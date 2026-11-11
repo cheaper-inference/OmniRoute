@@ -51,6 +51,19 @@ function dropInvalidSettings(settings: Record<string, unknown>) {
   const valid: Record<string, unknown> = {};
   const ignoredKeys: string[] = [];
   for (const [key, value] of Object.entries(settings)) {
+    // `__proto__` is an own settings key that the (`.strict()`) PATCH schema does
+    // not declare, so the parse below reports it as unrecognized and it would be
+    // dropped as invalid. Store it as an own property: a bracket assignment runs
+    // the `__proto__` setter and turns the row into the object's prototype.
+    if (key === "__proto__") {
+      Object.defineProperty(valid, key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+      continue;
+    }
     // Old backups store the Codex tier as a bare boolean. PATCH no longer accepts it, but
     // resolveCodexGlobalFastServiceTier still reads it, so keep it.
     if (key === "codexServiceTier" && typeof value === "boolean") {
