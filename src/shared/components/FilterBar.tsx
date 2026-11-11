@@ -72,6 +72,7 @@ export default function FilterBar({
 
       {filters.map((filter) => (
         <Select
+          native
           key={filter.key}
           compact
           aria-label={filter.label}

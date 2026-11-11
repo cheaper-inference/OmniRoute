@@ -382,6 +382,30 @@ continuations from the request protocol, asks the planner whether another tool r
 needed, and dynamically makes either the executor or planner the client-facing final
 step.
 
+Optional `config.agenticOrchestration.contextCompaction` applies a separate payload
+budget before each planner or executor dispatch. Enable it explicitly:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+These are serialized JSON character budgets selected by the operator, not token
+context windows or guaranteed upstream limits. Exact model IDs override the default.
+Above the threshold, compaction removes identical tool definitions, trims oversized
+tool evidence with a digest, and removes old complete history groups toward the target
+ratio. It retains system/developer instructions, the latest user request, the last
+tool round including parallel calls/results, and Gemini's leading routing instruction.
+Top-level instructions and tool settings are preserved. An omission marker records
+removed history; this is deterministic trimming, not a semantic summary. If the pinned
+context still exceeds the budget, the request returns 413 before contacting the model.
+With compaction disabled or below the threshold the request passes through unchanged.
+
 On tool-result continuations, OmniRoute also stops execution when two consecutive
 completed rounds repeat the same tool calls with unchanged results, or when every
 explicitly marked result in two consecutive rounds failed. Changed results permit

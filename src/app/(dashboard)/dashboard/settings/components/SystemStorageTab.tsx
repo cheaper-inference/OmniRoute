@@ -968,6 +968,24 @@ export default function SystemStorageTab() {
             />
           ))}
         </div>
+        <div className="mt-4 max-w-sm">
+          <Input
+            label={t("mediaStoreMaxMb")}
+            type="number"
+            min="1"
+            value={dbSettings.retention.mediaStoreMaxMb}
+            hint={t("mediaStoreMaxMbHint")}
+            onChange={(e) =>
+              setDbSettings({
+                ...dbSettings,
+                retention: {
+                  ...dbSettings.retention,
+                  mediaStoreMaxMb: parseInt(e.target.value) || 2048,
+                },
+              })
+            }
+          />
+        </div>
         <div className="mt-3">
           <Button
             variant="primary"
