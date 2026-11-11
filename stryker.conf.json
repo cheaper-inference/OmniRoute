@@ -291,6 +291,7 @@
       "tests/unit/chatcore-request-format.test.ts",
       "tests/unit/chatcore-sanitization.test.ts",
       "tests/unit/claude-max-tokens-responses-target.test.ts",
+      "tests/unit/chatcore-semantic-cache-enabled-flag.test.ts",
       "tests/unit/chatcore-semantic-cache-store.test.ts",
       "tests/unit/chatcore-semantic-cache.test.ts",
       "tests/unit/semantic-cache-no-truncated-writes.test.ts",

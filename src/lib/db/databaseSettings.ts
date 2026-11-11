@@ -445,6 +445,32 @@ export function getUserDatabaseSettings(): UserDatabaseSettings {
   return settings;
 }
 
+/**
+ * Every chat request asks whether the semantic cache is on. Answering through
+ * getUserDatabaseSettings() clones all defaults, runs two namespace SELECTs and decrypts the
+ * cache secrets just to read one boolean, so the answer is kept in memory. The window matches
+ * the settings read cache (5 s). updateDatabaseSettings() and any DB reset clear it at once,
+ * so a disabled cache takes effect on the next request. A miss uses the full resolver, so the
+ * precedence between the settings namespaces is unchanged.
+ */
+const SEMANTIC_CACHE_FLAG_TTL_MS = 5_000;
+
+let semanticCacheFlagCache: { value: boolean; expiresAt: number } | null = null;
+
+function clearSemanticCacheFlagCache(): void {
+  semanticCacheFlagCache = null;
+}
+
+registerDbStateResetter(clearSemanticCacheFlagCache);
+
+export function isSemanticCacheDbEnabled(): boolean {
+  const cached = semanticCacheFlagCache;
+  if (cached && Date.now() <= cached.expiresAt) return cached.value;
+  const value = getUserDatabaseSettings().cache.semanticCacheEnabled !== false;
+  semanticCacheFlagCache = { value, expiresAt: Date.now() + SEMANTIC_CACHE_FLAG_TTL_MS };
+  return value;
+}
+
 export function getDatabaseSettings(): DatabaseSettings {
   const dbStats = getDatabaseStats();
   const vacuumState = getVacuumSchedulerState();
@@ -539,6 +565,7 @@ export function updateDatabaseSettings(
   tx();
 
   clearPersistedCallLogRetentionCache();
+  clearSemanticCacheFlagCache();
   invalidateDbCache("settings");
   if (optimizationUpdated) {
     applyDatabaseOptimizationSettings(nextSettings.optimization);
