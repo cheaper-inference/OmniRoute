@@ -137,94 +137,141 @@ type Member = {
  * comma before them stays. Input that is not well-formed JSON is returned unchanged.
  */
 export function normalizeCchInput(body: string): string {
-  const edits: Edit[] = [];
-  let pos = 0;
+  try {
+    return new CchViewBuilder(body).build();
+  } catch {
+    return body;
+  }
+}
 
-  // Char codes, not one-character strings: bodies reach several MB.
-  const isWs = (c: number) => c === 32 || c === 9 || c === 13 || c === 10;
-  const skipWs = () => {
-    while (pos < body.length && isWs(body.charCodeAt(pos))) pos++;
-  };
-  const consume = (ch: string) => (body[pos] === ch ? (pos++, true) : false);
-  const parseString = (): Edit => {
-    const start = pos;
-    if (body[pos] !== '"') throw new Error("not a string");
-    pos++;
-    while (pos < body.length) {
-      const c = body.charCodeAt(pos);
-      if (c === 92) pos += 2;
-      else if (c === 34) return [start, ++pos];
-      else pos++;
+// Char codes, not one-character strings: bodies reach several MB.
+const isWs = (c: number) => c === 32 || c === 9 || c === 13 || c === 10;
+
+/** One-pass JSON scanner that records the byte ranges the hash view removes. */
+class CchViewBuilder {
+  private pos = 0;
+  private readonly edits: Edit[] = [];
+  private readonly body: string;
+
+  constructor(body: string) {
+    this.body = body;
+  }
+
+  /** Throws on input that is not well-formed JSON. */
+  build(): string {
+    this.parseValue(true);
+    this.skipWs();
+    if (this.pos !== this.body.length) throw new Error("trailing data");
+    this.edits.sort((a, b) => a[0] - b[0]);
+    let out = "";
+    let last = 0;
+    for (const [start, end] of this.edits) {
+      out += this.body.slice(last, start);
+      last = end;
+    }
+    return out + this.body.slice(last);
+  }
+
+  private skipWs(): void {
+    while (this.pos < this.body.length && isWs(this.body.charCodeAt(this.pos))) this.pos++;
+  }
+
+  private consume(ch: string): boolean {
+    if (this.body[this.pos] !== ch) return false;
+    this.pos++;
+    return true;
+  }
+
+  private addEdit(start: number, end: number): void {
+    if (start < end) this.edits.push([start, end]);
+  }
+
+  private parseString(): Edit {
+    const start = this.pos;
+    if (this.body[this.pos] !== '"') throw new Error("not a string");
+    this.pos++;
+    while (this.pos < this.body.length) {
+      const c = this.body.charCodeAt(this.pos);
+      if (c === 92) this.pos += 2;
+      else if (c === 34) return [start, ++this.pos];
+      else this.pos++;
     }
     throw new Error("unterminated string");
-  };
-  const addEdit = (start: number, end: number) => {
-    if (start < end) edits.push([start, end]);
-  };
-  const parseValue = (collect: boolean): void => {
-    skipWs();
-    const ch = body[pos];
-    if (ch === "{") return parseObject(collect);
-    if (ch === "[") return parseArray(collect);
+  }
+
+  private parseValue(collect: boolean): void {
+    this.skipWs();
+    const ch = this.body[this.pos];
+    if (ch === "{") return this.parseObject(collect);
+    if (ch === "[") return this.parseArray(collect);
     if (ch === '"') {
-      parseString();
+      this.parseString();
       return;
     }
-    const start = pos;
-    while (pos < body.length) {
-      const c = body.charCodeAt(pos);
+    const start = this.pos;
+    while (this.pos < this.body.length) {
+      const c = this.body.charCodeAt(this.pos);
       if (c === 44 || c === 125 || c === 93 || isWs(c)) break;
-      pos++;
+      this.pos++;
     }
-    if (pos === start) throw new Error("missing value");
-  };
-  const parseArray = (collect: boolean): void => {
-    pos++;
-    skipWs();
-    if (consume("]")) return;
+    if (this.pos === start) throw new Error("missing value");
+  }
+
+  private parseArray(collect: boolean): void {
+    this.pos++;
+    this.skipWs();
+    if (this.consume("]")) return;
     for (;;) {
-      parseValue(collect);
-      skipWs();
-      if (consume(",")) continue;
-      if (!consume("]")) throw new Error("unterminated array");
+      this.parseValue(collect);
+      this.skipWs();
+      if (this.consume(",")) continue;
+      if (!this.consume("]")) throw new Error("unterminated array");
       return;
     }
-  };
-  const parseObject = (collect: boolean): void => {
-    pos++;
-    skipWs();
-    if (consume("}")) return;
+  }
+
+  /** Parses `"key": value`; returns whether the member is left out of the hash view. */
+  private parseKeyValue(collect: boolean): boolean {
+    const [keyStart, keyEnd] = this.parseString();
+    this.skipWs();
+    if (!this.consume(":")) throw new Error("missing colon");
+    this.skipWs();
+    const key = this.body.slice(keyStart, keyEnd);
+    const skip = collect && EXCLUDED_KEYS.has(key);
+    if (collect && key === '"model"' && this.body[this.pos] === '"') {
+      const [valueStart, valueEnd] = this.parseString();
+      this.addEdit(valueStart + 1, valueEnd - 1);
+    } else {
+      this.parseValue(collect && !skip);
+    }
+    return skip;
+  }
+
+  private parseObject(collect: boolean): void {
+    this.pos++;
+    this.skipWs();
+    if (this.consume("}")) return;
     const members: Member[] = [];
     let commaBefore = -1;
     for (;;) {
-      skipWs();
-      const start = pos;
-      const [keyStart, keyEnd] = parseString();
-      skipWs();
-      if (!consume(":")) throw new Error("missing colon");
-      skipWs();
-      const key = body.slice(keyStart, keyEnd);
-      const skip = collect && EXCLUDED_KEYS.has(key);
-      if (collect && key === '"model"' && body[pos] === '"') {
-        const [valueStart, valueEnd] = parseString();
-        addEdit(valueStart + 1, valueEnd - 1);
-      } else {
-        parseValue(collect && !skip);
-      }
-      const end = pos;
-      skipWs();
-      const commaAfter = consume(",") ? pos - 1 : -1;
+      this.skipWs();
+      const start = this.pos;
+      const skip = this.parseKeyValue(collect);
+      const end = this.pos;
+      this.skipWs();
+      const commaAfter = this.consume(",") ? this.pos - 1 : -1;
       members.push({ start, end, commaBefore, commaAfter, skip });
       if (commaAfter >= 0) {
         commaBefore = commaAfter;
         continue;
       }
-      if (!consume("}")) throw new Error("unterminated object");
+      if (!this.consume("}")) throw new Error("unterminated object");
       break;
     }
-    if (collect) addSkippedMemberEdits(members);
-  };
-  const addSkippedMemberEdits = (members: Member[]): void => {
+    if (collect) this.addSkippedMemberEdits(members);
+  }
+
+  private addSkippedMemberEdits(members: Member[]): void {
     for (let first = 0; first < members.length;) {
       if (!members[first].skip) {
         first++;
@@ -232,30 +279,18 @@ export function normalizeCchInput(body: string): string {
       }
       let last = first;
       while (last + 1 < members.length && members[last + 1].skip) last++;
-      if (last + 1 < members.length) addEdit(members[first].start, members[last].commaAfter + 1);
-      else if (first > 0 && last > first) addEdit(members[first].start, members[last].end);
-      else if (first > 0) addEdit(members[first].commaBefore, members[last].end);
-      else addEdit(members[first].start, members[last].end);
+      if (last + 1 < members.length) {
+        this.addEdit(members[first].start, members[last].commaAfter + 1);
+      } else if (first > 0 && last > first) {
+        this.addEdit(members[first].start, members[last].end);
+      } else if (first > 0) {
+        this.addEdit(members[first].commaBefore, members[last].end);
+      } else {
+        this.addEdit(members[first].start, members[last].end);
+      }
       first = last + 1;
     }
-  };
-
-  try {
-    parseValue(true);
-    skipWs();
-    if (pos !== body.length) return body;
-  } catch {
-    return body;
   }
-
-  edits.sort((a, b) => a[0] - b[0]);
-  let out = "";
-  let last = 0;
-  for (const [start, end] of edits) {
-    out += body.slice(last, start);
-    last = end;
-  }
-  return out + body.slice(last);
 }
 
 export async function computeCCH(bodyBytes: Uint8Array): Promise<string> {
