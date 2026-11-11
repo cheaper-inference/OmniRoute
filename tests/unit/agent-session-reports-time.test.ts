@@ -184,6 +184,30 @@ test.before(async () => {
     timestamp: "2026-10-05T12:00:00.000Z",
   });
 
+  // Timestamps are written when a request ends. Session G: a 10 s request ending at 00:00:10,
+  // then a 1 s request ending at 00:00:12, so the session spans 12 s. Session H: two 10 s
+  // requests that ran in parallel, ending 1 s apart, so it spans 11 s.
+  for (const [offset, latencyMs] of [
+    [10_000, 10_000],
+    [12_000, 1000],
+  ]) {
+    await recordUsage({
+      ...member("key-time-g", "time-g"),
+      latencyMs,
+      timestamp: at("2026-10-08T00:00:00.000Z", offset),
+    });
+  }
+  for (const [offset, latencyMs] of [
+    [10_000, 10_000],
+    [11_000, 10_000],
+  ]) {
+    await recordUsage({
+      ...member("key-time-h", "time-h"),
+      latencyMs,
+      timestamp: at("2026-10-08T00:00:00.000Z", offset),
+    });
+  }
+
   // p95: latencies 100..2000 ms, plus one request with no recorded latency (0).
   for (let i = 0; i < 20; i++) {
     await recordUsage({
@@ -268,22 +292,30 @@ test("the idle cap is 15 minutes, in one exported constant", async () => {
   assert.equal(reportStats.REPORT_TIMELINE_MAX_POINTS, 2000);
 });
 
-test("active time sums gaps capped at 15 minutes plus the last request's latency", async () => {
-  // In window: 5 min (under the cap) + 60 min capped to 15 + the last in-window latency (3 s).
+test("active time runs from the first request's start, counting idle gaps up to 15 minutes", async () => {
+  // Timestamps mark request ends. In window: the first request's 1 s, then 5 min to the
+  // second end (under the cap), then 60 min to the third end, capped at its 3 s run plus 15 min.
   const inWindow = await totals(`${WINDOW}&apiKeyId=key-time-a`);
   assert.equal(inWindow.requests, 3);
-  assert.equal(inWindow.activeMs, 5 * MINUTE + 15 * MINUTE + 3000);
+  assert.equal(inWindow.activeMs, 1000 + 5 * MINUTE + 15 * MINUTE + 3000);
   assert.equal(inWindow.modelMs, 1000 + 2000 + 3000);
 
-  // All-time adds the capped overnight gap; the last request is now the next-day one.
+  // All-time adds the overnight gap, capped at the next-day request's 4 s plus 15 min.
   const allTime = await totals("apiKeyId=key-time-a");
-  assert.equal(allTime.activeMs, 5 * MINUTE + 15 * MINUTE + 15 * MINUTE + 4000);
+  assert.equal(allTime.activeMs, 1000 + 5 * MINUTE + 15 * MINUTE + 3000 + 15 * MINUTE + 4000);
   assert.equal(allTime.modelMs, 10_000);
 
   // A single request is active for its own latency.
   const single = await totals(`${WINDOW}&apiKeyId=key-time-b`);
   assert.equal(single.activeMs, 500);
   assert.equal(single.modelMs, 500);
+
+  // A 10 s request then a 1 s one, 2 s apart at their ends: the session spans 12 s.
+  assert.equal((await totals("apiKeyId=key-time-g")).activeMs, 12_000);
+  // Two parallel 10 s requests ending 1 s apart span 11 s, not the 20 s of model time.
+  const parallel = await totals("apiKeyId=key-time-h");
+  assert.equal(parallel.activeMs, 11_000);
+  assert.equal(parallel.modelMs, 20_000);
 });
 
 test("total active and model time equal the sum of the sessions list rows", async () => {
@@ -292,7 +324,7 @@ test("total active and model time equal the sum of the sessions list rows", asyn
   const { sessions } = await sessionList(query);
   assert.equal(sessions.length, 2);
   const byKey = Object.fromEntries(sessions.map((row) => [row.apiKeyId, row]));
-  assert.equal(byKey["key-time-a"].activeMs, 20 * MINUTE + 3000);
+  assert.equal(byKey["key-time-a"].activeMs, 20 * MINUTE + 4000);
   assert.equal(byKey["key-time-a"].modelMs, 6000);
   assert.equal(byKey["key-time-b"].activeMs, 500);
   assert.equal(
@@ -374,7 +406,7 @@ test("session detail totals carry active, model and wall time over all its reque
   const id = await sessionIdOf("key-time-a");
   const { totals: t } = await detail(id);
   assert.equal(t.requests, 4);
-  assert.equal(t.activeMs, 35 * MINUTE + 4000);
+  assert.equal(t.activeMs, 35 * MINUTE + 8000);
   assert.equal(t.modelMs, 10_000);
   assert.equal(t.wallMs, 24 * 60 * MINUTE);
   assert.equal(t.avgLatencyMs, 2500);

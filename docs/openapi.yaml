@@ -17869,8 +17869,8 @@ components:
         activeMs:
           type: integer
           description: >-
-            Per session, the gaps between consecutive requests, each capped at 15 minutes, plus
-            the last request's latency; summed over sessions.
+            Per session, the time from the first request's start to the last request's end,
+            with each idle gap between requests counted up to 15 minutes; summed over sessions.
         modelMs: { type: integer, description: Sum of latency_ms. }
     ReportSessionDetailTotals:
       allOf:

@@ -28,8 +28,10 @@ function nullableString(value: unknown): string | null {
 export interface AgentSessionTimes {
   sessionId: string;
   /**
-   * Gaps between consecutive requests (by timestamp), each capped at REPORT_ACTIVE_GAP_CAP_MS,
-   * plus the last request's latency.
+   * Time from the first request's start to the last request's end, with idle time between
+   * requests counted up to REPORT_ACTIVE_GAP_CAP_MS. Timestamps mark request ends, so this is
+   * the first request's latency plus, for each later request, the time since the previous end,
+   * capped at its own latency plus the idle cap.
    */
   activeMs: number;
   /** Sum of latency_ms. */
@@ -44,9 +46,12 @@ export interface AgentSessionTimes {
 }
 
 /**
- * Active and model time per session, over the requests matching the filter. Consecutive
- * requests come from LAG over each session ordered by timestamp, then id; a gap is the julianday()
- * difference in days times 86400000, rounded to whole milliseconds. Negative latencies count as 0.
+ * Active and model time per session, over the requests matching the filter. usage_history
+ * timestamps are written when a request ends. Consecutive requests come from LAG over each
+ * session ordered by timestamp, then id; a gap is the julianday() difference in days times
+ * 86400000, rounded to whole milliseconds. The first request counts its latency; each later one
+ * counts the gap since the previous end, capped at its latency plus the idle cap, so parallel
+ * requests are not counted twice. Negative latencies count as 0.
  */
 export function listAgentSessionTimes(
   db: SqliteAdapter,
@@ -62,14 +67,15 @@ export function listAgentSessionTimes(
                 MAX(COALESCE(uh.latency_ms, 0), 0) AS latency_ms,
                 CASE WHEN uh.ttft_ms > 0 THEN uh.ttft_ms END AS ttft_ms,
                 julianday(uh.timestamp) - julianday(LAG(uh.timestamp) OVER w) AS gap_days,
-                LEAD(uh.id) OVER w IS NULL AS is_last
+                LAG(uh.id) OVER w IS NULL AS is_first
          FROM ${REPORT_REQUESTS}
          WHERE ${conditions.join(" AND ")}
          WINDOW w AS (PARTITION BY uh.agent_session_id ORDER BY uh.timestamp, uh.id)
        )
        SELECT session_id,
-              COALESCE(SUM(MIN(MAX(ROUND(gap_days * 86400000), 0), ?)), 0)
-                + SUM(CASE WHEN is_last THEN latency_ms ELSE 0 END) AS active_ms,
+              SUM(CASE WHEN is_first THEN latency_ms
+                       ELSE MIN(MAX(ROUND(gap_days * 86400000), 0), latency_ms + ?) END)
+                AS active_ms,
               SUM(latency_ms) AS model_ms,
               SUM(latency_ms > 0) AS latency_samples,
               COUNT(ttft_ms) AS ttft_samples,

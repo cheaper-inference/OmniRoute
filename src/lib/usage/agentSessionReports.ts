@@ -87,7 +87,7 @@ export interface ReportTimeKpis {
   avgTtftMs: number | null;
   /** costUsd / sessions; null without sessions. */
   costPerSession: number | null;
-  /** Sum over sessions of their gaps between requests (each capped) plus last latency. */
+  /** Sum over sessions of first-start to last-end, idle gaps capped (agentSessionReportStats). */
   activeMs: number;
   /** Sum of latency_ms. */
   modelMs: number;
