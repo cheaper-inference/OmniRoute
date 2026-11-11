@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "更新",
     "clearAll": "Clear All",
+    "clearAllConfirm": "このキャッシュのすべてのエントリが削除されます。この操作は元に戻せません。",
     "memoryEntries": "メモリエントリ",
     "memoryEntriesSub": "インメモリLRU",
     "dbEntries": "DBエントリ",

@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Frissítés",
     "clearAll": "Clear All",
+    "clearAllConfirm": "A gyorsítótár összes bejegyzése törlődik. Ez a művelet nem vonható vissza.",
     "memoryEntries": "Memóriában tárolt bejegyzések",
     "memoryEntriesSub": "Memóriában tárolt LRU",
     "dbEntries": "Adatbázis-bejegyzések",
