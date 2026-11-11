@@ -198,7 +198,11 @@ export class NineRouterExecutor extends BaseExecutor {
     );
 
     const fetchOptions = { method: "POST", headers, signal: combinedSignal };
-    let response = await fetch(url, { ...fetchOptions, body: JSON.stringify(transformedBody) });
+    let response = await this.dispatchRequest(
+      url,
+      { ...fetchOptions, body: JSON.stringify(transformedBody) },
+      input.credentials
+    );
 
     // #14629: this override never calls super.execute(), so wire the same
     // reactive reasoning_effort 400 clamp-and-retry BaseExecutor applies.
@@ -209,7 +213,8 @@ export class NineRouterExecutor extends BaseExecutor {
       model: innerModel,
       body: transformedBody,
       fetchOptions,
-      fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+      fetchFn: (fetchUrl, fetchOpts) =>
+        this.dispatchRequest(fetchUrl, fetchOpts, input.credentials),
       log: input.log,
     });
 
@@ -221,7 +226,8 @@ export class NineRouterExecutor extends BaseExecutor {
       model: innerModel,
       body: transformedBody,
       fetchOptions,
-      fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+      fetchFn: (fetchUrl, fetchOpts) =>
+        this.dispatchRequest(fetchUrl, fetchOpts, input.credentials),
       serializeBody: (body) => JSON.stringify(body),
       strippedFields: new Set<string>(),
       log: input.log,
