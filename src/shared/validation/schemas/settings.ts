@@ -42,6 +42,12 @@ export const requestQueueSettingsSchema = z
     requestsPerMinute: z.number().int().min(1).optional(),
     minTimeBetweenRequestsMs: z.number().int().min(0).optional(),
     concurrentRequests: z.number().int().min(1).optional(),
+    // Whole-process upstream concurrency cap (hierarchical admission, #11493).
+    // 0 disables the global gate. Declared here because the Resilience tab
+    // PATCHes the entire `requestQueue` object from its GET payload, so a
+    // `.strict()` schema missing any field of `RequestQueueSettings` makes that
+    // card unsavable with "Unrecognized key: <field>".
+    globalConcurrentRequests: z.number().int().min(0).max(100_000).optional(),
     // 0 is an explicit "disable the queue-wait budget" sentinel (see
     // src/lib/resilience/settings/normalize.ts maxWaitMs) — do not clamp it up to 1.
     maxWaitMs: z.number().int().min(0).optional(),
