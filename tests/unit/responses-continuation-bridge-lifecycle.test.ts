@@ -99,6 +99,17 @@ test("the sweep evicts expired entries that nothing reads again", (t) => {
   assert.equal(store.getPendingContinuationStateCount(), 0);
 });
 
+test("pending count excludes expired entries even before the sweep interval", (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1_500_000 });
+  seed("resp-count-expired");
+  assert.equal(store.getPendingContinuationStateCount(), 1);
+
+  // No lookup, fresh insertion, or interval callback has run at this point.
+  // The diagnostic must not count a full-history bridge after its TTL.
+  t.mock.timers.setTime(1_500_000 + SEED_TTL_MS);
+  assert.equal(store.getPendingContinuationStateCount(), 0);
+});
+
 test("seeding evicts entries that are already expired", (t) => {
   t.mock.timers.enable({ apis: ["Date"], now: 2_000_000 });
   seed("resp-expired");
