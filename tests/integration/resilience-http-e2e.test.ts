@@ -565,6 +565,8 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   // block on every PATCH, so GET exposes it like every other stored block.
   // `antigravityTimingTelemetry` is the stored opt-in for sanitized physical-send timing
   // (`{ enabled }`, open-sse/services/antigravityTimingConfig.ts), not runtime state.
+  // `preferredAccountFailover` is the stored per provider/model failover preference
+  // added in #19259, also configuration rather than runtime state.
   assert.deepEqual(Object.keys(json).sort(), [
     "antigravityTimingTelemetry",
     "comboCooldownWait",
@@ -572,6 +574,7 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
     "credentialHealthCheck",
     "legacy",
     "p2cLatency",
+    "preferredAccountFailover",
     "providerBreaker",
     "providerCooldown",
     "providerQuotaOverrides",
