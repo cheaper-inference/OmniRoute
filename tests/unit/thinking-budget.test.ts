@@ -80,6 +80,44 @@ test("AUTO: strips OpenAI reasoning_effort", () => {
   setThinkingBudgetConfig(DEFAULT_THINKING_CONFIG);
 });
 
+test("AUTO: keeps explicit Claude thinking opt-out (no-think/ alias, thinking disabled)", () => {
+  setThinkingBudgetConfig({ mode: ThinkingMode.AUTO });
+  const body = {
+    model: "claude-haiku-5-5",
+    messages: [{ role: "user", content: "hello" }],
+    thinking: { type: "disabled" },
+  };
+  const result = applyThinkingBudget(body);
+  assert.deepEqual(result.thinking, { type: "disabled" });
+  setThinkingBudgetConfig(DEFAULT_THINKING_CONFIG);
+});
+
+test("AUTO: keeps reasoning_effort none/off but strips other levels", () => {
+  setThinkingBudgetConfig({ mode: ThinkingMode.AUTO });
+  for (const effort of ["none", "off", "NONE"]) {
+    const result = applyThinkingBudget({
+      model: "claude-haiku-5-5",
+      messages: [{ role: "user", content: "hello" }],
+      reasoning_effort: effort,
+    });
+    assert.equal(result.reasoning_effort, effort.toLowerCase());
+  }
+  const fromReasoning = applyThinkingBudget({
+    model: "o3-mini",
+    messages: [{ role: "user", content: "hello" }],
+    reasoning: { effort: "none", summary: "auto" },
+  });
+  assert.equal(fromReasoning.reasoning, undefined);
+  assert.equal(fromReasoning.reasoning_effort, "none");
+  const low = applyThinkingBudget({
+    model: "o3-mini",
+    messages: [{ role: "user", content: "hello" }],
+    reasoning_effort: "low",
+  });
+  assert.equal(low.reasoning_effort, undefined);
+  setThinkingBudgetConfig(DEFAULT_THINKING_CONFIG);
+});
+
 test("AUTO: strips Gemini thinking_config", () => {
   setThinkingBudgetConfig({ mode: ThinkingMode.AUTO });
   const body = {
