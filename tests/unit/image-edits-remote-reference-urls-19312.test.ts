@@ -188,6 +188,81 @@ test("#19312 reference sets above the edit limit are not fetched", async () => {
   assert.deepEqual(calls, []);
 });
 
+test("#19667 hosted Codex JSON resolves 128 remote references, but rejects 129 prefetches", async () => {
+  const url = "https://cdn.example.com/hosted.png";
+  const { calls, fetchImpl } = mockFetch({ [url]: imageResponse(PNG) });
+  const accepted = await resolveRemoteImageEditReferences(
+    { model: "codex/gpt-6.1-sol", image: Array(128).fill(url) },
+    { fetchImpl, lookup: publicLookup, maxReferences: 128 }
+  );
+  assert.equal(calls.length, 128);
+  assert.equal(extractImageEditInputFromJson(accepted).images.length, 128);
+
+  const rejected = { model: "codex/gpt-6.1-sol", image: Array(129).fill(url) };
+  assert.equal(
+    await resolveRemoteImageEditReferences(rejected, {
+      fetchImpl,
+      lookup: publicLookup,
+      maxReferences: 128,
+    }),
+    rejected
+  );
+  assert.equal(calls.length, 128, "over-limit sets must not start new fetches");
+});
+
+test("#19667 dedicated GPT Image keeps the 16-URL prefetch boundary", async () => {
+  const url = "https://cdn.example.com/ref.png";
+  const { calls, fetchImpl } = mockFetch({ [url]: imageResponse(PNG) });
+  const body = { model: "gpt-image-2", image: Array(17).fill(url) };
+  assert.equal(
+    await resolveRemoteImageEditReferences(body, { fetchImpl, lookup: publicLookup }),
+    body
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("#19667 readEditInput uses hosted Codex prefetch cap and keeps GPT Image at 16", async () => {
+  const calls: string[] = [];
+  setPinnedFetchTestOverride((async (input: string | URL | Request) => {
+    calls.push(String(input));
+    return imageResponse(PNG)();
+  }) as typeof fetch);
+  const imageUrls = Array(17).fill("https://93.184.216.34/ref.png");
+  try {
+    const hostedRequest = new Request("http://localhost/v1/images/edits", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "codex/gpt-6.1-sol",
+        prompt: "use all references",
+        image: imageUrls,
+      }),
+    });
+    const hostedInput = await readEditInput(hostedRequest);
+    assert.ok(hostedInput);
+    assert.equal(hostedInput.imageInputCount, 17);
+    assert.equal(hostedInput.images.length, 17);
+    assert.equal(calls.length, 17);
+
+    const dedicatedRequest = new Request("http://localhost/v1/images/edits", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-image-2",
+        prompt: "use all references",
+        image: imageUrls,
+      }),
+    });
+    const dedicatedInput = await readEditInput(dedicatedRequest);
+    assert.ok(dedicatedInput);
+    assert.equal(dedicatedInput.imageInputCount, 17);
+    assert.equal(dedicatedInput.images.length, 0);
+    assert.equal(calls.length, 17, "dedicated over-limit URLs must not be fetched");
+  } finally {
+    setPinnedFetchTestOverride(undefined);
+  }
+});
+
 test("#19312 readEditInput resolves http(s) references in a JSON edit body", async () => {
   const calls: string[] = [];
   setPinnedFetchTestOverride((async (input: string | URL | Request) => {

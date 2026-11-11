@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { getCachedSettings } from "@/lib/db/readCache";
+import { getImageModelEntry } from "@omniroute/open-sse/config/imageRegistry.ts";
 import {
+  MAX_CODEX_IMAGE_EDIT_REFERENCES,
   extractImageEditInputFromJson,
   resolveRemoteImageEditReferences,
 } from "@/lib/images/imageRouteModel";
@@ -132,8 +134,18 @@ export async function readEditInput(request: Request): Promise<EditInput | null>
         log.warn("IMAGE", "Invalid JSON edit body shape");
         return null;
       }
+      // Before model routing, only registered hosted Codex models opt in to
+      // 128 remote references. GPT Image and unresolved combos keep the
+      // conservative 16-reference prefetch guard.
+      const requestedModel =
+        typeof parsed.data.model === "string" ? getImageModelEntry(parsed.data.model) : null;
+      const hostedMaxReferences =
+        requestedModel?.provider === "codex" && !/^gpt-image-/i.test(requestedModel.model)
+          ? MAX_CODEX_IMAGE_EDIT_REFERENCES
+          : undefined;
       const resolved = await resolveRemoteImageEditReferences(parsed.data, {
         signal: request.signal,
+        maxReferences: hostedMaxReferences,
       });
       const extracted = extractImageEditInputFromJson(resolved);
       return extracted
