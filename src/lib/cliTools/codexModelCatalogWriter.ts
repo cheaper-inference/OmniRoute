@@ -40,6 +40,24 @@ export async function listOmniRouteChatModels(request: Request): Promise<Catalog
     .map((m) => ({ id: m.id, context_length: m.context_length }));
 }
 
+/**
+ * Publish through a sibling temp file and a rename, so an interrupted write leaves the old
+ * catalog whole. Identical bytes skip the write: no mtime bump for a file Codex may watch.
+ */
+async function publishCatalog(catalogPath: string, content: string): Promise<void> {
+  const next = Buffer.from(content);
+  const current = await fs.readFile(catalogPath).catch(() => null);
+  if (current?.equals(next)) return;
+  const tempPath = `${catalogPath}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    await fs.writeFile(tempPath, next);
+    await fs.rename(tempPath, catalogPath);
+  } catch (error) {
+    await fs.rm(tempPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
+}
+
 type WriteCatalogOptions = {
   codexDir: string;
   /** Models the user picked in this Apply; listed first and always included. */
@@ -112,7 +130,7 @@ export async function writeCodexModelCatalog({
 
   const catalogPath = getCodexCatalogPath(codexDir);
   try {
-    await fs.writeFile(catalogPath, JSON.stringify(catalog));
+    await publishCatalog(catalogPath, JSON.stringify(catalog));
   } catch (error) {
     console.log(
       "Could not write the Codex model catalog:",
