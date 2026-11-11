@@ -1,0 +1,1 @@
+- **feat(cli-tools):** The CLI tool backup list, restore and delete calls now accept every registered CLI tool (pi, smelt, omp, crush, forge and others), not only eight.
