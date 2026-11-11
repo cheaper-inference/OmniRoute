@@ -96,14 +96,19 @@ function recordConnectionInventories(
   byConnection: SyncedAvailableModelsByConnection,
   acc: InventoryAccumulator
 ): void {
+  const isAntigravity = isPerAccountCatalogProvider(providerId);
   for (const [connectionId, models] of Object.entries(byConnection)) {
     if (!Array.isArray(models) || models.length === 0) continue;
     const ids = new Set(
       models
         .map((m) => m.id)
-        .filter((id) => typeof id === "string" && !id.endsWith("-disabled") && !id.includes("-disabled"))
+        .filter(
+          (id) =>
+            typeof id === "string" &&
+            (!isAntigravity || (!id.endsWith("-disabled") && !id.includes("-disabled")))
+        )
     );
-    if (isPerAccountCatalogProvider(providerId)) recordPerAccountInventory(connectionId, ids, acc);
+    if (isAntigravity) recordPerAccountInventory(connectionId, ids, acc);
     else acc.advertised.set(connectionId, ids);
   }
 }
