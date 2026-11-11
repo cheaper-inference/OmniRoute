@@ -145,15 +145,14 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     // Server render never touches localStorage (it's read inside a useEffect), so the
     // SSR markup must reflect the "clamp" default regardless of what is persisted.
     const ssrHtml = renderToString(<FeatureFlagsGrid />);
-    // KEA-7886: the mode control is the kit segmented control (capsule Tabs): role="tab" +
-    // aria-selected instead of role="radio" + aria-checked.
-    expect(ssrHtml).toContain('aria-selected="true"');
+    // The mode control is a filter, so the segmented control is a radiogroup (#19620).
+    expect(ssrHtml).toContain('aria-checked="true"');
 
     const container = document.createElement("div");
     container.innerHTML = ssrHtml;
     document.body.appendChild(container);
     containers.push(container);
-    expect(container.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toBe(
+    expect(container.querySelector('[role="radio"][aria-checked="true"]')?.textContent).toBe(
       "On hover"
     );
 
@@ -173,10 +172,10 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     errorSpy.mockRestore();
 
     // After the post-mount effect reads localStorage, the persisted "full" mode applies.
-    const fullButton = Array.from(container.querySelectorAll('button[role="tab"]')).find(
+    const fullButton = Array.from(container.querySelectorAll('button[role="radio"]')).find(
       (el) => el.textContent === "Full text"
     );
-    expect(fullButton?.getAttribute("aria-selected")).toBe("true");
+    expect(fullButton?.getAttribute("aria-checked")).toBe("true");
 
     act(() => root?.unmount());
   });
@@ -195,7 +194,7 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     // Default is "clamp" and is written on mount too.
     expect(window.localStorage.getItem("ff-card-description-mode")).toBe("clamp");
 
-    const fullButton = Array.from(container.querySelectorAll('button[role="tab"]')).find(
+    const fullButton = Array.from(container.querySelectorAll('button[role="radio"]')).find(
       (el) => el.textContent === "Full text"
     ) as HTMLButtonElement;
     expect(fullButton).toBeTruthy();
@@ -206,9 +205,9 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     await settle();
 
     expect(window.localStorage.getItem("ff-card-description-mode")).toBe("full");
-    expect(fullButton.getAttribute("aria-selected")).toBe("true");
+    expect(fullButton.getAttribute("aria-checked")).toBe("true");
 
-    const clampButton = Array.from(container.querySelectorAll('button[role="tab"]')).find(
+    const clampButton = Array.from(container.querySelectorAll('button[role="radio"]')).find(
       (el) => el.textContent === "On hover"
     ) as HTMLButtonElement;
     await act(async () => {

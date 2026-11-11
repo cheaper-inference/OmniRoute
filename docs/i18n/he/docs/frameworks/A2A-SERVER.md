@@ -163,7 +163,7 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
 | דו"ח בריאות     | `health-report`      | מצטבר מפסק זרם, קירור, מצב נעילה לכל ספק                                                                                     | בריאות, חוסן            | "הצג מצב בריאותי של כל הספקים"         |
 | רשימה של יכולות | `list-capabilities`  | מחזירה את הקטלוג המלא של 45 כניסות Agent Skills (23 API + 21 CLI + 1 config) כטבלת סימון עם SKILL.md URLs גולמית להזרקת הקשר | קטלוג, גילוי, מיומנויות | "רשום את כל יכולות OmniRoute "         |
 
-> יש לשמור על כרטיס הסוכן מיושר עם הקטלוג החי של ספקי 377; ספירת ספקים ומטא נתונים free/no-auth מקורם ברישום זמן הריצה.
+> יש לשמור על כרטיס הסוכן מיושר עם הקטלוג החי של ספקי 381; ספירת ספקים ומטא נתונים free/no-auth מקורם ברישום זמן הריצה.
 
 ### פרט מיומנות `list-capabilities`
 
@@ -180,42 +180,50 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
 
 ---
 
-## REST API (משני)
+## REST API (עזר)
 
-נקודת הקצה JSON-RPC‏ `/a2a` היא נקודת הכניסה הקנונית של A2A. נקודות הקצה של REST שלהלן מספקות גישה משנית עבור לוחות מחוונים וכלים חיצוניים:
+נקודת הקצה של JSON-RPC `/a2a` היא נקודת הכניסה הקנונית A2A. נקודות הקצה REST להלן מספקות גישה עזר ללוחות מחוונים וכלים חיצוניים:
 
-| נקודת קצה                    | שיטה | תיאור                                              | אימות                                         |
-| :--------------------------- | :--- | :------------------------------------------------- | :-------------------------------------------- |
-| `/api/a2a/status`            | GET  | מצב השרת, מיומנויות רשומות                         | (ציבורי)                                      |
-| `/api/a2a/tasks`             | GET  | הצגת משימות עם מסננים                              | ניהול                                         |
-| `/api/a2a/tasks/[id]`        | GET  | קבלת משימה לפי מזהה                                | ניהול                                         |
-| `/api/a2a/tasks/[id]/cancel` | POST | ביטול משימה פעילה                                  | ניהול                                         |
-| `/.well-known/agent.json`    | GET  | כרטיס סוכן (גילוי A2A)                             | (ציבורי, נשמר במטמון למשך 3600 שניות)         |
-| `/api/a2a/tasks`             | POST | האצלה נכנסת לצי OmniConductor‏ (Conductor PRD RF5) | Bearer מול `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| נקודת קצה                    | שִׁיטָה | תֵאוּר                                            | Auth                                                                                      |
+| :--------------------------- | :------ | :------------------------------------------------ | :---------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET     | מצב שרת, כישורים רשומים                           | (פּוּמְבֵּי)                                                                              |
+| `/api/a2a/tasks`             | GET     | רשימת משימות עם מסננים                            | ניהול או מפתח API (ראה להלן)                                                              |
+| `/api/a2a/tasks/[id]`        | GET     | קבל משימה מאת ID                                  | ניהול או מפתח API (ראה להלן)                                                              |
+| `/api/a2a/tasks/[id]/cancel` | POST    | בטל משימת הפעלה                                   | ניהול או מפתח API (ראה להלן)                                                              |
+| `/.well-known/agent.json`    | GET     | כרטיס סוכן (גילוי A2A )                           | (ציבורי, שמור 3600s)                                                                      |
+| `/api/a2a/tasks`             | POST    | משלחת נכנסת לצי OmniConductor (Conductor PRD RF5) | זהה ל- `GET`, פלוס `OMNIROUTE_API_KEY` אם מוגדר בזמן `REQUIRE_API_KEY` כבוי; `a2aEnabled` |
 
-**האצלת Conductor נכנסת (`POST /api/a2a/tasks`):** סוכני A2A חיצוניים מאצילים עבודת קוד לצי OmniConductor דרך OmniRoute. גוף הבקשה: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ניתן להאציל רק מיומנויות של צי Conductor (אלו שמוכרזות בכרטיס הסוכן); השדה `metadata.conductor.repo.url` הוא חובה (הצי עובד על מאגרי git). הנתיב מתרגם את הבקשה ל-`POST /v1/tasks` של ה-hub באמצעות `CONDUCTOR_ORCHESTRATOR_TOKEN` בצד השרת (עם `CONDUCTOR_HUB_TOKEN` כחלופה), ומחזיר `201 { conductor_task_id, state: "submitted" }`; מצבי המשימה זורמים בחזרה דרך שיקוף SSE→A2A‏ (RF1) וניתן לצפות בהם באמצעות `GET /api/a2a/tasks?skill=conductor`.
+מי שיעבור למסלולי `/api/a2a/tasks*` תלוי בהגדרות הכניסה ומפתח ה-API:
+
+- `requireLogin=true` (ברירת מחדל): תוכנת האמצע מקבלת רק אישורי ניהול (הפעלה של לוח המחוונים, מקש `manage` -scope API, אסימון גישה `oma_` ) ו- `OMNIROUTE_API_KEY`. מפתח היסק רגיל מקבל `403`. בכותרת `Authorization` התווך לוקח `OMNIROUTE_API_KEY` רק כ- `Bearer <key>`; מפתח חשוף או טאב אחרי `Bearer` מקבל `401`.
+- `requireLogin=false`, או חלון הלולאה לפני הכניסה: עם `REQUIRE_API_KEY=true` כל מפתח OmniRoute API חוקי או אישור ניהול מתקבל ומתקשרים אנונימיים מקבלים `401`; עם `REQUIRE_API_KEY` מחוץ המסלולים פתוחים.
+- `POST /api/a2a/tasks` דורש בנוסף `OMNIROUTE_API_KEY` בכותרת `Authorization` כאשר המשתנה הזה מוגדר ו- `REQUIRE_API_KEY` כבוי. כותרות אחרות, כגון `x-api-key`, אינן נחשבות שם. עם כיבוי כניסה או לפני הכניסה, המפתח עובר עם או בלי קידומת `Bearer` ; עם התחברות, רק `Bearer <key>` עובר את תוכנת האמצע.
+
+כאשר נדרש אישור, אסימון `read` -scope `oma_` עובד רק עבור `GET`.
+
+**משלחת מנצח נכנס (`POST /api/a2a/tasks`):** סוכני A2A חיצוניים מאצילים עבודת קידוד לצי OmniConductor דרך OmniRoute. גוף: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — רק כישורי צי המנצח (אלה שהוכרזו בכרטיס הסוכן) ניתנים להאצלה; נדרש `metadata.conductor.repo.url` (הצי עובד על git repos). המסלול מתורגם ל- `POST /v1/tasks` של הרכזת באמצעות `CONDUCTOR_ORCHESTRATOR_TOKEN` בצד השרת (fallback `CONDUCTOR_HUB_TOKEN`) ומחזיר `201 { conductor_task_id, state: "submitted" }`; מצבי משימה זורמים בחזרה דרך המראה של SSE→A2A (RF1) והם גלויים דרך `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## הוספת מיומנות חדשה
 
-1. **יצירת קובץ מיומנות:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **צור קובץ מיומנות:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   יש לייצא פונקציה אסינכרונית `(task: A2ATask) => Promise<{ artifacts, metadata }>`. יש לפעול לפי המבנה של מיומנויות קיימות, כגון `smartRouting.ts`.
+   ייצא פונקציית אסינכרון `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. עקוב אחר הצורה של מיומנויות קיימות כגון `smartRouting.ts`. אם המיומנות מתקשרת חזרה ל- OmniRoute על HTTP, בנה את הכותרות עם `buildSelfLoopHeaders(caller)` מ- `src/lib/a2a/selfLoopAuth.ts` כך שהקריאה תרוץ עם המפתח של ה- A2A המתקשר, לא `OMNIROUTE_API_KEY`, והעביר `redirect: "error"` ל- `fetch` כך שהפניה לא תקבל את המפתח. העוזר בונה רק כותרות; כל מיומנות קובעת את מדיניות ההפניה מחדש בעצמה. הוא זורק `UnsafeSelfLoopTargetError` במקום לצרף מפתח כאשר ה- URL הבסיסי שנפתר הוא http רגיל מחוץ לרשת הפרטית (לולאהבק, שם קונטיינר או שירות וכתובות פרטיות בסדר) או מחזיק באישורים, כך שמיומנות שבולעת שיחות שנדחו חייבת להחזיר את השגיאה הזו.
 
-2. **רישום המטפל:** בקובץ `src/lib/a2a/taskExecution.ts`, יש להוסיף רשומה אל `A2A_SKILL_HANDLERS`:
+2. **מטפל ברישום:** ב- `src/lib/a2a/taskExecution.ts`, הוסף ערך ל- `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...מיומנויות קיימות
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **חשיפה בכרטיס הסוכן:** בקובץ `src/app/.well-known/agent.json/route.ts`, יש לצרף למערך `skills`:
+3. **חשיפה בכרטיס סוכן:** ב- `src/lib/a2a/agentCardMetadata.ts` (משותף ל- `/.well-known/agent.json` ו- `/.well-known/agent-card.json`), הוסף למערך `skills` :
 
    ```json
    {
@@ -227,9 +235,9 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
    }
    ```
 
-4. **כתיבת בדיקות:** `tests/unit/a2a-<your-skill>.test.ts`. יש לכסות את התרחיש התקין ואת תרחיש השגיאה.
+4. **כתוב מבחנים:** `tests/unit/a2a-<your-skill>.test.ts`. לכסות את נתיב השגיאה +.
 
-5. **תיעוד** המיומנות החדשה בטבלה `Available Skills` שבקובץ זה.
+5. **מִסְמָך** המיומנות החדשה בטבלת `Available Skills` של קובץ זה.
 
 ---
 

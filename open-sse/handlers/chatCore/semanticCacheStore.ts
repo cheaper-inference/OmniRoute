@@ -14,6 +14,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedCompletion as defaultIsTruncatedCompletion,
+  responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
 import { semanticCacheConversation } from "./semanticCacheConversation.ts";
@@ -63,10 +64,12 @@ export function storeSemanticCacheResponse(
   deps: SemanticCacheStoreDeps = DEFAULT_DEPS
 ): void {
   if (
+    args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
     !args.enabled ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
     (deps.isTruncatedCompletion ?? defaultIsTruncatedCompletion)(args.translatedResponse) ||
+    responseCarriesToolCalls(args.translatedResponse) ||
     !deps.isSmallEnoughForSemanticCache(args.translatedResponse)
   ) {
     return;

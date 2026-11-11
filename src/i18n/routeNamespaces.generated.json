@@ -1,5 +1,15 @@
 {
-  "root": ["auth", "common", "docs", "endpoint", "header", "landing", "publicSystem"],
+  "root": [
+    "auth",
+    "chatgptSignIn",
+    "common",
+    "docs",
+    "endpoint",
+    "header",
+    "landing",
+    "miniapp",
+    "publicSystem"
+  ],
   "chrome": [
     "agentSkills",
     "analytics",
@@ -553,6 +563,7 @@
       "trafficInspector"
     ],
     "combos": [
+      "accountPreferences",
       "agentSkills",
       "analytics",
       "breadcrumbs",
@@ -688,6 +699,7 @@
       "cloudSyncStatus",
       "codexKeyServiceMode",
       "common",
+      "conversations",
       "costs",
       "cursorAuthModal",
       "header",
@@ -1144,6 +1156,7 @@
       "analytics",
       "breadcrumbs",
       "cache",
+      "cliTools",
       "cloudSyncStatus",
       "codexKeyServiceMode",
       "common",
@@ -1386,6 +1399,8 @@
       "analytics",
       "breadcrumbs",
       "cache",
+      "chatgptSignIn",
+      "cliproxyHealth",
       "cliproxyProviderExposure",
       "cloudSyncStatus",
       "codexKeyServiceMode",
@@ -1393,7 +1408,9 @@
       "connectionTest",
       "costs",
       "cursorAuthModal",
+      "darioPanel",
       "embeddedServices",
+      "falNative",
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
@@ -1401,6 +1418,7 @@
       "miniPlayground",
       "noAuthProvider",
       "oauthModal",
+      "playground",
       "providerTest",
       "providers",
       "proxyConfigModal",

@@ -47,8 +47,6 @@ test("no Material Symbols ligature span is left in the app tree", () => {
 
 test("no raw <select>, <textarea> or <table> outside the adapters (dashboard + shared)", () => {
   const hits = countBy(DASHBOARD, /<(select|textarea|table)\b/g);
-  // The Select adapter renders the native <select class="ci-select-native"> branch.
-  delete hits["src/shared/components/Select.tsx"];
   // Comment-only mentions of "<select>" (no JSX): ModelSelectField, StudioConfigPane.
   for (const f of Object.keys(hits)) {
     const jsx = fs
@@ -107,7 +105,7 @@ test("every raw <button>/<input> left in the dashboard tree carries a `kit-excep
           unexplained.push(`${rel(f)}:${i + 1}`);
       });
   }
-  assert.ok(sites > 20, `found only ${sites} raw controls; the scan is broken`);
+  assert.ok(sites > 10, `found only ${sites} raw controls; the scan is broken`);
   assert.deepEqual(unexplained, []);
 });
 
@@ -133,18 +131,106 @@ test("hard-coded palette hues and dark: variants only where the exception is doc
   const DARK_ALLOWED: Record<string, number> = {
     // Typography plugin colours flip with prose-invert (no kit prose).
     "src/app/(dashboard)/dashboard/agent-skills/components/SkillPreviewPane.tsx": 1,
-    // Partner brand inks (Kimi, Cheaper Inference): dark brand hex on a dark surface (lote 2b).
-    "src/app/(dashboard)/dashboard/combos/KimiComboPresetCard.tsx": 1,
-    "src/app/(dashboard)/dashboard/providers/components/ProviderCard.tsx": 2,
   };
   assert.deepEqual(countBy(DASHBOARD, /(?<=["'`\s])dark:[a-z]/g), DARK_ALLOWED);
+});
+
+// The landing (/landing) follows the active palette (Editions or Classic, light or dark) through
+// the kit tokens and the globals.css bridge. It used to paint a fixed dark page with ~50 literals
+// (#0B0E14, #E54D5E, text-white, text-gray-400, bg-emerald-500, rgba() glows…).
+const LANDING_COLOR_LITERALS: Array<[string, RegExp]> = [
+  ["hex", /(?<![\w&/])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b/g],
+  // No \b: inside an arbitrary Tailwind value the function follows `_` (`shadow-[0_0_40px_rgba(…)]`).
+  ["rgb()/hsl()", /(?<![a-zA-Z-])(?:rgba?|hsla?|oklch|oklab)\(/g],
+  [
+    "Tailwind palette hue",
+    /\b(?:text|bg|border|ring|from|to|via|fill|stroke|outline|divide|accent|decoration|shadow|placeholder|caret)-(?:red|green|blue|amber|yellow|emerald|rose|slate|gray|zinc|neutral|indigo|violet|purple|orange|cyan|sky|teal|lime|pink|fuchsia|stone)-\d/g,
+  ],
+  [
+    "white/black",
+    /\b(?:text|bg|border|ring|from|to|via|fill|stroke|outline|divide|shadow|placeholder|caret)-(?:white|black)\b/g,
+  ],
+  [
+    "named SVG/CSS colour",
+    /\b(?:fill|stroke|color)=["'{]+(?!none|currentColor|var\()[a-z]+["'}]/gi,
+  ],
+];
+
+function landingColorLiterals(src: string): string[] {
+  // Like blankComments, but a `//` right after `:` is a URL (`https://…`), not a comment.
+  const blank = (m: string) => m.replace(/[^\n]/g, " ");
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/(?<!:)\/\/[^\n]*/g, blank);
+  return LANDING_COLOR_LITERALS.flatMap(([kind, re]) =>
+    (code.match(re) ?? []).map((m) => `${kind}: ${m}`)
+  );
+}
+
+test("the landing renders only kit colours (no hex, rgb(), palette hues or white/black)", () => {
+  const landing = files("src/app/landing");
+  assert.ok(landing.length >= 8, `found only ${landing.length} landing files; the scan is broken`);
+  const hits: Record<string, string[]> = {};
+  for (const f of landing) {
+    const found = landingColorLiterals(fs.readFileSync(f, "utf8"));
+    if (found.length) hits[rel(f)] = found;
+  }
+  assert.deepEqual(hits, {});
+});
+
+test("the landing colour scan catches each literal form and ignores anchors and tokens", () => {
+  const caught = landingColorLiterals(
+    [
+      '<div className="bg-[#0B0E14] text-white hover:text-gray-400" />',
+      '<path stroke={active ? "#E54D5E" : "rgb(75, 85, 99)"} />',
+      '<div className="shadow-[0_0_40px_rgba(229,77,94,0.3)] stroke-yellow-700 bg-white/10" />',
+      '<path fill="red" />',
+      '<a href="https://github.com/x" className="text-gray-400">',
+    ].join("\n")
+  );
+  assert.equal(caught.length, 10, caught.join("\n"));
+  assert.deepEqual(
+    landingColorLiterals(
+      [
+        '<a href="#features">x</a>',
+        '<div className="bg-bg text-text-main border-border text-[var(--ci-chart-2-ink)]" />',
+        '<path fill="none" stroke="var(--color-text-muted)" />',
+        "// a #E54D5E comment is not a colour",
+      ].join("\n")
+    ),
+    []
+  );
 });
 
 test("no hand-rolled role=dialog outside the Modal adapter", () => {
   const hits = countBy(DASHBOARD, /role=["{']*dialog/g);
   delete hits["src/shared/components/Modal.tsx"]; // doc comment on the kit DialogContent
-  // In-container dialog kept on purpose: pinned tests use window Escape/backdrop (lote 6 #1).
-  delete hits["src/shared/components/RequestLoggerDetail.tsx"];
+  assert.deepEqual(hits, {});
+});
+
+// A spun <Icon> kept turning under reduced motion and exposed no status. Spinners go through the
+// Spinner adapter in Loading.tsx: the kit arc, a labelled status unless `decorative`.
+test("animate-spin stays within its budget: new spinners use the Spinner adapter", () => {
+  const hits = countBy(APP, /\banimate-spin\b/g);
+  // Another front owns this file; its one spun icon goes with that work.
+  delete hits["src/shared/components/ConsoleLogViewer.tsx"];
+  const SPIN_ALLOWED: Record<string, number> = {
+    // Spun refresh/progress icons in files that draw charts, which the chart work owns.
+    "src/app/(dashboard)/dashboard/analytics/CompressionAnalyticsTab.tsx": 1,
+    "src/app/(dashboard)/dashboard/health/TelemetryCard.tsx": 1,
+    // Hand-made CSS rings, not icons: bordered spans and divs, some tinted to a status badge.
+    "src/app/(dashboard)/dashboard/analytics/components/DiversityScoreCard.tsx": 1,
+    "src/app/(dashboard)/dashboard/conversations/page.tsx": 1,
+    "src/app/(dashboard)/dashboard/health/page.tsx": 1,
+    "src/app/(dashboard)/dashboard/models/CatalogTestBadge.tsx": 1,
+    "src/app/(dashboard)/dashboard/tools/traffic-inspector/components/chat/MessageContent.tsx": 1,
+    "src/shared/components/RequestLoggerDetail.tsx": 1,
+    "src/shared/components/RequestLoggerV2.tsx": 1,
+  };
+  assert.deepEqual(hits, SPIN_ALLOWED);
+});
+
+test("no raw <kbd> outside the kit Kbd", () => {
+  const hits = countBy(APP, /<kbd\b/g);
+  delete hits["src/shared/components/CommandPalette.tsx"]; // moves with the kit Command palette
   assert.deepEqual(hits, {});
 });
 

@@ -158,6 +158,20 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     hasFree: true,
     freeNote: "$1-5 trial credits on signup for serverless inference",
   },
+  // ParalonCloud (https://paraloncloud.com) — OpenAI-compatible /v1 for chat + embeddings.
+  paraloncloud: {
+    id: "paraloncloud",
+    serviceKinds: ["llm", "embedding"],
+    alias: "paralon",
+    name: "ParalonCloud",
+    icon: "cloud",
+    color: "#2EE6A6",
+    textIcon: "PC",
+    website: "https://paraloncloud.com",
+    notice: {
+      apiKeyUrl: "https://paraloncloud.com/console",
+    },
+  },
   "ollama-cloud": {
     id: "ollama-cloud",
     serviceKinds: ["llm"],
@@ -202,6 +216,18 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#7C3AED",
     textIcon: "LA",
     website: "https://lambda.ai",
+  },
+  runcrate: {
+    id: "runcrate",
+    serviceKinds: ["llm"],
+    alias: "runcrate",
+    name: "Runcrate",
+    icon: "terminal",
+    color: "#1A2B79",
+    textIcon: "RC",
+    website: "https://www.runcrate.ai",
+    hasFree: true,
+    freeNote: "Open models are free with your GitHub account",
   },
   sambanova: {
     id: "sambanova",

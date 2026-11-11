@@ -1,3 +1,4 @@
+import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
@@ -68,6 +69,8 @@ import {
   tryCreditsRetry,
   tryEmbedLongRetryAfter,
   buildFinalAntigravityResult,
+  peekFirstAntigravitySseEvent,
+  isAntigravityHeaderDeadlineTimeout,
   buildAntigravity429ErrorMessage,
   markCreditsExhausted,
   isAbortError,
@@ -82,9 +85,8 @@ import {
   resolveAntigravityClientVersion,
 } from "../services/antigravityClientProfile.ts";
 import {
-  generateAntigravityRequestId,
+  buildAntigravityEnvelopeIdentity,
   getAntigravityEnvelopeUserAgent,
-  getAntigravitySessionId,
 } from "../services/antigravityIdentity.ts";
 import {
   isGeminiTrailingModelTurnRejectingModel,
@@ -466,13 +468,63 @@ function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, un
     : { ...request, systemInstruction };
 }
 
+/**
+ * Vertex AI (via Google Cloud Code for Claude models) enforces Anthropic's strict
+ * tool protocol: every tool_use must be immediately followed by a tool_result.
+ * In Gemini contents format, user turns merging tool results with demoted system/user
+ * turns (e.g. Claude Code's `<total_tokens>` budget notices) had `functionResponse`
+ * sorted to the end by `moveFunctionResponsesLast`, causing Vertex AI HTTP 400
+ * "tool_use ids were found without tool_result blocks immediately after".
+ *
+ * For Claude models, strip synthetic `<total_tokens>` budget blocks and ensure all
+ * `functionResponse` parts are placed first in the user turn.
+ */
+export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown[] {
+  return contents.map((content) => {
+    if (!content || typeof content !== "object") return content;
+    const c = content as { role?: unknown; parts?: unknown[] };
+    if (c.role !== "user" || !Array.isArray(c.parts)) return content;
+
+    const hasFunctionResponse = c.parts.some(
+      (p) => p && typeof p === "object" && "functionResponse" in p
+    );
+    if (!hasFunctionResponse) return content;
+    // Only a pure tool-result turn is reordered: a turn that also carries functionCall
+    // parts is not an Anthropic tool_result message, so its part order is left as-is.
+    const hasFunctionCall = c.parts.some((p) => p && typeof p === "object" && "functionCall" in p);
+    if (hasFunctionCall) return content;
+
+    const filteredParts = c.parts.filter((p) => {
+      if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") {
+        const text = (p as { text: string }).text.trim();
+        if (text.startsWith("<total_tokens>") && text.endsWith("</total_tokens>")) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    const responses: unknown[] = [];
+    const others: unknown[] = [];
+    for (const part of filteredParts) {
+      if (part && typeof part === "object" && "functionResponse" in part) {
+        responses.push(part);
+      } else {
+        others.push(part);
+      }
+    }
+
+    return { ...c, parts: [...responses, ...others] };
+  });
+}
+
 function sanitizeAntigravityGeminiRequest(
   request: Record<string, unknown>
 ): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
 
   if (Array.isArray(request.contents)) {
-    clean.contents = request.contents;
+    clean.contents = normalizeAntigravityClaudeContents(request.contents);
   }
 
   if (asRecord(request.systemInstruction)) {
@@ -617,11 +669,21 @@ type AntigravityAttemptOutcome =
   | { action: "retry"; sameUrl: boolean; lastStatus?: number };
 
 export class AntigravityExecutor extends BaseExecutor {
-  constructor() {
+  streamReadinessTimeoutMs?: number;
+
+  constructor(options?: { streamReadinessTimeoutMs?: number }) {
     super("antigravity", PROVIDERS.antigravity);
+    this.streamReadinessTimeoutMs = options?.streamReadinessTimeoutMs;
   }
 
-  override shouldRetry(status: number, urlIndex: number): boolean {
+  override shouldRetry(status: number, urlIndex: number, model?: string): boolean {
+    if (
+      status === HTTP_STATUS.NOT_FOUND &&
+      typeof model === "string" &&
+      /argon|gemini-4/i.test(model)
+    ) {
+      return false;
+    }
     return (
       (status === HTTP_STATUS.RATE_LIMITED ||
         status === HTTP_STATUS.NOT_FOUND ||
@@ -645,10 +707,14 @@ export class AntigravityExecutor extends BaseExecutor {
 
   buildHeaders(credentials: AntigravityCredentials, _stream = true): Record<string, string> {
     const clientProfile = getAntigravityClientProfile(credentials);
-    const raw = {
+    const raw: Record<string, string> = {
       ...getAntigravityContentHeaders(clientProfile, credentials.accessToken),
-      Accept: "text/event-stream",
     };
+    // The native Go CLI requests SSE through `?alt=sse` alone and sends no Accept header;
+    // only the IDE/Electron profile advertises `text/event-stream`.
+    if (clientProfile !== "cli") {
+      raw.Accept = "text/event-stream";
+    }
     // Scrub proxy/fingerprint headers that reveal non-native traffic
     return scrubProxyAndFingerprintHeaders(raw);
   }
@@ -850,14 +916,18 @@ export class AntigravityExecutor extends BaseExecutor {
       }
     }
 
+    const identity = buildAntigravityEnvelopeIdentity({
+      isClaude,
+      credentials,
+      sessionIdFallback:
+        typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined,
+    });
+
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);
     const rawTransformedRequest = {
       ...normalizedRequest,
       ...(contents.length > 0 && { contents }),
-      sessionId: getAntigravitySessionId(
-        credentials,
-        typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined
-      ),
+      sessionId: identity.sessionId,
       ...(safetySettings !== undefined && { safetySettings }),
       toolConfig:
         Array.isArray(normalizedRequest?.tools) && normalizedRequest.tools.length > 0
@@ -879,7 +949,12 @@ export class AntigravityExecutor extends BaseExecutor {
         : rawTransformedRequest;
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
-
+    // Identity labels join (never replace) the caller's own labels (#16618).
+    const callerLabels = asRecord((transformedRequest as Record<string, unknown>).labels);
+    (transformedRequest as Record<string, unknown>).labels = {
+      ...callerLabels,
+      ...identity.labels,
+    };
     const {
       project: _project,
       model: _model,
@@ -910,7 +985,7 @@ export class AntigravityExecutor extends BaseExecutor {
     const requestType = _requestType === "image_gen" ? "image_gen" : "agent";
     const envelope: AntigravityRequestEnvelope = {
       project: projectId,
-      requestId: generateAntigravityRequestId(),
+      requestId: identity.requestId,
       request: transformedRequest,
       model: upstreamModel,
       userAgent: getAntigravityEnvelopeUserAgent(credentials),
@@ -1231,7 +1306,13 @@ export class AntigravityExecutor extends BaseExecutor {
         headers: [["Content-Type", "application/json"]],
       });
 
-      return { response: syntheticResponse, url, headers, transformedBody };
+      return {
+        response: syntheticResponse,
+        upstreamHttpSelection: selectHttpResponse(response),
+        url,
+        headers,
+        transformedBody,
+      };
     };
 
     return collect();
@@ -1446,7 +1527,9 @@ export class AntigravityExecutor extends BaseExecutor {
         }
         // This deadline has already consumed its full header budget. Never
         // spend it again on another host within the SAME provider account.
-        if (isAntigravityPreResponseTimeout(error)) throw error;
+        // A silent body (headers but no first SSE event) is per-host and
+        // still fails over to the next base URL (#13125).
+        if (isAntigravityHeaderDeadlineTimeout(error)) throw error;
         lastError = error;
         // A fetch failure on a URL that still has a fallback is a retry, not a
         // failed request: the loop continues and the client gets the next
@@ -1548,7 +1631,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryMs = rateLimitOutcome.retryMs;
     }
 
-    if (!budget429Spent && this.shouldRetry(response.status, urlIndex)) {
+    if (!budget429Spent && this.shouldRetry(response.status, urlIndex, model)) {
       log.debug("RETRY", `${response.status} on ${url}, trying fallback ${urlIndex + 1}`);
       return { action: "retry", sameUrl: false, lastStatus: response.status };
     }
@@ -1600,9 +1683,16 @@ export class AntigravityExecutor extends BaseExecutor {
     signal: AbortSignal | null | undefined,
     log: SafeAntigravityLog
   ): Promise<SsePassthroughResult> {
-    if (!stream && response.ok && response.body) {
+    const peekedResponse = await peekFirstAntigravitySseEvent(
+      response,
+      url,
+      this.streamReadinessTimeoutMs,
+      signal
+    );
+
+    if (!stream && peekedResponse.ok && peekedResponse.body) {
       return this.collectStreamToResponse(
-        response,
+        peekedResponse,
         model,
         url,
         finalHeaders,
@@ -1614,7 +1704,7 @@ export class AntigravityExecutor extends BaseExecutor {
 
     return buildFinalAntigravityResult(
       stream,
-      response,
+      peekedResponse,
       url,
       finalHeaders,
       transformedBody,

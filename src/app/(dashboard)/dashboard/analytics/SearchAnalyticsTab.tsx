@@ -10,6 +10,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 interface SearchStats {
   total: number;
@@ -86,7 +87,7 @@ function StatCard({
         <Icon name={icon} size={18} />
         {label}
       </div>
-      <div className="text-2xl font-bold text-text">{value}</div>
+      <div className="text-2xl font-semibold text-text">{value}</div>
       {sub && <div className="text-xs text-text-muted">{sub}</div>}
     </div>
   );
@@ -155,8 +156,8 @@ export default function SearchAnalyticsTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-text-muted">
-        <Icon name="progress_activity" className="animate-spin mr-2" />
+      <div role="status" className="flex items-center justify-center py-16 text-text-muted">
+        <Spinner decorative size="sm" className="mr-2" />
         {t("searchAnalyticsLoading")}
       </div>
     );

@@ -443,7 +443,7 @@ Məqsədyönlü alt qovluqlara bölünüb:
 
 ---
 
-## 4. `open-sse/` — Streaming mühərrik iş sahəsi
+## 4. `open-sse/` — Streaming engine iş sahəsi
 
 `@omniroute/open-sse` kimi nəşr olunan ayrıca npm iş sahəsi. Sorğuların işlənməsi, icraçılar, tərcüməçilər, xidmətlər, transformator və MCP serverinə sahibdir.
 
@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,11 +485,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 yüksək səviyyəli icraçı modulları (`*.ts` minus `base.ts`, `index.ts` və testlər — `npm run check:docs-counts` hesablama ölçüləri). Hər bir icraçı sinfi birbaşa və ya `DefaultExecutor` və ya başqa icraçı vasitəsilə `BaseExecutor` (`base.ts`) genişləndirir; qalan modullar provayderə görə köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, qurk işləyiciləri). İcraçılara daxildir:
+159 yüksək səviyyəli icraçı modulları (`*.ts` minus `base.ts`, `index.ts` və testlər — `npm run check:docs-counts` ölçmələri). Hər bir icraçı sinfi birbaşa və ya `DefaultExecutor` və ya başqa icraçı vasitəsilə `BaseExecutor` (`base.ts`) genişləndirir; qalan modullar provayderə görə köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, quirk işləyiciləri). İcraçılara daxildir:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, plus `claudeIdentity.ts` `muse-spark-web` paylaşılan şəxsiyyət `devin-desktop`) və `index.ts` (reyestr).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, plus `claudeIdentity.ts` `muse-spark-web` paylaşılan şəxsiyyət köməkçisi) və `index.ts` `devin-desktop` reyestr).
 
-> Qeyd: burada qeyd olunmayan provayderlərə ümumi OpenAI-a uyğun icraçıdan istifadə edərək `default.ts` xidmət göstərir. Tam provayder kataloqu (377 provayder) `src/shared/constants/providers.ts`-də yaşayır.
+> Qeyd: burada qeyd olunmayan provayderlərə ümumi OpenAI-a uyğun icraçıdan istifadə edərək `default.ts` xidmət göstərir. Tam provayder kataloqu (381 provayder) `src/shared/constants/providers.ts`-də yaşayır.
 
 ### 4.3 `open-sse/translator/`
 
@@ -527,16 +527,16 @@ Hub-and-spoke tərcüməsi (OpenAI mərkəzdir).
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikal alət** `server.ts` -da simli ( `schemas/tools.ts` + yaddaşında 45 kanonik, bacarıqlar, GitHub-bacarıqlar, hovuz, oyunlaşdırma, plagin, Notion, Obsidian, yerli korpus və sıxılma modulları — `countUniqueMcpTools` ilə hesablanan birləşmə).
+- **110 unikal alət** `server.ts` -da simli ( `schemas/tools.ts` + yaddaşında 45 kanonik, bacarıqlar, GitHub-bacarıqlar, hovuz, oyunlaşdırma, plagin, Notion, Obsidian, yerli korpus və sıxılma modulları — birliyi `countUniqueMcpTools` ilə hesablanır).
 - **3 nəqliyyat** : stdio, HTTP Streamable, SSE.
-- **33 əhatə dairəsi** icra müddətində tətbiq edilir — `src/shared/constants/mcpScopes.ts`-da əsas siyahı, tam dəst hər bir alət modulu tərəfindən elan edilmiş əhatə dairələrinin birliyidir.
+- **33 əhatə dairəsi** `src/shared/constants/mcpScopes.ts` də iş vaxtı — əsas siyahısında tətbiq edilir, tam dəst hər bir alət modulu tərəfindən elan edilmiş əhatə dairələrinin birliyidir.
 - Audit cədvəli: `mcp_tool_audit` ( `audit.ts` ilə doldurulur).
 - Fayllar: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus `__tests__/` altında testlər.
 - Tam alət kataloqu üçün [MCP-SERVER.md](../frameworks/MCP-SERVER.md) baxın.
 
 ### 4.7 `open-sse/config/`
 
-Provayder reyestrləri (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), hər formata uyğun model reyestrləri (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), şəxsiyyət köməkçiləri (`codexIdentity.ts`, `codexInstructions.ts`, z , `anthropicHeaders.ts` `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, etimadnamə köməkçiləri (`credentialLoader.ts`, `codexClient.ts`) və bulud adapterləri (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, zqy `oci.ts` `glmProvider.ts` `maritalk.ts`, `petals.ts`, `runway.ts` `watsonx.ts` `sap.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

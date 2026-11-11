@@ -1,4 +1,6 @@
+import { transformStreamWithCancel } from "../utils/cancelableTransformStream.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { mergeCacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
@@ -10,6 +12,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
 import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 
 // #10223: threshold for detecting corrupted request_id fields. Normal
 // request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
@@ -145,10 +148,13 @@ function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord |
     usageNumber(source.total_tokens) ??
     usageNumber(source.totalTokens) ??
     inputTokens + outputTokens;
+  const cacheFields = mergeCacheCreationFields(previous, raw);
 
   return {
+    ...cacheFields,
     input_tokens: inputTokens,
     input_tokens_details: {
+      ...cacheFields,
       cached_tokens: cachedTokens,
       ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
       ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined
@@ -613,7 +619,8 @@ export function createResponsesApiTransformStream(
       };
 
       if (state.usage) {
-        response.usage = state.usage;
+        // Keep aggregation in upstream units; only emitted Responses usage includes cache writes.
+        response.usage = normalizeResponsesContextUsage(state.usage);
       }
 
       const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
@@ -629,7 +636,7 @@ export function createResponsesApiTransformStream(
   // goes through the normal per-message path instead of being silently dropped.
   const SSE_MESSAGE_TERMINATOR = encoder.encode("\n\n");
 
-  return new TransformStream(
+  return transformStreamWithCancel<Uint8Array, Uint8Array>(
     {
       start(controller) {
         // Periodic keepalive heartbeat to prevent client timeouts (Codex CLI #2544)

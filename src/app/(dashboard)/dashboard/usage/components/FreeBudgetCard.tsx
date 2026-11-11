@@ -291,7 +291,7 @@ function Kpi({ label, value, valueClass }: { label: string; value: string; value
   return (
     <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-surface-2">
       <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
-      <span className={`text-[19px] font-bold tabular-nums ${valueClass ?? "text-text-main"}`}>
+      <span className={`text-[19px] font-semibold tabular-nums ${valueClass ?? "text-text-main"}`}>
         {value}
       </span>
     </div>
@@ -625,8 +625,8 @@ export default function FreeBudgetCard() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search model, provider…"
-          aria-label="Search free models"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchAria")}
           data-testid="budget-search-input"
           className="min-w-[160px]"
           inputClassName="text-[11px]"
@@ -635,7 +635,7 @@ export default function FreeBudgetCard() {
           compact
           value={providerFilter}
           onChange={(e) => setProviderFilter(e.target.value)}
-          aria-label="Filter by provider"
+          aria-label={t("filterProviderAria")}
           data-testid="budget-provider-select"
           className="w-auto"
         >
@@ -647,7 +647,7 @@ export default function FreeBudgetCard() {
           ))}
         </Select>
         <Checkbox
-          label="Keyless only"
+          label={t("keylessOnly")}
           checked={keylessOnly}
           onChange={(e) => setKeylessOnly(e.target.checked)}
           data-testid="budget-keyless-toggle"

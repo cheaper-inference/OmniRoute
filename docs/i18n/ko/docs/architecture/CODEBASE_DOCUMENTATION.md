@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,15 +486,15 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156개의 최상위 실행기 모듈(`*.ts` 빼기 `base.ts`, `index.ts` 및 테스트 — `npm run check:docs-counts` 측정 횟수). 모든 실행기 클래스는 직접적으로 또는 `DefaultExecutor` 나 다른 실행기를 통해 `BaseExecutor` (`base.ts`)를 확장합니다. 나머지 모듈은 공급자별 도우미(도구 스키마, fetch/TTS 어댑터, 쿼크 처리기)입니다. 실행자에는 다음이 포함됩니다.
+159개의 최상위 실행기 모듈(`*.ts` 빼기 `base.ts`, `index.ts` 및 테스트 — `npm run check:docs-counts` 측정 개수)입니다. 모든 실행기 클래스는 직접적으로 또는 `DefaultExecutor` 나 다른 실행기를 통해 `BaseExecutor` (`base.ts`)를 확장합니다. 나머지 모듈은 공급자별 도우미(도구 스키마, fetch/TTS 어댑터, 쿼크 처리기)입니다. 실행자에는 다음이 포함됩니다.
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` ( 공유 신원 도우미 ) 및 `index.ts` (레지스트리).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, 플러스 `claudeIdentity.ts` ( 공유 신원 도우미 ) 및 `index.ts` (레지스트리).
 
-> 참고: 여기에 나열되지 않은 공급자는 일반 OpenAI 호환 실행기를 사용하여 `default.ts` 에서 제공됩니다. 전체 공급자 카탈로그(377개 공급자)는 `src/shared/constants/providers.ts` 에 있습니다.
+> 참고: 여기에 나열되지 않은 공급자는 일반 OpenAI 호환 실행기를 사용하여 `default.ts` 에서 제공됩니다. 전체 공급자 카탈로그(381개 공급자)는 `src/shared/constants/providers.ts` 에 있습니다.
 
 ### 4.3 `open-sse/translator/`
 
-허브 앤 스포크 번역(OpenAI 가 허브임).
+허브 앤 스포크 번역(OpenAI 가 허브입니다).
 
 - **9명의 번역가 요청** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **9명의 응답 번역가** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
@@ -519,7 +519,7 @@ open-sse/
 | 캐싱              | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | 라우팅 인텔리전스 | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | 모델 처리         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| 압축              | `compression/` — 전체 압축 엔진 배선                                                                                                                                                                                                                     |
+| 압축              | `compression/` — 완전 압축 엔진 배선                                                                                                                                                                                                                     |
 | 토큰 + 세션       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | 계층/매니페스트   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / 네트워크     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110개의 독특한 도구** `server.ts` 로 연결됩니다( `schemas/tools.ts` + 메모리, 기술, GitHub 기술, 풀, 게임화, 플러그인, Notion, Obsidian, local-corpus 및 압축 모듈의 정식 45개 — `countUniqueMcpTools` 로 계산된 통합).
+- **110개의 독특한 도구** `server.ts` 로 연결됩니다( `schemas/tools.ts` + 메모리, 기술, GitHub 기술, 풀, 게임화, 플러그인, Notion, Obsidian, local-corpus 및 `countUniqueMcpTools` 로 계산되는 압축 모듈 — 통합의 45개 표준).
 - **3개의 운송수단** : stdio, HTTP 스트리밍 가능, SSE.
-- **스코프 33개** 런타임 시 적용 — `src/shared/constants/mcpScopes.ts` 의 기본 목록, 전체 세트는 각 도구 모듈에서 선언된 범위의 통합입니다.
+- **스코프 33개** `src/shared/constants/mcpScopes.ts` 의 런타임 — 기본 목록에 적용되며 전체 세트는 각 도구 모듈에서 선언된 범위의 통합입니다.
 - 감사 테이블: `mcp_tool_audit` ( `audit.ts` 로 채워짐)
 - 파일: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts` 및 `__tests__/` 아래의 테스트.
 - 전체 도구 카탈로그는 [MCP-SERVER.md](../frameworks/MCP-SERVER.md) 참조하세요.

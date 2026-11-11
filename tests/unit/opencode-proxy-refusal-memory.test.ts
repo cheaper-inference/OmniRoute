@@ -5,7 +5,10 @@ import { OpencodeExecutor } from "../../open-sse/executors/opencode.ts";
 import type { ExecutorLog, ProviderCredentials } from "../../open-sse/executors/base.ts";
 import { resolveProxyForRequest } from "../../open-sse/utils/proxyFetch.ts";
 import * as memory from "../../open-sse/utils/proxyRefusalMemory.ts";
-import { lastResort429 } from "../../open-sse/executors/opencodeEgressThrottle.ts";
+import {
+  lastResort429,
+  lastResort429ForModel,
+} from "../../open-sse/executors/opencodeEgressThrottle.ts";
 
 // With PROXY_SKIP_RECENTLY_FAILED on, a refusal received on a proxied opencode account sets
 // that member aside across requests; a direct account is never concerned. With the flag off
@@ -85,6 +88,7 @@ describe("OpencodeExecutor proxy refusal memory", () => {
     globalThis.fetch = originalFetch;
     mock.timers.reset();
     delete process.env.PROXY_SKIP_RECENTLY_FAILED;
+    delete process.env.PROXY_REFUSAL_MODEL_SCOPE;
   });
 
   const proxied = () => credentials(FINGERPRINTS.map((fp, i) => ({ fp, proxyIndex: i })));
@@ -117,11 +121,61 @@ describe("OpencodeExecutor proxy refusal memory", () => {
     assert.deepStrictEqual(first.observed, [port(0), port(1)]);
     assert.strictEqual(first.status, 200);
     assert.strictEqual(memory.isProxyAvoided(keyFor(0)), true);
+    // PROXY_REFUSAL_MODEL_SCOPE off (default): the refusal covers the whole egress.
+    assert.strictEqual(memory.isProxyAvoided(keyFor(0), undefined, "another-model"), true);
 
     clearCooldowns(exec);
     assert.deepStrictEqual((await run(exec, proxied(), [200])).observed, [port(2)]);
     clearCooldowns(exec);
     assert.deepStrictEqual((await run(exec, proxied(), [200])).observed, [port(1)]);
+  });
+
+  it("flag on: a 429 sets the egress aside for its model, and model-less readers still see it", async () => {
+    process.env.PROXY_REFUSAL_MODEL_SCOPE = "true";
+    const exec = new OpencodeExecutor("opencode-zen");
+    const first = await run(exec, proxied(), [429, 200]);
+    assert.deepStrictEqual(first.observed, [port(0), port(1)]);
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
+    assert.strictEqual(memory.isProxyAvoided(keyFor(0), undefined, "another-model"), false);
+    assert.strictEqual(memory.isProxyAvoided(keyFor(0)), true);
+  });
+
+  it("flag on: a success through a member erases that member's model-scoped 429 entry", async () => {
+    process.env.PROXY_REFUSAL_MODEL_SCOPE = "true";
+    const creds = credentials([
+      { fp: FINGERPRINTS[0], proxyIndex: 0 },
+      { fp: FINGERPRINTS[1], proxyIndex: 1 },
+    ]);
+    const exec = new OpencodeExecutor("opencode-zen");
+    // Both members hit the quota 429 for model-a: both egress keys are set aside
+    // for model-a, so a model-a request finds no clean candidate.
+    const first = await run(exec, creds, [429, 429]);
+    assert.strictEqual(first.status, 429);
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(1), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
+
+    clearCooldowns(exec);
+    // With both members drained for model-a the rotation falls back to serving one
+    // anyway; that member's success is noted for model-a, erasing its entry.
+    assert.deepStrictEqual((await run(exec, creds, [200])).observed, [port(0)]);
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      false
+    );
+    // The member that never served keeps its model-scoped refusal.
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(1), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
   });
 
   it("with the flag opted out the refused proxy is tried again in turn", async () => {
@@ -262,5 +316,28 @@ describe("lastResort429", () => {
     assert.strictEqual(spare.take(403, accounts[0], never), null);
     assert.strictEqual(spare.take(429, accounts[0], never), accounts[1]);
     assert.strictEqual(spare.take(429, accounts[0], never), null);
+  });
+
+  it("a model-scoped 429 set-aside drains that member for the model that hit it", () => {
+    process.env.PROXY_SKIP_RECENTLY_FAILED = "true";
+    try {
+      const accounts = [
+        account("a", { host: "10.0.0.1", port: 1 }),
+        account("b", { host: "10.0.0.2", port: 2 }),
+      ];
+      const key0 = memory.proxyEgressKey(accounts[0].proxy);
+      assert.ok(key0);
+      memory.noteProxyRefusal(key0, "ip_quota_429", Date.now(), "model-a");
+
+      // For model-a, member a is drained by its own model-scoped 429 → b is served.
+      const forA = lastResort429ForModel("model-a", accounts, { nextAccountIdx: 0 }, new Set());
+      assert.strictEqual(forA.take(429, accounts[0], never), accounts[1]);
+
+      // For another model the set-aside is invisible → a is served.
+      const forB = lastResort429ForModel("model-b", accounts, { nextAccountIdx: 0 }, new Set());
+      assert.strictEqual(forB.take(429, accounts[0], never), accounts[0]);
+    } finally {
+      delete process.env.PROXY_SKIP_RECENTLY_FAILED;
+    }
   });
 });

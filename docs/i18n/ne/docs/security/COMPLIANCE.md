@@ -17,64 +17,72 @@ OmniRoute ले प्रशासनिक कार्यहरू, प्र
 कुनै पनि विफलतामा कललाई मौन रूपमा बेवास्ता गरिन्छ, जसले गर्दा अडिट लगिङले
 मुख्य अनुरोध प्रवाहलाई अवरुद्ध गर्न सक्दैन।
 
-## के-के लग गरिन्छ
+## के-के लग हुन्छ
 
 ### प्रशासनिक अडिट घटनाहरू (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` मा गरिएको प्रत्येक कलले
-एउटा पङ्क्ति सिर्जना गर्छ। कार्य स्ट्रिङहरूले `domain.verb` (वा `domain.verb.outcome`)
-ढाँचा पालना गर्छन्। स्रोत ट्रीमा पुष्टि गरिएका कार्य प्रकारहरूमा निम्न समावेश छन्:
+`logAuditEvent({ action, actor, target, details, ... })` को प्रत्येक कलले
+एउटा पङ्क्ति उत्पादन गर्छ। Action string हरूले `domain.verb` (वा
+`domain.verb.outcome`) ढाँचा पालना गर्छन्। ट्रीभित्र पुष्टि गरिएका action प्रकारहरू:
 
-| कार्य                                | स्रोत                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
 प्रत्येक प्रविष्टिले `action`, `actor` (पूर्वनिर्धारित रूपमा `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id`, र `timestamp` कैद गर्छ। संवेदनशील कुञ्जीहरू (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey` सँग मेल खाने कुनै पनि कुरा,
-आदि) लाई पङ्क्ति लेखिनुअघि पुनरावर्ती रूपमा `"[redacted]"` द्वारा लुकाइन्छ।
+`request_id`, र `timestamp` सङ्कलन गर्छ। संवेदनशील कुञ्जीहरू (`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey` सँग मेल खाने कुनै पनि
+कुञ्जी आदि) पङ्क्ति लेखिनुअघि पुनरावर्ती रूपमा `"[redacted]"` मा लुकाइन्छ।
+
+`api_key.auth.touch` पङ्क्तिहरूले अनुरोध लगसम्म कहिल्यै नपुग्ने सफल API-key
+मेटाडेटा र खोजसम्बन्धी पढाइहरू (GET/HEAD) अभिलेख गर्छन्: कुन कुञ्जी, कहिले,
+र सामान्यीकृत path; यी पङ्क्तिहरूलाई एकत्रित गरी अधिकतम 1,000 पङ्क्तिमा सीमित
+गरिन्छ। `noLog` भएका कुञ्जीहरू र environment key लाई छोडिन्छ। कल गर्ने व्यक्तिको
+IP address र user-agent `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` feature flag
+सक्रिय हुँदा मात्र थपिन्छ (पूर्वनिर्धारित रूपमा बन्द)।
 
 ### MCP उपकरण कलहरू (`mcp_tool_audit`)
 
 प्रत्येक MCP उपकरण आह्वानले
 `open-sse/mcp-server/audit.ts` मार्फत एउटा पङ्क्ति लेख्छ। स्किमा
-(`src/lib/db/migrations/002_mcp_a2a_tables.sql` बाट):
+`src/lib/db/migrations/002_mcp_a2a_tables.sql` बाट:
 
-| स्तम्भ           | टिप्पणी                               |
-| ---------------- | ------------------------------------- |
-| `id`             | स्वतः वृद्धि                          |
-| `tool_name`      | MCP उपकरण पहिचानकर्ता                 |
-| `input_hash`     | इनपुटको sha256 (पेलोड भण्डारण हुँदैन) |
-| `output_summary` | छोटो, काटिएको सारांश                  |
-| `duration_ms`    | वास्तविक बितेको समय                   |
-| `api_key_id`     | कलकर्ता (nullable)                    |
-| `success`        | `1` / `0`                             |
-| `error_code`     | विफलतामा अन्तिम त्रुटि कोड            |
-| `created_at`     | ISO टाइमस्ट्याम्प                     |
+| Column           | Notes                                   |
+| ---------------- | --------------------------------------- |
+| `id`             | स्वतः बढ्ने                             |
+| `tool_name`      | MCP उपकरण पहिचानकर्ता                   |
+| `input_hash`     | इनपुटको sha256 (payload भण्डारण हुँदैन) |
+| `output_summary` | छोटो, काटिएको सारांश                    |
+| `duration_ms`    | भित्ते-समय                              |
+| `api_key_id`     | कल गर्ने पक्ष (nullable)                |
+| `success`        | `1` / `0`                               |
+| `error_code`     | असफल हुँदा अन्तिम त्रुटि कोड            |
+| `created_at`     | ISO timestamp                           |
 
 ### अनुरोध / प्रयोग लगहरू
 
-यी सञ्चालनसम्बन्धी टेलिमेट्री हुन् (कडाइका साथ प्रशासनिक अडिट होइनन्), तर यिनले उही
-अवधारण पाइपलाइन साझा गर्छन्:
+यी सञ्चालनसम्बन्धी telemetry हुन् (कडाइका साथ प्रशासनिक अडिट होइनन्), तर समान
+retention pipeline साझा गर्छन्:
 
-- `usage_history` — प्रत्येक अनुरोधको प्रयोग रोल-अप
+- `usage_history` — प्रत्येक अनुरोधको प्रयोगको समग्र अभिलेख
 - `call_logs` — प्रत्येक अनुरोधको पूर्ण लग (पङ्क्ति सीमाको अधीनमा, तल हेर्नुहोस्)
-- `proxy_logs` — प्रोक्सी ट्राफिक लग (पङ्क्ति सीमाको अधीनमा)
-- `request_detail_logs` — पुरानो विस्तृत अनुरोध लग (उपस्थित भएमा अझै पनि काटछाँट गरिन्छ)
+- `proxy_logs` — proxy traffic लग (पङ्क्ति सीमाको अधीनमा)
+- `request_detail_logs` — पुरानो विस्तृत अनुरोध लग (उपस्थित भएमा अझै pruning गरिन्छ)
 
 ## भण्डारण स्किमा
 

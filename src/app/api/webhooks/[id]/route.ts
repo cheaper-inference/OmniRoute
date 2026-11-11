@@ -28,7 +28,7 @@ const updateWebhookSchema = z
     description: z.string().max(1000).optional(),
     enabled: z.boolean().optional(),
     kind: z.enum(WEBHOOK_KINDS).optional(),
-    metadata: z.record(z.string()).optional(),
+    metadata: z.record(z.string(), z.string()).optional(),
   })
   .strict();
 

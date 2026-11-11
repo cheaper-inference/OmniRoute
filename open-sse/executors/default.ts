@@ -60,6 +60,8 @@ import {
   normalizeGigachatChatUrl,
 } from "@/lib/providers/validation/urlHelpers";
 import { forwardOpencodeClientHeaders } from "../utils/opencodeHeaders.ts";
+import { floorMuseOutputTokens } from "./default/museCode.ts";
+import { defaultPerplexityAgentMaxOutputTokens } from "./default/perplexityAgentDefaults.ts";
 import { resolveZaiUrl } from "./default/zaiFormatOverride.ts";
 import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
 import { isForceStreamProvider } from "./default/forceStreamBody.ts";
@@ -70,28 +72,12 @@ import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
 import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
+import {
+  attachMuseCodeToolNameMap,
+  sanitizeMuseCodeToolNames,
+} from "./default/museCodeToolNames.ts";
 
 const NVIDIA_TOOL_CALL_ID_PATTERN = /^[A-Za-z0-9]{9}$/;
-const PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS = 4096;
-
-function defaultPerplexityAgentMaxOutputTokens<T>(body: T): T {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return body;
-
-  const record = body as Record<string, unknown>;
-  if (
-    record.max_output_tokens !== undefined ||
-    record.max_completion_tokens !== undefined ||
-    record.max_tokens !== undefined
-  ) {
-    return body;
-  }
-
-  return {
-    ...record,
-    max_output_tokens: PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS,
-  } as T;
-}
-
 const ZAI_GLM_53_OPENAI_MODEL_PATTERN = /^glm-5\.3(?:-flash)?$/i;
 const ZAI_GLM_53_EFFORT_MODEL_PATTERN = /^(glm-5\.3(?:-flash)?)-(low|high|max)$/i;
 
@@ -285,7 +271,10 @@ export class DefaultExecutor extends BaseExecutor {
       }
       case "perplexity-agent":
         return this.config.baseUrl;
+      case "mistral":
       case "openai": {
+        // Mistral opts in per model; a custom model arrives as the marker, see
+        // resolveExecutionCredentials.
         // #5842: responses-only models (o1-pro / gpt-5.x-pro) 404 on
         // /v1/chat/completions ("only supported in v1/responses"). Route them to
         // the native /responses endpoint — the per-model targetFormat (registry tag
@@ -298,8 +287,11 @@ export class DefaultExecutor extends BaseExecutor {
             ? (credentials.providerSpecificData.baseUrl as string)
             : null;
         const chatUrl = customBaseUrl ? normalizeOpenAIChatUrl(customBaseUrl) : this.config.baseUrl;
-        if (getModelTargetFormat("openai", model) === "openai-responses") {
-          return chatUrl.replace(/\/chat\/completions\/?$/, "/responses");
+        if (
+          credentials?.providerSpecificData?._omnirouteForceResponsesUpstream === true ||
+          getModelTargetFormat(this.provider, model) === "openai-responses"
+        ) {
+          return chatUrl.replace(/\/chat(?:\/completions)?\/?$/, "/responses");
         }
         return chatUrl;
       }
@@ -835,6 +827,7 @@ export class DefaultExecutor extends BaseExecutor {
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);
     }
+    if (this.provider === "muse-code") withDefaults = floorMuseOutputTokens(withDefaults);
 
     if (this.provider === "nvidia") normalizeNvidiaToolCallIds(withDefaults);
     if (this.provider === "openai") withDefaults = normalizeOpenAIToolCallIds(withDefaults);
@@ -1076,6 +1069,16 @@ export class DefaultExecutor extends BaseExecutor {
 
     if (this.provider === "workbuddy") {
       withDefaults = sanitizeWorkbuddyBody(withDefaults);
+    }
+
+    // Meta's Muse Code subscription gate 403s a request that declares a
+    // function tool under an exact coding-agent name (read_file, bash, ...)
+    // regardless of the client's identity. Rename those declarations to
+    // OmniRoute-prefixed wire aliases and publish the ledger on _toolNameMap
+    // so the response path restores the client's declared names.
+    if (this.provider === "muse-code") {
+      const aliases = sanitizeMuseCodeToolNames(withDefaults);
+      if (aliases) attachMuseCodeToolNameMap(withDefaults, aliases);
     }
 
     return applyRegistryBodyRepairs(this.provider, withDefaults);

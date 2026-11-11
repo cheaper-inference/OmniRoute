@@ -14,13 +14,13 @@
 
 ## Nedir
 
-OmniRoute işaretlenmiş 155 katalog girişi de dahil olmak üzere 377 sağlayıcıyı kaydettiriyor**free/no-auth** (kimlik doğrulamasız, ücretsiz katmanlı OAuth veya ücretsiz katmanlı API anahtarı — [Ücretsiz Katmanlar Kılavuzu'na](../getting-started/FREE-TIERS-GUIDE.md) ve [Ücretsiz Katmanlar dizininin](../reference/FREE_TIERS.md) tamamına bakın). İşin püf noktası: ücretsiz sağlayıcıların model kalitesi açısından büyük farklılıklar göstermesi. Sınır modeline hizmet veren, kimlik doğrulaması olmayan bir sağlayıcı, küçük eski bir modele hizmet veren sağlayıcıdan çok daha faydalıdır.
+OmniRoute işaretlenmiş 155 katalog girişi de dahil olmak üzere 381 sağlayıcıyı kaydettiriyor**free/no-auth** (kimlik doğrulamasız, ücretsiz katmanlı OAuth veya ücretsiz katmanlı API anahtarı — [Ücretsiz Kullanım Kılavuzu'na](../getting-started/FREE-TIERS-GUIDE.md) ve [Ücretsiz Kullanım dizininin](../reference/FREE_TIERS.md) tamamına bakın). İşin püf noktası: ücretsiz sağlayıcıların model kalitesi açısından büyük farklılıklar göstermesi. Sınır modeline hizmet veren, kimlik doğrulaması olmayan bir sağlayıcı, küçük eski bir modele hizmet veren sağlayıcıdan çok daha faydalıdır.
 
 **Ücretsiz Sağlayıcı Sıralaması** cevaplar "** hangi ücretsiz sağlayıcı bana en iyi modeli veriyor?** " her ücretsiz sağlayıcının kataloğuna katılarak** Kitle kaynaklı kalite puanları** itibaren** Arena AI liderlik tablosu** (insan tercihi ELO, LMArena chatbot arenasının ardındaki aynı fikir). Sağlayıcılar daha sonra güçlerine göre sıralanır.** en iyi ücretsiz model** .
 
 Sıralama üç gerçek kaynaktan hesaplanır:
 
-1. Ücretsiz sağlayıcı listeleri — `NOAUTH_PROVIDERS` ve `hasFree` (`src/shared/constants/providers.ts`) işaretli `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` girişleri.
+1. Ücretsiz sağlayıcı — `NOAUTH_PROVIDERS` yanı sıra `hasFree` (`src/shared/constants/providers.ts`) işaretli `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` girişlerini listeler.
 2. Her sağlayıcının model kataloğu, sağlayıcı kayıt defterinden (`open-sse/config/providerRegistry.ts`).
 3. Arena ELO senkronizasyon motoru (`src/lib/arenaEloSync.ts`) tarafından `model_intelligence` DB tablosunda saklanan ELO'dan türetilmiş göreve uyum puanları.
 

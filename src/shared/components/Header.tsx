@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { Kbd, KbdGroup } from "@omniroute/ui-kit/kbd";
 import { ProductSwitcher } from "@omniroute/ui-kit/keak-brand";
 import { SidebarTrigger, useSidebar } from "@omniroute/ui-kit/sidebar";
 
@@ -301,9 +302,10 @@ export default function Header({ onOpenCommandPalette }: HeaderProps) {
             className="hidden md:inline-flex"
           >
             <span className="text-xs">{t("quickNavigation")}</span>
-            <kbd className="hidden rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono text-[10px] lg:inline-flex">
-              {isMac ? "⌘K" : "Ctrl+K"}
-            </kbd>
+            <KbdGroup className="hidden lg:inline-flex">
+              <Kbd>{isMac ? "⌘" : "Ctrl"}</Kbd>
+              <Kbd>K</Kbd>
+            </KbdGroup>
           </Button>
         )}
         {onOpenCommandPalette && (

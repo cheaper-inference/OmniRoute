@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 top-level executor modules (`*.ts` minus `base.ts`, `index.ts` at mga pagsubok — ang bilang ng `npm run check:docs-counts` measures). Ang bawat klase ng tagapagpatupad ay nagpapalawak ng `BaseExecutor` (`base.ts`), direkta o sa pamamagitan ng `DefaultExecutor` o ibang tagapagpatupad; ang natitirang mga module ay mga katulong ng bawat provider (mga tool schema, fetch/TTS adapter, quirk handler). Kasama sa mga tagapagpatupad ang:
+159 top-level executor modules (`*.ts` minus `base.ts`, `index.ts` and tests — the count `npm run check:docs-counts` measures). Ang bawat klase ng tagapagpatupad ay nagpapalawak ng `BaseExecutor` (`base.ts`), direkta o sa pamamagitan ng `DefaultExecutor` o ibang tagapagpatupad; ang natitirang mga module ay mga katulong ng bawat provider (mga tool schema, fetch/TTS adapter, quirk handler). Kasama sa mga tagapagpatupad ang:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, tulong ( `claudeIdentity.ts` ) at ibinahagi `index.ts`
 
-> Tandaan: ang mga provider na hindi nakalista dito ay inihahatid ng `default.ts` gamit ang generic na OpenAI-compatible executor. Ang buong catalog ng provider (377 provider) ay nakatira sa `src/shared/constants/providers.ts`.
+> Tandaan: ang mga provider na hindi nakalista dito ay inihahatid ng `default.ts` gamit ang generic na OpenAI-compatible executor. Ang buong catalog ng provider (381 provider) ay nakatira sa `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -528,16 +528,16 @@ Mga Highlight (buong listahan sa ilalim ng `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 natatanging tool** naka-wire sa `server.ts` (45 canonical sa `schemas/tools.ts` + memory, kasanayan, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus at compression modules — unyon na binibilang ng `countUniqueMcpTools`).
+- **110 natatanging tool** naka-wire sa `server.ts` (45 canonical sa `schemas/tools.ts` + memory, kasanayan, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus at compression modules — union binibilang ng `countUniqueMcpTools`).
 - **3 transportasyon** : stdio, HTTP Streamable, SSE.
-- **33 saklaw** ipinapatupad sa runtime — base list sa `src/shared/constants/mcpScopes.ts`, ang buong set ay ang pagsasama-sama ng mga saklaw na idineklara ng bawat module ng tool.
+- **33 saklaw** ipinapatupad sa runtime — base list sa `src/shared/constants/mcpScopes.ts`, ang buong set ay ang unyon ng mga saklaw na ipinahayag ng bawat module ng tool.
 - Talahanayan ng pag-audit: `mcp_tool_audit` (pinupuno ng `audit.ts`).
 - Mga file: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, at mga pagsubok sa ilalim ng `__tests__/`.
 - Tingnan ang [MCP-SERVER.md](../frameworks/MCP-SERVER.md) para sa buong katalogo ng tool.
 
 ### 4.7 `open-sse/config/`
 
-Mga rehistro ng provider (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), mga rehistro ng modelong bawat format (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), mga katulong sa pagkakakilanlan (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `toolCloaking.ts`), zqp , `cliFingerprints.ts` `credentialLoader.ts` `codexClient.ts` `defaultThinkingSignature.ts`, at cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

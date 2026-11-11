@@ -1,7 +1,8 @@
 import { bridgeToResponsesSSE, buildResponseJSON } from "../vendor/codex-chatgpt-web/bridge.ts";
 import { AsyncEventQueue } from "../vendor/codex-chatgpt-web/event-queue.ts";
 import type { AdapterEvent } from "../vendor/codex-chatgpt-web/types.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { errorResponse as canonicalErrorResponse, sanitizeErrorMessage } from "../utils/error.ts";
+import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
 import { CodexAppServerClient, type CodexAppServerClientOptions } from "./codex/appServerClient.ts";
@@ -447,12 +448,14 @@ export class CodexAppServerExecutor extends BaseExecutor {
         await turnDone;
       } catch (err) {
         if (!terminated) {
+          const message = sanitizeErrorMessage(err instanceof Error ? err.message : err);
+          const status = drainAwareFailureStatus(502);
           events.push({
             type: "error",
-            message: sanitizeErrorMessage(err instanceof Error ? err.message : err),
-            status: 502,
-            errorType: "provider_error",
-            code: "codex_app_server_turn_failed",
+            message,
+            status,
+            errorType: status === 499 ? "client_disconnected" : "provider_error",
+            code: status === 499 ? "client_disconnected" : "codex_app_server_turn_failed",
           });
           events.close();
           markTerminated();
@@ -466,6 +469,20 @@ export class CodexAppServerExecutor extends BaseExecutor {
       const running = run();
       const collected = await events.collect();
       await running;
+      const drainFailure = collected.find(
+        (event) => event.type === "error" && event.status === 499
+      );
+      if (drainFailure?.type === "error") {
+        // Our own shutdown tore the app-server down under a request that was still
+        // in flight: the turn was never really served by the provider. Answer 499
+        // (client_disconnected) with the canonical body of the repo's errorResponse
+        // helper, so the runtime does not read our own teardown as provider ill
+        // health (see open-sse/utils/drainStatus.ts).
+        return {
+          response: canonicalErrorResponse(499, drainFailure.message),
+          url: config.url,
+        };
+      }
       const response = buildResponseJSON(collected, input.model, {
         toolNsMap: toolMaps.namespace,
         freeformToolNames: toolMaps.freeform,

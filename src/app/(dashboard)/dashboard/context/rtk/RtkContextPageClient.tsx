@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
-import { Collapsible, SegmentedControl } from "@/shared/components";
+import Collapsible from "@/shared/components/Collapsible";
+import SegmentedControl from "@/shared/components/SegmentedControl";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Checkbox from "@/shared/components/Checkbox";
@@ -442,6 +443,7 @@ export default function RtkContextPageClient() {
         description={t("description")}
         actions={
           <SegmentedControl
+            semantics="radio"
             aria-label={t("viewMode")}
             value={viewMode}
             onChange={(v) => setViewMode(v as "simple" | "advanced")}
@@ -466,7 +468,7 @@ export default function RtkContextPageClient() {
         <Alert
           variant="warning"
           icon={<Icon name="info" size={18} />}
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
           description={t("masterSwitchOffAlert")}
         />
       )}
@@ -604,7 +606,7 @@ export default function RtkContextPageClient() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-text-main">{filter.name}</p>
-                          <p className="mt-0.5 text-[11px] text-text-muted">{filter.description}</p>
+                          <p className="mt-0.5 text-xs text-text-muted">{filter.description}</p>
                         </div>
                         <Checkbox
                           aria-label={filter.name}

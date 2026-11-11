@@ -81,6 +81,8 @@ function conn(
 }
 
 beforeEach(() => {
+  // Successful imports intentionally reload the page after 2s; own that timer in each test.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -89,11 +91,18 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  for (const { root, el } of roots.splice(0)) {
-    act(() => root.unmount());
-    el.remove();
+  try {
+    for (const { root, el } of roots.splice(0)) {
+      act(() => root.unmount());
+      el.remove();
+    }
+  } finally {
+    // Do not navigate after jsdom teardown or leak fake timers into the next test.
+    vi.clearAllTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   }
-  vi.unstubAllGlobals();
 });
 
 describe("useModelImportHandlers — master autoSync", () => {
@@ -302,51 +311,150 @@ describe("useModelImportHandlers — upstream model auto-fetch", () => {
   });
 });
 
-describe("useModelImportHandlers — imported model metadata", () => {
-  it("preserves a discovered per-model targetFormat", async () => {
+describe("useModelImportHandlers — import through the model sync", () => {
+  function syncResponse(ok: boolean, status: number, body: Record<string, unknown>) {
+    return { ok, status, json: async () => body } as unknown as Response;
+  }
+
+  it("imports a connection's models through sync-models, not one row per model", async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const handleSetAlias = vi.fn().mockResolvedValue(undefined);
     const hook = renderHook(
       buildParams({
-        providerId: "vertex",
-        connections: [conn("vertex-connection", true)],
+        providerId: "openrouter",
+        providerStorageAlias: "openrouter",
+        connections: [conn("or-1", true)],
+        modelAliases: { "kept-model": "openrouter/vendor/kept-model" },
+        handleSetAlias,
       })
     );
     const fetchMock = vi.mocked(fetch);
-    fetchMock
-      .mockResolvedValueOnce({
+    fetchMock.mockResolvedValue(
+      syncResponse(true, 200, {
         ok: true,
-        json: async () => ({
-          models: [
-            {
-              id: "grok-4.6",
-              name: "Grok 4.6",
-              apiFormat: "chat-completions",
-              supportedEndpoints: ["chat"],
-              targetFormat: "openai",
-            },
-          ],
-        }),
-      } as Response)
-      .mockResolvedValue({ ok: true } as Response);
+        source: "api",
+        addedModelIds: ["vendor/new-model", "vendor/kept-model"],
+        removedModelIds: ["vendor/gone-model"],
+      })
+    );
 
     await act(async () => {
       await hook.get().handleImportModels();
     });
 
-    const createCall = fetchMock.mock.calls.find(
-      ([url, init]) => url === "/api/provider-models" && init?.method === "POST"
-    );
-    expect(createCall).toBeDefined();
-    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
-      expect.objectContaining({
-        provider: "vertex",
-        modelId: "grok-4.6",
-        targetFormat: "openai",
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      "/api/providers/or-1/sync-models?mode=import",
+    ]);
+    expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("POST");
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("done");
+    expect(progress.importedCount).toBe(2);
+    expect(progress.status).toBe("importSuccessCount");
+    expect(progress.logs).toContain("modelsNoLongerListed");
+    expect(progress.logs).toContain("− vendor/gone-model");
+    // A model the import adds keeps its bare-id alias when the alias is free.
+    expect(handleSetAlias).toHaveBeenCalledTimes(1);
+    expect(handleSetAlias).toHaveBeenCalledWith("vendor/new-model", "new-model", "openrouter");
+    expect(setTimeoutSpy.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(1);
+    setTimeoutSpy.mockRestore();
+  });
+
+  it("gives a shared bare alias to the first added model only", async () => {
+    const handleSetAlias = vi.fn().mockResolvedValue(undefined);
+    const hook = renderHook(
+      buildParams({
+        providerId: "openrouter",
+        providerStorageAlias: "openrouter",
+        connections: [conn("or-1", true)],
+        handleSetAlias,
       })
     );
+    vi.mocked(fetch).mockResolvedValue(
+      syncResponse(true, 200, {
+        ok: true,
+        source: "api",
+        addedModelIds: ["a/foo", "b/foo"],
+        removedModelIds: [],
+      })
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    // `b/foo` must not take over the `foo` alias the import just gave `a/foo`.
+    expect(handleSetAlias).toHaveBeenCalledTimes(1);
+    expect(handleSetAlias).toHaveBeenCalledWith("a/foo", "foo", "openrouter");
+  });
+
+  it("says the catalog is up to date when the listing holds nothing new", async () => {
+    const hook = renderHook(buildParams({ connections: [conn("c-1", true)] }));
+    vi.mocked(fetch).mockResolvedValue(
+      syncResponse(true, 200, { ok: true, source: "api", addedModelIds: [], removedModelIds: [] })
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("done");
+    expect(progress.status).toBe("allModelsAlreadyImported");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("names a provider that publishes no model list", async () => {
+    const hook = renderHook(buildParams({ connections: [conn("c-1", true)] }));
+    vi.mocked(fetch).mockResolvedValue(
+      syncResponse(true, 200, {
+        ok: true,
+        source: "local_catalog",
+        intentional: true,
+        warning: "Model discovery is not configured for this provider — using local catalog",
+        addedModelIds: [],
+      })
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("done");
+    expect(progress.degraded).toBeFalsy();
+    expect(progress.status).toBe("providerPublishesNoModelList");
+  });
+
+  it("ends a free-only import whose provider lists no free model with that message", async () => {
+    const hook = renderHook(buildParams({ connections: [conn("c-1", true)] }));
+    vi.mocked(fetch).mockResolvedValue(
+      syncResponse(true, 200, { ok: true, freeFilterEmpty: true })
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    expect(hook.get().importProgress.status).toBe("noFreeModelsFound");
+  });
+
+  it("reports a failed sync as an error with the server's message", async () => {
+    const hook = renderHook(buildParams({ connections: [conn("c-1", true)] }));
+    vi.mocked(fetch).mockResolvedValue(syncResponse(false, 404, { error: "Connection not found" }));
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("error");
+    expect(progress.error).toBe("Connection not found");
   });
 });
 
-describe("useModelImportHandlers — failed model creation", () => {
+// A no-auth provider used without a connection has no synced catalog and no
+// scheduled sync: its listed models are stored as imported custom rows.
+describe("useModelImportHandlers — no-auth listing import", () => {
   const rejected = {
     ok: false,
     status: 400,
@@ -358,7 +466,17 @@ describe("useModelImportHandlers — failed model creation", () => {
     }),
   } as unknown as Response;
 
-  function mockImport(catalog: Array<{ id: string }>, failingIds: string[]) {
+  function noAuthParams(overrides: Partial<UseModelImportHandlersParams> = {}) {
+    return buildParams({
+      providerId: "aihorde",
+      providerStorageAlias: "aihorde",
+      isFreeNoAuth: true,
+      connections: [],
+      ...overrides,
+    });
+  }
+
+  function mockImport(catalog: Array<Record<string, unknown>>, failingIds: string[]) {
     vi.mocked(fetch).mockImplementation(async (input, init) => {
       if (input === "/api/provider-models" && init?.method === "POST") {
         const { modelId } = JSON.parse(String(init.body));
@@ -368,16 +486,75 @@ describe("useModelImportHandlers — failed model creation", () => {
     });
   }
 
+  it("reads the provider's listing and preserves a discovered per-model targetFormat", async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const hook = renderHook(noAuthParams());
+    mockImport(
+      [
+        {
+          id: "grok-4.6",
+          name: "Grok 4.6",
+          apiFormat: "chat-completions",
+          supportedEndpoints: ["chat"],
+          targetFormat: "openai",
+        },
+      ],
+      []
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const fetchMock = vi.mocked(fetch);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/providers/aihorde/models?refresh=true");
+    expect(setTimeoutSpy.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(1);
+    const createCall = fetchMock.mock.calls.find(
+      ([url, init]) => url === "/api/provider-models" && init?.method === "POST"
+    );
+    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
+      expect.objectContaining({ provider: "aihorde", modelId: "grok-4.6", targetFormat: "openai" })
+    );
+  });
+
+  it("flags a degraded listing, imports it and refreshes the list in place", async () => {
+    const fetchProviderModelMeta = vi.fn().mockResolvedValue(undefined);
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const hook = renderHook(noAuthParams({ fetchProviderModelMeta }));
+    vi.mocked(fetch).mockImplementation(async (input, init) => {
+      if (input === "/api/provider-models" && init?.method === "POST") {
+        return { ok: true } as Response;
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          source: "local_catalog",
+          warning: "API unavailable — using local catalog",
+          error: "HTTP 500",
+          models: [{ id: "listed-model" }],
+        }),
+      } as Response;
+    });
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("done");
+    expect(progress.importedCount).toBe(1);
+    expect(progress.degraded).toBe(true);
+    expect(progress.degradedCause).toBe("HTTP 500");
+    expect(progress.logs).toContain("API unavailable — using local catalog");
+    // The degraded notice must stay on screen: no reload, the list is refreshed in place.
+    expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(false);
+    expect(fetchProviderModelMeta).toHaveBeenCalledTimes(2);
+    setTimeoutSpy.mockRestore();
+  });
+
   it("reports an error instead of success when every model is rejected (bug repro)", async () => {
     const handleSetAlias = vi.fn().mockResolvedValue(undefined);
-    const hook = renderHook(
-      buildParams({
-        providerId: "soniox",
-        providerStorageAlias: "sx",
-        connections: [conn("sx", true)],
-        handleSetAlias,
-      })
-    );
+    const hook = renderHook(noAuthParams({ handleSetAlias }));
     mockImport([{ id: "tts-rt-v2" }, { id: "stt-async-v5" }], ["tts-rt-v2", "stt-async-v5"]);
 
     await act(async () => {
@@ -396,15 +573,7 @@ describe("useModelImportHandlers — failed model creation", () => {
     const handleSetAlias = vi.fn().mockResolvedValue(undefined);
     const fetchProviderModelMeta = vi.fn().mockResolvedValue(undefined);
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
-    const hook = renderHook(
-      buildParams({
-        providerId: "soniox",
-        providerStorageAlias: "sx",
-        connections: [conn("sx", true)],
-        handleSetAlias,
-        fetchProviderModelMeta,
-      })
-    );
+    const hook = renderHook(noAuthParams({ handleSetAlias, fetchProviderModelMeta }));
     mockImport([{ id: "tts-rt-v2" }, { id: "stt-async-v5" }], ["tts-rt-v2"]);
 
     await act(async () => {
@@ -416,9 +585,10 @@ describe("useModelImportHandlers — failed model creation", () => {
     expect(progress.importedCount).toBe(1);
     expect(progress.logs.some((line) => line.includes("bulkFailedCount"))).toBe(true);
     expect(handleSetAlias).toHaveBeenCalledTimes(1);
-    expect(handleSetAlias).toHaveBeenCalledWith("stt-async-v5", "stt-async-v5", "sx");
+    expect(handleSetAlias).toHaveBeenCalledWith("stt-async-v5", "stt-async-v5", "aihorde");
     // No 2s auto-reload (it would wipe the failure lines); the listing is refreshed in place.
     expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
     expect(fetchProviderModelMeta).toHaveBeenCalledTimes(2);
     setTimeoutSpy.mockRestore();
   });

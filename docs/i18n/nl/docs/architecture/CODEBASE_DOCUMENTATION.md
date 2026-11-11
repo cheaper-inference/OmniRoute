@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 uitvoerdermodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests - de telling `npm run check:docs-counts` meet). Elke uitvoerderklasse breidt `BaseExecutor` (`base.ts`) uit, rechtstreeks of via `DefaultExecutor` of een andere uitvoerder; de overige modules zijn helpers per provider (toolschema's, fetch/TTS adapters, quirk-handlers). Executeurs zijn onder meer:
+159 uitvoerdermodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — de telling `npm run check:docs-counts` meet). Elke uitvoerderklasse breidt `BaseExecutor` (`base.ts`) uit, rechtstreeks of via `DefaultExecutor` of een andere uitvoerder; de overige modules zijn helpers per provider (toolschema's, fetch/TTS adapters, quirk-handlers). Executeurs zijn onder meer:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (gedeelde identiteitshelper) en `index.ts` (register).
 
-> Let op: providers die hier niet worden vermeld, worden door `default.ts` bediend met behulp van de generieke OpenAI-compatibele uitvoerder. De volledige aanbiederscatalogus (377 aanbieders) bevindt zich in `src/shared/constants/providers.ts`.
+> Let op: providers die hier niet worden vermeld, worden door `default.ts` bediend met behulp van de generieke OpenAI-compatibele uitvoerder. De volledige aanbiederscatalogus (381 aanbieders) bevindt zich in `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Hub-and-spoke-vertaling (OpenAI is de hub).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Reacties API ↔ Chat-aanvullingenconverter (gebruikt door de `responses/` route catch-all).
+- `responsesTransformer.ts` — `TransformStream` -based Reacties API ↔ Chat-aanvullingenconverter (gebruikt door de `responses/` -route catch-all).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Hoogtepunten (volledige lijst onder `open-sse/services/`):
 | Caching                  | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Route-intelligentie      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modelbehandeling         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Compressie               | `compression/` - volledige compressiemotorbedrading                                                                                                                                                                                                      |
+| Compressie               | `compression/` — volledige compressie motorbedrading                                                                                                                                                                                                     |
 | Token + sessie           | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Niveau / manifest        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / netwerk             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,16 +528,16 @@ Hoogtepunten (volledige lijst onder `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unieke gereedschappen** bedraad in `server.ts` (45 canoniek in `schemas/tools.ts` + -geheugen, vaardigheden, GitHub-vaardigheden, pool, gamification, plug-in, Notion, Obsidian, lokaal corpus en compressiemodules - unie geteld door `countUniqueMcpTools`).
+- **110 unieke gereedschappen** bedraad in `server.ts` (45 canoniek in `schemas/tools.ts` + -geheugen, vaardigheden, GitHub-vaardigheden, pool, gamification, plug-in, Notion, Obsidian, lokaal corpus en compressiemodules — unie geteld door `countUniqueMcpTools`).
 - **3 transporten** : stdio, HTTP Streamable, SSE.
-- **33 reikwijdten** afgedwongen tijdens runtime - basislijst in `src/shared/constants/mcpScopes.ts`, volledige set is de unie van de scopes die door elke toolmodule zijn gedeclareerd.
+- **33 reikwijdten** afgedwongen tijdens runtime — basislijst in `src/shared/constants/mcpScopes.ts`, volledige set is de unie van de scopes die door elke toolmodule zijn gedeclareerd.
 - Controletabel: `mcp_tool_audit` (gevuld met `audit.ts`).
 - Bestanden: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus tests onder `__tests__/`.
 - Zie [MCP-SERVER.md](../frameworks/MCP-SERVER.md) voor de volledige gereedschapscatalogus.
 
 ### 4.7 `open-sse/config/`
 
-Providerregisters (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), modelregisters per formaat (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identiteitshelpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, zqp , `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`), referentiehelpers (`credentialLoader.ts`, `defaultThinkingSignature.ts`) en cloudadapters (`azureAi.ts`, `bedrock.ts`, zqx , `datarobot.ts` `registryUtils.ts` zqz , `oci.ts`, `glmProvider.ts`, `maritalk.ts`, `petals.ts`, `runway.ts` `codexClient.ts` `sap.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `watsonx.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

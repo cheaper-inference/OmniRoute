@@ -6,7 +6,7 @@ import {
   outputContractOf,
 } from "@/lib/semanticCache";
 import { calculateCost } from "@/lib/usage/costCalculator";
-import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
+import { isSemanticCacheDbEnabled } from "@/lib/db/databaseSettings";
 import { finalizePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 import { synthesizeOpenAiSseFromJson } from "../../utils/jsonToSse.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
@@ -24,7 +24,7 @@ export function isSemanticCacheEnabled(
   return (
     apiKeyInfo?.cacheDefaultMode !== "bypass" &&
     settings.semanticCacheEnabled !== false &&
-    getUserDatabaseSettings().cache.semanticCacheEnabled !== false
+    isSemanticCacheDbEnabled()
   );
 }
 
@@ -63,7 +63,7 @@ export async function checkSemanticCache({
   cacheDefaultMode?: "legacy" | "bypass" | null;
   videoTranscriptSensitive?: boolean;
 }) {
-  if (videoTranscriptSensitive) return null;
+  if (provider === "muse-code" || videoTranscriptSensitive) return null;
   // Per-key bypass: skip cache lookup entirely when the API key opts out.
   if (cacheDefaultMode === "bypass") return null;
   if (semanticCacheEnabled && isCacheableForRead(body, clientRawRequest?.headers)) {
@@ -181,6 +181,14 @@ export async function checkSemanticCache({
 
       if (hitType === "semantic" && typeof similarity === "number") {
         headers[OMNIROUTE_RESPONSE_HEADERS.cacheSimilarity] = similarity.toFixed(4);
+      }
+
+      // A replayed SSE stream served straight from the cache bypasses the
+      // central response-header path — carry the no-buffering instruction
+      // explicitly so a reverse proxy streams it like a live one. JSON hits
+      // do not need it.
+      if (cachedSse) {
+        headers["X-Accel-Buffering"] = "no";
       }
 
       // A cache HIT serves WITHOUT an upstream call, so the incremental cost billed to

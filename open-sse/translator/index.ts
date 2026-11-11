@@ -2,6 +2,7 @@ import { FORMATS } from "./formats.ts";
 import {
   ensureToolCallIds,
   fixMissingToolResponses,
+  repairDisplacedToolResults,
   stripOrphanedToolResults,
 } from "./helpers/toolCallHelper.ts";
 import {
@@ -34,10 +35,12 @@ import { applyThinkingBudget } from "../services/thinkingBudget.ts";
 import { applyReasoningRuleDirective } from "@/lib/reasoningRouting/policy";
 import { getModelPreserveVideoUrl } from "@/lib/db/models/modelPreserveVideoUrl";
 import { getResolvedModelCapabilities, supportsReasoning } from "../services/modelCapabilities.ts";
+import { requestMediaRefs, assertCIMediaPreserved } from "./helpers/mediaIntegrity.ts";
 import { normalizeRoles, resolvePreserveDeveloperRole } from "../services/roleNormalizer.ts";
 import { hoistLeadingSystemMessage } from "./helpers/strictSystemHoist.ts";
 import { ensurePoeUserTurnHasText } from "./helpers/poeImageOnlyUserTurn.ts";
 import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claudeDeferredTools.ts";
+import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
   lookupReasoning,
@@ -46,6 +49,7 @@ import {
 } from "../services/reasoningCache.ts";
 import {
   normalizeResponsesReasoningEffort,
+  REASONING_SUMMARY_OPT_OUT_MARKER,
   RESPONSES_STORE_MARKER,
 } from "./request/openai-responses/helpers.ts";
 import { applyReasoningInputPolicy } from "../services/reasoningInputPolicy.ts";
@@ -341,6 +345,16 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
+/** A top-level `thread` object marks a Claude message-threads delta body. */
+function carriesMessageThread(body: unknown): boolean {
+  const thread = (body as { thread?: unknown } | null)?.thread;
+  return thread !== null && typeof thread === "object" && !Array.isArray(thread);
+}
+
+/**
+ * Translate a request between protocols, applying target-specific compatibility rules and
+ * enforcing attachment preservation for CI dispatch.
+ */
 export function translateRequest(
   sourceFormat,
   targetFormat,
@@ -370,7 +384,23 @@ export function translateRequest(
     copilotClient?: boolean;
   }
 ) {
+  // Only Anthropic holds message-thread state. A `thread` delta (the message-threads beta) omits
+  // the earlier turns, so a translated route would answer with no history. Refuse it with the
+  // code that makes Claude Code resend the full conversation. Same gate as the tool additions.
+  if (
+    sourceFormat === FORMATS.CLAUDE &&
+    !(targetFormat === FORMATS.CLAUDE && acceptsInlineToolAdditions(provider)) &&
+    carriesMessageThread(body)
+  ) {
+    throw Object.assign(new Error("message threads are not supported on translated routes"), {
+      statusCode: 400,
+      errorType: "invalid_request_error",
+      details: { error_code: "thread_unsupported_request" },
+    });
+  }
   // Claude Code inline-tools `tool_addition` blocks only reach Anthropic-native targets;
+  const originalCIMedia =
+    provider === "cheaperinference" || provider === "cinf" ? requestMediaRefs(body) : null;
   // everywhere else their definitions move into tools[] (copy-on-write).
   const hoistDeferredTools =
     sourceFormat === FORMATS.CLAUDE &&
@@ -398,8 +428,13 @@ export function translateRequest(
     ["opencode-go", "opencode-zen"].includes(normalizedProvider) ||
     /glm|zhipu|z-ai/i.test(normalizedModel);
 
-  // Phase 2: Apply thinking budget control before normalization
-  result = applyThinkingBudget(result);
+  // Phase 2: Apply thinking budget control before normalization. Gemini targets receive
+  // the model so a native thinkingLevel reaches the translator instead of a lossy budget.
+  // Claude -> Antigravity is excluded: claude-to-openai drops the level on the hub path.
+  const readsNativeGeminiLevel =
+    targetFormat === FORMATS.GEMINI ||
+    (targetFormat === FORMATS.ANTIGRAVITY && sourceFormat !== FORMATS.CLAUDE);
+  result = applyThinkingBudget(result, null, readsNativeGeminiLevel ? normalizedModel : undefined);
   // Explicit reasoning-routing policies are final. The marker is internal and is
   // consumed here before any provider translation can see it.
   result = applyReasoningRuleDirective(result);
@@ -430,16 +465,23 @@ export function translateRequest(
   });
   const preserveResponsesReasoning = sourceFormat === FORMATS.OPENAI_RESPONSES && isReasoner;
 
+  // In strict tool-history mode the Responses translator validates the history, so do not
+  // normalize malformed arguments or synthesize empty outputs before that boundary. Reordering
+  // a displaced tool result next to its call invents nothing, so it applies in both modes.
+  const strictResponsesHistory =
+    targetFormat === FORMATS.OPENAI_RESPONSES && isStrictResponsesToolHistoryEnabled();
+
   // Ensure tool_calls have id; optionally normalize to 9-char for providers like Mistral
-  ensureToolCallIds(result, { use9CharId });
+  if (!strictResponsesHistory) ensureToolCallIds(result, { use9CharId });
 
   // Fix missing tool responses (insert empty tool_result if needed)
-  fixMissingToolResponses(result);
+  repairDisplacedToolResults(result);
+  if (!strictResponsesHistory) fixMissingToolResponses(result);
 
   // Claude reconciliation preserves orphaned tool output as labelled user text.
   // Keep the raw result carriers until the target translator can perform that
   // lossless conversion; other target formats retain the strict orphan filter.
-  if (targetFormat !== FORMATS.CLAUDE) {
+  if (targetFormat !== FORMATS.CLAUDE && !strictResponsesHistory) {
     stripOrphanedToolResults(result);
   }
 
@@ -566,6 +608,21 @@ export function translateRequest(
                 }
               : credentials;
           result = toOpenAI(model, result, stream, step1Credentials);
+          // Responses creates messages after the initial role pass; normalize before
+          // Gemini targets consume the pivot and discard unsupported developer turns.
+          if (
+            sourceFormat === FORMATS.OPENAI_RESPONSES &&
+            (targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY) &&
+            Array.isArray(result.messages)
+          ) {
+            result.messages = normalizeRoles(
+              result.messages,
+              provider || "",
+              model || "",
+              targetFormat,
+              preserveDeveloperRole
+            );
+          }
           // Log OpenAI intermediate format
           reqLogger?.logOpenAIRequest?.(result);
         }
@@ -621,6 +678,10 @@ export function translateRequest(
                           options.signatureNamespace,
                           model
                         ),
+                        // Raw connection id (chatCore threads the serving connection as
+                        // signatureNamespace): openai-to-claude binds the Claude signed-
+                        // thinking restore on it (#17324 — signatures are org-scoped).
+                        _connectionId: options.signatureNamespace,
                       }
                     : {}),
                   ...(hasPreCompression ? { _preCompressionBody: options.preCompressionBody } : {}),
@@ -665,6 +726,7 @@ export function translateRequest(
     // honor explicit OpenAI-format markers (DashScope/alibaba, Xiaomi MiMo) when
     // requested upstream; generic/implicit-cache OpenAI providers stay stripped.
     result = filterToOpenAIFormat(result, {
+      normalizeFileUrls: normalizedProvider === "cheaperinference" || normalizedProvider === "cinf",
       preserveCacheControl:
         options?.preserveCacheControl === true &&
         providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride),
@@ -675,7 +737,10 @@ export function translateRequest(
       // Falls back to true for moonshot/kimi when unset (legacy behavior).
       preserveVideoUrl:
         getModelPreserveVideoUrl(normalizedProvider, normalizedModel) ??
-        (normalizedProvider === "moonshot" || normalizedProvider === "kimi"),
+        (normalizedProvider === "moonshot" ||
+          normalizedProvider === "kimi" ||
+          normalizedProvider === "cheaperinference" ||
+          normalizedProvider === "cinf"),
       // Same decision normalizeRoles made above — never undo it here.
       preserveDeveloperRole: resolvePreserveDeveloperRole(preserveDeveloperRole, provider),
     });
@@ -753,6 +818,7 @@ export function translateRequest(
 
   // Ensure unique tool_call ids on final payload (translators may have introduced duplicates)
   ensureToolCallIds(result, { use9CharId });
+  repairDisplacedToolResults(result);
   fixMissingToolResponses(result);
   stripOrphanedToolResults(result);
 
@@ -908,6 +974,12 @@ export function translateRequest(
     delete result[RESPONSES_STORE_MARKER];
   }
 
+  // #18124: only the Codex executor understands the reasoning-summary opt-out
+  // marker; any other provider would forward it verbatim to its upstream.
+  if (REASONING_SUMMARY_OPT_OUT_MARKER in result && provider !== "codex") {
+    delete result[REASONING_SUMMARY_OPT_OUT_MARKER];
+  }
+
   // #7293 follow-up: the pre-translation hoist above normalizes the *source*
   // message array, which a target translator can then undo. `claudeToOpenAI`
   // pushes `body.system` as a fresh leading system message before appending the
@@ -924,6 +996,7 @@ export function translateRequest(
     result.messages = ensurePoeUserTurnHasText(result.messages, provider);
   }
 
+  assertCIMediaPreserved(originalCIMedia, result);
   return result;
 }
 

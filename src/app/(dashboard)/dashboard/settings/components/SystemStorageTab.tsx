@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Card, Button, Badge, Checkbox, ConfirmModal, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import DatabaseBackupRetentionCard from "./DatabaseBackupRetentionCard";
 import ProviderTransferPanel from "./ProviderTransferPanel";
 import {
@@ -823,8 +824,8 @@ export default function SystemStorageTab() {
     return (
       <div className="flex flex-col gap-2 mt-3">
         {backupsLoading ? (
-          <div className="flex items-center justify-center py-6 text-text-muted">
-            <Icon name="progress_activity" size={20} className="animate-spin mr-2" />
+          <div role="status" className="flex items-center justify-center py-6 text-text-muted">
+            <Spinner decorative size="sm" className="mr-2" />
             {t("loadingBackups")}
           </div>
         ) : backups.length === 0 ? (
@@ -966,6 +967,24 @@ export default function SystemStorageTab() {
               }
             />
           ))}
+        </div>
+        <div className="mt-4 max-w-sm">
+          <Input
+            label={t("mediaStoreMaxMb")}
+            type="number"
+            min="1"
+            value={dbSettings.retention.mediaStoreMaxMb}
+            hint={t("mediaStoreMaxMbHint")}
+            onChange={(e) =>
+              setDbSettings({
+                ...dbSettings,
+                retention: {
+                  ...dbSettings.retention,
+                  mediaStoreMaxMb: parseInt(e.target.value) || 2048,
+                },
+              })
+            }
+          />
         </div>
         <div className="mt-3">
           <Button

@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — Работно пространство на двигателя за поточно предаване
+## 4. `open-sse/` — Работно пространство на стрийминг машина
 
 Отделно работно пространство npm, публикувано като `@omniroute/open-sse`. Притежава обработка на заявки, изпълнители, преводачи, услуги, трансформатор и MCP сървър.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 изпълнителни модула от най-високо ниво (`*.ts` минус `base.ts`, `index.ts` и тестове — броят измерва `npm run check:docs-counts` ). Всеки изпълнителен клас разширява `BaseExecutor` (`base.ts`), директно или чрез `DefaultExecutor` или друг изпълнител; останалите модули са помощници за всеки доставчик (схеми на инструменти, fetch/TTS адаптери, quirk манипулатори). Изпълнителите включват:
+159 изпълнителни модула от най-високо ниво (`*.ts` минус `base.ts`, `index.ts` и тестове — броят измерва `npm run check:docs-counts` ). Всеки изпълнителен клас разширява `BaseExecutor` (`base.ts`), директно или чрез `DefaultExecutor` или друг изпълнител; останалите модули са помощници за всеки доставчик (схеми на инструменти, fetch/TTS адаптери, манипулатори на quirk). Изпълнителите включват:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, плюс `claudeIdentity.ts` (помощник за споделена самоличност) и `index.ts` (регистър).
 
-> Забележка: доставчиците, които не са изброени тук, се обслужват от `default.ts` използвайки генеричния OpenAI-съвместим изпълнител. Пълният каталог на доставчиците (377 доставчици) се намира в `src/shared/constants/providers.ts`.
+> Забележка: доставчиците, които не са изброени тук, се обслужват от `default.ts` използвайки генеричния OpenAI-съвместим изпълнител. Пълният каталог на доставчиците (381 доставчици) се намира в `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Отговори API ↔ Преобразувател на завършени чатове (използван от маршрута `responses/` catch-all).
+- `responsesTransformer.ts` — `TransformStream` -based Отговори API ↔ Преобразувател на завършвания на чат (използван от маршрута `responses/` catch-all).
 
 ### 4.5 `open-sse/services/`
 
@@ -528,9 +528,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 уникални инструмента** свързани в `server.ts` (45 канонични в `schemas/tools.ts` + памет, умения, GitHub-умения, пул, геймификация, плъгин, Notion, Obsidian, локален корпус и модули за компресиране — обединение, преброено от `countUniqueMcpTools`).
+- **110 уникални инструмента** свързани в `server.ts` (45 канонични в `schemas/tools.ts` + памет, умения, GitHub-умения, пул, геймификация, плъгин, Notion, Obsidian, локален корпус и модули за компресия — съюз, преброени от `countUniqueMcpTools`).
 - **3 транспорта** : stdio, HTTP Streamable, SSE.
-- **33 обхвата** наложен по време на изпълнение — основен списък в `src/shared/constants/mcpScopes.ts`, пълният набор е обединението на обхватите, декларирани от всеки инструментален модул.
+- **33 обхвата** наложен по време на изпълнение — базов списък в `src/shared/constants/mcpScopes.ts`, пълният набор е обединението на обхватите, декларирани от всеки инструментален модул.
 - Таблица за одит: `mcp_tool_audit` (попълнена от `audit.ts`).
 - Файлове: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, плюс тестове под `__tests__/`.
 - Вижте [MCP-SERVER.md](../frameworks/MCP-SERVER.md) за пълния каталог с инструменти.

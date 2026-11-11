@@ -96,11 +96,30 @@ export function isQuotaLike(err) {
   );
 }
 
-export const llmCircuit = { open: false, reason: "" };
+export const llmCircuit = { open: false, reason: "", failures: 0 };
+
+// Consecutive LLM failures (any fallback-worthy kind) after which the circuit opens: a hung or
+// unreachable backend fails every request after its full timeout, so three in a row is enough.
+export const LLM_FAILURE_LIMIT = 3;
 
 export function resetLlmCircuit() {
   llmCircuit.open = false;
   llmCircuit.reason = "";
+  llmCircuit.failures = 0;
+}
+
+/** Records an LLM failure; returns true when this failure opened the circuit. */
+export function noteLlmFailure(err) {
+  llmCircuit.failures++;
+  if (llmCircuit.open) return false;
+  if (!isQuotaLike(err) && llmCircuit.failures < LLM_FAILURE_LIMIT) return false;
+  llmCircuit.open = true;
+  llmCircuit.reason = String(err?.message ?? err).slice(0, 160);
+  return true;
+}
+
+export function noteLlmSuccess() {
+  llmCircuit.failures = 0;
 }
 
 function useGoogleFirst(backend) {
@@ -114,15 +133,15 @@ function useGoogleFirst(backend) {
 export async function withGoogleFallback(llm, google, label = "translation", backend = null) {
   if (useGoogleFirst(backend)) return google();
   try {
-    return await llm();
+    const value = await llm();
+    noteLlmSuccess();
+    return value;
   } catch (err) {
     const fallback = backend?.googleFallback ?? googleFallbackEnabled();
     // A malformed request (400/413/422) is the caller's bug and stays loud, like the model chain
     // treats it; quota, credits, auth, 5xx, timeouts and network failures go to Google.
     if (!fallback || !(isFallbackWorthy(err) || isQuotaLike(err))) throw err;
-    if (isQuotaLike(err) && !llmCircuit.open) {
-      llmCircuit.open = true;
-      llmCircuit.reason = String(err?.message ?? err).slice(0, 160);
+    if (noteLlmFailure(err)) {
       logWarn(`LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`);
     } else {
       logWarn(`${label}: LLM failed (${String(err?.message ?? err).slice(0, 120)}) — using Google`);

@@ -13,6 +13,7 @@
 import { getDbInstance } from "./db/core";
 import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
+import { LITELLM_PROVIDER_MAP, remapHistoricalLitellmRows } from "./litellmProviderMap";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ type PricingEntry = {
   output_cost_per_video_per_second?: number;
   search_unit_cost?: number;
   ocr_cost_per_page?: number;
+  ocr_cost_per_annotated_page?: number;
 };
 
 type PricingModels = Record<string, PricingEntry>;
@@ -60,6 +62,8 @@ interface LiteLLMModelInfo {
   output_cost_per_video_per_second?: number;
   search_unit_cost?: number;
   ocr_cost_per_page?: number;
+  ocr_cost_per_annotated_page?: number;
+  annotation_cost_per_page?: number;
 }
 
 interface SyncStatus {
@@ -96,45 +100,6 @@ const SYNC_SOURCES = (process.env.PRICING_SYNC_SOURCES || "litellm")
 
 const LITELLM_PRICING_URL =
   "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json";
-
-// ─── Provider mapping: LiteLLM provider → OmniRoute aliases ─────
-
-const LITELLM_PROVIDER_MAP: Record<string, string[]> = {
-  openai: ["openai", "cx"],
-  anthropic: ["anthropic", "cc"],
-  vertex_ai: ["gemini"],
-  "vertex_ai-anthropic_models": ["anthropic"],
-  google: ["gemini"],
-  // Registry ALIAS, not registry id — pricingSync writes/reads are keyed by
-  // alias everywhere else (see getPricingForModel(provider, model) callers).
-  // Four of these previously used the provider's `id` string, which is not a
-  // valid pricing-lookup key for that provider and, worse, for `deepseek` a
-  // real (but wrong) alias existed under that string — silently routing
-  // DeepSeek's synced pricing onto Qoder (open-sse/config/providers/registry/
-  // qoder/index.ts, alias "if", an unrelated third-party API) instead of
-  // DeepSeek (alias "ds"). `bedrock`/`bedrock_converse` and `cloudflare`
-  // pointed at their provider's `id` ("kiro", "cloudflare-ai") rather than
-  // its `alias` ("kr", "cf") — not wrong-provider, just a dead key nothing
-  // downstream ever looks up, so those two providers silently never received
-  // synced pricing at all.
-  deepseek: ["ds"],
-  groq: ["groq"],
-  together_ai: ["openrouter"],
-  bedrock: ["kr"],
-  fireworks_ai: ["fireworks"],
-  cerebras: ["cerebras"],
-  nvidia_nim: ["nvidia"],
-  siliconflow: ["siliconflow"],
-  "vertex_ai-language_models": ["gemini"],
-  "vertex_ai-mistral_models": ["mistral"],
-  gemini: ["gemini"],
-  bedrock_converse: ["kr"],
-  cloudflare: ["cf"],
-  // stability-ai has no chat-completions registry entry (image-only:
-  // open-sse/config/providers/registry/stability-ai/imageModels.ts) — left
-  // as-is rather than guessed at; not the same bug shape as the three above.
-  stability: ["stability-ai"],
-};
 
 // ─── Periodic sync state ─────────────────────────────────
 
@@ -189,10 +154,14 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
       "output_cost_per_video_per_second",
       "search_unit_cost",
       "ocr_cost_per_page",
+      "ocr_cost_per_annotated_page",
     ] as const;
 
     const hasToken = info.input_cost_per_token != null || info.output_cost_per_token != null;
-    const hasNonToken = NON_TOKEN_FIELDS.some((f) => info[f] != null);
+    const annotationRate = info.annotation_cost_per_page;
+    const hasAnnotationRate =
+      typeof annotationRate === "number" && Number.isFinite(annotationRate) && annotationRate >= 0;
+    const hasNonToken = NON_TOKEN_FIELDS.some((f) => info[f] != null) || hasAnnotationRate;
     if (!hasToken && !hasNonToken) continue;
 
     const inputCost = (info.input_cost_per_token || 0) * 1_000_000;
@@ -215,6 +184,10 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
     for (const f of NON_TOKEN_FIELDS) {
       const v = info[f];
       if (typeof v === "number" && Number.isFinite(v)) entry[f] = v;
+    }
+    // LiteLLM's upstream spelling differs; retain an explicit canonical value, including zero.
+    if (entry.ocr_cost_per_annotated_page === undefined && hasAnnotationRate) {
+      entry.ocr_cost_per_annotated_page = annotationRate;
     }
 
     // Extract model name (strip provider prefix from key)
@@ -284,6 +257,7 @@ export function getSyncedPricing(): PricingByProvider {
       console.warn(`[PRICING_SYNC] Corrupted data for provider "${key}", skipping`);
     }
   }
+  remapHistoricalLitellmRows(synced);
   pricingMemo = synced;
   pricingMemoVersion = currentVersion;
   return synced;

@@ -6,8 +6,8 @@ import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { categoricalSlotFor } from "@/shared/utils/categoricalPalette";
 
 // ── Layer pill colours (10-layer model) ───────────────────────────────────
-// Kit chart tokens (KEA-7886 P8), deterministic by position in LAYER_ORDER (chart-(i % 5 + 1));
-// L9 shares chart-1 with L1 — the pill always prints the layer id, so colour is only a cue.
+// Kit chart tokens (KEA-7886 P8; #19066), deterministic by position in LAYER_ORDER (kit series
+// order, ciChartSeriesOrder[i % 8]) — six layers, six colours; the pill also prints the layer id.
 const LAYER_ORDER = ["L1", "L3", "L4", "L5", "L6", "L9"] as const; // prose, tool, code, MCP, history, pruning
 
 /**
@@ -141,7 +141,11 @@ export function EngineNode({ data }: NodeProps) {
       {/* Footer */}
       <div className="px-2.5 pb-2 pt-1 flex flex-col gap-0.5">
         {!skipped && (
-          <span className="text-[11px] font-bold" style={{ color }} data-testid="savings-percent">
+          <span
+            className="text-[11px] font-semibold"
+            style={{ color }}
+            data-testid="savings-percent"
+          >
             {`-${savings.toFixed(1)}%`}
           </span>
         )}

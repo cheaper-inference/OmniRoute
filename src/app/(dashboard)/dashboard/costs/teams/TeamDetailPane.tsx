@@ -121,7 +121,7 @@ export default function TeamDetailPane({
   return (
     <main className="min-w-0 space-y-5">
       {detailError && (
-        <p role="alert" className="text-red-600 dark:text-red-400">
+        <p role="alert" className="text-error">
           {t(detailError)}
         </p>
       )}

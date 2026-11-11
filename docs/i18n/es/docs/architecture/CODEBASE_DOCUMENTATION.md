@@ -444,7 +444,7 @@ Dividido en subdirectorios específicos:
 
 ---
 
-## 4. `open-sse/` : espacio de trabajo del motor de transmisión
+## 4. Espacio de trabajo del motor de transmisión `open-sse/` —
 
 Espacio de trabajo npm independiente publicado como `@omniroute/open-sse`. Posee procesamiento de solicitudes, ejecutores, traductores, servicios, transformador y el servidor MCP.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 módulos ejecutores de nivel superior (`*.ts` menos `base.ts`, `index.ts` y pruebas: el recuento de medidas `npm run check:docs-counts` ). Cada clase de ejecutor extiende `BaseExecutor` (`base.ts`), directamente o mediante `DefaultExecutor` u otro ejecutor; los módulos restantes son ayudantes por proveedor (esquemas de herramientas, adaptadores fetch/TTS, controladores de peculiaridades). Los ejecutores incluyen:
+159 módulos ejecutores de nivel superior (`*.ts` menos `base.ts`, `index.ts` y pruebas — el recuento de medidas `npm run check:docs-counts` ). Cada clase de ejecutor extiende `BaseExecutor` (`base.ts`), directamente o mediante `DefaultExecutor` u otro ejecutor; los módulos restantes son ayudantes por proveedor (esquemas de herramientas, adaptadores fetch/TTS, controladores de peculiaridades). Los ejecutores incluyen:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, zqo, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, además de `claudeIdentity.ts` (ayudante `devin-desktop` identidad compartida) y `index.ts` (registro).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> Nota: `default.ts` presta servicios a los proveedores que no figuran aquí mediante el ejecutor genérico compatible con OpenAI. El catálogo completo de proveedores (377 proveedores) se encuentra en `src/shared/constants/providers.ts`.
+> Nota: `default.ts` presta servicios a los proveedores que no figuran aquí mediante el ejecutor genérico compatible con OpenAI. El catálogo completo de proveedores (381 proveedores) se encuentra en `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -519,7 +519,7 @@ Aspectos destacados (lista completa en `open-sse/services/`):
 | Almacenamiento en caché      | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Inteligencia de enrutamiento | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Manejo de modelos            | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Compresión                   | `compression/` - cableado del motor de compresión total                                                                                                                                                                                                  |
+| Compresión                   | Cableado del motor de compresión total `compression/` —                                                                                                                                                                                                  |
 | Sesión de token +            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Nivel / manifiesto           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / red                     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ Aspectos destacados (lista completa en `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 herramientas únicas** cableado en `server.ts` (45 canónicos en `schemas/tools.ts` +, memoria, habilidades, habilidades de GitHub, grupo, gamificación, complemento, Notion, Obsidian, corpus local y módulos de compresión; unión contada por `countUniqueMcpTools`).
+- **110 herramientas únicas** cableado en `server.ts` (45 canónicos en `schemas/tools.ts` + memoria, habilidades, GitHub-skills, pool, gamificación, complemento, Notion, Obsidian, local-corpus y módulos de compresión — union contados por `countUniqueMcpTools`).
 - **3 transportes** : stdio, HTTP Streamable, SSE.
-- **33 alcances** aplicado en tiempo de ejecución: lista base en `src/shared/constants/mcpScopes.ts`, el conjunto completo es la unión de los alcances declarados por cada módulo de herramienta.
+- **33 alcances** aplicado en tiempo de ejecución lista base — en `src/shared/constants/mcpScopes.ts`, el conjunto completo es la unión de los alcances declarados por cada módulo de herramienta.
 - Tabla de auditoría: `mcp_tool_audit` (rellenada por `audit.ts`).
 - Archivos: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, además de pruebas bajo `__tests__/`.
 - Consulte [MCP-SERVER.md](../frameworks/MCP-SERVER.md) para obtener el catálogo completo de herramientas.

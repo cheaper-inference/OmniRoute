@@ -1,5 +1,5 @@
 # ── Multi-stage Dockerfile for Native Bun Runtime (web-latest-bun) ───────────
-FROM oven/bun:1.4.3-slim AS base
+FROM oven/bun:1.4.4-slim AS base
 WORKDIR /app
 
 RUN apt-get update \
@@ -60,7 +60,7 @@ ENV NODE_ENV=production
 RUN bun run --quiet build
 
 # ── Runner Base stage (100% Bun Native Production Runtime) ──────────────────
-FROM oven/bun:1.4.3-slim AS runner-base
+FROM oven/bun:1.4.4-slim AS runner-base
 
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint (Bun Native)" \
@@ -91,6 +91,7 @@ COPY --from=builder /app/.build/next/standalone ./
 ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 
 COPY --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
+COPY --from=builder /app/scripts/ops/opencode-free-relay.ts ./scripts/ops/opencode-free-relay.ts
 
 # Bun uses bun:sqlite. Remove every standalone/vendor copy of the Node-only
 # addon so no traced chunk can dlopen it and abort the process before fallback.

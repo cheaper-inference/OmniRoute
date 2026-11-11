@@ -63,6 +63,28 @@ export function bodyExceedsBudgetResponse(maxInflightBytes: number): Response {
   );
 }
 
+/**
+ * Content-Encoding the admission cannot decode: 415 for an encoding it does not support,
+ * 400 for a body that is not valid data for its declared encoding. The zlib error is never
+ * echoed (Hard Rule #12).
+ */
+export function contentEncodingRejectionResponse(reason: "unsupported" | "invalid"): Response {
+  const unsupported = reason === "unsupported";
+  const status = unsupported ? 415 : 400;
+  const message = unsupported
+    ? "Unsupported Content-Encoding (supported: gzip, br, deflate, zstd, identity)."
+    : "Request body could not be decoded according to its Content-Encoding.";
+  return new Response(
+    JSON.stringify(
+      buildErrorBody(status, message, undefined, {
+        type: "invalid_request_error",
+        code: unsupported ? "unsupported_content_encoding" : "invalid_content_encoding",
+      })
+    ),
+    { status, headers: JSON_HEADERS }
+  );
+}
+
 export function resourcePressureRejectionResponse(): Response {
   return new Response(
     JSON.stringify(

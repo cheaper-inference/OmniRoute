@@ -14,6 +14,7 @@
  * Sliced out of #3500 (proxy_logs cluster, slice 4).
  */
 
+import { logicalCallSql } from "./logicalCallSql";
 import { getDbInstance } from "./core";
 import { normalizeProxyHostForLog } from "../proxyLogHost";
 import { sanitizeTimingMs } from "@omniroute/open-sse/utils/timingMs.ts";
@@ -264,7 +265,7 @@ export function getPoolEgressFailureBreakdown(
        FROM (
          SELECT l.egress_ip AS exit,
                 (SELECT c.error_type FROM call_logs c
-                 WHERE c.correlation_id = l.correlation_id
+                 WHERE ${logicalCallSql("c")} AND c.correlation_id = l.correlation_id
                  ORDER BY c.rowid LIMIT 1) AS family
          FROM proxy_logs l
          JOIN proxy_registry r ON l.proxy_host = r.host AND l.proxy_port = r.port

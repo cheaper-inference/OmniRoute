@@ -22,6 +22,7 @@ import {
   isRetryablePollStatus,
   parseRetryAfterMs,
 } from "./pollRetry.ts";
+import { abortedVideoResult } from "./abort.ts";
 
 interface LogLike {
   info?: (tag: string, msg: string, meta?: unknown) => void;
@@ -106,6 +107,14 @@ export type VideoJobPreset = {
   statusFailed: string[];
   /** dot path into the poll response holding the finished video URL/array */
   resultPath: string;
+  /**
+   * Result location for providers whose finished poll response carries no URL at
+   * all (deAPI only serves the clip from `GET /v1/videos/{id}/content`). Contains
+   * {taskId} and optionally {model}; resolved against the job base URL and used
+   * instead of `resultPath`. Pair it with `resultNeedsAuth` when that route is
+   * gated by the provider key.
+   */
+  resultUrlTemplate?: string;
   /**
    * When true, the finished artifact is fetched with the provider credential and
    * stored locally, then reported as a URL on this gateway. Some providers publish
@@ -275,6 +284,40 @@ const VIDEO_JOB_PRESETS: Record<string, VideoJobPreset> = {
     maxPolls: 180,
     pollIntervalMs: 2000,
   },
+  // deAPI OpenAI-compatible gateway (https://docs.deapi.ai/openai-compatibility#video).
+  // POST /v1/videos → { id, status: "queued" }; GET /v1/videos/{id} moves through
+  // queued → in_progress → completed | failed and never carries a URL. The clip is
+  // served by the key-gated GET /v1/videos/{id}/content, so it is downloaded with the
+  // caller's deAPI key and re-served from this gateway. `seconds` is a string, as in
+  // the Sora contract; renders take minutes, hence the 5 s × 120 poll budget.
+  "deapi-video-job": {
+    id: "deapi-video-job",
+    displayName: "deAPI Video",
+    authHeaderName: "Authorization",
+    authScheme: "bearer",
+    baseUrlFallback: "https://oai.deapi.ai",
+    submit: {
+      method: "POST",
+      path: "/v1/videos",
+      buildBody: ({ model, prompt, duration, extras }) => ({
+        model,
+        prompt,
+        ...(typeof duration === "number" ? { seconds: String(duration) } : {}),
+        ...extras,
+      }),
+    },
+    taskIdPath: "id",
+    poll: { pathTemplate: "/v1/videos/{taskId}" },
+    statusPath: "status",
+    statusDone: ["completed"],
+    statusFailed: ["failed"],
+    resultPath: "url",
+    resultUrlTemplate: "/v1/videos/{taskId}/content",
+    resultNeedsAuth: true,
+    resultFormat: "mp4",
+    maxPolls: 120,
+    pollIntervalMs: 5000,
+  },
 };
 
 /** Resolve a configured job preset; null when the preset is unknown/none. */
@@ -337,6 +380,7 @@ export async function handleVideoJobGeneration({
   provider,
   recordCall,
   mediaSink,
+  signal = null,
 }: {
   model: string;
   presetName: string;
@@ -351,6 +395,8 @@ export async function handleVideoJobGeneration({
   recordCall?: RecordVideoJobCall;
   /** Required by presets whose result is auth-gated upstream (`resultNeedsAuth`). */
   mediaSink?: VideoMediaSink;
+  /** Caller abort (client disconnect / combo cancel); stops submit and polling. */
+  signal?: AbortSignal | null;
 }): Promise<VideoJobResult> {
   const startTime = Date.now();
   const result = await runVideoJobGeneration({
@@ -362,6 +408,7 @@ export async function handleVideoJobGeneration({
     maxPolls,
     pollIntervalMs,
     mediaSink,
+    signal,
   });
   // Recorded here rather than on each return, so a new exit path cannot skip it.
   // A recording failure must never turn a finished generation into an error.
@@ -389,6 +436,7 @@ async function runVideoJobGeneration({
   maxPolls: maxPollsOverride,
   pollIntervalMs: pollIntervalOverride,
   mediaSink,
+  signal = null,
 }: {
   model: string;
   presetName: string;
@@ -398,7 +446,9 @@ async function runVideoJobGeneration({
   maxPolls?: number;
   pollIntervalMs?: number;
   mediaSink?: VideoMediaSink;
+  signal?: AbortSignal | null;
 }): Promise<VideoJobResult> {
+  if (signal?.aborted) return abortedVideoResult();
   const preset = getVideoJobPreset(presetName);
   if (!preset) {
     return {
@@ -436,7 +486,9 @@ async function runVideoJobGeneration({
     headers: buildJobHeaders(preset, credentials),
     body: JSON.stringify(bodyForPreset),
     log,
+    signal,
   });
+  if (signal?.aborted) return abortedVideoResult();
   if (submitResult.ok === false) {
     return { success: false, status: submitResult.status, error: submitResult.error };
   }
@@ -465,16 +517,17 @@ async function runVideoJobGeneration({
   let consecutiveRetries = 0;
   let nextDelay = pollInterval;
   for (let attempt = 1; attempt <= maxPolls; attempt += 1) {
-    await sleep(nextDelay);
+    await sleep(nextDelay, signal);
+    if (signal?.aborted) return abortedVideoResult();
     nextDelay = pollInterval;
-    const pollUrl = `${baseUrl}${preset.poll.pathTemplate
-      .replace("{taskId}", encodeURIComponent(taskId))
-      .replace("{model}", encodeURIComponent(model))}`;
+    const pollUrl = `${baseUrl}${fillJobPathTemplate(preset.poll.pathTemplate, taskId, model)}`;
     const pollResult = await fetchJson(pollUrl, {
       method: "GET",
       headers: buildJobHeaders(preset, credentials),
       log,
+      signal,
     });
+    if (signal?.aborted) return abortedVideoResult();
     if (pollResult.ok === false) {
       // #15536: 429/503 on a status query is transient - back off and keep polling.
       if (
@@ -501,7 +554,9 @@ async function runVideoJobGeneration({
       readPath(pollResult.data, "state");
     const jobState = isDoneStatus(status, preset.statusDone, preset.statusFailed);
     if (jobState === "done") {
-      const url = readResultUrl(pollResult.data, preset.resultPath);
+      const url = preset.resultUrlTemplate
+        ? `${baseUrl}${fillJobPathTemplate(preset.resultUrlTemplate, taskId, model)}`
+        : readResultUrl(pollResult.data, preset.resultPath);
       if (!url) {
         return {
           success: false,
@@ -547,6 +602,13 @@ async function runVideoJobGeneration({
     status: 504,
     error: `Video job timed out after ${maxPolls} polls (${presetName})`,
   };
+}
+
+/** Substitute the URL-encoded job id and model into a preset path template. */
+function fillJobPathTemplate(template: string, taskId: string, model: string): string {
+  return template
+    .replace("{taskId}", encodeURIComponent(taskId))
+    .replace("{model}", encodeURIComponent(model));
 }
 
 function buildJobHeaders(preset: VideoJobPreset, credentials?: unknown): Record<string, string> {
@@ -671,6 +733,7 @@ async function fetchJson(
     body,
     log,
     raw,
+    signal,
   }: {
     method: string;
     headers: Record<string, string>;
@@ -678,51 +741,75 @@ async function fetchJson(
     log?: LogLike;
     /** Return the response body base64-encoded instead of parsing JSON. */
     raw?: boolean;
+    signal?: AbortSignal | null;
   }
-): Promise<
-  | { ok: true; data?: unknown; base64?: string }
-  | { ok: false; status: number; error: string; retryAfterMs?: number }
-> {
+): Promise<FetchJsonResult> {
   try {
     const response = await fetchWithTimeout(url, {
       method,
       headers,
       ...(body !== undefined ? { body } : {}),
       timeoutMs: getConfiguredTimeout(),
+      // A per-call derived signal: fetchWithTimeout never removes its abort listener.
+      ...(signal ? { signal: AbortSignal.any([signal]) } : {}),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      log?.error?.("VIDEO", `Upstream ${response.status} for ${url}: ${errorText.slice(0, 200)}`);
-      return {
-        ok: false,
-        status: response.status,
-        error: errorText,
-        retryAfterMs: parseRetryAfterMs(response.headers.get("retry-after")),
-      };
-    }
-    if (raw) {
-      const buffer = Buffer.from(await response.arrayBuffer());
-      if (buffer.length === 0) {
-        return { ok: false, status: 502, error: `Empty media body from ${url}` };
-      }
-      return { ok: true, base64: buffer.toString("base64") };
-    }
-    const data = await response.json();
-    return { ok: true, data };
+    return await readFetchJsonResponse(response, url, log, raw);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    const isTimeout =
-      err instanceof FetchTimeoutError || (err instanceof Error && err.name === "AbortError");
-    log?.error?.(
-      "VIDEO",
-      `${isTimeout ? "Timeout" : "Request error"} for ${url}: ${sanitizeErrorMessage(message)}`
-    );
+    return fetchJsonErrorResult(err, url, log, signal);
+  }
+}
+
+type FetchJsonResult =
+  | { ok: true; data?: unknown; base64?: string }
+  | { ok: false; status: number; error: string; retryAfterMs?: number };
+
+async function readFetchJsonResponse(
+  response: Response,
+  url: string,
+  log: LogLike | undefined,
+  raw: boolean | undefined
+): Promise<FetchJsonResult> {
+  if (!response.ok) {
+    const errorText = await response.text();
+    log?.error?.("VIDEO", `Upstream ${response.status} for ${url}: ${errorText.slice(0, 200)}`);
     return {
       ok: false,
-      status: isTimeout ? 504 : 502,
-      error: `Video provider error: ${sanitizeErrorMessage(message)}`,
+      status: response.status,
+      error: errorText,
+      retryAfterMs: parseRetryAfterMs(response.headers.get("retry-after")),
     };
   }
+  if (raw) {
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length === 0) {
+      return { ok: false, status: 502, error: `Empty media body from ${url}` };
+    }
+    return { ok: true, base64: buffer.toString("base64") };
+  }
+  const data = await response.json();
+  return { ok: true, data };
+}
+
+/** Maps a thrown fetch error to a result: 499 on caller abort, 504 on timeout, else 502. */
+function fetchJsonErrorResult(
+  err: unknown,
+  url: string,
+  log: LogLike | undefined,
+  signal: AbortSignal | null | undefined
+): FetchJsonResult {
+  if (signal?.aborted) return { ok: false, status: 499, error: "Request aborted" };
+  const message = err instanceof Error ? err.message : String(err);
+  const isTimeout =
+    err instanceof FetchTimeoutError || (err instanceof Error && err.name === "AbortError");
+  log?.error?.(
+    "VIDEO",
+    `${isTimeout ? "Timeout" : "Request error"} for ${url}: ${sanitizeErrorMessage(message)}`
+  );
+  return {
+    ok: false,
+    status: isTimeout ? 504 : 502,
+    error: `Video provider error: ${sanitizeErrorMessage(message)}`,
+  };
 }
 
 const NON_VIDEO_EXTENSION = /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i;

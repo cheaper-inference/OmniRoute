@@ -74,7 +74,8 @@ describe("ComboStepTestButton", () => {
     expect(url).toBe("/api/models/test");
     expect(JSON.parse(init.body)).toEqual({ providerId: "openai", modelId: "gpt-4o" });
     expect(button.title).toBe("87ms");
-    expect(button.textContent).toContain("check_circle");
+    // the Icon adapter renders a Lucide glyph tagged with its ICON_MAP name (no ligature text)
+    expect(button.querySelector('[data-icon="check_circle"]')).not.toBeNull();
   });
 
   it("shows the server error text when the probe fails", async () => {
@@ -95,7 +96,8 @@ describe("ComboStepTestButton", () => {
     });
 
     expect(button.title).toBe("Paid model blocked while hidePaidModels is enabled");
-    expect(button.textContent).toContain("cancel");
+    // the Icon adapter renders a Lucide glyph tagged with its ICON_MAP name (no ligature text)
+    expect(button.querySelector('[data-icon="cancel"]')).not.toBeNull();
   });
 
   it("keeps the result when the row is re-mounted at another position", async () => {

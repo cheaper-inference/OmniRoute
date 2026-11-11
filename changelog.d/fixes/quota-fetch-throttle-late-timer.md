@@ -1,0 +1,1 @@
+- **fix(quota):** the min-interval gate now measures spacing between real fetch starts, so a timer that wakes late no longer shrinks the next gap. A late `setTimeout` used to leave the next caller waiting from the scheduled instant, and under load that produced gaps of 204-212ms against the 250ms interval the gate promises (flaky `#15172` runs across four unrelated PRs)

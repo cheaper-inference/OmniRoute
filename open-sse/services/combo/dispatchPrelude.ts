@@ -12,17 +12,25 @@
  *
  * Extracted from combo.ts as a pure move (#3501). No behaviour change.
  */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { fisherYatesShuffle, getNextFromDeck } from "../../../src/shared/utils/shuffleDeck";
 import { handleFusionChat, type FusionTuning } from "../fusion.ts";
 import { handleAgenticPipelineChat, type AgenticOrchestrationConfig } from "../agenticPipeline.ts";
 import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
-import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
+import { hasMediaRequirements, nonImageMediaFailures } from "./mediaCompatibility.ts";
+import { errorResponse, errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import { parseModel } from "../model.ts";
 import { handlePipelineChat, type PipelineStep } from "../pipeline.ts";
 import type { resolveComboSetupConfig } from "../comboConfig.ts";
-import { clampComboDepth, clampGlobalAttempts, resolveDelayMs } from "./comboPredicates.ts";
+import {
+  clampComboDepth,
+  clampGlobalAttempts,
+  resolveDelayMs,
+  isLocalProcessPressureResponse,
+} from "./comboPredicates.ts";
+import { readAttemptFailure } from "./attemptFailure.ts";
 import {
   deriveRequestCompatibilityRequirements,
   isVisionIncompatibleTarget,
@@ -53,6 +61,7 @@ import {
   validateResponseQuality,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { AGENTIC_STALL_COMBO_REASON, isAgenticStallComboAttempt } from "./agenticStallFailover.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import type {
   ComboCollectionLike,
@@ -64,6 +73,7 @@ import type {
   IsModelAvailable,
   HiddenModelsByProvider,
   NestedComboMode,
+  ResolvedComboTarget,
   ResolvedComboUnit,
   SingleModelTarget,
 } from "./types.ts";
@@ -174,19 +184,32 @@ export function pinIsDurablyUnhealthy(
  * active connections, and decide via {@link pinIsDurablyUnhealthy}. Fail-open
  * (return false) on any error so a lookup bug never drops a healthy pin.
  */
-async function isPinnedModelDurablyUnhealthy(pinnedModel: string): Promise<boolean> {
+async function isPinnedModelDurablyUnhealthy(
+  pinnedModel: string,
+  boundConnectionIds?: readonly string[] | null
+): Promise<boolean> {
   try {
     const provider = parseModel(pinnedModel).provider;
     if (!provider) return false;
     const circuitState = getCircuitBreaker(provider)?.getStatus?.()?.state;
-    const connections = (await getCachedProviderPoolConnections({
+    let connections = (await getCachedProviderPoolConnections({
       provider,
       isActive: true,
     })) as Array<{
+      id?: string | null;
       testStatus?: string | null;
       backoffLevel?: number | null;
       rateLimitedUntil?: string | null;
     }>;
+    // A pin bound to specific account(s) can only be served by those: judge the
+    // pool the pin can actually use, not the whole provider. Otherwise a healthy
+    // sibling account keeps a dead bound pin alive and every turn dead-ends in
+    // the pinned dispatch (402 from handleNoCredentials) despite available
+    // fallback targets. A bound id missing from the active pool counts as dead.
+    if (Array.isArray(boundConnectionIds) && boundConnectionIds.length > 0) {
+      const bound = new Set(boundConnectionIds);
+      connections = connections.filter((c) => typeof c.id === "string" && bound.has(c.id));
+    }
     return pinIsDurablyUnhealthy(circuitState, connections || [], Date.now());
   } catch {
     return false;
@@ -215,51 +238,204 @@ export function buildDefaultNesting(
   );
 }
 
+/** True once the client went away while pre-content transport recovery is in charge. */
+function recoveryAborted(recovery: boolean | undefined, signal?: AbortSignal | null): boolean {
+  return recovery === true && signal?.aborted === true;
+}
+
 /**
  * Decide whether the honored pin's response is good enough to return as-is.
  * Returns the response to serve it, or null to fall through to the combo
  * strategy (200-but-empty, or a transient upstream status worth failing over).
  */
 async function evaluatePinnedResponse(args: {
+  body: Record<string, unknown>;
   pinnedResult: Response;
   pinnedModel: string;
+  hasOtherTargets: boolean;
   clientRequestedStream: boolean;
   config: ComboSetupConfig;
   log: ComboLogger;
+  preContentTransportRecovery?: boolean;
+  signal?: AbortSignal | null;
 }): Promise<Response | null> {
-  const { pinnedResult, pinnedModel, clientRequestedStream, config, log } = args;
+  const {
+    body,
+    pinnedResult,
+    pinnedModel,
+    hasOtherTargets,
+    clientRequestedStream,
+    config,
+    log,
+    preContentTransportRecovery,
+    signal,
+  } = args;
   if (pinnedResult.ok) {
-    let pinnedClone: Response;
-    try {
-      pinnedClone = pinnedResult.clone();
-    } catch {
-      pinnedClone = pinnedResult;
-    }
+    const pinnedClone = cloneForQuality(pinnedResult);
     const pinnedQuality = await validateResponseQuality(
       pinnedClone,
       clientRequestedStream,
       log,
       config.responseValidation,
-      null,
-      await isTrustedEmptyTurn(parseModel(pinnedModel).provider, pinnedResult)
+      preContentTransportRecovery ? signal : null,
+      await isTrustedEmptyTurn(parseModel(pinnedModel).provider, pinnedResult),
+      preContentTransportRecovery
     );
     releaseQualityClone(pinnedClone, pinnedResult, pinnedQuality);
-    if (pinnedQuality.valid) return pinnedResult;
+    if (recoveryAborted(preContentTransportRecovery, signal)) {
+      void pinnedQuality.clonedResponse?.body?.cancel().catch(() => {});
+      releaseRejectedQualityResponse(pinnedClone, pinnedResult);
+      return errorResponse(499, "Client disconnected");
+    }
+    // #13954 (opt-in): a stalled pin gives the turn back to the combo strategy.
+    const pinnedStalled =
+      pinnedQuality.valid &&
+      (await isAgenticStallComboAttempt({
+        body,
+        result: pinnedResult,
+        modelStr: pinnedModel,
+        hasNextTarget: hasOtherTargets,
+        log,
+      }));
+    if (pinnedQuality.valid && !pinnedStalled) return pinnedResult;
     releaseRejectedQualityResponse(pinnedClone, pinnedResult);
     log.warn(
       "COMBO",
-      `Pinned model ${pinnedModel} returned 200 but failed quality check: ${pinnedQuality.reason}, falling through to combo retry/fallback`
+      `Pinned model ${pinnedModel} returned 200 but ${pinnedStalled ? AGENTIC_STALL_COMBO_REASON : `failed quality check: ${pinnedQuality.reason}`}, falling through to combo retry/fallback`
     );
     return null;
   }
+  if (
+    pinnedResult.status === 503 &&
+    isLocalProcessPressureResponse(pinnedResult, (await readAttemptFailure(pinnedResult)).errorBody)
+  )
+    return pinnedResult;
   const pinnedStatus = pinnedResult.status || 500;
-  if (![401, 408, 429, 500, 502, 503, 504].includes(pinnedStatus)) {
+  // 402 must fall through like 401: handleNoCredentials() surfaces a
+  // credits-exhausted account as 402 (#12441 kept 401 for expired/banned), and
+  // the pinned dispatch is bound to the member's account(s) — returning 402
+  // as-is would fail every following turn of the session while the combo loop
+  // would skip the exhausted account and serve from a healthy target.
+  if (![401, 402, 408, 429, 500, 502, 503, 504].includes(pinnedStatus)) {
     return pinnedResult;
   }
   log.warn(
     "COMBO",
     `Pinned model ${pinnedModel} failed (${pinnedStatus}), falling through to combo retry/fallback`
   );
+  return null;
+}
+
+/**
+ * The account binding a context-cache pin must keep. The pin only records the model string, so
+ * without this the pinned dispatch ran with no connection at all and the provider-level selector
+ * (session affinity / LRU) could serve a member bound to account A from account B of the same
+ * provider. Mirrors the main loop: a single matching step keeps its `connectionId`; several steps
+ * sharing the model string are limited to the union of their allowlists; any matching step
+ * without a binding (dynamic account) leaves the whole provider pool open, as before.
+ */
+export function resolvePinnedConnectionBinding(
+  comboTargets: ReadonlyArray<
+    Pick<ResolvedComboTarget, "modelStr" | "connectionId" | "allowedConnectionIds">
+  >,
+  pinnedModel: string
+): { connectionId?: string; allowedConnectionIds?: string[] } {
+  const matches = comboTargets.filter((t) => t.modelStr === pinnedModel);
+  if (matches.length === 0) return {};
+  const allowed = new Set<string>();
+  for (const target of matches) {
+    const ids =
+      Array.isArray(target.allowedConnectionIds) && target.allowedConnectionIds.length > 0
+        ? target.allowedConnectionIds
+        : target.connectionId
+          ? [target.connectionId]
+          : [];
+    if (ids.length === 0) return {};
+    for (const id of ids) allowed.add(id);
+  }
+  const allowedConnectionIds = [...allowed];
+  const single = matches.length === 1 ? matches[0].connectionId : null;
+  return single ? { connectionId: single, allowedConnectionIds } : { allowedConnectionIds };
+}
+
+/**
+ * Dispatch to the honored pin and decide whether its response is served. Returns the response to
+ * serve (including a 499 when the client went away), or null to fall through to the combo strategy.
+ */
+async function dispatchHonoredPin(args: {
+  body: Record<string, unknown>;
+  combo: ComboLike;
+  pinnedModel: string;
+  comboTargets: ReturnType<typeof resolveComboTargets>;
+  connectionBinding: { connectionId?: string; allowedConnectionIds?: string[] };
+  config: ComboSetupConfig;
+  clientRequestedStream: boolean;
+  handleSingleModelWithTimeout: HandleSingleModel;
+  log: ComboLogger;
+  preContentTransportRecovery: boolean;
+  signal?: AbortSignal | null;
+}): Promise<Response | null> {
+  const {
+    body,
+    combo,
+    pinnedModel,
+    comboTargets,
+    connectionBinding,
+    config,
+    clientRequestedStream,
+    handleSingleModelWithTimeout,
+    log,
+    preContentTransportRecovery,
+    signal,
+  } = args;
+  let pinnedResult: Response | null = null;
+  try {
+    // #5501: the combo system_message also expands on the pinned context path —
+    // a session pin bypasses the main loop, so without this the template would
+    // go literal from the second in-session request on. Target context comes
+    // from the pinned model's resolved combo target when available.
+    const pinnedTarget = comboTargets.find((t) => t.modelStr === pinnedModel);
+    const pinnedBody = expandComboSystemPromptIfPresent(body, combo, {
+      modelId: pinnedModel,
+      providerId: pinnedTarget && pinnedTarget.provider !== "unknown" ? pinnedTarget.provider : "",
+      account:
+        typeof pinnedTarget?.label === "string" && pinnedTarget.label.trim().length > 0
+          ? pinnedTarget.label.trim()
+          : "",
+      fingerprint: pinnedTarget ? (resolveTargetFingerprint(pinnedTarget) ?? "") : "",
+    });
+    if (recoveryAborted(preContentTransportRecovery, signal))
+      return errorResponse(499, "Client disconnected");
+    pinnedResult = await handleSingleModelWithTimeout(pinnedBody, pinnedModel, {
+      ...connectionBinding,
+      modelPinned: true,
+    } as SingleModelTarget);
+  } catch (pinErr) {
+    if (recoveryAborted(preContentTransportRecovery, signal))
+      return errorResponse(499, "Client disconnected");
+    log.warn(
+      "COMBO",
+      `Pinned model ${pinnedModel} threw error: ${pinErr instanceof Error ? pinErr.message : String(pinErr)}, falling through to combo retry/fallback`
+    );
+  }
+  if (recoveryAborted(preContentTransportRecovery, signal)) {
+    if (pinnedResult) releaseRejectedQualityResponse(pinnedResult, pinnedResult);
+    return errorResponse(499, "Client disconnected");
+  }
+  if (pinnedResult) {
+    const accepted = await evaluatePinnedResponse({
+      body,
+      pinnedResult,
+      pinnedModel,
+      hasOtherTargets: comboTargets.length > 1,
+      clientRequestedStream,
+      config,
+      log,
+      preContentTransportRecovery,
+      signal,
+    });
+    return accepted;
+  }
   return null;
 }
 
@@ -278,6 +454,8 @@ export async function tryPinnedModelDispatch(args: {
   handleSingleModelWithTimeout: HandleSingleModel;
   log: ComboLogger;
   hiddenModelsByProvider?: HiddenModelsByProvider;
+  preContentTransportRecovery?: boolean;
+  signal?: AbortSignal | null;
 }): Promise<Response | null> {
   const {
     body,
@@ -300,6 +478,11 @@ export async function tryPinnedModelDispatch(args: {
   // combo's resolved targets (refs flattened) before honoring it. Only validate
   // when allCombos is authoritative (non-empty) so we can resolve combo-refs;
   // the auto-combo redirect path passes an empty list and keeps prior behavior.
+  const preContentTransportRecovery =
+    clientRequestedStream && args.preContentTransportRecovery === true;
+  const signal = args.signal;
+  if (recoveryAborted(preContentTransportRecovery, signal))
+    return errorResponse(499, "Client disconnected");
   const haveFullCombos = Array.isArray(allCombos) ? allCombos.length > 0 : !!allCombos;
   // Eagerly resolve the combo's targets once (used for the pin-validity check AND
   // #5501 template expansion). A non-authoritative allCombos (empty/missing)
@@ -315,54 +498,59 @@ export async function tryPinnedModelDispatch(args: {
     hiddenModelsByProvider
   );
   const pinInCombo = !haveFullCombos || comboTargets.some((t) => t.modelStr === pinnedModel);
+  const pinRequirements = deriveRequestCompatibilityRequirements(body);
+  if (hasMediaRequirements(pinRequirements)) {
+    const pinCaps = getResolvedModelCapabilities(pinnedModel);
+    const pinCandidate = comboTargets.find((t) => t.modelStr === pinnedModel);
+    if (
+      isVisionIncompatibleTarget(
+        {
+          provider: pinCaps.provider ?? "unknown",
+          providerId: pinCaps.provider,
+          modelStr: pinnedModel,
+          connectionId: pinCandidate?.connectionId ?? null,
+        },
+        pinRequirements
+      )
+    ) {
+      log.warn(
+        "COMBO",
+        "Context pin cannot read the current media; falling through to compatible targets"
+      );
+      return null;
+    }
+  }
   // Honor the pin only if it is still a combo target AND its provider is not
   // DURABLY down. Without the health gate a pin keeps routing a session to a
   // dead/credits-exhausted/throttled account forever (strategy bypassed, no
   // failover) — incident 2026-06-22: laila stuck on a throttled claude account
   // and credits_exhausted accounts never failing over. A transient cooldown is
   // tolerated (pin kept) so an unstable provider does not churn the pin.
-  const pinDurablyDown = pinInCombo ? await isPinnedModelDurablyUnhealthy(pinnedModel) : false;
+  // The same binding the honored dispatch will use — the health gate must judge
+  // exactly the account pool the pin can be served from.
+  const pinnedBinding = resolvePinnedConnectionBinding(comboTargets, pinnedModel);
+  const pinDurablyDown = pinInCombo
+    ? await isPinnedModelDurablyUnhealthy(pinnedModel, pinnedBinding.allowedConnectionIds)
+    : false;
   if (pinInCombo && !pinDurablyDown) {
     log.info(
       "COMBO",
       `Bypassing strategy — routing directly to pinned context model: ${pinnedModel}`
     );
-    let pinnedResult: Response | null = null;
-    try {
-      // #5501: the combo system_message also expands on the pinned context path —
-      // a session pin bypasses the main loop, so without this the template would
-      // go literal from the second in-session request on. Target context comes
-      // from the pinned model's resolved combo target when available.
-      const pinnedTarget = comboTargets.find((t) => t.modelStr === pinnedModel);
-      const pinnedBody = expandComboSystemPromptIfPresent(body, combo, {
-        modelId: pinnedModel,
-        providerId:
-          pinnedTarget && pinnedTarget.provider !== "unknown" ? pinnedTarget.provider : "",
-        account:
-          typeof pinnedTarget?.label === "string" && pinnedTarget.label.trim().length > 0
-            ? pinnedTarget.label.trim()
-            : "",
-        fingerprint: pinnedTarget ? (resolveTargetFingerprint(pinnedTarget) ?? "") : "",
-      });
-      pinnedResult = await handleSingleModelWithTimeout(pinnedBody, pinnedModel, {
-        modelPinned: true,
-      } as SingleModelTarget);
-    } catch (pinErr) {
-      log.warn(
-        "COMBO",
-        `Pinned model ${pinnedModel} threw error: ${pinErr instanceof Error ? pinErr.message : String(pinErr)}, falling through to combo retry/fallback`
-      );
-    }
-    if (pinnedResult) {
-      const accepted = await evaluatePinnedResponse({
-        pinnedResult,
-        pinnedModel,
-        clientRequestedStream,
-        config,
-        log,
-      });
-      if (accepted) return accepted;
-    }
+    const honored = await dispatchHonoredPin({
+      body,
+      combo,
+      pinnedModel,
+      comboTargets,
+      connectionBinding: pinnedBinding,
+      config,
+      clientRequestedStream,
+      handleSingleModelWithTimeout,
+      log,
+      preContentTransportRecovery,
+      signal,
+    });
+    if (honored) return honored;
     // Fall through to the target iteration loop below — retries and sibling
     // models will be tried via the normal combo machinery.
   }
@@ -419,10 +607,19 @@ export async function tryFusionDispatch(args: {
   // way an operator-hidden judge is dropped below, so fusion falls back to a
   // (vision-confirmed) panel member instead of silently losing the image for
   // the synthesis step.
+  const judgeCapabilities = configuredJudge ? getResolvedModelCapabilities(configuredJudge) : null;
   const judgeLacksConfirmedVision =
-    judgeFusionRequirements.requiresVision &&
     !!configuredJudge &&
-    getResolvedModelCapabilities(configuredJudge).supportsVision !== true;
+    ((judgeFusionRequirements.requiresVision && judgeCapabilities?.supportsVision !== true) ||
+      nonImageMediaFailures(
+        {
+          provider: judgeCapabilities?.provider ?? "unknown",
+          providerId: judgeCapabilities?.provider ?? null,
+          modelStr: configuredJudge,
+          connectionId: null,
+        },
+        judgeFusionRequirements
+      ).length > 0);
   // The panel is filtered for hidden models by resolveComboTargets, but the
   // explicit judge is a bare string that never passes through it (#8878). Drop a
   // hidden judge so fusion falls back to a surviving panel member instead of
@@ -484,26 +681,30 @@ export async function tryFusionDispatch(args: {
   // (isVisionIncompatibleTarget: unknown is excluded too): a panel fan-out has no
   // "last resort" tier, so the panel only receives targets with confirmed vision.
   const fusionRequirements = judgeFusionRequirements;
-  const resolvedFusionTargets = fusionRequirements.requiresVision
+  const resolvedFusionTargets = hasMediaRequirements(fusionRequirements)
     ? allResolvedFusionTargets.filter(
         (target) => !isVisionIncompatibleTarget(target, fusionRequirements)
       )
     : allResolvedFusionTargets;
-  if (fusionRequirements.requiresVision && resolvedFusionTargets.length === 0) {
+  if (hasMediaRequirements(fusionRequirements) && resolvedFusionTargets.length === 0) {
     log.warn(
       "COMBO",
       `Combo "${combo.name}" fusion panel has no target with confirmed vision support for this image request — every candidate was excluded (#3378)`
     );
     return errorResponseWithComboDiagnostics(
       400,
-      `No target in combo ${combo.name} has confirmed vision support for this image request`,
+      fusionRequirements.requiresVision
+        ? `No target in combo ${combo.name} has confirmed vision support for this image request`
+        : `No target in combo ${combo.name} supports every required audio, video or file input`,
       {
         poolSize: allResolvedFusionTargets.length,
         attempted: 0,
         excluded: allResolvedFusionTargets.map((target) => ({
           provider: target.provider,
           model: target.modelStr,
-          reason: "vision",
+          reason: fusionRequirements.requiresVision
+            ? "vision"
+            : nonImageMediaFailures(target, fusionRequirements).join("+"),
         })),
         attemptOrder: [],
         terminalReason: "capability_mismatch",
@@ -574,7 +775,7 @@ export async function tryFusionDispatch(args: {
  * below. The step list is `combo.models` (in order); an optional per-step
  * `prompt` is read off the target object (comboModelStepInputSchema.prompt).
  */
-export async function tryPipelineDispatch(args: {
+type PipelineDispatchArgs = {
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -585,7 +786,10 @@ export async function tryPipelineDispatch(args: {
   handleSingleModelWithTimeout: HandleSingleModel;
   log: ComboLogger;
   hiddenModelsByProvider?: HiddenModelsByProvider;
-}): Promise<Response | null> {
+};
+
+/** Dispatch a configured pipeline through the shared target compatibility checks. */
+export async function tryPipelineDispatch(args: PipelineDispatchArgs): Promise<Response | null> {
   const {
     body,
     combo,
@@ -749,7 +953,7 @@ async function orderRuntimeUnits(args: {
  * Returns null when the combo has no executable combo-ref, when the mode is
  * `flatten`, or when the strategy needs the full target machinery.
  */
-export async function tryRuntimeUnitDispatch(args: {
+type RuntimeUnitDispatchArgs = {
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -772,7 +976,12 @@ export async function tryRuntimeUnitDispatch(args: {
   endpointPath?: string | null;
   requestHeaders?: Headers | Record<string, unknown> | null;
   runCombo: RunCombo;
-}): Promise<Response | null> {
+};
+
+/** Dispatch a runtime unit after resolving its target and request compatibility. */
+export async function tryRuntimeUnitDispatch(
+  args: RuntimeUnitDispatchArgs
+): Promise<Response | null> {
   const { body, combo, config, strategy, allCombos, log, settings } = args;
   const nestingContext = buildDefaultNesting(args.nesting, combo.name, config);
   const nestedComboMode = normalizeNestedComboMode(config.nestedComboMode);

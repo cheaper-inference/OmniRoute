@@ -82,36 +82,40 @@ function renderHook(params: UseModelImportHandlersParams): { get: () => HookResu
 }
 
 beforeEach(() => {
+  // Successful imports intentionally reload the page after 2s; own that timer in each test.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
 });
 
 afterEach(() => {
-  for (const { root, el } of roots.splice(0)) {
-    act(() => root.unmount());
-    el.remove();
+  try {
+    for (const { root, el } of roots.splice(0)) {
+      act(() => root.unmount());
+      el.remove();
+    }
+  } finally {
+    // Do not navigate after jsdom teardown or leak fake timers into the next test.
+    vi.clearAllTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   }
-  vi.unstubAllGlobals();
 });
 
-function mockCatalog(payload: Record<string, unknown>) {
+/** The sync answers a degraded discovery with 502, its source, warning and cause. */
+function mockSync(ok: boolean, status: number, body: Record<string, unknown>) {
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      if (input === "/api/provider-models" && init?.method === "POST") {
-        return { ok: true } as Response;
-      }
-      return { ok: true, json: async () => payload } as Response;
-    })
+    vi.fn(async () => ({ ok, status, json: async () => body }) as unknown as Response)
   );
 }
 
 const DEGRADED = {
+  error: "HTTP 500",
   source: "local_catalog",
   warning: "API unavailable — using local catalog",
-  degraded: true,
-  error: "HTTP 500",
 };
 
 /**
@@ -119,6 +123,7 @@ const DEGRADED = {
  * warning with it, but the discovery did not fail.
  */
 const EXPECTED_CATALOG = {
+  ok: true,
   source: "local_catalog",
   intentional: true,
   warning: "Model discovery is not configured for this provider — using local catalog",
@@ -138,13 +143,17 @@ describe("the phase of the model import dialog", () => {
 });
 
 describe("the model import dialog", () => {
-  it("keeps the reason of the fallback out of the status line and in the state", async () => {
+  async function importWith(ok: boolean, status: number, body: Record<string, unknown>) {
     const hook = renderHook(buildParams({ connections: [{ id: "conn-1", isActive: true }] }));
-    mockCatalog({ ...DEGRADED, models: [{ id: "new-model", name: "New Model" }] });
-
+    mockSync(ok, status, body);
     await act(async () => {
       await hook.get().handleImportModels();
     });
+    return hook;
+  }
+
+  it("keeps the reason of the fallback out of the status line and in the state", async () => {
+    const hook = await importWith(false, 502, DEGRADED);
 
     const progress = hook.get().importProgress;
     expect(progress.degraded).toBe(true);
@@ -155,12 +164,7 @@ describe("the model import dialog", () => {
   });
 
   it("shows the fallback notice above the status line of the import dialog", async () => {
-    const hook = renderHook(buildParams({ connections: [{ id: "conn-1", isActive: true }] }));
-    mockCatalog({ ...DEGRADED, models: [{ id: "new-model", name: "New Model" }] });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
+    const hook = await importWith(false, 502, DEGRADED);
 
     const el = document.createElement("div");
     document.body.appendChild(el);
@@ -187,119 +191,62 @@ describe("the model import dialog", () => {
     ).toBe("HTTP 500");
   });
 
-  it("keeps the degraded state visible after a successful import, without a reload", async () => {
-    const fetchProviderModelMeta = vi.fn().mockResolvedValue(undefined);
+  it("ends a degraded import in the warning phase, stores nothing and does not reload", async () => {
+    // The sync refuses to store a fallback catalog: pinning it would hide the
+    // real failure behind models the provider may no longer serve.
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
-    const hook = renderHook(
-      buildParams({
-        connections: [{ id: "conn-1", isActive: true }],
-        fetchProviderModelMeta,
-      })
-    );
-    mockCatalog({ ...DEGRADED, models: [{ id: "new-model", name: "New Model" }] });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
+    const hook = await importWith(false, 502, DEGRADED);
 
     const progress = hook.get().importProgress;
-    expect(progress.phase).toBe("done");
-    expect(progress.importedCount).toBe(1);
+    expect(progress.phase).toBe("warning");
     expect(progress.degraded).toBe(true);
     expect(progress.degradedCause).toBe("HTTP 500");
-    // The dialog keeps the notice: the page must not reload under the operator.
+    expect(progress.importedCount).toBe(0);
+    expect(progress.status).toBe("noNewModelsAdded");
+    expect(progress.status).not.toBe("allModelsAlreadyImported");
     expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(false);
-    expect(fetchProviderModelMeta).toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
     setTimeoutSpy.mockRestore();
   });
 
-  it("ends in the warning phase when the fallback catalog holds no model", async () => {
-    const hook = renderHook(buildParams({ connections: [{ id: "conn-1", isActive: true }] }));
-    mockCatalog({ ...DEGRADED, models: [] });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
-
-    const progress = hook.get().importProgress;
-    expect(progress.phase).toBe("warning");
-    expect(progress.degraded).toBe(true);
-    expect(progress.degradedCause).toBe("HTTP 500");
-    expect(progress.status).toBe("noModelsFound");
-  });
-
-  it("keeps the phase message out of the log of the empty fallback catalog", async () => {
-    const hook = renderHook(buildParams({ connections: [{ id: "conn-1", isActive: true }] }));
-    mockCatalog({ ...DEGRADED, models: [] });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
+  it("keeps the phase message out of the log of the degraded import", async () => {
+    const hook = await importWith(false, 502, DEGRADED);
 
     const progress = hook.get().importProgress;
     // The server's own text is the log line, the phase message is the status.
-    expect(progress.logs).toContain("API unavailable — using local catalog");
-    expect(progress.logs).not.toContain("noModelsFound");
-  });
-
-  it("ends in the warning phase when the fallback catalog holds no new model", async () => {
-    const hook = renderHook(
-      buildParams({
-        connections: [{ id: "conn-1", isActive: true }],
-        models: [{ id: "known-model", name: "Known Model" }],
-      })
-    );
-    mockCatalog({ ...DEGRADED, models: [{ id: "known-model", name: "Known Model" }] });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
-
-    const progress = hook.get().importProgress;
-    expect(progress.phase).toBe("warning");
-    expect(progress.degraded).toBe(true);
-    expect(progress.degradedCause).toBe("HTTP 500");
-    expect(progress.status).toBe("allModelsAlreadyImported");
+    expect(progress.logs).toEqual(["API unavailable — using local catalog"]);
+    expect(progress.logs).not.toContain("noNewModelsAdded");
   });
 
   it("leaves a successful import unchanged: no degraded state, and the page reloads", async () => {
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
-    const hook = renderHook(buildParams({ connections: [{ id: "conn-1", isActive: true }] }));
-    mockCatalog({ source: "api", models: [{ id: "new-model", name: "New Model" }] });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
+    const hook = await importWith(true, 200, {
+      ok: true,
+      source: "api",
+      addedModelIds: ["new-model"],
+      removedModelIds: [],
     });
 
     const progress = hook.get().importProgress;
     expect(progress.phase).toBe("done");
     expect(progress.degraded).toBeFalsy();
     expect(progress.degradedCause).toBeUndefined();
-    expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(true);
+    expect(setTimeoutSpy.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(1);
+    // Closing the completion modal must not cancel the page-level navigation.
+    act(() => hook.get().setShowImportModal(false));
+    expect(vi.getTimerCount()).toBe(1);
     setTimeoutSpy.mockRestore();
   });
 
   it("ends in the done phase when the built-in catalog is the source the operator asked for", async () => {
-    const hook = renderHook(
-      buildParams({
-        connections: [{ id: "conn-1", isActive: true }],
-        models: [{ id: "known-model", name: "Known Model" }],
-      })
-    );
-    mockCatalog({
-      ...EXPECTED_CATALOG,
-      models: [{ id: "known-model", name: "Known Model" }],
-    });
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
+    const hook = await importWith(true, 200, { ...EXPECTED_CATALOG, addedModelIds: [] });
 
     const progress = hook.get().importProgress;
     expect(progress.phase).toBe("done");
     expect(progress.degraded).toBeFalsy();
     expect(progress.degradedCause).toBeUndefined();
-    expect(progress.status).toBe("allModelsAlreadyImported");
+    expect(progress.status).toBe("providerPublishesNoModelList");
 
     const el = document.createElement("div");
     document.body.appendChild(el);
@@ -314,20 +261,57 @@ describe("the model import dialog", () => {
     // The catalog the operator asked for is not a fallback: no notice, no reason.
     expect(document.body.querySelector('[data-testid="discovery-degraded-notice"]')).toBeNull();
   });
-
-  it("ends in the done phase when the expected catalog holds no model", async () => {
-    const hook = renderHook(buildParams({ connections: [{ id: "conn-1", isActive: true }] }));
-    mockCatalog({ ...EXPECTED_CATALOG, models: [] });
+  it("refreshes the model list after a sync, but not after a refused one", async () => {
+    const fetchProviderModelMeta = vi.fn().mockResolvedValue(undefined);
+    const hook = renderHook(
+      buildParams({ connections: [{ id: "conn-1", isActive: true }], fetchProviderModelMeta })
+    );
+    mockSync(false, 502, DEGRADED);
 
     await act(async () => {
       await hook.get().handleImportModels();
+    });
+
+    // A refused (degraded) import changed nothing, so there is nothing to reload.
+    expect(fetchProviderModelMeta).not.toHaveBeenCalled();
+
+    mockSync(true, 200, { ok: true, source: "api", addedModelIds: [], removedModelIds: [] });
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    // A sync that answered reloads the list, whatever it stored.
+    expect(fetchProviderModelMeta).toHaveBeenCalledTimes(1);
+  });
+
+  it("imports the models of a built-in catalog the operator asked for, without a notice", async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const hook = await importWith(true, 200, {
+      ...EXPECTED_CATALOG,
+      addedModelIds: ["known-model"],
     });
 
     const progress = hook.get().importProgress;
     expect(progress.phase).toBe("done");
     expect(progress.degraded).toBeFalsy();
     expect(progress.degradedCause).toBeUndefined();
-    expect(progress.status).toBe("noModelsFound");
+    expect(progress.importedCount).toBe(1);
+    expect(progress.status).toBe("importSuccessCount");
+    // The server's note on its catalog stays visible as a log line.
+    expect(progress.logs).toContain(EXPECTED_CATALOG.warning);
+    expect(setTimeoutSpy.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(1);
+    setTimeoutSpy.mockRestore();
+  });
+
+  it("ends in the done phase when the expected catalog adds no model", async () => {
+    const hook = await importWith(true, 200, { ...EXPECTED_CATALOG, addedModelIds: [] });
+
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("done");
+    expect(progress.degraded).toBeFalsy();
+    expect(progress.degradedCause).toBeUndefined();
+    expect(progress.importedCount).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 
@@ -367,7 +351,8 @@ describe("the status icon of the model import dialog", () => {
     return line;
   }
 
-  const kitIcons = (line: Element) => line.querySelectorAll("[data-icon]");
+  // The running phases draw the kit Spinner; every other state a Lucide icon.
+  const kitIcons = (line: Element) => line.querySelectorAll("[data-icon], [data-slot='spinner']");
   const legacySpans = (line: Element) => line.querySelectorAll("span.material-symbols-outlined");
 
   for (const phase of PHASES) {
@@ -391,7 +376,10 @@ describe("the status icon of the model import dialog", () => {
             ? "warning"
             : phase === "error"
               ? "error"
-              : "progress_activity"
+              : null
+      );
+      expect(kitIcons(line)[0].getAttribute("data-slot")).toBe(
+        phase === "fetching" || phase === "importing" ? "spinner" : null
       );
     });
   }

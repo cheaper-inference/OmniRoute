@@ -120,11 +120,11 @@
 
 ## 📖 提供者设置
 
-要从 CSV 或 JSON 文件批量添加 API 密钥连接，请使用 **控制面板 → 提供者 → 从文件导入**。各列按位置对应（`provider,name,apiKey,baseUrl,priority`）；`provider` 必须已作为托管提供者或兼容节点存在。请参阅[从 CSV 或 JSON 文件导入提供者](../providers/CSV-IMPORT.md)。
+要从 CSV 或 JSON 文件批量添加 API 密钥连接，请使用 **控制面板 → 提供者 → 从文件导入**。列按位置排列（`provider,name,apiKey,baseUrl,priority`）；`provider` 必须已经存在，且是受管理的提供者或兼容节点。请参阅[从 CSV 或 JSON 文件导入提供者](../providers/CSV-IMPORT.md)。
 
 ### 🔐 订阅提供者
 
-#### Claude Code (Pro/Max)
+#### Claude Code（Pro/Max）
 
 ```bash
 控制面板 → 提供者 → 连接 Claude Code
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**专业提示：** 复杂任务使用 Opus，追求速度则使用 Sonnet。OmniRoute 会按模型跟踪配额！
+**专业提示：** 复杂任务使用 Opus，追求速度使用 Sonnet。OmniRoute 会按模型跟踪配额！
 
-OmniRoute 主机上没有浏览器？在任何已登录 Claude Code 的环境中运行 `claude setup-token`，然后将有效期一年的令牌粘贴到 **Setup Token** 选项卡中。请参阅[使用 setup token 的 Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)。
+OmniRoute 主机上没有浏览器？在已登录 Claude Code 的任意位置运行 `claude setup-token`，然后将为期一年的令牌粘贴到 **Setup Token** 标签页中。请参阅[使用设置令牌运行 Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)。
 
-Claude 及与 Claude Code 兼容的路由会为 Opus 和 Sonnet 模型保留 `max` 思考强度。Haiku 模型不接受 `max` 强度级别，因此 OmniRoute 会在向上游发送请求前，将其降级为较高的思考预算。
+Claude 和 Claude Code 兼容路由会为 Opus 和 Sonnet
+模型保留 `max` 思考力度。Haiku 模型不接受 `max` 力度层级，因此 OmniRoute 会将该
+请求降级为高思考预算，然后再发送到上游。
 
-#### OpenAI Codex (Plus/Pro)
+#### OpenAI Codex（Plus/Pro）
 
 ```bash
 控制面板 → 提供者 → 连接 Codex
 → OAuth 登录（端口 1455）
-→ 每 5 小时 + 每周重置
+→ 5 小时 + 每周重置
 
 模型：
   cx/gpt-5.5
@@ -172,50 +174,56 @@ Claude 及与 Claude Code 兼容的路由会为 Opus 和 Sonnet 模型保留 `ma
   gh/gemini-3.1-pro-preview
 ```
 
+**AI 积分（基于令牌的计费）。** 当 GitHub 为该账户报告 `credits_used` 时，提供者限制卡片会显示 **AI 积分**一行，其中包含当前计费周期内消耗的积分，包括无限量组织计划。
+
+**本地 AI 积分限制。** 编辑 GitHub 连接，并设置**每个计费周期的 AI 积分限制**（`providerSpecificData.githubCreditLimit`）。留空可禁用此限制；设置为 `0` 时始终跳过该连接。当最后一次使用量读数达到或超过限制时，账户选择会跳过该连接，路由将回退到其他连接，其行为与配额策略截止相同。检查会读取定期配额刷新已经收集的使用量——请求路径不会调用 GitHub——并且采用故障放行策略：缺失或过时的读数（超过 15 分钟，或来自已经重置的计费周期）不会阻止该连接。这是一项本地保护措施，**不是有保障的消费上限**：GitHub 报告延迟、刷新间隔、正在进行的请求以及 OmniRoute 之外的使用量都可能导致实际使用量超过该限制。如需硬性上限，请使用 GitHub 自身的消费控制功能。
+
 ### 💰 低价提供者
 
 #### GLM-4.7（每日重置，$0.6/1M）
 
-1. 注册：[Zhipu AI](https://open.bigmodel.cn)
+1. 注册：[智谱 AI](https://open.bigmodel.cn)
 2. 从 Coding Plan 获取 API 密钥
 3. 控制面板 → 添加 API 密钥：提供者：`glm`，API 密钥：`your-key`
 
 **用法：** `glm/glm-4.7` — **专业提示：** Coding Plan 以 1/7 的成本提供 3 倍配额！每天上午 10:00 重置。
 
-#### MiniMax M2.1（每 5 小时重置，$0.20/1M）
+#### MiniMax M2.1（5 小时重置，$0.20/1M）
 
 1. 注册：[MiniMax](https://www.minimax.io)
 2. 获取 API 密钥 → 控制面板 → 添加 API 密钥
 
-**用法：** `minimax/MiniMax-M2.1` — **专业提示：** 长上下文（100 万令牌）的最便宜选择！
+**用法：** `minimax/MiniMax-M2.1` — **专业提示：** 长上下文场景下最便宜的选项（1M 令牌）！
 
-#### Kimi K2（固定每月 $9）
+#### Kimi K2（$9/月固定费用）
 
 1. 订阅：[Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. 获取 API 密钥 → 控制面板 → 添加 API 密钥
 
-**用法：** `kimi/kimi-k2.5` — **专业提示：** 每月固定 $9 即可获得 1000 万令牌，相当于每 100 万令牌 $0.90！
+**用法：** `kimi/kimi-k2.5` — **专业提示：** 每月固定 $9，可使用 10M 令牌 = 实际成本 $0.90/1M！
 
-#### Baidu Qianfan / ERNIE
+#### 百度千帆 / ERNIE
 
-1. 注册：[Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. 创建 Qianfan API 密钥 → 控制面板 → 添加 API 密钥：提供者：`qianfan`
+1. 注册：[百度智能云千帆](https://cloud.baidu.com/product/wenxinworkshop)
+2. 创建千帆 API 密钥 → 控制面板 → 添加 API 密钥：提供者：`qianfan`
 
-**用法：** `qianfan/ernie-5.1`、`qianfan/ernie-x1.1` 或其他与 OpenAI 兼容的 Qianfan 模型 ID。
+**用法：** `qianfan/ernie-5.1`、`qianfan/ernie-x1.1`，或其他千帆 OpenAI 兼容模型 ID。
 
 ### 🆓 免费提供者
 
-无需身份验证的免费提供者，其提供者页面上的 **无需身份验证** 旁边设有一个开关。将其关闭会禁用该提供者、将其从“已配置提供者”视图和紧凑视图中移除，并从 `/v1/models` 中移除其模型。
+无身份验证的免费提供者页面上有一个位于**无需身份验证**旁边的开关。
+关闭该开关会禁用该提供者，将其从“已配置提供者”和紧凑视图中移除，
+并从 `/v1/models` 中移除其模型。
 
 #### Qoder（9 个免费模型）
 
 ```bash
-控制面板 → 连接 Qoder → OAuth 登录 → 访问受提供者当前限制约束
+控制面板 → 连接 Qoder → OAuth 登录 → 使用受当前提供者限制约束
 
 模型：if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro（免费 Claude）
+#### Kiro（Claude 免费版）
 
 ```bash
 控制面板 → 连接 Kiro → AWS Builder ID 或 Google/GitHub → 每月约 50 个积分
@@ -333,49 +341,49 @@ API 密钥：[从仪表盘获取]
 
 ---
 
-## 🚀 部署
+## 🚀部署
 
 ### 全局 npm 安装（推荐）
 
 ```bash
 npm install -g omniroute
 
-# 创建配置目录
+# Create config directory
 mkdir -p ~/.omniroute
 
-# 创建 .env 文件（参见 .env.example）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 启动服务器
+# Start server
 omniroute
-# 或使用自定义端口：
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI 会自动从 `~/.omniroute/.env` 或 `./.env` 加载 `.env`。
+CLI自动从`~/.omniroute/.env`或`./.env`加载`.env` 。工作目录中的`./.env`只能设置一个简短的键允许列表（端口、 `REQUIRE_API_KEY`、区域设置和颜色设置）；将其他所有内容放入`~/.omniroute/.env`中。参见[CLI启动合约](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
 
 ### 托盘模式
 
-在系统托盘中启动 OmniRoute：
+在系统托盘中启动OmniRoute ：
 
 ```bash
 omniroute serve --tray
 ```
 
-服务器和托盘准备就绪后，该命令会返回。
+该命令在服务器和托盘准备就绪后返回。
 
-服务器将在没有终端的情况下继续运行。
+服务器在没有终端的情况下继续运行。
 
-托盘模式支持 macOS、Windows 和图形化 Linux 会话。托盘模式不会自动打开仪表盘。
+托盘模式支持macOS、 Windows和图形Linux会话。托盘模式不会自动打开仪表板。
 
-可以通过托盘菜单执行以下操作：
+使用托盘菜单执行以下操作：
 
-- 打开仪表盘。
-- 打开 `/dashboard/logs`。
-- 更改自动启动设置。
-- 停止 OmniRoute。
+- 打开仪表板。
+- 打开`/dashboard/logs`.
+- 更改自动启动。
+- 停止OmniRoute。
 
-不要将 `--tray` 与以下选项组合使用：
+不要将`--tray`与以下选项结合使用：
 
 - `--daemon`
 - `--log`
@@ -383,13 +391,13 @@ omniroute serve --tray
 
 这些模式需要不同的进程所有权。
 
-启用在下次登录计算机时启动：
+启用在下次机器登录时启动：
 
 ```bash
 omniroute autostart enable
 ```
 
-在 macOS、Windows 和图形化 Linux 会话中，自动启动会使用托盘模式。无头 Linux 会使用现有的 systemd 用户服务。
+自动启动在macOS、 Windows和图形Linux会话上使用托盘模式。 Headless Linux使用现有的 systemd 用户服务。
 
 禁用登录时启动：
 
@@ -399,16 +407,16 @@ omniroute autostart disable
 
 ### 卸载
 
-当你不再需要 OmniRoute 时，我们提供了两个快速脚本以进行彻底移除：
+当您不再需要OmniRoute时，我们提供两个快速脚本来彻底删除：
 
-| 命令                     | 操作                                                         |
-| ------------------------ | ------------------------------------------------------------ |
-| `npm run uninstall`      | 移除系统应用，但会**保留 `~/.omniroute` 中的数据库和配置**。 |
-| `npm run uninstall:full` | 移除应用，并永久**删除所有配置、密钥和数据库**。             |
+| 命令                     | 行动                                                      |
+| ------------------------ | --------------------------------------------------------- |
+| `npm run uninstall`      | 删除系统应用程序，但**保留您的DB和配置**在`~/.omniroute`. |
+| `npm run uninstall:full` | 永久删除应用程序AND**删除所有配置、密钥和数据库**。       |
 
-> 注意：要运行这些命令，请导航到 OmniRoute 项目文件夹（如果你克隆了该项目），然后运行它们。或者，如果是全局安装，只需运行 `npm uninstall -g omniroute`。
+> 注意：要运行这些命令，请导航到OmniRoute项目文件夹（如果您克隆了它）并运行它们。或者，如果全局安装，您可以简单地运行`npm uninstall -g omniroute`。
 
-### VPS 部署
+### VPS部署
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -424,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# 或者：pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 部署（低内存）
+### PM2部署（低内存）
 
-对于 RAM 有限的服务器，请使用内存限制选项：
+对于RAM有限的服务器，请使用内存限制选项：
 
 ```bash
-# 使用 512MB 限制（默认）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# 或使用自定义内存限制
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# 或使用 ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-创建 `ecosystem.config.js`：
+创建`ecosystem.config.js`：
 
 ```javascript
 module.exports = {
@@ -467,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# 构建镜像（默认 = runner-cli，预装 codex/claude/droid）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# 可移植模式（推荐）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-有关包含 CLI 二进制文件的主机集成模式，请参阅主文档中的 Docker 部分。
+对于使用CLI二进制文件的主机集成模式，请参阅主文档中的Docker部分。
 
-### Void Linux (xbps-src)
+### 作废Linux (xbps-src)
 
-Void Linux 用户可以使用 `xbps-src` 交叉编译框架，以原生方式打包和安装 OmniRoute。此过程会自动完成 Node.js 独立构建，并编译所需的 `better-sqlite3` 原生绑定。
+void Linux用户可以使用`xbps-src`交叉编译框架原生打包安装OmniRoute 。这会自动执行Node.js独立构建以及所需的`better-sqlite3`本机绑定。
 
 <details>
-<summary><b>查看 xbps-src 模板</b></summary>
+<summary><b>查看xbps-src模板</b></summary>
 
 ```bash
-# 'omniroute' 的模板文件
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -505,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# 确定 node-gyp 的目标 CPU 架构
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -514,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) 安装所有依赖项——跳过脚本
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) 构建 Next.js 独立软件包
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 将静态资源复制到独立软件包中
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) 编译 better-sqlite3 原生绑定
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) 将编译后的绑定放入独立软件包中
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) 移除特定于架构的 sharp 软件包
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) 复制 Next.js 静态分析遗漏的 pino 运行时依赖项：
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -550,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# 防止安装后钩子移除空的 Next.js 应用路由器目录
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -578,30 +586,30 @@ post_install() {
 
 ### 环境变量
 
-| 变量                                    | 默认值                               | 描述                                                                            |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 签名密钥（**在生产环境中请更改**）                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 首次登录密码                                                                    |
-| `DATA_DIR`                              | `~/.omniroute`                       | 数据目录（数据库、使用情况、日志）                                              |
-| `PORT`                                  | 框架默认值                           | 服务端口（示例中为 `20128`）                                                    |
-| `HOSTNAME`                              | 框架默认值                           | 绑定主机（Docker 默认为 `0.0.0.0`）                                             |
-| `NODE_ENV`                              | 运行时默认值                         | 部署时设置为 `production`                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 提供给仪表板并暴露给服务器的公共基础 URL（取代旧版 `BASE_URL`）                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 云同步端点的基础 URL（取代旧版 `CLOUD_URL`）                                    |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 用于生成 API 密钥的 HMAC 密钥                                                   |
-| `REQUIRE_API_KEY`                       | `false`                              | 对 `/v1/*` 强制要求 Bearer API 密钥                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 允许经过身份验证的仪表板用户按需查看存储的完整 API 密钥值                       |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 服务器端刷新已缓存 Provider Limits 数据的频率；界面中的刷新按钮仍会触发手动同步 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 禁用写入、导入或恢复前的自动 SQLite 快照；手动备份仍可用                        |
-| `APP_LOG_TO_FILE`                       | `true`                               | 将应用程序日志和审计日志输出到磁盘                                              |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | 强制使用 `Secure` 身份验证 Cookie（适用于 HTTPS 反向代理之后）                  |
-| `CLOUDFLARED_BIN`                       | 未设置                               | 使用现有的 `cloudflared` 二进制文件，而不是由系统管理下载                       |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 托管 Quick Tunnels 的传输协议（`http2`、`quic` 或 `auto`）                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 堆内存限制（MB）                                                        |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 提示词缓存条目的最大数量                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 语义缓存条目的最大数量                                                          |
+| 多变的                                  | 默认                     | 描述                                                                                     |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _（自动生成）_           | JWT签名秘密—在第一次运行时自动生成并保留到`server.env`；当数据目录是临时目录时显式设置它 |
+| `INITIAL_PASSWORD`                      | _（未设置）_             | 第一个登录密码。 npm/source安装以`CHANGEME`开头：替换它。取消设置：入门向导              |
+| `DATA_DIR`                              | `~/.omniroute`           | 数据目录（数据库、使用情况、日志）                                                       |
+| `PORT`                                  | 框架默认                 | 服务端口（示例中为`20128` ）                                                             |
+| `HOSTNAME`                              | 框架默认                 | 绑定主机（Docker默认为`0.0.0.0`）                                                        |
+| `NODE_ENV`                              | 运行时默认值             | 设置`production`进行部署                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 公共基础URL出现在仪表板上并暴露给服务器（取代旧版`BASE_URL`）                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 云同步端点基础URL （替换旧版`CLOUD_URL`）                                                |
+| `API_KEY_SECRET`                        | _（自动生成）_           | HMAC生成的API密钥的秘密—在第一次运行时自动生成并保存到`server.env`                       |
+| `REQUIRE_API_KEY`                       | `false`                  | 在`/v1/*`上强制执行 Bearer API密钥                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 允许经过身份验证的仪表板用户按需显示完整存储的API密钥值                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 缓存的提供者限制数据的服务器端刷新节奏； UI刷新按钮仍会触发手动同步                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 在writes/import/restore之前禁用自动SQLite快照；手动备份仍然有效                          |
+| `APP_LOG_TO_FILE`                       | `true`                   | 启用应用程序和审核日志输出到磁盘                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | 强制`Secure` auth cookie（在HTTPS反向代理后面）                                          |
+| `CLOUDFLARED_BIN`                       | 未设置                   | 使用现有的`cloudflared`二进制文件而不是托管下载                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 托管快速隧道的传输（`http2`、 `quic`或`auto`）                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB中的Node.js堆限制                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 最大提示缓存条目数                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 最大语义缓存条目数                                                                       |
 
-有关完整的环境变量参考，请参阅 [README](../README.md)。
+有关完整的环境变量参考，请参阅[README](../README.md) 。
 
 ---
 
@@ -610,55 +618,55 @@ post_install() {
 <details>
 <summary><b>查看所有可用模型</b></summary>
 
-> 以下列表基于 v3.8.0 的 `open-sse/config/providerRegistry.ts` 整理。云端目录(Gemini、OpenRouter 等)为动态同步 —— 如需完整的实时目录,请打开 **仪表盘 → 提供者 → [provider] → 可用模型**,或调用 `GET /api/models/catalog`。
+> 以下列表整理自 v3.8.0 的 `open-sse/config/providerRegistry.ts`。云端目录（Gemini、OpenRouter 等）会动态同步 — 如需查看完整的实时目录，请打开 **仪表板 → 提供者 → [提供者] → 可用模型**，或调用 `GET /api/models/catalog`。
 >
-> 如果某个提供者的内置列表已过时,请在该页面使用 **Import from /models**(或启用 **Auto-Sync**)来拉取实时上游目录。此流程已在 v3.8.50 中针对 LLM7.io(`gemini-3.1-flash-lite`)和 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)验证;在同一轮测试中,Pollinations 的匿名访问仍受上游限制。
+> 如果某个提供者的内置列表已发生偏差，请在该页面使用 **从 /models 导入**（或启用 **自动同步**）以获取上游实时目录。此功能已在 v3.8.50 中针对 LLM7.io (`gemini-3.1-flash-lite`) 和 UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) 验证；在同一轮测试期间，Pollinations 的匿名访问仍受上游限制。
 
-**Claude Code(`cc/`)** —— Pro/Max OAuth:`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth：`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex(`cx/`)** —— Plus/Pro OAuth:`cx/gpt-5.5`(+ 不同 effort 档位:`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`)、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth：`cx/gpt-5.5`（+ 推理强度层级：`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot(`gh/`)** —— OAuth:`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth：`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro(`kr/`)** —— 免费 OAuth:请使用 **仪表盘 → 提供者 → Kiro → 可用模型** 下显示的实时目录。可用性取决于账户和套餐。
+**Kiro (`kr/`)** — 免费 OAuth：请使用 **仪表板 → 提供者 → Kiro → 可用模型** 下显示的实时目录。可用性取决于账户和套餐。
 
-**Qoder(`if/`)** —— 免费 OAuth:`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
+**Qoder (`if/`)** — 免费 OAuth：`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM(`glm/`、`glm-cn/`、`zai/`、`glmt/`)** —— $0.2–0.6/1M:`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2–0.6/1M：`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
-**MiniMax(`minimax/`、`minimax-cn/`)** —— $0.2/1M:`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M：`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
-**Kimi(`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** —— 每月 $9 固定费用或按用量计费:`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
+**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — $9/月固定费用或按使用量计费：`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
 
-**DeepSeek(`ds/`)** —— API 密钥:`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API 密钥：`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
 
-**Groq(`groq/`)** —— 超高速:`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — 超快速：`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
 
-**xAI(`xai/`)** —— Grok 原生:`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — 原生 Grok：`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral(`mistral/`)** —— 欧盟托管:`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — 在欧盟托管：`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/codestral-latest`
 
-**Perplexity(`pplx/`)** —— 搜索增强:`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
+**Perplexity (`pplx/`)** — 增强搜索：`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
-**Together AI(`together/`)** —— 开源:`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`(免费)、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — 开源：`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（免费）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI(`fireworks/`)** —— 快速推理:`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 快速推理：`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras(`cerebras/`)** —— 晶圆级:`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — 晶圆级：`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
 
-**Cohere(`cohere/`)** —— 专注 RAG:`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — 专注于 RAG：`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
 
-**NVIDIA NIM(`nvidia/`)** —— 企业级:`nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 企业级：`nvidia/google/gemma-4-31b-it`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`、`nvidia/nvidia/nemotron-3-ultra-550b-a55b`、`nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**百度千帆(`qianfan/`)** —— ERNIE:`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE：`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
 
-**Ollama Cloud(`ollama-cloud/`)**:`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**：`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini(Google Cloud `gemini/`)**:按 API 密钥从 Google 实时同步 —— 无静态列表。在 **仪表盘 → 提供者** 中接入密钥,然后使用 **可用模型** 导入当前目录(例如 `gemini/gemini-3-pro`、`gemini/gemini-3-flash`)。
+**Gemini（Google Cloud `gemini/`）**：根据 API 密钥从 Google 实时同步 — 没有静态列表。在 **仪表板 → 提供者** 中连接密钥，然后使用 **可用模型** 导入当前目录（例如 `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**其他兼容提供者**(部分):`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`(通过 `aws-bedrock`)、`azure-ai`、`openrouter`(透传目录)、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。每个提供者在 `providerRegistry.ts` 中维护自己的模型列表,当提供者暴露 `/models` 端点时可自动同步。
+**其他兼容的提供者**（部分）：`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（通过 `aws-bedrock`）、`azure-ai`、`openrouter`（直通目录）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。每个提供者都在 `providerRegistry.ts` 中维护自己的模型列表，并且在提供者公开 `/models` 端点时可以自动同步。
 
-**关于模型 ID 的说明:** OmniRoute 使用提供者原生 ID(`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`)。部分 ID 包含带点号的版本号,因为这是上游 API 所期望的格式。如果某个模型未在上方列出,请运行 `omniroute models --search <term>` 或调用 `GET /api/models/catalog` 以确认可用性。
+**关于模型 ID 的说明：** OmniRoute 使用提供者原生 ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）。某些 ID 包含点号版本号，因为上游 API 要求使用这种格式。如果上方未列出某个模型，请运行 `omniroute models --search <term>`，或访问 `GET /api/models/catalog` 以确认其可用性。
 
 </details>
 

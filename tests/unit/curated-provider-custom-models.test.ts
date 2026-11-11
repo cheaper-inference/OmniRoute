@@ -102,3 +102,21 @@ test("the curated catalog still ships when no custom model was added", async () 
     "nothing was added, so nothing custom may appear"
   );
 });
+
+test("/v1/models keeps a discovery-imported custom row off a curated-only provider", async () => {
+  // Operator rows reach /v1/models (#18018); a row a discovery sync imported is a stale
+  // leftover on a provider with no upstream catalog and must stay unroutable (#8451).
+  await modelsDb.addCustomModel(CURATED_PROVIDER, "stale-imported-model", "Stale", "imported");
+  await modelsDb.addCustomModel(CURATED_PROVIDER, CUSTOM_MODEL_ID, "DeepSeek V4.1 Flash");
+
+  const response = await v1ModelsCatalog.getUnifiedModelsResponse(
+    new Request("http://localhost/api/v1/models")
+  );
+  assert.equal(response.status, 200);
+
+  const body = (await response.json()) as { data: Array<{ id: string }> };
+  const ids = body.data.map((row) => row.id);
+
+  assert.ok(ids.includes(`${CURATED_ALIAS}/${CUSTOM_MODEL_ID}`), "operator row must be listed");
+  assert.equal(ids.includes(`${CURATED_ALIAS}/stale-imported-model`), false);
+});

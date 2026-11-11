@@ -34,63 +34,61 @@ Kuna see arv on hinnanguline:
 
 ---
 
-## Kuidas maksumust hinnatakse
+## Kuidas kulusid hinnatakse
 
-### Hinnateabe allikas
+### Hinnakujunduse allikas
 
-Maksumused pärinevad hinnatabelist, mis määratakse järgmises tähtsuse järjekorras
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kulud pärinevad ühendatud hinnatabelist [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), selles paremusjärjestuses (** kõrgeim esimene** ):
 
-1. **Kasutaja ülekirjutused** — hinnad, mille määrate juhtpaneelil / lõpp-punkti `PATCH /api/pricing` kaudu.
-2. **Sünkroonitud väline hinnateave** — hangitakse LiteLLM-i avalikust failist
-   `model_prices_and_context_window.json`, kui sünkroonimine on lubatud (salvestatakse eraldi
-   nimeruumi `pricing_synced`, et see ei kirjutaks kunagi teie ülekirjutusi üle).
-3. **Programmisisene vaikehinnastus** — sisaldub OmniRoute'is.
+1. **Kasutaja alistab** — hinnad, mis on määratud armatuurlaual või `PATCH /api/pricing` ( `pricing` nimeruumi) kaudu.
+2. **model.dev sünkroonimine** — hinnakujundus on toodud `https://models.dev/api.json` ( `models_dev_pricing` nimeruum).
+3. **LiteLLM sünkroonimine** — hinnad saadi LiteLLM avalikust `model_prices_and_context_window.json` (nimeruumist `pricing_synced` ).
+4. **Kõvakodeeritud vaikesätted** — hinnad tarnitakse [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Välise hinnateabe sünkroonimine on **valikuline** ja vaikimisi keelatud. Asjakohased keskkonnamuutujad
-(vt [`.env.example`](../../.env.example)):
+Sama provider/model puhul kirjutavad kõrgema prioriteediga kihtide väärtused üle madalamate kihtide sobivad väljad; ülemisest kihist puuduvad väljad võivad siiski pärineda alumisest kihist. Järjekord on fikseeritud isegi siis, kui mõlemad sõltumatud sünkroonimistööd töötavad samal ajal. `GET /api/pricing?includeSources=1` tagastab `pricing` ja `sourceMap`, mille mudelipõhised sildid (`user`, `modelsDev`, `litellm`, `default`) tuvastavad seda mudelit sisaldava kõrgeima prioriteediga kihi.
 
-| Keskkonnamuutuja        | Vaikeväärtus | Otstarve                                                                  |
-| ----------------------- | ------------ | ------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`      | Lubab LiteLLM-i hinnateabe taustal sünkroonimise käivitamisel.            |
-| `PRICING_SYNC_INTERVAL` | `86400`      | Sünkroonimisintervall **sekundites** (vaikimisi kord päevas).             |
-| `PRICING_SYNC_SOURCES`  | `litellm`    | Komadega eraldatud allikate loend (praegu toetatakse ainult `litellm`-i). |
+**LiteLLM sünkroonimine** on lubatud, vaikimisi keelatud. Selle keskkonnamuutujad (vt [`.env.example`](../../.env.example) ) on järgmised:
 
-### Maksumuse valem
+| Env var                 | Vaikimisi | Eesmärk                                                                            |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Lubage taustal LiteLLM hinnakujunduse sünkroonimine.                               |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Sünkroonimisintervall sekundites (iga päev).                                       |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Allika valik ainult selle sünkroonimise jaoks; praegu toetatakse ainult `litellm`. |
 
-Maksumus arvutatakse päringupõhiselt tokenite arvu ja miljoni tokeni hinnamäärade alusel failis
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+**model.dev sünkroonimine** on LiteLLM sünkroonimisest eraldiseisev ja vaikimisi keelatud. Lubage see seadetes (models.dev sync) või kasutage neid muutujaid:
 
-- **Sisendtokenid** (millest on lahutatud vahemälust loetud ja vahemälu loomiseks kasutatud tokenid) × määr `input`.
-- **Vahemälust loetud tokenid** × määr `cached` (selle puudumisel kasutatakse sisendtokenite määra).
-- **Vahemälu loomiseks kasutatud tokenid** × määr `cache_creation` (selle puudumisel kasutatakse sisendtokenite määra).
-- **Väljundtokenid** × määr `output`.
-- **Põhjendustokenid** × määr `reasoning` (selle puudumisel kasutatakse väljundtokenite määra).
+| Env var                    | Vaikimisi     | Eesmärk                                                                                                                     |
+| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(määramata)_ | Unset järgib lülitit Seaded; `1/true/on/yes` sunnib sisse ja `0/false/off/no` sunnib välja (isegi kui seaded seda lubavad). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Sünkroonimise vaikeintervall mudelid.dev sekundites (iga päev).                                                             |
 
-Kõiki määrasid tõlgendatakse USA dollarites 1 000 000 tokeni kohta. Codexi teenusetase „fast”/„priority” või „flex” rakendab maksumuskordajat (`getCodexFastCostMultiplier`) — näiteks teenusetaseme „flex” puhul kehtib tokenitele 50% allahindlus, mida kuvatakse juhtpaneelil **flex-säästuna**.
+`PRICING_SYNC_SOURCES` teeb** mitte** luba mudelid.dev; see juhib ainult LiteLLM sünkroonimist. Kasutaja alistamise kustutamine ei tühjenda kumbagi sünkroonitud nimeruumi; jõustub järgmine saadaolev hinnakiht. Hinnata mudeli puhul kontrollige enne käsitsi alistamise lisamist nii sünkroonimisseadeid kui ka `sourceMap`.
 
-Mudelinimed normaliseeritakse esmalt (teenusepakkuja teede prefiksid, nagu `openai/` või
-`accounts/fireworks/models/`, eemaldatakse), et ka ajaloolised read vastaksid endiselt hinnale.
+### Kulude valem
 
-### Kuidas kulutused salvestatakse
+Kulud arvutatakse päringu kohta [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) žetoonide arvu ja miljonimärgiste määrade põhjal:
 
-- Päringupõhine maksumus arvutatakse pärast vastust ning salvestatakse põhimõttel „käivita ja unusta”, et see
-  ei lisaks kunagi kliendi jaoks latentsust. Ühiskvoodi kasutus ajastatakse järgmisele
-  sündmusetsükli sammule faili [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kaudu.
-- API-võtme kulutused puhverdatakse ja kirjutatakse partiidena
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) abil (vaikimisi 60 s kirjutusintervall,
-  1 000 kirje suurune puhver). Kohandamiseks saab kasutada järgmisi muutujaid:
+- **Sisestusmärgid** (miinus vahemälu lugemised ja vahemälu loomise märgid) × `input` määr.
+- **Vahemälu lugemise märgid** × `cached` määr (langeb tagasi sisendkiirusele).
+- **Vahemälu loomise märgid** × `cache_creation` määr (langeb tagasi sisendkiirusele).
+- **Väljundmärgid** × `output` määr.
+- **Arutlusmärgid** × `reasoning` kiirus (langeb tagasi väljundkiirusele).
 
-  | Keskkonnamuutuja                    | Vaikeväärtus | Otstarve                                          |
-  | ----------------------------------- | ------------ | ------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Puhvri kirjutusintervall millisekundites.         |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Puhverdatud kirjete maksimumarv enne kirjutamist. |
+Kõiki hindu tõlgendatakse kui USD 1 000 000 märgi kohta. Codex "kiire"/"prioriteedi" või "paindlik" teenusetasand rakendab kulukordajat (`getCodexFastCostMultiplier`) — nt flexi puhul esitatakse arve 50% märgisoodustusega, mis on esitatud** paindlik kokkuhoid** armatuurlaual.
 
-Juhtpaneeli maksumusi **ei** loeta salvestatud reapõhisest rahasummast — need arvutatakse
-analüütika lõpp-punkti igal käivitamisel jooksvalt ümber tokenite arvu ja kehtiva hinnatabeli
-põhjal. See tähendab, et vale hinna parandamine (ja uuesti sünkroonimine) uuendab
-ajaloolisi maksumuse hinnanguid tagasiulatuvalt.
+Mudelite nimed normaliseeritakse kõigepealt (teenusepakkuja tee eesliited, nagu `openai/` või `accounts/fireworks/models/` eemaldatakse), nii et ajaloolised read vastavad endiselt hinnale.
+
+### Kuidas kulutusi registreeritakse
+
+- Päringu hind arvutatakse pärast vastust ja salvestatakse tule ja unusta, nii et see ei lisa kliendile kunagi latentsust. Jagatud kvoodi tarbimine on ajastatud järgmise sündmusetsükli linnukesega [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kaudu.
+- API-võtme kulutused puhverdab ja loputab partiidena [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (vaikimisi 60-sekundiline loputusintervall, 1000 sisestusega puhver). Häälestatav:
+
+  | Env var                             | Vaikimisi | Eesmärk                                 |
+  | ----------------------------------- | --------- | --------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Loputusintervall millisekundites.       |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Max puhverdatud kirjed enne loputamist. |
+
+Armatuurlaua kulunumbrid on järgmised** mitte** loetakse iga rea kohta salvestatud dollarisummast — need arvutatakse käigu pealt uuesti lubade arvu ja praeguse hinnakujundustabeli põhjal iga kord, kui analüütika lõpp-punkt töötab. See tähendab, et vale hinna parandamine (ja uuesti sünkroonimine) värskendab ajaloolisi kuluprognoose tagasiulatuvalt.
 
 ---
 
@@ -139,52 +137,48 @@ Kulude ala sisaldab ka järgmisi lehti (kõik asuvad `/dashboard/costs/` all):
 
 ## API lõpp-punktid
 
-Kõik need nõuavad haldusautentimist (loopback/JWT, `requireManagementAuth` kaudu), kui
-pole märgitud teisiti.
+Kõik need nõuavad haldamise autentimist (loopback/JWT, `requireManagementAuth` kaudu ), kui pole märgitud.
 
-### Kasutus- ja kuluanalüütika
+### Kasutus- ja kuluanalüüs
 
-| Meetod | Lõpp-punkt               | Otstarve                                                                                                                                                                    |
-| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Täielik kulu- ja kasutusanalüütika: kokkuvõte, päevane trend, pakkuja/mudeli/API võtme/konto/taseme järgi. Päring: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Pakkujapõhine kvoodikasutus aja jooksul. Päring: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                               |
-| `GET`  | `/api/usage/history`     | Töötlemata kasutusajaloo read.                                                                                                                                              |
-| `GET`  | `/api/usage/call-logs`   | Päringupõhised kutselogid (mudel, sõned, kulu, latentsus, olek).                                                                                                            |
-| `GET`  | `/api/usage/quota`       | Pakkuja kvoodi olek.                                                                                                                                                        |
-| `GET`  | `/api/usage/proxy-logs`  | Puhverserveri päringulogid.                                                                                                                                                 |
+| meetod | Lõpp-punkt               | Eesmärk                                                                                                                                                        |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Täielik cost/usage analüüs: kokkuvõte, päevatrend, provider/model/API key/account/tier. järgi Päring: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Pakkuja kvoodi kasutamine aja jooksul. Päring: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                    |
+| `GET`  | `/api/usage/history`     | Töötlemata kasutusajaloo read.                                                                                                                                 |
+| `GET`  | `/api/usage/call-logs`   | Päringupõhised kõnelogid (mudel, märgid, hind, latentsusaeg, olek).                                                                                            |
+| `GET`  | `/api/usage/quota`       | Pakkuja kvoodi olek.                                                                                                                                           |
+| `GET`  | `/api/usage/proxy-logs`  | Puhverserveri taotluste logid.                                                                                                                                 |
 
 ### Eelarved
 
-| Meetod | Lõpp-punkt               | Otstarve                                                                                    |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Ühe API võtme kulude kokkuvõte ja eelarvekontroll (`apiKeyId` päringuparameeter on nõutav). |
-| `POST` | `/api/usage/budget`      | API võtme päeva-, nädala- ja kuupõhiste USD-limiitide ning hoiatuse lävendi määramine.      |
-| `GET`  | `/api/usage/budget/bulk` | API võtmete eelarvekokkuvõtete hulgipäring.                                                 |
+| meetod | Lõpp-punkt               | Eesmärk                                                                                          |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `GET`  | `/api/usage/budget`      | Kulude kokkuvõte + eelarve kontroll ühe API -võtme jaoks (vaja on `apiKeyId` päringuparameeter). |
+| `POST` | `/api/usage/budget`      | Määrake daily/weekly/monthly USD piirab + klahvi API hoiatusläve.                                |
+| `GET`  | `/api/usage/budget/bulk` | Hulgieelarve kokkuvõtted API klahvide vahel.                                                     |
 
-> Eelarve API ulatus määratakse **API võtme** (`apiKeyId`) järgi. Lõpp-punkti
-> `GET /api/usage/budget` tagastatud limiidid sisaldavad välju `dailyLimitUsd`,
-> `weeklyLimitUsd`, `monthlyLimitUsd`, `warningThreshold` ja jooksvaid kogusummasid
-> (`totalCostToday`, `totalCostMonth`, …).
+> Eelarve API on hõlmatud**API võti** (`apiKeyId`). `GET /api/usage/budget` tagastatud piirangud hõlmavad `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` ja jooksvaid kogusummasid (`totalCostToday`, `totalCostMonth`, …).
 
-### Hinnastamine
+### Hinnakujundus
 
-| Meetod   | Lõpp-punkt              | Otstarve                                                                                                                |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Praegune ühendatud hinnastamine (kasutaja + sünkroonitud + vaikeväärtused). `?includeSources=1` kuvab iga kirje allika. |
-| `PATCH`  | `/api/pricing`          | Hinnastamise alistamine kujul `{ provider: { model: { input, output, cached, … } } }`.                                  |
-| `DELETE` | `/api/pricing`          | Hinnastamise lähtestamine vaikeväärtustele (soovi korral piiratud parameetritega `?provider=&model=`).                  |
-| `GET`    | `/api/pricing/defaults` | Vaikimisi varumäärade kuvamine 1 miljoni kohta.                                                                         |
-| `GET`    | `/api/pricing/models`   | Mudeli järgi võtmetatud hinnastamine.                                                                                   |
-| `POST`   | `/api/pricing/sync`     | Välisallikatest (LiteLLM) käsitsi sünkroonimise käivitamine.                                                            |
-| `GET`    | `/api/pricing/sync`     | Praegune sünkroonimisolek.                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Kõigi sünkroonitud hinnastamisandmete kustutamine.                                                                      |
+| meetod   | Lõpp-punkt              | Eesmärk                                                                                                                                                  |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Ühendatud neljakihiline hinnakujundus (kasutaja, models.dev, LiteLLM, vaikeväärtused). `?includeSources=1` tagastab `pricing` + `sourceMap`.             |
+| `PATCH`  | `/api/pricing`          | Alista `{ provider: { model: { input, output, cached, … } } }` hinnakujundus.                                                                            |
+| `DELETE` | `/api/pricing`          | Kasutajahinna alistamise eemaldamine (valikuliselt reguleerib `?provider=&model=`); sünkroonitud määrad või sisseehitatud vaikesätted jäävad tagavaraks. |
+| `GET`    | `/api/pricing/defaults` | Kuva per-1M vaikevarumäärad.                                                                                                                             |
+| `GET`    | `/api/pricing/models`   | Hinnakujundus mudelite järgi.                                                                                                                            |
+| `POST`   | `/api/pricing/sync`     | Käivitage käsitsi sünkroonimine välistest allikatest (LiteLLM).                                                                                          |
+| `GET`    | `/api/pricing/sync`     | Praegune sünkroonimise olek.                                                                                                                             |
+| `DELETE` | `/api/pricing/sync`     | Selge ainult LiteLLM-iga sünkroonitud hinnakujundus (`pricing_synced`); models.dev andmed on eraldi.                                                     |
 
-### Muud kuludega seotud lõpp-punktid
+### Muud kuluga seotud lõpp-punktid
 
-| Meetod | Lõpp-punkt                    | Otstarve                                                                               |
-| ------ | ----------------------------- | -------------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Tasuta mudeli tokenite koguarv, sel kuul kasutatud kogus ja allesjäänud tasuta limiit. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Ühiskvoodi kogumi kasutus.                                                             |
+| meetod | Lõpp-punkt                    | Eesmärk                                                                             |
+| ------ | ----------------------------- | ----------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Tasuta mudeli žetoonide kogusumma, sel kuul kasutatud ja järelejäänud tasuta kvoot. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Kasutamine jagatud kvoodikogumi jaoks.                                              |
 
 ---
 

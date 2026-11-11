@@ -142,6 +142,9 @@ export default function CustomModelsSection({
   // custom model record.
   const [editingTargetFormat, setEditingTargetFormat] = useState("");
   const [newTargetFormat, setNewTargetFormat] = useState("");
+  // #4125: manual context-window override on the ADD form (previously only the EDIT
+  // form had it) — free text so it can be left blank (no override).
+  const [newContextWindowOverride, setNewContextWindowOverride] = useState("");
   const [savingModelId, setSavingModelId] = useState<string | null>(null);
   const [togglingModelId, setTogglingModelId] = useState<string | null>(null);
   // #4125: manual context-window override (Feature 5004 table) — free text so the
@@ -192,6 +195,11 @@ export default function CustomModelsSection({
 
   const handleAdd = async () => {
     if (!newModelId.trim() || adding) return;
+    const contextOverride = parseContextWindowOverrideInput(newContextWindowOverride);
+    if (contextOverride.invalid) {
+      notify.error(t("contextWindowOverrideInvalid"));
+      return;
+    }
     setAdding(true);
     try {
       const res = await fetch("/api/provider-models", {
@@ -205,6 +213,9 @@ export default function CustomModelsSection({
           supportedEndpoints: newEndpoints,
           ...(newTargetFormat ? { targetFormat: newTargetFormat } : {}),
           ...(newSupportsVision ? { supportsVision: true } : {}),
+          ...(contextOverride.value != null
+            ? { contextWindowOverride: contextOverride.value }
+            : {}),
           ...(newIsFree ? { isFree: true } : {}),
         }),
       });
@@ -215,6 +226,7 @@ export default function CustomModelsSection({
         setNewEndpoints(["chat"]);
         setNewTargetFormat("");
         setNewSupportsVision(false);
+        setNewContextWindowOverride("");
         setNewIsFree(false);
         await fetchCustomModels();
         onModelsChanged?.();
@@ -499,11 +511,11 @@ export default function CustomModelsSection({
               <option value="chat-completions">{t("chatCompletions")}</option>
               <option value="responses">{t("responsesApi")}</option>
               <option value="embeddings">{t("embeddings")}</option>
-              <option value="rerank">Rerank</option>
+              <option value="rerank">{t("rerank")}</option>
               <option value="audio-transcriptions">{t("audioTranscriptions")}</option>
               <option value="audio-speech">{t("audioSpeech")}</option>
               <option value="images-generations">{t("imagesGenerations")}</option>
-              <option value="video">Video</option>
+              <option value="video">{t("video")}</option>
             </Select>
           </div>
           <div className="min-w-0 lg:w-48">
@@ -521,6 +533,19 @@ export default function CustomModelsSection({
               <option value="gemini">{t("targetFormatGemini")}</option>
               <option value="antigravity">{t("targetFormatAntigravity")}</option>
             </Select>
+          </div>
+          <div className="min-w-0 lg:w-40">
+            <Input
+              id="custom-model-context-window"
+              label={t("contextWindowOverrideLabel")}
+              type="text"
+              inputMode="numeric"
+              value={newContextWindowOverride}
+              onChange={(e) => setNewContextWindowOverride(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              placeholder={t("contextWindowOverridePlaceholder")}
+              title={t("contextWindowOverrideHint")}
+            />
           </div>
           <div className="col-span-2 min-w-0 lg:flex-1">
             <span className="text-xs text-text-muted mb-1 block">
@@ -559,13 +584,13 @@ export default function CustomModelsSection({
             </span>
             <span
               className="text-xs text-text-main whitespace-nowrap"
-              title="Mark as free-tier (shown even when hide paid models is on)"
+              title={t("markFreeTierTitle")}
             >
               <Checkbox
                 id="custom-model-is-free"
                 checked={newIsFree}
                 onChange={(e) => setNewIsFree(e.target.checked)}
-                label="FREE"
+                label={t("freeBadge")}
               />
             </span>
           </div>
@@ -658,7 +683,7 @@ export default function CustomModelsSection({
                     )}
                     {model.isFree === true && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium">
-                        FREE
+                        {t("freeBadge")}
                       </span>
                     )}
                     {model.supportedEndpoints?.includes("embeddings") && (
@@ -738,11 +763,11 @@ export default function CustomModelsSection({
                             <option value="chat-completions">{t("chatCompletions")}</option>
                             <option value="responses">{t("responsesApi")}</option>
                             <option value="embeddings">{t("embeddings")}</option>
-                            <option value="rerank">Rerank</option>
+                            <option value="rerank">{t("rerank")}</option>
                             <option value="audio-transcriptions">{t("audioTranscriptions")}</option>
                             <option value="audio-speech">{t("audioSpeech")}</option>
                             <option value="images-generations">{t("imagesGenerations")}</option>
-                            <option value="video">Video</option>
+                            <option value="video">{t("video")}</option>
                           </Select>
                         </div>
                         <div className="min-w-0 lg:w-[11rem] lg:shrink-0">
@@ -811,7 +836,7 @@ export default function CustomModelsSection({
                               id={`custom-model-edit-free-${model.id}`}
                               checked={editingIsFree}
                               onChange={(e) => setEditingIsFree(e.target.checked)}
-                              label="FREE"
+                              label={t("freeBadge")}
                             />
                           </span>
                         </div>
@@ -870,7 +895,13 @@ export default function CustomModelsSection({
                     providerId={providerId}
                     modelId={model.id!}
                     effectiveModelNormalize={(p) =>
-                      effectiveNormalizeForProtocol(model.id!, p, customMap, overrideMap)
+                      effectiveNormalizeForProtocol(
+                        model.id!,
+                        p,
+                        customMap,
+                        overrideMap,
+                        providerId
+                      )
                     }
                     effectiveModelPreserveDeveloper={(p) =>
                       effectivePreserveForProtocol(model.id!, p, customMap, overrideMap)

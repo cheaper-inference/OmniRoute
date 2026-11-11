@@ -163,7 +163,7 @@ OmniRoute inafichua ujuzi wa A2A 6 unaotumia waya katika `src/lib/a2a/taskExecut
 | Ripoti ya Afya          | `health-report`      | Hukusanya kikatiza mzunguko, hali tulivu, hali ya kufunga kwa kila mtoa huduma                                                                                        | afya, uvumilivu           | "Onyesha hali ya afya ya watoa huduma wote"      |
 | Orodha ya Uwezo         | `list-capabilities`  | Hurejesha katalogi kamili ya Ujuzi wa Wakala yenye viingilio 45 (23 API + 21 CLI + 1 usanidi) kama jedwali la alama iliyo na SKILL.md URLs ghafi ya kudunga muktadha. | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote OmniRoute "                |
 
-> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 377; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
+> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 381; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
 
 ### `list-capabilities` Maelezo ya Ujuzi
 
@@ -180,42 +180,50 @@ Kila safu inajumuisha safu wima `rawUrl` ili mawakala waweze kuleta SKILL.md kam
 
 ---
 
-## REST API (saidizi)
+## REST API (msaidizi)
 
-Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi za REST zilizo hapa chini hutoa ufikiaji saidizi kwa dashibodi na zana za nje:
+Sehemu ya mwisho ya JSON-RPC `/a2a` ndio sehemu ya kisheria A2A ya kuingilia. Miisho ya REST hapa chini hutoa ufikiaji msaidizi wa dashibodi na zana za nje:
 
-| Endpointi                    | Mbinu | Maelezo                                                                   | Uthibitishaji                                      |
-| :--------------------------- | :---- | :------------------------------------------------------------------------ | :------------------------------------------------- |
-| `/api/a2a/status`            | GET   | Hali ya seva, ujuzi uliosajiliwa                                          | (ya umma)                                          |
-| `/api/a2a/tasks`             | GET   | Orodhesha kazi kwa kutumia vichujio                                       | usimamizi                                          |
-| `/api/a2a/tasks/[id]`        | GET   | Pata kazi kwa ID                                                          | usimamizi                                          |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Ghairi kazi inayoendelea                                                  | usimamizi                                          |
-| `/.well-known/agent.json`    | GET   | Kadi ya Wakala (ugunduzi wa A2A)                                          | (ya umma, imehifadhiwa kwa 3600s)                  |
-| `/api/a2a/tasks`             | POST  | Ukabidhi wa kazi unaoingia kwa kundi la OmniConductor (Conductor PRD RF5) | Bearer dhidi ya `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Mwisho                       | Mbinu | Maelezo                                                    | Auth                                                                                                        |
+| :--------------------------- | :---- | :--------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET   | Hali ya seva, ujuzi uliosajiliwa                           | (umma)                                                                                                      |
+| `/api/a2a/tasks`             | GET   | Orodhesha kazi na vichungi                                 | usimamizi au ufunguo wa API (tazama hapa chini)                                                             |
+| `/api/a2a/tasks/[id]`        | GET   | Pata kazi kwa ID                                           | usimamizi au ufunguo wa API (tazama hapa chini)                                                             |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Ghairi kazi inayoendeshwa                                  | usimamizi au ufunguo wa API (tazama hapa chini)                                                             |
+| `/.well-known/agent.json`    | GET   | Kadi ya Wakala ( ugunduzi wa A2A )                         | (ya umma, iliyohifadhiwa 3600s)                                                                             |
+| `/api/a2a/tasks`             | POST  | Ujumbe unaoingia kwa meli OmniConductor (Kondakta PRD RF5) | sawa na `GET`, pamoja na `OMNIROUTE_API_KEY` ikiwa imewekwa wakati `REQUIRE_API_KEY` imezimwa; `a2aEnabled` |
 
-**Ukabidhi wa Conductor unaoingia (`POST /api/a2a/tasks`):** mawakala wa nje wa A2A hukabidhi kazi za uandishi wa msimbo kwa kundi la OmniConductor kupitia OmniRoute. Mwili: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ni ujuzi wa kundi la Conductor pekee (ule uliotangazwa kwenye Kadi ya Wakala) unaoweza kukabidhiwa; `metadata.conductor.repo.url` inahitajika (kundi hufanya kazi kwenye hazina za git). Njia hiyo hutafsiriwa kuwa `POST /v1/tasks` ya kitovu kwa kutumia `CONDUCTOR_ORCHESTRATOR_TOKEN` ya upande wa seva (ikitumika `CONDUCTOR_HUB_TOKEN` kama mbadala) na kurejesha `201 { conductor_task_id, state: "submitted" }`; hali za kazi hurudishwa kupitia kioo cha SSE→A2A (RF1) na zinaonekana kupitia `GET /api/a2a/tasks?skill=conductor`.
+Nani hupitia njia za `/api/a2a/tasks*` inategemea kuingia na mipangilio ya ufunguo wa API:
+
+- `requireLogin=true` (chaguo-msingi): kifaa cha kati hukubali tu stakabadhi za usimamizi (kipindi cha dashibodi, kitufe cha `manage` -scope API, tokeni ya ufikiaji `oma_` ) na `OMNIROUTE_API_KEY`. Kitufe cha uelekezaji wazi kinapata `403`. Katika kichwa cha `Authorization` kifaa cha kati huchukua `OMNIROUTE_API_KEY` kama `Bearer <key>` tu; kitufe kilicho wazi au kichupo baada ya `Bearer` kupata `401`.
+- `requireLogin=false`, au kidirisha cha nyuma kabla ya kuingia: kwa `REQUIRE_API_KEY=true` kitufe chochote halali OmniRoute API au kitambulisho cha usimamizi kinakubaliwa na wapigaji simu wasiojulikana wanapata `401`; na `REQUIRE_API_KEY` nje njia ziko wazi.
+- `POST /api/a2a/tasks` pia inahitaji `OMNIROUTE_API_KEY` kwenye kichwa cha `Authorization` wakati utofauti huo umewekwa na `REQUIRE_API_KEY` imezimwa. Vichwa vingine, kama vile `x-api-key`, havihesabiki hapo. Ukizima kuingia au kabla ya kuingia, ufunguo hupita na au bila kiambishi awali `Bearer` ; ikiwa umewasha kuingia, ni `Bearer <key>` pekee hupita katikati.
+
+Pale ambapo kitambulisho kinahitajika, tokeni ya `read` -scope `oma_` inafanya kazi kwa `GET` pekee .
+
+**Ujumbe wa Kondakta anayeingia (`POST /api/a2a/tasks`):** mawakala wa A2A wa nje hukabidhi kazi ya uandishi kwa meli OmniConductor kupitia OmniRoute. Mwili: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ujuzi wa meli za Kondakta pekee (zilizotangazwa kwenye Kadi ya Wakala) ndizo zinazoweza kukabidhiwa; `metadata.conductor.repo.url` inahitajika (meli inafanya kazi kwenye git repos). Njia hutafsiriwa hadi `POST /v1/tasks` ya kitovu kwa kutumia `CONDUCTOR_ORCHESTRATOR_TOKEN` ya upande wa seva (fallback `CONDUCTOR_HUB_TOKEN`) na kurudisha `201 { conductor_task_id, state: "submitted" }`; hali ya kazi inarudi nyuma kupitia kioo cha SSE→A2A (RF1) na huonekana kupitia `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Kuongeza Ujuzi Mpya
+## Kuongeza Ustadi Mpya
 
-1. **Unda faili la ujuzi:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Unda faili ya ujuzi:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Hamisha nje fungsi ya async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Fuata muundo wa ujuzi uliopo kama vile `smartRouting.ts`.
+   Hamisha kitendakazi cha async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Fuata umbo la ujuzi uliopo kama vile `smartRouting.ts`. Ustadi ukijirudia OmniRoute juu ya HTTP, jenga vichwa na `buildSelfLoopHeaders(caller)` kutoka `src/lib/a2a/selfLoopAuth.ts` ili simu iendeshe kwa ufunguo wa mpigaji A2A, sio `OMNIROUTE_API_KEY`, na upitishe `redirect: "error"` hadi `fetch` ili uelekezaji upya usipate ufunguo. Msaidizi hujenga vichwa vya habari tu; kila ujuzi huweka sera ya kuelekeza kwingine yenyewe. Hutupa `UnsafeSelfLoopTargetError` badala ya kuambatisha ufunguo wakati msingi uliotatuliwa URL ukiwa wazi http nje ya mtandao wa kibinafsi (loopback, kontena au jina la huduma, na anwani za kibinafsi ni sawa) au inashikilia vitambulisho, kwa hivyo ujuzi unaomeza simu zilizokataliwa lazima ubatilishe hitilafu hiyo.
 
-2. **Sajili kishughulikiaji:** katika `src/lib/a2a/taskExecution.ts`, ongeza ingizo kwenye `A2A_SKILL_HANDLERS`:
+2. **Kidhibiti cha usajili:** katika `src/lib/a2a/taskExecution.ts`, ongeza kiingilio kwa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ujuzi uliopo
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Onyesha kwenye Kadi ya Wakala:** katika `src/app/.well-known/agent.json/route.ts`, ongeza kwenye mwisho wa safu ya `skills`:
+3. **Onyesha katika Kadi ya Wakala:** katika `src/lib/a2a/agentCardMetadata.ts` (iliyoshirikiwa na `/.well-known/agent.json` na `/.well-known/agent-card.json`), weka safu `skills` :
 
    ```json
    {
@@ -227,9 +235,9 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
    }
    ```
 
-4. **Andika majaribio:** `tests/unit/a2a-<your-skill>.test.ts`. Jumuisha njia ya mafanikio + njia ya hitilafu.
+4. **Andika majaribio:** `tests/unit/a2a-<your-skill>.test.ts`. Funika njia ya kufurahisha + njia ya makosa.
 
-5. **Andika nyaraka** za ujuzi mpya katika jedwali la `Available Skills` la faili hili.
+5. **Hati** ujuzi mpya katika jedwali `Available Skills` la faili hii.
 
 ---
 

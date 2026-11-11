@@ -12,6 +12,7 @@
  */
 import { z } from "zod";
 import type { ProxySubscriptionPayload } from "./subscriptionService";
+import { coerceMirrorUrls } from "./mirrorUrls";
 import { isCoreConfigPathAllowed } from "./coreConfig/pathGuard";
 import { isSelectorControlUrlAllowed } from "./selectorGuard";
 import { clampSelectorGapSeconds } from "./selectorTrigger";
@@ -109,6 +110,21 @@ function requireNameUrl(
   return { name, url };
 }
 
+/**
+ * Read the optional mirror feed list. Lenient like every other optional
+ * field here: absent/null/non-array reads as absent, entries coerce via
+ * `coerceMirrorUrls` (trimmed, deduped, capped, primary excluded). SSRF
+ * stays at fetch time, like the primary URL.
+ */
+function readMirrorUrls(
+  b: Record<string, unknown>,
+  primaryUrl: string
+): string[] | null | undefined {
+  if (b.mirrorUrls === undefined) return undefined;
+  if (b.mirrorUrls === null) return null;
+  return coerceMirrorUrls(b.mirrorUrls, primaryUrl);
+}
+
 function requireRuleProviders(
   b: Record<string, unknown>,
   mode: string,
@@ -164,10 +180,12 @@ export const proxySubscriptionCreateSchema = z
     if (!corePaths) return z.NEVER;
     const controlSecret = readControlSecret(b);
     const selectorMinGapSeconds = readGap(b);
+    const mirrorUrls = readMirrorUrls(b, named.url);
 
     return {
       name: named.name,
       url: named.url,
+      ...(mirrorUrls !== undefined ? { mirrorUrls } : {}),
       mode,
       ruleProviders,
       localCoreEndpoint,
@@ -201,6 +219,10 @@ function applyScalarFields(
   }
   if (b.selectorMinGapSeconds !== undefined) {
     payload.selectorMinGapSeconds = readGap(b);
+  }
+  if (b.mirrorUrls !== undefined) {
+    const primary = typeof b.url === "string" ? b.url.trim() : "";
+    payload.mirrorUrls = readMirrorUrls(b, primary);
   }
 }
 

@@ -76,6 +76,16 @@ export function getStatusPresentation(
     };
   }
 
+  if (connection.prefixShadowed?.code === "prefix_shadowed") {
+    return {
+      statusVariant: "warning",
+      statusLabel: t("statusRuntimeIssue"),
+      errorType: "prefix_shadowed",
+      errorBadge: null,
+      errorTextClass: "text-warning",
+    };
+  }
+
   if (effectiveStatus === "active" || effectiveStatus === "success") {
     return {
       statusVariant: "success",
@@ -105,7 +115,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusDeactivated", "Deactivated"),
       errorType,
       errorBadge,
-      errorTextClass: "text-error font-bold",
+      errorTextClass: "text-error font-semibold",
     };
   }
 
@@ -160,7 +170,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusBanned", "Banned (403)"),
       errorType,
       errorBadge,
-      errorTextClass: "text-error font-bold",
+      errorTextClass: "text-error font-semibold",
     };
   }
 

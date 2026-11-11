@@ -37,9 +37,9 @@ Comparație obiectivă a funcționalităților față de routere AI open-source 
 | **Suport pentru tuneluri (Cloudflared, Tailscale, Ngrok)** |                       ✅                        |         ❌          |        n/a        |    n/a     |
 | **Licență**                                                |                       MIT                       |         MIT         |    proprietar     | proprietar |
 
-## Când să alegi OmniRoute
+## Când să alegeți OmniRoute
 
-- Te auto-găzduiești și vrei** acoperire maximă a furnizorului** (377 de furnizori, 155 de intrări în catalog free/no-auth )
+- Te auto-găzduiești și vrei** acoperire maximă a furnizorului** (381 de furnizori, 155 de intrări în catalog free/no-auth )
 - Ai nevoie de un** server MCP încorporat** ( instrumente LLM, memorie, abilități expuse ca instrumente)
 - Ai nevoie** protocolul A2A** pentru fluxurile de lucru de la agent la agent
 - Tu vrei** ascuns amprenta** (JA3/JA4) pentru a evita detectarea de către CAPTCHAs în amonte
