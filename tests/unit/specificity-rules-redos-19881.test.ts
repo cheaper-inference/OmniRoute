@@ -19,7 +19,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { performance } from "node:perf_hooks";
 
-import { detectCodeComplexity } from "../../open-sse/services/specificityRules.ts";
+import {
+  detectCodeComplexity,
+  detectReasoningDepth,
+} from "../../open-sse/services/specificityRules.ts";
 
 test("detectCodeComplexity processes 100k+ char line of 'import ' in < 250ms (no quadratic ReDoS)", () => {
   const content = "import ".repeat(20_000); // 140,000 characters on one line without "from"
@@ -57,6 +60,19 @@ test("detectCodeComplexity processes 50k+ char line of '${' in < 250ms (no quadr
   assert.ok(
     elapsedMs < 250,
     `Scoring 50k chars took ${Math.round(elapsedMs)} ms, expected < 250 ms`
+  );
+});
+
+test("detectReasoningDepth processes 60k+ char line of 'if ' in < 250ms (no quadratic ReDoS)", () => {
+  const content = "if ".repeat(20_000); // 60,000 characters on one line without "then"
+  const start = performance.now();
+  const score = detectReasoningDepth({ messages: [{ role: "user", content }] });
+  const elapsedMs = performance.now() - start;
+
+  assert.equal(typeof score, "number");
+  assert.ok(
+    elapsedMs < 250,
+    `Scoring 60k chars took ${Math.round(elapsedMs)} ms, expected < 250 ms`
   );
 });
 
