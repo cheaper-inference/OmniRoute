@@ -541,17 +541,23 @@ export function recordChatCallCost(
  * Charge a priced non-chat call (image, speech, video/music, rerank) to the key's
  * dollar budget and cost ledger. These routes already price each successful call
  * for the X-OmniRoute cost header; only the metered share draws the budget down,
- * as on the chat path. Never throws.
+ * as on the chat path. Pass `serviceTier: MODAL_LEDGER_SERVICE_TIER` for a call that
+ * writes no usage_history row, so the per-key USD limits count it. Never throws.
  */
 export function recordModalCallCost(
   apiKeyId: string | null | undefined,
-  call: { provider: string; model?: string | null; costUsd: number }
+  call: { provider: string; model?: string | null; costUsd: number; serviceTier?: string }
 ): void {
   if (!apiKeyId) return;
   // Same rule as meteredBudgetCost(): flat-rate plans are not paid from the budget.
   if (isFlatRateProvider(call.provider)) return;
   if (!Number.isFinite(call.costUsd) || call.costUsd <= 0) return;
-  recordCost(apiKeyId, call.costUsd, { provider: call.provider, model: call.model, success: true });
+  recordCost(apiKeyId, call.costUsd, {
+    provider: call.provider,
+    model: call.model,
+    serviceTier: call.serviceTier,
+    success: true,
+  });
 }
 
 /**

@@ -36,6 +36,9 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
+import { recordModalCallCost } from "@/domain/costRules";
+import { MODAL_LEDGER_SERVICE_TIER } from "@/lib/db/costLedger";
+import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
@@ -219,13 +222,22 @@ async function transcribeWithModel(
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
     const durationUsage = await peekDurationUsage(response);
-    // No per-second pricing rule exists yet for transcription duration → cost 0
-    // (ADD-only headers, body intact). The upstream usage is still persisted on
-    // the call_logs row below so it is auditable ahead of that pricing rule.
+    // Priced per second from the duration the upstream reports; 0 when it reports none
+    // (ADD-only headers, body intact). The upstream usage is also persisted on the
+    // call_logs row below.
+    const costUsd = await calculateModalCost("audio", provider, resolvedModel, {
+      seconds: durationUsage?.seconds,
+    });
+    recordModalCallCost(apiKeyId, {
+      provider,
+      model: resolvedModel,
+      costUsd,
+      serviceTier: MODAL_LEDGER_SERVICE_TIER,
+    });
     response = attachOmniRouteMetaToResponse(response, {
       provider,
       model: resolvedModel,
-      costUsd: 0,
+      costUsd,
       latencyMs: Date.now() - startTime,
       requestId: generateRequestId(),
     });

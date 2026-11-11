@@ -1,5 +1,6 @@
 import { handleRerank } from "@omniroute/open-sse/handlers/rerank.ts";
 import { recordModalCallCost } from "@/domain/costRules";
+import { MODAL_LEDGER_SERVICE_TIER } from "@/lib/db/costLedger";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -268,7 +269,8 @@ export async function handleValidatedRerankRequestBody(
       connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
       apiKeyId: meta.apiKeyId || null,
       apiKeyName: meta.apiKeyName || null,
-      onPricedCall: (call) => recordModalCallCost(meta.apiKeyId, call),
+      onPricedCall: (call) =>
+        recordModalCallCost(meta.apiKeyId, { ...call, serviceTier: MODAL_LEDGER_SERVICE_TIER }),
       requestedModel,
       comboName: meta.comboName || null,
     });
