@@ -1,0 +1,1 @@
+- **fix(pii):** a custom PII regex that backtracks for exponential time on a long run of one character, such as an overlapping alternation, is now refused when you save or test it, instead of freezing the gateway. ([#19724](https://github.com/cheaper-inference/OmniRoute/pull/19724))

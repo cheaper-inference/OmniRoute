@@ -325,6 +325,67 @@ function buildInjectionScanText(text) {
   return text.slice(0, head) + SCAN_GAP + text.slice(text.length - tail);
 }
 
+// Decode limits. The scan text is capped at 16 KB, so these bound the extra work per request.
+const MAX_DECODE_DEPTH = 2;
+const MAX_DECODE_ATTEMPTS = 64;
+// Linear runs: one character class with a fixed floor, no nested quantifier. 24 base64 characters
+// are 18 bytes; 24 hex digits are 12 bytes. Shorter runs hold no usable instruction.
+const BASE64_RUN_RE = /[A-Za-z0-9+/_-]{24,}={0,2}/g;
+const HEX_RUN_RE = /(?:[0-9a-fA-F]{2}){12,}/g;
+const PERCENT_RUN_RE = /(?:%[0-9a-fA-F]{2})+/g;
+// Binary garbage fails this: a control character or U+FFFD from invalid UTF-8.
+const NOT_READABLE_RE = /[\u0000-\u0008\u000e-\u001f\u007f\ufffd]/;
+const ENCODING_EVASION_RULE = INJECTION_PATTERNS.find((rule) => rule.name === "encoding_evasion");
+
+/** The decoded text when the bytes read as text, else null (hashes, keys, binary). */
+function readableText(bytes) {
+  const decoded = bytes.toString("utf8");
+  return decoded.trim() && !NOT_READABLE_RE.test(decoded) ? decoded : null;
+}
+
+/**
+ * Decode base64, hex and percent-encoded runs found in the text, up to MAX_DECODE_DEPTH layers.
+ * Only text that decodes to readable UTF-8 is returned. A run that is not an encoding of text
+ * (a hash, a token, a long path) decodes to binary and is dropped.
+ * @param {string} text
+ * @returns {string[]}
+ */
+function decodeEncodedLayers(text) {
+  const found = [];
+  let attempts = MAX_DECODE_ATTEMPTS;
+  let layer = [text];
+  for (let depth = 0; depth < MAX_DECODE_DEPTH && layer.length > 0; depth++) {
+    const next = [];
+    for (const source of layer) {
+      const candidates = [];
+      if (source.includes("%")) {
+        const unescaped = source.replace(PERCENT_RUN_RE, (run) => {
+          try {
+            return decodeURIComponent(run);
+          } catch {
+            return run;
+          }
+        });
+        if (unescaped !== source) next.push(unescaped);
+      }
+      for (const run of source.match(HEX_RUN_RE) ?? []) {
+        candidates.push(Buffer.from(run, "hex"));
+      }
+      for (const run of source.match(BASE64_RUN_RE) ?? []) {
+        candidates.push(Buffer.from(run.replace(/-/g, "+").replace(/_/g, "/"), "base64"));
+      }
+      for (const bytes of candidates) {
+        if (attempts-- <= 0) break;
+        const decoded = readableText(bytes);
+        if (decoded) next.push(decoded);
+      }
+    }
+    found.push(...next);
+    layer = next;
+  }
+  return found;
+}
+
 /**
  * Scan content for prompt injection patterns.
  * @param {string} text
@@ -340,6 +401,22 @@ function detectInjection(text) {
         pattern: rule.name,
         severity: rule.severity,
         match: match[0].slice(0, 50), // truncate for logging
+      });
+    }
+  }
+  // Instructions hidden in base64, hex or percent-encoding: scan what they decode to. A hit keeps
+  // the rule's severity and takes a "decoded:" name, so it lands in the same bucket.
+  const seen = new Set(detections.map((d) => d.pattern));
+  for (const decoded of decodeEncodedLayers(scanText)) {
+    for (const rule of INJECTION_PATTERNS) {
+      if (rule === ENCODING_EVASION_RULE || seen.has(`decoded:${rule.name}`)) continue;
+      const match = decoded.match(rule.pattern);
+      if (!match) continue;
+      seen.add(`decoded:${rule.name}`);
+      detections.push({
+        pattern: `decoded:${rule.name}`,
+        severity: rule.severity,
+        match: match[0].slice(0, 50),
       });
     }
   }
