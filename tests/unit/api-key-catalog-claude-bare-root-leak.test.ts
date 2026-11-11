@@ -30,12 +30,17 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "test-api-key-secret-claude-bare-root";
 delete process.env.INITIAL_PASSWORD;
 delete process.env.JWT_SECRET;
+const originalCatalogBuildTimeout = process.env.CATALOG_BUILD_TIMEOUT_MS;
+// Permission assertions need a completed cold catalog even on loaded CI workers.
+// The production deadline is covered by 12627-catalog-inflight-timeout.test.ts.
+process.env.CATALOG_BUILD_TIMEOUT_MS = originalCatalogBuildTimeout || "120000";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
 const { isCatalogModelAllowedForKey } =
   await import("../../src/app/api/v1/models/catalogKeyFilter.ts");
 
@@ -47,11 +52,16 @@ async function resetStorage() {
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
 }
 
-test.beforeEach(async () => {
+test.beforeEach(async (t) => {
   await resetStorage();
+  // Claude key permissions do not depend on live anonymous image-worker discovery.
+  // The test context restores this mock after each test.
+  t.mock.method(aiHordeImageCatalog, "ensureFresh", async () => {});
 });
 
 test.after(() => {
+  if (originalCatalogBuildTimeout === undefined) delete process.env.CATALOG_BUILD_TIMEOUT_MS;
+  else process.env.CATALOG_BUILD_TIMEOUT_MS = originalCatalogBuildTimeout;
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -85,8 +95,8 @@ async function catalogIds(apiKey?: string): Promise<string[]> {
       headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     })
   );
-  assert.equal(response.status, 200);
   const body = (await response.json()) as { data: Array<{ id: string; owned_by?: string }> };
+  assert.equal(response.status, 200, response.status === 200 ? undefined : JSON.stringify(body));
   return body.data.filter((m) => m.owned_by !== "combo").map((m) => m.id);
 }
 
