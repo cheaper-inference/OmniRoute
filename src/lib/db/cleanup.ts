@@ -4,11 +4,14 @@
  * @module lib/db/cleanup
  */
 
+import path from "path";
+
 import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
-import { getDbInstance } from "./core";
+import { DATA_DIR, DB_BACKUPS_DIR, getDbInstance } from "./core";
+import { removeStaleSnapshotTemps } from "./backupRetention";
 import { getUserDatabaseSettings } from "./databaseSettings";
 import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
 import {
@@ -98,6 +101,12 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
       { table: "call_logs", column: "timestamp", cutoff: "iso" },
       cutoffISO,
       { progress: result }
+    );
+    // A failed legacy offload keeps old bodies in call_logs_v1_legacy. Age them out too; a row that
+    // has not expired stays for the next boot's retry. The helper skips a missing table.
+    await deleteFromTableBeforeInBatches(
+      { table: "call_logs_v1_legacy", column: "timestamp", cutoff: "iso" },
+      cutoffISO
     );
 
     console.log(`[Cleanup] Deleted ${result.deleted} call_logs older than ${retentionDays} days`);
@@ -1088,6 +1097,8 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
     console.log(`[Cleanup] ${label} cleanup freed ${result.totalDeleted} rows.`);
   }
 
+  // The prune pauses while a snapshot temp directory exists; drop the ones a killed upgrade left.
+  removeStaleSnapshotTemps(DB_BACKUPS_DIR ?? path.join(DATA_DIR, "db_backups"));
   pruneDbBackupsOutsideMigrationWindow();
 
   // Always run: it also drains pages left over from a previous capped pass or
