@@ -11,6 +11,7 @@ import {
   getCliRuntimeStatus,
 } from "@/shared/services/cliRuntime";
 import { createMultiBackup } from "@/shared/services/backupService";
+import { writeFilesWithRollback } from "@/lib/cli-helper/configTransaction";
 import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
 import { codexSettingsConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -235,13 +236,13 @@ export async function POST(request: Request) {
       if (catalog.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
     }
 
-    // Write merged config
-    const configContent = toToml(doc);
-    await fs.writeFile(configPath, configContent);
-
-    // Update auth.json with OPENAI_API_KEY (Codex reads this first)
+    // Write merged config, then auth.json with OPENAI_API_KEY (Codex reads this first).
+    // If the second write fails the first is put back: new routing must not meet old auth.
     authData.OPENAI_API_KEY = apiKey;
-    await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
+    await writeFilesWithRollback([
+      { path: configPath, content: toToml(doc) },
+      { path: authPath, content: JSON.stringify(authData, null, 2) },
+    ]);
 
     // Persist last-configured timestamp
     try {

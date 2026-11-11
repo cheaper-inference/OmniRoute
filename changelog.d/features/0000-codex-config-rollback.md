@@ -1,0 +1,1 @@
+- **feat(cli-tools):** applying Codex settings now puts `config.toml` back when the following `auth.json` write fails, so a failed apply no longer leaves new routing with old auth (a crash between the two writes is not covered).
