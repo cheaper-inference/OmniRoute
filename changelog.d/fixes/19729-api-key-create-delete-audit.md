@@ -1,0 +1,1 @@
+- **fix(audit):** Creating and deleting an API key now writes an audit row (action, key id, key name; never the key value). ([#19729](https://github.com/cheaper-inference/OmniRoute/pull/19729))

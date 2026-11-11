@@ -13,6 +13,33 @@ import { logger } from "../../../open-sse/utils/logger.ts";
 
 const log = logger("SKILLS_EXECUTOR");
 
+// skill_executions keeps history only: cap each stored JSON column, drop old rows, and cap the
+// row count, so a busy tool loop cannot grow the database without bound.
+const SKILL_EXECUTION_MAX_JSON_BYTES = 64 * 1024;
+const SKILL_EXECUTION_MAX_AGE_DAYS = 30;
+const SKILL_EXECUTION_MAX_ROWS = 10_000;
+
+function toStoredJson(value: unknown): string {
+  const json = JSON.stringify(value);
+  const bytes = Buffer.byteLength(json);
+  return bytes > SKILL_EXECUTION_MAX_JSON_BYTES
+    ? JSON.stringify({ truncated: true, originalBytes: bytes })
+    : json;
+}
+
+function pruneSkillExecutions(db: ReturnType<typeof getDbInstance>): void {
+  try {
+    const cutoff = new Date(Date.now() - SKILL_EXECUTION_MAX_AGE_DAYS * 86_400_000).toISOString();
+    db.prepare("DELETE FROM skill_executions WHERE created_at < ?").run(cutoff);
+    db.prepare(
+      `DELETE FROM skill_executions WHERE id IN
+         (SELECT id FROM skill_executions ORDER BY created_at DESC LIMIT -1 OFFSET ?)`
+    ).run(SKILL_EXECUTION_MAX_ROWS);
+  } catch (err) {
+    log.warn("skills.executor.prune_failed", { error: toSafeSkillErrorMessage(err) });
+  }
+}
+
 class SkillTimeoutError extends Error {
   constructor() {
     super("Skill execution timed out");
@@ -246,10 +273,11 @@ class SkillExecutor {
         skill.id,
         context.apiKeyId,
         context.sessionId || null,
-        JSON.stringify(input),
+        toStoredJson(input),
         SkillStatus.RUNNING,
         new Date().toISOString()
       );
+      pruneSkillExecutions(db);
 
       const { output, errorMessage, status } = await this.runHandler(skillName, input, {
         apiKeyId: context.apiKeyId,
@@ -260,7 +288,7 @@ class SkillExecutor {
 
       db.prepare(
         `UPDATE skill_executions SET output = ?, status = ?, error_message = ?, duration_ms = ? WHERE id = ?`
-      ).run(output ? JSON.stringify(output) : null, status, errorMessage, durationMs, executionId);
+      ).run(output ? toStoredJson(output) : null, status, errorMessage, durationMs, executionId);
 
       log.info("skills.executor.complete", {
         skillId: skill.id,
