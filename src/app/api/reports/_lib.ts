@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { REPORT_MULTI_VALUE_FILTERS, REPORT_SEARCH_MAX_LENGTH } from "@/lib/db/agentSessionReports";
 import { REPORT_DIMENSIONS, SESSION_REPORT_SORTS } from "@/lib/usage/agentSessionReports";
 
 // Stored timestamps are UTC `toISOString()` strings compared lexically, so any accepted offset
@@ -9,18 +10,30 @@ const isoTimestamp = z
   .datetime({ offset: true })
   .transform((value) => new Date(value).toISOString());
 
-const optionalText = z.string().trim().min(1).max(512).optional();
+const filterText = z.string().trim().min(1).max(512);
+/** Most values one multi-select filter accepts. */
+export const MAX_FILTER_VALUES = 50;
+// One value, or several from repeated query params (`?model=a&model=b`); never comma lists,
+// since project names may contain commas. Each value may be REPORT_FILTER_NONE ("__none__").
+const filterValues = z
+  .union([filterText, z.array(filterText).min(1).max(MAX_FILTER_VALUES)])
+  .optional();
 
-// apiKeyId, projectName and client also accept REPORT_FILTER_NONE ("__none__", no value).
 export const reportFilterSchema = z.object({
   from: isoTimestamp.optional(),
   to: isoTimestamp.optional(),
-  apiKeyId: optionalText,
-  projectName: optionalText,
-  client: optionalText,
-  provider: optionalText,
-  model: optionalText,
-  connectionId: optionalText,
+  apiKeyId: filterValues,
+  projectName: filterValues,
+  client: filterValues,
+  provider: filterValues,
+  model: filterValues,
+  connectionId: filterValues,
+  gitBranch: filterValues,
+  serviceTier: filterValues,
+  errorCode: filterValues,
+  billingTeamId: filterValues,
+  outcome: z.enum(["success", "error"]).optional(),
+  search: z.string().trim().min(1).max(REPORT_SEARCH_MAX_LENGTH).optional(),
   /** Minutes to add to UTC for local days (the browser's `-getTimezoneOffset()`). */
   tzOffset: z.coerce.number().int().min(-840).max(840).optional(),
 });
@@ -41,8 +54,23 @@ export const exportQuerySchema = reportFilterSchema.extend({
   ...sessionOrderSchema,
 });
 
-/** Query params as a plain object; empty values count as absent. */
-export function searchParamsObject(request: Request): Record<string, string> {
-  const entries = [...new URL(request.url).searchParams.entries()].filter(([, v]) => v !== "");
-  return Object.fromEntries(entries);
+const MULTI_VALUE_PARAMS = new Set<string>(REPORT_MULTI_VALUE_FILTERS);
+
+/**
+ * Query params as a plain object; empty values count as absent. Multi-value filters repeated in
+ * the query become arrays; a single value stays a string. Other repeated params keep the last.
+ */
+export function searchParamsObject(request: Request): Record<string, string | string[]> {
+  const params = new URL(request.url).searchParams;
+  const result: Record<string, string | string[]> = {};
+  for (const [key, value] of params.entries()) {
+    if (value === "") continue;
+    if (!MULTI_VALUE_PARAMS.has(key)) {
+      result[key] = value;
+      continue;
+    }
+    const values = params.getAll(key).filter((item) => item !== "");
+    result[key] = values.length === 1 ? values[0] : values;
+  }
+  return result;
 }

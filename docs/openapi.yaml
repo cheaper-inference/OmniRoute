@@ -4783,6 +4783,7 @@ paths:
       description: >
         Totals plus breakdowns by member, project, client, provider, model, account and day, computed
         from requests attributed to agent sessions. Cost is priced from token counts at read time.
+        Filters combine with AND; a filter given several values matches any of them.
       parameters:
         - $ref: "#/components/parameters/ReportFrom"
         - $ref: "#/components/parameters/ReportTo"
@@ -4792,6 +4793,12 @@ paths:
         - $ref: "#/components/parameters/ReportProvider"
         - $ref: "#/components/parameters/ReportModel"
         - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
         - $ref: "#/components/parameters/ReportTzOffset"
       responses:
         "200":
@@ -4818,6 +4825,12 @@ paths:
         - $ref: "#/components/parameters/ReportProvider"
         - $ref: "#/components/parameters/ReportModel"
         - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
         - $ref: "#/components/parameters/ReportTzOffset"
         - $ref: "#/components/parameters/ReportSessionSort"
         - $ref: "#/components/parameters/ReportSessionOrder"
@@ -4877,6 +4890,63 @@ paths:
         "404":
           description: Session not found
 
+  /api/reports/facets:
+    get:
+      tags: [Usage]
+      summary: Filter values for the team report dropdowns
+      description: >
+        The values each filter can offer, with the number of matching requests, for the time window
+        and the other active filters. Each dimension ignores its own filter, so a dimension keeps
+        offering its other values once one is picked. Counts only; nothing is priced.
+      parameters:
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+      responses:
+        "200":
+          description: Entries per dimension, most requests first, then by label.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    members,
+                    projects,
+                    clients,
+                    providers,
+                    models,
+                    accounts,
+                    branches,
+                    serviceTiers,
+                    errorCodes,
+                    teams,
+                  ]
+                properties:
+                  members: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  projects: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  clients: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  providers: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  models: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  accounts: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  branches: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  serviceTiers: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  errorCodes: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  teams: { $ref: "#/components/schemas/ReportFacetEntries" }
+        "400":
+          description: Invalid query parameters
+
   /api/reports/export:
     get:
       tags: [Usage]
@@ -4896,6 +4966,12 @@ paths:
         - $ref: "#/components/parameters/ReportProvider"
         - $ref: "#/components/parameters/ReportModel"
         - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
         - $ref: "#/components/parameters/ReportTzOffset"
         - $ref: "#/components/parameters/ReportSessionSort"
         - $ref: "#/components/parameters/ReportSessionOrder"
@@ -17365,32 +17441,104 @@ components:
     ReportApiKeyId:
       name: apiKeyId
       in: query
-      description: Team member (API key id). `__none__` matches sessions without an API key.
-      schema:
-        type: string
+      description: >
+        Team member (API key id). Repeat the parameter for several values (`?apiKeyId=a&apiKeyId=b`,
+        matched with IN). `__none__` matches sessions without an API key and can be mixed with ids.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
     ReportProjectName:
       name: projectName
       in: query
-      description: Project name. `__none__` matches sessions without a project.
-      schema:
-        type: string
+      description: >
+        Project name; repeat for several values (names may contain commas, so no comma lists).
+        `__none__` matches sessions without a project and can be mixed with names.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
     ReportClient:
       name: client
       in: query
-      description: Coding agent, e.g. claude-code or codex. `__none__` matches sessions without one.
-      schema:
-        type: string
+      description: >
+        Coding agent, e.g. claude-code or codex; repeat for several values. `__none__` matches
+        sessions without one.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
     ReportProvider:
       name: provider
       in: query
-      schema:
-        type: string
+      description: Provider of the request; repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
     ReportModel:
       name: model
       in: query
-      description: Only count requests to this model.
+      description: Only count requests to this model; repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportConnectionId:
+      name: connectionId
+      in: query
+      description: Provider account (connection id); repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportGitBranch:
+      name: gitBranch
+      in: query
+      description: >
+        Git branch of the session; repeat for several values. `__none__` matches sessions without
+        a branch.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportServiceTier:
+      name: serviceTier
+      in: query
+      description: >
+        Service tier of the request (standard, priority or flex; requests without one count as
+        standard); repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportErrorCode:
+      name: errorCode
+      in: query
+      description: >
+        Error code of the request; repeat for several values. `__none__` matches requests without
+        an error code.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportBillingTeamId:
+      name: billingTeamId
+      in: query
+      description: >
+        Billing team recorded on the request (see /api/teams); repeat for several values.
+        `__none__` matches requests without a billing team.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportOutcome:
+      name: outcome
+      in: query
+      description: Only count successful (`success`) or failed (`error`) requests.
       schema:
         type: string
+        enum: [success, error]
+    ReportSearch:
+      name: search
+      in: query
+      description: >
+        Case-insensitive substring of the session id, client session id, project name, project
+        path or git branch. `%`, `_` and `\` match literally.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
     ReportTzOffset:
       name: tzOffset
       in: query
@@ -17417,12 +17565,6 @@ components:
         type: string
         enum: [asc, desc]
         default: desc
-    ReportConnectionId:
-      name: connectionId
-      in: query
-      description: Provider account (connection id).
-      schema:
-        type: string
 
   responses:
     Unauthorized:
@@ -17565,6 +17707,28 @@ components:
         cacheCreation: { type: integer }
         output: { type: integer, description: Output tokens, reasoning included. }
         reasoning: { type: integer }
+    ReportFilterValues:
+      description: >-
+        One filter value, or several from a repeated query parameter (`?model=a&model=b`).
+        `__none__` matches an empty field (NULL or "") and can be mixed with
+        values. At most 50 values of 1 to 512 characters each.
+      oneOf:
+        - { type: string, minLength: 1, maxLength: 512 }
+        - type: array
+          minItems: 1
+          maxItems: 50
+          items: { type: string, minLength: 1, maxLength: 512 }
+    ReportFacetEntries:
+      type: array
+      items:
+        type: object
+        required: [value, label, requests]
+        properties:
+          value:
+            type: string
+            description: Value to send as the filter; "" is an empty field (filter with `__none__`).
+          label: { type: string, nullable: true, description: Display name, when one is known. }
+          requests: { type: integer }
     ReportSessionTotals:
       type: object
       description: Request totals of one session, priced at read time.

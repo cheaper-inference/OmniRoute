@@ -1,31 +1,54 @@
 /**
  * Team report source rows: attributed usage_history requests, sliced per session, provider,
- * model, account, service tier and day. Reading requests (not the session aggregates) keeps the
- * time window exact and lets provider/account filters see every request a session made.
+ * model, account, service tier and day, plus the filter facets. Reading requests (not the session
+ * aggregates) keeps the time window exact and lets per-request filters see every request a
+ * session made.
  */
 
 import type { AgentSessionRecord, AgentSessionTokens } from "./agentSessions";
 import type { SqliteAdapter } from "./adapters/types";
 
 /**
- * Filter value for apiKeyId, projectName and client that selects sessions where the field is
- * empty (no member, no project, no client). Breakdown rows for those sessions have key "".
+ * Filter value that selects requests whose field is empty (NULL or ""), for example sessions
+ * without a member or project. It can be mixed with other values. Breakdown and facet rows for
+ * empty fields have key/value "".
  */
 export const REPORT_FILTER_NONE = "__none__";
 
-export interface AgentSessionReportFilter {
+/** Longest accepted `search` term; longer input is cut to this length. */
+export const REPORT_SEARCH_MAX_LENGTH = 200;
+
+/** One value, or several matched with IN; each may be REPORT_FILTER_NONE. */
+export type ReportFilterValues = string | readonly string[];
+
+/** Filters that take one or several values (repeated query params). */
+export const REPORT_MULTI_VALUE_FILTERS = [
+  "apiKeyId",
+  "projectName",
+  "client",
+  "provider",
+  "model",
+  "connectionId",
+  "gitBranch",
+  "serviceTier",
+  "errorCode",
+  "billingTeamId",
+] as const;
+export type ReportMultiValueFilter = (typeof REPORT_MULTI_VALUE_FILTERS)[number];
+
+export type AgentSessionReportFilter = Partial<
+  Record<ReportMultiValueFilter, ReportFilterValues>
+> & {
   /** ISO timestamps (UTC, `toISOString()` form) bounding each request. */
   from?: string;
   to?: string;
-  /** REPORT_FILTER_NONE matches sessions without an API key. */
-  apiKeyId?: string;
-  /** REPORT_FILTER_NONE matches sessions without a project. */
-  projectName?: string;
-  /** REPORT_FILTER_NONE matches sessions without a client. */
-  client?: string;
-  provider?: string;
-  model?: string;
-  connectionId?: string;
+  /** Requests that succeeded or failed (usage_history.success). */
+  outcome?: "success" | "error";
+  /**
+   * Case-insensitive substring of the session id, client session id, project name, project path
+   * or git branch. `%`, `_` and `\` match literally.
+   */
+  search?: string;
   /** One session's requests (session detail totals); not a dashboard filter. */
   sessionId?: string;
   /**
@@ -33,7 +56,7 @@ export interface AgentSessionReportFilter {
    * groups by UTC day. Does not move the from/to bounds.
    */
   tzOffset?: number;
-}
+};
 
 export interface AgentSessionUsageSlice {
   sessionId: string;
@@ -57,48 +80,94 @@ export interface AgentSessionUsageSlice {
   tokens: AgentSessionTokens;
 }
 
-type TextFilterField = Exclude<keyof AgentSessionReportFilter, "tzOffset">;
-
-const FILTER_CONDITIONS: ReadonlyArray<[TextFilterField, string]> = [
-  ["from", "uh.timestamp >= ?"],
-  ["to", "uh.timestamp <= ?"],
-  ["apiKeyId", "s.api_key_id = ?"],
-  ["projectName", "s.project_name = ?"],
-  ["client", "s.client = ?"],
-  ["provider", "uh.provider = ?"],
-  ["model", "uh.model = ?"],
-  ["connectionId", "uh.connection_id = ?"],
-  ["sessionId", "uh.agent_session_id = ?"],
-];
-
-/** Conditions used instead when the filter value is REPORT_FILTER_NONE. */
-const NONE_CONDITIONS: Partial<Record<TextFilterField, string>> = {
-  apiKeyId: "(s.api_key_id IS NULL OR s.api_key_id = '')",
-  projectName: "(s.project_name IS NULL OR s.project_name = '')",
-  client: "(s.client IS NULL OR s.client = '')",
+/** SQL value of each multi-value filter; also the facet dimension's value. */
+const FILTER_COLUMNS: Record<ReportMultiValueFilter, string> = {
+  apiKeyId: "s.api_key_id",
+  projectName: "s.project_name",
+  client: "s.client",
+  provider: "uh.provider",
+  model: "uh.model",
+  connectionId: "uh.connection_id",
+  gitBranch: "s.git_branch",
+  // Same value the slices group and price by.
+  serviceTier: "COALESCE(NULLIF(uh.service_tier, ''), 'standard')",
+  errorCode: "uh.error_code",
+  billingTeamId: "uh.billing_team_id",
 };
+
+const SEARCH_COLUMNS = [
+  "s.id",
+  "s.client_session_id",
+  "s.project_name",
+  "s.project_path",
+  "s.git_branch",
+];
 
 function nullableString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
+}
+
+/** `col = ?` for one value, `col IN (...)` for several; REPORT_FILTER_NONE adds "is empty". */
+function valuesCondition(
+  column: string,
+  input: ReportFilterValues,
+  params: string[]
+): string | null {
+  const values = [...new Set(typeof input === "string" ? [input] : input)].filter(Boolean);
+  if (values.length === 0) return null;
+  const named = values.filter((value) => value !== REPORT_FILTER_NONE);
+  const parts = named.length < values.length ? [`${column} IS NULL`, `${column} = ''`] : [];
+  if (named.length === 1) parts.push(`${column} = ?`);
+  if (named.length > 1) parts.push(`${column} IN (${named.map(() => "?").join(", ")})`);
+  params.push(...named);
+  return parts.length === 1 ? parts[0] : `(${parts.join(" OR ")})`;
+}
+
+function likeContains(term: string): string {
+  return `%${term.replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
+}
+
+/**
+ * WHERE conditions and params for a filter over `usage_history uh JOIN agent_sessions s`.
+ * `skip` leaves one multi-value filter out (a facet lists its own dimension unfiltered).
+ */
+function buildReportConditions(
+  filter: AgentSessionReportFilter,
+  skip?: ReportMultiValueFilter
+): { conditions: string[]; params: string[] } {
+  const conditions = ["uh.agent_session_id IS NOT NULL"];
+  const params: string[] = [];
+  const add = (condition: string, value: string) => {
+    conditions.push(condition);
+    params.push(value);
+  };
+  if (filter.from) add("uh.timestamp >= ?", filter.from);
+  if (filter.to) add("uh.timestamp <= ?", filter.to);
+  if (filter.sessionId) add("uh.agent_session_id = ?", filter.sessionId);
+  for (const field of REPORT_MULTI_VALUE_FILTERS) {
+    const value = filter[field];
+    if (field === skip || value === undefined) continue;
+    const condition = valuesCondition(FILTER_COLUMNS[field], value, params);
+    if (condition) conditions.push(condition);
+  }
+  // Same rule as the errors count: success = 0 is an error.
+  if (filter.outcome === "error") conditions.push("uh.success = 0");
+  if (filter.outcome === "success") conditions.push("COALESCE(uh.success, 1) <> 0");
+  const term = filter.search?.trim().slice(0, REPORT_SEARCH_MAX_LENGTH);
+  if (term) {
+    // LIKE is case-insensitive for ASCII; the escaped pattern keeps % _ and \ literal.
+    const like = SEARCH_COLUMNS.map((column) => `${column} LIKE ? ESCAPE '\\'`);
+    conditions.push(`(${like.join(" OR ")})`);
+    params.push(...SEARCH_COLUMNS.map(() => likeContains(term)));
+  }
+  return { conditions, params };
 }
 
 export function listAgentSessionUsageSlices(
   db: SqliteAdapter,
   filter: AgentSessionReportFilter = {}
 ): AgentSessionUsageSlice[] {
-  const conditions = ["uh.agent_session_id IS NOT NULL"];
-  const params: string[] = [];
-  for (const [field, condition] of FILTER_CONDITIONS) {
-    const value = filter[field];
-    if (!value) continue;
-    const noneCondition = value === REPORT_FILTER_NONE ? NONE_CONDITIONS[field] : undefined;
-    if (noneCondition) {
-      conditions.push(noneCondition);
-      continue;
-    }
-    conditions.push(condition);
-    params.push(value);
-  }
+  const { conditions, params } = buildReportConditions(filter);
   // Stored timestamps are UTC ISO strings; a local day needs the offset applied first. The
   // modifier is bound ahead of the WHERE params because it appears first in the statement.
   const tzOffset = Math.trunc(Number(filter.tzOffset) || 0);
@@ -217,4 +286,82 @@ export function getAgentSessionMetadataByIds(
     }
   }
   return byId;
+}
+
+export interface ReportFacetEntry {
+  /** The filter value to send; "" when the field is empty (filter with REPORT_FILTER_NONE). */
+  value: string;
+  /** Display name when one is known (API key name, account label, team name). */
+  label: string | null;
+  requests: number;
+}
+
+export const REPORT_FACET_DIMENSIONS = [
+  "members",
+  "projects",
+  "clients",
+  "providers",
+  "models",
+  "accounts",
+  "branches",
+  "serviceTiers",
+  "errorCodes",
+  "teams",
+] as const;
+export type ReportFacetDimension = (typeof REPORT_FACET_DIMENSIONS)[number];
+export type AgentSessionReportFacets = Record<ReportFacetDimension, ReportFacetEntry[]>;
+
+const FACETS: Record<
+  ReportFacetDimension,
+  { filter: ReportMultiValueFilter; label?: string; join?: string }
+> = {
+  members: { filter: "apiKeyId", label: "MAX(NULLIF(s.api_key_name, ''))" },
+  projects: { filter: "projectName" },
+  clients: { filter: "client" },
+  providers: { filter: "provider" },
+  models: { filter: "model" },
+  accounts: { filter: "connectionId", label: "MAX(NULLIF(uh.account_label, ''))" },
+  branches: { filter: "gitBranch" },
+  serviceTiers: { filter: "serviceTier" },
+  errorCodes: { filter: "errorCode" },
+  teams: {
+    filter: "billingTeamId",
+    label: "MAX(t.name)",
+    join: "LEFT JOIN teams t ON t.id = uh.billing_team_id",
+  },
+};
+
+/**
+ * Values each report filter can offer, with request counts, for the window and the other active
+ * filters. A dimension ignores its own filter, so picking one value keeps the others on offer.
+ * One unpriced GROUP BY per dimension.
+ */
+export function listAgentSessionReportFacets(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter = {}
+): AgentSessionReportFacets {
+  const facets = REPORT_FACET_DIMENSIONS.map((dimension) => {
+    const facet = FACETS[dimension];
+    const { conditions, params } = buildReportConditions(filter, facet.filter);
+    const rows = db
+      .prepare(
+        `SELECT COALESCE(${FILTER_COLUMNS[facet.filter]}, '') AS facet_value,
+                ${facet.label ?? "NULL"} AS facet_label,
+                COUNT(*) AS requests
+         FROM usage_history uh
+         JOIN agent_sessions s ON s.id = uh.agent_session_id
+         ${facet.join ?? ""}
+         WHERE ${conditions.join(" AND ")}
+         GROUP BY facet_value
+         ORDER BY requests DESC, COALESCE(facet_label, facet_value) COLLATE NOCASE, facet_value`
+      )
+      .all(...params) as Record<string, unknown>[];
+    const entries: ReportFacetEntry[] = rows.map((row) => ({
+      value: String(row.facet_value),
+      label: nullableString(row.facet_label),
+      requests: Number(row.requests ?? 0),
+    }));
+    return [dimension, entries] as const;
+  });
+  return Object.fromEntries(facets) as AgentSessionReportFacets;
 }
