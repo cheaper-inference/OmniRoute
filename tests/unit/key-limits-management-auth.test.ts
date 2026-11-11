@@ -66,6 +66,11 @@ const ACCOUNT = "account-a";
 const OPERATOR_CAPS = { maxActiveKeys: 7919, dailyIssueLimit: 7907, hourlyIssueLimit: 7901 };
 const NEW_CAPS = { maxActiveKeys: 104729, dailyIssueLimit: 104723, hourlyIssueLimit: 104717 };
 
+/**
+ * Reject seeded cap values anywhere in a refusal payload, including nested fields.
+ * Validate the independently generated UUID v4 separately: coincidental cap digits in
+ * that request metadata are not evidence that the configured limits were disclosed.
+ */
 function assertNoConfiguredCaps(body: Record<string, unknown>): void {
   const { requestId, ...payload } = body;
   // createErrorResponse generates a random UUID independently of the configured caps.
@@ -187,6 +192,10 @@ const SURFACES: Surface[] = [
   },
 ];
 
+/**
+ * Exercise a limits endpoint with a refused credential and verify its status, sanitized
+ * error body and unchanged stored caps. If supplied, the credential must not be echoed.
+ */
 async function assertRefused(
   surface: Surface,
   make: RequestFactory,

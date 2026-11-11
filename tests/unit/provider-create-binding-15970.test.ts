@@ -61,10 +61,12 @@ test.after(async () => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-// POST starts testSingleConnection without awaiting it. Wait for its persisted health
-// result, not elapsed time or fetch entry, before resetting the DB and call counter.
-// Unsupported validators (Cloudflare here) skip lastTested but activate the new row.
-// afterEach also covers assertions that fail before post() finishes settling.
+/**
+ * Wait up to five seconds for the fixture's fire-and-forget credential probes to persist
+ * a health result before resetting the DB and call counter. Unsupported validators
+ * (Cloudflare here) skip lastTested but activate the new row. The afterEach caller also
+ * covers assertions that fail before post() finishes settling.
+ */
 async function waitForAutomaticProbes() {
   const deadline = Date.now() + 5_000;
   while (true) {
@@ -100,6 +102,11 @@ async function makeNode(type = "openai-compatible-chat") {
   });
 }
 
+/**
+ * Submit a synthetic provider through the authenticated management route without model
+ * sync. Successful creates wait for automatic credential validation; rejected requests
+ * return immediately so tests can assert that no row or upstream call was created.
+ */
 async function post(provider: string, providerSpecificData?: Record<string, unknown>, extra = {}) {
   const result = await POST(
     await makeManagementSessionRequest("http://localhost/api/providers", {
