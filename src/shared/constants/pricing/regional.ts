@@ -4,9 +4,49 @@
  */
 import { GLM_PRICING } from "./shared-tiers";
 
+// ZCode Start and Individual are subscription Coding Plan routes. Keep explicit
+// zero-price rows so successful usage is recognised as free instead of appearing
+// in the dashboard's "no configured price" report.
+const ZCODE_FREE_RATE = {
+  input: 0,
+  output: 0,
+  cached: 0,
+  reasoning: 0,
+  cache_creation: 0,
+};
+const ZCODE_FREE_MODEL_IDS = [
+  "glm-5.3-flash",
+  "glm-5.3",
+  "glm-5.3-max",
+  "glm-5.2",
+  "glm-5.1",
+  "glm-5",
+  "glm-5-turbo",
+  "glm-4.7-flash",
+  "glm-4.7",
+  "glm-4.6v",
+  "glm-4.6",
+  "glm-4.5v",
+  "glm-4.5",
+  "glm-4.5-air",
+] as const;
+const ZCODE_FREE_PRICING = Object.fromEntries(
+  ZCODE_FREE_MODEL_IDS.map((model) => [model, ZCODE_FREE_RATE])
+);
+
 export const DEFAULT_PRICING_REGIONAL = {
   glm: GLM_PRICING,
   glmt: GLM_PRICING,
+  zcode: ZCODE_FREE_PRICING,
+  zc: ZCODE_FREE_PRICING,
+  "zcode-start": ZCODE_FREE_PRICING,
+  "zc-start": ZCODE_FREE_PRICING,
+  "zcode-individual": ZCODE_FREE_PRICING,
+  "zc-individual": ZCODE_FREE_PRICING,
+  "zcode-cn-start": ZCODE_FREE_PRICING,
+  "zc-cn-start": ZCODE_FREE_PRICING,
+  "zcode-cn-individual": ZCODE_FREE_PRICING,
+  "zc-cn-individual": ZCODE_FREE_PRICING,
   kimi: {
     "kimi-latest": {
       input: 1.0,
