@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "ಬಳಕೆಯ ಇತಿಹಾಸ (ದಿನಗಳು)",
     "retentionMemoryEntries": "ಮೆಮೊರಿ ನಮೂದುಗಳು (ದಿನಗಳು)",
     "retentionXpAuditLog": "XP ಲೆಕ್ಕಪರಿಶೋಧನಾ ಲಾಗ್ (ದಿನಗಳು)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "ಉಳಿಕೆ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಉಳಿಸಿ",
     "storageAutoVacuumMode": "ಸ್ವಯಂಚಾಲಿತ ವ್ಯಾಕ್ಯೂಮ್ ಮೋಡ್",
     "storageScheduledVacuum": "ನಿಗದಿತ ವ್ಯಾಕ್ಯೂಮ್",

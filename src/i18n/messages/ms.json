@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "Sejarah Penggunaan (hari)",
     "retentionMemoryEntries": "Entri Memori (hari)",
     "retentionXpAuditLog": "Log Audit XP (hari)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Simpan tetapan penahanan",
     "storageAutoVacuumMode": "Mod Auto Vakum",
     "storageScheduledVacuum": "Vakum Berjadual",

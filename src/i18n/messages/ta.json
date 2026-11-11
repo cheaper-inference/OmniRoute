@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "பயன்பாட்டு வரலாறு (நாட்கள்)",
     "retentionMemoryEntries": "நினைவக உள்ளீடுகள் (நாட்கள்)",
     "retentionXpAuditLog": "XP தணிக்கைப் பதிவு (நாட்கள்)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "தக்கவைப்பு அமைப்புகளைச் சேமிக்கவும்",
     "storageAutoVacuumMode": "தானியங்கு வெற்றிட பயன்முறை",
     "storageScheduledVacuum": "திட்டமிடப்பட்ட வெற்றிடம்",

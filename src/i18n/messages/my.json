@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "အသုံးပြုမှုမှတ်တမ်း (ရက်)",
     "retentionMemoryEntries": "မှတ်ဉာဏ်ထည့်သွင်းချက်များ (ရက်)",
     "retentionXpAuditLog": "XP စစ်ဆေးမှတ်တမ်း (ရက်)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "ထိန်းသိမ်းကာလ ဆက်တင်များကို သိမ်းပါ",
     "storageAutoVacuumMode": "အလိုအလျောက် VACUUM မုဒ်",
     "storageScheduledVacuum": "အချိန်ဇယားအလိုက် VACUUM",

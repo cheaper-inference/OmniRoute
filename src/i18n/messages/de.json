@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "Nutzungsverlauf (Tage)",
     "retentionMemoryEntries": "Speichereinträge (Tage)",
     "retentionXpAuditLog": "XP-Audit-Log (Tage)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Aufbewahrungseinstellungen speichern",
     "storageAutoVacuumMode": "Automatischer Vakuummodus",
     "storageScheduledVacuum": "Geplantes Vakuum",

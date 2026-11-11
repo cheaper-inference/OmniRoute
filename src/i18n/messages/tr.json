@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "Kullanım Geçmişi (gün)",
     "retentionMemoryEntries": "Bellek Girişleri (gün)",
     "retentionXpAuditLog": "XP Denetim Günlüğü (gün)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Saklama ayarlarını kaydet",
     "storageAutoVacuumMode": "Otomatik Vakum Modu",
     "storageScheduledVacuum": "Planlanmış Vakum",

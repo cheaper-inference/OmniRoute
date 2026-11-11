@@ -8806,6 +8806,8 @@
     "retentionUsageHistory": "История использования (дни)",
     "retentionMemoryEntries": "Записи в памяти (дни)",
     "retentionXpAuditLog": "Журнал аудита XP (дни)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Сохранить настройки хранения",
     "storageAutoVacuumMode": "Автоматический режим вакуума",
     "storageScheduledVacuum": "Запланированный вакуум",
