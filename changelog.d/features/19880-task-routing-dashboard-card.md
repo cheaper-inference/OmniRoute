@@ -1,0 +1,1 @@
+- **feat(dashboard):** Task-Aware Routing can now be set up from Settings → Global Routing: a new card has the on/off switch, "One model per conversation", a model per task type, and escalation of complex prompts to a stronger model ([#19880](https://github.com/cheaper-inference/OmniRoute/pull/19880)) — thanks @AbinMadathil07
