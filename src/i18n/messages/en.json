@@ -16498,7 +16498,7 @@
     "trendsMetric": "Trend metric",
     "trendsWeekly": "This window is longer than a year, so each bar is one week, dated by its Monday.",
     "trendsFailed": "Could not load the trend.",
-    "trendsSummary": "{metric} by {dimension} per {bucket, select, week {week} other {day}}: {total} over {count, plural, one {# period} other {# periods}}. Largest: {top}.",
+    "trendsSummary": "{metric} by {dimension} {bucket, select, week {per week} other {per day}}: {total} over {count, plural, one {# period} other {# periods}}. Largest: {top}.",
     "filterByName": "Filter by {name}",
     "openDetails": "Open details for {name}",
     "matrix": "Matrix",
