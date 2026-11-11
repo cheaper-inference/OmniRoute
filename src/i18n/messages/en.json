@@ -6753,6 +6753,8 @@
     "tierOverrideHelpText": "Pin this provider to a routing tier instead of letting OmniRoute infer it from model pricing.",
     "museSparkWebCookieHint": "Muse Spark Web Cookie Hint",
     "museSparkWebCookiePlaceholder": "Muse Spark Web Cookie Placeholder",
+    "nativeJsonSchemaDescription": "Forward response_format json_schema unchanged instead of downgrading it to json_object.",
+    "nativeJsonSchemaLabel": "Native JSON schema support",
     "oauth": "Oauth",
     "openCliTools": "Open Cli Tools",
     "openSettings": "Open Settings",
