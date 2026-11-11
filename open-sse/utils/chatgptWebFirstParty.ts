@@ -277,19 +277,34 @@ function discoveryError(error: unknown, fallback: string): Error {
   return error instanceof Error ? error : new Error(fallback);
 }
 
-async function collectPageAssetCandidates(page: Page): Promise<string[]> {
-  const sources = await page.evaluate(() => ({
-    modulePreloadUrls: Array.from(
-      document.querySelectorAll<HTMLLinkElement>('link[rel="modulepreload"][href]'),
-      (link) => link.href
-    ),
-    resourceUrls: performance.getEntriesByType("resource").map((entry) => entry.name),
-  }));
-  const candidates = collectChatGptWebFirstPartyAssetCandidates(
-    sources.resourceUrls,
-    sources.modulePreloadUrls
-  );
-  return candidates;
+/**
+ * A legitimate ChatGPT redirect can replace the execution context between page load
+ * and the read-only asset inventory. Retry that inventory only; never replay a
+ * submitted chat turn and never bypass ChatGPT's content-security policy.
+ */
+export async function collectPageAssetCandidates(page: Page): Promise<string[]> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const sources = await page.evaluate(() => ({
+        modulePreloadUrls: Array.from(
+          document.querySelectorAll<HTMLLinkElement>('link[rel="modulepreload"][href]'),
+          (link) => link.href
+        ),
+        resourceUrls: performance.getEntriesByType("resource").map((entry) => entry.name),
+      }));
+      return collectChatGptWebFirstPartyAssetCandidates(
+        sources.resourceUrls,
+        sources.modulePreloadUrls
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const navigated = /Execution context was destroyed|Cannot find context with specified id|navigation/i.test(message);
+      if (!navigated || attempt === 2) throw error;
+      await page.waitForLoadState("domcontentloaded", { timeout: 4_000 }).catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+  }
+  return [];
 }
 
 async function inspectFirstPartyAsset(
@@ -593,6 +608,42 @@ export function describeBridgeLoadFailure(signals: ChatGptWebBridgeFailureSignal
   return `${base}: ${ranked.kind}: ${ranked.detail}`;
 }
 
+/**
+ * Validate the saved browser context with ChatGPT's own session endpoint
+ * before inspecting signed-in JS modules. Only the ready flag leaves the page.
+ * A login redirect must be diagnosed, not disguised as a module-contract error.
+ */
+export async function assertChatGptWebSignedIn(page: Page): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    let session: { ready: boolean; httpStatus: number };
+    try {
+      session = await page.evaluate(async () => {
+        const response = await fetch("/api/auth/session", {
+          credentials: "include",
+          signal: AbortSignal.timeout(8_000),
+        });
+        const result = response.ok ? await response.json().catch(() => null) : null;
+        return {
+          ready: typeof result?.user?.id === "string" && result.user.id.length > 0,
+          httpStatus: response.status,
+        };
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const navigation = /Execution context was destroyed|Cannot find context with specified id|navigation/i.test(message);
+      if (!navigation || attempt === 2) throw error;
+      await page.waitForLoadState("domcontentloaded", { timeout: 4_000 }).catch(() => {});
+      continue;
+    }
+    if (!session.ready) {
+      throw new Error(
+        "ChatGPT Web credentials require an authenticated browser session; re-import a complete Playwright storage state"
+      );
+    }
+    return;
+  }
+}
+
 async function ensureFirstPartyBridge(page: Page): Promise<void> {
   const ready = await page.evaluate((key) => {
     const root = globalThis as typeof globalThis & Record<string, unknown>;
@@ -600,6 +651,7 @@ async function ensureFirstPartyBridge(page: Page): Promise<void> {
   }, FIRST_PARTY_BRIDGE_KEY);
   if (ready) return;
 
+  await assertChatGptWebSignedIn(page);
   const { assetUrl, contract } = await discoverFirstPartyModule(page);
   // The integrity module is required through the page's own runtime, so whichever chunk
   // exposes `__webpack_require__` has to travel with the bridge source.
@@ -607,61 +659,123 @@ async function ensureFirstPartyBridge(page: Page): Promise<void> {
     contract.resolveIntegrity && contract.resolveIntegrityModule
       ? await collectPageAssetCandidates(page)
       : [];
-  const moduleSource = buildBridgeModuleSource(assetUrl, contract, candidateAssetUrls);
   const collected = collectBridgeFailureSignals(page, assetUrl);
   try {
+    // Load only same-origin assets permitted by ChatGPT's CSP. Its current CSP
+    // rejects blob: module scripts; no browser security setting is relaxed.
     await page.evaluate(
-      ({ bridgeKey, moduleSource: source }) =>
-        new Promise<void>((resolve, reject) => {
-          const root = globalThis as typeof globalThis & Record<string, unknown>;
-          if (typeof root[bridgeKey] === "object" && root[bridgeKey] !== null) {
-            resolve();
-            return;
-          }
-          // A CSP `script-src` refusal is only observable inside the page: it
-          // does not surface as a failed request, and `script.onerror` carries
-          // no reason. Captured here and folded into the rejection so it
-          // survives back across the evaluate boundary.
-          let cspDetail = "";
-          const violationListener = new AbortController();
-          document.addEventListener(
-            "securitypolicyviolation",
-            (event) => {
-              if (!cspDetail) {
-                cspDetail = `${event.violatedDirective} blocked ${event.blockedURI}`;
+      async ({ bridgeKey, assetUrl, names, integrityChunkUrls }) => {
+        const root = globalThis as typeof globalThis & Record<string, unknown>;
+        if (typeof root[bridgeKey] === "object" && root[bridgeKey] !== null) return;
+
+        // webpackIgnore is essential: Next.js must not rewrite an asset URL
+        // belonging to chatgpt.com into an OmniRoute bundle import.
+        const importChunk = (url: string): Promise<Record<string, unknown>> =>
+          import(/* webpackIgnore: true */ url) as Promise<Record<string, unknown>>;
+
+        if (names.resolveIntegrity && names.resolveIntegrityModule) {
+          const loadIntegrityModule = async (): Promise<Record<string, unknown>> => {
+            for (const url of integrityChunkUrls) {
+              let namespace: Record<string, unknown>;
+              try {
+                namespace = await importChunk(url);
+              } catch {
+                continue;
               }
+              const requireFromPage = namespace.__webpack_require__;
+              if (typeof requireFromPage !== "function") continue;
+              try {
+                const module = requireFromPage(names.resolveIntegrityModule);
+                if (module && typeof module === "object") {
+                  return module as Record<string, unknown>;
+                }
+              } catch {
+                // Continue until ChatGPT's actual runtime has loaded the module.
+              }
+            }
+            throw new Error(
+              "ChatGPT integrity module " + names.resolveIntegrityModule +
+                " is not registered in the page runtime (" + integrityChunkUrls.length +
+                " chunks loaded)"
+            );
+          };
+          const resolveIntegrity = async (proof: unknown): Promise<unknown> => {
+            const integrityModule = await loadIntegrityModule();
+            const handler = integrityModule[names.resolveIntegrity!];
+            if (typeof handler !== "function")
+              throw new Error("ChatGPT integrity resolver is unavailable");
+            return handler(proof);
+          };
+          const sessionPromise = fetch("/api/auth/session", {
+            credentials: "include",
+          }).then(async (response) => {
+            if (!response.ok) throw new Error("ChatGPT browser session is unavailable");
+            return response.json() as Promise<{ accessToken?: string }>;
+          });
+          const requestClient = {
+            safePost: async (
+              path: string,
+              options: {
+                additionalHeaders?: HeadersInit;
+                requestBody?: unknown;
+                skipJsonTransform?: boolean;
+                signal?: AbortSignal;
+              } = {}
+            ) => {
+              const headers = new Headers(options.additionalHeaders || {});
+              const session = await sessionPromise;
+              if (typeof session?.accessToken === "string" && session.accessToken)
+                headers.set("Authorization", "Bearer " + session.accessToken);
+              headers.set("Accept", "application/json");
+              if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+              const body =
+                typeof options.requestBody === "string"
+                  ? options.requestBody
+                  : JSON.stringify(options.requestBody ?? {});
+              const response = await fetch("/backend-api" + path, {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body,
+                signal: options.signal,
+              });
+              if (options.skipJsonTransform) return response;
+              if (!response.ok)
+                throw new Error("ChatGPT request failed with status " + response.status);
+              return response.json();
             },
-            { signal: violationListener.signal }
-          );
-          const blobUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
-          const script = document.createElement("script");
-          script.type = "module";
-          script.src = blobUrl;
-          script.onload = () => {
-            URL.revokeObjectURL(blobUrl);
-            violationListener.abort();
-            if (typeof root[bridgeKey] === "object" && root[bridgeKey] !== null) resolve();
-            else reject(new Error("ChatGPT Web first-party bridge did not initialize"));
           };
-          script.onerror = () => {
-            URL.revokeObjectURL(blobUrl);
-            violationListener.abort();
-            reject(new Error(cspDetail ? `csp: ${cspDetail}` : "no in-page reason"));
-          };
-          document.head.appendChild(script);
-        }),
-      { bridgeKey: FIRST_PARTY_BRIDGE_KEY, moduleSource }
+          root[bridgeKey] = { requestClient, resolveIntegrity };
+          return;
+        }
+
+        // Legacy upstream export path. The URL is validated as an exact
+        // chatgpt.com asset before it enters this browser context.
+        const upstream = await importChunk(assetUrl);
+        root[bridgeKey] = {
+          finalizeRequirements: upstream[names.finalizeRequirements],
+          proofManager: upstream[names.proofManager],
+          turnstileManager: upstream[names.turnstileManager],
+          requestClient: upstream[names.requestClient],
+          buildSentinelHeaders: upstream[names.buildSentinelHeaders],
+          resolveIntegrity: names.resolveIntegrity
+            ? upstream[names.resolveIntegrity]
+            : undefined,
+        };
+      },
+      {
+        bridgeKey: FIRST_PARTY_BRIDGE_KEY,
+        assetUrl: requireChatGptAssetUrl(assetUrl),
+        names: contract,
+        integrityChunkUrls: integrityCandidateChunkUrls(candidateAssetUrls),
+      }
     );
   } catch (error) {
     const inPage = error instanceof Error ? error.message : String(error);
     const signals = [...collected.signals];
-    if (inPage.startsWith("csp: ")) {
-      signals.unshift({ kind: "csp", detail: inPage.slice("csp: ".length) });
-    } else if (inPage && inPage !== "no in-page reason") {
+    if (inPage && !signals.some((signal) => signal.detail === inPage)) {
       signals.push({ kind: "pageerror", detail: inPage });
     }
-    // `cause` keeps the original for anyone reading a stack; the message is what
-    // reaches the operator log through buildErrorBody()/sanitizeErrorMessage().
     throw new Error(describeBridgeLoadFailure(signals), { cause: error });
   } finally {
     collected.dispose();
