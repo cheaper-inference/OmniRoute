@@ -199,6 +199,7 @@ import { isCatalogFreeModel } from "@/shared/utils/freeModels";
 import { getSessionAffinityStore } from "@/lib/db/sessionAccountAffinity";
 import { applyStickyOnly } from "./quotaStickyOnly";
 import { applyMaxActiveAccounts } from "./maxActiveAccounts";
+import { applyOAuthSessionCap } from "./oauthSessionCap";
 import {
   applySessionAffinityPin,
   formatSessionKeyForLog,
@@ -2220,6 +2221,7 @@ export async function getProviderCredentials(
             getOAuthSessionAvailability(candidate.id, options.sessionKey) > selectedAvailability
         );
       if (moreAvailablePeer) connection = moreAvailablePeer;
+      connection = applyOAuthSessionCap(connection, orderedConnections, options.sessionKey);
     }
 
     let exclusiveLease: ExclusiveConnectionLease | undefined;

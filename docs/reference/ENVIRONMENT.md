@@ -2071,3 +2071,8 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `PROVIDER_MAX_ACTIVE_ACCOUNTS` | unset (no cap) | `src/sse/services/maxActiveAccounts.ts` | Comma-separated `provider=N` pairs, for example `claude=2,codex=1`. For a listed provider, only the first N usable accounts by priority take requests. The rest are reserves, used only when fewer than N accounts are usable (cooldown, quota, model rules and exclusions are applied first). Unlisted providers, blank values and invalid numbers mean no cap. |
+## OAuth session cap
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `OAUTH_MAX_SESSIONS_PER_ACCOUNT` | unset (no cap) | `src/sse/services/oauthSessionCap.ts` | Whole number above 0. An OAuth account that already serves this many other live sessions is skipped for a new session. A session the account already serves keeps using it. Live sessions are tracked in memory per process and released when a request ends or fails. If every OAuth account is full, the first choice is kept, so the cap never refuses a request. Blank, non-numeric or `0` values mean no cap. |

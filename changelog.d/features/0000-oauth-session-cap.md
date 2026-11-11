@@ -1,0 +1,1 @@
+- **feat(routing):** Opt-in `OAUTH_MAX_SESSIONS_PER_ACCOUNT` caps live sessions per OAuth account, so new sessions move to another account before an upstream session limit is hit.
