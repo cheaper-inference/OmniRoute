@@ -12,6 +12,7 @@ import https from "node:https";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { TLSSocket } from "node:tls";
 import { spawn, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -78,10 +79,17 @@ function sendIntercepted(port: number): Promise<void> {
         method: "POST",
         path: "/v1beta/models/gemini-x:generateContent",
         headers: { host: TARGET_HOST, "content-type": "application/json" },
-        rejectUnauthorized: false,
+        // Trust only this test's CA and verify the hostname issued through SNI.
+        servername: TARGET_HOST,
+        ca: fs.readFileSync(path.join(dataDir, "mitm", "ca.crt")),
         agent: clientAgent,
       },
       (res) => {
+        if (!(res.socket instanceof TLSSocket) || !res.socket.authorized) {
+          res.resume();
+          reject(new Error("The test proxy certificate must be verified by its temporary CA"));
+          return;
+        }
         res.resume();
         res.on("end", resolve);
       }
