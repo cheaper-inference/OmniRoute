@@ -192,6 +192,16 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "gemini", modelId: "gemini-2.5-flash-lite", displayName: "Gemini 2.5 Flash-Lite", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
   { provider: "gemini", modelId: "gemini-3-flash-preview", displayName: "Gemini 3 Flash Preview", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
   { provider: "gemini", modelId: "gemini-3.1-flash-lite", displayName: "Gemini 3.1 Flash-Lite", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
+  // Google Gemini Developer API pricing (2026-09-28) lists Standard Free Tier
+  // input/output as free of charge for the current Flash generations below.
+  // Keep them in the shipped decision catalog so importFreeModelsOnly does not
+  // discard freshly auto-discovered models and make the authoritative live
+  // catalog reject otherwise valid Gemini API models.
+  { provider: "gemini", modelId: "gemini-3.5-flash", displayName: "Gemini 3.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
+  { provider: "gemini", modelId: "gemini-3.5-flash-lite", displayName: "Gemini 3.5 Flash-Lite", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
+  { provider: "gemini", modelId: "gemini-3.6-flash", displayName: "Gemini 3.6 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
+  { provider: "gemini", modelId: "gemini-3.7-flash", displayName: "Gemini 3.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
+  { provider: "gemini", modelId: "gemini-3.8-flash", displayName: "Gemini 3.8 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
   { provider: "glm-cn", modelId: "glm-4-flash", displayName: "GLM-4-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
   { provider: "glm-cn", modelId: "glm-4.5-flash", displayName: "GLM-4.5-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
   { provider: "glm-cn", modelId: "glm-4.7-flash", displayName: "GLM-4.7-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
