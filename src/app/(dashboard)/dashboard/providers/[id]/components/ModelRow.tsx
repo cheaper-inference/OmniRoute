@@ -20,7 +20,7 @@ import {
 } from "@/shared/utils/modelCatalogSearch";
 import { providerText } from "../providerPageHelpers";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
-import { Button, Checkbox, FilterPills } from "@/shared/components";
+import { Badge, Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
 import {
@@ -28,6 +28,8 @@ import {
   ContextWindowOverrideField,
   useContextWindowOverrideEditor,
 } from "./ContextWindowOverrideEditor";
+import ModelOutputTokenEditor from "./ModelOutputTokenEditor";
+import ModelVisionOverrideEditor from "./ModelVisionOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 
 // ---------------------------------------------------------------------------
@@ -281,6 +283,17 @@ export interface ModelRowProps {
   onSaveContextWindowOverride?: (modelId: string, value: number | null) => Promise<void>;
   savingContextOverride?: boolean;
   endpointInfo?: ModelEndpointEditorInfo;
+  /** Vision capable support. Without the save callback nothing renders. */
+  supportsVision?: boolean;
+  visionOverride?: boolean | null;
+  onSaveVisionOverride?: (modelId: string, value: boolean | null) => Promise<boolean>;
+  savingVisionOverride?: boolean;
+  /** Max output token override support. Without the save callback nothing renders. */
+  maxOutputTokenOverride?: number | null;
+  onSaveMaxOutputTokenOverride?: (modelId: string, value: number | null) => Promise<boolean>;
+  savingOutputOverride?: boolean;
+  /** Free badge support. */
+  isFree?: boolean;
 }
 
 export default function ModelRow({
@@ -309,6 +322,14 @@ export default function ModelRow({
   onSaveContextWindowOverride,
   savingContextOverride,
   endpointInfo,
+  supportsVision,
+  visionOverride,
+  onSaveVisionOverride,
+  savingVisionOverride,
+  maxOutputTokenOverride,
+  onSaveMaxOutputTokenOverride,
+  savingOutputOverride,
+  isFree,
 }: ModelRowProps) {
   const isHidden = Boolean(model.isHidden);
   const contextEditor = useContextWindowOverrideEditor({
@@ -391,6 +412,30 @@ export default function ModelRow({
             t={t}
           />
         )}
+        {supportsVision === true && (
+          <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+            {t("visionCapableLabel")}
+          </Badge>
+        )}
+        <ModelVisionOverrideEditor
+          modelId={model.id}
+          value={visionOverride}
+          onSave={onSaveVisionOverride}
+          saving={savingVisionOverride}
+          t={t}
+        />
+        <ModelOutputTokenEditor
+          modelId={model.id}
+          value={maxOutputTokenOverride}
+          saving={savingOutputOverride}
+          onSave={onSaveMaxOutputTokenOverride}
+          t={t}
+        />
+        {isFree && (
+          <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+            {providerText(t, "freeBadge", "Free")}
+          </Badge>
+        )}
         {onSetAlias && (
           <span className="flex min-w-0 flex-1 basis-16 items-center text-[10px] gap-1">
             {editing ? (
@@ -408,7 +453,7 @@ export default function ModelRow({
               />
             ) : (
               <span
-                className={`min-w-0 truncate text-[10px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
+                className={`truncate text-[9px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
                 onClick={startEditing}
                 title={
                   alias
