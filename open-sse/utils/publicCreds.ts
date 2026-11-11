@@ -125,6 +125,8 @@ export function decodePublicCredBytes(bytes: readonly number[]): string {
  * Or use the helper below `embeddedBytesFor()`.
  */
 const EMBEDDED_DEFAULTS = {
+  // Public entrypoint for first-time ChatGPT OSS registration, not an issued client ID.
+  chatgpt_id: [11, 20, 0, 8, 31, 6, 22, 43, 4, 74, 21, 27, 22, 51, 10, 15, 68, 19, 95, 27],
   // Gemini / Code Assist — google oauth client (public, PKCE)
   gemini_id: [
     89, 85, 95, 91, 71, 90, 77, 68, 92, 30, 73, 64, 79, 3, 6, 91, 75, 2, 3, 0, 29, 28, 13, 0, 1, 5,
