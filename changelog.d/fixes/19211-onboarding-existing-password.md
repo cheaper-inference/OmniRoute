@@ -1,0 +1,1 @@
+- Detect existing management password during dashboard onboarding to show password-configured status and allow continuing without triggering re-authentication errors (#19211).
