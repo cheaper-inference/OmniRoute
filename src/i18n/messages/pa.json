@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "ਕੈਸ਼ ਵਿੱਚ ਸੰਭਾਲੇ ਇਨਪੁਟ ਟੋਕਨ",
+    "inputTokensHint": "ਕੈਸ਼ ਤੋਂ ਪੜ੍ਹੇ ਟੋਕਨ ਸ਼ਾਮਲ ਨਹੀਂ ਹਨ। ਕੈਸ਼ ਵਿੱਚ ਲਿਖੇ ਟੋਕਨ ਇਨਪੁਟ ਟੋਕਨ ਵਜੋਂ ਹੀ ਗਿਣੇ ਜਾਂਦੇ ਹਨ।",
+    "inputSplitUnavailable": "ਇਨਪੁਟ ਦੀ ਵੰਡ ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਕੈਸ਼ ਪੜ੍ਹਨ ਦਾ ਡਾਟਾ ਅਧੂਰਾ ਜਾਂ ਅਸੰਗਤ ਹੈ।",
+    "cachedInputTokensHint": "ਸਿਰਫ਼ ਰਿਪੋਰਟ ਕੀਤੀਆਂ ਕੈਸ਼ ਰੀਡਾਂ, ਜੋ ਕੁੱਲ ਇਨਪੁਟ ਵਿੱਚ ਪਹਿਲਾਂ ਹੀ ਸ਼ਾਮਲ ਹਨ।",
     "title": "ਵਿਸ਼ਲੇਸ਼ਣ",
     "usageAnalyticsTitle": "ਵਰਤੋਂ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ",
     "tokenDisplayCompact": "ਸੰਖੇਪ",
