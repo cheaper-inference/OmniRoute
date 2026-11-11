@@ -414,6 +414,32 @@ function hasImages(messages: RequestMessage[]): boolean {
   return false;
 }
 
+/** Requests without tools are utility calls (session titles, WebFetch summaries), not agent turns. */
+function carriesTools(body: unknown): boolean {
+  const tools = (body as { tools?: unknown } | null)?.tools;
+  return Array.isArray(tools) && tools.length > 0;
+}
+
+const PRIORITY_ORDER: TaskType[] = [
+  "background",
+  "coding",
+  "vision",
+  "summarization",
+  "analysis",
+  "creative",
+];
+
+/**
+ * Task types in the order detection checks them (background first — most specific). In
+ * "first-user" mode the first prompt decides every turn, so a stray phrase such as
+ * "name this …" must not pin a whole agent session to the background model.
+ */
+function detectionOrder(anchor: DetectionAnchor, body: unknown): TaskType[] {
+  return anchor === "first-user" && carriesTools(body)
+    ? PRIORITY_ORDER.filter((taskType) => taskType !== "background")
+    : PRIORITY_ORDER;
+}
+
 /**
  * Detect the task type for a given request body.
  * Returns 'chat' (no-op) if nothing specific is detected.
@@ -438,18 +464,9 @@ export function detectTaskType(body: any): TaskType {
   const userText = anchorMsg ? extractText(anchorMsg.content, stripHarness) : "";
 
   // Check ALL task patterns in priority order
-  const priorityOrder: TaskType[] = [
-    "background",
-    "coding",
-    "vision",
-    "summarization",
-    "analysis",
-    "creative",
-  ];
-
   const overrides = getConfig().patternOverrides;
 
-  for (const taskType of priorityOrder) {
+  for (const taskType of detectionOrder(anchor, body)) {
     const defaults = TASK_PATTERNS[taskType];
     const override = overrides?.[taskType];
     const patterns = override?.patterns ?? defaults.patterns;

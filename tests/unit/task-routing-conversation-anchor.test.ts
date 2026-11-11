@@ -196,6 +196,25 @@ test("first-user anchor only treats images in the anchor message as vision", () 
   assert.equal(detectTaskType(body), "vision");
 });
 
+const NAME_THIS = "Name this function better and refactor src/auth.ts to use async/await";
+
+test("first-user anchor never pins an agent session to the background model", () => {
+  resetConfig();
+  setTaskRoutingConfig({ detectionAnchor: "first-user" });
+  for (let turns = 0; turns <= 3; turns++) {
+    assert.equal(detectTaskType(agentConversation(NAME_THIS, turns)), "coding");
+  }
+  // A title request carries no tools, so it is still a background task.
+  const title = { messages: [{ role: "user", content: "Generate a title for this conversation" }] };
+  assert.equal(detectTaskType(title), "background");
+});
+
+test("the default mode still treats the same agent request as background, as before", () => {
+  resetConfig();
+  const body = { tools: [{ name: "Bash" }], messages: [{ role: "user", content: NAME_THIS }] };
+  assert.equal(detectTaskType(body), "background");
+});
+
 // ── persistence + validation ─────────────────────────────────────────────────
 
 test("detectionAnchor survives a restart via hydration", () => {
