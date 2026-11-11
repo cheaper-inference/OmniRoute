@@ -53,6 +53,19 @@ import {
   type BedrockEmbeddingItem,
 } from "./bedrockEmbeddings.ts";
 import { resolveBedrockRegion } from "../config/bedrock.ts";
+import {
+  VERTEX_EMBEDDING_MAX_RESPONSE_BYTES,
+  buildVertexEmbeddingPlan,
+  mapVertexEmbeddingResponse,
+  resolveVertexEmbeddingUrl,
+  type VertexEmbeddingPlan,
+} from "./vertexEmbeddings.ts";
+import {
+  getAccessToken,
+  looksLikeServiceAccountJson,
+  parseSAFromApiKey,
+} from "../executors/vertex.ts";
+import { readBoundedResponseText } from "../utils/emptyTurnRetry.ts";
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 
 interface ClientRawRequest {
@@ -152,6 +165,8 @@ interface PreparedEmbeddingRequest {
   normalizeProviderResponse: ProviderResponseNormalizer;
   /** Set only for `nativeInvokeProtocol: "bedrock-invoke"`; built in the prepare stage so client errors are 400s. */
   bedrock?: BedrockEmbeddingPlan;
+  /** Set only for `nativeInvokeProtocol: "vertex-predict"`. */
+  vertex?: VertexEmbeddingPlan;
 }
 
 interface ParsedEmbeddingResponse {
@@ -500,6 +515,10 @@ async function applyStructuredTransport(
     await prepareBedrockTransport(runtime, prepared);
     return;
   }
+  if (runtime.providerConfig.nativeInvokeProtocol === "vertex-predict") {
+    await prepareVertexTransport(runtime, prepared);
+    return;
+  }
   const jinaNative = isJinaNativeEmbeddingInput(runtime.body.input);
   const geminiNative = isGeminiNativeEmbeddingInput(runtime.body.input);
   const canonical = hasStructuredEmbeddingInput(runtime.body.input);
@@ -763,6 +782,59 @@ async function prepareBedrockTransport(
 }
 
 /**
+ * Vertex prepare stage: service-account token, project URL and `:predict` body. Every client
+ * mistake throws here, so it surfaces as a 400 and never as a 502 that cools the connection.
+ */
+async function prepareVertexTransport(
+  runtime: EmbeddingRuntime,
+  prepared: PreparedEmbeddingRequest
+): Promise<void> {
+  const apiKey = runtime.credentials?.apiKey;
+  if (!looksLikeServiceAccountJson(apiKey)) {
+    throw new Error("Vertex embeddings need a Service Account JSON connection");
+  }
+  const serviceAccount = parseSAFromApiKey(apiKey);
+  const project = serviceAccount.project_id;
+  if (!project) throw new Error("Service Account JSON is missing project_id");
+  const region = runtime.credentials?.providerSpecificData?.region;
+  const plan = buildVertexEmbeddingPlan(
+    runtime.model || "",
+    runtime.body.input,
+    runtime.body.dimensions
+  );
+  prepared.vertex = plan;
+  prepared.upstreamBody = plan.body;
+  prepared.upstreamUrl = resolveVertexEmbeddingUrl(
+    plan.model,
+    project,
+    typeof region === "string" ? region : null
+  );
+  prepared.headers.Authorization = `Bearer ${await getAccessToken(serviceAccount)}`;
+}
+
+/** Dispatch stage for Vertex: one `:predict` call, reply read under a byte cap, mapped to OpenAI. */
+async function fetchVertexEmbeddingBatch(
+  prepared: PreparedEmbeddingRequest,
+  plan: VertexEmbeddingPlan,
+  reqLogger: RequestLogger
+): Promise<Response> {
+  reqLogger.logTargetRequest(prepared.upstreamUrl, prepared.headers, prepared.upstreamBody);
+  const response = await fetch(prepared.upstreamUrl, {
+    method: "POST",
+    headers: prepared.headers,
+    body: JSON.stringify(prepared.upstreamBody),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) return response;
+  const text = await readBoundedResponseText(response, VERTEX_EMBEDDING_MAX_RESPONSE_BYTES);
+  if (text === null) throw new Error("Vertex embedding response was unreadable or too large");
+  return new Response(JSON.stringify(mapVertexEmbeddingResponse(JSON.parse(text), plan)), {
+    status: 200,
+    headers: response.headers,
+  });
+}
+
+/**
  * Dispatch-stage half of the Bedrock transport: only the upstream calls live here,
  * so a thrown error genuinely means "the provider misbehaved" (502 + cooldown is
  * then the right outcome). Client-caused failures were already rejected in
@@ -824,6 +896,7 @@ async function dispatchEmbeddingRequest(
 ): Promise<Response> {
   // The plan is only ever set for `nativeInvokeProtocol: "bedrock-invoke"`.
   if (prepared.bedrock) return fetchBedrockEmbeddingBatch(prepared, prepared.bedrock, reqLogger);
+  if (prepared.vertex) return fetchVertexEmbeddingBatch(prepared, prepared.vertex, reqLogger);
   if (singleTexts) return fetchClovaEmbeddingBatch(prepared, singleTexts, reqLogger);
   reqLogger.logTargetRequest(prepared.upstreamUrl, prepared.headers, prepared.upstreamBody);
   return fetch(prepared.upstreamUrl, {
