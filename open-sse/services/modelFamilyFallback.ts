@@ -119,6 +119,7 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
 
   // Claude Mythos family — prefer the previous Fable before falling to Opus
   // tiers and then the cheaper Sonnet, matching the flagship ordering.
+  "claude-fable-5-2": ["claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-opus-4-8"],
   "claude-fable-5-1": ["claude-fable-5", "claude-opus-5", "claude-sonnet-5"],
   "claude-fable-5": ["claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5"],
 
