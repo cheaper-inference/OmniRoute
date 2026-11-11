@@ -27,7 +27,7 @@ import {
 import { resolveClientApiKey } from "../services/clientApiKeyResolver";
 import {
   getRuntimeProviderProfile,
-  clearModelLock,
+  clearModelLockExemptingUpstreamResets,
   lockModel,
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
@@ -2375,8 +2375,24 @@ async function handleSingleModelChat(
       });
 
       if (result.success) {
-        clearModelLock(provider, credentials.connectionId, model);
-        markQuotaHealthy(credentials.connectionId);
+        // A success does not prove a rate/quota window reopened — walls
+        // routinely let small or test-shaped requests through while still
+        // rejecting real traffic. Two rulings follow:
+        // (A) a lockout whose cooldown IS a verified upstream reset declaration
+        //     (Retry-After / X-RateLimit-Reset / RetryInfo) stays until its
+        //     declared instant; every other lockout clears exactly as before;
+        // (B) an internal live-test probe (the model/combo/connection test
+        //     routes self-loop through this handler with the self-hop-vouched
+        //     internal-test mark) proves the credential answers, not that quota
+        //     is healthy — it clears no lockout and never marks quota healthy,
+        //     the same ruling the test routes apply to a future
+        //     rate_limited_until: a poller may not overrule a 429 handler's
+        //     forward statement.
+        const isInternalLiveTest = trustedInternalTestMark(request?.headers) !== null;
+        if (!isInternalLiveTest) {
+          clearModelLockExemptingUpstreamResets(provider, credentials.connectionId, model);
+          markQuotaHealthy(credentials.connectionId);
+        }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
           !wasProviderProbe &&
