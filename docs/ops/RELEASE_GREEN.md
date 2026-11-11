@@ -6,8 +6,8 @@ title: "Release-Green — candidate validation and evidence"
 
 Release-Green observes a specific commit and reports its validation results. The
 [Quality Gates reference](../architecture/QUALITY_GATES.md) defines the current CI
-profiles, required checks and acceptance policy. The versioned
-[admission policy](../../config/quality/admission-policy.json) is the executable
+profiles, required checks and acceptance policy. The versioned admission policy in
+`config/quality/admission-policy.json` is the executable
 contract for `Gate / CI` and `Gate / Quality`.
 
 ## CI and observer scope
