@@ -1,0 +1,1 @@
+- **feat(budgets):** opt-in `OMNIROUTE_BUDGET_TIMEZONE` (IANA zone) makes API-key budget windows (daily, weekly, monthly) follow a local calendar and reset time instead of UTC (unset = UTC).
