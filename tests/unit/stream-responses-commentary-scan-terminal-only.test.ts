@@ -65,6 +65,10 @@ test("commentary filter scans the retained items only on response.completed", as
     },
   });
 
+  // Load undici's Response/stream internals before patching: its lazy first load
+  // filters large internal tables, which would be miscounted as a scan below.
+  await new Response(new ReadableStream({ start: (c) => c.close() })).text();
+
   // The commentary filter is Array#filter over the retained list, so count the
   // filter calls that see a list of full size.
   const originalFilter = Array.prototype.filter;
