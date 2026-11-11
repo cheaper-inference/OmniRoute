@@ -6,36 +6,33 @@
 
 ## Muhtasari
 
-Redis ni **tegemezi la hiari, lisilo la lazima** katika OmniRoute — programu huendelea kufanya kazi kwa utaratibu mbadala (uhifadhi wa ndani ya kumbukumbu)
-wakati Redis haipatikani. Katika mazingira ya uzalishaji, kusanidi Redis kwa ufanisi hupunguza muda wa kusubiri kwa aina nne tofauti za
-mizigo ya kazi:
+Redis ni **hiari, utegemezi laini** katika OmniRoute — programu huharibika kwa uzuri (nyuma za kumbukumbu) wakati Redis haipatikani. Katika uzalishaji, kurekebisha Redis hupunguza muda wa kusubiri kwa mizigo minne tofauti:
 
-| Mzigo wa kazi                    | Kiendeshi                     | Kiwanda cha Kiteja                                                    | Muundo wa Ufunguo                                                   |
-| -------------------------------- | ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Uzuiaji wa kiwango               | `rateLimiter.ts`              | `getRedisClient()` — singleton ya `ioredis` inayopakiwa inapohitajika | `<prefix>rl:*` madirisha ya kiwango yenye operesheni atomiki ya Lua |
-| Akiba ya uthibitishaji           | `apiKeys.ts`                  | Hutumia tena kiteja cha `rateLimiter`                                 | `<prefix>auth:api_key:<sha256>` yenye TTL                           |
-| Hifadhi ya mgao                  | `redisQuotaStore.ts`          | Singleton tofauti ya `getRedisClient(url)`                            | `<prefix>quota:*` inayoweza kusanidiwa kwa kila instansi            |
-| Kivunja saketi cha upashaji joto | `redisCircuitBreakerStore.ts` | Kiteja tofauti katika `circuitBreakerFactory.ts`                      | `<prefix>warmup:cb:<connectionId>`                                  |
+| Mzigo wa kazi            | Dereva                        | Kiwanda cha Wateja                             | Muundo muhimu                                                          |
+| ------------------------ | ----------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
+| Kupunguza viwango        | `rateLimiter.ts`              | `getRedisClient()` — mvivu `ioredis` singleton | Madirisha ya kikomo cha viwango vya atomiki `<prefix>rl:*` Lua-atomiki |
+| Anzisha akiba            | `apiKeys.ts`                  | Hutumia tena mteja wa `rateLimiter`            | `<prefix>auth:api_key:<sha256>` pamoja na TTL                          |
+| Duka la kiasi            | `redisQuotaStore.ts`          | Tenganisha singleton `getRedisClient(url)`     | `<prefix>quota:*` inayoweza kusanidiwa kwa kila tukio                  |
+| Kivunja mzunguko wa joto | `redisCircuitBreakerStore.ts` | Tenga mteja katika `circuitBreakerFactory.ts`  | `<prefix>warmup:cb:<connectionId>`                                     |
 
-Mizigo yote minne ya kazi hutumia kiambishi awali kimoja cha nafasi ya majina ili OmniRoute iweze kutumika pamoja na programu nyingine kwenye
-instansi moja ya Redis (k.m. `127.0.0.1:6379`). Tazama [Upangaji wa Nafasi za Majina za Funguo](#key-namespacing).
+Vipengee vyote vinne vya kazi hushiriki kiambishi awali cha nafasi ya majina ili OmniRoute iweze kuwepo na programu nyingine kwa mfano mmoja Redis (km `127.0.0.1:6379`). Angalia [Nafasi Muhimu ya Majina](#key-namespacing).
 
 ---
 
 ## Usanidi wa Sasa (Chaguomsingi za Msimbo)
 
-| Mpangilio                                        | Thamani                                                                      | Mahali                                                                                |
-| ------------------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Kigezo cha mazingira cha `REDIS_URL`             | `redis://redis:6379` (compose), hiari                                        | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Kigezo cha mazingira cha `REDIS_KEY_PREFIX`      | `omniroute:` (chaguomsingi)                                                  | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Kigezo cha mazingira cha `QUOTA_STORE_REDIS_URL` | tofauti, kinaweza kutofautiana na `REDIS_URL`                                | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                             | `"sqlite"` (chaguomsingi), `"redis"` hiari                                   | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` ya ioredis                | `3`                                                                          | uundaji wa kiteja katika `rateLimiter.ts`                                             |
-| `enableReadyCheck`                               | haijawekwa (chaguomsingi la ioredis: `true`)                                 | —                                                                                     |
-| `lazyConnect`                                    | haijawekwa (chaguomsingi la ioredis: `false`)                                | —                                                                                     |
-| `retryStrategy`                                  | haijawekwa (chaguomsingi la ioredis: msingi wa 200ms, ongezeko la kielelezo) | —                                                                                     |
-| TLS / nenosiri / faharasa ya DB                  | **havijasanidiwa**                                                           | —                                                                                     |
-| Sentinel / Cluster                               | **havijasanidiwa** — nodi moja inayojitegemea pekee                          | —                                                                                     |
+| Mpangilio                       | Thamani                                                           | Wapi                                                                                  |
+| ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (tunga), hiari                               | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (chaguo-msingi)                                      | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | tofauti, inaweza kutofautiana na `REDIS_URL`                      | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (chaguo-msingi), `"redis"` hiari                       | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                               | Uundaji wa mteja `rateLimiter.ts`                                                     |
+| `enableReadyCheck`              | haijawekwa (chaguo-msingi ya ioredis: `true`)                     | —                                                                                     |
+| `lazyConnect`                   | haijawekwa (chaguo-msingi ya ioredis: `false`)                    | —                                                                                     |
+| `retryStrategy`                 | haijawekwa (chaguo-msingi ya ioredis: msingi wa 200ms, kielelezo) | —                                                                                     |
+| TLS / nenosiri / index DB       | **haijasanidiwa**                                                 | —                                                                                     |
+| Sentinel / Nguzo                | **haijasanidiwa** — ilio na nodi moja pekee                       | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Uboreshaji Unaopendekezwa kwa Mazingira ya Uzalishaji
+## Urekebishaji wa Uzalishaji Unaopendekezwa
 
-### 1. Chaguo za Connection Pool / Client (constructor ya ioredis `Redis`)
+### 1. Dimbwi la Muunganisho / Chaguzi za Mteja (ioredis `Redis` kijenzi)
 
-Msimbo wa sasa huunda `new Redis(url)` moja bila chaguo maalum. Kwa upelekaji wa uzalishaji
-wenye replica nyingi, pitisha client factory kwenye msimbo au zungushia `getRedisClient()`:
+Msimbo wa sasa huunda `new Redis(url)` moja bila chaguo maalum. Kwa uwekaji wa nakala nyingi za uzalishaji, pitisha kiwanda cha mteja kwenye msimbo au funika `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // hakuna kikomo cha kujaribu tena; acha retryStrategy iamue
-  enableReadyCheck: true, // thibitisha kuwa seva iko tayari kabla ya kukubali miito
-  lazyConnect: true, // usiunganishe wakati wa uundaji; subiri mwito wa kwanza
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // kata tamaa baada ya majaribio 10 → unganisha tena baadaye
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, kikomo cha 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // unganisha amri za wakati mmoja kuwa andiko moja la TCP
-  keepAlive: 10000, // TCP keep-alive kila 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Mabadilishano muhimu:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — inapendelewa kwa uzalishaji ili kuwashwa
-  upya kwa muda kwa Redis kusisababishe kila ombi kushindwa mara moja. Mfumo mbadala wa kumbukumbu
-  katika `checkRateLimit()` hushughulikia njia ya hitilafu.
-- `lazyConnect: true` — huepuka kutegemea Redis kuwapo wakati wa kuanzisha kabla seva
-  haijaanza kukubali miunganisho.
-- `enableAutoPipelining: true` — hupunguza safari za kwenda na kurudi kwa ukaguzi wa wakati mmoja wa vikomo vya kasi;
-  ni muhimu kwa >50 RPS kwenye muunganisho mmoja.
+- `maxRetriesPerRequest: null` + `retryStrategy` — inayopendelewa kwa ajili ya uzalishaji ili Redis ya muda iwashwe tena isishindwe mara moja kila ombi. Njia mbadala ya kumbukumbu katika `checkRateLimit()` inachukua njia ya kutofaulu.
+- `lazyConnect: true` — inaepuka utegemezi wa kuanza kwa Redis kuwa juu kabla ya seva kuanza kukubali miunganisho.
+- `enableAutoPipelining: true` — inapunguza safari za kwenda na kurudi kwa ukaguzi wa kikomo wa viwango; manufaa katika > 50 RPS kwenye muunganisho mmoja.
 
 ### 2. Usanidi wa Seva ya Redis (`redis.conf`)
 
 ```
-# Kumbukumbu
-maxmemory 80%                        # acha nafasi kwa akiba ya kurasa ya OS
-maxmemory-policy allkeys-lru         # ondoa maingizo ya zamani ya akiba ya uthibitishaji kumbukumbu inapobanwa
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Uhifadhi endelevu (si lazima — OmniRoute ni salama dhidi ya hitilafu hata bila huu)
-save 300 1                           # tengeneza snapshot angalau kila dakika 5 ikiwa ≥1 key imebadilika
-appendonly no                        # AOF haihitajiki; data inaweza kutengenezwa upya
-appendfsync no                       # hakuna gharama ya ziada ya fsync (RDB inatosha)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Mtandao
-timeout 0                            # hakuna kukata muunganisho usiotumika
-tcp-keepalive 300                    # keep-alive ya dakika 5
-tcp-backlog 511                      # foleni ya miunganisho kwa mzigo unaoongezeka ghafla
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Utendaji
-hz 10                                # chaguo-msingi; 100 kwa matumizi nyeti kwa ucheleweshaji
-activedefrag yes                     # tenganisha vipande kiotomatiki mgawanyiko unapozidi >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Mabadilishano ya `maxmemory-policy allkeys-lru`:** Maingizo ya akiba ya uthibitishaji yanaweza kuondolewa
-kumbukumbu inapobanwa. Hii ni salama — `setCachedApiKey` daima hujaza upya kunapokuwa na kosa la kutopatikana, na
-mfumo mbadala wa SQLite ndio wenye mamlaka. Skripti ya Lua ya kikomo cha kasi huunda keys ndogo ambazo
-kwa muundo wake hudumu kwa muda mfupi.
+**Mabadiliko ya bei ya hisa `maxmemory-policy allkeys-lru`.** Maingizo ya akiba ya Auth yanaweza kuondolewa chini ya shinikizo la kumbukumbu. Hii ni salama — `setCachedApiKey` daima hujaza tena kwenye miss, na njia mbadala ya SQLite ni yenye mamlaka. Hati ya Lua yenye kikomo cha viwango huunda vitufe vidogo ambavyo vinaishi kwa muda mfupi kulingana na muundo.
 
-### 3. Mipangilio ya Docker Compose
+### 3. Docker Tunga Mipangilio
 
-Compose ya uzalishaji (`docker-compose.prod.yml`) hutumia `redis:8.6.2-alpine`. Ongeza:
+Utungaji wa uzalishaji (`docker-compose.prod.yml`) hutumia `redis:8.6.2-alpine`. Ongeza:
 
 ```yaml
 redis:
@@ -150,35 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Mazingatio ya Instance Nyingi / Upanuzi
+### 4. Mazingatio ya Matukio mengi / Kuongeza
 
-**Redis moja kwa replica zote** — skripti ya Lua ya kikomo cha kasi hutegemea nafasi moja
-ya keys yenye mamlaka. Instance nyingi za Redis zilizo nyuma ya replica zingepoteza atomicity
-na kuongeza bajeti mara mbili. Tumia Redis moja (au cluster ya Redis Sentinel yenye failover) kwa
-replica zote za programu.
+**Redis Moja kwa nakala zote** — hati ya Lua yenye kikomo cha viwango inategemea nafasi moja ya ufunguo iliyoidhinishwa. Matukio mengi Redis nyuma ya nakala yanaweza kupoteza atomiki na bajeti mara mbili. Tumia Redis moja (au nguzo ya Redis Sentinel iliyo na failover) kwa nakala zote za programu.
 
-**Idadi ya miunganisho:** Kila replica ya programu hufungua **miunganisho 2 ya TCP** kwenda Redis
-(client ya kikomo cha kasi + client ya hifadhi ya quota). Kwa replica 10 → miunganisho 20, ikiwa
-ndani kabisa ya kikomo chaguo-msingi cha miunganisho 10k cha instance ya Redis.
+**Idadi ya muunganisho:** Kila nakala ya programu inafungua **2 viunganisho vya TCP** kwa Redis (mteja wa duka la kikomo cha bei cha + ). Katika viunganisho 10 vya → 20, vilivyo ndani ya dari ya unganisho ya 10k ya mfano wa Redis.
 
 ### 5. Ufuatiliaji
 
-Fichua kupitia endpoint ya health-check:
+Fichua kupitia sehemu ya mwisho ya ukaguzi wa afya:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts tayari huita functions za rateLimiter
-// Ongeza ukaguzi mahususi wa Redis:
-//   1. Ucheleweshaji wa PING kupitia ioredis .ping()
-//   2. Matumizi ya kumbukumbu kupitia INFO memory
-//   3. Idadi ya miunganisho kupitia INFO clients
-//   4. Kiwango cha hit kwa maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Vipimo muhimu vya kufuatilia:
+Vipimo muhimu vya kutazama:
 
-- **Keys zilizoondolewa / sekunde** — ikiwa thamani si sifuri kwa muda mrefu, ongeza `maxmemory`
-- **Clients waliozuiwa** — thamani isiyo sifuri inaashiria skripti za Lua zinazoenda polepole au ushindani mkubwa
-- **Miunganisho iliyokataliwa** — kikomo cha miunganisho kimefikiwa; ni nadra kwa miunganisho 20
+- **Vifunguo vilivyoondolewa / sekunde** — ikiwa inaendelea kutokuwa sifuri, ongeza `maxmemory`
+- **Wateja waliozuiwa** — isiyo ya sifuri inapendekeza hati za polepole za Lua au ubishi mkubwa
+- **Miunganisho iliyokataliwa** Kikomo cha uunganisho — kimepigwa; nadra katika miunganisho 20
+
+### 6. Seva zinazolingana na Redis
+
+Seva yoyote inayotumika hapa lazima iendeshe hati za Lua: kikomo cha kiwango ni kimoja `EVAL`. Kwenye seva bila Lua, `checkRateLimit()` huweka `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` na kuhesabu kwa kila mchakato, kwa hivyo kila nakala hutekelezea kikomo peke yake. Hifadhi ya mshikamano wa kipindi cha pamoja (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) pia husoma na kusasisha pini kwa `EVAL`; bila Lua huweka `[SESSION_AFFINITY] Redis error; falling back to SQLite.` na kila nakala huweka pini zake. Mizigo mingine ya kazi hutumia amri wazi (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, heshi na seti), na mazingira ya nyuma ya kashe ya semantic ya Redis haitumi amri za `FT.*`.
+
+Ilijaribiwa na OmniRoute 3.8.52: KiviDB 1.2.0 na picha yake ya Lua (`kividb/kividb:v1.2.0-lua`). Kikomo cha bei (pamoja na mchakato wa pili wa kugawana vihesabio), akiba ya uthibitisho, hifadhi ya kiasi, kivunja mzunguko wa joto, hifadhi ya kache ya semantic, na ombi la `/v1/chat/completions` kupitia kidhibiti cha gumzo lilipitisha hundi 18 kati ya 19 ambazo hupitishwa kwenye Redis 8.10.3. Ile inayotofautiana: `INCRBYFLOAT` huhifadhi `0.1 + 0.2` kama `0.30000000000000004` ambapo Redis huhifadhi `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Hifadhi ya kiasi huchanganua zote mbili na `parseFloat`, lakini nambari mbili hutofautiana katika tarakimu za mwisho, kwa hivyo ulinganisho unaoangukia kwenye mpaka wa mgawo unaweza kutoka tofauti. Duka la ushirika wa kikao halikuwa sehemu ya uendeshaji huo. ( [kuweka](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [matokeo](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -201,13 +191,13 @@ flowchart LR
 
 ## Marejeleo
 
-| Faili                              | Kusudi                                                                                    |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Kiteja msingi cha Redis, hati ya Lua ya kudhibiti kiwango, mbadala wa kumbukumbu ya ndani |
-| `src/lib/db/apiKeys.ts`            | Akiba ya uthibitishaji — mbadala wa Redis→SQLite                                          |
-| `src/lib/quota/redisQuotaStore.ts` | Kiteja tofauti cha Redis kwa hifadhi ya hiari ya mgao                                     |
-| `src/lib/quota/storeFactory.ts`    | Hubadilisha kati ya viendeshaji vya mgao vya `sqlite` na `redis`                          |
-| `docker-compose.prod.yml`          | Kontena la Redis la mazingira ya uzalishaji (taswira `redis:8.6.2-alpine`)                |
-| `.env.example`                     | Nyaraka za vigeu vya mazingira vya Redis                                                  |
-| `src/app/api/local/redis/`         | Njia za API za uratibu wa kontena la usanidi                                              |
-| `bin/cli/commands/redis.mjs`       | Amri za CLI za uratibu wa kontena la usanidi                                              |
+| Faili                              | Kusudi                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Mteja wa msingi Redis, hati ya kikomo cha kiwango cha Lua, urejeshaji wa kumbukumbu |
+| `src/lib/db/apiKeys.ts`            | Akiba ya maandishi — Redis→SQLite mbadala                                           |
+| `src/lib/quota/redisQuotaStore.ts` | Tenganisha mteja wa Redis kwa duka la hiari la upendeleo                            |
+| `src/lib/quota/storeFactory.ts`    | Hubadilisha kati ya viendeshi vya upendeleo vya `sqlite` na `redis`                 |
+| `docker-compose.prod.yml`          | Chombo cha Prod Redis (picha `redis:8.6.2-alpine`)                                  |
+| `.env.example`                     | Hati Redis env vars                                                                 |
+| `src/app/api/local/redis/`         | Njia za API za upangaji wa vyombo vya dev                                           |
+| `bin/cli/commands/redis.mjs`       | CLI inaamuru kwa upangaji wa vyombo vya dev                                         |

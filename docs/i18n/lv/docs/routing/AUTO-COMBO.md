@@ -285,55 +285,61 @@ vērtības tiek padotas dzinēja esošajām `config.modePack` / `config.budgetCa
 
 ## Visas maršrutēšanas stratēģijas
 
-OmniRoute kombināciju dzinējs atbalsta **20 maršrutēšanas stratēģijas** (deklarētas `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Pats Auto Combo dzinējs ir pieejams ar stratēģiju `auto`; pārējās stratēģijas ir pieejamas saglabātajām kombinācijām.
+OmniRoute kombinētais dzinējs atbalsta **20 maršrutēšanas stratēģijas** (deklarēts `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Pats Auto Combo dzinējs ir pakļauts `auto` stratēģijai; pārējie ir pieejami pastāvīgām kombinācijām.
 
-| Stratēģija          | Apraksts                                                                                                                                                                                                          |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Sakārtots saraksts ar pirmo mērķi un skaidri norādītām prioritātēm                                                                                                                                                |
-| `weighted`          | Svērta nejauša izvēle, izmantojot katra mērķa svaru                                                                                                                                                               |
-| `round-robin`       | Secīga cikliska mērķu izvēle (paketēs; skatiet tālāk)                                                                                                                                                             |
-| `context-relay`     | Konteksta nodošana starp mērķiem (garām sarunām)                                                                                                                                                                  |
-| `fill-first`        | Katra mērķa kvotas aizpildīšana pirms pāriešanas pie nākamā                                                                                                                                                       |
-| `p2c`               | Nejauša slodzes līdzsvarošana, izmantojot divu izvēļu principu                                                                                                                                                    |
-| `random`            | Vienmērīga nejauša izvēle                                                                                                                                                                                         |
-| `least-used`        | Mērķa ar vismazāko pašreizējo slodzi izvēle                                                                                                                                                                       |
-| `cost-optimized`    | Izmaksu par pieprasījumu minimizēšana, ņemot vērā kataloga cenas                                                                                                                                                  |
-| `reset-aware` ⭐    | Prioritātes noteikšana pēc kvotas atiestatīšanas laika — īsāki atiestatīšanas periodi tiek novērtēti augstāk                                                                                                      |
-| `reset-window`      | Priekšroka mērķiem, kuru kvotas periods tiks atiestatīts visdrīzāk                                                                                                                                                |
-| `headroom`          | Mērķa ar vislielāko atlikušo kvotas rezervi izvēle                                                                                                                                                                |
-| `quota-weighted`    | Izlaist kontus ar izsmeltu kvotu, pēc tam izvēlēties no pārējiem proporcionāli atlikušajai kvotai, kas dalīta ar izpildē esošo pieprasījumu slodzi; esošās sarunas paliek piesaistītas                            |
-| `strict-random`     | Nejauša izvēle bez atkārtojumu dedublēšanas                                                                                                                                                                       |
-| `auto`              | Izmantot Auto Combo novērtēšanu (16 faktori) — **ieteicams**                                                                                                                                                      |
-| `lkgp`              | Pēdējais zināmais veiksmīgais ceļš (piesaista pēdējam veiksmīgajam nodrošinātājam un pēc tam atkāpjas uz noteikumiem)                                                                                             |
-| `context-optimized` | Izvēlēties pašreizējam konteksta lielumam vispiemērotāko mērķi                                                                                                                                                    |
-| `cache-optimized`   | Pārkārtot mērķus pēc uzvednes kešatmiņas atbilstības — vispirms tiek izmēģināts savienojums, kurā, visticamāk, jau ir šī pieprasījuma kešotais prefikss (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Paralēli nosūtīt pieprasījumu modeļu grupai un pēc tam ar vērtētāja palīdzību sintezēt vienu atbildi (skatiet tālāk)                                                                                              |
-| `pipeline`          | Izpildīt mērķus secīgi, katra posma izvadi nododot kā nākamā posma ievadi; tiek atgriezta tikai galīgā atbilde (#6396)                                                                                            |
+| stratēģija          | Apraksts                                                                                                                                                                                                                                |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Pirmā mērķa sakārtotais saraksts ar skaidru prioritāti                                                                                                                                                                                  |
+| `weighted`          | Svērts nejauši pēc mērķa svara                                                                                                                                                                                                          |
+| `round-robin`       | Pārvietojieties cauri mērķiem secībā (paketē; skatīt zemāk)                                                                                                                                                                             |
+| `context-relay`     | Nododiet kontekstu starp mērķiem (garas sarunas)                                                                                                                                                                                        |
+| `fill-first`        | Pirms pāriet uz nākamo, aizpildiet katra mērķa kvotu                                                                                                                                                                                    |
+| `p2c`               | Power-of-2-choices nejauša slodzes balansēšana                                                                                                                                                                                          |
+| `random`            | Vienota izlases veida atlase                                                                                                                                                                                                            |
+| `least-used`        | Izvēlieties mērķi ar mazāko strāvas slodzi                                                                                                                                                                                              |
+| `cost-optimized`    | Samaziniet USD par katru pieprasījumu, ņemot vērā kataloga cenas                                                                                                                                                                        |
+| `reset-aware` ⭐    | Prioritātes noteikšana pēc kvotas atiestatīšanas laika — īsie atiestatīšanas logi ir ierindoti augstāk                                                                                                                                  |
+| `reset-window`      | Dodiet priekšroku mērķiem, kuru kvotas logs tiek atiestatīts ātrāk                                                                                                                                                                      |
+| `headroom`          | Izvēlieties mērķi ar lielāko atlikušo kvotu                                                                                                                                                                                             |
+| `quota-weighted`    | Izlaist izsmeltos kontus, pēc tam izvēlieties starp pārējiem proporcionāli atlikušajai kvotai, kas dalīta ar slodzi lidojuma laikā; esošās sarunas paliek piespraustas                                                                  |
+| `strict-random`     | Nejauši bez atkārtojumu dedublikācijas                                                                                                                                                                                                  |
+| `auto`              | Izmantojiet automātisko kombināciju (16 faktoru) —**ieteicams**                                                                                                                                                                         |
+| `lkgp`              | Pēdējais zināmais pareizais ceļš (piesprauž pēdējo veiksmīgo pakalpojumu sniedzēju, pēc tam atgriežas pie noteikumiem)                                                                                                                  |
+| `context-optimized` | Izvēlieties mērķi, kas vislabāk atbilst pašreizējam konteksta lielumam                                                                                                                                                                  |
+| `cache-optimized`   | Mērķu pārkārtošana, izmantojot uzvednes kešatmiņas radniecību — vispirms tiek izmēģināts savienojums, kurā, visticamāk, jau ir šī pieprasījuma kešatmiņā saglabātais prefikss (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Paralēli virzieties uz modeļu paneli, pēc tam sintezējiet vienu atbildi ar tiesneša starpniecību (skatiet tālāk)                                                                                                                        |
+| `pipeline`          | Palaidiet mērķus secīgi, katra soļa izvadi ievietojot nākamās darbības ievadē; tiek atgriezta tikai galīgā atbilde (#6396)                                                                                                              |
 
-⭐ = Jaunums versijā v3.8.0 · 🧬 = Jaunums versijā v3.8.36
+⭐ = Jaunums versijā v3.8.0 · 🧬 = Jaunums v3.8.36
 
 ### `weighted` semantika
 
-`weighted` ir **proporcionāla nejauša izvēle katram pieprasījumam**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), nevis izlīdzinātājs:
+`weighted` ir a **proporcionāla izlases veida izloze katram pieprasījumam** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), nevis ekvalaizers:
 
-- Katram pieprasījumam tiek izvēlēts **viens** posms ar varbūtību `weight / totalWeight`; atlikušie posmi
-  tiek sakārtoti dilstošā svara secībā kā šī pieprasījuma rezerves ķēde.
-- Posms, kura svars ir `0` (vai nav norādīts), **nekad netiek izvēlēts**, kamēr kādam citam posmam
-  svars ir > 0 — tas var kalpot tikai kā rezerve pēc izvēlētā posma kļūmes. Tikai tad, ja **visi**
-  svari ir 0, izvēle kļūst vienmērīgi nejauša.
-- Posmi, kuru visi mērķi nav pieejami — nodrošinātāja ķēdes pārtraucēja stāvoklis `OPEN`, savienojuma
-  nogaidīšanas periods, modeļa bloķēšana — tiek izņemti no atlases pirms tās veikšanas
-  (`open-sse/services/combo/targetResolution.ts`), tādēļ viens darbspējīgs posms īslaicīgi var
-  tikt izvēlēts katram pieprasījumam.
-- `stickyWeightedLimit` (kombinācijas konfigurācija, noklusējums `1` = izslēgts) piesaista izvēlēto posmu norādītajam
-  secīgo veiksmīgo izpildes reižu skaitam pirms atkārtotas izvēles.
+- Katrs pieprasījums izlozē **viens** solis ar varbūtību `weight / totalWeight`; pārējās darbības ir sakārtotas pēc dilstošā svara kā šī pieprasījuma atkāpšanās ķēde.
+- Solis, kura svars ir `0` (vai trūkst), ir **nekad nav zīmēts** lai gan jebkura cita soļa svars ir > 0 — tas var kalpot tikai kā atkāpšanās līdzeklis pēc tam, kad novilktais solis nedarbojas. Tikai tad, kad **visi** svari ir 0 vai atlase kļūst vienota.
+- Darbības, kuru mērķi nav pieejami, — nodrošinātāja ķēdes pārtraucējs `OPEN`, savienojuma atdzišana, modeļa bloķēšana — tiek izņemti no izlozes, pirms tas notiek (`open-sse/services/combo/targetResolution.ts`), tāpēc viens veselīgs solis var īslaicīgi uzvarēt katru pieprasījumu.
+- `stickyWeightedLimit` (kombinētā konfigurācija, noklusējuma `1` = izslēgta) piesprauž zīmēto soli tik daudzām secīgām veiksmēm pirms atkārtotas zīmēšanas.
 
-Stingrai rotācijai izmantojiet `round-robin`; vienādi svari ar `weighted` nodrošina statistisku, nevis stingru līdzsvaru.
+Stingrai rotācijai izmantojiet `round-robin`; vienādi svari `weighted` sniedz statistisko —, nevis stingru — līdzsvaru.
 
 ### Aģenta konveijera režīms
 
 `pipeline` kombinācija ar vismaz diviem modeļiem var izvēlēties planner/executor maršrutēšanu ar `config.agenticOrchestration.enabled`. Pirmajam mērķim pieder plānošana un galīgās atbildes; otrais mērķis izstaro klienta vietējo rīku zvanus. OmniRoute nosaka rīka rezultāta turpinājumus no pieprasījuma protokola, jautā plānotājam, vai ir nepieciešama vēl viena rīka kārta, un dinamiski padara izpildītāju vai plānotāju par pēdējo soli, kas vērsts uz klientu.
+
+Izvēles `config.agenticOrchestration.contextCompaction` piemēro atsevišķu kravnesības budžetu pirms katra plānotāja vai izpildītāja nosūtīšanas. Iespējojiet to tieši:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Tie ir operatora atlasīti serializēti JSON rakstzīmju budžeti, nevis marķiera konteksta logi vai garantēti augšējie ierobežojumi. Precīzs modelis IDs ignorē noklusējuma iestatījumu. Virs sliekšņa, sablīvēšana noņem identiskas rīku definīcijas, apgriež pārāk lielus rīku pierādījumus ar īssavilkumu un noņem vecās pilnīgas vēstures grupas, lai sasniegtu mērķa attiecību. Tas saglabā system/developer instrukcijas, jaunāko lietotāja pieprasījumu, pēdējo rīku kārtu, tostarp paralēlo calls/results, un Gemini vadošo maršrutēšanas instrukciju. Tiek saglabātas augstākā līmeņa instrukcijas un rīku iestatījumi. Izlaiduma marķieris ieraksta noņemto vēsturi; šī ir deterministiska apgriešana, nevis semantisks kopsavilkums. Ja piespraustais konteksts joprojām pārsniedz budžetu, pieprasījums atgriež 413 pirms sazināšanās ar modeli. Ja blīvēšana ir atspējota vai zem sliekšņa, pieprasījums tiek nosūtīts nemainīgs.
 
 Rīka rezultāta turpinājumā OmniRoute aptur izpildi arī tad, ja divas secīgas pabeigtas kārtas atkārto vienu un to pašu rīka izsaukumu ar nemainīgiem rezultātiem vai ja katrs skaidri atzīmētais rezultāts divās secīgās kārtās ir neveiksmīgs. Mainīti rezultāti ļauj veikt atkārtotus zvanus (piemēram, aptauju). Aizsargs tiek atiestatīts pēc jauna lietotāja pieprasījuma, grupē paralēlos zvanus vienā kārtā un atbalsta Anthropic, tērzēšanas pabeigšanas, atbildes un Gemini vēsturi. Plānotājs saņem iemeslu un viņam pieder galīgā atbilde, pat ja tas pieprasa citu rīku kārtu.
 
@@ -351,15 +357,15 @@ Papildu modeļiem pēc otrā mērķa tiek pasūtītas izpildītāja dublējumkop
 
 Izpildītājs vienā atbildē var izdot vairākus neatkarīgus zvanus. Atkarīgie zvani tiek apstrādāti vēlākos klienta rīku-rezultātu pagriezienos, plānotājam pārskatot katru rezultātu. `maxToolRounds` noklusējuma vērtība ir `8` un pieņem `1`—`32`; Kad tas ir sasniegts, plānotājam ir jāsniedz labākā pieejamā galīgā atbilde. Iekšējie plānotāja lēmumi tiek buferizēti, savukārt atlasītā klienta atbilde saglabā sākotnējo straumēšanas preferenci.
 
-### `round-robin` piesaistītā pakešu apstrāde un kontu izvēršana
+### `round-robin` lipīga partija un konta paplašināšana
 
-Cikliskā apstrāde notiek paketēs, nevis pa vienam pieprasījumam katrā solī:
+Apļa pārbaude tiek veikta pa daļām, nevis viens pieprasījums katrā solī:
 
-- `stickyRoundRobinLimit` (vispirms kombinācijas konfigurācija, pēc tam `comboStickyRoundRobinLimit`, tad `settings.stickyRoundRobinLimit`; noklusējums — **3**) saglabā vienu un to pašu mērķi norādītajam secīgo veiksmīgo pieprasījumu skaitam un tikai pēc tam veic rotāciju. Lai rotācija notiktu pēc katra pieprasījuma, iestatiet kombinācijas pārrakstīšanas vērtību uz `1`. Kombināciju redaktors parāda faktisko vērtību un slāni, no kura tā iegūta.
-- `connectionAwareExpansion` (vispirms kombinācijas konfigurācija, pēc tam iestatījumi; noklusējums — **false**) pirms rotācijas izvērš katru pakalpojumu sniedzēja līmeņa soli atsevišķos kontu mērķos. B grupas stratēģijas (prioritāte, svērta atlase, cikliska atlase, nejauša atlase, p2c, vismazāk izmantotais, izmaksu optimizācija, lkgp, secīga aizpildīšana, stingri nejauša atlase, konteksta optimizācija, kešatmiņas optimizācija, konteksta pārsūtīšana, sapludināšana, konveijers) saglabā pakalpojumu sniedzēja līmeņa skatu, kamēr šī opcija nav ieslēgta. Kombināciju redaktorā ir pieejamas opcijas pārmantot / ieslēgt / izslēgt; pārmantošana izmanto globālo noklusējuma vērtību (izslēgts).
-- Uzvedņu kešatmiņas lokalitātes maršrutēšana (`promptCacheAffinityEnabled`; noklusējums — **true**) pārkārto piesaistītos savienojumus, lai atbilstošās kešatmiņas atslēgas paliktu vienā kontā. Tai ir priekšroka pār ciklisko un svērto rotāciju starp piesaistītiem katra konta soļiem. Ja nepieciešama stingra rotācija, izslēdziet to sadaļā Iestatījumi → Kombināciju noklusējumi. Katrai kombinācijai atsevišķa pārrakstīšanas opcija nav pieejama.
+- `stickyRoundRobinLimit` (kombinētā konfigurācija, pēc tam `comboStickyRoundRobinLimit`, pēc tam `settings.stickyRoundRobinLimit`, noklusējuma **3** ) saglabā to pašu mērķi tik daudziem secīgiem panākumiem pirms rotācijas. Iestatiet kombinēto ignorēšanu uz `1` viena pieprasījuma rotācijai. Kombinētais redaktors parāda efektīvo vērtību un to, no kura slāņa tā iegūta.
+- `connectionAwareExpansion` (kombinētā konfigurācija, pēc tam iestatījumi, noklusējuma **viltus** ) izvērš katru pakalpojumu sniedzēja līmeņa soli, iekļaujot tā mērķus katram kontam pirms rotācijas. B grupas stratēģijas (prioritārās, svērtās, apaļās, nejaušās, p2c, vismazāk izmantotās, optimizētās izmaksas, lkgp, aizpildīšana vispirms, stingri izlases veida, konteksta optimizēta, optimizēta kešatmiņai, konteksta pārraide, sapludināšana, konveijera) saglabā nodrošinātāja līmeņa skatu, līdz tas ir ieslēgts. Kombinētais redaktors atklāj inherit / on / off; inherit izmanto globālo noklusējumu (izslēgts).
+- Uzvednes kešatmiņas atrašanās vietas maršrutēšana (`promptCacheAffinityEnabled`, noklusējuma **taisnība** ) pārkārto piespraustos savienojumus, lai atbilstošās kešatmiņas atslēgas paliktu vienā kontā. Tai ir prioritāte pār apļveida un svērto rotāciju pa piespraustiem konta soļiem. Izslēdziet to sadaļā Iestatījumi → Combo noklusējuma iestatījumi, ja jums nepieciešama stingra pagriešana. Nav atsevišķas kombinācijas ignorēšanas.
 
-Vairāku kontu rotācijai vienā modelī ieteicams izmantot **vienu dinamiska konta soli** (tukšs `connectionId`, viss pūls) ar piesaistes ierobežojumu `1`, nevis trīs piesaistītus `connectionId`. Piesaistītie soļi kopā ar afinitāti tiek novirzīti uz vienu un to pašu kontu, pat ja RR skaitītājs turpina palielināties.
+Vairāku kontu rotācijai vienā modelī dodiet priekšroku **viens dinamiskā konta solis** (tukšs `connectionId`, viss baseins) ar lipīguma ierobežojumu `1`, nevis trīs piesprausti `connectionId`. Piespraustās darbības un radniecība tiek sakļauta tajā pašā kontā, pat ja RR skaitītājs virzās uz priekšu.
 
 ## Kodolsintēzes stratēģija
 

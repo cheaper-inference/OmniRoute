@@ -41,7 +41,7 @@ Pokretanje testova: pogledajte [Testiranje](#testiranje) u nastavku (prvo pokren
 - Prevodioci — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformer — `open-sse/transformer/` (Responses API ↔ Chat Completes)
 - Usluge — `open-sse/services/` (kombo usmjeravanje, ograničenja brzine, keširanje, itd.)
-- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 233 migracije)
+- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 234 migracije)
 - Domain/Policy — `src/domain/` (pogon politike, pravila troškova, rezervna logika)
 - MCP Server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modula; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
 - A2A Server — `src/lib/a2a/` (JSON-RPC 2.0 agentski protokol)

@@ -403,52 +403,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## કાર્યક્ષમતા ટ્યુનિંગ
+## પ્રદર્શન ટ્યુનિંગ
 
 ### WAL મોડ
 
-WAL ડિફૉલ્ટ રૂપે સક્ષમ હોય છે. વધુ લખાણવાળા વર્કલોડ માટે, આનો વિચાર કરો:
+WAL ડિફૉલ્ટ રૂપે સક્ષમ છે. ઉચ્ચ-લેખન વર્કલોડ માટે, ધ્યાનમાં લો:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- દર 1000 પેજે ચેકપોઇન્ટ
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL મર્યાદા
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### ઇન્ડેક્સ
+OmniRoute `journal_size_limit` સેટ કરતું નથી. ચેકપોઇન્ટ WAL ફ્રેમ્સને મુખ્ય ફાઇલમાં ખસેડે છે, પરંતુ WAL ફાઇલ તેની સૌથી મોટી ફાળવેલ કદ રાખે છે. `OMNIROUTE_WAL_GUARD_MAX_MB` ગાર્ડ ફક્ત ચેતવણી આપે છે અને `wal_checkpoint(RESTART)` ચલાવે છે; તે ડિસ્ક-સાઇઝ કેપ નથી.
 
-કાર્યક્ષમતા માટેના મુખ્ય ઇન્ડેક્સ (માઇગ્રેશન્સ દ્વારા આપમેળે બનાવવામાં આવે છે):
+### અનુક્રમણિકાઓ
 
-- `idx_models_provider` — પ્રદાતા મુજબ મોડેલ લુકઅપ
-- `idx_combo_targets_combo_id` — કોમ્બો ટાર્ગેટ વિસ્તરણ
+પ્રદર્શન માટે મુખ્ય સૂચકાંકો (સ્થળાંતર દ્વારા સ્વતઃ-નિર્માણ):
+
+- પ્રદાતા દ્વારા`idx_models_provider` — મોડેલ લુકઅપ્સ
+- `idx_combo_targets_combo_id` — કોમ્બો લક્ષ્ય વિસ્તરણ
 - `idx_usage_history_api_key_timestamp` — વપરાશ વિશ્લેષણ
-- `idx_quota_snapshots_api_key_window` — ક્વોટા ટ્રૅકિંગ
-- `idx_call_logs_timestamp` — કૉલ લૉગ ક્વેરીઓ
+- `idx_quota_snapshots_api_key_window` — ક્વોટા ટ્રેકિંગ
+- `idx_call_logs_timestamp` — કૉલ લોગ પ્રશ્નો
 
-નવો ઇન્ડેક્સ ઉમેરવા માટે, માઇગ્રેશન બનાવો:
+નવી અનુક્રમણિકા ઉમેરવા માટે, સ્થળાંતર બનાવો:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### મેમરી-મૅપ્ડ I/O
+### મેમરી-મેપ કરેલ I/O
 
-ખૂબ મોટા ડેટાબેસ (>10GB) માટે, SQLite pragma દ્વારા મેમરી મૅપિંગ સમાયોજિત કરી શકાય છે:
+ખૂબ મોટા ડેટાબેસેસ માટે (> 10GB), મેમરી મેપિંગ SQLite pragma દ્વારા એડજસ્ટ કરી શકાય છે:
 
 ```sql
--- SQLite pragma દ્વારા સેટ કરો (core.ts અથવા રનટાઇમમાં સમાયોજિત કરો)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### કમ્પૅક્શન
+### કોમ્પેક્શન
 
-લાંબા સમયથી ચાલી રહેલા OmniRoute ઇન્સ્ટન્સને ક્યારેક `VACUUM` કરવાથી લાભ થાય છે:
+લાંબા સમયથી ચાલતા OmniRoute ઉદાહરણો પ્રસંગોપાત `VACUUM` થી લાભ મેળવે છે:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-ઓછા ટ્રાફિકના સમયગાળા દરમિયાન દર મહિને ચલાવો. (WAL મોડ તેની જરૂરિયાત ઘટાડે છે, પરંતુ તેને સંપૂર્ણપણે દૂર કરતું નથી.)
+ઓછા ટ્રાફિકવાળી વિંડોઝ દરમિયાન માસિક ચલાવો. (WAL મોડ જરૂરિયાત ઘટાડે છે, પરંતુ તેને દૂર કરતું નથી.)
 
 ---
 

@@ -305,56 +305,61 @@ omgezette waarden worden doorgegeven aan de bestaande invoerwaarden `config.mode
 
 ## Alle routeringsstrategieën
 
-De combo-engine van OmniRoute ondersteunt **20 routeringsstrategieën** (gedeclareerd in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). De Auto Combo-engine zelf is beschikbaar via de strategie `auto`; de overige strategieën zijn beschikbaar voor opgeslagen combo's.
+OmniRoute's combo-engine ondersteunt **20 routeringsstrategieën** (aangegeven in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). De Auto Combo-engine zelf valt onder de `auto` -strategie; de anderen zijn beschikbaar voor aanhoudende combo's.
 
-| Strategie           | Beschrijving                                                                                                                                                                                                                       |
-| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Geordende lijst waarbij het eerste doel voorrang krijgt, met expliciete prioriteit                                                                                                                                                 |
-| `weighted`          | Gewogen willekeurige selectie op basis van het gewicht per doel                                                                                                                                                                    |
-| `round-robin`       | Doorloop doelen op volgorde (in batches; zie hieronder)                                                                                                                                                                            |
-| `context-relay`     | Geef context door tussen doelen (lange gesprekken)                                                                                                                                                                                 |
-| `fill-first`        | Vul het quotum van elk doel voordat naar het volgende wordt gegaan                                                                                                                                                                 |
-| `p2c`               | Willekeurige taakverdeling volgens het power-of-2-choices-principe                                                                                                                                                                 |
-| `random`            | Uniforme willekeurige selectie                                                                                                                                                                                                     |
-| `least-used`        | Kies het doel met de laagste huidige belasting                                                                                                                                                                                     |
-| `cost-optimized`    | Minimaliseer de kosten per aanvraag op basis van catalogusprijzen                                                                                                                                                                  |
-| `reset-aware` ⭐    | Geef prioriteit op basis van de resettijd van quota — korte resetvensters krijgen een hogere positie                                                                                                                               |
-| `reset-window`      | Geef de voorkeur aan doelen waarvan het quotumvenster het eerst wordt gereset                                                                                                                                                      |
-| `headroom`          | Kies het doel met de meeste resterende quotumruimte                                                                                                                                                                                |
-| `quota-weighted`    | Sla uitgeputte accounts over en kies vervolgens uit de rest naar rato van het resterende quotum gedeeld door de actieve belasting; bestaande gesprekken blijven aan hun doel gekoppeld                                             |
-| `strict-random`     | Willekeurige selectie zonder deduplicatie van herhalingen                                                                                                                                                                          |
-| `auto`              | Gebruik Auto Combo-scoring (16 factoren) — **aanbevolen**                                                                                                                                                                          |
-| `lkgp`              | Laatst bekende werkende route (houdt vast aan de laatst succesvolle provider en valt vervolgens terug op regels)                                                                                                                   |
-| `context-optimized` | Kies het doel dat het beste bij de huidige contextgrootte past                                                                                                                                                                     |
-| `cache-optimized`   | Herschik doelen op basis van promptcache-affiniteit — de verbinding die waarschijnlijk al het gecachete voorvoegsel van deze aanvraag bevat, wordt als eerste geprobeerd (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Stuur de aanvraag parallel naar een panel van modellen en synthetiseer vervolgens één antwoord via een beoordelingsmodel (zie hieronder)                                                                                           |
-| `pipeline`          | Voer doelen achtereenvolgens uit, waarbij de uitvoer van elke stap als invoer voor de volgende stap dient; alleen het uiteindelijke antwoord wordt geretourneerd (#6396)                                                           |
+| Strategie           | Beschrijving                                                                                                                                                                                                                                               |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Eerste doel geordende lijst met expliciete prioriteit                                                                                                                                                                                                      |
+| `weighted`          | Willekeurig gewogen op basis van het doelgewicht                                                                                                                                                                                                           |
+| `round-robin`       | Blader op volgorde door doelen (batch; zie hieronder)                                                                                                                                                                                                      |
+| `context-relay`     | Context doorgeven aan doelen (lange gesprekken)                                                                                                                                                                                                            |
+| `fill-first`        | Vul het quotum van elk doel voordat u naar het volgende gaat                                                                                                                                                                                               |
+| `p2c`               | Power-of-2-choices willekeurige taakverdeling                                                                                                                                                                                                              |
+| `random`            | Uniforme willekeurige selectie                                                                                                                                                                                                                             |
+| `least-used`        | Kies een doel met de laagste stroombelasting                                                                                                                                                                                                               |
+| `cost-optimized`    | Minimaliseer $ per aanvraag op basis van catalogusprijzen                                                                                                                                                                                                  |
+| `reset-aware` ⭐    | Prioriteer op basis van de quota-resettijd — korte reset-vensters staan hoger gerangschikt                                                                                                                                                                 |
+| `reset-window`      | Geef de voorkeur aan doelen waarvan de quotaperiode het snelst wordt gereset                                                                                                                                                                               |
+| `headroom`          | Kies het doel met de meeste resterende quotumruimte                                                                                                                                                                                                        |
+| `quota-weighted`    | Sla uitgeputte accounts over en kies vervolgens een van de rest in verhouding tot het overgebleven quotum gedeeld door de lading tijdens de vlucht; bestaande gesprekken blijven vastgezet                                                                 |
+| `strict-random`     | Willekeurig zonder ontdubbeling van herhalingen                                                                                                                                                                                                            |
+| `auto`              | Gebruik automatische comboscore (16-factoren) —**aanbevolen**                                                                                                                                                                                              |
+| `lkgp`              | Laatst bekende goede pad (pint vast aan de laatste succesvolle provider en valt vervolgens terug op regels)                                                                                                                                                |
+| `context-optimized` | Kies het doel dat het beste past bij de huidige contextgrootte                                                                                                                                                                                             |
+| `cache-optimized`   | Doelen opnieuw ordenen op basis van prompt-cache-affiniteit — De verbinding die het meest waarschijnlijk al het in de cache opgeslagen voorvoegsel van dit verzoek bevat, wordt eerst geprobeerd (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Waaier uit naar een panel van parallelle modellen en synthetiseer vervolgens één antwoord via een rechter (zie hieronder)                                                                                                                                  |
+| `pipeline`          | Voer doelen opeenvolgend uit, waarbij de uitvoer van elke stap wordt samengevoegd met de invoer van de volgende stap; alleen het definitieve antwoord wordt geretourneerd (#6396)                                                                          |
 
 ⭐ = Nieuw in v3.8.0 · 🧬 = Nieuw in v3.8.36
 
-### Semantiek van `weighted`
+### `weighted` semantiek
 
-`weighted` is een **proportionele willekeurige trekking per aanvraag**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), geen methode om de verdeling gelijk te trekken:
+`weighted` is een **proportionele willekeurige trekking per verzoek** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), geen equalizer:
 
-- Voor elke aanvraag wordt **één** stap getrokken met de waarschijnlijkheid `weight / totalWeight`; de resterende stappen
-  worden op aflopend gewicht geordend als terugvalketen voor die aanvraag.
-- Een stap waarvan het gewicht `0` is (of ontbreekt), wordt **nooit getrokken** zolang een andere stap een
-  gewicht > 0 heeft — deze kan alleen als terugvaloptie dienen nadat de getrokken stap mislukt. Alleen wanneer **alle**
-  gewichten 0 zijn, wordt de selectie uniform.
-- Stappen waarvan alle doelen niet beschikbaar zijn — `OPEN`-stroomonderbreker van de provider, afkoelperiode van de verbinding,
-  modelblokkering — worden vóór de trekking uit de selectie verwijderd
-  (`open-sse/services/combo/targetResolution.ts`), zodat één gezonde stap tijdelijk
-  elke aanvraag kan winnen.
-- `stickyWeightedLimit` (combo-configuratie, standaard `1` = uit) houdt de getrokken stap gedurende dat aantal
-  opeenvolgende successen vast voordat opnieuw wordt getrokken.
+- Elk verzoek trekt **een** stap met waarschijnlijkheid `weight / totalWeight`; de overige stappen worden geordend op aflopend gewicht als terugvalketen voor dat verzoek.
+- Een stap waarvan het gewicht `0` is (of ontbreekt).**nooit getekend** terwijl elke andere stap een gewicht > 0 — heeft, kan deze alleen als terugval dienen nadat de getekende stap mislukt. Alleen wanneer **alle** gewichten zijn 0, wordt de selectie uniform.
+- Stappen waarvan de doelen allemaal niet beschikbaar zijn — provider stroomonderbreker `OPEN`, verbindingsafkoeling, modelvergrendeling — worden uit de trekking verwijderd voordat dit gebeurt (`open-sse/services/combo/targetResolution.ts`), zodat een enkele gezonde stap tijdelijk elk verzoek kan winnen.
+- `stickyWeightedLimit` (combo-configuratie, standaard `1` = uit) zet de getekende stap vast voor zoveel opeenvolgende successen voordat deze opnieuw wordt getekend.
 
-Gebruik voor strikte rotatie `round-robin`; gelijke gewichten bij `weighted` zorgen voor een statistische — niet
-strikte — verdeling.
+Gebruik voor strikte rotatie `round-robin`; Gelijke gewichten op `weighted` geven een statistisch — en geen strikt — saldo.
 
 ### Agentische pijplijnmodus
 
-Een `pipeline` combo met minimaal twee modellen kan zich aanmelden voor planner/executor -routering met `config.agenticOrchestration.enabled`. Het eerste doelwit is eigenaar van de planning en de eindantwoorden; het tweede doel zendt client-native tooloproepen uit. OmniRoute detecteert voortzettingen van toolresultaten uit het aanvraagprotocol, vraagt de planner of er nog een toolronde nodig is en maakt op dynamische wijze de uitvoerder of planner de klantgerichte laatste stap.
+Een `pipeline` combo met minimaal twee modellen kan zich aanmelden voor planner/executor -routering met `config.agenticOrchestration.enabled`. Het eerste doelwit is eigenaar van de planning en de definitieve antwoorden; het tweede doel zendt client-native tooloproepen uit. OmniRoute detecteert voortzettingen van toolresultaten uit het aanvraagprotocol, vraagt de planner of er nog een toolronde nodig is en maakt op dynamische wijze de uitvoerder of planner de klantgerichte laatste stap.
+
+Optioneel hanteert `config.agenticOrchestration.contextCompaction` vóór elke planner of uitvoerder een apart payloadbudget. Schakel het expliciet in:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Dit zijn geserialiseerde JSON tekenbudgetten die door de operator zijn geselecteerd, geen token-contextvensters of gegarandeerde upstream-limieten. Exact model IDs overschrijft de standaard. Boven de drempel verwijdert compactie identieke gereedschapsdefinities, trimt overmaats gereedschapsbewijsmateriaal met een overzicht en verwijdert oude complete geschiedenisgroepen richting de doelverhouding. Het bewaart system/developer -instructies, het laatste gebruikersverzoek, de laatste gereedschapsronde inclusief parallelle calls/results en de leidende routeringsinstructie van Gemini. Instructies op het hoogste niveau en gereedschapsinstellingen blijven behouden. Een weglatingsmarkering registreert de verwijderde geschiedenis; dit is deterministisch bijsnijden, geen semantische samenvatting. Als de vastgezette context het budget nog steeds overschrijdt, retourneert het verzoek 413 voordat contact wordt opgenomen met het model. Als verdichting is uitgeschakeld of onder de drempel ligt, wordt het verzoek ongewijzigd doorgegeven.
 
 Bij voortzetting van gereedschapsresultaten stopt OmniRoute ook met de uitvoering wanneer twee opeenvolgende voltooide rondes dezelfde tooloproepen herhalen met ongewijzigde resultaten, of wanneer elk expliciet gemarkeerd resultaat in twee opeenvolgende rondes mislukt. Gewijzigde resultaten maken herhaalde oproepen mogelijk (bijvoorbeeld polling). De bewaker wordt gereset bij een nieuw gebruikersverzoek, groepeert parallelle oproepen in één ronde en ondersteunt Anthropic, Chat-voltooiingen, reacties en Gemini geschiedenis. De planner ontvangt de reden en is eigenaar van het uiteindelijke antwoord, ook als hij om een nieuwe gereedschapsronde vraagt.
 
@@ -372,29 +377,15 @@ Extra modellen na het tweede doel zijn bestelde executor-back-ups. Een mislukte 
 
 De uitvoerder kan in één reactie meerdere onafhankelijke oproepen uitzenden. Afhankelijke oproepen worden afgehandeld in latere resultaatbeurten van de clienttool, waarbij de planner elk resultaat beoordeelt. `maxToolRounds` is standaard `8` en accepteert `1`–`32`; eenmaal bereikt, moet de planner het best beschikbare eindantwoord produceren. De beslissingen van de interne planner worden gebufferd, terwijl het geselecteerde klantgerichte antwoord de oorspronkelijke streamingvoorkeur behoudt.
 
-### Sticky batches en accountuitbreiding voor `round-robin`
+### `round-robin` sticky batch- en accountuitbreiding
 
-Round-robin werkt met batches, niet met één aanvraag per stap:
+Round-robin is batchgewijs, niet één verzoek per stap:
 
-- `stickyRoundRobinLimit` (eerst combinatieconfiguratie, dan `comboStickyRoundRobinLimit`, vervolgens
-  `settings.stickyRoundRobinLimit`, standaard **3**) behoudt hetzelfde doelmodel gedurende dat aantal
-  opeenvolgende successen voordat wordt geroteerd. Stel de combinatieoverschrijving in op `1` voor rotatie
-  per aanvraag. De combinatie-editor toont de effectieve waarde en de laag waaruit deze afkomstig is.
-- `connectionAwareExpansion` (eerst combinatieconfiguratie, dan instellingen, standaard **false**) breidt
-  elke stap op providerniveau vóór rotatie uit naar doelmodellen per account. Strategieën van groep B
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) behouden een weergave op providerniveau totdat dit is ingeschakeld. De combinatie-editor biedt
-  overnemen / aan / uit; overnemen gebruikt de globale standaardwaarde (uit).
-- Routering op basis van promptcachelokaliteit (`promptCacheAffinityEnabled`, standaard **true**) herschikt
-  vastgezette verbindingen, zodat overeenkomende cachesleutels aan één account gekoppeld blijven. Dit heeft voorrang op
-  round-robin- en gewogen rotatie tussen vastgezette stappen per account. Schakel dit uit via
-  Settings → Combo defaults als u strikte rotatie nodig hebt. Er is geen overschrijving per combinatie.
+- `stickyRoundRobinLimit` (comboconfiguratie, vervolgens `comboStickyRoundRobinLimit` en vervolgens `settings.stickyRoundRobinLimit`, standaard **3** ) behoudt hetzelfde doel voor zoveel opeenvolgende successen voordat het roteert. Stel de combo-overschrijving in op `1` voor rotatie met één verzoek. De combo-editor toont de effectieve waarde en uit welke laag deze afkomstig is.
+- `connectionAwareExpansion` (comboconfiguratie, vervolgens instellingen, standaard **vals** ) breidt elke stap op providerniveau uit naar doelen per account vóór rotatie. Groep-B-strategieën (prioriteit, gewogen, round-robin, willekeurig, p2c, minst gebruikt, kostengeoptimaliseerd, lkgp, eerst vullen, strikt willekeurig, context-geoptimaliseerd, cache-geoptimaliseerd, context-relay, fusie, pijplijn) behouden een weergave op providerniveau totdat dit is ingeschakeld. De combo-editor stelt overnemen / aan / uit bloot; inherit gebruikt de globale standaard (uit).
+- Lokale routering met prompt-cache (`promptCacheAffinityEnabled`, standaard **WAAR** ) herschikt vastgezette verbindingen zodat overeenkomende cachesleutels op één account blijven. Het heeft voorrang op round-robin en gewogen rotatie over vastgezette stappen per account. Schakel het uit onder Instellingen → Combo-standaardinstellingen als u strikte rotatie nodig heeft. Er is geen overschrijving per combinatie.
 
-Gebruik voor rotatie tussen meerdere accounts voor één model bij voorkeur **één stap met dynamische accountselectie** (lege
-`connectionId`, volledige pool) met een sticky limiet van `1`, in plaats van drie vastgezette `connectionId`-waarden.
-Vastgezette stappen in combinatie met affiniteit komen steeds bij hetzelfde account terecht, zelfs terwijl de RR-teller
-doorloopt.
+Voor rotatie van meerdere accounts op één model heeft u de voorkeur **één dynamische accountstap** (lege `connectionId`, hele pool) met sticky limit `1`, niet drie vastgezette `connectionId`'s. Vastgezette stappen plus affiniteit vallen samen op hetzelfde account, zelfs als de RR -teller vooruitgaat.
 
 ## Fusiestrategie
 

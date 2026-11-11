@@ -40,77 +40,73 @@ Omdat het bedrag een schatting is:
 
 ---
 
-## Hoe kosten worden geschat
+## Hoe de kosten worden geschat
 
 ### De prijsbron
 
-Kosten zijn gebaseerd op de samengevoegde prijstabel in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), met deze prioriteitsvolgorde (**hoogste eerst**):
+Kosten komen uit de samengevoegde prijstabel in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), in deze volgorde van prioriteit (**hoogste eerst** ):
 
-1. **Gebruikersoverschrijvingen** — prijzen ingesteld in het dashboard of via `PATCH /api/pricing` (de naamruimte `pricing`).
-2. **Synchronisatie met models.dev** — prijzen opgehaald uit `https://models.dev/api.json` (de naamruimte `models_dev_pricing`).
-3. **Synchronisatie met LiteLLM** — prijzen opgehaald uit het openbare bestand `model_prices_and_context_window.json` van LiteLLM (de naamruimte `pricing_synced`).
-4. **In de code vastgelegde standaardwaarden** — tarieven meegeleverd in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Gebruikersoverschrijvingen** — prijzen ingesteld in het dashboard of via `PATCH /api/pricing` (de `pricing` naamruimte).
+2. **models.dev-synchronisatie** — -prijzen opgehaald uit `https://models.dev/api.json` (de `models_dev_pricing` naamruimte).
+3. **LiteLLM -synchronisatie** — prijzen opgehaald uit de openbare `model_prices_and_context_window.json` van LiteLLM(de `pricing_synced` naamruimte).
+4. **Hardgecodeerde standaardwaarden** — tarieven verzonden in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Voor dezelfde provider en hetzelfde model overschrijven waarden uit lagen met hogere prioriteit de overeenkomstige velden in lagere lagen. Velden die in een hogere laag ontbreken, kunnen nog steeds uit een lagere laag komen. De volgorde blijft vast, ook als beide onafhankelijke synchronisatietaken tegelijk lopen. `GET /api/pricing?includeSources=1` retourneert `pricing` en `sourceMap`; de labels per model (`user`, `modelsDev`, `litellm`, `default`) wijzen de laag met de hoogste prioriteit aan die dat model bevat.
+Voor dezelfde provider/model overschrijven waarden uit lagen met een hogere prioriteit overeenkomende velden in lagere lagen; velden die ontbreken in een bovenste laag kunnen toch afkomstig zijn uit een lagere laag. De volgorde staat vast, zelfs als beide onafhankelijke synchronisatietaken tegelijkertijd worden uitgevoerd. `GET /api/pricing?includeSources=1` retourneert `pricing` en `sourceMap`, waarvan de labels per model (`user`, `modelsDev`, `litellm`, `default`) de laag met de hoogste prioriteit identificeren die dat model bevat.
 
-**Synchronisatie met LiteLLM** is optioneel en standaard uitgeschakeld. De omgevingsvariabelen hiervoor (zie [`.env.example`](../../.env.example)) zijn:
+**LiteLLM -synchronisatie** is opt-in, standaard uitgeschakeld. De omgevingsvariabelen (zie [`.env.example`](../../.env.example) ) zijn:
 
-| Omgevingsvariabele      | Standaard | Doel                                                                                          |
-| ----------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Prijssynchronisatie met LiteLLM op de achtergrond inschakelen.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synchronisatie-interval in **seconden** (standaard dagelijks).                                |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Bronkeuze uitsluitend voor deze synchronisatie; momenteel wordt alleen `litellm` ondersteund. |
+| Env var                 | Standaard | Doel                                                                                        |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Schakel LiteLLM prijssynchronisatie op de achtergrond in.                                   |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synchronisatie-interval in seconden (dagelijks).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Bronselectie alleen voor deze synchronisatie; momenteel wordt alleen `litellm` ondersteund. |
 
-**Synchronisatie met models.dev** staat los van de synchronisatie met LiteLLM en is eveneens standaard uitgeschakeld. Schakel haar in via Instellingen (synchronisatie met models.dev), of gebruik deze variabelen:
+**models.dev-synchronisatie** staat los van de LiteLLM synchronisatie en is ook standaard uitgeschakeld. Schakel het in via Instellingen (models.dev sync) of gebruik deze variabelen:
 
-| Omgevingsvariabele         | Standaard          | Doel                                                                                                                                                                                          |
-| -------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(niet ingesteld)_ | Zonder waarde volgt dit de schakelaar in Instellingen; `1/true/on/yes` dwingt inschakeling af en `0/false/off/no` dwingt uitschakeling af, ook als Instellingen de synchronisatie inschakelt. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Standaardinterval van de synchronisatie met models.dev in seconden, dagelijks.                                                                                                                |
+| Env var                    | Standaard         | Doel                                                                                                                                                                |
+| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(uitgeschakeld)_ | Uitschakelen volgt de schakelaar Instellingen; `1/true/on/yes` wordt ingeschakeld en `0/false/off/no` wordt uitgeschakeld (zelfs als Instellingen dit inschakelen). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standaard synchronisatie-interval van models.dev in seconden (dagelijks).                                                                                           |
 
-`PRICING_SYNC_SOURCES` schakelt models.dev **niet** in; deze variabele bestuurt uitsluitend de synchronisatie met LiteLLM. Een gebruikersoverschrijving verwijderen wist geen van beide gesynchroniseerde naamruimten: de volgende beschikbare prijslaag wordt actief. Controleer bij een model zonder prijs beide synchronisatie-instellingen en `sourceMap` voordat u een handmatige overschrijving toevoegt.
+`PRICING_SYNC_SOURCES` wel **niet** modellen.dev inschakelen; het bestuurt alleen de LiteLLM synchronisatie. Als u een gebruikersoverschrijving verwijdert, worden de gesynchroniseerde naamruimten niet gewist; de volgende beschikbare prijslaag wordt van kracht. Voor een ongeprijsd model controleert u zowel de synchronisatie-instellingen als de `sourceMap` voordat u een handmatige overschrijving toevoegt.
 
 ### De kostenformule
 
-De kosten worden per verzoek berekend op basis van aantallen tokens en tarieven per miljoen
-tokens in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+De kosten worden per aanvraag berekend op basis van tokenaantallen en tokentarieven per miljoen in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Invoertokens** (minus cachelezingen en tokens voor het aanmaken van de cache) × `input`-tarief.
-- **Tokens uit cachelezingen** × `cached`-tarief (valt terug op het invoertarief).
-- **Tokens voor het aanmaken van de cache** × `cache_creation`-tarief (valt terug op het invoertarief).
-- **Uitvoertokens** × `output`-tarief.
-- **Redeneertokens** × `reasoning`-tarief (valt terug op het uitvoertarief).
+- **Invoertokens** (minus cache-leesbewerkingen en tokens voor het maken van caches) × `input` snelheid.
+- **In cache gelezen tokens** × `cached` -tarief (valt terug naar het invoertarief).
+- **Tokens voor het maken van caches** × `cache_creation` -tarief (valt terug naar het invoertarief).
+- **Uitvoertokens** × `output` tarief.
+- **Redeneringsfiches** × `reasoning` -snelheid (valt terug naar de uitvoersnelheid).
 
-Alle tarieven worden geïnterpreteerd als USD per 1.000.000 tokens. Een Codex-serviceniveau
-"fast"/"priority" of "flex" past een kostenvermenigvuldiger toe
-(`getCodexFastCostMultiplier`) — flex wordt bijvoorbeeld gefactureerd met 50% korting op
-tokens, wat op het dashboard wordt weergegeven als **flexbesparingen**.
+Alle tarieven worden geïnterpreteerd als USD per 1.000.000 tokens. Een Codex -servicelaag "snel"/"prioriteit" of "flex" past een kostenvermenigvuldiger toe (`getCodexFastCostMultiplier`). — bijvoorbeeld, flex wordt gefactureerd met een tokenkorting van 50%, weergegeven als **flex sparen** in het dashboard.
 
-Modelnamen worden eerst genormaliseerd (providerpadvoorvoegsels zoals `openai/` of
-`accounts/fireworks/models/` worden verwijderd), zodat historische rijen nog steeds aan
-een prijs kunnen worden gekoppeld.
+Modelnamen worden eerst genormaliseerd (providerpadvoorvoegsels zoals `openai/` of `accounts/fireworks/models/` worden verwijderd), zodat historische rijen nog steeds overeenkomen met een prijs.
 
-### Hoe uitgaven worden geregistreerd
+### Hoe de uitgaven worden geregistreerd
 
-- De kosten per verzoek worden na het antwoord berekend en zonder op het resultaat te
-  wachten geregistreerd, zodat dit nooit extra latentie voor de client veroorzaakt. Verbruik
-  van gedeelde quota wordt ingepland voor de volgende iteratie van de eventloop via
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Uitgaven via API-sleutels worden gebufferd en in batches weggeschreven door de
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standaard een wegschrijfinterval
-  van 60 seconden en een buffer van 1.000 vermeldingen). Instelbaar via:
+- De kosten per aanvraag worden berekend bij voltooiing van de aanvraag. Het verbruik van gedeelde quota wordt gepland bij de volgende event-loop tick via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- De uitgaven voor API-sleutels worden in batches gebufferd en leeggemaakt door de [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standaard spoelinterval van 60 seconden, buffer voor 1.000 invoer). Afstembaar via:
 
-  | Omgevingsvariabele                  | Standaard | Doel                                                           |
-  | ----------------------------------- | --------- | -------------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Wegschrijfinterval in milliseconden.                           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Maximaal aantal gebufferde vermeldingen vóór het wegschrijven. |
+  | Env var                             | Standaard | Doel                                           |
+  | ----------------------------------- | --------- | ---------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Spoelinterval in milliseconden.                |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Max. gebufferde invoeren vóór het doorspoelen. |
 
-De kostencijfers op het dashboard worden **niet** uit een opgeslagen dollarbedrag per rij
-gelezen — ze worden telkens wanneer het analyse-eindpunt wordt uitgevoerd direct opnieuw
-berekend op basis van de aantallen tokens en de huidige prijstabel. Dit betekent dat het
-corrigeren van een onjuiste prijs (en opnieuw synchroniseren) historische kostenschattingen
-met terugwerkende kracht bijwerkt.
+De kosten geven de voorkeur aan een exacte, door de provider gerapporteerde toeslag (`provider_cost_usd`), vervolgens aan een momentopname van een catalogusgeprijsde aanvraag (`calculated_cost_usd`), en vervolgens aan een tokenherziening van de huidige catalogus. Opgeslagen kosten worden niet opnieuw in rekening gebracht via hun tokentellingen. Verouderde rijen met alleen tokens veranderen nog steeds wanneer hun catalogusprijs verandert.
+
+### OCR en inbedding
+
+- Succesvolle `/v1/ocr` -aanvragen gebruiken upstream `usage_info.pages_processed`, niet het aangevraagde paginabereik of het aantal geretourneerde pagina-objecten. De schatting is pagina's × `ocr_cost_per_page` (absoluut USD/page,**niet** USD/million).
+- Voor aanvragen met document- of bounding box-annotaties geldt een apart `ocr_cost_per_annotated_page` tarief. Zonder dit blijven de kosten onbekend; het gewone OCR -tarief wordt niet stilzwijgend vervangen.
+- LiteLLM synchronisatie wijst het stroomopwaartse `annotation_cost_per_page` veld toe aan `ocr_cost_per_annotated_page`, waarbij de absolute USD/page waarde en alleen annotatie-items behouden blijven, inclusief expliciete nul. Een opgegeven canoniek veld heeft voorrang; ongeldige aliaswaarden worden genegeerd. Overschrijvingen van gebruikersprijzen behouden hun normale prioriteit. Zie [de OCR prijssleutels van LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -gebruik slaat het aantal pagina's, de eenheidsprijs, de berekende USD kosten, API sleutel en de geselecteerde verbinding op. Pagina's worden nooit weergegeven als tokens. Oproeplogboeken bevatten factureringsmetagegevens, geen document URLs, PDF bytes of geëxtraheerde tekst.
+- Succesvolle `/v1/embeddings` verzoeken registreren één gebruiksrij per fysieke batch, inclusief afzonderlijke batches die in dezelfde milliseconde worden voltooid. Door de aanbieder gerapporteerde kosten hebben voorrang op tokenschattingen; combo-wrappers brengen geen kosten met zich mee.
+- Gebruiksgeschiedenis, de kostenanalyse, provider/account -vensters, bestedingslimieten voor API-sleutels, het grootboek met aanvraagkosten en dagelijkse gebruiksoverzichten zijn inclusief deze kosten. Sleutels zonder logboek behouden de numerieke boekhouding zonder de brontekst te behouden.
+- Ontbrekend gebruik of tarieven zijn dat wel **onbekend** , niet gratis: de responskostenheader is weggelaten en het bestaande beleid voor ongeprijsd gebruik is van toepassing op beperkte API sleutels. Expliciet geconfigureerde nultarieven blijven geldig nulkostengebruik.
+
+Dit is alleen voorwaartse boekhouding. Oude OCR/embedding aanroepen die nooit gebruiksgeschiedenis hebben geschreven, kunnen niet worden gereconstrueerd op basis van deze migratie. Catalogusschattingen zijn USD -schattingen, geen factuur, en omvatten geen valutaomrekening, belastingen of kortingen.
 
 ---
 

@@ -38,70 +38,71 @@ OmniRoute は、トークン数にモデルの料金レートを掛けること�
 
 ## コストの見積もり方法
 
-### 料金の取得元
+### 価格設定のソース
 
-費用は [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) の統合された料金表から計算され、優先順位は次のとおりです（**高いものが先**）。
+コストは、 [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts)のマージされた価格表からこの優先順位で取得されます (**高い順**):
 
-1. **ユーザーによる上書き** — ダッシュボードまたは `PATCH /api/pricing` で設定した料金（`pricing` 名前空間）。
-2. **models.dev 同期** — `https://models.dev/api.json` から取得した料金（`models_dev_pricing` 名前空間）。
-3. **LiteLLM 同期** — LiteLLM の公開ファイル `model_prices_and_context_window.json` から取得した料金（`pricing_synced` 名前空間）。
-4. **コード内の既定値** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) に同梱されている単価。
+1. **ユーザーによるオーバーライド**—価格はダッシュボードまたは`PATCH /api/pricing` ( `pricing`名前空間) 経由で設定されます。
+2. **models.dev の同期**—価格は`https://models.dev/api.json` ( `models_dev_pricing`名前空間) から取得されます。
+3. **LiteLLM同期**—価格はLiteLLMのパブリック`model_prices_and_context_window.json` ( `pricing_synced`名前空間) から取得されます。
+4. **ハードコードされたデフォルト**— rates shipped in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-同じプロバイダーとモデルでは、優先度の高い層の値が下位層の対応するフィールドを上書きします。上位層にないフィールドは、引き続き下位層から取得できます。独立した両方の同期ジョブが同時に動作しても、この順序は変わりません。`GET /api/pricing?includeSources=1` は `pricing` と `sourceMap` を返し、モデルごとのラベル（`user`、`modelsDev`、`litellm`、`default`）は、そのモデルを含む最も優先度の高い層を示します。
+同じprovider/modelの場合、優先度の高いレイヤーの値が、下位レイヤーの一致するフィールドを上書きします。上位層に存在しないフィールドでも、下位層から取得することができます。両方の独立した同期ジョブが同時に実行される場合でも、順序は固定されます。 `GET /api/pricing?includeSources=1` `pricing`および`sourceMap`を返します。これらのモデルごとのラベル (`user`、 `modelsDev`、 `litellm`、 `default`) は、そのモデルを含む最も優先度の高い層を識別します。
 
-**LiteLLM 同期**は任意で有効にする機能で、既定では無効です。環境変数は次のとおりです（[`.env.example`](../../.env.example) を参照）。
+**LiteLLM同期**is opt-in, disabled by default. Its environment variables (see [`.env.example`](../../.env.example) ) are:
 
-| 環境変数                | デフォルト | 用途                                                                            |
-| ----------------------- | ---------- | ------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`    | バックグラウンドでの LiteLLM 料金同期を有効にします。                           |
-| `PRICING_SYNC_INTERVAL` | `86400`    | 同期間隔（**秒**単位、デフォルトは毎日）。                                      |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | この同期だけに適用する取得元の選択です。現在は `litellm` のみをサポートします。 |
+| 環境変数                | デフォルト | 目的                                                                   |
+| ----------------------- | ---------- | ---------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`    | LiteLLM価格設定のバックグラウンド同期を有効にします。                  |
+| `PRICING_SYNC_INTERVAL` | `86400`    | 同期間隔 (秒単位) (毎日)。                                             |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | この同期のみのソース選択。現在、 `litellm`のみがサポートされています。 |
 
-**models.dev 同期**は LiteLLM 同期とは独立しており、こちらも既定では無効です。設定（models.dev 同期）で有効にするか、次の変数を使用してください。
+**models.dev の同期**はLiteLLM同期とは別のものであり、デフォルトでも無効になっています。設定 (models.dev 同期) で有効にするか、次の変数を使用します。
 
-| 環境変数                   | 既定値       | 用途                                                                                                                                    |
-| -------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _（未設定）_ | 未設定なら設定画面のスイッチに従います。`1/true/on/yes` は強制的に有効にし、`0/false/off/no` は設定画面で有効でも強制的に無効にします。 |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | models.dev 同期の既定の間隔を秒で指定します。既定の頻度は毎日です。                                                                     |
+| 環境変数                   | デフォルト | 目的                                                                                                                                             |
+| -------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(未設定)_ | Unset follows the Settings toggle; `1/true/on/yes`強制的にオンになり、 `0/false/off/no`強制的にオフになります (設定が有効になっている場合でも)。 |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`    | デフォルトの models.dev 同期間隔 (秒単位) (毎日)。                                                                                               |
 
-`PRICING_SYNC_SOURCES` は models.dev を**有効にしません**。制御するのは LiteLLM 同期だけです。ユーザーの上書きを削除しても、同期されたどちらの名前空間も消去されません。次に利用可能な料金層が有効になります。料金がないモデルでは、手動の上書きを追加する前に、両方の同期設定と `sourceMap` を確認してください。
+`PRICING_SYNC_SOURCES`行います**ない**models.dev を有効にする; it controls only the LiteLLM sync.ユーザー オーバーライドを削除しても、同期された名前空間はクリアされません。次に利用可能な価格設定レイヤーが有効になります。価格のないモデルの場合は、手動オーバーライドを追加する前に、同期設定と`sourceMap`両方を確認してください。
 
 ### コストの計算式
 
-コストは、トークン数と 100 万トークンあたりの料金に基づき、リクエストごとに
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-（`computeCostFromPricing` / `calculateCost`）で計算されます。
+コストは、 [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) のトークン数と 100 万トークンあたりのレートからリクエストごとに計算されます。
 
-- **入力トークン**（キャッシュ読み取りトークンとキャッシュ作成トークンを除く）× `input` 料金。
-- **キャッシュ読み取りトークン** × `cached` 料金（未設定の場合は入力料金を使用）。
-- **キャッシュ作成トークン** × `cache_creation` 料金（未設定の場合は入力料金を使用）。
-- **出力トークン** × `output` 料金。
-- **推論トークン** × `reasoning` 料金（未設定の場合は出力料金を使用）。
+- **入力トークン**(キャッシュ読み取りとキャッシュ作成トークンを除く) × `input`レート。
+- **キャッシュ読み取りトークン**× `cached` rate (falls back to the input rate).
+- **キャッシュ作成トークン**× `cache_creation` rate (falls back to the input rate).
+- **出力トークン**× `output`レート。
+- **推論トークン**× `reasoning` rate (falls back to the output rate).
 
-すべての料金は、1,000,000 トークンあたりの USD として解釈されます。Codex の「fast」/「priority」または
-「flex」サービス階層にはコスト倍率（`getCodexFastCostMultiplier`）が適用されます。たとえば flex
-ではトークン料金が 50% 割引され、ダッシュボードに **flex savings** として表示されます。
+すべてのレートは、1,000,000 トークンあたりのUSDとして解釈されます。 Codex 「高速」/「優先」または「フレックス」サービス層では、コスト乗数 (`getCodexFastCostMultiplier`) —適用されます。たとえば、フレックスは 50% のトークン割引で請求され、次のように表れます。**フレックス節約**ダッシュボード内。
 
-最初にモデル名が正規化され（`openai/` や
-`accounts/fireworks/models/` などのプロバイダーパスのプレフィックスが削除されます）、過去の行も料金に一致するようにします。
+モデル名は最初に正規化されるため ( `openai/`や`accounts/fireworks/models/`などのプロバイダー パスのプレフィックスは削除されます)、履歴行は引き続き価格と一致します。
 
 ### 支出の記録方法
 
-- リクエストごとのコストはレスポンス後に計算され、クライアントへのレイテンシーを一切増やさないよう、完了を待たずに記録されます。共有クォータの消費は、
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) を介して次の
-  イベントループのティックにスケジュールされます。
-- API キーの支出はバッファリングされ、
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) によりバッチ単位でフラッシュされます（デフォルトのフラッシュ間隔は 60 秒、
-  バッファは 1,000 エントリ）。以下で調整できます。
+- リクエストごとのコストはリクエストの完了時に計算されます。共有クォータの消費は、 [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)を介して次のイベント ループ ティックでスケジュールされます。
+- API キーの使用量は、 [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)によってバッファリングされ、バッチでフラッシュされます (デフォルトのフラッシュ間隔は 60 秒、エントリ バッファーは 1,000 件)。以下を介して調整可能:
 
-  | 環境変数                            | デフォルト | 用途                                             |
-  | ----------------------------------- | ---------- | ------------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | フラッシュ間隔（ミリ秒単位）。                   |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | フラッシュ前にバッファリングする最大エントリ数。 |
+  | 環境変数                            | デフォルト | 目的                                                     |
+  | ----------------------------------- | ---------- | -------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | フラッシュ間隔 (ミリ秒単位)。                            |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | フラッシュする前にバッファリングされるエントリの最大数。 |
 
-ダッシュボードのコスト数値は、保存された行ごとの金額から読み取られるものでは**ありません**。分析エンドポイントが実行されるたびに、トークン数と現在の料金表から
-動的に再計算されます。つまり、誤った料金を修正して再同期すると、
-過去のコスト見積もりにも遡及的に反映されます。
+コストでは、プロバイダーが報告した正確な料金 (`provider_cost_usd`)、次にカタログ価格のリクエスト スナップショット (`calculated_cost_usd`)、そして現在のカタログからのトークンの再価格が優先されます。保存されたコストは、トークン数によって再度請求されることはありません。従来のトークンのみの行は、カタログ価格が変更されると引き続き変更されます。
+
+### OCRと埋め込み
+
+- 成功した`/v1/ocr`リクエストでは、リクエストされたページ範囲や返されたページ オブジェクトの数ではなく、アップストリーム`usage_info.pages_processed`が使用されます。推定値はページ× `ocr_cost_per_page` (絶対USD/page、**ない**USD/million）。
+- ドキュメントまたは境界ボックスの注釈を含むリクエストには、別の`ocr_cost_per_annotated_page`料金が必要です。それがなければコストは不明のままです。通常のOCR料金は黙って置き換えられるわけではありません。
+- LiteLLM sync は、そのアップストリーム`annotation_cost_per_page`フィールドを`ocr_cost_per_annotated_page`にマップし、絶対USD/page値と注釈のみのエントリ (明示的なゼロを含む) を保持します。指定された正規フィールドが優先されます。無効なエイリアス値は無視されます。ユーザー価格の上書きは、通常の優先順位を維持します。 [LiteLLMのOCR価格設定キー](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking)を参照してください。
+- OCR使用量には、ページ数、単価、計算されたUSDコスト、 APIキー、および選択された接続が保存されます。ページがトークンとして表現されることはありません。通話ログには、ドキュメントURLs、 PDFバイト、または抽出されたテキストではなく、請求メタデータが含まれます。
+- 成功した`/v1/embeddings`リクエストは、同じミリ秒内に完了した個別のバッチを含む、物理バッチごとに 1 つの使用量行を記録します。プロバイダーが報告した料金は、トークンの見積もりよりも優先されます。コンボ ラッパーには料金はかかりません。
+- 使用履歴、コスト分析、 provider/accountウィンドウ、API キーの使用制限、リクエストコスト台帳、日次使用量ロールアップには、これらの料金が含まれます。ログなしキーは、ソース テキストを保持せずに数値アカウンティングを保持します。
+- 使用量や料金が不足している場合は、**未知**無料ではありません: 応答コスト ヘッダーが省略され、既存の価格設定されていない使用ポリシーが限定されたAPIキーに適用されます。明示的に設定されたゼロ レートは、有効なゼロコスト使用法のままです。
+
+これはフォワードのみの会計です。使用履歴が書き込まれなかった古いOCR/embedding呼び出しは、この移行から再構築できません。カタログ見積もりはUSD見積もりであり、請求書ではなく、通貨換算、税金、割引は含まれません。
 
 ---
 

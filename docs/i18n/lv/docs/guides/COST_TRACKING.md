@@ -36,73 +36,73 @@ Tā kā šis skaitlis ir aptuvens novērtējums:
 
 ---
 
-## Kā tiek novērtētas izmaksas
+## Kā tiek aprēķinātas izmaksas
 
-### Cenu avots
+### Cenu noteikšanas avots
 
-Izmaksas iegūst no apvienotās cenu tabulas [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ievērojot šādu prioritāšu secību (**augstākā vispirms**):
+Izmaksas nāk no apvienotās cenu tabulas [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), šādā prioritātes secībā (**augstākais pirmais** ):
 
-1. **Lietotāja norādītās cenas** — cenas, kas iestatītas panelī vai ar `PATCH /api/pricing` (nosaukumvieta `pricing`).
-2. **models.dev sinhronizācija** — cenas, kas iegūtas no `https://models.dev/api.json` (nosaukumvieta `models_dev_pricing`).
-3. **LiteLLM sinhronizācija** — cenas, kas iegūtas no publiskā LiteLLM faila `model_prices_and_context_window.json` (nosaukumvieta `pricing_synced`).
-4. **Kodā iekļautās noklusētās cenas** — likmes, kas piegādātas [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Lietotājs ignorē** — cenas, kas iestatītas informācijas panelī vai izmantojot `PATCH /api/pricing` ( `pricing` nosaukumvieta).
+2. **model.dev sinhronizācija** — cenas iegūtas no `https://models.dev/api.json` ( `models_dev_pricing` nosaukumvietas).
+3. **LiteLLM sinhronizācija** — cenas iegūtas no LiteLLM publiskās `model_prices_and_context_window.json` ( `pricing_synced` nosaukumvietas).
+4. **Cietkodētie noklusējuma iestatījumi** — likmes tiek nosūtītas [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Tam pašam sniedzējam un modelim augstākas prioritātes slāņu vērtības pārraksta atbilstošos laukus zemākajos slāņos; augšējā slānī trūkstošie lauki joprojām var nākt no zemāka slāņa. Secība ir nemainīga arī tad, ja abi neatkarīgie sinhronizācijas uzdevumi darbojas vienlaikus. `GET /api/pricing?includeSources=1` atgriež `pricing` un `sourceMap`; katra modeļa etiķetes (`user`, `modelsDev`, `litellm`, `default`) norāda augstākās prioritātes slāni, kurā modelis ir iekļauts.
+Tam pašam provider/model vērtības no augstākas prioritātes slāņiem pārraksta atbilstošos laukus zemākajos slāņos; lauki, kas nav augšējā slānī, joprojām var nākt no apakšējā slāņa. Pasūtījums ir fiksēts pat tad, ja vienlaikus tiek izpildīti abi neatkarīgie sinhronizācijas darbi. `GET /api/pricing?includeSources=1` atgriež `pricing` un `sourceMap`, kuru katra modeļa etiķetes (`user`, `modelsDev`, `litellm`, `default`) identificē augstākās prioritātes slāni, kas satur šo modeli.
 
-**LiteLLM sinhronizācija** ir izvēles funkcija un pēc noklusējuma ir atspējota. Tās vides mainīgie (skatiet [`.env.example`](../../.env.example)) ir:
+**LiteLLM sinhronizācija** ir izvēlēta, pēc noklusējuma atspējota. Tās vides mainīgie (sk. [`.env.example`](../../.env.example) ) ir:
 
-| Vides mainīgais         | Noklusējums | Nolūks                                                                           |
+| Env var                 | Noklusējums | Mērķis                                                                           |
 | ----------------------- | ----------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`     | Iespējot LiteLLM cenu sinhronizāciju fonā.                                       |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Sinhronizācijas intervāls **sekundēs** (pēc noklusējuma reizi dienā).            |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Avota izvēle tikai šai sinhronizācijai; pašlaik tiek atbalstīts tikai `litellm`. |
+| `PRICING_SYNC_ENABLED`  | `false`     | Iespējot fona LiteLLM cenu sinhronizāciju.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Sinhronizācijas intervāls sekundēs (katru dienu).                                |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Avota atlase tikai šai sinhronizācijai; pašlaik tiek atbalstīts tikai `litellm`. |
 
-**models.dev sinhronizācija** ir nodalīta no LiteLLM sinhronizācijas un arī pēc noklusējuma atspējota. Iespējojiet to Iestatījumos (models.dev sinhronizācija) vai izmantojiet šos mainīgos:
+**model.dev sinhronizācija** ir atsevišķi no LiteLLM sinhronizācijas un arī pēc noklusējuma ir atspējota. Iespējojiet to sadaļā Iestatījumi (models.dev sync) vai izmantojiet šos mainīgos:
 
-| Vides mainīgais            | Noklusējums       | Mērķis                                                                                                                                                            |
-| -------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nav iestatīts)_ | Ja nav iestatīts, tiek ievērots Iestatījumu slēdzis; `1/true/on/yes` piespiedu kārtā ieslēdz, bet `0/false/off/no` izslēdz, pat ja Iestatījumos tas ir iespējots. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Noklusētais models.dev sinhronizācijas intervāls sekundēs, reizi dienā.                                                                                           |
+| Env var                    | Noklusējums     | Mērķis                                                                                                                                              |
+| -------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(atiestatīts)_ | Atiestatīts seko slēdzim Iestatījumi; `1/true/on/yes` tiek ieslēgta piespiedu kārtā un `0/false/off/no` izslēgta (pat ja iestatījumi ir iespējoti). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Noklusējuma model.dev sinhronizācijas intervāls sekundēs (katru dienu).                                                                             |
 
-`PRICING_SYNC_SOURCES` **neiespējo** models.dev; tas vada tikai LiteLLM sinhronizāciju. Lietotāja norādītas cenas dzēšana neiztīra nevienu sinhronizēto nosaukumvietu; spēkā stājas nākamais pieejamais cenu slānis. Modelim bez cenas pārbaudiet abus sinhronizācijas iestatījumus un `sourceMap`, pirms pievienojat manuāli norādītu cenu.
+`PRICING_SYNC_SOURCES` dara **nē** iespējot modeļus.dev; tas kontrolē tikai LiteLLM sinhronizāciju. Dzēšot lietotāja ignorēšanu, netiek notīrīta neviena sinhronizētā nosaukumvieta; stājas spēkā nākamais pieejamais cenu līmenis. Bezcenas modelim, pirms manuālas ignorēšanas pievienošanas pārbaudiet gan sinhronizācijas iestatījumus, gan `sourceMap`.
 
 ### Izmaksu formula
 
-Izmaksas katram pieprasījumam tiek aprēķinātas no tokenu skaita un likmēm par vienu miljonu tokenu failā
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Maksa tiek aprēķināta katram pieprasījumam no marķieru skaita un miljonu marķieru likmēm [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Ievades tokeni** (atskaitot kešatmiņas lasījumus un kešatmiņas izveides tokenus) × `input` likme.
-- **Kešatmiņas lasīšanas tokeni** × `cached` likme (ja tās nav, tiek izmantota ievades likme).
-- **Kešatmiņas izveides tokeni** × `cache_creation` likme (ja tās nav, tiek izmantota ievades likme).
-- **Izvades tokeni** × `output` likme.
-- **Spriešanas tokeni** × `reasoning` likme (ja tās nav, tiek izmantota izvades likme).
+- **Ievades marķieri** (atskaitot kešatmiņas lasīšanas un kešatmiņas izveides pilnvaras) × `input` likme.
+- **Kešatmiņas lasīšanas marķieri** × `cached` likme (atgriežas līdz ievades ātrumam).
+- **Kešatmiņas izveides marķieri** × `cache_creation` likme (atgriežas līdz ievades ātrumam).
+- **Izvades marķieri** × `output` likme.
+- **Spriešanas zīmes** × `reasoning` ātrums (atgriežas līdz izvades ātrumam).
 
-Visas likmes tiek interpretētas kā USD par 1 000 000 tokenu. Codex „fast”/„priority” vai
-„flex” pakalpojuma līmenim tiek piemērots izmaksu reizinātājs (`getCodexFastCostMultiplier`) — piemēram, flex
-tiek aprēķināts ar 50% tokenu atlaidi, kas informācijas panelī tiek parādīta kā **flex ietaupījums**.
+Visas likmes tiek interpretētas kā USD uz 1 000 000 žetonu. Codex "ātra"/"prioritāra" vai "elastīga" pakalpojuma līmenim tiek piemērots izmaksu reizinātājs (`getCodexFastCostMultiplier`). —, piemēram, flex tiek iekasēta ar 50% marķiera atlaidi, kas tiek rādīta kā **elastīgi ietaupījumi** informācijas panelī.
 
-Modeļu nosaukumi vispirms tiek normalizēti (tiek noņemti pakalpojumu sniedzēju ceļu prefiksi, piemēram, `openai/` vai
-`accounts/fireworks/models/`), lai arī vēsturiskās rindas joprojām atbilstu cenai.
+Modeļu nosaukumi vispirms tiek normalizēti (tiek noņemti pakalpojumu sniedzēja ceļa prefiksi, piemēram, `openai/` vai `accounts/fireworks/models/` ), tāpēc vēsturiskās rindas joprojām atbilst cenai.
 
-### Kā tiek reģistrēti izdevumi
+### Kā tiek reģistrēti tēriņi
 
-- Katra pieprasījuma izmaksas tiek aprēķinātas pēc atbildes saņemšanas un reģistrētas asinhroni, negaidot rezultātu, lai tas
-  nekad neradītu klientam papildu aizkavi. Koplietojamās kvotas patēriņa reģistrēšana tiek ieplānota nākamajā
-  notikumu cikla iterācijā, izmantojot [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API atslēgu izdevumi tiek buferēti un ierakstīti paketēs, izmantojot
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (noklusējuma ierakstīšanas intervāls ir 60 s,
-  bufera lielums — 1 000 ierakstu). To var pielāgot, izmantojot:
+- Pieprasījuma izmaksas tiek aprēķinātas pēc pieprasījuma aizpildīšanas. Koplietotās kvotas patēriņš ir ieplānots nākamajā notikumu cilpas atzīmēšanā, izmantojot [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API atslēgas tēriņi tiek buferizēti un izskaloti pa partijām, izmantojot [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (noklusējuma 60 s skalošanas intervāls, 1000 ierakstu buferis). Noskaņojams, izmantojot:
 
-  | Vides mainīgais                     | Noklusējums | Nolūks                                                    |
-  | ----------------------------------- | ----------- | --------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Ierakstīšanas intervāls milisekundēs.                     |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maksimālais buferēto ierakstu skaits pirms ierakstīšanas. |
+  | Env var                             | Noklusējums | Mērķis                                                   |
+  | ----------------------------------- | ----------- | -------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Skalošanas intervāls milisekundēs.                       |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maksimālais buferizēto ierakstu skaits pirms skalošanas. |
 
-Informācijas paneļa izmaksu skaitļi **netiek** nolasīti no katrai rindai saglabātas summas dolāros — tie
-tiek aprēķināti no jauna izpildes laikā, izmantojot tokenu skaitu un pašreizējo cenu tabulu, ikreiz, kad tiek
-izsaukts analītikas galapunkts. Tas nozīmē, ka nepareizas cenas izlabošana (un atkārtota sinhronizācija) ar atpakaļejošu
-spēku atjaunina vēsturiskos izmaksu novērtējumus.
+Izmaksas dod priekšroku precīzai pakalpojumu sniedzēja norādītai maksai (`provider_cost_usd`), pēc tam pieprasījuma momentuzņēmumam ar kataloga cenām (`calculated_cost_usd`), pēc tam marķiera pārcenošanai no pašreizējā kataloga. Saglabātās izmaksas netiek atkārtoti iekasētas, izmantojot to marķieru skaitu. Mantotās tikai marķiera rindas joprojām mainās, kad mainās to kataloga cena.
+
+### OCR un iegulšanas
+
+- Veiksmīgiem `/v1/ocr` pieprasījumiem tiek izmantots augšējais `usage_info.pages_processed`, nevis pieprasītais lapu diapazons vai atgriezto lapas objektu skaits. Aprēķins ir lapas × `ocr_cost_per_page` (absolūtais USD/page,**nē** USD/million).
+- Pieprasījumiem ar dokumentu vai norobežojošo lodziņu anotācijām ir nepieciešams atsevišķs `ocr_cost_per_annotated_page` tarifs. Bez tā izmaksas paliek nezināmas; parastais OCR tarifs netiek klusībā aizstāts.
+- LiteLLM sinhronizācija kartē savu augšupējo `annotation_cost_per_page` lauku uz `ocr_cost_per_annotated_page`, saglabājot absolūto USD/page vērtību un tikai anotāciju ierakstus, tostarp skaidru nulli. Priekšroka tiek dota piegādātajam kanoniskajam laukam; nederīgās aizstājvārdu vērtības tiek ignorētas. Lietotāju cenu ignorēšana saglabā savu parasto prioritāti. Skatiet [LiteLLMOCR cenu atslēgas](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR lietojums saglabā lapu skaitu, vienības cenu, aprēķinātās USD izmaksas, API atslēgu un izvēlēto savienojumu. Lapas nekad netiek attēlotas kā marķieri. Zvanu žurnālos ir ietverti norēķinu metadati, nevis dokuments URLs, PDF baiti vai izvilkts teksts.
+- Veiksmīgi `/v1/embeddings` pieprasījumi reģistrē vienu lietojuma rindu katrā fiziskajā paketē, tostarp atsevišķas partijas, kas pabeigtas tajā pašā milisekundē. Pakalpojumu sniedzēja ziņotajām maksām ir prioritāte pār simboliskām aplēsēm; kombinētie iesaiņotāji nepievieno maksu.
+- Šīs maksas ir iekļautas lietojuma vēsturē, izmaksu analīzē, provider/account logos, API atslēgas tēriņu limitos, pieprasījumu izmaksu virsgrāmatā un ikdienas lietošanas apkopojumos. Atslēgas bez reģistrēšanas saglabā skaitlisko uzskaiti, nesaglabājot avota tekstu.
+- Trūkst lietojuma vai tarifu **nezināms** , nav bezmaksas: atbildes izmaksu galvene ir izlaista, un esošā bezcenas lietošanas politika attiecas uz ierobežotām API atslēgām. Skaidri konfigurētas nulles likmes paliek spēkā bez maksas.
+
+Šī ir tikai uz priekšu vērsta grāmatvedība. Vecos OCR/embedding zvanus, kas nekad nav uzrakstījuši lietošanas vēsturi, nevar rekonstruēt no šīs migrācijas. Kataloga aprēķini ir USD aprēķini, nevis rēķins, un tie neietver valūtas konvertāciju, nodokļus vai atlaides.
 
 ---
 

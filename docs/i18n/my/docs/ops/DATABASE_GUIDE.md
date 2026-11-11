@@ -402,28 +402,29 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## စွမ်းဆောင်ရည် ချိန်ညှိခြင်း
+## Performance Tuning
 
 ### WAL မုဒ်
 
-WAL ကို ပုံမှန်အားဖြင့် ဖွင့်ထားပါသည်။ ရေးသားမှုများပြားသော အလုပ်ဝန်များအတွက် အောက်ပါတို့ကို စဉ်းစားပါ-
+WAL မူရင်းအတိုင်း ဖွင့်ထားသည်။ မြင့်မားသောစာရေးခြင်းအတွက်၊ စဉ်းစားကြည့်ပါ-
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- စာမျက်နှာ 1000 တိုင်း Checkpoint ပြုလုပ်ရန်
-PRAGMA journal_size_limit = 67108864;  -- WAL ပမာဏကို 64MB အထိ ကန့်သတ်ရန်
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute `journal_size_limit` မသတ်မှတ်ထားပေ။ စစ်ဆေးရေးဂိတ်တစ်ခုသည် WAL ဘောင်များကို ပင်မဖိုင်သို့ ရွှေ့ပေးသော်လည်း WAL ဖိုင်သည် ၎င်း၏အကြီးဆုံးခွဲဝေချထားပေးသည့် အရွယ်အစားကို ထိန်းသိမ်းထားသည်။ `OMNIROUTE_WAL_GUARD_MAX_MB` အစောင့်သည်သာ သတိပေးပြီး `wal_checkpoint(RESTART)` လုပ်ဆောင်သည်။ ၎င်းသည် disk အရွယ်အစားထုပ်မဟုတ်ပါ။
 
 ### အညွှန်းများ
 
-စွမ်းဆောင်ရည်အတွက် အဓိကအညွှန်းများ (migration များက အလိုအလျောက် ဖန်တီးပေးသည်)-
+စွမ်းဆောင်ရည်အတွက် အဓိက အညွှန်းများ (ပြောင်းရွှေ့မှုများဖြင့် အလိုအလျောက် ဖန်တီးထားသည်-
 
-- `idx_models_provider` — provider အလိုက် model ရှာဖွေခြင်း
-- `idx_combo_targets_combo_id` — combo target တိုးချဲ့ခြင်း
-- `idx_usage_history_api_key_timestamp` — အသုံးပြုမှုဆိုင်ရာ ခွဲခြမ်းစိတ်ဖြာမှု
-- `idx_quota_snapshots_api_key_window` — quota ခြေရာခံခြင်း
-- `idx_call_logs_timestamp` — call log query များ
+- ပံ့ပိုးသူမှ`idx_models_provider` — မော်ဒယ်ကို ရှာဖွေမှု
+- `idx_combo_targets_combo_id` — ပေါင်းစပ်ပစ်မှတ် ချဲ့ထွင်ခြင်း။
+- `idx_usage_history_api_key_timestamp` — အသုံးပြုမှု ပိုင်းခြားစိတ်ဖြာချက်
+- `idx_quota_snapshots_api_key_window` — ခွဲတမ်း ခြေရာခံခြင်း။
+- `idx_call_logs_timestamp` — ခေါ်ဆိုမှုမှတ်တမ်းမေးမြန်းချက်
 
-အညွှန်းအသစ်တစ်ခု ထည့်ရန် migration တစ်ခု ဖန်တီးပါ-
+အညွှန်းအသစ်တစ်ခုထည့်ရန်၊ ရွှေ့ပြောင်းခြင်းကို ဖန်တီးပါ-
 
 ```sql
 -- 023_add_my_index.sql
@@ -432,22 +433,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### Memory-Mapped I/O
 
-အလွန်ကြီးမားသော database များအတွက် (>10GB) SQLite pragma မှတစ်ဆင့် memory mapping ကို ချိန်ညှိနိုင်သည်-
+အလွန်ကြီးမားသောဒေတာဘေ့စ်များ (> 10GB) အတွက် မန်မိုရီမြေပုံကို SQLite pragma မှတစ်ဆင့် ချိန်ညှိနိုင်သည်-
 
 ```sql
--- SQLite pragma မှတစ်ဆင့် သတ်မှတ်ရန် (core.ts သို့မဟုတ် runtime တွင် ချိန်ညှိပါ)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### ကျစ်လျစ်အောင် ပြုလုပ်ခြင်း
+### ကျစ်ကျစ်လစ်လစ်
 
-အချိန်ကြာမြင့်စွာ လည်ပတ်နေသော OmniRoute instance များသည် ရံဖန်ရံခါ `VACUUM` ပြုလုပ်ခြင်းမှ အကျိုးရှိနိုင်သည်-
+ကာလရှည်ကြာလည်ပတ်နေသော OmniRoute ဖြစ်ရပ်များသည် ရံဖန်ရံခါ `VACUUM` မှ အကျိုးကျေးဇူးများ
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-အသုံးပြုမှုနည်းသော အချိန်ကာလများအတွင်း လစဉ် လုပ်ဆောင်ပါ။ (WAL မုဒ်က လိုအပ်ချက်ကို လျှော့ချပေးသော်လည်း လုံးဝ မပပျောက်စေပါ။)
+အသွားအလာနည်းသော ပြတင်းပေါက်များအတွင်း လစဉ်လုပ်ဆောင်ပါ။ (WAL မုဒ်သည် လိုအပ်မှုကို လျှော့ချပေးသည်၊ သို့သော် ၎င်းကို မဖယ်ရှားပါ။)
 
 ---
 

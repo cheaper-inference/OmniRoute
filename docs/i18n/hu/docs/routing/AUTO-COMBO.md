@@ -304,57 +304,63 @@ feloldott értékek a motor meglévő `config.modePack` / `config.budgetCap` /
 `config.budgetFallback` bemeneteibe kerülnek. Egy kombináció eltárolt `config.budgetFallback` ("strict" |
 "cheapest") értéke határozza meg az állandó szabályzatot; a fejléc ezt egyetlen kérés erejéig felülírja.
 
-## Az összes útválasztási stratégia
+## Minden útválasztási stratégia
 
-Az OmniRoute kombinációs motorja **20 útválasztási stratégiát** támogat (deklaráció: `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Maga az Auto Combo motor az `auto` stratégián keresztül érhető el; a többi stratégia a mentett kombinációkhoz használható.
+A OmniRoute kombinált motorja támogatja **20 útválasztási stratégia** (a `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` ben deklarálva). Maga az Auto Combo motor is a `auto` stratégia alatt látható; a többi elérhető tartós kombókhoz.
 
-| Stratégia           | Leírás                                                                                                                                                                                                                                                      |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Első célpontot előnyben részesítő, explicit prioritással rendelkező rendezett lista                                                                                                                                                                         |
-| `weighted`          | Súlyozott véletlenszerű kiválasztás célpontonkénti súly alapján                                                                                                                                                                                             |
-| `round-robin`       | A célpontok ciklikus bejárása sorrendben (kötegelve; lásd alább)                                                                                                                                                                                            |
-| `context-relay`     | A kontextus továbbadása a célpontok között (hosszú beszélgetésekhez)                                                                                                                                                                                        |
-| `fill-first`        | Az egyes célpontok kvótájának feltöltése a következőre lépés előtt                                                                                                                                                                                          |
-| `p2c`               | Véletlenszerű terheléselosztás a kettő közül jobb választás elve alapján                                                                                                                                                                                    |
-| `random`            | Egyenletes véletlenszerű kiválasztás                                                                                                                                                                                                                        |
-| `least-used`        | A jelenleg legalacsonyabb terhelésű célpont kiválasztása                                                                                                                                                                                                    |
-| `cost-optimized`    | A kérésenkénti költség minimalizálása a katalógus árazása alapján                                                                                                                                                                                           |
-| `reset-aware` ⭐    | Prioritás a kvóta visszaállítási ideje alapján — a rövid visszaállítási időablakok magasabb besorolást kapnak                                                                                                                                               |
-| `reset-window`      | Azon célpontok előnyben részesítése, amelyek kvótaablaka a leghamarabb áll vissza                                                                                                                                                                           |
-| `headroom`          | A legtöbb fennmaradó kvótatartalékkal rendelkező célpont kiválasztása                                                                                                                                                                                       |
-| `quota-weighted`    | A kimerített fiókok kihagyása, majd választás a többiek közül a fennmaradó kvóta és a folyamatban lévő terhelés hányadosával arányosan; a meglévő beszélgetések rögzítve maradnak                                                                           |
-| `strict-random`     | Véletlenszerű kiválasztás az ismétlődések kiszűrése nélkül                                                                                                                                                                                                  |
-| `auto`              | Az Auto Combo pontozásának használata (16 tényező) — **ajánlott**                                                                                                                                                                                           |
-| `lkgp`              | Utolsó ismert működő útvonal (rögzítés a legutóbb sikeres szolgáltatóhoz, majd visszatérés a szabályokhoz)                                                                                                                                                  |
-| `context-optimized` | Az aktuális kontextusmérethez legjobban illeszkedő célpont kiválasztása                                                                                                                                                                                     |
-| `cache-optimized`   | A célpontok átrendezése a promptgyorsítótárhoz való affinitás alapján — először azt a kapcsolatot próbálja, amely a legnagyobb valószínűséggel már tartalmazza a kérés gyorsítótárazott előtagját (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | A kérés párhuzamos elküldése több modellből álló panelnek, majd egyetlen válasz szintetizálása egy bíráló segítségével (lásd alább)                                                                                                                         |
-| `pipeline`          | A célpontok egymás utáni futtatása úgy, hogy minden lépés kimenete a következő lépés bemenetévé válik; csak a végső választ adja vissza (#6396)                                                                                                             |
+| Stratégia           | Leírás                                                                                                                                                                                                                     |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Első célként rendezett lista kifejezett prioritással                                                                                                                                                                       |
+| `weighted`          | Véletlenszerűen súlyozva a célsúly szerint                                                                                                                                                                                 |
+| `round-robin`       | Sorrendben lépkedjen a célok között (kötegelve; lásd lent)                                                                                                                                                                 |
+| `context-relay`     | Kontextus átadása a célok között (hosszú beszélgetések)                                                                                                                                                                    |
+| `fill-first`        | Töltse ki az egyes célpontok kvótáját, mielőtt a következőre lépne                                                                                                                                                         |
+| `p2c`               | Power-of-2-choices véletlenszerű terheléselosztás                                                                                                                                                                          |
+| `random`            | Egységes véletlenszerű kiválasztás                                                                                                                                                                                         |
+| `least-used`        | Válassza ki a legalacsonyabb áramterhelésű célt                                                                                                                                                                            |
+| `cost-optimized`    | Minimalizálja $ kérésenként adott katalógus árak                                                                                                                                                                           |
+| `reset-aware` ⭐    | Prioritás a kvóta-visszaállítási idő szerint — rövid alaphelyzetbe állítási ablakai magasabban rangsoroltak                                                                                                                |
+| `reset-window`      | Olyan célokat részesítsen előnyben, amelyeknek a kvótaablak a leghamarabb visszaáll                                                                                                                                        |
+| `headroom`          | Válassza ki azt a célpontot, amelynél a kvóta legnagyobb szabad mozgástere van                                                                                                                                             |
+| `quota-weighted`    | Hagyja ki a kimerült fiókokat, majd válasszon a többi közül a fennmaradó kvóta arányában, osztva a repülés közbeni töltettel; a meglévő beszélgetések rögzítve maradnak                                                    |
+| `strict-random`     | Véletlenszerű az ismétlések deduplikációja nélkül                                                                                                                                                                          |
+| `auto`              | Használja az Auto Combo pontozást (16-faktoros) —**ajánlott**                                                                                                                                                              |
+| `lkgp`              | Utolsó ismert-jó útvonal (kijelöli az utolsó sikeres szolgáltatót, majd visszatér a szabályokhoz)                                                                                                                          |
+| `context-optimized` | Válassza ki az aktuális kontextusmérethez legjobban illeszkedő célt                                                                                                                                                        |
+| `cache-optimized`   | Célok átrendezése gyorsítótárazási affinitás szerint — először azt a kapcsolatot próbálja ki, amelyikben a legvalószínűbb a kérés gyorsítótárban tárolt előtagja (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Párhuzamosan pásztázzon a modellek paneljéhez, majd szintetizáljon egy választ a bírón keresztül (lásd alább)                                                                                                              |
+| `pipeline`          | Futtassa a célokat egymás után, minden lépés kimenetét a következő lépés bemenetébe fűzve; csak a végső válasz kerül visszaadásra (#6396)                                                                                  |
 
-⭐ = Újdonság a v3.8.0 verzióban · 🧬 = Újdonság a v3.8.36 verzióban
+⭐ = Új a 3.8.0-ban · 🧬 = Új a 3.8.36-ban
 
-### A `weighted` működése
+### `weighted` szemantika
 
-A `weighted` **kérésenkénti arányos véletlenszerű sorsolást** végez
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), nem kiegyenlítést:
+`weighted` egy **arányos véletlenszerű sorsolás kérésenként** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), nem egyenlítő:
 
-- Minden kérés **egy** lépést sorsol ki `weight / totalWeight` valószínűséggel; a fennmaradó lépések
-  csökkenő súly szerinti sorrendben alkotják az adott kérés tartalék láncát.
-- Az a lépés, amelynek súlya `0` (vagy nincs megadva), **soha nem kerül kisorsolásra**, amíg bármely másik lépés
-  súlya > 0 — csak tartalékként szolgálhat, ha a kisorsolt lépés sikertelen. A kiválasztás csak akkor válik egyenletessé, ha **minden**
-  súly 0.
-- Azok a lépések, amelyek összes célpontja elérhetetlen — a szolgáltató áramkör-megszakítója `OPEN` állapotú, a kapcsolat
-  várakozási idő alatt áll, vagy a modell zárolva van — még a sorsolás előtt eltávolításra kerülnek
-  (`open-sse/services/combo/targetResolution.ts`), így egyetlen működő lépés átmenetileg
-  minden kérést megnyerhet.
-- A `stickyWeightedLimit` (kombinációs konfiguráció, alapértelmezés szerint `1` = kikapcsolva) ennyi
-  egymást követő sikerhez rögzíti a kisorsolt lépést az újrasorsolás előtt.
+- Minden kérés húz **egy** lépés valószínűséggel `weight / totalWeight`; a fennmaradó lépések csökkenő súly szerint vannak rendezve, mint a kérés tartaléklánca.
+- Az a lépcső, amelynek súlya `0` (vagy hiányzik).**soha nem rajzolt** míg bármely más lépés súlya > 0 — csak tartalékként szolgálhat, miután a megrajzolt lépés meghiúsul. Csak amikor **minden** a súlyok 0, egységessé válik-e a kijelölés.
+- Azok a lépések, amelyeknek a célpontjai mind — szolgáltató megszakítója `OPEN`, a kapcsolat lehűtése, — modell zárolása, kikerülnek a sorsolásból, mielőtt megtörténne (`open-sse/services/combo/targetResolution.ts`), így egyetlen egészséges lépéssel ideiglenesen minden kérést megnyerhet.
+- `stickyWeightedLimit` (kombinált konfiguráció, alapértelmezett `1` = kikapcsolva) rögzíti a megrajzolt lépést annyi egymást követő sikerhez az újrarajzolás előtt.
 
-Szigorú rotációhoz használja a `round-robin` stratégiát; a `weighted` stratégia azonos súlyokkal statisztikai — nem pedig szigorú — kiegyensúlyozást biztosít.
+A szigorú forgatáshoz használja `round-robin`; `weighted` egyenlő súlyai statisztikai — adnak, nem szigorú — egyensúlyt.
 
 ### Ügynöki csővezeték mód
 
 A legalább két modellt tartalmazó `pipeline` kombó választhatja planner/executor útválasztást `config.agenticOrchestration.enabled` vel. Az első célpont rendelkezik a tervezéssel és a végső válaszokkal; a második cél ügyfél-natív eszközhívásokat bocsát ki. OmniRoute észleli az eszköz-eredmény folytatásokat a kérelem protokollból, megkérdezi a tervezőt, hogy szükség van-e még egy szerszámkörre, és dinamikusan a végrehajtót vagy a tervezőt az ügyfél felé forduló utolsó lépéssé teszi.
+
+Az opcionális `config.agenticOrchestration.contextCompaction` külön hasznos teherköltségvetést alkalmaz minden tervezői vagy végrehajtói feladás előtt. Engedélyezze kifejezetten:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ezek az operátor által kiválasztott soros JSON karakter-költségvetések, nem jogkivonat-kontextusablakok vagy garantált upstream korlátok. A pontos IDs modell felülírja az alapértelmezettet. A küszöbérték felett a tömörítés eltávolítja az azonos szerszámdefiníciókat, kivonattal levágja a túlméretezett szerszámleírásokat, és eltávolítja a régi teljes előzménycsoportokat a célarány felé. Megőrzi system/developer utasításokat, a legújabb felhasználói kérést, az utolsó szerszámkört, beleértve a párhuzamos calls/results, és Gemini vezető útválasztási utasítását. A legfelső szintű utasítások és a szerszámbeállítások megmaradnak. Egy kihagyásjelző rögzíti az eltávolított előzményeket; ez determinisztikus vágás, nem szemantikai összefoglalás. Ha a rögzített kontextus továbbra is meghaladja a költségvetést, a kérés 413-at ad vissza, mielőtt kapcsolatba lépne a modellel. Ha a tömörítés le van tiltva vagy a küszöb alatt van, a kérés változatlan formában halad át.
 
 A szerszám-eredmény folytatásakor OmniRoute akkor is leállítja a végrehajtást, ha két egymást követő befejezett kör változatlan eredménnyel ismétli meg ugyanazt az eszközhívást, vagy ha két egymást követő körben minden kifejezetten megjelölt eredmény sikertelen volt. A megváltozott eredmények lehetővé teszik az ismételt hívást (például lekérdezést). Az őr új felhasználói kérésre alaphelyzetbe áll, egy körbe csoportosítja a párhuzamos hívásokat, és támogatja Anthropic, a csevegés befejezéseket, a válaszokat és Gemini előzményeket. A tervező megkapja az indoklást, és övé a végső válasz akkor is, ha újabb eszközkört kér.
 
@@ -372,15 +378,15 @@ A második cél utáni további modellek végrehajtói biztonsági mentések. A 
 
 A végrehajtó több független hívást is kiadhat egy válaszban. A függő hívások kezelése későbbi ügyféleszköz-eredmény fordulatokban történik, a tervező pedig minden eredményt felülvizsgál. `maxToolRounds` alapértelmezés szerint `8`, és elfogadja `1`–`32`; elérése után a tervezőnek az elérhető legjobb végső választ kell adnia. A belső tervezői döntések pufferelve vannak, míg a kiválasztott ügyféloldali válasz megőrzi az eredeti adatfolyam-beállítást.
 
-### A `round-robin` rögzített kötegelése és a fiókok kibővítése
+### `round-robin` ragadós köteg és fiókbővítés
 
-A round-robin kötegelve működik, nem kérésenként egy lépésben:
+A körmérkőzés kötegelt, nem lépésenként egy kérelem:
 
-- A `stickyRoundRobinLimit` (először a kombináció konfigurációja, majd `comboStickyRoundRobinLimit`, aztán `settings.stickyRoundRobinLimit`, alapértelmezés szerint **3**) ennyi egymást követő sikeres kérés erejéig ugyanazt a célt tartja meg, mielőtt továbblépne. Kérésenkénti rotációhoz állítsa a kombináció felülbírálási értékét `1`-re. A kombinációszerkesztő megjeleníti a tényleges értéket és azt, hogy melyik rétegből származik.
-- A `connectionAwareExpansion` (először a kombináció konfigurációja, majd a beállítások, alapértelmezés szerint **false**) a rotáció előtt minden szolgáltatói szintű lépést fiókonkénti célokra bont ki. A B csoportba tartozó stratégiák (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) szolgáltatói szintű nézetet tartanak fenn, amíg ez be nincs kapcsolva. A kombinációszerkesztőben az öröklés / be / ki lehetőségek érhetők el; az öröklés a globális alapértelmezést használja (ki).
-- A promptgyorsítótár lokalitásán alapuló útválasztás (`promptCacheAffinityEnabled`, alapértelmezés szerint **true**) átrendezi a rögzített kapcsolatokat, hogy az egyező gyorsítótárkulcsok ugyanazon a fiókon maradjanak. Ez elsőbbséget élvez a rögzített, fiókonkénti lépések közötti round-robin és weighted rotációval szemben. Ha szigorú rotációra van szüksége, kapcsolja ki a Settings → Combo defaults alatt. Kombinációnkénti felülbírálás nem érhető el.
+- `stickyRoundRobinLimit` (kombinált konfiguráció, majd `comboStickyRoundRobinLimit`, majd `settings.stickyRoundRobinLimit`, alapértelmezett **3** ). Állítsa a kombinált felülírást `1` -re az egykéréses elforgatáshoz. A kombinált szerkesztő megmutatja az effektív értéket és azt, hogy melyik rétegből származik.
+- `connectionAwareExpansion` (kombinált konfiguráció, majd beállítások, alapértelmezett **hamis** ) a rotáció előtt minden szolgáltatói szintű lépést fiókonkénti célokra bővít. A B-csoport stratégiái (prioritásos, súlyozott, körforgásos, véletlenszerű, p2c, legkevésbé használt, költségoptimalizált, lkgp, kitöltés-első, szigorú véletlenszerű, kontextusra optimalizált, gyorsítótár-optimalizált, kontextus-közvetítés, fúzió, folyamat) mindaddig szolgáltatói szintű nézetet biztosítanak, amíg ez be nem kapcsol. A kombinált szerkesztő megjeleníti az inherit / on / off; Az inherit a globális alapértelmezést használja (ki).
+- Prompt-cache helyi útválasztás (`promptCacheAffinityEnabled`, alapértelmezés **igaz** ) átrendezi a rögzített kapcsolatokat, így a megfelelő gyorsítótár-kulcsok egy fiókban maradnak. Ez elsőbbséget élvez a kör-robin és a súlyozott elforgatással szemben a rögzített fiókonkénti lépések között. Kapcsolja ki a Beállítások → Combo alapértelmezett beállításai alatt, ha szigorú elforgatásra van szüksége. Nincs kombinációnkénti felülírás.
 
-Egy modell több fiókja közötti rotációhoz lehetőleg **egyetlen dinamikus fióklépést** használjon (üres `connectionId`, teljes készlet) `1` értékű rögzítési korláttal, ne pedig három rögzített `connectionId`-t. A rögzített lépések és az affinitás kombinációja ugyanarra a fiókra irányítja a kéréseket még akkor is, amikor az RR-számláló előrehalad.
+Ha több fiókot szeretne váltani egy modellen, részesítse előnyben **egy dinamikus fiók lépés** (üres `connectionId`, egész medence) ragadós határértékkel `1`, nem három rögzített `connectionId` vel. A rögzített lépések és az affinitás összeomlik ugyanarra a fiókra, még akkor is, ha a RR számláló előrehalad.
 
 ## Fúziós stratégia
 

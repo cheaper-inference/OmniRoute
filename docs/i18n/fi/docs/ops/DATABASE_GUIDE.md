@@ -403,28 +403,29 @@ Tämä käyttää SQLiten verkossa toimivaa varmuuskopiointirajapintaa — komen
 
 ---
 
-## Suorituskyvyn optimointi
+## Suorituskyvyn viritys
 
-### WAL-tila
+### WAL -tila
 
-WAL on oletusarvoisesti käytössä. Paljon kirjoituksia sisältävissä kuormissa kannattaa harkita seuraavia asetuksia:
+WAL on oletuksena käytössä. Harkitse suuria kirjoitustöitä:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Tarkistuspiste 1000 sivun välein
-PRAGMA journal_size_limit = 67108864;  -- WAL-tiedoston enimmäiskoko 64 Mt
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ei aseta `journal_size_limit` tä. Tarkistuspiste siirtää WAL -kehykset päätiedostoon, mutta WAL tiedosto säilyttää suurimman varatun koonsa. `OMNIROUTE_WAL_GUARD_MAX_MB` -suoja vain varoittaa ja suorittaa `wal_checkpoint(RESTART)`:n; se ei ole levyn kokoinen kansi.
 
 ### Indeksit
 
-Suorituskyvyn kannalta keskeiset indeksit (migraatiot luovat ne automaattisesti):
+Suorituskyvyn keskeiset indeksit (automaattisesti luotu siirroilla):
 
-- `idx_models_provider` — mallien haut palveluntarjoajan mukaan
-- `idx_combo_targets_combo_id` — yhdistelmäkohteiden laajennus
-- `idx_usage_history_api_key_timestamp` — käyttöanalytiikka
-- `idx_quota_snapshots_api_key_window` — kiintiöiden seuranta
-- `idx_call_logs_timestamp` — kutsulokikyselyt
+- `idx_models_provider` — -mallihaut palveluntarjoajan mukaan
+- `idx_combo_targets_combo_id` — yhdistelmäkohteen laajennus
+- `idx_usage_history_api_key_timestamp` — n käyttöanalytiikka
+- `idx_quota_snapshots_api_key_window` — -kiintiön seuranta
+- `idx_call_logs_timestamp` — -puhelulokin kyselyt
 
-Lisää uusi indeksi luomalla migraatio:
+Lisää uusi hakemisto luomalla siirto:
 
 ```sql
 -- 023_add_my_index.sql
@@ -433,22 +434,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### Muistikartoitettu I/O
 
-Erittäin suurissa tietokannoissa (>10 Gt) muistikartoitusta voidaan säätää SQLite-pragmalla:
+Erittäin suurille tietokannoille (> 10GB) muistikartoitusta voidaan säätää SQLite pragman kautta:
 
 ```sql
--- Aseta SQLite-pragmalla (säädä tiedostossa core.ts tai ajonaikaisesti)
-PRAGMA mmap_size = 268435456;  -- 256 Mt
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Tiivistäminen
+### Tiivistys
 
-Pitkään käynnissä olevat OmniRoute-instanssit hyötyvät ajoittaisesta `VACUUM`-komennon suorittamisesta:
+Pitkäaikaiset OmniRoute esiintymät hyötyvät satunnaisesta `VACUUM`:stä:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Suorita se kuukausittain vähäisen liikenteen ajankohtina. (WAL-tila vähentää tarvetta, mutta ei poista sitä.)
+Suorita kuukausittain vähäliikenteen ikkunoiden aikana. (WAL -tila vähentää tarvetta, mutta ei poista sitä.)
 
 ---
 

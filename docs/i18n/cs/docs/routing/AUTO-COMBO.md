@@ -303,57 +303,63 @@ hodnoty jsou předány do stávajících vstupů enginu `config.modePack` / `con
 `config.budgetFallback`. Uložená hodnota `config.budgetFallback` dané kombinace ("strict" |
 "cheapest") nastavuje trvalou zásadu; hlavička ji přepíše pro jediný požadavek.
 
-## Všechny strategie směrování
+## Všechny směrovací strategie
 
-Kombinační engine OmniRoute podporuje **20 strategií směrování** (deklarovaných v `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Samotný engine Auto Combo je dostupný pod strategií `auto`; ostatní strategie jsou k dispozici pro uložené kombinace.
+Podporuje kombinovaný motor OmniRoute**20 směrovacích strategií** (deklarováno v `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Samotný motor Auto Combo je vystaven v rámci strategie `auto` ; ostatní jsou k dispozici pro trvalá komba.
 
-| Strategie           | Popis                                                                                                                                                                                                                                |
-| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Seřazený seznam s prvním cílem a explicitní prioritou                                                                                                                                                                                |
-| `weighted`          | Vážený náhodný výběr podle váhy jednotlivých cílů                                                                                                                                                                                    |
-| `round-robin`       | Postupné cyklické procházení cílů v daném pořadí (po dávkách; viz níže)                                                                                                                                                              |
-| `context-relay`     | Předávání kontextu mezi cíli (dlouhé konverzace)                                                                                                                                                                                     |
-| `fill-first`        | Vyčerpání kvóty každého cíle před přechodem na další                                                                                                                                                                                 |
-| `p2c`               | Náhodné vyvažování zátěže metodou „Power of 2 Choices“                                                                                                                                                                               |
-| `random`            | Rovnoměrný náhodný výběr                                                                                                                                                                                                             |
-| `least-used`        | Výběr cíle s nejnižší aktuální zátěží                                                                                                                                                                                                |
-| `cost-optimized`    | Minimalizace ceny v $ za požadavek podle katalogových cen                                                                                                                                                                            |
-| `reset-aware` ⭐    | Prioritizace podle času resetování kvóty — kratší intervaly resetování mají vyšší prioritu                                                                                                                                           |
-| `reset-window`      | Upřednostnění cílů, jejichž interval kvóty se resetuje nejdříve                                                                                                                                                                      |
-| `headroom`          | Výběr cíle s největší zbývající rezervou kvóty                                                                                                                                                                                       |
-| `quota-weighted`    | Přeskočení vyčerpaných účtů a následný výběr ze zbývajících úměrně zbytkové kvótě vydělené aktuální zátěží; existující konverzace zůstávají připnuté                                                                                 |
-| `strict-random`     | Náhodný výběr bez odstraňování opakování                                                                                                                                                                                             |
-| `auto`              | Použití bodového hodnocení Auto Combo (16 faktorů) — **doporučeno**                                                                                                                                                                  |
-| `lkgp`              | Poslední známá funkční cesta (připne se k poslednímu úspěšnému poskytovateli a poté použije záložní pravidla)                                                                                                                        |
-| `context-optimized` | Výběr cíle, který nejlépe odpovídá aktuální velikosti kontextu                                                                                                                                                                       |
-| `cache-optimized`   | Změna pořadí cílů podle afinity mezipaměti promptů — jako první se vyzkouší připojení, které již s největší pravděpodobností obsahuje prefix tohoto požadavku v mezipaměti (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Paralelní rozeslání panelu modelů a následná syntéza jedné odpovědi pomocí hodnoticího modelu (viz níže)                                                                                                                             |
-| `pipeline`          | Sekvenční spuštění cílů, při němž se výstup každého kroku předává jako vstup následujícího kroku; vrátí se pouze konečná odpověď (#6396)                                                                                             |
+| Strategie           | Popis                                                                                                                                                                                                                          |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Seřazený seznam prvního cíle s explicitní prioritou                                                                                                                                                                            |
+| `weighted`          | Váženo náhodně podle váhy cíle                                                                                                                                                                                                 |
+| `round-robin`       | Procházejte cíle v pořadí (dávkové; viz níže)                                                                                                                                                                                  |
+| `context-relay`     | Předání kontextu napříč cíli (dlouhé konverzace)                                                                                                                                                                               |
+| `fill-first`        | Před přechodem na další vyplňte kvótu každého cíle                                                                                                                                                                             |
+| `p2c`               | Power-of-2-choices náhodné vyvažování zátěže                                                                                                                                                                                   |
+| `random`            | Jednotný náhodný výběr                                                                                                                                                                                                         |
+| `least-used`        | Vyberte cíl s nejnižší proudovou zátěží                                                                                                                                                                                        |
+| `cost-optimized`    | Minimalizujte $ za požadavek podle katalogové ceny                                                                                                                                                                             |
+| `reset-aware` ⭐    | Priorita podle času resetování kvóty — krátká resetovací okna jsou zařazena výše                                                                                                                                               |
+| `reset-window`      | Preferovat cíle, jejichž okno kvóty se resetuje co nejdříve                                                                                                                                                                    |
+| `headroom`          | Vyberte cíl s největším zbývajícím prostorem kvóty                                                                                                                                                                             |
+| `quota-weighted`    | Přeskočte vyčerpané účty a poté vyberte ze zbývajících v poměru ke zbývající kvótě vydělené zatížením během letu; existující konverzace zůstanou připnuté                                                                      |
+| `strict-random`     | Náhodné bez deduplikace opakování                                                                                                                                                                                              |
+| `auto`              | Použijte automatické kombo bodování (16faktorové) —**doporučeno**                                                                                                                                                              |
+| `lkgp`              | Poslední známá dobrá cesta (připne se k poslednímu úspěšnému poskytovateli, pak se vrátí k pravidlům)                                                                                                                          |
+| `context-optimized` | Vyberte cíl, který nejlépe odpovídá aktuální velikosti kontextu                                                                                                                                                                |
+| `cache-optimized`   | Změnit pořadí cílů podle afinity rychlé mezipaměti — nejprve se vyzkouší připojení, které pravděpodobně již obsahuje předponu tohoto požadavku uloženou v mezipaměti (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Rozprostřete paralelně panel modelů a poté pomocí porotce syntetizujte jednu odpověď (viz níže)                                                                                                                                |
+| `pipeline`          | Spouštět cíle postupně, seřadit výstup každého kroku do vstupu dalšího kroku; je vrácena pouze konečná odpověď (#6396)                                                                                                         |
 
-⭐ = Novinka ve v3.8.0 · 🧬 = Novinka ve v3.8.36
+⭐ = Novinka ve verzi 3.8.0 · 🧬 = Novinka ve verzi 3.8.36
 
 ### Sémantika `weighted`
 
-`weighted` představuje **poměrný náhodný výběr pro každý požadavek**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), nikoli vyrovnávač:
+`weighted` je a **poměrné náhodné losování na žádost** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ne ekvalizér:
 
-- Pro každý požadavek se vybere **jeden** krok s pravděpodobností `weight / totalWeight`; zbývající kroky
-  jsou pro daný požadavek seřazeny sestupně podle váhy jako záložní řetězec.
-- Krok, jehož váha je `0` (nebo chybí), není **nikdy vybrán**, dokud má alespoň jeden jiný krok
-  váhu > 0 — může sloužit pouze jako záloha po selhání vybraného kroku. Pouze když jsou **všechny**
-  váhy nulové, stane se výběr rovnoměrným.
-- Kroky, jejichž cíle jsou všechny nedostupné — jistič poskytovatele ve stavu `OPEN`, čekací interval
-  připojení, uzamčení modelu — jsou z výběru odstraněny ještě před jeho provedením
-  (`open-sse/services/combo/targetResolution.ts`), takže jediný dostupný krok může dočasně
-  vyhrávat u každého požadavku.
-- `stickyWeightedLimit` (konfigurace kombinace, výchozí hodnota `1` = vypnuto) připne vybraný krok na daný počet
-  po sobě jdoucích úspěšných požadavků, než proběhne nový výběr.
+- Každá žádost se losuje **jeden** krok s pravděpodobností `weight / totalWeight`; zbývající kroky jsou seřazeny podle sestupné váhy jako záložní řetězec pro daný požadavek.
+- Krok, jehož hmotnost je `0` (nebo chybí), je **nikdy nekreslené** zatímco jakýkoli jiný krok má váhu > 0 — může sloužit pouze jako nouzový krok poté, co nakreslený krok selže. Jen když **vše** váhy jsou 0, výběr bude jednotný.
+- Kroky, jejichž cíle jsou všechny nedostupné, jistič poskytovatele — `OPEN`, ochlazení připojení, uzamčení modelu — jsou odstraněny ze slosování dříve, než k tomu dojde (`open-sse/services/combo/targetResolution.ts`), takže každý požadavek může dočasně vyhrát jediný zdravý krok.
+- `stickyWeightedLimit` (kombinovaná konfigurace, výchozí `1` = vypnuto) připíná nakreslený krok pro tolik po sobě jdoucích úspěchů, než se znovu vykreslí.
 
-Pro striktní rotaci použijte `round-robin`; stejné váhy u strategie `weighted` zajišťují statistické — nikoli striktní — vyvážení.
+Pro striktní rotaci použijte `round-robin`; stejné váhy na `weighted` dávají statistické —, nikoli striktní rovnováhu —.
 
 ### Agentický režim potrubí
 
-Kombinace `pipeline` s alespoň dvěma modely se může rozhodnout pro směrování planner/executor pomocí `config.agenticOrchestration.enabled`. První cíl vlastní plánování a konečné odpovědi; druhý cíl vysílá klientská nativní volání nástrojů. OmniRoute detekuje pokračování výsledků nástroje z protokolu požadavku, zeptá se plánovače, zda je potřeba další kolo nástroje, a dynamicky učiní z vykonavatele nebo plánovače konečným krokem pro klienta.
+Kombinace `pipeline` s alespoň dvěma modely se může rozhodnout pro směrování planner/executor se `config.agenticOrchestration.enabled`. První cíl vlastní plánování a konečné odpovědi; druhý cíl vysílá klientská nativní volání nástrojů. OmniRoute detekuje pokračování výsledků nástroje z protokolu požadavku, zeptá se plánovače, zda je potřeba další kolo nástroje, a dynamicky učiní z vykonavatele nebo plánovače konečným krokem pro klienta.
+
+Volitelné `config.agenticOrchestration.contextCompaction` aplikuje samostatný rozpočet užitečného zatížení před každým odesláním plánovače nebo exekutora. Aktivujte to explicitně:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Jedná se o serializované rozpočty znaků JSON vybrané operátorem, nikoli kontextová okna tokenů nebo garantované upstream limity. Přesný model IDs přepíše výchozí. Nad prahovou hodnotou zhutnění odstraní identické definice nástrojů, ořízne evidenci příliš velkých nástrojů pomocí výtahu a odstraní staré kompletní skupiny historie směrem k cílovému poměru. Uchovává instrukce system/developer, nejnovější požadavek uživatele, poslední kolo nástroje včetně paralelního calls/results a hlavní směrovací instrukce Gemini. Nejvyšší úrovně pokynů a nastavení nástrojů jsou zachovány. Značka vynechání zaznamenává odstraněnou historii; toto je deterministické ořezávání, nikoli sémantické shrnutí. Pokud připnutý kontext stále překračuje rozpočet, požadavek před kontaktováním modelu vrátí 413. Pokud je komprimace vypnuta nebo je pod prahovou hodnotou, požadavek prochází beze změny.
 
 U pokračování výsledků nástroje OmniRoute také zastaví provádění, když dvě po sobě jdoucí dokončená kola opakují stejná volání nástroje s nezměněnými výsledky, nebo když každý explicitně označený výsledek ve dvou po sobě jdoucích kolech selhal. Změněné výsledky umožňují opakované volání (například dotazování). Strážce se resetuje na nový požadavek uživatele, seskupuje paralelní hovory do jednoho kola a podporuje historii Anthropic, dokončení chatu, odezvy a Gemini. Plánovač obdrží důvod a vlastní konečnou odpověď, i když požaduje další kolo nástroje.
 
@@ -369,17 +375,17 @@ Další modely po druhém cíli jsou objednány zálohy exekutorů. Neúspěšn�
 }
 ```
 
-Exekutor může vydávat více nezávislých volání v jedné odpovědi. Závislá volání jsou zpracovávána v pozdějších kolech klientského nástroje a výsledku, přičemž plánovač kontroluje každý výsledek. `maxToolRounds` je výchozí `8` a přijímá `1`–`32`; jakmile je dosaženo, musí plánovač vytvořit nejlepší dostupnou konečnou odpověď. Rozhodnutí interního plánovače se ukládají do vyrovnávací paměti, zatímco vybraná odezva na straně klienta zachovává původní preference streamování.
+Exekutor může vydávat více nezávislých volání v jedné odpovědi. Závislá volání jsou zpracovávána v pozdějších kolech klientského nástroje a výsledku, přičemž plánovač kontroluje každý výsledek. `maxToolRounds` je výchozí `8` a přijímá `1`–`32`; jakmile je dosaženo, musí plánovač vytvořit nejlepší dostupnou konečnou odpověď. Rozhodnutí interního plánovače jsou ukládána do vyrovnávací paměti, zatímco vybraná odezva na straně klienta zachovává původní preference streamování.
 
-### Lepivé dávky `round-robin` a rozšíření podle účtů
+### Lepkavá dávka `round-robin` a rozšíření účtu
 
-Round-robin pracuje v dávkách, nikoli po jednom požadavku na krok:
+Round-robin je dávkový, nikoli jeden požadavek na krok:
 
-- `stickyRoundRobinLimit` (konfigurace kombinace, poté `comboStickyRoundRobinLimit`, poté `settings.stickyRoundRobinLimit`, výchozí hodnota **3**) ponechá stejný cíl po daný počet po sobě jdoucích úspěchů a teprve potom přejde na další. Pro rotaci po jednom požadavku nastavte přepsání na úrovni kombinace na `1`. Editor kombinace zobrazuje efektivní hodnotu a vrstvu, ze které pochází.
-- `connectionAwareExpansion` (konfigurace kombinace, poté nastavení, výchozí hodnota **false**) před rotací rozšíří každý krok na úrovni poskytovatele na cíle pro jednotlivé účty. Strategie skupiny B (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) zachovávají pohled na úrovni poskytovatele, dokud není tato možnost zapnuta. Editor kombinace nabízí možnosti inherit / on / off; inherit použije globální výchozí hodnotu (off).
-- Směrování podle lokality mezipaměti promptů (`promptCacheAffinityEnabled`, výchozí hodnota **true**) mění pořadí připnutých připojení tak, aby shodné klíče mezipaměti zůstaly na jednom účtu. Má přednost před rotací round-robin a weighted mezi připnutými kroky pro jednotlivé účty. Pokud potřebujete striktní rotaci, vypněte tuto možnost v Settings → Combo defaults. Přepsání na úrovni jednotlivých kombinací není k dispozici.
+- `stickyRoundRobinLimit` (kombinovaná konfigurace, poté `comboStickyRoundRobinLimit`, poté `settings.stickyRoundRobinLimit`, výchozí **3** ) udržuje stejný cíl pro tolik po sobě jdoucích úspěchů před otočením. Nastavte přepis komba na `1` pro rotaci jednoho požadavku. Combo editor ukazuje efektivní hodnotu a z jaké vrstvy pochází.
+- `connectionAwareExpansion` (kombinovaná konfigurace, poté nastavení, výchozí **falešný** ) rozšiřuje každý krok na úrovni poskytovatele na cíle pro jednotlivé účty před rotací. Strategie skupiny B (prioritní, vážené, cyklické, náhodné, p2c, nejméně používané, nákladově optimalizované, lkgp, fill-first, striktně náhodné, kontextově optimalizované, mezipaměť optimalizované, kontextové relé, fúze, potrubí) uchovávají zobrazení na úrovni poskytovatele, dokud není zapnuto. Combo editor odhaluje inherit / on / off; dědit používá globální výchozí nastavení (vypnuto).
+- Prompt-cache lokalitní směrování (`promptCacheAffinityEnabled`, výchozí **věrný** ) změní pořadí připojených připojení, takže odpovídající klíče mezipaměti zůstanou na jednom účtu. Má přednost před cyklickou rotací a váženou rotací mezi připnutými kroky pro jednotlivé účty. Pokud potřebujete striktní rotaci, vypněte jej v Nastavení Výchozí hodnoty → Combo. Neexistuje žádné přepsání jednotlivých kombinací.
 
-Pro rotaci mezi více účty u jednoho modelu upřednostněte **jeden krok s dynamickým účtem** (prázdné `connectionId`, celý fond) s lepivým limitem `1`, nikoli tři připnutá `connectionId`. Připnuté kroky společně s afinitou vedou ke sloučení na stejný účet, i když se čítač RR posouvá.
+Upřednostňujte rotaci více účtů na jednom modelu **jeden krok dynamického účtu** (prázdné `connectionId`, celý bazén) s lepivým limitem `1`, ne tři připnuté `connectionId` s. Připnuté kroky plus afinita se hroutí na stejný účet, i když počítadlo RR postupuje.
 
 ## Strategie Fusion
 

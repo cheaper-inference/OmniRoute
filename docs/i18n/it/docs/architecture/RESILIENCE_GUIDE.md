@@ -390,27 +390,17 @@ _stato_ attivo dei blocchi è effimero.
 
 ---
 
-## 4. Controllo della concorrenza con condivisione della quota (v3.8.36)
+## 4. Controllo della concorrenza delle quote di condivisione (v3.8.36)
 
-Gli account in abbonamento (GLM, MiniMax, ecc.) spesso accettano solo ~1–3
-richieste simultanee; superare questo limite attiva 429 e periodi di cooldown.
-Il problema è particolarmente evidente con le combinazioni **quota-share**
-(`qtSd/…`), in cui diverse chiavi API condividono lo stesso account upstream.
-Tre livelli impediscono di sovraccaricare un account condiviso.
+Gli account di abbonamento (GLM, MiniMax, ecc.) spesso accettano solo ~ 1–3 richieste simultanee; il superamento di tale limite attiva 429 e tempi di recupero. Questo è acuto sotto **condivisione delle quote** (`qtSd/…`), in cui diverse chiavi API condividono un account upstream. Tre livelli impediscono che un account condiviso venga inondato.
 
 ### Limite di concorrenza per connessione (`max_concurrent`)
 
-Ogni connessione del provider può dichiarare un limite massimo
-`max_concurrent` (`provider_connections.max_concurrent`, impostato nella finestra
-di dialogo della connessione / API / DB). Lasciarlo vuoto per non applicare
-alcun limite. Questo è l'unico parametro che controlla il livello di
-serializzazione descritto di seguito: impostarlo in base alla concorrenza reale
-dell'account (ad es. GLM ~1, MiniMax ~2).
+Ciascun provider di connessione può dichiarare un massimale `max_concurrent` (`provider_connections.max_concurrent`, impostato nella modalità di connessione/ API / DB). Lascialo vuoto per nessun limite. Questa è l'unica manopola che guida il livello di serializzazione sotto — impostandolo sulla concorrenza reale dell'account (ad esempio GLM ~ 1, MiniMax ~ 2).
 
 ### Limiti di concorrenza per modello (`modelConcurrency`)
 
-Una connessione può inoltre dichiarare limiti esatti di concorrenza per modello
-all'interno della relativa mappa `rateLimitOverrides`:
+Una connessione può inoltre dichiarare i limiti esatti di concorrenza per modello all'interno della sua mappa `rateLimitOverrides` :
 
 ```json
 {
@@ -421,92 +411,32 @@ all'interno della relativa mappa `rateLimitOverrides`:
 }
 ```
 
-Impostarlo nella finestra di dialogo della connessione (**Rate limit overrides →
-Limiti di concorrenza per modello**, un `model=cap` per riga) oppure tramite
-`PATCH /api/providers/[id]` con la stessa struttura JSON. Semantica delle chiavi:
+Impostalo nella connessione modale (**Il limite di velocità sostituisce i limiti di concorrenza → per modello** , uno `model=cap` per riga) o tramite `PATCH /api/providers/[id]` con la stessa forma JSON. Semantica chiave:
 
-- **A livello di connessione vs specifico per modello:** `maxConcurrent` rimane il
-  limite condiviso a livello dell'intera connessione. Quando si applicano
-  entrambi, entrambi i gate vengono acquisiti atomicamente nello stesso gate
-  composito (`global → provider → account → model`); il comportamento effettivo
-  segue il limite applicabile più restrittivo.
-- **Corrispondenza esatta della chiave del modello:** la chiave è la stringa del
-  modello passata all'executor dopo la risoluzione del routing, normalmente
-  l'ID del modello upstream senza prefisso (`glm-5`), non un alias
-  `provider/model` lato client (`zai/glm-5` non corrisponde a `glm-5`). I valori
-  sono limiti positivi interi per le richieste simultanee.
-- **Accodamento locale, senza rilevamento:** le richieste in eccesso vengono
-  accodate localmente con le semantiche di coda/timeout esistenti (errori di
-  ammissione tipizzati `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute
-  non rileva né deduce le policy upstream: applica i limiti esatti configurati
-  dall'operatore. Un gate del modello saturo non disabilita mai il provider e
-  non crea mai un blocco permanente del modello; il comportamento upstream per
-  429/cooldown/fallback rimane il meccanismo di gestione degli errori.
-- **Ambito per connessione e per processo:** i limiti si applicano per
-  connessione al database e vengono mantenuti in memoria, quindi due connessioni
-  che riutilizzano la stessa chiave API upstream non si coordinano tra loro.
-- **Non configurato significa invariato:** omettere la mappa (oppure lasciare
-  vuoto il campo nel dashboard) non aggiunge alcun gate per modello. Esempio di
-  configurazione senza dichiarare alcun limite universale del provider:
+- **A livello di connessione e specifico del modello:** `maxConcurrent` rimane il limite massimo condiviso a livello di connessione. Quando si applicano entrambi, entrambe le porte vengono acquisite atomicamente nella stessa porta composita (`global → provider → account → model`); il comportamento efficace è il limite applicabile più rigoroso.
+- **Corrispondenza esatta modello-chiave:** la chiave è la stringa del modello passata all'esecutore dopo la risoluzione del routing — normalmente l'ID del modello upstream nudo (`glm-5`), non un alias `provider/model` lato client (`zai/glm-5` non corrisponde `glm-5`). I valori rappresentano i limiti massimi di richieste simultanee con numeri interi positivi.
+- **Accodamento locale, nessuna scoperta:** le richieste in eccesso vengono accodate localmente con la semantica queue/timeout esistente (errori di ammissione `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` digitati). OmniRoute non scopre né deduce la politica a monte — ma applica i massimali esatti configurati dall'operatore. Un gate del modello saturo non disabilita mai il provider e non crea mai un blocco permanente del modello; Il comportamento 429/cooldown/fallback a monte rimane il backstop dell'errore.
+- **Ambito per connessione e per processo:** i limiti sono per connessione al database e mantenuti in memoria, quindi due connessioni che riutilizzano la stessa chiave API upstream non si coordinano tra loro.
+- **Non configurato significa invariato:** omettere la mappa (o lasciare vuoto il campo del dashboard) non aggiunge alcun cancello al modello. Configurazione di esempio senza imporre alcun limite al provider universale:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serializzazione delle richieste quota-share
+### Serializzazione delle richieste di quota-share
 
-Quando un dispatch quota-share ha come destinazione una connessione che dichiara
-un `max_concurrent` positivo, le richieste simultanee verso quell'**account**
-vengono serializzate tramite un semaforo per connessione (chiave
-`qsconn:<connectionId>`): le richieste in eccesso **attendono nella coda** invece
-di sovraccaricare l'account. È **fail-open**: una coda satura o un timeout
-prosegue senza uno slot, invece di rifiutare una richiesta che può essere
-inviata. Attivare/disattivare in **Impostazioni → Resilienza → Concorrenza
-quota-share per connessione**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, attivo per
-impostazione predefinita). Senza un limite `max_concurrent`, il comportamento
-rimane invariato.
+Quando un invio di quota-sharing prende di mira una connessione che dichiara uno `max_concurrent` positivo, vengono inviate richieste simultanee **account** vengono serializzate attraverso un semaforo per connessione (chiave `qsconn:<connectionId>`): richieste in eccesso **aspettare in coda** invece di inondare il conto. È **fail-open** — una coda saturata o un timeout procede senza uno slot anziché rifiutare mai una richiesta inviabile. Attiva **Impostazioni → Resilienza → Concorrenza quota per connessione** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, attivo per impostazione predefinita). Senza un limite `max_concurrent` il comportamento è invariato.
 
-> Il gate di routing quota-share (`selectQuotaShareTarget`, DRR + P2C) è a sua
-> volta fail-open e si limita a _deprioritizzare_ una connessione che ha
-> raggiunto il limite; con un pool composto da una sola connessione non può
-> imporre un limite rigido, quindi è questo semaforo a contenere effettivamente
-> il sovraccarico.
+> Il gate di routing della quota-share (`selectQuotaShareTarget`, DRR + P2C) è esso stesso fail-open e _deprioritizza_ solo una connessione — a limite massimo con un pool a connessione singola che non può limitare in modo rigido, quindi questo semaforo è ciò che contiene effettivamente il flusso.
 
-### Retry consapevole del cooldown delle combinazioni
+### Nuovo tentativo combinato con riconoscimento del tempo di recupero
 
-Per ogni strategia di combinazione (quando abilitata), una richiesta che
-causerebbe un 429 per un breve cooldown transitorio attende che il cooldown
-termini e viene nuovamente inviata, invece di restituire il 429. Questo copre le
-finestre TPM/RPM della classe Gemini (~60 s di retry-after) nelle combinazioni
-multi-modello, ad esempio quando entrambe le destinazioni di una combinazione a
-2 modelli raggiungono un limite di frequenza per modello. Il comportamento è
-limitato da `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) in **Impostazioni → Resilienza**. Non attende mai per
-`quota_exhausted` (bloccato fino a mezzanotte) né per motivi di autenticazione o
-di risorsa non trovata.
+Per ogni strategia combinata (se abilitata), una richiesta che cristallizzerebbe un 429 per un tempo di recupero temporaneo SHORT attende che finisca e rispedisce invece di restituire il 429 — questo copre le finestre TPM/RPM di classe Gemini (~ 60s retry-after) su combo multi-modello, ad esempio entrambi i bersagli di una combo a 2 modelli che raggiungono un limite di velocità per modello. Delimitato da `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) in **Impostazioni → Resilienza** . Non attende mai i motivi `quota_exhausted` (bloccato fino a mezzanotte) o auth/not-found. Con `comboTimeoutMs` impostato non inizia un'attesa che non può terminare prima di quella scadenza (#18998): il combo risponde subito con la sua risposta da terminale invece che con uno `COMBO_TIMEOUT` 504.
 
-Una combinazione può disattivare questa funzione con
-`config.comboCooldownWaitEnabled: false`. Solo `false` letterale disabilita
-queste attese condivise delle combinazioni (cooldown post-dispatch e attese
-pre-dispatch per circuito aperto/blocco del modello) e l'estensione del limite
-inferiore del timeout in base al budget di attesa. L'assenza del valore o
-`true` mantiene la policy globale; `true` non può abilitare globalmente un'attesa
-disabilitata. Un `targetTimeoutMs` esplicito ha comunque la precedenza. Questa
-opzione non modifica l'attesa pre-dispatch separata del pin del turno
-native-Codex.
+Una combo può rinunciare con `config.comboCooldownWaitEnabled: false`. Solo `false` letterale disabilita queste attese combinate condivise (attese circuit-open/model-lock post-invio e pre-invio) e la relativa estensione del timeout del budget di attesa. Mancante o `true` preserva la politica globale; `true` non può abilitare l'attesa disabilitata a livello globale. Un `targetTimeoutMs` esplicito vince comunque. Questa rinuncia non modifica l'attesa pre-invio separata del turn-pin del Codex nativo.
 
-Lo stesso gate copre il caso pre-dispatch (#16319): quando ogni destinazione di
-una combinazione viene saltata prima di qualsiasi tentativo perché il relativo
-modello si trova in un breve blocco transitorio, il percorso con zero tentativi
-attende la fine del blocco secondo gli stessi limiti e invia nuovamente la
-richiesta, invece di restituire un `503 ALL_TARGETS_SKIPPED` privo di suggerimenti.
-Quando non è consentito attendere (limite massimo, numero di tentativi o budget
-esaurito, oppure funzione disattivata), la risposta terminale viene convertita
-in `429 rate_limit_error` e contiene `retry_after` / `reset_at` relativi alla
-scadenza del blocco transitorio più vicina; i blocchi per quota, autenticazione e
-risorsa non trovata mantengono il 503 privo di suggerimenti.
+Lo stesso cancello copre il caso pre-dispatch (#16319): quando ogni bersaglio di una combo viene saltato prima che venga effettuato qualsiasi tentativo perché il suo modello si trova in un breve blocco transitorio, il percorso di tentativo zero attende il blocco sotto gli stessi limiti e si ri-invia, invece di rispondere a uno `503 ALL_TARGETS_SKIPPED` senza suggerimenti. Quando non è consentita alcuna attesa (tetto, tentativo o budget esaurito o funzionalità disattivata), la risposta del terminale viene aggiornata a `429 rate_limit_error` che trasporta `retry_after` / `reset_at` dalla prima scadenza del blocco temporaneo; i blocchi quota, autenticazione e non trovato mantengono il 503 senza suggerimenti.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

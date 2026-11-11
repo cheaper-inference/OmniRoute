@@ -36,73 +36,73 @@ Mivel az érték becslés:
 
 ---
 
-## A költségek becslésének módja
+## A költségek becslése
 
-### Az árak forrása
+### Az árképzés forrása
 
-A költségek a [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) összevont ártáblájából származnak, az alábbi elsőbbségi sorrendben (**legmagasabb elöl**):
+A költségek a [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) egyesített ártáblázatából származnak, ebben a sorrendben (**a legmagasabb először** ):
 
-1. **Felhasználói felülírások** — a vezérlőpulton vagy a `PATCH /api/pricing` útján megadott árak (a `pricing` névtérben).
-2. **models.dev-szinkronizálás** — a `https://models.dev/api.json` címről letöltött árak (a `models_dev_pricing` névtérben).
-3. **LiteLLM-szinkronizálás** — a LiteLLM nyilvános `model_prices_and_context_window.json` fájljából származó árak (a `pricing_synced` névtérben).
-4. **Beépített alapértékek** — a [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) alatt szállított díjak.
+1. **Felhasználó felülírja** Az irányítópulton vagy a `PATCH /api/pricing` (a `pricing` névtéren) keresztül beállított — árak.
+2. **model.dev szinkron** — árazás `https://models.dev/api.json` ből (a `models_dev_pricing` névtérből) származik.
+3. **LiteLLM szinkron** — árak LiteLLM nyilvános `model_prices_and_context_window.json` jéből (a `pricing_synced` névtérből) származnak.
+4. **Hardcoded alapértelmezések** — árakat [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ben szállítjuk.
 
-Azonos szolgáltató/modell esetén a magasabb prioritású rétegek felülírják az alsóbb rétegek megfelelő mezőit; a felső rétegből hiányzó mezők továbbra is származhatnak alsóbb rétegből. A sorrend akkor is rögzített, ha mindkét független szinkronizálási feladat egyszerre fut. A `GET /api/pricing?includeSources=1` visszaadja a `pricing` és `sourceMap` objektumot; az utóbbi modellenkénti címkéi (`user`, `modelsDev`, `litellm`, `default`) a modellt tartalmazó legmagasabb prioritású réteget jelölik.
+Ugyanazon provider/model esetén a magasabb prioritású rétegekből származó értékek felülírják az alacsonyabb rétegek megfelelő mezőit; a felső rétegből hiányzó mezők továbbra is származhatnak egy alsó rétegből. A sorrend akkor is rögzített, ha mindkét független szinkronizálási feladat egyszerre fut. `GET /api/pricing?includeSources=1` `pricing` és `sourceMap` adja vissza, amelyek modellenkénti címkéi (`user`, `modelsDev`, `litellm`, `default`) azonosítják az adott modellt tartalmazó legmagasabb prioritású réteget.
 
-A **LiteLLM-szinkronizálás** külön bekapcsolást igényel, alapértelmezés szerint ki van kapcsolva. Környezeti változói (lásd [`.env.example`](../../.env.example)):
+**LiteLLM szinkron** engedélyezve van, alapértelmezés szerint le van tiltva. Környezeti változói (lásd [`.env.example`](../../.env.example) ) a következők:
 
-| Környezeti változó      | Alapérték | Rendeltetés                                                                                |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Bekapcsolja a LiteLLM-árak háttérben történő szinkronizálását.                             |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Szinkronizálási időköz **másodpercben** (alapértelmezés szerint naponta).                  |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Forrásválasztás kizárólag ehhez a szinkronizáláshoz; jelenleg csak a `litellm` támogatott. |
+| Env var                 | Alapértelmezett | Cél                                                                                     |
+| ----------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`         | Engedélyezze a háttér LiteLLM árszinkronizálását.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`         | Szinkronizálási intervallum másodpercben (naponta).                                     |
+| `PRICING_SYNC_SOURCES`  | `litellm`       | Forrás kiválasztása csak ehhez a szinkronizáláshoz; jelenleg csak `litellm` támogatott. |
 
-A **models.dev-szinkronizálás** a LiteLLM-szinkronizálástól független, és szintén alapból ki van kapcsolva. A Beállításokban (models.dev-szinkronizálás) kapcsolható be, vagy ezekkel a változókkal:
+**model.dev szinkron** elkülönül a LiteLLM szinkronizálástól, és alapértelmezés szerint le is van tiltva. Engedélyezze a Beállításokban (models.dev sync), vagy használja az alábbi változókat:
 
-| Környezeti változó         | Alapérték           | Rendeltetés                                                                                                                                                                  |
-| -------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nincs beállítva)_ | Beállítatlanul a Beállítások kapcsolóját követi; `1/true/on/yes` kényszeríti a bekapcsolást, `0/false/off/no` pedig a kikapcsolást, akkor is, ha a Beállítások engedélyezné. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`             | A models.dev-szinkronizálás alapértelmezett időköze másodpercben (naponta).                                                                                                  |
+| Env var                    | Alapértelmezett | Cél                                                                                                                                                 |
+| -------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unset)_       | Az Unset a Beállítások kapcsolót követi; `1/true/on/yes` bekapcsol, `0/false/off/no` pedig kikapcsol (még akkor is, ha a beállítások engedélyezik). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Az alapértelmezett models.dev szinkronizálási időköz másodpercben (naponta).                                                                        |
 
-A `PRICING_SYNC_SOURCES` **nem** kapcsolja be a models.dev szinkronizálását; csak a LiteLLM-szinkronizálást vezérli. A felhasználói felülírás törlése egyik szinkronizált névteret sem üríti ki; a következő elérhető árréteg lép életbe. Árazatlan modellnél mindkét szinkronizálási beállítást és a `sourceMap` értékét ellenőrizze, mielőtt kézi felülírást ad hozzá.
+`PRICING_SYNC_SOURCES` igen **nem** model.dev engedélyezése; csak a LiteLLM szinkronizálást vezérli. A felhasználói felülírás törlése nem törli egyik szinkronizált névteret sem; a következő elérhető árréteg lép hatályba. Ár nélküli modell esetén ellenőrizze mind a szinkronizálási beállításokat, mind a `sourceMap` mielőtt manuális felülbírálást adna hozzá.
 
 ### A költségképlet
 
-A költséget a rendszer kérésenként számítja ki a tokenek száma és az egymillió tokenre vetített díjak alapján a
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`) fájlban:
+A költségeket kérésenként számítják ki a tokenszámból és [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) milliós tokenenkénti arányából:
 
-- **Bemeneti tokenek** (a gyorsítótárból olvasott és a gyorsítótár létrehozásához használt tokenek levonásával) × `input` díj.
-- **Gyorsítótárból olvasott tokenek** × `cached` díj (ennek hiányában a bemeneti díj).
-- **Gyorsítótár-létrehozási tokenek** × `cache_creation` díj (ennek hiányában a bemeneti díj).
-- **Kimeneti tokenek** × `output` díj.
-- **Következtetési tokenek** × `reasoning` díj (ennek hiányában a kimeneti díj).
+- **Beviteli tokenek** (mínusz a gyorsítótár olvasása és a gyorsítótár létrehozása tokenek) × `input` arány.
+- **Gyorsítótár-olvasási tokenek** × `cached` ráta (visszaesik a bemeneti sebességre).
+- **Gyorsítótár-létrehozási tokenek** × `cache_creation` ráta (visszaesik a bemeneti sebességre).
+- **Kimeneti tokenek** × `output` ráta.
+- **Érvelési jelzők** × `reasoning` ráta (visszaesik a kimeneti sebességre).
 
-Minden díj USD/1 000 000 token egységben értendő. A Codex „fast”/„priority” vagy
-„flex” szolgáltatási szintje költségszorzót alkalmaz (`getCodexFastCostMultiplier`) — például a flex
-50%-os tokenkedvezménnyel kerül elszámolásra, amely az irányítópulton **flex-megtakarításként** jelenik meg.
+Minden árfolyam USD ként van értelmezve 1 000 000 tokenenként. A Codex "gyors"/"prioritásos" vagy "rugalmas" szolgáltatási szintje költségszorzót (`getCodexFastCostMultiplier`) alkalmaz. — pl.**flex megtakarítás** a műszerfalon.
 
-A rendszer először normalizálja a modellneveket (eltávolítja a szolgáltatói útvonalelőtagokat, például az `openai/` vagy
-`accounts/fireworks/models/` előtagot), így a korábbi sorok továbbra is hozzárendelhetők egy árhoz.
+A modellnevek először normalizálásra kerülnek (a szolgáltatói elérési út előtagjai, például `openai/` vagy `accounts/fireworks/models/` levonásra kerülnek), így az előzménysorok továbbra is megegyeznek az árral.
 
-### A költés rögzítésének módja
+### Hogyan történik a költés rögzítése
 
-- A rendszer a válasz után számítja ki a kérésenkénti költséget, és „küldd el és felejtsd el” módon rögzíti, így az
-  soha nem növeli az ügyfél által érzékelt késleltetést. A megosztott kvóta felhasználásának rögzítése a következő
-  eseményciklus-ütemben történik a [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) használatával.
-- Az API-kulcsokhoz tartozó költés pufferbe kerül, majd a
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) kötegekben írja ki (alapértelmezett kiírási időköz:
-  60 másodperc, 1 000 bejegyzéses puffer). A következőkkel hangolható:
+- A kérésenkénti költséget a kérés teljesítésekor számítjuk ki. A megosztott kvótafelhasználás ütemezése a következő eseményhurok tickjére történik [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) keresztül.
+- Az API-kulcs kiadásait a [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (alapértelmezett 60 másodperces öblítési időköz, 1000 bejegyzéses puffer) puffereli és kötegekben üríti ki. Hangolható:
 
-  | Környezeti változó                  | Alapérték | Rendeltetés                                           |
-  | ----------------------------------- | --------- | ----------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Kiírási időköz ezredmásodpercben.                     |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | A pufferelt bejegyzések maximális száma kiírás előtt. |
+  | Env var                             | Alapértelmezett | Cél                                            |
+  | ----------------------------------- | --------------- | ---------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`         | Öblítési intervallum ezredmásodpercben.        |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`          | Maximális pufferelt bejegyzések öblítés előtt. |
 
-Az irányítópulton látható költségadatokat a rendszer **nem** egy soronként tárolt dollárösszegből olvassa ki — ehelyett
-minden alkalommal menet közben újraszámítja őket a tokenek száma és az aktuális ártáblázat alapján, amikor az
-analitikai végpont lefut. Ez azt jelenti, hogy egy hibás ár kijavítása (és az újbóli szinkronizálás)
-visszamenőleg is frissíti a korábbi költségbecsléseket.
+A költségek előnyben részesítik a pontos szolgáltató által bejelentett díjat (`provider_cost_usd`), majd egy katalógusáras kérés pillanatképet (`calculated_cost_usd`), majd a token átárazást az aktuális katalógusból. A tárolt költségeket nem terheljük újra a tokenszámuk alapján. A csak jogkivonattal rendelkező régi sorok továbbra is változnak, ha katalógusáraik módosulnak.
+
+### OCR és beágyazások
+
+- A sikeres `/v1/ocr` kérések az upstream `usage_info.pages_processed` használják, nem a kért oldaltartományt vagy a visszaadott oldalobjektumok számát. A becslés × `ocr_cost_per_page` oldal (abszolút USD/page,**nem** USD/million).
+- A dokumentum- vagy határolódoboz-feljegyzésekkel rendelkező kérésekhez külön `ocr_cost_per_annotated_page` tarifa szükséges. Enélkül a költségek ismeretlenek maradnak; a szokásos OCR tarifát nem helyettesítik csendben.
+- LiteLLM sync leképezi az upstream `annotation_cost_per_page` mezőjét `ocr_cost_per_annotated_page` be, megtartva az abszolút USD/page értéket és a csak megjegyzéseket tartalmazó bejegyzéseket, beleértve az explicit nullát is. A megadott kanonikus mező élvez elsőbbséget; az érvénytelen alias értékeket figyelmen kívül hagyja. A felhasználói árfelülírások megtartják normál prioritásukat. Lásd [LiteLLMOCR árazási kulcsait](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR használat tárolja az oldalak számát, az egységárat, a számított USD költséget, API kulcsot és a kiválasztott kapcsolatot. Az oldalak soha nem szerepelnek tokenként. A hívásnaplók számlázási metaadatokat tartalmaznak, nem dokumentum URLs, PDF bájtokat vagy kivont szöveget.
+- A sikeres `/v1/embeddings` -kérelmek fizikai kötegenként egy használati sort rögzítenek, beleértve az ugyanazon ezredmásodperc alatt elkészült különálló kötegeket is. A szolgáltató által jelentett díjak elsőbbséget élveznek a jelképes becslésekkel szemben; a kombinált burkolólapok nem adnak díjat.
+- A használati előzmények, a költségelemzés, provider/account ablakok, az API-kulcs kiadási korlátok, a kérelem-költségkönyv és a napi használati összesítések tartalmazzák ezeket a költségeket. A naplózás nélküli kulcsok megtartják a numerikus elszámolást a forrásszöveg megőrzése nélkül.
+- Hiányzó használati vagy tarifák vannak **ismeretlen** , nem ingyenes: a válaszköltség fejléc kimarad, és a meglévő árazatlan használati szabályzat vonatkozik a korlátozott API kulcsokra. A kifejezetten konfigurált nulla díjak továbbra is érvényesek nulla költségű használatban.
+
+Ez csak előremutató könyvelés. A régi OCR/embedding -hívások, amelyek soha nem írtak használati előzményeket, nem rekonstruálhatók ebből az áttelepítésből. A katalógus becslései USD becslések, nem számlák, és nem tartalmazzák a valutaváltást, az adókat vagy a kedvezményeket.
 
 ---
 

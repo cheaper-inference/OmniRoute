@@ -38,71 +38,71 @@ coigilteas is ea 'costas' na deaise, ní bille").
 
 ## Conas a mheastar costais
 
-### Foinse na praghsála
+### An fhoinse praghsála
 
-Tagann na costais ón tábla praghsála cumaiscthe in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), san ord tosaíochta seo (**an tosaíocht is airde ar dtús**):
+Tagann costais ón tábla praghsála cumaiscthe in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), san ord tosaíochta seo (**is airde ar dtús** ):
 
-1. **Sáruithe úsáideora** — praghsanna socraithe sa phainéal nó trí `PATCH /api/pricing` (an t-ainmspás `pricing`).
-2. **Sioncronú models.dev** — praghsanna faighte ó `https://models.dev/api.json` (an t-ainmspás `models_dev_pricing`).
-3. **Sioncronú LiteLLM** — praghsanna ó chomhad poiblí `model_prices_and_context_window.json` de chuid LiteLLM (an t-ainmspás `pricing_synced`).
-4. **Réamhshocruithe sa chód** — rátaí a sheachadtar in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Sáraíonn an t-úsáideoir** Praghsanna — socraithe sa deais nó trí `PATCH /api/pricing` (an t-ainmspás `pricing` ).
+2. **samhlacha.dev sioncronaithe** Praghsáil — faighte ó `https://models.dev/api.json` (spás an `models_dev_pricing` ).
+3. **Sioncronú LiteLLM** Praghsanna — faighte ó `model_prices_and_context_window.json` poiblí LiteLLM(an t-ainmspás `pricing_synced` ).
+4. **Réamhshocruithe le hardcode** Rátaí — seolta i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Don soláthraí/samhail chéanna, forscríobhann sraitheanna tosaíochta níos airde na réimsí comhfhreagracha sna sraitheanna ísle; is féidir le réimsí nach bhfuil i sraith uachtarach teacht ó shraith íochtarach fós. Fanann an t-ord seasta fiú nuair a ritheann an dá thasc sioncronaithe neamhspleácha ag an am céanna. Tugann `GET /api/pricing?includeSources=1` `pricing` agus `sourceMap` ar ais; aithníonn a lipéid in aghaidh samhla (`user`, `modelsDev`, `litellm`, `default`) an tsraith tosaíochta is airde ina bhfuil an tsamhail sin.
+Maidir leis an provider/model céanna , forscríobhann luachanna ó shraitheanna ardtosaíochta réimsí meaitseála i sraitheanna níos ísle; is féidir le réimsí atá as láthair ó shraith uachtarach teacht fós ó chiseal níos ísle. Tá an t-ordú socraithe fiú nuair a ritheann an dá phost sioncronaithe neamhspleácha ag an am céanna. Tugann `GET /api/pricing?includeSources=1` ar ais `pricing` agus `sourceMap`, a n-aithníonn a lipéid in aghaidh an mhúnla (`user`, `modelsDev`, `litellm`, `default`) an ciseal tosaíochta is airde ina bhfuil an tsamhail sin.
 
-Ní mór **sioncronú LiteLLM** a chumasú go sainráite; tá sé díchumasaithe de réir réamhshocraithe. Is iad seo a athróga timpeallachta (féach [`.env.example`](../../.env.example)):
+**Sioncronú LiteLLM** is rogha an diúltaithe, díchumasaithe de réir réamhshocraithe. Is iad na hathróga timpeallachta atá aige (féach [`.env.example`](../../.env.example) ):
 
-| Athróg timpeallachta    | Réamhshocrú | Cuspóir                                                                              |
-| ----------------------- | ----------- | ------------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`     | Cumasaíonn sé sioncronú praghsanna LiteLLM sa chúlra.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Eatramh sioncronaithe i **soicindí** (gach lá de réir réamhshocraithe).              |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Roghnú foinsí don sioncronú seo amháin; ní thacaítear ach le `litellm` faoi láthair. |
+| Env var                 | Réamhshocrú | Cuspóir                                                                           |
+| ----------------------- | ----------- | --------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`     | Cumasaigh sioncronú praghsála LiteLLM sa chúlra.                                  |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Eatramh sioncronaithe i soicindí (laethúil).                                      |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Roghnú foinse don sioncronú seo amháin; faoi láthair ní thacaítear ach `litellm`. |
 
-Tá **sioncronú models.dev** ar leithligh ó shioncronú LiteLLM agus tá sé díchumasaithe de réir réamhshocraithe freisin. Cumasaigh é sna Socruithe (sioncronú models.dev), nó úsáid na hathróga seo:
+**samhlacha.dev sioncronaithe** tá sé scartha ó shioncronú LiteLLM agus tá sé díchumasaithe freisin de réir réamhshocraithe. Cumasaigh é i Socruithe (models.dev sync) nó úsáid na hathróga seo:
 
-| Athróg timpeallachta       | Réamhshocrú   | Cuspóir                                                                                                                                                                                                 |
-| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(gan socrú)_ | Mura bhfuil luach socraithe, leanann sé an lasc sna Socruithe; cuireann `1/true/on/yes` ar siúl é go héigeantach agus cuireann `0/false/off/no` as é go héigeantach, fiú má chumasaíonn na Socruithe é. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Eatramh réamhshocraithe shioncronú models.dev i soicindí (go laethúil).                                                                                                                                 |
+| Env var                    | Réamhshocrú     | Cuspóir                                                                                                                       |
+| -------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(díshuiteáil)_ | Leanann Unset an scoránaigh Socruithe; Fórsaí `1/true/on/yes` ar agus fórsaí `0/false/off/no` as (fiú má chumas Socruithe é). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Eatramh sioncronaithe models.dev réamhshocraithe i soicindí (laethúil).                                                       |
 
-**Ní** chumasaíonn `PRICING_SYNC_SOURCES` models.dev; ní rialaíonn sé ach sioncronú LiteLLM. Ní ghlanann sárú úsáideora a scriosadh ceachtar ainmspás sioncronaithe; tagann an chéad sraith praghsála eile atá ar fáil i bhfeidhm. Maidir le samhail gan phraghas, seiceáil an dá shocrú sioncronaithe agus `sourceMap` sula gcuireann tú sárú láimhe leis.
+Déanann `PRICING_SYNC_SOURCES`**nach bhfuil** samhlacha a chumasú.dev; rialaíonn sé an sioncrónú LiteLLM amháin. Ní ghlanann scriosadh sáraithe úsáideora ceachtar den dá ainmspás sioncronaithe; éiríonn an chéad chiseal praghsála eile atá ar fáil i bhfeidhm. Le haghaidh samhail gan phraghas, seiceáil an dá shocruithe sioncronaithe agus an `sourceMap` sula gcuireann tú sáraíocht láimhe leis.
 
-### Foirmle an chostais
+### An fhoirmle costais
 
-Ríomhtar costas in aghaidh an iarratais ó líon na dticeáilíní agus rátaí in aghaidh an mhilliúin ticeáilín in
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Ríomhtar an costas in aghaidh an iarratais ó chomhairimh chomharthaí agus rátaí in aghaidh na milliún in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Ticeáilíní ionchuir** (lúide léamha taisce agus ticeáilíní cruthaithe taisce) × ráta `input`.
-- **Ticeáilíní léite ón taisce** × ráta `cached` (úsáidtear an ráta ionchuir mar chúltaca).
-- **Ticeáilíní cruthaithe taisce** × ráta `cache_creation` (úsáidtear an ráta ionchuir mar chúltaca).
-- **Ticeáilíní aschuir** × ráta `output`.
-- **Ticeáilíní réasúnaithe** × ráta `reasoning` (úsáidtear an ráta aschuir mar chúltaca).
+- **Comharthaí ionchuir** (lúide léite taisce agus comharthaí cruthaithe taisce) Ráta × `input`.
+- **Comharthaí taisce-léamh** Ráta × `cached` (titeann sé ar ais go dtí an ráta ionchuir).
+- **Comharthaí cruthúnais taisce** Ráta × `cache_creation` (titeann sé ar ais go dtí an ráta ionchuir).
+- **Comharthaí aschuir** Ráta × `output`.
+- **Comharthaí réasúnaíochta** Ráta × `reasoning` (titeann sé ar ais go dtí an ráta aschuir).
 
-Léirmhínítear gach ráta mar USD in aghaidh 1,000,000 ticeáilín. Cuireann sraith seirbhíse Codex "fast"/"priority" nó
-"flex" iolraitheoir costais i bhfeidhm (`getCodexFastCostMultiplier`) — mar shampla, gearrtar táille ar flex
-le lascaine 50% ar thiceáilíní, a thaispeántar mar **choigilteas flex** sa deais.
+Léirmhínítear na rátaí go léir mar USD in aghaidh an 1,000,000 comhartha. Cuireann sraith seirbhíse "tapa"/"tosaíochta" nó "flex" Codex i bhfeidhm iolraitheoir costais (`getCodexFastCostMultiplier`) — m.sh.**coigilteas flex** sa deais.
 
-Déantar ainmneacha samhlacha a normalú ar dtús (baintear réimíreanna conairí soláthraithe amhail `openai/` nó
-`accounts/fireworks/models/`) ionas go mbeidh ró-nna stairiúla fós ag teacht le praghas.
+Déantar ainmneacha samhlacha a normalú ar dtús (baintear réimíreanna cosán soláthraí mar `openai/` nó `accounts/fireworks/models/` ) agus mar sin tá sraitheanna stairiúla fós ag teacht le praghas.
 
 ### Conas a thaifeadtar caiteachas
 
-- Ríomhtar an costas in aghaidh an iarratais tar éis an fhreagra agus taifeadtar é gan fanacht leis an toradh ionas nach gcuireann sé
-  aga folaigh leis don chliant choíche. Sceidealaítear ídiú cuóta chomhroinnte ar an gcéad
-  ticeáil eile den lúb teagmhas trí [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Maolánaítear caiteachas eochrach API agus folmhaítear i mbaisceanna é ag an
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (eatramh folmhaithe réamhshocraithe 60s,
-  maolán 1,000 iontráil). Is féidir iad a choigeartú trí:
+- Ríomhtar an costas in aghaidh an iarratais nuair a dhéantar iarratas. Tá tomhaltas cuóta comhroinnte sceidealta ar an gcéad tic lúb imeachta eile trí [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Déantar caiteachas API-eochair a mhaolánú agus a shruthlú i mbaisceanna ag an [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (eatramh flush réamhshocraithe 60s, maolán iontrála 1,000). Iniúchadh trí:
 
-  | Athróg timpeallachta                | Réamhshocrú | Cuspóir                                        |
-  | ----------------------------------- | ----------- | ---------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Eatramh folmhaithe i milleasoicindí.           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Uaslíon iontrálacha maolánaithe roimh fholmhú. |
+  | Env var                             | Réamhshocrú | Cuspóir                                           |
+  | ----------------------------------- | ----------- | ------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Eatramh sruthlaithe i milleasoicindí.             |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Uasmhéid iontrálacha maolánacha roimh an sruthlú. |
 
-Ní léitear figiúirí costais na deaise ó mhéid dollar atá stóráilte in aghaidh an ró — déantar iad
-a athríomh ar an toirt ó líon na dticeáilíní agus ón tábla praghsála reatha gach uair a
-ritheann an críochphointe anailísíochta. Ciallaíonn sé sin go nuashonraítear meastacháin chostais stairiúla
-go haisghníomhach nuair a cheartaítear praghas mícheart (agus nuair a dhéantar athshioncronú).
+Is fearr le costais muirear beacht arna thuairisciú ag an soláthraí (`provider_cost_usd`), ansin pictiúr iarratais ar phraghas catalóige (`calculated_cost_usd`), ansin athphraghsáil chomharthaí ón gcatalóg reatha. Ní ghearrtar costais stóráilte arís trína n-áirimh chomharthaí. Ní athraíonn sraitheanna chomharthaí oidhreachta ach amháin nuair a athraíonn a bpraghas catalóige.
+
+### OCR agus leabaithe
+
+- Úsáideann iarratais `/v1/ocr` rathúla `usage_info.pages_processed` in aghaidh an tsrutha, ní an raon leathanach iarrtha nó líon na n-oibiachtaí leathanaigh a cuireadh ar ais. Is é an meastachán ná leathanaigh × `ocr_cost_per_page` ( USD/page iomlán ,**nach bhfuil** USD/million).
+- Teastaíonn taraif `ocr_cost_per_annotated_page` ar leith le haghaidh iarratais le nótaí doiciméad nó bosca teorann. Gan é, tá an costas fós anaithnid; ní chuirtear an gnáth-tharaif OCR in ionad go ciúin.
+- Mapálann sioncronú LiteLLM a réimse `annotation_cost_per_page` in aghaidh an tsrutha isteach i `ocr_cost_per_annotated_page`, ag coinneáil an luach iomlán USD/page agus iontrálacha anótála amháin, lena n-áirítear nialas follasach. Tá tús áite ag réimse canónach a sholáthraítear; déantar neamhaird ar luachanna ailias neamhbhailí. Coinníonn sáruithe praghsála úsáideoirí a ngnáththosaíocht. Féach [eochracha praghsála LiteLLMOCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Stórálann úsáid OCR comhaireamh na leathanach, praghas aonaid, costas ríomh USD, eochair API agus nasc roghnaithe. Ní léirítear leathanaigh mar chomharthaí riamh. Tá meiteashonraí billeála i logaí glaonna, ní doiciméadaítear bearta URLs, PDF nó téacs asbhainte.
+- Taifeadann iarratais `/v1/embeddings` rathúla sraith úsáide amháin in aghaidh an bhaisc fhisiciúil, lena n-áirítear baisceanna ar leith a críochnaíodh sa milleasoicind céanna. Tá tús áite ag muirir a thuairiscítear ó sholáthraí ar mheastacháin chomharthaí; ní chuireann cumhdaigh teaglama muirear.
+- Áiríonn stair úsáide, anailísíocht Costas, fuinneoga provider/account, teorainneacha caiteachais eochair-API, an mórleabhar costas iarratais agus rolladh suas úsáide laethúil na muirir seo. Coinníonn eochracha gan loga cuntasaíocht uimhriúil gan an téacs foinseach a choinneáil.
+- Tá úsáid nó taraifí ar iarraidh **anaithnid** , níl sé saor in aisce: fágtar an ceanntásc costais freagartha ar lár, agus baineann an beartas úsáide gan phraghas atá ann cheana le heochracha teoranta API. Tá rátaí nialais atá cumraithe go soiléir fós ina n-úsáid nialasach costais.
+
+Cuntasaíocht chun cinn amháin atá anseo. Ní féidir seanghlaonna OCR/embedding nár scríobh stair úsáide riamh a athchruthú ón imirce seo. Is meastacháin USD iad meastacháin chatalóige, ní sonrasc, agus ní chuimsíonn siad comhshó airgeadra, cáin ná lascainí.
 
 ---
 

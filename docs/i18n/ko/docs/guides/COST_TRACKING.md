@@ -37,73 +37,73 @@ CLI, CSV/JSON 내보내기, API 키별 예산에 사용됩니다.
 
 ---
 
-## 비용 추정 방식
+## 비용 추정 방법
 
-### 가격 정보 출처
+### 가격 소스
 
-비용은 [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts)의 병합된 가격표에서 가져오며, 우선순위는 다음과 같습니다(**높은 순서부터**).
+비용은 다음 우선순위에 따라 [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) 의 병합된 가격표에서 나옵니다(**가장 높은 것부터** ):
 
-1. **사용자 재정의** — 대시보드 또는 `PATCH /api/pricing`으로 설정한 가격(`pricing` 네임스페이스).
-2. **models.dev 동기화** — `https://models.dev/api.json`에서 가져온 가격(`models_dev_pricing` 네임스페이스).
-3. **LiteLLM 동기화** — LiteLLM의 공개 파일 `model_prices_and_context_window.json`에서 가져온 가격(`pricing_synced` 네임스페이스).
-4. **코드에 포함된 기본값** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/)에 포함되어 제공되는 요금.
+1. **사용자 재정의** — 가격은 대시보드나 `PATCH /api/pricing` ( `pricing` 네임스페이스)를 통해 설정됩니다.
+2. **models.dev 동기화** `https://models.dev/api.json` ( `models_dev_pricing` 네임스페이스)에서 가져온 — 가격입니다.
+3. **LiteLLM 동기화** LiteLLM 의 공개 `model_prices_and_context_window.json` ( `pricing_synced` 네임스페이스)에서 가져온 — 가격입니다.
+4. **하드코딩된 기본값** — 요율은 [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) 로 배송됩니다.
 
-같은 공급자/모델에서는 우선순위가 높은 계층의 값이 하위 계층의 해당 필드를 덮어씁니다. 상위 계층에 없는 필드는 여전히 하위 계층에서 가져올 수 있습니다. 독립적인 두 동기화 작업이 동시에 실행되어도 순서는 고정됩니다. `GET /api/pricing?includeSources=1`은 `pricing`과 `sourceMap`을 반환합니다. 모델별 레이블(`user`, `modelsDev`, `litellm`, `default`)은 해당 모델을 포함하는 계층 중 우선순위가 가장 높은 계층을 나타냅니다.
+동일한 provider/model 의 경우 우선순위가 높은 레이어의 값이 하위 레이어의 일치하는 필드를 덮어씁니다. 상위 레이어에 없는 필드가 하위 레이어에서 나올 수도 있습니다. 두 개의 독립적인 동기화 작업이 동시에 실행되는 경우에도 순서는 고정됩니다. `GET /api/pricing?includeSources=1` 모델별 레이블(`user`, `modelsDev`, `litellm`, `default`)이 해당 모델을 포함하는 우선순위가 가장 높은 레이어를 식별하는 `pricing` 및 `sourceMap` 반환합니다.
 
-**LiteLLM 동기화**는 명시적으로 활성화해야 하며 기본적으로 비활성화되어 있습니다. 환경 변수는 다음과 같습니다([`.env.example`](../../.env.example) 참조).
+**LiteLLM 동기화** 선택되어 있으며 기본적으로 비활성화되어 있습니다. 환경 변수( [`.env.example`](../../.env.example) 참조)는 다음과 같습니다.
 
-| 환경 변수               | 기본값    | 용도                                                                   |
-| ----------------------- | --------- | ---------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | 백그라운드 LiteLLM 가격 동기화를 활성화합니다.                         |
-| `PRICING_SYNC_INTERVAL` | `86400`   | 동기화 간격(**초** 단위, 기본값은 매일)입니다.                         |
-| `PRICING_SYNC_SOURCES`  | `litellm` | 이 동기화에만 적용되는 소스 선택입니다. 현재는 `litellm`만 지원합니다. |
+| 환경변수                | 기본      | 목적                                                            |
+| ----------------------- | --------- | --------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | 백그라운드 LiteLLM 가격 동기화를 활성화합니다.                  |
+| `PRICING_SYNC_INTERVAL` | `86400`   | 동기화 간격(초)(매일)                                           |
+| `PRICING_SYNC_SOURCES`  | `litellm` | 이 동기화에 대해서만 소스 선택. 현재는 `litellm` 만 지원됩니다. |
 
-**models.dev 동기화**는 LiteLLM 동기화와 별개이며, 이 역시 기본적으로 비활성화되어 있습니다. 설정(models.dev 동기화)에서 활성화하거나 다음 변수를 사용하세요.
+**models.dev 동기화** LiteLLM 동기화와 별개이며 기본적으로 비활성화되어 있습니다. 설정(models.dev sync)에서 활성화하거나 다음 변수를 사용하세요.
 
-| 환경 변수                  | 기본값            | 용도                                                                                                                                     |
-| -------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(설정되지 않음)_ | 설정하지 않으면 설정 화면의 스위치를 따릅니다. `1/true/on/yes`는 강제로 켜고 `0/false/off/no`는 설정 화면에서 켜져 있어도 강제로 끕니다. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | models.dev 동기화의 기본 주기를 초 단위로 지정합니다. 기본 빈도는 매일입니다.                                                            |
+| 환경변수                   | 기본              | 목적                                                                                                                                   |
+| -------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(설정되지 않음)_ | 설정 해제는 설정 토글을 따릅니다. `1/true/on/yes` 강제로 켜지고 `0/false/off/no` 강제로 꺼집니다(설정에서 활성화한 경우에도 마찬가지). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | 기본 models.dev 동기화 간격(초)(매일)                                                                                                  |
 
-`PRICING_SYNC_SOURCES`는 models.dev를 활성화하지 **않습니다**. LiteLLM 동기화만 제어합니다. 사용자 재정의를 삭제해도 동기화된 네임스페이스는 어느 쪽도 지워지지 않으며, 다음으로 사용 가능한 가격 계층이 적용됩니다. 가격이 없는 모델에 수동 재정의를 추가하기 전에 두 동기화 설정과 `sourceMap`을 확인하세요.
+`PRICING_SYNC_SOURCES` 는** ~ 아니다** models.dev를 활성화합니다. LiteLLM 동기화만 제어합니다. 사용자 재정의를 삭제해도 동기화된 네임스페이스는 지워지지 않습니다. 사용 가능한 다음 가격 책정 계층이 적용됩니다. 가격이 책정되지 않은 모델의 경우 수동 재정의를 추가하기 전에 동기화 설정과 `sourceMap` 모두 확인하세요.
 
-### 비용 계산 공식
+### 비용 공식
 
-비용은 [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)의
-(`computeCostFromPricing` / `calculateCost`)를 사용하여 토큰 수와 백만 토큰당 요금을
-기준으로 요청별로 계산됩니다.
+비용은 [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`)의 토큰 수 및 백만 개당 토큰 요율을 사용하여 요청별로 계산됩니다.
 
-- **입력 토큰**(캐시 읽기 및 캐시 생성 토큰 제외) × `input` 요금.
-- **캐시 읽기 토큰** × `cached` 요금(없으면 입력 요금 사용).
-- **캐시 생성 토큰** × `cache_creation` 요금(없으면 입력 요금 사용).
-- **출력 토큰** × `output` 요금.
-- **추론 토큰** × `reasoning` 요금(없으면 출력 요금 사용).
+- **입력 토큰** (캐시 읽기 및 캐시 생성 토큰 제외) × `input` 속도.
+- **캐시 읽기 토큰** × `cached` 속도(입력 속도로 폴백).
+- **캐시 생성 토큰** × `cache_creation` 속도(입력 속도로 폴백).
+- **출력 토큰** × `output` 환율.
+- **추론 토큰** × `reasoning` 속도(출력 속도로 폴백).
 
-모든 요금은 토큰 1,000,000개당 USD로 해석됩니다. Codex "fast"/"priority" 또는
-"flex" 서비스 등급에는 비용 배율(`getCodexFastCostMultiplier`)이 적용됩니다. 예를
-들어 flex는 토큰 비용에 50% 할인이 적용되며, 대시보드에서 **flex 절감액**으로 표시됩니다.
+모든 요율은 1,000,000개 토큰당 USD 로 해석됩니다. Codex "빠른"/"우선순위" 또는 "플렉스" 서비스 계층은 비용 승수(`getCodexFastCostMultiplier`)를 적용합니다. — 예를 들어 플렉스는 50% 토큰 할인으로 청구되며 다음과 같이 표시됩니다.**플렉스 저축** 대시보드에서.
 
-먼저 모델 이름을 정규화하여(`openai/` 또는 `accounts/fireworks/models/` 같은
-제공업체 경로 접두사 제거) 과거 행도 계속 가격 정보와 일치하도록 합니다.
+모델 이름이 먼저 정규화되므로( `openai/` 또는 `accounts/fireworks/models/` 와 같은 공급자 경로 접두사는 제거됨) 기록 행이 여전히 가격과 일치합니다.
 
-### 지출 기록 방식
+### 지출이 기록되는 방식
 
-- 요청별 비용은 응답 후 계산되고 파이어 앤 포겟 방식으로 기록되므로 클라이언트에
-  지연 시간을 추가하지 않습니다. 공유 할당량 소비는
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)를 통해
-  다음 이벤트 루프 틱에 예약됩니다.
-- API 키 지출은 [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)에 의해
-  버퍼링되고 배치 단위로 플러시됩니다(기본 플러시 간격 60초, 버퍼 항목 1,000개).
-  다음 변수를 통해 조정할 수 있습니다.
+- 요청당 비용은 요청 완료 시 계산됩니다. 공유 할당량 소비는 [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) 통해 다음 이벤트 루프 틱에 예약됩니다.
+- API 키 지출은 [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) 에 의해 일괄적으로 버퍼링되고 플러시됩니다(기본값 60초 플러시 간격, 1,000개 항목 버퍼). 다음을 통해 조정 가능:
 
-  | 환경 변수                           | 기본값  | 용도                                       |
-  | ----------------------------------- | ------- | ------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 플러시 간격(밀리초)입니다.                 |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 플러시 전까지 버퍼링할 최대 항목 수입니다. |
+  | 환경변수                            | 기본    | 목적                              |
+  | ----------------------------------- | ------- | --------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 플러시 간격(밀리초)입니다.        |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 플러시 전 최대 버퍼링 항목입니다. |
 
-대시보드의 비용 수치는 저장된 행별 금액에서 읽어오는 것이 아니라, 분석 엔드포인트가
-실행될 때마다 토큰 수와 현재 가격표를 사용하여 즉석에서 다시 계산됩니다. 따라서 잘못된
-가격을 수정하고 다시 동기화하면 과거 비용 추정치도 소급하여 업데이트됩니다.
+비용은 공급자가 보고한 정확한 요금(`provider_cost_usd`), 카탈로그 가격 요청 스냅샷(`calculated_cost_usd`), 현재 카탈로그의 토큰 가격 조정을 선호합니다. 저장된 비용은 토큰 수를 통해 다시 청구되지 않습니다. 레거시 토큰 전용 행은 카탈로그 가격이 변경되면 계속 변경됩니다.
+
+### OCR 및 임베딩
+
+- 성공적인 `/v1/ocr` 요청은 요청된 페이지 범위나 반환된 페이지 개체 수가 아닌 업스트림 `usage_info.pages_processed` 사용합니다. 추정치는 페이지 × `ocr_cost_per_page` (절대 USD/page,** ~ 아니다** USD/million).
+- 문서 또는 경계 상자 주석이 포함된 요청에는 별도의 `ocr_cost_per_annotated_page` 관세가 필요합니다. 그것이 없으면 비용은 알 수 없습니다. 일반 OCR 관세는 자동으로 대체되지 않습니다.
+- LiteLLM 동기화는 업스트림 `annotation_cost_per_page` 필드를 `ocr_cost_per_annotated_page` 에 매핑하여 절대 USD/page 값과 명시적 0을 포함한 주석 전용 항목을 유지합니다. 제공된 표준 필드가 우선합니다. 잘못된 별칭 값은 무시됩니다. 사용자 가격 재정의는 일반적인 우선순위를 유지합니다. [LiteLLM 의 OCR 가격 책정 키를](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) 참조하세요.
+- OCR 사용에는 페이지 수, 단가, 계산된 USD 비용, API 키 및 선택한 연결이 저장됩니다. 페이지는 토큰으로 표시되지 않습니다. 통화 기록에는 문서 URLs, PDF 바이트 또는 추출된 텍스트가 아닌 청구 메타데이터가 포함됩니다.
+- 성공적인 `/v1/embeddings` 요청은 동일한 밀리초 내에 완료된 별도의 배치를 포함하여 물리적 배치당 하나의 사용 행을 기록합니다. 공급자가 보고한 요금은 토큰 견적보다 우선합니다. 콤보 래퍼에는 요금이 추가되지 않습니다.
+- 사용 내역, 비용 분석, provider/account 창, API 키 지출 한도, 요청 비용 원장 및 일일 사용량 롤업에는 이러한 요금이 포함됩니다. 로그 없는 키는 소스 텍스트를 유지하지 않고 숫자 계산을 유지합니다.
+- 누락된 사용량 또는 관세는 다음과 같습니다.**알려지지 않은** , 무료 아님: response-cost 헤더가 생략되고 기존의 unpriced-usage 정책이 제한된 API 키에 적용됩니다. 명시적으로 구성된 제로 요율은 유효한 제로 비용 사용량으로 유지됩니다.
+
+이는 전방 전용 회계입니다. 사용 내역을 작성하지 않은 이전 OCR/embedding 호출은 이 마이그레이션에서 재구성할 수 없습니다. 카탈로그 견적은 송장이 아닌 USD 견적이며 통화 변환, 세금 또는 할인을 포함하지 않습니다.
 
 ---
 

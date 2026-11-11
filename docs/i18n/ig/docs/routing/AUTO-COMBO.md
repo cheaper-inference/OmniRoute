@@ -302,59 +302,65 @@ e kpebiri na-abanye na ntinye `config.modePack` / `config.budgetCap` /
 `config.budgetFallback` ndị engine ahụ nwere ugbu a. `config.budgetFallback` echekwara nke combo ("strict" |
 "cheapest") na-edobe amụma na-adịgide adịgide; nkụnyeisi ahụ na-akagbu ya maka naanị otu arịrịọ.
 
-## Usoro Ntụgharị Ụzọ Niile
+## Atụmatụ ụzọ ụzọ niile
 
-Injin ngwakọta OmniRoute na-akwado **usoro ntụgharị ụzọ 20** (akọwapụtara na `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). A na-ewepụta injin Auto Combo n’onwe ya n'okpuru usoro `auto`; ndị ọzọ dị maka ngwakọta ndị echekwara.
+Injin combo nke OmniRoute na-akwado **20 ụzọ aghụghọ** (kwuru na `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine n'onwe ya na-ekpughe n'okpuru `auto` atụmatụ; ndị ọzọ dị maka combos na-adịgide adịgide.
 
-| Usoro               | Nkọwa                                                                                                                                                                                                  |
-| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Ndepụta a haziri site na ebumnuche mbụ, nke nwere ọkwa mkpa akọwapụtara nke ọma                                                                                                                        |
-| `weighted`          | Nhọrọ enweghị usoro dabere n’ịdị arọ nke ebumnuche ọ bụla                                                                                                                                              |
-| `round-robin`       | Gaa n’usoro site n’otu ebumnuche ruo nke ọzọ (n’ìgwè; lee n’okpuru)                                                                                                                                    |
-| `context-relay`     | Nyefee ọnọdụ n’etiti ebumnuche dị iche iche (mkparịta ụka ogologo)                                                                                                                                     |
-| `fill-first`        | Mejupụta oke ojiji nke ebumnuche ọ bụla tupu ịgafe na nke ọzọ                                                                                                                                          |
-| `p2c`               | Ịhazigharị ibu ọrụ enweghị usoro site n’ike nhọrọ abụọ                                                                                                                                                 |
-| `random`            | Nhọrọ enweghị usoro nke nwere ohere hà nhata                                                                                                                                                           |
-| `least-used`        | Họrọ ebumnuche nwere ibu ọrụ kacha nta ugbu a                                                                                                                                                          |
-| `cost-optimized`    | Belata $ a na-akwụ maka arịrịọ ọ bụla dabere n’ọnụahịa dị na katalọgụ                                                                                                                                  |
-| `reset-aware` ⭐    | Nye ihe mkpa dabere n’oge nrụgharị oke ojiji — a na-enye windo nrụgharị dị mkpụmkpụ ọkwa dị elu                                                                                                        |
-| `reset-window`      | Họrọkarị ebumnuche nke windo oke ojiji ya ga-amalitegharị ngwa ngwa                                                                                                                                    |
-| `headroom`          | Họrọ ebumnuche nke nwere ohere oke ojiji fọdụrụ kacha ukwuu                                                                                                                                            |
-| `quota-weighted`    | Mafee akaụntụ ndị oke ojiji ha gwụchara, wee họrọ n’etiti ndị fọdụrụ n’ogo kwekọrọ na oke ojiji fọdụrụ nke e kewara site n’ibu ọrụ na-aga n’ihu; mkparịta ụka ndị dị adị na-anọgide n’otu ebe          |
-| `strict-random`     | Nhọrọ enweghị usoro na-enweghị iwepụ ihe ndị megharịrị ugboro ugboro                                                                                                                                   |
-| `auto`              | Jiri ngụkọ akara Auto Combo (ihe 16) — **akwadoro**                                                                                                                                                    |
-| `lkgp`              | Ụzọ Ikpeazụ A Mara na Ọ Dị Mma (na-arapara n’ebe onye na-eweta ọrụ ikpeazụ gara nke ọma nọ, ma mesịa laghachi n’iwu ma ọ daa)                                                                          |
-| `context-optimized` | Họrọ ebumnuche kacha daba n’ogo ọnọdụ dị ugbu a                                                                                                                                                        |
-| `cache-optimized`   | Hazigharịa ebumnuche dabere n’otú ha si kwekọọ na prompt-cache — a na-ebu ụzọ nwalee njikọ o yikarịrị ka o nweelarị prefix arịrịọ a na cache (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Ziga arịrịọ n’otu oge gaa na ìgwè model, wee jiri onye ọkaikpe chịkọta otu azịza (lee n’okpuru)                                                                                                        |
-| `pipeline`          | Gbaa ebumnuche n’usoro, na-etinye mmepụta nke usoro nke ọ bụla n’ime ntinye nke usoro na-esote; naanị azịza ikpeazụ ka a na-eweghachi (#6396)                                                          |
+| Atụmatụ             | Nkọwa                                                                                                                                                                   |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Ndepụta enyere iwu nke izizi nwere mkpa doro anya                                                                                                                       |
+| `weighted`          | A na-atụ aro na-enweghị usoro site na ibu nke ebumnuche ọ bụla                                                                                                          |
+| `round-robin`       | Gagharịa n'usoro ebumnuche (batched; lee n'okpuru)                                                                                                                      |
+| `context-relay`     | Wepụ ihe gbara ya gburugburu n'ofe ebumnuche (mkparịta ụka ogologo)                                                                                                     |
+| `fill-first`        | Dejupụta oke ebumnuche nke ọ bụla tupu ịkwaga na-esote                                                                                                                  |
+| `p2c`               | Power-of-2-choices na-edozi ibu random                                                                                                                                  |
+| `random`            | Nhọrọ enweghị usoro                                                                                                                                                     |
+| `least-used`        | Họrọ ebumnuche nwere ibu dị ugbu a kacha ala                                                                                                                            |
+| `cost-optimized`    | Wedata $ kwa arịrịọ enyere ọnụahịa katalọgụ                                                                                                                             |
+| `reset-aware` ⭐    | Wepụta ụzọ site na oge nrụpụta oke — mkpirisi ntọgharị windo dị elu                                                                                                     |
+| `reset-window`      | Họrọ ebumnuche ndị mpio oke ha ga-atọgharị ngwa ngwa                                                                                                                    |
+| `headroom`          | Họrọ ihe mgbaru ọsọ nke nwere isi ụlọ oke kacha fọdụrụ                                                                                                                  |
+| `quota-weighted`    | Mafere akaụntụ ndị ike gwụrụ, wee họrọ n'etiti ndị ọzọ dịka oke oke nke furu efu nke ibu ụgbọ elu kewara; Mkparịta ụka ndị dị adị na-akọrọ                              |
+| `strict-random`     | Random na-enweghị deduplication nke ikwugharị                                                                                                                           |
+| `auto`              | Jiri akara njikwa akpaaka (16-factor) —**kwadoro**                                                                                                                      |
+| `lkgp`              | Ụzọ Ikpeazụ mara-ezigbo (ntụnye na onye na-eweta ihe ịga nke ọma ikpeazụ, wee daa azụ na iwu)                                                                           |
+| `context-optimized` | Họrọ ebumnuche nke dabara nke ọma maka nha ọnọdụ ọnọdụ ugbu a                                                                                                           |
+| `cache-optimized`   | Dọgharịa ebumnuche site na cache affinity — njikọ nwere ike ijiderịrị prefix cache nke arịrịọ a nke mbụ nwara (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Gaa na otu panel nke ụdị n'otu oge, wee mepụta otu azịza site na onye ọka ikpe (lee n'okpuru)                                                                           |
+| `pipeline`          | Na-agba ọsọ lekwasịrị anya n'usoro, na-agbanye mmepụta nke ọ bụla n'ime ntinye nzọụkwụ ọzọ; naanị azịza ikpeazụ ka eweghachiri (#6396)                                  |
 
-⭐ = Ihe ọhụrụ na v3.8.0 · 🧬 = Ihe ọhụrụ na v3.8.36
+⭐ = ọhụrụ na v3.8.0 · 🧬 = ọhụrụ na v3.8.36
 
-### Nkọwa omume `weighted`
+### Ihe omuma `weighted`
 
-`weighted` bụ **nhọpụta enweghị usoro nke dabara n’ogo maka arịrịọ ọ bụla**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ọ bụghị ihe na-eme ka ha hara nhata:
+`weighted` bụ a **nhata random eserese kwa arịrịọ** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ọ bụghị ihe nhata:
 
-- Arịrịọ ọ bụla na-ahọrọ usoro **otu** site na ohere `weight / totalWeight`; a na-ahazi usoro ndị fọdụrụ
-  site n’arọ kachasị ruo n’arọ kacha nta ka ha bụrụ usoro ndabere maka arịrịọ ahụ.
-- Usoro nke arọ ya bụ `0` (ma ọ bụ nke na-enweghị arọ) **anaghị ahọrọ ma ọlị** mgbe usoro ọ bụla ọzọ nwere
-  arọ > 0 — naanị mgbe usoro ahọpụtara dara ka ọ nwere ike bụrụ ndabere. Ọ bụ naanị mgbe arọ **niile**
-  bụ 0 ka nhọrọ ga-enwe ohere hà nhata.
-- A na-ewepụ usoro ndị ebumnuche ha niile adịghị — circuit breaker nke onye na-eweta ọrụ dị `OPEN`, njikọ
-  nọ na cooldown, ma ọ bụ model nọ na lockout — n’ime nhọrọ tupu e mee ya
-  (`open-sse/services/combo/targetResolution.ts`), ya mere otu usoro dị mma nwere ike imeri arịrịọ ọ bụla nwa oge.
-- `stickyWeightedLimit` (nhazi combo, ndabara `1` = agbanyụrụ) na-eme ka usoro ahọpụtara nọgide maka
-  ihe ịga nke ọma ndị na-esochi ibe ha ruo n’ọnụọgụ ahụ tupu e mee nhọrọ ọzọ.
+- Arịrịọ ọ bụla na-adọta **otu** nzọụkwụ na puru omume `weight / totalWeight`; A na-enye iwu usoro ndị fọdụrụ site n'ịgbadata ibu dị ka agbụ azụ azụ maka arịrịọ ahụ.
+- Nzọụkwụ nke ibu ya bụ `0` (ma ọ bụ efu) bụ **mgbe e sere** ebe ọ bụla nzọụkwụ ọzọ nwere arọ > 0 — ọ nwere ike na-eje ozi dị ka a ọdịda mgbe adọta nzọụkwụ dara. Naanị mgbe **niile** arọ bụ 0 ka nhọrọ na-aghọ otu.
+- Nzọụkwụ onye lekwasịrị anya niile adịghị adị — na-eweta sekit breaker `OPEN`, njikọ cooldown, nlereanya lockout — na-ewepụ si eserese tupu ya emee (`open-sse/services/combo/targetResolution.ts`), otú a otu nzọụkwụ ike nwere ike nwa oge merie ọ bụla arịrịọ.
+- `stickyWeightedLimit` (nhazi nhazi, ndabara `1` = gbanyụọ) na-atụnye nzọụkwụ a dọtara maka ọtụtụ ihe ịga nke ọma na-aga n'ihu tupu ịmegharị ya.
 
-Maka ntụgharị siri ike, jiri `round-robin`; ịdị arọ hà nhata na `weighted` na-enye nguzozi nke ọnụ ọgụgụ — ọ bụghị
-nke siri ike.
+Maka ntụgharị siri ike jiri `round-robin`; nha nha nha na `weighted` na-enye — statistical ọ bụghị nguzozi — siri ike.
 
 ### Ụdị pipeline
 
 Ngwakọta `pipeline` nwere opekata mpe ụdị abụọ nwere ike ịbanye na planner/executor routing na `config.agenticOrchestration.enabled`. Ebumnuche nke mbụ nwere atụmatụ na azịza ikpeazụ; ebumnobi nke abụọ na-ebute oku ngwa ngwa nke ndị ahịa. OmniRoute na-achọpụta ihe ga-esi na ya pụta site na usoro arịrịọ ahụ, jụọ onye na-eme atụmatụ ma ọ dị mkpa gburugburu ngwaọrụ ọzọ, na-eme ka onye ọrụ ma ọ bụ onye na-eme atụmatụ bụrụ onye ahịa na-eche nzọụkwụ ikpeazụ.
 
-N'ịga n'ihu na nsonaazụ ngwá ọrụ, OmniRoute na-akwụsịkwa igbu ya mgbe agba abụọ na-aga n'ihu na-emeghachi otu oku ngwa ọrụ na-enweghi nsonaazụ agbanweghị, ma ọ bụ mgbe ọ bụla akara akara n'ụzọ doro anya na agba abụọ sochiri anya dara. Nsonaazụ gbanwere na-enye ohere oku ugboro ugboro (dịka ọmụmaatụ, ntuli aka). Onye nche na-amalitegharị na arịrịọ onye ọrụ ọhụrụ, otu na-akpọ oku na otu okirikiri, ma na-akwado Anthropic, Mmecha nkata, nzaghachi na akụkọ Gemini. Onye na-eme atụmatụ na-enweta ihe kpatara ya ma nwee azịza ikpeazụ ọ bụrụgodị na ọ rịọrọ ngwá ọrụ ọzọ gburugburu.
+Nhọrọ `config.agenticOrchestration.contextCompaction` na-etinye mmefu ego ịkwụ ụgwọ dị iche tupu onye nhazi ọ bụla ma ọ bụ onye mmebe ezipụ. Kwado ya nke ọma:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ndị a bụ usoro mmefu ego agwa JSON nke onye ọrụ ahọpụtara, ọbụghị mpio ihe ngosi akara ma ọ bụ oke elu ekwenyere. Kpọmkwem ụdị IDs ga-ewepụ ndabara. N'elu ọnụ ụzọ ahụ, kọmpat na-ewepụ nkọwa ngwa ọrụ yiri nke ahụ, jiri mgbari na-ewepụ ihe akaebe ngwaọrụ buru ibu, ma wepụ otu akụkọ ihe mere eme ochie zuru oke na oke ebumnuche. Ọ na-ejigide ntuziaka system/developer, arịrịọ onye ọrụ kachasị ọhụrụ, ngwa ọrụ ikpeazụ gụnyere calls/results yiri ya, yana ntuziaka ụzọ ụzọ Gemini. A na-echekwa ntuziaka ọkwa dị elu na ntọala ngwaọrụ. Ihe ndekọ ihe nrịbama ewepụrụ akụkọ ihe mere eme; Nke a bụ trimming deterministic, ọ bụghị nchịkọta nke semantic. Ọ bụrụ na ọnọdụ pinned ka karịrị mmefu ego, arịrịọ ahụ ga-alaghachi 413 tupu ịkpọtụrụ ihe nlereanya ahụ. Na mkpịsị aka nwere nkwarụ ma ọ bụ n'okpuru ọnụ ụzọ, arịrịọ ahụ na-agafe na-agbanweghị agbanwe.
+
+N'ịga n'ihu na nsonaazụ ngwá ọrụ, OmniRoute na-akwụsịkwa igbu ya mgbe agba abụọ na-aga n'ihu na-emeghachi otu oku ngwa ọrụ na-enweghi nsonaazụ agbanweghị, ma ọ bụ mgbe ọ bụla akara akara n'ụzọ doro anya na agba abụọ sochiri anya dara. Nsonaazụ gbanwere na-enye ohere oku ugboro ugboro (dịka ọmụmaatụ, ntuli aka). Onye nche na-amalitegharị na arịrịọ onye ọrụ ọhụrụ, otu na-akpọ oku na otu okirikiri, ma na-akwado Anthropic, Mmecha nkata, nzaghachi na akụkọ Gemini. Onye na-eme atụmatụ na-enweta ihe kpatara ya ma nwee azịza ikpeazụ ọ bụrụgodị na ọ na-arịọ ngwá ọrụ ọzọ gburugburu.
 
 Ụdị agbakwunyere mgbe ebumnuche nke abụọ gachara ka a na-enye iwu nkwado ndabere nke ndị mmebe. Nzaghachi HTTP dara ada ma ọ bụ mbugharị mwepu na-aga n'ihu na onye ọrụ na-esote, na-ebu otu mkpebi onye nhazi yana ngwa ala mana nzọụkwụ nke onye mmebe ahụ ozugbo wee dozie njikọ. A na-eweghachi nzaghachi nke ọma nke mbụ na-agbanweghị agbanwe, gụnyere mgbasa ozi SSE ; Enweghị ike ịnwagharị ọdịda mgbe mmiri malitere ịga nke ọma ebe a. Ọ bụrụ na ndị mmebe niile daa, ọdịda ikpeazụ ga-eweghachite. Ndị ahịa ite ime kwụsị izipu.
 
@@ -368,31 +374,17 @@ N'ịga n'ihu na nsonaazụ ngwá ọrụ, OmniRoute na-akwụsịkwa igbu ya mg
 }
 ```
 
-Onye mmebe ahụ nwere ike ịkpọnye ọtụtụ oku nọọrọ onwe ha n'otu nzaghachi. A na-edozi oku dabere na ntụgharị ngwa ọrụ ndị ahịa mechara, onye nhazi na-enyocha nsonaazụ ọ bụla. `maxToolRounds` na-adabara na `8` ma nabata `1`-`32`; ozugbo iru eru, onye na-eme atụmatụ aghaghị iwepụta azịza ikpeazụ kacha mma dị. A na-echekwa mkpebi ndị na-eme atụmatụ ime, ebe nzaghachi ihu ndị ahịa ahọpụtara na-echekwa mmasị nkwanye ugwu mbụ.
+Onye mmebe ahụ nwere ike ịkpọnye ọtụtụ oku nọọrọ onwe ha n'otu nzaghachi. A na-edozi oku dabere na ntụgharị ngwa ọrụ ndị ahịa mechara, onye nhazi na-enyocha nsonaazụ ọ bụla. `maxToolRounds` ndabara na `8` ma nabata `1`–`32`; ozugbo iru eru, onye na-eme atụmatụ aghaghị iwepụta azịza ikpeazụ kacha mma dị. A na-echekwa mkpebi ndị na-eme atụmatụ ime, ebe nzaghachi ndị ahịa ahọpụtara na-echekwa mmasị mbugharị mbugharị.
 
-### Batch nke `round-robin` na-anọgide otu ebe na mgbasawanye akaụntụ
+### Ogbe nnyapade `round-robin` na mgbasawanye akaụntụ
 
-A na-eme round-robin na batch, ọ bụghị otu arịrịọ kwa nzọụkwụ:
+A na-achịkọta gburugburu-robin, ọ bụghị otu arịrịọ-kwa-nzọụkwụ:
 
-- `stickyRoundRobinLimit` (config ngwakọta, emesịa `comboStickyRoundRobinLimit`, emesịa
-  `settings.stickyRoundRobinLimit`, ndabara **3**) na-edobe otu target ahụ ruo ọnụ ọgụgụ
-  ihe ịga nke ọma na-aga n'ihu ahụ tupu ntụgharị. Tọọ override nke ngwakọta ka ọ bụrụ `1` maka ntụgharị otu arịrịọ.
-  Editor ngwakọta na-egosi uru dị irè na layer o si bịa.
-- `connectionAwareExpansion` (config ngwakọta, emesịa settings, ndabara **false**) na-agbasa
-  nzọụkwụ ọ bụla dị n'ọkwa provider ka ọ bụrụ target kwa akaụntụ tupu ntụgharị. Strategy Group-B
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) na-edobe nlele dị n'ọkwa provider ruo mgbe agbanyere nke a. Editor ngwakọta na-enye
-  inherit / on / off; inherit na-eji ndabara zuru ụwa ọnụ (off).
-- Nhazi ụzọ dabere na ịdị nso nke prompt-cache (`promptCacheAffinityEnabled`, ndabara **true**) na-ahazigharị
-  njikọ ndị a kpọgidere ka cache key ndị kwekọrọ nọrọ n'otu akaụntụ. Ọ na-ebute ụzọ karịa
-  ntụgharị round-robin na weighted n'ofe nzọụkwụ kwa akaụntụ ndị a kpọgidere. Gbanyụọ ya n'okpuru
-  Settings → Combo defaults ma ọ bụrụ na ịchọrọ ntụgharị siri ike. Enweghị override kwa ngwakọta.
+- `stickyRoundRobinLimit` (nhazi nhazi, wee `comboStickyRoundRobinLimit`, wee `settings.stickyRoundRobinLimit`, ndabere **3** ) na-edobe otu ebumnuche ahụ maka ọtụtụ ihe ịga nke ọma n'usoro tupu ịtụgharị. Tọọ mbufe ngwakọta na `1` maka ntụgharị otu arịrịọ. Onye nchịkọta akụkọ combo na-egosi uru bara uru yana oyi akwa ọ si na ya pụta.
+- `connectionAwareExpansion` (nhazi nhazi, wee ntọala, ndabara **ụgha** ) na-agbasa ọkwa ọkwa onye ọ bụla n'ime ebumnuche akaụntụ ọ bụla tupu ntụgharị. Atụmatụ otu-B (ihe dị mkpa, arọ, gburugburu-robin, random, p2c, obere-eji, ọnụ ahịa kacha mma, lkgp, fill-mbụ, siri ike-random, ọnọdụ-kachasị mma, cache-kachasị mma, okirikiri-agba agba, fusion, pipeline) debe nlele ọkwa onye na-eweta ruo mgbe nke a ga-eme. Onye nchịkọta akụkọ combo na-ekpughe ihe nketa / gbanye / gbanyụọ; eketa na-eji ndabara zuru ụwa ọnụ (gbanyụọ).
+- Ntugharị mpaghara cache ngwa ngwa (`promptCacheAffinityEnabled`, ndabara **eziokwu** ) na-enyegharị njikọ ndị etinyere iwu ka igodo cache dabara adaba nọrọ n'otu akaụntụ. Ọ na-ebute ụzọ karịa gburugburu-robin na ntụgharị dị arọ n'ofe usoro akaụntụ ọ bụla etinyere. Gbanyụọ ya n'okpuru Ntọala → Combo ndabara ma ọ bụrụ na ịchọrọ ntụgharị siri ike. Enweghị nfefe n'otu n'otu.
 
-Maka ntụgharị ọtụtụ akaụntụ n'otu model, họrọ **otu nzọụkwụ dynamic-account** (`connectionId` tọgbọ chakoo,
-pool dum) nwere sticky limit `1`, ọ bụghị `connectionId` atọ a kpọgidere.
-Nzọụkwụ ndị a kpọgidere tinyere affinity na-adakọ n'otu akaụntụ ahụ ọbụlagodi mgbe counter RR
-na-aga n'ihu.
+Maka ntụgharị akaụntụ ọtụtụ n'otu ụdị, masịrị **otu dynamic-akaụntụ nzọụkwụ** ( `connectionId` efu, ọdọ mmiri dum) nwere oke `1`, ọ bụghị `connectionId` s atọ. Nzọụkwụ agbakwunyere gbakwunyere mmekọrịta na-adaba n'otu akaụntụ ahụ ọbụlagodi mgbe counter RR na-aga n'ihu.
 
 ## Ngwakọta Strategy
 

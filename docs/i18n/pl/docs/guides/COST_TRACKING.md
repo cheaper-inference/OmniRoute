@@ -1,15 +1,12 @@
+# Cost & Spend Tracking (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/COST_TRACKING.md) · 🇪🇹 [am](../../../am/docs/guides/COST_TRACKING.md) · 🇸🇦 [ar](../../../ar/docs/guides/COST_TRACKING.md) · 🇦🇿 [az](../../../az/docs/guides/COST_TRACKING.md) · 🇧🇬 [bg](../../../bg/docs/guides/COST_TRACKING.md) · 🇧🇩 [bn](../../../bn/docs/guides/COST_TRACKING.md) · 🇧🇦 [bs](../../../bs/docs/guides/COST_TRACKING.md) · 🇨🇿 [cs](../../../cs/docs/guides/COST_TRACKING.md) · 🇩🇰 [da](../../../da/docs/guides/COST_TRACKING.md) · 🇩🇪 [de](../../../de/docs/guides/COST_TRACKING.md) · 🇬🇷 [el](../../../el/docs/guides/COST_TRACKING.md) · 🇪🇸 [es](../../../es/docs/guides/COST_TRACKING.md) · 🇪🇪 [et](../../../et/docs/guides/COST_TRACKING.md) · 🇮🇷 [fa](../../../fa/docs/guides/COST_TRACKING.md) · 🇫🇮 [fi](../../../fi/docs/guides/COST_TRACKING.md) · 🇫🇷 [fr](../../../fr/docs/guides/COST_TRACKING.md) · 🇮🇪 [ga](../../../ga/docs/guides/COST_TRACKING.md) · 🇮🇳 [gu](../../../gu/docs/guides/COST_TRACKING.md) · 🇳🇬 [ha](../../../ha/docs/guides/COST_TRACKING.md) · 🇮🇱 [he](../../../he/docs/guides/COST_TRACKING.md) · 🇮🇳 [hi](../../../hi/docs/guides/COST_TRACKING.md) · 🇭🇷 [hr](../../../hr/docs/guides/COST_TRACKING.md) · 🇭🇺 [hu](../../../hu/docs/guides/COST_TRACKING.md) · 🇦🇲 [hy](../../../hy/docs/guides/COST_TRACKING.md) · 🇮🇩 [id](../../../id/docs/guides/COST_TRACKING.md) · 🇳🇬 [ig](../../../ig/docs/guides/COST_TRACKING.md) · 🇮🇹 [it](../../../it/docs/guides/COST_TRACKING.md) · 🇯🇵 [ja](../../../ja/docs/guides/COST_TRACKING.md) · 🇬🇪 [ka](../../../ka/docs/guides/COST_TRACKING.md) · 🇰🇭 [km](../../../km/docs/guides/COST_TRACKING.md) · 🇮🇳 [kn](../../../kn/docs/guides/COST_TRACKING.md) · 🇰🇷 [ko](../../../ko/docs/guides/COST_TRACKING.md) · 🇱🇹 [lt](../../../lt/docs/guides/COST_TRACKING.md) · 🇱🇻 [lv](../../../lv/docs/guides/COST_TRACKING.md) · 🇮🇳 [ml](../../../ml/docs/guides/COST_TRACKING.md) · 🇮🇳 [mr](../../../mr/docs/guides/COST_TRACKING.md) · 🇲🇾 [ms](../../../ms/docs/guides/COST_TRACKING.md) · 🇲🇹 [mt](../../../mt/docs/guides/COST_TRACKING.md) · 🇲🇲 [my](../../../my/docs/guides/COST_TRACKING.md) · 🇳🇵 [ne](../../../ne/docs/guides/COST_TRACKING.md) · 🇳🇱 [nl](../../../nl/docs/guides/COST_TRACKING.md) · 🇳🇴 [no](../../../no/docs/guides/COST_TRACKING.md) · 🇮🇳 [or](../../../or/docs/guides/COST_TRACKING.md) · 🇮🇳 [pa](../../../pa/docs/guides/COST_TRACKING.md) · 🇵🇭 [phi](../../../phi/docs/guides/COST_TRACKING.md) · 🇵🇹 [pt](../../../pt/docs/guides/COST_TRACKING.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/COST_TRACKING.md) · 🇷🇴 [ro](../../../ro/docs/guides/COST_TRACKING.md) · 🇷🇺 [ru](../../../ru/docs/guides/COST_TRACKING.md) · 🇱🇰 [si](../../../si/docs/guides/COST_TRACKING.md) · 🇸🇰 [sk](../../../sk/docs/guides/COST_TRACKING.md) · 🇸🇮 [sl](../../../sl/docs/guides/COST_TRACKING.md) · 🇷🇸 [sr](../../../sr/docs/guides/COST_TRACKING.md) · 🇸🇪 [sv](../../../sv/docs/guides/COST_TRACKING.md) · 🇰🇪 [sw](../../../sw/docs/guides/COST_TRACKING.md) · 🇮🇳 [ta](../../../ta/docs/guides/COST_TRACKING.md) · 🇮🇳 [te](../../../te/docs/guides/COST_TRACKING.md) · 🇹🇭 [th](../../../th/docs/guides/COST_TRACKING.md) · 🇹🇷 [tr](../../../tr/docs/guides/COST_TRACKING.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/COST_TRACKING.md) · 🇵🇰 [ur](../../../ur/docs/guides/COST_TRACKING.md) · 🇺🇿 [uz](../../../uz/docs/guides/COST_TRACKING.md) · 🇻🇳 [vi](../../../vi/docs/guides/COST_TRACKING.md) · 🇳🇬 [yo](../../../yo/docs/guides/COST_TRACKING.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/COST_TRACKING.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/COST_TRACKING.md)
+
 ---
-title: "Śledzenie kosztów i wydatków"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
 
-# Śledzenie kosztów i wydatków
+Jak OmniRoute szacuje, rejestruje i raportuje koszt każdego żądania — i dlaczego numer panelu kontrolnego to a **narzędzie do śledzenia oszczędności** , a nie rachunek.
 
-Jak OmniRoute szacuje, rejestruje i raportuje koszt każdego żądania — oraz dlaczego
-liczba na dashboardzie to **tracker oszczędności**, a nie rachunek.
-
-Zobacz też: [Przewodnik użytkownika](./USER_GUIDE.md) · [Galeria funkcji](./FEATURES.md)
+Zobacz także: [Podręcznik użytkownika](./USER_GUIDE.md) · [Galeria funkcji](./FEATURES.md)
 
 ---
 
@@ -43,71 +40,69 @@ Ponieważ liczba jest szacunkiem:
 
 ### Źródło cen
 
-Koszty wynikają ze scalonej tabeli cen w [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), w następującej kolejności (**najwyższy priorytet pierwszy**):
+Koszty pochodzą z połączonej tabeli cenowej w [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), w tej kolejności pierwszeństwa (**najpierw najwyższy** ):
 
-1. **Nadpisania użytkownika** — ceny z panelu lub `PATCH /api/pricing` (przestrzeń nazw `pricing`).
-2. **Synchronizacja models.dev** — ceny pobrane z `https://models.dev/api.json` (przestrzeń nazw `models_dev_pricing`).
-3. **Synchronizacja LiteLLM** — ceny z publicznego pliku `model_prices_and_context_window.json` projektu LiteLLM (przestrzeń nazw `pricing_synced`).
-4. **Wbudowane wartości domyślne** — stawki dostarczane w [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Zastąpienia użytkownika** Ceny — ustawiane w panelu kontrolnym lub poprzez `PATCH /api/pricing` (przestrzeń nazw `pricing` ).
+2. **synchronizacja modeli.dev** Ceny — pobrane z `https://models.dev/api.json` (przestrzeń nazw `models_dev_pricing` ).
+3. **Synchronizacja LiteLLM** Ceny — pobrane z publicznego LiteLLM(przestrzeni nazw `pricing_synced` ) `model_prices_and_context_window.json`.
+4. **Zakodowane na stałe ustawienia domyślne** Stawki — wysyłane w [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Dla tego samego dostawcy/modelu wyższe warstwy nadpisują odpowiadające pola niższych; brakujące pola mogą nadal pochodzić z niższej warstwy. Kolejność jest stała także wtedy, gdy oba niezależne zadania synchronizacji działają jednocześnie. `GET /api/pricing?includeSources=1` zwraca `pricing` i `sourceMap`; etykiety modeli (`user`, `modelsDev`, `litellm`, `default`) wskazują najwyższą warstwę zawierającą dany model.
+W przypadku tego samego provider/model wartości z warstw o wyższym priorytecie zastępują pasujące pola w niższych warstwach; pola nieobecne w górnej warstwie mogą nadal pochodzić z dolnej warstwy. Kolejność jest stała, nawet jeśli oba niezależne zadania synchronizacji są uruchamiane w tym samym czasie. `GET /api/pricing?includeSources=1` zwraca `pricing` i `sourceMap`, których etykiety poszczególnych modeli (`user`, `modelsDev`, `litellm`, `default`) identyfikują warstwę o najwyższym priorytecie zawierającą ten model.
 
-**Synchronizacja LiteLLM** wymaga włączenia i domyślnie jest wyłączona. Jej zmienne środowiskowe (zobacz [`.env.example`](../../.env.example)) to:
+**Synchronizacja LiteLLM** jest opcjonalna, domyślnie wyłączona. Jego zmienne środowiskowe (patrz [`.env.example`](../../.env.example) ) to:
 
-| Env var                 | Default   | Cel                                                                                          |
-| ----------------------- | --------- | -------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Włącza synchronizację cen LiteLLM w tle.                                                     |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interwał sync w **sekundach** (domyślnie codziennie).                                        |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Wybór źródła dotyczy tylko tej synchronizacji; obecnie obsługiwane jest wyłącznie `litellm`. |
+| Kop. zm                 | Domyślny  | Zamiar                                                                               |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`   | Włącz synchronizację cen LiteLLM w tle.                                              |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interwał synchronizacji w sekundach (codziennie).                                    |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Wybór źródła tylko dla tej synchronizacji; obecnie obsługiwany jest tylko `litellm`. |
 
-**Synchronizacja models.dev** jest niezależna od synchronizacji LiteLLM i również domyślnie wyłączona. Włącz ją w Ustawieniach (synchronizacja models.dev) lub użyj tych zmiennych:
+**synchronizacja modeli.dev** jest oddzielna od synchronizacji LiteLLM i jest również domyślnie wyłączona. Włącz tę opcję w Ustawieniach (synchronizacja modeli.dev) lub użyj tych zmiennych:
 
-| Zmienna środowiskowa       | Domyślnie        | Zastosowanie                                                                                                                                                    |
-| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nieustawiona)_ | Brak wartości oznacza użycie przełącznika w Ustawieniach; `1/true/on/yes` wymusza włączenie, a `0/false/off/no` wyłączenie, nawet jeśli Ustawienia ją włączają. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`          | Domyślny odstęp synchronizacji models.dev w sekundach (codziennie).                                                                                             |
+| Kop. zm                    | Domyślny       | Zamiar                                                                                                                                                              |
+| -------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nieoprawny)_ | Nieustawione następuje po przełączeniu Ustawień; `1/true/on/yes` wymusza włączenie, a `0/false/off/no` wymusza wyłączenie (nawet jeśli Ustawienia na to pozwalają). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Domyślny interwał synchronizacji models.dev w sekundach (dziennie).                                                                                                 |
 
-`PRICING_SYNC_SOURCES` **nie** włącza models.dev; steruje wyłącznie synchronizacją LiteLLM. Usunięcie nadpisania użytkownika nie czyści żadnej ze zsynchronizowanych przestrzeni nazw; zaczyna obowiązywać następna dostępna warstwa cen. Dla modelu bez ceny sprawdź oba ustawienia synchronizacji i `sourceMap`, zanim dodasz ręczne nadpisanie.
+`PRICING_SYNC_SOURCES` tak **nie** włącz models.dev; kontroluje tylko synchronizację LiteLLM. Usunięcie zastąpienia użytkownika nie powoduje wyczyszczenia żadnej zsynchronizowanej przestrzeni nazw; wchodzi w życie kolejna dostępna warstwa cenowa. W przypadku modelu niedrogiego sprawdź zarówno ustawienia synchronizacji, jak i `sourceMap` przed dodaniem ręcznego zastąpienia.
 
-### Formuła kosztu
+### Formuła kosztowa
 
-Koszt jest liczony per request z liczby tokenów i stawek za milion tokenów w
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Koszt jest obliczany na żądanie na podstawie liczby tokenów i stawek za milion tokenów w [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokeny wejściowe** (minus odczyty cache i tokeny tworzenia cache) × stawka `input`.
-- **Tokeny odczytu cache** × stawka `cached` (fallback do stawki input).
-- **Tokeny tworzenia cache** × stawka `cache_creation` (fallback do stawki input).
-- **Tokeny wyjściowe** × stawka `output`.
-- **Tokeny reasoning** × stawka `reasoning` (fallback do stawki output).
+- **Tokeny wejściowe** (minus odczyty pamięci podręcznej i tokeny tworzenia pamięci podręcznej) Szybkość × `input`.
+- **Tokeny odczytu pamięci podręcznej** × Stawka `cached` (powraca do stawki wejściowej).
+- **Tokeny tworzenia pamięci podręcznej** × Stawka `cache_creation` (powraca do stawki wejściowej).
+- **Tokeny wyjściowe** Kurs × `output`.
+- **Żetony rozumowania** × Stawka `reasoning` (powraca do stawki wyjściowej).
 
-Wszystkie stawki są interpretowane jako USD za 1 000 000 tokenów. Tier usługowy Codex
-„fast”/„priority” lub „flex” stosuje mnożnik kosztu (`getCodexFastCostMultiplier`) —
-np. flex jest rozliczany z 50% zniżką na tokeny, pokazywaną na dashboardzie jako
-**flex savings**.
+Wszystkie stawki są interpretowane jako USD na 1 000 000 tokenów. Warstwa usług „szybka”/„priorytetowa” lub „elastyczna” Codex stosuje mnożnik kosztów (`getCodexFastCostMultiplier`) —, np. Flex jest rozliczany z 50% rabatem za tokeny, wyświetlany jako **oszczędności elastyczne** w desce rozdzielczej.
 
-Nazwy modeli są najpierw normalizowane (prefiksy ścieżek providera, takie jak `openai/`
-lub `accounts/fireworks/models/`, są usuwane), dzięki czemu historyczne wiersze nadal
-pasują do ceny.
+Nazwy modeli są najpierw normalizowane (prefiksy ścieżek dostawców, takie jak `openai/` lub `accounts/fireworks/models/` są usuwane), więc wiersze historyczne nadal odpowiadają cenie.
 
-### Jak rejestrowane są wydatki
+### Sposób rejestrowania wydatków
 
-- Koszt per request jest liczony po odpowiedzi i zapisywany fire-and-forget, więc nie
-  dodaje opóźnienia po stronie klienta. Zużycie shared-quota jest planowane na następnym
-  ticku event-loop przez [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Wydatki kluczy API są buforowane i flushowane partiami przez
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (domyślny interwał flush 60 s,
-  bufor 1000 wpisów). Konfigurowalne przez:
+- Koszt pojedynczego żądania jest obliczany w momencie zakończenia żądania. Zużycie współdzielonego limitu jest planowane w następnym takcie pętli zdarzeń za pośrednictwem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Wydatki na klucze API są buforowane i opróżniane partiami przez [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (domyślny interwał opróżniania 60 s, bufor na 1000 wpisów). Możliwość strojenia poprzez:
 
-  | Env var                             | Default | Cel                                             |
-  | ----------------------------------- | ------- | ----------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interwał flush w milisekundach.                 |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maks. liczba buforowanych wpisów przed flushem. |
+  | Kop. zm                             | Domyślny | Zamiar                                           |
+  | ----------------------------------- | -------- | ------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interwał spłukiwania w milisekundach.            |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Maksymalnie buforowane wpisy przed opróżnieniem. |
 
-Liczby kosztów na dashboardzie **nie** pochodzą z zapisanej kwoty dolarowej per wiersz —
-są przeliczane w locie z liczby tokenów i bieżącej tabeli cen przy każdym wywołaniu
-endpointu analytics. Dzięki temu poprawa błędnej ceny (i ponowny sync) aktualizuje
-historyczne szacunki kosztów z mocą wsteczną.
+W kosztach preferowana jest dokładna opłata podana przez dostawcę (`provider_cost_usd`), następnie migawka żądania według cen katalogowych (`calculated_cost_usd`), a następnie ponowna wycena tokenowa z bieżącego katalogu. Przechowywane koszty nie są ponownie naliczane na podstawie liczby tokenów. Starsze wiersze zawierające tylko tokeny nadal zmieniają się, gdy zmienia się ich cena katalogowa.
+
+### OCR i osadzanie
+
+- Pomyślne żądania `/v1/ocr` wykorzystują nadrzędne `usage_info.pages_processed`, a nie żądany zakres stron lub liczbę zwróconych obiektów strony. Szacunek to strony × `ocr_cost_per_page` (absolutne USD/page,**nie** USD/million).
+- Żądania z adnotacjami dotyczącymi dokumentów lub ramek ograniczających wymagają osobnej taryfy `ocr_cost_per_annotated_page`. Bez tego koszt pozostaje nieznany; zwykła taryfa OCR nie jest po cichu zastępowana.
+- Synchronizacja LiteLLM mapuje swoje wcześniejsze pole `annotation_cost_per_page` na `ocr_cost_per_annotated_page`, zachowując bezwzględną wartość USD/page i wpisy zawierające wyłącznie adnotacje, w tym jawne zero. Dostarczone pole kanoniczne ma pierwszeństwo; nieprawidłowe wartości aliasów są ignorowane. Zastąpienia cen użytkownika zachowują swój normalny priorytet. Zobacz [klucze cenowe OCR LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Użycie OCR przechowuje liczbę stron, cenę jednostkową, obliczony koszt USD, klucz API i wybrane połączenie. Strony nigdy nie są reprezentowane jako tokeny. Dzienniki połączeń zawierają metadane rozliczeniowe, a nie dokument URLs, bajty PDF lub wyodrębniony tekst.
+- Pomyślne żądania `/v1/embeddings` rejestrują jeden wiersz użycia na partię fizyczną, w tym oddzielne partie zakończone w tej samej milisekundie. Opłaty zgłaszane przez dostawcę mają pierwszeństwo przed szacunkami tokenów; owijarki combo nie dodają opłaty.
+- Historia użytkowania, analiza kosztów, okna provider/account, limity wydatków klucza API, księga kosztów żądań i codzienne podsumowania użytkowania obejmują te opłaty. Klucze bez dziennika zachowują rozliczenie numeryczne bez zachowywania tekstu źródłowego.
+- Brakujące informacje dotyczące wykorzystania lub taryf **nieznany** , nie jest bezpłatny: nagłówek „koszt odpowiedzi” został pominięty, a istniejąca polityka bezpłatnego użytkowania ma zastosowanie do ograniczonych kluczy API. Jawnie skonfigurowane stawki zerowe pozostają ważne przy zerowym koszcie użytkowania.
+
+Jest to rachunkowość typu forward. Na podstawie tej migracji nie można odtworzyć starych wywołań OCR/embedding, które nigdy nie zapisywały historii użytkowania. Szacunki katalogowe są szacunkami USD, a nie fakturą i nie obejmują przeliczania walut, podatków ani rabatów.
 
 ---
 

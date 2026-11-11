@@ -402,52 +402,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## කාර්යසාධන සුසර කිරීම
+## කාර්ය සාධන සුසර කිරීම
 
-### WAL ප්රකාරය
+### WAL මාදිලිය
 
-WAL පෙරනිමියෙන් සක්රීය කර ඇත. ලිවීම් බහුල කාර්යභාර සඳහා, පහත දෑ සලකා බලන්න:
+WAL පෙරනිමියෙන් සක්රිය කර ඇත. ඉහළ ලිවීමේ වැඩ බර සඳහා, සලකා බලන්න:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- සෑම පිටු 1000කටම පරීක්ෂණ ලක්ෂ්යයක් සාදන්න
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL සීමාව
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute `journal_size_limit` සකසන්නේ නැත. මුරපොලක් WAL රාමු ප්‍රධාන ගොනුවට ගෙන යයි, නමුත් WAL ගොනුව එහි විශාලතම වෙන් කළ ප්‍රමාණය තබා ගනී. `OMNIROUTE_WAL_GUARD_MAX_MB` ආරක්ෂකයා `wal_checkpoint(RESTART)` පමණක් අනතුරු අඟවා ධාවනය කරයි; එය තැටි ප්‍රමාණයේ පියනක් නොවේ.
 
 ### දර්ශක
 
-කාර්යසාධනය සඳහා ප්රධාන දර්ශක (සංක්රමණ මඟින් ස්වයංක්රීයව සාදනු ලැබේ):
+කාර්ය සාධනය සඳහා ප්‍රධාන දර්ශක (සංක්‍රමණ මගින් ස්වයංක්‍රීයව සාදනු ලැබේ):
 
-- `idx_models_provider` — සපයන්නා අනුව ආකෘති සෙවීම්
-- `idx_combo_targets_combo_id` — සංයෝජන ඉලක්ක විස්තාරණය
+- සපයන්නා විසින්`idx_models_provider` — ආකෘති සෙවීම්
+- `idx_combo_targets_combo_id` — සංයුක්ත ඉලක්ක පුළුල් කිරීම
 - `idx_usage_history_api_key_timestamp` — භාවිත විශ්ලේෂණ
 - `idx_quota_snapshots_api_key_window` — කෝටා ලුහුබැඳීම
 - `idx_call_logs_timestamp` — ඇමතුම් ලොග් විමසුම්
 
-නව දර්ශකයක් එක් කිරීමට, සංක්රමණයක් සාදන්න:
+නව දර්ශකයක් එක් කිරීමට, සංක්‍රමණයක් සාදන්න:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### මතකයට සිතියම්ගත කළ I/O
+### මතක සිතියම්ගත I/O
 
-ඉතා විශාල දත්ත සමුදා (>10GB) සඳහා, SQLite pragma හරහා මතක සිතියම්ගත කිරීම සකස් කළ හැක:
+ඉතා විශාල දත්ත සමුදායන් සඳහා (> 10GB), මතක සිතියම්කරණය SQLite ප්‍රයෝගය හරහා සකස් කළ හැක:
 
 ```sql
--- SQLite pragma හරහා සකසන්න (core.ts හෝ ධාවන කාලය තුළ සකස් කරන්න)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### සම්පීඩනය
+### සංයුක්ත කිරීම
 
-දිගු කාලයක් ක්රියාත්මක වන OmniRoute අවස්ථා සඳහා වරින් වර `VACUUM` ධාවනය කිරීම ප්රයෝජනවත් වේ:
+දිගුකාලීන OmniRoute අවස්ථා ඉඳහිට `VACUUM` වලින් ප්‍රතිලාභ ලබයි:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-අඩු තදබදයක් ඇති කාල පරාසවලදී මාසිකව ධාවනය කරන්න. (WAL ප්රකාරය අවශ්යතාව අඩු කළද, එය සම්පූර්ණයෙන් ඉවත් නොකරයි.)
+අඩු තදබදය සහිත කවුළු තුළ මාසිකව ධාවනය කරන්න. (WAL මාදිලිය අවශ්‍යතාවය අඩු කරයි, නමුත් එය ඉවත් නොකරයි.)
 
 ---
 

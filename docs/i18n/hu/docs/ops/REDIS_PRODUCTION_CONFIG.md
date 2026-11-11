@@ -6,33 +6,33 @@
 
 ## Áttekintés
 
-A Redis egy **opcionális, laza függőség** az OmniRoute-ban — ha a Redis nem érhető el, az alkalmazás szabályozottan csökkentett funkcionalitásra vált (memórián belüli tartalékmegoldásokra). Éles környezetben a Redis finomhangolása négy különböző feladattípus késleltetését csökkenti:
+Redis egy **opcionális, lágy függőség** OmniRoute — -ben az alkalmazás kecsesen leromlik (memóriabeli tartalékok), ha Redis nem érhető el. A gyártás során Redis hangolása csökkenti a késleltetést négy különböző munkaterhelés esetén:
 
-| Feladattípus                    | Megvalósító                   | Klienspéldányosító                                            | Kulcsminta                                              |
-| ------------------------------- | ----------------------------- | ------------------------------------------------------------- | ------------------------------------------------------- |
-| Sebességkorlátozás              | `rateLimiter.ts`              | `getRedisClient()` — lusta inicializálású `ioredis` singleton | `<prefix>rl:*` Lua‑atomi sebességkorlátozási időablakok |
-| Hitelesítési gyorsítótár        | `apiKeys.ts`                  | Újra felhasználja a `rateLimiter` kliensét                    | `<prefix>auth:api_key:<sha256>` TTL-lel                 |
-| Kvótatároló                     | `redisQuotaStore.ts`          | Különálló `getRedisClient(url)` singleton                     | `<prefix>quota:*`, példányonként konfigurálható         |
-| Bemelegítési áramkör-megszakító | `redisCircuitBreakerStore.ts` | Különálló kliens a `circuitBreakerFactory.ts` fájlban         | `<prefix>warmup:cb:<connectionId>`                      |
+| Munkaterhelés       | Driver                        | Ügyfélgyár                                   | Kulcsminta                                         |
+| ------------------- | ----------------------------- | -------------------------------------------- | -------------------------------------------------- |
+| Áramkorlátozás      | `rateLimiter.ts`              | `getRedisClient()` — lusta `ioredis` szingli | `<prefix>rl:*` Lua-atomi sebességkorlátozó ablakok |
+| Auth cache          | `apiKeys.ts`                  | Újra felhasználja `rateLimiter` kliensét     | `<prefix>auth:api_key:<sha256>` TTL                |
+| Kvóta bolt          | `redisQuotaStore.ts`          | Különálló `getRedisClient(url)` szingli      | Példányonként konfigurálható `<prefix>quota:*`     |
+| Melegítő megszakító | `redisCircuitBreakerStore.ts` | Külön kliens a `circuitBreakerFactory.ts`    | `<prefix>warmup:cb:<connectionId>`                 |
 
-Mind a négy feladattípus közös névtérelőtagot használ, így az OmniRoute más alkalmazásokkal együtt is használhat egyetlen Redis-példányt (például `127.0.0.1:6379`). Lásd: [Kulcsok névterezése](#key-namespacing).
+Mind a négy munkaterhelés egy névtér-előtaggal rendelkezik, így OmniRoute együtt létezhet más alkalmazásokkal egyetlen Redis példányon (pl. `127.0.0.1:6379`). Lásd: [Kulcsnévtávolság](#key-namespacing).
 
 ---
 
-## Jelenlegi konfiguráció (kódbeli alapértékek)
+## Jelenlegi konfiguráció (alapértelmezett kód)
 
-| Beállítás                                  | Érték                                                                   | Hely                                                                                  |
-| ------------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL` környezeti változó             | `redis://redis:6379` (compose), opcionális                              | `rateLimiter.ts:5`, `.env.example`                                                    |
-| `REDIS_KEY_PREFIX` környezeti változó      | `omniroute:` (alapértelmezett)                                          | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL` környezeti változó | különálló, eltérhet a `REDIS_URL` értékétől                             | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                       | `"sqlite"` (alapértelmezett), opcionálisan `"redis"`                    | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`             | `3`                                                                     | kliens létrehozása a `rateLimiter.ts` fájlban                                         |
-| `enableReadyCheck`                         | nincs beállítva (ioredis-alapérték: `true`)                             | —                                                                                     |
-| `lazyConnect`                              | nincs beállítva (ioredis-alapérték: `false`)                            | —                                                                                     |
-| `retryStrategy`                            | nincs beállítva (ioredis-alapérték: 200 ms-os alapérték, exponenciális) | —                                                                                     |
-| TLS / jelszó / adatbázisindex              | **nincs konfigurálva**                                                  | —                                                                                     |
-| Sentinel / Cluster                         | **nincs konfigurálva** — csak önálló, egycsomópontos üzemmód            | —                                                                                     |
+| Beállítás                       | Érték                                                                | Ahol                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (kompozíció), opcionális                        | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (alapértelmezett)                                       | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | különálló, eltérhet `REDIS_URL` tól                                  | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (alapértelmezett), `"redis"` opcionális                   | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                                  | `rateLimiter.ts` kliens létrehozása                                                   |
+| `enableReadyCheck`              | nincs beállítva (ioredis alapértelmezett: `true`)                    | —                                                                                     |
+| `lazyConnect`                   | nincs beállítva (ioredis alapértelmezett: `false`)                   | —                                                                                     |
+| `retryStrategy`                 | nincs beállítva (ioredis alapértelmezés: 200 ms alap, exponenciális) | —                                                                                     |
+| TLS / jelszó / DB index         | **nincs konfigurálva**                                               | —                                                                                     |
+| Sentinel / Cluster              | **nincs konfigurálva** Csak — önálló egycsomópontja                  | —                                                                                     |
 
 ---
 
@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Ajánlott éles környezeti finomhangolás
+## Javasolt gyártási hangolás
 
-### 1. Kapcsolatkészlet / kliensbeállítások (ioredis `Redis` konstruktor)
+### 1. Csatlakozási készlet/kliens opciók (ioredis `Redis` konstruktor)
 
-A jelenlegi kód egyetlen `new Redis(url)` példányt hoz létre egyéni beállítások nélkül. Éles,
-több replikás telepítésekhez adjon át egy kliensgyárat a kódban, vagy burkolja be a `getRedisClient()` függvényt:
+A jelenlegi kód egyetlen `new Redis(url)` hoz létre egyéni beállítások nélkül. Éles többreplika üzembe helyezés esetén adjon át egy ügyfélgyárat a kódban, vagy csomagolja be `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // nincs újrapróbálkozási korlát; a retryStrategy döntsön
-  enableReadyCheck: true, // ellenőrizze, hogy a kiszolgáló készen áll-e a hívások fogadása előtt
-  lazyConnect: true, // ne kapcsolódjon létrehozáskor; várjon az első hívásig
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10 próbálkozás után adja fel → később kapcsolódjon újra
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, legfeljebb 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // egyesítse a párhuzamos parancsokat egyetlen TCP-írásba
-  keepAlive: 10000, // TCP-életben tartás 10 másodpercenként
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Főbb kompromisszumok:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — éles környezethez ajánlott, így az átmeneti
-  Redis-újraindulások nem okozzák azonnal minden kérés sikertelenségét. A memórián belüli tartalék
-  megoldás a `checkRateLimit()` függvényben kezeli a hibás végrehajtási ágat.
-- `lazyConnect: true` — elkerüli, hogy az indulás attól függjön, elérhető-e a Redis, mielőtt a kiszolgáló
-  megkezdi a kapcsolatok fogadását.
-- `enableAutoPipelining: true` — csökkenti a hálózati fordulók számát a párhuzamos sebességkorlát-ellenőrzéseknél;
-  egyetlen kapcsolaton 50 RPS fölött előnyös.
+- `maxRetriesPerRequest: null` + `retryStrategy` — előnyben részesített a termeléshez, így az átmeneti Redis újraindítások nem tesznek azonnal kudarcot minden kérés esetén. A `checkRateLimit()` memórián belüli tartaléka elnyeli a hibaútvonalat.
+- `lazyConnect: true` — elkerüli az indítási függőséget Redis től, mielőtt a kiszolgáló megkezdené a kapcsolatok fogadását.
+- `enableAutoPipelining: true` — csökkenti az oda-vissza utak számát az egyidejű díjkorlát-ellenőrzéseknél; előnyös > 50 RPS -nél egyetlen csatlakozáson.
 
-### 2. A Redis-kiszolgáló konfigurációja (`redis.conf`)
+### 2. Redis szerver konfiguráció (`redis.conf`)
 
 ```
-# Memória
-maxmemory 80%                        # maradjon hely az operációs rendszer lapgyorsítótárának
-maxmemory-policy allkeys-lru         # terhelés alatt távolítsa el az elavult hitelesítési gyorsítótár-bejegyzéseket
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Perzisztencia (opcionális — az OmniRoute enélkül is összeomlásbiztos)
-save 300 1                           # legalább 5 percenként készítsen pillanatképet, ha ≥1 kulcs megváltozott
-appendonly no                        # nincs szükség AOF-re; az adatok újra előállíthatók
-appendfsync no                       # nincs fsync-többletterhelés (az RDB elegendő)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Hálózat
-timeout 0                            # ne bontsa az inaktív kapcsolatokat
-tcp-keepalive 300                    # 5 perces életben tartás
-tcp-backlog 511                      # kapcsolati várólista a kiugró terhelésekhez
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Teljesítmény
-hz 10                                # alapértelmezett; késleltetésérzékeny esetben 100
-activedefrag yes                     # automatikus töredezettségmentesítés, ha a töredezettség >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Az `maxmemory-policy allkeys-lru` kompromisszuma:** Memórianyomás esetén a hitelesítési
-gyorsítótár bejegyzései eltávolíthatók. Ez biztonságos — a `setCachedApiKey` hiány esetén mindig
-újra feltölti őket, és az SQLite tartalék megoldás a mérvadó. A sebességkorlátozó Lua-szkript kis méretű,
-szándékosan rövid élettartamú kulcsokat hoz létre.
+**A `maxmemory-policy allkeys-lru` kompromisszuma:** A gyorsítótár hitelesítési bejegyzései a memória nyomására kiüríthetők. Ez biztonságos — `setCachedApiKey` mindig újratelepül kihagyáskor, és a SQLite tartalék a mérvadó. A sebességkorlátozó Lua szkript kis kulcsokat hoz létre, amelyek tervezésüknél fogva rövid életűek.
 
-### 3. Docker Compose-beállítások
+### 3. Docker Compose Settings
 
-Az éles környezethez tartozó compose (`docker-compose.prod.yml`) a `redis:8.6.2-alpine` rendszerképet használja. Adja hozzá:
+A prod compose (`docker-compose.prod.yml`) `redis:8.6.2-alpine` használja. Hozzáadás:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Több példányra / skálázásra vonatkozó megfontolások
+### 4. Többpéldányos/méretezési szempontok
 
-**Egyetlen Redis az összes replikához** — a sebességkorlátozó Lua-szkript egyetlen,
-mérvadó kulcstértől függ. A replikák mögötti több Redis-példány megszüntetné az atomosságot,
-és megduplázná a keretet. Használjon egyetlen Redis-példányt (vagy feladatátvételt biztosító Redis Sentinel-fürtöt)
-az alkalmazás összes replikájához.
+**Egyetlen Redis az összes replikához** — a sebességkorlátozó Lua szkript egyetlen mérvadó kulcstértől függ. Több Redis példány a replikák mögött elveszítené az atomerőt, és megduplázná a költségvetést. Használjon egyetlen Redis (vagy Redis Sentinel-fürtöt feladatátvétellel) az összes alkalmazásreplikához.
 
-**Kapcsolatok száma:** Minden alkalmazásreplika **2 TCP-kapcsolatot** nyit a Redis felé
-(sebességkorlátozó kliens + kvótatároló kliens). 10 replika esetén → 20 kapcsolat, ami jóval
-a Redis-példányok alapértelmezett 10 ezres kapcsolati korlátja alatt van.
+**Csatlakozások száma:** Minden alkalmazás replika megnyílik **2 TCP csatlakozás** a Redis (rate limiter client + kvótatároló kliens). 10 replika → 20 kapcsolatnál, jóval az alapértelmezett Redis példány 10 000 kapcsolati plafonján belül.
 
-### 5. Monitorozás
+### 5. Monitoring
 
-Tegye elérhetővé az állapotellenőrzési végponton keresztül:
+Exponálás állapotellenőrzési végponton keresztül:
 
 ```typescript
-// A src/app/api/monitoring/health/route.ts már meghívja a sebességkorlátozó függvényeit
-// Adjon hozzá Redis-specifikus ellenőrzéseket:
-//   1. PING-késleltetés az ioredis .ping() segítségével
-//   2. Memóriahasználat az INFO memory segítségével
-//   3. Kapcsolatok száma az INFO clients segítségével
-//   4. Találati arány a maxmemory-policy esetében (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Figyelendő fő mérőszámok:
+A legfontosabb figyelendő mutatók:
 
-- **Eltávolított kulcsok / másodperc** — ha tartósan nem nulla, növelje a `maxmemory` értékét
-- **Blokkolt kliensek** — a nullától eltérő érték lassú Lua-szkriptekre vagy nagy versengésre utal
-- **Elutasított kapcsolatok** — elérték a kapcsolati korlátot; 20 kapcsolatnál ritka
+- **Kilakoltatott kulcsok / mp** Ha — tartósan nem nulla, növelje `maxmemory`
+- **Letiltott ügyfelek** A nem nulla — lassú Lua-szkriptekre vagy nagy versengésre utal
+- **Elutasított kapcsolatok** — csatlakozási határérték; ritka 20 csatlakozásnál
+
+### 6. Redis-kompatibilis szerverek
+
+Minden itt használt szervernek Lua szkripteket kell futtatnia: a sebességkorlátozó egy `EVAL`. Lua nélküli kiszolgálón `checkRateLimit()` naplózza `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting`, és folyamatonként számol, így minden replika önmagában érvényesíti a korlátot. Az opt-in megosztott munkamenet-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) `EVAL` segítségével is beolvassa és frissíti a pineket; Lua nélkül naplózza `[SESSION_AFFINITY] Redis error; falling back to SQLite.`, és minden replika megtartja a saját tűit. A többi munkaterhelés sima parancsokat használ (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hash és set), és a szemantikus gyorsítótár Redis háttérrendszere nem küld `FT.*` parancsokat.
+
+OmniRoute 3.8.52-vel tesztelve: KiviDB 1.2.0 a Lua képpel (`kividb/kividb:v1.2.0-lua`). A sebességkorlátozó (beleértve a számlálókat megosztó második folyamatot), a hitelesítési gyorsítótár, a kvótatároló, a bemelegítési megszakító, a szemantikus gyorsítótár tárolója és a csevegéskezelőn keresztül érkező `/v1/chat/completions` -kérés a 19 ellenőrzés közül 18-on átment Redis 8.10.3-on. Ami különbözik: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` ként tárolja, ahol Redis `0.3` t ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). A kvótatároló mindkettőt `parseFloat`-lel elemzi, de a két szám az utolsó számjegyekben különbözik, így a pontosan egy kvótahatárra eső összehasonlítás másképp jöhet ki. A munkamenet-affinitástároló nem volt része ennek a futtatásnak. ( [beállítás](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [eredmények](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -190,13 +183,13 @@ flowchart LR
 
 ## Hivatkozások
 
-| Fájl                               | Rendeltetés                                                                          |
-| ---------------------------------- | ------------------------------------------------------------------------------------ |
-| `src/shared/utils/rateLimiter.ts`  | Elsődleges Redis-kliens, Lua sebességkorlátozó szkript, memóriabeli tartalékmegoldás |
-| `src/lib/db/apiKeys.ts`            | Hitelesítési gyorsítótár — Redis→SQLite tartalékmegoldással                          |
-| `src/lib/quota/redisQuotaStore.ts` | Különálló Redis-kliens az opcionális kvótatárolóhoz                                  |
-| `src/lib/quota/storeFactory.ts`    | Váltás a `sqlite` és a `redis` kvótameghajtók között                                 |
-| `docker-compose.prod.yml`          | Éles környezetbeli Redis-konténer (`redis:8.6.2-alpine` rendszerképpel)              |
-| `.env.example`                     | A Redis környezeti változóinak dokumentációja                                        |
-| `src/app/api/local/redis/`         | API-útvonalak a fejlesztői konténerek vezérléséhez                                   |
-| `bin/cli/commands/redis.mjs`       | CLI-parancsok a fejlesztői konténerek vezérléséhez                                   |
+| Fájl                               | Cél                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Elsődleges Redis kliens, Lua sebességkorlátozási szkript, memórián belüli tartalék |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite tartalék                                                 |
+| `src/lib/quota/redisQuotaStore.ts` | Külön Redis kliens az opcionális kvótatárolóhoz                                    |
+| `src/lib/quota/storeFactory.ts`    | Váltás `sqlite` és `redis` kvóta-illesztőprogramok között                          |
+| `docker-compose.prod.yml`          | Prod Redis tároló ( `redis:8.6.2-alpine` kép)                                      |
+| `.env.example`                     | Redis env vars dokumentáció                                                        |
+| `src/app/api/local/redis/`         | API útvonalak a fejlesztői konténer hangszereléséhez                               |
+| `bin/cli/commands/redis.mjs`       | CLI parancsok a fejlesztői konténer hangszereléséhez                               |

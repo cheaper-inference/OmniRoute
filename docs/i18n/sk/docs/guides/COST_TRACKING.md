@@ -41,69 +41,69 @@ Keďže toto číslo je odhad:
 
 ### Zdroj cien
 
-Náklady vychádzajú zo zlúčenej cenovej tabuľky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), v tomto poradí (**najvyššia priorita prvá**):
+Náklady pochádzajú zo zlúčenej cenovej tabuľky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) v tomto poradí priority (**najskôr najvyššie** ):
 
-1. **Používateľské prepísania** — ceny z panela alebo `PATCH /api/pricing` (menný priestor `pricing`).
-2. **Synchronizácia models.dev** — ceny z `https://models.dev/api.json` (menný priestor `models_dev_pricing`).
-3. **Synchronizácia LiteLLM** — ceny z verejného súboru `model_prices_and_context_window.json` projektu LiteLLM (menný priestor `pricing_synced`).
-4. **Zabudované predvolené hodnoty** — sadzby dodávané v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Používateľ prepíše** Ceny — sa nastavujú na prístrojovej doske alebo cez `PATCH /api/pricing` (menný priestor `pricing` ).
+2. **synchronizácia modelov.dev** Ceny — získané zo `https://models.dev/api.json` (menný priestor `models_dev_pricing` ).
+3. **LiteLLM synchronizácia** Ceny — získané z verejného `model_prices_and_context_window.json` LiteLLM(menný priestor `pricing_synced` ).
+4. **Pevne zakódované predvolené hodnoty** Sadzby — odosielané v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Pre rovnakého poskytovateľa/model vyššie vrstvy prepíšu zodpovedajúce polia nižších; chýbajúce polia môžu stále pochádzať z nižšej vrstvy. Poradie zostáva pevné, aj keď obe nezávislé synchronizácie bežia súčasne. `GET /api/pricing?includeSources=1` vráti `pricing` a `sourceMap`; označenia modelov (`user`, `modelsDev`, `litellm`, `default`) identifikujú vrstvu s najvyššou prioritou obsahujúcu daný model.
+V prípade rovnakého provider/model hodnoty z vrstiev s vyššou prioritou prepíšu zodpovedajúce polia v nižších vrstvách; polia chýbajúce v hornej vrstve môžu stále pochádzať z nižšej vrstvy. Poradie je pevné, aj keď sú obe nezávislé synchronizačné úlohy spustené súčasne. `GET /api/pricing?includeSources=1` vráti `pricing` a `sourceMap`, ktorých označenia podľa modelu (`user`, `modelsDev`, `litellm`, `default`) identifikujú vrstvu s najvyššou prioritou obsahujúcu daný model.
 
-**Synchronizácia LiteLLM** sa zapína voliteľne a predvolene je vypnutá. Jej premenné prostredia (pozrite [`.env.example`](../../.env.example)) sú:
+**LiteLLM synchronizácia** je voliteľné, predvolene zakázané. Jeho premenné prostredia (pozri [`.env.example`](../../.env.example) ) sú:
 
-| Premenná prostredia     | Predvolené | Účel                                                                                 |
+| Env var                 | Predvolené | Účel                                                                                 |
 | ----------------------- | ---------- | ------------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`    | Zapne synchronizáciu cien LiteLLM na pozadí.                                         |
-| `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v **sekundách** (predvolene raz denne).                      |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | Výber zdroja platí iba pre túto synchronizáciu; aktuálne sa podporuje iba `litellm`. |
+| `PRICING_SYNC_ENABLED`  | `false`    | Povoliť synchronizáciu cien LiteLLM na pozadí.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v sekundách (denne).                                         |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Výber zdroja len pre túto synchronizáciu; v súčasnosti je podporovaná iba `litellm`. |
 
-**Synchronizácia models.dev** je oddelená od synchronizácie LiteLLM a tiež predvolene vypnutá. Zapnite ju v Nastaveniach (synchronizácia models.dev) alebo použite tieto premenné:
+**synchronizácia modelov.dev** je oddelená od synchronizácie LiteLLM a je tiež predvolene vypnutá. Povoľte ju v Nastaveniach (synchronizácia modelov.dev) alebo použite tieto premenné:
 
-| Premenná prostredia        | Predvolené      | Účel                                                                                                                                       |
+| Env var                    | Predvolené      | Účel                                                                                                                                       |
 | -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavená)_ | Ak nie je nastavená, platí prepínač Nastavení; `1/true/on/yes` vynúti zapnutie a `0/false/off/no` vypnutie, aj keď ju Nastavenia zapínajú. |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavené)_ | Zrušiť nastavenie nasleduje po prepínači Nastavenia; `1/true/on/yes` sa zapne a `0/false/off/no` sa vypne (aj keď to nastavenia povoľujú). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Predvolený interval synchronizácie models.dev v sekundách (denne).                                                                         |
 
-`PRICING_SYNC_SOURCES` **nezapína** models.dev; riadi iba synchronizáciu LiteLLM. Vymazanie používateľského prepísania nevymaže žiadny synchronizovaný menný priestor; začne platiť ďalšia dostupná cenová vrstva. Pri modeli bez ceny skontrolujte obe nastavenia synchronizácie a `sourceMap` pred pridaním ručného prepísania.
+`PRICING_SYNC_SOURCES` áno **nie** povoliť modely.dev; ovláda iba synchronizáciu LiteLLM. Odstránením prepísania používateľa sa nevymaže ani synchronizovaný priestor názvov; začne platiť ďalšia dostupná cenová vrstva. Pri cenovom modeli pred pridaním manuálneho prepísania skontrolujte nastavenia synchronizácie aj `sourceMap`.
 
-### Vzorec na výpočet nákladov
+### Vzorec nákladov
 
-Náklady sa počítajú pre každú požiadavku z počtu tokenov a sadzieb za milión tokenov v
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Cena sa počíta na žiadosť z počtu tokenov a sadzieb za milión tokenov v [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Vstupné tokeny** (bez tokenov načítaných z vyrovnávacej pamäte a tokenov na jej vytvorenie) × sadzba `input`.
-- **Tokeny načítané z vyrovnávacej pamäte** × sadzba `cached` (ak chýba, použije sa vstupná sadzba).
-- **Tokeny na vytvorenie vyrovnávacej pamäte** × sadzba `cache_creation` (ak chýba, použije sa vstupná sadzba).
-- **Výstupné tokeny** × sadzba `output`.
-- **Tokeny uvažovania** × sadzba `reasoning` (ak chýba, použije sa výstupná sadzba).
+- **Vstupné tokeny** (mínus čítania z vyrovnávacej pamäte a tokeny na vytvorenie vyrovnávacej pamäte) × `input` rýchlosť.
+- **Tokeny na čítanie z vyrovnávacej pamäte** × Sadzba `cached` (spadne späť na vstupnú sadzbu).
+- **Tokeny na vytváranie vyrovnávacej pamäte** × Sadzba `cache_creation` (spadne späť na vstupnú sadzbu).
+- **Výstupné tokeny** Sadzba × `output`.
+- **Tokeny zdôvodnenia** × Rýchlosť `reasoning` (spadne späť na výstupnú rýchlosť).
 
-Všetky sadzby sa interpretujú ako USD za 1 000 000 tokenov. Úroveň služby Codex „fast“/„priority“
-alebo „flex“ uplatňuje násobiteľ nákladov (`getCodexFastCostMultiplier`) — napr. pri úrovni flex
-sa účtuje 50 % zľava na tokeny, ktorá sa na ovládacom paneli zobrazuje ako **úspory flex**.
+Všetky sadzby sú interpretované ako USD na 1 000 000 tokenov. Úroveň služieb „rýchla“/„priorita“ alebo „flex“ Codex uplatňuje násobiteľ nákladov (`getCodexFastCostMultiplier`) — napr. flex sa účtuje s 50 % zľavou na symbol, ktorá sa objaví ako **flexibilné úspory** v prístrojovej doske.
 
-Názvy modelov sa najprv normalizujú (odstránia sa predpony ciest poskytovateľov, ako napríklad `openai/`
-alebo `accounts/fireworks/models/`), aby sa aj historické riadky naďalej zhodovali s cenou.
+Názvy modelov sa najskôr normalizujú (predpony cesty poskytovateľa ako `openai/` alebo `accounts/fireworks/models/` sú odstránené), takže historické riadky stále zodpovedajú cene.
 
 ### Ako sa zaznamenávajú výdavky
 
-- Náklady na jednu požiadavku sa vypočítajú po odpovedi a zaznamenajú sa asynchrónne bez čakania,
-  takže klientovi nikdy nepridávajú latenciu. Spotreba zdieľanej kvóty sa naplánuje na nasledujúci
-  cyklus udalostí prostredníctvom [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Výdavky API kľúčov sa ukladajú do vyrovnávacej pamäte a zapisujú v dávkach pomocou
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (predvolený interval zápisu 60 s,
-  vyrovnávacia pamäť s kapacitou 1 000 záznamov). Možno ich upraviť pomocou:
+- Cena za žiadosť sa vypočíta po dokončení žiadosti. Spotreba zdieľanej kvóty je naplánovaná pri ďalšom zaškrtnutí slučky udalostí prostredníctvom [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Výdavky na kľúče API sa ukladajú do vyrovnávacej pamäte a vyprázdnia v dávkach pomocou [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (predvolený interval vyprázdnenia 60 s, vyrovnávacia pamäť 1 000 záznamov). Laditeľné cez:
 
-  | Premenná prostredia                 | Predvolené | Účel                                            |
-  | ----------------------------------- | ---------- | ----------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Interval zápisu v milisekundách.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maximálny počet záznamov pred vykonaním zápisu. |
+  | Env var                             | Predvolené | Účel                                                               |
+  | ----------------------------------- | ---------- | ------------------------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Interval splachovania v milisekundách.                             |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maximálny počet záznamov vo vyrovnávacej pamäti pred vyprázdnením. |
 
-Údaje o nákladoch na ovládacom paneli sa **nenačítavajú** z dolárovej sumy uloženej v jednotlivých
-riadkoch — pri každom spustení analytického koncového bodu sa nanovo vypočítajú z počtu tokenov
-a aktuálnej cenovej tabuľky. To znamená, že oprava nesprávnej ceny (a opätovná synchronizácia)
-spätne aktualizuje historické odhady nákladov.
+Náklady uprednostňujú presný poplatok nahlásený poskytovateľom (`provider_cost_usd`), potom snímku požiadavky podľa katalógovej ceny (`calculated_cost_usd`), potom precenenie tokenu z aktuálneho katalógu. Uložené náklady sa už neúčtujú prostredníctvom ich počtu tokenov. Staršie riadky obsahujúce iba token sa stále menia, keď sa zmení ich katalógová cena.
+
+### OCR a vloženia
+
+- Úspešné požiadavky `/v1/ocr` používajú upstream `usage_info.pages_processed`, nie požadovaný rozsah stránok alebo počet vrátených objektov stránok. Odhad je na stránkach × `ocr_cost_per_page` (absolútne USD/page,**nie** USD/million).
+- Žiadosti s anotáciami dokumentu alebo ohraničenia vyžadujú samostatnú tarifu `ocr_cost_per_annotated_page`. Bez nej zostávajú náklady neznáme; obyčajná tarifa OCR nie je v tichosti nahradená.
+- Synchronizácia LiteLLM mapuje svoje pole `annotation_cost_per_page` v smere toku do `ocr_cost_per_annotated_page`, pričom zachováva absolútnu hodnotu USD/page a záznamy len s anotáciami, vrátane explicitnej nuly. Dodané kanonické pole má prednosť; neplatné hodnoty aliasov sa ignorujú. Prepisy cien pre používateľov si zachovávajú svoju normálnu prioritu. Pozrite si [cenové kľúče LiteLLM spoločnosti OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Použitie OCR ukladá počet stránok, jednotkovú cenu, vypočítanú cenu USD, kľúč API a vybrané pripojenie. Stránky nie sú nikdy reprezentované ako tokeny. Protokoly hovorov obsahujú fakturačné metadáta, nie dokument URLs, bajty PDF alebo extrahovaný text.
+- Úspešné požiadavky `/v1/embeddings` zaznamenajú jeden riadok použitia na fyzickú dávku vrátane samostatných dávok dokončených v tej istej milisekunde. Poplatky nahlásené poskytovateľom majú prednosť pred symbolickými odhadmi; kombinované obaly neplatia poplatok.
+- Tieto poplatky zahŕňajú históriu používania, analýzu nákladov, okná provider/account, limity výdavkov na kľúče API, knihu nákladov na požiadavky a súhrny denného používania. Kľúče bez protokolu zachovávajú numerické účtovanie bez zachovania zdrojového textu.
+- Chýba použitie alebo tarify **neznámy** , nie zadarmo: hlavička nákladov na odozvu je vynechaná a existujúca politika neoceneného používania sa vzťahuje na obmedzené kľúče API. Explicitne nakonfigurované nulové sadzby zostávajú v platnosti s nulovými nákladmi.
+
+Toto je len predbežné účtovníctvo. Staré volania OCR/embedding, ktoré nikdy nezapísali históriu používania, nemožno z tejto migrácie zrekonštruovať. Katalógové odhady sú odhady USD, nie faktúra, a nezahŕňajú menový prevod, daň ani zľavy.
 
 ---
 

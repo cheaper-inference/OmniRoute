@@ -38,71 +38,71 @@ Deoarece valoarea este o estimare:
 
 ## Cum sunt estimate costurile
 
-### Sursa prețurilor
+### Sursa de stabilire a prețurilor
 
-Costurile provin din tabelul de prețuri combinat din [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), în această ordine (**prioritatea cea mai mare prima**):
+Costurile provin din tabelul de prețuri fuzionat din [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), în această ordine de prioritate (**cel mai înalt primul** ):
 
-1. **Suprascrieri ale utilizatorului** — prețuri stabilite în panou sau prin `PATCH /api/pricing` (spațiul de nume `pricing`).
-2. **Sincronizare models.dev** — prețuri preluate de la `https://models.dev/api.json` (spațiul de nume `models_dev_pricing`).
-3. **Sincronizare LiteLLM** — prețuri din fișierul public `model_prices_and_context_window.json` al LiteLLM (spațiul de nume `pricing_synced`).
-4. **Valori implicite încorporate** — tarife distribuite în [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Utilizatorul anulează** Prețurile — stabilite în tabloul de bord sau prin `PATCH /api/pricing` (spațiul de nume `pricing` ).
+2. **modele.dev sincronizare** Prețul — preluat de la `https://models.dev/api.json` (spațiul de nume `models_dev_pricing` ).
+3. **Sincronizare LiteLLM** Prețurile — preluate din `model_prices_and_context_window.json` public al LiteLLM(spațiul de nume `pricing_synced` ).
+4. **Valori implicite codificate** Tarifele — sunt expediate în [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Pentru același furnizor/model, nivelurile superioare suprascriu câmpurile corespunzătoare din nivelurile inferioare; câmpurile absente de sus pot proveni în continuare de jos. Ordinea rămâne fixă chiar dacă ambele sincronizări independente rulează simultan. `GET /api/pricing?includeSources=1` returnează `pricing` și `sourceMap`; etichetele per model (`user`, `modelsDev`, `litellm`, `default`) identifică nivelul cu cea mai mare prioritate care conține modelul.
+Pentru același provider/model, valorile din straturile cu prioritate mai mare suprascriu câmpurile de potrivire din straturile inferioare; câmpurile absente dintr-un strat superior pot proveni în continuare dintr-un strat inferior. Ordinea este fixată chiar și atunci când ambele joburi de sincronizare independente rulează în același timp. `GET /api/pricing?includeSources=1` returnează `pricing` și `sourceMap`, ale căror etichete per model (`user`, `modelsDev`, `litellm`, `default`) identifică stratul cu cea mai mare prioritate care conține acel model.
 
-**Sincronizarea LiteLLM** necesită activare explicită și este dezactivată implicit. Variabilele sale de mediu (vedeți [`.env.example`](../../.env.example)) sunt:
+**Sincronizare LiteLLM** este opt-in, dezactivat implicit. Variabilele sale de mediu (vezi [`.env.example`](../../.env.example) ) sunt:
 
-| Variabilă de mediu      | Valoare implicită | Scop                                                                                           |
-| ----------------------- | ----------------- | ---------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`           | Activează sincronizarea prețurilor LiteLLM în fundal.                                          |
-| `PRICING_SYNC_INTERVAL` | `86400`           | Intervalul de sincronizare în **secunde** (implicit, zilnic).                                  |
-| `PRICING_SYNC_SOURCES`  | `litellm`         | Selectarea sursei se aplică doar acestei sincronizări; momentan este acceptat numai `litellm`. |
+| Env var                 | Implicit  | Scop                                                                                            |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Activați sincronizarea prețurilor LiteLLM în fundal.                                            |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval de sincronizare în secunde (zilnic).                                                   |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Selectarea sursei numai pentru această sincronizare; în prezent, numai `litellm` este acceptat. |
 
-**Sincronizarea models.dev** este separată de cea LiteLLM și este de asemenea dezactivată implicit. Activați-o în Setări (sincronizare models.dev) sau folosiți aceste variabile:
+**modele.dev sincronizare** este separat de sincronizarea LiteLLM și este, de asemenea, dezactivat implicit. Activați-l în Setări (models.dev sync) sau utilizați aceste variabile:
 
-| Variabilă de mediu         | Implicit     | Scop                                                                                                                                                           |
-| -------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nesetată)_ | Dacă lipsește, urmează comutatorul din Setări; `1/true/on/yes` forțează activarea, iar `0/false/off/no` forțează dezactivarea chiar dacă Setările o activează. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Intervalul implicit de sincronizare models.dev în secunde (zilnic).                                                                                            |
+| Env var                    | Implicit       | Scop                                                                                                                                            |
+| -------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(dezactivat)_ | Dezactivat urmează comutatorul Setări; `1/true/on/yes` forțează activarea și `0/false/off/no` forțează oprirea (chiar dacă Setări o activează). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Intervalul de sincronizare modele implicite.dev în secunde (zilnic).                                                                            |
 
-`PRICING_SYNC_SOURCES` **nu** activează models.dev; controlează doar sincronizarea LiteLLM. Ștergerea unei suprascrieri a utilizatorului nu golește niciun spațiu de nume sincronizat; devine activ următorul nivel de prețuri disponibil. Pentru un model fără preț, verificați ambele setări de sincronizare și `sourceMap` înainte de a adăuga o suprascriere manuală.
+`PRICING_SYNC_SOURCES` face **nu** enable models.dev; controlează doar sincronizarea LiteLLM. Ștergerea unei înlocuiri de utilizator nu șterge nici spațiul de nume sincronizat; următorul nivel de preț disponibil devine efectiv. Pentru un model fără preț, verificați atât setările de sincronizare, cât și `sourceMap` înainte de a adăuga o modificare manuală.
 
-### Formula de calcul al costului
+### Formula costului
 
-Costul este calculat pentru fiecare solicitare pe baza numărului de tokenuri și a tarifelor per milion de tokenuri din
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Costul este calculat pe solicitare din numărul de jetoane și ratele pe milion de jetoane în [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokenuri de intrare** (minus citirile din cache și tokenurile de creare a cache-ului) × tariful `input`.
-- **Tokenuri citite din cache** × tariful `cached` (se utilizează tariful de intrare dacă acesta lipsește).
-- **Tokenuri de creare a cache-ului** × tariful `cache_creation` (se utilizează tariful de intrare dacă acesta lipsește).
-- **Tokenuri de ieșire** × tariful `output`.
-- **Tokenuri de raționament** × tariful `reasoning` (se utilizează tariful de ieșire dacă acesta lipsește).
+- **Jetoane de intrare** (minus citirile din cache și jetoanele de creare a memoriei cache) Rata × `input`.
+- **Jetoane citite în cache** Rata × `cached` (reduce la rata de intrare).
+- **Jetoane de creare a memoriei cache** Rata × `cache_creation` (reduce la rata de intrare).
+- **Jetoane de ieșire** Rata × `output`.
+- **Jetoane de raționament** Rata × `reasoning` (reduce la rata de ieșire).
 
-Toate tarifele sunt interpretate ca USD per 1.000.000 de tokenuri. Un nivel de serviciu Codex „fast”/„priority” sau
-„flex” aplică un multiplicator de cost (`getCodexFastCostMultiplier`) — de exemplu, flex
-este facturat cu o reducere de 50% pentru tokenuri, afișată drept **economii flex** în panoul de control.
+Toate ratele sunt interpretate ca USD per 1.000.000 de jetoane. Un nivel de serviciu „rapid”/„prioritario” sau „flex” Codex aplică un multiplicator de cost (`getCodexFastCostMultiplier`) —**economii flexibile** în tabloul de bord.
 
-Numele modelelor sunt normalizate mai întâi (prefixele căilor furnizorilor, precum `openai/` sau
-`accounts/fireworks/models/`, sunt eliminate), astfel încât rândurile istorice să corespundă în continuare unui preț.
+Numele modelelor sunt normalizate mai întâi (prefixele căii furnizorului, cum ar fi `openai/` sau `accounts/fireworks/models/` sunt eliminate), astfel încât rândurile istorice se potrivesc în continuare cu un preț.
 
-### Cum sunt înregistrate cheltuielile
+### Cum se înregistrează cheltuielile
 
-- Costul per solicitare este calculat după răspuns și înregistrat asincron, fără a se aștepta finalizarea operației, astfel încât
-  să nu adauge niciodată latență pentru client. Consumul cotei partajate este programat în următoarea iterație a
-  buclei de evenimente prin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Cheltuielile aferente cheilor API sunt stocate temporar și scrise în loturi de
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval implicit de scriere de 60 s,
-  buffer de 1.000 de intrări). Configurabil prin:
+- Costul per cerere este calculat la finalizarea cererii. Consumul cotei partajate este programat la următoarea bifare a buclei de eveniment prin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Cheltuielile cheii API sunt stocate în tampon și eliminate în loturi de [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval implicit de spălare de 60 de secunde, tampon de 1.000 de intrări). Reglabil prin:
 
-  | Variabilă de mediu                  | Valoare implicită | Scop                                                 |
-  | ----------------------------------- | ----------------- | ---------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`           | Intervalul de scriere în milisecunde.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`            | Numărul maxim de intrări stocate înainte de scriere. |
+  | Env var                             | Implicit | Scop                                                   |
+  | ----------------------------------- | -------- | ------------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interval de spălare în milisecunde.                    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Numărul maxim de intrări în tampon înainte de spălare. |
 
-Valorile costurilor din panoul de control **nu** sunt citite dintr-o sumă în dolari stocată pentru fiecare rând — acestea
-sunt recalculate dinamic pe baza numărului de tokenuri și a tabelului curent de prețuri de fiecare dată când
-este executat endpointul de analiză. Aceasta înseamnă că remedierea unui preț incorect (și resincronizarea)
-actualizează retroactiv estimările costurilor istorice.
+Costurile preferă o taxă exactă raportată de furnizor (`provider_cost_usd`), apoi un instantaneu al cererii cu prețul de catalog (`calculated_cost_usd`), apoi reprecierea simbolului din catalogul actual. Costurile stocate nu sunt taxate din nou prin numărul de simboluri. Rândurile vechi doar cu simboluri se modifică atunci când prețul lor de catalog se modifică.
+
+### OCR și înglobări
+
+- Solicitările `/v1/ocr` reușite folosesc `usage_info.pages_processed` în amonte, nu intervalul de pagini solicitat sau numărul de obiecte de pagină returnate. Estimarea este de pagini × `ocr_cost_per_page` ( USD/page absolut,**nu** USD/million).
+- Solicitările cu adnotări pentru documente sau casete de delimitare necesită un tarif `ocr_cost_per_annotated_page` separat. Fără el, costul rămâne necunoscut; tariful OCR obișnuit nu este înlocuit în tăcere.
+- Sincronizarea LiteLLM mapează câmpul `annotation_cost_per_page` din amonte în `ocr_cost_per_annotated_page`, păstrând valoarea USD/page absolută și intrările numai pentru adnotări, inclusiv zero explicit. Un câmp canonic furnizat are prioritate; valorile de alias nevalide sunt ignorate. Modificarea prețurilor de utilizator își păstrează prioritatea normală. Consultați [cheile de prețuri LiteLLM ale OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Utilizarea OCR stochează numărul de pagini, prețul unitar, costul USD calculat, cheia API și conexiunea selectată. Paginile nu sunt niciodată reprezentate ca simboluri. Jurnalele de apeluri conțin metadate de facturare, nu documente URLs, PDF octeți sau text extras.
+- Solicitările `/v1/embeddings` reușite înregistrează un rând de utilizare per lot fizic, inclusiv loturi separate finalizate în aceeași milisecundă. Taxele raportate de furnizor au prioritate față de estimările indicative; ambalajele combinate nu adaugă o taxă.
+- Istoricul utilizării, analiza costurilor, ferestrele provider/account, limitele de cheltuieli pentru cheia API, registrul cost-cost și cumul zilnic de utilizare includ aceste taxe. Cheile fără jurnal păstrează contabilitatea numerică fără a păstra textul sursă.
+- Lipsesc utilizarea sau tarifele sunt **necunoscut** , nu este gratuit: antetul costului de răspuns este omis, iar politica de utilizare fără preț existentă se aplică cheilor API limitate. Tarifele zero configurate explicit rămân valabile pentru utilizare fără costuri.
+
+Aceasta este o contabilitate forward. Vechile apeluri OCR/embedding care nu au scris niciodată istoricul utilizării nu pot fi reconstruite din această migrare. Estimările de catalog sunt estimări USD, nu o factură și nu includ conversia valutară, taxele sau reducerile.
 
 ---
 

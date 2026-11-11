@@ -37,76 +37,73 @@ Ker je številka le ocena:
 
 ---
 
-## Kako se stroški ocenjujejo
+## Kako so ocenjeni stroški
 
 ### Vir cen
 
-Stroški izhajajo iz združene tabele cen v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), v tem vrstnem redu (**najvišja prednost najprej**):
+Stroški izhajajo iz združene tabele cen v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) v tem prednostnem vrstnem redu (**prvi najvišji** ):
 
-1. **Uporabniške preglasitve** — cene iz plošče ali `PATCH /api/pricing` (imenski prostor `pricing`).
-2. **Sinhronizacija models.dev** — cene iz `https://models.dev/api.json` (imenski prostor `models_dev_pricing`).
-3. **Sinhronizacija LiteLLM** — cene iz javne datoteke `model_prices_and_context_window.json` projekta LiteLLM (imenski prostor `pricing_synced`).
-4. **Vgrajene privzete vrednosti** — tarife iz [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Uporabniške preglasitve** Cene —, nastavljene na nadzorni plošči ali prek `PATCH /api/pricing` (imenski prostor `pricing` ).
+2. **models.dev sync** Cene — pridobljene iz `https://models.dev/api.json` (imenski prostor `models_dev_pricing` ).
+3. **Sinhronizacija LiteLLM** Cene — pridobljene iz javnega `model_prices_and_context_window.json` LiteLLM(imenski prostor `pricing_synced` ).
+4. **Trdo kodirane privzete nastavitve** Cene — poslane v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Za istega ponudnika/model višje plasti preglasijo ujemajoča se polja nižjih; manjkajoča polja še vedno lahko izvirajo iz nižje plasti. Vrstni red ostane stalen tudi ob sočasnem izvajanju obeh neodvisnih sinhronizacij. `GET /api/pricing?includeSources=1` vrne `pricing` in `sourceMap`; oznake modelov (`user`, `modelsDev`, `litellm`, `default`) označujejo najvišjo plast, ki vsebuje model.
+Za isti provider/model vrednosti iz slojev z višjo prednostjo prepišejo ustrezna polja v nižjih slojih; polja, ki jih ni na zgornji plasti, lahko še vedno prihajajo iz spodnje plasti. Vrstni red je fiksen, tudi če obe neodvisni sinhronizacijski opravili potekata istočasno. `GET /api/pricing?includeSources=1` vrne `pricing` in `sourceMap`, katerih oznake za model (`user`, `modelsDev`, `litellm`, `default`) identificirajo plast z najvišjo prioriteto, ki vsebuje ta model.
 
-**Sinhronizacija LiteLLM** zahteva izrecen vklop in je privzeto izklopljena. Njene spremenljivke okolja (glejte [`.env.example`](../../.env.example)) so:
+**Sinhronizacija LiteLLM** je opt-in, privzeto onemogočen. Njene spremenljivke okolja (glej [`.env.example`](../../.env.example) ) so:
 
-| Okoljska spremenljivka  | Privzeto  | Namen                                                                         |
-| ----------------------- | --------- | ----------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Omogoči sinhronizacijo cen LiteLLM v ozadju.                                  |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinhronizacije v **sekundah** (privzeto enkrat dnevno).              |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Izbira vira velja samo za to sinhronizacijo; trenutno je podprt le `litellm`. |
+| Env var                 | Privzeto  | Namen                                                                     |
+| ----------------------- | --------- | ------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Omogoči sinhronizacijo cen LiteLLM v ozadju.                              |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinhronizacije v sekundah (dnevno).                              |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Izbira vira samo za to sinhronizacijo; trenutno je podprt samo `litellm`. |
 
-**Sinhronizacija models.dev** je ločena od sinhronizacije LiteLLM in prav tako privzeto izklopljena. Vklopite jo v Nastavitvah (sinhronizacija models.dev) ali uporabite spremenljivke:
+**models.dev sync** je ločen od sinhronizacije LiteLLM in je tudi privzeto onemogočen. Omogočite ga v nastavitvah (models.dev sync) ali uporabite te spremenljivke:
 
-| Spremenljivka okolja       | Privzeto          | Namen                                                                                                                                   |
-| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavljena)_ | Nenastavljena sledi stikalu v Nastavitvah; `1/true/on/yes` vsili vklop, `0/false/off/no` pa izklop, tudi če je v Nastavitvah omogočena. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Privzeti interval sinhronizacije models.dev v sekundah (dnevno).                                                                        |
+| Env var                    | Privzeto          | Namen                                                                                                                                               |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavljeno)_ | Razveljavitev sledi preklopu Nastavitve; `1/true/on/yes` se prisilno vklopi in `0/false/off/no` prisilno izklopi (tudi če nastavitve to omogočijo). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Privzeti interval sinhronizacije models.dev v sekundah (dnevno).                                                                                    |
 
-`PRICING_SYNC_SOURCES` **ne** omogoči models.dev; nadzoruje samo sinhronizacijo LiteLLM. Izbris uporabniške preglasitve ne počisti nobenega sinhroniziranega imenskega prostora; velja naslednja razpoložljiva cenovna plast. Pri modelu brez cene preverite obe nastavitvi sinhronizacije in `sourceMap`, preden dodate ročno preglasitev.
+`PRICING_SYNC_SOURCES` to počne **ne** omogoči models.dev; nadzoruje samo sinhronizacijo LiteLLM. Brisanje preglasitve uporabnika ne počisti nobenega sinhroniziranega imenskega prostora; začne veljati naslednja razpoložljiva cenovna plast. Pri modelu brez cene preverite nastavitve sinhronizacije in `sourceMap`, preden dodate ročno preglasitev.
 
-### Formula za izračun stroškov
+### Formula stroškov
 
-Strošek se izračuna za vsako zahtevo na podlagi števila žetonov in cen na milijon žetonov
-v [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Strošek se izračuna na zahtevo iz števila žetonov in stopenj na milijon žetonov v [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Vhodni žetoni** (brez branj iz predpomnilnika in žetonov za ustvarjanje predpomnilnika) × cena `input`.
-- **Žetoni, prebrani iz predpomnilnika** × cena `cached` (če ni določena, se uporabi cena za vhodne žetone).
-- **Žetoni za ustvarjanje predpomnilnika** × cena `cache_creation` (če ni določena, se uporabi cena za vhodne žetone).
-- **Izhodni žetoni** × cena `output`.
-- **Žetoni sklepanja** × cena `reasoning` (če ni določena, se uporabi cena za izhodne žetone).
+- **Vhodni žetoni** (minus branja predpomnilnika in žetoni za ustvarjanje predpomnilnika) Stopnja × `input`.
+- **Žetoni za branje predpomnilnika** Hitrost × `cached` (pade nazaj na hitrost vnosa).
+- **Žetoni za ustvarjanje predpomnilnika** Hitrost × `cache_creation` (pade nazaj na hitrost vnosa).
+- **Izhodni žetoni** Stopnja × `output`.
+- **Žetoni sklepanja** Stopnja × `reasoning` (pade nazaj na izhodno hitrost).
 
-Vse cene se razlagajo kot USD na 1.000.000 žetonov. Storitvena raven Codex »fast«/»priority«
-ali »flex« uporabi množitelj stroškov (`getCodexFastCostMultiplier`) — raven flex se na
-primer obračuna s 50-odstotnim popustom na žetone, kar je na nadzorni plošči prikazano kot
-**prihranek flex**.
+Vsi tečaji so interpretirani kot USD na 1.000.000 žetonov. Stopnja storitve Codex »hitra«/»prednostna« ali »fleksibilna« uporablja multiplikator stroškov (`getCodexFastCostMultiplier`). — npr.**fleksibilno varčevanje** na armaturni plošči.
 
-Imena modelov se najprej normalizirajo (predpone poti ponudnikov, kot sta `openai/` ali
-`accounts/fireworks/models/`, se odstranijo), tako da se tudi pretekle vrstice še vedno
-ujemajo s ceno.
+Imena modelov so najprej normalizirana (predpone poti ponudnika, kot sta `openai/` ali `accounts/fireworks/models/` so odstranjene), tako da se zgodovinske vrstice še vedno ujemajo s ceno.
 
-### Kako se poraba beleži
+### Kako se beleži poraba
 
-- Strošek posamezne zahteve se izračuna po odgovoru in zabeleži brez čakanja na dokončanje,
-  zato odjemalcu nikoli ne povzroči dodatne zakasnitve. Poraba skupne kvote je načrtovana
-  za naslednji cikel zanke dogodkov prek
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Poraba ključa API se medpomni in paketno zapisuje z
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (privzeti interval zapisovanja
-  je 60 s, medpomnilnik pa vsebuje 1.000 vnosov). Nastavljivo prek:
+- Stroški na zahtevo se izračunajo ob zaključku zahteve. Poraba skupne kvote je načrtovana ob naslednjem odkljuku dogodka prek [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Poraba ključa API-ja je v medpomnilniku in splakovan v paketih z [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (privzeti interval splakovanja 60 s, medpomnilnik 1000 vnosov). Nastavljivo prek:
 
-  | Okoljska spremenljivka              | Privzeto | Namen                                              |
-  | ----------------------------------- | -------- | -------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interval zapisovanja v milisekundah.               |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Največje število medpomnjenih vnosov pred zapisom. |
+  | Env var                             | Privzeto | Namen                                         |
+  | ----------------------------------- | -------- | --------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interval izpiranja v milisekundah.            |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Največ vnosov v medpomnilnik pred izpiranjem. |
 
-Podatki o stroških na nadzorni plošči se **ne** berejo iz shranjenega dolarskega zneska
-za posamezno vrstico — ob vsakem zagonu analitične končne točke se sproti znova izračunajo
-iz števila žetonov in trenutnega cenika. To pomeni, da popravek napačne cene (in ponovna
-sinhronizacija) retroaktivno posodobi pretekle ocene stroškov.
+Stroški dajejo prednost natančni ceni, ki jo prijavi ponudnik (`provider_cost_usd`), nato posnetku zahtevka po kataloški ceni (`calculated_cost_usd`), nato ponovni ceni žetona iz trenutnega kataloga. Shranjeni stroški se ne zaračunajo ponovno prek števila žetonov. Podedovane vrstice samo za žetone se še vedno spremenijo, ko se spremeni njihova kataloška cena.
+
+### OCR in vdelave
+
+- Uspešne zahteve `/v1/ocr` uporabljajo `usage_info.pages_processed` navzgor, ne pa zahtevanega obsega strani ali števila vrnjenih predmetov strani. Ocena je strani × `ocr_cost_per_page` (absolutni USD/page,**ne** USD/million).
+- Za zahteve z opombami v dokumentu ali omejevalnem polju je potrebna ločena tarifa `ocr_cost_per_annotated_page`. Brez tega ostanejo stroški neznani; običajna tarifa OCR ni tiho nadomeščena.
+- Sinhronizacija LiteLLM preslika svoje polje `annotation_cost_per_page` navzgor v `ocr_cost_per_annotated_page`, pri čemer ohrani absolutno vrednost USD/page in vnose samo za opombe, vključno z eksplicitno ničlo. Podano kanonično polje ima prednost; neveljavne vrednosti vzdevkov so prezrte. Preglasitve uporabniških cen ohranijo svojo običajno prednost. Oglejte si [ključe za določanje cen OCR LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Uporaba OCR shrani število strani, ceno na enoto, izračunan strošek USD, ključ API in izbrano povezavo. Strani niso nikoli predstavljene kot žetoni. Dnevniki klicev vsebujejo metapodatke o obračunavanju, ne dokumentov URLs, PDF bajtov ali izvlečenega besedila.
+- Uspešne zahteve `/v1/embeddings` zabeležijo eno vrstico uporabe na fizični paket, vključno z ločenimi paketi, dokončanimi v isti milisekundi. Stroški, ki jih poroča ponudnik, imajo prednost pred žetonskimi ocenami; kombinirani ovoji ne zaračunavajo.
+- Te stroške vključujejo zgodovina uporabe, analitika stroškov, okna provider/account, omejitve porabe ključa API-ja, knjiga stroškov zahtev in skupna dnevna uporaba. Ključi brez dnevnika ohranijo numerično obračunavanje brez ohranitve izvornega besedila.
+- Manjkajoča uporaba ali tarife so **neznano** , ni brezplačno: glava stroškov odgovora je izpuščena, obstoječa politika uporabe brez cene pa velja za omejene ključe API. Izrecno konfigurirane ničelne stopnje ostanejo veljavne pri uporabi brez stroškov.
+
+To je samo vnaprejšnje računovodstvo. Iz te selitve ni mogoče rekonstruirati starih klicev OCR/embedding, ki nikoli niso zapisali zgodovine uporabe. Ocene v katalogu so ocene USD, ne račun, in ne vključujejo pretvorbe valut, davka ali popustov.
 
 ---
 

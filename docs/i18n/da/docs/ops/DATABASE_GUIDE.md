@@ -403,28 +403,29 @@ Dette bruger SQLite's API til online-sikkerhedskopiering — det er sikkert at k
 
 ---
 
-## Ydeevneoptimering
+## Performance Tuning
 
-### WAL-tilstand
+### WAL -tilstand
 
-WAL er aktiveret som standard. Ved arbejdsbelastninger med mange skrivninger bør du overveje:
+WAL er aktiveret som standard. For høj-skrive-arbejdsbelastninger skal du overveje:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrolpunkt for hver 1000 sider
-PRAGMA journal_size_limit = 67108864;  -- WAL-grænse på 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute indstiller ikke `journal_size_limit`. Et kontrolpunkt flytter WAL rammer ind i hovedfilen, men WAL filen beholder sin største tildelte størrelse. `OMNIROUTE_WAL_GUARD_MAX_MB` vagten advarer og kører kun `wal_checkpoint(RESTART)`; det er ikke en disk-størrelse cap.
 
 ### Indekser
 
-Vigtige indekser for ydeevnen (oprettes automatisk af migreringer):
+Nøgleindekser for ydeevne (automatisk oprettet ved migreringer):
 
 - `idx_models_provider` — modelopslag efter udbyder
-- `idx_combo_targets_combo_id` — udvidelse af kombinationsmål
+- `idx_combo_targets_combo_id` — combo måludvidelse
 - `idx_usage_history_api_key_timestamp` — brugsanalyse
 - `idx_quota_snapshots_api_key_window` — kvotesporing
-- `idx_call_logs_timestamp` — forespørgsler i kaldlogfiler
+- `idx_call_logs_timestamp` — opkaldslogforespørgsler
 
-Opret en migrering for at tilføje et nyt indeks:
+For at tilføje et nyt indeks skal du oprette en migrering:
 
 ```sql
 -- 023_add_my_index.sql
@@ -433,22 +434,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### Hukommelseskortlagt I/O
 
-For meget store databaser (>10 GB) kan hukommelseskortlægningen justeres via et SQLite-pragma:
+For meget store databaser (> 10GB) kan memory mapping justeres via SQLite pragma:
 
 ```sql
--- Indstil via SQLite-pragma (juster i core.ts eller under kørsel)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Komprimering
 
-OmniRoute-instanser, der kører i længere tid, har gavn af lejlighedsvis `VACUUM`:
+Langvarige OmniRoute forekomster drager fordel af lejlighedsvis `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Kør månedligt i perioder med lav trafik. (WAL-tilstand reducerer behovet, men eliminerer det ikke.)
+Løb månedligt under vinduer med lav trafik. (WAL tilstand reducerer behovet, men eliminerer det ikke.)
 
 ---
 

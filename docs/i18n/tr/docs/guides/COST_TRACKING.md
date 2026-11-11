@@ -40,78 +40,73 @@ Bu sayı bir tahmin olduğundan:
 
 ---
 
-## Maliyetler nasıl tahmin edilir
+## Maliyetler nasıl tahmin ediliyor?
 
 ### Fiyatlandırma kaynağı
 
-Maliyetler [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) içindeki birleşik fiyat tablosundan şu sırayla alınır (**en yüksek öncelik önce**):
+Maliyetler [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) birleştirilmiş fiyatlandırma tablosundan bu öncelik sırasına göre gelir (**önce en yüksek** ):
 
-1. **Kullanıcı geçersiz kılmaları** — panelde veya `PATCH /api/pricing` ile ayarlanan fiyatlar (`pricing` ad alanı).
-2. **models.dev eşitlemesi** — `https://models.dev/api.json` kaynağından alınan fiyatlar (`models_dev_pricing` ad alanı).
-3. **LiteLLM eşitlemesi** — LiteLLM projesinin herkese açık `model_prices_and_context_window.json` dosyasından alınan fiyatlar (`pricing_synced` ad alanı).
-4. **Yerleşik varsayılanlar** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) içinde dağıtılan ücretler.
+1. **Kullanıcı geçersiz kılmaları** — fiyatları kontrol panelinde veya `PATCH /api/pricing` ( `pricing` ad alanı) aracılığıyla ayarlanır.
+2. **modeller.dev senkronizasyonu** — fiyatlandırması `https://models.dev/api.json` ( `models_dev_pricing` ad alanı) alındı.
+3. **LiteLLM senkronizasyonu** — fiyatları, LiteLLM halka `model_prices_and_context_window.json` ( `pricing_synced` ad alanı) alınmıştır.
+4. **Sabit kodlanmış varsayılanlar** — oranları [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) gönderilir.
 
-Aynı sağlayıcı/model için üst katmanlar alt katmanların eşleşen alanlarının üzerine yazar; üstte olmayan alanlar alttan gelebilir. Bağımsız eşitleme işleri birlikte çalışırken de sıra sabittir. `GET /api/pricing?includeSources=1`, `pricing` ve `sourceMap` döndürür; model etiketleri (`user`, `modelsDev`, `litellm`, `default`) o modeli içeren en yüksek öncelikli katmanı belirtir.
+Aynı provider/model için, yüksek öncelikli katmanlardan gelen değerler, alt katmanlardaki eşleşen alanların üzerine yazar; üst katmanda bulunmayan alanlar yine de alt katmandan gelebilir. Her iki bağımsız senkronizasyon işi aynı anda çalıştırıldığında bile sıra sabittir. `GET /api/pricing?includeSources=1`, model başına etiketleri (`user`, `modelsDev`, `litellm`, `default`) o modeli içeren en yüksek öncelikli katmanı tanımlayan `pricing` ve `sourceMap` döndürür.
 
-**LiteLLM eşitlemesi** isteğe bağlıdır ve varsayılan olarak kapalıdır. Ortam değişkenleri ([`.env.example`](../../.env.example) dosyasına bakın):
+**LiteLLM senkronizasyonu** isteğe bağlıdır, varsayılan olarak devre dışıdır. Ortam değişkenleri (bkz. [`.env.example`](../../.env.example) ):
 
-| Ortam değişkeni         | Varsayılan | Amaç                                                                                 |
-| ----------------------- | ---------- | ------------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`    | Arka planda LiteLLM fiyat eşitlemesini açar.                                         |
-| `PRICING_SYNC_INTERVAL` | `86400`    | **Saniye** cinsinden senkronizasyon aralığı (varsayılan olarak günlük).              |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | Kaynak seçimi yalnızca bu eşitlemeye aittir; şu anda yalnızca `litellm` desteklenir. |
+| Ortam değişkeni         | Varsayılan | Amaç                                                                                         |
+| ----------------------- | ---------- | -------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`    | Arka planda LiteLLM fiyatlandırma senkronizasyonunu etkinleştirin.                           |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Saniye cinsinden senkronizasyon aralığı (günlük).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Yalnızca bu senkronizasyon için kaynak seçimi; şu anda yalnızca `litellm` desteklenmektedir. |
 
-**models.dev eşitlemesi**, LiteLLM eşitlemesinden bağımsızdır ve o da varsayılan olarak kapalıdır. Ayarlardan açın (models.dev eşitlemesi) veya bu değişkenleri kullanın:
+**modeller.dev senkronizasyonu** LiteLLM senkronizasyonundan ayrıdır ve varsayılan olarak da devre dışıdır. Bunu Ayarlar'da etkinleştirin (models.dev senkronizasyonu) veya şu değişkenleri kullanın:
 
-| Ortam değişkeni            | Varsayılan       | Amaç                                                                                                                         |
-| -------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmamış)_ | Ayarlanmamışsa Ayarlar anahtarını izler; `1/true/on/yes` zorla açar, `0/false/off/no` Ayarlar açmış olsa bile zorla kapatır. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`          | Saniye cinsinden varsayılan models.dev eşitleme aralığı (günlük).                                                            |
+| Ortam değişkeni            | Varsayılan      | Amaç                                                                                                                      |
+| -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmadı)_ | Unset, Ayarlar geçişini takip eder; `1/true/on/yes` açılır ve `0/false/off/no` kapanır (Ayarlar bunu etkinleştirse bile). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Varsayılan models.dev senkronizasyon aralığı saniye cinsinden (günlük).                                                   |
 
-`PRICING_SYNC_SOURCES`, models.dev eşitlemesini **açmaz**; yalnızca LiteLLM eşitlemesini yönetir. Kullanıcı geçersiz kılmasını silmek eşitlenmiş ad alanlarının hiçbirini temizlemez; sıradaki kullanılabilir fiyat katmanı geçerli olur. Fiyatsız bir modelde elle geçersiz kılma eklemeden önce her iki eşitleme ayarını ve `sourceMap` değerini kontrol edin.
+`PRICING_SYNC_SOURCES` bunu yapar **Olumsuz** models.dev'i etkinleştirin; yalnızca LiteLLM senkronizasyonunu kontrol eder. Kullanıcı geçersiz kılmayı silmek, senkronize edilen ad alanlarının ikisini de temizlemez; bir sonraki mevcut fiyatlandırma katmanı etkili olur. Fiyatlandırılmamış bir model için manuel geçersiz kılma eklemeden önce hem senkronizasyon ayarlarını hem de `sourceMap` kontrol edin.
 
 ### Maliyet formülü
 
-Maliyet, her istek için token sayılarından ve milyon token başına oranlardan
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-içindeki (`computeCostFromPricing` / `calculateCost`) hesaplanır:
+Maliyet, [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) jeton sayılarından ve milyon başına jeton oranlarından istek başına hesaplanır:
 
-- **Girdi token'ları** (önbellek okumaları ve önbellek oluşturma token'ları çıkarıldıktan sonra) × `input` oranı.
-- **Önbellek okuma token'ları** × `cached` oranı (yoksa girdi oranı kullanılır).
-- **Önbellek oluşturma token'ları** × `cache_creation` oranı (yoksa girdi oranı kullanılır).
-- **Çıktı token'ları** × `output` oranı.
-- **Akıl yürütme token'ları** × `reasoning` oranı (yoksa çıktı oranı kullanılır).
+- **Giriş jetonları** (eksi önbellek okumaları ve önbellek oluşturma belirteçleri) × `input` oranı.
+- **Önbellek okuma belirteçleri** × `cached` oranı (giriş hızına geri döner).
+- **Önbellek oluşturma belirteçleri** × `cache_creation` oranı (giriş hızına geri döner).
+- **Çıkış jetonları** × `output` oranı.
+- **Muhakeme belirteçleri** × `reasoning` oranı (çıkış oranına geri döner).
 
-Tüm oranlar, 1.000.000 token başına USD olarak yorumlanır. Codex "fast"/"priority" veya
-"flex" hizmet katmanı bir maliyet çarpanı (`getCodexFastCostMultiplier`) uygular — örneğin
-flex, token maliyetinde %50 indirimle ücretlendirilir ve bu, gösterge panelinde
-**flex tasarrufu** olarak gösterilir.
+Tüm oranlar 1.000.000 token başına USD olarak yorumlanır. Bir Codex "hızlı"/"öncelikli" veya "esnek" hizmet katmanı bir maliyet çarpanı (`getCodexFastCostMultiplier`) uygular. —, flex %50 jeton indirimiyle faturalandırılır ve şu şekilde ortaya çıkar:**esnek tasarruf** kontrol panelinde.
 
-Model adları önce normalleştirilir (`openai/` veya `accounts/fireworks/models/` gibi
-sağlayıcı yolu önekleri kaldırılır); böylece geçmiş satırlar da bir fiyatla eşleşmeye
-devam eder.
+Önce model adları normalleştirilir ( `openai/` veya `accounts/fireworks/models/` gibi sağlayıcı yolu önekleri çıkarılır), böylece geçmiş satırlar hâlâ bir fiyatla eşleşir.
 
-### Harcamalar nasıl kaydedilir
+### Harcama nasıl kaydedilir?
 
-- İstek başına maliyet, yanıttan sonra hesaplanır ve istemciye hiçbir zaman gecikme
-  eklememesi için sonucu beklenmeden kaydedilir. Paylaşılan kota tüketimi, bir sonraki
-  olay döngüsü adımında [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)
-  aracılığıyla zamanlanır.
-- API anahtarı harcamaları arabelleğe alınır ve
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tarafından toplu olarak
-  yazılır (varsayılan 60 saniyelik yazma aralığı, 1.000 girdilik arabellek).
-  Şunlarla ayarlanabilir:
+- İstek başına maliyet, istek tamamlandığında hesaplanır. Paylaşılan kota tüketimi, [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) aracılığıyla bir sonraki olay döngüsü onayında planlanır.
+- API anahtarı harcaması, [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tarafından toplu olarak arabelleğe alınır ve temizlenir (varsayılan 60 saniyelik temizleme aralığı, 1.000 girişli arabellek). Şu şekilde ayarlanabilir:
 
-  | Ortam değişkeni                     | Varsayılan | Amaç                                             |
-  | ----------------------------------- | ---------- | ------------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Milisaniye cinsinden arabelleği yazma aralığı.   |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Yazmadan önce arabellekte tutulacak azami girdi. |
+  | Ortam değişkeni                     | Varsayılan | Amaç                                                    |
+  | ----------------------------------- | ---------- | ------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Milisaniye cinsinden yıkama aralığı.                    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Temizlemeden önce maksimum ara belleğe alınan girişler. |
 
-Gösterge panelindeki maliyet değerleri, satır başına saklanan bir dolar tutarından
-**okunmaz** — analiz uç noktası her çalıştığında token sayılarından ve geçerli
-fiyatlandırma tablosundan anlık olarak yeniden hesaplanır. Bu, hatalı bir fiyatı
-düzeltmenin (ve yeniden senkronize etmenin) geçmiş maliyet tahminlerini geriye dönük
-olarak güncelleyeceği anlamına gelir.
+Maliyetler, sağlayıcı tarafından bildirilen kesin bir ücreti (`provider_cost_usd`), ardından katalog fiyatlı bir istek anlık görüntüsünü (`calculated_cost_usd`), ardından mevcut katalogdan token yeniden fiyatlandırmasını tercih eder. Saklanan maliyetler, jeton sayımları aracılığıyla yeniden ücretlendirilmez. Yalnızca eski jeton satırları, katalog fiyatları değiştiğinde değişmeye devam eder.
+
+### OCR ve yerleştirmeler
+
+- Başarılı `/v1/ocr` istekleri, istenen sayfa aralığını veya döndürülen sayfa nesnelerinin sayısını değil, yukarı akış `usage_info.pages_processed` kullanır. Tahmin sayfa × `ocr_cost_per_page` (mutlak USD/page,**Olumsuz** USD/million).
+- Belge veya sınırlayıcı kutu açıklamalarına sahip talepler, ayrı bir `ocr_cost_per_annotated_page` tarifesi gerektirir. Onsuz maliyet bilinmiyor; sıradan OCR tarifesi sessizce ikame edilmez.
+- LiteLLM senkronizasyonu, yukarı akış `annotation_cost_per_page` alanını `ocr_cost_per_annotated_page` ile eşleştirerek mutlak USD/page değerini ve açık sıfır dahil yalnızca açıklama girişlerini korur. Sağlanan bir kanonik alan önceliklidir; geçersiz takma ad değerleri göz ardı edilir. Kullanıcı fiyatlandırmasını geçersiz kılma işlemleri normal önceliklerini korur. [LiteLLMOCR fiyatlandırma anahtarlarına](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) bakın.
+- OCR kullanımı sayfa sayısını, birim fiyatı, hesaplanan USD maliyetini, API anahtarını ve seçilen bağlantıyı saklar. Sayfalar hiçbir zaman belirteç olarak temsil edilmez. Çağrı günlükleri belge URLs, PDF baytlarını veya çıkarılan metni değil, faturalandırma meta verilerini içerir.
+- Başarılı `/v1/embeddings` istekleri, aynı milisaniyede tamamlanan ayrı gruplar da dahil olmak üzere, fiziksel toplu iş başına bir kullanım satırını kaydeder. Sağlayıcı tarafından bildirilen ücretler, jeton tahminlerine göre önceliklidir; Birleşik paketleyiciler ücret eklemez.
+- Kullanım geçmişi, Maliyet analizleri, provider/account pencereleri, API anahtarı harcama limitleri, istek-maliyet defteri ve günlük kullanım özetleri bu ücretleri içerir. Kayıt tutmayan anahtarlar, kaynak metni saklamadan sayısal hesaplamayı korur.
+- Eksik kullanım veya tarifeler **bilinmiyor** , ücretsiz değil: Yanıt maliyeti başlığı atlanır ve mevcut fiyatlandırılmamış kullanım politikası sınırlı API anahtarları için geçerlidir. Açıkça yapılandırılmış sıfır oranlar, geçerli sıfır maliyetli kullanım olarak kalır.
+
+Bu yalnızca ileriye dönük muhasebedir. Kullanım geçmişini hiç yazmayan eski OCR/embedding çağrıları bu geçişten yeniden oluşturulamaz. Katalog tahminleri USD tahminleridir, fatura değildir ve para birimi dönüştürmeyi, vergiyi veya indirimleri içermez.
 
 ---
 

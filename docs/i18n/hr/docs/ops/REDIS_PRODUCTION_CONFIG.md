@@ -6,33 +6,33 @@
 
 ## Pregled
 
-Redis je **neobavezna, slaba ovisnost** u aplikaciji OmniRoute — kada Redis nije dostupan, aplikacija nastavlja raditi uz smanjene mogućnosti (pričuvna rješenja u memoriji). U produkciji podešavanje Redisa smanjuje latenciju za četiri različita radna opterećenja:
+Redis je **izborna, meka ovisnost** u OmniRoute — aplikacija se graciozno degradira (zamjene u memoriji) kada Redis nije dostupan. U proizvodnji, podešavanje Redis smanjuje kašnjenje za četiri različita radna opterećenja:
 
-| Radno opterećenje           | Pokretač                      | Tvornica klijenta                                               | Uzorak ključa                                                        |
-| --------------------------- | ----------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Ograničavanje brzine        | `rateLimiter.ts`              | `getRedisClient()` — lijeno inicijalizirani singleton `ioredis` | `<prefix>rl:*` prozori ograničenja brzine, atomski putem Lua skripte |
-| Predmemorija autentikacije  | `apiKeys.ts`                  | Ponovno upotrebljava klijent iz `rateLimiter`                   | `<prefix>auth:api_key:<sha256>` s TTL-om                             |
-| Spremište kvota             | `redisQuotaStore.ts`          | Zaseban singleton `getRedisClient(url)`                         | `<prefix>quota:*`, podesivo po instanci                              |
-| Prekidač kruga zagrijavanja | `redisCircuitBreakerStore.ts` | Zaseban klijent u `circuitBreakerFactory.ts`                    | `<prefix>warmup:cb:<connectionId>`                                   |
+| Radno opterećenje        | Vozač                         | Tvornica klijenata                              | Uzorak ključa                                         |
+| ------------------------ | ----------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| Ograničenje brzine       | `rateLimiter.ts`              | `getRedisClient()` — lijeni `ioredis` singleton | `<prefix>rl:*` Lua‑prozori ograničenja atomske brzine |
+| Auth cache               | `apiKeys.ts`                  | Ponovno koristi `rateLimiter` klijent           | `<prefix>auth:api_key:<sha256>` sa TTL                |
+| Trgovina kvota           | `redisQuotaStore.ts`          | Odvojeni `getRedisClient(url)` singleton        | `<prefix>quota:*` konfigurabilan po instanci          |
+| Prekidač za zagrijavanje | `redisCircuitBreakerStore.ts` | Odvojeni klijent u `circuitBreakerFactory.ts`   | `<prefix>warmup:cb:<connectionId>`                    |
 
-Sva četiri radna opterećenja dijele jedan prefiks prostora naziva kako bi OmniRoute mogao istodobno raditi s drugim aplikacijama na jednoj instanci Redisa (npr. `127.0.0.1:6379`). Pogledajte [Prostor naziva ključeva](#key-namespacing).
+Sva četiri radna opterećenja dijele jedan prefiks prostora imena tako da OmniRoute može koegzistirati s drugim aplikacijama na jednoj Redis instanci (npr. `127.0.0.1:6379`). Pogledajte [Razmak imena ključeva](#key-namespacing).
 
 ---
 
-## Trenutačna konfiguracija (zadane vrijednosti u kodu)
+## Trenutna konfiguracija (zadane vrijednosti koda)
 
-| Postavka                                    | Vrijednost                                                                       | Lokacija                                                                              |
-| ------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Varijabla okruženja `REDIS_URL`             | `redis://redis:6379` (compose), neobavezno                                       | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Varijabla okruženja `REDIS_KEY_PREFIX`      | `omniroute:` (zadano)                                                            | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Varijabla okruženja `QUOTA_STORE_REDIS_URL` | zasebna, može se razlikovati od `REDIS_URL`                                      | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                        | `"sqlite"` (zadano), `"redis"` neobavezno                                        | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`              | `3`                                                                              | stvaranje klijenta u `rateLimiter.ts`                                                 |
-| `enableReadyCheck`                          | nije postavljeno (zadana vrijednost za ioredis: `true`)                          | —                                                                                     |
-| `lazyConnect`                               | nije postavljeno (zadana vrijednost za ioredis: `false`)                         | —                                                                                     |
-| `retryStrategy`                             | nije postavljeno (zadana vrijednost za ioredis: baza od 200 ms, eksponencijalno) | —                                                                                     |
-| TLS / lozinka / indeks baze podataka        | **nije konfigurirano**                                                           | —                                                                                     |
-| Sentinel / Cluster                          | **nije konfigurirano** — podržan je samo samostalni način rada s jednim čvorom   | —                                                                                     |
+| Postavka                        | Vrijednost                                                      | Gdje                                                                                  |
+| ------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (sastavi), izborno                         | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (zadano)                                           | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | odvojeno, može se razlikovati od `REDIS_URL`                    | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (zadano), `"redis"` izborno                          | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                             | Izrada `rateLimiter.ts` klijenta                                                      |
+| `enableReadyCheck`              | nije postavljeno (ioredis default: `true`)                      | —                                                                                     |
+| `lazyConnect`                   | nije postavljeno (ioredis default: `false`)                     | —                                                                                     |
+| `retryStrategy`                 | nije postavljeno (ioredis default: 200ms baza, eksponencijalno) | —                                                                                     |
+| TLS / lozinka / DB indeks       | **nije konfigurirano**                                          | —                                                                                     |
+| Sentinel / klaster              | **nije konfigurirano** — samostalni samo jedan čvor             | —                                                                                     |
 
 ---
 
@@ -60,67 +60,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Preporučeno podešavanje za produkciju
+## Preporučeno podešavanje proizvodnje
 
-### 1. Skup veza / opcije klijenta (ioredis konstruktor `Redis`)
+### 1. Skup veza / opcije klijenta (ioredis `Redis` konstruktor)
 
-Trenutačni kod stvara jedan `new Redis(url)` bez prilagođenih opcija. Za produkcijske implementacije
-s više replika proslijedite tvornicu klijenta u kodu ili omotajte `getRedisClient()`:
+Trenutačni kod stvara jedan `new Redis(url)` bez prilagođenih opcija. Za produkcijske implementacije više replika, proslijedite tvornicu klijenta u kodu ili omotajte `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // bez ograničenja ponovnih pokušaja; neka odluči retryStrategy
-  enableReadyCheck: true, // provjeri je li poslužitelj spreman prije prihvaćanja poziva
-  lazyConnect: true, // ne povezuj se pri stvaranju; pričekaj prvi poziv
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // odustani nakon 10 pokušaja → ponovno se poveži kasnije
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, najviše 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // objedini istodobne naredbe u jedno TCP zapisivanje
-  keepAlive: 10000, // TCP keep-alive svakih 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Ključni kompromisi:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — preporučuje se za produkciju kako privremena
-  ponovna pokretanja Redisa ne bi odmah uzrokovala neuspjeh svakog zahtjeva. Pričuvni mehanizam u memoriji u
-  `checkRateLimit()` preuzima putanju u slučaju pogreške.
-- `lazyConnect: true` — uklanja ovisnost pokretanja o dostupnosti Redisa prije nego što poslužitelj
-  počne prihvaćati veze.
-- `enableAutoPipelining: true` — smanjuje broj povratnih mrežnih putovanja za istodobne provjere ograničenja brzine;
-  korisno pri >50 zahtjeva u sekundi na jednoj vezi.
+- `maxRetriesPerRequest: null` + `retryStrategy` — preferira se za proizvodnju tako da prolazna Redis ponovna pokretanja ne propadaju svaki zahtjev odmah. Zamjena u memoriji u `checkRateLimit()` -u apsorbira putanju kvara.
+- `lazyConnect: true` — izbjegava ovisnost o pokretanju Redis prije nego što poslužitelj počne prihvaćati veze.
+- `enableAutoPipelining: true` — smanjuje povratna putovanja za istodobne provjere ograničenja brzine; povoljno na > 50 RPS na jednoj vezi.
 
 ### 2. Konfiguracija Redis poslužitelja (`redis.conf`)
 
 ```
-# Memorija
-maxmemory 80%                        # ostavi prostor za predmemoriju stranica OS-a
-maxmemory-policy allkeys-lru         # ukloni zastarjele unose predmemorije autentifikacije pod opterećenjem
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Trajnost (neobavezno — OmniRoute je otporan na padove i bez nje)
-save 300 1                           # snimi snimku najmanje svakih 5 min ako se promijenio ≥1 ključ
-appendonly no                        # AOF nije potreban; podatke je moguće ponovno generirati
-appendfsync no                       # bez dodatnog opterećenja zbog fsync-a (RDB je dovoljan)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Umrežavanje
-timeout 0                            # bez prekida neaktivnih veza
-tcp-keepalive 300                    # keep-alive od 5 min
-tcp-backlog 511                      # red čekanja veza za skokovita opterećenja
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Performanse
-hz 10                                # zadano; 100 za sustave osjetljive na latenciju
-activedefrag yes                     # automatski defragmentiraj kada je fragmentacija >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Kompromis za `maxmemory-policy allkeys-lru`:** Unosi predmemorije autentifikacije mogu se ukloniti pod
-memorijskim opterećenjem. To je sigurno — `setCachedApiKey` uvijek ponovno popunjava predmemoriju u slučaju promašaja, a
-pričuvni SQLite izvor je mjerodavan. Lua skripta za ograničavanje brzine stvara male ključeve koji su
-namjerno kratkotrajni.
+**Kompromis za `maxmemory-policy allkeys-lru`:** Auth cache unosi mogu biti izbačeni pod pritiskom memorije. Ovo je sigurno — `setCachedApiKey` se uvijek ponovno popunjava u slučaju promašaja, a rezervni SQLite je mjerodavan. Lua skripta za ograničavanje brzine stvara male ključeve koji su po dizajnu kratkotrajni.
 
-### 3. Postavke za Docker Compose
+### 3. Postavke za sastavljanje Docker
 
-Produkcijski Compose (`docker-compose.prod.yml`) upotrebljava `redis:8.6.2-alpine`. Dodajte:
+Prod compose (`docker-compose.prod.yml`) koristi `redis:8.6.2-alpine`. Dodati:
 
 ```yaml
 redis:
@@ -145,35 +137,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Razmatranja za više instanci / skaliranje
+### 4. Razmatranja više instanci/skaliranja
 
-**Jedan Redis za sve replike** — Lua skripta za ograničavanje brzine ovisi o jedinstvenom
-mjerodavnom prostoru ključeva. Više instanci Redisa iza replika izgubilo bi atomarnost
-i udvostručilo proračun. Upotrebljavajte jedan Redis (ili Redis Sentinel klaster s prebacivanjem u slučaju kvara) za
-sve replike aplikacije.
+**Jedan Redis za sve replike** — Lua skripta za ograničavanje brzine ovisi o jednom autoritativnom ključnom prostoru. Više Redis instanci iza replika izgubilo bi atomičnost i udvostručilo proračun. Upotrijebite jedan Redis (ili Redis Sentinel klaster s prelaskom u slučaju greške) za sve replike aplikacija.
 
-**Broj veza:** Svaka replika aplikacije otvara **2 TCP veze** prema Redisu
-(klijent ograničivača brzine + klijent spremišta kvota). Uz 10 replika → 20 veza, što je znatno
-ispod zadanog ograničenja instance Redisa od 10 tisuća veza.
+**Broj veza:** Otvara se svaka replika aplikacije **2 TCP priključka** na Redis (klijent limitera brzine + klijent kvote pohrane). Na 10 replika → 20 veza, unutar zadane gornje granice od 10k veza zadane Redis instance.
 
-### 5. Nadzor
+### 5. Praćenje
 
-Izložite putem krajnje točke za provjeru stanja:
+Izlaganje putem krajnje točke provjere zdravlja:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts već poziva funkcije rateLimiter
-// Dodajte provjere specifične za Redis:
-//   1. Latencija za PING putem ioredis .ping()
-//   2. Upotreba memorije putem INFO memory
-//   3. Broj veza putem INFO clients
-//   4. Stopa pogodaka za maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Ključne metrike koje treba pratiti:
+Ključni pokazatelji koje treba pratiti:
 
-- **Uklonjeni ključevi / s** — ako je vrijednost trajno različita od nule, povećajte `maxmemory`
-- **Blokirani klijenti** — vrijednost različita od nule upućuje na spore Lua skripte ili veliko nadmetanje
-- **Odbijene veze** — dosegnuto je ograničenje broja veza; rijetko pri 20 veza
+- **Iseljeni ključevi / sek** — ako je trajno različit od nule, povećajte `maxmemory`
+- **Blokirani klijenti** — različit od nule sugerira spore Lua skripte ili veliku konkurenciju
+- **Odbijene veze** pogodak ograničenja — veze; rijetko na 20 veza
+
+### 6. Poslužitelji kompatibilni s Redisom
+
+Svaki poslužitelj koji se ovdje koristi mora pokretati Lua skripte: limitator brzine je jedan `EVAL`. Na poslužitelju bez Lua, `checkRateLimit()` bilježi `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` i broji po procesu, tako da svaka replika sama provodi ograničenje. Opt-in dijeljena trgovina afiniteta sesije (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) također čita i ažurira pinove sa `EVAL`; bez Lua bilježi `[SESSION_AFFINITY] Redis error; falling back to SQLite.` i svaka replika čuva svoje vlastite pinove. Ostala radna opterećenja koriste obične naredbe (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashove i skupove), a Redis pozadina semantičke predmemorije ne šalje `FT.*` naredbe.
+
+Testirano sa OmniRoute 3.8.52: KiviDB 1.2.0 sa svojom Lua slikom (`kividb/kividb:v1.2.0-lua`). Ograničivač brzine (uključujući drugi proces koji dijeli brojače), predmemorija autentifikacije, pohrana kvota, prekidač strujnog kruga zagrijavanja, semantička pohrana predmemorije i `/v1/chat/completions` zahtjev kroz rukovatelj chatom prošli su 18 od 19 provjera koje prolaze na Redis 8.10.3. Onaj koji se razlikuje: `INCRBYFLOAT` pohranjuje `0.1 + 0.2` kao `0.30000000000000004` gdje Redis pohranjuje `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Pohrana kvota raščlanjuje oba pomoću `parseFloat`, ali se dva broja razlikuju u zadnjim znamenkama, tako da usporedba koja pada točno na granicu kvote može ispasti drugačije. Pohrana afiniteta sesije nije bila dio tog pokretanja. ( [postavljanje](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [rezultati](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -196,13 +189,13 @@ flowchart LR
 
 ## Reference
 
-| Datoteka                           | Svrha                                                                                                   |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Primarni Redis klijent, Lua skripta za ograničavanje učestalosti zahtjeva, pričuvno rješenje u memoriji |
-| `src/lib/db/apiKeys.ts`            | Predmemorija autentifikacije — Redis→SQLite pričuvno rješenje                                           |
-| `src/lib/quota/redisQuotaStore.ts` | Zaseban Redis klijent za opcionalno spremište kvota                                                     |
-| `src/lib/quota/storeFactory.ts`    | Prebacuje se između upravljačkih programa za kvote `sqlite` i `redis`                                   |
-| `docker-compose.prod.yml`          | Produkcijski Redis spremnik (slika `redis:8.6.2-alpine`)                                                |
-| `.env.example`                     | Dokumentacija varijabli okruženja za Redis                                                              |
-| `src/app/api/local/redis/`         | API rute za orkestraciju razvojnog spremnika                                                            |
-| `bin/cli/commands/redis.mjs`       | CLI naredbe za orkestraciju razvojnog spremnika                                                         |
+| File                               | Svrha                                                                         |
+| ---------------------------------- | ----------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Primarni Redis klijent, Lua skripta za ograničenje brzine, zamjena u memoriji |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite backback                                            |
+| `src/lib/quota/redisQuotaStore.ts` | Odvojeni Redis klijent za izbornu pohranu kvota                               |
+| `src/lib/quota/storeFactory.ts`    | Prebacuje između `sqlite` i `redis` upravljačkih programa kvote               |
+| `docker-compose.prod.yml`          | Proizvodni Redis kontejner (slika `redis:8.6.2-alpine`)                       |
+| `.env.example`                     | Redis env vars dokumentacija                                                  |
+| `src/app/api/local/redis/`         | API rute za orkestraciju razvojnog spremnika                                  |
+| `bin/cli/commands/redis.mjs`       | CLI naredbe za orkestraciju razvojnog spremnika                               |

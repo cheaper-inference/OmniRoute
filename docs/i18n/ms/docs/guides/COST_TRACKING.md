@@ -36,73 +36,73 @@ Oleh sebab angka tersebut ialah anggaran:
 
 ---
 
-## Cara kos dianggarkan
+## Bagaimana kos dianggarkan
 
 ### Sumber harga
 
-Kos datang daripada jadual harga gabungan dalam [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), mengikut susunan keutamaan ini (**yang tertinggi dahulu**):
+Kos datang daripada jadual harga yang digabungkan dalam [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), mengikut urutan keutamaan ini (**tertinggi dahulu** ):
 
-1. **Penggantian pengguna** — harga yang ditetapkan melalui papan pemuka atau `PATCH /api/pricing` (ruang nama `pricing`).
-2. **Penyegerakan models.dev** — harga yang diambil daripada `https://models.dev/api.json` (ruang nama `models_dev_pricing`).
-3. **Penyegerakan LiteLLM** — harga yang diambil daripada fail awam `model_prices_and_context_window.json` milik LiteLLM (ruang nama `pricing_synced`).
-4. **Nilai lalai dalam kod** — kadar yang disertakan dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Pengguna menimpa** Harga — ditetapkan dalam papan pemuka atau melalui `PATCH /api/pricing` (ruang nama `pricing` ).
+2. **penyegerakan models.dev** Harga — diambil daripada `https://models.dev/api.json` (ruang nama `models_dev_pricing` ).
+3. **penyegerakan LiteLLM** Harga — diambil daripada `model_prices_and_context_window.json` awam LiteLLM(ruang nama `pricing_synced` ).
+4. **Lalai berkod keras** Kadar — dihantar dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Bagi penyedia/model yang sama, nilai daripada lapisan berkeutamaan lebih tinggi menulis ganti medan yang sepadan dalam lapisan lebih rendah; medan yang tiada pada lapisan atas masih boleh datang daripada lapisan bawah. Susunan ini kekal walaupun kedua-dua tugas penyegerakan bebas berjalan serentak. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`; label bagi setiap model (`user`, `modelsDev`, `litellm`, `default`) mengenal pasti lapisan berkeutamaan tertinggi yang mengandungi model itu.
+Untuk provider/model yang sama , nilai daripada lapisan keutamaan yang lebih tinggi menimpa medan padanan dalam lapisan bawah; medan yang tidak hadir dari lapisan atas masih boleh datang dari lapisan bawah. Pesanan itu tetap walaupun kedua-dua kerja penyegerakan bebas dijalankan pada masa yang sama. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`, yang label setiap modelnya (`user`, `modelsDev`, `litellm`, `default`) mengenal pasti lapisan keutamaan tertinggi yang mengandungi model tersebut.
 
-**Penyegerakan LiteLLM** ialah pilihan dan dinyahaktifkan secara lalai. Pemboleh ubah persekitarannya (lihat [`.env.example`](../../.env.example)) ialah:
+**penyegerakan LiteLLM** adalah ikut serta, dilumpuhkan secara lalai. Pembolehubah persekitarannya (lihat [`.env.example`](../../.env.example) ) ialah:
 
-| Pemboleh ubah persekitaran | Lalai     | Tujuan                                                                                  |
-| -------------------------- | --------- | --------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`     | `false`   | Aktifkan penyegerakan harga LiteLLM di latar belakang.                                  |
-| `PRICING_SYNC_INTERVAL`    | `86400`   | Selang penyegerakan dalam **saat** (lalai setiap hari).                                 |
-| `PRICING_SYNC_SOURCES`     | `litellm` | Pemilihan sumber untuk penyegerakan ini sahaja; buat masa ini hanya `litellm` disokong. |
+| Env var                 | Lalai     | Tujuan                                                                                  |
+| ----------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Dayakan penyegerakan harga LiteLLM latar belakang.                                      |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Selang penyegerakan dalam beberapa saat (setiap hari).                                  |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Pemilihan sumber untuk penyegerakan ini sahaja; buat masa ini hanya `litellm` disokong. |
 
-**Penyegerakan models.dev** berasingan daripada penyegerakan LiteLLM dan turut dinyahaktifkan secara lalai. Aktifkannya dalam Tetapan (penyegerakan models.dev) atau gunakan pemboleh ubah berikut:
+**penyegerakan models.dev** adalah berasingan daripada penyegerakan LiteLLM dan juga dilumpuhkan secara lalai. Dayakannya dalam Tetapan (models.dev sync) atau gunakan pembolehubah ini:
 
-| Pemboleh ubah persekitaran | Lalai                | Tujuan                                                                                                                                                             |
-| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MODELS_DEV_SYNC_ENABLED`  | _(tidak ditetapkan)_ | Jika tidak ditetapkan, ia mengikut suis Tetapan; `1/true/on/yes` memaksa pengaktifan dan `0/false/off/no` memaksa penyahaktifan, walaupun Tetapan mengaktifkannya. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Selang lalai penyegerakan models.dev dalam saat, iaitu setiap hari.                                                                                                |
+| Env var                    | Lalai                | Tujuan                                                                                                                          |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(tidak ditetapkan)_ | Nyahset mengikuti togol Tetapan; `1/true/on/yes` memaksa hidup dan `0/false/off/no` mematikan (walaupun Tetapan mendayakannya). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Selang penyegerakan models.dev lalai dalam beberapa saat (setiap hari).                                                         |
 
-`PRICING_SYNC_SOURCES` **tidak** mengaktifkan models.dev; ia hanya mengawal penyegerakan LiteLLM. Memadam penggantian pengguna tidak mengosongkan mana-mana ruang nama yang disegerakkan; lapisan harga tersedia yang seterusnya mula berkuat kuasa. Untuk model tanpa harga, semak kedua-dua tetapan penyegerakan dan `sourceMap` sebelum menambah penggantian manual.
+`PRICING_SYNC_SOURCES` lakukan **bukan** dayakan models.dev; ia hanya mengawal penyegerakan LiteLLM. Memadamkan penggantian pengguna tidak mengosongkan sama ada ruang nama yang disegerakkan; lapisan harga yang tersedia seterusnya menjadi berkesan. Untuk model yang tidak berharga, semak kedua-dua tetapan penyegerakan dan `sourceMap` sebelum menambah penggantian manual.
 
 ### Formula kos
 
-Kos dikira bagi setiap permintaan berdasarkan bilangan token dan kadar bagi setiap sejuta token dalam
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kos dikira setiap permintaan daripada kiraan token dan kadar setiap juta token dalam [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Token input** (tolak bacaan cache dan token penciptaan cache) × kadar `input`.
-- **Token bacaan cache** × kadar `cached` (kembali menggunakan kadar input jika tiada).
-- **Token penciptaan cache** × kadar `cache_creation` (kembali menggunakan kadar input jika tiada).
-- **Token output** × kadar `output`.
-- **Token penaakulan** × kadar `reasoning` (kembali menggunakan kadar output jika tiada).
+- **Token input** (tolak bacaan cache dan token penciptaan cache) Kadar × `input`.
+- **Token baca cache** Kadar × `cached` (berbalik kepada kadar input).
+- **Token penciptaan cache** Kadar × `cache_creation` (berbalik kepada kadar input).
+- **Token keluaran** Kadar × `output`.
+- **Token penaakulan** Kadar × `reasoning` (berbalik kepada kadar keluaran).
 
-Semua kadar ditafsirkan sebagai USD bagi setiap 1,000,000 token. Peringkat perkhidmatan Codex "fast"/"priority" atau
-"flex" menggunakan pengganda kos (`getCodexFastCostMultiplier`) — contohnya, flex
-dicaj dengan diskaun token sebanyak 50%, yang dipaparkan sebagai **penjimatan flex** dalam papan pemuka.
+Semua kadar ditafsirkan sebagai USD setiap 1,000,000 token. Peringkat perkhidmatan "cepat"/"keutamaan" atau "flex" Codex menggunakan pengganda kos (`getCodexFastCostMultiplier`) — cth flex dibilkan pada diskaun token 50%, muncul sebagai **penjimatan fleksibel** dalam papan pemuka.
 
-Nama model dinormalkan terlebih dahulu (awalan laluan penyedia seperti `openai/` atau
-`accounts/fireworks/models/` dibuang) supaya baris sejarah masih dapat dipadankan dengan harga.
+Nama model dinormalkan dahulu (awalan laluan pembekal seperti `openai/` atau `accounts/fireworks/models/` dilucutkan) jadi baris sejarah masih sepadan dengan harga.
 
 ### Cara perbelanjaan direkodkan
 
-- Kos bagi setiap permintaan dikira selepas respons dan direkodkan tanpa menunggu hasil supaya ia
-  tidak menambahkan kependaman kepada klien. Penggunaan kuota dikongsi dijadualkan pada kitaran
-  gelung peristiwa seterusnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Perbelanjaan kunci API dibuffer dan ditulis keluar secara kelompok oleh
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (selang penulisan keluar lalai 60 saat,
-  buffer 1,000 entri). Boleh ditala melalui:
+- Kos setiap permintaan dikira semasa permintaan selesai. Penggunaan kuota dikongsi dijadualkan pada tanda gelung acara seterusnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Perbelanjaan kunci API ditimbal dan disiram secara berkelompok oleh [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (selang siram 60s lalai, penimbal 1,000 kemasukan). Boleh ditala melalui:
 
-  | Pemboleh ubah persekitaran          | Lalai   | Tujuan                                               |
-  | ----------------------------------- | ------- | ---------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Selang penulisan keluar dalam milisaat.              |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Entri maksimum yang dibuffer sebelum ditulis keluar. |
+  | Env var                             | Lalai   | Tujuan                                 |
+  | ----------------------------------- | ------- | -------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Selang siram dalam milisaat.           |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Masukan buffer maksimum sebelum siram. |
 
-Angka kos pada papan pemuka **tidak** dibaca daripada jumlah dolar bagi setiap baris yang disimpan — angka tersebut
-dikira semula secara dinamik berdasarkan bilangan token dan jadual harga semasa setiap kali
-titik akhir analitik dijalankan. Ini bermakna pembetulan harga yang salah (dan penyegerakan semula) akan mengemas kini
-anggaran kos sejarah secara retroaktif.
+Kos lebih suka caj yang dilaporkan pembekal yang tepat (`provider_cost_usd`), kemudian petikan permintaan harga katalog (`calculated_cost_usd`), kemudian harga semula token daripada katalog semasa. Kos yang disimpan tidak dicaj semula melalui kiraan token mereka. Baris token sahaja warisan masih berubah apabila harga katalognya berubah.
+
+### OCR dan benam
+
+- Permintaan `/v1/ocr` yang berjaya menggunakan `usage_info.pages_processed` huluan , bukan julat halaman yang diminta atau bilangan objek halaman yang dikembalikan. Anggaran ialah halaman × `ocr_cost_per_page` ( USD/page mutlak,**bukan** USD/million).
+- Permintaan dengan anotasi dokumen atau kotak sempadan memerlukan tarif `ocr_cost_per_annotated_page` yang berasingan. Tanpa itu, kos masih tidak diketahui; tarif OCR biasa tidak diganti secara senyap.
+- Penyegerakan LiteLLM memetakan medan `annotation_cost_per_page` huluannya ke dalam `ocr_cost_per_annotated_page`, mengekalkan nilai USD/page mutlak dan entri anotasi sahaja, termasuk sifar eksplisit. Medan kanonik yang dibekalkan diutamakan; nilai alias tidak sah diabaikan. Penggantian harga pengguna mengekalkan keutamaan biasa mereka. Lihat [kunci harga OCR LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Penggunaan OCR menyimpan kiraan halaman, harga seunit, kos USD yang dikira, kunci API dan sambungan yang dipilih. Halaman tidak pernah diwakili sebagai token. Log panggilan mengandungi metadata pengebilan, bukan dokumen URLs, PDF bait atau teks yang diekstrak.
+- Permintaan `/v1/embeddings` yang berjaya merekodkan satu baris penggunaan bagi setiap kelompok fizikal, termasuk kelompok berasingan yang diselesaikan dalam milisaat yang sama. Caj yang dilaporkan pembekal diutamakan daripada anggaran token; pembalut kombo tidak menambah caj.
+- Sejarah penggunaan, analisis Kos, tetingkap provider/account, had perbelanjaan kunci API, lejar kos permintaan dan rollup penggunaan harian termasuk caj ini. Kekunci tanpa log mengekalkan perakaunan berangka tanpa mengekalkan teks sumber.
+- Kehilangan penggunaan atau tarif adalah **tidak diketahui** , bukan percuma: pengepala kos tindak balas ditinggalkan dan dasar penggunaan tanpa harga sedia ada digunakan pada kunci API terhad. Kadar sifar yang dikonfigurasikan secara eksplisit kekal penggunaan kos sifar yang sah.
+
+Ini adalah perakaunan hadapan sahaja. Panggilan OCR/embedding lama yang tidak pernah menulis sejarah penggunaan tidak boleh dibina semula daripada penghijrahan ini. Anggaran katalog ialah anggaran USD, bukan invois dan tidak termasuk penukaran mata wang, cukai atau diskaun.
 
 ---
 

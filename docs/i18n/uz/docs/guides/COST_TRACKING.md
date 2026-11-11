@@ -38,74 +38,73 @@ Raqam taxminiy boʻlgani sababli:
 
 ---
 
-## Xarajatlar qanday hisoblanadi
+## Xarajatlar qanday baholanadi
 
-### Narxlar manbasi
+### Narxlar manbai
 
-Xarajatlar [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) ichidagi birlashtirilgan narx jadvalidan olinadi, tartib quyidagicha (**eng ustuvor birinchi**):
+Xarajatlar [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) birlashtirilgan narxlar jadvalidan kelib chiqadi, bu ustuvorlik tartibida (**birinchi navbatda eng yuqori** ):
 
-1. **Foydalanuvchi almashtirishlari** — panelda yoki `PATCH /api/pricing` orqali belgilangan narxlar (`pricing` nomlar sohasi).
-2. **models.dev sinxronlashi** — `https://models.dev/api.json` dan olingan narxlar (`models_dev_pricing` nomlar sohasi).
-3. **LiteLLM sinxronlashi** — LiteLLM ning ochiq `model_prices_and_context_window.json` faylidan olingan narxlar (`pricing_synced` nomlar sohasi).
-4. **Ichki standartlar** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) bilan yetkaziladigan tariflar.
+1. **Foydalanuvchi bekor qiladi** — narxlari asboblar panelida yoki `PATCH /api/pricing` ( `pricing` nom maydoni) orqali o'rnatiladi.
+2. **models.dev sinxronlash** — narxi `https://models.dev/api.json` ( `models_dev_pricing` nom maydoni) dan olingan.
+3. **LiteLLM sinxronlash** — narxlari LiteLLM ning ommaviy `model_prices_and_context_window.json` ( `pricing_synced` nom maydoni) dan olingan.
+4. **Qattiq kodlangan standart sozlamalar** [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) da yuborilgan — stavkalari.
 
-Bir xil provayder/model uchun yuqori qatlam quyi qatlamning mos maydonlarini almashtiradi; yuqorida yo‘q maydonlar quyidan olinishi mumkin. Har ikkala mustaqil sinxronlash bir vaqtda ishlasa ham tartib o‘zgarmaydi. `GET /api/pricing?includeSources=1` so‘rovi `pricing` va `sourceMap` ni qaytaradi; model belgilari (`user`, `modelsDev`, `litellm`, `default`) model mavjud bo‘lgan eng yuqori qatlamni bildiradi.
+Xuddi shu provider/model uchun yuqoriroq qatlamlardagi qiymatlar pastki qatlamlardagi mos keladigan maydonlarning ustiga yoziladi; Yuqori qatlamda mavjud bo'lmagan maydonlar pastki qatlamdan ham paydo bo'lishi mumkin. Har ikkala mustaqil sinxronlash ishlari bir vaqtning o'zida bajarilganda ham tartib o'rnatiladi. `GET /api/pricing?includeSources=1` `pricing` va `sourceMap` ni qaytaradi, ularning har bir modeldagi teglari (`user`, `modelsDev`, `litellm`, `default`) ushbu modelni o'z ichiga olgan eng yuqori ustuvor qatlamni aniqlaydi.
 
-**LiteLLM sinxronlashi** ixtiyoriy yoqiladi va standart holatda o‘chiq. Uning muhit o‘zgaruvchilari ([`.env.example`](../../.env.example) ga qarang):
+**LiteLLM sinxronlash** qo'shilgan, sukut bo'yicha o'chirilgan. Uning muhit o'zgaruvchilari (qarang [`.env.example`](../../.env.example) ) quyidagilardir:
 
-| Muhit oʻzgaruvchisi     | Standart  | Maqsad                                                                            |
-| ----------------------- | --------- | --------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Fondagi LiteLLM narx sinxronlashini yoqadi.                                       |
-| `PRICING_SYNC_INTERVAL` | `86400`   | **Soniyalardagi** sinxronlash oraligʻi (standart — har kuni).                     |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Manba tanlovi faqat shu sinxronlashga tegishli; hozir faqat `litellm` qo‘llanadi. |
+| Env var                 | Standart  | Maqsad                                                                                   |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Fonda LiteLLM narxlari sinxronlashni yoqish.                                             |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Sinxronlash oralig'i soniyalarda (kunlik).                                               |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Faqat shu sinxronlash uchun manba tanlash; hozirda faqat `litellm` qo'llab-quvvatlanadi. |
 
-**models.dev sinxronlashi** LiteLLM sinxronlashidan mustaqil va u ham standart holatda o‘chiq. Sozlamalarda yoqing (models.dev sinxronlashi) yoki shu o‘zgaruvchilardan foydalaning:
+**models.dev sinxronlash** LiteLLM sinxronlashdan alohida va sukut bo'yicha ham o'chirilgan. Uni Sozlamalar (models.dev sync) orqali yoqing yoki quyidagi o‘zgaruvchilardan foydalaning:
 
-| Muhit o‘zgaruvchisi        | Standart          | Vazifa                                                                                                                                              |
-| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(belgilanmagan)_ | Belgilanmasa Sozlamalar tugmasiga ergashadi; `1/true/on/yes` majburan yoqadi, `0/false/off/no` esa Sozlamalar yoqqan bo‘lsa ham majburan o‘chiradi. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | models.dev sinxronlashining soniyalardagi standart oralig‘i (har kuni).                                                                             |
+| Env var                    | Standart          | Maqsad                                                                                                                                                 |
+| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(o'rnatilmagan)_ | Sozlamalarni oʻchirish tugmasidan keyin bekor qilinadi; `1/true/on/yes` kuchga kiradi va `0/false/off/no` o‘chiradi (hatto Sozlamalar buni yoqsa ham). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standart models.dev sinxronlash oralig'i soniyalarda (kunlik).                                                                                         |
 
-`PRICING_SYNC_SOURCES` models.dev ni **yoqmaydi**; faqat LiteLLM sinxronlashini boshqaradi. Foydalanuvchi almashtirishini o‘chirish sinxronlangan nomlar sohalaridan hech birini tozalamaydi; keyingi mavjud narx qatlami kuchga kiradi. Narxi yo‘q modelga qo‘lda almashtirish qo‘shishdan avval ikkala sinxronlash sozlamasini va `sourceMap` ni tekshiring.
+`PRICING_SYNC_SOURCES` qiladi **emas** models.devni yoqish; u faqat LiteLLM sinxronlashni boshqaradi. Foydalanuvchining bekor qilinishini o'chirish sinxronlangan nom maydonini ham tozalamaydi; keyingi mavjud narxlash qatlami kuchga kiradi. Narxsiz model uchun qo'lda bekor qilishni qo'shishdan oldin sinxronlash sozlamalarini va `sourceMap` tekshiring.
 
-### Xarajat formulasi
+### Narx formulasi
 
-Xarajat har bir soʻrov uchun tokenlar soni va million token uchun stavkalardan foydalanib
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`) orqali hisoblanadi:
+Narx [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) da tokenlar soni va million token stavkalari bo'yicha so'rov bo'yicha hisoblanadi:
 
-- **Kirish tokenlari** (keshdan oʻqilgan va kesh yaratish tokenlari chiqarib tashlanadi) × `input` stavkasi.
-- **Keshdan oʻqilgan tokenlar** × `cached` stavkasi (mavjud boʻlmasa, kirish stavkasi ishlatiladi).
-- **Kesh yaratish tokenlari** × `cache_creation` stavkasi (mavjud boʻlmasa, kirish stavkasi ishlatiladi).
-- **Chiqish tokenlari** × `output` stavkasi.
-- **Mulohaza yuritish tokenlari** × `reasoning` stavkasi (mavjud boʻlmasa, chiqish stavkasi ishlatiladi).
+- **Kirish belgilari** (minus kesh o'qishlari va kesh yaratish tokenlari) × `input` tezligi.
+- **Keshni o'qish tokenlari** × `cached` tezligi (kiritish tezligiga qaytadi).
+- **Kesh yaratish tokenlari** × `cache_creation` tezligi (kiritish tezligiga qaytadi).
+- **Chiqish belgilari** × `output` darajasi.
+- **Fikrlash belgilari** × `reasoning` tezligi (chiqish tezligiga qaytadi).
 
-Barcha stavkalar 1 000 000 token uchun USD sifatida talqin qilinadi. Codex'ning «fast»/«priority»
-yoki «flex» xizmat darajasi xarajat koʻpaytirgichini (`getCodexFastCostMultiplier`) qoʻllaydi —
-masalan, flex tokenlar uchun 50% chegirma bilan hisoblanadi va boshqaruv panelida **flex tejamlari**
-sifatida koʻrsatiladi.
+Barcha stavkalar 1 000 000 token uchun USD sifatida talqin qilinadi. Codex "tezkor"/"prioritet" yoki "moslashuvchan" xizmat darajasi xarajat multiplikatorini (`getCodexFastCostMultiplier`) qo'llaydi, masalan, — 50% token chegirmasi bilan to'lanadi.**moslashuvchan tejash** asboblar panelida.
 
-Tarixiy qatorlar ham narxga mos kelishi uchun avval model nomlari meʼyorlashtiriladi
-(`openai/` yoki `accounts/fireworks/models/` kabi provayder yoʻli prefikslari olib tashlanadi).
+Model nomlari avval normallashtiriladi ( `openai/` yoki `accounts/fireworks/models/` kabi provayder yo‘li prefikslari olib tashlanadi), shuning uchun tarixiy qatorlar narxga mos keladi.
 
-### Xarajat qanday qayd etiladi
+### Qanday sarflanganligi qayd etiladi
 
-- Har bir soʻrov xarajati javobdan keyin hisoblanadi va mijoz uchun hech qanday kechikish
-  keltirib chiqarmasligi uchun natijani kutmasdan qayd etiladi. Umumiy kvota sarfi keyingi
-  voqealar sikli iteratsiyasiga [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) orqali rejalashtiriladi.
-- API kaliti boʻyicha sarf buferlanadi va
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tomonidan toʻplamlarda yoziladi
-  (standart yozish oraligʻi 60s, bufer hajmi 1 000 ta yozuv). Quyidagilar orqali sozlanadi:
+- Har bir so'rovning narxi so'rov tugagandan so'ng hisoblanadi. Birgalikda kvota iste'moli [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) orqali keyingi voqea-loop belgisida rejalashtirilgan.
+- API kaliti sarfi [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tomonidan buferlanadi va to'plamlarda tozalanadi (standart 60-yillarni tozalash oralig'i, 1000 kirish buferi). Quyidagi orqali sozlash mumkin:
 
-  | Muhit oʻzgaruvchisi                 | Standart | Maqsad                                  |
-  | ----------------------------------- | -------- | --------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Millisekundlardagi yozish oraligʻi.     |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Yozishdan oldingi maksimal bufer hajmi. |
+  | Env var                             | Standart | Maqsad                                           |
+  | ----------------------------------- | -------- | ------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Yuvish oralig'i millisekundlarda.                |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Tozalashdan oldin maksimal buferlangan yozuvlar. |
 
-Boshqaruv panelidagi xarajat koʻrsatkichlari har bir qatorda saqlangan dollar miqdoridan
-**olinmaydi** — ular tahlil endpointi har safar ishga tushganda tokenlar soni va joriy narxlar
-jadvali asosida qaytadan hisoblanadi. Bu notoʻgʻri narxni tuzatish (va qayta sinxronlash)
-tarixiy xarajat hisoblarini ham retrospektiv ravishda yangilashini anglatadi.
+Xarajatlar provayder tomonidan bildirilgan aniq to‘lovni (`provider_cost_usd`), so‘ngra katalog bahosidagi so‘rov snapshotini (`calculated_cost_usd`), so‘ngra joriy katalogdagi tokenlarni qayta baholashni afzal ko‘radi. Saqlangan xarajatlar tokenlar hisobi orqali qayta undirilmaydi. Katalog narxi o'zgarganda faqat eski token qatorlari o'zgaradi.
+
+### OCR va o'rnatish
+
+- Muvaffaqiyatli `/v1/ocr` so'rovlari so'ralgan sahifa diapazoni yoki qaytarilgan sahifa ob'ektlari sonini emas, balki yuqori oqim `usage_info.pages_processed` foydalanadi. Taxminiy sahifalar × `ocr_cost_per_page` (mutlaq USD/page,**emas** USD/million).
+- Hujjat yoki cheklov qutisi izohli so'rovlar alohida `ocr_cost_per_annotated_page` tarifini talab qiladi. Busiz, xarajat noma'lum bo'lib qoladi; oddiy OCR tarifi jimgina almashtirilmaydi.
+- LiteLLM sinxronlash o'zining yuqori oqimidagi `annotation_cost_per_page` maydonini `ocr_cost_per_annotated_page` ga moslashtiradi, mutlaq USD/page qiymatini va faqat izohli yozuvlarni, shu jumladan aniq nolni saqlaydi. Ta'minlangan kanonik maydon ustunlik qiladi; noto'g'ri taxallus qiymatlari e'tiborga olinmaydi. Foydalanuvchi narxlarini bekor qilish odatdagi ustuvorligini saqlab qoladi. [LiteLLM ning OCR narxlash kalitlariga](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) qarang.
+- OCR foydalanish sahifalar sonini, birlik narxini, hisoblangan USD narxini, API kalitini va tanlangan ulanishni saqlaydi. Sahifalar hech qachon token sifatida taqdim etilmaydi. Qo'ng'iroqlar jurnallarida URLs hujjati, PDF baytlari yoki ajratilgan matn emas, balki hisob-kitob metama'lumotlari mavjud.
+- Muvaffaqiyatli `/v1/embeddings` so'rovlari har bir jismoniy partiya uchun bitta foydalanish qatorini, shu jumladan bir xil millisekundda yakunlangan alohida partiyalarni qayd qiladi. Provayder tomonidan bildirilgan to'lovlar token hisob-kitoblaridan ustun turadi; kombinatsiyalangan o'ramlar to'lovni qo'shmaydi.
+- Foydalanish tarixi, Xarajatlar tahlili, provider/account oynalari, API-kaliti sarflama limitlari, so‘rovlar-xarajat kitobi va kundalik foydalanish to‘plamlari ushbu to‘lovlarni o‘z ichiga oladi. Jurnalsiz kalitlar manba matnini saqlamasdan raqamli hisobni saqlaydi.
+- Foydalanish yoki tariflar etishmayotgan **noma'lum** , bepul emas: javob-xarajat sarlavhasi o'tkazib yuborilgan va mavjud narxsiz foydalanish siyosati cheklangan API kalitlari uchun amal qiladi. Aniq sozlangan nol stavkalari nol xarajatli foydalanishda amal qiladi.
+
+Bu faqat oldinga mo'ljallangan buxgalteriya hisobi. Foydalanish tarixini hech qachon yozmagan eski OCR/embedding qo'ng'iroqlarini bu migratsiyadan qayta tiklab bo'lmaydi. Katalog baholari hisob-faktura emas, USD hisob-kitoblari bo‘lib, valyuta konvertatsiyasi, soliq yoki chegirmalarni o‘z ichiga olmaydi.
 
 ---
 

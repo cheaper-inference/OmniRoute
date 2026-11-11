@@ -37,73 +37,73 @@ Kwa sababu nambari hiyo ni makadirio:
 
 ---
 
-## Jinsi gharama zinavyokadiriwa
+## Jinsi gharama zinakadiriwa
 
 ### Chanzo cha bei
 
-Gharama hutoka kwenye jedwali la bei lililounganishwa katika [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), kwa mpangilio huu (**kipaumbele cha juu kwanza**):
+Gharama zinatokana na jedwali la bei lililounganishwa katika [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), kwa mpangilio huu wa utangulizi (**ya juu kwanza** ):
 
-1. **Mabadiliko ya mtumiaji** — bei za dashibodi au `PATCH /api/pricing` (eneo la majina `pricing`).
-2. **Usawazishaji wa models.dev** — bei kutoka `https://models.dev/api.json` (eneo la majina `models_dev_pricing`).
-3. **Usawazishaji wa LiteLLM** — bei kutoka faili ya umma `model_prices_and_context_window.json` ya LiteLLM (eneo la majina `pricing_synced`).
-4. **Chaguo-msingi zilizojengewa ndani** — viwango vinavyotolewa katika [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Mtumiaji anabatilisha** Bei za — zimewekwa kwenye dashibodi au kupitia `PATCH /api/pricing` (nafasi ya majina ya `pricing` ).
+2. **ulandanishi wa model.dev** Bei ya — imechukuliwa kutoka `https://models.dev/api.json` (nafasi ya majina ya `models_dev_pricing` ).
+3. **Usawazishaji LiteLLM** Bei za — zimechukuliwa kutoka `model_prices_and_context_window.json` ya umma ya LiteLLM(nafasi ya majina `pricing_synced` ).
+4. **Misimbo chaguomsingi yenye msimbo gumu** Viwango vya — vinasafirishwa kwa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Kwa mtoa huduma/modeli ileile, tabaka za juu hubadilisha sehemu zinazolingana za chini; sehemu zinazokosekana juu zinaweza kutoka chini. Mpangilio haubadiliki hata kazi zote mbili huru za usawazishaji zikiendeshwa pamoja. `GET /api/pricing?includeSources=1` hurudisha `pricing` na `sourceMap`; lebo za modeli (`user`, `modelsDev`, `litellm`, `default`) hutaja tabaka lenye kipaumbele cha juu linaloijumuisha.
+Kwa provider/model sawa, maadili kutoka kwa tabaka za kipaumbele cha juu hubatilisha sehemu zinazolingana katika tabaka za chini; shamba ambazo hazipo kwenye safu ya juu bado zinaweza kutoka kwa safu ya chini. Agizo hurekebishwa hata kazi zote mbili huru za kusawazisha zinaendeshwa kwa wakati mmoja. `GET /api/pricing?includeSources=1` inarudisha `pricing` na `sourceMap`, ambazo lebo za kila-model (`user`, `modelsDev`, `litellm`, `default`) zinabainisha safu ya kipaumbele cha juu iliyo na mfano huo.
 
-**Usawazishaji wa LiteLLM** huwashwa kwa hiari na umezimwa kwa chaguo-msingi. Vigezo vyake vya mazingira (tazama [`.env.example`](../../.env.example)) ni:
+**Usawazishaji LiteLLM** ni kuchagua kuingia, imezimwa kwa chaguomsingi. Viwango vyake vya mazingira (tazama [`.env.example`](../../.env.example) ) ni:
 
-| Kigeu cha mazingira     | Chaguo-msingi | Madhumuni                                                                         |
-| ----------------------- | ------------- | --------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`       | Huwasha usawazishaji wa bei za LiteLLM chinichini.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`       | Kipindi cha usawazishaji kwa **sekunde** (chaguo-msingi ni kila siku).            |
-| `PRICING_SYNC_SOURCES`  | `litellm`     | Uchaguzi wa chanzo ni wa usawazishaji huu tu; kwa sasa `litellm` pekee inatumika. |
+| Env var                 | Chaguomsingi | Kusudi                                                                                       |
+| ----------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`      | Washa usawazishaji wa bei LiteLLM wa usuli.                                                  |
+| `PRICING_SYNC_INTERVAL` | `86400`      | Muda wa kusawazisha kwa sekunde (kila siku).                                                 |
+| `PRICING_SYNC_SOURCES`  | `litellm`    | Uchaguzi wa chanzo kwa usawazishaji huu pekee; kwa sasa ni `litellm` pekee inayoungwa mkono. |
 
-**Usawazishaji wa models.dev** ni tofauti na ule wa LiteLLM, na pia umezimwa kwa chaguo-msingi. Uwashe katika Mipangilio (usawazishaji wa models.dev) au tumia vigezo hivi:
+**ulandanishi wa model.dev** ni tofauti na ulandanishi wa LiteLLM na pia imezimwa kwa chaguo-msingi. Iwashe katika Mipangilio (models.dev sync) au utumie vigeu hivi:
 
-| Kigezo cha mazingira       | Chaguo-msingi   | Kusudi                                                                                                                                                |
-| -------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(hakijawekwa)_ | Bila thamani hufuata swichi ya Mipangilio; `1/true/on/yes` hulazimisha kuwasha na `0/false/off/no` hulazimisha kuzima hata Mipangilio ikiwa imewasha. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Kipindi cha kawaida cha usawazishaji wa models.dev kwa sekunde (kila siku).                                                                           |
+| Env var                    | Chaguomsingi   | Kusudi                                                                                                                              |
+| -------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(haijawekwa)_ | Haijawekwa hufuata ugeuzaji wa Mipangilio; `1/true/on/yes` inawasha na `0/false/off/no` inazima (hata kama Mipangilio inaiwezesha). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Muda wa kusawazisha wa models.dev chaguomsingi katika sekunde (kila siku).                                                          |
 
-`PRICING_SYNC_SOURCES` **haiwashi** models.dev; inadhibiti usawazishaji wa LiteLLM tu. Kufuta mabadiliko ya mtumiaji hakufuti eneo lolote la majina lililosawazishwa; tabaka linalofuata la bei linalopatikana huanza kutumika. Kwa modeli isiyo na bei, kagua mipangilio yote miwili ya usawazishaji na `sourceMap` kabla ya kuweka bei kwa mkono.
+`PRICING_SYNC_SOURCES` inafanya **sivyo** wezesha models.dev; inadhibiti ulandanishi wa LiteLLM pekee. Kufuta ubatilishaji wa mtumiaji hakuondoi nafasi ya majina iliyosawazishwa; safu inayofuata ya bei inayopatikana inakuwa nzuri. Kwa modeli isiyo na bei, angalia mipangilio yote ya usawazishaji na `sourceMap` kabla ya kuongeza ubatilishaji wa mikono.
 
 ### Fomula ya gharama
 
-Gharama hukokotolewa kwa kila ombi kutokana na idadi ya tokeni na viwango vya kila tokeni milioni katika
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Gharama inakokotolewa kwa kila ombi kutoka kwa hesabu za tokeni na viwango vya tokeni kwa kila milioni katika [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokeni za ingizo** (bila tokeni za usomaji wa akiba muda na tokeni za kuunda akiba muda) × kiwango cha `input`.
-- **Tokeni za usomaji wa akiba muda** × kiwango cha `cached` (hutumia kiwango cha ingizo kama mbadala).
-- **Tokeni za kuunda akiba muda** × kiwango cha `cache_creation` (hutumia kiwango cha ingizo kama mbadala).
-- **Tokeni za matokeo** × kiwango cha `output`.
-- **Tokeni za kufikiri** × kiwango cha `reasoning` (hutumia kiwango cha matokeo kama mbadala).
+- **Ishara za kuingiza** (ondoa kache zilizosomwa na tokeni za kuunda akiba) Kiwango cha × `input`.
+- **Ishara za kusoma kache** Kiwango cha × `cached` (kinarudi kwa kiwango cha pembejeo).
+- **Ishara za kuunda akiba** Kiwango cha × `cache_creation` (kinarudi kwa kiwango cha pembejeo).
+- **Tokeni za pato** Kiwango cha biashara × `output`.
+- **Ishara za hoja** Kiwango cha × `reasoning` (kinarudi kwa kiwango cha pato).
 
-Viwango vyote hufasiriwa kama USD kwa kila tokeni 1,000,000. Kiwango cha huduma cha Codex
-"fast"/"priority" au "flex" hutumia kizidishi cha gharama (`getCodexFastCostMultiplier`) — kwa mfano, flex
-hutozwa kwa punguzo la 50% la tokeni, linaloonyeshwa kama **akiba ya flex** kwenye dashibodi.
+Viwango vyote vinatafsiriwa kama USD kwa tokeni 1,000,000. Kiwango cha huduma cha Codex "haraka"/"kipaumbele" au "flex" kinatumika kiongeza gharama (`getCodexFastCostMultiplier`) — mfano flex inatozwa kwa punguzo la tokeni la 50%, ikionyeshwa kama **akiba rahisi** kwenye dashibodi.
 
-Majina ya modeli husawazishwa kwanza (viambishi awali vya njia za mtoa huduma kama `openai/` au
-`accounts/fireworks/models/` huondolewa) ili safu mlalo za kihistoria ziendelee kulingana na bei.
+Majina ya miundo yanasawazishwa kwanza (viambishi awali vya njia ya mtoaji kama vile `openai/` au `accounts/fireworks/models/` vimeondolewa) kwa hivyo safu mlalo za kihistoria bado zinalingana na bei.
 
-### Jinsi matumizi yanavyorekodiwa
+### Jinsi matumizi yanarekodiwa
 
-- Gharama ya kila ombi hukokotolewa baada ya jibu na kurekodiwa bila kusubiri matokeo ili
-  isiongeze kamwe ucheleweshaji kwa kiteja. Matumizi ya mgao wa pamoja hupangwa kwenye mzunguko
-  unaofuata wa tukio kupitia [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Matumizi ya ufunguo wa API huhifadhiwa kwa muda na kuandikwa kwa mafungu na
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (kipindi chaguo-msingi cha sekunde 60 cha kuandika,
-  bafa ya maingizo 1,000). Inaweza kurekebishwa kupitia:
+- Gharama ya kila ombi inakokotolewa baada ya ombi kukamilika. Utumiaji wa mgawo ulioshirikiwa umeratibiwa kwenye tiki inayofuata ya kitanzi cha tukio kupitia [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Matumizi ya ufunguo wa API huakibishwa na kusukumwa kwa makundi na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (muda chaguomsingi wa 60s, bafa ya kuingia 1,000). Tunaweza kupitia:
 
-  | Kigeu cha mazingira                 | Chaguo-msingi | Madhumuni                                           |
-  | ----------------------------------- | ------------- | --------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`       | Kipindi cha kuandika kwa milisekunde.               |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`        | Upeo wa maingizo yanayohifadhiwa kabla ya kuandika. |
+  | Env var                             | Chaguomsingi | Kusudi                                                  |
+  | ----------------------------------- | ------------ | ------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Muda wa kuvuta maji kwa milisekunde.                    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Ingizo la juu zaidi lililoakibishwa kabla ya kusafisha. |
 
-Takwimu za gharama za dashibodi **hazisomwi** kutoka kwenye kiasi cha dola kilichohifadhiwa kwa kila safu mlalo —
-hukokotolewa upya papo hapo kutokana na idadi ya tokeni na jedwali la sasa la bei kila mara kituo cha mwisho cha
-uchanganuzi kinapoendeshwa. Hii inamaanisha kuwa kusahihisha bei isiyo sahihi (na kusawazisha upya) husasisha
-makadirio ya kihistoria ya gharama kwa kutumika kwa kipindi kilichopita.
+Gharama hupendelea malipo halisi yaliyoripotiwa na mtoa huduma (`provider_cost_usd`), kisha muhtasari wa ombi la bei ya katalogi (`calculated_cost_usd`), kisha uwekaji bei wa tokeni kutoka kwa orodha ya sasa. Gharama zilizohifadhiwa hazitozwi tena kupitia hesabu zao za tokeni. Safu mlalo za tokeni za urithi pekee bado hubadilika bei ya katalogi yao inapobadilika.
+
+### OCR na upachikaji
+
+- Maombi yaliyofaulu `/v1/ocr` yanatumia mkondo wa juu `usage_info.pages_processed`, si safu ya kurasa iliyoombwa au idadi ya vipengee vya ukurasa vilivyorejeshwa. Makadirio ni kurasa × `ocr_cost_per_page` ( USD/page kabisa,**sivyo** USD/million).
+- Maombi yenye maelezo ya hati au kisanduku cha kufunga yanahitaji ushuru tofauti `ocr_cost_per_annotated_page`. Bila hivyo, gharama bado haijulikani; ushuru wa kawaida OCR haubadilishwi kimya kimya.
+- LiteLLM inasawazisha uga wake wa juu `annotation_cost_per_page` hadi `ocr_cost_per_annotated_page`, ikihifadhi thamani kamili USD/page na maingizo ya ufafanuzi pekee, ikijumuisha sufuri dhahiri. Sehemu ya kisheria iliyotolewa inachukua nafasi ya kwanza; thamani za lakabu batili zimepuuzwa. Ubatilishaji wa bei za watumiaji hubakia na kipaumbele chao cha kawaida. Tazama [vitufe vya bei vya OCR vya LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Matumizi ya OCR huhifadhi hesabu ya ukurasa, bei ya kitengo, gharama ya USD iliyohesabiwa, ufunguo wa API na muunganisho uliochaguliwa. Kurasa kamwe hazijawakilishwa kama ishara. Rekodi za simu zina metadata ya bili, si hati URLs, baiti za PDF au maandishi yaliyotolewa.
+- Maombi yaliyofaulu `/v1/embeddings` hurekodi safu mlalo moja ya matumizi kwa kila bechi halisi, ikijumuisha beti tofauti zilizokamilishwa kwa milisekunde sawa. Gharama zinazoripotiwa na mtoaji huchukua nafasi ya kwanza kuliko makadirio ya tokeni; vifungashio vya kuchana haviongezi malipo.
+- Historia ya matumizi, takwimu za Gharama, madirisha provider/account, vikomo vya matumizi vya ufunguo wa API, leja ya gharama ya ombi na uwasilishaji wa matumizi ya kila siku ni pamoja na gharama hizi. Vifunguo vya hakuna kumbukumbu huhifadhi uhasibu wa nambari bila kubakiza maandishi asilia.
+- Kukosekana kwa matumizi au ushuru ni **haijulikani** , sio bure: kichwa cha gharama ya majibu kimeachwa, na sera iliyopo ya matumizi isiyo na bei inatumika kwa vibonye vidhibiti API. Viwango vya sifuri vilivyowekwa bayana vinasalia kuwa matumizi halali ya sifuri.
+
+Huu ni uhasibu wa mbele tu. Simu za zamani OCR/embedding ambazo hazikuwahi kuandika historia ya utumiaji haziwezi kujengwa upya kutokana na uhamiaji huu. Makadirio ya katalogi ni makadirio ya USD, si ankara, na hayajumuishi ubadilishaji wa sarafu, kodi au punguzo.
 
 ---
 

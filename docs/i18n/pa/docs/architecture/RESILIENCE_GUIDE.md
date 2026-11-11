@@ -407,25 +407,17 @@ rules" ਵੇਖੋ। ਮਿਆਦਾਂ Default (ਕੋਈ ਸਪਸ਼ਟ ਕ
 
 ---
 
-## 4. Quota-Share ਸਮਕਾਲੀਤਾ ਨਿਯੰਤਰਣ (v3.8.36)
+## 4. ਕੋਟਾ-ਸ਼ੇਅਰ ਕਰੰਸੀ ਕੰਟਰੋਲ (v3.8.36)
 
-ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਖਾਤੇ (GLM, MiniMax ਆਦਿ) ਅਕਸਰ ਸਿਰਫ਼ ~1–3 ਸਮਕਾਲੀ
-ਬੇਨਤੀਆਂ ਹੀ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ; ਇਸ ਤੋਂ ਵੱਧ ਹੋਣ 'ਤੇ 429s ਅਤੇ cooldowns ਟ੍ਰਿਗਰ ਹੁੰਦੇ ਹਨ। ਇਹ
-**quota-share** (`qtSd/…`) ਕੰਬੋਜ਼ ਵਿੱਚ ਖਾਸ ਤੌਰ 'ਤੇ ਗੰਭੀਰ ਹੁੰਦਾ ਹੈ, ਜਿੱਥੇ ਕਈ API ਕੁੰਜੀਆਂ
-ਇੱਕੋ upstream ਖਾਤਾ ਸਾਂਝਾ ਕਰਦੀਆਂ ਹਨ। ਤਿੰਨ ਪੱਧਰ ਸਾਂਝੇ ਖਾਤੇ ਨੂੰ ਹੜ੍ਹ ਤੋਂ ਬਚਾਉਂਦੇ ਹਨ।
+ਗਾਹਕੀ ਖਾਤੇ (GLM, MiniMax, ਆਦਿ) ਅਕਸਰ ਸਿਰਫ਼ ~ 1–3 ਸਮਕਾਲੀ ਬੇਨਤੀਆਂ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ; ਇਸ ਤੋਂ ਵੱਧ ਜਾਣਾ 429 ਅਤੇ ਕੂਲਡਾਊਨ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ। ਇਹ ਹੇਠ ਗੰਭੀਰ ਹੈ**ਕੋਟਾ-ਸ਼ੇਅਰ** (`qtSd/…`) ਕੰਬੋਜ਼, ਜਿੱਥੇ ਕਈ API ਕੁੰਜੀਆਂ ਇੱਕ ਅੱਪਸਟਰੀਮ ਖਾਤੇ ਨੂੰ ਸਾਂਝਾ ਕਰਦੀਆਂ ਹਨ। ਤਿੰਨ ਪਰਤਾਂ ਇੱਕ ਸਾਂਝੇ ਖਾਤੇ ਨੂੰ ਹੜ੍ਹਾਂ ਤੋਂ ਬਚਾਉਂਦੀਆਂ ਹਨ।
 
-### ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ ਸਮਕਾਲੀਤਾ ਸੀਮਾ (`max_concurrent`)
+### ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ ਸਮਕਾਲੀ ਕੈਪ (`max_concurrent`)
 
-ਹਰੇਕ provider connection ਇੱਕ `max_concurrent` ਸੀਮਾ ਘੋਸ਼ਿਤ ਕਰ ਸਕਦਾ ਹੈ
-(`provider_connections.max_concurrent`, ਜੋ connection modal / API / DB ਵਿੱਚ ਸੈੱਟ ਕੀਤੀ ਜਾਂਦੀ ਹੈ)।
-ਕੋਈ ਸੀਮਾ ਨਾ ਹੋਣ ਲਈ ਇਸਨੂੰ ਖਾਲੀ ਛੱਡੋ। ਇਹ ਹੇਠਾਂ ਦਿੱਤੀ serialization
-ਪਰਤ ਨੂੰ ਚਲਾਉਣ ਵਾਲਾ ਇਕੋ knob ਹੈ — ਇਸਨੂੰ ਖਾਤੇ ਦੀ ਅਸਲ ਸਮਕਾਲੀਤਾ 'ਤੇ ਸੈੱਟ ਕਰੋ
-(ਜਿਵੇਂ GLM ~1, MiniMax ~2)।
+ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਇੱਕ `max_concurrent` ਸੀਲਿੰਗ (`provider_connections.max_concurrent`, ਕਨੈਕਸ਼ਨ ਮਾਡਲ / API / DB ਵਿੱਚ ਸੈੱਟ) ਘੋਸ਼ਿਤ ਕਰ ਸਕਦਾ ਹੈ। ਇਸ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਸੀਮਾ ਦੇ ਖਾਲੀ ਛੱਡੋ। ਇਹ ਉਹ ਸਿੰਗਲ ਨੌਬ ਹੈ ਜੋ — ਦੇ ਹੇਠਾਂ ਸੀਰੀਅਲਾਈਜ਼ੇਸ਼ਨ ਲੇਅਰ ਨੂੰ ਚਲਾਉਂਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ ਖਾਤੇ ਦੀ ਅਸਲ ਸਮਰੂਪਤਾ (ਜਿਵੇਂ ਕਿ GLM ~ 1, MiniMax ~ 2) 'ਤੇ ਸੈੱਟ ਕਰਦਾ ਹੈ।
 
-### ਪ੍ਰਤੀ-ਮਾਡਲ ਸਮਕਾਲੀਤਾ ਸੀਮਾਵਾਂ (`modelConcurrency`)
+### ਪ੍ਰਤੀ-ਮਾਡਲ ਸਮਕਾਲੀ ਕੈਪਸ (`modelConcurrency`)
 
-ਇੱਕ connection ਆਪਣੇ `rateLimitOverrides` map ਵਿੱਚ ਸਹੀ ਪ੍ਰਤੀ-ਮਾਡਲ ਸਮਕਾਲੀਤਾ ਸੀਮਾਵਾਂ
-ਵੀ ਘੋਸ਼ਿਤ ਕਰ ਸਕਦਾ ਹੈ:
+ਇੱਕ ਕਨੈਕਸ਼ਨ ਇਸਦੇ `rateLimitOverrides` ਨਕਸ਼ੇ ਦੇ ਅੰਦਰ ਪ੍ਰਤੀ-ਮਾਡਲ ਕਨਕਰੰਸੀ ਸੀਲਿੰਗ ਨੂੰ ਵੀ ਘੋਸ਼ਿਤ ਕਰ ਸਕਦਾ ਹੈ:
 
 ```json
 {
@@ -436,81 +428,32 @@ rules" ਵੇਖੋ। ਮਿਆਦਾਂ Default (ਕੋਈ ਸਪਸ਼ਟ ਕ
 }
 ```
 
-ਇਸਨੂੰ connection modal (**Rate limit overrides → Per-model
-concurrency caps**, ਹਰ ਲਾਈਨ ਵਿੱਚ ਇੱਕ `model=cap`) ਜਾਂ
-`PATCH /api/providers/[id]` ਰਾਹੀਂ ਉਸੇ JSON ਆਕਾਰ ਨਾਲ ਸੈੱਟ ਕਰੋ। ਮੁੱਖ ਅਰਥ:
+ਇਸਨੂੰ ਕੁਨੈਕਸ਼ਨ ਮੋਡਲ ਵਿੱਚ ਸੈੱਟ ਕਰੋ (**ਦਰ ਸੀਮਾ → ਪ੍ਰਤੀ-ਮਾਡਲ ਕਨਕਰੰਸੀ ਕੈਪਸ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀ ਹੈ** , ਇੱਕ `model=cap` ਪ੍ਰਤੀ ਲਾਈਨ) ਜਾਂ ਉਸੇ JSON ਆਕਾਰ ਦੇ ਨਾਲ `PATCH /api/providers/[id]` ਰਾਹੀਂ। ਮੁੱਖ ਅਰਥ ਵਿਗਿਆਨ:
 
-- **Connection-wide ਬਨਾਮ model-specific:** `maxConcurrent` ਸਾਂਝੀ
-  connection-wide ਸੀਮਾ ਹੀ ਰਹਿੰਦੀ ਹੈ। ਜਦੋਂ ਦੋਵੇਂ ਲਾਗੂ ਹੁੰਦੇ ਹਨ, ਤਾਂ ਦੋਵੇਂ gates
-  ਇੱਕੋ composite gate
-  (`global → provider → account → model`) ਵਿੱਚ ਪਰਮਾਣੂ ਢੰਗ ਨਾਲ ਹਾਸਲ ਕੀਤੇ ਜਾਂਦੇ ਹਨ;
-  ਪ੍ਰਭਾਵੀ ਵਿਹਾਰ ਲਾਗੂ ਹੋਣ ਵਾਲੀ ਵਧੇਰੇ ਸਖ਼ਤ ਸੀਮਾ ਦੇ ਅਨੁਸਾਰ ਹੁੰਦਾ ਹੈ।
-- **Exact model-key match:** key ਉਹ model string ਹੈ ਜੋ routing resolution ਤੋਂ ਬਾਅਦ
-  executor ਨੂੰ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ — ਆਮ ਤੌਰ 'ਤੇ bare upstream model id
-  (`glm-5`), ਨਾ ਕਿ client-side `provider/model` alias (`zai/glm-5`, `glm-5` ਨਾਲ
-  match ਨਹੀਂ ਕਰਦਾ)। ਮੁੱਲ positive-integer ਸਮਕਾਲੀ-ਬੇਨਤੀ ਸੀਮਾਵਾਂ ਹੁੰਦੇ ਹਨ।
-- **Local queueing, no discovery:** ਵਾਧੂ ਬੇਨਤੀਆਂ ਮੌਜੂਦਾ queue/timeout semantics ਨਾਲ
-  ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਕਤਾਰ ਵਿੱਚ ਲੱਗਦੀਆਂ ਹਨ (typed `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` admission errors)। OmniRoute upstream policy ਨੂੰ discover
-  ਜਾਂ infer ਨਹੀਂ ਕਰਦਾ — ਇਹ operator ਵੱਲੋਂ configure ਕੀਤੀਆਂ ਸਹੀ ਸੀਮਾਵਾਂ ਲਾਗੂ ਕਰਦਾ ਹੈ।
-  Saturated model gate ਕਦੇ ਵੀ provider ਨੂੰ disable ਨਹੀਂ ਕਰਦਾ ਅਤੇ ਨਾ ਹੀ ਕੋਈ ਸਥਾਈ
-  model lockout ਬਣਾਉਂਦਾ ਹੈ; upstream 429/cooldown/fallback ਵਿਹਾਰ error backstop ਵਜੋਂ
-  ਜਾਰੀ ਰਹਿੰਦਾ ਹੈ।
-- **Per-connection, per-process scope:** caps ਪ੍ਰਤੀ database connection ਹੁੰਦੀਆਂ ਹਨ
-  ਅਤੇ memory ਵਿੱਚ ਰੱਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਇਸ ਲਈ ਇੱਕੋ upstream API key ਨੂੰ ਦੁਬਾਰਾ ਵਰਤਣ ਵਾਲੇ
-  ਦੋ connections ਇੱਕ-ਦੂਜੇ ਨਾਲ coordination ਨਹੀਂ ਕਰਦੇ।
-- **Unconfigured means unchanged:** map ਨੂੰ ਛੱਡ ਦੇਣ ਨਾਲ (ਜਾਂ dashboard field ਖਾਲੀ
-  ਛੱਡਣ ਨਾਲ) ਕੋਈ model gate ਨਹੀਂ ਜੋੜਿਆ ਜਾਂਦਾ। ਕਿਸੇ universal provider limit ਦਾ ਦਾਅਵਾ
-  ਕੀਤੇ ਬਿਨਾਂ configuration ਦੀ ਉਦਾਹਰਨ:
+- **ਕਨੈਕਸ਼ਨ-ਵਿਆਪਕ ਬਨਾਮ ਮਾਡਲ-ਵਿਸ਼ੇਸ਼:** `maxConcurrent` ਸਾਂਝਾ ਕੁਨੈਕਸ਼ਨ-ਵਿਆਪਕ ਸੀਲਿੰਗ ਬਣਿਆ ਹੋਇਆ ਹੈ। ਜਦੋਂ ਦੋਵੇਂ ਲਾਗੂ ਹੁੰਦੇ ਹਨ, ਤਾਂ ਦੋਵੇਂ ਗੇਟ ਇੱਕੋ ਕੰਪੋਜ਼ਿਟ ਗੇਟ (`global → provider → account → model`) ਵਿੱਚ ਪਰਮਾਣੂ ਰੂਪ ਵਿੱਚ ਪ੍ਰਾਪਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ; ਪ੍ਰਭਾਵੀ ਵਿਵਹਾਰ ਸਖਤ ਲਾਗੂ ਸੀਮਾ ਹੈ।
+- **ਸਟੀਕ ਮਾਡਲ-ਕੁੰਜੀ ਮੇਲ:** ਕੁੰਜੀ ਉਹ ਮਾਡਲ ਸਤਰ ਹੈ ਜੋ ਰੂਟਿੰਗ ਰੈਜ਼ੋਲਿਊਸ਼ਨ — ਤੋਂ ਬਾਅਦ ਐਗਜ਼ੀਕਿਊਟਰ ਨੂੰ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ, ਆਮ ਤੌਰ 'ਤੇ ਬੇਅਰ ਅਪਸਟ੍ਰੀਮ ਮਾਡਲ ਆਈਡੀ (`glm-5`), ਕਲਾਇੰਟ-ਸਾਈਡ `provider/model` ਉਰਫ ਨਹੀਂ (`zai/glm-5` `glm-5` ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ)। ਮੁੱਲ ਸਕਾਰਾਤਮਕ-ਪੂਰਨ ਅੰਕ ਸਮਕਾਲੀ-ਬੇਨਤੀ ਸੀਲਿੰਗ ਹਨ।
+- **ਸਥਾਨਕ ਕਤਾਰਬੰਦੀ, ਕੋਈ ਖੋਜ ਨਹੀਂ:** ਮੌਜੂਦਾ queue/timeout ਸਿਮੈਂਟਿਕਸ (ਟਾਈਪ ਕੀਤੀਆਂ `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ਦਾਖਲਾ ਗਲਤੀਆਂ) ਦੇ ਨਾਲ ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਵਾਧੂ ਬੇਨਤੀਆਂ ਦੀ ਕਤਾਰ ਹੈ। OmniRoute ਅਪਸਟ੍ਰੀਮ ਨੀਤੀ — ਦੀ ਖੋਜ ਜਾਂ ਅਨੁਮਾਨ ਨਹੀਂ ਲਗਾਉਂਦਾ ਹੈ ਇਹ ਓਪਰੇਟਰ ਦੁਆਰਾ ਕੌਂਫਿਗਰ ਕੀਤੀ ਗਈ ਸਹੀ ਸੀਲਿੰਗ ਨੂੰ ਲਾਗੂ ਕਰਦਾ ਹੈ। ਇੱਕ ਸੰਤ੍ਰਿਪਤ ਮਾਡਲ ਗੇਟ ਕਦੇ ਵੀ ਪ੍ਰਦਾਤਾ ਨੂੰ ਅਯੋਗ ਨਹੀਂ ਕਰਦਾ ਅਤੇ ਕਦੇ ਵੀ ਸਥਾਈ ਮਾਡਲ ਲਾਕਆਊਟ ਨਹੀਂ ਬਣਾਉਂਦਾ; ਅੱਪਸਟ੍ਰੀਮ 429/cooldown/fallback ਵਿਵਹਾਰ ਗਲਤੀ ਬੈਕਸਟੌਪ ਰਹਿੰਦਾ ਹੈ।
+- **ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ, ਪ੍ਰਤੀ-ਪ੍ਰਕਿਰਿਆ ਦਾ ਘੇਰਾ:** ਕੈਪਸ ਪ੍ਰਤੀ ਡੇਟਾਬੇਸ ਕਨੈਕਸ਼ਨ ਹੁੰਦੇ ਹਨ ਅਤੇ ਮੈਮੋਰੀ ਵਿੱਚ ਰੱਖੇ ਜਾਂਦੇ ਹਨ, ਇਸਲਈ ਇੱਕੋ ਅੱਪਸਟ੍ਰੀਮ API ਕੁੰਜੀ ਦੀ ਮੁੜ ਵਰਤੋਂ ਕਰਨ ਵਾਲੇ ਦੋ ਕਨੈਕਸ਼ਨ ਇੱਕ ਦੂਜੇ ਨਾਲ ਤਾਲਮੇਲ ਨਹੀਂ ਕਰਦੇ ਹਨ।
+- **ਗੈਰ-ਸੰਰਚਨਾ ਦਾ ਮਤਲਬ ਬਦਲਿਆ ਨਹੀਂ ਹੈ:** ਨਕਸ਼ੇ ਨੂੰ ਛੱਡਣਾ (ਜਾਂ ਡੈਸ਼ਬੋਰਡ ਖੇਤਰ ਨੂੰ ਖਾਲੀ ਛੱਡਣਾ) ਕੋਈ ਮਾਡਲ ਗੇਟ ਨਹੀਂ ਜੋੜਦਾ ਹੈ। ਕਿਸੇ ਵੀ ਯੂਨੀਵਰਸਲ ਪ੍ਰਦਾਤਾ ਸੀਮਾ ਦਾ ਦਾਅਵਾ ਕੀਤੇ ਬਿਨਾਂ ਉਦਾਹਰਨ ਕੌਂਫਿਗਰੇਸ਼ਨ:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Quota-share ਬੇਨਤੀ serialization
+### ਕੋਟਾ-ਸ਼ੇਅਰ ਬੇਨਤੀ ਸੀਰੀਅਲਾਈਜ਼ੇਸ਼ਨ
 
-ਜਦੋਂ quota-share dispatch ਕਿਸੇ ਅਜਿਹੇ connection ਨੂੰ target ਕਰਦਾ ਹੈ ਜੋ positive
-`max_concurrent` ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ, ਤਾਂ ਉਸ **account** ਲਈ ਸਮਕਾਲੀ ਬੇਨਤੀਆਂ ਨੂੰ
-ਪ੍ਰਤੀ-connection semaphore (key `qsconn:<connectionId>`) ਰਾਹੀਂ serialize ਕੀਤਾ ਜਾਂਦਾ ਹੈ:
-ਵਾਧੂ ਬੇਨਤੀਆਂ account 'ਤੇ ਹੜ੍ਹ ਪਾਉਣ ਦੀ ਬਜਾਏ **queue ਵਿੱਚ ਉਡੀਕ ਕਰਦੀਆਂ ਹਨ**। ਇਹ
-**fail-open** ਹੈ — saturated queue ਜਾਂ timeout ਹੋਣ 'ਤੇ slot ਤੋਂ ਬਿਨਾਂ ਅੱਗੇ ਵਧਿਆ ਜਾਂਦਾ ਹੈ,
-ਕਿਸੇ dispatchable ਬੇਨਤੀ ਨੂੰ ਕਦੇ reject ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ। ਇਸਨੂੰ **Settings → Resilience → Quota-share per-connection
-concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, default
-on) ਵਿੱਚ toggle ਕਰੋ। `max_concurrent` cap ਤੋਂ ਬਿਨਾਂ ਵਿਹਾਰ ਅਪਰਿਵਰਤਿਤ ਰਹਿੰਦਾ ਹੈ।
+ਜਦੋਂ ਇੱਕ ਕੋਟਾ-ਸ਼ੇਅਰ ਡਿਸਪੈਚ ਇੱਕ ਕੁਨੈਕਸ਼ਨ ਨੂੰ ਨਿਸ਼ਾਨਾ ਬਣਾਉਂਦਾ ਹੈ ਜੋ ਇੱਕ ਸਕਾਰਾਤਮਕ `max_concurrent` ਘੋਸ਼ਣਾ ਕਰਦਾ ਹੈ, ਉਸ ਲਈ ਸਮਕਾਲੀ ਬੇਨਤੀਆਂ**ਖਾਤਾ** ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ ਸੈਮਾਫੋਰ (ਕੁੰਜੀ `qsconn:<connectionId>`) ਦੁਆਰਾ ਲੜੀਬੱਧ ਕੀਤੇ ਜਾਂਦੇ ਹਨ: ਵਾਧੂ ਬੇਨਤੀਆਂ**ਕਤਾਰ ਵਿੱਚ ਉਡੀਕ ਕਰੋ** ਖਾਤੇ ਨੂੰ ਭਰਨ ਦੀ ਬਜਾਏ. ਇਹ ਹੈ**ਫੇਲ-ਓਪਨ** — ਇੱਕ ਸੰਤ੍ਰਿਪਤ ਕਤਾਰ ਜਾਂ ਸਮਾਂ ਸਮਾਪਤੀ ਇੱਕ ਸਲਾਟ ਤੋਂ ਬਿਨਾਂ ਅੱਗੇ ਵਧਦੀ ਹੈ ਨਾ ਕਿ ਕਿਸੇ ਡਿਸਪੈਚਯੋਗ ਬੇਨਤੀ ਨੂੰ ਕਦੇ ਵੀ ਰੱਦ ਕਰਨ ਦੀ ਬਜਾਏ। ਵਿੱਚ ਟੌਗਲ ਕਰੋ**ਸੈਟਿੰਗਾਂ → ਲਚਕੀਲਾਪਨ → ਕੋਟਾ-ਸ਼ੇਅਰ ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ ਸਮਰੂਪਤਾ** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ਡਿਫੌਲਟ ਚਾਲੂ)। `max_concurrent` ਕੈਪ ਤੋਂ ਬਿਨਾਂ ਵਿਵਹਾਰ ਬਦਲਿਆ ਨਹੀਂ ਹੈ।
 
-> Quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) ਖੁਦ
-> fail-open ਹੈ ਅਤੇ at-cap connection ਨੂੰ ਸਿਰਫ਼ _deprioritize_ ਕਰਦਾ ਹੈ — ਇੱਕ
-> single-connection pool ਨਾਲ ਇਹ hard-limit ਨਹੀਂ ਲਗਾ ਸਕਦਾ, ਇਸ ਲਈ ਇਹ semaphore ਹੀ ਅਸਲ ਵਿੱਚ
-> ਹੜ੍ਹ ਨੂੰ ਰੋਕਦਾ ਹੈ।
+> ਕੋਟਾ-ਸ਼ੇਅਰ ਰੂਟਿੰਗ ਗੇਟ (`selectQuotaShareTarget`, DRR + P2C) ਆਪਣੇ ਆਪ ਵਿੱਚ ਫੇਲ-ਓਪਨ ਹੈ ਅਤੇ ਇੱਕ ਸਿੰਗਲ-ਕੁਨੈਕਸ਼ਨ ਪੂਲ ਦੇ ਨਾਲ ਇੱਕ ਐਟ-ਕੈਪ ਕਨੈਕਸ਼ਨ — _deprioritizes_ ਕਰਦਾ ਹੈ, ਇਹ ਹਾਰਡ-ਸੀਮਾ ਨਹੀਂ ਕਰ ਸਕਦਾ, ਇਸਲਈ ਇਹ ਸੈਮਾਫੋਰ ਉਹ ਹੈ ਜਿਸ ਵਿੱਚ ਅਸਲ ਵਿੱਚ ਹੜ੍ਹ ਸ਼ਾਮਲ ਹੈ।
 
-### Combo cooldown-aware retry
+### ਕੰਬੋ ਕੂਲਡਡਾਊਨ-ਜਾਗਰੂਕ ਮੁੜ-ਕੋਸ਼ਿਸ਼
 
-ਹਰੇਕ combo strategy ਲਈ (ਜਦੋਂ enabled ਹੋਵੇ), ਜੇ ਕੋਈ ਬੇਨਤੀ SHORT transient cooldown
-ਲਈ 429 ਪੈਦਾ ਕਰਨ ਵਾਲੀ ਹੋਵੇ, ਤਾਂ 429 ਵਾਪਸ ਕਰਨ ਦੀ ਬਜਾਏ cooldown ਪੂਰਾ ਹੋਣ ਤੱਕ ਉਡੀਕ ਕਰਦੀ ਹੈ
-ਅਤੇ ਮੁੜ dispatch ਹੁੰਦੀ ਹੈ — ਇਹ multi-model combos ਵਿੱਚ Gemini-class TPM/RPM windows
-(~60s retry-after) ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਜਿਵੇਂ 2-model combo ਦੇ ਦੋਵੇਂ targets ਕਿਸੇ
-per-model rate limit ਨੂੰ hit ਕਰਨ। ਇਹ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) ਦੁਆਰਾ ਸੀਮਿਤ ਹੈ, ਜੋ **Settings → Resilience** ਵਿੱਚ ਹੈ। ਇਹ ਕਦੇ ਵੀ
-`quota_exhausted` (ਅੱਧੀ ਰਾਤ ਤੱਕ locked) ਜਾਂ auth/not-found ਕਾਰਨਾਂ ਲਈ ਉਡੀਕ ਨਹੀਂ ਕਰਦਾ।
+ਹਰੇਕ ਕੰਬੋ ਰਣਨੀਤੀ ਲਈ (ਜਦੋਂ ਯੋਗ ਕੀਤਾ ਜਾਂਦਾ ਹੈ), ਇੱਕ ਬੇਨਤੀ ਜੋ ਇੱਕ SHORT ਅਸਥਾਈ ਕੂਲਡਾਉਨ ਲਈ ਇੱਕ 429 ਨੂੰ ਕ੍ਰਿਸਟਲਾਈਜ਼ ਕਰੇਗੀ, ਇਸਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ ਅਤੇ 429 — ਵਾਪਸ ਕਰਨ ਦੀ ਬਜਾਏ ਮੁੜ-ਡਿਸਪੈਚ ਕਰਦੀ ਹੈ ਇਹ ਮਲਟੀ-ਮਾਡਲ ਕੰਬੋਜ਼ 'ਤੇ ਜੇਮਿਨੀ-ਕਲਾਸ TPM/RPM ਵਿੰਡੋਜ਼ (~ 60s ਮੁੜ-ਕੋਸ਼ਿਸ਼-ਬਾਅਦ) ਨੂੰ ਕਵਰ ਕਰਦੀ ਹੈ, ਉਦਾਹਰਨ ਲਈ ਇੱਕ combo-delmo ਦੋਨੋ-ਮੋਡਲ ਦੀ ਦਰ ਦੀ ਇੱਕ ਟੀਚਾ ਸੀਮਾ. ਵਿੱਚ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) ਦੁਆਰਾ ਘਿਰਿਆ ਹੋਇਆ **ਸੈਟਿੰਗਾਂ → ਲਚਕਤਾ** . ਇਹ ਕਦੇ ਵੀ `quota_exhausted` (ਅੱਧੀ ਰਾਤ ਤੱਕ ਲਾਕ) ਜਾਂ auth/not-found ਕਾਰਨਾਂ 'ਤੇ ਉਡੀਕ ਨਹੀਂ ਕਰਦਾ। `comboTimeoutMs` ਸੈੱਟ ਦੇ ਨਾਲ, ਇੱਕ ਉਡੀਕ ਜੋ ਉਸ ਅੰਤਮ ਤਾਰੀਖ ਤੋਂ ਪਹਿਲਾਂ ਖਤਮ ਨਹੀਂ ਹੋ ਸਕਦੀ ਹੈ ਸ਼ੁਰੂ ਨਹੀਂ ਹੁੰਦੀ (#18998): ਕੰਬੋ ਇੱਕ `COMBO_TIMEOUT` 504 ਦੀ ਬਜਾਏ ਇਸਦੇ ਟਰਮੀਨਲ ਜਵਾਬ ਦੇ ਨਾਲ ਇੱਕ ਵਾਰ ਜਵਾਬ ਦਿੰਦਾ ਹੈ।
 
-ਇੱਕ combo `config.comboCooldownWaitEnabled: false` ਨਾਲ opt out ਕਰ ਸਕਦਾ ਹੈ। ਕੇਵਲ literal
-`false` ਹੀ ਇਨ੍ਹਾਂ shared combo waits (post-dispatch cooldown ਅਤੇ pre-dispatch
-circuit-open/model-lock waits) ਅਤੇ ਉਨ੍ਹਾਂ ਦੇ wait-budget timeout-floor extension ਨੂੰ
-disable ਕਰਦਾ ਹੈ। Missing ਜਾਂ `true` global policy ਨੂੰ ਕਾਇਮ ਰੱਖਦਾ ਹੈ; `true` globally
-disabled waiting ਨੂੰ enable ਨਹੀਂ ਕਰ ਸਕਦਾ। Explicit `targetTimeoutMs` ਦੀ ਤਰਜੀਹ ਫਿਰ ਵੀ
-ਕਾਇਮ ਰਹਿੰਦੀ ਹੈ। ਇਹ opt-out ਵੱਖਰੇ native-Codex turn-pin pre-dispatch wait ਨੂੰ
-ਨਹੀਂ ਬਦਲਦਾ।
+ਇੱਕ ਕੰਬੋ `config.comboCooldownWaitEnabled: false` ਨਾਲ ਚੋਣ ਕਰ ਸਕਦਾ ਹੈ। ਸਿਰਫ਼ ਸ਼ਾਬਦਿਕ `false` ਇਹਨਾਂ ਸਾਂਝੇ ਕੀਤੇ ਕੰਬੋ ਉਡੀਕਾਂ (ਪੋਸਟ-ਡਿਸਪੈਚ ਕੂਲਡਾਉਨ ਅਤੇ ਪ੍ਰੀ-ਡਿਸਪੈਚ circuit-open/model-lock ਉਡੀਕਾਂ) ਅਤੇ ਉਹਨਾਂ ਦੀ ਉਡੀਕ-ਬਜਟ ਟਾਈਮਆਉਟ-ਫਲੋਰ ਐਕਸਟੈਂਸ਼ਨ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਂਦਾ ਹੈ। ਗੁੰਮ ਜਾਂ `true` ਗਲੋਬਲ ਨੀਤੀ ਨੂੰ ਸੁਰੱਖਿਅਤ ਰੱਖਦਾ ਹੈ; `true` ਵਿਸ਼ਵ ਪੱਧਰ 'ਤੇ ਅਯੋਗ ਉਡੀਕ ਨੂੰ ਸਮਰੱਥ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ। ਇੱਕ ਸਪੱਸ਼ਟ `targetTimeoutMs` ਅਜੇ ਵੀ ਜਿੱਤਦਾ ਹੈ। ਇਹ ਔਪਟ-ਆਊਟ ਵੱਖਰੇ ਮੂਲ-ਕੋਡੈਕਸ ਟਰਨ-ਪਿੰਨ ਪ੍ਰੀ-ਡਿਸਪੈਚ ਉਡੀਕ ਨੂੰ ਨਹੀਂ ਬਦਲਦਾ।
 
-ਇਹੀ gate pre-dispatch ਮਾਮਲੇ (#16319) ਨੂੰ ਵੀ ਕਵਰ ਕਰਦਾ ਹੈ: ਜਦੋਂ ਕਿਸੇ ਵੀ attempt ਤੋਂ
-ਪਹਿਲਾਂ combo ਦਾ ਹਰ target skip ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਉਸਦਾ model short transient
-lockout ਵਿੱਚ ਹੈ, ਤਾਂ zero-attempt path ਉਸੇ ceilings ਹੇਠ lockout ਖਤਮ ਹੋਣ ਤੱਕ ਉਡੀਕ ਕਰਦਾ ਹੈ
-ਅਤੇ ਮੁੜ dispatch ਹੁੰਦਾ ਹੈ, ਨਾ ਕਿ hint-ਰਹਿਤ
-`503 ALL_TARGETS_SKIPPED` ਦਾ ਜਵਾਬ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ ਕੋਈ ਉਡੀਕ ਮਨਜ਼ੂਰ ਨਹੀਂ (ceiling, attempt ਜਾਂ budget
-ਖਤਮ ਹੋ ਚੁੱਕੇ ਹੋਣ, ਜਾਂ feature off ਹੋਵੇ), ਤਾਂ terminal response ਨੂੰ
-`429 rate_limit_error` ਵਿੱਚ upgrade ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਖਤਮ ਹੋਣ ਵਾਲੇ
-transient lock ਤੋਂ `retry_after` / `reset_at` ਹੁੰਦਾ ਹੈ; quota, auth ਅਤੇ not-found locks
-hint-ਰਹਿਤ 503 ਹੀ ਰੱਖਦੇ ਹਨ।
+ਉਹੀ ਗੇਟ ਪ੍ਰੀ-ਡਿਸਪੈਚ ਕੇਸ (#16319) ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ: ਜਦੋਂ ਕੋਈ ਵੀ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਕੰਬੋ ਦਾ ਹਰ ਟੀਚਾ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਇਸਦਾ ਮਾਡਲ ਇੱਕ ਛੋਟੇ ਅਸਥਾਈ ਲਾਕਆਊਟ ਵਿੱਚ ਬੈਠਦਾ ਹੈ, ਜ਼ੀਰੋ-ਕੋਸ਼ਿਸ਼ ਮਾਰਗ ਇੱਕ ਸੰਕੇਤ-ਰਹਿਤ `503 ALL_TARGETS_SKIPPED` ਜਵਾਬ ਦੇਣ ਦੀ ਬਜਾਏ, ਉਸੇ ਛੱਤ ਦੇ ਹੇਠਾਂ ਲੌਕ ਆਉਟ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ ਅਤੇ ਦੁਬਾਰਾ ਡਿਸਪੈਚ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਕੋਈ ਇੰਤਜ਼ਾਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਛੱਤ, ਕੋਸ਼ਿਸ਼ ਜਾਂ ਬਜਟ ਖਤਮ ਹੋ ਗਿਆ ਹੈ, ਜਾਂ ਵਿਸ਼ੇਸ਼ਤਾ ਬੰਦ ਹੈ), ਟਰਮੀਨਲ ਜਵਾਬ `429 rate_limit_error` ਵਿੱਚ ਅੱਪਗ੍ਰੇਡ ਕਰਦਾ ਹੈ ਜੋ `retry_after` / `reset_at` ਨੂੰ ਛੇਤੀ ਤੋਂ ਛੇਤੀ ਅਸਥਾਈ ਲਾਕ ਦੀ ਮਿਆਦ ਪੁੱਗਦਾ ਹੈ; ਕੋਟਾ, ਪ੍ਰਮਾਣਿਕਤਾ ਅਤੇ ਨਾ-ਮਿਲੇ ਤਾਲੇ ਸੰਕੇਤ-ਘੱਟ 503 ਨੂੰ ਰੱਖਦੇ ਹਨ।
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

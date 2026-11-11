@@ -36,73 +36,73 @@ Dahil pagtatantiya ang numero:
 
 ---
 
-## Paano tinatantiya ang mga gastos
+## Paano tinatantya ang mga gastos
 
 ### Ang pinagmulan ng pagpepresyo
 
-Nanggagaling ang mga gastos sa pinagsamang talahanayan ng presyo sa [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), sa ganitong pagkakasunod ng priyoridad (**pinakamataas muna**):
+Ang mga gastos ay nagmumula sa pinagsanib na talahanayan ng pagpepresyo sa [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), sa ganitong pagkakasunud-sunod ng pangunguna (**pinakamataas muna** ):
 
-1. **Mga override ng user** — mga presyong itinakda sa dashboard o sa pamamagitan ng `PATCH /api/pricing` (namespace na `pricing`).
-2. **Pag-sync mula sa models.dev** — mga presyong kinukuha sa `https://models.dev/api.json` (namespace na `models_dev_pricing`).
-3. **Pag-sync mula sa LiteLLM** — mga presyong kinukuha sa pampublikong `model_prices_and_context_window.json` ng LiteLLM (namespace na `pricing_synced`).
-4. **Mga paunang halagang nasa code** — mga rate na kasama sa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Nag-override ang user** Itinakda ang mga presyo — sa dashboard o sa pamamagitan ng `PATCH /api/pricing` (ang namespace `pricing` ).
+2. **pag-sync ng models.dev** Ang pagpepresyo ng — na kinuha mula sa `https://models.dev/api.json` (ang namespace `models_dev_pricing` ).
+3. **LiteLLM sync** Ang mga presyo — na kinuha mula sa pampublikong `model_prices_and_context_window.json` ng LiteLLM(ang namespace `pricing_synced` ).
+4. **Mga naka-hardcode na default** Ang mga rate — ay ipinadala sa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Para sa parehong provider/modelo, pinapatungan ng mga halaga mula sa layer na may mas mataas na priyoridad ang katumbas na mga field sa mas mababang layer; ang mga field na wala sa itaas ay maaari pa ring manggaling sa ibaba. Nakapirmi ang pagkakasunod kahit sabay tumatakbo ang dalawang magkahiwalay na sync job. Nagbabalik ang `GET /api/pricing?includeSources=1` ng `pricing` at `sourceMap`; tinutukoy ng mga label bawat modelo (`user`, `modelsDev`, `litellm`, `default`) ang layer na may pinakamataas na priyoridad na naglalaman ng modelong iyon.
+Para sa parehong provider/model, ino-overwrite ng mga value mula sa mga layer na mas mataas ang priyoridad ang mga tumutugmang field sa mas mababang mga layer; ang mga field na wala sa itaas na layer ay maaari pa ring magmula sa mas mababang layer. Ang pagkakasunud-sunod ay naayos kahit na ang parehong mga independiyenteng trabaho sa pag-sync ay tumatakbo nang sabay. Ibinabalik ng `GET /api/pricing?includeSources=1` `pricing` at `sourceMap`, na ang mga label ng bawat modelo (`user`, `modelsDev`, `litellm`, `default`) ay tumutukoy sa pinakamataas na priyoridad na layer na naglalaman ng modelong iyon.
 
-Opsyonal ang **pag-sync mula sa LiteLLM** at naka-disable ito bilang default. Ang mga environment variable nito (tingnan ang [`.env.example`](../../.env.example)) ay:
+**LiteLLM sync** ay opt-in, hindi pinagana bilang default. Ang mga variable ng kapaligiran nito (tingnan [`.env.example`](../../.env.example) ) ay:
 
-| Env var                 | Default   | Layunin                                                                                           |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | I-enable ang pag-sync ng presyo mula sa LiteLLM sa background.                                    |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval ng sync sa **segundo** (araw-araw bilang default).                                       |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Pagpili ng pinagmumulan para lamang sa sync na ito; sa kasalukuyan, `litellm` lang ang suportado. |
+| Env var                 | Default   | Layunin                                                                                               |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Paganahin ang pag-sync ng pagpepresyo ng LiteLLM sa background.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`   | I-sync ang pagitan sa mga segundo (araw-araw).                                                        |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Pagpili ng pinagmulan para sa pag-sync na ito lamang; kasalukuyang `litellm` lang ang sinusuportahan. |
 
-Hiwalay ang **pag-sync mula sa models.dev** sa pag-sync mula sa LiteLLM at naka-disable din bilang default. I-enable ito sa Mga Setting (pag-sync mula sa models.dev), o gamitin ang mga variable na ito:
+**pag-sync ng models.dev** ay hiwalay sa LiteLLM sync at naka-disable din bilang default. Paganahin ito sa Mga Setting (models.dev sync) o gamitin ang mga variable na ito:
 
-| Environment variable       | Paunang halaga      | Layunin                                                                                                                                                                               |
-| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(hindi nakatakda)_ | Kung hindi nakatakda, sinusunod ang switch sa Mga Setting; ipinipilit ng `1/true/on/yes` ang pag-enable at ng `0/false/off/no` ang pag-disable, kahit naka-enable ito sa Mga Setting. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`             | Karaniwang pagitan ng pag-sync mula sa models.dev sa mga segundo, araw-araw.                                                                                                          |
+| Env var                    | Default   | Layunin                                                                                                                                         |
+| -------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unset)_ | Ang Unset ay sumusunod sa toggle ng Mga Setting; Pinipilit i-on `1/true/on/yes` at i-off `0/false/off/no` (kahit na-enable ito ng Mga Setting). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Default na agwat ng pag-sync ng models.dev sa mga segundo (araw-araw).                                                                          |
 
-**Hindi** ini-enable ng `PRICING_SYNC_SOURCES` ang models.dev; pag-sync mula sa LiteLLM lamang ang kinokontrol nito. Hindi binubura ng pag-alis ng override ng user ang alinman sa mga naka-sync na namespace; nagiging epektibo ang susunod na available na layer ng presyo. Para sa modelong walang presyo, suriin ang parehong sync setting at ang `sourceMap` bago magdagdag ng manual na override.
+Ginagawa ng `PRICING_SYNC_SOURCES`**hindi** paganahin ang models.dev; kinokontrol lamang nito ang LiteLLM sync. Ang pagtanggal ng override ng user ay hindi nag-clear ng alinman sa naka-sync na namespace; magiging epektibo ang susunod na magagamit na layer ng pagpepresyo. Para sa isang modelong walang presyo, tingnan ang parehong mga setting ng pag-sync at ang `sourceMap` bago magdagdag ng manu-manong override.
 
 ### Ang formula ng gastos
 
-Kinakalkula ang gastos para sa bawat request mula sa bilang ng mga token at mga rate sa bawat isang milyong token sa
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kinakalkula ang gastos sa bawat kahilingan mula sa mga bilang ng token at mga rate ng per-million-token sa [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Mga input token** (ibinawas ang mga cache read at cache-creation token) × `input` rate.
-- **Mga cache-read token** × `cached` rate (gagamitin ang input rate bilang fallback).
-- **Mga cache-creation token** × `cache_creation` rate (gagamitin ang input rate bilang fallback).
-- **Mga output token** × `output` rate.
-- **Mga reasoning token** × `reasoning` rate (gagamitin ang output rate bilang fallback).
+- **Mga token ng input** (bawas ang mga nabasang cache at mga token sa paggawa ng cache) × `input` rate.
+- **Mga token na binasa ng cache** × `cached` rate (bumabalik sa input rate).
+- **Mga token sa paggawa ng cache** × `cache_creation` rate (bumabalik sa input rate).
+- **Mga token ng output** × `output` rate.
+- **Mga token ng pangangatwiran** × `reasoning` rate (bumabalik sa output rate).
 
-Itinuturing ang lahat ng rate bilang USD sa bawat 1,000,000 token. Naglalapat ang Codex "fast"/"priority" o
-"flex" service tier ng cost multiplier (`getCodexFastCostMultiplier`) — hal., sinisingil ang flex
-nang may 50% diskuwento sa mga token, na ipinapakita bilang **flex savings** sa dashboard.
+Ang lahat ng mga rate ay binibigyang kahulugan bilang USD bawat 1,000,000 token. Ang Codex na "mabilis"/"priyoridad" o "flex" na tier ng serbisyo ay naglalapat ng cost multiplier (`getCodexFastCostMultiplier`) — eg flex ay sinisingil sa 50% na diskwento sa token, na ipinapakita bilang **ibaluktot ang pagtitipid** sa dashboard.
 
-Nino-normalize muna ang mga pangalan ng model (inaalis ang mga provider-path prefix gaya ng `openai/` o
-`accounts/fireworks/models/`) upang maitugma pa rin ang mga historical row sa isang presyo.
+Na-normalize muna ang mga pangalan ng modelo (tinatanggal ang mga prefix ng path ng provider gaya ng `openai/` o `accounts/fireworks/models/` ) kaya tumutugma pa rin ang mga makasaysayang hilera sa isang presyo.
 
-### Paano itinatala ang paggastos
+### Paano naitala ang paggastos
 
-- Kinakalkula ang gastos para sa bawat request pagkatapos ng response at itinatala sa paraang fire-and-forget upang
-  hindi ito kailanman magdagdag ng latency para sa client. Isine-schedule ang paggamit ng shared quota sa susunod na
-  event-loop tick sa pamamagitan ng [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Binu-buffer at fina-flush nang batch ang paggastos ng API key ng
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (default na 60s flush interval,
-  1,000-entry buffer). Maaaring isaayos sa pamamagitan ng:
+- Ang gastos sa bawat kahilingan ay kinukuwenta sa pagkumpleto ng kahilingan. Naka-iskedyul ang pagkonsumo ng shared-quota sa susunod na event-loop tick sa pamamagitan ng [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Ang paggastos sa API-key ay na-buffer at na-flush sa mga batch ng [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (default na 60s flush interval, 1,000-entry buffer). Natutugtog sa pamamagitan ng:
 
-  | Env var                             | Default | Layunin                                         |
-  | ----------------------------------- | ------- | ----------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval ng flush sa millisecond.               |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maximum na naka-buffer na entry bago mag-flush. |
+  | Env var                             | Default | Layunin                                      |
+  | ----------------------------------- | ------- | -------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Flush interval sa milliseconds.              |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max na buffered na mga entry bago mag-flush. |
 
-Ang mga halaga ng gastos sa dashboard ay **hindi** binabasa mula sa nakaimbak na halagang dolyar para sa bawat row — ang mga ito
-ay muling kinakalkula kaagad mula sa bilang ng mga token at sa kasalukuyang pricing table sa tuwing
-tumatakbo ang analytics endpoint. Nangangahulugan itong ang pagwawasto ng maling presyo (at muling pag-sync) ay
-nag-a-update sa mga historical na pagtatantiya ng gastos nang retroaktibo.
+Mas gusto ng mga gastos ang eksaktong singil na iniulat ng provider (`provider_cost_usd`), pagkatapos ay snapshot ng kahilingan sa presyo ng catalogue (`calculated_cost_usd`), pagkatapos ay muling pagpepresyo ng token mula sa kasalukuyang catalog. Ang mga nakaimbak na gastos ay hindi na muling sisingilin sa pamamagitan ng kanilang mga bilang ng token. Nagbabago pa rin ang mga legacy na token-only row kapag nagbago ang presyo ng kanilang catalog.
+
+### OCR at mga pag-embed
+
+- Ang mga matagumpay na kahilingan `/v1/ocr` ay gumagamit ng upstream `usage_info.pages_processed`, hindi ang hiniling na hanay ng pahina o ang bilang ng mga ibinalik na bagay sa pahina. Ang pagtatantya ay mga pahina × `ocr_cost_per_page` (absolute USD/page,**hindi** USD/million).
+- Nangangailangan ng hiwalay na taripa `ocr_cost_per_annotated_page` ang mga kahilingang may mga anotasyon ng dokumento o bounding-box. Kung wala ito, ang gastos ay nananatiling hindi alam; ang ordinaryong taripa OCR ay hindi tahimik na pinapalitan.
+- Minamapa ng LiteLLM sync ang upstream `annotation_cost_per_page` field nito sa `ocr_cost_per_annotated_page`, pinapanatili ang ganap na halaga USD/page at annotation-only na mga entry, kabilang ang tahasang zero. Ang isang ibinigay na canonical field ay mauuna; hindi papansinin ang mga di-wastong halaga ng alias. Ang mga override sa pagpepresyo ng user ay nagpapanatili ng kanilang normal na priyoridad. Tingnan ang [LiteLLM's OCR pricing keys](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Ang paggamit OCR ay nag-iimbak ng bilang ng pahina, presyo ng yunit, kinakalkula na halaga USD, API key at napiling koneksyon. Ang mga pahina ay hindi kailanman kinakatawan bilang mga token. Ang mga log ng tawag ay naglalaman ng metadata ng pagsingil, hindi dokumentong URLs, PDF byte o na-extract na text.
+- Ang mga matagumpay na kahilingan `/v1/embeddings` ay nagtatala ng isang hilera ng paggamit sa bawat pisikal na batch, kabilang ang mga hiwalay na batch na nakumpleto sa parehong millisecond. Ang mga singil na iniulat ng provider ay nangunguna sa mga pagtatantya ng token; Ang mga combo wrapper ay hindi nagdaragdag ng bayad.
+- Ang history ng paggamit, ang Costs analytics, provider/account window, API-key na mga limitasyon sa paggastos, ang request-cost ledger at araw-araw na rollup sa paggamit ay kinabibilangan ng mga pagsingil na ito. Ang mga walang-log na key ay nagpapanatili ng numerical accounting nang hindi pinapanatili ang source text.
+- Ang mga nawawalang paggamit o mga taripa ay **hindi kilala** , hindi libre: ang header ng response-cost ay tinanggal, at ang umiiral na patakaran sa hindi nakapresyo sa paggamit ay nalalapat sa mga limitadong API key. Ang mga tahasang na-configure na zero rate ay nananatiling wastong paggamit ng zero-cost.
+
+Forward-only accounting ito. Ang mga lumang tawag OCR/embedding na hindi kailanman nagsulat ng kasaysayan ng paggamit ay hindi maaaring muling buuin mula sa paglipat na ito. Ang mga pagtatantya ng catalog ay mga pagtatantya USD, hindi isang invoice, at hindi kasama ang conversion ng currency, buwis o mga diskwento.
 
 ---
 

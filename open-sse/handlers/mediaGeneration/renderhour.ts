@@ -18,6 +18,7 @@ import { randomUUID } from "node:crypto";
 import { RENDERHOUR_BASE_URL } from "../../config/providers/registry/renderhour/mediaModels.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { sleep } from "../../utils/sleep.ts";
+import { stripTrailingSlashes } from "../../utils/urlSanitize.ts";
 import {
   MAX_CONSECUTIVE_POLL_RETRIES,
   computePollRetryDelayMs,
@@ -82,9 +83,7 @@ export function renderhourToken(credentials: unknown): string {
 export function renderhourBaseUrl(credentials: unknown, configured = RENDERHOUR_BASE_URL): string {
   const override = (credentials as RenderhourCredentials | null)?.providerSpecificData?.baseUrl;
   const base = typeof override === "string" && override.trim() ? override.trim() : configured;
-  let end = base.length;
-  while (end > 0 && base.charCodeAt(end - 1) === 47) end--;
-  return base.slice(0, end);
+  return stripTrailingSlashes(base);
 }
 
 function firstString(...values: unknown[]): string | undefined {

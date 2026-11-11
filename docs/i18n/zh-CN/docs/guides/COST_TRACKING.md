@@ -29,60 +29,69 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 
 ### 定价来源
 
-成本取自 [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) 中合并后的价格表，优先级如下（**最高优先**）：
+成本来自[`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts)中的合并定价表，按优先顺序排列（**最高的第一个**）：
 
-1. **用户覆盖值** — 在仪表盘或通过 `PATCH /api/pricing` 设置的价格（`pricing` 命名空间）。
-2. **models.dev 同步** — 从 `https://models.dev/api.json` 获取的价格（`models_dev_pricing` 命名空间）。
-3. **LiteLLM 同步** — 从 LiteLLM 的公开文件 `model_prices_and_context_window.json` 获取的价格（`pricing_synced` 命名空间）。
-4. **内置默认值** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) 中随软件发布的费率。
+1. **用户覆盖**—价格在仪表板中或通过`PATCH /api/pricing` （ `pricing`命名空间）设置。
+2. **models.dev 同步**—定价从`https://models.dev/api.json` （ `models_dev_pricing`命名空间）获取。
+3. **LiteLLM同步**—价格取自LiteLLM的公共`model_prices_and_context_window.json` （ `pricing_synced`命名空间）。
+4. **硬编码默认值**—费率以[`src/shared/constants/pricing/`](../../src/shared/constants/pricing/)发货。
 
-对于同一个提供商/模型，高优先级层会覆盖低优先级层的对应字段；高层缺失的字段仍可来自低层。即使两个独立同步任务同时运行，此顺序也不改变。`GET /api/pricing?includeSources=1` 返回 `pricing` 和 `sourceMap`；每个模型的标签（`user`、`modelsDev`、`litellm`、`default`）标明包含该模型的最高优先级层。
+对于相同的provider/model，来自较高优先级层的值会覆盖较低层中的匹配字段；上层缺少的字段仍然可以来自下层。即使两个独立的同步作业同时运行，顺序也是固定的。 `GET /api/pricing?includeSources=1`返回`pricing`和`sourceMap`，其每个模型标签（`user`、 `modelsDev`、 `litellm`、 `default`）标识包含该模型的最高优先级层。
 
-**LiteLLM 同步**需主动启用，默认关闭。其环境变量如下（参见 [`.env.example`](../../.env.example)）：
+**LiteLLM同步**是选择加入，默认情况下禁用。它的环境变量（参见[`.env.example`](../../.env.example) ）是：
 
-| 环境变量                | 默认值    | 用途                                               |
-| ----------------------- | --------- | -------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | 启用后台 LiteLLM 价格同步。                        |
-| `PRICING_SYNC_INTERVAL` | `86400`   | 同步间隔，单位为**秒**（默认为每天一次）。         |
-| `PRICING_SYNC_SOURCES`  | `litellm` | 此来源选择仅适用于本项同步；目前仅支持 `litellm`。 |
+| 环境变量                | 默认      | 目的                                         |
+| ----------------------- | --------- | -------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | 启用后台LiteLLM定价同步。                    |
+| `PRICING_SYNC_INTERVAL` | `86400`   | 同步间隔以秒为单位（每天）。                 |
+| `PRICING_SYNC_SOURCES`  | `litellm` | 仅用于此同步的源选择；目前仅支持`litellm` 。 |
 
-**models.dev 同步**独立于 LiteLLM 同步，也默认关闭。可在设置中启用（models.dev 同步），或使用下列变量：
+**models.dev 同步**与LiteLLM同步分开，默认情况下也是禁用的。在设置（models.dev 同步）中启用它或使用这些变量：
 
-| 环境变量                   | 默认值     | 用途                                                                                                    |
-| -------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(未设置)_ | 未设置时遵循设置中的开关；`1/true/on/yes` 强制开启，`0/false/off/no` 强制关闭，即使设置中已启用也如此。 |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`    | 默认 models.dev 同步间隔，单位为秒（每天一次）。                                                        |
+| 环境变量                   | 默认         | 目的                                                                                            |
+| -------------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _（未设置）_ | 取消设置遵循设置切换； `1/true/on/yes`强制打开， `0/false/off/no`强制关闭（即使“设置”启用它）。 |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | 默认 models.dev 同步间隔（以秒为单位）（每日）。                                                |
 
-`PRICING_SYNC_SOURCES` **不会**启用 models.dev；它只控制 LiteLLM 同步。删除用户覆盖值不会清空任何一个同步命名空间；下一个可用的价格层会生效。对于没有价格的模型，添加手动覆盖值之前，应先检查两项同步设置及 `sourceMap`。
+`PRICING_SYNC_SOURCES`确实**不是**启用 models.dev；它仅控制LiteLLM同步。删除用户覆盖不会清除同步的命名空间；下一个可用的定价层将生效。对于未定价的型号，请在添加手动覆盖之前检查同步设置和`sourceMap` 。
 
 ### 成本公式
 
-成本根据 token 数量和每百万 token 的费率按请求计算，相关实现在
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-（`computeCostFromPricing` / `calculateCost`）中：
+成本是根据[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) 中的代币计数和每百万代币费率计算每个请求的成本：
 
-- **输入 token**（减去缓存读取 token 和缓存创建 token）× `input` 费率。
-- **缓存读取 token** × `cached` 费率（若未设置，则回退到输入费率）。
-- **缓存创建 token** × `cache_creation` 费率（若未设置，则回退到输入费率）。
-- **输出 token** × `output` 费率。
-- **推理 token** × `reasoning` 费率（若未设置，则回退到输出费率）。
+- **输入令牌**（减去缓存读取和缓存创建令牌） × `input`速率。
+- **缓存读取令牌**× `cached`速率（回落到输入速率）。
+- **缓存创建令牌**× `cache_creation`速率（回落到输入速率）。
+- **输出代币**× `output`率。
+- **推理标记**× `reasoning`速率（回落到输出速率）。
 
-所有费率均解释为每 1,000,000 个 token 的美元价格。Codex 的“fast”/“priority”或“flex”服务层级会应用成本乘数（`getCodexFastCostMultiplier`）——例如，flex 按 token 成本的 50% 折扣计费，并在仪表板中显示为 **flex 节省金额**。
+所有费率均解释为每 1,000,000 个代币的USD 。 Codex “快速”/“优先”或“灵活”服务层应用成本乘数 (`getCodexFastCostMultiplier`) — ，例如，灵活按 50% 代币折扣计费，表现为**弹性储蓄**在仪表板中。
 
-系统会先对模型名称进行规范化处理（去除诸如 `openai/` 或 `accounts/fireworks/models/` 等提供者路径前缀），以确保历史记录仍能匹配对应价格。
+首先对模型名称进行规范化（去除`openai/`或`accounts/fireworks/models/`等提供者路径前缀），以便历史行仍然与价格匹配。
 
 ### 如何记录支出
 
-- 系统会在响应完成后计算单请求成本，并以“即发即弃”的方式记录，因此绝不会增加客户端延迟。共享配额消耗会通过 [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) 安排在下一个事件循环 tick 中处理。
-- API 密钥支出会被缓冲，并由
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) 分批刷新（默认刷新间隔为 60 秒，缓冲区容量为 1,000 个条目）。可通过以下变量进行调整：
+- 每个请求的成本是在请求完成时计算的。共享配额消耗通过[`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)安排在下一个事件循环标记上。
+- API 密钥支出由[`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)批量缓冲和刷新（默认 60 秒刷新间隔，1,000 个条目缓冲区）。可通过以下方式调节：
 
-  | 环境变量                            | 默认值  | 用途                       |
+  | 环境变量                            | 默认    | 目的                       |
   | ----------------------------------- | ------- | -------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 刷新间隔，单位为毫秒。     |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 刷新前可缓冲的最大条目数。 |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 刷新间隔（以毫秒为单位）。 |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 刷新前的最大缓冲条目。     |
 
-仪表板中的成本数字**并非**读取自每行已存储的美元金额——每次运行分析端点时，系统都会根据 token 数量和当前定价表即时重新计算。这意味着，修正错误价格（并重新同步）后，历史成本估算也会追溯更新。
+成本更喜欢提供者报告的确切费用（`provider_cost_usd`），然后是目录定价的请求快照（`calculated_cost_usd`），然后是当前目录中的代币重新定价。存储的成本不会通过其代币计数再次收取。当目录价格发生变化时，旧的仅令牌行仍然会发生变化。
+
+### OCR和嵌入
+
+- 成功的`/v1/ocr`请求使用上游`usage_info.pages_processed`，而不是请求的页面范围或返回的页面对象的数量。估计是页数× `ocr_cost_per_page` （绝对USD/page，**不是**USD/million）。
+- 带有文档或边界框注释的请求需要单独的`ocr_cost_per_annotated_page`费率。如果没有它，成本仍然未知；普通OCR资费并没有悄然被取代。
+- LiteLLM同步将其上游`annotation_cost_per_page`字段映射到`ocr_cost_per_annotated_page`，保留绝对USD/page值和仅注释条目，包括显式零。提供的规范字段优先；无效的别名值将被忽略。用户定价覆盖保留其正常优先级。请参阅[LiteLLM的OCR定价要点](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking)。
+- OCR使用存储页数、单价、计算的USD成本、 API密钥和选定的连接。页面永远不会表示为令牌。呼叫日志包含计费元数据，而不是文档URLs、 PDF字节或提取的文本。
+- 成功的`/v1/embeddings`请求会记录每个物理批次的一个使用行，包括在同一毫秒内完成的单独批次。提供者报告的费用优先于代币估算；组合包装不增加费用。
+- 使用历史记录、成本分析、 provider/account窗口、API 密钥支出限制、请求成本分类账和每日使用情况汇总包含这些费用。无日志键保留数字记录而不保留源文本。
+- 缺少使用量或资费的是**未知**，不是免费的：省略响应成本标头，现有的无价使用策略适用于有限的API密钥。明确配置的零费率仍然有效的零成本使用。
+
+这是仅向前会计。从未写入使用历史记录的旧OCR/embedding调用无法从此迁移中重建。目录估算是USD估算，而不是发票，并且不包括货币兑换、税收或折扣。
 
 ---
 

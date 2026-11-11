@@ -50,6 +50,7 @@ import {
   parseStoredPayload,
   protectErrorPayloadForLog,
   protectPayloadForLog,
+  protectRequestBodyForLog,
 } from "../logPayloads";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import { getCallLogsDir, type CallLogArtifact, type CallLogDetailState } from "./callLogArtifacts";
@@ -577,7 +578,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     : entry.connectionId || apiKeyContext?.connectionId || null;
   const noLogEnabled = Boolean(entry.noLog) || (apiKeyId ? isNoLog(apiKeyId) : false);
 
-  const protectedRequestBody = noLogEnabled ? null : protectPayloadForLog(entry.requestBody);
+  const protectedRequestBody = noLogEnabled ? null : protectRequestBodyForLog(entry.requestBody);
   const responseStatus = Number(entry.status);
   const failedResponse = Number.isFinite(responseStatus) && responseStatus >= 400;
   const protectedResponseBody = noLogEnabled

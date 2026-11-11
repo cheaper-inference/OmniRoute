@@ -38,77 +38,73 @@ Bu rəqəm təxmini olduğuna görə:
 
 ---
 
-## Xərclər necə təxmin edilir
+## Xərclər necə qiymətləndirilir
 
 ### Qiymət mənbəyi
 
-Xərclər [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) daxilindəki birləşdirilmiş qiymət cədvəlindən bu üstünlük sırası ilə alınır (**ən yüksək əvvəl**):
+Xərclər bu prioritet qaydada [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) -da birləşdirilmiş qiymət cədvəlindən gəlir (**ən yüksək birinci** ):
 
-1. **İstifadəçi əvəzləmələri** — paneldə və ya `PATCH /api/pricing` vasitəsilə təyin edilmiş qiymətlər (`pricing` ad məkanı).
-2. **models.dev sinxronlaşdırması** — `https://models.dev/api.json` ünvanından alınmış qiymətlər (`models_dev_pricing` ad məkanı).
-3. **LiteLLM sinxronlaşdırması** — LiteLLM-in açıq `model_prices_and_context_window.json` faylından alınmış qiymətlər (`pricing_synced` ad məkanı).
-4. **Koddakı standart dəyərlər** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) daxilində təqdim olunan tariflər.
+1. **İstifadəçi ləğv edir** — qiymətləri tablosunda və ya `PATCH /api/pricing` ( `pricing` ad məkanı) vasitəsilə müəyyən edilir.
+2. **models.dev sinxronizasiyası** — qiyməti `https://models.dev/api.json` dən ( `models_dev_pricing` ad məkanı) götürülüb.
+3. **LiteLLM sinxronizasiyası** — qiymətləri LiteLLM-nin ictimai `model_prices_and_context_window.json` dən ( `pricing_synced` ad məkanı) götürülüb.
+4. **Hardcoded default** [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ilə göndərilən — dərəcələri.
 
-Eyni provayder/model üçün yüksək üstünlüklü təbəqələr aşağı təbəqələrdəki uyğun sahələrin üzərinə yazır; yuxarı təbəqədə olmayan sahələr yenə aşağı təbəqədən götürülə bilər. Hər iki müstəqil sinxronlaşdırma işi eyni vaxtda işləsə də sıra sabit qalır. `GET /api/pricing?includeSources=1` sorğusu `pricing` və `sourceMap` qaytarır; sonuncunun model üzrə etiketləri (`user`, `modelsDev`, `litellm`, `default`) həmin modeli ehtiva edən ən yüksək üstünlüklü təbəqəni göstərir.
+Eyni provider/model üçün daha yüksək prioritet təbəqələrdən olan dəyərlər aşağı təbəqələrdə uyğun sahələrin üzərinə yazır; yuxarı təbəqədə olmayan sahələr hələ də aşağı təbəqədən gələ bilər. Sifariş hətta hər iki müstəqil sinxronizasiya işi eyni vaxtda işləyərkən də müəyyən edilir. `GET /api/pricing?includeSources=1` hər model etiketləri (`user`, `modelsDev`, `litellm`, `default`) həmin modeli ehtiva edən ən yüksək prioritet təbəqəni müəyyən edən `pricing` və `sourceMap` ni qaytarır.
 
-**LiteLLM sinxronlaşdırması** ayrıca aktivləşdirilməlidir və standart olaraq söndürülüb. Onun mühit dəyişənləri (baxın: [`.env.example`](../../.env.example)) bunlardır:
+**LiteLLM sinxronizasiyası** qoşulur, defolt olaraq qeyri-aktivdir. Onun mühit dəyişənləri (bax: [`.env.example`](../../.env.example) ) bunlardır:
 
-| Mühit dəyişəni          | Standart  | Məqsəd                                                                             |
-| ----------------------- | --------- | ---------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Arxa planda LiteLLM qiymət sinxronlaşdırmasını aktivləşdirir.                      |
-| `PRICING_SYNC_INTERVAL` | `86400`   | **Saniyə** ilə sinxronizasiya intervalı (standart olaraq gündəlik).                |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Yalnız bu sinxronlaşdırma üçün mənbə seçimi; hazırda yalnız `litellm` dəstəklənir. |
+| Env var                 | Defolt    | Məqsəd                                                                            |
+| ----------------------- | --------- | --------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Fon LiteLLM qiymət sinxronizasiyasını aktivləşdirin.                              |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Saniyədə sinxronizasiya intervalı (gündəlik).                                     |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Yalnız bu sinxronizasiya üçün mənbə seçimi; hazırda yalnız `litellm` dəstəklənir. |
 
-**models.dev sinxronlaşdırması** LiteLLM sinxronlaşdırmasından ayrıdır və o da standart olaraq söndürülüb. Parametrlərdə (models.dev sinxronlaşdırması) aktivləşdirin və ya bu dəyişənlərdən istifadə edin:
+**models.dev sinxronizasiyası** LiteLLM sinxronizasiyasından ayrıdır və defolt olaraq deaktivdir. Onu Parametrlərdə aktivləşdirin (models.dev sync) və ya bu dəyişənlərdən istifadə edin:
 
-| Mühit dəyişəni             | Standart dəyər      | Məqsəd                                                                                                                                                           |
-| -------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(təyin edilməyib)_ | Təyin edilmədikdə Parametrlər keçidinə uyğun davranır; `1/true/on/yes` məcburi aktivləşdirir, `0/false/off/no` isə Parametrlər aktiv etsə belə məcburi söndürür. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`             | models.dev sinxronlaşdırmasının saniyə ilə standart intervalı (gündəlik).                                                                                        |
+| Env var                    | Defolt          | Məqsəd                                                                                                                                                  |
+| -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmadı)_ | Ayarlanmadan çıxarılır Parametrlər keçidindən sonra; `1/true/on/yes` güclənir və `0/false/off/no` güclə söndürülür (Parametrlər buna imkan versə belə). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Defolt models.dev sinxronizasiya intervalı saniyələrlə (gündəlik).                                                                                      |
 
-`PRICING_SYNC_SOURCES` models.dev-i **aktivləşdirmir**; yalnız LiteLLM sinxronlaşdırmasını idarə edir. İstifadəçi əvəzləməsinin silinməsi sinxronlaşdırılmış ad məkanlarının heç birini təmizləmir; növbəti mövcud qiymət təbəqəsi qüvvəyə minir. Qiymətsiz model üçün əl ilə əvəzləmə əlavə etməzdən əvvəl hər iki sinxronlaşdırma parametrini və `sourceMap` dəyərini yoxlayın.
+`PRICING_SYNC_SOURCES` edir **yox** models.dev-i aktivləşdirin; yalnız LiteLLM sinxronizasiyasına nəzarət edir. İstifadəçinin ləğv edilməsinin silinməsi nə sinxronlaşdırılmış ad məkanını silmir; növbəti mövcud qiymət təbəqəsi qüvvəyə minir. Qiymətsiz bir model üçün əl ilə ləğv etmədən əvvəl həm sinxronizasiya parametrlərini, həm də `sourceMap` ni yoxlayın.
 
 ### Xərc düsturu
 
-Xərc hər sorğu üçün token saylarından və bir milyon token üzrə tariflərdən istifadə etməklə
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) faylında
-(`computeCostFromPricing` / `calculateCost`) hesablanır:
+Xərc [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) -da (`computeCostFromPricing` / `calculateCost`) token sayılarından və milyon başına token dərəcələrindən sorğuya görə hesablanır:
 
-- **Giriş tokenləri** (keş oxumaları və keş yaratma tokenləri çıxılmaqla) × `input` tarifi.
-- **Keşdən oxunan tokenlər** × `cached` tarifi (olmadıqda giriş tarifindən istifadə edilir).
-- **Keş yaratma tokenləri** × `cache_creation` tarifi (olmadıqda giriş tarifindən istifadə edilir).
-- **Çıxış tokenləri** × `output` tarifi.
-- **Mühakimə tokenləri** × `reasoning` tarifi (olmadıqda çıxış tarifindən istifadə edilir).
+- **Giriş nişanları** (mənfi keş oxu və keş yaratma nişanları) × `input` dərəcəsi.
+- **Keş oxunan tokenlər** × `cached` dərəcəsi (giriş sürətinə qayıdır).
+- **Keş yaratma nişanları** × `cache_creation` dərəcəsi (giriş sürətinə qayıdır).
+- **Çıxış nişanları** × `output` dərəcəsi.
+- **Məntiqi işarələr** × `reasoning` dərəcəsi (çıxış dərəcəsinə qayıdır).
 
-Bütün tariflər 1.000.000 token üçün USD kimi şərh olunur. Codex «fast»/«priority» və ya
-«flex» xidmət səviyyəsi xərc əmsalı (`getCodexFastCostMultiplier`) tətbiq edir — məsələn,
-flex tokenlərə 50% endirimlə hesablanır və idarə panelində **flex qənaəti** kimi göstərilir.
+Bütün dərəcələr 1.000.000 token üçün USD kimi şərh olunur. Codex "sürətli"/"prioritet" və ya "çevik" xidmət səviyyəsi xərc multiplikatorunu (`getCodexFastCostMultiplier`) tətbiq edir, məsələn, — 50% token endirimi ilə hesablanır.**çevik qənaət** tablosunda.
 
-Əvvəlcə model adları normallaşdırılır (məsələn, `openai/` və ya
-`accounts/fireworks/models/` kimi provayder yolu prefiksləri silinir) ki, tarixi sətirlər
-hələ də qiymətlə uyğunlaşdırıla bilsin.
+Model adları əvvəlcə normallaşdırılır ( `openai/` və ya `accounts/fireworks/models/` kimi provayder yolu prefiksləri silinir), buna görə də tarixi sıralar hələ də qiymətə uyğun gəlir.
 
-### Xərclər necə qeydə alınır
+### Xərcləmə necə qeydə alınır
 
-- Hər sorğu üzrə xərc cavabdan sonra hesablanır və müştəri üçün heç bir gecikmə
-  yaratmaması məqsədilə nəticə gözlənilmədən qeydə alınır. Paylaşılan kvotanın istifadəsi
-  növbəti hadisə dövrü addımında
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) vasitəsilə
-  planlaşdırılır.
-- API açarı üzrə xərclər buferlənir və
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tərəfindən paketlərlə yazılır
-  (standart yazma intervalı 60 saniyə, bufer ölçüsü 1.000 qeyd). Aşağıdakılar vasitəsilə
-  tənzimlənə bilər:
+- Hər bir sorğunun dəyəri sorğu başa çatdıqdan sonra hesablanır. Paylaşılan kvota istehlakı [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) vasitəsilə növbəti hadisə dövriyyəsi işarəsində planlaşdırılır.
+- API açarının xərclənməsi [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (defolt 60-ların yuyulma intervalı, 1000 giriş buferi) tərəfindən buferlənir və partiyalar şəklində təmizlənir. Bunun vasitəsilə tənzimlənə bilər:
 
-  | Mühit dəyişəni                      | Standart | Məqsəd                                       |
-  | ----------------------------------- | -------- | -------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Millisaniyə ilə buferi yazma intervalı.      |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Yazmadan əvvəl buferdəki maksimum qeyd sayı. |
+  | Env var                             | Defolt  | Məqsəd                                             |
+  | ----------------------------------- | ------- | -------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Yuma intervalı millisaniyələrdə.                   |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Təmizləmədən əvvəl maksimum tamponlanmış girişlər. |
 
-İdarə panelindəki xərc rəqəmləri hər sətir üçün saxlanılmış dollar məbləğindən **oxunmur** —
-analitika son nöqtəsi hər dəfə işlədikdə onlar token sayları və cari qiymət cədvəli
-əsasında yenidən hesablanır. Bu o deməkdir ki, səhv qiymətin düzəldilməsi (və yenidən
-sinxronlaşdırılması) tarixi xərc təxminlərini geriyə dönük olaraq yeniləyir.
+Xərclər provayder tərəfindən bildirilən dəqiq ödənişə (`provider_cost_usd`), sonra kataloq qiymətli sorğu snapshotına (`calculated_cost_usd`), sonra cari kataloqdan tokenin yenidən qiymətlənməsinə üstünlük verir. Saxlanılan xərclər onların token sayları vasitəsilə yenidən tutulmur. Kataloq qiyməti dəyişdikcə köhnə mö'cüzəli sıralar hələ də dəyişir.
+
+### OCR və daxiletmələr
+
+- Uğurlu `/v1/ocr` sorğuları tələb olunan səhifə diapazonundan və ya geri qaytarılan səhifə obyektlərinin sayından deyil, yuxarı axın `usage_info.pages_processed` istifadə edir. Təxmini səhifələr × `ocr_cost_per_page` (mütləq USD/page,**yox** USD/million).
+- Sənəd və ya həddi xana annotasiyaları olan sorğular ayrıca `ocr_cost_per_annotated_page` tarifini tələb edir. Onsuz, dəyəri naməlum olaraq qalır; adi OCR tarifi səssizcə əvəz edilmir.
+- LiteLLM sinxronizasiyası mütləq USD/page dəyərini və açıq sıfır daxil olmaqla, yalnız annotasiya daxiletmələrini saxlayaraq, yuxarı axınındakı `annotation_cost_per_page` sahəsini `ocr_cost_per_annotated_page` ilə əlaqələndirir. Təchiz edilmiş kanonik sahə üstünlük təşkil edir; etibarsız ləqəb dəyərləri nəzərə alınmır. İstifadəçi qiymətlərini ləğv etmələri normal prioritetlərini saxlayır. [LiteLLM-nin OCR qiymət açarlarına](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) baxın.
+- OCR istifadəsi səhifə sayını, vahid qiymətini, hesablanmış USD dəyərini, API açarını və seçilmiş əlaqəni saxlayır. Səhifələr heç vaxt token kimi göstərilmir. Zəng qeydlərində faktura metadatası var, URLs sənədi, PDF baytları və ya çıxarılan mətn deyil.
+- Uğurlu `/v1/embeddings` sorğuları eyni millisaniyədə tamamlanan ayrı-ayrı partiyalar da daxil olmaqla, hər fiziki partiyaya bir istifadə sırasını qeyd edir. Provayder tərəfindən bildirilən ödənişlər token təxminlərindən üstündür; Combo sarmalayıcılar bir ödəniş əlavə etmir.
+- İstifadə tarixçəsi, Xərclər analitikası, provider/account pəncərələri, API açarı xərcləmə limitləri, sorğu-xərc kitabçası və gündəlik istifadə yığımlarına bu ödənişlər daxildir. Girişsiz düymələr mənbə mətni saxlamadan ədədi uçotu saxlayır.
+- Eksik istifadə və ya tariflər var **naməlum** , pulsuz deyil: cavab dəyəri başlığı buraxılıb və mövcud qiymətsiz istifadə siyasəti məhdud API açarlarına tətbiq edilir. Aydın şəkildə konfiqurasiya edilmiş sıfır tariflər etibarlı sıfır xərcli istifadə olaraq qalır.
+
+Bu yalnız irəli mühasibatdır. Heç vaxt istifadə tarixçəsi yazmamış köhnə OCR/embedding zəngləri bu miqrasiyadan yenidən qurula bilməz. Kataloq təxminləri faktura deyil, USD təxminləridir və valyuta konvertasiyası, vergi və ya endirimləri daxil etmir.
 
 ---
 

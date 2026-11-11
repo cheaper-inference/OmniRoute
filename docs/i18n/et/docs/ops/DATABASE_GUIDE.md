@@ -405,50 +405,51 @@ See kasutab SQLite'i veebipõhist varundus-API-t, mistõttu on käsku ohutu käi
 
 ## Jõudluse häälestamine
 
-### WAL-režiim
+### WAL režiim
 
-WAL on vaikimisi lubatud. Suure kirjutuskoormuse korral kaaluge järgmist:
+WAL on vaikimisi lubatud. Suure kirjutamiskoormuse korral kaaluge järgmist.
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrollpunkt iga 1000 lehekülje järel
-PRAGMA journal_size_limit = 67108864;  -- WAL-i piirang 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ei määra `journal_size_limit`. Kontrollpunkt teisaldab WAL kaadreid põhifaili, kuid WAL fail säilitab oma suurima eraldatud suuruse. `OMNIROUTE_WAL_GUARD_MAX_MB` valvur ainult hoiatab ja käivitab `wal_checkpoint(RESTART)`; see ei ole kettasuurune kork.
 
 ### Indeksid
 
-Jõudluse jaoks olulised indeksid (migratsioonid loovad need automaatselt):
+Peamised jõudluse indeksid (migreerimisega automaatselt loodud):
 
-- `idx_models_provider` — mudelite otsing teenusepakkuja järgi
-- `idx_combo_targets_combo_id` — kombinatsiooni sihtmärkide laiendamine
-- `idx_usage_history_api_key_timestamp` — kasutusanalüütika
-- `idx_quota_snapshots_api_key_window` — kvootide jälgimine
+- `idx_models_provider` — mudeli otsingud pakkuja järgi
+- `idx_combo_targets_combo_id` — kombineeritud sihtmärgi laiendus
+- `idx_usage_history_api_key_timestamp` — kasutusanalüüs
+- `idx_quota_snapshots_api_key_window` — kvoodi jälgimine
 - `idx_call_logs_timestamp` — kõnelogi päringud
 
-Uue indeksi lisamiseks looge migratsioon:
+Uue indeksi lisamiseks looge migratsioon.
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Mälukaardistatud sisend/väljund
+### Mäluga kaardistatud I/O
 
-Väga suurte andmebaaside (>10 GB) korral saab mälukaardistust kohandada SQLite'i pragma abil:
+Väga suurte andmebaaside (> 10GB) puhul saab mälu kaardistamist reguleerida SQLite pragma kaudu:
 
 ```sql
--- Määrake SQLite'i pragma abil (kohandage failis core.ts või käitusajal)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Tihendamine
 
-Pikka aega töötavatele OmniRoute'i eksemplaridele tuleb kasuks aeg-ajalt käivitatav `VACUUM`:
+Pikaajalised OmniRoute eksemplarid saavad aeg-ajalt `VACUUM`-st kasu:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Käivitage seda kord kuus vähese liiklusega ajavahemikul. (WAL-režiim vähendab vajadust, kuid ei kõrvalda seda.)
+Käivitage igakuiselt vähese liiklusega akende ajal. (WAL režiim vähendab vajadust, kuid ei kõrvalda seda.)
 
 ---
 

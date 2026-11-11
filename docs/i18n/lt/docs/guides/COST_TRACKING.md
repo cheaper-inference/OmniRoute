@@ -38,71 +38,71 @@ Kadangi šis skaičius yra įvertis:
 
 ## Kaip apskaičiuojamos išlaidos
 
-### Kainodaros šaltinis
+### Kainos šaltinis
 
-Kainos gaunamos iš sujungtos kainodaros lentelės [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), tokia pirmumo tvarka (**aukščiausias prioritetas pirmas**):
+Išlaidos gaunamos iš sujungtos kainodaros lentelės [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), šia eilės tvarka (**aukščiausia pirma** ):
 
-1. **Naudotojo perrašytos kainos** — kainos, nustatytos valdymo skyde arba per `PATCH /api/pricing` (vardų sritis `pricing`).
-2. **models.dev sinchronizavimas** — kainos, gaunamos iš `https://models.dev/api.json` (vardų sritis `models_dev_pricing`).
-3. **LiteLLM sinchronizavimas** — kainos, gaunamos iš viešo LiteLLM failo `model_prices_and_context_window.json` (vardų sritis `pricing_synced`).
-4. **Kode pateiktos numatytosios kainos** — tarifai, įtraukti į [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Vartotojas nepaiso** — kainos nustatytos prietaisų skydelyje arba per `PATCH /api/pricing` ( `pricing` vardų sritis).
+2. **Models.dev sinchronizavimas** — kainodara gauta iš `https://models.dev/api.json` ( `models_dev_pricing` vardų erdvės).
+3. **LiteLLM sinchronizavimas** — kainos gautos iš LiteLLM viešosios `model_prices_and_context_window.json` ( `pricing_synced` vardų erdvės).
+4. **Užkoduoti numatytieji nustatymai** — įkainiai siunčiami [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Tam pačiam teikėjui ir modeliui aukštesnio prioriteto sluoksnių reikšmės perrašo atitinkamus žemesnių sluoksnių laukus; laukus, kurių nėra aukštesniame sluoksnyje, vis dar gali pateikti žemesnis. Tvarka nekinta, net kai abi nepriklausomos sinchronizavimo užduotys vykdomos vienu metu. `GET /api/pricing?includeSources=1` grąžina `pricing` ir `sourceMap`; kiekvieno modelio žymos (`user`, `modelsDev`, `litellm`, `default`) nurodo aukščiausio prioriteto sluoksnį, kuriame yra tas modelis.
+Tam pačiam provider/model vertės iš aukštesnio prioriteto sluoksnių perrašo atitinkamus laukus žemesniuose sluoksniuose; Laukai, kurių nėra viršutiniame sluoksnyje, vis tiek gali būti iš apatinio sluoksnio. Užsakymas yra fiksuotas net tada, kai abi nepriklausomos sinchronizavimo užduotys vykdomos vienu metu. `GET /api/pricing?includeSources=1` pateikia `pricing` ir `sourceMap`, kurių kiekvieno modelio etiketės (`user`, `modelsDev`, `litellm`, `default`) nurodo aukščiausio prioriteto sluoksnį, kuriame yra tas modelis.
 
-**LiteLLM sinchronizavimas** įjungiamas pasirinktinai ir pagal numatymą yra išjungtas. Jo aplinkos kintamieji (žr. [`.env.example`](../../.env.example)) yra:
+**LiteLLM sinchronizavimas** yra pasirenkamas, pagal numatytuosius nustatymus išjungtas. Jo aplinkos kintamieji (žr. [`.env.example`](../../.env.example) ) yra šie:
 
-| Aplinkos kintamasis     | Numatytoji reikšmė | Paskirtis                                                                                   |
-| ----------------------- | ------------------ | ------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`            | Įjungti foninį LiteLLM kainų sinchronizavimą.                                               |
-| `PRICING_SYNC_INTERVAL` | `86400`            | Sinchronizavimo intervalas **sekundėmis** (numatyta — kasdien).                             |
-| `PRICING_SYNC_SOURCES`  | `litellm`          | Šaltinio parinkimas taikomas tik šiam sinchronizavimui; šiuo metu palaikomas tik `litellm`. |
+| Env var                 | Numatytoji | Tikslas                                                                             |
+| ----------------------- | ---------- | ----------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`    | Įgalinti foninį LiteLLM kainų sinchronizavimą.                                      |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Sinchronizavimo intervalas sekundėmis (kasdien).                                    |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Šaltinio pasirinkimas tik šiam sinchronizavimui; šiuo metu palaikoma tik `litellm`. |
 
-**models.dev sinchronizavimas** yra atskiras nuo LiteLLM sinchronizavimo ir taip pat pagal numatymą išjungtas. Įjunkite jį Nustatymuose (models.dev sinchronizavimas) arba naudokite šiuos kintamuosius:
+**Models.dev sinchronizavimas** yra atskiras nuo LiteLLM sinchronizavimo ir pagal numatytuosius nustatymus taip pat yra išjungtas. Įjunkite jį nustatymuose (models.dev sync) arba naudokite šiuos kintamuosius:
 
-| Aplinkos kintamasis        | Numatytoji reikšmė | Paskirtis                                                                                                                                                     |
-| -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nenustatyta)_    | Jei nenustatyta, laikomasi Nustatymų jungiklio; `1/true/on/yes` priverstinai įjungia, o `0/false/off/no` priverstinai išjungia, net jei Nustatymuose įjungta. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Numatytasis models.dev sinchronizavimo intervalas sekundėmis, kartą per dieną.                                                                                |
+| Env var                    | Numatytoji    | Tikslas                                                                                                                                               |
+| -------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nustatyta)_ | Atšaukti nustatymą seka perjungiklį Nustatymai; `1/true/on/yes` įsijungia, o `0/false/off/no` priverstinai išjungia (net jei nustatymai tai įgalina). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Numatytasis models.dev sinchronizavimo intervalas sekundėmis (kasdien).                                                                               |
 
-`PRICING_SYNC_SOURCES` models.dev **neįjungia**; jis valdo tik LiteLLM sinchronizavimą. Pašalinus naudotojo perrašytą kainą, abi sinchronizuotos vardų sritys lieka nepakeistos; įsigalioja kitas prieinamas kainodaros sluoksnis. Prieš rankiniu būdu nustatydami kainą jos neturinčiam modeliui, patikrinkite abiejų sinchronizavimų nustatymus ir `sourceMap`.
+`PRICING_SYNC_SOURCES` daro **ne** įgalinti models.dev; jis valdo tik LiteLLM sinchronizavimą. Ištrynus vartotojo nepaisymą, sinchronizuojama vardų erdvė neišvaloma; įsigalioja kitas galimas kainodaros sluoksnis. Jei modelis neįkainojamas, prieš pridėdami rankinį nepaisymą patikrinkite sinchronizavimo nustatymus ir `sourceMap`.
 
 ### Kainos formulė
 
-Kiekvienos užklausos kaina apskaičiuojama pagal žetonų skaičių ir milijonui žetonų taikomus tarifus,
-nurodytus [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Mokestis apskaičiuojamas pagal užklausą pagal žetonų skaičių ir milijono žetonų tarifus [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Įvesties žetonai** (atėmus podėlio skaitymo ir podėlio kūrimo žetonus) × `input` tarifas.
-- **Podėlio skaitymo žetonai** × `cached` tarifas (jei jo nėra, naudojamas įvesties tarifas).
-- **Podėlio kūrimo žetonai** × `cache_creation` tarifas (jei jo nėra, naudojamas įvesties tarifas).
-- **Išvesties žetonai** × `output` tarifas.
-- **Samprotavimo žetonai** × `reasoning` tarifas (jei jo nėra, naudojamas išvesties tarifas).
+- **Įvesties žetonai** (atėmus talpyklos skaitymus ir talpyklos kūrimo žetonus) × `input` rodiklis.
+- **Talpyklos skaitymo žetonai** × `cached` norma (sugrįžta į įvesties dažnį).
+- **Talpyklos kūrimo žetonai** × `cache_creation` norma (sugrįžta į įvesties dažnį).
+- **Išvesties žetonai** × `output` norma.
+- **Samprotavimo žetonai** × `reasoning` greitis (grįžta į išvesties spartą).
 
-Visi tarifai laikomi USD už 1 000 000 žetonų. „Codex“ „fast“ / „priority“ arba
-„flex“ paslaugos lygiui taikomas kainos daugiklis (`getCodexFastCostMultiplier`) — pvz., „flex“
-apmokestinamas taikant 50 % nuolaidą žetonams, kuri valdymo skydelyje rodoma kaip **„flex“ sutaupymas**.
+Visi tarifai interpretuojami kaip USD už 1 000 000 žetonų. Codex „greitos“ / „prioritetinės“ arba „lanksčios“ paslaugos pakopai taikomas sąnaudų daugiklis (`getCodexFastCostMultiplier`) —, pvz.**lankstus taupymas** prietaisų skydelyje.
 
-Pirmiausia modelių pavadinimai normalizuojami (pašalinami tiekėjo kelio prefiksai, pvz., `openai/` arba
-`accounts/fireworks/models/`), kad istorinės eilutės ir toliau atitiktų kainą.
+Modelių pavadinimai pirmiausia normalizuojami (tiekėjo kelio priešdėliai, pvz., `openai/` arba `accounts/fireworks/models/` pašalinami), todėl istorinės eilutės vis tiek atitinka kainą.
 
-### Kaip registruojamos išlaidos
+### Kaip įrašomos išlaidos
 
-- Užklausos kaina apskaičiuojama gavus atsakymą ir registruojama nelaukiant rezultato, todėl
-  klientui niekada nepridedama delsa. Bendros kvotos naudojimas suplanuojamas kitam
-  įvykių ciklo žingsniui per [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API rakto išlaidos kaupiamos buferyje ir paketais įrašomos naudojant
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (numatytasis įrašymo intervalas — 60 s,
-  1 000 įrašų buferis). Galima konfigūruoti naudojant:
+- Užklausos kaina apskaičiuojama užpildžius užklausą. Pasidalintos kvotos sunaudojimas suplanuotas kito įvykio ciklo varnele per [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API rakto išlaidas buferizuoja ir išleidžia [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (numatytasis 60 s praplovimo intervalas, 1 000 įrašų buferis). Derinamas per:
 
-  | Aplinkos kintamasis                 | Numatytoji reikšmė | Paskirtis                                                  |
-  | ----------------------------------- | ------------------ | ---------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`            | Įrašymo intervalas milisekundėmis.                         |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`             | Didžiausias buferyje laikomų įrašų skaičius prieš įrašymą. |
+  | Env var                             | Numatytoji | Tikslas                                       |
+  | ----------------------------------- | ---------- | --------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Praplovimo intervalas milisekundėmis.         |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maksimalus buferinis įrašas prieš praplovimą. |
 
-Valdymo skydelio kainų duomenys **nėra** nuskaitomi iš kiekvienoje eilutėje saugomos dolerio sumos — jie
-kaskart iš naujo apskaičiuojami pagal žetonų skaičių ir dabartinę kainų lentelę, kai tik
-vykdoma analizės galinio taško užklausa. Tai reiškia, kad ištaisius neteisingą kainą (ir pakartotinai sinchronizavus)
-istoriniai kainų įverčiai atnaujinami atgaline data.
+Išlaidoms pirmenybė teikiama tiksliui teikėjo nurodytam mokesčiui (`provider_cost_usd`), tada katalogo kainomis užklausos momentinei nuotraukai (`calculated_cost_usd`), tada žetonų perkainavimui iš dabartinio katalogo. Išsaugotos išlaidos dar kartą neapmokestinamos pagal jų žetonų skaičių. Pasenusios tik prieigos rakto eilutės vis tiek keičiasi, kai pasikeičia jų katalogo kaina.
+
+### OCR ir įterpimai
+
+- Sėkmingos `/v1/ocr` užklausos naudoja prieš srovę `usage_info.pages_processed`, o ne prašomą puslapių diapazoną arba grąžintų puslapio objektų skaičių. Sąmata yra puslapiai × `ocr_cost_per_page` (absoliutus USD/page,**ne** USD/million).
+- Užklausoms su dokumento arba apribojimo langelio komentarais reikalingas atskiras `ocr_cost_per_annotated_page` tarifas. Be jo kaina lieka nežinoma; įprastas OCR tarifas tyliai nepakeičiamas.
+- LiteLLM sinchronizavimas susieja savo prieš srovę esantį `annotation_cost_per_page` lauką į `ocr_cost_per_annotated_page`, išsaugodamas absoliučią USD/page reikšmę ir tik anotacijų įrašus, įskaitant aiškų nulį. Pateiktas kanoninis laukas turi pirmenybę; nepaisoma netinkamų slapyvardžių verčių. Vartotojo kainodaros nepaisymas išlaiko įprastą prioritetą. Žr. [LiteLLMOCR kainodaros raktus](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR naudojimas išsaugo puslapių skaičių, vieneto kainą, apskaičiuotą USD kainą, API raktą ir pasirinktą ryšį. Puslapiai niekada nevaizduojami kaip žetonai. Skambučių žurnaluose yra atsiskaitymo metaduomenys, o ne dokumentas URLs, PDF baitai ar išskirtas tekstas.
+- Sėkmingos `/v1/embeddings` užklausos įrašo vieną naudojimo eilutę kiekvienai fizinei paketai, įskaitant atskiras paketas, užpildytas per tą pačią milisekundę. Teikėjo nurodyti mokesčiai turi viršenybę prieš simbolinius įvertinimus; kombinuoti įvyniojimai neprideda mokesčio.
+- Naudojimo istorija, išlaidų analizė, provider/account langai, API rakto išlaidų limitai, užklausų išlaidų knyga ir kasdienio naudojimo suvestinės apima šiuos mokesčius. Neprisijungę raktai išsaugo skaitinę apskaitą, neišsaugodami šaltinio teksto.
+- Trūksta naudojimo ar tarifų **nežinomas** , nėra nemokama: atsakymo mokesčio antraštė praleista, o esama neįkainoto naudojimo politika taikoma ribotiems API raktams. Aiškiai sukonfigūruoti nuliniai įkainiai lieka galiojantys naudojant nulinį mokestį.
+
+Tai tik išankstinė apskaita. Seni OCR/embedding skambučiai, kurie niekada neparašė naudojimo istorijos, negali būti atkurti iš šio perkėlimo. Katalogo įvertinimai yra USD įvertinimai, o ne sąskaita faktūra ir neįtraukia valiutos konvertavimo, mokesčių ar nuolaidų.
 
 ---
 

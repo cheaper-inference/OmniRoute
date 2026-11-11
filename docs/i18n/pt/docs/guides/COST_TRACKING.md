@@ -39,71 +39,71 @@ Como o valor é uma estimativa:
 
 ## Como os custos são estimados
 
-### A origem dos preços
+### A fonte de preços
 
-Os custos provêm da tabela de preços combinada em [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), nesta ordem de precedência (**maior primeiro**):
+Os custos provêm da tabela de preços fundida no [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), por esta ordem de precedência (**mais alto primeiro** ):
 
-1. **Substituições do utilizador** — preços definidos no painel ou através de `PATCH /api/pricing` (espaço de nomes `pricing`).
-2. **Sincronização de models.dev** — preços obtidos de `https://models.dev/api.json` (espaço de nomes `models_dev_pricing`).
-3. **Sincronização de LiteLLM** — preços obtidos do ficheiro público `model_prices_and_context_window.json` de LiteLLM (espaço de nomes `pricing_synced`).
-4. **Predefinições incorporadas** — preços distribuídos em [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Substituições de utilizador** Preços — definidos no painel ou através de `PATCH /api/pricing` (o namespace `pricing` ).
+2. **sincronização de modelos.dev** Preços — obtidos a partir do `https://models.dev/api.json` (o namespace `models_dev_pricing` ).
+3. **Sincronização LiteLLM** Preços — obtidos a partir do `model_prices_and_context_window.json` público do LiteLLM(o namespace `pricing_synced` ).
+4. **Padrões codificados** Taxas — enviadas em [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Para o mesmo fornecedor/modelo, os níveis de maior prioridade substituem os campos correspondentes dos inferiores; campos ausentes num nível superior podem vir de um inferior. A ordem mantém-se mesmo quando ambos os processos de sincronização independentes correm em simultâneo. `GET /api/pricing?includeSources=1` devolve `pricing` e `sourceMap`; as etiquetas por modelo (`user`, `modelsDev`, `litellm`, `default`) identificam o nível de maior prioridade que contém esse modelo.
+Para o mesmo provider/model, os valores das camadas de maior prioridade substituem os campos correspondentes nas camadas inferiores; os campos em falta de uma camada superior podem ainda vir de uma camada inferior. A ordem é fixa mesmo quando ambos os trabalhos de sincronização independentes são executados ao mesmo tempo. `GET /api/pricing?includeSources=1` devolve `pricing` e `sourceMap`, cujos rótulos por modelo (`user`, `modelsDev`, `litellm`, `default`) identificam a camada de maior prioridade que contém esse modelo.
 
-A **sincronização de LiteLLM** é opcional e está desativada por predefinição. As suas variáveis de ambiente (consulte [`.env.example`](../../.env.example)) são:
+**Sincronização LiteLLM** é opcional, desativado por defeito. As suas variáveis de ambiente (ver [`.env.example`](../../.env.example) ) são:
 
-| Variável de ambiente    | Predefinição | Finalidade                                                                     |
-| ----------------------- | ------------ | ------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`      | Ativa a sincronização de preços de LiteLLM em segundo plano.                   |
-| `PRICING_SYNC_INTERVAL` | `86400`      | Intervalo de sincronização em **segundos** (diário por predefinição).          |
-| `PRICING_SYNC_SOURCES`  | `litellm`    | Seleciona a fonte apenas desta sincronização; atualmente só suporta `litellm`. |
+| Variável ambiente       | Predefinição | Finalidade                                                                                 |
+| ----------------------- | ------------ | ------------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`      | Ative a sincronização de preços LiteLLM em segundo plano.                                  |
+| `PRICING_SYNC_INTERVAL` | `86400`      | Intervalo de sincronização em segundos (diariamente).                                      |
+| `PRICING_SYNC_SOURCES`  | `litellm`    | Seleção da fonte apenas para esta sincronização; atualmente apenas `litellm` é compatível. |
 
-A **sincronização de models.dev** é independente da sincronização de LiteLLM e também está desativada por predefinição. Ative-a nas Definições (sincronização de models.dev) ou use estas variáveis:
+**sincronização de modelos.dev** está separado da sincronização LiteLLM e também está desativado por defeito. Active-o em Definições (sincronização de models.dev) ou utilize estas variáveis:
 
-| Variável de ambiente       | Predefinição     | Finalidade                                                                                                                                                              |
-| -------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(não definida)_ | Se não estiver definida, segue o controlo das Definições; `1/true/on/yes` força a ativação e `0/false/off/no` força a desativação, mesmo quando as Definições a ativam. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`          | Intervalo predefinido de sincronização de models.dev em segundos (diário).                                                                                              |
+| Variável ambiente          | Predefinição   | Finalidade                                                                                                                                 |
+| -------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(desativado)_ | Desativar segue a alternância de definições; `1/true/on/yes` é ativado e `0/false/off/no` é desativado (mesmo que as Definições o ativem). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Intervalo de sincronização padrão models.dev em segundos (diariamente).                                                                    |
 
-`PRICING_SYNC_SOURCES` **não** ativa models.dev; controla apenas a sincronização de LiteLLM. Eliminar uma substituição do utilizador não limpa nenhum dos espaços de nomes sincronizados; passa a vigorar o próximo nível de preços disponível. Para um modelo sem preço, verifique ambas as configurações de sincronização e o `sourceMap` antes de acrescentar uma substituição manual.
+`PRICING_SYNC_SOURCES` faz **não** enable templates.dev; apenas controla a sincronização LiteLLM. A eliminação de uma substituição de utilizador não limpa nenhum namespace sincronizado; a próxima camada de preços disponível entra em vigor. Para um modelo sem preço, verifique as definições de sincronização e o `sourceMap` antes de adicionar uma substituição manual.
 
-### A fórmula de custo
+### A fórmula do custo
 
-O custo é calculado por pedido a partir das contagens de tokens e das tarifas por milhão de tokens em
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+O custo é calculado por pedido a partir das contagens de tokens e das taxas por milhão de tokens em [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokens de entrada** (excluindo leituras da cache e tokens de criação da cache) × tarifa `input`.
-- **Tokens de leitura da cache** × tarifa `cached` (recorre à tarifa de entrada quando não está definida).
-- **Tokens de criação da cache** × tarifa `cache_creation` (recorre à tarifa de entrada quando não está definida).
-- **Tokens de saída** × tarifa `output`.
-- **Tokens de raciocínio** × tarifa `reasoning` (recorre à tarifa de saída quando não está definida).
+- **Tokens de entrada** (menos leituras de cache e tokens de criação de cache) × `input` Rate .
+- **Tokens de leitura de cache** Taxa × `cached` (volta à taxa de entrada).
+- **Tokens de criação de cache** Taxa × `cache_creation` (volta à taxa de entrada).
+- **Tokens de saída** Taxa × `output`.
+- **Tokens de raciocínio** Taxa × `reasoning` (volta à taxa de saída).
 
-Todas as tarifas são interpretadas como USD por 1 000 000 de tokens. Um nível de serviço
-"fast"/"priority" ou "flex" do Codex aplica um multiplicador de custo (`getCodexFastCostMultiplier`) — por exemplo, o nível flex
-é faturado com um desconto de 50% nos tokens, apresentado como **poupanças flex** no painel.
+Todas as taxas são interpretadas como USD por 1.000.000 de tokens. Um nível de serviço Codex "rápido"/"prioritário" ou "flexível" aplica um multiplicador de custos (`getCodexFastCostMultiplier`). — por exemplo, o flex é cobrado com um desconto de token de 50%, apresentado como **poupança flexível** no painel.
 
-Os nomes dos modelos são primeiro normalizados (os prefixos de caminhos dos fornecedores, como `openai/` ou
-`accounts/fireworks/models/`, são removidos), para que os registos históricos continuem a corresponder a um preço.
+Os nomes dos modelos são normalizados primeiro (os prefixos do caminho do fornecedor, como `openai/` ou `accounts/fireworks/models/` são removidos) para que as linhas históricas ainda correspondam a um preço.
 
-### Como as despesas são registadas
+### Como os gastos são registados
 
-- O custo por pedido é calculado após a resposta e registado de forma assíncrona, sem esperar pelo resultado, para que
-  nunca acrescente latência ao cliente. O consumo da quota partilhada é agendado para o ciclo seguinte
-  do event loop através de [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- As despesas das chaves de API são armazenadas temporariamente e descarregadas em lotes pelo
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervalo de descarga predefinido de 60 s,
-  buffer de 1 000 entradas). Configurável através de:
+- O custo por pedido é calculado na conclusão do pedido. O consumo da quota partilhada é agendado no próximo tick do ciclo de eventos através do [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- O gasto da chave API é armazenado em buffer e libertado em lotes pelo [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervalo de libertação padrão de 60 segundos, buffer de 1.000 entradas). Ajustável através de:
 
-  | Variável de ambiente                | Predefinição | Finalidade                                        |
+  | Variável ambiente                   | Predefinição | Finalidade                                        |
   | ----------------------------------- | ------------ | ------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Intervalo de descarga em milissegundos.           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Máximo de entradas armazenadas antes da descarga. |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Intervalo de libertação em milissegundos.         |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Máximo de entradas em buffer antes da libertação. |
 
-Os valores de custo do painel **não** são lidos a partir de um montante monetário armazenado por linha — são
-recalculados dinamicamente com base nas contagens de tokens e na tabela de preços atual sempre que o
-endpoint de análise é executado. Isto significa que a correção de um preço incorreto (e uma nova sincronização) atualiza
-retroativamente as estimativas de custos históricos.
+Os custos preferem uma cobrança exata informada pelo fornecedor (`provider_cost_usd`), depois um instantâneo de pedido com preço de catálogo (`calculated_cost_usd`) e, em seguida, uma reavaliação de token do catálogo atual. Os custos armazenados não são cobrados novamente através da contagem de tokens. As linhas apenas de token legado ainda mudam quando o preço de catálogo muda.
+
+### OCR e incorporações
+
+- Os pedidos `/v1/ocr` bem-sucedidos utilizam `usage_info.pages_processed` upstream, e não o intervalo de páginas solicitado ou o número de objetos de página devolvidos. A estimativa é de páginas × `ocr_cost_per_page` ( USD/page absoluto,**não** USD/million).
+- Os pedidos com anotações de documento ou caixa delimitadora exigem uma tarifa `ocr_cost_per_annotated_page` separada. Sem isso, o custo permanece desconhecido; a tarifa OCR normal não é substituída silenciosamente.
+- A sincronização LiteLLM mapeia o seu campo `annotation_cost_per_page` upstream em `ocr_cost_per_annotated_page`, retendo o valor USD/page absoluto e as entradas apenas de anotação, incluindo o zero explícito. Um campo canónico fornecido tem precedência; os valores de alias inválidos são ignorados. As substituições de preços do utilizador mantêm a prioridade normal. Consulte [as chaves de preços OCR da LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- A utilização OCR armazena a contagem de páginas, o preço unitário, o custo USD calculado, a chave API e a ligação selecionada. As páginas nunca são representadas como tokens. Os registos de chamadas contêm metadados de faturação, e não documentos URLs, bytes PDF ou texto extraído.
+- Os pedidos `/v1/embeddings` bem-sucedidos registam uma linha de utilização por lote físico, incluindo lotes separados concluídos no mesmo milissegundo. As cobranças reportadas pelo prestador têm precedência sobre as estimativas simbólicas; os wrappers combinados não adicionam cobrança.
+- O histórico de utilização, a análise de custos, as janelas provider/account, os limites de gastos da chave API, o livro-razão de custos de solicitação e as acumulações de utilização diária incluem estas cobranças. As chaves sem registo mantêm a contabilização numérica sem reter o texto de partida.
+- O uso ou as tarifas em falta são **desconhecido** , não gratuito: o cabeçalho do custo de resposta é omitido e a política de utilização sem preço existente aplica-se às chaves API limitadas. As taxas zero explicitamente configuradas continuam válidas para utilização a custo zero.
+
+Esta é uma contabilidade apenas futura. As chamadas OCR/embedding antigas que nunca gravaram o histórico de utilização não podem ser reconstruídas a partir desta migração. As estimativas de catálogo são estimativas USD, e não uma fatura, e não incluem a conversão de moeda, impostos ou descontos.
 
 ---
 

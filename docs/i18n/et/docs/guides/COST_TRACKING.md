@@ -34,71 +34,73 @@ Kuna see arv on hinnanguline:
 
 ---
 
-## Kuidas maksumust hinnatakse
+## Kuidas kulusid hinnatakse
 
-### Hinnateabe allikas
+### Hinnakujunduse allikas
 
-Kulud pärinevad ühendatud hinnatabelist failis [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), selles prioriteedijärjekorras (**kõrgeim esimesena**):
+Kulud pärinevad [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) ühendatud hinnatabelist, selles paremusjärjestuses (**kõrgeim esimene** ):
 
-1. **Kasutaja ülekirjutused** — juhtpaneelis või liidese `PATCH /api/pricing` kaudu määratud hinnad (nimeruum `pricing`).
-2. **models.dev sünkroonimine** — aadressilt `https://models.dev/api.json` saadud hinnad (nimeruum `models_dev_pricing`).
-3. **LiteLLM sünkroonimine** — hinnad LiteLLM avalikust failist `model_prices_and_context_window.json` (nimeruum `pricing_synced`).
-4. **Koodi sisseehitatud vaikeväärtused** — kaasasolevad hinnad kataloogis [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Kasutaja alistab** — hinnad on määratud armatuurlaual või `PATCH /api/pricing` ( `pricing` nimeruumi) kaudu.
+2. **model.dev sünkroonimine** — hinnakujundus on toodud `https://models.dev/api.json` ( `models_dev_pricing` nimeruum).
+3. **LiteLLM sünkroonimine** — hinnad saadi LiteLLM avalikust `model_prices_and_context_window.json` ( `pricing_synced` nimeruum).
+4. **Kõvakodeeritud vaikesätted** — hinnad tarnitakse [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Sama pakkuja/mudeli puhul kirjutavad kõrgema prioriteediga kihid üle madalamate kihtide vastavad väljad; ülemises kihis puuduvad väljad võivad endiselt tulla alumisest. Järjekord on fikseeritud ka siis, kui mõlemad sõltumatud sünkroonimistööd töötavad korraga. `GET /api/pricing?includeSources=1` tagastab `pricing` ja `sourceMap`; viimase mudelipõhised sildid (`user`, `modelsDev`, `litellm`, `default`) osutavad kõrgeima prioriteediga kihile, mis seda mudelit sisaldab.
+Sama provider/model puhul kirjutavad kõrgema prioriteediga kihtide väärtused üle madalamate kihtide sobivad väljad; ülemisest kihist puuduvad väljad võivad siiski pärineda alumisest kihist. Järjekord on fikseeritud isegi siis, kui mõlemad sõltumatud sünkroonimistööd töötavad samal ajal. `GET /api/pricing?includeSources=1` tagastab `pricing` ja `sourceMap`, mille mudelipõhised sildid (`user`, `modelsDev`, `litellm`, `default`) tuvastavad seda mudelit sisaldava kõrgeima prioriteediga kihi.
 
-**LiteLLM sünkroonimine** tuleb eraldi lubada ja see on vaikimisi keelatud. Selle keskkonnamuutujad (vt [`.env.example`](../../.env.example)) on:
+**LiteLLM sünkroonimine** on lubatud, vaikimisi keelatud. Selle keskkonnamuutujad (vt [`.env.example`](../../.env.example) ) on järgmised:
 
-| Keskkonnamuutuja        | Vaikeväärtus | Otstarve                                                                              |
-| ----------------------- | ------------ | ------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`      | Lubab LiteLLM hindade sünkroonimise taustal.                                          |
-| `PRICING_SYNC_INTERVAL` | `86400`      | Sünkroonimisintervall **sekundites** (vaikimisi kord päevas).                         |
-| `PRICING_SYNC_SOURCES`  | `litellm`    | Allikate valik ainult selle sünkroonimise jaoks; praegu on toetatud ainult `litellm`. |
+| Env var                 | Vaikimisi | Eesmärk                                                                            |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Lubage taustal LiteLLM hinnakujunduse sünkroonimine.                               |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Sünkroonimisintervall sekundites (iga päev).                                       |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Allika valik ainult selle sünkroonimise jaoks; praegu toetatakse ainult `litellm`. |
 
-**models.dev sünkroonimine** on LiteLLM sünkroonimisest eraldi ja samuti vaikimisi keelatud. Lubage see Seadetes (models.dev sünkroonimine) või kasutage neid muutujaid:
+**model.dev sünkroonimine** on LiteLLM sünkroonimisest eraldiseisev ja vaikimisi keelatud. Lubage see seadetes (models.dev sync) või kasutage neid muutujaid:
 
-| Keskkonnamuutuja           | Vaikeväärtus  | Otstarve                                                                                                                                             |
-| -------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(määramata)_ | Määramata väärtuse korral järgitakse Seadete lülitit; `1/true/on/yes` sunnib sisse ja `0/false/off/no` sunnib välja, isegi kui Seaded selle lubavad. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | models.dev sünkroonimise vaikeintervall sekundites (iga päev).                                                                                       |
+| Env var                    | Vaikimisi     | Eesmärk                                                                                                               |
+| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(määramata)_ | Unset järgib lülitit Seaded; `1/true/on/yes` lülitub sisse ja `0/false/off/no` välja (isegi kui seaded seda lubavad). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Sünkroonimise vaikeintervall mudelid.dev sekundites (iga päev).                                                       |
 
-`PRICING_SYNC_SOURCES` **ei** luba models.dev sünkroonimist, vaid juhib ainult LiteLLM sünkroonimist. Kasutaja ülekirjutuse kustutamine ei tühjenda kumbagi sünkroonitud nimeruumi; jõustub järgmine saadaolev hinnakiht. Hinnata mudeli puhul kontrollige enne käsitsi ülekirjutuse lisamist mõlemat sünkroonimisseadet ja `sourceMap`.
+`PRICING_SYNC_SOURCES` teeb **mitte** luba mudelid.dev; see juhib ainult LiteLLM sünkroonimist. Kasutaja alistamise kustutamine ei tühjenda kumbagi sünkroonitud nimeruumi; jõustub järgmine saadaolev hinnakiht. Hinnata mudeli puhul kontrollige enne käsitsi alistamise lisamist nii sünkroonimisseadeid kui ka `sourceMap`.
 
-### Maksumuse valem
+### Kulude valem
 
-Maksumus arvutatakse päringupõhiselt tokenite arvu ja miljoni tokeni hinnamäärade alusel failis
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kulud arvutatakse [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) žetoonide arvu ja miljonimärgiste määrade alusel päringu kohta:
 
-- **Sisendtokenid** (millest on lahutatud vahemälust loetud ja vahemälu loomiseks kasutatud tokenid) × määr `input`.
-- **Vahemälust loetud tokenid** × määr `cached` (selle puudumisel kasutatakse sisendtokenite määra).
-- **Vahemälu loomiseks kasutatud tokenid** × määr `cache_creation` (selle puudumisel kasutatakse sisendtokenite määra).
-- **Väljundtokenid** × määr `output`.
-- **Põhjendustokenid** × määr `reasoning` (selle puudumisel kasutatakse väljundtokenite määra).
+- **Sisestusmärgid** (miinus vahemälu lugemised ja vahemälu loomise märgid) × `input` määr.
+- **Vahemälu lugemise märgid** × `cached` määr (langeb tagasi sisendkiirusele).
+- **Vahemälu loomise märgid** × `cache_creation` määr (langeb tagasi sisendkiirusele).
+- **Väljundmärgid** × `output` määr.
+- **Arutlusmärgid** × `reasoning` kiirus (langeb tagasi väljundkiirusele).
 
-Kõiki määrasid tõlgendatakse USA dollarites 1 000 000 tokeni kohta. Codexi teenusetase „fast”/„priority” või „flex” rakendab maksumuskordajat (`getCodexFastCostMultiplier`) — näiteks teenusetaseme „flex” puhul kehtib tokenitele 50% allahindlus, mida kuvatakse juhtpaneelil **flex-säästuna**.
+Kõiki hindu tõlgendatakse kui USD 1 000 000 märgi kohta. Codex "kiire"/"prioriteetne" või "paindlik" teenusetasand rakendab kulukordajat (`getCodexFastCostMultiplier`) —, nt flexi puhul esitatakse arve 50% märgisoodustusega, mis on esitatud **paindlik kokkuhoid** armatuurlaual.
 
-Mudelinimed normaliseeritakse esmalt (teenusepakkuja teede prefiksid, nagu `openai/` või
-`accounts/fireworks/models/`, eemaldatakse), et ka ajaloolised read vastaksid endiselt hinnale.
+Mudelite nimed normaliseeritakse kõigepealt (teenusepakkuja tee eesliited, nagu `openai/` või `accounts/fireworks/models/` eemaldatakse), nii et ajaloolised read vastavad endiselt hinnale.
 
-### Kuidas kulutused salvestatakse
+### Kuidas kulutusi registreeritakse
 
-- Päringupõhine maksumus arvutatakse pärast vastust ning salvestatakse põhimõttel „käivita ja unusta”, et see
-  ei lisaks kunagi kliendi jaoks latentsust. Ühiskvoodi kasutus ajastatakse järgmisele
-  sündmusetsükli sammule faili [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kaudu.
-- API-võtme kulutused puhverdatakse ja kirjutatakse partiidena
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) abil (vaikimisi 60 s kirjutusintervall,
-  1 000 kirje suurune puhver). Kohandamiseks saab kasutada järgmisi muutujaid:
+- Taotluse maksumus arvutatakse taotluse täitmisel. Jagatud kvoodi tarbimine on ajastatud järgmise sündmusetsükli linnukesega [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kaudu.
+- API-võtme kulutused puhverdab ja loputab partiidena [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (vaikimisi 60-sekundiline loputusintervall, 1000 sisestuspuhver). Häälestatav:
 
-  | Keskkonnamuutuja                    | Vaikeväärtus | Otstarve                                          |
-  | ----------------------------------- | ------------ | ------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Puhvri kirjutusintervall millisekundites.         |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Puhverdatud kirjete maksimumarv enne kirjutamist. |
+  | Env var                             | Vaikimisi | Eesmärk                                 |
+  | ----------------------------------- | --------- | --------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Loputusintervall millisekundites.       |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Max puhverdatud kirjed enne loputamist. |
 
-Juhtpaneeli maksumusi **ei** loeta salvestatud reapõhisest rahasummast — need arvutatakse
-analüütika lõpp-punkti igal käivitamisel jooksvalt ümber tokenite arvu ja kehtiva hinnatabeli
-põhjal. See tähendab, et vale hinna parandamine (ja uuesti sünkroonimine) uuendab
-ajaloolisi maksumuse hinnanguid tagasiulatuvalt.
+Kulud eelistavad täpset pakkuja teatatud tasu (`provider_cost_usd`), seejärel kataloogihinnaga päringu hetketõmmist (`calculated_cost_usd`), seejärel kehtivast kataloogist token-ümberhindamist. Salvestatud kulude eest ei võeta uuesti tasu nende märgiloendite kaudu. Ainult loa pärandread muutuvad ka siis, kui nende kataloogihind muutub.
+
+### OCR ja manustused
+
+- Edukad `/v1/ocr` -päringud kasutavad ülesvoolu `usage_info.pages_processed`, mitte taotletud lehevahemikku või tagastatud leheobjektide arvu. Prognoos on lehekülgi × `ocr_cost_per_page` (absoluutne USD/page,**mitte** USD/million).
+- Dokumendi või piirdekasti märkustega päringud nõuavad eraldi `ocr_cost_per_annotated_page` tariifi. Ilma selleta jääb maksumus teadmata; tavalist OCR tariifi ei asendata vaikselt.
+- LiteLLM sünkroonimine kaardistab oma ülesvoolu `annotation_cost_per_page` välja `ocr_cost_per_annotated_page`, säilitades absoluutse USD/page väärtuse ja ainult märkuste kirjed, sealhulgas selge nulli. Esitatud kanooniline väli on ülimuslik; kehtetuid pseudonüümi väärtusi ignoreeritakse. Kasutajahindade alistamised säilitavad oma tavapärase prioriteedi. Vaadake [LiteLLMOCR -i hinnavõtmeid](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR kasutamine salvestab lehtede arvu, ühikuhinna, arvutatud USD maksumuse, API -võtme ja valitud ühenduse. Lehti ei esitata kunagi märkidena. Kõnelogid sisaldavad arvelduse metaandmeid, mitte dokumenti URLs, PDF baite ega ekstraktitud teksti.
+- Edukad `/v1/embeddings` -päringud salvestavad ühe kasutusrea füüsilise partii kohta, sealhulgas sama millisekundi jooksul täidetud eraldi partiid. Pakkuja teatatud tasud on sümboolsete hinnangute suhtes ülimuslikud; kombineeritud ümbrised ei lisa tasu.
+- Kasutusajalugu, kulude analüüs, provider/account aknad, API-võtme kululimiidid, päringu-kulude pearaamat ja igapäevased kasutuskogumid sisaldavad neid tasusid. Logimata klahvid säilitavad numbrilise arvestuse lähteteksti säilitamata.
+- Kasutus või tariifid puuduvad **teadmata** , mitte tasuta: vastusekulu päis jäetakse välja ja olemasolev hinnastamata kasutuseeskiri kehtib piiratud API võtmetele. Selgelt konfigureeritud nullmäärad jäävad kehtima nullkuluga kasutamiseks.
+
+See on ainult edasine arvestus. Vanu OCR/embedding kõnesid, mis pole kunagi kasutusajalugu kirjutanud, ei saa selle migratsiooni põhjal rekonstrueerida. Kataloogi hinnangud on USD hinnangud, mitte arve ega sisalda valuuta konverteerimist, makse ega allahindlusi.
 
 ---
 

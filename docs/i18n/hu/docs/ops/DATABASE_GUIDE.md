@@ -401,52 +401,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 Ez az SQLite online biztonsági mentési API-ját használja — biztonságosan futtatható az OmniRoute működése közben.
 
-## Teljesítményhangolás
+## Teljesítmény hangolás
 
 ### WAL mód
 
-A WAL alapértelmezés szerint engedélyezve van. Nagy írási terhelés esetén fontolja meg a következőket:
+WAL alapértelmezés szerint engedélyezve van. Nagy írási terhelés esetén vegye figyelembe:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Ellenőrzőpont minden 1000 oldal után
-PRAGMA journal_size_limit = 67108864;  -- 64 MB-os WAL-korlát
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute nem állítja be `journal_size_limit`. Egy ellenőrzőpont áthelyezi WAL kereteket a főfájlba, de a WAL fájl megtartja a legnagyobb lefoglalt méretét. A `OMNIROUTE_WAL_GUARD_MAX_MB` őr csak figyelmeztet és futtatja `wal_checkpoint(RESTART)`; ez nem lemez méretű kupak.
 
 ### Indexek
 
-A teljesítmény szempontjából fontos indexek (a migrációk automatikusan létrehozzák őket):
+A teljesítmény kulcsfontosságú indexei (áttelepítéssel automatikusan létrehozva):
 
-- `idx_models_provider` — modellek keresése szolgáltató alapján
-- `idx_combo_targets_combo_id` — kombinációs célok kibontása
-- `idx_usage_history_api_key_timestamp` — használati elemzések
-- `idx_quota_snapshots_api_key_window` — kvóták nyomon követése
-- `idx_call_logs_timestamp` — hívásnapló-lekérdezések
+- `idx_models_provider` — modell keresések szolgáltató szerint
+- `idx_combo_targets_combo_id` — kombinált célkiterjesztés
+- `idx_usage_history_api_key_timestamp` — használati elemzés
+- `idx_quota_snapshots_api_key_window` — kvótakövetés
+- `idx_call_logs_timestamp` — hívásnapló lekérdezések
 
-Új index hozzáadásához hozzon létre egy migrációt:
+Új index hozzáadásához hozzon létre egy áttelepítést:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Memórialeképezett I/O
+### Memóriaképes I/O
 
-Nagyon nagy adatbázisok (>10 GB) esetén a memórialeképezés a SQLite pragma használatával módosítható:
+Nagyon nagy adatbázisok (> 10GB) esetén a memórialeképezés SQLite pragma segítségével állítható be:
 
 ```sql
--- Beállítás SQLite pragma használatával (módosítsa a core.ts fájlban vagy futásidőben)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Tömörítés
 
-A hosszú ideig futó OmniRoute-példányok számára előnyös az alkalmankénti `VACUUM`:
+A régóta futó OmniRoute példányok előnyösek az alkalmi `VACUUM` ből:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Futtassa havonta, alacsony forgalmú időszakokban. (A WAL mód csökkenti ennek szükségességét, de nem szünteti meg teljesen.)
+Futtassa havonta az alacsony forgalmú ablakok alatt. (WAL mód csökkenti a szükségességet, de nem szünteti meg.)
 
 ---
 

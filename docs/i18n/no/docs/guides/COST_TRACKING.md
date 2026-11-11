@@ -36,73 +36,73 @@ Fordi tallet er et estimat:
 
 ---
 
-## Hvordan kostnader estimeres
+## Hvordan kostnadene beregnes
 
 ### Priskilden
 
-Kostnadene kommer fra den sammenslåtte pristabellen i [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), i denne prioritetsrekkefølgen (**høyest først**):
+Kostnadene kommer fra den sammenslåtte pristabellen i [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), i denne rekkefølgen (**høyest først** ):
 
-1. **Brukeroverstyringer** — priser satt i kontrollpanelet eller via `PATCH /api/pricing` (navnerommet `pricing`).
-2. **Synkronisering fra models.dev** — priser hentet fra `https://models.dev/api.json` (navnerommet `models_dev_pricing`).
-3. **Synkronisering fra LiteLLM** — priser hentet fra den offentlige filen `model_prices_and_context_window.json` fra LiteLLM (navnerommet `pricing_synced`).
-4. **Standardverdier i koden** — satser som følger med i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Bruker overstyrer** — priser satt i dashbordet eller via `PATCH /api/pricing` ( `pricing` navneområdet).
+2. **models.dev synkronisering** — priser hentet fra `https://models.dev/api.json` ( `models_dev_pricing` navneområdet).
+3. **LiteLLM -synkronisering** — priser hentet fra LiteLLM offentlige `model_prices_and_context_window.json` (navneområdet `pricing_synced` ).
+4. **Hardkodede standarder** — priser sendes i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-For samme leverandør/modell overskriver verdier fra lag med høyere prioritet tilsvarende felt i lavere lag; felt som mangler i et øvre lag, kan fortsatt komme fra et lavere lag. Rekkefølgen er fast selv om begge uavhengige synkroniseringsjobbene kjører samtidig. `GET /api/pricing?includeSources=1` returnerer `pricing` og `sourceMap`; etikettene per modell (`user`, `modelsDev`, `litellm`, `default`) identifiserer laget med høyest prioritet som inneholder modellen.
+For den samme provider/model overskriver verdier fra høyere prioriterte lag samsvarende felt i lavere lag; felt fraværende fra et øvre lag kan fortsatt komme fra et nedre lag. Rekkefølgen er fast selv når begge uavhengige synkroniseringsjobber kjører samtidig. `GET /api/pricing?includeSources=1` returnerer `pricing` og `sourceMap`, hvis etiketter per modell (`user`, `modelsDev`, `litellm`, `default`) identifiserer det høyest prioriterte laget som inneholder den modellen.
 
-**Synkronisering fra LiteLLM** er valgfri og deaktivert som standard. Miljøvariablene for den (se [`.env.example`](../../.env.example)) er:
+**LiteLLM -synkronisering** er opt-in, deaktivert som standard. Dens miljøvariabler (se [`.env.example`](../../.env.example) ) er:
 
-| Miljøvariabel           | Standard  | Formål                                                                       |
-| ----------------------- | --------- | ---------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Aktiver prissynkronisering fra LiteLLM i bakgrunnen.                         |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synkroniseringsintervall i **sekunder** (daglig som standard).               |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Kildevalg bare for denne synkroniseringen; foreløpig støttes bare `litellm`. |
+| Env var                 | Misligholde | Hensikt                                                                         |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`     | Aktiver bakgrunnssynkronisering av LiteLLM priser.                              |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Synkroniseringsintervall i sekunder (daglig).                                   |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Kildevalg kun for denne synkroniseringen; for øyeblikket støttes kun `litellm`. |
 
-**Synkronisering fra models.dev** er atskilt fra synkroniseringen fra LiteLLM og er også deaktivert som standard. Aktiver den i Innstillinger (models.dev-synkronisering), eller bruk disse variablene:
+**models.dev synkronisering** er atskilt fra LiteLLM synkroniseringen og er også deaktivert som standard. Aktiver den i Innstillinger (models.dev sync) eller bruk disse variablene:
 
-| Miljøvariabel              | Standard      | Formål                                                                                                                                                                     |
-| -------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(ikke satt)_ | Når variabelen ikke er satt, følger den bryteren i Innstillinger; `1/true/on/yes` tvinger den på, og `0/false/off/no` tvinger den av, selv om Innstillinger aktiverer den. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Standard intervall for synkronisering fra models.dev i sekunder, daglig.                                                                                                   |
+| Env var                    | Misligholde   | Hensikt                                                                                                                             |
+| -------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(uaktivert)_ | Unset følger innstillingsbryteren; `1/true/on/yes` tvinger på og `0/false/off/no` tvinger av (selv om Innstillinger aktiverer det). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Standard models.dev synkroniseringsintervall i sekunder (daglig).                                                                   |
 
-`PRICING_SYNC_SOURCES` aktiverer **ikke** models.dev; den styrer bare synkroniseringen fra LiteLLM. Sletting av en brukeroverstyring tømmer ingen av de synkroniserte navnerommene; neste tilgjengelige prislag blir gjeldende. For en modell uten pris må du kontrollere begge synkroniseringsinnstillingene og `sourceMap` før du legger til en manuell overstyring.
+Det gjør `PRICING_SYNC_SOURCES`**ikke** aktivere models.dev; den kontrollerer bare LiteLLM synkroniseringen. Sletting av en brukeroverstyring sletter ikke noen av de synkroniserte navneområdene. neste tilgjengelige prislag trer i kraft. For en upriset modell, sjekk både synkroniseringsinnstillinger og `sourceMap` før du legger til en manuell overstyring.
 
 ### Kostnadsformelen
 
-Kostnaden beregnes per forespørsel ut fra antall token og satser per million token i
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kostnaden beregnes per forespørsel fra token-antall og per million-token-priser i [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Inndata-token** (minus cacheavlesninger og token for opprettelse av cache) × `input`-satsen.
-- **Token lest fra cache** × `cached`-satsen (bruker inndatasatsen som reserve).
-- **Token for opprettelse av cache** × `cache_creation`-satsen (bruker inndatasatsen som reserve).
-- **Utdata-token** × `output`-satsen.
-- **Resonneringstoken** × `reasoning`-satsen (bruker utdatasatsen som reserve).
+- **Skriv inn tokens** (minus cache-lesing og cache-opprettingstokens) × `input` rate.
+- **Bufferleste tokens** × `cached` rate (faller tilbake til inngangshastigheten).
+- **Tokener for å lage cache** × `cache_creation` rate (faller tilbake til inngangshastigheten).
+- **Output tokens** × `output` rate.
+- **Resonneringstegn** × `reasoning` rate (faller tilbake til output rate).
 
-Alle satser tolkes som USD per 1 000 000 token. Et Codex-tjenestenivå av typen «fast»/«priority» eller
-«flex» bruker en kostnadsmultiplikator (`getCodexFastCostMultiplier`) — «flex» faktureres for eksempel
-med 50 % tokenrabatt, som vises som **flex-besparelser** i kontrollpanelet.
+Alle priser tolkes som USD per 1 000 000 tokens. En Codex "rask"/"prioritet" eller "flex" tjenestenivå bruker en kostnadsmultiplikator (`getCodexFastCostMultiplier`) —, f.eks. flex faktureres med en 50 % symbolrabatt, dukket opp som **flex besparelser** i dashbordet.
 
-Modellnavn normaliseres først (leverandørbaneprefikser som `openai/` eller
-`accounts/fireworks/models/` fjernes), slik at historiske rader fortsatt samsvarer med en pris.
+Modellnavn normaliseres først (leverandørbaneprefikser som `openai/` eller `accounts/fireworks/models/` fjernes) slik at historiske rader fortsatt samsvarer med en pris.
 
 ### Hvordan forbruk registreres
 
-- Kostnaden per forespørsel beregnes etter svaret og registreres asynkront uten å vente, slik at den
-  aldri øker svartiden for klienten. Forbruk av delt kvote planlegges i neste
-  hendelsesløkkesyklus via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Forbruk per API-nøkkel bufres og tømmes satsvis av
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard tømmeintervall på 60 sekunder,
-  buffer med 1 000 oppføringer). Kan justeres via:
+- Kostnaden per forespørsel beregnes ved fullføring av forespørselen. Forbruk av delt kvote er planlagt på neste event-loop-merke via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API-nøkkelforbruk bufres og tømmes i batcher av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-talls flush-intervall, 1000-entry buffer). Kan justeres via:
 
-  | Miljøvariabel                       | Standard | Formål                                            |
-  | ----------------------------------- | -------- | ------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Tømmeintervall i millisekunder.                   |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Maksimalt antall bufrede oppføringer før tømming. |
+  | Env var                             | Misligholde | Hensikt                             |
+  | ----------------------------------- | ----------- | ----------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Skylleintervall i millisekunder.    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maks bufrede oppføringer før flush. |
 
-Kostnadstallene i kontrollpanelet leses **ikke** fra et lagret dollarbeløp per rad — de
-beregnes på nytt fra antall token og den gjeldende pristabellen hver gang
-analyseendepunktet kjøres. Det betyr at korrigering av en feil pris (og ny synkronisering)
-oppdaterer historiske kostnadsestimater med tilbakevirkende kraft.
+Kostnader foretrekker en eksakt leverandørrapportert belastning (`provider_cost_usd`), deretter et øyeblikksbilde av forespørselen til katalogpriset (`calculated_cost_usd`), deretter token-reprising fra gjeldende katalog. Lagrede kostnader belastes ikke igjen gjennom token-tellingene. Eldre token-rader endres fortsatt når katalogprisen deres endres.
+
+### OCR og embeddings
+
+- Vellykkede `/v1/ocr` forespørsler bruker oppstrøms `usage_info.pages_processed`, ikke det forespurte sideområdet eller antallet returnerte sideobjekter. Anslaget er sider × `ocr_cost_per_page` (absolutt USD/page,**ikke** USD/million).
+- Forespørsler med dokument- eller avgrensningsmerknader krever en egen `ocr_cost_per_annotated_page` tariff. Uten det forblir kostnaden ukjent; den ordinære OCR tariffen erstattes ikke stille.
+- LiteLLM synkronisering kartlegger oppstrøms `annotation_cost_per_page` feltet til `ocr_cost_per_annotated_page`, og beholder den absolutte USD/page verdien og oppføringer som kun er for merknader, inkludert eksplisitt null. Et levert kanonisk felt har forrang; ugyldige aliasverdier ignoreres. Overstyring av brukerpriser beholder sin normale prioritet. Se [LiteLLMOCR prisnøkler](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -bruk lagrer sideantall, enhetspris, beregnet USD kostnad, API -nøkkel og valgt tilkobling. Sider er aldri representert som tokens. Anropslogger inneholder faktureringsmetadata, ikke dokument URLs, PDF byte eller ekstrahert tekst.
+- Vellykkede `/v1/embeddings` forespørsler registrerer én bruksrad per fysisk batch, inkludert separate batcher fullført i samme millisekund. Leverandørrapporterte belastninger har forrang over tokenestimater; combo wrappers legger ikke til en kostnad.
+- Brukshistorikk, kostnadsanalyse, provider/account vinduer, API-nøkkelforbruksgrenser, forespørselskostnadsbok og daglig brukssammendrag inkluderer disse kostnadene. No-log-nøkler beholder numerisk regnskap uten å beholde kildetekst.
+- Manglende bruk eller tariffer er **ukjent** , ikke gratis: svarkostnadsoverskriften er utelatt, og den eksisterende policyen for upriset bruk gjelder begrensede API nøkler. Eksplisitt konfigurerte nullsatser forblir gyldig nullkostnadsbruk.
+
+Dette er kun foreløpig regnskap. Gamle OCR/embedding anrop som aldri skrev brukshistorikk kan ikke rekonstrueres fra denne migreringen. Kataloganslag er USD -anslag, ikke en faktura, og inkluderer ikke valutaomregning, skatt eller rabatter.
 
 ---
 

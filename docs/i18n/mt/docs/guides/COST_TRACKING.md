@@ -33,73 +33,73 @@ Minħabba li n-numru huwa stima:
 
 ---
 
-## Kif jiġu stmati l-ispejjeż
+## Kif huma stmati l-ispejjeż
 
-### Is-sors tal-ipprezzar
+### Is-sors tal-prezzijiet
 
-L-ispejjeż jiġu mit-tabella magħquda tal-prezzijiet f’[`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), f’din l-ordni ta’ preċedenza (**l-ogħla l-ewwel**):
+L-ispejjeż jiġu mit-tabella tal-prezzijiet magħquda [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), f'din l-ordni ta' preċedenza (**l-ogħla l-ewwel** ):
 
-1. **Valuri sostitwiti mill-utent** — prezzijiet issettjati fid-dashboard jew permezz ta’ `PATCH /api/pricing` (l-ispazju tal-ismijiet `pricing`).
-2. **Sinkronizzazzjoni models.dev** — prezzijiet miksuba minn `https://models.dev/api.json` (l-ispazju tal-ismijiet `models_dev_pricing`).
-3. **Sinkronizzazzjoni LiteLLM** — prezzijiet miksuba mill-fajl pubbliku `model_prices_and_context_window.json` ta’ LiteLLM (l-ispazju tal-ismijiet `pricing_synced`).
-4. **Valuri awtomatiċi fil-kodiċi** — rati inklużi f’[`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **L-utent jinvalida** Prezzijiet — stabbiliti fid-dashboard jew permezz ta ' `PATCH /api/pricing` (l-ispazju tal-isem `pricing` ).
+2. **sinkronizzazzjoni tal-mudelli.dev** Ipprezzar — miġbur minn `https://models.dev/api.json` (l-ispazju tal-isem `models_dev_pricing` ).
+3. **Sinkronizzazzjoni LiteLLM** Prezzijiet — miġjuba minn `model_prices_and_context_window.json` pubbliku ta ' LiteLLM(l-ispazju tal-isem `pricing_synced` ).
+4. **Defaults hardcoded** Rati — mibgħuta [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Għall-istess fornitur/mudell, il-valuri mis-saffi bi prijorità ogħla jissostitwixxu l-oqsma korrispondenti fis-saffi aktar baxxi; oqsma li huma nieqsa minn saff ta’ fuq xorta jistgħu jiġu minn saff ta’ taħt. L-ordni tibqa’ fissa anki meta ż-żewġ kompiti indipendenti ta’ sinkronizzazzjoni jaħdmu fl-istess ħin. `GET /api/pricing?includeSources=1` jirritorna `pricing` u `sourceMap`; it-tikketti għal kull mudell (`user`, `modelsDev`, `litellm`, `default`) jidentifikaw is-saff bl-ogħla prijorità li fih dak il-mudell.
+Għall-istess provider/model, valuri minn saffi ta 'prijorità ogħla jissostitwixxu oqsma li jaqblu f'saffi aktar baxxi; oqsma assenti minn saff ta 'fuq xorta jistgħu jiġu minn saff t'isfel. L-ordni hija ffissata anke meta ż-żewġ xogħlijiet ta 'sinkronizzazzjoni indipendenti jaħdmu fl-istess ħin. `GET /api/pricing?includeSources=1` jirritorna `pricing` u `sourceMap`, li t-tikketti għal kull mudell tagħhom (`user`, `modelsDev`, `litellm`, `default`) jidentifikaw is-saff tal-ogħla prijorità li fih dak il-mudell.
 
-Is-**sinkronizzazzjoni LiteLLM** teħtieġ attivazzjoni espliċita u hija diżattivata b’mod awtomatiku. Il-varjabbli tal-ambjent tagħha (ara [`.env.example`](../../.env.example)) huma:
+**Sinkronizzazzjoni LiteLLM** huwa opt-in, diżattivat awtomatikament. Il-varjabbli ambjentali tiegħu (ara [`.env.example`](../../.env.example) ) huma:
 
-| Varjabbli tal-ambjent   | Valur predefinit | Għan                                                                                        |
-| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`          | Attiva s-sinkronizzazzjoni tal-prezzijiet LiteLLM fl-isfond.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`          | Intervall tas-sinkronizzazzjoni f'**sekondi** (kuljum b'mod predefinit).                    |
-| `PRICING_SYNC_SOURCES`  | `litellm`        | Għażla tas-sors għal din is-sinkronizzazzjoni biss; bħalissa huwa appoġġjat biss `litellm`. |
+| Env var                 | Default   | Għan                                                                                        |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Ippermetti s-sinkronizzazzjoni tal-prezzijiet LiteLLM fl-isfond.                            |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Intervall ta' sinkronizzazzjoni f'sekondi (kuljum).                                         |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Għażla tas-sors għal din is-sinkronizzazzjoni biss; bħalissa `litellm` biss huwa appoġġjat. |
 
-Is-**sinkronizzazzjoni models.dev** hija separata mis-sinkronizzazzjoni LiteLLM u wkoll diżattivata b’mod awtomatiku. Attivaha f’Settings (sinkronizzazzjoni models.dev), jew uża dawn il-varjabbli:
+**sinkronizzazzjoni tal-mudelli.dev** hija separata mis-sinkronizzazzjoni LiteLLM u hija wkoll diżattivata awtomatikament. Ippermettiha fis-Settings (models.dev sync) jew uża dawn il-varjabbli:
 
-| Varjabbli tal-ambjent      | Valur awtomatiku   | Għan                                                                                                                                                              |
-| -------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(mhux issettjat)_ | Meta mhux issettjat, isegwi s-swiċċ f’Settings; `1/true/on/yes` jimponi l-attivazzjoni u `0/false/off/no` jimponi d-diżattivazzjoni, anki jekk Settings jattivah. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Intervall awtomatiku tas-sinkronizzazzjoni models.dev f’sekondi, kuljum.                                                                                          |
+| Env var                    | Default   | Għan                                                                                                                         |
+| -------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(mitfi)_ | Unset isegwi l-toggle Settings; `1/true/on/yes` forzi fuq u `0/false/off/no` forzi off (anke jekk Settings jippermettu dan). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Intervall ta' sinkronizzazzjoni default models.dev f'sekondi (kuljum).                                                       |
 
-`PRICING_SYNC_SOURCES` **ma jattivax** models.dev; jikkontrolla biss is-sinkronizzazzjoni LiteLLM. It-tħassir ta’ valur sostitwit mill-utent ma jbattal l-ebda wieħed mill-ispazji tal-ismijiet sinkronizzati; jidħol fis-seħħ is-saff tal-prezzijiet li jmiss disponibbli. Għal mudell mingħajr prezz, iċċekkja ż-żewġ settings tas-sinkronizzazzjoni u `sourceMap` qabel iżżid valur manwali li jissostitwixxi l-prezz.
+`PRICING_SYNC_SOURCES` tagħmel **le** enable models.dev; tikkontrolla biss is-sinkronizzazzjoni LiteLLM. It-tħassir ta' override tal-utent ma jikklerja l-ebda spazju tal-isem issinkronizzat; is-saff tal-prezzijiet disponibbli li jmiss isir effettiv. Għal mudell bla prezz, iċċekkja kemm is-sinkronizzazzjoni kif ukoll iż `sourceMap` qabel ma żżid override manwali.
 
 ### Il-formula tal-ispiża
 
-L-ispiża tiġi kkalkulata għal kull talba mill-għadd ta' tokens u mir-rati għal kull miljun token fi
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+L-ispiża hija kkalkulata għal kull talba mill-għadd ta' tokens u r-rati ta' kull miljun token [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokens tal-input** (mingħajr il-qari mill-cache u t-tokens tal-ħolqien tal-cache) × ir-rata `input`.
-- **Tokens moqrija mill-cache** × ir-rata `cached` (jekk ma tkunx disponibbli, tintuża r-rata tal-input).
-- **Tokens tal-ħolqien tal-cache** × ir-rata `cache_creation` (jekk ma tkunx disponibbli, tintuża r-rata tal-input).
-- **Tokens tal-output** × ir-rata `output`.
-- **Tokens tar-raġunament** × ir-rata `reasoning` (jekk ma tkunx disponibbli, tintuża r-rata tal-output).
+- **Tokens tad-dħul** (nieqes il-qari tal-cache u t-tokens tal-ħolqien tal-cache) Rata × `input`.
+- **Tokens li jinqraw bil-cache** Rata × `cached` (taqa' lura għar-rata tal-input).
+- **Tokens tal-ħolqien tal-cache** Rata × `cache_creation` (taqa' lura għar-rata tal-input).
+- **Tokens tal-ħruġ** × `output` rata.
+- **Tokens tar-raġunament** Rata × `reasoning` (taqa' lura għar-rata tal-produzzjoni).
 
-Ir-rati kollha jiġu interpretati bħala USD għal kull 1,000,000 token. Livell ta' servizz Codex "fast"/"priority" jew
-"flex" japplika multiplikatur tal-ispiża (`getCodexFastCostMultiplier`) — pereżempju, flex
-jiġi ċċarġjat bi skont ta' 50% fuq it-tokens, muri bħala **ffrankar flex** fid-dashboard.
+Ir-rati kollha huma interpretati bħala USD għal kull 1,000,000 tokens. Livell ta' servizz "mgħaġġel"/"prijoritarju" jew "flex" Codex japplika multiplikatur tal-ispejjeż (`getCodexFastCostMultiplier`) — eż. flex jiġi ffatturat bi skont token ta' 50%, imtella' bħala **tfaddil flex** fid-dashboard.
 
-L-ismijiet tal-mudelli jiġu normalizzati l-ewwel (prefissi tal-mogħdijiet tal-fornituri bħal `openai/` jew
-`accounts/fireworks/models/` jitneħħew) sabiex ringieli storiċi xorta jaqblu ma' prezz.
+L-ismijiet tal-mudelli huma normalizzati l-ewwel (prefissi tal-mogħdija tal-fornitur bħal `openai/` jew `accounts/fireworks/models/` huma mqaxxra) sabiex ringieli storiċi għadhom jaqblu ma 'prezz.
 
-### Kif jiġi rreġistrat l-infiq
+### Kif tiġi rreġistrata l-infiq
 
-- L-ispiża għal kull talba tiġi kkalkulata wara r-risposta u rreġistrata mingħajr stennija għar-riżultat sabiex
-  qatt ma żżid latenza għall-klijent. Il-konsum tal-kwota kondiviża jiġi skedat fit-tick li jmiss
-  tal-event loop permezz ta' [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- L-infiq tal-API keys jinżamm f'buffer u jintbagħat f'lottijiet mill-
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervall predefinit ta' 60s bejn kull flush,
-  buffer ta' 1,000 entrata). Jista' jiġi rregolat permezz ta':
+- L-ispiża għal kull talba tiġi kkalkulata mat-tlestija tat-talba. Il-konsum tal-kwota maqsuma huwa skedat fuq il-marka tal-loop tal-avveniment li jmiss permezz ta [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- L-infiq taċ-ċavetta API huwa buffered u mlaħlaħ f'lottijiet mill- [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervall ta' flush default 60s, buffer ta' 1,000 dħul). Sintonizzabbli permezz ta':
 
-  | Varjabbli tal-ambjent               | Valur predefinit | Għan                                                 |
-  | ----------------------------------- | ---------------- | ---------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`          | Intervall tal-flush f'millisekondi.                  |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`           | Għadd massimu ta' entrati fil-buffer qabel il-flush. |
+  | Env var                             | Default | Għan                              |
+  | ----------------------------------- | ------- | --------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Aħsel intervall f'millisekondi.   |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max buffered entrati qabel flush. |
 
-Iċ-ċifri tal-ispejjeż fid-dashboard **ma** jinqrawx minn ammont f'dollari maħżun għal kull ringiela — jiġu
-kkalkulati mill-ġdid dak il-ħin mill-għadd ta' tokens u mit-tabella attwali tal-ipprezzar kull darba li
-jitħaddem l-endpoint tal-analytics. Dan ifisser li l-korrezzjoni ta' prezz ħażin (u s-sinkronizzazzjoni mill-ġdid) taġġorna
-b'mod retroattiv l-istimi storiċi tal-ispejjeż.
+L-ispejjeż jippreferu ħlas eżatt irrapportat mill-fornitur (`provider_cost_usd`), imbagħad snapshot tat-talba bi prezz ta 'katalgu (`calculated_cost_usd`), imbagħad token repricing mill-katalgu attwali. L-ispejjeż maħżuna ma jerġgħux jiġu ċċarġjati permezz tal-għadd tat-tokens tagħhom. Ringieli legacy ta' tokens biss għadhom jinbidlu meta jinbidel il-prezz tal-katalgu tagħhom.
+
+### OCR u embeddings
+
+- Talbiet `/v1/ocr` b'suċċess jużaw `usage_info.pages_processed` upstream , mhux il-firxa tal-paġna mitluba jew in-numru ta 'oġġetti tal-paġna rritornati. L-istima hija paġni × `ocr_cost_per_page` (assoluta USD/page,**le** USD/million).
+- It-talbiet b'annotazzjonijiet ta' dokumenti jew bounding-box jeħtieġu tariffa `ocr_cost_per_annotated_page` separata. Mingħajrha, l-ispiża tibqa 'mhux magħrufa; it-tariffa OCR ordinarja mhix sostitwita skiet.
+- Is-sinkronizzazzjoni LiteLLM timmappa l-qasam `annotation_cost_per_page` upstream tagħha `ocr_cost_per_annotated_page`, u żżomm il-valur USD/page assolut u l-entrati ta' annotazzjoni biss, inkluż żero espliċitu. Qasam kanoniku fornut jieħu preċedenza; valuri ta' alias invalidi huma injorati. L-overrides tal-prezzijiet tal-utenti jżommu l-prijorità normali tagħhom. Ara [ċ-ċwievet tal-prezzijiet OCR ta'LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- L-użu OCR jaħżen l-għadd tal-paġna, il-prezz tal-unità, l-ispiża USD ikkalkulata, iċ-ċavetta API u l-konnessjoni magħżula. Il-paġni qatt ma huma rappreżentati bħala tokens. Ir-reġistri tas-sejħiet fihom metadejta tal-kontijiet, mhux dokument URLs, bytes PDF jew test estratt.
+- Talbiet `/v1/embeddings` b'suċċess jirreġistraw ringiela ta' użu waħda għal kull lott fiżiku, inklużi lottijiet separati kompletati fl-istess millisekonda. It-tariffi rrapportati mill-fornitur jieħdu preċedenza fuq l-istimi tat-tokens; tgeżwir combo ma jżidux ħlas.
+- L-istorja tal-użu, l-Analitika tal-Ispejjeż, it-twieqi provider/account, il-limiti tal-infiq taċ-ċavetta tal-API, ir-reġistru tal-ispejjeż tat-talba u rollups tal-użu ta 'kuljum jinkludu dawn il-ħlasijiet. Iċ-ċwievet bla log iżommu l-kontabilità numerika mingħajr ma jżommu t-test tas-sors.
+- L-użu jew it-tariffi nieqsa huma **mhux magħruf** , mhux b'xejn: l-intestatura tal-ispiża tar-rispons titħalla barra, u l-politika eżistenti dwar l-użu bla prezz tapplika għal ċwievet API limitati. Ir-rati żero kkonfigurati b'mod espliċitu jibqgħu validi użu ta 'spiża żero.
+
+Din hija kontabilità bil-quddiem biss. Sejħiet OCR/embedding qodma li qatt ma kitbu l-istorja tal-użu ma jistgħux jiġu rikostitwiti minn din il-migrazzjoni. L-istimi tal-katalgu huma stimi USD, mhux fattura, u ma jinkludux konverżjoni tal-munita, taxxa jew roħs.
 
 ---
 

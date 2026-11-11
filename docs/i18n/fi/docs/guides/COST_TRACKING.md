@@ -39,72 +39,71 @@ Koska luku on arvio:
 
 ## Miten kustannukset arvioidaan
 
-### Hinnoittelulähde
+### Hinnoittelun lähde
 
-Kustannukset perustuvat tiedoston [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) yhdistettyyn hintataulukkoon tässä etusijajärjestyksessä (**korkein ensin**):
+Kustannukset tulevat [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) :n yhdistetystä hinnoittelutaulukosta tässä tärkeysjärjestyksessä (**korkein ensin** ):
 
-1. **Käyttäjän ohitukset** — hallintapaneelissa tai rajapinnalla `PATCH /api/pricing` asetetut hinnat (nimiavaruus `pricing`).
-2. **models.dev-synkronointi** — osoitteesta `https://models.dev/api.json` noudetut hinnat (nimiavaruus `models_dev_pricing`).
-3. **LiteLLM-synkronointi** — LiteLLM-palvelun julkisesta tiedostosta `model_prices_and_context_window.json` noudetut hinnat (nimiavaruus `pricing_synced`).
-4. **Koodiin sisältyvät oletusarvot** — hakemistossa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) toimitetut hinnat.
+1. **Käyttäjä ohittaa** — hinnat on asetettu kojelaudassa tai `PATCH /api/pricing` ( `pricing` nimiavaruuden) kautta.
+2. **mallit.dev-synkronointi** — -hinnoittelu haettu `https://models.dev/api.json` :stä ( `models_dev_pricing` nimitila).
+3. **LiteLLM -synkronointi** — hinnat haettu LiteLLM:n julkisesta `model_prices_and_context_window.json` ( `pricing_synced` nimiavaruudesta).
+4. **Kovakoodatut oletukset** — hinnat toimitetaan [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ssä.
 
-Samalla palveluntarjoaja-/malliparilla korkeamman etusijan kerrokset korvaavat alempien kerrosten vastaavat kentät; ylemmästä kerroksesta puuttuvat kentät voivat yhä tulla alemmasta. Järjestys pysyy kiinteänä myös molempien riippumattomien synkronointitöiden suoriutuessa yhtä aikaa. `GET /api/pricing?includeSources=1` palauttaa `pricing`- ja `sourceMap`-oliot. Jälkimmäisen mallikohtaiset tunnisteet (`user`, `modelsDev`, `litellm`, `default`) ilmaisevat mallin sisältävän korkeimman etusijan kerroksen.
+Saman provider/model kohdalla korkeamman prioriteetin tasojen arvot korvaavat alempien kerrosten vastaavat kentät; ylemmästä kerroksesta puuttuvat kentät voivat silti tulla alemmasta kerroksesta. Järjestys on kiinteä, vaikka molemmat itsenäiset synkronointityöt suoritetaan samanaikaisesti. `GET /api/pricing?includeSources=1` palauttaa `pricing` ja `sourceMap`, joiden mallikohtaiset tunnisteet (`user`, `modelsDev`, `litellm`, `default`) tunnistavat korkeimman prioriteetin kerroksen, joka sisältää kyseisen mallin.
 
-**LiteLLM-synkronointi** on otettava erikseen käyttöön, ja se on oletusarvoisesti pois käytöstä. Sen ympäristömuuttujat (katso [`.env.example`](../../.env.example)) ovat:
+**LiteLLM -synkronointi** on valinnainen, oletuksena poistettu käytöstä. Sen ympäristömuuttujat (katso [`.env.example`](../../.env.example) ) ovat:
 
-| Ympäristömuuttuja       | Oletus    | Tarkoitus                                                                              |
-| ----------------------- | --------- | -------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Ottaa LiteLLM-hintojen synkronoinnin käyttöön taustalla.                               |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synkronointiväli **sekunteina** (oletuksena päivittäin).                               |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Lähteiden valinta vain tälle synkronoinnille; tällä hetkellä vain `litellm` on tuettu. |
+| Env var                 | Oletus    | Tarkoitus                                                                             |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Ota käyttöön tausta LiteLLM -hinnoittelun synkronointi.                               |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synkronointiväli sekunneissa (päivittäin).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Lähteen valinta vain tälle synkronoinnille; tällä hetkellä vain `litellm` ta tuetaan. |
 
-**models.dev-synkronointi** on erillinen LiteLLM-synkronoinnista ja myös oletusarvoisesti pois käytöstä. Ota se käyttöön Asetuksissa (models.dev-synkronointi) tai näillä muuttujilla:
+**mallit.dev-synkronointi** on erillinen LiteLLM -synkronoinnista ja on myös oletusarvoisesti poistettu käytöstä. Ota se käyttöön asetuksissa (models.dev sync) tai käytä näitä muuttujia:
 
-| Ympäristömuuttuja          | Oletusarvo      | Tarkoitus                                                                                                                                                      |
-| -------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(ei asetettu)_ | Asettamattomana noudattaa Asetusten valitsinta; `1/true/on/yes` pakottaa käyttöön ja `0/false/off/no` pois käytöstä, vaikka Asetukset ottaisivat sen käyttöön. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | models.dev-synkronoinnin oletusväli sekunteina (päivittäin).                                                                                                   |
+| Env var                    | Oletus    | Tarkoitus                                                                                                                                  |
+| -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unset)_ | Unset seuraa Asetukset-kytkintä; `1/true/on/yes` pakottaa päälle ja `0/false/off/no` pakottaa pois päältä (vaikka Asetukset sallivat sen). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Model.dev-oletussynkronointiväli sekunneissa (päivittäin).                                                                                 |
 
-`PRICING_SYNC_SOURCES` **ei** ota models.dev-synkronointia käyttöön; se ohjaa vain LiteLLM-synkronointia. Käyttäjän ohituksen poistaminen ei tyhjennä kumpaakaan synkronoitua nimiavaruutta, vaan seuraava saatavilla oleva hintakerros tulee voimaan. Tarkista hinnoittelemattoman mallin kohdalla molemmat synkronointiasetukset ja `sourceMap` ennen manuaalisen ohituksen lisäämistä.
+`PRICING_SYNC_SOURCES` tekee **ei** salli mallit.dev; se ohjaa vain LiteLLM -synkronointia. Käyttäjän ohituksen poistaminen ei tyhjennä kumpaakaan synkronoitua nimiavaruutta. seuraava käytettävissä oleva hinnoittelutaso astuu voimaan. Jos malli on hinnoiteltu, tarkista sekä synkronointiasetukset että `sourceMap` ennen manuaalisen ohituksen lisäämistä.
 
 ### Kustannuskaava
 
-Kustannus lasketaan pyyntökohtaisesti tokenien määristä ja miljoonan tokenin hinnoista
-tiedostossa [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kustannukset lasketaan pyyntöä kohden [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) ssa (`computeCostFromPricing` / `calculateCost`) tunnistemäärästä ja miljoonakohtaisista tokeneista:
 
-- **Syötetokenit** (välimuistiluvut ja välimuistin luontitokenit vähennettyinä) × `input`-hinta.
-- **Välimuistista luetut tokenit** × `cached`-hinta (jos sitä ei ole, käytetään syötehintaa).
-- **Välimuistin luontitokenit** × `cache_creation`-hinta (jos sitä ei ole, käytetään syötehintaa).
-- **Tulostokenit** × `output`-hinta.
-- **Päättelytokenit** × `reasoning`-hinta (jos sitä ei ole, käytetään tulostehintaa).
+- **Syöttötunnukset** (miinus välimuistin lukemat ja välimuistin luontitunnukset) × `input` rate.
+- **Välimuistin lukutunnukset** × `cached` nopeus (laskee takaisin syöttönopeudeksi).
+- **Välimuistin luontitunnukset** × `cache_creation` nopeus (laskee takaisin syöttönopeudeksi).
+- **Tulostustunnukset** × `output` korko.
+- **Perustelut** × `reasoning` nopeus (laskee takaisin lähtönopeudeksi).
 
-Kaikki hinnat tulkitaan Yhdysvaltain dollareina 1 000 000:ta tokenia kohden. Codexin
-”fast”-/”priority”- tai ”flex”-palvelutaso käyttää kustannuskerrointa (`getCodexFastCostMultiplier`) — esimerkiksi flex
-laskutetaan 50 %:n alennuksella tokenien hinnasta, ja tämä esitetään hallintapaneelissa
-**flex-säästöinä**.
+Kaikki hinnat tulkitaan USD :ksi 1 000 000 tokenia kohti. Codex "fast"/"priority" tai "flex" palvelutaso käyttää kustannuskerrointa (`getCodexFastCostMultiplier`) — esim. flex laskutetaan 50 %:n token-alennuksella, joka julkaistaan **flex säästöjä** kojelaudassa.
 
-Mallien nimet normalisoidaan ensin (palveluntarjoajan polkuetuliitteet, kuten `openai/` tai
-`accounts/fireworks/models/`, poistetaan), jotta myös historialliset rivit vastaavat hintaa.
+Mallinimet normalisoidaan ensin (palveluntarjoajan polun etuliitteet, kuten `openai/` tai `accounts/fireworks/models/` poistetaan), joten historialliset rivit vastaavat edelleen hintaa.
 
-### Miten kulutus tallennetaan
+### Miten kulutus kirjataan
 
-- Pyyntökohtainen kustannus lasketaan vastauksen jälkeen ja tallennetaan odottamatta tulosta,
-  joten se ei koskaan lisää asiakkaan kokemaa viivettä. Jaetun kiintiön kulutuksen tallennus ajoitetaan
-  tapahtumasilmukan seuraavalle kierrokselle tiedoston [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kautta.
-- API-avaimen kulutus puskuroidaan ja kirjoitetaan erissä
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)-komponentilla (oletuksena 60 sekunnin kirjoitusväli,
-  1 000 merkinnän puskuri). Säädettävissä seuraavilla muuttujilla:
+- Pyyntökohtainen hinta lasketaan pyynnön valmistuttua. Jaetun kiintiön kulutus ajoitetaan seuraavan tapahtumasilmukan rastiin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kautta.
+- API-avaimen kulutus puskuroidaan ja tyhjennetään erissä [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) lla (oletusarvoinen 60 sekunnin huuhteluväli, 1 000 merkinnän puskuri). Viritettävä kautta:
 
-  | Ympäristömuuttuja                   | Oletus  | Tarkoitus                                                  |
-  | ----------------------------------- | ------- | ---------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Kirjoitusväli millisekunteina.                             |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Puskuroitujen merkintöjen enimmäismäärä ennen kirjoitusta. |
+  | Env var                             | Oletus  | Tarkoitus                                      |
+  | ----------------------------------- | ------- | ---------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Huuhteluväli millisekunteina.                  |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Enimmäispuskuroidut merkinnät ennen huuhtelua. |
 
-Hallintapaneelin kustannuslukuja **ei** lueta tallennetusta rivikohtaisesta dollarimäärästä
-— ne lasketaan aina uudelleen tokenien määristä ja nykyisestä hinnoittelutaulukosta, kun
-analytiikan päätepiste suoritetaan. Tämä tarkoittaa, että virheellisen hinnan korjaaminen
-(ja uudelleensynkronointi) päivittää historialliset kustannusarviot takautuvasti.
+Kustannukset valitsevat tarkan palveluntarjoajan ilmoittaman veloituksen (`provider_cost_usd`), sitten luettelohintaisen pyynnön tilannevedoksen (`calculated_cost_usd`) ja sitten token-uudelleenhinnoittelun nykyisestä luettelosta. Tallennettuja kuluja ei veloiteta uudelleen niiden tunnuslukujen kautta. Vanhat vain tunnusrivit muuttuvat edelleen, kun niiden luettelohinta muuttuu.
+
+### OCR ja upotukset
+
+- Onnistuneet `/v1/ocr` -pyynnöt käyttävät ylävirran `usage_info.pages_processed`, eivät pyydettyä sivualuetta tai palautettujen sivuobjektien määrää. Arvio on sivua × `ocr_cost_per_page` (absoluuttinen USD/page,**ei** USD/million).
+- Pyynnöt, joissa on asiakirja- tai rajoituslaatikon huomautuksia, vaativat erillisen `ocr_cost_per_annotated_page` tariffin. Ilman sitä kustannukset jäävät tuntemattomiksi; tavallista OCR tariffia ei korvata hiljaa.
+- LiteLLM -synkronointi kuvaa ylävirran `annotation_cost_per_page` kenttänsä `ocr_cost_per_annotated_page` ksi säilyttäen absoluuttisen USD/page arvon ja vain huomautuksia sisältävät merkinnät, mukaan lukien eksplisiittisen nollan. Toimitettu kanoninen kenttä on etusijalla; virheelliset aliasarvot ohitetaan. Käyttäjähinnoittelun ohitukset säilyttävät normaalin prioriteettinsa. Katso [LiteLLM:n OCR hinnoitteluavaimet](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -käyttö tallentaa sivumäärän, yksikköhinnan, lasketun USD hinnan, API -avaimen ja valitun yhteyden. Sivuja ei koskaan esitetä tokeneina. Puhelulokit sisältävät laskutuksen metatietoja, eivät asiakirjaa URLs, PDF tavuja tai purettua tekstiä.
+- Onnistuneet `/v1/embeddings` pyynnöt tallentavat yhden käyttörivin fyysistä erää kohti, mukaan lukien erilliset erät, jotka on suoritettu samassa millisekunnissa. Palveluntarjoajan ilmoittamat maksut ovat etusijalla token-arvioihin nähden; yhdistelmäkääreet eivät lisää maksua.
+- Käyttöhistoria, kustannusanalytiikka, provider/account ikkunat, API-avaimen kulutusrajat, pyyntö-kustannuskirjaus ja päivittäiset käyttökertoimet sisältävät nämä maksut. No-log-avaimet säilyttävät numeerisen kirjanpidon säilyttämättä lähdetekstiä.
+- Puuttuva käyttö tai tariffit ovat **tuntematon** , ei ilmainen: vastauskustannusotsikko jätetään pois, ja nykyinen hinnoittelemattoman käytön käytäntö koskee rajoitettuja API avaimia. Eksplisiittisesti määritetyt nollahinnat pysyvät voimassa ilman kustannuksia.
+
+Tämä on vain eteenpäin suuntautuvaa kirjanpitoa. Vanhoja OCR/embedding -kutsuja, jotka eivät koskaan kirjoittaneet käyttöhistoriaa, ei voida rekonstruoida tästä siirrosta. Luetteloarviot ovat USD -arvioita, eivät laskuja, eivätkä sisällä valuuttamuunnoksia, veroja tai alennuksia.
 
 ---
 

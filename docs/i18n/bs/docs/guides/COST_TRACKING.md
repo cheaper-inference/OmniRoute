@@ -1,4 +1,4 @@
-# Praćenje troškova i potrošnje (Bosanski)
+# Cost & Spend Tracking (Bosanski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../guides/COST_TRACKING.md) · 🇪🇹 [am](../../../am/docs/guides/COST_TRACKING.md) · 🇸🇦 [ar](../../../ar/docs/guides/COST_TRACKING.md) · 🇦🇿 [az](../../../az/docs/guides/COST_TRACKING.md) · 🇧🇬 [bg](../../../bg/docs/guides/COST_TRACKING.md) · 🇧🇩 [bn](../../../bn/docs/guides/COST_TRACKING.md) · 🇨🇿 [cs](../../../cs/docs/guides/COST_TRACKING.md) · 🇩🇰 [da](../../../da/docs/guides/COST_TRACKING.md) · 🇩🇪 [de](../../../de/docs/guides/COST_TRACKING.md) · 🇬🇷 [el](../../../el/docs/guides/COST_TRACKING.md) · 🇪🇸 [es](../../../es/docs/guides/COST_TRACKING.md) · 🇪🇪 [et](../../../et/docs/guides/COST_TRACKING.md) · 🇮🇷 [fa](../../../fa/docs/guides/COST_TRACKING.md) · 🇫🇮 [fi](../../../fi/docs/guides/COST_TRACKING.md) · 🇫🇷 [fr](../../../fr/docs/guides/COST_TRACKING.md) · 🇮🇪 [ga](../../../ga/docs/guides/COST_TRACKING.md) · 🇮🇳 [gu](../../../gu/docs/guides/COST_TRACKING.md) · 🇳🇬 [ha](../../../ha/docs/guides/COST_TRACKING.md) · 🇮🇱 [he](../../../he/docs/guides/COST_TRACKING.md) · 🇮🇳 [hi](../../../hi/docs/guides/COST_TRACKING.md) · 🇭🇷 [hr](../../../hr/docs/guides/COST_TRACKING.md) · 🇭🇺 [hu](../../../hu/docs/guides/COST_TRACKING.md) · 🇦🇲 [hy](../../../hy/docs/guides/COST_TRACKING.md) · 🇮🇩 [id](../../../id/docs/guides/COST_TRACKING.md) · 🇳🇬 [ig](../../../ig/docs/guides/COST_TRACKING.md) · 🇮🇹 [it](../../../it/docs/guides/COST_TRACKING.md) · 🇯🇵 [ja](../../../ja/docs/guides/COST_TRACKING.md) · 🇬🇪 [ka](../../../ka/docs/guides/COST_TRACKING.md) · 🇰🇭 [km](../../../km/docs/guides/COST_TRACKING.md) · 🇮🇳 [kn](../../../kn/docs/guides/COST_TRACKING.md) · 🇰🇷 [ko](../../../ko/docs/guides/COST_TRACKING.md) · 🇱🇹 [lt](../../../lt/docs/guides/COST_TRACKING.md) · 🇱🇻 [lv](../../../lv/docs/guides/COST_TRACKING.md) · 🇮🇳 [ml](../../../ml/docs/guides/COST_TRACKING.md) · 🇮🇳 [mr](../../../mr/docs/guides/COST_TRACKING.md) · 🇲🇾 [ms](../../../ms/docs/guides/COST_TRACKING.md) · 🇲🇹 [mt](../../../mt/docs/guides/COST_TRACKING.md) · 🇲🇲 [my](../../../my/docs/guides/COST_TRACKING.md) · 🇳🇵 [ne](../../../ne/docs/guides/COST_TRACKING.md) · 🇳🇱 [nl](../../../nl/docs/guides/COST_TRACKING.md) · 🇳🇴 [no](../../../no/docs/guides/COST_TRACKING.md) · 🇮🇳 [or](../../../or/docs/guides/COST_TRACKING.md) · 🇮🇳 [pa](../../../pa/docs/guides/COST_TRACKING.md) · 🇵🇭 [phi](../../../phi/docs/guides/COST_TRACKING.md) · 🇵🇱 [pl](../../../pl/docs/guides/COST_TRACKING.md) · 🇵🇹 [pt](../../../pt/docs/guides/COST_TRACKING.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/COST_TRACKING.md) · 🇷🇴 [ro](../../../ro/docs/guides/COST_TRACKING.md) · 🇷🇺 [ru](../../../ru/docs/guides/COST_TRACKING.md) · 🇱🇰 [si](../../../si/docs/guides/COST_TRACKING.md) · 🇸🇰 [sk](../../../sk/docs/guides/COST_TRACKING.md) · 🇸🇮 [sl](../../../sl/docs/guides/COST_TRACKING.md) · 🇷🇸 [sr](../../../sr/docs/guides/COST_TRACKING.md) · 🇸🇪 [sv](../../../sv/docs/guides/COST_TRACKING.md) · 🇰🇪 [sw](../../../sw/docs/guides/COST_TRACKING.md) · 🇮🇳 [ta](../../../ta/docs/guides/COST_TRACKING.md) · 🇮🇳 [te](../../../te/docs/guides/COST_TRACKING.md) · 🇹🇭 [th](../../../th/docs/guides/COST_TRACKING.md) · 🇹🇷 [tr](../../../tr/docs/guides/COST_TRACKING.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/COST_TRACKING.md) · 🇵🇰 [ur](../../../ur/docs/guides/COST_TRACKING.md) · 🇺🇿 [uz](../../../uz/docs/guides/COST_TRACKING.md) · 🇻🇳 [vi](../../../vi/docs/guides/COST_TRACKING.md) · 🇳🇬 [yo](../../../yo/docs/guides/COST_TRACKING.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/COST_TRACKING.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/COST_TRACKING.md)
 
@@ -27,59 +27,71 @@ Budući da je broj procjena:
 
 ## Kako se procjenjuju troškovi
 
-### Izvor cijena
+### Izvor cijene
 
-Troškovi se računaju iz objedinjene tabele cijena u [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ovim redoslijedom prvenstva (**najviše prvo**):
+Troškovi dolaze iz tabele spojenih cijena u [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ovim redoslijedom prioriteta (**najviša prva** ):
 
-1. **Korisničke zamjene** — cijene postavljene na kontrolnoj ploči ili putem `PATCH /api/pricing` (prostor imena `pricing`).
-2. **Sinhronizacija models.dev** — cijene preuzete sa `https://models.dev/api.json` (prostor imena `models_dev_pricing`).
-3. **Sinhronizacija LiteLLM** — cijene iz javne datoteke `model_prices_and_context_window.json` projekta LiteLLM (prostor imena `pricing_synced`).
-4. **Ugrađene podrazumijevane vrijednosti** — tarife isporučene u [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Korisnik nadjačava** — cijene postavljene na kontrolnoj tabli ili putem `PATCH /api/pricing` ( `pricing` imenskog prostora).
+2. **models.dev sync** — cijene preuzete iz `https://models.dev/api.json` ( `models_dev_pricing` imenski prostor).
+3. **LiteLLM sinhronizacija** — cijene dohvaćene iz LiteLLM-ovog javnog `model_prices_and_context_window.json` ( `pricing_synced` imenskog prostora).
+4. **Hardcoded defaults** — cijene se šalju u [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Za isti par pružalac/model slojevi višeg prvenstva prepisuju odgovarajuća polja nižih slojeva; polja kojih nema u višem sloju i dalje mogu doći iz nižeg. Redoslijed ostaje isti čak i kada oba nezavisna posla sinhronizacije rade istovremeno. `GET /api/pricing?includeSources=1` vraća `pricing` i `sourceMap`, čije oznake po modelu (`user`, `modelsDev`, `litellm`, `default`) označavaju sloj najvišeg prvenstva koji sadrži taj model.
+Za isti provider/model, vrijednosti iz slojeva višeg prioriteta zamenjuju odgovarajuća polja u nižim slojevima; polja koja su odsutna iz gornjeg sloja još uvijek mogu doći iz nižeg sloja. Redoslijed je fiksiran čak i kada se oba nezavisna posla sinhronizacije pokreću u isto vrijeme. `GET /api/pricing?includeSources=1` vraća `pricing` i `sourceMap`, čije oznake po modelu (`user`, `modelsDev`, `litellm`, `default`) identificiraju sloj najvišeg prioriteta koji sadrži taj model.
 
-**Sinhronizacija LiteLLM** zahtijeva izričito uključivanje i podrazumijevano je isključena. Njene varijable okruženja (pogledajte [`.env.example`](../../.env.example)) su:
+**LiteLLM sinhronizacija** je uključeno, onemogućeno prema zadanim postavkama. Njegove varijable okruženja (pogledajte [`.env.example`](../../.env.example) ) su:
 
-| Env var                 | Default   | Purpose                                                                      |
-| ----------------------- | --------- | ---------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Uključuje pozadinsku sinhronizaciju cijena LiteLLM.                          |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinhronizacije u **sekundama** (zadano dnevno).                     |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Izbor izvora samo za ovu sinhronizaciju; trenutno je podržan samo `litellm`. |
+| Env var                 | Default   | Svrha                                                                         |
+| ----------------------- | --------- | ----------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Omogućite pozadinsku sinhronizaciju LiteLLM cijena.                           |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinhronizacije u sekundama (dnevno).                                 |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Odabir izvora samo za ovu sinhronizaciju; trenutno je podržan samo `litellm`. |
 
-**Sinhronizacija models.dev** odvojena je od sinhronizacije LiteLLM i također je podrazumijevano isključena. Uključite je u Postavkama (sinhronizacija models.dev) ili koristite ove varijable:
+**models.dev sync** je odvojeno od LiteLLM sinhronizacije i također je onemogućeno po defaultu. Omogućite ga u Postavkama (models.dev sinhronizacija) ili koristite ove varijable:
 
-| Varijabla okruženja        | Podrazumijevano      | Svrha                                                                                                                                                               |
-| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nije postavljeno)_ | Ako nije postavljeno, prati prekidač u Postavkama; `1/true/on/yes` prisilno uključuje, a `0/false/off/no` prisilno isključuje, čak i ako je uključeno u Postavkama. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Podrazumijevani interval sinhronizacije models.dev u sekundama (dnevno).                                                                                            |
+| Env var                    | Default           | Svrha                                                                                                                                    |
+| -------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nepostavljeno)_ | Unset prati preklopku Postavke; `1/true/on/yes` se uključuje i `0/false/off/no` prisilno isključuje (čak i ako to Postavke omogućavaju). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Zadani interval sinhronizacije models.dev u sekundama (dnevno).                                                                          |
 
-`PRICING_SYNC_SOURCES` **ne** uključuje models.dev; upravlja samo sinhronizacijom LiteLLM. Brisanje korisničke zamjene ne prazni nijedan sinhronizovani prostor imena; primjenjuje se sljedeći dostupni sloj cijena. Za model bez cijene provjerite obje postavke sinhronizacije i `sourceMap` prije dodavanja ručne zamjene.
+`PRICING_SYNC_SOURCES` radi **ne** enable models.dev; kontroliše samo LiteLLM sinhronizaciju. Brisanjem zaobilaženja korisnika ne brišete ni sinkronizirani prostor imena; sljedeći dostupni sloj cijena postaje efikasan. Za model bez cijene, provjerite i postavke sinhronizacije i `sourceMap` prije dodavanja ručnog nadjačavanja.
 
 ### Formula troškova
 
 Trošak se izračunava po zahtjevu iz broja tokena i stopa po milion tokena u [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Ulazni tokeni** (minus čitanja iz keša i tokeni za kreiranje keša) × `input` stopa.
-- **Tokeni čitanja iz keša** × `cached` stopa (vraća se na ulaznu stopu ako nije dostupna).
-- **Tokeni za kreiranje keša** × `cache_creation` stopa (vraća se na ulaznu stopu ako nije dostupna).
+- **Ulazni tokeni** (minus čitanja keša i tokeni za kreiranje predmemorije) × `input` stopa.
+- **Tokeni za čitanje predmemorije** × `cached` stopa (pada nazad na ulaznu brzinu).
+- **Tokeni za kreiranje keša** × `cache_creation` stopa (pada nazad na ulaznu brzinu).
 - **Izlazni tokeni** × `output` stopa.
-- **Tokeni zaključivanja (reasoning)** × `reasoning` stopa (vraća se na izlaznu stopu ako nije dostupna).
+- **Reasoning tokens** × `reasoning` stopa (pada nazad na izlaznu stopu).
 
-Sve stope se tumače kao USD po 1.000.000 tokena. Codex "fast"/"priority" ili "flex" nivo usluge primjenjuje množitelj troškova (`getCodexFastCostMultiplier`) — npr. flex se naplaćuje uz popust od 50% na tokene, što se prikazuje kao **flex uštede** na kontrolnoj ploči.
+Sve stope se tumače kao USD na 1.000.000 tokena. Codex "brzi"/"prioritetni" ili "fleksibilni" nivo usluge primjenjuje multiplikator troškova (`getCodexFastCostMultiplier`) —, npr. flex se naplaćuje uz popust od 50% tokena, prikazan kao **flex štednja** u komandnoj tabli.
 
-Imena modela se prvo normalizuju (prefiksi putanje provajdera kao što su `openai/` ili `accounts/fireworks/models/` se uklanjaju) tako da se historijski redovi i dalje podudaraju sa cijenom.
+Nazivi modela se prvo normaliziraju (prefiksi putanje dobavljača kao što su `openai/` ili `accounts/fireworks/models/` su uklonjeni) tako da istorijski redovi i dalje odgovaraju cijeni.
 
 ### Kako se bilježi potrošnja
 
-- Trošak po zahtjevu se izračunava nakon odgovora i bilježi metodom "fire-and-forget" (pusti i zaboravi) tako da nikada ne dodaje latenciju klijentu. Potrošnja zajedničke kvote se zakazuje na sljedećem otkucaju petlje događaja (event-loop tick) putem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Potrošnja API ključa se baferuje i ispire (flush) u serijama od strane [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (zadano 60s interval ispiranja, bafer od 1.000 unosa). Podesivo putem:
+- Trošak po zahtjevu se izračunava po završetku zahtjeva. Potrošnja dijeljene kvote je zakazana za sljedeću petlju događaja putem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Potrošnja API ključa je baferovana i isprana u serijama od strane [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (podrazumevani interval ispiranja od 60s, bafer od 1000 unosa). Podesivo putem:
 
-  | Env var                             | Default | Purpose                                            |
-  | ----------------------------------- | ------- | -------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval ispiranja u milisekundama.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maksimalni broj baferovanih unosa prije ispiranja. |
+  | Env var                             | Default | Svrha                                   |
+  | ----------------------------------- | ------- | --------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval ispiranja u milisekundama.     |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maks. baferovani unosi prije ispiranja. |
 
-Podaci o troškovima na kontrolnoj ploči se **ne** čitaju iz pohranjenog dolarskog iznosa po redu — oni se ponovo izračunavaju u hodu iz broja tokena i trenutne tabele cijena svaki put kada se pokrene analitički krajnja tačka (endpoint). To znači da ispravljanje pogrešne cijene (i ponovna sinhronizacija) retroaktivno ažurira historijske procjene troškova.
+Troškovi preferiraju tačnu naplatu koju je prijavio provajder (`provider_cost_usd`), zatim snimak zahtjeva po kataloškim cijenama (`calculated_cost_usd`), a zatim ponovno procjenu tokena iz trenutnog kataloga. Pohranjeni troškovi se ne naplaćuju ponovo kroz njihov broj tokena. Naslijeđeni redovi samo za token i dalje se mijenjaju kada se njihova kataloška cijena promijeni.
+
+### OCR i ugradnje
+
+- Uspješni `/v1/ocr` zahtjevi koriste uzvodni `usage_info.pages_processed`, a ne traženi raspon stranica ili broj vraćenih objekata stranice. Procjena je stranica × `ocr_cost_per_page` (apsolutni USD/page,**ne** USD/million).
+- Zahtjevi s napomenama u dokumentima ili graničnim okvirima zahtijevaju posebnu `ocr_cost_per_annotated_page` tarifu. Bez toga, cijena ostaje nepoznata; obična OCR tarifa nije tiho zamijenjena.
+- LiteLLM sync mapira svoje uzvodno `annotation_cost_per_page` polje u `ocr_cost_per_annotated_page`, zadržavajući apsolutnu USD/page vrijednost i unose samo za napomene, uključujući eksplicitnu nulu. Dostavljeno kanonsko polje ima prednost; nevažeće alias vrijednosti se zanemaruju. Poništavanje korisničkih cijena zadržava svoj uobičajeni prioritet. Pogledajte [LiteLLM-ove OCR ključeve cijena](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Upotreba OCR pohranjuje broj stranica, jediničnu cijenu, izračunatu USD cijenu, API ključ i odabranu vezu. Stranice se nikada ne predstavljaju kao tokeni. Dnevnici poziva sadrže metapodatke o naplati, a ne dokument URLs, PDF bajtove ili ekstrahovani tekst.
+- Uspješni `/v1/embeddings` zahtjevi bilježe jedan red upotrebe po fizičkoj grupi, uključujući odvojene serije dovršene u istoj milisekundi. Naknade koje je prijavio provajder imaju prednost nad procjenama tokena; kombinovani omoti ne naplaćuju.
+- Istorija korištenja, analiza troškova, provider/account prozori, ograničenja potrošnje API ključeva, knjiga troškova zahtjeva i dnevni podaci o korištenju uključuju ove troškove. Ključevi bez evidencije zadržavaju numeričko računovodstvo bez zadržavanja izvornog teksta.
+- Nedostaje upotreba ili tarife **unknown** , nije besplatno: zaglavlje cijene odgovora je izostavljeno, a postojeća politika korištenja bez cijene se primjenjuje na ograničene API ključeve. Eksplicitno konfigurirane nulte stope ostaju važeće za korištenje bez troškova.
+
+Ovo je samo unaprijed računovodstvo. Stari OCR/embedding pozivi koji nikada nisu pisali istoriju upotrebe ne mogu se rekonstruisati iz ove migracije. Procjene kataloga su USD procjene, a ne faktura, i ne uključuju konverziju valuta, porez ili popuste.
 
 ---
 

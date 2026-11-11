@@ -36,73 +36,73 @@ Nítorí pé nọ́mbà náà jẹ́ ìṣírò:
 
 ---
 
-## Bí a ṣe ń ṣírò àwọn iye owó
+## Bawo ni iye owo ti wa ni ifoju
 
-### Orísun iye owó
+### Orisun idiyele
 
-Iye owó wá láti tábìlì iye tí a so pọ̀ nínú [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ní àtòjọ yìí (**àṣẹ gíga jù lọ lákọ̀ọ́kọ́**):
+Awọn idiyele wa lati tabili idiyele ti a dapọ ni [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ni aṣẹ iṣaaju yii (**ti o ga julọ akọkọ** ):
 
-1. **Ìròpọ̀ aṣàmúlò** — iye tí a ṣètò ní pátákó tàbí nípasẹ̀ `PATCH /api/pricing` (àgbègbè orúkọ `pricing`).
-2. **Ìmúdọ̀gba models.dev** — iye láti `https://models.dev/api.json` (àgbègbè orúkọ `models_dev_pricing`).
-3. **Ìmúdọ̀gba LiteLLM** — iye láti fáìlì gbangba `model_prices_and_context_window.json` ti LiteLLM (àgbègbè orúkọ `pricing_synced`).
-4. **Àiyipada inú ètò** — iye tí ó wà nínú [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Olumulo dojuiwọn** Awọn idiyele — ti ṣeto sinu dasibodu tabi nipasẹ `PATCH /api/pricing` (aaye orukọ `pricing` ).
+2. **modeli.dev ìsiṣẹpọ** Idiyele — ti a mu lati `https://models.dev/api.json` (aaye orukọ `models_dev_pricing` ).
+3. **LiteLLM ìsiṣẹpọ** Awọn idiyele — ti a mu lati `model_prices_and_context_window.json` ti gbogbo eniyan ti LiteLLM(aaye orukọ `pricing_synced` ).
+4. **Hardcoded aseku** Awọn oṣuwọn — ti a firanṣẹ ni [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Fún olùpèsè/àwòṣe kan náà, ìpele òkè rọ́pò ààyè tó bá mu ní ìpele ìsàlẹ̀; ààyè tí kò sí ní òkè tún lè wá láti ìsàlẹ̀. Àtòjọ kò yí padà bí iṣẹ́ ìmúdọ̀gba méjèèjì tí ó jẹ́ olómìnira ṣe ń ṣiṣẹ́ lẹ́ẹ̀kan náà. `GET /api/pricing?includeSources=1` dá `pricing` àti `sourceMap` padà; àmì àwòṣe (`user`, `modelsDev`, `litellm`, `default`) sọ ìpele àṣẹ gíga jù tí ó ní àwòṣe náà.
+Fun provider/model kanna, awọn iye lati awọn ipele ti o ni ayo ti o ga julọ ṣe atunkọ awọn aaye ti o baamu ni awọn ipele kekere; Awọn aaye ti ko si lati ipele oke le tun wa lati ipele kekere kan. Ilana naa wa titi paapaa nigbati awọn iṣẹ amuṣiṣẹpọ ominira mejeeji ṣiṣẹ ni akoko kanna. `GET /api/pricing?includeSources=1` da `pricing` ati `sourceMap` pada, eyiti awọn aami apẹrẹ fun-kọọkan (`user`, `modelsDev`, `litellm`, `default`) ṣe idanimọ ipele ti o ga julọ-pataki ti o ni awoṣe yẹn.
 
-**Ìmúdọ̀gba LiteLLM** nílò kí a yàn án, ó sì ti pa ní àiyipada. Àwọn àyípadà àyíká rẹ̀ (wo [`.env.example`](../../.env.example)) ni:
+**LiteLLM ìsiṣẹpọ** ti wa ni ijade, alaabo nipasẹ aiyipada. Awọn oniyipada ayika rẹ (wo [`.env.example`](../../.env.example) ) ni:
 
-| Env var                 | Àiyẹsẹ̀    | Ète                                                                                 |
-| ----------------------- | --------- | ----------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Mú ìmúdọ̀gba iye owó LiteLLM ṣiṣẹ́ ní abẹ́lẹ̀.                                          |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Àárín àkókò ìṣiṣẹ́pọ̀ ní **ìṣẹ́jú-àáyá** (àiyẹsẹ̀ jẹ́ ojoojúmọ́).                         |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Yíyan orísun jẹ́ fún ìmúdọ̀gba yìí nìkan; `litellm` nìkan ni a ṣe àtìlẹ́yìn fún báyìí. |
+| Env var                 | Aiyipada  | Idi                                                                          |
+| ----------------------- | --------- | ---------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Mu isọdọkan ifowoleri LiteLLM abẹlẹ ṣiṣẹ.                                    |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Aago amuṣiṣẹpọ ni iṣẹju-aaya (ojoojumọ).                                     |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Aṣayan orisun fun amuṣiṣẹpọ yii nikan; Lọwọlọwọ `litellm` nikan ni atilẹyin. |
 
-**Ìmúdọ̀gba models.dev** yàtọ̀ sí ìmúdọ̀gba LiteLLM, ó sì ti pa ní àiyipada pẹ̀lú. Mú un ṣiṣẹ́ nínú Ètò (ìmúdọ̀gba models.dev) tàbí lo àwọn àyípadà wọ̀nyí:
+**modeli.dev ìsiṣẹpọ** yato si LiteLLM amuṣiṣẹpọ ati pe o tun jẹ alaabo nipasẹ aiyipada. Mu ṣiṣẹ ni Eto (models.dev sync) tabi lo awọn oniyipada wọnyi:
 
-| Àyípadà àyíká              | Àiyipada    | Iṣẹ́                                                                                                                            |
-| -------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `MODELS_DEV_SYNC_ENABLED`  | _(kò ṣètò)_ | Bí kò bá ṣètò, ó tẹ̀lé bọ́tìnnì Ètò; `1/true/on/yes` fi dandan ṣiṣẹ́, `0/false/off/no` sì fi dandan pa á, bí Ètò tilẹ̀ mú un ṣiṣẹ́. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`     | Àkókò àiyipada ìmúdọ̀gba models.dev ní ìṣẹ́jú-àáyá (lójoojúmọ́).                                                                  |
+| Env var                    | Aiyipada       | Idi                                                                                                                          |
+| -------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(a ko ṣeto) _ | Unset telẹ awọn Eto toggle; `1/true/on/yes` fi agbara mu ati awọn ipa `0/false/off/no` kuro (paapaa ti Eto ba jẹ ki o ṣiṣẹ). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Default model.dev sync aarin ni iṣẹju-aaya (ojoojumọ).                                                                       |
 
-`PRICING_SYNC_SOURCES` **kò** mú models.dev ṣiṣẹ́; ó kan ṣàkóso ìmúdọ̀gba LiteLLM. Pípa ìròpọ̀ aṣàmúlò rẹ́ kò pa èyíkéyìí àgbègbè orúkọ tí a mú dọ́gba; ìpele iye tó kàn tí ó wà ló bẹ̀rẹ̀ sí ṣiṣẹ́. Fún àwòṣe tí kò ní iye, ṣàyẹ̀wò ètò ìmúdọ̀gba méjèèjì àti `sourceMap` kí o tó fi ìròpọ̀ ọwọ́ kún un.
+`PRICING_SYNC_SOURCES` ṣe **kii ṣe** jeki awọn modeli.dev; o nṣakoso amuṣiṣẹpọ LiteLLM nikan. Piparẹ ifasilẹ olumulo kan ko ṣe ko boya aaye orukọ ti a muṣiṣẹpọ; Layer ifowoleri ti o wa atẹle yoo munadoko. Fun awoṣe ti ko ni idiyele, ṣayẹwo mejeeji awọn eto amuṣiṣẹpọ ati `sourceMap` ṣaaju ki o to ṣafikun ifasilẹ afọwọṣe kan.
 
-### Àgbékalẹ̀ ìṣírò iye owó
+### Ilana idiyele
 
-A ń ṣírò iye owó fún ìbéèrè kọ̀ọ̀kan láti iye àwọn token àti iye owó fún mílíọ̀nù kan token nínú
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+A ṣe iṣiro idiyele fun ibeere lati awọn iṣiro ami-ami ati awọn oṣuwọn ami-miliọnu kan ni [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Àwọn token àbáwọlé** (láìka àwọn kíkà cache àti àwọn token ìṣẹ̀dá cache sí) × iye `input`.
-- **Àwọn token kíkà-cache** × iye `cached` (ó máa lo iye àbáwọlé bí kò bá sí).
-- **Àwọn token ìṣẹ̀dá-cache** × iye `cache_creation` (ó máa lo iye àbáwọlé bí kò bá sí).
-- **Àwọn token àbájáde** × iye `output`.
-- **Àwọn token ìrònú** × iye `reasoning` (ó máa lo iye àbájáde bí kò bá sí).
+- **Awọn ami igbewọle** (iyokuro kaṣe kika ati kaṣe-ẹda àmi) × `input` oṣuwọn.
+- **Kaṣe-ka àmi** Oṣuwọn × `cached` (ṣubu pada si iwọn titẹ sii).
+- **Kaṣe-ẹda àmi** Oṣuwọn × `cache_creation` (ṣubu pada si iwọn titẹ sii).
+- **Awọn ami ijade** Oṣuwọn × `output`.
+- **Awọn ami idi** Oṣuwọn × `reasoning` (ṣubu pada si oṣuwọn iṣelọpọ).
 
-A ka gbogbo àwọn iye náà sí USD fún token 1,000,000. Ìpele iṣẹ́ Codex “fast”/“priority” tàbí
-“flex” ń lo aṣọdipúpọ̀ iye owó (`getCodexFastCostMultiplier`) — fún àpẹẹrẹ, a ń gba owó
-flex pẹ̀lú ẹ̀dinwó token 50%, èyí tí ó ń hàn gẹ́gẹ́ bí **owó tí flex fipamọ́** nínú dásíbọ́ọ̀dù.
+Gbogbo awọn oṣuwọn ni a tumọ bi USD fun awọn ami-ami 1,000,000. Codex “yara”/“ ayo” tabi ipele iṣẹ “Flex” kan iye owo isodipupo (`getCodexFastCostMultiplier`) — fun apẹẹrẹ Flex ti wa ni idiyele ni ẹdinwo ami ami 50%, ti o farahan bi **Flex ifowopamọ** ninu Dasibodu.
 
-A kọ́kọ́ ṣe àwọn orúkọ awoṣe ní ìlànà boṣewa (a yọ àwọn ìpele-ìṣáájú ipa-ọ̀nà olupèsè bíi `openai/` tàbí
-`accounts/fireworks/models/` kúrò) kí àwọn ìlà àkọsílẹ̀ ìtàn ṣì lè bá iye owó kan mu.
+Awọn orukọ awoṣe jẹ deede ni akọkọ (awọn ami-iṣaaju ti olupese-ọna bii `openai/` tabi `accounts/fireworks/models/` ti yọ kuro) nitorina awọn ila itan tun baamu idiyele kan.
 
-### Bí a ṣe ń ṣàkọsílẹ̀ ìnáwó
+### Bawo ni na ti wa ni gba silẹ
 
-- A ń ṣírò iye owó ìbéèrè kọ̀ọ̀kan lẹ́yìn èsì, a sì ń ṣàkọsílẹ̀ rẹ̀ láìdúró de èsì rẹ̀, kí ó má bàa
-  fi ìdádúró kún ìṣiṣẹ́ oníbàárà. A ń ṣètò lílò ààlà ìpín ní àyípo event-loop tó tẹ̀ lé
-  nípasẹ̀ [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- A ń fi ìnáwó kọ́kọ́rọ́ API pamọ́ sínú buffer, a sì ń kọ ọ́ jáde ní àwọn ìpele nípasẹ̀
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (àárín àkókò kíkọjáde àiyẹsẹ̀ jẹ́ 60s,
-  buffer oníàkọsílẹ̀ 1,000). O lè ṣàtúnṣe rẹ̀ nípasẹ̀:
+- Iye idiyele ibeere-kọọkan jẹ iṣiro ni ipari ibeere. Lilo ipin-pin jẹ eto lori ami ami iṣẹlẹ-lupu atẹle nipasẹ [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Awọn inawo bọtini API jẹ ifipamọ ati ki o ṣan ni awọn ipele nipasẹ [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (aarin 60s aipe, ifipamọ-iwọle 1,000). Tunṣe nipasẹ:
 
-  | Env var                             | Àiyẹsẹ̀  | Ète                                              |
-  | ----------------------------------- | ------- | ------------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Àárín àkókò kíkọjáde ní milliseconds.            |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Iye àkọsílẹ̀ tó pọ̀ jù nínú buffer kí a tó kọjáde. |
+  | Env var                             | Aiyipada | Idi                                       |
+  | ----------------------------------- | -------- | ----------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Fọ aarin ni milliseconds.                 |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Awọn titẹ sii ti o pọju ṣaaju ki o to fọ. |
 
-A **kò** ka àwọn iye owó orí dásíbọ́ọ̀dù láti inú iye dọ́là tí a tọ́jú fún ìlà kọ̀ọ̀kan — a
-ń tún wọn ṣírò lẹ́sẹ̀kẹsẹ̀ láti inú iye àwọn token àti tábìlì iye owó lọ́wọ́lọ́wọ́ ní gbogbo ìgbà tí
-endpoint ìtúpalẹ̀ bá ṣiṣẹ́. Èyí túmọ̀ sí pé ṣíṣe àtúnṣe iye owó tí kò tọ́ (àti mímú unṣiṣẹ́pọ̀ lẹ́ẹ̀kan sí i) máa ń
-ṣe àfikún àtúnṣe sí àwọn ìṣírò iye owó ìtàn sẹ́yìn.
+Awọn idiyele fẹran idiyele ti olupese ti o royin (`provider_cost_usd`), lẹhinna fọto-ibeere ti o ni idiyele katalogi (`calculated_cost_usd`), lẹhinna atunṣe ami-ami lati katalogi lọwọlọwọ. Awọn idiyele ti o fipamọ ko ni idiyele lẹẹkansi nipasẹ awọn iṣiro ami-ami wọn. Legacy tokini-awọn ori ila nikan tun yipada nigbati idiyele katalogi wọn yipada.
+
+### OCR ati awọn ifibọ
+
+- Awọn ibeere `/v1/ocr` ti o ṣaṣeyọri lo `usage_info.pages_processed` oke, kii ṣe ibiti oju-iwe ti o beere tabi nọmba awọn nkan oju-iwe ti o pada. Iṣiro naa jẹ awọn oju-iwe × `ocr_cost_per_page` ( USD/page pipe,**kii ṣe** USD/million).
+- Awọn ibeere pẹlu iwe-ipamọ tabi awọn asọye apoti-ipin nilo idiyele `ocr_cost_per_annotated_page` lọtọ. Laisi rẹ, iye owo wa aimọ; owo-ori OCR lasan ko ni paarọ ipalọlọ.
+- LiteLLM amuṣiṣẹpọ maapu aaye `annotation_cost_per_page` oke rẹ sinu `ocr_cost_per_annotated_page`, ni idaduro iye USD/page pipe ati awọn titẹ sii-akọsilẹ nikan, pẹlu odo ti o fojuhan. Aaye canonical ti a pese gba iṣaaju; awọn iye inagijẹ ti ko tọ ko bikita. Ifowoleri olumulo dojuiwọn ni idaduro pataki deede wọn. Wo [awọn bọtini idiyele LiteLLM's OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Lilo OCR tọju kika oju-iwe, idiyele ẹyọkan, idiyele USD iṣiro, bọtini API ati asopọ ti o yan. Awọn oju-iwe ko ni ipoduduro bi awọn ami-ami. Awọn akọọlẹ ipe ni metadata ìdíyelé, kii ṣe iwe URLs, awọn baiti PDF tabi ọrọ ti a fa jade.
+- Awọn ibeere `/v1/embeddings` ti o ṣaṣeyọri ṣe igbasilẹ laini lilo kan fun ipele ti ara, pẹlu awọn ipele lọtọ ti o pari ni millisecond kanna. Awọn idiyele ti o royin olupese jẹ iṣaaju lori awọn iṣiro ami; konbo wrappers ko fi kan idiyele.
+- Itan-akọọlẹ lilo, awọn atupale Awọn idiyele, awọn window provider/account, awọn opin inawo bọtini API, iwe-ipamọ idiyele-ibeere ati awọn iyipo lilo ojoojumọ pẹlu awọn idiyele wọnyi. Awọn bọtini iforukọsilẹ ko si ṣe idaduro iṣiro nọmba laisi idaduro ọrọ orisun.
+- Sonu lilo tabi owo-ori jẹ **aimọ** , kii ṣe ọfẹ: akọsori iye owo idahun ti yọkuro, ati pe eto imulo lilo ti ko ni idiyele ti o wa tẹlẹ kan awọn bọtini API to lopin. Awọn oṣuwọn odo ti a tunto ni gbangba jẹ lilo iye owo odo to wulo.
+
+Eleyi jẹ siwaju-nikan iṣiro. Awọn ipe OCR/embedding atijọ ti ko kọ itan-akọọlẹ lilo rara ko le ṣe atunto lati ijira yii. Awọn iṣiro katalogi jẹ awọn iṣiro USD, kii ṣe iwe-owo, ati pe ko pẹlu iyipada owo, owo-ori tabi awọn ẹdinwo.
 
 ---
 

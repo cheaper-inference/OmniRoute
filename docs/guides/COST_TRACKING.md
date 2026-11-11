@@ -1,7 +1,7 @@
 ---
 title: "Cost & Spend Tracking"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.54
+lastUpdated: 2026-11-09
 ---
 
 # Cost & Spend Tracking
@@ -105,8 +105,8 @@ Model names are normalized first (provider-path prefixes such as `openai/` or
 
 ### How spend is recorded
 
-- The per-request cost is computed after the response and recorded fire-and-forget so it
-  never adds latency to the client. Shared-quota consumption is scheduled on the next
+- The per-request cost is computed at request completion. Shared-quota consumption
+  is scheduled on the next
   event-loop tick via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - API-key spend is buffered and flushed in batches by the
   [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (default 60s flush interval,
@@ -117,10 +117,40 @@ Model names are normalized first (provider-path prefixes such as `openai/` or
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Flush interval in milliseconds.    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max buffered entries before flush. |
 
-The dashboard's cost figures are **not** read from a stored per-row dollar amount — they
-are recomputed on the fly from token counts and the current pricing table each time the
-analytics endpoint runs. That means correcting a wrong price (and re-syncing) updates
-historical cost estimates retroactively.
+Costs prefer an exact provider-reported charge (`provider_cost_usd`), then a
+catalogue-priced request snapshot (`calculated_cost_usd`), then token repricing
+from the current catalogue. Stored costs are not charged again through their
+token counts. Legacy token-only rows still change when their catalogue price changes.
+
+### OCR and embeddings
+
+- Successful `/v1/ocr` requests use upstream `usage_info.pages_processed`, not
+  the requested page range or the number of returned page objects. The estimate
+  is pages × `ocr_cost_per_page` (absolute USD/page, **not** USD/million).
+- Requests with document or bounding-box annotations require a separate
+  `ocr_cost_per_annotated_page` tariff. Without it, the cost remains unknown;
+  the ordinary OCR tariff is not silently substituted.
+- LiteLLM sync maps its upstream `annotation_cost_per_page` field into
+  `ocr_cost_per_annotated_page`, retaining the absolute USD/page value and
+  annotation-only entries, including explicit zero. A supplied canonical field
+  takes precedence; invalid alias values are ignored. User pricing overrides
+  retain their normal priority. See [LiteLLM's OCR pricing keys](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR usage stores the page count, unit price, calculated USD cost, API key
+  and selected connection. Pages are never represented as tokens. Call logs
+  contain billing metadata, not document URLs, PDF bytes or extracted text.
+- Successful `/v1/embeddings` requests record one usage row per physical batch,
+  including separate batches completed in the same millisecond. Provider-reported
+  charges take precedence over token estimates; combo wrappers do not add a charge.
+- Usage history, the Costs analytics, provider/account windows, API-key spending
+  limits, the request-cost ledger and daily usage rollups include these charges.
+  No-log keys retain numerical accounting without retaining source text.
+- Missing usage or tariffs are **unknown**, not free: the response-cost header is
+  omitted, and the existing unpriced-usage policy applies to limited API keys.
+  Explicitly configured zero rates remain valid zero-cost usage.
+
+This is forward-only accounting. Old OCR/embedding calls that never wrote usage
+history cannot be reconstructed from this migration. Catalogue estimates are USD
+estimates, not an invoice, and do not include currency conversion, tax or discounts.
 
 ---
 

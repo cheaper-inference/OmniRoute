@@ -6,33 +6,33 @@
 
 ## نمای کلی
 
-Redis در OmniRoute یک **وابستگی اختیاری و غیرضروری** است — هنگامی که Redis در دسترس نباشد، برنامه بهصورت کنترلشده از گزینههای جایگزین درونحافظهای استفاده میکند. در محیط عملیاتی، تنظیم بهینه Redis تأخیر چهار بار کاری مجزا را کاهش میدهد:
+Redis یک است **اختیاری، وابستگی نرم** در OmniRoute — زمانی که Redis در دسترس نباشد، برنامه بهخوبی کاهش مییابد (بازگشتهای درون حافظه). در تولید، تنظیم Redis تأخیر را برای چهار بار کاری مجزا کاهش می دهد:
 
-| بار کاری              | راهانداز                      | کارخانه کلاینت                              | الگوی کلید                                                        |
-| --------------------- | ----------------------------- | ------------------------------------------- | ----------------------------------------------------------------- |
-| محدودسازی نرخ         | `rateLimiter.ts`              | `getRedisClient()` — تکنمونه تنبل `ioredis` | پنجرههای محدودسازی نرخ اتمیک مبتنی بر Lua با الگوی `<prefix>rl:*` |
-| کش احراز هویت         | `apiKeys.ts`                  | استفاده مجدد از کلاینت `rateLimiter`        | `<prefix>auth:api_key:<sha256>` همراه با TTL                      |
-| ذخیرهساز سهمیه        | `redisQuotaStore.ts`          | تکنمونه مجزای `getRedisClient(url)`         | `<prefix>quota:*` قابل پیکربندی برای هر نمونه                     |
-| قطعکننده مدار گرمسازی | `redisCircuitBreakerStore.ts` | کلاینت مجزا در `circuitBreakerFactory.ts`   | `<prefix>warmup:cb:<connectionId>`                                |
+| حجم کار                  | راننده                        | کارخانه مشتری                               | الگوی کلید                                    |
+| ------------------------ | ----------------------------- | ------------------------------------------- | --------------------------------------------- |
+| محدود کردن نرخ           | `rateLimiter.ts`              | `getRedisClient()` — تنبل `ioredis` تک تن   | پنجره های محدودیت نرخ اتمی `<prefix>rl:*` Lua |
+| حافظه پنهان تأیید اعتبار | `apiKeys.ts`                  | از مشتری `rateLimiter` مجددا استفاده می کند | `<prefix>auth:api_key:<sha256>` با TTL        |
+| فروشگاه سهمیه            | `redisQuotaStore.ts`          | تک تن `getRedisClient(url)` جدا             | `<prefix>quota:*` قابل تنظیم در هر نمونه      |
+| کلید گرم کردن مدار       | `redisCircuitBreakerStore.ts` | مشتری جداگانه در `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>`            |
 
-هر چهار بار کاری از یک پیشوند فضای نام مشترک استفاده میکنند تا OmniRoute بتواند در کنار برنامههای دیگر روی یک نمونه Redis واحد (برای مثال `127.0.0.1:6379`) فعالیت کند. به [فضای نام کلیدها](#key-namespacing) مراجعه کنید.
+هر چهار بار کاری یک پیشوند فضای نام مشترک دارند تا OmniRoute بتواند با برنامههای دیگر در یک نمونه Redis همزیستی داشته باشد (مثلا `127.0.0.1:6379`). به [فاصله نام کلید](#key-namespacing) مراجعه کنید.
 
 ---
 
-## پیکربندی فعلی (مقادیر پیشفرض کد)
+## پیکربندی فعلی (پیشفرض کد)
 
-| تنظیم                               | مقدار                                              | محل                                                                                   |
-| ----------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| متغیر محیطی `REDIS_URL`             | `redis://redis:6379` (در compose)، اختیاری         | `rateLimiter.ts:5`، `.env.example`                                                    |
-| متغیر محیطی `REDIS_KEY_PREFIX`      | `omniroute:` (پیشفرض)                              | `rateLimiter.ts`، `redisQuotaStore.ts`، `redisCircuitBreakerStore.ts`، `.env.example` |
-| متغیر محیطی `QUOTA_STORE_REDIS_URL` | مجزا و میتواند با `REDIS_URL` متفاوت باشد          | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                | `"sqlite"` (پیشفرض)، `"redis"` اختیاری             | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` در ioredis   | `3`                                                | ایجاد کلاینت در `rateLimiter.ts`                                                      |
-| `enableReadyCheck`                  | تنظیم نشده است (پیشفرض ioredis: `true`)            | —                                                                                     |
-| `lazyConnect`                       | تنظیم نشده است (پیشفرض ioredis: `false`)           | —                                                                                     |
-| `retryStrategy`                     | تنظیم نشده است (پیشفرض ioredis: پایه 200ms، نمایی) | —                                                                                     |
-| TLS / گذرواژه / نمایه پایگاه داده   | **پیکربندی نشده است**                              | —                                                                                     |
-| Sentinel / Cluster                  | **پیکربندی نشده است** — فقط تکگره مستقل            | —                                                                                     |
+| تنظیم                           | ارزش                                                       | کجا                                                                                   |
+| ------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (نوشتن)، اختیاری                      | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (پیشفرض)                                      | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | جداگانه، می تواند با `REDIS_URL` متفاوت باشد               | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (پیشفرض)، `"redis"` اختیاری است                 | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                        | ایجاد مشتری `rateLimiter.ts`                                                          |
+| `enableReadyCheck`              | تنظیم نشده است (پیشفرض ioredis: `true`)                    | —                                                                                     |
+| `lazyConnect`                   | تنظیم نشده است (پیشفرض ioredis: `false`)                   | —                                                                                     |
+| `retryStrategy`                 | تنظیم نشده است (پیشفرض ioredis: پایه 200 میلیثانیه، نمایی) | —                                                                                     |
+| TLS / رمز عبور / شاخص DB        | **پیکربندی نشده است**                                      | —                                                                                     |
+| نگهبان / خوشه                   | **پیکربندی نشده است** تنها تک گره مستقل —                  | —                                                                                     |
 
 ---
 
@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## تنظیمات پیشنهادی برای محیط عملیاتی
+## تنظیم تولید توصیه شده
 
-### 1. گزینههای Connection Pool / Client (سازنده `Redis` در ioredis)
+### 1. Connection Pool / Client Options (سازنده ioredis `Redis` )
 
-کد فعلی یک نمونه `new Redis(url)` را بدون هیچ گزینه سفارشی ایجاد میکند. برای استقرارهای عملیاتی
-چندنمونهای، یک client factory در کد ارسال کنید یا `getRedisClient()` را پوشش دهید:
+کد فعلی یک `new Redis(url)` واحد بدون گزینه های سفارشی ایجاد می کند. برای استقرار چند کپی تولید، یک کارخانه مشتری را در کد ارسال کنید یا `getRedisClient()` بپیچید:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // بدون محدودیت تلاش مجدد؛ تصمیمگیری را به retryStrategy بسپارید
-  enableReadyCheck: true, // پیش از پذیرش فراخوانیها، آمادهبودن سرور را بررسی کنید
-  lazyConnect: true, // هنگام ساخت متصل نشوید؛ تا نخستین فراخوانی منتظر بمانید
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // پس از 10 تلاش منصرف شوید ← بعداً دوباره متصل شوید
-    return Math.min(times * 200, 5000); // 200ms، 400ms، …، با سقف 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // فرمانهای همزمان را در یک نوشتن TCP ادغام کنید
-  keepAlive: 10000, // ارسال keep-alive در TCP هر 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**موازنههای کلیدی:**
+**معاوضه های کلیدی:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — برای محیط عملیاتی ترجیح داده میشود تا راهاندازیهای
-  مجدد و موقت Redis باعث شکست فوری تمام درخواستها نشوند. جایگزین درونحافظهای در
-  `checkRateLimit()` مسیر شکست را پوشش میدهد.
-- `lazyConnect: true` — از ایجاد وابستگی هنگام راهاندازی به در دسترسبودن Redis پیش از شروع
-  پذیرش اتصالها توسط سرور جلوگیری میکند.
-- `enableAutoPipelining: true` — رفتوبرگشتهای شبکه را برای بررسیهای همزمان محدودیت نرخ کاهش میدهد؛
-  در بیش از 50 RPS روی یک اتصال سودمند است.
+- `maxRetriesPerRequest: null` + `retryStrategy` — برای تولید ترجیح داده میشود، بنابراین راهاندازی مجدد Redis فوراً هر درخواستی را ناکام نمیگذارد. بازگشت به حافظه در `checkRateLimit()` مسیر شکست را جذب می کند.
+- `lazyConnect: true` — از وابستگی راه اندازی به Redis قبل از شروع پذیرش اتصالات توسط سرور جلوگیری می کند.
+- `enableAutoPipelining: true` — سفرهای رفت و برگشت را برای بررسیهای محدود نرخ همزمان کاهش میدهد. در > 50 RPS در یک اتصال مفید است.
 
 ### 2. پیکربندی سرور Redis (`redis.conf`)
 
 ```
-# حافظه
-maxmemory 80%                        # برای page cache سیستمعامل فضا باقی بگذارید
-maxmemory-policy allkeys-lru         # در شرایط فشار حافظه، ورودیهای قدیمی کش احراز هویت را حذف کنید
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# ماندگاری (اختیاری — OmniRoute بدون آن نیز در برابر خرابی ایمن است)
-save 300 1                           # اگر حداقل 1 کلید تغییر کرده است، دستکم هر 5 دقیقه snapshot بگیرید
-appendonly no                        # نیازی به AOF نیست؛ دادهها قابل بازتولید هستند
-appendfsync no                       # بدون سربار fsync؛ RDB کافی است
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# شبکه
-timeout 0                            # اتصالهای بیکار را قطع نکنید
-tcp-keepalive 300                    # keep-alive هر 5 دقیقه
-tcp-backlog 511                      # صف انتظار اتصال برای بارهای ناگهانی
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# کارایی
-hz 10                                # مقدار پیشفرض؛ برای موارد حساس به تأخیر از 100 استفاده کنید
-activedefrag yes                     # در صورت بیشترشدن fragmentation از 10٪، بهطور خودکار یکپارچهسازی کنید
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**موازنه مربوط به `maxmemory-policy allkeys-lru`:** ممکن است ورودیهای کش احراز هویت در شرایط
-فشار حافظه حذف شوند. این کار ایمن است — `setCachedApiKey` همیشه در صورت نبود داده، آن را دوباره پر میکند و
-جایگزین SQLite منبع معتبر است. اسکریپت Lua محدودکننده نرخ، کلیدهای کوچکی ایجاد میکند که
-طبق طراحی عمر کوتاهی دارند.
+**معامله برای `maxmemory-policy allkeys-lru`:** ورودیهای حافظه پنهان ممکن است تحت فشار حافظه حذف شوند. این ایمن است — `setCachedApiKey` همیشه در صورت از دست دادن دوباره پر می شود و نسخه جایگزین SQLite معتبر است. اسکریپت محدود کننده نرخ Lua کلیدهای کوچکی را ایجاد می کند که با طراحی کوتاه مدت هستند.
 
-### 3. تنظیمات Docker Compose
+### 3. Docker Compose Settings
 
-پیکربندی compose محیط عملیاتی (`docker-compose.prod.yml`) از `redis:8.6.2-alpine` استفاده میکند. موارد زیر را اضافه کنید:
+Prod compose (`docker-compose.prod.yml`) از `redis:8.6.2-alpine` استفاده می کند. افزودن:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. ملاحظات چندنمونهای / مقیاسپذیری
+### 4. ملاحظات چند نمونه ای / مقیاس بندی
 
-**یک Redis برای تمام replicaها** — اسکریپت Lua محدودکننده نرخ به یک فضای کلید
-معتبر و واحد وابسته است. استفاده از چند نمونه Redis پشت replicaها باعث ازدسترفتن خاصیت اتمی
-و دوبرابرشدن بودجه میشود. برای تمام replicaهای برنامه از یک Redis واحد (یا کلاستر Redis Sentinel با failover)
-استفاده کنید.
+**Redis واحد برای همه کپی ها** — اسکریپت Lua محدود کننده نرخ به یک فضای کلید معتبر وابسته است. چند نمونه Redis در پشت ماکت ها اتمی خود را از دست می دهند و بودجه را دو برابر می کنند. از یک Redis منفرد (یا کلاستر Redis Sentinel با failover) برای همه نسخههای برنامه استفاده کنید.
 
-**تعداد اتصالها:** هر replica برنامه، **2 اتصال TCP** به Redis باز میکند
-(client محدودکننده نرخ + client ذخیرهساز سهمیه). با 10 replica ← 20 اتصال ایجاد میشود که
-بسیار کمتر از سقف پیشفرض 10k اتصال در هر نمونه Redis است.
+**تعداد اتصال:** هر ماکت برنامه باز می شود **2 اتصال TCP** به Redis (کلینت محدودکننده نرخ + سهمیه فروشگاه مشتری). در 10 تکرار → 20 اتصال، به خوبی در سقف اتصال 10k نمونه پیش فرض Redis.
 
-### 5. پایش
+### 5. نظارت
 
-موارد زیر را از طریق endpoint بررسی سلامت ارائه کنید:
+قرار گرفتن در معرض از طریق نقطه پایانی بررسی سلامت:
 
 ```typescript
-// فایل src/app/api/monitoring/health/route.ts از قبل توابع rateLimiter را فراخوانی میکند
-// بررسیهای مختص Redis را اضافه کنید:
-//   1. تأخیر PING از طریق ioredis .ping()
-//   2. میزان مصرف حافظه از طریق INFO memory
-//   3. تعداد اتصالها از طریق INFO clients
-//   4. نرخ برخورد برای maxmemory-policy با استفاده از (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-معیارهای کلیدی برای پایش:
+معیارهای کلیدی برای تماشا:
 
-- **کلیدهای حذفشده / ثانیه** — اگر بهطور مداوم غیرصفر است، `maxmemory` را افزایش دهید
-- **clientهای مسدودشده** — مقدار غیرصفر نشاندهنده کندبودن اسکریپتهای Lua یا رقابت شدید است
-- **اتصالهای ردشده** — محدودیت اتصال پر شده است؛ با 20 اتصال بهندرت رخ میدهد
+- **کلیدهای خارج شده / ثانیه** اگر — دائماً صفر نیست، `maxmemory` را افزایش دهید
+- **مشتریان مسدود شده** — غیر صفر نشاندهنده اسکریپتهای کند Lua یا اختلاف زیاد است
+- **اتصالات رد شده** محدودیت اتصال — رسید. در 20 اتصال نادر است
+
+### 6. سرورهای سازگار با Redis
+
+هر سروری که در اینجا استفاده می شود باید اسکریپت های Lua را اجرا کند: محدود کننده نرخ یک `EVAL` است. در سروری بدون Lua، `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` را ثبت میکند و در هر فرآیند شمارش میکند، بنابراین هر کپی محدودیت را به تنهایی اعمال میکند. فروشگاه اشتراک اشتراکگذاری نشست (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) همچنین پینها را با `EVAL` میخواند و بهروزرسانی میکند. بدون Lua، `[SESSION_AFFINITY] Redis error; falling back to SQLite.` را ثبت می کند و هر ماکت پین های خود را نگه می دارد. بارهای کاری دیگر از دستورات ساده استفاده می کنند (`SET ... EX`، `GET`، `DEL`، `MGET`، `EXPIRE`، `INCRBYFLOAT`، هش ها و مجموعه ها)، و باطن Redis کش معنایی هیچ دستور `FT.*` ارسال نمی کند.
+
+تست شده با OmniRoute 3.8.52: KiviDB 1.2.0 با تصویر Lua (`kividb/kividb:v1.2.0-lua`). محدود کننده نرخ (شامل فرآیند دوم به اشتراک گذاری شمارنده ها)، حافظه پنهان تأیید، ذخیره سهمیه، قطع کننده مدار گرم کردن، ذخیره حافظه پنهان معنایی، و یک درخواست `/v1/chat/completions` از طریق کنترل کننده چت، 18 مورد از 19 بررسی را که در Redis 8.10.3 ارسال می شود، ارسال کردند. موردی که متفاوت است: `INCRBYFLOAT` `0.1 + 0.2` به عنوان `0.30000000000000004` ذخیره می کند، در حالی که Redis `0.3` ذخیره می کند ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). ذخیره سهمیه هر دو را با `parseFloat` تجزیه میکند، اما این دو عدد در آخرین رقمها متفاوت هستند، بنابراین مقایسهای که دقیقاً روی یک مرز سهمیه قرار میگیرد میتواند متفاوت باشد. فروشگاه session-ffinity بخشی از آن اجرا نبود. ( [تنظیم](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md) ، [نتایج](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -188,15 +181,15 @@ flowchart LR
 
 ---
 
-## منابع
+## مراجع
 
-| فایل                               | هدف                                                                             |
-| ---------------------------------- | ------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | کلاینت اصلی Redis، اسکریپت Lua برای محدودسازی نرخ و سازوکار جایگزین درونحافظهای |
-| `src/lib/db/apiKeys.ts`            | کش احراز هویت — سازوکار جایگزین Redis→SQLite                                    |
-| `src/lib/quota/redisQuotaStore.ts` | کلاینت مجزای Redis برای ذخیرهساز اختیاری سهمیه                                  |
-| `src/lib/quota/storeFactory.ts`    | جابهجایی بین درایورهای سهمیهٔ `sqlite` و `redis`                                |
-| `docker-compose.prod.yml`          | کانتینر Redis محیط تولید (ایمیج `redis:8.6.2-alpine`)                           |
-| `.env.example`                     | مستندات متغیرهای محیطی Redis                                                    |
-| `src/app/api/local/redis/`         | مسیرهای API برای هماهنگسازی کانتینر محیط توسعه                                  |
-| `bin/cli/commands/redis.mjs`       | فرمانهای CLI برای هماهنگسازی کانتینر محیط توسعه                                 |
+| فایل                               | هدف                                                            |
+| ---------------------------------- | -------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | کلاینت اصلی Redis ، اسکریپت Lua rate-limit، بازگشتی درون حافظه |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite backback                             |
+| `src/lib/quota/redisQuotaStore.ts` | مشتری Redis را برای فروشگاه سهمیه اختیاری جدا کنید             |
+| `src/lib/quota/storeFactory.ts`    | بین درایورهای سهمیه `sqlite` و `redis` سوئیچ می کند            |
+| `docker-compose.prod.yml`          | ظرف Prod Redis (تصویر `redis:8.6.2-alpine`)                    |
+| `.env.example`                     | مستندات Redis env vars                                         |
+| `src/app/api/local/redis/`         | مسیرهای API برای ارکستراسیون کانتینر توسعه دهنده               |
+| `bin/cli/commands/redis.mjs`       | دستورات CLI برای ارکستراسیون کانتینر توسعه دهنده               |

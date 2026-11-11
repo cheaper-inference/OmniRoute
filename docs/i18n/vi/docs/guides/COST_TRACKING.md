@@ -38,71 +38,71 @@ Vì con số này là một ước tính:
 
 ## Cách ước tính chi phí
 
-### Nguồn giá
+### Nguồn định giá
 
-Chi phí lấy từ bảng giá hợp nhất trong [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), theo thứ tự (**ưu tiên cao nhất trước**):
+Chi phí đến từ bảng giá hợp nhất trong [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), theo thứ tự ưu tiên này (**cao nhất đầu tiên** ):
 
-1. **Ghi đè của người dùng** — giá đặt trong bảng điều khiển hoặc qua `PATCH /api/pricing` (không gian tên `pricing`).
-2. **Đồng bộ models.dev** — giá từ `https://models.dev/api.json` (không gian tên `models_dev_pricing`).
-3. **Đồng bộ LiteLLM** — giá từ tệp công khai `model_prices_and_context_window.json` của LiteLLM (không gian tên `pricing_synced`).
-4. **Mặc định tích hợp** — mức giá đi kèm [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Ghi đè người dùng** Giá — được đặt trong bảng điều khiển hoặc thông qua `PATCH /api/pricing` (không gian tên `pricing` ).
+2. **đồng bộ hóa mô hình.dev** Giá — được lấy từ `https://models.dev/api.json` (không gian tên `models_dev_pricing` ).
+3. **Đồng bộ hóa LiteLLM** Giá — được lấy từ `model_prices_and_context_window.json` công khai của LiteLLM(không gian tên `pricing_synced` ).
+4. **Mặc định được mã hóa cứng** Tỷ giá — được vận chuyển bằng [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Với cùng nhà cung cấp/mô hình, lớp trên ghi đè trường tương ứng ở lớp dưới; trường thiếu vẫn lấy từ lớp dưới. Thứ tự cố định ngay cả khi cả hai tác vụ đồng bộ độc lập chạy đồng thời. `GET /api/pricing?includeSources=1` trả về `pricing` và `sourceMap`; nhãn từng mô hình (`user`, `modelsDev`, `litellm`, `default`) chỉ lớp ưu tiên cao nhất chứa mô hình.
+Đối với cùng một provider/model, các giá trị từ các lớp có mức ưu tiên cao hơn sẽ ghi đè các trường phù hợp ở các lớp thấp hơn; các trường không có ở lớp trên vẫn có thể đến từ lớp dưới. Thứ tự được cố định ngay cả khi cả hai công việc đồng bộ hóa độc lập đều chạy cùng lúc. `GET /api/pricing?includeSources=1` trả về `pricing` và `sourceMap`, có nhãn trên mỗi mô hình (`user`, `modelsDev`, `litellm`, `default`) xác định lớp có mức ưu tiên cao nhất chứa mô hình đó.
 
-**Đồng bộ LiteLLM** cần chủ động bật, mặc định tắt. Các biến môi trường của nó (xem [`.env.example`](../../.env.example)):
+**Đồng bộ hóa LiteLLM** được chọn tham gia, bị tắt theo mặc định. Các biến môi trường của nó (xem [`.env.example`](../../.env.example) ) là:
 
-| Biến môi trường         | Mặc định  | Mục đích                                                          |
-| ----------------------- | --------- | ----------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Bật đồng bộ giá LiteLLM trong nền.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Khoảng thời gian đồng bộ tính bằng **giây** (mặc định hằng ngày). |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Chọn nguồn chỉ cho đồng bộ này; hiện chỉ hỗ trợ `litellm`.        |
+| biến thể Env            | Mặc định  | Mục đích                                                               |
+| ----------------------- | --------- | ---------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Bật đồng bộ hóa giá LiteLLM nền.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Khoảng thời gian đồng bộ hóa tính bằng giây (hàng ngày).               |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Lựa chọn nguồn chỉ cho đồng bộ hóa này; hiện tại chỉ hỗ trợ `litellm`. |
 
-**Đồng bộ models.dev** độc lập với đồng bộ LiteLLM và cũng mặc định tắt. Bật trong Cài đặt (đồng bộ models.dev) hoặc dùng các biến sau:
+**đồng bộ hóa mô hình.dev** tách biệt với đồng bộ hóa LiteLLM và cũng bị tắt theo mặc định. Kích hoạt nó trong Cài đặt (đồng bộ hóa models.dev) hoặc sử dụng các biến sau:
 
-| Biến môi trường            | Mặc định     | Mục đích                                                                                                          |
-| -------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(chưa đặt)_ | Chưa đặt thì theo công tắc Cài đặt; `1/true/on/yes` buộc bật và `0/false/off/no` buộc tắt, kể cả khi Cài đặt bật. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Khoảng đồng bộ models.dev mặc định tính bằng giây (hằng ngày).                                                    |
+| biến thể Env               | Mặc định     | Mục đích                                                                                                                           |
+| -------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(chưa đặt)_ | Bỏ đặt theo sau chuyển đổi Cài đặt; `1/true/on/yes` buộc bật và `0/false/off/no` buộc tắt (ngay cả khi Cài đặt bật tính năng này). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Khoảng thời gian đồng bộ hóa models.dev mặc định tính bằng giây (hàng ngày).                                                       |
 
-`PRICING_SYNC_SOURCES` **không** bật models.dev; nó chỉ điều khiển đồng bộ LiteLLM. Xóa ghi đè người dùng không xóa không gian tên đồng bộ nào; lớp giá khả dụng tiếp theo có hiệu lực. Với mô hình chưa có giá, kiểm tra cả hai cài đặt đồng bộ và `sourceMap` trước khi ghi đè thủ công.
+`PRICING_SYNC_SOURCES` làm **không** kích hoạt models.dev; nó chỉ điều khiển đồng bộ hóa LiteLLM. Việc xóa phần ghi đè của người dùng sẽ không xóa cả vùng tên đã được đồng bộ hóa; lớp định giá có sẵn tiếp theo sẽ có hiệu lực. Đối với kiểu máy chưa được định giá, hãy kiểm tra cả cài đặt đồng bộ hóa và `sourceMap` trước khi thêm ghi đè thủ công.
 
-### Công thức tính chi phí
+### Công thức chi phí
 
-Chi phí được tính cho từng yêu cầu dựa trên số lượng token và mức giá trên một triệu token trong
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Chi phí được tính theo yêu cầu từ số lượng mã thông báo và tỷ lệ trên một triệu mã thông báo trong [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Token đầu vào** (trừ số token đọc từ bộ nhớ đệm và token tạo bộ nhớ đệm) × mức giá `input`.
-- **Token đọc từ bộ nhớ đệm** × mức giá `cached` (dùng mức giá đầu vào nếu không có).
-- **Token tạo bộ nhớ đệm** × mức giá `cache_creation` (dùng mức giá đầu vào nếu không có).
-- **Token đầu ra** × mức giá `output`.
-- **Token suy luận** × mức giá `reasoning` (dùng mức giá đầu ra nếu không có).
+- **Mã thông báo đầu vào** (trừ số lần đọc bộ đệm và mã thông báo tạo bộ đệm) Tỷ lệ × `input`.
+- **Mã thông báo đọc bộ đệm** Tốc độ × `cached` (trở lại tốc độ đầu vào).
+- **Mã thông báo tạo bộ đệm** Tốc độ × `cache_creation` (trở lại tốc độ đầu vào).
+- **Mã thông báo đầu ra** Tỷ lệ × `output`.
+- **Mã thông báo lý luận** Tỷ lệ × `reasoning` (trở lại tỷ lệ đầu ra).
 
-Tất cả mức giá được hiểu là USD trên mỗi 1.000.000 token. Bậc dịch vụ "fast"/"priority" hoặc
-"flex" của Codex áp dụng một hệ số chi phí (`getCodexFastCostMultiplier`) — ví dụ: flex
-được tính phí với mức chiết khấu 50% cho token, hiển thị dưới dạng **khoản tiết kiệm flex** trên bảng điều khiển.
+Tất cả các mức giá được hiểu là USD trên 1.000.000 token. Cấp dịch vụ "nhanh"/"ưu tiên" hoặc "linh hoạt" Codex áp dụng hệ số nhân chi phí (`getCodexFastCostMultiplier`) —, ví dụ: linh hoạt được tính phí ở mức chiết khấu mã thông báo 50%, hiển thị dưới dạng **tiết kiệm linh hoạt** trong bảng điều khiển.
 
-Tên mô hình được chuẩn hóa trước (các tiền tố đường dẫn nhà cung cấp như `openai/` hoặc
-`accounts/fireworks/models/` được loại bỏ) để các bản ghi lịch sử vẫn khớp với một mức giá.
+Tên mô hình được chuẩn hóa trước tiên (tiền tố đường dẫn nhà cung cấp như `openai/` hoặc `accounts/fireworks/models/` bị loại bỏ) để các hàng lịch sử vẫn khớp với giá.
 
-### Cách ghi nhận mức chi tiêu
+### Cách ghi lại chi tiêu
 
-- Chi phí của từng yêu cầu được tính sau khi có phản hồi và được ghi nhận theo kiểu không chờ kết quả để
-  không bao giờ làm tăng độ trễ phía máy khách. Mức sử dụng hạn ngạch dùng chung được lên lịch ở lượt tiếp theo của
-  vòng lặp sự kiện thông qua [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Mức chi tiêu của khóa API được lưu vào bộ đệm và ghi theo lô bởi
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (khoảng thời gian ghi mặc định là 60 giây,
-  bộ đệm 1.000 mục). Có thể điều chỉnh thông qua:
+- Chi phí cho mỗi yêu cầu được tính khi hoàn thành yêu cầu. Mức tiêu thụ hạn ngạch chia sẻ được lên lịch vào lần đánh dấu vòng lặp sự kiện tiếp theo thông qua [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Chi tiêu khóa API được [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) lưu vào bộ đệm và xóa theo đợt (khoảng thời gian xử lý mặc định là 60 giây, bộ đệm 1.000 mục nhập). Có thể điều chỉnh thông qua:
 
-  | Biến môi trường                     | Mặc định | Mục đích                                       |
-  | ----------------------------------- | -------- | ---------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Khoảng thời gian ghi tính bằng mili giây.      |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Số mục tối đa trong bộ đệm trước khi được ghi. |
+  | biến thể Env                        | Mặc định | Mục đích                                 |
+  | ----------------------------------- | -------- | ---------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Khoảng thời gian xả tính bằng mili giây. |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Các mục được đệm tối đa trước khi xóa.   |
 
-Các số liệu chi phí trên bảng điều khiển **không** được đọc từ một số tiền được lưu trữ cho từng hàng — chúng
-được tính lại tức thời từ số lượng token và bảng giá hiện tại mỗi khi
-điểm cuối phân tích chạy. Điều đó có nghĩa là việc sửa một mức giá sai (và đồng bộ lại) sẽ cập nhật
-hồi tố các ước tính chi phí trong lịch sử.
+Chi phí ưu tiên mức phí chính xác do nhà cung cấp báo cáo (`provider_cost_usd`), sau đó là ảnh chụp nhanh yêu cầu theo giá danh mục (`calculated_cost_usd`), sau đó định giá lại mã thông báo từ danh mục hiện tại. Chi phí đã lưu trữ không bị tính phí lại thông qua số lượng mã thông báo của chúng. Các hàng chỉ có mã thông báo cũ vẫn thay đổi khi giá danh mục của chúng thay đổi.
+
+### OCR và phần nhúng
+
+- Các yêu cầu `/v1/ocr` thành công sử dụng `usage_info.pages_processed` ngược dòng, không phải phạm vi trang được yêu cầu hoặc số lượng đối tượng trang được trả về. Ước tính là các trang × `ocr_cost_per_page` ( USD/page tuyệt đối ,**không** USD/million).
+- Các yêu cầu có chú thích tài liệu hoặc hộp giới hạn yêu cầu mức thuế `ocr_cost_per_annotated_page` riêng. Không có nó, chi phí vẫn chưa được biết; thuế OCR thông thường không được thay thế một cách âm thầm.
+- Đồng bộ hóa LiteLLM ánh xạ trường `annotation_cost_per_page` ngược dòng của nó vào `ocr_cost_per_annotated_page`, giữ lại giá trị USD/page tuyệt đối và các mục nhập chỉ chú thích, bao gồm cả số 0 rõ ràng. Trường chuẩn được cung cấp sẽ được ưu tiên; giá trị bí danh không hợp lệ sẽ bị bỏ qua. Phần ghi đè giá của người dùng vẫn giữ nguyên mức độ ưu tiên thông thường. Xem [khóa định giá OCR của LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Việc sử dụng OCR lưu trữ số lượng trang, đơn giá, chi phí USD được tính toán, khóa API và kết nối đã chọn. Các trang không bao giờ được thể hiện dưới dạng mã thông báo. Nhật ký cuộc gọi chứa siêu dữ liệu thanh toán, không phải tài liệu URLs, PDF byte hoặc văn bản được trích xuất.
+- Các yêu cầu `/v1/embeddings` thành công ghi lại một hàng sử dụng cho mỗi lô vật lý, bao gồm các lô riêng biệt được hoàn thành trong cùng một mili giây. Các khoản phí do nhà cung cấp báo cáo được ưu tiên hơn các ước tính về mã thông báo; gói kết hợp không tính thêm phí.
+- Lịch sử sử dụng, phân tích chi phí, thời lượng provider/account, giới hạn chi tiêu khóa API, sổ cái chi phí yêu cầu và tổng hợp mức sử dụng hàng ngày bao gồm các khoản phí này. Khóa không ghi nhật ký giữ lại tính toán số mà không giữ lại văn bản nguồn.
+- Thiếu cách sử dụng hoặc thuế quan là **không rõ** , không miễn phí: tiêu đề chi phí phản hồi bị bỏ qua và chính sách sử dụng không định giá hiện tại áp dụng cho các khóa API giới hạn. Mức giá bằng 0 được cấu hình rõ ràng vẫn duy trì mức sử dụng hợp lệ với chi phí bằng 0.
+
+Đây chỉ là kế toán chuyển tiếp. Không thể xây dựng lại các cuộc gọi OCR/embedding cũ chưa bao giờ ghi lịch sử sử dụng từ quá trình di chuyển này. Ước tính danh mục là ước tính USD, không phải hóa đơn và không bao gồm chuyển đổi tiền tệ, thuế hoặc chiết khấu.
 
 ---
 

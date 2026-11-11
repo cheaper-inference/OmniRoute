@@ -36,73 +36,73 @@ N'ihi na ọnụọgụ ahụ bụ atụmatụ:
 
 ---
 
-## Otu e si atụpụta ọnụ ahịa
+## Olee otú e si atụle ọnụ ahịa
 
 ### Isi mmalite ọnụahịa
 
-A na-enweta ụgwọ site na tebụl ọnụahịa ejikọtara na [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), n’usoro ibu ụzọ a (**nke kacha elu buru ụzọ**):
+Ọnụ ahịa na-abịa site na tebụl ọnụahịa ejikọta ọnụ na [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), n'usoro nke ụzọ a (**mbụ kacha elu** ):
 
-1. **Uru nnọchi onye ọrụ** — ọnụahịa a tọrọ na dashboard ma ọ bụ site na `PATCH /api/pricing` (oghere aha `pricing`).
-2. **Mmekọrịta models.dev** — ọnụahịa e wetara site na `https://models.dev/api.json` (oghere aha `models_dev_pricing`).
-3. **Mmekọrịta LiteLLM** — ọnụahịa e wetara site na faịlụ ọha LiteLLM bụ `model_prices_and_context_window.json` (oghere aha `pricing_synced`).
-4. **Uru ndabara etinyere n’ime koodu** — ọnụego a na-enye na [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Onye ọrụ gafere** Ọnụ ahịa — edobere na dashboard ma ọ bụ site na `PATCH /api/pricing` (ebe aha `pricing` ).
+2. **ụdị.dev mmekọrịta** Ọnụ ahịa — sitere na `https://models.dev/api.json` (ebe aha `models_dev_pricing` ).
+3. **LiteLLM mmekọrịta** Ọnụ ahịa — nwetara site na `model_prices_and_context_window.json` ọha LiteLLM(ebe aha `pricing_synced` ).
+4. **Edebere koodu siri ike** Ebugoro ọnụego — na [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Maka otu onye na-eweta ọrụ/mọdẹl, uru sitere n’ọkwa nwere ibu ụzọ dị elu na-edechi ubi data kwekọrọ na ha n’ọkwa dị n’okpuru; ubi data na-adịghị n’ọkwa elu ka nwere ike isi n’ọkwa ala bịa. Usoro a anaghị agbanwe ọbụlagodi mgbe ọrụ mmekọrịta abụọ ahụ nọọrọ onwe ha na-arụkọ ọrụ n’otu oge. `GET /api/pricing?includeSources=1` na-eweghachi `pricing` na `sourceMap`; akara nke mọdẹl ọ bụla (`user`, `modelsDev`, `litellm`, `default`) na-egosi ọkwa nwere ibu ụzọ kacha elu n’etiti ọkwa ndị nwere mọdẹl ahụ.
+Maka otu provider/model, ụkpụrụ sitere na ọkwa dị elu-ebute ụzọ na-edegharị ubi dakọtara na ọkwa dị ala; Oghere ndị na-anọghị na oyi akwa dị elu ka nwere ike isi na oyi akwa dị ala pụta. A na-edozi usoro ahụ ọbụlagodi mgbe ọrụ mmekọrịta abụọ nke onwe ha na-arụ n'otu oge. `GET /api/pricing?includeSources=1` na-eweghachite `pricing` na `sourceMap`, nke akara ngosi nke ọ bụla (`user`, `modelsDev`, `litellm`, `default`) na-achọpụta oyi akwa kachasị elu nke nwere ụdị ahụ.
 
-**Mmekọrịta LiteLLM** chọrọ ka a họrọ ịgbanye ya, agbanyụghịkwa ya na ndabara. Ihe na-agbanwe na gburugburu ya bụ ndị a (lee [`.env.example`](../../.env.example)):
+**LiteLLM mmekọrịta** bụ Nwepu-nbanye, nwere nkwarụ na ndabara. Ngbanwe gburugburu ya (lee [`.env.example`](../../.env.example) ) bụ:
 
-| Env var                 | Ndabara   | Ebumnuche                                                                         |
-| ----------------------- | --------- | --------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Gbanye mmekọrịta ọnụahịa LiteLLM nke na-arụ n’azụ.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Oge etiti mmekọrịta n'ime **sekọnd** (ndabara bụ kwa ụbọchị).                     |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Nhọrọ isi mmalite maka naanị mmekọrịta a; ugbu a, naanị `litellm` ka a na-akwado. |
+| Env var                 | Ọdabara   | Ebumnuche                                                                     |
+| ----------------------- | --------- | ----------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Kwado mmekọrịta ọnụahịa LiteLLM ndabere.                                      |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Oge mmekọrịta n'ime sekọnd (kwa ụbọchị).                                      |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Nhọrọ isi mmalite maka mmekọrịta a naanị; ugbu a naanị `litellm` ka akwadoro. |
 
-**Mmekọrịta models.dev** dị iche na mmekọrịta LiteLLM, agbanyụghịkwa ya na ndabara. Gbanye ya na Ntọala (mmekọrịta models.dev) ma ọ bụ jiri ihe na-agbanwe ndị a:
+**ụdị.dev mmekọrịta** dị iche na mmekọrịta LiteLLM ma bụrụkwa nke ndabara nwere nkwarụ. Kwado ya na Ntọala (models.dev sync) ma ọ bụ jiri mgbanwe ndị a:
 
-| Ihe na-agbanwe na gburugburu | Uru ndabara  | Ebumnuche                                                                                                                                                           |
-| ---------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`    | _(etọbeghị)_ | Mgbe etọbeghị ya, ọ na-eso ngbanwe dị na Ntọala; `1/true/on/yes` na-amanye ya ịgbanye, ebe `0/false/off/no` na-amanye ya ịgbanyụ, ọbụlagodi ma Ntọala agbanyere ya. |
-| `MODELS_DEV_SYNC_INTERVAL`   | `86400`      | Oge ndabara n’etiti mmekọrịta models.dev n’ime sekọnd (kwa ụbọchị).                                                                                                 |
+| Env var                    | Ọdabara      | Ebumnuche                                                                                                                                    |
+| -------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(Edobeghi)_ | Iweghachite na-esochi ngbanwe ntọala; Ndị agha `1/true/on/yes` na-amanye ma gbanyụọ `0/false/off/no` (ọbụlagodi ma ntọala na-enyere ya aka). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Model.dev ndabara na nkeji oge mmekọrịta na sekọnd (kwa ụbọchị).                                                                             |
 
-`PRICING_SYNC_SOURCES` **anaghị** agbanye models.dev; ọ na-achị naanị mmekọrịta LiteLLM. Ihichapụ uru nnọchi onye ọrụ anaghị ehichapụ oghere aha mmekọrịta ọ bụla n’ime ha; ọkwa ọnụahịa ọzọ dị njikere ga-amalite ịdị irè. Maka mọdẹl na-enweghị ọnụahịa, lelee ntọala mmekọrịta abụọ ahụ na `sourceMap` tupu itinye uru nnọchi n’aka.
+`PRICING_SYNC_SOURCES` na-eme ya **ọ bụghị** mee ka ụdịdị.dev; ọ na-ejikwa naanị mmekọrịta LiteLLM. Ihichapụ onye ọrụ mbugharị anaghị ekpochapụ oghere aha synced ; oyi akwa ọnụahịa dịnụ na-adị irè. Maka ụdị akwụghị ụgwọ, lelee ma ntọala mmekọrịta yana `sourceMap` tupu ịtinye mbugharị akwụkwọ ntuziaka.
 
-### Usoro mgbako ọnụ ahịa
+### Usoro ego
 
-A na-agbakọ ọnụ ahịa kwa arịrịọ site na ọnụọgụ token na ọnụego kwa nde token dị na
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+A na-agbakọ ọnụ ahịa n'otu arịrịọ site na ọnụ ọgụgụ token yana ọnụego nde otu nde na [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Input token** (ewepụrụ cache read na token imepụta cache) × ọnụego `input`.
-- **Cache-read token** × ọnụego `cached` (ọ bụrụ na ọ dịghị, ọ na-eji ọnụego input).
-- **Cache-creation token** × ọnụego `cache_creation` (ọ bụrụ na ọ dịghị, ọ na-eji ọnụego input).
-- **Output token** × ọnụego `output`.
-- **Reasoning token** × ọnụego `reasoning` (ọ bụrụ na ọ dịghị, ọ na-eji ọnụego output).
+- **Ntinye akara** (mwepu cache na-agụ na akara ihe nrụpụta cache) ọnụego × `input`.
+- **Ihe nleba anya na-agụ cache** Ọnụego × `cached` (dabere azụ na ọnụego ntinye).
+- **Ihe nrịbama-mmepụta cache** Ọnụego × `cache_creation` (dabere azụ na ọnụego ntinye).
+- **Ngosipụta mmepụta** Ọnụ ego × `output`.
+- **Ntụle echiche** Ọnụego × `reasoning` (dabere azụ na ọnụego mmepụta).
 
-A na-akọwa ọnụego niile dịka USD kwa token 1,000,000. Service tier Codex “fast”/“priority” ma ọ bụ
-“flex” na-etinye cost multiplier (`getCodexFastCostMultiplier`) — dịka ọmụmaatụ, a na-agbakọ ụgwọ flex
-site na mbelata ọnụahịa token nke 50%, nke a na-egosi dịka **ego flex chekwara** na dashboard.
+A na-atụgharịrị ọnụego niile dị ka USD kwa 1,000,000 token. A na-akwụ ụgwọ ọrụ Codex "ngwa ngwa"/"ihe mbụ" ma ọ bụ "flex" na-emetụta ọnụọgụ ọnụ ahịa (`getCodexFastCostMultiplier`) — dịka ọmụmaatụ flex ka a na-akwụ ụgwọ na mbelata akara ngosi 50%, pụtara dị ka **mgbanwe mgbanwe** na dashboard.
 
-A na-ebu ụzọ hazie aha model ka ha bụrụ otu ụdị (a na-ewepụ prefix nke provider-path dịka `openai/` ma ọ bụ
-`accounts/fireworks/models/`) ka ahịrị akụkọ ihe mere eme ka nwee ike dakọtara na ọnụahịa.
+A na-ebu ụzọ ahazi aha ụdịdị (ntụgharị ụzọ ndị na-eweta ụzọ dịka `openai/` ma ọ bụ `accounts/fireworks/models/` ) yabụ ahịrị akụkọ ihe mere eme ka dabara na ọnụahịa.
 
-### Otu e si edekọ mmefu
+### Otu esi emefu ego na-edekọ
 
-- A na-agbakọ ọnụ ahịa kwa arịrịọ mgbe nzaghachi gasịrị ma dekọọ ya n'ụdị fire-and-forget ka ọ ghara
-  itinye latency n'ebe client nọ. A na-ahazi ojiji shared-quota na tick event-loop na-esote
-  site na [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- A na-etinye mmefu API key na buffer ma zipụ ya n'ìgwè site na
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (ndabara bụ oge flush nke 60s,
-  buffer nwere ndekọ 1,000). Enwere ike ịhazi ya site na:
+- A na-agbakọ ọnụ ahịa otu arịrịọ mgbe emechara arịrịọ. A na-ahazi oriri oke-oke na akara mmemme na-esote site na [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- A na-echekwa ego igodo API ma na-ekpochapụ ya na batches site na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (n'oge 60s flush ndabara, ihe ntinye ntinye 1,000). A na-emegharị site na:
 
-  | Env var                             | Ndabara | Ebumnuche                                         |
-  | ----------------------------------- | ------- | ------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Oge etiti flush n'ime millisecond.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Ọnụọgụ kachasị nke ndekọ dị na buffer tupu flush. |
+  | Env var                             | Ọdabara | Ebumnuche                               |
+  | ----------------------------------- | ------- | --------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Ghichaa nkeji oge n'ime millisekọnd.    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Ndenye kacha echekwabara tupu ịsachapụ. |
 
-A naghị agụ ọnụ ọgụgụ ọnụ ahịa dị na dashboard site na ego dollar kwa ahịrị echekwara — kama,
-a na-agbakọgharị ha ozugbo site na ọnụọgụ token na tebụl ọnụahịa dị ugbu a oge ọ bụla
-analytics endpoint na-arụ ọrụ. Nke a pụtara na idozi ọnụahịa na-ezighị ezi (na ịmekọrịta ọzọ)
-na-emelite atụmatụ ọnụ ahịa akụkọ ihe mere eme n'ụzọ na-emetụta oge gara aga.
+Ọnụ ego na-ahọrọ kpọmkwem ụgwọ a na-akọ na onye na-eweta (`provider_cost_usd`), wee nweta ọnụ ahịa ọnụahịa katalọgụ (`calculated_cost_usd`), wee nwetaghachi akara ngosi site na katalọgụ dị ugbu a. A naghị akwụkwa ụgwọ echekwabara ọzọ site na ọnụọgụ akara ha. Ahịrị naanị token ka na-agbanwe mgbe ọnụahịa katalọgụ ha gbanwere.
+
+### OCR na ntinye
+
+- Arịrịọ `/v1/ocr` na-aga nke ọma na-eji `usage_info.pages_processed` elu, ọ bụghị oke ihu akwụkwọ a rịọrọ ma ọ bụ ọnụọgụ nke ihe ibe eweghachiri. Atụmatụ ahụ bụ ibe × `ocr_cost_per_page` ( USD/page zuru oke,**ọ bụghị** USD/million).
+- Arịrịọ nwere nkọwa akwụkwọ ma ọ bụ nkọwa igbe chọrọ tarifu `ocr_cost_per_annotated_page` dị iche. Na-enweghị ya, ọnụ ahịa na-anọgide na-amaghị; A naghị edochi tarifu OCR nkịtị.
+- LiteLLM mekọrịta maapụ mpaghara `annotation_cost_per_page` elu ya na `ocr_cost_per_annotated_page`, na-ejigide uru USD/page zuru oke yana ndenye naanị nkọwa, gụnyere efu efu. A na-enye ubi canonical na-ebute ụzọ; eleghara ụkpụrụ utu aha na-ezighi ezi anya. Ịkwụ ụgwọ ọnụahịa onye ọrụ na-ejigide ụzọ ha kwesịrị ekwesị. Hụ [igodo ọnụahịa LiteLLM nke OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Ojiji OCR na-echekwa ọnụ ọgụgụ ibe, ọnụ ahịa otu, ọnụ ahịa USD agbakọrọ, igodo API na njikọ ahọpụtara. Agaghị egosipụta ibe dị ka akara. Ndekọ oku nwere metadata ịgba ụgwọ, ọ bụghị akwụkwọ URLs, bytes PDF ma ọ bụ ederede ewepụtara.
+- Arịrịọ `/v1/embeddings` na-aga nke ọma dekọọ otu ahịrị ojiji n'otu ogbe anụ ahụ, gụnyere batches dị iche iche emechara n'otu millisekọnd. Ụgwọ ndị na-enye ndị na-eweta akụkọ na-ebute ụzọ karịa atụmatụ token; ihe mkpuchi combo anaghị atụkwasị ụgwọ.
+- Akụkọ ihe eji eme ihe, nyocha ọnụ ahịa, windo provider/account, oke imefu igodo API, akwụkwọ ndekọ ọnụ ahịa arịrịọ na mpịakọta ojiji kwa ụbọchị gụnyere ụgwọ ndị a. Igodo enweghị ndekọ na-ejigide ndekọ ọnụọgụgụ na-ejigideghị ederede isi mmalite.
+- Ojiji ma ọ bụ tarifụ na-efu efu **amaghị** , ọ bụghị n'efu: ewepụrụ nkụnye eji akwụ ụgwọ nzaghachi, yana amụma ojiji anaghị akwụ ụgwọ dị adị na-emetụta igodo API nwere oke. Ọnụego efu ahaziri nke ọma ka na-eji ọnụ efu efu efu.
+
+Nke a bụ naanị ndekọ ego n'ihu. Enweghị ike iwulite oku OCR/embedding ochie nke na-edebeghị akụkọ ihe mere eme ojiji site na mbugharị a. Atụmatụ katalọgụ bụ atụmatụ USD, ọ bụghị akwụkwọ ọnụahịa, na etinyeghị mgbanwe ego, ụtụ isi ma ọ bụ mbelata.
 
 ---
 

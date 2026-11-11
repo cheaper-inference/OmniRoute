@@ -41,79 +41,73 @@ Da es sich bei der Zahl um eine Schätzung handelt:
 
 ---
 
-## Wie Kosten geschätzt werden
+## Wie die Kosten geschätzt werden
 
 ### Die Preisquelle
 
-Die Kosten stammen aus der zusammengeführten Preistabelle in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), mit folgender Priorität (**höchste zuerst**):
+Die Kosten stammen aus der zusammengeführten Preistabelle in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), in dieser Rangfolge (**Höchste zuerst** ):
 
-1. **Benutzerüberschreibungen** — im Dashboard oder über `PATCH /api/pricing` festgelegte Preise (Namensraum `pricing`).
-2. **models.dev-Synchronisierung** — von `https://models.dev/api.json` abgerufene Preise (Namensraum `models_dev_pricing`).
-3. **LiteLLM-Synchronisierung** — Preise aus der öffentlichen Datei `model_prices_and_context_window.json` von LiteLLM (Namensraum `pricing_synced`).
-4. **Im Code hinterlegte Standardwerte** — mitgelieferte Tarife in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Benutzerüberschreibungen** — Preise werden im Dashboard oder über `PATCH /api/pricing` (den `pricing` Namespace) festgelegt.
+2. **models.dev-Synchronisierung** — Preise werden von `https://models.dev/api.json` (dem `models_dev_pricing` Namespace) abgerufen.
+3. **LiteLLM Synchronisierung** — Preise werden aus dem öffentlichen `model_prices_and_context_window.json` von LiteLLM(dem `pricing_synced` Namespace) abgerufen.
+4. **Hartcodierte Standardeinstellungen** — Tarife werden in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) versendet.
 
-Für dasselbe Anbieter-/Modellpaar überschreiben höher priorisierte Schichten die entsprechenden Felder niedrigerer Schichten; in einer höheren Schicht fehlende Felder können weiterhin aus einer niedrigeren stammen. Die Reihenfolge bleibt fest, auch wenn beide unabhängigen Synchronisierungsaufträge gleichzeitig laufen. `GET /api/pricing?includeSources=1` liefert `pricing` und `sourceMap` zurück. Dessen Kennzeichnungen je Modell (`user`, `modelsDev`, `litellm`, `default`) benennen die höchstpriorisierte Schicht, die das Modell enthält.
+Für die gleiche provider/model überschreiben Werte aus Schichten mit höherer Priorität übereinstimmende Felder in niedrigeren Schichten; Felder, die in einer oberen Schicht fehlen, können dennoch aus einer unteren Schicht stammen. Die Reihenfolge ist auch dann festgelegt, wenn beide unabhängigen Synchronisierungsjobs gleichzeitig ausgeführt werden. `GET /api/pricing?includeSources=1` gibt `pricing` und `sourceMap` zurück, deren Modellbezeichnungen (`user`, `modelsDev`, `litellm`, `default`) die Schicht mit der höchsten Priorität identifizieren, die dieses Modell enthält.
 
-Die **LiteLLM-Synchronisierung** muss ausdrücklich aktiviert werden und ist standardmäßig deaktiviert. Ihre Umgebungsvariablen (siehe [`.env.example`](../../.env.example)) sind:
+**LiteLLM Synchronisierung** ist Opt-in und standardmäßig deaktiviert. Seine Umgebungsvariablen (siehe [`.env.example`](../../.env.example) ) sind:
 
-| Umgebungsvariable       | Standardwert | Zweck                                                                                             |
-| ----------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`      | Aktiviert die LiteLLM-Preissynchronisierung im Hintergrund.                                       |
-| `PRICING_SYNC_INTERVAL` | `86400`      | Synchronisierungsintervall in **Sekunden** (standardmäßig täglich).                               |
-| `PRICING_SYNC_SOURCES`  | `litellm`    | Quellenauswahl ausschließlich für diese Synchronisierung; derzeit wird nur `litellm` unterstützt. |
+| Umgebungsvar            | Standard  | Zweck                                                                                  |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Aktivieren Sie LiteLLM Preissynchronisierung im Hintergrund.                           |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synchronisierungsintervall in Sekunden (täglich).                                      |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Quellenauswahl nur für diese Synchronisierung; Derzeit wird nur `litellm` unterstützt. |
 
-Die **models.dev-Synchronisierung** ist von der LiteLLM-Synchronisierung unabhängig und ebenfalls standardmäßig deaktiviert. Aktivieren Sie sie unter Einstellungen (models.dev-Synchronisierung) oder verwenden Sie diese Variablen:
+**models.dev-Synchronisierung** ist von der LiteLLM -Synchronisierung getrennt und ebenfalls standardmäßig deaktiviert. Aktivieren Sie es in den Einstellungen (models.dev sync) oder verwenden Sie diese Variablen:
 
-| Umgebungsvariable          | Standardwert      | Zweck                                                                                                                                                               |
-| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(nicht gesetzt)_ | Ohne Wert gilt der Schalter in den Einstellungen; `1/true/on/yes` erzwingt die Aktivierung, `0/false/off/no` die Deaktivierung, selbst bei aktivierter Einstellung. |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standardintervall der models.dev-Synchronisierung in Sekunden (täglich).                                                                                            |
+| Umgebungsvar               | Standard     | Zweck                                                                                                                                                                                |
+| -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unscharf)_ | Unscharf folgt dem Umschalten der Einstellungen; `1/true/on/yes` erzwingt das Einschalten und `0/false/off/no` erzwingt das Ausschalten (auch wenn die Einstellungen es aktivieren). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Standardmäßiges models.dev-Synchronisierungsintervall in Sekunden (täglich).                                                                                                         |
 
-`PRICING_SYNC_SOURCES` aktiviert models.dev **nicht**, sondern steuert ausschließlich die LiteLLM-Synchronisierung. Das Löschen einer Benutzerüberschreibung entfernt keinen der synchronisierten Namensräume; die nächste verfügbare Preisschicht wird wirksam. Prüfen Sie bei einem Modell ohne Preis beide Synchronisierungseinstellungen und `sourceMap`, bevor Sie eine manuelle Überschreibung hinzufügen.
+`PRICING_SYNC_SOURCES` tut es **nicht** models.dev aktivieren; Es steuert nur die LiteLLM Synchronisierung. Durch das Löschen einer Benutzerüberschreibung wird keiner der synchronisierten Namespaces gelöscht. die nächste verfügbare Preisebene wird wirksam. Überprüfen Sie bei einem Modell ohne Preis sowohl die Synchronisierungseinstellungen als auch den `sourceMap`, bevor Sie eine manuelle Überschreibung hinzufügen.
 
 ### Die Kostenformel
 
-Die Kosten werden pro Anfrage anhand der Token-Anzahl und der Preise pro Million Token in
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`) berechnet:
+Die Kosten werden pro Anfrage aus der Anzahl der Token und den Raten pro Million Token in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) berechnet:
 
-- **Eingabe-Token** (abzüglich Cache-Lese- und Cache-Erstellungs-Token) × `input`-Preis.
-- **Cache-Lese-Token** × `cached`-Preis (greift ersatzweise auf den Eingabepreis zurück).
-- **Cache-Erstellungs-Token** × `cache_creation`-Preis (greift ersatzweise auf den
-  Eingabepreis zurück).
-- **Ausgabe-Token** × `output`-Preis.
-- **Reasoning-Token** × `reasoning`-Preis (greift ersatzweise auf den Ausgabepreis zurück).
+- **Eingabe-Tokens** (abzüglich Cache-Lesevorgänge und Cache-Erstellungstoken) × `input` Rate.
+- **Cache-Lese-Token** × `cached` -Rate (fällt auf die Eingangsrate zurück).
+- **Token zur Cache-Erstellung** × `cache_creation` -Rate (fällt auf die Eingangsrate zurück).
+- **Ausgabetoken** × `output` Rate.
+- **Argumentationsmarken** × `reasoning` -Rate (fällt auf die Ausgaberate zurück).
 
-Alle Preise werden als USD pro 1.000.000 Token interpretiert. Für die Codex-Dienststufen
-„fast“/„priority“ oder „flex“ gilt ein Kostenmultiplikator
-(`getCodexFastCostMultiplier`) — bei „flex“ wird beispielsweise ein Token-Rabatt von 50 %
-berechnet, der im Dashboard als **Flex-Einsparungen** angezeigt wird.
+Alle Preise werden als USD pro 1.000.000 Token interpretiert. Eine Codex -Dienststufe „Schnell“, „Priorität“ oder „Flex“ wendet einen Kostenmultiplikator (`getCodexFastCostMultiplier`) an. —, z. B. Flex, wird mit einem Token-Rabatt von 50 % abgerechnet, angezeigt als **Flex-Einsparungen** im Armaturenbrett.
 
-Modellnamen werden zunächst normalisiert (Anbieterpfadpräfixe wie `openai/` oder
-`accounts/fireworks/models/` werden entfernt), sodass auch historische Zeilen weiterhin
-einem Preis zugeordnet werden können.
+Modellnamen werden zuerst normalisiert (Anbieterpfadpräfixe wie `openai/` oder `accounts/fireworks/models/` werden entfernt), sodass historische Zeilen immer noch einem Preis entsprechen.
 
 ### Wie Ausgaben erfasst werden
 
-- Die Kosten pro Anfrage werden nach der Antwort berechnet und nach dem
-  Fire-and-forget-Prinzip erfasst, sodass dem Client niemals zusätzliche Latenz
-  entsteht. Der Verbrauch des gemeinsamen Kontingents wird für den nächsten Durchlauf
-  der Ereignisschleife über
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) eingeplant.
-- Ausgaben für API-Schlüssel werden gepuffert und vom
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) stapelweise geschrieben
-  (standardmäßig alle 60 Sekunden, Puffer für 1.000 Einträge). Anpassbar über:
+- Die Kosten pro Anfrage werden bei Abschluss der Anfrage berechnet. Der Verbrauch gemeinsamer Kontingente wird beim nächsten Ereignisschleifen-Tick über [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) geplant.
+- API-Schlüsselausgaben werden von der [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) gepuffert und stapelweise geleert (Standard-Flush-Intervall von 60 Sekunden, Puffer für 1.000 Einträge). Einstellbar über:
 
-  | Umgebungsvariable                   | Standardwert | Zweck                                                   |
-  | ----------------------------------- | ------------ | ------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Schreibintervall in Millisekunden.                      |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Maximale Anzahl gepufferter Einträge vor dem Schreiben. |
+  | Umgebungsvar                        | Standard | Zweck                                   |
+  | ----------------------------------- | -------- | --------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Spülintervall in Millisekunden.         |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Max. gepufferte Einträge vor dem Flush. |
 
-Die Kostenangaben des Dashboards werden **nicht** aus einem pro Zeile gespeicherten
-Dollarbetrag ausgelesen — sie werden bei jeder Ausführung des Analyse-Endpunkts anhand
-der Token-Anzahlen und der aktuellen Preistabelle dynamisch neu berechnet. Das bedeutet,
-dass die Korrektur eines falschen Preises (und eine erneute Synchronisierung) die
-historischen Kostenschätzungen rückwirkend aktualisiert.
+Die Kosten umfassen eine genaue vom Anbieter gemeldete Gebühr (`provider_cost_usd`), dann einen Anfrage-Snapshot zum Katalogpreis (`calculated_cost_usd`) und dann eine Token-Neubewertung aus dem aktuellen Katalog. Gespeicherte Kosten werden nicht erneut durch ihre Token-Zählungen belastet. Ältere Nur-Token-Zeilen ändern sich weiterhin, wenn sich ihr Katalogpreis ändert.
+
+### OCR und Einbettungen
+
+- Erfolgreiche `/v1/ocr` -Anfragen verwenden Upstream- `usage_info.pages_processed`, nicht den angeforderten Seitenbereich oder die Anzahl der zurückgegebenen Seitenobjekte. Die Schätzung beträgt Seiten × `ocr_cost_per_page` (absolute USD/page,**nicht** USD/million).
+- Für Anfragen mit Dokument- oder Bounding-Box-Anmerkungen ist ein gesonderter `ocr_cost_per_annotated_page` Tarif erforderlich. Ohne sie bleiben die Kosten unbekannt; Der normale OCR Tarif wird nicht stillschweigend ersetzt.
+- LiteLLM Synchronisierung ordnet ihr Upstream- `annotation_cost_per_page` Feld `ocr_cost_per_annotated_page` zu und behält dabei den absoluten USD/page Wert und reine Anmerkungseinträge, einschließlich der expliziten Null, bei. Ein angegebenes kanonisches Feld hat Vorrang; Ungültige Aliaswerte werden ignoriert. Benutzerpreisüberschreibungen behalten ihre normale Priorität. Sehen Sie sich [OCR Preisschlüssel von LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) an.
+- Bei OCR -Nutzung werden die Seitenanzahl, der Stückpreis, die berechneten USD Kosten, API Schlüssel und die ausgewählte Verbindung gespeichert. Seiten werden niemals als Token dargestellt. Anrufprotokolle enthalten Abrechnungsmetadaten, keine Dokument- URLs, PDF Bytes oder extrahierten Text.
+- Erfolgreiche `/v1/embeddings` Anfragen zeichnen eine Nutzungszeile pro physischem Batch auf, einschließlich separater Batches, die in derselben Millisekunde abgeschlossen wurden. Vom Anbieter gemeldete Gebühren haben Vorrang vor Token-Schätzungen; Für Combo-Wrapper wird keine Gebühr erhoben.
+- Der Nutzungsverlauf, die Kostenanalyse, provider/account Fenster, Ausgabenlimits für API-Schlüssel, das Anforderungs-Kosten-Ledger und die täglichen Nutzungs-Rollups umfassen diese Gebühren. No-Log-Schlüssel behalten die numerische Abrechnung bei, ohne den Quelltext beizubehalten.
+- Fehlende Nutzungen oder Tarife liegen vor **unbekannt** , nicht kostenlos: Der Response-Cost-Header wird weggelassen und die bestehende Richtlinie zur unbezahlten Nutzung gilt für begrenzte API Schlüssel. Explizit konfigurierte Zero-Tarife behalten ihre Gültigkeit bei der Null-Kosten-Nutzung.
+
+Hierbei handelt es sich um eine reine Vorwärtsrechnung. Alte OCR/embedding Aufrufe, die nie einen Nutzungsverlauf geschrieben haben, können aus dieser Migration nicht rekonstruiert werden. Katalogschätzungen sind USD Schätzungen, keine Rechnungen und beinhalten keine Währungsumrechnung, Steuern oder Rabatte.
 
 ---
 

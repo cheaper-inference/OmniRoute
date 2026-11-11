@@ -6,33 +6,33 @@
 
 ## Pangkalahatang-ideya
 
-Ang Redis ay isang **opsyonal at hindi mahigpit na dependency** sa OmniRoute — maayos na bumababa ang kakayahan ng application (gumagamit ng mga in-memory na fallback) kapag hindi available ang Redis. Sa production, ang pag-tune sa Redis ay nagpapababa ng latency para sa apat na magkakaibang workload:
+Redis ay isang **opsyonal, malambot na dependency** sa OmniRoute — ang application ay bumababa nang maganda (in-memory fallbacks) kapag hindi available Redis. Sa produksyon, binabawasan ng pag-tune ng Redis ang latency para sa apat na natatanging workload:
 
-| Workload                  | Driver                        | Client Factory                                   | Pattern ng Key                                        |
-| ------------------------- | ----------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
-| Paglilimita ng rate       | `rateLimiter.ts`              | `getRedisClient()` — lazy na `ioredis` singleton | `<prefix>rl:*` mga Lua-atomic na window ng rate limit |
-| Cache ng auth             | `apiKeys.ts`                  | Muling ginagamit ang client ng `rateLimiter`     | `<prefix>auth:api_key:<sha256>` na may TTL            |
-| Imbakan ng quota          | `redisQuotaStore.ts`          | Hiwalay na `getRedisClient(url)` singleton       | `<prefix>quota:*` na nako-configure sa bawat instance |
-| Circuit breaker ng warmup | `redisCircuitBreakerStore.ts` | Hiwalay na client sa `circuitBreakerFactory.ts`  | `<prefix>warmup:cb:<connectionId>`                    |
+| Workload               | Driver                        | Pabrika ng Kliyente                                     | Key Pattern                                    |
+| ---------------------- | ----------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| Paglilimita sa rate    | `rateLimiter.ts`              | `getRedisClient()` — tamad `ioredis` singleton          | `<prefix>rl:*` Lua‑atomic rate limit window    |
+| Awth cache             | `apiKeys.ts`                  | Muling ginagamit ang kliyente ng `rateLimiter`          | `<prefix>auth:api_key:<sha256>` kasama ang TTL |
+| Tindahan ng quota      | `redisQuotaStore.ts`          | Paghiwalayin `getRedisClient(url)` singleton            | `<prefix>quota:*` configurable per-instance    |
+| Warmup circuit breaker | `redisCircuitBreakerStore.ts` | Paghiwalayin ang kliyente sa `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>`             |
 
-Iisang namespace prefix ang ginagamit ng lahat ng apat na workload upang makapagpatakbo ang OmniRoute kasama ng iba pang app sa iisang Redis instance (hal. `127.0.0.1:6379`). Tingnan ang [Paglalagay sa Namespace ng mga Key](#key-namespacing).
+Ang lahat ng apat na workload ay nagbabahagi ng isang namespace prefix upang OmniRoute ay maaaring umiral kasama ng iba pang mga app sa isang Redis instance (hal. `127.0.0.1:6379`). Tingnan [ang Key Namespacecing](#key-namespacing).
 
 ---
 
-## Kasalukuyang Configuration (Mga Default sa Code)
+## Kasalukuyang Configuration (Mga Default ng Code)
 
-| Setting                         | Value                                                         | Lokasyon                                                                              |
-| ------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL` env var             | `redis://redis:6379` (compose), opsyonal                      | `rateLimiter.ts:5`, `.env.example`                                                    |
-| `REDIS_KEY_PREFIX` env var      | `omniroute:` (default)                                        | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL` env var | hiwalay, maaaring iba sa `REDIS_URL`                          | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`            | `"sqlite"` (default), opsyonal ang `"redis"`                  | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`  | `3`                                                           | paggawa ng client sa `rateLimiter.ts`                                                 |
-| `enableReadyCheck`              | hindi nakatakda (default ng ioredis: `true`)                  | —                                                                                     |
-| `lazyConnect`                   | hindi nakatakda (default ng ioredis: `false`)                 | —                                                                                     |
-| `retryStrategy`                 | hindi nakatakda (default ng ioredis: 200ms base, exponential) | —                                                                                     |
-| TLS / password / DB index       | **hindi naka-configure**                                      | —                                                                                     |
-| Sentinel / Cluster              | **hindi naka-configure** — standalone na single-node lamang   | —                                                                                     |
+| Setting                         | Halaga                                                     | saan                                                                                  |
+| ------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (compose), opsyonal                   | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (default)                                     | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | hiwalay, maaaring iba sa `REDIS_URL`                       | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (default), `"redis"` opsyonal                   | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                        | Paglikha ng kliyente `rateLimiter.ts`                                                 |
+| `enableReadyCheck`              | hindi nakatakda (ioredis default: `true`)                  | —                                                                                     |
+| `lazyConnect`                   | hindi nakatakda (ioredis default: `false`)                 | —                                                                                     |
+| `retryStrategy`                 | hindi nakatakda (ioredis default: 200ms base, exponential) | —                                                                                     |
+| TLS / password / DB index       | **hindi naka-configure**                                   | —                                                                                     |
+| Sentinel / Cluster              | **hindi naka-configure** — standalone single-node lang     | —                                                                                     |
 
 ---
 
@@ -54,59 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Inirerekomendang Pag-tune para sa Produksyon
+## Inirerekomendang Pag-tune ng Produksyon
 
-### 1. Mga Opsyon sa Connection Pool / Client (ioredis `Redis` constructor)
+### 1. Connection Pool / Client Options (ioredis `Redis` constructor)
 
-Gumagawa ang kasalukuyang code ng iisang `new Redis(url)` nang walang mga custom na opsyon. Para sa mga production deployment na may maraming replica, magpasa ng client factory sa code o i-wrap ang `getRedisClient()`:
+Ang kasalukuyang code ay lumilikha ng isang `new Redis(url)` na walang mga custom na opsyon. Para sa production multi‑replica deployment, ipasa ang isang client factory sa code o i-wrap `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // walang limitasyon sa retry; hayaan ang retryStrategy na magpasya
-  enableReadyCheck: true, // tiyaking handa ang server bago tumanggap ng mga tawag
-  lazyConnect: true, // huwag kumonekta sa paggawa; hintayin ang unang tawag
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // sumuko pagkatapos ng 10 retry → muling kumonekta sa ibang pagkakataon
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, hanggang 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // pagsama-samahin ang magkakasabay na command sa iisang TCP write
-  keepAlive: 10000, // TCP keep-alive bawat 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Mahahalagang trade-off:**
+**Mga pangunahing trade-off:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — mas mainam para sa produksyon upang hindi agad mabigo ang bawat request kapag pansamantalang nag-restart ang Redis. Sinasalo ng in-memory fallback sa `checkRateLimit()` ang failure path.
-- `lazyConnect: true` — iniiwasang maging startup dependency ang pagiging aktibo ng Redis bago magsimulang tumanggap ng mga koneksyon ang server.
-- `enableAutoPipelining: true` — binabawasan ang mga round-trip para sa magkakasabay na pagsusuri ng rate limit; kapaki-pakinabang sa >50 RPS sa iisang koneksyon.
+- Mas gusto `maxRetriesPerRequest: null` + `retryStrategy` — para sa produksyon kaya hindi agad mabibigo ang mga lumilipas na Redis sa bawat kahilingan. Ang in-memory fallback sa `checkRateLimit()` ay sumisipsip sa failure path.
+- `lazyConnect: true` — ay umiiwas sa isang startup dependency sa Redis na naka-up bago magsimulang tumanggap ang server ng mga koneksyon.
+- Binabawasan ng `enableAutoPipelining: true` — ang mga round-trip para sa sabay-sabay na mga pagsusuri sa limitasyon sa rate; kapaki-pakinabang sa > 50 RPS sa isang koneksyon.
 
-### 2. Configuration ng Redis Server (`redis.conf`)
+### 2. Redis Server Configuration (`redis.conf`)
 
 ```
 # Memory
-maxmemory 80%                        # maglaan ng espasyo para sa OS page cache
-maxmemory-policy allkeys-lru         # alisin ang mga lipas na auth cache entry kapag kapos sa memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistence (opsyonal — crash-safe ang OmniRoute kahit wala nito)
-save 300 1                           # gumawa ng snapshot kahit bawat 5 min kung ≥1 key ang nagbago
-appendonly no                        # hindi kailangan ang AOF; maaaring buuing muli ang data
-appendfsync no                       # walang fsync overhead (sapat na ang RDB)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
 # Networking
-timeout 0                            # walang idle disconnect
-tcp-keepalive 300                    # 5 min keep-alive
-tcp-backlog 511                      # backlog ng koneksyon para sa pabugso-bugsong load
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
 # Performance
-hz 10                                # default; 100 para sa latency-sensitive
-activedefrag yes                     # awtomatikong mag-defragment kapag >10% ang fragmentation
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Trade-off para sa `maxmemory-policy allkeys-lru`:** Maaaring alisin ang mga auth cache entry kapag kapos sa memory. Ligtas ito — palaging muling naglalagay ang `setCachedApiKey` kapag may miss, at ang SQLite fallback ang awtoritatibong pinagmulan. Gumagawa ang rate-limiter Lua script ng maliliit na key na sadyang panandalian lamang.
+**Trade-off para sa `maxmemory-policy allkeys-lru`:** Ang mga entry ng auth cache ay maaaring maalis sa ilalim ng presyon ng memorya. Ito ay ligtas na — `setCachedApiKey` ay palaging muling pumupuno kapag miss, at ang SQLite fallback ay may awtoridad. Ang script ng rate-limiter na Lua ay lumilikha ng maliliit na key na panandalian sa disenyo.
 
 ### 3. Mga Setting ng Docker Compose
 
-Gumagamit ang prod compose (`docker-compose.prod.yml`) ng `redis:8.6.2-alpine`. Idagdag ang:
+Ang prod compose (`docker-compose.prod.yml`) ay gumagamit ng `redis:8.6.2-alpine`. Idagdag:
 
 ```yaml
 redis:
@@ -131,30 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Mga Pagsasaalang-alang para sa Maraming Instance / Scaling
+### 4. Mga Pagsasaalang-alang sa Multi‑Instance / Pag-scale
 
-**Iisang Redis para sa lahat ng replica** — umaasa ang rate-limiter Lua script sa iisang awtoritatibong key space. Mawawala ang atomicity at madodoble ang budget kapag maraming Redis instance ang nasa likod ng mga replica. Gumamit ng iisang Redis (o Redis Sentinel cluster na may failover) para sa lahat ng application replica.
+**Single Redis para sa lahat ng replika** — ang rate-limiter na Lua script ay nakadepende sa iisang authoritative key space. Maraming mga Redis instance sa likod ng mga replika ang mawawalan ng atomicity at doble ang badyet. Gumamit ng isang Redis (o Redis Sentinel cluster na may failover) para sa lahat ng mga replika ng application.
 
-**Bilang ng koneksyon:** Nagbubukas ang bawat application replica ng **2 TCP connection** sa Redis (rate limiter client + quota store client). Sa 10 replica → 20 koneksyon, na pasok na pasok sa default na limitasyong 10k koneksyon ng isang Redis instance.
+**Bilang ng koneksyon:** Ang bawat replika ng application ay bubukas **2 TCP na koneksyon** sa Redis (kliyente ng limiter ng rate + quota store client). Sa 10 replika → 20 na koneksyon, na nasa loob ng 10k na kisame ng koneksyon ng default Redis instance.
 
-### 5. Monitoring
+### 5. Pagsubaybay
 
-I-expose sa pamamagitan ng health-check endpoint:
+Ilantad sa pamamagitan ng endpoint ng pagsusuri sa kalusugan:
 
 ```typescript
-// Tumatawag na ang src/app/api/monitoring/health/route.ts sa mga function ng rateLimiter
-// Magdagdag ng mga pagsusuring partikular sa Redis:
-//   1. PING latency sa pamamagitan ng ioredis .ping()
-//   2. Paggamit ng memory sa pamamagitan ng INFO memory
-//   3. Bilang ng koneksyon sa pamamagitan ng INFO clients
-//   4. Hit rate para sa maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Mga pangunahing metric na dapat bantayan:
+Mga pangunahing sukatan upang panoorin:
 
-- **Mga inalis na key / sec** — kung palagi itong hindi zero, dagdagan ang `maxmemory`
-- **Mga naka-block na client** — nagpapahiwatig ang hindi zero ng mababagal na Lua script o mataas na contention
-- **Mga tinanggihang koneksyon** — naabot ang limitasyon sa koneksyon; bihira sa 20 koneksyon
+- **Mga pinaalis na susi / seg** — kung patuloy na hindi zero, dagdagan `maxmemory`
+- **Mga naka-block na kliyente** — non-zero ay nagmumungkahi ng mabagal na mga script ng Lua o mataas na pagtatalo
+- **Mga tinanggihang koneksyon** Na-hit ang limitasyon sa koneksyon — ; bihira sa 20 koneksyon
+
+### 6. Mga Redis-Compatible na Server
+
+Ang anumang server na ginamit dito ay dapat magpatakbo ng mga script ng Lua: ang limiter ng rate ay isang `EVAL`. Sa isang server na walang Lua, `checkRateLimit()` ay nagla-log ng `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` at nagbibilang sa bawat proseso, kaya ang bawat replica ay nagpapatupad ng limitasyon sa sarili nitong. Ang opt-in shared session-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ay nagbabasa at nag-a-update din ng mga pin gamit ang `EVAL`; nang walang Lua ito ay nag-log `[SESSION_AFFINITY] Redis error; falling back to SQLite.` at bawat replika ay nagpapanatili ng sarili nitong mga pin. Ang iba pang mga workload ay gumagamit ng mga simpleng command (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, mga hash at set), at ang Redis backend ng semantic cache ay hindi nagpapadala ng mga `FT.*` command.
+
+Sinubukan gamit ang OmniRoute 3.8.52: KiviDB 1.2.0 kasama ang imahe nitong Lua (`kividb/kividb:v1.2.0-lua`). Ang rate limiter (kabilang ang pangalawang proseso na nagbabahagi ng mga counter), auth cache, quota store, warmup circuit breaker, semantic cache store, at isang `/v1/chat/completions` na kahilingan sa pamamagitan ng chat handler ay pumasa sa 18 sa 19 na tseke na pumasa sa Redis 8.10.3. Ang nagkakaiba: Iniimbak ng `INCRBYFLOAT` `0.1 + 0.2` bilang `0.30000000000000004` kung saan iniimbak ng Redis `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Parehong pina-parse ng quota store ang `parseFloat`, ngunit ang dalawang numero ay naiiba sa mga huling digit, kaya ang paghahambing na eksaktong nasa hangganan ng quota ay maaaring lumabas nang iba. Ang tindahan ng session-affinity ay hindi bahagi ng pagtakbo na iyon. ( [setup](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [mga resulta](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -175,15 +181,15 @@ flowchart LR
 
 ---
 
-## Mga Sanggunian
+## Mga sanggunian
 
-| File                               | Layunin                                                                |
-| ---------------------------------- | ---------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Pangunahing Redis client, Lua rate-limit script, at in-memory fallback |
-| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite fallback                                     |
-| `src/lib/quota/redisQuotaStore.ts` | Hiwalay na Redis client para sa opsyonal na imbakan ng quota           |
-| `src/lib/quota/storeFactory.ts`    | Nagpapalit sa pagitan ng `sqlite` at `redis` na mga quota driver       |
-| `docker-compose.prod.yml`          | Redis container para sa production (image na `redis:8.6.2-alpine`)     |
-| `.env.example`                     | Dokumentasyon ng mga Redis env var                                     |
-| `src/app/api/local/redis/`         | Mga API route para sa orkestrasyon ng dev container                    |
-| `bin/cli/commands/redis.mjs`       | Mga CLI command para sa orkestrasyon ng dev container                  |
+| file                               | Layunin                                                               |
+| ---------------------------------- | --------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Pangunahing Redis client, Lua rate-limit script, in-memory fallback   |
+| `src/lib/db/apiKeys.ts`            | Awth cache — Redis→SQLite fallback                                    |
+| `src/lib/quota/redisQuotaStore.ts` | Paghiwalayin ang kliyente Redis para sa opsyonal na tindahan ng quota |
+| `src/lib/quota/storeFactory.ts`    | Lumipat sa pagitan ng `sqlite` at `redis` quota driver                |
+| `docker-compose.prod.yml`          | Prod Redis container (larawan `redis:8.6.2-alpine`)                   |
+| `.env.example`                     | Redis env vars documentation                                          |
+| `src/app/api/local/redis/`         | Mga ruta API para sa dev container orkestrasyon                       |
+| `bin/cli/commands/redis.mjs`       | Mga utos CLI para sa dev container orchestration                      |

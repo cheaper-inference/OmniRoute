@@ -438,25 +438,17 @@ DB — chúng sẽ bị mất khi khởi động lại. _Cài đặt_ được l
 
 ---
 
-## 4. Kiểm soát đồng thời theo hạn ngạch được chia sẻ (v3.8.36)
+## 4. Kiểm soát đồng thời chia sẻ hạn ngạch (v3.8.36)
 
-Các tài khoản đăng ký (GLM, MiniMax, v.v.) thường chỉ chấp nhận khoảng 1–3
-yêu cầu đồng thời; vượt quá giới hạn này sẽ kích hoạt 429 và thời gian cooldown. Tình trạng này đặc biệt nghiêm trọng với các combo **quota-share**
-(`qtSd/…`), trong đó nhiều khóa API dùng chung một tài khoản upstream. Ba lớp
-giúp ngăn tài khoản dùng chung bị gửi quá nhiều yêu cầu.
+Các tài khoản đăng ký (GLM, MiniMax, v.v.) thường chỉ chấp nhận các yêu cầu đồng thời ~ 1–3; vượt quá mức đó sẽ kích hoạt 429 giây và thời gian hồi chiêu. Đây là vấn đề cấp tính dưới **chia sẻ hạn ngạch** (`qtSd/…`), trong đó một số khóa API chia sẻ một tài khoản ngược dòng. Ba lớp giữ cho tài khoản dùng chung không bị ngập.
 
-### Giới hạn đồng thời theo kết nối (`max_concurrent`)
+### Giới hạn đồng thời trên mỗi kết nối (`max_concurrent`)
 
-Mỗi kết nối nhà cung cấp có thể khai báo ngưỡng `max_concurrent`
-(`provider_connections.max_concurrent`, được thiết lập trong biểu mẫu kết nối / API / DB).
-Để trống nếu không muốn giới hạn. Đây là nút điều khiển duy nhất chi phối lớp
-tuần tự hóa bên dưới — hãy đặt giá trị này theo mức đồng thời thực tế của tài khoản
-(ví dụ: GLM khoảng 1, MiniMax khoảng 2).
+Mỗi kết nối nhà cung cấp có thể khai báo mức trần `max_concurrent` (`provider_connections.max_concurrent`, được đặt trong phương thức kết nối / API / DB). Để trống không có giới hạn. Đây là núm duy nhất điều khiển lớp tuần tự hóa bên dưới —, đặt nó thành đồng thời thực sự của tài khoản (ví dụ GLM ~ 1, MiniMax ~ 2).
 
-### Giới hạn đồng thời theo mô hình (`modelConcurrency`)
+### Giới hạn đồng thời cho mỗi mô hình (`modelConcurrency`)
 
-Một kết nối cũng có thể khai báo các ngưỡng đồng thời chính xác theo từng mô hình
-bên trong map `rateLimitOverrides`:
+Ngoài ra, một kết nối có thể khai báo mức trần đồng thời chính xác cho mỗi mô hình trong bản đồ `rateLimitOverrides` của nó:
 
 ```json
 {
@@ -467,84 +459,32 @@ bên trong map `rateLimitOverrides`:
 }
 ```
 
-Thiết lập trong biểu mẫu kết nối (**Ghi đè giới hạn tốc độ → Giới hạn đồng thời
-theo mô hình**, mỗi dòng một `model=cap`) hoặc qua
-`PATCH /api/providers/[id]` với cùng cấu trúc JSON. Ngữ nghĩa chính:
+Đặt nó ở chế độ kết nối (**Giới hạn tốc độ ghi đè → Giới hạn đồng thời trên mỗi mô hình** , một `model=cap` trên mỗi dòng) hoặc thông qua `PATCH /api/providers/[id]` có cùng hình dạng JSON. Ngữ nghĩa chính:
 
-- **Theo toàn bộ kết nối so với theo từng mô hình:** `maxConcurrent` vẫn là
-  ngưỡng dùng chung cho toàn bộ kết nối. Khi cả hai cùng được áp dụng, cả hai
-  cổng kiểm soát được lấy một cách nguyên tử trong cùng một cổng kết hợp
-  (`global → provider → account → model`); hành vi hiệu dụng sẽ tuân theo giới hạn
-  nghiêm ngặt hơn được áp dụng.
-- **Khớp chính xác khóa mô hình:** khóa này là chuỗi mô hình được truyền cho
-  executor sau khi phân giải định tuyến — thông thường là ID mô hình upstream thuần
-  (`glm-5`), không phải bí danh `provider/model` phía máy khách (`zai/glm-5` không
-  khớp với `glm-5`). Các giá trị là ngưỡng số nguyên dương cho số yêu cầu đồng thời.
-- **Xếp hàng cục bộ, không tự phát hiện:** các yêu cầu vượt mức sẽ xếp hàng cục bộ
-  với ngữ nghĩa hàng đợi/thời gian chờ hiện có (các lỗi tiếp nhận có kiểu
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute không tự phát hiện hoặc
-  suy luận chính sách upstream — hệ thống thực thi chính xác các ngưỡng mà người
-  vận hành đã cấu hình. Cổng mô hình bị bão hòa không bao giờ vô hiệu hóa nhà cung cấp
-  và không bao giờ tạo ra khóa mô hình vĩnh viễn; hành vi 429/cooldown/fallback từ
-  upstream vẫn là cơ chế dự phòng khi có lỗi.
-- **Phạm vi theo từng kết nối, từng tiến trình:** các giới hạn áp dụng theo từng
-  kết nối cơ sở dữ liệu và được lưu trong bộ nhớ, vì vậy hai kết nối dùng lại cùng
-  một khóa API upstream sẽ không phối hợp với nhau.
-- **Không cấu hình nghĩa là không thay đổi:** bỏ qua map (hoặc để trống trường trên
-  dashboard) sẽ không thêm cổng kiểm soát theo mô hình. Ví dụ cấu hình không khẳng
-  định bất kỳ giới hạn phổ quát nào cho nhà cung cấp:
+- **Kết nối trên toàn bộ so với mô hình cụ thể:** `maxConcurrent` vẫn là trần kết nối chung. Khi áp dụng cả hai, cả hai cổng đều được thu nhận nguyên tử trong cùng một cổng tổng hợp (`global → provider → account → model`); hành vi hiệu quả là giới hạn áp dụng chặt chẽ hơn.
+- **Kết hợp khóa mô hình chính xác:** khóa là chuỗi mô hình được chuyển đến người thực thi sau khi định tuyến độ phân giải — thông thường là id mô hình ngược dòng trần (`glm-5`), không phải bí danh `provider/model` phía máy khách (`zai/glm-5` không khớp với `glm-5`). Giá trị là mức trần yêu cầu đồng thời số nguyên dương.
+- **Xếp hàng cục bộ, không có khám phá:** các yêu cầu vượt mức xếp hàng cục bộ với ngữ nghĩa queue/timeout hiện có (lỗi nhập `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` đã nhập). OmniRoute không phát hiện hoặc suy ra chính sách ngược dòng — mà nó thực thi các mức trần chính xác mà nhà điều hành đã định cấu hình. Cổng mô hình bão hòa không bao giờ vô hiệu hóa nhà cung cấp và không bao giờ tạo ra khóa mô hình vĩnh viễn; hành vi 429/cooldown/fallback ngược dòng vẫn là lỗi dừng lại.
+- **Phạm vi mỗi kết nối, mỗi quy trình:** giới hạn dành cho mỗi kết nối cơ sở dữ liệu và được giữ trong bộ nhớ, do đó, hai kết nối sử dụng lại cùng một khóa API ngược dòng không phối hợp với nhau.
+- **Chưa được định cấu hình có nghĩa là không thay đổi:** bỏ qua bản đồ (hoặc để trống trường bảng thông tin) sẽ không thêm cổng mô hình. Cấu hình ví dụ mà không xác nhận bất kỳ giới hạn nào của nhà cung cấp phổ quát:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Tuần tự hóa yêu cầu quota-share
+### Tuần tự hóa yêu cầu chia sẻ hạn ngạch
 
-Khi một lần phân phối quota-share nhắm đến một kết nối khai báo
-`max_concurrent` dương, các yêu cầu đồng thời đến **tài khoản** đó sẽ được tuần tự
-hóa thông qua một semaphore theo từng kết nối (khóa `qsconn:<connectionId>`): các
-yêu cầu vượt mức sẽ **chờ trong hàng đợi** thay vì gửi quá nhiều yêu cầu đến tài khoản.
-Cơ chế này **fail-open** — khi hàng đợi đầy hoặc hết thời gian chờ, yêu cầu vẫn tiếp
-tục mà không cần một slot, thay vì từ chối một yêu cầu có thể phân phối. Bật/tắt
-trong **Cài đặt → Khả năng phục hồi → Tính đồng thời quota-share theo từng kết nối**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, mặc định bật). Nếu không
-có giới hạn `max_concurrent`, hành vi không thay đổi.
+Khi công văn chia sẻ hạn ngạch nhắm mục tiêu kết nối khai báo `max_concurrent` tích cực, các yêu cầu đồng thời tới kết nối đó **tài khoản** được tuần tự hóa thông qua một semaphore trên mỗi kết nối (khóa `qsconn:<connectionId>`): yêu cầu vượt quá **chờ trong hàng đợi** thay vì làm ngập tài khoản. Đó là **mở không thành công** — hàng đợi bão hòa hoặc hết thời gian chờ sẽ tiếp tục mà không có thời điểm thay vì từ chối yêu cầu có thể gửi đi. Chuyển đổi trong **Cài đặt Khả năng phục hồi → Khả năng phục hồi → Định mức chia sẻ đồng thời trên mỗi kết nối** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, bật mặc định). Nếu không có giới hạn `max_concurrent` thì hành vi sẽ không thay đổi.
 
-> Cổng định tuyến quota-share (`selectQuotaShareTarget`, DRR + P2C) bản thân nó
-> cũng **fail-open** và chỉ _hạ mức ưu tiên_ một kết nối đang ở ngưỡng — với một
-> pool chỉ có một kết nối, nó không thể giới hạn cứng, vì vậy semaphore này mới là
-> thành phần thực sự ngăn việc gửi quá nhiều yêu cầu.
+> Cổng định tuyến chia sẻ hạn ngạch (`selectQuotaShareTarget`, DRR + P2C) tự mở không thành công và chỉ _deprioritizes_ một kết nối giới hạn — với một nhóm kết nối duy nhất mà nó không thể giới hạn cứng, vì vậy semaphore này thực sự chứa lũ.
 
-### Thử lại có nhận biết cooldown cho combo
+### Thử lại nhận biết thời gian hồi chiêu của combo
 
-Với mọi chiến lược combo (khi được bật), nếu một yêu cầu sắp tạo ra lỗi 429 do
-cooldown tạm thời NGẮN, yêu cầu sẽ chờ hết cooldown rồi phân phối lại thay vì trả
-về lỗi 429 — điều này bao phủ các cửa sổ TPM/RPM kiểu Gemini (retry-after khoảng
-60 giây) trên các combo nhiều mô hình, chẳng hạn khi cả hai đích của một combo
-2 mô hình đều chạm giới hạn tốc độ theo mô hình. Cơ chế này bị giới hạn bởi
-`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) trong **Cài đặt → Khả năng phục hồi**. Cơ chế này không bao giờ chờ
-đối với `quota_exhausted` (bị khóa đến nửa đêm) hoặc các lý do xác thực/không tìm thấy.
+Đối với mọi chiến lược kết hợp (khi được bật), một yêu cầu kết tinh 429 cho thời gian hồi chiêu tạm thời SHORT sẽ chờ đợi và gửi lại thay vì trả lại 429 — điều này bao gồm các cửa sổ TPM/RPM cấp Gemini (thử lại sau ~ 60) trên các kết hợp nhiều mô hình, ví dụ: cả hai mục tiêu của tổ hợp 2 mô hình đều đạt giới hạn tốc độ cho mỗi mô hình. Giới hạn bởi `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) trong **Cài đặt Khả năng phục hồi →** . Nó không bao giờ đợi vì lý do `quota_exhausted` (bị khóa đến nửa đêm) hoặc auth/not-found. Với `comboTimeoutMs` được đặt, thời gian chờ không thể kết thúc trước thời hạn đó sẽ không bắt đầu (#18998): kết hợp trả lời ngay lập tức bằng phản hồi đầu cuối thay vì `COMBO_TIMEOUT` 504.
 
-Một combo có thể tắt cơ chế này bằng `config.comboCooldownWaitEnabled: false`. Chỉ
-`false` dạng literal mới vô hiệu hóa các lần chờ combo dùng chung này (cooldown sau
-khi phân phối và chờ circuit mở/khóa mô hình trước khi phân phối) cùng phần mở rộng
-mức sàn thời gian chờ theo ngân sách chờ. Việc thiếu giá trị hoặc đặt `true` sẽ
-giữ nguyên chính sách toàn cục; `true` không thể bật cơ chế chờ nếu cơ chế này bị
-tắt trên toàn cục. `targetTimeoutMs` được chỉ định rõ ràng vẫn được ưu tiên. Tùy
-chọn tắt này không làm thay đổi thời gian chờ trước khi phân phối riêng của cơ chế
-ghim lượt native-Codex.
+Một sự kết hợp có thể chọn không tham gia với `config.comboCooldownWaitEnabled: false`. Chỉ `false` theo nghĩa đen mới vô hiệu hóa các thời gian chờ kết hợp được chia sẻ này (thời gian hồi chiêu sau khi gửi và thời gian chờ circuit-open/model-lock trước khi gửi) và phần mở rộng thời gian chờ trong ngân sách chờ của chúng. Thiếu hoặc `true` duy trì chính sách toàn cầu; `true` không thể kích hoạt tính năng chờ bị vô hiệu hóa trên toàn cầu. Một `targetTimeoutMs` rõ ràng vẫn thắng. Việc chọn không tham gia này không làm thay đổi thời gian chờ gửi trước mã pin riêng biệt của Codex.
 
-Cổng kiểm soát tương tự cũng bao phủ trường hợp trước khi phân phối (#16319): khi
-mọi đích của một combo bị bỏ qua trước khi có bất kỳ lần thử nào vì mô hình của
-chúng đang trong trạng thái khóa tạm thời ngắn hạn, đường dẫn không có lần thử sẽ
-chờ hết thời gian khóa theo cùng các giới hạn rồi phân phối lại, thay vì trả về
-`503 ALL_TARGETS_SKIPPED` không có gợi ý. Khi không được phép chờ (đã đạt ngưỡng,
-hết số lần thử hoặc ngân sách, hoặc tính năng bị tắt), phản hồi cuối cùng sẽ được
-nâng cấp thành `429 rate_limit_error`, chứa `retry_after` / `reset_at` từ thời điểm
-hết hạn khóa tạm thời sớm nhất; các khóa quota, xác thực và không tìm thấy vẫn giữ
-nguyên lỗi 503 không có gợi ý.
+Cổng tương tự bao gồm trường hợp trước khi gửi đi (#16319): khi mọi mục tiêu của một tổ hợp đều bị bỏ qua trước khi thực hiện bất kỳ nỗ lực nào vì mô hình của nó nằm trong tình trạng khóa tạm thời trong thời gian ngắn, đường dẫn không thử sẽ đợi khóa trong cùng một mức trần và gửi lại, thay vì trả lời `503 ALL_TARGETS_SKIPPED` không có gợi ý. Khi không được phép chờ đợi (hết trần, nỗ lực hoặc hết ngân sách hoặc tắt tính năng), phản hồi của thiết bị đầu cuối sẽ nâng cấp lên `429 rate_limit_error` mang `retry_after` / `reset_at` kể từ thời điểm hết hạn khóa tạm thời sớm nhất; hạn ngạch, khóa xác thực và khóa không tìm thấy giữ nguyên 503 không có gợi ý.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
