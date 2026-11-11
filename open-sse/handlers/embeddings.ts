@@ -83,6 +83,12 @@ interface HandleEmbeddingParams {
   apiKeyId?: string | null;
   apiKeyName?: string | null;
   connectionId?: string | null;
+  /**
+   * Provider id stored on the selected connection. For a custom node this is the node id
+   * (`openai-compatible-embeddings-…`), while `provider` is the model prefix. Error
+   * classification needs the node id; falls back to `provider` when absent.
+   */
+  connectionProvider?: string | null;
   requestedModel?: string | null;
   comboName?: string | null;
 }
@@ -861,7 +867,7 @@ async function handleUpstreamFailure(
         runtime.connectionId,
         response.status,
         errorText,
-        runtime.provider,
+        runtime.connectionProvider || runtime.provider,
         runtime.model
       );
     } catch {
