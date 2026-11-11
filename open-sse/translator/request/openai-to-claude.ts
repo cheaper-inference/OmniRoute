@@ -270,7 +270,12 @@ export function openaiToClaudeRequest(
         : requestedEffort === "xhigh" && !supportsXHighEffort("claude", model)
           ? "high"
           : requestedEffort;
-    if (isAdaptiveThinkingOnly(model)) {
+    if (normalizedEffort === "none" || normalizedEffort === "off") {
+      // Explicit opt-out. Omitting `thinking` is NOT "off" for thinks-by-default models
+      // (Claude Haiku 5.5 on the OAuth lane kept ~1-2k thinking tokens), so express it.
+      // normalizeThinkingForModel() later drops it for `rejectsThinkingDisabled` models.
+      result.thinking = { type: "disabled" };
+    } else if (isAdaptiveThinkingOnly(model)) {
       // Opus 4.7+/Fable 5 removed manual extended thinking: a fixed `budget_tokens`
       // (or `type:"enabled"`) is a hard 400. Steer EVERY level via adaptive +
       // output_config.effort instead of the budget buckets below. Unrecognized levels
@@ -337,7 +342,7 @@ export function openaiToClaudeRequest(
   // `body.reasoning_effort` (manual budget or adaptive effort), drop temperature
   // defensively. The model-name strip earlier already covers Claude OAuth's
   // forced-thinking case (claude-opus-4.x / claude-sonnet-4.x).
-  if (result.thinking && result.temperature !== undefined) {
+  if (result.thinking && result.thinking.type !== "disabled" && result.temperature !== undefined) {
     delete result.temperature;
   }
 

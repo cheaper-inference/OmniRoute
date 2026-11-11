@@ -59,10 +59,26 @@ test("strips temperature when reasoning_effort triggers thinking (final guard)",
   assert.ok(result.thinking, "reasoning_effort should produce a thinking block");
 });
 
+test("reasoning_effort none expresses thinking disabled and preserves temperature", () => {
+  // Omitting `thinking` is not "off" for thinks-by-default models (Haiku 5.5 OAuth lane),
+  // so the opt-out must be explicit. `disabled` is not extended thinking, so temperature stays.
+  for (const effort of ["none", "off"]) {
+    const body = { ...baseBody(), reasoning_effort: effort };
+    const result = openaiToClaudeRequest("claude-haiku-5-20251001", body, false);
+    assert.equal(result.temperature, 0.7);
+    assert.deepEqual(result.thinking, { type: "disabled" });
+  }
+});
+
+test("explicit thinking disabled preserves temperature", () => {
+  const body = { ...baseBody(), thinking: { type: "disabled" } };
+  const result = openaiToClaudeRequest("claude-haiku-5-20251001", body, false);
+  assert.equal(result.temperature, 0.7);
+  assert.deepEqual(result.thinking, { type: "disabled" });
+});
+
 test("preserves temperature when reasoning_effort is unrecognized on a non-thinking model", () => {
-  // "none" is not in the effort→budget map, so no thinking block is produced and
-  // temperature must survive on a model that does not force thinking.
-  const body = { ...baseBody(), reasoning_effort: "none" };
+  const body = { ...baseBody(), reasoning_effort: "bogus" };
   const result = openaiToClaudeRequest("claude-haiku-5-20251001", body, false);
   assert.equal(result.temperature, 0.7);
   assert.equal(result.thinking, undefined);

@@ -298,7 +298,7 @@ export function applyThinkingBudget(
 
   switch (cfg.mode) {
     case ThinkingMode.AUTO:
-      return stripThinkingConfig(processed);
+      return preserveThinkingOptOut(processed, stripThinkingConfig(processed));
 
     case ThinkingMode.PASSTHROUGH:
       return processed;
@@ -312,6 +312,38 @@ export function applyThinkingBudget(
     default:
       return processed;
   }
+}
+
+/**
+ * Explicit thinking opt-outs that AUTO mode must keep.
+ */
+const THINKING_OPT_OUT_EFFORTS = new Set(["none", "off"]);
+
+/**
+ * AUTO mode exists to stop clients from forcing reasoning budgets; it must not turn an
+ * explicit opt-out into "provider default". A thinks-by-default upstream (e.g. Claude Haiku
+ * 5.5 on the OAuth lane) left with no thinking field keeps thinking, so stripping
+ * `thinking:{type:"disabled"}` / `reasoning_effort:"none"` silently re-enables reasoning
+ * (no-think/ alias and explicit disables both became no-ops). Re-attach only the opt-out.
+ */
+function preserveThinkingOptOut(original: unknown, stripped: unknown) {
+  const src = toRecord(original);
+  const thinking = toRecord(src.thinking);
+  const effort =
+    typeof src.reasoning_effort === "string" ? src.reasoning_effort.trim().toLowerCase() : "";
+  const reasoningEffort = getStringField(toRecord(src.reasoning), "effort").trim().toLowerCase();
+  if (
+    thinking.type !== "disabled" &&
+    !THINKING_OPT_OUT_EFFORTS.has(effort) &&
+    !THINKING_OPT_OUT_EFFORTS.has(reasoningEffort)
+  ) {
+    return stripped;
+  }
+  const result: JsonRecord = { ...toRecord(stripped) };
+  if (thinking.type === "disabled") result.thinking = { type: "disabled" };
+  if (THINKING_OPT_OUT_EFFORTS.has(effort)) result.reasoning_effort = effort;
+  else if (THINKING_OPT_OUT_EFFORTS.has(reasoningEffort)) result.reasoning_effort = reasoningEffort;
+  return result;
 }
 
 /**
