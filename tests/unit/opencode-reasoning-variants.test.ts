@@ -76,4 +76,65 @@ describe("opencode config generator — reasoning variants from effort_tiers", (
     const cfg = await generate(existing);
     assert.deepEqual(cfg.provider.omniroute.models["cc/claude-opus-5-5"].variants, userVariants);
   });
+  it("refreshes generator-written variants when the catalog tiers change", async () => {
+    stubCatalog([
+      {
+        id: "cc/claude-opus-5-5",
+        capabilities: { reasoning: true, effort_tiers: ["low", "high"] },
+      },
+    ]);
+    const first = await generate();
+    assert.deepEqual(Object.keys(first.provider.omniroute.models["cc/claude-opus-5-5"].variants), [
+      "low",
+      "high",
+    ]);
+
+    stubCatalog([
+      { id: "cc/claude-opus-5-5", capabilities: { reasoning: true, effort_tiers: tiers } },
+    ]);
+    const second = await generate(JSON.stringify(first));
+    assert.deepEqual(
+      Object.keys(second.provider.omniroute.models["cc/claude-opus-5-5"].variants),
+      tiers
+    );
+  });
+
+  it("leaves a user-shaped variants object untouched on regeneration", async () => {
+    stubCatalog([
+      { id: "a/m", capabilities: { reasoning: true, effort_tiers: tiers } },
+      { id: "a/n", capabilities: { reasoning: true, effort_tiers: tiers } },
+      { id: "a/o", capabilities: { reasoning: true, effort_tiers: tiers } },
+    ]);
+    const renamedKey = { fast: { reasoningEffort: "low" } };
+    const extraKey = { low: { reasoningEffort: "low", textVerbosity: "low" } };
+    const empty = {};
+    const existing = JSON.stringify({
+      provider: {
+        omniroute: {
+          models: {
+            "a/m": { variants: renamedKey },
+            "a/n": { variants: extraKey },
+            "a/o": { variants: empty },
+          },
+        },
+      },
+    });
+    const models = (await generate(existing)).provider.omniroute.models;
+    assert.deepEqual(models["a/m"].variants, renamedKey);
+    assert.deepEqual(models["a/n"].variants, extraKey);
+    assert.deepEqual(models["a/o"].variants, empty);
+  });
+
+  it("writes no variants for an effort-suffixed row whose base id is listed", async () => {
+    stubCatalog([
+      { id: "cc/claude-opus-5-5", capabilities: { reasoning: true, effort_tiers: tiers } },
+      { id: "cc/claude-opus-5-5-low", capabilities: { reasoning: true, effort_tiers: tiers } },
+      { id: "cu/gpt-5-high", capabilities: { reasoning: true, effort_tiers: tiers } },
+    ]);
+    const models = (await generate()).provider.omniroute.models;
+    assert.deepEqual(Object.keys(models["cc/claude-opus-5-5"].variants), tiers);
+    assert.equal("variants" in models["cc/claude-opus-5-5-low"], false);
+    // No listed base id: nothing says the suffix is a variant of something else.
+    assert.deepEqual(Object.keys(models["cu/gpt-5-high"].variants), tiers);
+  });
 });

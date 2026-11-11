@@ -73,3 +73,25 @@ test("rows without effort_tiers emit no supported_reasoning_levels", async () =>
   assert.equal("supported_reasoning_levels" in rows.get("combo-no-tiers")!, false);
   assert.equal("supported_reasoning_levels" in rows.get("combo-empty-tiers")!, false);
 });
+
+test("an effort-suffixed row of a listed base id emits no supported_reasoning_levels", async () => {
+  const tiers = ["low", "medium", "high", "xhigh", "max"];
+  const rows = await rowsFor([
+    { id: "combo-base", object: "model", owned_by: "combo", capabilities: { effort_tiers: tiers } },
+    {
+      id: "combo-base-low",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+    {
+      id: "orphan-high",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+  ]);
+  assert.deepEqual(rows.get("combo-base")!.supported_reasoning_levels, tiers);
+  assert.equal("supported_reasoning_levels" in rows.get("combo-base-low")!, false);
+  assert.deepEqual(rows.get("orphan-high")!.supported_reasoning_levels, tiers);
+});

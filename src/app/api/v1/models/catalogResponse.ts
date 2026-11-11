@@ -444,13 +444,15 @@ export async function finalizeCatalogResponse(
   const capabilityResolutionSnapshot =
     enrichmentSnapshot?.capabilityResolutionSnapshot ?? createModelCapabilityResolutionSnapshot();
   const enriched: Array<Record<string, unknown>> = [];
+  const listedIds = new Set<unknown>(finalModels.map((model) => model.id));
   const catYIELD_EVERY = 5;
   let catEnrichCount = 0;
   for (const model of finalModels) {
     let listedModel: Record<string, unknown>;
     if (model.owned_by === "combo") {
       listedModel = withSupportedReasoningLevels(
-        maybeOmitCatalogModelName(model, includeModelNames)
+        maybeOmitCatalogModelName(model, includeModelNames),
+        listedIds
       );
     } else {
       const entry = enrichCatalogModelEntry(model, undefined, {
@@ -464,7 +466,8 @@ export async function finalizeCatalogResponse(
       listedModel = normalizeCatalogEntryPricing(listedModel, enrichmentSnapshot);
       listedModel = withCatalogDisplayName(listedModel);
       listedModel = withSupportedReasoningLevels(
-        maybeOmitCatalogModelName(listedModel, includeModelNames)
+        maybeOmitCatalogModelName(listedModel, includeModelNames),
+        listedIds
       );
     }
     enriched.push(listedModel);
