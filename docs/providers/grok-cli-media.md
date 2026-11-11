@@ -1,7 +1,7 @@
 ---
 title: "Grok Build OAuth media"
-version: 3.8.53
-lastUpdated: 2026-10-30
+version: 3.8.54
+lastUpdated: 2026-11-07
 ---
 
 # Grok Build OAuth media
@@ -73,6 +73,39 @@ The deadline also covers response-body reads. Client cancellation stops local
 fetches, waits and polling for Grok/xAI and compatible job-polling handlers,
 including their combo targets. It does not establish that the provider's remote
 job was cancelled.
+
+### Image and video input
+
+`image` sets the first frame. It accepts a public URL or a `data:` URI (JPEG, PNG
+or WebP) as a string, or an object `{ "url": "..." }` / `{ "file_id": "..." }`.
+`reference_images` takes an array of the same objects (up to 7) and guides the
+scene without pinning the first frame. `grok-imagine-video` rejects `image` and
+`reference_images` in the same request.
+
+```json
+{
+  "model": "gc/grok-imagine-video",
+  "prompt": "The cat turns its head toward the camera",
+  "image": "https://example.com/cat.jpg",
+  "duration": 6
+}
+```
+
+`video` edits an existing MP4 (up to 8.7 seconds), using the same string or object
+forms. The output keeps the source length and aspect ratio, capped at 720p, so
+`duration`, `aspect_ratio` and `resolution` are ignored.
+
+```json
+{
+  "model": "gc/grok-imagine-video",
+  "prompt": "Make it snow",
+  "video": "https://example.com/clip.mp4"
+}
+```
+
+Adding `"mode": "extend"` with a `duration` of 2 to 10 seconds extends the source
+video instead. Only the `xai` API-key provider supports this: the Grok Build proxy
+has no extension endpoint, so `grok-cli` returns 400 before creating a job.
 
 ```json
 {

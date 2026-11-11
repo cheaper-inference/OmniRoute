@@ -14,6 +14,8 @@ const RESPONSE_TOO_LARGE = Symbol("responseTooLarge");
 interface XaiVideoBody {
   prompt?: unknown;
   image?: unknown;
+  video?: unknown;
+  mode?: unknown;
   duration?: unknown;
   aspect_ratio?: unknown;
   resolution?: unknown;
@@ -36,10 +38,30 @@ interface XaiVideoLog {
   error: (scope: string, message: string) => void;
 }
 
+// xAI takes media as { url } (a public URL or a data: URI) or { file_id }; a bare string is a 422.
+function xaiMediaInput(value: unknown) {
+  if (typeof value === "string") return { url: value };
+  return isJsonObject(value) ? value : undefined;
+}
+
+function xaiVideoEndpoint(body: XaiVideoBody) {
+  if (xaiMediaInput(body.video) === undefined) return "generations";
+  return body.mode === "extend" ? "extensions" : "edits";
+}
+
 /** Map the OmniRoute video body onto xAI's create-job payload. */
 function buildXaiVideoPayload(model: string, prompt: string, body: XaiVideoBody) {
   const payload: Record<string, unknown> = { model, prompt };
-  if (typeof body.image === "string") payload.image = body.image;
+  const endpoint = xaiVideoEndpoint(body);
+  if (endpoint !== "generations") {
+    payload.video = xaiMediaInput(body.video);
+    if (endpoint === "extensions" && body.duration != null)
+      payload.duration = Number(body.duration);
+    return payload;
+  }
+  const image = xaiMediaInput(body.image);
+  if (image) payload.image = image;
+  if (Array.isArray(body.reference_images)) payload.reference_images = body.reference_images;
   if (body.duration != null) payload.duration = Number(body.duration);
   if (typeof body.aspect_ratio === "string") payload.aspect_ratio = body.aspect_ratio;
   if (typeof body.resolution === "string") payload.resolution = body.resolution;
@@ -133,6 +155,7 @@ function parseJsonOrEmpty(chunks: Uint8Array[]): XaiJobBody {
 /** POST the create-job request; resolves to the request_id or a ready error message. */
 async function createXaiVideoJob({
   baseUrl,
+  endpoint,
   token,
   payload,
   log,
@@ -141,6 +164,7 @@ async function createXaiVideoJob({
   signal,
 }: {
   baseUrl: string;
+  endpoint: string;
   token: string;
   payload: Record<string, unknown>;
   log?: XaiVideoLog | null;
@@ -152,7 +176,7 @@ async function createXaiVideoJob({
   const fetchSignal = xaiFetchSignal(deadline, signal);
   let createRes: Response;
   try {
-    createRes = await fetch(`${baseUrl}/generations`, {
+    createRes = await fetch(`${baseUrl}/${endpoint}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -422,6 +446,15 @@ export async function handleXaiVideoGeneration({
   const knobError = xaiVideoKnobError(timeoutMs, pollIntervalMs, clientMaxPolls);
   if (knobError) return knobError;
 
+  // The Grok Build proxy serves generations and edits only; POST /videos/extensions is a 405.
+  if (provider === "grok-cli" && xaiVideoEndpoint(body) === "extensions") {
+    return {
+      success: false,
+      status: 400,
+      error: "Video extension is not available on Grok Build; use the xai provider",
+    };
+  }
+
   if (!token) {
     return { success: false, status: 401, error: "xAI API key is required" };
   }
@@ -436,6 +469,7 @@ export async function handleXaiVideoGeneration({
     signal?.throwIfAborted();
     const created = await createXaiVideoJob({
       baseUrl,
+      endpoint: xaiVideoEndpoint(body),
       token: requestToken,
       payload: buildXaiVideoPayload(model, prompt, body),
       log,

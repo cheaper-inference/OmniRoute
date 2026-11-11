@@ -258,3 +258,115 @@ test("handleVideoGeneration never leaks a stack trace in xAI video error respons
     globalThis.fetch = originalFetch;
   }
 });
+
+test("handleVideoGeneration sends the xAI start frame as { url } and forwards reference_images", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const createBodies = [];
+
+  globalThis.setTimeout = immediateTimeout;
+  globalThis.fetch = async (url, options = {}) => {
+    const stringUrl = String(url);
+    if (stringUrl === CREATE_URL) {
+      createBodies.push(JSON.parse(await new Response(options.body).text()));
+      return jsonResponse({ request_id: `xai-img-${createBodies.length}`, status: "pending" });
+    }
+    if (stringUrl.startsWith(POLL_URL_PREFIX)) {
+      return jsonResponse({ status: "done", video: { url: "https://videos.x.ai/i2v.mp4" } });
+    }
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  };
+
+  const call = (extra) =>
+    handleVideoGeneration({
+      body: { model: "xai/grok-imagine-video", prompt: "animate it", ...extra },
+      credentials: { apiKey: "xai-key" },
+      log: null,
+    });
+
+  try {
+    const fromString = await call({ image: "https://example.com/frame.jpg" });
+    const fromObject = await call({
+      image: { url: "data:image/jpeg;base64,AAAA" },
+      reference_images: [{ url: "https://example.com/style.jpg" }],
+    });
+    await call({ image: 42 });
+
+    assert.equal(fromString.success, true);
+    assert.equal(fromObject.success, true);
+    assert.deepEqual(createBodies[0].image, { url: "https://example.com/frame.jpg" });
+    assert.deepEqual(createBodies[1].image, { url: "data:image/jpeg;base64,AAAA" });
+    assert.deepEqual(createBodies[1].reference_images, [{ url: "https://example.com/style.jpg" }]);
+    assert.equal(createBodies[2].image, undefined);
+    assert.equal(createBodies[0].reference_images, undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});
+
+test("handleVideoGeneration routes a source video to xAI edits, or extensions with mode extend", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const creates = [];
+
+  globalThis.setTimeout = immediateTimeout;
+  globalThis.fetch = async (url, options = {}) => {
+    const stringUrl = String(url);
+    if (options.method === "POST") {
+      creates.push({ url: stringUrl, body: JSON.parse(await new Response(options.body).text()) });
+      return jsonResponse({ request_id: `xai-vid-${creates.length}`, status: "pending" });
+    }
+    if (stringUrl.startsWith(POLL_URL_PREFIX)) {
+      return jsonResponse({ status: "done", video: { url: "https://videos.x.ai/v2v.mp4" } });
+    }
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  };
+
+  const call = (extra) =>
+    handleVideoGeneration({
+      body: { model: "xai/grok-imagine-video", prompt: "make it snow", ...extra },
+      credentials: { apiKey: "xai-key" },
+      log: null,
+    });
+
+  try {
+    const edited = await call({
+      video: "https://example.com/clip.mp4",
+      duration: 6,
+      resolution: "720p",
+    });
+    const extended = await call({ video: { file_id: "file-1" }, mode: "extend", duration: 4 });
+    const grokBuildExtend = await handleVideoGeneration({
+      body: {
+        model: "grok-cli/grok-imagine-video",
+        prompt: "x",
+        video: "https://e.com/c.mp4",
+        mode: "extend",
+      },
+      credentials: { accessToken: "grok-token" },
+      log: null,
+    });
+
+    assert.equal(edited.success, true);
+    assert.equal(extended.success, true);
+    assert.equal(creates[0].url, "https://api.x.ai/v1/videos/edits");
+    assert.deepEqual(creates[0].body, {
+      model: "grok-imagine-video",
+      prompt: "make it snow",
+      video: { url: "https://example.com/clip.mp4" },
+    });
+    assert.equal(grokBuildExtend.status, 400);
+    assert.equal(creates.length, 2, "Grok Build extend never reaches the proxy");
+    assert.equal(creates[1].url, "https://api.x.ai/v1/videos/extensions");
+    assert.deepEqual(creates[1].body, {
+      model: "grok-imagine-video",
+      prompt: "make it snow",
+      video: { file_id: "file-1" },
+      duration: 4,
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});
