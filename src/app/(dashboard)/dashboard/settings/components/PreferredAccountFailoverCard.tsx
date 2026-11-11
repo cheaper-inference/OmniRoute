@@ -187,7 +187,7 @@ export default function PreferredAccountFailoverCard({
 
   return (
     <Card className="space-y-4 p-6">
-      <h2 className="text-lg font-bold">
+      <h2 className="text-lg font-semibold">
         {label("preferredAccountFailoverTitle", "Preferred account failover")}
       </h2>
       <p className="text-sm text-text-muted">

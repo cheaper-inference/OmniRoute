@@ -16,6 +16,40 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "call_logs_summary_storage",
   },
   {
+    // The previous #14864 build kept agent_session_messages at 237. Free that slot before the
+    // usage_history_calculated_cost entries below rehome a legacy 236 row into it.
+    fromVersion: "237",
+    fromName: "agent_session_messages",
+    toVersion: "238",
+    toName: "agent_session_messages",
+  },
+  {
+    // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
+    // Match the name too: canonical cleanup/cache rows must never be rehomed.
+    fromVersion: "228",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "233",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "236",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
     fromVersion: "028",
     fromName: "provider_connection_max_concurrent",
     toVersion: "029",
@@ -601,42 +635,43 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
-  // Message-capture builds (#14864) shipped agent_session_messages as 199, 200, 210, 216, 231
-  // and 232. Upstream owns all of those slots; the migration now lives at 237. Name-locked.
+  // Message-capture builds (#14864) shipped agent_session_messages as 199, 200, 210, 216, 231,
+  // 232 and 237 (the 237 entry sits near the top of this list). Upstream owns all of those
+  // slots; the migration now lives at 238. Name-locked.
   {
     fromVersion: "199",
     fromName: "agent_session_messages",
-    toVersion: "237",
+    toVersion: "238",
     toName: "agent_session_messages",
   },
   {
     fromVersion: "200",
     fromName: "agent_session_messages",
-    toVersion: "237",
+    toVersion: "238",
     toName: "agent_session_messages",
   },
   {
     fromVersion: "210",
     fromName: "agent_session_messages",
-    toVersion: "237",
+    toVersion: "238",
     toName: "agent_session_messages",
   },
   {
     fromVersion: "216",
     fromName: "agent_session_messages",
-    toVersion: "237",
+    toVersion: "238",
     toName: "agent_session_messages",
   },
   {
     fromVersion: "231",
     fromName: "agent_session_messages",
-    toVersion: "237",
+    toVersion: "238",
     toName: "agent_session_messages",
   },
   {
     fromVersion: "232",
     fromName: "agent_session_messages",
-    toVersion: "237",
+    toVersion: "238",
     toName: "agent_session_messages",
   },
 ] as const;

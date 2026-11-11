@@ -1,4 +1,4 @@
--- 237_agent_session_messages.sql
+-- 238_agent_session_messages.sql
 -- Simplified conversation turns for agent sessions (opt-in via AGENT_SESSION_MESSAGES_ENABLED).
 -- Stores the latest user prompt and assistant text/tools per turn, capped at 4k chars.
 
