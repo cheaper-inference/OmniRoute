@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Kešatmiņā saglabātie ievades tokeni",
+    "inputTokensHint": "Neietver lasīšanu no kešatmiņas. Rakstīšana kešatmiņā joprojām tiek uzskaitīta kā ievades tokeni.",
+    "inputSplitUnavailable": "Ievades sadalījums nav pieejams, jo kešatmiņas lasīšanas dati ir nepilnīgi vai pretrunīgi.",
+    "cachedInputTokensHint": "Tikai ziņotā lasīšana no kešatmiņas, kas jau iekļauta kopējā ievadē.",
     "title": "Analītika",
     "usageAnalyticsTitle": "Lietojuma analītika",
     "tokenDisplayCompact": "Kompakts",
