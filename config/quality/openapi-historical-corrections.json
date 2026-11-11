@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "corrections": [
+    {
+      "id": "historical-groups-and-chat-auth-17267",
+      "status": "historical_spec_correction",
+      "trackingIssue": "https://github.com/cheaper-inference/OmniRoute/issues/17267",
+      "justification": "The four group handlers already require the documented JSON inputs and DELETE query parameters and return 201 on creation at the current immutable release base. Authz and the chat handler already return an error object for 401. A pinned oasdiff 1.19.1 scan reproduces exactly the same ten historical specification corrections, and all 14 release contract sources are byte-identical between the reviewed release base and candidate. This entry changes no API behavior, finding fingerprint, expiry or numeric ceiling; request-contract tests and candidate DAST remain required.",
+      "baseSha": "219e1e182fecbd9a4a54a200a98267f7cc676c0b",
+      "baseSpecSha256": "97162e15404a7baaa71290319051fbc589715d9f0fded5066723829359fd05e7",
+      "candidateSpecSha256": "86380f193361bef5e9e581f2e7b741415978a72420987b34708356440f26c5ee",
+      "scannerVersion": "1.19.1",
+      "reviewedCandidateSha": "f4381a61fb20fbd2ab59003ba57093484cc6c1c8",
+      "expiresOn": "2026-12-04",
+      "contractSources": [
+        {
+          "path": "src/app/api/keys/groups/route.ts",
+          "baseSha256": "d6a88a89bb4a4bb8a7a25c5a11eff1d12ac62029634c5af118c84c095d6f55e9",
+          "candidateSha256": "d6a88a89bb4a4bb8a7a25c5a11eff1d12ac62029634c5af118c84c095d6f55e9"
+        },
+        {
+          "path": "src/app/api/keys/groups/[id]/route.ts",
+          "baseSha256": "11c7177692483f796fcb0d7470c077c95f69eb4008d3bd0c270f8270446e3806",
+          "candidateSha256": "11c7177692483f796fcb0d7470c077c95f69eb4008d3bd0c270f8270446e3806"
+        },
+        {
+          "path": "src/app/api/keys/groups/[id]/keys/route.ts",
+          "baseSha256": "27e1d6c02dbf5c6c5435c9e84837187ed1c2536f0fa74f225f828d2ec6259cb2",
+          "candidateSha256": "27e1d6c02dbf5c6c5435c9e84837187ed1c2536f0fa74f225f828d2ec6259cb2"
+        },
+        {
+          "path": "src/app/api/keys/groups/[id]/permissions/route.ts",
+          "baseSha256": "3f39765c01bfbbb0133c24239858dad4aa53edd7c4e1679848ef09fe38d0d486",
+          "candidateSha256": "3f39765c01bfbbb0133c24239858dad4aa53edd7c4e1679848ef09fe38d0d486"
+        },
+        {
+          "path": "src/shared/validation/helpers.ts",
+          "baseSha256": "4c0ce67959151549033102b7ac1f8367c2be82560002ba1ab5a53d3c4e930d5c",
+          "candidateSha256": "4c0ce67959151549033102b7ac1f8367c2be82560002ba1ab5a53d3c4e930d5c"
+        },
+        {
+          "path": "src/app/api/v1/chat/completions/route.ts",
+          "baseSha256": "af6559c6b0254ea0e1f81f6fcab666a01ce56c882f55c68ca98320f0ac601617",
+          "candidateSha256": "af6559c6b0254ea0e1f81f6fcab666a01ce56c882f55c68ca98320f0ac601617"
+        },
+        {
+          "path": "src/shared/utils/clientApiRouteAuth.ts",
+          "baseSha256": "eb95a72172a9be0939ecffcece6c3d044a38585852737456ef04107ea655f3fc",
+          "candidateSha256": "eb95a72172a9be0939ecffcece6c3d044a38585852737456ef04107ea655f3fc"
+        },
+        {
+          "path": "src/server/authz/policies/clientApi.ts",
+          "baseSha256": "529dfeef05ed73a8332ea3d44cf25b51425dcd8dfa7b3e0ac953f982101c4422",
+          "candidateSha256": "529dfeef05ed73a8332ea3d44cf25b51425dcd8dfa7b3e0ac953f982101c4422"
+        },
+        {
+          "path": "src/server/authz/pipeline.ts",
+          "baseSha256": "87cb1b5b3ad98cb4ca2f1882cbf3ebf5c1591f70967f14343424c6bce1c3d761",
+          "candidateSha256": "87cb1b5b3ad98cb4ca2f1882cbf3ebf5c1591f70967f14343424c6bce1c3d761"
+        },
+        {
+          "path": "src/server/authz/context.ts",
+          "baseSha256": "0a1139785e724db342ebbccbe085f93d901088b4097ecd5e5bc1fc89418a25e0",
+          "candidateSha256": "0a1139785e724db342ebbccbe085f93d901088b4097ecd5e5bc1fc89418a25e0"
+        },
+        {
+          "path": "src/server/authz/classify.ts",
+          "baseSha256": "16c04661787bfb8ba7091c136bc7bffdd93382bd7f424aa76c9e87236af3d92f",
+          "candidateSha256": "16c04661787bfb8ba7091c136bc7bffdd93382bd7f424aa76c9e87236af3d92f"
+        },
+        {
+          "path": "src/server/authz/routeGuard.ts",
+          "baseSha256": "52ebf560b4553a910397d0b9887928f14d0fda22651270378b30c79111e7a6dd",
+          "candidateSha256": "52ebf560b4553a910397d0b9887928f14d0fda22651270378b30c79111e7a6dd"
+        },
+        {
+          "path": "src/proxy.ts",
+          "baseSha256": "67f165a099f762f70dd26ea378ff72c2b4daa587ef149c2b84838223c0571395",
+          "candidateSha256": "67f165a099f762f70dd26ea378ff72c2b4daa587ef149c2b84838223c0571395"
+        },
+        {
+          "path": "open-sse/utils/error.ts",
+          "baseSha256": "a90addc5f9e9c16a505703235bf9389f559dcb88d2e1371424dd333d5c68e77f",
+          "candidateSha256": "a90addc5f9e9c16a505703235bf9389f559dcb88d2e1371424dd333d5c68e77f"
+        }
+      ],
+      "findings": [
+        {
+          "id": "request-body-added-required",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/keys/groups",
+          "section": "paths",
+          "fingerprint": "7ee4b4560554"
+        },
+        {
+          "id": "response-success-status-removed",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/keys/groups",
+          "section": "paths",
+          "fingerprint": "c00a7e479bbd"
+        },
+        {
+          "id": "request-body-added-required",
+          "level": 3,
+          "operation": "PUT",
+          "path": "/api/keys/groups/{id}",
+          "section": "paths",
+          "fingerprint": "50b0eb845feb"
+        },
+        {
+          "id": "new-required-request-parameter",
+          "level": 3,
+          "operation": "DELETE",
+          "path": "/api/keys/groups/{id}/keys",
+          "section": "paths",
+          "fingerprint": "852ce797a791"
+        },
+        {
+          "id": "request-body-added-required",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/keys/groups/{id}/keys",
+          "section": "paths",
+          "fingerprint": "b14220eee8c8"
+        },
+        {
+          "id": "response-success-status-removed",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/keys/groups/{id}/keys",
+          "section": "paths",
+          "fingerprint": "738b5c9f171c"
+        },
+        {
+          "id": "new-required-request-parameter",
+          "level": 3,
+          "operation": "DELETE",
+          "path": "/api/keys/groups/{id}/permissions",
+          "section": "paths",
+          "fingerprint": "5189a8078493"
+        },
+        {
+          "id": "request-body-added-required",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/keys/groups/{id}/permissions",
+          "section": "paths",
+          "fingerprint": "7a6f8bd9b043"
+        },
+        {
+          "id": "response-success-status-removed",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/keys/groups/{id}/permissions",
+          "section": "paths",
+          "fingerprint": "b8f750837137"
+        },
+        {
+          "id": "response-property-type-changed",
+          "level": 3,
+          "operation": "POST",
+          "path": "/api/v1/chat/completions",
+          "section": "paths",
+          "fingerprint": "72557d7e0f0d"
+        }
+      ]
+    }
+  ]
+}
