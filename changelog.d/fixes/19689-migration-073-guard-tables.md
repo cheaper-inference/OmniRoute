@@ -1,0 +1,1 @@
+- **fix(db):** a database that lost the ledger row of the token-limit migration (073) now gets its token-limit tables back, so startup no longer fails later at migration 196 with "no such table". ([#19689](https://github.com/cheaper-inference/OmniRoute/pull/19689))

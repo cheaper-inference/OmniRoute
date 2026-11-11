@@ -31,7 +31,27 @@ type CountRow = { cnt?: number };
 
 let _lastBackupAt = 0;
 const BACKUP_THROTTLE_MS = 60 * 60 * 1000; // 60 minutes — high-churn pre-write (models.dev pricing) must not copy the whole SQLite file every call (#10351)
+const BACKUP_RETRY_MS = 60 * 1000; // a FAILED copy waits this long, not the full throttle, before the next try
 const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
+
+// Settles when the copy behind a `backupDbFile()` result is complete (rejects when it failed).
+const backupCompletion = new WeakMap<object, Promise<void>>();
+
+/**
+ * Copy to `<file>.tmp`, then publish by rename, so a name `listDbBackups()` returns is always a
+ * whole file. `db.backup()` creates its destination when the copy STARTS: a failed or killed copy
+ * would otherwise leave a partial `.sqlite` that restore and pruning treat as a good backup.
+ */
+async function writeBackupFile(backupFile: string) {
+  const tempFile = `${backupFile}.tmp`;
+  try {
+    await getDbInstance().backup(tempFile);
+    fs.renameSync(tempFile, backupFile);
+  } catch (err) {
+    fs.rmSync(tempFile, { force: true });
+    throw err;
+  }
+}
 
 function setStoredDbBackupInteger(key: string, value: number, options: { min: number }): void {
   if (!Number.isInteger(value) || value < options.min) return;
@@ -406,24 +426,38 @@ export function backupDbFile(reason = "auto") {
     const backupFile = path.join(backupDir, `db_${timestamp}_${reason}.sqlite`);
 
     // Use native SQLite backup API for consistency
-    const db = getDbInstance();
-    db.backup(backupFile)
-      .then(() => {
-        chmodQuiet(backupFile, DB_SECRET_FILE_MODE);
-        console.log(`[DB] Backup created: ${backupFile} (${stat.size} bytes)`);
-        cleanupDbBackups();
-      })
-      .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error("[DB] Backup failed:", message);
-      });
+    const completion = writeBackupFile(backupFile).then(() => {
+      chmodQuiet(backupFile, DB_SECRET_FILE_MODE);
+      console.log(`[DB] Backup created: ${backupFile} (${stat.size} bytes)`);
+      cleanupDbBackups();
+    });
+    completion.catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[DB] Backup failed:", message);
+      // A failed copy must not hold off the next routine backup for the whole throttle window.
+      if (_lastBackupAt === now) _lastBackupAt = now - BACKUP_THROTTLE_MS + BACKUP_RETRY_MS;
+    });
 
-    return { filename: path.basename(backupFile), size: stat.size };
+    const result = { filename: path.basename(backupFile), size: stat.size };
+    backupCompletion.set(result, completion);
+    return result;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[DB] Backup failed:", message);
     return null;
   }
+}
+
+/**
+ * Like `backupDbFile`, but resolves only when the backup file is complete and REJECTS when the
+ * copy fails. Use it where a caller reports "created" to a user. Resolves null when a gate skips
+ * the backup (nothing was written).
+ */
+export async function completeDbBackup(reason = "manual") {
+  const result = backupDbFile(reason);
+  if (!result) return null;
+  await backupCompletion.get(result);
+  return result;
 }
 
 // ──────────────── List Backups ────────────────

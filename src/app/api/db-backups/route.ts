@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   listDbBackups,
   restoreDbBackup,
-  backupDbFile,
+  completeDbBackup,
   cleanupDbBackups,
   getDbBackupMaxFiles,
   setDbBackupMaxFiles,
@@ -61,7 +61,8 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const result = backupDbFile("manual");
+    // Wait for the copy: `created: true` must mean a whole backup file exists.
+    const result = await completeDbBackup("manual");
     if (!result) {
       return NextResponse.json({ message: "No changes since last backup (throttled)" });
     }
