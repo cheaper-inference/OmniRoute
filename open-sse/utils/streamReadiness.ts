@@ -225,7 +225,12 @@ const CONTENT_BEARING_KEYS = [
 
 function isErrorOnlyStructuredPayload(payload: Record<string, unknown>): boolean {
   if (!("error" in payload)) return false;
-  return !CONTENT_BEARING_KEYS.some((key) => key in payload);
+  // A relay forwarding a dead downstream sends `{choices: [], error}`: no completion in it.
+  const emptyChoices =
+    Array.isArray(payload.choices) && payload.choices.length === 0 && payload.error;
+  return !CONTENT_BEARING_KEYS.some(
+    (key) => key in payload && !(key === "choices" && emptyChoices)
+  );
 }
 
 function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean {
