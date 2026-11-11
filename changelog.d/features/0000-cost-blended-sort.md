@@ -1,0 +1,1 @@
+- **feat(combo):** opt-in `OMNIROUTE_COST_SORT_BLENDED=true` ranks cost-optimized combo members by blended input+output price instead of input price only; default behavior is unchanged.

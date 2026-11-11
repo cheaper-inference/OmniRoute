@@ -12,6 +12,7 @@ import { secureRandomFloat, secureRandomInt } from "../../../src/shared/utils/se
 import { getComboStepTarget, getComboStepWeight } from "../../../src/lib/combos/steps.ts";
 import { getComboMetrics } from "../comboMetrics.ts";
 import { parseModel } from "../model.ts";
+import { blend } from "./candidateCost.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
 /**
@@ -64,6 +65,8 @@ export function orderTargetsForWeightedFallback<T extends { executionKey: string
  * @returns {Promise<Array<string>>} Sorted model strings
  */
 export async function sortModelsByCost(models: string[]): Promise<string[]> {
+  // Opt-in: rank by blended input+output price (as auto-combo does), not input only.
+  const blended = /^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_COST_SORT_BLENDED?.trim() ?? "");
   try {
     const { getPricingForModel } = await import("@/lib/db/settings");
     const withCost = await Promise.all(
@@ -73,8 +76,8 @@ export async function sortModelsByCost(models: string[]): Promise<string[]> {
         const model = parsed.model || modelStr;
         try {
           const pricing = await getPricingForModel(provider, model);
-          const cost = Number(pricing?.input);
-          return { modelStr, cost: Number.isFinite(cost) ? cost : Infinity };
+          const cost = blended ? blend(pricing) : Number(pricing?.input);
+          return { modelStr, cost: cost !== null && Number.isFinite(cost) ? cost : Infinity };
         } catch {
           return { modelStr, cost: Infinity };
         }
