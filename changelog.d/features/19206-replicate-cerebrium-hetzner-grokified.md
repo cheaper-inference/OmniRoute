@@ -1,0 +1,1 @@
+- **feat(providers):** add the Replicate chat executor (native SSE relay, polling fallback, real token usage, versioned models), the Cerebrium per-deployment provider, and the Hetzner Inference and Grokified OpenAI-compatible providers ([#19206](https://github.com/cheaper-inference/OmniRoute/pull/19206)) — thanks @jowimila

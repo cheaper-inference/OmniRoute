@@ -6736,6 +6736,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Označba mesta za spletni piškotek Grok",
     "herokuBaseUrlHint": "Namig za osnovni URL storitve Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skrij e-poštni naslov",
     "imageProviders": "Ponudniki slik",
     "videoProviders": "Ustvarjanje videoposnetkov",

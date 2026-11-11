@@ -6727,6 +6727,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ওয়েব কুকির প্লেসহোল্ডার",
     "herokuBaseUrlHint": "Heroku বেস URL-এর ইঙ্গিত",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ইমেল লুকান",
     "imageProviders": "ছবি প্রদানকারী",
     "videoProviders": "ভিডিও জেনারেশন",

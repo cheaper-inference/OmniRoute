@@ -80,6 +80,11 @@
       "configSource": "codebuddy-cn",
       "provider": "codebuddy-cn"
     },
+    "cerebrium": {
+      "className": "CerebriumExecutor",
+      "configSource": "cerebrium",
+      "provider": "cerebrium"
+    },
     "cf": {
       "className": "CloudflareAIExecutor",
       "configSource": "cloudflare-ai",
@@ -555,6 +560,11 @@
       "configSource": "qoder",
       "provider": "qoder"
     },
+    "replicate": {
+      "className": "ReplicateExecutor",
+      "configSource": "replicate",
+      "provider": "replicate"
+    },
     "stx": {
       "className": "SyntxExecutor",
       "configSource": "<custom-config>",
@@ -716,6 +726,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 143,
+  "keyCount": 145,
   "sharedInstances": []
 }

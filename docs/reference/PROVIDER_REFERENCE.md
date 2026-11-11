@@ -10,7 +10,7 @@ lastUpdated: 2026-11-10
 > Regenerate with: `npm run gen:provider-reference`
 > **Last generated:** 2026-11-10
 
-Total providers: **388**. See category breakdown below.
+Total providers: **392**. See category breakdown below.
 
 ## Categories
 
@@ -127,7 +127,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (258)
+## API Key Providers (paid / paid-with-free-credits) (262)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -166,6 +166,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `byteplus` | `bpm` | BytePlus ModelArk | API key | [link](https://console.byteplus.com/ark) | — |
 | `bytez` | `bytez` | Bytez | API key | [link](https://bytez.com) | $1 free credits, refreshes every 4 weeks |
 | `cerebras` | `cerebras` | Cerebras | API key | [link](https://inference.cerebras.ai) | One-time $5 signup credit (30-day validity); a payment method is required. Not a recurring free tier. |
+| `cerebrium` | `cerebrium` | Cerebrium | API key | [link](https://www.cerebrium.ai) | $30 one-time credit; set Base URL to your deployment's /run endpoint |
 | `charm-hyper` | `charm-hyper` | Charm Hyper | API key | [link](https://hyper.charm.land) | 100 free monthly Hypercredits on signup |
 | `chat-oripe` | `chat-oripe` | Chat Oripe | API key, aggregator | [link](https://api.oriper.com) | Official metadata advertises 2M tokens/month, but the public site and documentation were blocked during audit; treat the quota and brand mapping as unconfirmed. |
 | `chatanywhere` | `chatanywhere` | ChatAnywhere | API key, aggregator | [link](https://chatanywhere.tech) | Personal, educational or research use only: public documentation cites 10,000 points/day and 200 requests/day per IP/key; do not use for commercial traffic. |
@@ -230,12 +231,14 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `glm-cn` | `glmcn` | GLM Coding (China) | API key | [link](https://open.bigmodel.cn) | — |
 | `glmt` | `glmt` | GLM Thinking | API key | [link](https://open.bigmodel.cn) | — |
 | `greenpt` | `greenpt` | GreenPT | API key | [link](https://greenpt.com) | API subscription is free to create; inference is billed per token. No free inference allowance is published. |
+| `grokified` | `grokified` | Grokified | API key | [link](https://grokified.com) | $5 one-time credit on signup |
 | `groq` | `groq` | Groq | API key | [link](https://groq.com) | Free plan: per-model caps (200K tokens/day per chat model; see console.groq.com/docs/rate-limits for RPM/RPD) — no payment method on file. |
 | `haiper` | `hp` | Haiper | API key, video | [link](https://haiper.ai) | Get API key at haiper.ai/haiper-api |
 | `hcnsec` | `hcnsec` | Huancheng Public API | API key | [link](https://api.hcnsec.cn) | Get API key at api.hcnsec.cn |
 | `helixmind` | `helixmind` | HelixMind | API key, aggregator | [link](https://helixmind.online) | Previously circulated 3 RPM/50 RPD and no-card claims were not confirmed during the 2026-08-02 audit; current quota and billing require account verification. |
 | `helyxai` | `helyxai` | Helyx AI | API key, aggregator | [link](https://helyxai.space) | Operational Free plan documents 100,000 tokens/day; the site's separate 2M+ marketing claim conflicts and is not treated as a quota guarantee. |
 | `heroku` | `heroku` | Heroku AI | API key, enterprise | [link](https://www.heroku.com) | — |
+| `hetzner` | `hetzner` | Hetzner Inference API | API key | [link](https://experiments.hetzner.com/inference) | Free during Hetzner's experimental phase, no billing yet; no SLA |
 | `huggingface` | `hf` | HuggingFace | API key | [link](https://huggingface.co) | Free Inference API for thousands of models (Whisper, VITS, SDXL…) |
 | `hyperbolic` | `hyp` | Hyperbolic | API key | [link](https://hyperbolic.xyz) | $1-5 trial credits on signup for serverless inference |
 | `ideogram` | `ideo` | Ideogram | API key | [link](https://ideogram.ai) | Get API key at ideogram.ai/docs/api |
@@ -325,6 +328,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `recraft` | `recraft` | Recraft | API key, image | [link](https://recraft.ai) | — |
 | `regolo` | `regolo` | Regolo AI | API key | [link](https://regolo.ai) | Get your Regolo API key from regolo.ai, then paste it here as a Bearer token. |
 | `reka` | `reka` | Reka | API key | [link](https://docs.reka.ai/chat/overview) | Use your Reka API key. OmniRoute supports the OpenAI-compatible base URL https://api.reka.ai/v1 and sends both Authorization and X-Api-Key headers for compatibility. |
+| `replicate` | `replicate` | Replicate | API key, video | [link](https://replicate.com) | Pay per use; trial runs may be offered on select models (unverified) |
 | `requesty` | `requesty` | Requesty | API key | [link](https://requesty.ai) | Free tier ~200 requests/day - multi-model routing gateway (300+ models) |
 | `routeway` | `routeway` | Routeway | API key | [link](https://routeway.ai) | Create a free API key at routeway.ai, then paste it here as a Bearer token. |
 | `runcrate` | `runcrate` | Runcrate | API key | [link](https://www.runcrate.ai) | Open models are free with your GitHub account |
@@ -476,7 +480,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (173 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (176 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also
