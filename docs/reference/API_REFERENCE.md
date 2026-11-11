@@ -938,6 +938,10 @@ returned result when `contents.summary` is set. Tavily is recorded at 1 credit (
 Extract content from a URL via a configured web-fetch provider (Firecrawl, Jina
 Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
 
+Ollama web fetch (`ollama-search`, same key as Ollama Search or the `ollama-cloud` connection)
+returns Markdown only and caps content at 200,000 characters. It is explicit-only: it never
+joins the auto-select pool, so name it in `provider` to use it.
+
 Parallel Extract (`parallel-search`, same API key as Parallel Search) returns Markdown
 only — any other `format` is a `400` — and caps content at 100,000 characters. When
 the target page itself cannot be extracted, the upstream reports it inside an HTTP 200;
