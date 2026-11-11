@@ -1,0 +1,1 @@
+- **feat(auto-combo):** opt-in `OMNIROUTE_STATS_SKIP_PROVIDER_MOMENT=true` leaves provider bad-minute failures (HTTP 408, 429, 5xx) out of the per-model reliability stats, so one outage no longer drags a model score for the stats window; the default is unchanged.

@@ -1107,6 +1107,13 @@ export async function getModelLatencyStats(
     conditions.push("model = @model");
     queryParams.model = options.model;
   }
+  // Opt-in: a provider bad minute (429, 408, 5xx) is not evidence about the model, so it
+  // stays out of the reliability stats. Rows with no status keep counting.
+  if (/^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_STATS_SKIP_PROVIDER_MOMENT?.trim() ?? "")) {
+    conditions.push(
+      "(COALESCE(success, 1) != 0 OR status IS NULL OR (CAST(status AS INTEGER) NOT IN (408, 429) AND CAST(status AS INTEGER) < 500))"
+    );
+  }
 
   const rows = db
     .prepare(
