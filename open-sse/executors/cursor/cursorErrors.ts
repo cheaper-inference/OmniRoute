@@ -300,6 +300,6 @@ export function resolveCursorEmptyTurnError(options: {
     kind: "not_found",
     status: 404,
     type: "invalid_request_error",
-    message: `Cursor model is not available on this account: ${CURSOR_EMPTY_TURN_MESSAGE}`,
+    message: `Cursor model is not available on this account right now (plan or usage limit): ${CURSOR_EMPTY_TURN_MESSAGE}`,
   };
 }
