@@ -71,6 +71,8 @@ export function isDiscoverableAgyModelId(modelId: string): boolean {
     !id.startsWith("chat_") &&
     !id.startsWith("tab_") &&
     !id.endsWith("_weekly") &&
+    !id.endsWith("-disabled") &&
+    !id.includes("-disabled") &&
     !AGY_NON_CHAT_MODEL_IDS.has(id) &&
     !AGY_RETIRED_MODEL_IDS.has(id) &&
     !AGY_NON_CHAT_MODEL_PATTERN.test(id)
