@@ -7,16 +7,17 @@ import { isLocalCliUnavailableOnHost } from "./localCliHostAvailability";
  * (#15446). Called once at server boot (`registerNodejs`). The Devin probe is a
  * non-blocking cached read: when the cached status is missing or older than 60 s it
  * starts ONE background `devin auth status` spawn, so `devin-cli-agentic` joins the
- * auto/* pools only after the isolated login has been confirmed. zcode and auggie stay
- * out of every pool (family pools included) while their binary is missing on this host,
- * from the same cached verdict `/v1/models` uses to hide them.
+ * auto/* pools only after the isolated login has been confirmed. zcode, auggie and
+ * codex-app-server stay out of every pool (family pools included) while their binary or
+ * app-server transport is missing on this host, from the same cached verdict
+ * `/v1/models` uses to hide them.
  */
 export function registerNoAuthAutoRoutingReadiness(): void {
   registerNoAuthReadiness(
     "devin-cli-agentic",
     () => peekDevinAgenticAuthStatus() === "authenticated"
   );
-  for (const providerId of ["zcode", "auggie"]) {
+  for (const providerId of ["zcode", "auggie", "codex-app-server"]) {
     registerNoAuthReadiness(providerId, () => !isLocalCliUnavailableOnHost(providerId));
   }
 }

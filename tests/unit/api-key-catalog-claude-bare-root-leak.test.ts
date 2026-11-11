@@ -27,6 +27,11 @@ import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-bare-root-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// Describe a host where the Codex app-server and Devin bridge are configured, so their
+// rows are not hidden by the local-CLI host verdict.
+process.env.OMNIROUTE_CODEX_APPSERVER_WS = "ws://127.0.0.1:1456";
+process.env.OMNIROUTE_CODEX_APPSERVER_WS_TOKEN = "test-app-server-token";
+process.env.DEVIN_AGENTIC_HOME = path.join(TEST_DATA_DIR, ".sandbox", "devin-home");
 process.env.API_KEY_SECRET = "test-api-key-secret-claude-bare-root";
 delete process.env.INITIAL_PASSWORD;
 delete process.env.JWT_SECRET;
