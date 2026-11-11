@@ -345,6 +345,31 @@ export function forgetClaudeThinkingForClientResponse(responseBody: unknown): vo
   for (const id of ids) deleteKey(id);
 }
 
+/**
+ * Anthropic answers 400 "The final block in an assistant message cannot be
+ * `thinking`" when an assistant turn ends in a thinking or redacted_thinking
+ * block. Strip those trailing blocks from every assistant turn except the latest
+ * one (its signed blocks must stay byte-exact, #17324). A turn left with no
+ * blocks is returned with `content: []` so the caller can drop it.
+ */
+export function dropTrailingHistoricalThinking<M extends { role?: unknown; content?: unknown }>(
+  messages: M[]
+): M[] {
+  let latest = -1;
+  for (let i = messages.length - 1; i >= 0 && latest < 0; i--) {
+    if (messages[i]?.role === "assistant") latest = i;
+  }
+  const isThinking = (block: unknown) =>
+    (block as { type?: unknown } | null)?.type === "thinking" ||
+    (block as { type?: unknown } | null)?.type === "redacted_thinking";
+  return messages.map((msg, i) => {
+    if (i === latest || msg?.role !== "assistant" || !Array.isArray(msg.content)) return msg;
+    let end = msg.content.length;
+    while (end > 0 && isThinking(msg.content[end - 1])) end--;
+    return end === msg.content.length ? msg : { ...msg, content: msg.content.slice(0, end) };
+  });
+}
+
 export function clearClaudeThinkingStore() {
   entries.clear();
   totalChars = 0;

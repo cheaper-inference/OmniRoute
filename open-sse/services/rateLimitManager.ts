@@ -258,12 +258,17 @@ function buildLimiterDefaults() {
   // 0 or missing values mean "infinite" / no rate limit applies. This treats
   // the global request-queue settings the same way per-connection overrides
   // are interpreted (see resolveRpm / resolveMinTime / resolveMaxConcurrent).
+  const rpm = resolveRpm(currentRequestQueueSettings.requestsPerMinute);
+  // An uncapped bucket never needs a refill. null keeps Bottleneck from starting its
+  // 250 ms heartbeat timer for every live limiter (null, not undefined: updateSettings
+  // skips undefined, so it could not clear a timer that already runs).
+  const capped = rpm !== EFFECTIVELY_INFINITE;
   return {
     maxConcurrent: resolveMaxConcurrent(currentRequestQueueSettings.concurrentRequests),
     minTime: resolveMinTime(currentRequestQueueSettings.minTimeBetweenRequestsMs),
-    reservoir: resolveRpm(currentRequestQueueSettings.requestsPerMinute),
-    reservoirRefreshAmount: resolveRpm(currentRequestQueueSettings.requestsPerMinute),
-    reservoirRefreshInterval: 60 * 1000,
+    reservoir: rpm,
+    reservoirRefreshAmount: capped ? rpm : null,
+    reservoirRefreshInterval: capped ? 60 * 1000 : null,
   };
 }
 
