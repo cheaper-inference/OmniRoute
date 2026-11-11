@@ -18,6 +18,7 @@ const { buildAgentSessionReport } = await import("../../src/lib/usage/agentSessi
 const { GET: getSummary } = await import("../../src/app/api/reports/summary/route.ts");
 const { GET: getSessions } = await import("../../src/app/api/reports/sessions/route.ts");
 const { GET: getExport } = await import("../../src/app/api/reports/export/route.ts");
+const { GET: getFacets } = await import("../../src/app/api/reports/facets/route.ts");
 
 test.after(() => {
   if (ORIGINAL_INITIAL_PASSWORD === undefined) delete process.env.INITIAL_PASSWORD;
@@ -228,6 +229,35 @@ test("invalid filters are rejected with a sanitized 400", async () => {
 
   const badType = await getExport(reportRequest("/api/reports/export?type=secrets"));
   assert.equal(badType.status, 400);
+});
+
+test("every report route rejects a from later than to with a 400, compared in UTC", async () => {
+  const later = encodeURIComponent("2026-09-22T00:00:00Z");
+  const earlier = encodeURIComponent("2026-09-21T00:00:00Z");
+  const routes: Array<[string, (request: Request) => Promise<Response>]> = [
+    ["/api/reports/summary?", getSummary],
+    ["/api/reports/sessions?", getSessions],
+    ["/api/reports/export?type=members&", getExport],
+    ["/api/reports/export?type=sessions&", getExport],
+    ["/api/reports/facets?", getFacets],
+  ];
+  for (const [route, handler] of routes) {
+    const res = await handler(reportRequest(`${route}from=${later}&to=${earlier}`));
+    assert.equal(res.status, 400, route);
+    const body = (await res.json()) as { error: { message: string } };
+    assert.equal(body.error.message, "Invalid query parameters");
+    // Equal bounds are one instant, and are accepted.
+    const same = await handler(reportRequest(`${route}from=${later}&to=${later}`));
+    assert.equal(same.status, 200, route);
+  }
+  // 12:00+03:00 is 09:00Z, before 10:00Z: ordered once normalized, though not as raw text.
+  const offset = await getSummary(
+    reportRequest(
+      `/api/reports/summary?from=${encodeURIComponent("2026-09-21T12:00:00+03:00")}` +
+        `&to=${encodeURIComponent("2026-09-21T10:00:00Z")}`
+    )
+  );
+  assert.equal(offset.status, 200);
 });
 
 test("CSV export neutralizes spreadsheet formulas in client-supplied names", async () => {

@@ -78,6 +78,12 @@ export interface AgentSessionUsageSlice {
   requestsWithTokens: number;
   errors: number;
   tokens: AgentSessionTokens;
+  /**
+   * Sum of usage_history.provider_cost_usd, the exact cost some providers report. A slice holds
+   * either only requests that stored one (a number) or only requests that did not (null), so a
+   * number is the slice's whole cost and its tokens are for display only.
+   */
+  providerCostUsd: number | null;
 }
 
 /** SQL value of each multi-value filter; also the facet dimension's value. */
@@ -105,6 +111,10 @@ const SEARCH_COLUMNS = [
 
 function nullableString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
+}
+
+function nullableNumber(value: unknown): number | null {
+  return value === null || value === undefined ? null : Number(value);
 }
 
 /** `col = ?` for one value, `col IN (...)` for several; REPORT_FILTER_NONE adds "is empty". */
@@ -195,11 +205,13 @@ export function listAgentSessionUsageSlices(
               COALESCE(SUM(uh.tokens_output), 0) AS tokens_output,
               COALESCE(SUM(uh.tokens_cache_read), 0) AS tokens_cache_read,
               COALESCE(SUM(uh.tokens_cache_creation), 0) AS tokens_cache_creation,
-              COALESCE(SUM(uh.tokens_reasoning), 0) AS tokens_reasoning
+              COALESCE(SUM(uh.tokens_reasoning), 0) AS tokens_reasoning,
+              SUM(uh.provider_cost_usd) AS provider_cost_usd
        FROM usage_history uh
        JOIN agent_sessions s ON s.id = uh.agent_session_id
        WHERE ${conditions.join(" AND ")}
-       GROUP BY uh.agent_session_id, uh.provider, uh.model, uh.connection_id, service_tier, day`
+       GROUP BY uh.agent_session_id, uh.provider, uh.model, uh.connection_id, service_tier, day,
+                uh.provider_cost_usd IS NULL`
     )
     .all(...params) as Record<string, unknown>[];
 
@@ -228,7 +240,18 @@ export function listAgentSessionUsageSlices(
       cacheCreation: Number(row.tokens_cache_creation ?? 0),
       reasoning: Number(row.tokens_reasoning ?? 0),
     },
+    providerCostUsd: nullableNumber(row.provider_cost_usd),
   }));
+}
+
+/**
+ * Highest usage_history id. It changes whenever a request is recorded, so computed reports
+ * cached under it are dropped once new usage arrives.
+ */
+export function getUsageHistoryMaxId(db: SqliteAdapter): number {
+  const row = db.prepare("SELECT MAX(id) AS id FROM usage_history").get() as
+    { id: unknown } | undefined;
+  return Number(row?.id ?? 0);
 }
 
 /** Session columns shown next to windowed totals; firstSeenAt/lastSeenAt are all-time. */

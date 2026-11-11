@@ -20,7 +20,7 @@ const filterValues = z
   .union([filterText, z.array(filterText).min(1).max(MAX_FILTER_VALUES)])
   .optional();
 
-export const reportFilterSchema = z.object({
+const reportFilterFields = z.object({
   from: isoTimestamp.optional(),
   to: isoTimestamp.optional(),
   apiKeyId: filterValues,
@@ -39,16 +39,27 @@ export const reportFilterSchema = z.object({
   tzOffset: z.coerce.number().int().min(-840).max(840).optional(),
 });
 
+// from/to are normalized to `toISOString()` form, so comparing the strings compares the times.
+function windowInOrder(query: { from?: string; to?: string }): boolean {
+  return !query.from || !query.to || query.from <= query.to;
+}
+const WINDOW_ORDER_ISSUE = { message: "from must not be later than to", path: ["from"] };
+
+/** Report filters; `from` later than `to` is rejected. */
+export const reportFilterSchema = reportFilterFields.refine(windowInOrder, WINDOW_ORDER_ISSUE);
+
 const sessionOrderSchema = {
   sort: z.enum(SESSION_REPORT_SORTS).optional(),
   order: z.enum(["asc", "desc"]).optional(),
 };
 
-export const sessionsQuerySchema = reportFilterSchema.extend({
-  ...sessionOrderSchema,
-  limit: z.coerce.number().int().min(1).max(100).optional(),
-  offset: z.coerce.number().int().min(0).optional(),
-});
+export const sessionsQuerySchema = reportFilterFields
+  .extend({
+    ...sessionOrderSchema,
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+    offset: z.coerce.number().int().min(0).optional(),
+  })
+  .refine(windowInOrder, WINDOW_ORDER_ISSUE);
 
 /** Session detail: one page of the session's requests, newest first. */
 export const sessionDetailQuerySchema = z.object({
@@ -56,10 +67,12 @@ export const sessionDetailQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).optional(),
 });
 
-export const exportQuerySchema = reportFilterSchema.extend({
-  type: z.enum([...REPORT_DIMENSIONS, "sessions"]),
-  ...sessionOrderSchema,
-});
+export const exportQuerySchema = reportFilterFields
+  .extend({
+    type: z.enum([...REPORT_DIMENSIONS, "sessions"]),
+    ...sessionOrderSchema,
+  })
+  .refine(windowInOrder, WINDOW_ORDER_ISSUE);
 
 const MULTI_VALUE_PARAMS = new Set<string>(REPORT_MULTI_VALUE_FILTERS);
 

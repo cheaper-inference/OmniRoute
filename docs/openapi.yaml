@@ -4782,7 +4782,8 @@ paths:
       summary: Team report of coding-agent usage
       description: >
         Totals plus breakdowns by member, project, client, provider, model, account and day, computed
-        from requests attributed to agent sessions. Cost is priced from token counts at read time.
+        from requests attributed to agent sessions. Cost is the provider-reported cost for requests
+        that stored one, and is priced from token counts at read time for the others.
         Filters combine with AND; a filter given several values matches any of them.
       parameters:
         - $ref: "#/components/parameters/ReportFrom"
@@ -17470,14 +17471,18 @@ components:
     ReportFrom:
       name: from
       in: query
-      description: Only count requests at or after this ISO 8601 timestamp.
+      description: >
+        Only count requests at or after this ISO 8601 timestamp. A `from` later than `to` is
+        rejected with 400.
       schema:
         type: string
         format: date-time
     ReportTo:
       name: to
       in: query
-      description: Only count requests at or before this ISO 8601 timestamp.
+      description: >
+        Only count requests at or before this ISO 8601 timestamp. A `to` earlier than `from` is
+        rejected with 400.
       schema:
         type: string
         format: date-time
@@ -17495,7 +17500,9 @@ components:
       in: query
       description: >
         Project name; repeat for several values (names may contain commas, so no comma lists).
-        `__none__` matches sessions without a project and can be mixed with names.
+        `__none__` matches sessions without a project and can be mixed with names. Matches the
+        session's latest project name (each request that reports one overwrites it), not the
+        value each request had when it was made, so all of a session's requests match or none do.
       style: form
       explode: true
       schema: { $ref: "#/components/schemas/ReportFilterValues" }
@@ -17534,7 +17541,9 @@ components:
       in: query
       description: >
         Git branch of the session; repeat for several values. `__none__` matches sessions without
-        a branch.
+        a branch. Matches the session's latest branch (each request that reports one overwrites
+        it), not the branch each request was made on, so all of a session's requests match or
+        none do.
       style: form
       explode: true
       schema: { $ref: "#/components/schemas/ReportFilterValues" }
@@ -17577,7 +17586,9 @@ components:
       in: query
       description: >
         Case-insensitive substring of the session id, client session id, project name, project
-        path or git branch. `%`, `_` and `\` match literally.
+        path or git branch. `%`, `_` and `\` match literally. Project and branch are the
+        session's latest values (each request that reports one overwrites them), not each
+        request's value at the time.
       schema:
         type: string
         minLength: 1
@@ -17783,7 +17794,9 @@ components:
         errors: { type: integer }
         unpricedRequests:
           type: integer
-          description: Requests with tokens on a model without a pricing row (not in costUsd).
+          description: >
+            Requests with tokens and no provider-reported cost, on a model without a pricing row
+            (not in costUsd).
         costUsd: { type: number }
         tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
     ReportSessionRow:
@@ -17915,10 +17928,14 @@ components:
           type: integer
           description: Time to first token; full latency when none was reported, 0 when unrecorded.
         tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
-        costUsd: { type: number, description: Priced at read time. }
+        costUsd:
+          type: number
+          description: The provider-reported cost when the request stored one, otherwise priced at read time.
         priced:
           type: boolean
-          description: false when the request has tokens but its model has no pricing row.
+          description: >
+            false when the request has tokens, no provider-reported cost and its model has no
+            pricing row.
     ReportSessionTimeline:
       type: object
       required: [points, capped]

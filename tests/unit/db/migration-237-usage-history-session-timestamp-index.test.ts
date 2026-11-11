@@ -1,5 +1,6 @@
 // 237 adds the (agent_session_id, timestamp) index that the team reports' per-session reads use:
-// session detail pages and timeline, and the active-time window function.
+// session detail pages and timeline, and the active-time window function. It drops 235's
+// single-column idx_uh_agent_session, a prefix of the new index.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -55,7 +56,19 @@ function appliedVersions(db: Database.Database): string[] {
   ).map((row) => row.version);
 }
 
-test("237 creates the (agent_session_id, timestamp) index; a rerun is a no-op", () => {
+function usageIndexes(db: Database.Database): string[] {
+  return (db.prepare("PRAGMA index_list(usage_history)").all() as Array<{ name: string }>)
+    .map((index) => index.name)
+    .sort();
+}
+
+function queryPlan(db: Database.Database, sql: string): string[] {
+  return (db.prepare(`EXPLAIN QUERY PLAN ${sql}`).all("as_1") as Array<{ detail: string }>).map(
+    (row) => row.detail
+  );
+}
+
+test("237 creates the (agent_session_id, timestamp) index and drops 235's prefix index; a rerun is a no-op", () => {
   const db = openDb();
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 3);
@@ -63,10 +76,23 @@ test("237 creates the (agent_session_id, timestamp) index; a rerun is a no-op", 
       "agent_session_id",
       "timestamp",
     ]);
-    // 235's single-column index stays in this phase.
-    assert.deepEqual(indexColumns(db, "idx_uh_agent_session"), ["agent_session_id"]);
+    assert.ok(!usageIndexes(db).includes("idx_uh_agent_session"), usageIndexes(db).join(", "));
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
     assert.deepEqual(appliedVersions(db), ["234", "235", "237"]);
+    assert.deepEqual(usageIndexes(db), ["idx_uh_agent_session_timestamp"]);
+  } finally {
+    db.close();
+  }
+});
+
+test("237 drops idx_uh_agent_session on a database that ran 235 before it", () => {
+  const db = openDb();
+  try {
+    db.exec("ALTER TABLE usage_history ADD COLUMN agent_session_id TEXT");
+    db.exec("CREATE INDEX idx_uh_agent_session ON usage_history(agent_session_id)");
+    runMigrations(db, { isNewDb: true });
+    assert.ok(appliedVersions(db).includes("237"));
+    assert.deepEqual(usageIndexes(db), ["idx_uh_agent_session_timestamp"]);
   } finally {
     db.close();
   }
@@ -94,19 +120,30 @@ test("a session's requests in time order read from the index without a sort", ()
   const db = openDb();
   try {
     runMigrations(db, { isNewDb: true });
-    const plan = (
-      db
-        .prepare(
-          `EXPLAIN QUERY PLAN SELECT id FROM usage_history WHERE agent_session_id = ?
-           ORDER BY timestamp DESC, id DESC LIMIT 50`
-        )
-        .all("as_1") as Array<{ detail: string }>
-    ).map((row) => row.detail);
+    const plan = queryPlan(
+      db,
+      `SELECT id FROM usage_history WHERE agent_session_id = ?
+       ORDER BY timestamp DESC, id DESC LIMIT 50`
+    );
     assert.ok(
       plan.some((detail) => detail.includes("idx_uh_agent_session_timestamp")),
       plan.join("; ")
     );
     assert.ok(!plan.some((detail) => detail.includes("TEMP B-TREE")), plan.join("; "));
+  } finally {
+    db.close();
+  }
+});
+
+test("a lookup by session id alone, which 235's index served, uses the composite index", () => {
+  const db = openDb();
+  try {
+    runMigrations(db, { isNewDb: true });
+    const plan = queryPlan(db, "SELECT COUNT(*) FROM usage_history WHERE agent_session_id = ?");
+    assert.ok(
+      plan.some((detail) => detail.includes("idx_uh_agent_session_timestamp")),
+      plan.join("; ")
+    );
   } finally {
     db.close();
   }

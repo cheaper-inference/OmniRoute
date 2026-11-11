@@ -24,6 +24,10 @@ function nullableString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
 }
 
+function nullableNumber(value: unknown): number | null {
+  return value === null || value === undefined ? null : Number(value);
+}
+
 /** One session's time over the requests matching a filter. */
 export interface AgentSessionTimes {
   sessionId: string;
@@ -147,6 +151,8 @@ export interface AgentSessionReportRequest {
   ttftMs: number;
   /** Same meaning as the session tokens, so request rows add up to their session. */
   tokens: AgentSessionTokens & { uncachedInput: number };
+  /** Exact cost the provider reported (usage_history.provider_cost_usd); null when none. */
+  providerCostUsd: number | null;
 }
 
 export interface SessionRequestsPage {
@@ -174,7 +180,7 @@ export function listAgentSessionRequestsPage(
       `SELECT id, timestamp, provider, model, connection_id,
               COALESCE(NULLIF(service_tier, ''), 'standard') AS service_tier,
               status, success, error_code, latency_ms, ttft_ms, tokens_input, tokens_output,
-              tokens_cache_read, tokens_cache_creation, tokens_reasoning
+              tokens_cache_read, tokens_cache_creation, tokens_reasoning, provider_cost_usd
        FROM usage_history
        WHERE agent_session_id = ?
        ORDER BY timestamp DESC, id DESC
@@ -207,6 +213,7 @@ export function listAgentSessionRequestsPage(
         reasoning: Number(row.tokens_reasoning ?? 0),
         uncachedInput: Math.max(0, input - cacheRead - cacheCreation),
       },
+      providerCostUsd: nullableNumber(row.provider_cost_usd),
     };
   });
   return { requests, total: Number(countRow?.total ?? 0) };

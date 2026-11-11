@@ -2,8 +2,15 @@
  * Team reports for the management dashboard: usage, tokens and cost of coding-agent sessions,
  * rolled up by member (API key), project, provider, model, account and day.
  *
- * Cost is priced from each request slice at read time. Pricing is linear in tokens, so pricing
- * a summed slice equals summing per-request prices (the same approach as usage analytics).
+ * Cost is computed at read time from request slices. Requests that stored a provider-reported
+ * cost (usage_history.provider_cost_usd) are billed that cost, as usage analytics bills them:
+ * their tokens are shown but never priced again, and they are never unpriced. The other requests
+ * are priced from the catalog on each slice's summed tokens. That equals the sum of per-request
+ * prices for per-token rates; a rate chosen by one request's size (a long-context tier) is
+ * chosen by the slice's summed input instead.
+ *
+ * The summary and the per-session rows are cached briefly (agentSessionReportCache), so paging
+ * and sorting the sessions list do not price the window again.
  */
 
 import { getDbInstance } from "@/lib/db/core";
@@ -25,6 +32,7 @@ import {
   type AgentSessionTimes,
   type SessionRequestsPage,
 } from "@/lib/db/agentSessionReportStats";
+import { ReportResultCache } from "./agentSessionReportCache";
 import { calculateCostDetailed } from "./costCalculator";
 
 export type { AgentSessionReportFilter, SessionRequestsPage };
@@ -211,6 +219,9 @@ class TotalsAccumulator {
 }
 
 async function priceSlice(slice: AgentSessionUsageSlice): Promise<PricedSlice> {
+  if (slice.providerCostUsd !== null) {
+    return { ...slice, costUsd: slice.providerCostUsd, priced: true };
+  }
   const { costUsd, priced } = await calculateCostDetailed(
     slice.provider || "",
     slice.model || "",
@@ -290,9 +301,19 @@ function timeKpis(
   };
 }
 
+const reportCache = new ReportResultCache<AgentSessionReport>();
+
 export async function buildAgentSessionReport(
   filter: AgentSessionReportFilter = {},
   db: SqliteAdapter = getDbInstance()
+): Promise<AgentSessionReport> {
+  // A copy, so the caller cannot change the cached report.
+  return structuredClone(await reportCache.get(db, filter, () => computeReport(db, filter)));
+}
+
+async function computeReport(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter
 ): Promise<AgentSessionReport> {
   const slices = await listPricedSlices(db, filter);
   const accumulator = new TotalsAccumulator();
@@ -399,18 +420,32 @@ function sessionComparator(order: SessionReportOrder) {
 
 const SESSION_PAGE_DEFAULT_LIMIT = 20;
 
+// Per-session totals of a filter, unsorted; every page and sort order of the list reuses them.
+const sessionWindowsCache = new ReportResultCache<SessionWindow[]>();
+
+async function computeSessionWindows(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter
+): Promise<SessionWindow[]> {
+  const slices = await listPricedSlices(db, filter);
+  const times = new Map(listAgentSessionTimes(db, filter).map((time) => [time.sessionId, time]));
+  return sessionWindows(slices, times);
+}
+
 /**
  * Sessions with at least one request matching the filter, with totals over those requests only.
  * Built from the same priced slices as buildAgentSessionReport, so the rows add up to its totals.
+ * Session metadata is read for the returned page only.
  */
 export async function listAgentSessionReportRows(
   filter: AgentSessionReportFilter = {},
   page: SessionReportPage = {},
   db: SqliteAdapter = getDbInstance()
 ): Promise<{ sessions: AgentSessionReportRow[]; total: number }> {
-  const slices = await listPricedSlices(db, filter);
-  const times = new Map(listAgentSessionTimes(db, filter).map((time) => [time.sessionId, time]));
-  const windows = sessionWindows(slices, times).sort(sessionComparator(page));
+  const cached = await sessionWindowsCache.get(db, filter, () => computeSessionWindows(db, filter));
+  // The comparator orders every pair (ties go to the unique id), so sorting a copy of the
+  // cached rows gives the same order as sorting freshly built ones.
+  const windows = [...cached].sort(sessionComparator(page));
   const offset = Math.max(0, page.offset ?? 0);
   const pageWindows = windows.slice(offset, offset + (page.limit ?? SESSION_PAGE_DEFAULT_LIMIT));
   const metadata = getAgentSessionMetadataByIds(
@@ -419,7 +454,8 @@ export async function listAgentSessionReportRows(
   );
   const sessions = pageWindows.flatMap(({ sessionId, totals, ...window }) => {
     const session = metadata.get(sessionId);
-    return session ? [{ ...session, ...totals, ...window }] : [];
+    // tokens is copied so the caller cannot change the cached row.
+    return session ? [{ ...session, ...totals, tokens: { ...totals.tokens }, ...window }] : [];
   });
   return { sessions, total: windows.length };
 }
@@ -442,10 +478,16 @@ export async function getAgentSessionReportTotals(
   };
 }
 
-/** A session detail request with its cost priced at read time, like the totals. */
-export interface PricedSessionRequest extends AgentSessionReportRequest {
+/**
+ * A session detail request with its cost: the provider-reported cost when it stored one,
+ * otherwise priced at read time, like the totals.
+ */
+export interface PricedSessionRequest extends Omit<AgentSessionReportRequest, "providerCostUsd"> {
   costUsd: number;
-  /** false when the request has tokens but its model has no pricing row (not in costUsd). */
+  /**
+   * false when the request has tokens, no provider-reported cost and its model has no pricing
+   * row (not in costUsd).
+   */
   priced: boolean;
 }
 
@@ -458,7 +500,12 @@ export interface AgentSessionReportDetail {
   timeline: AgentSessionTimeline;
 }
 
-async function priceRequest(request: AgentSessionReportRequest): Promise<PricedSessionRequest> {
+async function priceRequest({
+  providerCostUsd,
+  ...request
+}: AgentSessionReportRequest): Promise<PricedSessionRequest> {
+  if (providerCostUsd !== null)
+    return { ...request, costUsd: round6(providerCostUsd), priced: true };
   const { input, output, cacheRead, cacheCreation, reasoning } = request.tokens;
   const { costUsd, priced } = await calculateCostDetailed(
     request.provider || "",
