@@ -810,6 +810,7 @@ export const validateProviderApiKeySchema = z
     connectorName: z.string().trim().max(200).optional(),
     // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
     zdrEnabled: z.boolean().optional(),
+    accountId: z.string().trim().max(200).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.provider === "google-pse-search" && !data.cx) {

@@ -60,6 +60,14 @@ export {
 export { getMitmAlias, setMitmAliasAll } from "./models/mitmAlias";
 export type { SyncedAvailableModel } from "./models/synced";
 export {
+  admitConnectionModels,
+  admitSyncedModelsByConnection,
+  getActiveConnectionAdmissionRefs,
+  unionAdmittedModels,
+  type AdmittedSyncedModels,
+  type ConnectionAdmissionRef,
+} from "./models/freeOnlyAdmission";
+export {
   getCustomModelVisionOverride,
   listCustomModelVisionOverrides,
   buildCustomModelVisionOverrides,

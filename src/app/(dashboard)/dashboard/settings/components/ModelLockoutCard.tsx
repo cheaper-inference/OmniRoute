@@ -346,7 +346,7 @@ export default function ModelLockoutCard() {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="gpp_maybe" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("modelLockout")}</h2>
+            <h2 className="text-lg font-semibold">{t("modelLockout")}</h2>
           </div>
           <p className="text-sm text-text-muted">{t("modelLockoutPageDescription")}</p>
         </div>

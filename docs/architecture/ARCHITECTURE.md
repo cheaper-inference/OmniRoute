@@ -952,6 +952,22 @@ Each provider has a specialized executor extending `BaseExecutor` (in `open-sse/
 
 All other providers (including custom compatible nodes) use the `DefaultExecutor`.
 
+### Automated probes and web-session accounts
+
+Model tests, Test All, combo tests and assessments send real chat requests. A web-session
+provider acts as the signed-in user, so each of those requests would be saved as a
+conversation on that account; automated probes that left such conversations got an account
+suspended (#14780). The chat pipeline therefore refuses every target an automated probe
+reaches whose provider takes a web-session credential, once the target's provider is
+resolved and before a credential is chosen (`src/lib/providers/chatProbePolicy.ts`). The
+refusal is `422` with `error.code` `chat_probe_not_isolated`, and the probe runners report
+it as a skip, not a failure.
+
+An executor that runs every chat in the provider's own no-history mode declares it with
+`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); probes to that
+provider are then allowed. ChatGPT Web declares `temporary-chat`. Pin a declaration to its
+mechanism with a test, so the claim cannot outlive the code that makes it true.
+
 ## Provider Compatibility Matrix
 
 > **Note:** The matrix below is a representative sample of the 351 registered providers in
