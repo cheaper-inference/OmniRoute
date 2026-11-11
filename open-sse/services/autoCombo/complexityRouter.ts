@@ -20,6 +20,7 @@ import {
 } from "../specificityDetector";
 import type { RuleInput, SpecificityLevel } from "../specificityTypes";
 import { generateRoutingHints, type RoutingHint } from "../manifestAdapter";
+import { applySessionTierFloor, isSessionTierFloorEnabled } from "./sessionTierFloor.ts";
 
 export type ComplexityTier = "free" | "cheap" | "premium";
 
@@ -77,7 +78,8 @@ export function classifyRequestComplexity(input: RuleInput): ComplexityClassific
 export async function buildComplexityRoutingHint(
   modelTargets: Parameters<typeof generateRoutingHints>[0],
   body: { messages?: unknown; tools?: unknown; model?: unknown } | null | undefined,
-  log: { info: (tag: string, message: string) => void }
+  log: { info: (tag: string, message: string) => void },
+  sessionId?: string | null
 ): Promise<RoutingHint | null> {
   try {
     const ruleInput = {
@@ -99,6 +101,12 @@ export async function buildComplexityRoutingHint(
       hint.recommendedMinTier as ComplexityTier,
       classification.recommendedTier
     ) as typeof hint.recommendedMinTier;
+    if (sessionId && isSessionTierFloorEnabled()) {
+      hint.recommendedMinTier = applySessionTierFloor(
+        sessionId,
+        hint.recommendedMinTier as ComplexityTier
+      ) as typeof hint.recommendedMinTier;
+    }
     log.info(
       "COMBO",
       `Complexity-aware routing: level=${classification.level} score=${classification.score} minTier=${hint.recommendedMinTier} tools=${classification.hasToolUse}`
