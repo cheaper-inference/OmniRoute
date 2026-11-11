@@ -1,0 +1,1 @@
+- **feat(cli-tools):** set `OMNIROUTE_CODEX_CATALOG_METADATA=true` and the Codex model picker catalog uses each routed model's own reasoning efforts and input modalities instead of values inherited from a bundled model (off by default).

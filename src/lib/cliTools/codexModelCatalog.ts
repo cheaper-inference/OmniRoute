@@ -45,7 +45,16 @@ export type CodexCatalogEntry = Record<string, unknown> & {
 
 export type CodexModelCatalog = { models: CodexCatalogEntry[] };
 
-export type CatalogModelInput = string | { id?: unknown; context_length?: unknown } | null;
+export type CatalogModelInput =
+  | string
+  | {
+      id?: unknown;
+      context_length?: unknown;
+      /** Optional metadata, applied only with OMNIROUTE_CODEX_CATALOG_METADATA on. */
+      input_modalities?: unknown;
+      capabilities?: { effort_tiers?: unknown } | null;
+    }
+  | null;
 
 const isValidEntry = (entry: unknown): entry is CodexCatalogEntry =>
   !!entry &&
@@ -79,8 +88,19 @@ const isCodexProviderModel = (id: string) => {
   return slash > 0 && resolveProviderId(id.slice(0, slash)) === "codex";
 };
 
+// Efforts Codex's own picker uses; anything else in a routed model's tier list is ignored.
+const CODEX_EFFORTS = ["none", "minimal", "low", "medium", "high", "xhigh"];
+const CODEX_MODALITIES = ["text", "image"];
+
+const knownStrings = (value: unknown, allowed: string[]): string[] =>
+  Array.isArray(value)
+    ? [...new Set(value.filter((v): v is string => typeof v === "string" && allowed.includes(v)))]
+    : [];
+
 const normalizeModel = (model: CatalogModelInput) => {
-  if (typeof model === "string") return { id: model.trim(), contextLength: null };
+  if (typeof model === "string") {
+    return { id: model.trim(), contextLength: null, efforts: [], modalities: [] };
+  }
   if (model && typeof model === "object" && typeof model.id === "string") {
     const contextLength =
       typeof model.context_length === "number" &&
@@ -88,9 +108,58 @@ const normalizeModel = (model: CatalogModelInput) => {
       model.context_length > 0
         ? model.context_length
         : null;
-    return { id: model.id.trim(), contextLength };
+    return {
+      id: model.id.trim(),
+      contextLength,
+      efforts: knownStrings(model.capabilities?.effort_tiers, CODEX_EFFORTS),
+      modalities: knownStrings(model.input_modalities, CODEX_MODALITIES),
+    };
   }
   return null;
+};
+
+const isCatalogMetadataEnabled = () =>
+  /^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_CODEX_CATALOG_METADATA?.trim() ?? "");
+
+/** Keep only the efforts the routed model offers; move the default if it was filtered out. */
+const filterReasoningLevels = (entry: CodexCatalogEntry, efforts: string[]) => {
+  const levels = Array.isArray(entry.supported_reasoning_levels)
+    ? (entry.supported_reasoning_levels as { effort?: string }[])
+    : [];
+  const kept = levels.filter((level) => efforts.includes(String(level.effort)));
+  if (kept.length === 0) return;
+  entry.supported_reasoning_levels = kept;
+  if (!kept.some((level) => level.effort === entry.default_reasoning_level)) {
+    entry.default_reasoning_level = String(kept[0].effort);
+  }
+};
+
+/** Replace the inherited picker efforts and modalities with the routed model's own (opt-in). */
+const applyRoutedMetadata = (
+  entry: CodexCatalogEntry,
+  model: { efforts: string[]; modalities: string[] }
+) => {
+  if (model.efforts.length > 0) filterReasoningLevels(entry, model.efforts);
+  if (model.modalities.length > 0 && Array.isArray(entry.input_modalities)) {
+    entry.input_modalities = model.modalities;
+  }
+};
+
+/** Fields for a routed model that has no bundled Codex entry to clone. */
+const applyUnmatchedModelFields = (
+  entry: CodexCatalogEntry,
+  model: { contextLength: number | null; efforts: string[]; modalities: string[] }
+) => {
+  // OpenAI service tiers (Fast/priority) do not exist on arbitrary upstreams.
+  entry.service_tiers = [];
+  entry.additional_speed_tiers = [];
+  // The template's window belongs to a GPT model; prefer OmniRoute's own figure so
+  // Codex compacts at the right point instead of overflowing upstream.
+  if (model.contextLength) {
+    entry.context_window = model.contextLength;
+    entry.max_context_window = model.contextLength;
+  }
+  if (isCatalogMetadataEnabled()) applyRoutedMetadata(entry, model);
 };
 
 /**
@@ -141,17 +210,7 @@ export function buildCodexModelCatalog(
       Object.assign(entry, structuredClone(CODE_MODE_OVERRIDES));
     }
 
-    if (!matched) {
-      // OpenAI service tiers (Fast/priority) do not exist on arbitrary upstreams.
-      entry.service_tiers = [];
-      entry.additional_speed_tiers = [];
-      // The template's window belongs to a GPT model; prefer OmniRoute's own figure so
-      // Codex compacts at the right point instead of overflowing upstream.
-      if (model.contextLength) {
-        entry.context_window = model.contextLength;
-        entry.max_context_window = model.contextLength;
-      }
-    }
+    if (!matched) applyUnmatchedModelFields(entry, model);
 
     listedEntries.push(entry);
   }

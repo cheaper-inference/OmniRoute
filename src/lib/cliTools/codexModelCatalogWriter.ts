@@ -16,7 +16,13 @@ export type CodexCatalogWriteResult =
   | { catalogPath: string; count: number; warning?: undefined }
   | { warning: string; catalogPath?: undefined; count?: undefined };
 
-type CatalogListEntry = { id?: unknown; type?: unknown; context_length?: unknown };
+type CatalogListEntry = {
+  id?: unknown;
+  type?: unknown;
+  context_length?: unknown;
+  input_modalities?: unknown;
+  capabilities?: { effort_tiers?: unknown } | null;
+};
 
 /**
  * List OmniRoute's chat models through the same unified catalog `/v1/models` serves
@@ -37,7 +43,12 @@ export async function listOmniRouteChatModels(request: Request): Promise<Catalog
   if (!Array.isArray(body?.data)) return [];
   return (body.data as CatalogListEntry[])
     .filter((m) => typeof m?.id === "string" && (!m.type || m.type === "chat"))
-    .map((m) => ({ id: m.id, context_length: m.context_length }));
+    .map((m) => ({
+      id: m.id,
+      context_length: m.context_length,
+      input_modalities: m.input_modalities,
+      capabilities: { effort_tiers: m.capabilities?.effort_tiers },
+    }));
 }
 
 /**
