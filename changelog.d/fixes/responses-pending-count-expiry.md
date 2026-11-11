@@ -1,0 +1,1 @@
+Exclude expired pending Responses continuation entries from the diagnostic count without waiting for the periodic sweep.
