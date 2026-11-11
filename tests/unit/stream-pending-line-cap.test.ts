@@ -36,9 +36,12 @@ function makeStream(onFailure?: (payload: { code?: string }) => boolean) {
 }
 
 // A source that sends one newline-free "line" in 16 KiB pieces, after optional leading frames.
-function endlessLineSource(leading: string[], totalChars: number) {
+// With `closeAsJson`, the line is a JSON event that is closed and terminated once fully sent,
+// so a stream that reads the whole line ends on a valid event (a non-JSON `data:` tail fails).
+function endlessLineSource(leading: string[], totalChars: number, closeAsJson = false) {
   let sent = 0;
   let leadingIdx = 0;
+  let closed = false;
   return new ReadableStream<Uint8Array>({
     pull(controller) {
       if (leadingIdx < leading.length) {
@@ -46,10 +49,15 @@ function endlessLineSource(leading: string[], totalChars: number) {
         return;
       }
       if (sent >= totalChars) {
+        if (closeAsJson && !closed) {
+          closed = true;
+          controller.enqueue(textEncoder.encode('"}\n\n'));
+          return;
+        }
         controller.close();
         return;
       }
-      const prefix = sent === 0 ? "data: " : "";
+      const prefix = sent === 0 ? (closeAsJson ? 'data: {"pad":"' : "data: ") : "";
       controller.enqueue(textEncoder.encode(prefix + "x".repeat(CHUNK_CHARS - prefix.length)));
       sent += CHUNK_CHARS;
     },
@@ -88,7 +96,7 @@ test("a newline-free upstream line is scanned for a newline in new text only", a
   try {
     const frames = 120; // 120 x 16 KiB = ~2 MiB, one line, no newline
     const { error } = await readAll(
-      endlessLineSource([], frames * CHUNK_CHARS).pipeThrough(makeStream())
+      endlessLineSource([], frames * CHUNK_CHARS, true).pipeThrough(makeStream())
     );
     assert.equal(error, null, "the whole line must be read, not rejected early");
   } finally {
