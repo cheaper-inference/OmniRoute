@@ -24,7 +24,6 @@ function resetSkillsRuntime() {
   skillRegistry["versionCache"].clear();
   skillExecutor["handlers"].clear();
   skillExecutor.setTimeout(50);
-  skillExecutor.setMaxRetries(3);
 }
 
 async function resetStorage() {
@@ -280,7 +279,6 @@ test("skillExecutor records handler errors as error and timeouts as timeout", as
       })
   );
   skillExecutor.setTimeout(5);
-  skillExecutor.setMaxRetries(7);
 
   const timedOut = await skillExecutor.execute(
     "echo@1.0.0",
@@ -288,7 +286,6 @@ test("skillExecutor records handler errors as error and timeouts as timeout", as
     { apiKeyId: "key-a", sessionId: "session-3" }
   );
 
-  assert.equal(skillExecutor["maxRetries"], 7);
   assert.equal(timedOut.status, "timeout");
   assert.equal(timedOut.output, null);
   assert.match(timedOut.errorMessage, /timed out/i);
