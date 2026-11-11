@@ -45,7 +45,7 @@ const digitsOnly = (value: string): string => value.replace(/\D/g, "");
 /** `0000000000`, `1111111111`, ... are never real identifiers. */
 const isRepeatedDigit = (digits: string): boolean => /^(\d)\1+$/.test(digits);
 
-function isValidLuhn(digits: string): boolean {
+export function isValidLuhn(digits: string): boolean {
   let sum = 0;
   let shouldDouble = false;
   for (let i = digits.length - 1; i >= 0; i--) {
