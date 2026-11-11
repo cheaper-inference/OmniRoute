@@ -293,3 +293,50 @@ test("an https:// proxy receives a TLS ClientHello before any CONNECT bytes", as
     await new Promise<void>((resolve) => proxy.close(() => resolve()));
   }
 });
+
+test(
+  "SOCKS5 tunnel preserves decoded username and password on the wire",
+  { timeout: 15_000 },
+  async () => {
+    let peer: net.Socket | undefined;
+    let authenticated = false;
+    const proxy = net.createServer((socket) => {
+      peer = socket;
+      socket.on("error", () => {});
+      socket.once("data", (hello) => {
+        assert.equal(hello[0], 5);
+        socket.write(Buffer.from([5, 2]));
+        socket.once("data", (auth) => {
+          assert.deepEqual(
+            auth,
+            Buffer.from([1, 4, ...Buffer.from("u@sr"), 5, ...Buffer.from("p:ss!")])
+          );
+          authenticated = true;
+          socket.write(Buffer.from([1, 0]));
+          socket.once("data", (request) => {
+            assert.equal(request[0], 5);
+            assert.equal(request[1], 1);
+            socket.write(Buffer.from([5, 0, 0, 1, 127, 0, 0, 1, 1, 187]));
+          });
+        });
+      });
+    });
+    await new Promise<void>((resolve) => proxy.listen(0, "127.0.0.1", resolve));
+    const port = (proxy.address() as net.AddressInfo).port;
+    let socket: net.Socket | undefined;
+    try {
+      socket = await createProxyTunnelSocket({
+        targetHost: "api2.cursor.sh",
+        targetPort: 443,
+        proxyUrl: `socks5h://u%40sr:p%3Ass%21@127.0.0.1:${port}`,
+        timeoutMs: 5_000,
+      });
+      assert.equal(authenticated, true);
+      assert.equal(socket.destroyed, false);
+    } finally {
+      socket?.destroy();
+      peer?.destroy();
+      await new Promise<void>((resolve) => proxy.close(() => resolve()));
+    }
+  }
+);

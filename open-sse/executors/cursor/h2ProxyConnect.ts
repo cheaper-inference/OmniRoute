@@ -20,6 +20,7 @@
 import net from "node:net";
 import tls from "node:tls";
 import type { EventEmitter } from "node:events";
+import type { SocksProxy } from "socks";
 
 import { hasAmbientProxyContext, resolveProxyForRequest } from "../../utils/proxyFetch.ts";
 import { stripIpv6Brackets } from "../../utils/proxyFamily.ts";
@@ -153,11 +154,21 @@ export function isSocksProxyProtocol(protocol: string): boolean {
   return SOCKS_PROTOCOLS.has(protocol);
 }
 
+/** Keep SOCKS address/auth construction separate from socket lifetime management. */
+function socksProxyOptions(proxy: URL): SocksProxy {
+  return {
+    host: proxy.hostname,
+    port: Number(proxy.port) || 1080,
+    type: proxy.protocol === "socks4:" || proxy.protocol === "socks4a:" ? 4 : 5,
+    ...(proxy.username ? { userId: decodeURIComponent(proxy.username) } : {}),
+    ...(proxy.password ? { password: decodeURIComponent(proxy.password) } : {}),
+  };
+}
+
 async function createSocksTunnel(options: ProxyTunnelOptions, proxy: URL): Promise<net.Socket> {
   if (options.signal?.aborted) throw new Error("aborted");
   const { SocksClient } = await import("socks");
   if (options.signal?.aborted) throw new Error("aborted");
-  const type = proxy.protocol === "socks4:" || proxy.protocol === "socks4a:" ? 4 : 5;
   const socket = net.connect({ host: proxy.hostname, port: Number(proxy.port) || 1080 });
   let onAbort: (() => void) | undefined;
   const aborted = new Promise<never>((_, reject) => {
@@ -179,13 +190,7 @@ async function createSocksTunnel(options: ProxyTunnelOptions, proxy: URL): Promi
     ]);
     const result = await Promise.race([
       SocksClient.createConnection({
-        proxy: {
-          host: proxy.hostname,
-          port: Number(proxy.port) || 1080,
-          type,
-          ...(proxy.username ? { userId: decodeURIComponent(proxy.username) } : {}),
-          ...(proxy.password ? { password: decodeURIComponent(proxy.password) } : {}),
-        },
+        proxy: socksProxyOptions(proxy),
         command: "connect",
         destination: { host: options.targetHost, port: options.targetPort },
         timeout: options.timeoutMs ?? DEFAULT_TUNNEL_TIMEOUT_MS,
