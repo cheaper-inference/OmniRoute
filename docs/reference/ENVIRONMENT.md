@@ -2058,3 +2058,9 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `OMNIROUTE_SESSION_TTL_MIN` | `15` | `open-sse/services/sessionManager.ts` | Idle TTL in minutes for the in-memory session map. Governs sticky connection reuse (`getSessionConnection`) and the active-sessions views; raising it keeps a session pinned to its connection longer. Read once at startup. Blank, non-numeric or `<= 0` values fall back to the default. |
+
+## Claude Code session cache key
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `OMNIROUTE_CLAUDE_SESSION_CACHE_KEY` | `false` | `open-sse/handlers/chatCore/claudeSessionCacheKey.ts` | When `1`, `true`, `yes` or `on`, a request that carries a valid `X-Claude-Code-Session-Id` header and no `prompt_cache_key` gets that session id as `prompt_cache_key` on OpenAI Chat and Responses targets. A key sent by the caller always wins. Providers that reject the field and the Codex provider are skipped. |

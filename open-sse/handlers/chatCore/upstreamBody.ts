@@ -20,6 +20,7 @@ import {
   type ConnectionCacheOverride,
 } from "../../utils/cacheControlPolicy.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import { resolveClaudeSessionCacheKey } from "./claudeSessionCacheKey.ts";
 import { stripInternalBodyFields } from "../../config/cliFingerprints.ts";
 import { readBodyReasoningEffort } from "../../executors/base/reasoningEffort.ts";
 import { sanitizeRequestForResolvedTarget } from "../../services/targetRequestSanitizer.ts";
@@ -324,8 +325,19 @@ async function injectPromptCacheKey(
   bodyToSend: Body,
   provider: string | null | undefined,
   targetFormat: string,
-  connectionCacheOverride: ConnectionCacheOverride | null
+  connectionCacheOverride: ConnectionCacheOverride | null,
+  clientHeaders?: unknown
 ): Promise<Body> {
+  const sessionKey =
+    providerSupportsCaching(
+      provider,
+      undefined,
+      connectionCacheOverride,
+      bodyToSend.model as string
+    ) && !providerRejectsPromptCacheKey(provider, connectionCacheOverride)
+      ? resolveClaudeSessionCacheKey(bodyToSend, provider, targetFormat, clientHeaders)
+      : null;
+  if (sessionKey) return { ...bodyToSend, prompt_cache_key: sessionKey };
   if (
     targetFormat === FORMATS.OPENAI &&
     providerSupportsCaching(
@@ -547,7 +559,8 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
     bodyToSend,
     provider,
     targetFormat,
-    connectionCacheOverride
+    connectionCacheOverride,
+    opts.clientRawRequest?.headers
   );
 
   return bodyToSend;
