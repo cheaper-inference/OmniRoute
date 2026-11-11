@@ -1,0 +1,1 @@
+- **fix(providers):** Register Claude Fable 5.2 on verified Anthropic, Claude OAuth, Bedrock and Vertex surfaces with 1M context, 128k output, adaptive-thinking and forced-tool-choice normalization, published pricing and family fallbacks ([#19850](https://github.com/cheaper-inference/OmniRoute/pull/19850)) — thanks @xiaoyaner0201
