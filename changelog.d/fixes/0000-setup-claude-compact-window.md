@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute setup-claude` sizes each profile's `CLAUDE_CODE_AUTO_COMPACT_WINDOW` from the model's catalog context window (95%, previously a fixed 190000 for every model, so 1M-context models compacted at a fifth of their window), and keeps `effortLevel` within the model's catalog effort tiers.

@@ -234,10 +234,15 @@ profile per model at `~/.claude/profiles/<name>/settings.json`, reusing the
     "ANTHROPIC_BASE_URL": "http://192.168.0.15:20128",
     "ANTHROPIC_MODEL": "glm/glm-5.2",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "190000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "124518",
   },
 }
 ```
+
+`CLAUDE_CODE_AUTO_COMPACT_WINDOW` is 95% of the model's catalog `context_length` (here
+131072), falling back to the model's known window and then to `190000` when neither is
+reported. `effortLevel` is only written when the catalog's `effort_tiers` allow it: a level the
+model does not offer is lowered to the highest listed one, and omitted when none fits.
 
 > **The auth token is never written to the profile.** Launch with
 > `omniroute launch --profile <name>` (it injects `ANTHROPIC_AUTH_TOKEN` from the

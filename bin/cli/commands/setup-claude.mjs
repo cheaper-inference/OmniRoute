@@ -31,10 +31,32 @@ import {
 } from "./setup-codex.mjs";
 
 /** Map a Codex-style effort to a Claude Code settings.json effortLevel. */
-function effortLevelFor(cfg) {
+function effortLevelFor(cfg, model) {
   // Codex categories use xhigh/high/low/undefined; Claude Code accepts the same
-  // names (low|medium|high|xhigh). Pass through, omit for the "simple" tier.
-  return cfg.effort || undefined;
+  // names (low|medium|high|xhigh). Omit for the "simple" tier. When the catalog
+  // lists the model's effort tiers, never ask for a level it does not offer:
+  // use the highest listed tier at or below the category's level.
+  const wanted = cfg.effort || undefined;
+  const tiers = model?.capabilities?.effort_tiers;
+  if (!wanted || !Array.isArray(tiers) || tiers.length === 0 || tiers.includes(wanted)) {
+    return wanted;
+  }
+  // "minimal" is not a Claude Code effortLevel, so it is never a clamp target.
+  const order = ["low", "medium", "high", "xhigh", "max"];
+  const below = order.slice(0, order.indexOf(wanted)).reverse();
+  return below.find((level) => tiers.includes(level));
+}
+
+const DEFAULT_COMPACT_WINDOW = 190000;
+
+/**
+ * Claude Code assumes a 200K window for any model id it does not recognize, so the
+ * profile tells it the real one: 95% of the catalog's context window (the old fixed
+ * 190000 is 95% of 200K), else of the category's known window, else 190000.
+ */
+function compactWindowFor(model, cfg) {
+  const ctx = Number(model?.context_length ?? model?.max_input_tokens ?? cfg?.ctx);
+  return Number.isFinite(ctx) && ctx > 0 ? Math.floor(ctx * 0.95) : DEFAULT_COMPACT_WINDOW;
 }
 
 /**
@@ -94,27 +116,27 @@ export function inheritedAnthropicKeyWarning(env = process.env) {
   if (!key || !String(key).trim()) return null;
   return (
     "ANTHROPIC_API_KEY is set in this shell. Claude Code sends it as x-api-key and asks " +
-    "\"Detected a custom API key in your environment\" — if ANTHROPIC_BASE_URL is not " +
+    '"Detected a custom API key in your environment" — if ANTHROPIC_BASE_URL is not ' +
     "picked up, that key goes to api.anthropic.com and you get a real Anthropic 401. " +
     "Unset it, or use `omniroute launch --profile <name>` (it strips every inherited " +
     "ANTHROPIC_* var before spawning claude)."
   );
 }
 
-/** Build the settings.json content for one Claude Code profile. */
-export function buildProfileSettings(modelId, baseUrl, cfg) {
+/** Build the settings.json content for one Claude Code profile from its catalog row. */
+export function buildProfileSettings(modelId, baseUrl, cfg, model) {
   const env = {
     ANTHROPIC_BASE_URL: baseUrl,
     ANTHROPIC_MODEL: modelId,
     CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: "1",
-    CLAUDE_CODE_AUTO_COMPACT_WINDOW: "190000",
+    CLAUDE_CODE_AUTO_COMPACT_WINDOW: String(compactWindowFor(model, cfg)),
   };
   const settings = {
     $schema: "https://json.schemastore.org/claude-code-settings.json",
     model: modelId,
     env,
   };
-  const effort = effortLevelFor(cfg);
+  const effort = effortLevelFor(cfg, model);
   if (effort) settings.effortLevel = effort;
   // NOTE: ANTHROPIC_AUTH_TOKEN is intentionally NOT written here — `omniroute
   // launch --profile` injects it from the active context, keeping the secret off
@@ -217,7 +239,7 @@ export async function syncClaudeProfilesFromModels(models, opts = {}) {
 
     const dir = join(profilesRoot, cfg.name);
     const filePath = join(dir, "settings.json");
-    const content = buildProfileSettings(id, baseUrl, cfg);
+    const content = buildProfileSettings(id, baseUrl, cfg, typeof m === "string" ? undefined : m);
 
     if (dryRun) {
       log(`\n── [dry-run] ${filePath} ──`);

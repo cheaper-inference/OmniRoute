@@ -53,6 +53,79 @@ test("buildProfileSettings NEVER writes the auth token to disk", () => {
   assert.equal(raw.includes("ANTHROPIC_API_KEY"), false);
 });
 
+test("buildProfileSettings sizes the compact window from the catalog context window", () => {
+  const cfg = fallbackClaudeProfile("cc/claude-opus-5-5", { id: "cc/claude-opus-5-5" });
+  const oneMillion = JSON.parse(
+    buildProfileSettings("cc/claude-opus-5-5", "http://x:20128", cfg, { context_length: 1_000_000 })
+  );
+  assert.equal(oneMillion.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "950000");
+  const small = JSON.parse(
+    buildProfileSettings("cc/claude-opus-5-5", "http://x:20128", cfg, { context_length: 128_000 })
+  );
+  assert.equal(small.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "121600");
+});
+
+test("buildProfileSettings keeps the 190000 compact window when nothing reports a context", () => {
+  const cfg = { ...categoriseModel("glm/glm-5.2"), ctx: undefined };
+  const json = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, { id: "glm/glm-5.2" })
+  );
+  assert.equal(json.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "190000");
+});
+
+test("buildProfileSettings clamps effortLevel to the model's catalog effort tiers", () => {
+  const cfg = categoriseModel("glm/glm-5.2"); // thinking -> xhigh
+  const clamped = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, {
+      capabilities: { effort_tiers: ["low", "medium", "high"] },
+    })
+  );
+  assert.equal(clamped.effortLevel, "high");
+  const supported = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, {
+      capabilities: { effort_tiers: ["low", "medium", "high", "xhigh", "max"] },
+    })
+  );
+  assert.equal(supported.effortLevel, "xhigh");
+});
+
+test("syncClaudeProfilesFromModels passes each catalog row's context window into its profile", async () => {
+  const claudeHome = await fs.mkdtemp(path.join(os.tmpdir(), "omniroute-claude-ctx-"));
+  try {
+    await syncClaudeProfilesFromModels(
+      [{ id: "new-provider/huge-ctx-1", output_modalities: ["text"], context_length: 1_000_000 }],
+      { claudeHome, baseUrl: "http://vps:20128" }
+    );
+    const json = JSON.parse(
+      await fs.readFile(
+        path.join(claudeHome, "profiles", "new-provider-huge-ctx-1", "settings.json"),
+        "utf8"
+      )
+    );
+    assert.equal(json.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "950000");
+  } finally {
+    await fs.rm(claudeHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("buildProfileSettings falls back to the category's known window when the catalog has none", () => {
+  const cfg = { ...categoriseModel("glm/glm-5.2"), ctx: 131072 };
+  const json = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, { id: "glm/glm-5.2" })
+  );
+  assert.equal(json.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "124518");
+});
+
+test("buildProfileSettings never clamps effortLevel down to minimal", () => {
+  const cfg = categoriseModel("glm/glm-5.2"); // xhigh
+  const json = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, {
+      capabilities: { effort_tiers: ["minimal", "max"] },
+    })
+  );
+  assert.equal("effortLevel" in json, false);
+});
+
 test("buildProfileSettings omits effortLevel for the simple tier", () => {
   const cfg = categoriseModel("ollamacloud/gemma4:31b"); // simple → no effort
   const json = JSON.parse(buildProfileSettings("ollamacloud/gemma4:31b", "http://x:20128", cfg));
