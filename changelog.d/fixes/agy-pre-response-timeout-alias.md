@@ -1,0 +1,1 @@
+- Preserve confirmed pre-response timeout evidence for the `agy` Antigravity provider alias as well as `antigravity`, without treating ordinary gateway 504 errors as confirmed header timeouts.
