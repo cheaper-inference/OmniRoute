@@ -212,6 +212,18 @@ async function click(el: HTMLElement) {
 }
 
 const urlsFor = (prefix: string) => urls.filter((url) => url.startsWith(prefix));
+async function exportAs(format: "CSV" | "JSON" = "CSV", trigger = "Export") {
+  fireEvent.pointerDown(screen.getByRole("button", { name: trigger }), {
+    button: 0,
+    ctrlKey: false,
+  });
+  const item = await screen.findByRole("menuitem", { name: `Export as ${format}` });
+  await act(async () => {
+    fireEvent.click(item);
+  });
+  await flush();
+}
+
 const lastUrl = (prefix: string) => urlsFor(prefix).at(-1) ?? "";
 const chipTexts = () =>
   [...container.querySelectorAll("[data-slot=scope-chip]")].map((chip) => chip.textContent);
@@ -273,7 +285,7 @@ describe("Team Reports filters from the URL", () => {
 
   it("keeps the export on the same repeated params", async () => {
     await renderPage("projectName=web%2C+app&projectName=__none__");
-    await click(screen.getByRole("button", { name: "Export CSV" }));
+    await exportAs();
 
     expect(paramsOf(lastUrl("/api/reports/export")).getAll("projectName")).toEqual([
       "web, app",

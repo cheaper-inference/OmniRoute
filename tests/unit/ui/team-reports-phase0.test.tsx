@@ -231,6 +231,18 @@ async function click(el: HTMLElement) {
   await flush();
 }
 
+async function exportAs(format: "CSV" | "JSON" = "CSV", trigger = "Export") {
+  fireEvent.pointerDown(screen.getByRole("button", { name: trigger }), {
+    button: 0,
+    ctrlKey: false,
+  });
+  const item = await screen.findByRole("menuitem", { name: `Export as ${format}` });
+  await act(async () => {
+    fireEvent.click(item);
+  });
+  await flush();
+}
+
 const lastUrl = (prefix: string) => urls.filter((url) => url.startsWith(prefix)).at(-1) ?? "";
 const paramsOf = (url: string) => new URL(url, "http://localhost").searchParams;
 
@@ -349,7 +361,7 @@ describe("Team Reports requests", () => {
   it("send tzOffset on summary, sessions and export requests", async () => {
     await render(<ReportsPageClient />);
     await click(button("Sessions"));
-    await click(button("Export CSV"));
+    await exportAs();
 
     for (const prefix of ["/api/reports/summary", "/api/reports/sessions", "/api/reports/export"]) {
       const matching = urls.filter((url) => url.startsWith(prefix));
@@ -367,7 +379,7 @@ describe("Team Reports sessions export", () => {
     chooseKitSelectValue(kitSelectByLabel("Sort by"), "cost");
     await flush();
     await click(button("Descending"));
-    await click(button("Export CSV"));
+    await exportAs();
 
     const params = paramsOf(lastUrl("/api/reports/export"));
     expect(params.get("type")).toBe("sessions");
@@ -382,7 +394,7 @@ describe("Team Reports sessions export", () => {
     exportHeaders = { "X-Report-Total": "3", "X-Report-Truncated": "false" };
     await render(<ReportsPageClient />);
     await click(button("Sessions"));
-    await click(button("Export CSV"));
+    await exportAs();
 
     expect(lastUrl("/api/reports/export")).not.toBe("");
     expect(container.querySelector("[role=status]")).toBeNull();

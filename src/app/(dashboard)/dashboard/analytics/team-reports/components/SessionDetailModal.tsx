@@ -27,6 +27,9 @@ import {
   formatSpan,
   splitTokens,
 } from "./format";
+import { sessionRequestsExportParams } from "../reportExport";
+import { useReportExport } from "../useReportExport";
+import ExportMenu, { ExportNote } from "./ExportMenu";
 import SessionTimeline from "./SessionTimeline";
 import { CacheTokens, useTokenLabels } from "./TokenFigures";
 
@@ -158,6 +161,7 @@ export default function SessionDetailModal({
   // The offset whose load failed, so moving to another page clears the message.
   const [failedAt, setFailedAt] = useState<number | null>(null);
   const failed = failedAt === offset;
+  const { note, busy, run } = useReportExport();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -230,7 +234,17 @@ export default function SessionDetailModal({
             <p className="truncate font-mono text-xs text-text-muted">{session.projectPath}</p>
           )}
           <SessionTimeline timeline={detail.timeline} />
-          <h4 className="font-semibold">{t("recentRequests")}</h4>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="font-semibold">{t("recentRequests")}</h4>
+            <ExportMenu
+              label={t("exportRequests")}
+              disabled={busy}
+              onExport={(format) =>
+                void run(sessionRequestsExportParams(sessionId, format), format)
+              }
+            />
+          </div>
+          <ExportNote note={note} />
           {failed && (
             <p role="alert" className="text-xs text-error">
               {t("loadFailed")}

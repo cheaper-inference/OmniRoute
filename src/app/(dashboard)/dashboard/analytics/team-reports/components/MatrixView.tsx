@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { SegmentedControl, Select } from "@/shared/components";
 
+import type { MatrixSelection } from "../reportExport";
 import {
   DIMENSION_INFO,
   MATRIX_DIMENSIONS,
@@ -19,16 +20,22 @@ interface MatrixViewProps extends MatrixHandlers {
   /** Report filters as a query string; the dimensions are added here. */
   query: string;
   refreshToken: number;
+  /** Owned by the page so the matrix export follows the view. */
+  selection: MatrixSelection;
+  onSelectionChange: (selection: MatrixSelection) => void;
 }
 
 /** Row and column dimension, metric, and the matrix for the current filters. Mounted only while shown. */
-export default function MatrixView({ query, refreshToken, onFilter, onOpen }: MatrixViewProps) {
+export default function MatrixView({
+  query,
+  refreshToken,
+  selection,
+  onSelectionChange,
+  onFilter,
+  onOpen,
+}: MatrixViewProps) {
   const t = useTranslations("reports");
-  const [dimensions, setDimensions] = useState<{
-    rows: ReportMatrixDimension;
-    cols: ReportMatrixDimension;
-  }>({ rows: "members", cols: "projects" });
-  const [metric, setMetric] = useState<MatrixMetric>("costUsd");
+  const { metric, ...dimensions } = selection;
 
   const matrixQuery = useMemo(() => {
     const params = new URLSearchParams(query);
@@ -44,13 +51,21 @@ export default function MatrixView({ query, refreshToken, onFilter, onOpen }: Ma
   );
 
   // The two dimensions always differ: picking the other axis's dimension swaps them.
-  const pick = (axis: "rows" | "cols", value: ReportMatrixDimension) =>
-    setDimensions((current) => {
-      if (axis === "rows") {
-        return { rows: value, cols: current.cols === value ? current.rows : current.cols };
-      }
-      return { rows: current.rows === value ? current.cols : current.rows, cols: value };
-    });
+  const pick = (axis: "rows" | "cols", value: ReportMatrixDimension) => {
+    if (axis === "rows") {
+      onSelectionChange({
+        ...selection,
+        rows: value,
+        cols: selection.cols === value ? selection.rows : selection.cols,
+      });
+    } else {
+      onSelectionChange({
+        ...selection,
+        rows: selection.rows === value ? selection.cols : selection.rows,
+        cols: value,
+      });
+    }
+  };
 
   const hasActive = Boolean(data?.cells.some((line) => line.some((cell) => cell.activeMs != null)));
   const shownMetric: MatrixMetric = metric === "activeMs" && !hasActive ? "costUsd" : metric;
@@ -89,7 +104,7 @@ export default function MatrixView({ query, refreshToken, onFilter, onOpen }: Ma
           size="sm"
           aria-label={t("matrixMetric")}
           value={shownMetric}
-          onChange={(value) => setMetric(value as MatrixMetric)}
+          onChange={(value) => onSelectionChange({ ...selection, metric: value as MatrixMetric })}
           options={metrics.map((value) => ({ value, label: t(`metric_${value}`) }))}
         />
       </div>

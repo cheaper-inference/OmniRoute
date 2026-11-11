@@ -9,6 +9,7 @@ import { Button, Card, SegmentedControl } from "@/shared/components";
 import { BREAKDOWN_TABS, type DrillKind } from "./breakdownTabs";
 import BreakdownTable from "./components/BreakdownTable";
 import DrillPanel, { type DrillTarget } from "./components/DrillPanel";
+import ExportMenu, { ExportNote } from "./components/ExportMenu";
 import FilterChips from "./components/FilterChips";
 import HeatmapView from "./components/HeatmapView";
 import KpiCards from "./components/KpiCards";
@@ -30,8 +31,15 @@ import {
   type TimePreset,
   REPORT_TABS,
 } from "./reportFilters";
+import {
+  DEFAULT_MATRIX_SELECTION,
+  tabExportParams,
+  type ExportFormat,
+  type MatrixSelection,
+} from "./reportExport";
 import { trendDimensionFor } from "./reportViews";
 import { useReportData } from "./useReportData";
+import { useReportExport } from "./useReportExport";
 
 export default function ReportsPageClient() {
   const t = useTranslations("reports");
@@ -45,7 +53,8 @@ export default function ReportsPageClient() {
   const [tab, setTab] = useState<ReportTab>(initial.tab);
   const [sessionOrder, setSessionOrder] = useState<SessionOrder>(initial.sessionOrder);
   const [refreshToken, setRefreshToken] = useState(0);
-  const [exportNote, setExportNote] = useState<string | null>(null);
+  const [matrix, setMatrix] = useState<MatrixSelection>(DEFAULT_MATRIX_SELECTION);
+  const { note: exportNote, busy: exporting, run: runExport } = useReportExport();
   const [drill, setDrill] = useState<DrillTarget | null>(null);
   const { query, loading, report, failed, facets } = useReportData(filters, refreshToken);
 
@@ -73,55 +82,25 @@ export default function ReportsPageClient() {
   const clearDimensionFilters = () =>
     setFilters((current) => ({ ...emptyFilters("all"), from: current.from, to: current.to }));
 
-  const exportCsv = async () => {
-    const params = new URLSearchParams(query);
-    params.set("type", tab);
-    if (tab === "sessions") {
-      params.set("sort", sessionOrder.sort);
-      params.set("order", sessionOrder.desc ? "desc" : "asc");
-    }
-    setExportNote(null);
-    try {
-      const res = await fetch(`/api/reports/export?${params}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      // Keep the server's date-stamped name; fall back if the header is missing.
-      const serverName = res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1];
-      link.download = serverName ?? `omniroute-report-${tab}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-      if (res.headers.get("X-Report-Truncated") === "true") {
-        setExportNote(t("exportTruncated", { total: Number(res.headers.get("X-Report-Total")) }));
-      }
-    } catch {
-      setExportNote(t("exportFailed"));
-    }
+  const exportActiveTab = (format: ExportFormat) => {
+    const params = tabExportParams(tab, format, query, sessionOrder, matrix);
+    if (params) void runExport(params, format);
   };
 
   const breakdownTab = isBreakdownTab(tab) ? BREAKDOWN_TABS[tab] : null;
   const filterField = breakdownTab?.filterField;
   const drillKind = breakdownTab?.drill;
   const openDrill = (kind: DrillKind, key: string, label: string) => setDrill({ kind, key, label });
-  // Matrix and heatmap have no CSV of their own.
-  const exportable = tab !== "matrix" && tab !== "heatmap";
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-end gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          icon="download"
-          disabled={!exportable}
-          onClick={() => void exportCsv()}
-        >
-          {t("exportCsv")}
-        </Button>
+        <ExportMenu
+          label={t("exportMenu")}
+          onExport={exportActiveTab}
+          disabled={tab === "heatmap" || exporting}
+          disabledHint={tab === "heatmap" ? t("exportNoHeatmap") : undefined}
+        />
         <Button size="sm" icon="refresh" onClick={() => setRefreshToken((current) => current + 1)}>
           {t("refresh")}
         </Button>
@@ -141,11 +120,7 @@ export default function ReportsPageClient() {
         onClear={clearDimensionFilters}
       />
 
-      {exportNote && (
-        <p role="status" className="text-sm text-text-muted">
-          {exportNote}
-        </p>
-      )}
+      <ExportNote note={exportNote} />
 
       {failed && (
         <p className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
@@ -196,6 +171,8 @@ export default function ReportsPageClient() {
           <MatrixView
             query={query}
             refreshToken={refreshToken}
+            selection={matrix}
+            onSelectionChange={setMatrix}
             onFilter={(pairs) =>
               setFilters((current) =>
                 pairs.reduce((next, [field, value]) => withFilterValue(next, field, value), current)

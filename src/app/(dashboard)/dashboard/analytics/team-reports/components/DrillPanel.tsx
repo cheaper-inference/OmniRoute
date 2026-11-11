@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Sheet,
@@ -17,6 +17,7 @@ import type { DrillKind } from "../breakdownTabs";
 import type { FilterField } from "../reportFilters";
 import { DIMENSION_INFO, isSessionsPage, isSummary } from "../reportViews";
 import { useReportResource } from "../useReportResource";
+import SessionDetailModal from "./SessionDetailModal";
 import { DrillKpis, DrillSessions, DrillTopList } from "./DrillSections";
 import TrendsSection from "./TrendsSection";
 
@@ -50,6 +51,7 @@ export default function DrillPanel({
   onApply,
 }: DrillPanelProps) {
   const t = useTranslations("reports");
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const field = KIND_FIELD[target.kind];
   // The panel's own value replaces the page's filter on the same field.
   const drillQuery = useMemo(() => {
@@ -77,64 +79,71 @@ export default function DrillPanel({
   const isMember = target.kind === "member";
 
   return (
-    <Sheet open onOpenChange={(open) => !open && onClose()}>
-      <SheetContent
-        side="right"
-        closeLabel={t("closePanel")}
-        aria-describedby={undefined}
-        className="w-full max-w-full bg-surface p-0 sm:w-[560px]"
-      >
-        <SheetHeader>
-          <SheetTitle className="break-words text-xl">{target.label}</SheetTitle>
-          <SheetDescription>
-            {t(isMember ? "drillMemberHelp" : "drillProjectHelp")}
-          </SheetDescription>
-        </SheetHeader>
-        <SheetBody className="space-y-5">
-          <Button
-            size="sm"
-            variant="secondary"
-            icon="filter_list"
-            onClick={() => {
-              onApply(field, target.key);
-              onClose();
-            }}
-          >
-            {t("applyAsFilter")}
-          </Button>
-          {summary.failed && <p className="text-sm text-error">{t("loadFailed")}</p>}
-          {summary.data && (
-            <div className={summary.loading ? "opacity-60 transition-opacity" : undefined}>
-              <DrillKpis totals={summary.data.totals} />
-            </div>
-          )}
-          {isMember ? (
+    <>
+      <Sheet open onOpenChange={(open) => !open && onClose()}>
+        <SheetContent
+          side="right"
+          closeLabel={t("closePanel")}
+          aria-describedby={undefined}
+          className="w-full max-w-full bg-surface p-0 sm:w-[560px]"
+        >
+          <SheetHeader>
+            <SheetTitle className="break-words text-xl">{target.label}</SheetTitle>
+            <SheetDescription>
+              {t(isMember ? "drillMemberHelp" : "drillProjectHelp")}
+            </SheetDescription>
+          </SheetHeader>
+          <SheetBody className="space-y-5">
+            <Button
+              size="sm"
+              variant="secondary"
+              icon="filter_list"
+              onClick={() => {
+                onApply(field, target.key);
+                onClose();
+              }}
+            >
+              {t("applyAsFilter")}
+            </Button>
+            {summary.failed && <p className="text-sm text-error">{t("loadFailed")}</p>}
+            {summary.data && (
+              <div className={summary.loading ? "opacity-60 transition-opacity" : undefined}>
+                <DrillKpis totals={summary.data.totals} />
+              </div>
+            )}
+            {isMember ? (
+              <DrillTopList
+                title={t("drillTopProjects")}
+                rows={breakdowns?.projects ?? []}
+                fallback={t("noProject")}
+              />
+            ) : (
+              <DrillTopList
+                title={t("drillByMember")}
+                rows={breakdowns?.members ?? []}
+                fallback={t("unknownMember")}
+              />
+            )}
             <DrillTopList
-              title={t("drillTopProjects")}
-              rows={breakdowns?.projects ?? []}
-              fallback={t("noProject")}
+              title={t("drillTopModels")}
+              rows={breakdowns?.models ?? []}
+              fallback={t("unknown")}
             />
-          ) : (
-            <DrillTopList
-              title={t("drillByMember")}
-              rows={breakdowns?.members ?? []}
-              fallback={t("unknownMember")}
+            <TrendsSection
+              query={drillQuery}
+              dimension="members"
+              refreshToken={refreshToken}
+              compact
             />
-          )}
-          <DrillTopList
-            title={t("drillTopModels")}
-            rows={breakdowns?.models ?? []}
-            fallback={t("unknown")}
-          />
-          <TrendsSection
-            query={drillQuery}
-            dimension="members"
-            refreshToken={refreshToken}
-            compact
-          />
-          <DrillSessions sessions={sessions.data?.sessions ?? []} kind={target.kind} />
-        </SheetBody>
-      </SheetContent>
-    </Sheet>
+            <DrillSessions
+              sessions={sessions.data?.sessions ?? []}
+              kind={target.kind}
+              onSelect={setSessionId}
+            />
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
+      {sessionId && <SessionDetailModal sessionId={sessionId} onClose={() => setSessionId(null)} />}
+    </>
   );
 }

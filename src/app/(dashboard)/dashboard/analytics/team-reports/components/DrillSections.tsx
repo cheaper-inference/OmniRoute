@@ -7,6 +7,7 @@ import type {
   ReportBreakdownRow,
   ReportSummaryTotals,
 } from "@/lib/usage/agentSessionReports";
+import { Button } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import { NO_VALUE, formatDateTime, formatLatency, formatRatio, formatSpan } from "./format";
@@ -85,9 +86,11 @@ export function DrillTopList({
 export function DrillSessions({
   sessions,
   kind,
+  onSelect,
 }: {
   sessions: AgentSessionReportRow[];
   kind: "member" | "project";
+  onSelect: (id: string) => void;
 }) {
   const t = useTranslations("reports");
   return (
@@ -104,8 +107,13 @@ export function DrillSessions({
               <li key={session.id} className="space-y-0.5 py-1.5">
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="min-w-0 truncate font-medium">{who}</span>
-                  <span className="shrink-0 font-mono tabular-nums text-success">
-                    {formatCost(session.costUsd)}
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="font-mono tabular-nums text-success">
+                      {formatCost(session.costUsd)}
+                    </span>
+                    <Button variant="ghost" size="sm" onClick={() => onSelect(session.id)}>
+                      {t("details")}
+                    </Button>
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-x-3 text-xs text-text-muted">
