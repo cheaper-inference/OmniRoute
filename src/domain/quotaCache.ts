@@ -47,7 +47,11 @@ import {
   isExplicitClaudeQuota429Text,
   isClaudeQuotaMetadata,
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
-import { readClaudeUsageLimitConfig } from "@omniroute/open-sse/services/claudeLowPriority.ts";
+import {
+  getClaudeHeader,
+  parseClaudeHeaderNumber,
+  readClaudeUsageLimitConfig,
+} from "@omniroute/open-sse/services/claudeLowPriority.ts";
 import {
   isClaudeModelCreditEntitlementText,
   SUBSCRIPTION_QUOTA_COOLDOWN_MS,
@@ -292,6 +296,7 @@ function isWindowParkReleased(entry: QuotaCacheEntry, now: number): boolean {
 
 export function __clearForTests() {
   getState().cache.clear();
+  noSnapshotUntil.clear();
 }
 
 function resolveAntigravityQuotaWindowsForModel(
@@ -552,6 +557,8 @@ function isClaudeQuotaExhaustedForRequest(
   );
 }
 
+type ClaudeResponseHeaders = Headers | Record<string, string | undefined>;
+
 export type ClaudeQuotaScopeDecision = {
   scope: "model" | "connection";
   // "headroom": fresh telemetry proves every account-wide window has quota left (#18296).
@@ -603,6 +610,30 @@ function hasProvenClaudeAccountHeadroom(globalWindows: QuotaInfo[]): boolean {
   return kinds.has("session") && kinds.has("weekly_all");
 }
 
+// A rejected unified status that blames an overage claim while the shared 7d window is allowed and
+// the 5h window is not rejected (its utilization is absent or below 1.0) rejects one model (Fable),
+// not the account. Anthropic omits the 5h headers when it did not evaluate that window.
+function isOverageOnlyClaudeRejection(headers: ClaudeResponseHeaders | null | undefined): boolean {
+  if (!headers) return false;
+  const h = (name: string) =>
+    getClaudeHeader(headers, `anthropic-ratelimit-unified-${name}`)?.trim().toLowerCase() ?? "";
+  if (h("status") !== "rejected") return false;
+  const status7d = h("7d-status");
+  if (status7d !== "allowed" && status7d !== "allowed_warning") return false;
+  const status5h = h("5h-status");
+  if (status5h !== "" && status5h !== "allowed" && status5h !== "allowed_warning") return false;
+  const overage =
+    h("representative-claim").includes("overage") ||
+    h("overage-status") === "rejected" ||
+    h("7d_oi-status") === "rejected";
+  if (!overage) return false;
+  const utilization5h = parseClaudeHeaderNumber(
+    headers,
+    "anthropic-ratelimit-unified-5h-utilization"
+  );
+  return utilization5h === undefined ? h("5h-utilization") === "" : utilization5h < 1;
+}
+
 // An explicit Claude model-credit entitlement failure is model scoped even
 // without a usable quota snapshot; never park unrelated sibling models.
 const MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT: ClaudeQuotaScopeDecision = {
@@ -641,6 +672,8 @@ export function getCachedClaudeQuotaScopeDecision(input: {
   status: number;
   errorText: string;
   model: string | null | undefined;
+  /** Headers of the 429 itself: they stand in for usage windows that are missing or stale. */
+  headers?: ClaudeResponseHeaders | null;
   nowMs?: number;
 }): ClaudeQuotaScopeDecision {
   const canonicalProvider = input.provider ? resolveProviderId(input.provider) : input.provider;
@@ -663,8 +696,9 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     resolveProviderId(entry.provider) !== canonicalProvider ||
     now - entry.fetchedAt >= ACTIVE_TTL_MS
   ) {
-    return modelCreditEntitlement
-      ? MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT
+    if (modelCreditEntitlement) return MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT;
+    return isOverageOnlyClaudeRejection(input.headers)
+      ? HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA
       : CONNECTION_SCOPED_CLAUDE_QUOTA;
   }
 
@@ -707,7 +741,12 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     );
   }
 
-  if (hasProvenClaudeAccountHeadroom(globalWindows)) return HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA;
+  if (
+    hasProvenClaudeAccountHeadroom(globalWindows) ||
+    isOverageOnlyClaudeRejection(input.headers)
+  ) {
+    return HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA;
+  }
 
   return CONNECTION_SCOPED_CLAUDE_QUOTA;
 }
@@ -876,6 +915,7 @@ export function setQuotaCache(
       : new Set<string>();
   const exhausted = isExhausted(quotas);
   if (isTelemetryOnlyRefresh(prior, quotas, modelQuotas)) return;
+  noSnapshotUntil.delete(connectionId);
   const entry: QuotaCacheEntry = {
     connectionId,
     provider,
@@ -938,9 +978,19 @@ export function getQuotaCacheOrSnapshot(connectionId: string): QuotaCacheEntry |
   return hydrateQuotaCacheFromSnapshots(connectionId);
 }
 
+// Connections whose last lookup found no snapshot rows, mapped to the time that verdict expires.
+// Credential selection asks about every candidate on every request; without this a pool with no
+// snapshots repeats the same empty query per candidate. setQuotaCache drops the verdict when it
+// records a reading. shortcut: module state, so a second bundle chunk (#8065) keeps its own copy
+// for at most NO_SNAPSHOT_TTL_MS; the shared cache entry is checked first and covers fresh writes.
+const NO_SNAPSHOT_TTL_MS = 30_000;
+const NO_SNAPSHOT_MAX_ENTRIES = 5_000;
+const noSnapshotUntil = new Map<string, number>();
+
 function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry | null {
   const { cache } = getState();
   if (cache.has(connectionId)) return cache.get(connectionId) || null;
+  if ((noSnapshotUntil.get(connectionId) ?? 0) > Date.now()) return null;
 
   let snapshots;
   try {
@@ -948,7 +998,11 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
   } catch {
     return null;
   }
-  if (!snapshots.length) return null;
+  if (!snapshots.length) {
+    if (noSnapshotUntil.size >= NO_SNAPSHOT_MAX_ENTRIES) noSnapshotUntil.clear();
+    noSnapshotUntil.set(connectionId, Date.now() + NO_SNAPSHOT_TTL_MS);
+    return null;
+  }
 
   const quotas: Record<string, QuotaInfo> = {};
   let provider = "";

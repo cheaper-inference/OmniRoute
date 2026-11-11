@@ -8,11 +8,15 @@
  *
  * Extracted so the frozen chat.ts / chatHelpers.ts do not grow (file-size gate).
  */
+import { inheritClaudeScopeHeaders } from "@omniroute/open-sse/services/claudeScopeHeaders.ts";
 import { inheritEmptyTurnPolicy } from "@omniroute/open-sse/utils/emptyTurnPolicy.ts";
 import { inheritProviderProbeResponse } from "@/shared/utils/providerProbeResult";
 
 export { inheritProviderProbeResponse };
 
 export function inheritResponsePolicies(source: Response, target: Response): Response {
-  return inheritEmptyTurnPolicy(source, inheritProviderProbeResponse(source, target));
+  return inheritClaudeScopeHeaders(
+    source,
+    inheritEmptyTurnPolicy(source, inheritProviderProbeResponse(source, target))
+  );
 }

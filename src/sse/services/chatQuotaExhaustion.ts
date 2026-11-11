@@ -14,6 +14,7 @@ export async function maybeMarkChatAccountExhaustedFrom429(input: {
   errorText: string;
   failureKind: FailureKind | undefined;
   passthroughModels: boolean | undefined;
+  headers?: Headers | null;
 }): Promise<void> {
   // Mark account as quota-exhausted only for explicit long-window quota signals.
   // A plain 429/high-traffic response should trigger fallback/cooldown, not poison
@@ -33,6 +34,7 @@ export async function maybeMarkChatAccountExhaustedFrom429(input: {
       status: input.status,
       errorText: input.errorText,
       model: input.model,
+      headers: input.headers,
     }).evidence !== "none"
   ) {
     return;

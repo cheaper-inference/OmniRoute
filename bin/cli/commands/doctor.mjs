@@ -10,7 +10,11 @@ import { getCliToken, CLI_TOKEN_HEADER } from "../utils/cliToken.mjs";
 import { printHeading } from "../io.mjs";
 import { printablePath } from "../utils/untrustedCwdEnv.mjs";
 import { t } from "../i18n.mjs";
-import { readDatabaseHealth, readEncryptedCredentialSamples } from "../sqlite.mjs";
+import {
+  readDatabaseHealth,
+  readEncryptedCredentialSamples,
+  withReadonlySqlite,
+} from "../sqlite.mjs";
 import { getCrashLogPath } from "../runtime/processSupervisor.mjs";
 import { prebuiltBinaryName } from "../runtime/nativeDeps.mjs";
 const STATIC_SALT = "omniroute-field-encryption-v1";
@@ -27,6 +31,12 @@ function warn(name, message, details = {}) {
 
 function fail(name, message, details = {}) {
   return { name, status: "fail", message, details };
+}
+
+// A check whose prerequisite did not pass is skipped, not failed: it cannot say anything, and it
+// must not flip the exit code or bury the real cause (the check it depends on).
+function skip(name, message, details = {}) {
+  return { name, status: "skip", message, details };
 }
 
 function parsePort(value, fallback) {
@@ -273,6 +283,62 @@ async function checkPorts() {
   return ok("Port availability", "Configured port(s) are available", {
     ports: { apiPort, dashboardPort },
   });
+}
+
+// Active compat connections (openai-compatible-*, anthropic-compatible-*) that have neither a
+// synced model list ('<provider>:<connectionId>') nor custom models ('<provider>'). Null when the
+// provider table does not exist yet.
+function readHollowConnections(dbPath) {
+  return withReadonlySqlite(dbPath, (db) => {
+    const tableExists = (name) =>
+      !!db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(name);
+    if (!tableExists("provider_connections")) return null;
+    const rows = db
+      .prepare(
+        `SELECT id, provider FROM provider_connections
+         WHERE COALESCE(is_active, 1) = 1
+           AND (provider LIKE 'openai-compatible-%' OR provider LIKE 'anthropic-compatible-%')`
+      )
+      .all();
+    if (!tableExists("key_value")) return rows.map((row) => row.id);
+    const hasModels = db.prepare(
+      `SELECT 1 FROM key_value
+       WHERE ((namespace = 'syncedAvailableModels' AND key = ?)
+           OR (namespace = 'customModels' AND key = ?))
+         AND value NOT IN ('', '[]', 'null')
+       LIMIT 1`
+    );
+    return rows
+      .filter((row) => !hasModels.get(`${row.provider}:${row.id}`, row.provider))
+      .map((row) => row.id);
+  });
+}
+
+// An active compat connection with no synced model list and no custom model has nothing to route
+// to: the symptom is "model not found" although the URL and key are right. Static-catalog
+// providers need no synced rows, so they are not looked at.
+async function checkProviders(dbPath, databaseCheck) {
+  if (!fs.existsSync(dbPath) || databaseCheck.status === "fail") {
+    return skip("Providers", "Skipped: the Database check did not pass", { dbPath });
+  }
+  try {
+    const hollow = await readHollowConnections(dbPath);
+    if (hollow === null) {
+      return skip("Providers", "Skipped: no provider table yet", { dbPath });
+    }
+    if (hollow.length > 0) {
+      return warn(
+        "Providers",
+        `${hollow.length} active connection(s) have no cached models; refresh the model list or add a custom model`,
+        { hollowConnections: hollow }
+      );
+    }
+    return ok("Providers", "Every active compat connection has models");
+  } catch (error) {
+    return warn("Providers", "Could not read provider connections", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 async function checkNodeRuntime(rootDir) {
@@ -591,8 +657,10 @@ export async function collectDoctorChecks(context = {}, options = {}) {
 
   const checks = [];
   checks.push(checkConfig(dataDir));
-  checks.push(await checkDatabase(dbPath, rootDir));
+  const databaseCheck = await checkDatabase(dbPath, rootDir);
+  checks.push(databaseCheck);
   checks.push(await checkStorageEncryption(dbPath));
+  checks.push(await checkProviders(dbPath, databaseCheck));
   checks.push(await checkPorts());
   checks.push(await checkNodeRuntime(rootDir));
   checks.push(await checkNativeBinary(rootDir));
@@ -600,8 +668,13 @@ export async function collectDoctorChecks(context = {}, options = {}) {
   checks.push(checkCrashLog());
 
   if (!options.skipLiveness) {
-    checks.push(await checkServerLiveness(options));
-    checks.push(await checkMachineTokenAuth(options));
+    const liveness = await checkServerLiveness(options);
+    checks.push(liveness);
+    checks.push(
+      liveness.status === "ok"
+        ? await checkMachineTokenAuth(options)
+        : skip("CLI machine token", "Skipped: the Server liveness check did not pass")
+    );
   }
 
   // CLI tool health checks
@@ -621,6 +694,7 @@ export async function collectDoctorChecks(context = {}, options = {}) {
       ok: checks.filter((check) => check.status === "ok").length,
       warn: checks.filter((check) => check.status === "warn").length,
       fail: checks.filter((check) => check.status === "fail").length,
+      skip: checks.filter((check) => check.status === "skip").length,
     },
   };
 }
@@ -628,7 +702,13 @@ export async function collectDoctorChecks(context = {}, options = {}) {
 function printCheck(check) {
   const label = check.status.toUpperCase().padEnd(4);
   const color =
-    check.status === "ok" ? "\x1b[32m" : check.status === "warn" ? "\x1b[33m" : "\x1b[31m";
+    check.status === "ok"
+      ? "\x1b[32m"
+      : check.status === "warn"
+        ? "\x1b[33m"
+        : check.status === "skip"
+          ? "\x1b[2m"
+          : "\x1b[31m";
   console.log(`${color}${label}\x1b[0m ${check.name}: ${check.message}`);
 }
 
@@ -666,7 +746,7 @@ export async function runDoctorCommand(opts = {}, context = {}) {
       printCheck(check);
     }
     console.log(
-      `\nSummary: ${result.summary.ok} ok, ${result.summary.warn} warning(s), ${result.summary.fail} failure(s)`
+      `\nSummary: ${result.summary.ok} ok, ${result.summary.warn} warning(s), ${result.summary.fail} failure(s), ${result.summary.skip} skipped`
     );
   }
 

@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute doctor` skips the machine-token check when the server does not answer, skips the new Providers check when there is no usable database, reports skipped checks in the summary without changing the exit code, and warns about active compat connections that have no cached models. ([#19764](https://github.com/cheaper-inference/OmniRoute/pull/19764))
