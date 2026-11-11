@@ -221,12 +221,12 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
 
       {open && (
         <div className="mt-1.5 flex flex-col gap-2">
-          <p className="text-[11px] text-text-muted leading-snug">{t("schedulesHint")}</p>
+          <p className="text-xs text-text-muted leading-snug">{t("schedulesHint")}</p>
 
           {!loaded ? (
-            <div className="text-[11px] text-text-muted italic">{t("loading")}</div>
+            <div className="text-xs text-text-muted italic">{t("loading")}</div>
           ) : rows.length === 0 ? (
-            <div className="text-[11px] text-text-muted italic">{t("schedulesEmpty")}</div>
+            <div className="text-xs text-text-muted italic">{t("schedulesEmpty")}</div>
           ) : (
             <div className="flex flex-col gap-2">
               {rows.map((row, index) => (
