@@ -12870,6 +12870,8 @@
     },
     "attempts": "forsøk",
     "detail": {
+      "tabOverview": "Oversikt",
+      "tabPayloads": "Nyttelaster",
       "omittedHttpAttempts": "{count} HTTP-sendinger ble ikke lagret",
       "noHttpResponse": "Ingen HTTP-respons ble observert",
       "transportError": "Transportfeil",

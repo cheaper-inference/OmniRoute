@@ -12870,6 +12870,8 @@
     },
     "attempts": "ପ୍ରୟାସଗୁଡ଼ିକ",
     "detail": {
+      "tabOverview": "ସାରାଂଶ",
+      "tabPayloads": "ପେଲୋଡ୍ଗୁଡ଼ିକ",
       "omittedHttpAttempts": "{count} HTTP ପ୍ରେରଣ ସଂରକ୍ଷିତ ହୋଇନାହିଁ",
       "noHttpResponse": "କୌଣସି HTTP ପ୍ରତିକ୍ରିୟା ଦେଖାଯାଇନାହିଁ",
       "transportError": "ପରିବହନ ତ୍ରୁଟି",

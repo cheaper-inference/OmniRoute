@@ -12870,6 +12870,8 @@
     },
     "attempts": "mga pagtatangkang",
     "detail": {
+      "tabOverview": "Pangkalahatang-ideya",
+      "tabPayloads": "Mga Payload",
       "omittedHttpAttempts": "Hindi napanatili ang {count} pagpapadala ng HTTP",
       "noHttpResponse": "Walang naobserbahang tugon sa HTTP",
       "transportError": "Error sa transportasyon",

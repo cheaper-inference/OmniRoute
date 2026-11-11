@@ -12870,6 +12870,8 @@
     },
     "attempts": "ሙከራዎች",
     "detail": {
+      "tabOverview": "አጠቃላይ እይታ",
+      "tabPayloads": "የውሂብ ጭነቶች",
       "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
       "noHttpResponse": "የHTTP ምላሽ አልታየም",
       "transportError": "የማጓጓዣ ስህተት",

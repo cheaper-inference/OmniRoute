@@ -12870,6 +12870,8 @@
     },
     "attempts": "спроби",
     "detail": {
+      "tabOverview": "Огляд",
+      "tabPayloads": "Дані",
       "omittedHttpAttempts": "{count} надсилань HTTP не збережено",
       "noHttpResponse": "Відповідь HTTP не спостерігалася",
       "transportError": "Помилка транспорту",

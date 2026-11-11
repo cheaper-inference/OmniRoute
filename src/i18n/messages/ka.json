@@ -12870,6 +12870,8 @@
     },
     "attempts": "მცდელობები",
     "detail": {
+      "tabOverview": "მიმოხილვა",
+      "tabPayloads": "მონაცემები",
       "omittedHttpAttempts": "{count} HTTP გაგზავნა არ შენახულა",
       "noHttpResponse": "HTTP პასუხი არ დაფიქსირებულა",
       "transportError": "გადაცემის შეცდომა",

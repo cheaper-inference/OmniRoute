@@ -12870,6 +12870,8 @@
     },
     "attempts": "pokusy",
     "detail": {
+      "tabOverview": "Prehľad",
+      "tabPayloads": "Dáta požiadaviek",
       "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
       "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
       "transportError": "Chyba prenosu",

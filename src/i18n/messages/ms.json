@@ -12870,6 +12870,8 @@
     },
     "attempts": "cuba",
     "detail": {
+      "tabOverview": "Gambaran keseluruhan",
+      "tabPayloads": "Muatan",
       "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
       "noHttpResponse": "Tiada respons HTTP diperhatikan",
       "transportError": "Ralat pengangkutan",

@@ -12870,6 +12870,8 @@
     },
     "attempts": "尝试次数",
     "detail": {
+      "tabOverview": "概述",
+      "tabPayloads": "负载",
       "omittedHttpAttempts": "未保留 {count} 次 HTTP 发送",
       "noHttpResponse": "未观察到 HTTP 响应",
       "transportError": "传输错误",

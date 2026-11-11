@@ -12870,6 +12870,8 @@
     },
     "attempts": "ശ്രമങ്ങൾ",
     "detail": {
+      "tabOverview": "അവലോകനം",
+      "tabPayloads": "പേലോഡുകൾ",
       "omittedHttpAttempts": "{count} HTTP അയയ്ക്കലുകൾ സൂക്ഷിച്ചിട്ടില്ല",
       "noHttpResponse": "HTTP പ്രതികരണം നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല",
       "transportError": "ഗതാഗത പിശക്",

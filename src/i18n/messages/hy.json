@@ -12870,6 +12870,8 @@
     },
     "attempts": "փորձեր",
     "detail": {
+      "tabOverview": "Ընդհանուր ակնարկ",
+      "tabPayloads": "Օգտակար բեռներ",
       "omittedHttpAttempts": "{count} HTTP ուղարկումներ չեն պահպանվել",
       "noHttpResponse": "HTTP պատասխան չի դիտարկվել",
       "transportError": "Փոխանցման սխալ",

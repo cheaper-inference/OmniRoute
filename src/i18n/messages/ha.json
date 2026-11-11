@@ -12870,6 +12870,8 @@
     },
     "attempts": "yunƙurai",
     "detail": {
+      "tabOverview": "Bayyani",
+      "tabPayloads": "Bayanan da aka aika",
       "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
       "noHttpResponse": "Ba a lura da martanin HTTP ba",
       "transportError": "Kuskuren jigila",

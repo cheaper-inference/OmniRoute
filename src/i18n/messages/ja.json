@@ -12870,6 +12870,8 @@
     },
     "attempts": "試行回数",
     "detail": {
+      "tabOverview": "概要",
+      "tabPayloads": "ペイロード",
       "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
       "noHttpResponse": "HTTP 応答は確認されていません",
       "transportError": "トランスポートエラー",

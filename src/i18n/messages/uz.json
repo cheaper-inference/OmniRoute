@@ -12870,6 +12870,8 @@
     },
     "attempts": "urinishlar",
     "detail": {
+      "tabOverview": "Umumiy ko‘rinish",
+      "tabPayloads": "Yuklamalar",
       "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
       "noHttpResponse": "HTTP javobi kuzatilmadi",
       "transportError": "Uzatish xatosi",

@@ -12870,6 +12870,8 @@
     },
     "attempts": "próby",
     "detail": {
+      "tabOverview": "Przegląd",
+      "tabPayloads": "Dane",
       "omittedHttpAttempts": "Nie zachowano {count} wysłań HTTP",
       "noHttpResponse": "Nie zaobserwowano odpowiedzi HTTP",
       "transportError": "Błąd transportu",

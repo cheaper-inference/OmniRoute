@@ -12870,6 +12870,8 @@
     },
     "attempts": "tentattivi",
     "detail": {
+      "tabOverview": "Ħarsa Ġenerali",
+      "tabPayloads": "Tagħbijiet",
       "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
       "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
       "transportError": "Żball fit-trasport",

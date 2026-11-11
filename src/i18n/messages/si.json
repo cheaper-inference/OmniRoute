@@ -12870,6 +12870,8 @@
     },
     "attempts": "උත්සාහ",
     "detail": {
+      "tabOverview": "දළ විශ්ලේෂණය",
+      "tabPayloads": "දත්තභාර",
       "omittedHttpAttempts": "HTTP යැවීම් {count}ක් රඳවාගෙන නැත",
       "noHttpResponse": "HTTP ප්‍රතිචාරයක් නිරීක්ෂණය වී නැත",
       "transportError": "ප්‍රවාහන දෝෂය",

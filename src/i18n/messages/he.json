@@ -12870,6 +12870,8 @@
     },
     "attempts": "ניסיונות",
     "detail": {
+      "tabOverview": "סקירה כללית",
+      "tabPayloads": "מטענים",
       "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
       "noHttpResponse": "לא נצפתה תגובת HTTP",
       "transportError": "שגיאת תעבורה",

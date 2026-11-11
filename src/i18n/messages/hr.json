@@ -12870,6 +12870,8 @@
     },
     "attempts": "pokušaji",
     "detail": {
+      "tabOverview": "Pregled",
+      "tabPayloads": "Sadržaji zahtjeva",
       "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
       "noHttpResponse": "HTTP odgovor nije zabilježen",
       "transportError": "Pogreška prijenosa",

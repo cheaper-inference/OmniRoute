@@ -12870,6 +12870,8 @@
     },
     "attempts": "versuche",
     "detail": {
+      "tabOverview": "Übersicht",
+      "tabPayloads": "Nutzdaten",
       "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
       "noHttpResponse": "Keine HTTP-Antwort beobachtet",
       "transportError": "Transportfehler",
