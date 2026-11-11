@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "omniroute",
   "version": "3.8.54",
   "description": "Unified AI router with 388 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
@@ -556,7 +556,7 @@
     "joi": "^18.2.9",
     "onnxruntime-node": "1.30.0",
     "eslint-plugin-react-hooks": "7.1.1",
-    "fast-xml-parser": "^5.10.1",
+    "fast-xml-parser": "^5.12.0",
     "sharp": "^0.35.5",
     "postcss": "^8.5.18",
     "ip-address": "^10.7.4",
