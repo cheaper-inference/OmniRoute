@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Podėlyje saugomi įvesties žetonai",
+    "inputTokensHint": "Neįtraukiami skaitymai iš podėlio. Įrašymai į podėlį vis tiek skaičiuojami kaip įvesties žetonai.",
+    "inputSplitUnavailable": "Įvesties išskaidymas nepasiekiamas, nes podėlio skaitymo duomenys yra neišsamūs arba nenuoseklūs.",
+    "cachedInputTokensHint": "Tik pateikti skaitymai iš podėlio, jau įtraukti į bendrą įvestį.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Naudojimo analitika",
     "tokenDisplayCompact": "Glaustas",

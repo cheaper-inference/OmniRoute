@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "कॅशमध्ये साठवलेले इनपुट टोकन",
+    "inputTokensHint": "कॅशमधून वाचलेले टोकन वगळले जातात. कॅशमध्ये लिहिलेले टोकन इनपुट टोकन म्हणूनच मोजले जातात.",
+    "inputSplitUnavailable": "इनपुटचे विभाजन उपलब्ध नाही कारण कॅश वाचनाचा डेटा अपूर्ण किंवा विसंगत आहे.",
+    "cachedInputTokensHint": "फक्त नोंदवलेली कॅश वाचने, जी एकूण इनपुटमध्ये आधीच समाविष्ट आहेत.",
     "title": "विश्लेषण",
     "usageAnalyticsTitle": "वापर विश्लेषण",
     "tokenDisplayCompact": "संक्षिप्त",

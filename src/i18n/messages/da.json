@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Cachelagrede inputtokens",
+    "inputTokensHint": "Udelukker læsninger fra cachen. Skrivninger til cachen tæller stadig som inputtokens.",
+    "inputSplitUnavailable": "Opdelingen af input er ikke tilgængelig, fordi data om cachelæsninger er ufuldstændige eller inkonsistente.",
+    "cachedInputTokensHint": "Kun rapporterede cachelæsninger, som allerede indgår i det samlede input.",
     "title": "Analyse",
     "usageAnalyticsTitle": "Forbrugsanalyser",
     "tokenDisplayCompact": "Kompakt",

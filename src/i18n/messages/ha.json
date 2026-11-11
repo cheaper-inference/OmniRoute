@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Token ɗin shigarwa da aka adana a ma'ajiyar wucin gadi",
+    "inputTokensHint": "Ba ya haɗa karantawa daga ma'ajiyar wucin gadi. Rubutawa zuwa ma'ajiyar har yanzu yana cikin token ɗin shigarwa.",
+    "inputSplitUnavailable": "Ba a samun rarrabuwar shigarwa saboda bayanan karanta ma'ajiyar wucin gadi ba su cika ba ko ba su daidaita ba.",
+    "cachedInputTokensHint": "Karatun ma'ajiyar wucin gadi da aka ruwaito kawai, wanda an riga an haɗa shi cikin jimillar shigarwa.",
     "title": "Nazari",
     "usageAnalyticsTitle": "Nazarin Amfani",
     "tokenDisplayCompact": "Takaitacce",

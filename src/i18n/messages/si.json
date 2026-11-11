@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "හැඹිලියේ ඇති ආදාන ටෝකන",
+    "inputTokensHint": "හැඹිලියෙන් කියවීම් ඇතුළත් නොවේ. හැඹිලියට ලිවීම් තවමත් ආදාන ටෝකන ලෙස ගණන් ගැනේ.",
+    "inputSplitUnavailable": "හැඹිලි කියවීම් දත්ත අසම්පූර්ණ හෝ නොගැළපෙන බැවින් ආදාන බෙදීම ලබා ගත නොහැක.",
+    "cachedInputTokensHint": "වාර්තා කළ හැඹිලි කියවීම් පමණි; ඒවා දැනටමත් මුළු ආදානයට ඇතුළත්ය.",
     "title": "විශ්ලේෂණ",
     "usageAnalyticsTitle": "භාවිත විශ්ලේෂණ",
     "tokenDisplayCompact": "සංක්ෂිප්ත",
