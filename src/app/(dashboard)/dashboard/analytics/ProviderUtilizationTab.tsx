@@ -340,7 +340,7 @@ export default function ProviderUtilizationTab() {
 
                     <div className="flex items-end justify-between gap-3">
                       <div>
-                        <p className="text-3xl font-bold text-text-main">
+                        <p className="text-3xl font-semibold text-text-main">
                           {point.remainingPct.toFixed(point.remainingPct < 10 ? 1 : 0)}%
                         </p>
                         <p className="mt-1 text-xs text-text-muted">
