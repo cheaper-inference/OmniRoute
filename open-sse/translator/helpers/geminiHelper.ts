@@ -130,6 +130,9 @@ export const GEMINI_UNSUPPORTED_SCHEMA_KEYS = new Set([
 
 export const UNSUPPORTED_SCHEMA_CONSTRAINTS = [...GEMINI_UNSUPPORTED_SCHEMA_KEYS];
 
+// Numeric bounds Phase 4 keeps (the length and count bounds are stripped there).
+const NUMERIC_BOUND_KEYS = ["minimum", "maximum", "minProperties", "maxProperties"] as const;
+
 // Default safety settings for the standard Gemini API surface.
 //
 // HARM_CATEGORY_CIVIC_INTEGRITY is intentionally NOT included here (#8231): the
@@ -1098,6 +1101,32 @@ export function cleanJSONSchemaForAntigravity(
   // Phase 4: Remove all unsupported keywords at ALL levels (including inside arrays).
   removeUnsupportedKeywords(cleaned, GEMINI_UNSUPPORTED_SCHEMA_KEYS);
 
+  // Phase 4b: string-encoded bounds ("5") that survive Phase 4 become numbers. Only the
+  // Gemini request path ran the shared tool-schema coercion; the Antigravity envelope did not.
+  // Not imported from schemaCoercion.ts: that module pulls in the DB layer.
+  function coerceNumericBounds(obj: unknown): void {
+    if (!obj || typeof obj !== "object") return;
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        coerceNumericBounds(item);
+      }
+      return;
+    }
+
+    const record = obj as JsonRecord;
+    for (const key of NUMERIC_BOUND_KEYS) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) {
+        record[key] = Number(value);
+      }
+    }
+
+    forEachSubschema(record, coerceNumericBounds);
+  }
+
+  coerceNumericBounds(cleaned);
+
   // Phase 5: Cleanup required fields recursively.
   function cleanupRequired(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
@@ -1215,34 +1244,31 @@ export function cleanJSONSchemaForAntigravity(
 
   ensureArrayItems(cleaned);
 
-  // Phase 9: protobuf field predicates — Gemini accepts `items` only on ARRAY
-  // nodes and `properties`/`required` only on OBJECT nodes ("items: field
-  // predicate failed: $type == Type.ARRAY"). Phase 2's union collapse keeps the
-  // keyword when no branch member matches the node type, so drop the
-  // contradictory predicates here (9router enforceTypeConstraints).
-  function enforceTypePredicates(obj: unknown): void {
+  // Phase 9: Gemini rejects `items` outside ARRAY and `properties`/`required` outside OBJECT.
+  // MCP schemas mix them with other types. Runs last so earlier phases cannot re-add them.
+  function pruneKeywordsByType(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
 
     if (Array.isArray(obj)) {
       for (const item of obj) {
-        enforceTypePredicates(item);
+        pruneKeywordsByType(item);
       }
       return;
     }
 
     const record = obj as JsonRecord;
-    if (record.type !== "array") {
-      delete record.items;
-    }
-    if (record.type !== "object") {
-      delete record.properties;
-      delete record.required;
+    if (typeof record.type === "string") {
+      if (record.type !== "array") delete record.items;
+      if (record.type !== "object") {
+        delete record.properties;
+        delete record.required;
+      }
     }
 
-    forEachSubschema(record, enforceTypePredicates);
+    forEachSubschema(record, pruneKeywordsByType);
   }
 
-  enforceTypePredicates(cleaned);
+  pruneKeywordsByType(cleaned);
 
   return cleaned;
 }
