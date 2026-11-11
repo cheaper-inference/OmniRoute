@@ -47,6 +47,9 @@ const grokBuildConfigSchema = z.object({
   keyId: z.string().trim().min(1).nullable().optional(),
   model: z.string().trim().min(1),
   contextWindow: z.number().int().positive().optional(),
+  // Opt-in reasoning-effort picker for the main slot; omitted means no picker keys are written.
+  reasoningEfforts: z.array(z.string().trim().min(1).max(32)).max(16).optional(),
+  reasoningEffort: z.string().trim().min(1).max(32).optional(),
   subagentModels: z
     .object({
       "general-purpose": modelSelectionSchema.optional(),
@@ -108,6 +111,8 @@ const normalizeApplyOptions = (
     apiKey,
     model: data.model,
     contextWindow: resolveContextWindow(data.contextWindow, data.model),
+    reasoningEfforts: data.reasoningEfforts,
+    reasoningEffort: data.reasoningEffort,
   };
   if (data.subagentModels !== undefined) {
     options.subagentModels = {};
