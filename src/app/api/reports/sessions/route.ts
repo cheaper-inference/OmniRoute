@@ -1,7 +1,6 @@
 import { createErrorResponse } from "@/lib/api/errorResponse";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { listAgentSessions } from "@/lib/db/agentSessions";
-import { getDbInstance } from "@/lib/db/core";
+import { listAgentSessionReportRows } from "@/lib/usage/agentSessionReports";
 
 import { searchParamsObject, sessionsQuerySchema } from "../_lib";
 
@@ -20,8 +19,9 @@ export async function GET(request: Request) {
     });
   }
 
+  const { sort, order, limit, offset, ...filter } = parsed.data;
   try {
-    return Response.json(listAgentSessions(getDbInstance(), parsed.data));
+    return Response.json(await listAgentSessionReportRows(filter, { sort, order, limit, offset }));
   } catch (error) {
     console.error("[reports] session list failed:", error);
     return createErrorResponse({ status: 500, message: "Failed to list sessions" });

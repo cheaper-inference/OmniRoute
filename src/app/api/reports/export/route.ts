@@ -24,19 +24,24 @@ export async function GET(request: Request) {
     });
   }
 
-  const { type, ...filter } = parsed.data;
+  const { type, sort, order, ...filter } = parsed.data;
   try {
-    const csv =
-      type === "sessions"
-        ? sessionsToCsv(listAgentSessionsForExport(filter))
-        : breakdownToCsv((await buildAgentSessionReport(filter)).breakdowns[type]);
     const day = new Date().toISOString().slice(0, 10);
-    return new Response(csv, {
-      headers: {
-        "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="omniroute-report-${type}-${day}.csv"`,
-      },
+    const headers: Record<string, string> = {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="omniroute-report-${type}-${day}.csv"`,
+    };
+    if (type !== "sessions") {
+      const { breakdowns } = await buildAgentSessionReport(filter);
+      return new Response(breakdownToCsv(breakdowns[type]), { headers });
+    }
+    const { sessions, total, truncated } = await listAgentSessionsForExport(filter, {
+      sort,
+      order,
     });
+    headers["X-Report-Total"] = String(total);
+    headers["X-Report-Truncated"] = String(truncated);
+    return new Response(sessionsToCsv(sessions), { headers });
   } catch (error) {
     console.error("[reports] export failed:", error);
     return createErrorResponse({ status: 500, message: "Failed to export report" });

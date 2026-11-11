@@ -4782,7 +4782,7 @@ paths:
       summary: Team report of coding-agent usage
       description: >
         Totals plus breakdowns by member, project, client, provider, model, account and day, computed
-        from requests attributed to agent sessions. Cost is priced from token counts.
+        from requests attributed to agent sessions. Cost is priced from token counts at read time.
       parameters:
         - $ref: "#/components/parameters/ReportFrom"
         - $ref: "#/components/parameters/ReportTo"
@@ -4790,7 +4790,9 @@ paths:
         - $ref: "#/components/parameters/ReportProjectName"
         - $ref: "#/components/parameters/ReportClient"
         - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
         - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportTzOffset"
       responses:
         "200":
           description: "{ totals, breakdowns: { members, projects, clients, providers, models, accounts, daily } }"
@@ -4802,8 +4804,11 @@ paths:
       tags: [Usage]
       summary: List agent sessions for the team report
       description: >
-        from/to match the session's last activity; provider and connectionId match sessions with
-        at least one request through that provider or account.
+        Sessions with at least one request matching the filters. Each row carries the totals of
+        those matching requests only (inside from/to, through the provider, model or account
+        filtered on), priced at read time like /api/reports/summary, so the rows add up to the
+        summary totals. firstSeenAt and lastSeenAt are all-time; windowFirstSeenAt and
+        windowLastSeenAt bound the matching requests.
       parameters:
         - $ref: "#/components/parameters/ReportFrom"
         - $ref: "#/components/parameters/ReportTo"
@@ -4811,17 +4816,11 @@ paths:
         - $ref: "#/components/parameters/ReportProjectName"
         - $ref: "#/components/parameters/ReportClient"
         - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
         - $ref: "#/components/parameters/ReportConnectionId"
-        - name: sort
-          in: query
-          schema:
-            type: string
-            enum: [lastSeen, firstSeen, requests, tokens, cost]
-        - name: order
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
+        - $ref: "#/components/parameters/ReportTzOffset"
+        - $ref: "#/components/parameters/ReportSessionSort"
+        - $ref: "#/components/parameters/ReportSessionOrder"
         - name: limit
           in: query
           schema:
@@ -4836,7 +4835,17 @@ paths:
             minimum: 0
       responses:
         "200":
-          description: "{ sessions, total }"
+          description: One page of sessions and the number of matching sessions.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessions, total]
+                properties:
+                  sessions:
+                    type: array
+                    items: { $ref: "#/components/schemas/ReportSessionRow" }
+                  total: { type: integer, description: Matching sessions across all pages. }
         "400":
           description: Invalid query parameters
 
@@ -4844,11 +4853,27 @@ paths:
     get:
       tags: [Usage]
       summary: Agent session detail with its latest 100 requests
+      description: >
+        `session` holds the stored session counters (cost priced at request time). `totals` holds
+        the session's all-time request totals priced at read time, the same way as the sessions
+        list rows and the summary.
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
         "200":
-          description: "{ session, recentRequests }"
+          description: "{ session, recentRequests, totals }"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session, recentRequests, totals]
+                properties:
+                  session: { type: object, description: Stored agent session record. }
+                  recentRequests:
+                    type: array
+                    description: Latest 100 requests, newest first.
+                    items: { type: object }
+                  totals: { $ref: "#/components/schemas/ReportSessionTotals" }
         "404":
           description: Session not found
 
@@ -4869,10 +4894,23 @@ paths:
         - $ref: "#/components/parameters/ReportProjectName"
         - $ref: "#/components/parameters/ReportClient"
         - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
         - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportTzOffset"
+        - $ref: "#/components/parameters/ReportSessionSort"
+        - $ref: "#/components/parameters/ReportSessionOrder"
       responses:
         "200":
-          description: CSV file (session export is capped at 10,000 rows)
+          description: >
+            CSV file. type=sessions exports the sessions list rows in the sort and order given,
+            capped at 10,000 rows; sort and order only apply to type=sessions.
+          headers:
+            X-Report-Total:
+              description: type=sessions only. Number of matching sessions before the cap.
+              schema: { type: integer, minimum: 0 }
+            X-Report-Truncated:
+              description: type=sessions only. true when X-Report-Total exceeds the cap.
+              schema: { type: string, enum: ["true", "false"] }
           content:
             text/csv:
               schema:
@@ -17327,18 +17365,19 @@ components:
     ReportApiKeyId:
       name: apiKeyId
       in: query
-      description: Team member (API key id).
+      description: Team member (API key id). `__none__` matches sessions without an API key.
       schema:
         type: string
     ReportProjectName:
       name: projectName
       in: query
+      description: Project name. `__none__` matches sessions without a project.
       schema:
         type: string
     ReportClient:
       name: client
       in: query
-      description: Coding agent, e.g. claude-code or codex.
+      description: Coding agent, e.g. claude-code or codex. `__none__` matches sessions without one.
       schema:
         type: string
     ReportProvider:
@@ -17346,6 +17385,38 @@ components:
       in: query
       schema:
         type: string
+    ReportModel:
+      name: model
+      in: query
+      description: Only count requests to this model.
+      schema:
+        type: string
+    ReportTzOffset:
+      name: tzOffset
+      in: query
+      description: >
+        Minutes to add to UTC to get local time (send `-new Date().getTimezoneOffset()`). The
+        daily breakdown groups by local day; absent or 0 groups by UTC day. from/to are not
+        shifted.
+      schema:
+        type: integer
+        minimum: -840
+        maximum: 840
+    ReportSessionSort:
+      name: sort
+      in: query
+      description: lastSeen and firstSeen sort by the window bounds of each session.
+      schema:
+        type: string
+        enum: [lastSeen, firstSeen, requests, tokens, cost]
+        default: lastSeen
+    ReportSessionOrder:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
     ReportConnectionId:
       name: connectionId
       in: query
@@ -17494,6 +17565,58 @@ components:
         cacheCreation: { type: integer }
         output: { type: integer, description: Output tokens, reasoning included. }
         reasoning: { type: integer }
+    ReportSessionTotals:
+      type: object
+      description: Request totals of one session, priced at read time.
+      required: [requests, errors, unpricedRequests, costUsd, tokens]
+      properties:
+        requests: { type: integer }
+        errors: { type: integer }
+        unpricedRequests:
+          type: integer
+          description: Requests with tokens on a model without a pricing row (not in costUsd).
+        costUsd: { type: number }
+        tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+    ReportSessionRow:
+      allOf:
+        - $ref: "#/components/schemas/ReportSessionTotals"
+        - type: object
+          required:
+            - id
+            - apiKeyId
+            - apiKeyName
+            - client
+            - clientSessionId
+            - projectName
+            - projectRepo
+            - projectPath
+            - projectSource
+            - gitBranch
+            - firstSeenAt
+            - lastSeenAt
+            - windowFirstSeenAt
+            - windowLastSeenAt
+          properties:
+            id: { type: string }
+            apiKeyId: { type: string, nullable: true }
+            apiKeyName: { type: string, nullable: true }
+            client: { type: string, nullable: true }
+            clientSessionId: { type: string, nullable: true }
+            projectName: { type: string, nullable: true }
+            projectRepo: { type: string, nullable: true }
+            projectPath: { type: string, nullable: true }
+            projectSource: { type: string, nullable: true, description: "header or path" }
+            gitBranch: { type: string, nullable: true }
+            firstSeenAt: { type: string, format: date-time, description: All-time first request. }
+            lastSeenAt: { type: string, format: date-time, description: All-time last request. }
+            windowFirstSeenAt:
+              type: string
+              format: date-time
+              description: First request matching the filters.
+            windowLastSeenAt:
+              type: string
+              format: date-time
+              description: Last request matching the filters.
     ImportedApiKey:
       type: object
       additionalProperties: false

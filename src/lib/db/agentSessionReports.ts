@@ -4,18 +4,35 @@
  * time window exact and lets provider/account filters see every request a session made.
  */
 
-import type { AgentSessionTokens } from "./agentSessions";
+import type { AgentSessionRecord, AgentSessionTokens } from "./agentSessions";
 import type { SqliteAdapter } from "./adapters/types";
+
+/**
+ * Filter value for apiKeyId, projectName and client that selects sessions where the field is
+ * empty (no member, no project, no client). Breakdown rows for those sessions have key "".
+ */
+export const REPORT_FILTER_NONE = "__none__";
 
 export interface AgentSessionReportFilter {
   /** ISO timestamps (UTC, `toISOString()` form) bounding each request. */
   from?: string;
   to?: string;
+  /** REPORT_FILTER_NONE matches sessions without an API key. */
   apiKeyId?: string;
+  /** REPORT_FILTER_NONE matches sessions without a project. */
   projectName?: string;
+  /** REPORT_FILTER_NONE matches sessions without a client. */
   client?: string;
   provider?: string;
+  model?: string;
   connectionId?: string;
+  /** One session's requests (session detail totals); not a dashboard filter. */
+  sessionId?: string;
+  /**
+   * Minutes to add to UTC to get local time (-840..840). Groups `day` by local day; absent or 0
+   * groups by UTC day. Does not move the from/to bounds.
+   */
+  tzOffset?: number;
 }
 
 export interface AgentSessionUsageSlice {
@@ -31,6 +48,7 @@ export interface AgentSessionUsageSlice {
   accountLabel: string | null;
   serviceTier: string;
   day: string;
+  firstSeenAt: string;
   lastSeenAt: string;
   requests: number;
   /** Requests that consumed tokens; only these can be unpriced (same rule as agent_sessions). */
@@ -39,15 +57,26 @@ export interface AgentSessionUsageSlice {
   tokens: AgentSessionTokens;
 }
 
-const FILTER_CONDITIONS: ReadonlyArray<[keyof AgentSessionReportFilter, string]> = [
+type TextFilterField = Exclude<keyof AgentSessionReportFilter, "tzOffset">;
+
+const FILTER_CONDITIONS: ReadonlyArray<[TextFilterField, string]> = [
   ["from", "uh.timestamp >= ?"],
   ["to", "uh.timestamp <= ?"],
   ["apiKeyId", "s.api_key_id = ?"],
   ["projectName", "s.project_name = ?"],
   ["client", "s.client = ?"],
   ["provider", "uh.provider = ?"],
+  ["model", "uh.model = ?"],
   ["connectionId", "uh.connection_id = ?"],
+  ["sessionId", "uh.agent_session_id = ?"],
 ];
+
+/** Conditions used instead when the filter value is REPORT_FILTER_NONE. */
+const NONE_CONDITIONS: Partial<Record<TextFilterField, string>> = {
+  apiKeyId: "(s.api_key_id IS NULL OR s.api_key_id = '')",
+  projectName: "(s.project_name IS NULL OR s.project_name = '')",
+  client: "(s.client IS NULL OR s.client = '')",
+};
 
 function nullableString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
@@ -62,9 +91,19 @@ export function listAgentSessionUsageSlices(
   for (const [field, condition] of FILTER_CONDITIONS) {
     const value = filter[field];
     if (!value) continue;
+    const noneCondition = value === REPORT_FILTER_NONE ? NONE_CONDITIONS[field] : undefined;
+    if (noneCondition) {
+      conditions.push(noneCondition);
+      continue;
+    }
     conditions.push(condition);
     params.push(value);
   }
+  // Stored timestamps are UTC ISO strings; a local day needs the offset applied first. The
+  // modifier is bound ahead of the WHERE params because it appears first in the statement.
+  const tzOffset = Math.trunc(Number(filter.tzOffset) || 0);
+  const dayExpression = tzOffset ? "date(uh.timestamp, ?)" : "substr(uh.timestamp, 1, 10)";
+  if (tzOffset) params.unshift(`${tzOffset} minutes`);
 
   // Session columns are functionally dependent on agent_session_id, so SQLite's bare-column
   // grouping returns the one session value.
@@ -74,7 +113,8 @@ export function listAgentSessionUsageSlices(
               s.project_name, s.project_repo, s.client, uh.provider, uh.model, uh.connection_id,
               MAX(uh.account_label) AS account_label,
               COALESCE(NULLIF(uh.service_tier, ''), 'standard') AS service_tier,
-              substr(uh.timestamp, 1, 10) AS day,
+              ${dayExpression} AS day,
+              MIN(uh.timestamp) AS first_seen_at,
               MAX(uh.timestamp) AS last_seen_at,
               COUNT(*) AS requests,
               SUM(CASE WHEN COALESCE(uh.tokens_input, 0) + COALESCE(uh.tokens_output, 0)
@@ -107,6 +147,7 @@ export function listAgentSessionUsageSlices(
     accountLabel: nullableString(row.account_label),
     serviceTier: String(row.service_tier),
     day: String(row.day),
+    firstSeenAt: String(row.first_seen_at),
     lastSeenAt: String(row.last_seen_at),
     requests: Number(row.requests ?? 0),
     requestsWithTokens: Number(row.requests_with_tokens ?? 0),
@@ -119,4 +160,61 @@ export function listAgentSessionUsageSlices(
       reasoning: Number(row.tokens_reasoning ?? 0),
     },
   }));
+}
+
+/** Session columns shown next to windowed totals; firstSeenAt/lastSeenAt are all-time. */
+export type AgentSessionReportMetadata = Pick<
+  AgentSessionRecord,
+  | "id"
+  | "apiKeyId"
+  | "apiKeyName"
+  | "client"
+  | "clientSessionId"
+  | "projectName"
+  | "projectRepo"
+  | "projectPath"
+  | "projectSource"
+  | "gitBranch"
+  | "firstSeenAt"
+  | "lastSeenAt"
+>;
+
+// Well under SQLite's bound-parameter limit; one page of the list is a single query.
+const METADATA_BATCH_SIZE = 500;
+
+export function getAgentSessionMetadataByIds(
+  db: SqliteAdapter,
+  ids: readonly string[]
+): Map<string, AgentSessionReportMetadata> {
+  const byId = new Map<string, AgentSessionReportMetadata>();
+  for (let start = 0; start < ids.length; start += METADATA_BATCH_SIZE) {
+    const batch = ids.slice(start, start + METADATA_BATCH_SIZE);
+    const rows = db
+      .prepare(
+        `SELECT id, api_key_id, api_key_name, client, client_session_id, project_name,
+                project_repo, project_path, project_source, git_branch, first_seen_at,
+                last_seen_at
+         FROM agent_sessions
+         WHERE id IN (${batch.map(() => "?").join(", ")})`
+      )
+      .all(...batch) as Record<string, unknown>[];
+    for (const row of rows) {
+      const id = String(row.id);
+      byId.set(id, {
+        id,
+        apiKeyId: nullableString(row.api_key_id),
+        apiKeyName: nullableString(row.api_key_name),
+        client: nullableString(row.client),
+        clientSessionId: nullableString(row.client_session_id),
+        projectName: nullableString(row.project_name),
+        projectRepo: nullableString(row.project_repo),
+        projectPath: nullableString(row.project_path),
+        projectSource: nullableString(row.project_source),
+        gitBranch: nullableString(row.git_branch),
+        firstSeenAt: String(row.first_seen_at),
+        lastSeenAt: String(row.last_seen_at),
+      });
+    }
+  }
+  return byId;
 }

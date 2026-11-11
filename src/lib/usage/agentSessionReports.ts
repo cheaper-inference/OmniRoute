@@ -9,11 +9,12 @@
 import { getDbInstance } from "@/lib/db/core";
 import type { SqliteAdapter } from "@/lib/db/adapters/types";
 import {
+  getAgentSessionMetadataByIds,
   listAgentSessionUsageSlices,
   type AgentSessionReportFilter,
+  type AgentSessionReportMetadata,
   type AgentSessionUsageSlice,
 } from "@/lib/db/agentSessionReports";
-import { listAgentSessions, type AgentSessionRecord } from "@/lib/db/agentSessions";
 import { calculateCostDetailed } from "./costCalculator";
 
 export type { AgentSessionReportFilter };
@@ -64,6 +65,41 @@ export type ReportDimension = (typeof REPORT_DIMENSIONS)[number];
 export interface AgentSessionReport {
   totals: ReportTotals;
   breakdowns: Record<ReportDimension, ReportBreakdownRow[]>;
+}
+
+/** One session's request totals; same meaning as the matching ReportTotals fields. */
+export type SessionReportTotals = Pick<
+  ReportTotals,
+  "requests" | "errors" | "unpricedRequests" | "costUsd" | "tokens"
+>;
+
+/** A sessions-list row: all-time session metadata plus totals of its requests in the window. */
+export interface AgentSessionReportRow extends AgentSessionReportMetadata, SessionReportTotals {
+  /** First and last request of the session inside the window. */
+  windowFirstSeenAt: string;
+  windowLastSeenAt: string;
+}
+
+export const SESSION_REPORT_SORTS = [
+  "lastSeen",
+  "firstSeen",
+  "requests",
+  "tokens",
+  "cost",
+] as const;
+export type SessionReportSort = (typeof SESSION_REPORT_SORTS)[number];
+
+export interface SessionReportOrder {
+  /** Default lastSeen; lastSeen and firstSeen sort by the window bounds. */
+  sort?: SessionReportSort;
+  /** Default desc. */
+  order?: "asc" | "desc";
+}
+
+export interface SessionReportPage extends SessionReportOrder {
+  /** Default 20. */
+  limit?: number;
+  offset?: number;
 }
 
 type PricedSlice = AgentSessionUsageSlice & { costUsd: number; priced: boolean };
@@ -157,11 +193,23 @@ function breakdownBy(dimension: ReportDimension, slices: PricedSlice[]): ReportB
   return rows.sort((a, b) => b.costUsd - a.costUsd || b.tokens.total - a.tokens.total);
 }
 
+function listPricedSlices(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter
+): Promise<PricedSlice[]> {
+  return Promise.all(listAgentSessionUsageSlices(db, filter).map(priceSlice));
+}
+
+function sessionTotals(totals: ReportTotals): SessionReportTotals {
+  const { requests, errors, unpricedRequests, costUsd, tokens } = totals;
+  return { requests, errors, unpricedRequests, costUsd, tokens };
+}
+
 export async function buildAgentSessionReport(
   filter: AgentSessionReportFilter = {},
   db: SqliteAdapter = getDbInstance()
 ): Promise<AgentSessionReport> {
-  const slices = await Promise.all(listAgentSessionUsageSlices(db, filter).map(priceSlice));
+  const slices = await listPricedSlices(db, filter);
   const totals = new TotalsAccumulator();
   for (const slice of slices) totals.add(slice);
 
@@ -172,25 +220,104 @@ export async function buildAgentSessionReport(
   return { totals: totals.toTotals(), breakdowns };
 }
 
-const SESSION_EXPORT_PAGE_SIZE = 100;
+interface SessionWindow {
+  sessionId: string;
+  totals: SessionReportTotals;
+  windowFirstSeenAt: string;
+  windowLastSeenAt: string;
+}
+
+function sessionWindows(slices: PricedSlice[]): SessionWindow[] {
+  const groups = new Map<string, { totals: TotalsAccumulator; first: string; last: string }>();
+  for (const slice of slices) {
+    let group = groups.get(slice.sessionId);
+    if (!group) {
+      group = { totals: new TotalsAccumulator(), first: slice.firstSeenAt, last: slice.lastSeenAt };
+      groups.set(slice.sessionId, group);
+    }
+    group.totals.add(slice);
+    if (slice.firstSeenAt < group.first) group.first = slice.firstSeenAt;
+    if (slice.lastSeenAt > group.last) group.last = slice.lastSeenAt;
+  }
+  return [...groups].map(([sessionId, { totals, first, last }]) => ({
+    sessionId,
+    totals: sessionTotals(totals.toTotals()),
+    windowFirstSeenAt: first,
+    windowLastSeenAt: last,
+  }));
+}
+
+const SORT_VALUES: Record<SessionReportSort, (session: SessionWindow) => string | number> = {
+  lastSeen: (s) => s.windowLastSeenAt,
+  firstSeen: (s) => s.windowFirstSeenAt,
+  requests: (s) => s.totals.requests,
+  tokens: (s) => s.totals.tokens.total,
+  cost: (s) => s.totals.costUsd,
+};
+
+function compareValues(a: string | number, b: string | number): number {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+
+function sessionComparator(order: SessionReportOrder) {
+  const value = SORT_VALUES[order.sort ?? "lastSeen"];
+  const direction = order.order === "asc" ? 1 : -1;
+  // Ties fall back to id descending, the order the stored session list used.
+  return (a: SessionWindow, b: SessionWindow) =>
+    direction * compareValues(value(a), value(b)) || compareValues(b.sessionId, a.sessionId);
+}
+
+const SESSION_PAGE_DEFAULT_LIMIT = 20;
+
+/**
+ * Sessions with at least one request matching the filter, with totals over those requests only.
+ * Built from the same priced slices as buildAgentSessionReport, so the rows add up to its totals.
+ */
+export async function listAgentSessionReportRows(
+  filter: AgentSessionReportFilter = {},
+  page: SessionReportPage = {},
+  db: SqliteAdapter = getDbInstance()
+): Promise<{ sessions: AgentSessionReportRow[]; total: number }> {
+  const windows = sessionWindows(await listPricedSlices(db, filter)).sort(sessionComparator(page));
+  const offset = Math.max(0, page.offset ?? 0);
+  const pageWindows = windows.slice(offset, offset + (page.limit ?? SESSION_PAGE_DEFAULT_LIMIT));
+  const metadata = getAgentSessionMetadataByIds(
+    db,
+    pageWindows.map((session) => session.sessionId)
+  );
+  const sessions = pageWindows.flatMap(({ sessionId, totals, ...window }) => {
+    const session = metadata.get(sessionId);
+    return session ? [{ ...session, ...totals, ...window }] : [];
+  });
+  return { sessions, total: windows.length };
+}
+
+/** All-time totals of one session, priced at read time like the list rows. */
+export async function getAgentSessionReportTotals(
+  sessionId: string,
+  db: SqliteAdapter = getDbInstance()
+): Promise<SessionReportTotals> {
+  const totals = new TotalsAccumulator();
+  for (const slice of await listPricedSlices(db, { sessionId })) totals.add(slice);
+  return sessionTotals(totals.toTotals());
+}
+
 /** Bounds one CSV download; narrower filters export the rest. */
 export const SESSION_EXPORT_MAX_ROWS = 10_000;
 
-export function listAgentSessionsForExport(
+export async function listAgentSessionsForExport(
   filter: AgentSessionReportFilter,
+  order: SessionReportOrder = {},
+  maxRows: number = SESSION_EXPORT_MAX_ROWS,
   db: SqliteAdapter = getDbInstance()
-): AgentSessionRecord[] {
-  const sessions: AgentSessionRecord[] = [];
-  while (sessions.length < SESSION_EXPORT_MAX_ROWS) {
-    const page = listAgentSessions(db, {
-      ...filter,
-      limit: SESSION_EXPORT_PAGE_SIZE,
-      offset: sessions.length,
-    });
-    sessions.push(...page.sessions);
-    if (page.sessions.length < SESSION_EXPORT_PAGE_SIZE) break;
-  }
-  return sessions;
+): Promise<{ sessions: AgentSessionReportRow[]; total: number; truncated: boolean }> {
+  const { sessions, total } = await listAgentSessionReportRows(
+    filter,
+    { ...order, limit: maxRows, offset: 0 },
+    db
+  );
+  return { sessions, total, truncated: total > maxRows };
 }
 
 // Leading =, +, -, @, tab or CR make spreadsheets evaluate a cell as a formula; project and
@@ -251,7 +378,7 @@ export function breakdownToCsv(rows: ReportBreakdownRow[]): string {
   );
 }
 
-export function sessionsToCsv(sessions: AgentSessionRecord[]): string {
+export function sessionsToCsv(sessions: AgentSessionReportRow[]): string {
   return toCsv(
     [
       "session_id",
@@ -267,8 +394,8 @@ export function sessionsToCsv(sessions: AgentSessionRecord[]): string {
       "tokens_total",
       "cost_usd",
       "unpriced_requests",
-      "last_provider",
-      "last_model",
+      "window_first_seen_at",
+      "window_last_seen_at",
       "first_seen_at",
       "last_seen_at",
     ],
@@ -281,13 +408,13 @@ export function sessionsToCsv(sessions: AgentSessionRecord[]): string {
       s.projectRepo,
       s.projectPath,
       s.gitBranch,
-      s.requestCount,
-      s.errorCount,
+      s.requests,
+      s.errors,
       s.tokens.total,
       s.costUsd,
-      s.unpricedCount,
-      s.lastProvider,
-      s.lastModel,
+      s.unpricedRequests,
+      s.windowFirstSeenAt,
+      s.windowLastSeenAt,
       s.firstSeenAt,
       s.lastSeenAt,
     ])
