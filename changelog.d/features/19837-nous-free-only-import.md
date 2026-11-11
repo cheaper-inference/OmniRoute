@@ -1,0 +1,1 @@
+- **feat(providers):** The "import only free models" option now works for Nous Portal: models whose live id ends in `:free` are imported as free, an explicit paid flag or a positive price still vetoes them, and the unverified Hermes-4 rows stay out of the shipped free catalog ([#19562](https://github.com/cheaper-inference/OmniRoute/issues/19562))
