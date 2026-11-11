@@ -40,7 +40,7 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
           {dimension.unit} / {dimension.window}
         </span>
         <span
-          className={`tabular-nums font-bold ${
+          className={`tabular-nums font-semibold ${
             usedPct >= 90 ? "text-error" : usedPct >= 70 ? "text-warning" : ""
           }`}
         >
