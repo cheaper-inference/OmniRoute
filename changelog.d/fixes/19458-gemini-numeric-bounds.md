@@ -1,0 +1,1 @@
+- **fix(gemini):** string-encoded schema bounds such as `minimum: "0"` or `maxProperties: "5"` are sent to Gemini and Antigravity as numbers. ([#19458](https://github.com/cheaper-inference/OmniRoute/pull/19458))
