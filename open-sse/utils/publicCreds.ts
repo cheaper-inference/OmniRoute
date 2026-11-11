@@ -125,6 +125,8 @@ export function decodePublicCredBytes(bytes: readonly number[]): string {
  * Or use the helper below `embeddedBytesFor()`.
  */
 const EMBEDDED_DEFAULTS = {
+  // Public entrypoint for first-time ChatGPT OSS registration, not an issued client ID.
+  chatgpt_id: [11, 20, 0, 8, 31, 6, 22, 43, 4, 74, 21, 27, 22, 51, 10, 15, 68, 19, 95, 27],
   // Gemini / Code Assist — google oauth client (public, PKCE)
   gemini_id: [
     89, 85, 95, 91, 71, 90, 77, 68, 92, 30, 73, 64, 79, 3, 6, 91, 75, 2, 3, 0, 29, 28, 13, 0, 1, 5,
@@ -170,6 +172,8 @@ const EMBEDDED_DEFAULTS = {
   // Openference OAuth — public PKCE client id. The plaintext equals the first
   // nine bytes of MASK, so its XOR-masked representation is nine zero bytes.
   openference_id: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  // RenderHour OAuth — public PKCE client id (no secret), built into renderhour.com
+  renderhour_id: [29, 5, 13, 54, 29, 2, 27, 29, 23, 66, 5, 1, 7],
   // MiniMax Code — public oauth client id, the name of the profile directory
   // the MiniMax Code CLI stores its credential in.
   minimax_id: [2, 14, 1, 13, 23, 66, 5, 1, 7, 65, 25, 22],
