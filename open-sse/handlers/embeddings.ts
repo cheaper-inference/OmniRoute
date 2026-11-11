@@ -61,6 +61,8 @@ interface ClientRawRequest {
   headers: Record<string, string>;
 }
 
+import { recordEmbeddingConsumption } from "./embeddingUsage";
+
 interface EmbeddingCredentials {
   apiKey?: string | null;
   accessToken?: string | null;
@@ -91,6 +93,8 @@ interface HandleEmbeddingParams {
   connectionProvider?: string | null;
   requestedModel?: string | null;
   comboName?: string | null;
+  /** Internal observer: preserve absent usage before the public zero-count fallback. */
+  onUsage?: (usage: Record<string, unknown> | null) => void;
 }
 
 interface EmbeddingFailure {
@@ -936,29 +940,6 @@ function recordEmbeddingSuccess(
   }).catch(() => {});
 }
 
-async function recordEmbeddingConsumption(
-  runtime: EmbeddingRuntime,
-  data: ParsedEmbeddingResponse,
-  requestCount: number
-): Promise<void> {
-  if (!runtime.apiKeyId || !runtime.connectionId) return;
-  try {
-    const { scheduleRecordConsumption } = await import("@/lib/quota/spendRecorder");
-    scheduleRecordConsumption({
-      apiKeyId: runtime.apiKeyId,
-      connectionId: runtime.connectionId,
-      provider: runtime.provider,
-      model: runtime.model || undefined,
-      cost: {
-        tokens: data.usage?.prompt_tokens || data.usage?.total_tokens || 0,
-        requests: requestCount,
-      },
-    });
-  } catch {
-    // Quota accounting is fail-open.
-  }
-}
-
 async function handleUpstreamSuccess(
   runtime: EmbeddingRuntime,
   prepared: PreparedEmbeddingRequest,
@@ -973,6 +954,7 @@ async function handleUpstreamSuccess(
     prepared.normalizeProviderResponse
   );
   recordEmbeddingSuccess(runtime, data, normalizedResponse);
+  runtime.onUsage?.(data.usage ?? null);
   await recordEmbeddingConsumption(runtime, data, requestCount);
   return {
     success: true,

@@ -842,6 +842,9 @@ export function useProviderConnections(
         }
       } else {
         notify.error(data.error || t("tokenRefreshFailed"));
+        if (conn?.provider === "chatgpt" && data.requiresReauth) {
+          await fetchConnections();
+        }
       }
     } catch (error) {
       console.error("Error refreshing token:", error);

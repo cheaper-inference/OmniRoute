@@ -173,7 +173,20 @@ export const refreshTokenByProvider = async (provider: string, credentials: any)
 export const formatProviderCredentials = (provider: string, credentials: any) =>
   _formatProviderCredentials(provider, credentials, log);
 
-export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInfo, log);
+export const getAllAccessTokens = (userInfo: any) =>
+  _getAllAccessTokens(userInfo, log, {
+    // Per-connection proxy parity with the single-connection refresh path
+    // (#13470): a connection with an assigned proxy pool must not egress its
+    // refresh directly. Resolution failure fails closed (the connection
+    // counts as failed, never refreshed on a direct connection).
+    resolveProxy: (provider: string, connectionId: string | null) =>
+      resolveProxyForCredentials(provider, { connectionId: connectionId ?? undefined }),
+    // Rotated tokens are persisted by the caller (open-sse stays free of
+    // `@/lib/db` imports); the write is atomic with the refresh inside the
+    // per-connection mutex.
+    onPersist: (connectionId: string, result: any) =>
+      updateProviderCredentials(connectionId, result),
+  });
 
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(connectionId: string, newCredentials: any) {
