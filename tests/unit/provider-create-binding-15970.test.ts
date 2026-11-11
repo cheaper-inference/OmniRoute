@@ -56,7 +56,18 @@ async function makeNode(type = "openai-compatible-chat") {
   });
 }
 
+// A 201 fires testSingleConnection() fire-and-forget; its upstream /models probe can land after
+// this test ends and be counted by the next test's "no upstream call" assertion. Wait for the
+// probe (bounded) so every test owns the calls it caused.
+async function settleAutoTest(callsBefore: number) {
+  const deadline = Date.now() + 5000;
+  while (fetchCalls.length === callsBefore && Date.now() < deadline) {
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  }
+}
+
 async function post(provider: string, providerSpecificData?: Record<string, unknown>, extra = {}) {
+  const callsBefore = fetchCalls.length;
   const result = await POST(
     await makeManagementSessionRequest("http://localhost/api/providers", {
       method: "POST",
@@ -70,6 +81,7 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
       },
     })
   );
+  if (result.status === 201) await settleAutoTest(callsBefore);
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
   return result;
 }
