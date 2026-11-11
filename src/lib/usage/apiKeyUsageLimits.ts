@@ -114,7 +114,6 @@ interface WeeklyResetCandidate {
   connectionId: string;
   provider: string;
   resetAtIso: string;
-  observedWindowStartIso: string | null;
 }
 
 interface QuotaSnapshotRow {
@@ -395,7 +394,6 @@ async function getProviderWeeklyWindow(
           connectionId: connection.id,
           provider: connection.provider,
           resetAtIso: resetAt,
-          observedWindowStartIso: getWeeklyWindowStartIso(connection.id, resetAt, nowMs),
         });
       }
     }
@@ -411,7 +409,6 @@ async function getProviderWeeklyWindow(
           connectionId: connection.id,
           provider: connection.provider,
           resetAtIso: resetAt,
-          observedWindowStartIso: getWeeklyWindowStartIso(connection.id, resetAt, nowMs),
         });
       }
     }
@@ -428,9 +425,12 @@ async function getProviderWeeklyWindow(
     candidates
       .sort((left, right) => Date.parse(left.resetAtIso) - Date.parse(right.resetAtIso))
       .at(0) ?? null;
+  // The window start costs 2-3 SQL statements, so resolve it for the selected connection only.
   return {
     resetAtIso: selected?.resetAtIso ?? null,
-    windowStartIso: selected?.observedWindowStartIso ?? null,
+    windowStartIso: selected
+      ? getWeeklyWindowStartIso(selected.connectionId, selected.resetAtIso, nowMs)
+      : null,
   };
 }
 
@@ -608,6 +608,27 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
   };
 }
 
+// A limited key re-aggregates its whole window on every request. Reuse a window's result
+// for a few seconds. shortcut: a key can overspend by what it spends inside the TTL, the
+// same class of overshoot as concurrent in-flight requests; upgrade to a running total.
+const SPEND_CACHE_TTL_MS = 2_000;
+const SPEND_CACHE_MAX_ENTRIES = 500;
+const spendCache = new Map<string, { at: number; spend: ApiKeyUsdSpend }>();
+
+async function getCachedApiKeyUsdSpendSince(
+  apiKeyId: string,
+  sinceIso: string
+): Promise<ApiKeyUsdSpend> {
+  const key = `${apiKeyId}|${sinceIso}`;
+  const nowMs = Date.now();
+  const hit = spendCache.get(key);
+  if (hit && nowMs - hit.at < SPEND_CACHE_TTL_MS) return hit.spend;
+  const spend = await getApiKeyUsdSpendSince(apiKeyId, sinceIso);
+  if (spendCache.size >= SPEND_CACHE_MAX_ENTRIES) spendCache.clear();
+  spendCache.set(key, { at: nowMs, spend });
+  return spend;
+}
+
 interface FiveHourWindow {
   windowStartIso: string;
   resetAtIso: string | null;
@@ -684,8 +705,8 @@ export async function getApiKeyUsageLimitStatus(
   const enabled = metadata.usageLimitEnabled === true;
 
   const [dailySpend, weeklySpend, fiveHour] = await Promise.all([
-    getApiKeyUsdSpendSince(metadata.id, dailyWindowStartIso),
-    getApiKeyUsdSpendSince(metadata.id, weeklyWindowStartIso),
+    getCachedApiKeyUsdSpendSince(metadata.id, dailyWindowStartIso),
+    getCachedApiKeyUsdSpendSince(metadata.id, weeklyWindowStartIso),
     getFiveHourWindow(metadata.id, fiveHourLimitUsd, now),
   ]);
   const dailySpentUsd = dailySpend.totalUsd;

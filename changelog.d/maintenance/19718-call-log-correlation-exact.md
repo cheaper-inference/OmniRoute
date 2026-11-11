@@ -1,0 +1,1 @@
+- **perf(call-logs):** The call-log query accepts an exact `correlationIdExact` filter that uses the correlation index. The substring `correlationId` filter is unchanged. ([#19718](https://github.com/cheaper-inference/OmniRoute/pull/19718))

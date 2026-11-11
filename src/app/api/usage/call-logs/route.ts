@@ -88,6 +88,9 @@ export function rowMatchesFilter(row: any, filter: Record<string, any>): boolean
   ) {
     return false;
   }
+  if (filter.correlationIdExact && row?.correlationId !== String(filter.correlationIdExact)) {
+    return false;
+  }
   if (filter.search) {
     const term = String(filter.search);
     const haystack = [
@@ -250,6 +253,32 @@ export function buildCallLogListRows({
   });
 }
 
+const STRING_FILTER_PARAMS = [
+  "status",
+  "model",
+  "provider",
+  "account",
+  "apiKey",
+  "combo",
+  "search",
+  "correlationId",
+  "correlationIdExact",
+] as const;
+
+function readCallLogFilter(searchParams: URLSearchParams): Record<string, any> {
+  const filter: Record<string, any> = {};
+  for (const key of STRING_FILTER_PARAMS) {
+    const value = searchParams.get(key);
+    if (value) filter[key] = value;
+  }
+  if (searchParams.get("limit")) filter.limit = parseInt(searchParams.get("limit") as string);
+  if (searchParams.get("offset")) filter.offset = parseInt(searchParams.get("offset") as string);
+  // Home Recent Requests feed sets excludeTests=1 so connection-test probe rows
+  // are dropped at the SQL layer (before LIMIT), not client-side after slicing.
+  if (searchParams.get("excludeTests") === "1") filter.excludeTests = true;
+  return filter;
+}
+
 export async function GET(request: Request) {
   try {
     const authError = await requireManagementAuth(request);
@@ -257,20 +286,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
 
-    const filter: Record<string, any> = {};
-    if (searchParams.get("status")) filter.status = searchParams.get("status");
-    if (searchParams.get("model")) filter.model = searchParams.get("model");
-    if (searchParams.get("provider")) filter.provider = searchParams.get("provider");
-    if (searchParams.get("account")) filter.account = searchParams.get("account");
-    if (searchParams.get("apiKey")) filter.apiKey = searchParams.get("apiKey");
-    if (searchParams.get("combo")) filter.combo = searchParams.get("combo");
-    if (searchParams.get("search")) filter.search = searchParams.get("search");
-    if (searchParams.get("correlationId")) filter.correlationId = searchParams.get("correlationId");
-    if (searchParams.get("limit")) filter.limit = parseInt(searchParams.get("limit"));
-    if (searchParams.get("offset")) filter.offset = parseInt(searchParams.get("offset"));
-    // Home Recent Requests feed sets excludeTests=1 so connection-test probe rows
-    // are dropped at the SQL layer (before LIMIT), not client-side after slicing.
-    if (searchParams.get("excludeTests") === "1") filter.excludeTests = true;
+    const filter = readCallLogFilter(searchParams);
 
     // This endpoint is polled every 2-10s by the logs dashboard. A full
     // `getProviderConnections()` read wraps every row in a lazy-decrypt proxy

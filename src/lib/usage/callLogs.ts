@@ -1073,6 +1073,11 @@ export async function getCallLogs(filter: any = {}) {
     params.apiKeyQ = `%${filter.apiKey}%`;
   }
   pushLikeFilter(conditions, params, "correlation_id", "correlationId", filter.correlationId);
+  if (filter.correlationIdExact) {
+    // Equality, unlike the substring filter above, can seek idx_cl_correlation_id.
+    conditions.push("cl.correlation_id = @correlationIdExact");
+    params.correlationIdExact = String(filter.correlationIdExact);
+  }
   pushLikeFilter(conditions, params, "session_tag", "sessionTag", filter.sessionTag);
   if (filter.combo) {
     conditions.push("cl.combo_name IS NOT NULL");

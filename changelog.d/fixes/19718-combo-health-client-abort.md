@@ -1,0 +1,1 @@
+- **fix(combos):** Combo health no longer counts client disconnects (HTTP 499) as provider failures, so aborted calls stop lowering the success rate of healthy combos and targets. ([#19718](https://github.com/cheaper-inference/OmniRoute/pull/19718))
