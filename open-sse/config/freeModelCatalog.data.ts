@@ -197,11 +197,11 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // Keep them in the shipped decision catalog so importFreeModelsOnly does not
   // discard freshly auto-discovered models and make the authoritative live
   // catalog reject otherwise valid Gemini API models.
-  { provider: "gemini", modelId: "gemini-3.5-flash", displayName: "Gemini 3.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
-  { provider: "gemini", modelId: "gemini-3.5-flash-lite", displayName: "Gemini 3.5 Flash-Lite", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
-  { provider: "gemini", modelId: "gemini-3.6-flash", displayName: "Gemini 3.6 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
-  { provider: "gemini", modelId: "gemini-3.7-flash", displayName: "Gemini 3.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
-  { provider: "gemini", modelId: "gemini-3.8-flash", displayName: "Gemini 3.8 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution" },
+  { provider: "gemini", modelId: "gemini-3.5-flash", displayName: "Gemini 3.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "gemini", modelId: "gemini-3.5-flash-lite", displayName: "Gemini 3.5 Flash-Lite", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "gemini", modelId: "gemini-3.6-flash", displayName: "Gemini 3.6 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "gemini", modelId: "gemini-3.7-flash", displayName: "Gemini 3.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "gemini", modelId: "gemini-3.8-flash", displayName: "Gemini 3.8 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "gemini-free", tos: "caution", trainsOnPrompts: true },
   { provider: "glm-cn", modelId: "glm-4-flash", displayName: "GLM-4-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
   { provider: "glm-cn", modelId: "glm-4.5-flash", displayName: "GLM-4.5-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
   { provider: "glm-cn", modelId: "glm-4.7-flash", displayName: "GLM-4.7-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
