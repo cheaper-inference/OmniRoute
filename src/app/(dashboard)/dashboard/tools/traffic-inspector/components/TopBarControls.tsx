@@ -85,6 +85,7 @@ export function TopBarControls({
     <div className="flex flex-wrap items-center gap-2 border-b border-border bg-bg-subtle px-3 py-2">
       {/* Profile selector */}
       <SegmentedControl
+        semantics="radio"
         size="sm"
         aria-label={t("trafficProfile")}
         value={profile}
@@ -104,6 +105,7 @@ export function TopBarControls({
 
       {/* Status filter */}
       <Select
+        native
         aria-label={t("filterStatus")}
         value={filters.status ?? ""}
         onChange={(e) => onStatusChange((e.target.value as ListFilters["status"]) || undefined)}

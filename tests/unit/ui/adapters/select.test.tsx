@@ -94,6 +94,134 @@ describe("Select adapter", () => {
     expect(seen).toEqual(["y"]);
   });
 
+  it("native renders the kit NativeSelect from options, with the legacy onChange shape", () => {
+    // React resets a controlled <select> right after the handler: read the event inside it.
+    const onChange = vi.fn((event: React.ChangeEvent<HTMLSelectElement>) => ({
+      value: event.target.value,
+      name: event.target.name,
+    }));
+    const { getByRole, container } = render(
+      <Select native label="Mode" name="mode" options={OPTIONS} value="b" onChange={onChange} />
+    );
+    const select = getByRole("combobox", { name: "Mode" }) as HTMLSelectElement;
+    expect(select.tagName).toBe("SELECT");
+    expect(select.closest(".ci-native-select")).not.toBeNull();
+    expect(container.querySelector(".ci-select__trigger")).toBeNull();
+    expect(Array.from(select.options).map((option) => [option.value, option.text])).toEqual([
+      ["a", "Alpha"],
+      ["b", "Beta"],
+    ]);
+    expect(select.value).toBe("b");
+    // A real <select> submits by itself: no adapter hidden input.
+    expect(container.querySelector('input[type="hidden"]')).toBeNull();
+
+    fireEvent.change(select, { target: { value: "a" } });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.results[0].value).toEqual({ value: "a", name: "mode" });
+  });
+
+  it("native shows the disabled placeholder only while nothing is selected", () => {
+    const { getByRole, rerender } = render(
+      <Select
+        native
+        aria-label="Mode"
+        placeholder="Pick one"
+        options={OPTIONS}
+        value=""
+        onChange={() => {}}
+      />
+    );
+    let select = getByRole("combobox") as HTMLSelectElement;
+    expect(select.options[0].text).toBe("Pick one");
+    expect(select.options[0].disabled).toBe(true);
+    expect(select.value).toBe("");
+
+    rerender(
+      <Select
+        native
+        aria-label="Mode"
+        placeholder="Pick one"
+        options={OPTIONS}
+        value="a"
+        onChange={() => {}}
+      />
+    );
+    select = getByRole("combobox") as HTMLSelectElement;
+    expect(Array.from(select.options).map((option) => option.value)).toEqual(["a", "b"]);
+  });
+
+  it("native keeps an uncontrolled placeholder selected instead of the first option", () => {
+    const { getByRole } = render(
+      <Select native aria-label="Mode" placeholder="Pick one" options={OPTIONS} />
+    );
+    expect((getByRole("combobox") as HTMLSelectElement).value).toBe("");
+  });
+
+  it("native keeps placeholderDisabled={false} pickable as the '' value", () => {
+    const onChange = vi.fn((event: React.ChangeEvent<HTMLSelectElement>) => event.target.value);
+    const { getByRole } = render(
+      <Select
+        native
+        aria-label="Provider"
+        placeholder="All"
+        placeholderDisabled={false}
+        options={OPTIONS}
+        value="a"
+        onChange={onChange}
+      />
+    );
+    const select = getByRole("combobox") as HTMLSelectElement;
+    expect(select.options[0].value).toBe("");
+    expect(select.options[0].text).toBe("All");
+    expect(select.options[0].disabled).toBe(false);
+    fireEvent.change(select, { target: { value: "" } });
+    expect(onChange.mock.results[0].value).toBe("");
+  });
+
+  it("native does not add a placeholder when an option already has the empty value", () => {
+    const { getByRole } = render(
+      <Select
+        native
+        aria-label="Status"
+        options={[{ value: "", label: "Any" }, ...OPTIONS]}
+        value=""
+        onChange={() => {}}
+      />
+    );
+    const select = getByRole("combobox") as HTMLSelectElement;
+    expect(Array.from(select.options).map((option) => option.text)).toEqual([
+      "Any",
+      "Alpha",
+      "Beta",
+    ]);
+  });
+
+  it("native honours disabled options, compact, error and hint", () => {
+    const { getByRole, container } = render(
+      <Select
+        native
+        compact
+        id="n"
+        label="Mode"
+        error="bad"
+        options={[OPTIONS[0], { value: "c", label: "Gamma", disabled: true }]}
+        value="a"
+        onChange={() => {}}
+      />
+    );
+    const select = getByRole("combobox", { name: "Mode" }) as HTMLSelectElement;
+    expect(select.options[1].disabled).toBe(true);
+    expect(select.getAttribute("aria-invalid")).toBe("true");
+    expect(select.getAttribute("aria-describedby")).toBe("n-error");
+    expect(container.querySelector(".ci-native-select")?.getAttribute("data-size")).toBe("sm");
+  });
+
+  it("without native, options still render the Radix menu", () => {
+    const { container } = render(<Select options={OPTIONS} value="a" onChange={() => {}} />);
+    expect(container.querySelector("select.ci-native-select__control")).toBeNull();
+    expect(container.querySelector(".ci-native-select")).toBeNull();
+  });
+
   it("items keep the legacy option values as data-value; the root mirrors the value", () => {
     const { getByRole, container } = render(
       <Select

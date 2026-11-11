@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { ConfirmModal } from "@/shared/components/Modal";
 import { useImprovePrompt } from "../hooks/useImprovePrompt";
 import type { ConfigState, ConfigStateSetter } from "./StudioConfigPane";
@@ -15,7 +16,7 @@ interface ImprovePromptButtonProps {
 }
 
 /**
- * ImprovePromptButton — "✨ Improve prompt" button with quota-consumption warning.
+ * ImprovePromptButton — "Improve prompt" button (sparkle icon) with quota-consumption warning.
  *
  * Flow: click → confirmation modal → confirm → calls useImprovePrompt.improve()
  * → on success, updates configState.systemPrompt and/or configState.params.
@@ -74,13 +75,11 @@ export default function ImprovePromptButton({
           aria-label={t("improvePromptAria")}
           title={!configState.model.trim() ? t("setModelFirst") : t("improvePromptTitle")}
         >
-          <span className="text-[13px]" aria-hidden="true">
-            ✨
-          </span>
+          <Icon name="auto_awesome" size={13} />
           {loading ? t("improvingPrompt") : t("improvePrompt")}
         </Button>
 
-        {improveError && <p className="text-[11px] text-error">{improveError}</p>}
+        {improveError && <p className="text-xs text-error">{improveError}</p>}
       </div>
 
       {/* Quota confirmation modal (kit Dialog via the ConfirmModal adapter) */}
@@ -93,9 +92,7 @@ export default function ImprovePromptButton({
         cancelText={t("cancel")}
         confirmText={
           <>
-            <span className="text-[12px]" aria-hidden="true">
-              ✨
-            </span>
+            <Icon name="auto_awesome" size={12} />
             {t("improveConfirm")}
           </>
         }
@@ -103,9 +100,7 @@ export default function ImprovePromptButton({
         message={
           confirmOpen && (
             <span className="flex items-start gap-3">
-              <span className="text-[24px] shrink-0" aria-hidden="true">
-                ✨
-              </span>
+              <Icon name="auto_awesome" size={24} className="shrink-0 text-primary" />
               <span className="flex flex-col">
                 <span className="text-xs text-text-muted">
                   {t.rich("improvePromptDescription", {

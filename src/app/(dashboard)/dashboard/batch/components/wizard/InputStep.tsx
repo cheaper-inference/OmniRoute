@@ -127,6 +127,7 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
     <div className="flex flex-col gap-6">
       {/* Kind toggle */}
       <SegmentedControl
+        semantics="radio"
         aria-label={t("wizardStep2Input")}
         className="self-start"
         value={isJsonl ? "jsonl" : "csv"}
