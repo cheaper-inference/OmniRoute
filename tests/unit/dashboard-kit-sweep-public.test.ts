@@ -260,8 +260,7 @@ const CONSTANTS_HEX_ALLOWED: Allow = {
   },
 };
 
-// The remaining exceptions were migrated to kit components or corrected to explain the
-// actual limitation. Keep the zero budget: no formerly exempt file may regain a stale claim.
+// Every stale reason is gone (#19066): a new one must use the kit component or name why it does not fit.
 const STALE_KIT_EXCEPTION_ALLOWED: Allow = {};
 
 function overBudget(list: string[], scan: (src: string) => number, allow: Allow): string[] {
