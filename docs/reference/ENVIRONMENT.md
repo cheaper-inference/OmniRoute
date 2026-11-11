@@ -2058,3 +2058,9 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `OMNIROUTE_SESSION_TTL_MIN` | `15` | `open-sse/services/sessionManager.ts` | Idle TTL in minutes for the in-memory session map. Governs sticky connection reuse (`getSessionConnection`) and the active-sessions views; raising it keeps a session pinned to its connection longer. Read once at startup. Blank, non-numeric or `<= 0` values fall back to the default. |
+
+## Moonshot region probe
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `MOONSHOT_REGION_PROBE` | `false` | `src/lib/providers/validation/moonshotRegionProbe.ts` | When `1`, `true`, `yes` or `on`, a Moonshot key that the default host (`api.moonshot.ai`) rejects as invalid is also tried on `api.moonshot.cn`. If that host accepts it, validation returns its base URL and the dashboard saves it with the connection, so a wrong-region key is fixed at save time instead of failing on every request. A connection with a custom base URL is never rewritten. 5xx and network errors on the default host do not trigger the probe. |

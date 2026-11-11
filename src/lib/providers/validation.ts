@@ -1,5 +1,6 @@
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { probeMoonshotRegions } from "./validation/moonshotRegionProbe";
 import {
   isClaudeCodeCompatibleProvider,
   isAnthropicCompatibleProvider,
@@ -184,7 +185,19 @@ export async function validateFreebuffProvider({ apiKey }: { apiKey: string }) {
   }
 }
 
-export async function validateProviderApiKey({
+export async function validateProviderApiKey(args: any) {
+  const first = await validateProviderApiKeyOnce(args);
+  // Opt-in (MOONSHOT_REGION_PROBE): a Moonshot key rejected on the default host may belong to
+  // the other region; the probe re-validates there and returns that base URL.
+  return probeMoonshotRegions(
+    typeof args?.provider === "string" ? resolveProviderId(args.provider) : args?.provider,
+    args?.providerSpecificData,
+    first,
+    (providerSpecificData) => validateProviderApiKeyOnce({ ...args, providerSpecificData })
+  );
+}
+
+async function validateProviderApiKeyOnce({
   provider,
   apiKey,
   providerSpecificData = {},
