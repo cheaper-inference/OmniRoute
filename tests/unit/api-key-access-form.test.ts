@@ -13,6 +13,7 @@
  *   mergeApiKeyPermissionScopes keeps unknown scopes in stored order; USD strings -> number | null.
  *
  * Bodies are compared with JSON.stringify so the key order (the wire bytes) must match too.
+ * The later MCP/CCR controls extend the legacy form state and remain off without explicit grants.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -174,6 +175,8 @@ const unrestrictedState: ApiKeyAccessFormState = {
   scheduleTz: LOCAL_TZ,
   rateLimits: [],
   manageEnabled: true,
+  mcpConnectEnabled: false,
+  compressionReadEnabled: false,
   selfUsageEnabled: true,
   selfAccountQuotaEnabled: false,
   bypassProviderQuotaPolicyEnabled: false,
@@ -195,6 +198,24 @@ const unrestrictedState: ApiKeyAccessFormState = {
 test("initial state matches the legacy modal: unrestricted key (combo/* means all combos)", () => {
   assert.deepEqual(createInitialFormState(keyUnrestricted), unrestrictedState);
 });
+
+for (const { scopes, mcp, compression, manage } of [
+  { scopes: [], mcp: false, compression: false, manage: false },
+  { scopes: ["mcp:connect"], mcp: true, compression: false, manage: false },
+  { scopes: ["read:compression"], mcp: false, compression: true, manage: false },
+  { scopes: ["mcp:connect", "read:compression"], mcp: true, compression: true, manage: false },
+  { scopes: ["manage"], mcp: false, compression: false, manage: true },
+  { scopes: ["admin"], mcp: false, compression: false, manage: false },
+]) {
+  test(`explicit MCP/CCR grants round-trip independently: ${scopes.join(",") || "none"}`, () => {
+    const key = { ...keyUnrestricted, scopes: ["custom:keep", ...scopes] };
+    const state = createInitialFormState(key);
+    assert.equal(state.mcpConnectEnabled, mcp);
+    assert.equal(state.compressionReadEnabled, compression);
+    assert.equal(state.manageEnabled, manage);
+    assert.deepEqual(buildApiKeyAccessPayload(state, key).scopes, ["custom:keep", ...scopes]);
+  });
+}
 
 test("initial state matches the legacy modal: restricted models + combos", () => {
   assert.deepEqual(createInitialFormState(keyRestrictedModelsCombos), {
