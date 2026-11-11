@@ -2,7 +2,7 @@ import fs from "node:fs";
 
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
 
-import { backupDbFile, setDbBackupMaxFiles } from "./backup";
+import { setDbBackupMaxFiles } from "./backup";
 import { toBooleanSetting, toStrictBooleanSetting } from "./booleanSetting";
 import { DATA_DIR, SQLITE_FILE, applyDatabaseOptimizationSettings, getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
@@ -519,7 +519,6 @@ export function updateDatabaseSettings(
   });
   tx();
 
-  backupDbFile("pre-write");
   clearPersistedCallLogRetentionCache();
   invalidateDbCache("settings");
   if (optimizationUpdated) {

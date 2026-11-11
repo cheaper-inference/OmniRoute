@@ -49,7 +49,6 @@ function getRetentionSettings() {
  * Clean up old quota_snapshots based on retention settings.
  */
 export async function cleanupQuotaSnapshots(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.quotaSnapshots;
@@ -60,9 +59,11 @@ export async function cleanupQuotaSnapshots(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM quota_snapshots WHERE created_at < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "quota_snapshots", column: "created_at", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} quota_snapshots older than ${retentionDays} days`
@@ -161,7 +162,6 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
  * Clean up old compression_analytics based on retention settings.
  */
 export async function cleanupCompressionAnalytics(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.compressionAnalytics;
@@ -172,9 +172,11 @@ export async function cleanupCompressionAnalytics(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM compression_analytics WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "compression_analytics", column: "timestamp", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} compression_analytics older than ${retentionDays} days`
@@ -192,7 +194,6 @@ export async function cleanupCompressionAnalytics(): Promise<CleanupResult> {
  * Uses retention.compressionAnalytics (same retention window as compression_analytics).
  */
 export async function cleanupCompressionEngineBreakdown(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.compressionAnalytics;
@@ -205,9 +206,11 @@ export async function cleanupCompressionEngineBreakdown(): Promise<CleanupResult
   try {
     if (!tableExists("compression_engine_breakdown")) return result;
 
-    const stmt = db.prepare("DELETE FROM compression_engine_breakdown WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "compression_engine_breakdown", column: "timestamp", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} compression_engine_breakdown older than ${retentionDays} days`
@@ -354,7 +357,6 @@ export async function cleanupMemoryEntries(): Promise<CleanupResult> {
  * is Date.now()), so the cutoff must be in milliseconds to match. (#9625)
  */
 export async function cleanupDomainCostHistory(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.domainCostHistory;
@@ -363,9 +365,11 @@ export async function cleanupDomainCostHistory(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM domain_cost_history WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffEpoch);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "domain_cost_history", column: "timestamp", cutoff: "epochMs" },
+      new Date(cutoffEpoch).toISOString(),
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} domain_cost_history older than ${retentionDays} days`
@@ -1030,7 +1034,6 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
  * Uses the same retention period as call_logs (30 days default).
  */
 export async function cleanupProxyLogs(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.callLogs;
@@ -1041,9 +1044,11 @@ export async function cleanupProxyLogs(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM proxy_logs WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "proxy_logs", column: "timestamp", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(`[Cleanup] Deleted ${result.deleted} proxy_logs older than ${retentionDays} days`);
   } catch (err: unknown) {

@@ -1302,6 +1302,12 @@ export function getDbInstance(): SqliteDatabase {
     // file EXCLUSIVE (checkpoint + WAL delete); node:sqlite opens with busy timeout 0, so with
     // the pragmas in the other order that window surfaced as `database is locked` at startup.
     db.pragma("busy_timeout = 2000");
+    // auto_vacuum only takes effect before the first page is written; `journal_mode = WAL` writes
+    // the header, so set it first and only on an empty file. Migration 046 seeds INCREMENTAL, so a
+    // new database starts in the mode it is configured for and never needs a conversion VACUUM.
+    if (Number(db.pragma("page_count", { simple: true })) === 0) {
+      db.pragma("auto_vacuum = INCREMENTAL");
+    }
     db.pragma("journal_mode = WAL");
     db.pragma("synchronous = NORMAL");
     db.pragma(`cache_size = -${DEFAULT_DATABASE_SETTINGS.optimization.cacheSize}`);
