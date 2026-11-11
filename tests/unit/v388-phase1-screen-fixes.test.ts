@@ -34,7 +34,9 @@ test("shared Select: renders children and guards placeholder/options when childr
   // `!children && placeholder`. The guard itself is unchanged — still gated on `!children`.
   // KEA-7886: the adapter resolves the fallback first (`resolvedPlaceholder = placeholder ??
   // t("selectOption")`), so the native-mode guard reads `!children && resolvedPlaceholder`.
-  assert.ok(src.includes("!children && resolvedPlaceholder"), "placeholder guarded by !children");
+  // #19620: the native branch also serves `options` with `native`, so the guard coerces the
+  // resolved placeholder (`!children && !!resolvedPlaceholder && placeholderIsNeeded`).
+  assert.ok(src.includes("!children && !!resolvedPlaceholder"), "placeholder guarded by !children");
   assert.ok(
     src.includes("!children &&\n            options.map") || src.includes("!children &&"),
     "options guarded by !children"
