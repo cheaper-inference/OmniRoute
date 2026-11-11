@@ -808,6 +808,7 @@ export const validateProviderApiKeySchema = z
     runtimeKey: z.string().trim().max(65_536).optional(),
     tunnelId: z.string().trim().max(128).optional(),
     connectorName: z.string().trim().max(200).optional(),
+    accountId: z.string().trim().max(256).optional(),
     // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
     zdrEnabled: z.boolean().optional(),
   })

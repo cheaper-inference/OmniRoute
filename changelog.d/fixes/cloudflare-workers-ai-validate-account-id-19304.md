@@ -1,0 +1,1 @@
+- **fix(providers):** forward `accountId` from provider modals and validation schema to `/api/providers/validate`, preventing false `CLOUDFLARE_ACCOUNT_ID_REQUIRED` errors when connecting Cloudflare Workers AI (#19304).

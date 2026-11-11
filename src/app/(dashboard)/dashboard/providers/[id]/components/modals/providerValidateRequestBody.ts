@@ -14,6 +14,7 @@ type ValidateFormFields = {
   tunnelId: string;
   connectorName: string;
   commandCodeZdrEnabled?: boolean;
+  accountId?: string;
 };
 
 const trimmedOrUndefined = (value: string) => value.trim() || undefined;
@@ -63,6 +64,7 @@ export function buildProviderValidateRequestBody(options: {
     runtimeKey: family.runtimeKey,
     tunnelId: family.tunnelId,
     connectorName: family.connectorName,
+    accountId: trimmedOrUndefined(formData.accountId || ""),
     zdrEnabled:
       provider === "command-code" && formData.commandCodeZdrEnabled === true ? true : undefined,
   };
