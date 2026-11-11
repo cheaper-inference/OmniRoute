@@ -1831,7 +1831,8 @@ export async function getProviderCredentials(
       if (preferred) {
         connection = preferred;
         selectedByApiKeyPreference = true;
-        preferredFallbackAvailable = orderedConnections.some(
+        // Full list: a sibling at its concurrency cap is still a failover target.
+        preferredFallbackAvailable = allOrderedConnections.some(
           (candidate) => candidate.id !== preferred.id
         );
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);

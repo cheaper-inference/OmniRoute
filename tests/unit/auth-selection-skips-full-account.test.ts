@@ -121,3 +121,34 @@ test("a session pinned to a full account keeps that account", async () => {
   assert.equal(second.connectionId, pinned, "the prompt-cache pin wins over load");
   releases.forEach((release) => release());
 });
+
+test("an API-key preference keeps a full preferred account and still reports its fallback", async () => {
+  const preferred = await seed("preferred-full", 2, 1);
+  const sibling = await seed("preferred-sibling", 1, 1);
+  const releases = await Promise.all([...fillAccount(preferred, 1), ...fillAccount(sibling, 1)]);
+
+  const selected = await auth.getProviderCredentials("openai", null, null, "gpt-4o", {
+    preferredConnectionIds: [preferred, sibling],
+  });
+
+  assert.equal(selected.connectionId, preferred, "the key preference wins over load");
+  assert.equal(selected.selectedByApiKeyPreference, true);
+  assert.equal(
+    selected.preferredFallbackAvailable,
+    true,
+    "a sibling at its cap is still a failover target for the preferred account"
+  );
+  releases.forEach((release) => release());
+});
+
+test("an API-key preference with no sibling reports no fallback", async () => {
+  const only = await seed("preferred-only", 1, 4);
+
+  const selected = await auth.getProviderCredentials("openai", null, null, "gpt-4o", {
+    preferredConnectionIds: [only],
+  });
+
+  assert.equal(selected.connectionId, only);
+  assert.equal(selected.selectedByApiKeyPreference, true);
+  assert.equal(selected.preferredFallbackAvailable, false);
+});
