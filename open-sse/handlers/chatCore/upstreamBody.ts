@@ -46,6 +46,7 @@ import {
   foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
+import { dedupeBuiltinWebTools } from "./webToolDedup.ts";
 
 type LoggerLike =
   | { debug?: (...args: unknown[]) => void; warn?: (tag: string, message: string) => void }
@@ -532,6 +533,7 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
   // After the sanitizers, which read `reasoning.effort`, and after payload rules can add it.
   bodyToSend = foldReasoningForOpenAIChat(bodyToSend, provider, targetFormat);
   bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
+  bodyToSend = dedupeBuiltinWebTools(bodyToSend, opts.clientRawRequest?.headers);
   // Relevance selection runs before the provider cap so the cap keeps the useful tools.
   const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
     rawBody: opts.rawBody,
