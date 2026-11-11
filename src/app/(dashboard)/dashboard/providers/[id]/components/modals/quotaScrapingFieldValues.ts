@@ -59,7 +59,26 @@ export function assignQuotaScrapingProviderData(
     assignZedHostedBillingPortalUrl(values, target);
     return;
   }
+  if (MUSE_CODE_PROVIDERS.has(provider ?? "")) {
+    assignMuseConsoleSession(values, target);
+    return;
+  }
   assignConsoleSessionProviderData(provider, values, target);
+}
+
+function assignMuseConsoleSession(
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  // Optional access: callers may pass a partial form object without the newer
+  // fields. The team id is independent of the session, so editing one alone
+  // still saves; empty/absent leaves the stored value alone on the edit round-trip.
+  if (values.museConsoleSession?.trim()) {
+    target.museConsoleSession = values.museConsoleSession.trim();
+  }
+  if (values.museTeamId?.trim()) {
+    target.museTeamId = values.museTeamId.trim();
+  }
 }
 
 function assignZedHostedBillingPortalUrl(
@@ -100,14 +119,5 @@ function assignConsoleSessionProviderData(
     // Optional access: callers may pass a partial form object without the newer
     // fields (same contract as the qwen branch above).
     target.xiaomiMimoConsoleCookie = values.xiaomiMimoConsoleCookie.trim();
-  } else if (MUSE_CODE_PROVIDERS.has(provider ?? "")) {
-    // Same partial-form contract as the qwen/xiaomi branches above; the team
-    // id is independent of the session so editing one alone still saves.
-    if (values.museConsoleSession?.trim()) {
-      target.museConsoleSession = values.museConsoleSession.trim();
-    }
-    if (values.museTeamId?.trim()) {
-      target.museTeamId = values.museTeamId.trim();
-    }
   }
 }

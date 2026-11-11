@@ -255,6 +255,36 @@ async function fetchLiveQuota(
   };
 }
 
+/**
+ * The persisted subscription metadata as an "unknown usage" response. Omitting
+ * quota values distinguishes unreported usage from exhaustion.
+ */
+function subscriptionFallback(psd: JsonRecord): { base: JsonRecord; metadataMessage: string } {
+  const tierName = typeof psd.subsTierName === "string" ? psd.subsTierName : undefined;
+  const tierId = typeof psd.subsTierId === "string" ? psd.subsTierId : undefined;
+  const isActive = typeof psd.isSubsActive === "boolean" ? psd.isSubsActive : undefined;
+  const hasPayment = typeof psd.hasPaymentMethod === "boolean" ? psd.hasPaymentMethod : undefined;
+
+  const activity = isActive === undefined ? "activity unknown" : isActive ? "active" : "inactive";
+  const unavailable =
+    "Live console quota is unavailable — paste the dev.meta.ai console cookie to enable it.";
+  return {
+    base: {
+      provider: "muse-code",
+      plan: tierName ?? "unknown",
+      subsTierId: tierId ?? undefined,
+      isSubsActive: isActive ?? undefined,
+      hasPaymentMethod: hasPayment ?? undefined,
+      resetAt: null,
+      unlimited: false,
+      details: [],
+    },
+    metadataMessage: tierName
+      ? `Muse Code subscription: ${tierName} (${activity}). ${unavailable}`
+      : `Muse Code subscription detected. ${unavailable}`,
+  };
+}
+
 /** Muse Code usage fetcher.
  *
  * Live via the dev.meta.ai console cookie when configured; otherwise the
@@ -268,30 +298,7 @@ export async function getMuseUsage(
   _connectionId?: string
 ): Promise<JsonRecord> {
   const psd = toRecord(providerSpecificData);
-
-  const tierName = typeof psd.subsTierName === "string" ? psd.subsTierName : undefined;
-  const tierId = typeof psd.subsTierId === "string" ? psd.subsTierId : undefined;
-  const isActive = typeof psd.isSubsActive === "boolean" ? psd.isSubsActive : undefined;
-  const hasPayment = typeof psd.hasPaymentMethod === "boolean" ? psd.hasPaymentMethod : undefined;
-
-  const activity = isActive === undefined ? "activity unknown" : isActive ? "active" : "inactive";
-
-  // Live console quota may be unavailable (no cookie). Return only
-  // subscription metadata; omitting quota values distinguishes unreported
-  // usage from exhaustion.
-  const fallbackBase = {
-    provider: "muse-code",
-    plan: tierName ?? "unknown",
-    subsTierId: tierId ?? undefined,
-    isSubsActive: isActive ?? undefined,
-    hasPaymentMethod: hasPayment ?? undefined,
-    resetAt: null,
-    unlimited: false,
-    details: [],
-  };
-  const metadataMessage = tierName
-    ? `Muse Code subscription: ${tierName} (${activity}). Live console quota is unavailable — paste the dev.meta.ai console cookie to enable it.`
-    : "Muse Code subscription detected. Live console quota is unavailable — paste the dev.meta.ai console cookie to enable it.";
+  const { base: fallbackBase, metadataMessage } = subscriptionFallback(psd);
 
   const session = getConsoleSession(psd);
   if (!session) {
