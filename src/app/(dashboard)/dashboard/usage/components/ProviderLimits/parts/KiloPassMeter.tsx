@@ -119,7 +119,7 @@ export default function KiloPassMeter({
         <span className="text-[12px] font-medium text-text-main">
           {translateUsageOrFallback(t, "kiloPassUsageLabel", "This month's usage")}
         </span>
-        <span className="text-[12px] font-bold tabular-nums" style={{ color: colors.text }}>
+        <span className="text-[12px] font-semibold tabular-nums" style={{ color: colors.text }}>
           {formatCurrency(model.used)} / {formatCurrency(model.total)}
         </span>
       </div>
