@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute setup-opencode` now writes OpenCode `variants` (`reasoningEffort` per level, from the catalog `effort_tiers`) for each model, and `/v1/models` rows also expose `supported_reasoning_levels` (mirroring `capabilities.effort_tiers`) so omp discovery shows the real reasoning levels instead of its own guesses.

@@ -129,6 +129,19 @@ export function withCatalogDisplayName<T extends Record<string, unknown>>(model:
 }
 
 /**
+ * Mirror `capabilities.effort_tiers` as the top-level `supported_reasoning_levels` that
+ * omp's `openai-models-list` discovery reads. Additive only: `effort_tiers` is untouched,
+ * and no `default_reasoning_level` is invented because no catalog source carries one.
+ */
+export function withSupportedReasoningLevels<T extends Record<string, unknown>>(model: T): T {
+  const capabilities = model.capabilities;
+  if (!capabilities || typeof capabilities !== "object") return model;
+  const tiers = (capabilities as Record<string, unknown>).effort_tiers;
+  if (!Array.isArray(tiers) || tiers.length === 0) return model;
+  return { ...model, supported_reasoning_levels: [...tiers] };
+}
+
+/**
  * The name a synced row should carry: its own published name, unless the static
  * registry already names the model (the registry name keeps winning, as before).
  */

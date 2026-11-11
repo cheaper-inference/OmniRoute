@@ -56,6 +56,8 @@ interface CatalogModelEntry {
     temperature?: boolean;
     tool_calling?: boolean;
     vision?: boolean;
+    /** Reasoning effort levels the model accepts, in ascending order. */
+    effort_tiers?: string[];
   };
   /** OpenAI-compatible modality arrays; some upstreams return these. */
   input_modalities?: string[];
@@ -240,6 +242,22 @@ function resolveContextLength(entry: CatalogModelEntry): number | undefined {
 }
 
 /**
+ * OpenCode 1.x `variants` from the catalog's effort tiers, in tier order. OpenCode has
+ * no "off" variant, so `none` is skipped.
+ */
+function buildReasoningVariants(
+  tiers: unknown
+): Record<string, { reasoningEffort: string }> | undefined {
+  if (!Array.isArray(tiers)) return undefined;
+  const variants: Record<string, { reasoningEffort: string }> = {};
+  for (const tier of tiers) {
+    if (typeof tier !== "string" || !tier || tier === "none") continue;
+    variants[tier] = { reasoningEffort: tier };
+  }
+  return Object.keys(variants).length > 0 ? variants : undefined;
+}
+
+/**
  * Build the entry that ends up under `provider.<name>.models[id]` in the
  * emitted opencode.json. Precedence:
  *
@@ -294,6 +312,11 @@ function buildModelEntry(
       if (v === undefined) continue;
       if (!(k in entry)) entry[k] = v;
     }
+  }
+
+  if (!("variants" in entry)) {
+    const variants = buildReasoningVariants(catalog?.capabilities?.effort_tiers);
+    if (variants) entry.variants = variants;
   }
 
   // Resolve the context window. Honor an explicit user override, then fall

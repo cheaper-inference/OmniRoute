@@ -51,7 +51,11 @@ import {
   isCatalogMirrorRefinementsEnabled,
 } from "@/shared/utils/featureFlags";
 import { extractApiKey } from "@/sse/services/auth";
-import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelpers";
+import {
+  maybeOmitCatalogModelName,
+  withCatalogDisplayName,
+  withSupportedReasoningLevels,
+} from "./catalogHelpers";
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 import {
@@ -445,7 +449,9 @@ export async function finalizeCatalogResponse(
   for (const model of finalModels) {
     let listedModel: Record<string, unknown>;
     if (model.owned_by === "combo") {
-      listedModel = maybeOmitCatalogModelName(model, includeModelNames);
+      listedModel = withSupportedReasoningLevels(
+        maybeOmitCatalogModelName(model, includeModelNames)
+      );
     } else {
       const entry = enrichCatalogModelEntry(model, undefined, {
         ...enrichmentSnapshot,
@@ -457,7 +463,9 @@ export async function finalizeCatalogResponse(
         : entry;
       listedModel = normalizeCatalogEntryPricing(listedModel, enrichmentSnapshot);
       listedModel = withCatalogDisplayName(listedModel);
-      listedModel = maybeOmitCatalogModelName(listedModel, includeModelNames);
+      listedModel = withSupportedReasoningLevels(
+        maybeOmitCatalogModelName(listedModel, includeModelNames)
+      );
     }
     enriched.push(listedModel);
     catEnrichCount++;
