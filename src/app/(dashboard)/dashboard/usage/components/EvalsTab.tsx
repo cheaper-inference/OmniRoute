@@ -1472,7 +1472,7 @@ export default function EvalsTab() {
                         ) : null}
                       </p>
                       {suite.source === "custom" && suite.updatedAt ? (
-                        <p className="text-[11px] text-text-muted mt-1">
+                        <p className="text-xs text-text-muted mt-1">
                           {t("suiteBuilderUpdatedAt", { value: formatTimestamp(suite.updatedAt) })}
                         </p>
                       ) : null}
