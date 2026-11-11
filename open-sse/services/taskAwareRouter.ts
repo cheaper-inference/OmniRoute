@@ -525,6 +525,12 @@ export function detectTaskType(body: any): TaskType {
 /** Utility traffic stays cheap, and the escalation model may not accept images. */
 const NEVER_ESCALATE: ReadonlySet<TaskType> = new Set<TaskType>(["background", "vision"]);
 
+/**
+ * Longer prompts are scored on their start: some specificity rules take quadratic time on a
+ * long line, and scoring runs on every request, so an unbounded prompt could stall the server.
+ */
+const MAX_SCORED_CHARS = 20_000;
+
 export interface ComplexityEscalation {
   /** Specificity score (0..100) of the anchor prompt. */
   score: number;
@@ -559,7 +565,7 @@ export function resolveComplexityEscalation(
   if (!routing) return null;
 
   const anchorMsg = selectAnchorMessage(getRequestMessages(body), getDetectionAnchor());
-  const text = anchorMsg ? extractRawText(anchorMsg.content, true) : "";
+  const text = anchorMsg ? extractRawText(anchorMsg.content, true).slice(0, MAX_SCORED_CHARS) : "";
   const { score } = analyzeSpecificity({ messages: [{ role: "user", content: text }] });
   const escalates =
     carriesTools(body) && !NEVER_ESCALATE.has(taskType) && score >= routing.minScore;

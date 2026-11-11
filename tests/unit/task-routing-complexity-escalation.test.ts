@@ -16,6 +16,7 @@ import {
   setTaskRoutingConfig,
   DEFAULT_COMPLEXITY_MIN_SCORE,
 } from "../../open-sse/services/taskAwareRouter.ts";
+import { analyzeSpecificity } from "../../open-sse/services/specificityDetector.ts";
 import { updateTaskRoutingSchema } from "../../src/shared/validation/schemas/routing.ts";
 
 const OPUS = "claude/claude-opus-5-5";
@@ -156,6 +157,20 @@ test("requests without tools never escalate, however complex their prompt", () =
     assert.equal(result.model, null);
   }
   assert.equal(resolveComplexityEscalation("coding", agentTurn)?.model, OPUS);
+});
+
+test("a long first prompt is scored on its first 20,000 characters only", () => {
+  resetConfig();
+  setTaskRoutingConfig({ detectionAnchor: "first-user", complexityRouting: ESCALATE_TO_OPUS });
+  const filler = "note ".repeat(4_000);
+  const body = {
+    tools: [{ name: "Bash" }],
+    messages: [{ role: "user", content: filler + HARD_PROMPT }],
+  };
+  const firstPart = analyzeSpecificity({ messages: [{ role: "user", content: filler }] }).score;
+  const result = resolveComplexityEscalation("coding", body);
+  assert.equal(result?.score, firstPart);
+  assert.equal(result?.model, null);
 });
 
 test("a malformed persisted complexityRouting block is ignored, not thrown on", () => {
