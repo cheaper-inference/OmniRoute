@@ -60,7 +60,8 @@ for (const failDurability of [false, true]) {
           undefined
         );
         rename(source, destination);
-        published = destination;
+        // The runner's snapshot lease is also written by rename; it is not the publication.
+        if (!path.basename(destination).startsWith(".migration-lease-")) published = destination;
       });
       t.mock.method(fs, "fsyncSync", (fd: number) => {
         if (published && failDurability)

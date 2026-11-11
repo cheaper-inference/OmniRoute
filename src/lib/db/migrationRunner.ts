@@ -27,6 +27,7 @@ import {
 } from "./migrationRunner/constants";
 import { getExtraMigrationFiles } from "./migrationRunner/extraDirs";
 import { migrationConsole as console } from "./migrationRunner/logger";
+import { acquireSnapshotLease } from "./backupRetention";
 import {
   createPreMigrationBackup,
   hashFileSync,
@@ -433,6 +434,37 @@ function triggerHasWhenClause(db: SqliteAdapter, triggerName: string): boolean {
   return trigger !== undefined && /\bWHEN\b/i.test(trigger.sql);
 }
 
+function hasIndex(db: SqliteAdapter, indexName: string): boolean {
+  return Boolean(
+    db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = ?").get(indexName)
+  );
+}
+
+/**
+ * Duplicate-column recovery may record a migration only if every column its SQL adds exists.
+ * Throws inside the caller's transaction, so the ledger row is rolled back with it.
+ */
+function assertAddedColumnsPresent(
+  db: SqliteAdapter,
+  migration: { version: string; name: string },
+  sql: string | null
+): void {
+  if (sql === null) return;
+  const code = sql.replace(/\/\*[\s\S]*?\*\//g, "").replace(/--[^\n]*/g, "");
+  const missing: string[] = [];
+  for (const m of code.matchAll(
+    /ALTER\s+TABLE\s+["`]?(\w+)["`]?\s+ADD\s+COLUMN\s+["`]?(\w+)["`]?/gi
+  )) {
+    if (!hasColumn(db, m[1], m[2])) missing.push(`${m[1]}.${m[2]}`);
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `${migration.version}_${migration.name} cannot be recorded: column(s) still missing after ` +
+        `duplicate-column recovery: ${missing.join(", ")}`
+    );
+  }
+}
+
 function isSchemaAlreadyApplied(
   db: SqliteAdapter,
   migration: { version: string; name: string }
@@ -443,11 +475,26 @@ function isSchemaAlreadyApplied(
     case "095":
       return hasColumn(db, "provider_nodes", "custom_headers_json");
     case "005":
-      return hasColumn(db, "combos", "system_message");
+      return (
+        hasColumn(db, "combos", "system_message") &&
+        hasColumn(db, "combos", "tool_filter_regex") &&
+        hasColumn(db, "combos", "context_cache_protection") &&
+        hasIndex(db, "idx_combos_cache_protection")
+      );
     case "007":
       return hasColumn(db, "call_logs", "request_type");
     case "009":
       return hasColumn(db, "call_logs", "requested_model");
+    case "012":
+      // Data-only: 012 adds the cache tokens to tokens_input once. Later rows already store the
+      // total, so a ledger-gap replay after any later migration ran would add them a second time.
+      return Boolean(
+        db
+          .prepare(
+            "SELECT 1 FROM _omniroute_migrations WHERE CAST(version AS INTEGER) > 12 LIMIT 1"
+          )
+          .get()
+      );
     case "018":
       return (
         hasColumn(db, "call_logs", "tokens_cache_read") &&
@@ -470,7 +517,14 @@ function isSchemaAlreadyApplied(
     case "026":
       return hasColumn(db, "call_logs", "cache_source");
     case "027":
-      return hasColumn(db, "skills", "mode");
+      return (
+        hasColumn(db, "skills", "mode") &&
+        hasColumn(db, "skills", "source_provider") &&
+        hasColumn(db, "skills", "tags") &&
+        hasColumn(db, "skills", "install_count") &&
+        hasIndex(db, "idx_skills_mode") &&
+        hasIndex(db, "idx_skills_source_provider")
+      );
     case "028":
       return hasTable(db, "batches") && hasTable(db, "files");
     case "029":
@@ -856,6 +910,36 @@ export function runMigrations(
   db: SqliteAdapter,
   options?: { isNewDb?: boolean; databaseExistedBeforeInitialization?: boolean }
 ): number {
+  // Pin the restore point for the whole run so pruning in any process keeps it until the
+  // upgrade ends, whether it succeeds or throws.
+  const lease = { release: () => {} };
+  try {
+    return runMigrationsLeased(db, options, lease);
+  } finally {
+    lease.release();
+  }
+}
+
+function leasePreMigrationBackup(
+  db: SqliteAdapter,
+  lease: { release: () => void },
+  receipt: PreMigrationBackupReceipt | null
+): PreMigrationBackupReceipt | null {
+  if (receipt) {
+    lease.release();
+    lease.release = acquireSnapshotLease(
+      path.join(path.dirname(db.name), "db_backups"),
+      receipt.path
+    );
+  }
+  return receipt;
+}
+
+function runMigrationsLeased(
+  db: SqliteAdapter,
+  options: { isNewDb?: boolean; databaseExistedBeforeInitialization?: boolean } | undefined,
+  lease: { release: () => void }
+): number {
   const isNewDb = options?.isNewDb === true;
   // `isNewDb` also covers a setup-created skeleton so it can bypass the mass-migration
   // false positive. Snapshot eligibility must use the independent physical-file fact:
@@ -920,7 +1004,7 @@ export function runMigrations(
       databaseExistedBeforeInitialization;
 
     if (needsSnapshot) {
-      preMigrationBackup = createPreMigrationBackup(db);
+      preMigrationBackup = leasePreMigrationBackup(db, lease, createPreMigrationBackup(db));
       if (!preMigrationBackup) {
         throw new Error(
           "[Migration] Refusing to migrate an existing database without a durable snapshot. " +
@@ -959,7 +1043,7 @@ export function runMigrations(
               "refusing to export from inside the rollback savepoint."
           );
         }
-        preMigrationBackup = createPreMigrationBackup(db);
+        preMigrationBackup = leasePreMigrationBackup(db, lease, createPreMigrationBackup(db));
         if (!preMigrationBackup) {
           throw new Error(
             "[Migration] Refusing to migrate an existing database without a durable snapshot. " +
@@ -1189,7 +1273,11 @@ export function runMigrations(
         message.includes("duplicate column name") &&
         !atomicPhysicalReplays.has(migration.version)
       ) {
-        const skipped = applyMigrationSkippingExistingColumns(db, migration, genericSql);
+        const skipped = db.transaction(() => {
+          const skippedColumns = applyMigrationSkippingExistingColumns(db, migration, genericSql);
+          assertAddedColumnsPresent(db, migration, genericSql);
+          return skippedColumns;
+        })() as string[];
         count += 1;
         console.log(
           `[Migration] Applied (column pre-exists): ${migration.version}_${migration.name}` +
