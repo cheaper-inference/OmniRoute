@@ -75,6 +75,13 @@ const FETCH_PROVIDERS: FetchProviderDef[] = [
     freeMonthlyQuota: 0,
     fetchFormats: ["markdown"],
   },
+  {
+    id: "deepseek-search",
+    name: "DeepSeek Fetch",
+    costPerQuery: 0.0007,
+    freeMonthlyQuota: 0,
+    fetchFormats: ["markdown"],
+  },
 ];
 
 // ---------------------------------------------------------------------------

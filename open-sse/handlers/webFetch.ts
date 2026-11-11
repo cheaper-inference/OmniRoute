@@ -25,6 +25,7 @@ import { tinyfishFetch } from "../executors/tinyfish-fetch.ts";
 import { nimbleFetch } from "../executors/nimble-fetch.ts";
 import { anysearchFetch } from "../executors/anysearch-fetch.ts";
 import { parallelFetch } from "../executors/parallel-fetch.ts";
+import { deepseekFetch } from "../executors/deepseek-fetch.ts";
 
 export type WebFetchFormat = "markdown" | "html" | "links" | "screenshot";
 
@@ -38,7 +39,8 @@ export interface WebFetchRequest {
     | "context7"
     | "nimble-search"
     | "anysearch-search"
-    | "parallel-search";
+    | "parallel-search"
+    | "deepseek-search";
   format?: WebFetchFormat;
   depth?: 0 | 1 | 2;
   wait_for_selector?: string;
@@ -76,6 +78,7 @@ export const WEB_FETCH_PROVIDERS = Object.freeze([
   "context7",
   "nimble-search",
   "parallel-search",
+  "deepseek-search",
 ] as const);
 // Derived from the array — adding a provider to WEB_FETCH_PROVIDERS
 // automatically widens the union; they cannot drift apart.
@@ -172,6 +175,14 @@ export async function handleWebFetch(
       case "parallel-search":
         // Parallel Extract is markdown-only; parallelFetch rejects other formats with 400.
         return await parallelFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "deepseek-search":
+        return await deepseekFetch({
           url: req.url,
           format,
           includeMetadata,

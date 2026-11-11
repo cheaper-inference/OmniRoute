@@ -229,6 +229,17 @@ export const SEARCH_PROVIDERS = {
     website: "https://platform.kimi.ai/docs/api/tools-search",
     authHint: "Moonshot AI API key (MOONSHOT_API_KEY) from platform.kimi.ai",
   },
+  "deepseek-search": {
+    id: "deepseek-search",
+    serviceKinds: ["webSearch", "webFetch"],
+    alias: "deepseek-search",
+    name: "DeepSeek Search",
+    icon: "search",
+    color: "#4D6BFE",
+    textIcon: "DS",
+    website: "https://api-docs.deepseek.com/guides/search",
+    authHint: "DeepSeek API key (sk-...) from platform.deepseek.com",
+  },
   context7: {
     id: "context7",
     alias: "context7",
