@@ -1,4 +1,5 @@
 import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
+import { resolveAntigravityModelId } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
 
 /**
  * Hosted providers whose model entitlement differs PER ACCOUNT (plan/tier), so the
@@ -26,6 +27,13 @@ export function inventoryOrFailOpen(
 ): Map<string, Set<string>> {
   for (const models of inventory.values()) {
     if (models.size > 0 && isModelAdvertisedByConnection(requestedModel, models)) return inventory;
+  }
+  const rawModel = requestedModel.slice(requestedModel.lastIndexOf("/") + 1);
+  const resolved = resolveAntigravityModelId(rawModel);
+  if (resolved !== rawModel) {
+    for (const models of inventory.values()) {
+      if (models.size > 0 && isModelAdvertisedByConnection(resolved, models)) return inventory;
+    }
   }
   return new Map();
 }
