@@ -473,7 +473,8 @@ export function resolveKeyForRequest(
 ): { key: string; keyId: string } | null {
   if (selectedKeyId) {
     const health = getOrCreateHealth(connectionId, selectedKeyId);
-    if (health.status !== "invalid") {
+    // A sticky key in 429 cooldown falls through to rotation like any other cooling key.
+    if (health.status !== "invalid" && !isCooling(connectionId, selectedKeyId)) {
       if (selectedKeyId === "primary" && primaryKey) {
         return { key: primaryKey, keyId: "primary" };
       }
