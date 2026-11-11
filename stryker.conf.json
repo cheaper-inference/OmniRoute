@@ -794,7 +794,11 @@
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
       "tests/unit/universal-handoff-api-key-scope.test.ts",
-      "tests/unit/combo-avoid-stalled-account.test.ts"
+      "tests/unit/combo-avoid-stalled-account.test.ts",
+      "tests/unit/auth-cooldown-keeps-longer.test.ts",
+      "tests/unit/auth-empty-pool-reasons.test.ts",
+      "tests/unit/auth-lru-single-pass.test.ts",
+      "tests/unit/auto-routing-unknown-auto-404.test.ts"
     ],
     "nodeArgs": [
       "--import",

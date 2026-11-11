@@ -486,6 +486,35 @@ function getP2CConnectionScore(
 
   return { score, quotaHeadroomPercent };
 }
+/**
+ * The connection `[...list].sort(order)[0]` would return, found in one pass with each
+ * `lastUsedAt` parsed once. Oldest-first order: lower backoff, never-used, oldest, then priority
+ * among never-used. `newestFirst` is the sticky-window order: most recent first, never-used last.
+ * Ties keep the earlier list entry, like the stable sort did.
+ */
+function pickByLastUsed<
+  T extends { backoffLevel?: number | null; lastUsedAt?: string | null; priority?: number | null },
+>(list: T[], newestFirst = false): T {
+  const usedMs = (c: T) => (c.lastUsedAt ? new Date(c.lastUsedAt).getTime() : null);
+  const before = (a: T, aMs: number | null, b: T, bMs: number | null): boolean => {
+    if (!newestFirst && (a.backoffLevel || 0) !== (b.backoffLevel || 0)) {
+      return (a.backoffLevel || 0) < (b.backoffLevel || 0);
+    }
+    if (aMs === null && bMs === null) return (a.priority || 999) < (b.priority || 999);
+    if (aMs === null || bMs === null) return (aMs === null) !== newestFirst;
+    return newestFirst ? aMs > bMs : aMs < bMs;
+  };
+  let best = list[0];
+  let bestMs = usedMs(best);
+  for (let i = 1; i < list.length; i++) {
+    const ms = usedMs(list[i]);
+    if (before(list[i], ms, best, bestMs)) {
+      best = list[i];
+      bestMs = ms;
+    }
+  }
+  return best;
+}
 function compareP2CConnections(
   provider: string,
   a: ProviderConnectionView,
@@ -1484,6 +1513,15 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
+      // Class names and counts only: an operator sees why the pool is empty without ids or key state.
+      const rejectReasons: Record<string, number> = {};
+      for (const status of connectionFilterStatus.values()) {
+        rejectReasons[status] = (rejectReasons[status] ?? 0) + 1;
+      }
+      const rejectSummary = Object.entries(rejectReasons)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([reason, count]) => `${reason}=${count}`)
+        .join(", ");
       // Only plan-eligible accounts may contribute to this model's retry/cooldown hint.
       const planEligible = filterCodexPlanEligible(provider, connections, requestedModel);
       const cooldownStates: CooldownInspectionState[] = planEligible.map((connection) => {
@@ -1541,8 +1579,8 @@ export async function getProviderCredentials(
         log.warn(
           "AUTH",
           allBlockedByModelCooldown
-            ? `${provider} | all ${connections.length} active accounts cooling down for model ${requestedModel} (${formatRetryAfter(earliest)}) | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
-            : `${provider} | all ${connections.length} active accounts rate limited (${formatRetryAfter(earliest)}) | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
+            ? `${provider} | all ${connections.length} active accounts cooling down for model ${requestedModel} (${formatRetryAfter(earliest)}) | rejected: ${rejectSummary} | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
+            : `${provider} | all ${connections.length} active accounts rate limited (${formatRetryAfter(earliest)}) | rejected: ${rejectSummary} | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
         );
         invalidateManagedLease(
           options,
@@ -1558,6 +1596,7 @@ export async function getProviderCredentials(
           cooldownModel: allBlockedByModelCooldown ? requestedModel : null,
           ...copilotRejectionFlag(provider, requestedModel, connections, connectionFilterStatus),
           connectionsCount: connections.length,
+          rejectReasons,
         };
       }
       const syntheticFallback = await maybeSyntheticNoAuthFallback(
@@ -1576,7 +1615,10 @@ export async function getProviderCredentials(
         return buildAllExpiredCredentials(terminalConnections);
       }
       invalidateManagedLease(options, "CONNECTION_INELIGIBLE");
-      log.warn("AUTH", `${provider} | all ${connections.length} accounts unavailable`);
+      log.warn(
+        "AUTH",
+        `${provider} | all ${connections.length} accounts unavailable | rejected: ${rejectSummary}`
+      );
       return null;
     }
 
@@ -1902,15 +1944,8 @@ export async function getProviderCredentials(
       const isFallbackScenario = excludeConnectionId !== null || excludedConnectionIds.size > 0;
 
       if (!isFallbackScenario) {
-        // Sort by lastUsed (most recent first) to find current candidate
-        const byRecency = [...orderedConnections].sort((a: any, b: any) => {
-          if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-          if (!a.lastUsedAt) return 1;
-          if (!b.lastUsedAt) return -1;
-          return new Date(b.lastUsedAt).getTime() - new Date(a.lastUsedAt).getTime();
-        });
-
-        const current = byRecency[0];
+        // Most recently used account is the sticky candidate
+        const current = pickByLastUsed(orderedConnections, true);
         const currentCount = current?.consecutiveUseCount || 0;
 
         if (current && current.lastUsedAt && currentCount < stickyLimit) {
@@ -1929,18 +1964,7 @@ export async function getProviderCredentials(
           // Pick the least recently used (excluding current if possible)
           // Also penalize accounts with high backoffLevel (previously rate-limited)
           // so they don't get immediately re-selected after cooldown (#340)
-          const sortedByOldest = [...orderedConnections].sort((a: any, b: any) => {
-            // Penalize previously rate-limited accounts (backoffLevel > 0)
-            const aBackoff = a.backoffLevel || 0;
-            const bBackoff = b.backoffLevel || 0;
-            if (aBackoff !== bBackoff) return aBackoff - bBackoff; // lower backoff first
-            if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-            if (!a.lastUsedAt) return -1;
-            if (!b.lastUsedAt) return 1;
-            return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
-          });
-
-          connection = sortedByOldest[0];
+          connection = pickByLastUsed(orderedConnections);
           log.debug(
             "AUTH",
             `${provider} round-robin: switching to LRU ${connection.id?.slice(0, 8)}... (current count=${currentCount} >= limit=${stickyLimit} or no lastUsedAt)`
@@ -1955,17 +1979,7 @@ export async function getProviderCredentials(
         // Fallback scenario: excluded an account due to failure
         // Always pick the least recently used to ensure proper cycling
         // Also penalize accounts with high backoffLevel (#340)
-        const sortedByOldest = [...orderedConnections].sort((a: any, b: any) => {
-          const aBackoff = a.backoffLevel || 0;
-          const bBackoff = b.backoffLevel || 0;
-          if (aBackoff !== bBackoff) return aBackoff - bBackoff;
-          if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-          if (!a.lastUsedAt) return -1;
-          if (!b.lastUsedAt) return 1;
-          return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
-        });
-
-        connection = sortedByOldest[0];
+        connection = pickByLastUsed(orderedConnections);
         log.info(
           "AUTH",
           `${provider} round-robin: FALLBACK MODE - excluded_count=${excludedConnectionIds.size} excluded=${formatConnectionPrefixesForLog(excludedConnectionIds)} picked_lru=${connection.id?.slice(0, 8)}...`
@@ -2009,16 +2023,7 @@ export async function getProviderCredentials(
       // round-robin fallback branch applies. Without it the oldest lastUsedAt
       // could belong to an account that just 429'd, so a failover landed on it
       // for one request before the next call settled on a healthy account.
-      const sorted = [...orderedConnections].sort((a, b) => {
-        const aBackoff = a.backoffLevel || 0;
-        const bBackoff = b.backoffLevel || 0;
-        if (aBackoff !== bBackoff) return aBackoff - bBackoff; // lower backoff first
-        if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-        if (!a.lastUsedAt) return -1;
-        if (!b.lastUsedAt) return 1;
-        return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
-      });
-      connection = sorted[0];
+      connection = pickByLastUsed(orderedConnections);
       // expiry-first (#14533) ranks by the quota closest to being lost; see its leaf module.
       if (strategy === "expiry-first")
         connection = pickExpiryFirstConnection(orderedConnections, settings, {
@@ -2662,6 +2667,49 @@ export async function markAccountUnavailable(
       ? cooldownUntilMs(conn.rateLimitedUntil)
       : NaN;
     if (Number.isFinite(existingCooldownMs) && existingCooldownMs > Date.now()) {
+      // A cooldown only grows: a real upstream reset longer than the stored one (a 5 h quota 429
+      // racing a 5 s transient mark) moves the end out. Backoff level and error fields stay.
+      const longer =
+        !coolingDisabled &&
+        provider !== "codex" &&
+        options.persistUnavailableState !== false &&
+        !hasPerModelFailureScope(
+          provider,
+          model,
+          (conn?.providerSpecificData as Record<string, unknown> | undefined)?.passthroughModels as
+            boolean | undefined,
+          status,
+          errorText
+        ) &&
+        !(await shouldIsolateProbeFailures())
+          ? checkFallbackError(
+              status,
+              errorText,
+              backoffLevel,
+              model,
+              provider,
+              options.headers ?? null,
+              providerProfile || (provider ? await getRuntimeProviderProfile(provider) : null),
+              options.structuredError ?? null,
+              null,
+              await resolveDailyResetForProvider(provider)
+            )
+          : null;
+      if (
+        longer?.usedUpstreamRetryHint &&
+        !longer.permanent &&
+        longer.ruleScope !== "model" &&
+        longer.cooldownMs > existingCooldownMs - Date.now()
+      ) {
+        await updateProviderConnection(connectionId, {
+          rateLimitedUntil: getUnavailableUntil(longer.cooldownMs),
+        });
+        log.info(
+          "AUTH",
+          `${connectionId.slice(0, 8)} cooldown extended to ${Math.ceil(longer.cooldownMs / 1000)}s by a longer upstream reset`
+        );
+        return { shouldFallback: true, cooldownMs: longer.cooldownMs };
+      }
       log.info(
         "AUTH",
         `${connectionId.slice(0, 8)} already marked unavailable (until ${conn?.rateLimitedUntil}), skipping duplicate mark`
