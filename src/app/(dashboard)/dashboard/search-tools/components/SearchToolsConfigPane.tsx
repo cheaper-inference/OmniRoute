@@ -41,7 +41,7 @@ export default function SearchToolsConfigPane({
 
   return (
     <aside
-      className="w-[220px] shrink-0 border-l border-border bg-bg-alt overflow-y-auto flex flex-col"
+      className="w-full lg:w-[220px] shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-bg-alt lg:overflow-y-auto flex flex-col"
       data-testid="search-tools-config-pane"
       aria-label={t("configurationPane")}
     >

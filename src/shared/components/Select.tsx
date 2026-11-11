@@ -24,8 +24,10 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   placeholderDisabled?: boolean;
   /** Label and select on one line, with a shorter select (settings rows, cards). */
   compact?: boolean;
-  /** Height of the native branch without `compact`'s one-line layout (`<option>` children). */
+  /** Height of the native branch without `compact`'s one-line layout. */
   nativeSize?: "xs" | "sm" | "md";
+  /** Render `options` with the platform picker (kit NativeSelect) instead of the Radix menu. */
+  native?: boolean;
 }
 
 // Radix Select reserves the empty string for "no value" (it shows the placeholder), so an
@@ -39,9 +41,10 @@ const fromKitValue = (value: string) => (value === EMPTY_VALUE ? "" : value);
  *
  * - `options` → the kit (Radix) Select; `onValueChange` is turned into the legacy
  *   `onChange({ target: { value, name } })` shape every caller reads.
- * - `<option>` children → the kit NativeSelect, because Radix Select has no DOM `<option>`s;
- *   the real change event is passed through untouched. `selectClassName` lands on its wrapper,
- *   which sets the width and the type of the `<select>`.
+ * - `<option>` children, or `options` with `native` → the kit NativeSelect (OS picker on phones;
+ *   Radix Select has no DOM `<option>`s). The real change event is passed through untouched, and
+ *   it has the same `target.value` / `target.name` the kit branch synthesizes. `selectClassName`
+ *   lands on its wrapper, which sets the width and the type of the `<select>`.
  */
 export default function Select({
   label,
@@ -59,6 +62,7 @@ export default function Select({
   placeholderDisabled = true,
   compact = false,
   nativeSize,
+  native = false,
   id: externalId,
   name,
   children,
@@ -78,7 +82,7 @@ export default function Select({
     defaultValue == null ? "" : String(defaultValue)
   );
   const resolvedPlaceholder = placeholder ?? t("selectOption");
-  const useKit = options !== undefined && children == null;
+  const useKit = options !== undefined && children == null && !native;
 
   let control: React.ReactNode;
   if (useKit) {
@@ -150,12 +154,24 @@ export default function Select({
       );
     }
   } else {
+    const nativeOptions = children == null ? options : undefined;
+    const currentValue = String(value ?? defaultValue ?? "");
+    // With `options` the disabled placeholder only stands in for "nothing picked yet"; the
+    // Radix branch does not list it either.
+    const placeholderIsNeeded =
+      !nativeOptions ||
+      (!nativeOptions.some((option) => option.value === "") &&
+        (!placeholderDisabled || !nativeOptions.some((option) => option.value === currentValue)));
+    const showPlaceholder = !children && !!resolvedPlaceholder && placeholderIsNeeded;
+    // A browser selects the first enabled option of an unset <select>, not a disabled placeholder.
+    const nativeDefaultValue =
+      defaultValue ?? (nativeOptions && value === undefined && showPlaceholder ? "" : undefined);
     control = (
       <KitNativeSelect
         id={selectId}
         name={name}
         value={value}
-        defaultValue={defaultValue}
+        defaultValue={nativeDefaultValue}
         onChange={onChange}
         disabled={disabled}
         required={required}
@@ -166,11 +182,16 @@ export default function Select({
         className={selectClassName}
         {...(props as Omit<typeof props, "multiple">)}
       >
-        {!children && resolvedPlaceholder && (
+        {showPlaceholder && (
           <option value="" disabled={placeholderDisabled}>
             {resolvedPlaceholder}
           </option>
         )}
+        {nativeOptions?.map((option) => (
+          <option key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </option>
+        ))}
         {children}
       </KitNativeSelect>
     );
