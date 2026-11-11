@@ -12870,6 +12870,8 @@
     },
     "attempts": "προσπάθειες",
     "detail": {
+      "tabOverview": "Επισκόπηση",
+      "tabPayloads": "Ωφέλιμα φορτία",
       "omittedHttpAttempts": "Δεν διατηρήθηκαν {count} αποστολές HTTP",
       "noHttpResponse": "Δεν παρατηρήθηκε απόκριση HTTP",
       "transportError": "Σφάλμα μεταφοράς",

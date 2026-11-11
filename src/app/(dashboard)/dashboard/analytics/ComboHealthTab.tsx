@@ -886,6 +886,7 @@ export default function ComboHealthTab() {
         <div className="flex flex-col gap-3 sm:items-end">
           <TimeRangeSelector value={range} onChange={setRange} />
           <SegmentedControl
+            semantics="radio"
             size="sm"
             aria-label={t("comboHealthForecastHorizon", { value: horizon })}
             value={horizon}

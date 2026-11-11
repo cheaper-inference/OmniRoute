@@ -12870,6 +12870,8 @@
     },
     "attempts": "tentativas",
     "detail": {
+      "tabOverview": "Visão Geral",
+      "tabPayloads": "Payloads",
       "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
       "noHttpResponse": "Nenhuma resposta HTTP foi observada",
       "transportError": "Erro de transporte",

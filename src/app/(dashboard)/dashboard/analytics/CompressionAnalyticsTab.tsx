@@ -197,6 +197,7 @@ export default function CompressionAnalyticsTab() {
     <div className="flex flex-col gap-6">
       {/* Time Range Selector */}
       <SegmentedControl
+        semantics="radio"
         size="sm"
         aria-label={t("compressionAnalyticsTitle")}
         value={since}

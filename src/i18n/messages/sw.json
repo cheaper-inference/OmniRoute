@@ -12870,6 +12870,8 @@
     },
     "attempts": "jaribio",
     "detail": {
+      "tabOverview": "Muhtasari",
+      "tabPayloads": "Data za maombi",
       "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
       "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
       "transportError": "Hitilafu ya usafirishaji",

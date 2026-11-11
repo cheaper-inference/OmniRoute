@@ -12870,6 +12870,8 @@
     },
     "attempts": "ਕੋਸ਼ਿਸ਼ਾਂ",
     "detail": {
+      "tabOverview": "ਸੰਖੇਪ ਜਾਣਕਾਰੀ",
+      "tabPayloads": "ਪੇਲੋਡ",
       "omittedHttpAttempts": "{count} HTTP ਭੇਜਣ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ",
       "noHttpResponse": "ਕੋਈ HTTP ਜਵਾਬ ਦੇਖਿਆ ਨਹੀਂ ਗਿਆ",
       "transportError": "ਆਵਾਜਾਈ ਗਲਤੀ",

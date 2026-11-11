@@ -12870,6 +12870,8 @@
     },
     "attempts": "àwọn ìgbìyànjú",
     "detail": {
+      "tabOverview": "Àkótán",
+      "tabPayloads": "Àwọn payload",
       "omittedHttpAttempts": "A kò fi ìfiránṣẹ́ HTTP {count} pamọ́",
       "noHttpResponse": "A kò ṣàkíyèsí ìdáhùn HTTP kankan",
       "transportError": "Àṣìṣe ìgbéjáde",

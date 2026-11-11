@@ -12870,6 +12870,8 @@
     },
     "attempts": "попытки",
     "detail": {
+      "tabOverview": "Обзор",
+      "tabPayloads": "Данные запросов",
       "omittedHttpAttempts": "{count} отправок HTTP не сохранено",
       "noHttpResponse": "Ответ HTTP не наблюдался",
       "transportError": "Ошибка транспорта",

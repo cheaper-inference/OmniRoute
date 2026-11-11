@@ -12870,6 +12870,8 @@
     },
     "attempts": "mēģinājumi",
     "detail": {
+      "tabOverview": "Pārskats",
+      "tabPayloads": "Dati",
       "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
       "noHttpResponse": "HTTP atbilde nav novērota",
       "transportError": "Pārsūtīšanas kļūda",

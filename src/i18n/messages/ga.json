@@ -12870,6 +12870,8 @@
     },
     "attempts": "iarrachtaí",
     "detail": {
+      "tabOverview": "Forbhreathnú",
+      "tabPayloads": "Pálastaí",
       "omittedHttpAttempts": "Níor coinníodh {count} seoladh HTTP",
       "noHttpResponse": "Níor breathnaíodh aon fhreagra HTTP",
       "transportError": "Earráid iompair",

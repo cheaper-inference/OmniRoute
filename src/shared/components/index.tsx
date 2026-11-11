@@ -33,7 +33,7 @@ export { default as KiroOAuthWrapper } from "./KiroOAuthWrapper";
 export { default as KiroSocialOAuthModal } from "./KiroSocialOAuthModal";
 export { default as CursorAuthModal } from "./CursorAuthModal";
 export { default as TraeAuthModal } from "./TraeAuthModal";
-export { default as SegmentedControl } from "./SegmentedControl";
+export { default as SegmentedControl, SegmentedPanel, SegmentedTabs } from "./SegmentedControl";
 export { default as FilterPills } from "./FilterPills";
 export { default as ActionBar } from "./ActionBar";
 export { default as ReorderControl } from "./ReorderControl";

@@ -12870,6 +12870,8 @@
     },
     "attempts": "pogingen",
     "detail": {
+      "tabOverview": "Overzicht",
+      "tabPayloads": "Payloads",
       "omittedHttpAttempts": "{count} HTTP-verzendingen niet bewaard",
       "noHttpResponse": "Geen HTTP-antwoord waargenomen",
       "transportError": "Transportfout",

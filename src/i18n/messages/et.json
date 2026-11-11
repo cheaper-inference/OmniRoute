@@ -12870,6 +12870,8 @@
     },
     "attempts": "katsed",
     "detail": {
+      "tabOverview": "Ülevaade",
+      "tabPayloads": "Andmekoormused",
       "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
       "noHttpResponse": "HTTP vastust ei täheldatud",
       "transportError": "Transpordiviga",

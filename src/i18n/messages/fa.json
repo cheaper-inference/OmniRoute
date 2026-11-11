@@ -12870,6 +12870,8 @@
     },
     "attempts": "تلاش‌ها",
     "detail": {
+      "tabOverview": "نمای کلی",
+      "tabPayloads": "محتواها",
       "omittedHttpAttempts": "{count} ارسال HTTP نگهداری نشد",
       "noHttpResponse": "هیچ پاسخ HTTP مشاهده نشد",
       "transportError": "خطای انتقال",

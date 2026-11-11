@@ -12870,6 +12870,8 @@
     },
     "attempts": "опити",
     "detail": {
+      "tabOverview": "Преглед",
+      "tabPayloads": "Данни",
       "omittedHttpAttempts": "{count} HTTP изпращания не са запазени",
       "noHttpResponse": "Не е наблюдаван HTTP отговор",
       "transportError": "Грешка при преноса",

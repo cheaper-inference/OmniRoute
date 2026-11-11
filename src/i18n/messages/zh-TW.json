@@ -12870,6 +12870,8 @@
     },
     "attempts": "嘗試次數",
     "detail": {
+      "tabOverview": "概述",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
       "noHttpResponse": "未觀察到 HTTP 回應",
       "transportError": "傳輸錯誤",

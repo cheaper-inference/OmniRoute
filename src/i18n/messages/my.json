@@ -12870,6 +12870,8 @@
     },
     "attempts": "ကြိုးပမ်းမှုများ",
     "detail": {
+      "tabOverview": "ခြုံငုံသုံးသပ်ချက်",
+      "tabPayloads": "Payload များ",
       "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
       "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
       "transportError": "ပို့ဆောင်မှု အမှား",
