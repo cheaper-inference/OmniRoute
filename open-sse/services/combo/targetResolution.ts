@@ -102,6 +102,7 @@ import type {
   HiddenModelsByProvider,
   ResolvedComboTarget,
 } from "./types.ts";
+import { chargeComboCallBudget } from "./comboCallBudget.ts";
 
 export interface ResolveComboTargetPipelineDeps {
   body: Record<string, unknown>;
@@ -957,6 +958,13 @@ export async function resolveComboTargetPipeline(
     drawnId,
     orderedTargets[0]?.connectionId ?? ""
   );
+
+  // Opt-in per-combo call budget (config.budgetCalls + budgetWindowMs): over the budget
+  // the combo is withheld and this request runs on its first target only.
+  if (chargeComboCallBudget(combo.name, config as Record<string, unknown>)) {
+    log.info("COMBO", `Combo "${combo.name}" is over its call budget; using the first target only`);
+    orderedTargets = orderedTargets.slice(0, 1);
+  }
 
   // Parallel pre-screen: check provider profiles and model availability for all targets
   // Only runs for priority strategy where sequential checking causes latency
