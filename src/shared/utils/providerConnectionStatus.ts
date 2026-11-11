@@ -53,3 +53,27 @@ export function isProviderConnectionErrored(
     ERROR_STATUSES.has(getEffectiveProviderConnectionStatus(connection, now))
   );
 }
+
+export type ProviderHealth = "active" | "error" | "idle";
+
+/**
+ * Aggregate one provider's connections into a single health state for
+ * status/topology nodes: any healthy connection wins, otherwise any errored
+ * connection, otherwise idle.
+ *
+ * Takes the connection list so callers never pass `Array#some` directly —
+ * `some` forwards the array index as the second argument, which the per-
+ * connection helpers would read as `now` and pin an expired cooldown to
+ * "still errored".
+ */
+export function getProviderHealth(
+  connections: readonly ProviderConnectionStatusLike[],
+  now = Date.now()
+): ProviderHealth {
+  let errored = false;
+  for (const connection of connections) {
+    if (isProviderConnectionConnected(connection, now)) return "active";
+    if (isProviderConnectionErrored(connection, now)) errored = true;
+  }
+  return errored ? "error" : "idle";
+}

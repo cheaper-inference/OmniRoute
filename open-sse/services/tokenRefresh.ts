@@ -59,6 +59,7 @@ import {
 } from "./antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
+import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshRenderhourToken } from "./tokenRefresh/providers/renderhour.ts";
@@ -120,6 +121,7 @@ export const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 // Providers with non-rotating tokens (Google, Anthropic) or where multi-
 // account is naturally isolated keep longer lead times.
 export const REFRESH_LEAD_MS: Record<string, number> = {
+  chatgpt: 60_000, // Official SIWC local SDK refresh window.
   // Rotating refresh tokens — minimize refresh frequency to avoid the
   // "refresh-invalidates-siblings" cascade documented for OpenAI Auth0.
   codex: 5 * 60 * 1000, // 5 minutes
@@ -446,6 +448,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
 
+    case "chatgpt":
+      return await refreshChatGptToken(credentials, proxyConfig);
+
     case "cursor":
       if (!credentials.refreshToken) {
         return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
@@ -520,6 +525,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "chatgpt",
     "copilot-m365-web",
     "gemini",
     "antigravity",
@@ -760,10 +766,17 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
               accessToken: dbConnection.accessToken,
               refreshToken: dbConnection.refreshToken,
               expiresAt: dbConnection.expiresAt,
+              ...(provider === "chatgpt"
+                ? { providerSpecificData: dbConnection.providerSpecificData }
+                : {}),
             };
           }
           credentials.refreshToken = dbConnection.refreshToken;
           credentials.accessToken = dbConnection.accessToken;
+          if (provider === "chatgpt") {
+            credentials.expiresAt = dbConnection.expiresAt;
+            credentials.providerSpecificData = dbConnection.providerSpecificData;
+          }
         }
       }
     } catch (e) {
