@@ -22,6 +22,10 @@ const HASHES = {
   },
 };
 
+/**
+ * Resolve pinned release metadata and checksum for a platform/architecture, rejecting unverified
+ * targets.
+ */
 export function officialRelease(core: ManagedCore, platform = os.platform(), arch = os.arch()) {
   const key = `${platform}-${arch}`;
   const sha256 = (HASHES[core] as Record<string, string>)[key];

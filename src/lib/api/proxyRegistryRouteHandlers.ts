@@ -80,6 +80,10 @@ export async function handleProxyCreate(request: Request) {
   }
 }
 
+/**
+ * Validate a registry patch, preserving omitted fields and protecting managed endpoint metadata.
+ * Apply an optional assignment with the update and return sanitized failure responses.
+ */
 export async function handleProxyUpdate(request: Request) {
   const parsed = await readJsonBody(request);
   if (!parsed.ok) return parsed.response;

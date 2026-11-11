@@ -14,6 +14,10 @@ export class HealthChecker {
   private currentHealth: HealthState = "unknown";
   private active = false;
 
+  /**
+   * Configure interval polling with either an abort-aware native probe or a direct HTTP health
+   * check.
+   */
   constructor(
     private readonly healthUrl: () => string,
     private readonly intervalMs: number,
@@ -21,6 +25,7 @@ export class HealthChecker {
     private readonly probe?: (signal: AbortSignal) => Promise<boolean>
   ) {}
 
+  /** Reset health and schedule polling once without keeping the Node process alive. */
   start(): void {
     if (this.active) return;
     this.active = true;
@@ -31,6 +36,7 @@ export class HealthChecker {
     (this.timer as { unref?: () => void })?.unref?.();
   }
 
+  /** Disable polling, clear its interval, and reset reported health to unknown. */
   stop(): void {
     this.active = false;
     if (this.timer) {
@@ -40,10 +46,12 @@ export class HealthChecker {
     this.setHealth("unknown");
   }
 
+  /** Return the most recently recorded health state. */
   getHealth(): HealthState {
     return this.currentHealth;
   }
 
+  /** Run one bounded health probe, resetting consecutive failures on success or recording a failure. */
   private async poll(): Promise<void> {
     if (!this.active) return;
 
@@ -70,6 +78,7 @@ export class HealthChecker {
     }
   }
 
+  /** Count a failed probe and mark unhealthy after three consecutive failures. */
   private recordFailure(): void {
     this.consecutiveFailures++;
     if (this.consecutiveFailures >= FAILURE_THRESHOLD) {
@@ -77,6 +86,7 @@ export class HealthChecker {
     }
   }
 
+  /** Notify the subscriber only when the recorded health state changes. */
   private setHealth(health: HealthState): void {
     if (health === this.currentHealth) return;
     this.currentHealth = health;

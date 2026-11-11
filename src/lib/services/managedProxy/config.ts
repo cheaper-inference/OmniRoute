@@ -81,10 +81,12 @@ const QUERY_KEYS = new Set([
 ]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Identify non-null, non-array objects accepted as outbound records. */
 function object(value: unknown): value is Json {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
+/** Reject deeply nested outbound options, unsafe local resources, and disabled TLS verification. */
 function rejectUnsafe(value: unknown, depth = 0): void {
   if (depth > 20) throw new Error("Outbound configuration is too deeply nested");
   if (Array.isArray(value)) return value.forEach((v) => rejectUnsafe(v, depth + 1));
@@ -120,6 +122,7 @@ function rejectUnsafe(value: unknown, depth = 0): void {
   }
 }
 
+/** Validate a native outbound for the selected core and clone it without a caller-supplied tag. */
 export function nativeOutbound(core: ManagedCore, value: unknown): Json {
   if (!object(value)) throw new Error("Native outbound must be an object");
   const protocol = core === "singbox" ? value.type : value.protocol;
@@ -132,6 +135,7 @@ export function nativeOutbound(core: ManagedCore, value: unknown): Json {
   return result;
 }
 
+/** Decode a URI credential, replacing decoding failures with a source-specific error. */
 function decode(value: string): string {
   try {
     return decodeURIComponent(value);
@@ -140,11 +144,13 @@ function decode(value: string): string {
   }
 }
 
+/** Decode standard or URL-safe base64 text after rejecting characters outside its alphabet. */
 function decodeBase64(value: string): string {
   if (!/^[A-Za-z0-9+/_=-]+$/.test(value)) throw new Error("Malformed base64 source");
   return Buffer.from(value.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
 }
 
+/** Coerce an upstream port and reject values outside the integer TCP/UDP port range. */
 function port(value: unknown): number {
   const result = Number(value);
   if (!Number.isSafeInteger(result) || result < 1 || result > 65535)
@@ -152,6 +158,7 @@ function port(value: unknown): number {
   return result;
 }
 
+/** Reject unknown URI option names and requests to disable TLS verification. */
 function auditQuery(p: URLSearchParams): void {
   for (const key of p.keys()) {
     if (!/^[a-zA-Z0-9_-]{1,64}$/.test(key)) throw new Error("Unsupported option name");
@@ -164,6 +171,7 @@ function auditQuery(p: URLSearchParams): void {
   }
 }
 
+/** Resolve the security mode and reject TLS or REALITY options incompatible with it. */
 function securityKind(p: URLSearchParams, defaultTls: boolean): string {
   const security = (p.get("security") || (defaultTls ? "tls" : "none")).toLowerCase();
   if (security !== "reality" && ["pbk", "sid", "spx"].some((key) => p.has(key)))
@@ -178,6 +186,7 @@ function securityKind(p: URLSearchParams, defaultTls: boolean): string {
   return security;
 }
 
+/** Build sing-box TLS options, requiring a REALITY public key and rejecting spider paths. */
 function singboxTls(p: URLSearchParams, serverName: string, security: string): Json {
   const alpn = p.get("alpn")?.split(",");
   const fingerprint = p.get("fp");
@@ -193,6 +202,7 @@ function singboxTls(p: URLSearchParams, serverName: string, security: string): J
   return { tls: result };
 }
 
+/** Build Xray TLS or REALITY settings, requiring a public key for REALITY. */
 function xrayTls(p: URLSearchParams, serverName: string, security: string): Json {
   const alpn = p.get("alpn")?.split(",");
   const fingerprint = p.get("fp");
@@ -209,6 +219,7 @@ function xrayTls(p: URLSearchParams, serverName: string, security: string): Json
   return { security, [security === "tls" ? "tlsSettings" : "realitySettings"]: settings };
 }
 
+/** Validate security query options and produce the selected core's TLS configuration. */
 function tls(core: ManagedCore, p: URLSearchParams, host: string, defaultTls: boolean): Json {
   auditQuery(p);
   const security = securityKind(p, defaultTls);
@@ -219,6 +230,7 @@ function tls(core: ManagedCore, p: URLSearchParams, host: string, defaultTls: bo
     : xrayTls(p, serverName, security);
 }
 
+/** Project WebSocket or HTTP transport options, rejecting unsupported core-specific settings. */
 function httpTransport(core: ManagedCore, p: URLSearchParams, kind: string): Json {
   if (["service", "serviceName"].some((key) => p.has(key)))
     throw new Error("Service name requires gRPC transport");
@@ -240,6 +252,7 @@ function httpTransport(core: ManagedCore, p: URLSearchParams, kind: string): Jso
   return { network: kind, [`${kind}Settings`]: settings };
 }
 
+/** Convert an explicit transport to native settings and reject incompatible transport options. */
 function transport(core: ManagedCore, p: URLSearchParams): Json {
   const kind = (p.get("type") || "tcp").toLowerCase();
   if (!["tcp", "raw", "ws", "grpc", "httpupgrade", "xhttp"].includes(kind))
@@ -274,6 +287,7 @@ type Projection = {
   vmess?: Json;
 };
 
+/** Add positive finite Hysteria bandwidth limits to the supplied outbound record. */
 function bandwidthOptions(p: URLSearchParams, result: Json): void {
   for (const key of ["upmbps", "downmbps"])
     if (p.has(key)) {
@@ -283,6 +297,7 @@ function bandwidthOptions(p: URLSearchParams, result: Json): void {
     }
 }
 
+/** Add Hysteria 2 bandwidth and Salamander options, rejecting unsupported protocol options. */
 function hysteriaOptions(p: URLSearchParams, result: Json): void {
   bandwidthOptions(p, result);
   if (p.has("obfs-password") && !p.has("obfs"))
@@ -303,6 +318,7 @@ function hysteriaOptions(p: URLSearchParams, result: Json): void {
     if (p.has(key)) throw new Error(`Unsupported option: ${key}`);
 }
 
+/** Add TUIC options to the outbound, validating booleans and rejecting Hysteria-only options. */
 function tuicOptions(p: URLSearchParams, result: Json): void {
   for (const key of ["obfs", "obfs-password", "upmbps", "downmbps"])
     if (p.has(key)) throw new Error(`Unsupported option: ${key}`);
@@ -316,6 +332,9 @@ function tuicOptions(p: URLSearchParams, result: Json): void {
     }
 }
 
+/**
+ * Build a sing-box outbound from parsed credentials, security, and compatible transport options.
+ */
 function singboxProjection(n: Projection, security: Json): Json {
   const { type, host, upstreamPort, secret, password, p, vmess } = n;
   const result: Json = { type, server: host, server_port: upstreamPort, ...security };
@@ -343,6 +362,7 @@ function singboxProjection(n: Projection, security: Json): Json {
   return result;
 }
 
+/** Build Xray account, endpoint, and stream settings from a validated protocol projection. */
 function xrayProjection(n: Projection, security: Json): Json {
   const { type, host, upstreamPort, secret, password, p, vmess } = n;
   const flow = p.get("flow");
@@ -366,6 +386,7 @@ function xrayProjection(n: Projection, security: Json): Json {
   return { protocol: type, settings, streamSettings: { ...security, ...transport(n.core, p) } };
 }
 
+/** Reject unsupported core/protocol combinations, invalid UUIDs, and incompatible URI options. */
 function auditProtocol(n: Projection): void {
   const { core, type, secret, p } = n;
   if (core === "xray" && ["hysteria2", "tuic", "anytls"].includes(type))
@@ -394,6 +415,9 @@ function auditProtocol(n: Projection): void {
   }
 }
 
+/**
+ * Normalize protocol aliases, validate security and protocol options, and render a native outbound.
+ */
 function project(
   core: ManagedCore,
   protocol: string,
@@ -412,6 +436,7 @@ function project(
   return core === "singbox" ? singboxProjection(n, security) : xrayProjection(n, security);
 }
 
+/** Parse a base64 VMess JSON source and reject unsupported fields before native conversion. */
 function vmessSource(core: ManagedCore, source: string): Json {
   let value: unknown;
   try {
@@ -455,6 +480,7 @@ function vmessSource(core: ManagedCore, source: string): Json {
   return project(core, "vmess", host, port(value.port), String(value.id || ""), "", p, value);
 }
 
+/** Decode URI credentials, including Shadowsocks base64 pairs and TUIC's separate password. */
 function uriCredentials(url: URL, scheme: string): { secret: string; password: string } {
   let secret = decode(url.username),
     password = decode(url.password);
@@ -471,6 +497,7 @@ function uriCredentials(url: URL, scheme: string): { secret: string; password: s
   return { secret, password };
 }
 
+/** Validate a proxy URL and its unique query options before projecting it to the selected core. */
 function urlSource(core: ManagedCore, source: string, scheme: string): Json {
   let url: URL;
   try {
@@ -498,6 +525,7 @@ function urlSource(core: ManagedCore, source: string, scheme: string): Json {
   );
 }
 
+/** Convert a bounded URI or native JSON source to an outbound, rejecting unsupported input. */
 export function sourceOutbound(core: ManagedCore, source: string): Json {
   if (source.length > 65536) throw new Error("Proxy source exceeds 64 KiB");
   if (source.trim().startsWith("{")) {
@@ -515,6 +543,7 @@ export function sourceOutbound(core: ManagedCore, source: string): Json {
   return scheme === "vmess" ? vmessSource(core, source) : urlSource(core, source, scheme);
 }
 
+/** Render 1–100 loopback SOCKS listeners with per-listener routing; reject invalid IDs or ports. */
 export function renderManagedConfig(core: ManagedCore, entries: ManagedListener[]): Json {
   if (entries.length === 0 || entries.length > 100)
     throw new Error("Managed core requires 1 to 100 listeners");
@@ -562,6 +591,7 @@ export function renderManagedConfig(core: ManagedCore, entries: ManagedListener[
   };
 }
 
+/** Return the selected core's config-validation arguments without launching its listeners. */
 export function nativeCheckArgs(core: ManagedCore, configPath: string): string[] {
   return core === "singbox" ? ["check", "-c", configPath] : ["run", "-test", "-c", configPath];
 }

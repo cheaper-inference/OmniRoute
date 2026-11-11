@@ -31,10 +31,12 @@ const ManifestSchema = z
 type Entry = z.infer<typeof EntrySchema>;
 const locks = new Map<string, Promise<unknown>>();
 
+/** Resolve the managed-proxy storage root beneath the application data directory. */
 export function managedRoot(): string {
   return path.join(resolveDataDir(), "services", "managed-proxy");
 }
 
+/** Read a private config file, returning null only when the file is absent. */
 function readOptional(file: string): string | null {
   try {
     return readPrivateConfigFile(file);
@@ -44,10 +46,14 @@ function readOptional(file: string): string | null {
   }
 }
 
+/**
+ * Parse and validate encrypted source entries, treating absent or empty text as an empty manifest.
+ */
 export function readManagedManifest(text: string | null): Entry[] {
   return text ? ManifestSchema.parse(JSON.parse(text)).entries : [];
 }
 
+/** Decrypt persisted sources and convert them to listeners; reject unreadable credentials. */
 export function managedListeners(core: ManagedCore, entries: Entry[]): ManagedListener[] {
   return entries.map((entry) => {
     const source = decrypt(entry.sourceEnc);
@@ -62,6 +68,9 @@ export function managedListeners(core: ManagedCore, entries: Entry[]): ManagedLi
   });
 }
 
+/**
+ * Serialize actions by storage root across both cores; a rejected action does not block the next.
+ */
 export async function withManagedLock<T>(
   _core: ManagedCore,
   root: string,
@@ -79,6 +88,9 @@ export async function withManagedLock<T>(
   }
 }
 
+/**
+ * Validate the core directory and return persisted listener metadata without source credentials.
+ */
 export function managedEntries(core: ManagedCore, root = managedRoot()) {
   ensureManagedDirectory(path.join(root, core));
   return readManagedManifest(readOptional(path.join(root, core, "sources.json"))).map(
@@ -101,6 +113,7 @@ export type ActivationDependencies = {
   allocate: typeof allocatePort;
   running?: (core: ManagedCore) => boolean;
 };
+/** Load process-management helpers lazily and assemble dependencies for activation. */
 async function runtimeDependencies(): Promise<ActivationDependencies> {
   const { allocatePort, checkNative, startManaged, stopManaged, isManagedRunning } =
     await import("./runtime");
@@ -114,6 +127,7 @@ async function runtimeDependencies(): Promise<ActivationDependencies> {
   };
 }
 
+/** Restore a prior private file or remove the replacement when the original was absent. */
 function restoreFile(file: string, content: string | null): void {
   if (content === null) fs.rmSync(file, { force: true });
   else writePrivateConfigFile(file, content);
@@ -131,6 +145,10 @@ type SaveSnapshot = {
   wasRunning: boolean;
   priorListeners: ManagedListener[];
 };
+/**
+ * Restore saved files and, if previously running, listeners; report rollback failure without
+ * secrets.
+ */
 async function restoreSave(snapshot: SaveSnapshot, deps: ActivationDependencies): Promise<void> {
   const {
     core,
@@ -268,6 +286,7 @@ export async function saveManagedProxy<T>(
   });
 }
 
+/** Stop a core under the shared lock and persist its disabled startup-restoration flag. */
 export async function stopManagedProxyCore(core: ManagedCore, root = managedRoot()): Promise<void> {
   const { stop } = await runtimeDependencies();
   await withManagedLock(core, root, async () => {
@@ -280,6 +299,7 @@ export async function stopManagedProxyCore(core: ManagedCore, root = managedRoot
   });
 }
 
+/** Validate and start saved listeners; restoration mode forbids downloading a missing binary. */
 export async function startManagedProxyCore(
   core: ManagedCore,
   root = managedRoot(),
@@ -302,6 +322,7 @@ export async function startManagedProxyCore(
   });
 }
 
+/** Restore enabled, nonempty saved cores independently, logging fixed messages on failures. */
 export async function restoreManagedProxyCores(root = managedRoot()): Promise<void> {
   for (const core of ["singbox", "xray"] as ManagedCore[]) {
     try {

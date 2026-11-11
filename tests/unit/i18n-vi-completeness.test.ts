@@ -28,6 +28,7 @@ function flattenMessages(value: unknown, segments: Array<string | number> = []):
 
 function placeholderNames(value: string): string[] {
   const names: string[] = [];
+  /** Collect ICU argument and tag names recursively, excluding literals and pound markers. */
   function visit(elements: MessageFormatElement[]): void {
     for (const element of elements) {
       if (element.type === TYPE.literal || element.type === TYPE.pound) continue;

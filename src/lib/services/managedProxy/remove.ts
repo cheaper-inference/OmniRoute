@@ -7,6 +7,7 @@ import { checkNative, startManaged, stopManaged, isManagedRunning } from "./runt
 import { installManagedCore } from "./install";
 import { ensureManagedDirectory } from "./directories";
 
+/** Read a private config file, returning null only for a missing file. */
 function readOptional(file: string): string | null {
   try {
     return readPrivateConfigFile(file);
@@ -16,11 +17,15 @@ function readOptional(file: string): string | null {
   }
 }
 
+/** Restore prior private contents or remove a file that did not previously exist. */
 function restoreFile(file: string, contents: string | null): void {
   if (contents === null) fs.rmSync(file, { force: true });
   else writePrivateConfigFile(file, contents);
 }
 
+/**
+ * Restart restored listeners without downloading a binary and report a sanitized rollback failure.
+ */
 async function restoreRemovedCore(
   core: ManagedCore,
   root: string,

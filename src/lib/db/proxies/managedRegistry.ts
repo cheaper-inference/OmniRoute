@@ -4,7 +4,11 @@ import type { ProxyAssignmentPayload, ProxyPayload } from "./types";
 
 type ManagedIdentity = { id: string; core: string; name: string; port: number };
 
-/** Keep managed identity lookup and existing registry mutation inside the owning DB layer. */
+/**
+ * Create or update the loopback SOCKS5 row identified by serialized managed-core notes.
+ * Apply an optional assignment through the registry's combined persistence helpers.
+ * @throws When an existing row disappears or creation returns no registry entry.
+ */
 export async function commitManagedProxy(
   entry: ManagedIdentity,
   assignment?: ProxyAssignmentPayload

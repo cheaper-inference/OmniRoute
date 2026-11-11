@@ -13,6 +13,7 @@ const batchDeleteSchema = z.object({
   force: z.boolean().optional().default(false),
 });
 
+/** Delete the query-selected proxy through the supplied remover, mapping missing IDs to errors. */
 export async function handleProxyDelete(
   request: Request,
   remove: ProxyDeletion = deleteProxyWithManagedCleanup
@@ -35,6 +36,10 @@ export async function handleProxyDelete(
   }
 }
 
+/**
+ * Validate and delete up to 100 IDs in order, retaining per-item failures and successes.
+ * Dispatcher invalidation is best-effort after at least one successful deletion.
+ */
 export async function handleProxyBatchDelete(
   request: Request,
   remove: ProxyDeletion = deleteProxyWithManagedCleanup

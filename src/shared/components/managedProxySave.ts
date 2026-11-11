@@ -5,7 +5,11 @@ import {
 } from "./proxyConfigPersistence";
 import { isSameScopeAssignment } from "./proxyAssignment";
 
-/** Reuse a managed identity only when replacing its one existing assignment. */
+/**
+ * Save a source and its scope assignment through the managed-core endpoint.
+ * Reuse identity only for the same core and one matching existing assignment;
+ * otherwise omit the ID so shared or unrelated entries are not overwritten.
+ */
 export async function saveManagedSource(
   core: string,
   sourceLink: string,

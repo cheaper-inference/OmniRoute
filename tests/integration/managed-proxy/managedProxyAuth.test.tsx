@@ -39,6 +39,7 @@ vi.mock("@/lib/services/managedProxy/manager", () => ({
 }));
 const { GET, POST, PATCH } = await import("../../../src/app/api/services/managed-proxy/route");
 
+/** Build a managed-proxy request with optional peer locality and a synthetic write payload. */
 function request(method: string, locality?: string) {
   return new Request("http://127.0.0.1/api/services/managed-proxy", {
     method,

@@ -68,6 +68,7 @@ beforeEach(() => {
   process.env.JWT_SECRET = "synthetic-csrf-secret";
 });
 
+/** Build a deletion request with configurable peer evidence, headers, method, and base path. */
 function request(
   pathname = SINGLE,
   method = "DELETE",
@@ -90,6 +91,7 @@ function request(
   });
 }
 
+/** Extract the request headers forwarded by a Next.js middleware response. */
 function forwarded(response: Response) {
   const headers = new Headers();
   for (const [key, value] of response.headers)

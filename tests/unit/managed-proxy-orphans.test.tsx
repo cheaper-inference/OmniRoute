@@ -38,6 +38,9 @@ vi.mock("../../src/lib/services/managedProxy/manager", () => ({
 }));
 const { removeManagedProxy } = await import("../../src/lib/services/managedProxy/remove");
 const previousDataDir = process.env.DATA_DIR;
+/**
+ * Reset deletion state and create optional saved sources and config in an isolated data directory.
+ */
 function fixture(entries?: { id: string; port: number }[], config = true) {
   state.root = fs.mkdtempSync(path.join(os.tmpdir(), "managed-orphans-"));
   process.env.DATA_DIR = state.root;

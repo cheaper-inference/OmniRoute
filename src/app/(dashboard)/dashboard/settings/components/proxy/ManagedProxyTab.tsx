@@ -20,6 +20,7 @@ type CoreState = {
   distribution?: string;
   entries: Array<{ id: string; name: string; port: number }>;
 };
+/** Fetch managed-core states and entries, throwing the server message or localized fallback. */
 async function loadCoreMetadata(loadError: string): Promise<CoreState[]> {
   const response = await fetch("/api/services/managed-proxy");
   const payload = await response.json();
@@ -27,6 +28,7 @@ async function loadCoreMetadata(loadError: string): Promise<CoreState[]> {
   return payload.cores || [];
 }
 
+/** Load core metadata on mount and cancel stale requests when the locale changes. */
 function useInitialCoreMetadata(
   loadError: string,
   setCores: (cores: CoreState[]) => void,
@@ -67,6 +69,7 @@ function useManagedProxyState() {
       ? { packets: "tlshello", length: fragmentLength, interval: fragmentInterval }
       : undefined;
   useInitialCoreMetadata(loadError, setCores, setError);
+  /** Submit an explicit action once, refresh metadata, and surface errors without stale results. */
   async function operation(
     method: "POST" | "PATCH",
     body: Record<string, unknown>
@@ -127,7 +130,7 @@ function useManagedProxyState() {
   };
 }
 
-/** Compose the managed-core form without mixing transport and layout state. */
+/** Compose explicit managed-core saves, tests, and lifecycle controls apart from transport state. */
 export default function ManagedProxyTab() {
   const t = useTranslations("managedProxy");
   const state = useManagedProxyState();
@@ -290,6 +293,7 @@ function ManagedSourceActions({ state }: { state: ReturnType<typeof useManagedPr
   );
 }
 
+/** List each core's local endpoints and offer start/stop controls when entries exist. */
 function ManagedCoreList({
   cores,
   busy,
@@ -343,6 +347,7 @@ function ManagedCoreList({
   );
 }
 
+/** Render controlled core, name, and source inputs without storing source text separately. */
 function ManagedSourceFields({
   busy,
   core,

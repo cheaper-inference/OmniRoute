@@ -166,11 +166,24 @@ for (const basePath of ["", "/omniroute"]) {
           headers: { "x-forwarded-for": "203.0.113.10" },
         });
         assert.equal(remoteOrdinary.status, 200, await remoteOrdinary.clone().text());
-        const remoteManaged = await send("/api/settings/proxies?id=managed-first", {
-          method: "DELETE",
-          headers: { "x-forwarded-for": "203.0.113.10" },
-        });
-        assert.equal(remoteManaged.status, 500);
+        for (const force of ["", "&force=1"]) {
+          const remoteManaged = await send(`/api/settings/proxies?id=managed-first${force}`, {
+            method: "DELETE",
+            headers: { "x-forwarded-for": "203.0.113.10" },
+          });
+          // Remote requests stay on ordinary CRUD and must not enter the managed lifecycle.
+          assert.equal(remoteManaged.status, 401, await remoteManaged.clone().text());
+          assert.equal(remoteManaged.headers.get("location"), null);
+          assert.equal(remoteManaged.headers.get("x-omniroute-proxy-delete-origin"), null);
+          const rejection = await remoteManaged.json();
+          assert.deepEqual(rejection.error, {
+            message:
+              "Managed proxy deletion requires the authenticated local managed-core endpoint",
+            type: "invalid_request",
+          });
+          assert.equal(typeof rejection.requestId, "string");
+          assert.ok(rejection.requestId.length > 0);
+        }
       } finally {
         if (child?.pid) {
           if (process.platform === "win32") {

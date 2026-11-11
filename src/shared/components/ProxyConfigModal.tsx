@@ -80,6 +80,7 @@ function getCustomProxyName(level: ProxyConfigLevel, levelId?: string, levelLabe
   return `Custom Provider Proxy${suffix}`;
 }
 
+/** Configure a scope with a saved proxy, ordinary endpoint, or managed-core source. */
 export default function ProxyConfigModal({
   isOpen,
   onClose,
@@ -154,6 +155,7 @@ export default function ProxyConfigModal({
   useEffect(() => {
     if (!isOpen) return;
 
+    /** Load registry and legacy settings, keeping managed entries in the saved-proxy view. */
     const loadProxy = async () => {
       try {
         let hasSavedAssignment = false;
@@ -284,6 +286,10 @@ export default function ProxyConfigModal({
     loadProxy();
   }, [isOpen, level, levelId, resetFields, socks5HiddenError, levelGlobalLabel]);
 
+  /**
+   * Persist the selected mode and scope, reusing custom entries only when exclusively assigned.
+   * Managed sources use the local core API instead of directly editing registry endpoints.
+   */
   const handleSave = async () => {
     if (mode === "saved" && !selectedProxyId) {
       setFormError(t("errorSelectSavedProxy"));

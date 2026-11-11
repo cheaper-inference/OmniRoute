@@ -259,6 +259,11 @@ async function getBodySizeSettings(): Promise<Record<string, unknown> | undefine
   }
 }
 
+/**
+ * Classify requests, replace trusted headers, and apply request-size and CORS handling.
+ * With enforcement enabled, check policy and origins before stamping the subject or
+ * rewriting eligible loopback deletions to the managed-core handler.
+ */
 export async function runAuthzPipeline(
   request: NextRequest,
   options: AuthzPipelineOptions = {}

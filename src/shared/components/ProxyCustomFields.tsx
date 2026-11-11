@@ -8,6 +8,7 @@ import SegmentedControl from "./SegmentedControl";
 import Button from "./Button";
 import Icon from "./Icon";
 
+/** Heuristically detect native source links or JSON input; validation remains server-side. */
 export function isManagedProxySource(value: string): boolean {
   return (
     /^(?!https?:\/\/|socks5?:\/\/)[a-z0-9]+:\/\//i.test(value.trim()) ||
@@ -34,6 +35,7 @@ type Props = {
   getDefaultPort: (type: string) => string;
 };
 
+/** Switch between ordinary endpoint fields and managed-core selection based on host input. */
 export default function ProxyCustomFields(p: Props) {
   const t = useTranslations("proxyConfigModal");
   const managed = isManagedProxySource(p.host);
@@ -97,6 +99,7 @@ export default function ProxyCustomFields(p: Props) {
   );
 }
 
+/** Render the optional credential fields for an ordinary proxy using parent-controlled state. */
 function ProxyAuthFields({ p }: { p: Props }) {
   const t = useTranslations("proxyConfigModal");
   return (

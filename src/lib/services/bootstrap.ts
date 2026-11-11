@@ -159,6 +159,7 @@ const SERVICES: ServiceEntry[] = [
   },
 ];
 
+/** Bind each embedded service's configured port and credentials to its installer spawn factory. */
 function buildSpawnArgsFactory(
   cfg: ServiceEntry,
   apiKey: string
@@ -187,6 +188,10 @@ function buildSpawnArgsFactory(
   return () => cliproxySpawnArgs(cfg.port, apiKey);
 }
 
+/**
+ * Restore managed cores, register installed services, and start those configured for automatic
+ * startup.
+ */
 export async function bootstrapEmbeddedServices(): Promise<void> {
   await restoreManagedProxyCoresSafely();
   for (const cfg of SERVICES) {
