@@ -1151,7 +1151,7 @@ function LayerSection({
           {badge}
         </span>
       </div>
-      <p className="text-[11px] text-text-muted mb-2">{description}</p>
+      <p className="text-xs text-text-muted mb-2">{description}</p>
       {children}
     </div>
   );
