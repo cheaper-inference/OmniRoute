@@ -84,7 +84,7 @@ describe("Analytics Token Hover Tooltips", () => {
       );
     });
 
-    const values = container.querySelectorAll(".text-2xl.font-bold");
+    const values = container.querySelectorAll(".text-2xl.font-semibold");
     expect(values).toHaveLength(2);
     expect(values[0]?.getAttribute("data-tooltip")).toBe(fmtFull(1532481200));
     expect(values[0]?.textContent).toBe("1.5B");
@@ -136,7 +136,7 @@ describe("Analytics Token Hover Tooltips", () => {
       );
     });
 
-    const statElements = container.querySelectorAll(".text-sm.font-bold.text-right");
+    const statElements = container.querySelectorAll(".text-sm.font-semibold.text-right");
     expect(statElements).toHaveLength(2);
     expect(statElements[0]?.getAttribute("data-tooltip")).toBe(
       `tokens : ${fmtFull(131482)} tokens`
