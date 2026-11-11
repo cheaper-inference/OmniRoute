@@ -52,13 +52,16 @@ do and touches nothing.
 
 What it does every run: sweeps our own leftovers (`runner-*`, `omniroute-*`,
 `next-build*`, `e2e-build.tar.gz`) after **3 h on tmpfs** and 24 h on disk
-`_work/_temp`; kills a `next-build` older than 75 min (no job runs that long — on
-2026-08-27 one ran 70 min after GitHub had declared its job lost); prunes 48 h-old
-checkouts of runners whose unit is **stopped**; alerts on disk ≥ 85 %, memory PSI
-`full/avg60` ≥ 10 %, and more listeners than `MAX_ACTIVE_RUNNERS` (with an
+`_work/_temp`; alerts on a `next-build` older than 75 min and keeps it running;
+prunes 48 h-old checkouts of runners whose unit is **stopped**; alerts on disk ≥ 85 %,
+memory PSI `full/avg60` ≥ 10 %, and more listeners than `MAX_ACTIVE_RUNNERS` (with an
 omniroute/other breakdown). Exit 1 = attention needed; read the log.
 
-The 75-minute rule does not catch a build whose job GitHub already gave up on. When the
+Elapsed time alone does not prove that a process is orphaned. The janitor never sends
+signals based on age. The existing `ZOMBIE_BUILD_MAX_MIN` and `ZOMBIE_BUILD_COMM`
+environment names remain supported for cron configurations. Before cleaning up a
+suspected orphan, confirm that its exact GitHub job is terminal and identify the
+processes belonging to that job. When the
 `Runner.Listener` cannot renew its job, `_diag/Runner_*.log` shows
 `POST request to …/renewjob timed out after 100 seconds`, the API reports the job `completed`
 (failure) about ten minutes after the last successful renewal, and `next-build` keeps running with

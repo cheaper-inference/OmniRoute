@@ -16,11 +16,9 @@
 #   1) sweep stale artefacts our tooling leaves behind — tmpfs bases after 3 h
 #      (they hold RAM), disk _work/_temp bases after 24 h; only names we create,
 #      only when no process has them open
-#   2) kill zombie builds: a `next-build` older than ZOMBIE_BUILD_MAX_MIN has no
-#      job attached (a real Build step measures ~26 min). On 2026-08-27 one ran
-#      70 minutes after GitHub had already declared its job lost, eating 3.6 GB
-#      and a full core set. KillMode=mixed on the units covers systemctl
-#      stop/restart; this covers the lost-connection path.
+#   2) alert on long-running builds: elapsed time cannot establish that a job
+#      ended or that a process belongs to an orphaned run. Keep the process;
+#      verified job/process ownership is required before operator cleanup.
 #   3) prune 48 h-old checkouts under _work of runners whose unit is INACTIVE
 #      (stopped runners cannot be mid-job; active ones are never touched)
 #   4) alert: root disk >= DISK_ALERT_PCT, memory PSI full/avg60 >= threshold,
@@ -111,20 +109,17 @@ for base in $JANITOR_TMP_BASES; do sweep "$base" $(( TMPFS_MAX_AGE_HOURS * 60 ))
 for base in $JANITOR_WORK_TEMP_BASES; do sweep "$base" $(( WORK_TEMP_MAX_AGE_HOURS * 60 )); done
 say "stale temp sweep done"
 
-# 2) zombie builds
-ZOMBIES=0
+# 2) long-running builds. Keep the legacy threshold/pattern environment names
+# for existing cron configurations. Age is an alert, never signal authorization.
+LONG_RUNNING=0
 while read -r pid etimes comm; do
   [ -n "${pid:-}" ] || continue
   if [ "$etimes" -gt $(( ZOMBIE_BUILD_MAX_MIN * 60 )) ]; then
-    say "⚠ zombie build pid=$pid comm=$comm age=$(( etimes / 60 ))min > ${ZOMBIE_BUILD_MAX_MIN}min — no job runs this long"
-    if [ "$DRY_RUN" -eq 1 ]; then say "[dry-run] would: kill -TERM $pid (then -KILL)"; else
-      kill -TERM "$pid" 2>/dev/null || true; sleep 10
-      kill -0 "$pid" 2>/dev/null && { kill -KILL "$pid" 2>/dev/null || true; say "  needed SIGKILL"; }
-    fi
-    ZOMBIES=$(( ZOMBIES + 1 )); STATUS=1
+    say "⚠ long-running build pid=$pid comm=$comm age=$(( etimes / 60 ))min > ${ZOMBIE_BUILD_MAX_MIN}min — age alone does not prove orphan ownership; kept"
+    LONG_RUNNING=$(( LONG_RUNNING + 1 )); STATUS=1
   fi
 done < <(ps -eo pid=,etimes=,comm= 2>/dev/null | awk -v c="$ZOMBIE_BUILD_COMM" '$3 ~ ("^" c) {print $1, $2, $3}' || true)
-say "zombie builds: $ZOMBIES"
+say "long-running builds: $LONG_RUNNING"
 
 # 3) old checkouts of STOPPED runners
 for d in $JANITOR_RUNNER_DIRS; do

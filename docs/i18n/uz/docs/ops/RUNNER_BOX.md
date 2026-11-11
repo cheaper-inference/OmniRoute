@@ -4,75 +4,42 @@
 
 ---
 
-Oʻzida joylashtirilgan pool **.113** mashinasida (`tomni-proxmox-113`) ishlaydi. 2026-10-18 sanasidan beri har bir
-OmniRoute runneri **bitta rol**, bitta label hamda uning ish yuklamasi bo‘yicha o‘lchangan natijalarga
-mos xotira/CPU budjetiga ega. Turbopack slotiga build uchun zarur resurslar ajratiladi; qolgan slotlar
-ularning o‘lchangan eng yuqori ko‘rsatkichlariga moslab sozlangan. Mashinada resurslar faqat Turbopack
-buildi Release-Green webpack buildi va lint job bilan bir vaqtda ishlaganda ortiqcha taqsimlanadi;
-host swap (16 GB) buni qoplaydi, pull-request Buildlari esa hostingdagi runnerlarda ishlagani uchun
-Turbopack sloti ko‘pincha bo‘sh turadi:
+O'z-o'zidan joylashgan basseyn ustida ishlaydi **.113** quti (`tomni-proxmox-113`). 2026-10-18 dan boshlab har bir OmniRoute yuguruvchisi bor **bitta rol** , bitta yorliq va memory/CPU byudjeti uning ish yukini o'lchaganiga mos keladi. Turbopack uyasi qurilish uchun zarur bo'lgan narsalarni oladi; boshqa uyalar ularning o'lchangan cho'qqilariga mos keladi. Quti faqat Turbopack konstruktsiyasi Release-Green veb-paketi tuzilmasi va lint ishiga to'g'ri kelganda bajariladi; xost almashinuvi (16 GB) buni o'zlashtiradi va pull-so'rov Builds hostingda ishlayotganligi sababli Turbopack uyasi ko'pincha ishlamaydi:
 
-| runner               | label                           | rol                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`           |
-| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack buildlari: `ci.yml` `Build` (faqat push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y buildi | 56 GB / 60 GB (swap 0)     | 1600 %               |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack buildi                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %                |
-| `omniroute-113-2`    | `omni-light`                    | tungi ishlar (Schemathesis, promptfoo, garak, k6) va `quality.yml` faylidagi `lint-guard`                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                |
-| `omniroute-113`      | `omni-light`                    | yuqoridagi bilan bir xil pool                                                                                                                       | 8 GB / 12 GB               | 400 %                |
-| OmniHeuris, OmniMind | (ularning repolari)             | faqat Dependabot (har biri uchun eng yuqori ko‘rsatkich 155 MB, 2026-10-18)                                                                         | 4 GB / 6 GB                | har biri uchun 200 % |
+| yuguruvchi           | yorliq                          | roli                                                                                                                                                      | `MemoryHigh` / `MemoryMax`        | `CPUQuota`    |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack tuzilmalari: `ci.yml` `Build` (faqat push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y qurilishi | 56 GB / 60 GB (almashtirish 0)    | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Yashil (`release-green` + `main-green`), veb-paketni yaratish                                                                                     | 20 GB / 24 GB (almashtirish 4 GB) | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | tungi kechalar (Schemathesis, promptfoo, garak, k6) va `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (almashtirish 4 GB) | 600 %         |
+| `omniroute-113`      | `omni-light`                    | yuqoridagi kabi bir xil hovuz                                                                                                                             | 8 GB / 12 GB                      | 400 %         |
+| OmniHeuris, OmniMind | (ularning repolari)             | Faqat Dependabot (har biri 155 MB choʻqqisi, 2026-10-18)                                                                                                  | 4 GB / 6 GB                       | Har biri 200% |
 
-2026-10-18 sanasida o‘lchangan:
+O'lchov sanasi: 2026-10-18:
 
-| resurs    | qiymat                         | rejalashtirish uchun nimani anglatadi                                                                                                                                                                                                                                                                                                                                                                               |
-| --------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 yadro**           | Turbopack production buildi cheklovsiz holatda 49 GB gacha yetdi (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 da faqat compile bosqichining o‘zi ~40 GB egallaydi (`next-build` ichida 36 GB RSS va har biri 3 GB bo‘lgan 17 ta loader workeri, 2026-10-18 sanasida o‘lchangan); webpack buildi ~14–16 GB. Bitta Turbopack va bitta webpack buildi birga sig‘adi; ikkita Turbopack buildi sig‘maydi |
-| swap      | 16 GB                          | `omniroute-113-5` swap o‘chirilgan holda (`MemorySwapMax=0`) ishlaydi, shuning uchun nazoratdan chiqqan build mashinani swap ishlatishga majbur qilish o‘rniga o‘z limitida to‘xtatiladi                                                                                                                                                                                                                            |
-| `/tmp`    | **12 GB tmpfs = RAM**          | bu yerda saqlangan har qanday narsa xotirani egallaydi; qoldiqlar 3 soatdan keyin tozalanadi                                                                                                                                                                                                                                                                                                                        |
-| CPU       | 32 yadroda 60 load kuzatildi   | kvotalardan oldin bitta Turbopack buildi (~1166 % CPU) va shu mashinadagi coverage to‘plami boshqa listenerlarning heartbeatlarini resursdan mahrum qilgan (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                    |
-| runnerlar | **7 ta listener** (2026-10-28) | 5 ta OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` `omni-build-60gb` labelini ham olib yuradi; `omniroute-113-3/-4/-8` repozitoriydan o‘chirib tashlandi (2026-10-28)                                                                                                                                                                                                                                        |
+| resurs        | qiymat                        | rejalashtirish uchun nimani anglatadi                                                                                                                                                                                                                                                                                                                                                   |
+| ------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU     | **78 GB / 32 yadro**          | a Turbopack ishlab chiqarish qurilishi 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`) cho'qqisiga; Keyingi 16.3.8 da kompilyatsiya bosqichining o'zi ~ 40 GB ( `next-build` 36 GB RSS plus 3 GB da 17 yuklovchi ishchi, o'lchangan 2026-10-18); ~ 14–16 GB da tuzilgan veb-paket. Bitta Turbopack + bitta veb-paketi bir-biriga mos keladi; ikkita Turbopack qurilmaydi |
+| almashtirish  | 16 GB                         | `omniroute-113-5` almashtirish (`MemorySwapMax=0`) bilan ishlaydi, shuning uchun qutini almashtirish o'rniga qochqin qurilish qopqog'ida kesiladi.                                                                                                                                                                                                                                      |
+| `/tmp`        | **12 GB tmpfs = RAM**         | u erda to'xtab qolgan har qanday narsa xotira; qoldiqlari 3 soatdan keyin supurib tashlanadi                                                                                                                                                                                                                                                                                            |
+| CPU           | kuzatilgan 32 yadroga 60 yuk  | kvotalardan oldin bitta Turbopack qurilishi (~ 1166% CPU) va bir xil qutidagi qamrov to'plami boshqa tinglovchilarning yurak urishini to'xtatdi (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                   |
+| yuguruvchilar | **7 tinglovchi** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ham `omni-build-60gb` olib yuradi; `omniroute-113-3/-4/-8` repodan o'chirildi (2026-10-28)                                                                                                                                                                                                                                       |
 
-Limitlar har bir unitning `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-faylida joylashgan (avvalgi qiymatlar `override.conf.bak-20261018` sifatida saqlangan) va
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` orqali ishlayotgan
-tizimga qo‘llangan — restart qilinmagan, shuning uchun hech bir ishlayotgan jobga ta’sir qilinmagan.
-Labellar runnerlar API orqali
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) o‘zgartiriladi va
-bu ham ishlayotgan tizimda amalga oshiriladi.
+Cheklovlar har bir birlikning `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` da (oldingi qiymatlar `override.conf.bak-20261018` sifatida saqlangan) mavjud va `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bilan qayta ishga tushirilmagan holda jonli ravishda qo'llanilgan, shuning uchun hech qanday ishlaydigan ishga tegilmagan. Yorliqlar yuguruvchilar API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) orqali o'zgartiriladi, shuningdek, jonli.
 
-## Tozalagichni o‘rnatish (bir marta, serverda)
+## Farroshni o'rnating (bir martalik, qutiga)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): har 30 daqiqada, jurnalni /var/log/runner-janitor.log fayliga yozish
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` talab qilinadi: tozalagich yo‘lni o‘chirishdan oldin ochiq fayllarning bir martalik
-holatini tekshirish orqali undan foydalanilmayotganini tasdiqlaydi; bu vosita bo‘lmasa, hech
-narsani o‘chirmaydi va bu haqda xabar beradi (exit 1). Har qanday o‘zgarishni avval
-`--dry-run` bilan sinab ko‘ring — u aynan nima qilishini ko‘rsatadi va hech narsaga tegmaydi.
+`lsof` talab qilinadi: farrosh yo'lni olib tashlashdan oldin ochiq fayllarning bir lahzasi bilan yo'l bo'sh ekanligini isbotlaydi va asbobsiz u hech narsani olib tashlamaydi va shunday demaydi (1-chiqish). `--dry-run` bilan har qanday o'zgartirishni sinab ko'ring, avval — u aynan nima qilishini chop etadi va hech narsaga tegmaydi.
 
-Har ishga tushganda quyidagilarni bajaradi: o‘zimizdan qolgan fayllarni (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) **tmpfs’da 3 soatdan** va diskdagi
-`_work/_temp` ichida 24 soatdan keyin tozalaydi; 75 daqiqadan eski `next-build` jarayonini
-to‘xtatadi (hech bir vazifa buncha uzoq ishlamaydi — 2026-08-27 kuni GitHub vazifani yo‘qolgan deb
-e’lon qilganidan keyin bittasi 70 daqiqa ishlagan); unit’i **to‘xtatilgan** runner’larning 48 soatlik
-checkout’larini tozalaydi; disk ≥ 85 %, xotira PSI `full/avg60` ≥ 10 % bo‘lsa va tinglovchilar soni
-`MAX_ACTIVE_RUNNERS` qiymatidan oshsa ogohlantiradi (omniroute/boshqalar bo‘yicha taqsimot bilan).
-Exit 1 = e’tibor talab qilinadi; jurnalni o‘qing.
+U har safar nima qiladi: o'z qoldiqlarimizni (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) keyin tozalaydi **tmpfs da 3 soat** va `_work/_temp` diskida 24 soat; 75 daqiqadan kattaroq `next-build` haqida ogohlantiradi va uning ishlashini ta'minlaydi; birligi bo'lgan yuguruvchilarning 48 h-old kassasini kesadi **to'xtadi** ; diskdagi ogohlantirishlar ≥ 85 %, xotira PSI `full/avg60` ≥ 10 % va `MAX_ACTIVE_RUNNERS` dan ko'proq tinglovchilar ( omniroute/other buzilishi bilan). Chiqish 1 = diqqat kerak; jurnalni o'qing.
 
-75 daqiqalik qoida GitHub allaqachon voz kechgan vazifaning build jarayonini aniqlamaydi.
-`Runner.Listener` o‘z vazifasini yangilay olmasa, `_diag/Runner_*.log` ichida
-`POST request to …/renewjob timed out after 100 seconds` ko‘rinadi, API oxirgi muvaffaqiyatli
-yangilanishdan taxminan o‘n daqiqa o‘tib vazifani `completed` (muvaffaqiyatsiz) deb ko‘rsatadi,
-`next-build` esa hech qanday vazifaga biriktirilmagan holda ishlashda davom etadi
-(2026-10-18: #17066 build’i 19:43 da muvaffaqiyatsiz deb belgilangan, ammo uning build jarayoni
-besh daqiqadan keyin ham 40 GB xotirani band qilib turgan). Eng yangi `_diag/Worker_*.log` ichida
-ref’ni tasdiqlang, so‘ng faqat build jarayonlari daraxtiga PID bo‘yicha SIGTERM yuboring —
-`next-build`, `npm run build`, `build-next-isolated.mjs` va `_work` ishchi jarayonlariga.
-`Runner.Listener`, `RunnerService.js` yoki `Runner.Worker` jarayonlariga hech qachon tegmang:
-worker vazifa bekor qilinganini xabar qiladi, listener esa o‘z-o‘zidan yana onlayn holatga qaytadi.
+O'tgan vaqtning o'zi jarayonning etimligini isbotlamaydi. Farrosh hech qachon yoshga qarab signal yubormaydi. Mavjud `ZOMBIE_BUILD_MAX_MIN` va `ZOMBIE_BUILD_COMM` muhit nomlari cron konfiguratsiyasi uchun qo'llab-quvvatlanadi. Shubhali etimni tozalashdan oldin, uning aniq GitHub ishi terminal ekanligini tasdiqlang va bu ishga tegishli jarayonlarni aniqlang. `Runner.Listener` o'z ishini yangilay olmasa, `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds` ko'rsatadi, API oxirgi muvaffaqiyatli yangilanishdan taxminan o'n daqiqa o'tgach `completed` (muvaffaqiyatsizlik) ishi haqida xabar beradi va `next-build` hech qanday ish qo'shilmagan holda ishlashda davom etadi (2026-10-18: #17066 qurilishi 19:43 da muvaffaqiyatsiz tugadi va uning qurilishi GB da davom etardi). Eng yangi `_diag/Worker_*.log` dagi refni tasdiqlang, keyin SIGTERM faqat PID — `next-build`, `npm run build`, `build-next-isolated.mjs` va `_work` ishchilari tomonidan tuzilgan daraxtni tasdiqlang. Hech qachon `Runner.Listener`, `RunnerService.js` yoki `Runner.Worker` ga tegmang: ishchi ishni bekor qilingani haqida xabar beradi va tinglovchi oʻz-oʻzidan tarmoqqa qaytadi.
 
 ## Runner unit’lari: KillMode
 

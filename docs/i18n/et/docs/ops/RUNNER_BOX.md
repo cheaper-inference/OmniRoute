@@ -4,72 +4,42 @@
 
 ---
 
-Isehostitud ressursikogum töötab **.113** masinas (`tomni-proxmox-113`). Alates 2026-10-18 on igal
-OmniRoute'i täituril **üks roll**, üks silt ning selle töökoormuse mõõtmistulemustele vastav mälu- ja
-CPU-eelarve. Turbopacki pesa saab koosteks vajalikud ressursid; teised pesad on seadistatud vastavalt
-nende mõõdetud tippkoormustele. Masinas tekib ülebroneerimine ainult siis, kui Turbopacki kooste langeb
-kokku Release-Greeni webpacki kooste ja lint-tööga; hosti saaleala (16 GB) tasandab selle ning kuna
-tõmbetaotluste Build-tööd käivad majutatud täituritel, on Turbopacki pesa enamiku ajast jõude:
+Iseseisev bassein jookseb **.113** kast (`tomni-proxmox-113`). Alates 2026-10-18 on igal OmniRoute jooksjal **üks roll** , üks silt ja memory/CPU eelarve, mille suurus on selle töökoormuse mõõtmiseks. Turbopack pesa saab selle, mida ehitus vajab; teised pilud on mõõdetud nende mõõdetud piikide järgi. Kast töötab üle ainult siis, kui Turbopack versioon langeb kokku Release-Green veebipaki järguga ja ebemetööga; hostivahetus (16 GB) võtab selle endasse ja kuna tõmbetaotluse konstruktsioonid töötavad hostitud, on Turbopack pesa enamiku ajast jõude:
 
-| täitur               | silt                            | roll                                                                                                                                                  | `MemoryHigh` / `MemoryMax`    | `CPUQuota`     |
-| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopacki koosted: `ci.yml` `Build` (ainult push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, igaöine a11y-kooste | 56 GB / 60 GB (saaleala 0)    | 1600 %         |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpacki kooste                                                                                       | 20 GB / 24 GB (saaleala 4 GB) | 800 %          |
-| `omniroute-113-2`    | `omni-light`                    | igaöised tööd (Schemathesis, promptfoo, garak, k6) ja `quality.yml` `lint-guard`                                                                      | 12 GB / 16 GB (saaleala 4 GB) | 600 %          |
-| `omniroute-113`      | `omni-light`                    | sama ressursikogum nagu ülal                                                                                                                          | 8 GB / 12 GB                  | 400 %          |
-| OmniHeuris, OmniMind | (nende repositooriumid)         | ainult Dependabot (kummagi tipp 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                   | 200 % kummalgi |
+| jooksja              | silt                            | rolli                                                                                                                                                | `MemoryHigh` / `MemoryMax`   | `CPUQuota`  |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack järgud: `ci.yml` `Build` (ainult push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, igaõhtune a11y järg | 56 GB / 60 GB (vahetus 0)    | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), veebipaketi koostamine                                                                               | 20 GB / 24 GB (vahetus 4 GB) | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | öölehed (Schemathesis, promptfoo, garak, k6) ja `quality.yml` `lint-guard`                                                                           | 12 GB / 16 GB (vahetus 4 GB) | 600 %       |
+| `omniroute-113`      | `omni-light`                    | sama bassein nagu ülal                                                                                                                               | 8 GB / 12 GB                 | 400 %       |
+| OmniHeuris, OmniMind | (nende repod)                   | Ainult Dependabot (igaüks tipp 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                  | 200% igaüks |
 
 Mõõdetud 2026-10-18:
 
-| ressurss  | väärtus                                  | tähendus ajastamise jaoks                                                                                                                                                                                                                                                                                                                                                                             |
-| --------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 tuuma**                     | Turbopacki produktsioonikooste tipp oli piiranguteta 49 GB (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 puhul kasutab ainuüksi kompileerimisfaas ~40 GB (36 GB RSS protsessis `next-build` ning 17 laaduri tööprotsessi, igaüks 3 GB; mõõdetud 2026-10-18); webpacki kooste kasutab ~14–16 GB. Üks Turbopacki ja üks webpacki kooste mahuvad korraga; kaks Turbopacki koostet ei mahu |
-| saaleala  | 16 GB                                    | `omniroute-113-5` töötab ilma saalealata (`MemorySwapMax=0`), et kontrolli alt väljunud kooste peatuks piirangu saavutamisel ega sunniks kogu masinat saalima                                                                                                                                                                                                                                         |
-| `/tmp`    | **12 GB tmpfs = RAM**                    | kõik sinna paigutatu kasutab mälu; ülejäägid eemaldatakse 3 tunni pärast                                                                                                                                                                                                                                                                                                                              |
-| CPU       | 32 tuumaga masinas täheldati koormust 60 | enne kvootide rakendamist jättis üks Turbopacki kooste (~1166 % CPU) koos samas masinas töötava katvustestide komplektiga teiste kuulajate südamelöögid ressurssideta (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                           |
-| täiturid  | **7 kuulajat** (2026-10-28)              | 5 OmniRoute'i + OmniHeuris + OmniMind; `omniroute-113-5` kannab ka silti `omni-build-60gb`; `omniroute-113-3/-4/-8` kustutati repositooriumist (2026-10-28)                                                                                                                                                                                                                                           |
+| ressurss  | väärtus                             | mida see ajastamise jaoks tähendab                                                                                                                                                                                                                                                                                                                                                  |
+| --------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 südamikku**            | Turbopack tootmiskomplekt saavutas haripunkti 49 GB piiramata (`tests/unit/ci-build-bundler-webpack.test.ts`); järgmisel 16.3.8 on kompileerimisfaasis üksi ~ 40 GB (36 GB RSS `next-build` pluss 17 laaduritöölist 3 GB juures, mõõdetud 2026-10-18); veebipaketi koostamine aadressil ~ 14–16 GB. Üks Turbopack + üks veebipakk sobib kokku; kaks Turbopack ehitamist ei tee seda |
+| vahetus   | 16 GB                               | `omniroute-113-5` töötab väljalülitusega (`MemorySwapMax=0`) , nii et karbi vahetamise asemel lõigatakse ära jooksnud konstruktsioon selle korgist                                                                                                                                                                                                                                  |
+| `/tmp`    | **12 GB tmpfs = RAM**               | kõik sinna pargitud on mälu; jäägid pühitakse 3 tunni pärast                                                                                                                                                                                                                                                                                                                        |
+| CPU       | täheldatud koormus 60 32 südamikule | enne kvoote näljutasid üks Turbopack konstruktsioon (~ 1166 % CPU) ja samas kastis asuv levikomplekt teiste kuulajate südamelööke (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                             |
+| jooksjad  | **7 kuulajat** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` kannab ka `omni-build-60gb` d; `omniroute-113-3/-4/-8` kustutati repost (2026-10-28)                                                                                                                                                                                                                                         |
 
-Piirangud asuvad iga üksuse failis `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-(varasemad väärtused on säilitatud failis `override.conf.bak-20261018`) ning need rakendati töötavas süsteemis käsuga
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — taaskäivitust ei tehtud, seega
-ühtegi töötavat tööd ei mõjutatud. Silte muudetakse täiturite API kaudu
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), samuti töötavas süsteemis.
+Piirangud kehtivad iga üksuse `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (varasemad väärtused säilitati kui `override.conf.bak-20261018`) ja neid rakendati reaalajas koos `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ilma taaskäivituseta, seega ei puudutatud ühtegi töötavat tööd. Silte vahetatakse jooksjate API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) kaudu, samuti reaalajas.
 
-## Koristaja paigaldamine (ühekordselt serveris)
+## Paigaldage majahoidja (ühekordne, karbile)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): iga 30 minuti järel, logi faili /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` on nõutav: enne tee eemaldamist kontrollib koristaja ühe avatud failide
-hetktõmmise abil, et tee pole kasutuses; ilma selle tööriistata ei eemalda ta midagi
-ja annab sellest teada (exit 1). Proovi kõiki muudatusi esmalt võtmega `--dry-run` —
-see kuvab täpselt, mida tehtaks, ega muuda midagi.
+`lsof` on nõutav: majahoidja tõestab, et tee on jõude, tehes enne selle eemaldamist ühe hetktõmmise avatud failidest, ilma tööriistata ei eemalda ta midagi ja ütleb seda (1. väljumine). Proovige `--dry-run` ga mis tahes muudatust, esimene — prindib täpselt seda, mida see teeks, ega puuduta midagi.
 
-Mida see igal käivitusel teeb: koristab meie enda jäägid (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) pärast **3 tundi tmpfs-is** ja 24 tundi kettal
-asuvas kataloogis `_work/_temp`; lõpetab üle 75 minuti vanuse `next-build`-i (ükski
-töö ei kesta nii kaua — 2026-08-27 töötas üks neist 70 minutit pärast seda, kui
-GitHub oli selle töö kadunuks kuulutanud); eemaldab 48 tunni vanused töökoopiad
-runner'itelt, mille üksus on **peatatud**; annab hoiatuse, kui kettakasutus on ≥ 85%,
-mälu PSI `full/avg60` on ≥ 10% või kuulajaid on rohkem kui `MAX_ACTIVE_RUNNERS`
-(koos jaotusega omniroute/muud). Exit 1 = vajab tähelepanu; loe logi.
+Mida see igal sõidul teeb: pühib meie enda jäägid (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) pärast **3 tundi tmpfs-is** ja 24 h kettal `_work/_temp`; hoiatab `next-build` kohta, mis on vanem kui 75 minutit, ja hoiab seda töös; kärbib 48 h-vanad jooksjate kassad, kelle ühik on **peatunud** ; hoiatused kettal ≥ 85%, mälu PSI `full/avg60` ≥ 10% ja rohkem kuulajaid kui `MAX_ACTIVE_RUNNERS` ( omniroute/other rikkega). Väljumine 1 = tähelepanu vajab; loe logi.
 
-75 minuti reegel ei tuvasta build'i, mille puhul GitHub on juba loobunud. Kui
-`Runner.Listener` ei saa oma tööd uuendada, kuvatakse `_diag/Runner_*.log`-is
-`POST request to …/renewjob timed out after 100 seconds`, API märgib töö `completed`
-(ebaõnnestunuks) umbes kümme minutit pärast viimast edukat uuendamist ning `next-build`
-jätkab töötamist ilma seotud tööta (2026-10-18: #17066 Build märgiti kell 19:43
-ebaõnnestunuks ja selle build hoidis viis minutit hiljem endiselt enda all 40 GB).
-Kontrolli uusimas `_diag/Worker_*.log`-is ref'i, seejärel saada ainult build'i
-protsessipuule PID-i järgi SIGTERM — `next-build`, `npm run build`,
-`build-next-isolated.mjs` ja `_work`-i tööprotsessid. Ära kunagi puutu protsesse
-`Runner.Listener`, `RunnerService.js` ega `Runner.Worker`: tööprotsess teatab, et
-töö on tühistatud, ja kuulaja läheb ise uuesti võrku.
+Ainuüksi kulunud aeg ei tõesta, et protsess on orvuks jäänud. Koristaja ei saada kunagi signaale vanuse alusel. Olemasolevad `ZOMBIE_BUILD_MAX_MIN` ja `ZOMBIE_BUILD_COMM` keskkonnanimed jäävad cron-konfiguratsioonide jaoks toetatuks. Enne arvatava orvu puhastamist veenduge, et selle täpne GitHub töö on terminal ja tuvastage selle töö juurde kuuluvad protsessid. Kui `Runner.Listener` ei saa oma tööd uuendada, näitab `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds`, API teatab tööst `completed` (tõrke) umbes kümme minutit pärast viimast edukat uuendamist ja `next-build` jätkab tööd, ilma et oleks ühtegi tööd (2026-10-18: #17066 ehitamine nurjus kell 19:43 ja selle ehitamine kestis veel viis minutit GB hiljem). Kinnitage viide uusimas `_diag/Worker_*.log`, seejärel SIGTERM ainult PID — `next-build`, `npm run build`, `build-next-isolated.mjs` ja `_work` töötajate ehituspuu. Ärge kunagi puudutage `Runner.Listener`, `RunnerService.js` või `Runner.Worker`: töötaja teatab, et töö on tühistatud ja kuulaja läheb ise uuesti võrku.
 
 ## Runner'i üksused: KillMode
 

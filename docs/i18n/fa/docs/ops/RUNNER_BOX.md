@@ -4,73 +4,42 @@
 
 ---
 
-مجموعهٔ self-hosted روی سرور **.113** (`tomni-proxmox-113`) اجرا میشود. از 2026-10-18، هر
-runner در OmniRoute دارای **یک نقش**، یک label و بودجهٔ حافظه/CPU متناسب با بار کاری
-اندازهگیریشدهٔ خود است. اسلات Turbopack منابع موردنیاز build را دریافت میکند؛ اسلاتهای دیگر براساس
-بیشینهٔ مصرف اندازهگیریشدهٔ خود تخصیص یافتهاند. سرور تنها زمانی بیشتخصیص دارد که یک build با Turbopack
-همزمان با یک build با webpack در Release-Green و یک job مربوط به lint اجرا شود؛ swap میزبان (16 GB)
-این وضعیت را پوشش میدهد و چون Buildهای pull request بهصورت hosted اجرا میشوند، اسلات Turbopack
-بیشتر اوقات بیکار است:
+استخر خود میزبان اجرا می شود **.113** جعبه (`tomni-proxmox-113`). از سال 2026-10-18 هر دونده OmniRoute دارای است **یک نقش** ، یک برچسب و بودجه memory/CPU به اندازه حجم کاری آن اندازه گیری شده است. اسلات Turbopack آنچه را که ساختنی نیاز دارد دریافت می کند. اسلات های دیگر به قله های اندازه گیری شده خود اندازه می شوند. این جعبه فقط زمانی بیش از حد متعهد می شود که یک ساخت Turbopack با ساخت بسته وب Release-Green و یک کار پرز همزمان باشد. تعویض میزبان (16 GB) آن را جذب میکند، و از آنجایی که سازههای درخواستی pull به صورت میزبانی اجرا میشوند، اسلات Turbopack اغلب اوقات بیکار است:
 
-| runner               | label                           | نقش                                                                                                                                              | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
-| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | buildهای Turbopack: `ci.yml` `Build` (فقط push/dispatch)، Docker amd64، `npm-publish`، `nightly-v4-build`، `preview-artifact`، build شبانهٔ a11y | 56 GB / 60 GB (swap 0)     | 1600 %            |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`)، build با webpack                                                                                 | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
-| `omniroute-113-2`    | `omni-light`                    | jobهای شبانه (Schemathesis، promptfoo، garak، k6) و `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
-| `omniroute-113`      | `omni-light`                    | همان مجموعهٔ بالا                                                                                                                                | 8 GB / 12 GB               | 400 %             |
-| OmniHeuris, OmniMind | (مخزنهای خودشان)                | فقط Dependabot (بیشینهٔ مصرف هرکدام 155 MB، 2026-10-18)                                                                                          | 4 GB / 6 GB                | 200 % برای هرکدام |
+| دونده                | برچسب زدن                       | نقش                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | ساختهای Turbopack : `ci.yml` `Build` (فقط push/dispatch )، Docker amd64، `npm-publish`، `nightly-v4-build`، `preview-artifact`، ساخت شبانه a11y | 56 GB / 60 GB (تعویض 0)    | 1600 %           |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`)، ساخت بسته وب                                                                                    | 20 GB / 24 GB (تعویض 4 GB) | 800 %            |
+| `omniroute-113-2`    | `omni-light`                    | شبانه (Schemathesis، promptfoo، garak، k6) و `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (تعویض 4 GB) | 600 %            |
+| `omniroute-113`      | `omni-light`                    | همان استخر بالا                                                                                                                                 | 8 GB / 12 GB               | 400 %            |
+| OmniHeuris, OmniMind | ( مخازن آنها )                  | فقط Dependabot (اوج 155 MB هر کدام، 18-10-2026)                                                                                                 | 4 GB / 6 GB                | هر کدام 200 درصد |
 
-اندازهگیریشده در 2026-10-18:
+اندازهگیریشده 18/10/2026:
 
-| منبع      | مقدار                        | مفهوم آن برای زمانبندی                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 هسته**          | یک build پروداکشن با Turbopack بدون محدودیت به بیشینهٔ 49 GB رسید (`tests/unit/ci-build-bundler-webpack.test.ts`)؛ در Next 16.3.8، مرحلهٔ compile بهتنهایی حدود 40 GB اشغال میکند (36 GB از RSS در `next-build` بهعلاوهٔ 17 worker مربوط به loader با 3 GB، اندازهگیریشده در 2026-10-18)؛ یک build با webpack حدود 14–16 GB مصرف میکند. یک build با Turbopack بههمراه یک build با webpack همزمان قابل اجرا هستند؛ دو build با Turbopack قابل اجرا نیستند |
-| swap      | 16 GB                        | `omniroute-113-5` با swap غیرفعال (`MemorySwapMax=0`) اجرا میشود تا یک build مهارنشده بهجای درگیرکردن swap کل سرور، هنگام رسیدن به سقف خود متوقف شود                                                                                                                                                                                                                                                                                                     |
-| `/tmp`    | **12 GB tmpfs = RAM**        | هر چیزی که در آن قرار گیرد، حافظه مصرف میکند؛ باقیماندهها پس از 3 ساعت پاکسازی میشوند                                                                                                                                                                                                                                                                                                                                                                    |
-| CPU       | بار 60 روی 32 هسته مشاهده شد | پیش از اعمال quotaها، یک build با Turbopack (حدود 1166 % CPU) بههمراه یک مجموعهتست coverage روی همان سرور، heartbeatهای listenerهای دیگر را از منابع محروم کرد (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                                                                     |
-| runnerها  | **7 listener** (2026-10-28)  | 5 مورد OmniRoute به‌علاوهٔ OmniHeuris و OmniMind؛ `omniroute-113-5` برچسب `omni-build-60gb` را نیز دارد؛ `omniroute-113-3/-4/-8` از مخزن حذف شدند (2026-10-28)                                                                                                                                                                                                                                                                                           |
+| منبع      | ارزش                              | برای برنامه ریزی به چه معناست                                                                                                                                                                                                                                                                                                                                                 |
+| --------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 هسته**               | تولید Turbopack در 49 GB بدون پوشش (`tests/unit/ci-build-bundler-webpack.test.ts`) به اوج خود رسید. در 16.3.8 بعدی، فاز کامپایل به تنهایی ~ 40 GB را دارد (36 GB RSS در `next-build` به اضافه 17 کارگر لودر در 3 GB، اندازهگیری شده در 18-10-2026). یک بسته وب ساخته شده در ~ 14–16 GB. یک ساخت Turbopack + یک بسته وب با هم مناسب است. دو ساخت Turbopack این کار را نمی کنند |
+| مبادله    | 16 GB                             | `omniroute-113-5` با swap off (`MemorySwapMax=0`) اجرا می شود، بنابراین به جای تعویض جعبه، یک ساختار فرار در درپوش آن بریده می شود.                                                                                                                                                                                                                                           |
+| `/tmp`    | **12 GB tmpfs = RAM**             | هر چیزی که در آنجا پارک شود حافظه دارد. باقی مانده غذا بعد از 3 ساعت جارو می شود                                                                                                                                                                                                                                                                                              |
+| CPU       | بار 60 روی 32 هسته مشاهده شده است | قبل از سهمیهبندی، یک ساخت Turbopack (~ 1166 % CPU) بهعلاوه یک مجموعه پوشش روی همان جعبه، ضربان قلب شنوندگان دیگر را گرسنه میکرد (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                         |
+| دونده ها  | **7 شنونده** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` همچنین `omni-build-60gb` را حمل می کند. `omniroute-113-3/-4/-8` از مخزن حذف شد (28-10-2026)                                                                                                                                                                                                                            |
 
-محدودیتها در `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` مربوط به هر unit
-قرار دارند (مقادیر قبلی با نام `override.conf.bak-20261018` نگهداری شدهاند) و بهصورت زنده با
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` اعمال شدند — بدون restart،
-بنابراین هیچ job در حال اجرایی تحت تأثیر قرار نگرفت. labelها نیز از طریق API مربوط به runnerها
-تغییر داده میشوند (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) و این کار نیز بهصورت زنده انجام میشود.
+محدودیتها در `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` هر واحد (مقادیر قبلی به عنوان `override.conf.bak-20261018` حفظ میشوند) وجود دارند و با `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — بدون راهاندازی مجدد بهطور زنده اعمال میشوند، بنابراین هیچ کار در حال اجرا لمس نمیشود. برچسب ها از طریق دونده API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`)، همچنین زنده تغییر می کنند.
 
-## نصب پاکساز (یکبار، روی سرور)
+## سرایدار را نصب کنید (یک بار روی جعبه)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): هر ۳۰ دقیقه، ثبت گزارش در /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-وجود `lsof` الزامی است: پاکساز پیش از حذف یک مسیر، با گرفتن یک اسنپشات از فایلهای
-باز، بیاستفاده بودن آن را اثبات میکند؛ بدون این ابزار چیزی را حذف نمیکند و این موضوع را
-اعلام میکند (خروجی 1). هر تغییری را ابتدا با `--dry-run` امتحان کنید — دقیقاً کارهایی را که
-انجام خواهد داد چاپ میکند و به چیزی دست نمیزند.
+`lsof` مورد نیاز است: سرایدار ثابت میکند که یک مسیر قبل از حذف با یک عکس فوری از فایلهای باز، بیحرکت است، و بدون ابزار، چیزی را حذف نمیکند و چنین میگوید (خروج 1). هر تغییری را با `--dry-run` امتحان کنید —
 
-کاری که در هر اجرا انجام میدهد: باقیماندههای خودمان (`runner-*`، `omniroute-*`،
-`next-build*`، `e2e-build.tar.gz`) را پس از **۳ ساعت روی tmpfs** و ۲۴ ساعت روی
-`_work/_temp` دیسکی پاکسازی میکند؛ یک `next-build` قدیمیتر از ۷۵ دقیقه را میبندد
-(هیچ jobای اینقدر طول نمیکشد — در 2026-08-27، پس از آنکه GitHub، job مربوطه را
-ازدسترفته اعلام کرده بود، یکی از آنها ۷۰ دقیقه اجرا شد)؛ checkoutهای ۴۸ساعتهٔ runnerهایی
-را که unit آنها **متوقف است** حذف میکند؛ و دربارهٔ استفاده از دیسک ≥ ۸۵٪، مقدار
-`full/avg60` در PSI حافظه ≥ ۱۰٪ و بیشتر بودن تعداد listenerها از
-`MAX_ACTIVE_RUNNERS` (با تفکیک omniroute/other) هشدار میدهد. خروجی 1 = نیازمند
-رسیدگی؛ گزارش را بخوانید.
+کاری که در هر بار اجرا انجام می دهد: باقیمانده خودمان (`runner-*`، `omniroute-*`، `next-build*`، `e2e-build.tar.gz`) را بعد از آن جارو می کند **3 ساعت در tmpfs** و 24 ساعت روی دیسک `_work/_temp`. در `next-build` قدیمی تر از 75 دقیقه هشدار می دهد و آن را در حال اجرا نگه می دارد. هرس 48 h-old checkouts از دوندگان که واحد است **متوقف شد** ; هشدارها روی دیسک ≥ 85٪، حافظه PSI `full/avg60` ≥ 10٪، و شنوندگان بیشتر از `MAX_ACTIVE_RUNNERS` (با تجزیه omniroute/other ). خروجی 1 = توجه لازم است. گزارش را بخوانید
 
-قانون ۷۵ دقیقهای، buildای را که GitHub قبلاً از آن صرفنظر کرده است شناسایی نمیکند. وقتی
-`Runner.Listener` نمیتواند job خود را تمدید کند، `_diag/Runner_*.log` پیام
-`POST request to …/renewjob timed out after 100 seconds` را نشان میدهد، API حدود ده دقیقه
-پس از آخرین تمدید موفق، وضعیت job را `completed` (ناموفق) گزارش میکند و `next-build` بدون
-هیچ job متصلی به اجرا ادامه میدهد (2026-10-18: Build مربوط به #17066 در ساعت 19:43
-ناموفق شد و build آن پنج دقیقه بعد همچنان ۴۰ GB را اشغال کرده بود). ref را در جدیدترین
-`_diag/Worker_*.log` تأیید کنید، سپس فقط درخت build را براساس PID با SIGTERM خاتمه دهید —
-`next-build`، `npm run build`، `build-next-isolated.mjs` و workerهای `_work`. هرگز به
-`Runner.Listener`، `RunnerService.js` یا `Runner.Worker` دست نزنید: worker لغو شدن job
-را گزارش میکند و listener خودش دوباره آنلاین میشود.
+زمان سپری شده به تنهایی ثابت نمی کند که یک فرآیند یتیم است. سرایدار هرگز بر اساس سن سیگنال ارسال نمی کند. نامهای موجود محیط `ZOMBIE_BUILD_MAX_MIN` و `ZOMBIE_BUILD_COMM` برای پیکربندیهای cron پشتیبانی میشوند. قبل از تمیز کردن یک یتیم مشکوک، تأیید کنید که کار دقیق GitHub آن پایانی است و فرآیندهای مربوط به آن شغل را شناسایی کنید. هنگامی که `Runner.Listener` نمی تواند کار خود را تمدید کند، `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds` را نشان می دهد، API کار `completed` (شکست) را حدود ده دقیقه پس از آخرین تمدید موفقیت آمیز گزارش می کند، و `next-build` بدون هیچ کاری به کار خود ادامه می دهد (18/10/2026: Build of #17066 در ساعت 19:43 شکست خورد و ساخت GB هنوز در پنج دقیقه باقی مانده بود). ref را در جدیدترین `_diag/Worker_*.log` تأیید کنید، سپس SIGTERM فقط درخت ساخت را توسط PID — `next-build`، `npm run build`، `build-next-isolated.mjs` و کارگران `_work` تأیید کنید. هرگز `Runner.Listener`، `RunnerService.js` یا `Runner.Worker` را لمس نکنید: کارگر کار را لغو شده گزارش میکند و شنونده به تنهایی آنلاین میشود.
 
 ## unitهای Runner: KillMode
 

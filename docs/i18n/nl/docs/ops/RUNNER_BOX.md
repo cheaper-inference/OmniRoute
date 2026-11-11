@@ -4,73 +4,42 @@
 
 ---
 
-De zelf-gehoste pool draait op de **.113**-machine (`tomni-proxmox-113`). Sinds 2026-10-18 heeft elke
-OmniRoute-runner **één rol**, één label en een geheugen-/CPU-budget dat is afgestemd op het gemeten
-gebruik van de workload. Het Turbopack-slot krijgt wat de build nodig heeft; de andere slots zijn
-afgestemd op hun gemeten piekgebruik. De machine raakt alleen overbezet wanneer een Turbopack-build
-samenvalt met een Release-Green-webpack-build en een lint-taak; de swapruimte van de host (16 GB)
-vangt dat op. Omdat builds voor pull requests hosted worden uitgevoerd, is het Turbopack-slot
-meestal inactief:
+Het zelfgehoste zwembad draait op de **.113** doos (`tomni-proxmox-113`). Sinds 18-10-2026 heeft elke OmniRoute -loper dit **één rol** , één label en een memory/CPU budget afgestemd op de werklast. Het Turbopack slot krijgt wat de build nodig heeft; de andere slots zijn afgestemd op hun gemeten pieken. De box maakt alleen een overcommit wanneer een Turbopack -build samenvalt met een Release-Green webpack-build en een lintjob; host swap (16 GB) absorbeert dat, en omdat pull-request Builds gehost worden uitgevoerd, is het Turbopack slot meestal inactief:
 
-| runner               | label                           | rol                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-builds: `ci.yml` `Build` (alleen push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, de nachtelijke a11y-build | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-build                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`                    | nachtelijke taken (Schemathesis, promptfoo, garak, k6) en `quality.yml` `lint-guard`                                                                      | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`                    | dezelfde pool als hierboven                                                                                                                               | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (hun repo's)                    | alleen Dependabot (piek van elk 155 MB, 2026-10-18)                                                                                                       | 4 GB / 6 GB                | elk 200 %  |
+| loper                | label                           | rol                                                                                                                                                        | `MemoryHigh` / `MemoryMax`  | `CPUQuota` |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack builds: `ci.yml` `Build` (alleen push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, de nachtelijke a11y build | 56 GB / 60 GB (wissel 0)    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-build                                                                                              | 20 GB / 24 GB (wissel 4 GB) | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Schemathesis, promptfoo, garak, k6) en `quality.yml` `lint-guard`                                                                               | 12 GB / 16 GB (wissel 4 GB) | 600 %      |
+| `omniroute-113`      | `omni-light`                    | hetzelfde zwembad als hierboven                                                                                                                            | 8 GB / 12 GB                | 400 %      |
+| OmniHeuris, OmniMind | (hun repo's)                    | Alleen Dependabot (piek 155 MB elk, 18-10-2026)                                                                                                            | 4 GB / 6 GB                 | 200% elk   |
 
-Gemeten op 2026-10-18:
+Gemeten 2026-10-18:
 
-| resource  | waarde                       | betekenis voor de planning                                                                                                                                                                                                                                                                                                                                                                |
-| --------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 cores**         | een Turbopack-productiebuild bereikte zonder limiet een piek van 49 GB (`tests/unit/ci-build-bundler-webpack.test.ts`); op Next 16.3.8 gebruikt alleen de compilatiefase al ~40 GB (36 GB RSS in `next-build` plus 17 loader-workers van 3 GB, gemeten op 2026-10-18); een webpack-build gebruikt ~14–16 GB. Eén Turbopack- en één webpack-build passen samen; twee Turbopack-builds niet |
-| swap      | 16 GB                        | `omniroute-113-5` draait zonder swap (`MemorySwapMax=0`), zodat een ontspoorde build bij zijn limiet wordt afgebroken in plaats van de machine te laten swappen                                                                                                                                                                                                                           |
-| `/tmp`    | **12 GB tmpfs = RAM**        | alles wat daar wordt geparkeerd, neemt geheugen in beslag; achtergebleven bestanden worden na 3 uur opgeruimd                                                                                                                                                                                                                                                                             |
-| CPU       | load 60 op 32 cores gemeten  | vóór de quota's zorgden één Turbopack-build (~1166 % CPU) en een coverage-suite op dezelfde machine ervoor dat de heartbeats van de andere listeners werden verdrongen (`The self-hosted runner lost communication`, #16853)                                                                                                                                                              |
-| runners   | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` draagt ook `omni-build-60gb`; `omniroute-113-3/-4/-8` zijn uit de repository verwijderd (2026-10-28)                                                                                                                                                                                                                               |
+| bron      | waarde                                | wat het betekent voor de planning                                                                                                                                                                                                                                                                                                                                            |
+| --------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 kernen**                 | een Turbopack -productieopbouw piekte op 49 GB zonder limiet (`tests/unit/ci-build-bundler-webpack.test.ts`); op Next 16.3.8 bevat de compileerfase alleen al ~ 40 GB (36 GB RSS in `next-build` plus 17 laderarbeiders bij 3 GB, gemeten op 18-10-2026); een webpack gebouwd op ~ 14–16 GB. Eén Turbopack + één webpack-build passen bij elkaar; twee Turbopack builds niet |
+| ruil      | 16 GB                                 | `omniroute-113-5` werkt met swap off (`MemorySwapMax=0`), dus een op hol geslagen build wordt aan de bovenkant afgesneden in plaats van de doos te verwisselen                                                                                                                                                                                                               |
+| `/tmp`    | **12 GB tmpfs = RAM**                 | alles wat daar geparkeerd staat, heeft geheugen; restjes worden na 3 uur geveegd                                                                                                                                                                                                                                                                                             |
+| CPU       | belasting 60 op 32 kernen waargenomen | vóór de quota hongerde één Turbopack -build (~ 1166% CPU) plus een dekkingssuite op dezelfde box de hartslag van de andere luisteraars uit (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                             |
+| lopers    | **7 luisteraars** (2026-10-28)        | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` voert ook `omni-build-60gb`; `omniroute-113-3/-4/-8` is verwijderd uit de repository (28-10-2026)                                                                                                                                                                                                                     |
 
-De limieten staan in het bestand `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-van elke unit (eerdere waarden zijn bewaard als `override.conf.bak-20261018`) en zijn live toegepast
-met `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — zonder herstart,
-zodat geen actieve taak werd beïnvloed. Labels worden eveneens live gewijzigd via de runners-API
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`).
+De limieten zijn live in de `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` van elke eenheid (vorige waarden behouden als `override.conf.bak-20261018`) en werden live toegepast met `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — zonder herstart, dus er werd geen lopende taak aangeraakt. Labels worden gewijzigd via de lopers API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), ook live.
 
-## Installeer de opschoner (eenmalig, op de machine)
+## Installeer de conciërge (eenmalig, op de doos)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): elke 30 min, logboek naar /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` is vereist: de opschoner stelt met één momentopname van geopende
-bestanden vast dat een pad niet in gebruik is voordat het wordt verwijderd. Zonder dit
-hulpprogramma verwijdert de opschoner niets en meldt hij dat
-(exit 1). Probeer wijzigingen eerst met `--dry-run` — dit toont exact wat er zou
-gebeuren en wijzigt niets.
+`lsof` is vereist: de conciërge bewijst dat een pad inactief is met één momentopname van geopende bestanden voordat het wordt verwijderd, en zonder de tool verwijdert het niets en zegt dat ook (afrit 1). Probeer elke verandering eerst met `--dry-run` — drukt precies af wat het zou doen en raakt niets aan.
 
-Wat er bij elke uitvoering gebeurt: onze eigen restanten (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) worden opgeruimd na **3 uur op tmpfs** en 24 uur op
-`_work/_temp` op schijf; een `next-build` ouder dan 75 minuten wordt beëindigd (geen enkele taak duurt zo lang — op
-2026-08-27 duurde er één 70 minuten nadat GitHub de taak al als verloren had aangemerkt);
-48 uur oude check-outs van runners waarvan de unit **gestopt** is, worden opgeschoond;
-er wordt gewaarschuwd bij schijfgebruik ≥ 85%, geheugen-PSI
-`full/avg60` ≥ 10% en meer listeners dan `MAX_ACTIVE_RUNNERS` (met een
-uitsplitsing naar omniroute/overig). Exit 1 = aandacht vereist; lees het logboek.
+Wat het elke keer doet: veegt onze eigen restjes (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) erna **3 uur op tmpfs** en 24 uur op schijf `_work/_temp`; waarschuwt bij een `next-build` ouder dan 75 minuten en zorgt ervoor dat deze blijft draaien; snoeit 48 uur oude kassa's van hardlopers waarvan de eenheid is **gestopt** ; waarschuwingen op schijf ≥ 85%, geheugen PSI `full/avg60` ≥ 10%, en meer luisteraars dan `MAX_ACTIVE_RUNNERS` (met een omniroute/other uitsplitsing). Afrit 1 = aandacht nodig; lees het logboek.
 
-De regel van 75 minuten detecteert geen build waarvan GitHub de taak al heeft opgegeven. Wanneer de
-`Runner.Listener` de taak niet kan verlengen, toont `_diag/Runner_*.log`
-`POST request to …/renewjob timed out after 100 seconds`, rapporteert de API de taak ongeveer tien
-minuten na de laatste geslaagde verlenging als `completed` (mislukt) en blijft `next-build` actief
-zonder gekoppelde taak (2026-10-18: de build van #17066 werd om 19:43 als mislukt aangemerkt en de
-build hield vijf minuten later nog steeds 40 GB bezet). Controleer de ref in het nieuwste
-`_diag/Worker_*.log` en stuur vervolgens alleen de buildboom een SIGTERM op basis van PID —
-`next-build`, `npm run build`, `build-next-isolated.mjs` en de `_work`-workers. Raak
-`Runner.Listener`, `RunnerService.js` of `Runner.Worker` nooit aan: de worker
-rapporteert de taak als geannuleerd en de listener komt vanzelf weer online.
+Alleen de verstreken tijd bewijst niet dat een proces verweesd is. De conciërge stuurt nooit signalen op basis van leeftijd. De bestaande `ZOMBIE_BUILD_MAX_MIN` en `ZOMBIE_BUILD_COMM` -omgevingsnamen blijven ondersteund voor cron-configuraties. Voordat u een vermoedelijk weeskind opruimt, moet u bevestigen dat de exacte GitHub taak terminaal is en de processen identificeren die bij die taak horen. Wanneer de `Runner.Listener` zijn taak niet kan vernieuwen, toont `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds`, de API rapporteert de taak `completed` (mislukking) ongeveer tien minuten na de laatste succesvolle verlenging, en `next-build` blijft draaien zonder dat er een taak is gekoppeld (18-10-2026: de build van #17066 is om 19:43 uur mislukt en de build had vijf minuten later nog steeds 40 GB ). Bevestig de ref in de nieuwste `_diag/Worker_*.log`, daarna SIGTERM alleen de build-boom door PID — `next-build`, `npm run build`, `build-next-isolated.mjs` en de `_work` werknemers. Raak `Runner.Listener`, `RunnerService.js` of `Runner.Worker` nooit aan: de medewerker rapporteert de taak als geannuleerd en de luisteraar gaat vanzelf weer online.
 
 ## Runner-units: KillMode
 
