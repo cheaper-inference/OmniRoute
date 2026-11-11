@@ -99,6 +99,12 @@ function recordConnectionInventories(
   }
 }
 
+/**
+ * Load one provider's persisted catalogs into the shared accumulator. Unreadable or
+ * malformed catalogs add no inventories and, for per-account providers, invalidate the
+ * shared catalog. Codex catalogs are used only when an active pool member lists
+ * the requested model, so disabled or deleted owners cannot make stale lists binding.
+ */
 async function collectProviderInventory(
   providerId: string,
   connections: ProviderConnectionView[],
@@ -156,8 +162,11 @@ function collectInventoryProviders(
 
 /**
  * Self-hosted hosts, Codex subscription accounts and Antigravity/agy accounts (plans list
- * different models) can advertise different inventories. For Codex, once an account inventory advertises the requested
- * model, unsynchronized accounts are not eligible guesses for it. With no
+ * different models) can advertise different inventories. For Codex, once an active account
+ * inventory advertises the requested model, unsynchronized accounts are not eligible
+ * guesses for it. Codex evidence comes from `poolConnections`, the active pool before
+ * API-key allowlists, pins or exclusions narrow `connections`. This evidence does not
+ * authorize selecting accounts outside the caller's credential restrictions. With no
  * inventories at all, retain the existing bootstrap/offline behavior.
  *
  * #18311: a Codex model that no synced inventory lists (a user-added custom
