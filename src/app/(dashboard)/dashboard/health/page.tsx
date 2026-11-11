@@ -680,7 +680,7 @@ function HealthSnapshot() {
                       <span className={`w-2 h-2 rounded-full ${dot}`}></span>
                       {feat.feature}
                     </span>
-                    <span className="text-xs uppercase tracking-wider font-bold opacity-70">
+                    <span className="text-xs uppercase tracking-wider font-semibold opacity-70">
                       {feat.level}
                     </span>
                   </div>
@@ -771,7 +771,7 @@ function HealthSnapshot() {
                   key={label}
                   className="text-center p-2 rounded-lg bg-surface/30 border border-border/30"
                 >
-                  <p className={`text-lg font-bold tabular-nums ${color}`}>{value}</p>
+                  <p className={`text-lg font-semibold tabular-nums ${color}`}>{value}</p>
                   <p className="text-xs text-text-muted mt-0.5">{label}</p>
                 </div>
               ))}
@@ -845,7 +845,7 @@ function HealthSnapshot() {
                           className={`rounded-lg p-3 ${style.bg} border border-border flex items-center gap-3`}
                         >
                           <div
-                            className="size-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
+                            className="size-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-semibold"
                             style={{
                               backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
                               color: providerInfo?.color || "var(--color-text-muted)",
@@ -1015,7 +1015,7 @@ function HealthSnapshot() {
                       >
                         <div className="flex items-center gap-2.5 mb-2">
                           <div
-                            className="size-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold"
+                            className="size-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-semibold"
                             style={{
                               backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
                               color: providerInfo?.color || "var(--color-text-muted)",

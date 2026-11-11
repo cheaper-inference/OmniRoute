@@ -153,7 +153,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "statusOverview", "Status Overview")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {getI18nOrFallback(
                     t,
                     "configOnlyHint",
@@ -176,7 +176,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "activeModePack", "Active Mode Pack")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {getI18nOrFallback(
                     t,
                     "modePackHint",
@@ -222,7 +222,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "providerScores", "Provider Scores")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {normalizedConfig.candidatePool.length > 0
                     ? `${normalizedConfig.candidatePool.length} providers currently ranked for this combo.`
                     : getI18nOrFallback(
@@ -294,7 +294,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "routingInputs", "Routing Inputs")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {getI18nOrFallback(
                     t,
                     "routingInputsHint",

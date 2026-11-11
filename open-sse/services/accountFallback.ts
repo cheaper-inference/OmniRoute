@@ -339,11 +339,24 @@ export function isTokenRateLimitWording(errorText: string | null | undefined): b
   );
 }
 
-/** Shared context-overflow text match with TPM/RPM exclusion. */
+// Phrases that only a real context overflow uses; they outrank the validation exclusion below.
+const STRONG_CONTEXT_OVERFLOW_RE =
+  /\b(?:maximum context|context (?:length|window))\b|context_length_exceeded|\b(?:prompt is |input (?:is )?)too long\b/i;
+
+/** Shared context-overflow text match with TPM/RPM and parameter-validation exclusions. */
 export function isContextOverflowText(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
   if (isTokenRateLimitWording(text)) return false;
+  if (!STRONG_CONTEXT_OVERFLOW_RE.test(text)) {
+    if (/\b(?:invalid_value|invalid_type)\b/i.test(text)) return false;
+    if (
+      /\b(?:max_tokens|max_completion_tokens|max_output_tokens)\b/i.test(text) &&
+      /\b(?:invalid|illegal|param(?:eter)?|expected|must be|range)\b/i.test(text)
+    ) {
+      return false;
+    }
+  }
   return CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text));
 }
 
@@ -1486,8 +1499,9 @@ export function parseRetryAfterFromBody(responseBody: unknown): {
   for (const detail of Array.isArray(details) ? details : []) {
     const detailRecord = toJsonRecord(detail);
     if (detailRecord.retryDelay) {
+      const delayMs = parseDelayString(detailRecord.retryDelay);
       return {
-        retryAfterMs: parseDelayString(detailRecord.retryDelay),
+        retryAfterMs: delayMs === null ? null : Math.min(delayMs, MAX_PROVIDER_COOLDOWN_MS),
         reason: RateLimitReason.RATE_LIMIT_EXCEEDED,
       };
     }
@@ -1906,7 +1920,10 @@ export function checkFallbackError(
     const resetTime = parseResetFromHeaders(headers);
     if (resetTime) {
       const waitMs = Math.max(resetTime - Date.now(), 0);
-      if (waitMs > 0) return { retryAfterMs: waitMs, provenance: "header" };
+      // Header hints bypass maxCooldownMs downstream, so clamp them here: an
+      // epoch-like Retry-After must not lock the connection for decades.
+      if (waitMs > 0)
+        return { retryAfterMs: Math.min(waitMs, MAX_PROVIDER_COOLDOWN_MS), provenance: "header" };
     }
 
     const detailedJsonHint = parseDetailedRetryHintFromJsonBody(errorStr, MAX_PROVIDER_COOLDOWN_MS);
@@ -2175,7 +2192,8 @@ export function checkFallbackError(
         } else {
           return {
             shouldFallback: true,
-            cooldownMs: tpdMs,
+            // A Retry-After header wins over the node clock; clamp it like detectRetryHint does.
+            cooldownMs: Math.min(tpdMs, MAX_PROVIDER_COOLDOWN_MS),
             reason: RateLimitReason.QUOTA_EXHAUSTED,
             dailyQuotaExhausted: true,
           };

@@ -109,7 +109,7 @@ import {
   hasPerModelQuota,
   hasPerModelFailureScope,
   getRuntimeProviderProfile,
-  recordModelLockoutFailure,
+  recordModelLockoutFailure as recordModelLockoutFailureBase,
   retryHintBypassesMaxCooldownMs,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
@@ -802,6 +802,37 @@ function createSelectionLock(key: string) {
 // unavailable in parallel, which was the root cause of cascading 502 lockouts.
 const markMutexes = new Map<string, Promise<void>>();
 
+// Requests in flight when a fault starts all fail with it. While the model is still locked for
+// the same reason, a repeat hit is the same episode and must not climb the backoff ladder; a
+// longer upstream hint than the cooldown already applied still extends the lock.
+// shortcut: guards the markAccountUnavailable sites only, the combo and chat.ts callers of
+// accountFallback.recordModelLockoutFailure still count every hit; move the guard there to cover them.
+function recordModelLockoutFailure(...args: Parameters<typeof recordModelLockoutFailureBase>): {
+  cooldownMs: number;
+  failureCount: number;
+} {
+  const [provider, connectionId, model, reason, , , , options] = args;
+  const lock = getModelLockoutInfo(provider, connectionId, model);
+  if (lock && lock.reason === reason && lock.remainingMs > 0) {
+    const appliedMs = lock.remainingMs + Date.now() - Date.parse(lock.lockedAt);
+    // The applied cooldown is already clamped, so clamp a non-authoritative hint the same way
+    // before comparing; an authoritative upstream reset keeps its full length.
+    const cap = options?.maxCooldownMs;
+    const rawHintMs = options?.exactCooldownMs;
+    const hintMs =
+      typeof rawHintMs === "number" &&
+      typeof cap === "number" &&
+      cap > 0 &&
+      !options?.exactCooldownIsUpstreamReset
+        ? Math.min(rawHintMs, cap)
+        : rawHintMs;
+    if (typeof hintMs !== "number" || hintMs <= appliedMs) {
+      return { cooldownMs: lock.remainingMs, failureCount: lock.failureCount };
+    }
+  }
+  return recordModelLockoutFailureBase(...args);
+}
+
 // Strict-Random shuffle deck moved to src/shared/utils/shuffleDeck.ts
 // auth.ts uses getNextFromDeckSync inside the provider-scoped selection mutex.
 // Re-export for backwards compat with existing test imports.
@@ -845,6 +876,8 @@ async function materializeConnection(
     reactivatedFromInactive?: boolean;
     routingLease?: AntigravityLease;
     requestedModel?: string | null;
+    selectedByApiKeyPreference?: boolean;
+    preferredFallbackAvailable?: boolean;
   } = {}
 ) {
   const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
@@ -1368,7 +1401,8 @@ export async function getProviderCredentials(
       }
       if (
         requestedModel &&
-        ((c.provider === "codex" && advertisedModelsByConnection.get(c.id)?.size === 0) ||
+        (((c.provider === "codex" || c.provider === "chatgpt") &&
+          advertisedModelsByConnection.get(c.id)?.size === 0) ||
           !isRequestedModelAdvertised(
             c.provider,
             requestedModel,
@@ -1855,11 +1889,15 @@ export async function getProviderCredentials(
         )
       : undefined;
     let selectedByApiKeyPreference = false;
+    let preferredFallbackAvailable = false;
     if (!connection && options.preferredConnectionIds?.length) {
       const preferred = pickPreferredConnection(orderedConnections, options.preferredConnectionIds);
       if (preferred) {
         connection = preferred;
         selectedByApiKeyPreference = true;
+        preferredFallbackAvailable = orderedConnections.some(
+          (candidate) => candidate.id !== preferred.id
+        );
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
       }
     }
@@ -1890,9 +1928,15 @@ export async function getProviderCredentials(
       if (options.lease) commitSelectionSideEffects = affinityPlan?.commit;
       else syncSessionAffinityRuntimeFields(connectionsRaw, connection);
     } else if (options.sessionKey) {
-      log.info(
+      // Selection falls back to LRU, so a miss means affinity is off or no candidate is left.
+      log.debug(
         "AUTH",
-        `session_key=${formatSessionKeyForLog(options.sessionKey)} has no available affinity target`
+        `session_key=${formatSessionKeyForLog(options.sessionKey)} has no available affinity target`,
+        {
+          reason: sessionAffinityTtlMs <= 0 ? "affinity_disabled" : "no_connection",
+          provider,
+          candidates: leasePolicy.connections.length,
+        }
       );
     }
 
@@ -2105,6 +2149,8 @@ export async function getProviderCredentials(
         return materializeConnection(connection, options, {
           commitSelectionSideEffects,
           selectNextLeaseCandidate,
+          selectedByApiKeyPreference,
+          preferredFallbackAvailable,
           ...probeStamp,
         });
       }
@@ -2154,6 +2200,8 @@ export async function getProviderCredentials(
       ...probeStamp,
       routingLease: reserved.lease,
       requestedModel,
+      selectedByApiKeyPreference,
+      preferredFallbackAvailable,
     });
   } finally {
     selectionLock?.release();
