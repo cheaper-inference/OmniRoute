@@ -201,6 +201,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     isResponsesEndpoint,
     preserveCacheControl,
     reasoningCacheScope,
+    antigravitySessionKey,
     requestToolIdentityMap,
     stream,
     toolNameMap,
@@ -555,6 +556,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             signatureNamespace: connectionId,
             copilotClient: copilotCompatibleReasoning,
             reasoningCacheScope,
+            antigravitySessionKey,
             onReasoningReplayHistory: (messages) => {
               reasoningReplayHistory = messages;
             },

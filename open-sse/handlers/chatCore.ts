@@ -930,6 +930,10 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
+  // One upstream Antigravity session per conversation (prompt-cache scope); the
+  // non-streaming server-tool follow-up leg must reuse it, or it falls back to the
+  // account-wide session and evicts parallel conversations' caches.
+  const antigravitySessionKey = conversationId || sessionAffinityKey || null;
   const reasoningCacheScope = reasoningReplaySessionKey
     ? `api-key:${String(apiKeyInfo?.id ?? "local")}\x1f${String(reasoningReplaySessionKey)}`
     : null;
@@ -2371,7 +2375,7 @@ async function handleChatCoreInner({
           signatureNamespace: connectionId,
           copilotClient: copilotCompatibleReasoning,
           reasoningCacheScope,
-          antigravitySessionKey: conversationId || sessionAffinityKey || null,
+          antigravitySessionKey,
           videoTranscriptSensitive: videoBridgeObserved,
           onReasoningReplayHistory: (messages) => {
             reasoningReplayHistory = messages;
@@ -3404,6 +3408,7 @@ async function handleChatCoreInner({
       persistFailureUsage,
       pipelineRecovered,
       pipelineSessionId,
+      antigravitySessionKey,
       preserveCacheControl,
       provider,
       providerHeaders,
