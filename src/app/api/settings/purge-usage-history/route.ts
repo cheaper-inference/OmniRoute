@@ -43,6 +43,7 @@ export async function POST(request: Request) {
         deleted: result.deleted,
         deletedUsageHistory: result.deletedUsageHistory,
         deletedAgentSessionMessages: result.deletedAgentSessionMessages,
+        deletedAgentSessions: result.deletedAgentSessions,
         deletedDailySummary: result.deletedDailySummary,
         deletedHourlySummary: result.deletedHourlySummary,
         deletedCallLogs: result.deletedCallLogs,

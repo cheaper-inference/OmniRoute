@@ -74,6 +74,11 @@ test("purge usage API exposes every conversation reset counter", () => {
     /deletedAgenticConversations:\s*result\.deletedAgenticConversations/,
     "the API response should expose deleted conversation roots"
   );
+  assert.match(
+    routeSource,
+    /deletedAgentSessions:\s*result\.deletedAgentSessions/,
+    "the API response should expose deleted agent sessions"
+  );
 });
 
 test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hourly_usage_summary; a period only deletes rows older than the cutoff; an invalid period throws", async () => {
@@ -126,6 +131,11 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
            (id, api_key_id, fingerprint_hash, last_message_count, last_messages_hash, turn_count, first_seen_at, last_seen_at)
          VALUES ('conversation-test', 'key-test', 'fp', 0, '', 1, ?, ?)`
       ).run(recentIso, recentIso);
+      db.prepare(
+        `INSERT INTO agent_sessions
+           (id, api_key_id, project_path, git_branch, first_seen_at, last_seen_at, request_count)
+         VALUES ('session-test', 'key-test', '/repo', 'main', ?, ?, 3)`
+      ).run(oldIso, recentIso);
       db.prepare(
         `INSERT INTO conversation_turn_nodes
            (id, conversation_id, parent_id, role, content_hash, last_correlation_id, first_seen_at, last_seen_at)
@@ -279,6 +289,11 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
       1,
       "a timed reset should preserve conversation roots"
     );
+    assert.equal(
+      countRows(db, "agent_sessions"),
+      1,
+      "a timed reset cannot subtract from session totals, so it keeps agent_sessions"
+    );
 
     assert.equal(countRows(db, "usage_history"), 1, "recent usage_history row should survive");
     assert.equal(countRows(db, "call_logs"), 1, "recent call_logs row should survive");
@@ -359,6 +374,7 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
       1,
       "'all' should delete conversation roots"
     );
+    assert.equal(allResult.deletedAgentSessions, 1, "'all' should delete agent sessions");
     assert.equal(
       fs.existsSync(recentArtifactPath),
       false,
@@ -390,6 +406,7 @@ test("resetUsageHistory: 'all' wipes usage_history, daily_usage_summary, and hou
       0,
       "'all' should empty agentic_conversations"
     );
+    assert.equal(countRows(db, "agent_sessions"), 0, "'all' should empty agent_sessions");
     assert.equal(countRows(db, "provider_nodes"), 1, "provider config should still survive 'all'");
     assert.equal(countRows(db, "api_keys"), 1, "API keys should still survive 'all'");
     assert.equal(countRows(db, "combos"), 1, "combos should still survive 'all'");

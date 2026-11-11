@@ -38,6 +38,15 @@ function bearerExample({ path, method }: Operation, baseUrl: string): string[] {
       '  -d "{\\"name\\":\\"Imported key\\",\\"key\\":\\"$IMPORTED_API_KEY\\"}"',
     ];
   }
+  if (path === "/api/keys/{id}/self-service" && method === "PUT") {
+    // The route rejects an empty body: it needs at least one setting to change.
+    return [
+      `curl -X PUT ${baseUrl}${path} \\`,
+      '  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \\',
+      '  -H "Content-Type: application/json" \\',
+      '  -d \'{"anthropicRateLimitHeaders":"auto"}\'',
+    ];
+  }
   const curlMethod = method === "GET" ? "" : `-X ${method} `;
   if (path === "/api/v1/video-bridge/drilldown" && ["GET", "DELETE"].includes(method)) {
     return [
