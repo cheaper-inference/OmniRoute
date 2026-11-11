@@ -2058,3 +2058,9 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `OMNIROUTE_SESSION_TTL_MIN` | `15` | `open-sse/services/sessionManager.ts` | Idle TTL in minutes for the in-memory session map. Governs sticky connection reuse (`getSessionConnection`) and the active-sessions views; raising it keeps a session pinned to its connection longer. Read once at startup. Blank, non-numeric or `<= 0` values fall back to the default. |
+
+## Quota sticky-only accounts
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `OMNIROUTE_QUOTA_STICKY_ONLY_USED_PERCENT` | unset (off) | `src/sse/services/quotaStickyOnly.ts` | Integer 1-99. An account whose cached quota window is at or above this used-% serves only sessions already pinned to it by session affinity; new sessions route to other accounts. Needs `sessionAffinityTtlMs` > 0. If every candidate account is at or above the value, none is held back. Blank, non-numeric or out-of-range values turn the feature off. Set it below the quota cutoff so accounts pass through this state before they are blocked. |

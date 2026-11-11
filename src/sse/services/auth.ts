@@ -191,6 +191,7 @@ import {
 } from "./connectionModelInventory";
 import { isCatalogFreeModel } from "@/shared/utils/freeModels";
 import { getSessionAffinityStore } from "@/lib/db/sessionAccountAffinity";
+import { applyStickyOnly } from "./quotaStickyOnly";
 import {
   applySessionAffinityPin,
   formatSessionKeyForLog,
@@ -1883,7 +1884,17 @@ export async function getProviderCredentials(
       };
     }
 
-    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
+    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(
+      provider,
+      applyStickyOnly(
+        withQuota,
+        provider,
+        options.sessionKey,
+        sessionAffinityTtlMs,
+        affinityRecord
+      ),
+      requestedModel
+    );
     const policyValidLeaseCandidates = options._leaseCandidateIds
       ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
       : subscriptionFirst;
