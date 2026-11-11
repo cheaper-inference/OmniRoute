@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/prompt-template-expansion.test.ts",
       "tests/unit/prompt-template-chat-wiring.test.ts",
-      "tests/unit/payload-rule-conditions.test.ts"
+      "tests/unit/payload-rule-conditions.test.ts",
+      "tests/unit/block-client-tier-fields.test.ts"
     ],
     "nodeArgs": [
       "--import",

@@ -1,0 +1,1 @@
+- **feat(providers):** new per-connection opt-in `providerSpecificData.blockClientTierFields` removes client-supplied `service_tier`, `safety_identifier`, `inference_geo`, `speed` and `include_obfuscation` from upstream requests; off by default.
