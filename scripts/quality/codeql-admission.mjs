@@ -137,6 +137,21 @@ export function assertCodeqlSetup(setup, policy) {
   }
 }
 
+// GitHub can trim displayed paths while retaining every finding. Keep these
+// exact presentation diagnostics in the receipt; extraction, omitted results,
+// malformed warnings, server errors and incomplete SARIF remain blocking.
+function hasOnlyPresentationWarnings(warning) {
+  if (!warning) return true;
+  if (typeof warning !== "string") return false;
+  const kinds = new Set();
+  return warning.split("\n").every((line) => {
+    const match = /^(\d+) (relatedLocations|threadFlows) were ignored$/.exec(line);
+    if (!match || !Number.isSafeInteger(Number(match[1])) || kinds.has(match[2])) return false;
+    kinds.add(match[2]);
+    return true;
+  });
+}
+
 export function selectCodeqlAnalyses(analyses, context, policy, setup) {
   requireEvidence(Array.isArray(analyses), "SCAN_ANALYSES_INVALID");
   assertCodeqlSetup(setup, policy);
@@ -165,10 +180,7 @@ export function selectCodeqlAnalyses(analyses, context, policy, setup) {
       "SCAN_PROFILE_STALE"
     );
     requireEvidence(analysis.error === "", "SCAN_ANALYSIS_FAILED");
-    requireEvidence(
-      !analysis.warning || /^\d+ relatedLocations were ignored$/.test(analysis.warning),
-      "SCAN_ANALYSIS_WARNING"
-    );
+    requireEvidence(hasOnlyPresentationWarnings(analysis.warning), "SCAN_ANALYSIS_WARNING");
     requireEvidence(
       Number.isSafeInteger(analysis.rules_count) &&
         analysis.rules_count >= policy.minimumRules?.[language] &&
