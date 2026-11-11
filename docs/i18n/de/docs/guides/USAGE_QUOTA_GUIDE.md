@@ -38,31 +38,31 @@ Anfrage ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Was erfasst wird
+## Was aufgezeichnet wird
 
 Der Dienst `usage.ts` erfasst für jede Anfrage ein **Nutzungsereignis**:
 
-| Feld               | Typ     | Quelle                                                      |
-| ------------------ | ------- | ----------------------------------------------------------- |
-| `id`               | string  | Beim Erfassen generierte UUID                               |
-| `apiKeyId`         | string  | Der API-Schlüssel, der die Anfrage initiiert hat            |
-| `provider`         | string  | Anbieter-ID (openai, anthropic usw.)                        |
-| `model`            | string  | Modell-ID (gpt-5, claude-opus-4-6 usw.)                     |
-| `comboId`          | string? | Kombinations-ID, falls über eine Kombination weitergeleitet |
-| `promptTokens`     | number  | Aus der Antwort des Upstream-Anbieters                      |
-| `completionTokens` | number  | Aus der Antwort des Upstream-Anbieters                      |
-| `cachedTokens`     | number  | Tokens aus Cache-Treffern (Anthropic-Prompt-Caching usw.)   |
-| `totalTokens`      | number  | Prompt + Vervollständigung                                  |
-| `costUsd`          | number  | Anhand von Preisdaten berechnet                             |
-| `latencyMs`        | number  | Gesamtdauer der Anfrage                                     |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`  |
-| `errorClass`       | string? | Fehlerklasse, falls Status != Erfolg                        |
-| `timestamp`        | string  | ISO 8601 UTC                                                |
-| `metadata`         | object  | Benutzerdefinierte, durch Plugins eingefügte Daten          |
+| Feld               | Typ     | Quelle                                                     |
+| ------------------ | ------- | ---------------------------------------------------------- |
+| `id`               | string  | Bei der Aufzeichnung generierte UUID                       |
+| `apiKeyId`         | string  | Der API-Schlüssel, der die Anfrage ausgelöst hat           |
+| `provider`         | string  | Anbieter-ID (openai, anthropic usw.)                       |
+| `model`            | string  | Modell-ID (gpt-5, claude-opus-4-6 usw.)                    |
+| `comboId`          | string? | Combo-ID bei Weiterleitung über eine Combo                 |
+| `promptTokens`     | number  | Aus der Antwort des vorgelagerten Anbieters                |
+| `completionTokens` | number  | Aus der Antwort des vorgelagerten Anbieters                |
+| `cachedTokens`     | number  | Tokens aus Cache-Treffern (Anthropic-Prompt-Caching usw.)  |
+| `totalTokens`      | number  | Prompt + Vervollständigung                                 |
+| `costUsd`          | number  | Aus Preisdaten berechnet                                   |
+| `latencyMs`        | number  | Gesamtdauer der Anfrage                                    |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
+| `errorClass`       | string? | Fehlerklasse, wenn der Status nicht success ist            |
+| `timestamp`        | string  | ISO 8601 UTC                                               |
+| `metadata`         | object  | Benutzerdefinierte, von Plugins eingefügte Daten           |
 
 ### Woher die Tokens stammen
 
-Tokens werden im **Antwort-Handler** aus der Antwort des Upstream-Anbieters extrahiert:
+Tokens werden im **Antwort-Handler** aus der Antwort des vorgelagerten Anbieters extrahiert:
 
 ```ts
 // Aus open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Für Anbieter, die keine Nutzungsdaten zurückgeben (einige Web-Cookie-Anbieter), **schätzt** OmniRoute die Token-Anzahl anhand der Heuristik `~4 Zeichen pro Token` (siehe `open-sse/services/autoCombo/pipelineRouter.ts`).
+Bei Anbietern, die keine Nutzungsdaten zurückgeben (einige Web-Cookie-Anbieter), **schätzt** OmniRoute die Tokens anhand der Heuristik `~4 chars per token` (siehe `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Zwischengespeicherte Tokens
+### Gecachte Tokens
 
 OmniRoute erfasst `cached_tokens` getrennt von `prompt_tokens`, weil:
 
-- Anthropic-Prompt-Caching für zwischengespeicherte Tokens einen reduzierten Preis berechnet (10 % des normalen Preises)
-- Einige Anbieter `cache_read_input_tokens` zurückgeben, die anders abgerechnet werden sollten
-- Analysen die **Cache-Trefferrate** anzeigen können = `cached_tokens / prompt_tokens`
+- Beim Prompt-Caching von Anthropic für gecachte Tokens ein reduzierter Tarif berechnet wird (10 % des regulären Tarifs)
+- Einige Anbieter `cache_read_input_tokens` zurückgeben, für die ein anderer Preis angesetzt werden sollte
+- Analysen die **Cache-Trefferquote** = `cached_tokens / prompt_tokens` anzeigen können
+
+### Diagnose der Cache-Schreibstufen
+
+Das Panel zum Zustand des Prompt-Caches im Analytics-Dashboard unterscheidet zwischen vom Anbieter gemeldeten
+Cache-Schreibvorgängen mit 5 Minuten und 1 Stunde Gültigkeit. Die Anthropic-Felder
+`usage.cache_creation.ephemeral_5m_input_tokens` und
+`usage.cache_creation.ephemeral_1h_input_tokens` bleiben bei der Umwandlung von Nutzungsdaten im Streaming- und
+Nicht-Streaming-Modus erhalten und werden mit den Aufrufprotokoll-Zusammenfassungen gespeichert. Die Gesamtsumme
+der Cache-Schreibvorgänge wird diesen Kategorien nicht ein zweites Mal hinzugefügt.
+
+Aufrufe mit lediglich einem Gesamtzähler für Schreibvorgänge, einschließlich älterer Datensätze, haben eine unbekannte
+Stufe. Bei einer teilweisen Aufschlüsselung bleibt der nicht zugeordnete Rest unbekannt; ungültige oder
+widersprüchliche Zähler werden markiert, statt ihnen stillschweigend eine TTL zuzuweisen. TTL-Markierungen auf
+Anfrageseite sind kein Nachweis für eine abgerechnete Stufe.
+
+Die API-äquivalente Kostenschätzung für Schreibvorgänge im Panel deckt nur gemeldete Stufen mit bekannten Preisen ab, nicht
+die gesamte Anfrage. Bei nativen Claude/Anthropic-Modellpreisen verwendet sie für
+Schreibvorgänge mit 5 Minuten Gültigkeit das 1,25-Fache des Eingabetarifs und für Schreibvorgänge mit 1 Stunde Gültigkeit das Doppelte des Eingabetarifs. Fehlende
+Preise gelten als nicht verfügbar, nicht als null. Preise werden bei der Protokollierung jedes neuen Aufrufs erfasst;
+historische Datensätze werden nicht neu bepreist. Für Abonnementkonten kann daher eine
+API-äquivalente Schätzung vorliegen, ohne dass dieser Betrag als tatsächliche Ausgabe anfällt oder auf das Abonnementkontingent
+angerechnet wird. Bestehende Berechnungen für Kontingente, Budgets und anbietergenaue Kosten bleiben unverändert.
+
+Diese Diagnosen verwenden die vorhandene größenbegrenzte Zusammenfassung zum Cache-Zustand und die bestehende
+Aufbewahrung der Aufrufprotokolle. Sie ändern weder die TTL-Standardwerte für Anfragen noch das Routing oder die Kontoauswahl.
+Die Erfassung der vom Client angeforderten TTL im Vergleich zur effektiv ausgehenden TTL unmittelbar beim Senden
+an den Anbieter wird auf später verschoben; dieses Panel zeigt die Stufen laut Abrechnungsbeleg, nicht die effektiv ausgehende TTL.
+
+Implementierung: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` und `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,31 +153,31 @@ Bei Modellen ohne Preisdaten greift OmniRoute auf eine **Kostenschätzung** anha
 
 ## Aggregation nach Datumsbereich
 
-Das Modul `usageAnalytics.ts` berechnet Dashboard-Widgets aus Rohdaten zur Nutzung. Es unterstützt 7 Zeiträume:
+Das Modul `usageAnalytics.ts` berechnet Dashboard-Widgets aus rohen Nutzungsdaten. Es unterstützt 7 Zeiträume:
 
 | Zeitraum | Zeitfenster                             | Anwendungsfall                      |
 | -------- | --------------------------------------- | ----------------------------------- |
 | `1d`     | Letzte 24 Stunden                       | Erkennung stündlicher Kostenspitzen |
-| `7d`     | Letzte 7 Tage                           | Wöchentliche Auswertung             |
+| `7d`     | Letzte 7 Tage                           | Wöchentliche Überprüfung            |
 | `30d`    | Letzte 30 Tage                          | Monatliche Abrechnung               |
 | `90d`    | Letzte 90 Tage                          | Quartalsanalyse                     |
-| `ytd`    | Seit dem 1. Januar des aktuellen Jahres | Überwachung des Jahresbudgets       |
+| `ytd`    | Seit dem 1. Januar des laufenden Jahres | Jährliche Budgetüberwachung         |
 | `all`    | Gesamter Zeitraum                       | Gesamtstatistiken                   |
-| `custom` | Benutzerdefinierter Start-/Endpunkt     | Audits, Ad-hoc-Abfragen             |
+| `custom` | Benutzerdefinierter Beginn und Ende     | Audits, Ad-hoc-Abfragen             |
 
 ### Berechnete Dashboard-Widgets
 
-Für jeden Datumsbereich berechnet die Analyseschicht Folgendes:
+Für jeden Datumsbereich berechnet die Analyseschicht:
 
-| Widget                       | Beschreibung                                                              |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| **Übersichtskarten**         | Gesamtzahl der Anfragen, Gesamtkosten, Gesamtzahl der Token, Erfolgsquote |
-| **Tägliches Trenddiagramm**  | Kosten und Token pro Tag, nach Modell gestapelt                           |
-| **Aktivitäts-Heatmap**       | Raster aus Tageszeit × Wochentag, Farbe = Anzahl der Anfragen             |
-| **Modellaufschlüsselung**    | Kreisdiagramm der Kosten nach Modell                                      |
-| **Anbieteraufschlüsselung**  | Balkendiagramm der Anfragen nach Anbieter                                 |
-| **Wichtigste API-Schlüssel** | Tabelle der 10 Schlüssel mit den höchsten Kosten                          |
-| **Fehleranalyse**            | Fehlerrate im Zeitverlauf, häufigste Fehlerklassen                        |
+| Widget                             | Beschreibung                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| **Übersichtskarten**               | Gesamtzahl der Anfragen, Gesamtkosten, Gesamtzahl der Tokens, Erfolgsquote |
+| **Diagramm zum täglichen Verlauf** | Kosten + Tokens pro Tag, nach Modell gestapelt                             |
+| **Aktivitäts-Heatmap**             | Raster aus Tagesstunde × Wochentag, Farbe = Anzahl der Anfragen            |
+| **Aufschlüsselung nach Modell**    | Kreisdiagramm der Kosten nach Modell                                       |
+| **Aufschlüsselung nach Anbieter**  | Balkendiagramm der Anfragen nach Anbieter                                  |
+| **Top-API-Schlüssel**              | Tabelle der 10 Schlüssel mit den höchsten Kosten                           |
+| **Fehleranalyse**                  | Fehlerquote im Zeitverlauf, häufigste Fehlerklassen                        |
 
 ### Programmatischer Zugriff
 
@@ -157,7 +187,7 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // Datensätze des Nutzungsverlaufs
   "7d",                 // Zeitraum: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // Zuordnung der Anbieter-Verbindungen (connectionId → Kontoname)
+  connectionMap,        // Zuordnung der Anbieterverbindungen (connectionId → Kontoname)
   {
     startDate: "2025-01-01",  // optional: für den Zeitraum "custom"
     endDate: "2025-06-01",   // optional: für den Zeitraum "custom"
@@ -169,7 +199,7 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## Kontingentdurchsetzung
+## Durchsetzung von Kontingenten
 
 Das Kontingent pro API-Schlüssel wird an zwei Stellen durchgesetzt:
 
@@ -182,12 +212,12 @@ Das Kontingent pro API-Schlüssel wird an zwei Stellen durchgesetzt:
 // Pro API-Schlüssel
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — Warnung anzeigen
-  quotaLimit: 10_00,    // $10.00 — harte Begrenzung
+  quotaLimit: 10_00,    // $10.00 — harter Stopp
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Durchsetzungsablauf
+### Ablauf der Durchsetzung
 
 ```
 Anfrage ──▶ quotaCheck()
@@ -195,7 +225,7 @@ Anfrage ──▶ quotaCheck()
               ├── Innerhalb des Limits?  ──▶ zulassen
               │
               └── Limit überschritten?  ──▶ 429 Too Many Requests
-                                            mit Retry-After-Header
+                                   mit Retry-After-Header
 ```
 
 ### Kontingent-Snapshots
@@ -203,19 +233,19 @@ Anfrage ──▶ quotaCheck()
 Die Tabelle `quotaSnapshots` speichert den **historischen Kontingentstatus** für Trendanalysen:
 
 | Feld | Beschreibung |
-| ----------- | ------------------------------------------ | ------ | ------- |
-| `apiKeyId` | Der verfolgte Schlüssel |
+| ----------- | -------------------------------- | ------ | ------- |
+| `apiKeyId` | Der überwachte Schlüssel |
 | `window` | "day" | "week" | "month" |
-| `used` | In diesem Zeitfenster verbrauchte Kosten (Cent) |
+| `used` | In diesem Zeitfenster angefallene Kosten (Cent) |
 | `limit` | Das Limit (Cent) |
 | `resetAt` | Zeitpunkt, zu dem das Zeitfenster zurückgesetzt wird |
 | `createdAt` | Zeitpunkt, zu dem der Snapshot erstellt wurde |
 
-Snapshots werden **bei jeder Anfrage** erstellt, deren Kosten > 0 sind, und für Folgendes verwendet:
+Snapshots werden **bei jeder Anfrage** erstellt, die Kosten > 0 verursacht, und dienen dazu:
 
-- Darstellung des Kontingent-Fortschrittsbalkens im Dashboard
-- Anzeige von Diagrammen zum Kontingenttrend der letzten 30 Tage
-- Auslösung von Warnungen, wenn sich die Nutzung dem Limit nähert
+- Den Kontingent-Fortschrittsbalken im Dashboard darzustellen
+- Diagramme zum Kontingentverlauf über 30 Tage anzuzeigen
+- Warnmeldungen auszulösen, wenn sich die Nutzung dem Limit nähert
 
 ---
 
@@ -253,7 +283,7 @@ Antwort:
 }
 ```
 
-### Analysezusammenfassung abrufen
+### Analyseübersicht abrufen
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ Antwort:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,7 +313,7 @@ Antwort:
 
 ### Nutzungsanalysen abfragen
 
-Auf Nutzungsdaten wird über das Dashboard oder MCP-Tools zugegriffen, nicht über direkte REST-Export-Endpunkte. Verfügbare Analysen:
+Der Zugriff auf Nutzungsdaten erfolgt über das Dashboard oder MCP-Tools, nicht über direkte REST-Exportendpunkte. Verfügbare Analysen:
 
 - **`/api/usage/analytics`** — aggregierte Nutzungsmetriken (gruppiert nach Modell, Anbieter, Schlüssel)
 - **`/api/usage/quota`** — aktueller Kontingentstatus pro API-Schlüssel
@@ -298,14 +323,14 @@ Auf Nutzungsdaten wird über das Dashboard oder MCP-Tools zugegriffen, nicht üb
 
 ## MCP-Tools
 
-Zwei MCP-Tools stellen Agenten Nutzungsdaten zur Verfügung (siehe `open-sse/mcp-server/tools/`):
+Zwei MCP-Tools stellen Agenten Nutzungsdaten bereit (siehe `open-sse/mcp-server/tools/`):
 
 | Tool                    | Beschreibung                                                             |
 | ----------------------- | ------------------------------------------------------------------------ |
 | `omniroute_cost_report` | Erstellt einen Kostenbericht pro Schlüssel für einen bestimmten Zeitraum |
 | `omniroute_check_quota` | Gibt den aktuellen Kontingentstatus für einen API-Schlüssel zurück       |
 
-Beispiel für einen Agentenaufruf:
+Beispiel für einen Aufruf durch einen Agenten:
 
 ```json
 {
@@ -318,7 +343,7 @@ Beispiel für einen Agentenaufruf:
 
 ## Aufbewahrung und Bereinigung
 
-Nutzungsdaten wachsen um ca. 1–10 KB pro Anfrage. Bei entsprechender Skalierung kann dies erheblich sein.
+Die Nutzungsdaten wachsen um ~1–10 KB pro Anfrage. Bei großem Anfragevolumen kann dies erheblich sein.
 
 ### Aufbewahrungseinstellungen
 
@@ -330,10 +355,10 @@ Standardmäßig wird der Nutzungsverlauf **90 Tage** lang aufbewahrt.
 
 Alte Datensätze werden durch `src/lib/db/cleanup.ts` bereinigt:
 
-- Wird durch den Cron-Hintergrundprozess ausgelöst
-- Löscht Datensätze aus `usage_history`, die älter als die konfigurierte Aufbewahrungseinstellung `usageHistory` sind
+- Wird durch den Cron-Prozess im Hintergrund ausgelöst
+- Löscht Datensätze aus `usage_history`, die älter sind als die konfigurierte Aufbewahrungsfrist in `usageHistory`
 
-### Speicherplatzschätzung
+### Geschätzter Speicherbedarf
 
 | Anfragerate          | Speicherbedarf für 30 Tage | Speicherbedarf für 90 Tage |
 | -------------------- | -------------------------- | -------------------------- |
@@ -342,10 +367,10 @@ Alte Datensätze werden durch `src/lib/db/cleanup.ts` bereinigt:
 | 10.000 Anfragen/Tag  | ~300 MB                    | ~900 MB                    |
 | 100.000 Anfragen/Tag | ~3 GB                      | ~9 GB                      |
 
-Bei sehr hohem Datenverkehr sollten Sie Folgendes erwägen:
+Bei sehr hohem Anfrageaufkommen sollten Sie Folgendes in Betracht ziehen:
 
-- Verkürzen des Aufbewahrungszeitraums über die Datenbankeinstellungen
-- Verwenden von `aggregated_metrics` anstelle von Rohdatensätzen (nur für Analysen)
+- Die Aufbewahrungsfrist über die Datenbankeinstellungen verkürzen
+- `aggregated_metrics` anstelle von Rohdatensätzen verwenden (nur für Analysen)
 
 ---
 
@@ -354,29 +379,29 @@ Bei sehr hohem Datenverkehr sollten Sie Folgendes erwägen:
 ### 1. Das richtige Modell verwenden
 
 ```bash
-# Schnelle Antwort — günstig und schnell verwenden
+# Schnelle Antwort — günstig + schnell verwenden
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Komplexe Aufgabe — hohe Qualität verwenden
+# Komplexe Aufgabe — Qualität verwenden
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Caching aktivieren
 
-Das Prompt-Caching von Anthropic spart bei wiederholtem Kontext **90 %**:
+Das Prompt-Caching von Anthropic spart **90% bei wiederholtem Kontext**:
 
 ```ts
-// Das Caching erfolgt automatisch — fügen Sie einfach denselben umfangreichen System-Prompt ein
+// Das Caching erfolgt automatisch — einfach denselben umfangreichen System-Prompt einfügen
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Wird automatisch im Cache gespeichert
+  system: longSystemPrompt, // Wird automatisch zwischengespeichert
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Komprimierung verwenden
 
-Die RTK- und Caveman-Komprimierung spart bei Sitzungen mit intensiver Tool-Nutzung **15–95 %**:
+Die Komprimierung mit RTK + Caveman spart **15-95% bei Sitzungen mit intensiver Tool-Nutzung**:
 
 ```ts
 const config = {
@@ -389,13 +414,13 @@ const config = {
 
 ### 4. Kontingente pro Schlüssel festlegen
 
-Legen Sie immer `quotaLimit` fest, um unkontrollierte Kosten zu vermeiden:
+Setzen Sie immer `quotaLimit`, um unkontrollierte Kosten zu verhindern:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Obergrenze von 10 $/Monat
 ```
 
-### 5. Größte Verbraucher prüfen
+### 5. Die größten Verbraucher überprüfen
 
 Verwenden Sie das Dashboard oder **`/api/usage/analytics`**, um nach API-Schlüssel zu gruppieren und nach Kosten zu sortieren:
 
@@ -407,30 +432,30 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Fehlerbehebung
 
-### „Kosten sind höher als erwartet“
+### "Kosten sind höher als erwartet"
 
 1. Prüfen Sie **`/api/usage/analytics?groupBy=model`** — ermitteln Sie das teure Modell
 2. Prüfen Sie **`/api/usage/analytics?groupBy=apiKey`** — ermitteln Sie den größten Verbraucher
-3. Vergewissern Sie sich, dass die Preisdaten aktuell sind: `POST /api/pricing/sync`
+3. Stellen Sie sicher, dass die Preisdaten aktuell sind: `POST /api/pricing/sync`
 
-### „Datensätze fehlen“
+### "Datensätze fehlen"
 
-- Prüfen Sie die Einstellungen zur Datenbankaufbewahrung unter Dashboard → Database → Cleanup — alte Datensätze werden durch die regelmäßige Bereinigungsaufgabe (`src/lib/db/cleanup.ts`) gelöscht
+- Prüfen Sie die Aufbewahrungseinstellungen der Datenbank unter Dashboard → Datenbank → Bereinigung — alte Datensätze werden durch die regelmäßige Bereinigungsaufgabe gelöscht (`src/lib/db/cleanup.ts`)
 - Prüfen Sie `src/lib/db/usage*.ts` auf Fehler — Fehler beim Schreiben in die Datenbank werden protokolliert, aber nicht angezeigt
-- Vergewissern Sie sich, dass die Anfrage tatsächlich `chatCore` erreicht hat — prüfen Sie das Combo-Routing
+- Stellen Sie sicher, dass die Anfrage tatsächlich `chatCore` erreicht hat — prüfen Sie das Combo-Routing
 
-### „Kontingent wird nicht durchgesetzt“
+### "Kontingent wird nicht durchgesetzt"
 
 - Prüfen Sie die Einstellung `quotaLimit` des Schlüssels
-- Vergewissern Sie sich, dass `quotaWindow` korrekt festgelegt ist
-- Suchen Sie nach `quotaSnapshots`-Datensätzen — sie sollten bei jeder Anfrage erstellt werden
+- Stellen Sie sicher, dass `quotaWindow` korrekt eingestellt ist
+- Suchen Sie nach `quotaSnapshots`-Datensätzen — diese sollten bei jeder Anfrage erstellt werden
 
 ---
 
 ## Siehe auch
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schema für Nutzungstabellen
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schema der Nutzungstabellen
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Umgebungsvariablen für die Preissynchronisierung
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Wie `auto/fast` und `auto/cheap` die Kosten senken
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Wie `auto/fast`, `auto/cheap` die Kosten senken
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Vollständige Referenz zu `/api/usage/*`
 - Quelle: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`
