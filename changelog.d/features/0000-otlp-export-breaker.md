@@ -1,0 +1,1 @@
+- **feat(observability):** the OTLP routing exporter now stops calling a dead collector for 30 s after 5 failed exports, then sends one probe; healthy collectors see no change.
