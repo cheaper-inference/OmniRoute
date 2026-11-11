@@ -1,99 +1,69 @@
 ---
-title: "Release-Green — keeping the queue and release branch green"
+title: "Release-Green — candidate validation and evidence"
 ---
 
-# Release-Green: keeping the queue and release branch green
+# Release-Green: candidate validation and evidence
 
-## The problem this solves
+Release-Green observes a specific commit and reports its validation results. The
+[Quality Gates reference](../architecture/QUALITY_GATES.md) defines the current CI
+profiles, required checks and acceptance policy. The versioned
+[admission policy](../../config/quality/admission-policy.json) is the executable
+contract for `Gate / CI` and `Gate / Quality`.
 
-The **full gate** (`.github/workflows/ci.yml` — unit shards, vitest, ratchets,
-`package-artifact`, SonarQube, E2E) runs **only on the release PR** (PR → `main`). PRs targeting
-`release/**` receive the **fast-gates** (`quality.yml`: TIA-impacted tests + typecheck + lint)
-and, for code changes, an **advisory** production build. Consequence: release-only reds can still
-accumulate silently on the release branch and **explode in layers of ~40 min** at release time,
-one at a time.
+## CI and observer scope
 
-The "release-green family" exists to **anticipate** those reds — validate the equivalent of the full
-gate **locally / outside of release**, at any time, so the release PR is already
-green on its first CI run.
+`ci.yml` and `quality.yml` cover pull requests into main and release branches.
+The selected profile determines which jobs apply. Full CI also includes lanes
+that an ordinary pull request does not execute. A quick observer result cannot
+replace those jobs, and a completed workflow wrapper cannot replace its receipts.
 
-> **Non-negotiable principle:** none of this blocks the contributor. We do not add a required
-> check that fails their PR. The **drift** (ratchets) is for the maintainer to rebaseline at release —
-> never a contributor concern. No piece **closes** a PR (credit theft) nor
-> **weakens** a test to pass.
+The production build belongs to CI. There is no duplicate advisory build in
+`quality.yml`. Missing artifacts, cancelled work and incomplete measurements do
+not establish a successful required check. Confirm the current base, head and
+combined candidate before accepting the results.
 
-## The family (4 pieces) — and how each runs independently
+## Local validation
 
-| Piece                                                                      | What it is                                                                        | When to run                                                                       | Scope                           |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------- |
-| **`/green-prs`** (Solution A)                                              | On-demand scan by the maintainer of the **queue of open PRs**                     | **Independently, periodically** — and especially **before** a `/generate-release` | Entire PR queue → `release/**`  |
-| **`/validate-release-green`** (Solution C — `npm run check:release-green`) | Validation engine: reproduces the full gate against a branch OR a merge candidate | Independently, at any time                                                        | A specific branch or a merge-PR |
-| **`/babysit <PR#>`**                                                       | Drives **live CI** of **one** PR to green                                         | Independently, per PR                                                             | A single PR                     |
-| **`nightly-release-green.yml`** (Solution D)                               | Automated nightly workflow; opens issue on HARD red                               | Automatic (cron)                                                                  | The active release branch       |
-
-**Short answer to "is this only for releases?":** **no.** `/green-prs` was designed to
-run **periodically, between releases**. Running independently is the normal use — release is just
-the moment when running it yields the most value.
-
-## PR-to-release advisory build
-
-`quality.yml` now includes `Build (advisory)` for non-draft code PRs and Mergify queue branches.
-It mirrors the production build recipe from `ci.yml`: Node 24, `npm-ci-retry`,
-`check:node-runtime`, and `npm run build` with `OMNIROUTE_USE_TURBOPACK=1`. It intentionally
-does not upload a build artifact because no downstream quality job consumes one in this workflow.
-Remove `continue-on-error` after one week of stable release-PR runs so the signal becomes a
-blocking PR-to-release gate.
-
-## Solution C — `npm run check:release-green` (the engine)
-
-Reproduces release-equivalent validation against the current working tree and classifies each red:
-
-- **HARD** (typecheck, lint errors, unit, vitest, db-rules, public-creds, optional
-  `package-artifact`) → **real defect**; `exit 1`. Fixed on the source branch (TDD, Rule #18).
-- **DRIFT** (eslint **warnings**, cognitive-complexity, file-size) → ratchet drift accumulated in
-  the cycle, **not the contributor's fault**; it is only reported and **rebaselined by the maintainer at
-  release**. Drift **never** changes the exit code — so it never blocks anyone.
+Run the observer in an owned worktree after preparing its dependencies. Use the
+[worktree and resource protocol](WORKTREE_ISOLATION.md) before heavy validation.
 
 ```bash
-npm run check:release-green                 # current branch (working tree)
-node scripts/quality/validate-release-green.mjs --json   # structured output
-node scripts/quality/validate-release-green.mjs --quick  # skips unit+vitest (drift+typecheck+lint only)
-node scripts/quality/validate-release-green.mjs --with-build  # includes package-artifact (slow)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-Diagnoses and **reports** only (no auto-fix). The fix-to-green orchestration lives in
-`/green-prs` and `/review-prs`.
+The quick profile is partial. The full profile checks its modeled requirements
+and preserves command receipts; it does not certify deployment or substitute for
+applicable hosted checks. The report distinguishes execution failure from metric
+drift. Required ratchets remain blocking according to the selected policy.
+Do not raise a baseline merely to obtain a passing result.
 
-## Solution A — `/green-prs` (the queue scan)
+## Nightly and manual sweeps
 
-Procedure (summary — see the `green-prs` skill for details):
+The nightly release and compatibility resolvers select a canonical release branch.
+That selection must match the branch that triggered the workflow, and the suites
+use the event's immutable SHA. For manual execution, select the intended release
+in `RELEASE_BRANCH` and dispatch on that same ref:
 
-1. **Inventory** the queue of open PRs against the active release branch.
-2. **Triage** each PR (viable / reject-worthy / needs-author) — reject/needs-author are
-   **reported, not closed** (the author decides).
-3. For each viable PR, in an **isolated worktree** (Rule #19), bring the PR to the release tip and run
-   `npm run check:release-green`:
-   - **HARD** → fix **on the contributor's branch** via co-authorship (preserves the author's "Merged" status),
-     re-run until all HARDs are cleared.
-   - **DRIFT** → leave it; it will be rebaselined at release.
-4. **Report** a PR × (verdict, HARD reds, fixed?, DRIFT, release-green now?) table.
+```bash
+gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+```
 
-Can **prepare** the queue without merging; only merges when explicitly requested — and never closes a PR.
+Cross-branch dispatch is rejected before executing the selected code. Hosted main
+suites checkout `main` and verify that its SHA still matches the resolved target
+before installation. If main moves during resolution, rerun the incomplete sweep
+on the new commit. Do not combine suite receipts from different candidates.
 
-## Recommended cadence
+## Failure triage and recovery
 
-- Run **`/green-prs` periodically** (e.g., weekly) and **always before a
-  `/generate-release`**.
-- Keep **`nightly-release-green.yml`** (Solution D) as a continuous signal: when it opens a
-  HARD red issue, it is time for a scan.
-- Use **`/validate-release-green`** ad-hoc to check a branch or a specific merge candidate.
-- Use **`/babysit <PR#>`** when a specific PR needs to be driven to green on live CI.
+Use the incident as a diagnostic index, then inspect the exact run, attempt,
+failing step and artifact. Compare equivalent base and candidate evidence before
+attributing a failure to a contributor. Infrastructure errors, inherited defects,
+candidate regressions and pending approvals require different remedies.
 
-## Relationship to release
-
-- `/generate-release` calls validation in **Phase 0 (pre-flight)**: rebaselines DRIFT and fixes
-  HARD before opening the release PR.
-- `/review-prs` uses the release-green gate at the merge decision step (green-before-merge).
-
-The goal of all pieces is the same: **a green release PR on the first CI run**, instead of surfing
-reds in 40-minute layers on release day.
+The `/green-prs`, `/sweep-reds`, `/validate-release-green` and `/babysit` skills
+collect evidence and prepare fixes under their documented scope. Keep contributor
+credit, use isolated repair branches, and verify all required checks before an
+authorized merge. No automatic rebaseline or incident closure substitutes for a
+passing current candidate.
