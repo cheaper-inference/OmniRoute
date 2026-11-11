@@ -104,6 +104,16 @@ Kos lebih suka caj yang dilaporkan pembekal yang tepat (`provider_cost_usd`), ke
 
 Ini adalah perakaunan hadapan sahaja. Panggilan OCR/embedding lama yang tidak pernah menulis sejarah penggunaan tidak boleh dibina semula daripada penghijrahan ini. Anggaran katalog ialah anggaran USD, bukan invois dan tidak termasuk penukaran mata wang, cukai atau diskaun.
 
+### Ucapan dan imej
+
+- `/v1/audio/transcriptions`, `/v1/audio/speech` dan percubaan penjanaan imej yang berjaya berkongsi perakaunan berangka. Panggilan terus dan kombo membawa kunci API pemanggil dan sambungan yang dipilih; pembalut kombo tidak pernah menambah debit kedua.
+- USD yang dilaporkan pembekal memenangi anggaran katalog, termasuk caj sifar yang jelas. OpenRouterJSON `usage.cost` dinormalkan kepada `cost_usd`. Jika tidak, token yang diukur menggunakan harga token, saat transkripsi menggunakan harga sesaat, input pertuturan menggunakan kiraan aksara Unicode dan imej harga rata menggunakan nombor yang sebenarnya dikembalikan, bukan `n` yang diminta .
+- OpenRouter TTS binari tidak mempunyai badan penggunaan JSON. Selepas audio selesai atau pemanggil membatalkan, OmniRoute menanyakan penjanaan ID pada **sama** dikonfigurasikan asal OpenRouter. Permintaan EU tidak pernah kembali kepada asal global. Ini ialah carian terhad, baca sahaja; sintesis tidak dicuba semula untuk perakaunan. Rekod pengebilan boleh muncul selepas audio selesai: carian semula dijalankan di latar belakang sehingga kira-kira 52 saat, termasuk tarikh akhir rangkaian.
+- Semasa carian itu, respons audio mempunyai `X-OmniRoute-Cost-Status: pending` dan tiada pengepala kos respons. Caj terakhirnya muncul dalam sejarah penggunaan, analitik dan lejar utama selepas penyelarasan. Jika metadata tidak tersedia, petikan tarif yang dikonfigurasikan digunakan; jika tidak kos tetap tidak diketahui.
+- Saat, aksara dan kiraan imej mempunyai medan unit pengebilan yang berasingan, tidak pernah mengira token palsu. Perakaunan hanya mengekalkan penggunaan berangka, bukan teks pertuturan, transkrip atau bait imej. Pengecualian imej tidak berharga sedia ada tidak berubah: tarif imej yang benar-benar hilang tidak baru mengunci kunci terhad dan respons mengetepikan pengepala kos dan bukannya mengisytiharkan panggilan percuma. Kegagalan kedai harga masih mengekalkan bukti penggunaan untuk penguatkuasaan yang gagal ditutup.
+
+Tiada caj speech/image sejarah dicipta atau diisi semula. Pengebilan pembekal kekal sebagai rujukan untuk invois dan untuk panggilan yang cajnya tidak dilaporkan.
+
 ---
 
 ## Papan pemuka: halaman Kos

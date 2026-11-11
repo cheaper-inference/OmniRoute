@@ -108,6 +108,16 @@ Os custos preferem uma cobrança exata informada pelo provedor (`provider_cost_u
 
 Esta é uma contabilidade somente futura. Chamadas OCR/embedding antigas que nunca gravaram o histórico de uso não podem ser reconstruídas a partir desta migração. As estimativas de catálogo são estimativas USD, não uma fatura, e não incluem conversão de moeda, impostos ou descontos.
 
+### Fala e imagens
+
+- Tentativas bem-sucedidas `/v1/audio/transcriptions`, `/v1/audio/speech` e geração de imagens compartilham a contabilidade numérica. As chamadas diretas e combinadas carregam a chave API do chamador e a conexão selecionada; um wrapper combinado nunca adiciona um segundo débito.
+- USD informado pelo provedor vence uma estimativa de catálogo, incluindo uma cobrança zero explícita. O JSON `usage.cost` do OpenRouter é normalizado para `cost_usd`. Caso contrário, os tokens medidos usam preços de token, os segundos de transcrição usam preços por segundo, a entrada de fala usa contagens de caracteres Unicode e as imagens de preço fixo usam o número realmente retornado, não o `n` solicitado.
+- Binário OpenRouter TTS não possui corpo de uso JSON. Depois que o áudio for concluído ou o chamador cancelar, OmniRoute consulta sua geração ID no **mesmo** origem OpenRouter configurada. Uma solicitação EU nunca retorna à origem global. Esta é uma pesquisa limitada e somente leitura; a síntese não é repetida para contabilização. Os registros de cobrança podem aparecer após o término do áudio: novas tentativas de pesquisa são executadas em segundo plano por até 52 segundos, incluindo prazos de rede.
+- Durante essa pesquisa, a resposta de áudio possui `X-OmniRoute-Cost-Status: pending` e nenhum cabeçalho de custo de resposta. Sua cobrança final aparece no histórico de uso, na análise e no livro principal após a reconciliação. Se os metadados não estiverem disponíveis, é utilizado um instantâneo tarifário configurado; caso contrário, o custo permanecerá desconhecido.
+- Contagens de segundos, caracteres e imagens têm campos de unidade de cobrança separados, nunca contagens de tokens falsos. A contabilidade retém apenas o uso numérico, não texto de fala, transcrições ou bytes de imagem. As isenções existentes para imagens sem preço permanecem inalteradas: uma tarifa de imagem genuinamente ausente não bloqueia novamente uma chave limitada e a resposta omite o cabeçalho de custo em vez de declarar a chamada gratuita. Uma falha na loja de preços ainda retém evidências de uso para aplicação de falha fechada.
+
+Nenhuma cobrança histórica speech/image é inventada ou preenchida. A faturação do prestador continua a ser a referência para faturas e chamadas cuja cobrança não foi reportada.
+
 ---
 
 ## Dashboard: a página de Custos

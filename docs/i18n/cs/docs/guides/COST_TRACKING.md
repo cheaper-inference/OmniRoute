@@ -104,6 +104,16 @@ Náklady upřednostňují přesný poplatek nahlášený poskytovatelem (`provid
 
 Toto je pouze dopředné účetnictví. Stará volání OCR/embedding, která nikdy nezapsala historii použití, nelze z této migrace rekonstruovat. Katalogové odhady jsou odhady USD, nikoli faktura, a nezahrnují převod měny, daně ani slevy.
 
+### Řeč a obrazy
+
+- Úspěšné pokusy `/v1/audio/transcriptions`, `/v1/audio/speech` a generování obrázků sdílejí numerické účetnictví. Přímé a kombinované hovory nesou klíč API volajícího a zvolené spojení; kombinovaný obal nikdy nepřidá druhý debet.
+- Poskytovatelem hlášená USD vítězí nad katalogovým odhadem, včetně explicitního nulového poplatku. OpenRouterJSON `usage.cost` je normalizováno na `cost_usd`. Jinak měřené tokeny používají ceny tokenů, sekundy přepisu používají ceny za sekundu, hlasový vstup používá počet znaků Unicode a obrázky s pevnou cenou používají skutečně vrácené číslo, nikoli požadované `n`.
+- Binární OpenRouter TTS nemá žádné tělo použití JSON. Po dokončení zvuku nebo zrušení volajícího se OmniRoute zeptá na svou generaci ID na **stejný** nakonfigurovaný původ OpenRouter. Požadavek EU se nikdy nevrací ke globálnímu původu. Toto je omezené vyhledávání pouze pro čtení; syntéza není znovu zkoušena pro účetnictví. Fakturační záznamy se mohou objevit po dokončení zvuku: opakování vyhledávání běží na pozadí po dobu až 52 sekund, včetně síťových uzávěrek.
+- Během tohoto vyhledávání má zvuková odpověď `X-OmniRoute-Cost-Status: pending` a žádnou hlavičku nákladů na odezvu. Jeho konečný poplatek se po odsouhlasení objeví v historii používání, analýze a hlavní knize. Pokud metadata nejsou k dispozici, použije se konfigurovaný snímek tarifu; jinak cena zůstává neznámá.
+- Počty sekund, znaků a obrázků mají samostatná pole fakturačních jednotek, nikdy ne falešné počty tokenů. Účetnictví zachovává pouze numerické použití, nikoli text řeči, přepisy nebo bajty obrázků. Stávající výjimky týkající se neplacených obrázků se nemění: skutečně chybějící tarif pro obrázky nově nezamyká omezený klíč a odpověď vynechává hlavičku ceny, místo aby hovor prohlásil za bezplatný. Selhání obchodu s cenami stále uchovává důkazy o použití pro vynucení, které bylo ukončeno selháním.
+
+Žádný historický poplatek speech/image není vynalezen ani zasypán. Účtování poskytovatele zůstává referenční pro faktury a pro hovory, jejichž cena nebyla hlášena.
+
 ---
 
 ## Dashboard: stránka Náklady

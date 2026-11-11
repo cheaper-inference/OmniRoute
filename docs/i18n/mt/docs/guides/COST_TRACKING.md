@@ -101,6 +101,16 @@ L-ispejjeż jippreferu ħlas eżatt irrapportat mill-fornitur (`provider_cost_us
 
 Din hija kontabilità bil-quddiem biss. Sejħiet OCR/embedding qodma li qatt ma kitbu l-istorja tal-użu ma jistgħux jiġu rikostitwiti minn din il-migrazzjoni. L-istimi tal-katalgu huma stimi USD, mhux fattura, u ma jinkludux konverżjoni tal-munita, taxxa jew roħs.
 
+### Diskors u stampi
+
+- `/v1/audio/transcriptions`, `/v1/audio/speech` u tentattivi ta' ġenerazzjoni ta' immaġni b'suċċess jaqsmu l-kontabilità numerika. Sejħiet diretti u combo jġorru ċ-ċavetta API ta' min iċempel u l-konnessjoni magħżula; tgeżwir combo qatt ma jżid it-tieni debitu.
+- USD rapportata mill-fornitur tirbaħ fuq stima ta 'katalgu, inkluż ħlas żero espliċitu. Iż JSON `usage.cost` ta' OpenRouter huwa normalizzat għal `cost_usd`. Inkella, tokens imkejla jużaw prezzijiet ta 'tokens, sekondi ta' traskrizzjoni jużaw prezzijiet kull sekonda, input tad-diskors juża għadd ta 'karattri Unicode, u immaġini bi prezz fiss jużaw in-numru attwalment ritornat, mhux iż- `n` mitlub.
+- Binarju OpenRouter TTS m'għandux korp ta 'użu JSON. Wara li l-awdjo jitlesta jew min iċempel jikkanċella, OmniRoute jistaqsi l-ġenerazzjoni tiegħu ID fuq il-**l-istess** oriġini OpenRouter konfigurata. Talba EU qatt ma taqa' lura għall-oriġini globali. Din hija tfittxija delimitata, li tinqara biss; sinteżi ma terġax tiġi ppruvata għall-kontabilità. Ir-rekords tal-kontijiet jistgħu jidhru wara li l-awdjo jkun intemm: it-testijiet ta' tfittxija jerġgħu jibdew fl-isfond sa madwar 52 sekonda, inklużi l-iskadenzi tan-netwerk.
+- Matul dik il-ħarsa, ir-rispons tal-awdjo għandu `X-OmniRoute-Cost-Status: pending` u l-ebda header tal-ispiża tar-rispons. Il-ħlas finali tiegħu jidher fl-istorja tal-użu, l-analiżi u r-reġistru ewlieni wara r-rikonċiljazzjoni. Jekk il-metadata ma tkunx disponibbli, tintuża snapshot tat-tariffa kkonfigurat; inkella l-ispiża tibqa' mhux magħrufa.
+- Sekondi, karattri u għadd ta' immaġni għandhom oqsma separati tal-unità tal-kontijiet, qatt għadd ta' tokens foloz. Il-kontabilità żżomm biss użu numeriku, mhux test tad-diskors, traskrizzjonijiet jew bytes tal-immaġni. L-eżenzjonijiet eżistenti ta' immaġni bla prezz ma jinbidlux: tariffa ta' immaġini ġenwinament nieqsa ma tissakkarx ċavetta limitata ġdida, u r-rispons iħalli barra l-header tal-ispiża aktar milli tiddikjara s-sejħa ħielsa. Falliment fil-maħżen tal-prezzijiet xorta jżomm evidenza tal-użu għall-infurzar tal-falliment magħluq.
+
+L-ebda ħlas speech/image storiku ma jiġi ivvintat jew mimli lura. Il-kontijiet tal-fornitur jibqa' r-referenza għall-fatturi u għal sejħiet li l-ħlas tagħhom ma kienx irrappurtat.
+
 ---
 
 ## Dashboard: il-paġna tal-Ispejjeż

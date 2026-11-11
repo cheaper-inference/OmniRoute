@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "تاریخچه استفاده (روزها)",
     "retentionMemoryEntries": "ورودی های حافظه (روز)",
     "retentionXpAuditLog": "گزارش حسابرسی XP (روز)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "ذخیره تنظیمات نگهداری",
     "storageAutoVacuumMode": "حالت خلاء خودکار",
     "storageScheduledVacuum": "خلاء برنامه ریزی شده",

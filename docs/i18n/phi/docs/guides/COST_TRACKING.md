@@ -104,6 +104,16 @@ Mas gusto ng mga gastos ang eksaktong singil na iniulat ng provider (`provider_c
 
 Forward-only accounting ito. Ang mga lumang tawag OCR/embedding na hindi kailanman nagsulat ng kasaysayan ng paggamit ay hindi maaaring muling buuin mula sa paglipat na ito. Ang mga pagtatantya ng catalog ay mga pagtatantya USD, hindi isang invoice, at hindi kasama ang conversion ng currency, buwis o mga diskwento.
 
+### Pagsasalita at mga imahe
+
+- Ang matagumpay `/v1/audio/transcriptions`, `/v1/audio/speech` at mga pagtatangka sa pagbuo ng imahe ay nagbabahagi ng numerical accounting. Ang mga direktang at combo na tawag ay nagdadala ng API key ng tumatawag at ang napiling koneksyon; ang isang combo wrapper ay hindi kailanman nagdaragdag ng pangalawang debit.
+- USD na iniulat ng provider ay nanalo sa pagtatantya ng catalog, kabilang ang isang tahasang zero charge. Ang JSON `usage.cost` ng OpenRouter ay na-normalize sa `cost_usd`. Kung hindi, ang mga sinusukat na token ay gumagamit ng mga presyo ng token, ang mga segundo ng transkripsyon ay gumagamit ng bawat segundong presyo, ang speech input ay gumagamit ng mga bilang ng character na Unicode, at ang mga flat-price na larawan ay gumagamit ng numerong aktwal na ibinalik, hindi ang hiniling na `n`.
+- Ang binary OpenRouter TTS ay walang JSON na katawan ng paggamit. Pagkatapos makumpleto ang audio o magkansela ang tumatawag, itatanong ng OmniRoute ang henerasyong ID nito sa **pareho** naka-configure na pinagmulan OpenRouter. Ang isang kahilingan EU ay hindi na babalik sa pandaigdigang pinagmulan. Ito ay isang bounded, read-only lookup; ang synthesis ay hindi muling sinubukan para sa accounting. Maaaring lumitaw ang mga tala sa pagsingil pagkatapos ng audio: ang mga muling pagsubok sa paghahanap ay tumatakbo sa background nang hanggang sa humigit-kumulang 52 segundo, kabilang ang mga deadline ng network.
+- Sa panahon ng paghahanap na iyon, ang tugon ng audio ay may `X-OmniRoute-Cost-Status: pending` at walang header ng gastos sa pagtugon. Ang huling singil nito ay lilitaw sa kasaysayan ng paggamit, analytics at ang pangunahing ledger pagkatapos ng pagkakasundo. Kung hindi available ang metadata, isang naka-configure na snapshot ng taripa ang ginagamit; kung hindi man ang gastos ay mananatiling hindi alam.
+- Ang mga segundo, ang mga character at mga bilang ng larawan ay may magkahiwalay na mga field ng unit ng pagsingil, hindi kailanman mga pekeng bilang ng token. Ang accounting ay nagpapanatili lamang ng numerical na paggamit, hindi speech text, transcript o image byte. Ang mga kasalukuyang hindi napresyuhan na mga pagbubukod sa imahe ay hindi nagbabago: ang isang tunay na nawawalang taripa ng imahe ay hindi bagong nakakandado ng isang limitadong susi, at ang tugon ay nag-aalis ng header ng gastos sa halip na ideklarang libre ang tawag. Ang isang pagkabigo sa pagpepresyo sa tindahan ay nagpapanatili pa rin ng ebidensya sa paggamit para sa mabibigong pagsasara ng pagpapatupad.
+
+Walang makasaysayang speech/image charge na naimbento o na-backfill. Ang pagsingil ng provider ay nananatiling reference para sa mga invoice at para sa mga tawag na hindi naiulat ang pagsingil.
+
 ---
 
 ## Dashboard: ang pahina ng Mga Gastos

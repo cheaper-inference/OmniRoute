@@ -108,6 +108,9 @@ const INLINE_PATTERNS = [
   /https?:\/\/[^\s)<>\]]+/y, // bare URLs
   /\{[^{}\n]{1,80}\}|\$\{[^}\n]+\}|%[sd]|\$[A-Z_][A-Z0-9_]*/y, // ICU / shell placeholders
   /(?<![\w-])[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+(?![\w-])/y, // UPPER_SNAKE env names
+  // Preserve the repository qualifier too: transliterating 9router in 9router#1437
+  // loses the original reference. Match before paths, and leave C#7 as prose.
+  /(?<![\w/.-])(?:[\w.-]+\/[\w.-]+|[\w.-]{2,})#\d+(?!\d)/y,
   /(?<![\w/-])(?:[\w.-]+\/)+[\w.-]+(?![\w/-])/y, // paths with a slash
   /(?<![\w-])[\w-]+\.(?:md|mdx|ts|tsx|js|mjs|cjs|json|ya?ml|sh|sql|css|html|txt|toml|env)(?![\w-])/y, // file names
   /(?<![\w-])--?[a-z][\w-]*(?![\w-])/y, // CLI flags

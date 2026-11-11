@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "Lietojuma vēsture (dienas)",
     "retentionMemoryEntries": "Atmiņas ieraksti (dienas)",
     "retentionXpAuditLog": "XP audita žurnāls (dienas)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Saglabāt glabāšanas iestatījumus",
     "storageAutoVacuumMode": "Automātiskais VACUUM režīms",
     "storageScheduledVacuum": "Plānotā VACUUM darbība",

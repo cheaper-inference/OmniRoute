@@ -105,6 +105,16 @@ Náklady uprednostňujú presný poplatok nahlásený poskytovateľom (`provider
 
 Toto je len predbežné účtovníctvo. Staré volania OCR/embedding, ktoré nikdy nezapísali históriu používania, nemožno z tejto migrácie zrekonštruovať. Katalógové odhady sú odhady USD, nie faktúra, a nezahŕňajú menový prevod, daň ani zľavy.
 
+### Reč a obrázky
+
+- Úspešné pokusy `/v1/audio/transcriptions`, `/v1/audio/speech` a generovanie obrázkov zdieľajú numerické účtovanie. Priame a kombinované hovory nesú API kľúč volajúceho a zvolené spojenie; kombinovaný obal nikdy nepridá druhý debet.
+- Poskytovateľom nahlásená USD víťazí nad katalógovým odhadom, vrátane explicitného nulového poplatku. OpenRouterJSON `usage.cost` je normalizovaný na `cost_usd`. V opačnom prípade merané tokeny používajú ceny tokenov, sekundy prepisu používajú ceny za sekundu, hlasový vstup používa počet znakov Unicode a obrázky s pevnou cenou používajú skutočne vrátené číslo, nie požadované `n`.
+- Binárne OpenRouter TTS nemá telo použitia JSON. Po dokončení zvuku alebo zrušení volajúceho sa OmniRoute spýta na svoju generáciu ID**rovnaký** nakonfigurovaný pôvod OpenRouter. Žiadosť EU sa nikdy nevráti späť ku globálnemu pôvodu. Toto je ohraničené vyhľadávanie len na čítanie; syntéza sa pre účtovníctvo neopakuje. Fakturačné záznamy sa môžu objaviť po dokončení zvuku: opakované vyhľadávanie prebieha na pozadí až približne 52 sekúnd, vrátane uzávierok siete.
+- Počas tohto vyhľadávania má zvuková odpoveď `X-OmniRoute-Cost-Status: pending` a nemá hlavičku nákladov na odozvu. Jeho konečný poplatok sa objaví v histórii používania, analytike a hlavnej knihe po vyrovnaní. Ak metadáta nie sú k dispozícii, použije sa konfigurovaná snímka tarify; inak náklady zostávajú neznáme.
+- Počty sekúnd, znakov a obrázkov majú samostatné polia fakturačných jednotiek, nikdy nie falošné počty tokenov. Účtovníctvo zachováva iba číselné použitie, nie text reči, prepisy alebo bajty obrázkov. Existujúce výnimky týkajúce sa neocenených obrázkov sú nezmenené: skutočne chýbajúca tarifa za obrázok nezablokuje obmedzený kľúč a v odpovedi sa vynechá hlavička ceny namiesto toho, aby sa hovor vyhlásil za bezplatný. Zlyhanie obchodu s cenami si stále uchováva dôkazy o používaní pre neúspešné vynútenie.
+
+Žiadny historický poplatok speech/image nie je vynájdený ani zasypaný. Účtovanie poskytovateľa zostáva referenčným pre faktúry a hovory, ktorých poplatok nebol nahlásený.
+
 ---
 
 ## Informačný panel: stránka Náklady

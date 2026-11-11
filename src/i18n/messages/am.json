@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "የአጠቃቀም ታሪክ (ቀናት)",
     "retentionMemoryEntries": "የማህደረ ትውስታ ግቤቶች (ቀናት)",
     "retentionXpAuditLog": "የXP ኦዲት ምዝግብ (ቀናት)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "የማቆያ ቅንብሮችን አስቀምጥ",
     "storageAutoVacuumMode": "ራስ-ሰር Vacuum ሁነታ",
     "storageScheduledVacuum": "መርሐግብር የተያዘለት Vacuum",

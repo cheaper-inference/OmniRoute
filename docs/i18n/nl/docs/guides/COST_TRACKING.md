@@ -108,6 +108,16 @@ De kosten geven de voorkeur aan een exacte, door de provider gerapporteerde toes
 
 Dit is alleen voorwaartse boekhouding. Oude OCR/embedding aanroepen die nooit gebruiksgeschiedenis hebben geschreven, kunnen niet worden gereconstrueerd op basis van deze migratie. Catalogusschattingen zijn USD -schattingen, geen factuur, en omvatten geen valutaomrekening, belastingen of kortingen.
 
+### Spraak en beelden
+
+- Succesvolle `/v1/audio/transcriptions`, `/v1/audio/speech` en beeldgeneratiepogingen delen numerieke boekhouding. Directe en combo-oproepen bevatten de API sleutel van de beller en de geselecteerde verbinding; een combo-wrapper voegt nooit een tweede afschrijving toe.
+- Door de provider gerapporteerde USD wint een catalogusschatting, inclusief een expliciet nultarief. OpenRouter's JSON `usage.cost` is genormaliseerd naar `cost_usd`. Anders gebruiken gemeten tokens tokenprijzen, gebruiken transcriptieseconden prijzen per seconde, gebruikt spraakinvoer Unicode-tekentellingen en gebruiken afbeeldingen met een vaste prijs het daadwerkelijk geretourneerde aantal, niet de gevraagde `n`.
+- Binaire OpenRouter TTS heeft geen JSON gebruikstekst. Nadat de audio is voltooid of de beller annuleert, vraagt OmniRoute de generatie ID op de **dezelfde** geconfigureerde OpenRouter oorsprong. Een EU verzoek valt nooit terug op de mondiale oorsprong. Dit is een begrensde, alleen-lezen zoekopdracht; De synthese wordt niet opnieuw geprobeerd voor de boekhouding. Factureringsgegevens kunnen verschijnen nadat de audio is afgelopen: nieuwe zoekpogingen worden maximaal ongeveer 52 seconden op de achtergrond uitgevoerd, inclusief netwerkdeadlines.
+- Tijdens dat opzoeken heeft het audioantwoord `X-OmniRoute-Cost-Status: pending` en geen header voor responskosten. De uiteindelijke kosten verschijnen na afstemming in de gebruiksgeschiedenis, analyses en het grootboek. Als metagegevens niet beschikbaar zijn, wordt een geconfigureerde tariefmomentopname gebruikt; anders blijven de kosten onbekend.
+- Het aantal seconden, tekens en afbeeldingen heeft afzonderlijke velden voor de factureringseenheden, en nooit valse tokens. De boekhouding behoudt alleen numeriek gebruik, geen spraaktekst, transcripties of afbeeldingsbytes. De bestaande vrijstellingen voor ongeprijsde afbeeldingen zijn ongewijzigd: een werkelijk ontbrekend afbeeldingstarief vergrendelt niet opnieuw een beperkte sleutel, en het antwoord laat de kostenkop weg in plaats van het gesprek gratis te verklaren. Bij een mislukte prijsopslag blijft er nog steeds gebruiksbewijs aanwezig voor het afdwingen van een mislukte sluiting.
+
+Er wordt geen historische speech/image heffing uitgevonden of aangevuld. De facturering aan de provider blijft de referentie voor facturen en voor oproepen waarvan de kosten niet zijn gerapporteerd.
+
 ---
 
 ## Dashboard: de pagina Kosten

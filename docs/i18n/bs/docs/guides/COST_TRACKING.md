@@ -89,9 +89,19 @@ Troškovi preferiraju tačnu naplatu koju je prijavio provajder (`provider_cost_
 - Upotreba OCR pohranjuje broj stranica, jediničnu cijenu, izračunatu USD cijenu, API ključ i odabranu vezu. Stranice se nikada ne predstavljaju kao tokeni. Dnevnici poziva sadrže metapodatke o naplati, a ne dokument URLs, PDF bajtove ili ekstrahovani tekst.
 - Uspješni `/v1/embeddings` zahtjevi bilježe jedan red upotrebe po fizičkoj grupi, uključujući odvojene serije dovršene u istoj milisekundi. Naknade koje je prijavio provajder imaju prednost nad procjenama tokena; kombinovani omoti ne naplaćuju.
 - Istorija korištenja, analiza troškova, provider/account prozori, ograničenja potrošnje API ključeva, knjiga troškova zahtjeva i dnevni podaci o korištenju uključuju ove troškove. Ključevi bez evidencije zadržavaju numeričko računovodstvo bez zadržavanja izvornog teksta.
-- Nedostaje upotreba ili tarife **unknown** , nije besplatno: zaglavlje cijene odgovora je izostavljeno, a postojeća politika korištenja bez cijene se primjenjuje na ograničene API ključeve. Eksplicitno konfigurirane nulte stope ostaju važeće za korištenje bez troškova.
+- Nedostaje upotreba ili tarife **nepoznato** , nije besplatno: zaglavlje cijene odgovora je izostavljeno, a postojeća politika korištenja bez cijene se primjenjuje na ograničene API ključeve. Eksplicitno konfigurirane nulte stope ostaju važeće za korištenje bez troškova.
 
 Ovo je samo unaprijed računovodstvo. Stari OCR/embedding pozivi koji nikada nisu pisali istoriju upotrebe ne mogu se rekonstruisati iz ove migracije. Procjene kataloga su USD procjene, a ne faktura, i ne uključuju konverziju valuta, porez ili popuste.
+
+### Govor i slike
+
+- Uspješni `/v1/audio/transcriptions`, `/v1/audio/speech` i pokušaji generiranja slike dijele numeričko računovodstvo. Direktni i kombinovani pozivi nose API ključ pozivaoca i odabranu vezu; kombinovani omot nikada ne dodaje drugo zaduženje.
+- USD koju je prijavio provajder pobjeđuje katalošku procjenu, uključujući eksplicitnu nultu naplatu. OpenRouter-ov JSON `usage.cost` je normaliziran na `cost_usd`. Inače, izmjereni tokeni koriste cijene tokena, sekunde za transkripciju koriste cijene po sekundi, govorni unos koristi Unicode broj znakova, a slike s fiksnom cijenom koriste stvarno vraćeni broj, a ne traženi `n`.
+- Binarni OpenRouter TTS nema JSON tijelo upotrebe. Nakon što se zvuk završi ili pozivalac otkaže, OmniRoute postavlja upit za svoju generaciju ID na **isto** konfigurirano OpenRouter porijeklo. EU zahtjev se nikada ne vraća na globalno porijeklo. Ovo je ograničeno pretraživanje samo za čitanje; sinteza se ne pokušava ponovo za računovodstvo. Zapisi o naplati mogu se pojaviti nakon što se zvuk završi: pokušaji traženja se izvode u pozadini do oko 52 sekunde, uključujući mrežne rokove.
+- Tokom tog pretraživanja, audio odgovor ima `X-OmniRoute-Cost-Status: pending` i nema zaglavlje cijene odgovora. Njegova konačna naplata se pojavljuje u istoriji upotrebe, analitici i ključnoj knjizi nakon usaglašavanja. Ako su metapodaci nedostupni, koristi se snimak konfigurisane tarife; inače trošak ostaje nepoznat.
+- Broj sekundi, znakova i slika imaju zasebna polja obračunske jedinice, nikada lažni broj tokena. Računovodstvo zadržava samo numeričku upotrebu, a ne govorni tekst, transkripte ili slikovne bajtove. Postojeća izuzeća za slike bez cijene su nepromijenjena: stvarno nedostaje slika tarifa ne zaključava ograničeni ključ, a odgovor izostavlja zaglavlje cijene umjesto da proglašava poziv besplatnim. Neuspjeh trgovine s cijenama i dalje zadržava dokaze o korištenju za provođenje neuspješnog zatvaranja.
+
+Nikakva istorijska speech/image naknada nije izmišljena ili zatrpana. Naplata provajdera ostaje referentna za fakture i za pozive čija naplata nije prijavljena.
 
 ---
 

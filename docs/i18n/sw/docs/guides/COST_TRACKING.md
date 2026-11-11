@@ -105,6 +105,16 @@ Gharama hupendelea malipo halisi yaliyoripotiwa na mtoa huduma (`provider_cost_u
 
 Huu ni uhasibu wa mbele tu. Simu za zamani OCR/embedding ambazo hazikuwahi kuandika historia ya utumiaji haziwezi kujengwa upya kutokana na uhamiaji huu. Makadirio ya katalogi ni makadirio ya USD, si ankara, na hayajumuishi ubadilishaji wa sarafu, kodi au punguzo.
 
+### Hotuba na picha
+
+- `/v1/audio/transcriptions`, `/v1/audio/speech` na majaribio ya kuunda picha yaliyofaulu yanashiriki uhasibu wa nambari. Simu za moja kwa moja na za kuchana hubeba kitufe cha API cha mpigaji na muunganisho uliochaguliwa; karatasi ya kuchana haiongezi kamwe debiti ya pili.
+- USD iliyoripotiwa na mtoa huduma inashinda juu ya makadirio ya katalogi, ikijumuisha malipo ya sifuri dhahiri. JSON `usage.cost` ya OpenRouter imebadilishwa kuwa `cost_usd`. Vinginevyo, tokeni zilizopimwa hutumia bei za tokeni, sekunde za manukuu hutumia bei kwa kila sekunde, ingizo la matamshi hutumia hesabu za herufi za Unicode, na picha za bei bapa hutumia nambari iliyorejeshwa, si `n` iliyoombwa.
+- Binary OpenRouter TTS haina chombo cha matumizi cha JSON. Baada ya sauti kukamilika au mpigaji kughairi, OmniRoute huuliza ID ya kizazi chake kwenye **sawa** imesanidiwa asili ya OpenRouter. Ombi la EU halirudi nyuma kwenye asili ya kimataifa. Huu ni uchunguzi wa mipaka, wa kusoma tu; usanisi haujaribiwi tena kwa uhasibu. Rekodi za malipo zinaweza kuonekana baada ya sauti kukamilika: majaribio ya kutafuta tena yanaendeshwa chinichini kwa hadi sekunde 52, ikijumuisha makataa ya mtandao.
+- Wakati wa utafutaji huo, jibu la sauti lina `X-OmniRoute-Cost-Status: pending` na hakuna kichwa cha gharama ya majibu. Malipo yake ya mwisho yanaonekana katika historia ya matumizi, uchanganuzi na leja muhimu baada ya upatanisho. Ikiwa metadata haipatikani, taswira ya ushuru iliyosanidiwa inatumiwa; vinginevyo gharama inabakia haijulikani.
+- Sekunde, herufi na hesabu za picha zina sehemu tofauti za kitengo cha bili, kamwe hazihesabiki hesabu za tokeni bandia. Uhasibu hubaki na matumizi ya nambari pekee, si maandishi ya hotuba, nakala au baiti za picha. Misamaha iliyopo ya picha isiyo na bei haijabadilishwa: ushuru wa picha unaokosekana haufungi tena ufunguo mdogo, na jibu huacha kichwa cha gharama badala ya kutangaza kuwa simu bila malipo. Kushindwa kwa duka la bei bado kunahifadhi ushahidi wa matumizi kwa utekelezaji ambao haujafungwa.
+
+Hakuna malipo ya kihistoria speech/image ambayo yamevumbuliwa au kujazwa nyuma. Malipo ya mtoa huduma yanasalia kuwa marejeleo ya ankara na simu ambazo malipo yake hayakuripotiwa.
+
 ---
 
 ## Dashibodi: ukurasa wa Gharama

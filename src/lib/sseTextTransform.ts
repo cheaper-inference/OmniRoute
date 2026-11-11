@@ -60,6 +60,10 @@ export const METADATA_KEYS = new Set([
   "speed",
   "signature",
   "request_id",
+  // Mistral anti token-length side-channel padding (#19293): random alphabet/digit runs
+  // attached to every streamed chunk since 2025-08-27 (Mistral changelog). Not answer
+  // text; routing it to content spliced padding into the next real text delta.
+  "p",
 ]);
 
 // Anthropic Messages SSE frames. Their streamed text lives at fixed paths (block text,

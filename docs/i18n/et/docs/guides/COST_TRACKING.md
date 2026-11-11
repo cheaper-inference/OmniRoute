@@ -102,6 +102,16 @@ Kulud eelistavad täpset pakkuja teatatud tasu (`provider_cost_usd`), seejärel 
 
 See on ainult edasine arvestus. Vanu OCR/embedding kõnesid, mis pole kunagi kasutusajalugu kirjutanud, ei saa selle migratsiooni põhjal rekonstrueerida. Kataloogi hinnangud on USD hinnangud, mitte arve ega sisalda valuuta konverteerimist, makse ega allahindlusi.
 
+### Kõne ja pildid
+
+- Edukad `/v1/audio/transcriptions`, `/v1/audio/speech` ja piltide genereerimise katsed jagavad numbrilist arvestust. Otsesed ja kombineeritud kõned kannavad helistaja API klahvi ja valitud ühendust; kombineeritud ümbris ei lisa kunagi teist deebetit.
+- Pakkuja teatatud USD võidab kataloogihinnangu, sealhulgas selgesõnalise nulltasu. OpenRouterJSON `usage.cost` on normaliseeritud `cost_usd`. Vastasel juhul kasutavad mõõdetud märgid märgihindu, transkriptsioonisekundid sekundihindu, kõnesisend Unicode'i tähemärkide loendust ja kindla hinnaga kujutised kasutavad tegelikult tagastatud numbrit, mitte taotletud `n`.
+- Binaarne OpenRouter TTS puudub JSON kasutuskeha. Kui heli on lõppenud või helistaja tühistab, küsib OmniRoute oma ID generatsiooni päringut **sama** konfigureeritud OpenRouter päritolu. EU taotlus ei lange kunagi tagasi globaalse päritoluni. See on piiratud, kirjutuskaitstud otsing; sünteesi raamatupidamiseks uuesti ei proovita. Arvelduskirjed võivad ilmuda pärast seda, kui heli on lõppenud: kordusotsingud jooksevad taustal kuni umbes 52 sekundit, sealhulgas võrgu tähtajad.
+- Selle otsingu ajal on helivastusel `X-OmniRoute-Cost-Status: pending` ja vastusekulu päis puudub. Selle lõplik tasu kuvatakse pärast vastavust kasutusajaloos, analüütikas ja võtmeraamatus. Kui metaandmed pole saadaval, kasutatakse konfigureeritud tariifi ülevaadet; muidu jääb hind teadmata.
+- Sekunditel, tähemärkidel ja piltide loendustel on eraldi arveldusühiku väljad, mitte kunagi võltsitud žetoonide arv. Raamatupidamine säilitab ainult numbrikasutust, mitte kõneteksti, ärakirju ega pildibaite. Olemasolevad hinnavaba pildi erandid ei muutu: tõeliselt puuduv pilditariif ei lukusta äsja piiratud võtit ja vastusest jäetakse välja kulu päis, selle asemel, et kõne tasutaks kuulutada. Hinnakujunduspoe tõrge säilitab endiselt kasutustõendeid tõrkega suletud jõustamise jaoks.
+
+Ühtegi ajaloolist speech/image tasu ei leiuta ega täideta. Teenusepakkuja arveldamine jääb arvete ja kõnede viiteallikaks, mille tasu ei ole teatatud.
+
 ---
 
 ## Juhtpaneel: kulude leht

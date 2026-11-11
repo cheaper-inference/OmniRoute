@@ -106,6 +106,16 @@ Xarajatlar provayder tomonidan bildirilgan aniq to‘lovni (`provider_cost_usd`)
 
 Bu faqat oldinga mo'ljallangan buxgalteriya hisobi. Foydalanish tarixini hech qachon yozmagan eski OCR/embedding qo'ng'iroqlarini bu migratsiyadan qayta tiklab bo'lmaydi. Katalog baholari hisob-faktura emas, USD hisob-kitoblari bo‘lib, valyuta konvertatsiyasi, soliq yoki chegirmalarni o‘z ichiga olmaydi.
 
+### Nutq va tasvirlar
+
+- Muvaffaqiyatli `/v1/audio/transcriptions`, `/v1/audio/speech` va tasvir yaratishga urinishlar soni hisobini almashadi. To'g'ridan-to'g'ri va kombinatsiyalangan qo'ng'iroqlar qo'ng'iroq qiluvchining API kalitini va tanlangan ulanishni olib yuradi; kombinatsiyalangan o'ram hech qachon ikkinchi debetni qo'shmaydi.
+- Provayder tomonidan bildirilgan USD aniq nol to‘lovni o‘z ichiga olgan katalog bahosi ustidan g‘alaba qozonadi. OpenRouter ning JSON `usage.cost` `cost_usd` ga normallashtiriladi. Aks holda, oʻlchangan tokenlar token narxlaridan, transkripsiya soniyalarida soniya narxlaridan, nutq matnida Unicode belgilar sonidan foydalaniladi va tekis narxdagi tasvirlar soʻralgan `n` emas, balki aslida qaytarilgan raqamdan foydalanadi.
+- Ikkilik OpenRouter TTS JSON foydalanish tanasiga ega emas. Ovoz tugallangandan yoki qo'ng'iroq qiluvchi bekor qilingandan so'ng, OmniRoute o'z avlodi ID so'raydi **bir xil** konfiguratsiya qilingan OpenRouter kelib chiqishi. EU so'rovi hech qachon global kelib chiqishiga qaytmaydi. Bu cheklangan, faqat o'qish uchun qidiruv; sintez buxgalteriya hisobi uchun qayta urinilmaydi. Toʻlov yozuvlari audio tugagandan soʻng paydo boʻlishi mumkin: qayta qidirish urinishlari fonda taxminan 52 soniyagacha ishlaydi, shu jumladan tarmoq muddatlari.
+- Ushbu qidiruv paytida audio javobda `X-OmniRoute-Cost-Status: pending` mavjud va javob narxi sarlavhasi yo'q. Uning yakuniy to'lovi foydalanish tarixida, tahliliy ma'lumotlarda va yarashuvdan so'ng kalit kitobida ko'rinadi. Agar metadata mavjud bo'lmasa, sozlangan tarif surati ishlatiladi; aks holda xarajat noma'lum bo'lib qoladi.
+- Soniyalar, belgilar va tasvirlar hisob-kitoblari alohida maydonlarga ega, hech qachon soxta tokenlar hisoblanmaydi. Buxgalteriya hisobi nutq matni, transkript yoki tasvir baytlarini emas, faqat raqamli foydalanishni saqlaydi. Mavjud narxsiz tasvir imtiyozlari o'zgarmadi: haqiqatan ham etishmayotgan tasvir tarifi cheklangan kalitni yangidan bloklamaydi va javob qo'ng'iroqni bepul deb e'lon qilish o'rniga narx sarlavhasini o'tkazib yuboradi. Narxlar do'konidagi nosozlik hali ham muvaffaqiyatsiz yopilgan ijro uchun foydalanish dalillarini saqlab qoladi.
+
+Hech qanday tarixiy speech/image to'lovi ixtiro qilinmaydi yoki to'ldirilmaydi. Provayder hisob-kitobi hisob-fakturalar va toʻlovi haqida xabar berilmagan qoʻngʻiroqlar uchun maʼlumotnoma boʻlib qoladi.
+
 ---
 
 ## Boshqaruv paneli: Xarajatlar sahifasi

@@ -104,6 +104,16 @@ Omkostninger foretrækker en nøjagtig udbyderrapporteret afgift (`provider_cost
 
 Dette er fremadrettet regnskab. Gamle OCR/embedding -kald, der aldrig har skrevet brugshistorik, kan ikke rekonstrueres ud fra denne migration. Katalogestimater er USD estimater, ikke en faktura, og inkluderer ikke valutaomregning, skat eller rabatter.
 
+### Tale og billeder
+
+- Vellykkede forsøg på `/v1/audio/transcriptions`, `/v1/audio/speech` og billedgenerering deler numerisk regnskab. Direkte og combo-opkald bærer den opkaldendes API nøgle og den valgte forbindelse; en kombinationsindpakning tilføjer aldrig en anden debitering.
+- Udbyder-rapporteret USD vinder over et katalogestimat, inklusive en eksplicit nulafgift. OpenRouter's JSON `usage.cost` er normaliseret til `cost_usd`. Ellers bruger målte tokens tokenpriser, transskriptionssekunder bruger priser pr. sekund, taleinput bruger Unicode-tegnantal, og fastprisbilleder bruger det tal, der faktisk returneres, ikke den anmodede `n`.
+- Binær OpenRouter TTS har ingen JSON -brugstekst. Når lyden er fuldført, eller den, der ringer op, annullerer, forespørger OmniRoute sin generation ID på **samme** konfigureret OpenRouter oprindelse. En EU anmodning falder aldrig tilbage til den globale oprindelse. Dette er et afgrænset, skrivebeskyttet opslag; syntese prøves ikke igen til regnskab. Faktureringsposter kan vises, efter at lyden er afsluttet: Genforsøg på opslag kører i baggrunden i op til ca. 52 sekunder, inklusive netværksfrister.
+- Under det opslag har lydsvaret `X-OmniRoute-Cost-Status: pending` og ingen svaromkostningsheader. Dens endelige opkrævning vises i brugshistorik, analyser og nøglebog efter afstemning. Hvis metadata ikke er tilgængelig, bruges et konfigureret tarif-øjebliksbillede; ellers forbliver prisen ukendt.
+- Sekunder, tegn og billedantal har separate faktureringsenhedsfelter, aldrig falske tokentællinger. Regnskab bevarer kun numerisk brug, ikke taletekst, transskriptioner eller billedbytes. Eksisterende fritagelser for uprissatte billeder er uændrede: En virkelig manglende billedtakst låser ikke en begrænset nøgle for nylig, og svaret udelader prisoverskriften i stedet for at erklære opkaldet gratis. En prisfastsættelsesbutiksfejl bevarer stadig brugsbeviser for fejllukket håndhævelse.
+
+Ingen historisk speech/image afgift er opfundet eller udfyldt. Leverandørfakturering forbliver referencen for fakturaer og for opkald, hvis debitering ikke blev rapporteret.
+
 ---
 
 ## Dashboard: siden Omkostninger

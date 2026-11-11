@@ -104,6 +104,16 @@ Kudade sun fi son ainihin cajin da aka ba da rahoton (`provider_cost_usd`), sann
 
 Wannan lissafin gaba ne kawai. Tsohon kiran OCR/embedding wanda bai taɓa rubuta tarihin amfani ba ba za a iya sake gina shi daga wannan ƙaura ba. Ƙididdiga masu ƙididdiga na USD, ba daftari ba, kuma ba su haɗa da canjin kuɗi, haraji ko rangwame ba.
 
+### Magana da hotuna
+
+- Nasara `/v1/audio/transcriptions`, `/v1/audio/speech` da yunƙurin samar da hoto suna raba lissafin lissafi. Kiran kai tsaye da haɗin kai suna ɗaukar maɓallin API mai kira da haɗin da aka zaɓa; abin rufe fuska bai taɓa ƙara zari na biyu ba.
+- USD da aka ruwaito mai bayarwa ya yi nasara akan kimar katalogi, gami da cajin sifili bayyananne. OpenRouter na JSON `usage.cost` an daidaita shi zuwa `cost_usd`. In ba haka ba, alamomin da aka auna suna amfani da farashin alama, daƙiƙan rubutu suna amfani da farashi na biyu-biyu, shigar da magana yana amfani da ƙidayar halayen Unicode, kuma hotuna masu tsada suna amfani da lambar da aka dawo da gaske, ba `n` ɗin da ake nema ba.
+- Binary OpenRouter TTS bashi da jikin amfanin JSON. Bayan sautin ya ƙare ko mai kiran ya soke, OmniRoute ya tambayi tsarar sa ID akan **iri daya** tushen OpenRouter. Buƙatar EU baya faɗuwa zuwa asalin duniya. Wannan iyakataccen bincike ne, karantawa kawai; Ba a sake gwada ƙididdiga don lissafin kuɗi ba. Rubutun lissafin kuɗi na iya bayyana bayan an gama sautin: sake dubawa yana gudana a bango har zuwa daƙiƙa 52, gami da ƙayyadaddun ƙayyadaddun hanyar sadarwa.
+- Yayin wannan binciken, martanin mai jiwuwa yana da `X-OmniRoute-Cost-Status: pending` kuma babu mai amsa-kudin kai. Cajin sa na ƙarshe yana bayyana a tarihin amfani, nazari da maɓalli na maɓalli bayan sulhu. Idan babu metadata, ana amfani da hoton jadawalin jadawalin kuɗin fito; in ba haka ba farashin ya tsaya ba a sani ba.
+- Daƙiƙa, haruffa da ƙididdigar hoto suna da filayen lissafin raka'a daban-daban, waɗanda ba za su taɓa yin ƙirƙira na jabu ba. Lissafi yana riƙe da amfani na lambobi kawai, ba rubutun magana ba, kwafi ko hoto na hoto. Keɓewar hoton da ba ta da tsada ba ta canzawa: farashin hoton hoton da ya ɓace na gaske baya sabon kulle maɓalli mai iyaka, kuma martanin ya tsallake kan farashin maimakon bayyana kiran kyauta. Rashin lalacewar kantin farashi har yanzu yana riƙe da shaidar amfani don gazawar tilastawa-rufe.
+
+Ba a ƙirƙira ko cika cajin speech/image na tarihi ba. Biyan kuɗaɗen mai bayarwa ya kasance maƙasudin rasitoci da kira waɗanda ba a ba da rahoton cajin su ba.
+
 ---
 
 ## Dashboard: shafin Kuɗaɗe

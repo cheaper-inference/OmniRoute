@@ -104,6 +104,16 @@ Kostnader föredrar en exakt leverantörsrapporterad debitering (`provider_cost_
 
 Detta är enbart forward-redovisning. Gamla OCR/embedding anrop som aldrig skrev användningshistorik kan inte rekonstrueras från denna migrering. Kataloguppskattningar är USD uppskattningar, inte en faktura, och inkluderar inte valutaomvandling, skatt eller rabatter.
 
+### Tal och bilder
+
+- Framgångsrika `/v1/audio/transcriptions`, `/v1/audio/speech` och bildgenereringsförsök delar numerisk redovisning. Direkt- och kombinationssamtal bär uppringarens API nyckel och den valda anslutningen; ett kombinerat omslag lägger aldrig till en andra debitering.
+- Leverantörsrapporterad USD vinner över en kataloguppskattning, inklusive en explicit nollavgift. OpenRouter:s JSON `usage.cost` är normaliserad till `cost_usd`. Annars använder uppmätta tokens tokenpriser, transkriptionssekunder använder priser per sekund, talinmatning använder Unicode-teckenantal och fastprisbilder använder det antal som faktiskt returneras, inte den begärda `n`.
+- Binär OpenRouter TTS har ingen JSON användningskropp. Efter att ljudet har slutförts eller den som ringer avbryter, frågar OmniRoute sin generation ID på **samma** konfigurerat OpenRouter ursprung. En EU förfrågan faller aldrig tillbaka till det globala ursprunget. Detta är en avgränsad, skrivskyddad uppslagning; syntes inte omförsöks för redovisning. Faktureringsposter kan visas efter att ljudet har avslutats: uppslagsförsök körs i bakgrunden i upp till cirka 52 sekunder, inklusive nätverksdeadlines.
+- Under den sökningen har ljudsvaret `X-OmniRoute-Cost-Status: pending` och ingen svarskostnadshuvud. Dess slutliga laddning visas i användningshistorik, analyser och nyckelboken efter avstämning. Om metadata inte är tillgänglig används en konfigurerad tariffögonblicksbild; annars förblir kostnaden okänd.
+- Sekunder, tecken och bildantal har separata faktureringsenhetsfält, aldrig falska tokenräkningar. Redovisning behåller endast numerisk användning, inte taltext, utskrifter eller bildbytes. Befintliga undantag för oprissatta bilder är oförändrade: en tariff för bilder som verkligen saknas låser inte en ny begränsad nyckel, och svaret utelämnar kostnadsrubriken snarare än att samtalet förklaras fritt. Ett misslyckande i prissättningsbutiken behåller fortfarande användningsbevis för felstängd verkställighet.
+
+Ingen historisk speech/image avgift är uppfunnen eller återfylld. Leverantörsdebitering förblir referensen för fakturor och för samtal vars debitering inte har rapporterats.
+
 ---
 
 ## Instrumentpanel: sidan Kostnader

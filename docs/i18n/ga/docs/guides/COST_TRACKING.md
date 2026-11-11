@@ -104,6 +104,16 @@ Is fearr le costais muirear beacht arna thuairisciú ag an soláthraí (`provide
 
 Cuntasaíocht chun cinn amháin atá anseo. Ní féidir seanghlaonna OCR/embedding nár scríobh stair úsáide riamh a athchruthú ón imirce seo. Is meastacháin USD iad meastacháin chatalóige, ní sonrasc, agus ní chuimsíonn siad comhshó airgeadra, cáin ná lascainí.
 
+### Óráid agus íomhánna
+
+- Déanann iarrachtaí rathúla `/v1/audio/transcriptions`, `/v1/audio/speech` agus giniúint íomhá cuntasaíocht uimhriúil a roinnt. Iompraíonn glaonna díreacha agus teaglama eochair API an ghlaoiteora agus an nasc roghnaithe; ní chuireann cumhdach teaglama an dara dochar riamh.
+- Bhuaigh USD arna thuairisciú ag soláthraí thar mheastachán catalóige, lena n-áirítear muirear nialasach sainráite. Tá OpenRouterJSON `usage.cost` normalaithe go `cost_usd`. Seachas sin, úsáideann comharthaí tomhaiste praghsanna comharthaí, úsáideann soicind trascríobh praghsanna in aghaidh an tsoicind, úsáideann ionchur cainte comhaireamh carachtair Unicode, agus úsáideann íomhánna ar phraghas cothrom an uimhir a thugtar ar ais i ndáiríre, ní an `n` iarrtha.
+- Níl aon chomhlacht úsáide JSON ag Dénártha OpenRouter TTS. Tar éis an fhuaim a chríochnú nó an glaoiteoir a chealú, cuireann OmniRoute ceist ar a ghlúin ID ar an **céanna** tionscnaimh OpenRouter cumraithe. Ní thagann iarratas EU ar ais go dtí an bunús domhanda. Is cuardach teoranta, inléite amháin é seo; ní dhéantar sintéis a aisghabháil le haghaidh cuntasaíochta. Is féidir taifid bhilleála a thaispeáint tar éis don fhuaim a bheith críochnaithe: ritheann atriail chuardaigh sa chúlra ar feadh suas le 52 soicind, lena n-áirítear spriocdhátaí líonra.
+- Le linn an chuardaigh sin, tá `X-OmniRoute-Cost-Status: pending` agus níl aon cheanntásc costais freagartha ag an bhfreagra fuaime. Tá a lucht deiridh le feiceáil sa stair úsáide, san anailísíocht agus sa mhórleabhar mór tar éis an athmhuintearais. Mura bhfuil meiteashonraí ar fáil, úsáidtear pictiúr taraife cumraithe; seachas sin fanann an costas anaithnid.
+- Tá réimsí aonad billeála ar leith ag soicind, carachtair agus comhaireamh íomhánna, ní chomhaireamh chomharthaí bréige riamh. Ní choinníonn an chuntasaíocht ach úsáid uimhriúil, ní téacs cainte, tras-scríbhinní nó bearta íomhá. Níl aon athrú ar dhíolúintí íomhá neamhphraghas atá ann faoi láthair: ní ghlasann taraif íomhá atá in easnamh i ndáiríre eochair theoranta, agus fágann an fhreagairt an ceanntásc costais ar lár seachas an glao a fhógairt saor in aisce. Coinníonn teip i siopa praghsála fianaise úsáide fós maidir le forghníomhú teip-dúnta.
+
+Ní dhéantar aon mhuirear speech/image stairiúil a chumadh ná a aislíonadh. Tá billeáil soláthraí fós mar thagairt do shonraisc agus do ghlaonna nár tuairiscíodh a dtáille.
+
 ---
 
 ## Deais: an leathanach Costais

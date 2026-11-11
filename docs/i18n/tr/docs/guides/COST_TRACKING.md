@@ -108,6 +108,16 @@ Maliyetler, sağlayıcı tarafından bildirilen kesin bir ücreti (`provider_cos
 
 Bu yalnızca ileriye dönük muhasebedir. Kullanım geçmişini hiç yazmayan eski OCR/embedding çağrıları bu geçişten yeniden oluşturulamaz. Katalog tahminleri USD tahminleridir, fatura değildir ve para birimi dönüştürmeyi, vergiyi veya indirimleri içermez.
 
+### Konuşma ve görüntüler
+
+- Başarılı `/v1/audio/transcriptions`, `/v1/audio/speech` ve görüntü oluşturma girişimleri sayısal hesaplamayı paylaşır. Doğrudan ve birleşik aramalar arayanın API anahtarını ve seçilen bağlantıyı taşır; birleşik sarmalayıcı asla ikinci bir borç eklemez.
+- Sağlayıcının bildirdiği USD, açık bir sıfır ücret dahil olmak üzere katalog tahminini kazandı. OpenRouterJSON `usage.cost` `cost_usd` normalleştirilmiştir. Aksi takdirde, ölçülen belirteçler belirteç fiyatlarını kullanır, transkripsiyon saniyeleri saniye başına fiyatları kullanır, konuşma girişi Unicode karakter sayılarını kullanır ve sabit fiyatlı görüntüler istenen `n` değil gerçekte döndürülen sayıyı kullanır.
+- İkili OpenRouter TTS JSON kullanım gövdesi yoktur. Ses tamamlandıktan veya arayan kişi iptal ettikten sonra OmniRoute, kendi ID neslini sorgular.**Aynı** yapılandırılmış OpenRouter kaynağı. Bir EU isteği asla global kaynağa geri dönmez. Bu sınırlı, salt okunur bir aramadır; Muhasebe için sentez yeniden denenmez. Faturalandırma kayıtları ses bittikten sonra görünebilir: yeniden arama denemeleri, ağ son tarihleri de dahil olmak üzere arka planda yaklaşık 52 saniyeye kadar çalışır.
+- Bu arama sırasında sesli yanıtta `X-OmniRoute-Cost-Status: pending` bulunur ve yanıt maliyeti başlığı yoktur. Nihai ücreti, mutabakat sonrasında kullanım geçmişinde, analizlerde ve ana defterde görünür. Meta veriler mevcut değilse yapılandırılmış bir tarife anlık görüntüsü kullanılır; aksi takdirde maliyet bilinmiyor.
+- Saniyeler, karakterler ve resim sayıları ayrı faturalandırma birimi alanlarına sahiptir; asla sahte jeton sayıları yoktur. Muhasebe, konuşma metnini, transkriptleri veya resim baytlarını değil, yalnızca sayısal kullanımı korur. Mevcut fiyatlandırılmamış görüntü muafiyetleri değişmemiştir: gerçekten eksik bir görüntü tarifesi, sınırlı bir anahtarı yeni kilitlemez ve yanıtta, çağrının ücretsiz olduğu bildirilmek yerine maliyet başlığı atlanır. Fiyatlandırma deposu hatası, arızalı kapatma uygulamasına ilişkin kullanım kanıtlarını hâlâ korur.
+
+Hiçbir tarihsel speech/image ücreti icat edilmedi veya doldurulmadı. Sağlayıcı faturası, faturalar ve ücreti bildirilmeyen aramalar için referans olmaya devam ediyor.
+
 ---
 
 ## Dashboard: Maliyetler sayfası

@@ -108,6 +108,16 @@ Les coûts préfèrent les frais exacts déclarés par le fournisseur (`provider
 
 Il s’agit d’une comptabilité prospective uniquement. Les anciens appels OCR/embedding qui n’ont jamais écrit d’historique d’utilisation ne peuvent pas être reconstruits à partir de cette migration. Les estimations du catalogue sont des estimations USD, et non une facture, et n'incluent pas la conversion de devises, les taxes ou les remises.
 
+### Discours et images
+
+- Les tentatives réussies `/v1/audio/transcriptions`, `/v1/audio/speech` et de génération d'images partagent la comptabilité numérique. Les appels directs et combinés portent la clé API de l'appelant et la connexion sélectionnée ; un wrapper combo n’ajoute jamais de deuxième débit.
+- USD signalé par le fournisseur l'emporte sur une estimation de catalogue, y compris des frais explicites nuls. Le JSON `usage.cost` de OpenRouter est normalisé en `cost_usd`. Sinon, les jetons mesurés utilisent les prix des jetons, les secondes de transcription utilisent les prix à la seconde, la saisie vocale utilise le nombre de caractères Unicode et les images à prix forfaitaire utilisent le nombre réellement renvoyé, et non le `n` demandé.
+- Le binaire OpenRouter TTS n'a pas de corps d'utilisation JSON. Une fois l'audio terminé ou l'appelant annulé, OmniRoute interroge sa génération ID sur le **même** origine OpenRouter configurée. Une requête EU ne revient jamais à l’origine globale. Il s'agit d'une recherche limitée en lecture seule ; la synthèse n’est pas retentée pour la comptabilité. Les enregistrements de facturation peuvent apparaître une fois l'audio terminé : les tentatives de recherche s'exécutent en arrière-plan pendant environ 52 secondes, y compris les délais du réseau.
+- Au cours de cette recherche, la réponse audio comporte `X-OmniRoute-Cost-Status: pending` et aucun en-tête de coût de réponse. Son montant final apparaît dans l'historique d'utilisation, les analyses et le grand livre après rapprochement. Si les métadonnées ne sont pas disponibles, un instantané de tarif configuré est utilisé ; sinon le coût reste inconnu.
+- Les secondes, les caractères et les images ont des champs d'unité de facturation distincts, jamais de faux comptes de jetons. La comptabilité ne conserve que l'utilisation numérique, pas le texte vocal, les transcriptions ou les octets d'image. Les exemptions existantes pour les images non tarifées restent inchangées : un tarif d'image véritablement manquant ne verrouille pas à nouveau une clé limitée, et la réponse omet l'en-tête de coût plutôt que de déclarer l'appel gratuit. Un échec de magasin de tarification conserve toujours des preuves d'utilisation pour l'application de la fermeture en cas d'échec.
+
+Aucune charge speech/image historique n’est inventée ou comblée. La facturation du fournisseur reste la référence pour les factures et pour les appels dont le tarif n'a pas été signalé.
+
 ---
 
 ## Tableau de bord : la page Coûts

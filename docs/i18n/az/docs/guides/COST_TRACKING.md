@@ -106,6 +106,16 @@ Xərclər provayder tərəfindən bildirilən dəqiq ödənişə (`provider_cost
 
 Bu yalnız irəli mühasibatdır. Heç vaxt istifadə tarixçəsi yazmamış köhnə OCR/embedding zəngləri bu miqrasiyadan yenidən qurula bilməz. Kataloq təxminləri faktura deyil, USD təxminləridir və valyuta konvertasiyası, vergi və ya endirimləri daxil etmir.
 
+### Nitq və şəkillər
+
+- Uğurlu `/v1/audio/transcriptions`, `/v1/audio/speech` və təsvir yaratma cəhdləri ədədi uçotu paylaşır. Birbaşa və kombo zənglər zəng edənin API düyməsini və seçilmiş əlaqəni daşıyır; kombo sarğı heç vaxt ikinci debet əlavə etmir.
+- Provayder tərəfindən bildirilən USD, açıq-aydın sıfır ödəniş daxil olmaqla, kataloq təxmini üzərində qalib gəlir. OpenRouter-nin JSON `usage.cost` `cost_usd` yə normallaşdırılıb. Əks halda, ölçülmüş tokenlər token qiymətlərindən, transkripsiya saniyələri saniyəlik qiymətlərdən, nitq daxiletməsi Unicode simvol saylarından istifadə edir və düz qiymətli şəkillər tələb olunan `n` dən deyil, faktiki qaytarılan nömrədən istifadə edir.
+- Binary OpenRouter TTS JSON istifadə orqanı yoxdur. Səs tamamlandıqdan və ya zəng edən şəxs ləğv edildikdən sonra OmniRoute öz nəsil ID telefonda sorğulayır **eyni** konfiqurasiya edilmiş OpenRouter mənşəyi. EU sorğusu heç vaxt qlobal mənşəyə qayıtmır. Bu, məhdud, yalnız oxuna bilən axtarışdır; sintez mühasibat uçotu üçün təkrar sınaqdan keçirilmir. Faturalandırma qeydləri audio bitdikdən sonra görünə bilər: axtarış təkrar cəhdləri şəbəkənin son tarixləri daxil olmaqla təxminən 52 saniyəyə qədər arxa planda işləyir.
+- Bu axtarış zamanı audio cavabda `X-OmniRoute-Cost-Status: pending` var və cavab dəyəri başlığı yoxdur. Onun son ödənişi istifadə tarixçəsində, analitikada və uzlaşmadan sonra əsas kitabda görünür. Əgər metadata mövcud deyilsə, konfiqurasiya edilmiş tarif snapshotından istifadə edilir; əks halda xərc naməlum qalır.
+- Saniyələr, simvollar və şəkil saylarında ayrı-ayrı faktura vahidi sahələri var, heç vaxt saxta nişan sayıları yoxdur. Mühasibat uçotunda nitq mətni, transkript və ya şəkil baytları deyil, yalnız ədədi istifadə saxlanılır. Mövcud qiymətsiz təsvir istisnaları dəyişməzdir: həqiqətən çatışmayan təsvir tarifi məhdud açarı yenicə kilidləmir və cavab zəngi pulsuz elan etmək əvəzinə qiymət başlığını buraxır. Bir qiymət mağazasının uğursuzluğu hələ də uğursuz bağlı icra üçün istifadə sübutunu saxlayır.
+
+Heç bir tarixi speech/image ödənişi icad edilmir və ya doldurulmur. Provayder fakturaları hesab-fakturalar və ödənişi bildirilməyən zənglər üçün istinad olaraq qalır.
+
 ---
 
 ## İdarə paneli: Xərclər səhifəsi

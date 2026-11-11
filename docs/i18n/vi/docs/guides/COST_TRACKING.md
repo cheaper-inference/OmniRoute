@@ -104,6 +104,16 @@ Chi phí ưu tiên mức phí chính xác do nhà cung cấp báo cáo (`provide
 
 Đây chỉ là kế toán chuyển tiếp. Không thể xây dựng lại các cuộc gọi OCR/embedding cũ chưa bao giờ ghi lịch sử sử dụng từ quá trình di chuyển này. Ước tính danh mục là ước tính USD, không phải hóa đơn và không bao gồm chuyển đổi tiền tệ, thuế hoặc chiết khấu.
 
+### Lời nói và hình ảnh
+
+- Các nỗ lực `/v1/audio/transcriptions`, `/v1/audio/speech` và tạo hình ảnh thành công đều chia sẻ cách tính toán số. Cuộc gọi trực tiếp và kết hợp mang theo khóa API của người gọi và kết nối đã chọn; trình bao bọc kết hợp không bao giờ thêm khoản ghi nợ thứ hai.
+- USD do nhà cung cấp báo cáo chiếm ưu thế so với ước tính trong danh mục, bao gồm cả khoản phí bằng 0 rõ ràng. `usage.cost` JSON của OpenRouter được chuẩn hóa thành `cost_usd`. Mặt khác, mã thông báo được đo sử dụng giá mã thông báo, số giây phiên âm sử dụng giá mỗi giây, đầu vào giọng nói sử dụng số ký tự Unicode và hình ảnh giá cố định sử dụng số thực được trả về chứ không phải `n` được yêu cầu.
+- OpenRouter TTS nhị phân không có nội dung sử dụng JSON. Sau khi âm thanh hoàn tất hoặc người gọi hủy, OmniRoute truy vấn ID thế hệ của nó trên **như nhau** Nguồn gốc OpenRouter được cấu hình. Yêu cầu EU không bao giờ quay trở lại nguồn gốc toàn cầu. Đây là tra cứu có giới hạn, chỉ đọc; tổng hợp không được thử lại cho kế toán. Bản ghi thanh toán có thể xuất hiện sau khi âm thanh kết thúc: các lần thử tra cứu chạy trong nền tối đa khoảng 52 giây, bao gồm cả thời hạn mạng.
+- Trong quá trình tra cứu đó, phản hồi âm thanh có `X-OmniRoute-Cost-Status: pending` và không có tiêu đề chi phí phản hồi. Khoản phí cuối cùng của nó xuất hiện trong lịch sử sử dụng, phân tích và sổ cái chính sau khi đối chiếu. Nếu không có siêu dữ liệu thì ảnh chụp nhanh về giá đã định cấu hình sẽ được sử dụng; nếu không thì chi phí vẫn chưa được biết.
+- Giây, ký tự và số lượng hình ảnh có các trường đơn vị thanh toán riêng biệt, không bao giờ có số lượng mã thông báo giả. Kế toán chỉ giữ lại việc sử dụng số, không giữ lại văn bản lời nói, bản ghi hoặc byte hình ảnh. Các miễn trừ hình ảnh chưa được định giá hiện tại không thay đổi: biểu giá hình ảnh thực sự bị thiếu không khóa khóa giới hạn mới và phản hồi bỏ qua tiêu đề chi phí thay vì tuyên bố cuộc gọi miễn phí. Lỗi cửa hàng định giá vẫn giữ lại bằng chứng sử dụng cho việc thực thi không đóng.
+
+Không có khoản phí speech/image lịch sử nào được phát minh hoặc lấp đầy. Thanh toán của nhà cung cấp vẫn là tài liệu tham khảo cho các hóa đơn và cho các cuộc gọi mà khoản phí không được báo cáo.
+
 ---
 
 ## Bảng điều khiển: trang Chi phí

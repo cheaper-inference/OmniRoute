@@ -104,6 +104,16 @@ Awọn idiyele fẹran idiyele ti olupese ti o royin (`provider_cost_usd`), lẹ
 
 Eleyi jẹ siwaju-nikan iṣiro. Awọn ipe OCR/embedding atijọ ti ko kọ itan-akọọlẹ lilo rara ko le ṣe atunto lati ijira yii. Awọn iṣiro katalogi jẹ awọn iṣiro USD, kii ṣe iwe-owo, ati pe ko pẹlu iyipada owo, owo-ori tabi awọn ẹdinwo.
 
+### Ọrọ ati awọn aworan
+
+- `/v1/audio/transcriptions` ti o ṣaṣeyọri, `/v1/audio/speech` ati awọn igbiyanju iran-aworan pin iṣiro iṣiro. Awọn ipe taara ati awọn konbo gbe bọtini API olupe ati asopọ ti o yan; a konbo wrapper kò fi kan keji debiti.
+- USD ti o royin olupese bori lori iṣiro katalogi kan, pẹlu idiyele odo ti o fojuhan. OpenRouter's JSON `usage.cost` jẹ deede si `cost_usd`. Bibẹẹkọ, awọn ami wiwọn lo awọn idiyele ami, awọn iṣẹju-aaya transcription lo awọn idiyele iṣẹju-aaya, igbewọle ọrọ nlo awọn iṣiro ohun kikọ Unicode, ati awọn aworan idiyele alapin lo nọmba ti o da pada, kii ṣe `n` ti o beere.
+- Alakomeji OpenRouter TTS ko ni ara lilo JSON. Lẹhin ti ohun ti pari tabi olupe ti fagile, OmniRoute yoo beere iran rẹ ID lori **kanna** tunto OpenRouter Oti. Ibeere EU kan ko ṣubu pada si ipilẹṣẹ agbaye. Eleyi jẹ kan didi, kika-nikan wiwa; kolaginni ti ko ba tun gbiyanju fun iṣiro. Awọn igbasilẹ ìdíyelé le han lẹhin ti ohun naa ti pari: awọn igbiyanju wiwa ṣiṣẹ ni abẹlẹ fun bii awọn aaya 52, pẹlu awọn akoko ipari nẹtiwọki.
+- Lakoko wiwa yẹn, idahun ohun ni `X-OmniRoute-Cost-Status: pending` ko si si akọsori idiyele-idahun. Idiyele ipari rẹ han ninu itan-akọọlẹ lilo, awọn atupale ati iwe akọọlẹ bọtini lẹhin ilaja. Ti metadata ko ba si, aworan iwoye ti owo atunto ni a lo; bibẹkọ ti iye owo duro aimọ.
+- Awọn iṣẹju-aaya, awọn kikọ ati awọn iṣiro aworan ni awọn aaye ipin-isanwo lọtọ, kii ṣe awọn iṣiro ami iro rara. Iṣiro ṣe idaduro lilo nọmba nikan, kii ṣe ọrọ ọrọ, awọn iwe afọwọkọ tabi awọn baiti aworan. Awọn imukuro aworan ti ko ni idiyele tẹlẹ ko yipada: idiyele aworan ti o padanu nitootọ ko ni titiipa bọtini ti o lopin tuntun, ati pe idahun fi akọsori iye owo kuku ju sisọ ipe naa lọfẹ. Ikuna ile-itaja idiyele ṣi daduro ẹri lilo fun imuṣeduro pipade-ikuna.
+
+Ko si idiyele speech/image itan ti a ṣẹda tabi ti o kun. Idiyele olupese jẹ itọkasi fun awọn risiti ati fun awọn ipe ti idiyele wọn ko royin.
+
 ---
 
 ## Pátákó ìṣàkóso: ojú-ewé Àwọn Ìnáwó

@@ -104,6 +104,16 @@ W kosztach preferowana jest dokładna opłata podana przez dostawcę (`provider_
 
 Jest to rachunkowość typu forward. Na podstawie tej migracji nie można odtworzyć starych wywołań OCR/embedding, które nigdy nie zapisywały historii użytkowania. Szacunki katalogowe są szacunkami USD, a nie fakturą i nie obejmują przeliczania walut, podatków ani rabatów.
 
+### Mowa i obrazy
+
+- Udane próby `/v1/audio/transcriptions`, `/v1/audio/speech` i generowania obrazu mają wspólną rachunkowość numeryczną. Połączenia bezpośrednie i kombi zawierają klucz API osoby dzwoniącej i wybrane połączenie; opakowanie combo nigdy nie dodaje drugiego obciążenia.
+- USD zgłoszone przez dostawcę wygrywa w porównaniu z szacunkami katalogowymi, w tym wyraźną zerową opłatą. OpenRouterJSON `usage.cost` jest znormalizowany do `cost_usd`. W przeciwnym razie zmierzone tokeny korzystają z cen tokenów, sekundy transkrypcji korzystają z cen na sekundę, wprowadzanie mowy wykorzystuje liczbę znaków Unicode, a obrazy z ceną ryczałtową korzystają z faktycznie zwróconej liczby, a nie żądanego `n`.
+- Binarny OpenRouter TTS nie ma treści użytkowej JSON. Po zakończeniu dźwięku lub anulowaniu przez osobę dzwoniącą OmniRoute wysyła zapytanie ID o generację na **To samo** skonfigurowane pochodzenie OpenRouter. Żądanie EU nigdy nie wraca do źródła globalnego. Jest to wyszukiwanie ograniczone, tylko do odczytu; synteza nie jest ponawiana do celów księgowych. Rekordy rozliczeniowe mogą pojawić się po zakończeniu odtwarzania dźwięku: ponowne wyszukiwanie odbywa się w tle przez maksymalnie około 52 sekundy, włączając terminy sieciowe.
+- Podczas tego wyszukiwania odpowiedź audio ma `X-OmniRoute-Cost-Status: pending` i nie ma nagłówka kosztu odpowiedzi. Jego końcowa opłata pojawia się w historii użytkowania, analityce i księdze kluczy po uzgodnieniu. Jeśli metadane są niedostępne, używana jest skonfigurowana migawka taryfowa; w przeciwnym razie koszt pozostaje nieznany.
+- Sekundy, znaki i liczby obrazów mają oddzielne pola jednostek rozliczeniowych, nigdy nie są liczone fałszywe tokeny. Księgowość zachowuje wyłącznie użycie numeryczne, a nie tekst mowy, transkrypcje lub bajty obrazu. Istniejące wyjątki dotyczące obrazów bez ceny pozostają niezmienione: taryfa dotycząca rzeczywiście brakującego obrazu nie blokuje nowego klucza z ograniczonym dostępem, a w odpowiedzi pomija się nagłówek kosztu, zamiast deklarować, że połączenie jest bezpłatne. W przypadku awarii magazynu cenowego nadal pozostają dowody użycia umożliwiające wymuszenie zamknięcia w przypadku awarii.
+
+Nie wymyślono ani nie uzupełniono żadnych historycznych opłat speech/image. Rozliczenia z operatorem pozostają punktem odniesienia dla faktur i połączeń, których opłaty nie zostały zgłoszone.
+
 ---
 
 ## Dashboard: strona Costs

@@ -105,6 +105,16 @@ Troškovi preferiraju točnu naknadu koju prijavljuje pružatelj (`provider_cost
 
 Ovo je računovodstvo samo za unaprijed. Stari OCR/embedding pozivi koji nikada nisu napisali povijest korištenja ne mogu se rekonstruirati iz ove migracije. Procjene kataloga su procjene USD, a ne faktura i ne uključuju konverziju valuta, porez ili popuste.
 
+### Govor i slike
+
+- Uspješni `/v1/audio/transcriptions`, `/v1/audio/speech` i pokušaji generiranja slika dijele numeričko računovodstvo. Izravni i kombinirani pozivi nose API ključ pozivatelja i odabranu vezu; kombinirani omotač nikada ne dodaje drugo zaduženje.
+- USD koji je prijavio pružatelj nadmašuje katalošku procjenu, uključujući eksplicitnu nultu naknadu. OpenRouter-ov JSON `usage.cost` je normaliziran na `cost_usd`. U suprotnom, izmjereni tokeni koriste cijene tokena, sekunde transkripcije koriste cijene po sekundi, govorni unos koristi broj Unicode znakova, a slike fiksne cijene koriste stvarno vraćeni broj, a ne traženi `n`.
+- Binarni OpenRouter TTS nema JSON tijelo upotrebe. Nakon što se zvuk završi ili pozivatelj otkaže, OmniRoute postavlja upit o svojoj generaciji ID na **isti** konfigurirano OpenRouter podrijetlo. EU zahtjev se nikada ne vraća na globalno porijeklo. Ovo je ograničeno pretraživanje samo za čitanje; sinteza se ne pokušava ponovno za računovodstvo. Zapisi o naplati mogu se pojaviti nakon završetka zvuka: ponovni pokušaji pretraživanja izvode se u pozadini do otprilike 52 sekunde, uključujući mrežne rokove.
+- Tijekom tog traženja, audio odgovor ima `X-OmniRoute-Cost-Status: pending` i nema zaglavlje cijene odgovora. Njegovo konačno terećenje pojavljuje se u povijesti korištenja, analitici i glavnoj knjizi nakon usklađivanja. Ako metapodaci nisu dostupni, koristi se konfigurirana snimka tarife; inače trošak ostaje nepoznat.
+- Brojevi sekundi, znakova i slika imaju zasebna polja obračunske jedinice, nikad lažni brojevi tokena. Računovodstvo zadržava samo numeričku upotrebu, ne govorni tekst, transkripte ili bajtove slika. Postojeća izuzeća za slike bez cijene su nepromijenjena: tarifa za slike koja stvarno nedostaje ne zaključava ograničeni ključ, a odgovor izostavlja zaglavlje cijene umjesto da poziv proglašava besplatnim. Neuspješna trgovina s cijenama još uvijek zadržava dokaze o korištenju za provedbu zatvaranja nakon pogreške.
+
+Nikakva povijesna naknada speech/image nije izmišljena niti popunjena. Naplata davatelja usluga ostaje referenca za fakture i za pozive čija cijena nije prijavljena.
+
 ---
 
 ## Nadzorna ploča: stranica Troškovi

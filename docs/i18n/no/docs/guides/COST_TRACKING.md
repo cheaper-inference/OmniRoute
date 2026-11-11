@@ -104,6 +104,16 @@ Kostnader foretrekker en eksakt leverandørrapportert belastning (`provider_cost
 
 Dette er kun foreløpig regnskap. Gamle OCR/embedding anrop som aldri skrev brukshistorikk kan ikke rekonstrueres fra denne migreringen. Kataloganslag er USD -anslag, ikke en faktura, og inkluderer ikke valutaomregning, skatt eller rabatter.
 
+### Tale og bilder
+
+- Vellykkede `/v1/audio/transcriptions`, `/v1/audio/speech` og bildegenereringsforsøk deler numerisk regnskap. Direkte og kombinasjonsanrop har anroperens API nøkkel og den valgte forbindelsen; en combo wrapper legger aldri til en ekstra debet.
+- Leverandørrapportert USD vinner over et katalogestimat, inkludert en eksplisitt nullavgift. OpenRouterJSON `usage.cost` er normalisert til `cost_usd`. Ellers bruker målte tokens tokenpriser, transkripsjonssekunder bruker priser per sekund, taleinndata bruker Unicode-tegnteller, og flatprisbilder bruker tallet som faktisk returneres, ikke den forespurte `n`.
+- Binær OpenRouter TTS har ingen JSON -brukskropp. Etter at lyden er fullført eller innringeren kansellerer, spør OmniRoute sin generasjon ID på **samme** konfigurert OpenRouter opprinnelse. En EU forespørsel faller aldri tilbake til den globale opprinnelsen. Dette er et avgrenset, skrivebeskyttet oppslag; syntese prøves ikke på nytt for regnskap. Faktureringsposter kan vises etter at lyden er ferdig: oppslagsforsøk kjører i bakgrunnen i opptil 52 sekunder, inkludert nettverksfrister.
+- Under det oppslaget har lydresponsen `X-OmniRoute-Cost-Status: pending` og ingen responskostnadsoverskrift. Den endelige belastningen vises i brukshistorikk, analyser og hovedboken etter avstemming. Hvis metadata ikke er tilgjengelig, brukes et konfigurert tarifføyeblikksbilde; ellers forblir kostnaden ukjent.
+- Sekunder, tegn og bildeantall har separate faktureringsenhetsfelt, aldri falske tokentellinger. Regnskap beholder kun numerisk bruk, ikke taletekst, transkripsjoner eller bildebytes. Eksisterende fritak for uprisede bilder er uendret: en virkelig manglende bildetariff låser ikke nylig en begrenset nøkkel, og svaret utelater kostnadsoverskriften i stedet for å erklære samtalen gratis. En svikt i prissettingsbutikken beholder fortsatt bruksbevis for feillukket håndhevelse.
+
+Ingen historisk speech/image avgift er oppfunnet eller gjenfylt. Leverandørfakturering forblir referansen for fakturaer og for samtaler hvis kostnad ikke ble rapportert.
+
 ---
 
 ## Kontrollpanel: Kostnader-siden

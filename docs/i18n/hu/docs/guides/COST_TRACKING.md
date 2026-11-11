@@ -104,6 +104,16 @@ A költségek előnyben részesítik a pontos szolgáltató által bejelentett d
 
 Ez csak előremutató könyvelés. A régi OCR/embedding -hívások, amelyek soha nem írtak használati előzményeket, nem rekonstruálhatók ebből az áttelepítésből. A katalógus becslései USD becslések, nem számlák, és nem tartalmazzák a valutaváltást, az adókat vagy a kedvezményeket.
 
+### Beszéd és képek
+
+- A sikeres `/v1/audio/transcriptions`, `/v1/audio/speech` és képgenerálási kísérletek megosztják a numerikus elszámolást. A közvetlen és kombinált hívások a hívó fél API gombját és a kiválasztott kapcsolatot hordozzák; a kombinált csomagoló soha nem ad hozzá második terhelést.
+- A szolgáltató által jelentett USD felülmúlja a katalógusbecslést, beleértve az explicit nulla díjat. A OpenRouterJSON `usage.cost` `cost_usd`-re van normalizálva. Ellenkező esetben a mért tokenek tokenárakat, az átírási másodpercek másodpercenkénti árat, a beszédbevitel Unicode karakterszámokat, az átalányáras képek pedig a ténylegesen visszaadott számot használják, nem a kért `n`.
+- Bináris OpenRouter TTS nincs JSON használati törzse. A hang befejezése vagy a hívó fél megszakítása után OmniRoute lekérdezi ID generációját a készüléken **azonos** konfigurált OpenRouter eredet. A EU kérés soha nem esik vissza a globális eredetre. Ez egy korlátozott, csak olvasható keresés; a szintézist nem próbálják újra elszámolni. A számlázási rekordok a hang befejezése után jelenhetnek meg: a keresési újrapróbálkozások a háttérben futnak körülbelül 52 másodpercig, beleértve a hálózati határidőket is.
+- A keresés során a hangválasznak `X-OmniRoute-Cost-Status: pending` van, és nincs válaszköltség fejléc. Végső terhelése az egyeztetés után megjelenik a használati előzményekben, az analitikában és a kulcskönyvben. Ha a metaadatok nem állnak rendelkezésre, a rendszer egy konfigurált tarifa-pillanatképet használ; ellenkező esetben a költségek ismeretlenek maradnak.
+- A másodpercek, a karakterek és a képek számának külön számlázási egységmezője van, soha nem hamis tokenszám. A könyvelés csak a numerikus felhasználást tartja meg, a beszédszöveget, az átiratokat vagy a képbájtokat nem. A meglévő árazatlan képmentességek változatlanok: a valóban hiányzó képtarifa nem zár újonnan egy korlátozott kulcsot, és a válasz elhagyja a költségfejlécet, ahelyett, hogy a hívást ingyenesnek nyilvánítaná. Az árképzési bolt meghibásodása továbbra is megőrzi a használati bizonyítékot a hibamentes végrehajtáshoz.
+
+A történelmi speech/image töltést nem találták ki vagy töltik vissza. A szolgáltató számlázása marad a referencia a számlák és a nem jelentett hívások esetében.
+
 ---
 
 ## Irányítópult: a Költségek oldal

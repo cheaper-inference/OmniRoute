@@ -104,6 +104,16 @@ Izmaksas dod priekšroku precīzai pakalpojumu sniedzēja norādītai maksai (`p
 
 Šī ir tikai uz priekšu vērsta grāmatvedība. Vecos OCR/embedding zvanus, kas nekad nav uzrakstījuši lietošanas vēsturi, nevar rekonstruēt no šīs migrācijas. Kataloga aprēķini ir USD aprēķini, nevis rēķins, un tie neietver valūtas konvertāciju, nodokļus vai atlaides.
 
+### Runa un attēli
+
+- Veiksmīgiem `/v1/audio/transcriptions`, `/v1/audio/speech` un attēlu ģenerēšanas mēģinājumiem ir kopīga skaitliskā uzskaite. Tiešajiem un kombinētajiem zvaniem ir zvanītāja API atslēga un izvēlētais savienojums; kombinētais iesaiņotājs nekad nepievieno otro debetu.
+- Pakalpojumu sniedzēja ziņotais USD pārspēj kataloga aprēķinu, tostarp skaidru nulles maksu. OpenRouterJSON `usage.cost` ir normalizēts uz `cost_usd`. Pretējā gadījumā izmērītajos marķieros tiek izmantotas marķieru cenas, transkripcijas sekundēs tiek izmantotas sekundes cenas, runas ievadei tiek izmantots unikoda rakstzīmju skaits, un vienotas cenas attēlos tiek izmantots faktiski atgrieztais skaitlis, nevis pieprasītais `n`.
+- Binārais OpenRouter TTS nav JSON lietojuma pamatteksta. Kad audio ir pabeigta vai zvanītājs atceļ, OmniRoute vaicā tās paaudzes ID uz **tas pats** konfigurēta OpenRouter izcelsme. EU pieprasījums nekad neattiecas uz globālo izcelsmi. Šis ir ierobežots, tikai lasāms uzmeklējums; sintēze netiek atkārtoti mēģināta uzskaitei. Norēķinu ieraksti var parādīties pēc tam, kad audio ir beidzies: uzmeklēšanas atkārtotie mēģinājumi tiek veikti fonā aptuveni 52 sekundes, ieskaitot tīkla termiņus.
+- Šīs uzmeklēšanas laikā audio atbildei ir `X-OmniRoute-Cost-Status: pending` un nav atbildes maksas galvenes. Tās pēdējā maksa pēc saskaņošanas parādās lietošanas vēsturē, analīzē un atslēgu grāmatā. Ja metadati nav pieejami, tiek izmantots konfigurēts tarifa momentuzņēmums; pretējā gadījumā izmaksas paliek nezināmas.
+- Sekunžu, rakstzīmju un attēlu skaitam ir atsevišķi norēķinu vienības lauki, nekad nav norādīti viltoti marķieri. Grāmatvedība saglabā tikai skaitlisko lietojumu, nevis runas tekstu, atšifrējumus vai attēlu baitus. Esošie bezcenas attēlu izņēmumi ir nemainīgi: patiesi trūkstošais attēla tarifs nebloķē ierobežotu atslēgu, un atbildē tiek izlaista izmaksu galvene, nevis paziņots, ka zvans ir bezmaksas. Cenu noteikšanas veikala kļūmes gadījumā joprojām tiek saglabāti lietojuma pierādījumi, lai veiktu izpildi bez atteices.
+
+Nekāda vēsturiskā speech/image maksa nav izgudrota vai aizpildīta. Pakalpojumu sniedzēja norēķini joprojām ir atsauce rēķiniem un zvaniem, par kuriem maksa netika ziņots.
+
 ---
 
 ## Informācijas panelis: lapa Izmaksas

@@ -109,6 +109,16 @@ Die Kosten umfassen eine genaue vom Anbieter gemeldete Gebühr (`provider_cost_u
 
 Hierbei handelt es sich um eine reine Vorwärtsrechnung. Alte OCR/embedding Aufrufe, die nie einen Nutzungsverlauf geschrieben haben, können aus dieser Migration nicht rekonstruiert werden. Katalogschätzungen sind USD Schätzungen, keine Rechnungen und beinhalten keine Währungsumrechnung, Steuern oder Rabatte.
 
+### Sprache und Bilder
+
+- Erfolgreiche `/v1/audio/transcriptions`, `/v1/audio/speech` und Bildgenerierungsversuche teilen sich die numerische Rechnungslegung. Direkt- und Combo-Anrufe tragen die API Taste des Anrufers und die ausgewählte Verbindung; Ein Combo-Wrapper fügt niemals eine zweite Belastung hinzu.
+- Die vom Anbieter gemeldete USD gewinnt gegenüber einer Katalogschätzung, einschließlich einer expliziten Nullgebühr. JSON `usage.cost` von OpenRouter wird auf `cost_usd` normalisiert. Andernfalls verwenden gemessene Token Token-Preise, Transkriptionssekunden verwenden Sekundenpreise, Spracheingaben verwenden Unicode-Zeichenanzahlen und Pauschalpreisbilder verwenden die tatsächlich zurückgegebene Anzahl, nicht den angeforderten `n`.
+- Binärer OpenRouter TTS hat keinen JSON Nutzungskörper. Nachdem der Ton beendet ist oder der Anrufer abgebrochen hat, fragt OmniRoute seine Generierungs ID auf dem ab **Dasselbe** konfigurierter OpenRouter Ursprung. Eine EU Anfrage greift niemals auf den globalen Ursprung zurück. Dies ist eine begrenzte, schreibgeschützte Suche. Die Synthese wird für die Buchhaltung nicht wiederholt. Abrechnungsdatensätze können angezeigt werden, nachdem die Audiowiedergabe beendet ist: Suchversuche werden bis zu etwa 52 Sekunden lang im Hintergrund ausgeführt, einschließlich Netzwerkfristen.
+- Während dieser Suche verfügt die Audioantwort über `X-OmniRoute-Cost-Status: pending` und keinen Antwortkosten-Header. Die endgültige Gebühr erscheint nach dem Abgleich im Nutzungsverlauf, in der Analyse und im Hauptbuch. Wenn Metadaten nicht verfügbar sind, wird ein konfigurierter Tarif-Snapshot verwendet; andernfalls bleiben die Kosten unbekannt.
+- Sekunden-, Zeichen- und Bildanzahlen verfügen über separate Abrechnungseinheitenfelder, niemals gefälschte Token-Zählungen. Bei der Buchhaltung werden nur numerische Verwendungen gespeichert, keine Sprachtexte, Transkripte oder Bildbytes. Bestehende Ausnahmen für unbezahlte Bilder bleiben unverändert: Ein tatsächlich fehlender Bildtarif sperrt einen begrenzten Schlüssel nicht erneut, und in der Antwort wird der Kostenkopf weggelassen, anstatt den Anruf als kostenlos zu erklären. Bei einem Preisspeicherfehler bleiben weiterhin Nutzungsnachweise für die Durchsetzung bei Fail-Closing erhalten.
+
+Es wird keine historische speech/image Gebühr erfunden oder aufgefüllt. Die Rechnungsstellung des Anbieters bleibt die Referenz für Rechnungen und für Anrufe, deren Gebühr nicht gemeldet wurde.
+
 ---
 
 ## Dashboard: die Kostenseite

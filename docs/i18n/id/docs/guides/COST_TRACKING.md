@@ -105,6 +105,16 @@ Biaya lebih memilih biaya yang dilaporkan penyedia secara tepat (`provider_cost_
 
 Ini adalah akuntansi forward-only. Panggilan OCR/embedding lama yang tidak pernah menulis riwayat penggunaan tidak dapat direkonstruksi dari migrasi ini. Perkiraan katalog adalah perkiraan USD, bukan faktur, dan tidak termasuk konversi mata uang, pajak, atau diskon.
 
+### Pidato dan gambar
+
+- Upaya `/v1/audio/transcriptions`, `/v1/audio/speech` dan pembuatan gambar yang berhasil berbagi penghitungan numerik. Panggilan langsung dan kombo membawa kunci API pemanggil dan koneksi yang dipilih; pembungkus kombo tidak pernah menambahkan debit kedua.
+- USD yang dilaporkan penyedia menang atas perkiraan katalog, termasuk biaya nol yang eksplisit. OpenRouterJSON `usage.cost` dinormalisasi menjadi `cost_usd`. Jika tidak, token yang diukur menggunakan harga token, detik transkripsi menggunakan harga per detik, masukan ucapan menggunakan jumlah karakter Unicode, dan gambar harga tetap menggunakan nomor yang sebenarnya dikembalikan, bukan `n` yang diminta.
+- Biner OpenRouter TTS tidak memiliki badan penggunaan JSON. Setelah audio selesai atau penelepon membatalkan, OmniRoute menanyakan generasi ID di **sama** asal OpenRouter yang dikonfigurasi. Permintaan EU tidak pernah kembali ke asal global. Ini adalah pencarian terbatas dan hanya-baca; sintesis tidak dicoba ulang untuk akuntansi. Catatan penagihan dapat muncul setelah audio selesai: percobaan ulang pencarian dijalankan di latar belakang hingga sekitar 52 detik, termasuk tenggat waktu jaringan.
+- Selama pencarian tersebut, respons audio memiliki `X-OmniRoute-Cost-Status: pending` dan tidak ada header biaya respons. Tagihan akhirnya muncul dalam riwayat penggunaan, analitik, dan buku besar setelah rekonsiliasi. Jika metadata tidak tersedia, snapshot tarif yang dikonfigurasi akan digunakan; jika tidak, biayanya tetap tidak diketahui.
+- Detik, jumlah karakter dan gambar memiliki bidang unit penagihan terpisah, tidak pernah memalsukan jumlah token. Akuntansi hanya mempertahankan penggunaan numerik, bukan teks ucapan, transkrip, atau byte gambar. Pengecualian gambar tanpa harga yang ada tidak berubah: tarif gambar yang benar-benar hilang tidak lagi mengunci kunci terbatas, dan responsnya menghilangkan header biaya daripada menyatakan panggilan itu gratis. Kegagalan penyimpanan harga masih menyimpan bukti penggunaan untuk penegakan yang gagal-ditutup.
+
+Tidak ada muatan speech/image historis yang ditemukan atau diisi ulang. Tagihan penyedia tetap menjadi referensi untuk faktur dan panggilan yang biayanya tidak dilaporkan.
+
 ---
 
 ## Dasbor: halaman Biaya

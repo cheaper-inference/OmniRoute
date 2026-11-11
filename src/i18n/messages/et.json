@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "Kasutusajalugu (päevades)",
     "retentionMemoryEntries": "Mälukirjed (päevades)",
     "retentionXpAuditLog": "XP auditilogi (päevades)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Salvesta säilitussätted",
     "storageAutoVacuumMode": "Automaatse VACUUM-i režiim",
     "storageScheduledVacuum": "Ajastatud VACUUM",

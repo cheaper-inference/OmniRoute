@@ -36,6 +36,7 @@ import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptW
 import { filterChatSelectableModels } from "../modelEndpointPolicy.ts";
 import { DEFAULT_INTENT_CONFIG, type IntentClassifierConfig } from "../intentClassifier.ts";
 import { getTaskFitness } from "../autoCombo/taskFitness.ts";
+import { stripHarnessWrappers } from "../specificityRules.ts";
 import {
   calculateFactors,
   calculateScore,
@@ -177,9 +178,9 @@ export function extractPromptForIntent(body: Record<string, unknown> | null | un
   const fromMessages = Array.isArray(body.messages)
     ? [...body.messages].reverse().find((m) => isRecord(m) && m.role === "user")
     : null;
-  if (isRecord(fromMessages)) return toTextContent(fromMessages.content);
+  if (isRecord(fromMessages)) return stripHarnessWrappers(toTextContent(fromMessages.content));
 
-  if (typeof body.input === "string") return body.input;
+  if (typeof body.input === "string") return stripHarnessWrappers(body.input);
   if (Array.isArray(body.input)) {
     const text = body.input
       .map((item) => {
@@ -190,10 +191,10 @@ export function extractPromptForIntent(body: Record<string, unknown> | null | un
       })
       .filter(Boolean)
       .join("\n");
-    if (text) return text;
+    if (text) return stripHarnessWrappers(text);
   }
 
-  if (typeof body.prompt === "string") return body.prompt;
+  if (typeof body.prompt === "string") return stripHarnessWrappers(body.prompt);
   return "";
 }
 

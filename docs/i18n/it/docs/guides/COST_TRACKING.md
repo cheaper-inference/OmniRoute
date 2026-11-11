@@ -107,6 +107,16 @@ I costi preferiscono un addebito esatto riportato dal fornitore (`provider_cost_
 
 Questa è la contabilità forward-only. Le vecchie chiamate OCR/embedding che non hanno mai scritto la cronologia di utilizzo non possono essere ricostruite da questa migrazione. Le stime del catalogo sono stime USD, non una fattura e non includono conversione di valuta, tasse o sconti.
 
+### Discorso e immagini
+
+- I tentativi `/v1/audio/transcriptions`, `/v1/audio/speech` e di generazione di immagini riusciti condividono la contabilità numerica. Le chiamate dirette e combinate trasportano il tasto API del chiamante e la connessione selezionata; un wrapper combinato non aggiunge mai un secondo addebito.
+- USD segnalata dal fornitore vince sulla stima del catalogo, incluso un esplicito costo zero. `usage.cost` JSON OpenRouter è normalizzato in `cost_usd`. In caso contrario, i token misurati utilizzano i prezzi dei token, i secondi di trascrizione utilizzano i prezzi al secondo, l'input vocale utilizza il conteggio dei caratteri Unicode e le immagini a prezzo fisso utilizzano il numero effettivamente restituito, non lo `n` richiesto.
+- OpenRouter binario TTS non ha un corpo di utilizzo JSON. Una volta completato l'audio o annullato dal chiamante, OmniRoute interroga il suo ID di generazione sul file **Stesso** origine OpenRouter configurata. Una richiesta EU non ritorna mai all'origine globale. Si tratta di una ricerca limitata e di sola lettura; la sintesi non viene ritentata per la contabilità. I record di fatturazione possono essere visualizzati al termine dell'audio: i tentativi di ricerca vengono eseguiti in background per un massimo di circa 52 secondi, comprese le scadenze di rete.
+- Durante tale ricerca, la risposta audio presenta `X-OmniRoute-Cost-Status: pending` e nessuna intestazione del costo della risposta. L'addebito finale viene visualizzato nella cronologia di utilizzo, nell'analisi e nel registro delle chiavi dopo la riconciliazione. Se i metadati non sono disponibili, viene utilizzata un'istantanea tariffaria configurata; altrimenti il costo rimane sconosciuto.
+- I conteggi dei secondi, dei caratteri e delle immagini hanno campi separati per le unità di fatturazione, mai conteggi di token falsi. La contabilità conserva solo l'utilizzo numerico, non il testo vocale, le trascrizioni o i byte di immagini. Le esenzioni esistenti per le immagini senza prezzo rimangono invariate: una tariffa per immagini effettivamente mancante non blocca nuovamente una chiave limitata e la risposta omette l'intestazione del costo anziché dichiarare la chiamata gratuita. Un errore nell'archivio prezzi conserva ancora prove di utilizzo per l'applicazione con chiusura in caso di errore.
+
+Nessun addebito storico speech/image viene inventato o riempito. La fatturazione al fornitore resta il riferimento per le fatture e per le chiamate il cui addebito non è stato riportato.
+
 ---
 
 ## Dashboard: la pagina Costi

@@ -152,6 +152,36 @@ This is forward-only accounting. Old OCR/embedding calls that never wrote usage
 history cannot be reconstructed from this migration. Catalogue estimates are USD
 estimates, not an invoice, and do not include currency conversion, tax or discounts.
 
+### Speech and images
+
+- Successful `/v1/audio/transcriptions`, `/v1/audio/speech` and image-generation
+  attempts share numerical accounting. Direct and combo calls carry the caller's
+  API key and the selected connection; a combo wrapper never adds a second debit.
+- Provider-reported USD wins over a catalogue estimate, including an explicit
+  zero charge. OpenRouter's JSON `usage.cost` is normalized to `cost_usd`.
+  Otherwise, measured tokens use token prices, transcription seconds use
+  per-second prices, speech input uses Unicode character counts, and flat-price
+  images use the number actually returned, not the requested `n`.
+- Binary OpenRouter TTS has no JSON usage body. After the audio completes or the
+  caller cancels, OmniRoute queries its generation ID on the **same** configured
+  OpenRouter origin. An EU request never falls back to the global origin. This is
+  a bounded, read-only lookup; synthesis is not retried for accounting.
+  Billing records can appear after the audio has finished: lookup retries run
+  in the background for up to about 52 seconds, including network deadlines.
+- During that lookup, the audio response has `X-OmniRoute-Cost-Status: pending`
+  and no response-cost header. Its final charge appears in usage history,
+  analytics and the key ledger after reconciliation. If metadata is unavailable,
+  a configured tariff snapshot is used; otherwise the cost stays unknown.
+- Seconds, characters and image counts have separate billing-unit fields, never
+  fake token counts. Accounting retains only numerical usage, not speech text,
+  transcripts or image bytes. Existing unpriced-image exemptions are unchanged:
+  a genuinely missing image tariff does not newly lock a limited key, and the
+  response omits the cost header rather than declaring the call free. A pricing
+  store failure still retains usage evidence for fail-closed enforcement.
+
+No historical speech/image charge is invented or backfilled. Provider billing
+remains the reference for invoices and for calls whose charge was not reported.
+
 ---
 
 ## Dashboard: the Costs page

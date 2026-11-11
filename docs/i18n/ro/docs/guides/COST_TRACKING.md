@@ -104,6 +104,16 @@ Costurile preferă o taxă exactă raportată de furnizor (`provider_cost_usd`),
 
 Aceasta este o contabilitate forward. Vechile apeluri OCR/embedding care nu au scris niciodată istoricul utilizării nu pot fi reconstruite din această migrare. Estimările de catalog sunt estimări USD, nu o factură și nu includ conversia valutară, taxele sau reducerile.
 
+### Discurs și imagini
+
+- Încercările reușite `/v1/audio/transcriptions`, `/v1/audio/speech` și de generare de imagini au în comun contabilitatea numerică. Apelurile directe și combinate poartă cheia API a apelantului și conexiunea selectată; un pachet combo nu adaugă niciodată un al doilea debit.
+- USD raportat de furnizor câștigă o estimare de catalog, inclusiv o taxă explicită zero. OpenRouterJSON al lui `usage.cost` este normalizat la `cost_usd`. În caz contrar, jetoanele măsurate folosesc prețuri de simboluri, secundele de transcriere folosesc prețuri pe secundă, introducerea vocală utilizează numărul de caractere Unicode, iar imaginile cu preț fix utilizează numărul returnat efectiv, nu `n` solicitat.
+- OpenRouter binar TTS nu are un corp de utilizare JSON. După terminarea sunetului sau după ce apelantul se anulează, OmniRoute interogează generația sa ID pe **aceleaşi** originea OpenRouter configurată. O solicitare EU nu revine niciodată la originea globală. Aceasta este o căutare limitată, numai pentru citire; sinteza nu este reîncercată pentru contabilitate. Înregistrările de facturare pot apărea după terminarea sunetului: încercările de căutare se execută în fundal timp de până la aproximativ 52 de secunde, inclusiv termenele limită ale rețelei.
+- În timpul acelei căutări, răspunsul audio are `X-OmniRoute-Cost-Status: pending` și niciun antet pentru costul răspunsului. Taxa sa finală apare în istoricul utilizării, analize și registrul cheie după reconciliere. Dacă metadatele nu sunt disponibile, se utilizează un instantaneu de tarif configurat; altfel costul rămâne necunoscut.
+- Numărările de secunde, caractere și imagini au câmpuri separate pentru unități de facturare, niciodată numărătoare de simboluri false. Contabilitatea păstrează doar utilizarea numerică, nu textul vorbirii, transcrierile sau octeții de imagine. Scutirile existente pentru imagini fără preț sunt neschimbate: un tarif de imagine care lipsește cu adevărat nu blochează nou o cheie limitată, iar răspunsul omite antetul de cost în loc să declare apelul gratuit. O defecțiune a unui magazin de prețuri păstrează în continuare dovezile de utilizare pentru aplicarea în mod neînchis.
+
+Nicio taxă istorică speech/image nu este inventată sau completată. Facturarea furnizorului rămâne referința pentru facturi și pentru apelurile a căror taxă nu a fost raportată.
+
 ---
 
 ## Tablou de bord: pagina Costuri

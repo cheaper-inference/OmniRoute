@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "ব্যবহারের ইতিহাস (দিন)",
     "retentionMemoryEntries": "মেমরি এন্ট্রি (দিন)",
     "retentionXpAuditLog": "XP অডিট লগ (দিন)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "রিটেনশন সেটিংস সংরক্ষণ করুন",
     "storageAutoVacuumMode": "অটো ভ্যাকুয়াম মোড",
     "storageScheduledVacuum": "নির্ধারিত ভ্যাকুয়াম",

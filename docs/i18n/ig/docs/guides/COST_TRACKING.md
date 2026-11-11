@@ -104,6 +104,16 @@ A na-ebu ụzọ ahazi aha ụdịdị (ntụgharị ụzọ ndị na-eweta ụz
 
 Nke a bụ naanị ndekọ ego n'ihu. Enweghị ike iwulite oku OCR/embedding ochie nke na-edebeghị akụkọ ihe mere eme ojiji site na mbugharị a. Atụmatụ katalọgụ bụ atụmatụ USD, ọ bụghị akwụkwọ ọnụahịa, na etinyeghị mgbanwe ego, ụtụ isi ma ọ bụ mbelata.
 
+### Okwu na onyonyo
+
+- `/v1/audio/transcriptions` na-aga nke ọma, `/v1/audio/speech` na mbọ-ọgbọ onyonyo na-ekekọrịta ndekọ ọnụ ọgụgụ. Kpọmkwem na oku combo na-ebu igodo API onye ọkpụkpọ na njikọ ahọpụtara; ihe mkpuchi combo anaghị atụkwasị ụgwọ ụgwọ nke abụọ.
+- USD nke onye na-eweta na-akọ na-emeri atụmatụ katalọgụ, gụnyere ụgwọ efu efu. JSON nke OpenRouter `usage.cost` na-eme ka ọ bụrụ `cost_usd`. Ma ọ bụghị ya, akara ndị a tụrụ atụ na-eji ọnụ ahịa token, nkeji ntụgharị ederede na-eji ọnụ ahịa nkeji nke abụọ, ntinye okwu na-eji ọnụọgụ mkpụrụedemede Unicode, na onyonyo ọnụ ala na-eji ọnụọgụ eweghachiri n'ezie, ọ bụghị `n` a rịọrọ.
+- ọnụọgụ abụọ OpenRouter TTS enweghị ahụ ojiji JSON. Mgbe audio mechara ma ọ bụ onye na-akpọ oku kagburu, OmniRoute jụrụ ọgbọ ya ID na **otu** ahaziri mmalite OpenRouter. Arịrịọ EU anaghị ada azụ na mmalite zuru ụwa ọnụ. Nke a bụ nlebanya nwere oke, naanị ọgụgụ; A naghị anwale njikọ maka ngụkọ. Ndekọ ịgba ụgwọ nwere ike ịpụta ka emechara ọdịyo ahụ: nyochagharị na-agba ọsọ n'azụ ruo ihe dị ka sekọnd 52, gụnyere oge njedebe netwọkụ.
+- N'oge nleba anya ahụ, nzaghachi ọdịyo nwere `X-OmniRoute-Cost-Status: pending` na enweghị isi okwu nzaghachi-ọnụ. Ebubo ikpeazụ ya pụtara na akụkọ ojiji, nyocha na akwụkwọ ndekọ aha mgbe emechara ya. Ọ bụrụ na metadata adịghị, a na-eji foto tarifu ahaziri ahazi; ma ọ bụghị ya, ọnụ ahịa na-anọ amaghị.
+- Sekọnd, mkpụrụedemede na ọnụ ọgụgụ onyonyo nwere mpaghara ịgba ụgwọ dị iche iche, ọ dịghị mgbe ọnụọgụ token adịgboroja. Akaụntụ na-ejigide naanị ojiji ọnụọgụ, ọ bụghị ederede okwu, transcript ma ọ bụ bytes onyonyo. Mwepu onyonyo enweghị ọnụ ahịa dị adị anaghị agbanwe agbanwe: tarifu onyonyo na-efu efu anaghị ekpochi igodo nwere oke ọhụrụ, yana nzaghachi na-ewepụ nkụnye eji isi mee ọnụ ahịa karịa ikwuwapụta oku a n'efu. Ọdịda ụlọ ahịa ọnụahịa ka na-ejigide akaebe ojiji maka mmanye emechiri emechi.
+
+Ọ nweghị ụgwọ speech/image akụkọ ihe mere eme echepụtara ma ọ bụ mejupụta azụ. Ịgba ụgwọ ndị na-enye ndị na-eweta ọrụ ka bụ ntụaka maka akwụkwọ ọnụahịa yana maka oku nke akwụghị ụgwọ ya.
+
 ---
 
 ## Dashboard: ibe Costs

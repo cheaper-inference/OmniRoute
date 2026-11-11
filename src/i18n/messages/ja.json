@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "利用履歴（日）",
     "retentionMemoryEntries": "メモリエントリ (日)",
     "retentionXpAuditLog": "XP監査ログ (日)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "保持設定を保存",
     "storageAutoVacuumMode": "自動真空モード",
     "storageScheduledVacuum": "スケジュールされたバキューム",

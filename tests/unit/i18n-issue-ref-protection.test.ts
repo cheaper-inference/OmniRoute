@@ -144,3 +144,32 @@ test("translateBody fails the chunk instead of shipping a corrupted issue refere
     /failed validation \(google\): issue refs/
   );
 });
+
+test("maskInline preserves repository-qualified issue references", () => {
+  const source = "Relay fixes 9router#1360 and decolua/9router#1437; C#7 stays prose.";
+  const masked = google.maskInline(source);
+  assert.deepEqual(
+    masked.tokens.map((token: { raw: string }) => token.raw),
+    ["9router#1360", "decolua/9router#1437"]
+  );
+  assert.equal(masked.restore(masked.html), source);
+});
+
+test("qualified issue references survive translator transliteration", async () => {
+  const source = "Relay fixes 9router#1360 and 9router#1437.";
+  const fetchImpl = async (_url: string, init: { body: string }) => ({
+    ok: true,
+    status: 200,
+    json: async () =>
+      new URLSearchParams(init.body)
+        .getAll("q")
+        .map((html) => html.replaceAll("Relay", "Реле").replaceAll("9router", "9роутер")),
+  });
+  const translated = await google.translateMarkdownWithGoogle(source, "bg", {
+    fetchImpl,
+    backoffMs: 1,
+  });
+  assert.ok(translated.includes("9router#1360"), translated);
+  assert.ok(translated.includes("9router#1437"), translated);
+  assert.deepEqual(runner.validateTranslatedChunk(source, translated).problems, []);
+});

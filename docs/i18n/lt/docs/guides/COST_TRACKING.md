@@ -104,6 +104,16 @@ Išlaidoms pirmenybė teikiama tiksliui teikėjo nurodytam mokesčiui (`provider
 
 Tai tik išankstinė apskaita. Seni OCR/embedding skambučiai, kurie niekada neparašė naudojimo istorijos, negali būti atkurti iš šio perkėlimo. Katalogo įvertinimai yra USD įvertinimai, o ne sąskaita faktūra ir neįtraukia valiutos konvertavimo, mokesčių ar nuolaidų.
 
+### Kalba ir vaizdai
+
+- Sėkmingi `/v1/audio/transcriptions`, `/v1/audio/speech` ir vaizdo generavimo bandymai dalijasi skaitine apskaita. Tiesioginiai ir kombinuoti skambučiai turi skambinančiojo API klavišą ir pasirinktą ryšį; kombinuotas įvynioklis niekada neprideda antrojo debeto.
+- Tiekėjo pranešta USD laimi katalogo sąmatą, įskaitant aiškų nulinį mokestį. OpenRouterJSON `usage.cost` normalizuotas į `cost_usd`. Kitu atveju išmatuoti atpažinimo ženklai naudoja prieigos raktų kainas, transkripcijos sekundės naudoja sekundės kainas, kalbos įvestis naudoja Unicode simbolių skaičių, o vienodos kainos vaizduose naudojamas faktiškai grąžintas skaičius, o ne prašomas `n`.
+- Dvejetainis OpenRouter TTS neturi JSON naudojimo turinio. Pasibaigus garsui arba skambintojui atšaukus, OmniRoute pateikia užklausą dėl savo kartos ID**tas pats** sukonfigūruota OpenRouter kilmė. EU užklausa niekada negrįžta į pasaulinę kilmę. Tai ribota, tik skaitoma paieška; sintezė nebandoma pakartotinai apskaitai. Atsiskaitymo įrašai gali būti rodomi pasibaigus garsui: peržvalgos kartojasi fone iki maždaug 52 sekundžių, įskaitant tinklo terminus.
+- Per šią peržiūrą garso atsakas turi `X-OmniRoute-Cost-Status: pending` ir jokio atsakymo mokesčio antraštės. Galutinis jo mokestis rodomas naudojimo istorijoje, analizėje ir raktų knygoje po suderinimo. Jei metaduomenys nepasiekiami, naudojamas sukonfigūruotas tarifo momentinis vaizdas; kitu atveju kaina lieka nežinoma.
+- Sekundžių, simbolių ir vaizdų skaičiai turi atskirus atsiskaitymo vieneto laukus, niekada netikrų žetonų skaičių. Apskaita išsaugo tik skaičių, o ne kalbos tekstą, nuorašus ar vaizdo baitus. Esamos neįkainoto vaizdo išimtys nesikeičia: tikrai trūkstamas vaizdo tarifas naujai neužrakina riboto rakto, o atsakyme praleidžiama išlaidų antraštė, o ne skelbiama, kad skambutis nemokamas. Kainodaros parduotuvės gedimas vis tiek išsaugo naudojimo įrodymus, kad būtų užtikrintas gedimas.
+
+Joks istorinis speech/image mokestis nėra sugalvotas ar užpildytas. Sąskaitų faktūrų ir skambučių, kurių mokesčiai nebuvo pranešta, nuoroda išlieka teikėjo atsiskaitymas.
+
 ---
 
 ## Valdymo skydelis: puslapis „Išlaidos“

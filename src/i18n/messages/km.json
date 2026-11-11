@@ -13787,6 +13787,8 @@
     "retentionUsageHistory": "ប្រវត្តិការប្រើប្រាស់ (ថ្ងៃ)",
     "retentionMemoryEntries": "ធាតុអង្គចងចាំ (ថ្ងៃ)",
     "retentionXpAuditLog": "កំណត់ហេតុសវនកម្ម XP (ថ្ងៃ)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "រក្សាទុកការកំណត់រយៈពេលរក្សាទុក",
     "storageAutoVacuumMode": "របៀប VACUUM ស្វ័យប្រវត្តិ",
     "storageScheduledVacuum": "VACUUM តាមកាលវិភាគ",
