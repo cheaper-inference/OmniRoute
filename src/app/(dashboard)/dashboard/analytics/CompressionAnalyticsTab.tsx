@@ -359,18 +359,23 @@ export default function CompressionAnalyticsTab() {
               {stats.last24h.map((entry, idx) => {
                 const countPct = (entry.count / maxCountPerHour) * 100;
                 return (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                    <div
-                      className="w-full rounded-t-sm bg-gradient-to-b from-primary to-primary/70 transition-all hover:opacity-80 cursor-pointer group relative"
-                      style={{ height: `${Math.max(countPct, 5)}%` }}
-                      title={t("compressionAnalyticsChartPoint", {
-                        hour: entry.hour,
-                        count: entry.count,
-                        tokens: entry.tokensSaved.toLocaleString(),
-                      })}
-                    >
-                      <div className="absolute -top-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-text-muted whitespace-nowrap text-center">
-                        {entry.count}
+                  <div key={idx} className="flex-1 h-full flex flex-col items-center gap-2">
+                    {/* items-end on the row leaves the column height indefinite, so the bar's %
+                        height would resolve to 0: h-full gives the column a definite height and
+                        this flex-1 wrapper a definite bar area for the % to resolve against. */}
+                    <div className="flex min-h-0 w-full flex-1 items-end">
+                      <div
+                        className="w-full rounded-t-sm bg-gradient-to-b from-primary to-primary/70 transition-all hover:opacity-80 cursor-pointer group relative"
+                        style={{ height: `${Math.max(countPct, 5)}%` }}
+                        title={t("compressionAnalyticsChartPoint", {
+                          hour: entry.hour,
+                          count: entry.count,
+                          tokens: entry.tokensSaved.toLocaleString(),
+                        })}
+                      >
+                        <div className="absolute -top-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-text-muted whitespace-nowrap text-center">
+                          {entry.count}
+                        </div>
                       </div>
                     </div>
                     <div className="text-xs text-text-muted rotate-45 origin-left">

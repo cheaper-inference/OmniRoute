@@ -652,7 +652,7 @@ export default function CacheSettingsTab() {
                 >
                   {testResult.ok ? (
                     <div className="flex items-center gap-2">
-                      <span className="font-bold">{t("semanticCacheConnectionVerified")}</span>
+                      <span className="font-semibold">{t("semanticCacheConnectionVerified")}</span>
                       <span>
                         {testResult.resolvedBaseUrl
                           ? t("semanticCacheTestSuccessVia", {
@@ -668,7 +668,7 @@ export default function CacheSettingsTab() {
                     </div>
                   ) : (
                     <div>
-                      <span className="font-bold">{t("semanticCacheConnectionFailed")} </span>
+                      <span className="font-semibold">{t("semanticCacheConnectionFailed")} </span>
                       <span>{testResult.error || t("semanticCacheUnknownError")}</span>
                     </div>
                   )}

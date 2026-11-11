@@ -238,13 +238,13 @@ export default function UsageStats() {
                   key={`${req.model}-${req.provider}-${req.account}`}
                   className="px-3 py-1.5 rounded-md bg-bg-subtle border border-primary/20 text-xs font-mono shadow-sm"
                 >
-                  <span className="text-primary font-bold">{req.model}</span>
+                  <span className="text-primary font-semibold">{req.model}</span>
                   <span className="mx-1 text-text-muted">|</span>
                   <span className="text-text-main">{req.provider}</span>
                   <span className="mx-1 text-text-muted">|</span>
                   <span className="text-text-main font-medium">{req.account}</span>
                   {req.count > 1 && (
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-primary text-accent-foreground font-bold">
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-primary text-accent-foreground font-semibold">
                       x{req.count}
                     </span>
                   )}

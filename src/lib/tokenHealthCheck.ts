@@ -950,7 +950,8 @@ export async function checkConnection(conn: any) {
   // cadence while the access token is still valid for days.
   const tokenExpiresAt = getEffectiveTokenExpiryMs(conn);
   const hasKnownExpiry = tokenExpiresAt > 0;
-  const isAboutToExpire = hasKnownExpiry && tokenExpiresAt - Date.now() < TOKEN_EXPIRY_BUFFER;
+  const refreshLeadMs = conn.provider === "chatgpt" ? 60_000 : TOKEN_EXPIRY_BUFFER;
+  const isAboutToExpire = hasKnownExpiry && tokenExpiresAt - Date.now() < refreshLeadMs;
 
   // ROTATING_REFRESH_PROVIDERS — providers whose refresh_tokens are SINGLE-USE
   // (each refresh consumes the old one and returns a new one). For these, refreshing

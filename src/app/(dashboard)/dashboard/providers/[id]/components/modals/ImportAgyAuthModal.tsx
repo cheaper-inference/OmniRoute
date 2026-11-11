@@ -397,7 +397,7 @@ function SingleSourceInput({ single }: { single: ReturnType<typeof useSingleImpo
           onChange={single.onFile}
           inputClassName={FILE_INPUT_CLASS}
         />
-        <p className="text-[11px] text-text-muted">{t("agyImportFileHint")}</p>
+        <p className="text-xs text-text-muted">{t("agyImportFileHint")}</p>
       </SegmentedPanel>
       <SegmentedPanel value="paste">
         <Textarea
@@ -478,7 +478,7 @@ function BulkSourceInput({ bulk }: { bulk: ReturnType<typeof useBulkImport> }) {
           onChange={bulk.onFiles}
           inputClassName={FILE_INPUT_CLASS}
         />
-        <p className="text-[11px] text-text-muted">{t("agyImportBulkFileHint")}</p>
+        <p className="text-xs text-text-muted">{t("agyImportBulkFileHint")}</p>
       </SegmentedPanel>
       <SegmentedPanel value="paste">
         <Textarea
@@ -508,7 +508,7 @@ function BulkStagedList({ entries }: { entries: AgyBulkEntry[] }) {
           >
             <span className="truncate">{e.name}</span>
             {e.parseError ? (
-              <span className="text-error text-[11px]">{e.parseError}</span>
+              <span className="text-error text-xs">{e.parseError}</span>
             ) : (
               <span className="text-success text-[11px]">{t("agyImportValid")}</span>
             )}
@@ -526,7 +526,7 @@ function BulkResultPanel({ result, errors }: { result: AgyBulkResult; errors: Ag
       <p className="font-semibold">{t("agyImportResults")}</p>
       <p className="text-text-muted">{t("agyImportResultsSummary", { ...result })}</p>
       {errors.map((err, i) => (
-        <p key={`${err.name}-${i}`} className="text-error text-[11px]">
+        <p key={`${err.name}-${i}`} className="text-error text-xs">
           {err.name}: {err.message}
         </p>
       ))}

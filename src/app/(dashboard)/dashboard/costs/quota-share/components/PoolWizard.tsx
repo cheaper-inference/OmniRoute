@@ -642,7 +642,7 @@ export default function PoolWizard({
               <h2 className="text-sm font-semibold text-text-main mb-0.5">
                 {t("wizardStep1Title")}
               </h2>
-              <p className="text-[11px] text-text-muted">{t("wizardStep1Subtitle")}</p>
+              <p className="text-xs text-text-muted">{t("wizardStep1Subtitle")}</p>
             </div>
 
             {/* Connection multi-select (checkboxes) */}
@@ -793,13 +793,13 @@ export default function PoolWizard({
               <h2 className="text-sm font-semibold text-text-main mb-0.5">
                 {t("wizardStep2Title")}
               </h2>
-              <p className="text-[11px] text-text-muted">{t("wizardStep2Subtitle")}</p>
+              <p className="text-xs text-text-muted">{t("wizardStep2Subtitle")}</p>
             </div>
 
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
             <div className="rounded-lg border border-border bg-bg-subtle p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase tracking-wide font-bold text-text-muted">
+                <span className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
                   {tPlans("dimensionLabel")}
                 </span>
                 <Button variant="ghost" size="sm" icon="add" onClick={addDimension}>
@@ -808,7 +808,7 @@ export default function PoolWizard({
               </div>
 
               {editDimensions.length === 0 && (
-                <div className="text-[11px] text-text-muted italic py-3 text-center">
+                <div className="text-xs text-text-muted italic py-3 text-center">
                   {tPlans("unconfiguredLabel")} — {tPlans("addDimension")}
                 </div>
               )}
@@ -900,7 +900,7 @@ export default function PoolWizard({
               <h2 className="text-sm font-semibold text-text-main mb-0.5">
                 {t("wizardStep3Title")}
               </h2>
-              <p className="text-[11px] text-text-muted">{t("wizardStep3Subtitle")}</p>
+              <p className="text-xs text-text-muted">{t("wizardStep3Subtitle")}</p>
             </div>
 
             {/* Allocation rows (ported from EditAllocationsModal) */}
@@ -979,7 +979,7 @@ export default function PoolWizard({
             {/* Add key + equal split controls */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-[11px]">
               <span
-                className={`font-bold tabular-nums ${
+                className={`font-semibold tabular-nums ${
                   totalWeight === 100
                     ? "text-success"
                     : totalWeight > 100
@@ -1072,7 +1072,7 @@ export default function PoolWizard({
             )}
 
             {error && (
-              <p role="alert" className="rounded bg-error/10 px-3 py-2 text-[11px] text-error">
+              <p role="alert" className="rounded bg-error/10 px-3 py-2 text-xs text-error">
                 {error}
               </p>
             )}

@@ -606,7 +606,7 @@ export default function RtkContextPageClient() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-text-main">{filter.name}</p>
-                          <p className="mt-0.5 text-[11px] text-text-muted">{filter.description}</p>
+                          <p className="mt-0.5 text-xs text-text-muted">{filter.description}</p>
                         </div>
                         <Checkbox
                           aria-label={filter.name}

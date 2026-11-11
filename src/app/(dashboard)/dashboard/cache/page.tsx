@@ -20,6 +20,7 @@ import SegmentedControl, {
   SegmentedPanel,
   SegmentedTabs,
 } from "@/shared/components/SegmentedControl";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
@@ -334,6 +335,7 @@ export default function CachePage() {
   const tRoot = useTranslations();
   const notify = useNotificationStore();
   const nodeMap = useProviderNodeMap();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const [stats, setStats] = useState<CacheStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -363,6 +365,13 @@ export default function CachePage() {
   }, [fetchStats]);
 
   const handleClearAll = async () => {
+    const confirmed = await requestConfirm({
+      title: t("clearAll"),
+      message: t("clearAllConfirm"),
+      confirmText: t("clearAll"),
+    });
+    if (!confirmed) return;
+
     setClearing(true);
     try {
       const res = await fetch("/api/cache", { method: "DELETE" });
@@ -795,6 +804,7 @@ export default function CachePage() {
           </div>
         </Card>
       </SegmentedPanel>
+      {confirmDialog}
     </SegmentedTabs>
   );
 }

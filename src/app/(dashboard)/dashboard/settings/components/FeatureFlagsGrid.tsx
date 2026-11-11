@@ -350,6 +350,7 @@ export default function FeatureFlagsGrid() {
             />
 
             <Select
+              native
               compact
               aria-label={t("categoryLabel", {
                 category: t(

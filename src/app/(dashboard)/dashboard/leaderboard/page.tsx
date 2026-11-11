@@ -157,7 +157,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-text-muted">{t("leaderboardYourRank")}</p>
-              <p className="text-3xl font-bold mt-1">#{myRank}</p>
+              <p className="text-3xl font-semibold mt-1">#{myRank}</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-text-muted">{tg("scope")}</p>
@@ -194,7 +194,7 @@ export default function LeaderboardPage() {
                       <p className="text-sm text-text-muted truncate" title={entry.apiKeyId}>
                         {entryLabel(entry, 8)}
                       </p>
-                      <p className="text-2xl font-bold mt-1">
+                      <p className="text-2xl font-semibold mt-1">
                         {entry.score.toLocaleString(locale)}
                       </p>
                       <p className="text-xs text-text-muted">
