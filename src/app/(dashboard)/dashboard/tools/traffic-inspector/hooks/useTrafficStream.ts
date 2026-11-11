@@ -28,6 +28,51 @@ export interface TrafficStreamActions {
   clear: () => void;
 }
 
+interface PollerDeps {
+  applyFilter: (req: InterceptedRequest) => boolean;
+  mountedRef: { current: boolean };
+  pausedRef: { current: boolean };
+  setConnected: (connected: boolean) => void;
+  setRequests: (requests: InterceptedRequest[]) => void;
+}
+
+function createPoller({
+  applyFilter,
+  mountedRef,
+  pausedRef,
+  setConnected,
+  setRequests,
+}: PollerDeps) {
+  let timer: ReturnType<typeof setInterval> | null = null;
+
+  const pollOnce = async () => {
+    try {
+      const res = await fetch(POLL_PATH, { credentials: "same-origin" });
+      if (!res.ok || !mountedRef.current || timer === null) return;
+      const body = (await res.json()) as { requests?: InterceptedRequest[] };
+      if (!Array.isArray(body.requests)) return;
+      setConnected(true);
+      if (pausedRef.current) return;
+      // The list is oldest first; the socket path shows newest first.
+      setRequests(body.requests.filter(applyFilter).reverse().slice(0, 1000));
+    } catch {
+      // A failed poll is retried on the next tick.
+    }
+  };
+
+  return {
+    start() {
+      if (timer) return;
+      timer = setInterval(pollOnce, POLL_INTERVAL_MS);
+      void pollOnce();
+    },
+    stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    },
+  };
+}
+
 export function useTrafficStream(
   filters: FiltersState | ListFilters
 ): [TrafficStreamState, TrafficStreamActions] {
@@ -39,7 +84,6 @@ export function useTrafficStream(
   const wsRef = useRef<WebSocket | null>(null);
   const backoffRef = useRef(INITIAL_BACKOFF_MS);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mountedRef = useRef(true);
   const pausedRef = useRef(false);
   const pendingRef = useRef<InterceptedRequest[]>([]);
@@ -59,31 +103,7 @@ export function useTrafficStream(
   useEffect(() => {
     mountedRef.current = true;
 
-    const stopPolling = () => {
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      pollTimerRef.current = null;
-    };
-
-    const pollOnce = async () => {
-      try {
-        const res = await fetch(POLL_PATH, { credentials: "same-origin" });
-        if (!res.ok || !mountedRef.current || pollTimerRef.current === null) return;
-        const body = (await res.json()) as { requests?: InterceptedRequest[] };
-        if (!Array.isArray(body.requests)) return;
-        setConnected(true);
-        if (pausedRef.current) return;
-        // The list is oldest first; the socket path shows newest first.
-        setRequests(body.requests.filter(applyFilter).reverse().slice(0, 1000));
-      } catch {
-        // A failed poll is retried on the next tick.
-      }
-    };
-
-    const startPolling = () => {
-      if (pollTimerRef.current) return;
-      pollTimerRef.current = setInterval(pollOnce, POLL_INTERVAL_MS);
-      void pollOnce();
-    };
+    const poller = createPoller({ applyFilter, mountedRef, pausedRef, setConnected, setRequests });
 
     const connect = () => {
       if (!mountedRef.current) return;
@@ -99,7 +119,7 @@ export function useTrafficStream(
       ws.onopen = () => {
         if (!mountedRef.current) return;
         backoffRef.current = INITIAL_BACKOFF_MS;
-        stopPolling();
+        poller.stop();
         setConnected(true);
       };
 
@@ -140,7 +160,7 @@ export function useTrafficStream(
       ws.onclose = () => {
         if (!mountedRef.current) return;
         setConnected(false);
-        startPolling();
+        poller.start();
         const delay = Math.min(backoffRef.current, MAX_BACKOFF_MS);
         backoffRef.current = Math.min(backoffRef.current * BACKOFF_MULTIPLIER, MAX_BACKOFF_MS);
         reconnectTimerRef.current = setTimeout(() => {
@@ -161,7 +181,7 @@ export function useTrafficStream(
     return () => {
       mountedRef.current = false;
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-      stopPolling();
+      poller.stop();
       wsRef.current?.close();
     };
   }, [applyFilter]);

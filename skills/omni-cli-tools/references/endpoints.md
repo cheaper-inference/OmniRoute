@@ -464,7 +464,7 @@ curl http://localhost:20128/api/cli-tools/all-statuses \
 
 POST cli tools › apply
 
-Submit the original toolId, apiKey, optional baseUrl/model and optional dryRun in the JSON body. Returned content is a redacted, non-cacheable preview, not an importable configuration. A non-dry-run request writes the original generated configuration; the container write guard remains active.
+Submit the original toolId, apiKey, optional baseUrl/model and optional dryRun in the JSON body. Returned content is a redacted, non-cacheable preview, not an importable configuration. A non-dry-run request writes the original generated configuration; the container write guard remains active. A dry run also returns planFingerprint. Send it back as planFingerprint on the non-dry-run request to apply only if the target file and the generated config are unchanged since the preview; otherwise the route answers 409 with the current preview and planFingerprint and writes nothing. Omitting it keeps the old behaviour.
 
 ```bash
 curl -X POST http://localhost:20128/api/cli-tools/apply \

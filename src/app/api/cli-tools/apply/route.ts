@@ -47,7 +47,12 @@ function ensureBackup(configPath: string): string | null {
  * bytes and the redacted config it would write (which carries the merged contribution and
  * the model roster). Secret-free; an optimistic check, never authorization.
  */
-function computePlanFingerprint(toolId: string, configPath: string, safeContent: string): string {
+function computePlanFingerprint(
+  toolId: string,
+  configPathOrNull: string | null | undefined,
+  safeContent: string
+): string {
+  const configPath = configPathOrNull || "";
   let current: string;
   try {
     current = `file:${readPrivateConfigFile(configPath)}`;
@@ -58,6 +63,28 @@ function computePlanFingerprint(toolId: string, configPath: string, safeContent:
     .update(JSON.stringify([toolId, configPath, current, safeContent]))
     .digest("hex");
   return `p1:${digest.slice(0, 32)}`;
+}
+
+/**
+ * The plan the caller confirmed no longer matches the file or the request: refuse and answer
+ * with the current plan. Null when no fingerprint was sent or it still matches.
+ */
+function stalePlanRefusal(
+  planFingerprint: string | undefined,
+  currentFingerprint: string,
+  configPath: string,
+  safeContent: string
+): Response | null {
+  if (!planFingerprint || planFingerprint === currentFingerprint) return null;
+  return privateConfigResponse(
+    {
+      error: "The config changed since the preview. Review the current plan and apply again.",
+      configPath,
+      content: safeContent,
+      planFingerprint: currentFingerprint,
+    },
+    409
+  );
 }
 
 // POST /api/cli-tools/apply - Apply config for a specific tool
@@ -97,11 +124,8 @@ export async function POST(request: Request) {
     }
     const safeContent = redactGeneratedConfig(result.content || "", [apiKey]);
     const configPath = result.configPath || getCliPrimaryConfigPath(canonicalToolId);
-    const currentFingerprint = computePlanFingerprint(
-      canonicalToolId,
-      configPath || "",
-      safeContent
-    );
+    const currentFingerprint = computePlanFingerprint(canonicalToolId, configPath, safeContent);
+    const migration = result.migration ? { migration: result.migration } : {};
 
     if (dryRun) {
       return privateConfigResponse({
@@ -109,7 +133,7 @@ export async function POST(request: Request) {
         configPath: result.configPath,
         content: safeContent,
         planFingerprint: currentFingerprint,
-        ...(result.migration ? { migration: result.migration } : {}),
+        ...migration,
       });
     }
 
@@ -128,19 +152,9 @@ export async function POST(request: Request) {
       return refusal;
     }
 
-    // The plan the caller confirmed no longer matches the file or the request: refuse and
-    // answer with the current plan. Nothing awaits between this check and the write below.
-    if (planFingerprint && planFingerprint !== currentFingerprint) {
-      return privateConfigResponse(
-        {
-          error: "The config changed since the preview. Review the current plan and apply again.",
-          configPath,
-          content: safeContent,
-          planFingerprint: currentFingerprint,
-        },
-        409
-      );
-    }
+    // Nothing awaits between this check and the write below.
+    const stale = stalePlanRefusal(planFingerprint, currentFingerprint, configPath, safeContent);
+    if (stale) return stale;
 
     const backupPath = ensureBackup(configPath);
 
@@ -151,7 +165,7 @@ export async function POST(request: Request) {
       configPath,
       backupPath,
       content: safeContent,
-      ...(result.migration ? { migration: result.migration } : {}),
+      ...migration,
     });
   } catch {
     return configError(500, "Failed to apply config");
