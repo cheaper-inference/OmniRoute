@@ -532,6 +532,8 @@ test("matrix JSON is the matrix response in the export envelope", async () => {
   assert.equal(res.headers.get("x-report-truncated"), "true");
   const body = (await res.json()) as Record<string, unknown>;
   assert.ok(Number.isFinite(Date.parse(String(body.generatedAt))));
+  // Before deepEqual: it narrows body to the expected object's type.
+  assert.equal(body.truncated, true);
   assert.deepEqual(body, {
     type: "matrix",
     generatedAt: body.generatedAt,
@@ -539,7 +541,6 @@ test("matrix JSON is the matrix response in the export envelope", async () => {
     total: WIDE_PROJECTS,
     ...matrix,
   });
-  assert.equal(body.truncated, true);
 });
 
 test("sessionRequests exports every request of the session, newest first", async () => {
