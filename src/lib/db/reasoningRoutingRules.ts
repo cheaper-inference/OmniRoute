@@ -11,12 +11,9 @@ import { registerDbStateResetter } from "./stateReset";
 export type {
   ReasoningBudgetAction,
   ReasoningEffort,
-  ReasoningEffortMode,
   ReasoningRoutingRule,
   ReasoningRoutingRuleInput,
-  ReasoningRuleScope,
   ReasoningSourceEffort,
-  ReasoningTargetKind,
 } from "@/domain/persistence/reasoningRoutingRuleRepository";
 
 let cache: { version: number; rules: ReasoningRoutingRule[] } | null = null;
