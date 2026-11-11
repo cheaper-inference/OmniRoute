@@ -48,6 +48,13 @@ const REPORT: AgentSessionReport = {
     members: 2,
     projects: 2,
     lastSeenAt: "2026-09-25T10:00:00.000Z",
+    cacheHitRate: null,
+    avgLatencyMs: null,
+    p95LatencyMs: null,
+    avgTtftMs: null,
+    costPerSession: null,
+    activeMs: 0,
+    modelMs: 0,
   },
   breakdowns: {
     members: [],
@@ -57,6 +64,10 @@ const REPORT: AgentSessionReport = {
     models: [],
     accounts: [],
     daily: [],
+    branches: [],
+    errorCodes: [],
+    serviceTiers: [],
+    teams: [],
   },
 };
 
@@ -114,6 +125,9 @@ const ROW: AgentSessionReportRow = {
   tokens: TOKENS,
   windowFirstSeenAt: SESSION.firstSeenAt,
   windowLastSeenAt: SESSION.lastSeenAt,
+  activeMs: 0,
+  modelMs: 0,
+  mainModel: null,
 };
 
 const TOTALS = {

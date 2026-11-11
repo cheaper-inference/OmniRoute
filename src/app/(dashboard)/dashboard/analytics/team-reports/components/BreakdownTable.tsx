@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { Button as LinkButton } from "@omniroute/ui-kit/button";
 import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
 import {
   Table,
@@ -45,6 +46,8 @@ interface BreakdownTableProps {
   onFilter?: (key: string) => void;
   /** The empty-key row can be filtered on (as FILTER_NONE), because the dimension has a "none" filter. */
   filterNone?: boolean;
+  /** Makes a row's name open its detail panel (rows with a key only). */
+  onOpen?: (row: ReportBreakdownRow) => void;
 }
 
 function sortValue(row: ReportBreakdownRow, key: SortKey, extra: ExtraCount): string | number {
@@ -121,6 +124,7 @@ function BreakdownRow({
   showDetail,
   onFilter,
   filterNone,
+  onOpen,
 }: {
   row: ReportBreakdownRow;
   fallbackName: string;
@@ -128,13 +132,28 @@ function BreakdownRow({
   showDetail: boolean;
   onFilter?: (key: string) => void;
   filterNone: boolean;
+  onOpen?: (row: ReportBreakdownRow) => void;
 }) {
   const t = useTranslations("reports");
   const tokens = splitTokens(row.tokens);
+  const name = row.label || row.key || fallbackName;
   return (
     <TableRow>
       <TableCell className="py-2.5 px-3">
-        <div className="font-medium text-text-main">{row.label || row.key || fallbackName}</div>
+        <div className="font-medium text-text-main">
+          {onOpen && row.key ? (
+            <LinkButton
+              variant="link"
+              className="h-auto min-h-0 p-0 text-start font-medium"
+              aria-label={t("openDetails", { name })}
+              onClick={() => onOpen(row)}
+            >
+              {name}
+            </LinkButton>
+          ) : (
+            name
+          )}
+        </div>
         {showDetail && row.detail && (
           <div className="max-w-[260px] truncate font-mono text-xs text-text-muted">
             {row.detail}
@@ -182,6 +201,7 @@ export default function BreakdownTable({
   defaultSort = "cost",
   onFilter,
   filterNone = false,
+  onOpen,
 }: BreakdownTableProps) {
   const t = useTranslations("reports");
   const columns = useBreakdownColumns(nameHeader, extraCount);
@@ -225,6 +245,7 @@ export default function BreakdownTable({
             showDetail={showDetail}
             onFilter={onFilter}
             filterNone={filterNone}
+            onOpen={onOpen}
           />
         ))}
       </TableBody>

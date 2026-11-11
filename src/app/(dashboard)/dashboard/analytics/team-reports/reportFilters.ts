@@ -1,6 +1,6 @@
 /** Dashboard-side report view state and its mapping to /api/reports query strings and the page URL. */
 
-import type { ReportDimension } from "@/lib/usage/agentSessionReports";
+import type { ReportBreakdownDimension } from "@/lib/usage/agentSessionReports";
 import type { ReportFacetDimension, ReportFacetEntry } from "@/lib/db/agentSessionReports";
 
 /** Filter value meaning "the field is empty"; mirrors REPORT_FILTER_NONE in the backend. */
@@ -72,8 +72,20 @@ export const REPORT_TABS = [
   "providers",
   "models",
   "accounts",
-] as const satisfies readonly (ReportDimension | "sessions")[];
+  "branches",
+  "errorCodes",
+  "serviceTiers",
+  "teams",
+  "matrix",
+  "heatmap",
+] as const satisfies readonly (ReportBreakdownDimension | "sessions" | "matrix" | "heatmap")[];
 export type ReportTab = (typeof REPORT_TABS)[number];
+/** The tabs that are a table of one summary breakdown. */
+export type BreakdownTab = Exclude<ReportTab, "sessions" | "matrix" | "heatmap">;
+
+export function isBreakdownTab(tab: ReportTab): tab is BreakdownTab {
+  return tab !== "sessions" && tab !== "matrix" && tab !== "heatmap";
+}
 const DEFAULT_TAB: ReportTab = "members";
 
 export const SESSION_SORT_FIELDS = [

@@ -4,21 +4,25 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import type { ReportDimension } from "@/lib/usage/agentSessionReports";
 import { Button, Card, SegmentedControl } from "@/shared/components";
 
+import { BREAKDOWN_TABS, type DrillKind } from "./breakdownTabs";
 import BreakdownTable from "./components/BreakdownTable";
+import DrillPanel, { type DrillTarget } from "./components/DrillPanel";
 import FilterChips from "./components/FilterChips";
+import HeatmapView from "./components/HeatmapView";
 import KpiCards from "./components/KpiCards";
+import MatrixView from "./components/MatrixView";
 import ReportFilters from "./components/ReportFilters";
 import SessionsPanel from "./components/SessionsPanel";
+import TrendsSection from "./components/TrendsSection";
 import {
   emptyFilters,
+  isBreakdownTab,
   parseReportView,
   presetWindow,
   serializeReportView,
   withFilterValue,
-  type FilterField,
   type PresetChoice,
   type ReportFilterState,
   type ReportTab,
@@ -26,63 +30,8 @@ import {
   type TimePreset,
   REPORT_TABS,
 } from "./reportFilters";
+import { trendDimensionFor } from "./reportViews";
 import { useReportData } from "./useReportData";
-
-interface BreakdownTabConfig {
-  nameKey: string;
-  fallbackKey: string;
-  extraCount: "members" | "projects";
-  filterField?: FilterField;
-  /** The empty-key row filters by "none" (the dimension has a "No ..." filter option). */
-  filterNone?: boolean;
-  showDetail?: boolean;
-  defaultSort?: "name";
-}
-
-const BREAKDOWN_TABS: Record<ReportDimension, BreakdownTabConfig> = {
-  members: {
-    nameKey: "member",
-    fallbackKey: "unknownMember",
-    extraCount: "projects",
-    filterField: "apiKeyId",
-    filterNone: true,
-  },
-  projects: {
-    nameKey: "project",
-    fallbackKey: "noProject",
-    extraCount: "members",
-    filterField: "projectName",
-    filterNone: true,
-    showDetail: true,
-  },
-  clients: {
-    nameKey: "client",
-    fallbackKey: "unknown",
-    extraCount: "members",
-    filterField: "client",
-    filterNone: true,
-  },
-  providers: {
-    nameKey: "provider",
-    fallbackKey: "unknown",
-    extraCount: "members",
-    filterField: "provider",
-  },
-  models: {
-    nameKey: "colModel",
-    fallbackKey: "unknown",
-    extraCount: "members",
-    filterField: "model",
-  },
-  accounts: {
-    nameKey: "account",
-    fallbackKey: "unknown",
-    extraCount: "members",
-    filterField: "connectionId",
-    showDetail: true,
-  },
-  daily: { nameKey: "colDate", fallbackKey: "unknown", extraCount: "members", defaultSort: "name" },
-};
 
 export default function ReportsPageClient() {
   const t = useTranslations("reports");
@@ -97,6 +46,7 @@ export default function ReportsPageClient() {
   const [sessionOrder, setSessionOrder] = useState<SessionOrder>(initial.sessionOrder);
   const [refreshToken, setRefreshToken] = useState(0);
   const [exportNote, setExportNote] = useState<string | null>(null);
+  const [drill, setDrill] = useState<DrillTarget | null>(null);
   const { query, loading, report, failed, facets } = useReportData(filters, refreshToken);
 
   const urlQuery = useMemo(
@@ -153,13 +103,23 @@ export default function ReportsPageClient() {
     }
   };
 
-  const breakdownTab = tab === "sessions" ? null : BREAKDOWN_TABS[tab];
+  const breakdownTab = isBreakdownTab(tab) ? BREAKDOWN_TABS[tab] : null;
   const filterField = breakdownTab?.filterField;
+  const drillKind = breakdownTab?.drill;
+  const openDrill = (kind: DrillKind, key: string, label: string) => setDrill({ kind, key, label });
+  // Matrix and heatmap have no CSV of their own.
+  const exportable = tab !== "matrix" && tab !== "heatmap";
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" size="sm" icon="download" onClick={() => void exportCsv()}>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="download"
+          disabled={!exportable}
+          onClick={() => void exportCsv()}
+        >
           {t("exportCsv")}
         </Button>
         <Button size="sm" icon="refresh" onClick={() => setRefreshToken((current) => current + 1)}>
@@ -194,6 +154,14 @@ export default function ReportsPageClient() {
       )}
       {report && <KpiCards totals={report.totals} />}
 
+      <Card padding="md">
+        <TrendsSection
+          query={query}
+          dimension={trendDimensionFor(tab)}
+          refreshToken={refreshToken}
+        />
+      </Card>
+
       <div className="overflow-x-auto">
         <SegmentedControl
           size="sm"
@@ -208,19 +176,35 @@ export default function ReportsPageClient() {
         {breakdownTab ? (
           <BreakdownTable
             key={tab}
-            rows={report?.breakdowns[tab as ReportDimension] ?? []}
+            rows={report?.breakdowns[tab] ?? []}
             nameHeader={t(breakdownTab.nameKey)}
             fallbackName={t(breakdownTab.fallbackKey)}
             extraCount={breakdownTab.extraCount}
             showDetail={breakdownTab.showDetail}
             defaultSort={breakdownTab.defaultSort}
             filterNone={breakdownTab.filterNone}
+            onOpen={
+              drillKind ? (row) => openDrill(drillKind, row.key, row.label || row.key) : undefined
+            }
             onFilter={
               filterField
                 ? (key) => setFilters((current) => withFilterValue(current, filterField, key))
                 : undefined
             }
           />
+        ) : tab === "matrix" ? (
+          <MatrixView
+            query={query}
+            refreshToken={refreshToken}
+            onFilter={(pairs) =>
+              setFilters((current) =>
+                pairs.reduce((next, [field, value]) => withFilterValue(next, field, value), current)
+              )
+            }
+            onOpen={openDrill}
+          />
+        ) : tab === "heatmap" ? (
+          <HeatmapView query={query} refreshToken={refreshToken} />
         ) : (
           <SessionsPanel
             query={query}
@@ -230,6 +214,17 @@ export default function ReportsPageClient() {
           />
         )}
       </Card>
+
+      {drill && (
+        <DrillPanel
+          key={`${drill.kind}:${drill.key}`}
+          target={drill}
+          query={query}
+          refreshToken={refreshToken}
+          onClose={() => setDrill(null)}
+          onApply={(field, key) => setFilters((current) => withFilterValue(current, field, key))}
+        />
+      )}
     </div>
   );
 }

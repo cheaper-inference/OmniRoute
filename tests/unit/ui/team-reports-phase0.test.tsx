@@ -67,6 +67,13 @@ const REPORT: AgentSessionReport = {
     members: 1,
     projects: 1,
     lastSeenAt: "2026-09-25T10:00:00.000Z",
+    cacheHitRate: null,
+    avgLatencyMs: null,
+    p95LatencyMs: null,
+    avgTtftMs: null,
+    costPerSession: null,
+    activeMs: 0,
+    modelMs: 0,
   },
   breakdowns: {
     members: [breakdown("key-alice", "alice"), breakdown("")],
@@ -76,6 +83,10 @@ const REPORT: AgentSessionReport = {
     models: [breakdown("claude-sonnet"), breakdown("gpt-5")],
     accounts: [],
     daily: [],
+    branches: [],
+    errorCodes: [],
+    serviceTiers: [],
+    teams: [],
   },
 };
 
@@ -100,6 +111,9 @@ const ROW: AgentSessionReportRow = {
   tokens: TOKENS,
   windowFirstSeenAt: "2026-09-25T09:00:00.000Z",
   windowLastSeenAt: "2026-09-25T10:00:00.000Z",
+  activeMs: 0,
+  modelMs: 0,
+  mainModel: null,
 };
 
 const ALL_TIME_TOTALS: SessionReportTotals = {
