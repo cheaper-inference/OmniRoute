@@ -6,59 +6,40 @@
 
 Basen znajdujący się na terenie obiektu znajduje się na terenie obiektu **.113** pudełko (`tomni-proxmox-113`). Od 2026-10-18 każdy biegacz OmniRoute posiada **jedna rola** , jedną etykietę i budżet memory/CPU dostosowany do mierzonego obciążenia pracą. Gniazdo Turbopack dostaje to, czego potrzebuje kompilacja; pozostałe szczeliny są dobierane odpowiednio do zmierzonych wartości szczytowych. Pudełko powoduje nadmierne zaangażowanie tylko wtedy, gdy kompilacja Turbopack zbiega się z kompilacją pakietu internetowego Release-Green i zadaniem lint; Host swap (16 GB) pochłania to, a ponieważ kompilacje pull-request działają na serwerze, slot Turbopack jest przez większość czasu bezczynny:
 
-| runner               | etykieta                        | rola                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | kompilacje Turbopack: `ci.yml` `Build` (tylko push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nocna kompilacja a11y | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), kompilacja webpack                                                                                       | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`                    | zadania nocne (Schemathesis, promptfoo, garak, k6) oraz `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`                    | ta sama pula co powyżej                                                                                                                                  | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (ich repozytoria)               | Tylko zależne roboty (szczyt 155 MB każdy, 18.10.2026 r.)                                                                                                | 4 GB / 6 GB                | 200% każdy |
+| biegacz              | etykieta                        | rola                                                                                                                                                       | `MemoryHigh` / `MemoryMax`  | `CPUQuota` |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Kompilacje Turbopack : `ci.yml` `Build` (tylko push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nocna kompilacja a11y | 56 GB / 60 GB (zamień 0)    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), kompilacja pakietu internetowego                                                                           | 20 GB / 24 GB (zamień 4 GB) | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Schemathesis, Promptfoo, Garak, K6) i `quality.yml` `lint-guard`                                                                                | 12 GB / 16 GB (zamień 4 GB) | 600 %      |
+| `omniroute-113`      | `omni-light`                    | ten sam basen co powyżej                                                                                                                                   | 8 GB / 12 GB                | 400 %      |
+| OmniHeuris, OmniMind | (ich repozytoria)               | Tylko zależne roboty (szczyt 155 MB każdy, 18.10.2026 r.)                                                                                                  | 4 GB / 6 GB                 | 200% każdy |
 
 Zmierzone 2026-10-18:
 
-| zasób     | wartość                                     | znaczenie dla planowania                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ratunek   | wartość                                     | co to oznacza dla planowania                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | --------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RAM / CPU | **78 GB / 32 rdzenie**                      | wersja produkcyjna Turbopack osiągnęła szczyt na poziomie 49 GB bez limitu (`tests/unit/ci-build-bundler-webpack.test.ts`); w następnym 16.3.8 sama faza kompilacji zawiera ~ 40 GB (36 GB RSS w `next-build` plus 17 pracowników ładowarek przy 3 GB, pomiar na dzień 18.10.2026 r.); kompilacja pakietu internetowego w ~ 14–16 GB. Jedna kompilacja Turbopack + jeden pakiet internetowy pasują do siebie; dwie wersje Turbopack tego nie robią |
 | zamieniać | 16 GB                                       | `omniroute-113-5` działa z wymianą (`MemorySwapMax=0`), więc niekontrolowana kompilacja jest wycinana na końcu, zamiast zamieniać pudełko                                                                                                                                                                                                                                                                                                          |
-| `/tmp`    | **12 GB tmpfs = RAM**                       | wszystko, co jest tam przechowywane, zajmuje pamięć; pozostałości są usuwane po 3 h                                                                                                                                                                                                                                                                                                                                                                |
+| `/tmp`    | **12 GB tmpfs = RAM**                       | wszystko, co tam zaparkowane, jest pamięcią; resztki są zamiatane po 3 godzinach                                                                                                                                                                                                                                                                                                                                                                   |
 | CPU       | Zaobserwowano obciążenie 60 na 32 rdzeniach | przed limitami jedna kompilacja Turbopack (~ 1166% CPU) plus pakiet zasięgu na tym samym urządzeniu zagłodziły bicie serca innych słuchaczy (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                                                  |
-| biegacze  | **7 słuchaczy** (2026-10-28)                | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` przenosi również `omni-build`; `omniroute-113-3/-4/-8` zostało usunięte z repozytorium (2026-10-28)                                                                                                                                                                                                                                                                                         |
+| biegacze  | **7 słuchaczy** (2026-10-28)                | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` przenosi również `omni-build-60gb`; `omniroute-113-3/-4/-8` zostało usunięte z repozytorium (2026-10-28)                                                                                                                                                                                                                                                                                    |
 
 Limity znajdują się w `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` każdej jednostki (poprzednie wartości zachowywane były jako `override.conf.bak-20261018`) i zostały zastosowane na bieżąco z `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez ponownego uruchamiania, więc żadne uruchomione zadanie nie zostało dotknięte. Etykiety zmieniane są poprzez prowadnice API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), także na żywo.
 
-## Instalacja skryptu czyszczącego (jednorazowo, na serwerze)
+## Zainstaluj woźnego (jednorazowo, na skrzynce)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): co 30 min, zapisuj log do /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` jest wymagany: przed usunięciem skrypt czyszczący potwierdza, że ścieżka jest
-bezczynna, wykonując pojedynczy zrzut otwartych plików. Bez tego narzędzia niczego
-nie usuwa i informuje o tym (kod wyjścia 1). Każdą zmianę należy najpierw wypróbować
-z opcją `--dry-run` — skrypt wypisze dokładnie, co by zrobił, nie wprowadzając żadnych zmian.
+Wymagane jest `lsof` : woźny udowadnia, że ścieżka jest pusta, za pomocą jednej migawki otwartych plików przed jej usunięciem, a bez narzędzia niczego nie usuwa i mówi to (wyjście 1). Wypróbuj dowolną zmianę w `--dry-run` najpierw — drukuje dokładnie to, co by zrobił i niczego nie dotyka.
 
-Co robi przy każdym uruchomieniu: usuwa nasze pozostałości (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) po **3 godz. na tmpfs** i po 24 godz. na dysku
-w `_work/_temp`; kończy proces `next-build` starszy niż 75 min (żadne zadanie nie działa
-tak długo — 2026-08-27 jedno działało przez 70 min po tym, jak GitHub uznał jego zadanie
-za utracone); usuwa starsze niż 48 godz. katalogi robocze runnerów, których jednostka jest
-**zatrzymana**; alarmuje przy wykorzystaniu dysku ≥ 85%, wartości pamięci PSI
-`full/avg60` ≥ 10% oraz liczbie procesów nasłuchujących większej niż `MAX_ACTIVE_RUNNERS`
-(z podziałem na omniroute/inne). Kod wyjścia 1 = wymagana interwencja; przeczytaj log.
+Co robi przy każdym uruchomieniu: zamiata nasze własne resztki (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) po **3 godziny na tmpfs** i 24 h na dysku `_work/_temp`; ostrzega o `next-build` starszym niż 75 minut i utrzymuje go w działaniu; suszone śliwki 48-godzinne kasy biegaczy, których jednostka jest **zatrzymał się** ; alerty na dysku ≥ 85%, pamięć PSI `full/avg60` ≥ 10% i więcej słuchaczy niż `MAX_ACTIVE_RUNNERS` (z podziałem omniroute/other ). Wyjście 1 Wymagana uwaga = ; przeczytaj log.
 
-Reguła 75 minut nie wykrywa kompilacji, której zadanie GitHub już porzucił. Gdy
-`Runner.Listener` nie może odnowić zadania, w `_diag/Runner_*.log` pojawia się
-`POST request to …/renewjob timed out after 100 seconds`, API zgłasza zadanie jako `completed`
-(niepowodzenie) około dziesięciu minut po ostatnim udanym odnowieniu, a `next-build` nadal działa
-bez przypisanego zadania (2026-10-18: kompilacja #17066 została oznaczona jako nieudana o 19:43,
-a jej proces kompilacji pięć minut później nadal zajmował 40 GB). Potwierdź ref w najnowszym
-`_diag/Worker_*.log`, a następnie wyślij SIGTERM wyłącznie do drzewa procesów kompilacji według
-PID — `next-build`, `npm run build`, `build-next-isolated.mjs` oraz procesów roboczych `_work`.
-Nigdy nie ingeruj w `Runner.Listener`, `RunnerService.js` ani `Runner.Worker`: proces roboczy
-zgłosi zadanie jako anulowane, a listener sam wróci do trybu online.
+Sam upływ czasu nie dowodzi, że proces jest osierocony. Woźny nigdy nie wysyła sygnałów ze względu na wiek. Istniejące nazwy środowisk `ZOMBIE_BUILD_MAX_MIN` i `ZOMBIE_BUILD_COMM` są nadal obsługiwane w konfiguracjach cron. Przed oczyszczeniem podejrzanej sieroty potwierdź, że jej dokładne zadanie GitHub jest końcowe i zidentyfikuj procesy należące do tego zadania. Kiedy `Runner.Listener` nie może odnowić swojego zadania, `_diag/Runner_*.log` pokazuje `POST request to …/renewjob timed out after 100 seconds`, API zgłasza zadanie `completed` (awaria) około dziesięć minut po ostatnim pomyślnym odnowieniu, a `next-build` działa dalej bez dołączonego zadania (2026-10-18: Kompilacja #17066 nie powiodła się o 19:43, a jego kompilacja nadal utrzymywała 40 GB pięć minut później). Potwierdź ref w najnowszym `_diag/Worker_*.log`, następnie SIGTERM tylko drzewo kompilacji autorstwa PID — `next-build`, `npm run build`, `build-next-isolated.mjs` i pracowników `_work`. Nigdy nie dotykaj `Runner.Listener`, `RunnerService.js` ani `Runner.Worker`: pracownik zgłasza zadanie jako anulowane, a słuchacz sam wraca do trybu online.
 
 ## Jednostki runnerów: KillMode
 

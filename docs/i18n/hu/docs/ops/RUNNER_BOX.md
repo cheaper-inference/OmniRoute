@@ -6,63 +6,40 @@
 
 Az önálló medence a **.113** doboz (`tomni-proxmox-113`). 2026-10-18 óta minden OmniRoute futó rendelkezik **egy szerepet** , egy címkét és egy memory/CPU költségvetést, amelynek mérete megfelel a munkaterhelésének. A Turbopack slot azt kapja, amire a buildnek szüksége van; a többi rés a mért csúcsukra van méretezve. A doboz csak akkor lép túl, ha egy Turbopack build egybeesik egy Release-Green webpack összeállítással és egy szöszmunkával; A gazdagépcsere (16 GB) elnyeli ezt, és mivel a pull-request buildek hosztolva futnak, a Turbopack slot az idő nagy részében tétlen:
 
-| runner               | címke                           | szerep                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-buildek: `ci.yml` `Build` (csak push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, az éjszakai a11y-build | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-build                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`                    | éjszakai futások (Schemathesis, promptfoo, garak, k6) és a `quality.yml` `lint-guard`                                                                 | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`                    | ugyanaz a pool, mint fent                                                                                                                             | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (a repóik)                      | Csak Dependabot (csúcs 155 MB egyenként, 2026-10-18)                                                                                                  | 4 GB / 6 GB                | 200% mindegyik |
+| futó                 | címke                           | szerep                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack buildek: `ci.yml` `Build` (csak push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, az éjszakai a11y build | 56 GB / 60 GB (csere 0)    | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack összeállítás                                                                                   | 20 GB / 24 GB (csere 4 GB) | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | éjszakai lapok (Schemathesis, promptfoo, garak, k6) és `quality.yml` `lint-guard`                                                                      | 12 GB / 16 GB (csere 4 GB) | 600 %          |
+| `omniroute-113`      | `omni-light`                    | ugyanaz a medence, mint fent                                                                                                                           | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (a repóik)                      | Csak Dependabot (csúcs 155 MB egyenként, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200% mindegyik |
 
 2026-10-18-án mérve:
 
-| erőforrás | érték                               | mit jelent ez az ütemezés szempontjából                                                                                                                                                                                                                                                                                                                            |
+| forrás    | érték                               | mit jelent az ütemezés szempontjából                                                                                                                                                                                                                                                                                                                               |
 | --------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RAM / CPU | **78 GB / 32 mag**                  | egy Turbopack gyártási build 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`) volt; Következő 16.3.8-án a fordítási fázis önmagában ~ 40 GB (36 GB RSS `next-build` ban plusz 17 rakodómunkás 3 GB nél, mérve 2026-10-18); webpack build a ~ 14–16 GB címen. Egy Turbopack + egy webpack összeállítás illeszkedik egymáshoz; két Turbopack build nem |
 | csere     | 16 GB                               | `omniroute-113-5` csereleállítással (`MemorySwapMax=0`) fut, így az elszabadult buildet a kupaknál levágják a doboz cseréje helyett                                                                                                                                                                                                                                |
-| `/tmp`    | **12 GB tmpfs = RAM**               | minden, amit itt tárolunk, memóriát foglal; a maradványokat 3 óra után eltávolítja a rendszer                                                                                                                                                                                                                                                                      |
+| `/tmp`    | **12 GB tmpfs = RAM**               | bármi, ami ott parkolt, emlék; a maradékot 3 óra múlva seperjük                                                                                                                                                                                                                                                                                                    |
 | CPU       | 60 terhelés figyelhető meg 32 magon | a kvóták előtt egy Turbopack build (~ 1166 % CPU) és egy lefedettségcsomag ugyanazon a dobozon kiéheztette a többi hallgató szívverését (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                      |
-| futók     | **7 hallgató** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` `omni-build` is hordozza; `omniroute-113-3/-4/-8` törölve lett a repóból (2026-10-28)                                                                                                                                                                                                                       |
+| futók     | **7 hallgató** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` `omni-build-60gb` is hordozza; `omniroute-113-3/-4/-8` törölve lett a repóból (2026-10-28)                                                                                                                                                                                                                  |
 
 A határértékek az egyes egységek `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` -jában élnek (a korábbi értékek `override.conf.bak-20261018` ként vannak megtartva), és élőben alkalmazták `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — újraindítás nélkül, így nem érintettek futó feladatokat. A címkék a API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) futókon keresztül változnak, szintén élőben.
 
-## A takarító telepítése (egyszeri alkalommal, a gépen)
+## Szerelje fel a házmestert (egyszer, a dobozra)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): 30 percenként, naplózás a /var/log/runner-janitor.log fájlba
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-Az `lsof` kötelező: a takarító a megnyitott fájlok egyetlen pillanatfelvételével
-ellenőrzi, hogy egy elérési út nincs használatban, mielőtt eltávolítaná; az eszköz
-nélkül semmit sem távolít el, és ezt jelzi is (exit 1). Minden módosítást először
-a `--dry-run` kapcsolóval próbálj ki — pontosan kiírja, mit tenne, és semmihez sem nyúl.
+`lsof` szükséges: a gondnok a megnyitott fájlok egy pillanatképével bizonyítja, hogy az elérési út tétlen, mielőtt eltávolítaná, és az eszköz nélkül semmit sem távolít el, és ezt mondja (1. kilépés). Próbáljon ki bármilyen változtatást `--dry-run` vel, először — pontosan azt nyomtatja ki, amit tenne, és nem érint semmit.
 
-Minden futáskor a következőket végzi el: eltakarítja a saját maradványainkat
-(`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) **3 óra után tmpfs-en**,
-illetve 24 óra után a lemezen lévő `_work/_temp` könyvtárból; leállítja a 75 percnél
-régebbi `next-build` folyamatokat (egyetlen feladat sem fut ennyi ideig — 2026-08-27-én
-az egyik 70 percig futott azután, hogy a GitHub már elveszettnek nyilvánította a
-feladatát); eltávolítja azoknak a futtatóknak a 48 óránál régebbi munkapéldányait,
-amelyek egysége **le van állítva**; riaszt, ha a lemezhasználat ≥ 85%, a memória PSI
-`full/avg60` értéke ≥ 10%, vagy a figyelők száma meghaladja a `MAX_ACTIVE_RUNNERS`
-értékét (omniroute/egyéb bontásban). Exit 1 = beavatkozás szükséges; olvasd el a naplót.
+Amit minden futásnál csinál: a saját maradékainkat (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) söpri **3 óra tmpfs-en** és 24 óra `_work/_temp` lemezen; figyelmeztet a 75 percnél régebbi `next-build` -re, és folyamatosan fut; aszalt 48 h-os pénztárak futók, akiknek egysége **megállt** ; riasztások a lemezen ≥ 85%, memória PSI `full/avg60` ≥ 10%, és több figyelő, mint `MAX_ACTIVE_RUNNERS` ( omniroute/other bontással). Kilépés 1 = figyelem szükséges; olvassa el a naplót.
 
-A 75 perces szabály nem észleli azt a buildet, amelynek feladatáról a GitHub már
-lemondott. Ha a `Runner.Listener` nem tudja megújítani a feladatát, a
-`_diag/Runner_*.log` fájlban ez jelenik meg:
-`POST request to …/renewjob timed out after 100 seconds`; az API az utolsó sikeres
-megújítás után körülbelül tíz perccel `completed` (failure) állapotúnak jelenti a
-feladatot, a `next-build` pedig hozzárendelt feladat nélkül tovább fut
-(2026-10-18: a #17066 buildje 19:43-kor sikertelen lett, de a buildje öt perccel
-később még mindig 40 GB-ot foglalt). Ellenőrizd a refet a legújabb
-`_diag/Worker_*.log` fájlban, majd PID alapján csak a build folyamatfájának küldj
-SIGTERM jelzést — a `next-build`, az `npm run build`, a `build-next-isolated.mjs`
-és a `_work` workerfolyamatok számára. Soha ne nyúlj a `Runner.Listener`,
-`RunnerService.js` vagy `Runner.Worker` folyamatokhoz: a worker megszakítottként
-jelenti a feladatot, a listener pedig magától újra online állapotba kerül.
+Az eltelt idő önmagában nem bizonyítja, hogy egy folyamat árva. A portás soha nem ad jeleket életkor alapján. A meglévő `ZOMBIE_BUILD_MAX_MIN` és `ZOMBIE_BUILD_COMM` környezetnevek továbbra is támogatottak a cron konfigurációkhoz. A feltételezett árva eltávolítása előtt győződjön meg arról, hogy a pontos GitHub feladata terminál, és azonosítsa a feladathoz tartozó folyamatokat. Amikor a `Runner.Listener` nem tudja megújítani a feladatát, `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds` mutatja, a API körülbelül tíz perccel az utolsó sikeres megújítás után jelenti a `completed` (hiba) feladatot, és `next-build` tovább fut, és nincs csatolva feladat (2026. 10. 18.: a #17066 buildje 19:43-kor meghiúsult, és a build még 5 perccel GB perccel később is kitartott). Erősítse meg a ref-et a legújabb `_diag/Worker_*.log` ben, majd SIGTERM csak a PID — `next-build`, `npm run build`, `build-next-isolated.mjs` és a `_work` munkások összeállítási fáját. Soha ne érintse meg `Runner.Listener`, `RunnerService.js` vagy `Runner.Worker`: a dolgozó lemondottként jelenti be a munkát, és a hallgató magától visszatér az internetre.
 
 ## Futtatóegységek: KillMode
 

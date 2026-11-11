@@ -6,62 +6,40 @@
 
 በራሱ የሚስተናገደው ገንዳ በ ላይ ይሰራል **.113** ሳጥን (`tomni-proxmox-113`)። ከ2026-10-18 ጀምሮ እያንዳንዱ OmniRoute ሯጭ አለው።**አንድ ሚና** ፣ አንድ መለያ እና የ memory/CPU በጀት የሥራ ጫናው በሚለካው መጠን። የ Turbopack ማስገቢያ ለግንባታው የሚያስፈልገውን ነገር ያገኛል; የተቀሩት ክፍተቶች እስከ የተለኩ ቁንጮቻቸው መጠን ያላቸው ናቸው። ሣጥኑ የ Turbopack ግንባታ ከለቀቅ-አረንጓዴ ዌብፓክ ግንባታ እና ከተሸፈነ ሥራ ጋር ሲገጣጠም ብቻ ነው የሚያሸንፈው። አስተናጋጅ ስዋፕ (16 GB) ያንን ይቀበላል፣ እና የፑል-ጥያቄ ግንቦች የሚስተናገዱ ስለሆነ፣ የ Turbopack ማስገቢያ ብዙ ጊዜ ስራ ፈት ነው የሚሆነው
 
-| runner               | label                           | ሚና                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
-| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | የTurbopack builds፦ `ci.yml` `Build` (ለpush/dispatch ብቻ)፣ Docker amd64፣ `npm-publish`፣ `nightly-v4-build`፣ `preview-artifact`፣ የምሽቱ a11y build | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`)፣ webpack build                                                                                 | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`                    | የምሽት ስራዎች (Schemathesis፣ promptfoo፣ garak፣ k6) እና `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
-| `omniroute-113`      | `omni-light`                    | ከላይ ካለው ጋር ተመሳሳይ ፑል                                                                                                                           | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (የእነሱ ቦታ)                       | ዲፔንዳቦት ብቻ (ከፍተኛ 155 MB እያንዳንዳቸው፣ 2026-10-18)                                                                                                  | 4 GB / 6 GB                | እያንዳንዳቸው 200% |
+| ሯጭ                   | መለያ                             | ሚና                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack ይገነባል `ci.yml` `Build` (push/dispatch ብቻ)፣ Docker amd64፣ `npm-publish`፣ `nightly-v4-build`፣ `preview-artifact`፣ የሌሊት a11y ግንባታ | 56 GB / 60 GB (ስዋፕ 0)      | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | መልቀቅ-አረንጓዴ (`release-green` + `main-green`)፣ የዌብፓክ ግንባታ                                                                                  | 20 GB / 24 GB (4 GB መለዋወጥ) | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Schemathesis፣ Quickfoo፣garak፣k6) እና `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (4 GB መለዋወጥ) | 600 %         |
+| `omniroute-113`      | `omni-light`                    | ከላይ ካለው ተመሳሳይ ገንዳ                                                                                                                        | 8 GB / 12 GB               | 400 %         |
+| OmniHeuris, OmniMind | (የእነሱ ቦታ)                       | ዲፔንዳቦት ብቻ (ከፍተኛ 155 MB እያንዳንዳቸው፣ 2026-10-18)                                                                                             | 4 GB / 6 GB                | እያንዳንዳቸው 200% |
 
 የተለካው 2026-10-18፡
 
-| ሀብት       | ዋጋ                       | ለስራ መርሐግብር ያለው ትርጉም                                                                                                                                                                                                                                                                                     |
+| ምንጭ       | ዋጋ                       | ለማቀድ ምን ማለት ነው                                                                                                                                                                                                                                                                                          |
 | --------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RAM / CPU | **78 GB / 32 ኮር**        | የ Turbopack ምርት ግንባታ በ 49 GB ያልታሸገ (`tests/unit/ci-build-bundler-webpack.test.ts`); በሚቀጥለው 16.3.8 የማጠናቀር ደረጃ ብቻ ~ 40 GB ይይዛል (36 GB RSS በ `next-build` እና 17 ሎደር ሰራተኞች በ 3 GB, 2026-10-18 ይለካሉ); የድረ-ገጽ ጥቅል ግንባታ በ ~ 14–16 GB። አንድ Turbopack + አንድ የዌብፓክ ግንባታ አንድ ላይ ይጣጣማል; ሁለት Turbopack ግንባታዎች አያደርጉም |
 | መለዋወጥ     | 16 GB                    | `omniroute-113-5` የሚሄደው በተለዋዋጭ (`MemorySwapMax=0`) ነው ስለዚህ የሸሸ ግንባታ ሳጥኑን ከመቀየር ይልቅ ቆብ ላይ ይቆርጣል                                                                                                                                                                                                          |
-| `/tmp`    | **12 GB tmpfs = RAM**    | እዚያ የተቀመጠ ማንኛውም ነገር memory ይጠቀማል፤ የቀሩ ፋይሎች ከ3 h በኋላ ይጸዳሉ                                                                                                                                                                                                                                                |
+| `/tmp`    | **12 GB tmpfs = RAM**    | እዚያ የቆመ ማንኛውም ነገር ትውስታ አለ; ቅሪቶች ከ 3 ሰዓታት በኋላ ይታጠባሉ                                                                                                                                                                                                                                                      |
 | CPU       | ጭነት 60 በ 32 ኮሮች ላይ ታይቷል  | ከኮታዎቹ በፊት፣ አንድ Turbopack ግንባታ (~ 1166% CPU) እና በተመሳሳይ ሣጥን ላይ ያለው የሽፋን ስብስብ የሌሎችን አድማጮች የልብ ትርታ ረሃብ ነበር (`The self-hosted runner lost communication`፣ #16853)                                                                                                                                            |
-| ሯጮች       | **7 አድማጮች** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ደግሞ `omni-build` ይሸከማል; `omniroute-113-3/-4/-8` ከሪፖው ተሰርዟል (2026-10-28)                                                                                                                                                                          |
+| ሯጮች       | **7 አድማጮች** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ደግሞ `omni-build-60gb` ይሸከማል; `omniroute-113-3/-4/-8` ከሪፖው ተሰርዟል (2026-10-28)                                                                                                                                                                     |
 
 ገደቦቹ በእያንዳንዱ ክፍል `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ውስጥ ይኖራሉ (የቀደሙት እሴቶች እንደ `override.conf.bak-20261018` ተጠብቀው ነበር) እና በቀጥታ በ `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ተተግብረዋል ምንም ዳግም መጀመር የለም፣ ስለዚህ ምንም የሩጫ ስራ አልተነካም። መለያዎች በሩጫዎቹ በኩል ይቀየራሉ API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`)፣ እንዲሁም ቀጥታ ስርጭት።
 
-## ጽዳት አስተዳዳሪውን ይጫኑ (አንድ ጊዜ፣ በማሽኑ ላይ)
+## የጽዳት ሰራተኛውን ጫን (አንድ ጊዜ ፣ በሳጥኑ ላይ)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root)፦ በየ30 ደቂቃው፣ ወደ /var/log/runner-janitor.log መዝግብ
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` ያስፈልጋል፦ ጽዳት አስተዳዳሪው አንድን ዱካ ከማስወገዱ በፊት የተከፈቱ
-ፋይሎችን አንድ ጊዜ በመመልከት ዱካው ስራ ፈት መሆኑን ያረጋግጣል፤ ይህ መሣሪያ ከሌለ
-ምንም ነገር አያስወግድም፣ ይህንንም ይገልጻል
-(exit 1)። ማንኛውንም ለውጥ በመጀመሪያ በ`--dry-run` ይሞክሩ — ምን እንደሚያደርግ
-በትክክል ያትማል፣ ምንም ነገርም አይለውጥም።
+`lsof` ያስፈልጋል፡ የፅዳት ሰራተኛው መንገዱ ስራ ፈት መሆኑን ከማስወገድዎ በፊት በአንድ ቅጽበታዊ ክፍት ፋይሎች ያረጋግጣሉ፣ እና ያለመሳሪያው ምንም ነገር አያስወግድም እና እንደዚህ ይላል (ውጣ 1)። ማንኛውንም ለውጥ በ `--dry-run` ይሞክሩ በመጀመሪያ — የሚሰራውን በትክክል ያትማል እና ምንም አይነካም።
 
-በእያንዳንዱ አሂድ የሚያደርገው፦ የራሳችንን ቅሪቶች (`runner-*`፣ `omniroute-*`፣
-`next-build*`፣ `e2e-build.tar.gz`) **በtmpfs ላይ ከ3 ሰዓት** እና በዲስክ
-`_work/_temp` ላይ ከ24 ሰዓት በኋላ ያጸዳል፤ ከ75 ደቂቃ በላይ የቆየ `next-build`ን
-ያቋርጣል (ምንም job ይህን ያህል ጊዜ አይሰራም — በ2026-08-27 GitHub የእሱ job
-እንደጠፋ ካወጀ በኋላ አንዱ ለ70 ደቂቃ ሰርቷል)፤ unit-ቸው **የቆመ**
-runner-ዎችን ከ48 ሰዓት በላይ የቆዩ checkouts ይቀንሳል፤ የዲስክ አጠቃቀም ≥ 85 %፣
-የማህደረ ትውስታ PSI `full/avg60` ≥ 10 %፣ እና የlisteners ብዛት ከ`MAX_ACTIVE_RUNNERS`
-ሲበልጥ (ከomniroute/other ዝርዝር ክፍፍል ጋር) ማንቂያ ይሰጣል። Exit 1 = ትኩረት
-ያስፈልጋል፤ log-ውን ያንብቡ።
+እያንዳንዱን ሩጫ የሚያደርገው ነገር፡ የራሳችንን የተረፈውን (`runner-*`፣ `omniroute-*`፣ `next-build*`፣ `e2e-build.tar.gz`) ጠራርጎ ከቆየ በኋላ **በ tmpfs ላይ 3 ሰ** እና 24 ሰአት በዲስክ `_work/_temp`; ከ75 ደቂቃ በላይ በሆነ `next-build` ላይ ማንቂያዎች እና እንዲሰራ ያደርገዋል። ፕሪንስ የ 48 ሸ-አሮጌ ቼክአውት ሯጮች ክፍላቸው ነው።**ቆመ** ; በዲስክ ላይ ያሉ ማንቂያዎች ≥ 85%፣ ማህደረ ትውስታ PSI `full/avg60` ≥ 10%፣ እና ከ `MAX_ACTIVE_RUNNERS` የበለጠ አድማጮች (ከ omniroute/other ብልሽት ጋር)። ከ 1 = ትኩረት ውጣ; መዝገቡን ያንብቡ.
 
-የ75 ደቂቃው ሕግ GitHub አስቀድሞ ተስፋ የቆረጠበትን build አይይዝም።
-`Runner.Listener` job-ውን ማደስ ሳይችል ሲቀር፣ `_diag/Runner_*.log` ውስጥ
-`POST request to …/renewjob timed out after 100 seconds` ይታያል፣ API-ው ከመጨረሻው
-የተሳካ renewal በኋላ በአስር ደቂቃ ገደማ job-ውን `completed`
-(failure) ብሎ ያሳውቃል፣ እና `next-build` ምንም job ሳይያያዝበት መስራቱን ይቀጥላል
-(2026-10-18፦ የ#17066 Build በ19:43 እንዳልተሳካ ተመዝግቦ ነበር፣ ነገር ግን build-ው
-ከአምስት ደቂቃ በኋላም 40 GB ይዞ ነበር)። በአዲሱ `_diag/Worker_*.log` ውስጥ
-ref-ውን ያረጋግጡ፣ ከዚያ የbuild tree-ውን ብቻ በPID SIGTERM ይላኩ — `next-build`፣
-`npm run build`፣ `build-next-isolated.mjs` እና የ`_work` workers። `Runner.Listener`፣
-`RunnerService.js` ወይም `Runner.Worker`ን በፍጹም አይንኩ፦ worker-ው job-ው
-እንደተሰረዘ ሪፖርት ያደርጋል፣ listener-ውም በራሱ እንደገና online ይሆናል።
+ያለፈው ጊዜ ብቻ አንድ ሂደት ወላጅ አልባ መሆኑን አያረጋግጥም. የጽዳት ሰራተኛው በእድሜ ላይ የተመሰረተ ምልክት በጭራሽ አይልክም። ያሉት `ZOMBIE_BUILD_MAX_MIN` እና `ZOMBIE_BUILD_COMM` አካባቢ ስሞች ለክሮን ውቅሮች ይደገፋሉ። ተጠርጣሪ ወላጅ አልባ ልጅን ከማጽዳትዎ በፊት ትክክለኛው GitHub ስራው የመጨረሻ መሆኑን ያረጋግጡ እና የዚያ ስራውን ሂደት ይለዩ። `Runner.Listener` ስራውን ማደስ በማይችልበት ጊዜ, `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds` ያሳያል, API ስራውን `completed` (ውድቀትን) ከመጨረሻው የተሳካ እድሳት በኋላ ከአስር ደቂቃዎች በኋላ ሪፖርት ያደርጋል, እና `next-build` ምንም ስራ ሳይይዝ መሮጡን ይቀጥላል (2026-10-18: የ #17066 Build በ 19:43 ላይ አልተሳካም እና ግንባታው አሁንም 40 GB ከአምስት ደቂቃዎች በኋላ ይዞ ነበር). ማጣቀሻውን በአዲሱ `_diag/Worker_*.log` ያረጋግጡ፣ ከዚያ SIGTERM በ PID — `next-build`፣ `npm run build`፣ `build-next-isolated.mjs` እና `_work` ሰራተኞች የሚገነባውን ዛፍ ብቻ ነው። `Runner.Listener`፣ `RunnerService.js` ወይም `Runner.Worker` በጭራሽ አይንኩ፡ ሰራተኛው እንደተሰረዘ ሪፖርት ያደርጋል እና አድማጩ በራሱ ወደ መስመር ይመለሳል።
 
 ## የRunner units፦ KillMode
 

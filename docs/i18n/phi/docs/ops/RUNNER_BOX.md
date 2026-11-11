@@ -6,57 +6,40 @@
 
 Ang self-hosted pool ay tumatakbo sa **.113** kahon (`tomni-proxmox-113`). Mula noong 2026-10-18 bawat OmniRoute runner ay mayroon **isang papel** , isang label, at isang memory/CPU na badyet na sukat sa kung ano ang sinukat ng workload nito. Nakukuha ng Turbopack slot ang kailangan ng build; ang iba pang mga puwang ay may sukat sa kanilang nasusukat na mga taluktok. Ang kahon ay nag-overcommit lamang kapag ang isang Turbopack build ay nag-tutugma sa isang Release-Green webpack build at isang lint job; na-absorb iyon ng host swap (16 GB), at dahil naka-host ang pull-request Builds, ang slot Turbopack ay madalas na walang ginagawa:
 
-| runner               | label                           | tungkulin                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Mga Turbopack build: `ci.yml` `Build` (push/dispatch lang), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ang nightly a11y build | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`                    | mga nightly (Schemathesis, promptfoo, garak, k6) at `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`                    | kaparehong pool gaya ng nasa itaas                                                                                                                      | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (kanilang mga repo)             | Dependabot lang (peak 155 MB bawat isa, 2026-10-18)                                                                                                     | 4 GB / 6 GB                | 200% bawat isa |
+| mananakbo            | label                           | papel                                                                                                                                                   | `MemoryHigh` / `MemoryMax`       | `CPUQuota`     |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack build: `ci.yml` `Build` (push/dispatch lang), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ang gabi-gabing a11y build | 56 GB / 60 GB (swap 0)           | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                           | 20 GB / 24 GB (magpalit ng 4 GB) | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Schemathesis, promptfoo, garak, k6) at `quality.yml` `lint-guard`                                                                            | 12 GB / 16 GB (magpalit ng 4 GB) | 600 %          |
+| `omniroute-113`      | `omni-light`                    | parehong pool tulad ng nasa itaas                                                                                                                       | 8 GB / 12 GB                     | 400 %          |
+| OmniHeuris, OmniMind | (kanilang mga repo)             | Dependabot lang (peak 155 MB bawat isa, 2026-10-18)                                                                                                     | 4 GB / 6 GB                      | 200% bawat isa |
 
 Sinukat noong 2026-10-18:
 
-| resource      | halaga                                 | kahulugan nito para sa pag-iiskedyul                                                                                                                                                                                                                                                                                                                                                             |
+| mapagkukunan  | halaga                                 | ano ang ibig sabihin ng pag-iiskedyul                                                                                                                                                                                                                                                                                                                                                            |
 | ------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RAM / CPU     | **78 GB / 32 core**                    | ang isang Turbopack production build ay umabot sa 49 GB na walang takip (`tests/unit/ci-build-bundler-webpack.test.ts`); sa Susunod na 16.3.8 ang compile phase lamang ay mayroong ~ 40 GB (36 GB RSS sa `next-build` plus 17 loader worker sa 3 GB, sinusukat 2026-10-18); isang webpack build sa ~ 14–16 GB. Isang Turbopack + isang webpack build magkasya; dalawang Turbopack build ay hindi |
 | magpalit      | 16 GB                                  | Tumatakbo `omniroute-113-5` nang may swap off (`MemorySwapMax=0`) kaya ang isang runaway build ay pinutol sa cap nito sa halip na palitan ang kahon                                                                                                                                                                                                                                              |
-| `/tmp`        | **12 GB tmpfs = RAM**                  | anumang pansamantalang inilagay rito ay gumagamit ng memory; nililinis ang mga natira pagkalipas ng 3 h                                                                                                                                                                                                                                                                                          |
+| `/tmp`        | **12 GB tmpfs = RAM**                  | anumang nakaparada doon ay alaala; Ang mga natira ay winalis pagkatapos ng 3 oras                                                                                                                                                                                                                                                                                                                |
 | CPU           | nag-load ng 60 sa 32 core na sinusunod | bago ang mga quota, isang Turbopack build (~ 1166 % CPU) at isang coverage suite sa parehong kahon ang nagpagutom sa tibok ng puso ng ibang mga tagapakinig (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                |
-| mga mananakbo | **7 tagapakinig** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ay nagdadala din ng `omni-build`; `omniroute-113-3/-4/-8` ay tinanggal mula sa repo (2026-10-28)                                                                                                                                                                                                                                          |
+| mga mananakbo | **7 tagapakinig** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ay nagdadala din ng `omni-build-60gb`; `omniroute-113-3/-4/-8` ay tinanggal mula sa repo (2026-10-28)                                                                                                                                                                                                                                     |
 
 Ang mga limitasyon ay nakatira sa `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ng bawat unit (mga dating value na pinanatili bilang `override.conf.bak-20261018`) at nailapat nang live nang walang pag-restart `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` —, kaya walang gumaganang trabaho ang nahawakan. Binago ang mga label sa pamamagitan ng mga runner na API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), live din.
 
-## I-install ang janitor (isang beses lang, sa server)
+## I-install ang janitor (isang beses, sa kahon)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): bawat 30 min, i-log sa /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-Kinakailangan ang `lsof`: pinatutunayan ng janitor na idle ang isang path gamit ang isang snapshot ng mga bukas na
-file bago ito alisin, at kung wala ang tool ay wala itong inaalis at sinasabi nito
-iyon (exit 1). Subukan muna ang anumang pagbabago gamit ang `--dry-run` — eksakto nitong ipinapakita kung ano ang
-gagawin nito at wala itong gagalawin.
+Kinakailangan ang `lsof` : pinatutunayan ng janitor na ang isang landas ay idle na may isang snapshot ng mga bukas na file bago ito alisin, at kung wala ang tool ay wala itong inaalis at sinabi ito (exit 1). Subukan ang anumang pagbabago sa `--dry-run` muna — ito ay nagpi-print nang eksakto kung ano ang gagawin nito at wala itong hinawakan.
 
-Ang ginagawa nito sa bawat pagtakbo: nililinis ang sarili nating mga natira (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) makalipas ang **3 oras sa tmpfs** at 24 oras sa disk na
-`_work/_temp`; pinapatay ang isang `next-build` na mas matanda sa 75 minuto (walang job na tumatakbo nang ganoon katagal — noong
-2026-08-27, may isang tumakbo nang 70 minuto matapos ideklara ng GitHub na nawala ang job nito); inaalis ang mga 48 oras nang
-checkout ng mga runner na ang unit ay **stopped**; nag-aalerto kapag ang disk ay ≥ 85%, ang memory PSI na
-`full/avg60` ay ≥ 10%, at mas marami ang mga listener kaysa sa `MAX_ACTIVE_RUNNERS` (kasama ang
-paghahati sa omniroute/iba pa). Exit 1 = kailangan ng atensyon; basahin ang log.
+Ano ang ginagawa nito sa bawat pagtakbo: winalis ang sarili nating mga tira (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) pagkatapos **3 h sa tmpfs** at 24 h sa disk `_work/_temp`; mga alerto sa isang `next-build` na mas matanda sa 75 min at pinapanatili itong tumatakbo; prunes 48 h-old checkout ng mga runner na ang unit ay **huminto** ; mga alerto sa disk ≥ 85 %, memory PSI `full/avg60` ≥ 10 %, at mas maraming tagapakinig kaysa sa `MAX_ACTIVE_RUNNERS` (na may omniroute/other breakdown). Exit 1 = pansin kailangan; basahin ang log.
 
-Hindi nasasaklaw ng 75-minutong panuntunan ang isang build na sinukuan na ng GitHub ang job. Kapag hindi
-ma-renew ng `Runner.Listener` ang job nito, ipinapakita ng `_diag/Runner_*.log` ang
-`POST request to …/renewjob timed out after 100 seconds`, iniuulat ng API ang job bilang `completed`
-(failure) humigit-kumulang sampung minuto matapos ang huling matagumpay na renewal, at patuloy na tumatakbo ang `next-build` nang
-walang nakakabit na job (2026-10-18: nabigo ang Build ng #17066 nang 19:43 at ang build nito ay
-gumagamit pa rin ng 40 GB makalipas ang limang minuto). Kumpirmahin ang ref sa pinakabagong `_diag/Worker_*.log`, pagkatapos ay
-magpadala ng SIGTERM sa build tree lamang ayon sa PID — `next-build`, `npm run build`, `build-next-isolated.mjs` at
-ang mga worker ng `_work`. Huwag kailanman galawin ang `Runner.Listener`, `RunnerService.js` o `Runner.Worker`: iniuulat ng
-worker ang job bilang cancelled at kusang bumabalik online ang listener.
+Ang lumipas na oras lamang ay hindi nagpapatunay na ang isang proseso ay naulila. Ang janitor ay hindi kailanman nagpapadala ng mga senyales batay sa edad. Ang mga kasalukuyang pangalan ng kapaligiran `ZOMBIE_BUILD_MAX_MIN` at `ZOMBIE_BUILD_COMM` ay nananatiling suportado para sa mga pagsasaayos ng cron. Bago linisin ang isang pinaghihinalaang ulila, kumpirmahin na ang eksaktong GitHub na trabaho nito ay terminal at tukuyin ang mga prosesong kabilang sa trabahong iyon. Kapag hindi na-renew ng `Runner.Listener` ang trabaho nito, ipinapakita ng `_diag/Runner_*.log` ang `POST request to …/renewjob timed out after 100 seconds`, iniuulat ng API ang trabahong `completed` (failure) humigit-kumulang sampung minuto pagkatapos ng huling matagumpay na pag-renew, at patuloy na tumatakbo `next-build` nang walang kalakip na trabaho (2026-10-18: nabigo ang Build of #17066 noong 19:43 at ang build nito ay GB pa rin ang nakalipas). Kumpirmahin ang ref sa pinakabagong `_diag/Worker_*.log`, pagkatapos ay SIGTERM lang ang build tree ng PID — `next-build`, `npm run build`, `build-next-isolated.mjs` at ang mga manggagawa `_work`. Huwag kailanman hawakan ang `Runner.Listener`, `RunnerService.js` o `Runner.Worker`: iniuulat ng manggagawa ang trabaho bilang nakansela at ang nakikinig ay babalik online nang mag-isa.
 
 ## Mga unit ng runner: KillMode
 

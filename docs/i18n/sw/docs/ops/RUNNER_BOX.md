@@ -6,57 +6,40 @@
 
 Bwawa la kujiendesha linaendesha kwenye **.113** sanduku (`tomni-proxmox-113`). Tangu 2026-10-18 kila mwanariadha wa OmniRoute anayo **jukumu moja** , lebo moja, na bajeti ya memory/CPU yenye ukubwa wa kile ambacho mzigo wake wa kazi ulipimwa. Slot Turbopack inapata kile ambacho jengo linahitaji; maeneo mengine yana ukubwa wa vilele vilivyopimwa. Kisanduku hutosheleza tu wakati muundo wa Turbopack unalingana na muundo wa pakiti ya wavuti ya Release-Green na kazi ya pamba; ubadilishanaji wa mwenyeji (16 GB) huchukua hiyo, na kwa sababu Majengo ya ombi la kuvuta-ombi yanaendeshwa, nafasi ya Turbopack haifanyi kitu wakati mwingi:
 
-| runner               | lebo                            | jukumu                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Build za Turbopack: `ci.yml` `Build` (push/dispatch pekee), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build ya kila usiku ya a11y | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build ya webpack                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`                    | kazi za kila usiku (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`                    | bwawa lilelile kama hapo juu                                                                                                                                 | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (makazi yao)                    | Dependabot pekee (kilele 155 MB kila moja, 2026-10-18)                                                                                                       | 4 GB / 6 GB                | 200% kila mmoja |
+| mkimbiaji            | lebo                            | jukumu                                                                                                                                                  | `MemoryHigh` / `MemoryMax`       | `CPUQuota`      |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack inajenga: `ci.yml` `Build` (push/dispatch pekee), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, jengo la a11y la usiku | 56 GB / 60 GB (badilishana 0)    | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), uundaji wa pakiti za wavuti                                                                             | 20 GB / 24 GB (badilishana 4 GB) | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | matukio ya usiku (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (badilishana 4 GB) | 600 %           |
+| `omniroute-113`      | `omni-light`                    | bwawa sawa na hapo juu                                                                                                                                  | 8 GB / 12 GB                     | 400 %           |
+| OmniHeuris, OmniMind | (makazi yao)                    | Dependabot pekee (kilele 155 MB kila moja, 2026-10-18)                                                                                                  | 4 GB / 6 GB                      | 200% kila mmoja |
 
 Ilipimwa 2026-10-18:
 
-| rasilimali    | thamani                                  | maana yake kwa upangaji wa kazi                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| rasilimali    | thamani                                  | nini maana ya kupanga ratiba                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RAM / CPU     | **78 GB / 32 cores**                     | ujenzi wa uzalishaji wa Turbopack ulifikia kilele cha GB 49 ambazo hazijafungwa (`tests/unit/ci-build-bundler-webpack.test.ts`); kwenye Ijayo 16.3.8 awamu ya kukusanya pekee inashikilia ~ 40 GB (36 GB RSS katika `next-build` pamoja na wafanyakazi 17 wa mizigo katika 3 GB, iliyopimwa 2026-10-18); muundo wa kifurushi cha wavuti katika ~ 14–16 GB. Kifurushi kimoja cha wavuti Turbopack + kinafaa pamoja; mbili Turbopack hujenga hawana |
 | kubadilishana | 16 GB                                    | `omniroute-113-5` inaendeshwa na swap off (`MemorySwapMax=0`) kwa hivyo jengo lililotoroka hukatwa kwenye kofia yake badala ya kubadilisha kisanduku.                                                                                                                                                                                                                                                                                             |
-| `/tmp`        | **12 GB tmpfs = RAM**                    | chochote kinachowekwa hapo hutumia kumbukumbu; masalio huondolewa baada ya saa 3                                                                                                                                                                                                                                                                                                                                                                  |
+| `/tmp`        | **12 GB tmpfs = RAM**                    | chochote kilichoegeshwa hapo ni kumbukumbu; mabaki hufagiliwa baada ya 3 h                                                                                                                                                                                                                                                                                                                                                                        |
 | CPU           | mzigo 60 kwenye cores 32 zilizozingatiwa | kabla ya nafasi, jengo moja la Turbopack (~ 1166 % CPU) pamoja na chumba cha kufunika kwenye kisanduku kimoja kilisababisha njaa ya mapigo ya mioyo ya wasikilizaji wengine (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                 |
-| wakimbiaji    | **7 wasikilizaji** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` pia hubeba `omni-build`; `omniroute-113-3/-4/-8` ilifutwa kutoka kwa repo (2026-10-28)                                                                                                                                                                                                                                                                                                     |
+| wakimbiaji    | **7 wasikilizaji** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` pia hubeba `omni-build-60gb`; `omniroute-113-3/-4/-8` ilifutwa kutoka kwa repo (2026-10-28)                                                                                                                                                                                                                                                                                                |
 
 Vikomo vinaishi katika `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ya kila kitengo (thamani za awali zilihifadhiwa kama `override.conf.bak-20261018`) na zilitumika moja kwa moja na `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — haikuanzishwa tena, kwa hivyo hakuna kazi ya kukimbia iliyoguswa. Lebo hubadilishwa kupitia wakimbiaji API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), pia huishi.
 
-## Sakinisha janitor (mara moja, kwenye mashine)
+## Sakinisha janitor (wakati mmoja, kwenye sanduku)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): kila baada ya dakika 30, andika kumbukumbu kwenye /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` inahitajika: janitor huthibitisha kuwa njia haitumiki kwa picha moja ya hali ya faili
-zilizofunguliwa kabla ya kuiondoa, na bila zana hiyo haiondoi chochote na husema hivyo
-(exit 1). Jaribu mabadiliko yoyote kwa `--dry-run` kwanza — huchapisha kwa usahihi kile ambacho
-ingefanya bila kubadilisha chochote.
+`lsof` inahitajika: janitor inathibitisha njia ni ya uvivu na snapshot moja ya faili wazi kabla ya kuiondoa, na bila chombo haiondoi chochote na inasema hivyo (toka 1). Jaribu mabadiliko yoyote ukitumia `--dry-run` kwanza — inachapisha kile ambacho ingefanya na haigusi chochote.
 
-Kile inachofanya kila inapotekelezwa: hufagia mabaki yetu wenyewe (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) baada ya **saa 3 kwenye tmpfs** na saa 24 kwenye diski ya
-`_work/_temp`; huua `next-build` yenye umri wa zaidi ya dakika 75 (hakuna job inayotekelezwa kwa muda huo — mnamo
-2026-08-27 moja ilitekelezwa kwa dakika 70 baada ya GitHub kutangaza kuwa job yake imepotea); hupogoa checkout
-zenye umri wa saa 48 za runner ambazo unit zake **zimesimamishwa**; hutoa tahadhari diski inapofikia ≥ 85 %, PSI ya
-kumbukumbu ya `full/avg60` inapofikia ≥ 10 %, na visikilizi vinapozidi `MAX_ACTIVE_RUNNERS` (pamoja na
-mgawanyo wa omniroute/nyingine). Msimbo wa kutoka 1 = hatua inahitajika; soma logi.
+Inachofanya kila kukimbia: hufagia mabaki yetu wenyewe (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) baada ya **Saa 3 kwa tmpfs** na 24 h kwenye disk `_work/_temp`; arifa kwenye `next-build` ya zaidi ya dakika 75 na huifanya iendelee; punguza malipo ya saa 48 ya wakimbiaji ambao kitengo chao kiko **kusimamishwa** ; arifa kwenye diski ≥ 85 %, kumbukumbu PSI `full/avg60` ≥ 10 %, na wasikilizaji zaidi kuliko `MAX_ACTIVE_RUNNERS` (iliyo na uchanganuzi omniroute/other ). Toka 1 = tahadhari inahitajika; soma logi.
 
-Kanuni ya dakika 75 haigundui build ambayo GitHub tayari imeikatia tamaa. Wakati
-`Runner.Listener` haiwezi kufanya upya job yake, `_diag/Runner_*.log` huonyesha
-`POST request to …/renewjob timed out after 100 seconds`, API huripoti job kuwa `completed`
-(failure) takribani dakika kumi baada ya ufanyaji upya wa mwisho uliofanikiwa, na `next-build` huendelea kutekelezwa bila
-job iliyoambatishwa (2026-10-18: Build ya #17066 ilishindwa saa 19:43 na build yake bado
-ilikuwa inashikilia GB 40 dakika tano baadaye). Thibitisha ref katika `_diag/Worker_*.log` mpya zaidi, kisha
-tuma SIGTERM kwa mti wa build pekee kwa kutumia PID — `next-build`, `npm run build`, `build-next-isolated.mjs` na
-worker za `_work`. Kamwe usiguse `Runner.Listener`, `RunnerService.js` au `Runner.Worker`: worker
-huripoti job kuwa imeghairiwa na listener hurudi mtandaoni yenyewe.
+Wakati uliopita peke yake hauthibitishi kwamba mchakato ni yatima. Janitor kamwe hutuma ishara kulingana na umri. Majina ya mazingira ya `ZOMBIE_BUILD_MAX_MIN` na `ZOMBIE_BUILD_COMM` yaliyopo yanaendelea kutumika kwa usanidi wa cron. Kabla ya kumsafisha mshukiwa yatima, thibitisha kwamba kazi yake kamili GitHub ni ya mwisho na utambue taratibu zinazohusika na kazi hiyo. Wakati `Runner.Listener` haiwezi kufanya upya kazi yake, `_diag/Runner_*.log` inaonyesha `POST request to …/renewjob timed out after 100 seconds`, API inaripoti kazi `completed` (kufeli) kama dakika kumi baada ya uboreshaji wa mwisho uliofanikiwa, na `next-build` inaendelea kukimbia bila kazi yoyote iliyoambatanishwa (2026-10-18: Jengo la #17066 lilishindwa saa 19:43 na ujenzi wake ulikuwa bado unashikilia GB 40). Thibitisha rejeleo katika `_diag/Worker_*.log` mpya zaidi, kisha SIGTERM tu mti wa ujenzi na PID — `next-build`, `npm run build`, `build-next-isolated.mjs` na wafanyakazi wa `_work`. Usiguse kamwe `Runner.Listener`, `RunnerService.js` au `Runner.Worker`: mfanyakazi anaripoti kazi kuwa imeghairiwa na msikilizaji anarejea mtandaoni peke yake.
 
 ## Unit za runner: KillMode
 

@@ -6,57 +6,40 @@
 
 Poolen med egen värd går på **.113** box (`tomni-proxmox-113`). Sedan 2026-10-18 har varje OmniRoute löpare **en roll** , en etikett och en memory/CPU budget storleksanpassad till vad dess arbetsbelastning mätte. Turbopack sloten får vad bygget behöver; de andra slitsarna är dimensionerade till sina uppmätta toppar. Boxen övervinner bara när en Turbopack konstruktion sammanfaller med en Release-Green-webpack-konstruktion och ett luddjobb; host swap (16 GB) absorberar det, och eftersom pull-request Builds körs på värd, är Turbopack platsen inaktiv för det mesta:
 
-| runner               | etikett                         | roll                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
+| löpare               | märka                           | roll                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
 | -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-byggen: `ci.yml` `Build` (endast push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattliga a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-bygge                                                                                            | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`                    | nattliga jobb (Schemathesis, promptfoo, garak, k6) och `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack -byggen: `ci.yml` `Build` (endast push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, den nattliga byggnaden | 56 GB / 60 GB (swap 0)     | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webbpaketbyggd                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | nattliga (Schemathesis, promptfoo, garak, k6) och `quality.yml` `lint-guard`                                                                             | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
 | `omniroute-113`      | `omni-light`                    | samma pool som ovan                                                                                                                                      | 8 GB / 12 GB               | 400 %         |
 | OmniHeuris, OmniMind | (deras repos)                   | Endast Dependabot (topp 155 MB vardera, 2026-10-18)                                                                                                      | 4 GB / 6 GB                | 200 % vardera |
 
 Uppmätt 2026-10-18:
 
-| resurs    | värde                                   | vad det innebär för schemaläggningen                                                                                                                                                                                                                                                                                                                                        |
+| resurs    | värde                                   | vad det betyder för schemaläggning                                                                                                                                                                                                                                                                                                                                          |
 | --------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RAM / CPU | **78 GB / 32 kärnor**                   | en Turbopack produktionsuppbyggnad nådde en topp på 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`); nästa 16.3.8 innehåller kompileringsfasen enbart ~ 40 GB (36 GB RSS i `next-build` plus 17 lastararbetare vid 3 GB, uppmätt 2026-10-18); ett webbpaket byggt på ~ 14–16 GB. En Turbopack + ett webbpaket byggs ihop; två Turbopack -byggen gör det inte |
 | byta      | 16 GB                                   | `omniroute-113-5` körs med swap off (`MemorySwapMax=0`) så en skenande konstruktion klipps vid dess lock istället för att byta lådan                                                                                                                                                                                                                                        |
-| `/tmp`    | **12 GB tmpfs = RAM**                   | allt som placeras där använder minne; kvarlämnade filer rensas efter 3 h                                                                                                                                                                                                                                                                                                    |
+| `/tmp`    | **12 GB tmpfs = RAM**                   | allt som parkeras där finns minne; rester sopas efter 3 timmar                                                                                                                                                                                                                                                                                                              |
 | CPU       | belastning 60 på 32 kärnor observerades | före kvoterna svälter en Turbopack byggd (~ 1166 % CPU) plus en täckningssvit på samma box de andra lyssnarnas hjärtslag (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                              |
-| löpare    | **7 lyssnare** (2026-10-28)             | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` bär också `omni-build`; `omniroute-113-3/-4/-8` raderades från repan (2026-10-28)                                                                                                                                                                                                                                    |
+| löpare    | **7 lyssnare** (2026-10-28)             | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` bär också `omni-build-60gb`; `omniroute-113-3/-4/-8` raderades från repan (2026-10-28)                                                                                                                                                                                                                               |
 
 Gränserna finns i varje enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (tidigare värden behölls som `override.conf.bak-20261018`) och tillämpades live med `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ingen omstart, så inget körande jobb berördes. Etiketter ändras genom löparna API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), även live.
 
-## Installera rensningsskriptet (en gång, på maskinen)
+## Installera vaktmästaren (en gång, på lådan)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): var 30:e minut, logga till /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` krävs: rensningsskriptet verifierar att en sökväg är inaktiv med en ögonblicksbild av öppna
-filer innan den tas bort, och utan verktyget tar det inte bort någonting och meddelar detta
-(exit 1). Prova först alla ändringar med `--dry-run` — det skriver ut exakt vad det skulle
-göra utan att ändra någonting.
+`lsof` krävs: vaktmästaren bevisar att en sökväg är inaktiv med en ögonblicksbild av öppna filer innan den tas bort, och utan verktyget tar den bort ingenting och säger så (avsluta 1). Prova alla ändringar med `--dry-run` först — den skriver ut exakt vad den skulle göra och rör ingenting.
 
-Vad det gör vid varje körning: rensar våra egna kvarlämnade filer (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) efter **3 timmar på tmpfs** och 24 timmar på diskens
-`_work/_temp`; avslutar en `next-build` som är äldre än 75 minuter (inget jobb körs så länge — den
-2026-08-27 kördes ett jobb i 70 minuter efter att GitHub hade förklarat jobbet förlorat); rensar
-48 timmar gamla utcheckningar för runners vars enhet är **stoppad**; varnar vid diskanvändning
-≥ 85 %, minnes-PSI `full/avg60` ≥ 10 % och fler lyssnare än `MAX_ACTIVE_RUNNERS` (med en
-uppdelning mellan omniroute/övriga). Exit 1 = åtgärd krävs; läs loggen.
+Vad den gör varje körning: sopar våra egna rester (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) efter **3 timmar på tmpfs** och 24 timmar på skivan `_work/_temp`; larmar på en `next-build` äldre än 75 min och håller den igång; beskär 48 h gamla kassor av löpare vars enhet är **stannade** ; varningar på disk ≥ 85 %, minne PSI `full/avg60` ≥ 10 % och fler lyssnare än `MAX_ACTIVE_RUNNERS` (med en omniroute/other uppdelning). Utgång 1 = uppmärksamhet behövs; läs loggen.
 
-75-minutersregeln fångar inte ett bygge vars jobb GitHub redan har gett upp. När
-`Runner.Listener` inte kan förnya sitt jobb visar `_diag/Runner_*.log`
-`POST request to …/renewjob timed out after 100 seconds`, API:et rapporterar jobbet som `completed`
-(misslyckat) ungefär tio minuter efter den senaste lyckade förnyelsen, och `next-build` fortsätter köras
-utan något anslutet jobb (2026-10-18: bygget för #17066 markerades som misslyckat 19:43 och höll
-fortfarande 40 GB fem minuter senare). Bekräfta referensen i den senaste `_diag/Worker_*.log` och
-skicka sedan SIGTERM endast till byggets processträd via PID — `next-build`, `npm run build`, `build-next-isolated.mjs` och
-`_work`-processerna. Rör aldrig `Runner.Listener`, `RunnerService.js` eller `Runner.Worker`: worker-processen
-rapporterar jobbet som avbrutet och lyssnaren går tillbaka online av sig själv.
+Enbart förfluten tid bevisar inte att en process är föräldralös. Vaktmästaren skickar aldrig signaler baserat på ålder. De befintliga `ZOMBIE_BUILD_MAX_MIN` och `ZOMBIE_BUILD_COMM` -miljönamnen stöds fortfarande för cron-konfigurationer. Innan du städar upp ett misstänkt föräldralöst barn, bekräfta att dess exakta GitHub jobb är terminalt och identifiera de processer som hör till jobbet. När `Runner.Listener` inte kan förnya sitt jobb visar `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds`, API rapporterar jobbet `completed` (misslyckande) cirka tio minuter efter den senaste framgångsrika förnyelsen, och `next-build` fortsätter att köra utan något jobb kopplat (2026-10-18: Build of #17066 misslyckades 19:43 och dess konstruktion höll fortfarande GB 40 minuter senare). Bekräfta referensen i den senaste `_diag/Worker_*.log`, sedan SIGTERM endast byggträdet av PID — `next-build`, `npm run build`, `build-next-isolated.mjs` och `_work` arbetarna. Rör aldrig `Runner.Listener`, `RunnerService.js` eller `Runner.Worker`: arbetaren rapporterar jobbet som avbrutet och lyssnaren går online igen av sig själv.
 
 ## Runner-enheter: KillMode
 

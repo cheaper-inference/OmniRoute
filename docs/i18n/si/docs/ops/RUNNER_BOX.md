@@ -6,58 +6,40 @@
 
 ස්වයං-සත්කාරක සංචිතය මත ධාවනය වේ**.113** පෙට්ටිය (`tomni-proxmox-113`). 2026-10-18 සිට සෑම OmniRoute ධාවකයෙකුටම ඇත **එක් භූමිකාවක්** , එක් ලේබලයක්, සහ memory/CPU අයවැය එහි වැඩ ප්‍රමාණය මනින ප්‍රමාණයට. Turbopack slot එක ගොඩනැගීමට අවශ්‍ය දේ ලබා ගනී; අනෙක් තව් ඒවායේ මනින ලද මුදුන් දක්වා ප්‍රමාණ කර ඇත. Turbopack බිල්ඩ් එකක් Release-Green webpack build එකක් සහ lint job එකක් සමඟ සමපාත වූ විට පමණක් කොටුව ඉක්මවා යයි; host swap (16 GB) එය අවශෝෂණය කරයි, සහ pull-request Builds ධාරකයෙන් ධාවනය වන නිසා, Turbopack slot බොහෝ විට අක්‍රිය වේ:
 
-| runner               | label                           | භූමිකාව                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
-| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack builds: `ci.yml` `Build` (push/dispatch පමණි), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, රාත්රී a11y build එක | 56 GB / 60 GB (swap 0)     | 1600 %      |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
-| `omniroute-113-2`    | `omni-light`                    | රාත්රී jobs (Schemathesis, promptfoo, garak, k6) සහ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
-| `omniroute-113`      | `omni-light`                    | ඉහත සඳහන් සංචිතයම                                                                                                                                  | 8 GB / 12 GB               | 400 %       |
-| OmniHeuris, OmniMind | (ඔවුන්ගේ ගබඩා)                  | Dependabot පමණි (උච්චතම 155 MB බැගින්, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200% බැගින් |
+| ධාවකයා               | ලේබලය                           | භූමිකාව                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack ගොඩනැගීම්: `ci.yml` `Build` (push/dispatch පමණි), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, රාත්‍රී a11y ගොඩනැගීම | 56 GB / 60 GB (swap 0)     | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | රාත්‍රී විනෝද (Schemathesis, promptfoo, garak, k6) සහ `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
+| `omniroute-113`      | `omni-light`                    | ඉහත ආකාරයටම තටාකය                                                                                                                                      | 8 GB / 12 GB               | 400 %       |
+| OmniHeuris, OmniMind | (ඔවුන්ගේ ගබඩා)                  | Dependabot පමණි (උච්චතම 155 MB බැගින්, 2026-10-18)                                                                                                     | 4 GB / 6 GB                | 200% බැගින් |
 
 2026-10-18 මනින ලදී:
 
-| සම්පත         | අගය                                   | scheduling සඳහා එහි අර්ථය                                                                                                                                                                                                                                                                                                                                          |
+| සම්පත         | වටිනාකම                               | කාලසටහන්ගත කිරීම සඳහා එයින් අදහස් කරන්නේ කුමක්ද?                                                                                                                                                                                                                                                                                                                   |
 | ------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RAM / CPU     | **78 GB / 32 cores**                  | Turbopack නිෂ්පාදන ගොඩනැගීමක් 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`) දක්වා ඉහළ ගියේය; මීළඟ 16.3.8 හි සම්පාදනය කිරීමේ අදියර පමණක් ~ 40 GB ( `next-build` හි GB RSS 36 ක් සහ 3 GB හි ලෝඩර් කම්කරුවන් 17 ක්, 2026-10-18 මනින ලද); ~ 14-16 GB හි වෙබ් පැකේජයක් ගොඩනැගීම. එක Turbopack + එක webpack build එකට ගැලපේ; Turbopack බිල්ඩ් දෙකක් නැත |
 | හුවමාරු කරන්න | 16 GB                                 | `omniroute-113-5` swap off (`MemorySwapMax=0`) සමඟ ක්‍රියා කරයි, එබැවින් පෙට්ටිය මාරු කිරීම වෙනුවට එහි තොප්පියෙහි ධාවන පථය කපා ඇත.                                                                                                                                                                                                                                 |
-| `/tmp`        | **12 GB tmpfs = RAM**                 | එහි තබන ඕනෑම දෙයක් memory භාවිත කරයි; ඉතිරි වූ දේවල් පැය 3කට පසු ඉවත් කෙරේ                                                                                                                                                                                                                                                                                         |
+| `/tmp`        | **12 GB tmpfs = RAM**                 | එහි නවතා ඇති ඕනෑම දෙයක් මතකය; ඉතිරි කොටස් පැය 3 කට පසු අතුගා දමනු ලැබේ                                                                                                                                                                                                                                                                                             |
 | CPU           | load 60 on cores 32 නිරීක්ෂණය         | කෝටා වලට පෙර, එක් Turbopack ගොඩනැගීම (~ 1166 % CPU) සහ එකම පෙට්ටියේ ආවරණ කට්ටලයක් අනෙක් සවන්දෙන්නන්ගේ හද ගැස්ම (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                               |
-| ධාවකයන්       | **සවන්දෙන්නන් 7 දෙනෙක්** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ද `omni-build` දරයි ; `omniroute-113-3/-4/-8` repo වෙතින් මකා ඇත (2026-10-28)                                                                                                                                                                                                                               |
+| ධාවකයන්       | **සවන්දෙන්නන් 7 දෙනෙක්** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ද `omni-build-60gb` දරයි ; `omniroute-113-3/-4/-8` repo වෙතින් මකා ඇත (2026-10-28)                                                                                                                                                                                                                          |
 
 සීමාවන් එක් එක් ඒකකයේ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (පෙර අගයන් `override.conf.bak-20261018` ලෙස තබා ඇත) තුළ සජීවීව පවතින අතර `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — සමඟ සජීවීව යොදන ලදී නැවත ආරම්භයක් නැත, එබැවින් ධාවන කාර්යයක් ස්පර්ශ නොකළේය. API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) ධාවකයන් හරහා ලේබල වෙනස් කරනු ලැබේ, සජීවීව.
 
-## පිරිසිදුකාරකය ස්ථාපනය කිරීම (එක් වරක් පමණක්, යන්ත්රය මත)
+## මුරකරු ස්ථාපනය කරන්න (එක් වරක්, කොටුව මත)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): සෑම මිනිත්තු 30කටම, /var/log/runner-janitor.log වෙත ලොග් කරන්න
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` අවශ්ය වේ: පිරිසිදුකාරකය මාර්ගයක් ඉවත් කිරීමට පෙර, විවෘත ගොනුවල එක් snapshot එකක් භාවිතයෙන් එය නිෂ්ක්රීය බව තහවුරු කරන අතර, මෙම මෙවලම නොමැති නම් එය කිසිවක් ඉවත් නොකර ඒ බව සඳහන් කරයි (exit 1). ඕනෑම වෙනසක් පළමුව `--dry-run` සමඟ අත්හදා බලන්න — එය සිදු කිරීමට නියමිත දේ හරියටම මුද්රණය කරන අතර කිසිවක් වෙනස් නොකරයි.
+`lsof` අවශ්‍ය වේ: මුරකරු මාර්ගයක් ඉවත් කිරීමට පෙර විවෘත ගොනු එක් ඡායාරූපයක් සමඟ අක්‍රිය බව ඔප්පු කරයි, සහ මෙවලම නොමැතිව එය කිසිවක් ඉවත් නොකරන අතර එසේ කියයි (පිටවීම 1). `--dry-run` පළමු — සමඟ ඕනෑම වෙනසක් උත්සාහ කරන්න එය එය කරන්නේ කුමක්ද යන්න හරියටම මුද්‍රණය කරන අතර කිසිවක් ස්පර්ශ නොකරයි.
 
-එක් එක් ධාවනයේදී එය කරන දේ: අපගේම ඉතිරි වූ දෑ (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) **tmpfs මත පැය 3කට** පසුව සහ තැටියේ
-`_work/_temp` තුළ පැය 24කට පසුව ඉවත් කරයි; මිනිත්තු 75කට වඩා පැරණි `next-build`
-ක් අවසන් කරයි (කිසිදු job එකක් එතරම් කාලයක් ධාවනය නොවේ — 2026-08-27 දින GitHub විසින්
-එහි job එක අහිමි වූ බව ප්රකාශ කිරීමෙන් පසුව එකක් මිනිත්තු 70ක් ධාවනය විය); ඒකකය
-**නවතා ඇති** runners සඳහා පැය 48ක් පැරණි checkouts ඉවත් කරයි; තැටි භාවිතය ≥ 85 %,
-memory PSI `full/avg60` ≥ 10 %, සහ `MAX_ACTIVE_RUNNERS` ට වඩා වැඩි listeners සංඛ්යාවක්
-ඇති විට (omniroute/other බෙදීමක් සමඟ) අනතුරු අඟවයි. Exit 1 = අවධානය අවශ්යයි;
-ලොගය කියවන්න.
+එය සෑම ධාවනයකදීම කරන්නේ කුමක්ද: අපගේම ඉතිරි වූ දේ (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) අතුගා දමයි**3 h tmpfs මත** සහ `_work/_temp` තැටියේ පැය 24; මිනිත්තු 75කට වඩා පැරණි `next-build` මත ඇඟවීම් සහ එය ක්‍රියාත්මක කරයි; ඒකකයක් ඇති ධාවකයන්ගේ පැය 48 පැරණි පිරික්සුම් කප්පාදු කරයි**නැවැත්තුවා** ; තැටියේ ≥ 85 %, මතකය PSI `full/avg60` ≥ 10 %, සහ `MAX_ACTIVE_RUNNERS` ට වඩා වැඩි සවන්දෙන්නන් ( omniroute/other බිඳවැටීමක් සමඟ) පිළිබඳ ඇඟවීම් පිටවීම 1 = අවධානය අවශ්‍යයි; ලොගය කියවන්න.
 
-GitHub විසින් දැනටමත් අත්හැර දැමූ job එකක build එකක් මිනිත්තු 75 නීතියට හසු නොවේ.
-`Runner.Listener` හට එහි job එක අලුත් කළ නොහැකි විට, `_diag/Runner_*.log` තුළ
-`POST request to …/renewjob timed out after 100 seconds` පෙන්වයි, අවසාන සාර්ථක
-අලුත් කිරීමෙන් මිනිත්තු දහයකට පමණ පසු API එක job එක `completed` (failure) ලෙස
-වාර්තා කරයි, සහ සම්බන්ධිත job එකක් නොමැතිව `next-build` දිගටම ධාවනය වේ
-(2026-10-18: #17066 හි Build එක 19:43ට අසාර්ථක වූ අතර මිනිත්තු පහකට පසුවත් එහි
-build එක 40 GB රඳවාගෙන සිටියේය). නවතම `_diag/Worker_*.log` තුළ ref එක තහවුරු කර,
-PID අනුව build tree එකට පමණක් SIGTERM යවන්න — `next-build`, `npm run build`,
-`build-next-isolated.mjs` සහ `_work` workers. කිසිවිටෙක `Runner.Listener`,
-`RunnerService.js` හෝ `Runner.Worker` ස්පර්ශ නොකරන්න: worker එක job එක අවලංගු වූ
-බව වාර්තා කරන අතර listener එක ස්වයංක්රීයව නැවත online වේ.
+ක්‍රියාවලියක් අනාථ බව ගත වූ කාලය පමණක් ඔප්පු නොවේ. මුරකරු කිසිවිටෙක වයස අනුව සංඥා යවන්නේ නැත. පවතින `ZOMBIE_BUILD_MAX_MIN` සහ `ZOMBIE_BUILD_COMM` පරිසර නාමයන් ක්‍රෝන් වින්‍යාස කිරීම් සඳහා සහය දක්වයි. සැක සහිත අනාථයෙකු පිරිසිදු කිරීමට පෙර, එහි නිශ්චිත GitHub කාර්යය පර්යන්තය බව තහවුරු කර එම කාර්යයට අයත් ක්‍රියාවලීන් හඳුනා ගන්න. `Runner.Listener` එහි කාර්යය අලුත් කිරීමට නොහැකි වූ විට, `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds` පෙන්වයි, API අවසාන සාර්ථක අලුත් කිරීමෙන් විනාඩි දහයකට පමණ පසුව `completed` (අසාර්ථකත්වය) කාර්යය වාර්තා කරයි, සහ `next-build` කිසිදු කාර්යයක් සම්බන්ධ කර නොගෙන දිගටම ක්‍රියාත්මක වේ (2026-10-18: #17066 ගොඩනැගීම 19:43 ට අසාර්ථක වූ අතර GB විනාඩි 40 ට පසුවත් පැවතුනි). නවතම `_diag/Worker_*.log` හි ref තහවුරු කරන්න, ඉන්පසු PID — `next-build`, `npm run build`, `build-next-isolated.mjs` සහ `_work` සේවකයින් විසින් සාදන ලද ගස පමණක් SIGTERM. කිසි විටෙකත් `Runner.Listener`, `RunnerService.js` හෝ `Runner.Worker` ස්පර්ශ නොකරන්න: සේවකයා රැකියාව අවලංගු කර ඇති බව වාර්තා කරන අතර සවන්දෙන්නා එය විසින්ම සබැඳිව යයි.
 
 ## Runner ඒකක: KillMode
 
