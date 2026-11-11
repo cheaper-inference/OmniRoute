@@ -1688,13 +1688,11 @@ jobs:
       - run: npm run test:protocols:e2e
 
   admission-verdict:
-    # A queue-draft edit run must not leave a check named "Gate / CI" on the draft: Mergify
-    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
-    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
-    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || 'Gate / CI' }}
-    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
-    # workflow concurrency note): that draft is never what branch protection merges.
-    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    # Only requested candidates receive the required check name. An ordinary draft
+    # deliberately skips its producer jobs and must not create a failed admission.
+    # Classifier failures still reach the gate; queue metadata edits keep their own name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / CI' || 'Admission not requested / CI' }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
