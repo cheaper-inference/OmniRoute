@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "缓存输入令牌",
+    "inputTokensHint": "不包含缓存读取。缓存写入仍计入输入令牌。",
+    "inputSplitUnavailable": "由于缓存读取数据不完整或不一致，无法显示输入细分。",
+    "cachedInputTokensHint": "仅包含已报告的缓存读取，已计入输入总量。",
     "title": "分析",
     "usageAnalyticsTitle": "用量分析",
     "tokenDisplayCompact": "紧凑",
