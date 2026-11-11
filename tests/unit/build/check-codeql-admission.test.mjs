@@ -511,3 +511,46 @@ test("global strict measurement fails when gh is unavailable, with no false zero
     fs.rmSync(directory, { recursive: true, force: true });
   }
 });
+
+for (const warning of [
+  "30175 threadFlows were ignored",
+  "469 relatedLocations were ignored\n30175 threadFlows were ignored",
+  "30175 threadFlows were ignored\n469 relatedLocations were ignored",
+]) {
+  test(`display-only warning retains complete findings and its receipt: ${warning}`, () => {
+    const data = fixture(4);
+    data.analyses[2].warning = warning;
+    const result = evaluateCodeqlCandidate(data);
+    assert.equal(result.verdict, "PASS");
+    assert.equal(result.count, 4);
+    assert.equal(result.analyses[2].warning, warning);
+    data.sarifs[data.analyses[2].id].runs[0].results.pop();
+    assert.throws(() => evaluateCodeqlCandidate(data), /SCAN_SARIF_RESULTS_INCOMPLETE/);
+  });
+}
+
+for (const warning of [
+  "30175 threadFlows were ignored\nNo source code was seen",
+  "30175 threadFlows were ignored\n1 results were ignored",
+  "30175 threadFlows were ignored\n30175 threadFlows were ignored",
+  "30175 threadFlows were ignored\n",
+  "9007199254740992 threadFlows were ignored",
+  "-1 threadFlows were ignored",
+  "30175 threadFlows were ignored (partial extraction)",
+]) {
+  test(`unrecognized or malformed warning remains blocking: ${warning}`, () => {
+    const data = fixture(4);
+    data.analyses[2].warning = warning;
+    assert.throws(() => evaluateCodeqlCandidate(data), /SCAN_ANALYSIS_WARNING/);
+  });
+}
+
+test("presentation warnings never conceal a failed or ruleless server analysis", () => {
+  const data = fixture(4);
+  data.analyses[2].warning = "379 relatedLocations were ignored\n30184 threadFlows were ignored";
+  data.analyses[2].error = "Unknown Error";
+  assert.throws(() => evaluateCodeqlCandidate(data), /SCAN_ANALYSIS_FAILED/);
+  data.analyses[2].error = "";
+  data.analyses[2].rules_count = 0;
+  assert.throws(() => evaluateCodeqlCandidate(data), /SCAN_RULES_MISSING/);
+});
