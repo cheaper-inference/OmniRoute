@@ -4781,10 +4781,13 @@ paths:
       tags: [Usage]
       summary: Team report of coding-agent usage
       description: >
-        Totals plus breakdowns by member, project, client, provider, model, account and day, computed
-        from requests attributed to agent sessions. Cost is the provider-reported cost for requests
-        that stored one, and is priced from token counts at read time for the others.
-        Filters combine with AND; a filter given several values matches any of them.
+        Totals plus breakdowns by member, project, client, provider, model, account, day, git
+        branch, error code, service tier and billing team, computed from requests attributed to
+        agent sessions. Cost is the provider-reported cost for requests that stored one, and is
+        priced from token counts at read time for the others.
+        Filters combine with AND; a filter given several values matches any of them. A breakdown
+        row's key is the value of its filter ("" is an empty field, filtered with `__none__`), so
+        a row drills down by calling this route or /api/reports/sessions with that filter added.
       parameters:
         - $ref: "#/components/parameters/ReportFrom"
         - $ref: "#/components/parameters/ReportTo"
@@ -4825,7 +4828,28 @@ paths:
                           lastSeenAt: { type: string, format: date-time, nullable: true }
                   breakdowns:
                     type: object
-                    description: Rows per dimension (members, projects, clients, providers, models, accounts, daily).
+                    description: >-
+                      Rows per dimension, most cost first (daily: oldest day first). errorCodes
+                      has a "" row for the requests without an error code (all successful
+                      requests and failures that stored none); add outcome=error for failures
+                      only. teams rows carry the team name as label.
+                    required:
+                      [
+                        members,
+                        projects,
+                        clients,
+                        providers,
+                        models,
+                        accounts,
+                        daily,
+                        branches,
+                        errorCodes,
+                        serviceTiers,
+                        teams,
+                      ]
+                    additionalProperties:
+                      type: array
+                      items: { $ref: "#/components/schemas/ReportBreakdownRow" }
         "400":
           description: Invalid query parameters
 
@@ -5001,7 +5025,21 @@ paths:
           required: true
           schema:
             type: string
-            enum: [members, projects, clients, providers, models, accounts, daily, sessions]
+            enum:
+              [
+                members,
+                projects,
+                clients,
+                providers,
+                models,
+                accounts,
+                daily,
+                branches,
+                errorCodes,
+                serviceTiers,
+                teams,
+                sessions,
+              ]
         - $ref: "#/components/parameters/ReportFrom"
         - $ref: "#/components/parameters/ReportTo"
         - $ref: "#/components/parameters/ReportApiKeyId"
@@ -5035,6 +5073,152 @@ paths:
             text/csv:
               schema:
                 type: string
+        "400":
+          description: Invalid query parameters
+
+  /api/reports/matrix:
+    get:
+      tags: [Usage]
+      summary: Team report matrix crossing two dimensions
+      description: >
+        The matching requests crossed by two dimensions (default members by projects), priced
+        like /api/reports/summary. Rows keep the 25 values with the most cost and columns the 15
+        with the most cost (ties: tokens, requests, key); the rest of each axis is summed into
+        a last entry with `other: true` and key `__other__`, and `truncated` is true. A cell
+        drills down by calling /api/reports/summary or /api/reports/sessions with the row's and
+        the column's filters (the other bucket has no single filter). Built from the same cached
+        read of the window as the summary, so a page loading both reads the window once.
+      parameters:
+        - name: rows
+          in: query
+          description: Dimension of the rows.
+          schema:
+            type: string
+            enum: [members, projects, clients, providers, models, branches, teams]
+            default: members
+        - name: cols
+          in: query
+          description: Dimension of the columns; must differ from rows.
+          schema:
+            type: string
+            enum: [members, projects, clients, providers, models, branches, teams]
+            default: projects
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: Row and column headers, every cell, and the totals.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportMatrix" }
+        "400":
+          description: Invalid query parameters, or rows equal to cols
+
+  /api/reports/trends:
+    get:
+      tags: [Usage]
+      summary: Team report trend per local day, stacked by a dimension
+      description: >
+        One metric of the matching requests per local day (tzOffset), stacked by one dimension:
+        the 8 values with the largest metric over the window (ties: key), then a series with
+        `other: true` and key `__other__` summing the rest. The days run from `from` (else the
+        first day with usage) to `to` (else today), days without usage included as zeros. A
+        window longer than 366 days is summed per week (Monday to Sunday) and `bucket` is
+        `week`; a window longer than 366 weeks is rejected with 400. Built from the same cached
+        read of the window as the summary.
+      parameters:
+        - name: dimension
+          in: query
+          description: Dimension to stack by.
+          schema:
+            type: string
+            enum:
+              [
+                members,
+                projects,
+                clients,
+                providers,
+                models,
+                branches,
+                teams,
+                errorCodes,
+                serviceTiers,
+              ]
+            default: members
+        - name: metric
+          in: query
+          description: costUsd, tokens (input + output) or requests.
+          schema:
+            type: string
+            enum: [costUsd, tokens, requests]
+            default: costUsd
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: The days and one series per stacked value.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportTrends" }
+        "400":
+          description: Invalid query parameters, or a window longer than 366 weeks
+
+  /api/reports/heatmap:
+    get:
+      tags: [Usage]
+      summary: Team report requests and cost by local weekday and hour
+      description: >
+        The matching requests and their cost (priced like /api/reports/summary) in a 7 x 24
+        grid of local weekday and hour (tzOffset), with the largest cell of each grid for
+        scaling. No filter selects one weekday or hour, so a cell has no drill-down.
+      parameters:
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: The two grids and their largest cells.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportHeatmap" }
         "400":
           description: Invalid query parameters
 
@@ -17598,8 +17782,8 @@ components:
       in: query
       description: >
         Minutes to add to UTC to get local time (send `-new Date().getTimezoneOffset()`). The
-        daily breakdown groups by local day; absent or 0 groups by UTC day. from/to are not
-        shifted.
+        daily breakdown and the trends group by local day and the heatmap by local weekday and
+        hour; absent or 0 uses UTC. from/to are not shifted.
       schema:
         type: integer
         minimum: -840
@@ -17854,6 +18038,142 @@ components:
               description: >-
                 Model with the most matching requests; ties go to the higher cost, then the
                 name. null when that is the requests without a model.
+    ReportBreakdownRow:
+      allOf:
+        - $ref: "#/components/schemas/ReportSessionTotals"
+        - type: object
+          required: [key, label, detail, sessions, members, projects, lastSeenAt]
+          properties:
+            key:
+              type: string
+              description: >-
+                The value to filter on; "" is an empty field (filter with `__none__`). daily
+                rows hold the local day.
+            label:
+              type: string
+              nullable: true
+              description: Display name when one is known (API key name, account label, team name).
+            detail:
+              type: string
+              nullable: true
+              description: Project repo for projects, the provider for accounts.
+            sessions: { type: integer }
+            members: { type: integer }
+            projects: { type: integer }
+            lastSeenAt: { type: string, format: date-time, nullable: true }
+    ReportMatrixMetrics:
+      type: object
+      required: [requests, tokens, costUsd, activeMs]
+      properties:
+        requests: { type: integer }
+        tokens: { type: integer, description: input + output, as tokens.total in the summary. }
+        costUsd: { type: number }
+        activeMs:
+          type: integer
+          nullable: true
+          description: >-
+            Active time (as ReportTimeKpis.activeMs) of the sessions the entry covers. Only
+            entries whose dimensions all belong to the session (members, projects, clients,
+            branches) cover whole sessions; entries of a request-level dimension (providers,
+            models, teams) split sessions and have null. The totals always have it.
+    ReportMatrixHeader:
+      allOf:
+        - $ref: "#/components/schemas/ReportMatrixMetrics"
+        - type: object
+          required: [key, label, other]
+          properties:
+            key:
+              type: string
+              description: >-
+                The value to filter on ("" is an empty field: filter with `__none__`);
+                `__other__` for the other bucket.
+            label: { type: string, nullable: true, description: API key name or team name. }
+            other: { type: boolean, description: true for the bucket summing the rest. }
+    ReportMatrix:
+      type: object
+      required:
+        [rowDimension, colDimension, rows, cols, cells, totals, truncated, rowCount, colCount]
+      properties:
+        rowDimension: { type: string }
+        colDimension: { type: string }
+        rows:
+          type: array
+          description: Up to 25 values by cost, then the other bucket when there are more.
+          items: { $ref: "#/components/schemas/ReportMatrixHeader" }
+        cols:
+          type: array
+          description: Up to 15 values by cost, then the other bucket when there are more.
+          items: { $ref: "#/components/schemas/ReportMatrixHeader" }
+        cells:
+          type: array
+          description: cells[i][j] holds rows[i] x cols[j]; every cell is present (zeros when empty).
+          items:
+            type: array
+            items: { $ref: "#/components/schemas/ReportMatrixMetrics" }
+        totals: { $ref: "#/components/schemas/ReportMatrixMetrics" }
+        truncated:
+          type: boolean
+          description: true when either axis had more values than its cap.
+        rowCount: { type: integer, description: Distinct row values before the cap. }
+        colCount: { type: integer, description: Distinct column values before the cap. }
+    ReportTrends:
+      type: object
+      required: [dimension, metric, bucket, days, series]
+      properties:
+        dimension: { type: string }
+        metric: { type: string, enum: [costUsd, tokens, requests] }
+        bucket:
+          type: string
+          enum: [day, week]
+          description: week when the window spans more than 366 local days.
+        days:
+          type: array
+          description: Local days (YYYY-MM-DD), oldest first; for weeks, the Monday each starts on.
+          items: { type: string, format: date }
+        series:
+          type: array
+          description: Up to 8 series by the metric's window total, then other.
+          items:
+            type: object
+            required: [key, label, other, values]
+            properties:
+              key:
+                type: string
+                description: >-
+                  The value to filter on ("" is an empty field: filter with `__none__`);
+                  `__other__` for the other series.
+              label: { type: string, nullable: true, description: API key name or team name. }
+              other: { type: boolean }
+              values:
+                type: array
+                description: One value per entry of days.
+                items: { type: number }
+    ReportHeatmap:
+      type: object
+      required: [requests, costUsd, maxRequests, maxCostUsd]
+      properties:
+        requests:
+          type: array
+          description: requests[weekday][hour], local weekday 0 = Sunday to 6 = Saturday, hour 0-23.
+          minItems: 7
+          maxItems: 7
+          items:
+            type: array
+            minItems: 24
+            maxItems: 24
+            items: { type: integer }
+        costUsd:
+          type: array
+          description: Cost in the same layout as requests.
+          minItems: 7
+          maxItems: 7
+          items:
+            type: array
+            minItems: 24
+            maxItems: 24
+            items: { type: number }
+        maxRequests: { type: integer, description: Largest requests cell; 0 without requests. }
+        maxCostUsd: { type: number, description: Largest costUsd cell. }
     ReportTimeKpis:
       type: object
       description: >-

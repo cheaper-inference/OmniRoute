@@ -1,6 +1,7 @@
 /**
  * Team reports for the management dashboard: usage, tokens and cost of coding-agent sessions,
- * rolled up by member (API key), project, provider, model, account and day.
+ * rolled up by member (API key), project, client, provider, model, account, day, git branch,
+ * error code, service tier and billing team.
  *
  * Cost is computed at read time from request slices. Requests that stored a provider-reported
  * cost (usage_history.provider_cost_usd) are billed that cost, as usage analytics bills them:
@@ -9,18 +10,17 @@
  * prices for per-token rates; a rate chosen by one request's size (a long-context tier) is
  * chosen by the slice's summed input instead.
  *
- * The summary and the per-session rows are cached briefly (agentSessionReportCache), so paging
- * and sorting the sessions list do not price the window again.
+ * The summary and the per-session rows are built from the filter's cached scan
+ * (agentSessionReportScan) and kept on it, so paging and sorting the sessions list, and the matrix
+ * and trends views of the same filter, do not read or price the window again.
  */
 
 import { getDbInstance } from "@/lib/db/core";
 import type { SqliteAdapter } from "@/lib/db/adapters/types";
 import {
   getAgentSessionMetadataByIds,
-  listAgentSessionUsageSlices,
   type AgentSessionReportFilter,
   type AgentSessionReportMetadata,
-  type AgentSessionUsageSlice,
 } from "@/lib/db/agentSessionReports";
 import {
   getAgentSessionLatencyPercentile,
@@ -32,10 +32,25 @@ import {
   type AgentSessionTimes,
   type SessionRequestsPage,
 } from "@/lib/db/agentSessionReportStats";
-import { ReportResultCache } from "./agentSessionReportCache";
+import {
+  getReportScan,
+  listPricedSlices,
+  REPORT_BREAKDOWN_DIMENSIONS,
+  SLICE_IDENTITY,
+  type PricedSlice,
+  type ReportBreakdownDimension,
+  type ReportScan,
+  type SliceIdentity,
+} from "./agentSessionReportScan";
 import { calculateCostDetailed } from "./costCalculator";
 
 export type { AgentSessionReportFilter, SessionRequestsPage };
+export {
+  REPORT_BREAKDOWN_DIMENSIONS,
+  REPORT_DIMENSIONS,
+  type ReportBreakdownDimension,
+  type ReportDimension,
+} from "./agentSessionReportScan";
 
 export interface ReportTotals {
   requests: number;
@@ -63,22 +78,14 @@ export interface ReportTotals {
 
 export interface ReportBreakdownRow extends ReportTotals {
   key: string;
-  /** Display name when one is known (API key name, account label); null means "use the key". */
+  /**
+   * Display name when one is known (API key name, account label, team name); null means "use the
+   * key".
+   */
   label: string | null;
   /** Secondary text: project repo, or the account's provider. */
   detail: string | null;
 }
-
-export const REPORT_DIMENSIONS = [
-  "members",
-  "projects",
-  "clients",
-  "providers",
-  "models",
-  "accounts",
-  "daily",
-] as const;
-export type ReportDimension = (typeof REPORT_DIMENSIONS)[number];
 
 /**
  * Time and latency KPIs over the same requests as the totals. Latency and TTFT averages use only
@@ -105,7 +112,11 @@ export type ReportSummaryTotals = ReportTotals & ReportTimeKpis;
 
 export interface AgentSessionReport {
   totals: ReportSummaryTotals;
-  breakdowns: Record<ReportDimension, ReportBreakdownRow[]>;
+  /**
+   * Rows per dimension. errorCodes has a "" row for the requests without an error code (all
+   * successful ones and failures that stored none); filter with outcome=error for failures only.
+   */
+  breakdowns: Record<ReportBreakdownDimension, ReportBreakdownRow[]>;
 }
 
 /** One session's request totals; same meaning as the matching ReportTotals fields. */
@@ -156,19 +167,6 @@ export interface SessionReportPage extends SessionReportOrder {
   offset?: number;
 }
 
-type PricedSlice = AgentSessionUsageSlice & { costUsd: number; priced: boolean };
-type RowIdentity = Pick<ReportBreakdownRow, "key" | "label" | "detail">;
-
-const DIMENSION_IDENTITY: Record<ReportDimension, (slice: PricedSlice) => RowIdentity> = {
-  members: (s) => ({ key: s.apiKeyId ?? "", label: s.apiKeyName, detail: null }),
-  projects: (s) => ({ key: s.projectName ?? "", label: null, detail: s.projectRepo }),
-  clients: (s) => ({ key: s.client ?? "", label: null, detail: null }),
-  providers: (s) => ({ key: s.provider ?? "", label: null, detail: null }),
-  models: (s) => ({ key: s.model ?? "", label: null, detail: null }),
-  accounts: (s) => ({ key: s.connectionId ?? "", label: s.accountLabel, detail: s.provider }),
-  daily: (s) => ({ key: s.day, label: null, detail: null }),
-};
-
 class TotalsAccumulator {
   private requests = 0;
   private errors = 0;
@@ -218,23 +216,13 @@ class TotalsAccumulator {
   }
 }
 
-async function priceSlice(slice: AgentSessionUsageSlice): Promise<PricedSlice> {
-  if (slice.providerCostUsd !== null) {
-    return { ...slice, costUsd: slice.providerCostUsd, priced: true };
-  }
-  const { costUsd, priced } = await calculateCostDetailed(
-    slice.provider || "",
-    slice.model || "",
-    slice.tokens,
-    { provider: slice.provider, model: slice.model, serviceTier: slice.serviceTier }
-  );
-  return { ...slice, costUsd, priced };
-}
-
-function breakdownBy(dimension: ReportDimension, slices: PricedSlice[]): ReportBreakdownRow[] {
-  const groups = new Map<string, { identity: RowIdentity; totals: TotalsAccumulator }>();
+function breakdownBy(
+  dimension: ReportBreakdownDimension,
+  slices: readonly PricedSlice[]
+): ReportBreakdownRow[] {
+  const groups = new Map<string, { identity: SliceIdentity; totals: TotalsAccumulator }>();
   for (const slice of slices) {
-    const identity = DIMENSION_IDENTITY[dimension](slice);
+    const identity = SLICE_IDENTITY[dimension](slice);
     let group = groups.get(identity.key);
     if (!group) {
       group = { identity, totals: new TotalsAccumulator() };
@@ -248,13 +236,6 @@ function breakdownBy(dimension: ReportDimension, slices: PricedSlice[]): ReportB
   }));
   if (dimension === "daily") return rows.sort((a, b) => a.key.localeCompare(b.key));
   return rows.sort((a, b) => b.costUsd - a.costUsd || b.tokens.total - a.tokens.total);
-}
-
-function listPricedSlices(
-  db: SqliteAdapter,
-  filter: AgentSessionReportFilter
-): Promise<PricedSlice[]> {
-  return Promise.all(listAgentSessionUsageSlices(db, filter).map(priceSlice));
 }
 
 function sessionTotals(totals: ReportTotals): SessionReportTotals {
@@ -273,7 +254,7 @@ function timeKpis(
   db: SqliteAdapter,
   filter: AgentSessionReportFilter,
   totals: ReportTotals,
-  times: AgentSessionTimes[]
+  times: readonly AgentSessionTimes[]
 ): ReportTimeKpis {
   let activeMs = 0;
   let modelMs = 0;
@@ -301,30 +282,25 @@ function timeKpis(
   };
 }
 
-const reportCache = new ReportResultCache<AgentSessionReport>();
-
 export async function buildAgentSessionReport(
   filter: AgentSessionReportFilter = {},
   db: SqliteAdapter = getDbInstance()
 ): Promise<AgentSessionReport> {
+  const scan = await getReportScan(db, filter);
   // A copy, so the caller cannot change the cached report.
-  return structuredClone(await reportCache.get(db, filter, () => computeReport(db, filter)));
+  return structuredClone(await scan.derive("summary", () => computeReport(scan)));
 }
 
-async function computeReport(
-  db: SqliteAdapter,
-  filter: AgentSessionReportFilter
-): Promise<AgentSessionReport> {
-  const slices = await listPricedSlices(db, filter);
+function computeReport(scan: ReportScan): AgentSessionReport {
   const accumulator = new TotalsAccumulator();
-  for (const slice of slices) accumulator.add(slice);
+  for (const slice of scan.slices) accumulator.add(slice);
   const totals = accumulator.toTotals();
 
   const breakdowns = Object.fromEntries(
-    REPORT_DIMENSIONS.map((dimension) => [dimension, breakdownBy(dimension, slices)])
-  ) as Record<ReportDimension, ReportBreakdownRow[]>;
+    REPORT_BREAKDOWN_DIMENSIONS.map((dimension) => [dimension, breakdownBy(dimension, scan.slices)])
+  ) as Record<ReportBreakdownDimension, ReportBreakdownRow[]>;
 
-  const kpis = timeKpis(db, filter, totals, listAgentSessionTimes(db, filter));
+  const kpis = timeKpis(scan.db, scan.filter, totals, scan.sessionTimes());
   return { totals: { ...totals, ...kpis }, breakdowns };
 }
 
@@ -358,7 +334,7 @@ function mainModelOf(models: Map<string, ModelUse>): string | null {
 }
 
 function sessionWindows(
-  slices: PricedSlice[],
+  slices: readonly PricedSlice[],
   times: ReadonlyMap<string, AgentSessionTimes>
 ): SessionWindow[] {
   const groups = new Map<
@@ -420,16 +396,9 @@ function sessionComparator(order: SessionReportOrder) {
 
 const SESSION_PAGE_DEFAULT_LIMIT = 20;
 
-// Per-session totals of a filter, unsorted; every page and sort order of the list reuses them.
-const sessionWindowsCache = new ReportResultCache<SessionWindow[]>();
-
-async function computeSessionWindows(
-  db: SqliteAdapter,
-  filter: AgentSessionReportFilter
-): Promise<SessionWindow[]> {
-  const slices = await listPricedSlices(db, filter);
-  const times = new Map(listAgentSessionTimes(db, filter).map((time) => [time.sessionId, time]));
-  return sessionWindows(slices, times);
+function computeSessionWindows(scan: ReportScan): SessionWindow[] {
+  const times = new Map(scan.sessionTimes().map((time) => [time.sessionId, time]));
+  return sessionWindows(scan.slices, times);
 }
 
 /**
@@ -442,7 +411,9 @@ export async function listAgentSessionReportRows(
   page: SessionReportPage = {},
   db: SqliteAdapter = getDbInstance()
 ): Promise<{ sessions: AgentSessionReportRow[]; total: number }> {
-  const cached = await sessionWindowsCache.get(db, filter, () => computeSessionWindows(db, filter));
+  const scan = await getReportScan(db, filter);
+  // Per-session totals of the filter, unsorted; every page and sort order of the list reuses them.
+  const cached = await scan.derive("sessions", () => computeSessionWindows(scan));
   // The comparator orders every pair (ties go to the unique id), so sorting a copy of the
   // cached rows gives the same order as sorting freshly built ones.
   const windows = [...cached].sort(sessionComparator(page));

@@ -5,8 +5,9 @@
  *
  * Entries belong to one database handle and are keyed by the normalized filter. One is served
  * only while usage_history's highest id is unchanged (a recorded request drops it) and for at
- * most REPORT_CACHE_TTL_MS, which bounds how long a pricing edit or deleted usage goes unseen.
- * Callers must not mutate a cached value; concurrent callers share one computation.
+ * most REPORT_CACHE_TTL_MS, which bounds how long a pricing edit or deleted usage goes unseen;
+ * after that it is released. Callers must not mutate a cached value; concurrent callers share
+ * one computation.
  */
 
 import type { SqliteAdapter } from "@/lib/db/adapters/types";
@@ -74,10 +75,14 @@ export class ReportResultCache<T> {
     const entry: CacheEntry<T> = { version, storedAt: now, value: compute() };
     entries.set(key, entry);
     const owner = entries;
-    // A failed computation is not kept; the caller still gets the rejection.
-    entry.value.catch(() => {
+    const drop = () => {
       if (owner.get(key) === entry) owner.delete(key);
-    });
+    };
+    // A failed computation is not kept; the caller still gets the rejection.
+    entry.value.catch(drop);
+    // Dropped once it can no longer be served, so a filter nobody asks for again frees its
+    // result (a scan holds every slice of its window) instead of waiting for eviction.
+    setTimeout(drop, REPORT_CACHE_TTL_MS).unref?.();
     for (const oldest of entries.keys()) {
       if (entries.size <= REPORT_CACHE_MAX_ENTRIES) break;
       entries.delete(oldest);

@@ -1,8 +1,8 @@
 /**
  * Team report source rows: attributed usage_history requests, sliced per session, provider,
- * model, account, service tier and day, plus the filter facets. Reading requests (not the session
- * aggregates) keeps the time window exact and lets per-request filters see every request a
- * session made.
+ * model, account, service tier, error code, billing team and day (or per local weekday and hour),
+ * plus the filter facets. Reading requests (not the session aggregates) keeps the time window
+ * exact and lets per-request filters see every request a session made.
  */
 
 import type { AgentSessionRecord, AgentSessionTokens } from "./agentSessions";
@@ -58,32 +58,43 @@ export type AgentSessionReportFilter = Partial<
   tzOffset?: number;
 };
 
-export interface AgentSessionUsageSlice {
-  sessionId: string;
-  apiKeyId: string | null;
-  apiKeyName: string | null;
-  projectName: string | null;
-  projectRepo: string | null;
-  client: string | null;
+/** Request counts and token sums of a group of requests, with what prices them. */
+export interface ReportUsageSums {
   provider: string | null;
   model: string | null;
-  connectionId: string | null;
-  accountLabel: string | null;
+  /** The tier the requests are priced with; "standard" when none was stored. */
   serviceTier: string;
-  day: string;
-  firstSeenAt: string;
-  lastSeenAt: string;
   requests: number;
   /** Requests that consumed tokens; only these can be unpriced (same rule as agent_sessions). */
   requestsWithTokens: number;
   errors: number;
   tokens: AgentSessionTokens;
   /**
-   * Sum of usage_history.provider_cost_usd, the exact cost some providers report. A slice holds
+   * Sum of usage_history.provider_cost_usd, the exact cost some providers report. A group holds
    * either only requests that stored one (a number) or only requests that did not (null), so a
-   * number is the slice's whole cost and its tokens are for display only.
+   * number is the group's whole cost and its tokens are for display only.
    */
   providerCostUsd: number | null;
+}
+
+export interface AgentSessionUsageSlice extends ReportUsageSums {
+  sessionId: string;
+  apiKeyId: string | null;
+  apiKeyName: string | null;
+  projectName: string | null;
+  projectRepo: string | null;
+  client: string | null;
+  /** The session's git branch. */
+  gitBranch: string | null;
+  connectionId: string | null;
+  accountLabel: string | null;
+  errorCode: string | null;
+  billingTeamId: string | null;
+  /** Name of the billing team; null without a team or when the team row is gone. */
+  billingTeamName: string | null;
+  day: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
 }
 
 /** SQL value of each multi-value filter; also the facet dimension's value. */
@@ -173,63 +184,29 @@ export function buildReportConditions(
   return { conditions, params };
 }
 
-export function listAgentSessionUsageSlices(
-  db: SqliteAdapter,
-  filter: AgentSessionReportFilter = {}
-): AgentSessionUsageSlice[] {
-  const { conditions, params } = buildReportConditions(filter);
-  // Stored timestamps are UTC ISO strings; a local day needs the offset applied first. The
-  // modifier is bound ahead of the WHERE params because it appears first in the statement.
-  const tzOffset = Math.trunc(Number(filter.tzOffset) || 0);
-  const dayExpression = tzOffset ? "date(uh.timestamp, ?)" : "substr(uh.timestamp, 1, 10)";
-  if (tzOffset) params.unshift(`${tzOffset} minutes`);
+// Same value the filter matches and the slices price by.
+const SERVICE_TIER_SQL = FILTER_COLUMNS.serviceTier;
 
-  // Session columns are functionally dependent on agent_session_id, so SQLite's bare-column
-  // grouping returns the one session value.
-  const rows = db
-    .prepare(
-      `SELECT uh.agent_session_id AS session_id, s.api_key_id, s.api_key_name,
-              s.project_name, s.project_repo, s.client, uh.provider, uh.model, uh.connection_id,
-              MAX(uh.account_label) AS account_label,
-              COALESCE(NULLIF(uh.service_tier, ''), 'standard') AS service_tier,
-              ${dayExpression} AS day,
-              MIN(uh.timestamp) AS first_seen_at,
-              MAX(uh.timestamp) AS last_seen_at,
-              COUNT(*) AS requests,
-              SUM(CASE WHEN COALESCE(uh.tokens_input, 0) + COALESCE(uh.tokens_output, 0)
-                            + COALESCE(uh.tokens_cache_read, 0)
-                            + COALESCE(uh.tokens_cache_creation, 0) > 0
-                       THEN 1 ELSE 0 END) AS requests_with_tokens,
-              SUM(CASE WHEN uh.success = 0 THEN 1 ELSE 0 END) AS errors,
-              COALESCE(SUM(uh.tokens_input), 0) AS tokens_input,
-              COALESCE(SUM(uh.tokens_output), 0) AS tokens_output,
-              COALESCE(SUM(uh.tokens_cache_read), 0) AS tokens_cache_read,
-              COALESCE(SUM(uh.tokens_cache_creation), 0) AS tokens_cache_creation,
-              COALESCE(SUM(uh.tokens_reasoning), 0) AS tokens_reasoning,
-              SUM(uh.provider_cost_usd) AS provider_cost_usd
-       FROM usage_history uh
-       JOIN agent_sessions s ON s.id = uh.agent_session_id
-       WHERE ${conditions.join(" AND ")}
-       GROUP BY uh.agent_session_id, uh.provider, uh.model, uh.connection_id, service_tier, day,
-                uh.provider_cost_usd IS NULL`
-    )
-    .all(...params) as Record<string, unknown>[];
+/** Columns read by usageSums(); the GROUP BY must split on uh.provider_cost_usd IS NULL. */
+const USAGE_SUMS_SQL = `uh.provider, uh.model, ${SERVICE_TIER_SQL} AS service_tier,
+       COUNT(*) AS requests,
+       SUM(CASE WHEN COALESCE(uh.tokens_input, 0) + COALESCE(uh.tokens_output, 0)
+                     + COALESCE(uh.tokens_cache_read, 0)
+                     + COALESCE(uh.tokens_cache_creation, 0) > 0
+                THEN 1 ELSE 0 END) AS requests_with_tokens,
+       SUM(CASE WHEN uh.success = 0 THEN 1 ELSE 0 END) AS errors,
+       COALESCE(SUM(uh.tokens_input), 0) AS tokens_input,
+       COALESCE(SUM(uh.tokens_output), 0) AS tokens_output,
+       COALESCE(SUM(uh.tokens_cache_read), 0) AS tokens_cache_read,
+       COALESCE(SUM(uh.tokens_cache_creation), 0) AS tokens_cache_creation,
+       COALESCE(SUM(uh.tokens_reasoning), 0) AS tokens_reasoning,
+       SUM(uh.provider_cost_usd) AS provider_cost_usd`;
 
-  return rows.map((row) => ({
-    sessionId: String(row.session_id),
-    apiKeyId: nullableString(row.api_key_id),
-    apiKeyName: nullableString(row.api_key_name),
-    projectName: nullableString(row.project_name),
-    projectRepo: nullableString(row.project_repo),
-    client: nullableString(row.client),
+function usageSums(row: Record<string, unknown>): ReportUsageSums {
+  return {
     provider: nullableString(row.provider),
     model: nullableString(row.model),
-    connectionId: nullableString(row.connection_id),
-    accountLabel: nullableString(row.account_label),
     serviceTier: String(row.service_tier),
-    day: String(row.day),
-    firstSeenAt: String(row.first_seen_at),
-    lastSeenAt: String(row.last_seen_at),
     requests: Number(row.requests ?? 0),
     requestsWithTokens: Number(row.requests_with_tokens ?? 0),
     errors: Number(row.errors ?? 0),
@@ -241,7 +218,131 @@ export function listAgentSessionUsageSlices(
       reasoning: Number(row.tokens_reasoning ?? 0),
     },
     providerCostUsd: nullableNumber(row.provider_cost_usd),
-  }));
+  };
+}
+
+/** The filter's tzOffset as an SQLite date modifier, or null for UTC. */
+function localTimeModifier(filter: AgentSessionReportFilter): string | null {
+  const tzOffset = Math.trunc(Number(filter.tzOffset) || 0);
+  return tzOffset ? `${tzOffset} minutes` : null;
+}
+
+// Well under SQLite's bound-parameter limit; one page of the list is a single query.
+const METADATA_BATCH_SIZE = 500;
+
+/** Team names by id, for the billing teams the slices name (a handful). */
+function getTeamNamesByIds(db: SqliteAdapter, ids: readonly string[]): Map<string, string> {
+  const names = new Map<string, string>();
+  for (let start = 0; start < ids.length; start += METADATA_BATCH_SIZE) {
+    const batch = ids.slice(start, start + METADATA_BATCH_SIZE);
+    const rows = db
+      .prepare(`SELECT id, name FROM teams WHERE id IN (${batch.map(() => "?").join(", ")})`)
+      .all(...batch) as Record<string, unknown>[];
+    for (const row of rows) names.set(String(row.id), String(row.name));
+  }
+  return names;
+}
+
+export function listAgentSessionUsageSlices(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter = {}
+): AgentSessionUsageSlice[] {
+  const { conditions, params } = buildReportConditions(filter);
+  // Stored timestamps are UTC ISO strings; a local day needs the offset applied first. The
+  // modifier is bound ahead of the WHERE params because it appears first in the statement.
+  const modifier = localTimeModifier(filter);
+  const dayExpression = modifier ? "date(uh.timestamp, ?)" : "substr(uh.timestamp, 1, 10)";
+  if (modifier) params.unshift(modifier);
+
+  // Session columns are functionally dependent on agent_session_id, so SQLite's bare-column
+  // grouping returns the one session value.
+  const rows = db
+    .prepare(
+      `SELECT uh.agent_session_id AS session_id, s.api_key_id, s.api_key_name,
+              s.project_name, s.project_repo, s.client, s.git_branch, uh.connection_id,
+              MAX(uh.account_label) AS account_label, uh.error_code, uh.billing_team_id,
+              ${dayExpression} AS day,
+              MIN(uh.timestamp) AS first_seen_at,
+              MAX(uh.timestamp) AS last_seen_at,
+              ${USAGE_SUMS_SQL}
+       FROM usage_history uh
+       JOIN agent_sessions s ON s.id = uh.agent_session_id
+       WHERE ${conditions.join(" AND ")}
+       GROUP BY uh.agent_session_id, uh.provider, uh.model, uh.connection_id, service_tier, day,
+                uh.error_code, uh.billing_team_id, uh.provider_cost_usd IS NULL`
+    )
+    .all(...params) as Record<string, unknown>[];
+
+  const teamIds = new Set<string>();
+  for (const row of rows) {
+    if (typeof row.billing_team_id === "string") teamIds.add(row.billing_team_id);
+  }
+  const teamNames = getTeamNamesByIds(db, [...teamIds]);
+
+  return rows.map((row) => {
+    const billingTeamId = nullableString(row.billing_team_id);
+    return {
+      ...usageSums(row),
+      sessionId: String(row.session_id),
+      apiKeyId: nullableString(row.api_key_id),
+      apiKeyName: nullableString(row.api_key_name),
+      projectName: nullableString(row.project_name),
+      projectRepo: nullableString(row.project_repo),
+      client: nullableString(row.client),
+      gitBranch: nullableString(row.git_branch),
+      connectionId: nullableString(row.connection_id),
+      accountLabel: nullableString(row.account_label),
+      errorCode: nullableString(row.error_code),
+      billingTeamId,
+      billingTeamName: billingTeamId ? (teamNames.get(billingTeamId) ?? null) : null,
+      day: String(row.day),
+      firstSeenAt: String(row.first_seen_at),
+      lastSeenAt: String(row.last_seen_at),
+    };
+  });
+}
+
+/** Requests of one local weekday and hour, per provider, model and tier (for pricing). */
+export interface AgentSessionHourlySlice extends ReportUsageSums {
+  /** Local day of the week, 0 = Sunday ... 6 = Saturday. */
+  weekday: number;
+  /** Local hour, 0..23. */
+  hour: number;
+}
+
+/**
+ * The filter's requests grouped by local weekday and hour (tzOffset applies, as for days), and
+ * by what prices them. One strftime per request; no session columns are read.
+ */
+export function listAgentSessionHourlySlices(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter = {}
+): AgentSessionHourlySlice[] {
+  const { conditions, params } = buildReportConditions(filter);
+  const modifier = localTimeModifier(filter);
+  const slotExpression = modifier
+    ? "strftime('%w %H', uh.timestamp, ?)"
+    : "strftime('%w %H', uh.timestamp)";
+  if (modifier) params.unshift(modifier);
+
+  const rows = db
+    .prepare(
+      `SELECT ${slotExpression} AS slot, ${USAGE_SUMS_SQL}
+       FROM usage_history uh
+       JOIN agent_sessions s ON s.id = uh.agent_session_id
+       WHERE ${conditions.join(" AND ")}
+       GROUP BY slot, uh.provider, uh.model, service_tier, uh.provider_cost_usd IS NULL`
+    )
+    .all(...params) as Record<string, unknown>[];
+
+  // A timestamp SQLite cannot parse has no slot; it cannot be placed, so it is left out.
+  return rows.flatMap((row) => {
+    const [weekday, hour] = String(row.slot ?? "")
+      .split(" ")
+      .map(Number);
+    if (!(weekday >= 0 && weekday <= 6 && hour >= 0 && hour <= 23)) return [];
+    return [{ ...usageSums(row), weekday, hour }];
+  });
 }
 
 /**
@@ -270,9 +371,6 @@ export type AgentSessionReportMetadata = Pick<
   | "firstSeenAt"
   | "lastSeenAt"
 >;
-
-// Well under SQLite's bound-parameter limit; one page of the list is a single query.
-const METADATA_BATCH_SIZE = 500;
 
 export function getAgentSessionMetadataByIds(
   db: SqliteAdapter,

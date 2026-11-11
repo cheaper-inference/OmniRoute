@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { REPORT_MULTI_VALUE_FILTERS, REPORT_SEARCH_MAX_LENGTH } from "@/lib/db/agentSessionReports";
 import { SESSION_REQUESTS_MAX_LIMIT } from "@/lib/db/agentSessionReportStats";
-import { REPORT_DIMENSIONS, SESSION_REPORT_SORTS } from "@/lib/usage/agentSessionReports";
+import { REPORT_BREAKDOWN_DIMENSIONS, SESSION_REPORT_SORTS } from "@/lib/usage/agentSessionReports";
+import {
+  REPORT_MATRIX_DIMENSIONS,
+  REPORT_TREND_DIMENSIONS,
+  REPORT_TREND_METRICS,
+} from "@/lib/usage/agentSessionReportViews";
 
 // Stored timestamps are UTC `toISOString()` strings compared lexically, so any accepted offset
 // is normalized to that form before it reaches SQL.
@@ -69,8 +74,28 @@ export const sessionDetailQuerySchema = z.object({
 
 export const exportQuerySchema = reportFilterFields
   .extend({
-    type: z.enum([...REPORT_DIMENSIONS, "sessions"]),
+    type: z.enum([...REPORT_BREAKDOWN_DIMENSIONS, "sessions"]),
     ...sessionOrderSchema,
+  })
+  .refine(windowInOrder, WINDOW_ORDER_ISSUE);
+
+/** Matrix: report filters plus the two dimensions to cross, which must differ. */
+export const matrixQuerySchema = reportFilterFields
+  .extend({
+    rows: z.enum(REPORT_MATRIX_DIMENSIONS).default("members"),
+    cols: z.enum(REPORT_MATRIX_DIMENSIONS).default("projects"),
+  })
+  .refine(windowInOrder, WINDOW_ORDER_ISSUE)
+  .refine((query) => query.rows !== query.cols, {
+    message: "rows and cols must differ",
+    path: ["cols"],
+  });
+
+/** Trends: report filters plus the dimension to stack by and the metric to chart. */
+export const trendsQuerySchema = reportFilterFields
+  .extend({
+    dimension: z.enum(REPORT_TREND_DIMENSIONS).default("members"),
+    metric: z.enum(REPORT_TREND_METRICS).default("costUsd"),
   })
   .refine(windowInOrder, WINDOW_ORDER_ISSUE);
 
