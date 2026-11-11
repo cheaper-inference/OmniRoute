@@ -66,3 +66,40 @@ describe("non-streaming claude→openai usage cache tokens", () => {
     assert.equal(usage.prompt_tokens_details, undefined);
   });
 });
+
+describe("non-streaming Gemini→OpenAI cache metadata bounds", () => {
+  const makeGemini = (cachedContentTokenCount: number) => ({
+    responseId: "response-test",
+    modelVersion: "gemini-3.7-flash",
+    candidates: [
+      { content: { parts: [{ text: "ok" }] }, finishReason: "STOP" },
+    ],
+    usageMetadata: {
+      promptTokenCount: 10,
+      candidatesTokenCount: 2,
+      totalTokenCount: 12,
+      cachedContentTokenCount,
+    },
+  });
+
+  test("does not report cached input larger than the entire prompt", () => {
+    const out = translateNonStreamingResponse(
+      makeGemini(99),
+      FORMATS.GEMINI,
+      FORMATS.OPENAI
+    ) as Record<string, unknown>;
+    const usage = out.usage as Record<string, unknown>;
+    assert.equal(usage.prompt_tokens, 10);
+    assert.equal(usage.prompt_tokens_details, undefined);
+  });
+
+  test("valid cached count remains visible", () => {
+    const out = translateNonStreamingResponse(
+      makeGemini(4),
+      FORMATS.GEMINI,
+      FORMATS.OPENAI
+    ) as Record<string, unknown>;
+    const usage = out.usage as Record<string, unknown>;
+    assert.deepEqual(usage.prompt_tokens_details, { cached_tokens: 4 });
+  });
+});
