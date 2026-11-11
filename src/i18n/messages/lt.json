@@ -11981,6 +11981,7 @@
     "description": "Stebėkite teikėjo užklausų podėlio efektyvumą ir vietinį semantinį pakartotinį atsakymų naudojimą.",
     "refresh": "Atnaujinti",
     "clearAll": "Išvalyti semantinį podėlį",
+    "clearAllConfirm": "Visi šios talpyklos įrašai bus ištrinti. Šio veiksmo anuliuoti negalima.",
     "memoryEntries": "Atminties įrašai",
     "memoryEntriesSub": "LRU atmintyje",
     "dbEntries": "DB įrašai",

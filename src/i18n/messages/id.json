@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Muat Ulang",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Semua entri dalam cache ini akan dihapus. Tindakan ini tidak dapat dibatalkan.",
     "memoryEntries": "Entri Memori",
     "memoryEntriesSub": "LRU dalam memori",
     "dbEntries": "Entri DB",
