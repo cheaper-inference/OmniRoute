@@ -1,101 +1,41 @@
-# Release-Green: keeping the queue and release branch green (ଓଡ଼ିଆ)
+# Release-Green: candidate validation and evidence (ଓଡ଼ିଆ)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇦🇿 [az](../../../az/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇯🇵 [ja](../../../ja/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇲🇲 [my](../../../my/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇱 [pl](../../../pl/docs/ops/RELEASE_GREEN.md) · 🇵🇹 [pt](../../../pt/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ta](../../../ta/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
 
 ---
 
-## ଏହା ସମାଧାନ କରୁଥିବା ସମସ୍ୟା
+ରିଲିଜ୍-ଗ୍ରୀନ୍ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରତିବଦ୍ଧତା ପାଳନ କରେ ଏବଂ ଏହାର ବ valid ଧତା ଫଳାଫଳଗୁଡିକ ରିପୋର୍ଟ କରେ। [କ୍ୱାଲିଟି ଗେଟ୍ସ ରେଫରେନ୍ସ](../architecture/QUALITY_GATES.md) ସାମ୍ପ୍ରତିକ CI ପ୍ରୋଫାଇଲ୍, ଆବଶ୍ୟକ ଚେକ୍ ଏବଂ ଗ୍ରହଣ ନୀତି ବ୍ୟାଖ୍ୟା କରେ। ସଂସ୍କରଣ ହୋଇଥିବା [ଆଡମିଶନ ନୀତି](../../config/quality/admission-policy.json) ହେଉଛି `Gate / CI` ଏବଂ `Gate / Quality` ପାଇଁ ଏକଜେକ୍ୟୁଟେବଲ୍ ଚୁକ୍ତି।
 
-**ସମ୍ପୂର୍ଣ୍ଣ ଗେଟ୍** (`.github/workflows/ci.yml` — unit shards, vitest, ratchets,
-`package-artifact`, SonarQube, E2E) **କେବଳ release PR** (PR → `main`) ରେ ଚାଲେ। `release/**`କୁ
-ଟାର୍ଗେଟ୍ କରୁଥିବା PRଗୁଡ଼ିକ **fast-gates** (`quality.yml`: TIA-ପ୍ରଭାବିତ ପରୀକ୍ଷା + typecheck + lint)
-ପାଆନ୍ତି ଏବଂ କୋଡ୍ ପରିବର୍ତ୍ତନ ପାଇଁ ଏକ **ପରାମର୍ଶମୂଳକ** production build ମଧ୍ୟ ପାଆନ୍ତି। ଏହାର ପରିଣାମ:
-କେବଳ release ସମୟରେ ଦେଖାଯାଉଥିବା ବିଫଳତାଗୁଡ଼ିକ release branchରେ ନିରବରେ ଜମା ହୋଇପାରେ ଏବଂ
-release ସମୟରେ ଗୋଟିଏ ପରେ ଗୋଟିଏ କରି **~40 ମିନିଟ୍ର ସ୍ତରରେ ବିସ୍ଫୋରିତ ହୋଇପାରେ**।
+## CI ଏବଂ ପର୍ଯ୍ୟବେକ୍ଷକ ପରିସର।
 
-"release-green family" ସେହି ବିଫଳତାଗୁଡ଼ିକୁ **ଆଗରୁ ଅନୁମାନ କରିବା** ପାଇଁ ରହିଛି — ଯେକୌଣସି
-ସମୟରେ full gateର ସମତୁଲ୍ୟକୁ **ସ୍ଥାନୀୟ ଭାବେ / release ବାହାରେ** ବୈଧ କରିବା, ଯାହାଦ୍ୱାରା
-release PR ତାହାର ପ୍ରଥମ CI runରେ ହିଁ green ରହେ।
+`ci.yml` ଏବଂ `quality.yml` କଭର ଅନୁରୋଧଗୁଡ଼ିକୁ ମୁଖ୍ୟ ଏବଂ ଶାଖାଗୁଡ଼ିକୁ ମୁକ୍ତ କରିଥାଏ। କେଉଁ ଚାକିରି ପ୍ରୟୋଗ ହେବ ତାହା ମନୋନୀତ ପ୍ରୋଫାଇଲ୍ ନିର୍ଣ୍ଣୟ କରେ। ପୂର୍ଣ୍ଣ CI ମଧ୍ୟ ଗାଡ଼ି ଅନ୍ତର୍ଭୂକ୍ତ କରେ ଯାହା ଏକ ସାଧାରଣ ଟାଣ ଅନୁରୋଧ ଏକଜେକ୍ୟୁଟ୍ କରେ ନାହିଁ। ଏକ ଶୀଘ୍ର ପର୍ଯ୍ୟବେକ୍ଷକ ଫଳାଫଳ ସେହି କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ବଦଳାଇ ପାରିବ ନାହିଁ, ଏବଂ ଏକ ସଂପୂର୍ଣ୍ଣ କାର୍ଯ୍ୟଧାରା ରାପର୍ ଏହାର ରସିଦକୁ ବଦଳାଇ ପାରିବ ନାହିଁ।
 
-> **ଅପରିବର୍ତ୍ତନୀୟ ନୀତି:** ଏଥିରୁ କୌଣସିଟି contributorଙ୍କୁ ଅବରୋଧ କରେ ନାହିଁ। ଆମେ
-> ସେମାନଙ୍କ PRକୁ ବିଫଳ କରୁଥିବା କୌଣସି required check ଯୋଡ଼ୁ ନାହିଁ। **drift** (ratchets) release
-> ସମୟରେ maintainerଙ୍କ ଦ୍ୱାରା rebaseline କରିବା ପାଇଁ — ଏହା କେବେବି contributorଙ୍କ ଚିନ୍ତାର
-> ବିଷୟ ନୁହେଁ। କୌଣସି ଅଂଶ PRକୁ **ବନ୍ଦ କରେ ନାହିଁ** (credit theft) କିମ୍ବା pass କରାଇବା
-> ପାଇଁ କୌଣସି testକୁ **ଦୁର୍ବଳ କରେ ନାହିଁ**।
+ଉତ୍ପାଦନ ନିର୍ମାଣ CI ର ଅଟେ। `quality.yml` ରେ କ dup ଣସି ନକଲ ପରାମର୍ଶଦାତା ନିର୍ମାଣ ନାହିଁ। ନିଖୋଜ କଳାକୃତି, ବାତିଲ ହୋଇଥିବା କାର୍ଯ୍ୟ ଏବଂ ଅସମ୍ପୂର୍ଣ୍ଣ ମାପ ଏକ ସଫଳ ଆବଶ୍ୟକୀୟ ଚେକ୍ ପ୍ରତିଷ୍ଠା କରେ ନାହିଁ। ଫଳାଫଳ ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ ସାମ୍ପ୍ରତିକ ଆଧାର, ମୁଣ୍ଡ ଏବଂ ମିଳିତ ପ୍ରାର୍ଥୀ ନିଶ୍ଚିତ କରନ୍ତୁ।
 
-## ଏହି ପରିବାର (4ଟି ଅଂଶ) — ଏବଂ ପ୍ରତ୍ୟେକଟି କିପରି ସ୍ୱାଧୀନ ଭାବେ ଚାଲେ
+## ସ୍ଥାନୀୟ ବ valid ଧତା।
 
-| ଅଂଶ                                                                      | ଏହା କ’ଣ                                                                               | କେବେ ଚଲାଇବେ                                                                  | ପରିସର                                 |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------- |
-| **`/green-prs`** (ସମାଧାନ A)                                              | **ଖୋଲା PRଗୁଡ଼ିକର ଧାଡ଼ି** ଉପରେ maintainerଙ୍କ ଚାହିଦାନୁସାରେ scan                         | **ସ୍ୱାଧୀନ ଭାବେ, ସମୟାନ୍ତରରେ** — ଏବଂ ବିଶେଷକରି `/generate-release`ର **ପୂର୍ବରୁ** | ସମଗ୍ର PR ଧାଡ଼ି → `release/**`         |
-| **`/validate-release-green`** (ସମାଧାନ C — `npm run check:release-green`) | ବୈଧତାକରଣ engine: ଏକ branch କିମ୍ବା merge candidate ବିପକ୍ଷରେ full gateକୁ ପୁନଃସୃଷ୍ଟି କରେ | ସ୍ୱାଧୀନ ଭାବେ, ଯେକୌଣସି ସମୟରେ                                                  | ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ branch କିମ୍ବା merge-PR |
-| **`/babysit <PR#>`**                                                     | **ଗୋଟିଏ** PRର **live CI**କୁ green ସ୍ଥିତିକୁ ନେଇଯାଏ                                     | ସ୍ୱାଧୀନ ଭାବେ, ପ୍ରତ୍ୟେକ PR ପାଇଁ                                               | ଗୋଟିଏ PR                              |
-| **`nightly-release-green.yml`** (ସମାଧାନ D)                               | ସ୍ୱୟଂଚାଳିତ nightly workflow; HARD red ହେଲେ issue ଖୋଲେ                                 | ସ୍ୱୟଂଚାଳିତ (cron)                                                            | ସକ୍ରିୟ release branch                 |
-
-**"ଏହା କେବଳ release ପାଇଁ କି?"ର ସଂକ୍ଷିପ୍ତ ଉତ୍ତର:** **ନା।** `/green-prs`କୁ
-**releaseଗୁଡ଼ିକ ମଧ୍ୟରେ, ସମୟାନ୍ତରରେ** ଚଲାଇବା ପାଇଁ ଡିଜାଇନ୍ କରାଯାଇଥିଲା। ସ୍ୱାଧୀନ ଭାବେ ଚଲାଇବା
-ହେଉଛି ସାଧାରଣ ବ୍ୟବହାର — release କେବଳ ସେହି ମୁହୂର୍ତ୍ତ, ଯେତେବେଳେ ଏହାକୁ ଚଲାଇବାରୁ ସର୍ବାଧିକ
-ମୂଲ୍ୟ ମିଳେ।
-
-## PR-ରୁ-release ପରାମର୍ଶମୂଳକ build
-
-`quality.yml` ବର୍ତ୍ତମାନ non-draft code PR ଏବଂ Mergify queue branchଗୁଡ଼ିକ ପାଇଁ `Build (advisory)` ଅନ୍ତର୍ଭୁକ୍ତ କରେ।
-ଏହା `ci.yml`ର production build recipeକୁ ଅନୁସରଣ କରେ: Node 24, `npm-ci-retry`,
-`check:node-runtime`, ଏବଂ `OMNIROUTE_USE_TURBOPACK=1` ସହିତ `npm run build`। ଏହି workflowରେ କୌଣସି downstream quality job build artifact ବ୍ୟବହାର କରୁ ନଥିବାରୁ ଏହା ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ
-କୌଣସି build artifact upload କରେ ନାହିଁ।
-ଗୋଟିଏ ସପ୍ତାହର ସ୍ଥିର release-PR run ପରେ `continue-on-error`କୁ ହଟାନ୍ତୁ, ଯାହାଦ୍ୱାରା signalଟି ଏକ
-blocking PR-to-release gate ହୋଇଯିବ।
-
-## ସମାଧାନ C — `npm run check:release-green` (ଇଞ୍ଜିନ୍)
-
-ବର୍ତ୍ତମାନର working tree ବିପକ୍ଷରେ release-ସମତୁଲ validation ପୁନଃଉତ୍ପାଦନ କରେ ଏବଂ ପ୍ରତ୍ୟେକ redକୁ ଶ୍ରେଣୀବଦ୍ଧ କରେ:
-
-- **HARD** (typecheck, lint error, unit, vitest, db-rules, public-creds, ଇଚ୍ଛାଧୀନ
-  `package-artifact`) → **ପ୍ରକୃତ ତ୍ରୁଟି**; `exit 1`। source branchରେ ସମାଧାନ କରାଯାଏ (TDD, ନିୟମ #18)।
-- **DRIFT** (eslint **warning**, cognitive-complexity, file-size) → cycleରେ ସଞ୍ଚିତ ratchet drift,
-  **contributorଙ୍କ ଦୋଷ ନୁହେଁ**; ଏହା କେବଳ report କରାଯାଏ ଏବଂ **release ସମୟରେ maintainerଙ୍କ ଦ୍ୱାରା
-  rebaseline କରାଯାଏ**। Drift **କେବେବି** exit code ପରିବର୍ତ୍ତନ କରେ ନାହିଁ — ତେଣୁ ଏହା କାହାକୁ ବି block କରେ ନାହିଁ।
+ଏହାର ନିର୍ଭରଶୀଳତା ପ୍ରସ୍ତୁତ କରିବା ପରେ ପର୍ଯ୍ୟବେକ୍ଷକଙ୍କୁ ଏକ ମାଲିକାନା ୱାର୍କଟ୍ରିରେ ଚଲାନ୍ତୁ। ଭାରୀ ବ valid ଧତା ପୂର୍ବରୁ [ୱର୍କଟ୍ରି ଏବଂ ଉତ୍ସ ପ୍ରୋଟୋକଲ୍](WORKTREE_ISOLATION.md) ବ୍ୟବହାର କରନ୍ତୁ।
 
 ```bash
-npm run check:release-green                 # ବର୍ତ୍ତମାନର branch (working tree)
-node scripts/quality/validate-release-green.mjs --json   # ସଂରଚିତ output
-node scripts/quality/validate-release-green.mjs --quick  # unit+vitest ଛାଡ଼ିଦିଏ (କେବଳ drift+typecheck+lint)
-node scripts/quality/validate-release-green.mjs --with-build  # package-artifact ଅନ୍ତର୍ଭୁକ୍ତ କରେ (ଧୀର)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-କେବଳ ନିଦାନ ଏବଂ **report** କରେ (କୌଣସି auto-fix ନାହିଁ)। fix-to-green orchestration
-`/green-prs` ଏବଂ `/review-prs`ରେ ରହିଛି।
+ଦ୍ରୁତ ପ୍ରୋଫାଇଲ୍ ଆଂଶିକ ଅଟେ। ପୂର୍ଣ୍ଣ ପ୍ରୋଫାଇଲ୍ ଏହାର ମଡେଲ ହୋଇଥିବା ଆବଶ୍ୟକତା ଯାଞ୍ଚ କରେ ଏବଂ କମାଣ୍ଡ ରସିଦ ସଂରକ୍ଷଣ କରେ; ଏହା ନିୟୋଜନ ପ୍ରମାଣ କରେ ନାହିଁ କିମ୍ବା ପ୍ରଯୁଜ୍ୟ ହୋଷ୍ଟ ଚେକ୍ ପାଇଁ ବିକଳ୍ପ ନୁହେଁ। ରିପୋର୍ଟ ମେଟ୍ରିକ୍ ଡ୍ରାଇଫ୍ ଠାରୁ ନିଷ୍ପାଦନ ବିଫଳତାକୁ ପୃଥକ କରେ। ମନୋନୀତ ନୀତି ଅନୁଯାୟୀ ଆବଶ୍ୟକ ରାଚଗୁଡିକ ଅବରୋଧ ହୋଇ ରହିଥାଏ। କେବଳ ଏକ ପାସ୍ ଫଳାଫଳ ପାଇବା ପାଇଁ ଏକ ବେସ୍ ଲାଇନ୍ ଉଠାନ୍ତୁ ନାହିଁ।
 
-## ସମାଧାନ A — `/green-prs` (queue scan)
+## ରାତ୍ରି ଏବଂ ମାନୁଆଲ୍ ସୁଇପ୍।
 
-ପ୍ରକ୍ରିୟା (ସାରାଂଶ — ବିବରଣୀ ପାଇଁ `green-prs` skill ଦେଖନ୍ତୁ):
+ରାତ୍ରି ରିଲିଜ୍ ଏବଂ ସୁସଙ୍ଗତତା ସମାଧାନକାରୀମାନେ ଏକ କାନୋନିକାଲ୍ ରିଲିଜ୍ ଶାଖା ଚୟନ କରନ୍ତି। ସେହି ଚୟନ ନିଶ୍ଚିତ ଭାବରେ ଶାଖା ସହିତ ମେଳ ଖାଇବ ଯାହା କାର୍ଯ୍ୟ ପ୍ରବାହକୁ ପ୍ରବର୍ତ୍ତାଇଥାଏ, ଏବଂ ସୁଇଟ୍ ଇଭେଣ୍ଟର ଅକ୍ଷୟ SHA ବ୍ୟବହାର କରେ। ମାନୁଆଲ୍ ଏକଜେକ୍ୟୁଶନ୍ ପାଇଁ, `release_branch` ରେ ଉଦ୍ଦିଷ୍ଟ ପ୍ରକାଶନକୁ ବାଛ ଏବଂ ସେହି ସମାନ ରେଫରେ ପଠାନ୍ତୁ:
 
-1. ସକ୍ରିୟ release branch ବିପକ୍ଷରେ open PRଗୁଡ଼ିକର queueକୁ **Inventory** କରନ୍ତୁ।
-2. ପ୍ରତ୍ୟେକ PRକୁ **Triage** କରନ୍ତୁ (viable / reject-worthy / needs-author) — reject/needs-authorକୁ
-   **report କରାଯାଏ, close କରାଯାଏ ନାହିଁ** (ଲେଖକ ନିଷ୍ପତ୍ତି ନିଅନ୍ତି)।
-3. ପ୍ରତ୍ୟେକ viable PR ପାଇଁ, ଏକ **ପୃଥକ worktree**ରେ (ନିୟମ #19), PRଟିକୁ release tip ପର୍ଯ୍ୟନ୍ତ ଆଣନ୍ତୁ ଏବଂ
-   `npm run check:release-green` ଚଲାନ୍ତୁ:
-   - **HARD** → co-authorship ମାଧ୍ୟମରେ **contributorଙ୍କ branchରେ** ସମାଧାନ କରନ୍ତୁ (ଲେଖକଙ୍କ "Merged" status ସଂରକ୍ଷିତ ରହେ),
-     ସମସ୍ତ HARD ସଫା ନହେବା ପର୍ଯ୍ୟନ୍ତ ପୁନଃଚଲାନ୍ତୁ।
-   - **DRIFT** → ଏହାକୁ ଛାଡ଼ିଦିଅନ୍ତୁ; release ସମୟରେ ଏହା rebaseline କରାଯିବ।
-4. ଏକ PR × (verdict, HARD red, fixed?, DRIFT, release-green now?) table **Report** କରନ୍ତୁ।
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-merge ନକରି queueକୁ **ପ୍ରସ୍ତୁତ** କରିପାରେ; କେବଳ ସ୍ପଷ୍ଟ ଭାବେ ଅନୁରୋଧ କରାଗଲେ merge କରେ — ଏବଂ କେବେବି PR close କରେ ନାହିଁ।
+ମନୋନୀତ କୋଡ୍ କାର୍ଯ୍ୟକାରୀ କରିବା ପୂର୍ବରୁ କ୍ରସ୍-ଶାଖା ପଠାଇବା ପ୍ରତ୍ୟାଖ୍ୟାନ। ହୋଷ୍ଟ ହୋଇଥିବା ମୁଖ୍ୟ ସୁଟ୍ ଚେକଆଉଟ୍ `main` ଏବଂ ଯାଞ୍ଚ କରନ୍ତୁ ଯେ ଏହାର SHA ସଂସ୍ଥାପନ ପୂର୍ବରୁ ସମାଧାନ ହୋଇଥିବା ଲକ୍ଷ୍ୟ ସହିତ ମେଳ ଖାଉଛି। ଯଦି ରିଜୋଲ୍ୟୁସନ୍ ସମୟରେ ମୁଖ୍ୟ ଗତି କରେ, ତେବେ ନୂତନ ପ୍ରତିଶ୍ରୁତି ଉପରେ ଅସମ୍ପୂର୍ଣ୍ଣ ସ୍ୱିପ୍ ଚଲାନ୍ତୁ। ବିଭିନ୍ନ ପ୍ରାର୍ଥୀଙ୍କ ଠାରୁ ସୁଟ୍ ରସିଦ୍ ମିଶ୍ରଣ କରନ୍ତୁ ନାହିଁ।
 
-## ସୁପାରିଶ କରାଯାଇଥିବା cadence
+## ବିଫଳତା ଟ୍ରାଇଜ୍ ଏବଂ ପୁନରୁଦ୍ଧାର।
 
-- **`/green-prs`କୁ ନିୟମିତ ଭାବେ ଚଲାନ୍ତୁ** (ଯଥା, ସାପ୍ତାହିକ) ଏବଂ ଏକ
-  `/generate-release` ପୂର୍ବରୁ **ସର୍ବଦା** ଚଲାନ୍ତୁ।
-- ଏକ ନିରନ୍ତର signal ଭାବେ **`nightly-release-green.yml`** (ସମାଧାନ D)କୁ ରଖନ୍ତୁ: ଏହା ଏକ
-  HARD red issue ଖୋଲିଲେ, scan କରିବାର ସମୟ ଆସିଛି।
-- ଏକ branch କିମ୍ବା ନିର୍ଦ୍ଦିଷ୍ଟ merge candidateକୁ ଯାଞ୍ଚ କରିବା ପାଇଁ ଆବଶ୍ୟକତାନୁସାରେ **`/validate-release-green`** ବ୍ୟବହାର କରନ୍ତୁ।
-- ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ PRକୁ live CIରେ green କରିବା ପର୍ଯ୍ୟନ୍ତ ଆଗେଇନେବା ଆବଶ୍ୟକ ହେଲେ **`/babysit <PR#>`** ବ୍ୟବହାର କରନ୍ତୁ।
+ଘଟଣାକୁ ଏକ ଡାଇଗ୍ନୋଷ୍ଟିକ୍ ଇଣ୍ଡେକ୍ସ ଭାବରେ ବ୍ୟବହାର କରନ୍ତୁ, ତା’ପରେ ସଠିକ୍ ଚାଲିବା, ଚେଷ୍ଟା, ବିଫଳ ପଦକ୍ଷେପ ଏବଂ କଳାକୃତି ଯାଞ୍ଚ କରନ୍ତୁ। ଜଣେ ସହଯୋଗୀଙ୍କୁ ବିଫଳତା ଦର୍ଶାଇବା ପୂର୍ବରୁ ସମାନ ଆଧାର ଏବଂ ପ୍ରାର୍ଥୀ ପ୍ରମାଣ ତୁଳନା କରନ୍ତୁ। ଭିତ୍ତିଭୂମି ତ୍ରୁଟି, ଉତ୍ତରାଧିକାରୀ ତ୍ରୁଟି, ପ୍ରାର୍ଥୀ ରିଗ୍ରେସନ୍ ଏବଂ ବିଚାରାଧୀନ ଅନୁମୋଦନ ବିଭିନ୍ନ ପ୍ରତିକାର ଆବଶ୍ୟକ କରେ।
 
-## release ସହିତ ସମ୍ପର୍କ
-
-- `/generate-release`, **Phase 0 (pre-flight)**ରେ validationକୁ call କରେ: release PR ଖୋଲିବା ପୂର୍ବରୁ DRIFTକୁ rebaseline କରେ ଏବଂ
-  HARDକୁ ସମାଧାନ କରେ।
-- `/review-prs`, merge ନିଷ୍ପତ୍ତି ପର୍ଯ୍ୟାୟରେ release-green gate ବ୍ୟବହାର କରେ (merge ପୂର୍ବରୁ green)।
-
-ସମସ୍ତ ଅଂଶର ଲକ୍ଷ୍ୟ ସମାନ: release ଦିନରେ 40-minute layerରେ
-redଗୁଡ଼ିକୁ ଗୋଟିଏ ପରେ ଗୋଟିଏ ସମ୍ଭାଳିବା ପରିବର୍ତ୍ତେ, **ପ୍ରଥମ CI runରେ ଏକ green release PR**।
+`/green-prs`, `/sweep-reds`, `/validate-release-green` ଏବଂ `/babysit` କ skills ଶଳ ପ୍ରମାଣ ସଂଗ୍ରହ କରେ ଏବଂ ସେମାନଙ୍କର ଡକ୍ୟୁମେଣ୍ଟ୍ ପରିସର ମଧ୍ୟରେ ଫିକ୍ସ ପ୍ରସ୍ତୁତ କରେ। ସହଯୋଗୀ କ୍ରେଡିଟ୍ ରଖନ୍ତୁ, ପୃଥକ ମରାମତି ଶାଖା ବ୍ୟବହାର କରନ୍ତୁ ଏବଂ ଏକ ପ୍ରାଧିକୃତ ମିଶ୍ରଣ ପୂର୍ବରୁ ସମସ୍ତ ଆବଶ୍ୟକୀୟ ଯାଞ୍ଚ ଯାଞ୍ଚ କରନ୍ତୁ। ପାସ୍ କରୁଥିବା ପ୍ରାର୍ଥୀଙ୍କ ପାଇଁ କ No ଣସି ସ୍ୱୟଂଚାଳିତ ପୁନ reb ଲାଇନ୍ କିମ୍ବା ଘଟଣା ବନ୍ଦ ସ୍ଥାନ ନାହିଁ।

@@ -1,99 +1,41 @@
+# Release-Green: candidate validation and evidence (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇦🇿 [az](../../../az/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇯🇵 [ja](../../../ja/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇲🇲 [my](../../../my/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [or](../../../or/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇹 [pt](../../../pt/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ta](../../../ta/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
+
 ---
-title: "Release-Green — utrzymywanie kolejki i gałęzi release na zielono"
----
 
-# Release-Green: utrzymywanie kolejki i gałęzi release na zielono
+Release-Green obserwuje konkretne zatwierdzenie i raportuje wyniki jego walidacji. [Odniesienie do Quality Gates](../architecture/QUALITY_GATES.md) definiuje aktualne profile CI, wymagane kontrole i politykę akceptacji. Wersjonowana [polityka dostępu](../../config/quality/admission-policy.json) to wykonywalna umowa dla `Gate / CI` i `Gate / Quality`.
 
-## Problem, który to rozwiązuje
+## CI i zakres obserwacyjny
 
-**Pełna bramka** (`.github/workflows/ci.yml` — unit shards, vitest, ratchets,
-`package-artifact`, SonarQube, E2E) uruchamia się **tylko na PR release** (PR → `main`). PR-y celujące w
-`release/**` dostają **fast-gates** (`quality.yml`: testy TIA-impacted + typecheck + lint)
-oraz, przy zmianach w kodzie, **doradczy** build produkcyjny. Skutek: czerwone tylko na release mogą nadal
-cicho gromadzić się na gałęzi release i **wybuchać warstwami po ~40 min** w momencie release,
-jedna po drugiej.
+`ci.yml` i `quality.yml` obejmują żądania ściągnięcia do gałęzi głównej i wydania. Wybrany profil określa, które stanowiska pracy mają zastosowanie. Pełne CI obejmuje także linie, których nie wykonuje zwykłe żądanie ściągnięcia. Wynik szybkiego obserwatora nie może zastąpić tych zadań, a ukończone opakowanie przepływu pracy nie może zastąpić potwierdzeń.
 
-Rodzina „release-green” istnieje po to, by **wyprzedzać** te czerwone — walidować odpowiednik pełnej
-bramki **lokalnie / poza release**, w dowolnym momencie, tak aby PR release był już
-zielony przy pierwszym przebiegu CI.
+Wersja produkcyjna należy do CI. W `quality.yml` nie ma zduplikowanej kompilacji doradczej. Brakujące artefakty, anulowana praca i niekompletne pomiary nie stanowią podstawy do pomyślnej wymaganej kontroli. Przed zatwierdzeniem wyników potwierdź obecną bazę, głowę i połączonego kandydata.
 
-> **Nienegocjowalna zasada:** nic z tego nie blokuje kontrybutora. Nie dodajemy wymaganego
-> checka, który oblewa jego PR. **Drift** (ratchets) jest do rebaseline’u przez maintainera przy release —
-> nigdy nie jest sprawą kontrybutora. Żaden element **nie zamyka** PR-a (kradzież kredytu) ani
-> **nie osłabia** testu, by przeszedł.
+## Weryfikacja lokalna
 
-## Rodzina (4 elementy) — i jak każdy działa niezależnie
-
-| Element                                                                    | Czym jest                                                                      | Kiedy uruchamiać                                                      | Zakres                         |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ------------------------------ |
-| **`/green-prs`** (Solution A)                                              | Skan na żądanie przez maintainera **kolejki otwartych PR-ów**                  | **Niezależnie, okresowo** — i zwłaszcza **przed** `/generate-release` | Cała kolejka PR → `release/**` |
-| **`/validate-release-green`** (Solution C — `npm run check:release-green`) | Silnik walidacji: odtwarza pełną bramkę względem gałęzi LUB kandydata do merge | Niezależnie, w dowolnym momencie                                      | Konkretna gałąź lub merge-PR   |
-| **`/babysit <PR#>`**                                                       | Prowadzi **żywe CI** **jednego** PR-a do zielonego                             | Niezależnie, per PR                                                   | Pojedynczy PR                  |
-| **`nightly-release-green.yml`** (Solution D)                               | Zautomatyzowany nocny workflow; otwiera issue przy HARD red                    | Automatycznie (cron)                                                  | Aktywna gałąź release          |
-
-**Krótka odpowiedź na „czy to tylko na release?”:** **nie.** `/green-prs` zaprojektowano tak, by
-uruchamiać je **okresowo, między release’ami**. Niezależne uruchamianie to normalne użycie — release to tylko
-moment, w którym uruchomienie daje największą wartość.
-
-## Doradczy build PR-to-release
-
-`quality.yml` zawiera teraz `Build (advisory)` dla niedraftowych PR-ów z kodem oraz gałęzi kolejki Mergify.
-Odtwarza recepturę builda produkcyjnego z `ci.yml`: Node 24, `npm-ci-retry`,
-`check:node-runtime` oraz `npm run build` z `OMNIROUTE_USE_TURBOPACK=1`. Celowo
-nie wgrywa artefaktu builda, bo żaden dalszy job jakości w tym workflow go nie konsumuje.
-Usuń `continue-on-error` po tygodniu stabilnych przebiegów PR-ów release, aby sygnał stał się
-blokującą bramką PR-to-release.
-
-## Solution C — `npm run check:release-green` (silnik)
-
-Odtwarza walidację równoważną release względem bieżącego working tree i klasyfikuje każde czerwone:
-
-- **HARD** (typecheck, lint errors, unit, vitest, db-rules, public-creds, opcjonalnie
-  `package-artifact`) → **rzeczywista usterka**; `exit 1`. Naprawiane na gałęzi źródłowej (TDD, Rule #18).
-- **DRIFT** (eslint **warnings**, cognitive-complexity, file-size) → drift ratchetów nagromadzony w
-  cyklu, **nie wina kontrybutora**; jest tylko raportowany i **rebaselined przez maintainera przy
-  release**. Drift **nigdy** nie zmienia kodu wyjścia — więc nikogo nie blokuje.
+Uruchom obserwatora w posiadanym drzewie roboczym po przygotowaniu jego zależności. Przed wnikliwą walidacją użyj [protokołu drzewa roboczego i zasobów](WORKTREE_ISOLATION.md).
 
 ```bash
-npm run check:release-green                 # current branch (working tree)
-node scripts/quality/validate-release-green.mjs --json   # structured output
-node scripts/quality/validate-release-green.mjs --quick  # skips unit+vitest (drift+typecheck+lint only)
-node scripts/quality/validate-release-green.mjs --with-build  # includes package-artifact (slow)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-Tylko diagnozuje i **raportuje** (bez auto-fix). Orkiestracja fix-to-green żyje w
-`/green-prs` i `/review-prs`.
+Szybki profil jest częściowy. Pełny profil sprawdza modelowane wymagania i zachowuje potwierdzenia poleceń; nie potwierdza wdrożenia ani nie zastępuje odpowiednich hostowanych kontroli. W raporcie rozróżnia się niepowodzenie wykonania od dryfu metryki. Wymagane grzechotki pozostają blokowane zgodnie z wybraną polityką. Nie podnoś poziomu bazowego tylko po to, aby uzyskać pozytywny wynik.
 
-## Solution A — `/green-prs` (skan kolejki)
+## Zamiatanie nocne i ręczne
 
-Procedura (skrót — szczegóły w skillu `green-prs`):
+Programy do rozwiązywania problemów z wydaniem nocnym i zgodnością wybierają gałąź wydania kanonicznego. Ten wybór musi pasować do gałęzi, która wyzwoliła przepływ pracy, a zestawy korzystają z niezmiennego SHA zdarzenia. W przypadku ręcznego wykonania wybierz zamierzoną wersję w `release_branch` i wyślij w tym samym ref.:
 
-1. **Inwentaryzacja** kolejki otwartych PR-ów względem aktywnej gałęzi release.
-2. **Triage** każdego PR-a (viable / reject-worthy / needs-author) — reject/needs-author są
-   **raportowane, nie zamykane** (decyduje autor).
-3. Dla każdego viable PR-a, w **izolowanym worktree** (Rule #19), dociągnij PR do tipa release i uruchom
-   `npm run check:release-green`:
-   - **HARD** → napraw **na gałęzi kontrybutora** przez co-authorship (zachowuje status autora „Merged”),
-     powtarzaj aż wszystkie HARD znikną.
-   - **DRIFT** → zostaw; zostanie zrebaselined przy release.
-4. **Raport** tabela PR × (werdykt, HARD reds, fixed?, DRIFT, release-green now?).
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-Może **przygotować** kolejkę bez merge’owania; merge’uje tylko na wyraźne żądanie — i nigdy nie zamyka PR-a.
+Wysyłka międzyoddziałowa zostaje odrzucona przed wykonaniem wybranego kodu. Hostowane główne pakiety sprawdzają `main` i przed instalacją sprawdzają, czy jego SHA nadal odpowiada ustalonemu celowi. Jeśli główne ruchy zostaną przesunięte podczas rozwiązywania, ponownie uruchom niekompletne przeszukanie w nowym zatwierdzeniu. Nie łącz rachunków za apartament od różnych kandydatów.
 
-## Zalecany rytm
+## Segregacja awarii i rekonwalescencja
 
-- Uruchamiaj **`/green-prs` okresowo** (np. co tydzień) i **zawsze przed
-  `/generate-release`**.
-- Trzymaj **`nightly-release-green.yml`** (Solution D) jako ciągły sygnał: gdy otworzy
-  issue HARD red, czas na skan.
-- Używaj **`/validate-release-green`** ad-hoc, by sprawdzić gałąź lub konkretnego kandydata do merge.
-- Używaj **`/babysit <PR#>`**, gdy konkretny PR trzeba doprowadzić do zielonego na żywym CI.
+Użyj zdarzenia jako indeksu diagnostycznego, a następnie sprawdź dokładny przebieg, próbę, nieudany krok i artefakt. Porównaj równoważne dowody podstawowe i potencjalne, zanim przypiszesz błąd autorowi. Błędy w infrastrukturze, wady odziedziczone, regresje kandydatów i oczekujące zatwierdzenia wymagają różnych środków zaradczych.
 
-## Relacja do release
-
-- `/generate-release` wywołuje walidację w **Phase 0 (pre-flight)**: rebaselined DRIFT i naprawia
-  HARD przed otwarciem PR-a release.
-- `/review-prs` używa bramki release-green na etapie decyzji o merge (green-before-merge).
-
-Cel wszystkich elementów jest ten sam: **zielony PR release przy pierwszym przebiegu CI**, zamiast surfowania
-po czerwonych w 40-minutowych warstwach w dniu release.
+Umiejętności `/green-prs`, `/sweep-reds`, `/validate-release-green` i `/babysit` zbierają dowody i przygotowują poprawki w ramach ich udokumentowanego zakresu. Zachowaj kredyt współautora, korzystaj z izolowanych oddziałów napraw i sprawdzaj wszystkie wymagane kontrole przed autoryzowanym połączeniem. Żadne automatyczne ponowne ustalenie wartości bazowej ani zamknięcie incydentu nie zastępują aktualnego kandydata.

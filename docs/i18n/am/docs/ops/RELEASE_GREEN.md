@@ -25,11 +25,11 @@ npm run check:release-green -- --with-build --full-ci --json
 
 ## በምሽት እና በእጅ መጥረግ
 
-የምሽት ልቀት እና ተኳኋኝነት ፈላጊዎች ቀኖናዊ ልቀት ቅርንጫፍን ይመርጣሉ። ያ ምርጫ የስራ ሂደቱን ከቀሰቀሰው ቅርንጫፍ ጋር መዛመድ አለበት፣ እና ስዊቶች የዝግጅቱን የማይለዋወጥ SHA ይጠቀማሉ። ለእጅ አፈጻጸም የታሰበውን በ `RELEASE_BRANCH` ውስጥ ይምረጡ እና በዚያው ማጣቀሻ ላይ ይላኩ፡-
+የምሽት ልቀት እና ተኳኋኝነት ፈላጊዎች ቀኖናዊ ልቀት ቅርንጫፍን ይመርጣሉ። ያ ምርጫ የስራ ሂደቱን ከቀሰቀሰው ቅርንጫፍ ጋር መዛመድ አለበት፣ እና ስዊቶች የዝግጅቱን የማይለዋወጥ SHA ይጠቀማሉ። ለእጅ አፈጻጸም የታሰበውን በ `release_branch` ውስጥ ይምረጡ እና በዚያው ማጣቀሻ ላይ ይላኩ፡-
 
 ```bash
-gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
-gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
 ```
 
 የተመረጠውን ኮድ ከመተግበሩ በፊት የቅርንጫፍ ተሻጋሪ መላክ ውድቅ ተደርጓል። የተስተናገዱ ዋና ዋና ክፍሎች `main` ይፈትሹ እና SHA አሁንም ከመጫኑ በፊት ከተፈታው ዒላማ ጋር እንደሚመሳሰል ያረጋግጡ። በመፍትሔው ጊዜ ዋናው የሚንቀሳቀስ ከሆነ፣ ያልተሟላውን መጥረግ በአዲሱ ቁርጠኝነት እንደገና ያካሂዱ። ከተለያዩ እጩዎች የተሰበሰቡ ደረሰኞችን አያጣምሩ።

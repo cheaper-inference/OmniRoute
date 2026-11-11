@@ -25,11 +25,11 @@ npm run check:release-green -- --with-build --full-ci --json
 
 ## රාත්‍රී සහ අතින් අතුගා දැමීම
 
-රාත්‍රී නිකුතුව සහ ගැළපුම් විසඳන්නන් කැනොනිකල් මුදා හැරීමේ ශාඛාවක් තෝරා ගනී. එම තේරීම කාර්ය ප්‍රවාහය අවුලුවාලූ ශාඛාවට ගැළපිය යුතු අතර, කට්ටල සිදුවීමේ වෙනස් කළ නොහැකි SHA භාවිතා කරයි. අතින් ක්‍රියාත්මක කිරීම සඳහා, `RELEASE_BRANCH` හි අපේක්ෂිත නිකුතුව තෝරා එම ref වෙතම යවන්න:
+රාත්‍රී නිකුතුව සහ ගැළපුම් විසඳන්නන් කැනොනිකල් මුදා හැරීමේ ශාඛාවක් තෝරා ගනී. එම තේරීම කාර්ය ප්‍රවාහය අවුලුවාලූ ශාඛාවට ගැළපිය යුතු අතර, කට්ටල සිදුවීමේ වෙනස් කළ නොහැකි SHA භාවිතා කරයි. අතින් ක්‍රියාත්මක කිරීම සඳහා, `release_branch` හි අපේක්ෂිත නිකුතුව තෝරා එම ref වෙතම යවන්න:
 
 ```bash
-gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
-gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
 ```
 
 තෝරාගත් කේතය ක්‍රියාත්මක කිරීමට පෙර හරස් ශාඛා යැවීම ප්‍රතික්ෂේප කරනු ලැබේ. සත්කාරක ප්‍රධාන කට්ටල `main` පිරික්සීම සහ එහි SHA තවමත් ස්ථාපනය කිරීමට පෙර විසඳන ලද ඉලක්කයට ගැලපෙන බව තහවුරු කරන්න. විභේදනය අතරතුර ප්‍රධාන චලනයන් සිදු වුවහොත්, නව කැපවීම මත අසම්පූර්ණ අතුගා දැමීම නැවත ක්‍රියාත්මක කරන්න. විවිධ අපේක්ෂකයින්ගෙන් කට්ටල රිසිට්පත් ඒකාබද්ධ නොකරන්න.

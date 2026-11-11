@@ -1,100 +1,41 @@
-# Release-Green: keeping the queue and release branch green (မြန်မာ)
+# Release-Green: candidate validation and evidence (မြန်မာ)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇦🇿 [az](../../../az/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇯🇵 [ja](../../../ja/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [or](../../../or/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇱 [pl](../../../pl/docs/ops/RELEASE_GREEN.md) · 🇵🇹 [pt](../../../pt/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ta](../../../ta/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
 
 ---
 
-## ဤအရာက ဖြေရှင်းပေးသည့် ပြဿနာ
+Release-Green သည် သတ်မှတ်ထားသော ကတိကဝတ်တစ်ခုကို စောင့်ကြည့်ပြီး ၎င်း၏ တရားဝင်မှုရလဒ်များကို အစီရင်ခံပါသည်။ [Quality Gates ရည်ညွှန်းချက်သည်](../architecture/QUALITY_GATES.md) လက်ရှိ CI ပရိုဖိုင်များ၊ လိုအပ်သော စစ်ဆေးမှုများနှင့် လက်ခံမှုမူဝါဒကို သတ်မှတ်သည်။ ဗားရှင်းသတ်မှတ်ထားသော [ဝင်ခွင့်မူဝါဒ](../../config/quality/admission-policy.json) သည် `Gate / CI` နှင့် `Gate / Quality` အတွက် အကောင်အထည်ဖော်နိုင်သော စာချုပ်ဖြစ်သည်။
 
-**full gate** (`.github/workflows/ci.yml` — unit shards၊ vitest၊ ratchets၊
-`package-artifact`၊ SonarQube၊ E2E) သည် **release PR** (PR → `main`) တွင်သာ run ပါသည်။ `release/**`
-ကို target လုပ်သည့် PR များသည် **fast-gates** (`quality.yml`: TIA သက်ရောက်မှုရှိသော tests + typecheck + lint)
-ကို ရရှိပြီး၊ code အပြောင်းအလဲများအတွက် **အကြံပြုချက်သဘောသာဖြစ်သော** production build ကိုလည်း ရရှိပါသည်။
-အကျိုးဆက်အနေဖြင့် release တွင်သာ ပေါ်လာသော red များသည် release branch ပေါ်တွင် တိတ်တဆိတ်
-စုလာနိုင်ပြီး၊ release လုပ်ချိန်တွင် **တစ်ကြိမ်လျှင် ~40 min ကြာသော အလွှာများအဖြစ် ပေါက်ကွဲ**
-လာနိုင်ပါသည်။
+## CI နှင့် လေ့လာသူနယ်ပယ်
 
-"release-green family" သည် ထို red များကို **ကြိုတင်ခန့်မှန်းရန်** ရှိနေခြင်းဖြစ်သည် — full
-gate နှင့် ညီမျှသော validation ကို အချိန်မရွေး **local တွင် / release ပြင်ပတွင်** ပြုလုပ်နိုင်သဖြင့် release PR သည်
-ပထမဆုံး CI run ကတည်းက green ဖြစ်နေစေပါသည်။
+`ci.yml` နှင့် `quality.yml` ကာဗာသည် တောင်းဆိုမှုများကို ပင်မအကိုင်းအခက်များထဲသို့ ဆွဲထုတ်ပြီး ထုတ်ဝေခြင်း ရွေးချယ်ထားသောပရိုဖိုင်သည် မည်သည့်အလုပ်များလျှောက်ထားသည်ကို ဆုံးဖြတ်သည်။ အပြည့်အဝ CI သာမန်ဆွဲတင်တောင်းဆိုမှု မလုပ်ဆောင်နိုင်သော လမ်းကြောင်းများလည်း ပါဝင်သည်။ လျင်မြန်သော အကဲခတ်မှုရလဒ်သည် ထိုအလုပ်များကို အစားထိုး၍မရပါ၊ ပြီးမြောက်သော အလုပ်အသွားအလာ ထုပ်ပိုးမှုတစ်ခုသည် ၎င်း၏ပြေစာများကို အစားထိုး၍မရပါ။
 
-> **မညှိနှိုင်းနိုင်သော အခြေခံမူ:** ဤအရာများထဲမှ မည်သည့်အရာကမျှ contributor ကို မတားဆီးပါ။ ၎င်းတို့၏
-> PR ကို fail ဖြစ်စေမည့် required check ကို ကျွန်ုပ်တို့ မထည့်ပါ။ **drift** (ratchets) သည် release လုပ်ချိန်တွင် maintainer က rebaseline
-> လုပ်ရန်အတွက်သာဖြစ်ပြီး — contributor က စိုးရိမ်ရမည့်ကိစ္စ မဟုတ်ပါ။ မည်သည့်အစိတ်အပိုင်းကမျှ PR ကို **ပိတ်ခြင်း**
-> (credit theft) မပြုသကဲ့သို့ pass ဖြစ်စေရန် test တစ်ခုကို **အားလျော့စေခြင်း** လည်း မပြုပါ။
+ထုတ်လုပ်မှုတည်ဆောက်မှုကို CI မှပိုင်ဆိုင်သည်။ `quality.yml` တွင် ထပ်နေသည် အကြံပေးချက် တည်ဆောက်ခြင်း မရှိပါ။ ပျောက်ဆုံးနေသော ရှေးဟောင်းပစ္စည်းများ၊ ဖျက်သိမ်းထားသော အလုပ်နှင့် မပြည့်စုံသော တိုင်းတာမှုများသည် အောင်မြင်စွာ လိုအပ်သော စစ်ဆေးမှုကို မပြုလုပ်ပါ။ ရလဒ်များကိုလက်ခံခြင်းမပြုမီ လက်ရှိအခြေခံ၊ အကြီးအကဲနှင့် ပေါင်းစပ်ကိုယ်စားလှယ်ကို အတည်ပြုပါ။
 
-## အစုအဖွဲ့ (အစိတ်အပိုင်း 4 ခု) — တစ်ခုချင်းစီကို သီးခြား run ပုံ
+## ဒေသဆိုင်ရာ အတည်ပြုချက်
 
-| အစိတ်အပိုင်း                                                               | ၎င်းက ဘာလဲ                                                                                  | မည်သည့်အချိန်တွင် run ရမည်                                           | အကျုံးဝင်မှု                            |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------- |
-| **`/green-prs`** (Solution A)                                              | maintainer က **ဖွင့်ထားသော PR များ၏ queue** ကို လိုအပ်သည့်အချိန်တွင် scan လုပ်ခြင်း         | **သီးခြား၊ အခါအားလျော်စွာ** — အထူးသဖြင့် `/generate-release` မလုပ်မီ | PR queue တစ်ခုလုံး → `release/**`       |
-| **`/validate-release-green`** (Solution C — `npm run check:release-green`) | Validation engine: branch သို့မဟုတ် merge candidate ကို full gate နှင့်အညီ ပြန်လည်စစ်ဆေးသည် | သီးခြား၊ အချိန်မရွေး                                                 | သတ်မှတ်ထားသော branch သို့မဟုတ် merge-PR |
-| **`/babysit <PR#>`**                                                       | PR **တစ်ခု** ၏ **live CI** ကို green ဖြစ်သည်အထိ မောင်းနှင်ပေးသည်                            | PR တစ်ခုချင်းအလိုက် သီးခြား                                          | PR တစ်ခုတည်း                            |
-| **`nightly-release-green.yml`** (Solution D)                               | အလိုအလျောက် nightly workflow; HARD red ဖြစ်လျှင် issue ဖွင့်သည်                             | အလိုအလျောက် (cron)                                                   | လက်ရှိအသုံးပြုနေသော release branch      |
-
-**"ဒါက release များအတွက်ပဲလား?" ဟူသည့်မေးခွန်းအတွက် အဖြေတို:** **မဟုတ်ပါ။** `/green-prs` ကို
-**release များကြားတွင် အခါအားလျော်စွာ** run ရန် ဒီဇိုင်းရေးဆွဲထားသည်။ သီးခြား run ခြင်းသည် ပုံမှန်အသုံးပြုပုံဖြစ်ပြီး —
-release သည် ၎င်းကို run ခြင်းမှ တန်ဖိုးအများဆုံး ရရှိသည့် အချိန်သာ ဖြစ်ပါသည်။
-
-## PR မှ release သို့ အကြံပြု build
-
-`quality.yml` တွင် ယခုအခါ draft မဟုတ်သော code PR များနှင့် Mergify queue branch များအတွက် `Build (advisory)` ပါဝင်လာပါသည်။
-၎င်းသည် `ci.yml` ရှိ production build လုပ်ငန်းစဉ်ဖြစ်သော Node 24၊ `npm-ci-retry`၊
-`check:node-runtime` နှင့် `OMNIROUTE_USE_TURBOPACK=1` ဖြင့် `npm run build` တို့ကို အလားတူ လုပ်ဆောင်ပါသည်။ ဤ workflow တွင် downstream quality job တစ်ခုမျှ build artifact ကို အသုံးမပြုသောကြောင့်
-build artifact ကို ရည်ရွယ်ချက်ရှိရှိ upload မလုပ်ပါ။
-တည်ငြိမ်သော release-PR run များကို တစ်ပတ်ကြာ လုပ်ဆောင်ပြီးနောက် `continue-on-error` ကို ဖယ်ရှားပါ။ ထိုသို့ဖြင့် ဤ signal သည်
-PR မှ release သို့ blocking gate တစ်ခု ဖြစ်လာပါမည်။
-
-## ဖြေရှင်းချက် C — `npm run check:release-green` (အင်ဂျင်)
-
-လက်ရှိ working tree အပေါ်တွင် release နှင့်ညီမျှသော validation ကို ပြန်လည်လုပ်ဆောင်ပြီး red တစ်ခုချင်းစီကို အမျိုးအစားခွဲသည်-
-
-- **HARD** (typecheck၊ lint error များ၊ unit၊ vitest၊ db-rules၊ public-creds၊ ရွေးချယ်နိုင်သော
-  `package-artifact`) → **တကယ့် defect**; `exit 1`။ Source branch ပေါ်တွင် ပြင်ဆင်သည် (TDD၊ Rule #18)။
-- **DRIFT** (eslint **warning များ**၊ cognitive-complexity၊ file-size) → cycle အတွင်း စုပုံလာသော ratchet drift ဖြစ်ပြီး
-  **contributor ၏ အပြစ်မဟုတ်ပါ**; ၎င်းကို report သာလုပ်ပြီး **release လုပ်ချိန်တွင် maintainer က rebaseline လုပ်သည်**။
-  Drift သည် exit code ကို **မည်သည့်အခါမျှ** မပြောင်းလဲပါ — ထို့ကြောင့် မည်သူ့ကိုမျှ ဘယ်တော့မှ မတားဆီးပါ။
+၎င်း၏မှီခိုမှုကို ပြင်ဆင်ပြီးနောက် ပိုင်ဆိုင်သော worktree တွင် လေ့လာသူအား လုပ်ဆောင်ပါ။ ပြင်းထန်စွာအတည်ပြုခြင်းမပြုမီ [worktree နှင့် resource protocol ကို](WORKTREE_ISOLATION.md) သုံးပါ။
 
 ```bash
-npm run check:release-green                 # လက်ရှိ branch (working tree)
-node scripts/quality/validate-release-green.mjs --json   # ဖွဲ့စည်းတည်ဆောက်ထားသော output
-node scripts/quality/validate-release-green.mjs --quick  # unit+vitest ကို ကျော်သည် (drift+typecheck+lint သာ)
-node scripts/quality/validate-release-green.mjs --with-build  # package-artifact ပါဝင်သည် (နှေးသည်)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-ရောဂါရှာဖွေပြီး **report** သာလုပ်သည် (အလိုအလျောက်ပြင်ဆင်ခြင်း မရှိပါ)။ Green ဖြစ်အောင် ပြင်ဆင်သည့် orchestration သည်
-`/green-prs` နှင့် `/review-prs` တွင် ရှိသည်။
+အမြန်ပရိုဖိုင်သည် တစ်စိတ်တစ်ပိုင်းဖြစ်သည်။ ပရိုဖိုင်အပြည့်အစုံသည် ၎င်း၏ပုံစံပြလိုအပ်ချက်များကို စစ်ဆေးပြီး အမိန့်ပေးပြေစာများကို ထိန်းသိမ်းထားသည်။ သက်ဆိုင်ရာ လက်ခံထားသော စစ်ဆေးမှုများအတွက် ဖြန့်ကျက်ခြင်း သို့မဟုတ် အစားထိုးခြင်းကို အသိအမှတ်ပြုခြင်း မရှိပါ။ အစီရင်ခံစာသည် အကောင်အထည်ဖော်မှု ပျက်ကွက်မှုကို မက်ထရစ်ပျံကျမှုနှင့် ခွဲခြားထားသည်။ ရွေးချယ်ထားသောမူဝါဒအရ လိုအပ်သော ratchet များကို ပိတ်ဆို့ထားဆဲဖြစ်သည်။ ရလဒ်တစ်ခုရရှိရန် အခြေခံအချက်များကို မမြှင့်တင်ပါနှင့်။
 
-## ဖြေရှင်းချက် A — `/green-prs` (queue scan)
+## ညစဉ်ညတိုင်း လက်ဖြင့်အဟုန်
 
-လုပ်ထုံးလုပ်နည်း (အကျဉ်းချုပ် — အသေးစိတ်အတွက် `green-prs` skill ကို ကြည့်ပါ)-
+ညစဉ်ထုတ်လွှတ်မှုနှင့် လိုက်ဖက်ညီမှုဖြေရှင်းပေးသူများသည် canonical release ဌာနခွဲကို ရွေးချယ်သည်။ ထိုရွေးချယ်မှုသည် အလုပ်အသွားအလာကို အစပြုခဲ့သော ဌာနခွဲနှင့် ကိုက်ညီရမည်ဖြစ်ပြီး အစုံလိုက်များသည် ပွဲ၏ မပြောင်းလဲနိုင်သော SHA အသုံးပြုပါသည်။ ကိုယ်တိုင်လုပ်ဆောင်မှုအတွက်၊ `release_branch` တွင် ရည်ရွယ်ထားသော ထုတ်ဝေမှုကို ရွေးချယ်ပြီး ထိုတူညီသော ကိုးကားချက်ကို ပေးပို့ပါ-
 
-1. Active release branch နှင့် ဆက်စပ်သော ဖွင့်ထားသည့် PR များ၏ queue ကို **စာရင်းပြုစုပါ**။
-2. PR တစ်ခုချင်းစီကို **triage လုပ်ပါ** (viable / reject-worthy / needs-author) — reject/needs-author များကို
-   **report သာလုပ်ပြီး ပိတ်မထားပါ** (author က ဆုံးဖြတ်သည်)။
-3. Viable PR တစ်ခုချင်းစီအတွက် **သီးခြား worktree** (Rule #19) တစ်ခုအတွင်း PR ကို release tip သို့ ယူဆောင်ပြီး
-   `npm run check:release-green` ကို run ပါ-
-   - **HARD** → co-authorship မှတစ်ဆင့် **contributor ၏ branch ပေါ်တွင်** ပြင်ဆင်ပါ (author ၏ "Merged" status ကို ထိန်းသိမ်းပေးသည်)၊
-     HARD အားလုံး ရှင်းလင်းသွားသည်အထိ ပြန် run ပါ။
-   - **DRIFT** → မပြင်ဘဲထားပါ; release လုပ်ချိန်တွင် rebaseline လုပ်ပါမည်။
-4. PR × (verdict၊ HARD red များ၊ ပြင်ဆင်ပြီးပြီလား?၊ DRIFT၊ ယခု release-green ဖြစ်ပြီလား?) ဇယားကို **report လုပ်ပါ**။
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-Merge မလုပ်ဘဲ queue ကို **ပြင်ဆင်နိုင်သည်**; အတိအလင်း တောင်းဆိုသည့်အခါမှသာ merge လုပ်ပြီး — PR ကို မည်သည့်အခါမျှ မပိတ်ပါ။
+ရွေးချယ်ထားသောကုဒ်ကို မလုပ်ဆောင်မီ ဘဏ်ခွဲများ ပေးပို့ခြင်းကို ပယ်ချပါသည်။ `main` ထုတ်ပေးသည့် ပင်မ suites များကို လက်ခံဆောင်ရွက်ပေးပြီး ၎င်း၏ SHA ထည့်သွင်းခြင်းမပြုမီ ဖြေရှင်းထားသော ပစ်မှတ်နှင့် ကိုက်ညီနေသေးကြောင်း စစ်ဆေးပါ။ ကြည်လင်ပြတ်သားမှုအတွင်း ပင်မရွှေ့ပါက၊ ကွန်မန့်အသစ်တွင် မပြည့်စုံသော တံမြက်ခင်းကို ပြန်လုပ်ပါ။ မတူညီသော ကိုယ်စားလှယ်လောင်းများမှ ပြေစာတွဲများကို ပေါင်းစပ်မထားပါ။
 
-## အကြံပြုထားသော လုပ်ဆောင်ချိန်ဇယား
+## ရှုံးနိမ့်မှု triage နှင့် ပြန်လည်ထူထောင်ရေး
 
-- **`/green-prs` ကို အခါအားလျော်စွာ** (ဥပမာ အပတ်စဉ်) run ပြီး **`/generate-release` မတိုင်မီ အမြဲတမ်း**
-  run ပါ။
-- **`nightly-release-green.yml`** (ဖြေရှင်းချက် D) ကို စဉ်ဆက်မပြတ် signal အဖြစ် ထိန်းသိမ်းထားပါ- ၎င်းက
-  HARD red issue တစ်ခုကို ဖွင့်လိုက်သောအခါ scan လုပ်ရမည့်အချိန် ဖြစ်သည်။
-- Branch တစ်ခု သို့မဟုတ် သီးခြား merge candidate တစ်ခုကို စစ်ဆေးရန် **`/validate-release-green`** ကို လိုအပ်သလို အသုံးပြုပါ။
-- သီးခြား PR တစ်ခုကို live CI တွင် green ဖြစ်သည်အထိ ဆောင်ရွက်ပေးရန် လိုအပ်သည့်အခါ **`/babysit <PR#>`** ကို အသုံးပြုပါ။
+အဖြစ်အပျက်ကို ရောဂါရှာဖွေရေးအညွှန်းအဖြစ် သုံးပါ၊ ထို့နောက် အတိအကျပြေးခြင်း၊ ကြိုးစားခြင်း၊ ကျရှုံးသည့်အဆင့်နှင့် လက်ရာများကို စစ်ဆေးပါ။ ပံ့ပိုးကူညီသူအား ပျက်ကွက်သည်ဟု မသတ်မှတ်မီ ညီမျှသောအခြေခံနှင့် ကိုယ်စားလှယ်လောင်းအထောက်အထားများကို နှိုင်းယှဉ်ပါ။ အခြေခံအဆောက်အအုံဆိုင်ရာ အမှားအယွင်းများ၊ အမွေဆက်ခံသော ချို့ယွင်းချက်များ၊ ကိုယ်စားလှယ်လောင်း ဆုတ်ယုတ်မှုများနှင့် ဆိုင်းငံ့ထားသော အတည်ပြုချက်များသည် မတူညီသော ကုထုံးများ လိုအပ်ပါသည်။
 
-## Release နှင့် ဆက်နွှယ်ပုံ
-
-- `/generate-release` သည် **Phase 0 (pre-flight)** တွင် validation ကို ခေါ်သည်- release PR ကို မဖွင့်မီ DRIFT ကို rebaseline လုပ်ပြီး
-  HARD ကို ပြင်ဆင်သည်။
-- `/review-prs` သည် merge ဆုံးဖြတ်ချက်အဆင့်တွင် release-green gate ကို အသုံးပြုသည် (merge မလုပ်မီ green ဖြစ်ရမည်)။
-
-အစိတ်အပိုင်းအားလုံး၏ ရည်ရွယ်ချက်မှာ အတူတူပင်ဖြစ်သည်- release လုပ်သည့်နေ့တွင် မိနစ် ၄၀ ကြာသော layer များတစ်လျှောက်
-red များကို လိုက်လံဖြေရှင်းနေမည့်အစား **ပထမဆုံး CI run မှာပင် green ဖြစ်သော release PR တစ်ခု** ရရှိရန်ဖြစ်သည်။
+`/green-prs`၊ `/sweep-reds`၊ `/validate-release-green` နှင့် `/babysit` ကျွမ်းကျင်မှုများသည် အထောက်အထားများကို စုဆောင်းပြီး ၎င်းတို့၏ မှတ်တမ်းတင်ထားသော နယ်ပယ်အောက်တွင် ပြင်ဆင်မှုများ ပြုလုပ်ပါသည်။ ပံ့ပိုးသူအား ခရက်ဒစ်ထားရှိပါ၊ သီးခြားပြုပြင်ရေးဌာနခွဲများကို အသုံးပြုကာ ခွင့်ပြုချက်မပေါင်းစပ်မီ လိုအပ်သည့် စစ်ဆေးမှုများအားလုံးကို အတည်ပြုပါ။ လက်ရှိ ဖြတ်သန်းနေသော ကိုယ်စားလှယ်လောင်းအတွက် အလိုအလျောက် ပြန်လည်ခြေချခြင်း သို့မဟုတ် အဖြစ်အပျက် ပိတ်ခြင်း အစားထိုးခြင်းများ မရှိပါ။

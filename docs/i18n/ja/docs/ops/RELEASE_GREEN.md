@@ -25,11 +25,11 @@ npm run check:release-green -- --with-build --full-ci --json
 
 ## 夜間および手動のスイープ
 
-夜間リリースおよび互換性リゾルバーは、正規リリース ブランチを選択します。その選択はワークフローをトリガーしたブランチと一致する必要があり、スイートはイベントの不変SHAを使用します。手動で実行する場合は、 `RELEASE_BRANCH`で目的のリリースを選択し、同じ参照でディスパッチします。
+夜間リリースおよび互換性リゾルバーは、正規リリース ブランチを選択します。その選択はワークフローをトリガーしたブランチと一致する必要があり、スイートはイベントの不変SHAを使用します。手動で実行する場合は、 `release_branch`で目的のリリースを選択し、同じ参照でディスパッチします。
 
 ```bash
-gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
-gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
 ```
 
 選択したコードを実行する前に、ブランチ間のディスパッチは拒否されます。ホストされたメイン スイートは`main`をチェックアウトし、インストール前にそのSHA解決されたターゲットとまだ一致していることを確認します。メインが解決中に移動した場合は、新しいコミットで不完全なスイープを再実行します。異なる候補者からのスイートの領収書を結合しないでください。

@@ -25,11 +25,11 @@ npm run check:release-green -- --with-build --full-ci --json
 
 ## جاروهای شبانه و دستی
 
-حلکنندههای انتشار شبانه و سازگاری، یک شاخه انتشار متعارف را انتخاب میکنند. آن انتخاب باید با شاخه ای که جریان کار را راه اندازی کرده است مطابقت داشته باشد و مجموعه ها از SHA تغییرناپذیر رویداد استفاده می کنند. برای اجرای دستی، نسخه مورد نظر را در `RELEASE_BRANCH` انتخاب کنید و در همان مرجع ارسال کنید:
+حلکنندههای انتشار شبانه و سازگاری، یک شاخه انتشار متعارف را انتخاب میکنند. آن انتخاب باید با شاخه ای که جریان کار را راه اندازی کرده است مطابقت داشته باشد و مجموعه ها از SHA تغییرناپذیر رویداد استفاده می کنند. برای اجرای دستی، نسخه مورد نظر را در `release_branch` انتخاب کنید و در همان مرجع ارسال کنید:
 
 ```bash
-gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
-gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
 ```
 
 قبل از اجرای کد انتخابی، ارسال بین شاخه ای رد می شود. مجموعههای اصلی میزبانی شده، `main` را بررسی کرده و بررسی کنید که SHA آن همچنان با هدف حلشده مطابقت دارد قبل از نصب. اگر اصلی در حین تفکیک حرکت کرد، Sweep ناقص را در commit جدید دوباره اجرا کنید. رسیدهای مجموعه از نامزدهای مختلف را ترکیب نکنید.

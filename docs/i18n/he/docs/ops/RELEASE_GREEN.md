@@ -25,11 +25,11 @@ npm run check:release-green -- --with-build --full-ci --json
 
 ## ניקוי לילה וידני
 
-פותרי השחרור וההתאמה הליליים בוחרים בענף שחרור קנוני. הבחירה הזו חייבת להתאים לסניף שהפעיל את זרימת העבודה, והסוויטות משתמשות SHA הבלתי משתנה של האירוע. לביצוע ידני, בחר את המהדורה המיועדת ב- `RELEASE_BRANCH` ושלח על אותו ref:
+פותרי השחרור וההתאמה הליליים בוחרים בענף שחרור קנוני. הבחירה הזו חייבת להתאים לסניף שהפעיל את זרימת העבודה, והסוויטות משתמשות SHA הבלתי משתנה של האירוע. לביצוע ידני, בחר את המהדורה המיועדת ב- `release_branch` ושלח על אותו ref:
 
 ```bash
-gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
-gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
 ```
 
 שיגור חוצה סניפים נדחה לפני ביצוע הקוד שנבחר. סוויטות ראשיות מתארחות בודקים `main` ומוודאים שה- SHA שלה עדיין תואם את היעד שנפתר לפני ההתקנה. אם המהלכים העיקריים במהלך הרזולוציה, הפעל מחדש את הסוויפ הלא שלם ב-commit החדש. אין לשלב קבלות על סוויטות ממועמדים שונים.
