@@ -186,19 +186,32 @@ test("a stalled error body does not hang validation and its read is cancelled", 
   assert.ok(cancelled, "the clone's branch must already be cancelled after the timeout");
 });
 
-test("redaction covers individual cookie values and a key embedded in the endpoint path", () => {
+test("redaction covers individual cookie values, JSON cookie exports and path credentials", () => {
   const cookieKey = "session=abcdefSESSIONVALUE123; csrf=zyxwvCSRFVALUE987";
   assert.equal(
     redactValidationText("echo: csrf=zyxwvCSRFVALUE987 only", cookieKey).includes("CSRFVALUE"),
     false
   );
+  const jsonCookieKey = JSON.stringify([
+    { name: "sso", value: "eyJhbGciOiJIUzI1NiJ9SSOVALUE" },
+    { name: "sso-rw", value: "rwTOKENVALUE4242" },
+  ]);
+  const echoed = redactValidationText(
+    "forbidden for sso=eyJhbGciOiJIUzI1NiJ9SSOVALUE and rwTOKENVALUE4242",
+    jsonCookieKey
+  );
+  assert.ok(!echoed.includes("SSOVALUE") && !echoed.includes("rwTOKENVALUE"), echoed);
+  // A credential in a custom base-URL path need not match the validated key.
   const record = buildValidationLogRecord({
     provider: "custom",
     apiKey: SECRET,
     outcome: "access_denied",
-    rejection: { endpoint: `https://api.provider.example/${SECRET}/v1/models`, status: 403 },
+    rejection: {
+      endpoint: "https://relay.provider.example/t/OTHERPATHTOKEN123/v1/models",
+      status: 403,
+    },
   });
-  assert.ok(!String(record.endpoint).includes(SECRET), String(record.endpoint));
+  assert.equal(record.endpoint, "https://relay.provider.example");
 });
 
 test("classifyValidationRejection buckets statuses", () => {
@@ -253,7 +266,7 @@ test("buildValidationLogRecord carries provider/endpoint/status/body but never t
   const serialized = JSON.stringify(record);
   assert.equal(record.provider, "together");
   assert.equal(record.status, 403);
-  assert.equal(record.endpoint, "https://api.provider.example/v1/models");
+  assert.equal(record.endpoint, "https://api.provider.example");
   assert.equal(record.outcome, "access_denied");
   assert.ok(!serialized.includes(SECRET), serialized);
   assert.ok(String(record.body).length <= 520, `body too long: ${String(record.body).length}`);

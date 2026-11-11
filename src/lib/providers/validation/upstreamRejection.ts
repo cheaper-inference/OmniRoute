@@ -15,11 +15,13 @@
  *   - refines the verdict from the decisive (last) upstream response
  *     ({@link refineValidationResult}), and
  *   - emits one sanitized log line per validation ({@link buildValidationLogRecord}):
- *     provider, endpoint without query/userinfo, HTTP status, truncated body —
+ *     provider, endpoint origin (scheme + host), HTTP status, truncated body —
  *     never the key, Authorization header or other secrets.
  */
 
 import { AsyncLocalStorage } from "node:async_hooks";
+
+import { parseJsonCookiesToHeader } from "@/lib/providers/webCookieAuth";
 
 export type ValidationRejectionKind =
   "auth" | "access_denied" | "forbidden_ambiguous" | "rate_limited" | "unavailable" | "other";
@@ -194,6 +196,16 @@ export function sanitizeValidationEndpoint(url: string): string {
   }
 }
 
+/** scheme + host only — what the validation log records. */
+export function validationEndpointOrigin(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return "[unparseable-url]";
+  }
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -210,7 +222,16 @@ const MIN_REDACTED_FRAGMENT_CHARS = 6;
 function credentialFragments(apiKey: string | null): string[] {
   if (!apiKey || apiKey.length < MIN_REDACTED_FRAGMENT_CHARS) return [];
   const fragments = new Set<string>([apiKey]);
-  for (const part of apiKey.split(/[;,\s]+/)) {
+  // A JSON cookie export (`[{"name":"sso","value":"..."}]`, accepted by
+  // normalizeSessionCookieHeader) is split as the `name=value; ...` header it
+  // stands for — otherwise each value keeps its JSON quotes and never matches.
+  let source = apiKey;
+  try {
+    source = parseJsonCookiesToHeader(apiKey) ?? apiKey;
+  } catch {
+    // Malformed cookie JSON — fall back to splitting the raw string.
+  }
+  for (const part of source.split(/[;,\s]+/)) {
     const trimmed = part.trim();
     if (trimmed.length >= MIN_REDACTED_FRAGMENT_CHARS) fragments.add(trimmed);
     const eq = trimmed.indexOf("=");
@@ -449,9 +470,10 @@ export function buildValidationLogRecord({
   };
   if (typeof probes === "number") record.probes = probes;
   if (rejection) {
-    // Query/userinfo are already gone; a credential embedded in the path
-    // (custom base URLs) is caught by the key-fragment redaction.
-    record.endpoint = redactValidationText(sanitizeValidationEndpoint(rejection.endpoint), key);
+    // Origin only: a custom base URL can carry its own credential in the path,
+    // which need not match the validated key. Provider + status + body already
+    // identify the refusing probe.
+    record.endpoint = validationEndpointOrigin(rejection.endpoint);
     record.status = rejection.status;
     if (rejection.body) {
       record.body = truncate(
