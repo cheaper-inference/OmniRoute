@@ -14,7 +14,7 @@ import Icon from "@/shared/components/Icon";
  */
 
 import { useState } from "react";
-import { ActionBar, AutoGrid, Button } from "@/shared/components";
+import { ActionBar, Button } from "@/shared/components";
 import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
 import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
 import {
@@ -538,7 +538,7 @@ export default function ProviderModelsSection({
           onSortFreeFirstChange={setSortFreeFirst}
         />
       )}
-      <AutoGrid>
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         {displayModels.map((model) => {
           return (
             <ModelRow
@@ -591,6 +591,7 @@ export default function ProviderModelsSection({
               contextWindowOverride={contextOverrides[model.id] ?? null}
               onSaveContextWindowOverride={saveContextWindowOverride}
               savingContextOverride={savingContextModelId === model.id}
+              isFree={model.isFree}
             />
           );
         })}
@@ -601,7 +602,7 @@ export default function ProviderModelsSection({
             })}
           </p>
         )}
-      </AutoGrid>
+      </div>
     </div>
   );
 }
