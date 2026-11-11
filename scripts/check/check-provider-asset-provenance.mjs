@@ -199,6 +199,16 @@ function inspectGitCommit(objectId) {
   return null;
 }
 
+function verifyAuditedCommitAncestry(commit) {
+  const result = spawnSync("git", ["-C", repoRoot, "merge-base", "--is-ancestor", commit, "HEAD"], {
+    encoding: "utf8",
+  });
+  if (result.error || ![0, 1].includes(result.status)) {
+    return `unable to verify auditedCommit ancestry with Git: ${result.error?.message || result.stderr.trim() || "git merge-base failed"}`;
+  }
+  return result.status === 0 ? null : `auditedCommit must be an ancestor of HEAD: ${commit}`;
+}
+
 function verifyAuditedProviderSnapshot(commit, physicalFiles) {
   const failures = [];
   const treeResult = spawnSync(
@@ -330,6 +340,8 @@ async function main() {
         failures.push(gitCommitFailure);
       } else if (providersDir === defaultProvidersDir) {
         failures.push(...verifyAuditedProviderSnapshot(header.auditedCommit, physicalFiles));
+        const ancestryFailure = verifyAuditedCommitAncestry(header.auditedCommit);
+        if (ancestryFailure) failures.push(ancestryFailure);
       }
     }
     if (typeof header.auditedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(header.auditedAt)) {
