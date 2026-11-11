@@ -5,7 +5,12 @@ import { useTranslations } from "next-intl";
 import type { AgentSessionReport, ReportBreakdownRow } from "@/lib/usage/agentSessionReports";
 import { Button, Input, SegmentedControl, Select } from "@/shared/components";
 
-import { TIME_PRESETS, type ReportFilterState, type TimePreset } from "../reportFilters";
+import {
+  FILTER_NONE,
+  TIME_PRESETS,
+  type ReportFilterState,
+  type TimePreset,
+} from "../reportFilters";
 
 interface ReportFiltersProps {
   filters: ReportFilterState;
@@ -18,10 +23,11 @@ interface ReportFiltersProps {
 }
 
 const DIMENSION_FILTERS = [
-  { field: "apiKeyId", dimension: "members", labelKey: "member" },
-  { field: "projectName", dimension: "projects", labelKey: "project" },
-  { field: "client", dimension: "clients", labelKey: "client" },
+  { field: "apiKeyId", dimension: "members", labelKey: "member", noneKey: "noneMember" },
+  { field: "projectName", dimension: "projects", labelKey: "project", noneKey: "noneProject" },
+  { field: "client", dimension: "clients", labelKey: "client", noneKey: "noneClient" },
   { field: "provider", dimension: "providers", labelKey: "provider" },
+  { field: "model", dimension: "models", labelKey: "colModel" },
   { field: "connectionId", dimension: "accounts", labelKey: "account" },
 ] as const;
 
@@ -58,7 +64,7 @@ export default function ReportFilters({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-7">
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
         {(["from", "to"] as const).map((field) => (
           <Input
             key={field}
@@ -68,10 +74,12 @@ export default function ReportFilters({
             onChange={(event) => onChange({ [field]: event.target.value })}
           />
         ))}
-        {DIMENSION_FILTERS.map(({ field, dimension, labelKey }) => {
+        {DIMENSION_FILTERS.map((filter) => {
+          const { field, dimension, labelKey } = filter;
+          const noneKey = "noneKey" in filter ? filter.noneKey : null;
           const rows = (options?.[dimension] ?? []).filter((row) => row.key);
           const selected = filters[field];
-          const listed = rows.some((row) => row.key === selected);
+          const listed = rows.some((row) => row.key === selected) || selected === FILTER_NONE;
           return (
             <Select
               key={field}
@@ -81,6 +89,7 @@ export default function ReportFilters({
               placeholderDisabled={false}
               onChange={(event) => onChange({ [field]: event.target.value })}
               options={[
+                ...(noneKey ? [{ value: FILTER_NONE, label: t(noneKey) }] : []),
                 ...rows.map((row) => ({ value: row.key, label: optionLabel(row) })),
                 ...(selected && !listed ? [{ value: selected, label: selected }] : []),
               ]}

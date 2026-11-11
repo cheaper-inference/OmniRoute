@@ -8,8 +8,21 @@ export interface ReportFilterState {
   projectName: string;
   client: string;
   provider: string;
+  model: string;
   connectionId: string;
 }
+
+/** Filter value meaning "the field is empty"; mirrors REPORT_FILTER_NONE in the backend. */
+export const FILTER_NONE = "__none__";
+
+const DIMENSION_FIELDS = [
+  "apiKeyId",
+  "projectName",
+  "client",
+  "provider",
+  "model",
+  "connectionId",
+] as const;
 
 export const TIME_PRESETS = ["24h", "7d", "30d", "90d", "all"] as const;
 export type TimePreset = (typeof TIME_PRESETS)[number];
@@ -40,6 +53,7 @@ export function emptyFilters(preset: TimePreset): ReportFilterState {
     projectName: "",
     client: "",
     provider: "",
+    model: "",
     connectionId: "",
   };
 }
@@ -47,10 +61,12 @@ export function emptyFilters(preset: TimePreset): ReportFilterState {
 /** Query string for the report APIs; `windowOnly` drops every non-time filter. */
 export function toReportQuery(filters: ReportFilterState, windowOnly = false): URLSearchParams {
   const params = new URLSearchParams();
+  // Minutes east of UTC; the API uses it to group `daily` rows by the viewer's calendar days.
+  params.set("tzOffset", String(-new Date().getTimezoneOffset() || 0));
   if (filters.from) params.set("from", new Date(filters.from).toISOString());
   if (filters.to) params.set("to", new Date(filters.to).toISOString());
   if (windowOnly) return params;
-  for (const field of ["apiKeyId", "projectName", "client", "provider", "connectionId"] as const) {
+  for (const field of DIMENSION_FIELDS) {
     if (filters[field]) params.set(field, filters[field]);
   }
   return params;

@@ -13,7 +13,10 @@ import type {
   AgentSessionRecentUsage,
   AgentSessionRecord,
 } from "../../../src/lib/db/agentSessions";
-import type { AgentSessionReport } from "../../../src/lib/usage/agentSessionReports";
+import type {
+  AgentSessionReport,
+  AgentSessionReportRow,
+} from "../../../src/lib/usage/agentSessionReports";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -51,6 +54,18 @@ const REPORT: AgentSessionReport = {
   },
 };
 
+const TOKENS = {
+  input: 12_000,
+  output: 3_000,
+  cacheRead: 9_000,
+  cacheCreation: 1_000,
+  reasoning: 500,
+  uncachedInput: 2_000,
+  total: 15_000,
+};
+
+// Stored record of the detail endpoint: its own counters are deliberately different from the
+// read-time totals, which are what the modal must show.
 const SESSION: AgentSessionRecord = {
   id: "as_session1",
   apiKeyId: "key-alice",
@@ -64,21 +79,43 @@ const SESSION: AgentSessionRecord = {
   gitBranch: "main",
   firstSeenAt: "2026-09-25T09:00:00.000Z",
   lastSeenAt: "2026-09-25T10:00:00.000Z",
-  requestCount: 4,
-  errorCount: 0,
-  tokens: {
-    input: 12_000,
-    output: 3_000,
-    cacheRead: 9_000,
-    cacheCreation: 1_000,
-    reasoning: 500,
-    uncachedInput: 2_000,
-    total: 15_000,
-  },
+  requestCount: 99,
+  errorCount: 9,
+  tokens: { ...TOKENS, input: 1, output: 1, cacheRead: 0, cacheCreation: 0, uncachedInput: 1 },
   costUsd: 0.5,
   unpricedCount: 0,
   lastProvider: "anthropic",
   lastModel: "claude-sonnet",
+};
+
+const ROW: AgentSessionReportRow = {
+  id: SESSION.id,
+  apiKeyId: SESSION.apiKeyId,
+  apiKeyName: SESSION.apiKeyName,
+  client: SESSION.client,
+  clientSessionId: null,
+  projectName: SESSION.projectName,
+  projectRepo: null,
+  projectPath: null,
+  projectSource: null,
+  gitBranch: "main",
+  firstSeenAt: SESSION.firstSeenAt,
+  lastSeenAt: SESSION.lastSeenAt,
+  requests: 4,
+  errors: 0,
+  unpricedRequests: 0,
+  costUsd: 0.5,
+  tokens: TOKENS,
+  windowFirstSeenAt: SESSION.firstSeenAt,
+  windowLastSeenAt: SESSION.lastSeenAt,
+};
+
+const TOTALS = {
+  requests: 4,
+  errors: 0,
+  unpricedRequests: 0,
+  costUsd: 0.5,
+  tokens: TOKENS,
 };
 
 // The two requests of SESSION: their split adds up to the session header.
@@ -107,6 +144,13 @@ const REQUESTS = [
   request(2, { input: 5_000, output: 2_000, cacheRead: 4_000, cacheCreation: 0 }),
 ];
 
+const PANEL_PROPS = {
+  query: "",
+  refreshToken: 0,
+  order: { sort: "lastSeen", desc: true } as const,
+  onOrderChange: () => {},
+};
+
 let container: HTMLDivElement;
 let root: Root;
 
@@ -120,8 +164,8 @@ beforeEach(() => {
       const body = url.startsWith("/api/reports/summary")
         ? REPORT
         : url.startsWith(`/api/reports/sessions/${SESSION.id}`)
-          ? { session: SESSION, recentRequests: REQUESTS }
-          : { sessions: [SESSION], total: 1 };
+          ? { session: SESSION, recentRequests: REQUESTS, totals: TOTALS }
+          : { sessions: [ROW], total: 1 };
       return { ok: true, status: 200, json: async () => body };
     })
   );
@@ -188,7 +232,7 @@ describe("Team Reports token split", () => {
   });
 
   it("sessions list shows Input, Output and Cache columns", async () => {
-    await render(<SessionsPanel query="" refreshToken={0} />);
+    await render(<SessionsPanel {...PANEL_PROPS} />);
 
     const headers = [...container.querySelectorAll("thead th")].map((th) => th.textContent);
     expect(headers).not.toContain("Tokens");
@@ -201,7 +245,7 @@ describe("Team Reports token split", () => {
   });
 
   it("session detail shows Input, Output and Cache", async () => {
-    await render(<SessionsPanel query="" refreshToken={0} />);
+    await render(<SessionsPanel {...PANEL_PROPS} />);
 
     const details = [...container.querySelectorAll("tbody button")].find(
       (button) => button.textContent === "Details"

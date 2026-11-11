@@ -13,7 +13,7 @@ import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import BreakdownTable from "./components/BreakdownTable";
 import ReportFilters from "./components/ReportFilters";
-import SessionsPanel from "./components/SessionsPanel";
+import SessionsPanel, { type SessionOrder } from "./components/SessionsPanel";
 import { CacheTokens, useTokenLabels } from "./components/TokenFigures";
 import { splitTokens } from "./components/format";
 import {
@@ -31,6 +31,8 @@ interface BreakdownTabConfig {
   fallbackKey: string;
   extraCount: "members" | "projects";
   filterField?: Exclude<keyof ReportFilterState, "from" | "to">;
+  /** The empty-key row filters by "none" (the dimension has a "No ..." filter option). */
+  filterNone?: boolean;
   showDetail?: boolean;
   defaultSort?: "name";
 }
@@ -41,12 +43,14 @@ const BREAKDOWN_TABS: Record<ReportDimension, BreakdownTabConfig> = {
     fallbackKey: "unknownMember",
     extraCount: "projects",
     filterField: "apiKeyId",
+    filterNone: true,
   },
   projects: {
     nameKey: "project",
     fallbackKey: "noProject",
     extraCount: "members",
     filterField: "projectName",
+    filterNone: true,
     showDetail: true,
   },
   clients: {
@@ -54,6 +58,7 @@ const BREAKDOWN_TABS: Record<ReportDimension, BreakdownTabConfig> = {
     fallbackKey: "unknown",
     extraCount: "members",
     filterField: "client",
+    filterNone: true,
   },
   providers: {
     nameKey: "provider",
@@ -61,7 +66,12 @@ const BREAKDOWN_TABS: Record<ReportDimension, BreakdownTabConfig> = {
     extraCount: "members",
     filterField: "provider",
   },
-  models: { nameKey: "colModel", fallbackKey: "unknown", extraCount: "members" },
+  models: {
+    nameKey: "colModel",
+    fallbackKey: "unknown",
+    extraCount: "members",
+    filterField: "model",
+  },
   accounts: {
     nameKey: "account",
     fallbackKey: "unknown",
@@ -203,6 +213,8 @@ export default function ReportsPageClient() {
   const [filters, setFilters] = useState<ReportFilterState>(() => emptyFilters("7d"));
   const [tab, setTab] = useState<ReportTab>("members");
   const [refreshToken, setRefreshToken] = useState(0);
+  const [sessionOrder, setSessionOrder] = useState<SessionOrder>({ sort: "lastSeen", desc: true });
+  const [exportNote, setExportNote] = useState<string | null>(null);
   const { query, loading, report, failed, windowOptions } = useReportData(filters, refreshToken);
 
   const applyPreset = (next: TimePreset) => {
@@ -216,10 +228,34 @@ export default function ReportsPageClient() {
   const clearDimensionFilters = () =>
     setFilters((current) => ({ ...emptyFilters("all"), from: current.from, to: current.to }));
 
-  const exportCsv = () => {
+  const exportCsv = async () => {
     const params = new URLSearchParams(query);
     params.set("type", tab);
-    window.location.href = `/api/reports/export?${params}`;
+    if (tab === "sessions") {
+      params.set("sort", sessionOrder.sort);
+      params.set("order", sessionOrder.desc ? "desc" : "asc");
+    }
+    setExportNote(null);
+    try {
+      const res = await fetch(`/api/reports/export?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      // Keep the server's date-stamped name; fall back if the header is missing.
+      const serverName = res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1];
+      link.download = serverName ?? `omniroute-report-${tab}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      if (res.headers.get("X-Report-Truncated") === "true") {
+        setExportNote(t("exportTruncated", { total: Number(res.headers.get("X-Report-Total")) }));
+      }
+    } catch {
+      setExportNote(t("exportFailed"));
+    }
   };
 
   const breakdownTab = tab === "sessions" ? null : BREAKDOWN_TABS[tab];
@@ -228,7 +264,7 @@ export default function ReportsPageClient() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" size="sm" icon="download" onClick={exportCsv}>
+        <Button variant="secondary" size="sm" icon="download" onClick={() => void exportCsv()}>
           {t("exportCsv")}
         </Button>
         <Button size="sm" icon="refresh" onClick={() => setRefreshToken((current) => current + 1)}>
@@ -244,6 +280,12 @@ export default function ReportsPageClient() {
         onChange={patchFilters}
         onClear={clearDimensionFilters}
       />
+
+      {exportNote && (
+        <p role="status" className="text-sm text-text-muted">
+          {exportNote}
+        </p>
+      )}
 
       {failed && (
         <p className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
@@ -272,10 +314,16 @@ export default function ReportsPageClient() {
             extraCount={breakdownTab.extraCount}
             showDetail={breakdownTab.showDetail}
             defaultSort={breakdownTab.defaultSort}
+            filterNone={breakdownTab.filterNone}
             onFilter={filterField ? (key) => patchFilters({ [filterField]: key }) : undefined}
           />
         ) : (
-          <SessionsPanel query={query} refreshToken={refreshToken} />
+          <SessionsPanel
+            query={query}
+            refreshToken={refreshToken}
+            order={sessionOrder}
+            onOrderChange={setSessionOrder}
+          />
         )}
       </Card>
     </div>

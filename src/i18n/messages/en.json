@@ -16406,7 +16406,6 @@
     "details": "Details",
     "sessionDetail": "Session details",
     "recentRequests": "Latest requests",
-    "sessionsWindowHint": "Sessions whose last activity falls in the selected time range.",
     "sortBy": "Sort by",
     "sort_lastSeen": "Last active",
     "sort_firstSeen": "Started",
@@ -16417,7 +16416,15 @@
     "sortAsc": "Ascending",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {page} of {pages} · {total} sessions"
+    "pageOf": "Page {page} of {pages} · {total} sessions",
+    "sessionsWindowHintV2": "The list counts only the requests inside the selected time range, the same as the cards above.",
+    "noneMember": "No member",
+    "noneProject": "No project",
+    "noneClient": "No client",
+    "firstSeenAllTime": "First seen (all time)",
+    "lastSeenAllTime": "Last seen (all time)",
+    "exportTruncated": "Exported only the first rows of {total, number} sessions. Narrow the filters to export the rest.",
+    "exportFailed": "Could not export the report. Try again."
   },
   "connectionTest": {
     "title": "Test message",

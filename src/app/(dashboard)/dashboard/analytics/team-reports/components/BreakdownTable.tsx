@@ -17,6 +17,7 @@ import type { ReportBreakdownRow } from "@/lib/usage/agentSessionReports";
 import { Button } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
+import { FILTER_NONE } from "../reportFilters";
 import { formatDateTime, splitTokens } from "./format";
 import { CacheTokens, useTokenLabels } from "./TokenFigures";
 
@@ -42,6 +43,8 @@ interface BreakdownTableProps {
   showDetail?: boolean;
   defaultSort?: SortKey;
   onFilter?: (key: string) => void;
+  /** The empty-key row can be filtered on (as FILTER_NONE), because the dimension has a "none" filter. */
+  filterNone?: boolean;
 }
 
 function sortValue(row: ReportBreakdownRow, key: SortKey, extra: ExtraCount): string | number {
@@ -117,12 +120,14 @@ function BreakdownRow({
   extraCount,
   showDetail,
   onFilter,
+  filterNone,
 }: {
   row: ReportBreakdownRow;
   fallbackName: string;
   extraCount: ExtraCount;
   showDetail: boolean;
   onFilter?: (key: string) => void;
+  filterNone: boolean;
 }) {
   const t = useTranslations("reports");
   const tokens = splitTokens(row.tokens);
@@ -157,8 +162,8 @@ function BreakdownRow({
       </TableCell>
       {onFilter && (
         <TableCell className="py-2.5 px-3 text-right">
-          {row.key && (
-            <Button variant="ghost" size="sm" onClick={() => onFilter(row.key)}>
+          {(row.key || filterNone) && (
+            <Button variant="ghost" size="sm" onClick={() => onFilter(row.key || FILTER_NONE)}>
               {t("filterBy")}
             </Button>
           )}
@@ -176,6 +181,7 @@ export default function BreakdownTable({
   showDetail = false,
   defaultSort = "cost",
   onFilter,
+  filterNone = false,
 }: BreakdownTableProps) {
   const t = useTranslations("reports");
   const columns = useBreakdownColumns(nameHeader, extraCount);
@@ -212,12 +218,13 @@ export default function BreakdownTable({
       <TableBody>
         {sortedRows.map((row) => (
           <BreakdownRow
-            key={row.key || "__none__"}
+            key={row.key || FILTER_NONE}
             row={row}
             fallbackName={fallbackName}
             extraCount={extraCount}
             showDetail={showDetail}
             onFilter={onFilter}
+            filterNone={filterNone}
           />
         ))}
       </TableBody>

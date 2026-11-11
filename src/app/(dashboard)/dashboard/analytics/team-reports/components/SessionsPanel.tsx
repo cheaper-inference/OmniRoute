@@ -12,6 +12,7 @@ import {
 } from "@omniroute/ui-kit/table";
 
 import type { AgentSessionRecentUsage, AgentSessionRecord } from "@/lib/db/agentSessions";
+import type { AgentSessionReportRow, SessionReportTotals } from "@/lib/usage/agentSessionReports";
 import { Button, Modal, Select } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
@@ -22,16 +23,26 @@ const PAGE_SIZE = 25;
 const SORT_FIELDS = ["lastSeen", "firstSeen", "requests", "tokens", "cost"] as const;
 type SessionSort = (typeof SORT_FIELDS)[number];
 
+export interface SessionOrder {
+  sort: SessionSort;
+  desc: boolean;
+}
+
 interface SessionsPanelProps {
   /** Report filters as a query string; paging and sorting are added here. */
   query: string;
   /** Bumped by the page's refresh button. */
   refreshToken: number;
+  /** Owned by the page so the CSV export can follow the list order. */
+  order: SessionOrder;
+  onOrderChange: (order: SessionOrder) => void;
 }
 
 interface SessionDetail {
   session: AgentSessionRecord;
   recentRequests: AgentSessionRecentUsage[];
+  /** All-time totals at read-time prices. */
+  totals: SessionReportTotals;
 }
 
 function RecentRequestsTable({ requests }: { requests: AgentSessionRecentUsage[] }) {
@@ -106,24 +117,26 @@ function SessionDetailModal({ sessionId, onClose }: { sessionId: string; onClose
   }, [sessionId]);
 
   const session = detail?.session;
-  const tokens = session && splitTokens(session.tokens);
-  const facts: Array<[string, ReactNode]> = session
-    ? [
-        [t("member"), session.apiKeyName ?? session.apiKeyId ?? "-"],
-        [t("project"), session.projectName ?? "-"],
-        [t("colBranch"), session.gitBranch ?? "-"],
-        [t("colCost"), formatCost(session.costUsd)],
-        [t("colRequests"), `${session.requestCount} (${session.errorCount} ${t("colErrors")})`],
-        [tokenLabels.input, fmtCompact(tokens.input)],
-        [tokenLabels.output, fmtCompact(tokens.output)],
-        [tokenLabels.cache, <CacheTokens key="cache" split={tokens} />],
-        [t("colFirstSeen"), formatDateTime(session.firstSeenAt)],
-        [t("colLastActive"), formatDateTime(session.lastSeenAt)],
-      ]
-    : [];
+  const totals = detail?.totals;
+  const tokens = totals && splitTokens(totals.tokens);
+  const facts: Array<[string, ReactNode]> =
+    session && totals && tokens
+      ? [
+          [t("member"), session.apiKeyName ?? session.apiKeyId ?? "-"],
+          [t("project"), session.projectName ?? "-"],
+          [t("colBranch"), session.gitBranch ?? "-"],
+          [t("colCost"), formatCost(totals.costUsd)],
+          [t("colRequests"), `${totals.requests} (${totals.errors} ${t("colErrors")})`],
+          [tokenLabels.input, fmtCompact(tokens.input)],
+          [tokenLabels.output, fmtCompact(tokens.output)],
+          [tokenLabels.cache, <CacheTokens key="cache" split={tokens} />],
+          [t("firstSeenAllTime"), formatDateTime(session.firstSeenAt)],
+          [t("lastSeenAllTime"), formatDateTime(session.lastSeenAt)],
+        ]
+      : [];
   return (
     <Modal isOpen onClose={onClose} size="xl" title={t("sessionDetail")}>
-      {!session ? (
+      {!session || !totals ? (
         <p className="py-8 text-center text-sm text-text-muted">
           {failed ? t("loadFailed") : t("loading")}
         </p>
@@ -179,7 +192,7 @@ function SessionRow({
   session,
   onSelect,
 }: {
-  session: AgentSessionRecord;
+  session: AgentSessionReportRow;
   onSelect: (id: string) => void;
 }) {
   const t = useTranslations("reports");
@@ -194,7 +207,14 @@ function SessionRow({
       <TableCell className="py-2.5 px-3 font-mono text-xs text-text-muted">
         {session.gitBranch ?? "-"}
       </TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">{session.requestCount}</TableCell>
+      <TableCell className="py-2.5 px-3 text-right tabular-nums">
+        {session.requests}
+        {session.errors > 0 && (
+          <span className="ml-1 text-xs text-error">
+            ({session.errors} {t("colErrors")})
+          </span>
+        )}
+      </TableCell>
       <TableCell className="py-2.5 px-3 text-right tabular-nums">
         {fmtCompact(tokens.input)}
       </TableCell>
@@ -208,7 +228,7 @@ function SessionRow({
         {formatCost(session.costUsd)}
       </TableCell>
       <TableCell className="py-2.5 px-3 text-text-muted">
-        {formatDateTime(session.lastSeenAt)}
+        {formatDateTime(session.windowLastSeenAt)}
       </TableCell>
       <TableCell className="py-2.5 px-3 text-right">
         <Button variant="ghost" size="sm" onClick={() => onSelect(session.id)}>
@@ -223,7 +243,7 @@ function SessionsTable({
   sessions,
   onSelect,
 }: {
-  sessions: AgentSessionRecord[];
+  sessions: AgentSessionReportRow[];
   onSelect: (id: string) => void;
 }) {
   const t = useTranslations("reports");
@@ -284,14 +304,20 @@ function Pager({
   );
 }
 
-export default function SessionsPanel({ query, refreshToken }: SessionsPanelProps) {
+export default function SessionsPanel({
+  query,
+  refreshToken,
+  order,
+  onOrderChange,
+}: SessionsPanelProps) {
   const t = useTranslations("reports");
-  const [sort, setSort] = useState<SessionSort>("lastSeen");
-  const [desc, setDesc] = useState(true);
+  const { sort, desc } = order;
   // Paging is tied to the query it was chosen for, so a filter change starts again at page 1.
   const [paging, setPaging] = useState({ query, page: 0 });
   const page = paging.query === query ? paging.page : 0;
-  const [data, setData] = useState<{ sessions: AgentSessionRecord[]; total: number } | null>(null);
+  const [data, setData] = useState<{ sessions: AgentSessionReportRow[]; total: number } | null>(
+    null
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -316,12 +342,12 @@ export default function SessionsPanel({ query, refreshToken }: SessionsPanelProp
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <p className="text-xs text-text-muted">{t("sessionsWindowHint")}</p>
+        <p className="text-xs text-text-muted">{t("sessionsWindowHintV2")}</p>
         <SortControls
           sort={sort}
           desc={desc}
-          onSort={setSort}
-          onToggleOrder={() => setDesc((current) => !current)}
+          onSort={(next) => onOrderChange({ sort: next, desc })}
+          onToggleOrder={() => onOrderChange({ sort, desc: !desc })}
         />
       </div>
 
