@@ -43,7 +43,6 @@ import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { applyStrategyOrdering } from "./applyStrategyOrdering.ts";
-import { parseAutoConfig } from "./autoConfig.ts";
 import { orderSimilarTargets } from "../autoCombo/omniJev.ts";
 import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
 import { clampComboDepth } from "./comboPredicates.ts";
@@ -961,9 +960,9 @@ export async function resolveComboTargetPipeline(
     orderedTargets[0]?.connectionId ?? ""
   );
 
-  // Parallel pre-screen: check provider profiles and model availability for all targets
   orderedTargets = applyOmniJevSimilarFirst(strategy, combo, orderedTargets);
 
+  // Parallel pre-screen: check provider profiles and model availability for all targets
   // Only runs for priority strategy where sequential checking causes latency
   const preScreenMap = traits.preScreensTargets
     ? await preScreenTargets(orderedTargets, isModelAvailable).catch(

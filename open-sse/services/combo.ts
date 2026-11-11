@@ -170,7 +170,6 @@ import { executeTargetAttempt } from "./combo/executeTargetAttempt.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./combo/attemptLoopTypes.ts";
 import { clearStaleLKGP } from "./combo/staleLkgpClear.ts";
 import { getStrategyTraits } from "./combo/strategyRegistry.ts";
-import { parseAutoConfig } from "./combo/autoConfig.ts";
 import { prepareOmniJev, injectOmniJev } from "./autoCombo/omniJev.ts";
 
 // Native Codex auto-resume (#13180) rejection reasons that mean the turn either carries

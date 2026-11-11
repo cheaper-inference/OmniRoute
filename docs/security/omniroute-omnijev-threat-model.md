@@ -1,3 +1,9 @@
+---
+title: "OmniJev Threat Model"
+version: 3.8.54
+lastUpdated: 2026-11-11
+---
+
 # OmniJev threat model
 
 ## Executive summary
@@ -74,14 +80,14 @@ flowchart TD
 
 ## Assets and security objectives
 
-| Asset | Why it matters | Security objective (C/I/A) |
-|---|---|---|
-| Client prompts and tool constraints | May contain secrets, PII, source code, or business data | C/I |
-| `TYPESAFE_API_KEY` | Authorizes external decision requests and may incur cost | C/I |
-| Combo strategy/configuration | Controls model selection, fallback, and external disclosure | I/A |
-| Provider credentials and executor authorization | Grants access to upstream models and accounts | C/I |
-| Cache signatures and responses | Can expose or incorrectly reuse tenant data | C/I |
-| Routing availability | Failed orchestration can deny generation or amplify cost | A |
+| Asset                                           | Why it matters                                              | Security objective (C/I/A) |
+| ----------------------------------------------- | ----------------------------------------------------------- | -------------------------- |
+| Client prompts and tool constraints             | May contain secrets, PII, source code, or business data     | C/I                        |
+| `TYPESAFE_API_KEY`                              | Authorizes external decision requests and may incur cost    | C/I                        |
+| Combo strategy/configuration                    | Controls model selection, fallback, and external disclosure | I/A                        |
+| Provider credentials and executor authorization | Grants access to upstream models and accounts               | C/I                        |
+| Cache signatures and responses                  | Can expose or incorrectly reuse tenant data                 | C/I                        |
+| Routing availability                            | Failed orchestration can deny generation or amplify cost    | A                          |
 
 ## Attacker model
 
@@ -104,13 +110,13 @@ flowchart TD
 
 ## Entry points and attack surfaces
 
-| Surface | How reached | Trust boundary | Notes | Evidence |
-|---|---|---|---|---|
-| OmniJev combo request | Authenticated chat/response combo | Client -> server | Enrichment runs before target attempts | `open-sse/services/combo.ts:handleComboChat` |
-| TypeSafe preflight | `mode: "jev-api"` | Server -> external service | Fixed URL, bearer env key, timeout, bounded body | `open-sse/services/autoCombo/omniJev.ts:prepareOmniJev` |
-| Typed answer parser | External JSON response | External service -> server | Strict enums, distributions, score range, confidence threshold | `open-sse/services/autoCombo/omniJev.ts:validateJevAnswers` |
-| Strategy configuration | Dashboard or MCP combo write | Operator/MCP -> config | Raw API keys are rejected; MCP tool requires combo-write scope | `src/shared/validation/omniJev.ts`, `open-sse/mcp-server/schemas/tools.ts:setRoutingStrategyInput` |
-| Similar-model fallback | Provider failure/circuit state | Orchestrator -> executor | Only eligible targets are reordered; blocked targets are not resurrected | `open-sse/services/combo/resolveAutoStrategy.ts` |
+| Surface                | How reached                       | Trust boundary             | Notes                                                                    | Evidence                                                                                           |
+| ---------------------- | --------------------------------- | -------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| OmniJev combo request  | Authenticated chat/response combo | Client -> server           | Enrichment runs before target attempts                                   | `open-sse/services/combo.ts:handleComboChat`                                                       |
+| TypeSafe preflight     | `mode: "jev-api"`                 | Server -> external service | Fixed URL, bearer env key, timeout, bounded body                         | `open-sse/services/autoCombo/omniJev.ts:prepareOmniJev`                                            |
+| Typed answer parser    | External JSON response            | External service -> server | Strict enums, distributions, score range, confidence threshold           | `open-sse/services/autoCombo/omniJev.ts:validateJevAnswers`                                        |
+| Strategy configuration | Dashboard or MCP combo write      | Operator/MCP -> config     | Raw API keys are rejected; MCP tool requires combo-write scope           | `src/shared/validation/omniJev.ts`, `open-sse/mcp-server/schemas/tools.ts:setRoutingStrategyInput` |
+| Similar-model fallback | Provider failure/circuit state    | Orchestrator -> executor   | Only eligible targets are reordered; blocked targets are not resurrected | `open-sse/services/combo/resolveAutoStrategy.ts`                                                   |
 
 ## Top abuse paths
 
@@ -132,13 +138,13 @@ flowchart TD
 
 ## Threat model table
 
-| Threat ID | Threat source | Prerequisites | Threat action | Impact | Impacted assets | Existing controls (evidence) | Gaps | Recommended mitigations | Detection ideas | Likelihood | Impact severity | Priority |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| TM-001 | External disclosure | Operator enables `jev-api`; prompt contains sensitive data | Forward prompt text to external TypeSafe boundary | Confidentiality loss or residency/compliance violation | Prompts, PII, source code | Explicit mode; local default; latest text only; no raw prompt logging | No tenant-level consent, redaction, residency gate, or external-retention policy in OmniJev | Add policy gate for allowed tenants/data classes, optional PII redaction, and clear audit metadata before enabling external mode | Count external preflights by tenant/combo; alert on unexpected `jev-api` use | Medium | High | high |
-| TM-002 | Authenticated client or tenant workload | OmniJev `jev-api` enabled and many eligible requests | Cause one external preflight per request | Cost, latency, or availability degradation | Routing availability, external quota, billing | Timeout; one batched request; existing upstream/API rate controls | No OmniJev-specific per-key budget, concurrency cap, or cache for equivalent classifications | Add per-tenant preflight quota/concurrency and fail to local methodology when exhausted | Track preflight count, timeout rate, latency, and fallback reason by combo/key | Medium | Medium | medium |
-| TM-003 | Adversarial prompt author | Client can control latest user text | Manipulate bounded classification to alter guidance/order | Quality degradation or less suitable fallback; no direct privilege escalation | Routing integrity, response quality | State is data; closed `choice`/`score`/`noul`; confidence/distribution checks; deterministic policy code | No adversarial classifier evaluation or prompt-content redaction | Add regression corpus for instruction injection and monitor task-distribution drift | Log packet provenance/task/threshold result without prompt text | Medium | Low | low |
-| TM-004 | Malformed external service response | `jev-api` enabled; external response is malformed or contradictory | Bypass typed decision assumptions | Incorrect routing if parser is weakened; current path safely falls back | Routing integrity, availability | Strict Zod schemas, exact probability sums, weighted score check, confidence gate, bounded response reader | Schema changes at provider require contract tests | Keep contract fixtures and fail closed to local bounded methodology | Count invalid-decision/unavailable/cancelled reasons | Low | Medium | low |
-| TM-005 | Authorized config writer or compromised MCP credential | Combo-write permission | Enable external mode or alter fallback policy | Changes disclosure and routing behavior for future requests | Combo config, prompts, availability | Dashboard/MCP auth boundary; combo schema rejects embedded credentials; MCP tool has `write:combos` scope | No separate permission for external data egress | Require explicit egress permission/confirmation for `jev-api`; audit config diffs | Audit actor, combo, old/new mode, and scope | Low | High | medium |
+| Threat ID | Threat source                                          | Prerequisites                                                      | Threat action                                             | Impact                                                                        | Impacted assets                               | Existing controls (evidence)                                                                               | Gaps                                                                                         | Recommended mitigations                                                                                                          | Detection ideas                                                                | Likelihood | Impact severity | Priority |
+| --------- | ------------------------------------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- | --------------- | -------- |
+| TM-001    | External disclosure                                    | Operator enables `jev-api`; prompt contains sensitive data         | Forward prompt text to external TypeSafe boundary         | Confidentiality loss or residency/compliance violation                        | Prompts, PII, source code                     | Explicit mode; local default; latest text only; no raw prompt logging                                      | No tenant-level consent, redaction, residency gate, or external-retention policy in OmniJev  | Add policy gate for allowed tenants/data classes, optional PII redaction, and clear audit metadata before enabling external mode | Count external preflights by tenant/combo; alert on unexpected `jev-api` use   | Medium     | High            | high     |
+| TM-002    | Authenticated client or tenant workload                | OmniJev `jev-api` enabled and many eligible requests               | Cause one external preflight per request                  | Cost, latency, or availability degradation                                    | Routing availability, external quota, billing | Timeout; one batched request; existing upstream/API rate controls                                          | No OmniJev-specific per-key budget, concurrency cap, or cache for equivalent classifications | Add per-tenant preflight quota/concurrency and fail to local methodology when exhausted                                          | Track preflight count, timeout rate, latency, and fallback reason by combo/key | Medium     | Medium          | medium   |
+| TM-003    | Adversarial prompt author                              | Client can control latest user text                                | Manipulate bounded classification to alter guidance/order | Quality degradation or less suitable fallback; no direct privilege escalation | Routing integrity, response quality           | State is data; closed `choice`/`score`/`noul`; confidence/distribution checks; deterministic policy code   | No adversarial classifier evaluation or prompt-content redaction                             | Add regression corpus for instruction injection and monitor task-distribution drift                                              | Log packet provenance/task/threshold result without prompt text                | Medium     | Low             | low      |
+| TM-004    | Malformed external service response                    | `jev-api` enabled; external response is malformed or contradictory | Bypass typed decision assumptions                         | Incorrect routing if parser is weakened; current path safely falls back       | Routing integrity, availability               | Strict Zod schemas, exact probability sums, weighted score check, confidence gate, bounded response reader | Schema changes at provider require contract tests                                            | Keep contract fixtures and fail closed to local bounded methodology                                                              | Count invalid-decision/unavailable/cancelled reasons                           | Low        | Medium          | low      |
+| TM-005    | Authorized config writer or compromised MCP credential | Combo-write permission                                             | Enable external mode or alter fallback policy             | Changes disclosure and routing behavior for future requests                   | Combo config, prompts, availability           | Dashboard/MCP auth boundary; combo schema rejects embedded credentials; MCP tool has `write:combos` scope  | No separate permission for external data egress                                              | Require explicit egress permission/confirmation for `jev-api`; audit config diffs                                                | Audit actor, combo, old/new mode, and scope                                    | Low        | High            | medium   |
 
 ## Criticality calibration
 
@@ -153,15 +159,15 @@ flowchart TD
 
 ## Focus paths for security review
 
-| Path | Why it matters | Related Threat IDs |
-|---|---|---|
-| `open-sse/services/autoCombo/omniJev.ts` | External boundary, secret use, bounded parser, prompt injection | TM-001, TM-002, TM-003, TM-004 |
-| `open-sse/services/combo.ts` | Pre-generation ordering and request propagation | TM-003, TM-005 |
-| `open-sse/services/combo/resolveAutoStrategy.ts` | Eligibility, circuit/quota filtering, fallback order | TM-003, TM-005 |
-| `src/shared/validation/omniJev.ts` | Persisted configuration and secret exclusion | TM-001, TM-005 |
-| `open-sse/mcp-server/schemas/tools.ts` | Management input and scope contract | TM-005 |
-| `open-sse/mcp-server/tools/advancedTools.ts` | Runtime config mutation through MCP | TM-005 |
-| `open-sse/handlers/chatCore/semanticCacheConversation.ts` | Cache isolation after prompt enrichment | TM-001, TM-003 |
+| Path                                                      | Why it matters                                                  | Related Threat IDs             |
+| --------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------ |
+| `open-sse/services/autoCombo/omniJev.ts`                  | External boundary, secret use, bounded parser, prompt injection | TM-001, TM-002, TM-003, TM-004 |
+| `open-sse/services/combo.ts`                              | Pre-generation ordering and request propagation                 | TM-003, TM-005                 |
+| `open-sse/services/combo/resolveAutoStrategy.ts`          | Eligibility, circuit/quota filtering, fallback order            | TM-003, TM-005                 |
+| `src/shared/validation/omniJev.ts`                        | Persisted configuration and secret exclusion                    | TM-001, TM-005                 |
+| `open-sse/mcp-server/schemas/tools.ts`                    | Management input and scope contract                             | TM-005                         |
+| `open-sse/mcp-server/tools/advancedTools.ts`              | Runtime config mutation through MCP                             | TM-005                         |
+| `open-sse/handlers/chatCore/semanticCacheConversation.ts` | Cache isolation after prompt enrichment                         | TM-001, TM-003                 |
 
 ## Notes on use
 

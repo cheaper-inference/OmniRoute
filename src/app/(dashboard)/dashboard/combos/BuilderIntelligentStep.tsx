@@ -351,24 +351,26 @@ export default function BuilderIntelligentStep({
               "Enrich requests before generation using the TypeSafe/Jev methodology. Compatible models take over on failure."
             )}
           </p>
-          <label className="text-xs font-semibold block mt-3 mb-2" htmlFor="omni-jev-mode">
-            {getI18nOrFallback(t, "omniJevMode", "Enrichment mode")}
-          </label>
-          <select
-            id="omni-jev-mode"
-            value={normalizedConfig.omniJev?.mode ?? "methodology"}
-            onChange={(event) =>
-              updateConfig({ omniJev: { ...normalizedConfig.omniJev, mode: event.target.value } })
-            }
-            className="w-full text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent"
-          >
-            <option value="methodology">
-              {getI18nOrFallback(t, "omniJevLocal", "Skill methodology (no Jev API key)")}
-            </option>
-            <option value="jev-api">
-              {getI18nOrFallback(t, "omniJevApi", "Optional Jev API preflight")}
-            </option>
-          </select>
+          <div className="mt-3">
+            <Select
+              id="omni-jev-mode"
+              label={getI18nOrFallback(t, "omniJevMode", "Enrichment mode")}
+              value={normalizedConfig.omniJev?.mode ?? "methodology"}
+              onChange={(event) =>
+                updateConfig({ omniJev: { ...normalizedConfig.omniJev, mode: event.target.value } })
+              }
+              options={[
+                {
+                  value: "methodology",
+                  label: getI18nOrFallback(t, "omniJevLocal", "Skill methodology (no Jev API key)"),
+                },
+                {
+                  value: "jev-api",
+                  label: getI18nOrFallback(t, "omniJevApi", "Optional Jev API preflight"),
+                },
+              ]}
+            />
+          </div>
           {normalizedConfig.omniJev?.mode === "jev-api" && (
             <p className="text-xs text-text-muted mt-2">
               {getI18nOrFallback(
