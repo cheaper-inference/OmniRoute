@@ -492,7 +492,8 @@ export type StreamContentWatcher = {
   /**
    * True once a terminal frame declared a NORMAL stop (finish_reason "stop",
    * stop_reason "end_turn"/"stop_sequence") — the upstream's own verdict that
-   * the turn is complete, even when no content followed (#16072).
+   * the turn is complete, even when no content followed (#16072). Not updated once
+   * content is seen: the verdict only matters for a stream that carried no content.
    */
   sawNormalStopTerminal: () => boolean;
   /**
@@ -567,13 +568,20 @@ export function createStreamContentWatcher(
 
   return {
     note(text: string): void {
-      if (!text) return;
+      // Once content is proven every reader is satisfied (each tests `!sawContent()` or ORs
+      // it with the other flags), so later frames are not parsed or buffered and the
+      // other flags keep the value they had at that point.
+      if (!text || content) return;
       pending += text;
       for (;;) {
         const boundary = pending.search(/\r?\n\r?\n/);
         if (boundary === -1) break;
         inspect(pending.slice(0, boundary));
         pending = pending.slice(boundary).replace(/^\r?\n\r?\n/, "");
+        if (content) {
+          pending = "";
+          return;
+        }
       }
       if (pending.length > MAX_BUFFERED) {
         inspect(pending);
@@ -581,7 +589,7 @@ export function createStreamContentWatcher(
       }
     },
     finish(): void {
-      inspect(pending);
+      if (!content) inspect(pending);
       pending = "";
     },
     sawContent: () => content,
@@ -856,6 +864,11 @@ export function prependBufferedChunks(
     },
   });
 }
+
+// Ceiling on bytes held before the first readiness signal. Comment-only or non-JSON bodies
+// never signal readiness, so without it they grow with upstream rate x deadline. Kept far
+// above one real first frame (a Responses `response.created` echoes instructions and tools).
+const PRE_SIGNAL_MAX_BYTES = 1024 * 1024;
 
 class StreamReadinessReadTimeout extends Error {
   constructor() {
@@ -1258,6 +1271,31 @@ export async function ensureStreamReadiness(
         return {
           ok: true,
           response: buildReadyResponse(),
+        };
+      }
+
+      if (bufferedBytes > PRE_SIGNAL_MAX_BYTES) {
+        const reason = `Stream sent ${bufferedBytes} bytes without a non-ping SSE event (limit=${PRE_SIGNAL_MAX_BYTES})`;
+        options.log?.warn?.(
+          "STREAM",
+          `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
+        );
+        await reader.cancel(reason).catch(() => {});
+        return {
+          ok: false,
+          reason,
+          classificationReason: reason,
+          code: "STREAM_READINESS_TIMEOUT",
+          type: "stream_timeout",
+          anyByteAt: lastChunkAt,
+          response: createErrorResponse(
+            HTTP_STATUS.GATEWAY_TIMEOUT,
+            reason,
+            "STREAM_READINESS_TIMEOUT",
+            "stream_timeout",
+            undefined,
+            buildAnyByteAtHeader(lastChunkAt)
+          ),
         };
       }
     }

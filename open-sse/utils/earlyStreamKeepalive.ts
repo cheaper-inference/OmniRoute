@@ -632,6 +632,7 @@ export async function withEarlyStreamKeepalive(
         aborted = true;
         stopDeadline();
         stopKeepalive();
+        upstreamReader?.cancel().catch(() => {});
         try {
           deadlineController?.abort();
         } catch {
@@ -674,7 +675,7 @@ export async function withEarlyStreamKeepalive(
 
       try {
         const result = await settled;
-        stopDeadline();
+        // The deadline stays armed here: a non-SSE body is read below and must be bound too.
         stopKeepalive();
         if (aborted) {
           // The synthetic keepalive response can be cancelled before the handler resolves.
@@ -695,7 +696,9 @@ export async function withEarlyStreamKeepalive(
           const isSse = contentType.includes("text/event-stream");
 
           if (response.body && isSse) {
-            // Real SSE stream — forward it verbatim.
+            // Real SSE stream — forward it verbatim. The deadline guards only the
+            // handler wait and the non-SSE body read, never a long-lived stream.
+            stopDeadline();
             upstreamReader = response.body.getReader();
             let bytesForwarded = 0;
             // Last four forwarded bytes. A finished SSE event ends in \n\n (or \r\n\r\n).
@@ -750,7 +753,24 @@ export async function withEarlyStreamKeepalive(
             // committed to a 200 event-stream, so the HTTP status can no longer
             // change. Frame the (already-sanitized) body as an in-band error event
             // instead of forwarding raw JSON, which would be malformed SSE.
-            const text = response.body ? await response.text().catch(() => "") : "";
+            // Read through upstreamReader so the deadline, abort and cancel paths can
+            // cancel a body that trickles forever.
+            let text = "";
+            if (response.body) {
+              upstreamReader = response.body.getReader();
+              const decoder = new TextDecoder();
+              try {
+                while (true) {
+                  const { done, value } = await upstreamReader.read();
+                  if (done) break;
+                  if (value) text += decoder.decode(value, { stream: true });
+                }
+                text += decoder.decode();
+              } catch {
+                text = "";
+              }
+            }
+            if (aborted) return;
             const dataLine =
               errorFrameFormat === "responses"
                 ? buildResponsesErrorDataLine(text, {
