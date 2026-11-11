@@ -815,7 +815,8 @@
       "tests/unit/failure-window-penalty.test.ts",
       "tests/unit/tier-spillover.test.ts",
       "tests/unit/oauth-session-cap.test.ts",
-      "tests/unit/connection-model-mapping.test.ts"
+      "tests/unit/connection-model-mapping.test.ts",
+      "tests/unit/monthly-quota-text-cooldown.test.ts"
     ],
     "nodeArgs": [
       "--import",
