@@ -146,6 +146,7 @@ test("GET projects the same scoped Codex quota observations used by routing", as
     },
   });
 
+  const cacheWriteStartedAt = Date.now();
   quotaCache.setQuotaCache(codex.id, "codex", {
     session: { remainingPercentage: 50, resetAt: resetAt5h },
     weekly: { remainingPercentage: 50, resetAt: resetAt7d },
@@ -156,6 +157,7 @@ test("GET projects the same scoped Codex quota observations used by routing", as
     gpt_5_3_codex_spark_session: { remainingPercentage: 60, resetAt: resetAt5h },
     gpt_5_3_codex_spark_weekly: { remainingPercentage: 40, resetAt: resetAt7d },
   });
+  const cacheWriteFinishedAt = Date.now();
 
   const routing = auth.evaluateQuotaLimitPolicy(
     "codex",
@@ -224,6 +226,16 @@ test("GET projects the same scoped Codex quota observations used by routing", as
     resetAt: resetAt7d,
     usedPercentage: 60,
   });
-  assert.ok(general.quota.observedAt);
-  assert.equal(general.quota.observedAt, spark.quota.observedAt);
+  // Each cached scope is observed independently. A millisecond elapsed between
+  // the writes is valid, so assert both observations belong to this write window
+  // instead of requiring byte-identical ISO timestamps.
+  for (const child of [general, spark]) {
+    assert.ok(child.quota.observedAt);
+    const observedAt = Date.parse(child.quota.observedAt);
+    assert.ok(Number.isFinite(observedAt));
+    assert.ok(
+      observedAt >= cacheWriteStartedAt && observedAt <= cacheWriteFinishedAt,
+      `unexpected cache observation time: ${child.quota.observedAt}`
+    );
+  }
 });
