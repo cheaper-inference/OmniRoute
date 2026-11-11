@@ -374,16 +374,25 @@ Tables created across the migrations (123 total):
 
 ### 3.3 `src/domain/` — Domain layer
 
-Pure business logic, no I/O. Imported by routes and handlers.
+Domain services and evaluation contracts. Some modules are called by the live
+request path; others remain standalone contracts. Do not assume this entire directory
+is free of I/O or that changing every module affects production routing.
+
+The live policy surfaces are `src/shared/utils/apiKeyPolicy.ts` and
+`src/sse/handlers/chat/resolvedModelPolicy.ts`. Live combo handling and target
+resolution use `open-sse/services/combo.ts`. The tested `policyEngine.ts` and
+`comboResolver.ts` contracts, together with `src/lib/container.ts`, are not the
+wiring of the inspected chat request path. Keep them separate from those active
+surfaces when planning a routing change.
 
 | File                                       | Purpose                                           |
 | ------------------------------------------ | ------------------------------------------------- |
-| `policyEngine.ts`                          | Top-level policy resolver                         |
+| `policyEngine.ts`                          | Reserved policy-evaluation contract               |
 | `fallbackPolicy.ts`                        | Fallback decision tree                            |
 | `costRules.ts`                             | Cost calculation rules                            |
 | `lockoutPolicy.ts`                         | Model lockout decisions                           |
 | `tagRouter.ts`                             | Tag-based routing                                 |
-| `comboResolver.ts`                         | Combo resolution from request → target list       |
+| `comboResolver.ts`                         | Reserved combo-selection contract                 |
 | `connectionModelRules.ts`                  | Per-connection model filters                      |
 | `modelAvailability.ts`                     | Model availability check                          |
 | `degradation.ts`                           | Degraded-mode transitions                         |
@@ -715,13 +724,14 @@ Client request
      CORS preflight check
      Zod validation (chatCompletionsSchema in shared/validation/schemas.ts)
      Auth (extractApiKey + isValidApiKey OR requireManagementAuth)
-     Policy engine (src/server/authz/pipeline.ts)
+     Route authorization (src/server/authz/pipeline.ts)
+     API-key policy (src/shared/utils/apiKeyPolicy.ts; enforced on the selected path)
      Guardrails (PII masker, prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
      Cache check (semantic + read cache)
      Rate limit (rateLimitManager, accountSemaphore)
      Combo routing (if model resolves to a combo)
-       comboResolver → loop per target → handleSingleModel()
+       resolveComboTargets (open-sse/services/combo.ts) → per-target dispatch
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
        fetch upstream → retry/backoff via accountFallback
