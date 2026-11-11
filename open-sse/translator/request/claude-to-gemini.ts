@@ -69,7 +69,7 @@ function urlImagePart(url) {
  * Without this case the block was dropped in user turns, so an attached PDF never
  * reached the model.
  */
-function documentPart(block) {
+function documentPart(block): { inlineData?: unknown; fileData?: unknown; text?: string } | null {
   const source = block?.source;
   if (source?.type === "base64") return base64DocumentPart(source);
   if (source?.type === "url") return urlDocumentPart(source);
