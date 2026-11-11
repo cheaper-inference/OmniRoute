@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Päivitä",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Kaikki tämän välimuistin merkinnät poistetaan. Tätä ei voi perua.",
     "memoryEntries": "Muistissa olevat merkinnät",
     "memoryEntriesSub": "Muistissa oleva LRU",
     "dbEntries": "Tietokantamerkinnät",
