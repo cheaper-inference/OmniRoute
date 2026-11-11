@@ -78,7 +78,8 @@ export async function deleteFromTableBeforeInBatches(
   }
   if (!tableExists(target.table)) return 0;
 
-  const statement = getDbInstance().prepare(
+  const db = getDbInstance();
+  const statement = db.prepare(
     `DELETE FROM ${target.table}
      WHERE rowid IN (
        SELECT rowid FROM ${target.table}
@@ -86,11 +87,30 @@ export async function deleteFromTableBeforeInBatches(
        LIMIT ?
      )`
   );
+  // call_logs rows point at body files on disk. Pick the batch first, delete exactly those
+  // rowids, then remove their files: an idle gateway no longer keeps expired bodies until the
+  // request-driven orphan scanner finds them. No ORDER BY, so the pick costs what the delete did.
+  const pickBatch =
+    target.table === "call_logs"
+      ? db.prepare<{ rowid: number; artifact_relpath: string | null }>(
+          `SELECT rowid, artifact_relpath FROM call_logs WHERE ${target.column} < ? LIMIT ?`
+        )
+      : null;
+  const removePicked = db.prepare(
+    `DELETE FROM ${target.table} WHERE ${target.column} < ? AND rowid IN (SELECT value FROM json_each(?))`
+  );
   const cutoff = cutoffValue(target, cutoffIso);
   let deleted = 0;
 
   while (true) {
-    const batch = statement.run(cutoff, batchSize).changes;
+    let batch: number;
+    if (pickBatch) {
+      const rows = pickBatch.all(cutoff, batchSize);
+      batch = removePicked.run(cutoff, JSON.stringify(rows.map((row) => row.rowid))).changes;
+      for (const row of rows) deleteCallArtifact(row.artifact_relpath);
+    } else {
+      batch = statement.run(cutoff, batchSize).changes;
+    }
     deleted += batch;
     if (options.progress) options.progress.deleted += batch;
     if (batch < batchSize) return deleted;
