@@ -12,7 +12,7 @@
  */
 
 import { normalizePayloadForLog } from "@/lib/logPayloads";
-import { extractSSEErrorMessage } from "../sseParser.ts";
+import { extractSSEErrorFrame } from "../sseParser.ts";
 import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
 import { parseJsonDocumentBehindEventStream } from "./nonStreamingJsonDocument.ts";
 import { isTruncatedStreamBody } from "../sseParser/truncation.ts";
@@ -48,6 +48,8 @@ export type NonStreamingParseResult =
   | {
       kind: "invalid_sse";
       message: string;
+      /** HTTP status (400-599) the upstream error frame carried; absent means 502. */
+      status?: number;
       looksLikeSSE: true;
       normalizedProviderPayload: unknown;
     }
@@ -123,11 +125,13 @@ function parseBufferedEventStream(
     // failure with an error-only chunk (`data: {"error":{"message":"Devin CLI not found..."}}`)
     // that carries no `choices`. Surface that real, sanitized message instead of the generic 502
     // so the actionable error is not swallowed (#3324).
-    const surfacedSseError = extractSSEErrorMessage(streamPayload);
-    const invalidSseMessage = surfacedSseError || "Invalid SSE response for non-streaming request";
+    const surfacedSseError = extractSSEErrorFrame(streamPayload);
+    const invalidSseMessage =
+      surfacedSseError?.message || "Invalid SSE response for non-streaming request";
     return {
       kind: "invalid_sse",
       message: invalidSseMessage,
+      status: surfacedSseError?.status,
       looksLikeSSE: true,
       normalizedProviderPayload,
     };

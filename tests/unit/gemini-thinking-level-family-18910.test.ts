@@ -70,14 +70,15 @@ test("legacy models keep the numeric off-switch for reasoning_effort none", () =
   }
 });
 
-test("gemini-3.8-flash-high reasoning_effort high still emits only thinkingLevel high", () => {
+test("gemini-3.8-flash-high reasoning_effort high emits thinkingLevel high, no numeric budget", () => {
   const tc = openaiThinking("gemini-3.8-flash-high", {
     max_tokens: 65536,
     reasoning_effort: "high",
   });
-  assert.deepEqual(tc, { thinkingLevel: "high" });
+  // includeThoughts defaults to true on the thinking-level path (#19302).
+  assert.deepEqual(tc, { thinkingLevel: "high", includeThoughts: true });
+  assert.equal(tc?.includeThoughts, true);
   assert.equal(tc?.thinkingBudget, undefined);
-  assert.equal(tc?.includeThoughts, undefined);
 });
 
 test("gemini-3.1-pro thinking.budget_tokens 5000 keeps the base budget mapping", () => {
@@ -128,7 +129,7 @@ test("future Gemini majors 5/6/10 also send thinkingLevel low for none", () => {
 
 test("gemini-4-argon keeps thinkingLevel high for effort high", () => {
   const tc = openaiThinking("gemini-4-argon", { max_tokens: 65536, reasoning_effort: "high" });
-  assert.deepEqual(tc, { thinkingLevel: "high" });
+  assert.deepEqual(tc, { thinkingLevel: "high", includeThoughts: true });
 });
 
 test("gemini-4-argon thinking.budget_tokens 0 is low, 24576 is high", () => {
@@ -141,7 +142,7 @@ test("gemini-4-argon thinking.budget_tokens 0 is low, 24576 is high", () => {
     max_tokens: 65536,
     thinking: { type: "enabled", budget_tokens: 24576 },
   });
-  assert.deepEqual(high, { thinkingLevel: "high" });
+  assert.deepEqual(high, { thinkingLevel: "high", includeThoughts: true });
 });
 
 test("Claude path sends thinkingLevel low for gemini-4-argon budget_tokens 0", () => {

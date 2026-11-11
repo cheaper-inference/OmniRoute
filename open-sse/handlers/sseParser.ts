@@ -29,6 +29,26 @@ import {
  * to the normal parsers).
  */
 export function extractSSEErrorMessage(rawSSE: unknown): string | null {
+  return extractSSEErrorFrame(rawSSE)?.message ?? null;
+}
+
+/** An HTTP error status carried by an SSE error frame: `error.status`, else a numeric `error.code`. */
+function frameErrorStatus(err: unknown): number | undefined {
+  if (!err || typeof err !== "object" || Array.isArray(err)) return undefined;
+  const { status, code } = err as Record<string, unknown>;
+  for (const value of [status, code]) {
+    if (typeof value === "number" && Number.isInteger(value) && value >= 400 && value <= 599) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Like {@link extractSSEErrorMessage}, but also returns the frame's own HTTP status (400-599)
+ * when it has one, so a 429 inside an error frame keeps its class for fallback and client retry.
+ */
+export function extractSSEErrorFrame(rawSSE: unknown): { message: string; status?: number } | null {
   const lines = String(rawSSE || "").split("\n");
 
   for (const line of lines) {
@@ -69,7 +89,7 @@ export function extractSSEErrorMessage(rawSSE: unknown): string | null {
     }
 
     const sanitized = sanitizeErrorMessage(message);
-    if (sanitized) return sanitized;
+    if (sanitized) return { message: sanitized, status: frameErrorStatus(err) };
   }
 
   return null;
