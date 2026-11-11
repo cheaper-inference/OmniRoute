@@ -32,7 +32,8 @@ const BIG_MARKER = "[inline image: image/png, 600000 bytes, 800000 base64 chars]
 function logEntry(id: string, requestBody: unknown, pipelinePayloads?: unknown) {
   return {
     id,
-    timestamp: "2026-03-30T12:34:56.789Z",
+    // This fixture tests image storage, so its record must be inside retention.
+    timestamp: new Date().toISOString(),
     method: "POST",
     path: "/v1/chat/completions",
     status: 200,
@@ -60,6 +61,8 @@ test("a large inline screenshot no longer erases the request text from the call 
   };
 
   await callLogs.saveCallLog(logEntry("img_big", requestBody));
+  // Exercise the same cleanup that may run between persistence and the detail read.
+  callLogs.rotateCallLogs();
   const detail = await callLogs.getCallLogById("img_big");
 
   const content = (detail?.requestBody as typeof requestBody).messages[0].content;
@@ -80,6 +83,8 @@ test("the pipeline copy keeps the image, so a continued Responses turn can repla
       }
     )
   );
+  // Exercise the same cleanup that may run between persistence and the detail read.
+  callLogs.rotateCallLogs();
   const detail = await callLogs.getCallLogById("img_pipeline");
 
   const stored = detail?.pipelinePayloads?.clientRawRequest as typeof raw;
