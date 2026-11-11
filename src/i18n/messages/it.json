@@ -11923,7 +11923,9 @@
       "openConversation": "Apri conversazione {id}",
       "omittedHttpAttempts": "{count} invii HTTP non conservati",
       "noHttpResponse": "Nessuna risposta HTTP osservata",
-      "transportError": "Errore di trasporto"
+      "transportError": "Errore di trasporto",
+      "tabPayloads": "Payload",
+      "tabOverview": "Panoramica"
     },
     "tableLabel": "Log delle richieste",
     "throughputPostFirstToken": "Dopo il primo token",

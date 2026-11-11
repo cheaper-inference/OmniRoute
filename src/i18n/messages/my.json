@@ -11923,7 +11923,9 @@
       "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်",
       "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
       "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
-      "transportError": "ပို့ဆောင်မှု အမှား"
+      "transportError": "ပို့ဆောင်မှု အမှား",
+      "tabPayloads": "Payload များ",
+      "tabOverview": "ခြုံငုံသုံးသပ်ချက်"
     },
     "tableLabel": "တောင်းဆိုမှုမှတ်တမ်းများ",
     "throughputPostFirstToken": "ပထမတိုကင် နောက်ပိုင်း",

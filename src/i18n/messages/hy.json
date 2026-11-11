@@ -11923,7 +11923,9 @@
       "openConversation": "Բացել {id} զրույցը",
       "omittedHttpAttempts": "{count} HTTP ուղարկումներ չեն պահպանվել",
       "noHttpResponse": "HTTP պատասխան չի դիտարկվել",
-      "transportError": "Փոխանցման սխալ"
+      "transportError": "Փոխանցման սխալ",
+      "tabPayloads": "Օգտակար բեռներ",
+      "tabOverview": "Ընդհանուր ակնարկ"
     },
     "tableLabel": "Հարցումների մատյաններ",
     "throughputPostFirstToken": "Առաջին թոքենից հետո",

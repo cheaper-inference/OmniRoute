@@ -11923,7 +11923,9 @@
       "openConversation": "Відкрити розмову {id}",
       "omittedHttpAttempts": "{count} надсилань HTTP не збережено",
       "noHttpResponse": "Відповідь HTTP не спостерігалася",
-      "transportError": "Помилка транспорту"
+      "transportError": "Помилка транспорту",
+      "tabPayloads": "Дані",
+      "tabOverview": "Огляд"
     },
     "tableLabel": "Журнали запитів",
     "throughputPostFirstToken": "Після першого токена",

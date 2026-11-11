@@ -11923,7 +11923,9 @@
       "openConversation": "{id} संभाषण उघडा",
       "omittedHttpAttempts": "{count} HTTP प्रेषणे जतन केलेली नाहीत",
       "noHttpResponse": "कोणताही HTTP प्रतिसाद दिसून आलेला नाही",
-      "transportError": "वाहतूक त्रुटी"
+      "transportError": "वाहतूक त्रुटी",
+      "tabPayloads": "पेलोड्स",
+      "tabOverview": "आढावा"
     },
     "tableLabel": "विनंती लॉग",
     "throughputPostFirstToken": "पहिल्या टोकननंतर",

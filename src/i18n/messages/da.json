@@ -11923,7 +11923,9 @@
       "openConversation": "Åbn samtale {id}",
       "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
       "noHttpResponse": "Intet HTTP-svar blev observeret",
-      "transportError": "Transportfejl"
+      "transportError": "Transportfejl",
+      "tabPayloads": "Nyttelaster",
+      "tabOverview": "Oversigt"
     },
     "tableLabel": "Anmodningslogfiler",
     "throughputPostFirstToken": "Efter første token",

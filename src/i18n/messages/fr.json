@@ -11923,7 +11923,9 @@
       "openConversation": "Ouvrir la conversation {id}",
       "omittedHttpAttempts": "{count} envois HTTP non conservés",
       "noHttpResponse": "Aucune réponse HTTP observée",
-      "transportError": "Erreur de transport"
+      "transportError": "Erreur de transport",
+      "tabPayloads": "Charges utiles",
+      "tabOverview": "Aperçu"
     },
     "tableLabel": "Journaux des requêtes",
     "throughputPostFirstToken": "Après le premier token",

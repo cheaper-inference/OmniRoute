@@ -11923,7 +11923,9 @@
       "openConversation": "Buɗe tattaunawa {id}",
       "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
       "noHttpResponse": "Ba a lura da martanin HTTP ba",
-      "transportError": "Kuskuren jigila"
+      "transportError": "Kuskuren jigila",
+      "tabPayloads": "Bayanan da aka aika",
+      "tabOverview": "Bayyani"
     },
     "tableLabel": "Rajistocin buƙatu",
     "throughputPostFirstToken": "Bayan farkon token",

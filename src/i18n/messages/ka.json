@@ -11923,7 +11923,9 @@
       "openConversation": "საუბრის გახსნა: {id}",
       "omittedHttpAttempts": "{count} HTTP გაგზავნა არ შენახულა",
       "noHttpResponse": "HTTP პასუხი არ დაფიქსირებულა",
-      "transportError": "გადაცემის შეცდომა"
+      "transportError": "გადაცემის შეცდომა",
+      "tabPayloads": "მონაცემები",
+      "tabOverview": "მიმოხილვა"
     },
     "tableLabel": "მოთხოვნების ჟურნალები",
     "throughputPostFirstToken": "პირველი ტოკენის შემდგომი",

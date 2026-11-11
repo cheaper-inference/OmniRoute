@@ -11923,7 +11923,9 @@
       "openConversation": "{id} സംഭാഷണം തുറക്കുക",
       "omittedHttpAttempts": "{count} HTTP അയയ്ക്കലുകൾ സൂക്ഷിച്ചിട്ടില്ല",
       "noHttpResponse": "HTTP പ്രതികരണം നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല",
-      "transportError": "ഗതാഗത പിശക്"
+      "transportError": "ഗതാഗത പിശക്",
+      "tabPayloads": "പേലോഡുകൾ",
+      "tabOverview": "അവലോകനം"
     },
     "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ",
     "throughputPostFirstToken": "ആദ്യ ടോക്കണിന് ശേഷം",

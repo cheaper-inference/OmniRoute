@@ -11923,7 +11923,9 @@
       "openConversation": "Fungua mazungumzo {id}",
       "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
       "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
-      "transportError": "Hitilafu ya usafirishaji"
+      "transportError": "Hitilafu ya usafirishaji",
+      "tabPayloads": "Data za maombi",
+      "tabOverview": "Muhtasari"
     },
     "tableLabel": "Kumbukumbu za maombi",
     "throughputPostFirstToken": "Baada ya tokeni ya kwanza",

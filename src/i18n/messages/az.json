@@ -11923,7 +11923,9 @@
       "openConversation": "{id} söhbətini aç",
       "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
       "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
-      "transportError": "Nəqliyyat xətası"
+      "transportError": "Nəqliyyat xətası",
+      "tabPayloads": "Faydalı yüklər",
+      "tabOverview": "Ümumi baxış"
     },
     "tableLabel": "Sorğu jurnalları",
     "throughputPostFirstToken": "İlk tokendən sonra",

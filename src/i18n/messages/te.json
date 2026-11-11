@@ -11923,7 +11923,9 @@
       "openConversation": "{id} సంభాషణను తెరవండి",
       "omittedHttpAttempts": "{count} HTTP పంపకాలు నిల్వ చేయబడలేదు",
       "noHttpResponse": "HTTP ప్రతిస్పందన గమనించబడలేదు",
-      "transportError": "రవాణా లోపం"
+      "transportError": "రవాణా లోపం",
+      "tabPayloads": "పేలోడ్లు",
+      "tabOverview": "అవలోకనం"
     },
     "tableLabel": "అభ్యర్థన లాగ్లు",
     "throughputPostFirstToken": "మొదటి టోకెన్ తర్వాత",

@@ -11923,7 +11923,9 @@
       "openConversation": "Buka perbualan {id}",
       "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
       "noHttpResponse": "Tiada respons HTTP diperhatikan",
-      "transportError": "Ralat pengangkutan"
+      "transportError": "Ralat pengangkutan",
+      "tabPayloads": "Muatan",
+      "tabOverview": "Gambaran keseluruhan"
     },
     "tableLabel": "Log permintaan",
     "throughputPostFirstToken": "Selepas-token-pertama",

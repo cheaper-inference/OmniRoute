@@ -11923,7 +11923,9 @@
       "openConversation": "कुराकानी {id} खोल्नुहोस्",
       "omittedHttpAttempts": "{count} HTTP पठाइहरू सुरक्षित राखिएनन्",
       "noHttpResponse": "कुनै HTTP प्रतिक्रिया देखिएन",
-      "transportError": "परिवहन त्रुटि"
+      "transportError": "परिवहन त्रुटि",
+      "tabPayloads": "पेलोडहरू",
+      "tabOverview": "अवलोकन"
     },
     "tableLabel": "अनुरोध लगहरू",
     "throughputPostFirstToken": "पहिलो टोकन पछिको",

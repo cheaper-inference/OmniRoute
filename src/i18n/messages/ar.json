@@ -11923,7 +11923,9 @@
       "openConversation": "فتح المحادثة {id}",
       "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
       "noHttpResponse": "لم تُرصد أي استجابة HTTP",
-      "transportError": "خطأ في النقل"
+      "transportError": "خطأ في النقل",
+      "tabPayloads": "الحمولات",
+      "tabOverview": "نظرة عامة"
     },
     "tableLabel": "سجلات الطلبات",
     "throughputPostFirstToken": "ما بعد الرمز الأول",

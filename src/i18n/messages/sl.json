@@ -11923,7 +11923,9 @@
       "openConversation": "Odpri pogovor {id}",
       "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
       "noHttpResponse": "Odgovor HTTP ni bil zaznan",
-      "transportError": "Napaka prenosa"
+      "transportError": "Napaka prenosa",
+      "tabPayloads": "Koristne vsebine",
+      "tabOverview": "Pregled"
     },
     "tableLabel": "Dnevniki zahtev",
     "throughputPostFirstToken": "Po prvem tokenu",

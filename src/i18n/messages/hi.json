@@ -11923,7 +11923,9 @@
       "openConversation": "बातचीत {id} खोलें",
       "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
       "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
-      "transportError": "परिवहन त्रुटि"
+      "transportError": "परिवहन त्रुटि",
+      "tabPayloads": "पेलोड",
+      "tabOverview": "सिंहावलोकन"
     },
     "tableLabel": "अनुरोध लॉग",
     "throughputPostFirstToken": "पहले टोकन के बाद",

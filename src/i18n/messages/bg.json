@@ -11923,7 +11923,9 @@
       "openConversation": "Отваряне на разговор {id}",
       "omittedHttpAttempts": "{count} HTTP изпращания не са запазени",
       "noHttpResponse": "Не е наблюдаван HTTP отговор",
-      "transportError": "Грешка при преноса"
+      "transportError": "Грешка при преноса",
+      "tabPayloads": "Данни",
+      "tabOverview": "Преглед"
     },
     "tableLabel": "Регистри на заявките",
     "throughputPostFirstToken": "След първия токен",

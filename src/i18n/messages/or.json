@@ -11923,7 +11923,9 @@
       "openConversation": "ବାର୍ତ୍ତାଳାପ {id} ଖୋଲନ୍ତୁ",
       "omittedHttpAttempts": "{count} HTTP ପ୍ରେରଣ ସଂରକ୍ଷିତ ହୋଇନାହିଁ",
       "noHttpResponse": "କୌଣସି HTTP ପ୍ରତିକ୍ରିୟା ଦେଖାଯାଇନାହିଁ",
-      "transportError": "ପରିବହନ ତ୍ରୁଟି"
+      "transportError": "ପରିବହନ ତ୍ରୁଟି",
+      "tabPayloads": "ପେଲୋଡ୍ଗୁଡ଼ିକ",
+      "tabOverview": "ସାରାଂଶ"
     },
     "tableLabel": "ଅନୁରୋଧ ଲଗ୍ଗୁଡ଼ିକ",
     "throughputPostFirstToken": "ପ୍ରଥମ ଟୋକନ୍ ପରେ",

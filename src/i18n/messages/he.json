@@ -11923,7 +11923,9 @@
       "openConversation": "פתיחת השיחה {id}",
       "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
       "noHttpResponse": "לא נצפתה תגובת HTTP",
-      "transportError": "שגיאת תעבורה"
+      "transportError": "שגיאת תעבורה",
+      "tabPayloads": "מטענים",
+      "tabOverview": "סקירה כללית"
     },
     "tableLabel": "יומני בקשות",
     "throughputPostFirstToken": "לאחר הטוקן הראשון",

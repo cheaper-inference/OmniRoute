@@ -11923,7 +11923,9 @@
       "openConversation": "Konversation {id} öffnen",
       "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
       "noHttpResponse": "Keine HTTP-Antwort beobachtet",
-      "transportError": "Transportfehler"
+      "transportError": "Transportfehler",
+      "tabPayloads": "Nutzdaten",
+      "tabOverview": "Übersicht"
     },
     "tableLabel": "Anfrageprotokolle",
     "throughputPostFirstToken": "Nach erstem Token",

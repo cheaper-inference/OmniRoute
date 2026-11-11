@@ -11923,7 +11923,9 @@
       "openConversation": "ውይይት {id}ን ይክፈቱ",
       "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
       "noHttpResponse": "የHTTP ምላሽ አልታየም",
-      "transportError": "የማጓጓዣ ስህተት"
+      "transportError": "የማጓጓዣ ስህተት",
+      "tabPayloads": "የውሂብ ጭነቶች",
+      "tabOverview": "አጠቃላይ እይታ"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",

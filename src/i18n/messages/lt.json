@@ -11923,7 +11923,9 @@
       "openConversation": "Atidaryti pokalbį {id}",
       "omittedHttpAttempts": "{count} HTTP siuntimų neišsaugota",
       "noHttpResponse": "HTTP atsakymas nepastebėtas",
-      "transportError": "Perdavimo klaida"
+      "transportError": "Perdavimo klaida",
+      "tabPayloads": "Naudingosios apkrovos",
+      "tabOverview": "Apžvalga"
     },
     "tableLabel": "Užklausų žurnalai",
     "throughputPostFirstToken": "Po pirmojo tokeno",

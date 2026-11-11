@@ -11923,7 +11923,9 @@
       "openConversation": "વાતચીત {id} ખોલો",
       "omittedHttpAttempts": "{count} HTTP મોકલણો સાચવવામાં આવી નથી",
       "noHttpResponse": "કોઈ HTTP પ્રતિસાદ જોવા મળ્યો નથી",
-      "transportError": "પરિવહન ભૂલ"
+      "transportError": "પરિવહન ભૂલ",
+      "tabPayloads": "પેલોડ્સ",
+      "tabOverview": "વિહંગાવલોકન"
     },
     "tableLabel": "વિનંતી લૉગ્સ",
     "throughputPostFirstToken": "પ્રથમ ટોકન પછી",

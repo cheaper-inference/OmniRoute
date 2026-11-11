@@ -11923,7 +11923,9 @@
       "openConversation": "گفتگو {id} کھولیں",
       "omittedHttpAttempts": "{count} HTTP ارسال محفوظ نہیں کیے گئے",
       "noHttpResponse": "کوئی HTTP جواب مشاہدے میں نہیں آیا",
-      "transportError": "نقل و حمل کی خرابی"
+      "transportError": "نقل و حمل کی خرابی",
+      "tabPayloads": "پے لوڈز",
+      "tabOverview": "جائزہ"
     },
     "tableLabel": "درخواست کے لاگز",
     "throughputPostFirstToken": "پہلے ٹوکن کے بعد",

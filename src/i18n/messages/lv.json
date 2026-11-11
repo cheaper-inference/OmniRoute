@@ -11923,7 +11923,9 @@
       "openConversation": "Atvērt sarunu {id}",
       "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
       "noHttpResponse": "HTTP atbilde nav novērota",
-      "transportError": "Pārsūtīšanas kļūda"
+      "transportError": "Pārsūtīšanas kļūda",
+      "tabPayloads": "Dati",
+      "tabOverview": "Pārskats"
     },
     "tableLabel": "Pieprasījumu žurnāli",
     "throughputPostFirstToken": "Pēc pirmā marķiera",

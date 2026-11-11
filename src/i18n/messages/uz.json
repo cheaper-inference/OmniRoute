@@ -11923,7 +11923,9 @@
       "openConversation": "{id} suhbatini ochish",
       "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
       "noHttpResponse": "HTTP javobi kuzatilmadi",
-      "transportError": "Uzatish xatosi"
+      "transportError": "Uzatish xatosi",
+      "tabPayloads": "Yuklamalar",
+      "tabOverview": "Umumiy ko‘rinish"
     },
     "tableLabel": "Soʻrov jurnallari",
     "throughputPostFirstToken": "Birinchi tokendan keyin",

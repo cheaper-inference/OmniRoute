@@ -11923,7 +11923,9 @@
       "openConversation": "{id} உரையாடலைத் திறக்கவும்",
       "omittedHttpAttempts": "{count} HTTP அனுப்புதல்கள் தக்கவைக்கப்படவில்லை",
       "noHttpResponse": "HTTP பதில் எதுவும் காணப்படவில்லை",
-      "transportError": "பரிமாற்றப் பிழை"
+      "transportError": "பரிமாற்றப் பிழை",
+      "tabPayloads": "பேலோடுகள்",
+      "tabOverview": "மேலோட்டம்"
     },
     "tableLabel": "கோரிக்கைப் பதிவுகள்",
     "throughputPostFirstToken": "முதல் டோக்கனுக்குப் பின்",

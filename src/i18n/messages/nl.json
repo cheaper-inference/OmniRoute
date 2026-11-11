@@ -11923,7 +11923,9 @@
       "openConversation": "Gesprek {id} openen",
       "omittedHttpAttempts": "{count} HTTP-verzendingen niet bewaard",
       "noHttpResponse": "Geen HTTP-antwoord waargenomen",
-      "transportError": "Transportfout"
+      "transportError": "Transportfout",
+      "tabPayloads": "Payloads",
+      "tabOverview": "Overzicht"
     },
     "tableLabel": "Aanvraaglogboeken",
     "throughputPostFirstToken": "Na eerste token",

@@ -11923,7 +11923,9 @@
       "openConversation": "Deschide conversația {id}",
       "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
       "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
-      "transportError": "Eroare de transport"
+      "transportError": "Eroare de transport",
+      "tabPayloads": "Payloaduri",
+      "tabOverview": "Prezentare generală"
     },
     "tableLabel": "Jurnale de solicitări",
     "throughputPostFirstToken": "După primul token",

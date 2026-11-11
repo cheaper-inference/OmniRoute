@@ -11923,7 +11923,9 @@
       "openConversation": "Άνοιγμα συνομιλίας {id}",
       "omittedHttpAttempts": "Δεν διατηρήθηκαν {count} αποστολές HTTP",
       "noHttpResponse": "Δεν παρατηρήθηκε απόκριση HTTP",
-      "transportError": "Σφάλμα μεταφοράς"
+      "transportError": "Σφάλμα μεταφοράς",
+      "tabPayloads": "Ωφέλιμα φορτία",
+      "tabOverview": "Επισκόπηση"
     },
     "tableLabel": "Αρχεία καταγραφής αιτημάτων",
     "throughputPostFirstToken": "Μετά το πρώτο token",

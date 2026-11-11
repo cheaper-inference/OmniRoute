@@ -11923,7 +11923,9 @@
       "openConversation": "ਗੱਲਬਾਤ {id} ਖੋਲ੍ਹੋ",
       "omittedHttpAttempts": "{count} HTTP ਭੇਜਣ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ",
       "noHttpResponse": "ਕੋਈ HTTP ਜਵਾਬ ਦੇਖਿਆ ਨਹੀਂ ਗਿਆ",
-      "transportError": "ਆਵਾਜਾਈ ਗਲਤੀ"
+      "transportError": "ਆਵਾਜਾਈ ਗਲਤੀ",
+      "tabPayloads": "ਪੇਲੋਡ",
+      "tabOverview": "ਸੰਖੇਪ ਜਾਣਕਾਰੀ"
     },
     "tableLabel": "ਬੇਨਤੀ ਲੌਗ",
     "throughputPostFirstToken": "ਪਹਿਲੇ ਟੋਕਨ ਤੋਂ ਬਾਅਦ",

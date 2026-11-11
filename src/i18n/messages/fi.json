@@ -11923,7 +11923,9 @@
       "openConversation": "Avaa keskustelu {id}",
       "omittedHttpAttempts": "{count} HTTP-lähetystä ei säilytetty",
       "noHttpResponse": "HTTP-vastausta ei havaittu",
-      "transportError": "Siirtovirhe"
+      "transportError": "Siirtovirhe",
+      "tabPayloads": "Hyötykuormat",
+      "tabOverview": "Yleiskatsaus"
     },
     "tableLabel": "Pyyntölokit",
     "throughputPostFirstToken": "Ensimmäisen tokenin jälkeen",

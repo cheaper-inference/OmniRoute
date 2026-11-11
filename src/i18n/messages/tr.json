@@ -11923,7 +11923,9 @@
       "openConversation": "{id} konuşmasını aç",
       "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
       "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
-      "transportError": "Aktarım hatası"
+      "transportError": "Aktarım hatası",
+      "tabPayloads": "Yükler",
+      "tabOverview": "Genel Bakış"
     },
     "tableLabel": "İstek günlükleri",
     "throughputPostFirstToken": "İlk token sonrası",

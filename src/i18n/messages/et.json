@@ -11923,7 +11923,9 @@
       "openConversation": "Ava vestlus {id}",
       "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
       "noHttpResponse": "HTTP vastust ei täheldatud",
-      "transportError": "Transpordiviga"
+      "transportError": "Transpordiviga",
+      "tabPayloads": "Andmekoormused",
+      "tabOverview": "Ülevaade"
     },
     "tableLabel": "Päringulogid",
     "throughputPostFirstToken": "Pärast esimest tokenit",

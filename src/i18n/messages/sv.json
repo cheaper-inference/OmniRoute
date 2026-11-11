@@ -11923,7 +11923,9 @@
       "openConversation": "Öppna konversation {id}",
       "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
       "noHttpResponse": "Inget HTTP-svar observerades",
-      "transportError": "Transportfel"
+      "transportError": "Transportfel",
+      "tabPayloads": "Nyttolaster",
+      "tabOverview": "Översikt"
     },
     "tableLabel": "Förfrågningsloggar",
     "throughputPostFirstToken": "Efter första token",

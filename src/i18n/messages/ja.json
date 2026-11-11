@@ -11923,7 +11923,9 @@
       "openConversation": "会話 {id} を開く",
       "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
       "noHttpResponse": "HTTP 応答は確認されていません",
-      "transportError": "トランスポートエラー"
+      "transportError": "トランスポートエラー",
+      "tabPayloads": "ペイロード",
+      "tabOverview": "概要"
     },
     "tableLabel": "リクエストログ",
     "throughputPostFirstToken": "初回トークン以降",
