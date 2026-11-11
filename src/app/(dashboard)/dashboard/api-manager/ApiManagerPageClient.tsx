@@ -1148,6 +1148,7 @@ export default function ApiManagerPageClient() {
           {/* Template Picker */}
           <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
             <Select
+              native
               label={t("templatePickerLabel")}
               value={selectedTemplateId}
               onChange={(e) => void handleSelectTemplateInCreateModal(e.target.value)}
