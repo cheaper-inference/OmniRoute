@@ -373,52 +373,55 @@ function workingSetBytes(cgroup: ResourceSignals["cgroup"]): number | null {
   return cgroup.currentBytes - cgroup.fileBytes;
 }
 
-/**
- * memory.events.high also counts short reclaim stalls on clean file cache.
- * Treat them as advisory (high) rather than a global 503 only when the cache
- * dominates, the working set is comfortably below memory.high, and local
- * memory PSI confirms that reclaim is cheap. Missing/host-only PSI, a new
- * memory.max event, or a significant stall all preserve the critical guard.
- */
-function cacheDominatesWorkingSet(
-  currentBytes: number,
-  highBytes: number,
-  fileBytes: number,
-  recoveryRatio: number
-): boolean {
-  if (currentBytes <= 0 || highBytes <= 0 || fileBytes <= 0 || fileBytes > currentBytes) {
+type UsableCacheCgroup = ResourceSignals["cgroup"] & {
+  currentBytes: number;
+  highBytes: number;
+  fileBytes: number;
+  events: NonNullable<ResourceSignals["cgroup"]["events"]> & { max: number };
+};
+
+type CompleteCgroupPsi = NonNullable<ResourceSignals["psi"]> & {
+  someAvg10: number;
+  fullAvg10: number;
+};
+
+function hasUsableCacheCgroup(cgroup: ResourceSignals["cgroup"]): cgroup is UsableCacheCgroup {
+  const { currentBytes, highBytes, fileBytes, events } = cgroup;
+  if ([currentBytes, highBytes, fileBytes].some((value) => value == null || value <= 0)) {
     return false;
   }
-  return fileBytes >= currentBytes * 0.4 && currentBytes - fileBytes <= highBytes * recoveryRatio;
+  return fileBytes! <= currentBytes! && events?.max != null;
 }
 
+function hasCompleteCgroupPsi(psi: ResourceSignals["psi"]): psi is CompleteCgroupPsi {
+  return psi?.psiSource === "cgroup" && psi.someAvg10 != null && psi.fullAvg10 != null;
+}
+
+/**
+ * memory.events.high can be a short clean-cache reclaim rather than exhaustion.
+ * Only downgrade when the working set and *local* PSI confirm cheap reclaim;
+ * missing metrics and new memory.max events preserve the critical guard.
+ */
 function isCacheDominatedHigh(
   signals: ResourceSignals,
   thresholds: ResourcePressureThresholds,
   previousEvents: ThrottleCounters | null = null
 ): boolean {
-  const { currentBytes, highBytes, fileBytes, events } = signals.cgroup;
+  const cgroup = signals.cgroup;
   const psi = signals.psi;
-  if (
-    psiPressureDisabled() ||
-    currentBytes == null ||
-    highBytes == null ||
-    fileBytes == null ||
-    events?.max == null ||
-    psi?.psiSource !== "cgroup" ||
-    psi.someAvg10 == null ||
-    psi.fullAvg10 == null
-  ) {
+  if (psiPressureDisabled() || !hasUsableCacheCgroup(cgroup) || !hasCompleteCgroupPsi(psi)) {
     return false;
   }
+  const { currentBytes, highBytes, fileBytes } = cgroup;
   if (
-    !cacheDominatesWorkingSet(currentBytes, highBytes, fileBytes, thresholds.recoveryRatio) ||
+    fileBytes < currentBytes * 0.4 ||
+    currentBytes - fileBytes > highBytes * thresholds.recoveryRatio ||
     psi.someAvg10 > 1 ||
     psi.fullAvg10 > 1
   ) {
     return false;
   }
-  return previousEvents?.max == null || events.max <= previousEvents.max;
+  return previousEvents?.max == null || cgroup.events.max <= previousEvents.max;
 }
 
 function isRecovered(

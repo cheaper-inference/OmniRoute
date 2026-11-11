@@ -11981,6 +11981,7 @@
     "description": "Provayder sorğu keşinin səmərəliliyini və yerli semantik cavabların təkrar istifadəsini izləyin.",
     "refresh": "Yenilə",
     "clearAll": "Semantik keşi təmizlə",
+    "clearAllConfirm": "Bu keşdəki bütün qeydlər silinəcək. Bu əməliyyat geri qaytarıla bilməz.",
     "memoryEntries": "Yaddaşdakı qeydlər",
     "memoryEntriesSub": "Operativ yaddaşdakı LRU",
     "dbEntries": "Verilənlər bazasındakı qeydlər",

@@ -249,6 +249,7 @@
     "check:circular-deps": "node scripts/check/check-circular-deps.mjs",
     "check:mutation-ratchet": "node scripts/check/check-mutation-ratchet.mjs",
     "check:rtl-ratchet": "node scripts/check/check-rtl-ratchet.mjs",
+    "check:type-scale-ratchet": "node scripts/check/check-type-scale-ratchet.mjs",
     "check:licenses": "node scripts/check/check-licenses.mjs",
     "check:pr-evidence": "node scripts/check/check-pr-evidence.mjs",
     "check:vuln-ratchet": "node scripts/check/check-vuln-ratchet.mjs",
