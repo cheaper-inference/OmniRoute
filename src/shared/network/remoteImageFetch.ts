@@ -11,9 +11,5 @@ export {
   upstreamMediaErrorText,
   UPSTREAM_MEDIA_LIMITS,
   type RemoteImageFetchOptions,
-  type RemoteImageFetchResult,
-  type RemoteImageLookup,
-  type RemoteMediaFetchOptions,
   type RemoteMediaFetchResult,
-  type UpstreamMediaDownloadOptions,
 } from "../../../open-sse/utils/remoteMediaFetch.ts";

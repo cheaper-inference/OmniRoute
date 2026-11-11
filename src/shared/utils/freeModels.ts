@@ -165,6 +165,16 @@ function hasFreeBadgeVeto(provider: string, model: FreeBadgeCandidate): boolean 
   return resolveProviderId(provider) === "opencode-zen" || hasPayloadPaidEvidence(model);
 }
 
+/** Legacy display hints apply only after the provider and paid-evidence vetoes. */
+function hasLegacyFreeBadgeHint(model: FreeBadgeCandidate): boolean {
+  return (
+    Boolean(model.free) ||
+    model.isFree === true ||
+    model.id.endsWith(":free") ||
+    /\bgr[aá]tis\b|\bfree\b/i.test(model.name || "")
+  );
+}
+
 /** Feature flag that turns on the stricter badge rule (default off). */
 export const FREE_BADGE_STRICT_FLAG = "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER";
 
@@ -200,13 +210,7 @@ export function isModelFreeBadge(
     return isFreeModel(provider, candidate);
   }
   if (!options.strict) {
-    return (
-      Boolean(model.free) ||
-      model.isFree === true ||
-      model.id.endsWith(":free") ||
-      /\bgr[aá]tis\b|\bfree\b/i.test(model.name || "") ||
-      isFreeModel(provider, candidate)
-    );
+    return hasLegacyFreeBadgeHint(model) || isFreeModel(provider, candidate);
   }
   const explicit = model.isFree === true || model.free === true;
   if (explicit || isFreeModel(provider, candidate)) return true;

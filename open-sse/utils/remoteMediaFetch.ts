@@ -172,6 +172,26 @@ async function cancelBody(response: Response): Promise<void> {
   await response.body?.cancel().catch(() => {});
 }
 
+/** Validate this hop before selecting its direct or proxied transport. */
+async function selectRemoteMediaFetch(
+  url: URL,
+  options: RemoteMediaFetchOptions,
+  guard: OutboundUrlGuardMode,
+  lookup: RemoteImageLookup
+): Promise<typeof fetch> {
+  // A usable proxy owns DNS resolution. Direct connections keep the validated pin.
+  const proxied =
+    options.pinDirectOnly === true && !!resolveProxyForRequest(url.toString()).proxyUrl;
+  const addresses = await assertHostnameResolvesPublic(url, guard, lookup, !proxied);
+  return (
+    options.fetchImpl ??
+    pinnedFetchTestOverride ??
+    (options.pinDns === true && !proxied && addresses.length
+      ? createPinnedFetch(addresses[0].address, addresses[0].family)
+      : fetch)
+  );
+}
+
 /**
  * Follow redirects by hand, checking every hop, and return the first non-redirect response
  * without reading its body. A 3xx body is discarded before the next hop.
@@ -180,11 +200,6 @@ async function openRemoteMedia(
   input: string | URL,
   options: RemoteMediaFetchOptions
 ): Promise<{ response: Response; url: URL }> {
-  const injectedFetch = options.fetchImpl;
-  // Default off: production callers that need connection pinning opt in. This keeps
-  // globalThis.fetch mockable for image-generation tests and preserves the previous
-  // DNS pre-check behavior for non-embedding callers.
-  const pinDns = options.pinDns === true;
   const guard = options.guard ?? getProviderOutboundGuard();
   const maxRedirects = options.maxRedirects ?? DEFAULT_MAX_REDIRECTS;
   const signal = combineSignals(options.signal, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
@@ -195,19 +210,8 @@ async function openRemoteMedia(
     options.enforceHttps === true
   );
   for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
-    // DNS-rebinding guard: validate every hop's hostname against its resolved
-    // IPs before issuing the request (GHSA-cmhj-wh2f-9cgx).
-    // A proxy URL is what sends patched fetch down the proxied route: a context with no usable
-    // host has a source but no URL, and connects directly.
-    const proxied =
-      options.pinDirectOnly === true && !!resolveProxyForRequest(currentUrl.toString()).proxyUrl;
-    const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup, !proxied);
-    const fetchImpl =
-      injectedFetch ??
-      pinnedFetchTestOverride ??
-      (pinDns && !proxied && addresses.length
-        ? createPinnedFetch(addresses[0].address, addresses[0].family)
-        : fetch);
+    // Re-resolve and validate every redirect before selecting that hop's transport.
+    const fetchImpl = await selectRemoteMediaFetch(currentUrl, options, guard, lookup);
     const response = await fetchImpl(currentUrl.toString(), {
       method: "GET",
       redirect: "manual",
