@@ -110,7 +110,10 @@ export function validateTrivyIgnorePolicyShape(policy) {
       "The reviewed expiry must remain 2026-12-02T00:00:00Z"
     );
     requireCondition(
-      typeof entry.statement === "string" && entry.statement.includes(TRACKING_ISSUE),
+      typeof entry.statement === "string" &&
+        entry.statement
+          .split(/[\s()<>\[\]"'`]+/)
+          .some((reference) => reference.replace(/[.,;:!?]+$/, "") === TRACKING_ISSUE),
       "Every exception must retain the tracking issue #18765"
     );
   }

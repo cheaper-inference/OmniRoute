@@ -15,7 +15,7 @@ const baseSha = "2".repeat(40);
 
 function fixture(run) {
   mkdirSync(join(root, "_artifacts"), { recursive: true });
-  const dir = mkdtempSync(join(root, "_artifacts/eslint-measurement-"));
+  const dir = mkdtempSync(join(root, "_artifacts/eslint-measurement space ; $-"));
   try {
     for (const path of [
       "config/quality",
@@ -273,4 +273,12 @@ test("a failed metrics collection cannot feed old values into the ratchet", () =
   assert.equal(result.invoked, true);
   assert.equal(result.ratchetInvoked, false);
   assert.equal(result.report.checks.find((check) => check.id === "quality:ratchet").ok, false);
+});
+
+// The fixture's npx exits 91. Only the installed Node entrypoint may run.
+test("the observer runs installed ESLint without npx even with shell metacharacters in its path", () => {
+  const result = observe(JSON.stringify(report));
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.invoked, true);
+  assert.equal(result.report.checks.find((check) => check.id === "lint-errors").ok, true);
 });

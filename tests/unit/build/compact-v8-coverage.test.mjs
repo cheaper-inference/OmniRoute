@@ -315,15 +315,82 @@ test("reporting checks the original bytes after decompression", async (t) => {
   });
 });
 
-test("duplicate raw filenames from different shards cannot overwrite each other", async (t) => {
+test("same V8 filename on independent shards preserves every sample and c8 counter", async (t) => {
+  const options = await workspace(t);
+  const rawName = "coverage-4606-1794431026139-0.json";
+  for (const [index, count] of [1, 3].entries()) {
+    const input = join(options.dir, `runner-${index + 1}`);
+    const packed = join(options.dir, `packed-${index + 1}`);
+    await mkdir(input);
+    const data = minimal();
+    data.result[0].functions[0].ranges[0].count = count;
+    const bytes = JSON.stringify(data);
+    await writeFile(join(input, rawName), bytes);
+    // c8's flat input directory needs distinct names to retain both samples.
+    // Keep filename order with a deterministic numeric-shard tie break.
+    await writeFile(join(options.inputDirectory, `coverage-${index + 1}.json`), bytes);
+    await compactV8Coverage({
+      ...options,
+      inputDirectory: input,
+      outputDirectory: packed,
+      shard: `${index + 1}/2`,
+    });
+    await cp(packed, options.outputDirectory, { recursive: true });
+  }
+  const verify = { directory: options.outputDirectory, total: 2, candidateSha };
+  const verified = await verifyCoverageShards(verify);
+  assert.equal(verified.status, "PASS");
+  assert.equal(verified.inputFiles, 2, "independent samples must never be deduplicated");
+  const cleanEnv = { ...process.env };
+  delete cleanEnv.NODE_V8_COVERAGE;
+  runNode(
+    [
+      "node_modules/c8/bin/c8.js",
+      "report",
+      "--merge-async",
+      "--temp-directory",
+      options.inputDirectory,
+      "--reports-dir",
+      join(options.dir, "expected"),
+      "--reporter=json",
+      "--exclude=tests/**",
+      "--exclude=**/*.test.*",
+    ],
+    cleanEnv
+  );
+  await reportCoverageShards({
+    ...verify,
+    reportOptions: ["--reports-dir", join(options.dir, "actual"), "--reporter=json"],
+  });
+  const expected = JSON.parse(
+    await readFile(join(options.dir, "expected/coverage-final.json"), "utf8")
+  );
+  const actual = JSON.parse(
+    await readFile(join(options.dir, "actual/coverage-final.json"), "utf8")
+  );
+  assert.ok(Object.keys(expected).length, "the regression must cover actual project code");
+  assert.deepEqual(
+    actual,
+    expected,
+    "both shard samples must contribute to every Istanbul counter"
+  );
+});
+
+test("duplicate entries within one shard remain invalid", async (t) => {
   const options = await workspace(t);
   await writeFile(join(options.inputDirectory, "coverage.json"), JSON.stringify(minimal()));
-  await compactV8Coverage({ ...options, shard: "1/2" });
-  const second = join(options.dir, "duplicate");
-  await compactV8Coverage({ ...options, outputDirectory: second, shard: "2/2" });
-  await cp(second, options.outputDirectory, { recursive: true });
+  const manifest = await compactV8Coverage(options);
+  manifest.inputs.push({ ...manifest.inputs[0] });
+  manifest.inputFiles += 1;
+  manifest.inputBytes *= 2;
+  manifest.packedBytes *= 2;
+  await cp(
+    join(options.outputDirectory, "shard-1-of-1/coverage.json.gz"),
+    join(options.outputDirectory, "shard-1-of-1/unreferenced.json.gz")
+  );
+  await writeFile(join(options.outputDirectory, "manifest-1-of-1.json"), JSON.stringify(manifest));
   await assert.rejects(
-    verifyCoverageShards({ directory: options.outputDirectory, total: 2, candidateSha }),
+    verifyCoverageShards({ directory: options.outputDirectory, total: 1, candidateSha }),
     /Invalid or duplicate coverage input/
   );
 });

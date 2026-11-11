@@ -87,7 +87,7 @@ test("suites run hosted on the resolved commit and only outside push", () => {
   assert.equal(suites.needs, "resolve-target");
   assert.match(suites.if ?? "", /github\.event_name != 'push'/);
   const checkout = suites.steps?.find((s) => s.uses?.startsWith("actions/checkout@"));
-  assert.equal(checkout?.with?.ref, "${{ needs.resolve-target.outputs.sha }}");
+  assert.equal(checkout?.with?.ref, "${{ github.sha }}");
   const runtime = suites.steps?.find((s) => s.uses?.startsWith("actions/setup-node@"));
   assert.equal(runtime?.with?.["node-version"], "${{ needs.resolve-target.outputs.node-version }}");
   assert.match(workflow.jobs["resolve-target"].if ?? "", /github\.event_name != 'push'/);
@@ -139,7 +139,7 @@ test("main-green consumes hosted suites run on main's resolved commit", () => {
   const releaseMatrix = workflow.jobs.suites.strategy?.matrix;
   assert.deepEqual(hostedMatrixFromCi(ci), releaseMatrix);
   const checkout = suites.steps?.find((s) => s.uses?.startsWith("actions/checkout@"));
-  assert.equal(checkout?.with?.ref, "${{ needs.resolve-main.outputs.sha }}");
+  assert.equal(checkout?.with?.ref, "main");
   const runtime = suites.steps?.find((s) => s.uses?.startsWith("actions/setup-node@"));
   assert.equal(runtime?.with?.["node-version"], "${{ needs.resolve-main.outputs.node-version }}");
   const mainRuntime = (job.steps ?? []).find((s) => s.uses?.startsWith("actions/setup-node@"));

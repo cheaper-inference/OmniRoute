@@ -143,8 +143,9 @@ async function coverageInputs({ directory, total, candidateSha }) {
   if (entries.length !== total * 2)
     throw new Error("Missing or unexpected coverage shard manifests");
   const inputs = [];
-  const seen = new Set();
   for (let index = 1; index <= total; index++) {
+    // V8 filenames identify a process on one runner, not across independent runners.
+    const seen = new Set();
     const id = `${index}-of-${total}`;
     const manifestPath = resolve(dir, `manifest-${id}.json`);
     const dataDir = resolve(dir, `shard-${id}`);
@@ -188,11 +189,13 @@ async function coverageInputs({ directory, total, candidateSha }) {
       if (packed.length !== item.packedBytes || sha256(packed) !== item.packedSha256) {
         throw new Error(`Coverage hash mismatch: ${id}`);
       }
-      inputs.push({ ...item, file });
+      inputs.push({ ...item, file, shardIndex: index });
     }
   }
-  // Same filename order as c8 reading the flattened Linux artifact directory.
-  return inputs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  // Preserve c8 filename order, retaining every colliding sample in shard order.
+  return inputs.sort((a, b) =>
+    a.name < b.name ? -1 : a.name > b.name ? 1 : a.shardIndex - b.shardIndex
+  );
 }
 
 /** Admit all artifacts; failed-test artifacts use a separate workflow artifact prefix. */

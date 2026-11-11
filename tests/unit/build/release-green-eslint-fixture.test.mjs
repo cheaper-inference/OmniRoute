@@ -33,12 +33,16 @@ function currentObserverArguments(report) {
       ts.isIdentifier(node.expression) &&
       node.expression.text === "run" &&
       node.arguments.length >= 2 &&
-      ts.isStringLiteral(node.arguments[0]) &&
-      node.arguments[0].text === "npx"
+      ts.isPropertyAccessExpression(node.arguments[0]) &&
+      node.arguments[0].getText(source) === "process.execPath"
     ) {
       assert.ok(ts.isArrayLiteralExpression(node.arguments[1]));
+      assert.equal(
+        node.arguments[1].elements[0].getText(source),
+        'join(ROOT, "node_modules", "eslint", "bin", "eslint.js")'
+      );
       commands.push(
-        node.arguments[1].elements.map((entry) => {
+        node.arguments[1].elements.slice(1).map((entry) => {
           if (ts.isStringLiteral(entry)) return entry.text;
           assert.ok(ts.isIdentifier(entry) && entry.text === "lintReportPath");
           return report;
@@ -91,7 +95,7 @@ test("the shared fixture satisfies the current observer report channel despite c
 
 test("a missing output-file contract fails instead of silently returning stdout JSON", (t) => {
   const { report, execute } = fixture(t);
-  const result = execute(["eslint", ".", "--format", "json"]);
+  const result = execute([".", "--format", "json"]);
   assert.equal(result.status, 33);
   assert.equal(readFileSync(report, "utf8"), "");
   assert.throws(() => readEslintMeasurement(report), /incomplete or invalid/);

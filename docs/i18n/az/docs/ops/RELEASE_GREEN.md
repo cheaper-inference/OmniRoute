@@ -1,97 +1,41 @@
-# Release-Green: keeping the queue and release branch green (Azərbaycan dili)
+# Release-Green: candidate validation and evidence (Azərbaycan dili)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇯🇵 [ja](../../../ja/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇲🇲 [my](../../../my/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [or](../../../or/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇱 [pl](../../../pl/docs/ops/RELEASE_GREEN.md) · 🇵🇹 [pt](../../../pt/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ta](../../../ta/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
 
 ---
 
-## Bunun həll etdiyi problem
+Release-Green xüsusi öhdəliyi müşahidə edir və onun təsdiqləmə nəticələrini bildirir. [Keyfiyyət Qapıları arayışı](../architecture/QUALITY_GATES.md) cari CI profillərini, tələb olunan yoxlamaları və qəbul siyasətini müəyyən edir. `config/quality/admission-policy.json` də versiyalı qəbul siyasəti `Gate / CI` və `Gate / Quality` üçün icra edilə bilən müqavilədir.
 
-**Tam yoxlama** (`.github/workflows/ci.yml` — unit hissələri, vitest, ratchet-lər,
-`package-artifact`, SonarQube, E2E) **yalnız buraxılış PR-ində** (PR → `main`) işləyir.
-`release/**` hədəfləyən PR-lər **sürətli yoxlamalardan** (`quality.yml`: TIA-nın təsir etdiyi testlər +
-tip yoxlaması + lint) və kod dəyişiklikləri üçün **məsləhət xarakterli** istehsal build-indən keçir.
-Nəticə: yalnız buraxılışda üzə çıxan qırmızı nəticələr buraxılış budağında səssizcə toplana və
-buraxılış zamanı hər dəfə bir-bir olmaqla **~40 dəqiqəlik mərhələlər şəklində partlaya** bilər.
+## CI və müşahidəçi əhatə dairəsi
 
-"release-green ailəsi" həmin qırmızı nəticələri **qabaqcadan müəyyənləşdirmək** üçün mövcuddur —
-tam yoxlamanın ekvivalentini istənilən vaxt **lokal olaraq / buraxılışdan kənarda** doğrulayır ki,
-buraxılış PR-i ilk CI işə salınmasındaca yaşıl olsun.
+`ci.yml` və `quality.yml` sorğuları əsas və buraxılış filiallarına çəkir. Seçilmiş profil hansı işlərin tətbiq olunduğunu müəyyən edir. Tam CI həmçinin adi çəkmə sorğusunun yerinə yetirilmədiyi zolaqları da əhatə edir. Sürətli müşahidəçi nəticəsi bu işləri əvəz edə bilməz və tamamlanmış iş axını paketi onun qəbzlərini əvəz edə bilməz.
 
-> **Dəyişməz prinsip:** bunların heç biri töhfəçini bloklamır. Onların PR-i uğursuz edən məcburi
-> yoxlama əlavə etmirik. **Kənarlaşma** (ratchet-lər) buraxılış zamanı texniki xidmət göstərən şəxs
-> tərəfindən yenidən baza səviyyəsinə uyğunlaşdırılmalıdır — bu, heç vaxt töhfəçinin qayğısı deyil.
-> Heç bir hissə PR-i **bağlamır** (əməyi mənimsəmir) və keçməsi üçün testi **zəiflətmir**.
+İstehsal quruluşu CI ya məxsusdur. `quality.yml` də dublikat məsləhət quruluşu yoxdur. Çatışmayan artefaktlar, ləğv edilmiş iş və natamam ölçmələr uğurlu tələb olunan yoxlamanı yaratmır. Nəticələri qəbul etməzdən əvvəl cari bazanı, rəhbəri və birləşmiş namizədi təsdiqləyin.
 
-## Ailə (4 hissə) — və hər birinin müstəqil işləmə qaydası
+## Yerli doğrulama
 
-| Hissə                                                                  | Nədir                                                                                    | Nə vaxt işə salınmalıdır                                                             | Əhatə dairəsi                   |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------- |
-| **`/green-prs`** (Həll A)                                              | Texniki xidmət göstərən şəxsin **açıq PR növbəsini** tələb əsasında skan etməsi          | **Müstəqil və vaxtaşırı** — xüsusilə də `/generate-release` əməliyyatından **əvvəl** | Bütün PR növbəsi → `release/**` |
-| **`/validate-release-green`** (Həll C — `npm run check:release-green`) | Doğrulama mühərriki: tam yoxlamanı budaq VƏ YA birləşdirmə namizədi üzərində təkrarlayır | Müstəqil şəkildə, istənilən vaxt                                                     | Konkret budaq və ya merge PR-i  |
-| **`/babysit <PR#>`**                                                   | **Bir** PR-in **canlı CI** prosesini yaşıl nəticəyədək idarə edir                        | Müstəqil şəkildə, hər PR üçün                                                        | Tək bir PR                      |
-| **`nightly-release-green.yml`** (Həll D)                               | Avtomatlaşdırılmış gecəlik workflow; HARD qırmızı nəticədə issue açır                    | Avtomatik (cron)                                                                     | Aktiv buraxılış budağı          |
-
-**"Bu yalnız buraxılışlar üçündür?" sualının qısa cavabı:** **xeyr.** `/green-prs`
-**vaxtaşırı, buraxılışlar arasında** işləmək üçün hazırlanıb. Onu müstəqil şəkildə işə salmaq normal
-istifadə formasıdır — buraxılış sadəcə onun işə salınmasının ən çox fayda verdiyi məqamdır.
-
-## PR-dən buraxılışa tövsiyə xarakterli yığım
-
-`quality.yml` artıq qaralama olmayan kod PR-ları və Mergify növbə budaqları üçün `Build (advisory)` mərhələsini ehtiva edir.
-O, `ci.yml` faylındakı istehsal yığımı reseptini təkrarlayır: Node 24, `npm-ci-retry`,
-`check:node-runtime` və `OMNIROUTE_USE_TURBOPACK=1` ilə `npm run build`. Bu iş axınında sonrakı heç bir keyfiyyət tapşırığı yığım artefaktından istifadə etmədiyi üçün qəsdən
-yığım artefaktı yükləmir.
-Siqnalın PR-dən buraxılışa keçidi bloklayan bir qapıya çevrilməsi üçün bir həftəlik stabil buraxılış PR-ı icralarından sonra `continue-on-error` parametrini silin.
-
-## Həll C — `npm run check:release-green` (mühərrik)
-
-Cari iş ağacında buraxılışa ekvivalent yoxlamanı təkrarlayır və hər bir uğursuzluğu təsnif edir:
-
-- **HARD** (tip yoxlaması, lint xətaları, vahid testləri, vitest, db-rules, public-creds, istəyə bağlı
-  `package-artifact`) → **real qüsur**; `exit 1`. Mənbə budağında düzəldilir (TDD, Qayda #18).
-- **DRIFT** (eslint **xəbərdarlıqları**, koqnitiv mürəkkəblik, fayl ölçüsü) → dövr ərzində yığılmış sərhəd sürüşməsi,
-  **töhfə verənin günahı deyil**; yalnız hesabatda göstərilir və **buraxılış zamanı texniki xidmətçi tərəfindən yenidən baza səviyyəsinə uyğunlaşdırılır**.
-  DRIFT **heç vaxt** çıxış kodunu dəyişmir — buna görə də heç kimi bloklamır.
+Asılılıqları hazırladıqdan sonra müşahidəçini sahib olduğu iş ağacında işə salın. Ağır yoxlamadan əvvəl `docs/ops/WORKTREE_ISOLATION.md` -da iş ağacı və resurs protokoluna əməl edin.
 
 ```bash
-npm run check:release-green                 # cari budaq (iş ağacı)
-node scripts/quality/validate-release-green.mjs --json   # strukturlaşdırılmış çıxış
-node scripts/quality/validate-release-green.mjs --quick  # vahid testlərini və vitest-i ötürür (yalnız sürüşmə, tip yoxlaması və lint)
-node scripts/quality/validate-release-green.mjs --with-build  # package-artifact yoxlamasını daxil edir (ləng)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-Yalnız diaqnostika aparır və **hesabat verir** (avtomatik düzəliş etmir). Yaşıl vəziyyətə çatdırmaq üçün düzəlişlərin orkestrasiyası
-`/green-prs` və `/review-prs` daxilindədir.
+Sürətli profil qisməndir. Tam profil onun modelləşdirilmiş tələblərini yoxlayır və əmr daxilolmalarını qoruyur; o, yerləşdirməni təsdiqləmir və ya müvafiq hosted çekləri əvəz etmir. Hesabat icra uğursuzluğunu metrik sürüşmədən fərqləndirir. Tələb olunan tıxaclar seçilmiş siyasətə uyğun olaraq bloklanır. Yalnız keçici bir nəticə əldə etmək üçün baza səviyyəsini yüksəltməyin.
 
-## Həll A — `/green-prs` (növbənin skan edilməsi)
+## Gecə və əllə süpürmə işləri
 
-Prosedur (xülasə — ətraflı məlumat üçün `green-prs` bacarığına baxın):
+Gecə buraxılışı və uyğunluq həllediciləri kanonik buraxılış filialı seçirlər. Bu seçim iş axınına səbəb olan filiala uyğun olmalıdır və paketlər hadisənin dəyişməz SHA istifadə edir. Əllə icra etmək üçün, `release_branch` də nəzərdə tutulan buraxılışı seçin və həmin istinadda göndərin:
 
-1. Aktiv buraxılış budağına qarşı açıq PR növbəsini **inventarlaşdırın**.
-2. Hər bir PR-ı **çeşidləyin** (uyğun / rədd edilməli / müəllifin müdaxiləsi tələb olunur) — rədd edilməli və ya müəllifin müdaxiləsini tələb edən PR-lar
-   **hesabatda göstərilir, bağlanmır** (qərarı müəllif verir).
-3. Hər bir uyğun PR üçün **izolyasiya edilmiş iş ağacında** (Qayda #19) PR-ı buraxılışın son vəziyyətinə gətirin və
-   `npm run check:release-green` əmrini icra edin:
-   - **HARD** → həmmüəlliflik vasitəsilə **töhfə verənin budağında** düzəldin (müəllifin "Merged" statusunu qoruyur),
-     bütün HARD-lar aradan qaldırılana qədər yenidən icra edin.
-   - **DRIFT** → olduğu kimi saxlayın; buraxılış zamanı yenidən baza səviyyəsinə uyğunlaşdırılacaq.
-4. PR × (qərar, HARD uğursuzluqları, düzəldilib?, DRIFT, indi release-green vəziyyətindədir?) cədvəlini **hesabatda təqdim edin**.
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-Növbəni birləşdirmə aparmadan **hazırlaya** bilər; yalnız açıq şəkildə tələb edildikdə birləşdirir — və heç vaxt PR-ı bağlamır.
+Seçilmiş kodu icra etməzdən əvvəl filiallararası göndəriş rədd edilir. Yerləşdirilmiş əsas dəstlər `main` yoxlayın və quraşdırmadan əvvəl SHA nin hələ də həll edilmiş hədəfə uyğun olduğunu yoxlayın. Qətnamə zamanı əsas hərəkət edərsə, yeni öhdəliyin natamam taramasını təkrar edin. Fərqli namizədlərdən gələn qəbzləri birləşdirməyin.
 
-## Tövsiyə olunan tezlik
+## Uğursuzluq triajı və bərpası
 
-- **`/green-prs` əmrini mütəmadi olaraq** (məsələn, həftəlik) və **həmişə
-  `/generate-release` əmrindən əvvəl** icra edin.
-- Davamlı siqnal kimi **`nightly-release-green.yml`** (Həll D) faylını saxlayın: o, HARD uğursuzluğu ilə bağlı məsələ açdıqda,
-  skan vaxtı çatıb.
-- Budağı və ya konkret birləşdirmə namizədini yoxlamaq üçün **`/validate-release-green`** əmrindən ehtiyac yarandıqda istifadə edin.
-- Konkret PR-ın canlı CI-da yaşıl vəziyyətə gətirilməsi lazım olduqda **`/babysit <PR#>`** əmrindən istifadə edin.
+Hadisəni diaqnostik göstərici kimi istifadə edin, sonra dəqiq qaçışı, cəhdi, uğursuz addımı və artefaktı yoxlayın. Uğursuzluğu töhfə verənə aid etməzdən əvvəl ekvivalent baza və namizəd sübutlarını müqayisə edin. İnfrastruktur xətaları, irsi qüsurlar, namizədlərin reqressiyaları və gözlənilən təsdiqlər müxtəlif vasitələr tələb edir.
 
-## Buraxılışla əlaqəsi
-
-- `/generate-release` yoxlamanı **Mərhələ 0-da (ilkin yoxlama)** çağırır: buraxılış PR-ını açmazdan əvvəl DRIFT-i yenidən baza səviyyəsinə uyğunlaşdırır və
-  HARD xətalarını düzəldir.
-- `/review-prs` birləşdirmə qərarı mərhələsində release-green qapısından istifadə edir (birləşdirmədən əvvəl yaşıl vəziyyət).
-
-Bütün hissələrin məqsədi eynidir: buraxılış günündə 40 dəqiqəlik mərhələlərlə uğursuzluqlar arasında keçid etmək əvəzinə, **ilk CI icrasında yaşıl olan buraxılış PR-ı**.
+`/green-prs`, `/sweep-reds`, `/validate-release-green` və `/babysit` bacarıqları sübutlar toplayır və sənədləşdirilmiş əhatə dairəsi daxilində düzəlişlər hazırlayır. Səlahiyyətli birləşmədən əvvəl ianəçi kreditini saxlayın, təcrid olunmuş təmir filiallarından istifadə edin və bütün tələb olunan yoxlamaları yoxlayın. Heç bir avtomatik rebaseline və ya insident bağlanması keçən cari namizədi əvəz etmir.

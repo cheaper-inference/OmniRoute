@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const DEFAULT_MEASUREMENT = JSON.stringify([
@@ -14,7 +14,7 @@ const config = JSON.parse(fs.readFileSync(path.join(__dirname, "eslint-fixture.j
 const args = process.argv.slice(2);
 const outputIndices = args.flatMap((arg, index) => arg === "--output-file" ? [index] : []);
 const outputIndex = outputIndices[0];
-if (args[0] !== "eslint" || outputIndices.length !== 1 ||
+if (args[0] !== "." || outputIndices.length !== 1 ||
     !args[outputIndex + 1] || args[outputIndex + 1].startsWith("--") ||
     args[args.indexOf("--format") + 1] !== "json") process.exit(33);
 fs.writeFileSync(args[outputIndex + 1], config.measurementText);
@@ -36,12 +36,19 @@ export function writeReleaseGreenEslintFixture(
   ) {
     throw new Error("Invalid ESLint fixture configuration");
   }
+  const directory = join(binDirectory, "..", "node_modules", "eslint", "bin");
+  mkdirSync(directory, { recursive: true });
   writeFileSync(
-    join(binDirectory, "eslint-fixture.json"),
+    join(directory, "eslint-fixture.json"),
     JSON.stringify({ measurementText, diagnosticText, exitCode }),
     { flag: "wx", mode: 0o600 }
   );
-  const command = join(binDirectory, "npx");
+  // Using npx here would introduce an unnecessary package-manager shell boundary.
+  writeFileSync(join(binDirectory, "npx"), `#!${process.execPath}\nprocess.exit(91);\n`, {
+    flag: "wx",
+    mode: 0o755,
+  });
+  const command = join(directory, "eslint.js");
   writeFileSync(command, `#!${process.execPath}\n${COMMAND}`, { flag: "wx", mode: 0o755 });
   return command;
 }

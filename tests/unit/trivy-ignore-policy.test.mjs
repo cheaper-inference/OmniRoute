@@ -219,3 +219,27 @@ test("the CLI blocks the reviewed policy when its real clock reaches expiry", (t
   assert.match(child.stderr, /accepted-risk policy has expired/);
   assert.equal(child.stdout, "");
 });
+
+test("tracking attribution requires the exact issue URL, not a substring in another URL", () => {
+  const issue = "https://github.com/cheaper-inference/OmniRoute/issues/18765";
+  for (const reference of [
+    `${issue}0`,
+    `${issue}/unrelated`,
+    `${issue}?redirect=elsewhere`,
+    `https://example.invalid/?next=${issue}`,
+    `prefix${issue}`,
+  ]) {
+    const policy = fixture();
+    policy.vulnerabilities[0].statement = `Accepted: ${reference}`;
+    assert.throws(
+      () => validateTrivyIgnorePolicy(policy, { now: beforeExpiry }),
+      /tracking issue/,
+      reference
+    );
+  }
+  for (const reference of [issue, `<${issue}>`, `[review](${issue})`, `${issue}.`]) {
+    const policy = fixture();
+    policy.vulnerabilities[0].statement = `Accepted: ${reference}`;
+    assert.equal(validateTrivyIgnorePolicy(policy, { now: beforeExpiry }).exceptions, 2);
+  }
+});
