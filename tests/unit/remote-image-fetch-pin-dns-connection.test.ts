@@ -106,3 +106,44 @@ test("createPinnedFetch closes its dispatcher after the request completes (no le
     }
   );
 });
+
+
+test("createPinnedFetch returns a streaming response before its body finishes", async () => {
+  let finishBody: (() => void) | undefined;
+  await withHttpServer(
+    (_req, res) => {
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.write("first-chunk");
+      finishBody = () => res.end("-last-chunk");
+    },
+    async (port) => {
+      // The server cannot end its response until after fetch returns. Awaiting
+      // Agent.close() inside the pinned fetch is therefore a deadlock, causing
+      // URL-only transcription downloads to hit their deadline.
+      const request = createPinnedFetch("127.0.0.1", 4)(
+        `http://pinned-stream-test.invalid:${port}/audio`,
+        { signal: AbortSignal.timeout(5000) }
+      );
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const response = await Promise.race([
+          request,
+          new Promise<Response>((_resolve, reject) => {
+            timer = setTimeout(
+              () => reject(new Error("pinned fetch waited for unread response body")),
+              1200
+            );
+          }),
+        ]);
+        assert.equal(response.status, 200);
+        finishBody();
+        assert.equal(await response.text(), "first-chunk-last-chunk");
+      } finally {
+        if (timer) clearTimeout(timer);
+        // Release even on a failure, so the test never leaves a server socket open.
+        finishBody?.();
+        await request.catch(() => undefined);
+      }
+    }
+  );
+});
