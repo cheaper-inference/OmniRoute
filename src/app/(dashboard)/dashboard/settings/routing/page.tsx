@@ -10,6 +10,7 @@ import ComboDefaultsTab from "../components/ComboDefaultsTab";
 import FallbackChainsEditor from "../components/FallbackChainsEditor";
 import ModelAliasesUnified from "../components/ModelAliasesUnified";
 import BackgroundDegradationTab from "../components/BackgroundDegradationTab";
+import TaskAwareRoutingCard from "../components/TaskAwareRoutingCard";
 import RoutingEntryLink from "@/shared/components/routing/RoutingEntryLink";
 import CatalogVisibilityCard from "../components/CatalogVisibilityCard";
 
@@ -33,6 +34,7 @@ export default function SettingsRoutingPage() {
       <ModelRoutingSection />
       <RoutingTab />
       <BackgroundDegradationTab />
+      <TaskAwareRoutingCard />
     </div>
   );
 }
