@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "omniroute",
   "version": "3.8.54",
   "description": "Unified AI router with 388 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",

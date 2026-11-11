@@ -1,0 +1,1 @@
+- **fix(deps):** clear the two critical `npm audit` chains that were reddening every PR — `fast-xml-parser` (GHSA-474x-hrwr-fgx4) and `mongoose` (GHSA-6972-9mcm-vhwj and three siblings) ([#19965](https://github.com/cheaper-inference/OmniRoute/pull/19965)) — thanks @AndreAlmeidaDC
