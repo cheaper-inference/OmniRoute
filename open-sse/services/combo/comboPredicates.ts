@@ -14,6 +14,7 @@ import {
 import { finitePercentUsed, remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
+import { isQuotaExhaustedText } from "../../config/errorConfig.ts";
 import { parseModel } from "../model.ts";
 import { isSelfInflictedUpstreamTimeout } from "../../handlers/chatCore/cooldownClassification.ts";
 import {
@@ -620,7 +621,10 @@ export function shouldSkipConnDisable(
     // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
     // the same model attribution predicate as failure persistence; ordinary
     // invalid_request_error (including 400) remains request-scoped.
+    // An account-quota signal ("out of extra usage") relayed as invalid_request_error is
+    // account-scoped: cool the connection down and fail over instead of returning the 400.
     (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
+      !isQuotaExhaustedText(errorText) &&
       !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
     // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.
