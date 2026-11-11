@@ -12,7 +12,11 @@ import {
   HERMES_AGENT_ROLES,
   type HermesAgentRole,
 } from "@/lib/cli-helper/config-generator/hermes-agent";
-import { getHermesConfigPath } from "@/lib/cli-helper/config-generator/hermesHome";
+import {
+  getHermesConfigPath,
+  listHermesProfiles,
+  resolveHermesProfileHome,
+} from "@/lib/cli-helper/config-generator/hermesHome";
 import { getApiKeyById } from "@/lib/db/apiKeys";
 import { createMultiBackup } from "@/shared/services/backupService";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
@@ -35,6 +39,9 @@ const hermesAgentSettingsSchema = z.object({
     )
     .min(1, "selections must be a non-empty array of { role, model }"),
   preview: z.boolean().optional(),
+  // Optional: apply to one named Hermes profile, or to every listed profile. Neither = default home.
+  profile: z.string().optional(),
+  applyToAll: z.boolean().optional(),
 });
 
 /**
@@ -116,9 +123,16 @@ export async function GET(request: Request) {
   const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
-    const roles = await getCurrentHermesAgentRoles();
-
-    const configPath = getCliPrimaryConfigPath("hermes-agent") || getConfigPath();
+    const query = new URL(request.url).searchParams;
+    const profile = query.get("profile");
+    let configPath = getCliPrimaryConfigPath("hermes-agent") || getConfigPath();
+    if (profile) {
+      const profileHome = resolveHermesProfileHome(profile);
+      if (!profileHome)
+        return NextResponse.json({ error: "Unknown Hermes profile" }, { status: 400 });
+      configPath = path.join(profileHome, "config.yaml");
+    }
+    const roles = await getCurrentHermesAgentRoles(configPath);
     let firstSetupAt: string | null = null;
 
     try {
@@ -129,7 +143,12 @@ export async function GET(request: Request) {
       // no metadata yet
     }
 
-    return NextResponse.json({ success: true, roles, firstSetupAt });
+    return NextResponse.json({
+      success: true,
+      roles,
+      firstSetupAt,
+      ...(query.has("profiles") ? { profiles: listHermesProfiles() } : {}),
+    });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: sanitizeErrorMessage(error) },
@@ -157,62 +176,114 @@ export async function POST(request: Request) {
     );
   }
 
-  const { baseUrl, keyId, apiKey, selections, preview } = parsed.data;
+  const { baseUrl, keyId, apiKey, selections, preview, profile, applyToAll } = parsed.data;
 
   if (!validateBaseUrl(baseUrl)) {
     return NextResponse.json({ error: "baseUrl must be a valid http(s) URL" }, { status: 400 });
   }
+  if (profile && applyToAll) {
+    return NextResponse.json(
+      { error: "Use either profile or applyToAll, not both" },
+      { status: 400 }
+    );
+  }
 
-  const configPath = getCliPrimaryConfigPath("hermes-agent") || getConfigPath();
-  const configDir = path.dirname(configPath);
+  const input: ApplyInput = {
+    baseUrl,
+    keyId,
+    apiKey: await resolveApiKey(keyId, apiKey),
+    selections,
+    preview,
+  };
 
-  await fs.mkdir(configDir, { recursive: true });
+  if (applyToAll) return NextResponse.json(await applyToEveryProfile(input));
 
-  // Resolve keyId server-side. The generator references OMNIROUTE_API_KEY;
-  // only the non-preview apply path writes the resolved secret to Hermes' .env.
-  let resolvedApiKey = apiKey ?? null;
+  let configPath = getCliPrimaryConfigPath("hermes-agent") || getConfigPath();
+  if (profile) {
+    const profileHome = resolveHermesProfileHome(profile);
+    if (!profileHome)
+      return NextResponse.json({ error: "Unknown Hermes profile" }, { status: 400 });
+    configPath = path.join(profileHome, "config.yaml");
+  }
+  const outcome = await applyToConfig(configPath, input);
+  return NextResponse.json(outcome.body, { status: outcome.status });
+}
+
+/**
+ * Resolve keyId server-side. The generator references OMNIROUTE_API_KEY;
+ * only the non-preview apply path writes the resolved secret to Hermes' .env.
+ */
+async function resolveApiKey(
+  keyId: string | null | undefined,
+  apiKey: string | null | undefined
+): Promise<string | null> {
   if (keyId) {
     try {
       const keyRecord = await getApiKeyById(keyId);
-      if (keyRecord?.key) {
-        resolvedApiKey = keyRecord.key as string;
-      }
+      if (keyRecord?.key) return keyRecord.key as string;
     } catch {
       // Non-critical: fall back to whatever apiKey (if any) was already provided.
     }
   }
+  return apiKey ?? null;
+}
+
+/** Apply to every listed profile on its own: one failure is reported and does not stop the rest. */
+async function applyToEveryProfile(input: ApplyInput) {
+  const results: Array<Record<string, unknown>> = [];
+  for (const name of listHermesProfiles()) {
+    const profileHome = resolveHermesProfileHome(name);
+    if (!profileHome) continue;
+    const outcome = await applyToConfig(path.join(profileHome, "config.yaml"), input);
+    results.push({ profile: name, success: outcome.status === 200, ...outcome.body });
+  }
+  return { success: results.every((entry) => entry.success), results };
+}
+
+type ApplyInput = {
+  baseUrl: string;
+  keyId?: string | null;
+  apiKey: string | null;
+  selections: Array<{ role: HermesAgentRole; model: string }>;
+  preview?: boolean;
+};
+
+/** Merge the selections into one Hermes config.yaml (and its sibling .env). */
+async function applyToConfig(
+  configPath: string,
+  { baseUrl, keyId, apiKey: resolvedApiKey, selections, preview }: ApplyInput
+): Promise<{ status: number; body: Record<string, unknown> }> {
+  const configDir = path.dirname(configPath);
+
+  await fs.mkdir(configDir, { recursive: true });
 
   const payload = {
     baseUrl,
     keyId,
     apiKey: resolvedApiKey,
     selections,
+    configPath,
   };
 
   const result = await generateHermesAgentConfig(payload);
 
   if (result.error) {
-    return NextResponse.json({ error: result.error }, { status: 400 });
+    return { status: 400, body: { error: result.error } };
   }
 
   // Preview mode: return the would-be YAML without writing it (Phase 5 polish)
   if (preview === true) {
-    return NextResponse.json({
-      success: true,
-      preview: true,
-      yaml: result.yaml,
-      configPath,
-    });
+    return { status: 200, body: { success: true, preview: true, yaml: result.yaml, configPath } };
   }
 
   const envPath = path.join(configDir, ".env");
   const existingEnv = await readTextIfPresent(envPath);
   const hasExistingApiKey = hasUsableHermesApiKey(existingEnv);
   if (!resolvedApiKey && !hasExistingApiKey) {
-    return NextResponse.json(
-      { error: "The selected OmniRoute API key could not be resolved" },
-      { status: 400 }
-    );
+    return {
+      status: 400,
+      body: { error: "The selected OmniRoute API key could not be resolved" },
+    };
   }
   await createMultiBackup("hermes-agent", [configPath, envPath]);
   if (resolvedApiKey) {
@@ -232,9 +303,12 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    message: `Hermes Agent config saved to ${configPath}`,
-    configPath,
-  });
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: `Hermes Agent config saved to ${configPath}`,
+      configPath,
+    },
+  };
 }

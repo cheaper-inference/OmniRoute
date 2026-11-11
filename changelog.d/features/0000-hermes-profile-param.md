@@ -1,0 +1,1 @@
+- **feat(cli-tools):** The Hermes Agent settings API takes an optional `profile` (or `applyToAll`) to read or write one Hermes profile instead of only the default home; without them nothing changes.
