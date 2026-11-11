@@ -117,6 +117,7 @@ function runStep(
     encoding: "utf8",
     env: {
       PATH: `${bin}:${process.env.PATH}`,
+      HOME: cwd,
       STATE: opts.state,
       GH_TOKEN: "stub",
       GITHUB_REPOSITORY: "cheaper-inference/OmniRoute",
