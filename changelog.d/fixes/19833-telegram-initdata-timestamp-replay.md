@@ -1,0 +1,1 @@
+- **fix(telegram):** enforce bidirectional timestamp boundaries and replay protection on Mini App `initData`. Previously, future `auth_date` values bypassed the `now - authDate > maxAgeSec` freshness check and never expired, and valid payloads could be replayed repeatedly within the window ([#19833](https://github.com/cheaper-inference/OmniRoute/issues/19833)).
