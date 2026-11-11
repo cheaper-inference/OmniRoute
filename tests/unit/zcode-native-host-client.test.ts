@@ -253,3 +253,119 @@ test("credentials echoed in error codes are removed", async () => {
     await f.cleanup();
   }
 });
+
+test("concurrent native ERROR202 keeps safe method and codes without payload or arguments", async () => {
+  const f = await fixture((socket) => {
+    socket.send(frame([200]));
+    socket.on("message", (raw) => {
+      const h = decodeZcodeValue(Buffer.from(raw as Buffer).subarray(13)).value as [
+        number,
+        number,
+        string,
+        string,
+      ];
+      socket.send(
+        h[3] === "getView"
+          ? frame([201, h[1]], { available: true })
+          : frame([202, h[1]], {
+              message: "FIXTURE_TOKEN raw-payload-secret",
+              code: "ERR_BUSY",
+              data: { code: 1310, secret: "hidden-provider-value" },
+            })
+      );
+    });
+  });
+  const client = new NativeZcodeHostClient({ serverRoot: f.root });
+  try {
+    const failed = assert.rejects(
+      client.call("zcode-agent", "sendPrompt", [{ content: "private-prompt" }]),
+      (error: Error) => {
+        assert.match(error.message, /zcode-agent\.sendPrompt/);
+        assert.match(error.message, /ERR_BUSY/);
+        assert.match(error.message, /1310/);
+        assert.doesNotMatch(
+          error.message + JSON.stringify(error),
+          /FIXTURE_TOKEN|raw-payload-secret|hidden-provider-value|private-prompt/
+        );
+        return true;
+      }
+    );
+    const successful = client.call("model-selection", "getView", []);
+    await failed;
+    assert.deepEqual(await successful, { available: true });
+  } finally {
+    await client.close();
+    await f.cleanup();
+  }
+});
+
+test("ERROR202 preserves only the known lowercase model cancellation code", async () => {
+  const f = await fixture((socket) => {
+    socket.send(frame([200]));
+    socket.on("message", (raw) => {
+      const h = decodeZcodeValue(Buffer.from(raw as Buffer).subarray(13)).value as number[];
+      socket.send(
+        frame([202, h[1]], {
+          code: "model_request_cancelled",
+          message: "FIXTURE_TOKEN upstream secret",
+          data: { code: "model_request_cancelled" },
+        })
+      );
+    });
+  });
+  const client = new NativeZcodeHostClient({ serverRoot: f.root });
+  try {
+    await assert.rejects(
+      client.call("zcode-agent", "sendPrompt", []),
+      (error: Error & { code?: unknown; providerCode?: unknown }) => {
+        assert.equal(error.code, "model_request_cancelled");
+        assert.equal(error.providerCode, "model_request_cancelled");
+        assert.doesNotMatch(error.message + JSON.stringify(error), /FIXTURE_TOKEN|upstream secret/);
+        return true;
+      }
+    );
+  } finally {
+    await client.close();
+    await f.cleanup();
+  }
+});
+
+test("only the exact unusual-activity vendor refusal becomes a safe category", async () => {
+  let count = 0;
+  const f = await fixture((socket) => {
+    socket.send(frame([200]));
+    socket.on("message", (raw) => {
+      const h = decodeZcodeValue(Buffer.from(raw as Buffer).subarray(13)).value as number[];
+      socket.send(
+        frame([202, h[1]], {
+          code: -32603,
+          message:
+            count++ === 0
+              ? "request has been blocked due to unusual activity."
+              : "user quoted request has been blocked due to unusual activity.",
+        })
+      );
+    });
+  });
+  const client = new NativeZcodeHostClient({ serverRoot: f.root });
+  try {
+    await assert.rejects(
+      client.call("zcode-agent", "generateWorkspaceText", []),
+      (error: Error & { providerReason?: string }) => {
+        assert.equal(error.providerReason, "unusual_activity");
+        assert.doesNotMatch(error.message, /request has been blocked/);
+        return true;
+      }
+    );
+    await assert.rejects(
+      client.call("zcode-agent", "generateWorkspaceText", []),
+      (error: Error & { providerReason?: string }) => {
+        assert.equal(error.providerReason, undefined);
+        return true;
+      }
+    );
+  } finally {
+    await client.close();
+    await f.cleanup();
+  }
+});

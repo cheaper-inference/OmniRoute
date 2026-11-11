@@ -14,41 +14,38 @@ process.env.ZCODE_NATIVE_CONNECTION_ID = "native-content-fixture";
 const { ZcodeExecutor } = await import("../../open-sse/executors/zcode.ts");
 const { NativeZcodeHostClient } =
   await import("../../open-sse/executors/zcode/nativeHostClient.ts");
-const { NativeZcodeSessionBridge } =
-  await import("../../open-sse/executors/zcode/nativeSession.ts");
 
 test.after(() => cleanupTempDataDir(testDataDir));
 
-type NativeInput = Parameters<InstanceType<typeof NativeZcodeSessionBridge>["execute"]>[0];
-
 function captureNativeRequest(t: TestContext) {
-  const calls: NativeInput[] = [];
+  const calls: Record<string, unknown>[] = [];
   t.mock.method(NativeZcodeHostClient.prototype, "start", async () => {});
   t.mock.method(NativeZcodeHostClient.prototype, "close", async () => {});
   t.mock.method(
     NativeZcodeHostClient.prototype,
     "call",
-    async (channel: string, method: string) => {
-      assert.equal(channel, "model-selection");
-      assert.equal(method, "getView");
-      return {
-        providers: [
-          {
-            providerId: "account:zai-start-plan",
-            models: [{ modelId: "GLM-5.3-Flash", config: {} }],
-          },
-        ],
-      };
+    async (channel: string, method: string, args: unknown[]) => {
+      if (method === "getView") {
+        assert.equal(channel, "model-selection");
+        return {
+          providers: [
+            {
+              providerId: "account:zai-individual-coding-plan",
+              models: [{ modelId: "GLM-5.3-Flash", config: {} }],
+            },
+          ],
+        };
+      }
+      assert.equal(channel, "zcode-agent");
+      assert.equal(method, "generateWorkspaceText");
+      calls.push(args[0] as Record<string, unknown>);
+      return { text: "native text accepted", finishReason: "stop" };
     }
   );
-  t.mock.method(NativeZcodeSessionBridge.prototype, "execute", async (input: NativeInput) => {
-    calls.push(input);
-    return { text: "native text accepted", finishReason: "stop" };
-  });
   return {
     calls,
     async execute(body: Record<string, unknown>) {
-      const result = await new ZcodeExecutor().execute({
+      const result = await new ZcodeExecutor({ provider: "zcode-individual" }).execute({
         model: "glm-5.3-flash",
         body,
         stream: false,
@@ -76,7 +73,7 @@ test("native ZCode accepts ordered Responses text parts without mutating caller 
   const response = await fixture.execute({ messages });
   assert.equal(response.status, 200, await response.text());
   assert.deepEqual(fixture.calls[0].messages, [
-    { role: "developer", content: "Keep instructions." },
+    { role: "system", content: "Keep instructions." },
     { role: "user", content: "first second third" },
   ]);
   assert.deepEqual(messages, original);
@@ -112,11 +109,15 @@ test("native ZCode text normalization preserves caller tool calls, results and s
   assert.equal(response.status, 200, await response.text());
   assert.deepEqual(fixture.calls[0].messages, [
     { role: "user", content: "Use echo." },
-    { role: "assistant", content: "", tool_calls: [toolCall] },
+    {
+      role: "assistant",
+      content: "",
+      toolCalls: [{ id: toolCall.id, name: "echo", input: { value: "client-owned-result" } }],
+    },
     {
       role: "tool",
-      name: "echo",
-      tool_call_id: toolCall.id,
+      toolName: "echo",
+      toolCallId: toolCall.id,
       content: "client-owned-result",
     },
   ]);
