@@ -7436,7 +7436,11 @@
     "quotaRefreshStale": "Sabar ta dawo da tsoffin bayanan iyakar amfani. Wannan ba sabon bayani ba ne.",
     "quotaRefreshPartial": "Wani ɓangare na bayanan iyakar amfani kaɗai yake samuwa.",
     "quotaWindowUnavailable": "Babu bayanin iyakar amfani na {window}",
-    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu."
+    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu.",
+    "museConsoleSessionLabel": "Muse Code console session",
+    "museConsoleSessionHint": "Required for live 5h/weekly quota. In the Muse developer console, open DevTools > Application > Cookies > dev.meta.ai > llama_dev_sess and copy the cookie VALUE, not the whole Cookie header. Sensitive: expires in about a year. Leave blank to keep the stored session.",
+    "museTeamIdLabel": "Muse Code team id (optional)",
+    "museTeamIdHint": "Optional. Set it only if the console quota is team-scoped. Leave blank to keep the stored team id."
   },
   "settings": {
     "proxyTraffic": {

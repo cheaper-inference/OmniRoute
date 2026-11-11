@@ -7436,7 +7436,11 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्थिति जाँच गर्दै…",
     "doctorCheck": "डक्टर स्थिति जाँच गर्नुहोस्",
-    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड"
+    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड",
+    "museConsoleSessionLabel": "Muse Code console session",
+    "museConsoleSessionHint": "Required for live 5h/weekly quota. In the Muse developer console, open DevTools > Application > Cookies > dev.meta.ai > llama_dev_sess and copy the cookie VALUE, not the whole Cookie header. Sensitive: expires in about a year. Leave blank to keep the stored session.",
+    "museTeamIdLabel": "Muse Code team id (optional)",
+    "museTeamIdHint": "Optional. Set it only if the console quota is team-scoped. Leave blank to keep the stored team id."
   },
   "settings": {
     "proxyTraffic": {

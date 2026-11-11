@@ -106,7 +106,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "mb",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
   "openrouter",
-  // Muse Code has no live quota endpoint; its fetcher surfaces persisted subscription metadata.
+  // Muse Code reads live quota from the dev.meta.ai console when a cookie is configured.
   "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",

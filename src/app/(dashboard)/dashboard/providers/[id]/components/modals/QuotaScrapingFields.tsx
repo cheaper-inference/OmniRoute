@@ -7,6 +7,7 @@ import { providerText, type ProviderMessageTranslator } from "../../providerPage
 import {
   assignQuotaScrapingProviderData,
   EMPTY_QUOTA_SCRAPING_FIELDS,
+  MUSE_CODE_PROVIDERS,
   QWEN_TOKEN_PLAN_PROVIDERS,
   VOLCENGINE_PLAN_PROVIDERS,
   XIAOMI_MIMO_PROVIDERS,
@@ -239,6 +240,48 @@ function ConsoleSessionQuotaFields({
               "under Request Headers copy the WHOLE Cookie value (it contains " +
               "api-platform_serviceToken and userId). It expires with the browser session — " +
               "re-paste it when the quota reports an expired session."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+      </div>
+    );
+  }
+
+  if (MUSE_CODE_PROVIDERS.has(provider ?? "")) {
+    return (
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+        <Input
+          label={providerText(t, "museConsoleSessionLabel", "Muse Code console session")}
+          name="museConsoleSession"
+          type="password"
+          value={values.museConsoleSession}
+          onChange={(e) => onChange({ museConsoleSession: e.target.value })}
+          placeholder="llama_dev_sess=..."
+          hint={providerText(
+            t,
+            "museConsoleSessionHint",
+            (editMode ? "Leave blank to keep the stored session. " : "") +
+              "Required for live 5h/weekly quota — the inference key cannot read it. " +
+              "How to get it: log in to the Muse developer console, open DevTools > Application > Cookies > dev.meta.ai > llama_dev_sess, " +
+              "then copy the cookie VALUE (not the whole Cookie header). It is sensitive and expires in about a year."
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+        <Input
+          label={providerText(t, "museTeamIdLabel", "Muse Code team id (optional)")}
+          name="museTeamId"
+          value={values.museTeamId}
+          onChange={(e) => onChange({ museTeamId: e.target.value })}
+          placeholder="team-..."
+          hint={providerText(
+            t,
+            "museTeamIdHint",
+            (editMode ? "Leave blank to keep the stored team id. " : "") +
+              "Optional. Set it only if the console quota is team-scoped."
           )}
           autoComplete="off"
           spellCheck={false}

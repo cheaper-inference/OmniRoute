@@ -533,6 +533,7 @@ export function validateProviderSpecificData(
     "qwenCloudSecToken",
     "volcConsoleCookie",
     "xiaomiMimoConsoleCookie",
+    "museConsoleSession",
   ] as const) {
     const value = data[key];
     if (value !== undefined && value !== null && typeof value !== "string") {
@@ -549,6 +550,22 @@ export function validateProviderSpecificData(
         path: [key],
       });
     }
+  }
+
+  const museTeamId = data.museTeamId;
+  if (museTeamId !== undefined && museTeamId !== null && typeof museTeamId !== "string") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.museTeamId must be a string",
+      path: ["museTeamId"],
+    });
+  }
+  if (typeof museTeamId === "string" && museTeamId.length > 1000) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.museTeamId must be at most 1000 characters",
+      path: ["museTeamId"],
+    });
   }
 
   for (const key of [
