@@ -44,7 +44,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Release branch to validate (default: highest release/vX.Y.Z)"
+        description: "Release branch to validate; dispatch with --ref on that same branch"
         required: false
         type: string
 
@@ -98,7 +98,11 @@ jobs:
           if ! printf '%s' "$TARGET" | grep -qE '^release/v[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "Refusing non-canonical branch name: $TARGET"; exit 1
           fi
-          SHA=$(gh api "repos/$GITHUB_REPOSITORY/branches/$TARGET" --jq '.commit.sha')
+          # Bind code and cache scope to the triggering branch, including dispatch.
+          if [[ "$GITHUB_REF_TYPE" != branch || "$TARGET" != "$GITHUB_REF_NAME" ]]; then
+            echo "Dispatch this workflow with --ref $TARGET; cross-branch execution is refused"; exit 1
+          fi
+          SHA="$GITHUB_SHA"
           if ! printf '%s' "$SHA" | grep -qE '^[0-9a-f]{40}$'; then echo "No tip for $TARGET"; exit 1; fi
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
@@ -145,7 +149,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve-target.outputs.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -557,8 +561,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve-main.outputs.sha }}
+          # Only main is trusted here; reject a move since resolution before executing it.
+          ref: main
           persist-credentials: false
+      - name: Verify resolved main commit
+        env:
+          EXPECTED_SHA: ${{ needs.resolve-main.outputs.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA=$(git rev-parse HEAD)
+          if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ || "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "Main changed after resolution; this sweep is incomplete. Rerun on the new commit."
+            exit 1
+          fi
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-main.outputs.node-version }}

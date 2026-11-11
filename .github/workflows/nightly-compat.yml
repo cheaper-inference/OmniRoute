@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch to validate (default: highest release/vX.Y.Z)"
+        description: "Release branch to validate; dispatch with --ref on that same branch"
         required: false
         type: string
 
@@ -50,10 +50,13 @@ jobs:
               | sort -t/ -k2 -V \
               | tail -1)
           fi
-          case "$TARGET" in
-            release/v[0-9]*.[0-9]*.[0-9]*) ;;
-            *) echo "Refusing non-canonical branch name: $TARGET"; exit 1 ;;
-          esac
+          if [[ ! "$TARGET" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Refusing non-canonical branch name: $TARGET"; exit 1
+          fi
+          # A dispatch input must never select code from a different cache scope.
+          if [[ "$GITHUB_REF_TYPE" != branch || "$TARGET" != "$GITHUB_REF_NAME" ]]; then
+            echo "Dispatch this workflow with --ref $TARGET; cross-branch execution is refused"; exit 1
+          fi
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
 
   compat-build-26:
@@ -65,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve-branch.outputs.target }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -106,7 +109,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve-branch.outputs.target }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
