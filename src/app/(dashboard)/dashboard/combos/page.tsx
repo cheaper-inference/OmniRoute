@@ -53,6 +53,7 @@ import {
   scrollToComboCardWhenRendered,
 } from "./comboPagination";
 import { useComboPagination } from "./useComboPagination";
+import { filterCombosBySearch } from "./comboSearch";
 import { ComboListToolbar, ComboPaginationNav } from "./ComboListControls";
 import { ResponseValidationEditor, type ResponseValidationValue } from "./ResponseValidationEditor";
 import ReasoningTokenBufferToggle from "./ReasoningTokenBufferToggle";
@@ -954,9 +955,17 @@ function CombosPageContent() {
     () => combos.filter((combo) => isIntelligentStrategy(combo?.strategy)),
     [combos]
   );
+  // Opt-in list search: `?search=1` shows the box. Without it the query stays empty and the
+  // list is exactly the strategy-filtered inventory.
+  const searchEnabled = searchParams.get("search") === "1";
+  const [comboSearch, setComboSearch] = useState("");
   const filteredCombos = useMemo(
-    () => filterCombosByStrategyCategory(combos, activeFilter),
-    [combos, activeFilter]
+    () =>
+      filterCombosBySearch(
+        filterCombosByStrategyCategory(combos, activeFilter),
+        searchEnabled ? comboSearch : ""
+      ),
+    [combos, activeFilter, searchEnabled, comboSearch]
   );
   const {
     page: visibleComboPage,
@@ -965,7 +974,7 @@ function CombosPageContent() {
     pageItems: pagedCombos,
     pageStart: comboPageStart,
     pageEnd: comboPageEnd,
-  } = useComboPagination(filteredCombos, activeFilter);
+  } = useComboPagination(filteredCombos, `${activeFilter}|${searchEnabled ? comboSearch : ""}`);
   const visibleCombos = reorderingAllCombos ? combos : pagedCombos;
   const selectedIntelligentCombo = useMemo(() => {
     if (intelligentCombos.length === 0) return null;
@@ -1473,6 +1482,8 @@ function CombosPageContent() {
           reordering={reorderingAllCombos}
           savingOrder={savingComboOrder}
           onToggleReorder={handleReorderAllToggle}
+          searchQuery={comboSearch}
+          onSearchChange={searchEnabled ? setComboSearch : undefined}
         />
       )}
 

@@ -1,0 +1,1 @@
+- **feat(combos):** add `?search=1` to the combos page URL to show a search box that filters the list by combo name or member model id (off by default).

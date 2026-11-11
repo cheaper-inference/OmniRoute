@@ -15,6 +15,9 @@ type ComboListToolbarProps = {
   reordering: boolean;
   savingOrder: boolean;
   onToggleReorder: () => void;
+  /** Search box above the list. Shown only when `onSearchChange` is given. */
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 };
 
 /** Page summary + the "Reorder all" switch above the combo inventory. */
@@ -27,6 +30,8 @@ export function ComboListToolbar({
   reordering,
   savingOrder,
   onToggleReorder,
+  searchQuery = "",
+  onSearchChange,
 }: ComboListToolbarProps) {
   const summary = reordering
     ? getI18nOrFallback(
@@ -50,6 +55,17 @@ export function ComboListToolbar({
       <p className="text-xs text-text-muted" aria-live="polite">
         {summary}
       </p>
+      {onSearchChange && (
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={getI18nOrFallback(t, "searchCombos", "Search combos by name or model")}
+          aria-label={getI18nOrFallback(t, "searchCombos", "Search combos by name or model")}
+          className="w-full rounded-lg border border-border bg-bg px-3 py-1.5 text-sm sm:max-w-xs"
+          data-testid="combo-list-search"
+        />
+      )}
       {comboCount > 1 && (
         <Button
           size="sm"
