@@ -102,7 +102,10 @@ import {
 import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
-import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
+import {
+  applyClientProtocolAlternate,
+  resolveChatCoreTargetFormat,
+} from "./chatCore/targetFormat.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
 import { usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeUpstreamRequestParams } from "./chatCore/upstreamRequestParams.ts";
@@ -837,6 +840,20 @@ async function handleChatCoreInner({
 
   // Wire target-format resolution extracted to chatCore/targetFormat.ts (#3501); `alias` is reused
   // downstream when stripping the alias/ prefix off the upstream model id.
+  // Opt-in: a Claude client uses the provider's Anthropic alternate; the executors read the same
+  // connection data, so body format, URL and auth header switch together.
+  if (credentials) {
+    const protocolPsd = applyClientProtocolAlternate({
+      provider,
+      resolvedModel,
+      sourceFormat,
+      customModelTargetFormat,
+      providerSpecificData: credentials.providerSpecificData,
+    });
+    if (protocolPsd !== credentials.providerSpecificData) {
+      credentials = { ...credentials, providerSpecificData: protocolPsd };
+    }
+  }
   const { alias, targetFormat } = resolveChatCoreTargetFormat({
     provider,
     resolvedModel,

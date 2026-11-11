@@ -2064,3 +2064,8 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `OMNIROUTE_CLAUDE_SESSION_CACHE_KEY` | `false` | `open-sse/handlers/chatCore/claudeSessionCacheKey.ts` | When `1`, `true`, `yes` or `on`, a request that carries a valid `X-Claude-Code-Session-Id` header and no `prompt_cache_key` gets that session id as `prompt_cache_key` on OpenAI Chat and Responses targets. A key sent by the caller always wins. Providers that reject the field and the Codex provider are skipped. |
+## Claude client protocol
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `CLAUDE_CLIENT_ANTHROPIC_ENDPOINT` | `false` | `open-sse/handlers/chatCore/targetFormat.ts` | When `1`, `true`, `yes` or `on`, a Claude-format client request goes to the provider's declared Anthropic endpoint (the `claude` alternate format in the provider registry) instead of being translated to OpenAI Chat. The body format, URL and auth header switch together. A connection that already has `targetFormat` set, and models with their own target format, are not changed. Providers without an Anthropic alternate are not changed. |
