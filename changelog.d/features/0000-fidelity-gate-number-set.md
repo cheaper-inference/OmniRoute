@@ -1,0 +1,1 @@
+- **feat(compression):** the compression fidelity gate (opt-in) now compares numbers as whole literals, so `12` no longer counts as preserved inside `123`, and a trailing comma or full stop is not part of a number.

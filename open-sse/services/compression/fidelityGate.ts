@@ -32,10 +32,11 @@ const CRITICAL_KINDS = new Set([
 ]);
 
 // Anti-ReDoS: all quantifiers are bounded.
-// NUMERIC_RE matches a number plus any trailing run of digits/dots/commas (e.g. "1,3" in a diff
-// hunk, "1," in JSON). This is intentional: comparing the same literal slice in input vs output
-// keeps the check structural-aware and ReDoS-bounded ({0,40}).
-const NUMERIC_RE = /\d[\d.,]{0,40}/g;
+// NUMERIC_RE matches one standalone number literal: digits with optional ./, groups between digit
+// runs (e.g. "1,3" in a diff hunk, "3.5"). A trailing separator is punctuation, not part of the
+// number. The input and output literals are compared as sets, so "12" never matches inside "123".
+// All quantifiers are bounded (ReDoS).
+const NUMERIC_RE = /\d{1,40}(?:[.,]\d{1,40}){0,10}/g;
 const JSON_KEY_RE = /"([A-Za-z_$][\w$-]{0,80})"\s*:/g;
 const HUNK_RE = /@@ -\d{1,9}(?:,\d{1,9})? \+\d{1,9}(?:,\d{1,9})? @@/g;
 
@@ -44,6 +45,10 @@ function survivalRatio(needles: string[], haystack: string): number {
   let survived = 0;
   for (const n of needles) if (haystack.includes(n)) survived++;
   return survived / needles.length;
+}
+
+function numberLiterals(text: string): Set<string> {
+  return new Set(text.match(NUMERIC_RE) ?? []);
 }
 
 function uniq(values: Iterable<string>): string[] {
@@ -90,8 +95,9 @@ export function checkFidelity(
     }
 
     if (cfg.checkNumericIntegrity !== false) {
-      for (const num of uniq(inputText.match(NUMERIC_RE) ?? [])) {
-        if (!outputText.includes(num)) {
+      const outputNumbers = numberLiterals(outputText);
+      for (const num of numberLiterals(inputText)) {
+        if (!outputNumbers.has(num)) {
           return {
             passed: false,
             failedInvariant: "numeric",

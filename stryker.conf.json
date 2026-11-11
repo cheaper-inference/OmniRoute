@@ -813,7 +813,8 @@
       "tests/unit/routing-otel-breaker.test.ts",
       "tests/unit/latency-stats-provider-moment.test.ts",
       "tests/unit/radar-sync-shape-reasons.test.ts",
-      "tests/unit/models-dev-fetch-guard.test.ts"
+      "tests/unit/models-dev-fetch-guard.test.ts",
+      "tests/unit/compression/fidelity-gate-number-set.test.ts"
     ],
     "nodeArgs": [
       "--import",
