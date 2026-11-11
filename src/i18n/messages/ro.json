@@ -6051,6 +6051,8 @@
     "importFromModels": "Import din /modele",
     "modelsImported": "{count} modele importate",
     "allModelsAlreadyImported": "Toate modelele sunt deja importate",
+    "providerPublishesNoModelList": "Acest furnizor nu publică o listă de modele — catalogul său integrat este actualizat",
+    "modelsNoLongerListed": "{count, plural, one {# model nu mai este listat} few {# modele nu mai sunt listate} other {# de modele nu mai sunt listate}} de furnizor",
     "noNewModelsToImport": "Niciun model nou de importat — toate modelele sunt deja în registru sau în lista de modele personalizate",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Descoperirea modelului a eșuat {time}",

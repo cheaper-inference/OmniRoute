@@ -6051,6 +6051,8 @@
     "importFromModels": "/models থেকে ইম্পোর্ট করুন",
     "modelsImported": "{count}টি মডেল ইম্পোর্ট করা হয়েছে",
     "allModelsAlreadyImported": "সব মডেল ইতিমধ্যেই ইম্পোর্ট করা হয়েছে",
+    "providerPublishesNoModelList": "এই প্রদানকারী কোনো মডেলের তালিকা প্রকাশ করে না — এর অন্তর্নির্মিত ক্যাটালগ হালনাগাদ রয়েছে",
+    "modelsNoLongerListed": "{count, plural, one {#টি মডেল আর প্রদানকারীর তালিকায় নেই} other {#টি মডেল আর প্রদানকারীর তালিকায় নেই}}",
     "noNewModelsToImport": "ইম্পোর্ট করার মতো কোনো নতুন মডেল নেই — সব মডেল ইতিমধ্যেই registry বা custom models তালিকায় রয়েছে",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "মডেল আবিষ্কার ব্যর্থ হয়েছে {time}",

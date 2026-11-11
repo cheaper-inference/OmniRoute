@@ -6051,6 +6051,8 @@
     "importFromModels": "Impor dari /models",
     "modelsImported": "{count} model diimpor",
     "allModelsAlreadyImported": "Semua model sudah diimpor",
+    "providerPublishesNoModelList": "Penyedia ini tidak menerbitkan daftar model — katalog bawaannya sudah mutakhir",
+    "modelsNoLongerListed": "{count, plural, one {# model tidak lagi terdaftar} other {# model tidak lagi terdaftar}} oleh penyedia",
     "noNewModelsToImport": "Tidak ada model baru untuk diimpor — semua model sudah ada di registri atau daftar model kustom",
     "localCatalogFallbackStatus": "Tidak dapat menjangkau daftar model penyedia — menampilkan katalog bawaan",
     "discoveryDegradedStatus": "Penemuan model gagal {time}",

@@ -6051,6 +6051,8 @@
     "importFromModels": "Iompórtáil ó /models",
     "modelsImported": "Iompórtáladh {count} múnla",
     "allModelsAlreadyImported": "Tá na múnlaí go léir iompórtáilte cheana",
+    "providerPublishesNoModelList": "Ní fhoilsíonn an soláthraí seo aon liosta samhlacha — tá a chatalóg ionsuite cothrom le dáta",
+    "modelsNoLongerListed": "{count, plural, one {Níl # samhail liostaithe ag an soláthraí a thuilleadh} two {Níl # shamhail liostaithe ag an soláthraí a thuilleadh} few {Níl # shamhail liostaithe ag an soláthraí a thuilleadh} many {Níl # samhail liostaithe ag an soláthraí a thuilleadh} other {Níl # samhail liostaithe ag an soláthraí a thuilleadh}}",
     "noNewModelsToImport": "Níl aon mhúnla nua le hiompórtáil — tá na múnlaí go léir sa chlárlann nó ar liosta na múnlaí saincheaptha",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Theip ar fhionnachtain mionsamhail {time}",

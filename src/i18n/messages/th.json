@@ -6051,6 +6051,8 @@
     "importFromModels": "นำเข้าจาก /models",
     "modelsImported": "นำเข้าโมเดลแล้ว {count} รายการ",
     "allModelsAlreadyImported": "นำเข้าโมเดลทั้งหมดแล้ว",
+    "providerPublishesNoModelList": "ผู้ให้บริการรายนี้ไม่มีการเผยแพร่รายชื่อโมเดล — แค็ตตาล็อกในตัวเป็นข้อมูลล่าสุด",
+    "modelsNoLongerListed": "{count, plural, one {# โมเดล} other {# โมเดล}} ไม่อยู่ในรายการของผู้ให้บริการอีกต่อไป",
     "noNewModelsToImport": "ไม่มีโมเดลใหม่ที่จะนำเข้า — โมเดลทั้งหมดมีอยู่แล้วในรีจิสทรีหรือรายการโมเดลที่กำหนดเอง",
     "localCatalogFallbackStatus": "ไม่สามารถเข้าถึงรายการโมเดลของผู้ให้บริการได้ — กำลังแสดงแค็ตตาล็อกที่มีมาในตัว",
     "discoveryDegradedStatus": "การค้นพบโมเดลล้มเหลว {time}",

@@ -6051,6 +6051,8 @@
     "importFromModels": "从 /models 导入",
     "modelsImported": "已导入 {count} 个模型",
     "allModelsAlreadyImported": "所有模型已导入",
+    "providerPublishesNoModelList": "此提供者不发布模型列表 — 其内置目录已是最新",
+    "modelsNoLongerListed": "{count, plural, one {# 个模型已不再由提供者列出} other {# 个模型已不再由提供者列出}}",
     "noNewModelsToImport": "没有新模型可导入 — 所有模型已在注册表或自定义模型列表中",
     "localCatalogFallbackStatus": "无法获取提供者的模型列表，正在显示内置目录",
     "discoveryDegradedStatus": "模型发现失败 {time}",

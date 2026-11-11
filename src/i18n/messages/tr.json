@@ -6051,6 +6051,8 @@
     "importFromModels": "/models'ten içe aktar",
     "modelsImported": "{count} model içe aktarıldı",
     "allModelsAlreadyImported": "Tüm modeller zaten içe aktarıldı",
+    "providerPublishesNoModelList": "Bu sağlayıcı bir model listesi yayımlamıyor — yerleşik kataloğu günceldir",
+    "modelsNoLongerListed": "{count, plural, one {# model artık} other {# model artık}} sağlayıcı tarafından listelenmiyor",
     "noNewModelsToImport": "İçe aktarılacak yeni model yok — tüm modeller zaten kayıt defterinde veya özel modeller listesinde",
     "localCatalogFallbackStatus": "Sağlayıcının model listesine ulaşılamadı — yerleşik katalog gösteriliyor",
     "discoveryDegradedStatus": "Model keşfi başarısız {time}",

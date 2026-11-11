@@ -6051,6 +6051,8 @@
     "importFromModels": "ייבוא מ /models",
     "modelsImported": "יובאו {count} מודלים",
     "allModelsAlreadyImported": "כל הדגמים כבר מיובאים",
+    "providerPublishesNoModelList": "ספק זה אינו מפרסם רשימת מודלים — הקטלוג המובנה שלו מעודכן",
+    "modelsNoLongerListed": "{count, plural, one {מודל אחד אינו מופיע עוד אצל הספק} other {# מודלים אינם מופיעים עוד אצל הספק}}",
     "noNewModelsToImport": "אין דגמים חדשים לייבוא — כל הדגמים כבר קיימים ברישום או ברשימת הדגמים המותאמים",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "גילוי מודלים נכשל {time}",

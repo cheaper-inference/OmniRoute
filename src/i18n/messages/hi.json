@@ -6051,6 +6051,8 @@
     "importFromModels": "/मॉडल से आयात करें",
     "modelsImported": "{count} मॉडल आयात किए गए",
     "allModelsAlreadyImported": "सभी मॉडल पहले से ही आयातित हैं",
+    "providerPublishesNoModelList": "यह प्रदाता किसी मॉडल सूची को प्रकाशित नहीं करता — इसकी अंतर्निहित कैटलॉग अद्यतित है",
+    "modelsNoLongerListed": "{count, plural, one {# मॉडल अब प्रदाता द्वारा सूचीबद्ध नहीं है} other {# मॉडल अब प्रदाता द्वारा सूचीबद्ध नहीं हैं}}",
     "noNewModelsToImport": "आयात करने के लिए कोई नए मॉडल नहीं — सभी मॉडल पहले से ही रजिस्ट्री या कस्टम मॉडल सूची में हैं",
     "localCatalogFallbackStatus": "प्रदाता की मॉडल सूची तक नहीं पहुँचा जा सका — अंतर्निहित कैटलॉग दिखाया जा रहा है",
     "discoveryDegradedStatus": "मॉडल खोज विफल {time}",

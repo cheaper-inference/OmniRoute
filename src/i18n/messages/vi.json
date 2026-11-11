@@ -6051,6 +6051,8 @@
     "importFromModels": "Nhập từ /models",
     "modelsImported": "Đã nhập {count} mô hình",
     "allModelsAlreadyImported": "Tất cả mô hình đã được nhập",
+    "providerPublishesNoModelList": "Nhà cung cấp này không công bố danh sách mô hình — danh mục tích hợp của họ đã được cập nhật",
+    "modelsNoLongerListed": "{count, plural, one {# mô hình không còn được nhà cung cấp liệt kê} other {# mô hình không còn được nhà cung cấp liệt kê}}",
     "noNewModelsToImport": "Không có mô hình mới để nhập — tất cả mô hình đã có trong sổ đăng ký hoặc danh sách mô hình tùy chỉnh",
     "localCatalogFallbackStatus": "Không thể lấy danh sách mô hình của nhà cung cấp — đang hiển thị danh mục tích hợp sẵn",
     "discoveryDegradedStatus": "Khám phá mô hình thất bại {time}",

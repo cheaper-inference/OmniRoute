@@ -6051,6 +6051,8 @@
     "importFromModels": "/models இலிருந்து இறக்குமதி செய்யவும்",
     "modelsImported": "{count} மாடல்கள் இறக்குமதி செய்யப்பட்டன",
     "allModelsAlreadyImported": "அனைத்து மாடல்களும் ஏற்கனவே இறக்குமதி செய்யப்பட்டுள்ளன",
+    "providerPublishesNoModelList": "இந்த வழங்குநர் எந்த மாடல் பட்டியலையும் வெளியிடவில்லை — அதன் உட்பொதிக்கப்பட்ட பட்டியல் புதுப்பிக்கப்பட்ட நிலையில் உள்ளது",
+    "modelsNoLongerListed": "{count, plural, one {# மாடல் இனி வழங்குநரால் பட்டியலிடப்படவில்லை} other {# மாடல்கள் இனி வழங்குநரால் பட்டியலிடப்படவில்லை}}",
     "noNewModelsToImport": "இறக்குமதி செய்யப் புதிய மாடல்கள் எதுவும் இல்லை — அனைத்து மாடல்களும் ஏற்கனவே பதிவகத்தில் அல்லது தனிப்பயன் மாடல்கள் பட்டியலில் உள்ளன",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "மாடல் கண்டுபிடிப்பு தோல்வியடைந்தது {time}",

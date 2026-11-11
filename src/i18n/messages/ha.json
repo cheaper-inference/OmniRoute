@@ -6051,6 +6051,8 @@
     "importFromModels": "Shigo daga /models",
     "modelsImported": "An shigo da samfura {count}",
     "allModelsAlreadyImported": "An riga an shigo da duk samfuran",
+    "providerPublishesNoModelList": "Wannan mai ba da sabis ba ya wallafa jerin samfura — kundin da ke ciki yana sabuntacce",
+    "modelsNoLongerListed": "{count, plural, one {Ba a sake jera # samfur daga mai ba da sabis ba} other {Ba a sake jera # samfura daga mai ba da sabis ba}}",
     "noNewModelsToImport": "Babu sababbin samfuran da za a shigo da su — duk samfuran suna cikin kundin rajista ko jerin samfuran al'ada",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Gano model ya kasa {time}",

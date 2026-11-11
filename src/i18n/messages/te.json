@@ -6051,6 +6051,8 @@
     "importFromModels": "/models నుండి దిగుమతి చేయండి",
     "modelsImported": "{count} మోడళ్లు దిగుమతి చేయబడ్డాయి",
     "allModelsAlreadyImported": "అన్ని మోడళ్లు ఇప్పటికే దిగుమతి చేయబడ్డాయి",
+    "providerPublishesNoModelList": "ఈ ప్రొవైడర్ ఏ మోడల్ జాబితాను ప్రచురించదు — దీని అంతర్నిర్మిత కాటలాగ్ తాజాగా ఉంది",
+    "modelsNoLongerListed": "{count, plural, one {# మోడల్ ఇకపై ప్రొవైడర్ ద్వారా జాబితా చేయబడలేదు} other {# మోడళ్లు ఇకపై ప్రొవైడర్ ద్వారా జాబితా చేయబడలేదు}}",
     "noNewModelsToImport": "దిగుమతి చేయడానికి కొత్త మోడళ్లు లేవు — అన్ని మోడళ్లు ఇప్పటికే రిజిస్ట్రీ లేదా అనుకూల మోడళ్ల జాబితాలో ఉన్నాయి",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "మోడల్ డిస్కవరీ విఫలమైంది {time}",

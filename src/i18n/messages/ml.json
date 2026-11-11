@@ -6051,6 +6051,8 @@
     "importFromModels": "/models-ൽ നിന്ന് ഇറക്കുമതി ചെയ്യുക",
     "modelsImported": "{count} മോഡലുകൾ ഇറക്കുമതി ചെയ്തു",
     "allModelsAlreadyImported": "എല്ലാ മോഡലുകളും ഇതിനകം ഇറക്കുമതി ചെയ്തിട്ടുണ്ട്",
+    "providerPublishesNoModelList": "ഈ ദാതാവ് മോഡലുകളുടെ പട്ടിക പ്രസിദ്ധീകരിക്കുന്നില്ല — അതിന്റെ അന്തർനിർമ്മിത കാറ്റലോഗ് നിലവിലുള്ളതാണ്",
+    "modelsNoLongerListed": "{count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} ഇനി ദാതാവിന്റെ പട്ടികയിൽ ഇല്ല",
     "noNewModelsToImport": "ഇറക്കുമതി ചെയ്യാൻ പുതിയ മോഡലുകളൊന്നുമില്ല — എല്ലാ മോഡലുകളും ഇതിനകം രജിസ്ട്രിയിലോ ഇഷ്ടാനുസൃത മോഡലുകളുടെ പട്ടികയിലോ ഉണ്ട്",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "മോഡൽ കണ്ടെത്തൽ പരാജയപ്പെട്ടു {time}",

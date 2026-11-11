@@ -6051,6 +6051,8 @@
     "importFromModels": "Importēt no /models",
     "modelsImported": "Importēti modeļi: {count}",
     "allModelsAlreadyImported": "Visi modeļi jau importēti",
+    "providerPublishesNoModelList": "Šis nodrošinātājs nepublicē modeļu sarakstu — tā iebūvētais katalogs ir aktuāls",
+    "modelsNoLongerListed": "{count, plural, one {# modelis vairs nav} other {# modeļi vairs nav}} norādīti nodrošinātāja sarakstā",
     "noNewModelsToImport": "Nav jaunu modeļu importēšanai — visi modeļi jau ir reģistrā vai pielāgoto modeļu sarakstā",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modeļa atklāšana neizdevās {time}",
