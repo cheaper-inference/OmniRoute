@@ -14,6 +14,7 @@ import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
 import { Skeleton } from "@/shared/components/Loading";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 
@@ -125,6 +126,7 @@ const REFRESH_INTERVAL_MS = 10_000;
 export default function ReasoningCacheTab() {
   const t = useTranslations("cache");
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const [data, setData] = useState<ReasoningCacheData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,6 +171,13 @@ export default function ReasoningCacheTab() {
   }, [fetchData]);
 
   const handleClear = async () => {
+    const confirmed = await requestConfirm({
+      title: t("reasoningClearAll"),
+      message: t("clearAllConfirm"),
+      confirmText: t("reasoningClearAll"),
+    });
+    if (!confirmed) return;
+
     setClearing(true);
     try {
       const res = await fetch("/api/cache/reasoning", { method: "DELETE" });
@@ -501,6 +510,8 @@ export default function ReasoningCacheTab() {
           <InfoRow icon="info">{t("reasoningBehaviorModels")}</InfoRow>
         </div>
       </div>
+
+      {confirmDialog}
     </div>
   );
 }

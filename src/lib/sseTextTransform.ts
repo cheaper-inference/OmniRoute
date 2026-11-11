@@ -1,3 +1,4 @@
+import { transformStreamWithCancel } from "../../open-sse/utils/cancelableTransformStream.ts";
 import { resolveStreamIndices } from "./streamIndices";
 export type FieldCategory = "content" | "reasoning" | "toolArgs" | "partialJson";
 
@@ -59,6 +60,10 @@ export const METADATA_KEYS = new Set([
   "speed",
   "signature",
   "request_id",
+  // Mistral anti token-length side-channel padding (#19293): random alphabet/digit runs
+  // attached to every streamed chunk since 2025-08-27 (Mistral changelog). Not answer
+  // text; routing it to content spliced padding into the next real text delta.
+  "p",
 ]);
 
 // Anthropic Messages SSE frames. Their streamed text lives at fixed paths (block text,
@@ -490,7 +495,7 @@ export function createSseTextTransform(
     }
   };
 
-  return new TransformStream({
+  return transformStreamWithCancel<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
       try {
         const chunkStr = decoder.decode(chunk, { stream: true });
@@ -502,15 +507,13 @@ export function createSseTextTransform(
           handleLine(line, controller);
         }
       } catch (err: any) {
-        let context = "[REDACTED_DUE_TO_PII]";
-        if (!err?.message?.startsWith("[PII]")) {
-          if (typeof chunk === "string") {
-            context = chunk.slice(0, 200);
-          } else if (chunk instanceof Uint8Array) {
-            context = fallbackDecoder.decode(chunk.slice(0, 200));
-          } else {
-            context = String(chunk).slice(0, 200);
-          }
+        // chunk is typed Uint8Array, so the [unavailable] fallback only fires if a
+        // caller violates that contract at runtime. Keep the guard so a bad caller
+        // logs a label instead of throwing inside the error path.
+        const errorIsPii = !!err?.message?.startsWith("[PII]");
+        let context = errorIsPii ? "[REDACTED_DUE_TO_PII]" : "[unavailable]";
+        if (!errorIsPii && chunk instanceof Uint8Array) {
+          context = fallbackDecoder.decode(chunk.slice(0, 200));
         }
         console.error("[SSE-TRANSFORM] Error in transform:", err, "chunk:", context);
         lineBuffer = "";
@@ -547,5 +550,5 @@ export function createSseTextTransform(
         onCancel();
       }
     },
-  } as any);
+  });
 }

@@ -107,6 +107,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     customToolNames,
     echoModel,
     effectiveModel,
+    agentContext,
     endpointPath,
     executeProviderRequest,
     executor,
@@ -206,6 +207,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       provider,
       model,
       log,
+      signal: streamController.signal,
       // #16438 opt-in: briefly probe Claude/Codex streams for usable output after the first
       // lifecycle event so an empty turn can be retried on a sibling connection.
       contentProbeMs:
@@ -371,6 +373,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     isCombo, // #14116: foreign-account quota-header strip (only meaningful when true)
     requestedConnectionId: forcedConnectionId || null,
     selectedConnectionId: credentials?.connectionId ?? null,
+    apiKeyInfo, // per-key upstream anthropic-ratelimit-* header policy (#14862)
   });
 
   // The streaming headers (turn-state included, when present) are committed to
@@ -532,6 +535,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       comboStrategy,
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
+      agentContext,
       partialUsage: streamPartialUsage,
       emittedOutput: streamEmittedOutput(transformStream),
     });

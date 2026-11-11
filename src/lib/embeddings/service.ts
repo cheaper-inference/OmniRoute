@@ -37,9 +37,7 @@ import {
   formatUnknownEmbeddingProviderError,
 } from "./errors";
 import { isPrivateHost, isCloudMetadataHost } from "@/shared/network/outboundUrlGuard";
-import { calculateCost } from "@/lib/usage/costCalculator";
-import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
-import { generateRequestId } from "@/shared/utils/requestId";
+import { embeddingSuccessResponse } from "./billing";
 import { resolveLocalSyncedEndpointRoute } from "@/lib/providerModels/syncedEndpointRouting";
 import { resolveAlibabaProviderEmbeddingUrl } from "@/shared/constants/alibabaProviderRegions";
 import { ensureCopilotEmbeddingToken } from "./copilotToken";
@@ -542,6 +540,7 @@ export async function createEmbeddingResponse(
     }
   }
 
+  let reportedUsage: Record<string, unknown> | null = null;
   const runEmbedding = () =>
     handleEmbedding({
       body:
@@ -564,6 +563,9 @@ export async function createEmbeddingResponse(
       apiKeyName: options.apiKeyName || null,
       requestedModel,
       comboName: options.comboName || null,
+      onUsage: (usage) => {
+        reportedUsage = usage;
+      },
       // #10347 — thread the selected connection id so handleEmbedding can cool the
       // account on a hard upstream failure (previously always null on /v1/embeddings).
       connectionId:
@@ -571,6 +573,7 @@ export async function createEmbeddingResponse(
         options.connectionId ||
         connectionIdForProxy ||
         null,
+      connectionProvider: credentialsProviderId,
     });
 
   const result = connectionIdForProxy
@@ -581,20 +584,14 @@ export async function createEmbeddingResponse(
 
   if (result.success) {
     if (credentials) await clearRecoveredProviderState(credentials as Record<string, unknown>);
-    responseHeaders.set("Content-Type", "application/json");
-    const usage = (result.data as { usage?: Record<string, number> })?.usage ?? null;
-    const costUsd = usage ? await calculateCost(provider, effectiveModel ?? "", usage) : 0;
-    attachOmniRouteMetaHeaders(responseHeaders, {
+    return embeddingSuccessResponse(result.data, responseHeaders, {
       provider,
-      model: effectiveModel,
-      usage,
-      costUsd,
-      latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
-    });
-    return new Response(JSON.stringify(result.data), {
-      status: result.status,
-      headers: responseHeaders,
+      model: effectiveModel ?? "",
+      usage: reportedUsage,
+      apiKeyId: options.apiKeyId,
+      apiKeyName: options.apiKeyName,
+      connectionId: connectionIdForProxy || options.connectionId,
+      startTime,
     });
   }
 
@@ -611,11 +608,15 @@ export async function createEmbeddingResponse(
     typeof credentials.connectionId === "string" &&
     HARD_ERROR_STATUSES.has(result.status)
   ) {
+    // Classify against the connection's own provider id. For a custom node the
+    // request `provider` is the model prefix (e.g. "my-embed"), which is not a
+    // compatible-provider id, so a node's rate-limit 429 was judged by API-key wallet
+    // rules and parked as credits_exhausted instead of a model-scoped cooldown.
     markAccountUnavailable(
       credentials.connectionId,
       result.status,
       result.error || "Embedding provider error",
-      provider,
+      credentialsProviderId,
       resolvedModel || null
     ).catch((err) => {
       log.debug(

@@ -236,6 +236,69 @@ connection** (Edit connection → Claude section → `lowPriorityMode` / `autoLi
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Auto-apply banked resets
+
+**Scope:** Codex and Claude subscription (OAuth) connections. **Opt-in**: the
+`bankedResetAutoApply` setting is off and in `dry-run` mode by default
+(Settings → AI → Auto-apply banked resets).
+
+**Purpose:** spend banked resets on their own when an account hits a usage wall, instead of
+waiting for an operator to press "Redeem" on the Provider Limits page.
+
+| Credit type (`creditTypes`) | What is redeemed                          | Where it runs                                                   |
+| --------------------------- | ----------------------------------------- | --------------------------------------------------------------- |
+| `codexCredits`              | Codex reset credits                       | background job, every 60 s                                      |
+| `claudeCredits`             | Claude banked grants (`GRANT` credits)    | background job, every 60 s                                      |
+| `claudeSessionReset`        | Claude weekly session-limit reset (above) | request path, through the same policy as the per-account toggle |
+
+**Implementation:**
+
+- Pure decision (one rule set for both paths): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Background job: `src/lib/services/bankedResetAutoApply.ts` (started in `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registered through
+  `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- History, caps and webhook: `src/lib/usage/bankedResetAudit.ts`
+- History API: `GET /api/settings/banked-reset-auto/history?limit=50` (management auth)
+
+**Decision order** (the first failing rule is the recorded reason):
+
+1. Feature off, credit type off, or account out of scope (`accountScope` `all` / `selected`
+   plus the per-account `connections` map).
+2. Outside the optional UTC schedule (`startHourUtc` > `endHourUtc` crosses midnight).
+3. Caps over the last 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3), and
+   `minSpacingMinutes` (30) between any two redemptions.
+4. Trigger: a walled `session` or `weekly` window (read from
+   `getQuotaWindowStatus().reachedThreshold`, not `isAccountQuotaExhausted()`, which only
+   reports an account with every window spent), or a credit expiring within
+   `expiringCreditHours` (24) on an account that has used at least
+   `expiringCreditMinUsedPercent` (50).
+5. Natural-reset guard: skip when the walled 5-hour window resets within
+   `sessionResetGuardMinutes` (90), or the walled weekly window within
+   `weeklyResetGuardHours` (12).
+6. Weekly floor: skip a 5-hour reset when weekly remaining is below `weeklyFloorPercent` (10).
+7. `last-resort` mode: skip while another in-scope account of the same provider has at least
+   `poolHeadroomPercent` (10) left in both windows. Expiring-credit triggers bypass this.
+8. `dry-run` records a row and redeems nothing; `last-resort` and `eager` redeem.
+
+Missing quota data never unlocks a redemption: an unknown reset time or weekly usage skips.
+
+**Claude session reset:** with the feature off, or `claudeSessionReset` off, the per-account
+`autoLimitReset` toggle decides exactly as before. With both on, the feature replaces the
+per-account toggles: an in-scope account may claim only when the policy allows it, and in
+`dry-run` mode no claim is made.
+
+**Safety:** the job redeems at most one credit per tick, decides before listing credits (a
+skipped account is never listed), uses idempotency keys
+`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, and backs an account off for 1 h after a
+failed listing or redemption. Every redemption, failure and dry-run decision is written to
+`audit_log` (`action: "bankedReset.redeem"`, no tokens or credit ids); the caps are counted
+from those rows, so they survive restarts. Successful redemptions also fire the
+`provider.reset_redeemed` webhook.
+
+Regression guards: `tests/unit/banked-reset-policy.test.ts`,
+`tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`,
+`tests/unit/banked-reset-history-route.test.ts`.
+
 ### Session affinity (#7274)
 
 **Scope:** one client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) pinned to one connection, for **any** provider.
@@ -483,7 +546,9 @@ returning the 429 — this covers Gemini-class TPM/RPM windows (~60s retry-after
 on multi-model combos, e.g. both targets of a 2-model combo hitting a per-model
 rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
-(locked until midnight) or auth/not-found reasons.
+(locked until midnight) or auth/not-found reasons. With `comboTimeoutMs` set, a
+wait that cannot finish before that deadline does not start (#18998): the combo
+answers at once with its terminal response instead of a `COMBO_TIMEOUT` 504.
 
 A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
 `false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch
