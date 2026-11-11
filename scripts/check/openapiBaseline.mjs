@@ -37,8 +37,25 @@ export function resolveOpenapiBaseline({
     } else if (eventName === "push") {
       requestedBase = event.before;
       if (event.after !== candidateSha) throw new Error("Push head mismatch");
+    } else if (
+      eventName === "workflow_dispatch" &&
+      (event.inputs?.candidate_base_branch || event.inputs?.i18n_base_sha)
+    ) {
+      // A full manual candidate must measure the same change as its PR. A
+      // follow-up commit must never hide earlier API breaks by changing HEAD^1.
+      requestedBase = event.inputs.i18n_base_sha;
+      if (
+        !/^(main|release\/v[0-9]+\.[0-9]+\.[0-9]+)$/.test(
+          event.inputs.candidate_base_branch ?? ""
+        ) ||
+        !SHA.test(requestedBase ?? "") ||
+        env.GITHUB_SHA !== candidateSha
+      ) {
+        throw new Error("Invalid manual candidate comparison");
+      }
+      git("merge-base", "--is-ancestor", requestedBase, candidateSha);
     } else if (["schedule", "workflow_dispatch"].includes(eventName)) {
-      // No PR diff exists. Observe the selected commit's own change, pinned to its first parent.
+      // No candidate was supplied. Observe the selected commit's own change.
       requestedBase = git("rev-parse", "--verify", `${candidateSha}^1`);
     } else {
       throw new Error(`Unsupported OpenAPI event: ${eventName}`);

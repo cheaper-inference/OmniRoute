@@ -336,3 +336,41 @@ test("an already corrected event base with no findings does not inherit a stale 
   assert.match(r.stdout, /openapiBreakingAccepted=0/);
   assert.match(r.stdout, /openapiBreakingUnknown=0/);
 });
+
+test("manual candidate measures its full explicit base instead of only the last commit", (t) => {
+  const f = fixture(t);
+  f.spec({});
+  f.commit();
+  writeFileSync(join(f.dir, "followup.txt"), "unrelated follow-up");
+  f.commit();
+  const r = f.run("workflow_dispatch", {
+    inputs: { candidate_base_branch: "main", i18n_base_sha: f.original },
+  });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.match(r.stdout, /openapiBreaking=1/);
+  assert.match(r.stdout, new RegExp(`openapiBaseSha=${f.original}`));
+});
+
+for (const [label, makeInputs, extra] of [
+  ["missing base SHA", () => ({ candidate_base_branch: "main" }), {}],
+  ["missing target", (f) => ({ i18n_base_sha: f.original }), {}],
+  [
+    "invalid target",
+    (f) => ({ candidate_base_branch: "feature/unreviewed", i18n_base_sha: f.original }),
+    {},
+  ],
+  ["moving SHA", () => ({ candidate_base_branch: "main", i18n_base_sha: "HEAD^" }), {}],
+  ["diverged base", (f) => ({ candidate_base_branch: "main", i18n_base_sha: f.advanced }), {}],
+  [
+    "different checkout",
+    (f) => ({ candidate_base_branch: "release/v3.8.54", i18n_base_sha: f.original }),
+    { GITHUB_SHA: "b".repeat(40) },
+  ],
+]) {
+  test(`manual candidate fails closed for ${label}`, (t) => {
+    const f = fixture(t);
+    const r = f.run("workflow_dispatch", { inputs: makeInputs(f) }, extra);
+    assert.equal(r.status, 2, r.stdout + r.stderr);
+    assert.match(r.stdout, /openapiBreaking=INCOMPLETE reason=base-unresolved/);
+  });
+}
