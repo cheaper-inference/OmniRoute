@@ -112,7 +112,7 @@ const ctx = (arch: string, vars: Context): Context => ({
 
 test("amd64 runner per DOCKER_AMD64_RUNNER value", () => {
   const cases: Array<[Context, Value]> = [
-    [VPS_ON, ["self-hosted", "omni-build"]],
+    [VPS_ON, ["self-hosted", "omni-build", "omni-build-60gb"]],
     [{}, "ubuntu-24.04"],
     [
       { ...VPS_ON, ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "true" },

@@ -66,7 +66,7 @@ test("the expiry guard blocks before both scans without changing their severity 
   const index = steps.findIndex(
     (step) =>
       step.run ===
-      "node .ci-trivy-policy/scripts/ci/prepare-trivy-scan-policy.mjs .ci-trivy-policy/.trivyignore.yaml .trivyignore.yaml .ci-trivy-policy/effective.trivyignore.yaml"
+      "node .ci-trivy-policy/scripts/ci/prepare-trivy-scan-policy.mjs .ci-trivy-policy/.trivyignore.yaml .ci-trivy-candidate/.trivyignore.yaml .ci-trivy-policy/effective.trivyignore.yaml"
   );
   assert.ok(index >= 0);
   assert.notEqual(steps[index]["continue-on-error"], true);

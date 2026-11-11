@@ -517,7 +517,17 @@ jobs:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
       - name: CHANGELOG integrity (nenhum bullet da base pode sumir no merge-result)
-        run: npm run check:changelog-integrity
+        env:
+          CHANGELOG_EVENT_NAME: ${{ github.event_name }}
+          CHANGELOG_CANDIDATE_SHA: ${{ github.sha }}
+          CHANGELOG_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CHANGELOG_MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          CHANGELOG_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          CHANGELOG_BASE_REF="$(node scripts/quality/changelog-comparison-base.mjs)"
+          export CHANGELOG_BASE_REF
+          npm run check:changelog-integrity
       - name: Agent-skills generator sync (SKILL.md gerado ≡ catálogo)
         run: npm run check:agent-skills-sync
 
