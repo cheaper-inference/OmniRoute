@@ -1,0 +1,1 @@
+- **fix(compression):** teach the compression-marker protocol once in the pipeline, accept a plain underscore in announced retrieve tool names, and keep truncated MCP tool results as valid JSON with a pagination hint ([#18870](https://github.com/cheaper-inference/OmniRoute/pull/18870)) — thanks @maxmad64bis

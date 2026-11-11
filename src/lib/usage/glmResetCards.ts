@@ -9,6 +9,11 @@ import { resolveProxyForConnection } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { fetchAndPersistProviderLimits } from "@/lib/usage/providerLimits";
 import {
+  captureGlmResetRecovery,
+  recoverGlmResetCooldown,
+  type GlmResetRecoveryState,
+} from "@/lib/usage/glmResetCardRecovery";
+import {
   fetchGlmResetCardList,
   getGlmResetCardEnvelopeMessage,
   getGlmResetCardEnvelopeStatus,
@@ -134,6 +139,7 @@ export interface GlmResetCardConsumeResult {
 
 interface RedemptionAttempt {
   requestedSelection: string | null;
+  recoveryState?: GlmResetRecoveryState | null;
   card?: GlmResetCard;
   inFlight?: Promise<GlmResetCardConsumeResult>;
   committed?: GlmResetCardConsumeResult;
@@ -272,11 +278,15 @@ function assertCompatibleAttempt(
   }
 }
 
-async function refreshAfterCommit(connectionId: string): Promise<GlmResetCardConsumeResult> {
+async function refreshAfterCommit(
+  connectionId: string,
+  attempt: RedemptionAttempt
+): Promise<GlmResetCardConsumeResult> {
   try {
     const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
       allowRotatingRefresh: true,
     });
+    await recoverGlmResetCooldown(connectionId, attempt.recoveryState, refreshed.usage);
     return { outcome: "reset", usage: refreshed.usage };
   } catch {
     // Redemption is already irreversible. The caller can preserve its current
@@ -352,6 +362,10 @@ async function executeRedemption(
     attempt.card = card;
   }
 
+  if (attempt.recoveryState === undefined) {
+    attempt.recoveryState = captureGlmResetRecovery(connection, attempt.card.resetType);
+  }
+
   // A transport rejection is ambiguous: z.ai may have committed the card before
   // the response was lost. Keep `attempt.card`, and the next call will retry the
   // exact same body/requestId without relisting.
@@ -412,7 +426,7 @@ export async function consumeGlmResetCard(
         executeRedemption(attempt, connection, requestId, proxyInfo?.proxy ?? null)
       );
       return runWithConnectionFetch(proxyInfo?.proxy ?? null, () =>
-        refreshAfterCommit(connection.id)
+        refreshAfterCommit(connection.id, attempt)
       );
     })();
     attempt.inFlight = operation;

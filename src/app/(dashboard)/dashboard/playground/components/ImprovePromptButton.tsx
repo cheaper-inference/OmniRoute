@@ -79,7 +79,7 @@ export default function ImprovePromptButton({
           {loading ? t("improvingPrompt") : t("improvePrompt")}
         </Button>
 
-        {improveError && <p className="text-[11px] text-error">{improveError}</p>}
+        {improveError && <p className="text-xs text-error">{improveError}</p>}
       </div>
 
       {/* Quota confirmation modal (kit Dialog via the ConfirmModal adapter) */}
