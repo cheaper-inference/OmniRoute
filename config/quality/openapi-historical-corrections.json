@@ -5,12 +5,12 @@
       "id": "historical-groups-and-chat-auth-17267",
       "status": "historical_spec_correction",
       "trackingIssue": "https://github.com/cheaper-inference/OmniRoute/issues/17267",
-      "justification": "The four group handlers already required their JSON inputs and two DELETE query parameters and returned 201 on creation at the immutable event base. Both the authz proxy and chat handler already returned an error object for 401. The 14 contract sources are byte-identical at reviewed base and candidate; the ten scanner findings correct historical specification drift. Zod and Next versions differ, so this source proof does not claim whole-runtime equivalence. Candidate DAST and request-contract tests remain required.",
-      "baseSha": "26bf6812c06afb33abeb877160585050c0f5ca5d",
-      "baseSpecSha256": "b5ca0929a47416f4f223c79572c58c5e070595483cd36f13f6312149e50a9b03",
-      "candidateSpecSha256": "10224a13ec7930e67c6befe3a97de35782194382eaaa1a08617390566e3ee1dd",
+      "justification": "The four group handlers still require the documented JSON inputs and DELETE query parameters and return 201 on creation at the current immutable main base. Both authz and the chat handler return an error object for 401. A fresh oasdiff 1.19.1 scan reproduces exactly the same ten historical specification corrections, and all 14 contract sources are byte-identical between this reviewed base and candidate. This refresh changes no API behavior, finding fingerprint, expiry or numeric ceiling; request-contract tests and candidate DAST remain required.",
+      "baseSha": "094a1aa1c0b2c54a4c4e3065948b3d4e9c1d0165",
+      "baseSpecSha256": "382c51388159e411dfe79d002aff2bbe3bd8bdcdcbad3b08201fbf14815d63bc",
+      "candidateSpecSha256": "76ac0224403f93dee408b75bc722f036d0fb9f1ce20631e2e4ffb326ced54cea",
       "scannerVersion": "1.19.1",
-      "reviewedCandidateSha": "f785665ce6213de69d0f5d7689beaececc937270",
+      "reviewedCandidateSha": "cc7ff6e86e982ba0c9eba59247124aa33aeb8882",
       "expiresOn": "2026-12-04",
       "contractSources": [
         {
@@ -40,23 +40,23 @@
         },
         {
           "path": "src/app/api/v1/chat/completions/route.ts",
-          "baseSha256": "6a424a262bd94d61abb8c1714f90311719eecac43a05fabd10b978285b7ca71c",
-          "candidateSha256": "6a424a262bd94d61abb8c1714f90311719eecac43a05fabd10b978285b7ca71c"
+          "baseSha256": "af6559c6b0254ea0e1f81f6fcab666a01ce56c882f55c68ca98320f0ac601617",
+          "candidateSha256": "af6559c6b0254ea0e1f81f6fcab666a01ce56c882f55c68ca98320f0ac601617"
         },
         {
           "path": "src/shared/utils/clientApiRouteAuth.ts",
-          "baseSha256": "dde9f7a235723edeb3ed33684df1b1afdb79fa86f3de1fd3444fed8f53c2fdd2",
-          "candidateSha256": "dde9f7a235723edeb3ed33684df1b1afdb79fa86f3de1fd3444fed8f53c2fdd2"
+          "baseSha256": "eb95a72172a9be0939ecffcece6c3d044a38585852737456ef04107ea655f3fc",
+          "candidateSha256": "eb95a72172a9be0939ecffcece6c3d044a38585852737456ef04107ea655f3fc"
         },
         {
           "path": "src/server/authz/policies/clientApi.ts",
-          "baseSha256": "0152e18771a006f5f94047a6d95f19ea6ab0cf863a97fbe4311c25f5a6121c89",
-          "candidateSha256": "0152e18771a006f5f94047a6d95f19ea6ab0cf863a97fbe4311c25f5a6121c89"
+          "baseSha256": "529dfeef05ed73a8332ea3d44cf25b51425dcd8dfa7b3e0ac953f982101c4422",
+          "candidateSha256": "529dfeef05ed73a8332ea3d44cf25b51425dcd8dfa7b3e0ac953f982101c4422"
         },
         {
           "path": "src/server/authz/pipeline.ts",
-          "baseSha256": "cf76cc1e94d850bcebafb51f183800fae30b7212fa96554db1b7e901646284c5",
-          "candidateSha256": "cf76cc1e94d850bcebafb51f183800fae30b7212fa96554db1b7e901646284c5"
+          "baseSha256": "87cb1b5b3ad98cb4ca2f1882cbf3ebf5c1591f70967f14343424c6bce1c3d761",
+          "candidateSha256": "87cb1b5b3ad98cb4ca2f1882cbf3ebf5c1591f70967f14343424c6bce1c3d761"
         },
         {
           "path": "src/server/authz/context.ts",
@@ -65,23 +65,23 @@
         },
         {
           "path": "src/server/authz/classify.ts",
-          "baseSha256": "0cba240a6f3553927821eb1cab513d23aae2ebeb899aa38dc1fad30e2026d128",
-          "candidateSha256": "0cba240a6f3553927821eb1cab513d23aae2ebeb899aa38dc1fad30e2026d128"
+          "baseSha256": "16c04661787bfb8ba7091c136bc7bffdd93382bd7f424aa76c9e87236af3d92f",
+          "candidateSha256": "16c04661787bfb8ba7091c136bc7bffdd93382bd7f424aa76c9e87236af3d92f"
         },
         {
           "path": "src/server/authz/routeGuard.ts",
-          "baseSha256": "f1fdcf54f0e77d1bfcbebc075d4d8baeff9f1bdb923a164dff9a36d1b7649d64",
-          "candidateSha256": "f1fdcf54f0e77d1bfcbebc075d4d8baeff9f1bdb923a164dff9a36d1b7649d64"
+          "baseSha256": "f8580ec772cfcfc380398758ec55e9a91e5bbb144d0a555b25a9222d01ee2883",
+          "candidateSha256": "f8580ec772cfcfc380398758ec55e9a91e5bbb144d0a555b25a9222d01ee2883"
         },
         {
           "path": "src/proxy.ts",
-          "baseSha256": "5f2b1c1525a02f498eb0ec73135c5857a1cdfeee83ffdc40ae9a4b5e3224f175",
-          "candidateSha256": "5f2b1c1525a02f498eb0ec73135c5857a1cdfeee83ffdc40ae9a4b5e3224f175"
+          "baseSha256": "67f165a099f762f70dd26ea378ff72c2b4daa587ef149c2b84838223c0571395",
+          "candidateSha256": "67f165a099f762f70dd26ea378ff72c2b4daa587ef149c2b84838223c0571395"
         },
         {
           "path": "open-sse/utils/error.ts",
-          "baseSha256": "89b0dd8b8003229e1da0ff9de8bc2953a874835e55cac4bc4bb3e9c350fb6993",
-          "candidateSha256": "89b0dd8b8003229e1da0ff9de8bc2953a874835e55cac4bc4bb3e9c350fb6993"
+          "baseSha256": "e438e76a2b88826c9a5d4487b4c76fc8b90e7882211146db1ac05daae8010dbe",
+          "candidateSha256": "e438e76a2b88826c9a5d4487b4c76fc8b90e7882211146db1ac05daae8010dbe"
         }
       ],
       "findings": [
