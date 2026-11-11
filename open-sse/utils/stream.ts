@@ -70,6 +70,13 @@ import { collectDeclaredToolNames } from "../translator/response/openai-response
 import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { appendToolCallNameDelta } from "./toolCallName.ts";
 import {
+  advancePendingLineBytes,
+  mergeNativeToolCalls,
+  summaryTextTailMarker,
+  trackClaudeNativeToolCall,
+  type StreamToolCall as ToolCall,
+} from "./streamSummaryHelpers.ts";
+import {
   generateSessionId,
   markToolFinish,
   consumeToolFinishTime,
@@ -185,19 +192,6 @@ type StreamCompletePayload = {
 /** Queue budget every provider used before `streamBufferBytes` existed. */
 const DEFAULT_STREAM_BUFFER_BYTES = 16384;
 
-/**
- * Longest upstream SSE line (bytes, newline excluded) the stream keeps in memory. A line past
- * it ends the stream with one error frame. Generous on purpose (same size as the non-streaming
- * response cap): one inline base64 image frame can reach tens of MiB.
- */
-const MAX_PENDING_SSE_LINE_BYTES = 64 * 1024 * 1024;
-
-/**
- * Same window as `appendBoundedText` in streamHelpers.ts. Streamed answer text at or past it
- * has lost its head, so the summary is only a log tail and must not be cached as the answer.
- */
-const SUMMARY_TEXT_WINDOW_CHARS = 64 * 1024;
-
 type StreamOptions = {
   mode?: string;
   targetFormat?: string;
@@ -284,64 +278,10 @@ type TranslateState = ReturnType<typeof initState> & {
   } | null;
 };
 
-type ToolCall = {
-  id: string | null;
-  index: number;
-  type: string;
-  function: { name: string; arguments: string };
-};
-
 type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-/** `{ _summary_text_tail: true }` when streamed text reached the window, else `{}`. */
-function summaryTextTailMarker(...texts: Array<string | undefined>): { _summary_text_tail?: true } {
-  return texts.some((text) => (text?.length ?? 0) >= SUMMARY_TEXT_WINDOW_CHARS)
-    ? { _summary_text_tail: true }
-    : {};
-}
-
-/**
- * Chat-shaped tool calls for the completion summary: the Chat/textual calls, then native Claude
- * `tool_use` blocks and Responses `function_call` items (each once, by call id). The result is
- * a fresh list; the wire events are not touched.
- */
-function mergeNativeToolCalls(
-  chatCalls: ToolCall[],
-  claudeCalls: ToolCall[],
-  responsesItems: Iterable<unknown>,
-  responsesPending: Iterable<unknown>
-): ToolCall[] {
-  const calls = [...chatCalls].sort((a, b) => a.index - b.index);
-  const seen = new Set(calls.map((call) => call.id).filter(Boolean));
-  const add = (call: ToolCall) => {
-    if (call.id && seen.has(call.id)) return;
-    if (call.id) seen.add(call.id);
-    calls.push({ ...call, index: calls.length });
-  };
-  for (const call of claudeCalls) add(call);
-  for (const raw of [...responsesItems, ...responsesPending]) {
-    const item = asRecord(raw);
-    if (item.type !== "function_call" || typeof item.name !== "string") continue;
-    add({
-      id:
-        typeof item.call_id === "string"
-          ? item.call_id
-          : typeof item.id === "string"
-            ? item.id
-            : null,
-      index: 0,
-      type: "function",
-      function: {
-        name: item.name,
-        arguments: typeof item.arguments === "string" ? item.arguments : "",
-      },
-    });
-  }
-  return calls;
 }
 
 const TERMINAL_STREAM_EVENT_TYPES = new Set([
@@ -1704,18 +1644,9 @@ export function createSSEStream(options: StreamOptions = {}) {
         const now = Date.now();
         timing.markByte();
         lastChunkTime = now;
-        // Count the pending line in bytes through its first newline BEFORE it is buffered or parsed.
-        const firstNl = chunk.indexOf(10);
-        if (
-          pendingLineBytes + (firstNl >= 0 ? firstNl : chunk.byteLength) >
-          MAX_PENDING_SSE_LINE_BYTES
-        ) {
-          abortOversizePendingLine(controller);
-          return;
-        }
-        const lastNl = chunk.lastIndexOf(10);
-        pendingLineBytes =
-          lastNl >= 0 ? chunk.byteLength - lastNl - 1 : pendingLineBytes + chunk.byteLength;
+        const nextPendingLineBytes = advancePendingLineBytes(pendingLineBytes, chunk);
+        if (nextPendingLineBytes === null) return abortOversizePendingLine(controller);
+        pendingLineBytes = nextPendingLineBytes;
         const text = decoder.decode(chunk, { stream: true });
         buffer += text;
         reqLogger?.appendProviderChunk?.(text);
@@ -2294,34 +2225,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     clientTools ?? (body as JsonRecord | null)?.tools
                   );
                   // Native tool_use blocks only feed the completion summary; the wire is unchanged.
-                  if (
-                    parsed.type === "content_block_start" &&
-                    parsed.content_block?.type === "tool_use"
-                  ) {
-                    const input = parsed.content_block.input;
-                    passthroughNativeToolCalls.set(`claude:${parsed.index}`, {
-                      id:
-                        typeof parsed.content_block.id === "string"
-                          ? parsed.content_block.id
-                          : null,
-                      index: passthroughNativeToolCalls.size,
-                      type: "function",
-                      function: {
-                        name: String(parsed.content_block.name ?? ""),
-                        arguments:
-                          input && typeof input === "object" && Object.keys(input).length > 0
-                            ? JSON.stringify(input)
-                            : "",
-                      },
-                    });
-                  } else if (
-                    parsed.type === "content_block_delta" &&
-                    parsed.delta?.type === "input_json_delta" &&
-                    typeof parsed.delta.partial_json === "string"
-                  ) {
-                    const nativeCall = passthroughNativeToolCalls.get(`claude:${parsed.index}`);
-                    if (nativeCall) nativeCall.function.arguments += parsed.delta.partial_json;
-                  }
+                  trackClaudeNativeToolCall(passthroughNativeToolCalls, parsed);
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
                     totalContentLength += parsed.delta.text.length;
