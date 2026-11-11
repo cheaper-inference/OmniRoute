@@ -59,6 +59,21 @@ because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the P
 
 After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
 
+### Retained evidence in the acceptance reducer
+
+`scripts/quality/validate-release-acceptance.mjs` reduces a supplied plan and its
+manifests; it does not establish that the plan covers the complete release pipeline.
+Its reports explicitly set `releaseAcceptance: false`, even when that plan is
+`VERIFIED`. The `release-acceptance.yml` workflow still uses shadow fixtures, not
+real build, package, boot or promotion receipts.
+
+The CLI requires `--evidence-root` to verify retained evidence. Files are resolved
+as `<evidence-root>/<artifact_id>/<member>` and hashed as SHA-256. A PASS record
+without evidence, a missing or changed file, an unsafe path or a symlink prevents
+verification. Missing files are not equivalent to empty successful logs. Existing
+SHA/run/attempt checks remain independent: matching bytes cannot rescue a stale
+receipt. File integrity is not proof of execution authenticity or artifact promotion.
+
 ### Static scan inventory
 
 The versioned npm-alias inventory and static-scan membership live in
