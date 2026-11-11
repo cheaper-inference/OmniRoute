@@ -4,7 +4,7 @@
 
 ---
 
-Ntọhapụ-Green na-enyocha otu nkwa ma na-akọpụta nsonaazụ nkwado ya. [Ntụtụ aka nke Quality Gates](../architecture/QUALITY_GATES.md) na-akọwa profaịlụ CI dị ugbu a, ndenye ego achọrọ na amụma nnabata. [Amụma nnabata](../../config/quality/admission-policy.json) mbiputegharị bụ nkwekọrịta enwere ike ime maka `Gate / CI` na `Gate / Quality`.
+Ntọhapụ-Green na-enyocha otu nkwa ma na-akọpụta nsonaazụ nkwado ya. [Ntụtụ aka nke Quality Gates](../architecture/QUALITY_GATES.md) na-akọwa profaịlụ CI dị ugbu a, ndenye ego achọrọ na amụma nnabata. Amụma nnabata mbiputere na `config/quality/admission-policy.json` bụ nkwekọrịta enwere ike ime maka `Gate / CI` na `Gate / Quality`.
 
 ## CI na ihe nleba anya
 
@@ -14,7 +14,7 @@ Nrụpụta mmepụta bụ nke CI. Enweghị iwu ụlọ ndụmọdụ oyiri na 
 
 ## Nkwado mpaghara
 
-Gbaa onye na-ekiri ihe n'osisi ọrụ nwere mgbe ọ kwadochara ndabere ya. Jiri [usoro ọrụ na akụrụngwa](WORKTREE_ISOLATION.md) tupu akwado ya nke ukwuu.
+Gbaa onye na-ekiri ihe n'osisi ọrụ nwere mgbe ọ kwadochara ndabere ya. Soro usoro ọrụ na akụrụngwa dị na `docs/ops/WORKTREE_ISOLATION.md` tupu nkwenye siri ike.
 
 ```bash
 npm run check:release-green -- --quick --json

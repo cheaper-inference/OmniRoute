@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green josserva impenn speċifiku u jirrapporta r-riżultati tal-validazzjoni tiegħu. [Ir-referenza tal-Quality Gates](../architecture/QUALITY_GATES.md) tiddefinixxi l-profili CI attwali, il-kontrolli meħtieġa u l-politika ta 'aċċettazzjoni. Il- [politika tad-dħul](../../config/quality/admission-policy.json) b'verżjoni hija l-kuntratt eżekutibbli għal `Gate / CI` u `Gate / Quality`.
+Release-Green josserva impenn speċifiku u jirrapporta r-riżultati tal-validazzjoni tiegħu. [Ir-referenza tal-Quality Gates](../architecture/QUALITY_GATES.md) tiddefinixxi l-profili CI attwali, il-kontrolli meħtieġa u l-politika ta 'aċċettazzjoni. Il-politika ta' ammissjoni b'verżjoni `config/quality/admission-policy.json` hija l-kuntratt eżekutibbli għal `Gate / CI` u `Gate / Quality`.
 
 ## CI u l-ambitu tal-osservatur
 
@@ -14,7 +14,7 @@ Il-bini tal-produzzjoni jappartjeni lil CI. M'hemm l-ebda bini konsultattiv dupl
 
 ## Validazzjoni lokali
 
-Mexxi l-osservatur f'siġra tax-xogħol proprjetà wara li tħejji d-dipendenzi tagħha. Uża l- [worktree u l-protokoll tar-riżorsi](WORKTREE_ISOLATION.md) qabel validazzjoni qawwija.
+Mexxi l-osservatur f'siġra tax-xogħol proprjetà wara li tħejji d-dipendenzi tagħha. Segwi l-worktree u l-protokoll tar-riżorsi `docs/ops/WORKTREE_ISOLATION.md` qabel validazzjoni qawwija.
 
 ```bash
 npm run check:release-green -- --quick --json

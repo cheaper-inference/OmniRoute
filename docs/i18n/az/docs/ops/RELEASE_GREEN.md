@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green xüsusi öhdəliyi müşahidə edir və onun təsdiqləmə nəticələrini bildirir. [Keyfiyyət Qapıları arayışı](../architecture/QUALITY_GATES.md) cari CI profillərini, tələb olunan yoxlamaları və qəbul siyasətini müəyyən edir. Versiyalaşdırılmış [qəbul siyasəti](../../config/quality/admission-policy.json) `Gate / CI` və `Gate / Quality` üçün icra edilə bilən müqavilədir.
+Release-Green xüsusi öhdəliyi müşahidə edir və onun təsdiqləmə nəticələrini bildirir. [Keyfiyyət Qapıları arayışı](../architecture/QUALITY_GATES.md) cari CI profillərini, tələb olunan yoxlamaları və qəbul siyasətini müəyyən edir. `config/quality/admission-policy.json` də versiyalı qəbul siyasəti `Gate / CI` və `Gate / Quality` üçün icra edilə bilən müqavilədir.
 
 ## CI və müşahidəçi əhatə dairəsi
 
@@ -14,7 +14,7 @@ Release-Green xüsusi öhdəliyi müşahidə edir və onun təsdiqləmə nətic�
 
 ## Yerli doğrulama
 
-Asılılıqları hazırladıqdan sonra müşahidəçini sahib olduğu iş ağacında işə salın. Ağır yoxlamadan əvvəl [iş ağacı və resurs protokolundan](WORKTREE_ISOLATION.md) istifadə edin.
+Asılılıqları hazırladıqdan sonra müşahidəçini sahib olduğu iş ağacında işə salın. Ağır yoxlamadan əvvəl `docs/ops/WORKTREE_ISOLATION.md` -da iş ağacı və resurs protokoluna əməl edin.
 
 ```bash
 npm run check:release-green -- --quick --json

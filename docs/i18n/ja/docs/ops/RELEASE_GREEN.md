@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green は、特定のコミットを監視し、その検証結果を報告します。 [Quality Gates リファレンスでは](../architecture/QUALITY_GATES.md)、現在のCIプロファイル、必要なチェック、および受け入れポリシーが定義されています。バージョン管理された[アドミッション ポリシー](../../config/quality/admission-policy.json)は、 `Gate / CI`および`Gate / Quality`の実行可能な契約です。
+Release-Green は、特定のコミットを監視し、その検証結果を報告します。 [Quality Gates リファレンスでは](../architecture/QUALITY_GATES.md)、現在のCIプロファイル、必要なチェック、および受け入れポリシーが定義されています。 `config/quality/admission-policy.json`のバージョン管理されたアドミッション ポリシーは、 `Gate / CI`および`Gate / Quality`の実行可能な契約です。
 
 ## CIとオブザーバー スコープ
 
@@ -14,7 +14,7 @@ Release-Green は、特定のコミットを監視し、その検証結果を報
 
 ## ローカル検証
 
-依存関係を準備した後、所有されているワークツリーでオブザーバーを実行します。大量の検証を行う前に、[ワークツリーとリソース プロトコルを](WORKTREE_ISOLATION.md)使用してください。
+依存関係を準備した後、所有されているワークツリーでオブザーバーを実行します。厳密な検証を行う前に、 `docs/ops/WORKTREE_ISOLATION.md`のワークツリーとリソース プロトコルに従ってください。
 
 ```bash
 npm run check:release-green -- --quick --json

@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green tarkkailee tiettyä sitoumusta ja raportoi sen validointitulokset. [Quality Gates -viite](../architecture/QUALITY_GATES.md) määrittelee nykyiset CI profiilit, vaaditut tarkastukset ja hyväksymiskäytännöt. Versioitu [pääsykäytäntö](../../config/quality/admission-policy.json) on suoritettava sopimus `Gate / CI` ja `Gate / Quality`.
+Release-Green tarkkailee tiettyä sitoumusta ja raportoi sen validointitulokset. [Quality Gates -viite](../architecture/QUALITY_GATES.md) määrittelee nykyiset CI profiilit, vaaditut tarkastukset ja hyväksymiskäytännöt. Versioitu pääsykäytäntö `config/quality/admission-policy.json` ssä on suoritettava sopimus `Gate / CI` lle ja `Gate / Quality`.
 
 ## CI ja tarkkailijan laajuus
 
@@ -14,7 +14,7 @@ Tuotantorakennus kuuluu CI. `quality.yml` ssä ei ole päällekkäistä neuvoa-a
 
 ## Paikallinen vahvistus
 
-Aja tarkkailija omistamassasi työpuussa valmisteltuasi sen riippuvuudet. Käytä [työpuu- ja resurssiprotokollaa](WORKTREE_ISOLATION.md) ennen raskasta validointia.
+Aja tarkkailija omistamassasi työpuussa valmisteltuasi sen riippuvuudet. Noudata `docs/ops/WORKTREE_ISOLATION.md` :n työpuu- ja resurssiprotokollaa ennen raskasta validointia.
 
 ```bash
 npm run check:release-green -- --quick --json

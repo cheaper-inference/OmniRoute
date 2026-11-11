@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green ievēro noteiktu apņemšanos un ziņo par tās validācijas rezultātiem. [Kvalitātes vārtu atsauce](../architecture/QUALITY_GATES.md) nosaka pašreizējos CI profilus, nepieciešamās pārbaudes un pieņemšanas politiku. Versionētā [uzņemšanas politika](../../config/quality/admission-policy.json) ir izpildāms līgums `Gate / CI` un `Gate / Quality`.
+Release-Green ievēro noteiktu apņemšanos un ziņo par tās validācijas rezultātiem. [Kvalitātes vārtu atsauce](../architecture/QUALITY_GATES.md) nosaka pašreizējos CI profilus, nepieciešamās pārbaudes un pieņemšanas politiku. Versionētā uzņemšanas politika `config/quality/admission-policy.json` ir izpildāms līgums `Gate / CI` un `Gate / Quality`.
 
 ## CI un novērotāja darbības joma
 
@@ -14,7 +14,7 @@ Ražošanas būve pieder CI. `quality.yml` nav dublikātu konsultatīvo būvēju
 
 ## Vietējā validācija
 
-Palaidiet novērotāju piederošā darbkokā pēc tā atkarību sagatavošanas. Pirms smagas validācijas izmantojiet [darbkoku un resursu protokolu](WORKTREE_ISOLATION.md).
+Palaidiet novērotāju piederošā darbkokā pēc tā atkarību sagatavošanas. Pirms smagas validācijas ievērojiet `docs/ops/WORKTREE_ISOLATION.md` darbkoka un resursu protokolu.
 
 ```bash
 npm run check:release-green -- --quick --json

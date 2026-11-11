@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green belirli bir işlemi gözlemler ve doğrulama sonuçlarını bildirir. [Kalite Kapıları referansı](../architecture/QUALITY_GATES.md) mevcut CI profillerini, gerekli kontrolleri ve kabul politikasını tanımlar. Sürümlendirilmiş [kabul politikası,](../../config/quality/admission-policy.json) `Gate / CI` ve `Gate / Quality` için yürütülebilir sözleşmedir.
+Release-Green belirli bir işlemi gözlemler ve doğrulama sonuçlarını bildirir. [Kalite Kapıları referansı](../architecture/QUALITY_GATES.md) mevcut CI profillerini, gerekli kontrolleri ve kabul politikasını tanımlar. `config/quality/admission-policy.json` sürümlendirilmiş kabul politikası, `Gate / CI` ve `Gate / Quality` için yürütülebilir sözleşmedir.
 
 ## CI ve gözlemci kapsamı
 
@@ -14,7 +14,7 @@ Release-Green belirli bir işlemi gözlemler ve doğrulama sonuçlarını bildir
 
 ## Yerel doğrulama
 
-Bağımlılıklarını hazırladıktan sonra gözlemciyi sahip olunan bir çalışma ağacında çalıştırın. Yoğun doğrulamadan önce [çalışma ağacını ve kaynak protokolünü](WORKTREE_ISOLATION.md) kullanın.
+Bağımlılıklarını hazırladıktan sonra gözlemciyi sahip olunan bir çalışma ağacında çalıştırın. Yoğun doğrulamadan önce `docs/ops/WORKTREE_ISOLATION.md` çalışma ağacını ve kaynak protokolünü izleyin.
 
 ```bash
 npm run check:release-green -- --quick --json

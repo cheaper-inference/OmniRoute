@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green obserwuje konkretne zatwierdzenie i raportuje wyniki jego walidacji. [Odniesienie do Quality Gates](../architecture/QUALITY_GATES.md) definiuje aktualne profile CI, wymagane kontrole i politykę akceptacji. Wersjonowana [polityka dostępu](../../config/quality/admission-policy.json) to wykonywalna umowa dla `Gate / CI` i `Gate / Quality`.
+Release-Green obserwuje konkretne zatwierdzenie i raportuje wyniki jego walidacji. [Odniesienie do Quality Gates](../architecture/QUALITY_GATES.md) definiuje aktualne profile CI, wymagane kontrole i politykę akceptacji. Wersjonowana polityka dostępu w `config/quality/admission-policy.json` jest wykonywalną umową dla `Gate / CI` i `Gate / Quality`.
 
 ## CI i zakres obserwacyjny
 
@@ -14,7 +14,7 @@ Wersja produkcyjna należy do CI. W `quality.yml` nie ma zduplikowanej kompilacj
 
 ## Weryfikacja lokalna
 
-Uruchom obserwatora w posiadanym drzewie roboczym po przygotowaniu jego zależności. Przed wnikliwą walidacją użyj [protokołu drzewa roboczego i zasobów](WORKTREE_ISOLATION.md).
+Uruchom obserwatora w posiadanym drzewie roboczym po przygotowaniu jego zależności. Przed wnikliwą walidacją postępuj zgodnie z protokołem drzewa roboczego i zasobów w `docs/ops/WORKTREE_ISOLATION.md`.
 
 ```bash
 npm run check:release-green -- --quick --json

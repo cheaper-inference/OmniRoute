@@ -4,7 +4,7 @@
 
 ---
 
-Ang Release-Green ay nagmamasid sa isang partikular na commit at nag-uulat ng mga resulta ng pagpapatunay nito. Tinutukoy ng [sanggunian ng Quality Gates](../architecture/QUALITY_GATES.md) ang kasalukuyang mga profile CI, mga kinakailangang pagsusuri at patakaran sa pagtanggap. Ang bersyon na [patakaran sa pagpasok](../../config/quality/admission-policy.json) ay ang maipapatupad na kontrata para sa `Gate / CI` at `Gate / Quality`.
+Ang Release-Green ay nagmamasid sa isang partikular na commit at nag-uulat ng mga resulta ng pagpapatunay nito. Tinutukoy ng [sanggunian ng Quality Gates](../architecture/QUALITY_GATES.md) ang kasalukuyang mga profile CI, mga kinakailangang pagsusuri at patakaran sa pagtanggap. Ang bersyon na patakaran sa admission sa `config/quality/admission-policy.json` ay ang maipapatupad na kontrata para sa `Gate / CI` at `Gate / Quality`.
 
 ## CI at saklaw ng tagamasid
 
@@ -14,7 +14,7 @@ Ang production build ay nabibilang sa CI. Walang duplicate na advisory build sa 
 
 ## Lokal na pagpapatunay
 
-Patakbuhin ang observer sa isang pag-aaring worktree pagkatapos ihanda ang mga dependency nito. Gamitin ang [worktree at resource protocol](WORKTREE_ISOLATION.md) bago ang mabigat na pagpapatunay.
+Patakbuhin ang observer sa isang pag-aaring worktree pagkatapos ihanda ang mga dependency nito. Sundin ang worktree at resource protocol sa `docs/ops/WORKTREE_ISOLATION.md` bago ang mabigat na pagpapatunay.
 
 ```bash
 npm run check:release-green -- --quick --json

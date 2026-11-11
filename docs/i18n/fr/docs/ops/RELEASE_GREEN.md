@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green observe un commit spécifique et rapporte ses résultats de validation. La [référence Quality Gates](../architecture/QUALITY_GATES.md) définit les profils CI actuels, les contrôles requis et la politique d'acceptation. La [politique d'admission](../../config/quality/admission-policy.json) versionnée est le contrat exécutable pour `Gate / CI` et `Gate / Quality`.
+Release-Green observe un commit spécifique et rapporte ses résultats de validation. La [référence Quality Gates](../architecture/QUALITY_GATES.md) définit les profils CI actuels, les contrôles requis et la politique d'acceptation. La politique d'admission versionnée dans `config/quality/admission-policy.json` est le contrat exécutable pour `Gate / CI` et `Gate / Quality`.
 
 ## CI et portée d'observateur
 
@@ -14,7 +14,7 @@ La version de production appartient à CI. Il n'y a pas de version d'avis en dou
 
 ## Validation locale
 
-Exécutez l'observateur dans un arbre de travail détenu après avoir préparé ses dépendances. Utilisez l' [arbre de travail et le protocole de ressources](WORKTREE_ISOLATION.md) avant une validation approfondie.
+Exécutez l'observateur dans un arbre de travail détenu après avoir préparé ses dépendances. Suivez l'arbre de travail et le protocole de ressources dans `docs/ops/WORKTREE_ISOLATION.md` avant une validation approfondie.
 
 ```bash
 npm run check:release-green -- --quick --json

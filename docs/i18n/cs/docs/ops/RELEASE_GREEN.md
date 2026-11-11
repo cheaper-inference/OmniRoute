@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green sleduje konkrétní odevzdání a hlásí výsledky jeho ověření. [Reference Gates kvality](../architecture/QUALITY_GATES.md) definuje aktuální profily CI, požadované kontroly a zásady přijímání. Verzovaná [politika přijímání](../../config/quality/admission-policy.json) je spustitelný kontrakt pro `Gate / CI` a `Gate / Quality`.
+Release-Green sleduje konkrétní odevzdání a hlásí výsledky jeho ověření. [Reference Gates kvality](../architecture/QUALITY_GATES.md) definuje aktuální profily CI, požadované kontroly a zásady přijímání. Verzovaná politika přijímání v `config/quality/admission-policy.json` je spustitelný kontrakt pro `Gate / CI` a `Gate / Quality`.
 
 ## CI a rozsah pozorovatele
 
@@ -14,7 +14,7 @@ Produkční sestava patří CI. V `quality.yml` není žádné duplicitní sesta
 
 ## Místní ověření
 
-Po přípravě jeho závislostí spusťte pozorovatele ve vlastněném pracovním stromu. Před náročným ověřováním použijte [protokol pracovního stromu a prostředků](WORKTREE_ISOLATION.md).
+Po přípravě jeho závislostí spusťte pozorovatele ve vlastněném pracovním stromu. Před náročným ověřováním postupujte podle pracovního stromu a protokolu prostředků v `docs/ops/WORKTREE_ISOLATION.md`.
 
 ```bash
 npm run check:release-green -- --quick --json

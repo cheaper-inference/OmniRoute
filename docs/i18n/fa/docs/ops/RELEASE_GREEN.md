@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green یک commit خاص را مشاهده می کند و نتایج اعتبارسنجی آن را گزارش می دهد. [مرجع Quality Gates](../architecture/QUALITY_GATES.md) نمایه های فعلی CI ، چک های مورد نیاز و خط مشی پذیرش را تعریف می کند. [خط مشی پذیرش](../../config/quality/admission-policy.json) نسخه شده، قرارداد قابل اجرا برای `Gate / CI` و `Gate / Quality` است.
+Release-Green یک commit خاص را مشاهده می کند و نتایج اعتبارسنجی آن را گزارش می دهد. [مرجع Quality Gates](../architecture/QUALITY_GATES.md) نمایه های فعلی CI ، چک های مورد نیاز و خط مشی پذیرش را تعریف می کند. خط مشی پذیرش نسخه شده در `config/quality/admission-policy.json` قرارداد قابل اجرا برای `Gate / CI` و `Gate / Quality` است.
 
 ## CI و محدوده ناظر
 
@@ -14,7 +14,7 @@ Release-Green یک commit خاص را مشاهده می کند و نتایج ا�
 
 ## اعتبار سنجی محلی
 
-مشاهدهگر را پس از آمادهسازی وابستگیهای آن، در یک درخت کاری متعلق به آن اجرا کنید. قبل از اعتبارسنجی سنگین از [درخت کاری و پروتکل منبع](WORKTREE_ISOLATION.md) استفاده کنید.
+مشاهدهگر را پس از آمادهسازی وابستگیهای آن، در یک درخت کاری متعلق به آن اجرا کنید. قبل از اعتبار سنجی سنگین، پروتکل درخت کاری و منبع را در `docs/ops/WORKTREE_ISOLATION.md` دنبال کنید.
 
 ```bash
 npm run check:release-green -- --quick --json

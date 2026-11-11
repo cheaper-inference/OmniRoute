@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green은 특정 커밋을 관찰하고 해당 검증 결과를 보고합니다. [Quality Gates 참조는](../architecture/QUALITY_GATES.md) 현재 CI 프로필, 필수 점검 및 승인 정책을 정의합니다. 버전이 지정된 [허용 정책](../../config/quality/admission-policy.json) 은 `Gate / CI` 및 `Gate / Quality` 에 대해 실행 가능한 계약입니다.
+Release-Green은 특정 커밋을 관찰하고 해당 검증 결과를 보고합니다. [Quality Gates 참조는](../architecture/QUALITY_GATES.md) 현재 CI 프로필, 필수 점검 및 승인 정책을 정의합니다. `config/quality/admission-policy.json` 의 버전화된 승인 정책은 `Gate / CI` 및 `Gate / Quality` 에 대한 실행 가능한 계약입니다.
 
 ## CI 및 관찰자 범위
 
@@ -14,7 +14,7 @@ Release-Green은 특정 커밋을 관찰하고 해당 검증 결과를 보고합
 
 ## 로컬 검증
 
-종속성을 준비한 후 소유된 작업 트리에서 관찰자를 실행합니다. 철저한 검증 전에 [작업 트리 및 리소스 프로토콜을](WORKTREE_ISOLATION.md) 사용하십시오.
+종속성을 준비한 후 소유된 작업 트리에서 관찰자를 실행합니다. 철저한 검증 전에 `docs/ops/WORKTREE_ISOLATION.md` 의 작업 트리 및 리소스 프로토콜을 따르십시오.
 
 ```bash
 npm run check:release-green -- --quick --json

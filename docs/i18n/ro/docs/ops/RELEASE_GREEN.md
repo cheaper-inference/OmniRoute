@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green observă un anumit commit și raportează rezultatele validării acestuia. [Referința Quality Gates](../architecture/QUALITY_GATES.md) definește profilurile actuale CI, verificările necesare și politica de acceptare. [Politica de admitere](../../config/quality/admission-policy.json) versionată este contractul executabil pentru `Gate / CI` și `Gate / Quality`.
+Release-Green observă un anumit commit și raportează rezultatele validării acestuia. [Referința Quality Gates](../architecture/QUALITY_GATES.md) definește profilurile actuale CI, verificările necesare și politica de acceptare. Politica de admitere versionată în `config/quality/admission-policy.json` este contractul executabil pentru `Gate / CI` și `Gate / Quality`.
 
 ## CI și domeniul de aplicare al observatorului
 
@@ -14,7 +14,7 @@ Construcția de producție aparține CI. Nu există o versiune de consiliere dup
 
 ## Validare locală
 
-Rulați observatorul într-un arbore de lucru deținut după pregătirea dependențelor acestuia. Utilizați arborele [de lucru și protocolul de resurse](WORKTREE_ISOLATION.md) înainte de validarea grea.
+Rulați observatorul într-un arbore de lucru deținut după pregătirea dependențelor acestuia. Urmați arborele de lucru și protocolul de resurse din `docs/ops/WORKTREE_ISOLATION.md` înainte de validarea grea.
 
 ```bash
 npm run check:release-green -- --quick --json

@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green memerhatikan komitmen tertentu dan melaporkan hasil pengesahannya. [Rujukan Quality Gates](../architecture/QUALITY_GATES.md) mentakrifkan profil CI semasa, semakan yang diperlukan dan dasar penerimaan. [Dasar kemasukan](../../config/quality/admission-policy.json) versi ialah kontrak boleh laku untuk `Gate / CI` dan `Gate / Quality`.
+Release-Green memerhatikan komitmen tertentu dan melaporkan hasil pengesahannya. [Rujukan Quality Gates](../architecture/QUALITY_GATES.md) mentakrifkan profil CI semasa, semakan yang diperlukan dan dasar penerimaan. Dasar kemasukan versi dalam `config/quality/admission-policy.json` ialah kontrak boleh laku untuk `Gate / CI` dan `Gate / Quality`.
 
 ## CI dan skop pemerhati
 
@@ -14,7 +14,7 @@ Binaan pengeluaran adalah milik CI. Tiada binaan nasihat pendua dalam `quality.y
 
 ## Pengesahan tempatan
 
-Jalankan pemerhati dalam pepohon kerja milik selepas menyediakan kebergantungannya. Gunakan [worktree dan protokol sumber](WORKTREE_ISOLATION.md) sebelum pengesahan berat.
+Jalankan pemerhati dalam pepohon kerja milik selepas menyediakan kebergantungannya. Ikuti worktree dan protokol sumber dalam `docs/ops/WORKTREE_ISOLATION.md` sebelum pengesahan berat.
 
 ```bash
 npm run check:release-green -- --quick --json

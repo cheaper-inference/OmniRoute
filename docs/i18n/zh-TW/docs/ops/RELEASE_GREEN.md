@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green 觀察特定的提交並報告其驗證結果。 [Quality Gates 參考](../architecture/QUALITY_GATES.md)定義了目前的CI設定檔、所需的檢查和驗收政策。版本化[准入策略](../../config/quality/admission-policy.json)是`Gate / CI`和`Gate / Quality`的可執行合約。
+Release-Green 觀察特定的提交並報告其驗證結果。 [Quality Gates 參考](../architecture/QUALITY_GATES.md)定義了目前的CI設定檔、所需的檢查和驗收政策。 `config/quality/admission-policy.json`中的版本化進入策略是`Gate / CI`和`Gate / Quality`的可執行合約。
 
 ## CI和觀察員範圍
 
@@ -14,14 +14,14 @@ Release-Green 觀察特定的提交並報告其驗證結果。 [Quality Gates �
 
 ## 本地驗證
 
-準備好其依賴項後，在擁有的工作樹中運行觀察者。在進行大量驗證之前使用[工作樹和資源協定](WORKTREE_ISOLATION.md)。
+準備好其依賴項後，在擁有的工作樹中運行觀察者。在進行大量驗證之前，請遵循`docs/ops/WORKTREE_ISOLATION.md`中的工作樹和資源協定。
 
 ```bash
 npm run check:release-green -- --quick --json
 npm run check:release-green -- --with-build --full-ci --json
 ```
 
-快速配置文件是部分的。完整的設定檔檢查其建模要求並保留命令收據；它不證明部署或替代適用的託管檢查。該報告將執行失敗與指標漂移區分開來。根據所選策略，所需的棘輪保持鎖定狀態。不要僅僅為了獲得通過的結果而提高基準。
+快速設定檔是部分的。完整的設定檔檢查其建模要求並保留命令收據；它不證明部署或替代適用的託管檢查。該報告將執行失敗與指標漂移區分開來。根據所選策略，所需的棘輪保持鎖定狀態。不要僅僅為了獲得通過的結果而提高基準。
 
 ## 每晚及手動清掃
 

@@ -4,7 +4,7 @@
 
 ---
 
-Tu-Alawọ ewe ṣe akiyesi ifaramo kan pato ati ṣe ijabọ awọn abajade afọwọsi rẹ. [Itọkasi Didara Gates](../architecture/QUALITY_GATES.md) n ṣalaye awọn profaili CI lọwọlọwọ, awọn sọwedowo ti o nilo ati eto imulo gbigba. [Ilana gbigba](../../config/quality/admission-policy.json) ti ikede jẹ adehun ṣiṣe fun `Gate / CI` ati `Gate / Quality`.
+Tu-Alawọ ewe ṣe akiyesi ifaramo kan pato ati ṣe ijabọ awọn abajade afọwọsi rẹ. [Itọkasi Didara Gates](../architecture/QUALITY_GATES.md) n ṣalaye awọn profaili CI lọwọlọwọ, awọn sọwedowo ti o nilo ati eto imulo gbigba. Ilana gbigba ti ikede ni `config/quality/admission-policy.json` jẹ adehun ṣiṣe fun `Gate / CI` ati `Gate / Quality`.
 
 ## CI ati alawoye dopin
 
@@ -14,7 +14,7 @@ Itumọ iṣelọpọ jẹ ti CI. Ko si idamọran ẹda ẹda ni `quality.yml`.
 
 ## Afọwọsi agbegbe
 
-Ṣiṣe awọn Oluwoye ni ohun ini worktree lẹhin mura awọn oniwe-gbára. Lo [igi iṣẹ ati ilana awọn orisun](WORKTREE_ISOLATION.md) ṣaaju ijẹrisi eru.
+Ṣiṣe awọn Oluwoye ni ohun ini worktree lẹhin mura awọn oniwe-gbára. Tẹle igi iṣẹ ati ilana awọn orisun ni `docs/ops/WORKTREE_ISOLATION.md` ṣaaju ijẹrisi eru.
 
 ```bash
 npm run check:release-green -- --quick --json

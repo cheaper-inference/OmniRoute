@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green observa una confirmación específica e informa los resultados de su validación. La [referencia de Quality Gates](../architecture/QUALITY_GATES.md) define los perfiles CI actuales, las comprobaciones requeridas y la política de aceptación. La [política de admisión](../../config/quality/admission-policy.json) versionada es el contrato ejecutable para `Gate / CI` y `Gate / Quality`.
+Release-Green observa una confirmación específica e informa los resultados de su validación. La [referencia de Quality Gates](../architecture/QUALITY_GATES.md) define los perfiles CI actuales, las comprobaciones requeridas y la política de aceptación. La política de admisión versionada en `config/quality/admission-policy.json` es el contrato ejecutable para `Gate / CI` y `Gate / Quality`.
 
 ## CI y alcance del observador
 
@@ -14,7 +14,7 @@ La estructura de producción pertenece a CI. No hay ninguna compilación de avis
 
 ## Validación local
 
-Ejecute el observador en un árbol de trabajo propio después de preparar sus dependencias. Utilice el [árbol de trabajo y el protocolo de recursos](WORKTREE_ISOLATION.md) antes de una validación exhaustiva.
+Ejecute el observador en un árbol de trabajo propio después de preparar sus dependencias. Siga el árbol de trabajo y el protocolo de recursos en `docs/ops/WORKTREE_ISOLATION.md` antes de una validación exhaustiva.
 
 ```bash
 npm run check:release-green -- --quick --json

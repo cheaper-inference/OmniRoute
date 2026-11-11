@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green jälgib konkreetset kohustust ja teatab selle kinnitamise tulemustest. [Kvaliteedivärava viide](../architecture/QUALITY_GATES.md) määratleb praegused CI profiilid, nõutavad kontrollid ja vastuvõtupoliitika. Versioonitud [vastuvõtupoliitika](../../config/quality/admission-policy.json) on `Gate / CI` ja `Gate / Quality` käivitatav leping.
+Release-Green jälgib konkreetset kohustust ja teatab selle kinnitamise tulemustest. [Kvaliteedivärava viide](../architecture/QUALITY_GATES.md) määratleb praegused CI profiilid, nõutavad kontrollid ja vastuvõtupoliitika. `config/quality/admission-policy.json` versioonide sissepääsupoliitika on `Gate / CI` ja `Gate / Quality` käivitatav leping.
 
 ## CI ja vaatleja ulatus
 
@@ -14,7 +14,7 @@ Tootmisehitus kuulub CI. `quality.yml` s ei ole dubleerivaid nõuandeid. Puuduva
 
 ## Kohalik valideerimine
 
-Käivitage vaatleja omandatud tööpuus pärast selle sõltuvuste ettevalmistamist. Kasutage enne ulatuslikku valideerimist [tööpuu ja ressursi protokolli](WORKTREE_ISOLATION.md).
+Käivitage vaatleja omandatud tööpuus pärast selle sõltuvuste ettevalmistamist. Enne ulatuslikku valideerimist järgige `docs/ops/WORKTREE_ISOLATION.md` tööpuu ja ressursi protokolli.
 
 ```bash
 npm run check:release-green -- --quick --json

@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green observeert een specifieke commit en rapporteert de validatieresultaten ervan. De [Quality Gates-referentie](../architecture/QUALITY_GATES.md) definieert de huidige CI profielen, vereiste controles en acceptatiebeleid. Het [versietoelatingsbeleid](../../config/quality/admission-policy.json) is het uitvoerbare contract voor `Gate / CI` en `Gate / Quality`.
+Release-Green observeert een specifieke commit en rapporteert de validatieresultaten ervan. De [Quality Gates-referentie](../architecture/QUALITY_GATES.md) definieert de huidige CI profielen, vereiste controles en acceptatiebeleid. Het versietoelatingsbeleid in `config/quality/admission-policy.json` is het uitvoerbare contract voor `Gate / CI` en `Gate / Quality`.
 
 ## CI en waarnemersscope
 
@@ -14,7 +14,7 @@ De productiebuild is eigendom van CI. Er is geen dubbele adviesbuild in `quality
 
 ## Lokale validatie
 
-Voer de waarnemer uit in een eigen werkboom nadat u de afhankelijkheden ervan hebt voorbereid. Gebruik de [werkboom en het bronprotocol](WORKTREE_ISOLATION.md) vóór zware validatie.
+Voer de waarnemer uit in een eigen werkboom nadat u de afhankelijkheden ervan hebt voorbereid. Volg de werkboom en het resourceprotocol in `docs/ops/WORKTREE_ISOLATION.md` vóór zware validatie.
 
 ```bash
 npm run check:release-green -- --quick --json

@@ -4,7 +4,7 @@
 
 ---
 
-A Release-Green megfigyel egy adott véglegesítést, és jelenti annak érvényesítési eredményeit. A [Quality Gates hivatkozás](../architecture/QUALITY_GATES.md) határozza meg az aktuális CI profilokat, a szükséges ellenőrzéseket és az elfogadási szabályzatot. A verziózott [felvételi szabályzat](../../config/quality/admission-policy.json) `Gate / CI` és `Gate / Quality` végrehajtható szerződése.
+A Release-Green megfigyel egy adott véglegesítést, és jelenti annak érvényesítési eredményeit. A [Quality Gates hivatkozás](../architecture/QUALITY_GATES.md) határozza meg az aktuális CI profilokat, a szükséges ellenőrzéseket és az elfogadási szabályzatot. A `config/quality/admission-policy.json` verziózott felvételi szabályzata a `Gate / CI` és `Gate / Quality` végrehajtható szerződése.
 
 ## CI és megfigyelői kör
 
@@ -14,7 +14,7 @@ A gyártási build CI hoz tartozik. `quality.yml` ben nincs duplikált tanácsad
 
 ## Helyi érvényesítés
 
-Futtassa a megfigyelőt egy saját munkafán, miután elkészítette a függőségeit. Használja a [munkafát és az erőforrás protokollt](WORKTREE_ISOLATION.md) az erős ellenőrzés előtt.
+Futtassa a megfigyelőt egy saját munkafán, miután elkészítette a függőségeit. Kövesse a `docs/ops/WORKTREE_ISOLATION.md` munkafa- és erőforrás-protokollját a súlyos érvényesítés előtt.
 
 ```bash
 npm run check:release-green -- --quick --json

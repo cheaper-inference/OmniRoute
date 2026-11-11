@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green observerar ett specifikt åtagande och rapporterar dess valideringsresultat. [Quality Gates-referensen](../architecture/QUALITY_GATES.md) definierar aktuella CI profiler, nödvändiga kontroller och acceptanspolicy. Den versionerade [antagningspolicyn](../../config/quality/admission-policy.json) är det körbara kontraktet för `Gate / CI` och `Gate / Quality`.
+Release-Green observerar ett specifikt åtagande och rapporterar dess valideringsresultat. [Quality Gates-referensen](../architecture/QUALITY_GATES.md) definierar aktuella CI profiler, nödvändiga kontroller och acceptanspolicy. Den versionerade antagningspolicyn i `config/quality/admission-policy.json` är det exekverbara kontraktet för `Gate / CI` och `Gate / Quality`.
 
 ## CI och observatörs räckvidd
 
@@ -14,7 +14,7 @@ Produktionsbygget tillhör CI. Det finns ingen dubblett av rådgivningsbyggen i 
 
 ## Lokal validering
 
-Kör observatören i ett ägt arbetsträd efter att ha förberett dess beroenden. Använd [arbetsträdet och resursprotokollet](WORKTREE_ISOLATION.md) innan tung validering.
+Kör observatören i ett ägt arbetsträd efter att ha förberett dess beroenden. Följ arbetsträdet och resursprotokollet i `docs/ops/WORKTREE_ISOLATION.md` innan tung validering.
 
 ```bash
 npm run check:release-green -- --quick --json

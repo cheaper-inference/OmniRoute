@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green beobachtet einen bestimmten Commit und meldet seine Validierungsergebnisse. Die [Quality Gates-Referenz](../architecture/QUALITY_GATES.md) definiert die aktuellen CI Profile, erforderlichen Prüfungen und Akzeptanzrichtlinien. Die versionierte [Zulassungsrichtlinie](../../config/quality/admission-policy.json) ist der ausführbare Vertrag für `Gate / CI` und `Gate / Quality`.
+Release-Green beobachtet einen bestimmten Commit und meldet seine Validierungsergebnisse. Die [Quality Gates-Referenz](../architecture/QUALITY_GATES.md) definiert die aktuellen CI Profile, erforderlichen Prüfungen und Akzeptanzrichtlinien. Die versionierte Zulassungsrichtlinie in `config/quality/admission-policy.json` ist der ausführbare Vertrag für `Gate / CI` und `Gate / Quality`.
 
 ## CI und Beobachterbereich
 
@@ -14,7 +14,7 @@ Der Produktionsaufbau gehört CI. In `quality.yml` gibt es keinen doppelten Advi
 
 ## Lokale Validierung
 
-Führen Sie den Beobachter in einem eigenen Arbeitsbaum aus, nachdem Sie seine Abhängigkeiten vorbereitet haben. Verwenden Sie das [Arbeitsbaum- und Ressourcenprotokoll](WORKTREE_ISOLATION.md) vor einer umfassenden Validierung.
+Führen Sie den Beobachter in einem eigenen Arbeitsbaum aus, nachdem Sie seine Abhängigkeiten vorbereitet haben. Befolgen Sie vor der umfassenden Validierung das Arbeitsbaum- und Ressourcenprotokoll in `docs/ops/WORKTREE_ISOLATION.md`.
 
 ```bash
 npm run check:release-green -- --quick --json

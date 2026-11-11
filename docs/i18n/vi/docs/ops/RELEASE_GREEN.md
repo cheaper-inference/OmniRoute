@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green quan sát một cam kết cụ thể và báo cáo kết quả xác nhận của nó. [Tham chiếu Cổng Chất lượng](../architecture/QUALITY_GATES.md) xác định các cấu hình CI hiện tại, các kiểm tra bắt buộc và chính sách chấp nhận. [Chính sách nhập học](../../config/quality/admission-policy.json) theo phiên bản là hợp đồng thực thi cho `Gate / CI` và `Gate / Quality`.
+Release-Green quan sát một cam kết cụ thể và báo cáo kết quả xác nhận của nó. [Tham chiếu Cổng Chất lượng](../architecture/QUALITY_GATES.md) xác định các cấu hình CI hiện tại, các kiểm tra bắt buộc và chính sách chấp nhận. Chính sách nhập học được phiên bản trong `config/quality/admission-policy.json` là hợp đồng thực thi cho `Gate / CI` và `Gate / Quality`.
 
 ## CI và phạm vi quan sát
 
@@ -14,7 +14,7 @@ Việc xây dựng sản xuất thuộc về CI. Không có bản dựng tư v�
 
 ## Xác thực cục bộ
 
-Chạy trình quan sát trong cây làm việc được sở hữu sau khi chuẩn bị các phần phụ thuộc của nó. Sử dụng [cây làm việc và giao thức tài nguyên](WORKTREE_ISOLATION.md) trước khi xác thực kỹ lưỡng.
+Chạy trình quan sát trong cây làm việc được sở hữu sau khi chuẩn bị các phần phụ thuộc của nó. Thực hiện theo cây công việc và giao thức tài nguyên trong `docs/ops/WORKTREE_ISOLATION.md` trước khi xác thực kỹ lưỡng.
 
 ```bash
 npm run check:release-green -- --quick --json

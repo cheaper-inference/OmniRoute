@@ -4,7 +4,7 @@
 
 ---
 
-Sakin-Green yana lura da ƙayyadaddun alƙawari kuma yana ba da rahoton ingantaccen sakamakonsa. [Maganar Ƙofar Ƙofar Ƙirar](../architecture/QUALITY_GATES.md) tana bayyana bayanan martaba CI na yanzu, da ake buƙata da manufofin karɓa. [Manufar shigar da](../../config/quality/admission-policy.json) sigar ita ce kwangilar aiwatarwa don `Gate / CI` da `Gate / Quality`.
+Sakin-Green yana lura da ƙayyadaddun alƙawari kuma yana ba da rahoton ingantaccen sakamakonsa. [Maganar Ƙofar Ƙofar Ƙirar](../architecture/QUALITY_GATES.md) tana bayyana bayanan martaba CI na yanzu, da ake buƙata da manufofin karɓa. Manufar shigar da sigar a cikin `config/quality/admission-policy.json` ita ce kwangilar aiwatarwa don `Gate / CI` da `Gate / Quality`.
 
 ## CI da iyakokin masu kallo
 
@@ -14,7 +14,7 @@ Ginin samarwa na CI ne. Babu kwafin nasihar ginawa a cikin `quality.yml`. Rasa k
 
 ## Tabbatarwa na gida
 
-Guda mai kallo a cikin itacen aiki mallakar bayan shirya abubuwan dogaronsa. Yi amfani da [bishiyar aiki da ka'idar albarkatu](WORKTREE_ISOLATION.md) kafin ingantaccen inganci.
+Guda mai kallo a cikin itacen aiki mallakar bayan shirya abubuwan dogaronsa. Bi tsarin aiki da ka'idar albarkatu a cikin `docs/ops/WORKTREE_ISOLATION.md` kafin ingantaccen inganci.
 
 ```bash
 npm run check:release-green -- --quick --json

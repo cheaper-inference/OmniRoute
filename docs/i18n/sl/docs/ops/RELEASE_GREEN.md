@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green opazuje določeno objavo in poroča o rezultatih preverjanja. [Referenca Quality Gates](../architecture/QUALITY_GATES.md) določa trenutne profile CI, zahtevana preverjanja in politiko sprejemanja. [Politika sprejema](../../config/quality/admission-policy.json) z različicami je izvršljiva pogodba za `Gate / CI` in `Gate / Quality`.
+Release-Green opazuje določeno objavo in poroča o rezultatih preverjanja. [Referenca Quality Gates](../architecture/QUALITY_GATES.md) določa trenutne profile CI, zahtevana preverjanja in politiko sprejemanja. Politika sprejema z različicami v `config/quality/admission-policy.json` je izvedljiva pogodba za `Gate / CI` in `Gate / Quality`.
 
 ## CI in obseg opazovalca
 
@@ -14,7 +14,7 @@ Proizvodna zgradba pripada CI. V `quality.yml` ni podvojene svetovalne zgradbe. 
 
 ## Lokalna validacija
 
-Po pripravi njegovih odvisnosti zaženite opazovalca v lastnem delovnem drevesu. Pred obsežnim preverjanjem uporabite [delovno drevo in protokol virov](WORKTREE_ISOLATION.md).
+Po pripravi njegovih odvisnosti zaženite opazovalca v lastnem delovnem drevesu. Sledite delovnemu drevesu in protokolu virov v `docs/ops/WORKTREE_ISOLATION.md` pred obsežno validacijo.
 
 ```bash
 npm run check:release-green -- --quick --json

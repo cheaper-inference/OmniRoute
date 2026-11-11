@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green hutazama ahadi mahususi na huripoti matokeo yake ya uthibitishaji. [Rejea ya Quality Gates](../architecture/QUALITY_GATES.md) inafafanua wasifu wa sasa CI, ukaguzi unaohitajika na sera ya kukubalika. [Sera ya uandikishaji](../../config/quality/admission-policy.json) iliyobadilishwa ni mkataba unaotekelezeka wa `Gate / CI` na `Gate / Quality`.
+Release-Green hutazama ahadi mahususi na huripoti matokeo yake ya uthibitishaji. [Rejea ya Quality Gates](../architecture/QUALITY_GATES.md) inafafanua wasifu wa sasa CI, ukaguzi unaohitajika na sera ya kukubalika. Sera ya uandikishaji iliyotolewa katika `config/quality/admission-policy.json` ni mkataba unaotekelezeka wa `Gate / CI` na `Gate / Quality`.
 
 ## CI na upeo wa mwangalizi
 
@@ -14,7 +14,7 @@ Jengo la uzalishaji ni la CI. Hakuna muundo wa ushauri unaorudiwa katika `qualit
 
 ## Uthibitishaji wa ndani
 
-Endesha mwangalizi kwenye mti wa kazi unaomilikiwa baada ya kuandaa vitegemezi vyake. Tumia [mti wa kazi na itifaki ya rasilimali](WORKTREE_ISOLATION.md) kabla ya uthibitisho mzito.
+Endesha mwangalizi kwenye mti wa kazi unaomilikiwa baada ya kuandaa vitegemezi vyake. Fuata mti wa kazi na itifaki ya rasilimali katika `docs/ops/WORKTREE_ISOLATION.md` kabla ya uthibitisho mzito.
 
 ```bash
 npm run check:release-green -- --quick --json

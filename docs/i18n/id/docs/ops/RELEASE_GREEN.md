@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green mengamati komitmen tertentu dan melaporkan hasil validasinya. [Referensi Gerbang Kualitas](../architecture/QUALITY_GATES.md) menentukan profil CI saat ini, pemeriksaan yang diperlukan, dan kebijakan penerimaan. [Kebijakan penerimaan](../../config/quality/admission-policy.json) berversi adalah kontrak yang dapat dieksekusi untuk `Gate / CI` dan `Gate / Quality`.
+Release-Green mengamati komitmen tertentu dan melaporkan hasil validasinya. [Referensi Gerbang Kualitas](../architecture/QUALITY_GATES.md) menentukan profil CI saat ini, pemeriksaan yang diperlukan, dan kebijakan penerimaan. Kebijakan penerimaan berversi di `config/quality/admission-policy.json` adalah kontrak yang dapat dieksekusi untuk `Gate / CI` dan `Gate / Quality`.
 
 ## CI dan ruang lingkup pengamat
 
@@ -14,7 +14,7 @@ Pembuatan produksi adalah milik CI. Tidak ada build penasehat duplikat di `quali
 
 ## Validasi lokal
 
-Jalankan pengamat di pohon kerja yang dimiliki setelah menyiapkan dependensinya. Gunakan [protokol pohon kerja dan sumber daya](WORKTREE_ISOLATION.md) sebelum validasi berat.
+Jalankan pengamat di pohon kerja yang dimiliki setelah menyiapkan dependensinya. Ikuti protokol pohon kerja dan sumber daya di `docs/ops/WORKTREE_ISOLATION.md` sebelum validasi berat.
 
 ```bash
 npm run check:release-green -- --quick --json

@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green 观察特定的提交并报告其验证结果。 [Quality Gates 参考](../architecture/QUALITY_GATES.md)定义了当前的CI配置文件、所需的检查和验收政策。版本化[准入策略](../../config/quality/admission-policy.json)是`Gate / CI`和`Gate / Quality`的可执行合约。
+Release-Green 观察特定的提交并报告其验证结果。 [Quality Gates 参考](../architecture/QUALITY_GATES.md)定义了当前的CI配置文件、所需的检查和验收政策。 `config/quality/admission-policy.json`中的版本化准入策略是`Gate / CI`和`Gate / Quality`的可执行合约。
 
 ## CI和观察员范围
 
@@ -14,7 +14,7 @@ Release-Green 观察特定的提交并报告其验证结果。 [Quality Gates �
 
 ## 本地验证
 
-准备好其依赖项后，在拥有的工作树中运行观察者。在进行大量验证之前使用[工作树和资源协议](WORKTREE_ISOLATION.md)。
+准备好其依赖项后，在拥有的工作树中运行观察者。在进行大量验证之前，请遵循`docs/ops/WORKTREE_ISOLATION.md`中的工作树和资源协议。
 
 ```bash
 npm run check:release-green -- --quick --json

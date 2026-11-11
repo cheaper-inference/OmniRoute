@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green ma'lum bir majburiyatni kuzatadi va uning tekshiruv natijalari haqida xabar beradi. [Sifat Geyts ma'lumotnomasi](../architecture/QUALITY_GATES.md) joriy CI profillarini, zarur tekshiruvlarni va qabul qilish siyosatini belgilaydi. Versiyalangan [qabul siyosati](../../config/quality/admission-policy.json) `Gate / CI` va `Gate / Quality` uchun bajariladigan shartnomadir.
+Release-Green ma'lum bir majburiyatni kuzatadi va uning tekshiruv natijalari haqida xabar beradi. [Sifat Geyts ma'lumotnomasi](../architecture/QUALITY_GATES.md) joriy CI profillarini, zarur tekshiruvlarni va qabul qilish siyosatini belgilaydi. `config/quality/admission-policy.json` -da versiyalashtirilgan qabul siyosati `Gate / CI` va `Gate / Quality` uchun bajariladigan shartnomadir.
 
 ## CI va kuzatuvchi doirasi
 
@@ -14,7 +14,7 @@ Ishlab chiqarish qurilishi CI tegishli. `quality.yml` da takroriy maslahat tuzil
 
 ## Mahalliy tasdiqlash
 
-Bog'liqlarini tayyorlagandan so'ng, kuzatuvchini tegishli ishchi daraxtda ishga tushiring. Kuchli tekshirishdan oldin [ishchi daraxti va resurs protokolidan](WORKTREE_ISOLATION.md) foydalaning.
+Bog'liqlarini tayyorlagandan so'ng, kuzatuvchini tegishli ishchi daraxtda ishga tushiring. Kuchli tekshirishdan oldin `docs/ops/WORKTREE_ISOLATION.md` da ishchi daraxti va manba protokoliga rioya qiling.
 
 ```bash
 npm run check:release-green -- --quick --json

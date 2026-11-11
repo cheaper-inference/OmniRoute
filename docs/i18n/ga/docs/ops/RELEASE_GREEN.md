@@ -4,7 +4,7 @@
 
 ---
 
-Cloíonn Release-Green gealltanas ar leith agus tuairiscíonn sé a thorthaí bailíochtaithe. Sainmhíníonn [tagairt Quality Gates](../architecture/QUALITY_GATES.md) na próifílí CI reatha, na seiceálacha riachtanacha agus an beartas glactha. Is é an [polasaí iontrála](../../config/quality/admission-policy.json) versioned ná an conradh inrite do `Gate / CI` agus `Gate / Quality`.
+Cloíonn Release-Green gealltanas ar leith agus tuairiscíonn sé a thorthaí bailíochtaithe. Sainmhíníonn [tagairt Quality Gates](../architecture/QUALITY_GATES.md) na próifílí CI reatha, na seiceálacha riachtanacha agus an beartas glactha. Is é an polasaí iontrála leagan in `config/quality/admission-policy.json` an conradh inrite do `Gate / CI` agus `Gate / Quality`.
 
 ## CI agus raon feidhme an bhreathnóra
 
@@ -14,7 +14,7 @@ Is le CI an tógáil táirgeachta. Níl aon tógáil chomhairleach dhúblach i `
 
 ## Bailíochtú áitiúil
 
-Rith an breathnóir i crann oibre faoi úinéireacht tar éis a spleáchais a ullmhú. Úsáid an [crann oibre agus an prótacal acmhainne](WORKTREE_ISOLATION.md) roimh bhailíochtú trom.
+Rith an breathnóir i crann oibre faoi úinéireacht tar éis a spleáchais a ullmhú. Lean an prótacal crann oibre agus acmhainní in `docs/ops/WORKTREE_ISOLATION.md` roimh bhailíochtú trom.
 
 ```bash
 npm run check:release-green -- --quick --json

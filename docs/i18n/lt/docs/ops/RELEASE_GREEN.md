@@ -4,7 +4,7 @@
 
 ---
 
-Release-Green stebi konkretų įsipareigojimą ir praneša apie jo patvirtinimo rezultatus. [Kokybės vartų nuoroda](../architecture/QUALITY_GATES.md) apibrėžia dabartinius CI profilius, būtinus patikrinimus ir priėmimo politiką. Versionuota [priėmimo politika](../../config/quality/admission-policy.json) yra vykdoma `Gate / CI` ir `Gate / Quality` sutartis.
+Release-Green stebi konkretų įsipareigojimą ir praneša apie jo patvirtinimo rezultatus. [Kokybės vartų nuoroda](../architecture/QUALITY_GATES.md) apibrėžia dabartinius CI profilius, būtinus patikrinimus ir priėmimo politiką. Versionuota priėmimo politika `config/quality/admission-policy.json` yra vykdoma `Gate / CI` ir `Gate / Quality` sutartis.
 
 ## CI ir stebėtojo sritis
 
@@ -14,7 +14,7 @@ Gamybos konstrukcija priklauso CI. `quality.yml` nėra pasikartojančių pataria
 
 ## Vietinis patvirtinimas
 
-Paruošę jo priklausomybes, paleiskite stebėtoją jam priklausančiame darbo medyje. Prieš intensyvų patvirtinimą naudokite [darbo medį ir išteklių protokolą](WORKTREE_ISOLATION.md).
+Paruošę jo priklausomybes, paleiskite stebėtoją jam priklausančiame darbo medyje. Prieš intensyvų patvirtinimą vadovaukitės `docs/ops/WORKTREE_ISOLATION.md` darbo medžio ir išteklių protokolu.
 
 ```bash
 npm run check:release-green -- --quick --json
