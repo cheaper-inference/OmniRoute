@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Екстерне CLI интеграције + Унутрашње OmniRoute CLI                                         |
 | `I18N.md`                   | и18н архитектура, додавање језика, 67 локалитета                                           |
 | `UNINSTALL.md`              | Чисте кораке деинсталирања                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Аутоматски генерисано** каталог 381 провајдера (реген: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Аутоматски генерисано** каталог 382 провајдера (реген: `npm run gen:provider-reference`) |
 
 ### Дубоки зарон подсистема
 

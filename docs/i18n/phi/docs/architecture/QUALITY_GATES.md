@@ -296,7 +296,7 @@ Tumatakbo pagkatapos ng `build`. Bina-block ang merge kapag nabigo.
 
 | Suite            | Bine-validate                                           | Blocking                                                                                                                                           |
 | ---------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 tool), autoCombo, cache — vitest runner | Oo                                                                                                                                                 |
+| `test:vitest`    | MCP server (129 tool), autoCombo, cache — vitest runner | Oo                                                                                                                                                 |
 | `test:vitest:ui` | Mga test ng UI component — vitest runner                | **Blocking** — tahasang hindi isinama sa `vitest.config.ts` ang mga dati nang failure; magiging dahilan ng pagkabigo ng job ang mga bagong failure |
 
 ### Mga nightly workflow (naka-iskedyul, advisory)

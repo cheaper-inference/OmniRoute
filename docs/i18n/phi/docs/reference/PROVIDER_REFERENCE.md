@@ -6,7 +6,7 @@
 
 > **Awtomatikong nabuo** mula sa `src/shared/constants/providers.ts` — huwag mag-edit gamit ang kamay. Buuin muli gamit ang: `npm run gen:provider-reference`** Huling nabuo:** 2026-11-08
 
-Kabuuang mga provider:** 381** . Tingnan ang breakdown ng kategorya sa ibaba.
+Kabuuang mga provider:** 382** . Tingnan ang breakdown ng kategorya sa ibaba.
 
 ## Mga Kategorya
 

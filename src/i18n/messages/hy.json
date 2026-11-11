@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT չորս-տվյալ ապացուցիչ",
     "doctorChecking": "Գնահատում է դրությունը…",
     "doctorCheck": "Ստուգել դոկտորի դրությունը",
-    "fallbackRetryBackendTitle": "Հետապատասխանվող վերափորձարարական backend"
+    "fallbackRetryBackendTitle": "Հետապատասխանվող վերափորձարարական backend",
+    "rosebudPanel": {
+      "title": "Rosebud բաժանորդագրություն",
+      "description": "Լիազորեք յուրաքանչյուր հաշիվ մեկ անգամ: Պատկերների, ձայնի կամ տեսանյութերի ստեղծումը ծախսում է այդ հաշվի առկա Rosebud վարկերը:",
+      "connect": "Միացրեք Rosebud հաշիվը",
+      "approve": "Հաստատել Rosebud վրա",
+      "checkAccount": "Ստուգեք թույլտվությունը և վարկերը",
+      "reauthorize": "Վերահաստատել",
+      "refreshModels": "Թարմացրեք մոդելները",
+      "defaultAccountName": "Rosebud հաշիվ",
+      "balanceUnavailable": "անհասանելի",
+      "accountStatus": "{status}: {account} — {balance} վարկեր",
+      "modelsDiscovered": "Հայտնաբերվել են {count} մոդելներ. Գները ներկայացված են Rosebud ապառիկներով։",
+      "requestFailed": "Չհաջողվեց կատարել այս հարցումը: Rosebud թույլտվությունն աշխատում է OmniRoute սերվերի վրա և պահանջում է տեղական կամ LAN մուտք:"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP սերվեր",
-        "description": "Միացեք OmniRoute MCP սերվերին (110 գործիք, փոխանցման 3 եղանակ՝ SSE/stdio/HTTP)։ Ներառում է երթուղավորման, քեշի, սեղմման, հիշողության, հմտությունների, մատակարարների և աուդիտի գործիքներ՝ թույլտվությունների 33 շրջանակներում։"
+        "description": "Միացեք OmniRoute MCP սերվերին (129 գործիք, փոխանցման 3 եղանակ՝ SSE/stdio/HTTP)։ Ներառում է երթուղավորման, քեշի, սեղմման, հիշողության, հմտությունների, մատակարարների և աուդիտի գործիքներ՝ թույլտվությունների 34 շրջանակներում։"
       },
       "omni-agents-a2a": {
         "name": "Գործակալներ և A2A արձանագրություն",

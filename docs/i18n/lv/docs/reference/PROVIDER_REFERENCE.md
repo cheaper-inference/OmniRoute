@@ -6,7 +6,7 @@
 
 > **Automātiski ģenerēts** no `src/shared/constants/providers.ts` — nerediģēt ar roku. Atjaunot ar: `npm run gen:provider-reference`** Pēdējā ģenerēšana:** 2026-11-08
 
-Kopējais pakalpojumu sniedzēju skaits:** 381** . Skatiet kategoriju sadalījumu zemāk.
+Kopējais pakalpojumu sniedzēju skaits:** 382** . Skatiet kategoriju sadalījumu zemāk.
 
 ## Kategorijas
 

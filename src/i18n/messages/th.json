@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Custom connector ของ ChatGPT",
     "doctorChecking": "กำลังตรวจสอบสถานะ…",
     "doctorCheck": "ตรวจสถานะ doctor",
-    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่"
+    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่",
+    "rosebudPanel": {
+      "title": "สมัครสมาชิก Rosebud",
+      "description": "อนุญาตแต่ละบัญชีหนึ่งครั้ง การสร้างภาพ เสียง หรือวิดีโอจะใช้เครดิต Rosebud ที่มีอยู่ของบัญชีนั้น",
+      "connect": "เชื่อมต่อบัญชี Rosebud",
+      "approve": "อนุมัติบน Rosebud",
+      "checkAccount": "ตรวจสอบการอนุญาตและเครดิต",
+      "reauthorize": "ให้สิทธิ์อีกครั้ง",
+      "refreshModels": "รีเฟรชโมเดล",
+      "defaultAccountName": "บัญชีRosebud",
+      "balanceUnavailable": "ไม่พร้อมใช้งาน",
+      "accountStatus": "{status}: {account} — {balance} เครดิต",
+      "modelsDiscovered": "ค้นพบโมเดล {count} ราคาอยู่ใน Rosebud เครดิต",
+      "requestFailed": "ไม่สามารถดำเนินการตามคำขอนี้ได้ การอนุญาต Rosebud ทำงานบนเซิร์ฟเวอร์ OmniRoute และต้องการการเข้าถึงภายในหรือ LAN"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "เซิร์ฟเวอร์ MCP",
-        "description": "เชื่อมต่อกับเซิร์ฟเวอร์ OmniRoute MCP (110 เครื่องมือ, 3 ช่องทางการรับส่งข้อมูล: SSE/stdio/HTTP) ครอบคลุมการกำหนดเส้นทาง, แคช, การบีบอัดข้อมูล, หน่วยความจำ, ทักษะ, ผู้ให้บริการ และเครื่องมือตรวจสอบใน 33 ขอบเขตสิทธิ์การใช้งาน"
+        "description": "เชื่อมต่อกับเซิร์ฟเวอร์ OmniRoute MCP (129 เครื่องมือ, 3 ช่องทางการรับส่งข้อมูล: SSE/stdio/HTTP) ครอบคลุมการกำหนดเส้นทาง, แคช, การบีบอัดข้อมูล, หน่วยความจำ, ทักษะ, ผู้ให้บริการ และเครื่องมือตรวจสอบใน 34 ขอบเขตสิทธิ์การใช้งาน"
       },
       "omni-agents-a2a": {
         "name": "เอเจนต์และโปรโตคอล A2A",

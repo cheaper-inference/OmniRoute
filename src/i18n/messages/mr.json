@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्थिती तपासत आहे…",
     "doctorCheck": "डॉक्टर स्थिती तपासा",
-    "fallbackRetryBackendTitle": "फॉलबॅक रीट्राय बॅकएंड"
+    "fallbackRetryBackendTitle": "फॉलबॅक रीट्राय बॅकएंड",
+    "rosebudPanel": {
+      "title": "Rosebud सदस्यता",
+      "description": "प्रत्येक खाते एकदा अधिकृत करा. प्रतिमा, ध्वनी किंवा व्हिडिओ तयार करणे त्या खात्याचे विद्यमान Rosebud क्रेडिट्स खर्च करते.",
+      "connect": "Rosebud खाते कनेक्ट करा",
+      "approve": "Rosebud वर मंजूर करा",
+      "checkAccount": "अधिकृतता आणि क्रेडिट तपासा",
+      "reauthorize": "पुन्हा अधिकृत करा",
+      "refreshModels": "मॉडेल रिफ्रेश करा",
+      "defaultAccountName": "Rosebud खाते",
+      "balanceUnavailable": "अनुपलब्ध",
+      "accountStatus": "{status}: {account} — {balance} क्रेडिट्स",
+      "modelsDiscovered": "{count} मॉडेल शोधले. किंमती Rosebud क्रेडिट्समध्ये आहेत.",
+      "requestFailed": "ही विनंती पूर्ण करण्यात अक्षम. Rosebud अधिकृतता OmniRoute सर्व्हरवर चालते आणि स्थानिक किंवा LAN प्रवेश आवश्यक आहे."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP सर्व्हर",
-        "description": "OmniRoute MCP सर्व्हरशी कनेक्ट व्हा (110 टूल्स, 3 ट्रान्सपोर्ट्स: SSE/stdio/HTTP). 33 परवानगी स्कोप्समधील राउटिंग, कॅश, कॉम्प्रेशन, मेमरी, स्किल्स, प्रोव्हायडर्स आणि ऑडिट टूल्स समाविष्ट करते."
+        "description": "OmniRoute MCP सर्व्हरशी कनेक्ट व्हा (129 टूल्स, 3 ट्रान्सपोर्ट्स: SSE/stdio/HTTP). 34 परवानगी स्कोप्समधील राउटिंग, कॅश, कॉम्प्रेशन, मेमरी, स्किल्स, प्रोव्हायडर्स आणि ऑडिट टूल्स समाविष्ट करते."
       },
       "omni-agents-a2a": {
         "name": "एजंट्स आणि A2A प्रोटोकॉल",

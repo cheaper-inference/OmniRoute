@@ -6,7 +6,7 @@
 
 > **Imetolewa kiotomatiki** kutoka `src/shared/constants/providers.ts` — usihariri kwa mkono. Tengeneza upya na: `npm run gen:provider-reference`** Iliyotolewa mwisho:** 2026-11-08
 
-Jumla ya watoa huduma:** 381** . Tazama uchanganuzi wa kategoria hapa chini.
+Jumla ya watoa huduma:** 382** . Tazama uchanganuzi wa kategoria hapa chini.
 
 ## Kategoria
 

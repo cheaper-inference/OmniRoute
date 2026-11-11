@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT aangepaste connector",
     "doctorChecking": "Status wordt gecontroleerd…",
     "doctorCheck": "Doctor-status controleren",
-    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen"
+    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen",
+    "rosebudPanel": {
+      "title": "Rosebud-abonnement",
+      "description": "Autoriseer elk account één keer. Voor het maken van afbeeldingen, geluid of video worden de bestaande Rosebud-tegoeden van dat account besteed.",
+      "connect": "Verbind Rosebud account",
+      "approve": "Goedkeuren op Rosebud",
+      "checkAccount": "Controleer autorisatie en tegoeden",
+      "reauthorize": "Opnieuw autoriseren",
+      "refreshModels": "Modellen vernieuwen",
+      "defaultAccountName": "Rosebud-account",
+      "balanceUnavailable": "niet beschikbaar",
+      "accountStatus": "{status}: {account} — {balance} tegoeden",
+      "modelsDiscovered": "{count} modellen ontdekt. Prijzen zijn in Rosebud tegoeden.",
+      "requestFailed": "Kan dit verzoek niet voltooien. Rosebud autorisatie draait op de OmniRoute server en vereist lokale of LAN toegang."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Maak verbinding met de OmniRoute MCP-server (110 tools, 3 transporten: SSE/stdio/HTTP). Omvat routering, cache, compressie, geheugen, vaardigheden, providers en audit-tools over 33 machtigingsbereiken."
+        "description": "Maak verbinding met de OmniRoute MCP-server (129 tools, 3 transporten: SSE/stdio/HTTP). Omvat routering, cache, compressie, geheugen, vaardigheden, providers en audit-tools over 34 machtigingsbereiken."
       },
       "omni-agents-a2a": {
         "name": "Agents & A2A-protocol",

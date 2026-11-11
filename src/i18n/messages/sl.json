@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Češni adapter ChatGPT",
     "doctorChecking": "Preverjanje stanja …",
     "doctorCheck": "Preveri zdravstveno stanje",
-    "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu"
+    "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu",
+    "rosebudPanel": {
+      "title": "Rosebud naročnina",
+      "description": "Pooblastite vsak račun enkrat. Ustvarjanje slik, zvoka ali videa porabi obstoječe kredite Rosebud tega računa.",
+      "connect": "Povežite račun Rosebud",
+      "approve": "Odobri na Rosebud",
+      "checkAccount": "Preverite avtorizacijo in kredite",
+      "reauthorize": "Ponovno pooblasti",
+      "refreshModels": "Osveži modele",
+      "defaultAccountName": "Rosebud račun",
+      "balanceUnavailable": "nedosegljiv",
+      "accountStatus": "{status}: {account} — {balance} krediti",
+      "modelsDiscovered": "odkriti modeli {count}. Cene so v Rosebud kreditih.",
+      "requestFailed": "Te zahteve ni mogoče dokončati. avtorizacija Rosebud se izvaja na strežniku OmniRoute in zahteva lokalni ali LAN dostop."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Strežnik MCP",
-        "description": "Povežite se s strežnikom OmniRoute MCP (110 orodij, 3 načini prenosa: SSE/stdio/HTTP). Vključuje orodja za usmerjanje, predpomnilnik, stiskanje, pomnilnik, veščine, ponudnike in revizijo v 33 obsegih dovoljenj."
+        "description": "Povežite se s strežnikom OmniRoute MCP (129 orodij, 3 načini prenosa: SSE/stdio/HTTP). Vključuje orodja za usmerjanje, predpomnilnik, stiskanje, pomnilnik, veščine, ponudnike in revizijo v 34 obsegih dovoljenj."
       },
       "omni-agents-a2a": {
         "name": "Agenti in protokol A2A",

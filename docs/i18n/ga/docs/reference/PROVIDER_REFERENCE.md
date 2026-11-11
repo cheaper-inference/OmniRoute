@@ -6,7 +6,7 @@
 
 > **Uathghinte** ó `src/shared/constants/providers.ts` — ná cuir in eagar de láimh. Athghin le: `npm run gen:provider-reference`** Gineadh an uair dheireanach:** 2026-11-08
 
-Soláthraithe iomlána:** 381** . Féach miondealú na gcatagóirí thíos.
+Soláthraithe iomlána:** 382** . Féach miondealú na gcatagóirí thíos.
 
 ## Catagóirí
 

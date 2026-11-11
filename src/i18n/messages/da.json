@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT brugerdefineret connector",
     "doctorChecking": "Tjekker status…",
     "doctorCheck": "Tjek lægestatus",
-    "fallbackRetryBackendTitle": "Fallback genforsøg backend"
+    "fallbackRetryBackendTitle": "Fallback genforsøg backend",
+    "rosebudPanel": {
+      "title": "Rosebud abonnement",
+      "description": "Godkend hver konto én gang. Oprettelse af billeder, lyd eller video bruger den kontos eksisterende Rosebud kreditter.",
+      "connect": "Tilslut Rosebud konto",
+      "approve": "Godkend på Rosebud",
+      "checkAccount": "Tjek autorisation og kreditter",
+      "reauthorize": "Genautoriser",
+      "refreshModels": "Opdater modeller",
+      "defaultAccountName": "Rosebud konto",
+      "balanceUnavailable": "ikke tilgængelig",
+      "accountStatus": "{status}: {account} — {balance} kreditter",
+      "modelsDiscovered": "{count} modeller opdaget. Priserne er i Rosebud kreditter.",
+      "requestFailed": "Denne anmodning kunne ikke fuldføres. Rosebud autorisation kører på OmniRoute serveren og kræver lokal eller LAN adgang."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Opret forbindelse til OmniRoute MCP-serveren (110 værktøjer, 3 transporter: SSE/stdio/HTTP). Dækker routing, cache, komprimering, hukommelse, færdigheder, udbydere og revisionsværktøjer på tværs af 33 rettighedsområder."
+        "description": "Opret forbindelse til OmniRoute MCP-serveren (129 værktøjer, 3 transporter: SSE/stdio/HTTP). Dækker routing, cache, komprimering, hukommelse, færdigheder, udbydere og revisionsværktøjer på tværs af 34 rettighedsområder."
       },
       "omni-agents-a2a": {
         "name": "Agenter & A2A-protokol",

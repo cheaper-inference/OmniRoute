@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT özel bağlantı noktası",
     "doctorChecking": "Durum kontrol ediliyor…",
     "doctorCheck": "Doktor durumunu kontrol et",
-    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu"
+    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu",
+    "rosebudPanel": {
+      "title": "Rosebud aboneliği",
+      "description": "Her hesaba bir kez yetki verin. Resim, ses veya video oluşturmak, o hesabın mevcut Rosebud kredilerini harcar.",
+      "connect": "Rosebud hesabını bağlayın",
+      "approve": "Rosebud onayla",
+      "checkAccount": "Yetki ve kredileri kontrol edin",
+      "reauthorize": "Yeniden yetkilendir",
+      "refreshModels": "Modelleri yenile",
+      "defaultAccountName": "Rosebud hesabı",
+      "balanceUnavailable": "müsait değil",
+      "accountStatus": "{status}: {account} — {balance} kredisi",
+      "modelsDiscovered": "{count} modelleri keşfedildi. Fiyatlar Rosebud kredisi cinsindendir.",
+      "requestFailed": "Bu istek tamamlanamıyor. Rosebud yetkilendirmesi OmniRoute sunucusunda çalışır ve yerel veya LAN erişimi gerektirir."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP Sunucusu",
-        "description": "OmniRoute MCP sunucusuna bağlanın (110 araç, 3 taşıma protokolü: SSE/stdio/HTTP). 33 izin kapsamı genelinde yönlendirme, önbellek, sıkıştırma, bellek, yetenekler, sağlayıcılar ve denetim araçlarını kapsar."
+        "description": "OmniRoute MCP sunucusuna bağlanın (129 araç, 3 taşıma protokolü: SSE/stdio/HTTP). 34 izin kapsamı genelinde yönlendirme, önbellek, sıkıştırma, bellek, yetenekler, sağlayıcılar ve denetim araçlarını kapsar."
       },
       "omni-agents-a2a": {
         "name": "Temsilciler ve A2A Protokolü",

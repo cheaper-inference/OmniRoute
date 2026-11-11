@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "চ্যাটজিপিটি কাস্টম কানেক্টর",
     "doctorChecking": "স্ট্যাটাস যাচাই করা হচ্ছে…",
     "doctorCheck": "ডক্টর স্ট্যাটাস যাচাই করুন",
-    "fallbackRetryBackendTitle": "ফলব্যাক রিট্রাই ব্যাকএন্ড"
+    "fallbackRetryBackendTitle": "ফলব্যাক রিট্রাই ব্যাকএন্ড",
+    "rosebudPanel": {
+      "title": "Rosebud সাবস্ক্রিপশন",
+      "description": "প্রতিটি অ্যাকাউন্ট একবার অনুমোদন করুন। ছবি, শব্দ বা ভিডিও তৈরি করা সেই অ্যাকাউন্টের বিদ্যমান Rosebud ক্রেডিট খরচ করে।",
+      "connect": "Rosebud অ্যাকাউন্ট সংযুক্ত করুন",
+      "approve": "Rosebud উপর অনুমোদন",
+      "checkAccount": "অনুমোদন এবং ক্রেডিট চেক করুন",
+      "reauthorize": "পুনরায় অনুমোদন করুন",
+      "refreshModels": "মডেল রিফ্রেশ করুন",
+      "defaultAccountName": "Rosebud অ্যাকাউন্ট",
+      "balanceUnavailable": "অনুপলব্ধ",
+      "accountStatus": "{status}: {account} — {balance} ক্রেডিট",
+      "modelsDiscovered": "{count} মডেল আবিষ্কৃত. দাম Rosebud ক্রেডিট মধ্যে আছে.",
+      "requestFailed": "এই অনুরোধ সম্পূর্ণ করতে অক্ষম. Rosebud অনুমোদন OmniRoute সার্ভারে চলে এবং স্থানীয় বা LAN অ্যাক্সেসের প্রয়োজন।"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP সার্ভার",
-        "description": "OmniRoute MCP সার্ভারের সাথে কানেক্ট করুন (৩৭টি টুল, ৩টি ট্রান্সপোর্ট: SSE/stdio/HTTP)। ১৬টি পারমিশন স্কোপ জুড়ে রাউটিং, ক্যাশ, কম্প্রেশন, মেমরি, স্কিল, প্রোভাইডার এবং অডিট টুল কভার করে।"
+        "description": "OmniRoute MCP সার্ভারের সাথে কানেক্ট করুন (১২৯টি টুল, ৩টি ট্রান্সপোর্ট: SSE/stdio/HTTP)। ১৬টি পারমিশন স্কোপ জুড়ে রাউটিং, ক্যাশ, কম্প্রেশন, মেমরি, স্কিল, প্রোভাইডার এবং অডিট টুল কভার করে।"
       },
       "omni-agents-a2a": {
         "name": "এজেন্ট ও A2A প্রোটোকল",

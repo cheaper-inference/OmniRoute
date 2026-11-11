@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "کانکتور سفارشی ChatGPT",
     "doctorChecking": "در حال بررسی وضعیت…",
     "doctorCheck": "بررسی وضعیت داکتور",
-    "fallbackRetryBackendTitle": "بک‌اند تلاش مجدد جایگزین"
+    "fallbackRetryBackendTitle": "بک‌اند تلاش مجدد جایگزین",
+    "rosebudPanel": {
+      "title": "اشتراک Rosebud",
+      "description": "هر حساب را یک بار مجاز کنید. ایجاد تصاویر، صدا یا ویدیو اعتبار Rosebud موجود آن حساب را خرج می کند.",
+      "connect": "حساب Rosebud را متصل کنید",
+      "approve": "تایید بر Rosebud",
+      "checkAccount": "مجوز و اعتبار را بررسی کنید",
+      "reauthorize": "مجدداً مجوز دهید",
+      "refreshModels": "رفرش کردن مدل ها",
+      "defaultAccountName": "حساب Rosebud",
+      "balanceUnavailable": "در دسترس نیست",
+      "accountStatus": "{status}: {account} — {balance} اعتبارات",
+      "modelsDiscovered": "مدل های {count} کشف شد. قیمت ها بر حسب اعتبار Rosebud می باشد.",
+      "requestFailed": "نمی توان این درخواست را تکمیل کرد. مجوز Rosebud روی سرور OmniRoute اجرا می شود و به دسترسی محلی یا LAN نیاز دارد."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "سرور MCP",
-        "description": "اتصال به سرور OmniRoute MCP (۱۱۰ ابزار، ۳ انتقال: SSE/stdio/HTTP). شامل مسیریابی، کش، فشرده‌سازی، حافظه، مهارت‌ها، ارائه‌دهندگان و ابزارهای حسابرسی در ۳۳ محدوده مجوز."
+        "description": "اتصال به سرور OmniRoute MCP (۱۲۹ ابزار، ۳ انتقال: SSE/stdio/HTTP). شامل مسیریابی، کش، فشرده‌سازی، حافظه، مهارت‌ها، ارائه‌دهندگان و ابزارهای حسابرسی در ۳۴ محدوده مجوز."
       },
       "omni-agents-a2a": {
         "name": "عامل‌ها و پروتکل A2A",

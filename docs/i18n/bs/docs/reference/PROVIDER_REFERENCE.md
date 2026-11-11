@@ -6,7 +6,7 @@
 
 > **Automatski generirano** iz `src/shared/constants/providers.ts` — nemojte uređivati ručno. Regeneracija sa: `npm run gen:provider-reference`** Posljednje generirano:** 2026-11-08
 
-Ukupni provajderi:** 381** . Pogledajte pregled kategorija ispod.
+Ukupni provajderi:** 382** . Pogledajte pregled kategorija ispod.
 
 ## Kategorije
 

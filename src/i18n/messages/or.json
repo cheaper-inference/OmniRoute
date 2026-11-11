@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ଚାଟ୍ ଜି ପି ଟି କଷ୍ଟମ୍ କୋନେକ୍ଟର",
     "doctorChecking": "ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରାଯାଉଛି…",
     "doctorCheck": "ଡକ୍ଟର ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
-    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend"
+    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend",
+    "rosebudPanel": {
+      "title": "Rosebud ସଦସ୍ୟତା",
+      "description": "ପ୍ରତ୍ୟେକ ଖାତାକୁ ଥରେ ପ୍ରାଧିକରଣ କରନ୍ତୁ। ପ୍ରତିଛବି, ଧ୍ୱନି କିମ୍ବା ଭିଡିଓ ସୃଷ୍ଟି କରିବା ସେହି ଖାତାର ବିଦ୍ୟମାନ Rosebud କ୍ରେଡିଟ୍ ଖର୍ଚ୍ଚ କରେ।",
+      "connect": "Rosebud ଖାତା ସଂଯୋଗ କରନ୍ତୁ",
+      "approve": "Rosebud ରେ ଅନୁମୋଦନ କରନ୍ତୁ",
+      "checkAccount": "ପ୍ରାଧିକରଣ ଏବଂ କ୍ରେଡିଟ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
+      "reauthorize": "ଅନୁମତି ଦିଅନ୍ତୁ",
+      "refreshModels": "ମଡେଲଗୁଡିକ ସତେଜ କରନ୍ତୁ",
+      "defaultAccountName": "Rosebud ଖାତା",
+      "balanceUnavailable": "ଉପଲବ୍ଧ ନାହିଁ",
+      "accountStatus": "{status}: {account} — {balance} କ୍ରେଡିଟ୍",
+      "modelsDiscovered": "{count} ମଡେଲଗୁଡିକ ଆବିଷ୍କୃତ। ମୂଲ୍ୟ Rosebud କ୍ରେଡିଟରେ ଅଛି।",
+      "requestFailed": "ଏହି ଅନୁରୋଧ ସଂପୂର୍ଣ୍ଣ କରିବାକୁ ଅସମର୍ଥ। Rosebud ପ୍ରାଧିକରଣ OmniRoute ସର୍ଭରରେ ଚାଲିଥାଏ ଏବଂ ସ୍ଥାନୀୟ କିମ୍ବା LAN ପ୍ରବେଶ ଆବଶ୍ୟକ କରେ।"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP ସର୍ଭର୍",
-        "description": "OmniRoute MCP ସର୍ଭର୍ସହ ସଂଯୋଗ କରନ୍ତୁ (110ଟି ଟୁଲ୍, 3ଟି ପରିବହନ ମାଧ୍ୟମ: SSE/stdio/HTTP)। ଏହା 33ଟି ଅନୁମତି ପରିସରରେ ରାଉଟିଂ, କ୍ୟାଶ୍, ସଙ୍କୋଚନ, ମେମୋରି, ଦକ୍ଷତା, ପ୍ରଦାନକାରୀ ଏବଂ ଅଡିଟ୍ ଟୁଲ୍କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।"
+        "description": "OmniRoute MCP ସର୍ଭର୍ସହ ସଂଯୋଗ କରନ୍ତୁ (129ଟି ଟୁଲ୍, 3ଟି ପରିବହନ ମାଧ୍ୟମ: SSE/stdio/HTTP)। ଏହା 34ଟି ଅନୁମତି ପରିସରରେ ରାଉଟିଂ, କ୍ୟାଶ୍, ସଙ୍କୋଚନ, ମେମୋରି, ଦକ୍ଷତା, ପ୍ରଦାନକାରୀ ଏବଂ ଅଡିଟ୍ ଟୁଲ୍କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।"
       },
       "omni-agents-a2a": {
         "name": "ଏଜେଣ୍ଟ ଏବଂ A2A ପ୍ରୋଟୋକଲ୍",

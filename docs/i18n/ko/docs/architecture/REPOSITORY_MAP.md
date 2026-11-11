@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 아키텍처, 언어 추가, 67개 로케일                                         |
 | `UNINSTALL.md`              | 깔끔한 제거 단계                                                              |
-| `PROVIDER_REFERENCE.md`     | **자동 생성** 381개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **자동 생성** 382개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
 
 ### 하위 시스템 심층 분석
 

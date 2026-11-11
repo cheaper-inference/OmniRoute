@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Персонализиран конектор на ChatGPT",
     "doctorChecking": "Проверява се състоянието…",
     "doctorCheck": "Проверка на състоянието на doctor",
-    "fallbackRetryBackendTitle": "Резервен backend за повторни опити"
+    "fallbackRetryBackendTitle": "Резервен backend за повторни опити",
+    "rosebudPanel": {
+      "title": "Rosebud абонамент",
+      "description": "Упълномощавайте всеки акаунт веднъж. Създаването на изображения, звук или видео изразходва съществуващите Rosebud кредити на този акаунт.",
+      "connect": "Свържете Rosebud акаунт",
+      "approve": "Одобряване на Rosebud",
+      "checkAccount": "Проверете авторизацията и кредитите",
+      "reauthorize": "Преупълномощаване",
+      "refreshModels": "Обновете моделите",
+      "defaultAccountName": "Rosebud акаунт",
+      "balanceUnavailable": "недостъпен",
+      "accountStatus": "{status}: {account} — {balance} кредити",
+      "modelsDiscovered": "открити модели {count}. Цените са в Rosebud кредити.",
+      "requestFailed": "Не може да се изпълни тази заявка. Rosebud оторизацията се изпълнява на OmniRoute сървъра и изисква локален или LAN достъп."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP сървър",
-        "description": "Свържете се с OmniRoute MCP сървъра (110 инструмента, 3 транспорта: SSE/stdio/HTTP). Обхваща инструменти за маршрутизиране, кеширане, компресиране, памет, умения, доставчици и одит в рамките на 33 обхвата на разрешения."
+        "description": "Свържете се с OmniRoute MCP сървъра (129 инструмента, 3 транспорта: SSE/stdio/HTTP). Обхваща инструменти за маршрутизиране, кеширане, компресиране, памет, умения, доставчици и одит в рамките на 34 обхвата на разрешения."
       },
       "omni-agents-a2a": {
         "name": "Агенти и A2A протокол",

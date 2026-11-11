@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> Mara: Ndị na-enye ndị na-edepụtaghị ebe a bụ ndị `default.ts` na-eje ozi site na iji onye mmebe OpenAI dakọtara. Katalọgụ ndị na-eweta ọrụ (ndị na-enye 381) bi na `src/shared/constants/providers.ts`.
+> Mara: Ndị na-enye ndị na-edepụtaghị ebe a bụ ndị `default.ts` na-eje ozi site na iji onye mmebe OpenAI dakọtara. Katalọgụ ndị na-eweta ọrụ (ndị na-enye 382) bi na `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

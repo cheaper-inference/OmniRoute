@@ -1,0 +1,119 @@
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, readFile, writeFile, link, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { RosebudError, rosebudRoot } from "./cli.ts";
+
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+        .map(([k, v]) => [k, canonical(v)])
+    );
+  return value;
+}
+
+/** Publish a binding atomically; when another request won the race, its binding stands. */
+async function writeBinding(folder: string, file: string, binding: Record<string, string>) {
+  await mkdir(folder, { recursive: true, mode: 0o700 });
+  const temporary = file + "." + randomUUID();
+  await writeFile(temporary, JSON.stringify(binding), { mode: 0o600 });
+  try {
+    await link(temporary, file);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
+async function readBinding(file: string) {
+  try {
+    return JSON.parse(await readFile(file, "utf8"));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+/** Pin a caller's retry to the original account before another paid submit is possible. */
+export async function rosebudImageBinding(
+  scope: string,
+  key: unknown,
+  body: unknown,
+  allowed: string[] | null,
+  candidate?: string
+): Promise<string | undefined> {
+  if (key === undefined || key === null) return undefined;
+  if (typeof key !== "string" || key.length < 1 || key.length > 200)
+    throw new RosebudError("invalid_idempotency_key", 400);
+  const digest = (value: unknown) =>
+    createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  const fingerprint = digest(canonical(body));
+  const folder = join(rosebudRoot(), "image-bindings");
+  const file = join(folder, digest([scope, key]) + ".json");
+  if (candidate) await writeBinding(folder, file, { connectionId: candidate, fingerprint });
+  const saved = await readBinding(file);
+  if (!saved) return undefined;
+  if (saved.fingerprint !== fingerprint) throw new RosebudError("idempotency_conflict", 409);
+  if (typeof saved.connectionId !== "string") throw new RosebudError("invalid_image_binding", 409);
+  if (allowed?.length && !allowed.includes(saved.connectionId))
+    throw new RosebudError("connection_not_allowed", 403);
+  return saved.connectionId;
+}
+
+/** Keep user-provided keys from colliding across independently authenticated callers. */
+export function scopedRosebudKey(scope: string, key: string) {
+  return (
+    "caller-" +
+    createHash("sha256")
+      .update(JSON.stringify([scope, key]))
+      .digest("hex")
+  );
+}
+
+export function matchesRosebudPin(pinned: string | undefined, selected: string | undefined) {
+  return !pinned || pinned === selected;
+}
+
+/** The route uses this boundary so soft selector fallback cannot escape a paid binding. */
+function selectedConnectionId(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const id = (value as { connectionId?: unknown }).connectionId;
+  return typeof id === "string" ? id : undefined;
+}
+
+export async function selectRosebudImageCredentials<T>(options: {
+  pinned?: string;
+  eligible: string[];
+  lookup: (ids: string[], forced?: string) => Promise<T>;
+  bind: (candidate: string) => Promise<string | undefined>;
+  usable: (credentials: NonNullable<T>) => boolean;
+}) {
+  let pinned = options.pinned;
+  let selected = await options.lookup(pinned ? [pinned] : options.eligible, pinned);
+  // With no pin there is no paid retry to protect: the route reports these as 400, 403 or 429.
+  if (!pinned && (!selected || !options.usable(selected as NonNullable<T>)))
+    return { credentials: selected, pinned: undefined };
+  const verify = (value: T, expected?: string): NonNullable<T> => {
+    const id = selectedConnectionId(value);
+    if (
+      !value ||
+      !id ||
+      !matchesRosebudPin(expected, id) ||
+      !options.eligible.includes(id) ||
+      !options.usable(value)
+    )
+      throw new RosebudError("original_connection_unavailable", 409);
+    return value;
+  };
+  let credentials = verify(selected, pinned);
+  const candidateId = selectedConnectionId(credentials)!;
+  pinned = await options.bind(candidateId);
+  if (pinned && candidateId !== pinned) {
+    selected = await options.lookup([pinned], pinned);
+    credentials = verify(selected, pinned);
+  }
+  return { credentials, pinned };
+}

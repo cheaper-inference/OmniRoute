@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Conector personalizat pentru ChatGPT",
     "doctorChecking": "Verificarea stării…",
     "doctorCheck": "Verifică starea doctorului",
-    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback"
+    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback",
+    "rosebudPanel": {
+      "title": "abonament Rosebud",
+      "description": "Autorizați fiecare cont o dată. Crearea de imagini, sunet sau videoclipuri cheltuiește creditele Rosebud existente ale contului respectiv.",
+      "connect": "Conectați contul Rosebud",
+      "approve": "Aprobați pe Rosebud",
+      "checkAccount": "Verificați autorizația și creditele",
+      "reauthorize": "Reautorizați",
+      "refreshModels": "Actualizează modelele",
+      "defaultAccountName": "cont Rosebud",
+      "balanceUnavailable": "indisponibil",
+      "accountStatus": "{status}: {account} — {balance} credite",
+      "modelsDiscovered": "modele {count} descoperite. Prețurile sunt exprimate în credite Rosebud.",
+      "requestFailed": "Nu se poate finaliza această solicitare. Autorizarea Rosebud rulează pe serverul OmniRoute și necesită acces local sau LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Server MCP",
-        "description": "Conectează-te la serverul MCP OmniRoute (110 de instrumente, 3 transporturi: SSE/stdio/HTTP). Acoperă rutarea, memoria cache, compresia, memoria, abilitățile, furnizorii și instrumentele de audit în 33 scopuri de permisiuni."
+        "description": "Conectează-te la serverul MCP OmniRoute (129 de instrumente, 3 transporturi: SSE/stdio/HTTP). Acoperă rutarea, memoria cache, compresia, memoria, abilitățile, furnizorii și instrumentele de audit în 34 scopuri de permisiuni."
       },
       "omni-agents-a2a": {
         "name": "Agenți & Protocol A2A",

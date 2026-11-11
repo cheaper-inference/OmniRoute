@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Muunganishaji maalum wa ChatGPT",
     "doctorChecking": "Inathibitisha hali…",
     "doctorCheck": "Thibitisha hali ya mwanga",
-    "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji"
+    "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji",
+    "rosebudPanel": {
+      "title": "usajili wa Rosebud",
+      "description": "Idhinisha kila akaunti mara moja. Kuunda picha, sauti au video kunatumia salio la Rosebud lililopo la akaunti hiyo.",
+      "connect": "Unganisha akaunti Rosebud",
+      "approve": "Idhinisha kwenye Rosebud",
+      "checkAccount": "Angalia idhini na mikopo",
+      "reauthorize": "Idhinisha upya",
+      "refreshModels": "Onyesha upya mifano",
+      "defaultAccountName": "hesabu Rosebud",
+      "balanceUnavailable": "haipatikani",
+      "accountStatus": "{status}: {account} — {balance} krediti",
+      "modelsDiscovered": "mifano {count} iligunduliwa. Bei ziko katika salio la Rosebud.",
+      "requestFailed": "Imeshindwa kukamilisha ombi hili. idhini ya Rosebud inaendeshwa kwenye seva OmniRoute na inahitaji ufikiaji wa ndani au LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Seva ya MCP",
-        "description": "Unganisha kwenye seva ya OmniRoute MCP (zana 110, usafirishaji 3: SSE/stdio/HTTP). Inajumuisha uelekezaji, kache, mgandamizo, kumbukumbu, ujuzi, watoa huduma, na zana za ukaguzi kwenye mawanda 33 ya ruhusa."
+        "description": "Unganisha kwenye seva ya OmniRoute MCP (zana 129, usafirishaji 3: SSE/stdio/HTTP). Inajumuisha uelekezaji, kache, mgandamizo, kumbukumbu, ujuzi, watoa huduma, na zana za ukaguzi kwenye mawanda 34 ya ruhusa."
       },
       "omni-agents-a2a": {
         "name": "Ejenti na Itifaki ya A2A",

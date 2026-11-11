@@ -113,6 +113,12 @@ export async function executeImageWithCredentialFallback({
   allowedConnections = null,
   selectNextCredentials = defaultSelectNextCredentials,
 }: ImageCredentialRetryOptions): Promise<ImageCredentialRetryResult> {
+  // Rosebud's durable request identity belongs to one CLI profile. Never rotate
+  // a possibly paid job to another account after a lost/expired response.
+  if (provider === "rosebud") {
+    return { credentials, result: await execute(credentials) };
+  }
+
   // Local/no-auth image providers intentionally have no credential row. They
   // still need one direct attempt, but there is no account identity to refresh
   // or rotate after a 401.

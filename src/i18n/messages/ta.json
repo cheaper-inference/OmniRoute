@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT தனிப்பயன் இணைப்பி (custom connector)",
     "doctorChecking": "நிலையை பரிசீலிக்கிறது… (Checking status…)",
     "doctorCheck": "மருத்துவர் நிலையைப் பரிசீலிக்கவும் (Check doctor status)",
-    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி"
+    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி",
+    "rosebudPanel": {
+      "title": "Rosebud சந்தா",
+      "description": "ஒவ்வொரு கணக்கையும் ஒரு முறை அங்கீகரிக்கவும். படங்கள், ஒலி அல்லது வீடியோவை உருவாக்குவது அந்தக் கணக்கின் தற்போதைய Rosebud வரவுகளைச் செலவிடுகிறது.",
+      "connect": "Rosebud கணக்கை இணைக்கவும்",
+      "approve": "Rosebud மீது ஒப்புதல்",
+      "checkAccount": "அங்கீகாரம் மற்றும் வரவுகளை சரிபார்க்கவும்",
+      "reauthorize": "மீண்டும் அங்கீகரிக்கவும்",
+      "refreshModels": "மாதிரிகளைப் புதுப்பிக்கவும்",
+      "defaultAccountName": "Rosebud கணக்கு",
+      "balanceUnavailable": "கிடைக்கவில்லை",
+      "accountStatus": "{status}: {account} — {balance} வரவுகள்",
+      "modelsDiscovered": "{count} மாதிரிகள் கண்டுபிடிக்கப்பட்டன. விலைகள் Rosebud கிரெடிட்களில் உள்ளன.",
+      "requestFailed": "இந்தக் கோரிக்கையை நிறைவு செய்ய முடியவில்லை. Rosebud அங்கீகாரம் OmniRoute சேவையகத்தில் இயங்குகிறது மற்றும் உள்ளூர் அல்லது LAN அணுகல் தேவைப்படுகிறது."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP சர்வர்",
-        "description": "OmniRoute MCP சர்வரோடு இணைக்கவும் (110 கருவிகள், 3 டிரான்ஸ்போர்ட்டுகள்: SSE/stdio/HTTP). 33 அனுமதி வரம்புகளில் ரூட்டிங், கேச், கம்ப்ரஷன், மெமரி, திறன்கள், வழங்குநர்கள் மற்றும் தணிக்கைக் கருவிகளை உள்ளடக்கியது."
+        "description": "OmniRoute MCP சர்வரோடு இணைக்கவும் (129 கருவிகள், 3 டிரான்ஸ்போர்ட்டுகள்: SSE/stdio/HTTP). 34 அனுமதி வரம்புகளில் ரூட்டிங், கேச், கம்ப்ரஷன், மெமரி, திறன்கள், வழங்குநர்கள் மற்றும் தணிக்கைக் கருவிகளை உள்ளடக்கியது."
       },
       "omni-agents-a2a": {
         "name": "ஏஜெண்டுகள் & A2A புரோட்டோகால்",

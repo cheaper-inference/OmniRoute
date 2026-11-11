@@ -6,7 +6,7 @@
 
 > **Automaatselt genereeritud** alates `src/shared/constants/providers.ts` — ärge redigeerige käsitsi. Taastage koos: `npm run gen:provider-reference`** Viimati loodud:** 2026-11-08
 
-Pakkujaid kokku:** 381** . Vaata kategooriate jaotust allpool.
+Pakkujaid kokku:** 382** . Vaata kategooriate jaotust allpool.
 
 ## Kategooriad
 

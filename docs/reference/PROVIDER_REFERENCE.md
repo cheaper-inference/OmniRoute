@@ -10,7 +10,7 @@ lastUpdated: 2026-11-10
 > Regenerate with: `npm run gen:provider-reference`
 > **Last generated:** 2026-11-10
 
-Total providers: **388**. See category breakdown below.
+Total providers: **389**. See category breakdown below.
 
 ## Categories
 
@@ -34,7 +34,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 ---
 
-## No-auth Providers (no key required) (10)
+## No-auth Providers (no key required) (11)
 
 | ID | Alias | Name | Tags | Website | Notes | Tool calling |
 |----|-------|------|------|---------|-------|--------------|
@@ -45,6 +45,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `devin-cli-agentic` | `dva` | Devin CLI Agentic Bridge | No-auth | [link](https://docs.devin.ai/work-with-devin/devin-cli) | Authentication is owned by the official Devin CLI in its isolated bridge volume. | emulated |
 | `duckduckgo-web` | `ddgw` | DuckDuckGo AI Chat | No-auth | [link](https://duckduckgo.com/duckchat) | No credentials required — DuckDuckGo AI Chat is anonymous and free. | emulated |
 | `minimax-code` | `mmcode` | MiniMax Code | No-auth | [link](https://www.minimax.io) | No API key stored by OmniRoute. The provider reads the local MiniMax Code profile to authenticate a run. You can also sign in to your MiniMax account from this page (device code) — the credential is written into that same local profile. | native |
+| `rosebud` | `rosebud` | Rosebud AI | No-auth | [link](https://rosebud.ai) | Authorize the official Rosebud CLI on this server. Each connection has isolated credentials. | — |
 | `uncloseai` | `unc` | UncloseAI | No-auth | [link](https://uncloseai.com) | No auth required. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync; verified live model: turboderp/Qwen3.8-27B-exl3. | emulated |
 | `veoaifree-web` | `veo-free` | Veo AI Free | No-auth, video | [link](https://veoaifree.com) | No auth required. Rate limited to 6 requests/hour per IP. | — |
 | `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | No API key stored by OmniRoute. The local ZCode app-server uses the existing builtin:zai-coding-plan login. | — |

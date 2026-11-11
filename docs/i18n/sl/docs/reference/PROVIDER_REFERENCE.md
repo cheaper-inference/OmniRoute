@@ -6,7 +6,7 @@
 
 > **Samodejno ustvarjeno** iz `src/shared/constants/providers.ts` — ne urejaj ročno. Regeneriraj z: `npm run gen:provider-reference`** Nazadnje ustvarjeno:** 2026-11-08
 
-Skupaj ponudniki:** 381** . Glej razčlenitev kategorij spodaj.
+Skupaj ponudniki:** 382** . Glej razčlenitev kategorij spodaj.
 
 ## Kategorije
 

@@ -6,7 +6,7 @@
 
 > **Automatisch generiert** von `src/shared/constants/providers.ts` — nicht von Hand bearbeiten. Regenerieren mit: `npm run gen:provider-reference`** Zuletzt generiert:** 08.11.2026
 
-Gesamtanbieter:** 381** . Siehe Kategorienaufschlüsselung unten.
+Gesamtanbieter:** 382** . Siehe Kategorienaufschlüsselung unten.
 
 ## Kategorien
 

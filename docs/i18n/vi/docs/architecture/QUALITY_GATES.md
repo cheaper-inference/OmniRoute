@@ -221,7 +221,7 @@ Chạy theo `build`. Khối hợp nhất khi thất bại.
 
 | Suite            | Xác thực                                              | Chặn                                                                                                                    |
 | ---------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | máy chủ MCP (110 công cụ), autoCombo, bộ đệm — vitest | Đúng                                                                                                                    |
+| `test:vitest`    | máy chủ MCP (129 công cụ), autoCombo, bộ đệm — vitest | Đúng                                                                                                                    |
 | `test:vitest:ui` | kiểm tra thành phần UI — vitest Á hậu                 | **Chặn** Các lỗi tồn tại từ trước — được loại trừ rõ ràng trong `vitest.config.ts`; thất bại mới làm thất bại công việc |
 
 ### Quy trình làm việc hàng đêm (theo lịch trình, tư vấn)

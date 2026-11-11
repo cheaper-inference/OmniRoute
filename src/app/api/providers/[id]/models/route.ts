@@ -1,3 +1,5 @@
+import { requireRosebudAccess, requireRosebudLocalPeer } from "@/lib/rosebud/authorization";
+import { discoverRosebud, projectRosebudCatalog } from "@/lib/rosebud/provider";
 import { NextResponse } from "next/server";
 import { FalClient } from "@omniroute/open-sse/handlers/fal/client";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
@@ -230,6 +232,15 @@ export async function GET(
     const provider = connectionProvider;
     if (!provider) {
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
+    }
+    if (provider === "rosebud") {
+      const denied = await requireRosebudAccess(request, id);
+      if (denied) return denied;
+      const remote = requireRosebudLocalPeer(request);
+      if (remote) return remote;
+      return NextResponse.json(
+        projectRosebudCatalog(await discoverRosebud(id), { chatOnly, excludeHidden })
+      );
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
     if (provider === "chatgpt") return buildChatGptModelsResponse(connection, excludeHidden);

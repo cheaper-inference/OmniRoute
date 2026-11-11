@@ -176,7 +176,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute
 
-Local/remote AI gateway exposing OpenAI-compatible REST. One key, 388 providers,
+Local/remote AI gateway exposing OpenAI-compatible REST. One key, 389 providers,
 auto-fallback, RTK token saver, MCP server, A2A agents.
 
 ## Setup
@@ -214,7 +214,7 @@ Use `data[].id` as `model` field in requests. Combos appear with `owned_by:"comb
 | Embeddings             | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
 | Web search             | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
 | Web fetch              | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| MCP server (110 tools) | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-mcp/SKILL.md            |
+| MCP server (129 tools) | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-mcp/SKILL.md            |
 | A2A protocol           | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-agents-a2a/SKILL.md     |
 | Routing & combos       | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-combos-routing/SKILL.md |
 | Token compression      | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-compression/SKILL.md    |

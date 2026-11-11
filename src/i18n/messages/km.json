@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ឧបករណ៍ភ្ជាប់ផ្ទាល់ខ្លួនរបស់ ChatGPT",
     "doctorChecking": "កំពុងពិនិត្យស្ថានភាព…",
     "doctorCheck": "ពិនិត្យស្ថានភាព doctor",
-    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ"
+    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ",
+    "rosebudPanel": {
+      "title": "ការជាវ Rosebud",
+      "description": "អនុញ្ញាតគណនីនីមួយៗម្តង។ ការបង្កើតរូបភាព សំឡេង ឬវីដេអូចំណាយទៅលើឥណទាន Rosebud ដែលមានស្រាប់របស់គណនីនោះ។",
+      "connect": "ភ្ជាប់គណនី Rosebud",
+      "approve": "យល់ព្រមលើ Rosebud",
+      "checkAccount": "ពិនិត្យការអនុញ្ញាត និងឥណទាន",
+      "reauthorize": "ផ្តល់សិទ្ធិឡើងវិញ",
+      "refreshModels": "ធ្វើឱ្យគំរូឡើងវិញ",
+      "defaultAccountName": "គណនីRosebud",
+      "balanceUnavailable": "មិនអាចប្រើបាន",
+      "accountStatus": "{status}: {account} — {balance} ឌីត",
+      "modelsDiscovered": "ម៉ូដែល {count} ត្រូវបានរកឃើញ។ តម្លៃគឺនៅក្នុងឥណទាន Rosebud ។",
+      "requestFailed": "មិនអាចបំពេញសំណើនេះបានទេ។ ការអនុញ្ញាត Rosebud ដំណើរការលើម៉ាស៊ីនមេ OmniRoute ហើយទាមទារការចូលប្រើមូលដ្ឋាន ឬ LAN ។"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "ម៉ាស៊ីនមេ MCP",
-        "description": "តភ្ជាប់ទៅម៉ាស៊ីនមេ OmniRoute MCP (ឧបករណ៍ 110 និងមធ្យោបាយបញ្ជូន 3៖ SSE/stdio/HTTP)។ គ្របដណ្តប់លើឧបករណ៍កំណត់ផ្លូវ ឃ្លាំងសម្ងាត់ ការបង្ហាប់ អង្គចងចាំ ជំនាញ អ្នកផ្តល់សេវា និងសវនកម្ម នៅទូទាំងវិសាលភាពសិទ្ធិ 33។"
+        "description": "តភ្ជាប់ទៅម៉ាស៊ីនមេ OmniRoute MCP (ឧបករណ៍ 129 និងមធ្យោបាយបញ្ជូន 3៖ SSE/stdio/HTTP)។ គ្របដណ្តប់លើឧបករណ៍កំណត់ផ្លូវ ឃ្លាំងសម្ងាត់ ការបង្ហាប់ អង្គចងចាំ ជំនាញ អ្នកផ្តល់សេវា និងសវនកម្ម នៅទូទាំងវិសាលភាពសិទ្ធិ 34។"
       },
       "omni-agents-a2a": {
         "name": "ភ្នាក់ងារ និងពិធីការ A2A",

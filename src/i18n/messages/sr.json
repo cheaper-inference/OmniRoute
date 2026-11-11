@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT прилагођени конектор",
     "doctorChecking": "Провера статуса…",
     "doctorCheck": "Провери статус лекара",
-    "fallbackRetryBackendTitle": "Задња резорна линија за поновни покушај"
+    "fallbackRetryBackendTitle": "Задња резорна линија за поновни покушај",
+    "rosebudPanel": {
+      "title": "Rosebud претплата",
+      "description": "Овластите сваки налог једном. Креирање слика, звука или видео записа троши постојеће Rosebud кредите тог налога.",
+      "connect": "Повежите Rosebud налог",
+      "approve": "Одобре на Rosebud",
+      "checkAccount": "Проверите овлашћење и кредите",
+      "reauthorize": "Поново овластити",
+      "refreshModels": "Освежите моделе",
+      "defaultAccountName": "Rosebud налог",
+      "balanceUnavailable": "недоступан",
+      "accountStatus": "{status}: {account} — {balance} кредити",
+      "modelsDiscovered": "{count} модели откривени. Цене су у Rosebud кредитима.",
+      "requestFailed": "Није могуће довршити овај захтев. Rosebud ауторизација ради на OmniRoute серверу и захтева локални или LAN приступ."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP server",
-        "description": "Povežite se sa OmniRoute MCP serverom (110 alata, 3 transporta: SSE/stdio/HTTP). Obuhvata alate za rutiranje, keš, kompresiju, memoriju, veštine, provajdere i reviziju u okviru 33 obima ovlašćenja."
+        "description": "Povežite se sa OmniRoute MCP serverom (129 alata, 3 transporta: SSE/stdio/HTTP). Obuhvata alate za rutiranje, keš, kompresiju, memoriju, veštine, provajdere i reviziju u okviru 34 obima ovlašćenja."
       },
       "omni-agents-a2a": {
         "name": "Agenti i A2A protokol",

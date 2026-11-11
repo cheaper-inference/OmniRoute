@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT pasirinktinė jungtis",
     "doctorChecking": "Tikrinamas būsena…",
     "doctorCheck": "Patikrinti doctor būseną",
-    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas"
+    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas",
+    "rosebudPanel": {
+      "title": "Rosebud prenumerata",
+      "description": "Įgaliokite kiekvieną paskyrą vieną kartą. Kuriant vaizdus, garsą ar vaizdo įrašą išleidžiami tos paskyros esami Rosebud kreditai.",
+      "connect": "Prijunkite Rosebud paskyrą",
+      "approve": "Patvirtinti Rosebud",
+      "checkAccount": "Patikrinkite įgaliojimą ir kreditus",
+      "reauthorize": "Iš naujo įgalioti",
+      "refreshModels": "Atnaujinkite modelius",
+      "defaultAccountName": "Rosebud sąskaitą",
+      "balanceUnavailable": "nepasiekiamas",
+      "accountStatus": "{status}: {account} — {balance} kreditai",
+      "modelsDiscovered": "aptikti {count} modeliai. Kainos nurodytos Rosebud kreditais.",
+      "requestFailed": "Nepavyko įvykdyti šios užklausos. Rosebud autorizacija veikia OmniRoute serveryje ir reikalinga vietinė arba LAN prieiga."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP serveris",
-        "description": "Prisijunkite prie OmniRoute MCP serverio (110 įrankių, 3 perdavimo būdai: SSE/stdio/HTTP). Jis apima maršruto parinkimo, talpyklos, glaudinimo, atminties, įgūdžių, teikėjų ir audito įrankius 33 leidimų taikymo srityse."
+        "description": "Prisijunkite prie OmniRoute MCP serverio (129 įrankių, 3 perdavimo būdai: SSE/stdio/HTTP). Jis apima maršruto parinkimo, talpyklos, glaudinimo, atminties, įgūdžių, teikėjų ir audito įrankius 34 leidimų taikymo srityse."
       },
       "omni-agents-a2a": {
         "name": "Agentai ir A2A protokolas",

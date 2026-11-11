@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT pielāgots savienotājs",
     "doctorChecking": "Pārbauda statusu...",
     "doctorCheck": "Pārbaudīt ārstēšanas statusu",
-    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure"
+    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure",
+    "rosebudPanel": {
+      "title": "Rosebud abonements",
+      "description": "Autorizējiet katru kontu vienreiz. Veidojot attēlus, skaņu vai video, tiek tērēti šī konta esošie Rosebud kredīti.",
+      "connect": "Pievienojiet Rosebud kontu",
+      "approve": "Apstiprināt uz Rosebud",
+      "checkAccount": "Pārbaudiet autorizāciju un kredītus",
+      "reauthorize": "Atkārtoti autorizēt",
+      "refreshModels": "Atsvaidziniet modeļus",
+      "defaultAccountName": "Rosebud konts",
+      "balanceUnavailable": "nav pieejams",
+      "accountStatus": "{status}: {account} — {balance} kredīti",
+      "modelsDiscovered": "{count} modeļi atklāti. Cenas norādītas Rosebud kredītos.",
+      "requestFailed": "Nevar izpildīt šo pieprasījumu. Rosebud autorizācija darbojas OmniRoute serverī, un tai ir nepieciešama lokāla vai LAN piekļuve."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP serveris",
-        "description": "Izveidojiet savienojumu ar OmniRoute MCP serveri (110 rīki, 3 transporti: SSE/stdio/HTTP). Tas aptver maršrutēšanas, kešatmiņas, saspiešanas, atmiņas, prasmju, nodrošinātāju un audita rīkus 33 atļauju tvērumos."
+        "description": "Izveidojiet savienojumu ar OmniRoute MCP serveri (129 rīki, 3 transporti: SSE/stdio/HTTP). Tas aptver maršrutēšanas, kešatmiņas, saspiešanas, atmiņas, prasmju, nodrošinātāju un audita rīkus 34 atļauju tvērumos."
       },
       "omni-agents-a2a": {
         "name": "Aģenti un A2A protokols",

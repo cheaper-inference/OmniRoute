@@ -6,7 +6,7 @@
 
 > **Generat automat** din `src/shared/constants/providers.ts` — nu editați manual. Regenerare cu: `npm run gen:provider-reference`** Ultima generare:** 2026-11-08
 
-Total furnizori:** 381** . Vedeți defalcarea categoriei de mai jos.
+Total furnizori:** 382** . Vedeți defalcarea categoriei de mai jos.
 
 ## Categorii
 

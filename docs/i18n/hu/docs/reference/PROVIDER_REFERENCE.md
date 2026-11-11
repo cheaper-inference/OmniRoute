@@ -6,7 +6,7 @@
 
 > **Automatikusan generált** innen: `src/shared/constants/providers.ts` — ne szerkessze kézzel. Regenerálás a következővel: `npm run gen:provider-reference`** Utoljára generált:** 2026-11-08
 
-Összes szolgáltató:** 381** . Lásd alább a kategóriák lebontását.
+Összes szolgáltató:** 382** . Lásd alább a kategóriák lebontását.
 
 ## Kategóriák
 

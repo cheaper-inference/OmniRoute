@@ -6,7 +6,7 @@
 
 > **Ti ipilẹṣẹ laifọwọyi** lati `src/shared/constants/providers.ts` — ma ṣe ṣatunkọ pẹlu ọwọ. Ṣe atunbi pẹlu: `npm run gen:provider-reference`** Ti ipilẹṣẹ kẹhin:** 2026-11-08
 
-Lapapọ awọn olupese:** 381** . Wo didenukole ẹka ni isalẹ.
+Lapapọ awọn olupese:** 382** . Wo didenukole ẹka ni isalẹ.
 
 ## Awọn ẹka
 

@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT-ის თვითონ შესქმნელი კონექტორი",
     "doctorChecking": "სტატუსის შემოწმება…",
     "doctorCheck": "დოქტორის სტატუსის შემოწმება",
-    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend"
+    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend",
+    "rosebudPanel": {
+      "title": "Rosebud გამოწერა",
+      "description": "ყოველი ანგარიშის ავტორიზაცია ერთხელ. სურათების, ხმის ან ვიდეოს შექმნა ამ ანგარიშის არსებულ Rosebud კრედიტებს ხარჯავს.",
+      "connect": "დააკავშირეთ Rosebud ანგარიში",
+      "approve": "დამტკიცება Rosebud ზე",
+      "checkAccount": "შეამოწმეთ ავტორიზაცია და კრედიტები",
+      "reauthorize": "ხელახალი ავტორიზაცია",
+      "refreshModels": "განაახლეთ მოდელები",
+      "defaultAccountName": "Rosebud ანგარიში",
+      "balanceUnavailable": "მიუწვდომელია",
+      "accountStatus": "{status}: {account} — {balance} კრედიტები",
+      "modelsDiscovered": "აღმოჩენილია {count} მოდელები. ფასები მოცემულია Rosebud კრედიტში.",
+      "requestFailed": "ამ მოთხოვნის შესრულება შეუძლებელია. Rosebud ავტორიზაცია მუშაობს OmniRoute სერვერზე და მოითხოვს ადგილობრივ ან LAN წვდომას."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP სერვერი",
-        "description": "დაუკავშირდით OmniRoute MCP სერვერს (110 ხელსაწყო, 3 ტრანსპორტი: SSE/stdio/HTTP). მოიცავს მარშრუტიზაციის, კეშის, შეკუმშვის, მეხსიერების, უნარების, პროვაიდერებისა და აუდიტის ხელსაწყოებს წვდომის 33 სფეროში."
+        "description": "დაუკავშირდით OmniRoute MCP სერვერს (129 ხელსაწყო, 3 ტრანსპორტი: SSE/stdio/HTTP). მოიცავს მარშრუტიზაციის, კეშის, შეკუმშვის, მეხსიერების, უნარების, პროვაიდერებისა და აუდიტის ხელსაწყოებს წვდომის 34 სფეროში."
       },
       "omni-agents-a2a": {
         "name": "აგენტები და A2A პროტოკოლი",

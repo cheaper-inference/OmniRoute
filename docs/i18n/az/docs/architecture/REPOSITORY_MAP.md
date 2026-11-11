@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponenti API: `packages/ui-kit` — üzərində adapterlər bax `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tərəfindən istifadə edilən ikon adları → Lucide komponentləri (`<Icon>`)              |
-| `constants/providers.ts`         | **381 provayder** Zod təsdiqi ilə (həqiqət mənbəyi)                                                        |
+| `constants/providers.ts`         | **382 provayder** Zod təsdiqi ilə (həqiqət mənbəyi)                                                        |
 | `constants/cliTools.ts`          | Xarici CLI alət reyestri                                                                                   |
 | `constants/routingStrategies.ts` | **20 marşrutlaşdırma strategiyası** prioritetləri ilə                                                      |
 | `constants/publicApiRoutes.ts`   | Daşıyıcının (idarəçiyə qarşı) auth tələb edən marşrutlar                                                   |

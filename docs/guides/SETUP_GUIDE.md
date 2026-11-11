@@ -257,7 +257,7 @@ Or, when `mcpTransport` is `streamable-http` (set it on `/dashboard/mcp` or with
 
 The key travels as `Authorization: Bearer <api-key>` (see [MCP Server → Remote access](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) for remote hosts; a remote key needs `mcp:connect` plus its read/write scopes).
 
-**Full MCP documentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients. Operator reference for the compression CCR/dedup tools (markers, prerequisites, per-tool scopes, retrieval pagination, diagnostics): [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+**Full MCP documentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 129 tools, IDE configs, Python/TS/Go clients. Operator reference for the compression CCR/dedup tools (markers, prerequisites, per-tool scopes, retrieval pagination, diagnostics): [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### A2A Setup (Agent-to-Agent Protocol)
 

@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ulkoiset CLI -integraatiot + Sisäiset OmniRoute CLI                                                |
 | `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 aluetta                                                  |
 | `UNINSTALL.md`              | Puhdista asennuksen poistovaiheet                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 381 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 382 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
 
 ### Alajärjestelmän syväsukellukset
 

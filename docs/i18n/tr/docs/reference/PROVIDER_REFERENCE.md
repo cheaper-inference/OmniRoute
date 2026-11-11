@@ -6,7 +6,7 @@
 
 > **Otomatik olarak oluşturuldu** `src/shared/constants/providers.ts` — elle düzenleme yapmayın. Şununla yeniden oluştur: `npm run gen:provider-reference`** Son oluşturulan:** 2026-11-08
 
-Toplam sağlayıcılar:** 381** . Aşağıdaki kategori dökümüne bakın.
+Toplam sağlayıcılar:** 382** . Aşağıdaki kategori dökümüne bakın.
 
 ## Kategoriler
 

@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT Custom Connector",
     "doctorChecking": "Status wird geprüft…",
     "doctorCheck": "Doctor-Status prüfen",
-    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen"
+    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen",
+    "rosebudPanel": {
+      "title": "Rosebud-Abonnement",
+      "description": "Autorisieren Sie jedes Konto einmal. Für das Erstellen von Bildern, Ton oder Video wird das vorhandene Rosebud-Guthaben dieses Kontos ausgegeben.",
+      "connect": "Verbinden Sie Rosebud Konto",
+      "approve": "Auf Rosebud genehmigen",
+      "checkAccount": "Überprüfen Sie die Autorisierung und Gutschrift",
+      "reauthorize": "Erneut autorisieren",
+      "refreshModels": "Modelle aktualisieren",
+      "defaultAccountName": "Rosebud Konto",
+      "balanceUnavailable": "nicht verfügbar",
+      "accountStatus": "{status}: {account} — {balance} Credits",
+      "modelsDiscovered": "{count} Modelle entdeckt. Die Preise sind in Rosebud Credits angegeben.",
+      "requestFailed": "Diese Anfrage kann nicht abgeschlossen werden. Rosebud Autorisierung läuft auf dem OmniRoute -Server und erfordert lokalen oder LAN Zugriff."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP-Server",
-        "description": "Verbindung zum OmniRoute-MCP-Server herstellen (110 Tools, 3 Transporte: SSE/stdio/HTTP). Deckt Routing-, Cache-, Komprimierungs-, Speicher-, Skill-, Anbieter- und Audit-Tools über 33 Berechtigungsbereiche hinweg ab."
+        "description": "Verbindung zum OmniRoute-MCP-Server herstellen (129 Tools, 3 Transporte: SSE/stdio/HTTP). Deckt Routing-, Cache-, Komprimierungs-, Speicher-, Skill-, Anbieter- und Audit-Tools über 34 Berechtigungsbereiche hinweg ab."
       },
       "omni-agents-a2a": {
         "name": "Agenten & A2A-Protokoll",

@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT စိတ်ကြိုက် connector",
     "doctorChecking": "အခြေအနေစစ်ဆေးနေသည်…",
     "doctorCheck": "doctor အခြေအနေ စစ်ဆေးရန်",
-    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်"
+    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်",
+    "rosebudPanel": {
+      "title": "Rosebud စာရင်းသွင်းခြင်း။",
+      "description": "အကောင့်တစ်ခုစီကို တစ်ကြိမ်လုပ်ပိုင်ခွင့်ပေးပါ။ ရုပ်ပုံများ၊ အသံ သို့မဟုတ် ဗီဒီယို ဖန်တီးခြင်းသည် ထိုအကောင့်၏ လက်ရှိ Rosebud ခရက်ဒစ်များကို သုံးစွဲသည်။",
+      "connect": "Rosebud အကောင့်ကို ချိတ်ဆက်ပါ။",
+      "approve": "Rosebud ကိုအတည်ပြုပါ။",
+      "checkAccount": "ခွင့်ပြုချက်နှင့် ခရက်ဒစ်များကို စစ်ဆေးပါ။",
+      "reauthorize": "ပြန်လုပ်ပိုင်ခွင့်",
+      "refreshModels": "မော်ဒယ်များကို ပြန်လည်စတင်ပါ။",
+      "defaultAccountName": "Rosebud အကောင့်",
+      "balanceUnavailable": "မရရှိနိုင်ပါ။",
+      "accountStatus": "{status}: {account} — {balance} ဒစ်",
+      "modelsDiscovered": "{count} မော်ဒယ်များကို ရှာဖွေတွေ့ရှိခဲ့သည်။ စျေးနှုန်းများသည် Rosebud ခရက်ဒစ်များဖြစ်သည်။",
+      "requestFailed": "ဤတောင်းဆိုချက်ကို အပြီးသတ်၍မရပါ။ Rosebud ခွင့်ပြုချက်သည် OmniRoute ဆာဗာပေါ်တွင် အလုပ်လုပ်ပြီး ဒေသဆိုင်ရာ သို့မဟုတ် LAN အသုံးပြုခွင့် လိုအပ်သည်။"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP ဆာဗာ",
-        "description": "OmniRoute MCP ဆာဗာ (ကိရိယာ 110 ခု၊ သယ်ယူပို့ဆောင်မှု 3 မျိုး- SSE/stdio/HTTP) သို့ ချိတ်ဆက်ပါ။ ခွင့်ပြုချက်နယ်ပယ် 33 ခုတစ်လျှောက် routing၊ cache၊ compression၊ memory၊ skills၊ providers နှင့် audit tools များ ပါဝင်သည်။"
+        "description": "OmniRoute MCP ဆာဗာ (ကိရိယာ 129 ခု၊ သယ်ယူပို့ဆောင်မှု 3 မျိုး- SSE/stdio/HTTP) သို့ ချိတ်ဆက်ပါ။ ခွင့်ပြုချက်နယ်ပယ် 34 ခုတစ်လျှောက် routing၊ cache၊ compression၊ memory၊ skills၊ providers နှင့် audit tools များ ပါဝင်သည်။"
       },
       "omni-agents-a2a": {
         "name": "Agent များနှင့် A2A Protocol",

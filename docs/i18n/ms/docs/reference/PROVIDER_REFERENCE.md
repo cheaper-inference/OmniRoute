@@ -6,7 +6,7 @@
 
 > **Dijana secara automatik** dari `src/shared/constants/providers.ts` — jangan edit dengan tangan. Menjana semula dengan: `npm run gen:provider-reference`** Terakhir dihasilkan:** 2026-11-08
 
-Jumlah pembekal:** 381** . Lihat pecahan kategori di bawah.
+Jumlah pembekal:** 382** . Lihat pecahan kategori di bawah.
 
 ## Kategori
 

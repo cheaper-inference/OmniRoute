@@ -6,7 +6,7 @@
 
 > **Được tạo tự động** từ `src/shared/constants/providers.ts` — không chỉnh sửa bằng tay. Tái tạo với: `npm run gen:provider-reference`** Được tạo lần cuối:** 2026-11-08
 
-Tổng số nhà cung cấp:** 381** . Xem phân tích danh mục bên dưới.
+Tổng số nhà cung cấp:** 382** . Xem phân tích danh mục bên dưới.
 
 ## Danh mục
 

@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | გარე CLI ინტეგრაციები + შიდა OmniRoute CLI                                                       |
 | `I18N.md`                   | i18n არქიტექტურა, ენის დამატება, 67 ლოკალი                                                       |
 | `UNINSTALL.md`              | დეინსტალაციის ნაბიჯების გასუფთავება                                                              |
-| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 381 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 382 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
 
 ### ღრმა ჩაყვინთვის ქვესისტემა
 

@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "موصل ChatGPT المخصص",
     "doctorChecking": "جارٍ التحقق من الحالة…",
     "doctorCheck": "التحقق من حالة الطبيب",
-    "fallbackRetryBackendTitle": "الخادم الاحتياطي لإعادة المحاولة"
+    "fallbackRetryBackendTitle": "الخادم الاحتياطي لإعادة المحاولة",
+    "rosebudPanel": {
+      "title": "اشتراك Rosebud",
+      "description": "قم بتفويض كل حساب مرة واحدة. يؤدي إنشاء الصور أو الصوت أو الفيديو إلى إنفاق أرصدة Rosebud الموجودة في هذا الحساب.",
+      "connect": "ربط حساب Rosebud",
+      "approve": "الموافقة على Rosebud",
+      "checkAccount": "التحقق من التفويض والاعتمادات",
+      "reauthorize": "إعادة التفويض",
+      "refreshModels": "تحديث النماذج",
+      "defaultAccountName": "حساب Rosebud",
+      "balanceUnavailable": "غير متاح",
+      "accountStatus": "{status}: {account} — {balance} رصيد",
+      "modelsDiscovered": "تم اكتشاف نماذج {count}. الأسعار في الاعتمادات Rosebud.",
+      "requestFailed": "غير قادر على إكمال هذا الطلب. يعمل ترخيص Rosebud على خادم OmniRoute ويتطلب الوصول المحلي أو الوصول إلى LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "خادم MCP",
-        "description": "الاتصال بخادم OmniRoute MCP (110 أداة، 3 وسائط نقل: SSE/stdio/HTTP). يغطي التوجيه، والتخزين المؤقت، والضغط، والذاكرة، والمهارات، والمزودين، وأدوات التدقيق عبر 33 نطاق صلاحية."
+        "description": "الاتصال بخادم OmniRoute MCP (129 أداة، 3 وسائط نقل: SSE/stdio/HTTP). يغطي التوجيه، والتخزين المؤقت، والضغط، والذاكرة، والمهارات، والمزودين، وأدوات التدقيق عبر 34 نطاق صلاحية."
       },
       "omni-agents-a2a": {
         "name": "الوكلاء وبروتوكول A2A",

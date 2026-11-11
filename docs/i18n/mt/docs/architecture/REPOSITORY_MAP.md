@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adapters fuq `packages/ui-kit` — ara `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal - ikoni użati mill - iskrins → Lucide components (`<Icon>`)               |
-| `constants/providers.ts`         | **381 fornitur** bil-validazzjoni Zod (sors tal-verità)                                            |
+| `constants/providers.ts`         | **382 fornitur** bil-validazzjoni Zod (sors tal-verità)                                            |
 | `constants/cliTools.ts`          | Reġistru estern tal-għodda CLI                                                                     |
 | `constants/routingStrategies.ts` | **20 strateġija ta' rotta** bi prijoritajiet                                                       |
 | `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtifikazzjoni Bearer (vs management).                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazzjonijiet esterni CLI + Intern OmniRoute CLI                                          |
 | `I18N.md`                   | arkitettura i18n, li żżid lingwa, 67 lokali                                                   |
 | `UNINSTALL.md`              | Naddaf passi tad-diżinstalla                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 381 fornitur (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 382 fornitur (regen: `npm run gen:provider-reference`) |
 
 ### Subsistema deep-dives
 

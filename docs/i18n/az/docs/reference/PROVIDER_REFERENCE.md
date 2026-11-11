@@ -6,7 +6,7 @@
 
 > **Avtomatik yaradıldı** `src/shared/constants/providers.ts` — dan əllə redaktə etməyin. Yenidən bərpa edin: `npm run gen:provider-reference`** Son yaradılan:** 08-11-2026
 
-Ümumi provayderlər:** 381** . Aşağıdakı kateqoriya bölgüsünə baxın.
+Ümumi provayderlər:** 382** . Aşağıdakı kateqoriya bölgüsünə baxın.
 
 ## Kateqoriyalar
 

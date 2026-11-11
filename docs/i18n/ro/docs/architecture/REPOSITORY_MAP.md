@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componenta tabloului de bord API: adaptoare peste `packages/ui-kit` — vezi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nume de pictograme utilizate de ecranele componente → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 de furnizori** cu validare Zod (sursa adevărului)                                                         |
+| `constants/providers.ts`         | **382 de furnizori** cu validare Zod (sursa adevărului)                                                         |
 | `constants/cliTools.ts`          | Registrul extern al instrumentului CLI                                                                          |
 | `constants/routingStrategies.ts` | **20 de strategii de rutare** cu prioritati                                                                     |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (vs management)                                                         |

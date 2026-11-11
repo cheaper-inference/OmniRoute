@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Pembangun litar khas ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Semak status doktor",
-    "fallbackRetryBackendTitle": "Backend percubaan semula semula jadi"
+    "fallbackRetryBackendTitle": "Backend percubaan semula semula jadi",
+    "rosebudPanel": {
+      "title": "langganan Rosebud",
+      "description": "Benarkan setiap akaun sekali. Membuat imej, bunyi atau video membelanjakan kredit Rosebud sedia ada akaun itu.",
+      "connect": "Sambung akaun Rosebud",
+      "approve": "Luluskan pada Rosebud",
+      "checkAccount": "Semak kebenaran dan kredit",
+      "reauthorize": "Kebenaran semula",
+      "refreshModels": "Muat semula model",
+      "defaultAccountName": "akaun Rosebud",
+      "balanceUnavailable": "tidak tersedia",
+      "accountStatus": "{status}: {account} — {balance} kredit",
+      "modelsDiscovered": "model {count} ditemui. Harga adalah dalam kredit Rosebud.",
+      "requestFailed": "Tidak dapat melengkapkan permintaan ini. kebenaran Rosebud berjalan pada pelayan OmniRoute dan memerlukan akses setempat atau LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Pelayan MCP",
-        "description": "Sambung ke pelayan MCP OmniRoute (110 alatan, 3 pengangkutan: SSE/stdio/HTTP). Meliputi penghalaan, cache, pemampatan, memori, kemahiran, penyedia dan alatan audit merentasi 33 skop kebenaran."
+        "description": "Sambung ke pelayan MCP OmniRoute (129 alatan, 3 pengangkutan: SSE/stdio/HTTP). Meliputi penghalaan, cache, pemampatan, memori, kemahiran, penyedia dan alatan audit merentasi 34 skop kebenaran."
       },
       "omni-agents-a2a": {
         "name": "Ejen & Protokol A2A",

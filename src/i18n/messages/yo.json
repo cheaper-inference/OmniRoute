@@ -7434,7 +7434,21 @@
     "quotaRefreshStale": "Sẹ́fà dá dátà ìwọ̀n lílo àtijọ́ padà. Èyí kì í ṣe àkíyèsí tuntun.",
     "quotaRefreshPartial": "Apá kan nínú dátà ìwọ̀n lílo nìkan ló wà.",
     "quotaWindowUnavailable": "Ìwọ̀n lílo fún {window} kò sí",
-    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀."
+    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀.",
+    "rosebudPanel": {
+      "title": "Rosebud alabapin",
+      "description": "Fun laṣẹ iroyin kọọkan lẹẹkan. Ṣiṣẹda awọn aworan, ohun tabi fidio nawo awọn kirẹditi Rosebud ti akọọlẹ yẹn.",
+      "connect": "Sopọ Rosebud iroyin",
+      "approve": "Fọwọsi lori Rosebud",
+      "checkAccount": "Ṣayẹwo aṣẹ ati awọn kirediti",
+      "reauthorize": "Tun laṣẹ",
+      "refreshModels": "Sọ awọn awoṣe",
+      "defaultAccountName": "Rosebud iroyin",
+      "balanceUnavailable": "ko si",
+      "accountStatus": "{status}: {account} — {balance} kirediti",
+      "modelsDiscovered": "{count} si dede awari. Awọn idiyele wa ni awọn kirediti Rosebud.",
+      "requestFailed": "Ko le pari ibeere yii. Aṣẹ Rosebud nṣiṣẹ lori olupin OmniRoute ati pe o nilo iraye si agbegbe tabi LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Sẹ́fà MCP",
-        "description": "Sopọ̀ mọ́ sẹ́fà OmniRoute MCP (irinṣẹ́ 110, ọ̀nà gbigbe 3: SSE/stdio/HTTP). Ó bo ìdarí ọ̀nà, àpamọ́, ìfúnpọ̀, ìrántí, àwọn ọgbọ́n, àwọn olùpèsè, àti àwọn irinṣẹ́ àyẹ̀wò láàrín àyè-àṣẹ 33."
+        "description": "Sopọ̀ mọ́ sẹ́fà OmniRoute MCP (irinṣẹ́ 129, ọ̀nà gbigbe 3: SSE/stdio/HTTP). Ó bo ìdarí ọ̀nà, àpamọ́, ìfúnpọ̀, ìrántí, àwọn ọgbọ́n, àwọn olùpèsè, àti àwọn irinṣẹ́ àyẹ̀wò láàrín àyè-àṣẹ 34."
       },
       "omni-agents-a2a": {
         "name": "Àwọn Aṣojú & Ìlànà A2A",

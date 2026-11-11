@@ -49,6 +49,7 @@ function assertNoStaleEntries(
 // prefixes documented in routeGuard.ts (SPAWN_CAPABLE_PREFIXES) and CLAUDE.md
 // Hard Rules #15/#17 for the dirs that physically exist under src/app/api/.
 export const SPAWN_CAPABLE_ROUTE_ROOTS: ReadonlyArray<string> = [
+  "src/app/api/rosebud", // Every action runs the official Rosebud CLI.
   "src/app/api/services",
   "src/app/api/mcp",
   "src/app/api/cli-tools/runtime",
@@ -305,6 +306,13 @@ export const KNOWN_TRANSITIVE_SPAWN_SINKS: Record<string, string> = {
   "src/shared/services/cliRuntime.ts": `${G09_BASELINE} (child_process)`,
   "src/shared/services/cliRuntimeNpmPrefix.ts": `${G09_BASELINE} (child_process)`,
   "src/shared/services/loginShellPath.ts": `${G09_BASELINE} (child_process)`,
+  // Not baseline: added by #18577 (review it with that PR).
+  "open-sse/services/rosebud/cli.ts":
+    "#18577: provider-conditional Rosebud CLI spawn on routes that must stay remote-reachable for every " +
+    "other provider, so they cannot be path-classified. Gated at each call site on the trusted peer " +
+    "verdict and fail-closed: /v1/images/generations returns 403 before binding or discovery, the " +
+    "connection-test routes pass allowLocalSpawn from getRequestPeerLocality, and sync-models refuses " +
+    "remote peers. Fixed argv, no shell, executable taken from server configuration only.",
 };
 
 /** Recursively collect every `route.ts` under `dir` (returns [] if dir absent). */

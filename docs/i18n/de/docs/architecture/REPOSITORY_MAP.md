@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard-Komponente API: Adapter über `packages/ui-kit` — siehe `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: Von den Bildschirmen verwendete Symbolnamen → Lucide-Komponenten (`<Icon>`)               |
-| `constants/providers.ts`         | **381 Anbieter** mit Zod -Validierung (Quelle der Wahrheit)                                           |
+| `constants/providers.ts`         | **382 Anbieter** mit Zod -Validierung (Quelle der Wahrheit)                                           |
 | `constants/cliTools.ts`          | Externe CLI Tool-Registrierung                                                                        |
 | `constants/routingStrategies.ts` | **20 Routing-Strategien** mit Prioritäten                                                             |
 | `constants/publicApiRoutes.ts`   | Routen, die eine Bearer-Authentifizierung (vs. Management-Authentifizierung) erfordern                |

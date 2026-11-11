@@ -6,7 +6,7 @@
 
 > **Emepụtara akpaaka** si `src/shared/constants/providers.ts` — ejila aka dezie ya. Jiri: `npm run gen:provider-reference` megharịa** Emepụtara ikpeazụ:** 2026-11-08
 
-Mgbakọta ndị na-eweta:** 381** . Lee ndakpọ ngalaba n'okpuru.
+Mgbakọta ndị na-eweta:** 382** . Lee ndakpọ ngalaba n'okpuru.
 
 ## Otu dị iche iche
 

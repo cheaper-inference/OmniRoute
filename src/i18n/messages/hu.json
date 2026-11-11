@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT egyedi csatlakozó",
     "doctorChecking": "Állapot ellenőrzése…",
     "doctorCheck": "Orvos állapotának ellenőrzése",
-    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere"
+    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere",
+    "rosebudPanel": {
+      "title": "Rosebud előfizetés",
+      "description": "Minden fiókot egyszer engedélyezzen. A képek, hangok vagy videók létrehozása a fiók meglévő Rosebud jóváírásait költi el.",
+      "connect": "Rosebud fiók csatlakoztatása",
+      "approve": "Jóváhagyás a Rosebud",
+      "checkAccount": "Ellenőrizze a jogosultságot és a jóváírásokat",
+      "reauthorize": "Engedélyezze újra",
+      "refreshModels": "Modellek frissítése",
+      "defaultAccountName": "Rosebud fiók",
+      "balanceUnavailable": "nem elérhető",
+      "accountStatus": "{status}: {account} — {balance} kredit",
+      "modelsDiscovered": "{count} modelleket fedeztek fel. Az árak Rosebud kreditben értendők.",
+      "requestFailed": "Ezt a kérést nem lehet teljesíteni. Rosebud jogosultság a OmniRoute szerveren fut, és helyi vagy LAN hozzáférést igényel."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP-szerver",
-        "description": "Csatlakozás az OmniRoute MCP-szerverhez (110 eszköz, 3 transzport: SSE/stdio/HTTP). Lefedi az útvonalválasztást, a gyorsítótárat, a tömörítést, a memóriát, a képességeket, a szolgáltatókat és az audit eszközöket 33 jogosultsági körben."
+        "description": "Csatlakozás az OmniRoute MCP-szerverhez (129 eszköz, 3 transzport: SSE/stdio/HTTP). Lefedi az útvonalválasztást, a gyorsítótárat, a tömörítést, a memóriát, a képességeket, a szolgáltatókat és az audit eszközöket 34 jogosultsági körben."
       },
       "omni-agents-a2a": {
         "name": "Ágensek és A2A protokoll",

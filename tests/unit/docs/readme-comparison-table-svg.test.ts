@@ -5,13 +5,20 @@ import {
   renderComparisonTable,
   COMPARISON_TABLE_COPY,
 } from "../../../scripts/docs/gen-readme-comparison-table.mjs";
-import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { buildChecks, readProviderTotal } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 // The committed comparison table must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as text
 // and declare both palettes. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const FILE = "docs/diagrams/comparison-table.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+test("the visible provider total matches the live catalog", () => {
+  assert.ok(
+    COMPARISON_TABLE_COPY.values.includes(String(readProviderTotal())),
+    "the visible provider cell must match the catalog, not only the SVG description"
+  );
+});
 
 test("the committed comparison table is exactly what the generator produces", async () => {
   const generated = await renderComparisonTable();

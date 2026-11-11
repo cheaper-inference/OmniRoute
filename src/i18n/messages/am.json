@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "የChatGPT ተዛዳዊ አገናኝ",
     "doctorChecking": "ሁኔታን በማረጋገጥ ላይ…",
     "doctorCheck": "የዶክተር ሁኔታ ማረጋገጫ",
-    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ"
+    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ",
+    "rosebudPanel": {
+      "title": "Rosebud የደንበኝነት ምዝገባ",
+      "description": "ለእያንዳንዱ መለያ አንድ ጊዜ ፍቀድ። ምስሎችን፣ ድምጽን ወይም ቪዲዮን መፍጠር የዚያ መለያ ነባር Rosebud ክሬዲቶችን ያወጣል።",
+      "connect": "Rosebud መለያን ያገናኙ",
+      "approve": "Rosebud ላይ አጽድቅ",
+      "checkAccount": "ፈቃድ እና ክሬዲት ያረጋግጡ",
+      "reauthorize": "እንደገና ፍቀድ",
+      "refreshModels": "ሞዴሎችን ያድሱ",
+      "defaultAccountName": "Rosebud መለያ",
+      "balanceUnavailable": "አይገኝም",
+      "accountStatus": "{status}: {account} — {balance} ምስጋናዎች",
+      "modelsDiscovered": "{count} ሞዴሎች ተገኝተዋል። ዋጋዎች በ Rosebud ክሬዲቶች ውስጥ ናቸው።",
+      "requestFailed": "ይህን ጥያቄ ማጠናቀቅ አልተቻለም። Rosebud ፍቃድ በ OmniRoute አገልጋይ ላይ ይሰራል እና አካባቢያዊ ወይም LAN መዳረሻ ያስፈልገዋል።"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP አገልጋይ",
-        "description": "ከOmniRoute MCP server (110 መሣሪያዎች፣ 3 መጓጓዣዎች፦ SSE/stdio/HTTP) ጋር ይገናኙ። በ33 የፈቃድ ወሰኖች ውስጥ የማዘዋወር፣ የመሸጎጫ፣ የመጭመቅ፣ የማስታወሻ፣ የክህሎት፣ የአቅራቢ እና የኦዲት መሣሪያዎችን ይሸፍናል።"
+        "description": "ከOmniRoute MCP server (129 መሣሪያዎች፣ 3 መጓጓዣዎች፦ SSE/stdio/HTTP) ጋር ይገናኙ። በ34 የፈቃድ ወሰኖች ውስጥ የማዘዋወር፣ የመሸጎጫ፣ የመጭመቅ፣ የማስታወሻ፣ የክህሎት፣ የአቅራቢ እና የኦዲት መሣሪያዎችን ይሸፍናል።"
       },
       "omni-agents-a2a": {
         "name": "ወኪሎች እና A2A ፕሮቶኮል",

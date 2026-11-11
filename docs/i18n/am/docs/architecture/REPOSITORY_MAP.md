@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------- |
 | `components/`                    | ዳሽቦርድ መለዋወጫ API: አስማሚዎች በ `packages/ui-kit` — ላይ `docs/architecture/DESIGN_SYSTEM.md` ይመልከቱ |
 | `constants/iconMap.ts`           | `ICON_MAP`: በስክሪኖቹ ጥቅም ላይ የዋሉ የአዶ ስሞች → የሉሲድ ክፍሎች (`<Icon>`)                                |
-| `constants/providers.ts`         | **381 አቅራቢዎች** በ Zod ማረጋገጫ (የእውነት ምንጭ)                                                      |
+| `constants/providers.ts`         | **382 አቅራቢዎች** በ Zod ማረጋገጫ (የእውነት ምንጭ)                                                      |
 | `constants/cliTools.ts`          | ውጫዊ CLI መሣሪያ መዝገብ                                                                           |
 | `constants/routingStrategies.ts` | **20 የማዞሪያ ስልቶች** ቅድሚያ ከሚሰጣቸው ነገሮች ጋር                                                       |
 | `constants/publicApiRoutes.ts`   | ተሸካሚ (ከአስተዳደር ጋር) ማረጋገጫ የሚያስፈልጋቸው መስመሮች                                                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ውጫዊ CLI ውህደቶች + ውስጣዊ OmniRoute CLI                                      |
 | `I18N.md`                   | i18n architecture, ቋንቋ መጨመር, 67 አካባቢዎች                                  |
 | `UNINSTALL.md`              | የማራገፍ ደረጃዎችን ያጽዱ                                                        |
-| `PROVIDER_REFERENCE.md`     | **በራስ የመነጨ** የ381 አቅራቢዎች ካታሎግ (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **በራስ የመነጨ** የ382 አቅራቢዎች ካታሎግ (regen: `npm run gen:provider-reference`) |
 
 ### ሥርዓተ-ጥልቅ-ጠልቆዎች
 

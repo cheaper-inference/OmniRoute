@@ -6,7 +6,7 @@
 
 > **Sukurta automatiškai** iš `src/shared/constants/providers.ts` — neredaguoti ranka. Regeneruoti naudojant: `npm run gen:provider-reference`** Paskutinį kartą sukurta:** 2026-11-08
 
-Iš viso teikėjų:** 381** . Žr. kategorijų suskirstymą žemiau.
+Iš viso teikėjų:** 382** . Žr. kategorijų suskirstymą žemiau.
 
 ## Kategorijos
 

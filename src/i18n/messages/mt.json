@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Konnezzjoni ċċattiva ChatGPT",
     "doctorChecking": "Nistaqsi d-dejja…",
     "doctorCheck": "Iċċekkja d-dejja tad-doctor",
-    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback"
+    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback",
+    "rosebudPanel": {
+      "title": "Rosebud abbonament",
+      "description": "Awtorizza kull kont darba. Il-ħolqien ta' immaġini, ħoss jew vidjo jonfoq il-krediti Rosebud eżistenti ta' dak il-kont.",
+      "connect": "Qabbad il-kont Rosebud",
+      "approve": "Approva fuq Rosebud",
+      "checkAccount": "Iċċekkja l-awtorizzazzjoni u l-krediti",
+      "reauthorize": "Awtorizza mill-ġdid",
+      "refreshModels": "Aġġorna l-mudelli",
+      "defaultAccountName": "kont Rosebud",
+      "balanceUnavailable": "mhux disponibbli",
+      "accountStatus": "{status}: {account} — {balance} krediti",
+      "modelsDiscovered": "mudelli {count} skoperti. Il-prezzijiet huma fi Rosebud credits.",
+      "requestFailed": "Ma tistax timla din it-talba. L-awtorizzazzjoni Rosebud taħdem fuq is-server OmniRoute u teħtieġ aċċess lokali jew LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Server MCP",
-        "description": "Qabbad mas-server MCP ta’ OmniRoute (110 għodda, 3 trasporti: SSE/stdio/HTTP). Ikopri għodod għar-rototizzazzjoni, il-cache, il-kompressjoni, il-memorja, il-ħiliet, il-fornituri u l-awditjar fi 33 ambitu ta’ permess."
+        "description": "Qabbad mas-server MCP ta’ OmniRoute (129 għodda, 3 trasporti: SSE/stdio/HTTP). Ikopri għodod għar-rototizzazzjoni, il-cache, il-kompressjoni, il-memorja, il-ħiliet, il-fornituri u l-awditjar fi 34 ambitu ta’ permess."
       },
       "omni-agents-a2a": {
         "name": "Aġenti u Protokoll A2A",

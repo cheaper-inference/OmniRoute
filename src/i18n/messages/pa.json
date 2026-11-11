@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ਛੇਟਜੀਪੀਟੀ ਕਸਟਮ ਕਨੈਕਟਰ",
     "doctorChecking": "ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ…",
     "doctorCheck": "ਡਾਕਟਰ ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਕਰੋ",
-    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ"
+    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ",
+    "rosebudPanel": {
+      "title": "Rosebud ਗਾਹਕੀ",
+      "description": "ਹਰੇਕ ਖਾਤੇ ਨੂੰ ਇੱਕ ਵਾਰ ਅਧਿਕਾਰਤ ਕਰੋ। ਚਿੱਤਰ, ਆਵਾਜ਼ ਜਾਂ ਵੀਡੀਓ ਬਣਾਉਣਾ ਉਸ ਖਾਤੇ ਦੇ ਮੌਜੂਦਾ Rosebud ਕ੍ਰੈਡਿਟ ਖਰਚ ਕਰਦਾ ਹੈ।",
+      "connect": "Rosebud ਖਾਤੇ ਨਾਲ ਜੁੜੋ",
+      "approve": "Rosebud ਤੇ ਮਨਜ਼ੂਰੀ ਦਿਓ",
+      "checkAccount": "ਪ੍ਰਮਾਣਿਕਤਾ ਅਤੇ ਕ੍ਰੈਡਿਟ ਦੀ ਜਾਂਚ ਕਰੋ",
+      "reauthorize": "ਮੁੜ ਅਧਿਕਾਰਤ ਕਰੋ",
+      "refreshModels": "ਮਾਡਲਾਂ ਨੂੰ ਤਾਜ਼ਾ ਕਰੋ",
+      "defaultAccountName": "Rosebud ਖਾਤਾ",
+      "balanceUnavailable": "ਅਣਉਪਲਬਧ",
+      "accountStatus": "{status}: {account} — {balance} ਕ੍ਰੈਡਿਟ",
+      "modelsDiscovered": "{count} ਮਾਡਲਾਂ ਦੀ ਖੋਜ ਕੀਤੀ ਗਈ। ਕੀਮਤਾਂ Rosebud ਕ੍ਰੈਡਿਟ ਵਿੱਚ ਹਨ।",
+      "requestFailed": "ਇਸ ਬੇਨਤੀ ਨੂੰ ਪੂਰਾ ਕਰਨ ਵਿੱਚ ਅਸਮਰੱਥ। Rosebud ਅਧਿਕਾਰ OmniRoute ਸਰਵਰ 'ਤੇ ਚੱਲਦਾ ਹੈ ਅਤੇ ਸਥਾਨਕ ਜਾਂ LAN ਪਹੁੰਚ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP ਸਰਵਰ",
-        "description": "OmniRoute MCP ਸਰਵਰ (110 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ: SSE/stdio/HTTP) ਨਾਲ ਕਨੈਕਟ ਕਰੋ। ਇਹ 33 ਅਨੁਮਤੀ ਸਕੋਪਾਂ ਵਿੱਚ ਰੂਟਿੰਗ, ਕੈਸ਼, ਕੰਪ੍ਰੈਸ਼ਨ, ਮੈਮੋਰੀ, ਹੁਨਰ, ਪ੍ਰਦਾਤਾ ਅਤੇ ਆਡਿਟ ਟੂਲਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ।"
+        "description": "OmniRoute MCP ਸਰਵਰ (129 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ: SSE/stdio/HTTP) ਨਾਲ ਕਨੈਕਟ ਕਰੋ। ਇਹ 34 ਅਨੁਮਤੀ ਸਕੋਪਾਂ ਵਿੱਚ ਰੂਟਿੰਗ, ਕੈਸ਼, ਕੰਪ੍ਰੈਸ਼ਨ, ਮੈਮੋਰੀ, ਹੁਨਰ, ਪ੍ਰਦਾਤਾ ਅਤੇ ਆਡਿਟ ਟੂਲਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ।"
       },
       "omni-agents-a2a": {
         "name": "ਏਜੰਟ ਅਤੇ A2A ਪ੍ਰੋਟੋਕੋਲ",

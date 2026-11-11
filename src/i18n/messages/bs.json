@@ -7434,7 +7434,21 @@
     "quotaRefreshStale": "Server je vratio stare podatke o kvoti. Ovo nije novo očitanje.",
     "quotaRefreshPartial": "Dostupan je samo dio podataka o kvoti.",
     "quotaWindowUnavailable": "Kvota za {window} nije dostupna",
-    "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena."
+    "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena.",
+    "rosebudPanel": {
+      "title": "Rosebud pretplata",
+      "description": "Autorizirajte svaki račun jednom. Kreiranje slika, zvuka ili videa troši postojeće Rosebud kredite tog računa.",
+      "connect": "Povežite Rosebud nalog",
+      "approve": "Odobre na Rosebud",
+      "checkAccount": "Provjerite autorizaciju i kredite",
+      "reauthorize": "Ponovo ovlasti",
+      "refreshModels": "Osvježite modele",
+      "defaultAccountName": "Rosebud nalog",
+      "balanceUnavailable": "nedostupan",
+      "accountStatus": "{status}: {account} — {balance} krediti",
+      "modelsDiscovered": "{count} modeli otkriveni. Cijene su izražene u Rosebud kreditima.",
+      "requestFailed": "Nije moguće dovršiti ovaj zahtjev. Rosebud autorizacija radi na OmniRoute serveru i zahtijeva lokalni ili LAN pristup."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP server",
-        "description": "Povežite se na OmniRoute MCP server (110 alata, 3 transporta: SSE/stdio/HTTP). Obuhvata rutiranje, keširanje, kompresiju, memoriju, vještine, provajdere i alate za reviziju kroz 33 opsega dozvola."
+        "description": "Povežite se na OmniRoute MCP server (129 alata, 3 transporta: SSE/stdio/HTTP). Obuhvata rutiranje, keširanje, kompresiju, memoriju, vještine, provajdere i alate za reviziju kroz 34 opsega dozvola."
       },
       "omni-agents-a2a": {
         "name": "Agenti i A2A Protokol",

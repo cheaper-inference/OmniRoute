@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Konektor kustom ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Periksa status doctor",
-    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
+    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback",
+    "rosebudPanel": {
+      "title": "berlangganan Rosebud",
+      "description": "Otorisasi setiap akun satu kali. Membuat gambar, suara, atau video menghabiskan kredit Rosebud yang ada di akun tersebut.",
+      "connect": "Hubungkan akun Rosebud",
+      "approve": "Setujui di Rosebud",
+      "checkAccount": "Periksa otorisasi dan kredit",
+      "reauthorize": "Otorisasi ulang",
+      "refreshModels": "Segarkan model",
+      "defaultAccountName": "akun Rosebud",
+      "balanceUnavailable": "tidak tersedia",
+      "accountStatus": "{status}: {account} — {balance} kredit",
+      "modelsDiscovered": "model {count} ditemukan. Harga dalam kredit Rosebud.",
+      "requestFailed": "Tidak dapat menyelesaikan permintaan ini. otorisasi Rosebud berjalan di server OmniRoute dan memerlukan akses lokal atau LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Server MCP",
-        "description": "Hubungkan ke server MCP OmniRoute (110 alat, 3 transportasi: SSE/stdio/HTTP). Mencakup perutean, cache, kompresi, memori, keahlian, penyedia, dan alat audit di 33 cakupan izin."
+        "description": "Hubungkan ke server MCP OmniRoute (129 alat, 3 transportasi: SSE/stdio/HTTP). Mencakup perutean, cache, kompresi, memori, keahlian, penyedia, dan alat audit di 34 cakupan izin."
       },
       "omni-agents-a2a": {
         "name": "Agen & Protokol A2A",

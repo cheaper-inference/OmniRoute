@@ -6,7 +6,7 @@
 
 > **Generado automáticamente** de `src/shared/constants/providers.ts` — no editar a mano. Regenerar con: `npm run gen:provider-reference`** Última generación:** 2026-11-08
 
-Proveedores totales:** 381** . Consulte el desglose de categorías a continuación.
+Proveedores totales:** 382** . Consulte el desglose de categorías a continuación.
 
 ## Categorías
 

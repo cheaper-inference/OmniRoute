@@ -1,3 +1,5 @@
+import { requireRosebudLocalPeer, requireRosebudSyncAccess } from "@/lib/rosebud/authorization";
+import { discoverRosebud } from "@/lib/rosebud/provider";
 import { NextResponse } from "next/server";
 import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -444,6 +446,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Connection not found" }, { status: 404 });
     }
 
+    if (connection.provider === "rosebud") {
+      const denied = await requireRosebudSyncAccess(request, id);
+      if (denied) return denied;
+      const remote = requireRosebudLocalPeer(request);
+      if (remote) return remote;
+      const catalog = await discoverRosebud(id);
+      const images = catalog.models.filter((model) => model.type === "image");
+      return NextResponse.json({
+        ok: true,
+        provider: "rosebud",
+        syncedModels: images.length,
+        availableModelsCount: catalog.models.length,
+        importedModels: images,
+      });
+    }
     logProvider = toNonEmptyString(connection.provider) || "unknown";
     channelLabel = getModelSyncChannelLabel(connection);
 

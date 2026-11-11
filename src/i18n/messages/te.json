@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT కస్టమ్ కనెక్టర్",
     "doctorChecking": "స్థితిని సరిచూస్తున్నాము…",
     "doctorCheck": "డాక్టర్ స్థితిని సరిచూడండి",
-    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్"
+    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్",
+    "rosebudPanel": {
+      "title": "Rosebud చందా",
+      "description": "ప్రతి ఖాతాకు ఒకసారి అధికారం ఇవ్వండి. చిత్రాలు, ధ్వని లేదా వీడియోని సృష్టించడం వలన ఆ ఖాతా యొక్క ఇప్పటికే ఉన్న Rosebud క్రెడిట్లు ఖర్చు చేయబడతాయి.",
+      "connect": "Rosebud ఖాతాను కనెక్ట్ చేయండి",
+      "approve": "Rosebud పై ఆమోదించండి",
+      "checkAccount": "అధికారం మరియు క్రెడిట్లను తనిఖీ చేయండి",
+      "reauthorize": "తిరిగి అధికారం ఇవ్వండి",
+      "refreshModels": "మోడల్లను రిఫ్రెష్ చేయండి",
+      "defaultAccountName": "Rosebud ఖాతా",
+      "balanceUnavailable": "అందుబాటులో లేదు",
+      "accountStatus": "{status}: {account} — {balance} క్రెడిట్స్",
+      "modelsDiscovered": "{count} నమూనాలు కనుగొనబడ్డాయి. ధరలు Rosebud క్రెడిట్లలో ఉన్నాయి.",
+      "requestFailed": "ఈ అభ్యర్థనను పూర్తి చేయడం సాధ్యపడలేదు. Rosebud అధికారీకరణ OmniRoute సర్వర్పై నడుస్తుంది మరియు స్థానిక లేదా LAN యాక్సెస్ అవసరం."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP సర్వర్",
-        "description": "OmniRoute MCP సర్వర్‌కు కనెక్ట్ అవ్వండి (110 టూల్స్, 3 ట్రాన్స్‌పోర్ట్‌లు: SSE/stdio/HTTP). 33 అనుమతి స్కోప్‌లలో రూటింగ్, కాష్, కంప్రెషన్, మెమరీ, స్కిల్స్, ప్రొవైడర్లు మరియు ఆడిట్ టూల్స్‌ను కవర్ చేస్తుంది."
+        "description": "OmniRoute MCP సర్వర్‌కు కనెక్ట్ అవ్వండి (129 టూల్స్, 3 ట్రాన్స్‌పోర్ట్‌లు: SSE/stdio/HTTP). 34 అనుమతి స్కోప్‌లలో రూటింగ్, కాష్, కంప్రెషన్, మెమరీ, స్కిల్స్, ప్రొవైడర్లు మరియు ఆడిట్ టూల్స్‌ను కవర్ చేస్తుంది."
       },
       "omni-agents-a2a": {
         "name": "ఏజెంట్లు & A2A ప్రోటోకాల్",

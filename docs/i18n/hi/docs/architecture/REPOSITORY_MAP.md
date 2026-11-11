@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाहरी CLI एकीकरण + आंतरिक OmniRoute CLI                                           |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा, 67 स्थान जोड़ना                                        |
 | `UNINSTALL.md`              | अनइंस्टॉल चरण साफ़ करें                                                           |
-| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 381 प्रदाताओं की सूची (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 382 प्रदाताओं की सूची (regen: `npm run gen:provider-reference`) |
 
 ### सबसिस्टम गहराई से गोता लगाता है
 

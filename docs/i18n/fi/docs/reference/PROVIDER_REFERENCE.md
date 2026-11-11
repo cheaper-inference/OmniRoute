@@ -6,7 +6,7 @@
 
 > **Luotu automaattisesti** `src/shared/constants/providers.ts` — stä älä muokkaa käsin. Regeneroi käyttämällä: `npm run gen:provider-reference`** Viimeksi luotu:** 2026-11-08
 
-Palveluntarjoajat yhteensä:** 381** . Katso luokkaerittely alta.
+Palveluntarjoajat yhteensä:** 382** . Katso luokkaerittely alta.
 
 ## Luokat
 

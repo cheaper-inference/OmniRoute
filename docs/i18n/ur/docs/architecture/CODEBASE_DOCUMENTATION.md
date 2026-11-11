@@ -492,7 +492,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `vertex` `devin-desktop` plus `claudeIdentity.ts` (مشترکہ شناخت مددگار) اور `index.ts` `qoder` رجسٹری)۔
 
-> نوٹ: فراہم کنندگان جو یہاں درج نہیں ہیں وہ `default.ts` کے ذریعہ عام OpenAI- مطابقت پذیر ایگزیکیوٹر کا استعمال کرتے ہوئے پیش کیے جاتے ہیں۔ مکمل فراہم کنندہ کیٹلاگ (381 فراہم کنندگان) `src/shared/constants/providers.ts` میں رہتے ہیں۔
+> نوٹ: فراہم کنندگان جو یہاں درج نہیں ہیں وہ `default.ts` کے ذریعہ عام OpenAI- مطابقت پذیر ایگزیکیوٹر کا استعمال کرتے ہوئے پیش کیے جاتے ہیں۔ مکمل فراہم کنندہ کیٹلاگ (382 فراہم کنندگان) `src/shared/constants/providers.ts` میں رہتے ہیں۔
 
 ### 4.3 `open-sse/translator/`
 

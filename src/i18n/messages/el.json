@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Προσαρμοσμένος συνδέτης ChatGPT",
     "doctorChecking": "Έλεγχος κατάστασης…",
     "doctorCheck": "Έλεγχος κατάστασης γιατρού",
-    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης"
+    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης",
+    "rosebudPanel": {
+      "title": "συνδρομή Rosebud",
+      "description": "Εξουσιοδοτήστε κάθε λογαριασμό μία φορά. Η δημιουργία εικόνων, ήχου ή βίντεο ξοδεύει τις υπάρχουσες πιστώσεις Rosebud αυτού του λογαριασμού.",
+      "connect": "Σύνδεση λογαριασμού Rosebud",
+      "approve": "Έγκριση στο Rosebud",
+      "checkAccount": "Ελέγξτε την εξουσιοδότηση και τις πιστώσεις",
+      "reauthorize": "Επανεξουσιοδότηση",
+      "refreshModels": "Ανανέωση μοντέλων",
+      "defaultAccountName": "λογαριασμός Rosebud",
+      "balanceUnavailable": "δυσεύρετος",
+      "accountStatus": "{status}: {account} — {balance} πιστώσεις",
+      "modelsDiscovered": "Ανακαλύφθηκαν μοντέλα {count}. Οι τιμές είναι σε πιστώσεις Rosebud.",
+      "requestFailed": "Δεν είναι δυνατή η ολοκλήρωση αυτού του αιτήματος. Η εξουσιοδότηση Rosebud εκτελείται στον διακομιστή OmniRoute και απαιτεί τοπική ή LAN πρόσβαση."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Διακομιστής MCP",
-        "description": "Σύνδεση στον διακομιστή MCP του OmniRoute (110 εργαλεία, 3 μέθοδοι μεταφοράς: SSE/stdio/HTTP). Καλύπτει εργαλεία δρομολόγησης, κρυφής μνήμης, συμπίεσης, μνήμης, δεξιοτήτων, παρόχων και ελέγχου σε 33 πεδία δικαιωμάτων."
+        "description": "Σύνδεση στον διακομιστή MCP του OmniRoute (129 εργαλεία, 3 μέθοδοι μεταφοράς: SSE/stdio/HTTP). Καλύπτει εργαλεία δρομολόγησης, κρυφής μνήμης, συμπίεσης, μνήμης, δεξιοτήτων, παρόχων και ελέγχου σε 34 πεδία δικαιωμάτων."
       },
       "omni-agents-a2a": {
         "name": "Πράκτορες & πρωτόκολλο A2A",

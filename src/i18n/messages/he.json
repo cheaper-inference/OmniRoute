@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "מחבר מותאם אישית עבור ChatGPT",
     "doctorChecking": "בדוק סטטוס…",
     "doctorCheck": "בדוק סטטוס רופא",
-    "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום"
+    "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום",
+    "rosebudPanel": {
+      "title": "מנוי Rosebud",
+      "description": "אשר כל חשבון פעם אחת. יצירת תמונות, קול או וידאו מוציאה את Rosebud הקיימים של החשבון הזה.",
+      "connect": "חבר חשבון Rosebud",
+      "approve": "אשר על Rosebud",
+      "checkAccount": "בדוק הרשאות וזיכויים",
+      "reauthorize": "הרשאה מחדש",
+      "refreshModels": "רענון דגמים",
+      "defaultAccountName": "חשבון Rosebud",
+      "balanceUnavailable": "לא זמין",
+      "accountStatus": "{status}: {account} — {balance} קרדיטים",
+      "modelsDiscovered": "התגלו דגמי {count}. המחירים הם באשראי Rosebud.",
+      "requestFailed": "לא ניתן להשלים בקשה זו. הרשאת Rosebud פועלת על שרת OmniRoute ודורשת גישה מקומית או LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "שרת MCP",
-        "description": "התחבר לשרת ה-MCP של OmniRoute (‏110 כלים, 3 תעבורות: SSE/stdio/HTTP). מכסה ניתוב, מטמון, דחיסה, זיכרון, מיומנויות, ספקים וכלי ביקורת על פני 33 טווחי הרשאות."
+        "description": "התחבר לשרת ה-MCP של OmniRoute (‏129 כלים, 3 תעבורות: SSE/stdio/HTTP). מכסה ניתוב, מטמון, דחיסה, זיכרון, מיומנויות, ספקים וכלי ביקורת על פני 34 טווחי הרשאות."
       },
       "omni-agents-a2a": {
         "name": "סוכנים ופרוטוקול A2A",

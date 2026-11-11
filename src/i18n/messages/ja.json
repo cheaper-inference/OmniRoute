@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPTカスタムコネクタ",
     "doctorChecking": "状態を確認中…",
     "doctorCheck": "ドクター状態を確認する",
-    "fallbackRetryBackendTitle": "フォールバック再試行バックエンド"
+    "fallbackRetryBackendTitle": "フォールバック再試行バックエンド",
+    "rosebudPanel": {
+      "title": "Rosebudサブスクリプション",
+      "description": "各アカウントを一度認証します。画像、サウンド、またはビデオを作成するには、そのアカウントの既存のRosebudクレジットが消費されます。",
+      "connect": "Rosebudアカウントを接続する",
+      "approve": "Rosebudで承認する",
+      "checkAccount": "権限とクレジットを確認する",
+      "reauthorize": "再認証",
+      "refreshModels": "モデルを更新する",
+      "defaultAccountName": "Rosebudアカウント",
+      "balanceUnavailable": "利用不可",
+      "accountStatus": "{status}: {account} — {balance}クレジット",
+      "modelsDiscovered": "{count}モデルが発見されました。価格はRosebudクレジットで表示されます。",
+      "requestFailed": "このリクエストを完了できません。 Rosebud認証はOmniRouteサーバー上で実行され、ローカルまたはLANアクセスが必要です。"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCPサーバー",
-        "description": "OmniRoute MCPサーバー（110のツール、3つのトランスポート：SSE/stdio/HTTP）に接続します。33の権限スコープにわたるルーティング、キャッシュ、圧縮、メモリ、スキル、プロバイダー、および監査ツールをカバーします。"
+        "description": "OmniRoute MCPサーバー（129のツール、3つのトランスポート：SSE/stdio/HTTP）に接続します。34の権限スコープにわたるルーティング、キャッシュ、圧縮、メモリ、スキル、プロバイダー、および監査ツールをカバーします。"
       },
       "omni-agents-a2a": {
         "name": "エージェント＆A2Aプロトコル",

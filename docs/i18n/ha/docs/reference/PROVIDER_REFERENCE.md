@@ -6,7 +6,7 @@
 
 > **An ƙirƙira ta atomatik** daga `src/shared/constants/providers.ts` — kar a gyara da hannu. Sake haɓakawa da: `npm run gen:provider-reference`** Ƙarshe da aka samar:** 2026-11-08
 
-Jimlar masu samarwa:** 381** . Duba rugujewar rukuni a ƙasa.
+Jimlar masu samarwa:** 382** . Duba rugujewar rukuni a ƙasa.
 
 ## Rukunoni
 

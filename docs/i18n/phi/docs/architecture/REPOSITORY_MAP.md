@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Dashboard component API: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → Lucide component (`<Icon>`)                          |
-| `constants/providers.ts`         | **381 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
+| `constants/providers.ts`         | **382 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
 | `constants/cliTools.ts`          | Panlabas na CLI tool registry                                                                                      |
 | `constants/routingStrategies.ts` | **20 mga diskarte sa pagruruta** may mga priyoridad                                                                |
 | `constants/publicApiRoutes.ts`   | Mga ruta na nangangailangan ng Bearer (vs management) auth                                                         |

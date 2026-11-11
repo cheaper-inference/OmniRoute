@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | Armatuurlaua komponent API: `packages/ui-kit` adapterid — vt `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekraanidel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                  |
-| `constants/providers.ts`         | **381 pakkujat** Zod valideerimisega (tõe allikas)                                                |
+| `constants/providers.ts`         | **382 pakkujat** Zod valideerimisega (tõe allikas)                                                |
 | `constants/cliTools.ts`          | Väline CLI tööriista register                                                                     |
 | `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** prioriteetidega                                                    |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad kandja (vs haldamise) autentimist                                         |

@@ -6,7 +6,7 @@
 
 > **Ġenerat awtomatikament** minn `src/shared/constants/providers.ts` — teditjax bl-idejn. Riġenera bi: `npm run gen:provider-reference`** Ġenerat l-aħħar:** 2026-11-08
 
-Fornituri totali:** 381** . Ara t-tqassim tal-kategorija hawn taħt.
+Fornituri totali:** 382** . Ara t-tqassim tal-kategorija hawn taħt.
 
 ## Kategoriji
 

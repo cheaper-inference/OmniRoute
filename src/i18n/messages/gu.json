@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT કસ્ટમ કનેક્ટર",
     "doctorChecking": "સ્થિતિ તપાસવામાં…",
     "doctorCheck": "ડૉક્ટર સ્થિતિ તપાસો",
-    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ"
+    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ",
+    "rosebudPanel": {
+      "title": "Rosebud સબ્સ્ક્રિપ્શન",
+      "description": "દરેક ખાતાને એકવાર અધિકૃત કરો. છબીઓ, ધ્વનિ અથવા વિડિયો બનાવવાથી તે ખાતાની હાલની Rosebud ક્રેડિટનો ખર્ચ થાય છે.",
+      "connect": "Rosebud એકાઉન્ટને કનેક્ટ કરો",
+      "approve": "Rosebud પર મંજૂર કરો",
+      "checkAccount": "અધિકૃતતા અને ક્રેડિટ તપાસો",
+      "reauthorize": "ફરીથી અધિકૃત કરો",
+      "refreshModels": "મોડલ્સ રિફ્રેશ કરો",
+      "defaultAccountName": "Rosebud એકાઉન્ટ",
+      "balanceUnavailable": "અનુપલબ્ધ",
+      "accountStatus": "{status}: {account} — {balance} ક્રેડિટ્સ",
+      "modelsDiscovered": "{count} મોડેલો શોધ્યા. કિંમતો Rosebud ક્રેડિટમાં છે.",
+      "requestFailed": "આ વિનંતી પૂર્ણ કરવામાં અસમર્થ. Rosebud અધિકૃતતા OmniRoute સર્વર પર ચાલે છે અને તેને સ્થાનિક અથવા LAN ઍક્સેસની જરૂર છે."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP સર્વર",
-        "description": "OmniRoute MCP સર્વર (110 ટૂલ્સ, 3 ટ્રાન્સપોર્ટ્સ: SSE/stdio/HTTP) સાથે કનેક્ટ થાઓ. 33 પરમિશન સ્કોપ્સમાં રાઉટિંગ, કેશ, કમ્પ્રેશન, મેમરી, સ્કિલ્સ, પ્રોવાઇડર્સ અને ઓડિટ ટૂલ્સને આવરી લે છે."
+        "description": "OmniRoute MCP સર્વર (129 ટૂલ્સ, 3 ટ્રાન્સપોર્ટ્સ: SSE/stdio/HTTP) સાથે કનેક્ટ થાઓ. 34 પરમિશન સ્કોપ્સમાં રાઉટિંગ, કેશ, કમ્પ્રેશન, મેમરી, સ્કિલ્સ, પ્રોવાઇડર્સ અને ઓડિટ ટૂલ્સને આવરી લે છે."
       },
       "omni-agents-a2a": {
         "name": "એજન્ટ્સ અને A2A પ્રોટોકોલ",

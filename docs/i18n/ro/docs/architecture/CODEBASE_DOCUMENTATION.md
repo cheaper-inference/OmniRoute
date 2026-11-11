@@ -499,7 +499,7 @@ direct sau prin `DefaultExecutor` ori un alt executor; modulele rămase sunt aju
 (ajutor partajat pentru identitate) și `index.ts` (registru).
 
 > Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts`, folosind executorul generic
-> compatibil cu OpenAI. Catalogul complet al furnizorilor (381 de furnizori) se află în
+> compatibil cu OpenAI. Catalogul complet al furnizorilor (382 de furnizori) se află în
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

@@ -6,7 +6,7 @@
 
 > **Automatski generirano** iz `src/shared/constants/providers.ts` — ne uređuj ručno. Regeneriraj sa: `npm run gen:provider-reference`** Zadnje generirano:** 2026-11-08
 
-Ukupni davatelji:** 381** . Pogledajte raščlambu kategorija u nastavku.
+Ukupni davatelji:** 382** . Pogledajte raščlambu kategorija u nastavku.
 
 ## Kategorije
 

@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT کسٹم کنیکٹر",
     "doctorChecking": "حالت کا جائزہ لیا جا رہا ہے…",
     "doctorCheck": "ڈاکٹر کی حالت کا جائزہ لیں",
-    "fallbackRetryBackendTitle": "متبادل دوبارہ کوشش بیک اینڈ"
+    "fallbackRetryBackendTitle": "متبادل دوبارہ کوشش بیک اینڈ",
+    "rosebudPanel": {
+      "title": "Rosebud سبسکرپشن",
+      "description": "ہر اکاؤنٹ کو ایک بار اجازت دیں۔ تصاویر، آواز یا ویڈیو بنانے سے اس اکاؤنٹ کے موجودہ Rosebud کریڈٹس خرچ ہوتے ہیں۔",
+      "connect": "Rosebud اکاؤنٹ سے رابطہ کریں۔",
+      "approve": "Rosebud پر منظور کریں۔",
+      "checkAccount": "اجازت اور کریڈٹ چیک کریں۔",
+      "reauthorize": "دوبارہ اختیار کرنا",
+      "refreshModels": "ماڈلز کو ریفریش کریں۔",
+      "defaultAccountName": "Rosebud اکاؤنٹ",
+      "balanceUnavailable": "دستیاب نہیں",
+      "accountStatus": "{status}: {account} — {balance} کریڈٹس",
+      "modelsDiscovered": "{count} ماڈلز دریافت قیمتیں Rosebud کریڈٹ میں ہیں۔",
+      "requestFailed": "اس درخواست کو مکمل کرنے سے قاصر۔ Rosebud اجازت OmniRoute سرور پر چلتی ہے اور اسے مقامی یا LAN رسائی کی ضرورت ہوتی ہے۔"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP سرور",
-        "description": "OmniRoute MCP سرور سے جڑیں (110 ٹولز، 3 ٹرانسپورٹس: SSE/stdio/HTTP)۔ 33 اجازت کے اسکوپس میں روٹنگ، کیش، کمپریشن، میموری، اسکلز، پرووائیڈرز، اور آڈٹ ٹولز کا احاطہ کرتا ہے۔"
+        "description": "OmniRoute MCP سرور سے جڑیں (129 ٹولز، 3 ٹرانسپورٹس: SSE/stdio/HTTP)۔ 34 اجازت کے اسکوپس میں روٹنگ، کیش، کمپریشن، میموری، اسکلز، پرووائیڈرز، اور آڈٹ ٹولز کا احاطہ کرتا ہے۔"
       },
       "omni-agents-a2a": {
         "name": "ایجنٹس اور A2A پروٹوکول",

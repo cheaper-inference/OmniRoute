@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Vlastný konektor ChatGPT",
     "doctorChecking": "Kontrola stavu…",
     "doctorCheck": "Skontrolovať stav doctor",
-    "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy"
+    "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy",
+    "rosebudPanel": {
+      "title": "predplatné Rosebud",
+      "description": "Autorizovať každý účet raz. Vytváranie obrázkov, zvuku alebo videa míňa existujúce kredity Rosebud daného účtu.",
+      "connect": "Pripojte účet Rosebud",
+      "approve": "Schváliť na Rosebud",
+      "checkAccount": "Skontrolujte autorizáciu a kredity",
+      "reauthorize": "Znovu autorizovať",
+      "refreshModels": "Obnoviť modely",
+      "defaultAccountName": "Rosebud účet",
+      "balanceUnavailable": "nedostupné",
+      "accountStatus": "{status}: {account} — {balance} kredity",
+      "modelsDiscovered": "objavené modely {count}. Ceny sú v kreditoch Rosebud.",
+      "requestFailed": "Túto žiadosť nie je možné dokončiť. Autorizácia Rosebud beží na serveri OmniRoute a vyžaduje lokálny alebo LAN prístup."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Server MCP",
-        "description": "Pripojte sa k serveru OmniRoute MCP (110 nástrojov, 3 transporty: SSE/stdio/HTTP). Zahŕňa smerovanie, vyrovnávaciu pamäť, kompresiu, pamäť, zručnosti, poskytovateľov a nástroje auditu v rámci 33 rozsahov oprávnení."
+        "description": "Pripojte sa k serveru OmniRoute MCP (129 nástrojov, 3 transporty: SSE/stdio/HTTP). Zahŕňa smerovanie, vyrovnávaciu pamäť, kompresiu, pamäť, zručnosti, poskytovateľov a nástroje auditu v rámci 34 rozsahov oprávnení."
       },
       "omni-agents-a2a": {
         "name": "Agenti a protokol A2A",

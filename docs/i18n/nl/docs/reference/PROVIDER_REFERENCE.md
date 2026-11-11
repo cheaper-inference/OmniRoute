@@ -6,7 +6,7 @@
 
 > **Automatisch gegenereerd** van `src/shared/constants/providers.ts` — niet met de hand bewerken. Regenereer met: `npm run gen:provider-reference`** Laatst gegenereerd:** 08-11-2026
 
-Totaal aanbieders:** 381** . Zie de categorie-indeling hieronder.
+Totaal aanbieders:** 382** . Zie de categorie-indeling hieronder.
 
 ## Categorieën
 

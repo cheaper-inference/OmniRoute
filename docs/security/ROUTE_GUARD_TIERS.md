@@ -171,6 +171,8 @@ non-spawning sources (persisted state, settings, fs checks), flagged `probed: fa
 | Route                                                            | Probe skipped for remote callers                                    |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
 | `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) and CLI-fallback spawn |
+| `POST /api/providers/{id}/sync-models`, `GET .../models`         | Rosebud CLI catalog discovery; a remote caller gets 403             |
+| `POST /api/v1/images/generations`                                | Rosebud CLI generation; a remote caller gets 403 before any work    |
 | `GET /api/headroom/status`                                       | `which headroom` and the python `--version` probes                  |
 | `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`   |
 | `GET /api/tunnels/cloudflared` (GET-exempt from LOCAL_ONLY)      | `which cloudflared` PATH lookup                                     |

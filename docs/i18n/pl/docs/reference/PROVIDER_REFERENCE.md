@@ -6,7 +6,7 @@
 
 > **Wygenerowane automatycznie** z `src/shared/constants/providers.ts` — nie edytuj ręcznie. Regeneruj za pomocą: `npm run gen:provider-reference`** Ostatnio wygenerowane:** 2026-11-08
 
-Łączni dostawcy:** 381** . Zobacz podział kategorii poniżej.
+Łączni dostawcy:** 382** . Zobacz podział kategorii poniżej.
 
 ## Kategorie
 

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Εξάρτημα ταμπλό API: προσαρμογείς πάνω από `packages/ui-kit` — δείτε `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ονόματα εικονιδίων που χρησιμοποιούνται από τις οθόνες → στοιχεία Lucide (`<Icon>`)           |
-| `constants/providers.ts`         | **381 πάροχοι** με επικύρωση Zod (πηγή αλήθειας)                                                          |
+| `constants/providers.ts`         | **382 πάροχοι** με επικύρωση Zod (πηγή αλήθειας)                                                          |
 | `constants/cliTools.ts`          | Εξωτερικό μητρώο εργαλείων CLI                                                                            |
 | `constants/routingStrategies.ts` | **20 στρατηγικές δρομολόγησης** με προτεραιότητες                                                         |
 | `constants/publicApiRoutes.ts`   | Διαδρομές που απαιτούν εξουσιοδότηση φορέα (έναντι διαχείρισης).                                          |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | CLI ενσωματώσεις + Εσωτερικές OmniRoute CLI                                                |
 | `I18N.md`                   | αρχιτεκτονική i18n, προσθήκη γλώσσας, 67 τοπικές ρυθμίσεις                                 |
 | `UNINSTALL.md`              | Καθαρίστε τα βήματα απεγκατάστασης                                                         |
-| `PROVIDER_REFERENCE.md`     | **Δημιουργείται αυτόματα** κατάλογος 381 παρόχων (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Δημιουργείται αυτόματα** κατάλογος 382 παρόχων (regen: `npm run gen:provider-reference`) |
 
 ### Βαθιές καταδύσεις υποσυστήματος
 

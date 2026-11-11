@@ -249,6 +249,7 @@
       "tests/unit/authz/route-guard-version-get-exemption.test.ts",
       "tests/unit/authz/route-guard-vnc-session-local-only.test.ts",
       "tests/unit/authz/routeGuard.test.ts",
+      "tests/unit/rosebud-mcp.test.ts",
       "tests/unit/auto-combo-candidates-locked-model-visible.test.ts",
       "tests/unit/auto-combo-context-advertising.test.ts",
       "tests/unit/auto-combo-engine.test.ts",

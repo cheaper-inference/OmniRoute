@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Prilagodljivi konektor ChatGPT",
     "doctorChecking": "Provjeravanje statusa…",
     "doctorCheck": "Provjeri status doktoriranja",
-    "fallbackRetryBackendTitle": "Poslužnik za ponovna pokretanja u slučaju pada"
+    "fallbackRetryBackendTitle": "Poslužnik za ponovna pokretanja u slučaju pada",
+    "rosebudPanel": {
+      "title": "Rosebud pretplata",
+      "description": "Autorizirajte svaki račun jednom. Stvaranje slika, zvuka ili videa troši postojeće Rosebud kredite tog računa.",
+      "connect": "Povežite Rosebud račun",
+      "approve": "Odobri na Rosebud",
+      "checkAccount": "Provjerite autorizaciju i kredite",
+      "reauthorize": "Ponovno autoriziraj",
+      "refreshModels": "Osvježi modele",
+      "defaultAccountName": "Rosebud račun",
+      "balanceUnavailable": "nedostupan",
+      "accountStatus": "{status}: {account} — {balance} krediti",
+      "modelsDiscovered": "otkriveni {count} modeli. Cijene su u Rosebud kreditima.",
+      "requestFailed": "Nije moguće izvršiti ovaj zahtjev. Rosebud autorizacija radi na OmniRoute poslužitelju i zahtijeva lokalni ili LAN pristup."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP poslužitelj",
-        "description": "Povežite se s OmniRoute MCP poslužiteljem (110 alata, 3 načina prijenosa: SSE/stdio/HTTP). Obuhvaća alate za usmjeravanje, predmemoriju, kompresiju, memoriju, vještine, pružatelje i reviziju, raspoređene u 33 opsega dopuštenja."
+        "description": "Povežite se s OmniRoute MCP poslužiteljem (129 alata, 3 načina prijenosa: SSE/stdio/HTTP). Obuhvaća alate za usmjeravanje, predmemoriju, kompresiju, memoriju, vještine, pružatelje i reviziju, raspoređene u 34 opsega dopuštenja."
       },
       "omni-agents-a2a": {
         "name": "Agenti i A2A protokol",

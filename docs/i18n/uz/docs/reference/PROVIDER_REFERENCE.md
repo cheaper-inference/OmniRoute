@@ -6,7 +6,7 @@
 
 > **Avtomatik yaratilgan** `src/shared/constants/providers.ts` — dan qo'lda tahrir qilmang. Quyidagi bilan qayta tiklash: `npm run gen:provider-reference`** Oxirgi yaratilgan:** 2026-11-08
 
-Jami provayderlar:** 381** . Quyida turkumlar boʻyicha koʻring.
+Jami provayderlar:** 382** . Quyida turkumlar boʻyicha koʻring.
 
 ## Toifalar
 

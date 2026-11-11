@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Egendefinert ChatGPT-tilkobling",
     "doctorChecking": "Sjekker status …",
     "doctorCheck": "Sjekk lege-status",
-    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend"
+    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend",
+    "rosebudPanel": {
+      "title": "Rosebud abonnement",
+      "description": "Autoriser hver konto én gang. Å lage bilder, lyd eller video bruker kontoens eksisterende Rosebud kreditter.",
+      "connect": "Koble til Rosebud kontoen",
+      "approve": "Godkjenne på Rosebud",
+      "checkAccount": "Sjekk autorisasjon og kreditter",
+      "reauthorize": "Autoriser på nytt",
+      "refreshModels": "Oppdater modellene",
+      "defaultAccountName": "Rosebud konto",
+      "balanceUnavailable": "utilgjengelig",
+      "accountStatus": "{status}: {account} — {balance} kreditter",
+      "modelsDiscovered": "{count} modeller oppdaget. Prisene er i Rosebud kreditter.",
+      "requestFailed": "Kan ikke fullføre denne forespørselen. Rosebud autorisasjon kjører på OmniRoute serveren og krever lokal eller LAN tilgang."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Koble til OmniRoute MCP-serveren (110 verktøy, 3 transporter: SSE/stdio/HTTP). Dekker ruting, hurtigbuffer, komprimering, minne, ferdigheter, leverandører og revisjonsverktøy på tvers av 33 tillatelsesomfang."
+        "description": "Koble til OmniRoute MCP-serveren (129 verktøy, 3 transporter: SSE/stdio/HTTP). Dekker ruting, hurtigbuffer, komprimering, minne, ferdigheter, leverandører og revisjonsverktøy på tvers av 34 tillatelsesomfang."
       },
       "omni-agents-a2a": {
         "name": "Agenter og A2A-protokoll",

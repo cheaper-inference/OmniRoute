@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | டாஷ்போர்டு கூறு API: `packages/ui-kit` — மீது அடாப்டர்கள் `docs/architecture/DESIGN_SYSTEM.md` பார்க்கவும் |
 | `constants/iconMap.ts`           | `ICON_MAP`: திரைகளால் பயன்படுத்தப்படும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                         |
-| `constants/providers.ts`         | **381 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
+| `constants/providers.ts`         | **382 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
 | `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவு                                                                                |
 | `constants/routingStrategies.ts` | **20 ரூட்டிங் உத்திகள்** முன்னுரிமைகளுடன்                                                                  |
 | `constants/publicApiRoutes.ts`   | Bearer (vs management) அங்கீகாரம் தேவைப்படும் வழிகள்                                                       |

@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT o‘zlashtirilgan konnektor",
     "doctorChecking": "Holat tekshirilmoqda…",
     "doctorCheck": "Doctor holatini tekshirish",
-    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
+    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend",
+    "rosebudPanel": {
+      "title": "Rosebud obunasi",
+      "description": "Har bir hisobni bir marta avtorizatsiya qiling. Tasvirlar, ovoz yoki video yaratish uchun ushbu hisobning mavjud Rosebud kreditlari sarflanadi.",
+      "connect": "Rosebud hisobini ulang",
+      "approve": "Rosebud da ma'qullang",
+      "checkAccount": "Avtorizatsiya va kreditlarni tekshiring",
+      "reauthorize": "Qayta ruxsat berish",
+      "refreshModels": "Modellarni yangilash",
+      "defaultAccountName": "Rosebud hisobi",
+      "balanceUnavailable": "mavjud emas",
+      "accountStatus": "{status}: {account} — {balance} kreditlari",
+      "modelsDiscovered": "{count} modellari topildi. Narxlar Rosebud kreditida.",
+      "requestFailed": "Bu soʻrovni bajarib boʻlmadi. Rosebud avtorizatsiyasi OmniRoute serverida ishlaydi va mahalliy yoki LAN ruxsatini talab qiladi."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP serveri",
-        "description": "OmniRoute MCP serveriga ulaning (110 ta vosita, 3 ta transport: SSE/stdio/HTTP). 33 ta ruxsat doirasida marshrutlash, kesh, siqish, xotira, ko‘nikmalar, provayderlar va audit vositalarini qamrab oladi."
+        "description": "OmniRoute MCP serveriga ulaning (129 ta vosita, 3 ta transport: SSE/stdio/HTTP). 34 ta ruxsat doirasida marshrutlash, kesh, siqish, xotira, ko‘nikmalar, provayderlar va audit vositalarini qamrab oladi."
       },
       "omni-agents-a2a": {
         "name": "Agentlar va A2A protokoli",

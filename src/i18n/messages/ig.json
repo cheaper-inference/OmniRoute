@@ -7434,7 +7434,21 @@
     "quotaRefreshStale": "Sava weghachiri data oke ojiji ochie. Nke a abụghị nlele ọhụrụ.",
     "quotaRefreshPartial": "Naanị akụkụ data oke ojiji dị.",
     "quotaWindowUnavailable": "Oke ojiji {window} adịghị",
-    "quotaConnectionRefreshFailed": "Nnyocha oke ojiji agwụla, mana enweghị ike imelite ndepụta akaụntụ."
+    "quotaConnectionRefreshFailed": "Nnyocha oke ojiji agwụla, mana enweghị ike imelite ndepụta akaụntụ.",
+    "rosebudPanel": {
+      "title": "ndebanye aha Rosebud",
+      "description": "Nye ikike akaụntụ ọ bụla otu ugboro. Ịmepụta onyonyo, ụda ma ọ bụ vidiyo na-eji kredit Rosebud dị na akaụntụ ahụ.",
+      "connect": "Jikọọ akaụntụ Rosebud",
+      "approve": "Kwado na Rosebud",
+      "checkAccount": "Lelee ikike na kredit",
+      "reauthorize": "Nyeghachi ikike",
+      "refreshModels": "Weghachite ụdịdị",
+      "defaultAccountName": "akaụntụ Rosebud",
+      "balanceUnavailable": "adịghị adị",
+      "accountStatus": "{status}: {account} — {balance} kredit",
+      "modelsDiscovered": "ụdị {count} chọpụtara. Ọnụ ahịa dị na kredit Rosebud.",
+      "requestFailed": "Enweghị ike imezu arịrịọ a. ikike Rosebud na-agba na sava OmniRoute ma chọọ ohere mpaghara ma ọ bụ LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Sava MCP",
-        "description": "Jikọọ na sava OmniRoute MCP (ngwaọrụ 110, ụzọ mbufe 3: SSE/stdio/HTTP). Ọ na-ekpuchi nduzi ụzọ, cache, mkpakọ, ebe nchekwa, nka, ndị na-eweta ọrụ, na ngwaọrụ nyocha n'ofe oke ikike 33."
+        "description": "Jikọọ na sava OmniRoute MCP (ngwaọrụ 129, ụzọ mbufe 3: SSE/stdio/HTTP). Ọ na-ekpuchi nduzi ụzọ, cache, mkpakọ, ebe nchekwa, nka, ndị na-eweta ọrụ, na ngwaọrụ nyocha n'ofe oke ikike 34."
       },
       "omni-agents-a2a": {
         "name": "Ndị Nnọchi Anya na Usoro A2A",

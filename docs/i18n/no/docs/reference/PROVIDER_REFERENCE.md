@@ -6,7 +6,7 @@
 
 > **Autogenerert** fra `src/shared/constants/providers.ts` — ikke rediger for hånd. Regenerer med: `npm run gen:provider-reference`** Sist generert:** 2026-11-08
 
-Totale leverandører:** 381** . Se kategorioversikt nedenfor.
+Totale leverandører:** 382** . Se kategorioversikt nedenfor.
 
 ## Kategorier
 

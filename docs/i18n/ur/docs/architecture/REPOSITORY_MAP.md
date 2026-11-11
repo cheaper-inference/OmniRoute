@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------- |
 | `components/`                    | ڈیش بورڈ جزو API: اڈاپٹر اوور `packages/ui-kit` — دیکھیں `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: اسکرینز کے ذریعے استعمال ہونے والے آئیکن کے نام → Lucide اجزاء (`<Icon>`)         |
-| `constants/providers.ts`         | **381 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
+| `constants/providers.ts`         | **382 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
 | `constants/cliTools.ts`          | بیرونی CLI ٹول رجسٹری                                                                         |
 | `constants/routingStrategies.ts` | **20 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
 | `constants/publicApiRoutes.ts`   | وہ راستے جن کے لیے بیئرر (بمقابلہ مینجمنٹ) تصنیف کی ضرورت ہوتی ہے۔                            |

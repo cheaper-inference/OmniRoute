@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्थिति जाँच गर्दै…",
     "doctorCheck": "डक्टर स्थिति जाँच गर्नुहोस्",
-    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड"
+    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड",
+    "rosebudPanel": {
+      "title": "Rosebud सदस्यता",
+      "description": "प्रत्येक खाता एक पटक अधिकृत गर्नुहोस्। छविहरू, ध्वनि वा भिडियोहरू सिर्जना गर्दा त्यो खाताको अवस्थित Rosebud क्रेडिटहरू खर्च हुन्छ।",
+      "connect": "Rosebud खाता जडान गर्नुहोस्",
+      "approve": "Rosebud मा अनुमोदन गर्नुहोस्",
+      "checkAccount": "प्राधिकरण र क्रेडिट जाँच गर्नुहोस्",
+      "reauthorize": "पुन: अधिकृत गर्नुहोस्",
+      "refreshModels": "मोडेलहरू ताजा गर्नुहोस्",
+      "defaultAccountName": "Rosebud खाता",
+      "balanceUnavailable": "अनुपलब्ध",
+      "accountStatus": "{status}: {account} — {balance} क्रेडिटहरू",
+      "modelsDiscovered": "{count} मोडेलहरू पत्ता लगाइयो। मूल्यहरू Rosebud क्रेडिटहरूमा छन्।",
+      "requestFailed": "यो अनुरोध पूरा गर्न असमर्थ। Rosebud प्राधिकरण OmniRoute सर्भरमा चल्छ र स्थानीय वा LAN पहुँच चाहिन्छ।"
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP सर्भर",
-        "description": "OmniRoute MCP सर्भरमा जडान गर्नुहोस् (110 उपकरण, 3 ट्रान्सपोर्ट: SSE/stdio/HTTP)। यसले 33 अनुमति क्षेत्रहरूमा राउटिङ, क्यास, सङ्कुचन, मेमोरी, सीप, प्रदायक र अडिट उपकरणहरू समेट्छ।"
+        "description": "OmniRoute MCP सर्भरमा जडान गर्नुहोस् (129 उपकरण, 3 ट्रान्सपोर्ट: SSE/stdio/HTTP)। यसले 34 अनुमति क्षेत्रहरूमा राउटिङ, क्यास, सङ्कुचन, मेमोरी, सीप, प्रदायक र अडिट उपकरणहरू समेट्छ।"
       },
       "omni-agents-a2a": {
         "name": "एजेन्टहरू र A2A प्रोटोकल",

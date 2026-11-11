@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Bộ kết nối tùy chỉnh ChatGPT",
     "doctorChecking": "Đang kiểm tra trạng thái…",
     "doctorCheck": "Kiểm tra trạng thái doctor",
-    "fallbackRetryBackendTitle": "Hạ tầng lưu trữ thử lại dự phòng"
+    "fallbackRetryBackendTitle": "Hạ tầng lưu trữ thử lại dự phòng",
+    "rosebudPanel": {
+      "title": "đăng ký Rosebud",
+      "description": "Ủy quyền cho mỗi tài khoản một lần. Việc tạo hình ảnh, âm thanh hoặc video sẽ tiêu tốn tín dụng Rosebud hiện có của tài khoản đó.",
+      "connect": "Kết nối tài khoản Rosebud",
+      "approve": "Phê duyệt trên Rosebud",
+      "checkAccount": "Kiểm tra ủy quyền và tín dụng",
+      "reauthorize": "Ủy quyền lại",
+      "refreshModels": "Làm mới mô hình",
+      "defaultAccountName": "tài khoản Rosebud",
+      "balanceUnavailable": "không có sẵn",
+      "accountStatus": "{status}: {account} — {balance} tín dụng",
+      "modelsDiscovered": "mô hình {count} được phát hiện Giá được tính bằng tín dụng Rosebud.",
+      "requestFailed": "Không thể hoàn thành yêu cầu này. ủy quyền Rosebud chạy trên máy chủ OmniRoute và yêu cầu quyền truy cập cục bộ hoặc LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Máy chủ MCP",
-        "description": "Kết nối máy chủ MCP OmniRoute với 110 công cụ và 3 transport SSE/stdio/HTTP. Bao phủ định tuyến, cache, nén, bộ nhớ, skill, nhà cung cấp và kiểm toán trong 33 phạm vi quyền."
+        "description": "Kết nối máy chủ MCP OmniRoute với 129 công cụ và 3 transport SSE/stdio/HTTP. Bao phủ định tuyến, cache, nén, bộ nhớ, skill, nhà cung cấp và kiểm toán trong 34 phạm vi quyền."
       },
       "omni-agents-a2a": {
         "name": "Agent & giao thức A2A",

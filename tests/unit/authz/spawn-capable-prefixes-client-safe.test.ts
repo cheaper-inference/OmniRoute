@@ -71,6 +71,7 @@ test("SPAWN_CAPABLE_PREFIXES is defined in the server-free constants leaf with t
   assert.ok(Array.isArray(SPAWN_CAPABLE_PREFIXES));
   // The full deny-list survived the extraction out of routeGuard.ts (Hard Rules #15/#17).
   for (const prefix of [
+    "/api/rosebud/",
     "/api/cli-tools/runtime/",
     "/api/services/",
     "/api/tools/agent-bridge/",
@@ -141,5 +142,5 @@ test("SPAWN_CAPABLE_PREFIXES is defined in the server-free constants leaf with t
   // + 1 host-credential read (/api/oauth/kiro/auto-import) that must never be bypassable.
   // + 1 (whycodes-settings, #14107).
   // qwen-settings is the one pre-existing entry not enumerated above.
-  assert.equal(SPAWN_CAPABLE_PREFIXES.length, 53);
+  assert.equal(SPAWN_CAPABLE_PREFIXES.length, 54);
 });

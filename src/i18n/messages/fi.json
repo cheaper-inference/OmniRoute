@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "ChatGPT-mukautettu liittimen",
     "doctorChecking": "Tarkistetaan tilaa…",
     "doctorCheck": "Tarkista doctor-tila",
-    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi"
+    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi",
+    "rosebudPanel": {
+      "title": "Rosebud-tilaus",
+      "description": "Valtuuta jokainen tili kerran. Kuvien, äänen tai videon luominen kuluttaa tilin nykyiset Rosebud hyvitykset.",
+      "connect": "Yhdistä Rosebud-tili",
+      "approve": "Hyväksy Rosebud",
+      "checkAccount": "Tarkista valtuutus ja hyvitykset",
+      "reauthorize": "Valtuuta uudelleen",
+      "refreshModels": "Päivitä mallit",
+      "defaultAccountName": "Rosebud-tili",
+      "balanceUnavailable": "ei ole saatavilla",
+      "accountStatus": "{status}: {account} — {balance} krediittiä",
+      "modelsDiscovered": "{count} malleja löydetty. Hinnat ovat Rosebud-pisteitä.",
+      "requestFailed": "Tätä pyyntöä ei voi suorittaa loppuun. Rosebud valtuutus toimii OmniRoute palvelimella ja vaatii paikallisen tai LAN -käytön."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "MCP-palvelin",
-        "description": "Yhdistä OmniRouten MCP-palvelimeen (110 työkalua, 3 siirtotietä: SSE/stdio/HTTP). Kattaa reitityksen, välimuistin, pakkauksen, muistin, taidot, tarjoajat ja auditointityökalut 33 käyttöoikeusalueella."
+        "description": "Yhdistä OmniRouten MCP-palvelimeen (129 työkalua, 3 siirtotietä: SSE/stdio/HTTP). Kattaa reitityksen, välimuistin, pakkauksen, muistin, taidot, tarjoajat ja auditointityökalut 34 käyttöoikeusalueella."
       },
       "omni-agents-a2a": {
         "name": "Agentit ja A2A-protokolla",

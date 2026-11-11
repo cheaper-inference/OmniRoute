@@ -66,7 +66,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #14619 extracted Firefly's credential lookup into adobeFireflyEdit.ts;
     // the same class-B site moves with it, 8->7 here and 0->1 in the helper.
     "src/app/api/v1/images/edits/route.ts": 7,
-    "src/app/api/v1/images/generations/route.ts": 3,
+    // #18577: Rosebud selection has its own lookup, limited to the accounts whose catalog supports
+    // the model and to any pinned retry account. Same quota-preflight lookup (class B).
+    "src/app/api/v1/images/generations/route.ts": 4,
     "src/app/api/v1/images/upscale/route.ts": 1,
     "src/app/api/v1/messages/count_tokens/route.ts": 1,
     "src/app/api/v1/moderations/route.ts": 1,
@@ -313,6 +315,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/lib/proxyEgress.ts": 1,
     "src/lib/quota/connectionRecovery.ts": 2,
+    // #18577: reads a Rosebud connection's profile, activation and cached catalog. It selects nothing
+    // for dispatch: paid image requests run only on the connection the route's fenced lookup returned,
+    // so this is a state read (class C).
+    "src/lib/rosebud/provider.ts": 6,
     // #18630: the opt-in reset-credit auto-spend sweep lists the active Codex OAuth
     // connections only to hand each id to spendExpiringResetCredits() in
     // codexResetCredits.ts, whose loadCodexConnection() carries the auxiliary-lease

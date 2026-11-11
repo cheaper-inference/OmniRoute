@@ -7434,7 +7434,21 @@
     "quotaRefreshStale": "Sabar ta dawo da tsoffin bayanan iyakar amfani. Wannan ba sabon bayani ba ne.",
     "quotaRefreshPartial": "Wani ɓangare na bayanan iyakar amfani kaɗai yake samuwa.",
     "quotaWindowUnavailable": "Babu bayanin iyakar amfani na {window}",
-    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu."
+    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu.",
+    "rosebudPanel": {
+      "title": "Biyan kuɗin Rosebud",
+      "description": "Yi izini kowane asusun sau ɗaya. Ƙirƙirar hotuna, sauti ko bidiyo yana kashe kuɗin kuɗin Rosebud na asusun.",
+      "connect": "Haɗa asusun Rosebud",
+      "approve": "Amincewa akan Rosebud",
+      "checkAccount": "Bincika izini da ƙididdiga",
+      "reauthorize": "Sake ba da izini",
+      "refreshModels": "Sabunta samfura",
+      "defaultAccountName": "Asusun Rosebud",
+      "balanceUnavailable": "babu",
+      "accountStatus": "{status}: {account} — {balance} ƙididdiga",
+      "modelsDiscovered": "{count} model gano. Farashin suna cikin kiredit na Rosebud.",
+      "requestFailed": "An kasa kammala wannan buƙatar. Izinin Rosebud yana gudana akan sabar OmniRoute kuma yana buƙatar shiga gida ko LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Sabar MCP",
-        "description": "Haɗa zuwa sabar OmniRoute MCP (kayan aiki 110, hanyoyin sufuri 3: SSE/stdio/HTTP). Ya ƙunshi kayan aikin juyar da hanya, ma'ajiyar wucin gadi, matsewa, ƙwaƙwalwa, ƙwarewa, masu bayarwa, da kayan aikin bincike a cikin fannonin izini 33."
+        "description": "Haɗa zuwa sabar OmniRoute MCP (kayan aiki 129, hanyoyin sufuri 3: SSE/stdio/HTTP). Ya ƙunshi kayan aikin juyar da hanya, ma'ajiyar wucin gadi, matsewa, ƙwaƙwalwa, ƙwarewa, masu bayarwa, da kayan aikin bincike a cikin fannonin izini 34."
       },
       "omni-agents-a2a": {
         "name": "Wakilai da Ka'idar A2A",

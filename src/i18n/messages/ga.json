@@ -7434,7 +7434,21 @@
     "chatgptConnectorLabel": "Ceanglaíocá saincheaptha ChatGPT",
     "doctorChecking": "Ag seiceáil stádas…",
     "doctorCheck": "Seiceáil stádas an dochtúra",
-    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta"
+    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta",
+    "rosebudPanel": {
+      "title": "Rosebud síntiús",
+      "description": "Údaraigh gach cuntas uair amháin. Má chruthaítear íomhánna, fuaim nó físeán caitheann sé creidmheasanna Rosebud reatha an chuntais sin.",
+      "connect": "Ceangail cuntas Rosebud",
+      "approve": "Faomhadh ar Rosebud",
+      "checkAccount": "Seiceáil údarú agus creidmheasanna",
+      "reauthorize": "Athúdarú",
+      "refreshModels": "Samhlacha a athnuachan",
+      "defaultAccountName": "cuntas Rosebud",
+      "balanceUnavailable": "ar fáil",
+      "accountStatus": "{status}: {account} — {balance} creidmheasanna",
+      "modelsDiscovered": "samhlacha {count} aimsithe. Tá na praghsanna i gcreidmheasanna Rosebud.",
+      "requestFailed": "Ní féidir an t-iarratas seo a chomhlánú. Ritheann údarú Rosebud ar an bhfreastalaí OmniRoute agus éilíonn sé rochtain áitiúil nó LAN."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14027,7 +14041,7 @@
       },
       "omni-mcp": {
         "name": "Freastalaí MCP",
-        "description": "Ceangail le freastalaí MCP OmniRoute (110 uirlis, 3 phrótacal iompair: SSE/stdio/HTTP). Clúdaíonn sé ródú, taisceadh, comhbhrú, cuimhne, scileanna, soláthraithe agus uirlisí iniúchóireachta thar 33 scóip cheada."
+        "description": "Ceangail le freastalaí MCP OmniRoute (129 uirlis, 3 phrótacal iompair: SSE/stdio/HTTP). Clúdaíonn sé ródú, taisceadh, comhbhrú, cuimhne, scileanna, soláthraithe agus uirlisí iniúchóireachta thar 34 scóip cheada."
       },
       "omni-agents-a2a": {
         "name": "Gníomhairí & Prótacal A2A",
