@@ -811,7 +811,8 @@
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/combo-cost-sort-blended.test.ts",
-      "tests/unit/session-tier-floor.test.ts"
+      "tests/unit/session-tier-floor.test.ts",
+      "tests/unit/combo-budget-class-status.test.ts"
     ],
     "nodeArgs": [
       "--import",
