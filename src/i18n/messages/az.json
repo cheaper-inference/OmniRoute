@@ -4481,7 +4481,7 @@
     "spend7d": "7 günlük xərc",
     "avgCostPerRequest": "Sorğu üzrə orta xərc",
     "noCostDataDescription": "Xərc məlumatlarının burada görünməsi üçün sorğular göndərməyə başlayın. Xərclər bütün provayderlər üçün avtomatik izlənilir.",
-    "spendToday": "Bugünkü xərc",
+    "spendToday": "1 günlük xərc",
     "overviewLoadFailed": "Xərclər icmalını yükləmək mümkün olmadı",
     "overviewDescription": "Bütün qoşulmuş provayderlər və modellər üzrə real vaxt rejimində xərc bölgüsü",
     "providerShare": "Provayder payı",

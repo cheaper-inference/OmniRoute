@@ -4481,7 +4481,7 @@
     "spend7d": "Spend 7D",
     "avgCostPerRequest": "Avg Cost / Request",
     "noCostDataDescription": "Start making requests to see cost data appear here. Costs are tracked automatically for all providers.",
-    "spendToday": "Spend Today",
+    "spendToday": "Spend 1D",
     "overviewLoadFailed": "Failed to load cost overview",
     "overviewDescription": "Real-time spending breakdown across all connected providers and models",
     "providerShare": "Provider Share",

@@ -4481,7 +4481,7 @@
     "spend7d": "የ7 ቀናት ወጪ",
     "avgCostPerRequest": "አማካይ ወጪ / ጥያቄ",
     "noCostDataDescription": "የወጪ ውሂብ እዚህ እንዲታይ ጥያቄዎችን ማቅረብ ይጀምሩ። ወጪዎች ለሁሉም አቅራቢዎች በራስ-ሰር ይከታተላሉ።",
-    "spendToday": "የዛሬ ወጪ",
+    "spendToday": "የ1 ቀን ወጪ",
     "overviewLoadFailed": "የወጪ አጠቃላይ እይታን መጫን አልተሳካም",
     "overviewDescription": "በሁሉም የተገናኙ አቅራቢዎችና ሞዴሎች ላይ ያለው ቅጽበታዊ የወጪ ዝርዝር",
     "providerShare": "የአቅራቢ ድርሻ",

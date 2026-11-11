@@ -1086,14 +1086,16 @@ function CostExplorerCard({
             value={groupBy}
             onChange={(value) => onGroupByChange(value as CostExplorerGroupBy)}
           />
-          <Input
-            icon="search"
-            value={searchQuery}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder={t("filterRows")}
-            aria-label={t("filterCostExplorerRows")}
-            className="min-w-55"
-          />
+          <div>
+            <Input
+              icon="search"
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={t("filterRows")}
+              aria-label={t("filterCostExplorerRows")}
+              className="min-w-55"
+            />
+          </div>
         </div>
       </div>
 

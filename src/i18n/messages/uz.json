@@ -4481,7 +4481,7 @@
     "spend7d": "7 kunlik xarajat",
     "avgCostPerRequest": "Soʻrov boshiga oʻrtacha xarajat",
     "noCostDataDescription": "Xarajat maʼlumotlari bu yerda koʻrinishi uchun soʻrovlar yuborishni boshlang. Barcha provayderlar uchun xarajatlar avtomatik ravishda kuzatiladi.",
-    "spendToday": "Bugungi xarajat",
+    "spendToday": "1 kunlik xarajat",
     "overviewLoadFailed": "Xarajatlar sharhini yuklab boʻlmadi",
     "overviewDescription": "Barcha ulangan provayderlar va modellar boʻyicha real vaqt rejimidagi xarajatlar taqsimoti",
     "providerShare": "Provayder ulushi",

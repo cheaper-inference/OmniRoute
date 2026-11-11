@@ -4481,7 +4481,7 @@
     "spend7d": "Poraba v 7 dneh",
     "avgCostPerRequest": "Povprečni strošek na zahtevo",
     "noCostDataDescription": "Začnite pošiljati zahteve, da se tukaj prikažejo podatki o stroških. Stroški se samodejno spremljajo za vse ponudnike.",
-    "spendToday": "Današnja poraba",
+    "spendToday": "Poraba za 1 dan",
     "overviewLoadFailed": "Pregleda stroškov ni bilo mogoče naložiti",
     "overviewDescription": "Razčlenitev porabe v realnem času za vse povezane ponudnike in modele",
     "providerShare": "Delež po ponudnikih",
