@@ -16,6 +16,7 @@ import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
 
@@ -311,9 +312,7 @@ export default function TokensPage() {
             <p className="text-sm text-text-muted">{t("tokensTokenBalance")}</p>
             <p className="text-4xl font-bold mt-1">{balance.toLocaleString(locale)}</p>
           </div>
-          <div className="text-6xl opacity-20" aria-hidden="true">
-            🪙
-          </div>
+          <Icon name="toll" size={60} className="shrink-0 opacity-20" />
         </div>
       </Card>
 
