@@ -1,0 +1,1 @@
+- **feat(routing):** opt-in `OMNIROUTE_FAILURE_WINDOW_PENALTY=true` sorts an account behind healthy ones for a fixed 90 s window after an attributable 5xx failure, without a cooldown; the default is unchanged.
