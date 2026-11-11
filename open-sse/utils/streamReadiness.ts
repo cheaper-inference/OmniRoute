@@ -857,6 +857,13 @@ export function prependBufferedChunks(
   });
 }
 
+function isDeadlineAbortReason(reason: unknown): boolean {
+  return (
+    reason instanceof Error &&
+    (reason.name === "TimeoutError" || reason.name === "BodyTimeoutError")
+  );
+}
+
 class StreamReadinessReadTimeout extends Error {
   constructor() {
     super("STREAM_READINESS_TIMEOUT");
@@ -894,6 +901,8 @@ export async function ensureStreamReadiness(
     log?: StreamReadinessLogger | null;
     /** Brief content check after the first lifecycle event; expiry hands off, never aborts. */
     contentProbeMs?: number;
+    /** Request signal. An abort on it that is not a deadline is a client disconnect, not a stall. */
+    signal?: AbortSignal | null;
   }
 ): Promise<StreamReadinessResult> {
   if (!response.body || options.timeoutMs <= 0) return { ok: true, response };
@@ -1011,6 +1020,33 @@ export async function ensureStreamReadiness(
           // pending read, including a rejection; starting another read would lose a chunk.
           handedOffReader = true;
           return { ok: true, response: buildReadyResponse() };
+        }
+        // A departed client is not an upstream stall: report 499, not a 504. Deadlines
+        // (TimeoutError / BodyTimeoutError) are gateway-owned and stay on the stall path.
+        // Without a signal, only a bare AbortError can be told apart.
+        const signal = options.signal;
+        const clientAborted = signal
+          ? signal.aborted && !isDeadlineAbortReason(signal.reason)
+          : error instanceof Error && error.name === "AbortError";
+        if (clientAborted) {
+          const reason = "Client disconnected before the stream produced a non-ping SSE event";
+          options.log?.debug?.(
+            "STREAM",
+            `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
+          );
+          return {
+            ok: false,
+            reason,
+            classificationReason: reason,
+            code: "client_disconnected",
+            type: "client_disconnected",
+            response: createErrorResponse(
+              499,
+              reason,
+              "client_disconnected",
+              "client_disconnected"
+            ),
+          };
         }
         // A source stream that errors before its first non-ping event (e.g. an
         // executor watchdog giving up on a stalled upstream) must say so instead of
