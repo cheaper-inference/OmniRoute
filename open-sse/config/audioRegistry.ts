@@ -864,6 +864,22 @@ function claimsPrefixedModel(
   );
 }
 
+/** Phase 1 and 1.5: match `<providerId>/` or the short `<alias>/` prefix in the hardcoded registry. */
+function matchPrefixedProvider(
+  modelStr: string,
+  registry: Record<string, AudioProvider>,
+  prefixOf: (providerId: string) => string | null
+): { provider: string; model: string } | null {
+  for (const [providerId, config] of Object.entries(registry)) {
+    const prefix = prefixOf(providerId);
+    if (!prefix || !modelStr.startsWith(prefix + "/")) continue;
+    if (claimsPrefixedModel(registry, config, modelStr)) {
+      return { provider: providerId, model: modelStr.slice(prefix.length + 1) };
+    }
+  }
+  return null;
+}
+
 function parseAudioModel(
   modelStr: string | null,
   registry: Record<string, AudioProvider>,
@@ -872,25 +888,17 @@ function parseAudioModel(
   if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   // Phase 1: prefix match in hardcoded registry
-  for (const [providerId, config] of Object.entries(registry)) {
-    if (modelStr.startsWith(providerId + "/")) {
-      if (claimsPrefixedModel(registry, config, modelStr)) {
-        return { provider: providerId, model: modelStr.slice(providerId.length + 1) };
-      }
-    }
-  }
+  const byId = matchPrefixedProvider(modelStr, registry, (providerId) => providerId);
+  if (byId) return byId;
 
   // Phase 1.5: prefix match against the short provider alias the catalog itself
   // advertises (e.g. "el/eleven_multilingual_v2" for elevenlabs) when it differs
   // from the canonical registry key already tried in Phase 1.
-  for (const [providerId, config] of Object.entries(registry)) {
+  const byAlias = matchPrefixedProvider(modelStr, registry, (providerId) => {
     const alias = getProviderAlias(providerId);
-    if (alias && alias !== providerId && modelStr.startsWith(alias + "/")) {
-      if (claimsPrefixedModel(registry, config, modelStr)) {
-        return { provider: providerId, model: modelStr.slice(alias.length + 1) };
-      }
-    }
-  }
+    return alias && alias !== providerId ? alias : null;
+  });
+  if (byAlias) return byAlias;
 
   // Phase 2: bare model lookup in hardcoded registry
   for (const [providerId, config] of Object.entries(registry)) {
