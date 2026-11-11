@@ -345,6 +345,12 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
+/** A top-level `thread` object marks a Claude message-threads delta body. */
+function carriesMessageThread(body: unknown): boolean {
+  const thread = (body as { thread?: unknown } | null)?.thread;
+  return thread !== null && typeof thread === "object" && !Array.isArray(thread);
+}
+
 /**
  * Translate a request between protocols, applying target-specific compatibility rules and
  * enforcing attachment preservation for CI dispatch.
@@ -378,6 +384,20 @@ export function translateRequest(
     copilotClient?: boolean;
   }
 ) {
+  // Only Anthropic holds message-thread state. A `thread` delta (the message-threads beta) omits
+  // the earlier turns, so a translated route would answer with no history. Refuse it with the
+  // code that makes Claude Code resend the full conversation. Same gate as the tool additions.
+  if (
+    sourceFormat === FORMATS.CLAUDE &&
+    !(targetFormat === FORMATS.CLAUDE && acceptsInlineToolAdditions(provider)) &&
+    carriesMessageThread(body)
+  ) {
+    throw Object.assign(new Error("message threads are not supported on translated routes"), {
+      statusCode: 400,
+      errorType: "invalid_request_error",
+      details: { error_code: "thread_unsupported_request" },
+    });
+  }
   // Claude Code inline-tools `tool_addition` blocks only reach Anthropic-native targets;
   const originalCIMedia =
     provider === "cheaperinference" || provider === "cinf" ? requestMediaRefs(body) : null;
@@ -408,8 +428,13 @@ export function translateRequest(
     ["opencode-go", "opencode-zen"].includes(normalizedProvider) ||
     /glm|zhipu|z-ai/i.test(normalizedModel);
 
-  // Phase 2: Apply thinking budget control before normalization
-  result = applyThinkingBudget(result);
+  // Phase 2: Apply thinking budget control before normalization. Gemini targets receive
+  // the model so a native thinkingLevel reaches the translator instead of a lossy budget.
+  // Claude -> Antigravity is excluded: claude-to-openai drops the level on the hub path.
+  const readsNativeGeminiLevel =
+    targetFormat === FORMATS.GEMINI ||
+    (targetFormat === FORMATS.ANTIGRAVITY && sourceFormat !== FORMATS.CLAUDE);
+  result = applyThinkingBudget(result, null, readsNativeGeminiLevel ? normalizedModel : undefined);
   // Explicit reasoning-routing policies are final. The marker is internal and is
   // consumed here before any provider translation can see it.
   result = applyReasoningRuleDirective(result);

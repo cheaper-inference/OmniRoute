@@ -1003,6 +1003,29 @@
       "stream": "https://api.chatanywhere.org/v1/chat/completions"
     }
   },
+  "chatgpt": {
+    "format": "openai-responses",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.openai.com/v1/responses",
+      "stream": "https://api.openai.com/v1/responses"
+    }
+  },
   "chatgpt-web": {
     "format": "openai",
     "headers": {

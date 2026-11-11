@@ -14,6 +14,7 @@ const specializedCredentialExecutors: Record<string, CredentialExecutorLoader> =
   kiro: () => import("./kiro.ts").then((m) => new m.KiroExecutor()),
   "amazon-q": () => import("./kiro.ts").then((m) => new m.KiroExecutor("amazon-q")),
   codex: () => import("./codex.ts").then((m) => new m.CodexExecutor()),
+  chatgpt: () => import("./chatgpt.ts").then((m) => new m.ChatGptExecutor()),
   cursor: () => import("./cursor.ts").then((m) => new m.CursorExecutor()),
   cu: () => import("./cursor.ts").then((m) => new m.CursorExecutor()),
   "cursor-api": () => import("./cursor.ts").then((m) => new m.CursorExecutor("cursor-api")),

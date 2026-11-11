@@ -104,6 +104,7 @@ export function TopBarControls({
 
       {/* Status filter */}
       <Select
+        native
         aria-label={t("filterStatus")}
         value={filters.status ?? ""}
         onChange={(e) => onStatusChange((e.target.value as ListFilters["status"]) || undefined)}

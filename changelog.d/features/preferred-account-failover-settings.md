@@ -1,0 +1,1 @@
+- **feat(settings):** Configure preferred-account response-start failover across all chat providers with a 20 s default, 5 s Antigravity / 12 s Gemini 3.8 heuristics and per-provider/per-model overrides in Settings → Resilience.
