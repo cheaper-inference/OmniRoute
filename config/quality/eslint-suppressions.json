@@ -1358,24 +1358,9 @@
       "count": 1
     }
   },
-  "src/lib/skills/a2a.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
-  "src/lib/skills/builtin/browser.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/lib/skills/githubCollector.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "src/lib/skills/hybrid.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 7
     }
   },
   "src/lib/skills/memoryBuiltins.ts": {

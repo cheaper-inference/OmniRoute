@@ -1,0 +1,1 @@
+- **refactor(skills):** remove four unused skills-module files (`hybrid`, `a2a`, `custom`, `builtin/browser`); no production code imported them.
