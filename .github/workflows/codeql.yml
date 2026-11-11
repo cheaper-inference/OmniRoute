@@ -1,85 +1,100 @@
-name: CodeQL producer
-# Activate only after reviewed Default Setup readback. This workflow is called
-# from CI so admission cannot outrun its matrix. No independent PR trigger.
+name: CodeQL SARIF diagnostic
+# Temporary diagnostic branch only. This replacement is not a landing candidate.
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      admission:
-        type: boolean
+      source_sha:
+        description: Exact source commit whose failed SARIF must be reproduced
         required: true
-      ci-workflow-ref:
         type: string
-        required: false
-        default: ""
-      ci-workflow-sha:
-        type: string
-        required: false
-        default: ""
 permissions:
   contents: read
+concurrency:
+  group: codeql-sarif-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  analyze:
-    name: Analyze (${{ matrix.language }})
+  diagnose:
+    if: ${{ github.repository == 'cheaper-inference/OmniRoute' && github.actor == 'diegosouzapw' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: read
       actions: read
-      # GitHub supports SARIF uploads for pull_request with a downgraded fork token.
-      # Do not enable write tokens or repository secrets for forks.
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [actions, c-cpp, javascript-typescript, python]
-        build-mode: [none]
-        include:
-          - language: actions
-            category: /language:actions
-          - language: c-cpp
-            category: /language:c-cpp
-          - language: javascript-typescript
-            category: /language:javascript-typescript
-          - language: python
-            category: /language:python
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          package-manager-cache: false
-          node-version: "24"
-      - name: Require reviewed scanner activation and finite target
-        run: node scripts/quality/codeql-producer.mjs preflight
-      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
-      # No project install/build or external secrets; extraction uses none for all languages.
-      - id: analyze
-        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
-        with:
-          category: ${{ matrix.category }}
-          wait-for-processing: true
-      # The action can warn and continue when processing lookup fails. Record its
-      # actual upload ID; the dependent admission checks processing again, fail-closed.
-      - name: Record this exact upload
-        if: ${{ inputs.admission }}
+      - name: Validate the finite source identity
         env:
-          CI_WORKFLOW_REF: ${{ inputs.ci-workflow-ref }}
-          CI_WORKFLOW_SHA: ${{ inputs.ci-workflow-sha }}
-          CODEQL_LANGUAGE: ${{ matrix.language }}
-          CODEQL_CATEGORY: ${{ matrix.category }}
-          CODEQL_BUILD_MODE: ${{ matrix.build-mode }}
-          CODEQL_SARIF_ID: ${{ steps.analyze.outputs.sarif-id }}
-        run: node scripts/quality/codeql-producer.mjs write
-      - name: Retain this language upload receipt
-        if: ${{ inputs.admission }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          test "$SOURCE_SHA" = ae9352c54b6fc547f05fc356df5c17f9788669b4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          name: codeql-upload-${{ github.run_id }}-${{ matrix.language }}-${{ github.run_attempt }}
-          path: .artifacts/codeql-uploads/codeql-${{ matrix.language }}-${{ github.run_attempt }}.json
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - name: Bind the actual analyzed source
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p .artifacts/codeql-diagnostic
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          Path('.artifacts/codeql-diagnostic/identity.json').write_text(json.dumps({
+              'sourceCommit': os.environ['SOURCE_SHA'],
+              'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'workflowCommit': os.environ['WORKFLOW_SHA'],
+              'purpose': 'Inspect original SARIF after failed ingestion; no Code Scanning upload',
+              'qualityAcceptance': False,
+          }, indent=2) + '\n')
+          PY
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066
+        with:
+          languages: javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066
+        with:
+          category: /language:javascript-typescript
+          output: .artifacts/codeql-diagnostic/sarif
+          upload: never
+          wait-for-processing: false
+      - name: Summarize original SARIF without suppressing results
+        if: ${{ always() }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path('.artifacts/codeql-diagnostic')
+          rows = []
+          for path in sorted((out / 'sarif').glob('*.sarif')):
+              raw = path.read_bytes()
+              document = json.loads(raw)
+              runs = []
+              for run in document.get('runs', []):
+                  results = run.get('results', [])
+                  runs.append({
+                      'rules': len(run['tool']['driver'].get('rules', [])),
+                      'extensions': [{'name': e.get('name'), 'rules': len(e.get('rules', []))}
+                                     for e in run['tool'].get('extensions', [])],
+                      'results': len(results),
+                      'maxRelatedLocations': max((len(r.get('relatedLocations', [])) for r in results), default=0),
+                      'maxThreadFlowLocations': max((sum(len(t.get('locations', []))
+                          for c in r.get('codeFlows', []) for t in c.get('threadFlows', []))
+                          for r in results), default=0),
+                      'invocations': [{k: i.get(k) for k in ['executionSuccessful', 'exitCode',
+                          'toolExecutionNotifications', 'toolConfigurationNotifications']}
+                          for i in run.get('invocations', [])],
+                  })
+              rows.append({'path': str(path), 'bytes': len(raw),
+                           'sha256': hashlib.sha256(raw).hexdigest(), 'runs': runs})
+          (out / 'summary.json').write_text(json.dumps({'files': rows, 'qualityAcceptance': False}, indent=2) + '\n')
+          assert rows, 'No original SARIF was generated'
+          PY
+      - name: Retain diagnostic evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: codeql-sarif-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .artifacts/codeql-diagnostic
           if-no-files-found: error
           retention-days: 14
