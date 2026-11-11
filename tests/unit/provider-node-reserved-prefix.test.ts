@@ -254,10 +254,11 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
   // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
   // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
+  // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
   // ZCode native accounts (#19307) register four tariff ids plus their four aliases
   // (zcode-start/zc-start, zcode-individual/zc-individual, zcode-cn-start/zc-cn-start,
-  // zcode-cn-individual/zc-cn-individual): +8 (443 -> 451). Measured on the merged tree.
-  assert.equal(RESERVED_PREFIX_COUNT, 451);
+  // zcode-cn-individual/zc-cn-individual): +8 (444 -> 452). Measured on the merged tree.
+  assert.equal(RESERVED_PREFIX_COUNT, 452);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("zcode-start"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
@@ -268,6 +269,7 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("empiriolabs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("megabrain"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("mb"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("chatgpt"), true);
 });
 
 test("notrack-web registry id and alias stay reserved", () => {

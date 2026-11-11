@@ -196,6 +196,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
     "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
+    // #15201: the ChatGPT sign-in session route reads the target connection row twice
+    // (existing-registration check on start, and again on completion) behind management
+    // auth — state reads, never connection selection or dispatch (class C).
+    "src/app/api/oauth/chatgpt/session/route.ts": 2,
     // Management-authenticated reauthorization validates the named account; no model dispatch.
     "src/app/api/oauth/zcode/login/start/route.ts": 1,
     "src/app/api/oauth/codex/import/route.ts": 1,
@@ -244,6 +248,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the handlers it delegates to carry the auxiliary-lease fence themselves. It
     // never selects a connection to serve a request, so it stays class C.
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
+    // #15201: connection-local usage summary looks the row up by id behind management
+    // auth to bound the result to a real ChatGPT connection — a state read (class C).
+    "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
@@ -338,6 +345,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // lookup behind the health endpoint, never connection selection or dispatch (class C).
     "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
+    // #18864: after a confirmed GLM reset-card redemption (whose caller already passed the
+    // auxiliary-lease gate) the row is re-read only to confirm the captured cooldown is
+    // unchanged before the compare-and-clear — a state read, never connection selection or
+    // dispatch, so class C (same shape as resetCreditCooldownRelease.ts).
+    "src/lib/usage/glmResetCardRecovery.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
