@@ -37,6 +37,9 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/chatgpt-account-routing.test.ts",
+      "tests/unit/chatgpt-siwc-lifecycle-contract-15201.test.ts",
+      "tests/unit/chatgpt-siwc.test.ts",
       "tests/unit/codex-reset-credit-autospend.test.ts",
       "tests/unit/ci-payload-quota-scope.test.ts",
       "tests/unit/combo-multimodal-input-routing.test.ts",
@@ -81,6 +84,7 @@
       "tests/unit/combo-safety-stop.test.ts",
       "tests/unit/combo-live-connection-id-18374.test.ts",
       "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
+      "tests/unit/combo-allowed-connections-limit.test.ts",
       "tests/unit/model-family-fallback-eligibility.test.ts",
       "tests/unit/noauth-autocombo-lockout-7623.test.ts",
       "tests/unit/auth-opencode-zen-noauth-fallback.test.ts",
@@ -294,6 +298,7 @@
       "tests/unit/chatcore-telemetry-helpers.test.ts",
       "tests/unit/chatcore-translation-paths.test.ts",
       "tests/unit/chatcore-upstream-timeouts.test.ts",
+      "tests/unit/billable-tokens-reasoning-subset.test.ts",
       "tests/unit/check-error-helper.test.ts",
       "tests/unit/check-route-guard-membership.test.ts",
       "tests/unit/check-test-discovery.test.ts",
@@ -742,6 +747,7 @@
       "tests/unit/provider-error-rules-opt-in-flags-16797.test.ts",
       "tests/unit/17132-quota-share-block-per-key.test.ts",
       "tests/unit/18633-credit-exhaustion-parks-connection.test.ts",
+      "tests/unit/glm-reset-card-recovery.test.ts",
       "tests/unit/combo-agentic-stall-failover.test.ts",
       "tests/unit/quota-share-public-code-17132.test.ts",
       "tests/unit/request-scoped-400.test.ts",

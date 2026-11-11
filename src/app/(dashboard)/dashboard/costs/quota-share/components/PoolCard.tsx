@@ -155,7 +155,7 @@ export default function PoolCard({
           ))}
         </div>
       ) : (
-        <div className="text-[11px] text-text-muted italic mb-3">
+        <div className="text-xs text-text-muted italic mb-3">
           {t("multiDimensionLabel")} — {t("loading")}
         </div>
       )}
