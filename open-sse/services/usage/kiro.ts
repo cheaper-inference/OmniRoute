@@ -26,10 +26,9 @@ import {
 
 type JsonRecord = Record<string, unknown>;
 
-// Retired codewhisperer.us-east-1 default: Kiro's 2026-11-09 client-version gate
-// (#19607, kirodotdev/Kiro#11335) rejects the legacy host; GetUsageLimits rides the
-// regional Amazon Q endpoint like every other Kiro surface. Env override kept for
-// operators who pinned a custom base URL.
+// GetUsageLimits uses the regional Amazon Q host like the rest of the Kiro integration
+// (#19607; previously codewhisperer.us-east-1). Env override kept for operators who
+// pinned a custom base URL.
 const CODEWHISPERER_BASE_URL =
   process.env.OMNIROUTE_CODEWHISPERER_BASE_URL ?? "https://q.us-east-1.amazonaws.com";
 
@@ -322,7 +321,7 @@ export async function getKiroUsage(accessToken?: string, providerSpecificData?: 
 
     // The RUNTIME region is the profileArn region (us-east-1 / eu-central-1), never the IdC token
     // region. Route GetUsageLimits to that region's regional Amazon Q host so quota resolves for
-    // cross-region IdC (#19607: the legacy codewhisperer.us-east-1 host is retired).
+    // cross-region IdC.
     const region = resolveKiroRuntimeRegion({ region: storedRegion, profileArn });
     const usageBaseUrl = region === "us-east-1" ? CODEWHISPERER_BASE_URL : kiroRuntimeHost(region);
     const qBaseUrl = `https://q.${region}.amazonaws.com`;

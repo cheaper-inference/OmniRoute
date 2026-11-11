@@ -15,9 +15,8 @@ import { KiroExecutor } from "../../open-sse/executors/kiro.ts";
 // body can't be fixed by resending it elsewhere), every Builder ID
 // connection's first request always failed here instead of ever reaching
 // the host that would have served it.
-// 2026-11-10 (#19607) — the fallback host is q.us-east-1.amazonaws.com;
-// the legacy codewhisperer.us-east-1 special case was retired with Kiro's
-// client-version enforcement (kirodotdev/Kiro#11335).
+// Since #19607 the fallback host is q.us-east-1.amazonaws.com (the host the
+// current kiro-cli uses) instead of codewhisperer.us-east-1.
 
 function jsonResponse(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {

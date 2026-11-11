@@ -52,7 +52,7 @@ try {
 assert.ok(captured.length > 0, "usage fetcher must have issued at least one request");
 assert.ok(
   captured.every((u) => !u.includes("codewhisperer.")),
-  `default usage routing must avoid the retired codewhisperer host; got ${JSON.stringify(captured)}`
+  `default usage routing must avoid the legacy codewhisperer host; got ${JSON.stringify(captured)}`
 );
 assert.ok(
   captured.some((u) => u.startsWith("https://q.us-east-1.amazonaws.com")),

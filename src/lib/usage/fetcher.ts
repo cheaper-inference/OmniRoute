@@ -424,8 +424,7 @@ async function getQoderUsage(accessToken) {
  */
 async function getKiroUsage(accessToken: string) {
   try {
-    // Regional Amazon Q host — the legacy codewhisperer.us-east-1 surface is retired
-    // and 403s under Kiro's client-version gate (#19607, kirodotdev/Kiro#11335).
+    // Regional Amazon Q host, matching the rest of the Kiro integration (#19607).
     const response = await fetch("https://q.us-east-1.amazonaws.com/getUserCredits", {
       method: "GET",
       headers: {

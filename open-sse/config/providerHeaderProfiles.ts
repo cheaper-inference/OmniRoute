@@ -443,14 +443,17 @@ export function resetCodeBuddyCnVersionCache(): void {
   codeBuddyVersionInFlight = null;
 }
 
-// Kiro enforces a client-version floor since 2026-11-09 (kirodotdev/Kiro#11335):
-// clients older than CLI 1.28.2 / IDE 0.11.133 get
-// 403 "This version of Kiro is no longer supported" on every inference call
-// (#19607). `kiro-ide/1.0.0` was far below the floor; identify as a current
-// kiro-cli release instead. Keep the version comfortably above the next floor
-// too (CLI 2.5.0 / IDE 0.12.291, effective 2027-01-15 — kirodotdev/Kiro#11966).
-export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-cli/3.1.0";
-export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-cli/3.1.0";
+// Kiro's client-version gate (since 2026-11-09, kirodotdev/Kiro#11335; the floor rises to
+// IDE 0.12.291 on 2027-01-15, kirodotdev/Kiro#11966) answers inference with
+// 403 "This version of Kiro is no longer supported" (#19607). It reads the User-Agent only.
+// Live on 2026-11-10, q.us-east-1 rejected both `kiro-ide/1.0.0` and `kiro-cli/3.1.0` and
+// served this Kiro IDE identity (the IDE's own User-Agent shape, without its per-machine
+// suffix). The model catalog (kiroModels.ts) shares KIRO_IDE_VERSION so the two cannot drift.
+export const KIRO_IDE_VERSION = "1.4.121";
+export const KIRO_SDK_USER_AGENT =
+  "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 " +
+  `api/codewhispererstreaming#1.0.0 m/E KiroIDE-${KIRO_IDE_VERSION}`;
+export const KIRO_AMZ_USER_AGENT = `aws-sdk-js/1.0.0 KiroIDE-${KIRO_IDE_VERSION}`;
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 

@@ -598,9 +598,13 @@ export function classifyProviderError(
     // This is a recoverable configuration issue, not a ban: the account still works in Kiro IDE.
     // Do NOT classify as FORBIDDEN (which bans permanently). Treat as PROJECT_ROUTE_ERROR
     // so the connection stays active and can be retried after profile discovery (#10725).
+    // Kiro's client-version gate (#19607) — 403 "This version of Kiro is no longer supported"
+    // rejects the client identity (User-Agent), not the account: the same token succeeds
+    // once the request carries a supported identity, so it gets the same non-ban handling.
     const isKiroProfile403 =
       (p === "kiro" || p === "amazon-q") &&
-      bodyStr.includes("User is not authorized to make this call");
+      (bodyStr.includes("User is not authorized to make this call") ||
+        bodyStr.includes("This version of Kiro is no longer supported"));
     if (isKiroProfile403) {
       return PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR;
     }

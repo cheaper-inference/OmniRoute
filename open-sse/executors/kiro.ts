@@ -328,9 +328,8 @@ const KIRO_ENDPOINT_FALLBACK_STATUSES = new Set([401, 403, 404]);
  * `generateAssistantResponse` from the regional Amazon Q host —
  * confirmed both against a live Builder ID kiro-cli session and against the
  * production accounts that were surfacing this 400 to end users.
- * (2026-11-10, #19607: the fallback host is `q.us-east-1.amazonaws.com`;
- * `codewhisperer.us-east-1.amazonaws.com` was retired with Kiro's client-version
- * enforcement, kirodotdev/Kiro#11335.)
+ * (Since #19607 that regional host is `q.us-east-1.amazonaws.com`, the host the
+ * current kiro-cli uses, instead of `codewhisperer.us-east-1.amazonaws.com`.)
  *
  * A plain 400 is deliberately excluded from KIRO_ENDPOINT_FALLBACK_STATUSES
  * above (a malformed request body cannot be fixed by resending it to another
@@ -461,24 +460,22 @@ export class KiroExecutor extends BaseExecutor {
       typeof credentials.providerSpecificData?.authMethod === "string"
         ? credentials.providerSpecificData.authMethod
         : undefined;
-    // All auth methods ride the regional Amazon Q host (q.<region>) — us-east-1 included
-    // since the legacy codewhisperer host was retired (#19607). API keys additionally
-    // normalize their region through the Q profile-region allowlist. One persisted
-    // region, no surface rotation.
+    // Every auth method uses the regional Amazon Q host (q.<region>), us-east-1 included
+    // (#19607) — the host the current kiro-cli uses. API keys additionally normalize their
+    // region through the Q profile-region allowlist. One persisted region, no surface rotation.
     const runtimeHost =
       authMethod === "api_key" ? kiroApiKeyRuntimeHost(region) : kiroRuntimeHost(region);
     const regionalUrl = `${runtimeHost}/generateAssistantResponse`;
 
-    // The Kiro branded gateway (runtime.*.kiro.dev) only exists for us-east-1 and is
-    // the ONLY surface that still authenticates SSO-issued (builder-id/IdC) tokens
-    // after the 2026-11-09 client-version enforcement (#19607, live-verified): the
-    // AWS-native hosts — codewhisperer AND q.<region> — answer the version-gate 403
-    // for those tokens regardless of User-Agent. IdC therefore rides the gateway
-    // first like builder-id/social, keeping the regional Q host as fallback (an
-    // eu-central-1 IdC profile has no gateway — only the regional host serves it).
-    // API keys and external-IdP org tokens remain gateway-ineligible: the gateway
-    // rejects TokenType=API_KEY and org-IdP tokens outright (403 "bearer token invalid").
-    const isCodeWhispererOnly = authMethod === "api_key" || isExternalIdpAuthMethod(authMethod);
+    // The Kiro branded gateway (runtime.*.kiro.dev) is only used for us-east-1. It rejects
+    // TokenType=API_KEY and external-IdP org tokens (403 "bearer token invalid"), so those
+    // go straight to the regional Amazon Q host. IdC also stays on the regional host, as
+    // before #19607: Kiro's version gate checks the User-Agent, not the host, and
+    // q.us-east-1 served a real IdC completion with the Kiro IDE identity (live,
+    // 2026-11-10). Everything else tries the gateway first — the surface the native Kiro
+    // IDE talks to — and falls back to the regional host on an auth/profile-shaped failure.
+    const isCodeWhispererOnly =
+      authMethod === "api_key" || authMethod === "idc" || isExternalIdpAuthMethod(authMethod);
     const candidateUrls =
       region === "us-east-1" && !isCodeWhispererOnly
         ? ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse", regionalUrl]

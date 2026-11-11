@@ -59,13 +59,11 @@ export const KIRO_PROFILE_REGIONS = ["us-east-1", "eu-central-1"] as const;
  * CodeWhisperer / Amazon Q runtime host for a region. All regions — us-east-1
  * included — use the regional Amazon Q endpoint `q.{region}.amazonaws.com`.
  *
- * The legacy `codewhisperer.us-east-1.amazonaws.com` special case was retired with
- * the 2026-11-09 client-version enforcement (kirodotdev/Kiro#11335, #19607): the
- * current kiro-cli only embeds `runtime.*.kiro.dev` and `q.<region>.amazonaws.com`
- * and never talks to the codewhisperer host, which the gate now rejects with
- * 403 "This version of Kiro is no longer supported". SSO/social/IdC tokens
- * authenticate on the regional q.* host exactly like API keys already did
- * (see `kiroApiKeyRuntimeHost`).
+ * us-east-1 used the legacy `codewhisperer.us-east-1.amazonaws.com` host until #19607. The
+ * current kiro-cli (3.1.0) embeds only `runtime.*.kiro.dev` and `q.<region>.amazonaws.com`,
+ * so every region now follows it onto the regional Amazon Q host. This is not what fixes
+ * Kiro's 403 "This version of Kiro is no longer supported": that gate checks the
+ * User-Agent (see KIRO_SDK_USER_AGENT), and with a supported one both hosts pass it.
  */
 export function kiroRuntimeHost(region: string): string {
   return `https://q.${region}.amazonaws.com`;

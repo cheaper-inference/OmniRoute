@@ -34,8 +34,7 @@ test("Kiro API key validator resolves profiles with bearer auth", async () => {
       return new Response(JSON.stringify({ models: [] }), { status: 200 });
     }
 
-    // Profile lookup rides the regional Amazon Q host since #19607 (the legacy
-    // codewhisperer.us-east-1 surface was retired with Kiro's client-version gate).
+    // Profile lookup uses the regional Amazon Q host since #19607 (was codewhisperer.us-east-1).
     assert.equal(String(url), "https://q.us-east-1.amazonaws.com");
     assert.equal(headers.Authorization, "Bearer ksk-valid");
     assert.equal(headers["x-amz-target"], "AmazonCodeWhispererService.ListAvailableProfiles");

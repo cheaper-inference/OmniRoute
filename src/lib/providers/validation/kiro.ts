@@ -1,4 +1,8 @@
 import { kiroApiKeyRuntimeHost } from "@omniroute/open-sse/services/kiroRegion.ts";
+import {
+  KIRO_AMZ_USER_AGENT,
+  KIRO_SDK_USER_AGENT,
+} from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 
 // Kiro runtime probe — falls back to a generateAssistantResponse call when an API key
 // cannot list profiles. Extracted from validation.ts (god-file decomposition) — top-level
@@ -49,6 +53,10 @@ export async function validateKiroApiKeyRuntimeProbe({
         Accept: "application/vnd.amazon.eventstream",
         "Amz-Sdk-Request": "attempt=1; max=3",
         "Amz-Sdk-Invocation-Id": crypto.randomUUID(),
+        // Same identity as inference: this probe is a real GenerateAssistantResponse call,
+        // so Kiro's version gate (#19607) 403s it without a supported User-Agent.
+        "User-Agent": KIRO_SDK_USER_AGENT,
+        "X-Amz-User-Agent": KIRO_AMZ_USER_AGENT,
       },
       body: JSON.stringify(body),
       signal: controller.signal,

@@ -5,13 +5,22 @@
  * (kirodotdev/Kiro#11335) with:
  *   403 "This version of Kiro is no longer supported. Please update to the latest
  *        version of Kiro to continue."
- * OmniRoute identified itself as `kiro-ide/1.0.0` (inference, credits, refresh) and
- * `KiroIDE-0.10.32` (model catalog) — both far below the floor. The same enforcement
- * retired the legacy `codewhisperer.us-east-1.amazonaws.com` runtime host: the current
- * kiro-cli only talks to `runtime.*.kiro.dev` and `q.<region>.amazonaws.com`.
+ * OmniRoute identified itself as `kiro-ide/1.0.0` (inference) and `KiroIDE-0.10.32`
+ * (model catalog) — both below the floor.
  *
- * These tests pin the three identities so a future UA/host drift fails loudly here
- * instead of as an upstream 403 in production.
+ * Live matrix, 2026-11-10, real IdC token, invalid model id so nothing is generated:
+ *   q.us-east-1             UA kiro-ide/1.0.0      -> 403 version gate
+ *   q.us-east-1             UA kiro-cli/3.1.0      -> 403 version gate
+ *   q.us-east-1             UA ...KiroIDE-1.4.121  -> passes (400 INVALID_MODEL_ID)
+ *   codewhisperer.us-east-1 UA ...KiroIDE-1.4.121  -> passes
+ *   runtime.us-east-1.kiro.dev, either UA          -> passes
+ * The gate reads `User-Agent` only (X-Amz-User-Agent swapped alone changes nothing) and
+ * does not need the machine-id suffix. A real completion on q.us-east-1 with the IDE
+ * User-Agent returned 200. Connections that only use q.<region> (api_key, external_idp,
+ * eu-central-1) therefore need the IDE identity; a kiro-cli identity is not enough.
+ *
+ * These tests pin the identities so a future drift fails here instead of as an
+ * upstream 403 in production.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -19,6 +28,10 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { KiroExecutor } from "../../open-sse/executors/kiro.ts";
+import {
+  classifyProviderError,
+  PROVIDER_ERROR_TYPES,
+} from "../../open-sse/services/errorClassifier.ts";
 import { kiroRuntimeHost } from "../../open-sse/services/kiroRegion.ts";
 import { fetchKiroAvailableModels } from "../../open-sse/services/kiroModels.ts";
 import {
@@ -28,15 +41,14 @@ import {
 } from "../../open-sse/config/providerHeaderProfiles.ts";
 
 /**
- * Lowest client version Kiro still serves (kirodotdev/Kiro#11335; the next floor,
- * CLI 1.28.2–2.5.0 / IDE 0.11.133–0.12.291, takes effect 2027-01-15 per
- * kirodotdev/Kiro#11966 — keep the pinned identities comfortably above it).
+ * Kiro IDE version floor to stay above: 0.11.133 since 2026-11-09 (kirodotdev/Kiro#11335),
+ * raised to 0.12.291 on 2027-01-15 (kirodotdev/Kiro#11966). Pin against the later one.
  */
-const MIN_SUPPORTED_CLI = [1, 28, 2];
+const NEXT_IDE_FLOOR = [0, 12, 291];
 
-/** Extract the `kiro-cli/<ver>` (or `KiroIDE-<ver>`-style) version from a UA string. */
-function uaVersion(ua: string): number[] | null {
-  const match = ua.match(/kiro-cli\/(\d+(?:\.\d+)*)/i) ?? ua.match(/KiroIDE-(\d+(?:\.\d+)*)/i);
+/** Extract the `KiroIDE-<ver>` version from a UA string. */
+function kiroIdeVersion(ua: string): number[] | null {
+  const match = ua.match(/KiroIDE-(\d+(?:\.\d+)*)/);
   return match ? match[1].split(".").map(Number) : null;
 }
 
@@ -115,92 +127,120 @@ async function captureExecuteRequests(
   return { urls, headers: capturedHeaders };
 }
 
-test("kiro service User-Agent identifies a supported kiro-cli version (>= 1.28.2)", () => {
-  const headers = getKiroServiceHeaders();
-  for (const ua of [KIRO_SDK_USER_AGENT, KIRO_AMZ_USER_AGENT]) {
-    const version = uaVersion(ua);
-    assert.ok(version, `UA must carry a version segment: ${ua}`);
-    assert.ok(
-      atLeast(version, MIN_SUPPORTED_CLI),
-      `UA version ${ua} is below Kiro's minimum supported CLI 1.28.2 (kirodotdev/Kiro#11335) — upstream answers 403`
+/** The exact 403 body Kiro returns to a client below its version floor (live, 2026-11-10). */
+const KIRO_VERSION_GATE_403 = {
+  message:
+    "This version of Kiro is no longer supported. Please update to the latest version of Kiro to continue.",
+  reason: "FEATURE_NOT_SUPPORTED",
+};
+
+test("version-gate 403 is a recoverable Kiro error, not a permanent ban", () => {
+  // The body blames the client version, not the account: the same token succeeds once the
+  // request carries a supported identity. FORBIDDEN would write the terminal banned /
+  // isActive:false state on the first occurrence (#19607 log: "banned (403) -- disabling
+  // permanently"), so the connection stayed dead even after the client was fixed.
+  for (const provider of ["kiro", "amazon-q"]) {
+    assert.equal(
+      classifyProviderError(403, KIRO_VERSION_GATE_403, provider),
+      PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR,
+      `${provider} version-gate 403 must not ban the connection`
     );
   }
-  assert.equal(headers["User-Agent"], KIRO_SDK_USER_AGENT);
 });
 
-test("kiro inference requests send the versioned User-Agent over the wire", async () => {
-  const { headers } = await captureExecuteRequests({
-    accessToken: "idc-token",
-    providerSpecificData: { authMethod: "idc", region: "us-east-1" },
-  });
-  const ua = String(headers["User-Agent"] ?? "");
-  const version = uaVersion(ua);
-  assert.ok(version, `executor must send a versioned User-Agent, got: ${ua}`);
-  assert.ok(atLeast(version, MIN_SUPPORTED_CLI), `executor UA below floor: ${ua}`);
+test("control: the version-gate wording on a non-Kiro oauth provider keeps FORBIDDEN", () => {
+  assert.equal(
+    classifyProviderError(403, KIRO_VERSION_GATE_403, "claude"),
+    PROVIDER_ERROR_TYPES.FORBIDDEN
+  );
 });
 
-test("kiroRuntimeHost never routes to the retired codewhisperer host in us-east-1", () => {
-  // The current kiro-cli embeds only runtime.*.kiro.dev and q.<region>.amazonaws.com;
-  // codewhisperer.us-east-1.amazonaws.com is the retired legacy surface the version
-  // gate rejects (#19607).
+test("kiro service User-Agent identifies a Kiro IDE release above the next version floor", () => {
+  // A kiro-cli identity is not enough: q.<region> answers the version-gate 403 to
+  // `kiro-cli/3.1.0` while it serves a Kiro IDE identity (live matrix in the header).
+  for (const ua of [KIRO_SDK_USER_AGENT, KIRO_AMZ_USER_AGENT]) {
+    const version = kiroIdeVersion(ua);
+    assert.ok(version, `UA must carry KiroIDE-<version>: ${ua}`);
+    assert.ok(
+      atLeast(version, NEXT_IDE_FLOOR),
+      `UA ${ua} is below the Kiro IDE 0.12.291 floor (kirodotdev/Kiro#11966)`
+    );
+  }
+  assert.equal(getKiroServiceHeaders()["User-Agent"], KIRO_SDK_USER_AGENT);
+});
+
+test("connections served only by q.<region> send the Kiro IDE User-Agent", async () => {
+  // api_key, external_idp and eu-central-1 never reach the branded gateway, so the
+  // User-Agent alone decides whether they pass the gate.
+  const cases: Credentials[] = [
+    { apiKey: "ksk_test", providerSpecificData: { authMethod: "api_key", region: "us-east-1" } },
+    {
+      accessToken: "org-token",
+      providerSpecificData: { authMethod: "external_idp", region: "us-east-1" },
+    },
+    {
+      accessToken: "idc-token",
+      providerSpecificData: { authMethod: "idc", region: "eu-central-1" },
+    },
+  ];
+  for (const credentials of cases) {
+    const { urls, headers } = await captureExecuteRequests(credentials);
+    const label = JSON.stringify(credentials.providerSpecificData);
+    assert.ok(
+      urls.every((u) => /^https:\/\/q\.[a-z0-9-]+\.amazonaws\.com\//.test(u)),
+      `${label} must use the regional Amazon Q host, got ${JSON.stringify(urls)}`
+    );
+    const ua = String(headers["User-Agent"] ?? "");
+    const version = kiroIdeVersion(ua);
+    assert.ok(version && atLeast(version, NEXT_IDE_FLOOR), `${label} sent User-Agent: ${ua}`);
+  }
+});
+
+test("API-key import probe sends the Kiro IDE User-Agent", async () => {
+  // The probe is a real GenerateAssistantResponse call, so the version gate applies to it.
+  // Without a supported User-Agent a valid key gets the gate 403, which the probe reports
+  // as "Invalid Kiro API key or AWS region".
+  const { validateKiroApiKeyRuntimeProbe } =
+    await import("../../src/lib/providers/validation/kiro.ts");
+  const originalFetch = globalThis.fetch;
+  let probeUa = "";
+  globalThis.fetch = (async (_url: URL | string, init?: RequestInit) => {
+    const headers = (init?.headers ?? {}) as Record<string, string>;
+    probeUa = String(headers["User-Agent"] ?? headers["user-agent"] ?? "");
+    return new Response(new ReadableStream(), { status: 200 });
+  }) as typeof fetch;
+  try {
+    await validateKiroApiKeyRuntimeProbe({ apiKey: "ksk_test", region: "us-east-1" });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  const version = kiroIdeVersion(probeUa);
+  assert.ok(version && atLeast(version, NEXT_IDE_FLOOR), `probe sent User-Agent: ${probeUa}`);
+});
+
+test("kiroRuntimeHost uses the regional Amazon Q host in us-east-1, like kiro-cli 3.1.0", () => {
+  // kiro-cli 3.1.0 embeds only runtime.*.kiro.dev and q.<region>.amazonaws.com. The
+  // codewhisperer host still answers, but OmniRoute follows the current client's hosts.
   assert.equal(
     kiroRuntimeHost("us-east-1"),
     "https://q.us-east-1.amazonaws.com",
-    "us-east-1 runtime must use the regional Amazon Q host, not the retired codewhisperer host"
+    "us-east-1 runtime must use the regional Amazon Q host"
   );
   assert.equal(kiroRuntimeHost("eu-central-1"), "https://q.eu-central-1.amazonaws.com");
 });
 
-test("idc connection in us-east-1 tries the branded gateway first, regional Q as fallback", async () => {
-  // Live-verified 2026-11-10 (#19607): AWS-native hosts (codewhisperer AND q.us-east-1)
-  // reject SSO-issued tokens with the version-gate 403 regardless of User-Agent; the
-  // branded runtime.us-east-1.kiro.dev gateway authenticates the same IdC token and
-  // streams a real completion. IdC inference must therefore ride the gateway first
-  // exactly like builder-id/social, keeping the regional Q host as the fallback.
+test("idc connection in us-east-1 uses only the regional Amazon Q host", async () => {
+  // The gate is User-Agent based, not host based: with the Kiro IDE identity a real IdC
+  // completion returned 200 from q.us-east-1 (live, 2026-11-10). IdC keeps its pre-#19607
+  // single-surface routing; the branded gateway is not needed to pass the gate.
   const { urls } = await captureExecuteRequests({
     accessToken: "idc-token",
     providerSpecificData: { authMethod: "idc", region: "us-east-1" },
   });
-  // Success on the first candidate means exactly one URL — the gateway.
-  assert.deepEqual(urls, ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse"]);
+  assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
 });
 
-test("idc connection falls back to the regional Q host when the gateway rejects auth", async () => {
-  const executor = new KiroExecutor();
-  executor.transformEventStreamToSSE = () =>
-    new Response("data: [DONE]\n\n", {
-      status: 200,
-      headers: { "Content-Type": "text/event-stream" },
-    });
-  const originalFetch = globalThis.fetch;
-  const urls: string[] = [];
-  globalThis.fetch = (async (url: URL | string) => {
-    urls.push(String(url));
-    if (String(url).includes("runtime.us-east-1.kiro.dev")) {
-      return new Response(JSON.stringify({ message: "bearer token invalid" }), { status: 403 });
-    }
-    return new Response("ok", { status: 200 });
-  }) as typeof fetch;
-  try {
-    await executor.execute({
-      model: "kiro-model",
-      body: { conversationState: {} },
-      stream: true,
-      credentials: {
-        accessToken: "idc-token",
-        providerSpecificData: { authMethod: "idc", region: "us-east-1" },
-      },
-    } as Parameters<KiroExecutor["execute"]>[0]);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-  assert.deepEqual(urls, [
-    "https://runtime.us-east-1.kiro.dev/generateAssistantResponse",
-    "https://q.us-east-1.amazonaws.com/generateAssistantResponse",
-  ]);
-});
-
-test("kiro catalog fingerprint UA carries a supported IDE version", async () => {
+test("kiro catalog and inference advertise the same Kiro IDE version", async () => {
   let catalogUa = "";
   const fetchImpl = (async (_url: URL | string, init?: RequestInit) => {
     const headers = (init?.headers ?? {}) as Record<string, string>;
@@ -215,19 +255,17 @@ test("kiro catalog fingerprint UA carries a supported IDE version", async () => 
     providerSpecificData: { authMethod: "idc", region: "us-east-1", clientId: "abc" },
     fetchImpl,
   });
-  const match = catalogUa.match(/KiroIDE-(\d+(?:\.\d+)*)/i);
-  assert.ok(match, `catalog UA must carry KiroIDE-<version>, got: ${catalogUa}`);
-  const version = match[1].split(".").map(Number);
-  // IDE floor is 0.11.133 (kirodotdev/Kiro#11335)
-  assert.ok(
-    atLeast(version, [0, 11, 133]),
-    `catalog UA IDE version ${match[1]} is below the 0.11.133 support floor`
-  );
+  // One shared version: the catalog advertised KiroIDE-0.10.32 while inference sent
+  // kiro-ide/1.0.0, and each drifted below the floor on its own (#19607).
+  const catalogVersion = kiroIdeVersion(catalogUa);
+  assert.ok(catalogVersion, `catalog UA must carry KiroIDE-<version>, got: ${catalogUa}`);
+  assert.deepEqual(catalogVersion, kiroIdeVersion(KIRO_SDK_USER_AGENT));
+  assert.ok(atLeast(catalogVersion, NEXT_IDE_FLOOR), `catalog UA below floor: ${catalogUa}`);
 });
 
-test("kiro usage fetches never target the retired codewhisperer host in us-east-1", () => {
-  // GetUsageLimits routed its primary attempt to the legacy codewhisperer host for
-  // us-east-1 profiles; with the 2026-11-09 gate that host 403s every request (#19607).
+test("kiro usage fetches use the regional Amazon Q host in us-east-1", () => {
+  // GetUsageLimits used the legacy codewhisperer host for us-east-1 profiles; since
+  // #19607 it follows the rest of the integration onto q.us-east-1.
   //
   // The usage module captures OMNIROUTE_CODEWHISPERER_BASE_URL at module load, and
   // `test:unit:fast` runs with --test-isolation=none — ~60 alphabetically-earlier test

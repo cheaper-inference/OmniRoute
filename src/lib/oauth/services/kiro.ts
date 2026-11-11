@@ -484,9 +484,8 @@ export class KiroService {
    */
   async listAvailableProfiles(accessToken: string, region: string = "us-east-1") {
     assertValidAwsRegion(region);
-    // Regional Amazon Q host for every region — the legacy codewhisperer.us-east-1
-    // surface is retired and 403s under Kiro's client-version gate (#19607,
-    // kirodotdev/Kiro#11335).
+    // Regional Amazon Q host for every region, us-east-1 included (#19607), matching
+    // kiroRuntimeHost.
     const endpoint = `https://q.${region}.amazonaws.com`;
 
     const response = await fetch(endpoint, {
