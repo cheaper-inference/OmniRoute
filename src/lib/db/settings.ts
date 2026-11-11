@@ -353,12 +353,29 @@ export async function getSettings() {
     const record = toRecord(row);
     const key = typeof record.key === "string" ? record.key : null;
     const rawValue = typeof record.value === "string" ? record.value : null;
-    if (!key || rawValue === null || key.startsWith("_")) continue;
+    if (!key || rawValue === null) continue;
+    let parsed: unknown;
     try {
-      settings[key] = JSON.parse(rawValue);
+      parsed = JSON.parse(rawValue);
     } catch {
-      settings[key] = rawValue;
+      parsed = rawValue;
     }
+    // `__proto__` is a real settings key, not one of the internal `_` rows: the
+    // underscore filter below would drop it. Defining it as an own property is
+    // also what keeps it away from the `__proto__` setter, which a plain
+    // assignment would run, turning the row into the object's prototype
+    // instead of a property that Object.entries (and so an export) can see.
+    if (key === "__proto__") {
+      Object.defineProperty(settings, key, {
+        value: parsed,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+      continue;
+    }
+    if (key.startsWith("_")) continue;
+    settings[key] = parsed;
   }
 
   for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
