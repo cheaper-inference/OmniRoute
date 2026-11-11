@@ -48,7 +48,6 @@ Three sources of skills coexist in the same registry:
    - `web_search` — pluggable search provider with caching (`executeWebSearch`)
    - `eval_code` — Docker-sandboxed `node` or `python` execution
    - `execute_command` — Docker-sandboxed shell command
-   - `browser` — Playwright-backed scaffolding, disabled by default (`builtin/browser.ts`)
 2. **SkillsMP** (the OmniRoute Marketplace) — fetched from `https://skillsmp.com/api/v1/skills/search`. Requires `skillsmpApiKey` in Settings.
 3. **SkillsSH** (`skills.sh` community catalog) — fetched from `https://skills.sh/api/search`. No auth needed; SKILL.md content pulled from GitHub raw.
 
@@ -185,12 +184,6 @@ Default allowed images: `alpine:3.20`, `node:22-alpine`, `python:3.12-alpine`. A
 
 ---
 
-## Hybrid Executor (preview)
-
-`src/lib/skills/hybrid.ts` defines a `HybridExecutor` that decides between `direct` (in-process) and `sandbox` execution per call, with an `autoUpgrade` retry path on timeout/memory errors. The wired-in `directExecutor` / `sandboxRunner` implementations are stubs (`executeDirect`, `executeInSandbox` return placeholder objects) — treat this module as a contract under construction. Real execution still goes through `skillExecutor` + `SandboxRunner`.
-
----
-
 ## Storage
 
 Schema lives in two migrations:
@@ -256,12 +249,6 @@ Four MCP tools wrap the skills surface (`open-sse/mcp-server/tools/skillTools.ts
 | `omniroute_skills_executions` | Recent execution history (default 50, max 100)               |
 
 See [MCP-SERVER.md](./MCP-SERVER.md) for transport setup and scope assignments.
-
----
-
-## A2A Integration
-
-`src/lib/skills/a2a.ts` exports the `memory_aware_routing` A2A skill descriptor and a `registerA2ASkill(registry)` helper. Custom A2A skills live in `src/lib/a2a/skills/` and are dispatched via `A2A_SKILL_HANDLERS` (`src/lib/a2a/taskExecution.ts`). See [A2A-SERVER.md](./A2A-SERVER.md) for the full task lifecycle.
 
 ---
 
@@ -443,22 +430,7 @@ document; there is no float `0.6`-style threshold and no `registry.ts` scoring.
 
 ## Built-in Skills Catalog
 
-OmniRoute ships with a curated set of built-in skills in `src/lib/skills/builtin/`. The most common ones:
-
-### Browser Automation Skill
-
-The browser skill (`src/lib/skills/builtin/browser.ts`) provides headless browser automation via Playwright/Puppeteer. **It is implemented but not in the default skills catalog** — to use it, install the browser extension plugin separately.
-
-```ts
-// Enable in your config
-const config: SkillConfig = {
-  enabled: true,
-  mode: SkillMode.MANUAL, // Always require explicit invocation
-  allowedSkills: ["browser"],
-  timeout: 60000, // 60s for page loads
-  maxRetries: 1,
-};
-```
+OmniRoute ships with a curated set of built-in skills (`src/lib/skills/builtins.ts`). The most common ones:
 
 ### Other Built-in Categories
 
