@@ -1,0 +1,1 @@
+- **feat(chat):** new opt-in `OMNIROUTE_STREAMING_POLICY` sets `allow`, `deny` or `always` streaming per route prefix, so operators can answer SSE-broken clients with a clear 400 or force SSE behind proxies with idle timeouts; unset = no change.
