@@ -109,6 +109,30 @@ const cases: Case[] = [
     expectedClass: "CLIENT_API",
     expectedNormalized: "/api/v1/models",
   },
+  {
+    name: "/a2a alias",
+    path: "/a2a",
+    expectedClass: "CLIENT_API",
+    expectedNormalized: "/a2a",
+  },
+  {
+    name: "/a2a/* alias",
+    path: "/a2a/tasks",
+    expectedClass: "CLIENT_API",
+    expectedNormalized: "/a2a/tasks",
+  },
+  {
+    name: "/connect public page",
+    path: "/connect",
+    expectedClass: "PUBLIC",
+    expectedNormalized: "/connect",
+  },
+  {
+    name: "/connect/* public page",
+    path: "/connect/device-flow-token-123",
+    expectedClass: "PUBLIC",
+    expectedNormalized: "/connect/device-flow-token-123",
+  },
 
   {
     name: "/api/auth/login is PUBLIC",
