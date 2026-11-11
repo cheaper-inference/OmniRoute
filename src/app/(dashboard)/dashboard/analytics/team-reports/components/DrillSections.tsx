@@ -34,7 +34,7 @@ export function DrillKpis({ totals }: { totals: ReportSummaryTotals }) {
       {figures.map(([term, value]) => (
         <div key={term} className="rounded-lg border border-border bg-surface-2 px-3 py-2">
           <dt className="text-xs text-text-muted">{term}</dt>
-          <dd className="text-base font-bold tabular-nums text-text-main">{value}</dd>
+          <dd className="text-base font-semibold tabular-nums text-text-main">{value}</dd>
         </div>
       ))}
     </dl>

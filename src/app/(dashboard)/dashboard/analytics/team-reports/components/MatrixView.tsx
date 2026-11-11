@@ -101,6 +101,7 @@ export default function MatrixView({
           onChange={(event) => pick("cols", event.target.value as ReportMatrixDimension)}
         />
         <SegmentedControl
+          semantics="radio"
           size="sm"
           aria-label={t("matrixMetric")}
           value={shownMetric}

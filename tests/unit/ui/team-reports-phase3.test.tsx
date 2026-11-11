@@ -304,7 +304,7 @@ describe("trends chart", () => {
     const legend = [...container.querySelectorAll("ul li")].map((li) => li.textContent);
     expect(legend.slice(-2)).toEqual(["alice($3.00)", "Other($1.00)"]);
 
-    await click(screen.getByRole("tab", { name: "Tokens" }));
+    await click(screen.getByRole("radio", { name: "Tokens" }));
     expect(paramsOf(lastUrl("/api/reports/trends")).get("metric")).toBe("tokens");
   });
 
@@ -313,7 +313,7 @@ describe("trends chart", () => {
     expect(screen.queryByText(messages.reports.trendsWeekly)).toBeNull();
 
     trendsBody = { ...trendsBody, bucket: "week" };
-    await click(screen.getByRole("tab", { name: "Requests" }));
+    await click(screen.getByRole("radio", { name: "Requests" }));
     expect(screen.getByText(messages.reports.trendsWeekly)).toBeTruthy();
   });
 });
@@ -404,7 +404,7 @@ describe("matrix", () => {
 
   it("offers active time only when the cells have it, and sends no metric param", async () => {
     await renderPage("tab=matrix");
-    expect(screen.queryByRole("tab", { name: "Active time" })).not.toBeNull();
+    expect(screen.queryByRole("radio", { name: "Active time" })).not.toBeNull();
 
     matrix = matrixBody({
       cells: [
@@ -413,7 +413,7 @@ describe("matrix", () => {
       ],
     });
     await click(screen.getByRole("button", { name: /Refresh/ }));
-    expect(screen.queryAllByRole("tab", { name: "Active time" })).toHaveLength(0);
+    expect(screen.queryAllByRole("radio", { name: "Active time" })).toHaveLength(0);
   });
 });
 
@@ -445,7 +445,7 @@ describe("activity heatmap", () => {
     heatmap = { ...heatmap, costUsd, maxCostUsd: 1.5 };
     await renderPage("tab=heatmap");
     // The trends chart has a Cost selector too; the heatmap's is the last.
-    await click(screen.getAllByRole("tab", { name: "Cost" }).at(-1) as HTMLElement);
+    await click(screen.getAllByRole("radio", { name: "Cost" }).at(-1) as HTMLElement);
     const wednesday = container.querySelectorAll("tbody tr")[2].querySelectorAll("td")[14];
     expect(wednesday.getAttribute("title")).toContain("$1.50");
   });

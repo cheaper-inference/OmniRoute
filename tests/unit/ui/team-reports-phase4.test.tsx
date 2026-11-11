@@ -303,7 +303,7 @@ describe("export menu on the page", () => {
       fireEvent.change(screen.getByLabelText("Rows"), { target: { value: "models" } });
     });
     await flush();
-    await click(screen.getAllByRole("tab", { name: "Requests" }).at(-1) as HTMLElement);
+    await click(screen.getAllByRole("radio", { name: "Requests" }).at(-1) as HTMLElement);
     await exportAs("JSON");
 
     const params = lastExport();
@@ -317,7 +317,7 @@ describe("export menu on the page", () => {
 
   it("keeps the matrix choice after visiting another tab", async () => {
     await renderPage("tab=matrix");
-    await click(screen.getAllByRole("tab", { name: "Tokens" }).at(-1) as HTMLElement);
+    await click(screen.getAllByRole("radio", { name: "Tokens" }).at(-1) as HTMLElement);
     await openTab("Members");
     await openTab("Matrix");
     await exportAs("CSV");

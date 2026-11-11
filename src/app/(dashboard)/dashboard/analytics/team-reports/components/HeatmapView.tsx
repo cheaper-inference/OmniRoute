@@ -53,6 +53,7 @@ export default function HeatmapView({ query, refreshToken }: HeatmapViewProps) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-text-muted">{t("heatmapHelp")}</p>
         <SegmentedControl
+          semantics="radio"
           size="sm"
           aria-label={t("heatmapMetric")}
           value={metric}

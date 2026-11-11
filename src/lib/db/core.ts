@@ -60,6 +60,7 @@ export { toSnakeCase, toCamelCase, objToSnake, rowToCamel, cleanNulls } from "./
 export { isNativeSqliteLoadError, isSqliteDriverUnavailableError };
 import {
   ensureProviderConnectionsColumns,
+  dropPrefixDuplicateIndexes,
   ensureUsageHistoryAccountIndex,
   ensureUsageHistoryColumns,
   ensureCallLogsColumns,
@@ -343,8 +344,6 @@ const SCHEMA_SQL = `
     error_code TEXT,
     timestamp TEXT NOT NULL
   );
-  CREATE INDEX IF NOT EXISTS idx_uh_timestamp ON usage_history(timestamp);
-  CREATE INDEX IF NOT EXISTS idx_uh_provider ON usage_history(provider);
   CREATE INDEX IF NOT EXISTS idx_uh_model ON usage_history(model);
   CREATE INDEX IF NOT EXISTS idx_uh_connection_timestamp ON usage_history(connection_id, timestamp);
 
@@ -776,14 +775,6 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
         detail_state = 'ready'
     WHERE id = @id
   `);
-  const markMissingStmt = db.prepare(`
-    UPDATE call_logs
-    SET detail_state = 'missing',
-        artifact_relpath = NULL,
-        artifact_size_bytes = NULL,
-        artifact_sha256 = NULL
-    WHERE id = ?
-  `);
 
   let failed = 0;
   const tx = db.transaction(() => {
@@ -829,8 +820,9 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
         buildArtifactRelativePath(artifact.summary.timestamp, artifact.summary.id)
       );
       if (!artifactResult) {
+        // Keep the row 'legacy-inline': its body still lives in the legacy table, and the next
+        // boot's selector must find it again before that table is dropped.
         failed++;
-        markMissingStmt.run(row.id);
         continue;
       }
 
@@ -1302,6 +1294,12 @@ export function getDbInstance(): SqliteDatabase {
     // file EXCLUSIVE (checkpoint + WAL delete); node:sqlite opens with busy timeout 0, so with
     // the pragmas in the other order that window surfaced as `database is locked` at startup.
     db.pragma("busy_timeout = 2000");
+    // auto_vacuum only takes effect before the first page is written; `journal_mode = WAL` writes
+    // the header, so set it first and only on an empty file. Migration 046 seeds INCREMENTAL, so a
+    // new database starts in the mode it is configured for and never needs a conversion VACUUM.
+    if (Number(db.pragma("page_count", { simple: true })) === 0) {
+      db.pragma("auto_vacuum = INCREMENTAL");
+    }
     db.pragma("journal_mode = WAL");
     db.pragma("synchronous = NORMAL");
     db.pragma(`cache_size = -${DEFAULT_DATABASE_SETTINGS.optimization.cacheSize}`);
@@ -1333,6 +1331,7 @@ export function getDbInstance(): SqliteDatabase {
     // Fresh installs need the same post-migration index guarantee as upgraded
     // databases, including recovery from an interrupted migration 127 attempt.
     ensureUsageHistoryAccountIndex(db);
+    dropPrefixDuplicateIndexes(db);
 
     applyStoredDatabaseOptimizationSettings(db);
 

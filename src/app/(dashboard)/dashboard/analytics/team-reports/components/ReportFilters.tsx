@@ -92,6 +92,7 @@ export default function ReportFilters({
   return (
     <div className="space-y-3 rounded-xl border border-border bg-surface/30 p-4">
       <SegmentedControl
+        semantics="radio"
         size="sm"
         aria-label={t("timeRange")}
         value={preset}

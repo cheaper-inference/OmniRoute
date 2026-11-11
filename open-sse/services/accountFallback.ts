@@ -339,11 +339,24 @@ export function isTokenRateLimitWording(errorText: string | null | undefined): b
   );
 }
 
-/** Shared context-overflow text match with TPM/RPM exclusion. */
+// Phrases that only a real context overflow uses; they outrank the validation exclusion below.
+const STRONG_CONTEXT_OVERFLOW_RE =
+  /\b(?:maximum context|context (?:length|window))\b|context_length_exceeded|\b(?:prompt is |input (?:is )?)too long\b/i;
+
+/** Shared context-overflow text match with TPM/RPM and parameter-validation exclusions. */
 export function isContextOverflowText(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
   if (isTokenRateLimitWording(text)) return false;
+  if (!STRONG_CONTEXT_OVERFLOW_RE.test(text)) {
+    if (/\b(?:invalid_value|invalid_type)\b/i.test(text)) return false;
+    if (
+      /\b(?:max_tokens|max_completion_tokens|max_output_tokens)\b/i.test(text) &&
+      /\b(?:invalid|illegal|param(?:eter)?|expected|must be|range)\b/i.test(text)
+    ) {
+      return false;
+    }
+  }
   return CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text));
 }
 

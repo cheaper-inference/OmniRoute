@@ -92,6 +92,7 @@ export default function TrendsSection({
           <p className="text-xs text-text-muted">{t("trendsBy", { dimension: dimensionName })}</p>
         </div>
         <SegmentedControl
+          semantics="radio"
           size="sm"
           aria-label={t("trendsMetric")}
           value={metric}

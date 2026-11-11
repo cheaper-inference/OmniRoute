@@ -211,7 +211,7 @@ export default function MatrixTable({ matrix, metric, handlers }: MatrixTablePro
               {show(col)}
             </TableCell>
           ))}
-          <TableCell className="px-3 py-2 text-right font-bold tabular-nums">
+          <TableCell className="px-3 py-2 text-right font-semibold tabular-nums">
             {show(matrix.totals)}
           </TableCell>
         </TableRow>

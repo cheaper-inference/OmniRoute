@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Button, Card, SegmentedControl } from "@/shared/components";
+import { Button, Card, SegmentedControl, SegmentedPanel, SegmentedTabs } from "@/shared/components";
 
 import { BREAKDOWN_TABS, type DrillKind } from "./breakdownTabs";
 import BreakdownTable from "./components/BreakdownTable";
@@ -137,60 +137,73 @@ export default function ReportsPageClient() {
         />
       </Card>
 
-      <div className="overflow-x-auto">
-        <SegmentedControl
-          size="sm"
-          aria-label={t("breakdown")}
-          value={tab}
-          onChange={(value) => setTab(value as ReportTab)}
-          options={REPORT_TABS.map((value) => ({ value, label: t(`tab_${value}`) }))}
-        />
-      </div>
+      <SegmentedTabs
+        value={tab}
+        onChange={(value) => setTab(value as ReportTab)}
+        className="flex flex-col gap-6"
+      >
+        <div className="overflow-x-auto">
+          <SegmentedControl
+            semantics="tabs"
+            size="sm"
+            aria-label={t("breakdown")}
+            options={REPORT_TABS.map((value) => ({ value, label: t(`tab_${value}`) }))}
+          />
+        </div>
 
-      <Card padding="md" className={loading ? "opacity-60 transition-opacity" : undefined}>
-        {breakdownTab ? (
-          <BreakdownTable
-            key={tab}
-            rows={report?.breakdowns[tab] ?? []}
-            nameHeader={t(breakdownTab.nameKey)}
-            fallbackName={t(breakdownTab.fallbackKey)}
-            extraCount={breakdownTab.extraCount}
-            showDetail={breakdownTab.showDetail}
-            defaultSort={breakdownTab.defaultSort}
-            filterNone={breakdownTab.filterNone}
-            onOpen={
-              drillKind ? (row) => openDrill(drillKind, row.key, row.label || row.key) : undefined
-            }
-            onFilter={
-              filterField
-                ? (key) => setFilters((current) => withFilterValue(current, filterField, key))
-                : undefined
-            }
-          />
-        ) : tab === "matrix" ? (
-          <MatrixView
-            query={query}
-            refreshToken={refreshToken}
-            selection={matrix}
-            onSelectionChange={setMatrix}
-            onFilter={(pairs) =>
-              setFilters((current) =>
-                pairs.reduce((next, [field, value]) => withFilterValue(next, field, value), current)
-              )
-            }
-            onOpen={openDrill}
-          />
-        ) : tab === "heatmap" ? (
-          <HeatmapView query={query} refreshToken={refreshToken} />
-        ) : (
-          <SessionsPanel
-            query={query}
-            refreshToken={refreshToken}
-            order={sessionOrder}
-            onOrderChange={setSessionOrder}
-          />
-        )}
-      </Card>
+        {/* One panel: the active tab's view is rendered below, keyed by `tab`. */}
+        <SegmentedPanel value={tab}>
+          <Card padding="md" className={loading ? "opacity-60 transition-opacity" : undefined}>
+            {breakdownTab ? (
+              <BreakdownTable
+                key={tab}
+                rows={report?.breakdowns[tab] ?? []}
+                nameHeader={t(breakdownTab.nameKey)}
+                fallbackName={t(breakdownTab.fallbackKey)}
+                extraCount={breakdownTab.extraCount}
+                showDetail={breakdownTab.showDetail}
+                defaultSort={breakdownTab.defaultSort}
+                filterNone={breakdownTab.filterNone}
+                onOpen={
+                  drillKind
+                    ? (row) => openDrill(drillKind, row.key, row.label || row.key)
+                    : undefined
+                }
+                onFilter={
+                  filterField
+                    ? (key) => setFilters((current) => withFilterValue(current, filterField, key))
+                    : undefined
+                }
+              />
+            ) : tab === "matrix" ? (
+              <MatrixView
+                query={query}
+                refreshToken={refreshToken}
+                selection={matrix}
+                onSelectionChange={setMatrix}
+                onFilter={(pairs) =>
+                  setFilters((current) =>
+                    pairs.reduce(
+                      (next, [field, value]) => withFilterValue(next, field, value),
+                      current
+                    )
+                  )
+                }
+                onOpen={openDrill}
+              />
+            ) : tab === "heatmap" ? (
+              <HeatmapView query={query} refreshToken={refreshToken} />
+            ) : (
+              <SessionsPanel
+                query={query}
+                refreshToken={refreshToken}
+                order={sessionOrder}
+                onOrderChange={setSessionOrder}
+              />
+            )}
+          </Card>
+        </SegmentedPanel>
+      </SegmentedTabs>
 
       {drill && (
         <DrillPanel
