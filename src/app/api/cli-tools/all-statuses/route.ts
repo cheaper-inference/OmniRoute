@@ -29,6 +29,23 @@ const TOOL_CHECK_TIMEOUT_MS = 5000; // 5s per tool max, counted from when its ch
 // A cold batch used to start one detection probe per catalog tool (39) at once.
 const TOOL_CHECK_CONCURRENCY = 4;
 
+/** At most `limit` holders at once; `acquire` waits for a free slot, `release` frees one. */
+function createSlots(limit: number) {
+  let free = limit;
+  const waiting: Array<() => void> = [];
+  return {
+    async acquire(): Promise<void> {
+      if (free > 0) free--;
+      else await new Promise<void>((resolve) => waiting.push(resolve));
+    },
+    release(): void {
+      const next = waiting.shift();
+      if (next) next();
+      else free++;
+    },
+  };
+}
+
 const getConfigPath = (toolId: string): string | null =>
   toolId === "grok-build"
     ? resolveGrokBuildConfigPath(process.env, getCliConfigHome())
@@ -153,8 +170,7 @@ export async function GET(request: Request): Promise<Response> {
 
     // For each tool: use cache hit, or run detection + config check. At most
     // TOOL_CHECK_CONCURRENCY uncached checks run at once; the rest wait for a free slot.
-    let freeSlots = TOOL_CHECK_CONCURRENCY;
-    const waiting: Array<() => void> = [];
+    const slots = createSlots(TOOL_CHECK_CONCURRENCY);
     await Promise.allSettled(
       toolIds.map(async (toolId) => {
         const mtimeMs = mtimesMap[toolId] ?? 0;
@@ -165,8 +181,7 @@ export async function GET(request: Request): Promise<Response> {
           return;
         }
 
-        if (freeSlots > 0) freeSlots--;
-        else await new Promise<void>((resolve) => waiting.push(resolve));
+        await slots.acquire();
 
         try {
           const runtimePromise = Promise.race<Awaited<ReturnType<typeof getCliRuntimeStatus>>>([
@@ -228,9 +243,7 @@ export async function GET(request: Request): Promise<Response> {
           };
           statuses[toolId] = result;
         } finally {
-          const next = waiting.shift();
-          if (next) next();
-          else freeSlots++;
+          slots.release();
         }
       })
     );
