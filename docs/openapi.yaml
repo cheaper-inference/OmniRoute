@@ -4802,7 +4802,29 @@ paths:
         - $ref: "#/components/parameters/ReportTzOffset"
       responses:
         "200":
-          description: "{ totals, breakdowns: { members, projects, clients, providers, models, accounts, daily } }"
+          description: >
+            `totals` over all matching requests, with the time and latency KPIs
+            (ReportTimeKpis); `breakdowns` rows carry the totals without those KPIs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [totals, breakdowns]
+                properties:
+                  totals:
+                    allOf:
+                      - $ref: "#/components/schemas/ReportSessionTotals"
+                      - $ref: "#/components/schemas/ReportTimeKpis"
+                      - type: object
+                        required: [sessions, members, projects, lastSeenAt]
+                        properties:
+                          sessions: { type: integer }
+                          members: { type: integer }
+                          projects: { type: integer }
+                          lastSeenAt: { type: string, format: date-time, nullable: true }
+                  breakdowns:
+                    type: object
+                    description: Rows per dimension (members, projects, clients, providers, models, accounts, daily).
         "400":
           description: Invalid query parameters
 
@@ -4865,28 +4887,49 @@ paths:
   /api/reports/sessions/{id}:
     get:
       tags: [Usage]
-      summary: Agent session detail with its latest 100 requests
+      summary: Agent session detail with a page of its requests
       description: >
         `session` holds the stored session counters (cost priced at request time). `totals` holds
         the session's all-time request totals priced at read time, the same way as the sessions
-        list rows and the summary.
+        list rows and the summary, plus its time and latency KPIs. `recentRequests` is one page
+        of all the session's requests, newest first, each priced at read time.
       parameters:
         - $ref: "#/components/parameters/ResourceId"
+        - name: limit
+          in: query
+          description: Requests per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
       responses:
         "200":
-          description: "{ session, recentRequests, totals }"
+          description: "{ session, recentRequests, requestsTotal, totals, timeline }"
           content:
             application/json:
               schema:
                 type: object
-                required: [session, recentRequests, totals]
+                required: [session, recentRequests, requestsTotal, totals, timeline]
                 properties:
                   session: { type: object, description: Stored agent session record. }
                   recentRequests:
                     type: array
-                    description: Latest 100 requests, newest first.
-                    items: { type: object }
-                  totals: { $ref: "#/components/schemas/ReportSessionTotals" }
+                    description: One page (limit, offset) of the session's requests, newest first.
+                    items: { $ref: "#/components/schemas/ReportSessionRequest" }
+                  requestsTotal:
+                    type: integer
+                    description: All of the session's requests, across pages.
+                  totals: { $ref: "#/components/schemas/ReportSessionDetailTotals" }
+                  timeline: { $ref: "#/components/schemas/ReportSessionTimeline" }
+        "400":
+          description: Invalid query parameters
         "404":
           description: Session not found
 
@@ -17553,10 +17596,12 @@ components:
     ReportSessionSort:
       name: sort
       in: query
-      description: lastSeen and firstSeen sort by the window bounds of each session.
+      description: >-
+        lastSeen and firstSeen sort by the window bounds of each session; activeTime sorts by
+        activeMs.
       schema:
         type: string
-        enum: [lastSeen, firstSeen, requests, tokens, cost]
+        enum: [lastSeen, firstSeen, requests, tokens, cost, activeTime]
         default: lastSeen
     ReportSessionOrder:
       name: order
@@ -17760,6 +17805,9 @@ components:
             - lastSeenAt
             - windowFirstSeenAt
             - windowLastSeenAt
+            - activeMs
+            - modelMs
+            - mainModel
           properties:
             id: { type: string }
             apiKeyId: { type: string, nullable: true }
@@ -17781,6 +17829,114 @@ components:
               type: string
               format: date-time
               description: Last request matching the filters.
+            activeMs:
+              type: integer
+              description: Same as ReportTimeKpis.activeMs, over the matching requests.
+            modelMs:
+              type: integer
+              description: Sum of latency_ms of the matching requests.
+            mainModel:
+              type: string
+              nullable: true
+              description: >-
+                Model with the most matching requests; ties go to the higher cost, then the
+                name. null when that is the requests without a model.
+    ReportTimeKpis:
+      type: object
+      description: >-
+        Time and latency over the same requests as the totals. Latency and TTFT averages use
+        only requests with a recorded value (> 0).
+      required:
+        [cacheHitRate, avgLatencyMs, p95LatencyMs, avgTtftMs, costPerSession, activeMs, modelMs]
+      properties:
+        cacheHitRate:
+          type: number
+          nullable: true
+          description: tokens.cacheRead / tokens.input; null when input is 0.
+        avgLatencyMs: { type: integer, nullable: true, description: Mean latency_ms. }
+        p95LatencyMs:
+          type: integer
+          nullable: true
+          description: Nearest-rank 95th percentile of latency_ms.
+        avgTtftMs:
+          type: integer
+          nullable: true
+          description: Mean time to first token; requests that reported none store their latency.
+        costPerSession:
+          type: number
+          nullable: true
+          description: costUsd / sessions; null without sessions.
+        activeMs:
+          type: integer
+          description: >-
+            Per session, the gaps between consecutive requests, each capped at 15 minutes, plus
+            the last request's latency; summed over sessions.
+        modelMs: { type: integer, description: Sum of latency_ms. }
+    ReportSessionDetailTotals:
+      allOf:
+        - $ref: "#/components/schemas/ReportSessionTotals"
+        - $ref: "#/components/schemas/ReportTimeKpis"
+        - type: object
+          required: [wallMs]
+          properties:
+            wallMs:
+              type: integer
+              description: Last request time minus first request time.
+    ReportSessionRequest:
+      type: object
+      required:
+        - id
+        - timestamp
+        - provider
+        - model
+        - connectionId
+        - serviceTier
+        - status
+        - success
+        - errorCode
+        - latencyMs
+        - ttftMs
+        - tokens
+        - costUsd
+        - priced
+      properties:
+        id: { type: integer }
+        timestamp: { type: string, format: date-time }
+        provider: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        connectionId: { type: string, nullable: true }
+        serviceTier:
+          { type: string, description: The priced tier; "standard" when none was stored. }
+        status: { type: string, nullable: true }
+        success: { type: boolean }
+        errorCode: { type: string, nullable: true }
+        latencyMs: { type: integer }
+        ttftMs:
+          type: integer
+          description: Time to first token; full latency when none was reported, 0 when unrecorded.
+        tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+        costUsd: { type: number, description: Priced at read time. }
+        priced:
+          type: boolean
+          description: false when the request has tokens but its model has no pricing row.
+    ReportSessionTimeline:
+      type: object
+      required: [points, capped]
+      properties:
+        points:
+          type: array
+          description: The newest 2000 requests at most, oldest first.
+          items:
+            type: object
+            required: [timestamp, model, latencyMs, ok]
+            properties:
+              timestamp: { type: string, format: date-time }
+              model: { type: string, nullable: true }
+              latencyMs: { type: integer }
+              ok: { type: boolean, description: false when the request failed. }
+        capped:
+          type: boolean
+          description: true when the session has more requests than points; the oldest are left out.
     ImportedApiKey:
       type: object
       additionalProperties: false

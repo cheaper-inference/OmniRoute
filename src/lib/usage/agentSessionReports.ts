@@ -15,9 +15,19 @@ import {
   type AgentSessionReportMetadata,
   type AgentSessionUsageSlice,
 } from "@/lib/db/agentSessionReports";
+import {
+  getAgentSessionLatencyPercentile,
+  listAgentSessionRequestsPage,
+  listAgentSessionTimeline,
+  listAgentSessionTimes,
+  type AgentSessionReportRequest,
+  type AgentSessionTimeline,
+  type AgentSessionTimes,
+  type SessionRequestsPage,
+} from "@/lib/db/agentSessionReportStats";
 import { calculateCostDetailed } from "./costCalculator";
 
-export type { AgentSessionReportFilter };
+export type { AgentSessionReportFilter, SessionRequestsPage };
 
 export interface ReportTotals {
   requests: number;
@@ -62,8 +72,31 @@ export const REPORT_DIMENSIONS = [
 ] as const;
 export type ReportDimension = (typeof REPORT_DIMENSIONS)[number];
 
+/**
+ * Time and latency KPIs over the same requests as the totals. Latency and TTFT averages use only
+ * requests with a recorded value (> 0).
+ */
+export interface ReportTimeKpis {
+  /** tokens.cacheRead / tokens.input; null when input is 0. */
+  cacheHitRate: number | null;
+  /** Mean latency_ms, rounded to whole ms; null without samples. */
+  avgLatencyMs: number | null;
+  /** Nearest-rank 95th percentile of latency_ms; null without samples. */
+  p95LatencyMs: number | null;
+  /** Mean ttft_ms, rounded to whole ms (requests without a TTFT store their latency). */
+  avgTtftMs: number | null;
+  /** costUsd / sessions; null without sessions. */
+  costPerSession: number | null;
+  /** Sum over sessions of their gaps between requests (each capped) plus last latency. */
+  activeMs: number;
+  /** Sum of latency_ms. */
+  modelMs: number;
+}
+
+export type ReportSummaryTotals = ReportTotals & ReportTimeKpis;
+
 export interface AgentSessionReport {
-  totals: ReportTotals;
+  totals: ReportSummaryTotals;
   breakdowns: Record<ReportDimension, ReportBreakdownRow[]>;
 }
 
@@ -73,11 +106,23 @@ export type SessionReportTotals = Pick<
   "requests" | "errors" | "unpricedRequests" | "costUsd" | "tokens"
 >;
 
+/** Session detail totals: costPerSession equals costUsd once the session has a request. */
+export type SessionReportDetailTotals = SessionReportTotals &
+  ReportTimeKpis & {
+    /** Last request time minus first request time. */
+    wallMs: number;
+  };
+
 /** A sessions-list row: all-time session metadata plus totals of its requests in the window. */
 export interface AgentSessionReportRow extends AgentSessionReportMetadata, SessionReportTotals {
   /** First and last request of the session inside the window. */
   windowFirstSeenAt: string;
   windowLastSeenAt: string;
+  /** Same meaning as ReportTimeKpis, over this session's requests in the window. */
+  activeMs: number;
+  modelMs: number;
+  /** Model with the most requests in the window; ties go to the higher cost, then the name. */
+  mainModel: string | null;
 }
 
 export const SESSION_REPORT_SORTS = [
@@ -86,6 +131,7 @@ export const SESSION_REPORT_SORTS = [
   "requests",
   "tokens",
   "cost",
+  "activeTime",
 ] as const;
 export type SessionReportSort = (typeof SESSION_REPORT_SORTS)[number];
 
@@ -205,19 +251,60 @@ function sessionTotals(totals: ReportTotals): SessionReportTotals {
   return { requests, errors, unpricedRequests, costUsd, tokens };
 }
 
+const LATENCY_PERCENTILE = 95;
+
+function round6(value: number): number {
+  return Number(value.toFixed(6));
+}
+
+/** KPIs over the filtered requests; `times` are their per-session figures. */
+function timeKpis(
+  db: SqliteAdapter,
+  filter: AgentSessionReportFilter,
+  totals: ReportTotals,
+  times: AgentSessionTimes[]
+): ReportTimeKpis {
+  let activeMs = 0;
+  let modelMs = 0;
+  let latencySamples = 0;
+  let ttftSamples = 0;
+  let ttftMsSum = 0;
+  for (const session of times) {
+    activeMs += session.activeMs;
+    modelMs += session.modelMs;
+    latencySamples += session.latencySamples;
+    ttftSamples += session.ttftSamples;
+    ttftMsSum += session.ttftMsSum;
+  }
+  const { input, cacheRead } = totals.tokens;
+  return {
+    cacheHitRate: input > 0 ? round6(cacheRead / input) : null,
+    // Latencies are clamped at 0, so modelMs is also the sum of the positive samples.
+    avgLatencyMs: latencySamples > 0 ? Math.round(modelMs / latencySamples) : null,
+    p95LatencyMs:
+      latencySamples > 0 ? getAgentSessionLatencyPercentile(db, filter, LATENCY_PERCENTILE) : null,
+    avgTtftMs: ttftSamples > 0 ? Math.round(ttftMsSum / ttftSamples) : null,
+    costPerSession: totals.sessions > 0 ? round6(totals.costUsd / totals.sessions) : null,
+    activeMs,
+    modelMs,
+  };
+}
+
 export async function buildAgentSessionReport(
   filter: AgentSessionReportFilter = {},
   db: SqliteAdapter = getDbInstance()
 ): Promise<AgentSessionReport> {
   const slices = await listPricedSlices(db, filter);
-  const totals = new TotalsAccumulator();
-  for (const slice of slices) totals.add(slice);
+  const accumulator = new TotalsAccumulator();
+  for (const slice of slices) accumulator.add(slice);
+  const totals = accumulator.toTotals();
 
   const breakdowns = Object.fromEntries(
     REPORT_DIMENSIONS.map((dimension) => [dimension, breakdownBy(dimension, slices)])
   ) as Record<ReportDimension, ReportBreakdownRow[]>;
 
-  return { totals: totals.toTotals(), breakdowns };
+  const kpis = timeKpis(db, filter, totals, listAgentSessionTimes(db, filter));
+  return { totals: { ...totals, ...kpis }, breakdowns };
 }
 
 interface SessionWindow {
@@ -225,25 +312,66 @@ interface SessionWindow {
   totals: SessionReportTotals;
   windowFirstSeenAt: string;
   windowLastSeenAt: string;
+  activeMs: number;
+  modelMs: number;
+  mainModel: string | null;
 }
 
-function sessionWindows(slices: PricedSlice[]): SessionWindow[] {
-  const groups = new Map<string, { totals: TotalsAccumulator; first: string; last: string }>();
+interface ModelUse {
+  requests: number;
+  costUsd: number;
+}
+
+/** Most requests first; ties go to the higher cost, then the name in code-point order. */
+function compareModelUse([nameA, a]: [string, ModelUse], [nameB, b]: [string, ModelUse]): number {
+  return b.requests - a.requests || b.costUsd - a.costUsd || compareValues(nameA, nameB);
+}
+
+/** The session's main model; null when that is the requests without a model. */
+function mainModelOf(models: Map<string, ModelUse>): string | null {
+  let best: [string, ModelUse] | null = null;
+  for (const entry of models) {
+    if (!best || compareModelUse(entry, best) < 0) best = entry;
+  }
+  return best?.[0] || null;
+}
+
+function sessionWindows(
+  slices: PricedSlice[],
+  times: ReadonlyMap<string, AgentSessionTimes>
+): SessionWindow[] {
+  const groups = new Map<
+    string,
+    { totals: TotalsAccumulator; first: string; last: string; models: Map<string, ModelUse> }
+  >();
   for (const slice of slices) {
     let group = groups.get(slice.sessionId);
     if (!group) {
-      group = { totals: new TotalsAccumulator(), first: slice.firstSeenAt, last: slice.lastSeenAt };
+      group = {
+        totals: new TotalsAccumulator(),
+        first: slice.firstSeenAt,
+        last: slice.lastSeenAt,
+        models: new Map(),
+      };
       groups.set(slice.sessionId, group);
     }
     group.totals.add(slice);
     if (slice.firstSeenAt < group.first) group.first = slice.firstSeenAt;
     if (slice.lastSeenAt > group.last) group.last = slice.lastSeenAt;
+    const model = slice.model ?? "";
+    const use = group.models.get(model) ?? { requests: 0, costUsd: 0 };
+    use.requests += slice.requests;
+    use.costUsd += slice.costUsd;
+    group.models.set(model, use);
   }
-  return [...groups].map(([sessionId, { totals, first, last }]) => ({
+  return [...groups].map(([sessionId, { totals, first, last, models }]) => ({
     sessionId,
     totals: sessionTotals(totals.toTotals()),
     windowFirstSeenAt: first,
     windowLastSeenAt: last,
+    activeMs: times.get(sessionId)?.activeMs ?? 0,
+    modelMs: times.get(sessionId)?.modelMs ?? 0,
+    mainModel: mainModelOf(models),
   }));
 }
 
@@ -253,6 +381,7 @@ const SORT_VALUES: Record<SessionReportSort, (session: SessionWindow) => string 
   requests: (s) => s.totals.requests,
   tokens: (s) => s.totals.tokens.total,
   cost: (s) => s.totals.costUsd,
+  activeTime: (s) => s.activeMs,
 };
 
 function compareValues(a: string | number, b: string | number): number {
@@ -279,7 +408,9 @@ export async function listAgentSessionReportRows(
   page: SessionReportPage = {},
   db: SqliteAdapter = getDbInstance()
 ): Promise<{ sessions: AgentSessionReportRow[]; total: number }> {
-  const windows = sessionWindows(await listPricedSlices(db, filter)).sort(sessionComparator(page));
+  const slices = await listPricedSlices(db, filter);
+  const times = new Map(listAgentSessionTimes(db, filter).map((time) => [time.sessionId, time]));
+  const windows = sessionWindows(slices, times).sort(sessionComparator(page));
   const offset = Math.max(0, page.offset ?? 0);
   const pageWindows = windows.slice(offset, offset + (page.limit ?? SESSION_PAGE_DEFAULT_LIMIT));
   const metadata = getAgentSessionMetadataByIds(
@@ -293,14 +424,70 @@ export async function listAgentSessionReportRows(
   return { sessions, total: windows.length };
 }
 
-/** All-time totals of one session, priced at read time like the list rows. */
+/** All-time totals and time of one session, priced at read time like the list rows. */
 export async function getAgentSessionReportTotals(
   sessionId: string,
   db: SqliteAdapter = getDbInstance()
-): Promise<SessionReportTotals> {
-  const totals = new TotalsAccumulator();
-  for (const slice of await listPricedSlices(db, { sessionId })) totals.add(slice);
-  return sessionTotals(totals.toTotals());
+): Promise<SessionReportDetailTotals> {
+  const filter: AgentSessionReportFilter = { sessionId };
+  const accumulator = new TotalsAccumulator();
+  for (const slice of await listPricedSlices(db, filter)) accumulator.add(slice);
+  const totals = accumulator.toTotals();
+  const times = listAgentSessionTimes(db, filter);
+  const wallMs = times[0] ? Date.parse(times[0].lastSeenAt) - Date.parse(times[0].firstSeenAt) : 0;
+  return {
+    ...sessionTotals(totals),
+    ...timeKpis(db, filter, totals, times),
+    wallMs: Number.isFinite(wallMs) ? wallMs : 0,
+  };
+}
+
+/** A session detail request with its cost priced at read time, like the totals. */
+export interface PricedSessionRequest extends AgentSessionReportRequest {
+  costUsd: number;
+  /** false when the request has tokens but its model has no pricing row (not in costUsd). */
+  priced: boolean;
+}
+
+export interface AgentSessionReportDetail {
+  /** One page of the session's requests, newest first. */
+  recentRequests: PricedSessionRequest[];
+  /** All of the session's requests, across pages. */
+  requestsTotal: number;
+  totals: SessionReportDetailTotals;
+  timeline: AgentSessionTimeline;
+}
+
+async function priceRequest(request: AgentSessionReportRequest): Promise<PricedSessionRequest> {
+  const { input, output, cacheRead, cacheCreation, reasoning } = request.tokens;
+  const { costUsd, priced } = await calculateCostDetailed(
+    request.provider || "",
+    request.model || "",
+    { input, output, cacheRead, cacheCreation, reasoning },
+    { provider: request.provider, model: request.model, serviceTier: request.serviceTier }
+  );
+  // Same rule as unpricedRequests: a request without tokens is never unpriced.
+  const hasTokens = input + output + cacheRead + cacheCreation > 0;
+  return { ...request, costUsd: round6(costUsd), priced: priced || !hasTokens };
+}
+
+/** Session detail: one page of requests, all-time totals and the timeline. */
+export async function getAgentSessionReportDetail(
+  sessionId: string,
+  page: SessionRequestsPage = {},
+  db: SqliteAdapter = getDbInstance()
+): Promise<AgentSessionReportDetail> {
+  const { requests, total } = listAgentSessionRequestsPage(db, sessionId, page);
+  const [recentRequests, totals] = await Promise.all([
+    Promise.all(requests.map(priceRequest)),
+    getAgentSessionReportTotals(sessionId, db),
+  ]);
+  return {
+    recentRequests,
+    requestsTotal: total,
+    totals,
+    timeline: listAgentSessionTimeline(db, sessionId),
+  };
 }
 
 /** Bounds one CSV download; narrower filters export the rest. */

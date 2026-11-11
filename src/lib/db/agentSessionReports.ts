@@ -131,7 +131,7 @@ function likeContains(term: string): string {
  * WHERE conditions and params for a filter over `usage_history uh JOIN agent_sessions s`.
  * `skip` leaves one multi-value filter out (a facet lists its own dimension unfiltered).
  */
-function buildReportConditions(
+export function buildReportConditions(
   filter: AgentSessionReportFilter,
   skip?: ReportMultiValueFilter
 ): { conditions: string[]; params: string[] } {

@@ -365,13 +365,18 @@ test("session detail totals are priced at read time and match the all-time list 
   };
   assert.equal(detail.session.requestCount, 3);
   assert.equal(detail.recentRequests.length, 3);
-  assert.deepEqual(detail.totals, {
-    requests: row.requests,
-    errors: row.errors,
-    unpricedRequests: row.unpricedRequests,
-    costUsd: row.costUsd,
-    tokens: row.tokens,
-  });
+  // Phase 2 adds time and latency KPIs next to these; the shared fields must match the row.
+  const { requests, errors, unpricedRequests, costUsd, tokens } = detail.totals;
+  assert.deepEqual(
+    { requests, errors, unpricedRequests, costUsd, tokens },
+    {
+      requests: row.requests,
+      errors: row.errors,
+      unpricedRequests: row.unpricedRequests,
+      costUsd: row.costUsd,
+      tokens: row.tokens,
+    }
+  );
   assert.equal(detail.totals.requests, 3);
   assert.equal(detail.totals.errors, 1);
   const report = await summary("apiKeyId=key-alice");

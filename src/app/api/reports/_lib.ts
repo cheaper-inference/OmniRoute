@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { REPORT_MULTI_VALUE_FILTERS, REPORT_SEARCH_MAX_LENGTH } from "@/lib/db/agentSessionReports";
+import { SESSION_REQUESTS_MAX_LIMIT } from "@/lib/db/agentSessionReportStats";
 import { REPORT_DIMENSIONS, SESSION_REPORT_SORTS } from "@/lib/usage/agentSessionReports";
 
 // Stored timestamps are UTC `toISOString()` strings compared lexically, so any accepted offset
@@ -46,6 +47,12 @@ const sessionOrderSchema = {
 export const sessionsQuerySchema = reportFilterSchema.extend({
   ...sessionOrderSchema,
   limit: z.coerce.number().int().min(1).max(100).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+});
+
+/** Session detail: one page of the session's requests, newest first. */
+export const sessionDetailQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(SESSION_REQUESTS_MAX_LIMIT).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 });
 
