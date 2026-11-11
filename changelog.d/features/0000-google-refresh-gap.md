@@ -1,0 +1,1 @@
+- **feat(oauth):** opt-in `BG_REFRESH_GOOGLE_DELAY_MS` spaces background token refreshes of Google OAuth accounts (antigravity, gemini-cli) by a base gap plus jitter, to avoid anti-abuse limits (off by default).

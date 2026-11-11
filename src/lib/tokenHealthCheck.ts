@@ -38,6 +38,7 @@ import {
   isInRefreshBackoff,
   preservesRefreshTokenOnUnrecoverable,
 } from "@/lib/tokenRefreshCircuit";
+import { waitForGoogleRefreshSlot } from "@/lib/tokenHealthGoogleGap";
 
 const LOG_PREFIX = "[HealthCheck]";
 const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
@@ -1025,6 +1026,7 @@ export async function checkConnection(conn: any) {
   let persistedResult: RefreshResultShape | null = null;
   let result: RefreshResultShape | null;
   try {
+    await waitForGoogleRefreshSlot(conn.provider);
     result = await tokenRefresh.getAccessToken(
       conn.provider,
       credentials,
