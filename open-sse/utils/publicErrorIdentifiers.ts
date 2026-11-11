@@ -45,6 +45,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "cf_mitigated_challenge",
   "chat_admission_busy",
   "chat_history_too_large",
+  "chat_probe_not_isolated",
   "chatgpt_session_expired",
   "chatgpt_submission_ambiguous",
   "chatgpt_submitted_turn_failed",

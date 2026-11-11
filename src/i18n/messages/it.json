@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Aggiorna",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Tutte le voci di questa cache verranno eliminate. L'operazione non può essere annullata.",
     "memoryEntries": "Voci in memoria",
     "memoryEntriesSub": "LRU in memoria",
     "dbEntries": "Voci nel DB",

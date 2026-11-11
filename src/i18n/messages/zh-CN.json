@@ -11981,6 +11981,7 @@
     "description": "监控提供者侧 Prompt Cache 的效率，以及本地 Semantic Cache 的响应复用情况。",
     "refresh": "刷新",
     "clearAll": "清空语义缓存",
+    "clearAllConfirm": "此缓存中的所有条目都将被删除。此操作无法撤销。",
     "memoryEntries": "内存条目",
     "memoryEntriesSub": "内存 LRU",
     "dbEntries": "数据库条目",

@@ -11981,6 +11981,7 @@
     "description": "Nyochaa arụmọrụ cache ntuziaka nke ndị na-eweta ọrụ na otú e si eji nzaghachi semantiki mpaghara eme ihe ọzọ.",
     "refresh": "Mee ka ọ dị ọhụrụ",
     "clearAll": "Hichapụ Cache Semantiki",
+    "clearAllConfirm": "A ga-ehichapụ ihe niile dị na cache a. Enweghị ike ịtụgharị nke a.",
     "memoryEntries": "Ndenye Ebe Nchekwa",
     "memoryEntriesSub": "LRU dị na ebe nchekwa",
     "dbEntries": "Ndenye DB",
