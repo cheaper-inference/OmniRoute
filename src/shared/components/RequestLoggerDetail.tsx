@@ -252,7 +252,7 @@ function StreamSection({ title, sectionId, json, onCopy }) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-bold">
+          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-semibold">
             {title}
           </h3>
           <Button
@@ -602,7 +602,7 @@ export function RequestLoggerDetailPanel({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               {timingLog.active ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-warning/20 text-warning border border-warning/30">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold bg-warning/20 text-warning border border-warning/30">
                   <span className="inline-block h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
                 </span>
               ) : classifyHttpLog(log) === "transport_error" ||
@@ -613,16 +613,16 @@ export function RequestLoggerDetailPanel({
                   )}
                 </Badge>
               ) : log.status === 0 ? (
-                <span className="inline-block px-2.5 py-1 rounded text-xs font-bold bg-success/20 text-success border border-success/30">
+                <span className="inline-block px-2.5 py-1 rounded text-xs font-semibold bg-success/20 text-success border border-success/30">
                   {t("completed")}
                 </span>
               ) : (
-                <Badge variant={httpStatusTone(log.status)} className="font-bold">
+                <Badge variant={httpStatusTone(log.status)} className="font-semibold">
                   {log.status}
                 </Badge>
               )}
               {hasStatusDiscrepancy && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
                   {t("upstreamStatus", { status: providerStatus })}
                 </span>
               )}
@@ -631,7 +631,7 @@ export function RequestLoggerDetailPanel({
                   {t("omittedHttpAttempts", { count: upstreamHttp.omitted })}
                 </Badge>
               )}
-              {log.method && <span className="font-bold text-lg">{log.method}</span>}
+              {log.method && <span className="font-semibold text-lg">{log.method}</span>}
             </div>
             {hasStatusDiscrepancy && (
               <span className="text-[10px] text-warning font-medium mt-0.5">
@@ -755,7 +755,7 @@ export function RequestLoggerDetailPanel({
                 {t("provider")}
               </div>
               <span
-                className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
+                className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
                 style={{ backgroundColor: providerColor.bg, color: providerColor.text }}
               >
                 {providerLabel}
@@ -807,13 +807,13 @@ export function RequestLoggerDetailPanel({
                 {t("input")}
               </div>
               <div className="flex flex-wrap items-center gap-1.5" data-testid="token-group-input">
-                <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-bold">
+                <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-semibold">
                   {t("totalIn", { value: formatTokenValue(tokenStats.totalIn) })}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-info/20 text-info text-xs font-bold">
+                <span className="px-2 py-0.5 rounded bg-info/20 text-info text-xs font-semibold">
                   {t("cacheRead", { value: formatTokenValue(tokenStats.cacheRead) })}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-xs font-bold">
+                <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-xs font-semibold">
                   {t("cacheWrite", { value: formatTokenValue(tokenStats.cacheWrite) })}
                 </span>
                 {tokenStats.compressed != null &&
@@ -826,7 +826,7 @@ export function RequestLoggerDetailPanel({
                         ? Math.max(0, Math.min(100, Math.round((saved / fromTokens) * 100)))
                         : 100;
                     return (
-                      <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-bold">
+                      <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
                         {t("compressed", {
                           from: fromTokens.toLocaleString(),
                           to: Math.max(0, tokenStats.totalIn).toLocaleString(),
@@ -842,10 +842,10 @@ export function RequestLoggerDetailPanel({
                 {t("output")}
               </div>
               <div className="flex flex-wrap items-center gap-1.5" data-testid="token-group-output">
-                <span className="px-2 py-0.5 rounded bg-success/20 text-success text-xs font-bold">
+                <span className="px-2 py-0.5 rounded bg-success/20 text-success text-xs font-semibold">
                   {t("totalOut", { value: formatTokenValue(tokenStats.totalOut) })}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-bold">
+                <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
                   {t("reasoning", { value: formatReasoningStat(tokenStats, t) })}
                 </span>
               </div>
@@ -876,7 +876,7 @@ export function RequestLoggerDetailPanel({
                 {t("provider")}
               </div>
               <span
-                className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
+                className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
                 style={{ backgroundColor: providerColor.bg, color: providerColor.text }}
               >
                 {providerLabel}
@@ -887,7 +887,7 @@ export function RequestLoggerDetailPanel({
                 {t("requestProtocol")}
               </div>
               <span
-                className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
+                className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
                 style={{ backgroundColor: protocol.bg, color: protocol.text }}
               >
                 {protocol.label}
@@ -898,7 +898,7 @@ export function RequestLoggerDetailPanel({
                 {t("cacheSource")}
               </div>
               <span
-                className={`inline-block px-2.5 py-1 rounded text-[10px] font-bold border ${cacheSourceClassName}`}
+                className={`inline-block px-2.5 py-1 rounded text-[10px] font-semibold border ${cacheSourceClassName}`}
               >
                 {cacheSourceLabel}
               </span>
@@ -917,7 +917,7 @@ export function RequestLoggerDetailPanel({
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("modelPinning")}
                 </div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold bg-chart-3/15 text-chart-3 border border-chart-3/25">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold bg-chart-3/15 text-chart-3 border border-chart-3/25">
                   <Icon name="push_pin" size={12} />
                   {t("activeModelPinning")}
                 </span>
@@ -965,7 +965,7 @@ export function RequestLoggerDetailPanel({
                 {t("combo")}
               </div>
               {detail?.comboName || log.comboName ? (
-                <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-chart-3/20 text-chart-3 border border-chart-3/30">
+                <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold bg-chart-3/20 text-chart-3 border border-chart-3/30">
                   {detail?.comboName || log.comboName}
                 </span>
               ) : (
@@ -995,7 +995,7 @@ export function RequestLoggerDetailPanel({
         {(detail?.error || log.error) && (
           <div className="p-4 rounded-xl bg-error/10 border border-error/30">
             <div className="flex items-center justify-between mb-1">
-              <div className="text-[10px] text-error uppercase tracking-wider font-bold">
+              <div className="text-[10px] text-error uppercase tracking-wider font-semibold">
                 {t("error")}
               </div>
               {isCombo503 && !cleared && (
@@ -1044,7 +1044,7 @@ export function RequestLoggerDetailPanel({
         {/* Related Requests (same correlation ID) */}
         {relatedLogs.length > 1 && (
           <div className="p-4 rounded-xl bg-bg-subtle border border-border">
-            <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2 font-bold">
+            <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2 font-semibold">
               {t("relatedRequests", { count: relatedLogs.length })}
             </div>
             <div className="flex flex-col gap-1">
@@ -1073,7 +1073,7 @@ export function RequestLoggerDetailPanel({
                             ? "error"
                             : httpStatusTone(r.status)
                       }
-                      className="min-w-[28px] justify-center text-[9px] font-bold"
+                      className="min-w-[28px] justify-center text-[9px] font-semibold"
                     >
                       {classifyHttpLog(r) === "transport_error"
                         ? t("transportError")
@@ -1090,7 +1090,9 @@ export function RequestLoggerDetailPanel({
                     </span>
                     <span className="text-text-muted ml-auto">{formatDuration(r.duration)}</span>
                     {isCurrent && (
-                      <span className="text-[9px] text-primary font-bold ml-1">{t("current")}</span>
+                      <span className="text-[9px] text-primary font-semibold ml-1">
+                        {t("current")}
+                      </span>
                     )}
                   </Button>
                 );
@@ -1101,7 +1103,7 @@ export function RequestLoggerDetailPanel({
 
         {detailIssue && (
           <div className="p-4 rounded-xl bg-warning/10 border border-warning/30">
-            <div className="text-[10px] text-warning uppercase tracking-wider mb-1 font-bold">
+            <div className="text-[10px] text-warning uppercase tracking-wider mb-1 font-semibold">
               {t("detailStatus")}
             </div>
             <div className="text-sm text-warning">{detailIssue}</div>
