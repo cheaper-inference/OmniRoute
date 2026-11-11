@@ -165,7 +165,13 @@ beforeEach(() => {
         : url.startsWith("/api/reports/summary")
           ? REPORT
           : url.startsWith(`/api/reports/sessions/${ROW.id}`)
-            ? { session: STORED_SESSION, recentRequests: [], totals: ALL_TIME_TOTALS }
+            ? {
+                session: STORED_SESSION,
+                recentRequests: [],
+                requestsTotal: 0,
+                totals: ALL_TIME_TOTALS,
+                timeline: { points: [], capped: false },
+              }
             : { sessions: [ROW], total: 1 };
       return { ok: true, status: 200, json: async () => body };
     })
@@ -261,7 +267,8 @@ describe("Team Reports sessions list (window totals)", () => {
     const headers = [...container.querySelectorAll("thead th")].map((th) => th.textContent);
     const cells = [...container.querySelectorAll("tbody tr td")];
     const at = (header: string) => cells[headers.indexOf(header)] as HTMLElement;
-    expect(at("Requests").textContent).toBe("7(2 Errors)");
+    expect(at("Requests").textContent).toBe("7");
+    expect(at("Errors").textContent).toBe("2");
     expect(at("Cost").textContent).toBe(formatCost(0.5));
     expect(at("Last active").textContent).toBe(formatDateTime(ROW.windowLastSeenAt));
     expect(at("Last active").textContent).not.toBe(formatDateTime(ROW.lastSeenAt));

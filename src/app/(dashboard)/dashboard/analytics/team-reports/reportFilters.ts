@@ -76,7 +76,14 @@ export const REPORT_TABS = [
 export type ReportTab = (typeof REPORT_TABS)[number];
 const DEFAULT_TAB: ReportTab = "members";
 
-export const SESSION_SORT_FIELDS = ["lastSeen", "firstSeen", "requests", "tokens", "cost"] as const;
+export const SESSION_SORT_FIELDS = [
+  "lastSeen",
+  "firstSeen",
+  "requests",
+  "tokens",
+  "cost",
+  "activeTime",
+] as const;
 export type SessionSort = (typeof SESSION_SORT_FIELDS)[number];
 export interface SessionOrder {
   sort: SessionSort;

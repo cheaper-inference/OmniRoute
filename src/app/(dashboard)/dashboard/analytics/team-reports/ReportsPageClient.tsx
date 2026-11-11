@@ -1,19 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import type { ReportDimension, ReportTotals } from "@/lib/usage/agentSessionReports";
+import type { ReportDimension } from "@/lib/usage/agentSessionReports";
 import { Button, Card, SegmentedControl } from "@/shared/components";
-import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import BreakdownTable from "./components/BreakdownTable";
 import FilterChips from "./components/FilterChips";
+import KpiCards from "./components/KpiCards";
 import ReportFilters from "./components/ReportFilters";
 import SessionsPanel from "./components/SessionsPanel";
-import { CacheTokens, useTokenLabels } from "./components/TokenFigures";
-import { splitTokens } from "./components/format";
 import {
   emptyFilters,
   parseReportView,
@@ -85,73 +83,6 @@ const BREAKDOWN_TABS: Record<ReportDimension, BreakdownTabConfig> = {
   },
   daily: { nameKey: "colDate", fallbackKey: "unknown", extraCount: "members", defaultSort: "name" },
 };
-
-interface KpiCard {
-  label: string;
-  value?: string;
-  /** Several labelled figures in place of the single value. */
-  figures?: Array<[string, ReactNode]>;
-  hint: string | null;
-}
-
-function KpiCards({ totals }: { totals: ReportTotals }) {
-  const t = useTranslations("reports");
-  const tokenLabels = useTokenLabels();
-  const tokens = splitTokens(totals.tokens);
-  const errorRate = totals.requests ? ((totals.errors / totals.requests) * 100).toFixed(1) : "0";
-  const cards: KpiCard[] = [
-    {
-      label: t("kpiCost"),
-      value: formatCost(totals.costUsd),
-      hint: t("kpiUnpriced", { count: totals.unpricedRequests }),
-    },
-    {
-      label: t("kpiTokens"),
-      figures: [
-        [tokenLabels.input, fmtCompact(tokens.input)],
-        [tokenLabels.output, fmtCompact(tokens.output)],
-        [tokenLabels.cache, <CacheTokens key="cache" split={tokens} />],
-      ],
-      hint: null,
-    },
-    {
-      label: t("kpiSessions"),
-      value: String(totals.sessions),
-      hint: t("kpiRequests", { count: totals.requests }),
-    },
-    {
-      label: t("kpiErrors"),
-      value: `${errorRate}%`,
-      hint: t("kpiErrorCount", { count: totals.errors }),
-    },
-    { label: t("kpiMembers"), value: String(totals.members), hint: null },
-    { label: t("kpiProjects"), value: String(totals.projects), hint: null },
-  ];
-  return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      {cards.map((card) => (
-        <Card key={card.label} padding="sm">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
-            {card.label}
-          </p>
-          {card.figures ? (
-            <dl className="mt-1 space-y-0.5">
-              {card.figures.map(([term, value]) => (
-                <div key={term} className="flex items-baseline justify-between gap-2">
-                  <dt className="text-xs text-text-muted">{term}</dt>
-                  <dd className="text-sm font-bold tabular-nums text-text-main">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : (
-            <p className="mt-1 text-xl font-bold tabular-nums text-text-main">{card.value}</p>
-          )}
-          {card.hint && <p className="mt-0.5 text-xs text-text-muted">{card.hint}</p>}
-        </Card>
-      ))}
-    </div>
-  );
-}
 
 export default function ReportsPageClient() {
   const t = useTranslations("reports");

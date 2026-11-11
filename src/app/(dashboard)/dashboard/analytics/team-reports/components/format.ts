@@ -1,3 +1,5 @@
+import { formatDuration } from "@/shared/utils/formatting";
+
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return "-";
   const date = new Date(iso);
@@ -40,4 +42,29 @@ export function splitTokens(tokens: StoredTokens): TokenSplit {
     cacheRead: tokens.cacheRead,
     cacheCreation: tokens.cacheCreation,
   };
+}
+
+/** Shown in place of a figure that has no value (no input, no latency samples, no sessions). */
+export const NO_VALUE = "—";
+
+/** Time spans as "2h 14m", "12m 5s", "48s"; sub-second spans round to "0s". */
+export function formatSpan(ms: number | null | undefined): string {
+  if (ms == null || !Number.isFinite(ms)) return NO_VALUE;
+  const total = Math.max(0, Math.round(ms / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
+/** Request latency and TTFT: "420ms", "1.2s". `null` and 0 (nothing recorded) read as no value. */
+export function formatLatency(ms: number | null | undefined): string {
+  return ms ? formatDuration(ms) : NO_VALUE;
+}
+
+/** A 0..1 ratio as "87.5%". */
+export function formatRatio(ratio: number | null | undefined): string {
+  return ratio == null || !Number.isFinite(ratio) ? NO_VALUE : `${(ratio * 100).toFixed(1)}%`;
 }

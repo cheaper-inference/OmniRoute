@@ -172,7 +172,13 @@ beforeEach(() => {
         : url.startsWith("/api/reports/summary")
           ? REPORT
           : url.startsWith(`/api/reports/sessions/${SESSION.id}`)
-            ? { session: SESSION, recentRequests: REQUESTS, totals: TOTALS }
+            ? {
+                session: SESSION,
+                recentRequests: REQUESTS,
+                requestsTotal: REQUESTS.length,
+                totals: TOTALS,
+                timeline: { points: [], capped: false },
+              }
             : { sessions: [ROW], total: 1 };
       return { ok: true, status: 200, json: async () => body };
     })
