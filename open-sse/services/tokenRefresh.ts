@@ -16,7 +16,7 @@ import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
-import { serializeRefresh } from "./refreshSerializer.ts";
+import { serializeRefresh, rotationGroupFor } from "./refreshSerializer.ts";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
   extractOAuthErrorCode,
@@ -59,6 +59,7 @@ import {
 } from "./antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
+import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshRenderhourToken } from "./tokenRefresh/providers/renderhour.ts";
@@ -120,6 +121,7 @@ export const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 // Providers with non-rotating tokens (Google, Anthropic) or where multi-
 // account is naturally isolated keep longer lead times.
 export const REFRESH_LEAD_MS: Record<string, number> = {
+  chatgpt: 60_000, // Official SIWC local SDK refresh window.
   // Rotating refresh tokens — minimize refresh frequency to avoid the
   // "refresh-invalidates-siblings" cascade documented for OpenAI Auth0.
   codex: 5 * 60 * 1000, // 5 minutes
@@ -215,6 +217,11 @@ let refreshMutexMaxMs = REFRESH_MUTEX_MAX_MS_DEFAULT;
 export function setRefreshMutexMaxMsForTest(ms: number | null) {
   refreshMutexMaxMs = typeof ms === "number" ? ms : REFRESH_MUTEX_MAX_MS_DEFAULT;
 }
+
+// Cap for the grouped refresh wave (getAllAccessTokens): keeps one OAuth token
+// endpoint from seeing hundreds of parallel refreshes, same order as the quota
+// fetch caps in combo strategies.
+const BULK_TOKEN_REFRESH_CONCURRENCY = 8;
 
 // Token Rotation Map (codex-multi-auth pattern) lives in
 // ./tokenRefresh/rotationMap.ts — see that leaf for the in-memory rotation
@@ -441,6 +448,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
 
+    case "chatgpt":
+      return await refreshChatGptToken(credentials, proxyConfig);
+
     case "cursor":
       if (!credentials.refreshToken) {
         return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
@@ -515,6 +525,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "chatgpt",
     "copilot-m365-web",
     "gemini",
     "antigravity",
@@ -755,10 +766,17 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
               accessToken: dbConnection.accessToken,
               refreshToken: dbConnection.refreshToken,
               expiresAt: dbConnection.expiresAt,
+              ...(provider === "chatgpt"
+                ? { providerSpecificData: dbConnection.providerSpecificData }
+                : {}),
             };
           }
           credentials.refreshToken = dbConnection.refreshToken;
           credentials.accessToken = dbConnection.accessToken;
+          if (provider === "chatgpt") {
+            credentials.expiresAt = dbConnection.expiresAt;
+            credentials.providerSpecificData = dbConnection.providerSpecificData;
+          }
         }
       }
     } catch (e) {
@@ -851,28 +869,183 @@ export function formatProviderCredentials(provider, credentials, log) {
   }
 }
 
+/** Connection id when usable (a non-empty string), else null. */
+function bulkConnectionId(connection) {
+  return typeof connection.connectionId === "string" && connection.connectionId
+    ? connection.connectionId
+    : null;
+}
+
+/** Result map key: per connection when it has an id, else by provider. */
+function bulkConnectionKey(connection) {
+  const connectionId = bulkConnectionId(connection);
+  return connectionId ? `${connection.provider}:${connectionId}` : connection.provider;
+}
+
+/**
+ * Resolve the proxy for one grouped connection, fail-closed: a connection
+ * with a proxy policy must not egress its refresh on a direct connection
+ * (#13470). A failed resolution is logged and returned as `null` plus an
+ * error marker, so the caller counts the connection as failed rather than
+ * refreshing it directly.
+ */
+async function resolveBulkProxy(opts, provider, connectionId, key, log) {
+  if (!opts?.resolveProxy) return { proxy: null, failed: false };
+  try {
+    return { proxy: (await opts.resolveProxy(provider, connectionId)) ?? null, failed: false };
+  } catch (proxyErr) {
+    log?.error?.(
+      "TOKEN_REFRESH",
+      `Bulk refresh: proxy resolution failed for ${key}: ${
+        proxyErr instanceof Error ? proxyErr.message : String(proxyErr)
+      }`
+    );
+    return { proxy: null, failed: true };
+  }
+}
+
+/**
+ * Refresh one grouped-connection credential and store the token in `results`
+ * under its bulk key. A usable result carries an access token; error markers
+ * and failures leave the pre-seeded null in place. The proxy and the rotated-
+ * token persist callback are supplied by the caller (`opts`); without them the
+ * connection refreshes exactly as before (no proxy, no row write) — open-sse
+ * stays free of `@/lib/db` imports.
+ */
+async function refreshBulkConnection(connection, results, log, opts) {
+  const key = bulkConnectionKey(connection);
+  const connectionId = bulkConnectionId(connection);
+
+  const { proxy, failed: proxyFailed } = await resolveBulkProxy(
+    opts,
+    connection.provider,
+    connectionId,
+    key,
+    log
+  );
+  if (proxyFailed) return;
+
+  const onPersist =
+    connectionId && opts?.onPersist
+      ? async (refreshResult) => {
+          await opts.onPersist(connectionId, refreshResult);
+        }
+      : undefined;
+
+  try {
+    const token = await getAccessToken(
+      connection.provider,
+      {
+        connectionId: connectionId || undefined,
+        refreshToken: connection.refreshToken,
+        accessToken: connection.accessToken || null,
+        expiresAt: connection.expiresAt,
+        providerSpecificData: connection.providerSpecificData,
+      },
+      log,
+      proxy,
+      onPersist
+    );
+    if (token && typeof token === "object" && token.accessToken) {
+      results[key] = token;
+    }
+  } catch {
+    results[key] = null;
+  }
+}
+
+/**
+ * Rotation group of `connection`, or null when its provider does not rotate.
+ */
+function bulkRotationGroup(connection) {
+  return rotationGroupFor(connection.provider);
+}
+
+/**
+ * Next unclaimed eligible index whose rotation group (when rotating) is not
+ * held by another in-flight refresh, else -1. A rotating provider only starts
+ * when no sibling of its group is in flight, so the wave itself enforces
+ * one-at-a-time per group and the serializer's settle gap is never paid — a
+ * sibling enters the lane only after the previous one has fully left it.
+ * Non-rotating providers draw freely from the pool.
+ */
+function pickBulkConnection(eligible, claimed, inFlightGroups) {
+  for (let i = 0; i < eligible.length; i++) {
+    if (claimed.has(i)) continue;
+    const group = bulkRotationGroup(eligible[i]);
+    if (group && inFlightGroups.has(group)) continue;
+    return i;
+  }
+  return -1;
+}
+
 /**
  * Get all access tokens for a user
+ *
+ * Refreshes the user's active connections in a bounded wave (up to
+ * BULK_TOKEN_REFRESH_CONCURRENCY in flight, one at a time per rotation group)
+ * instead of serially. Results are keyed per connection
+ * (`provider:connectionId`) when the connection has an id, otherwise by
+ * provider; failed connections are present with a `null` value so callers can
+ * tell "refreshed" from "failed" without guessing. `opts.resolveProxy` and
+ * `opts.onPersist` are optional per-connection hooks supplied by the caller.
  */
-export async function getAllAccessTokens(userInfo, log) {
+export async function getAllAccessTokens(userInfo, log, opts) {
   const results = {};
+  const connections = userInfo?.connections;
+  if (connections && Array.isArray(connections)) {
+    const eligible = connections.filter((connection) => connection.isActive && connection.provider);
 
-  if (userInfo.connections && Array.isArray(userInfo.connections)) {
-    for (const connection of userInfo.connections) {
-      if (connection.isActive && connection.provider) {
-        const token = await getAccessToken(
-          connection.provider,
-          {
-            refreshToken: connection.refreshToken,
-          },
-          log
-        );
+    // Pre-seed so a failed connection is present with null (entry order preserved).
+    for (const connection of eligible) {
+      results[bulkConnectionKey(connection)] = null;
+    }
 
-        if (token) {
-          results[connection.provider] = token;
+    const claimed = new Set();
+    const inFlightGroups = new Set();
+    // Slots parked because every unclaimed connection is behind a held
+    // rotation group; woken when an in-flight refresh releases its group.
+    let parkedSlots: Array<() => void> = [];
+    const wakeParkedSlots = () => {
+      const wake = parkedSlots;
+      parkedSlots = [];
+      for (const resolve of wake) resolve();
+    };
+    const worker = async () => {
+      while (claimed.size < eligible.length) {
+        const i = pickBulkConnection(eligible, claimed, inFlightGroups);
+        if (i < 0) {
+          // Every unclaimed connection is behind a held rotation group — park
+          // until an in-flight sibling finishes (no busy re-polling: a sibling
+          // refresh can hold its lane for seconds). A held group implies an
+          // in-flight refresh whose `finally` wakes this slot.
+          await new Promise<void>((resolve) => parkedSlots.push(resolve));
+          continue;
+        }
+        claimed.add(i);
+        const connection = eligible[i];
+        const group = bulkRotationGroup(connection);
+        if (group) {
+          // Held from claim to completion: another wave slot may not claim a
+          // sibling of a group that is currently refreshing.
+          inFlightGroups.add(group);
+        }
+        try {
+          await refreshBulkConnection(connection, results, log, opts);
+        } finally {
+          if (group) {
+            inFlightGroups.delete(group);
+            wakeParkedSlots();
+          }
         }
       }
-    }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(BULK_TOKEN_REFRESH_CONCURRENCY, eligible.length) }, () =>
+        worker()
+      )
+    );
   }
 
   return results;
