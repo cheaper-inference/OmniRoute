@@ -1,0 +1,1 @@
+- **fix(api):** `/v1/models` and the auto/* pools no longer advertise models of no-auth local-CLI providers (zcode, auggie, devin-cli-agentic, codex-app-server) whose binary or bridge is missing on the server host, so clients configured from the live list only see models that can run; explicit requests and providers with a connection are unchanged.
