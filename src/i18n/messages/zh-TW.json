@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "快取輸入權杖",
+    "inputTokensHint": "不包含快取讀取。快取寫入仍計入輸入權杖。",
+    "inputSplitUnavailable": "由於快取讀取資料不完整或不一致，無法顯示輸入細項。",
+    "cachedInputTokensHint": "僅包含已回報的快取讀取，已計入輸入總量。",
     "title": "分析",
     "usageAnalyticsTitle": "用量分析",
     "tokenDisplayCompact": "精簡",

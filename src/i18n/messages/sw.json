@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Tokeni za ingizo zilizohifadhiwa kwenye akiba",
+    "inputTokensHint": "Haijumuishi usomaji kutoka kwenye akiba. Uandishi kwenye akiba bado huhesabiwa kama tokeni za ingizo.",
+    "inputSplitUnavailable": "Mgawanyo wa ingizo haupatikani kwa sababu data ya usomaji wa akiba haijakamilika au hailingani.",
+    "cachedInputTokensHint": "Usomaji wa akiba ulioripotiwa pekee, ambao tayari umejumuishwa katika jumla ya ingizo.",
     "title": "Uchanganuzi",
     "usageAnalyticsTitle": "Uchambuzi wa Matumizi",
     "tokenDisplayCompact": "Fupi",

@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Vahemällu salvestatud sisendtokenid",
+    "inputTokensHint": "Ei sisalda vahemälust lugemisi. Vahemällu kirjutamised loetakse endiselt sisendtokeniteks.",
+    "inputSplitUnavailable": "Sisendi jaotus pole saadaval, sest vahemälu lugemisandmed on puudulikud või vastuolulised.",
+    "cachedInputTokensHint": "Ainult teatatud vahemälust lugemised, mis sisalduvad juba kogu sisendis.",
     "title": "Analüütika",
     "usageAnalyticsTitle": "Kasutusanalüütika",
     "tokenDisplayCompact": "Kompaktne",

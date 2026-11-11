@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "캐시된 입력 토큰",
+    "inputTokensHint": "캐시 읽기는 제외됩니다. 캐시 쓰기는 여전히 입력 토큰으로 집계됩니다.",
+    "inputSplitUnavailable": "캐시 읽기 데이터가 불완전하거나 일관되지 않아 입력 내역을 표시할 수 없습니다.",
+    "cachedInputTokensHint": "보고된 캐시 읽기만 해당하며, 이미 총 입력에 포함되어 있습니다.",
     "title": "분석",
     "usageAnalyticsTitle": "사용량 분석",
     "tokenDisplayCompact": "간략",
