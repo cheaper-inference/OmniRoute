@@ -1,6 +1,7 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
 import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
@@ -882,6 +883,11 @@ export function createSSEStream(options: StreamOptions = {}) {
 
   let buffer = "";
   let usage: UsageLike | null = null;
+  const mergePassthroughCacheCreationUsage = (value: unknown) => {
+    if (!value) return;
+    const fields = mergeCacheCreationFields(usage, value);
+    if (Object.keys(fields).length > 0) Object.assign((usage ??= {}), fields);
+  };
   let lastPropagatedCacheEvidence: TranslateState["cacheEvidence"];
 
   function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLike): UsageLike {
@@ -1030,6 +1036,14 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Guard against duplicate [DONE] events — ensures exactly one per stream
   let doneSent = false;
   let upstreamErrorForwarded = false;
+  // Wire format of the chunks pushed into providerPayloadCollector. TRANSLATE mode receives the raw
+  // provider response (targetFormat). PASSTHROUGH forwards the provider's chunks unchanged, so their
+  // format is the client's -- but passthrough callers (createPassthroughStreamWithLogger) pass only
+  // clientResponseFormat, never sourceFormat. Falling back to clientResponseFormat keeps the
+  // dashboard's Provider Response from collapsing to an empty chat.completion for a Responses
+  // passthrough (e.g. Mistral's native /v1/responses).
+  const providerWireFormat =
+    mode === STREAM_MODE.TRANSLATE ? targetFormat : (sourceFormat ?? clientResponseFormat);
   const providerPayloadCollector = createStructuredSSECollector({
     stage: "provider_response",
     // #9315: compute the summary live from every pushed chunk (not just the
@@ -1052,8 +1066,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     // mode has no separate provider/client format split — nothing gets
     // translated, so the provider's raw chunks genuinely ARE in sourceFormat
     // (and real passthrough callers, e.g. createPassthroughStreamWithLogger,
-    // don't even pass targetFormat) — keep using sourceFormat there.
-    format: mode === STREAM_MODE.TRANSLATE ? targetFormat : sourceFormat,
+    // don't even pass targetFormat, nor sourceFormat) — see providerWireFormat above.
+    format: providerWireFormat,
     fallbackModel: model,
   });
   const clientPayloadCollector = createStructuredSSECollector({
@@ -1750,7 +1764,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Responses SSE: only extract usage, forward payload as-is
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = mergeUsageSnapshot(usage, extracted);
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
@@ -2094,6 +2111,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     if (!usage) usage = {};
                     const u = usage;
                     const eu = extracted as UsageTokenRecord;
+                    Object.assign(u, mergeCacheCreationFields(u, extracted));
                     if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
                     if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
                     if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
@@ -2219,6 +2237,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   const hadArrayContent = Array.isArray(rawDelta?.content);
                   const nativeFailure = nativeFinishFailure(parsed); // before sanitize drops it
 
+                  // Client sanitization may remove diagnostic status fields.
+                  // Capture provider evidence first without changing token totals.
+                  mergePassthroughCacheCreationUsage(extractUsage(parsed));
                   if (!projectedFailure) {
                     parsed = sanitizeStreamingChunk(parsed);
                     if (
@@ -2393,7 +2414,10 @@ export function createSSEStream(options: StreamOptions = {}) {
 
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = mergeUsageSnapshot(usage, extracted);
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
 
                   const isFinishChunk = parsed.choices?.[0]?.finish_reason;
@@ -2707,6 +2731,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             } else {
               const su = state.usage as UsageLike;
               const eu = extracted as UsageLike;
+              Object.assign(su, mergeCacheCreationFields(su, extracted));
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
@@ -2813,8 +2838,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                 passthroughResponsesId = value;
               },
               setUsage: (value: unknown) => {
-                usage = value as UsageTokenRecord;
+                usage = {
+                  ...(value as UsageTokenRecord),
+                  ...mergeCacheCreationFields(usage, value),
+                };
               },
+              mergeCacheCreationUsage: mergePassthroughCacheCreationUsage,
               addTotalContentLength: (value: number) => {
                 totalContentLength += value;
               },
@@ -2888,6 +2917,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
                 if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
+                mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -3181,14 +3211,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // reasoning-heavy stream (live incident 2026-09-04) -- see
                   // providerPayloadCollector's own `format:` construction comment above.
                   providerPayload: providerPayloadCollector.build(
-                    sourceFormat === FORMATS.OPENAI_RESPONSES
+                    providerWireFormat === FORMATS.OPENAI_RESPONSES
                       ? providerPayloadCollector.getSummary()
                       : { object: "chat.completion", ...responseBody },
                     { includeEvents: false }
                   ),
                   // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
                   // clientResponseFormat (what the client actually receives) rather than
-                  // sourceFormat (what the upstream sent) -- they're equal in passthrough
+                  // providerWireFormat (what the upstream sent) -- they're equal in passthrough
                   // mode but conceptually distinct. Without this, `entry.responseId` in
                   // src/lib/usage/callLogs.ts is always null for a Responses-API client
                   // (extractResponsesId reads `clientResponse.id`, which the chat-shaped
@@ -3305,6 +3335,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 } else {
                   const su = state.usage as UsageLike;
                   const eu = extracted as UsageLike;
+                  Object.assign(su, mergeCacheCreationFields(su, extracted));
                   if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                   if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;

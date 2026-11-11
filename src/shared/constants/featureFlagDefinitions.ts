@@ -1,4 +1,7 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
+import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
+import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+import { AGENT_SESSION_MESSAGES_ENABLED_FLAG } from "./agentSessionFeatureFlagDefinitions";
 
 export type { FeatureFlagDefinition };
 
@@ -1107,6 +1110,8 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
 
+  FAL_NATIVE_ENABLED_FLAG,
+
   {
     key: "CATALOG_MIRROR_REFINEMENTS_ENABLED",
     label: "Catalog Mirror Refinements",
@@ -1383,18 +1388,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
-    key: "AGENT_SESSION_MESSAGES_ENABLED",
-    label: "Agent Session Messages Capture",
-    description:
-      "Capture simplified conversation turns (user prompt, assistant response, called tools) for coding-agent sessions and expose them through GET /v1/me/sessions/{id}/messages to the session owner. Off by default: turns are not captured unless this flag is enabled. Never captured for noLog API keys.",
-    descriptionI18nKey: "featureFlagAgentSessionMessagesEnabledDescription",
-    category: "policies",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
-  {
     key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
     label: "Cursor Grok 4.7: Drop the max Effort Tier",
     description:
@@ -1442,4 +1435,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  AGENT_SESSION_MESSAGES_ENABLED_FLAG,
+  ...SEARCH_FEATURE_FLAG_DEFINITIONS,
 ];

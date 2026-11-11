@@ -107,6 +107,7 @@ export async function PATCH(request, { params }) {
       usageLimitEnabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd,
       chaosModeEnabled,
       sharedQuotaProviders,
       anthropicRateLimitHeaders,
@@ -153,6 +154,7 @@ export async function PATCH(request, { params }) {
     if (usageLimitEnabled !== undefined) payload.usageLimitEnabled = usageLimitEnabled;
     if (dailyUsageLimitUsd !== undefined) payload.dailyUsageLimitUsd = dailyUsageLimitUsd;
     if (weeklyUsageLimitUsd !== undefined) payload.weeklyUsageLimitUsd = weeklyUsageLimitUsd;
+    if (fiveHourUsageLimitUsd !== undefined) payload.fiveHourUsageLimitUsd = fiveHourUsageLimitUsd;
     if (chaosModeEnabled !== undefined) payload.chaosModeEnabled = chaosModeEnabled;
 
     const hasSelfServiceUpdate =
@@ -204,6 +206,7 @@ export async function PATCH(request, { params }) {
       ...(usageLimitEnabled !== undefined && { usageLimitEnabled }),
       ...(dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd }),
       ...(weeklyUsageLimitUsd !== undefined && { weeklyUsageLimitUsd }),
+      ...(fiveHourUsageLimitUsd !== undefined && { fiveHourUsageLimitUsd }),
       ...(chaosModeEnabled !== undefined && { chaosModeEnabled }),
       ...(selfServiceSettings && {
         ...(sharedQuotaProviders !== undefined && {
