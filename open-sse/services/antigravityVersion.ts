@@ -91,6 +91,12 @@ function parseCliRelease(payload: unknown): string | null {
   return normalizeVersion(release.tag_name ?? release.name);
 }
 
+/**
+ * Resolve one product's advertised client version: a fresh cached success (6 h TTL) wins;
+ * concurrent callers share one in-flight lookup; after a failed lookup the last known or
+ * fallback version is returned without refetching for ANTIGRAVITY_VERSION_FAILURE_BACKOFF_MS,
+ * so a refused source (e.g. GitHub's anonymous rate limit) is not hit on every request.
+ */
 async function resolveProductVersion(
   state: ProductVersionState,
   fallbackVersion: string,
@@ -188,6 +194,7 @@ export function seedAntigravityCliVersionCache(version: string, fetchedAt = Date
   seedVersionCache(cliState, version, fetchedAt);
 }
 
+/** Reset both products' cache, in-flight lookup and failure backoff (tests and operator reloads). */
 export function clearAntigravityVersionCaches(): void {
   ideState.cache = null;
   ideState.inFlight = null;
