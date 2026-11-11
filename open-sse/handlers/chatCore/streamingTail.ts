@@ -211,6 +211,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       provider,
       model,
       log,
+      signal: streamController.signal,
       // #16438 opt-in: briefly probe Claude/Codex streams for usable output after the first
       // lifecycle event so an empty turn can be retried on a sibling connection.
       contentProbeMs:
