@@ -7,6 +7,7 @@
 import React from "react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import TaskAwareRoutingCard from "@/app/(dashboard)/dashboard/settings/components/TaskAwareRoutingCard";
 
 vi.mock("next-intl", () => ({
@@ -136,6 +137,26 @@ describe("TaskAwareRoutingCard", () => {
         complexityRouting: { enabled: true, minScore: 6, model: OPUS },
       })
     );
+  });
+
+  it("saves a typed threshold once, when the field loses focus", async () => {
+    const escalation = { enabled: true, minScore: 6, model: OPUS };
+    server = { ...server, enabled: true, complexityRouting: escalation };
+    stubFetch();
+    const user = userEvent.setup();
+    render(<TaskAwareRoutingCard />);
+
+    await user.click(await screen.findByLabelText("taskRoutingComplexityThreshold"));
+    await user.keyboard("{Control>}a{/Control}12");
+    expect(puts).toEqual([]);
+
+    await user.tab();
+    await waitFor(() =>
+      expect(puts).toEqual([{ complexityRouting: { ...escalation, minScore: 12 } }])
+    );
+    expect(
+      (screen.getByLabelText("taskRoutingComplexityThreshold") as HTMLInputElement).value
+    ).toBe("12");
   });
 
   it("restores the default model map", async () => {

@@ -172,6 +172,30 @@ function TaskModelsSection({
   );
 }
 
+// Every save applies to live routing, so a number is saved when the field loses focus, never
+// per keystroke (typing "12" would save 1 first). Mount with key={saved} to reset the draft.
+function ThresholdField({
+  label,
+  saved,
+  onSave,
+}: {
+  label: string;
+  saved: number;
+  onSave: (minScore: number) => void;
+}) {
+  const [draft, setDraft] = useState(saved);
+  return (
+    <div
+      className="w-32"
+      onBlur={() => {
+        if (draft !== saved) onSave(draft);
+      }}
+    >
+      <NumberField label={label} value={draft} min={0} max={100} onChange={setDraft} />
+    </div>
+  );
+}
+
 // complexityRouting is replaced as a whole on update, so every save sends all three fields.
 function EscalationSection({
   complexity,
@@ -203,17 +227,12 @@ function EscalationSection({
           testId="task-routing-complexity-model"
           onChange={(model) => update({ model })}
         />
-        <div className="w-32">
-          <NumberField
-            label={t("taskRoutingComplexityThreshold")}
-            value={complexity.minScore}
-            min={0}
-            max={100}
-            onChange={(minScore) => {
-              if (minScore !== complexity.minScore) update({ minScore });
-            }}
-          />
-        </div>
+        <ThresholdField
+          key={complexity.minScore}
+          label={t("taskRoutingComplexityThreshold")}
+          saved={complexity.minScore}
+          onSave={(minScore) => update({ minScore })}
+        />
       </div>
       {!complexity.model && (
         <p className="text-xs text-text-muted">{t("taskRoutingComplexityModelRequired")}</p>
