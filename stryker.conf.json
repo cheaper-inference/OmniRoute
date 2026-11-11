@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/combo-cost-sort-blended.test.ts",
       "tests/unit/session-tier-floor.test.ts",
-      "tests/unit/combo-budget-class-status.test.ts"
+      "tests/unit/combo-budget-class-status.test.ts",
+      "tests/unit/bare-model-subscription-preference.test.ts"
     ],
     "nodeArgs": [
       "--import",
