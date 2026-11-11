@@ -3465,6 +3465,7 @@ async function handleChatCoreInner({
       compressionResponseMeta,
       connectionId,
       contextEditingEnabled,
+      contextLimit,
       copilotCompatibleReasoning,
       createErrorResult,
       credentials,

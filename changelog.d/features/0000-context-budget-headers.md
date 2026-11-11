@@ -1,0 +1,1 @@
+- **feat(chat):** set `OMNIROUTE_CONTEXT_HEADERS=true` to add `X-OmniRoute-Context-Window` and `X-OmniRoute-Context-Remaining` headers to non-streaming chat responses (off by default).

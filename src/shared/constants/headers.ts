@@ -3,6 +3,8 @@ export const OMNIROUTE_RESPONSE_HEADERS = {
   cacheHit: "X-OmniRoute-Cache-Hit",
   cacheLatency: "X-OmniRoute-Cache-Latency",
   cacheSimilarity: "X-OmniRoute-Cache-Similarity",
+  contextRemaining: "X-OmniRoute-Context-Remaining",
+  contextWindow: "X-OmniRoute-Context-Window",
   savingsTokens: "X-OmniRoute-Savings-Tokens",
   compression: "X-OmniRoute-Compression",
   costSaved: "X-OmniRoute-Cost-Saved",
