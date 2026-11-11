@@ -319,10 +319,9 @@ The `SkillExecutor` (`src/lib/skills/executor.ts`) is a **singleton** that manag
 
 ### Default Configuration
 
-| Setting      | Default       | Configurable via                     |
-| ------------ | ------------- | ------------------------------------ |
-| `timeout`    | `30000` (30s) | `skillExecutor.setTimeout(ms)`       |
-| `maxRetries` | `3`           | `skillExecutor.setMaxRetries(count)` |
+| Setting   | Default       | Configurable via               |
+| --------- | ------------- | ------------------------------ |
+| `timeout` | `30000` (30s) | `skillExecutor.setTimeout(ms)` |
 
 > **Important**: The executor is a singleton — calling `setTimeout()` affects all subsequent invocations globally. Per-skill timeouts are not currently supported; if you need different timeouts per skill, submit separate processes or fork the executor.
 
