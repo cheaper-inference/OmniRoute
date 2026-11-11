@@ -17,9 +17,12 @@
  * Operators can still point any task type at a specific model via
  * PUT /api/settings/task-routing — the defaults just stop shipping stale ones.
  *
- * Opt-in for agent traffic: `detectionAnchor: "first-user"` keeps one decision per
- * conversation (see DetectionAnchor).
+ * Two opt-in refinements for agent traffic: `detectionAnchor: "first-user"` keeps one
+ * decision per conversation (see DetectionAnchor), and `complexityRouting` escalates hard
+ * prompts to a stronger model (see ComplexityRoutingConfig).
  */
+
+import { analyzeSpecificity } from "./specificityDetector";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -53,6 +56,19 @@ export type TaskPatternOverrides = Partial<Record<TaskType, Partial<TaskPattern>
  */
 export type DetectionAnchor = "latest-user" | "first-user";
 
+/**
+ * Opt-in escalation by prompt complexity. The anchor prompt is scored with the existing
+ * specificity detector (`specificityDetector.ts`, 0..100); when the score is at least
+ * `minScore`, the request goes to `model` instead of the task-type mapping. Only requests
+ * that carry tools (agent turns) escalate; background and vision requests never do.
+ */
+export interface ComplexityRoutingConfig {
+  enabled: boolean;
+  minScore: number;
+  /** provider/model, combo name or `auto/` id. Required when enabled. */
+  model: string;
+}
+
 export interface TaskRoutingConfig {
   enabled: boolean;
   /**
@@ -65,6 +81,8 @@ export interface TaskRoutingConfig {
   detectionEnabled: boolean;
   /** See DetectionAnchor. Missing = "latest-user". */
   detectionAnchor?: DetectionAnchor;
+  /** See ComplexityRoutingConfig. Missing or disabled = no escalation. */
+  complexityRouting?: ComplexityRoutingConfig;
   stats: { detected: number; routed: number };
 }
 
@@ -221,12 +239,22 @@ const DEFAULT_TASK_MODEL_MAP: Record<TaskType, string> = {
 const GLOBAL_KEY = "__omniroute_taskRouting_config__";
 const _store = globalThis as unknown as Record<string, TaskRoutingConfig | undefined>;
 
+/**
+ * Default `complexityRouting.minScore`. Measured on coding-agent prompts: one-line asks
+ * ("rename X", "add a delete button that calls …", "write unit tests for …") score 1–3,
+ * while multi-step design/debugging prompts (race conditions, cross-service refactors,
+ * migrations) score 9+. The detector's named levels put both groups in trivial/simple, so
+ * the threshold is a raw score rather than a level name.
+ */
+export const DEFAULT_COMPLEXITY_MIN_SCORE = 6;
+
 function freshConfig(): TaskRoutingConfig {
   return {
     enabled: false, // User must explicitly enable
     taskModelMap: { ...DEFAULT_TASK_MODEL_MAP },
     detectionEnabled: true,
     detectionAnchor: "latest-user",
+    complexityRouting: { enabled: false, minScore: DEFAULT_COMPLEXITY_MIN_SCORE, model: "" },
     stats: { detected: 0, routed: 0 },
   };
 }
@@ -254,6 +282,7 @@ export function getTaskRoutingConfig(): TaskRoutingConfig {
   return {
     ...current,
     taskModelMap: { ...current.taskModelMap },
+    ...(current.complexityRouting ? { complexityRouting: { ...current.complexityRouting } } : {}),
     stats: { ...current.stats },
   };
 }
@@ -491,18 +520,73 @@ export function detectTaskType(body: any): TaskType {
   return "chat";
 }
 
+// ── Complexity escalation ────────────────────────────────────────────────────
+
+/** Utility traffic stays cheap, and the escalation model may not accept images. */
+const NEVER_ESCALATE: ReadonlySet<TaskType> = new Set<TaskType>(["background", "vision"]);
+
+export interface ComplexityEscalation {
+  /** Specificity score (0..100) of the anchor prompt. */
+  score: number;
+  /** The model to escalate to, or null when the request stays on the task-type mapping. */
+  model: string | null;
+}
+
+/** The persisted complexityRouting block when it is enabled and well-formed, else null. */
+function getActiveComplexityRouting(): ComplexityRoutingConfig | null {
+  const routing = getConfig().complexityRouting;
+  if (!routing || routing.enabled !== true) return null;
+  const model = typeof routing.model === "string" ? routing.model.trim() : "";
+  const { minScore } = routing;
+  if (!model || typeof minScore !== "number" || !Number.isFinite(minScore)) return null;
+  return { enabled: true, minScore, model };
+}
+
+/**
+ * Score the anchor prompt and decide whether it escalates. Only the anchor user text is
+ * scored, without harness blocks — never tool schemas, the system prompt or the rest of the
+ * history — so an agent request carrying dozens of tools and a long transcript is judged by
+ * what was asked. Only agent turns escalate: Claude Code's WebFetch summarizer and
+ * session-title requests carry no tools and put a fetched page or a transcript in the user
+ * turn, which scores as complex without being a hard task. Returns null when
+ * complexityRouting is off.
+ */
+export function resolveComplexityEscalation(
+  taskType: TaskType,
+  body: unknown
+): ComplexityEscalation | null {
+  const routing = getActiveComplexityRouting();
+  if (!routing) return null;
+
+  const anchorMsg = selectAnchorMessage(getRequestMessages(body), getDetectionAnchor());
+  const text = anchorMsg ? extractRawText(anchorMsg.content, true) : "";
+  const { score } = analyzeSpecificity({ messages: [{ role: "user", content: text }] });
+  const escalates =
+    carriesTools(body) && !NEVER_ESCALATE.has(taskType) && score >= routing.minScore;
+  return { score, model: escalates ? routing.model : null };
+}
+
+// ── Routing ──────────────────────────────────────────────────────────────────
+
+export interface TaskRouteResult {
+  model: string;
+  taskType: TaskType;
+  wasRouted: boolean;
+  /** Present when complexityRouting is enabled: the anchor prompt's specificity score. */
+  complexityScore?: number;
+  /** True when the model came from complexityRouting rather than the task-type map. */
+  escalated?: boolean;
+}
+
 /**
  * Apply task-aware model override.
  * Returns the original model if routing is disabled or no override found.
  *
  * @param originalModel - The model from the request (e.g. "openai/gpt-4o")
  * @param body - The raw request body to detect task type from
- * @returns { model, taskType, wasRouted }
+ * @returns { model, taskType, wasRouted, complexityScore?, escalated? }
  */
-export function applyTaskAwareRouting(
-  originalModel: string,
-  body: any
-): { model: string; taskType: TaskType; wasRouted: boolean } {
+export function applyTaskAwareRouting(originalModel: string, body: any): TaskRouteResult {
   const config = getConfig();
   if (!config.enabled || !config.detectionEnabled) {
     return { model: originalModel, taskType: "chat", wasRouted: false };
@@ -511,11 +595,15 @@ export function applyTaskAwareRouting(
   const taskType = detectTaskType(body);
   config.stats.detected++;
 
-  const preferred = config.taskModelMap[taskType];
+  const escalation = resolveComplexityEscalation(taskType, body);
+  const complexity = escalation
+    ? { complexityScore: escalation.score, escalated: escalation.model !== null }
+    : {};
+  const preferred = escalation?.model ?? config.taskModelMap[taskType];
 
   // No override configured for this task type
   if (!preferred || preferred === "") {
-    return { model: originalModel, taskType, wasRouted: false };
+    return { model: originalModel, taskType, wasRouted: false, ...complexity };
   }
 
   // Don't override if the model is already "better" (e.g. user sent opus, preferred is flash)
@@ -527,5 +615,5 @@ export function applyTaskAwareRouting(
   }
 
   config.stats.routed++;
-  return { model: preferred, taskType, wasRouted: true };
+  return { model: preferred, taskType, wasRouted: true, ...complexity };
 }
