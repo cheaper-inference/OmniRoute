@@ -310,7 +310,14 @@ export class AdaptiveAdmissionController {
     // Once work is queued, every newer request joins the same fair queue even if it
     // currently fits. This makes bounded bypass accounting effective and prevents
     // direct arrivals from indefinitely jumping an older reserved weighted request.
-    if (this.queue.size === 0 && this.activeCost + BigInt(cost) <= BigInt(limit)) {
+    // With virtual lanes on, a tenant's older queued work sits in its lane, not in the
+    // shared queue, so a newer request from the same tenant must queue behind it too.
+    // Other tenants keep bypassing a lane whose head does not fit.
+    if (
+      this.queue.size === 0 &&
+      !this.hasQueuedLane(request.tenantKey) &&
+      this.activeCost + BigInt(cost) <= BigInt(limit)
+    ) {
       return this.admit(cost);
     }
 
@@ -620,43 +627,61 @@ export class AdaptiveAdmissionController {
     this.dispatchLanes();
   }
 
-  /** Round-robin dispatch across per-tenant virtual lane queues (#9654). */
+  private hasQueuedLane(tenantKey: string | undefined): boolean {
+    if (!this.config.virtualLanes || !tenantKey || tenantKey === "_default") return false;
+    return (this.virtualLanes.get(tenantKey)?.queue.size ?? 0) > 0;
+  }
+
+  /**
+   * Round-robin dispatch across per-tenant virtual lane queues (#9654). The Map order is
+   * the cursor: a lane that was just served moves to the end, so the next freed slot goes
+   * to the next tenant instead of restarting at the first lane. Each round serves at most
+   * one entry per lane; rounds repeat while capacity remains and some lane was served, so
+   * spare capacity is not left idle until the next release.
+   */
   private dispatchLanes(): void {
     if (this.shutDown || this.config.mode !== "enforce") return;
-    if (this.virtualLanes.size === 0) return;
-
-    const keys = Array.from(this.virtualLanes.keys());
-    for (const key of keys) {
-      const lane = this.virtualLanes.get(key);
-      if (!lane) continue;
-      // Dispatch as many entries from this lane as capacity allows,
-      // then break to give other lanes a fair share.
-      while (lane.queue.size > 0) {
-        const limit = this.adaptation.currentLimit;
-        const available = BigInt(limit) - this.activeCost;
-        if (available <= 0n) return;
-        const entry = lane.queue.dequeue(Number(available));
-        if (!entry) break; // head doesn't fit
-        this.clearEntryTimer(entry);
-        this.detachAbort(entry);
-        if (entry.payload.signal?.aborted) {
-          entry.payload.reject(
-            createAdmissionRejectError("ADMISSION_ABORTED", "request aborted while queued")
-          );
-          this.rejectedCount += 1;
-          continue;
+    let served = true;
+    while (served && this.virtualLanes.size > 0) {
+      served = false;
+      for (const key of Array.from(this.virtualLanes.keys())) {
+        const lane = this.virtualLanes.get(key);
+        if (!lane) continue;
+        let laneServed = false;
+        while (lane.queue.size > 0) {
+          const available = BigInt(this.adaptation.currentLimit) - this.activeCost;
+          if (available <= 0n) return;
+          const entry = lane.queue.dequeue(Number(available));
+          if (!entry) break; // head doesn't fit
+          this.clearEntryTimer(entry);
+          this.detachAbort(entry);
+          if (entry.payload.signal?.aborted) {
+            entry.payload.reject(
+              createAdmissionRejectError("ADMISSION_ABORTED", "request aborted while queued")
+            );
+            this.rejectedCount += 1;
+            continue;
+          }
+          if (this.clock.now() >= entry.deadlineMs) {
+            entry.payload.reject(
+              createAdmissionRejectError("ADMISSION_DEADLINE", "admission wait deadline exceeded")
+            );
+            this.rejectedCount += 1;
+            continue;
+          }
+          entry.payload.resolve(this.admit(entry.cost));
+          laneServed = true;
+          break; // yield to next lane for fairness
         }
-        if (this.clock.now() >= entry.deadlineMs) {
-          entry.payload.reject(
-            createAdmissionRejectError("ADMISSION_DEADLINE", "admission wait deadline exceeded")
-          );
-          this.rejectedCount += 1;
-          continue;
+        this.removeEmptyLane(key);
+        if (laneServed) {
+          served = true;
+          if (this.virtualLanes.get(key) === lane) {
+            this.virtualLanes.delete(key);
+            this.virtualLanes.set(key, lane);
+          }
         }
-        entry.payload.resolve(this.admit(entry.cost));
-        break; // yield to next lane for fairness
       }
-      this.removeEmptyLane(key);
     }
   }
 

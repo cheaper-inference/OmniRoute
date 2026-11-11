@@ -218,6 +218,22 @@ export function expandPromptCacheAffinityTargetsFromConnections(
   connectionsByProvider: Map<string, Array<Record<string, unknown>>>
 ): ResolvedComboTarget[] {
   const expandedTargets: ResolvedComboTarget[] = [];
+  // One id -> connection index per provider, built on first use. The first entry
+  // wins for a duplicate id, like the linear find it replaces.
+  const indexByProvider = new Map<string, Map<string, Record<string, unknown>>>();
+  const findConnection = (provider: string, connectionId: string) => {
+    let index = indexByProvider.get(provider);
+    if (!index) {
+      index = new Map();
+      for (const candidate of connectionsByProvider.get(provider) || []) {
+        if (typeof candidate?.id === "string" && !index.has(candidate.id)) {
+          index.set(candidate.id, candidate);
+        }
+      }
+      indexByProvider.set(provider, index);
+    }
+    return index.get(connectionId);
+  };
   for (const target of targets) {
     if (target.connectionId) {
       const provider =
@@ -225,9 +241,7 @@ export function expandPromptCacheAffinityTargetsFromConnections(
         parseModel(target.modelStr).provider ||
         parseModel(target.modelStr).providerAlias ||
         "unknown";
-      const connection = (connectionsByProvider.get(provider) || []).find(
-        (candidate) => candidate?.id === target.connectionId
-      );
+      const connection = findConnection(provider, target.connectionId);
       expandedTargets.push({
         ...target,
         authType: typeof connection?.authType === "string" ? connection.authType : target.authType,
@@ -257,9 +271,7 @@ export function expandPromptCacheAffinityTargetsFromConnections(
       continue;
     }
     for (const connectionId of scopedConnectionIds) {
-      const connection = (connectionsByProvider.get(provider) || []).find(
-        (candidate) => candidate?.id === connectionId
-      );
+      const connection = findConnection(provider, connectionId);
       expandedTargets.push({
         ...target,
         connectionId,

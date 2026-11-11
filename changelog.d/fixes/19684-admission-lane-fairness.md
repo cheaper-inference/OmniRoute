@@ -1,0 +1,1 @@
+- **fix(admission):** with per-tenant virtual lanes on, a freed slot now rotates across tenants instead of always serving the first lane, and a newer request no longer jumps an older request queued in its own lane. ([#19684](https://github.com/cheaper-inference/OmniRoute/pull/19684))
