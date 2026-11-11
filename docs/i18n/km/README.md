@@ -15,7 +15,7 @@
 
 **បង្កើតឡើងដោយ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                              |             v3.8.50              | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------- | :------------------------------: | :---------: | :-------------------: |
-| អ្នកផ្គត់ផ្គង់🌐             |               352                |   **358**   |          387          |
+| អ្នកផ្គត់ផ្គង់🌐             |               352                |   **358**   |          388          |
 | 🧠 ម៉ូដែលជជែកពិសេស IDs       |               1320               |  **1374**   |         1535          |
 | ស្ពានគំរូ🖼️                  | ចក្ខុវិស័យ 🆕 + អូឌីយ៉ូ + វីដេអូ |      ✓      |           ✓           |
 | កាតាឡុក 📡 រ៉ាដាឥតគិតថ្លៃ    |          🆕 ជ្រើសរើសចូល          |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 387 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 388 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 វិធីសាស្រ្តពេញលេញ &amp; per-feature detail vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 - **🖼️ ចំណុចបញ្ចប់ថ្មី។** — `/v1/ocr` (Mistral OCR) និង `/v1/audio/translations` (រចនាប័ទ្មខ្សឹប) ជុំវិញផ្ទៃប្រព័ន្ធផ្សព្វផ្សាយ។ → [API ឯកសារយោង](docs/reference/API_REFERENCE.md)
 - **🎨 ការបង្កើតរូបភាព / វីដេអូ / អូឌីយ៉ូ** — មួយ។ API សម្រាប់ប្រព័ន្ធផ្សព្វផ្សាយ៖ xAI Grok ស្រមៃ & ណូវីតា AI វីដេអូ, ComfyUI, Magnific, Adobe Firefly, Segmind, និងអ្នកផ្តល់ការនិយាយដូចជា ElevenLabs. → [API ឯកសារយោង](docs/reference/API_REFERENCE.md)
 - **ការដាក់ពង្រាយ 🌍 & ops** — ប្រូកស៊ីបញ្ច្រាស `basePath`, ស្វែងរកភាសាកម្មវិធីរុករកតាមអ៊ីនធឺណិតដោយស្វ័យប្រវត្តិ, ការតាមដានឧបករណ៍ក្នុងមួយសោ, ការជឿទុកចិត្ត MITM មិនសូវជា root, ការធ្វើមូលដ្ឋានីយកម្ម zh-TW ។ [បរិស្ថាន](docs/reference/ENVIRONMENT.md) →
-- **🤝 អ្នកផ្តល់សេវា និងភ្នាក់ងារច្រើនទៀត** ភ្នាក់ងារពពក — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ជាមួយនឹងកម្មវិធីរុករកតាមអ៊ីនធឺណិត + OAuth កាតថ្នាក់ទីមួយ Ollama Claude Opus 5 & Sonnet 5 ភាពជាដៃគូផ្លូវការ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova Agnes , និង AI**387- កាតាឡុកអ្នកផ្តល់សេវា** . [អ្នកផ្គត់ផ្គង់](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 អ្នកផ្តល់សេវា និងភ្នាក់ងារច្រើនទៀត** ភ្នាក់ងារពពក — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ជាមួយនឹងកម្មវិធីរុករកតាមអ៊ីនធឺណិត + OAuth កាតថ្នាក់ទីមួយ Ollama Claude Opus 5 & Sonnet 5 ភាពជាដៃគូផ្លូវការ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova Agnes , និង AI**388- កាតាឡុកអ្នកផ្តល់សេវា** . [អ្នកផ្គត់ផ្គង់](docs/reference/PROVIDER_REFERENCE.md) →
 - **តម្លាភាពនៃការបញ្ជូនត 📡** — រាល់ការឆ្លើយតបមានបឋមកថា `X-OmniRoute-Decision` ដែលដាក់ឈ្មោះ strategy/provider/latency ដែលបានបម្រើវា យុទ្ធសាស្ត្របន្សំ `cache-optimized` ថ្មី + Auto-Combo `cacheAffinity` ផ្លូវកត្តាកត្តាស្នើម្តងទៀតត្រឡប់ទៅការតភ្ជាប់ដែលកាន់បុព្វបទដែលបានរក្សាទុក ហើយចំណុចបញ្ចប់ `/v1/auto-combo/{channel}/candidates` បានតែអានបង្ហាញពីក្រុមបេក្ខជនបន្តផ្ទាល់របស់ប៉ុស្តិ៍ `auto/*` ។ → [បន្សំស្វ័យប្រវត្តិ](docs/routing/AUTO-COMBO.md)
 - **⚡ ប្រតិបត្តិការក្នុងស្រុក & អ៊ីនហ្វ្រា** — ចុចតែម្តងគត់ Redis មូលដ្ឋាន Cloudflare Workers / Deno Deploy relay deploy, Bifrost & Mux ជាសេវាកម្មបង្កប់ក្រោមការគ្រប់គ្រង។ [សេវាកម្មបង្កប់](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 ក៏មាននៅក្នុងប្រអប់ផងដែរ។** — plugin framework + marketplace, Omni/Agent/GitHub skill frameworks, Obsidian vault integration (22 MCP tools), OpenAI-compatible Batch & Files APIs, semantic response cache, gamification with leaderboards, ACP agent discovery (ភ្នាក់ងារដែលភ្ជាប់មកជាមួយ 15), កំណត់ពេលនាំចេញទៅកាន់ BigQuery, `auto/chaos` fandel Telegram -parallel app កម្មវិធីគ្រប់គ្រងកំណែ និងចំណាត់ថ្នាក់អ្នកផ្តល់សេវាឥតគិតថ្លៃ LMArena-ELO ។ [ឯកសារ](docs/README.md) →
@@ -677,11 +677,11 @@ omniroute configure codex          # ក៏ដូចជា: claude opencode qwen
 
 <div align="center">
 
-## អ្នកផ្តល់🌐 387 AI — 156 បានសម្គាល់កាតាឡុកដោយឥតគិតថ្លៃ
+## អ្នកផ្តល់🌐 388 AI — 156 បានសម្គាល់កាតាឡុកដោយឥតគិតថ្លៃ
 
 </div>
 
-> **អ្នកផ្តល់សេវាចុះបញ្ជីចំនួន ៣៨៧** ឆ្លងកាត់ការជជែកតាម Canonical ប្រព័ន្ធផ្សព្វផ្សាយ ការស្វែងរក មូលដ្ឋាន ភ្នាក់ងារពពក និងការប្រមូលប្រព័ន្ធ រួមទាំង **156 ផ្ទុកទិន្នន័យមេតានៃការរកឃើញ `hasFree: true`** . ការចុះឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់**245 អ្នកផ្តល់សេវា / 3,172 គូគំរូអ្នកផ្តល់សេវាផ្សេងគ្នា / 1,535 គំរូដើម IDs** ; កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **466 ជួរក្នុងមួយម៉ូដែល** ,**34 អាងដែលកើតឡើងដដែលៗ** និង **អ្នកផ្តល់សេវា recurring/keyless ឥតគិតថ្លៃ 52 ជារៀងរហូត** . ទាំងនេះគឺជាភាគបែងផ្សេងគ្នាដោយការរចនា; និយមន័យ និងការគណនាដោយបូកបញ្ចូលគ្នា រស់នៅក្នុង [សេចក្តីយោងអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [ថ្នាក់ឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md) ។
+> **អ្នកផ្តល់សេវាចុះបញ្ជីចំនួន ៣៨៨** ឆ្លងកាត់ការជជែកតាម Canonical ប្រព័ន្ធផ្សព្វផ្សាយ ការស្វែងរក មូលដ្ឋាន ភ្នាក់ងារពពក និងការប្រមូលប្រព័ន្ធ រួមទាំង **156 ផ្ទុកទិន្នន័យមេតានៃការរកឃើញ `hasFree: true`** . ការចុះឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់**245 អ្នកផ្តល់សេវា / 3,172 គូគំរូអ្នកផ្តល់សេវាផ្សេងគ្នា / 1,535 គំរូដើម IDs** ; កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **466 ជួរក្នុងមួយម៉ូដែល** ,**34 អាងដែលកើតឡើងដដែលៗ** និង **អ្នកផ្តល់សេវា recurring/keyless ឥតគិតថ្លៃ 52 ជារៀងរហូត** . ទាំងនេះគឺជាភាគបែងផ្សេងគ្នាដោយការរចនា; និយមន័យ និងការគណនាដោយបូកបញ្ចូលគ្នា រស់នៅក្នុង [សេចក្តីយោងអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [ថ្នាក់ឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md) ។
 
 <div align="center">
 

@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | קוֹבֶץ                        | מַטָרָה                             |
 | ----------------------------- | ----------------------------------- |
-| `providerRegistry.ts`         | רישום מודל צ'אט מעל קטלוג 387 ספקים |
+| `providerRegistry.ts`         | רישום מודל צ'אט מעל קטלוג 388 ספקים |
 | `providerModels.ts`           | כינויים של מודלים, מיפוי פורמטים    |
 | `constants.ts`                | פסק זמן, מגבלות, קודי סטטוס         |
 | `defaultThinkingSignature.ts` | חתימת חשיבה Claude ברירת מחדל       |

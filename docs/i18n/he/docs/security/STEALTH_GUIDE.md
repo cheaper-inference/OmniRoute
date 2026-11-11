@@ -138,41 +138,63 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ---
 
-## הסוואת Antigravity
+## Antigravity התגנבות
 
-בקשות Antigravity משמרות את טקסט הקורא בייט אחר בייט. OmniRoute אינו מוסיף תווים ברוחב אפס להנחיות ואינו משנה שמות של כלים או מזריק כלים כדי לחקות לקוח IDE.
+בקשות Antigravity משמרות טקסט של המתקשר בייט-עבור-בייט. OmniRoute אינו מכניס תווים ברוחב אפס להנחיות או לכלי rename/inject כדי לחקות לקוח IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-מסיר סמנים של Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) לפני ההעברה.
+מסיר סמני SDK אל חלד (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) לפני ההעברה.
 
-### ⚠️ סיכון: `ANTIGRAVITY_CREDITS=always` (מוקד סיכון לחסימת חשבון)
+### סיכון ⚠️ : `ANTIGRAVITY_CREDITS=always` (נקודה חמה לאיסור חשבון)
 
-`ANTIGRAVITY_CREDITS=always` (נצרך על ידי `open-sse/executors/antigravity.ts`) מנתב **כל** בקשה דרך חריגות ממכסת נקודות הזכות של Antigravity AI (נקודות זכות בתשלום של Google), במקום לאפשר למכסת השכבה החינמית של Google להגביל את השימוש. הדבר מתועד כתכונה, אך זהו **הדיווח הנפוץ ביותר שאנו רואים על הפרת תנאי השירות** — מספר חשבונות Google Ultra נחסמו עם `403 / "service disabled for ToS violation" / insufficient_quota` לאחר שפעלו במשך כמה שעות עם `=always`.
+מסלולי `ANTIGRAVITY_CREDITS=always` (נצרך על ידי `open-sse/executors/antigravity.ts`).**כֹּל** בקש באמצעות Antigravity AI Credit Overages (זיכויים Google בתשלום) במקום לתת למכסה החופשית של Google לשער דברים. זה מתועד כתכונה, אבל זה כן **דוח הפרת ה-TOS הנפוץ ביותר שאנו רואים** חשבונות — מרובים של Google Ultra נאסרו עם `403 / "service disabled for ToS violation" / insufficient_quota` לאחר הפעלתם במשך כמה שעות עם `=always`.
 
-האכיפה במעלה הזרם מתבצעת **בצד של Google**, ואינה דבר ש-OmniRoute יכול למנוע. שם משתנה הסביבה והתיעוד הקיים גורמים לאפשרות להישמע כמו מתג בטוח להפעלה; היא אינה כזו.
+האכיפה במעלה הזרם מופעלת **הצד של Google** , שום דבר ש- OmniRoute לא יכול למנוע. השם env var והמסמכים הקיימים גורמים לזה להישמע כמו כפתור בטוח להעיף; זה לא.
 
-**מדוע הדבר גורר זיהוי שימוש לרעה באופן אגרסיבי יותר משימוש בשכבה החינמית בלבד:**
+**מדוע זה מושך את זיהוי התעללות בצורה אגרסיבית יותר מאשר שימוש בשכבת חינם בלבד:**
 
-- הוצאה אוטומטית ומתמשכת בחשבון Google יחיד מסומנת באופן שונה מפגיעות בשכבה החינמית שמגיעות למכסה ואז נעצרות.
-- לחריגות בתשלום אין תקרת קצב, ולכן לקוח שהוגדר באופן שגוי יכול לצרוך מאות דולרים בתוך דקות ולהיראות כמו מכירה מחדש של מפתחות API או תעבורת בוטים.
-- מספר משתמשי OmniRoute הצורכים במקביל נקודות זכות מעבר למכסה מאותה כתובת IP חיצונית מחזקים את האות.
+- הוצאה אוטומטית מתמשכת בחשבון Google בודד מסמנת אחרת מאשר מכסה-ועצירות-מכסה חופשית.
+- לעליות אשראי אין תקרת תעריף, כך שלקוח בעל תצורה שגויה יכול לצרוב כמה מאות USD תוך דקות ולהיראות כמו מכירה חוזרת של מפתח API או תעבורת בוט.
+- משתמשי OmniRoute מרובים שפוגעים בנקודות יתר במקביל מאותו IP חיצוני מרכיבים את האות.
 
-**גישה מומלצת:**
+**יציבה מומלצת:**
 
-1. השאירו את ברירת המחדל `ANTIGRAVITY_CREDITS=off`, אלא אם המפעיל מקבל במפורש את הסיכון הכרוך בנקודות זכות בתשלום ובאכיפת החשבון. `retry` שולח תחילה את הבקשה הרגילה ומזריק נקודות זכות לכל היותר פעם אחת לאחר שגיאת מכסה מתאימה מסוג 429; `always` מזריק נקודות זכות כבר בבקשה הראשונה.
-2. **פזרו את העומס בין ספקים באמצעות Auto-Combo** (`model: "auto"` או `kr/glm/etc`-combo), במקום להעמיס עד לרוויה על חשבון Antigravity יחיד.
-3. **הגדירו מגבלות RPM לכל חיבור** בדף העריכה של ספק Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). טווח של 30–60 RPM הוא גבול עליון סביר לשימוש מתמשך.
-4. **השתמשו ברשת יציבה במעלה הזרם הנשלטת על ידי המפעיל**, והימנעו משיתוף חשבון יחיד בין משתמשים או עומסי עבודה שאינם קשורים זה לזה.
-5. **במקרה של חסימה**: הגישו ערעור דרך `support.google.com` → "Restore Workspace/Account access", בצירוף גוף התגובה המדויק של `quota_exceeded` / `service disabled` שנשלח על ידי Google. שחזור החשבון אינו מובטח.
+1. שמור על ברירת המחדל `ANTIGRAVITY_CREDITS=off` אלא אם המפעיל מקבל במפורש אשראי בתשלום ואכיפת חשבון. `retry` שולחת תחילה את הבקשה הרגילה ומזרימה זיכויים לכל היותר פעם אחת לאחר מכסה זכאית 429; `always` מזריק קרדיטים על הבקשה הראשונה.
+2. **פזר עומס בין ספקים באמצעות Auto-Combo** (`model: "auto"` או `kr/glm/etc` -combo) במקום להרוות חשבון Antigravity יחיד.
+3. **הגדר מגבלות RPM לכל חיבור** בדף העריכה של ספק Antigravity (Dashboard → Providers → Antigravity → חיבור → מגבלת קצב). 30–60 RPM הוא גבול עליון בר הגנה לשימוש מתמשך.
+4. **השתמש ברשת יציבה, הנשלטת על ידי מפעיל** והימנע משיתוף חשבון אחד בין משתמשים או עומסי עבודה שאינם קשורים.
+5. **אם נאסר** : ערעור באמצעות `support.google.com` → "שחזר גישת Workspace/Account " עם גוף התגובה המדויק של `quota_exceeded` / `service disabled` Google שנשלח. שחזור אינו מובטח.
 
-תיעוד משתני הסביבה מפרט את ההשלכות על החשבון ועל ההוצאות עבור כל מצב של נקודות זכות.
+הפניה לסביבה מתעדת את השלכות החשבון וההוצאות של כל מצב זיכויים.
+
+#### לא רק `=always`: ניתוב Antigravity OAuth באופן כללי
+
+ההשעיות אינן מוגבלות לעלויות אשראי. דיווחים בנובמבר 2026 (#19223, #19266) מתארים כמה חשבונות Google שהושעו במהלך ניתוב דרך ספקי `antigravity` ו- `agy` (Antigravity CLI), עם:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+שני הספקים מאמתים עם הפעלת Antigravity מוצר OAuth, וזה המקרה שהודעת הסיכון של לוח המחוונים ("ספק זה משתמש במוצר הרשמי שלך session/OAuth, שאינו מורשה לשימוש proxy/router ") מזהירה לפני הוספת חיבור. אף אחת מההמלצות לעיל אינה מאפשרת שימוש זה; הם רק מפחיתים את כמות התנועה שחשבון אחד נושא.
+
+**ממשקי API מורשים לדגמי Gemini.** Google מציעה גישה פרוגרמטית ל- Gemini דרך APIs שלה, שבה OmniRoute תומך כספקי מפתחות API רגילים:
+
+| מזהה ספק | שם לוח המחוונים           | תְעוּדָה                                                                |
+| -------- | ------------------------- | ----------------------------------------------------------------------- |
+| `gemini` | Gemini (Google AI Studio) | מפתח Gemini API מ- Google AI Studio (זמין שכבה חינם)                    |
+| `vertex` | קודקוד AI                 | חשבון שירות JSON, אסימון גישה OAuth או מפתח Vertex Express API (Gemini) |
+
+ספקים אלה משתמשים בבעיות Google באישורים עבור גישה API, בניגוד להפעלת המוצר Antigravity. הם לא עושים כל שימוש תואם או מסירים את הסיכון של אכיפה: כל אחד כפוף לתנאים משלו, שעל המפעיל לבדוק את פריסתם. לדוגמה, [התנאים וההגבלות הנוספים של Gemini API](https://ai.google.dev/gemini-api/terms) מתירים רק שירותים בתשלום כאשר לקוחות API זמינים למשתמשים באזור הכלכלי האירופי, שוויץ או בריטניה, ותוכן שנשלח לשירותים ללא תשלום עשוי לשמש לשיפור המוצרים של Google. Vertex AI נופל תחת תנאי Google Cloud במקום זאת ( [תנאים ספציפיים לשירות](https://cloud.google.com/terms/service-terms) ). התמחור והמכסות עוקבים אחר תנאי ה- API האלה במקום מנוי Antigravity.
+
+מפעילים שרוצים להימנע מהשעיות Antigravity המתוארות לעיל צריכים לנתב תעבורת Gemini דרך אחד מהספקים הללו במקום `antigravity` / `agy`, לאחר בדיקה שהשימוש בהם מתאים לתנאי הספק.
 
 נקודות מגע:
 
-- `open-sse/executors/antigravity.ts` — קורא את `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — תשתית העברת פרטי ההזדהות
-- דוח התקרית המקורי: דיון [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `open-sse/executors/antigravity.ts` — קורא `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — אישורי אינסטלציה
+- דוח אירוע מקורי: דיון [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

@@ -117,39 +117,61 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ## Antigravity 스텔스
 
-Antigravity 요청은 호출자의 텍스트를 바이트 단위로 그대로 보존합니다. OmniRoute는 IDE 클라이언트를 모방하기 위해 프롬프트에 폭 없는 문자를 삽입하거나 도구 이름을 변경/주입하지 않습니다.
+Antigravity 요청은 호출자 텍스트를 바이트 단위로 보존합니다. OmniRoute IDE 클라이언트를 모방하기 위해 프롬프트나 rename/inject 도구에 너비가 0인 문자를 삽입하지 않습니다.
 
 ### `antigravityHeaderScrub.ts`
 
-전달하기 전에 Stainless SDK 마커(`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`)를 제거합니다.
+전달하기 전에 스테인리스 SDK 마커(`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`)를 제거합니다.
 
-### ⚠️ 위험: `ANTIGRAVITY_CREDITS=always` (계정 정지 위험이 집중되는 지점)
+### ⚠️ 위험: `ANTIGRAVITY_CREDITS=always` (계정 금지 핫스팟)
 
-`ANTIGRAVITY_CREDITS=always`(`open-sse/executors/antigravity.ts`에서 사용)는 Google의 무료 등급 할당량이 요청을 제한하도록 두는 대신 **모든** 요청을 Antigravity AI Credit Overages(유료 Google 크레딧)를 통해 라우팅합니다. 이는 기능으로 문서화되어 있지만, **현재 가장 자주 보고되는 단일 ToS 위반 사례**입니다. 여러 Google Ultra 계정이 `=always`로 몇 시간 실행한 후 `403 / "service disabled for ToS violation" / insufficient_quota`와 함께 정지되었습니다.
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` 에서 사용) 경로 **모든** Google 의 무료 계층 할당량을 제한하는 대신 Antigravity AI 크레딧 초과(유료 Google 크레딧)를 통해 요청하세요. 이는 기능으로 문서화되어 있지만 **우리가 볼 수 있는 가장 일반적인 ToS 위반 보고서** — 여러 Google Ultra 계정이 `=always` 로 몇 시간 동안 실행된 후 `403 / "service disabled for ToS violation" / insufficient_quota` 로 금지되었습니다.
 
-업스트림 집행은 OmniRoute가 방지할 수 있는 것이 아니라 **Google 측**에서 이루어집니다. 환경 변수 이름과 기존 문서만 보면 안전하게 활성화할 수 있는 설정처럼 보이지만, 실제로는 그렇지 않습니다.
+업스트림 시행이 켜져 있습니다.**Google 측** , OmniRoute 막을 수 있는 것은 아무것도 없습니다. env var 이름과 기존 문서를 보면 뒤집기에 안전한 손잡이처럼 들립니다. 그렇지 않습니다.
 
-**무료 등급만 사용하는 경우보다 악용 감지에 더 적극적으로 포착되는 이유:**
+**이것이 무료 계층 전용 사용보다 남용 감지를 더 적극적으로 유도하는 이유는 다음과 같습니다.**
 
-- 단일 Google 계정에서 지속적으로 자동화된 지출이 발생하면, 무료 등급의 할당량에 도달하여 중지되는 경우와는 다른 방식으로 표시됩니다.
-- 크레딧 초과 사용에는 속도 상한이 없으므로, 잘못 구성된 클라이언트가 몇 분 만에 수백 USD를 소진하고 API 키 재판매나 봇 트래픽처럼 보일 수 있습니다.
-- 여러 OmniRoute 사용자가 동일한 외부 IP에서 동시에 초과 사용 크레딧을 소비하면 탐지 신호가 누적됩니다.
+- 단일 Google 계정에 대한 지속적인 자동 지출은 무료 계층 히트 할당량 및 중지와 다르게 플래그를 지정합니다.
+- 신용 초과에는 비율 상한선이 없으므로 잘못 구성된 클라이언트는 몇 분 만에 수백 개의 USD 소모하여 API 키 재판매 또는 봇 트래픽처럼 보일 수 있습니다.
+- 여러 OmniRoute 사용자가 동일한 외부 IP 에서 동시에 초과 크레딧에 도달하면 신호가 합성됩니다.
 
-**권장 운영 방침:**
+**권장 자세:**
 
-1. 운영자가 유료 크레딧 및 계정 집행 위험을 명시적으로 수락하지 않는 한 기본값인 `ANTIGRAVITY_CREDITS=off`를 유지하세요. `retry`는 먼저 일반 요청을 전송하고, 해당되는 할당량 429가 발생한 후 최대 한 번만 크레딧을 주입합니다. `always`는 첫 번째 요청부터 크레딧을 주입합니다.
-2. 단일 Antigravity 계정을 포화시키는 대신 **Auto-Combo를 통해 제공자 전체에 부하를 분산하세요**(`model: "auto"` 또는 `kr/glm/etc`-combo).
-3. Antigravity 제공자의 편집 페이지(Dashboard → Providers → Antigravity → connection → rate limit)에서 **연결별 RPM 제한을 설정하세요**. 지속적인 사용에는 30~60 RPM이 합리적으로 방어 가능한 상한입니다.
-4. **운영자가 제어하는 안정적인 업스트림 네트워크를 사용**하고, 서로 관련 없는 사용자나 워크로드가 하나의 계정을 공유하지 않도록 하세요.
-5. **정지된 경우**: Google이 전송한 정확한 `quota_exceeded` / `service disabled` 응답 본문과 함께 `support.google.com` → "Restore Workspace/Account access"를 통해 이의를 제기하세요. 복구는 보장되지 않습니다.
+1. 운영자가 유료 신용 및 계정 집행 위험을 명시적으로 수락하지 않는 한 기본 `ANTIGRAVITY_CREDITS=off` 유지합니다. `retry` 먼저 일반 요청을 보내고 적격 할당량 429 이후 최대 한 번 크레딧을 주입합니다. `always` 첫 번째 요청에 크레딧을 주입합니다.
+2. **자동 콤보를 통해 공급자 간에 부하 분산** (`model: "auto"` 또는 `kr/glm/etc` -combo) 단일 Antigravity 계정을 포화시키는 대신.
+3. **연결당 RPM 제한 설정** Antigravity 공급자의 편집 페이지(대시보드 → 공급자 → Antigravity → 연결 → 속도 제한)에서. 30-60 RPM 는 지속적인 사용을 위한 방어 가능한 상한선입니다.
+4. **안정적인 운영자 제어 업스트림 네트워킹 사용** 관련 없는 사용자나 작업 부하 간에 하나의 계정을 공유하지 마세요.
+5. **금지된 경우** : 정확한 `quota_exceeded` / `service disabled` 응답 본문 Google 전송된 `support.google.com` → " Workspace/Account 액세스 복원"을 통해 항소합니다. 복원이 보장되지 않습니다.
 
-환경 참조 문서에는 각 크레딧 모드가 계정과 지출에 미치는 영향이 설명되어 있습니다.
+환경 참조에는 각 크레딧 모드의 계정 및 지출 의미가 문서화되어 있습니다.
 
-관련 지점:
+#### `=always` 뿐만 아니라 Antigravity OAuth 라우팅 전반
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`를 읽음
-- `src/lib/oauth/providers/antigravity.ts` — 자격 증명 연결 처리
-- 최초 사고 보고서: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+정지는 신용 초과에만 국한되지 않습니다. 2026년 11월 보고서(#19223, #19266)에서는 `antigravity` 및 `agy` (Antigravity CLI) 제공업체를 통해 라우팅하는 동안 정지된 여러 Google 계정에 대해 다음과 같이 설명합니다.
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+두 공급자 모두 Antigravity 제품 OAuth 세션으로 인증합니다. 이는 연결이 추가되기 전에 대시보드의 위험 알림("이 공급자는 proxy/router 사용이 승인되지 않은 공식 제품 session/OAuth 사용합니다.")에서 경고하는 경우입니다. 위의 권장 사항 중 어느 것도 해당 사용을 승인하지 않습니다. 하나의 계정이 전달하는 트래픽의 양만 줄입니다.
+
+**Gemini 모델용으로 승인된 API 인터페이스.** Google APIs 통해 Gemini 에 대한 프로그래밍 방식의 액세스를 제공하며, OmniRoute 이를 일반 API 키 공급자로 지원합니다.
+
+| 제공자 ID | 대시보드 이름               | 신임장                                                                 |
+| --------- | --------------------------- | ---------------------------------------------------------------------- |
+| `gemini`  | Gemini (Google AI 스튜디오) | Google AI Studio의 Gemini API 키(무료 등급 사용 가능)                  |
+| `vertex`  | 버텍스 AI                   | 서비스 계정 JSON, OAuth 액세스 토큰 또는 Vertex Express API 키(Gemini) |
+
+이러한 공급자는 Antigravity 제품 세션과 달리 API 액세스를 위해 자격 증명 Google 문제를 사용합니다. 모든 사용을 규정에 맞게 만들거나 시행 위험을 제거하지는 않습니다. 각각은 자체 조건에 따라 관리되며 운영자는 배포를 확인해야 합니다. 예를 들어, [Gemini API 추가 서비스 약관은](https://ai.google.dev/gemini-api/terms) API 클라이언트가 유럽 경제 지역, 스위스 또는 영국의 사용자에게 제공되고 무료 서비스로 전송된 콘텐츠가 Google 제품을 개선하는 데 사용될 수 있는 경우 유료 서비스만 허용합니다. Vertex AI 대신 Google Cloud 약관( [서비스별 약관](https://cloud.google.com/terms/service-terms) )을 따릅니다. 가격과 할당량은 Antigravity 구독이 아닌 API 조건을 따릅니다.
+
+위에 설명된 Antigravity 정지를 피하려는 운영자는 해당 서비스의 사용이 공급자의 조건에 맞는지 확인한 후 `antigravity` / `agy` 대신 이러한 공급자 중 하나를 통해 Gemini 트래픽을 라우팅해야 합니다.
+
+터치 포인트:
+
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` 를 읽습니다.
+- `src/lib/oauth/providers/antigravity.ts` — 자격 증명 배관
+- 사건 보고서 원본: 토론 [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

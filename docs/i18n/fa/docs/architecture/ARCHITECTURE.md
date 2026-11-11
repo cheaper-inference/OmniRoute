@@ -15,7 +15,7 @@ OmniRoute یک درگاه مسیریابی محلی هوش مصنوعی و دا�
 
 قابلیتهای اصلی:
 
-- سطح API سازگار با OpenAI برای CLI/ابزارها (387 ارائهدهنده، 159 ماژول اجرایی)
+- سطح API سازگار با OpenAI برای CLI/ابزارها (388 ارائهدهنده، 159 ماژول اجرایی)
 - تبدیل درخواست/پاسخ میان قالبهای ارائهدهندگان
 - جایگزینی ترکیب مدلها (توالی چندمدلی)
 - گامهای ترکیبی ساختاریافته (`provider + model + connection`) با ترتیبدهی زمان اجرا بر اساس `compositeTiers`
@@ -859,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: ماژولهای مشخص را مستقیماً وارد کنید — بدون barrel (لایه قدیمی بازصادرکننده `localDb.ts` حذف شده است)
 - `src/lib/usageDb.ts`: نمای تاریخچه استفاده/گزارش فراخوانیها روی جداول SQLite
 
-## پوشش اجراکنندهٔ ارائهدهنده (الگوی Strategy)
+## پوشش مجری ارائه دهنده (الگوی استراتژی)
 
-هر ارائهدهنده یک اجراکنندهٔ تخصصی دارد که `BaseExecutor` (در `open-sse/executors/base.ts`) را گسترش میدهد؛ این کلاس ساخت URL، ایجاد هدرها، تلاش مجدد با تأخیر تصاعدی، هوکهای نوسازی اطلاعات احراز هویت و متد هماهنگسازی `execute()` را فراهم میکند.
+هر ارائهدهنده یک مجری تخصصی دارد که `BaseExecutor` را گسترش میدهد (در `open-sse/executors/base.ts`)، که ساختمان URL ، ساخت هدر، تلاش مجدد با عقبنشینی نمایی، قلابهای تازهسازی اعتبار و روش هماهنگسازی `execute()` را ارائه میدهد.
 
-| اجراکننده                 | ارائهدهنده(ها)                                                                                                                                               | مدیریت ویژه                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، Perplexity، Together، Fireworks، Cerebras، Cohere، NVIDIA و غیره | پیکربندی پویای URL/هدر برای هر ارائهدهنده                      |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | شناسههای سفارشی پروژه/نشست، تجزیهٔ Retry-After، مبهمسازی 429   |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | مسیریابی مبتنی بر استقرار، اعمال اجباری کوئری api-version      |
-| `BlackboxWebExecutor`     | Blackbox AI (حالت وب)                                                                                                                                        | مهندسی معکوس نشست وب با شبیهسازی اثرانگشت TLS                  |
-| `ClaudeIdentityExecutor`  | Claude.ai (مسیر CCH)                                                                                                                                         | خطوط لولهٔ محدودیت و نگاشت مجدد ابزار، شکلدهی اثرانگشت         |
-| `CliProxyApiExecutor`     | ارائهدهندگان سازگار با CLIProxyAPI                                                                                                                           | احراز هویت و مدیریت پروتکل سفارشی                              |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                        | تزریق شناسهٔ حساب، ردیابی مصرف مبتنی بر Neurons                |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | تزریق دستورالعملهای سیستمی، اجبار میزان تلاش استدلالی          |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | پل Responses API مبتنی بر نشست مرورگر با سنجاقکردن رشته/نوبت   |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                 | OAuth و چرخش هدر در هر نشست                                    |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | پروتکل ConnectRPC، کدگذاری Protobuf، امضای درخواست با checksum |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | پلزنی چرخهٔ عمر وظیفهٔ Devin از طریق ماژول عامل ابری           |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | نوسازی توکن Copilot، هدرهای مشابهساز VSCode                    |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth و مسیریابی محدود به پروژه                         |
-| `GlmExecutor`             | Z.AI GLM (شامل پیشتنظیم `glmt`)                                                                                                                              | آگاه از بودجهٔ تفکر، ثابتهای پیشتنظیم GLMT                     |
-| `GrokWebExecutor`         | وب xAI Grok                                                                                                                                                  | مهندسی معکوس نشست وب، انتخاب حالت (تفکر/استاندارد)             |
-| `KieExecutor`             | KIE                                                                                                                                                          | صدور توکن سفارشی با لنگرهای نشست چرخشی                         |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | تبدیل قالب دودویی AWS EventStream به SSE                       |
-| `MuseSparkWebExecutor`    | Muse Spark (وب)                                                                                                                                              | مهندسی معکوس نشست وب با پلزنی پیامهای تصویری                   |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                    | ساختار بدنهٔ درخواست مختص ارائهدهنده                           |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | راهاندازی ارائهدهندهٔ سازگار با AI SDK                         |
-| `PerplexityWebExecutor`   | وب Perplexity                                                                                                                                                | مهندسی معکوس نشست وب برای ادامهٔ گفتگو                         |
-| `PetalsExecutor`          | استنتاج توزیعشدهٔ Petals                                                                                                                                     | مسیریابی ازدحام غیرمتمرکز                                      |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                              | بدون نیاز به کلید API، درخواستهای دارای محدودیت نرخ            |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                     | پشتیبانی از PAT و OAuth، سطح رایگان چندمدلی                    |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                             | احراز هویت حساب سرویس، نقاط پایانی مبتنی بر منطقه              |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                | کلید API واردشده و استریم گفتگوی Connect-protobuf              |
+| مجری                      | ارائه دهنده(های)                                                                                                                                               | هندلینگ ویژه                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، Perplexity، Together، Fireworks، Cerebras، Cohere، NVIDIA، و غیره. | پیکربندی دینامیک URL/header برای هر ارائه دهنده                       |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                             | سفارشی project/session IDs، سعی مجدد-پس از تجزیه، 429 مبهم سازی       |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                   | مسیریابی مبتنی بر استقرار، اجرای پرس و جو نسخه api                    |
+| `BlackboxWebExecutor`     | Blackbox AI (حالت وب)                                                                                                                                          | معکوس کردن جلسه وب با شبیه سازی اثر انگشت TLS                         |
+| `ClaudeIdentityExecutor`  | Claude.ai (مسیر CCH )                                                                                                                                          | محدودیت خطوط لوله نقشه برداری ابزار + ، شکل دهی اثر انگشت             |
+| `CliProxyApiExecutor`     | ارائه دهندگان سازگار با CLIProxyAPI                                                                                                                            | کنترل سفارشی و پروتکل                                                 |
+| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                          | تزریق ID حساب، ردیابی استفاده مبتنی بر نورون                          |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                   | دستورالعمل های سیستم را تزریق می کند، تلاش استدلالی را مجبور می کند   |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                            | پاسخ جلسه مرورگر پل API با پین کردن thread/turn                       |
+| `CommandCodeExecutor`     | کد دستوری                                                                                                                                                      | چرخش هدر OAuth + در هر جلسه                                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                     | پروتکل ConnectRPC ، رمزگذاری Protobuf، امضای درخواست از طریق checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                      | پل زدن چرخه عمر وظیفه Devin از طریق ماژول عامل ابر                    |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                 | بهروزرسانی رمز Copilot ، هدرهای شبیهسازی کد VSC                       |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                     | مسیریابی پروژه GitLab OAuth +                                         |
+| `GlmExecutor`             | Z.AI GLM (شامل پیش تنظیم `glmt` )                                                                                                                              | ثابت های از پیش تعیین شده GLMT با آگاهی از بودجه فکری                 |
+| `GrokWebExecutor`         | وب xAI Grok                                                                                                                                                    | معکوس جلسه وب، انتخاب حالت (think/standard)                           |
+| `KieExecutor`             | KIE                                                                                                                                                            | صدور توکن سفارشی با لنگرهای جلسه چرخشی                                |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                         | تبدیل فرمت باینری AWS EventStream → SSE                               |
+| `MuseSparkWebExecutor`    | میوز اسپارک (وب)                                                                                                                                               | معکوس کردن جلسه وب با پل زدن تصویر-پیام                               |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                      | شکل بدن درخواست خاص ارائه دهنده                                       |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                       | راه اندازی ارائه دهنده سازگار با AI SDK                               |
+| `PerplexityWebExecutor`   | وب سرگشتگی                                                                                                                                                     | معکوس جلسه وب برای ادامه چت                                           |
+| `PetalsExecutor`          | گلبرگ ها استنباط را توزیع کردند                                                                                                                                | مسیریابی ازدحام غیرمتمرکز                                             |
+| `PollinationsExecutor`    | گرده افشانی AI                                                                                                                                                 | کلید API مورد نیاز نیست، درخواستهایی با نرخ محدود                     |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                       | پشتیبانی از PAT و OAuth ، لایه رایگان چند مدل                         |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                               | احراز هویت حساب سرویس، نقاط پایانی مبتنی بر منطقه                     |
+| `DevinDesktopExecutor`    | دسکتاپ Devin                                                                                                                                                   | کلید API وارداتی + Connect-protobuf جریان چت                          |
 
-تمام ارائهدهندگان دیگر (از جمله گرههای سازگار سفارشی) از `DefaultExecutor` استفاده میکنند.
+همه ارائه دهندگان دیگر (از جمله گره های سازگار سفارشی) از `DefaultExecutor` استفاده می کنند.
+
+### بررسی های خودکار و حساب های جلسه وب
+
+تست های مدل، تست همه، تست های ترکیبی و ارزیابی درخواست های چت واقعی را ارسال می کنند. یک ارائه دهنده جلسه وب به عنوان کاربر وارد شده عمل می کند، بنابراین هر یک از این درخواست ها به عنوان یک مکالمه در آن حساب ذخیره می شود. کاوشگرهای خودکاری که چنین مکالماتی را ترک کردند، یک حساب کاربری تعلیق کردند (#14780). بنابراین خط لوله چت از هر هدفی که یک کاوشگر خودکار به آن میرسد که ارائهدهنده آن اعتبار جلسه وب را میگیرد، پس از حل شدن ارائهدهنده هدف و قبل از انتخاب اعتبار (`src/lib/providers/chatProbePolicy.ts`) خودداری میکند. امتناع `422` با `error.code` `chat_probe_not_isolated` است، و دوندگان کاوشگر آن را به عنوان یک پرش، نه یک شکست گزارش می دهند.
+
+اجرایی که هر چت را در حالت بدون سابقه خود ارائه دهنده اجرا می کند، آن را با `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) اعلام می کند. پس از آن بررسی به آن ارائه دهنده مجاز است. ChatGPT Web `temporary-chat` را اعلام می کند. یک اعلان را با یک آزمایش به مکانیسم آن پین کنید، بنابراین ادعا نمی تواند بیشتر از کدی که آن را درست می کند، باقی بماند.
 
 ## ماتریس سازگاری ارائهدهندگان
 

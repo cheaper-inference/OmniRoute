@@ -149,39 +149,61 @@ Gerelateerde modules in dezelfde bundel:
 
 ## Antigravity Stealth
 
-Antigravity-verzoeken behouden de tekst van de aanroeper byte voor byte. OmniRoute voegt geen zero-width-tekens toe aan prompts en hernoemt of injecteert geen tools om een IDE-client na te bootsen.
+Antigravity verzoeken behouden de tekst van de beller byte voor byte. OmniRoute voegt geen tekens met een breedte van nul in aanwijzingen of rename/inject tools in om een IDE client te imiteren.
 
 ### `antigravityHeaderScrub.ts`
 
-Verwijdert Stainless SDK-markeringen (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) voordat het verzoek wordt doorgestuurd.
+Stript roestvrijstalen SDK markeringen (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) voordat ze worden doorgestuurd.
 
-### ⚠️ Risico: `ANTIGRAVITY_CREDITS=always` (hoog risico op accountblokkering)
+### ⚠️ risico: `ANTIGRAVITY_CREDITS=always` (hotspot voor accountverbod)
 
-`ANTIGRAVITY_CREDITS=always` (gebruikt door `open-sse/executors/antigravity.ts`) routeert **elk** verzoek via Antigravity AI Credit Overages (betaalde Google-tegoeden), in plaats van de quota van Googles gratis abonnement als begrenzing te gebruiken. Dit is als functie gedocumenteerd, maar het is **veruit de meest voorkomende melding van een ToS-schending die we zien** — meerdere Google Ultra-accounts zijn geblokkeerd met `403 / "service disabled for ToS violation" / insufficient_quota` nadat ze enkele uren met `=always` hadden gedraaid.
+`ANTIGRAVITY_CREDITS=always` routes (gebruikt door `open-sse/executors/antigravity.ts`).**elk** verzoek via Antigravity AI Credit Overages (betaalde Google credits) in plaats van de vrije quota van Google dingen te laten regelen. Dit is gedocumenteerd als een functie, maar dat is het ook **het meest voorkomende ToS-schendingsrapport dat we tegenkomen** — meerdere Google Ultra-accounts zijn verbannen met `403 / "service disabled for ToS violation" / insufficient_quota` nadat ze een paar uur met `=always` hadden gedraaid.
 
-De upstreamhandhaving vindt plaats aan **de kant van Google** en kan niet door OmniRoute worden voorkomen. De naam van de omgevingsvariabele en de bestaande documentatie wekken de indruk dat dit een veilige instelling is om in te schakelen; dat is niet zo.
+De stroomopwaartse handhaving is aan de gang **Google's kant** , niets wat OmniRoute kan voorkomen. De env var-naam en de bestaande documenten laten het klinken als een veilige knop om aan te draaien; dat is het niet.
 
-**Waarom dit agressievere misbruikdetectie veroorzaakt dan uitsluitend gebruik van het gratis abonnement:**
+**Waarom dit de detectie van misbruik agressiever maakt dan gebruik van alleen free-tier:**
 
-- Aanhoudende geautomatiseerde uitgaven op één Google-account worden anders gemarkeerd dan gebruik waarbij het gratis abonnement het quotum bereikt en vervolgens stopt.
-- Overschrijdingen via tegoeden hebben geen snelheidslimiet, waardoor een verkeerd geconfigureerde client binnen enkele minuten voor honderden USD kan verbruiken en op doorverkoop van API-sleutels of botverkeer kan lijken.
-- Wanneer meerdere OmniRoute-gebruikers parallel overschrijdingstegoeden gebruiken vanaf hetzelfde externe IP-adres, wordt het signaal versterkt.
+- Aanhoudende geautomatiseerde uitgaven voor één Google account worden anders gemarkeerd dan free-tier hits-quota-and-stops.
+- Er is geen tariefplafond voor kredietoverschotten, dus een verkeerd geconfigureerde client kan binnen enkele minuten honderden USD verbranden en eruitzien als wederverkoop van API-sleutels of botverkeer.
+- Meerdere OmniRoute gebruikers die parallel tegoeden van dezelfde externe IP ontvangen, versterken het signaal.
 
-**Aanbevolen aanpak:**
+**Aanbevolen houding:**
 
-1. Behoud de standaardinstelling `ANTIGRAVITY_CREDITS=off`, tenzij de operator expliciet het risico van betaalde tegoeden en accounthandhaving accepteert. `retry` verzendt eerst het normale verzoek en injecteert na een in aanmerking komende quota-429 maximaal één keer tegoeden; `always` injecteert tegoeden bij het eerste verzoek.
-2. **Verdeel de belasting over providers via Auto-Combo** (`model: "auto"` of `kr/glm/etc`-combo) in plaats van één Antigravity-account volledig te belasten.
-3. **Stel RPM-limieten per verbinding in** op de bewerkingspagina van de Antigravity-provider (Dashboard → Providers → Antigravity → verbinding → snelheidslimiet). 30–60 RPM is een verdedigbare bovengrens voor langdurig gebruik.
-4. **Gebruik stabiele upstreamnetwerken die door de operator worden beheerd** en vermijd het delen van één account tussen niet-gerelateerde gebruikers of workloads.
-5. **Bij blokkering**: dien bezwaar in via `support.google.com` → ‘Restore Workspace/Account access’ en voeg de exacte `quota_exceeded`- / `service disabled`-responsebody toe die Google heeft verzonden. Herstel is niet gegarandeerd.
+1. Behoud de standaard `ANTIGRAVITY_CREDITS=off` tenzij de operator expliciet het risico van betaald krediet en accountafdwinging accepteert. `retry` verzendt eerst het normale verzoek en injecteert maximaal één keer krediet na een in aanmerking komend quotum 429; `always` injecteert credits op eerste verzoek.
+2. **Verdeel de belasting over providers via Auto-Combo** (`model: "auto"` of `kr/glm/etc` -combo) in plaats van één Antigravity account te verzadigen.
+3. **Stel RPM -limieten per verbinding in** op de bewerkingspagina van de Antigravity -provider (Dashboard → Providers → Antigravity → -verbinding → snelheidslimiet). 30–60 RPM is een verdedigbare bovengrens voor langdurig gebruik.
+4. **Gebruik stabiele, door de operator gecontroleerde upstream-netwerken** en vermijd het delen van één account met niet-gerelateerde gebruikers of werklasten.
+5. **Indien verboden** : beroep doen via `support.google.com` → " Workspace/Account toegang herstellen" met de exacte verzonden `quota_exceeded` / `service disabled` -antwoordtekst Google. Herstel is niet gegarandeerd.
 
-De omgevingsreferentie documenteert de gevolgen voor het account en de uitgaven van elke tegoedmodus.
+De omgevingsreferentie documenteert de account- en bestedingsimplicaties van elke kredietmodus.
 
-Raakvlakken:
+#### Niet alleen `=always`: Antigravity OAuth -routing in het algemeen
+
+De opschortingen zijn niet beperkt tot kredietoverschotten. Rapporten uit november 2026 (#19223, #19266) beschrijven verschillende Google accounts die zijn opgeschort tijdens het routeren via de `antigravity` en `agy` providers (Antigravity CLI), met:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Beide providers authenticeren zich met de Antigravity product OAuth sessie, wat het geval is waar de risicomelding van het dashboard ("Deze provider gebruikt uw officiële product session/OAuth, dat niet is geautoriseerd voor proxy/router gebruik") waarschuwt voordat er een verbinding wordt toegevoegd. Geen van de bovenstaande aanbevelingen maakt dat gebruik toegestaan; ze verminderen alleen hoeveel verkeer één account genereert.
+
+**Geautoriseerde API interfaces voor Gemini -modellen.** Google biedt programmatische toegang tot Gemini via zijn APIs, die OmniRoute ondersteunt als gewone API-sleutelproviders:
+
+| Provider-id | Dashboardnaam             | Referentie                                                                       |
+| ----------- | ------------------------- | -------------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | Gemini API sleutel van Google AI Studio (gratis laag beschikbaar)                |
+| `vertex`    | Hoekpunt AI               | Serviceaccount JSON, OAuth -toegangstoken of Vertex Express API sleutel (Gemini) |
+
+Deze providers gebruiken inloggegevens Google problemen voor API toegang, in tegenstelling tot de Antigravity -productsessie. Ze zorgen er niet voor dat elk gebruik compliant is of dat het risico van handhaving wordt weggenomen: elk gebruik is onderworpen aan zijn eigen voorwaarden, die de exploitant moet controleren op de toepassing ervan. De [aanvullende servicevoorwaarden Gemini API](https://ai.google.dev/gemini-api/terms) staan bijvoorbeeld alleen betaalde services toe wanneer API -clients beschikbaar worden gesteld aan gebruikers in de Europese Economische Ruimte, Zwitserland of het Verenigd Koninkrijk, en inhoud die naar onbetaalde services wordt verzonden, kan worden gebruikt om de producten van Google te verbeteren. Vertex AI valt in plaats daarvan onder de Google Cloud-voorwaarden ( [Servicespecifieke voorwaarden](https://cloud.google.com/terms/service-terms) ). Prijzen en quota volgen die API voorwaarden in plaats van een Antigravity abonnement.
+
+Operators die de hierboven beschreven Antigravity opschortingen willen vermijden, moeten Gemini verkeer via een van deze providers routeren in plaats van `antigravity` / `agy`, nadat ze hebben gecontroleerd of het gebruik ervan voldoet aan de voorwaarden van de provider.
+
+Aanraakpunten:
 
 - `open-sse/executors/antigravity.ts` — leest `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — verwerking van referenties
-- Oorspronkelijke incidentmelding: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `src/lib/oauth/providers/antigravity.ts` — certificaat loodgieterswerk
+- Origineel incidentrapport: Bespreking [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **በራስ የመነጨ** ከ `src/shared/constants/providers.ts` — በእጅ አያርትዑ. በ `npm run gen:provider-reference` ያድሱ **መጨረሻ የተፈጠረው፡-** 2026-11-10
+> **በራስ የመነጨ** ከ `src/shared/constants/providers.ts` — በእጅ አያርትዑ. በ `npm run gen:provider-reference` ያድሱ **መጨረሻ የተፈጠረው፡-** 2026-11-11
 
-ጠቅላላ አቅራቢዎች፡-**387** . የምድቡን ዝርዝር ከዚህ በታች ይመልከቱ።
+ጠቅላላ አቅራቢዎች፡-**388** . የምድቡን ዝርዝር ከዚህ በታች ይመልከቱ።
 
 ## ምድቦች
 
@@ -45,13 +45,14 @@
 | `veoaifree-web`         | `veo-free` | Veo AI Free               | ማረጋገጫ-አልባ, ቪዲዮ | [አገናኝ](https://veoaifree.com)                           | ማረጋገጫ አያስፈልግም። በእያንዳንዱ IP በሰዓት 6 ጥያቄዎች የተገደበ ነው።                                                                                                                                    | —        |
 | `zcode`                 | `zc`       | ZCode (GLM Coding Plan)   | ማረጋገጫ-አልባ      | [አገናኝ](https://zcode.z.ai)                              | OmniRoute ምንም የAPI ቁልፍ አያከማችም። የአካባቢው ZCode app-server ነባሩን builtin:zai-coding-plan መግባት ይጠቀማል።                                                                                     | —        |
 
-## OAuth አቅራቢዎች (30)
+## OAuth አቅራቢዎች (31)
 
 | ID               | ተለዋጭ ስም       | ስም                        | መለያዎች | ድረ ገጽ                                                                     | ማስታወሻዎች                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------- | ------------- | ------------------------- | ----- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `agy`            | `agy`         | Antigravity CLI           | OAuth | [አገናኝ](https://antigravity.google)                                        | የAntigravity CLI (`agy`) መግቢያዎን ያስመጡ (የቶከን ፋይሉን ይለጥፉ/ይስቀሉ)፣ አካባቢያዊ የCLI መግቢያን በራስ-ሰር ያግኙ፣ ወይም በGoogle ይግቡ። የAntigravity ጀርባ አገልግሎትን (የClaude ሞዴሎችን ጨምሮ) ይጋራል።                                                                                                                                                                                                                                        |
 | `amazon-q`       | `aq`          | Amazon Q                  | OAuth | [አገናኝ](https://aws.amazon.com/q/developer/)                               | እንደ Kiro ተመሳሳይ የAWS Builder ID ወይም የገባ refresh-token ፍሰትን ይጠቀማል፣ ነገር ግን የAmazon Q ግንኙነቶችን ለይቶ ያቆያል።                                                                                                                                                                                                                                                                                                  |
 | `antigravity`    | —             | Antigravity               | OAuth | —                                                                         | —                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `chatgpt`        | `chatgpt`     | ChatGPT                   | OAuth | —                                                                         | የChatGPT ዕቅድዎን በመጠቀም ብቁ የሆኑ ጥያቄዎችን ለመፍቀድ በChatGPT ይግቡ። ከCodex እና ChatGPT Web የተለየ ነው። የቅድመ እይታ ገደቦች ተፈጻሚ ይሆናሉ።                                                                                                                                                                                                                                                                                       |
 | `claude`         | `cc`          | Claude Code               | OAuth | —                                                                         | —                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `cline`          | `cl`          | Cline                     | OAuth | —                                                                         | በCline መለያዎ (OAuth) ይግቡ፣ ወይም ከapp.cline.bot → Settings → API Keys ቀጥተኛ API ቁልፍ ይለጥፉ። በርካታ API ቁልፎች ይደገፋሉ እና በራስ-ሰር በተራ ይጠቀማሉ — እያንዳንዱን እንደ የተለየ ግንኙነት ያክሉ።                                                                                                                                                                                                                                           |
 | `clinepass`      | `cp`          | ClinePass                 | OAuth | [አገናኝ](https://cline.bot/cline-pass)                                      | ClinePass 10 ክፍት የኮዲንግ ሞዴሎችን ያካተተ የCline $9.99/ወር የደንበኝነት ምዝገባ ነው። በCline መለያዎ (ከCline CLI/IDE ጋር ተመሳሳይ መግቢያ) ይግቡ፣ ወይም ቀጥተኛ የClinePass API ቁልፍ (app.cline.bot → Settings → API Keys) ይለጥፉ። የClinePass የደንበኝነት ምዝገባ የcline-pass/* ሞዴሎችን ይከፍታል። የCline WorkOS OAuth ፍሰትን እንደገና ይጠቀማል።                                                                                                                  |
@@ -471,7 +472,7 @@
 
 - ካታሎግ፦ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - መዝገብ (የእያንዳንዱ ሞዴል ዝርዝሮች)፦ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- አስፈጻሚዎች፦ [`open-sse/executors/`](../../open-sse/executors/) (172 ትግበራዎች)
+- አስፈጻሚዎች፦ [`open-sse/executors/`](../../open-sse/executors/) (174 ትግበራዎች)
 - ተርጓሚዎች፦ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ተጨማሪ ይመልከቱ

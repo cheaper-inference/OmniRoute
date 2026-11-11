@@ -15,7 +15,7 @@
 
 **[ディエゴ・ソウザ](https://github.com/diegosouzapw)によって作成されました**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                      |           v3.8.50            | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------------ | :--------------------------: | :---------: | :-------------------: |
-| 🌐プロバイダー                       |             352              |   **358**   |          387          |
+| 🌐プロバイダー                       |             352              |   **358**   |          388          |
 | 🧠独自チャットモデルIDs              |             1320             |  **1374**   |         1535          |
 | 🖼️モダリティブリッジ                 | 🆕ビジョン+オーディオ+ビデオ |      ✓      |           ✓           |
 | 📡レーダー無料カタログ               |         🆕オプトイン         |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特長 — 9router、OpenRouter、CLIProxyAPI、LiteLLM と 13 項目で比較した機能スナップショット。OmniRoute: 387 プロバイダー、150 以上の無料枠内蔵、20 種類のルーティング戦略、12 エンジンのトークン圧縮、110 ツール内蔵 MCP サーバー、A2A エージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLS フィンガープリントステルス、Desktop/Termux/PWA、67 言語の UI ローカライズ。OmniRoute は MIT ライセンスでセルフホスト可能。他社機能や数値は変更される場合があります。詳細はリンク先の方法論をご覧ください。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特長 — 9router、OpenRouter、CLIProxyAPI、LiteLLM と 13 項目で比較した機能スナップショット。OmniRoute: 388 プロバイダー、150 以上の無料枠内蔵、20 種類のルーティング戦略、12 エンジンのトークン圧縮、110 ツール内蔵 MCP サーバー、A2A エージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLS フィンガープリントステルス、Desktop/Termux/PWA、67 言語の UI ローカライズ。OmniRoute は MIT ライセンスでセルフホスト可能。他社機能や数値は変更される場合があります。詳細はリンク先の方法論をご覧ください。"/>
 
 <sub>📊 9router、OpenRouter、CLIProxyAPI、LiteLLM との詳細な比較方法と各機能の詳細 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radarはオプトイン方式で、GETリクエストのみを使用します。
 - **🖼️新しいエンドポイント**— `/v1/ocr` (Mistral OCR) および`/v1/audio/translations` (Whisper-style) はメディア面を充実させます。 → [APIリファレンス](docs/reference/API_REFERENCE.md)
 - **🎨画像/ビデオ/オーディオ生成**メディア用の— one API : xAI Grok Imagine & Novita AIビデオ、 ComfyUI、Magnific、Adobe Firefly、Segmind、およびElevenLabsなどの音声プロバイダー。 → [APIリファレンス](docs/reference/API_REFERENCE.md)
 - **🌍展開と運用**—リバースプロキシ`basePath`、ブラウザ言語の自動検出、キーごとのデバイス追跡、ルートレスMITM信頼、zh-TW ローカリゼーション。 →[環境](docs/reference/ENVIRONMENT.md)
-- **🤝その他のプロバイダーとエージェント**—クラウド エージェント (Codexクラウド、 Cursor、 Devin、 Jules)、ブラウザ付きGrokビルド (xAI) + OAuthログイン、 Ollamaファーストクラス カード、 Claude Opus 5 および Sonnet 5、 Kimi公式パートナーシップ (Code/Web/Moonshot)、 Zed、 Requesty、 SenseNova、 Yuanbao、 Agnes AI…、および更新された**387プロバイダーカタログ**。 →[プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝その他のプロバイダーとエージェント**—クラウド エージェント (Codexクラウド、 Cursor、 Devin、 Jules)、ブラウザ付きGrokビルド (xAI) + OAuthログイン、 Ollamaファーストクラス カード、 Claude Opus 5 および Sonnet 5、 Kimi公式パートナーシップ (Code/Web/Moonshot)、 Zed、 Requesty、 SenseNova、 Yuanbao、 Agnes AI…、および更新された**388プロバイダーカタログ**。 →[プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
 - **📡ルーティングの透明性**—すべての応答には、応答を提供したstrategy/provider/latencyを指定する`X-OmniRoute-Decision`ヘッダー、新しい`cache-optimized`コンボ戦略+自動コンボ`cacheAffinity`要素ルート リクエストがキャッシュされたプレフィックスを保持する接続に戻され、読み取り専用`/v1/auto-combo/{channel}/candidates`エンドポイントが`auto/*`チャネルのライブ候補プールを公開します。 →[オートコンボ](docs/routing/AUTO-COMBO.md)
 - **⚡ローカルのパフォーマンスとインフラ**—ワンクリック ローカルRedis、 Cloudflareワーカー / Deno リレー デプロイヤー、Bifrost および Mux を監視された組み込みサービスとしてデプロイします。 →[組み込みサービス](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩もボックス内にあります**—プラグイン フレームワーク+マーケットプレイス、 Omni/Agent/GitHubスキル フレームワーク、 Obsidianボールト統合 (22 個のMCPツール)、OpenAI 互換のバッチ & ファイルAPIs、セマンティック応答キャッシュ、リーダーボードによるゲーミフィケーション、 ACPエージェント検出 (15 個の組み込みエージェント)、 BigQueryへのスケジュールされたログ エクスポート、 `auto/chaos`並列マルチモデル ファンアウト、 Telegramボット ブリッジ、アプリ内バージョン マネージャー、 LMArena-ELO の無料プロバイダー ランキング。 →[ドキュメント](docs/README.md)
@@ -678,11 +678,11 @@ omniroute configure codex          # 他にも: claude opencode qwen aider goose
 
 <div align="center">
 
-## 🌐 387 AIプロバイダー— 156 カタログマーク付き無料
+## 🌐 388 AIプロバイダー— 156 カタログマーク付き無料
 
 </div>
 
-> **387 の登録プロバイダー**正規のチャット、メディア、検索、ローカル、クラウド エージェント、およびシステム コレクション全体にわたって、以下を含みます。**156 `hasFree: true`ディスカバリーメタデータを伝送する**。チャット モデル レジストリの対象範囲**245 プロバイダー / 3,172 の異なるプロバイダーとモデルのペア / 1,535 の生モデルIDs** ;別の無料のカタログには、**モデルごとに 466 行**、**34 の定期的なプール**そして**52 のrecurring/keyless永久無料プロバイダー**。これらは設計上、分母が異なります。定義とプールの重複排除された計算は、[プロバイダー リファレンス](docs/reference/PROVIDER_REFERENCE.md)と[無料利用枠](docs/reference/FREE_TIERS.md)に存在します。
+> **388 の登録プロバイダー**正規のチャット、メディア、検索、ローカル、クラウド エージェント、およびシステム コレクション全体にわたって、以下を含みます。**156 `hasFree: true`ディスカバリーメタデータを伝送する**。チャット モデル レジストリの対象範囲**245 プロバイダー / 3,172 の異なるプロバイダーとモデルのペア / 1,535 の生モデルIDs** ;別の無料のカタログには、**モデルごとに 466 行**、**34 の定期的なプール**そして**52 のrecurring/keyless永久無料プロバイダー**。これらは設計上、分母が異なります。定義とプールの重複排除された計算は、[プロバイダー リファレンス](docs/reference/PROVIDER_REFERENCE.md)と[無料利用枠](docs/reference/FREE_TIERS.md)に存在します。
 
 <div align="center">
 

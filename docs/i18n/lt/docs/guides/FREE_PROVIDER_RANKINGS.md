@@ -13,7 +13,7 @@
 
 ## Kas Tai yra
 
-OmniRoute registruoja 387 tiekėją, iš jų pažymėti 155 katalogo įrašai**free/no-auth** (be autentifikavimo, laisvos pakopos OAuth arba laisvos pakopos API klavišą — žr. [nemokamų lygių vadovą](../getting-started/FREE-TIERS-GUIDE.md) ir visą [nemokamų lygių katalogą](../reference/FREE_TIERS.md) ). Laimikis: nemokamų paslaugų teikėjų modelių kokybė labai skiriasi. Neautorizacijos teikėjas, aptarnaujantis pasienio modelį, yra daug naudingesnis nei teikiantis nedidelį seną modelį.
+OmniRoute registruoja 388 tiekėją, iš jų pažymėti 155 katalogo įrašai**free/no-auth** (be autentifikavimo, laisvos pakopos OAuth arba laisvos pakopos API klavišą — žr. [nemokamų lygių vadovą](../getting-started/FREE-TIERS-GUIDE.md) ir visą [nemokamų lygių katalogą](../reference/FREE_TIERS.md) ). Laimikis: nemokamų paslaugų teikėjų modelių kokybė labai skiriasi. Neautorizacijos teikėjas, aptarnaujantis pasienio modelį, yra daug naudingesnis nei teikiantis nedidelį seną modelį.
 
 **Nemokamas teikėjų reitingas** atsakymai"** kuris nemokamas teikėjas suteikia man geriausią modelį?** “, prisijungdami prie kiekvieno nemokamo teikėjo katalogo su** minios kokybės balai** iš** Arena AI lyderių lentelė** (žmogaus pirmenybė ELO, ta pati idėja yra LMArena chatbot arena). Tada paslaugų teikėjai reitinguojami pagal jų stiprumą** geriausias nemokamas modelis** .
 

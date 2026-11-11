@@ -488,7 +488,7 @@ Detta hanterar:
 
 | Fil                           | Ändamål                                           |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Chattmodellregister över 387-leverantörskatalogen |
+| `providerRegistry.ts`         | Chattmodellregister över 388-leverantörskatalogen |
 | `providerModels.ts`           | Modellalias, formatmappning                       |
 | `constants.ts`                | Timeouts, gränser, statuskoder                    |
 | `defaultThinkingSignature.ts` | Standard Claude tänkande signatur                 |

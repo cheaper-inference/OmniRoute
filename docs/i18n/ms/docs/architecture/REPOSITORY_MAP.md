@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API komponen papan pemuka: penyesuai untuk `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh skrin → komponen Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **387 penyedia** dengan pengesahan Zod (sumber rujukan utama)                                             |
+| `constants/providers.ts`         | **388 penyedia** dengan pengesahan Zod (sumber rujukan utama)                                             |
 | `constants/cliTools.ts`          | Daftar alat CLI luaran                                                                                    |
 | `constants/routingStrategies.ts` | **20 strategi penghalaan** dengan keutamaan                                                               |
 | `constants/publicApiRoutes.ts`   | Laluan yang memerlukan pengesahan Bearer (berbanding pengesahan pengurusan)                               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrasi CLI luaran + CLI OmniRoute Dalaman                                                          |
 | `I18N.md`                   | Seni bina i18n, menambah bahasa, 67 lokal                                                             |
 | `UNINSTALL.md`              | Langkah nyahpasang bersih                                                                             |
-| `PROVIDER_REFERENCE.md`     | Katalog **dijana secara automatik** bagi 387 penyedia (jana semula: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalog **dijana secara automatik** bagi 388 penyedia (jana semula: `npm run gen:provider-reference`) |
 
 ### Analisis mendalam subsistem
 

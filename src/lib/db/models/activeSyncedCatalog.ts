@@ -19,6 +19,11 @@ import {
 import { normalizeSyncedAvailableModels } from "./synced";
 import { getRawProviderConnections } from "../providers";
 import { isSyncedAtFresh } from "./syncedCatalogFreshness";
+import {
+  admitSyncedModelsByConnection,
+  readConnectionAdmissionRef,
+  type ConnectionAdmissionRef,
+} from "./freeOnlyAdmission";
 
 export type ActiveSyncedCatalog = {
   authoritative: boolean;
@@ -326,6 +331,8 @@ function unionRegistryDispatchModels(
 type ConnectionCatalog = {
   models: SyncedAvailableModel[];
   hasFreshConnection: boolean;
+  /** Every active connection is free-only, one is fresh, and none admits a model. */
+  freeOnlyExhausted: boolean;
 };
 
 async function loadConnectionCatalog(storedProviderId: string): Promise<ConnectionCatalog> {
@@ -334,7 +341,7 @@ async function loadConnectionCatalog(storedProviderId: string): Promise<Connecti
       { provider: storedProviderId, isActive: true },
       undefined,
       undefined,
-      ["id", "provider", "synced_models_at"]
+      ["id", "provider", "synced_models_at", "provider_specific_data"]
     ),
     getSyncedAvailableModelsByConnection(storedProviderId),
   ]);
@@ -342,15 +349,22 @@ async function loadConnectionCatalog(storedProviderId: string): Promise<Connecti
   const activeConnections = connections
     .map(readConnectionRef)
     .filter((connection): connection is ProviderConnectionRef => connection !== null);
+  // A free-only connection serves only the rows the sync's free predicate admits.
+  const admitted = admitSyncedModelsByConnection(
+    storedProviderId,
+    modelsByConnection,
+    connections.flatMap((connection) => readConnectionAdmissionRef(connection) ?? [])
+  );
 
   return {
     models: collectModelsForConnections(
-      modelsByConnection,
+      admitted.byConnection,
       activeConnections.map((connection) => connection.id)
     ),
     hasFreshConnection: activeConnections.some((connection) =>
       isSyncedAtFresh(connection.syncedModelsAt)
     ),
+    freeOnlyExhausted: admitted.freeOnlyExhausted,
   };
 }
 
@@ -390,6 +404,13 @@ export async function getActiveSyncedCatalog(
       };
     }
 
+    // Every active connection imports free models only and the provider lists no
+    // free model: nothing is callable. This is a synced answer, not a missing
+    // catalog, so it must not fail open to the static (paid) one.
+    if (siblingCatalogs.some((catalog) => catalog.freeOnlyExhausted)) {
+      return { authoritative: providerUsesAuthoritativeLiveCatalog(providerId), models: [] };
+    }
+
     // No ACTIVE CONNECTION carries a catalog for this provider — but a provider
     // NODE can: nodes live in `provider_nodes`, never in `provider_connections`,
     // so filtering by active connection ids drops their synced catalog entirely.
@@ -421,6 +442,31 @@ export async function getActiveSyncedCatalog(
 }
 
 /**
+ * Active connections that feed the /v1/models listing, grouped by provider, with
+ * the free-only admission reference of each.
+ */
+function groupListableConnections(connections: unknown[]) {
+  const connectionIdsByProvider = new Map<string, Set<string>>();
+  const admissionRefsByProvider = new Map<string, ConnectionAdmissionRef[]>();
+  for (const rawConnection of connections) {
+    const connection = readConnectionRef(rawConnection);
+    // Search providers have no chat models: their synced rows are the
+    // static-import UI's searchTypes (web/news/x), not routable catalog
+    // entries. Keep them out of the /v1/models live source.
+    if (!connection || getSearchProvider(connection.provider)) continue;
+    const ids = connectionIdsByProvider.get(connection.provider) ?? new Set<string>();
+    ids.add(connection.id);
+    connectionIdsByProvider.set(connection.provider, ids);
+    const admissionRef = readConnectionAdmissionRef(rawConnection);
+    if (!admissionRef) continue;
+    const refs = admissionRefsByProvider.get(connection.provider) ?? [];
+    refs.push(admissionRef);
+    admissionRefsByProvider.set(connection.provider, refs);
+  }
+  return { connectionIdsByProvider, admissionRefsByProvider };
+}
+
+/**
  * Return non-empty synced catalogs grouped by provider, restricted to active
  * connections. This is the authoritative live source for /v1/models.
  */
@@ -440,25 +486,12 @@ export async function getAllActiveSyncedModels(
     const connections = await getRawProviderConnections({ isActive: true }, undefined, undefined, [
       "id",
       "provider",
+      "synced_models_at",
+      "provider_specific_data",
     ]);
 
-    const connectionIdsByProvider = new Map<string, Set<string>>();
-
-    for (const rawConnection of connections) {
-      const connection = readConnectionRef(rawConnection);
-      if (!connection) continue;
-
-      // Search providers have no chat models: their synced rows are the
-      // static-import UI's searchTypes (web/news/x), not routable catalog
-      // entries. Keep them out of the /v1/models live source.
-      if (getSearchProvider(connection.provider)) continue;
-
-      if (!connectionIdsByProvider.has(connection.provider)) {
-        connectionIdsByProvider.set(connection.provider, new Set());
-      }
-
-      connectionIdsByProvider.get(connection.provider)!.add(connection.id);
-    }
+    const { connectionIdsByProvider, admissionRefsByProvider } =
+      groupListableConnections(connections);
 
     const result: Record<string, SyncedAvailableModel[]> = {};
 
@@ -480,7 +513,11 @@ export async function getAllActiveSyncedModels(
 
     await Promise.all(
       Array.from(connectionIdsByProvider.entries()).map(async ([providerId, connectionIds]) => {
-        const modelsByConnection = await getSyncedAvailableModelsByConnection(providerId);
+        const modelsByConnection = admitSyncedModelsByConnection(
+          providerId,
+          await getSyncedAvailableModelsByConnection(providerId),
+          admissionRefsByProvider.get(providerId) ?? []
+        ).byConnection;
 
         // Dispatch (getActiveSyncedCatalog) unions registry dispatch-tagged
         // rows into discovery; listing must agree, or model pickers fed by

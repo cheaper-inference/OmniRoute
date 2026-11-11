@@ -15,7 +15,7 @@ OmniRoute Next.js ਉੱਤੇ ਬਣਿਆ ਇੱਕ ਸਥਾਨਕ AI ਰਾ�
 
 ਮੁੱਖ ਸਮਰੱਥਾਵਾਂ:
 
-- CLI/ਟੂਲਾਂ ਲਈ OpenAI-ਅਨੁਕੂਲ API ਸਤਹ (387 ਪ੍ਰਦਾਤਾ, 159 ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ)
+- CLI/ਟੂਲਾਂ ਲਈ OpenAI-ਅਨੁਕੂਲ API ਸਤਹ (388 ਪ੍ਰਦਾਤਾ, 159 ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ)
 - ਪ੍ਰਦਾਤਾ ਫਾਰਮੈਟਾਂ ਵਿਚਕਾਰ ਬੇਨਤੀ/ਜਵਾਬ ਅਨੁਵਾਦ
 - ਮਾਡਲ ਕੌਂਬੋ ਫਾਲਬੈਕ (ਬਹੁ-ਮਾਡਲ ਕ੍ਰਮ)
 - `compositeTiers` ਦੁਆਰਾ ਰਨਟਾਈਮ ਕ੍ਰਮਬੱਧਤਾ ਨਾਲ ਸੰਰਚਿਤ ਕੌਂਬੋ ਪੜਾਅ (`provider + model + connection`)
@@ -858,41 +858,47 @@ flowchart LR
 - `src/lib/db/*`: ਖਾਸ ਮੋਡੀਊਲ ਸਿੱਧੇ ਇੰਪੋਰਟ ਕਰੋ — ਕੋਈ ਬੈਰਲ ਨਹੀਂ (ਪੁਰਾਣੀ `localDb.ts` ਰੀ-ਐਕਸਪੋਰਟ ਪਰਤ ਹਟਾ ਦਿੱਤੀ ਗਈ ਸੀ)
 - `src/lib/usageDb.ts`: SQLite ਟੇਬਲਾਂ ਦੇ ਉੱਪਰ ਵਰਤੋਂ ਇਤਿਹਾਸ/ਕਾਲ ਲੌਗਾਂ ਲਈ ਫਸਾਡ
 
-## ਪ੍ਰੋਵਾਈਡਰ ਐਗਜ਼ਿਕਿਊਟਰ ਕਵਰੇਜ (ਸਟ੍ਰੈਟੇਜੀ ਪੈਟਰਨ)
+## ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਟਰ ਕਵਰੇਜ (ਰਣਨੀਤੀ ਪੈਟਰਨ)
 
-ਹਰੇਕ ਪ੍ਰੋਵਾਈਡਰ ਕੋਲ `BaseExecutor` (`open-sse/executors/base.ts` ਵਿੱਚ) ਨੂੰ ਐਕਸਟੈਂਡ ਕਰਨ ਵਾਲਾ ਇੱਕ ਵਿਸ਼ੇਸ਼ ਐਗਜ਼ਿਕਿਊਟਰ ਹੁੰਦਾ ਹੈ, ਜੋ URL ਬਣਾਉਣ, ਹੈਡਰ ਤਿਆਰ ਕਰਨ, ਐਕਸਪੋਨੇਨਸ਼ੀਅਲ ਬੈਕਆਫ਼ ਨਾਲ ਮੁੜ ਕੋਸ਼ਿਸ਼, ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰਿਫ੍ਰੈਸ਼ ਹੁੱਕਸ, ਅਤੇ `execute()` ਔਰਕੈਸਟ੍ਰੇਸ਼ਨ ਵਿਧੀ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
+ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਕੋਲ `BaseExecutor` ( `open-sse/executors/base.ts` ਵਿੱਚ) ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਵਾਲਾ ਇੱਕ ਵਿਸ਼ੇਸ਼ ਐਗਜ਼ੀਕਿਊਟਰ ਹੁੰਦਾ ਹੈ, ਜੋ URL ਬਿਲਡਿੰਗ, ਸਿਰਲੇਖ ਨਿਰਮਾਣ, ਐਕਸਪੋਨੈਂਸ਼ੀਅਲ ਬੈਕਆਫ ਨਾਲ ਮੁੜ ਕੋਸ਼ਿਸ਼, ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰਿਫਰੈਸ਼ ਹੁੱਕ, ਅਤੇ `execute()` ਆਰਕੈਸਟਰੇਸ਼ਨ ਵਿਧੀ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
 
-| ਐਗਜ਼ੀਕਿਊਟਰ                | ਪ੍ਰਦਾਤਾ                                                                                                                                                    | ਵਿਸ਼ੇਸ਼ ਪ੍ਰਬੰਧਨ                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, ਆਦਿ | ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਡਾਇਨਾਮਿਕ URL/ਹੈਡਰ ਸੰਰਚਨਾ                           |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | ਕਸਟਮ ਪ੍ਰੋਜੈਕਟ/ਸੈਸ਼ਨ ID, Retry-After ਪਾਰਸਿੰਗ, 429 ਅਸਪਸ਼ਟੀਕਰਨ        |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | ਡਿਪਲੌਇਮੈਂਟ-ਅਧਾਰਿਤ ਰਾਊਟਿੰਗ, api-version ਕਵੇਰੀ ਲਾਗੂ ਕਰਨਾ             |
-| `BlackboxWebExecutor`     | Blackbox AI (ਵੈੱਬ-ਮੋਡ)                                                                                                                                     | TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਨੁਕਰਣ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                        |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH ਪਾਥ)                                                                                                                                        | ਕੰਸਟ੍ਰੇਇੰਟ + ਟੂਲ-ਰੀਮੈਪ ਪਾਈਪਲਾਈਨਾਂ, ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ੇਪਿੰਗ             |
-| `CliProxyApiExecutor`     | CLIProxyAPI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ                                                                                                                                 | ਕਸਟਮ ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਪ੍ਰੋਟੋਕੋਲ ਪ੍ਰਬੰਧਨ                              |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | ਖਾਤਾ ID ਇੰਜੈਕਸ਼ਨ, Neurons-ਅਧਾਰਿਤ ਵਰਤੋਂ ਟਰੈਕਿੰਗ                     |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | ਸਿਸਟਮ ਹਦਾਇਤਾਂ ਇੰਜੈਕਟ ਕਰਦਾ ਹੈ, ਤਰਕ ਯਤਨ ਨੂੰ ਲਾਜ਼ਮੀ ਬਣਾਉਂਦਾ ਹੈ        |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | ਥ੍ਰੈੱਡ/ਟਰਨ ਪਿੰਨਿੰਗ ਵਾਲਾ ਬ੍ਰਾਊਜ਼ਰ-ਸੈਸ਼ਨ Responses API ਬ੍ਰਿਜ         |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + ਪ੍ਰਤੀ-ਸੈਸ਼ਨ ਹੈਡਰ ਰੋਟੇਸ਼ਨ                                   |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC ਪ੍ਰੋਟੋਕੋਲ, Protobuf ਐਨਕੋਡਿੰਗ, ਚੈਕਸਮ ਰਾਹੀਂ ਬੇਨਤੀ ਸਾਈਨਿੰਗ |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | ਕਲਾਉਡ ਏਜੰਟ ਮੋਡੀਊਲ ਰਾਹੀਂ Devin ਟਾਸਕ ਲਾਈਫਸਾਈਕਲ ਬ੍ਰਿਜਿੰਗ              |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼, VSCode ਦੀ ਨਕਲ ਕਰਨ ਵਾਲੇ ਹੈਡਰ                 |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + ਪ੍ਰੋਜੈਕਟ-ਸਕੋਪਡ ਰਾਊਟਿੰਗ                              |
-| `GlmExecutor`             | Z.AI GLM (`glmt` ਪ੍ਰੀਸੈੱਟ ਸਮੇਤ)                                                                                                                            | ਸੋਚ-ਬਜਟ ਪ੍ਰਤੀ ਜਾਗਰੂਕ, GLMT ਪ੍ਰੀਸੈੱਟ ਕਾਂਸਟੈਂਟ                       |
-| `GrokWebExecutor`         | xAI Grok ਵੈੱਬ                                                                                                                                              | ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ, ਮੋਡ ਚੋਣ (ਸੋਚ/ਮਿਆਰੀ)                              |
-| `KieExecutor`             | KIE                                                                                                                                                        | ਘੁੰਮਦੇ ਸੈਸ਼ਨ ਐਂਕਰਾਂ ਨਾਲ ਕਸਟਮ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ                        |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream ਬਾਈਨਰੀ ਫਾਰਮੈਟ → SSE ਰੂਪਾਂਤਰਨ                       |
-| `MuseSparkWebExecutor`    | Muse Spark (ਵੈੱਬ)                                                                                                                                          | ਚਿੱਤਰ-ਸੁਨੇਹਾ ਬ੍ਰਿਜਿੰਗ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                         |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਬੇਨਤੀ ਬਾਡੀ ਦਾ ਆਕਾਰ                                 |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਸੈੱਟਅੱਪ                                      |
-| `PerplexityWebExecutor`   | Perplexity ਵੈੱਬ                                                                                                                                            | ਚੈਟ ਜਾਰੀ ਰੱਖਣ ਲਈ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                                  |
-| `PetalsExecutor`          | Petals ਡਿਸਟ੍ਰਿਬਿਊਟਡ ਇਨਫਰੈਂਸ                                                                                                                                | ਵਿਕੇਂਦਰੀਕ੍ਰਿਤ ਸਵਾਰਮ ਰਾਊਟਿੰਗ                                        |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | ਕਿਸੇ API ਕੁੰਜੀ ਦੀ ਲੋੜ ਨਹੀਂ, ਦਰ-ਸੀਮਿਤ ਬੇਨਤੀਆਂ                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT ਅਤੇ OAuth ਸਹਾਇਤਾ, ਬਹੁ-ਮਾਡਲ ਮੁਫ਼ਤ ਟੀਅਰ                          |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | ਸਰਵਿਸ ਅਕਾਊਂਟ ਪ੍ਰਮਾਣੀਕਰਨ, ਖੇਤਰ-ਅਧਾਰਿਤ ਐਂਡਪੌਇੰਟ                      |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | ਇੰਪੋਰਟ ਕੀਤੀ API ਕੁੰਜੀ + Connect-protobuf ਚੈਟ ਸਟ੍ਰੀਮਿੰਗ             |
+| ਐਗਜ਼ੀਕਿਊਟਰ                | ਪ੍ਰਦਾਤਾ(ਆਂ)                                                                                                                                               | ਵਿਸ਼ੇਸ਼ ਪਰਬੰਧਨ                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, ਪਰੇਸ਼ਾਨੀ, Together, Fireworks, Cerebras, Cohere, NVIDIA, ਆਦਿ। | ਪ੍ਰਤੀ ਪ੍ਰਦਾਤਾ ਡਾਇਨਾਮਿਕ URL/header ਸੰਰਚਨਾ                                   |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                        | ਕਸਟਮ project/session IDs, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ- ਪਾਰਸ ਕਰਨ ਤੋਂ ਬਾਅਦ, 429 ਗੁੰਝਲਦਾਰ |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                              | ਤੈਨਾਤੀ-ਅਧਾਰਿਤ ਰੂਟਿੰਗ, ਏਪੀਆਈ-ਵਰਜਨ ਪੁੱਛਗਿੱਛ ਲਾਗੂਕਰਨ                          |
+| `BlackboxWebExecutor`     | ਬਲੈਕਬਾਕਸ AI (ਵੈੱਬ-ਮੋਡ)                                                                                                                                    | TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਇਮੂਲੇਸ਼ਨ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                              |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH ਮਾਰਗ)                                                                                                                                      | ਕੰਸਟ੍ਰੈਂਟ + ਟੂਲ-ਰੀਮੈਪ ਪਾਈਪਲਾਈਨਾਂ, ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ੇਪਿੰਗ                      |
+| `CliProxyApiExecutor`     | CLIProxyAPI- ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ                                                                                                                               | ਕਸਟਮ ਪ੍ਰਮਾਣਿਕਤਾ ਅਤੇ ਪ੍ਰੋਟੋਕੋਲ ਹੈਂਡਲਿੰਗ                                     |
+| `CloudflareAiExecutor`    | Cloudflare ਵਰਕਰ AI                                                                                                                                        | ਖਾਤਾ ID ਇੰਜੈਕਸ਼ਨ, ਨਿਊਰੋਨਸ-ਅਧਾਰਿਤ ਵਰਤੋਂ ਟਰੈਕਿੰਗ                             |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                              | ਸਿਸਟਮ ਨਿਰਦੇਸ਼ਾਂ ਨੂੰ ਇੰਜੈਕਟ ਕਰਦਾ ਹੈ, ਤਰਕ ਦੇ ਯਤਨਾਂ ਨੂੰ ਮਜਬੂਰ ਕਰਦਾ ਹੈ         |
+| `ChatGptWebCodexExecutor` | ChatGPT ਵੈੱਬ (Codex)                                                                                                                                      | ਬ੍ਰਾਊਜ਼ਰ-ਸੈਸ਼ਨ thread/turn ਪਿਨਿੰਗ ਦੇ ਨਾਲ API ਬ੍ਰਿਜ ਜਵਾਬ ਦਿੰਦਾ ਹੈ           |
+| `CommandCodeExecutor`     | ਕਮਾਂਡ ਕੋਡ                                                                                                                                                 | OAuth + ਪ੍ਰਤੀ-ਸੈਸ਼ਨ ਹੈਡਰ ਰੋਟੇਸ਼ਨ                                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                | ConnectRPC ਪ੍ਰੋਟੋਕੋਲ, ਪ੍ਰੋਟੋਬੁਫ ਏਨਕੋਡਿੰਗ, ਚੈੱਕਸਮ ਦੁਆਰਾ ਹਸਤਾਖਰ ਕਰਨ ਦੀ ਬੇਨਤੀ |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                 | ਕਲਾਉਡ ਏਜੰਟ ਮੋਡੀਊਲ ਰਾਹੀਂDevin ਟਾਸਕ ਲਾਈਫਸਾਈਕਲ ਬ੍ਰਿਜਿੰਗ                       |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                            | Copilot ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼, VSCode-ਨਕਲ ਕਰਨ ਵਾਲੇ ਸਿਰਲੇਖ                          |
+| `GitlabExecutor`          | GitLab ਜੋੜੀ                                                                                                                                               | GitLab OAuth + ਪ੍ਰੋਜੈਕਟ-ਸਕੋਪਡ ਰੂਟਿੰਗ                                       |
+| `GlmExecutor`             | Z.AI GLM (ਸਮੇਤ `glmt` ਪ੍ਰੀਸੈੱਟ)                                                                                                                           | ਸੋਚ-ਬਜਟ ਜਾਗਰੂਕ, GLMT ਪ੍ਰੀਸੈਟ ਸਥਿਰਾਂਕ                                       |
+| `GrokWebExecutor`         | xAI Grok ਵੈੱਬ                                                                                                                                             | ਵੈੱਬ ਸੈਸ਼ਨ ਰਿਵਰਸ, ਮੋਡ ਚੋਣ (think/standard)                                 |
+| `KieExecutor`             | KIE                                                                                                                                                       | ਰੋਟੇਟਿੰਗ ਸੈਸ਼ਨ ਐਂਕਰਾਂ ਨਾਲ ਕਸਟਮ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ                              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                    | AWS EventStream ਬਾਈਨਰੀ ਫਾਰਮੈਟ → SSE ਰੂਪਾਂਤਰਨ                               |
+| `MuseSparkWebExecutor`    | ਮਿਊਜ਼ ਸਪਾਰਕ (ਵੈੱਬ)                                                                                                                                        | ਚਿੱਤਰ-ਸੁਨੇਹਾ ਬ੍ਰਿਜਿੰਗ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਉਲਟਾ                                  |
+| `NlpCloudExecutor`        | NLP ਕਲਾਊਡ                                                                                                                                                 | ਪ੍ਰਦਾਨਕ-ਵਿਸ਼ੇਸ਼ ਬੇਨਤੀ ਬਾਡੀ ਸ਼ਕਲ                                            |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                  | AI SDK ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਸੈੱਟਅੱਪ                                              |
+| `PerplexityWebExecutor`   | ਉਲਝਣ ਵੈੱਬ                                                                                                                                                 | ਚੈਟ ਜਾਰੀ ਰੱਖਣ ਲਈ ਵੈੱਬ-ਸੈਸ਼ਨ ਉਲਟਾ                                           |
+| `PetalsExecutor`          | ਪੇਟਲ ਵੰਡਿਆ ਅਨੁਮਾਨ                                                                                                                                         | ਵਿਕੇਂਦਰੀਕ੍ਰਿਤ ਝੁੰਡ ਰੂਟਿੰਗ                                                  |
+| `PollinationsExecutor`    | ਪਰਾਗਣ AI                                                                                                                                                  | ਕੋਈ API ਕੁੰਜੀ ਦੀ ਲੋੜ ਨਹੀਂ, ਦਰ-ਸੀਮਤ ਬੇਨਤੀਆਂ                                 |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                  | PAT ਅਤੇ OAuth ਸਮਰਥਨ, ਮਲਟੀ-ਮਾਡਲ ਫ੍ਰੀ ਟੀਅਰ                                   |
+| `VertexExecutor`          | Google ਵਰਟੇਕਸ AI                                                                                                                                          | ਸੇਵਾ ਖਾਤਾ ਪ੍ਰਮਾਣਿਕਤਾ, ਖੇਤਰ-ਆਧਾਰਿਤ ਅੰਤਮ ਬਿੰਦੂ                               |
+| `DevinDesktopExecutor`    | Devin ਡੈਸਕਟਾਪ                                                                                                                                             | ਆਯਾਤ ਕੀਤਾ API ਕੁੰਜੀ + ਕਨੈਕਟ-ਪ੍ਰੋਟੋਬੁਫ ਚੈਟ ਸਟ੍ਰੀਮਿੰਗ                        |
 
-ਹੋਰ ਸਾਰੇ ਪ੍ਰੋਵਾਈਡਰ (ਕਸਟਮ ਅਨੁਕੂਲ ਨੋਡਾਂ ਸਮੇਤ) `DefaultExecutor` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
+ਹੋਰ ਸਾਰੇ ਪ੍ਰਦਾਤਾ (ਕਸਟਮ ਅਨੁਕੂਲ ਨੋਡਸ ਸਮੇਤ) `DefaultExecutor` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
+
+### ਸਵੈਚਲਿਤ ਪੜਤਾਲਾਂ ਅਤੇ ਵੈੱਬ-ਸ਼ੈਸ਼ਨ ਖਾਤੇ
+
+ਮਾਡਲ ਟੈਸਟ, ਸਾਰੇ ਟੈਸਟ, ਕੰਬੋ ਟੈਸਟ ਅਤੇ ਮੁਲਾਂਕਣ ਅਸਲ ਚੈਟ ਬੇਨਤੀਆਂ ਭੇਜਦੇ ਹਨ। ਇੱਕ ਵੈੱਬ-ਸੈਸ਼ਨ ਪ੍ਰਦਾਤਾ ਸਾਈਨ-ਇਨ ਕੀਤੇ ਉਪਭੋਗਤਾ ਵਜੋਂ ਕੰਮ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਉਹਨਾਂ ਵਿੱਚੋਂ ਹਰੇਕ ਬੇਨਤੀ ਨੂੰ ਉਸ ਖਾਤੇ 'ਤੇ ਇੱਕ ਗੱਲਬਾਤ ਦੇ ਰੂਪ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ; ਸਵੈਚਲਿਤ ਪੜਤਾਲਾਂ ਜੋ ਅਜਿਹੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਨੂੰ ਛੱਡ ਦਿੰਦੀਆਂ ਹਨ, ਇੱਕ ਖਾਤਾ ਮੁਅੱਤਲ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ (#14780)। ਇਸਲਈ ਚੈਟ ਪਾਈਪਲਾਈਨ ਹਰੇਕ ਟੀਚੇ ਤੋਂ ਇਨਕਾਰ ਕਰਦੀ ਹੈ ਇੱਕ ਸਵੈਚਾਲਤ ਪੜਤਾਲ ਪਹੁੰਚਦੀ ਹੈ ਜਿਸਦਾ ਪ੍ਰਦਾਤਾ ਇੱਕ ਵੈੱਬ-ਸੈਸ਼ਨ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲੈਂਦਾ ਹੈ, ਇੱਕ ਵਾਰ ਟਾਰਗਿਟ ਦੇ ਪ੍ਰਦਾਤਾ ਦੇ ਹੱਲ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਅਤੇ ਇੱਕ ਪ੍ਰਮਾਣ ਪੱਤਰ ਚੁਣੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ (`src/lib/providers/chatProbePolicy.ts`)। ਇਨਕਾਰ `error.code` `chat_probe_not_isolated` ਦੇ ਨਾਲ `422` ਹੈ, ਅਤੇ ਪੜਤਾਲ ਦੌੜਾਕ ਇਸਨੂੰ ਇੱਕ ਛੱਡਣ ਦੇ ਰੂਪ ਵਿੱਚ ਰਿਪੋਰਟ ਕਰਦੇ ਹਨ, ਨਾ ਕਿ ਇੱਕ ਅਸਫਲਤਾ।
+
+ਇੱਕ ਐਗਜ਼ੀਕਿਊਟਰ ਜੋ ਪ੍ਰਦਾਤਾ ਦੇ ਆਪਣੇ ਨੋ-ਹਿਸਟਰੀ ਮੋਡ ਵਿੱਚ ਹਰ ਚੈਟ ਨੂੰ ਚਲਾਉਂਦਾ ਹੈ, ਇਸਨੂੰ `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) ਨਾਲ ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ; ਫਿਰ ਉਸ ਪ੍ਰਦਾਤਾ ਨੂੰ ਪੜਤਾਲਾਂ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ChatGPT ਵੈੱਬ ਨੇ `temporary-chat` ਘੋਸ਼ਣਾ ਕੀਤੀ। ਇੱਕ ਘੋਸ਼ਣਾ ਨੂੰ ਇਸਦੇ ਮਕੈਨਿਜ਼ਮ ਵਿੱਚ ਇੱਕ ਟੈਸਟ ਦੇ ਨਾਲ ਪਿੰਨ ਕਰੋ, ਇਸਲਈ ਦਾਅਵਾ ਉਸ ਕੋਡ ਤੋਂ ਬਾਹਰ ਨਹੀਂ ਰਹਿ ਸਕਦਾ ਜੋ ਇਸਨੂੰ ਸੱਚ ਬਣਾਉਂਦਾ ਹੈ।
 
 ## ਪ੍ਰੋਵਾਈਡਰ ਅਨੁਕੂਲਤਾ ਮੈਟ੍ਰਿਕਸ
 

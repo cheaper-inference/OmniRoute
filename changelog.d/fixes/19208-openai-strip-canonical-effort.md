@@ -1,0 +1,1 @@
+- **fix(openai):** Requests carrying OmniRoute's canonical top-level `effort` no longer fail on OpenAI Chat Completions with 400 "Unknown parameter: 'effort'": the key is dropped after it is mapped to `reasoning_effort`, and the `reasoning` object is folded onto `reasoning_effort` for that endpoint ([#18912](https://github.com/cheaper-inference/OmniRoute/issues/18912))

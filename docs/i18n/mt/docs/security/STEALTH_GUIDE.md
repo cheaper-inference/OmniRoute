@@ -137,40 +137,62 @@ Moduli relatati fl-istess pakkett:
 
 ---
 
-## Stealth ta’ Antigravity
+## Antigravity Stealth
 
-It-talbiet Antigravity jippreservaw it-test tas-sejjieħ byte b’byte. OmniRoute ma jdaħħalx karattri b’wisa’ żero fil-prompts u ma jibdilx l-ismijiet tal-għodod jew jinjetta għodod biex jimita klijent IDE.
+It-talbiet Antigravity jippreservaw it-test ta' min iċempel byte għal byte. OmniRoute ma jdaħħalx karattri ta' wisa' żero f'prompts jew għodod rename/inject biex jimitaw klijent IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Ineħħi l-markaturi tal-SDK Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) qabel ma jgħaddi t-talba.
+Strixxi Stainless SDK markers (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) qabel ma jintbagħtu.
 
-### ⚠️ Riskju: `ANTIGRAVITY_CREDITS=always` (punt kritiku għal projbizzjoni tal-kont)
+### Riskju ⚠️ : `ANTIGRAVITY_CREDITS=always` (hot spot tal-projbizzjoni tal-kont)
 
-`ANTIGRAVITY_CREDITS=always` (ikkonsmat minn `open-sse/executors/antigravity.ts`) jgħaddi **kull** talba minn Antigravity AI Credit Overages (krediti Google bi ħlas) minflok iħalli l-kwota tal-livell bla ħlas ta’ Google tikkontrolla l-użu. Dan huwa ddokumentat bħala karatteristika, iżda huwa **l-aktar rapport komuni ta’ ksur tat-ToS li naraw** — diversi kontijiet Google Ultra ġew ipprojbiti bi `403 / "service disabled for ToS violation" / insufficient_quota` wara li damu jaħdmu għal ftit sigħat b’`=always`.
+Rotot `ANTIGRAVITY_CREDITS=always` (ikkunsmat minn `open-sse/executors/antigravity.ts`).**kull** talba permezz ta ' Antigravity AI Credit Overages (krediti Google imħallsa) minflok ma tħalli l-affarijiet ta' gate ta' kwota b'xejn ta ' Google. Dan huwa dokumentat bħala karatteristika, iżda huwa **ir-rapport uniku l-aktar komuni ta’ ksur ta’ ToS li naraw** — kontijiet multipli Google Ultra ġew ipprojbiti ma ' `403 / "service disabled for ToS violation" / insufficient_quota` wara li damu għal ftit sigħat ma' `=always`.
 
-L-infurzar upstream isir **min-naħa ta’ Google**, u mhuwiex xi ħaġa li OmniRoute jista’ jipprevjeni. L-isem tal-varjabbli tal-ambjent u d-dokumentazzjoni eżistenti jagħtuh l-impressjoni li huwa kontroll sikur biex tattivah; mhuwiex.
+L-infurzar upstream huwa mixgħul **in-naħa ta'Google** , xejn OmniRoute jista 'jipprevjeni. L-isem env var u d-doks eżistenti jagħmluha ħoss bħal pum sikur biex taqleb; mhuwiex.
 
-**Għaliex dan jattira d-detezzjoni tal-abbuż b’mod aktar aggressiv mill-użu tal-livell bla ħlas biss:**
+**Għaliex dan jiġbed l-iskoperta tal-abbuż b'mod aktar aggressiv mill-użu ta' saff b'xejn biss:**
 
-- Infiq awtomatizzat u sostnut fuq kont Google wieħed jiġi mmarkat b’mod differenti minn meta l-livell bla ħlas jilħaq il-kwota u jieqaf.
-- L-infiq żejjed tal-krediti m’għandux limitu massimu tar-rata, għalhekk klijent ikkonfigurat ħażin jista’ jaħraq diversi mijiet ta’ USD f’minuti u jidher bħallikieku qed jerġa’ jbigħ API keys jew jiġġenera traffiku ta’ bots.
-- Diversi utenti ta’ OmniRoute li jużaw krediti żejda b’mod parallel mill-istess IP estern isaħħu s-sinjal.
+- L-infiq awtomatizzat sostnut fuq kont wieħed Google jimmarka b'mod differenti minn hits-quota-and-stops b'xejn.
+- L-eċċess tal-kreditu m'għandhom l-ebda limitu massimu tar-rata, għalhekk klijent ikkonfigurat ħażin jista' jaħraq diversi mijiet ta USD f'minuti u jidher qisu bejgħ mill-ġdid ta' API-key jew traffiku bot.
+- Utenti multipli OmniRoute li jolqtu krediti ta 'eċċess b'mod parallel mill-istess IP esterni jikkomponu s-sinjal.
 
 **Pożizzjoni rakkomandata:**
 
-1. Żomm il-valur predefinit `ANTIGRAVITY_CREDITS=off` sakemm l-operatur ma jaċċettax b’mod espliċitu r-riskju tal-krediti bi ħlas u tal-infurzar fuq il-kont. `retry` jibgħat it-talba normali l-ewwel u jinjetta l-krediti mhux aktar minn darba wara żball 429 eliġibbli relatat mal-kwota; `always` jinjetta l-krediti mal-ewwel talba.
-2. **Qassam it-tagħbija bejn il-fornituri permezz ta’ Auto-Combo** (`model: "auto"` jew combo `kr/glm/etc`) minflok timmassimizza l-użu ta’ kont Antigravity wieħed.
-3. **Issettja limiti RPM għal kull konnessjoni** fil-paġna tal-editjar tal-fornitur Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM huwa limitu massimu difendibbli għal użu sostnut.
-4. **Uża networking upstream stabbli u kkontrollat mill-operatur** u evita li taqsam kont wieħed bejn utenti jew workloads mhux relatati.
-5. **Jekk tiġi pprojbit**: appella permezz ta’ `support.google.com` → “Restore Workspace/Account access” bil-body eżatt tar-risposta `quota_exceeded` / `service disabled` li bagħtet Google. Ir-restawr mhuwiex garantit.
+1. Żomm iż- `ANTIGRAVITY_CREDITS=off` default sakemm l-operatur ma jaċċettax b'mod espliċitu kreditu mħallas u riskju ta' infurzar tal-kont. `retry` jibgħat it-talba normali l-ewwel u jinjetta krediti l-aktar darba wara kwota eliġibbli 429; `always` jinjetta krediti fuq l-ewwel talba.
+2. **Ifrex it-tagħbija bejn il-fornituri permezz ta' Auto-Combo** (`model: "auto"` jew `kr/glm/etc` -combo) minflok satura kont Antigravity wieħed.
+3. **Issettja limiti RPM għal kull konnessjoni** fil-paġna ta 'editjar tal-fornitur Antigravity (Dashboard → Providers → Antigravity → konnessjoni → limitu tar-rata). 30–60 RPM huwa limitu ta' fuq difiżibbli għal użu sostnut.
+4. **Uża netwerking upstream stabbli, ikkontrollat mill-operatur** u tevita li taqsam kont wieħed bejn utenti jew tagħbija tax-xogħol mhux relatati.
+5. **Jekk ipprojbit** : appell permezz ta `support.google.com` → "Restore Workspace/Account access" bil-korp ta' rispons `quota_exceeded` / `service disabled` eżatt mibgħut Google. Ir-restawr mhuwiex garantit.
 
-Ir-referenza tal-ambjent tiddokumenta l-implikazzjonijiet għal kull kont u għall-infiq ta’ kull modalità ta’ krediti.
+Ir-referenza tal-ambjent tiddokumenta l-implikazzjonijiet tal-kont u tal-infiq ta’ kull mod ta’ krediti.
 
-Punti ta’ kuntatt:
+#### Mhux biss `=always`: Antigravity OAuth routing b'mod ġenerali
+
+Is-sospensjonijiet mhumiex limitati għal kreditu żejjed. Rapporti f'Novembru 2026 (#19223, #19266) jiddeskrivu diversi kontijiet Google sospiżi waqt ir-rotta permezz tal-fornituri `antigravity` u `agy` (Antigravity CLI), bi:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Iż-żewġ fornituri jawtentikaw mas-sessjoni OAuth tal-prodott Antigravity, li huwa l-każ dwar l-avviż tar-riskju tad-dashboard ("Dan il-fornitur juża l-prodott uffiċjali tiegħek session/OAuth, li mhuwiex awtorizzat għall-użu proxy/router ") iwissi dwar qabel ma tiżdied konnessjoni. L-ebda waħda mir-rakkomandazzjonijiet ta' hawn fuq ma tagħmel dak l-użu awtorizzat; huma jnaqqsu biss kemm traffiku kont wieħed iġorr.
+
+**Interfaces API awtorizzati għal mudelli Gemini.** Google joffri aċċess programmatiku għal Gemini permezz ta ' APIs tiegħu, li OmniRoute jappoġġja bħala fornituri ordinarji ta' API-key:
+
+| Id-fornitur | Isem tad-dashboard        | Kredenzjali                                                                           |
+| ----------- | ------------------------- | ------------------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | Ċavetta Gemini API minn Google AI Studio (livell b'xejn disponibbli)                  |
+| `vertex`    | Vertex AI                 | Kont tas-Servizz JSON, token ta' aċċess OAuth jew ċavetta Vertex Express API (Gemini) |
+
+Dawn il-fornituri jużaw kredenzjali kwistjonijiet Google għall-aċċess API, b'differenza mis-sessjoni tal-prodott Antigravity. Ma jagħmlux kull użu konformi jew ineħħu r-riskju tal-infurzar: kull wieħed huwa rregolat mit-termini tiegħu stess, li l-operatur irid jiċċekkja għall-iskjerament tagħhom. Pereżempju, it [-Termini ta’ Servizz Addizzjonali Gemini API](https://ai.google.dev/gemini-api/terms) jippermettu biss Servizzi Mħallsa meta l-klijenti API isiru disponibbli għall-utenti fiż-Żona Ekonomika Ewropea, l-Isvizzera jew ir-Renju Unit, u l-kontenut mibgħut lil Servizzi Mhux Imħallsa jista’ jintuża biex itejjeb il-prodotti ta’ Google. Vertex AI minflok jaqa' taħt it-termini Google Cloud ( [Termini Speċifiċi tas-Servizz](https://cloud.google.com/terms/service-terms) ). Il-prezzijiet u l-kwoti jsegwu dawk it-termini API aktar milli abbonament Antigravity.
+
+Operaturi li jridu jevitaw is-sospensjonijiet Antigravity deskritti hawn fuq għandhom iwasslu t-traffiku Gemini minn wieħed minn dawn il-fornituri minflok `antigravity` / `agy`, wara li jiċċekkjaw li l-użu tagħhom jaqbel mat-termini tal-fornitur.
+
+Punti ta' kuntatt:
 
 - `open-sse/executors/antigravity.ts` — jaqra `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — infrastruttura tal-kredenzjali
+- Plumbing tal-kredenzjali `src/lib/oauth/providers/antigravity.ts` —
 - Rapport oriġinali tal-inċident: Diskussjoni [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---

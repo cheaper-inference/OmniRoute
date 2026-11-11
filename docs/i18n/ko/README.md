@@ -15,7 +15,7 @@
 
 **만든 사람 [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                         |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 제공업체             |            352            |   **358**   |          387          |
+| 🌐 제공업체             |            352            |   **358**   |          388          |
 | 🧠 독특한 채팅 모델 IDs |           1320            |  **1374**   |         1535          |
 | 🖼️ 모달리티 브리지      | 🆕 비전 + 오디오 + 비디오 |      ✓      |           ✓           |
 | 📡 레이더 무료 카탈로그 |          🆕 동의          |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 387 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 388 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 전체 방법론 &amp; 기능별 세부 정보 vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar는 선택적으로 사용할 수 있으며 GET 전용입니다. OmniRoute 
 - **🖼️ 새로운 엔드포인트** — `/v1/ocr` (Mistral OCR) 및 `/v1/audio/translations` (속삭임 스타일)는 미디어 표면을 마무리합니다. → [API 참조](docs/reference/API_REFERENCE.md)
 - **🎨 이미지/비디오/오디오 생성** 미디어용 — one API : xAI Grok Imagine & Novita AI 비디오, ComfyUI, Magnific, Adobe Firefly, Segmind 및 ElevenLabs 와 같은 음성 제공업체. → [API 참조](docs/reference/API_REFERENCE.md)
 - **🌍 배포 및 운영** — 역방향 프록시 `basePath`, 브라우저 언어 자동 감지, 키별 장치 추적, 루트 없는 MITM 신뢰, zh-TW 현지화. → [환경](docs/reference/ENVIRONMENT.md)
-- **🤝 더 많은 제공자 및 대리인** — 클라우드 에이전트(Codex 구름, Cursor, Devin, Jules), Grok 짓다 (xAI) 브라우저 사용 + OAuth 로그인, Ollama 일류 카드, Claude Opus 5 & Sonnet 5, Kimi 공식 파트너십(Code/Web/Moonshot), Zed, 요청, SenseNova, 위안바오, 아그네스 AI… 그리고 상쾌한 **387 제공자 카탈로그**. → [공급자](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 더 많은 제공자 및 대리인** — 클라우드 에이전트(Codex 구름, Cursor, Devin, Jules), Grok 짓다 (xAI) 브라우저 사용 + OAuth 로그인, Ollama 일류 카드, Claude Opus 5 & Sonnet 5, Kimi 공식 파트너십(Code/Web/Moonshot), Zed, 요청, SenseNova, 위안바오, 아그네스 AI… 그리고 상쾌한 **388 제공자 카탈로그**. → [공급자](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 라우팅 투명성** — 모든 응답은 이를 제공한 strategy/provider/latency 명명하는 `X-OmniRoute-Decision` 헤더, 새로운 `cache-optimized` 콤보 전략 + 자동 콤보 `cacheAffinity` 요소 경로 반복 요청을 캐시된 접두사를 보유하는 연결로 다시 전달하며 읽기 전용 `/v1/auto-combo/{channel}/candidates` 엔드포인트는 `auto/*` 채널의 라이브 후보 풀을 노출합니다. → [자동 콤보](docs/routing/AUTO-COMBO.md)
 - **⚡ 현지 실적 및 인프라** — 원클릭 로컬 Redis, Cloudflare Workers/Deno 릴레이 배포자, Bifrost 및 Mux를 감독되는 임베디드 서비스로 배포합니다. → [임베디드 서비스](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 상자에도 들어있습니다.** — 플러그인 프레임워크 + 마켓플레이스, Omni/Agent/GitHub 기술 프레임워크, Obsidian 볼트 통합(22개 MCP 도구), OpenAI 호환 배치 및 파일 APIs, 의미론적 응답 캐시, 리더보드를 사용한 게임화, ACP 에이전트 검색(15개 내장 에이전트), BigQuery 로 예약된 로그 내보내기, `auto/chaos` 병렬 다중 모델 팬아웃, Telegram 봇 브리지, 인앱 버전 관리자 및 LMArena-ELO 무료 제공자 순위. → [문서](docs/README.md)
@@ -678,11 +678,11 @@ omniroute configure codex          # 또한: claude opencode qwen aider goose ge
 
 <div align="center">
 
-## 🌐 387 AI 공급자 — 156 카탈로그 표시 무료
+## 🌐 388 AI 공급자 — 156 카탈로그 표시 무료
 
 </div>
 
-> **387개의 등록된 제공업체** 다음을 포함하여 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션 전반에 걸쳐 **156 `hasFree: true` 검색 메타데이터 전달** . 채팅 모델 레지스트리에는 다음이 포함됩니다.**245개의 공급자 / 3,172개의 개별 공급자-모델 쌍 / 1,535개의 원시 모델 IDs** ; 별도의 무료 예산 카탈로그에는 **모델별 행 466개** ,**34개의 반복 풀** 그리고 **52개의 recurring/keyless 영구 무료 제공업체** . 이는 설계에 따라 서로 다른 분모입니다. 정의 및 풀 중복 제거 계산은 [공급자 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 계층](docs/reference/FREE_TIERS.md) 에 있습니다.
+> **388개의 등록된 제공업체** 다음을 포함하여 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션 전반에 걸쳐 **156 `hasFree: true` 검색 메타데이터 전달** . 채팅 모델 레지스트리에는 다음이 포함됩니다.**245개의 공급자 / 3,172개의 개별 공급자-모델 쌍 / 1,535개의 원시 모델 IDs** ; 별도의 무료 예산 카탈로그에는 **모델별 행 466개** ,**34개의 반복 풀** 그리고 **52개의 recurring/keyless 영구 무료 제공업체** . 이는 설계에 따라 서로 다른 분모입니다. 정의 및 풀 중복 제거 계산은 [공급자 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 계층](docs/reference/FREE_TIERS.md) 에 있습니다.
 
 <div align="center">
 

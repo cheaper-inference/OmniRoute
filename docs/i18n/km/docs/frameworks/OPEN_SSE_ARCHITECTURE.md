@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ឯកសារ                             | គោលបំណង                                         |
 | --------------------------------- | ----------------------------------------------- |
-| `providerRegistry.ts`             | ការចុះឈ្មោះម៉ូដែលជជែកលើកាតាឡុកអ្នកផ្តល់សេវា 387 |
+| `providerRegistry.ts`             | ការចុះឈ្មោះម៉ូដែលជជែកលើកាតាឡុកអ្នកផ្តល់សេវា 388 |
 | `providerModels.ts`               | ឈ្មោះក្លែងក្លាយ គំរូ ការធ្វើផែនទីទម្រង់         |
 | `constants.ts`                    | អស់ពេលកំណត់ លេខកូដស្ថានភាព                      |
 | `defaultThinkingSignature.ts`     | ហត្ថលេខាការគិត Claude លំនាំដើម                  |

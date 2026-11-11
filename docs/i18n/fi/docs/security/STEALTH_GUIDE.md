@@ -151,41 +151,63 @@ Saman paketin rinnakkaismoduulit:
 
 ---
 
-## Antigravity-häive
+## Antigravity Stealth
 
-Antigravity-pyynnöt säilyttävät kutsujan tekstin tavu tavulta. OmniRoute ei lisää kehotteisiin nollaleveyksisiä merkkejä eikä nimeä työkaluja uudelleen tai lisää niitä jäljitelläkseen IDE-asiakasohjelmaa.
+Antigravity pyynnöt säilyttävät soittajan tekstin tavuittain. OmniRoute ei lisää nollaleveyksiä merkkejä kehotteisiin tai rename/inject työkaluihin jäljitelläkseen IDE asiakasta.
 
 ### `antigravityHeaderScrub.ts`
 
-Poistaa Stainless SDK -merkinnät (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) ennen välittämistä.
+Leikkaa ruostumattomat SDK -merkit (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) ennen edelleenlähetystä.
 
-### ⚠️ Riski: `ANTIGRAVITY_CREDITS=always` (suuri tilikiellon riski)
+### ⚠️ riski: `ANTIGRAVITY_CREDITS=always` (tilikiellon hot spot)
 
-`ANTIGRAVITY_CREDITS=always` (käytössä tiedostossa `open-sse/executors/antigravity.ts`) reitittää **jokaisen** pyynnön Antigravity AI Credit Overages -ylityslaskutuksen kautta (maksulliset Google-krediitit) sen sijaan, että Googlen maksuttoman tason kiintiön annettaisiin rajoittaa käyttöä. Tämä on dokumentoitu ominaisuutena, mutta se on **yleisin näkemämme ilmoitettu käyttöehtorikkomus** — useita Google Ultra -tilejä on estetty muutaman tunnin käytön jälkeen vastauksella `403 / "service disabled for ToS violation" / insufficient_quota`, kun käytössä on ollut `=always`.
+`ANTIGRAVITY_CREDITS=always` (kuluttaa `open-sse/executors/antigravity.ts`) reitit **joka** Pyydä Antigravity AI Credit Overages (maksetut Google pisteet) kautta sen sijaan, että antaisit Google:n vapaan tason kiintiöportin asioita. Tämä on dokumentoitu ominaisuutena, mutta se on **yleisin yksittäinen käyttöehtojen rikkomusraportti, jonka näemme** — useat Google Ultra -tilit on estetty `403 / "service disabled for ToS violation" / insufficient_quota` kanssa muutaman tunnin `=always` käytön jälkeen.
 
-Ylävirran valvonta tapahtuu **Googlen puolella**, eikä OmniRoute voi estää sitä. Ympäristömuuttujan nimi ja nykyinen dokumentaatio saavat asetuksen vaikuttamaan turvalliselta ottaa käyttöön, mutta sitä se ei ole.
+Ylävirran valvonta on päällä **Google:n puolella** , ei mitään OmniRoute voi estää. env var -nimi ja olemassa olevat asiakirjat saavat sen kuulostamaan turvalliselta käänteeltä; se ei ole.
 
-**Miksi tämä käynnistää väärinkäytön tunnistuksen herkemmin kuin pelkkä maksuttoman tason käyttö:**
+**Miksi tämä tekee väärinkäytösten havaitsemisesta aggressiivisemmin kuin vain vapaan tason käyttö:**
 
-- Jatkuva automatisoitu rahankäyttö yhdellä Google-tilillä merkitään eri tavalla kuin maksuttoman tason käyttö, joka saavuttaa kiintiön ja pysähtyy.
-- Krediittien ylityskäytöllä ei ole nopeusrajoitusta, joten väärin määritetty asiakasohjelma voi kuluttaa satoja Yhdysvaltain dollareita minuuteissa ja näyttää API-avainten jälleenmyynniltä tai bottiliikenteeltä.
-- Useiden OmniRoute-käyttäjien rinnakkainen ylityskrediittien käyttö samasta ulkoisesta IP-osoitteesta voimistaa signaalia.
+- Jatkuva automaattinen kulutus yhdelle Google -tilille merkitsee eri tavalla kuin vapaan tason osumat-kiintiö-ja-pysähdykset.
+- Luoton ylityksellä ei ole korkokattoa, joten väärin määritetty asiakas voi polttaa useita satoja USD minuuteissa ja näyttää API-avaimen jälleenmyynniltä tai robottiliikenteeltä.
+- Useat OmniRoute käyttäjät, jotka osuvat ylimääräisiin hyvityksiin rinnakkain samasta ulkoisesta IP yhdistävät signaalin.
 
-**Suositeltu toimintatapa:**
+**Suositeltu asento:**
 
-1. Säilytä oletusarvo `ANTIGRAVITY_CREDITS=off`, ellei operaattori nimenomaisesti hyväksy maksullisiin krediitteihin ja tilin valvontatoimiin liittyvää riskiä. `retry` lähettää ensin tavallisen pyynnön ja lisää krediitit enintään kerran ehdot täyttävän kiintiöön liittyvän 429-virheen jälkeen; `always` lisää krediitit jo ensimmäiseen pyyntöön.
-2. **Jaa kuorma palveluntarjoajien kesken Auto-Combolla** (`model: "auto"` tai `kr/glm/etc`-combo) sen sijaan, että kuormittaisit yhden Antigravity-tilin äärimmilleen.
-3. **Aseta yhteyskohtaiset RPM-rajat** Antigravity-palveluntarjoajan muokkaussivulla (Dashboard → Providers → Antigravity → yhteys → nopeusrajoitus). 30–60 RPM on perusteltavissa oleva yläraja jatkuvalle käytölle.
-4. **Käytä vakaata, operaattorin hallitsemaa ylävirran verkkoyhteyttä** ja vältä yhden tilin jakamista toisistaan riippumattomien käyttäjien tai työkuormien kesken.
-5. **Jos tili estetään**: tee valitus osoitteessa `support.google.com` → ”Restore Workspace/Account access” ja liitä mukaan Googlen lähettämä täsmällinen `quota_exceeded` / `service disabled` -vastausrunko. Tilin palauttamista ei taata.
+1. Säilytä oletusarvoinen `ANTIGRAVITY_CREDITS=off`, ellei operaattori nimenomaisesti hyväksy maksettujen luottojen ja tilien täytäntöönpanoriskiä. `retry` lähettää tavallisen pyynnön ensin ja lisää hyvityksiä enintään kerran hyväksyttävän kiintiön 429 jälkeen; `always` lisää krediittejä ensimmäisestä pyynnöstä.
+2. **Jaa kuorma palveluntarjoajille Auto-Combon avulla** (`model: "auto"` tai `kr/glm/etc` -combo) yhden Antigravity -tilin kyllästämisen sijaan.
+3. **Aseta yhteyskohtaiset RPM rajat** Antigravity palveluntarjoajan muokkaussivulla (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM on puolustettava yläraja jatkuvaan käyttöön.
+4. **Käytä vakaata, operaattorin ohjaamaa alkupään verkkoa** ja vältä yhden tilin jakamista asiaankuulumattomien käyttäjien tai työkuormien kesken.
+5. **Jos kielletään** : valitus `support.google.com` → kautta "Palauta Workspace/Account -käyttö" lähetetyllä `quota_exceeded` / `service disabled` Google. Palauttamista ei taata.
 
-Ympäristömuuttujien viitedokumentaatiossa kuvataan kunkin krediittitilan vaikutukset tiliin ja kuluihin.
+Ympäristöviite dokumentoi kunkin hyvitystilan tili- ja kulutusvaikutukset.
 
-Liittyvät kohdat:
+#### Ei vain `=always`: Antigravity OAuth -reititys yleensä
 
-- `open-sse/executors/antigravity.ts` — lukee arvon `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — tunnistetietojen välitys
-- Alkuperäinen tapahtumaraportti: keskustelu [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Jäädytykset eivät rajoitu luottojen ylittymiseen. Marraskuussa 2026 tehdyt raportit (#19223, #19266) kuvaavat useita Google -tilejä, jotka on jäädytetty reititettäessä `antigravity` ja `agy` (Antigravity CLI) -palveluntarjoajien kautta:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Molemmat palveluntarjoajat todentavat Antigravity tuotteen OAuth istunnon avulla, josta kojelaudan riskiilmoitus ("Tämä tarjoaja käyttää virallista tuotettasi session/OAuth, jota ei ole valtuutettu proxy/router käyttöön") varoittaa ennen yhteyden lisäämistä. Mikään yllä olevista suosituksista ei salli tätä käyttöä; ne vain vähentävät yhden tilin liikennettä.
+
+**Valtuutetut API rajapinnat Gemini malleille.** Google tarjoaa ohjelmallisen pääsyn Gemini hen APIs kautta, jota OmniRoute tukee tavallisina API-avaimen tarjoajina:
+
+| Palveluntarjoajan tunnus | Kojelaudan nimi           | Valtuustiedot                                                                     |
+| ------------------------ | ------------------------- | --------------------------------------------------------------------------------- |
+| `gemini`                 | Gemini (Google AI Studio) | Gemini API avain Google AI Studiolta (ilmainen taso saatavilla)                   |
+| `vertex`                 | Vertex AI                 | Palvelutili JSON, OAuth käyttöoikeustunnus tai Vertex Express API -avain (Gemini) |
+
+Nämä palveluntarjoajat käyttävät kirjautumistietojen Google -ongelmia API käyttöön, toisin kuin Antigravity -tuoteistunnossa. Ne eivät tee jokaisesta käytöstä yhteensopivaa tai poista täytäntöönpanon riskiä: kutakin säätelevät omat ehdot, jotka operaattorin on tarkistettava niiden käyttöönottoa varten. Esimerkiksi [Gemini API lisäpalveluehdot](https://ai.google.dev/gemini-api/terms) sallivat vain maksulliset palvelut, kun API -asiakkaat asetetaan käyttäjien saataville Euroopan talousalueella, Sveitsissä tai Yhdistyneessä kuningaskunnassa, ja Maksuttomiin palveluihin lähetettyä sisältöä voidaan käyttää Google:n tuotteiden parantamiseen. Vertex AI kuuluu sen sijaan Google Cloud -ehtojen piiriin ( [palvelukohtaiset ehdot](https://cloud.google.com/terms/service-terms) ). Hinnoittelu ja kiintiöt noudattavat API -ehtoja Antigravity tilauksen sijaan.
+
+Operaattoreiden, jotka haluavat välttää yllä kuvatut Antigravity jäädytykset, tulee reitittää Gemini -liikenne jonkin näistä palveluntarjoajista `antigravity` / `agy` sijaan sen jälkeen, kun he ovat tarkistaneet, että niiden käyttö on palveluntarjoajan ehtojen mukaista.
+
+Kosketuspisteet:
+
+- `open-sse/executors/antigravity.ts` — lukee `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — n valtakirjaputkisto
+- Alkuperäinen tapausraportti: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

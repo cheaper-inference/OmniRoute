@@ -15,7 +15,7 @@ OmniRoute هو بوابة محلية لتوجيه الذكاء الاصطناع�
 
 الإمكانات الأساسية:
 
-- واجهة API متوافقة مع OpenAI لأدوات سطر الأوامر والأدوات الأخرى (387 مزوّدًا، و159 وحدة تنفيذ)
+- واجهة API متوافقة مع OpenAI لأدوات سطر الأوامر والأدوات الأخرى (388 مزوّدًا، و159 وحدة تنفيذ)
 - ترجمة الطلبات والاستجابات بين تنسيقات المزوّدين
 - تراجع احتياطي لتركيبات النماذج (تسلسل متعدد النماذج)
 - خطوات تركيبات منظّمة (`provider + model + connection`) مع ترتيب وقت التشغيل حسب `compositeTiers`
@@ -859,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: استورد الوحدات المحددة مباشرةً — من دون ملف تجميعي (أُزيلت طبقة إعادة التصدير القديمة `localDb.ts`)
 - `src/lib/usageDb.ts`: واجهة لسجل الاستخدام/سجلات الاستدعاءات مبنية فوق جداول SQLite
 
-## تغطية منفِّذات المزوّدين (نمط الاستراتيجية)
+## تغطية الجهة المنفذة للمزود (نمط الإستراتيجية)
 
-يمتلك كل مزوّد منفِّذًا متخصصًا يوسّع `BaseExecutor` (في `open-sse/executors/base.ts`)، والذي يوفّر إنشاء عناوين URL، وبناء الترويسات، وإعادة المحاولة مع تراجع أُسّي، وخطافات لتحديث بيانات الاعتماد، وطريقة التنسيق `execute()`.
+كل مزود لديه منفذ متخصص يمتد `BaseExecutor` (في `open-sse/executors/base.ts`)، والذي يوفر بناء URL ، وبناء الرأس، وإعادة المحاولة مع التراجع الأسي، وخطافات تحديث بيانات الاعتماد، وطريقة تنسيق `execute()`.
 
-| المنفّذ                   | المزوّد (المزوّدون)                                                                                                                                           | المعالجة الخاصة                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، Perplexity، Together، Fireworks، Cerebras، Cohere، NVIDIA، وغيرها | تهيئة ديناميكية لعنوان URL والترويسات لكل مزوّد                            |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | معرّفات مخصّصة للمشروع/الجلسة، وتحليل Retry-After، وتمويه 429              |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                  | توجيه قائم على عمليات النشر، وفرض استعلام api-version                      |
-| `BlackboxWebExecutor`     | Blackbox AI (وضع الويب)                                                                                                                                       | هندسة عكسية لجلسة الويب مع محاكاة بصمة TLS                                 |
-| `ClaudeIdentityExecutor`  | Claude.ai (مسار CCH)                                                                                                                                          | مسارات معالجة للقيود وإعادة تعيين الأدوات، وتشكيل البصمة                   |
-| `CliProxyApiExecutor`     | المزوّدون المتوافقون مع CLIProxyAPI                                                                                                                           | معالجة مخصّصة للمصادقة والبروتوكول                                         |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                         | حقن معرّف الحساب، وتتبع الاستخدام المستند إلى Neurons                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | يحقن تعليمات النظام، ويفرض مستوى جهد الاستدلال                             |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                           | جسر Responses API لجلسة المتصفح مع تثبيت سلسلة المحادثة/الدور              |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                  | OAuth مع تدوير الترويسات لكل جلسة                                          |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | بروتوكول ConnectRPC، وترميز Protobuf، وتوقيع الطلبات عبر المجموع الاختباري |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | ربط دورة حياة مهام Devin عبر وحدة الوكيل السحابي                           |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | تحديث رمز Copilot، وترويسات تحاكي VSCode                                   |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | GitLab OAuth مع توجيه محدد النطاق بالمشروع                                 |
-| `GlmExecutor`             | Z.AI GLM (بما في ذلك الإعداد المسبق `glmt`)                                                                                                                   | مراعاة ميزانية التفكير، وثوابت الإعداد المسبق GLMT                         |
-| `GrokWebExecutor`         | xAI Grok على الويب                                                                                                                                            | هندسة عكسية لجلسة الويب، واختيار الوضع (التفكير/القياسي)                   |
-| `KieExecutor`             | KIE                                                                                                                                                           | إصدار رموز مخصّصة مع نقاط ارتكاز جلسة متناوبة                              |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | تحويل تنسيق AWS EventStream الثنائي ← SSE                                  |
-| `MuseSparkWebExecutor`    | Muse Spark (الويب)                                                                                                                                            | هندسة عكسية لجلسة الويب مع ربط رسائل الصور                                 |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                     | بنية نص طلب خاصة بالمزوّد                                                  |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | إعداد مزوّد متوافق مع AI SDK                                               |
-| `PerplexityWebExecutor`   | Perplexity على الويب                                                                                                                                          | هندسة عكسية لجلسة الويب لمتابعة المحادثة                                   |
-| `PetalsExecutor`          | الاستدلال الموزّع من Petals                                                                                                                                   | توجيه سرب لامركزي                                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                               | لا يتطلب مفتاح API، وطلبات محدودة المعدل                                   |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                      | دعم PAT وOAuth، وفئة مجانية متعددة النماذج                                 |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                              | مصادقة حساب الخدمة، ونقاط نهاية قائمة على المنطقة                          |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                 | مفتاح API مستورد مع بث المحادثة عبر Connect-protobuf                       |
+| المنفذ                    | المزود (المزودون)                                                                                                                                       | التعامل الخاص                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، الحيرة، Together، Fireworks، Cerebras، Cohere، NVIDIA، إلخ. | تكوين URL/header الديناميكي لكل مزود                                    |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                      | project/session IDs مخصص، إعادة المحاولة بعد التحليل، 429 تشويش         |
+| `AzureOpenAIExecutor`     | أزور OpenAI                                                                                                                                             | التوجيه القائم على النشر، وفرض استعلام إصدار واجهة برمجة التطبيقات      |
+| `BlackboxWebExecutor`     | Blackbox AI (وضع الويب)                                                                                                                                 | عكس جلسة الويب مع محاكاة بصمة TLS                                       |
+| `ClaudeIdentityExecutor`  | Claude.ai (مسار CCH )                                                                                                                                   | قيود + أداة إعادة رسم خطوط الأنابيب، وتشكيل بصمات الأصابع               |
+| `CliProxyApiExecutor`     | مقدمو الخدمات المتوافقون مع CLIProxyAPI                                                                                                                 | المصادقة المخصصة ومعالجة البروتوكول                                     |
+| `CloudflareAiExecutor`    | عمال Cloudflare AI                                                                                                                                      | حقن حساب ID ، وتتبع الاستخدام القائم على الخلايا العصبية                |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                            | يحقن تعليمات النظام، ويفرض جهدًا منطقيًا                                |
+| `ChatGptWebCodexExecutor` | شبكة ChatGPT (Codex)                                                                                                                                    | استجابات جلسة المتصفح جسر API مع تثبيت thread/turn                      |
+| `CommandCodeExecutor`     | رمز الأمر                                                                                                                                               | OAuth + دوران الرأس لكل جلسة                                            |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                              | بروتوكول ConnectRPC ، ترميز Protobuf، طلب التوقيع عبر المجموع الاختباري |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                               | جسر دورة حياة مهمة Devin عبر وحدة وكيل السحابة                          |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                          | تحديث رمز Copilot ، ورؤوس محاكاة VSCode                                 |
+| `GitlabExecutor`          | ثنائي GitLab                                                                                                                                            | GitLab OAuth + ، التوجيه على نطاق المشروع                               |
+| `GlmExecutor`             | Z.AI GLM (بما في ذلك الإعداد المسبق `glmt` )                                                                                                            | التفكير في الميزانية وثوابت GLMT المحددة مسبقًا                         |
+| `GrokWebExecutor`         | شبكة xAI Grok                                                                                                                                           | عكس جلسة الويب، اختيار الوضع (think/standard)                           |
+| `KieExecutor`             | KIE                                                                                                                                                     | إصدار رمز مميز مخصص مع مراسي الجلسة الدوارة                             |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                  | AWS EventStream تنسيق ثنائي → تحويل SSE                                 |
+| `MuseSparkWebExecutor`    | موسى سبارك (الويب)                                                                                                                                      | عكس جلسة الويب مع توصيل الرسائل المصورة                                 |
+| `NlpCloudExecutor`        | سحابة NLP                                                                                                                                               | شكل الجسم الخاص بطلب الموفر                                             |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                | إعداد الموفر المتوافق مع AI SDK                                         |
+| `PerplexityWebExecutor`   | شبكة الحيرة                                                                                                                                             | عكس جلسة الويب لمواصلة الدردشة                                          |
+| `PetalsExecutor`          | بتلات موزعة الاستدلال                                                                                                                                   | توجيه السرب اللامركزي                                                   |
+| `PollinationsExecutor`    | التلقيح AI                                                                                                                                              | لا يوجد مفتاح API مطلوب، طلبات ذات معدل محدود                           |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                | دعم PAT و OAuth ، طبقة مجانية متعددة النماذج                            |
+| `VertexExecutor`          | Google فيرتكس AI                                                                                                                                        | مصادقة حساب الخدمة، ونقاط النهاية المستندة إلى المنطقة                  |
+| `DevinDesktopExecutor`    | سطح المكتب Devin                                                                                                                                        | مفتاح API المستورد + Connect-protobuf دفق الدردشة                       |
 
-تستخدم جميع المزوّدات الأخرى (بما في ذلك العُقد المخصصة المتوافقة) `DefaultExecutor`.
+يستخدم كافة الموفرين الآخرين (بما في ذلك العقد المتوافقة المخصصة) `DefaultExecutor`.
+
+### التحقيقات الآلية وحسابات جلسة الويب
+
+اختبارات النماذج واختبار الكل واختبارات التحرير والسرد والتقييمات ترسل طلبات دردشة حقيقية. يعمل موفر جلسة الويب كمستخدم مسجل الدخول، لذلك سيتم حفظ كل من هذه الطلبات كمحادثة على هذا الحساب؛ التحقيقات الآلية التي تركت مثل هذه المحادثات أدت إلى تعليق الحساب (#14780). ولذلك يرفض مسار الدردشة كل هدف يصل إليه مسبار آلي يأخذ مزوده بيانات اعتماد جلسة الويب، بمجرد حل موفر الهدف وقبل اختيار بيانات الاعتماد (`src/lib/providers/chatProbePolicy.ts`). الرفض هو `422` مع `error.code` `chat_probe_not_isolated`، وأبلغ عداءو المسبار عن ذلك على أنه تخطي وليس فشلًا.
+
+يقوم المنفذ الذي يدير كل محادثة في وضع عدم السجل الخاص بالموفر بالإعلان عنها باستخدام `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`)؛ يُسمح بعد ذلك بإجراء تحقيقات لهذا المزود. تعلن ChatGPT Web عن `temporary-chat`. قم بتثبيت إعلان على آليته من خلال اختبار، بحيث لا يمكن للمطالبة أن تتجاوز عمر الكود الذي يجعلها صحيحة.
 
 ## مصفوفة توافق موفّري الخدمة
 

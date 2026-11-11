@@ -15,7 +15,7 @@
 
 **Készítette: [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------ | :----------------------: | :---------: | :-------------------: |
-| 🌐 szolgáltatók                |           352            |   **358**   |          387          |
+| 🌐 szolgáltatók                |           352            |   **358**   |          388          |
 | 🧠 Egyedülálló chat modell IDs |           1320           |  **1374**   |         1535          |
 | 🖼️ Modality Bridge             | 🆕 látás + audio + videó |      ✓      |           ✓           |
 | 📡 Radar ingyenes katalógus    |     🆕 feliratkozás      |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Mind a **20** stratégia — szabadon kombinálhatók a kombó egyes lépéseibe
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mi emeli ki az OmniRoute-ot — egy időbélyegzett funkció-összehasonlítás a 9router, OpenRouter, CLIProxyAPI és LiteLLM között 13 képesség mentén. OmniRoute: 387 szolgáltató, 150+ beépített ingyenes csomag, 20 útválasztási stratégia, 12-motoros token tömörítés, beépített MCP szerver 110 eszközzel, A2A ügynökprotokoll, tartós memória, védőkorlátok, felhőügynökök, TLS ujjlenyomat rejtés, Asztali/Termux/PWA és 67 i18n UI nyelv. Az OmniRoute MIT-licencelt és önállóan üzemeltethető. A versenytársak képességei és számai változhatnak; lásd a hivatkozott módszertant."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mi emeli ki az OmniRoute-ot — egy időbélyegzett funkció-összehasonlítás a 9router, OpenRouter, CLIProxyAPI és LiteLLM között 13 képesség mentén. OmniRoute: 388 szolgáltató, 150+ beépített ingyenes csomag, 20 útválasztási stratégia, 12-motoros token tömörítés, beépített MCP szerver 110 eszközzel, A2A ügynökprotokoll, tartós memória, védőkorlátok, felhőügynökök, TLS ujjlenyomat rejtés, Asztali/Termux/PWA és 67 i18n UI nyelv. Az OmniRoute MIT-licencelt és önállóan üzemeltethető. A versenytársak képességei és számai változhatnak; lásd a hivatkozott módszertant."/>
 
 <sub>📊 Teljes módszertan &amp; funkciónkénti részletek a 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM ellenében → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ A Radar használata opcionális, és kizárólag GET-kéréseket alkalmaz. Az Om
 - **🖼️ Új végpontok** — `/v1/ocr` (Mistral OCR) és `/v1/audio/translations` (súgó stílusú) kerekíti a hordozófelületet. → [API Referencia](docs/reference/API_REFERENCE.md)
 - **🎨 Kép / videó / audio generálás** — one API médiához: xAI Grok Imagine & Novita AI videó, ComfyUI, Magnific, Adobe Firefly, Segmind és beszédszolgáltatók, például ElevenLabs. → [API Referencia](docs/reference/API_REFERENCE.md)
 - **🌍 telepítés és műveletek** — fordított proxy `basePath`, böngésző nyelvű automatikus észlelés, kulcsonkénti eszközkövetés, gyökér nélküli MITM megbízhatóság, zh-TW lokalizáció. → [környezet](docs/reference/ENVIRONMENT.md)
-- **🤝 További szolgáltatók és ügynökök** — felhőügynökök (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) böngészővel + OAuth bejelentkezéssel, Ollama első osztályú kártyával, Claude Opus 5 és Sonnet 5, Kimi hivatalos partnerség (Code/Web/Moonshot), Zed, Requesty, A refs, SenseNovaAI...**387 szolgáltató katalógusa** . → [szolgáltatók](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 További szolgáltatók és ügynökök** — felhőügynökök (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) böngészővel + OAuth bejelentkezéssel, Ollama első osztályú kártyával, Claude Opus 5 és Sonnet 5, Kimi hivatalos partnerség (Code/Web/Moonshot), Zed, Requesty, A refs, SenseNovaAI...**388 szolgáltató katalógusa** . → [szolgáltatók](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Útválasztás átláthatósága** — minden válasz tartalmaz egy `X-OmniRoute-Decision` fejlécet, amely megnevezi az azt kiszolgáló strategy/provider/latency, egy új `cache-optimized` kombinált stratégia + Auto-Combo `cacheAffinity` faktor ismétlési kéréseket irányít vissza a gyorsítótárazott előtagot tároló kapcsolathoz, és egy csak olvasható `/v1/auto-combo/{channel}/candidates` végpont felfedi egy `auto/*` csatorna élő jelöltkészletét. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Helyi teljesítmény és infra** — egykattintásos helyi Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux felügyelt beágyazott szolgáltatásként. → [beágyazott szolgáltatások](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 A dobozban is** — beépülő modul keretrendszer + piactér, Omni/Agent/GitHub készségek keretrendszerei, Obsidian tároló integráció (22 MCP eszköz), OpenAI-kompatibilis Batch & Files APIs, szemantikus válasz gyorsítótár, gamifikáció ranglistákkal, ACP ügynök felderítés (15 beépített ügynök), ütemezett naplóexport a BigQuery, `auto/chaos` -fan-out párhuzamos multi-model és híd, a Telegram fan-out több-model-ban egy alkalmazás LMArena-ELO ingyenes szolgáltatói rangsor. → [Docs](docs/README.md)
@@ -678,11 +678,11 @@ megóvja a titkos adatokat a shell előzményétől. → [CLI Integrációk](doc
 
 <div align="center">
 
-## 🌐 387 AI szolgáltatók — 156 katalógussal jelölt ingyenes
+## 🌐 388 AI szolgáltatók — 156 katalógussal jelölt ingyenes
 
 </div>
 
-> **387 regisztrált szolgáltató** a kanonikus csevegési, média-, keresési, helyi, felhő-ügynök- és rendszergyűjteményekben, beleértve **156 `hasFree: true` felfedezési metaadatokat hordozó** . A csevegési modell nyilvántartása kiterjed **245 szolgáltató / 3172 különálló szolgáltató-modell pár / 1535 nyers IDs modell** ; a külön szabad költségvetésű katalógus rendelkezik **466 sor modellenként** ,**34 visszatérő medence** és **52 recurring/keyless free-forever szolgáltató** . Ezek tervezésüknél fogva különböző nevezők; A definíciók és a pool-deuped számítások a [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) és [a Free Tiers](docs/reference/FREE_TIERS.md) oldalon találhatók.
+> **388 regisztrált szolgáltató** a kanonikus csevegési, média-, keresési, helyi, felhő-ügynök- és rendszergyűjteményekben, beleértve **156 `hasFree: true` felfedezési metaadatokat hordozó** . A csevegési modell nyilvántartása kiterjed **245 szolgáltató / 3172 különálló szolgáltató-modell pár / 1535 nyers IDs modell** ; a külön szabad költségvetésű katalógus rendelkezik **466 sor modellenként** ,**34 visszatérő medence** és **52 recurring/keyless free-forever szolgáltató** . Ezek tervezésüknél fogva különböző nevezők; A definíciók és a pool-deuped számítások a [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) és [a Free Tiers](docs/reference/FREE_TIERS.md) oldalon találhatók.
 
 <div align="center">
 

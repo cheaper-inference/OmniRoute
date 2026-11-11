@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Irányítópult-komponens API: adapterek a `packages/ui-kit` felett — lásd: `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: a képernyők által használt ikonnevek → Lucide-komponensek (`<Icon>`)                              |
-| `constants/providers.ts`         | **387 szolgáltató** Zod-validációval (hiteles forrás)                                                         |
+| `constants/providers.ts`         | **388 szolgáltató** Zod-validációval (hiteles forrás)                                                         |
 | `constants/cliTools.ts`          | Külső CLI-eszközök nyilvántartása                                                                             |
 | `constants/routingStrategies.ts` | **20 útválasztási stratégia** prioritásokkal                                                                  |
 | `constants/publicApiRoutes.ts`   | Bearer-hitelesítést (a felügyeleti hitelesítés helyett) igénylő útvonalak                                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Külső CLI-integrációk + belső OmniRoute CLI                                                               |
 | `I18N.md`                   | i18n-architektúra, nyelv hozzáadása, 67 területi beállítás                                                |
 | `UNINSTALL.md`              | Tiszta eltávolítás lépései                                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** katalógus 387 szolgáltatóról (újragenerálás: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** katalógus 388 szolgáltatóról (újragenerálás: `npm run gen:provider-reference`) |
 
 ### Alrendszeri mélyreható ismertetők
 

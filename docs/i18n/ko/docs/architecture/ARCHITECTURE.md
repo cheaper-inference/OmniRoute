@@ -14,7 +14,7 @@ OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이
 
 핵심 기능:
 
-- CLI/tools 용 OpenAI 호환 API 표면(공급자 387개, 실행기 모듈 159개)
+- CLI/tools 용 OpenAI 호환 API 표면(공급자 388개, 실행기 모듈 159개)
 - 공급자 형식에 따른 Request/response 번역
 - 모델 콤보 대체(다중 모델 시퀀스)
 - `compositeTiers` 를 기준으로 런타임 순서를 지정하는 구조화된 콤보 단계(`provider + model + connection`)
@@ -848,41 +848,47 @@ flowchart LR
 - `src/lib/db/*`: 특정 모듈을 직접 가져오기 — 배럴 없음(기존 `localDb.ts` 재내보내기 계층은 제거됨)
 - `src/lib/usageDb.ts`: SQLite 테이블 기반의 사용 이력/호출 로그 퍼사드
 
-## 프로바이더 실행기 적용 범위(전략 패턴)
+## 공급자 실행자 적용 범위(전략 패턴)
 
-각 프로바이더에는 `BaseExecutor`(`open-sse/executors/base.ts`)를 확장하는 특화된 실행기가 있으며, 이 기본 클래스는 URL 생성, 헤더 구성, 지수 백오프를 사용한 재시도, 자격 증명 갱신 훅 및 `execute()` 오케스트레이션 메서드를 제공합니다.
+각 공급자에는 URL 구축, 헤더 구성, 지수 백오프를 통한 재시도, 자격 증명 새로 고침 후크 및 `execute()` 오케스트레이션 방법을 제공하는 `BaseExecutor` ( `open-sse/executors/base.ts` 내)를 확장하는 특수 실행기가 있습니다.
 
-| 실행기                    | 제공업체                                                                                                                                                 | 특수 처리                                                     |
+| 집행자                    | 공급자                                                                                                                                                   | 특별 취급                                                     |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA 등 | 제공업체별 동적 URL/헤더 구성                                 |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | 사용자 지정 프로젝트/세션 ID, Retry-After 파싱, 429 난독화    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                             | 배포 기반 라우팅, api-version 쿼리 강제 적용                  |
-| `BlackboxWebExecutor`     | Blackbox AI(웹 모드)                                                                                                                                     | TLS 지문 에뮬레이션을 사용하는 웹 세션 리버스 엔지니어링      |
-| `ClaudeIdentityExecutor`  | Claude.ai(CCH 경로)                                                                                                                                      | 제약 조건 + 도구 재매핑 파이프라인, 지문 조정                 |
-| `CliProxyApiExecutor`     | CLIProxyAPI 호환 제공업체                                                                                                                                | 사용자 지정 인증 및 프로토콜 처리                             |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                    | 계정 ID 주입, Neurons 기반 사용량 추적                        |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | 시스템 지침 주입, 추론 강도 강제 적용                         |
-| `ChatGptWebCodexExecutor` | ChatGPT Web(Codex)                                                                                                                                       | 스레드/턴 고정 기능을 갖춘 브라우저 세션 Responses API 브리지 |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                             | OAuth + 세션별 헤더 순환                                      |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA 등 | 공급자별 동적 URL/header 구성                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | 맞춤형 project/session IDs, 구문 분석 후 재시도, 429 난독화   |
+| `AzureOpenAIExecutor`     | 아주르 OpenAI                                                                                                                                            | 배포 기반 라우팅, API 버전 쿼리 적용                          |
+| `BlackboxWebExecutor`     | Blackbox AI (웹 모드)                                                                                                                                    | TLS 지문 에뮬레이션을 통한 웹 세션 역방향                     |
+| `ClaudeIdentityExecutor`  | Claude.ai(CCH 경로)                                                                                                                                      | 제약 + 도구 재매핑 파이프라인, 지문 형성                      |
+| `CliProxyApiExecutor`     | CLIProxyAPI 호환 공급자                                                                                                                                  | 사용자 정의 인증 및 프로토콜 처리                             |
+| `CloudflareAiExecutor`    | Cloudflare 근로자 AI                                                                                                                                     | 계정 ID 주입, 뉴런 기반 사용 추적                             |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | 시스템 지침을 주입하고 추론 노력을 강요합니다.                |
+| `ChatGptWebCodexExecutor` | ChatGPT 웹(Codex)                                                                                                                                        | 브라우저 세션 응답 thread/turn 고정 기능이 있는 API 브리지    |
+| `CommandCodeExecutor`     | 명령 코드                                                                                                                                                | OAuth + 세션별 헤더 회전                                      |
 | `CursorExecutor`          | Cursor IDE                                                                                                                                               | ConnectRPC 프로토콜, Protobuf 인코딩, 체크섬을 통한 요청 서명 |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | 클라우드 에이전트 모듈을 통한 Devin 작업 수명 주기 브리징     |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot 토큰 갱신, VSCode 모방 헤더                           |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                               | GitLab OAuth + 프로젝트 범위 라우팅                           |
-| `GlmExecutor`             | Z.AI GLM(`glmt` 프리셋 포함)                                                                                                                             | 사고 예산 인식, GLMT 프리셋 상수                              |
-| `GrokWebExecutor`         | xAI Grok 웹                                                                                                                                              | 웹 세션 리버스 엔지니어링, 모드 선택(사고/표준)               |
-| `KieExecutor`             | KIE                                                                                                                                                      | 순환 세션 앵커를 사용하는 사용자 지정 토큰 발급               |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | 클라우드 에이전트 모듈을 통한 Devin 작업 라이프사이클 브리징  |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot 토큰 새로 고침, VSCode 모방 헤더                      |
+| `GitlabExecutor`          | GitLab 듀오                                                                                                                                              | GitLab OAuth + 프로젝트 범위 라우팅                           |
+| `GlmExecutor`             | Z.AI GLM ( `glmt` 사전 설정 포함)                                                                                                                        | 생각 예산 인식, GLMT 사전 설정 상수                           |
+| `GrokWebExecutor`         | xAI Grok 웹                                                                                                                                              | 웹 세션 역방향, 모드 선택(think/standard)                     |
+| `KieExecutor`             | KIE                                                                                                                                                      | 순환 세션 앵커를 사용한 사용자 정의 토큰 발행                 |
 | `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                   | AWS EventStream 바이너리 형식 → SSE 변환                      |
-| `MuseSparkWebExecutor`    | Muse Spark(웹)                                                                                                                                           | 이미지 메시지 브리징을 사용하는 웹 세션 리버스 엔지니어링     |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                | 제공업체별 요청 본문 형식                                     |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK 호환 제공업체 설정                                     |
-| `PerplexityWebExecutor`   | Perplexity 웹                                                                                                                                            | 채팅 연속성을 위한 웹 세션 리버스 엔지니어링                  |
-| `PetalsExecutor`          | Petals 분산 추론                                                                                                                                         | 탈중앙화 스웜 라우팅                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                          | API 키 불필요, 요청 속도 제한                                 |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT 및 OAuth 지원, 다중 모델 무료 티어                        |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                         | 서비스 계정 인증, 리전 기반 엔드포인트                        |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                            | 가져온 API 키 + Connect-protobuf 채팅 스트리밍                |
+| `MuseSparkWebExecutor`    | 뮤즈 스파크(웹)                                                                                                                                          | 이미지 메시지 브리징을 사용한 웹 세션 역방향                  |
+| `NlpCloudExecutor`        | NLP 클라우드                                                                                                                                             | 공급자별 요청 본문 형태                                       |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK 호환 공급자 설정                                       |
+| `PerplexityWebExecutor`   | 당혹스러운 웹                                                                                                                                            | 채팅 지속을 위한 웹 세션 반전                                 |
+| `PetalsExecutor`          | 꽃잎 분산 추론                                                                                                                                           | 분산형 스웜 라우팅                                            |
+| `PollinationsExecutor`    | 수분 AI                                                                                                                                                  | API 키가 필요하지 않으며 요청 속도가 제한되어 있습니다.       |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT 및 OAuth 지원, 다중 모델 프리 티어                        |
+| `VertexExecutor`          | Google 버텍스 AI                                                                                                                                         | 서비스 계정 인증, 지역 기반 엔드포인트                        |
+| `DevinDesktopExecutor`    | Devin 데스크탑                                                                                                                                           | 가져온 API 키 + Connect-protobuf 채팅 스트리밍                |
 
-그 외의 모든 제공자(사용자 지정 호환 노드 포함)는 `DefaultExecutor`를 사용합니다.
+다른 모든 공급자(맞춤형 호환 노드 포함)는 `DefaultExecutor` 사용합니다.
+
+### 자동화된 프로브 및 웹 세션 계정
+
+모델 테스트, 전체 테스트, 콤보 테스트 및 평가를 통해 실제 채팅 요청을 보냅니다. 웹 세션 공급자는 로그인한 사용자 역할을 하므로 각 요청은 해당 계정의 대화로 저장됩니다. 그러한 대화를 떠난 자동화된 조사는 계정을 정지시켰습니다(#14780). 따라서 채팅 파이프라인은 대상의 공급자가 확인되고 자격 증명이 선택되기 전에(`src/lib/providers/chatProbePolicy.ts`) 제공자가 웹 세션 자격 증명을 가져오는 자동 프로브가 도달하는 모든 대상을 거부합니다. 거부는 `422` with `error.code` `chat_probe_not_isolated` 이며, 프로브 실행자는 이를 실패가 아닌 건너뛰기로 보고합니다.
+
+제공자 자신의 기록 없음 모드에서 모든 채팅을 실행하는 실행자는 이를 `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`)로 선언합니다. 그런 다음 해당 공급자에 대한 프로브가 허용됩니다. ChatGPT 웹은 `temporary-chat` 선언합니다. 테스트를 통해 메커니즘에 선언을 고정하면 주장이 이를 사실로 만드는 코드보다 오래 지속될 수 없습니다.
 
 ## 공급자 호환성 매트릭스
 

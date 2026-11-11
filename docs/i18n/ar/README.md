@@ -15,7 +15,7 @@
 
 **ابتكرها [دييغو سوزا](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                   |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :-------------------: | :---------: | :-------------------: |
-| مقدمي 🌐                          |          352          |   **358**   |          387          |
+| مقدمي 🌐                          |          352          |   **358**   |          388          |
 | 🧠 نموذج الدردشة الفريد IDs       |         1320          |  **1374**   |         1535          |
 | جسر طريقة 🖼️                      | رؤية 🆕 + صوت + فيديو |      ✓      |           ✓           |
 | كتالوج 📡 الرادار المجاني         |    الاشتراك في 🆕     |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 387 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 388 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
 
 <sub>📊 المنهجية الكاملة وتفاصيل كل ميزة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 - **🖼️ نقاط نهاية جديدة** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (نمط الهمس) يدور حول سطح الوسائط. → [API مرجع](docs/reference/API_REFERENCE.md)
 - **🎨 توليد الصورة / الفيديو / الصوت** — واحد API لوسائل الإعلام: xAI Grok تخيل ونوفيتا AI فيديو، ComfyUIو Magnific و Adobe Firefly و Segmind وموفرو الكلام مثل ElevenLabs. → [API مرجع](docs/reference/API_REFERENCE.md)
 - **نشر 🌍 والعمليات** — الوكيل العكسي `basePath`، والاكتشاف التلقائي للغة المتصفح، وتتبع الجهاز لكل مفتاح، وثقة MITM بدون جذر، وتوطين zh-TW. [بيئة](docs/reference/ENVIRONMENT.md) →
-- **🤝 المزيد من مقدمي الخدمات والوكلاء** وكلاء — السحابي (Codex Cloud، Cursor، Devin، Jules)، Grok Build (xAI) مع تسجيل الدخول للمتصفح + OAuth ، بطاقة Ollama من الدرجة الأولى، Claude Opus 5 & Sonnet 5، شراكة Kimi الرسمية (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI... وتحديث **387-كتالوج الموفر** . [مقدمي](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 المزيد من مقدمي الخدمات والوكلاء** وكلاء — السحابي (Codex Cloud، Cursor، Devin، Jules)، Grok Build (xAI) مع تسجيل الدخول للمتصفح + OAuth ، بطاقة Ollama من الدرجة الأولى، Claude Opus 5 & Sonnet 5، شراكة Kimi الرسمية (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI... وتحديث **388-كتالوج الموفر** . [مقدمي](docs/reference/PROVIDER_REFERENCE.md) →
 - **شفافية توجيه 📡** تحمل كل استجابة — رأس `X-OmniRoute-Decision` يسمي strategy/provider/latency الذي يخدمها، وإستراتيجية تحرير وسرد `cache-optimized` جديدة، توجيه عامل + Auto-Combo `cacheAffinity` يكرر الطلبات مرة أخرى إلى الاتصال الذي يحمل البادئة المخزنة مؤقتًا، وتكشف نقطة نهاية `/v1/auto-combo/{channel}/candidates` للقراءة فقط عن تجمع المرشحين المباشر لقناة `auto/*`. مجموعة → [التلقائية](docs/routing/AUTO-COMBO.md)
 - **⚡ الأداء المحلي والبنية التحتية** — بنقرة واحدة، Redis و Cloudflare Workers / Deno نشر أجهزة نشر الترحيل وBifrost وMux كخدمات مدمجة خاضعة للإشراف. [خدمات](docs/frameworks/EMBEDDED-SERVICES.md) → المدمجة
 - **🧩 موجود أيضًا في الصندوق** إطار عمل — الإضافي، سوق + ، وأطر مهارات Omni/Agent/GitHub ، وتكامل Obsidian vault (22 أداة MCP )، والملفات والدُفعات المتوافقة مع OpenAI APIs، وذاكرة التخزين المؤقت للاستجابة الدلالية، واللعب مع لوحات المتصدرين، واكتشاف وكيل ACP (15 وكيلًا مدمجًا)، وتصدير السجل المجدول إلى BigQuery، وتوزيع `auto/chaos` المتوازي متعدد النماذج، وجسر روبوت Telegram ، ومدير إصدار داخل التطبيق و تصنيفات المزودين المجانيين لـ LMArena-ELO. [مستندات](docs/README.md) →
@@ -678,11 +678,11 @@ omniroute configure codex          # أيضًا: claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 387 مقدمو خدمات AI — 156 بدون علامة كتالوج
+## 🌐 388 مقدمو خدمات AI — 156 بدون علامة كتالوج
 
 </div>
 
-> **387 مقدمي الخدمات المسجلين** عبر الدردشة الأساسية والوسائط والبحث والمجموعات المحلية والوكلاء السحابيين ومجموعات النظام، بما في ذلك **156 يحمل البيانات الوصفية لاكتشاف `hasFree: true`** . يغطي سجل نموذج الدردشة **245 مزودًا / 3,172 زوجًا متميزًا من نماذج المزودين / 1,535 نموذجًا أوليًا IDs** ; يحتوي كتالوج الميزانية الحرة المنفصل على **466 صفًا لكل نموذج** ,**34 حمامات متكررة** و **52 من مقدمي خدمة recurring/keyless مجانًا إلى الأبد** . هذه قواسم مختلفة حسب التصميم؛ التعريفات والحسابات المحذوفة موجودة في [مرجع الموفر](docs/reference/PROVIDER_REFERENCE.md) [والطبقات المجانية](docs/reference/FREE_TIERS.md).
+> **388 مقدمي الخدمات المسجلين** عبر الدردشة الأساسية والوسائط والبحث والمجموعات المحلية والوكلاء السحابيين ومجموعات النظام، بما في ذلك **156 يحمل البيانات الوصفية لاكتشاف `hasFree: true`** . يغطي سجل نموذج الدردشة **245 مزودًا / 3,172 زوجًا متميزًا من نماذج المزودين / 1,535 نموذجًا أوليًا IDs** ; يحتوي كتالوج الميزانية الحرة المنفصل على **466 صفًا لكل نموذج** ,**34 حمامات متكررة** و **52 من مقدمي خدمة recurring/keyless مجانًا إلى الأبد** . هذه قواسم مختلفة حسب التصميم؛ التعريفات والحسابات المحذوفة موجودة في [مرجع الموفر](docs/reference/PROVIDER_REFERENCE.md) [والطبقات المجانية](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

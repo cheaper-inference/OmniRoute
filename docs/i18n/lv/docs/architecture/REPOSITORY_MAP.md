@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Informācijas paneļa komponentu API: adapteri virs `packages/ui-kit` — skatiet `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekrānos izmantotie ikonu nosaukumi → Lucide komponenti (`<Icon>`)                                      |
-| `constants/providers.ts`         | **387 pakalpojumu sniedzēji** ar Zod validāciju (patiesības avots)                                                 |
+| `constants/providers.ts`         | **388 pakalpojumu sniedzēji** ar Zod validāciju (patiesības avots)                                                 |
 | `constants/cliTools.ts`          | Ārējo CLI rīku reģistrs                                                                                            |
 | `constants/routingStrategies.ts` | **20 maršrutēšanas stratēģijas** ar prioritātēm                                                                    |
 | `constants/publicApiRoutes.ts`   | Maršruti, kuriem nepieciešama Bearer (nevis pārvaldības) autentifikācija                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ārējās CLI integrācijas + iekšējais OmniRoute CLI                                              |
 | `I18N.md`                   | i18n arhitektūra, valodas pievienošana, 67 lokales                                             |
 | `UNINSTALL.md`              | Tīras atinstalēšanas soļi                                                                      |
-| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 387 nodrošinātāju katalogs (regen.: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 388 nodrošinātāju katalogs (regen.: `npm run gen:provider-reference`) |
 
 ### Apakšsistēmu padziļināti apraksti
 

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: `packages/ui-kit` အပေါ် adapter များ — `docs/architecture/DESIGN_SYSTEM.md` ကို ကြည့်ပါ |
 | `constants/iconMap.ts`           | `ICON_MAP`: ဖန်သားပြင်များတွင် အသုံးပြုသည့် icon အမည်များ → Lucide component များ (`<Icon>`)                     |
-| `constants/providers.ts`         | Zod validation ပါဝင်သော **provider 387 ခု** (အမှန်တရား၏ မူလရင်းမြစ်)                                             |
+| `constants/providers.ts`         | Zod validation ပါဝင်သော **provider 388 ခု** (အမှန်တရား၏ မူလရင်းမြစ်)                                             |
 | `constants/cliTools.ts`          | ပြင်ပ CLI tool registry                                                                                          |
 | `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သော **routing strategy 20 ခု**                                                             |
 | `constants/publicApiRoutes.ts`   | (management auth နှင့် နှိုင်းယှဉ်၍) Bearer auth လိုအပ်သော route များ                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ပြင်ပ CLI integration များ + အတွင်းပိုင်း OmniRoute CLI                                                 |
 | `I18N.md`                   | i18n ဗိသုကာ၊ ဘာသာစကားအသစ်ထည့်သွင်းနည်း၊ locales ၆၇ ခု                                                   |
 | `UNINSTALL.md`              | သန့်ရှင်းစွာ ဖယ်ရှားထုတ်သွင်းခြင်း အဆင့်များ                                                            |
-| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ ၃၈၇ ဦး၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ ၃၈၈ ဦး၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
 
 ### Subsystem အသေးစိတ် လေ့လာသုံးသပ်ချက်များ
 

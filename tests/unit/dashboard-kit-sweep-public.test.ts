@@ -260,6 +260,7 @@ const CONSTANTS_HEX_ALLOWED: Allow = {
   },
 };
 
+// Every stale reason is gone (#19066): a new one must use the kit component or name why it does not fit.
 const STALE_KIT_EXCEPTION_ALLOWED: Allow = {};
 
 function overBudget(list: string[], scan: (src: string) => number, allow: Allow): string[] {

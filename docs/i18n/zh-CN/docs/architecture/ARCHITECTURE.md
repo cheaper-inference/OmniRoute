@@ -17,7 +17,7 @@ OmniRoute 是一个基于 Next.js 构建的本地 AI 路由网关和仪表板。
 
 核心功能：
 
-- 为 CLI/工具提供 OpenAI 兼容的 API 接口（387 个提供者、159 个执行器模块）
+- 为 CLI/工具提供 OpenAI 兼容的 API 接口（388 个提供者、159 个执行器模块）
 - 跨提供者格式的请求/响应转换
 - 模型组合故障回退（多模型序列）
 - 结构化组合步骤（`provider + model + connection`），运行时按 `compositeTiers` 排序
@@ -859,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`：直接导入特定模块——不使用桶式导出（旧的 `localDb.ts` 重导出层已移除）
 - `src/lib/usageDb.ts`：构建于 SQLite 表之上的用量历史/调用日志门面
 
-## 服务商执行器覆盖（策略模式）
+## 提供者执行者覆盖范围（策略模式）
 
-每个服务商都有一个继承 `BaseExecutor`（在 `open-sse/executors/base.ts` 中）的专用执行器，该基类提供了 URL 构建、Header 构造、带指数退避的重试、凭据刷新钩子以及 `execute()` 编排方法。
+每个提供者都有一个扩展`BaseExecutor`专门执行器（在`open-sse/executors/base.ts`中），它提供URL构建、标头构建、指数退避重试、凭证刷新挂钩和`execute()`编排方法。
 
-| 执行器                    | 服务商                                                                                                                                                   | 特殊处理                                             |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA 等 | 每服务商动态 URL/Header 配置                         |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | 自定义项目/会话 ID、Retry-After 解析、429 混淆       |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                             | 基于部署的路由、api-version 查询参数强制执行         |
-| `BlackboxWebExecutor`     | Blackbox AI (web-mode)                                                                                                                                   | Web 会话反向 + TLS 指纹模拟                          |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH 通道)                                                                                                                                     | 约束 + Tool 重映射管线、指纹塑造                     |
-| `CliProxyApiExecutor`     | CLIProxyAPI 兼容服务商                                                                                                                                   | 自定义认证和协议处理                                 |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                    | 帐户 ID 注入、基于 Neurons 的用量追踪                |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | 注入系统指令、强制推理力度                           |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                      | 浏览器会话 Responses API 桥接与线程/轮次固定         |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                             | OAuth + 每会话 Header 轮换                           |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                               | ConnectRPC 协议、Protobuf 编码、基于校验和的请求签名 |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | Devin 任务生命周期桥接（通过云代理模块）             |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot Token 刷新、VSCode 模仿 Header               |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                               | GitLab OAuth + 项目级路由                            |
-| `GlmExecutor`             | Z.AI GLM（含 `glmt` 预设）                                                                                                                               | Thinking Budget 感知、GLMT 预设常量                  |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                             | Web 会话反向、模式选择（think/standard）             |
-| `KieExecutor`             | KIE                                                                                                                                                      | 自定义 Token 签发 + 轮换会话锚点                     |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                   | AWS EventStream 二进制格式 → SSE 转换                |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                         | Web 会话反向 + 图片消息桥接                          |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                | 服务商专属请求体形状                                 |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK 兼容服务商初始化                              |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                           | Web 会话反向，用于聊延续                             |
-| `PetalsExecutor`          | Petals distributed inference                                                                                                                             | 去中心化集群路由                                     |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                          | 无需 API Key、带速率限制的请求                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT 和 OAuth 支持、多模型免费层                      |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                         | 服务帐户认证、基于区域的端点                         |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                            | 导入的 API 密钥 + Connect-protobuf 聊天流            |
+| 执行者                    | 提供者                                                                                                                                                            | 特殊处理                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI、 Claude、 Gemini、 Qwen、 OpenRouter、 GLM、 Kimi、 MiniMax、 DeepSeek、 Groq、 xAI、 Mistral、困惑、 Together、 Fireworks、 Cerebras、 Cohere、 NVIDIA等 | 每个提供者的动态URL/header配置                        |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                | 自定义project/session IDs，解析后重试，429混淆        |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                      | 基于部署的路由、api 版本查询执行                      |
+| `BlackboxWebExecutor`     | Blackbox AI （网络模式）                                                                                                                                          | 使用TLS指纹模拟进行 Web 会话反向                      |
+| `ClaudeIdentityExecutor`  | Claude.ai（CCH路径）                                                                                                                                              | 约束+工具-重映射管道、指纹整形                        |
+| `CliProxyApiExecutor`     | CLIProxyAPI 兼容的提供程序                                                                                                                                        | 自定义身份验证和协议处理                              |
+| `CloudflareAiExecutor`    | Cloudflare工人AI                                                                                                                                                  | 账户ID注入，基于神经元的使用跟踪                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                      | 注入系统指令，强制推理工作                            |
+| `ChatGptWebCodexExecutor` | ChatGPT网站 (Codex)                                                                                                                                               | 浏览器会话响应API桥接thread/turn固定                  |
+| `CommandCodeExecutor`     | 命令码                                                                                                                                                            | OAuth +每会话标头轮换                                 |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                        | ConnectRPC协议、Protobuf 编码、通过校验和进行请求签名 |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                         | 通过云代理模块进行Devin任务生命周期桥接               |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                    | Copilot令牌刷新、VSCode 模仿标头                      |
+| `GitlabExecutor`          | GitLab二人组                                                                                                                                                      | GitLab OAuth +项目范围路由                            |
+| `GlmExecutor`             | Z.AI GLM （包括`glmt`预设）                                                                                                                                       | 思考预算意识， GLMT预设常数                           |
+| `GrokWebExecutor`         | xAI Grok网站                                                                                                                                                      | Web会话反向，模式选择（think/standard）               |
+| `KieExecutor`             | KIE                                                                                                                                                               | 具有旋转会话锚点的自定义令牌发行                      |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                            | AWS EventStream二进制格式→ SSE转换                    |
+| `MuseSparkWebExecutor`    | 缪斯火花（网络）                                                                                                                                                  | 通过图像消息桥接实现网络会话反向                      |
+| `NlpCloudExecutor`        | NLP云                                                                                                                                                             | 提供者特定的请求正文形状                              |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                          | AI SDK兼容提供者设置                                  |
+| `PerplexityWebExecutor`   | 困惑网                                                                                                                                                            | 网络会话反向以继续聊天                                |
+| `PetalsExecutor`          | 花瓣分布式推理                                                                                                                                                    | 分散群路由                                            |
+| `PollinationsExecutor`    | 授粉AI                                                                                                                                                            | 无需API密钥，请求速率受限                             |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                          | PAT和OAuth支持，多模型免费套餐                        |
+| `VertexExecutor`          | Google顶点AI                                                                                                                                                      | 服务帐户身份验证、基于区域的端点                      |
+| `DevinDesktopExecutor`    | Devin桌面版                                                                                                                                                       | 导入API密钥+ Connect-protobuf聊天流                   |
 
-其余所有服务商（含自定义兼容节点）使用 `DefaultExecutor`。
+所有其他提供者（包括自定义兼容节点）都使用`DefaultExecutor`。
+
+### 自动探测和网络会话帐户
+
+模型测试、测试全部、组合测试和评估发送真实的聊天请求。网络会话提供者充当登录用户，因此每个请求都将保存为该帐户上的对话；留下此类对话的自动探测会导致帐户被暂停（#14780）。因此，一旦目标的提供者被解析并且在选择凭证之前（`src/lib/providers/chatProbePolicy.ts`），聊天管道就会拒绝自动探测到达的每个提供者获取网络会话凭证的目标。拒绝是`422`和`error.code` `chat_probe_not_isolated`，并且探测运行器将其报告为跳过，而不是失败。
+
+在提供者自己的无历史模式下运行每个聊天的执行器使用`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) 进行声明；然后允许对该提供者进行探测。 ChatGPT Web声明`temporary-chat`。通过测试将声明固定到其机制上，因此该声明不能比使其成立的代码更长久。
 
 ## 提供者兼容性矩阵
 

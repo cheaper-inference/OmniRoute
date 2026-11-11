@@ -15,7 +15,7 @@ OmniRoute הוא שער ניתוב מקומי לבינה מלאכותית ולו
 
 יכולות עיקריות:
 
-- ממשק API תואם OpenAI עבור כלי CLI וכלים אחרים (387 ספקים, 159 מודולי ביצוע)
+- ממשק API תואם OpenAI עבור כלי CLI וכלים אחרים (388 ספקים, 159 מודולי ביצוע)
 - תרגום בקשות/תגובות בין פורמטים של ספקים
 - מעבר חלופי באמצעות קומבינציית מודלים (רצף מרובה מודלים)
 - שלבי קומבינציה מובנים (`provider + model + connection`) עם סידור בזמן ריצה לפי `compositeTiers`
@@ -859,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: יש לייבא מודולים ספציפיים ישירות — ללא barrel (שכבת הייצוא מחדש הישנה `localDb.ts` הוסרה)
 - `src/lib/usageDb.ts`: ממשק להיסטוריית שימוש/יומני קריאות מעל טבלאות SQLite
 
-## כיסוי מפעילי ספקים (תבנית אסטרטגיה)
+## כיסוי מנהלי ספק (דפוס אסטרטגיה)
 
-לכל ספק יש מפעיל ייעודי המרחיב את `BaseExecutor` (ב־`open-sse/executors/base.ts`), המספק בניית כתובות URL, יצירת כותרות, ניסיונות חוזרים עם השהיה מעריכית, נקודות חיבור לרענון פרטי גישה, ואת מתודת התזמור `execute()`.
+לכל ספק יש מבצע מיוחד המרחיב `BaseExecutor` (ב- `open-sse/executors/base.ts`), המספק בניית URL, בניית כותרות, ניסיון חוזר עם גיבוי אקספוננציאלי, ווים לרענון אישורים ושיטת תזמור `execute()`.
 
-| מבצע                      | ספק(ים)                                                                                                                                                    | טיפול מיוחד                                                       |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA וכו׳ | תצורה דינמית של כתובת URL/כותרות לפי ספק                          |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | מזהי פרויקט/הפעלה מותאמים אישית, ניתוח Retry-After, הסוואת 429    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | ניתוב מבוסס פריסה, אכיפת שאילתת api-version                       |
-| `BlackboxWebExecutor`     | Blackbox AI (מצב אינטרנט)                                                                                                                                  | הנדסה לאחור של הפעלת אינטרנט עם הדמיית טביעת אצבע של TLS          |
-| `ClaudeIdentityExecutor`  | Claude.ai (נתיב CCH)                                                                                                                                       | צינורות עיבוד של אילוצים ומיפוי כלים מחדש, עיצוב טביעת אצבע       |
-| `CliProxyApiExecutor`     | ספקים תואמי CLIProxyAPI                                                                                                                                    | אימות וטיפול בפרוטוקול בהתאמה אישית                               |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | הזרקת מזהה חשבון, מעקב שימוש מבוסס Neurons                        |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | מזריק הנחיות מערכת, כופה מאמץ הסקה                                |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | גשר Responses API של הפעלת דפדפן עם הצמדת שרשור/תור               |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + רוטציית כותרות לכל הפעלה                                  |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | פרוטוקול ConnectRPC, קידוד Protobuf, חתימת בקשות באמצעות checksum |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | גישור מחזור החיים של משימות Devin באמצעות מודול סוכן ענן          |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | רענון אסימון Copilot, כותרות המדמות VSCode                        |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + ניתוב בהיקף הפרויקט                                |
-| `GlmExecutor`             | Z.AI GLM (כולל הקביעה המוגדרת מראש `glmt`)                                                                                                                 | מודע לתקציב חשיבה, קבועי הקביעה המוגדרת מראש GLMT                 |
-| `GrokWebExecutor`         | xAI Grok באינטרנט                                                                                                                                          | הנדסה לאחור של הפעלת אינטרנט, בחירת מצב (חשיבה/רגיל)              |
-| `KieExecutor`             | KIE                                                                                                                                                        | הנפקת אסימון מותאמת אישית עם עוגני הפעלה מתחלפים                  |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | המרת הפורמט הבינארי AWS EventStream ל-SSE                         |
-| `MuseSparkWebExecutor`    | Muse Spark (אינטרנט)                                                                                                                                       | הנדסה לאחור של הפעלת אינטרנט עם גישור הודעות תמונה                |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | מבנה גוף בקשה ייחודי לספק                                         |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | הגדרת ספק התואמת ל-AI SDK                                         |
-| `PerplexityWebExecutor`   | Perplexity באינטרנט                                                                                                                                        | הנדסה לאחור של הפעלת אינטרנט להמשך צ׳אט                           |
-| `PetalsExecutor`          | הסקה מבוזרת של Petals                                                                                                                                      | ניתוב נחיל מבוזר                                                  |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | אין צורך במפתח API, בקשות מוגבלות בקצב                            |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | תמיכה ב-PAT וב-OAuth, מסלול חינמי מרובה מודלים                    |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | אימות באמצעות חשבון שירות, נקודות קצה מבוססות אזור                |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | מפתח API מיובא + הזרמת צ׳אט באמצעות Connect-protobuf              |
+| מְבַצֵעַ                  | ספק(ים)                                                                                                                                                     | טיפול מיוחד                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA וכו'. | תצורת URL/header דינמית לכל ספק                                     |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | project/session IDs מותאם אישית, ניסיון חוזר-לאחר ניתוח, ערפול 429  |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | ניתוב מבוסס פריסה, אכיפת שאילתות בגרסת API                          |
+| `BlackboxWebExecutor`     | Blackbox AI (מצב אינטרנט)                                                                                                                                   | הפכת הפעלה באינטרנט עם אמולציית טביעות אצבע TLS                     |
+| `ClaudeIdentityExecutor`  | Claude.ai (נתיב CCH )                                                                                                                                       | אילוץ + כלי-מיפוי מחדש של צינורות, עיצוב טביעת אצבע                 |
+| `CliProxyApiExecutor`     | ספקים תואמי CLIProxyAPI                                                                                                                                     | טיפול באימות ובפרוטוקול מותאמים אישית                               |
+| `CloudflareAiExecutor`    | Cloudflare עובדי AI                                                                                                                                         | הזרקת ID לחשבון, מעקב אחר שימוש מבוסס נוירונים                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | מזריק הוראות מערכת, מאלץ מאמץ חשיבה                                 |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | תגובות API bridge עם הצמדת thread/turn                              |
+| `CommandCodeExecutor`     | קוד פקודה                                                                                                                                                   | סיבוב כותרת OAuth + לכל הפעלה                                       |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | פרוטוקול ConnectRPC, קידוד Protobuf, חתימה על בקשה באמצעות checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | גישור מחזור החיים של משימות Devin באמצעות מודול סוכן ענן            |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | רענון אסימון Copilot, כותרות המחקות VSCode                          |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | ניתוב בהיקף של GitLab OAuth +                                       |
+| `GlmExecutor`             | Z.AI GLM (כולל `glmt` מוגדר מראש)                                                                                                                           | חשיבה-תקציבית, קבועים קבועים מראש GLMT                              |
+| `GrokWebExecutor`         | xAI Grok אינטרנט                                                                                                                                            | הפעלה הפוכה, בחירת מצב (think/standard)                             |
+| `KieExecutor`             | KIE                                                                                                                                                         | הנפקת אסימון מותאם אישית עם עוגני הפעלה מסתובבים                    |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | AWS EventStream פורמט בינארי → SSE המרה                             |
+| `MuseSparkWebExecutor`    | Muse Spark (אינטרנט)                                                                                                                                        | הפעלה של אינטרנט הפוכה עם גישור בין הודעת תמונה                     |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | בקשה ספציפית לספק מבנה גוף                                          |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | הגדרת ספק תואם AI SDK                                               |
+| `PerplexityWebExecutor`   | רשת תמיהה                                                                                                                                                   | היפוך סשן אינטרנט להמשך צ'אט                                        |
+| `PetalsExecutor`          | מסקנות מבוזרות של עלי כותרת                                                                                                                                 | ניתוב נחיל מבוזר                                                    |
+| `PollinationsExecutor`    | האבקות AI                                                                                                                                                   | אין צורך במפתח API, בקשות מוגבלות בתעריף                            |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                    | תמיכה ב-PAT ו- OAuth, שכבה חינם מרובת דגמים                         |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | אישור חשבון שירות, נקודות קצה מבוססות אזור                          |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | מיובא מפתח API + Connect-protobuf הזרמת צ'אט                        |
 
-כל שאר הספקים (כולל צמתים תואמים מותאמים אישית) משתמשים ב-`DefaultExecutor`.
+כל הספקים האחרים (כולל צמתים תואמים מותאמים אישית) משתמשים ב- `DefaultExecutor`.
+
+### בדיקות אוטומטיות וחשבונות הפעלה באינטרנט
+
+בדיקות מודל, Test All, בדיקות משולבות והערכות שולחות בקשות צ'אט אמיתיות. ספק פעילויות אינטרנט פועל כמשתמש המחובר, כך שכל אחת מהבקשות הללו תישמר כשיחה בחשבון זה; בדיקות אוטומטיות שהשאירו שיחות כאלה הושעו חשבון (#14780). לפיכך, צינור הצ'אט מסרב לכל יעד אליו מגיעה בדיקה אוטומטית, שהספק שלו לוקח אישור הפעלה באינטרנט, לאחר שספק היעד נפתר ולפני בחירת אישור (`src/lib/providers/chatProbePolicy.ts`). הסירוב הוא `422` עם `error.code` `chat_probe_not_isolated`, ורצי הבדיקה מדווחים על כך כדילוג, לא כישלון.
+
+מנהל שמריץ כל צ'אט במצב ללא היסטוריה של הספק עצמו מצהיר על כך עם `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); לאחר מכן מותרות בדיקות לאותו ספק. ChatGPT Web מכריז על `temporary-chat`. הצמד הצהרה למנגנון שלה עם בדיקה, כך שהטענה לא יכולה להאריך ימים יותר מהקוד שהופך אותה לאמת.
 
 ## מטריצת תאימות ספקים
 

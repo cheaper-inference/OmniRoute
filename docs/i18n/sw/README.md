@@ -15,7 +15,7 @@
 
 **Imeundwa na [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                     |           v3.8.50            | **v3.8.51** |       `v3.8.54+`       |
 | ----------------------------------- | :--------------------------: | :---------: | :--------------------: |
-| Watoa huduma wa 🌐                  |             352              |   **358**   |          387           |
+| Watoa huduma wa 🌐                  |             352              |   **358**   |          388           |
 | 🧠 Muundo wa kipekee wa gumzo IDs   |             1320             |  **1374**   |          1535          |
 | Daraja la Mfumo 🖼️                  |  🆕 vision + audio + video   |      ✓      |           ✓            |
 | Katalogi ya bure ya Rada 📡         |     🆕 kuchagua kuingia      |      ✓      |           ✓            |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Mikakati yote **20** — changanya na kulinganisha kwa kila hatua ya combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Nini kinaifanya OmniRoute kujitofautisha — muhtasari wa vipengele vilivyopitwa na wakati dhidi ya 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 387, zaidi ya 150 viwango vya bure vimejengwa ndani, mikakati 20 ya uelekezaji, token compression ya injini 12, MCP server iliyojengwa ndani na zana 110, itifaki ya wakala A2A, kumbukumbu endelevu, guardrails, mawakala wa wingu, TLS fingerprint stealth, Desktop/Termux/PWA na lugha 67 za UI za i18n. OmniRoute ina leseni ya MIT na inaweza kujiendesha mwenyewe. Uwezo na idadi za washindani zinaweza kubadilika; angalia mbinu iliyounganishwa."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Nini kinaifanya OmniRoute kujitofautisha — muhtasari wa vipengele vilivyopitwa na wakati dhidi ya 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 388, zaidi ya 150 viwango vya bure vimejengwa ndani, mikakati 20 ya uelekezaji, token compression ya injini 12, MCP server iliyojengwa ndani na zana 110, itifaki ya wakala A2A, kumbukumbu endelevu, guardrails, mawakala wa wingu, TLS fingerprint stealth, Desktop/Termux/PWA na lugha 67 za UI za i18n. OmniRoute ina leseni ya MIT na inaweza kujiendesha mwenyewe. Uwezo na idadi za washindani zinaweza kubadilika; angalia mbinu iliyounganishwa."/>
 
 <sub>📊 Mbinu kamili &amp; maelezo ya kila kipengele dhidi ya 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 - **🖼️ Mwisho mpya** — `/v1/ocr` (Mistral OCR) na `/v1/audio/translations` (Mtindo wa kunong'ona) zungusha uso wa media. → [API Rejea](docs/reference/API_REFERENCE.md)
 - **🎨 Uzalishaji wa picha / video / sauti** — moja API kwa vyombo vya habari: xAI Grok Fikiria & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, na vitoa matamshi kama vile ElevenLabs. → [API Rejea](docs/reference/API_REFERENCE.md)
 - **Usambazaji wa 🌍 & ops** — reverse-proxy `basePath`, kivinjari cha lugha ya kutambua kiotomatiki, ufuatiliaji wa kifaa kwa kila ufunguo, uaminifu wa MITM usio na mizizi, ujanibishaji wa zh-TW. [Mazingira](docs/reference/ENVIRONMENT.md) →
-- **🤝 Watoa huduma na mawakala zaidi** — mawakala wa wingu (Codex Wingu, Cursor, Devin, Jules), Grok Kujenga (xAI) na kivinjari + OAuth ingia, Ollama kadi ya daraja la kwanza, Claude Opus 5 & Sonnet 5, Kimi ushirikiano rasmi (Code/Web/Moonshot), Zed, Ombi, SenseNova, Yuanbao, Agnes AI... na kuburudishwa **Katalogi ya watoa huduma 387**. → [Watoa huduma](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Watoa huduma na mawakala zaidi** — mawakala wa wingu (Codex Wingu, Cursor, Devin, Jules), Grok Kujenga (xAI) na kivinjari + OAuth ingia, Ollama kadi ya daraja la kwanza, Claude Opus 5 & Sonnet 5, Kimi ushirikiano rasmi (Code/Web/Moonshot), Zed, Ombi, SenseNova, Yuanbao, Agnes AI... na kuburudishwa **Katalogi ya watoa huduma 388**. → [Watoa huduma](docs/reference/PROVIDER_REFERENCE.md)
 - **Uwazi wa uelekezaji 📡** — kila jibu hubeba kichwa cha `X-OmniRoute-Decision` kinachotaja strategy/provider/latency iliyoitumikia, mbinu mpya ya mbinu ya `cache-optimized` combo ya + Auto-Combo `cacheAffinity` inaomba kurudia muunganisho unaoshikilia kiambishi awali kilichoakibishwa, na sehemu ya mwisho `/v1/auto-combo/{channel}/candidates` ya kusoma tu inafichua mkusanyiko wa wagombeaji wa moja kwa moja wa kituo cha `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **Utendaji wa ndani ⚡ & infra** — mbofyo mmoja wa ndani Redis, Cloudflare Workers / Deno Deploy relay visambazaji, Bifrost & Mux kama huduma zilizopachikwa zinazosimamiwa. [Huduma Zilizopachikwa za](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Pia kwenye kisanduku** Mfumo wa programu-jalizi — +, mifumo ya ustadi Omni/Agent/GitHub, ujumuishaji wa vault Obsidian (zana 22 MCP ), Kundi na Faili zinazooana na OpenAI APIs, akiba ya majibu ya kisemantiki, uchezaji na bao za wanaoongoza, ugunduzi wa wakala wa ACP (mawakala 15 waliojengewa ndani), usafirishaji wa logi uliopangwa kwa BigQuery, `auto/chaos`, Telegram, AJ-Blaja nyingi msimamizi wa toleo la ndani ya programu na viwango vya mtoa huduma bila malipo LMArena-ELO. [Hati](docs/README.md) →
@@ -678,11 +678,11 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
 
 <div align="center">
 
-## Watoa Huduma wa 🌐 387 AI — 156 Katalogi-Imetiwa Alama Bila Malipo
+## Watoa Huduma wa 🌐 388 AI — 156 Katalogi-Imetiwa Alama Bila Malipo
 
 </div>
 
-> **Watoa huduma 387 waliosajiliwa** kote kwenye gumzo la kanuni, midia, utafutaji, wa ndani, wakala wa wingu na makusanyo ya mfumo, ikijumuisha **156 iliyobeba metadata ya ugunduzi wa `hasFree: true`** . Usajili wa muundo wa gumzo unashughulikia **Watoa huduma 245 / jozi 3,172 tofauti za watoa huduma / 1,535 mfano ghafi IDs** ; katalogi tofauti ya bure ya bajeti inayo **Safu 466 kwa kila mfano** ,**34 mabwawa ya mara kwa mara** na **52 recurring/keyless watoa huduma bila malipo** . Hizi ni madhehebu tofauti kwa kubuni; ufafanuzi na hesabu zilizojumuishwa kwenye bwawa huishi katika [Marejeleo ya Mtoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango Visivyolipishwa](docs/reference/FREE_TIERS.md).
+> **Watoa huduma 388 waliosajiliwa** kote kwenye gumzo la kanuni, midia, utafutaji, wa ndani, wakala wa wingu na makusanyo ya mfumo, ikijumuisha **156 iliyobeba metadata ya ugunduzi wa `hasFree: true`** . Usajili wa muundo wa gumzo unashughulikia **Watoa huduma 245 / jozi 3,172 tofauti za watoa huduma / 1,535 mfano ghafi IDs** ; katalogi tofauti ya bure ya bajeti inayo **Safu 466 kwa kila mfano** ,**34 mabwawa ya mara kwa mara** na **52 recurring/keyless watoa huduma bila malipo** . Hizi ni madhehebu tofauti kwa kubuni; ufafanuzi na hesabu zilizojumuishwa kwenye bwawa huishi katika [Marejeleo ya Mtoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango Visivyolipishwa](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

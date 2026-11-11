@@ -4,9 +4,9 @@
 
 ---
 
-> **自动生成**来自`src/shared/constants/providers.ts` —不手工编辑。再生方式： `npm run gen:provider-reference`**最后生成：** 2026-11-10
+> **自动生成**来自`src/shared/constants/providers.ts` —不手工编辑。再生方式： `npm run gen:provider-reference`**最后生成：** 2026-11-11
 
-提供者总数：**第387章**。请参阅下面的类别细分。
+提供者总数：**第388章**。请参阅下面的类别细分。
 
 ## 类别
 
@@ -45,13 +45,14 @@
 | `veoaifree-web`         | `veo-free` | Veo AI Free               | 免认证、视频 | [link](https://veoaifree.com)                           | 无需认证。每个 IP 限流为 6 次请求/小时。                                                                                                                                           | —        |
 | `zcode`                 | `zc`       | ZCode (GLM Coding Plan)   | 免认证       | [link](https://zcode.z.ai)                              | OmniRoute 不存储 API 密钥。本地 ZCode app-server 使用现有的 builtin:zai-coding-plan 登录。                                                                                         | —        |
 
-## OAuth提供者 (30)
+## OAuth提供者 (31)
 
 | ID               | 别名          | 名称                      | 标签  | 网站                                                                      | 备注                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------- | ------------- | ------------------------- | ----- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `agy`            | `agy`         | Antigravity CLI           | OAuth | [链接](https://antigravity.google)                                        | 导入你的 Antigravity CLI (`agy`) 登录信息（粘贴/上传其令牌文件）、自动检测本地 CLI 登录，或使用 Google 登录。与 Antigravity 共用后端（包括 Claude 模型）。                                                                                                                                                                                                     |
 | `amazon-q`       | `aq`          | Amazon Q                  | OAuth | [链接](https://aws.amazon.com/q/developer/)                               | 使用与 Kiro 相同的 AWS Builder ID 或导入刷新令牌的流程，但 Amazon Q 连接会单独保存。                                                                                                                                                                                                                                                                           |
 | `antigravity`    | —             | Antigravity               | OAuth | —                                                                         | —                                                                                                                                                                                                                                                                                                                                                              |
+| `chatgpt`        | `chatgpt`     | ChatGPT                   | OAuth | —                                                                         | 使用 ChatGPT 登录，通过您的 ChatGPT 计划授权符合条件的请求。与 Codex 和 ChatGPT Web 分开。受预览版限制。                                                                                                                                                                                                                                                       |
 | `claude`         | `cc`          | Claude Code               | OAuth | —                                                                         | —                                                                                                                                                                                                                                                                                                                                                              |
 | `cline`          | `cl`          | Cline                     | OAuth | —                                                                         | 使用你的 Cline 账户登录（OAuth），或粘贴来自 app.cline.bot → 设置 → API Keys 的直接 API 密钥。支持多个 API 密钥并会自动轮换——请将每个密钥添加为单独的连接。                                                                                                                                                                                                    |
 | `clinepass`      | `cp`          | ClinePass                 | OAuth | [链接](https://cline.bot/cline-pass)                                      | ClinePass 是 Cline 每月 $9.99 的订阅，捆绑提供 10 个开放编码模型。使用你的 Cline 账户登录（与 Cline CLI/IDE 使用相同的登录信息），或粘贴直接的 ClinePass API 密钥（app.cline.bot → 设置 → API Keys）。ClinePass 订阅可解锁 cline-pass/* 模型。复用 Cline WorkOS OAuth 流程。                                                                                   |
@@ -471,7 +472,7 @@
 
 - 目录：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - 注册表（各模型的详细信息）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 执行器：[`open-sse/executors/`](../../open-sse/executors/)（172 个实现）
+- 执行器：[`open-sse/executors/`](../../open-sse/executors/)（174 个实现）
 - 转换器：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 另请参阅

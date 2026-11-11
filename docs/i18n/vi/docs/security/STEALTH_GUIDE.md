@@ -115,40 +115,62 @@ Các mô-đun liên quan trong cùng gói:
 
 ---
 
-## Ẩn mình Antigravity
+## Tàng hình Antigravity
 
-Các yêu cầu Antigravity giữ nguyên từng byte văn bản của bên gọi. OmniRoute không chèn ký tự có độ rộng bằng 0 vào prompt hoặc đổi tên/chèn công cụ để bắt chước một ứng dụng khách IDE.
+Yêu cầu Antigravity bảo toàn từng byte văn bản của người gọi. OmniRoute không chèn các ký tự có độ rộng bằng 0 vào lời nhắc hoặc công cụ rename/inject để bắt chước ứng dụng khách IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Loại bỏ các dấu hiệu của Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) trước khi chuyển tiếp.
+Dải các điểm đánh dấu SDK không gỉ (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) trước khi chuyển tiếp.
 
-### ⚠️ Rủi ro: `ANTIGRAVITY_CREDITS=always` (điểm nóng gây khóa tài khoản)
+### Rủi ro ⚠️ : `ANTIGRAVITY_CREDITS=always` (điểm nóng cấm tài khoản)
 
-`ANTIGRAVITY_CREDITS=always` (được sử dụng bởi `open-sse/executors/antigravity.ts`) định tuyến **mọi** yêu cầu qua phần tín dụng vượt mức Antigravity AI Credit Overages (tín dụng Google trả phí), thay vì để hạn ngạch gói miễn phí của Google giới hạn hoạt động. Điều này được ghi nhận trong tài liệu như một tính năng, nhưng đây **là loại báo cáo vi phạm Điều khoản dịch vụ phổ biến nhất mà chúng tôi ghi nhận** — nhiều tài khoản Google Ultra đã bị khóa với lỗi `403 / "service disabled for ToS violation" / insufficient_quota` sau khi chạy trong vài giờ với `=always`.
+Các tuyến `ANTIGRAVITY_CREDITS=always` (được tiêu thụ bởi `open-sse/executors/antigravity.ts`)**mọi** yêu cầu thông qua Antigravity AI Tín dụng vượt mức (tín dụng Google đã trả) thay vì cho phép những thứ cổng hạn ngạch miễn phí của Google. Điều này được ghi lại như một tính năng, nhưng nó là **báo cáo vi phạm Điều khoản dịch vụ phổ biến nhất mà chúng tôi thấy** Nhiều tài khoản Google Ultra — đã bị cấm sử dụng `403 / "service disabled for ToS violation" / insufficient_quota` sau khi chạy được vài giờ với `=always`.
 
-Việc thực thi được tiến hành ở **phía Google**, OmniRoute không thể ngăn chặn. Tên biến môi trường và tài liệu hiện có khiến tùy chọn này có vẻ an toàn để bật; thực tế không phải vậy.
+Việc thực thi ngược dòng đang diễn ra **Phía Google** , không phải điều gì OmniRoute cũng có thể ngăn chặn được. Tên env var và các tài liệu hiện có làm cho nó giống như một nút xoay an toàn để lật; không phải vậy.
 
-**Lý do điều này kích hoạt cơ chế phát hiện lạm dụng mạnh hơn so với việc chỉ sử dụng gói miễn phí:**
+**Tại sao tính năng này thu hút khả năng phát hiện lạm dụng mạnh mẽ hơn so với mức sử dụng chỉ ở cấp độ miễn phí:**
 
-- Hoạt động chi tiêu tự động kéo dài trên một tài khoản Google duy nhất bị đánh dấu khác với trường hợp gói miễn phí đạt hạn ngạch rồi dừng lại.
-- Tín dụng vượt mức không có giới hạn tốc độ, vì vậy một ứng dụng khách cấu hình sai có thể tiêu hết vài trăm USD trong vài phút và trông giống hoạt động bán lại khóa API hoặc lưu lượng bot.
-- Nhiều người dùng OmniRoute đồng thời sử dụng tín dụng vượt mức từ cùng một IP bên ngoài sẽ làm tín hiệu này trầm trọng hơn.
+- Chi tiêu tự động được duy trì trên một tài khoản Google duy nhất gắn cờ khác với số lần truy cập-hạn ngạch-và-điểm dừng cấp miễn phí.
+- Tín dụng vượt mức không có mức trần, do đó, một khách hàng bị định cấu hình sai có thể tiêu tốn hàng trăm USD trong vài phút và trông giống như lưu lượng bot hoặc bán lại khóa API.
+- Nhiều người dùng OmniRoute song song đạt được các khoản tín dụng vượt mức từ cùng một IP bên ngoài sẽ tạo ra tín hiệu.
 
-**Cấu hình khuyến nghị:**
+**Tư thế khuyên dùng:**
 
-1. Giữ mặc định `ANTIGRAVITY_CREDITS=off` trừ khi người vận hành chấp nhận rõ ràng rủi ro về tín dụng trả phí và biện pháp xử lý tài khoản. `retry` gửi yêu cầu thông thường trước và chỉ chèn tín dụng tối đa một lần sau lỗi hạn ngạch 429 đủ điều kiện; `always` chèn tín dụng ngay trong yêu cầu đầu tiên.
-2. **Phân bổ tải giữa các nhà cung cấp thông qua Auto-Combo** (`model: "auto"` hoặc combo `kr/glm/etc`) thay vì làm quá tải một tài khoản Antigravity duy nhất.
-3. **Đặt giới hạn RPM cho từng kết nối** trong trang chỉnh sửa của nhà cung cấp Antigravity (Bảng điều khiển → Nhà cung cấp → Antigravity → kết nối → giới hạn tốc độ). 30–60 RPM là giới hạn trên hợp lý cho việc sử dụng liên tục.
-4. **Sử dụng mạng thượng nguồn ổn định do người vận hành kiểm soát** và tránh dùng chung một tài khoản cho những người dùng hoặc khối lượng công việc không liên quan.
-5. **Nếu bị khóa**: gửi kháng nghị qua `support.google.com` → "Khôi phục quyền truy cập Không gian làm việc/Tài khoản" kèm theo chính xác nội dung phản hồi `quota_exceeded` / `service disabled` mà Google đã gửi. Việc khôi phục không được đảm bảo.
+1. Giữ `ANTIGRAVITY_CREDITS=off` mặc định trừ khi nhà điều hành chấp nhận rủi ro tín dụng thanh toán và thực thi tài khoản một cách rõ ràng. `retry` gửi yêu cầu bình thường trước và cấp tín dụng nhiều nhất một lần sau hạn ngạch đủ điều kiện 429; `always` cấp tín dụng theo yêu cầu đầu tiên.
+2. **Phân bổ tải cho các nhà cung cấp thông qua Auto-Combo** (`model: "auto"` hoặc `kr/glm/etc` -combo) thay vì bão hòa một tài khoản Antigravity.
+3. **Đặt cho mỗi kết nối RPM giới hạn** trong Antigravity trang chỉnh sửa của nhà cung cấp (Bảng điều khiển → Nhà cung cấp → Antigravity → sự liên quan → giới hạn tỷ lệ). 30–60 RPM là giới hạn trên có thể bảo vệ được để sử dụng lâu dài.
+4. **Sử dụng mạng ngược dòng ổn định, do nhà điều hành kiểm soát** và tránh chia sẻ một tài khoản với những người dùng hoặc khối lượng công việc không liên quan.
+5. **Nếu bị cấm** : khiếu nại qua `support.google.com` → "Khôi phục quyền truy cập Workspace/Account " với nội dung phản hồi `quota_exceeded` / `service disabled` chính xác mà Google đã gửi. Sự phục hồi không được đảm bảo.
 
-Tài liệu tham chiếu về môi trường mô tả các tác động đối với tài khoản và chi phí của từng chế độ tín dụng.
+Tham chiếu môi trường ghi lại tài khoản và ý nghĩa chi tiêu của từng chế độ tín dụng.
 
-Các điểm liên quan:
+#### Không chỉ `=always`: Định tuyến Antigravity OAuth nói chung
+
+Việc đình chỉ không chỉ giới hạn ở việc vượt quá mức tín dụng. Các báo cáo vào tháng 11 năm 2026 (#19223, #19266) mô tả một số tài khoản Google bị tạm ngưng trong khi định tuyến thông qua các nhà cung cấp `antigravity` và `agy` (Antigravity CLI), trong đó:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Cả hai nhà cung cấp đều xác thực bằng phiên OAuth của sản phẩm Antigravity, đây là trường hợp thông báo rủi ro của trang tổng quan ("Nhà cung cấp này sử dụng sản phẩm chính thức session/OAuth của bạn, sản phẩm này không được phép sử dụng proxy/router ") cảnh báo trước khi thêm kết nối. Không có khuyến nghị nào ở trên chứng tỏ việc sử dụng đó được cho phép; chúng chỉ giảm lượng lưu lượng truy cập mà một tài khoản mang theo.
+
+**Giao diện API được ủy quyền cho các mô hình Gemini.** Google cung cấp quyền truy cập theo chương trình vào Gemini thông qua APIs của nó, OmniRoute hỗ trợ như các nhà cung cấp khóa API thông thường:
+
+| Id nhà cung cấp | Tên trang tổng quan       | Thông tin xác thực                                                                            |
+| --------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `gemini`        | Gemini (Google AI Studio) | Khóa Gemini API từ Google AI Studio (có sẵn bậc miễn phí)                                     |
+| `vertex`        | Đỉnh AI                   | Tài khoản dịch vụ JSON, mã thông báo truy cập OAuth hoặc khóa API của Vertex Express (Gemini) |
+
+Các nhà cung cấp này sử dụng thông tin xác thực Google để truy cập API, không giống như phiên sản phẩm Antigravity. Chúng không làm cho mọi hoạt động sử dụng đều tuân thủ hoặc loại bỏ rủi ro thực thi: mỗi điều khoản đều bị chi phối bởi các điều khoản riêng mà nhà điều hành phải kiểm tra khi triển khai. Ví dụ: [Điều khoản dịch vụ bổ sung Gemini API](https://ai.google.dev/gemini-api/terms) chỉ cho phép Dịch vụ phải trả phí khi khách hàng API được cung cấp cho người dùng ở Khu vực kinh tế Châu Âu, Thụy Sĩ hoặc Vương quốc Anh và nội dung được gửi tới Dịch vụ không phải trả phí có thể được sử dụng để cải thiện các sản phẩm của Google. Thay vào đó, Vertex AI tuân theo các điều khoản của Google Cloud ( [Điều khoản dành riêng cho dịch vụ](https://cloud.google.com/terms/service-terms) ). Giá cả và hạn ngạch tuân theo các điều khoản API đó thay vì đăng ký Antigravity.
+
+Các nhà khai thác muốn tránh việc tạm dừng Antigravity được mô tả ở trên nên định tuyến lưu lượng Gemini thông qua một trong những nhà cung cấp này thay vì `antigravity` / `agy`, sau khi kiểm tra xem việc sử dụng chúng có phù hợp với các điều khoản của nhà cung cấp hay không.
+
+Điểm tiếp xúc:
 
 - `open-sse/executors/antigravity.ts` — đọc `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — hệ thống kết nối thông tin xác thực
+- Hệ thống ống nước chứng chỉ `src/lib/oauth/providers/antigravity.ts` —
 - Báo cáo sự cố ban đầu: Thảo luận [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---

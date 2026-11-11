@@ -488,7 +488,7 @@ Dette håndterer:
 
 | Fil                           | Hensikt                                          |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Chat-modellregister over 387-leverandørkatalogen |
+| `providerRegistry.ts`         | Chat-modellregister over 388-leverandørkatalogen |
 | `providerModels.ts`           | Modellaliaser, formatkartlegging                 |
 | `constants.ts`                | Tidsavbrudd, grenser, statuskoder                |
 | `defaultThinkingSignature.ts` | Standard Claude tenkende signatur                |

@@ -15,7 +15,7 @@
 
 **Ստեղծվել է [Դիեգո Սոուզայի](https://github.com/diegosouzapw) կողմից**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                   |            v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :----------------------------: | :---------: | :-------------------: |
-| 🌐 մատակարարներ                   |              352               |   **358**   |          387          |
+| 🌐 մատակարարներ                   |              352               |   **358**   |          388          |
 | 🧠 Զրույցի եզակի մոդել IDs        |              1320              |  **1374**   |         1535          |
 | 🖼️ Modality Bridge                | 🆕 vision + աուդիո + տեսանյութ |      ✓      |           ✓           |
 | 📡 Radar անվճար կատալոգ           |          🆕 ի միացում          |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ինչով է OmniRoute-ը տարբերվում — հնացած հնարավորությունների համեմատական պատկերը 9router, OpenRouter, CLIProxyAPI և LiteLLM-ի հետ՝ 13 հնարավորությունների շրջանակում։ OmniRoute՝ 387 մատակարար, 150+ ներկառուցված անվճար փաթեթ, 20 երթուղավորման ռազմավարություն, 12-շարժիչով տոկենների սեղմում, ներկառուցված MCP սերվեր՝ 110 գործիքներով, A2A գործակալների արձանագրություն, մշտական հիշողություն, պաշտպանիչ սահմանափակումներ, ամպային գործակալներ, TLS մատնահետքերի քողարկում, Desktop/Termux/PWA և 67 i18n UI լեզվական տարբերակ։ OmniRoute-ը MIT լիցենզավորված է և կարող է տեղադրվել ինքնուրույն։ Մրցակիցների հնարավորություններն ու քանակները կարող են փոփոխվել. մանրամասների համար տեսեք կցված մեթոդաբանությունը։"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ինչով է OmniRoute-ը տարբերվում — հնացած հնարավորությունների համեմատական պատկերը 9router, OpenRouter, CLIProxyAPI և LiteLLM-ի հետ՝ 13 հնարավորությունների շրջանակում։ OmniRoute՝ 388 մատակարար, 150+ ներկառուցված անվճար փաթեթ, 20 երթուղավորման ռազմավարություն, 12-շարժիչով տոկենների սեղմում, ներկառուցված MCP սերվեր՝ 110 գործիքներով, A2A գործակալների արձանագրություն, մշտական հիշողություն, պաշտպանիչ սահմանափակումներ, ամպային գործակալներ, TLS մատնահետքերի քողարկում, Desktop/Termux/PWA և 67 i18n UI լեզվական տարբերակ։ OmniRoute-ը MIT լիցենզավորված է և կարող է տեղադրվել ինքնուրույն։ Մրցակիցների հնարավորություններն ու քանակները կարող են փոփոխվել. մանրամասների համար տեսեք կցված մեթոդաբանությունը։"/>
 
 <sub>📊 Լրիվ մեթոդաբանությունը և յուրաքանչյուր հնարավորության մանրամասն համեմատությունը 9router, OpenRouter, CLIProxyAPI և LiteLLM-ի հետ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar-ի օգտագործումը կամընտիր է, և այն աշխատու�
 - **🖼️ Նոր վերջնակետեր** — `/v1/ocr` (Mistral OCR) և `/v1/audio/translations` (Whisper-style) լրացնում են մեդիա մակերեսը: → [API Տեղեկանք](docs/reference/API_REFERENCE.md)
 - **🎨 պատկերի / վիդեո / աուդիո արտադրություն** — մեկ API լրատվամիջոցների համար. xAI Grok Imagine & Novita AI տեսանյութ, ComfyUI, Magnific, Adobe Firefly, Segmind և խոսքի մատակարարներ, ինչպիսիք են ElevenLabs: → [API Հղում](docs/reference/API_REFERENCE.md)
 - **🌍 տեղակայում և գործ** — հակադարձ վստահված անձ `basePath`, բրաուզերի լեզվով ավտոմատ հայտնաբերում, յուրաքանչյուր բանալիով սարքի հետևում, MITM վստահություն առանց արմատների, zh-TW տեղայնացում: → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Ավելի շատ մատակարարներ և գործակալներ** — ամպային գործակալներ (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) զննարկիչով + OAuth մուտքով, Ollama առաջին կարգի քարտ, Claude Opus 5 & Sonnet 5, Kimi պաշտոնական համագործակցություն (Code/Web/Moonshot), Zed, SenseNova, Agnes, AI… թարմացված **387-պրովայդերների կատալոգ** . → [մատակարարներ](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Ավելի շատ մատակարարներ և գործակալներ** — ամպային գործակալներ (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) զննարկիչով + OAuth մուտքով, Ollama առաջին կարգի քարտ, Claude Opus 5 & Sonnet 5, Kimi պաշտոնական համագործակցություն (Code/Web/Moonshot), Zed, SenseNova, Agnes, AI… թարմացված **388-պրովայդերների կատալոգ** . → [մատակարարներ](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing թափանցիկություն** — յուրաքանչյուր պատասխան պարունակում է `X-OmniRoute-Decision` վերնագիր՝ անվանելով այն strategy/provider/latency, որը ծառայում է իրեն, `cache-optimized` նոր համակցված ռազմավարությունը + Auto-Combo `cacheAffinity` գործոնը կրկնում է երթուղին դեպի կապ, որը պահում է քեշավորված նախածանցը, և միայն կարդալու համար `/v1/auto-combo/{channel}/candidates` վերջնակետը բացահայտում է `auto/*` ալիքի կենդանի թեկնածուների ֆոնդը: → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Տեղական կատարում և ինֆրա** — մեկ սեղմումով տեղական Redis, Cloudflare Workers / Deno Deploy ռելեի տեղակայիչներ, Bifrost & Mux որպես վերահսկվող ներկառուցված ծառայություններ: → [ներդրված ծառայություններ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Նաև տուփի մեջ** — հավելումների շրջանակ + շուկա, Omni/Agent/GitHub հմտությունների շրջանակներ, Obsidian պահոցների ինտեգրում (22 MCP գործիքներ), OpenAI-ի հետ համատեղելի Batch & Files APIs, իմաստային պատասխանի քեշ, խաղավորում առաջատար ցուցատախտակների հետ, ACP գործակալի հայտնաբերում (15 ներկառուցված գործակալներ), պլանավորված log-out BigQuery a paras `auto/chaos` Telegram bridge, ներծրագրային տարբերակի կառավարիչ և LMARena-ELO անվճար մատակարարների վարկանիշ: → [Փաստաթղթեր](docs/README.md)
@@ -678,11 +678,11 @@ omniroute configure codex          # նաև՝ claude opencode qwen aider goose g
 
 <div align="center">
 
-## 🌐 387 AI Պրովայդերներ — 156 կատալոգ-նշված անվճար
+## 🌐 388 AI Պրովայդերներ — 156 կատալոգ-նշված անվճար
 
 </div>
 
-> **387 գրանցված պրովայդեր** կանոնական զրույցի, լրատվամիջոցների, որոնման, տեղական, ամպային գործակալների և համակարգի հավաքածուներում, ներառյալ **156, որը կրում է `hasFree: true` հայտնաբերման մետատվյալներ** . Զրույցի մոդելի ռեեստրը ծածկում է **245 մատակարար / 3,172 տարբեր մատակարար-մոդել զույգ / 1,535 հում մոդել IDs** ; առանձին ազատ բյուջեի կատալոգն ունի **466 յուրաքանչյուր մոդելի տող** ,**34 կրկնվող լողավազան** և **52 recurring/keyless անվճար ընդմիշտ մատակարարներ** . Սրանք նախագծով տարբեր հայտարարներ են. սահմանումները և լողավազանից չեղյալ համարվող հաշվարկները գործում են [Մատակարարի հղումում](docs/reference/PROVIDER_REFERENCE.md) և [անվճար մակարդակներում](docs/reference/FREE_TIERS.md) :
+> **388 գրանցված պրովայդեր** կանոնական զրույցի, լրատվամիջոցների, որոնման, տեղական, ամպային գործակալների և համակարգի հավաքածուներում, ներառյալ **156, որը կրում է `hasFree: true` հայտնաբերման մետատվյալներ** . Զրույցի մոդելի ռեեստրը ծածկում է **245 մատակարար / 3,172 տարբեր մատակարար-մոդել զույգ / 1,535 հում մոդել IDs** ; առանձին ազատ բյուջեի կատալոգն ունի **466 յուրաքանչյուր մոդելի տող** ,**34 կրկնվող լողավազան** և **52 recurring/keyless անվճար ընդմիշտ մատակարարներ** . Սրանք նախագծով տարբեր հայտարարներ են. սահմանումները և լողավազանից չեղյալ համարվող հաշվարկները գործում են [Մատակարարի հղումում](docs/reference/PROVIDER_REFERENCE.md) և [անվճար մակարդակներում](docs/reference/FREE_TIERS.md) :
 
 <div align="center">
 

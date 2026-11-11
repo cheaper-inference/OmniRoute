@@ -135,41 +135,63 @@ Module masu alaƙa a cikin wannan kunshi:
 
 ---
 
-## Ɓoye-Ɓoyen Antigravity
+## Antigravity Stealth
 
-Buƙatun Antigravity suna kiyaye rubutun mai kira byte-zuwa-byte. OmniRoute ba ya saka haruffan zero-width a cikin prompt ko sake suna/saka tool domin kwaikwayon client na IDE.
+Buƙatun Antigravity yana adana rubutun mai kira byte-for-byte. OmniRoute baya saka haruffa masu faɗin sifili cikin faɗakarwa ko kayan aikin rename/inject don yin koyi da abokin ciniki IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Yana cire alamomin Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) kafin turawa.
+Zaɓuɓɓuka Bakin SDK alamomi (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) kafin turawa.
 
-### ⚠️ Haɗari: `ANTIGRAVITY_CREDITS=always` (babban wurin haɗarin dakatar da account)
+### Hadarin ⚠️ : `ANTIGRAVITY_CREDITS=always` (wajen da aka hana asusu)
 
-`ANTIGRAVITY_CREDITS=always` (wanda `open-sse/executors/antigravity.ts` ke amfani da shi) yana tura **kowace** buƙata ta Antigravity AI Credit Overages (credits na Google da ake biya) maimakon barin quota na matakin kyauta na Google ya takaita abubuwa. An rubuta wannan a matsayin wata fasali, amma shi ne **rahoton keta ToS mafi yawan faruwa da muke gani** — an dakatar da account na Google Ultra da dama tare da `403 / "service disabled for ToS violation" / insufficient_quota` bayan gudanarwa na wasu awanni da `=always`.
+Hanyoyin `ANTIGRAVITY_CREDITS=always` (wanda `open-sse/executors/antigravity.ts` ke cinyewa).**kowane** nema ta hanyar Antigravity AI Credit Overages (biya Google credits) maimakon barin Google's kyauta ga keɓaɓɓen ƙofa abubuwa. An rubuta wannan a matsayin sifa, amma yana da **rahoton cin zarafin ToS guda ɗaya da muke gani** An dakatar da asusun — da yawa Google Ultra tare da `403 / "service disabled for ToS violation" / insufficient_quota` bayan ya gudana na 'yan sa'o'i tare da `=always`.
 
-Tilasta dokokin upstream yana faruwa ne a **ɓangaren Google**, ba wani abu da OmniRoute zai iya hana ba. Sunan env var da takardun da ake da su suna sa ya yi kama da maɓalli mai aminci da za a kunna; amma ba haka ba ne.
+Ana ci gaba da aiwatar da aikin **Bangaren Google** , ba wani abu da OmniRoute zai iya hanawa ba. Sunan env var da takaddun da ke akwai suna sa ya zama kamar kulli mai aminci don juyawa; ba haka ba.
 
-**Dalilin da ya sa wannan ke jawo gano amfani ba daidai ba fiye da amfani da matakin kyauta kawai:**
+**Me yasa wannan ke jawo gano cin zarafi fiye da amfani da matakin kyauta kawai:**
 
-- Ci gaba da kashe kuɗi ta atomatik a kan account ɗin Google guda ɗaya yana haifar da alama ta daban da matakin kyauta wanda zai kai quota sannan ya tsaya.
-- Credit overages ba su da iyakar rate, don haka client da aka saita ba daidai ba zai iya cinye ɗaruruwan USD cikin mintuna kuma ya yi kama da sake sayar da API key ko zirga-zirgar bot.
-- Masu amfani da OmniRoute da dama da suke amfani da overage credits lokaci guda daga external IP ɗaya suna ƙara ƙarfin wannan alama.
+- Ci gaba da ciyarwa ta atomatik akan tutocin asusun Google guda ɗaya daban fiye da matakin hits-ke-da-tsayawa.
+- Ƙididdigar ƙima ba ta da rufin ƙima, don haka abokin ciniki da ba daidai ba zai iya ƙone ta cikin USD ɗari da yawa a cikin mintuna kuma yayi kama da sake siyarwar API-key ko zirga-zirgar bot.
+- Masu amfani da OmniRoute da yawa suna bugun ƙididdiga masu yawa a layi daya daga IP na waje guda suna haɗa siginar.
 
-**Matsayin da ake ba da shawara:**
+**Matsayin da aka ba da shawarar:**
 
-1. Bar tsohon saitin `ANTIGRAVITY_CREDITS=off` sai idan mai gudanarwa ya amince kai tsaye da haɗarin biyan credits da kuma matakin tilasta doka kan account. `retry` yana fara aika buƙata ta al'ada sannan ya saka credits sau ɗaya kacal bayan quota 429 mai cancanta; `always` yana saka credits a buƙata ta farko.
-2. **Rarraba load tsakanin masu samarwa ta Auto-Combo** (`model: "auto"` ko `kr/glm/etc`-combo) maimakon cika ƙarfin account ɗin Antigravity guda ɗaya.
-3. **Saita iyakokin RPM ga kowane haɗi** a shafin gyaran mai samar da Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM iyaka ce ta sama da za a iya kare hujjarta don amfani mai ɗorewa.
-4. **Yi amfani da tsayayyen upstream networking da mai gudanarwa ke sarrafawa** kuma a guji raba account guda ɗaya tsakanin masu amfani ko workloads marasa alaƙa.
-5. **Idan an dakatar da account**: shigar da roƙon ɗaukaka ƙara ta `support.google.com` → "Restore Workspace/Account access" tare da ainihin body na martanin `quota_exceeded` / `service disabled` da Google ya aika. Ba a tabbatar da maido da account ba.
+1. Ajiye tsohuwar `ANTIGRAVITY_CREDITS=off` sai dai idan mai aiki ya karɓi ƙididdiga da aka biya da haɗarin tilasta aiwatar da asusu. `retry` yana aika buƙatun al'ada da farko kuma yana allurar ƙididdigewa sau ɗaya bayan adadin da ya cancanta 429; `always` tana allurar ƙididdiga akan buƙatun farko.
+2. **Yada kaya a kan masu samarwa ta hanyar Auto-Combo** (`model: "auto"` ko `kr/glm/etc` -combo) maimakon yin cikakken asusun Antigravity guda ɗaya.
+3. **Saita iyakoki RPM kowane-haɗi** a cikin shafin gyare-gyare na mai bada Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30-60 RPM shine babban abin kariya don amfani mai dorewa.
+4. **Yi amfani da tsayayye, hanyar sadarwar sama mai sarrafa afareta** kuma a guji raba asusu ɗaya a tsakanin masu amfani ko nauyin aiki marasa alaƙa.
+5. **Idan an hana** : roko ta hanyar `support.google.com` → "Mayar da damar Workspace/Account " tare da ainihin `quota_exceeded` / `service disabled` amsa jikin Google da aka aiko. Ba a da garantin maidowa.
 
-Takardar bayanin environment tana bayyana tasirin kowane yanayin credits kan account da kashe kuɗi.
+Bayanin yanayi yana rubuta asusu kuma yana kashe tasirin kowane yanayin ƙididdigewa.
 
-Wuraren da abin ya shafa:
+#### Ba kawai `=always` ba: Antigravity OAuth routing gabaɗaya
+
+Dakatarwar ba ta iyakance ga yawan kiredit ba. Rahotanni a cikin Nuwamba 2026 (#19223, #19266) sun bayyana wasu asusun Google da aka dakatar yayin da suke tafiya ta hanyar masu samar da `antigravity` da `agy` (Antigravity CLI), tare da:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Dukansu masu samarwa sun tabbatar da zaman Antigravity samfurin OAuth, wanda shine yanayin sanarwar haɗarin dashboard ("Wannan mai bada yana amfani da samfurin ku na hukuma session/OAuth, wanda ba a ba da izini don amfani da proxy/router ") yayi kashedin kafin a haɗa haɗin. Babu ɗayan shawarwarin da ke sama da ya ba da izinin amfani; suna rage yawan zirga-zirgar ababen hawa ne kawai.
+
+**Abubuwan musaya na API masu izini don ƙirar Gemini.** Google tana ba da damar yin amfani da shirye-shirye zuwa Gemini ta hanyar APIs ɗin sa, wanda OmniRoute ke goyan bayan a matsayin masu samar da maɓallin API na yau da kullun:
+
+| Id mai bayarwa | Dashboard sunan           | Takaddun shaida                                                                        |
+| -------------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| `gemini`       | Gemini (Google AI Studio) | Maɓallin Gemini API daga Google AI Studio (akwai matakin kyauta)                       |
+| `vertex`       | Farashin AI               | Asusun Sabis JSON, alamar samun damar OAuth ko maɓallin API na Vertex Express (Gemini) |
+
+Waɗannan masu samarwa suna amfani da al'amurran Google na takaddun shaida don samun damar API, sabanin zaman samfurin Antigravity. Ba su sa kowane amfani ya dace ba ko cire haɗarin tilastawa: kowanne ana sarrafa shi da nasa sharuɗɗan, wanda ma'aikacin dole ne ya bincika jigilar su. Misali, [Ƙarin Sharuɗɗan Sabis Gemini API](https://ai.google.dev/gemini-api/terms) yana ba da damar Sabis na Biya kawai lokacin da aka samar da abokan ciniki API ga masu amfani a Yankin Tattalin Arziki na Turai, Switzerland ko United Kingdom, kuma ana iya amfani da abun ciki da aka aika zuwa Sabis ɗin da ba a biya ba don haɓaka samfuran Google. Vertex AI ya faɗi ƙarƙashin Google Cloud sharuɗɗan maimakon ( [Sharuɗɗan Takaddun Sabis](https://cloud.google.com/terms/service-terms) ). Farashi da ƙididdiga suna bin waɗannan sharuɗɗan API maimakon biyan kuɗin Antigravity.
+
+Masu aiki waɗanda ke son guje wa dakatarwar Antigravity da aka kwatanta a sama yakamata su bi hanyar Gemini ta ɗayan waɗannan masu samarwa maimakon `antigravity` / `agy`, bayan sun duba cewa amfani da su ya yi daidai da sharuɗɗan mai bayarwa.
+
+Abubuwan taɓawa:
 
 - `open-sse/executors/antigravity.ts` — yana karanta `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — sarrafa credentials
-- Rahoton farko na matsalar: Tattaunawa [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `src/lib/oauth/providers/antigravity.ts` — bututun bututu
+- Rahoton abin da ya faru na asali: Tattaunawa [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

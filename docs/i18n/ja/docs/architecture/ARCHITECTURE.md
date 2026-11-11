@@ -15,7 +15,7 @@ OmniRoute は、Next.js を基盤とするローカル AI ルーティングゲ�
 
 主な機能：
 
-- CLI／ツール向けの OpenAI 互換 API サーフェス（387 プロバイダー、159 エグゼキューターモジュール）
+- CLI／ツール向けの OpenAI 互換 API サーフェス（388 プロバイダー、159 エグゼキューターモジュール）
 - プロバイダー形式間でのリクエスト／レスポンス変換
 - モデルコンボのフォールバック（複数モデルのシーケンス）
 - 構造化されたコンボステップ（`provider + model + connection`）と、`compositeTiers` によるランタイム順序付け
@@ -850,41 +850,47 @@ flowchart LR
 - `src/lib/db/*`: 特定のモジュールを直接インポート — バレルは使用しない（旧`localDb.ts`再エクスポートレイヤーは削除済み）
 - `src/lib/usageDb.ts`: SQLiteテーブル上に構築された使用履歴／呼び出しログのファサード
 
-## プロバイダーエグゼキューターのカバレッジ（Strategy パターン）
+## プロバイダーエグゼキューターのカバレッジ (戦略パターン)
 
-各プロバイダーには、`BaseExecutor`（`open-sse/executors/base.ts` 内）を拡張した専用のエグゼキューターがあります。これは、URL の構築、ヘッダーの構築、指数バックオフによる再試行、認証情報の更新フック、および `execute()` オーケストレーションメソッドを提供します。
+各プロバイダーには、 `BaseExecutor` ( `open-sse/executors/base.ts`内) を拡張する特殊なエグゼキューターがあり、 URL構築、ヘッダーの構築、指数バックオフによる再試行、資格情報の更新フック、および`execute()`オーケストレーション メソッドを提供します。
 
-| エグゼキューター          | プロバイダー                                                                                                                                               | 特別な処理                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI、Claude、Gemini、Qwen、OpenRouter、GLM、Kimi、MiniMax、DeepSeek、Groq、xAI、Mistral、Perplexity、Together、Fireworks、Cerebras、Cohere、NVIDIA など | プロバイダーごとの動的な URL／ヘッダー設定                                         |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | カスタムプロジェクト／セッション ID、Retry-After の解析、429 の難読化              |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | デプロイメントベースのルーティング、api-version クエリの適用                       |
-| `BlackboxWebExecutor`     | Blackbox AI（Web モード）                                                                                                                                  | TLS フィンガープリントのエミュレーションを伴う Web セッションのリバース処理        |
-| `ClaudeIdentityExecutor`  | Claude.ai（CCH パス）                                                                                                                                      | 制約およびツール再マッピングのパイプライン、フィンガープリント調整                 |
-| `CliProxyApiExecutor`     | CLIProxyAPI 互換プロバイダー                                                                                                                               | カスタム認証およびプロトコル処理                                                   |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | アカウント ID の注入、Neurons ベースの使用量追跡                                   |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | システム指示を注入し、推論エフォートを強制                                         |
-| `ChatGptWebCodexExecutor` | ChatGPT Web（Codex）                                                                                                                                       | スレッド／ターン固定を備えたブラウザセッション用 Responses API ブリッジ            |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth およびセッションごとのヘッダーローテーション                                 |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC プロトコル、Protobuf エンコーディング、チェックサムによるリクエスト署名 |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | クラウドエージェントモジュールを介した Devin タスクライフサイクルのブリッジ        |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot トークンの更新、VSCode を模したヘッダー                                    |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth およびプロジェクトスコープのルーティング                              |
-| `GlmExecutor`             | Z.AI GLM（`glmt` プリセットを含む）                                                                                                                        | 思考バジェット対応、GLMT プリセット定数                                            |
-| `GrokWebExecutor`         | xAI Grok Web                                                                                                                                               | Web セッションのリバース処理、モード選択（think／standard）                        |
-| `KieExecutor`             | KIE                                                                                                                                                        | ローテーションするセッションアンカーを使用したカスタムトークン発行                 |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream バイナリ形式から SSE への変換                                      |
-| `MuseSparkWebExecutor`    | Muse Spark（Web）                                                                                                                                          | 画像メッセージのブリッジを伴う Web セッションのリバース処理                        |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | プロバイダー固有のリクエストボディ形式                                             |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK 互換のプロバイダー設定                                                      |
-| `PerplexityWebExecutor`   | Perplexity Web                                                                                                                                             | チャット継続のための Web セッションのリバース処理                                  |
-| `PetalsExecutor`          | Petals 分散推論                                                                                                                                            | 分散型スウォームルーティング                                                       |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | API キー不要、レート制限付きリクエスト                                             |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT および OAuth のサポート、複数モデル対応の無料枠                                |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | サービスアカウント認証、リージョンベースのエンドポイント                           |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | インポートされた API キーおよび Connect-Protobuf によるチャットストリーミング      |
+| 執行者                    | プロバイダー                                                                                                                                                                       | 特別な取り扱い                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI、 Claude、 Gemini、 Qwen、 OpenRouter、 GLM、 Kimi、 MiniMax、 DeepSeek、 Groq、 xAI、 Mistral、 パープレキシティ、 Together、 Fireworks、 Cerebras、 Cohere、 NVIDIAなど。 | プロバイダーごとの動的URL/header構成                                              |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                                 | カスタムproject/session IDs、解析後の再試行、429 難読化                           |
+| `AzureOpenAIExecutor`     | アズールOpenAI                                                                                                                                                                     | デプロイメントベースのルーティング、API バージョンのクエリ強制                    |
+| `BlackboxWebExecutor`     | ブラックボックスAI (Web モード)                                                                                                                                                    | TLS指紋エミュレーションを使用した Web セッション リバース                         |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCHパス)                                                                                                                                                                | 制約+ツール - パイプラインの再マッピング、フィンガープリントの整形                |
+| `CliProxyApiExecutor`     | CLIProxyAPI 互換プロバイダー                                                                                                                                                       | カスタム認証とプロトコル処理                                                      |
+| `CloudflareAiExecutor`    | CloudflareワーカーAI                                                                                                                                                               | アカウントIDインジェクション、ニューロンベースの使用状況追跡                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                                       | システム命令を注入し、推論努力を強制する                                          |
+| `ChatGptWebCodexExecutor` | ChatGPTウェブ (Codex)                                                                                                                                                              | ブラウザセッションの応答thread/turnピニングを使用したAPIブリッジ                  |
+| `CommandCodeExecutor`     | コマンドコード                                                                                                                                                                     | OAuth +セッションごとのヘッダーのローテーション                                   |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                                         | ConnectRPCプロトコル、Protobuf エンコーディング、チェックサムによるリクエスト署名 |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                                          | クラウド エージェント モジュールを介したDevinタスク ライフサイクル ブリッジング   |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                                     | Copilotトークンのリフレッシュ、VSCode を模倣したヘッダー                          |
+| `GitlabExecutor`          | GitLabデュオ                                                                                                                                                                       | GitLab OAuth +プロジェクト スコープのルーティング                                 |
+| `GlmExecutor`             | Z.AI GLM ( `glmt`プリセットを含む)                                                                                                                                                 | 予算を考慮したGLMTプリセット定数                                                  |
+| `GrokWebExecutor`         | xAI Grokウェブ                                                                                                                                                                     | Web セッションのリバース、モード選択 (think/standard)                             |
+| `KieExecutor`             | KIE                                                                                                                                                                                | ローテーションセッションアンカーを使用したカスタムトークンの発行                  |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                                             | AWS EventStreamバイナリ形式→ SSE変換                                              |
+| `MuseSparkWebExecutor`    | ミューズスパーク（ウェブ）                                                                                                                                                         | イメージメッセージブリッジングを使用した Web セッションリバース                   |
+| `NlpCloudExecutor`        | NLPクラウド                                                                                                                                                                        | プロバイダー固有のリクエストボディの形状                                          |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                                           | AI SDK互換プロバイダーのセットアップ                                              |
+| `PerplexityWebExecutor`   | パープレキシティウェブ                                                                                                                                                             | チャットを継続するための Web セッションのリバース                                 |
+| `PetalsExecutor`          | 花びら分散推論                                                                                                                                                                     | 分散型スウォーム ルーティング                                                     |
+| `PollinationsExecutor`    | 受粉AI                                                                                                                                                                             | APIキーは不要、レート制限されたリクエスト                                         |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                                           | PATおよびOAuthサポート、マルチモデルの無料枠                                      |
+| `VertexExecutor`          | Google頂点AI                                                                                                                                                                       | サービスアカウント認証、リージョンベースのエンドポイント                          |
+| `DevinDesktopExecutor`    | Devinデスクトップ                                                                                                                                                                  | インポートされたAPIキー+ Connect-protobuf チャット ストリーミング                 |
 
-その他のすべてのプロバイダー（カスタム互換ノードを含む）は、`DefaultExecutor` を使用します。
+他のすべてのプロバイダー (カスタム互換ノードを含む) は`DefaultExecutor`を使用します。
+
+### 自動化されたプローブと Web セッション アカウント
+
+モデル テスト、すべてテスト、コンボ テストおよび評価では、実際のチャット リクエストが送信されます。 Web セッション プロバイダーはサインイン ユーザーとして機能するため、これらの各要求はそのアカウントの会話として保存されます。このような会話を残した自動プローブはアカウントを停止されました (#14780)。したがって、チャット パイプラインは、ターゲットのプロバイダーが解決されてから資格情報が選択される (`src/lib/providers/chatProbePolicy.ts`) 前に、プロバイダーが Web セッション資格情報を取得する自動プローブが到達するすべてのターゲットを拒否します。拒否は`422`と`error.code` `chat_probe_not_isolated`であり、プローブ ランナーはそれを失敗ではなくスキップとして報告します。
+
+プロバイダー独自の履歴なしモードですべてのチャットを実行するエグゼキューターは、それを`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) で宣言します。その後、そのプロバイダーへのプローブが許可されます。 ChatGPT Web は`temporary-chat`を宣言します。テストを使用して宣言をそのメカニズムに固定するため、クレームがそれを true にするコードよりも長く存続することはありません。
 
 ## プロバイダー互換性マトリックス
 

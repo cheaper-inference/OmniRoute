@@ -15,7 +15,7 @@
 
 **创建者：[迭戈·苏萨](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                     |     v3.8.50      | **v3.8.51** |      `v3.8.54+`       |
 | ------------------- | :--------------: | :---------: | :-------------------: |
-| 🌐提供者            |       352        |   **358**   |          387          |
+| 🌐提供者            |       352        |   **358**   |          388          |
 | 🧠独特的聊天模型IDs |       1320       |  **1374**   |         1535          |
 | 🖼️模态桥            | 🆕视觉+音频+视频 |      ✓      |           ✓           |
 | 📡雷达免费目录      |    🆕选择加入    |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的独特之处——与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 项能力上的带日期功能快照对比。OmniRoute：387 个提供者，内置 150 多个免费层级，20 种路由策略，支持 12 个引擎的令牌压缩，内置 MCP 服务器并提供 110 个工具，A2A 智能体协议，持久化记忆，防护栏，云端智能体，TLS 指纹隐身，Desktop/Termux/PWA，以及支持 67 种 i18n UI 语言环境。OmniRoute 采用 MIT 许可证并支持自托管。竞争对手的功能和数量可能会发生变化；请参阅链接的方法说明。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的独特之处——与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 项能力上的带日期功能快照对比。OmniRoute：388 个提供者，内置 150 多个免费层级，20 种路由策略，支持 12 个引擎的令牌压缩，内置 MCP 服务器并提供 110 个工具，A2A 智能体协议，持久化记忆，防护栏，云端智能体，TLS 指纹隐身，Desktop/Termux/PWA，以及支持 67 种 i18n UI 语言环境。OmniRoute 采用 MIT 许可证并支持自托管。竞争对手的功能和数量可能会发生变化；请参阅链接的方法说明。"/>
 
 <sub>📊 完整的方法说明及与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的逐项功能详情 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar 需主动选择启用，且仅使用 GET 请求。OmniRoute 客户端不�
 - **🖼️新端点**— `/v1/ocr` (Mistral OCR) 和`/v1/audio/translations` （耳语式）使介质表面更加圆润。 → [API参考](docs/reference/API_REFERENCE.md)
 - **🎨图像/视频/音频生成**— 1 API用于媒体： xAI Grok Imagine & Novita AI视频、 ComfyUI、Magnific、Adobe Firefly、Segmind 以及ElevenLabs等语音提供者。 → [API参考](docs/reference/API_REFERENCE.md)
 - **🌍部署和操作**—反向代理`basePath`、浏览器语言自动检测、每键设备跟踪、无根MITM信任、zh-TW 本地化。 →[环境](docs/reference/ENVIRONMENT.md)
-- **🤝更多供应商和代理商**—云代理（Codex Cloud、 Cursor、 Devin、 Jules）、 Grok Build（xAI）带浏览器+ OAuth登录、 Ollama一等卡、 Claude Opus 5 & Sonnet 5、 Kimi官方合作伙伴（Code/Web/Moonshot）、 Zed、Requesty、 SenseNova、元宝、Agnes AI……以及刷新版**387-提供者目录**。 →[提供者](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝更多供应商和代理商**—云代理（Codex Cloud、 Cursor、 Devin、 Jules）、 Grok Build（xAI）带浏览器+ OAuth登录、 Ollama一等卡、 Claude Opus 5 & Sonnet 5、 Kimi官方合作伙伴（Code/Web/Moonshot）、 Zed、Requesty、 SenseNova、元宝、Agnes AI……以及刷新版**388-提供者目录**。 →[提供者](docs/reference/PROVIDER_REFERENCE.md)
 - **📡路由透明性**—每个响应都携带一个`X-OmniRoute-Decision`标头，命名为其提供服务的strategy/provider/latency ，新的`cache-optimized`组合策略+自动组合`cacheAffinity`因子将重复请求路由回保存缓存前缀的连接，只读`/v1/auto-combo/{channel}/candidates`端点公开`auto/*`通道的实时候选池。 →[自动组合](docs/routing/AUTO-COMBO.md)
 - **⚡本地性能和基础设施**—一键式本地Redis、 Cloudflare Workers / Deno Deploy 中继部署器、Bifrost 和 Mux 作为受监督的嵌入式服务。 →[嵌入式服务](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩盒子里还有**—插件框架+市场、 Omni/Agent/GitHub技能框架、 Obsidian库集成（22 个MCP工具）、OpenAI 兼容的批处理和文件APIs、语义响应缓存、排行榜游戏化、 ACP代理发现（15 个内置代理）、计划日志导出到BigQuery、 `auto/chaos`并行多模型扇出、 Telegram机器人桥、应用内版本管理器和 LMArena-ELO 免费提供者排名。 →[文档](docs/README.md)
@@ -678,11 +678,11 @@ Shell 历史记录中。→ [CLI 集成](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 387 AI提供者— 156 目录标记免费
+## 🌐 388 AI提供者— 156 目录标记免费
 
 </div>
 
-> **387 家注册提供者**跨规范聊天、媒体、搜索、本地、云代理和系统集合，包括**156 carrying `hasFree: true` discovery metadata** 。聊天模型注册表涵盖**245 个提供者/3,172 个不同的提供者模型对/1,535 个原始模型IDs** ;单独的免费预算目录有**每个模型 466 行**,**34 个循环池**和**52 recurring/keyless free-forever providers** 。这些是设计上不同的分母；定义和池重复数据删除计算位于[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费套餐](docs/reference/FREE_TIERS.md)中。
+> **388 家注册提供者**跨规范聊天、媒体、搜索、本地、云代理和系统集合，包括**156 carrying `hasFree: true` discovery metadata** 。聊天模型注册表涵盖**245 个提供者/3,172 个不同的提供者模型对/1,535 个原始模型IDs** ;单独的免费预算目录有**每个模型 466 行**,**34 个循环池**和**52 recurring/keyless free-forever providers** 。这些是设计上不同的分母；定义和池重复数据删除计算位于[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费套餐](docs/reference/FREE_TIERS.md)中。
 
 <div align="center">
 

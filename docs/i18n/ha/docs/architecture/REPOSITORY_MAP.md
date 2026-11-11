@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | API na sassan dashboard: adapters a kan `packages/ui-kit` — duba `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: sunayen gumaka da shafukan suke amfani da su → sassan Lucide (`<Icon>`)                   |
-| `constants/providers.ts`         | **Masu samarwa 387** tare da tabbatarwar Zod (tushen gaskiya)                                         |
+| `constants/providers.ts`         | **Masu samarwa 388** tare da tabbatarwar Zod (tushen gaskiya)                                         |
 | `constants/cliTools.ts`          | Rijistar kayan aikin CLI na waje                                                                      |
 | `constants/routingStrategies.ts` | **Dabarun routing 20** tare da fifiko                                                                 |
 | `constants/publicApiRoutes.ts`   | Routes da ke buƙatar tantancewar Bearer (maimakon management)                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Haɗin CLI na waje + CLI na ciki na OmniRoute                                                                  |
 | `I18N.md`                   | Gine-ginen i18n, ƙara harshe, wuraren harshe 67                                                               |
 | `UNINSTALL.md`              | Matakan cirewa cikin tsafta                                                                                   |
-| `PROVIDER_REFERENCE.md`     | Katalog na masu samarwa 387 wanda aka **samara ta atomatik** (sake samarwa: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalog na masu samarwa 388 wanda aka **samara ta atomatik** (sake samarwa: `npm run gen:provider-reference`) |
 
 ### Zurfafan nazarin ƙananan tsare-tsare
 

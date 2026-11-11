@@ -4,9 +4,9 @@
 
 ---
 
-> **נוצר אוטומטית** מ- `src/shared/constants/providers.ts` — אין לערוך ביד. התחדש עם: `npm run gen:provider-reference`**נוצר לאחרונה:** 2026-11-10
+> **נוצר אוטומטית** מ- `src/shared/constants/providers.ts` — אין לערוך ביד. התחדש עם: `npm run gen:provider-reference`**נוצר לאחרונה:** 2026-11-11
 
-סה"כ ספקים:**387** . ראה פירוט קטגוריות למטה.
+סה"כ ספקים:**388** . ראה פירוט קטגוריות למטה.
 
 ## קטגוריות
 
@@ -45,13 +45,14 @@
 | `veoaifree-web`         | `veo-free` | Veo AI Free               | ללא אימות, וידאו | [link](https://veoaifree.com)                           | לא נדרש אימות. מוגבל ל-6 בקשות לשעה לכל כתובת IP.                                                                                                                                                      | —          |
 | `zcode`                 | `zc`       | ZCode (GLM Coding Plan)   | ללא אימות        | [link](https://zcode.z.ai)                              | OmniRoute לא שומר מפתח API. שרת-היישום המקומי של ZCode משתמש בהתחברות הקיימת של builtin:zai-coding-plan.                                                                                               | —          |
 
-## ספקי OAuth (30)
+## ספקי OAuth (31)
 
 | מזהה             | כינוי         | שם                        | תגיות | אתר אינטרנט                                                                | הערות                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ---------------- | ------------- | ------------------------- | ----- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `agy`            | `agy`         | Antigravity CLI           | OAuth | [קישור](https://antigravity.google)                                        | ייבוא פרטי ההתחברות של Antigravity CLI ‏(`agy`) באמצעות הדבקה או העלאה של קובץ האסימון שלו, זיהוי אוטומטי של התחברות מקומית ל-CLI, או התחברות באמצעות Google. משתמש באותו קצה עורפי של Antigravity (כולל מודלי Claude).                                                                                                                                                                                                                                     |
 | `amazon-q`       | `aq`          | Amazon Q                  | OAuth | [קישור](https://aws.amazon.com/q/developer/)                               | משתמש באותו AWS Builder ID או בתהליך של ייבוא אסימון רענון כמו Kiro, אך שומר את חיבורי Amazon Q בנפרד.                                                                                                                                                                                                                                                                                                                                                      |
 | `antigravity`    | —             | Antigravity               | OAuth | —                                                                          | —                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `chatgpt`        | `chatgpt`     | ChatGPT                   | OAuth | —                                                                          | יש להיכנס באמצעות ChatGPT כדי לאשר בקשות מתאימות דרך תוכנית ChatGPT שלך. נפרד מ־Codex ומ־ChatGPT Web. חלות מגבלות גרסת התצוגה המקדימה.                                                                                                                                                                                                                                                                                                                      |
 | `claude`         | `cc`          | Claude Code               | OAuth | —                                                                          | —                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `cline`          | `cl`          | Cline                     | OAuth | —                                                                          | התחברות באמצעות חשבון Cline שלך (OAuth), או הדבקת מפתח API ישיר מתוך app.cline.bot ← Settings ← API Keys. קיימת תמיכה במספר מפתחות API, והם מתחלפים אוטומטית — יש להוסיף כל אחד כחיבור נפרד.                                                                                                                                                                                                                                                                |
 | `clinepass`      | `cp`          | ClinePass                 | OAuth | [קישור](https://cline.bot/cline-pass)                                      | ClinePass הוא מינוי של Cline במחיר $9.99 לחודש, הכולל 10 מודלים פתוחים לתכנות. ניתן להתחבר באמצעות חשבון Cline שלך (אותם פרטי התחברות כמו ב-Cline CLI/IDE), או להדביק מפתח API ישיר של ClinePass ‏(app.cline.bot ← Settings ← API Keys). מינוי ClinePass פותח גישה למודלים cline-pass/*. נעשה שימוש חוזר בתהליך OAuth של Cline WorkOS.                                                                                                                      |
@@ -471,7 +472,7 @@
 
 - קטלוג: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - מאגר רישום (פרטים לכל מודל): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- רכיבי ביצוע: [`open-sse/executors/`](../../open-sse/executors/) (172 מימושים)
+- רכיבי ביצוע: [`open-sse/executors/`](../../open-sse/executors/) (174 מימושים)
 - מתרגמים: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ראה גם
