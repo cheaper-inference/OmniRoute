@@ -886,7 +886,7 @@ export default function ModelSelectModal({
             className="rounded-lg border border-border bg-bg-subtle px-2.5 py-2 space-y-2"
             data-testid="model-select-provider-test-panel"
           >
-            <p className="text-[11px] text-text-muted leading-snug">
+            <p className="text-xs text-text-muted leading-snug">
               {labelOrFallback(
                 "providerTestHint",
                 "Tip: check a provider → Test → Add working (or Remove working to undo)."
