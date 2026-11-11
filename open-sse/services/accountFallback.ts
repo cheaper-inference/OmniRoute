@@ -307,6 +307,23 @@ export const ACCOUNT_SUSPENDED_BILLING_PATTERNS = [
   /\b(?:spending limit|billing|invoice|payment)\b[\s\S]{0,120}?\bsuspended\b/i,
 ];
 
+// A capability gap (HTTP 501, or gRPC Unimplemented behind a 5xx) says this target cannot serve
+// this kind of request, such as a rerank call to a server with no reranker. Skip it, no penalty.
+const CAPABILITY_GAP_RE = /\bcode\s{0,3}=\s{0,3}Unimplemented\b/i;
+// Request-size errors behind a 5xx: the same input fails on every account of this model.
+const REQUEST_SIZE_ERROR_RE =
+  /exceeds the available context size|received message larger than max|grpc message limit exceeded/i;
+// Several patterns below use an unbounded `.*` between two literals, which is quadratic on long
+// text. Keep the head and the tail of long text. JSON-looking text gets a larger cap, above any
+// real provider error body, so its structure (Google QuotaFailure details, retry hints) parses.
+const ERROR_TEXT_CAP = 2000;
+const ERROR_JSON_CAP = 16_000;
+function capErrorText(text: string): string {
+  const cap = /^\s*[{[]/.test(text) ? ERROR_JSON_CAP : ERROR_TEXT_CAP;
+  if (text.length <= cap) return text;
+  return `${text.slice(0, cap / 2)}\n${text.slice(-cap / 2)}`;
+}
+
 // Context overflow patterns — the prompt exceeds the model's maximum context length.
 // Different providers phrase this differently. Used to decide whether a 400 error
 // should trigger combo fallback (a different model may have a larger context window).
@@ -1113,7 +1130,7 @@ export function isModelLocked(
   connectionId: string,
   model: string | null | undefined
 ): boolean {
-  if (!model) return false;
+  if (!model || modelLockouts.size === 0) return false;
   return exactModelLock.isAnyKeyLocked(
     modelLockouts,
     cleanupModelLockKey,
@@ -1129,7 +1146,7 @@ export function getModelLockoutInfo(
   connectionId: string,
   model: string | null | undefined
 ) {
-  if (!model) return null;
+  if (!model || modelLockouts.size === 0) return null;
   const entry = exactModelLock.findLatestLockEntry(
     modelLockouts,
     cleanupModelLockKey,
@@ -1853,7 +1870,25 @@ export function checkFallbackError(
   if (svc) return svc;
   const rg = rot.gateFor(status, rotation?.account);
   if (rg) return rg;
-  const errorStr = (errorText || "").toString();
+  const errorStr = capErrorText((errorText || "").toString());
+  // 501 / Unimplemented: skip to the next target, no cooldown, no breaker, no failure count.
+  if (status === 501 || (status >= HTTP_STATUS.SERVER_ERROR && CAPABILITY_GAP_RE.test(errorStr))) {
+    return {
+      shouldFallback: true,
+      cooldownMs: 0,
+      reason: RateLimitReason.UNKNOWN,
+      skipProviderBreaker: true,
+    };
+  }
+  // A request-size error behind a 5xx is a request fact, not an account fact: no retry.
+  if (status >= HTTP_STATUS.SERVER_ERROR && REQUEST_SIZE_ERROR_RE.test(errorStr)) {
+    return {
+      shouldFallback: false,
+      cooldownMs: 0,
+      reason: RateLimitReason.UNKNOWN,
+      skipProviderBreaker: true,
+    };
+  }
   const profile = profileOverride ?? (provider ? getProviderProfile(provider) : null);
   const maxBackoffSteps = profile?.maxBackoffSteps ?? BACKOFF_CONFIG.maxLevel;
   const retryableStatuses = new Set([

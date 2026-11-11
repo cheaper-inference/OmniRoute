@@ -1,0 +1,1 @@
+- **fix(combo):** the in-memory combo decision trace of one request now stops at 512 decisions and 512 Auto evaluation transitions and marks itself `truncated`, so a long retry loop over a large pool cannot grow a single trace without limit. ([#19688](https://github.com/cheaper-inference/OmniRoute/pull/19688))
