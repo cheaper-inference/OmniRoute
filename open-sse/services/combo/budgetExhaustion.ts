@@ -34,13 +34,22 @@ export async function readBudgetFailure(response: Response): Promise<BudgetError
   return { status: response.status, error };
 }
 
+// Claude Code compacts only on this wording and reads both counts from it. The final token-budget
+// gate writes it on the Claude wire; keep it when it is the last rejection (it may sit inside a
+// raw JSON error body).
+const CLAUDE_PROMPT_TOO_LONG = /prompt is too long: (\d+) tokens > (\d+) maximum/i;
+
 export function buildContextBudgetResponse(
   lastError: string | null | undefined,
   errors: ReadonlyArray<BudgetErrorEntry>,
   diagnostics: ComboDiagnostics
 ): Response {
   if (isContextOverflowDominant(lastError, errors)) {
-    return errorResponseWithComboDiagnostics(400, CONTEXT_OVERFLOW_BUDGET_MESSAGE, diagnostics, {
+    const claude = CLAUDE_PROMPT_TOO_LONG.exec(String(lastError || ""));
+    const message = claude
+      ? `prompt is too long: ${claude[1]} tokens > ${claude[2]} maximum`
+      : CONTEXT_OVERFLOW_BUDGET_MESSAGE;
+    return errorResponseWithComboDiagnostics(400, message, diagnostics, {
       code: "context_length_exceeded",
       type: "invalid_request_error",
     });

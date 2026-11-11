@@ -1,0 +1,1 @@
+- **feat(media):** the size cap for stored media can be set. Use the env `MEDIA_STORE_MAX_MB` (MiB), or the new field "Media store size cap" in Settings > Storage. The env wins when it is set. The default stays 2 GiB. ([#19470](https://github.com/cheaper-inference/OmniRoute/pull/19470))

@@ -6,7 +6,7 @@ import {
   outputContractOf,
 } from "@/lib/semanticCache";
 import { calculateCost } from "@/lib/usage/costCalculator";
-import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
+import { isSemanticCacheDbEnabled } from "@/lib/db/databaseSettings";
 import { finalizePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 import { synthesizeOpenAiSseFromJson } from "../../utils/jsonToSse.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
@@ -23,7 +23,7 @@ export function isSemanticCacheEnabled(
   return (
     apiKeyInfo?.cacheDefaultMode !== "bypass" &&
     settings.semanticCacheEnabled !== false &&
-    getUserDatabaseSettings().cache.semanticCacheEnabled !== false
+    isSemanticCacheDbEnabled()
   );
 }
 
