@@ -20,17 +20,8 @@
 import { buildErrorBody } from "./error.ts";
 import type { StreamFailureSnapshot } from "./streamErrorFormat.ts";
 import { buildStreamFailureSnapshot } from "./streamFailureSnapshot.ts";
-import { buildStreamSummaryFromEvents } from "./streamPayloadCollector.ts";
-
-type StructuredSSEEventLike = {
-  index: number;
-  timestamp?: string;
-  event?: string;
-  data: unknown;
-};
 
 type StructuredSSECollectorLike = {
-  getEvents: () => StructuredSSEEventLike[];
   getEventCount: () => number;
   getSummary: () => unknown;
   build: (summary?: unknown, opts?: { includeEvents?: boolean }) => unknown;
@@ -117,11 +108,7 @@ export function rejectEmptyChoicesStream(ctx: EmptyChoicesRejectContext): boolea
         error: error.message,
         errorCode: "empty_content",
         providerPayload: ctx.providerPayloadCollector.build(
-          buildStreamSummaryFromEvents(
-            ctx.providerPayloadCollector.getEvents(),
-            ctx.targetFormat,
-            ctx.model
-          ),
+          ctx.providerPayloadCollector.getSummary(),
           { includeEvents: false }
         ),
         clientPayload: ctx.clientPayloadCollector.build(errorBody, { includeEvents: false }),

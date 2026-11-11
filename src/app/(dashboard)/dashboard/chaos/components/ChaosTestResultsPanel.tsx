@@ -45,7 +45,7 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
 
   return (
     <div className="p-3 rounded-lg border border-border bg-surface space-y-3">
-      <h3 className="text-sm font-bold text-text-main">{resultsTitle}</h3>
+      <h3 className="text-sm font-semibold text-text-main">{resultsTitle}</h3>
       <div className="text-xs text-text-muted">{startedLabel}</div>
       {result.models.map((model, idx) => (
         <div
