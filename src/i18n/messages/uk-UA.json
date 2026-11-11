@@ -2872,7 +2872,8 @@
       "webFetch": "Отримання з вебу",
       "video": "Відео",
       "music": "Музика",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Рішення"
     },
     "noProviders": "Поки що немає налаштованих провайдерів цього типу.",
     "addConnection": "Додати з'єднання",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Користувацький конектор ChatGPT",
     "doctorChecking": "Перевірка статусу…",
     "doctorCheck": "Перевірити статус doctor",
-    "fallbackRetryBackendTitle": "Резервний бекенд повторної спроби"
+    "fallbackRetryBackendTitle": "Резервний бекенд повторної спроби",
+    "categoryDecisions": "Рішення",
+    "decisionProvidersHeading": "Моделі ухвалення рішень",
+    "decisionProvidersDesc": "Нативні типізовані рішення через наявні облікові записи провайдерів. Налаштуйте підтримувану кінцеву точку рішень і перевірте доступність моделі."
   },
   "settings": {
     "proxyTraffic": {

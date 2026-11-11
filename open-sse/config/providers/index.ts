@@ -299,7 +299,10 @@ import { megabrainProvider } from "./registry/megabrain/index.ts";
 import { paraloncloudProvider } from "./registry/paraloncloud/index.ts";
 import { empiriolabsProvider } from "./registry/empiriolabs/index.ts";
 
+import { supersoniclabsProvider } from "./registry/supersoniclabs/index.ts";
+
 export const REGISTRY: Record<string, RegistryEntry> = {
+  supersoniclabs: supersoniclabsProvider,
   aimlapi: aimlapiProvider,
   "mlx-gemma": mlxGemmaProvider,
   "mlx-qwen": mlxQwenProvider,

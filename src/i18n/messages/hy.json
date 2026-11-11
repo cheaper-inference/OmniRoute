@@ -2872,7 +2872,8 @@
       "webFetch": "Վեբ առբերում",
       "video": "Տեսանյութ",
       "music": "Երաժշտություն",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Որոշումներ"
     },
     "noProviders": "Այս տեսակի համար դեռևս ոչ մի մատակարար կազմաձևված չէ։",
     "addConnection": "Ավելացնել միացում",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT չորս-տվյալ ապացուցիչ",
     "doctorChecking": "Գնահատում է դրությունը…",
     "doctorCheck": "Ստուգել դոկտորի դրությունը",
-    "fallbackRetryBackendTitle": "Հետապատասխանվող վերափորձարարական backend"
+    "fallbackRetryBackendTitle": "Հետապատասխանվող վերափորձարարական backend",
+    "categoryDecisions": "Որոշումներ",
+    "decisionProvidersHeading": "Որոշումների մոդելներ",
+    "decisionProvidersDesc": "Տիպավորված որոշումներ մատակարարների առկա հաշիվների միջոցով։ Կարգավորեք աջակցվող որոշումների վերջնակետը և ստուգեք մոդելի հասանելիությունը։"
   },
   "settings": {
     "proxyTraffic": {

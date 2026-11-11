@@ -2872,7 +2872,8 @@
       "webFetch": "ୱେବ୍ ଆହରଣ",
       "video": "ଭିଡିଓ",
       "music": "ସଙ୍ଗୀତ",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "ନିଷ୍ପତ୍ତିଗୁଡ଼ିକ"
     },
     "noProviders": "ଏହି ପ୍ରକାର ପାଇଁ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ପ୍ରଦାନକାରୀ ବିନ୍ୟାସ କରାଯାଇନାହିଁ।",
     "addConnection": "ସଂଯୋଗ ଯୋଡ଼ନ୍ତୁ",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ଚାଟ୍ ଜି ପି ଟି କଷ୍ଟମ୍ କୋନେକ୍ଟର",
     "doctorChecking": "ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରାଯାଉଛି…",
     "doctorCheck": "ଡକ୍ଟର ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
-    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend"
+    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend",
+    "categoryDecisions": "ନିଷ୍ପତ୍ତିଗୁଡ଼ିକ",
+    "decisionProvidersHeading": "ନିଷ୍ପତ୍ତି ମଡେଲଗୁଡ଼ିକ",
+    "decisionProvidersDesc": "ବିଦ୍ୟମାନ ପ୍ରଦାତା ଖାତା ମାଧ୍ୟମରେ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରକାରର ନେଟିଭ୍ ନିଷ୍ପତ୍ତି। ସମର୍ଥିତ ନିଷ୍ପତ୍ତି ଏଣ୍ଡପଏଣ୍ଟ ବିନ୍ୟାସ କରନ୍ତୁ ଏବଂ ମଡେଲର ଉପଲବ୍ଧତା ଯାଞ୍ଚ କରନ୍ତୁ।"
   },
   "settings": {
     "proxyTraffic": {

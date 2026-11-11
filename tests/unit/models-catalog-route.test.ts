@@ -1657,3 +1657,23 @@ test("v1 models catalog hides disabled noAuth provider models", async () => {
     "DuckDuckGo no-auth models must be hidden while no-auth providers are disabled"
   );
 });
+
+test("management catalog exposes raw endpoint metadata even with combos-only discovery", async () => {
+  await settingsDb.updateSettings({ requireLogin: false, exposeCombosOnly: true });
+  await seedConnection("supersoniclabs");
+  const { GET } = await import("../../src/app/api/models/catalog/route.ts");
+  const response = await GET(new Request("http://localhost/api/models/catalog"));
+  const body = (await response.json()) as {
+    data: Record<string, unknown>[];
+    catalog: Record<string, unknown>;
+  };
+  assert.equal(response.status, 200);
+  const julia = body.data.find((row) => row.id === "supersoniclabs/julia-1");
+  assert.ok(julia);
+  assert.deepEqual(julia.supported_endpoints, ["systemone"]);
+  assert.equal(julia.context_length, null);
+  assert.equal((julia.capabilities as Record<string, unknown>).tool_calling, false);
+  assert.equal((julia.capabilities as Record<string, unknown>).reasoning, false);
+  assert.equal(julia.pricing, null);
+  assert.ok(body.catalog.supersoniclabs);
+});

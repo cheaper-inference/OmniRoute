@@ -2872,7 +2872,8 @@
       "webFetch": "واکشی وب",
       "video": "ویدیو",
       "music": "موسیقی",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "تصمیم‌ها"
     },
     "noProviders": "هنوز هیچ ارائه‌دهنده‌ای برای این نوع پیکربندی نشده است.",
     "addConnection": "افزودن اتصال",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "کانکتور سفارشی ChatGPT",
     "doctorChecking": "در حال بررسی وضعیت…",
     "doctorCheck": "بررسی وضعیت داکتور",
-    "fallbackRetryBackendTitle": "بک‌اند تلاش مجدد جایگزین"
+    "fallbackRetryBackendTitle": "بک‌اند تلاش مجدد جایگزین",
+    "categoryDecisions": "تصمیم‌ها",
+    "decisionProvidersHeading": "مدل‌های تصمیم‌گیری",
+    "decisionProvidersDesc": "تصمیم‌های بومی دارای نوع مشخص از طریق حساب‌های فعلی ارائه‌دهندگان. نقطه پایانی پشتیبانی‌شده را تنظیم و دسترسی به مدل را بررسی کنید."
   },
   "settings": {
     "proxyTraffic": {

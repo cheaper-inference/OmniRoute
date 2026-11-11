@@ -2872,7 +2872,8 @@
       "webFetch": "Veebisisu toomine",
       "video": "Video",
       "music": "Muusika",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Otsused"
     },
     "noProviders": "Seda tüüpi teenusepakkujaid pole veel seadistatud.",
     "addConnection": "Lisa ühendus",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT kohandatud ühendus",
     "doctorChecking": "Kontrollitakse olekut…",
     "doctorCheck": "Kontrolli arsti olekut",
-    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi"
+    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi",
+    "categoryDecisions": "Otsused",
+    "decisionProvidersHeading": "Otsustusmudelid",
+    "decisionProvidersDesc": "Tüübistatud otsused olemasolevate teenusepakkuja kontode kaudu. Seadistage toetatud otsuste lõpp-punkt ja kontrollige mudeli saadavust."
   },
   "settings": {
     "proxyTraffic": {

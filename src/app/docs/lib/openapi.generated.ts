@@ -25,7 +25,7 @@ export interface OpenApiEndpoint {
   hasRequestBody: boolean;
 }
 
-export const OPENAPI_VERSION = "3.8.53";
+export const OPENAPI_VERSION = "3.8.54";
 export const OPENAPI_TITLE = "OmniRoute API";
 
 export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
@@ -1508,6 +1508,38 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     tags: ["Models"],
     requiresAuth: true,
     hasRequestBody: true,
+  },
+  {
+    path: "/v1/decisions",
+    method: "POST",
+    summary: "Invoke a native OpenAI Decisions model",
+    description:
+      "Requires a client API key. Input and native answers are preserved. Cross-format translation is unsupported.",
+    tag: "Decisions",
+    tags: ["Decisions"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/v1/systemone",
+    method: "POST",
+    summary: "Invoke a native System One model",
+    description:
+      "Native noul, choice and score questions. No conversion to chat or OpenAI Decisions.",
+    tag: "Decisions",
+    tags: ["Decisions"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/v1/systemone/models",
+    method: "GET",
+    summary: "List accessible native decision models",
+    description: "",
+    tag: "Decisions",
+    tags: ["Decisions"],
+    requiresAuth: true,
+    hasRequestBody: false,
   },
 ];
 

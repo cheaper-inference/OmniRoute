@@ -97,6 +97,7 @@ export interface ApiKeyUsageLimitDeps {
 }
 
 interface UsageCostRow {
+  decisionEndpoint?: number;
   storedCost: number | null;
   unmeteredRequests: number | null;
   provider: string | null;
@@ -533,6 +534,7 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
       SELECT
         LOWER(provider) as provider,
         LOWER(model) as model,
+        CASE WHEN endpoint IN ('/v1/decisions', '/v1/systemone') THEN 1 ELSE 0 END as decisionEndpoint,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COALESCE(SUM(provider_cost_usd), 0) as storedCost,
         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN 1 ELSE 0 END), 0) as unmeteredRequests,
@@ -546,7 +548,7 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
         AND (success = 1 OR provider_cost_usd IS NOT NULL)
-      GROUP BY LOWER(provider), LOWER(model), serviceTier
+      GROUP BY LOWER(provider), LOWER(model), serviceTier, decisionEndpoint
     `
     )
     .all({ apiKeyId, sinceIso }) as UsageCostRow[];
@@ -564,6 +566,12 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     // unpriced: only rows without a stored cost are priced from tokens.
     total += toNumber(row.storedCost);
     if (toNumber(row.unmeteredRequests) === 0) continue;
+    // Decision endpoints can have different prices from chat for the same model.
+    // Without a reported cost retain unknown spend and the existing fail-closed policy.
+    if (row.decisionEndpoint) {
+      unpriced.add(`${provider}/${model}`);
+      continue;
+    }
 
     const { costUsd, priced, failed } = await calculateCostDetailed(
       provider,

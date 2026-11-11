@@ -100,8 +100,8 @@ async function fetchFromAPI(): Promise<CatalogEntry[]> {
   }
 
   const json = (await res.json()) as { data?: CatalogEntry[] };
-  const models = Array.isArray(json.data) ? json.data : [];
-  return models;
+  if (!json || !Array.isArray(json.data)) throw new Error("Invalid OpenRouter model catalog");
+  return json.data;
 }
 
 /**

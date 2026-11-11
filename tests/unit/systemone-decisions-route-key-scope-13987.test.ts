@@ -179,7 +179,13 @@ test("#13987 route: malformed JSON, schema failures and unknown models answer 40
     postRequest("/v1/systemone", { ...VALID_BODY, model: "openai/gpt-6" }, key.key)
   );
   assert.equal(chatModel.status, 400);
-  assert.match(await chatModel.text(), /Unknown decisions model/);
+  assert.match(await chatModel.text(), /invalid_native_request/);
+
+  const bareChatModel = await systemOneRoute.POST(
+    postRequest("/v1/systemone", { ...VALID_BODY, model: "gpt-6" }, key.key)
+  );
+  assert.equal(bareChatModel.status, 400);
+  assert.match(await bareChatModel.text(), /Unknown decisions model/);
 });
 
 test("#13987 route: OPTIONS advertises GET/POST and GET lists a models envelope", async () => {

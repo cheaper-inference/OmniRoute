@@ -2872,7 +2872,8 @@
       "webFetch": "Verkkonouto",
       "video": "Video",
       "music": "Musiikki",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Päätökset"
     },
     "noProviders": "Tälle tyypille ei ole vielä määritetty tarjoajia.",
     "addConnection": "Lisää yhteys",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT-mukautettu liittimen",
     "doctorChecking": "Tarkistetaan tilaa…",
     "doctorCheck": "Tarkista doctor-tila",
-    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi"
+    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi",
+    "categoryDecisions": "Päätökset",
+    "decisionProvidersHeading": "Päätösmallit",
+    "decisionProvidersDesc": "Natiivit tyypitetyt päätökset nykyisten palveluntarjoajatilien kautta. Määritä tuettu päätösrajapinta ja tarkista mallin saatavuus."
   },
   "settings": {
     "proxyTraffic": {

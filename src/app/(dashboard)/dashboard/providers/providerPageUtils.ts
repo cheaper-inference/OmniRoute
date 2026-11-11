@@ -96,6 +96,7 @@ const PROVIDER_CATEGORY_URL_VALUES = new Set([
   "compatible",
   "webcookie",
   "search",
+  "decisions",
   "webfetch",
   "audio",
   "local",
@@ -227,6 +228,7 @@ export function providerEntryIsWebFetchOnly<TProvider>(entry: ProviderEntry<TPro
 
 export function isPrimaryLlmProviderEntry<TProvider>(entry: ProviderEntry<TProvider>): boolean {
   return (
+    entry.providerId !== "supersoniclabs" &&
     !IMAGE_ONLY_PROVIDER_IDS.has(entry.providerId) &&
     !AGGREGATOR_PROVIDER_IDS.has(entry.providerId) &&
     !ENTERPRISE_CLOUD_PROVIDER_IDS.has(entry.providerId) &&

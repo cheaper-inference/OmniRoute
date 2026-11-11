@@ -2872,7 +2872,8 @@
       "webFetch": "Web Getirme",
       "video": "Video",
       "music": "Müzik",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Kararlar"
     },
     "noProviders": "Bu tür için henüz bir sağlayıcı yapılandırılmadı.",
     "addConnection": "Bağlantı Ekle",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT özel bağlantı noktası",
     "doctorChecking": "Durum kontrol ediliyor…",
     "doctorCheck": "Doktor durumunu kontrol et",
-    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu"
+    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu",
+    "categoryDecisions": "Kararlar",
+    "decisionProvidersHeading": "Karar modelleri",
+    "decisionProvidersDesc": "Mevcut sağlayıcı hesapları üzerinden yerel, tür tanımlı kararlar. Desteklenen karar uç noktasını yapılandırın ve modelin kullanılabilirliğini doğrulayın."
   },
   "settings": {
     "proxyTraffic": {

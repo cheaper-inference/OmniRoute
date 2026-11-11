@@ -2872,7 +2872,8 @@
       "webFetch": "Lấy dữ liệu web",
       "video": "Video",
       "music": "Âm nhạc",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Quyết định"
     },
     "noProviders": "Chưa có nhà cung cấp nào được cấu hình cho loại này.",
     "addConnection": "Thêm kết nối",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Bộ kết nối tùy chỉnh ChatGPT",
     "doctorChecking": "Đang kiểm tra trạng thái…",
     "doctorCheck": "Kiểm tra trạng thái doctor",
-    "fallbackRetryBackendTitle": "Hạ tầng lưu trữ thử lại dự phòng"
+    "fallbackRetryBackendTitle": "Hạ tầng lưu trữ thử lại dự phòng",
+    "categoryDecisions": "Quyết định",
+    "decisionProvidersHeading": "Mô hình quyết định",
+    "decisionProvidersDesc": "Quyết định gốc có kiểu xác định qua tài khoản nhà cung cấp hiện có. Cấu hình điểm cuối quyết định được hỗ trợ và xác minh khả năng sử dụng mô hình."
   },
   "settings": {
     "proxyTraffic": {

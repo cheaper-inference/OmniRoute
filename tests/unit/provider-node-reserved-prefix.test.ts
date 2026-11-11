@@ -225,11 +225,13 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Gisoo (#18112) adds id and alias "gisoo" (+1 distinct prefix: 435 -> 436).
   // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
   // more (436 -> 438).
-  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
-  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
-  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
-  // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
-  assert.equal(RESERVED_PREFIX_COUNT, 444);
+  // Supersonic Labs (#18838) reserves its native provider id (438 -> 439).
+  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 439 -> 440).
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 440 -> 442).
+  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 442 -> 444).
+  assert.equal(RESERVED_PREFIX_COUNT, 445);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("supersoniclabs"), true);
+  // Sign in with ChatGPT (#15201) reserves its native provider id (444 -> 445).
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);

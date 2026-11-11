@@ -2557,6 +2557,18 @@ export async function GET(
           connection.providerSpecificData as Record<string, unknown> | null | undefined
         );
       }
+      if (provider === "ollama-cloud") {
+        pageModels = await enrichOllamaLocalModels(
+          pageModels,
+          "https://ollama.com",
+          proxy,
+          typeof connection.apiKey === "string"
+            ? connection.apiKey
+            : typeof connection.accessToken === "string"
+              ? connection.accessToken
+              : undefined
+        );
+      }
       allModels = allModels.concat(pageModels);
 
       if (config.nextPageUrl) {

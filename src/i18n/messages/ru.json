@@ -2872,7 +2872,8 @@
       "webFetch": "Веб-извлечение",
       "video": "Видео",
       "music": "Музыка",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Решения"
     },
     "noProviders": "Для этого типа еще не настроены провайдеры.",
     "addConnection": "Добавить соединение",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Пользовательский коннектор ChatGPT",
     "doctorChecking": "Проверка состояния…",
     "doctorCheck": "Проверить состояние doctor",
-    "fallbackRetryBackendTitle": "Запасной сервер повторов"
+    "fallbackRetryBackendTitle": "Запасной сервер повторов",
+    "categoryDecisions": "Решения",
+    "decisionProvidersHeading": "Модели принятия решений",
+    "decisionProvidersDesc": "Нативные типизированные решения через существующие учётные записи провайдеров. Настройте поддерживаемую конечную точку решений и проверьте доступность модели."
   },
   "settings": {
     "proxyTraffic": {

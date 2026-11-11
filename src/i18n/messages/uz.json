@@ -2872,7 +2872,8 @@
       "webFetch": "Vebdan olish",
       "video": "Video",
       "music": "Musiqa",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Qarorlar"
     },
     "noProviders": "Bu tur uchun hali hech qanday provayder sozlanmagan.",
     "addConnection": "Ulanish qoʻshish",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT o‘zlashtirilgan konnektor",
     "doctorChecking": "Holat tekshirilmoqda…",
     "doctorCheck": "Doctor holatini tekshirish",
-    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
+    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend",
+    "categoryDecisions": "Qarorlar",
+    "decisionProvidersHeading": "Qaror modellari",
+    "decisionProvidersDesc": "Mavjud provayder hisoblari orqali aniq turdagi mahalliy qarorlar. Qo‘llab-quvvatlanadigan qaror so‘nggi nuqtasini sozlang va model mavjudligini tekshiring."
   },
   "settings": {
     "proxyTraffic": {

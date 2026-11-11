@@ -2872,7 +2872,8 @@
       "webFetch": "வலை பெறுதல்",
       "video": "காணொளி",
       "music": "இசை",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "முடிவுகள்"
     },
     "noProviders": "இந்த வகைக்கு இன்னும் வழங்குநர்கள் எதுவும் கட்டமைக்கப்படவில்லை.",
     "addConnection": "இணைப்பைச் சேர்",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT தனிப்பயன் இணைப்பி (custom connector)",
     "doctorChecking": "நிலையை பரிசீலிக்கிறது… (Checking status…)",
     "doctorCheck": "மருத்துவர் நிலையைப் பரிசீலிக்கவும் (Check doctor status)",
-    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி"
+    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி",
+    "categoryDecisions": "முடிவுகள்",
+    "decisionProvidersHeading": "முடிவெடுக்கும் மாதிரிகள்",
+    "decisionProvidersDesc": "தற்போதுள்ள வழங்குநர் கணக்குகள் மூலம் வகை குறிப்பிடப்பட்ட இயல்பான முடிவுகள். ஆதரிக்கப்படும் முடிவு முனைப்புள்ளியை உள்ளமைத்து, மாதிரி கிடைப்பதைச் சரிபார்க்கவும்."
   },
   "settings": {
     "proxyTraffic": {

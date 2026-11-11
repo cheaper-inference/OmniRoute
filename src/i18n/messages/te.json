@@ -2872,7 +2872,8 @@
       "webFetch": "వెబ్ ఫెచ్",
       "video": "వీడియో",
       "music": "సంగీతం",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "నిర్ణయాలు"
     },
     "noProviders": "ఈ రకానికి ఇంకా ప్రొవైడర్‌లు కాన్ఫిగర్ చేయబడలేదు.",
     "addConnection": "కనెక్షన్‌ని జోడించండి",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT కస్టమ్ కనెక్టర్",
     "doctorChecking": "స్థితిని సరిచూస్తున్నాము…",
     "doctorCheck": "డాక్టర్ స్థితిని సరిచూడండి",
-    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్"
+    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్",
+    "categoryDecisions": "నిర్ణయాలు",
+    "decisionProvidersHeading": "నిర్ణయ నమూనాలు",
+    "decisionProvidersDesc": "ఇప్పటికే ఉన్న ప్రొవైడర్ ఖాతాల ద్వారా నిర్దిష్ట రకం గల స్థానిక నిర్ణయాలు. మద్దతు ఉన్న నిర్ణయ ఎండ్‌పాయింట్‌ను కాన్ఫిగర్ చేసి నమూనా లభ్యతను తనిఖీ చేయండి."
   },
   "settings": {
     "proxyTraffic": {

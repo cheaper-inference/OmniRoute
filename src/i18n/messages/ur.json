@@ -2872,7 +2872,8 @@
       "webFetch": "ویب فیچ",
       "video": "ویڈیو",
       "music": "موسیقی",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "فیصلے"
     },
     "noProviders": "اس قسم کے لیے ابھی تک کوئی فراہم کنندہ کنفیگر نہیں کیا گیا ہے۔",
     "addConnection": "کنکشن شامل کریں",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT کسٹم کنیکٹر",
     "doctorChecking": "حالت کا جائزہ لیا جا رہا ہے…",
     "doctorCheck": "ڈاکٹر کی حالت کا جائزہ لیں",
-    "fallbackRetryBackendTitle": "متبادل دوبارہ کوشش بیک اینڈ"
+    "fallbackRetryBackendTitle": "متبادل دوبارہ کوشش بیک اینڈ",
+    "categoryDecisions": "فیصلے",
+    "decisionProvidersHeading": "فیصلہ ساز ماڈل",
+    "decisionProvidersDesc": "موجودہ فراہم کنندہ اکاؤنٹس کے ذریعے متعین نوعیت کے مقامی فیصلے۔ معاون فیصلہ اینڈپوائنٹ ترتیب دیں اور ماڈل کی دستیابی کی تصدیق کریں۔"
   },
   "settings": {
     "proxyTraffic": {

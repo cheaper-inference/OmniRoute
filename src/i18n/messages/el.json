@@ -2872,7 +2872,8 @@
       "webFetch": "Ανάκτηση Ιστοσελίδας",
       "video": "Βίντεο",
       "music": "Μουσική",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Αποφάσεις"
     },
     "noProviders": "Δεν έχουν ρυθμιστεί ακόμη πάροχοι για αυτή την κατηγορία.",
     "addConnection": "Προσθήκη σύνδεσης",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Προσαρμοσμένος συνδέτης ChatGPT",
     "doctorChecking": "Έλεγχος κατάστασης…",
     "doctorCheck": "Έλεγχος κατάστασης γιατρού",
-    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης"
+    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης",
+    "categoryDecisions": "Αποφάσεις",
+    "decisionProvidersHeading": "Μοντέλα αποφάσεων",
+    "decisionProvidersDesc": "Εγγενείς αποφάσεις με καθορισμένους τύπους μέσω υπαρχόντων λογαριασμών παρόχων. Ρυθμίστε το υποστηριζόμενο τελικό σημείο αποφάσεων και ελέγξτε τη διαθεσιμότητα του μοντέλου."
   },
   "settings": {
     "proxyTraffic": {

@@ -2872,7 +2872,8 @@
       "webFetch": "Pagkuha mula sa Web",
       "video": "Bidyo",
       "music": "Musika",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Mga desisyon"
     },
     "noProviders": "Wala pang mga provider na na-configure para sa uring ito.",
     "addConnection": "Magdagdag ng Koneksyon",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Custom na connector ng ChatGPT",
     "doctorChecking": "Sinoo ang status…",
     "doctorCheck": "Suriin ang status ng doctor",
-    "fallbackRetryBackendTitle": "Fallback na backend ng pag-uulit"
+    "fallbackRetryBackendTitle": "Fallback na backend ng pag-uulit",
+    "categoryDecisions": "Mga desisyon",
+    "decisionProvidersHeading": "Mga modelo ng desisyon",
+    "decisionProvidersDesc": "Mga native na desisyong may tinukoy na uri gamit ang kasalukuyang mga account ng provider. I-configure ang suportadong endpoint at tiyaking available ang modelo."
   },
   "settings": {
     "proxyTraffic": {

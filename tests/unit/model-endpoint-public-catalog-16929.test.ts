@@ -60,3 +60,14 @@ test("#16929: runnable, multi-endpoint and unknown models remain in the catalog"
     true
   );
 });
+
+test("native decision rows remain typed catalog entries for normal provider imports", () => {
+  assert.equal(
+    isUnifiedChatSourceModelSelectable("custom-systemone", {
+      id: "julia-1",
+      supportedEndpoints: ["systemone"],
+      endpointCapabilitySource: "operator",
+    }),
+    true
+  );
+});

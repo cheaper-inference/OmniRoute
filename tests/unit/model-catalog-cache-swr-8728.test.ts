@@ -81,6 +81,7 @@ test("an expired successful entry is served immediately while a refresh runs beh
   // The stale body comes back on THIS call — the caller never waits for the rebuild.
   const stale = await resolve(async () => payload("new"));
   assert.equal(await stale.text(), "old", "the expired-but-recent entry must be served as-is");
+  assert.equal(stale.headers.get("x-omniroute-catalog"), "stale");
 
   await catalogCache.__flushCatalogBackgroundRefreshForTest();
 

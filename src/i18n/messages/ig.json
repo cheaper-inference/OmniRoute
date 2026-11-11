@@ -2872,7 +2872,8 @@
       "webFetch": "Iweta Ihe na Weebụ",
       "video": "Vidio",
       "music": "Egwu",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Mkpebi"
     },
     "noProviders": "Ahazibeghị ndị na-eweta ọrụ maka ụdị a.",
     "addConnection": "Tinye Njikọ",
@@ -7426,6 +7427,9 @@
     "doctorChecking": "Ị na-lekọtaọnwe...",
     "doctorCheck": "Lege onwe dọkịta",
     "fallbackRetryBackendTitle": "Moodulu mgbochi nke mbàmbà nchịkwa",
+    "categoryDecisions": "Mkpebi",
+    "decisionProvidersHeading": "Ụdị mkpebi",
+    "decisionProvidersDesc": "Mkpebi nwere ụdị akọwapụtara site na akaụntụ ndị na-eweta ọrụ dị adị. Hazie ebe njedebe mkpebi a na-akwado ma lelee ma ụdị ahụ dị.",
     "quotaRefreshCurrent": "Melite oke ojiji dị ugbu a",
     "quotaRefreshCurrentHint": "Na-enyocha oke ojiji akaụntụ a dị ugbu a na-ejighị kredit nrụgharị.",
     "quotaRefreshing": "A na-enyocha oke ojiji…",

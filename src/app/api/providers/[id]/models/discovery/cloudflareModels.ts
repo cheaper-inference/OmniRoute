@@ -71,6 +71,7 @@ export function parseCloudflareModelsSearch(data: unknown): JsonRecord[] {
     const taskName = asRecord(model.task).name;
     const task = typeof taskName === "string" ? taskName : "";
     if (NON_CHAT_TASK.test(task) || NON_CHAT_ID.test(slug)) return [];
+    const isDecision = ["@cf/cloudflare/clef", "@cf/cloudflare/clef-flash"].includes(slug);
     const isImage = IMAGE_TASK.test(task) || IMAGE_ID.test(slug);
     return [
       {
@@ -78,6 +79,14 @@ export function parseCloudflareModelsSearch(data: unknown): JsonRecord[] {
         name: slug,
         ...(typeof model.description === "string" && model.description
           ? { description: model.description }
+          : {}),
+        ...(isDecision
+          ? {
+              supportedEndpoints: ["systemone"],
+              apiFormat: "systemone",
+              modelType: "decisions",
+              supportsVision: true,
+            }
           : {}),
         ...(isImage ? { supportedEndpoints: ["images"], modelType: "image" } : {}),
       },

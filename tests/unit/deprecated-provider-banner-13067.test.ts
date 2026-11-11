@@ -34,9 +34,10 @@ test("providers page mounts the leftover banner", () => {
 // from 2020 to 2010 lines; the freeze is re-pinned at the measured size.
 // KEA-7886 P8 (#18144): section-header dots moved to <CategoryDot category=…>, shrinking it
 // again from 2010 to 1989 lines; re-pinned at the measured size.
-test("providers page stays frozen at 1989 lines", () => {
+// Native decision-provider category adds 47 lines to the previous 1989-line page.
+test("providers page stays frozen at 2036 lines", () => {
   const lines = fs.readFileSync(pagePath, "utf8").split("\n").length;
-  assert.equal(lines, 1989);
+  assert.equal(lines, 2036);
 });
 
 test("purge surfaces notify.error when POST is not ok", () => {

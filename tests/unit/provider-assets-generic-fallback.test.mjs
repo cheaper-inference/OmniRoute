@@ -204,9 +204,10 @@ test("provider bundle retires exactly the 78 unresolved assets and keeps the gen
   // (unresolved status, non-blocking) ships in the bundle — 142 → 143.
   // gisoo (#18112): contributor-supplied logomark with a provenance record
   // (unresolved status, non-blocking) ships in the bundle — 143 → 144.
+  // Provenance-backed Supersonic Labs and original OrcaRouter assets add two.
   // Sign in with ChatGPT (#15201): the official SIWC black/white ChatGPT marks, each with a
-  // provenance record (probable status, non-blocking), ship in the bundle — 144 → 146.
-  assert.equal(distributedAssets.length, 146, "all 146 non-target assets must remain");
+  // provenance record (probable status, non-blocking), ship in the bundle — 146 → 148.
+  assert.equal(distributedAssets.length, 148, "all 148 non-target assets must remain");
   assert.ok(distributedAssets.includes("cli-generic.svg"));
 });
 

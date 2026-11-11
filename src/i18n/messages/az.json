@@ -2872,7 +2872,8 @@
       "webFetch": "Veb gətirmə",
       "video": "Video",
       "music": "Musiqi",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Qərarlar"
     },
     "noProviders": "Bu növ üçün hələ heç bir provayder konfiqurasiya edilməyib.",
     "addConnection": "Bağlantı əlavə et",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT xüsusi konnektoru",
     "doctorChecking": "Status yoxlanılır…",
     "doctorCheck": "Həkim statusunu yoxlayın",
-    "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi"
+    "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi",
+    "categoryDecisions": "Qərarlar",
+    "decisionProvidersHeading": "Qərar modelləri",
+    "decisionProvidersDesc": "Mövcud provayder hesabları ilə tipli qərarlar. Dəstəklənən qərar son nöqtəsini qurun və modelin mövcudluğunu yoxlayın."
   },
   "settings": {
     "proxyTraffic": {

@@ -2872,7 +2872,8 @@
       "webFetch": "වෙබයෙන් ලබා ගැනීම",
       "video": "වීඩියෝ",
       "music": "සංගීතය",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "තීරණ"
     },
     "noProviders": "මෙම වර්ගය සඳහා තවමත් කිසිදු සැපයුම්කරුවෙකු වින්යාස කර නැත.",
     "addConnection": "සම්බන්ධතාවක් එක් කරන්න",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT කුසලාන සම්බන්ධකය",
     "doctorChecking": "අවස්ථාව පරීක්ෂා කරමින්...",
     "doctorCheck": "දොකටර් අවස්ථාව පරීක්ෂා කරන්න",
-    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය"
+    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය",
+    "categoryDecisions": "තීරණ",
+    "decisionProvidersHeading": "තීරණ ආකෘති",
+    "decisionProvidersDesc": "පවතින සැපයුම්කරු ගිණුම් හරහා නිශ්චිත වර්ග සහිත ස්වදේශීය තීරණ. සහාය දක්වන තීරණ අන්ත ලක්ෂ්‍යය වින්‍යාස කර ආකෘතිය ලබාගත හැකි බව තහවුරු කරන්න."
   },
   "settings": {
     "proxyTraffic": {

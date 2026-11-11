@@ -2872,7 +2872,8 @@
       "webFetch": "ከድር ማምጣት",
       "video": "ቪዲዮ",
       "music": "ሙዚቃ",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "ውሳኔዎች"
     },
     "noProviders": "ለዚህ ዓይነት እስካሁን ምንም አቅራቢዎች አልተዋቀሩም።",
     "addConnection": "ግንኙነት ያክሉ",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "የChatGPT ተዛዳዊ አገናኝ",
     "doctorChecking": "ሁኔታን በማረጋገጥ ላይ…",
     "doctorCheck": "የዶክተር ሁኔታ ማረጋገጫ",
-    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ"
+    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ",
+    "categoryDecisions": "ውሳኔዎች",
+    "decisionProvidersHeading": "የውሳኔ ሞዴሎች",
+    "decisionProvidersDesc": "በነባር የአቅራቢ መለያዎች የውሳኔ ሞዴሎችን ይጠቀሙ። የሚደገፈውን የውሳኔ መጨረሻ ነጥብ ያዋቅሩ እና የሞዴሉን ተገኝነት ያረጋግጡ።"
   },
   "settings": {
     "proxyTraffic": {

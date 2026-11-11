@@ -2872,7 +2872,8 @@
       "webFetch": "Уеб извличане",
       "video": "Видео",
       "music": "Музика",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Решения"
     },
     "noProviders": "Все още няма конфигурирани доставчици за този тип.",
     "addConnection": "Добавяне на връзка",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Персонализиран конектор на ChatGPT",
     "doctorChecking": "Проверява се състоянието…",
     "doctorCheck": "Проверка на състоянието на doctor",
-    "fallbackRetryBackendTitle": "Резервен backend за повторни опити"
+    "fallbackRetryBackendTitle": "Резервен backend за повторни опити",
+    "categoryDecisions": "Решения",
+    "decisionProvidersHeading": "Модели за решения",
+    "decisionProvidersDesc": "Нативни типизирани решения чрез съществуващите акаунти при доставчици. Настройте поддържаната крайна точка и проверете наличността на модела."
   },
   "settings": {
     "proxyTraffic": {

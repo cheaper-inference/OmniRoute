@@ -2872,7 +2872,8 @@
       "webFetch": "網頁抓取",
       "video": "影片",
       "music": "音樂",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "決策"
     },
     "noProviders": "尚未為此類型設定任何提供者。",
     "addConnection": "新增連線",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT 自訂連接器",
     "doctorChecking": "正在檢查狀態…",
     "doctorCheck": "檢查診斷狀態",
-    "fallbackRetryBackendTitle": "回退重試後端"
+    "fallbackRetryBackendTitle": "回退重試後端",
+    "categoryDecisions": "決策",
+    "decisionProvidersHeading": "決策模型",
+    "decisionProvidersDesc": "透過現有提供者帳戶使用原生類型化決策。設定支援的決策端點並驗證模型可用性。"
   },
   "settings": {
     "proxyTraffic": {

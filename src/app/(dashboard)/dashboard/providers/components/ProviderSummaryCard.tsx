@@ -23,6 +23,7 @@ export interface ProviderSummaryStats {
   compatible: SummaryStat;
   webcookie: SummaryStat;
   search: SummaryStat;
+  decisions?: SummaryStat;
   audio: SummaryStat;
   local: SummaryStat;
   upstreamproxy: SummaryStat;
@@ -144,6 +145,11 @@ export default function ProviderSummaryCard({
       key: "search",
       label: providerText(t, "categorySearch", "Search"),
       stat: summaryStats.search,
+    },
+    {
+      key: "decisions",
+      label: providerText(t, "categoryDecisions", "Decisions"),
+      stat: summaryStats.decisions ?? { configured: 0, total: 0 },
     },
     {
       key: "webfetch",

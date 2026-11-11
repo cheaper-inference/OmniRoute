@@ -2872,7 +2872,8 @@
       "webFetch": "ទាញយកពីបណ្ដាញ",
       "video": "វីដេអូ",
       "music": "តន្ត្រី",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "ការសម្រេចចិត្ត"
     },
     "noProviders": "មិនទាន់មានអ្នកផ្ដល់សេវាណាមួយត្រូវបានកំណត់រចនាសម្ព័ន្ធសម្រាប់ប្រភេទនេះទេ។",
     "addConnection": "បន្ថែមការតភ្ជាប់",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ឧបករណ៍ភ្ជាប់ផ្ទាល់ខ្លួនរបស់ ChatGPT",
     "doctorChecking": "កំពុងពិនិត្យស្ថានភាព…",
     "doctorCheck": "ពិនិត្យស្ថានភាព doctor",
-    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ"
+    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ",
+    "categoryDecisions": "ការសម្រេចចិត្ត",
+    "decisionProvidersHeading": "ម៉ូដែលសម្រេចចិត្ត",
+    "decisionProvidersDesc": "ការសម្រេចចិត្តដែលមានប្រភេទកំណត់តាមគណនីអ្នកផ្តល់សេវាដែលមានស្រាប់។ កំណត់រចនាសម្ព័ន្ធចំណុចបញ្ចប់សម្រេចចិត្តដែលគាំទ្រ និងផ្ទៀងផ្ទាត់ភាពអាចប្រើបានរបស់ម៉ូដែល។"
   },
   "settings": {
     "proxyTraffic": {

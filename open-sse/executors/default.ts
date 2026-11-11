@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { buildErrorBody } from "../utils/error.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
 import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
@@ -1165,6 +1166,29 @@ export class DefaultExecutor extends BaseExecutor {
   }
 
   async execute(input: ExecuteInput) {
+    const nativeFormat = getRegistryEntry(this.provider)?.format;
+    const connectionFormat = input.credentials?.providerSpecificData?.apiType;
+    if (
+      nativeFormat === "systemone" ||
+      nativeFormat === "decisions" ||
+      connectionFormat === "systemone" ||
+      connectionFormat === "decisions"
+    ) {
+      const endpoint =
+        nativeFormat === "decisions" || connectionFormat === "decisions"
+          ? "decisions"
+          : "systemone";
+      return {
+        response: Response.json(
+          buildErrorBody(400, `This provider requires POST /v1/${endpoint}.`, undefined, {
+            type: "invalid_request_error",
+            code: "native_endpoint_required",
+          }),
+          { status: 400 }
+        ),
+      };
+    }
+
     rejectStrictPool(input.validationDispatch, this.poolConfig);
     // #6846 Phase 1: per-connection nvidia concurrency cap — no-op for other providers.
     const releaseNvidiaSlot = await acquireNvidiaConcurrencySlot(

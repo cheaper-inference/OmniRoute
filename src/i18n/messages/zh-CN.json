@@ -2872,7 +2872,8 @@
       "webFetch": "网页抓取",
       "video": "视频",
       "music": "音乐",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "决策"
     },
     "noProviders": "尚未为此类型配置任何提供者。",
     "addConnection": "添加连接",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "ChatGPT 自定义连接器",
     "doctorChecking": "正在检查状态…",
     "doctorCheck": "检查诊断状态",
-    "fallbackRetryBackendTitle": "回退重试后端"
+    "fallbackRetryBackendTitle": "回退重试后端",
+    "categoryDecisions": "决策",
+    "decisionProvidersHeading": "决策模型",
+    "decisionProvidersDesc": "通过现有提供者账户使用原生类型化决策。配置支持的决策端点并验证模型可用性。"
   },
   "settings": {
     "proxyTraffic": {

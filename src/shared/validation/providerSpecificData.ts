@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { decisionConnectionSchema } from "@omniroute/open-sse/config/decisionRegistry.ts";
 import {
   OPENROUTER_PRESET_MAX_LENGTH,
   isOpenRouterPresetValue,
@@ -160,6 +161,13 @@ export function validateProviderSpecificData(
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
+  if (data.decision !== undefined && !decisionConnectionSchema.safeParse(data.decision).success) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Invalid decision provider configuration",
+      path: ["decision"],
+    });
+  }
 
   const gheUrl = data.gheUrl;
   if (gheUrl !== undefined) {

@@ -15,6 +15,13 @@ export function isUnifiedChatSourceModelSelectable(
 ): boolean {
   if (!isModelSelectable(provider, model.id)) return false;
   if (
+    model.supportedEndpoints?.some(
+      (endpoint) => endpoint === "decisions" || endpoint === "systemone"
+    ) &&
+    !model.supportedEndpoints.some((endpoint) => endpoint === "chat" || endpoint === "responses")
+  )
+    return true; // Typed decision rows are advertised as decisions, never chat.
+  if (
     getModelEndpointDecision(provider, model.id, model.supportedEndpoints).reason ===
     "provider-policy"
   )

@@ -5,6 +5,7 @@ import SegmentedControl from "@/shared/components/SegmentedControl";
 import type { ServiceKind } from "@/shared/constants/providers";
 
 const KIND_ICON: Record<ServiceKind, string> = {
+  decisions: "psychology",
   llm: "chat",
   embedding: "data_object",
   image: "image",

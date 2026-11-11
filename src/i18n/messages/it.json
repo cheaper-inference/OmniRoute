@@ -2872,7 +2872,8 @@
       "webFetch": "Recupero Web",
       "video": "Video",
       "music": "Musica",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Decisioni"
     },
     "noProviders": "Nessun provider ancora configurato per questo tipo.",
     "addConnection": "Aggiungi connessione",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "Connettore personalizzato di ChatGPT",
     "doctorChecking": "Verifica dello stato…",
     "doctorCheck": "Verifica dello stato di doctor",
-    "fallbackRetryBackendTitle": "Backend di riprova di fallback"
+    "fallbackRetryBackendTitle": "Backend di riprova di fallback",
+    "categoryDecisions": "Decisioni",
+    "decisionProvidersHeading": "Modelli decisionali",
+    "decisionProvidersDesc": "Decisioni native tipizzate tramite gli account dei fornitori esistenti. Configura l'endpoint decisionale supportato e verifica la disponibilità del modello."
   },
   "settings": {
     "proxyTraffic": {

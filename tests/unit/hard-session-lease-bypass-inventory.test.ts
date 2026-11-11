@@ -48,6 +48,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #13987: System One decisions (/v1/systemone), same
     // scoped quota-preflight credential lookup as /v1/classify (class B).
     "src/app/api/v1/_shared/systemOneRoute.ts": 1,
+    // Native decision dispatch resolves credentials with quota preflight and the
+    // key connection allowlist, rejects scope/cooldown sentinels (class B).
+    "src/app/api/v1/_shared/decisionRuntime.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -252,6 +255,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
+    // Read-only catalog enumeration: key scope filters connections before
+    // discovery, without inference dispatch or affinity mutation (class C).
+    "src/app/api/v1/systemone/models/route.ts": 1,
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
     "src/lib/chaos/chaosExecutor.ts": 1,

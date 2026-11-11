@@ -2872,7 +2872,8 @@
       "webFetch": "ওয়েব ফেচ",
       "video": "ভিডিও",
       "music": "মিউজিক",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "সিদ্ধান্ত"
     },
     "noProviders": "এই ধরনের জন্য এখনও কোনো প্রোভাইডার কনফিগার করা হয়নি।",
     "addConnection": "সংযোগ যোগ করুন",
@@ -7434,7 +7435,10 @@
     "chatgptConnectorLabel": "চ্যাটজিপিটি কাস্টম কানেক্টর",
     "doctorChecking": "স্ট্যাটাস যাচাই করা হচ্ছে…",
     "doctorCheck": "ডক্টর স্ট্যাটাস যাচাই করুন",
-    "fallbackRetryBackendTitle": "ফলব্যাক রিট্রাই ব্যাকএন্ড"
+    "fallbackRetryBackendTitle": "ফলব্যাক রিট্রাই ব্যাকএন্ড",
+    "categoryDecisions": "সিদ্ধান্ত",
+    "decisionProvidersHeading": "সিদ্ধান্ত মডেল",
+    "decisionProvidersDesc": "বিদ্যমান প্রদানকারী অ্যাকাউন্টের মাধ্যমে নির্দিষ্ট ধরনের নেটিভ সিদ্ধান্ত। সমর্থিত সিদ্ধান্ত এন্ডপয়েন্ট কনফিগার করুন এবং মডেলের উপলভ্যতা যাচাই করুন।"
   },
   "settings": {
     "proxyTraffic": {
