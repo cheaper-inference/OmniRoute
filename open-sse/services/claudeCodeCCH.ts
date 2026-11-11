@@ -5,20 +5,16 @@
  * the serialized request body. The server verifies this to confirm the request
  * came from a genuine Claude Code client.
  *
- * Algorithm (matches the native client):
+ * Algorithm:
  *   1. Serialize request body with cch=00000 placeholder
- *   2. Build the hash view: drop `max_tokens`, `fallbacks` and
- *      `fallback_credit_token` members, empty every `model` string value
- *   3. xxHash64(view_bytes, seed) & 0xFFFFF
- *   4. Zero-padded 5-char lowercase hex
- *   5. Replace cch=00000 with computed value in the unmodified body
+ *   2. xxHash64(body_bytes, seed) & 0xFFFFF
+ *   3. Zero-padded 5-char lowercase hex
+ *   4. Replace cch=00000 with computed value
  */
 
 import xxhashInit from "xxhash-wasm";
 
-// Same value as the xxHash64 initial state stored next to the `cch=00000` routine of the
-// Claude Code binary, and as the CLIProxyAPI signer.
-const CCH_SEED = 0x4d659218e32a3268n;
+const CCH_SEED = 0x6e52736ac806831en;
 const CCH_PATTERN = /\bcch=([0-9a-f]{5});/;
 
 // The billing header is the only place a `cch=` value must be rewritten. It is
@@ -117,182 +113,6 @@ async function ensureXxhash() {
   return xxhashPromise;
 }
 
-// ── Hash view ────────────────────────────────────────────────────────────────
-
-const EXCLUDED_KEYS = new Set(['"max_tokens"', '"fallbacks"', '"fallback_credit_token"']);
-
-type Edit = [start: number, end: number];
-type Member = {
-  start: number;
-  end: number;
-  commaBefore: number;
-  commaAfter: number;
-  skip: boolean;
-};
-
-/**
- * Build the string the native client hashes: the body with dispatch-only members
- * removed and `model` string values emptied, without re-serializing JSON. Quirk kept
- * from the native client: when an object ends with two or more removed members, the
- * comma before them stays. Input that is not well-formed JSON is returned unchanged.
- */
-export function normalizeCchInput(body: string): string {
-  try {
-    return new CchViewBuilder(body).build();
-  } catch {
-    return body;
-  }
-}
-
-// Char codes, not one-character strings: bodies reach several MB.
-const isWs = (c: number) => c === 32 || c === 9 || c === 13 || c === 10;
-
-/** One-pass JSON scanner that records the byte ranges the hash view removes. */
-class CchViewBuilder {
-  private pos = 0;
-  private readonly edits: Edit[] = [];
-  private readonly body: string;
-
-  constructor(body: string) {
-    this.body = body;
-  }
-
-  /** Throws on input that is not well-formed JSON. */
-  build(): string {
-    this.parseValue(true);
-    this.skipWs();
-    if (this.pos !== this.body.length) throw new Error("trailing data");
-    this.edits.sort((a, b) => a[0] - b[0]);
-    let out = "";
-    let last = 0;
-    for (const [start, end] of this.edits) {
-      out += this.body.slice(last, start);
-      last = end;
-    }
-    return out + this.body.slice(last);
-  }
-
-  private skipWs(): void {
-    while (this.pos < this.body.length && isWs(this.body.charCodeAt(this.pos))) this.pos++;
-  }
-
-  private consume(ch: string): boolean {
-    if (this.body[this.pos] !== ch) return false;
-    this.pos++;
-    return true;
-  }
-
-  private addEdit(start: number, end: number): void {
-    if (start < end) this.edits.push([start, end]);
-  }
-
-  private parseString(): Edit {
-    const start = this.pos;
-    if (this.body[this.pos] !== '"') throw new Error("not a string");
-    this.pos++;
-    while (this.pos < this.body.length) {
-      const c = this.body.charCodeAt(this.pos);
-      if (c === 92) this.pos += 2;
-      else if (c === 34) return [start, ++this.pos];
-      else this.pos++;
-    }
-    throw new Error("unterminated string");
-  }
-
-  private parseValue(collect: boolean): void {
-    this.skipWs();
-    const ch = this.body[this.pos];
-    if (ch === "{") return this.parseObject(collect);
-    if (ch === "[") return this.parseArray(collect);
-    if (ch === '"') {
-      this.parseString();
-      return;
-    }
-    const start = this.pos;
-    while (this.pos < this.body.length) {
-      const c = this.body.charCodeAt(this.pos);
-      if (c === 44 || c === 125 || c === 93 || isWs(c)) break;
-      this.pos++;
-    }
-    if (this.pos === start) throw new Error("missing value");
-  }
-
-  private parseArray(collect: boolean): void {
-    this.pos++;
-    this.skipWs();
-    if (this.consume("]")) return;
-    for (;;) {
-      this.parseValue(collect);
-      this.skipWs();
-      if (this.consume(",")) continue;
-      if (!this.consume("]")) throw new Error("unterminated array");
-      return;
-    }
-  }
-
-  /** Parses `"key": value`; returns whether the member is left out of the hash view. */
-  private parseKeyValue(collect: boolean): boolean {
-    const [keyStart, keyEnd] = this.parseString();
-    this.skipWs();
-    if (!this.consume(":")) throw new Error("missing colon");
-    this.skipWs();
-    const key = this.body.slice(keyStart, keyEnd);
-    const skip = collect && EXCLUDED_KEYS.has(key);
-    if (collect && key === '"model"' && this.body[this.pos] === '"') {
-      const [valueStart, valueEnd] = this.parseString();
-      this.addEdit(valueStart + 1, valueEnd - 1);
-    } else {
-      this.parseValue(collect && !skip);
-    }
-    return skip;
-  }
-
-  private parseObject(collect: boolean): void {
-    this.pos++;
-    this.skipWs();
-    if (this.consume("}")) return;
-    const members: Member[] = [];
-    let commaBefore = -1;
-    for (;;) {
-      this.skipWs();
-      const start = this.pos;
-      const skip = this.parseKeyValue(collect);
-      const end = this.pos;
-      this.skipWs();
-      const commaAfter = this.consume(",") ? this.pos - 1 : -1;
-      members.push({ start, end, commaBefore, commaAfter, skip });
-      if (commaAfter >= 0) {
-        commaBefore = commaAfter;
-        continue;
-      }
-      if (!this.consume("}")) throw new Error("unterminated object");
-      break;
-    }
-    if (collect) this.addSkippedMemberEdits(members);
-  }
-
-  private addSkippedMemberEdits(members: Member[]): void {
-    for (let first = 0; first < members.length;) {
-      if (!members[first].skip) {
-        first++;
-        continue;
-      }
-      let last = first;
-      while (last + 1 < members.length && members[last + 1].skip) last++;
-      if (last + 1 < members.length) {
-        this.addEdit(members[first].start, members[last].commaAfter + 1);
-      } else if (first > 0 && last > first) {
-        this.addEdit(members[first].start, members[last].end);
-      } else if (first > 0) {
-        this.addEdit(members[first].commaBefore, members[last].end);
-      } else {
-        this.addEdit(members[first].start, members[last].end);
-      }
-      first = last + 1;
-    }
-  }
-}
-
 export async function computeCCH(bodyBytes: Uint8Array): Promise<string> {
   await ensureXxhash();
   const hash = xxhash64Fn!(bodyBytes, CCH_SEED);
@@ -306,8 +126,8 @@ export async function signRequestBody(bodyString: string): Promise<string> {
   // system), leaving the real billing header unsigned.
   const placeholderAt = findBillingPlaceholder(bodyString);
   if (placeholderAt < 0) return bodyString;
-  // The native client hashes the normalized view of the body, placeholder included.
-  const bodyBytes = new TextEncoder().encode(normalizeCchInput(bodyString));
+  const encoder = new TextEncoder();
+  const bodyBytes = encoder.encode(bodyString);
   const token = await computeCCH(bodyBytes);
   return (
     bodyString.slice(0, placeholderAt) +
