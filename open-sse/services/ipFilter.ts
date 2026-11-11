@@ -115,6 +115,34 @@ export function getIPFilterConfig() {
  * @param {string} ip
  * @returns {{ allowed: boolean, reason?: string }}
  */
+/**
+ * Mode decision for an already-normalised address. Split out of `checkIP` to keep
+ * that function under the cognitive-complexity ratchet.
+ */
+function decideByMode(ip) {
+  switch (_config.mode) {
+    case "whitelist":
+      // A whitelist with no entries yet means the admin just switched mode and
+      // could not save an entry otherwise; the first entry arms enforcement.
+      if (_config.whitelist.size === 0) return { allowed: true };
+      return matchesAny(ip, _config.whitelist)
+        ? { allowed: true }
+        : { allowed: false, reason: "IP not in whitelist" };
+
+    case "whitelist-priority":
+      if (matchesAny(ip, _config.whitelist)) return { allowed: true };
+      return matchesAny(ip, _config.blacklist)
+        ? { allowed: false, reason: "IP blacklisted" }
+        : { allowed: true };
+
+    case "blacklist":
+    default:
+      return matchesAny(ip, _config.blacklist)
+        ? { allowed: false, reason: "IP blacklisted" }
+        : { allowed: true };
+  }
+}
+
 export function checkIP(ip) {
   ensureLoaded();
   if (!_config.enabled) return { allowed: true };
@@ -131,38 +159,7 @@ export function checkIP(ip) {
     _config.tempBans.delete(normalizedIP); // Expired
   }
 
-  switch (_config.mode) {
-    case "whitelist":
-      // Only whitelisted IPs allowed — but if the whitelist is empty the admin
-      // has just switched to this mode and has not added IPs yet.  Allow the
-      // request through so the admin can still reach the dashboard to populate
-      // the list.  Once at least one entry exists, enforcement kicks in.
-      if (_config.whitelist.size === 0) {
-        return { allowed: true };
-      }
-      if (!matchesAny(normalizedIP, _config.whitelist)) {
-        return { allowed: false, reason: "IP not in whitelist" };
-      }
-      return { allowed: true };
-
-    case "whitelist-priority":
-      // Whitelist overrides blacklist
-      if (matchesAny(normalizedIP, _config.whitelist)) {
-        return { allowed: true };
-      }
-      if (matchesAny(normalizedIP, _config.blacklist)) {
-        return { allowed: false, reason: "IP blacklisted" };
-      }
-      return { allowed: true };
-
-    case "blacklist":
-    default:
-      // Blacklisted IPs blocked
-      if (matchesAny(normalizedIP, _config.blacklist)) {
-        return { allowed: false, reason: "IP blacklisted" };
-      }
-      return { allowed: true };
-  }
+  return decideByMode(normalizedIP);
 }
 
 /**
@@ -330,6 +327,16 @@ function pickFirstValidIp(rawValue) {
   return null;
 }
 
+/** Whether one list entry matches the canonical address. */
+function entryMatches(canonical, family, entry) {
+  if (entry.includes("*")) {
+    // Wildcards are an IPv4 shape ("192.168.*.*").
+    return family === 4 && matchesWildcard(canonical, entry);
+  }
+  if (entry.includes("/")) return matchesCIDR(canonical, entry);
+  return normalizeIP(entry) === canonical;
+}
+
 function matchesAny(ip, ipSet) {
   const canonical = normalizeIP(ip);
   if (!canonical) return false;
@@ -338,55 +345,45 @@ function matchesAny(ip, ipSet) {
 
   const family = isIP(canonical);
   for (const entry of ipSet) {
-    // Wildcards are an IPv4 shape ("192.168.*.*").
-    if (entry.includes("*")) {
-      if (family === 4 && matchesWildcard(canonical, entry)) return true;
-      continue;
-    }
-    if (entry.includes("/")) {
-      if (matchesCIDR(canonical, entry)) return true;
-      continue;
-    }
-    if (normalizeIP(entry) === canonical) return true;
+    if (entryMatches(canonical, family, entry)) return true;
   }
   return false;
 }
 
-function matchesCIDR(ip, cidr) {
-  try {
-    const slash = cidr.indexOf("/");
-    if (slash <= 0) return false;
+function matchesIpv4Cidr(ip, network, mask) {
+  const ipNum = ipToNum(ip);
+  const rangeNum = ipToNum(network);
+  if (ipNum === null || rangeNum === null) return false;
+  const maskBits = (-1 << (32 - mask)) >>> 0;
+  return (ipNum & maskBits) === (rangeNum & maskBits);
+}
 
-    const network = normalizeIP(cidr.slice(0, slash));
-    const mask = Number.parseInt(cidr.slice(slash + 1), 10);
-    const family = isIP(ip);
-    if (!network || Number.isNaN(mask) || family === 0 || family !== isIP(network)) return false;
-    const maxBits = family === 4 ? 32 : 128;
-    if (mask < 0 || mask > maxBits) return false;
-    if (mask === 0) return true;
-
-    if (family === 4) {
-      const ipNum = ipToNum(ip);
-      const rangeNum = ipToNum(network);
-      if (ipNum === null || rangeNum === null) return false;
-      const maskBits = (-1 << (32 - mask)) >>> 0;
-      return (ipNum & maskBits) === (rangeNum & maskBits);
-    }
-
-    const address = ipv6ToBytes(ip);
-    const range = ipv6ToBytes(network);
-    if (!address || !range) return false;
-    const whole = Math.floor(mask / 8);
-    for (let i = 0; i < whole; i += 1) {
-      if (address[i] !== range[i]) return false;
-    }
-    const rest = mask % 8;
-    if (rest === 0) return true;
-    const bits = (0xff << (8 - rest)) & 0xff;
-    return (address[whole] & bits) === (range[whole] & bits);
-  } catch {
-    return false;
+function matchesIpv6Cidr(ip, network, mask) {
+  const address = ipv6ToBytes(ip);
+  const range = ipv6ToBytes(network);
+  if (!address || !range) return false;
+  const whole = Math.floor(mask / 8);
+  for (let i = 0; i < whole; i += 1) {
+    if (address[i] !== range[i]) return false;
   }
+  const rest = mask % 8;
+  if (rest === 0) return true;
+  const bits = (0xff << (8 - rest)) & 0xff;
+  return (address[whole] & bits) === (range[whole] & bits);
+}
+
+function matchesCIDR(ip, cidr) {
+  const slash = cidr.indexOf("/");
+  if (slash <= 0) return false;
+
+  const network = normalizeIP(cidr.slice(0, slash));
+  const mask = Number.parseInt(cidr.slice(slash + 1), 10);
+  const family = isIP(ip);
+  if (!network || Number.isNaN(mask) || family === 0 || family !== isIP(network)) return false;
+  if (mask < 0 || mask > (family === 4 ? 32 : 128)) return false;
+  if (mask === 0) return true;
+
+  return family === 4 ? matchesIpv4Cidr(ip, network, mask) : matchesIpv6Cidr(ip, network, mask);
 }
 
 function ipToNum(ip) {
