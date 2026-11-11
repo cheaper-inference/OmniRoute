@@ -1,0 +1,1 @@
+- **perf(cli-tools):** The CLI tools status check runs at most four tool probes at once on a cold batch, instead of starting up to 39 detection processes together. Each tool keeps its 5 second limit, the cache and the result order. ([#19716](https://github.com/cheaper-inference/OmniRoute/pull/19716))

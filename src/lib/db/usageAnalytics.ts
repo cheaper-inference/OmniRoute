@@ -156,17 +156,24 @@ export interface DailyCostRow extends CostTokenFields {
   provider: string;
   model: string;
   serviceTier: string;
+  requests: number;
   promptTokens: number;
   completionTokens: number;
   cacheReadTokens: number;
   cacheCreationTokens: number;
   reasoningTokens: number;
+  totalTokens: number;
+  avgLatencyMs: number;
+  successfulRequests: number;
+  lastUsed: string;
   storedCost: number;
   isAggregated: number;
 }
 
 /**
- * Per-day, per-provider, per-model token breakdown for cost calculation.
+ * Per-day, per-provider, per-model, per-service-tier usage and token breakdown. The analytics
+ * route derives its daily cost, model usage, provider cost and service-tier views from this one
+ * grouped scan; they all share this grain.
  */
 export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams): DailyCostRow[] {
   const db = getDbInstance();
@@ -178,11 +185,16 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
         LOWER(provider) as provider,
         LOWER(model) as model,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
+        COALESCE(SUM(requests), 0) as requests,
         COALESCE(SUM(tokens_input), 0) as promptTokens,
         COALESCE(SUM(tokens_output), 0) as completionTokens,
         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+        COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
+        COALESCE(AVG(latency_ms), 0) as avgLatencyMs,
+        COALESCE(SUM(CASE WHEN success = 1 THEN requests ELSE 0 END), 0) as successfulRequests,
+        COALESCE(MAX(timestamp), '') as lastUsed,
         COALESCE(SUM(stored_cost), 0.0) as storedCost,
         MAX(is_aggregated) as isAggregated,
         ${UNIFIED_COST_TOKEN_SUMS}
@@ -227,105 +239,6 @@ export function getHeatmapRows(heatmapConditions: string[], params: AnalyticsPar
 }
 
 // ---------------------------------------------------------------------------
-
-export interface ModelUsageRow extends CostTokenFields {
-  model: string;
-  provider: string;
-  serviceTier: string;
-  requests: number;
-  promptTokens: number;
-  completionTokens: number;
-  cacheReadTokens: number;
-  cacheCreationTokens: number;
-  reasoningTokens: number;
-  totalTokens: number;
-  avgLatencyMs: number;
-  successfulRequests: number;
-  lastUsed: string;
-  storedCost: number;
-  isAggregated: number;
-}
-
-/**
- * Per-model usage aggregates from the unified source CTE.
- */
-export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams): ModelUsageRow[] {
-  const db = getDbInstance();
-  return db
-    .prepare(
-      `
-      SELECT
-        LOWER(model) as model,
-        LOWER(provider) as provider,
-        COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-        COALESCE(SUM(requests), 0) as requests,
-        COALESCE(SUM(tokens_input), 0) as promptTokens,
-        COALESCE(SUM(tokens_output), 0) as completionTokens,
-        COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-        COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
-        COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
-        COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
-        COALESCE(AVG(latency_ms), 0) as avgLatencyMs,
-        COALESCE(SUM(CASE WHEN success = 1 THEN requests ELSE 0 END), 0) as successfulRequests,
-        COALESCE(MAX(timestamp), '') as lastUsed,
-        COALESCE(SUM(stored_cost), 0.0) as storedCost,
-        MAX(is_aggregated) as isAggregated,
-        ${UNIFIED_COST_TOKEN_SUMS}
-      FROM ${unifiedSource} AS _u
-      -- Keep cost inputs separated by day. Historical provider rows do not
-      -- always use one cache-token convention, and computeCostFromPricing's
-      -- non-cached-input clamp is intentionally non-linear across those rows.
-      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier
-      ORDER BY requests DESC
-    `
-    )
-    .all(params) as ModelUsageRow[];
-}
-
-// ---------------------------------------------------------------------------
-
-export interface ProviderCostRow extends CostTokenFields {
-  provider: string;
-  model: string;
-  serviceTier: string;
-  promptTokens: number;
-  completionTokens: number;
-  cacheReadTokens: number;
-  cacheCreationTokens: number;
-  reasoningTokens: number;
-  storedCost: number;
-  isAggregated: number;
-}
-
-/**
- * Per-provider, per-model token breakdown for provider cost calculation.
- */
-export function getProviderCostRows(
-  unifiedSource: string,
-  params: AnalyticsParams
-): ProviderCostRow[] {
-  const db = getDbInstance();
-  return db
-    .prepare(
-      `
-      SELECT
-        LOWER(provider) as provider,
-        LOWER(model) as model,
-        COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-        COALESCE(SUM(tokens_input), 0) as promptTokens,
-        COALESCE(SUM(tokens_output), 0) as completionTokens,
-        COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-        COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
-        COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
-        COALESCE(SUM(stored_cost), 0.0) as storedCost,
-        MAX(is_aggregated) as isAggregated,
-        ${UNIFIED_COST_TOKEN_SUMS}
-      FROM ${unifiedSource} AS _u
-      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier
-    `
-    )
-    .all(params) as ProviderCostRow[];
-}
 
 // ---------------------------------------------------------------------------
 
@@ -637,56 +550,6 @@ export function getApiKeyTotalsRows(
     `
     )
     .all(params) as ApiKeyTotalsRow[];
-}
-
-// ---------------------------------------------------------------------------
-
-export interface ServiceTierUsageRow extends CostTokenFields {
-  serviceTier: string;
-  provider: string;
-  model: string;
-  requests: number;
-  promptTokens: number;
-  completionTokens: number;
-  cacheReadTokens: number;
-  cacheCreationTokens: number;
-  reasoningTokens: number;
-  totalTokens: number;
-  storedCost: number;
-  isAggregated: number;
-}
-
-/**
- * Per-service-tier, per-provider, per-model usage aggregates.
- */
-export function getServiceTierUsageRows(
-  unifiedSource: string,
-  params: AnalyticsParams
-): ServiceTierUsageRow[] {
-  const db = getDbInstance();
-  return db
-    .prepare(
-      `
-      SELECT
-        COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-        LOWER(provider) as provider,
-        LOWER(model) as model,
-        COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-        COALESCE(SUM(requests), 0) as requests,
-        COALESCE(SUM(tokens_input), 0) as promptTokens,
-        COALESCE(SUM(tokens_output), 0) as completionTokens,
-        COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-        COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
-        COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
-        COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
-        COALESCE(SUM(stored_cost), 0.0) as storedCost,
-        MAX(is_aggregated) as isAggregated,
-        ${UNIFIED_COST_TOKEN_SUMS}
-      FROM ${unifiedSource} AS _u
-      GROUP BY DATE(timestamp), serviceTier, LOWER(provider), LOWER(model)
-    `
-    )
-    .all(params) as ServiceTierUsageRow[];
 }
 
 // ---------------------------------------------------------------------------

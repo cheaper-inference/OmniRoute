@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { getWalMaintenanceState } from "@/lib/db/walMaintenance";
-import { buildHealthPayload } from "@/lib/monitoring/observability";
+import {
+  buildHealthPayload,
+  countStaleDbNonOkConnections,
+  summarizeConnectionCooldown,
+} from "@/lib/monitoring/observability";
 import { getEventLoopStallStats as readEventLoopStallStats } from "@/lib/healthzLag";
 import { readRunningBuildSha } from "@/lib/monitoring/buildSha";
 import { APP_CONFIG } from "@/shared/constants/config";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
 /**
  * GET /api/monitoring/health — System health overview
@@ -128,8 +134,59 @@ function refreshDeepHealthVerdict(): void {
   });
 }
 
+// ?provider=<id>[&unhealthRatioThreshold=0..1]: one provider pool as counts plus one verdict, so a
+// plain uptime monitor can alert on pool degradation from the HTTP status alone. An active account
+// is unhealthy when its stored test status is a known non-ok or it is cooling down. A pool with no
+// active account counts as fully unhealthy. Counts only: no account name, id or key leaves here.
+const poolQuerySchema = z.object({
+  provider: z.string().trim().min(1).max(64),
+  unhealthRatioThreshold: z.coerce.number().min(0).max(1).default(0.5),
+});
+
+async function poolHealthResponse(request: Request, authError: Response | null) {
+  if (authError) return authError;
+  const { searchParams } = new URL(request.url);
+  const parsed = poolQuerySchema.safeParse({
+    provider: searchParams.get("provider") || undefined,
+    unhealthRatioThreshold: searchParams.get("unhealthRatioThreshold") || undefined,
+  });
+  if (!parsed.success) {
+    return NextResponse.json(
+      buildErrorBody(400, parsed.error.issues[0]?.message ?? "Invalid query parameters"),
+      { status: 400 }
+    );
+  }
+  const { provider, unhealthRatioThreshold } = parsed.data;
+  const connections = await getProviderConnections({ provider, isActive: true });
+  const nowMs = Date.now();
+  const unhealthy = connections.filter(
+    (connection) =>
+      countStaleDbNonOkConnections([connection]) > 0 ||
+      Object.keys(summarizeConnectionCooldown([connection], nowMs)).length > 0
+  ).length;
+  const total = connections.length;
+  const unhealthyRatio = total === 0 ? 1 : Math.round((unhealthy / total) * 100) / 100;
+  const summaryHealth = unhealthyRatio <= unhealthRatioThreshold;
+  return NextResponse.json(
+    {
+      provider,
+      total,
+      healthy: total - unhealthy,
+      unhealthy,
+      unhealthyRatio,
+      unhealthRatioThreshold,
+      summaryHealth,
+    },
+    { status: summaryHealth ? 200 : 503 }
+  );
+}
+
 export async function GET(request: Request) {
-  const fullView = (await requireManagementAuth(request, { alwaysRequireAuth: true })) === null;
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (new URL(request.url).searchParams.has("provider")) {
+    return poolHealthResponse(request, authError);
+  }
+  const fullView = authError === null;
   const wantDeep = fullView && isDeepHealthOptedIn(request);
   if (wantDeep) refreshDeepHealthVerdict();
   const cachedNow = Date.now();
