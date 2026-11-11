@@ -2371,6 +2371,7 @@ async function handleChatCoreInner({
           signatureNamespace: connectionId,
           copilotClient: copilotCompatibleReasoning,
           reasoningCacheScope,
+          antigravitySessionKey: conversationId || sessionAffinityKey || null,
           videoTranscriptSensitive: videoBridgeObserved,
           onReasoningReplayHistory: (messages) => {
             reasoningReplayHistory = messages;

@@ -102,6 +102,24 @@ export function deriveAntigravitySessionId(accountKey?: string | null): string |
   return hash.toString();
 }
 
+/**
+ * Upstream Cloud Code session for one conversation on one account. Stable across turns
+ * of that conversation (prompt-cache reuse) yet distinct between conversations running in
+ * parallel on the same account, which otherwise share and evict one session cache.
+ */
+export function getAntigravityConversationSessionId(
+  credentials?: AntigravityCredentialsLike | null,
+  conversationKey?: string | null
+): string {
+  const conversation = toNonEmptyString(conversationKey);
+  const account = getAntigravityAccountKey(credentials);
+  if (!conversation) return getAntigravitySessionId(credentials);
+  return (
+    deriveAntigravitySessionId(`${account ?? ""}\x1f${conversation}`) ||
+    getAntigravitySessionId(credentials)
+  );
+}
+
 export function getAntigravitySessionId(
   credentials?: AntigravityCredentialsLike | null,
   fallback?: unknown

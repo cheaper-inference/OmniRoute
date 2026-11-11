@@ -376,6 +376,8 @@ export function translateRequest(
     /** UA-detected GitHub Copilot client. Forwarded to translators via the
      *  transient `_copilotClient` credential flag (see openai-responses → openai). */
     copilotClient?: boolean;
+    /** Per-conversation key for the Antigravity upstream sessionId (prompt-cache scope). */
+    antigravitySessionKey?: string | null;
   }
 ) {
   // Claude Code inline-tools `tool_addition` blocks only reach Anthropic-native targets;
@@ -534,10 +536,12 @@ export function translateRequest(
       // thoughtSignature on tool-use history (#8979 / #2504 parity with the hub path).
       const hasNs = options?.signatureNamespace != null;
       const hasProvider = provider != null;
+      const agySessionKey = options?.antigravitySessionKey || null;
       const directCredentials =
-        hasNs || hasProvider
+        hasNs || hasProvider || agySessionKey
           ? {
               ...(credentials && typeof credentials === "object" ? credentials : {}),
+              ...(agySessionKey ? { _antigravitySessionKey: agySessionKey } : {}),
               ...(hasProvider ? { _provider: provider } : {}),
               ...(hasNs
                 ? {
@@ -648,10 +652,12 @@ export function translateRequest(
           const hasCopilot = options?.copilotClient === true;
           const hasProvider = provider != null;
           const videoSensitive = options?.videoTranscriptSensitive === true;
+          const agySessionKey = options?.antigravitySessionKey || null;
           const translationCredentials =
-            hasNs || hasPreCompression || hasCopilot || hasProvider || videoSensitive
+            hasNs || hasPreCompression || hasCopilot || hasProvider || videoSensitive || agySessionKey
               ? {
                   ...(credentials && typeof credentials === "object" ? credentials : {}),
+                  ...(agySessionKey ? { _antigravitySessionKey: agySessionKey } : {}),
                   ...(hasNs
                     ? {
                         _signatureNamespace: scopeGeminiThoughtSignatureNamespace(
