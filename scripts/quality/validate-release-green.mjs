@@ -273,7 +273,9 @@ export function evaluateEslintRun(run, warningBaseline) {
         warningBaseline == null
           ? `${warnings} (no baseline)`
           : `${warnings} vs baseline ${warningBaseline}${
-              warningDrift ? ` (+${warnings - warningBaseline} drift → rebaseline at release)` : ""
+              warningDrift
+                ? ` (+${warnings - warningBaseline} drift; inspect the applicable admission policy)`
+                : ""
             }`,
     },
   ];
@@ -333,7 +335,7 @@ export function evaluateComplexityRun({ code, out }, cogBase) {
       label: "Cognitive complexity (ratchet)",
       kind: "drift",
       ok: !cogOver,
-      detail: `${cogCurrent} vs baseline ${cogBase}${cogOver ? ` (+${cogCurrent - cogBase} drift → rebaseline at release)` : ""}`,
+      detail: `${cogCurrent} vs baseline ${cogBase}${cogOver ? ` (+${cogCurrent - cogBase} drift; inspect the applicable admission policy)` : ""}`,
     },
     {
       id: "complexity",
@@ -347,7 +349,8 @@ export function evaluateComplexityRun({ code, out }, cogBase) {
 
 /**
  * Drift verdict for a ratchet: a metric that grew past its committed baseline is
- * "drift" (reported, never blocking). `direction:"down"` metrics (warnings,
+ * advisory drift in this observer profile. Required CI ratchets keep their own
+ * blocking disposition. `direction:"down"` metrics (warnings,
  * complexity, file-size counts) regress when current > baseline.
  */
 export function isDrift(current, baseline) {
@@ -355,7 +358,7 @@ export function isDrift(current, baseline) {
   return current > baseline;
 }
 
-/** releaseGreen iff there are zero failing HARD checks (drift never blocks). */
+/** This observer profile passes iff its required checks pass; it does not admit a PR. */
 export function computeVerdict(results) {
   const hardFailures = results.filter((r) => r.kind === "hard" && !r.ok);
   const drift = results.filter((r) => r.kind === "drift" && !r.ok);
@@ -398,8 +401,8 @@ export const FULL_CI_GATE_JOBS = [
 // Gates that cannot run meaningfully in a local working-tree pre-flight:
 //   • check:pr-evidence  — inspects the open PR body (no PR locally)
 //   • check:codeql-ratchet — queries GitHub's code-scanning alerts for the REMOTE main
-//     branch (CodeQL Default Setup only analyzes main/PRs→main; a local run reflects
-//     post-merge server state the pre-flight can't change). Checked on the release PR.
+//     branch. This legacy extractor does not provide exact-candidate scanner evidence;
+//     CI/codeql-admission validates the four Advanced uploads for its own candidate.
 export const FULL_CI_SKIP = new Set(["check:pr-evidence", "check:codeql-ratchet"]);
 
 // Gates that need a specific env to behave like CI (else they compare against the wrong base).
@@ -1245,10 +1248,9 @@ async function main() {
     }
   }
 
-  // Remaining quality-gate / quality-extended ratchets that the PR→release
-  // fast-gates skip and that historically surfaced — one at a time, because the
-  // CI Quality Ratchet job is fail-fast — only on the release PR. Running them all
-  // here (drift, never blocking) means a single rebaseline pass at release.
+  // Collect advisory measurements for the curated observer profile. The full
+  // static manifest and CI admission policy retain their required dispositions.
+  // An observed regression does not authorize raising a baseline.
   // complexity recorded above with cognitive (check:complexity-ratchets)
   await driftCmd("dead-code", "Dead-code (ratchet)", npmCmd, ["run", "check:dead-code"]);
   await driftCmd("type-coverage", "Type coverage (ratchet)", npmCmd, [

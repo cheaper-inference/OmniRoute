@@ -2,24 +2,17 @@ name: Release-Green (continuous)
 
 # Continuous validation: artifacts, issue state and job exit must agree.
 #
-# WHY: the full gate (ci.yml) only runs on the release PR (PR → main), so reds
-# accrue silently on release/** and explode — in layers — at release time. This
-# workflow reproduces the release-equivalent validation on the release branch and,
-# when there are HARD failures, opens/updates a single tracking issue.
+# CI validates ordinary PRs with their applicable selection; dispatch, pushes to
+# main and trusted merge-queue candidates run the full selection. This observer
+# checks the resulting base separately and maintains a diagnostic incident index.
 #
-# WS5.1 (v3.8.49 quality plan) — two modes:
-#   push to release/v* (code paths) → --quick (fast HARD gates, ~5-8min). Catches the
-#     captain's direct pushes (sync-back — the one ungated write path) AND the merged
-#     COMBINATION right after every PR merge, attributing the offending push range in
-#     the issue. Base-red MTTD drops from ≤24h to ≤~15min after the offending push.
-#   schedule → full --with-build --full-ci (the deep sweep incl. build+suites): 3×/day for
-#     the release branch, 1×/day (05:23) for main, whose SHA only moves on a release.
+# Pushes to release/v* and main run the quick observer profile. Scheduled sweeps
+# use --with-build --full-ci: release three times daily and main at 05:23 UTC.
+# These receipts cover the selected profile, not every applicable hosted check.
 #
-# It is NOT a required status check and never touches a contributor PR — it only
-# reports. Ratchet drift (eslint warnings / cognitive-complexity / file-size) is
-# expected mid-cycle and is reported but never raises the alarm on its own; only
-# real defects (typecheck / lint errors / unit / vitest / db-rules / public-creds /
-# package-artifact) flip the issue open.
+# Measured advisory drift stays visible. Required failures and incomplete
+# execution evidence keep the observation unsuccessful. Admission follows the
+# current CI/Quality policy; no automatic baseline increase is authorized here.
 
 on:
   push:
@@ -432,7 +425,7 @@ jobs:
             fi
             echo '```'
             echo ""
-            echo "_Ratchet drift (eslint warnings / cognitive-complexity / file-size) listed above is expected mid-cycle and is rebaselined at release — it is NOT a contributor concern and did not, on its own, open this issue._"
+            echo "_This incident records the selected observer profile. Advisory drift remains visible; required checks retain their blocking policy. A baseline increase is not an automatic remedy. Confirm the exact candidate and compare its base before attributing a failure._"
           } > issue-body.md
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
@@ -791,7 +784,7 @@ jobs:
             fi
             echo '```'
             echo ""
-            echo "_Ratchet drift (eslint warnings / cognitive-complexity / file-size) is expected mid-cycle and did NOT, on its own, open this issue._"
+            echo "_This incident records the selected observer profile. Advisory drift remains visible; required checks retain their blocking policy. A baseline increase is not an automatic remedy. Confirm the exact candidate and compare its base before attributing a failure._"
           } > issue-body.md
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
