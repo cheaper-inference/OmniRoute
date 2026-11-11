@@ -47,9 +47,12 @@ import {
 import type { RoutingHint } from "../manifestAdapter";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import {
-  getSyncedAvailableModels,
+  admitSyncedModelsByConnection,
+  getActiveConnectionAdmissionRefs,
   getCustomModels,
   getHiddenModelsByProvider,
+  getSyncedAvailableModelsByConnection,
+  unionAdmittedModels,
 } from "../../../src/lib/db/models";
 import { getProviderModels } from "../../config/providerModels.ts";
 import {
@@ -533,10 +536,13 @@ export async function expandAutoComboCandidatePool(
       // synced a subset (e.g. OpenRouter with importFreeModelsOnly).
       // #11088 (option 1): the synced store now persists non-chat models too —
       // chat combo pools must keep filtering them out at read time.
-      const [syncedModelsRaw, rawCustomModels] = await Promise.all([
-        getSyncedAvailableModels(providerId),
+      // A free-only connection contributes only its free rows; a provider whose
+      // free-only connections list no free model has nothing to expand.
+      const [admitted, rawCustomModels] = await Promise.all([
+        loadAdmittedSyncedModels(providerId),
         getCustomModels(providerId),
       ]);
+      const syncedModelsRaw = admitted.models;
       const customModels = sanitizeAutoCustomModels(rawCustomModels);
       const syncedModels = filterChatSelectableModels(providerId, syncedModelsRaw);
       // Custom rows include speech / transcription / image models imported from a
@@ -550,6 +556,7 @@ export async function expandAutoComboCandidatePool(
       // A provider whose custom rows are all non-chat still has user models, so it
       // must not fall back to its static chat catalog.
       const hasUserModels =
+        admitted.freeOnlyExhausted ||
         userVisibleIds.size > 0 ||
         customModels.some((m: { id?: string }) => m.id && !hiddenModels?.has(m.id));
       const expandIds = hasUserModels
@@ -636,16 +643,31 @@ async function loadPermittedConnectionsByProvider(
   }
 }
 
+/**
+ * A provider's synced models as the pools may use them: a free-only connection
+ * contributes only its free rows, and `freeOnlyExhausted` says the provider's
+ * free-only connections list no free model (so a pool must not fall back to
+ * the static catalog).
+ */
+async function loadAdmittedSyncedModels(providerId: string) {
+  const [syncedByConnection, admissionRefs] = await Promise.all([
+    getSyncedAvailableModelsByConnection(providerId),
+    getActiveConnectionAdmissionRefs(providerId),
+  ]);
+  const admitted = admitSyncedModelsByConnection(providerId, syncedByConnection, admissionRefs);
+  return { models: unionAdmittedModels(admitted), freeOnlyExhausted: admitted.freeOnlyExhausted };
+}
+
 /** Chat-selectable, non-hidden model ids a restricted provider contributes to the pool. */
 async function resolveRestrictedProviderModelIds(
   providerId: string,
   hiddenModels: ReadonlySet<string> | undefined
 ): Promise<string[]> {
-  const [syncedModelsRaw, customModelsRaw] = await Promise.all([
-    getSyncedAvailableModels(providerId),
+  const [admitted, customModelsRaw] = await Promise.all([
+    loadAdmittedSyncedModels(providerId),
     getCustomModels(providerId),
   ]);
-  const syncedModels = filterChatSelectableModels(providerId, syncedModelsRaw);
+  const syncedModels = filterChatSelectableModels(providerId, admitted.models);
   const customModels = filterChatSelectableModels(
     providerId,
     Array.isArray(customModelsRaw)
@@ -659,7 +681,7 @@ async function resolveRestrictedProviderModelIds(
   for (const model of [...syncedModels, ...customModels]) {
     if (model.id && !hiddenModels?.has(model.id)) userVisibleIds.add(model.id);
   }
-  if (userVisibleIds.size > 0) return Array.from(userVisibleIds);
+  if (userVisibleIds.size > 0 || admitted.freeOnlyExhausted) return Array.from(userVisibleIds);
   return filterChatSelectableModels(providerId, getProviderModels(providerId))
     .map((model) => model.id)
     .filter((modelId) => !hiddenModels?.has(modelId));

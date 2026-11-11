@@ -171,6 +171,45 @@ The upstream enforcement is on **Google's side**, not anything OmniRoute can pre
 
 The environment reference documents the account and spend implications of each credits mode.
 
+#### Not only `=always`: Antigravity OAuth routing in general
+
+The suspensions are not limited to credit overages. Reports in November 2026 (#19223, #19266)
+describe several Google accounts suspended while routing through the `antigravity`
+and `agy` (Antigravity CLI) providers, with:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Both providers authenticate with the Antigravity product OAuth session, which is the case the
+dashboard's risk notice ("This provider uses your official product session/OAuth, which is not
+authorized for proxy/router use") warns about before a connection is added. None of the
+recommendations above make that usage authorized; they only reduce how much traffic one account
+carries.
+
+**Authorized API interfaces for Gemini models.** Google offers programmatic access to Gemini
+through its APIs, which OmniRoute supports as ordinary API-key providers:
+
+| Provider id | Dashboard name            | Credential                                                                  |
+| ----------- | ------------------------- | --------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | Gemini API key from Google AI Studio (free tier available)                  |
+| `vertex`    | Vertex AI                 | Service Account JSON, OAuth access token or Vertex Express API key (Gemini) |
+
+These providers use credentials Google issues for API access, unlike the Antigravity product
+session. They do not make every use compliant or remove the risk of enforcement: each is governed
+by its own terms, which the operator has to check for their deployment. For example, the
+[Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms) allow only Paid
+Services when API clients are made available to users in the European Economic Area, Switzerland
+or the United Kingdom, and content sent to Unpaid Services may be used to improve Google's
+products. Vertex AI falls under the Google Cloud terms instead
+([Service Specific Terms](https://cloud.google.com/terms/service-terms)). Pricing and quotas
+follow those API terms rather than an Antigravity subscription.
+
+Operators who want to avoid the Antigravity suspensions described above should route Gemini
+traffic through one of these providers instead of `antigravity` / `agy`, after checking that their
+use fits the provider's terms.
+
 Touch points:
 
 - `open-sse/executors/antigravity.ts` — reads `process.env.ANTIGRAVITY_CREDITS`
