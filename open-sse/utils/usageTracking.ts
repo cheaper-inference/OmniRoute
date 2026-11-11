@@ -1022,6 +1022,29 @@ function isSpaceCode(c: number) {
   );
 }
 
+const CHAR_CJK = 0;
+const CHAR_SPACE = 1;
+const CHAR_LOWER = 2;
+const CHAR_UPPER = 3;
+const CHAR_WORD = 4; // digit or underscore
+const CHAR_OTHER = 5;
+
+function charKind(c: number) {
+  if ((c >= 0x3000 && c <= 0x9fff) || (c >= 0xf900 && c <= 0xfaff)) return CHAR_CJK;
+  if (isSpaceCode(c)) return CHAR_SPACE;
+  if (c >= 97 && c <= 122) return CHAR_LOWER;
+  if (c >= 65 && c <= 90) return CHAR_UPPER;
+  if ((c >= 48 && c <= 57) || c === 95) return CHAR_WORD;
+  return CHAR_OTHER;
+}
+
+// 1 when the high surrogate at `i` starts an astral CJK code point, else 0.
+function astralCjkAt(text: string, i: number, c: number) {
+  if (c < 0xd800 || c > 0xdbff) return 0;
+  const cp = text.codePointAt(i)!;
+  return cp >= 0x20000 && cp <= 0x2fa1f ? 1 : 0;
+}
+
 function estimateTokenCount(text: unknown) {
   if (!text || typeof text !== "string") return 0;
 
@@ -1035,28 +1058,21 @@ function estimateTokenCount(text: unknown) {
   let prevLower = false;
   for (let i = 0; i < text.length; i++) {
     const c = text.charCodeAt(i);
-    let isLower = false;
-    if ((c >= 0x3000 && c <= 0x9fff) || (c >= 0xf900 && c <= 0xfaff)) {
+    const kind = charKind(c);
+    if (kind === CHAR_CJK) {
       cjkCount++;
       inWord = false;
-    } else if (isSpaceCode(c)) {
+    } else if (kind === CHAR_SPACE) {
       inWord = false;
-    } else if (c >= 97 && c <= 122) {
-      isLower = true;
-      if (!inWord) tokens++;
-      inWord = true;
-    } else if ((c >= 65 && c <= 90) || (c >= 48 && c <= 57) || c === 95) {
-      if (!inWord || (prevLower && c >= 65 && c <= 90)) tokens++;
-      inWord = true;
-    } else {
-      if (c >= 0xd800 && c <= 0xdbff) {
-        const cp = text.codePointAt(i)!;
-        if (cp >= 0x20000 && cp <= 0x2fa1f) cjkCount++;
-      }
+    } else if (kind === CHAR_OTHER) {
+      cjkCount += astralCjkAt(text, i, c);
       tokens++;
       inWord = false;
+    } else {
+      if (!inWord || (prevLower && kind === CHAR_UPPER)) tokens++;
+      inWord = true;
     }
-    prevLower = isLower;
+    prevLower = kind === CHAR_LOWER;
   }
 
   // Apply sub-word correction: BPE tokenizers often split long words
