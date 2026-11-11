@@ -438,9 +438,6 @@
     "zustand": "^5.0.15"
   },
   "optionalDependencies": {
-    "@johnhenry/backend-cpu": "^0.3.2",
-    "@johnhenry/backend-webgpu": "^0.5.1",
-    "@johnhenry/laya-router": "^0.1.4",
     "@atjsh/llmlingua-2": "3.0.0",
     "@huggingface/transformers": "^4.2.0",
     "better-sqlite3": "^13.0.3",
