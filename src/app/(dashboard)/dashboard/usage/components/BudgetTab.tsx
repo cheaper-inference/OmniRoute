@@ -916,11 +916,9 @@ function BudgetRowExpanded({
             <span className="text-[10px] text-text-muted">{t("budgetByProvider")}</span>
           </div>
           {breakdown === undefined ? (
-            <div className="text-[11px] text-text-muted py-2 animate-pulse">
-              {t("budgetLoading")}
-            </div>
+            <div className="text-xs text-text-muted py-2 animate-pulse">{t("budgetLoading")}</div>
           ) : breakdown.length === 0 ? (
-            <div className="text-[11px] text-text-muted py-2">{t("noSpendLast30Days")}</div>
+            <div className="text-xs text-text-muted py-2">{t("noSpendLast30Days")}</div>
           ) : (
             <div className="space-y-1.5">
               {breakdown.slice(0, 5).map((b) => (
