@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/routing-otel-breaker.test.ts",
       "tests/unit/latency-stats-provider-moment.test.ts",
-      "tests/unit/radar-sync-shape-reasons.test.ts"
+      "tests/unit/radar-sync-shape-reasons.test.ts",
+      "tests/unit/models-dev-fetch-guard.test.ts"
     ],
     "nodeArgs": [
       "--import",

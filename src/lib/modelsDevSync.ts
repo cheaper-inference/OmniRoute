@@ -116,6 +116,7 @@ let lastSyncModelCount = 0;
 let lastSyncCapabilityCount = 0;
 let activeSyncIntervalMs = SYNC_INTERVAL_MS;
 let cachedData: ModelsDevData | null = null;
+let cachedEtag: string | null = null;
 let cacheTime = 0;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 let cachedCapabilities: CapabilitiesByProvider | null = null;
@@ -165,9 +166,25 @@ async function sleepWithAbort(ms: number, signal?: AbortSignal): Promise<void> {
 
 // ─── Core: Fetch ─────────────────────────────────────────
 
+/** A catalog body larger than this is refused (the real one is a few MiB). */
+const MAX_CATALOG_BYTES = 16 * 1024 * 1024;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+/** Guards the full-replace pricing save: an empty or foreign body must never reach it. */
+function isUsableCatalog(data: unknown): data is ModelsDevData {
+  if (!isPlainObject(data)) return false;
+  const providers = Object.values(data);
+  return providers.every(isPlainObject) && providers.some((p) => isPlainObject(p.models));
+}
+
 /**
  * Fetch raw data from models.dev API.
- * Uses in-memory cache with 24h TTL to avoid repeated fetches.
+ * Uses in-memory cache with 24h TTL to avoid repeated fetches. After the TTL the last
+ * ETag is sent back, so an unchanged catalog (304) costs no body. A response that is too
+ * large or is not a usable catalog throws and leaves the cached catalog in place.
  */
 export async function fetchModelsDev(signal?: AbortSignal): Promise<ModelsDevData> {
   // Return cached data if still fresh
@@ -177,19 +194,31 @@ export async function fetchModelsDev(signal?: AbortSignal): Promise<ModelsDevDat
 
   const response = await fetch(MODELS_DEV_API_URL, {
     signal: signal ?? AbortSignal.timeout(30000),
+    ...(cachedData && cachedEtag ? { headers: { "If-None-Match": cachedEtag } } : {}),
   });
+  if (response.status === 304 && cachedData) {
+    cacheTime = Date.now();
+    return cachedData;
+  }
   if (!response.ok) {
     throw new Error(`models.dev fetch failed [${response.status}]: ${response.statusText}`);
   }
+  if (Number(response.headers.get("content-length")) > MAX_CATALOG_BYTES) {
+    throw new Error("models.dev response too large");
+  }
   const text = await response.text();
+  if (text.length > MAX_CATALOG_BYTES) throw new Error("models.dev response too large");
+  let data: unknown;
   try {
-    const data = JSON.parse(text) as ModelsDevData;
-    cachedData = data;
-    cacheTime = Date.now();
-    return data;
+    data = JSON.parse(text);
   } catch {
     throw new Error(`models.dev returned invalid JSON (${text.slice(0, 100)}...)`);
   }
+  if (!isUsableCatalog(data)) throw new Error("models.dev returned an unusable catalog");
+  cachedData = data;
+  cachedEtag = response.headers.get("etag");
+  cacheTime = Date.now();
+  return data;
 }
 
 // ─── DB: models.dev pricing namespace ────────────────────
