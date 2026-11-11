@@ -4,6 +4,7 @@ import { AUTHZ_HEADER_PEER_LOCALITY, AUTHZ_HEADER_PROXY_DELETE_ORIGIN } from "./
 
 export const MANAGED_PROXY_DELETE_PATH = "/api/services/managed-proxy/registry-delete";
 
+/** Match only the method/path pairs eligible for local managed-proxy deletion dispatch. */
 export function isProxyDeletionOrigin(pathname: string, method: string): boolean {
   return (
     (method === "DELETE" &&
@@ -12,7 +13,10 @@ export function isProxyDeletionOrigin(pathname: string, method: string): boolean
   );
 }
 
-/** Called only after the original enforced policy and browser-origin checks succeed. */
+/**
+ * Build a local deletion rewrite and stamp its original allowlisted path in forwarded headers.
+ * Call only after enforced policy and browser-origin checks; non-loopback requests return null.
+ */
 export function managedProxyDeletionDestination(
   request: NextRequest,
   normalizedPath: string,
@@ -30,7 +34,10 @@ export function managedProxyDeletionDestination(
   return destination;
 }
 
-/** Auth checks use the original allowlisted URL, without consuming the deletion body. */
+/**
+ * Reconstruct the stamped, allowlisted origin URL for authentication without reading the body.
+ * Return null when the original method/path pair is missing or not eligible for deletion.
+ */
 export function proxyDeletionAuthRequest(request: Request): Request | null {
   const origin = request.headers.get(AUTHZ_HEADER_PROXY_DELETE_ORIGIN);
   if (!origin || !isProxyDeletionOrigin(origin, request.method)) return null;

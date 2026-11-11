@@ -26,6 +26,7 @@ const SaveSchema = z
   .strict();
 const LifecycleSchema = z.object({ core: CoreSchema, action: z.enum(["start", "stop"]) }).strict();
 
+/** Require trusted loopback locality and management authentication, including direct invocations. */
 async function guard(request: Request): Promise<Response | null> {
   // Central services classification checks the real peer before auth; also fail closed on
   // direct raw-Next invocation where the trusted locality stamp is missing.
@@ -38,6 +39,7 @@ async function guard(request: Request): Promise<Response | null> {
   return requireManagementAuth(request, { alwaysRequireAuth: true });
 }
 
+/** Return an operation error using an allowlisted message prefix or a generic fallback. */
 function failure(error: unknown): Response {
   // Never expose raw native stderr, decrypted sources, or parser payloads.
   const message =
@@ -50,6 +52,7 @@ function failure(error: unknown): Response {
   return createErrorResponse({ status: 400, message, type: "invalid_request" });
 }
 
+/** Return core states and managed-entry metadata after local management authorization. */
 export async function GET(request: Request) {
   const denied = await guard(request);
   if (denied) return denied;
@@ -66,6 +69,10 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * Validate and save a managed source with registry persistence and optional scope assignment.
+ * Invalidate cached dispatchers only after the managed save succeeds.
+ */
 export async function POST(request: Request) {
   const denied = await guard(request);
   if (denied) return denied;
@@ -86,6 +93,7 @@ export async function POST(request: Request) {
   }
 }
 
+/** Validate and execute an authorized local start or stop action for the selected core. */
 export async function PATCH(request: Request) {
   const denied = await guard(request);
   if (denied) return denied;

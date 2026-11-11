@@ -42,6 +42,7 @@ for (const key of [
 env.SQLITE_FILE = env.OMNIROUTE_SQLITE_FILE = path.join(env.DATA_DIR, "storage.sqlite");
 
 let cleanupVerified = true;
+/** Run one isolated suite with bounded output-idle/wall time and verified child cleanup. */
 async function run(args, wallMs = 120000) {
   const child = spawn(process.execPath, args, {
     cwd: project,
@@ -53,6 +54,7 @@ async function run(args, wallMs = 120000) {
   });
   let timedOut = false;
   let idle;
+  /** Terminate only this runner's process tree when its progress or wall-time deadline expires. */
   const kill = () => {
     timedOut = true;
     if (process.platform === "win32") {
@@ -69,6 +71,7 @@ async function run(args, wallMs = 120000) {
       }
     }
   };
+  /** Refresh the idle deadline whenever either captured stream produces output. */
   const progress = () => {
     clearTimeout(idle);
     idle = setTimeout(kill, 45000);

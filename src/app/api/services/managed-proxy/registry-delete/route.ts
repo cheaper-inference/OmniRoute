@@ -7,6 +7,10 @@ import { proxyDeletionAuthRequest } from "@/server/authz/managedProxyDeletionDis
 
 export const runtime = "nodejs";
 
+/**
+ * Require local pipeline dispatch, authenticate the original route, and run managed-aware deletion.
+ * Preserve the original request body for ordered batch deletion results.
+ */
 async function handleDeletion(request: Request): Promise<Response> {
   const authRequest = proxyDeletionAuthRequest(request);
   if (request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) !== "loopback" || !authRequest)

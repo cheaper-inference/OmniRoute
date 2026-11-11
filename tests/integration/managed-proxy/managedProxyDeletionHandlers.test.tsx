@@ -74,6 +74,7 @@ beforeEach(() => {
   });
 });
 
+/** Build an internal deletion request with configurable origin, locality, and optional body. */
 function request({
   method = "DELETE",
   origin = SINGLE,

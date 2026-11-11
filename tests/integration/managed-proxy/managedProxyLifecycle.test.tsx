@@ -54,6 +54,7 @@ function config(overrides: Partial<ServiceConfig> = {}): ServiceConfig {
     ...overrides,
   };
 }
+/** Probe process existence without sending a signal; only ESRCH means the process is gone. */
 function isAlive(pid: number): boolean {
   try {
     process.kill(pid, 0);

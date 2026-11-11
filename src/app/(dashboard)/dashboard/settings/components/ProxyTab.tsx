@@ -27,6 +27,7 @@ const TABS: Array<{ id: TabId; labelKey: string; fallback: string }> = [
   { id: "managed-cores", labelKey: "proxyManagedCoresTab", fallback: "Managed cores" },
 ];
 
+/** Render proxy settings sections with the active tab synchronized to the URL query. */
 export default function ProxyTab() {
   const t = useTranslations("settings");
   const searchParams = useSearchParams();

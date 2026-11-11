@@ -6,6 +6,9 @@ import { restoreManagedProxyCoresSafely } from "../../src/lib/services/managedPr
 for (const failure of ["load", "restore"]) {
   test(`${failure} failure allows bootstrap to continue without leaking diagnostics`, async () => {
     log.mockClear();
+    /**
+     * Inject either a module-load failure or a restoration failure with private diagnostic text.
+     */
     const load = async () => {
       if (failure === "load") throw new Error("/private/path dependency missing");
       return {

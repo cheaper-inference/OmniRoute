@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-// Called before importing any application module, including in standalone tests.
+/**
+ * Require a hosted test run and verify that every writable state path belongs to its fixture.
+ * Standalone hosted tests create and scrub their own environment before application imports.
+ */
 export function assertManagedFixture() {
   assert.equal(process.env.GITHUB_ACTIONS, "true", "Managed runtime tests are hosted-only");
   if (!process.env.MANAGED_PROXY_FIXTURE_ROOT) {

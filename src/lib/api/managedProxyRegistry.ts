@@ -2,6 +2,7 @@ import { getProxyById, deleteProxyById } from "@/lib/db/proxies";
 import { createErrorResponse } from "./errorResponse";
 import type { ManagedCore } from "@/lib/services/managedProxy/config";
 
+/** Read supported managed-core identity metadata; ordinary or malformed notes return null. */
 export function managedProxyIdentity(
   notes: string | null | undefined
 ): { id: string; core: ManagedCore } | null {
@@ -16,6 +17,7 @@ export function managedProxyIdentity(
   return null;
 }
 
+/** Reject direct changes to a managed endpoint or its identity metadata; allow other fields. */
 export async function rejectManagedEndpointEdit(
   id: string,
   changes: Record<string, unknown>
@@ -35,6 +37,10 @@ export async function rejectManagedEndpointEdit(
   return null;
 }
 
+/**
+ * Delete an ordinary registry proxy, rejecting managed entries that require local dispatch.
+ * @throws When the registry row belongs to a managed core.
+ */
 export async function deleteProxyWithManagedCleanup(
   _request: Request,
   id: string,
@@ -42,8 +48,9 @@ export async function deleteProxyWithManagedCleanup(
 ): Promise<boolean> {
   const proxy = await getProxyById(id, { includeSecrets: false });
   if (managedProxyIdentity(proxy?.notes))
-    throw new Error(
-      "Managed proxy deletion requires the authenticated local managed-core endpoint"
+    throw Object.assign(
+      new Error("Managed proxy deletion requires the authenticated local managed-core endpoint"),
+      { status: 401 }
     );
   return deleteProxyById(id, { force });
 }

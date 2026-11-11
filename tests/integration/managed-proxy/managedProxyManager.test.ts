@@ -133,6 +133,7 @@ for (const stage of ["install", "check", "start", "commit"] as const) {
           let committed = false;
           const nextDeps = { ...deps };
           if (stage !== "commit") {
+            /** Record the injected stage failure once, then allow rollback attempts to proceed. */
             const fail = async () => {
               calls.push(`failed-${stage}`);
               if (!failedOnce) {

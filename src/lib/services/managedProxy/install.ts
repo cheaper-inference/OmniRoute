@@ -11,6 +11,7 @@ const MAX_ARCHIVE = 128 * 1024 * 1024;
 const MAX_EXPANDED = 384 * 1024 * 1024;
 const MAX_ENTRIES = 2000;
 
+/** Reject archive names containing absolute paths, traversal, or ambiguous path separators. */
 function safeName(name: string): string {
   if (
     !name ||
@@ -33,6 +34,7 @@ export async function archiveExecutable(
   let count = 0,
     expanded = 0;
   const found: Buffer[] = [];
+  /** Validate each archive path and enforce cumulative entry-count and expanded-size limits. */
   function audit(name: string, size: number) {
     safeName(name);
     if (
@@ -83,12 +85,16 @@ export async function archiveExecutable(
   return uniqueExecutable(found);
 }
 
+/** Require exactly one nonempty executable within the expanded archive size limit. */
 function uniqueExecutable(found: Buffer[]): Buffer {
   if (found.length !== 1 || found[0].length === 0 || found[0].length > MAX_EXPANDED)
     throw new Error("Core archive must contain exactly one executable");
   return found[0];
 }
 
+/**
+ * Fetch a bounded release asset, validating the final HTTPS host and cancelling the reader on exit.
+ */
 async function download(url: string): Promise<Buffer> {
   const response = await fetch(url, { signal: AbortSignal.timeout(120000), redirect: "follow" });
   if (!response.ok || !response.body)
@@ -122,6 +128,7 @@ async function download(url: string): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+/** Create an installation directory if needed and reject a linked or non-directory leaf. */
 async function regularPrivateDirectory(directory: string): Promise<void> {
   await fs.mkdir(directory, { recursive: true, mode: 0o700 });
   const info = await fs.lstat(directory);
@@ -199,6 +206,7 @@ async function downloadManagedVersion(
   }
 }
 
+/** Return the pinned verified binary, downloading only when absent and explicitly allowed. */
 export async function installManagedCore(
   core: ManagedCore,
   root: string,

@@ -19,6 +19,9 @@ export function coreEnvironment(): NodeJS.ProcessEnv {
   return env;
 }
 
+/**
+ * Run the core's bounded native config check, replacing diagnostics that may contain credentials.
+ */
 export async function checkNative(
   core: ManagedCore,
   executable: string,
@@ -38,10 +41,12 @@ export async function checkNative(
   }
 }
 
+/** Probe a loopback SOCKS5 no-auth greeting; resolve false on abort, timeout, or socket failure. */
 export function probeSocks(port: number, signal: AbortSignal): Promise<boolean> {
   return new Promise((resolve) => {
     const socket = net.createConnection({ host: "127.0.0.1", port });
     let settled = false;
+    /** Settle once and release the socket and abort listener on every completion path. */
     const done = (ok: boolean) => {
       if (settled) return;
       settled = true;
@@ -67,6 +72,7 @@ export function probeSocks(port: number, signal: AbortSignal): Promise<boolean> 
   });
 }
 
+/** Find a currently free loopback port outside the excluded set, releasing it before returning. */
 export async function allocatePort(excluded: Set<number>): Promise<number> {
   for (let attempt = 0; attempt < 10; attempt++) {
     const port = await new Promise<number>((resolve, reject) => {
@@ -83,10 +89,15 @@ export async function allocatePort(excluded: Set<number>): Promise<number> {
   throw new Error("No distinct localhost port is available");
 }
 
+/** Report whether the registered managed-core supervisor is in the running state. */
 export function isManagedRunning(core: ManagedCore): boolean {
   return getSupervisor(`managed-proxy-${core}`)?.getStatus().state === "running";
 }
 
+/**
+ * Reuse a healthy core or start an owned replacement; require healthy listeners and clean up on
+ * failure.
+ */
 export async function startManaged(
   core: ManagedCore,
   executable: string,
@@ -122,6 +133,7 @@ export async function startManaged(
       cwd: path.dirname(configPath),
     }),
     healthUrl: () => "",
+    /** Require every configured listener to complete the SOCKS handshake. */
     healthProbe: async (signal) => {
       for (const listener of listeners)
         if (!(await probeSocks(listener.port, signal))) return false;
@@ -147,6 +159,7 @@ export async function startManaged(
   }
 }
 
+/** Stop and unregister the owned managed-core supervisor if one is registered. */
 export async function stopManaged(core: ManagedCore): Promise<void> {
   const tool = `managed-proxy-${core}`;
   const supervisor = getSupervisor(tool);
