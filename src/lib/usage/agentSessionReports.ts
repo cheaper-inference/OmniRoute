@@ -291,13 +291,40 @@ export async function buildAgentSessionReport(
   return structuredClone(await scan.derive("summary", () => computeReport(scan)));
 }
 
-function computeReport(scan: ReportScan): AgentSessionReport {
+/** One dimension's rows, kept on the scan and shared with the summary. */
+function scanBreakdown(
+  scan: ReportScan,
+  dimension: ReportBreakdownDimension
+): Promise<ReportBreakdownRow[]> {
+  return scan.derive(`breakdown:${dimension}`, () => breakdownBy(dimension, scan.slices));
+}
+
+/**
+ * The rows of one summary breakdown, from the same cached scan, without the summary's time and
+ * latency figures (they need their own reads of the window).
+ */
+export async function buildReportBreakdown(
+  filter: AgentSessionReportFilter,
+  dimension: ReportBreakdownDimension,
+  db: SqliteAdapter = getDbInstance()
+): Promise<ReportBreakdownRow[]> {
+  const scan = await getReportScan(db, filter);
+  // A copy, so the caller cannot change the cached rows.
+  return structuredClone(await scanBreakdown(scan, dimension));
+}
+
+async function computeReport(scan: ReportScan): Promise<AgentSessionReport> {
   const accumulator = new TotalsAccumulator();
   for (const slice of scan.slices) accumulator.add(slice);
   const totals = accumulator.toTotals();
 
   const breakdowns = Object.fromEntries(
-    REPORT_BREAKDOWN_DIMENSIONS.map((dimension) => [dimension, breakdownBy(dimension, scan.slices)])
+    await Promise.all(
+      REPORT_BREAKDOWN_DIMENSIONS.map(async (dimension) => [
+        dimension,
+        await scanBreakdown(scan, dimension),
+      ])
+    )
   ) as Record<ReportBreakdownDimension, ReportBreakdownRow[]>;
 
   const kpis = timeKpis(scan.db, scan.filter, totals, scan.sessionTimes());
@@ -508,7 +535,7 @@ export async function getAgentSessionReportDetail(
   };
 }
 
-/** Bounds one CSV download; narrower filters export the rest. */
+/** Bounds one sessions or session-requests export; narrower filters export the rest. */
 export const SESSION_EXPORT_MAX_ROWS = 10_000;
 
 export async function listAgentSessionsForExport(
@@ -525,103 +552,24 @@ export async function listAgentSessionsForExport(
   return { sessions, total, truncated: total > maxRows };
 }
 
-// Leading =, +, -, @, tab or CR make spreadsheets evaluate a cell as a formula; project and
-// key names come from client headers, so they are untrusted.
-const FORMULA_PREFIX = /^[=+\-@\t\r]/;
-
-function csvCell(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  let text = String(value);
-  if (typeof value === "string" && FORMULA_PREFIX.test(text)) text = `'${text}`;
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-function toCsv(header: string[], rows: unknown[][]): string {
-  return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
-}
-
-export function breakdownToCsv(rows: ReportBreakdownRow[]): string {
-  return toCsv(
-    [
-      "key",
-      "label",
-      "detail",
-      "sessions",
-      "members",
-      "projects",
-      "requests",
-      "errors",
-      "tokens_input",
-      "tokens_output",
-      "tokens_cache_read",
-      "tokens_cache_creation",
-      "tokens_reasoning",
-      "tokens_total",
-      "cost_usd",
-      "unpriced_requests",
-      "last_seen_at",
-    ],
-    rows.map((r) => [
-      r.key,
-      r.label,
-      r.detail,
-      r.sessions,
-      r.members,
-      r.projects,
-      r.requests,
-      r.errors,
-      r.tokens.input,
-      r.tokens.output,
-      r.tokens.cacheRead,
-      r.tokens.cacheCreation,
-      r.tokens.reasoning,
-      r.tokens.total,
-      r.costUsd,
-      r.unpricedRequests,
-      r.lastSeenAt,
-    ])
+/**
+ * Up to maxRows of all of a session's requests, newest first, priced like the session detail's
+ * requests. total counts all of them.
+ */
+export async function listAgentSessionRequestsForExport(
+  sessionId: string,
+  maxRows: number = SESSION_EXPORT_MAX_ROWS,
+  db: SqliteAdapter = getDbInstance()
+): Promise<{ requests: PricedSessionRequest[]; total: number; truncated: boolean }> {
+  const { requests, total } = listAgentSessionRequestsPage(
+    db,
+    sessionId,
+    { limit: maxRows, offset: 0 },
+    maxRows
   );
-}
-
-export function sessionsToCsv(sessions: AgentSessionReportRow[]): string {
-  return toCsv(
-    [
-      "session_id",
-      "api_key_id",
-      "api_key_name",
-      "client",
-      "project_name",
-      "project_repo",
-      "project_path",
-      "git_branch",
-      "requests",
-      "errors",
-      "tokens_total",
-      "cost_usd",
-      "unpriced_requests",
-      "window_first_seen_at",
-      "window_last_seen_at",
-      "first_seen_at",
-      "last_seen_at",
-    ],
-    sessions.map((s) => [
-      s.id,
-      s.apiKeyId,
-      s.apiKeyName,
-      s.client,
-      s.projectName,
-      s.projectRepo,
-      s.projectPath,
-      s.gitBranch,
-      s.requests,
-      s.errors,
-      s.tokens.total,
-      s.costUsd,
-      s.unpricedRequests,
-      s.windowFirstSeenAt,
-      s.windowLastSeenAt,
-      s.firstSeenAt,
-      s.lastSeenAt,
-    ])
-  );
+  return {
+    requests: await Promise.all(requests.map(priceRequest)),
+    total,
+    truncated: total > maxRows,
+  };
 }

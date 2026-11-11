@@ -161,15 +161,19 @@ export interface SessionRequestsPage {
   offset?: number;
 }
 
-/** One page of a session's requests, newest first, and how many it has. */
+/**
+ * One page of a session's requests, newest first, and how many it has. The page size is capped
+ * at maxLimit (the export reads up to its row cap in one page).
+ */
 export function listAgentSessionRequestsPage(
   db: SqliteAdapter,
   sessionId: string,
-  page: SessionRequestsPage = {}
+  page: SessionRequestsPage = {},
+  maxLimit: number = SESSION_REQUESTS_MAX_LIMIT
 ): { requests: AgentSessionReportRequest[]; total: number } {
   const limit = Math.max(
     1,
-    Math.min(Math.trunc(page.limit ?? SESSION_REQUESTS_DEFAULT_LIMIT), SESSION_REQUESTS_MAX_LIMIT)
+    Math.min(Math.trunc(page.limit ?? SESSION_REQUESTS_DEFAULT_LIMIT), Math.trunc(maxLimit))
   );
   const offset = Math.max(0, Math.trunc(page.offset ?? 0));
   const countRow = db

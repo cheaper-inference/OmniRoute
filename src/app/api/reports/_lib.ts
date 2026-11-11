@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { REPORT_MULTI_VALUE_FILTERS, REPORT_SEARCH_MAX_LENGTH } from "@/lib/db/agentSessionReports";
 import { SESSION_REQUESTS_MAX_LIMIT } from "@/lib/db/agentSessionReportStats";
-import { REPORT_BREAKDOWN_DIMENSIONS, SESSION_REPORT_SORTS } from "@/lib/usage/agentSessionReports";
+import {
+  REPORT_EXPORT_FORMATS,
+  REPORT_EXPORT_TYPES,
+  REPORT_MATRIX_EXPORT_METRICS,
+} from "@/lib/usage/agentSessionReportExport";
+import { SESSION_REPORT_SORTS } from "@/lib/usage/agentSessionReports";
 import {
   REPORT_MATRIX_DIMENSIONS,
   REPORT_TREND_DIMENSIONS,
@@ -72,12 +77,54 @@ export const sessionDetailQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).optional(),
 });
 
+/** Export params only type=matrix takes; the other types reject them. */
+const MATRIX_EXPORT_PARAMS = ["rows", "cols", "metric"] as const;
+
+/**
+ * Export: the type and format, the report filters, and the params of one type: sort/order for
+ * sessions (ignored by the other types, as before), rows/cols/metric for the matrix, and the
+ * required sessionId for sessionRequests.
+ */
 export const exportQuerySchema = reportFilterFields
   .extend({
-    type: z.enum([...REPORT_BREAKDOWN_DIMENSIONS, "sessions"]),
+    type: z.enum(REPORT_EXPORT_TYPES),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     ...sessionOrderSchema,
+    rows: z.enum(REPORT_MATRIX_DIMENSIONS).optional(),
+    cols: z.enum(REPORT_MATRIX_DIMENSIONS).optional(),
+    metric: z.enum(REPORT_MATRIX_EXPORT_METRICS).optional(),
+    sessionId: filterText.optional(),
   })
-  .refine(windowInOrder, WINDOW_ORDER_ISSUE);
+  .refine(windowInOrder, WINDOW_ORDER_ISSUE)
+  .superRefine((query, ctx) => {
+    for (const param of MATRIX_EXPORT_PARAMS) {
+      if (query[param] !== undefined && query.type !== "matrix") {
+        ctx.addIssue({
+          code: "custom",
+          message: `${param} is only valid with type=matrix`,
+          path: [param],
+        });
+      }
+    }
+    if (query.sessionId !== undefined && query.type !== "sessionRequests") {
+      ctx.addIssue({
+        code: "custom",
+        message: "sessionId is only valid with type=sessionRequests",
+        path: ["sessionId"],
+      });
+    }
+    if (query.type === "sessionRequests" && query.sessionId === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        message: "sessionId is required with type=sessionRequests",
+        path: ["sessionId"],
+      });
+    }
+    // The matrix defaults, as /api/reports/matrix.
+    if (query.type === "matrix" && (query.rows ?? "members") === (query.cols ?? "projects")) {
+      ctx.addIssue({ code: "custom", message: "rows and cols must differ", path: ["cols"] });
+    }
+  });
 
 /** Matrix: report filters plus the two dimensions to cross, which must differ. */
 export const matrixQuerySchema = reportFilterFields
