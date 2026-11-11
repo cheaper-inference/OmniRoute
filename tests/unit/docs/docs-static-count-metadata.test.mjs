@@ -98,3 +98,21 @@ test("CLI metadata rejects malformed syntax before counting recoverable declarat
   assert.throws(() => countCliToolRecords(malformed), /COUNT_FACTS_CLI_SYNTAX/);
   assert.throws(() => countCliToolCategories(malformed), /COUNT_FACTS_CLI_SYNTAX/);
 });
+
+for (const [specifier, target] of [
+  ["./metadata.ts", "metadata.ts"],
+  ["./metadata.mts", "metadata.mts"],
+  ["./metadata.cts", "metadata.cts"],
+  ["./metadata", "metadata.ts"],
+  ["./metadata", "metadata/index.ts"],
+  ["@/metadata", "src/metadata.ts"],
+]) {
+  test(`literal metadata resolves ${specifier} through ${target} without execution`, () => {
+    const read = reader({
+      "entry.ts": `import { VALUE } from "${specifier}"; export const ENTRY=VALUE;`,
+      [target]: 'throw new Error("must not run"); export const VALUE={id:"verified"};',
+    });
+    const props = read.properties(read.reference("entry.ts", "ENTRY"));
+    assert.equal(read.string(props.get("id")), "verified");
+  });
+}

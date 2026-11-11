@@ -62,6 +62,7 @@ jobs:
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: ${{ matrix.category }}
+          output: .artifacts/codeql-sarif
           wait-for-processing: true
       # The action can warn and continue when processing lookup fails. Record its
       # actual upload ID; the dependent admission checks processing again, fail-closed.
@@ -82,4 +83,14 @@ jobs:
           name: codeql-upload-${{ github.run_id }}-${{ matrix.language }}-${{ github.run_attempt }}
           path: .artifacts/codeql-uploads/codeql-${{ matrix.language }}-${{ github.run_attempt }}.json
           if-no-files-found: error
+          retention-days: 14
+      # A successful upload can still leave an invalid analysis on the server.
+      # Retain original findings for diagnosis; admission still reads exact receipts.
+      - name: Retain original CodeQL SARIF for diagnosis
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: codeql-sarif-${{ github.run_id }}-${{ matrix.language }}-${{ github.run_attempt }}
+          path: .artifacts/codeql-sarif
+          if-no-files-found: warn
           retention-days: 14
