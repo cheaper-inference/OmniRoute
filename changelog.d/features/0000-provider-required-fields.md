@@ -1,0 +1,1 @@
+- **feat(providers):** creating an Azure OpenAI connection without a resource endpoint (base URL) is now refused at save, instead of failing on the first request.
