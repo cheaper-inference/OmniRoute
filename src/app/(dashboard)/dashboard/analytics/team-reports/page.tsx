@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import ReportsPageClient from "./ReportsPageClient";
 
 export const metadata = {
@@ -6,5 +8,10 @@ export const metadata = {
 };
 
 export default function ReportsPage() {
-  return <ReportsPageClient />;
+  // The client reads the URL query (useSearchParams), which needs a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <ReportsPageClient />
+    </Suspense>
+  );
 }

@@ -18,6 +18,12 @@ import type {
   AgentSessionReportRow,
 } from "../../../src/lib/usage/agentSessionReports";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: () => {} }),
+  usePathname: () => "/dashboard/analytics/team-reports",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const fmt = (value: number) => new Intl.NumberFormat().format(value);
@@ -161,11 +167,13 @@ beforeEach(() => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string) => {
-      const body = url.startsWith("/api/reports/summary")
-        ? REPORT
-        : url.startsWith(`/api/reports/sessions/${SESSION.id}`)
-          ? { session: SESSION, recentRequests: REQUESTS, totals: TOTALS }
-          : { sessions: [ROW], total: 1 };
+      const body = url.startsWith("/api/reports/facets")
+        ? {}
+        : url.startsWith("/api/reports/summary")
+          ? REPORT
+          : url.startsWith(`/api/reports/sessions/${SESSION.id}`)
+            ? { session: SESSION, recentRequests: REQUESTS, totals: TOTALS }
+            : { sessions: [ROW], total: 1 };
       return { ok: true, status: 200, json: async () => body };
     })
   );

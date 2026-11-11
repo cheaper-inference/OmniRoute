@@ -3,6 +3,7 @@
 // "none" filter value, the tzOffset on every request and the truncated-export note.
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextIntlClientProvider } from "next-intl";
 
@@ -18,12 +19,13 @@ import type {
   ReportBreakdownRow,
   SessionReportTotals,
 } from "../../../src/lib/usage/agentSessionReports";
-import {
-  chooseKitSelectValue,
-  kitSelectByLabel,
-  kitSelectOptions,
-  kitSelectValue,
-} from "../../helpers/kitSelect";
+import { chooseKitSelectValue, kitSelectByLabel } from "../../helpers/kitSelect";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: () => {} }),
+  usePathname: () => "/dashboard/analytics/team-reports",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -119,6 +121,20 @@ const STORED_SESSION = {
   lastModel: null,
 } as unknown as AgentSessionRecord;
 
+const facet = (value: string, label: string | null = null) => ({ value, label, requests: 5 });
+const FACETS = {
+  members: [facet("key-alice", "alice"), facet("")],
+  projects: [facet("web-app"), facet("")],
+  clients: [facet("claude-code"), facet("")],
+  providers: [facet("anthropic"), facet("")],
+  models: [facet("claude-sonnet"), facet("gpt-5")],
+  accounts: [],
+  branches: [facet("main")],
+  serviceTiers: [],
+  errorCodes: [],
+  teams: [],
+};
+
 const TZ_OFFSET = String(-new Date().getTimezoneOffset());
 
 let container: HTMLDivElement;
@@ -144,11 +160,13 @@ beforeEach(() => {
           blob: async () => new Blob(["a,b"]),
         };
       }
-      const body = url.startsWith("/api/reports/summary")
-        ? REPORT
-        : url.startsWith(`/api/reports/sessions/${ROW.id}`)
-          ? { session: STORED_SESSION, recentRequests: [], totals: ALL_TIME_TOTALS }
-          : { sessions: [ROW], total: 1 };
+      const body = url.startsWith("/api/reports/facets")
+        ? FACETS
+        : url.startsWith("/api/reports/summary")
+          ? REPORT
+          : url.startsWith(`/api/reports/sessions/${ROW.id}`)
+            ? { session: STORED_SESSION, recentRequests: [], totals: ALL_TIME_TOTALS }
+            : { sessions: [ROW], total: 1 };
       return { ok: true, status: 200, json: async () => body };
     })
   );
@@ -194,13 +212,6 @@ async function click(el: HTMLElement) {
 }
 
 const lastUrl = (prefix: string) => urls.filter((url) => url.startsWith(prefix)).at(-1) ?? "";
-// The page also loads a window-only summary for the dropdown options; the filtered one is the
-// longer of the two latest summary requests.
-const filteredSummary = () =>
-  urls
-    .filter((url) => url.startsWith("/api/reports/summary"))
-    .slice(-2)
-    .reduce((longest, url) => (url.length > longest.length ? url : longest), "");
 const paramsOf = (url: string) => new URL(url, "http://localhost").searchParams;
 
 function rowByName(name: string): HTMLTableRowElement {
@@ -209,6 +220,30 @@ function rowByName(name: string): HTMLTableRowElement {
   );
   if (!found) throw new Error(`no row "${name}"`);
   return found as HTMLTableRowElement;
+}
+
+/** Opens a multi-select filter and ticks one option. */
+async function pickOption(dimension: string, option: string) {
+  await click(screen.getByRole("button", { name: `${dimension} filter` }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("checkbox", { name: option }));
+  });
+  await act(async () => {
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+  });
+  await flush();
+}
+
+async function optionNames(dimension: string): Promise<string[]> {
+  await click(screen.getByRole("button", { name: `${dimension} filter` }));
+  const names = screen
+    .getAllByRole("checkbox")
+    .map((box) => box.closest("label, div")?.textContent ?? "");
+  await act(async () => {
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+  });
+  await flush();
+  return names;
 }
 
 const panelProps = {
@@ -251,49 +286,38 @@ describe("Team Reports filters", () => {
   it("filters by model from the dropdown and from a models row", async () => {
     await render(<ReportsPageClient />);
 
-    const modelSelect = kitSelectByLabel("Model");
-    expect(kitSelectOptions(modelSelect).map((o) => o.value)).toEqual([
-      "",
-      "claude-sonnet",
-      "gpt-5",
-    ]);
+    expect(await optionNames("Model")).toEqual(["All", "claude-sonnet", "gpt-5"]);
 
-    chooseKitSelectValue(modelSelect, "claude-sonnet");
-    await flush();
-    expect(paramsOf(filteredSummary()).get("model")).toBe("claude-sonnet");
+    await pickOption("Model", "claude-sonnet");
+    expect(paramsOf(lastUrl("/api/reports/summary")).getAll("model")).toEqual(["claude-sonnet"]);
 
-    await click(button("Clear filters"));
-    expect(paramsOf(filteredSummary()).has("model")).toBe(false);
+    await click(button("Clear all"));
+    expect(paramsOf(lastUrl("/api/reports/summary")).has("model")).toBe(false);
 
     await click(button("Models"));
     await click(button("Filter", rowByName("gpt-5")));
-    expect(paramsOf(filteredSummary()).get("model")).toBe("gpt-5");
-    expect(kitSelectValue(kitSelectByLabel("Model"))).toBe("gpt-5");
+    expect(paramsOf(lastUrl("/api/reports/summary")).getAll("model")).toEqual(["gpt-5"]);
   });
 
   it('offers a "none" entry for member, project and client only', async () => {
     await render(<ReportsPageClient />);
 
-    const none = (label: string) =>
-      kitSelectOptions(kitSelectByLabel(label)).filter((o) => o.value === "__none__");
-    expect(none("Member").map((o) => o.label)).toEqual(["No member"]);
-    expect(none("Project").map((o) => o.label)).toEqual(["No project"]);
-    expect(none("Client").map((o) => o.label)).toEqual(["No client"]);
-    expect(none("Provider")).toEqual([]);
+    expect(await optionNames("Member")).toContain("No member");
+    expect(await optionNames("Project")).toContain("No project");
+    expect(await optionNames("Client")).toContain("No client");
+    expect(await optionNames("Provider")).not.toContain("No provider");
 
-    chooseKitSelectValue(kitSelectByLabel("Project"), "__none__");
-    await flush();
-    expect(paramsOf(filteredSummary()).get("projectName")).toBe("__none__");
-    expect(kitSelectValue(kitSelectByLabel("Project"))).toBe("__none__");
+    await pickOption("Project", "No project");
+    expect(paramsOf(lastUrl("/api/reports/summary")).getAll("projectName")).toEqual(["__none__"]);
   });
 
   it('filters by "__none__" when the empty-key row is clicked', async () => {
     await render(<ReportsPageClient />);
 
     await click(button("Filter", rowByName("Unknown key")));
-    expect(paramsOf(filteredSummary()).get("apiKeyId")).toBe("__none__");
+    expect(paramsOf(lastUrl("/api/reports/summary")).getAll("apiKeyId")).toEqual(["__none__"]);
 
-    await click(button("Clear filters"));
+    await click(button("Clear all"));
     await click(button("Providers"));
     // Providers have no "none" filter, so the empty-key row has no filter action.
     expect(rowByName("unknown").querySelector("button")).toBeNull();

@@ -16,17 +16,11 @@ import type { AgentSessionReportRow, SessionReportTotals } from "@/lib/usage/age
 import { Button, Modal, Select } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
+import { SESSION_SORT_FIELDS, type SessionOrder, type SessionSort } from "../reportFilters";
 import { formatDateTime, splitTokens } from "./format";
 import { CacheTokens, useTokenLabels } from "./TokenFigures";
 
 const PAGE_SIZE = 25;
-const SORT_FIELDS = ["lastSeen", "firstSeen", "requests", "tokens", "cost"] as const;
-type SessionSort = (typeof SORT_FIELDS)[number];
-
-export interface SessionOrder {
-  sort: SessionSort;
-  desc: boolean;
-}
 
 interface SessionsPanelProps {
   /** Report filters as a query string; paging and sorting are added here. */
@@ -179,7 +173,7 @@ function SortControls({
         label={t("sortBy")}
         value={sort}
         onChange={(event) => onSort(event.target.value as SessionSort)}
-        options={SORT_FIELDS.map((field) => ({ value: field, label: t(`sort_${field}`) }))}
+        options={SESSION_SORT_FIELDS.map((field) => ({ value: field, label: t(`sort_${field}`) }))}
       />
       <Button variant="outline" onClick={onToggleOrder}>
         {desc ? t("sortDesc") : t("sortAsc")}

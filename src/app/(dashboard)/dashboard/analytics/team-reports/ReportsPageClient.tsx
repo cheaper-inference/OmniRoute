@@ -1,36 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import type {
-  AgentSessionReport,
-  ReportDimension,
-  ReportTotals,
-} from "@/lib/usage/agentSessionReports";
+import type { ReportDimension, ReportTotals } from "@/lib/usage/agentSessionReports";
 import { Button, Card, SegmentedControl } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import BreakdownTable from "./components/BreakdownTable";
+import FilterChips from "./components/FilterChips";
 import ReportFilters from "./components/ReportFilters";
-import SessionsPanel, { type SessionOrder } from "./components/SessionsPanel";
+import SessionsPanel from "./components/SessionsPanel";
 import { CacheTokens, useTokenLabels } from "./components/TokenFigures";
 import { splitTokens } from "./components/format";
 import {
   emptyFilters,
+  parseReportView,
   presetWindow,
-  toReportQuery,
+  serializeReportView,
+  withFilterValue,
+  type FilterField,
+  type PresetChoice,
   type ReportFilterState,
+  type ReportTab,
+  type SessionOrder,
   type TimePreset,
+  REPORT_TABS,
 } from "./reportFilters";
-
-type ReportTab = ReportDimension | "sessions";
+import { useReportData } from "./useReportData";
 
 interface BreakdownTabConfig {
   nameKey: string;
   fallbackKey: string;
   extraCount: "members" | "projects";
-  filterField?: Exclude<keyof ReportFilterState, "from" | "to">;
+  filterField?: FilterField;
   /** The empty-key row filters by "none" (the dimension has a "No ..." filter option). */
   filterNone?: boolean;
   showDetail?: boolean;
@@ -81,23 +85,6 @@ const BREAKDOWN_TABS: Record<ReportDimension, BreakdownTabConfig> = {
   },
   daily: { nameKey: "colDate", fallbackKey: "unknown", extraCount: "members", defaultSort: "name" },
 };
-
-const TAB_ORDER: ReportTab[] = [
-  "members",
-  "projects",
-  "sessions",
-  "daily",
-  "clients",
-  "providers",
-  "models",
-  "accounts",
-];
-
-async function loadReport(query: string, signal: AbortSignal): Promise<AgentSessionReport> {
-  const res = await fetch(`/api/reports/summary?${query}`, { signal });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
 
 interface KpiCard {
   label: string;
@@ -166,65 +153,42 @@ function KpiCards({ totals }: { totals: ReportTotals }) {
   );
 }
 
-/** The report for the current filters, plus dropdown options for the whole time window. */
-function useReportData(filters: ReportFilterState, refreshToken: number) {
-  const [result, setResult] = useState<{ key: string; report?: AgentSessionReport } | null>(null);
-  const [windowOptions, setWindowOptions] = useState<AgentSessionReport["breakdowns"] | null>(null);
-
-  const query = useMemo(() => toReportQuery(filters).toString(), [filters]);
-  const windowQuery = useMemo(() => toReportQuery(filters, true).toString(), [filters]);
-  const requestKey = `${query}#${refreshToken}`;
-  // Filter dropdowns list every value in the time window, not only the filtered subset; without
-  // dimension filters the report itself is that list.
-  const windowOnly = windowQuery === query;
-
-  useEffect(() => {
-    const controller = new AbortController();
-    loadReport(query, controller.signal)
-      .then((report) => {
-        setResult({ key: requestKey, report });
-        if (windowOnly) setWindowOptions(report.breakdowns);
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setResult({ key: requestKey });
-      });
-    return () => controller.abort();
-  }, [query, requestKey, windowOnly]);
-
-  useEffect(() => {
-    if (windowOnly) return;
-    const controller = new AbortController();
-    loadReport(windowQuery, controller.signal)
-      .then((report) => setWindowOptions(report.breakdowns))
-      .catch(() => {
-        // Keep the previous options; the report itself surfaces load failures.
-      });
-    return () => controller.abort();
-  }, [windowQuery, windowOnly, refreshToken]);
-
-  const loading = result?.key !== requestKey;
-  const report = result?.report;
-  return { query, loading, report, failed: !loading && !report, windowOptions };
-}
-
 export default function ReportsPageClient() {
   const t = useTranslations("reports");
-  const [preset, setPreset] = useState<TimePreset | "custom">("7d");
-  const [filters, setFilters] = useState<ReportFilterState>(() => emptyFilters("7d"));
-  const [tab, setTab] = useState<ReportTab>("members");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  // The URL is read once, on first load; after that the state is the source and the URL follows.
+  const [initial] = useState(() => parseReportView(new URLSearchParams(searchParams?.toString())));
+  const [preset, setPreset] = useState<PresetChoice>(initial.preset);
+  const [filters, setFilters] = useState<ReportFilterState>(initial.filters);
+  const [tab, setTab] = useState<ReportTab>(initial.tab);
+  const [sessionOrder, setSessionOrder] = useState<SessionOrder>(initial.sessionOrder);
   const [refreshToken, setRefreshToken] = useState(0);
-  const [sessionOrder, setSessionOrder] = useState<SessionOrder>({ sort: "lastSeen", desc: true });
   const [exportNote, setExportNote] = useState<string | null>(null);
-  const { query, loading, report, failed, windowOptions } = useReportData(filters, refreshToken);
+  const { query, loading, report, failed, facets } = useReportData(filters, refreshToken);
+
+  const urlQuery = useMemo(
+    () => serializeReportView({ preset, filters, tab, sessionOrder }).toString(),
+    [preset, filters, tab, sessionOrder]
+  );
+  const writtenQuery = useRef(searchParams?.toString() ?? "");
+  useEffect(() => {
+    if (urlQuery === writtenQuery.current) return;
+    writtenQuery.current = urlQuery;
+    // replace, not push: no history entry per filter change.
+    router.replace(urlQuery ? `${pathname}?${urlQuery}` : pathname, { scroll: false });
+  }, [urlQuery, pathname, router]);
 
   const applyPreset = (next: TimePreset) => {
     setPreset(next);
     setFilters((current) => ({ ...current, ...presetWindow(next) }));
   };
-  const patchFilters = (patch: Partial<ReportFilterState>) => {
+  // Stable, so the debounced search box does not restart its timer on every page render.
+  const patchFilters = useCallback((patch: Partial<ReportFilterState>) => {
     if ("from" in patch || "to" in patch) setPreset("custom");
     setFilters((current) => ({ ...current, ...patch }));
-  };
+  }, []);
   const clearDimensionFilters = () =>
     setFilters((current) => ({ ...emptyFilters("all"), from: current.from, to: current.to }));
 
@@ -275,8 +239,13 @@ export default function ReportsPageClient() {
       <ReportFilters
         filters={filters}
         preset={preset}
-        options={windowOptions}
+        facets={facets}
         onPreset={applyPreset}
+        onChange={patchFilters}
+      />
+      <FilterChips
+        filters={filters}
+        facets={facets}
         onChange={patchFilters}
         onClear={clearDimensionFilters}
       />
@@ -300,7 +269,7 @@ export default function ReportsPageClient() {
           aria-label={t("breakdown")}
           value={tab}
           onChange={(value) => setTab(value as ReportTab)}
-          options={TAB_ORDER.map((value) => ({ value, label: t(`tab_${value}`) }))}
+          options={REPORT_TABS.map((value) => ({ value, label: t(`tab_${value}`) }))}
         />
       </div>
 
@@ -315,7 +284,11 @@ export default function ReportsPageClient() {
             showDetail={breakdownTab.showDetail}
             defaultSort={breakdownTab.defaultSort}
             filterNone={breakdownTab.filterNone}
-            onFilter={filterField ? (key) => patchFilters({ [filterField]: key }) : undefined}
+            onFilter={
+              filterField
+                ? (key) => setFilters((current) => withFilterValue(current, filterField, key))
+                : undefined
+            }
           />
         ) : (
           <SessionsPanel
