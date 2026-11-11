@@ -10,9 +10,16 @@
     "state": "not-configured",
     "query_suite": "default",
     "threat_model": "remote",
-    "languages": ["actions", "c-cpp", "javascript-typescript", "python"],
+    "languages": [
+      "actions",
+      "c-cpp",
+      "javascript",
+      "javascript-typescript",
+      "python",
+      "typescript"
+    ],
     "updated_at": null,
-    "observedAt": null
+    "observedAt": "2026-11-11T14:25:15.987610+00:00"
   },
   "minimumRules": {
     "actions": 17,
@@ -20,7 +27,7 @@
     "javascript-typescript": 87,
     "python": 43
   },
-  "activationStatus": "PENDING_DEFAULT_SETUP_TRANSITION",
+  "activationStatus": "READY_AFTER_ADMIN_READBACK",
   "producerReceiptsRequired": true,
-  "targetBranches": ["main", "release/v3.8.53"]
+  "targetBranches": ["main", "release/v3.8.54"]
 }

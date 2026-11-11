@@ -121,11 +121,17 @@ export function assertCodeqlSetup(setup, policy) {
       JSON.stringify(normalizedLanguages(policy.languages)),
     "SCAN_LANGUAGE_COVERAGE_CHANGED"
   );
-  requireEvidence(Number.isFinite(Date.parse(setup.updated_at)), "SCAN_SETUP_DATE_INVALID");
+  // GitHub clears updated_at when Default Setup is disabled. Advanced admission
+  // must bind to the actual administrative observation, never invent that date.
+  const clearedTimestamp = policy.setup === "advanced" && setup.updated_at === null;
+  requireEvidence(
+    clearedTimestamp || Number.isFinite(Date.parse(setup.updated_at)),
+    "SCAN_SETUP_DATE_INVALID"
+  );
   if (policy.setup === "advanced") {
     requireEvidence(
       Number.isFinite(Date.parse(setup.observedAt)) &&
-        Date.parse(setup.observedAt) >= Date.parse(setup.updated_at),
+        (clearedTimestamp || Date.parse(setup.observedAt) >= Date.parse(setup.updated_at)),
       "SCAN_SETUP_READBACK_INVALID"
     );
   }
@@ -154,7 +160,8 @@ export function selectCodeqlAnalyses(analyses, context, policy, setup) {
     requireEvidence(analysis.analysis_key === policy.analysisKey, "SCAN_ANALYSIS_ORIGIN_CHANGED");
     requireEvidence(
       Number.isFinite(Date.parse(analysis.created_at)) &&
-        Date.parse(analysis.created_at) >= Date.parse(setup.updated_at),
+        Date.parse(analysis.created_at) >=
+          Date.parse(policy.setup === "advanced" ? setup.observedAt : setup.updated_at),
       "SCAN_PROFILE_STALE"
     );
     requireEvidence(analysis.error === "", "SCAN_ANALYSIS_FAILED");
@@ -373,7 +380,8 @@ export function observeCodeqlCandidate({
     );
   const stopSearch = (entries) =>
     completeCategories(entries) ||
-    Date.parse(entries.at(-1)?.created_at) < Date.parse(setup.updated_at);
+    Date.parse(entries.at(-1)?.created_at) <
+      Date.parse(policy.setup === "advanced" ? setup.observedAt : setup.updated_at);
   let selectedReceipts;
   if (policy.producerReceiptsRequired) {
     requireEvidence(producer, "SCAN_UPLOAD_RECEIPTS_MISSING");

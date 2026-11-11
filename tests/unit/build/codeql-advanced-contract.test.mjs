@@ -17,7 +17,9 @@ const policy = JSON.parse(
   fs.readFileSync(path.join(root, "config/quality/codeql-admission-policy.json"), "utf8")
 );
 const workflow = parse(fs.readFileSync(path.join(root, ".github/workflows/codeql.yml"), "utf8"));
-const activeRelease = `release/v${JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).version}`;
+// Administrative onboarding is explicit: main can still publish the previous version.
+// Advancing package.json alone must not silently authorize a new scanner target.
+const activeRelease = "release/v3.8.54";
 const env = {
   GITHUB_REPOSITORY: "cheaper-inference/OmniRoute",
   GITHUB_SHA: "a".repeat(40),
@@ -158,9 +160,10 @@ test("an activation label without readback data and an unknown state remain clos
   const missingDate = structuredClone(policy);
   missingDate.activationStatus = "READY_AFTER_ADMIN_READBACK";
   missingDate.reviewedSetup.updated_at = null;
+  missingDate.reviewedSetup.observedAt = null;
   assert.throws(
     () => assertCodeqlSetup(missingDate.reviewedSetup, missingDate),
-    /SCAN_SETUP_DATE_INVALID/
+    /SCAN_SETUP_READBACK_INVALID/
   );
   const unknown = { ...policy, activationStatus: "UNREVIEWED" };
   assert.throws(
