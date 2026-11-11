@@ -1,0 +1,1 @@
+- **feat(gemini):** the in-memory Gemini thought-signature cache now evicts the least recently used entry, so a signature read on every turn of a long tool loop is no longer dropped by a burst of newer ones.
