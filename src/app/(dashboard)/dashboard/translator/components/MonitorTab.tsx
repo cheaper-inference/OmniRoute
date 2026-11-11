@@ -68,7 +68,7 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
           <Icon name={icon} size={22} className={resolved.icon} />
         </div>
         <div>
-          <p className="text-lg font-bold text-text-main">{value}</p>
+          <p className="text-lg font-semibold text-text-main">{value}</p>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">{label}</p>
         </div>
       </div>

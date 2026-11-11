@@ -4,6 +4,7 @@ type SyncPhase =
   | "discovery"
   | "discovery-body"
   | "managed-import"
+  | "free-filter-cut"
   | "stale-combo"
   | "stale-combo-prune"
   | "call-log";

@@ -40,7 +40,7 @@ export default function StackedAllocationBar({
 
   return (
     <div className="mb-3">
-      <h4 className="text-[10px] uppercase tracking-wide font-bold text-text-muted mb-1.5">
+      <h4 className="text-[10px] uppercase tracking-wide font-semibold text-text-muted mb-1.5">
         {t("stackedBarTitle")}
       </h4>
 

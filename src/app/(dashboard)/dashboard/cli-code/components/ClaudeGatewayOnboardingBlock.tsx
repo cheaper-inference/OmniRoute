@@ -49,7 +49,7 @@ export default function ClaudeGatewayOnboardingBlock({ baseUrl }: { baseUrl: str
         {snippet}
       </pre>
 
-      <p className="mt-2 text-[11px] text-text-muted">{t("ccOnboardingWindowNote")}</p>
+      <p className="mt-2 text-xs text-text-muted">{t("ccOnboardingWindowNote")}</p>
     </div>
   );
 }

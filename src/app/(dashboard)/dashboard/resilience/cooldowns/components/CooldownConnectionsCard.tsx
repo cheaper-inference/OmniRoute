@@ -129,6 +129,7 @@ export default function CooldownConnectionsCard({
     <Card title={t("list.title")} subtitle={t("list.subtitle")} icon="timer_off">
       <div className="mb-4 flex flex-wrap items-end gap-4">
         <Select
+          native
           label={t("list.provider")}
           value={provider}
           placeholder={t("list.allProviders")}
