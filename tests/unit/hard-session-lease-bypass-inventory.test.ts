@@ -122,6 +122,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/chatCore/streamingResponse.ts": 1,
     "open-sse/handlers/chatCore/cliproxyModelMapping.ts": 1,
     "open-sse/handlers/chatCore/cliproxyapiCredentials.ts": 1,
+    // Per-connection model mapping wrapper: one execute() delegate, same shape as the
+    // CLIProxyAPI mapping wrapper above; the wrapped dispatch is fenced by the caller.
+    "open-sse/services/connectionModelMapping.ts": 1,
     // v3.8.51 #11754: the legacy common ChatGPT Web's synthetic
     // image-edit-continuation ChatGptWebExecutor.execute() call (the sole
     // executor.execute() site in this file) was removed with the provider;
@@ -401,6 +404,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     "open-sse/handlers/chatCore/streamingResponse.ts": "A",
     "open-sse/handlers/chatCore/cliproxyModelMapping.ts": "A",
     "open-sse/handlers/chatCore/cliproxyapiCredentials.ts": "A",
+    "open-sse/services/connectionModelMapping.ts": "A",
     "open-sse/handlers/videoGeneration.ts": "B",
     "open-sse/services/compression/eval/executorModelClient.ts": "B",
     "src/lib/compression/judgeModelClient.ts": "B",
