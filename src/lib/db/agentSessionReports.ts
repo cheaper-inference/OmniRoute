@@ -70,11 +70,12 @@ export interface ReportUsageSums {
   errors: number;
   tokens: AgentSessionTokens;
   /**
-   * Sum of usage_history.provider_cost_usd, the exact cost some providers report. A group holds
-   * either only requests that stored one (a number) or only requests that did not (null), so a
-   * number is the group's whole cost and its tokens are for display only.
+   * Sum of the stored cost (STORED_COST_SQL): the provider-reported cost, else the catalogue
+   * estimate of a non-token tariff such as OCR pages. A group holds either only requests that
+   * stored one (a number) or only requests that did not (null), so a number is the group's whole
+   * cost and its tokens are for display only.
    */
-  providerCostUsd: number | null;
+  storedCostUsd: number | null;
 }
 
 export interface AgentSessionUsageSlice extends ReportUsageSums {
@@ -187,7 +188,14 @@ export function buildReportConditions(
 // Same value the filter matches and the slices price by.
 const SERVICE_TIER_SQL = FILTER_COLUMNS.serviceTier;
 
-/** Columns read by usageSums(); the GROUP BY must split on uh.provider_cost_usd IS NULL. */
+/**
+ * A request's stored cost, as usage analytics bills it: the exact provider-reported cost, else the
+ * catalogue estimate of a non-token tariff (OCR pages, embedding batches). NULL means "price the
+ * tokens from the catalog".
+ */
+export const STORED_COST_SQL = "COALESCE(uh.provider_cost_usd, uh.calculated_cost_usd)";
+
+/** Columns read by usageSums(); the GROUP BY must split on STORED_COST_SQL IS NULL. */
 const USAGE_SUMS_SQL = `uh.provider, uh.model, ${SERVICE_TIER_SQL} AS service_tier,
        COUNT(*) AS requests,
        SUM(CASE WHEN COALESCE(uh.tokens_input, 0) + COALESCE(uh.tokens_output, 0)
@@ -200,7 +208,7 @@ const USAGE_SUMS_SQL = `uh.provider, uh.model, ${SERVICE_TIER_SQL} AS service_ti
        COALESCE(SUM(uh.tokens_cache_read), 0) AS tokens_cache_read,
        COALESCE(SUM(uh.tokens_cache_creation), 0) AS tokens_cache_creation,
        COALESCE(SUM(uh.tokens_reasoning), 0) AS tokens_reasoning,
-       SUM(uh.provider_cost_usd) AS provider_cost_usd`;
+       SUM(${STORED_COST_SQL}) AS stored_cost_usd`;
 
 function usageSums(row: Record<string, unknown>): ReportUsageSums {
   return {
@@ -217,7 +225,7 @@ function usageSums(row: Record<string, unknown>): ReportUsageSums {
       cacheCreation: Number(row.tokens_cache_creation ?? 0),
       reasoning: Number(row.tokens_reasoning ?? 0),
     },
-    providerCostUsd: nullableNumber(row.provider_cost_usd),
+    storedCostUsd: nullableNumber(row.stored_cost_usd),
   };
 }
 
@@ -269,7 +277,7 @@ export function listAgentSessionUsageSlices(
        JOIN agent_sessions s ON s.id = uh.agent_session_id
        WHERE ${conditions.join(" AND ")}
        GROUP BY uh.agent_session_id, uh.provider, uh.model, uh.connection_id, service_tier, day,
-                uh.error_code, uh.billing_team_id, uh.provider_cost_usd IS NULL`
+                uh.error_code, uh.billing_team_id, ${STORED_COST_SQL} IS NULL`
     )
     .all(...params) as Record<string, unknown>[];
 
@@ -331,7 +339,7 @@ export function listAgentSessionHourlySlices(
        FROM usage_history uh
        JOIN agent_sessions s ON s.id = uh.agent_session_id
        WHERE ${conditions.join(" AND ")}
-       GROUP BY slot, uh.provider, uh.model, service_tier, uh.provider_cost_usd IS NULL`
+       GROUP BY slot, uh.provider, uh.model, service_tier, ${STORED_COST_SQL} IS NULL`
     )
     .all(...params) as Record<string, unknown>[];
 

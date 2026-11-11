@@ -22,13 +22,14 @@ import { calculateCostDetailed } from "./costCalculator";
 export type PricedSlice = AgentSessionUsageSlice & { costUsd: number; priced: boolean };
 
 /**
- * Cost of a group of requests: the provider-reported cost when its requests stored one (they are
- * never unpriced), otherwise priced from the catalog on the group's summed tokens.
+ * Cost of a group of requests: their stored cost when they have one (provider-reported, else a
+ * non-token catalogue estimate; they are never unpriced), otherwise priced from the catalog on
+ * the group's summed tokens.
  */
 export async function priceUsage(
-  usage: Pick<ReportUsageSums, "provider" | "model" | "serviceTier" | "tokens" | "providerCostUsd">
+  usage: Pick<ReportUsageSums, "provider" | "model" | "serviceTier" | "tokens" | "storedCostUsd">
 ): Promise<{ costUsd: number; priced: boolean }> {
-  if (usage.providerCostUsd !== null) return { costUsd: usage.providerCostUsd, priced: true };
+  if (usage.storedCostUsd !== null) return { costUsd: usage.storedCostUsd, priced: true };
   const { costUsd, priced } = await calculateCostDetailed(
     usage.provider || "",
     usage.model || "",

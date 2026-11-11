@@ -4783,8 +4783,9 @@ paths:
       description: >
         Totals plus breakdowns by member, project, client, provider, model, account, day, git
         branch, error code, service tier and billing team, computed from requests attributed to
-        agent sessions. Cost is the provider-reported cost for requests that stored one, and is
-        priced from token counts at read time for the others.
+        agent sessions. Cost is the stored cost for requests that have one (the provider-reported
+        cost, else the catalogue estimate of a non-token tariff such as OCR pages), and is priced
+        from token counts at read time for the others.
         Filters combine with AND; a filter given several values matches any of them. A breakdown
         row's key is the value of its filter ("" is an empty field, filtered with `__none__`), so
         a row drills down by calling this route or /api/reports/sessions with that filter added.
@@ -18056,7 +18057,7 @@ components:
         unpricedRequests:
           type: integer
           description: >
-            Requests with tokens and no provider-reported cost, on a model without a pricing row
+            Requests with tokens and no stored cost, on a model without a pricing row
             (not in costUsd).
         costUsd: { type: number }
         tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
@@ -18370,11 +18371,13 @@ components:
         tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
         costUsd:
           type: number
-          description: The provider-reported cost when the request stored one, otherwise priced at read time.
+          description: >
+            The stored cost when the request has one (provider-reported, else a non-token
+            catalogue estimate), otherwise priced at read time.
         priced:
           type: boolean
           description: >
-            false when the request has tokens, no provider-reported cost and its model has no
+            false when the request has tokens, no stored cost and its model has no
             pricing row.
     ReportSessionTimeline:
       type: object

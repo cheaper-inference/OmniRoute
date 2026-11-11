@@ -158,7 +158,7 @@ test("a request with a provider-reported cost and no catalog price shows that co
   assert.equal(detail.recentRequests.length, 1);
   assert.equal(detail.recentRequests[0].costUsd, STORED_COST);
   assert.equal(detail.recentRequests[0].priced, true);
-  assert.ok(!("providerCostUsd" in detail.recentRequests[0]), "the response shape is unchanged");
+  assert.ok(!("storedCostUsd" in detail.recentRequests[0]), "the response shape is unchanged");
 
   const sessionCsv = await exportCsvRow("type=sessions&apiKeyId=key-stored");
   assert.equal(sessionCsv.cost_usd, String(STORED_COST));

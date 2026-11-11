@@ -3,9 +3,10 @@
  * rolled up by member (API key), project, client, provider, model, account, day, git branch,
  * error code, service tier and billing team.
  *
- * Cost is computed at read time from request slices. Requests that stored a provider-reported
- * cost (usage_history.provider_cost_usd) are billed that cost, as usage analytics bills them:
- * their tokens are shown but never priced again, and they are never unpriced. The other requests
+ * Cost is computed at read time from request slices. Requests that stored a cost are billed that
+ * cost, as usage analytics bills them: the provider-reported cost (provider_cost_usd), else the
+ * catalogue estimate of a non-token tariff such as OCR pages (calculated_cost_usd). Their tokens
+ * are shown but never priced again, and they are never unpriced. The other requests
  * are priced from the catalog on each slice's summed tokens. That equals the sum of per-request
  * prices for per-token rates; a rate chosen by one request's size (a long-context tier) is
  * chosen by the slice's summed input instead.
@@ -477,13 +478,13 @@ export async function getAgentSessionReportTotals(
 }
 
 /**
- * A session detail request with its cost: the provider-reported cost when it stored one,
- * otherwise priced at read time, like the totals.
+ * A session detail request with its cost: the stored cost when it has one, otherwise priced at
+ * read time, like the totals.
  */
-export interface PricedSessionRequest extends Omit<AgentSessionReportRequest, "providerCostUsd"> {
+export interface PricedSessionRequest extends Omit<AgentSessionReportRequest, "storedCostUsd"> {
   costUsd: number;
   /**
-   * false when the request has tokens, no provider-reported cost and its model has no pricing
+   * false when the request has tokens, no stored cost and its model has no pricing
    * row (not in costUsd).
    */
   priced: boolean;
@@ -499,11 +500,10 @@ export interface AgentSessionReportDetail {
 }
 
 async function priceRequest({
-  providerCostUsd,
+  storedCostUsd,
   ...request
 }: AgentSessionReportRequest): Promise<PricedSessionRequest> {
-  if (providerCostUsd !== null)
-    return { ...request, costUsd: round6(providerCostUsd), priced: true };
+  if (storedCostUsd !== null) return { ...request, costUsd: round6(storedCostUsd), priced: true };
   const { input, output, cacheRead, cacheCreation, reasoning } = request.tokens;
   const { costUsd, priced } = await calculateCostDetailed(
     request.provider || "",

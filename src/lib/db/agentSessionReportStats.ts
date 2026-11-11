@@ -6,7 +6,11 @@
 
 import type { SqliteAdapter } from "./adapters/types";
 import type { AgentSessionTokens } from "./agentSessions";
-import { buildReportConditions, type AgentSessionReportFilter } from "./agentSessionReports";
+import {
+  buildReportConditions,
+  STORED_COST_SQL,
+  type AgentSessionReportFilter,
+} from "./agentSessionReports";
 
 /** Longest gap between two consecutive requests of a session that counts as active time. */
 export const REPORT_ACTIVE_GAP_CAP_MS = 15 * 60 * 1000;
@@ -151,8 +155,8 @@ export interface AgentSessionReportRequest {
   ttftMs: number;
   /** Same meaning as the session tokens, so request rows add up to their session. */
   tokens: AgentSessionTokens & { uncachedInput: number };
-  /** Exact cost the provider reported (usage_history.provider_cost_usd); null when none. */
-  providerCostUsd: number | null;
+  /** Stored cost (provider-reported, else a non-token catalogue estimate); null when none. */
+  storedCostUsd: number | null;
 }
 
 export interface SessionRequestsPage {
@@ -184,8 +188,9 @@ export function listAgentSessionRequestsPage(
       `SELECT id, timestamp, provider, model, connection_id,
               COALESCE(NULLIF(service_tier, ''), 'standard') AS service_tier,
               status, success, error_code, latency_ms, ttft_ms, tokens_input, tokens_output,
-              tokens_cache_read, tokens_cache_creation, tokens_reasoning, provider_cost_usd
-       FROM usage_history
+              tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+              ${STORED_COST_SQL} AS stored_cost_usd
+       FROM usage_history uh
        WHERE agent_session_id = ?
        ORDER BY timestamp DESC, id DESC
        LIMIT ? OFFSET ?`
@@ -217,7 +222,7 @@ export function listAgentSessionRequestsPage(
         reasoning: Number(row.tokens_reasoning ?? 0),
         uncachedInput: Math.max(0, input - cacheRead - cacheCreation),
       },
-      providerCostUsd: nullableNumber(row.provider_cost_usd),
+      storedCostUsd: nullableNumber(row.stored_cost_usd),
     };
   });
   return { requests, total: Number(countRow?.total ?? 0) };
