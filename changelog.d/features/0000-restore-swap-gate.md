@@ -1,0 +1,1 @@
+- **feat(db):** A backup restore now blocks new database opens while it swaps the files, so every request after `restored: true` reads the restored database.

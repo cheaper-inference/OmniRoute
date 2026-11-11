@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/codex-catalog-atomic-write.test.ts",
       "tests/unit/codex-settings-write-rollback.test.ts",
-      "tests/unit/cli-tools-backups-allowlist.test.ts"
+      "tests/unit/cli-tools-backups-allowlist.test.ts",
+      "tests/unit/db-restore-swap-reopen.test.ts"
     ],
     "nodeArgs": [
       "--import",
