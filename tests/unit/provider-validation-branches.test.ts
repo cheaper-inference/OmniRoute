@@ -445,7 +445,7 @@ test("anthropic-compatible validation rejects invalid keys (auth-fail on both /m
   });
 
   assert.equal(result.valid, false);
-  assert.equal(result.error, "Invalid API key");
+  assert.match(String(result.error), /^Invalid API key \(HTTP 403/);
   assert.deepEqual(calls, [
     "https://api.example.com/v1/models",
     "https://api.example.com/v1/messages",

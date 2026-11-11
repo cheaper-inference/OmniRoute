@@ -133,6 +133,12 @@ import {
   validateXiaomiMimoTokenPlanProvider,
   buildGitlawbValidators,
 } from "./validation/specialtyInline";
+import {
+  buildValidationLogRecord,
+  refineValidationResult,
+  runWithValidationTrace,
+} from "./validation/upstreamRejection";
+import { createLogger } from "@/shared/utils/logger";
 // validateCommandCodeProvider + validateClaudeCodeCompatibleProvider have external importers
 // (provider-nodes/validate route + tests) — re-export to preserve the historical public surface.
 export { validateCommandCodeProvider, validateClaudeCodeCompatibleProvider };
@@ -184,7 +190,47 @@ export async function validateFreebuffProvider({ apiKey }: { apiKey: string }) {
   }
 }
 
-export async function validateProviderApiKey({
+const validationLog = createLogger("provider-validation");
+
+/**
+ * Validate a provider credential.
+ *
+ * The provider-specific dispatcher runs inside an upstream-response trace (fed by the shared
+ * validation transport) so that a provider-side access refusal — 403 / 451 / geo-block / egress
+ * HTML page — is reported as such instead of the canned "Invalid API key", for every validator
+ * that goes through the transport. One sanitized log line per validation records provider,
+ * endpoint (no query), status and a truncated body — never the key. See ./validation/upstreamRejection.
+ */
+export async function validateProviderApiKey(args: any) {
+  const provider = args?.provider;
+  const apiKey = args?.apiKey;
+  const { value, responses } = await runWithValidationTrace(apiKey, () =>
+    dispatchProviderValidation(args)
+  );
+  const { result, outcome, decisive } = refineValidationResult(
+    value,
+    responses,
+    typeof apiKey === "string" && apiKey ? apiKey : null
+  );
+
+  const rejection =
+    decisive && (decisive.status < 200 || decisive.status >= 400) ? decisive : undefined;
+  const record = buildValidationLogRecord({
+    provider,
+    apiKey,
+    outcome,
+    rejection,
+    probes: responses.length,
+  });
+  if (result && (result as { valid?: boolean }).valid) {
+    validationLog.info(record, "provider key validation passed");
+  } else {
+    validationLog.warn(record, "provider key validation failed");
+  }
+  return result;
+}
+
+async function dispatchProviderValidation({
   provider,
   apiKey,
   providerSpecificData = {},
