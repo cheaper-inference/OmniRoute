@@ -192,6 +192,7 @@ import {
 import { isCatalogFreeModel } from "@/shared/utils/freeModels";
 import { getSessionAffinityStore } from "@/lib/db/sessionAccountAffinity";
 import { applyStickyOnly } from "./quotaStickyOnly";
+import { applyMaxActiveAccounts } from "./maxActiveAccounts";
 import {
   applySessionAffinityPin,
   formatSessionKeyForLog,
@@ -1886,12 +1887,15 @@ export async function getProviderCredentials(
 
     const subscriptionFirst = holdBackCodexCreditOnlyAccounts(
       provider,
-      applyStickyOnly(
-        withQuota,
-        provider,
-        options.sessionKey,
-        sessionAffinityTtlMs,
-        affinityRecord
+      applyMaxActiveAccounts(
+        applyStickyOnly(
+          withQuota,
+          provider,
+          options.sessionKey,
+          sessionAffinityTtlMs,
+          affinityRecord
+        ),
+        provider
       ),
       requestedModel
     );
