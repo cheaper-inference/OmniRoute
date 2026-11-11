@@ -360,6 +360,16 @@ function removeEmptyPortableDirectory(backupDir: string, directory?: string): vo
   }
 }
 
+/** Unlink every file of one family; returns how many went. An emptied portable directory goes too. */
+function deleteFamilyFiles(backupDir: string, family: BackupFamily): number {
+  let deleted = 0;
+  for (const name of family.files) {
+    if (unlinkSyncWithRetry(path.join(backupDir, name))) deleted += 1;
+  }
+  if (deleted > 0) removeEmptyPortableDirectory(backupDir, family.directory);
+  return deleted;
+}
+
 /**
  * Delete backup families beyond `maxFiles` (newest kept), older than `retentionDays`
  * (0 disables the age rule), or orphaned (sidecars whose primary is already gone).
@@ -405,18 +415,9 @@ export function pruneBackupDirectory(options: {
     const isOrphan = !family.hasPrimary;
     if (!isOverflowPrimary && !isExpired && !isOrphan) continue;
 
-    let anyDeletedInFamily = false;
-    for (const name of family.files) {
-      const deleted = unlinkSyncWithRetry(path.join(backupDir, name));
-      if (deleted) {
-        deletedFiles += 1;
-        anyDeletedInFamily = true;
-      }
-    }
-    if (anyDeletedInFamily) {
-      removeEmptyPortableDirectory(backupDir, family.directory);
-      deletedBackupFamilies += 1;
-    }
+    const deleted = deleteFamilyFiles(backupDir, family);
+    deletedFiles += deleted;
+    if (deleted > 0) deletedBackupFamilies += 1;
   }
 
   return {
