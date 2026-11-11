@@ -1,0 +1,1 @@
+- **fix(db):** Saving database or cache settings now takes the pre-write backup before the write and waits for it, so the backup holds the old values. The extra backup after the write is gone.

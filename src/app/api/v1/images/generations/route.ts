@@ -54,12 +54,13 @@ import {
   canExposeCodexImageQuota,
   type CodexImageQuotaSnapshot,
 } from "@omniroute/open-sse/services/codexImageQuotaTelemetry.ts";
-import { calculateModalCost } from "@/lib/usage/costCalculator";
-import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
-import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
+import {
+  imageRequestBill,
+  runImageRequestWithAccounting,
+} from "@/lib/usage/imageRequestAccounting";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
 import { updateProviderCredentials } from "@/sse/services/tokenRefresh";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
@@ -452,24 +453,23 @@ async function postHandler(request, context) {
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);
-    // Bill the images actually delivered: a provider that returns fewer than the
-    // requested `n` must not be charged for the missing ones (#16398 follow-up).
-    const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
-    const costUsd = await calculateModalCost("image", provider, body.model, { n });
-    recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
+    const bill = imageRequestBill(result);
+    const costUsd = bill?.costUsd ?? null;
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,
       model: body.model,
       costUsd,
       latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      requestId: bill?.requestId || generateRequestId(),
     });
     attachCodexImageQuotaHeaders(
       headers,
       (result as { telemetry?: { codexQuota?: CodexImageQuotaSnapshot } }).telemetry?.codexQuota,
       canExposeCodexImageQuota(provider, request.headers, policy.apiKeyInfo?.scopes)
     );
+    if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
+    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "known");
     return new Response(JSON.stringify((result as { data: unknown }).data), {
       status: 200,
       headers,

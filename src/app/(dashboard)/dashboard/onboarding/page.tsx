@@ -329,7 +329,7 @@ export default function OnboardingWizard() {
               )}
             />
             {/* The step title is the page heading (the wizard has no PageHeader). */}
-            <h1 className="text-2xl font-bold text-text-main">{currentStep.title}</h1>
+            <h1 className="text-2xl font-semibold text-text-main">{currentStep.title}</h1>
             {currentStep.id === "tiers" && (
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted text-balance">
                 {t("tier.subtitle")}
