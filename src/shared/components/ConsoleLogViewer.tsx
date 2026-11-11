@@ -304,9 +304,14 @@ function AutoScrollButton({ autoScroll, onToggle }: { autoScroll: boolean; onTog
       aria-pressed={autoScroll}
       onClick={onToggle}
       title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
-      className={cn(autoScroll && "border-info/30 bg-info/15 text-info")}
+      // The label stays in ink: text-info on the 15% info tint is under AA in the light looks.
+      className={cn(autoScroll && "border-info/30 bg-info/15 text-text-main")}
     >
-      <Icon name={autoScroll ? "vertical_align_bottom" : "lock"} size={16} />
+      <Icon
+        name={autoScroll ? "vertical_align_bottom" : "lock"}
+        size={16}
+        className={cn(autoScroll && "text-info")}
+      />
       {tv("autoScroll")}
     </Button>
   );
