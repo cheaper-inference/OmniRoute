@@ -1,0 +1,1 @@
+- **feat(audio):** `POST /v1/audio/transcriptions` accepts native ElevenLabs Scribe models (`elevenlabs/scribe_v1`, `elevenlabs/scribe_v2`) with your ElevenLabs key, no reseller needed. The existing `elevenlabs/speech-to-text` Kie id still works.

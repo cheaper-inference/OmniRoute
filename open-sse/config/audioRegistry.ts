@@ -49,6 +49,11 @@ export interface AudioProvider {
    * endpoint. Endpoint-adapter evidence (#16929) is then scoped per model.
    */
   modelScoped?: boolean;
+  /**
+   * Do not claim `<provider>/<id>` when another provider lists the whole string as a model id.
+   * Lets kie keep its bare catalog id "elevenlabs/speech-to-text" next to native ElevenLabs.
+   */
+  yieldToBareIds?: boolean;
   models: AudioModel[];
 }
 
@@ -258,6 +263,22 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     models: [
       { id: "elevenlabs/speech-to-text", name: "ElevenLabs STT" },
       { id: "elevenlabs/audio-isolation", name: "ElevenLabs Audio Isolation" },
+    ],
+  },
+
+  // Native ElevenLabs Scribe. The kie reseller keeps its own "elevenlabs/speech-to-text" id; the
+  // scribe_* ids below do not collide with it, so both resolve (prefix match here, bare match on kie).
+  elevenlabs: {
+    id: "elevenlabs",
+    alias: "el",
+    baseUrl: "https://api.elevenlabs.io/v1/speech-to-text",
+    authType: "apikey",
+    authHeader: "xi-api-key",
+    format: "elevenlabs-stt",
+    yieldToBareIds: true,
+    models: [
+      { id: "scribe_v1", name: "ElevenLabs Scribe v1" },
+      { id: "scribe_v2", name: "ElevenLabs Scribe v2" },
     ],
   },
 
@@ -831,6 +852,18 @@ export function buildDynamicAudioProvider(node: ProviderNodeRow, audioPath: stri
   };
 }
 
+/** True unless `config` yields `modelStr` to another provider that lists it verbatim. */
+function claimsPrefixedModel(
+  registry: Record<string, AudioProvider>,
+  config: AudioProvider,
+  modelStr: string
+): boolean {
+  if (!config.yieldToBareIds) return true;
+  return !Object.values(registry).some(
+    (other) => other !== config && other.models.some((m) => m.id === modelStr)
+  );
+}
+
 function parseAudioModel(
   modelStr: string | null,
   registry: Record<string, AudioProvider>,
@@ -839,19 +872,23 @@ function parseAudioModel(
   if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   // Phase 1: prefix match in hardcoded registry
-  for (const [providerId] of Object.entries(registry)) {
+  for (const [providerId, config] of Object.entries(registry)) {
     if (modelStr.startsWith(providerId + "/")) {
-      return { provider: providerId, model: modelStr.slice(providerId.length + 1) };
+      if (claimsPrefixedModel(registry, config, modelStr)) {
+        return { provider: providerId, model: modelStr.slice(providerId.length + 1) };
+      }
     }
   }
 
   // Phase 1.5: prefix match against the short provider alias the catalog itself
   // advertises (e.g. "el/eleven_multilingual_v2" for elevenlabs) when it differs
   // from the canonical registry key already tried in Phase 1.
-  for (const [providerId] of Object.entries(registry)) {
+  for (const [providerId, config] of Object.entries(registry)) {
     const alias = getProviderAlias(providerId);
     if (alias && alias !== providerId && modelStr.startsWith(alias + "/")) {
-      return { provider: providerId, model: modelStr.slice(alias.length + 1) };
+      if (claimsPrefixedModel(registry, config, modelStr)) {
+        return { provider: providerId, model: modelStr.slice(alias.length + 1) };
+      }
     }
   }
 

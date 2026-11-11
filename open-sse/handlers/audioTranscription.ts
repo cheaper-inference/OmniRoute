@@ -680,6 +680,29 @@ async function handleHuggingFaceTranscription(providerConfig, file, modelId, tok
 }
 
 /**
+ * Handle native ElevenLabs Scribe transcription (multipart, model_id field, xi-api-key header).
+ */
+async function handleElevenLabsTranscription(providerConfig, file, modelId, token, formData) {
+  const fields: Record<string, string> = { model_id: modelId };
+  const language = optionalFormString(formData, "language");
+  if (language) fields.language_code = language;
+  const { body, contentType } = await buildMultipartBody(file, fields);
+  const res = await fetch(providerConfig.baseUrl, {
+    method: "POST",
+    headers: { ...buildAuthHeaders(providerConfig, token), "Content-Type": contentType },
+    body,
+  });
+  if (!res.ok) {
+    return upstreamErrorResponse(res, await res.text());
+  }
+  const data = await res.json();
+  return Response.json(
+    { text: typeof data?.text === "string" ? data.text : "" },
+    { headers: { ...CORS_HEADERS } }
+  );
+}
+
+/**
  * Handle Kie.ai transcription
  */
 function normalizeKieTranscriptionText(recordData: unknown): string {
@@ -1124,6 +1147,10 @@ export async function handleAudioTranscription({
 
   if (providerConfig.format === "kie-audio") {
     return handleKieAudioTranscription(providerConfig, file, modelId, token);
+  }
+
+  if (providerConfig.format === "elevenlabs-stt") {
+    return handleElevenLabsTranscription(providerConfig, file, modelId, token, formData);
   }
 
   if (providerConfig.format === "rev-ai") {
