@@ -814,7 +814,8 @@
       "tests/unit/token-health-google-refresh-gap.test.ts",
       "tests/unit/token-health-check-provider-cap.test.ts",
       "tests/unit/wake-recovery.test.ts",
-      "tests/unit/services/cliproxy-account-health-v8-path.test.ts"
+      "tests/unit/services/cliproxy-account-health-v8-path.test.ts",
+      "tests/unit/client-retry-after-cap.test.ts"
     ],
     "nodeArgs": [
       "--import",
