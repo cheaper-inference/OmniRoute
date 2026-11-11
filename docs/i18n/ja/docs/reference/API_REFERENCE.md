@@ -885,28 +885,28 @@ CLI は `base_url + /responses` を WebSocket にアップグレードし、Omni
 
 ---
 
-## セルフサービスの使用状況（`/api/usage/om-usage`）
+## セルフサービスの使用 (`/api/usage/om-usage`)
 
-任意の API キーで、**自身の**使用状況とクォータを読み取れます。管理者認証は不要です。これは、クライアント（CLI、OmniCopilot パネル）がキー所有者に使用額を表示するために使用するエンドポイントです。
+どのAPIキーでも読み取ることができます**独自の**使用量とクォータ—管理認証がありません。これは、クライアント (CLI、 OmniCopilotパネル) がキーホルダーに支出を表示するために使用するエンドポイントです。
 
 ```bash
-# テキスト形式（従来の契約 — ターミナル向けのプレーンテキスト）
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# 構造化形式 — UI が消費する形式
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-キーでは **`allowUsageCommand`** が有効になっている必要があります（デフォルトでは無効 — ダッシュボードの API キーマネージャーでキーごとに切り替えます）。無効の場合、エンドポイントは `403` を返します。
+キーには次のものが必要です**`allowUsageCommand`**有効 (デフォルトではオフ—は、ダッシュボードの API キー マネージャーによってキーごとに切り替えられます)。これがないと、エンドポイントは`403`応答します。
 
-`?format=json` は判別可能な形式を返すため、呼び出し元が拒否レスポンスからデータフィールドを読み取ることはありません。成功時:
+`?format=json`識別された形状を返すため、呼び出し側は拒否からデータ フィールドを読み取ることはありません。成功時:
 
 ```jsonc
 {
   "allowed": true,
-  // キーがキーごとの使用制限（日次/月次 USD）をオプトインした場合のみ存在します:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -915,9 +915,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 選択されたプロバイダーのクォータスナップショット。まだキャッシュされていない場合は null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // 各接続のスナップショット。UI は複数のプロバイダーを横並びで表示できます:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -925,52 +925,49 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-拒否時（無効なキーによる `401` / 許可されていない場合の `403`）も同じルートが
-`{ "allowed": false, "error": { "message": "…" } }` を返します。`personal`/`provider` が存在するものの空である状態（キーは許可されているが、まだ取得できる情報がない）は拒否とは異なる状態であり、これらを区別できるのは JSON 形式のみです。
+拒否（`401`不正なキー / `403`許可されない）の場合、同じルートは`{ "allowed": false, "error": { "message": "…" } }` —を返しますが、存在するが空の`personal`/`provider` （キーは許可されていますが、まだ何も学習されていません）は拒否とは異なる状態であり、 JSON形式のみがそれらを区別します。
 
-**認証:** 呼び出し元自身の Bearer API キーを `isValidApiKey` で検証します。これは管理サーフェス（`/api/keys/…`）ではなく、管理サーフェスは引き続き `requireManagementAuth` の背後にあります。
+**Auth:** the caller's own Bearer API key, validated with `isValidApiKey` — this is _not_ the management surface (`/api/keys/…`), which stays behind `requireManagementAuth`.
 
-### 生のクォータ割合とカットオフ調整済みクォータ割合
+### 未処理のクォータの割合とカットオフ調整されたクォータの割合
 
-`/api/usage/om-usage` を利用する際、呼び出し元は、**プレーンテキスト出力**と構造化された **JSON 出力**で示される割合の違いに注意する必要があります。
+`/api/usage/om-usage`を使用する場合、呼び出し元は、**プレーンテキスト出力**そして構造化された**JSON出力**:
 
-| Aspect               | Plain-text format (`/api/usage/om-usage` / `@@om-usage`)                                          | JSON format (`?format=json`)                                                 |
-| :------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------- |
-| **Output field**     | `NN% left`（例: `20% left`）                                                                      | `provider.quotas` / `providers[].quotas`                                     |
-| **Measurement**      | **カットオフ調整済みの使用可能量**: カットオフしきい値を超えて残っている容量                      | **上流の生クォータ**: 調整されていないプロバイダーの測定値                   |
-| **Cutoff scaling**   | `effectiveRemainingPercent()` により、保護された予備容量が `0% left` と表示されるようスケーリング | なし（プロバイダーが報告した生のスナップショット値）                         |
-| **Threshold data**   | 表示される割合に組み込まれる                                                                      | 接続ごとの `quotaWindowThresholds`（またはサーバーのデフォルト）に保存される |
-| **Primary consumer** | 対話型 CLI、ターミナルプロンプト、人間のオペレーター                                              | プログラムによる統合、ダッシュボード、分析、課金トラッカー                   |
+| 側面                       | プレーンテキスト形式 (`/api/usage/om-usage` / `@@om-usage`)                                                  | JSON形式 (`?format=json`)                                            |
+| :------------------------- | :----------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------- |
+| **出力フィールド**         | `NN% left` (例: `20% left`)                                                                                  | `provider.quotas` / `providers[].quotas`                             |
+| **測定**                   | **カットオフ調整後の使用可能許容量**: カットオフ閾値を超える残存容量                                         | **生のアップストリーム クォータ**: 未調整のプロバイダー測定値        |
+| **カットオフスケーリング** | `effectiveRemainingPercent()`経由でスケーリングされるため、保護されたリザーブは`0% left`として読み取られます | なし (プロバイダーによって報告された生のスナップショット値)          |
+| **閾値データ**             | 表示パーセンテージに組み込まれます                                                                           | 接続ごとに`quotaWindowThresholds`に保存 (またはサーバーのデフォルト) |
+| **一次消費者**             | インタラクティブなCLIs、ターミナル プロンプト、人間のオペレーター                                            | プログラムによる統合、ダッシュボード、分析、請求トラッカー           |
 
-#### カットオフ調整の計算式
+#### カットオフ調整式
 
-OmniRoute は、上流での枯渇を防ぐために、事前対応型のクォータカットオフをサポートしています（接続の `quotaWindowThresholds`、プロバイダーのデフォルト、またはグローバルのレジリエンス設定で構成）。クォータウィンドウでカットオフしきい値（例: `cutoff = 25%`）が有効な場合、テキストレンダラーは残りの使用可能量を次のように計算します。
+OmniRoute 、アップストリームの枯渇を防ぐためのプロアクティブなクォータ カットオフをサポートしています (接続`quotaWindowThresholds`、プロバイダーのデフォルト、またはグローバル復元設定によって構成されます)。カットオフしきい値 (例: `cutoff = 25%`) がクォータ ウィンドウでアクティブな場合、テキスト レンダラーは残りの許容量を次のように計算します。
 
-- `remaining <= cutoff` の場合: `0%` を返します。
-- `remaining > cutoff` の場合: `((remaining - cutoff) / (100 - cutoff)) * 100` を返します。
+- `remaining <= cutoff`の場合: `0%`を返します。
+- `remaining > cutoff`の場合: `((remaining - cutoff) / (100 - cutoff)) * 100`を返します。
 
-整形されたテキスト出力では、これを最も近い整数に丸めます（`Math.round(...)`）。
+フォーマットされたテキスト出力は、これを最も近い整数 (`Math.round(...)`) に丸めます。
 
-#### 具体例
+#### 説明的な例
 
-プロバイダーウィンドウが**生の使用率 60%**（したがって**生の残りクォータ 40%**）で、設定された
-**残りクォータのカットオフ**しきい値が **25%** の場合：
+次のプロバイダー ウィンドウを考えてみましょう。** 60% の未加工使用率**（したがって**残りの未加工割り当て量 40%** ) と設定された**残り 25% のクォータ カットオフ**しきい値：
 
-| 表現                            | 計算                                                   |  残り   |                 推定使用率                  |
-| :------------------------------ | :----------------------------------------------------- | :-----: | :-----------------------------------------: |
-| **生の JSON（`?format=json`）** | アップストリームのスナップショット（`quotas[window]`） | **40%** |                   **60%**                   |
-| **テキスト形式（`NN% left`）**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100`     | **20%** | **80%**（`100 - remaining` を計算する場合） |
+| 表現                          | 計算                                                 |  残り   |             暗黙的に使用される             |
+| :---------------------------- | :--------------------------------------------------- | :-----: | :----------------------------------------: |
+| **生のJSON (`?format=json`)** | アップストリーム スナップショット (`quotas[window]`) | **40%** |                  **60%**                   |
+| **テキスト形式 (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100`   | **20%** | **80%** ( `100 - remaining`を計算する場合) |
 
-- **テキストに 20% left と表示される理由：** アカウント上で物理的に残っているクォータ 40% のうち、25% は
-  カットオフポリシーによって予約されています。ルーターがこの接続へのルーティングを停止するまでに、呼び出し元が利用できる残りのヘッドルームは、使用可能な 75% のうち 15% だけです。スケーリングにより、ルーティングが停止するタイミングと、接続が枯渇（`0% left`）を示すタイミングが正確に一致します。
-- **JSON が生の値を保持する理由：** JSON ペイロードは正確なプロバイダーのスナップショット（`UsageSnapshot`）を返すため、外部ツールは、サーバー側での情報損失を伴うスケーリングなしに、アップストリームの実際の使用率と接続レベルの `quotaWindowThresholds` にアクセスできます。
+- **テキストに残り 20% が表示される理由:**アカウントに残っている 40% の物理割り当てのうち、25% はカットオフ ポリシーによって予約されています。ルータがこの接続へのルーティングを停止するまで、発信者には使用可能なヘッドルーム 75% のうち 15% しか残っていません。スケーリングにより、ルーティングが停止する正確な時点で、接続の枯渇 (`0% left`) 信号が確実に送信されます。
+- **JSON生の値を保持する理由:** JSONペイロードは正確なプロバイダー スナップショット (`UsageSnapshot`) を返すため、外部ツールはサーバー側の損失の多いスケーリングを行わずに、グラウンドトゥルースのアップストリーム利用と接続レベルの`quotaWindowThresholds`にアクセスできます。
 
-#### 利用者の移行ガイダンス
+#### 消費者移行ガイダンス
 
-外部統合（エディタープラグインやエージェント拡張機能など）が以前、テキストエンドポイント（`NN% left`）をスクレイピングし、使用率を `100 - NN` として計算していた場合、`?format=json` への移行により次のようになります。
+外部統合 (エディター プラグインやエージェント拡張機能など) が以前にテキスト エンドポイント (`NN% left`) をスクレイピングし、使用率を`100 - NN`として計算していた場合、 `?format=json`への移行は次のことを意味します。
 
-- 生の JSON 値を読み取ることで、**実際のアップストリーム消費量**（上記の例では使用率 60%）が反映されます。
-- 統合側でテキストエンドポイントの利用可能量のセマンティクスを維持したい場合は、接続レベルのオーバーライドに `quotaWindowThresholds` を使用して、実効残量の計算式をクライアント側で評価できます。
+- 生のJSON値を読み取ると反映されます**実際の上流消費量**(上記の例では 60% が使用されています)。
+- 統合でテキスト エンドポイントの使用可能許可セマンティクスを保持したい場合は、接続レベルのオーバーライドに`quotaWindowThresholds`を使用してクライアント側で有効な残りの式を評価できます。
 
 ---
 
@@ -1152,36 +1149,37 @@ Claudeコードの自動モード分類子は、明示的な推論制御が含�
 
 `PATCH /api/keys/{id}`既存のキーの権限を更新します。すべての`/api/keys*`ルートと同様に、推論キーではなく、管理承認 ( [「管理認証](../guides/MANAGEMENT-AUTH.md)」を参照) が必要です。変更したいフィールドのみを送信してください。これらのいずれも含まれないリクエストは`No valid fields to update`で拒否されます。受け入れられるフィールドは、 `src/shared/validation/schemas/keys.ts`の`updateKeyPermissionsSchema`によって定義されます。
 
-| 分野                                        | タイプ                                                     | 注意事項                                                                                                                          |
-| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | 文字列、1 ～ 200 文字                                      |                                                                                                                                   |
-| `isActive`                                  | ブール値                                                   |                                                                                                                                   |
-| `isBanned`                                  | ブール値                                                   |                                                                                                                                   |
-| `expiresAt`                                 | ISO 8601 日時または`null`                                  | `null`有効期限をクリアします                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                      | モードが`all`の場合、`allowedModels`空でなければなりません                                                                        |
-| `allowedModels`, `blockedModels`            | 文字列の配列、最大 1000                                    |                                                                                                                                   |
-| `allowedCombos`                             | 文字列の配列、最大 500                                     | キーが呼び出す可能性のあるコンボのゲート。直接モデルは`modelAccessMode` / `allowedModels`によって管理されます                     |
-| `connectionAccessMode`                      | `all` \| `restricted`                                      | `allowedConnections` 、 `restricted`の場合は空であってはならず、 `all`の場合は空でなければなりません                              |
-| `allowedConnections`                        | UUIDsの配列、最大 100                                      |                                                                                                                                   |
-| `allowAutoCombos`                           | ブール値                                                   | `false`このキーを持つ`auto/*`モデルのリクエストを拒否します。決して設定しないキーは許可されます                                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                              | `GET /v1/models`このキーに対してリストする内容 (コンボのみ、モデルのみ、または両方)。キーが何を呼び出すかは変わりません           |
-| `forcedModel`                               | 最大 300 文字の文字列、または`null`                        | チャット リクエストを`X-Route-Model`および`body.model`経由でこのmodel/comboにルーティングします。キーの制限は引き続き適用されます |
-| `noLog`, `autoResolve`                      | ブール値                                                   |                                                                                                                                   |
-| `throttleDelayMs`                           | 整数、0 ～ 300000                                          |                                                                                                                                   |
-| `maxSessions`                               | 整数、0 ～ 10000                                           |                                                                                                                                   |
-| `rateLimits`                                | `{ limit, window }` (正の整数、最大 50) または`null`の配列 | `null`限界をクリアします                                                                                                          |
-| `accessSchedule`                            | スケジュールオブジェクトまたは`null`                       | `null`スケジュールをクリアします                                                                                                  |
-| `scopes`                                    | 文字列の配列、最大 32                                      |                                                                                                                                   |
-| `allowedEndpoints`                          | 文字列の配列、最大 20                                      |                                                                                                                                   |
-| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                   |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | [「キーごとのキャッシュ バイパス」](#per-key-cache-bypass)を参照してください。                                                    |
-| `compressionEnabled`                        | ブール値                                                   |                                                                                                                                   |
-| `codexServiceMode`                          | Codexサービス モードの 1 つ                                |                                                                                                                                   |
-| `disableNonPublicModels`                    | ブール値                                                   |                                                                                                                                   |
-| `allowUsageCommand`                         | ブール値                                                   |                                                                                                                                   |
-| `usageLimitEnabled`                         | ブール値                                                   |                                                                                                                                   |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 数値>= 0 または`null`                                      |                                                                                                                                   |
-| `chaosModeEnabled`                          | ブール値                                                   |                                                                                                                                   |
+| 分野                                        | タイプ                                                     | 注意事項                                                                                                                                                                                                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | 文字列、1 ～ 200 文字                                      |                                                                                                                                                                                                                                                                            |
+| `isActive`                                  | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `isBanned`                                  | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `expiresAt`                                 | ISO 8601 日時または`null`                                  | `null`有効期限をクリアします                                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                      | モードが`all`の場合、`allowedModels`空でなければなりません                                                                                                                                                                                                                 |
+| `allowedModels`, `blockedModels`            | 文字列の配列、最大 1000                                    |                                                                                                                                                                                                                                                                            |
+| `allowedCombos`                             | 文字列の配列、最大 500                                     | キーが呼び出す可能性のあるコンボのゲート。直接モデルは`modelAccessMode` / `allowedModels`によって管理されます                                                                                                                                                              |
+| `connectionAccessMode`                      | `all` \| `restricted`                                      | `allowedConnections` 、 `restricted`の場合は空であってはならず、 `all`の場合は空でなければなりません                                                                                                                                                                       |
+| `allowedConnections`                        | UUIDsの配列、最大 100                                      |                                                                                                                                                                                                                                                                            |
+| `allowAutoCombos`                           | ブール値                                                   | `false`このキーを持つ`auto/*`モデルのリクエストを拒否します。決して設定しないキーは許可されます                                                                                                                                                                            |
+| `catalogScope`                              | `all` \| `combos` \| `models`                              | `GET /v1/models`このキーに対してリストする内容 (コンボのみ、モデルのみ、または両方)。キーが何を呼び出すかは変わりません                                                                                                                                                    |
+| `forcedModel`                               | 最大 300 文字の文字列、または`null`                        | チャット リクエストを`X-Route-Model`および`body.model`経由でこのmodel/comboにルーティングします。キーの制限は引き続き適用されます                                                                                                                                          |
+| `noLog`, `autoResolve`                      | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `throttleDelayMs`                           | 整数、0 ～ 300000                                          |                                                                                                                                                                                                                                                                            |
+| `maxSessions`                               | 整数、0 ～ 10000                                           |                                                                                                                                                                                                                                                                            |
+| `rateLimits`                                | `{ limit, window }` (正の整数、最大 50) または`null`の配列 | `null`限界をクリアします                                                                                                                                                                                                                                                   |
+| `accessSchedule`                            | スケジュールオブジェクトまたは`null`                       | `null`スケジュールをクリアします                                                                                                                                                                                                                                           |
+| `scopes`                                    | 文字列の配列、最大 32                                      |                                                                                                                                                                                                                                                                            |
+| `allowedEndpoints`                          | 文字列の配列、最大 20                                      |                                                                                                                                                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | [「キーごとのキャッシュ バイパス」](#per-key-cache-bypass)を参照してください。                                                                                                                                                                                             |
+| `compressionEnabled`                        | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `codexServiceMode`                          | Codexサービス モードの 1 つ                                |                                                                                                                                                                                                                                                                            |
+| `disableNonPublicModels`                    | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `allowUsageCommand`                         | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `usageLimitEnabled`                         | ブール値                                                   |                                                                                                                                                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 数値>= 0 または`null`                                      |                                                                                                                                                                                                                                                                            |
+| `fiveHourUsageLimitUsd`                     | 数値>= 0 または`null`                                      | ローリング 5 時間のUSD予算。日次および週次の制限 (`usageLimitEnabled`、 `UNPRICED_USAGE_BUDGET_POLICY`) と同様に適用されます。 `retry-after`は、ウィンドウ内で最も古い支出が期限切れになるときであり、制限をはるかに超えたキーがブロックされたままになる可能性があります。 |
+| `chaosModeEnabled`                          | ブール値                                                   |                                                                                                                                                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

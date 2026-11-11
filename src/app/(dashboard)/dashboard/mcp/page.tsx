@@ -32,6 +32,7 @@ function ServiceToggle({
   toggling: boolean;
 }) {
   const t = useTranslations("mcpDashboard");
+  const tCommon = useTranslations("common");
   const online = enabled && status.online;
   const loading = enabled && status.loading;
 
@@ -55,7 +56,7 @@ function ServiceToggle({
           enabled ? "text-success" : "text-text-muted"
         )}
       >
-        {toggling ? "..." : enabled ? "ON" : "OFF"}
+        {toggling ? "..." : enabled ? tCommon("on") : tCommon("off")}
       </span>
     </div>
   );
