@@ -25,12 +25,14 @@ export function originalCacheSession(headers: unknown, body?: Body): string | nu
   return sessionId(body?.session_id) || sessionId(body?.conversation_id) || metadataSession(body);
 }
 
+/** Read a lower-case header name from Fetch Headers or a case-insensitive plain object. */
 function readHeader(headers: unknown, name: string): unknown {
   if (headers instanceof Headers) return headers.get(name);
   if (!headers || typeof headers !== "object") return null;
   return Object.entries(headers).find(([key]) => key.toLowerCase() === name)?.[1];
 }
 
+/** Extract a validated session ID from bounded JSON in Claude metadata.user_id. */
 function metadataSession(body?: Body): string | null {
   const metadata = body?.metadata;
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;

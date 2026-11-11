@@ -8,8 +8,11 @@ const categories = [
   "other",
 ];
 const sources = ["fileReads", "localSearch", "shellCommands", "mcpResults", "otherOrUnknown"];
+/** Treat non-object content entries as empty records for role and tool-call inspection. */
 const record = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+/** Accept only nonempty bounded call IDs for correlating tool results with earlier calls. */
 const id = (v) => (typeof v === "string" && v.length > 0 && v.length <= 256 ? v : null);
+/** Preserve text verbatim and serialize structured content, using empty text for undefined. */
 const serialized = (v) => (typeof v === "string" ? v : (JSON.stringify(v) ?? ""));
 
 /** Exact tool-name allowlists; MCP names win before any local tool classification. */
@@ -24,6 +27,7 @@ function outputSource(name) {
   return "otherOrUnknown";
 }
 
+/** Yield visible text and tool-call units recursively, marking media without counting its payload. */
 function* contentParts(content, category, reference) {
   if (typeof content === "string") {
     yield { category, text: content, reference };
@@ -107,6 +111,7 @@ export function countTokenBreakdown(
   encode,
   { now = performance.now.bind(performance), maxChars = 262144, maxMs = 1500 } = {}
 ) {
+  /** Initialize independent token, byte, and part counters for each requested bucket. */
   const empty = (names) =>
     Object.fromEntries(names.map((n) => [n, { tokens: 0, bytes: 0, parts: 0 }]));
   const out = {

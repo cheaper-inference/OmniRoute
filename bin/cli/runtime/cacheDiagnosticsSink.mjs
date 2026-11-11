@@ -35,6 +35,7 @@ function closedRun(directory, name) {
   }
 }
 
+/** Run synchronous retention work under an exclusive lock; acquisition failures propagate. */
 function withRotationLock(directory, work) {
   const lock = path.join(directory, ".rotation.lock");
   const lockFd = fs.openSync(lock, "wx", 0o600);
@@ -46,6 +47,7 @@ function withRotationLock(directory, work) {
   }
 }
 
+/** Delete only verified closed runs beyond the four most recently closed leases. */
 function rotateClosedRuns(directory) {
   const closed = fs
     .readdirSync(directory)
@@ -107,6 +109,7 @@ export function createCacheDiagnosticsSink(
   });
   return {
     file,
+    /** Accept one JSONL record within the size cap; drop new records during backpressure or shutdown. */
     write(record) {
       if (failed || blocked || ended) return false;
       const line =
@@ -117,6 +120,7 @@ export function createCacheDiagnosticsSink(
       blocked = !stream.write(line);
       return true;
     },
+    /** Drain the stream before marking its lease closed, then attempt retention under the lock. */
     async close() {
       if (ended) return;
       ended = true;

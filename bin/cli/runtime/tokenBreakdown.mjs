@@ -18,13 +18,16 @@ export const OUTPUT_SOURCES = [
   "otherOrUnknown",
 ];
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
+/** Bound worker-supplied counts to nonnegative safe integers no greater than one billion. */
 const numeric = (value) => Number.isSafeInteger(value) && value >= 0 && value <= 1000000000;
+/** Return a fixed rejection status without exposing untrusted worker payloads. */
 const invalid = () => ({ status: "invalid_result" });
 
 /** Project a worker message onto fixed numeric fields; never forward arbitrary worker strings. */
 export function validateTokenBreakdown(value) {
   if (["invalid_json", "oversized"].includes(value?.status)) return { status: value.status };
   if (!["ok", "unavailable_tokenizer"].includes(value?.status)) return invalid();
+  /** Copy only validated token, byte, and part counts for every expected category or source. */
   const project = (names, source) => {
     if (
       !source ||
@@ -83,6 +86,7 @@ export function createTokenBreakdown({
     stopped = false,
     disabled = false,
     retryAt = 0;
+  /** Settle a job once after worker termination, applying cooldown or permanent disablement. */
   async function finish(job, result, permanent = false) {
     if (pending !== job || job.finishing) return;
     job.finishing = true;
@@ -98,6 +102,7 @@ export function createTokenBreakdown({
     pending = null;
     job.resolve(result);
   }
+  /** Estimate one bounded body without queueing; return explicit statuses when work cannot start. */
   function submit(body) {
     if (stopped) return Promise.resolve({ status: "stopped" });
     if (disabled) return Promise.resolve({ status: "unavailable" });
@@ -141,6 +146,7 @@ export function createTokenBreakdown({
   }
   return {
     submit,
+    /** Reject future submissions and wait for any in-flight worker cleanup to finish. */
     async stop() {
       stopped = true;
       if (pending) {

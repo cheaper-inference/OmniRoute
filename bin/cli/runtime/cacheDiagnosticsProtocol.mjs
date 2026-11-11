@@ -1,7 +1,10 @@
+/** Normalize non-object and array inputs to an empty usage record. */
 const record = (value) =>
   value && typeof value === "object" && !Array.isArray(value) ? value : {};
+/** Accept finite nonnegative counters, preserving zero and returning null for invalid values. */
 const counter = (value) =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+/** Validate the first present alias; an invalid preferred value does not fall through. */
 const first = (values) => {
   for (const value of values) if (value !== undefined && value !== null) return counter(value);
   return null;
@@ -38,6 +41,7 @@ export function createCacheUsageParser({ maxFrameBytes = 256 * 1024, sse = true 
     terminal = false,
     usage = rawCacheUsage(null),
     reported = false;
+  /** Merge reported counters from one JSON payload and track terminal markers independently. */
   function consume(text) {
     if (text === "[DONE]") {
       terminal = true;
@@ -58,6 +62,7 @@ export function createCacheUsageParser({ maxFrameBytes = 256 * 1024, sse = true 
       /* Malformed frames establish no usage; a terminal marker remains independent. */
     }
   }
+  /** Decode observed chunks incrementally, abandoning parsing when a frame exceeds the byte cap. */
   function push(chunk) {
     if (unavailable) return;
     const bytes = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
@@ -90,6 +95,7 @@ export function createCacheUsageParser({ maxFrameBytes = 256 * 1024, sse = true 
   }
   return {
     push,
+    /** Flush trailing text and return counters with separate terminal and availability indicators. */
     finish() {
       if (!unavailable) {
         buffer += decoder.decode();

@@ -5,10 +5,12 @@ on:
     paths:
       - "open-sse/services/compression/**"
       - "open-sse/handlers/chatCore/sessionPromptCacheKey.ts"
+      - "src/lib/gracefulShutdown.ts"
       - "bin/cli/runtime/**"
       - "scripts/build/runtime-env.mjs"
       - "scripts/test/check-compression-packaged-runtime.mjs"
       - "tests/fixtures/compression-packaged-runtime/**"
+      - "tests/fixtures/token-breakdown/**"
       - "tests/unit/cache-diagnostics-*.test.mjs"
       - "tests/unit/token-breakdown-*.test.mjs"
       - "package*.json"
@@ -39,7 +41,7 @@ jobs:
           cache: npm
       - uses: ./.github/actions/npm-ci-retry
       - name: Real local fetch, private leases and disposable workers
-        run: node --test tests/unit/cache-diagnostics-fetch.test.mjs tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/cache-diagnostics-leases.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
+        run: node --test tests/unit/cache-diagnostics-workflow.test.mjs tests/unit/cache-diagnostics-fetch.test.mjs tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/cache-diagnostics-leases.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
   packaged-runtime:
     name: Packaged compression (${{ matrix.os }})
     strategy:
@@ -58,6 +60,6 @@ jobs:
           cache: npm
       - uses: ./.github/actions/npm-ci-retry
       - name: Private diagnostics and disposable-worker regressions
-        run: node --test tests/unit/cache-diagnostics-fetch.test.mjs tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/cache-diagnostics-leases.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
+        run: node --test tests/unit/cache-diagnostics-workflow.test.mjs tests/unit/cache-diagnostics-fetch.test.mjs tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/cache-diagnostics-leases.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
       - name: Real Turbopack pool in an installation path with spaces
         run: npm run test:compression:packaged

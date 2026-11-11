@@ -23,6 +23,7 @@ export interface PermissionScopeOptions {
   bypassProviderQuotaPolicyEnabled: boolean;
 }
 
+/** Build explicit grants for a new key, defaulting self-usage on and gating quota access on it. */
 export function buildApiKeyCreateScopes(options: CreateScopeOptions): string[] {
   const scopes: string[] = [];
   const selfUsageEnabled = options.selfUsageEnabled ?? true;
@@ -39,6 +40,7 @@ export function buildApiKeyCreateScopes(options: CreateScopeOptions): string[] {
   return scopes;
 }
 
+/** Update owned permission toggles while preserving unrelated scopes and unspecified MCP grants. */
 export function mergeApiKeyPermissionScopes(
   currentScopes: readonly string[] | null | undefined,
   options: PermissionScopeOptions
@@ -62,6 +64,7 @@ export function mergeApiKeyPermissionScopes(
   return [...scopes];
 }
 
+/** Mutate a scope set to match one explicitly controlled permission toggle. */
 function setScope(scopes: Set<string>, scope: string, enabled: boolean): void {
   if (enabled) {
     scopes.add(scope);

@@ -34,6 +34,7 @@ function endpoint(request) {
   }
   return null;
 }
+/** Read a lower-case header name from Undici pairs or a header object; missing values are empty. */
 function header(headers, name) {
   if (Array.isArray(headers)) {
     for (let i = 0; i < headers.length; i += 2)
@@ -74,12 +75,14 @@ export function startCacheDiagnostics({
     pending = new Map(),
     groups = new Map(),
     subscriptions = [];
+  /** Hash request material with a per-run key so persisted fingerprints cannot link separate runs. */
   const fingerprint = (value) => createHmac("sha256", key).update(value).digest("hex");
   const counter =
     bodySupported && env.OMNIROUTE_TOKEN_BREAKDOWN === "1"
       ? (tokenCounter ?? createTokenBreakdown())
       : null;
   let stopped = false;
+  /** Register a guarded diagnostic listener and retain it for shutdown unsubscription. */
   function listen(name, fn) {
     const target = channel(`undici:request:${name}`);
     const callback = (message) => {
@@ -93,6 +96,7 @@ export function startCacheDiagnostics({
     target.subscribe(callback);
     subscriptions.push([target, callback]);
   }
+  /** Remove one pending request and persist only its bounded usage observation and fingerprints. */
   function finish(request, failure) {
     const entry = pending.get(request);
     if (!entry) return;
@@ -242,6 +246,7 @@ export function startCacheDiagnostics({
   timer.unref();
   if (bodySupported) log("INFO", "Private cache diagnostics enabled");
   return {
+    /** Unsubscribe observers, discard pending bodies, and await worker and sink cleanup. */
     async stop() {
       if (stopped) return;
       stopped = true;

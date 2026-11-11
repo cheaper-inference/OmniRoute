@@ -4,6 +4,7 @@ import Toggle from "@/shared/components/Toggle";
 import type { useKeyTemplateCreation } from "../useKeyTemplateCreation";
 import McpPermissionControls from "./McpPermissionControls";
 
+/** Edit quick-create management and independent MCP grants, synchronizing both management states. */
 export default function QuickKeyPermissionControls({
   draft,
   disabled,
