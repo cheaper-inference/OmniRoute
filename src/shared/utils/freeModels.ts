@@ -56,7 +56,10 @@ const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeTyp
 /** Provider ids that have at least one documented free model. */
 // SiliconFlow has a live free-labelled catalog but the shipped ten-flagship list
 // was actually billable (#17028). Accept only verified per-model live evidence.
-const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow"] as const;
+// Nous Portal marks its free models in its own /models list (`isFree`, `:free` ids), but
+// the shipped Hermes-4 rows had no evidence and were removed (#16781/#16791), so it has no
+// catalog rows either: live evidence per model, paid flags and prices still veto (#19562).
+const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow", "nous-research"] as const;
 export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
   ...FREE_BUDGETS.map((m) => m.provider),
   ...LIVE_EVIDENCE_ONLY_PROVIDERS,
