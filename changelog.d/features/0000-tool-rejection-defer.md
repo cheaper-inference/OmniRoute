@@ -1,0 +1,1 @@
+- **feat(combo):** opt-in `OMNIROUTE_TOOL_REJECTION_DEFER=true` tries a combo target last for tool requests after it rejects 3 distinct tool requests with a provider 400 inside 1 h (6 h soft defer, cleared by a served tool request). Off by default.

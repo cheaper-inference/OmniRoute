@@ -11,6 +11,7 @@ import { createChaosHeaderBarrier } from "./combo/chaosHeaderBarrier.ts";
 import { runComboWithSafetyLatch } from "./combo/safetyStopLatch.ts";
 
 import { recordComboFailure } from "./combo/failureTracker.ts";
+import { deferToolRejectingTargets } from "./combo/toolRejectionTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
 import { buildTargetTimeoutRunner } from "./combo/targetTimeoutRunner.ts";
 import { costKey, resolvePoolCosts } from "./combo/candidateCost.ts";
@@ -1094,7 +1095,10 @@ async function handleComboChatInner({
   const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap, compatRejectedTargets } =
     targetResolution;
   const _sticky = targetResolution.sticky;
-  let orderedTargets = targetResolution.orderedTargets;
+  let orderedTargets = deferToolRejectingTargets(
+    targetResolution.orderedTargets,
+    body as Record<string, unknown>
+  );
   const quotaCutoffResetWindowConfig = resolveResetWindowConfig(config as Record<string, unknown>);
 
   let pinnedLockWaitMs = 0;

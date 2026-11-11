@@ -814,7 +814,8 @@
       "tests/unit/gemini-signature-store-lru.test.ts",
       "tests/unit/claude-session-prompt-cache-key.test.ts",
       "tests/unit/claude-client-anthropic-endpoint.test.ts",
-      "tests/unit/route-streaming-policy.test.ts"
+      "tests/unit/route-streaming-policy.test.ts",
+      "tests/unit/combo-tool-rejection-defer.test.ts"
     ],
     "nodeArgs": [
       "--import",
