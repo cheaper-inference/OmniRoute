@@ -1,0 +1,1 @@
+- **feat(ollama):** Opt-in `OMNIROUTE_OLLAMA_REAL_TAGS=1` makes `GET /api/tags` list the real model catalog (same auth as `/v1/models`) instead of two sample models.

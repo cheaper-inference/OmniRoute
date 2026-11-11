@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/bedrock-iam-static-keys.test.ts",
       "tests/unit/moonshot-region-probe.test.ts",
-      "tests/unit/provider-required-fields.test.ts"
+      "tests/unit/provider-required-fields.test.ts",
+      "tests/unit/ollama-real-tags.test.ts"
     ],
     "nodeArgs": [
       "--import",
