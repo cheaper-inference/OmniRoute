@@ -16,6 +16,9 @@
  *
  * Operators can still point any task type at a specific model via
  * PUT /api/settings/task-routing — the defaults just stop shipping stale ones.
+ *
+ * Opt-in for agent traffic: `detectionAnchor: "first-user"` keeps one decision per
+ * conversation (see DetectionAnchor).
  */
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -36,6 +39,20 @@ interface TaskPattern {
  */
 export type TaskPatternOverrides = Partial<Record<TaskType, Partial<TaskPattern>>>;
 
+/**
+ * Which user message drives detection.
+ *
+ *  - "latest-user" (default): the most recent user message — the original behavior.
+ *  - "first-user": the first user message that carries human-written text. Agent CLIs
+ *    (Claude Code, Codex, …) resend the whole conversation on every turn, so this anchor
+ *    gives every turn of a conversation the same decision: the model never flips
+ *    mid-conversation, and the upstream prompt cache — which is per model — stays warm.
+ *    Each subagent conversation starts with its own first message, so it is classified
+ *    on its own. Harness-injected blocks are ignored in this mode only, so the default
+ *    mode detects exactly as before.
+ */
+export type DetectionAnchor = "latest-user" | "first-user";
+
 export interface TaskRoutingConfig {
   enabled: boolean;
   /**
@@ -46,6 +63,8 @@ export interface TaskRoutingConfig {
   /** Operator-configurable detection patterns — see TaskPatternOverrides. */
   patternOverrides?: TaskPatternOverrides;
   detectionEnabled: boolean;
+  /** See DetectionAnchor. Missing = "latest-user". */
+  detectionAnchor?: DetectionAnchor;
   stats: { detected: number; routed: number };
 }
 
@@ -207,6 +226,7 @@ function freshConfig(): TaskRoutingConfig {
     enabled: false, // User must explicitly enable
     taskModelMap: { ...DEFAULT_TASK_MODEL_MAP },
     detectionEnabled: true,
+    detectionAnchor: "latest-user",
     stats: { detected: 0, routed: 0 },
   };
 }
@@ -301,16 +321,86 @@ interface RequestMessage {
   content?: unknown;
 }
 
-function extractText(content: unknown): string {
-  if (typeof content === "string") return content.toLowerCase();
+/**
+ * Blocks that agent harnesses inject into user turns — Claude Code wraps project
+ * instructions, skill/tool listings and reminders in `<system-reminder>`, and Codex sends its
+ * cwd/sandbox/shell as a user message holding only `<environment_context>`. They are not the
+ * user's request, and their boilerplate ("implement", code fences, …) would otherwise drive
+ * detection.
+ */
+const HARNESS_INJECTED_TAGS = ["system-reminder", "environment_context"];
+
+/**
+ * Remove every complete `<tag>…</tag>` block for the injected tags. Plain indexOf scanning,
+ * linear in the input — no regex, so no ReDoS surface. An unterminated opening tag is kept
+ * as-is: only text that is provably injected is dropped.
+ */
+export function stripHarnessInjectedBlocks(text: string): string {
+  let out = text;
+  for (const tag of HARNESS_INJECTED_TAGS) {
+    const open = `<${tag}>`;
+    const close = `</${tag}>`;
+    let kept = "";
+    let cursor = 0;
+    for (;;) {
+      const start = out.indexOf(open, cursor);
+      const end = start === -1 ? -1 : out.indexOf(close, start + open.length);
+      if (end === -1) {
+        kept += out.slice(cursor);
+        break;
+      }
+      kept += out.slice(cursor, start);
+      cursor = end + close.length;
+    }
+    out = kept;
+  }
+  return out;
+}
+
+function extractRawText(content: unknown, stripHarness: boolean): string {
+  const clean = (text: string) => (stripHarness ? stripHarnessInjectedBlocks(text) : text);
+  if (typeof content === "string") return clean(content);
   if (Array.isArray(content)) {
     return content
       .map((part: any) =>
-        typeof part === "string" ? part.toLowerCase() : part?.text?.toLowerCase() || ""
+        clean(typeof part === "string" ? part : typeof part?.text === "string" ? part.text : "")
       )
       .join(" ");
   }
   return "";
+}
+
+function extractText(content: unknown, stripHarness: boolean): string {
+  return extractRawText(content, stripHarness).toLowerCase();
+}
+
+function getRequestMessages(body: unknown): RequestMessage[] {
+  if (!body || typeof body !== "object") return [];
+  const { messages, input } = body as { messages?: unknown; input?: unknown };
+  if (Array.isArray(messages)) return messages as RequestMessage[];
+  if (Array.isArray(input)) return input as RequestMessage[];
+  return [];
+}
+
+function getDetectionAnchor(): DetectionAnchor {
+  return getConfig().detectionAnchor === "first-user" ? "first-user" : "latest-user";
+}
+
+/**
+ * The user message detection reads. "first-user" skips leading user turns that carry no
+ * human-written text (only injected blocks or tool results), falling back to the first
+ * user message when none has any.
+ */
+function selectAnchorMessage(
+  messages: RequestMessage[],
+  anchor: DetectionAnchor
+): RequestMessage | undefined {
+  const userMessages = messages.filter((m) => m.role === "user");
+  if (anchor === "first-user") {
+    const typedByUser = (m: RequestMessage) => extractRawText(m.content, true).trim().length > 0;
+    return userMessages.find(typedByUser) ?? userMessages[0];
+  }
+  return userMessages[userMessages.length - 1];
 }
 
 function hasImages(messages: RequestMessage[]): boolean {
@@ -329,24 +419,23 @@ function hasImages(messages: RequestMessage[]): boolean {
  * Returns 'chat' (no-op) if nothing specific is detected.
  */
 export function detectTaskType(body: any): TaskType {
-  if (!body || typeof body !== "object") return "chat";
-
-  const messages: RequestMessage[] = Array.isArray(body.messages)
-    ? body.messages
-    : Array.isArray(body.input)
-      ? body.input
-      : [];
-
+  const messages = getRequestMessages(body);
   if (messages.length === 0) return "chat";
 
-  // 1. Vision — check for image_url in any message
-  if (hasImages(messages)) return "vision";
+  const anchor = getDetectionAnchor();
+  const anchorMsg = selectAnchorMessage(messages, anchor);
 
-  // 2. System prompt patterns (background first — most specific)
+  // 1. Vision — check for image_url in any message ("first-user": only in the anchor
+  // message, so a screenshot pasted mid-conversation does not flip the decision)
+  const imageScope = anchor === "first-user" ? (anchorMsg ? [anchorMsg] : []) : messages;
+  if (hasImages(imageScope)) return "vision";
+
+  // 2. System prompt patterns (background first — most specific). Harness blocks are
+  // ignored only in "first-user" mode, so the default mode detects exactly as before.
+  const stripHarness = anchor === "first-user";
   const systemMsg = messages.find((m) => m.role === "system" || m.role === "developer");
-  const systemText = systemMsg ? extractText(systemMsg.content) : "";
-  const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
-  const userText = lastUserMsg ? extractText(lastUserMsg.content) : "";
+  const systemText = systemMsg ? extractText(systemMsg.content, stripHarness) : "";
+  const userText = anchorMsg ? extractText(anchorMsg.content, stripHarness) : "";
 
   // Check ALL task patterns in priority order
   const priorityOrder: TaskType[] = [
