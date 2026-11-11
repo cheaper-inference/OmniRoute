@@ -101,10 +101,12 @@ export function createStaticMetadataReader(readSource) {
     else fail(`IMPORT_UNSUPPORTED:${specifier}`);
     if (candidate.startsWith("../") || path.posix.isAbsolute(candidate))
       fail("IMPORT_OUTSIDE_ROOT");
-    for (const file of /\.[cm]?tsx?$/.test(candidate)
+    const candidates = /\.[cm]?tsx?$/.test(candidate)
       ? [candidate]
-      : [candidate + ".ts", candidate + "/index.ts"])
+      : [candidate + ".ts", candidate + "/index.ts"];
+    for (const file of candidates) {
       if (typeof readSource(file) === "string") return file;
+    }
     fail(`IMPORT_MISSING:${candidate}`);
   };
   const declaration = (file, name) => {

@@ -104,3 +104,30 @@ for (const id of ["codeql-scan", "codeql-admission"]) {
     });
   }
 }
+
+test("original SARIF is retained after failed ingestion without replacing upload receipts", () => {
+  const steps = producer.jobs.analyze.steps;
+  const analyze = steps.find((step) => step.id === "analyze");
+  const raw = steps.find((step) => step.name === "Retain original CodeQL SARIF for diagnosis");
+  assert.ok(raw, "a failed ingestion must leave the original SARIF available");
+  assert.equal(raw.if, "${{ always() }}");
+  assert.match(raw.uses, /^actions\/upload-artifact@[a-f0-9]{40}$/);
+  assert.equal(analyze.with.output, ".artifacts/codeql-sarif");
+  assert.equal(raw.with.path, analyze.with.output);
+  assert.equal(
+    raw.with.name,
+    "codeql-sarif-${{ github.run_id }}-${{ matrix.language }}-${{ github.run_attempt }}"
+  );
+  assert.equal(raw.with["retention-days"], 14);
+  assert.equal(
+    raw.with["if-no-files-found"],
+    "warn",
+    "initialization may fail before SARIF exists"
+  );
+  assert.equal(analyze.with.upload ?? "always", "always");
+  assert.equal(analyze.with["wait-for-processing"], true);
+  assert.ok(steps.indexOf(raw) > steps.indexOf(analyze));
+  const receiptUpload = steps.find((step) => step.with?.name?.startsWith("codeql-upload-"));
+  assert.ok(receiptUpload, "raw diagnostics never substitute for authenticated upload receipts");
+  assert.notEqual(raw.with.name, receiptUpload.with.name);
+});
