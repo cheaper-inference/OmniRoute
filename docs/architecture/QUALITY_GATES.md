@@ -137,11 +137,11 @@ The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify open
 a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
 when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
 
-Mergify writes its queue summary into the draft's description, and other apps can edit it too.
-A `pull_request` `edited` event on such a draft takes its own concurrency group
-(`-queue-edit-<run_id>`) so it cannot cancel the draft's real run, and it skips the gate and the
-matrix. Only `Merge integrity` still runs. The skipped gate job carries a different check name,
-because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
+Mergify writes its queue summary into the draft's description. Body/title-only
+`pull_request` `edited` events use a run-specific concurrency group and do not rerun
+classification, test matrices, merge integrity or the admission verdict. Observation-only
+check names cannot replace `Gate / CI` or `Gate / Quality`. An edit that changes the target
+base requests fresh candidate validation.
 
 After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
 
@@ -214,7 +214,7 @@ deleted recorded core files cannot produce a successful absolute verdict.
 `.github/workflows/quality.yml` complements CI on main/release PRs, pushes to `main`,
 dispatch and merge groups. PRs use path-filtered fast checks. The permanently
 disabled duplicate build was removed; the real build/package/boot checks remain in CI.
-The unit suite and vitest run only in CI (`Unit Tests (N/8)` and `Vitest`).
+The unit suite and vitest run only in CI (`Unit Tests (N/12)` and `Vitest`).
 
 | Job                                              | Scope                                                                                                                                                                                        | Blocking             |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |

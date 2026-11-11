@@ -86,11 +86,7 @@ CI JSONL ଫାଇଲଗୁଡ଼ିକୁ `unit-progress-ci-<run>-<attempt>-<sh
 ଗୋଟିଏ `mergify/merge-queue/` branchରେ draft PR ଖୋଲେ, CI ସେଠାରେ ସମ୍ପୂର୍ଣ୍ଣ selection ଚଲାଏ, ଏବଂ
 `Gate / CI`, `Gate / Quality` ଏବଂ `Merge integrity (changelog + generated skills)` pass ହେଲେ ମୂଳ PR merge ହୁଏ।
 
-Mergify ଏହାର queue summaryକୁ draftର descriptionରେ ଲେଖେ, ଏବଂ ଅନ୍ୟ appଗୁଡ଼ିକ ମଧ୍ୟ ଏହାକୁ edit କରିପାରନ୍ତି।
-ଏପରି draftରେ ଗୋଟିଏ `pull_request` `edited` event ନିଜସ୍ୱ concurrency group
-(`-queue-edit-<run_id>`) ନିଏ, ତେଣୁ ଏହା draftର ପ୍ରକୃତ runକୁ cancel କରିପାରେ ନାହିଁ, ଏବଂ ଏହା gate ଓ
-matrixକୁ skip କରେ। କେବଳ `Merge integrity` ତଥାପି ଚାଲେ। Skip ହୋଇଥିବା gate jobର check name ଅଲଗା,
-କାରଣ Mergify ଗୋଟିଏ skip ହୋଇଥିବା `Gate / CI`କୁ failed check ଭାବେ ପଢ଼େ ଏବଂ PRକୁ dequeue କରେ।
+Mergify ଏହାର queue summaryକୁ draftର descriptionରେ ଲେଖେ। କେବଳ ବର୍ଣ୍ଣନା କିମ୍ବା ଶୀର୍ଷକ ବଦଳାଉଥିବା `pull_request` `edited` eventଗୁଡ଼ିକ ପ୍ରତ୍ୟେକ run ପାଇଁ ଏକ ସ୍ୱତନ୍ତ୍ର concurrency group ବ୍ୟବହାର କରନ୍ତି; ସେଗୁଡ଼ିକ classification, test matrix, merge integrity କିମ୍ବା admission verdictକୁ ପୁଣି ଚଲାନ୍ତି ନାହିଁ। କେବଳ ପର୍ଯ୍ୟବେକ୍ଷଣ ପାଇଁ ଥିବା check nameଗୁଡ଼ିକ `Gate / CI` କିମ୍ବା `Gate / Quality`କୁ ପ୍ରତିସ୍ଥାପନ କରିପାରିବେ ନାହିଁ। ଲକ୍ଷ୍ୟ base ବଦଳାଉଥିବା ଏକ edit ନୂଆ candidate validation ଅନୁରୋଧ କରେ।
 
 ଗୋଟିଏ dequeue ପରେ, push ସର୍ବଦା PRକୁ ପୁନଃ queue କରେ ନାହିଁ। ଏଥିରେ `@mergifyio queue` comment କରନ୍ତୁ।
 
@@ -137,7 +133,7 @@ CIର ପ୍ରାମାଣିକ ଉତ୍ସ ହେଉଛି `.github/workflow
 
 ### PR ଫାଷ୍ଟ-ପାଥ୍ (`quality.yml`) ରିଲିଜ୍ କରନ୍ତୁ।
 
-`.github/workflows/quality.yml` CI main/release PRs ରେ ସଂପନ୍ନ କରେ, `main` କୁ ଠେଲିଦିଏ, ଗୋଷ୍ଠୀ ପଠାନ୍ତୁ ଏବଂ ମିଶ୍ରଣ କର। PRs ପଥ-ଫିଲ୍ଟର୍ ଦ୍ରୁତ ଯାଞ୍ଚ ବ୍ୟବହାର କରନ୍ତୁ। ସ୍ଥାୟୀ ଭାବରେ ଅକ୍ଷମ ନକଲ ନିର୍ମାଣକୁ ହଟାଇ ଦିଆଗଲା; ପ୍ରକୃତ build/package/boot ଯାଞ୍ଚଗୁଡ଼ିକ CI ରେ ରହିଥାଏ। ୟୁନିଟ୍ ସୁଟ୍ ଏବଂ ଭିଟେଷ୍ଟ କେବଳ CI (`Unit Tests (N/8)` ଏବଂ `Vitest`) ରେ ଚାଲିଥାଏ।
+`.github/workflows/quality.yml` CI main/release PRs ରେ ସଂପନ୍ନ କରେ, `main` କୁ ଠେଲିଦିଏ, ଗୋଷ୍ଠୀ ପଠାନ୍ତୁ ଏବଂ ମିଶ୍ରଣ କର। PRs ପଥ-ଫିଲ୍ଟର୍ ଦ୍ରୁତ ଯାଞ୍ଚ ବ୍ୟବହାର କରନ୍ତୁ। ସ୍ଥାୟୀ ଭାବରେ ଅକ୍ଷମ ନକଲ ନିର୍ମାଣକୁ ହଟାଇ ଦିଆଗଲା; ପ୍ରକୃତ build/package/boot ଯାଞ୍ଚଗୁଡ଼ିକ CI ରେ ରହିଥାଏ। ୟୁନିଟ୍ ସୁଟ୍ ଏବଂ ଭିଟେଷ୍ଟ କେବଳ CI (`Unit Tests (N/12)` ଏବଂ `Vitest`) ରେ ଚାଲିଥାଏ।
 
 | ଚାକିରି                                           | ପରିସର                                                                                                                                                                                               | ଅବରୋଧ                       |
 | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
