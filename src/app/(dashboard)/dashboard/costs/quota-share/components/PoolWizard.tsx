@@ -798,7 +798,7 @@ export default function PoolWizard({
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
             <div className="rounded-lg border border-border bg-bg-subtle p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase tracking-wide font-bold text-text-muted">
+                <span className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
                   {tPlans("dimensionLabel")}
                 </span>
                 <Button variant="ghost" size="sm" icon="add" onClick={addDimension}>
@@ -978,7 +978,7 @@ export default function PoolWizard({
             {/* Add key + equal split controls */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-[11px]">
               <span
-                className={`font-bold tabular-nums ${
+                className={`font-semibold tabular-nums ${
                   totalWeight === 100
                     ? "text-success"
                     : totalWeight > 100
