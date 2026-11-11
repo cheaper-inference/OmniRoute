@@ -1,5 +1,10 @@
 export * from "./base";
-export * from "./piiMasker";
+export { PIIMaskerGuardrail } from "./piiMasker";
 export * from "./promptInjection";
 export * from "./registry";
-export * from "./credentialMasker";
+export {
+  CREDENTIAL_PATTERNS,
+  CredentialMaskerGuardrail,
+  redactCredentials,
+} from "./credentialMasker";
+export type { CredentialPattern, CredentialRedactionResult } from "./credentialMasker";

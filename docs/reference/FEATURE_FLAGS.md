@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-121 flags across 6 categories. **Default** is the definition default — the value
+122 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -103,7 +103,7 @@ used when neither a DB override nor an environment variable is present.
 | ----------------------------------------------- | ------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                                             |
 | `OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED`        | boolean | `false` |         | OpenCode Zen/Go: send the OpenCode v2 CLI client fingerprint (#16571) — User-Agent `opencode/latest/<2.x>/cli`, `x-opencode-client: cli`, a client User-Agent kept only when it is a 2.x OpenCode client; on gated free-tier requests no `x-opencode-request`, the session mirrored onto `x-opencode-session-id`/`x-session-affinity`/`x-session-id`, the v2 CLI `read`/`shell` schemas on injected placeholder tools and a `tool_choice` of `"none"` dropped. Off by default: identity, headers and body unchanged.                                                             |
 
-### Policies (8)
+### Policies (9)
 
 | Key                                      | Type    | Default       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------- | ------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -115,6 +115,7 @@ used when neither a DB override nor an environment variable is present.
 | `USAGE_LIMIT_IGNORE_UNPRICED`            | boolean | `false`       | Count usage of models that have no price as $0 in per-key USD usage quotas instead of treating the quota as exceeded. Off by default: an unpriced model or routing alias can hide real spend, so the quota fails closed.                                                                                                                                                                                                                                                                                                                                                                    |
 | `RADAR_ENABLED`                          | boolean | `false`       | Enable the OmniRoute Radar module (catalog feed screens and sync). Off by default; enabling only unlocks the UI — data sync remains a separate opt-in.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED` | boolean | `false`       | Enforce trusted model endpoint tags (provider-declared, inferred from a specialty model id, or operator-set): reject a request sent to an endpoint the model does not serve with HTTP 400 before dispatch on `/v1/chat/completions`, `/v1/embeddings`, `/v1/rerank`, `/v1/images/generations`, `/v1/videos/generations`, `/v1/music/generations` and `/v1/audio/*`; hide models whose tagged endpoints have no OmniRoute adapter from `/v1/models`; answer the dashboard model test with 422 for them (#16929). Off by default: endpoint tags stay informational and dispatch is unchanged. |
+| `AGENT_SESSION_MESSAGES_ENABLED`         | boolean | `false`       | Capture simplified conversation turns (user prompt, assistant reply, tool names) for coding-agent sessions and expose them to the session owner through `GET /v1/me/sessions/{id}/messages`. Off by default; never captured for `noLog` keys.                                                                                                                                                                                                                                                                                                                                               |
 
 When `UNPRICED_USAGE_BUDGET_POLICY` is explicitly configured (DB override before environment),
 it takes precedence over `USAGE_LIMIT_IGNORE_UNPRICED`. With no explicit enum value, the
@@ -284,10 +285,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 121 flags
+    // ... all 122 flags
   ],
   "summary": {
-    "total": 121,
+    "total": 122,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

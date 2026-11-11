@@ -16047,7 +16047,11 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › sessions › <id>"
-      description: Get details and recent requests of a session owned by the calling API key.
+      description: >-
+        Get details and recent requests of a session owned by the calling API key.
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
+      security:
+        - BearerAuth: []
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -16075,8 +16079,89 @@ paths:
                         latencyMs: { type: integer }
                         status: { type: [string, "null"] }
                         success: { type: boolean }
+        "400":
+          description: Missing session id
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
         "404":
           description: Session not found
+        "500":
+          description: The session could not be read
+  /api/v1/me/sessions/{id}/messages:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions › <id> › messages"
+      description: >-
+        Simplified conversation turns (user prompt, assistant reply, tool names) of a session
+        owned by the calling API key (also served at /v1/me/sessions/{id}/messages). Turns are
+        stored only while the AGENT_SESSION_MESSAGES_ENABLED feature flag is on, and never for
+        `noLog` keys. Authenticate with `Authorization: Bearer <key>`; requires scope
+        `self:usage`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Message id to continue after, taken from `nextCursor`.
+          schema:
+            type: integer
+            minimum: 1
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId: { type: string }
+                  capturing:
+                    type: boolean
+                    description: Whether turn capture is currently enabled.
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        timestamp: { type: string, format: date-time }
+                        provider: { type: [string, "null"] }
+                        model: { type: [string, "null"] }
+                        success: { type: boolean }
+                        user: { type: [string, "null"] }
+                        assistant: { type: [string, "null"] }
+                        tools: { type: array, items: { type: string } }
+                        truncated:
+                          type: boolean
+                          description: The prompt or reply was cut to the stored length.
+                  nextCursor: { type: [integer, "null"] }
+        "400":
+          description: Invalid query parameters or missing session id
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "404":
+          description: Session not found
+        "500":
+          description: Session messages could not be read
   /api/v1/models/{model}:
     get:
       tags:

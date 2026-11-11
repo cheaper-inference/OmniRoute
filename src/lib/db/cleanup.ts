@@ -11,6 +11,7 @@ import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { DATA_DIR, DB_BACKUPS_DIR, getDbInstance } from "./core";
+import { deleteAgentSessionMessagesBefore } from "./agentSessionMessages";
 import { removeStaleSnapshotTemps } from "./backupRetention";
 import { getUserDatabaseSettings } from "./databaseSettings";
 import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
@@ -119,6 +120,30 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
   return result;
 }
 
+/** First day (YYYY-MM-DD) kept by usage_history retention; older rows are removed. */
+function usageHistoryCutoffDay(retentionDays: number): string {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+  return cutoffDate.toISOString().split("T")[0];
+}
+
+/**
+ * Clean up old agent_session_messages with the same day boundary as usage_history.
+ */
+export async function cleanupAgentSessionMessages(): Promise<CleanupResult> {
+  const db = getDbInstance();
+  const cutoffDay = usageHistoryCutoffDay(getRetentionSettings().usageHistory);
+
+  const result: CleanupResult = { deleted: 0, errors: 0 };
+  try {
+    result.deleted = deleteAgentSessionMessagesBefore(db, cutoffDay);
+  } catch (err) {
+    result.errors++;
+    console.error("[Cleanup] Error cleaning agent_session_messages:", err);
+  }
+  return result;
+}
+
 /**
  * Clean up old usage_history based on retention settings.
  */
@@ -126,10 +151,7 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   const retention = getRetentionSettings();
 
   const retentionDays = retention.usageHistory;
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-  const cutoffISO = cutoffDate.toISOString();
-  const cutoffDateStr = cutoffISO.split("T")[0];
+  const cutoffDateStr = usageHistoryCutoffDay(retentionDays);
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
@@ -738,6 +760,7 @@ export async function runAutoCleanup(): Promise<{
     quotaSnapshots: await cleanupQuotaSnapshots(),
     callLogs: await cleanupCallLogs(),
     usageHistory: await cleanupUsageHistory(),
+    agentSessionMessages: await cleanupAgentSessionMessages(),
     compressionAnalytics: await cleanupCompressionAnalytics(),
     compressionEngineBreakdown: await cleanupCompressionEngineBreakdown(),
     mcpAudit: await cleanupMcpAudit(),
@@ -868,6 +891,8 @@ const RESET_USAGE_HISTORY_PERIOD_MS: Record<TimedResetUsageHistoryPeriod, number
 
 export interface ResetUsageHistoryResult extends CleanupResult {
   deletedUsageHistory: number;
+  deletedAgentSessionMessages: number;
+  deletedAgentSessions: number;
   deletedDailySummary: number;
   deletedDailyTeamSummary: number;
   deletedHourlySummary: number;
@@ -913,6 +938,12 @@ const RESET_TARGETS: Array<
   DeleteByPeriodTarget & { resultKey: keyof ResetUsageHistoryResult; allOnly?: boolean }
 > = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
+  {
+    table: "agent_session_messages",
+    column: "timestamp",
+    cutoff: "iso",
+    resultKey: "deletedAgentSessionMessages",
+  },
   {
     table: "daily_usage_summary",
     column: "date",
@@ -989,6 +1020,17 @@ const RESET_TARGETS: Array<
     resultKey: "deletedAgenticConversations",
     allOnly: true,
   },
+  // Session rows hold running totals (requests, tokens, cost) plus the project path and branch
+  // of the traffic. A timed reset cannot subtract the deleted rows from those totals, so only
+  // "all" removes them. There is no retention pass either: like daily_usage_summary, the totals
+  // are meant to outlive the raw usage_history rows.
+  {
+    table: "agent_sessions",
+    column: "last_seen_at",
+    cutoff: "iso",
+    resultKey: "deletedAgentSessions",
+    allOnly: true,
+  },
 ];
 
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
@@ -1001,6 +1043,8 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
   const result: ResetUsageHistoryResult = {
     deleted: 0,
     deletedUsageHistory: 0,
+    deletedAgentSessionMessages: 0,
+    deletedAgentSessions: 0,
     deletedDailySummary: 0,
     deletedDailyTeamSummary: 0,
     deletedHourlySummary: 0,

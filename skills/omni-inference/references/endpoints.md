@@ -95,6 +95,7 @@
 - [`GET /api/v1/me/status`](#get-apiv1mestatus)
 - [`GET /api/v1/me/sessions`](#get-apiv1mesessions)
 - [`GET /api/v1/me/sessions/{id}`](#get-apiv1mesessionsid)
+- [`GET /api/v1/me/sessions/{id}/messages`](#get-apiv1mesessionsidmessages)
 - [`GET /api/v1/muse-code/models`](#get-apiv1muse-codemodels)
 - [`GET /api/v1/music/generations`](#get-apiv1musicgenerations)
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
@@ -1153,10 +1154,21 @@ curl http://localhost:20128/api/v1/me/sessions \
 
 GET me › sessions › <id>
 
-Get details and recent requests of a session owned by the calling API key.
+Get details and recent requests of a session owned by the calling API key. Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
 
 ```bash
 curl http://localhost:20128/api/v1/me/sessions/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions/{id}/messages
+
+GET me › sessions › <id> › messages
+
+Simplified conversation turns (user prompt, assistant reply, tool names) of a session owned by the calling API key (also served at /v1/me/sessions/{id}/messages). Turns are stored only while the AGENT_SESSION_MESSAGES_ENABLED feature flag is on, and never for `noLog` keys. Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions/{id}/messages \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 

@@ -39,6 +39,7 @@ import {
   readUpstreamDispatchedAt,
   queueWaitMsFromDispatch,
 } from "../../utils/proxyFetch.ts";
+import { discardSessionTurnAttempt } from "./sessionTurnAttempts.ts";
 import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
@@ -302,6 +303,8 @@ export type PersistAttemptLogsContext = {
   pendingRequestId: unknown;
   pendingRequestGeneration?: string;
   clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
+  /** This attempt's agent context; identifies the attempt whose session turn a failure drops. */
+  agentContext?: object | null;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
@@ -521,6 +524,8 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     videoBridgeLogRedaction,
     videoContentRemoved,
   } = ctx;
+  // A non-200 outcome means the client did not get this attempt's reply.
+  if (status !== 200) discardSessionTurnAttempt(clientRawRequest?.body, ctx.agentContext);
   const initialConnectionId = toConnectionId(connectionId);
   const finalConnectionId = toConnectionId(credentials?.connectionId) || initialConnectionId;
   const accountRotationMeta = buildAccountRotationMeta(

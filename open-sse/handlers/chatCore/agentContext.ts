@@ -19,9 +19,24 @@
  * entries and the first MAX_SCAN_CHARS of each text, and uses indexOf rather than regexes.
  */
 
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+
 import { resolveClientSessionId as resolveSharedClientSessionId } from "../../services/conversationTracker.ts";
+import { defaultLogger } from "../../utils/logger.ts";
+import {
+  extractAgentSessionTurn,
+  extractUserTurnText,
+  type AgentSessionTurn,
+} from "./agentSessionTurn.ts";
 import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
+import { isFusionPanelCall } from "../../utils/fusionPanelContext.ts";
+import {
+  discardSessionTurnAttempt,
+  sessionTurnAttemptSeq,
+  sessionTurnRequestKey,
+  startSessionTurnAttempt,
+} from "./sessionTurnAttempts.ts";
 
 type HeaderSource = Record<string, unknown> | Headers | null | undefined;
 type JsonRecord = Record<string, unknown>;
@@ -228,12 +243,59 @@ export function resolveUsageAgentContext(
   headers: HeaderSource,
   apiKeyInfo: { noLog?: boolean } | null | undefined
 ): AgentContext {
-  const context = extractAgentContext(body, headers);
-  return apiKeyInfo?.noLog === true ? withoutPromptDerivedFields(context) : context;
+  const extracted = extractAgentContext(body, headers);
+  const context = apiKeyInfo?.noLog === true ? withoutPromptDerivedFields(extracted) : extracted;
+  startSessionTurnAttempt(context); // numbers this attempt at dispatch (see sessionTurnAttempts)
+  return context;
 }
 
 export function hasAgentIdentity(
   context: AgentContext | null | undefined
 ): context is AgentContext {
   return Boolean(context?.clientSessionId || context?.projectName);
+}
+
+export interface SessionTurnInput {
+  /** The client's request as received; its body is the prompt source and the attempt key. */
+  clientRawRequest?: { body?: unknown } | null;
+  /** Pipeline body, used when the raw client body has no prompt (log bounds can drop it). */
+  body: unknown;
+  /** Alternative representations of the client-visible reply (see extractAgentSessionTurn). */
+  responses: readonly unknown[];
+  /** Streaming completion status; a failed stream stores no turn and drops the earlier one. */
+  streamStatus?: number;
+  agentContext: AgentContext | null | undefined;
+  apiKeyInfo: { noLog?: boolean } | null | undefined;
+}
+
+/**
+ * Simplified conversation turn to store for the request's agent session, or null. Stored only
+ * when AGENT_SESSION_MESSAGES_ENABLED is on, the request has an agent identity, the key is not
+ * `noLog` and a streamed reply finished with 200. The prompt comes from the raw client body
+ * (compression and compaction rewrite the pipeline body), like call logs.
+ */
+export function resolveSessionTurn(input: SessionTurnInput): AgentSessionTurn | null {
+  if (isFusionPanelCall()) return null; // a panel reply never reaches the client
+  const rawBody = input.clientRawRequest?.body;
+  if (input.streamStatus !== undefined && input.streamStatus !== 200) {
+    discardSessionTurnAttempt(rawBody, input.agentContext);
+    return null;
+  }
+  if (!hasAgentIdentity(input.agentContext) || input.apiKeyInfo?.noLog === true) return null;
+  if (!isFeatureFlagEnabled("AGENT_SESSION_MESSAGES_ENABLED")) return null;
+  try {
+    const promptBody = rawBody && extractUserTurnText(rawBody).text ? rawBody : input.body;
+    const turn = extractAgentSessionTurn(promptBody, ...input.responses);
+    if (!turn) return null;
+    return {
+      ...turn,
+      requestKey: sessionTurnRequestKey(rawBody),
+      attemptSeq: sessionTurnAttemptSeq(input.agentContext),
+    };
+  } catch (error) {
+    defaultLogger.debug("AGENT_SESSION", "session turn extraction failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
 }

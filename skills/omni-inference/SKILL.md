@@ -106,6 +106,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`GET /api/v1/me/status`](references/endpoints.md#get-apiv1mestatus)
 - [`GET /api/v1/me/sessions`](references/endpoints.md#get-apiv1mesessions)
 - [`GET /api/v1/me/sessions/{id}`](references/endpoints.md#get-apiv1mesessionsid)
+- [`GET /api/v1/me/sessions/{id}/messages`](references/endpoints.md#get-apiv1mesessionsidmessages)
 - [`GET /api/v1/muse-code/models`](references/endpoints.md#get-apiv1muse-codemodels)
 - [`GET /api/v1/music/generations`](references/endpoints.md#get-apiv1musicgenerations)
 - [`POST /api/v1/music/generations`](references/endpoints.md#post-apiv1musicgenerations)
