@@ -45,6 +45,24 @@ for (const fixture of [
   { initial: "10.9.8", installed: "11.15.0", installExit: 0, exit: 0, installs: 1 },
   { initial: "10.9.8", installed: "11.15.0", installExit: 42, exit: 42, installs: 1 },
   { initial: "10.9.8", installed: "10.9.8", installExit: 0, exit: 1, installs: 1 },
+  { initial: "10.9.7", installed: "11.15.0", installExit: 0, exit: 0, installs: 2 },
+  {
+    initial: "10.9.7",
+    installed: "11.15.0",
+    installExit: 0,
+    bridgeExit: 43,
+    exit: 43,
+    installs: 1,
+  },
+  {
+    initial: "10.9.7",
+    installed: "11.15.0",
+    installExit: 0,
+    bridgeVersion: "10.9.7",
+    exit: 1,
+    installs: 1,
+  },
+  { initial: "10.9.7", installed: "11.15.0", installExit: 42, exit: 42, installs: 2 },
 ]) {
   test(`npm bootstrap ${JSON.stringify(fixture)}`, () => {
     const dir = mkdtempSync(join(tmpdir(), "omni-npm-toolchain-"));
@@ -67,6 +85,15 @@ for (const fixture of [
         npm() {
           if [ "$1" = "--version" ]; then cat version; return; fi
           printf '%s\\n' "$*" >> calls
+          if [ "$3" = "npm@10.9.8" ]; then
+            if [ "$FIXTURE_BRIDGE_EXIT" != "0" ]; then return "$FIXTURE_BRIDGE_EXIT"; fi
+            printf '%s' "$FIXTURE_BRIDGE_VERSION" > version
+            return
+          fi
+          if [ "$(cat version)" = "10.9.7" ]; then
+            echo "Cannot find module 'promise-retry'" >&2
+            return 1
+          fi
           if [ "$FIXTURE_INSTALL_EXIT" != "0" ]; then return "$FIXTURE_INSTALL_EXIT"; fi
           printf '%s' "$FIXTURE_INSTALLED_VERSION" > version
         }
@@ -80,6 +107,8 @@ for (const fixture of [
             ...process.env,
             FIXTURE_INSTALL_EXIT: String(fixture.installExit),
             FIXTURE_INSTALLED_VERSION: fixture.installed,
+            FIXTURE_BRIDGE_EXIT: String(fixture.bridgeExit ?? 0),
+            FIXTURE_BRIDGE_VERSION: fixture.bridgeVersion ?? "10.9.8",
             GITHUB_OUTPUT: join(dir, "outputs"),
           },
         }
@@ -87,8 +116,13 @@ for (const fixture of [
       assert.equal(result.status, fixture.exit, result.stderr);
       const calls = readFileSync(join(dir, "calls"), "utf8").trim();
       assert.equal(calls ? calls.split("\n").length : 0, fixture.installs);
-      if (fixture.installs)
-        assert.match(calls, /^install --global npm@11\.15\.0 --no-audit --no-fund$/);
+      if (fixture.installs) {
+        const expected = ["install --global npm@11.15.0 --no-audit --no-fund"];
+        if (fixture.initial === "10.9.7") {
+          expected.unshift("install --global npm@10.9.8 --no-audit --no-fund");
+        }
+        assert.deepEqual(calls.split("\n"), expected.slice(0, fixture.installs));
+      }
       if (fixture.exit === 0)
         assert.equal(readFileSync(join(dir, "outputs"), "utf8"), "version=11.15.0\n");
     } finally {
