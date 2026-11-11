@@ -38,13 +38,13 @@ export function detectCodeComplexity(input: RuleInput): number {
   const langIndicators = [
     /function\s+\w+\s*\(/gi,
     /const\s+\w+\s*=/gi,
-    /import\s+.*from/gi,
+    /import\s+.{0,200}?from/gi,
     /class\s+\w+/gi,
     /interface\s+\w+/gi,
     /async\s+function/gi,
     /def\s+\w+\s*\(/gi,
-    /SELECT\s+.*FROM/gi,
-    /\$\{.*\}/g,
+    /SELECT\s+.{0,500}?FROM/gi,
+    /\$\{.{0,200}?\}/g,
   ];
   const langMatches = langIndicators.reduce((sum, re) => {
     const matches = allText.match(re);
