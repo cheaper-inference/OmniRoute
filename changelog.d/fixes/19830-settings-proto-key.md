@@ -1,0 +1,1 @@
+- **fix(settings):** a `settings.__proto__` row survives an import/export round-trip instead of being dropped as an internal `_` key ([#19830](https://github.com/cheaper-inference/OmniRoute/pull/19830)) — thanks @AndreAlmeidaDC
