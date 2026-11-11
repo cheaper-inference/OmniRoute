@@ -15,7 +15,7 @@ let root: Root;
 
 async function flushEffects() {
   await act(async () => {
-    await Promise.resolve();
+    await vi.runOnlyPendingTimersAsync();
   });
 }
 
@@ -53,6 +53,9 @@ function pressEscape(target: EventTarget) {
 
 describe("ModelCompatPopover — Escape and focus return (#18070)", () => {
   beforeEach(() => {
+    // Radix defers close autofocus to a task. Keep that task pending until the test
+    // explicitly advances it, so machine scheduling cannot decide the assertion.
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -65,10 +68,15 @@ describe("ModelCompatPopover — Escape and focus return (#18070)", () => {
     root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
-    document.body.innerHTML = "";
-    vi.unstubAllGlobals();
+  afterEach(async () => {
+    try {
+      act(() => root.unmount());
+      await flushEffects();
+    } finally {
+      document.body.innerHTML = "";
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    }
   });
 
   it("names the open panel as a dialog controlled by the trigger", async () => {
@@ -110,7 +118,7 @@ describe("ModelCompatPopover — Escape and focus return (#18070)", () => {
     await act(async () => {
       // The kit Popover (Radix) listens for outside presses from the next task on and dismisses
       // on the click that ends a primary-button press.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await vi.runOnlyPendingTimersAsync();
       outside.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
       outside.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
