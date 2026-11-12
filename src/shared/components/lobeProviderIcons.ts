@@ -318,6 +318,7 @@ const LOBE_PROVIDER_ALIASES = {
   azure: "Azure",
   "azure-ai": "AzureAI",
   "azure-openai": "AzureAI",
+  "azure-speech": "AzureAI",
   bai: "Baichuan",
   baidu: "Baidu",
   "bailian-coding-plan": "Bailian",

@@ -434,12 +434,13 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `xquik-search` | `xquik` | Xquik X Search | Search | [link](https://docs.xquik.com) | Xquik API key (xq_...). Search is metered per returned post; the catalog estimate uses 5 results. |
 | `youcom-search` | `youcom-search` | You.com Search | Search | [link](https://you.com/business/api/) | X-API-Key from the You.com platform dashboard |
 
-## Audio-only Providers (12)
+## Audio-only Providers (13)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
 | `assemblyai` | `aai` | AssemblyAI | Audio | [link](https://assemblyai.com) | — |
 | `aws-polly` | `polly` | AWS Polly | Audio | [link](https://aws.amazon.com/polly/) | Use AWS Secret Access Key as API key; set providerSpecificData.accessKeyId and optional region. |
+| `azure-speech` | `azspeech` | Azure AI Speech | Audio | [link](https://azure.microsoft.com/products/ai-services/ai-speech) | Use an Azure Speech resource key and configure its region (for example westeurope). You can optionally set the resource endpoint as a custom Base URL. |
 | `cartesia` | `cartesia` | Cartesia | Audio | [link](https://cartesia.ai) | — |
 | `deepgram` | `dg` | Deepgram | Audio | [link](https://deepgram.com) | — |
 | `elevenlabs` | `el` | ElevenLabs | Audio | [link](https://elevenlabs.io) | — |

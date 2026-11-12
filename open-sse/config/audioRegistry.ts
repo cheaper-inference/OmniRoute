@@ -374,6 +374,15 @@ export const AUDIO_TRANSLATION_PROVIDERS: Record<string, AudioProvider> = {
 };
 
 export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
+  "azure-speech": {
+    id: "azure-speech",
+    baseUrl: "https://{region}.tts.speech.microsoft.com/cognitiveservices/v1",
+    authType: "apikey",
+    authHeader: "ocp-apim-subscription-key",
+    format: "azure-speech-tts",
+    defaultVoice: "en-US-AvaMultilingualNeural",
+    models: [{ id: "neural", name: "Azure Neural Text to Speech" }],
+  },
   "grok-cli": {
     id: "grok-cli",
     baseUrl: "https://api.x.ai/v1/tts",
