@@ -66,7 +66,9 @@ const P = await import("../../src/shared/constants/providers.ts");
 // deAPI adds one apikey/specialty-media entry — 256.
 // EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
-const APIKEY_PROVIDER_COUNT = 258;
+// Atlas Cloud (#16114) extracts one aggregator gateway into apikey/atlascloud.ts and spreads it
+// from the barrel, like BeatAPI — 259.
+const APIKEY_PROVIDER_COUNT = 259;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -91,17 +93,18 @@ test("barrel still exports every catalog + key helpers", () => {
   }
 });
 
-test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into ${APIKEY_PROVIDER_COUNT} entries (no loss / no dup)`, async () => {
+test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi, empiriolabs and atlascloud extracts into ${APIKEY_PROVIDER_COUNT} entries (no loss / no dup)`, async () => {
   const keys = Object.keys((P as Record<string, object>).APIKEY_PROVIDERS);
   assert.equal(keys.length, APIKEY_PROVIDER_COUNT);
   assert.equal(new Set(keys).size, APIKEY_PROVIDER_COUNT, "duplicate keys after spread-merge");
   assert.ok(keys.includes("ainetcafe"), "ainetcafe must be in APIKEY_PROVIDERS");
   // the merged object's entry-count equals the sum of the 6 semantic family files plus the
-  // beatapi overflow extract; they are a strict partition (every provider in exactly one),
+  // beatapi, empiriolabs and atlascloud overflow extracts; they are a strict partition (every provider in exactly one),
   // so the sum must be exactly APIKEY_PROVIDER_COUNT.
   const families: [string, string][] = [
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
     ["beatapi", "APIKEY_PROVIDERS_BEATAPI"],
+    ["atlascloud", "APIKEY_PROVIDERS_ATLASCLOUD"],
     ["empiriolabs", "APIKEY_PROVIDERS_EMPIRIOLABS"],
     ["frontier-labs", "APIKEY_PROVIDERS_FRONTIER"],
     ["inference-hosts", "APIKEY_PROVIDERS_INFERENCE"],
