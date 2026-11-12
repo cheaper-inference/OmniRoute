@@ -40,7 +40,12 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import { buildOmniRouteSseMetadataComment } from "@/domain/omnirouteResponseMeta";
 import { sseCommentsEnabled } from "./sseHeartbeat.ts";
 import { createStructuredSSECollector } from "./streamPayloadCollector.ts";
-import { STREAM_IDLE_TIMEOUT_MS, FETCH_BODY_TIMEOUT_MS, HTTP_STATUS } from "../config/constants.ts";
+import {
+  STREAM_IDLE_TIMEOUT_MS,
+  FETCH_BODY_TIMEOUT_MS,
+  HTTP_STATUS,
+  RESPONSES_DEFERRED_COMPLETION_GRACE_MS,
+} from "../config/constants.ts";
 import {
   OMIT_STREAMING_CHUNK_MARKER,
   isResponsesCommentaryMessageItem,
@@ -245,6 +250,9 @@ type TranslateState = ReturnType<typeof initState> & {
   usage?: unknown;
   cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
+  /** Responses translator: finish_reason seen, response.completed waits for a usage chunk. */
+  awaitingTrailingUsage?: boolean;
+  completedSent?: boolean;
   copilotCompatibleReasoning?: boolean;
   /** Suppress the `</think>` close marker for clients that render it verbatim (#5245). */
   suppressThinkClose?: boolean;
@@ -1135,6 +1143,12 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Idle timeout state — closes stream if provider stops sending data
   let lastChunkTime = Date.now();
   let idleTimer: ReturnType<typeof setInterval> | null = null;
+  // Responses client: finish_reason arrived but no usage trailer or [DONE] yet.
+  let deferredCompletionTimer: ReturnType<typeof setTimeout> | null = null;
+  const clearDeferredCompletionTimer = () => {
+    if (deferredCompletionTimer) clearTimeout(deferredCompletionTimer);
+    deferredCompletionTimer = null;
+  };
   let streamTimedOut = false;
   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -1153,6 +1167,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   const multilineSseDataLineNormalizer = createSSEDataLineNormalizer();
 
   const clearIdleTimer = () => {
+    // Every end-of-stream path (flush, cancel, idle timeout, failure abort) calls this, so the
+    // deferred completion must not fire after any of them.
+    clearDeferredCompletionTimer();
     if (idleTimer) {
       clearInterval(idleTimer);
       idleTimer = null;
@@ -2861,11 +2878,35 @@ export function createSSEStream(options: StreamOptions = {}) {
               emitTranslatedClientItem(controller, item);
             }
           }
+
+          // The Responses translator defers response.completed for a trailing usage
+          // chunk. If neither usage nor [DONE] follows, flush it after a short grace.
+          if (state?.awaitingTrailingUsage && !state.completedSent && !deferredCompletionTimer) {
+            deferredCompletionTimer = setTimeout(() => {
+              deferredCompletionTimer = null;
+              try {
+                for (const item of translateResponse(targetFormat, sourceFormat, null, state) ||
+                  []) {
+                  emitTranslatedClientItem(controller, item);
+                }
+              } catch (error) {
+                // Every end-of-stream path clears this timer, so the stream is still live:
+                // report the failure and give the client a terminal error (as the transformer does).
+                console.warn(
+                  `[STREAM] deferred completion flush failed (${model || "unknown"}):`,
+                  error
+                );
+                controller.error(error);
+              }
+            }, RESPONSES_DEFERRED_COMPLETION_GRACE_MS);
+            deferredCompletionTimer.unref?.();
+          }
         }
       },
 
       async flush(controller) {
         flushing = true;
+        clearDeferredCompletionTimer();
         // Clean up idle watchdog timer
         if (idleTimer) {
           clearIdleTimer();
