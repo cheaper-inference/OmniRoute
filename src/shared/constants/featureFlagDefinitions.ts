@@ -657,6 +657,19 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "OMNIROUTE_MCP_V2",
+    label: "MCP v2 Sidecar",
+    description:
+      "Enable the experimental 2026-07-28 spec MCP v2 sidecar (stateless, no handshake). Off by default; v1 is untouched.",
+    descriptionI18nKey: "featureFlagOmnirouteMcpV2Description",
+    category: "runtime",
+    // Experimental surface: ships off so v1 behavior is unchanged unless an operator opts in.
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: true,
+    warningLevel: "caution",
+  },
+  {
     key: "OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS",
     label: "MCP Compress Descriptions",
     description: "Compress MCP tool descriptions to reduce token usage",
