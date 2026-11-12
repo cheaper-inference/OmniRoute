@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
   const callerOwner = await resolveA2AOwner(req);
   // Skills that call back into OmniRoute send this caller's API key. Only a
   // caller without one (a dashboard session) gets OMNIROUTE_API_KEY instead.
-  const caller: A2ACallerContext = { apiKey: extractApiKey(req) };
+  const caller: A2ACallerContext = { apiKey: extractApiKey(req, { allowUrl: false }) };
 
   // A2A 1.0 method-name compatibility (SendMessage → message/send, etc.)
   const isV1Method = method in V1_METHOD_ALIASES;

@@ -110,7 +110,10 @@ export const clientApiPolicy: RoutePolicy = {
     // NOT short-circuit auth, and neither may an unrelated Bearer sent ALONGSIDE
     // a valid x-api-key (Claude Code with a claude.ai session or
     // ANTHROPIC_AUTH_TOKEN): the request is accepted when ANY credential validates.
-    const credentials = extractApiKeyCandidates(ctx.request as Request);
+    const allowUrl =
+      ctx.classification.normalizedPath !== "/a2a" &&
+      !ctx.classification.normalizedPath.startsWith("/a2a/");
+    const credentials = extractApiKeyCandidates(ctx.request as Request, { allowUrl });
     if (credentials.length === 0) {
       // The WS descriptor handshake is a metadata read; the route handler
       // performs the actual wsAuth/dashboard/API-key decision and returns the
