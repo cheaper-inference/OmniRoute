@@ -50,7 +50,10 @@ import {
 } from "../config/providers/registry/poe/index.ts";
 import { buildMaritalkChatUrl } from "../config/maritalk.ts";
 import { LOCAL_PROVIDERS } from "@/shared/constants/providers";
-import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import {
+  isForbiddenCustomHeaderName,
+  isValidHttpHeaderName,
+} from "@/shared/constants/upstreamHeaders";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
 import { applyClineAuthHeaders } from "@/shared/utils/clineAuth";
 import {
@@ -198,6 +201,7 @@ function applyCustomHeaders(headers: Record<string, string>, rawCustomHeaders: u
   for (const [k, v] of Object.entries(customHeaders)) {
     if (typeof k !== "string" || typeof v !== "string") continue;
     if (isForbiddenCustomHeaderName(k)) continue;
+    if (!isValidHttpHeaderName(k)) continue;
     if (/[\r\n\0]/.test(k) || /[\r\n]/.test(v)) continue;
     const lower = k.toLowerCase();
     for (const existing of Object.keys(headers)) {

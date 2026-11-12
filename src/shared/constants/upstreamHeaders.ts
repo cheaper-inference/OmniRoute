@@ -50,6 +50,18 @@ export function isForbiddenUpstreamHeaderName(name: string): boolean {
 }
 
 /**
+ * RFC 7230 §3.2.6 `token`: the only characters legal in an HTTP header field name.
+ * `Headers.append()` (undici/fetch) throws on anything else, so a name like an e-mail
+ * address ("admin@example.com", e.g. from a browser autofill into the header-name field)
+ * turns every request to that model into a 502. Validate here, on write AND on read.
+ */
+const HTTP_HEADER_TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+
+export function isValidHttpHeaderName(name: string): boolean {
+  return HTTP_HEADER_TOKEN.test(String(name));
+}
+
+/**
  * Auth headers that must come from the connection's credentials, never from
  * operator-set per-provider custom headers. Kept here as the single source of
  * truth so the Zod `customHeadersSchema` (schemas.ts) and the executor's
