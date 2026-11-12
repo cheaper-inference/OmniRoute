@@ -5,7 +5,7 @@
  * All `fetch` calls are mocked with a fake cookie (`FAKE_SESSION_VALUE`); no
  * real credentials, accounts.json, DB, or live upstream are touched.
  */
-import test, { afterEach } from "node:test";
+import test, { afterEach, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
 import { getMuseUsage } from "../../open-sse/services/usage/museCode.ts";
@@ -65,10 +65,17 @@ function stubFetch(handler: (url: string) => Promise<unknown> | unknown): FetchC
 }
 
 const originalFetch = globalThis.fetch;
+const originalEnvSession = process.env.MUSE_CONSOLE_SESSION;
+
+// Start every test without an ambient env cookie, and put the developer's own value back after.
+beforeEach(() => {
+  delete process.env.MUSE_CONSOLE_SESSION;
+});
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
-  delete process.env.MUSE_CONSOLE_SESSION;
+  if (originalEnvSession === undefined) delete process.env.MUSE_CONSOLE_SESSION;
+  else process.env.MUSE_CONSOLE_SESSION = originalEnvSession;
 });
 
 function assertResultHasNoLeak(result: unknown, consoleLines: string[] = []): void {
@@ -218,6 +225,60 @@ test("empty or null used values degrade instead of reading as 0 used", async () 
     })) as Record<string, unknown>;
     assert.equal("quotas" in result, false, `no quotas for used=${JSON.stringify(used)}`);
     assert.match(String(result.message ?? ""), /payload unrecognized/);
+  }
+});
+
+test("a Cookie header without llama_dev_sess is rejected, not sent as the session", async () => {
+  for (const header of [
+    "Cookie: other_session=SECRET; theme=dark",
+    "other_session=SECRET; theme=dark",
+    "Cookie: other_session=SECRET",
+  ]) {
+    const calls = stubFetch(() => teamsResponse([{ team_id: "team-1", team_name: "Solo" }]));
+    const result = (await getMuseUsage(undefined, {
+      museConsoleSession: header,
+    })) as Record<string, unknown>;
+
+    assert.equal(calls.length, 0, `no request for header ${JSON.stringify(header)}`);
+    assert.equal("quotas" in result, false);
+    assert.match(String(result.message ?? ""), /llama_dev_sess/);
+    assert.equal(JSON.stringify(result).includes("SECRET"), false, "unrelated cookie not echoed");
+  }
+});
+
+test("negative used values degrade instead of reporting a full quota", async () => {
+  for (const field of ["window_weighted_used", "weekly_weighted_used"]) {
+    stubFetch((url) => {
+      if (url === `${PORTAL}/teams`) {
+        return teamsResponse([{ team_id: "team-1", team_name: "Solo" }]);
+      }
+      return quotaResponse({ [field]: "-1" });
+    });
+
+    const result = (await getMuseUsage(undefined, {
+      museConsoleSession: FAKE_SESSION,
+    })) as Record<string, unknown>;
+    assert.equal("quotas" in result, false, `no quotas for negative ${field}`);
+    assert.match(String(result.message ?? ""), /payload unrecognized/);
+  }
+});
+
+test("a non-2xx portal answer with a valid-looking body is not live quota", async () => {
+  for (const failing of ["/teams", "/subscription-quota"]) {
+    stubFetch((url) => {
+      const ok =
+        url === `${PORTAL}/teams`
+          ? teamsResponse([{ team_id: "team-1", team_name: "Solo" }])
+          : quotaResponse();
+      return url.endsWith(failing) ? { status: 500, json: ok.json } : ok;
+    });
+
+    const result = (await getMuseUsage(undefined, {
+      museConsoleSession: FAKE_SESSION,
+    })) as Record<string, unknown>;
+    assert.equal("quotas" in result, false, `HTTP 500 on ${failing} must not produce quotas`);
+    assert.match(String(result.message ?? ""), /HTTP 500/);
+    assertResultHasNoLeak(result);
   }
 });
 

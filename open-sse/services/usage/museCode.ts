@@ -49,15 +49,23 @@ const EXPIRED_COOKIE_HINT =
   `cookie from ${ACQUISITION_PATH} into the connection's museConsoleSession field or ` +
   "MUSE_CONSOLE_SESSION.";
 
-/** Pull the `llama_dev_sess` value out of a bare value or a full Cookie header. */
+/**
+ * Pull the `llama_dev_sess` value out of a bare value or a full Cookie header.
+ * A header (explicit `Cookie:` prefix, or several `;`-separated pairs) that
+ * carries no `llama_dev_sess` yields "" so an unrelated cookie is never sent
+ * to dev.meta.ai as the session.
+ */
 function extractSessionValue(raw: string): string {
+  const trimmed = raw.trim();
   // Strip one optional `Cookie:` prefix first so the single-pair form
   // `Cookie: llama_dev_sess=…` matches the key=value branch below.
-  const trimmed = raw.trim().replace(/^Cookie:\s*/i, "");
+  const stripped = trimmed.replace(/^Cookie:\s*/i, "");
+  const hadHeaderPrefix = stripped.length !== trimmed.length;
   // Accept a full `Cookie: a=1; llama_dev_sess=…; b=2` header (or a bare
   // `llama_dev_sess=…` pair) and keep only the session pair.
-  const labelled = trimmed.match(/(?:^|;\s*)llama_dev_sess=([^;\s]+)/);
-  const value = labelled ? labelled[1] : trimmed;
+  const labelled = stripped.match(/(?:^|;\s*)llama_dev_sess=([^;\s]+)/);
+  if (!labelled && (hadHeaderPrefix || stripped.includes(";"))) return "";
+  const value = labelled ? labelled[1] : stripped;
   // Never reuse a value carrying header-injection characters.
   return value.replace(/[\r\n;]/g, "").trim();
 }
@@ -99,6 +107,15 @@ function isAuthRejected(status: number): boolean {
   return status === 401 || status === 403;
 }
 
+/** The degraded-result message for a portal response that is not a usable 2xx, else null. */
+function portalFailureMessage(status: number): string | null {
+  if (isAuthRejected(status)) return EXPIRED_COOKIE_HINT;
+  if (status < 200 || status >= 300) {
+    return `Muse Code console answered HTTP ${status} — live quota is unavailable right now.`;
+  }
+  return null;
+}
+
 type Team = { teamId: string; teamName: string };
 
 // Strict zod shape for GET /teams: an array of { team_id, team_name? }.
@@ -133,19 +150,19 @@ interface SubscriptionQuota {
 
 // Strict zod shape for the subscription-quota object. The four
 // window/weekly used+limit values must be finite numbers (non-empty numeric
-// strings coerce; null, "" and [] must not become 0) with limits > 0; resets,
-// when present, must be positive finite.
+// strings coerce; null, "" and [] must not become 0), used >= 0 and limits > 0;
+// resets, when present, must be positive finite.
 const looseNumber = z.union([z.number(), z.string().trim().min(1)]).transform(Number);
-const finiteNumber = looseNumber.pipe(z.number().finite());
+const usedNumber = looseNumber.pipe(z.number().finite().nonnegative());
 const positiveNumber = looseNumber.pipe(z.number().finite().positive());
 const resetsAt = positiveNumber.nullable().optional();
 
 const subscriptionQuotaSchema = z.object({
   tier: z.string().trim().optional(),
-  window_weighted_used: finiteNumber,
+  window_weighted_used: usedNumber,
   window_weighted_limit: positiveNumber,
   window_resets_at: resetsAt,
-  weekly_weighted_used: finiteNumber,
+  weekly_weighted_used: usedNumber,
   weekly_weighted_limit: positiveNumber,
   weekly_resets_at: resetsAt,
 });
@@ -188,7 +205,8 @@ async function fetchLiveQuota(
   requestedTeamId: string | null
 ): Promise<LiveResult> {
   const teamsFetch = await fetchPortalJson("/teams", session);
-  if (isAuthRejected(teamsFetch.status)) return { message: EXPIRED_COOKIE_HINT };
+  const teamsFailure = portalFailureMessage(teamsFetch.status);
+  if (teamsFailure) return { message: teamsFailure };
 
   const teams = parseTeams(teamsFetch.body);
   if (!teams || teams.length === 0) {
@@ -225,7 +243,8 @@ async function fetchLiveQuota(
     `/teams/${encodeURIComponent(team.teamId)}/subscription-quota`,
     session
   );
-  if (isAuthRejected(quotaFetch.status)) return { message: EXPIRED_COOKIE_HINT };
+  const quotaFailure = portalFailureMessage(quotaFetch.status);
+  if (quotaFailure) return { message: quotaFailure };
 
   const quota = parseSubscriptionQuota(quotaFetch.body);
   if (!quota) {
