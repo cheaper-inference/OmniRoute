@@ -1,0 +1,1 @@
+- Extend the quality skill contract to merge waves and security review callers; require current-candidate checks and exact-base evidence instead of administrative or inherited-failure exceptions.

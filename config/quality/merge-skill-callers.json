@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "scope": "merge-security-admission-callers",
+  "overlay": {
+    "path": "skill-caller-overlays/merge-security-admission.patch",
+    "sha256": "e3c39ae3728b6094e08b749e82b969541282f49798760e6886ba922c46e71538"
+  },
+  "files": [
+    {
+      "path": "merge-waves/SKILL.md",
+      "beforeSha256": "91b7de80f0aea2a39a493948d23d5d7e10ce8934210297126545dc23fa6b6fad",
+      "afterSha256": "d28df06929502c11c832d06d7073aa9ae3e3b7ab36ab0eca9b7a0749d7fa7beb"
+    },
+    {
+      "path": "merge-waves/references/01-censo.md",
+      "beforeSha256": "b7926e3aea35921a9adaea1c251e0bb2d1eae2a330e863b7db543fbc8990db2e",
+      "afterSha256": "9f162785282c5d82e851dd6b00486395e20d812b88383240d3de589662c79147"
+    },
+    {
+      "path": "merge-waves/references/02-pregate.md",
+      "beforeSha256": "47efe57d41ce9a3f784ea3202f570e97f817974b61b19c759db45352f8f9dfea",
+      "afterSha256": "33cac37069bc3c3f3671aad366e1f0f80d12d88173605118b6c0f2880417c378"
+    },
+    {
+      "path": "merge-waves/references/03-board-validacao.md",
+      "beforeSha256": "b43a44a74177694019eed97990174bbdc1abfb746167094cf07ad1caae4ed5fd",
+      "afterSha256": "aa58e145b60d56e0a69b6937908c8fe1821580e0f685009a39581b720bd9d02f"
+    },
+    {
+      "path": "merge-waves/references/04-squash.md",
+      "beforeSha256": "8c44abd9cf7b77f15f7149e4da86c5b8cf92833ceb95fcdfcdf03726026cdc81",
+      "afterSha256": "19514c62dbf42851e1290ddf9afee789ec4084970a421d3b80b841eda1a4901b"
+    },
+    {
+      "path": "merge-waves/references/05-teardown-relato.md",
+      "beforeSha256": "b64531920e496302e0b7e55ee39906680cac84c7a1bf01bb26262c5ebd7beb75",
+      "afterSha256": "b64531920e496302e0b7e55ee39906680cac84c7a1bf01bb26262c5ebd7beb75"
+    },
+    {
+      "path": "merge-waves/references/06-conserto-branch.md",
+      "beforeSha256": "c80c2fdba1b1f40c1d2684bc17438fcf13c55d1a1061cd09354b02091c028b81",
+      "afterSha256": "628e43ea2c07a59c8a9bad7554dd5acf018b056591f16394f5ac78307218cc71"
+    },
+    {
+      "path": "security-wave/SKILL.md",
+      "beforeSha256": "cf3d3a5ea0a18e552498f62fbedff8beaeeb946ceb67b1871f43244937249f98",
+      "afterSha256": "40d864072a454563e4bbdfd90d9ab2a3f4513291d58d449e436989d10d359c79"
+    },
+    {
+      "path": "security-wave/references/recipes-and-pitfalls.md",
+      "beforeSha256": "c842002326d33ee046211ae460e23615a6ce3a15d846fef25572cba980762f74",
+      "afterSha256": "92d6705a79042261456b87e56b582b94a9cbef4b44a2c697669adb1a7fc403e6"
+    },
+    {
+      "path": "omni-code-sec/SKILL.md",
+      "beforeSha256": "5a6380795c8786aff0934c056be9cfe810e3ababfd88d0916ed2b07ee4705666",
+      "afterSha256": "c3ab4c2c46a6c0fb8178b601c3d7fd4532673a033129cbd1849060ac8c32f517"
+    },
+    {
+      "path": "omni-code-sec/rubric.md",
+      "beforeSha256": "48537ad31fb3f347c12281c3f0969ba44167842861bbf27b1c3500b7cb196701",
+      "afterSha256": "c1bdbe853193af764cfdc9c1abf238e0bdaf8718b3e346b1a75406955fde2cee"
+    },
+    {
+      "path": "omni-code-review/rubric.md",
+      "beforeSha256": "41f09cb2d66d72ed610aefd84fdff71066ae3c2c5bc0f201631c72e1c740be0d",
+      "afterSha256": "557f327ef84d29485f3a8ab5d955fbb20e243eb32aad932c0c7194f6dea939c2"
+    },
+    {
+      "path": "_shared/omni-review-core.md",
+      "beforeSha256": "675c397bc8f636cce30a287f04de01485ffed83b3250026508ae74e41f49b696",
+      "afterSha256": "13da8b00297fae7273810c29bdde8b812cf6cb25832be9679b12c795c8eb8a3e"
+    },
+    {
+      "path": "_shared/pr-rework-uplift.md",
+      "beforeSha256": "376f2ae67e022c78b43d68a2fcd4c9f157ce737889953bbf95e18ffc03f30bdf",
+      "afterSha256": "4e84323e7b0b26b2630367d1c234f898956e1cffeca2462819b519cec9d05ecf"
+    },
+    {
+      "path": "security-wave/templates/worker-prompt.md",
+      "beforeSha256": "9e97d1b3b8b8032c4514df6026deafc06508d0b633513837c9a3ba7459b5c34b",
+      "afterSha256": "ebc5db8cac4675c5cffb762f474a9135daa7d91f492e41cad11e27eb3310d7b1"
+    },
+    {
+      "path": "uplift-prs/REWORK_RULES.md",
+      "beforeSha256": "a9dc75b0c6ccd6a1ad3c7267a41eac929c339b4567186990020eb55ec89f1d36",
+      "afterSha256": "6f5985d46496beec76a189a4f02682177520cf64bbf2c527f51847332b3f3e97"
+    },
+    {
+      "path": "review-prs/SKILL.md",
+      "beforeSha256": "d8a0339ff68c8edd0105abc4acaede909db0bb32abb077bb76fd3ec8afaae48a",
+      "afterSha256": "73e3429749dac78218f1d99b5b2481c7d9d94cad93cb549c992046034cbd2162"
+    },
+    {
+      "path": "review-group-prs/SKILL.md",
+      "beforeSha256": "d9e7984e3fcc018656aecd17392f09f84db67de85321b6293876497f596981fa",
+      "afterSha256": "f02a0f88692aebdef75c5b72013c0971c6f9a204347fba843e7179bdea446a7c"
+    }
+  ]
+}

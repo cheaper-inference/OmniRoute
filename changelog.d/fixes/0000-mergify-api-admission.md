@@ -1,0 +1,1 @@
+- Require an explicit GitHub Actions API Route Typecheck success in both merge queues, so absent, skipped, neutral or unrelated-app results cannot satisfy admission.
