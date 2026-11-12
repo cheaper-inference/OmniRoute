@@ -1,0 +1,1 @@
+- **perf(codex):** Claude Code requests routed to Codex now send the Claude Code session id as `prompt_cache_key`, so each session gets its own prompt-cache partition instead of sharing one account-wide key. ([#19723](https://github.com/cheaper-inference/OmniRoute/pull/19723))

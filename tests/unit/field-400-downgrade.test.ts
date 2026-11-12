@@ -2,6 +2,11 @@ import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { BaseExecutor } from "../../open-sse/executors/base.ts";
 import { detectRejectedMessageFields } from "../../open-sse/config/providerFieldStrips.ts";
+import { __clearLearnedStrippedFieldsForTests } from "../../open-sse/executors/base/fieldDowngradeRecovery.ts";
+
+// Each test starts from an empty learned-field table: the executor remembers a field the upstream
+// rejected for the same provider and model, and these tests reuse one provider and model name.
+test.beforeEach(() => __clearLearnedStrippedFieldsForTests());
 
 // A minimal executor that passes through the body unchanged (no transformRequest
 // side-effects) so we can assert on exactly what base.ts sends upstream.
