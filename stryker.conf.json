@@ -432,6 +432,7 @@
       "tests/unit/db-reset-module-state.test.ts",
       "tests/unit/db-server-tool-executions-migration.test.ts",
       "tests/unit/db/stats-dbstat-optional.test.ts",
+      "tests/unit/db/codex-connection-fences.test.ts",
       "tests/unit/ddg-circuit-breaker-null-content-6999-7000.test.ts",
       "tests/unit/domain-persistence.test.ts",
       "tests/unit/embedding-account-cooldown-10347.test.ts",

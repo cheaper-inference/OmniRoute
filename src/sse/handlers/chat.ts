@@ -80,8 +80,15 @@ import {
   PROVIDER_ID_TO_ALIAS,
 } from "@omniroute/open-sse/config/providerModels.ts";
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
+import {
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+  STALE_CODEX_OPERATION_CODE,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import { createHookContext, runHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
 import { rejectPeerRequest } from "@/shared/resilience/peerRouting";
 import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
@@ -1825,6 +1832,9 @@ async function handleSingleModelChat(
   let preferredTimeoutOriginal: Response | null = null;
   let preferredFailoverUsed = false;
   const sameAccountTransportRetries = new Map<string, number>();
+  // An obsolete Codex selection/response is not a fault of the current account. Reselect once
+  // without cooling or excluding its connection ID; never replay a successful response.
+  let staleCodexReselected = false;
   let accountFallbacks = 0;
   let sameAccountRetries = 0;
   let routingWaitMs = 0;
@@ -2197,7 +2207,10 @@ async function handleSingleModelChat(
         );
       } catch (error) {
         releaseOAuthSession();
-        throw error;
+        if (!(error instanceof StaleCodexOperationError)) throw error;
+        if (staleCodexReselected) return errorResponse(error.status, error.message);
+        staleCodexReselected = true;
+        continue;
       }
       const museBindFailure =
         museOwner &&
@@ -2349,6 +2362,29 @@ async function handleSingleModelChat(
           )
         );
       else agyLease.release(leaseId);
+      const staleCodexFailure = !result.success && !isCodexResponseCurrent(result.response);
+      if (
+        staleCodexFailure &&
+        isPassiveCodex(provider) &&
+        (result.status === 401 || result.status === 403)
+      ) {
+        // Passive auth recovery already tried an eligible synchronized token below. Restarting
+        // the whole request loses its rejection history and can replay an expired or rejected
+        // token after an A -> B -> A rollback. Do not cool/exclude the replacement account.
+        return result.response;
+      }
+      if (result.errorCode === STALE_CODEX_OPERATION_CODE || staleCodexFailure) {
+        if (staleCodexReselected) {
+          return staleCodexFailure
+            ? withRoutingTelemetry(
+                errorResponse(409, new StaleCodexOperationError().message),
+                credentials?.connectionId
+              )
+            : result.response;
+        }
+        staleCodexReselected = true;
+        continue;
+      }
       const proxyLatency = Date.now() - proxyStartTime;
       const providerAlias = PROVIDER_ID_TO_ALIAS[provider] || provider;
       const effectiveTargetFormat =
@@ -2375,8 +2411,10 @@ async function handleSingleModelChat(
       });
 
       if (result.success) {
-        clearModelLock(provider, credentials.connectionId, model);
-        markQuotaHealthy(credentials.connectionId);
+        if (isCodexResponseCurrent(result.response, true)) {
+          clearModelLock(provider, credentials.connectionId, model);
+          markQuotaHealthy(credentials.connectionId);
+        }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
           !wasProviderProbe &&
@@ -2919,26 +2957,28 @@ async function handleSingleModelChat(
 
       const { shouldFallback, cooldownMs } = skipConnectionDisable
         ? { shouldFallback: false, cooldownMs: 0 }
-        : await markAccountUnavailable(
-            credentials.connectionId,
-            result.status,
-            errorStr,
-            provider,
-            model,
-            providerProfile,
-            buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
-              persistUnavailableState: !(
-                isCombo &&
-                result.status === 429 &&
-                (failureKind === "rate_limit" || failureKind === "transient")
-              ),
-              isCombo,
-              headers: result.response.headers,
-              isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
-              avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
-              suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,
-              structuredError: { code: result.errorCode, type: result.errorType },
-            })
+        : await runWithCodexResponseFence(result.response, () =>
+            markAccountUnavailable(
+              credentials.connectionId,
+              result.status,
+              errorStr,
+              provider,
+              model,
+              providerProfile,
+              buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
+                persistUnavailableState: !(
+                  isCombo &&
+                  result.status === 429 &&
+                  (failureKind === "rate_limit" || failureKind === "transient")
+                ),
+                isCombo,
+                headers: result.response.headers,
+                isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
+                avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
+                suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,
+                structuredError: { code: result.errorCode, type: result.errorType },
+              })
+            )
           );
 
       if (avalancheRisk?.shouldSuppressFallback) {

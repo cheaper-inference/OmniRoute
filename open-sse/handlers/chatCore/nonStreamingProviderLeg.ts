@@ -29,6 +29,7 @@ import {
   readResponseTextWithinCap,
 } from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
+import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
@@ -484,20 +485,26 @@ export async function runNonStreamingProviderLeg(
           connectionId: outcome.connectionId || connectionId,
           model: outcome.model || currentModel,
         });
+        const sanitized = legError(
+          outcome.result.status,
+          formatted,
+          undefined,
+          // Keep the upstream retry hint on the sanitized response.
+          outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
+          outcome.result.errorCode,
+          outcome.result.errorType,
+          { passthrough: input.sourceFormat === "claude" }
+        );
+        // The sanitized response still answers for the attempt's Codex owner: failure writes
+        // keyed on it must use that attempt's fence, not the invocation's original one.
+        if (outcome.result.response && sanitized.response) {
+          inheritCodexResponseFence(outcome.result.response, sanitized.response);
+        }
         return {
           kind: "error",
           upstreamHttpSelection,
           result: {
-            ...legError(
-              outcome.result.status,
-              formatted,
-              undefined,
-              // Keep the upstream retry hint on the sanitized response.
-              outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
-              outcome.result.errorCode,
-              outcome.result.errorType,
-              { passthrough: input.sourceFormat === "claude" }
-            ),
+            ...sanitized,
             // Never relay the raw upstream Response (body, Set-Cookie, other headers) to the
             // client: legError() above built the sanitized one. Upstream headers stay on
             // `upstreamHeaders` for server-side classification only.
