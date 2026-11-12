@@ -106,9 +106,12 @@
  
  Arquivo com `@vitest-environment jsdom` ou `vi.mock` não roda sob `node:test`. Use `npx vitest run <arquivo>` só nesses. Lint como o CI: `npx eslint --suppressions-location config/quality/eslint-suppressions.json <arquivos>`. Não rode `next build` nesta onda.
  
-@@ -82,7 +75,7 @@
+@@ -80,9 +73,9 @@
+ git diff --name-only "$(git merge-base "$ACTIVE" refs/mw/<id>/$N)" "refs/mw/<id>/$N"
+ ```
  
- A interseção com o arquivo que o checker acusou é a candidata a ejetar. Confirme com `git diff "$ACTIVE"...refs/mw/<id>/$N --stat -- <arquivo>`. Ejetar é reset desta worktree e reboard das outras. Não edite o baseline para caber.
+-A interseção com o arquivo que o checker acusou é a candidata a ejetar. Confirme com `git diff "$ACTIVE"...refs/mw/<id>/$N --stat -- <arquivo>`. Ejetar é reset desta worktree e reboard das outras. Não edite o baseline para caber.
++A interseção com o arquivo que o checker acusou é a candidata a ejetar. Confirme com `git diff "$ACTIVE"...refs/mw/<id>/$N --stat -- <arquivo>`. Ejetar exige reconstruir um board próprio com as PRs restantes, preservando o anterior e seus recibos. Não edite o baseline para caber.
  
 -Estouro num arquivo que nenhuma PR do lote toca: herança da tip. Anote e siga. Não é defeito da onda.
 +Estouro num arquivo fora do diff é uma hipótese de falha herdada. Reproduza a mesma assinatura na base exata com ambiente comparável e registre os recibos. Um gate obrigatório vermelho continua bloqueando o merge até reparo e revalidação.
@@ -225,21 +228,41 @@
  
  ## Fase 6 — Relatório e autorização
  
-@@ -335,12 +328,12 @@
+@@ -335,17 +328,23 @@
  ## Fase 7 — Merge (só com autorização explícita; `merge-gates.md` manda)
  
  Antes do lote: matriz de arquivos em comum entre os PRs autorizados (`gh pr diff --name-only` de
 -cada); independentes primeiro; re-fetch e `merge-tree` depois de **cada** merge.
-+cada); independentes primeiro. Antes de **cada** merge, refaça a identidade base/head/candidato/política e confira todos os checks obrigatórios. Mudança na base ou no head invalida os recibos anteriores, mesmo que o diff pareça igual. Use a garantia de identidade do servidor descrita em `merge-gates.md`; sem ela, HOLD.
- 
- ```bash
- gh issue list --repo $R --label release-freeze --state open                  # vazio
- read st H b < <(gh pr view $N --repo $R --json state,headRefOid,headRefName --jq '[.state,.headRefOid,.headRefName]|@tsv')
+-
+-```bash
+-gh issue list --repo $R --label release-freeze --state open                  # vazio
+-read st H b < <(gh pr view $N --repo $R --json state,headRefOid,headRefName --jq '[.state,.headRefOid,.headRefName]|@tsv')
 -[ "$st" = OPEN ] && [ "${H:0:10}" = "<head auditado>" ] || echo "HEAD MUDOU — re-auditar"
-+[ "$st" = OPEN ] && [ "$H" = "<SHA completo auditado>" ] || { echo "HEAD MUDOU — re-auditar"; exit 1; }
- gh pr diff $N --repo $R --name-only | grep -Ei '(^|/)(AGENTS\.md|CLAUDE\.md|GEMINI\.md|llm\.txt|SKILL\.md)$|^\.agents/|^\.claude/|^config/quality/skill-templates/'
- git fetch -q origin $BASE $b && git merge-tree --write-tree origin/$BASE origin/$b >/dev/null 2>&1 && echo clean || echo CONFLICT
- git worktree list | grep -iE "$N|<slug>"                                    # nenhuma alheia
+-gh pr diff $N --repo $R --name-only | grep -Ei '(^|/)(AGENTS\.md|CLAUDE\.md|GEMINI\.md|llm\.txt|SKILL\.md)$|^\.agents/|^\.claude/|^config/quality/skill-templates/'
+-git fetch -q origin $BASE $b && git merge-tree --write-tree origin/$BASE origin/$b >/dev/null 2>&1 && echo clean || echo CONFLICT
+-git worktree list | grep -iE "$N|<slug>"                                    # nenhuma alheia
+-gh pr merge $N --repo $R --squash --match-head-commit $H
+-gh pr view $N --repo $R --json state,mergeCommit --jq '.state+" "+(.mergeCommit.oid//"")[:10]'
++cada); independentes primeiro. Antes de **cada** merge, refaça a identidade base/head/candidato/política e confira todos os checks obrigatórios. Mudança na base ou no head invalida os recibos anteriores, mesmo que o diff pareça igual. Use a garantia de identidade do servidor descrita em `merge-gates.md`; sem ela, HOLD.
++
++Primeiro faça as leituras; não execute um bloco que continue para merge depois de apenas imprimir CONFLICT, freeze ou superfície protegida:
++
++```bash
++gh issue list --repo "$R" --label release-freeze --state open --json number,title
++gh pr view "$N" --repo "$R" --json state,headRefOid,headRefName,baseRefName,mergeStateStatus
++gh pr checks "$N" --repo "$R" --json name,state,link
++gh pr diff "$N" --repo "$R" --name-only
++git worktree list --porcelain
++```
++
++Confira o SHA completo (40 caracteres), a base remota, a árvore combinada e a política nos recibos. Conflito, freeze aplicável, worktree alheia ativa, superfície protegida sem decisão específica ou check obrigatório incompleto mantém HOLD. Patches em `config/quality/skill-caller-overlays/` também são instruções protegidas. Só após satisfazer `merge-gates.md`, em uma ação separada:
++
++```bash
++gh pr merge "$N" --repo "$R" --squash --match-head-commit "<SHA completo validado>"
++gh pr view "$N" --repo "$R" --json state,mergedAt,mergeCommit
+ ```
+ 
+ PR de contribuidor externo: nunca fechar após usar o código; mergear via GitHub para o crédito.
 --- a/security-wave/references/recipes-and-pitfalls.md
 +++ b/security-wave/references/recipes-and-pitfalls.md
 @@ -64,8 +64,10 @@
@@ -303,7 +326,13 @@
  (grep/node -e/test run with no writes) in `evidence`. No evidence → confidence low.
 --- a/_shared/omni-review-core.md
 +++ b/_shared/omni-review-core.md
-@@ -147,8 +147,7 @@
+@@ -143,12 +143,13 @@
+ # Base-green (../_shared/base-green.md) — the issue is searched by BRANCH NAME, never by sha:
+ BASE_RED=$(gh issue list --repo cheaper-inference/OmniRoute --state open --search "Release branch not green: $BASE_NAME in:title" --json number,title --jq '.[0].number // empty')
+ echo "BASE_RED=${BASE_RED:-}" >> "$WORK/run.env"
++# Issue-derived hints; initialize an empty input even when no incident is open.
++: > "$WORK/inherited-reds.txt"
+ # HARD reds = the indented ❌ lines of the "HARD failures" block in the issue's LAST comment
  [ -n "$BASE_RED" ] && gh issue view "$BASE_RED" --repo cheaper-inference/OmniRoute --json comments --jq '.comments[-1].body' | sed -n '/^HARD failures/,/^```/p' | grep '^[[:space:]]*❌' | grep -v 'NOT release-green' | sed 's/^[[:space:]]*//' > "$WORK/inherited-reds.txt"
  ```
  - `--areas` takes directory PREFIXES (`src/lib,open-sse/handlers`), not globs.
@@ -313,7 +342,7 @@
  
  ## Step 2 — Discover reviewers, confirm the roster (P2 only if needed)
  
-@@ -401,7 +400,7 @@
+@@ -401,7 +402,7 @@
  
  ## Step 9 — PR, owner validation (P4), merge
  
@@ -322,7 +351,7 @@
  ```bash
  source "$WORK/run.env"; cd "$FIX_WT"
  git push -u origin "$FIX_BRANCH"
-@@ -412,10 +411,7 @@
+@@ -412,10 +413,7 @@
  ```
  - **P4:** show the PR, wait for CI green AND the owner's explicit merge OK (the P3 OK authorized
    fixing, not merging). No OK → outcome `held`; the PR stays open; stop here.
@@ -334,7 +363,7 @@
  
  ## Step 10 — Teardown (P5) and Step 10-lite
  
-@@ -442,7 +438,7 @@
+@@ -442,7 +440,7 @@
  | Workflow interrupted (named workflow, e.g. `claude-security:scan`, `insecure-defaults:audit-pipeline`) | resume with `Workflow({ name, args, resumeFromRunId })` — resuming by `scriptPath` alone drops `args` and the pipeline exits with `no-args`/`missing-plugin-root` (measured 2026-09-21) |
  | API 429/500/529 kills subagents mid-run | the journal keeps completed results; stop the task and resume from the run id; a worker that died with uncommitted edits is audited (`git status`/`git diff`) before anything is discarded |
  | citation does not exist / does not match | `confidence: low` + `DISCUSS`; counted per reviewer under "invalid citations" |

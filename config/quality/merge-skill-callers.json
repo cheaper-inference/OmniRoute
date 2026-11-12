@@ -3,7 +3,7 @@
   "scope": "merge-security-admission-callers",
   "overlay": {
     "path": "skill-caller-overlays/merge-security-admission.patch",
-    "sha256": "ecff8e3333f29267ade878b39c3b44e2fc3aea8577ee7741f29fed0e8bcb0a3b"
+    "sha256": "e3c39ae3728b6094e08b749e82b969541282f49798760e6886ba922c46e71538"
   },
   "files": [
     {
@@ -24,7 +24,7 @@
     {
       "path": "merge-waves/references/03-board-validacao.md",
       "beforeSha256": "b43a44a74177694019eed97990174bbdc1abfb746167094cf07ad1caae4ed5fd",
-      "afterSha256": "0b88ee7199a6d7d233cfe673a60291a3a90cce044486db004252d2e1a4d80b68"
+      "afterSha256": "aa58e145b60d56e0a69b6937908c8fe1821580e0f685009a39581b720bd9d02f"
     },
     {
       "path": "merge-waves/references/04-squash.md",
@@ -44,7 +44,7 @@
     {
       "path": "security-wave/SKILL.md",
       "beforeSha256": "cf3d3a5ea0a18e552498f62fbedff8beaeeb946ceb67b1871f43244937249f98",
-      "afterSha256": "9f719554d0d8043fb90f0ecac098f00e67a511852fdbfa4ac654872d18b30834"
+      "afterSha256": "40d864072a454563e4bbdfd90d9ab2a3f4513291d58d449e436989d10d359c79"
     },
     {
       "path": "security-wave/references/recipes-and-pitfalls.md",
@@ -69,7 +69,7 @@
     {
       "path": "_shared/omni-review-core.md",
       "beforeSha256": "675c397bc8f636cce30a287f04de01485ffed83b3250026508ae74e41f49b696",
-      "afterSha256": "368b0d72d4a4298f11f8b51dc0d8eafe3a2073e5d12bf6130ac4878234e24955"
+      "afterSha256": "13da8b00297fae7273810c29bdde8b812cf6cb25832be9679b12c795c8eb8a3e"
     },
     {
       "path": "_shared/pr-rework-uplift.md",
