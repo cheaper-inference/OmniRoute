@@ -11,3 +11,5 @@ export { consumeProbeBudget, utcDay } from "./health/probeBudget.ts";
 export { evaluateEndpoint, updateCacheFromProbe } from "./health/evaluate.ts";
 export { buildDesiredGraph } from "./graph.ts";
 export { OWNER, ownershipDescription, parseOwnership, stableHash } from "./ownership.ts";
+export { deletionOrder, validateDesiredDag } from "./omniroute/dag.ts";
+export { liveStateHash, planOmniRoute } from "./omniroute/plan.ts";
