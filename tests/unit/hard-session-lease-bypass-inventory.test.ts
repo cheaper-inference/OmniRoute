@@ -59,9 +59,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/v1/audio/transcriptions/route.ts": 3,
     "src/app/api/v1/audio/translations/route.ts": 2,
     "src/app/api/v1/classify/route.ts": 1,
-    // Gemini Decisions: credential resolution receives the caller-key allowedConnections
+    // Gemini Decisions handler: credential resolution receives the caller-key allowedConnections
     // allowlist from enforceApiKeyPolicyWithScope, just like /v1/classify (class B).
-    "src/app/api/v1/decisions/route.ts": 1,
+    "open-sse/handlers/geminiDecisionWorkflow.ts": 1,
     // v3.8.51 #11754: the second resolveImageRouteModel() call (a duplicate
     // of the retirement-check one hoisted before enforceApiKeyPolicy) was
     // removed as dead redundant code, 6->5. #12653 added combo target
@@ -257,10 +257,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
-    // Gemini Decisions: after an upstream project-wide 429, list Google rows only
+    // Gemini Decisions handler: after an upstream project-wide 429, list Google rows only
     // to exclude same-project connection IDs. The list never selects credentials
     // or dispatches; final selection remains in scoped quota preflight (class C).
-    "src/app/api/v1/decisions/route.ts": 1,
+    "open-sse/handlers/geminiDecisionWorkflow.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,

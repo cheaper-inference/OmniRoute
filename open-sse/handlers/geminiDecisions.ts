@@ -38,6 +38,54 @@ export function geminiDecisionInputTokens(body: Record<string, unknown> | null):
   return typeof count === "number" && Number.isFinite(count) && count >= 0 ? count : 0;
 }
 
+function invalidGoogleResponse(
+  error: string, started: number
+): GeminiDecisionTransportResult {
+  return {
+    status: 502,
+    body: null,
+    headers: new Headers(),
+    latencyMs: Date.now() - started,
+    timedOut: false,
+    transportError: error,
+  };
+}
+
+async function parseGoogleResponse(
+  response: Response, started: number
+): Promise<GeminiDecisionTransportResult> {
+  const sizeHeader = Number(response.headers.get("content-length") || "0");
+  if (sizeHeader > MAX_RESPONSE_BYTES) {
+    return invalidGoogleResponse("Upstream Decisions response exceeded size limit", started);
+  }
+  const text = await response.text();
+  if (text.length > MAX_RESPONSE_BYTES) {
+    return invalidGoogleResponse("Upstream Decisions response exceeded size limit", started);
+  }
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = null;
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return invalidGoogleResponse("Invalid upstream Decisions JSON response", started);
+  }
+  const record = body as Record<string, unknown>;
+  if (response.ok && (!record.answers || typeof record.answers !== "object" ||
+    Array.isArray(record.answers))) {
+    return invalidGoogleResponse("Upstream Decisions response lacks answers", started);
+  }
+  return {
+    status: response.status,
+    body: record,
+    headers: response.headers,
+    latencyMs: Date.now() - started,
+    timedOut: false,
+    transportError: null,
+  };
+}
+
 export async function executeGeminiDecision(
   input: GeminiDecisionPayload,
   apiKey: string,
@@ -74,48 +122,7 @@ export async function executeGeminiDecision(
       }),
       signal: controller.signal,
     });
-    const sizeHeader = Number(response.headers.get("content-length") || "0");
-    if (sizeHeader > MAX_RESPONSE_BYTES) {
-      return {
-        status: 502, body: null, headers: new Headers(), latencyMs: Date.now() - started,
-        timedOut: false, transportError: "Upstream Decisions response exceeded size limit",
-      };
-    }
-    const text = await response.text();
-    if (text.length > MAX_RESPONSE_BYTES) {
-      return {
-        status: 502, body: null, headers: new Headers(), latencyMs: Date.now() - started,
-        timedOut: false, transportError: "Upstream Decisions response exceeded size limit",
-      };
-    }
-    let body: unknown;
-    try {
-      body = JSON.parse(text);
-    } catch {
-      body = null;
-    }
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return {
-        status: 502, body: null, headers: new Headers(), latencyMs: Date.now() - started,
-        timedOut: false, transportError: "Invalid upstream Decisions JSON response",
-      };
-    }
-    const record = body as Record<string, unknown>;
-    if (response.ok && (!record.answers || typeof record.answers !== "object" ||
-      Array.isArray(record.answers))) {
-      return {
-        status: 502, body: null, headers: new Headers(), latencyMs: Date.now() - started,
-        timedOut: false, transportError: "Upstream Decisions response lacks answers",
-      };
-    }
-    return {
-      status: response.status,
-      body: record,
-      headers: response.headers,
-      latencyMs: Date.now() - started,
-      timedOut: false,
-      transportError: null,
-    };
+    return await parseGoogleResponse(response, started);
   } catch {
     return {
       status: options.signal?.aborted ? 499 : timedOut ? 504 : 502,
