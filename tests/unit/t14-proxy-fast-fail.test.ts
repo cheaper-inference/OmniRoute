@@ -255,3 +255,139 @@ test("nested same-context: probe runs only once", async () => {
     invalidateProxyHealth(proxyUrl);
   }
 });
+
+// ─── HAC-107: timeout verdicts are never memoized ────────────────────────────
+
+test("HAC-107: a timeout verdict is not cached and the next call re-probes", async () => {
+  const proxyUrl = "http://127.0.0.1:9099";
+  invalidateProxyHealth(proxyUrl);
+  let probeCount = 0;
+  __setProxyHealthTcpCheckForTesting(async (): Promise<ProxyProbeVerdict> => {
+    probeCount += 1;
+    return "timeout";
+  });
+  try {
+    assert.equal(await isProxyReachable(proxyUrl, 50, 30_000), false);
+    assert.equal(
+      getCachedProxyHealth(proxyUrl),
+      null,
+      "a timeout must not be memoized as a health verdict"
+    );
+    assert.equal(await isProxyReachable(proxyUrl, 50, 30_000), false);
+    assert.equal(probeCount, 2, "every call after a timeout must retry the probe");
+    assert.equal(getCachedProxyHealth(proxyUrl), null);
+  } finally {
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+});
+
+test("HAC-107: definitive verdicts are cached (ok and refused fail)", async () => {
+  const okUrl = "http://127.0.0.1:9100";
+  const failUrl = "http://127.0.0.1:9101";
+  invalidateProxyHealth(okUrl);
+  invalidateProxyHealth(failUrl);
+  const counts = new Map<string, number>();
+  __setProxyHealthTcpCheckForTesting(async (host, port): Promise<ProxyProbeVerdict> => {
+    const key = `${host}:${port}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    return port === 9100 ? "ok" : "fail";
+  });
+  try {
+    assert.equal(await isProxyReachable(okUrl, 50, 30_000), true);
+    assert.equal(await isProxyReachable(okUrl, 50, 30_000), true);
+    assert.equal(getCachedProxyHealth(okUrl), true);
+    assert.equal(counts.get("127.0.0.1:9100"), 1, "definitive success must be cached");
+
+    assert.equal(await isProxyReachable(failUrl, 50, 30_000), false);
+    assert.equal(await isProxyReachable(failUrl, 50, 30_000), false);
+    assert.equal(getCachedProxyHealth(failUrl), false);
+    assert.equal(counts.get("127.0.0.1:9101"), 1, "definitive refusal must be cached");
+  } finally {
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(okUrl);
+    invalidateProxyHealth(failUrl);
+  }
+});
+
+test("HAC-107: legacy boolean probe results still map to ok/fail", async () => {
+  const proxyUrl = "http://127.0.0.1:9102";
+  invalidateProxyHealth(proxyUrl);
+  let probeCount = 0;
+  __setProxyHealthTcpCheckForTesting(async () => {
+    probeCount += 1;
+    return true;
+  });
+  try {
+    assert.equal(await isProxyReachable(proxyUrl, 50, 30_000), true);
+    assert.equal(await isProxyReachable(proxyUrl, 50, 30_000), true);
+    assert.equal(probeCount, 1, "a boolean true is a definitive success and is cached");
+  } finally {
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+});
+
+test("HAC-107: concurrent callers share one in-flight probe across a timeout", async () => {
+  const proxyUrl = "http://127.0.0.1:9103";
+  invalidateProxyHealth(proxyUrl);
+  let probeCount = 0;
+  let releaseProbe!: (verdict: ProxyProbeVerdict) => void;
+  const probeStarted = new Promise<void>((resolve) => {
+    __setProxyHealthTcpCheckForTesting(async () => {
+      probeCount += 1;
+      resolve();
+      return new Promise<ProxyProbeVerdict>((resolveProbe) => {
+        releaseProbe = resolveProbe;
+      });
+    });
+  });
+  try {
+    const checks = Array.from({ length: 20 }, () => isProxyReachable(proxyUrl, 50, 30_000));
+    await probeStarted;
+    assert.equal(probeCount, 1, "concurrent callers must not fan out probes");
+    releaseProbe("timeout");
+    assert.deepEqual(
+      await Promise.all(checks),
+      Array.from({ length: 20 }, () => false)
+    );
+    assert.equal(getCachedProxyHealth(proxyUrl), null, "the shared timeout is not cached");
+    assert.equal(probeCount, 1);
+  } finally {
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+});
+
+test("HAC-107: degraded/restored logs once per definitive state change", async () => {
+  const proxyUrl = "http://127.0.0.1:9104";
+  invalidateProxyHealth(proxyUrl);
+  const logged: string[] = [];
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  console.log = (...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  };
+  console.warn = (...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  };
+  const verdicts: ProxyProbeVerdict[] = ["timeout", "fail", "fail", "ok", "ok", "timeout", "ok"];
+  let index = 0;
+  __setProxyHealthTcpCheckForTesting(async () => verdicts[index++] ?? "ok");
+  try {
+    for (let i = 0; i < verdicts.length; i += 1) {
+      await isProxyReachable(proxyUrl, 50, 0);
+    }
+    assert.equal(index, verdicts.length, "every iteration must reach the probe");
+    assert.deepEqual(
+      logged.filter((line) => line.startsWith("[ProxyHealth] ") && line.includes(proxyUrl)),
+      [`[ProxyHealth] ${proxyUrl} degraded`, `[ProxyHealth] ${proxyUrl} restored`],
+      "only definitive transitions log, and only once per state change"
+    );
+  } finally {
+    console.log = originalLog;
+    console.warn = originalWarn;
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+});
