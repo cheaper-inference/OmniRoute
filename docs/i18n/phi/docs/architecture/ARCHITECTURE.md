@@ -14,7 +14,7 @@ OmniRoute ay isang lokal AI routing gateway at dashboard na binuo sa Next.js. Na
 
 Mga pangunahing kakayahan:
 
-- OpenAI-compatible API surface para sa CLI/tools (380 provider, 158 executor modules)
+- OpenAI-compatible API surface para sa CLI/tools (381 provider, 159 executor modules)
 - pagsasalin ng Request/response sa mga format ng provider
 - Modelong combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) na may runtime na pag-order sa pamamagitan ng `compositeTiers`
@@ -71,7 +71,7 @@ Mga pangunahing kakayahan:
 - GLM Thinking (`glmt`) preset ng first-class na provider
 - Hybrid token counting (provider-side `/messages/count_tokens` na may fallback sa pagtatantya)
 - Model alias auto-seeding (30 + cross-proxy dialect normalizations sa startup)
-- Ligtas na outbound fetch na may SSRF guard, pribadong URL blocking, at na-configure na muling subukan
+- Ligtas na outbound fetch na may SSRF guard, pribadong URL blocking, at nako-configure na muling subukan
 - Sinusubukang muli ng cooldown-aware na chat ang na-configure na `requestRetry` at `maxRetryIntervalSec`
 - Pagpapatunay ng kapaligiran ng runtime gamit ang Zod sa pagsisimula
 - Compliance audit v2 na may pagination, provider CRUD event, at SSRF-blocked validation logging
@@ -362,7 +362,7 @@ Masusing talakayan: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 Ang Auto Combo ay dynamic na nagmamarka at pumipili ng mga target sa pagruruta sa oras ng kahilingan, sa halip na umasa sa isang static na kahulugan ng combo. Pinapagana nito ang `auto/*` model prefix family.
 
-- Pagpasok ng makina: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Entry ng engine: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
 - Resolver: `src/domain/comboResolver.ts` (auto-detection ng `auto/` prefix)
 - Dashboard: `/dashboard/auto-combo`
 - Telemetry: `auto_combo_decisions` SQLite table
@@ -392,7 +392,7 @@ Para sa provisioning ng bawat ahente at mga detalye OAuth, tingnan [`docs/framew
 
 ### C. Guardrails
 
-Ang guardrails module ay isang hot-reloadable middleware layer na sumusuri sa mga kahilingan at tugon para sa PII, agarang pag-iniksyon, at hindi ligtas na nilalaman ng paningin. Ang mga paglabag ay nag-short-circuit sa kahilingan sa HTTP** 503** kasama ang isang structured na error code, na nagbibigay-daan sa mga downstream na tumatawag na muling subukan o sangay.
+Ang guardrails module ay isang hot-reloadable middleware layer na sumusuri sa mga kahilingan at tugon para sa PII, agarang pag-iniksyon, at hindi ligtas na nilalaman ng paningin. Ang mga paglabag ay short-circuit ang kahilingan sa HTTP** 503** kasama ang isang structured na error code, na nagbibigay-daan sa mga downstream na tumatawag na muling subukan o sangay.
 
 - ugat ng module: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - Mainit na pag-reload: binabantayan ng registry ang mga pagbabago sa config at muling itinatayo ang chain sa lugar
@@ -414,10 +414,10 @@ Ang `src/domain/` namespace ay nakasentro sa mga desisyon sa patakaran upang ang
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Mga snapshot ng availability ng modelo: `src/domain/modelAvailability.ts`
 - Pagsubaybay sa pag-expire ng provider: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Ang mga provider ay nagdaragdag at nag-aalis ng mga window ng quota ( ibinaba ng OpenAI ang 5 oras Codex window para sa ilang mga plano), kaya ang isang paggamit ng pagbabasa sa adapter ng provider ay nagpapatunay na kumpleto (`quotasComplete`, tingnan `src/lib/usage/usageReading.ts`) ay ang buong window set ng account: isang window na kilala nang mas maaga ngunit wala dito ay nagretiro na, sa cache, sa `quota_snapshots` a restart ang rehydrates (isang rekord ng pagre-retiro na zq), sa naka-retiro Codex na estado, sa naka-attach na rehydrates (isang rekord na nag-retiro) mga bucket ng saturation ng Claude. Ang bahagyang ebidensya (mga header ng tugon, mga lipas na kopya) ay nag-a-update lamang sa mga bintanang dala nito.
 - Estado ng pagkasira: `src/domain/degradation.ts`
 - Pag-audit ng configuration: `src/domain/configAudit.ts`
-- tagabuo ng metadata ng tugon OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`
 - Subsystem ng pagtatasa: `src/domain/assessment/` — periodic evaluation jobs
 
 ### E. Awtorisasyon Pipeline

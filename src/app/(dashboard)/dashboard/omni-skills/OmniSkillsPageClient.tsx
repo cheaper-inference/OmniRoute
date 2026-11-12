@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import { Card } from "@/shared/components";
 import { SkillsConceptCard } from "@/shared/components";
 import Button from "@/shared/components/Button";
+import { FileInput } from "@/shared/components/FileInput";
 import Modal from "@/shared/components/Modal";
 import Textarea from "@/shared/components/Textarea";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
@@ -52,7 +53,6 @@ export function OmniSkillsPageClient(): JSX.Element {
     message: string;
   } | null>(null);
   const [installing, setInstalling] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [skillsProvider, setSkillsProvider] = useState<SkillsProvider>("skillsmp");
 
   const t = useTranslations("skills");
@@ -172,8 +172,7 @@ export function OmniSkillsPageClient(): JSX.Element {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileUpload = (file: File | undefined) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -223,19 +222,19 @@ export function OmniSkillsPageClient(): JSX.Element {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalSkills")}</p>
-          <p className="text-2xl font-bold text-text-main mt-1">{skillsTotal}</p>
+          <p className="text-2xl font-semibold text-text-main mt-1">{skillsTotal}</p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("enabledSkills")}</p>
-          <p className="text-2xl font-bold text-success mt-1">{enabledCount}</p>
+          <p className="text-2xl font-semibold text-success mt-1">{enabledCount}</p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
-          <p className="text-2xl font-bold text-primary mt-1">{execTotal}</p>
+          <p className="text-2xl font-semibold text-primary mt-1">{execTotal}</p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("successRate")}</p>
-          <p className="text-2xl font-bold text-warning mt-1">{successRate}%</p>
+          <p className="text-2xl font-semibold text-warning mt-1">{successRate}%</p>
         </Card>
       </div>
 
@@ -332,17 +331,13 @@ export function OmniSkillsPageClient(): JSX.Element {
           className="h-48 resize-none font-mono text-sm"
         />
         <div className="flex flex-wrap items-center gap-3 mt-3">
-          {/* kit-exception: Native file picker for the JSON upload (driven by the button; adapters have none). */}
-          <input
-            ref={fileInputRef}
-            type="file"
+          <FileInput
             accept=".json"
-            onChange={handleFileUpload}
-            className="hidden"
+            chooseLabel={t("uploadJson")}
+            onFilesChange={(files) => handleFileUpload(files[0])}
+            // Any picked file fills the textarea, as before; Install reports invalid JSON.
+            onFilesRejected={(rejections) => handleFileUpload(rejections[0]?.file)}
           />
-          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-            {t("uploadJson")}
-          </Button>
           <div className="flex-1" />
           <Button variant="outline" size="sm" onClick={closeInstallModal}>
             {t("cancel")}

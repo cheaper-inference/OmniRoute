@@ -2,6 +2,11 @@ import {
   copyOpenAICompatibleReasoningFields,
   getReadableReasoningValue,
 } from "../utils/reasoningFields.ts";
+import {
+  hasDotsToolCalls,
+  parseDotsToolCalls,
+  stripDotsToolCallBlocks,
+} from "../utils/dotsToolCalls.ts";
 import { stripInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 import { normalizeOpenAICompatibleFinishReason } from "../utils/finishReason.ts";
 import {
@@ -20,6 +25,8 @@ import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
 import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
 import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
+import { copyUrlCitationAnnotations } from "./responseSanitizer/urlCitations.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 export {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -408,6 +415,29 @@ function applyTextualToolCallSanitization(sanitized: JsonRecord, msgRecord: Json
   }
 }
 
+/** Dots Studio `<dots_function_call>` markup in content (OpenAI leg) becomes structured tool_calls. */
+function applyDotsToolCallSanitization(sanitized: JsonRecord, msgRecord: JsonRecord): void {
+  if (typeof sanitized.content !== "string" || !hasDotsToolCalls(sanitized.content)) return;
+  // Non-streaming body only: a whole message, so nothing is held back for a later chunk.
+  // finish_reason belongs to the choice; sanitizeOpenAIResponse promotes it to
+  // "tool_calls" once the message carries tool_calls.
+  const dotsResult = parseDotsToolCalls(sanitized.content, { final: true });
+  if (dotsResult.toolCalls.length > 0 && !msgRecord.tool_calls && !sanitized.tool_calls) {
+    sanitized.content = dotsResult.content || null;
+    sanitized.tool_calls = dotsResult.toolCalls;
+  } else if (dotsResult.content !== sanitized.content) {
+    sanitized.content = dotsResult.content || null;
+  }
+}
+
+/** Scrub dots blocks from reasoning fields if present. */
+function scrubDotsFromReasoning(sanitized: JsonRecord): void {
+  for (const key of ["reasoning_content", "reasoning"]) {
+    const value = sanitized[key];
+    if (typeof value === "string") sanitized[key] = stripDotsToolCallBlocks(value);
+  }
+}
+
 function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
   const msgRecord = toRecord(msg);
   if (!msgRecord) return msg;
@@ -419,7 +449,10 @@ function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
 
   Object.assign(sanitized, sanitizeMessageContent(msgRecord, options));
 
+  applyDotsToolCallSanitization(sanitized, msgRecord);
   copyOpenAICompatibleReasoningFields(msgRecord, sanitized);
+  scrubDotsFromReasoning(sanitized);
+  copyUrlCitationAnnotations(msgRecord, sanitized);
   applyTextualToolCallSanitization(sanitized, msgRecord);
 
   if (msgRecord.tool_calls) {
@@ -561,7 +594,7 @@ function sanitizeResponsesUsage(usage: unknown): unknown {
   sanitized.output_tokens = outputTokens;
   sanitized.total_tokens = totalTokens;
 
-  return sanitized;
+  return normalizeResponsesContextUsage(sanitized);
 }
 
 /**
@@ -589,6 +622,24 @@ function normalizeResponsesId(id: unknown): string {
   }
   if (id.startsWith("resp_")) return id;
   return `resp_${id}`;
+}
+
+const TOOL_CALL_BASE_KEYS = new Set(["index", "id", "type", "function"]);
+
+/**
+ * False for a streamed tool_call placeholder that carries nothing: no id, name,
+ * argument text, non-function type or extension key. Such items made the stream
+ * count a phantom call, mint an id for it and rewrite the finish to tool_calls.
+ */
+function isNonEmptyToolCallDelta(tc: unknown): boolean {
+  const t = toRecord(tc);
+  if (!t) return true;
+  if (t.id != null && t.id !== "") return true;
+  if (t.type != null && t.type !== "function") return true;
+  const fn = toRecord(t.function);
+  if (fn?.name) return true;
+  if (fn?.arguments != null && fn.arguments !== "") return true;
+  return Object.entries(t).some(([key, value]) => value != null && !TOOL_CALL_BASE_KEYS.has(key));
 }
 
 /**
@@ -773,6 +824,10 @@ function sanitizeResponsesStreamingEvent(parsedRecord: JsonRecord): JsonRecord {
     } else {
       delete sanitizedResponse.output_text;
     }
+    const responseUsage = toRecord(responseRecord.usage);
+    if (responseUsage) {
+      sanitizedResponse.usage = normalizeResponsesContextUsage(responseUsage);
+    }
     sanitized.response = sanitizedResponse;
   }
 
@@ -931,6 +986,41 @@ function extractResponsesOutputText(output: JsonRecord[]): string {
   return parts.join("");
 }
 
+/** Responses `incomplete_details.reason` for a Chat Completions finish_reason, or null. */
+function incompleteReasonForFinish(finishReason: unknown): string | null {
+  if (finishReason === "length") return "max_output_tokens";
+  return finishReason === "content_filter" ? "content_filter" : null;
+}
+
+/** Chat Completions tool_calls (or the legacy function_call) as Responses function_call items. */
+function buildFunctionCallOutputs(message: JsonRecord, choice: JsonRecord): JsonRecord[] {
+  const toolCalls = Array.isArray(message.tool_calls)
+    ? message.tool_calls
+    : message.function_call
+      ? [
+          {
+            id: toString(choice.id) || "call_0",
+            type: "function",
+            function: message.function_call,
+          },
+        ]
+      : [];
+  const items: JsonRecord[] = [];
+  for (let index = 0; index < toolCalls.length; index += 1) {
+    const toolCall = toRecord(toolCalls[index]) || {};
+    const fn = toRecord(toolCall.function) || {};
+    const callId = toString(toolCall.id) || `call_${index}`;
+    items.push({
+      id: `fc_${callId}`,
+      type: "function_call",
+      call_id: callId,
+      name: toString(fn.name) || "",
+      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
+    });
+  }
+  return items;
+}
+
 function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecord {
   const responseId = normalizeResponsesId(openaiResponse.id);
   const createdAt = toNumber(openaiResponse.created) ?? Math.floor(Date.now() / 1000);
@@ -939,6 +1029,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     ? (toRecord(openaiResponse.choices[0]) ?? {})
     : {};
   const message = toRecord(choice.message) || {};
+  const incompleteReason = incompleteReasonForFinish(choice.finish_reason);
   const output: JsonRecord[] = [];
 
   const reasoningContent =
@@ -959,6 +1050,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
       id: `msg_${responseId}_0`,
       type: "message",
       role: toString(message.role) || "assistant",
+      ...(incompleteReason ? { status: "incomplete" } : {}),
       content:
         messageContent.length > 0
           ? messageContent
@@ -966,37 +1058,15 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     });
   }
 
-  const toolCalls = Array.isArray(message.tool_calls)
-    ? message.tool_calls
-    : message.function_call
-      ? [
-          {
-            id: toString(choice.id) || "call_0",
-            type: "function",
-            function: message.function_call,
-          },
-        ]
-      : [];
-
-  for (let index = 0; index < toolCalls.length; index += 1) {
-    const toolCall = toRecord(toolCalls[index]) || {};
-    const fn = toRecord(toolCall.function) || {};
-    const callId = toString(toolCall.id) || `call_${index}`;
-    output.push({
-      id: `fc_${callId}`,
-      type: "function_call",
-      call_id: callId,
-      name: toString(fn.name) || "",
-      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
-    });
-  }
+  output.push(...buildFunctionCallOutputs(message, choice));
 
   const sanitized: JsonRecord = {
     id: responseId,
     object: "response",
     created_at: createdAt,
     model,
-    status: "completed",
+    status: incompleteReason ? "incomplete" : "completed",
+    ...(incompleteReason ? { incomplete_details: { reason: incompleteReason } } : {}),
     background: false,
     error: null,
     output,
@@ -1098,7 +1168,7 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
           if (deltaRecord.content !== undefined) {
             delta.content =
               typeof deltaRecord.content === "string"
-                ? collapseExcessiveNewlines(stripZeroWidthText(deltaRecord.content))
+                ? stripZeroWidthText(deltaRecord.content)
                 : deltaRecord.content;
           }
           copyOpenAICompatibleReasoningFields(deltaRecord, delta);
@@ -1111,23 +1181,28 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
             }
           }
           if (deltaRecord.tool_calls !== undefined) {
-            delta.tool_calls = Array.isArray(deltaRecord.tool_calls)
-              ? deltaRecord.tool_calls.map((tc) => {
-                  const t = toRecord(tc);
-                  if (!t) return tc;
-                  const strippedToolCall = stripZeroWidthToolCallArguments(t);
-                  const strippedRecord = toRecord(strippedToolCall) || t;
-                  if (t.id !== undefined && t.id !== null && typeof t.id !== "string") {
-                    return { ...strippedRecord, id: String(t.id) };
-                  }
-                  return strippedRecord;
-                })
-              : deltaRecord.tool_calls;
+            if (!Array.isArray(deltaRecord.tool_calls)) {
+              delta.tool_calls = deltaRecord.tool_calls;
+            } else {
+              const toolCalls = deltaRecord.tool_calls.filter(isNonEmptyToolCallDelta).map((tc) => {
+                const t = toRecord(tc);
+                if (!t) return tc;
+                const strippedToolCall = stripZeroWidthToolCallArguments(t);
+                const strippedRecord = toRecord(strippedToolCall) || t;
+                if (t.id !== undefined && t.id !== null && typeof t.id !== "string") {
+                  return { ...strippedRecord, id: String(t.id) };
+                }
+                return strippedRecord;
+              });
+              if (toolCalls.length > 0) delta.tool_calls = toolCalls;
+            }
           }
           if (deltaRecord.function_call !== undefined)
             delta.function_call = stripZeroWidthFunctionArguments(deltaRecord.function_call);
           // Generated-image deltas (gemini-to-openai inlineData) must survive the allow-list.
           if (Array.isArray(deltaRecord.images)) delta.images = deltaRecord.images;
+          // So must the sources a web-grounded answer cites.
+          copyUrlCitationAnnotations(deltaRecord, delta);
           c.delta = delta;
         } else {
           c.delta = choiceRecord.delta;

@@ -14,7 +14,7 @@ OmniRoute በ Next.js ላይ የተገነባ የአካባቢያዊ AI ማዞሪ�
 
 ዋና ችሎታዎች፡-
 
-- ክፍት AI-ተኳሃኝ API ወለል ለ CLI/tools (380 አቅራቢዎች፣ 158 አስፈፃሚ ሞጁሎች)
+- ክፍት AI-ተኳሃኝ API ወለል ለ CLI/tools (381 አቅራቢዎች፣ 159 አስፈፃሚ ሞጁሎች)
 - Request/response ትርጉም በአቅራቢ ቅርጸቶች
 - የሞዴል ጥምር ውድቀት (ባለብዙ ሞዴል ተከታታይ)
 - የተዋቀሩ ጥምር ደረጃዎች (`provider + model + connection`) በአሂድ ጊዜ በ `compositeTiers`
@@ -24,7 +24,7 @@ OmniRoute በ Next.js ላይ የተገነባ የአካባቢያዊ AI ማዞሪ�
 - በ `/v1/embeddings` (18 አቅራቢዎች) መክተት
 - ምስል ማመንጨት በ `/v1/images/generations` (10 + አቅራቢዎች፣ 20 + ሞዴሎች)
 - የድምጽ ቅጂ በ `/v1/audio/transcriptions` (18 አቅራቢዎች)
-- ጽሑፍ-ወደ-ንግግር በ `/v1/audio/speech` (24 አብሮገነብ አቅራቢዎች)
+- ጽሑፍ ወደ ንግግር በ `/v1/audio/speech` (24 አብሮገነብ አቅራቢዎች)
 - የቪዲዮ ትውልድ `/v1/videos/generations` (ComfyUI + SD WebUI)
 - የሙዚቃ ትውልድ በ `/v1/music/generations` (ComfyUI)
 - የድር ፍለጋ በ `/v1/search` (20 አቅራቢዎች)
@@ -50,9 +50,9 @@ OmniRoute በ Next.js ላይ የተገነባ የአካባቢያዊ AI ማዞሪ�
 - የጎራ ሁኔታ ጽናት (SQLite ጻፍ-በመሸጎጫ ለመውደቅ, በጀቶች, መቆለፊያዎች, የወረዳ ተላላፊዎች)
 - የፖሊሲ ሞተር ለተማከለ ጥያቄ ግምገማ (lockout → budget → fallback)
 - ቴሌሜትሪ ከ p50/p95/p99 መዘግየት ድምር ጋር ይጠይቁ
-- ጥምር ኢላማ ቴሌሜትሪ እና ታሪካዊ ጥምር ጤናን በ `combo_execution_key` / `combo_step_id` በኩል
+- ጥምር ዒላማ ቴሌሜትሪ እና ታሪካዊ ጥምር ጤና በ `combo_execution_key` / `combo_step_id` በኩል
 - ተዛማጅ ID (X-ጥያቄ-መታወቂያ) ከጫፍ እስከ ጫፍ ፍለጋ
-- ተገዢነት ኦዲት ምዝግብ ማስታወሻ በአንድ API ቁልፍ መርጦ መውጣት
+- ተገዢነት ኦዲት ምዝግብ ማስታወሻ በ API ቁልፍ መርጦ መውጣት
 - የኢቫል ማዕቀፍ ለ LLM ጥራት ማረጋገጫ
 - የጤና ዳሽቦርድ ከቅጽበት አቅራቢ የወረዳ ተላላፊ ሁኔታ ጋር
 - MCP አገልጋይ (110 መሳሪያዎች) ከ 3 ማጓጓዣዎች (stdio/SSE/Streamable HTTP) ጋር
@@ -360,7 +360,7 @@ OmniRoute በአካባቢው የሚሰሩና **የተካተቱ አገልግሎ�
 
 ### ሀ. አውቶማቲክ ኮምቦ ሞተር
 
-አውቶ ኮምቦ በማይለዋወጥ ጥምር ፍቺ ላይ ከመተማመን ይልቅ በተጠየቀ ጊዜ የማዞሪያ ኢላማዎችን ያስመዘግብ እና ይመርጣል። የ `auto/*` ሞዴል ቅድመ ቅጥያ ቤተሰብን ያበረታታል።
+አውቶ ኮምቦ በማይለዋወጥ ጥምር ፍቺ ላይ ከመተማመን ይልቅ በተጠየቀ ጊዜ የማዞሪያ ኢላማዎችን ያስመዘግብ እና ይመርጣል። `auto/*` ሞዴል ቅድመ ቅጥያ ቤተሰብን ያበረታታል።
 
 - የሞተር ግቤት `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
 - መፍትሄ ሰጪ `src/domain/comboResolver.ts` (የ `auto/` ቅድመ ቅጥያ በራስ-ሰር ማግኘት)
@@ -392,7 +392,7 @@ Cloud Agents በሶስተኛ ወገን የሚስተናገዱ የኮድ ወኪል
 
 ### ሐ. Guardrails
 
-የጠባቂዎች ሞጁል ትኩስ-እንደገና ሊጫን የሚችል የመሃከለኛ ዌር ንብርብር ለ PII፣ ፈጣን መርፌ እና ደህንነቱ ያልተጠበቀ የእይታ ይዘትን የሚመረምር። ጥሰቶች ጥያቄውን በ HTTP አጭር ዙር ያደርጋሉ** 503** እና የተዋቀረ የስህተት ኮድ፣ የታችኛው ተፋሰስ ደዋዮች እንደገና እንዲሞክሩ ወይም እንዲቀጥሉ ያስችላቸዋል።
+የጠባቂዎች ሞጁል ትኩስ-እንደገና ሊጫን የሚችል የመሃከለኛ ዌር ንብርብር ለ PII፣ ፈጣን መርፌ እና ደህንነቱ ያልተጠበቀ የእይታ ይዘትን የሚመረምር። ጥሰቶች ጥያቄውን በ HTTP አጭር ዙር ያደርጋሉ** 503** እንዲሁም የተዋቀረ የስህተት ኮድ፣ የታችኛው ተፋሰስ ደዋዮች እንደገና እንዲሞክሩ ወይም እንዲቀጥሉ ያስችላቸዋል።
 
 - የሞዱል ሥር `src/lib/guardrails/` (`base.ts`፣ `registry.ts`፣ `piiMasker.ts`፣ `promptInjection.ts`፣ `visionBridge.ts`፣ `visionBridgeHelpers.ts`)
 - ትኩስ ዳግም መጫን፡ የመመዝገቢያ ሰዓቶች ለማዋቀር ለውጦች እና ሰንሰለቱን በቦታው እንደገና ይገነባል።
@@ -414,7 +414,7 @@ Cloud Agents በሶስተኛ ወገን የሚስተናገዱ የኮድ ወኪል
 - Connection/model ደንብ ተቀናጅተው `src/domain/connectionModelRules.ts`
 - የሞዴል ተገኝነት ቅጽበተ-ፎቶዎች `src/domain/modelAvailability.ts`
 - የአቅራቢው የማለፊያ ክትትል `src/domain/providerExpiration.ts`
-- የኮታ መሸጎጫ `src/domain/quotaCache.ts`
+- የኮታ መሸጎጫ `src/domain/quotaCache.ts`. አቅራቢዎች የኮታ መስኮቶችን ይጨምራሉ እና ያስወግዳሉ (OpenAI ለአንዳንድ ዕቅዶች የ5-ሰዓት Codex መስኮቱን ጥሏል) ስለዚህ የአቅራቢውን አስማሚ ማንበብ እንደተጠናቀቀ ይመሰክራል (`quotasComplete`, `src/lib/usage/usageReading.ts` ይመልከቱ) የመለያው ሙሉ መስኮት ስብስብ ነው፡ ቀደም ብሎ የሚታወቅ ነገር ግን ከእሱ የሌሉበት መስኮት ጡረታ ወጥቷል፣ በመሸጎጫው ውስጥ፣ በ `quota_snapshots` ውስጥ እንደገና ሃይድሮጂን እንደገና ይጀመራል እና የተመዘገበው መግለጫ Codex እንደገና ይጀምራል። የ Claude ሙሌት ባልዲዎች። ከፊል ማስረጃ (የምላሽ ራስጌዎች፣ የቆዩ ቅጂዎች) የተሸከሙትን መስኮቶች ብቻ ያዘምናል።
 - የማዋረድ ሁኔታ `src/domain/degradation.ts`
 - የማዋቀር ኦዲት `src/domain/configAudit.ts`
 - OmniRoute ምላሽ ሜታዳታ ገንቢ `src/domain/omnirouteResponseMeta.ts`
@@ -434,11 +434,11 @@ Cloud Agents በሶስተኛ ወገን የሚስተናገዱ የኮድ ወኪል
 
 የህዝብ እና የአስተዳደር መንገዶች ከባድ ድንበር ናቸው agent/cooldown APIs እና የአቅራቢ ሚውቴሽን የአስተዳደር ማረጋገጫ ያስፈልጋቸዋል (HTTP 401 ከጠፋ)።
 
-ለሙሉ መስመር አመዳደብ ደንቦች፣ [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ይመልከቱ።
+ለሙሉ መስመር ምደባ ደንቦች፣ [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ይመልከቱ።
 
 ### F. Workflow FSM እና Task-Aware Router
 
-በተገኘው የስራ ፍሰት ደረጃ (እቅድ፣ አፈጻጸም፣ ግምገማ) እና ከበስተጀርባ-ተግባር ትስስር ላይ በመመስረት ትራፊክን ለመምራት ከጥምር ምርጫ በላይ የተደራረበ ባለ ውሱን-ግዛት-ማሽን የሚነዳ ራውተር።
+በተገኘው የስራ ፍሰት ደረጃ (እቅድ፣ አፈጻጸም፣ ግምገማ) እና ከበስተጀርባ-ተግባር ትስስር ላይ በመመስረት ትራፊክን ለመምራት ከጥምር ምርጫ በላይ የተደራረበው ባለገደብ-ግዛት-ማሽን የሚነዳ ራውተር።
 
 - የስራ ፍሰት FSM: `open-sse/services/workflowFSM.ts`
 - ተግባርን የሚያውቅ ራውተር `open-sse/services/taskAwareRouter.ts`

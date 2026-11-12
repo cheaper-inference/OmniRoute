@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 top-level executor modules (`*.ts` minus `base.ts`, `index.ts` and tests — the count `npm run check:docs-counts` measures). Every executor class extends `BaseExecutor` (`base.ts`), directly or through `DefaultExecutor` or another executor; the remaining modules are per-provider helpers (tool schemas, fetch/TTS adapters, quirk handlers). Executors include:
+159 top-level executor modules (`*.ts` minus `base.ts`, `index.ts` and tests — the count `npm run check:docs-counts` measures). Every executor class extends `BaseExecutor` (`base.ts`), directly or through `DefaultExecutor` or another executor; the remaining modules are per-provider helpers (tool schemas, fetch/TTS adapters, quirk handlers). Executors include:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> ማሳሰቢያ፡ እዚህ ያልተዘረዘሩ አቅራቢዎች አጠቃላይ የOpenAI-ተኳሃኝ ፈጻሚን በመጠቀም በ `default.ts` ያገለግላሉ። የሙሉ አቅራቢ ካታሎግ (380 አቅራቢዎች) በ `src/shared/constants/providers.ts` ውስጥ ይኖራሉ።
+> ማሳሰቢያ፡ እዚህ ያልተዘረዘሩ አቅራቢዎች አጠቃላይ የOpenAI-ተኳሃኝ ፈጻሚን በመጠቀም በ `default.ts` ያገለግላሉ። የሙሉ አቅራቢ ካታሎግ (381 አቅራቢዎች) በ `src/shared/constants/providers.ts` ውስጥ ይኖራሉ።
 
 ### 4.3 `open-sse/translator/`
 
@@ -541,7 +541,7 @@ Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeader
 
 ### 4.8 `open-sse/utils/`
 
-የዥረት `thinkTagParser.ts` `kieTask.ts` `cursorAgentProtobuf.ts` ረዳቶች `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts` `ollamaTransform.ts` `proxyDispatcher.ts` `sleep.ts` `tlsClient.ts` `networkProxy.ts` `awsSigV4.ts` `cacheControlPolicy.ts` `error.ts` `cursorChecksum.ts` `requestLogger.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `progressTracker.ts` `bypassHandler.ts` `cors.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `usageTracking.ts`
+`sleep.ts` `thinkTagParser.ts` `comfyuiClient.ts` `ollamaTransform.ts` `proxyDispatcher.ts` `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts` `cors.ts` `streamReadiness.ts` `logger.ts` `sseHeartbeat.ts` `error.ts` `proxyFetch.ts` `tlsClient.ts` `cursorVersionDetector.ts` `cacheControlPolicy.ts` `awsSigV4.ts` `cursorChecksum.ts` `networkProxy.ts` `cursorAgentProtobuf.ts` `bypassHandler.ts` `kieTask.ts` `requestLogger.ts` `aiSdkCompat.ts` `progressTracker.ts` `urlSanitize.ts` `usageTracking.ts`
 
 ---
 

@@ -57,6 +57,7 @@ import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableMod
 import {
   isDiscoveryImportedCustomSource,
   providerUsesCuratedModelsOnly,
+  providerIsCursor,
   providerUsesExclusiveSyncedListing,
 } from "@/lib/providers/modelListingCapability";
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
@@ -87,7 +88,11 @@ import {
   isProviderNodePrefixReserved,
   selectCompatibleNodeForPrefix,
 } from "@/lib/providerNodePrefixes";
-import { applyCatalogPostFilters, finalizeCatalogResponse } from "./catalogResponse";
+import {
+  applyCatalogPostFilters,
+  finalizeCatalogResponse,
+  syntheticVariantListingIds,
+} from "./catalogResponse";
 import {
   isNoAuthProviderBlocked,
   isNoAuthProviderKey,
@@ -136,7 +141,12 @@ import {
   getProviderPrefixes as getProviderPrefixesFromMaps,
   getComboTargetModelId as getComboTargetModelIdFromMaps,
 } from "./catalogProviderMaps";
-import { indexNodeApiTypes, nodeModelEndpoints, overlayEndpoints } from "./catalogNodeModality";
+import {
+  customOverlayEndpointFields,
+  indexNodeApiTypes,
+  nodeModelEndpoints,
+  overlayEndpoints,
+} from "./catalogNodeModality";
 import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
   getModelCatalogAuthRejection,
@@ -879,6 +889,18 @@ async function buildUnifiedModelsResponseCore(
       };
     };
 
+    // A combo's metadata describes its own resolved targets, minus hidden models.
+    const getVisibleComboTargets = (combo: Parameters<typeof resolveNestedComboTargets>[0]) =>
+      (
+        resolveNestedComboTargets(
+          combo,
+          combos as Parameters<typeof resolveNestedComboTargets>[1]
+        ) as ComboCatalogTarget[]
+      ).filter((target) => {
+        const resolved = getComboTargetModelId(target);
+        return resolved ? !isModelHiddenStrict(resolved.providerId, resolved.modelId) : true;
+      });
+
     // Collect models from active providers (or all if none active)
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
@@ -893,10 +915,38 @@ async function buildUnifiedModelsResponseCore(
       const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
       earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
     }
+    // #18726: synthesized effort variants (`<provider>/<base>-<tier>`) are appended
+    // after the base-row loops ran these checks, so a variant hidden on its own
+    // (or matched by the exposure denylist) is re-checked by its own id. A
+    // compatible-node prefix maps back to the node id the hidden row is keyed by.
+    // A `no-think/` alias or a mirror of a hidden variant is checked by the real model id.
+    // Only the denylist applies here: a variant inherits its base's allowlist
+    // match, so allowlisting a base keeps advertising its variants. A deny entry
+    // under the public prefix, the canonical id or the node id hides the variant.
+    const variantDenylistOnly = { modelVisibilityDenylist: settings.modelVisibilityDenylist };
+    const isSyntheticVariantDenied = (providerKeys: string[], modelId: string): boolean =>
+      providerKeys.some((key) => !isModelExposureAllowed(key, modelId, variantDenylistOnly));
+    const isListingIdHidden = (id: string): boolean => {
+      const slash = id.indexOf("/");
+      if (slash <= 0 || slash === id.length - 1) return false;
+      const providerKey = id.slice(0, slash);
+      const modelId = id.slice(slash + 1);
+      const nodeId = providerNodeIdByPrefix[providerKey];
+      const providerKeys = [providerKey, aliasToProviderId[providerKey], nodeId].filter(
+        (key): key is string => Boolean(key)
+      );
+      return (
+        isModelHiddenBulk(nodeId || providerKey, modelId) ||
+        isSyntheticVariantDenied(providerKeys, modelId)
+      );
+    };
+    const isSyntheticVariantHidden = (model: Record<string, any>): boolean =>
+      syntheticVariantListingIds(model).some(isListingIdHidden);
     const postFilterContext = {
       connections,
       prefixMode,
       aliasToProviderId,
+      isSyntheticVariantHidden,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
       allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,
@@ -930,7 +980,7 @@ async function buildUnifiedModelsResponseCore(
         earlyKeyMeta.allowedQuotas,
         combos,
         timestamp,
-        (c) => buildComboCatalogMetadata(c, combos)
+        (c) => buildComboCatalogMetadata(c, getVisibleComboTargets(c))
       );
       const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
       return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
@@ -1047,14 +1097,9 @@ async function buildUnifiedModelsResponseCore(
       if (listedIds.has(combo.name)) continue; // #4164: don't shadow a built-in auto/* id
 
       // Skip combos whose any underlying target model is hidden
-      const comboTargets = resolveNestedComboTargets(
-        combo as Parameters<typeof resolveNestedComboTargets>[0],
-        combos as Parameters<typeof resolveNestedComboTargets>[1]
-      ) as ComboCatalogTarget[];
-      const visibleTargets = comboTargets.filter((target) => {
-        const resolved = getComboTargetModelId(target);
-        return resolved ? !isModelHiddenStrict(resolved.providerId, resolved.modelId) : true;
-      });
+      const visibleTargets = getVisibleComboTargets(
+        combo as Parameters<typeof resolveNestedComboTargets>[0]
+      );
       if (visibleTargets.length === 0) continue;
 
       const comboMetadata = buildComboCatalogMetadata(combo, visibleTargets);
@@ -1321,11 +1366,10 @@ async function buildUnifiedModelsResponseCore(
           continue;
         }
 
-        for (const sm of ["cursor", "cu"].includes(providerId.trim().toLowerCase())
+        for (const sm of providerIsCursor(providerId)
           ? ensureCursorAutoCatalogEntry(
               syncedModels.map((row) => ({
                 ...row,
-                id: row.id,
                 name: row.name || row.id,
                 owned_by: "cursor",
               }))
@@ -1930,10 +1974,7 @@ async function buildUnifiedModelsResponseCore(
           const existingIndex = models.findIndex((m) => m.id === aliasId);
           if (existingIndex !== -1) {
             const existing = models[existingIndex] as Record<string, unknown> & { id: string };
-            const endpoints = Array.isArray(model.supportedEndpoints)
-              ? model.supportedEndpoints
-              : undefined;
-            const apiFormat = typeof model.apiFormat === "string" ? model.apiFormat : undefined;
+            const { endpoints, apiFormat } = customOverlayEndpointFields(model, existing);
             const visionFields =
               typeof model.supportsVision === "boolean"
                 ? model.supportsVision
@@ -2235,7 +2276,7 @@ async function buildUnifiedModelsResponseCore(
           keyMeta.allowedQuotas,
           combos,
           timestamp,
-          (c) => buildComboCatalogMetadata(c, combos)
+          (c) => buildComboCatalogMetadata(c, getVisibleComboTargets(c))
         );
       } else if (!keyMeta) {
         // #6406: A valid apiKey without a DB metadata row is an env-var master key

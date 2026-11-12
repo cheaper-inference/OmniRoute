@@ -4,18 +4,23 @@
  * module only owns the SQL.
  *
  * A key counts as "limited" only when enforcement can actually block it: the
- * per-key USD limit is enabled AND at least one positive daily/weekly limit is
+ * per-key USD limit is enabled AND at least one positive daily/weekly/5-hour limit is
  * configured (mirrors `normalizeLimitUsd` in `apiKeyUsageLimits.ts`).
  */
 import { getDbInstance } from "./core";
 
 const LIMITED_KEY_SQL = `k.usage_limit_enabled = 1
-  AND (COALESCE(k.daily_usage_limit_usd, 0) > 0 OR COALESCE(k.weekly_usage_limit_usd, 0) > 0)`;
+  AND (
+    COALESCE(k.daily_usage_limit_usd, 0) > 0
+    OR COALESCE(k.weekly_usage_limit_usd, 0) > 0
+    OR COALESCE(k.five_hour_usage_limit_usd, 0) > 0
+  )`;
 
 export interface UsageModelGroupRow {
   provider: string;
   model: string;
   requests: number;
+  unpricedUnitRequests: number;
   apiKeys: number;
   limitedApiKeys: number;
   lastSeenAt: string | null;
@@ -23,7 +28,7 @@ export interface UsageModelGroupRow {
 
 /**
  * Successful usage since `sinceIso`, grouped by lower-cased provider/model (same keys enforcement groups by).
- * Rows carrying a provider-reported cost (`provider_cost_usd`) are billed at that amount and never need
+ * Rows with a provider-reported cost or catalogue snapshot never need
  * a pricing row, so — like enforcement in `apiKeyUsageLimits.ts` — they are left out.
  */
 export function getSuccessfulUsageModelGroupsSince(sinceIso: string): UsageModelGroupRow[] {
@@ -34,6 +39,7 @@ export function getSuccessfulUsageModelGroupsSince(sinceIso: string): UsageModel
         LOWER(u.provider) as provider,
         LOWER(u.model) as model,
         COUNT(*) as requests,
+        SUM(CASE WHEN u.billing_unit IS NOT NULL THEN 1 ELSE 0 END) as unpricedUnitRequests,
         COUNT(DISTINCT u.api_key_id) as apiKeys,
         COUNT(DISTINCT CASE WHEN ${LIMITED_KEY_SQL} THEN u.api_key_id END) as limitedApiKeys,
         MAX(u.timestamp) as lastSeenAt
@@ -41,7 +47,7 @@ export function getSuccessfulUsageModelGroupsSince(sinceIso: string): UsageModel
       LEFT JOIN api_keys k ON k.id = u.api_key_id
       WHERE u.timestamp >= @sinceIso
         AND u.success = 1
-        AND u.provider_cost_usd IS NULL
+        AND COALESCE(u.provider_cost_usd, u.calculated_cost_usd) IS NULL
       GROUP BY LOWER(u.provider), LOWER(u.model)
     `
     )
@@ -56,6 +62,7 @@ export function getSuccessfulUsageModelGroupsSince(sinceIso: string): UsageModel
         provider,
         model,
         requests: Number(row.requests) || 0,
+        unpricedUnitRequests: Number(row.unpricedUnitRequests) || 0,
         apiKeys: Number(row.apiKeys) || 0,
         limitedApiKeys: Number(row.limitedApiKeys) || 0,
         lastSeenAt: typeof row.lastSeenAt === "string" ? row.lastSeenAt : null,
@@ -75,7 +82,7 @@ export function countLimitedApiKeysUsingModelsSince(sinceIso: string, labels: st
       JOIN api_keys k ON k.id = u.api_key_id
       WHERE u.timestamp >= @sinceIso
         AND u.success = 1
-        AND u.provider_cost_usd IS NULL
+        AND COALESCE(u.provider_cost_usd, u.calculated_cost_usd) IS NULL
         AND ${LIMITED_KEY_SQL}
         AND (LOWER(u.provider) || '/' || LOWER(u.model)) IN (SELECT value FROM json_each(@labels))
     `

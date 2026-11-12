@@ -53,6 +53,7 @@ import {
   type BedrockEmbeddingItem,
 } from "./bedrockEmbeddings.ts";
 import { resolveBedrockRegion } from "../config/bedrock.ts";
+import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 
 interface ClientRawRequest {
   endpoint: string;
@@ -60,9 +61,12 @@ interface ClientRawRequest {
   headers: Record<string, string>;
 }
 
+import { recordEmbeddingConsumption } from "./embeddingUsage";
+
 interface EmbeddingCredentials {
   apiKey?: string | null;
   accessToken?: string | null;
+  copilotToken?: string | null;
   providerSpecificData?: Record<string, unknown> | null;
 }
 
@@ -81,8 +85,16 @@ interface HandleEmbeddingParams {
   apiKeyId?: string | null;
   apiKeyName?: string | null;
   connectionId?: string | null;
+  /**
+   * Provider id stored on the selected connection. For a custom node this is the node id
+   * (`openai-compatible-embeddings-…`), while `provider` is the model prefix. Error
+   * classification needs the node id; falls back to `provider` when absent.
+   */
+  connectionProvider?: string | null;
   requestedModel?: string | null;
   comboName?: string | null;
+  /** Internal observer: preserve absent usage before the public zero-count fallback. */
+  onUsage?: (usage: Record<string, unknown> | null) => void;
 }
 
 interface EmbeddingFailure {
@@ -174,6 +186,21 @@ function fillMissingEmbeddingIndex(item: unknown, position: number): void {
   if (typeof record.index !== "number" || !Number.isFinite(record.index)) {
     record.index = position;
   }
+}
+
+/**
+ * Many upstreams ignore `encoding_format` and answer with number arrays. The OpenAI Node SDK
+ * (v4+) asks for base64 and decodes the string, so a float array would be misread. Pack it as
+ * little-endian float32; a vector the upstream already encoded (a string) passes through.
+ */
+function packEmbeddingAsBase64(item: unknown): void {
+  if (!item || typeof item !== "object" || !("embedding" in item)) return;
+  const record = item as { embedding: unknown };
+  const vector = record.embedding;
+  if (!Array.isArray(vector) || !vector.every((value) => typeof value === "number")) return;
+  const bytes = Buffer.alloc(vector.length * 4);
+  vector.forEach((value, i) => bytes.writeFloatLE(value, i * 4));
+  record.embedding = bytes.toString("base64");
 }
 
 function failure(status: number, error: string, headers?: Headers): EmbeddingFailure {
@@ -310,9 +337,12 @@ export function clampEmbeddingStringInput(input: unknown): unknown {
 }
 
 function buildUpstreamBody(runtime: EmbeddingRuntime): Record<string, unknown> {
+  const input = runtime.body.input;
   const upstreamBody: Record<string, unknown> = {
     model: runtime.model,
-    input: clampEmbeddingStringInput(runtime.body.input),
+    input: clampEmbeddingStringInput(
+      runtime.providerConfig.requiresArrayInput && typeof input === "string" ? [input] : input
+    ),
   };
   if (runtime.body.dimensions !== undefined) upstreamBody.dimensions = runtime.body.dimensions;
   if (runtime.body.encoding_format !== undefined) {
@@ -370,11 +400,26 @@ function resolveUpstreamUrl(runtime: EmbeddingRuntime): string {
     : runtime.providerConfig.baseUrl;
 }
 
+/** Token stored under the provider's `tokenField` (top level first, then providerSpecificData). */
+function providerFieldToken(runtime: EmbeddingRuntime): string | null {
+  const field = runtime.providerConfig.tokenField;
+  if (!field || !runtime.credentials) return null;
+  const value = runtime.credentials[field] || runtime.credentials.providerSpecificData?.[field];
+  return typeof value === "string" && value ? value : null;
+}
+
 function buildAuth(
   runtime: EmbeddingRuntime
 ): { headers: Record<string, string>; token: string | null } | EmbeddingFailure {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = runtime.credentials?.apiKey || runtime.credentials?.accessToken || null;
+  const headers: Record<string, string> =
+    runtime.providerConfig.identityHeaders === "github-copilot"
+      ? getGitHubCopilotChatHeaders("application/json")
+      : { "Content-Type": "application/json" };
+  const token =
+    providerFieldToken(runtime) ||
+    runtime.credentials?.apiKey ||
+    runtime.credentials?.accessToken ||
+    null;
   if (!token && runtime.providerConfig.authType !== "none") {
     return failure(
       401,
@@ -520,9 +565,6 @@ function resolveSingleTexts(runtime: EmbeddingRuntime): string[] | EmbeddingFail
     clamped.some((item) => typeof item !== "string" || item.trim().length === 0)
   ) {
     return failure(400, "CLOVA Studio embedding v2 accepts non-empty text strings only");
-  }
-  if (runtime.body.encoding_format === "base64") {
-    return failure(400, "CLOVA Studio embedding v2 supports float encoding only");
   }
   if (runtime.body.dimensions !== undefined && Number(runtime.body.dimensions) !== 1024) {
     return failure(400, "CLOVA Studio embedding v2 has a fixed dimension of 1024");
@@ -702,9 +744,6 @@ async function prepareBedrockTransport(
 ): Promise<void> {
   const family = bedrockEmbeddingFamily(runtime.model || "");
   if (!family) throw new Error(`Unsupported Bedrock embedding model: ${runtime.model}`);
-  if (runtime.body.encoding_format === "base64") {
-    throw new Error("Bedrock embeddings support float encoding only");
-  }
   const items = await collectBedrockEmbeddingItems(runtime.body.input);
   if (items.length === 0) throw new Error("Embedding input was empty");
 
@@ -841,7 +880,7 @@ async function handleUpstreamFailure(
         runtime.connectionId,
         response.status,
         errorText,
-        runtime.provider,
+        runtime.connectionProvider || runtime.provider,
         runtime.model
       );
     } catch {
@@ -863,6 +902,7 @@ function normalizeEmbeddingData(
   if (Array.isArray(responseItems)) {
     responseItems.forEach(flattenSingleRowEmbedding);
     responseItems.forEach(fillMissingEmbeddingIndex);
+    if (runtime.body.encoding_format === "base64") responseItems.forEach(packEmbeddingAsBase64);
   }
   return {
     data,
@@ -910,29 +950,6 @@ function recordEmbeddingSuccess(
   }).catch(() => {});
 }
 
-async function recordEmbeddingConsumption(
-  runtime: EmbeddingRuntime,
-  data: ParsedEmbeddingResponse,
-  requestCount: number
-): Promise<void> {
-  if (!runtime.apiKeyId || !runtime.connectionId) return;
-  try {
-    const { scheduleRecordConsumption } = await import("@/lib/quota/spendRecorder");
-    scheduleRecordConsumption({
-      apiKeyId: runtime.apiKeyId,
-      connectionId: runtime.connectionId,
-      provider: runtime.provider,
-      model: runtime.model || undefined,
-      cost: {
-        tokens: data.usage?.prompt_tokens || data.usage?.total_tokens || 0,
-        requests: requestCount,
-      },
-    });
-  } catch {
-    // Quota accounting is fail-open.
-  }
-}
-
 async function handleUpstreamSuccess(
   runtime: EmbeddingRuntime,
   prepared: PreparedEmbeddingRequest,
@@ -947,6 +964,7 @@ async function handleUpstreamSuccess(
     prepared.normalizeProviderResponse
   );
   recordEmbeddingSuccess(runtime, data, normalizedResponse);
+  runtime.onUsage?.(data.usage ?? null);
   await recordEmbeddingConsumption(runtime, data, requestCount);
   return {
     success: true,

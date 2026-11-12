@@ -1,3 +1,12 @@
+import {
+  TRANSPORT_ERROR_LABEL,
+  NO_RESPONSE_LABEL,
+  type HttpAttemptRecord,
+} from "../../utils/upstreamHttp.ts";
+import type {
+  HttpAttemptCollector,
+  HttpAttemptSelection,
+} from "../../utils/providerHttpAttempts.ts";
 /**
  * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
  * decomposition, #3501).
@@ -15,7 +24,8 @@ import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
 import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
 import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveUpstreamHttpAttempt } from "@/lib/usageDb";
+import { captureReasoningSnapshotMeta } from "@/lib/usage/callLogs";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
 import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import { FORMATS } from "../../translator/formats.ts";
@@ -248,6 +258,7 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
 }
 
 export type PersistAttemptLogsArgs = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   status: number;
   tokens?: unknown;
   usageEstimated?: boolean | null;
@@ -278,6 +289,7 @@ export type PersistAttemptLogsArgs = {
 };
 
 export type PersistAttemptLogsContext = {
+  httpAttempts?: HttpAttemptCollector;
   /** Per-attempt trace id — MUST match the id emitted in `request.started` so the live
    * dashboard can pair the terminal event and clear the topology node's active pulse. */
   traceId: string;
@@ -405,7 +417,69 @@ export function resolveRequestLifecycleEvent(input: {
   };
 }
 
+type HttpAttemptLogContext = Pick<
+  PersistAttemptLogsContext,
+  "httpAttempts" | "correlationId" | "traceId" | "noLogEnabled" | "apiKeyInfo" | "comboName"
+>;
+
+function toUpstreamHttpAttemptLog(
+  send: HttpAttemptRecord,
+  groupId: string,
+  ctx: HttpAttemptLogContext
+): Parameters<typeof saveUpstreamHttpAttempt>[0] {
+  return {
+    timestamp: new Date(send.endedAt ?? send.cutoffAt ?? send.startedAt).toISOString(),
+    method: send.method,
+    path: send.endpoint,
+    status: send.status ?? 0,
+    model: send.model,
+    provider: send.provider,
+    connectionId: send.connectionId,
+    duration: send.durationMs ?? 0,
+    error:
+      send.outcome === "transport_error"
+        ? TRANSPORT_ERROR_LABEL
+        : send.outcome === "no_response_observed"
+          ? NO_RESPONSE_LABEL
+          : null,
+    correlationId: ctx.correlationId || ctx.traceId,
+    noLog: Boolean(ctx.noLogEnabled),
+    apiKeyId: ctx.apiKeyInfo?.id,
+    apiKeyName: ctx.apiKeyInfo?.name,
+    comboName: ctx.comboName,
+    upstreamHttp: { version: 1, groupId, role: "attempt", send },
+  };
+}
+
+/** One synchronous seal shared by terminal logging and exits before stream handoff. */
+export function drainUpstreamHttpAttempts(
+  ctx: HttpAttemptLogContext,
+  args?: Pick<PersistAttemptLogsArgs, "upstreamHttpSelection" | "status" | "error">
+) {
+  try {
+    const observed = ctx.httpAttempts?.drain(
+      args?.upstreamHttpSelection ?? null,
+      args?.status,
+      args?.error
+    );
+    if (observed) {
+      for (const send of observed.records) {
+        if (send.id === observed.summary.send?.id) continue;
+        try {
+          saveUpstreamHttpAttempt(
+            toUpstreamHttpAttemptLog(send, observed.summary.groupId, ctx)
+          ).catch(() => {});
+        } catch {}
+      }
+    }
+    return observed?.summary;
+  } catch {
+    return undefined;
+  }
+}
+
 export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAttemptLogsContext) {
+  const upstreamHttp = drainUpstreamHttpAttempts(ctx, args);
   const {
     status,
     tokens,
@@ -476,6 +550,11 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     ? { _omniroute_omitted: "video-transcript" }
     : (responseBody ?? (status >= 400 ? providerResponse : undefined));
   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
+  // Keep reasoning observability even though no-log policy discards all
+  // request/response payloads. Only source and character-count scalars survive.
+  const noLogReasoningSnapshot = noLogEnabled
+    ? captureReasoningSnapshotMeta(retainedResponse)
+    : null;
 
   const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
   if (providerWarnings.length > 0) {
@@ -580,6 +659,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // (rejected before egress) — mirrors the addedWait late-read above.
   const upstreamDispatchedAt = readUpstreamDispatchedAt();
   saveCallLog({
+    upstreamHttp: upstreamHttp?.total ? upstreamHttp : null,
     pendingRequestId: ctx.pendingRequestId,
     pendingRequestGeneration: ctx.pendingRequestGeneration,
     method: "POST",
@@ -598,33 +678,39 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     // Encrypted-reasoning observation: stream-side flag plus duration, and
     // the two request bodies so the sink can read effort values
     // (requested from the client body, upstream from the post-strip body).
-    reasoningMeta: args.reasoningMeta ?? null,
+    reasoningMeta: noLogReasoningSnapshot
+      ? { ...(args.reasoningMeta ?? {}), ...noLogReasoningSnapshot }
+      : (args.reasoningMeta ?? null),
     clientRequestBody: body ?? null,
     upstreamRequestBody: providerRequest ?? null,
-    requestBody: cloneBoundedChatLogPayload(
-      attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
-        ...accountRotationMeta,
-        claudePromptCache: claudeCacheMeta,
-        geminiPromptCache,
-      })
-    ),
-    responseBody: cloneBoundedChatLogPayload(
-      attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
-        ...accountRotationMeta,
-        claudePromptCache: claudeCacheMeta
-          ? {
-              applied: claudeCacheMeta.applied,
-              totalBreakpoints: claudeCacheMeta.totalBreakpoints,
-              anthropicBeta: claudeCacheMeta.anthropicBeta,
-            }
-          : null,
-        claudePromptCacheUsage: claudeCacheUsageMeta,
-        geminiPromptCache,
-        // Operators can tell estimated token counts (and the cost derived from them)
-        // apart from provider-reported ones. Log-only: billing is unchanged.
-        usageEstimated: isEstimatedUsage(tokens) ? true : null,
-      })
-    ),
+    requestBody: noLogEnabled
+      ? null
+      : cloneBoundedChatLogPayload(
+          attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
+            ...accountRotationMeta,
+            claudePromptCache: claudeCacheMeta,
+            geminiPromptCache,
+          })
+        ),
+    responseBody: noLogEnabled
+      ? null
+      : cloneBoundedChatLogPayload(
+          attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
+            ...accountRotationMeta,
+            claudePromptCache: claudeCacheMeta
+              ? {
+                  applied: claudeCacheMeta.applied,
+                  totalBreakpoints: claudeCacheMeta.totalBreakpoints,
+                  anthropicBeta: claudeCacheMeta.anthropicBeta,
+                }
+              : null,
+            claudePromptCacheUsage: claudeCacheUsageMeta,
+            geminiPromptCache,
+            // Operators can tell estimated token counts (and the cost derived from them)
+            // apart from provider-reported ones. Log-only: billing is unchanged.
+            usageEstimated: isEstimatedUsage(tokens) ? true : null,
+          })
+        ),
     error: retainedError || null,
     sourceFormat,
     targetFormat,

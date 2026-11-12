@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -473,7 +473,7 @@ open-sse/
 | `embeddings.ts`         | एम्बेडिंग                                                                  |
 | `imageGeneration.ts`    | प्रतिमा निर्मिती                                                           |
 | `audioSpeech.ts`        | मजकूर ते भाषण                                                              |
-| `audioTranscription.ts` | भाषण-ते-मजकूर                                                              |
+| `audioTranscription.ts` | भाषण ते मजकूर                                                              |
 | `videoGeneration.ts`    | व्हिडिओ निर्मिती                                                           |
 | `musicGeneration.ts`    | संगीत पिढी                                                                 |
 | `rerank.ts`             | पुनर्रँकिंग                                                                |
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 उच्च-स्तरीय एक्झिक्युटर मॉड्यूल (`*.ts` वजा `base.ts`, `index.ts` आणि चाचण्या — `npm run check:docs-counts` मोजणी मोजतात). प्रत्येक एक्झिक्युटर वर्ग `BaseExecutor` (`base.ts`), थेट किंवा `DefaultExecutor` किंवा अन्य एक्झिक्युटरद्वारे विस्तारित करतो; उर्वरित मॉड्यूल प्रति-प्रदाता मदतनीस आहेत (टूल स्कीमा, fetch/TTS अडॅप्टर, क्विर्क हँडलर). एक्झिक्युटरमध्ये हे समाविष्ट आहे:
+159 उच्च-स्तरीय एक्झिक्युटर मॉड्यूल्स (`*.ts` वजा `base.ts`, `index.ts` आणि चाचण्या — `npm run check:docs-counts` मोजणी मोजतात). प्रत्येक एक्झिक्युटर वर्ग `BaseExecutor` (`base.ts`), थेट किंवा `DefaultExecutor` किंवा अन्य एक्झिक्युटरद्वारे विस्तारित करतो; उर्वरित मॉड्यूल प्रति-प्रदाता मदतनीस आहेत (टूल स्कीमा, fetch/TTS अडॅप्टर, क्विर्क हँडलर). एक्झिक्युटरमध्ये हे समाविष्ट आहे:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, अधिक `devin-desktop`(शेअर आयडेंटिटी हेल्पर) आणि `claudeIdentity.ts` ( `index.ts` ).
 
-> टीप: येथे सूचीबद्ध नसलेले प्रदाते जेनेरिक OpenAI- सुसंगत एक्झिक्युटर वापरून `default.ts` द्वारे सर्व्ह केले जातात. पूर्ण प्रदाता कॅटलॉग (380 प्रदाता) `src/shared/constants/providers.ts` मध्ये राहतात.
+> टीप: येथे सूचीबद्ध नसलेले प्रदाते जेनेरिक OpenAI- सुसंगत एक्झिक्युटर वापरून `default.ts` द्वारे सर्व्ह केले जातात. संपूर्ण प्रदाता कॅटलॉग (381 प्रदाता) `src/shared/constants/providers.ts` मध्ये राहतात.
 
 ### 4.3 `open-sse/translator/`
 
@@ -541,7 +541,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-स्ट्रीमिंग आदिम आणि प्रदाता मदतनीस: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts` `ollamaTransform.ts` `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`.
+स्ट्रीमिंग आदिम आणि प्रदाता मदतनीस: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts` `ollamaTransform.ts` `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`.
 
 ---
 

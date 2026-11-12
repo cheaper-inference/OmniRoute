@@ -16,7 +16,7 @@ OmniRoute on kohalik AI marsruutimise lüüs ja armatuurlaud, mis on ehitatud Ne
 
 Põhilised võimalused:
 
-- OpenAI-ga ühilduv API pind CLI/tools jaoks (380 pakkujat, 158 täitjamoodulit)
+- OpenAI-ga ühilduv API pind CLI/tools jaoks (381 pakkujat, 159 täitjamoodulit)
 - Request/response tõlge teenusepakkuja vormingute vahel
 - Mudeli kombineeritud varu (mitme mudeli jada)
 - Struktureeritud kombineeritud sammud (`provider + model + connection`) koos käitusaja järjestamisega `compositeTiers` järgi
@@ -49,7 +49,7 @@ Põhilised võimalused:
 - Allkirjapõhine päringu deduplikatsiooni vahemälu
 - Domeenikiht: kulureeglid, varupoliitika, sulgemispoliitika
 - Konteksti edastamine: seansi üleandmise kokkuvõtted konto vaheldumise järjepidevuse jaoks
-- Domeeni oleku püsivus (SQLite -vahemälu varude, eelarvete, lukustuste, kaitselülitite jaoks)
+- Domeeni oleku püsivus (SQLite läbikirjutamise vahemälu varude, eelarvete, lukustuste, kaitselülitite jaoks)
 - Tsentraliseeritud taotluste hindamise poliitikamootor (lockout → budget → backback)
 - Taotlege telemeetriat p50/p95/p99 latentsusagregatsiooniga
 - Kombineeritud sihtmärgi telemeetria ja ajalooline kombineeritud sihtmärk tervise `combo_execution_key` / `combo_step_id` kaudu
@@ -413,7 +413,7 @@ Reeglikomplekti loomise ja läve häälestamise kohta vt [`docs/security/GUARDRA
 - Connection/model reegli liitja: `src/domain/connectionModelRules.ts`
 - Mudeli saadavuse hetktõmmised: `src/domain/modelAvailability.ts`
 - Pakkuja aegumise jälgimine: `src/domain/providerExpiration.ts`
-- Kvoodi vahemälu: `src/domain/quotaCache.ts`
+- Kvoodi vahemälu: `src/domain/quotaCache.ts`. Pakkujad lisavad ja eemaldavad kvoodiaknaid (mõnede plaanide puhul loobus OpenAI 5-tunnise Codex aknast), nii et teenusepakkuja adapteri kasutuslugemine kinnitab täielikku (`quotasComplete`, vt `src/lib/usage/usageReading.ts`) on konto täielik akende komplekt: varem tuntud aken, mis sellest puudus, on kasutuselt kõrvaldatud, vahemälus, lisa `quota_snapshots`. püsis Codex kvoodi olek ja Claude küllastussalvedes. Osalised tõendid (vastuse päised, aegunud koopiad) värskendavad ainult neid aknaid, mida see kannab.
 - Lagunemisaste: `src/domain/degradation.ts`
 - Konfiguratsiooni audit: `src/domain/configAudit.ts`
 - OmniRoute vastuse metaandmete koostaja: `src/domain/omnirouteResponseMeta.ts`
@@ -431,7 +431,7 @@ Autoriseerimiskonveier klassifitseerib kõik sissetulevad taotlused ja rakendab 
 - Väiteabiline: `src/server/authz/assertAuth.ts`
 - Taotluse kontekst: `src/server/authz/context.ts`
 
-Avalikud ja haldusmarsruudid on rasked piirid: agent/cooldown APIs ja pakkuja mutatsioonid nõuavad haldusautentimist (kui see puudub HTTP 401).
+Avalikud vs haldusmarsruudid on ranged piirid: agent/cooldown APIs ja pakkuja mutatsioonid nõuavad haldamise autentimist (kui puudub HTTP 401).
 
 Täielikud marsruudi klassifitseerimise reeglid leiate jaotisest [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 

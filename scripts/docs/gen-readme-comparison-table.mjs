@@ -9,7 +9,7 @@
 // the drawn text and what the outlining step shapes. The canonical numbers stay in
 // <text>/<desc> because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
 // The table is a dated snapshot of each project's docs — cells are kept verbatim; only the
-// provider total follows the live code (380), which the counts gate enforces.
+// provider total follows the live code (389), which the counts gate enforces.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
@@ -18,7 +18,7 @@ import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs"
 // Cells: a string is drawn as text; "yes" / "mid" / "no" draw the check / partial / cross glyph.
 // Column order: OmniRoute, 9router, OpenRouter, CLIProxyAPI, LiteLLM.
 const ROWS = [
-  { label: "Providers", cells: ["380", "40+", "400+*", "~5", "100+"] },
+  { label: "Providers", cells: ["389", "40+", "400+*", "~5", "100+"] },
   { label: "Free providers built-in", cells: ["150+", "yes", "mid", "no", "no"] },
   { label: "Routing strategies", cells: ["21", "2", "3", "2", "6"] },
   { label: "Token compression", cells: ["12 eng", "yes", "mid", "no", "no"] },
@@ -98,7 +98,7 @@ export async function renderComparisonTable() {
       viewBox: "0 0 1200 780",
       title:
         "Comparison table: OmniRoute versus 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities.",
-      desc: "OmniRoute is the only one with the full set: 380 providers, 150+ free providers built-in, 21 routing strategies, 12-engine token compression, a built-in MCP server with 110 tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, 67 UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.",
+      desc: "OmniRoute is the only one with the full set: 389 providers, 150+ free providers built-in, 21 routing strategies, 12-engine token compression, a built-in MCP server with 110 tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, 67 UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.",
       extraCss: `.cmp-strong{font-weight:600;fill:var(--ink)}`,
     }) +
       gridDefs("cmp-grid") +
@@ -114,7 +114,7 @@ export async function renderComparisonTable() {
       `  <text x="44" y="96" class="sub">${esc(C.headline[0])}<tspan class="cmp-strong">${esc(C.headline[1])}</tspan></text>\n` +
       `  <rect x="36" y="126" width="1128" height="596" rx="12" class="surface" stroke-width="1"/>\n` +
       stripes +
-      // The one lime moment: the OmniRoute column, a soft accent fill behind ink text.
+      // The one accent moment: the OmniRoute column, a soft accent fill behind ink text.
       `  <rect x="352" y="126" width="176" height="596" rx="12" class="accent-soft stroke-accent" stroke-width="1.5"/>\n` +
       headers +
       `  <line x1="44" y1="162" x2="1156" y2="162" class="rule" stroke-width="1"/>\n` +

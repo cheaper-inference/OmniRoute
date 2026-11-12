@@ -64,242 +64,307 @@ Neviršijus slenksčio, tiekėjas **nėra** laikomas atvėsinamu; sėkminga užk
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Regresijos apsauga: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Ryšio vėsinimas
+## 2. Ryšio atvėsimas
 
-**Taikymo sritis:** vienas tiekėjas connection/account/key.
+**Apimtis:** vienas teikėjo ryšys / paskyra / raktas.
 
-**Paskirtis:** praleisti vieną blogą raktą, o kiti to paties teikėjo ryšiai toliau teikiami.
+**Paskirtis:** praleisti vieną netinkamą raktą, kol kiti to paties teikėjo ryšiai toliau aptarnauja užklausas.
 
 **Įgyvendinimas:**
 
-- Žymėti neprieinamas: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Pažymėjimas kaip nepasiekiamo: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Pasirinkimas: `getProviderCredentials*` tame pačiame faile
-- Atvėsimo apskaičiavimas: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Nustatymai: `src/lib/resilience/settings.ts`
+- Atvėsimo skaičiavimas: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Nuostatos: `src/lib/resilience/settings.ts`
 
-**Vienos jungties laukai:**
+**Kiekvieno ryšio laukai:**
 
-- `rateLimitedUntil` — laiko žyma, kol baigsis atvėsimo laikas
+- `rateLimitedUntil` — laiko žyma, iki kurios galioja atvėsimas
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — eksponentinis atsitraukimo skaitiklis
+- `backoffLevel` — eksponentinio atidėjimo skaitiklis
 
-**Numatytieji atvėsimai:**
+**Numatytieji atvėsimo laikotarpiai:**
 
-- OAuth bazė: 5s
-- API raktų bazė: 3 sek
-- API raktas 429: teikia pirmenybę `Retry-After`/reset headers/parseable atstatymo tekstui
-- Atsitraukimas: `baseCooldownMs * 2 ** failureIndex`
+- OAuth bazinis: 5 s
+- API rakto bazinis: 3 s
+- API rakto 429: pirmenybė teikiama teikėjo `Retry-After` / atstatymo antraštėms / išanalizuojamam atstatymo tekstui
+- Atidėjimas: `baseCooldownMs * 2 ** failureIndex`
 
-**Teikėjo pakartotinio bandymo delsa.** Teikėjo informacijos puslapyje yra a** Bandykite dar kartą vėluoti** pasirinkite (Automatinis, 15s iki 1h). Tai taupo `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, per `PATCH /api/resilience`). Kai greičio ribojimo klaidoje nėra užuominos apie pakartotinį bandymą prieš srovę, ši vertė pakeičia teikėjo sumažintą atsitraukimą ir iš naujo nustato `backoffLevel` į 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ribotos spartos klaidos pirmenybė, pirmiausia didžiausia: užuomina apie pakartotinį bandymą prieš srovę, tada kiekvienam ryšiui `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, tada kiekvieno teikėjo pakartotinio bandymo delsa, tada env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, tada sumažintas atsitraukimas. Automatiškai pašalina lauką. Tai turi įtakos tik tarifo ribos priežasčiai, o ne galutinėms būsenoms.
+**Pakartojimo delsa pagal teikėją.** Teikėjo išsamios informacijos puslapyje yra **Pakartojimo delsa** pasirinkimas (Automatinis,
+nuo 15 s iki 1 val.). Jis išsaugo `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, per `PATCH /api/resilience`). Kai ribojimo greičiu klaida neturi teikėjo perduoto pakartojimo
+signalo, ši reikšmė pakeičia teikėjui pritaikytą atidėjimą ir nustato `backoffLevel` į 0
+(`open-sse/services/rotationConfig.ts::overrideFor`). Ribojimo greičiu klaidos pirmenybės tvarka nuo didžiausios iki
+mažiausios: teikėjo pakartojimo signalas, tada konkretaus ryšio `providerSpecificData.rotationOverrides.rateLimitResetSeconds`,
+tada pakartojimo delsa pagal teikėją, tada aplinkos kintamasis `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, tada
+pritaikytas atidėjimas. Automatinis režimas pašalina lauką. Tai taikoma tik ribojimo greičiu priežasčiai, niekada galinėms būsenoms.
 
-**Apsauga nuo griaustinio:** neleidžia vienu metu atsirandantiems gedimams per daug pailginti aušinimo arba dvigubai padidinti `backoffLevel`.
+**Apsauga nuo vienu metu kylančių užklausų:** neleidžia dėl vienu metu įvykusių klaidų pernelyg pratęsti atvėsimo arba dukart padidinti `backoffLevel`.
 
-**Lygiagretumo limitas 429 nepakyla atsitraukimo laiptais.** `429` kurio kūnas praneša apie lygiagretumo ribą („per daug vienu metu esančių užklausų“, „lygiagretumo riba“, „lygiagrečios užklausos limitas“, GLM `并发数过高`), reiškia, kad paskyra yra sveika, bet užimta. `checkFallbackError()` grąžina priežastį `concurrency_limited`: neperjunkite prie kito ryšio dabar, atvėsinkite šį ryšį, kad gautumėte fiksuotą `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) arba užuominą prieš srovę pakartotinai, palikite `backoffLevel` nepakeistą ir nustatykite `skipProviderBreaker`. Aiškus kvotos tekstas vis tiek laimi, todėl tekstas, kuris taip pat atitinka kvotos šabloną, lieka kvotos verdiktas. Aptikimas: `looksLikeConcurrencyLimit()` in `src/shared/utils/classify429.ts`; verdiktas: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (pertraukiklio `FailureKind`) yra nepakitęs ir vis dar skaito šių kūnų `rate_limit`.
+**429 klaidos dėl lygiagretumo ribos nekelia atidėjimo pakopomis.** `429`, kurio turinys nurodo
+lygiagretumo ribą („per daug lygiagrečių užklausų“, „lygiagretumo riba“, „lygiagrečių užklausų
+riba“, GLM `并发数过高`), reiškia, kad paskyra yra sveika, tačiau užimta.
+`checkFallbackError()` grąžina priežastį `concurrency_limited`: iškart pereinama prie kito
+ryšio, šis ryšys atvėsinamas fiksuotam `CONCURRENCY_LIMIT_COOLDOWN_MS` laikotarpiui (1 s) arba iki teikėjo nurodyto pakartojimo signalo,
+`backoffLevel` lieka nepakeistas ir nustatoma `skipProviderBreaker`.
+Aiškus kvotos turinys vis tiek turi pirmenybę, todėl turinys, atitinkantis ir kvotos šabloną,
+lieka kvotos verdiktu. Aptikimas: `looksLikeConcurrencyLimit()` faile `src/shared/utils/classify429.ts`;
+verdiktas: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (grandininio jungiklio
+`FailureKind`) nepakeistas ir šiems turiniams vis dar nuskaito `rate_limit`.
 
-**Srautinio turinio prekystaliai neatvėsina paskyros.** Kai turinio stabdymo sargybinis (`open-sse/utils/streamHandler.ts`) atsisako srauto, kuris laiku neatsiuntė modelio išvesties, `markAccountUnavailable()` įrašo ryšio klaidą, bet nenustato atvėsimo: sustabdymas priklauso tai užklausai, dažniausiai ilgas samprotavimo posūkis be išvesties. Operatoriai gali vėl pasirinkti naudodami `resilienceSettings.streamStallCooldown.enabled` (numatytasis `false`).
+**Srauto turinio strigimai neatvėsina paskyros.** Kai turinio strigimo stebėjimo mechanizmas
+(`open-sse/utils/streamHandler.ts`) nutraukia srautą, kuris per nustatytą laiką nepateikė jokios modelio išvesties,
+`markAccountUnavailable()` įrašo klaidą ryšyje, tačiau nenustato atvėsimo: strigimas priklauso nuo tos užklausos,
+dažniausiai nuo ilgo samprotavimo etapo, kai išvestis dar nepateikta. Operatoriai gali pasirinktinai įjungti šią
+funkciją naudodami `resilienceSettings.streamStallCooldown.enabled` (numatytoji reikšmė
+`false`).
 
-**Pasirinkimo delsos signalas `p2c` paskyros pasirinkimui.** Kiekvienas išsiųstas bandymas įrašo laiką iki pirmojo baito ir kiekvieno ryšio (ir jungties + modelio) rezultatą: paskutinius 20 mėginių per 15 minučių (`open-sse/services/connectionLatencyTracker.ts`, įrašytas iš `safeLogEvents()` į `src/sse/handlers/chatHelpers.ts`). Kai `resilienceSettings.p2cLatency.weight` yra didesnis nei `0` (diapazonas 0–20, numatytasis `0` = išjungtas), `compareP2CConnections()` `src/sse/services/auth.ts` prideda iki `weight` taškų kiekvienam poros kandidatui. Pusė to gaunama iš delsos kaip santykio su greitesniu kandidatu (du kartus lėtesnis užtrunka visą pusę), o pusė – iš slenkančio klaidų dažnio. Terminas taikomas tik tada, kai abu kandidatai turi bent 3 pavyzdžius, todėl naujos paskyros nėra baudžiamos, o jo viršutinė riba neviršija kvotos blokuotų ir kvotų išnaudotų baudų. Tai neprideda jokios savo grandinės: sugedusias paskyras vis tiek tvarko atšaldymo, blokavimo ir pertraukiklio sluoksniai. Nustatykite jį naudodami `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Pasirinktinai įjungiamas delsos signalas `p2c` paskyros pasirinkimui.** Kiekvienas išsiųstas bandymas kiekvienam ryšiui
+(ir kiekvienam ryšio bei modelio deriniui) registruoja laiką iki pirmo baito ir rezultatą atmintyje esančiame slenkančiame lange:
+paskutiniai 20 pavyzdžių per 15 minučių
+(`open-sse/services/connectionLatencyTracker.ts`, registruojama iš `safeLogEvents()` faile
+`src/sse/handlers/chatHelpers.ts`). Kai `resilienceSettings.p2cLatency.weight` yra didesnis nei
+`0` (diapazonas 0–20, numatytoji reikšmė `0` = išjungta), `compareP2CConnections()` faile `src/sse/services/auth.ts`
+kiekvienam poros kandidatui prideda iki `weight` taškų. Pusė jų gaunama iš delsos kaip santykis su
+greitesniu kandidatu (dvigubai lėtesnis kandidatas gauna visą pusę), o kita pusė — iš slenkančio klaidų dažnio.
+Šis narys taikomas tik tada, kai abu kandidatai turi bent 3 pavyzdžius, todėl naujos paskyros nebaudžiamos,
+o jo riba išlieka mažesnė už kvotos užblokuoto ir kvotos išeikvoto kandidato baudas. Jis nesukuria atskiro grandininio
+jungiklio: nebesėkmingos paskyros vis tiek tvarkomos atvėsimo, blokavimo ir grandininio jungiklio sluoksniuose.
+Nustatykite naudodami `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-**Samprotavimo rėmeliai iš naujo paleidžia turinio sustabdymo biudžetą.** Samprotavimo modelis gali mąstyti kelias minutes prieš pirmą matomą prieigos raktą: Claude srautu perduoda `thinking_delta` kadrus, kurių mąstymo tekstas gali būti tuščias, o atsakymai API perduoda vieną samprotavimo elementą po kito. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) atpažįsta šiuos kadrus, o budėtojas iš naujo pradeda savo biudžetą kiekvienam iš jų, užuot atšaukęs posūkį. Jie vis dar nėra modelio išvestis, todėl posūkis, kuris baigiasi tik samprotavimu, vis tiek pranešamas kaip tuščias, o posūkis, kuris sustabdo samprotavimą ir siunčia tik širdies plakimus, vis tiek suveikia sarginis šuo.
+**Samprotavimo kadrai iš naujo paleidžia turinio strigimo biudžetą.** Samprotaujantis modelis gali mąstyti
+kelias minutes prieš pateikdamas pirmą matomą žetoną: Claude perduoda `thinking_delta` kadrus, kurių
+samprotavimo tekstas gali būti tuščias, o Responses API perduoda vieną samprotavimo elementą po kito.
+`isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) atpažįsta šiuos kadrus, o stebėjimo mechanizmas
+iš naujo paleidžia savo biudžetą po kiekvieno kadro, užuot nutraukęs etapą. Jie vis tiek nėra modelio išvestis,
+todėl etapas, pasibaigiantis vien samprotavimu, vis dar pranešamas kaip tuščias, o etapas, kuriame samprotavimas
+baigiasi ir siunčiami tik signalai apie veikimą, vis tiek suaktyvina stebėjimo mechanizmą.
 
-Kiro dvejetainiai `reasoningContentEvent` kadrai su netuščiu parašu išsaugo šią samprotavimo veiklą per vykdytoją kaip tuščią `reasoning_content` delta. Parašas nepersiunčiamas. Metaduomenys, neužbaigti kadrai ir tušti parašai nepaleidžia turinio biudžeto iš naujo; nepriklausomas aktyvaus srauto skirtasis laikas ir kliento atšaukimas vis dar galioja (`open-sse/executors/kiro/reasoning.ts`).
+Kiro dvejetainiai `reasoningContentEvent` kadrai su netuščiu parašu išsaugo šią samprotavimo veiklą per vykdiklį kaip tuščią
+`reasoning_content` deltą. Parašas neperduodamas. Metaduomenys, neužbaigti kadrai ir tušti parašai nepaleidžia
+turinio biudžeto iš naujo; nepriklausomas aktyvaus srauto skirtasis laikas ir kliento atšaukimas vis tiek taikomi
+(`open-sse/executors/kiro/reasoning.ts`).
 
-**Galinės būsenos (NOT atvėsimai):**
+**Galutinės būsenos (NE atvėrimai):**
 
-- `banned` — nustatytas pagal uždrausto raktinio žodžio / paskyros uždraudimo aptikimą (žr. [BAN_DETECTION](../security/BAN_DETECTION.md) ) ir tris iš eilės einančius atmetimus pagal užklausą (`request_rejected`, pvz., Anthropic OAuth 403 "Užklausa neleidžiama" — `open-sse/services/requestRejectedStreak.ts`); vienas atsisakymas tik atvėsina ryšį
-- `expired` (perėjimai į terminalą po ribotų pakartotinių bandymų — `EXPIRED_RETRY_MAX = 3` su eksponenciniu atsitraukimu — todėl trumpalaikės OAuth klaidos gali savaime išgyti prieš visam laikui išjungiant paskyrą)
+- `banned` — nustatoma aptikus draudžiamą raktinį žodį / užblokuotą paskyrą (žr. [BAN_DETECTION](../security/BAN_DETECTION.md)). Teikėjo atmetimai pagal atskiras užklausas (`request_rejected`, pvz., Anthropic OAuth 403 „Request not allowed“) jos niekada nenustato: jie skaičiuojami pagal ryšį ir modelį, o tas modelis pašalinamas iš rotacijos taikant didėjantį atvėsimą, apribotą `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 val.), arba ryšys atvėsinamas, kai modelis nežinomas — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (po riboto pakartojimų skaičiaus pereina į galutinę būseną — `EXPIRED_RETRY_MAX = 3` su eksponentiniu atidėjimu — kad laikinos OAuth klaidos galėtų išsispręsti pačios prieš visam laikui išaktyvinant paskyrą)
 - `credits_exhausted`
 
-Jie išlieka tol, kol kredencialai pasikeičia arba operatorius juos nustato iš naujo. Neperrašykite terminalų būsenų trumpalaikio vėsinimo būsena.
+Šie nustatymai išlieka, kol pasikeičia kredencialai arba operatorius juos nustato iš naujo. Neperrašykite galutinių būsenų laikina aušinimo būsena.
 
-**Tingus atsigavimas:** kai `rateLimitedUntil` praeina, ryšys vėl tampa tinkamas. Sėkmingai naudojant, `clearAccountError()` išvalo visus klaidų laukus.
+**Lėtas atkūrimas:** kai `rateLimitedUntil` laikas praeina, ryšys vėl tampa tinkamas naudoti. Sėkmingai panaudojus, `clearAccountError()` išvalo visus klaidų laukus.
 
-### Claude OAuth naudojimo siena: žemesnio prioriteto juosta + seanso ribos nustatymas iš naujo
+### Claude OAuth naudojimo riba: žemesnio prioriteto kanalas + seanso ribos nustatymas iš naujo
 
-**Taikymo sritis:** vienas Claude abonementinis (OAuth) ryšys. Abi savybės yra** pasirinkti kiekvienam ryšiui** (Redaguoti ryšio → Claude skyrių → `lowPriorityMode` / `autoLimitReset` `providerSpecificData`, abi išjungtos pagal nutylėjimą) ir atspindėti Claude kodo `/low-priority` ir `/limit-reset` komandas (laido sutartis, paimta iš Claude kodo 2.1.263).
-
-**Įgyvendinimas:**
-
-- Būsenos mašinos + atsako klasifikacija: `open-sse/services/claudeLowPriority.ts`
-- Iš naujo nustatyti status/claim klientą: `open-sse/services/claudeLimitReset.ts`
-- Vykdytojo kabliukas (antraštės įpurškimas + tos pačios paskyros pakartotinis bandymas): `open-sse/executors/base.ts::execute()`
-- Pasirinkimo patvarumas: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
-
-**Suaktyvinimas:** 5 valandų naudojimo siena — a `429`, kurios antraštėse yra `anthropic-ratelimit-unified-status: rejected` ir, kai paskyra tinkama, `anthropic-ratelimit-unified-slow-offer: treatment`. Niekas nesiunčiamas prieš tą pirmąją sieną 429; 429 serija be suvienodintų antraščių eina įprastu atvėsimo keliu.
-
-**Žemesnio prioriteto juosta** (`lowPriorityMode`):
-
-- Ant sienos 429 vykdytojas priima pasiūlymą ir nedelsdamas bando iš naujo** tas pats** sąskaita su `anthropic-usage-limit: slow`; juosta lieka aktyvi iki paskelbto `anthropic-ratelimit-unified-reset` (+ 60s grace) ir kiekviena tame lange pateikta užklausa turi antraštę. Perimtas 429 niekada nepasiekia `handleChatCore`, todėl ryšys yra** ne** įdėti į šaldymą ir nepasukti.
-- `anthropic-ratelimit-unified-slow-status` vėlesniuose atsakymuose: `active` / `not_needed` išlaikyti juostą; `slot_busy` (429) arba `529` palaukite serverio `anthropic-ratelimit-unified-slow-retry-after` (numatytasis 20 s, fiksavimas 5–600 s, ± 30 % virpėjimas) ir bandykite dar kartą, apriboti `anthropic-ratelimit-unified-slow-max-wait` (numatytasis 20 min., spaustukas 1 min.–6 val.) — praėjus, kad juosta baigiasi. Laukimą papildomai apriboja tai, kas liko iš pačios užklausos prieš srovę pradžios skirtojo laiko (`resolveFetchStartTimeout`, pagal numatytuosius nustatymus 10 min.), atėmus 5 s ribą: be šios ribos 20 minučių numatytasis maksimalus laukimas būtų ilgesnis už užklausą, o miego režimas būtų nutrauktas laukimo viduryje, o ne atvėsus `TimeoutError` `max_wait` +.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5h lango apvertimas arba `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (kuris baigiasi kaip `extra_usage` bet kokioje būsenoje, nes mokamas perviršis dabar apima sieną) baigia juostą; tada atsakas patenka į įprastą vėsinimo kelią. `budget_exhausted` prisimenamas iki paskelbto biudžeto nustatymo iš naujo (≤ 8 dienos).
-- Sienų patikra vykdoma po paties vykdytojo 400 pakartotų bandymų (konteksto redagavimas, thinking/effort gnybtai, param automatinis mokymasis), todėl siena 429, kuri iškyla tik viename iš tų bandymų, vis tiek sulaikoma, o ne pasiekia atvėsimo kelią.
-- Vieno ryšio būsena yra atmintyje (paleidimas iš naujo kainuoja vienai papildomai sienai 429 už pakartotinį priėmimą).
-
-**Seanso limito nustatymas iš naujo** (`autoLimitReset`, bandyta prieš juostą, kai abi yra įjungtos):
-
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` blokas; kai `arm: "reset"` ir `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` su `{ "program": "juniper_tide" }` (organizacija UUID iš `providerSpecificData.organizationUUID`, bootstrap atsarginė dalis).
-- `result: reset|not_limited` → užklausa bandoma dar kartą visu greičiu (nėra lėtos antraštės). `already_used` / `not_offered` memoise `next_available_at` (numatytasis viena savaitė); bet koks gedimas atsitraukia po 15 minučių. Iš naujo nustatoma kartą per savaitę ir vis tiek įskaičiuojama į savaitės limitą.
-
-Regresijos apsauga: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
-
-### Seanso bendrumas (#7274)
-
-**Taikymo sritis:** viena kliento sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` antraštė) prisegta prie vieno ryšio,** bet koks** teikėjas.
-
-**Paskirtis:** laikykite daugiafunkcinį agentą (Claude kodas, pagalbininkas, pasirinktiniai agentai) toje pačioje paskyroje visoms užklausoms, sumažindami kelių paskyrų konteksto praradimą ir pasikartojančius šaltojo paleidimo 429s paslaugų teikėjams, kurių seanso būsena yra vienai paskyrai.
+**Taikymo sritis:** vienas Claude prenumeratos (OAuth) ryšys. Abi funkcijos yra **pasirenkamos kiekvienam ryšiui** (Edit connection → Claude section → `lowPriorityMode` / `autoLimitReset` lauke `providerSpecificData`, abi pagal numatytuosius nustatymus išjungtos) ir atkartoja Claude Code komandas `/low-priority` bei `/limit-reset` (laidinis kontraktas užfiksuotas iš Claude Code 2.1.263).
 
 **Įgyvendinimas:**
 
-- TTL skiriamoji geba: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Smeigtukas selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Antraštės ištraukimas (bendras, bet koks teikėjas): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Stalas su smeigtukais: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Nustatymas: `sessionAffinityTtlMs` (visuotinis TTL ms, `0` išjungiamas) — `src/lib/db/settings.ts`. Pervadintas iš tik Codex `codexSessionAffinityTtlMs` perkeliant `124_generic_session_affinity_ttl.sql`, kuris perkelia bet kokį anksčiau sukonfigūruotą Codex TTL kaip naują numatytąjį.
+- Būsenų mašina ir atsakymų klasifikavimas: `open-sse/services/claudeLowPriority.ts`
+- Nustatymo iš naujo būsenos / pretenzijos klientas: `open-sse/services/claudeLimitReset.ts`
+- Vykdytojo kabliukas (antraštės įterpimas + pakartotinis bandymas su ta pačia paskyra): `open-sse/executors/base.ts::execute()`
+- Pasirenkamas išsaugojimas: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-Iki #7274 `resolveSessionAffinityTtlMs()` buvo griežtai prijungtas prie `0` kiekvienam teikėjui, išskyrus `codex`, todėl TTL nustatymas (ir seanso antraštės) neturėjo jokios įtakos niekur kitur, nors prisegimo mechanizmas ir antraštės ištraukimas jau buvo teikėjo agnostikai. Pataisymas pašalino tą ankstyvą grąžinimą; TTL dabar vienodai taikomas kiekvienam teikėjui, kai pasauliniu mastu nustatytas aukščiau `0`.
+**Aktyviklis:** 5 valandų naudojimo riba — `429`, kurio antraštėse yra
+`anthropic-ratelimit-unified-status: rejected` ir, kai paskyra tinkama, `anthropic-ratelimit-unified-slow-offer: treatment`. Iki pirmojo ribos `429` nieko nesiunčiama; serija `429` be suvienodintų antraščių apdorojama įprastu aušinimo keliu.
 
-Trys seanso giminingumo antraštės niekada nepersiunčiamos, — vykdytojai sukuria savo antraštes nuo nulio, o ne perduoda kliento antraštes, todėl tai lieka tik vidinės koreliacijos ID.
+**Žemesnio prioriteto kanalas** (`lowPriorityMode`):
 
-### Išskirtinės valdomos sesijos ryšio nuomos sutartys
+- Gavęs ribos `429`, vykdytojas priima pasiūlymą ir iš karto pakartoja užklausą su **ta pačia** paskyra, pridėdamas `anthropic-usage-limit: slow`; kanalas lieka aktyvus iki paskelbto `anthropic-ratelimit-unified-reset` laiko (+60 s atsargos), o kiekviena užklausa šiame lange turi šią antraštę. Perimtas `429` niekada nepasiekia `handleChatCore`, todėl ryšys **neperkeliamas į aušinimą** ir nėra pakeičiamas kitu.
+- `anthropic-ratelimit-unified-slow-status` vėlesniuose atsakymuose: `active` / `not_needed` išlaiko kanalą; `slot_busy` (`429`) arba `529` laukia serverio nurodyto `anthropic-ratelimit-unified-slow-retry-after` (numatytoji reikšmė – 20 s, apribota nuo 5 iki 600 s, su ±30 % atsitiktiniu svyravimu) ir pakartoja užklausą, neviršydami `anthropic-ratelimit-unified-slow-max-wait` (numatytoji reikšmė – 20 min., apribota nuo 1 min. iki 6 val.) — pasibaigus šiam laikui kanalas baigiamas, o 10 minučių atvėsimo laikotarpis neleidžia jo priimti iš naujo. Laukimo laiką papildomai riboja likęs pačios užklausos pradinio prisijungimo laukimo laikas (`resolveFetchStartTimeout`, pagal numatytuosius nustatymus 10 min.) minus 5 s atsarga: be šio apribojimo numatytasis 20 minučių maksimalus laukimo laikas viršytų užklausos trukmę, miego režimas būtų nutrauktas laukimo viduryje, o vietoje sklandaus `max_wait` užbaigimo ir atvėsimo būtų pateikta `TimeoutError` klaida.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 valandų lango persikėlimas arba `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (tokiu atveju kanalas baigiamas kaip `extra_usage` esant bet kokiai būsenai, nes sieną dabar padengia mokamas viršijimas) užbaigia kanalą; tada atsakymas perduodamas įprastu aušinimo keliu. `budget_exhausted` būsena įsimenama iki paskelbto biudžeto nustatymo iš naujo laiko (ne ilgiau kaip 8 dienos).
+- Ribos patikra vykdoma po paties vykdytojo 400 klaidomis grindžiamų pakartotinių bandymų tame pačiame bandyme (konteksto redagavimo, mąstymo / pastangų apribojimų, parametrų automatinio išmokimo), todėl ribos `429`, kuris pasirodo tik per vieną iš šių pakartotinių bandymų, vis tiek perimamas ir nepasiekia aušinimo kelio.
+- Būsena laikoma atmintyje kiekvienam ryšiui (po paleidimo iš naujo reikia dar vieno ribos `429`, kad pasiūlymas būtų priimtas iš naujo).
 
-**Taikymo sritis:** vienam aktyviam valdomam HTTP client/session priklauso vienas tinkamas OmniRoute ryšys.
+**Seanso ribos nustatymas iš naujo** (`autoLimitReset`, kai abi funkcijos įjungtos, bandomas prieš kanalą):
 
-**Paskirtis:** Suteikite ilgalaikę išskirtinę ryšio nuosavybę klientams, kuriems reikia tvirtos maršruto tvoros per užklausas. Tai skiriasi nuo seanso giminystės, kuri yra švelnaus tęstinumo pirmenybė: išskirtinė nuoma išlieka gyvavimo ciklo būsena SQLite, užtikrina visuotinį aktyvaus savininko ir aktyvaus ryšio unikalumą ir atmeta pasenusią generaciją prieš teikėjo išsiuntimą.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` blokas; kai `arm: "reset"` ir `available: true`, siunčiamas `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` su `{ "program": "juniper_tide" }` (organizacijos UUID gaunamas iš `providerSpecificData.organizationUUID`, naudojant paleidimo atsarginį variantą).
+- `result: reset|not_limited` → užklausa kartojama visu greičiu (be lėto režimo antraštės). `already_used` / `not_offered` įsimena `next_available_at` (pagal numatytuosius nustatymus – viena savaitė); bet kokia klaida sukelia 15 minučių laukimą. Nustatymas iš naujo atliekamas kartą per savaitę ir vis tiek įskaičiuojamas į savaitinę ribą.
 
-Ši funkcija pasirenkama pagal API klavišą. Valdomas raktas turi turėti `lease:exclusive` taikymo sritį ir aiškų netuščią `allowedConnections` sąrašą. Bet kuris HTTP klientas gali naudoti gyvavimo ciklo galinį tašką; Kliento vardo, vartotojo agento, teikėjo, OAuth metodo ar modelio nereikia. Nuomos sutarčiai priklauso ryšys, o ne modelis, todėl modelio pakeitimas išlaiko įpareigojimus, o ryšys paprastai išlieka tinkamas. Įprasto modelio, kvotos, sveikatos, atvėsimo ir leidžiamųjų sąrašo taisyklės išlieka autoritetingos ir gali perkelti tą pačią kartą į kitą nemokamą tinkamą ryšį.
+Regresijos apsaugos: `tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-Gyvenimo ciklas yra `POST /api/v1/session-leases` su JSON veiksmais `acquire`, `renew` ir `release`. Tvarkomose išvadų užklausose pateikiama nepermatoma `X-OmniRoute-Lease-Owner` reikšmė ir tiksli `X-OmniRoute-Lease-Generation`. Savininkas naudoja `vlo_` ir 43 base64url simbolius; saugoma tik jos SHA-256 maiša. Kiekviena galutinė siuntimo tvora taip pat susieja autentifikuotą API raktą ID ir aktyvų ryšį ID. Nuomos valdymo antraštės pašalinamos iš žurnalų, išsaugotų užklausų momentinių kopijų ir ankstesnių vykdytojų antraščių.
+### Seanso susiejimas (#7274)
 
-Jei įprastas maršrutas turi tinkamų valdomų kandidatų, bet kiekvienas laisvas kandidatas yra užimtas užsienio aktyvios nuomos sutarties, OmniRoute pateikia HTTP `429`, nuomos pajėgumo nepasiekiamas kodas, laukimo pajėgumo būsena ir ribotas `Retry-After` gautas iš anksčiausio atitinkamo galiojimo pabaigos. Įprastas tuščias tinkamumas nėra ginčas dėl nuomos ir išlaiko esamą maršruto klaidos semantiką.
+**Taikymo sritis:** viena kliento sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` antraštė) susiejama su vienu ryšiu, nepriklausomai nuo teikėjo.
 
-Susiję mechanizmai lieka atskiri:
+**Paskirtis:** išlaikyti kelių žingsnių agentą (Claude Code, aider, pasirinktinius agentus) toje pačioje paskyroje tarp užklausų, sumažinant konteksto praradimą keičiant paskyrą ir pasikartojančias šaltosios pradžios `429` klaidas teikėjuose, kuriuose sesijos būsena priklauso nuo paskyros.
 
-- OAuth seanso užimtumas yra proceso vietinis minkštas paskirstymas OAuth paskyroms.
-- Paskyros semaforai suteikia užklausų sutapimo leidimus ir baigiasi, kai užklausa baigiama.
-- Išskirtinės valdomos sesijos nuomos sutartys yra ilgalaikė nuosavybė su kartos tvora.
+**Įgyvendinimas:**
 
----
+- TTL nustatymas: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Susieto ryšio parinkimas / sukūrimas: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Antraštės išgavimas (bendras, bet kuriam teikėjui): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Išsaugotų susiejimų lentelė: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Nustatymas: `sessionAffinityTtlMs` (visuotinis TTL milisekundėmis, `0` išjungia) — `src/lib/db/settings.ts`. Perkėlimo `124_generic_session_affinity_ttl.sql` pervadintas iš tik „Codex“ skirto `codexSessionAffinityTtlMs`; jis perkelia anksčiau sukonfigūruotą „Codex“ TTL kaip naująją numatytąją reikšmę.
 
-## 3. Modelio blokavimas
+Prieš #7274 `resolveSessionAffinityTtlMs()` kiekvienam teikėjui, išskyrus `codex`, iš karto grąžindavo `0`, todėl TTL nustatymas (ir sesijos antraštės) niekur kitur neturėjo poveikio, nors susiejimo mechanizmas ir antraščių išgavimas jau buvo nepriklausomi nuo teikėjo. Pataisa pašalino šį ankstyvą grįžimą; dabar TTL vienodai taikomas visiems teikėjams, kai tik visuotinai nustatomas didesnis nei `0`.
+
+Trys seanso susiejimo antraštės niekada neperduodamos aukštesniam lygiui — vykdytojai kuria savo aukštesnio lygio antraštes nuo nulio, o ne perduoda kliento antraštes, todėl jos lieka tik vidiniu koreliacijos identifikatoriumi.
+
+### Išskirtinės valdomo seanso ryšio nuomos kortelės
+
+**Apimtis:** vienas aktyvus valdomas HTTP klientas / sesija valdo vieną tinkamą „OmniRoute“ ryšį.
+
+**Paskirtis:** užtikrinti ilgalaikę išskirtinę ryšio nuosavybę klientams, kuriems tarp užklausų reikalinga griežta
+maršrutizavimo riba. Tai skiriasi nuo sesijos afiniteto, kuris yra silpna tęstinumo pirmenybė:
+išskirtinė nuoma išlieka gyvavimo ciklo būsena SQLite duomenų bazėje, užtikrina visuotinį aktyvių savininkų ir
+aktyvių ryšių unikalumą ir atmeta pasenusią kartą prieš perduodant užklausą tiekėjui.
+
+Ši funkcija pasirenkama kiekvienam API raktui. Valdomas raktas turi turėti `lease:exclusive` sritį ir
+aiškų netuščią `allowedConnections` sąrašą. Gyvavimo ciklo galiniu tašku gali naudotis bet kuris HTTP klientas;
+nereikalingas kliento pavadinimas, vartotojo agentas, tiekėjas, OAuth metodas ar modelis. Nuoma valdo ryšį,
+o ne modelį, todėl pakeitus modelį susiejimas išlieka, kol ryšys tebėra įprastai tinkamas. Įprastos modelio,
+kvotos, būklės, atvėsimo ir leidžiamų sąrašo taisyklės išlieka viršesnės ir gali perkelti tą pačią kartą į kitą
+laisvą tinkamą ryšį.
+
+Gyvavimo ciklą sudaro `POST /api/v1/session-leases` su JSON veiksmais `acquire`, `renew` ir `release`.
+Valdomos išvados užklausos pateikia nepermatomą `X-OmniRoute-Lease-Owner` reikšmę ir tikslią
+`X-OmniRoute-Lease-Generation` reikšmę. Savininkas naudoja `vlo_`, po kurio eina 43 base64url simboliai;
+saugoma tik jo SHA-256 maiša. Kiekviena galutinio perdavimo tiekėjui riba taip pat susieja autentifikuoto
+API rakto ID ir aktyvaus ryšio ID. Nuomos valdymo antraštės pašalinamos iš žurnalų, išsaugomų užklausų
+momentinių kopijų ir išsiuntimo vykdytojo antraščių.
+
+Jei įprastas maršrutizavimas turi tinkamų valdomų kandidatų, tačiau kiekvieną laisvą kandidatą užima kito
+savininko aktyvi nuoma, „OmniRoute“ grąžina HTTP `429`, `lease-capacity-unavailable` kodą, laukimo dėl
+pajėgumo būseną ir ribotą `Retry-After`, apskaičiuotą pagal anksčiausią reikšmingą galiojimo pabaigą.
+Įprastas tinkamų kandidatų nebuvimas nėra nuomos varžymasis dėl pajėgumo, todėl išlaiko esamą maršrutizavimo
+klaidų semantiką.
+
+Susiję mechanizmai išlieka atskiri:
+
+- OAuth sesijų užimtumas yra procesui lokalus minkštas OAuth paskyrų paskirstymas.
+- Paskyrų semaforai suteikia užklausų lygiagretumo leidimus ir baigia galioti užklausai pasibaigus.
+- Išskirtinės valdomų sesijų nuomos yra ilgalaikė gyvavimo ciklo nuosavybė su kartos riba.
+
+## 3. Model Lockout
 
 **Apimtis:** teikėjo + ryšio + modelio trejetas.
 
-**Rakto apimtis pagal būseną:** nepavykusi būsena nusprendžia, pagal kurį raktą įrašomas blokavimas (`resolveLockoutScope()` faile `open-sse/services/accountFallback/exactModelLock.ts`):
+**Apimties parinkimas pagal būseną:** nesėkmę nurodanti būsena nustato, į kurį raktą užraktas įrašomas
+(`resolveLockoutScope()` faile `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — kvotos arba teisių signalas — blokuojama **kvotų šeima**:
-  codex atveju — visa `codex` / `spark` apimtis (visi ryšio `gpt-5*` modeliai),
-  kitiems teikėjams — `getQuotaScopedModelForProvider()`.
-- `404` blokuoja grynąjį modelį (`getModelLockKey()` susiaurina `not_found`).
-- Bet kokia kita būsena — `5xx` transporto/serverio klaidos ir paties OmniRoute
-  sugeneruotas `502` iš kokybės validacijos — blokuoja tik **tikslią**
-  teikėjo/ryšio/modelio kombinaciją. Sugedęs srautas viename modelyje nėra įrodymas
-  apie paskyros kvotą; prieš šią taisyklę vienas tuščias atsakymas iš
-  `codex/gpt-5.6-luna` pašalindavo visus to ryšio `gpt-5*` modelius iš
-  maršrutizavimo 2–30 min (eskaluojant), nors jų kvota liko nepaliesta.
-- Skambintojo aiškiai nurodyta `scope` parinktis visada turi pirmenybę (Antigravity perduoda `"exact"`).
+- `429` / `403` / `402` — kvotos arba teisių signalas — užrakinama **kvotos šeima**:
+  codex atveju visa `codex` / `spark` apimtis (kiekvienas ryšio `gpt-5*` modelis), o
+  kitiems teikėjams naudojama `getQuotaScopedModelForProvider()`.
+- `404` užrakina bazinį modelį (`getModelLockKey()` susiaurina `not_found`).
+- Bet kuri kita būsena — `5xx` transporto / serverio klaidos ir paties „OmniRoute“
+  sugeneruotas `502` po kokybės tikrinimo — užrakina tik **tikslų**
+  teikėjo / ryšio / modelio trejetą. Blogas vieno modelio srautas nėra įrodymas apie
+  paskyros kvotą; prieš įvedant šią taisyklę vienas tuščias atsakas iš
+  `codex/gpt-5.6-luna` pašalindavo iš maršrutizavimo kiekvieną to ryšio `gpt-5*` modelį
+  2–30 minučių (laikas ilgėdavo), nors jo kvota likdavo nepakeista.
+- Aiškiai skambinančiojo nurodyta `scope` parinktis visada turi pirmenybę
+  („Antigravity“ perduoda `"exact"`).
 
-**Paskirtis:** išvengti viso ryšio išjungimo, kai nepasiekiamas arba kvotos apribotas tik vienas modelis.
+**Paskirtis:** išvengti viso ryšio išjungimo, kai nepasiekiamas arba kvotos ribojamas tik vienas modelis.
 
 **Pavyzdžiai:**
 
-- Kiekvienam modeliui kvotas taikantys teikėjai, grąžinantys 429
-- Vietiniai teikėjai, grąžinantys 404 dėl vieno trūkstamo modelio
-- Konkretaus teikėjo režimo/modelio leidimų klaidos (pvz., Grok režimai)
+- Teikėjai, kurių kvota taikoma kiekvienam modeliui ir kurie grąžina `429`
+- Vietiniai teikėjai, grąžinantys `404` dėl vieno trūkstamo modelio
+- Konkrečiam teikėjui būdingos režimo / modelio teisių klaidos (pvz., „Grok“ režimai)
 
 **Įgyvendinimas:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Modelių atvėsimų skydelis (v3.8.0)
+### Modelių vėsinimo skydelis (v3.8.0)
 
-UI: Nustatymai → Modelių atvėsimai (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+Sąsaja: Nustatymai → Modelių vėsinimas (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Išvardija aktyvius blokavimus su: provider, connection, model, reason, expiresAt. Operatoriai gali rankiniu būdu vėl įjungti modelį iš kortelės.
+Pateikia aktyvius užraktus su šia informacija: teikėjas, ryšys, modelis, priežastis, expiresAt. Operatoriai gali rankiniu būdu iš naujo įjungti modelį kortelėje.
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — aktyvių blokavimų sąrašas
-- `DELETE /api/resilience/model-cooldowns` — rankinis vėl įjungimas. Turinys: `{provider, connection, model}`. Autentifikacija: management.
+- `GET /api/resilience/model-cooldowns` — išvardyti aktyvius užraktus
+- `DELETE /api/resilience/model-cooldowns` — įjungti iš naujo rankiniu būdu. Pagrindinė dalis: `{provider, connection, model}`. Autentifikavimas: valdymo.
 
-### Atvėsimų tvarkytuvė
+### Vėsinimo tvarkytuvė
 
-UI: Stebėsena → Atvėsimų tvarkytuvė (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+Sąsaja: Stebėjimas → Vėsinimo tvarkytuvė (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Vienas puslapis kiekvienam ryšiui, kuris pašalintas iš maršrutizavimo dėl laikinos
-priežasties, užuot atidarius kiekvieno teikėjo puslapį. Jame išvardijami ryšių
-atvėsimai, modelių blokavimai ir galutinės būsenos; juos galima išvalyti kiekvienam
-ryšiui atskirai, pasirinktai grupei arba visiems teikėjo ryšiams, taip pat redaguojamos
-dažniausiai derinamos atvėsimo taisyklės: `streamStallCooldown.enabled` ir OAuth / API rakto
-`connectionCooldown` bazinis atvėsimas bei maksimalūs atsitraukimo žingsniai
-(išsaugoma per `PATCH /api/resilience`). Galutinės būsenos (`banned`, `expired`,
-`credits_exhausted`) išvardijamos, bet čia niekada neišvalomos.
+Vienas puslapis kiekvienam ryšiui, kuris dėl laikinos priežasties pašalintas iš maršrutizavimo, užuot
+atidarius kiekvieno teikėjo puslapį. Jame pateikiami ryšių vėsinimai, modelių užraktai ir galinės
+būsenos, jie išvalomi kiekvienam ryšiui, pasirinktam ryšių rinkiniui arba visiems teikėjo ryšiams,
+taip pat redaguojamos dažniausiai derinamos vėsinimo taisyklės: `streamStallCooldown.enabled` ir
+„OAuth“ / API rakto `connectionCooldown` bazinis vėsinimo laikas bei didžiausias atsitraukimo
+žingsnių skaičius (išsaugoma per `PATCH /api/resilience`). Galinės būsenos (`banned`, `expired`, `credits_exhausted`) pateikiamos, tačiau čia niekada neišvalomos.
 
-**REST API** (`src/lib/resilience/cooldownManager.ts`, autentifikacija: management):
+Tame pačiame puslapyje esanti kortelė **Klaidų vėsinimo taisyklės** redaguoja operatoriaus klaidų taisykles
+(`settings.providerErrorRules`) ir kiekvieno teikėjo bendrąsias numatytąsias reikšmes
+(`settings.providerErrorDefaults`) per `PATCH /api/settings` — kaip jos taikomos, žr. „Operatoriaus
+deklaruotos taisyklės“ §7. Trukmės: numatytoji (nenurodytas vėsinimas), 30 min.,
+1 val., 5 val., 24 val. arba pasirinktinė nuo 1 iki 43 200 minučių (30 dienų).
 
-- `GET /api/resilience/cooldowns[?provider=]` — ryšiai su būsena, likusiu atvėsimu,
-  atsitraukimo lygiu, paskutinės klaidos tipu ir modelių blokavimais (be kredencialų)
-- `POST /api/resilience/cooldowns` — turinys `{connectionIds: string[]}` arba
+**REST API** (`src/lib/resilience/cooldownManager.ts`, autentifikavimas: valdymo):
+
+- `GET /api/resilience/cooldowns[?provider=]` — ryšiai su būsena, likusiu vėsinimo laiku,
+  atsitraukimo lygiu, paskutiniu klaidos tipu ir modelių užraktais (be prisijungimo duomenų)
+- `POST /api/resilience/cooldowns` — pagrindinė dalis `{connectionIds: string[]}` arba
   `{all: true, provider?}`; grąžina `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### Blokavimo nustatymų UI + atkūrimas sėkmių mažinimo principu (v3.8.23)
+### Užraktų nustatymų sąsaja + atkūrimas mažėjant po sėkmės (v3.8.23)
 
-Modelio blokavimas iš visada įjungto, užkoduoto elgesio tapo visiškai
-konfigūruojama, pasirinktinai įjungiama funkcija su atskira nustatymų kortele ir
-savigydos atkūrimo keliu.
+Modelio užrakinimas iš visada įjungto, standžiai užkoduoto elgesio tapo visiškai konfigūruojama,
+pasirinktinai įjungiama funkcija su atskira nustatymų kortele ir savaime atsikuriančiu atkūrimo keliu.
 
-**Nustatymų kortelė:** Nustatymai → Modelio blokavimas
+**Nustatymų kortelė:** Nustatymai → Modelio užrakinimas
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Ji **skiriasi** nuo aukščiau minėtos tik skaitymui skirtos `ModelCooldownsCard`
-(kuri tik _išvardija_ aktyvius blokavimus) — naujoji kortelė _konfigūruoja
-parametrus_. Numatytosios reikšmės apibrėžtos `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Tai **atskira** nuo anksčiau pateiktos tik skaitomos `ModelCooldownsCard` (ji tik
+_išvardija_ aktyvius užraktus) — naujoji kortelė _konfigūruoja parametrus_. Numatytosios reikšmės saugomos
+`DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Nustatymas              | Numatytoji reikšmė               | Reikšmė                                                                  |
-| ----------------------- | -------------------------------- | ------------------------------------------------------------------------ |
-| `enabled`               | `false`                          | Pagrindinis jungiklis — modelio blokavimas **pagal numatymą išjungtas**. |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Upstream būsenos, laikomos modelio apimties nesėkme.                     |
-| `baseCooldownMs`        | `120_000` (120 s)                | Pradinė blokavimo trukmė už pirmą nesėkmę.                               |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Eskaluoto atvėsimo viršutinė riba.                                       |
-| `maxBackoffSteps`       | `10`                             | Maksimalūs eksponentinio atsitraukimo eskalavimo žingsniai.              |
-| `useExponentialBackoff` | `true`                           | Ar pasikartojančios nesėkmės eksponentiškai ilgina atvėsimą.             |
+| Nustatymas              | Numatytasis                      | Reikšmė                                                                                   |
+| ----------------------- | -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Pagrindinis jungiklis — modelio užrakinimas **išjungtas pagal numatytuosius nustatymus**. |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Iš teikėjo gaunamos būsenos, laikomos su modeliu susietu gedimu.                          |
+| `baseCooldownMs`        | `120_000` (120 s)                | Pradinė užrakinimo trukmė po pirmojo gedimo.                                              |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Didinamo vėsinimo laiko riba.                                                             |
+| `maxBackoffSteps`       | `10`                             | Didžiausias eksponentinio atsitraukimo didinimo žingsnių skaičius.                        |
+| `useExponentialBackoff` | `true`                           | Ar pasikartojantys gedimai eksponentiškai didina vėsinimo laiką.                          |
 
-Nustatymai išsaugomi per įprastą nustatymų saugyklą ir tikrinami pagal
-atsparumo nustatymų schemą; kortelė apriboja `baseCooldownMs`/`maxCooldownMs`
-(su `maxCooldownMs ≥ baseCooldownMs`) ir `maxBackoffSteps`.
+Nustatymai išsaugomi įprastoje nustatymų saugykloje ir tikrinami pagal atsparumo nustatymų schemą;
+kortelė apriboja `baseCooldownMs` / `maxCooldownMs` reikšmes (kai `maxCooldownMs ≥ baseCooldownMs`)
+ir `maxBackoffSteps`.
 
-**Atkūrimas sėkmių mažinimo principu:** atkūrimas **nėra** vien tik laikmačio
-pasibaigimas. Sveikas atsakymas mažina modelio nesėkmių skaičių, todėl modelis,
-atsigavęs lango viduryje, nustoja eskaluotis (ir išsivalo) anksčiau, nei pasibaigtų
-jo laikmatis. Sėkmingam combo taikiniui `open-sse/services/combo.ts` iškviečia
-`decayModelFailureCount()` (`open-sse/services/accountFallback.ts`), kuri **perpus
-sumažina** saugomą `failureCount` (`Math.floor(failureCount / 2)`); kai jis pasiekia
-`0`, blokavimo įrašas visiškai ištrinamas. Atitinkamoji funkcija
-`recordModelLockoutFailure()` didina skaičių (ir eskaluoja atvėsimą) esant
-nesėkmėms eskalavimo lange. Šis sėkmių mažinimas veikia papildomai prie įprasto
-laikmačio pasibaigimo — bet kuris iš šių kelių gali vėl įjungti modelį.
+**Atkūrimas mažėjant po sėkmės:** atkūrimas vyksta **ne vien tik pasibaigus laikmačiui**. Sveikas
+atsakas sumažina modelio nesėkmių skaičių, todėl viduryje lango atsikūręs modelis nustoja
+didinti vėsinimo laiką (ir užraktas pašalinamas) anksčiau, nei baigtųsi jo laikmatis. Sėkmingo
+kombinuoto taikinio atveju `open-sse/services/combo.ts` iškviečia `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), kuris **perpus sumažina** išsaugotą
+`failureCount` reikšmę (`Math.floor(failureCount / 2)`); kai ji pasiekia `0`, užrakto įrašas
+visiškai ištrinamas. Atitinkama funkcija `recordModelLockoutFailure()` padidina skaičių (ir
+didina vėsinimo laiką), kai gedimai įvyksta didinimo lange. Šis mažėjimas po sėkmės papildo
+įprastą laikmačio pabaigą — bet kuris iš šių kelių gali iš naujo įjungti modelį.
 
-**Būsena:** blokavimai laikomi **operatyviojoje atmintyje** (kiekvieno proceso
-`Map` struktūrose su `ModelLockoutEntry`, indeksuojamose raktu
-`provider:connectionId:model`, o tikslios apimties blokavimai — raktu
-`provider:connectionId:exact:model`), o ne išsaugomi
-DB — jie prarandami paleidus iš naujo. _Nustatymai_ išsaugomi; aktyvi blokavimo
-_būsena_ yra laikina.
+**Būsena:** blokavimai laikomi **atmintyje** (kiekvieno proceso `Map` objektuose,
+kuriuose `ModelLockoutEntry` elementai indeksuojami pagal
+`provider:connectionId:model`, o tikslios aprėpties blokavimai – pagal
+`provider:connectionId:exact:model`), o ne duomenų bazėje
+— paleidus iš naujo jie prarandami. _Nustatymai_ išsaugomi, o aktyvi blokavimo _būsena_ yra laikina.
 
 ---
 
-## 4. Kvotų dalijimosi lygiagretumo valdymas (v3.8.36)
+## 4. Kvotos dalies lygiagretumo valdymas (v3.8.36)
 
-Prenumeratos paskyros (GLM, MiniMax ir kt.) dažnai priima tik ~1–3 lygiagrečias užklausas; viršijus šį skaičių, suaktyvinamos 429 klaidos ir atvėsimai. Tai ypač opu **kvotų dalijimosi** (`qtSd/…`) kombinacijose, kai keli API raktai dalijasi viena upstream paskyra. Trys sluoksniai apsaugo bendrą paskyrą nuo užtvindymo.
+Prenumeratos paskyros (GLM, MiniMax ir kt.) dažnai priima tik ~1–3 lygiagrečias
+užklausas; viršijus šį skaičių suaktyvinamos 429 klaidos ir laukimo laikotarpiai. Tai ypač
+aktualu naudojant **kvotos dalies** (`qtSd/…`) kombinacijas, kai keli API raktai
+dalijasi viena pirmine paskyra. Trys sluoksniai neleidžia perpildyti bendrinamos paskyros.
 
-### Lygiagretumo riba vienam prisijungimui (`max_concurrent`)
+### Lygiagrečių užklausų riba vienam ryšiui (`max_concurrent`)
 
-Kiekvienas teikėjo prisijungimas gali deklaruoti `max_concurrent` lubas
-(`provider_connections.max_concurrent`, nustatomas prisijungimo modale / API / DB).
-Palikite tuščią, jei ribos nereikia. Tai vienintelė rankenėlė, valdanti žemiau aprašomą
-serializavimo sluoksnį — nustatykite ją pagal realų paskyros lygiagretumą (pvz., GLM ~1, MiniMax ~2).
+Kiekvienas teikėjo ryšys gali deklaruoti `max_concurrent` ribą
+(`provider_connections.max_concurrent`, nustatomą ryšio lange / API / DB).
+Palikite lauką tuščią, jei riba nereikalinga. Tai vienintelis nustatymas, valdantis toliau
+aprašytą serializavimo sluoksnį — nustatykite tikrąją paskyros lygiagretumo ribą
+(pvz., GLM ~1, MiniMax ~2).
 
-### Lygiagretumo ribos pagal modelį (`modelConcurrency`)
+### Lygiagrečių užklausų ribos vienam modeliui (`modelConcurrency`)
 
-Prisijungimas papildomai gali deklaruoti tikslias lygiagretumo lubas kiekvienam modeliui
+Ryšys papildomai gali deklaruoti tikslias lygiagrečių užklausų vienam modeliui ribas
 savo `rateLimitOverrides` žemėlapyje:
 
 ```json
@@ -311,73 +376,88 @@ savo `rateLimitOverrides` žemėlapyje:
 }
 ```
 
-Nustatykite jį prisijungimo modale (**Dažnio ribų perrašymai → Lygiagretumo ribos pagal modelį**, po vieną `model=cap` eilutėje) arba per
-`PATCH /api/providers/[id]` su ta pačia JSON struktūra. Pagrindinė semantika:
+Nustatykite tai ryšio lange (**Rate limit overrides → Per-model
+concurrency caps**, po vieną `model=cap` eilutėje) arba naudodami
+`PATCH /api/providers/[id]` su tokia pačia JSON struktūra. Pagrindinė semantika:
 
-- **Viso prisijungimo ir konkretaus modelio ribos:** `maxConcurrent` išlieka bendra
-  viso prisijungimo riba. Kai taikomos abi, abu šliuzai užimami
-  atomiškai tame pačiame sudėtiniame šliuze
-  (`global → provider → account → model`); efektyvioji elgsena atitinka
-  griežtesnę taikomą ribą.
-- **Tikslus modelio rakto atitikimas:** raktas yra modelio eilutė, perduodama
-  vykdytojui po maršruto išskyrimo — paprastai grynasis upstream modelio ID
-  (`glm-5`), o ne kliento pusės `provider/model` slapyvardis (`zai/glm-5` neatitinka
-  `glm-5`). Reikšmės yra teigiami sveikieji skaičiai — lygiagrečių užklausų lubos.
-- **Vietinė laukimo eilė, be automatinio aptikimo:** perteklinės užklausos laukia vietinėje
-  eilėje pagal esamą eilės / laiko limito semantiką (tipizuotos `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` priėmimo klaidos). OmniRoute pats neatranda ir
-  nenusprendžia upstream politikos — jis vykdo tikslias operatoriaus
-  sukonfiguruotas lubas. Prisotinęs modelio šliuzas niekada neišjungia teikėjo ir niekada
-  nesukuria nuolatinio modelio blokavimo; upstream 429 / atvėsimo / atsarginio (fallback)
-  elgsena išlieka klaidų paskutine gynyba.
-- **Vieno prisijungimo, vieno proceso apimtis:** ribos taikomos kiekvienam duomenų bazės
-  prisijungimui atskirai ir laikomos operatyviojoje atmintyje, todėl du prisijungimai, naudojantys tą patį
-  upstream API raktą, tarpusavyje nekoordinuoja.
-- **Nekonfigūruota reiškia nepakeistą elgseną:** praleidus žemėlapį (arba palikus
-  skydelio lauką tuščią) modelio šliuzas nepridedamas. Konfigūracijos pavyzdys,
-  nedeklaruojantis jokios universalios teikėjo ribos:
+- **Bendra ryšio ir konkretaus modelio riba:** `maxConcurrent` išlieka bendra
+  visam ryšiui taikoma riba. Kai taikomos abi ribos, abu vartai įgyjami
+  atomiškai tame pačiame sudėtiniame stale
+  (`global → provider → account → model`); faktinį elgesį lemia griežtesnė
+  taikoma riba.
+- **Tikslus modelio rakto sutapimas:** raktas yra modelio eilutė, perduodama vykdikliui
+  po maršrutizavimo išsprendimo — paprastai grynasis pirminio teikėjo modelio ID
+  (`glm-5`), o ne kliento pusės `provider/model` pseudonimas (`zai/glm-5` nesutaps su
+  `glm-5`). Reikšmės yra teigiamos sveikųjų skaičių lygiagrečių užklausų ribos.
+- **Vietinė eilė, be aptikimo:** perteklinės užklausos dedamos į vietinę eilę pagal
+  esamą eilės / skirtosios laiko trukmės semantiką (tipizuotos
+  `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL` priėmimo klaidos). OmniRoute neaptinka ir
+  nenustato pirminio teikėjo politikos — jis taiko tikslias operatoriaus
+  sukonfigūruotas ribas. Prisotintas modelio vartas niekada neišjungia teikėjo ir
+  nesukuria nuolatinio modelio blokavimo; pirminio teikėjo 429 klaidų / laukimo
+  laikotarpio / atsarginio maršruto elgsena išlieka atsarginiu klaidų valdymo mechanizmu.
+- **Vieno ryšio ir vieno proceso apimtis:** ribos taikomos kiekvienam duomenų bazės
+  ryšiui ir laikomos atmintyje, todėl du ryšiai, pakartotinai naudojantys tą patį
+  pirminio teikėjo API raktą, tarpusavyje nesinchronizuojami.
+- **Nesukonfigūruota reiškia, kad elgsena nesikeičia:** praleidus žemėlapį (arba
+  palikus prietaisų skydelio lauką tuščią), modelio vartas nepridedamas. Pavyzdinė
+  konfigūracija, nenustatanti jokios visuotinės teikėjo ribos:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Kvotų dalijimosi užklausų serializavimas
+### Kvotos dalies užklausų serializavimas
 
-Kai kvotų dalijimosi išsiuntimas nukreipiamas į prisijungimą, deklaruojantį teigiamą
-`max_concurrent`, lygiagrečios užklausos į tą **paskyrą** serializuojamos per
-prisijungimo semaforą (raktas `qsconn:<connectionId>`): perteklinės užklausos **laukia
-eilėje**, užuot užtvindžiusios paskyrą. Jis veikia **fail-open** (atviro gedimo)
-principu — prisotinus eilę arba suėjus laiko limitui, užklausa leidžiama be vietos,
-o niekada neatmetama, jei ji apskritai gali būti išsiųsta. Perjungiama
-**Nustatymai → Atsparumas → Kvotų dalijimosi lygiagretumo riba pagal prisijungimą**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, pagal numatymą įjungta).
-Be `max_concurrent` ribos elgsena nepakitusi.
+Kai kvotos dalies išsiuntimas nukreipiamas į ryšį, kuriame deklaruota teigiama
+`max_concurrent` reikšmė, lygiagrečios užklausos tai **paskyrai** serializuojamos per
+vienam ryšiui skirtą semaforą (raktas `qsconn:<connectionId>`): perteklinės užklausos
+**laukia eilėje**, užuot perpildžiusios paskyrą. Tai veikia **neuždarančiu režimu** —
+prisotinta eilė arba skirtosios laiko trukmės pabaiga leidžia tęsti be vietos, o
+išsiunčiama užklausa niekada neatmetama. Įjungimo parinktis:
+**Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, pagal
+numatytuosius nustatymus įjungta). Jei `max_concurrent` riba nenustatyta, elgsena
+nesikeičia.
 
-> Pats kvotų dalijimosi maršruto šliuzas (`selectQuotaShareTarget`, DRR + P2C) taip pat
-> yra fail-open ir tik _sumažina prioritetą_ ribą pasiekusiam prisijungimui — turint
-> vieno prisijungimo telkinį jis negali riboti griežtai, todėl būtent šis semaforas
-> realiai sulaiko antvandį.
+> Kvotos dalies maršrutizavimo vartai (`selectQuotaShareTarget`, DRR + P2C) patys
+> veikia neuždaromuoju režimu ir tik _sumažina prioritetą_ ryšiui, pasiekusiam ribą —
+> vieno ryšio telkinyje jie negali nustatyti griežtos ribos, todėl šis semaforas
+> iš tikrųjų suvaldo perpildymą.
 
-### Į atvėsimą reaguojantis kombinacijų pakartotinis bandymas
+### Kombinacijos laukimo laikotarpiui pritaikytas pakartotinis bandymas
 
-Kiekvienai kombinacijos strategijai (kai funkcija įjungta) užklausa, kuri sukristalizuotų 429
-klaidą dėl TRUMPO laikino atvėsimo, jį palaukia ir yra išsiunčiama iš naujo, užuot
-grąžinusi 429 — tai apima Gemini klasės TPM/RPM langus (~60 s retry-after)
-kelių modelių kombinacijose, pvz., kai abu dviejų modelių kombinacijos taikiniai
-atsitrenkia į konkretaus modelio dažnio ribą. Ribojama `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) skiltyje **Nustatymai → Atsparumas**. Jis niekada nelaukia dėl `quota_exhausted`
-(užrakinta iki vidurnakčio) arba autentifikavimo / „nerasta" (not-found) priežasčių.
+Naudojant bet kurią kombinacijos strategiją (kai ji įjungta), užklausa, dėl kurios
+trumpu laikinu laukimo laikotarpiu susidarytų 429 klaida, palaukia jo pabaigos ir
+išsiunčiama iš naujo, užuot grąžinus 429 klaidą — tai apima Gemini klasės TPM/RPM
+langus (~60 s `retry-after`) kelių modelių kombinacijose, pvz., kai abiem 2 modelių
+kombinacijos tikslams pasiekiama vieno modelio spartos riba. Laukimą riboja
+`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
+`budgetMs`) skiltyje **Settings → Resilience**. Laukimas niekada netaikomas
+`quota_exhausted` atveju (užrakinta iki vidurnakčio) arba dėl autentifikavimo /
+nerasto objekto priežasčių.
 
-Tas pats šliuzas apima ir prieš išsiuntimą esantį atvejį (#16319): kai visi
-kombinacijos taikiniai praleidžiami dar prieš bet kokį bandymą, nes jų modelis yra trumpame
-laikiname užrakte, kelias be bandymų palaukia užrakto pabaigos pagal tas pačias
-lubas ir išsiunčia iš naujo, užuot atsakęs be užuominų
-`503 ALL_TARGETS_SKIPPED`. Kai laukti neleidžiama (pasiektos lubos, išsemti bandymai
-ar biudžetas arba funkcija išjungta), galutinis atsakas pakeliamas į
-`429 rate_limit_error`, nešantį `retry_after` / `reset_at` iš ankstyviausio
-laikinio užrakto galiojimo pabaigos; kvotų, autentifikavimo ir „nerasta" užraktai
-išlaiko beužuomininį 503.
+Kombinacija gali atsisakyti šios funkcijos naudodama
+`config.comboCooldownWaitEnabled: false`. Tik tiesioginė `false` reikšmė išjungia
+šiuos bendrinamus kombinacijos laukimus (po išsiuntimo taikomą laukimą ir prieš
+išsiuntimą taikomą grandinės atviros būsenos / modelio užrakto laukimą) bei jų
+laukimo biudžeto skirtojo laiko trukmės apatinės ribos išplėtimą. Jei reikšmės nėra
+arba nustatyta `true`, visuotinė politika išlaikoma; `true` negali įjungti visuotinai
+išjungto laukimo. Aiškiai nustatytas `targetTimeoutMs` vis tiek turi pirmenybę.
+Ši atsisakymo parinktis nekeičia atskiro įprasto Codex ėjimo prisegimo laukimo prieš
+išsiuntimą.
+
+Tas pats vartas apima ir atvejį prieš išsiuntimą (#16319): kai kiekvienas
+kombinacijos tikslas praleidžiamas dar nepradėjus jokio bandymo, nes jo modelis yra
+trumpai laikinai užrakintas, kelias be bandymų palaukia užrakto pabaigos pagal tas
+pačias ribas ir išsiunčia iš naujo, užuot grąžinus užuominų neturintį
+`503 ALL_TARGETS_SKIPPED`. Kai laukti negalima (pasiekta riba, išnaudotas bandymų
+ar biudžeto limitas arba funkcija išjungta), galutinis atsakymas pakeičiamas į
+`429 rate_limit_error`, kuriame pateikiami `retry_after` / `reset_at` iš
+anksčiausio laikino modelio užrakto galiojimo pabaigos; kvotos, autentifikavimo ir
+nerasto objekto užraktai išlaiko užuominų neturintį 503 atsakymą.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -482,226 +562,297 @@ Kai įjungta, stebėjimo nutraukimas taikomas tik aktyviam bandymui prieš srov�
 
 ---
 
-## 7. Upstream būsenos persakymas (klaidingai nurodytos kvotos klaidos)
+## 7. Upstream būsenos perrašymas (neteisingai nurodytos kvotos klaidos)
 
-**Apimtis:** vienas upstream šliuzas, kuris apie laikinai išsektą kvotą praneša neteisinga HTTP būsena.
+**Apimtis:** vienas upstream šliuzas, kuris apie laikiną kvotos išeikvojimą praneša naudodamas neteisingą HTTP būseną.
 
-**Paskirtis:** ištaisyti klaidingą būseną PRIEŠ klasifikavimą, kad vėlesni vartotojai (fallback variklis, combo agregavimas, klientui grąžinamas atsakymas) matytų tikrąjį pakartojamą klaidos pobūdį.
+**Paskirtis:** pataisyti klaidinantį statusą PRIEŠ klasifikavimą, kad tolesni vartotojai (atsarginio veikimo modulis, kombinacijų agregavimas, klientui grąžinamas atsakymas) matytų tikrąją, pakartotinai bandytiną klaidos prigimtį.
 
-Kai kurie šliuzai LAIKINĄ kvotos išsekimą signalizuoja nepakartojama HTTP būsena. `agentrouter.org` grąžina `403` (kartais `400`) su kinų kalbos atsakymo tekstu (`用户额度不足` / `额度不足`) vietoj standartinio `429`. Klientai, tokie kaip Claude Code, `403` laiko nuolatine klaida ir nutraukia sesiją, o be pataisymo fallback variklis ją klasifikuotų kaip `AUTH_ERROR`, o ne kaip kvotos įvykį.
+Kai kurie šliuzai apie LAIKINĄ kvotos išeikvojimą praneša naudodami būseną, kuri neleidžia pakartotinai bandyti. `agentrouter.org` grąžina `403` (kartais `400`) su kinišku turiniu
+(`用户额度不足` / `额度不足`) vietoj standartinės `429`. Tokie klientai kaip Claude
+Code traktuoja `403` kaip nuolatinę klaidą ir nutraukia seansą, o be pataisymo
+atsarginio veikimo modulis ją klasifikuotų kaip `AUTH_ERROR`, o ne kaip kvotos
+įvykį.
 
 **Įgyvendinimas:**
 
-- Registras + atitikties tikrintuvas: `open-sse/config/upstreamStatusRestatement.ts` — kiekvieno tiekėjo taisyklių sąrašas (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), tikrinamas per `applyStatusRestatement()`.
-- Iškvietimo vieta: `providerFailure:` blokas faile `open-sse/handlers/chatCore.ts` (apie 3654 eilutę), iškart po to, kai `parseUpstreamError()` išanalizuoja upstream atsakymą su klaidos HTTP būsena (`!providerResponse.ok`), ir prieš prasidedant bet kokiam klasifikavimui, kad kiekvienas vėlesnis vartotojas matytų ištaisytą būseną. Klaidos, įterptos `200` SSE srauto viduje, eina atskiru, vėlesniu srauto analizavimo keliu ir šiandien šio kablio (hook) **nepasiekia** — tai žinomas apribojimas, kurio kol kas nereikia agentrouter klaidingai būsenai (kuri pasireiškia kaip klaidos HTTP būsena).
-- Pakartojimo tinkamumas: `429` yra `RETRY_AFTER_ELIGIBLE_STATUSES` (`open-sse/services/combo/unavailableRetryGate.ts`), todėl persakyta klaida turi tikrą pakartojimo langą, o ne pasireiškia kaip negyva `403`.
-- Sintetinė `60s` reikšmė `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) yra tik tai, ką persakytas atsakymas praneša **klientui**; tai nėra paties ryšio vidinė pertraukos (cooldown) / blokavimo trukmė — ją atskirai valdo tas mechanizmas, kuris iš tikrųjų apdoroja persakytą klaidą (Connection Cooldown eskaluojantis backoff, §2, bazinė `3s` API rakto tiekėjams; arba Model Lockout, §3, tiekėjams su kvota pagal modelį, kaip agentrouter). Maršrutizatorius viduje gali tapti tinkamu pakartojimui anksčiau nei per 60 s langą, kurį jis skelbia klientui — tai sąmoningas rezervas, o ne klaida.
+- Registras + atitikimo modulis: `open-sse/config/upstreamStatusRestatement.ts` — kiekvienam
+  teikėjui skirtas taisyklių sąrašas (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`), pritaikomas naudojant `applyStatusRestatement()`.
+- Iškvietimo vieta: `providerFailure:` blokas faile `open-sse/handlers/chatCore.ts`
+  (maždaug ties 3654 eilute), iškart po to, kai `parseUpstreamError()` išanalizuoja upstream
+  atsakymą su klaidos HTTP būsena (`!providerResponse.ok`), ir prieš atliekant bet kokį
+  klasifikavimą, kad visi tolesni vartotojai matytų pataisytą būseną. Klaidos, įterptos į
+  `200` SSE srautą, apdorojamos atskiru, vėlesniu srauto analizavimo keliu ir šiandien šis
+  kablys joms **netaikomas** — tai žinomas apribojimas, kuris kol kas nereikalingas
+  `agentrouter` neteisingai būsenai, nes ji pateikiama kaip klaidos HTTP būsena.
+- Pakartotinio bandymo tinkamumas: `429` yra įtrauktas į `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), todėl perrašyta klaida turi tikrą
+  pakartotinio bandymo langą, užuot buvusi pateikta kaip neaktyvi `403`.
+- Sintetinė `60s` `defaultRetryAfterMs` reikšmė (`upstreamStatusRestatement.ts`)
+  yra tik tai, ką perrašytas atsakymas nurodo **klientui**; ji pati nėra ryšio vidinio
+  atvėsimo / blokavimo trukmė — ją atskirai nustato mechanizmas, kuris faktiškai apdoroja
+  perrašytą klaidą (Ryšio atvėsimo eskaluojamas atsitraukimas, §2, API rakto
+  teikėjams taikant bazinę `3s` reikšmę, arba Modelio blokavimas, §3, kiekvieno modelio
+  kvotą naudojantiems teikėjams, tokiems kaip `agentrouter`). Maršrutizatorius gali tapti
+  tinkamas vidiniam pakartotiniam bandymui anksčiau nei baigsis klientui skelbiamas
+  60s langas — tai tyčinė atsarga, o ne klaida.
 
-Nuolatinės klaidos (agentrouter `无权访问模型` — nėra prieigos prie šio modelio) NIEKADA nepersakomos: `excludeMarkers` vetuoja taisyklę net tada, kai atitinka `textMarkers`, todėl klaida išlaiko pradinę būseną ir niekas jos nesikartoja amžinai. Atitinkama tiekėjo klasifikavimo taisyklė (`agentrouter-model-access-denied` faile `open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope: "model"`, deklaruota `6h` bazinė pertrauka) tikrinama `checkFallbackError` (`open-sse/services/accountFallback.ts`) _prieš_ bendrąjį apikey kategorijos `FORBIDDEN` ankstyvąjį grąžinimą, su sąlyga `honorsRuleLockScope(provider)` (#10334 — šiuo metu taikoma išskirtinai agentrouter per `HONORS_RULE_LOCK_SCOPE_PROVIDERS` leidžiamųjų sąrašą faile `providerErrorRules.ts`). Taisyklės deklaruota 6 val. pertrauka perduodama kaip `fallbackResult.baseCooldownMs`, tačiau ji vis tiek patenka į jau egzistuojantį blokavimo pagal modelio kvotą kelią (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`, kurio #10334 nepakeitė, išskyrus pertraukos šaltinį): ji apribojama iki operatoriaus `mlSettings.maxCooldownMs` (numatytoji `1_800_000ms` / 30 min.), kaip ir bet kuris kitas modelio blokavimas, o _išsaugota blokavimo priežastis_ lieka ankstesnė užkoduota `"forbidden"`, o ne taisyklės `"auth_error"` — visoje grandinėje įgyvendinama tik pertraukos trukmė, o ne priežasties eilutė. Pats ryšys lieka aktyvus; gretimi modeliai tame pačiame ryšyje nepaveikiami.
+Nuolatinės klaidos (`agentrouter` `无权访问模型` — nėra prieigos prie šio modelio)
+**NIEKADA** neperrašomos: `excludeMarkers` panaikina taisyklės taikymą net tada, kai
+sutampa `textMarkers`, todėl klaida išlaiko pradinę būseną ir dėl jos niekada
+neatliekami pakartotiniai bandymai. Atitinkama teikėjo klasifikavimo taisyklė
+(`agentrouter-model-access-denied` faile `open-sse/config/providerErrorRules.ts`:
+`reason: "auth_error"`, `scope: "model"`, deklaruota `6h` bazinė atvėsimo trukmė)
+tikrinama `checkFallbackError` funkcijoje (`open-sse/services/accountFallback.ts`)
+_prieš_ bendrą apikey kategorijos `FORBIDDEN` ankstyvą grįžimą, jei tenkinama
+`honorsRuleLockScope(provider)` sąlyga (#10334 — šiuo metu išskirtinai taikoma
+`agentrouter` per `HONORS_RULE_LOCK_SCOPE_PROVIDERS` leidžiamų teikėjų sąrašą faile
+`providerErrorRules.ts`). Taisyklėje deklaruota 6h atvėsimo trukmė perduodama kaip
+`fallbackResult.baseCooldownMs`, tačiau ji vis tiek patenka į iš anksto egzistavusį
+kiekvieno modelio kvotos blokavimo kelią (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`), kurio #10334 nepakeitė, išskyrus atvėsimo šaltinį:
+ji apribojama operatoriaus `mlSettings.maxCooldownMs` reikšme (numatytoji
+`1_800_000ms` / 30min), kaip ir kiekvienas kitas modelio blokavimas, o
+_išsaugota blokavimo priežastis_ lieka anksčiau naudota užkoduota `"forbidden"`,
+o ne taisyklės `"auth_error"` — iki galo taikoma tik atvėsimo trukmė, o ne
+priežasties eilutė. Pats ryšys išlieka aktyvus; kitiems modeliams tame pačiame
+ryšyje tai neturi įtakos.
 
-Persakytos kvotos klaidos (`额度不足`) produkcijoje pasiekia tiekėjo taisyklę (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, be savo deklaruotos pertraukos — taikomas numatytasis persistencijos sluoksnio masteliuojamas backoff). Nuo #10334 `scope` reikšmė `ProviderErrorRuleMatch` YRA naudojama visoje grandinėje, tačiau **tik** tiekėjams iš `HONORS_RULE_LOCK_SCOPE_PROVIDERS` leidžiamųjų sąrašo (`providerErrorRules.ts` — šiandien tik `"agentrouter"`, kontroliuojama per `honorsRuleLockScope()`). Visiems kitiems tiekėjams `scope` lieka tik informatyvus, lygiai kaip iki #10334. `checkFallbackError` perduoda atitikusios taisyklės scope kaip `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) yra bendroji apsauginė funkcija, patvirtinanti, kad `ruleScope` iš tiesų saugu taikyti kaip visam ryšiui skirtą, savaime atsistatantį signalą (scope `"connection"`, reason `quota_exhausted`, niekada `permanent`, niekada `creditsExhausted` — apsauga nuo galimos ateities taisyklės, kuri scope `"connection"` derintų su nuolatine paskyros būsena). Ją iškviečia du vartotojai:
+Perrašytos kvotos klaidos (`额度不足`) gamybinėje aplinkoje pasiekia teikėjo taisyklę
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, be savo deklaruotos atvėsimo trukmės — taikoma išsaugojimo sluoksnio
+numatytoji mastelio keitimo atsitraukimo reikšmė). Nuo #10334 `scope` reikšmė
+`ProviderErrorRuleMatch` objekte naudojama iki galo, tačiau **tik** teikėjams,
+įtrauktiems į `HONORS_RULE_LOCK_SCOPE_PROVIDERS` leidžiamų teikėjų sąrašą
+(`providerErrorRules.ts` — šiandien tik `"agentrouter"`, tikrinama per
+`honorsRuleLockScope()`). Visiems kitiems teikėjams `scope` lieka informacinė,
+kaip ir iki #10334. `checkFallbackError` atitikusios taisyklės sritį pateikia kaip
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) yra bendras tikrintuvas, patvirtinantis, kad
+`ruleScope` tikrai saugu taikyti kaip visam ryšiui galiojantį, savaime atkuriamą
+signalą (sritis `"connection"`, priežastis `quota_exhausted`, niekada
+`permanent`, niekada `creditsExhausted` — apsauga nuo būsimos taisyklės, kuri
+susietų sritį `"connection"` su nuolatine paskyros būsena). Jį iškviečia du
+vartotojai:
 
-- **Išlaikymas** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  vietoj to, kad patektų į passthrough teikėjo užrakinimo **pagal modelį**
-  šaką (agentrouter yra `passthroughModels: true` → `hasPerModelQuota()`
-  grąžina `true`), taikomas **laikinas ryšio atvėsimo laikotarpis** —
-  `testStatus: "unavailable"` + `rateLimitedUntil`, niekada ne galutinė būsena
-  (`credits_exhausted`/`banned`/`expired`) — todėl ryšys atsistato savaime,
-  pasibaigus atvėsimo laikotarpiui, užuot reikalavus rankinio kredencialų atstatymo.
-  Praleidžiama ryšiams su `disableCooling: true` (#2997): šis atsisakymas
-  vietoj to pereina į užrakinimą pagal modelį (dokumentuotas kompromisas —
+- **Persistencija** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  užuot patekęs į passthrough-provider **kiekvieno modelio** blokavimo šaką
+  (agentrouter yra `passthroughModels: true` → `hasPerModelQuota()`
+  grąžina `true`), jis pritaiko **laikiną ryšio atvėsimo laikotarpį** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, niekada nenustatydamas galutinės būsenos
+  (`credits_exhausted`/`banned`/`expired`) — todėl ryšys automatiškai atsigauna
+  pasibaigus atvėsimo laikotarpiui, užuot reikalavęs rankiniu būdu iš naujo nustatyti kredencialus.
+  Netaikoma ryšiams, kuriuose nustatyta `disableCooling: true` (#2997): ši atsisakymo parinktis
+  nukreipia į blokavimą pagal modelį (tai dokumentuotas kompromisas —
   žr. kodo komentarą virš šakos).
-- **To paties užklausos combo maršrutizavimas** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): tas pats saugiklis pažymi
-  ryšį atmintyje esančioje `exhaustedConnections` aibėje, su raktu
-  `${provider}:${connectionId}`. Tai praleidžia tik likusį TO PATIES UŽKLAUSOS
-  tikslą, kuris _pats jau turi būtent tą `connectionId`_ savo tikslo objekte
+- **Kombinuotas maršrutizavimas tame pačiame užklausoje** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): tas pats apsaugos mechanizmas įtraukia
+  ryšį į atmintyje saugomą `exhaustedConnections` rinkinį, kurio raktas yra
+  `${provider}:${connectionId}`. Taip praleidžiamas tik likęs SAME-REQUEST taikinys,
+  kuris _pats jau turi tą patį `connectionId`_ savo taikinio objekte
   (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` prieš `exhaustedConnections` paiešką) — paprastas
-  modelių sąrašo combo, kuriame gretimi tikslai neturi savo fiksuoto `connectionId`,
-  o vienas iš jų nustatomas tik išsiuntimo metu iš atsakymo antraštės
-  `X-OmniRoute-Selected-Connection-Id`, niekada nepasiekia šio rakto atitikties. Šiuo
-  dažnu atveju tikroji apsauga nuo to, kad likęs etapas pakartotinai panaudotų
-  ką tik išsemtą paskyrą, yra NĖRA ši aibė — tai aukščiau aprašytas išlaikymo
-  sluoksnis (ryšio `rateLimitedUntil` dabar jau ateityje), kartu su tuo pačiu
-  saugikliu, slopinančiu `transientRateLimitedProviders` šiai
-  klaidai (žr. „Dviajų etapų dizainas" ir kodo komentarą ties
-  `isAgentrouterConnectionQuotaScope` šaka `targetExhaustion.ts` faile): kai
-  ši aibė lieka nepažymėta, `combo.ts` `allowRateLimitedConnection` priverstinis leidimas
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NEįsijungia
-  teikėjo likusiems etapams, todėl kredencialų pasirinkimo `rateLimitedUntil`
-  filtras (`src/sse/services/auth.ts:1238`) gerbiamas kaip įprasta, o
-  likęs etapas arba pasirenka kitą, vis dar tinkamą agentrouter
-  ryšį, arba nepavyksta dėl neprieinamų kredencialų — jis neveržia
-  savęs atgal į ryšį, kurį ši šaka ką tik atvėsino.
+connectionId)` prieš `exhaustedConnections` paiešką) — įprastas
+  modelių sąrašo derinys, kuriame gretimuose taikiniuose nėra jiems priskirto
+  `connectionId`, o vienas ryšys išsprendžiamas kiekvieno išsiuntimo metu
+  pagal atsakymo `X-OmniRoute-Selected-Connection-Id` antraštę, niekada neatitinka
+  šio rakto. Tokiu įprastu atveju tikroji apsauga nuo to, kad likusi grandis
+  pakartotinai panaudotų ką tik išnaudotą paskyrą, yra NE šis Set — ją užtikrina
+  pirmiau aprašytas persistavimo sluoksnis (`rateLimitedUntil` ryšiui dabar yra ateityje)
+  kartu su tuo, kad tas pats apsaugos mechanizmas nesukuria
+  `transientRateLimitedProviders` įrašo dėl šios klaidos (žr. „Dviejų etapų dizainas“
+  ir kodo komentarą apie `isAgentrouterConnectionQuotaScope` šaką
+  faile `targetExhaustion.ts`): kai šis Set nepažymėtas,
+  `combo.ts` `allowRateLimitedConnection` priverstinis leidimas
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NEĮSIGALIOJA
+  likusioms teikėjo grandims, todėl kredencialų parinkimo
+  `rateLimitedUntil` filtras (`src/sse/services/auth.ts:1238`) taikomas įprastai,
+  o likusi grandis arba parenka kitą, vis dar tinkamą agentrouter
+  ryšį, arba baigia darbą neradusi galimų kredencialų — ji nepriverstinai
+  negrįžta prie ryšio, kuris ką tik buvo atvėsintas šioje šakoje.
 
-### Dviajų etapų dizainas: būsenos perfrazavimas, tada klasifikavimas
+### Dviejų etapų dizainas: būsenos perfrazavimas, tada klasifikavimas
 
 Būsenos perfrazavimas (`upstreamStatusRestatement.ts`) ir teikėjo
 klasifikavimo taisyklės (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) yra atskiri registrai, kurie abu kaip raktus naudoja teikėjo id
-ir tekstinius žymenis, bet jie vykdomi skirtingose vietose ir tarnauja
-skirtingiems tikslams: perfrazavimas perrašo HTTP būseną anksti `chatCore.ts` faile;
-klasifikavimo taisyklės parenka atsarginę `reason` ir užrakina `scope`
-(`model` / `provider` / `connection`) `checkFallbackError()` viduje
+`providerRuleRegistry`) yra atskiri registrai, kurie abu remiasi teikėjo ID
+ir teksto žymenimis, tačiau vykdomi skirtingose vietose ir atlieka skirtingas
+paskirtis: perfrazavimas anksti perrašo HTTP būseną faile `chatCore.ts`;
+klasifikavimo taisyklės parenka atsarginio veikimo `reason` ir blokavimo
+`scope` (`model` / `provider` / `connection`) funkcijoje `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`).
 
-Klasifikavimo taisyklės mato visą klaidos **tekstą** (reikalingą kūno
-žymenims, pvz., `额度不足`, atpažinti) tik teikėjams, įtrauktiems į `FULL_TEXT_RULE_PROVIDERS`
-leidžiamųjų sąrašą `providerErrorRules.ts` faile — šiuo metu tik `"agentrouter"`. Kiekvienam
-kitam **įtaisytajam katalogo** teikėjui `checkFallbackError` perduoda
-`getProviderErrorRuleMatch` tik struktūrizuotą klaidą (`{code, type}`), kurios
-užtenka taisyklėms, pagrįstoms antrašte/būsena/kodu, bet kuri akla kūno teksto žymenims.
-Pagalbinė funkcija `resolveRuleMatchBody()` atlieka šį pasirinkimą: visas klaidos tekstas
-leidžiamųjų sąraše esantiems teikėjams, priešingu atveju — struktūrizuota klaida. **Įtaisytojo**
-teikėjo pridėjimas į `FULL_TEXT_RULE_PROVIDERS` yra aiškus kiekvienam teikėjui taikomas
-opt-in — tai sukurta tam, kad numatytasis kelias kiekvienam teikėjui, neįtrauktam į
-sąrašą, liktų nepakeistas baitas į baitą.
+Klasifikavimo taisyklės mato tik visą klaidos **tekstą** (jo reikia kūno
+žymenims, pvz., `额度不足`, atpažinti) tų teikėjų, kurie išvardyti
+`FULL_TEXT_RULE_PROVIDERS` leidžiamų teikėjų sąraše faile `providerErrorRules.ts` —
+šiuo metu jame yra tik `"agentrouter"`. Kiekvieno kito **integruoto katalogo**
+teikėjo atveju `checkFallbackError` funkcijai `getProviderErrorRuleMatch`
+perduoda tik struktūrinę klaidą (`{code, type}`), kurios pakanka antraštėmis,
+būsena ar kodu grindžiamoms taisyklėms, tačiau nepakanka kūno teksto žymenims.
+Pagalbinė funkcija `resolveRuleMatchBody()` atlieka šį pasirinkimą: visą klaidos
+tekstą leidžiamų teikėjų sąraše esantiems teikėjams, o struktūrinę klaidą —
+kitiems. **Integruoto** teikėjo įtraukimas į `FULL_TEXT_RULE_PROVIDERS` yra
+aiškus konkretaus teikėjo pasirinkimas — taip užtikrinama, kad numatytasis
+kelias kiekvienam į sąrašą neįtrauktam teikėjui liktų visiškai nepakitęs.
 
-Taisyklės `scope` (`model` / `provider` / `connection`) yra atskiras opt-in,
-nepriklausomas nuo `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` jį tik pateikia kaip
-`fallbackResult.ruleScope`, o tolesni vartotojai gerbia jį kaip
-ką nors daugiau nei informacinę žymę tik teikėjams, esantiems
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` leidžiamųjų sąraše tame pačiame faile (kontroliuojama per `honorsRuleLockScope()` — šiandien tik `"agentrouter"`). Žr. „Perfrazuotos kvotų
-klaidos" aukščiau, ką iš tikrųjų daro `scope: "connection"` atitikmuo, kai
-teikėjas jau yra tame leidžiamųjų sąraše.
+Taisyklės `scope` (`model` / `provider` / `connection`) yra atskiras
+pasirinkimas, nesusijęs su `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError`
+pateikia jį tik kaip `fallbackResult.ruleScope`, o tolesni vartotojai
+į jį žiūri kaip į ką nors daugiau nei informacinę etiketę tik teikėjams,
+esantiems tame pačiame faile pateiktame `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+leidžiamų teikėjų sąraše (tikrinama per `honorsRuleLockScope()` — šiuo metu
+jame yra tik `"agentrouter"`). Žr. pirmiau esantį skyrių „Perfrazuotos kvotos
+klaidos“, kuriame paaiškinta, ką iš tikrųjų reiškia `scope: "connection"` atitiktis,
+kai teikėjas yra šiame leidžiamų teikėjų sąraše.
 
-**#11104 — operatoriaus deklaruotos taisyklės apeina abu leidžiamųjų sąrašus.** Operatorius gali
-deklaruoti konkretaus teikėjo taisyklę vykdymo metu per `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-neredaguodamas šio failo. Operatoriaus taisyklės kontroliavimas per
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — leidžiamuosius
-sąrašus, skirtus apsaugoti **numatytąją** įtaisytųjų katalogo taisyklių elgseną —
+**#11104 — operatoriaus deklaruotos taisyklės apeina abu leidžiamų teikėjų sąrašus.**
+Operatorius gali vykdymo metu deklaruoti kiekvieno teikėjo taisyklę per
+`settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`),
+nekeisdamas šio failo. Operatorinės taisyklės taikymas tik tada, kai teikėjas yra
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` sąraše —
+šie sąrašai skirti apsaugoti **numatytąją** integruoto katalogo taisyklių elgseną —
 padarytų nustatymų mechanizmą neveiksmingą kiekvienam teikėjui, išskyrus jau
-ten išvardytus, nes taisyklės deklaravimas jau savaime yra aiškus operatoriaus
-opt-in. Tiek `resolveRuleMatchBody()`, tiek `honorsRuleLockScope()` pirmiausia tikrina
-`hasOperatorRuleForProvider()`: teikėjas su operatoriaus taisykle gauna
-nepdorotą klaidos tekstą, o jo deklaruota `scope` gerbiama, nepriklausomai nuo
-to, ar jis taip pat yra kuriame nors iš leidžiamųjų sąrašų.
+įtrauktus į šiuos sąrašus, nes taisyklės deklaravimas jau pats savaime yra
+aiškus operatoriaus pasirinkimas. `resolveRuleMatchBody()` ir
+`honorsRuleLockScope()` pirmiausia tikrina `hasOperatorRuleForProvider()`:
+teikėjas, kuriam priskirta operatoriaus taisyklė, gauna neapdorotą klaidos
+tekstą, o jo deklaruotas `scope` yra gerbiamas nepriklausomai nuo to,
+ar teikėjas taip pat yra kuriame nors iš šių leidžiamų teikėjų sąrašų.
+
+**Operatoriaus deklaruotos taisyklės** (`OperatorProviderErrorRule`): kiekviena taisyklė
+gali turėti pasirinktinį `status` ir pasirinktinį `match` (paprastą, didžiųjų ir
+mažųjų raidžių neskiriantį klaidos teksto poaibį, niekada ne `RegExp`, todėl negali
+sukelti ReDoS), tačiau turi nustatyti bent vieną iš jų. Jei nustatyti abu, jiems
+taikoma AND sąlyga; nenurodytas laukas atitinka bet ką, todėl
+`{match: "insufficient_quota"}` atitinka bet kurią būseną, kurioje yra šis kodas.
+Laimi pirmoji atitinkanti taisyklė. `cooldownMs` priima reikšmes iki 30 dienų;
+iš viso galima nustatyti ne daugiau kaip 50 taisyklių.
+
+**Bendrieji numatytieji nustatymai** (`settings.providerErrorDefaults`, pasirenkami, nustatomi per
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+su `cooldownMs` nuo 1 minutės iki 30 dienų. Numatytasis nustatymas taikomas tik tada, kai
+nebuvo pritaikyta jokia operatoriaus taisyklė ir jokia integruoto katalogo taisyklė, ir tik
+402, 403, 408, 429 bei 5xx klaidoms. Užklausos struktūros klaidos (400, 404, 409, 413, 422)
+ir paprastos 401 klaidos toliau tvarkomos savaip. Jei aiškus `reason` nenurodytas, priežastis
+nustatoma pagal būseną taip pat, kaip tai daro `classifyError`. Numatytosios reikšmės
+deklaravimas laikomas operatoriaus taisykle funkcijai `hasOperatorRuleForProvider()`, todėl
+atsižvelgiama į jos `scope` (numatytoji reikšmė — `"connection"`). Efektyvus numatytojo
+nustatymo laukimo laikas yra ilgesnis iš jo `cooldownMs` ir paties teikėjo pakartotinio bandymo
+užuominos (`Retry-After`, `x-ratelimit-reset` arba iš naujo nustatymo užuominos tekste; tai
+ta pati užuomina, į kurią variklis atsižvelgia, kai įjungtas ryšio laukimo nustatymas
+„naudoti upstream pakartotinio bandymo užuominas“), todėl numatytasis nustatymas gali
+pailginti trumpą upstream užuominą, bet niekada nesutrumpins tikro iš naujo nustatymo
+laikotarpio. Aiški operatoriaus taisyklė išsaugo tikslų savo `cooldownMs`. Nei taisyklė, nei
+numatytasis nustatymas neapeina `markAccountUnavailable` ryšio laukimo apsaugų: aktyvus,
+ilgesnis laukimo laikotarpis niekada nesutrumpinamas, o galutinė būsena niekada
+neperrašoma. Integruoti tekstiniai detektoriai, kurie `checkFallbackError` vykdomi anksčiau
+(išeikvoti kreditai, dienos kvota, deaktyvinta paskyra), vis dar turi pirmenybę savo
+frazėms.
 
 **Žinoma spraga — `providerRuleRegistry` niekada netikrinamas HTTP 400 atveju.**
-`checkFallbackError` `BAD_REQUEST` šaka klasifikuoja 400 būseną visiškai
-per savo šablonų masyvus (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` ir kt. `accountFallback.ts` faile) ir grąžina rezultatą prieš
-pasiekiant virš jos esančią `configuredRule`/`getProviderErrorRuleMatch` šaką.
-Įtaisytoji katalogo taisyklė (arba operatoriaus taisyklė) su `status: 400` yra
-sintaksiškai galiojanti, bet niekada nesuveiks. Šiandien jokia esama taisyklė nėra
-nukreipta į 400, todėl nieko produkcinėje aplinkoje tai neveikia — tačiau būsimai
-400 taisyklei pirmiausia reikėtų pakeisti šią šaką, o tai yra didesnis
-pakeitimas nei taisyklės pridėjimas (ji perklasifikuoja 400 kiekvienam teikėjui,
-jau remiančiam šablonų masyvų elgsena) ir neįeina į vieno teikėjo
-taisyklės pridėjimo apimtį.
+`checkFallbackError` `BAD_REQUEST` šakoje 400 būseną visiškai klasifikuoja naudodama savo
+šablonų masyvus (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` ir kt. faile `accountFallback.ts`) ir grąžina rezultatą prieš
+pasiekiant aukščiau esančią `configuredRule`/`getProviderErrorRuleMatch` šaką.
+Integruoto katalogo taisyklė (arba operatoriaus taisyklė) su `status: 400` yra sintaksiškai
+galiojanti, tačiau niekada nebus pritaikyta. Šiuo metu jokia esama taisyklė netaikoma 400,
+todėl veikiančioje sistemoje tai nieko nepakeičia — tačiau būsimai 400 taisyklei pirmiausia
+reikės pakeisti šią šaką. Tai didesnis pakeitimas nei vienos taisyklės pridėjimas (jis pakeistų
+400 klasifikavimą kiekvienam teikėjui, kuris jau remiasi šablonų masyvų elgsena) ir nepatenka
+į vieno teikėjo taisyklės papildymo apimtį.
 
-### Naujo kvotą klaidingai nurodančio šliuzo pridėjimas
+### Naujo neteisingai kvotą nurodančio tarpinio serverio pridėjimas
 
 1. Užregistruokite vieną taisyklių masyvą `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). `textMarkers` išlaikykite
-   specifinius konkrečiam tiekėjui; niekada pakartotinai nenaudokite bendrinių
-   angliškų frazių, kurios sutampa su
+   (`open-sse/config/upstreamStatusRestatement.ts`). `textMarkers` turi būti būdingi
+   konkrečiam teikėjui; niekada nenaudokite bendrinių angliškų frazių, kurios sutampa su
    `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
 2. Pasirinktinai užregistruokite klasifikavimo taisykles
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`), kad būtų
-   parinkta tinkama užrakto apimtis (`connection` – visai paskyrai galiojančiai
-   kvotai, `model` – konkretaus modelio klaidoms). Šis žingsnis produkcijoje
-   įsigalioja tik tiems tiekėjams, kurių taisyklėms reikalingas visas klaidos
-   tekstas (body žymos): pridėkite tiekėjo id į `FULL_TEXT_RULE_PROVIDERS`
-   tame pačiame faile – priešingu atveju `checkFallbackError` taisyklei visada
-   perduos tik struktūrizuotą `{code, type}` klaidą ir body teksto taisyklė
-   niekada neatitiks gyvojo srauto. Taisyklėms, kurios atitinka vien pagal
-   `status`/`headers` (kaip Opencode ar Minimax), šio opt-in įgalinimo
-   nereikia. Atskirai: jei taisyklė deklaruoja `scope: "connection"` ir
-   tikslas yra tikras viso ryšio atvėsimas kartu su to paties užklausimo
-   combo praleidimu (o ne vien informacinė žyma), pridėkite tiekėjo id į
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` tame pačiame faile – būtent tai valdo
-   `isAgentrouterConnectionQuotaScope()` tipo apimties panaudojimą
+   `open-sse/config/providerErrorRules.ts` faile (`providerRuleRegistry`), kad būtų
+   pasirinkta tinkama blokavimo apimtis (`connection` paskyros lygio kvotai, `model`
+   konkretaus modelio klaidoms). Šis veiksmas veikia produkcijoje tik tiems teikėjams,
+   kurių taisyklėms reikia viso klaidos teksto (kūno žymenų): įtraukite teikėjo
+   identifikatorių į `FULL_TEXT_RULE_PROVIDERS` tame pačiame faile — priešingu atveju
+   `checkFallbackError` taisyklei perduos tik struktūrizuotą `{code, type}` klaidą, todėl
+   taisyklė pagal kūno tekstą niekada nesutaps su realiu srautu.
+   Taisyklėms, kurios tikrina tik `status`/`headers` (pavyzdžiui, Opencode arba Minimax
+   taisyklėms), šio pasirinkimo nereikia. Atskirai, jei taisyklė deklaruoja
+   `scope: "connection"` ir siekiama tikro viso ryšio laukimo bei tos pačios užklausos
+   kombinacijos praleidimo (ne vien informacinės etiketės), įtraukite teikėjo
+   identifikatorių į `HONORS_RULE_LOCK_SCOPE_PROVIDERS` tame pačiame faile — tai
+   kontroliuoja `isAgentrouterConnectionQuotaScope()` tipo naudojimą
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) ir
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); be to, `scope` vis tiek
-   teka per `fallbackResult.ruleScope`, tačiau niekas pagal jį neveikia.
-3. Pridėkite vienetų testus, atkartojančius
+   (`open-sse/services/combo/targetExhaustion.ts`); be šio įtraukimo
+   `scope` vis tiek perduodamas per `fallbackResult.ruleScope`, tačiau niekas pagal jį
+   neatliekama.
+3. Pridėkite vienetinius testus, atkartojančius
    `tests/unit/upstream-status-restatement.test.ts` ir
-   `tests/unit/agentrouter-error-rules.test.ts` (įskaitant not-permanent /
-   not-creditsExhausted apsaugas ir – jei tiekėjui reikalingas leidžiamųjų
-   sąrašas – testą, patvirtinantį, kad `resolveRuleMatchBody()` grąžina visą
-   tekstą tik tam tiekėjui).
+   `tests/unit/agentrouter-error-rules.test.ts` (įskaitant
+   `not-permanent` / `not-creditsExhausted` apsaugas ir, jei teikėjui reikia
+   leidžiamų teikėjų sąrašo, testą, patvirtinantį, kad `resolveRuleMatchBody()` grąžina
+   visą tekstą tik tam teikėjui).
 
 Jokių `chatCore.ts`, `classifyError` ar combo pakeitimų nereikia.
 
-#### Užraktas pagal išėjimo (egress) IP grupes (#10880)
+#### Egress grupėmis pagrįstas blokavimas (#10880)
 
-Tiekėjai, įtraukti į `EGRESS_BUCKETED_LOCK_PROVIDERS` (opencode šeima),
-traktuojami kaip pagal IP grupes suskirstytas upstream (opencode nemokamas
-lygmuo yra suskirstytas pagal IP, o ne pagal paskyrą – žr. #9611): 429
-statuso atvejis, suklasifikuotas kaip `quota_exhausted` **arba**
-`rate_limit_exceeded`, atvėsina kiekvieną leidžiamoje šeimoje esantį ryšį,
-kurio paskutinis žinomas išėjimo IP sutampa su nepavykusio ryšio IP, dar prieš
-rotacijai spėjant juos išbandyti – taip išvengiama N-1 garantuotai
-nepavykstančių upstream užklausų (toks pats principas kaip #10460/#10525).
-`rate_limit_exceeded` įtrauktas sąmoningai: `markAccountUnavailable` kelyje
-opencode taisyklės niekada neatitinka (jokie headers/body neperduodami
-`checkFallbackError`, opencode nėra `FULL_TEXT_RULE_PROVIDERS`), todėl 429,
-kurio body turi prenumeratos kvotos tekstą ("monthly usage limit reached"),
-yra suklasifikuojamas kaip `quota_exhausted` atsarginio klasifikavimo pagal
-kvotos tekstą mechanizmo (`buildSubscriptionQuotaFallback`,
-`accountFallback.ts`; 1 val. atvėsimas) dar prieš išvis pasiekiant
-`status_429` taisyklę – tuo tarpu 429 be kvotos teksto (paprastas srauto
-ribojimas) klasifikuojamas per `status_429` taisyklę kaip
-`rate_limit_exceeded` ir vis tiek atvėsina IP šeimą. Leidžiamųjų sąraše
-esančiam tiekėjui pagal IP grupę apribotas srautas yra toks pats signalas
-kaip išseikusi kvota. Sąžiningi apribojimai:
+Teikėjai, esantys `EGRESS_BUCKETED_LOCK_PROVIDERS` (Opencode šeima), laikomi upstream,
+grupuojamu pagal IP (nemokama Opencode pakopa grupuojama pagal IP, o ne pagal paskyrą —
+žr. #9611): 429 būsena, klasifikuota kaip `quota_exhausted`
+**arba** `rate_limit_exceeded`, prieš rotacijai jas bandant, nustato laukimo laiką
+kiekvienam leidžiamai šeimai priklausančiam ryšiui, kurio paskutinis žinomas egress IP
+sutampa su nepavykusio ryšio IP
+— taip išvengiama N-1 garantuotai nesėkmingų upstream iškvietimų (ta pati schema kaip
+#10460/#10525). `rate_limit_exceeded` įtrauktas sąmoningai: `markAccountUnavailable`
+kelyje su Opencode susijusios taisyklės niekada nesutampa (į
+`checkFallbackError` neperduodamos antraštės / kūnas, Opencode nėra
+`FULL_TEXT_RULE_PROVIDERS` sąraše), todėl 429, kurio kūne yra prenumeratos kvotos tekstas
+(„pasiekta mėnesio naudojimo riba“), prieš pasiekiant `status_429` taisyklę klasifikuojamas
+kaip `quota_exhausted` pagal kvotos teksto atsarginį mechanizmą
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1 val. laukimo laikas), o 429,
+kuriame kvotos teksto nėra (įprastas dažnio ribojimas), klasifikuojamas pagal
+`status_429` taisyklę kaip `rate_limit_exceeded` ir vis tiek nustato laukimo laiką visai
+IP grupei. Leidžiamam teikėjui pagal IP grupuojamas dažnio ribojimas yra tas pats signalas
+kaip išeikvota kvota. Sąžiningi apribojimai:
 
-- **Geriausių pastangų principas (best-effort)**: užraktas iš `proxy_logs`
-  nustato prisijungimo paskutinį žinomą `egress_ip` (24 val. langas,
-  sinchroniškai, be podėlio). Šaltas podėlis (išėjimo IP niekada nebuvo
-  zonduotas) arba nėra eilutės → nepavykstantį prisijungimą šaka vis tiek
-  atvėsina (užfiksuojama kaip ir dabar), tik joks brolinis prisijungimas
-  neužrakinamas.
-- **Niekada ne galutinė būsena**: atvėsimas yra atsinaujinantis kvotos langas
-  (`testStatus: "unavailable"`); iš IP lygmens signalo niekada neišvedama
-  nuolatinė būsena. `disableCooling` prisijungimai šaką visiškai praleidžia.
-- **Užrakto grūdėtumas keičiasi leidžiamojo sąrašo šeimai**: tai apimties
-  pakeitimas, ne tik brolinių prisijungimų optimizavimas. opencode yra
-  `passthroughModels` tiekėjas, todėl iki šios šakos 429 sukeldavo užraktą
-  pagal MODELĮ; dabar jis sukelia prisijungimo atvėsimą — įskaitant
-  operatorių, naudojantį vienintelį prisijungimą visai be brolinių. Būtent
-  tokį grūdėtumą opencode taisyklių lentelė jau deklaruoja kaip teisingą
-  (`scope: "connection"`, `providerErrorRules.ts`), tačiau jo iki šiol
-  niekada nebuvo laikomasi, nes opencode nėra įtrauktas į
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Šaka pati įrašo nepavykusio
-  prisijungimo atvėsimą + `backoffLevel`, atkartodama prisijungimo apimties
-  agentrouter šaką, ir grįžta — blokas pagal modelį ir toliau esantis
-  bendrasis kelias niekada nepasiekiami.
-- **Combo įtrauktas**: kaip ir agentrouter šaka, apimtis sąmoningai ignoruoja
-  `persistUnavailableState`/`isCombo` švelninimą, kurį combo kvietėjas taiko 429. Užraktas pagal modelį nėra švelnesnė šios apimties forma — tai
-  netinkamas vienetas: jis nieko nesako apie išsemtą IP, todėl combo
-  rotacija ir toliau degintų po vieną garantuotai nepavykusį iškvietimą
-  kiekvienam broliniam prisijungimui.
-- **Brolinių prisijungimų sauga**: brolinis prisijungimas, jau esantis
-  galutinėje būsenoje (banned/credits_exhausted) arba jau turintis ilgesnį
-  atvėsimą, niekada neperrašomas.
-- **Išskirtinis leidžiamasis sąrašas**: `EGRESS_BUCKETED_LOCK_PROVIDERS`
-  plėtimas yra sąmoningas savininko sprendimas; jokio bendrojo sujungimo
-  (šablonas #10334/#10419). Brolinių prisijungimų užklausa susieja tą patį
-  leidžiamąjį sąrašą, o ne kartoja jo kaip SQL literalo, todėl jo plėtimas
-  išlieka vienos eilutės pakeitimu.
-- **Išėjimo IP rotacija abiem kryptimis**: paieškos langas (24 val.) yra daug
-  platesnis nei išėjimo IP podėlio TTL (5 min.), todėl „paskutinis žinomas
-  IP“ yra istorija, o ne dabartinė būsena. Jei prisijungimo proxy per tą
-  langą pasikeitė, užraktas gali **praleisti** tikrai bendrinamą IP
-  (užfiksuotas IP yra naujas, neišsemtas) — ir simetriškai gali **atvėsinti
-  brolinį prisijungimą, kuris per tą laiką jau pasitraukė** nuo išsemto IP.
-  Antruoju atveju tas brolinis prisijungimas praranda vieną atvėsimo langą;
-  abu atvejai yra priimtini istorija pagrįstos, geriausių pastangų principu
-  veikiančios paieškos apribojimai.
-- **Kaina**: du apriboti `proxy_logs` skenavimai (pagal langą filtruojami per
-  `idx_pl_timestamp`), tik 429 dažniu. Jokio naujo indekso (migracija 134
-  YAGNI). Išmatuota vidutinio dydžio realaus srauto DB kopijoje; didelio
-  pralaidumo instancija tame pačiame lange laiko proporcingai daugiau eilučių.
-
----
+- **Geriausios pastangos**: užraktas nustato paskutinį žinomą ryšio `egress_ip`
+  iš `proxy_logs` (24 val. laikotarpiu, sinchroniškai, be talpyklos). Tuščia talpykla (egress
+  IP niekada nebuvo tikrintas) arba nėra eilutės → ryšį, dėl kurio įvyko klaida, šaka vis tiek atvėsina
+  (įrašo kaip ir šiandien), tik joks gretimas ryšys neužrakinamas.
+- **Niekada ne galutinė būsena**: atvėsinimas yra atnaujinamas kvotos langas
+  (`testStatus: "unavailable"`); nuolatinė būsena niekada neišvedama iš IP lygio signalo. Ryšiai su
+  `disableCooling` visą šaką praleidžia.
+- **Leidžiamų sąraše esančios šeimos užrakto detalumas keičiasi**: tai apimties pakeitimas, o ne tik gretimo
+  ryšio optimizavimas. opencode yra `passthroughModels` teikėjas, todėl iki šios šakos 429 sukeldavo
+  vieno modelio užrakinimą; dabar tai sukelia ryšio atvėsinimą — taip pat ir operatoriui, naudojančiam vieną
+  ryšį be jokio gretimo ryšio. Toks detalumas jau deklaruotas kaip teisingas opencode taisyklių lentelėje
+  (`scope: "connection"`, `providerErrorRules.ts`), tačiau iki šiol niekada nebuvo taikomas, nes opencode nėra
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Šaka pati įrašo klaidą sukėlusio
+  ryšio atvėsinimą ir `backoffLevel`, imituodama
+  ryšio apimties agentrouter šaką, ir grįžta — vieno modelio blokavimas bei toliau esantis bendrasis kelias
+  niekada nepasiekiami.
+- **Įtrauktas derinys**: kaip ir agentrouter šakoje, apimtis sąmoningai nepaiso
+  `persistUnavailableState`/`isCombo` pažeminimo, kurį derinio iškvietėjas taiko 429 atveju. Vieno modelio
+  užrakinimas nėra silpnesnė šios apimties forma — tai netinkamas vienetas: jis nieko nepasako apie
+  išnaudotą IP, todėl derinio rotacija ir toliau atliktų po vieną garantuotai nesėkmingą iškvietimą kiekvienam
+  gretimam ryšiui.
+- **Gretimų ryšių saugumas**: gretimas ryšys, kuris jau yra galutinės būsenos (uždraustas / baigėsi kreditai)
+  arba jau yra ilgesnio atvėsinimo būsenoje, niekada neperrašomas.
+- **Išskirtinis leidžiamų sąrašas**: `EGRESS_BUCKETED_LOCK_PROVIDERS` išplėtimas yra
+  aiškus savininko sprendimas; jokio bendrojo susiejimo (šablonas #10334/#10419). Gretimų ryšių užklausa
+  susieja tą patį leidžiamų sąrašą, o ne kartoja jį kaip SQL literalą, todėl jį išplėtus pakanka pakeisti vieną eilutę.
+- **Egress IP rotacija abiem kryptimis**: paieškos langas (24 val.) yra daug platesnis nei egress IP
+  talpyklos TTL (5 min.), todėl „paskutinis žinomas IP“ yra istorija, o ne dabartinė būsena. Jei ryšio
+  tarpinis serveris per langą pakeitė IP, užraktas gali **neaptikti** tikrai bendro IP (įrašytas IP yra naujas,
+  dar neišnaudotas) — ir atvirkščiai, gali **atvėsinti gretimą ryšį, kuris nuo to laiko persikėlė** nuo
+  išnaudoto IP. Antruoju atveju tas gretimas ryšys praranda vieną atvėsinimo langą; abu atvejai priimami kaip geriausio įmanomo
+  tikslumo istorija pagrįstos paieškos apribojimai.
+- **Kaina**: du apriboti `proxy_logs` skenavimai (filtruojami pagal langą per `idx_pl_timestamp`), atliekami tik 429 dažniu. Naujo indekso nereikia (migracija 134
+  YAGNI). Išmatuota realaus srauto vidutinio dydžio DB kopijoje; didelio pralaidumo egzempliorius tame pačiame lange proporcingai
+  saugo daugiau eilučių.
 
 ## Kitos atsparumo funkcijos
 

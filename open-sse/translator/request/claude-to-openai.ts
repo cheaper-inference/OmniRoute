@@ -1,3 +1,4 @@
+import { OPENAI_SERVICE_TIERS, SERVICE_TIER_PROVIDERS } from "../../config/serviceTier.ts";
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
@@ -40,8 +41,39 @@ function normalizeToolSchema(schema: unknown): Record<string, unknown> {
 
 function normalizeOpenAIReasoningEffort(effort: unknown): string | undefined {
   if (typeof effort !== "string") return undefined;
-  const normalized = effort.toLowerCase();
+  const normalized = effort.trim().toLowerCase();
   return normalized || undefined;
+}
+
+// The turn's effort is the last role=system directive that carries one (Claude Code
+// mid-conversation directive); the top-level output_config is only the cached default.
+function lastSystemDirectiveEffort(messages: unknown): string | undefined {
+  if (!Array.isArray(messages)) return undefined;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message?.role !== "system") continue;
+    const effort = normalizeOpenAIReasoningEffort(message.output_config?.effort);
+    if (effort) return effort;
+  }
+  return undefined;
+}
+
+// The steps that run before this translator (thinking mode, forced reasoning rules, role
+// normalization) only see the top-level output_config.effort. Move the directive's effort
+// there first, so Auto strips it, a forced rule replaces it and a model without a system role
+// cannot lose it. The directives give up their copy, so it is not read a second time here.
+export function hoistSystemDirectiveEffort<T>(body: T): T {
+  const record = body as unknown as JsonRecord | null;
+  const effort = lastSystemDirectiveEffort(record?.messages);
+  if (!record || !effort) return body;
+  const messages = (record.messages as JsonRecord[]).map((message) => {
+    if (message?.role !== "system" || !message.output_config) return message;
+    const output_config = { ...(message.output_config as JsonRecord) };
+    delete output_config.effort;
+    return { ...message, output_config };
+  });
+  const output_config = { ...(record.output_config as JsonRecord | undefined), effort };
+  return { ...record, messages, output_config } as T;
 }
 
 function toStringArray(value: unknown): string[] {
@@ -98,14 +130,10 @@ function nativeWebSearchTargetFormat(credentials: unknown): string | null {
 
 // OpenAI service_tier values. Anthropic's "standard_only" has no OpenAI twin beyond
 // "default"; "fast" is the alias the Codex billing/executor path already accepts.
-const OPENAI_SERVICE_TIERS = new Set(["auto", "default", "flex", "priority", "scale"]);
 const CLAUDE_TO_OPENAI_SERVICE_TIER: Record<string, string> = {
   standard_only: "default",
   fast: "priority",
 };
-// Only targets known to accept a top-level service_tier get it; strict
-// OpenAI-compatible gateways reject unknown fields with a 400.
-const SERVICE_TIER_PROVIDERS = new Set(["openai", "azure-openai", "codex"]);
 
 /** Client service_tier to keep across the Claude → OpenAI pivot, or undefined to drop it. */
 function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string | undefined {
@@ -121,7 +149,11 @@ function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string |
 }
 
 // Convert Claude request to OpenAI format
+/** Translate Claude requests and their tool/media history to the OpenAI request format. */
 export function claudeToOpenAIRequest(model, body, stream, credentials: unknown = null) {
+  const routedProvider =
+    credentials && typeof credentials === "object" ? (credentials as JsonRecord)._provider : null;
+  const preserveDocumentUrls = routedProvider === "cheaperinference" || routedProvider === "cinf";
   // #2069 — when the routed provider honors OpenAI-format cache_control breakpoints
   // (DashScope/alibaba, etc.) and the upstream caller requested preservation, keep
   // the client's cache_control markers on system + message text blocks instead of
@@ -225,7 +257,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   if (body.messages && Array.isArray(body.messages)) {
     for (let i = 0; i < body.messages.length; i++) {
       const msg = body.messages[i];
-      const converted = convertClaudeMessage(msg, preserveCacheControl);
+      const converted = convertClaudeMessage(msg, preserveCacheControl, preserveDocumentUrls);
       if (converted) {
         // Claude Code hook contexts (SessionStart/PreToolUse) arrive as
         // role:"system" mid-array — strictly valid for the Anthropic Messages
@@ -344,7 +376,10 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
   // Priority: output_config.effort > enabled thinking budget > explicit opt-out fallback.
   // Budget buckets match the reverse mapping in thinkingBudget.ts::setCustomBudget.
-  const outputEffort = normalizeOpenAIReasoningEffort(body.output_config?.effort) || "";
+  const outputEffort =
+    lastSystemDirectiveEffort(body.messages) ||
+    normalizeOpenAIReasoningEffort(body.output_config?.effort) ||
+    "";
   if (outputEffort) {
     result.reasoning_effort = outputEffort;
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
@@ -385,14 +420,19 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
 // Tool messages whose tool_call_id matches no assistant.tool_calls are dropped here
 // (supersedes the standalone #4385 orphan filter — same drop behavior, plus ordering).
 function regroupToolMessages(messages: JsonRecord[]): JsonRecord[] {
-  // tool_call_id -> index of the assistant message that issued it (first wins).
-  const callIdToAssistant = new Map<string, number>();
+  // tool_call_id -> FIFO of assistant indexes that issued it. An id is only unique
+  // within one assistant turn (agent sessions reuse `call_0`-style ids), so each
+  // tool message pairs with the oldest assistant that still lacks a result for it;
+  // first-wins dropped the 2nd real result and left the 2nd turn unanswered.
+  const openAssistantsByCallId = new Map<string, number[]>();
   messages.forEach((msg, idx) => {
     if (msg.role === "assistant" && Array.isArray(msg.tool_calls)) {
       for (const tc of msg.tool_calls as { id?: string }[]) {
-        if (tc.id && !callIdToAssistant.has(String(tc.id))) {
-          callIdToAssistant.set(String(tc.id), idx);
-        }
+        if (!tc.id) continue;
+        const callId = String(tc.id);
+        const queue = openAssistantsByCallId.get(callId);
+        if (queue) queue.push(idx);
+        else openAssistantsByCallId.set(callId, [idx]);
       }
     }
   });
@@ -402,8 +442,8 @@ function regroupToolMessages(messages: JsonRecord[]): JsonRecord[] {
   for (const msg of messages) {
     if (msg.role !== "tool") continue;
     const callId = String(msg.tool_call_id ?? "");
-    const assistantIdx = callIdToAssistant.get(callId);
-    if (assistantIdx === undefined) continue; // orphan -> drop
+    const assistantIdx = callId ? openAssistantsByCallId.get(callId)?.shift() : undefined;
+    if (assistantIdx === undefined) continue; // orphan or already paired -> drop
     let group = toolsByAssistant.get(assistantIdx);
     if (!group) {
       group = new Map();
@@ -471,7 +511,12 @@ function fixMissingToolResponses(messages) {
 // (Claude Code sends PDFs this way) becomes the Chat Completions `file` part, which
 // OpenAI accepts natively and geminiHelper turns into `inlineData`. Plain-text and URL
 // documents become text, because OpenAI `file` parts only carry base64 data.
-function convertClaudeDocumentBlock(block, preserveCacheControl = false): JsonRecord | null {
+/** Retain Claude document sources as OpenAI file parts or extracted text. */
+function convertClaudeDocumentBlock(
+  block,
+  preserveCacheControl = false,
+  preserveDocumentUrls = false
+): JsonRecord | null {
   const source = block?.source;
   const title = typeof block?.title === "string" && block.title ? block.title : null;
   let part: JsonRecord | null = null;
@@ -484,7 +529,15 @@ function convertClaudeDocumentBlock(block, preserveCacheControl = false): JsonRe
   } else if (source?.type === "text" && typeof source.data === "string" && source.data) {
     part = { type: "text", text: title ? `[${title}]\n${source.data}` : source.data };
   } else if (source?.type === "url" && typeof source.url === "string" && source.url) {
-    part = { type: "text", text: `[Document${title ? `: ${title}` : ""}] ${source.url}` };
+    part = preserveDocumentUrls
+      ? {
+          type: "file",
+          file: {
+            file_data: source.url,
+            filename: title ? (/\.pdf$/i.test(title) ? title : `${title}.pdf`) : "attachment.pdf",
+          },
+        }
+      : { type: "text", text: `[Document${title ? `: ${title}` : ""}] ${source.url}` };
   }
 
   if (part && preserveCacheControl && block.cache_control !== undefined) {
@@ -509,7 +562,8 @@ function buildOmittedBlocksNotice(types: string[]): string {
 }
 
 // Convert single Claude message - returns single message or array of messages
-function convertClaudeMessage(msg, preserveCacheControl = false) {
+/** Convert Claude message blocks while retaining tools and typed attachments. */
+function convertClaudeMessage(msg, preserveCacheControl = false, preserveDocumentUrls = false) {
   // Preserve system role for mid-conversation system turns (#6954).
   // Previously any role that wasn't "user" or "tool" was mapped to "assistant",
   // which misattributed system messages as assistant output.
@@ -565,7 +619,11 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
           break;
 
         case "document": {
-          const documentPart = convertClaudeDocumentBlock(block, preserveCacheControl);
+          const documentPart = convertClaudeDocumentBlock(
+            block,
+            preserveCacheControl,
+            preserveDocumentUrls
+          );
           if (documentPart) parts.push(documentPart);
           break;
         }
@@ -624,7 +682,7 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
                 hasImage = true;
               } else if (c.type === "document") {
                 // Same lift for documents: a `tool` message cannot carry a file part.
-                const documentPart = convertClaudeDocumentBlock(c);
+                const documentPart = convertClaudeDocumentBlock(c, false, preserveDocumentUrls);
                 if (documentPart?.type === "text") {
                   textParts.push(documentPart.text as string);
                 } else if (documentPart) {

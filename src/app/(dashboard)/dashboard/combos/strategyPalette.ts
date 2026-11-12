@@ -6,18 +6,23 @@ import { categoricalSlot, type CategoricalSlot } from "@/shared/utils/categorica
 
 /**
  * One routing-strategy palette for the combos screens (list badge + live StrategyNode) on the
- * kit's five chart tokens (KEA-7886, P8). The index is the strategy's position in
- * ROUTING_STRATEGY_VALUES (then the internal ones), so `chart-(index % 5 + 1)`:
+ * kit's eight chart tokens (KEA-7886 P8; #19066). The index is the strategy's position in
+ * ROUTING_STRATEGY_VALUES (then the internal ones), and the token is the kit series order
+ * `ciChartSeriesOrder[index % 8]`:
  *
- *   chart-1 priority · p2c · reset-window · auto · pipeline
- *   chart-2 weighted · random · expiry-first · lkgp · quota-share
- *   chart-3 round-robin · least-used · headroom · context-optimized
- *   chart-4 context-relay · cost-optimized · quota-weighted · cache-optimized
- *   chart-5 fill-first · reset-aware · strict-random · fusion
+ *   chart-1 priority · cost-optimized · lkgp
+ *   chart-2 weighted · reset-aware · context-optimized
+ *   chart-3 round-robin · reset-window · cache-optimized
+ *   chart-4 context-relay · expiry-first · fusion
+ *   chart-5 fill-first · headroom · pipeline
+ *   chart-6 p2c · quota-weighted · quota-share
+ *   chart-7 random · strict-random
+ *   chart-8 least-used · auto
  *
- * Twenty-one strategies share five colours, so the colour is only a grouping cue: every badge and
- * node prints the strategy name in neutral ink (the chart tokens have no `-foreground` pair and
- * lime/pink text fails contrast on the light surface). Unknown strategies get no token.
+ * Twenty-two palette entries (twenty-one public strategies plus the internal quota-share) share
+ * eight colours, so the colour is only a grouping cue: every badge and node prints the strategy
+ * name. Badge text uses the token's text-safe `-ink` on the opaque `-subtle` tint (the kit's
+ * chip pair). Unknown strategies get no token and neutral ink.
  */
 export const STRATEGY_PALETTE_ORDER: readonly string[] = [
   ...ROUTING_STRATEGY_VALUES,
@@ -38,8 +43,10 @@ export function strategyColorVar(strategy: string | null | undefined): string {
   return strategySlot(strategy)?.colorVar ?? STRATEGY_NEUTRAL_COLOR;
 }
 
-/** Chip classes for the strategy badge: token tint + border, neutral ink for the label. */
+/** Chip classes for the strategy badge: `-subtle` tint + token border + the token's `-ink`. */
 export function strategyBadgeClass(strategy: string | null | undefined): string {
   const slot = strategySlot(strategy);
-  return `${slot ? slot.chipClass : "bg-bg-subtle border border-border"} text-text-main`;
+  return slot
+    ? `${slot.chipClass} ${slot.inkClass}`
+    : "bg-bg-subtle border border-border text-text-main";
 }

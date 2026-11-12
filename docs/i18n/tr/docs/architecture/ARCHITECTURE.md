@@ -14,9 +14,9 @@ OmniRoute Next.js üzerine kurulu yerel bir AI yönlendirme ağ geçidi ve kontr
 
 Çekirdek yetenekler:
 
-- CLI/tools için OpenAI uyumlu API yüzeyi (380 sağlayıcı, 158 yürütücü modül)
+- CLI/tools için OpenAI uyumlu API yüzeyi (381 sağlayıcı, 159 yürütücü modül)
 - sağlayıcı formatları arasında Request/response çevirisi
-- Model birleşimi geri dönüşü (çoklu model dizisi)
+- Model birleşimi geri dönüşü (çoklu model sırası)
 - `compositeTiers` tarafından çalışma zamanı sıralamasıyla yapılandırılmış birleşik adımlar (`provider + model + connection`)
 - Hesap düzeyinde geri dönüş (sağlayıcı başına çoklu hesap)
 - Ana sohbet yolunda kota ön kontrolü ve kotaya duyarlı P2C hesabı seçimi
@@ -78,7 +78,7 @@ OmniRoute Next.js üzerine kurulu yerel bir AI yönlendirme ağ geçidi ve kontr
 
 Birincil çalışma zamanı modeli:
 
-- `src/app/api/*` altındaki Next.js uygulama rotaları, hem gösterge tablosu APIs hem de APIs uyumluluğunu uygular
+- `src/app/api/*` altındaki Next.js uygulama rotaları, hem kontrol paneli APIs hem de APIs uyumluluğunu uygular
 - `src/sse/*` + `open-sse/*` paylaşılan bir SSE/routing çekirdeği, sağlayıcı yürütme, çeviri, akış, geri dönüş ve kullanımı yönetir
 
 ## Referans Diyagramları
@@ -415,7 +415,7 @@ Kural kümesi yazma ve eşik ayarlama için bkz [`docs/security/GUARDRAILS.md`](
 - Connection/model kural birleştiricisi: `src/domain/connectionModelRules.ts`
 - Model kullanılabilirliği anlık görüntüleri: `src/domain/modelAvailability.ts`
 - Sağlayıcı son kullanma tarihi takibi: `src/domain/providerExpiration.ts`
-- Kota önbelleği: `src/domain/quotaCache.ts`
+- Kota önbelleği: `src/domain/quotaCache.ts`. Sağlayıcılar kota pencereleri ekler ve kaldırır (OpenAI bazı planlar için 5 saatlik Codex penceresini düşürdü), dolayısıyla sağlayıcının bağdaştırıcısını okuyan bir kullanım (`quotasComplete`, bkz. `src/lib/usage/usageReading.ts`) hesabın tam pencere kümesidir: daha önce bilinen ancak orada bulunmayan bir pencere kullanımdan kaldırılır, önbellekte, `quota_snapshots` yeniden başlatma (eklenmiş bir kullanımdan kaldırma kaydı), kalıcı Codex kota durumunda ve Claude doygunluk paketlerinde yeniden nemlendirilir. Kısmi kanıtlar (yanıt başlıkları, eski kopyalar) yalnızca taşıdığı pencereleri günceller.
 - Bozunma durumu: `src/domain/degradation.ts`
 - Yapılandırma denetimi: `src/domain/configAudit.ts`
 - OmniRoute yanıtı meta veri oluşturucusu: `src/domain/omnirouteResponseMeta.ts`
@@ -433,7 +433,7 @@ Yetkilendirme hattı, gelen her isteği sınıflandırır ve gönderilmeden önc
 - İddia yardımcısı: `src/server/authz/assertAuth.ts`
 - Talep bağlamı: `src/server/authz/context.ts`
 
-Genel ve yönetim yolları zorlu bir sınırdır: agent/cooldown APIs ve sağlayıcı mutasyonları, yönetim kimlik doğrulaması gerektirir (eksikse HTTP 401).
+Genel ve yönetim yolları zorlu bir sınırdır: agent/cooldown APIs ve sağlayıcı mutasyonları yönetim kimlik doğrulaması gerektirir (eksikse HTTP 401).
 
 Rota sınıflandırma kurallarının tamamı için [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) bakın.
 

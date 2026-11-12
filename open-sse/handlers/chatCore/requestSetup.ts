@@ -49,3 +49,19 @@ export function resolveChatCoreRequestSetup(
     typeof body?.model === "string" && body.model.trim().length > 0 ? body.model : model;
   return { apiFormat, customModelTargetFormat, requestedModel };
 }
+
+/**
+ * The model name the response-model echo (#1311 opt-in, #3697 Codex CLI, Claude Code) writes
+ * back. Combo and alias dispatch rewrite the dispatched body.model to the resolved leaf target
+ * before handleChatCore runs, so requestedModel is the leaf there. clientRawRequest.body is the
+ * snapshot of what the client actually sent; prefer its model and fall back to requestedModel.
+ */
+export function resolveClientEchoModel(clientRawBody: unknown, requestedModel: string): string {
+  const clientModel =
+    clientRawBody && typeof clientRawBody === "object"
+      ? (clientRawBody as { model?: unknown }).model
+      : undefined;
+  return typeof clientModel === "string" && clientModel.trim().length > 0
+    ? clientModel
+    : requestedModel;
+}

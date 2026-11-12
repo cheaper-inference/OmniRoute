@@ -15,6 +15,8 @@ npx --no-install lint-staged --no-stash
 node scripts/quality/gate-manifest.mjs
 node scripts/check/check-docs-sync.mjs
 npm run check:any-budget:t11
+# kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down
+node scripts/check/check-type-scale-ratchet.mjs --ratchet --quiet
 node scripts/check/check-tracked-artifacts.mjs
 # vendored kit must stay byte-identical to the pinned upstream commit; skips with a warning where the private clone is absent
 npm run --silent check:ui-kit-snapshot

@@ -1,7 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { TYPE_COLORS, LEVEL_COLORS, PROVIDER_COLORS } from "@/shared/constants/colors";
+import {
+  TYPE_COLORS,
+  LEVEL_COLORS,
+  PROVIDER_COLORS,
+  neutralBadge,
+} from "@/shared/constants/colors";
 import {
   formatDuration as formatLatency,
   maskAccount,
@@ -93,23 +98,16 @@ function ObservedLinkField({ label, href, title, short }) {
 }
 
 function StatusBadges({ log, t }) {
-  const typeColor = TYPE_COLORS[log.proxy?.type] || {
-    bg: "#6B7280",
-    text: "#fff",
-    label: log.proxy?.type || "-",
-  };
+  const typeColor = TYPE_COLORS[log.proxy?.type] || neutralBadge(log.proxy?.type || "-");
   const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
-  const providerColor = PROVIDER_COLORS[log.provider] || {
-    bg: "#374151",
-    text: "#fff",
-    label: (log.provider || "-").toUpperCase(),
-  };
+  const providerColor =
+    PROVIDER_COLORS[log.provider] || neutralBadge((log.provider || "-").toUpperCase());
   return (
     <>
       <div>
         <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{t("type")}</div>
         <span
-          className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
+          className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
           style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
         >
           {typeColor.label}
@@ -120,7 +118,7 @@ function StatusBadges({ log, t }) {
           {t("level")}
         </div>
         <span
-          className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
+          className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
           style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
         >
           {levelColor.label}
@@ -132,7 +130,7 @@ function StatusBadges({ log, t }) {
         </div>
         {log.provider ? (
           <span
-            className="inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase"
+            className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
             style={{ backgroundColor: providerColor.bg, color: providerColor.text }}
           >
             {providerColor.label}
@@ -153,7 +151,7 @@ function TlsBadge({ log, t }) {
         {t("tlsFingerprint")}
       </div>
       {log.tlsFingerprint ? (
-        <Badge variant="info" className="text-[10px] font-bold uppercase">
+        <Badge variant="info" className="text-[10px] font-semibold uppercase">
           <span aria-hidden="true">🔒</span> Chrome 124
         </Badge>
       ) : (
@@ -258,7 +256,7 @@ export default function ProxyLogDetail({ log, onClose }) {
       {...TALL_MODAL_PROPS}
       title={
         <span className="flex items-center gap-3">
-          <Badge variant={proxyStatusTone(log.status)} className="font-bold uppercase">
+          <Badge variant={proxyStatusTone(log.status)} className="font-semibold uppercase">
             {log.status}
           </Badge>
           <span>{t("event")}</span>
@@ -272,7 +270,7 @@ export default function ProxyLogDetail({ log, onClose }) {
         {/* Error */}
         {log.error && (
           <div className="rounded-xl border border-error/30 bg-error/10 p-4">
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-error">
+            <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-error">
               {t("error")}
             </div>
             <div className="font-mono text-sm text-error">{log.error}</div>
@@ -282,7 +280,7 @@ export default function ProxyLogDetail({ log, onClose }) {
         {/* Proxy Config Details */}
         {log.proxy && (
           <div className="rounded-xl border border-border bg-bg-subtle p-4">
-            <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
               {t("configuration")}
             </div>
             <pre className="overflow-x-auto rounded-lg bg-surface-2 p-3 font-mono text-xs text-text-primary">

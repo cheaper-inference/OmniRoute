@@ -14,7 +14,7 @@ OmniRoute er en lokal AI routing gateway og dashboard bygget på Next.js. Det gi
 
 Kerneegenskaber:
 
-- OpenAI-kompatibel API overflade til CLI/tools (380 udbydere, 158 eksekveringsmoduler)
+- OpenAI-kompatibel API overflade til CLI/tools (381 udbydere, 159 eksekveringsmoduler)
 - Request/response -oversættelse på tværs af udbyderformater
 - Model combo fallback (multi-model sekvens)
 - Strukturerede combo-trin (`provider + model + connection`) med runtime-bestilling efter `compositeTiers`
@@ -53,7 +53,7 @@ Kerneegenskaber:
 - Combo target telemetri og historisk combo target sundhed via `combo_execution_key` / `combo_step_id`
 - Korrelation ID (X-Request-Id) for ende-til-ende-sporing
 - Overholdelsesrevisionslogning med opt-out pr. API nøgle
-- Eval ramme for LLM kvalitetssikring
+- Eval framework for LLM kvalitetssikring
 - Sundhedsdashboard med udbyderens strømafbryderstatus i realtid
 - MCP Server (110 værktøjer) med 3 transporter (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
@@ -414,7 +414,7 @@ For regelsætforfattelse og tærskeljustering, se [`docs/security/GUARDRAILS.md`
 - Connection/model regel snedker: `src/domain/connectionModelRules.ts`
 - Snapshots af modeltilgængelighed: `src/domain/modelAvailability.ts`
 - Sporing af udbyderens udløb: `src/domain/providerExpiration.ts`
-- Kvote cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Nedbrydningstilstand: `src/domain/degradation.ts`
 - Konfigurationsrevision: `src/domain/configAudit.ts`
 - OmniRoute respons metadata builder: `src/domain/omnirouteResponseMeta.ts`

@@ -10,11 +10,11 @@ _Son yenilənmə: 2026-06-28_
 
 ## İcra Xülasəsi
 
-OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və idarə panelidir. O, tək OpenAI-a uyğun son nöqtəni (`/v1/*`) təmin edir və tərcümə, geri qaytarma, işarənin yenilənməsi və istifadənin izlənməsi ilə bir çox yuxarı axın provayderləri arasında trafiki istiqamətləndirir.
+OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və idarə panelidir. O, tək OpenAI-a uyğun son nöqtəni (`/v1/*`) təmin edir və tərcümə, geri qaytarma, işarənin yenilənməsi və istifadənin izlənməsi ilə çoxsaylı yuxarı provayderlər üzrə trafiki yönləndirir.
 
 Əsas imkanlar:
 
-- CLI/tools üçün OpenAI uyğun API səthi (380 provayder, 158 icraçı modul)
+- CLI/tools üçün OpenAI uyğun API səthi (381 provayder, 159 icraçı modul)
 - provayder formatları arasında Request/response tərcüməsi
 - Model kombinasiyası (çox model ardıcıllığı)
 - Strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`) `compositeTiers` tərəfindən iş vaxtı sifarişi ilə
@@ -44,7 +44,7 @@ OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və
 - Provayderə məxsus profillərlə hesab başına artırılmış tarif məhdudiyyəti
 - Provayderin davamlılığı üçün dövrə açarı nümunəsi
 - Muteks kilidləmə ilə ildırımdan qorunma
-- İmza əsaslı sorğunun təkmilləşdirmə keşi
+- İmza əsaslı sorğu təkmilləşdirmə keşi
 - Domen təbəqəsi: xərc qaydaları, ehtiyat siyasəti, bloklama siyasəti
 - Kontekst ötürülməsi: hesabın fırlanmasının davamlılığı üçün sessiyanın ötürülməsi xülasələri
 - Domen vəziyyətinin davamlılığı (qaytarmalar, büdcələr, blokajlar, elektrik açarları üçün SQLite yazma keşi)
@@ -413,7 +413,7 @@ Qaydalar toplusunun yaradılması və həddi tənzimləmək üçün [`docs/secur
 - Connection/model qayda qovşağı: `src/domain/connectionModelRules.ts`
 - Modelin mövcudluğu anlıq görüntüləri: `src/domain/modelAvailability.ts`
 - Provayderin istifadə müddətinin izlənməsi: `src/domain/providerExpiration.ts`
-- Kvota keşi: `src/domain/quotaCache.ts`
+- Kvota keşi: `src/domain/quotaCache.ts`. Provayderlər kvota pəncərələrini əlavə edir və silir (OpenAI bəzi planlar üçün 5 saatlıq Codex pəncərəsini buraxdı), buna görə də provayderin adapterini oxuyan istifadə tam olduğunu təsdiq edir (`quotasComplete`, bax `src/lib/usage/usageReading.ts`) hesabın tam pəncərə dəstidir: əvvəllər məlum olan, lakin orada olmayan pəncərə işdən çıxarılıb, keşdə, rehidrasyonda (rehidrəndə) davamlı Codex kvota vəziyyəti və `quota_snapshots` Claude s doyma vedrələrində. Qismən sübut (cavab başlıqları, köhnə nüsxələr) yalnız daşıdığı pəncərələri yeniləyir.
 - Deqradasiya vəziyyəti: `src/domain/degradation.ts`
 - Konfiqurasiya auditi: `src/domain/configAudit.ts`
 - OmniRoute cavab metadata qurucusu: `src/domain/omnirouteResponseMeta.ts`

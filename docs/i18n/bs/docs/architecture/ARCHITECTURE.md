@@ -14,7 +14,7 @@ OmniRoute je lokalni AI gateway i nadzorna ploča izgrađena na Next.js. Pruža 
 
 Osnovne mogućnosti:
 
-- OpenAI kompatibilna API površina za CLI/tools (380 provajdera, 158 izvršnih modula)
+- OpenAI kompatibilna API površina za CLI/tools (381 provajdera, 159 izvršnih modula)
 - Request/response prijevod preko formata provajdera
 - Kombinirani model (slijed više modela)
 - Strukturirani kombinovani koraci (`provider + model + connection`) sa poredanjem vremena izvođenja po `compositeTiers`
@@ -31,7 +31,7 @@ Osnovne mogućnosti:
 - Moderacije preko `/v1/moderations`
 - Ponovno rangiranje preko `/v1/rerank`
 - Razmislite o raščlanjivanju oznaka (`<think>...</think>`) za modele zaključivanja
-- Sanitizacija odgovora za strogu OpenAI SDK kompatibilnost
+- Sanacija odgovora za strogu OpenAI SDK kompatibilnost
 - Normalizacija uloga (programer → sistem, sistem → korisnik) za međuprovajdersku kompatibilnost
 - Strukturirana konverzija izlaza (json_schema → Gemini responseSchema)
 - Lokalna postojanost za provajdere, ključevi, aliasi, kombinacije, postavke, cijene (122 DB modula)
@@ -61,7 +61,7 @@ Osnovne mogućnosti:
 - Sistem vještina (registrator, izvršilac, sandbox, ugrađene vještine)
 - MITM proxy sa upravljanjem certifikatima i DNS rukovanjem
 - Prompt injection guard Middleware
-- Promptni kompresijski cjevovod s Cavemanom, RTK, naslaganim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
+- Promptni kompresijski cjevovod s Cavemanom, RTK, složenim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
 - ACP (Agent Communication Protocol) registar
 - Modularni OAuth provajderi (22 pojedinačna modula pod `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall skripte
@@ -78,7 +78,7 @@ Osnovne mogućnosti:
 
 Primarni model vremena izvođenja:
 
-- rute aplikacije Next.js pod `src/app/api/*` implementiraju i nadzornu ploču APIs i kompatibilnost APIs
+- rute Next.js aplikacija pod `src/app/api/*` implementiraju i nadzornu ploču APIs i kompatibilnost APIs
 - Zajedničko SSE/routing jezgro u `src/sse/*` + `open-sse/*` upravlja izvršavanjem provajdera, prijevodom, streamingom, zamjenskim i korištenjem
 
 ## Referentni dijagrami
@@ -414,7 +414,7 @@ Imenski prostor `src/domain/` centralizira odluke politike tako da rukovaoci rut
 - Connection/model pravilo stolar: `src/domain/connectionModelRules.ts`
 - Snimci dostupnosti modela: `src/domain/modelAvailability.ts`
 - Praćenje isteka provajdera: `src/domain/providerExpiration.ts`
-- Keš kvota: `src/domain/quotaCache.ts`
+- Keš kvota: `src/domain/quotaCache.ts`. Provajderi dodaju i uklanjaju prozore kvota (OpenAI je izbacio 5-satni Codex prozor za neke planove), tako da upotreba čitanja adaptera provajdera potvrđuje da je kompletna (`quotasComplete`, vidi `src/lib/usage/usageReading.ts`) je kompletan set prozora naloga: prozor poznat ranije, ali odsutan iz njega je povučen, u keš memoriji, u `quota_snapshots`, rehydratesre a restart app. Codex kvotno stanje i u Claude-ovim segmentima zasićenja. Djelomični dokazi (zaglavlja odgovora, zastarjele kopije) ažuriraju samo prozore koje nose.
 - Degradacijsko stanje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - OmniRoute odgovor za izgradnju metapodataka: `src/domain/omnirouteResponseMeta.ts`

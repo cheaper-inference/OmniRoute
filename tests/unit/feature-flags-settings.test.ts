@@ -58,17 +58,28 @@ const {
 // tool_call wrapper repair, default on) to 86.
 // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
 // published catalog, default off) takes it to 87.
-// UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) takes it to 114;
+// UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) takes it to 113.
+// COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) takes it to 114.
 // API_KEY_AUDIT_CLIENT_DETAILS_ENABLED (#17982, client IP + user-agent on api_key.auth.touch
 // audit rows, default off) takes it to 115.
-const EXPECTED_FEATURE_FLAG_COUNT = 115;
+// CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
+// takes it to 116.
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection
+// keepMidConversationSystem opt-in) takes it back to 115.
+// The two #18312 transport flags (PROXY_STRICT_POST_REPLAY_ENABLED, RESPONSES_TRANSPORT_KEEPALIVE_ENABLED,
+// both default off) take it to 117.
+// OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) takes it to 118.
+// PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
+// FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) takes it to 120;
+// CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933, default off) takes it to 121.
+const EXPECTED_FEATURE_FLAG_COUNT = 121;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
 // (#17003, lets Claude OAuth drop the redact-thinking beta for summarized thinking,
 // default off) to 87.
 // MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) takes it to 88.
-// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, default off) takes it to 88.
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection keepMidConversationSystem opt-in) — 115 back to 114.
 // MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) takes it to 88.
 // default off) to 87; AUTO_REQUEST_RESOLVED_CAPABILITIES (#16419, resolved-capability
 // scoring inputs on the auto/* request path, default off) to 88.
@@ -288,6 +299,15 @@ describe("featureFlagDefinitions", () => {
   it("defines OPENCODE_USER_BLOCKED_ROTATION as an opt-in network boolean flag disabled by default", () => {
     const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_USER_BLOCKED_ROTATION");
     assert.ok(def, "OPENCODE_USER_BLOCKED_ROTATION should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines OPENCODE_FREE_TIER_EGRESS_PROBE as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_FREE_TIER_EGRESS_PROBE");
+    assert.ok(def, "OPENCODE_FREE_TIER_EGRESS_PROBE should exist");
     assert.strictEqual(def.category, "network");
     assert.strictEqual(def.type, "boolean");
     assert.strictEqual(def.defaultValue, "false");

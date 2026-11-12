@@ -14,9 +14,9 @@ OmniRoute ialah pintu masuk dan papan pemuka penghalaan AI tempatan yang dibina 
 
 Keupayaan teras:
 
-- Permukaan API yang serasi OpenAI untuk CLI/tools (380 pembekal, 158 modul pelaksana)
+- Permukaan API yang serasi OpenAI untuk CLI/tools (381 pembekal, 159 modul pelaksana)
 - terjemahan Request/response merentas format pembekal
-- Model kombo mundur (jujukan berbilang model)
+- Sandaran kombo model (jujukan berbilang model)
 - Langkah kombo berstruktur (`provider + model + connection`) dengan pesanan masa jalan oleh `compositeTiers`
 - Saling balik peringkat akaun (berbilang akaun bagi setiap pembekal)
 - Pemilihan akaun P2C prapenerbangan dan kuota sedar kuota dalam laluan sembang utama
@@ -51,7 +51,7 @@ Keupayaan teras:
 - Enjin dasar untuk penilaian permintaan berpusat (kunci keluar bajet → → sandaran)
 - Minta telemetri dengan pengagregatan kependaman p50/p95/p99
 - Telemetri sasaran kombo dan kesihatan sasaran kombo sejarah melalui `combo_execution_key` / `combo_step_id`
-- Korelasi ID (X-Request-Id) untuk pengesanan hujung ke hujung
+- ID korelasi (Id-Permintaan-X) untuk pengesanan hujung ke hujung
 - Pengelogan audit pematuhan dengan memilih keluar setiap kunci API
 - Rangka kerja Eval untuk jaminan kualiti LLM
 - Papan pemuka kesihatan dengan status pemutus litar pembekal masa nyata
@@ -61,7 +61,7 @@ Keupayaan teras:
 - Sistem kemahiran (pendaftaran, pelaksana, kotak pasir, kemahiran terbina dalam)
 - proksi MITM dengan pengurusan sijil dan pengendalian DNS
 - Perisian tengah pengawal suntikan segera
-- Talian paip mampatan segera dengan Caveman, RTK, talian paip bertindan, gabungan mampatan, pek bahasa dan analitis
+- Talian paip mampatan segera dengan Caveman, RTK, saluran paip bertindan, gabungan mampatan, pek bahasa dan analitis
 - ACP (Protokol Komunikasi Agen) pendaftaran
 - Penyedia OAuth modular (22 modul individu di bawah `src/lib/oauth/providers/`)
 - skrip Uninstall/full-uninstall
@@ -379,7 +379,7 @@ Untuk butiran algoritma penuh (formula faktor, penalaan berat), lihat [`docs/rou
 
 ### B. Agen Awan
 
-Ejen Awan membungkus platform ejen kod yang dihoskan pihak ketiga (Codex Cloud, Devin, Jules) di belakang kitaran hayat tugasan yang disokong DB yang seragam. Semua titik akhir creation/inspection tugas memerlukan pengesahan pengurusan.
+Ejen Awan membalut platform ejen kod yang dihoskan pihak ketiga (Codex Cloud, Devin, Jules) di belakang kitaran hayat tugasan yang disokong DB yang seragam. Semua titik akhir creation/inspection tugas memerlukan pengesahan pengurusan.
 
 - Akar modul: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, tambah subdirektori setiap ejen di bawah `agents/`)
 - Pelaksanaan setiap ejen: `agents/codex/`, `agents/devin/`, `agents/jules/`
@@ -414,7 +414,7 @@ Ruang nama `src/domain/` memusatkan keputusan dasar supaya pengendali laluan tid
 - penyambung peraturan Connection/model : `src/domain/connectionModelRules.ts`
 - Gambar ketersediaan model: `src/domain/modelAvailability.ts`
 - Penjejakan tamat tempoh pembekal: `src/domain/providerExpiration.ts`
-- Cache kuota: `src/domain/quotaCache.ts`
+- Cache kuota: `src/domain/quotaCache.ts`. Pembekal menambah dan mengalih keluar tetingkap kuota (OpenAI menggugurkan tetingkap Codex 5 jam untuk beberapa pelan), jadi penggunaan membaca penyesuai penyedia membuktikan sebagai lengkap (`quotasComplete`, lihat `src/lib/usage/usageReading.ts`) ialah set tetingkap penuh akaun: tetingkap yang diketahui lebih awal tetapi tidak hadir daripadanya telah dihentikan, dalam cache, dalam `quota_snapshots` a mulakan semula rehidrasi (rekod zq) yang dimulakan semula, dalam keadaan Codex yang dimulakan semula baldi tepu Claude. Bukti separa (pengepala respons, salinan lapuk) hanya mengemas kini tetingkap yang dibawanya.
 - Keadaan degradasi: `src/domain/degradation.ts`
 - Audit konfigurasi: `src/domain/configAudit.ts`
 - pembina metadata tindak balas OmniRoute : `src/domain/omnirouteResponseMeta.ts`

@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 وحدة تنفيذية عالية المستوى (`*.ts` ناقص `base.ts` و `index.ts` واختبارات — ومقاييس العد `npm run check:docs-counts` ). تقوم كل فئة منفذة بتمديد `BaseExecutor` (`base.ts`) مباشرة أو من خلال `DefaultExecutor` أو منفذ آخر؛ الوحدات المتبقية عبارة عن مساعدين لكل مزود (مخططات الأدوات، ومحولات fetch/TTS ، ومعالجات quirk). المنفذون يشملون:
+159 وحدة تنفيذية عالية المستوى (`*.ts` ناقص `base.ts` و `index.ts` واختبارات — ومقاييس العد `npm run check:docs-counts` ). تقوم كل فئة منفذة بتمديد `BaseExecutor` (`base.ts`) مباشرة أو من خلال `DefaultExecutor` أو منفذ آخر؛ الوحدات المتبقية عبارة عن مساعدين لكل مزود (مخططات الأدوات، ومحولات fetch/TTS ، ومعالجات quirk). المنفذون يشملون:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> ملاحظة: يتم تقديم الخدمات للموفرين غير المدرجين هنا بواسطة `default.ts` باستخدام المنفذ العام المتوافق مع OpenAI. يوجد كتالوج المزودين الكامل (380 مزودًا) في `src/shared/constants/providers.ts`.
+> ملاحظة: يتم تقديم الخدمات للموفرين غير المدرجين هنا بواسطة `default.ts` باستخدام المنفذ العام المتوافق مع OpenAI. يوجد كتالوج المزودين الكامل (381 مقدمًا) في `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

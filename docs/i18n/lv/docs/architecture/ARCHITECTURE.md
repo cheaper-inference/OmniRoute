@@ -14,7 +14,7 @@ OmniRoute ir vietējā AI maršrutēšanas vārteja un informācijas panelis, ka
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API virsma priekš CLI/tools (380 pakalpojumu sniedzēji, 158 izpildītāju moduļi)
+- Ar OpenAI saderīga API virsma CLI/tools (381 nodrošinātājs, 159 izpildītāja moduļi)
 - Request/response tulkojums starp pakalpojumu sniedzēju formātiem
 - Modeļa kombinācijas atkāpšanās (vairāku modeļu secība)
 - Strukturētas kombinētās darbības (`provider + model + connection`) ar izpildlaika secību pēc `compositeTiers`
@@ -24,7 +24,7 @@ Galvenās iespējas:
 - Iegulšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
 - Attēlu ģenerēšana, izmantojot `/v1/images/generations` (10 + nodrošinātāji, 20 + modeļi)
 - Audio transkripcija, izmantojot `/v1/audio/transcriptions` (18 pakalpojumu sniedzēji)
-- Teksta pārvēršana runā, izmantojot `/v1/audio/speech` (24 iebūvēti pakalpojumu sniedzēji)
+- Teksta pārvēršana runā, izmantojot `/v1/audio/speech` (24 iebūvēti pakalpojumu sniedzēji)
 - Video ģenerēšana, izmantojot `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Mūzikas ģenerēšana, izmantojot `/v1/music/generations` (ComfyUI)
 - Meklēšana tīmeklī, izmantojot `/v1/search` (20 pakalpojumu sniedzēji)
@@ -61,20 +61,20 @@ Galvenās iespējas:
 - Prasmju sistēma (reģistrs, izpildītājs, smilškaste, iebūvētās prasmes)
 - MITM starpniekserveris ar sertifikātu pārvaldību un DNS apstrādi
 - Ātra injekcijas aizsarga starpprogrammatūra
-- Ātra saspiešanas konveijera ar Caveman, RTK, stacked konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analīzi
+- Ātra saspiešanas konveijers ar Caveman, RTK, stacked konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analīzi
 - ACP (Agent Communication Protocol) reģistrs
 - Moduļu OAuth nodrošinātāji (22 atsevišķi moduļi zem `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall skripti
 - OAuth vides remonta darbība
 - WebSocket tilts ar OpenAI saderīgiem WS klientiem (`/v1/ws`)
 - Sinhronizācijas pilnvaru pārvaldība (issue/revoke, ETag versijas konfigurācijas komplekta lejupielāde)
-- GLM Thinking (`glmt`) pirmšķirīgs pakalpojumu sniedzēja iepriekš iestatīts
+- GLM Thinking (`glmt`) pirmās klases nodrošinātāja iepriekšiestatījums
 - Hibrīda pilnvaru skaitīšana (pakalpojumu sniedzēja puses `/messages/count_tokens` ar aprēķinu atkāpšanos)
 - Modeļa aizstājvārda automātiskā iesēšana (30 + starpniekservera dialektu normalizēšana startēšanas laikā)
 - Droša izejošā ielāde ar SSRF aizsargu, privātu URL bloķēšanu un konfigurējamu atkārtotu mēģinājumu
 - Atkārtoti tērzēšanas mēģinājumi ar atdzišanu, izmantojot konfigurējamus `requestRetry` un `maxRetryIntervalSec`
 - Izpildlaika vides validācija ar Zod startēšanas laikā
-- Atbilstības audits v2 ar lappušu piešķiršanu, pakalpojumu sniedzēja CRUD notikumiem un SSRF bloķētu validācijas reģistrēšanu
+- Atbilstības audits v2 ar lappušu noteikšanu, pakalpojumu sniedzēja CRUD notikumiem un SSRF bloķētu validācijas reģistrēšanu
 
 Primārais izpildlaika modelis:
 
@@ -405,7 +405,7 @@ Lai iegūtu informāciju par kārtulu kopas izveidi un sliekšņa regulēšanu, 
 
 `src/domain/` nosaukumtelpa centralizē politikas lēmumus, tāpēc maršruta apstrādātājiem pašiem nav jāmontē lockout/budget/fallback loģika.
 
-- Politikas dzinējs: `src/domain/policyEngine.ts` — vienots ieejas punkts pirmsizpildes novērtējumam (bloķēšanas → budžeta → rezerves pasūtīšana)
+- Politikas dzinējs: `src/domain/policyEngine.ts` — vienots ieejas punkts pirmsizpildes novērtēšanai (lokauts → budžeta → rezerves pasūtīšana)
 - Izmaksu noteikumi: `src/domain/costRules.ts`
 - Atkāpšanās politika: `src/domain/fallbackPolicy.ts`
 - Lokauta politika: `src/domain/lockoutPolicy.ts`
@@ -414,7 +414,7 @@ Lai iegūtu informāciju par kārtulu kopas izveidi un sliekšņa regulēšanu, 
 - Connection/model noteikumu galdnieks: `src/domain/connectionModelRules.ts`
 - Modeļu pieejamības momentuzņēmumi: `src/domain/modelAvailability.ts`
 - Pakalpojumu sniedzēja derīguma termiņa izsekošana: `src/domain/providerExpiration.ts`
-- Kvotas kešatmiņa: `src/domain/quotaCache.ts`
+- Kvotas kešatmiņa: `src/domain/quotaCache.ts`. Pakalpojumu sniedzēji pievieno un noņem kvotu logus (dažos plānos OpenAI atcēla 5 stundu Codex logu), tāpēc pakalpojumu sniedzēja adaptera izmantošanas nolasīšana apliecina, ka tā ir pilnīga (`quotasComplete`, sk. `src/lib/usage/usageReading.ts`) ir visa konta logu kopa: logs, kas bija zināms agrāk, bet tajā nav Claude `quota_snapshots` Codex. Daļēji pierādījumi (atbilžu galvenes, novecojušas kopijas) atjaunina tikai tajā esošos logus.
 - Noārdīšanās stāvoklis: `src/domain/degradation.ts`
 - Konfigurācijas audits: `src/domain/configAudit.ts`
 - OmniRoute atbildes metadatu veidotājs: `src/domain/omnirouteResponseMeta.ts`

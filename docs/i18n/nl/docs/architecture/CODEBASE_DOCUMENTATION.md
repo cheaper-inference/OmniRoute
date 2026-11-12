@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 uitvoerdermodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — de telling `npm run check:docs-counts` meet). Elke uitvoerderklasse breidt `BaseExecutor` (`base.ts`) uit, rechtstreeks of via `DefaultExecutor` of een andere uitvoerder; de overige modules zijn helpers per provider (toolschema's, fetch/TTS adapters, quirk-handlers). Executeurs zijn onder meer:
+159 uitvoerdermodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — de telling `npm run check:docs-counts` meet). Elke uitvoerderklasse breidt `BaseExecutor` (`base.ts`) uit, rechtstreeks of via `DefaultExecutor` of een andere uitvoerder; de overige modules zijn helpers per provider (toolschema's, fetch/TTS adapters, quirk-handlers). Executeurs zijn onder meer:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (gedeelde identiteitshelper) en `index.ts` (register).
 
-> Let op: providers die hier niet worden vermeld, worden door `default.ts` bediend met behulp van de generieke OpenAI-compatibele uitvoerder. De volledige aanbiederscatalogus (380 aanbieders) bevindt zich in `src/shared/constants/providers.ts`.
+> Let op: providers die hier niet worden vermeld, worden door `default.ts` bediend met behulp van de generieke OpenAI-compatibele uitvoerder. De volledige aanbiederscatalogus (381 aanbieders) bevindt zich in `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

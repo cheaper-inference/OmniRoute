@@ -18,64 +18,73 @@ OmniRoute పరిపాలనా చర్యలు, ప్రామాణీ�
 ఏదైనా వైఫల్యం సంభవించినప్పుడు కాల్ నిశ్శబ్దంగా విస్మరించబడుతుంది, తద్వారా ఆడిట్ లాగింగ్ ప్రధాన
 రిక్వెస్ట్ ప్రవాహానికి అంతరాయం కలిగించదు.
 
-## లాగ్ చేయబడేవి
+## ఏవి లాగ్ చేయబడతాయి
 
 ### పరిపాలనా ఆడిట్ ఈవెంట్లు (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`కు చేసే ప్రతి కాల్
-ఒక వరుసను సృష్టిస్తుంది. చర్య స్ట్రింగ్లు `domain.verb` (లేదా `domain.verb.outcome`)
-నమూనాను అనుసరిస్తాయి. సోర్స్ ట్రీలో నిర్ధారించబడిన చర్య రకాలు:
+`logAuditEvent({ action, actor, target, details, ... })` కు చేసే ప్రతి కాల్
+ఒక వరుసను సృష్టిస్తుంది. యాక్షన్ స్ట్రింగ్లు `domain.verb` (లేదా
+`domain.verb.outcome`) నమూనాను అనుసరిస్తాయి. ట్రీలో నిర్ధారించబడిన యాక్షన్ రకాలు:
 
-| చర్య                                 | మూలం                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ప్రతి ఎంట్రీ `action`, `actor` (డిఫాల్ట్గా `"system"`), `target`,
+ప్రతి ఎంట్రీలో `action`, `actor` (డిఫాల్ట్గా `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` మరియు `timestamp`ను నమోదు చేస్తుంది. సున్నితమైన కీలు (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey`తో సరిపోలే ఏదైనా,
-మొదలైనవి) వరుస రాయబడటానికి ముందు పునరావృతంగా `"[redacted]"`తో మాస్క్ చేయబడతాయి.
+`request_id`, మరియు `timestamp` ఉంటాయి. సున్నితమైన కీలు (`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey` కు సరిపోలే ఏదైనా
+విలువ మొదలైనవి) వరుసను రాయడానికి ముందు పునరావృతంగా `"[redacted]"` గా
+రెడాక్ట్ చేయబడతాయి.
+
+`api_key.auth.touch` వరుసలు రిక్వెస్ట్ లాగ్కు చేరని విజయవంతమైన API కీ మెటాడేటా
+మరియు డిస్కవరీ రీడ్లను (GET/HEAD) నమోదు చేస్తాయి: ఏ కీ, ఎప్పుడు, మరియు
+సాధారణీకరించిన పాత్; ఇవి సమీకరించబడి గరిష్ఠంగా 1,000 వరుసలకు పరిమితం చేయబడతాయి.
+`noLog` ఉన్న కీలు మరియు ఎన్విరాన్మెంట్ కీ మినహాయించబడతాయి. `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`
+ఫీచర్ ఫ్లాగ్ ఆన్లో ఉన్నప్పుడు మాత్రమే (డిఫాల్ట్గా ఆఫ్లో ఉంటుంది) కాలర్ యొక్క
+IP చిరునామా మరియు యూజర్-ఏజెంట్ జోడించబడతాయి.
 
 ### MCP టూల్ కాల్లు (`mcp_tool_audit`)
 
-ప్రతి MCP టూల్ ఆహ్వానం
-`open-sse/mcp-server/audit.ts` ద్వారా ఒక వరుసను రాస్తుంది. స్కీమా
-(`src/lib/db/migrations/002_mcp_a2a_tables.sql` నుండి):
+ప్రతి MCP టూల్ ఇన్వొకేషన్ `open-sse/mcp-server/audit.ts` ద్వారా ఒక వరుసను
+రాస్తుంది. స్కీమా
+`src/lib/db/migrations/002_mcp_a2a_tables.sql` నుండి:
 
-| కాలమ్            | గమనికలు                                     |
+| Column           | Notes                                       |
 | ---------------- | ------------------------------------------- |
-| `id`             | స్వయంచాలకంగా పెరుగుతుంది                    |
+| `id`             | ఆటోఇన్క్రిమెంట్                             |
 | `tool_name`      | MCP టూల్ ఐడెంటిఫైయర్                        |
 | `input_hash`     | ఇన్పుట్ యొక్క sha256 (పేలోడ్ నిల్వ చేయబడదు) |
-| `output_summary` | సంక్షిప్తంగా కుదించిన సారాంశం               |
-| `duration_ms`    | గడిచిన వాస్తవ సమయం                          |
-| `api_key_id`     | కాలర్ (శూన్యంగా ఉండవచ్చు)                   |
+| `output_summary` | సంక్షిప్త, కుదించబడిన సారాంశం               |
+| `duration_ms`    | గడిచిన సమయం                                 |
+| `api_key_id`     | కాలర్ (నల్ కావచ్చు)                         |
 | `success`        | `1` / `0`                                   |
-| `error_code`     | వైఫల్యంపై తుది ఎర్రర్ కోడ్                  |
+| `error_code`     | విఫలమైనప్పుడు టెర్మినల్ ఎరర్ కోడ్           |
 | `created_at`     | ISO టైమ్స్టాంప్                             |
 
 ### రిక్వెస్ట్ / వినియోగ లాగ్లు
 
-ఇవి కార్యాచరణ టెలిమెట్రీకి చెందినవి (ఖచ్చితంగా పరిపాలనా ఆడిట్ కాదు), కానీ ఇవి అదే
-నిల్వకాల పైప్లైన్ను పంచుకుంటాయి:
+ఇవి ఆపరేషనల్ టెలిమెట్రీ (కచ్చితంగా అడ్మిన్ ఆడిట్ కాదు), అయితే ఇదే
+రిటెన్షన్ పైప్లైన్ను పంచుకుంటాయి:
 
-- `usage_history` — ప్రతి రిక్వెస్ట్కు వినియోగ సమగ్రత
-- `call_logs` — ప్రతి రిక్వెస్ట్కు పూర్తి లాగ్ (వరుస పరిమితికి లోబడి ఉంటుంది, క్రింద చూడండి)
-- `proxy_logs` — ప్రాక్సీ ట్రాఫిక్ లాగ్ (వరుస పరిమితికి లోబడి ఉంటుంది)
-- `request_detail_logs` — పాత వివరణాత్మక రిక్వెస్ట్ లాగ్ (ఉనికిలో ఉంటే ఇప్పటికీ తొలగించబడుతుంది)
+- `usage_history` — ప్రతి రిక్వెస్ట్కు వినియోగ రోల్-అప్
+- `call_logs` — ప్రతి రిక్వెస్ట్కు పూర్తి లాగ్ (క్రింద చూడగల వరుస-పరిమితికి లోబడి ఉంటుంది)
+- `proxy_logs` — ప్రాక్సీ ట్రాఫిక్ లాగ్ (వరుస-పరిమితికి లోబడి ఉంటుంది)
+- `request_detail_logs` — లెగసీ వివరమైన రిక్వెస్ట్ లాగ్ (ఉన్నట్లయితే ఇప్పటికీ ప్రూన్ చేయబడుతుంది)
 
 ## నిల్వ స్కీమా
 

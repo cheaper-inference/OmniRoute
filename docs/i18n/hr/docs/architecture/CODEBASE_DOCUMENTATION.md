@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 izvršnih modula najviše razine (`*.ts` minus `base.ts`, `index.ts` i testovi — mjere `npm run check:docs-counts` ). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`), izravno ili preko `DefaultExecutor` ili drugog izvršitelja; preostali moduli su pomoćnici po pružatelju (sheme alata, fetch/TTS adapteri, rukovatelji quirkovima). Izvršitelji uključuju:
+159 izvršnih modula najviše razine (`*.ts` minus `base.ts`, `index.ts` i testovi — broj `npm run check:docs-counts` mjere). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`), izravno ili preko `DefaultExecutor` ili drugog izvršitelja; preostali moduli su pomoćnici po pružatelju (sheme alata, fetch/TTS adapteri, rukovatelji quirkovima). Izvršitelji uključuju:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pomoćnik zajedničkog identiteta) i `index.ts` (registar).
 
-> Napomena: pružatelje koji nisu ovdje navedeni opslužuje `default.ts` pomoću generičkog izvršnog programa koji je kompatibilan s OpenAI-om. Cijeli katalog pružatelja (380 pružatelja) nalazi se u `src/shared/constants/providers.ts`.
+> Napomena: pružatelje koji nisu ovdje navedeni opslužuje `default.ts` pomoću generičkog izvršnog programa koji je kompatibilan s OpenAI-om. Cijeli katalog pružatelja (381 pružatelja) nalazi se u `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -528,7 +528,7 @@ Istaknuto (cijeli popis pod `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 jedinstvenih alata** ožičeno u `server.ts` (45 kanonskih u `schemas/tools.ts` + memoriji, vještinama, GitHub-vještinama, skupu, igrifikaciji, dodatku, Notion, Obsidian, lokalnom korpusu i modulima za kompresiju — uniji koje broji `countUniqueMcpTools`).
+- **110 jedinstvenih alata** ožičeno u `server.ts` (45 kanonskih u `schemas/tools.ts` + memoriji, vještinama, GitHub-vještinama, bazenu, igrifikaciji, dodatku, Notion, Obsidian, lokalnom korpusu i kompresijskim modulima — unija broji `countUniqueMcpTools`).
 - **3 prijevoza** : stdio, HTTP Streamable, SSE.
 - **33 opsega** nametnut u vrijeme izvođenja — osnovni popis u `src/shared/constants/mcpScopes.ts`, puni skup je unija opsega koje je deklarirao svaki modul alata.
 - Tablica revizije: `mcp_tool_audit` (popunjava `audit.ts`).

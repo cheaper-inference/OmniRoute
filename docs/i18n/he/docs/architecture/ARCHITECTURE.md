@@ -14,7 +14,7 @@ OmniRoute הוא שער ניתוב ולוח מחוונים מקומי AI הבנ�
 
 יכולות ליבה:
 
-- משטח API תואם OpenAI עבור CLI/tools (380 ספקים, 158 מודולי executor)
+- משטח API תואם OpenAI עבור CLI/tools (381 ספקים, 159 מודולי executor)
 - תרגום Request/response בין פורמטים של ספקים
 - מודל חזרה משולבת (רצף מרובה דגמים)
 - שלבים משולבים מובנים (`provider + model + connection`) עם סידור זמן ריצה לפי `compositeTiers`
@@ -27,7 +27,7 @@ OmniRoute הוא שער ניתוב ולוח מחוונים מקומי AI הבנ�
 - טקסט לדיבור באמצעות `/v1/audio/speech` (24 ספקים מובנים)
 - הפקת וידאו באמצעות `/v1/videos/generations` (ComfyUI + SD WebUI)
 - יצירת מוזיקה באמצעות `/v1/music/generations` (ComfyUI)
-- חיפוש אינטרנט באמצעות `/v1/search` (20 ספקים)
+- חיפוש באינטרנט באמצעות `/v1/search` (20 ספקים)
 - מנחים דרך `/v1/moderations`
 - דירוג מחדש באמצעות `/v1/rerank`
 - תחשוב על ניתוח תגים (`<think>...</think>`) עבור מודלים של חשיבה
@@ -414,7 +414,7 @@ Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של �
 - Connection/model כלל מצרף: `src/domain/connectionModelRules.ts`
 - תמונות זמינות דגם: `src/domain/modelAvailability.ts`
 - מעקב אחר תפוגה של ספק: `src/domain/providerExpiration.ts`
-- מטמון מכסה: `src/domain/quotaCache.ts`
+- מטמון מכסה: `src/domain/quotaCache.ts`. ספקים מוסיפים ומסירים חלונות מכסה (OpenAI השפיל את חלון Codex של 5 שעות עבור תוכניות מסוימות), כך ששימוש שקורא את המתאם של הספק מעיד כמושלם (`quotasComplete`, ראה `src/lib/usage/usageReading.ts`) הוא ערכת החלונות המלאה של החשבון: חלון שידוע קודם לכן אך נעדר ממנו מנותק, במטמון, ב- Codex, ב- `quota_snapshots` a restart in rehydrated. מצב מכסה ובדליי הרוויה של Claude. ראיות חלקיות (כותרות תגובות, עותקים מיושנים) מעדכנות רק את החלונות שהיא נושאת.
 - מצב השפלה: `src/domain/degradation.ts`
 - ביקורת תצורה: `src/domain/configAudit.ts`
 - בונה מטא נתונים של תגובות OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -434,7 +434,7 @@ Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של �
 
 מסלולים ציבוריים לעומת ניהול הם גבול קשה: agent/cooldown APIs ומוטציות ספק דורשות אישור ניהול (HTTP 401 אם חסר).
 
-לכללי סיווג המסלולים המלאים, ראה [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+לכללי סיווג המסלול המלאים, ראה [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
 ### ו. זרימת עבודה FSM ונתב מודע למשימות
 

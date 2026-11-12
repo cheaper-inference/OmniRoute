@@ -14,7 +14,7 @@ OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이
 
 핵심 기능:
 
-- CLI/tools 용 OpenAI 호환 API 표면(공급자 380개, 실행기 모듈 158개)
+- CLI/tools 용 OpenAI 호환 API 표면(공급자 381개, 실행기 모듈 159개)
 - 공급자 형식에 따른 Request/response 번역
 - 모델 콤보 대체(다중 모델 시퀀스)
 - `compositeTiers` 를 기준으로 런타임 순서를 지정하는 구조화된 콤보 단계(`provider + model + connection`)
@@ -61,7 +61,7 @@ OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이
 - 스킬 시스템(레지스트리, 실행자, 샌드박스, 내장 스킬)
 - 인증서 관리 및 DNS 처리 기능을 갖춘 MITM 프록시
 - 프롬프트 주입 가드 미들웨어
-- Caveman, RTK, 스택 파이프라인, 압축 콤보, 언어 팩 및 분석을 포함하는 신속한 압축 파이프라인
+- Caveman, RTK, 스택 파이프라인, 압축 콤보, 언어 팩 및 분석을 포함한 신속한 압축 파이프라인
 - ACP (에이전트 통신 프로토콜) 레지스트리
 - 모듈 OAuth 공급자( `src/lib/oauth/providers/` 아래의 개별 모듈 22개)
 - Uninstall/full-uninstall 스크립트
@@ -404,7 +404,7 @@ Cloud Agents는 균일한 DB 지원 작업 수명 주기 뒤에 타사 호스팅
 - Connection/model 규칙 조이너: `src/domain/connectionModelRules.ts`
 - 모델 가용성 스냅샷: `src/domain/modelAvailability.ts`
 - 공급자 만료 추적: `src/domain/providerExpiration.ts`
-- 할당량 캐시: `src/domain/quotaCache.ts`
+- 할당량 캐시: `src/domain/quotaCache.ts`. 공급자는 할당량 창(OpenAI 일부 계획에 대해 5시간 Codex 창을 삭제함)을 추가하고 제거하므로 공급자의 어댑터를 읽는 사용이 완료로 증명됩니다(`quotasComplete`, `src/lib/usage/usageReading.ts` 참조)는 계정의 전체 창 세트입니다. 이전에 알려졌으나 거기에 없는 창은 폐기되고, 캐시에서, `quota_snapshots` 에서 다시 시작하면 재수화(추가된 폐기 기록)되고, 지속된 Codex 할당량 상태 및 Claude 에서 포화 버킷. 부분 증거(응답 헤더, 오래된 복사본)는 해당 창만 업데이트합니다.
 - 저하 상태: `src/domain/degradation.ts`
 - 구성 감사: `src/domain/configAudit.ts`
 - OmniRoute 응답 메타데이터 빌더: `src/domain/omnirouteResponseMeta.ts`

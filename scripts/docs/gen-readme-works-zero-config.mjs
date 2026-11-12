@@ -154,8 +154,8 @@ export async function renderReadmeWorksZeroConfig() {
       `  <text x="40" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
       `  <line x1="${afterKicker(40, C.kicker[0])}" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>\n` +
       `  <text x="40" y="98" class="sub">${esc(C.headline[0])}<tspan font-weight="600" style="fill:var(--ok)">${esc(C.headline[1])}</tspan></text>\n` +
-      // connectors (under the tiles) + travelling dots: lime = the request leaving the install
-      // step, ok = the answer reaching the tool. The lime dot carries a hairline ink stroke so it
+      // connectors (under the tiles) + travelling dots: accent = the request leaving the install
+      // step, ok = the answer reaching the tool. The accent dot carries a hairline ink stroke so it
       // reads on the light canvas too.
       `  <g class="rule" stroke-width="2" stroke-dasharray="5 5" fill="none">\n` +
       `    <use href="#wzc-c1"/>\n    <use href="#wzc-c2"/>\n  </g>\n` +

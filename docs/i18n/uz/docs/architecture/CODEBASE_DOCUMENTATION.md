@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,11 +485,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 ta yuqori darajadagi ijrochi modullari (`*.ts` minus `base.ts`, `index.ts` va testlar — `npm run check:docs-counts` o'lchovlari). Har bir bajaruvchi sinfi `BaseExecutor` (`base.ts`) ni bevosita yoki `DefaultExecutor` yoki boshqa bajaruvchi orqali kengaytiradi; qolgan modullar provayder uchun yordamchilardir (asbob sxemalari, fetch/TTS adapterlari, quik ishlov beruvchilar). Ijrochilarga quyidagilar kiradi:
+159 ta yuqori darajadagi ijrochi modullari (`*.ts` minus `base.ts`, `index.ts` va testlar — `npm run check:docs-counts` o'lchovlari). Har bir bajaruvchi sinfi `BaseExecutor` (`base.ts`) ni bevosita yoki `DefaultExecutor` yoki boshqa bajaruvchi orqali kengaytiradi; qolgan modullar provayder uchun yordamchilardir (asbob sxemalari, fetch/TTS adapterlari, quik ishlov beruvchilar). Ijrochilarga quyidagilar kiradi:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode` `petals` `perplexity-web`, `pollinations`, `qoder`, plus `devin-desktop`(birgalikda identifikatsiya yordamchisi) va `claudeIdentity.ts` (ro'yxatga olish kitobi) `index.ts`
 
-> Eslatma: bu yerda sanab o‘tilmagan provayderlarga `default.ts` umumiy OpenAI-mos ijrochi yordamida xizmat ko‘rsatadi. To'liq provayderlar katalogi (380 ta provayder) `src/shared/constants/providers.ts` da yashaydi.
+> Eslatma: bu yerda sanab o‘tilmagan provayderlarga `default.ts` umumiy OpenAI-mos ijrochi yordamida xizmat ko‘rsatadi. To'liq provayderlar katalogi (381 ta provayder) `src/shared/constants/providers.ts` da yashaydi.
 
 ### 4.3 `open-sse/translator/`
 

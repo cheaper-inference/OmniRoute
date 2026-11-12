@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **שפות:** 🇺🇸 [אנגלית](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [ערבית](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [אזרית](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [בולגרית](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [בנגלית](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [בוסנית](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [צ'כית](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [דנית](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [גרמנית](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [יוונית](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [ספרדית](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [אסטונית](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [פרסית](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [פינית](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [צרפתית](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [אירית](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [גוג'ראטית](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [האוסה](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [הינדי](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [קרואטית](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [הונגרית](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [ארמנית](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [אינדונזית](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [איגבו](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [איטלקית](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [יפנית](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [גאורגית](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [חמרית](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [קנאדה](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [קוריאנית](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [ליטאית](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [לטבית](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [מלאיאלאם](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [מראטהית](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [מלאית](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [מלטית](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [בורמזית](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [נפאלית](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [הולנדית](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [נורווגית](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [אודיה](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [פנג'אבית](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [פיליפינית](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [פולנית](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [פורטוגזית (פורטוגל)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [פורטוגזית (ברזיל)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [רומנית](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [רוסית](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [סינהלה](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [סלובקית](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [סלובנית](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [סרבית](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [שוודית](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [סווהילי](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [טמילית](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [טלוגו](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [תאית](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [טורקית](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [אוקראינית](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [אורדו](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [אוזבקית](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [וייטנאמית](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [יורובה](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [סינית (מפושטת)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [סינית (מסורתית)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **שפות:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-הפניה מרכזית ל־API של OmniRoute. היא מכסה את הממשק הציבורי של `/v1` ואת נקודות הקצה הנפוצות ביותר לניהול; [`docs/openapi.yaml`](../openapi.yaml) הקריא למכונה ועץ הנתיבים תחת `src/app/api/` הם המקורות המלאים והממצים.
+מדריך העזר המרכזי עבור ה־API של OmniRoute. הוא מכסה את הממשק הציבורי של `/v1` ואת נקודות הקצה הנפוצות ביותר לניהול; [`docs/openapi.yaml`](../openapi.yaml), הניתן לקריאה על ידי מכונה, ועץ הנתיבים תחת `src/app/api/` הם המקורות המקיפים.
 
-למטריצת היכולות הממוקדת של הפרוטוקול התואם ל־OpenAI ושל הספקים, ראו
+לעיון בפרוטוקול התואם ל־OpenAI ובמטריצת היכולות של הספקים, ראו
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+כל פריסה מספקת עותק משלה של המפרט ב־`/openapi.yaml`, שנוצר מתוך `docs/openapi.yaml` במהלך תהליך הבנייה. הוא כולל את גרסת הבנייה וכתובת URL יחסית של השרת (`./`), כך שהבקשות נשארות אצל המארח שסיפק את המסמך. לכלי שמייבא את הקובץ שהורד אין מארח כזה, ולכן יש להגדיר בו ידנית את כתובת הבסיס.
 
 ---
 
@@ -353,35 +355,37 @@ Content-Type: application/json
 
 הספקים הזמינים כוללים את OpenAI (GPT Image 2),‏ xAI (Grok Image),‏ Together AI (FLUX),‏ Fireworks AI,‏ Nebius (FLUX),‏ Hyperbolic,‏ NanoBanana,‏ **OpenRouter**,‏ **ZenMux**,‏ SD WebUI (מקומי),‏ ComfyUI (מקומי).
 
-`n` מחזיר `n` תמונות בתוך `data[]`. ספקים שה־API במעלה הזרם שלהם מחזיר תמונה אחת בכל קריאה
+`n` מחזיר `n` תמונות בתוך `data[]`. ספקים שממשק ה-API upstream שלהם מחזיר תמונה אחת בכל קריאה
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) מקבלים `n` קריאות נפרדות במעלה הזרם, כאשר לכל היותר 4 מהן
-מתבצעות במקביל. ערך `seed` קבוע מוזח לפי אינדקס הקריאה (`seed`, `seed + 1`, …), כך שהתמונות
-יהיו שונות אך יישארו ניתנות לשחזור. הערך `n` מוגבל ל־10. הבקשה כולה נכשלת אם אחת מהקריאות
-נכשלת. רשימת הפורמטים לפיצול הקריאות נמצאת ב־`SINGLE_IMAGE_FANOUT_FORMATS` בתוך
+NVIDIA NIM, Cloudflare Workers AI) מבצעים `n` קריאות upstream נפרדות, עם 4 קריאות פעילות לכל היותר. ערך
+`seed` קבוע מוזז לפי אינדקס הקריאה (`seed`,‏ `seed + 1`,‏ …), כך שהתמונות שונות אך נשארות ניתנות לשחזור. הערך
+`n` מוגבל ל-10. הבקשה כולה נכשלת אם קריאה כלשהי נכשלת. רשימת פורמטי ה-fan-out נמצאת ב-
+`SINGLE_IMAGE_FANOUT_FORMATS` בתוך
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux עושה שימוש חוזר בחיבור הקיים של מפתח ה־API ומקבל קידומות `zenmux/` או `zm/`:
+ZenMux עושה שימוש חוזר בחיבור הקיים עם מפתח ה-API ומקבל קידומות `zenmux/` או `zm/`:
 
-- `zenmux/openai/gpt-image-2` משתמש ב־OpenAI Images API של ZenMux. האפשרויות כוללות `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` ו־`response_format`.
-- מפרסמים אחרים, כגון `zm/meta/muse-image-1.0`, משתמשים בנקודת הקצה `:predict` של Vertex AI
-  ב־ZenMux. `n` ממופה אל `sampleCount`,‏ `aspect_ratio` אל `aspectRatio`, ו־`image_size`
-  (`1K`,‏ `2K`,‏ `4K`) אל `sampleImageSize`. ערך `size` בפיקסלים מספק יחס גובה־רוחב בלבד,
-  ואינו מבטיח ממדי פיקסלים. היחסים, הרזולוציות והכמויות הנתמכים משתנים לפי מודל.
+- `zenmux/openai/gpt-image-2` משתמש ב-API של OpenAI Images דרך ZenMux. האפשרויות כוללות את `size`,
+  `quality`,‏ `n`,‏ `output_format`,‏ `output_compression`,‏ `background` ו-`response_format`.
+- מפרסמים אחרים, כגון `zm/meta/muse-image-1.0`, משתמשים בנקודת הקצה `:predict` של Vertex AI דרך ZenMux. `n` ממופה אל `sampleCount`,‏ `aspect_ratio` אל `aspectRatio`, ו-`image_size`
+  (`1K`,‏ `2K`,‏ `4K`) אל `sampleImageSize`. ערך `size` בפיקסלים מספק יחס גובה-רוחב בלבד,
+  ואינו מבטיח ממדי פיקסלים. היחסים, הרזולוציות והכמויות הנתמכים משתנים לפי המודל.
 - `zm/inclusionai/ming-image-0.1-design` בוחר את הממדים בעצמו. יש להשמיט את `size`,
-  `aspect_ratio` ו־`image_size`; ערכים מפורשים יחזירו HTTP 400. ניתן לבקש PNG,‏ JPEG ו־WebP
+  `aspect_ratio` ו-`image_size`; ערכים מפורשים יחזירו HTTP 400. ניתן לבקש PNG,‏ JPEG ו-WebP
   באמצעות `output_format`.
 
-האינטגרציה הזו תומכת ביצירת תמונות מטקסט, ולא בעריכת תמונות ייחוס. פלט Vertex מנורמל אל
-`data[].b64_json`;‏ `response_format: "url"` מחזיר כתובת URL מסוג HTTPS במעלה הזרם, או כתובת
-URL של נתוני base64 כאשר זמינים רק בתים של תמונה. פלטים ריקים או מסוננים מחזירים שגיאה במקום
-הצלחה ללא תוכן. הגישה למודלים תלויה בחשבון ZenMux. ראו את
-[Vertex API של ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) ואת
+האינטגרציה הזו תומכת ביצירת תמונות מטקסט, ולא בעריכת תמונות ייחוס. פלט Vertex מנורמל ל-`data[].b64_json`;‏ `response_format: "url"` מחזיר כתובת URL מסוג HTTPS מה-upstream, או כתובת URL של נתוני base64 כאשר זמינים רק נתוני תמונה. פלטים ריקים או מסוננים
+מחזירים שגיאה במקום הצלחה עם תוצאה ריקה. הגישה למודלים תלויה בחשבון ZenMux.
+ראו את [Vertex API של ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) ואת
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+חיבור התחברות של Microsoft 365 Copilot משרת את `copilot-m365-web/m365-copilot-image`
+באמצעות כלי התמונות המובנה של Copilot: תור Copilot אחד לכל תמונה (`n` 1–4), כאשר `size` מכוון
+רק את הכיוון, והתמונות מוחזרות בתוך התשובה (`b64_json`, או כתובת URL של נתונים עבור
+`response_format: "url"`). ראו [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
-# הצגת כל מודלי התמונות
+# רשימת כל מודלי התמונות
 GET /v1/images/generations
 ```
 
@@ -822,25 +826,36 @@ POST /v1/providers/{provider}/images/generations
 
 ## API חיפוש
 
-הפשטה של ספקי חיפוש באינטרנט (Tavily, Brave, Exa, Serper ועוד).
+הפשטה של ספקי חיפוש באינטרנט (Tavily, Brave, Exa, Serper וכו').
 
 | שיטה | נתיב                   | תיאור                                                                                         |
 | ---- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | הצגת ספקי החיפוש המוגדרים והיכולות שלהם                                                       |
+| GET  | `/v1/search`           | הצגת ספקי החיפוש שהוגדרו והיכולות שלהם                                                        |
 | POST | `/v1/search`           | הרצת שאילתת חיפוש — גוף הבקשה עובר אימות באמצעות `v1SearchSchema`, ותומך במטמון ובאיחוד בקשות |
-| GET  | `/v1/search/analytics` | סטטיסטיקות פגיעות/השהיה/מטמון לפי ספק                                                         |
+| GET  | `/v1/search/analytics` | נתוני פגיעות/זמן תגובה/מטמון לפי ספק                                                          |
 
 **אימות:** מפתח API מסוג Bearer (`extractApiKey` + `isValidApiKey`). מדיניות החיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
 
+**בחירה אוטומטית:** ללא `provider`, הספק הזול ביותר עם חיבור שהוגדר מופעל
+ראשון, והספק הזול הבא משמש כחלופה במקרה כשל. ספקי מוצא אחרון חינמיים (`duckduckgo-free`)
+נמצאים בשימוש רק כאשר לא הוגדר שום דבר אחר. SearXNG באירוח עצמי נחשב כמוגדר לאחר שהחיבור שלו
+שומר `baseUrl` אמיתי (ולא את ברירת המחדל של הקטלוג `http://localhost:8888/search`): במקרה כזה
+הוא מדורג כספק בעלות $0 לפני ספקים הדורשים מפתח, כאשר הספק הזול ביותר הדורש מפתח משמש כחלופה,
+כולל כאשר SearXNG מחזיר 400, 401, 403 או 404. `baseUrl` שאינו כתובת URL חוקית מסוג `http(s)`
+או שמצביע על כתובת של מטא-נתונים בענן אינו נחשב. חיבור SearXNG ששומר אסימון מדורג באופן זה רק
+עבור `https://` או `http://` בלולאה חוזרת. מול `http://` מרוחק ולא מוצפן הוא לעולם אינו משמש
+כחלופה ונשאר מוצא אחרון, בשימוש רק כאשר לא הוגדר ספק אחר או כאשר הוא התבקש לפי שם, ולכן הוא
+אכן שולח את האסימון בטקסט גלוי בשני המקרים האלה.
+
 ### `provider_options` של Exa ושל Tavily
 
-Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך מאגר עם מרחב שמות:
+Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך מאגר בעל מרחב שמות:
 `provider_options.exa` (או `provider_options["exa-search"]`) ו-`provider_options.tavily`
 (או `provider_options["tavily-search"]`). רק המפתחות שלהלן מועברים הלאה. כל אחד מהם
-נבדק מול סכמת Zod משלו בקובץ `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-ומפתח עם סוג שגוי מושמט. כל מפתח אחר מתעלמים ממנו, כולל פרטי אימות, כתובת בסיס,
-`stream` ו-`outputSchema`. המפתחות השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...) ממשיכים לפעול
-כבעבר.
+נבדק מול סכמת Zod משלו ב-`open-sse/handlers/search/providerOptionsPassthrough.ts`,
+ומפתח שהטיפוס שלו שגוי מושמט. כל מפתח אחר מתעלמים ממנו, כולל פרטי אימות, כתובת בסיס,
+`stream` ו-`outputSchema`. המפתחות השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...)
+ממשיכים לפעול כבעבר.
 
 | ספק    | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקוננים                                                                                                                                  |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -848,38 +863,38 @@ Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך מאגר 
 | Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
 השדות הגנריים תמיד גוברים: `query`, `max_results`, `filters` (דומיינים), `country` והנושא
-שנגזר מתוך `search_type`. ב-Exa, `search_type: "news"` שומר על `category: "news"`.
+שנגזר מ-`search_type`. ב-Exa, `search_type: "news"` שומר על `category: "news"`.
 Tavily מקבל גם `search_type: "finance"` (`topic: "finance"`).
 
-עלות החיפוש של Firecrawl נרשמת עבור כל בלוק שהתחיל ובו 10 תוצאות שהוחזרו, במחיר של $0.002 (2
-קרדיטים) לבלוק, ולפחות בלוק אחד בכל קריאה
+עלות החיפוש ב-Firecrawl נרשמת עבור כל בלוק התחלתי של 10 תוצאות שהוחזרו, במחיר של $0.002
+(2 קרדיטים) לבלוק ולפחות בלוק אחד בכל קריאה
 ([חיוב Firecrawl](https://docs.firecrawl.dev/billing)): 11 תוצאות עולות $0.004.
 
-השדה הגנרי `time_range` מגיע כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן מסוג ISO)
-ו-Tavily מקבל `start_date` (`YYYY-MM-DD`). תאריך מפורש בתוך `provider_options`
-גובר על התאריך הממופה.
+השדה הגנרי `time_range` מועבר כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן
+ISO) ו-Tavily מקבל `start_date` (`YYYY-MM-DD`). תאריך מפורש בתוך `provider_options`
+עוקף את התאריך שמופה.
 
-תוצאות Exa משמרות את `id`, `highlights` (כל ההדגשות, ולא רק הראשונה ששימשה בתור
+תוצאות Exa שומרות את `id`, `highlights` (כל ההדגשות, ולא רק הראשונה ששימשה בתור
 `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ו-`extras` בתוך
-`provider_raw`. תוצאות Tavily משמרות את `images` ואת `favicon`.
+`provider_raw`. תוצאות Tavily שומרות את `images` ואת `favicon`.
 
-עלות החיפוש של Linkup נרשמת בסך $0.005 עבור `depth` בערכים `fast` ו-`standard`, ובסך $0.05 עבור
+עלות החיפוש ב-Linkup נרשמת כ-$0.005 עבור `depth` בערכים `fast` ו-`standard`, וכ-$0.05 עבור
 `deep` ([תמחור Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
-בין אם `depth` מגיע מתוך `provider_options` ובין אם מהגדרות החיבור.
+בלי קשר לשאלה אם `depth` מגיע מ-`provider_options` או מההגדרות של החיבור.
 
-Exa `type: "lite"` (Exa 3.0) מקבל קבוצת שדות מצומצמת יותר ודוחה את הבקשה כולה
-כאשר מוגדר שדה אחר כלשהו. עבור lite, `additionalQueries`, `systemPrompt` וכל מפתח של
+Exa `type: "lite"` (Exa 3.0) מקבל קבוצת שדות מצומצמת יותר ודוחה את הבקשה כולה כאשר מוגדר
+כל שדה אחר. במצב lite, `additionalQueries`, `systemPrompt` וכל מפתח של
 `contents`, מלבד `text` ו-`highlights`, מושמטים לפני הקריאה. השדות שהוצאו משימוש
-`subpages`, `subpageTarget`, `highlights.numSentences` ו-`highlights.highlightsPerUrl` אינם מועברים
-עוד.
+`subpages`, `subpageTarget`, `highlights.numSentences` ו-`highlights.highlightsPerUrl` אינם
+מועברים עוד.
 
-חישוב העלויות הוא לפי הרישום השטוח `costPerQuery`, למעט Exa, שפועל לפי התמחור העצמי של Exa:
-$0.007 לקריאה עבור `auto` (וגם עבור `fast` מדור קודם) או $0.004 עבור `lite` (וגם עבור
+חשבונאות העלויות היא הרישום השטוח `costPerQuery`, למעט Exa, שפועלת לפי התמחור
+העצמאי של Exa: $0.007 לכל קריאה עבור `auto` (וגם עבור `fast` מדור קודם) או $0.004 עבור `lite` (וגם עבור
 `instant` מדור קודם), עבור 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לכל
-תוצאה שהוחזרה כאשר מוגדר `contents.summary`. Tavily נרשם כקרדיט אחד ($0.008) עבור
-`search_depth` בערכים `basic`, `fast` ו-`ultra-fast`, וכ-2 קרדיטים ($0.016) עבור `advanced`
-([קרדיטי API של Tavily](https://docs.tavily.com/documentation/api-credits)). קריאה עם
-`auto_parameters: true` שבה Tavily משדרג ל-advanced עדיין נרשמת כקרדיט אחד.
+תוצאה שהוחזרה כאשר `contents.summary` מוגדר. Tavily נרשמת כקרדיט אחד ($0.008) עבור
+`search_depth` `basic`, `fast` ו-`ultra-fast`, וכ-2 קרדיטים ($0.016) עבור `advanced`
+([קרדיטים של Tavily API](https://docs.tavily.com/documentation/api-credits)). קריאה עם
+`auto_parameters: true` שבה Tavily משדרגת ל-advanced עדיין נרשמת כקרדיט אחד.
 
 ---
 
@@ -1007,29 +1022,26 @@ codex exec "Responda apenas: PONG"
 
 ## שימוש בשירות עצמי (`/api/usage/om-usage`)
 
-כל מפתח API יכול לקרוא את השימוש והמכסות **שלו** — ללא אימות ניהולי. זו נקודת הקצה שבה
-לקוח (CLI, חלונית OmniCopilot) משתמש כדי להציג לבעל המפתח את ההוצאות שלו.
+כל מפתח API יכול לקרוא** משלו** שימוש ומכסות — אין אישור ניהול. זוהי נקודת הקצה שבה משתמש לקוח (CLI, פאנל OmniCopilot ) כדי להציג לבעל מפתח את ההוצאה שלו.
 
 ```bash
-# צורת טקסט (החוזה ההיסטורי — טקסט פשוט עבור מסוף)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# צורה מובנית — מה שממשק משתמש צורך
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-למפתח חייבת להיות האפשרות **`allowUsageCommand`** מופעלת (כבויה כברירת מחדל — מנהל מפתחות
-ה-API בלוח הבקרה מפעיל או מכבה אותה עבור כל מפתח). בלעדיה נקודת הקצה מחזירה `403`.
+המפתח חייב להיות**`allowUsageCommand`** מופעל (כבוי כברירת מחדל — מנהל מפתחות ה-API של לוח המחוונים מחליף אותו לפי מפתח). בלעדיו נקודת הקצה עונה `403`.
 
-`?format=json` מחזיר מבנה מובחן, כך שהמתקשר לעולם אינו קורא שדה נתונים מתשובת סירוב.
-במקרה של הצלחה:
+`?format=json` מחזיר צורה מובחנת כך שמתקשר לעולם לא קורא שדה נתונים מתוך סירוב. על הצלחה:
 
 ```jsonc
 {
   "allowed": true,
-  // קיים רק כאשר המפתח הצטרף למגבלות שימוש לכל מפתח (בדולר יומי/שבועי):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1038,9 +1050,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // תמונת מצב של מכסת הספק שנבחר, או null כאשר עדיין דבר לא נשמר במטמון:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // תמונת מצב של כל חיבור, כדי שממשק משתמש יוכל להציג כמה ספקים זה לצד זה:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1048,64 +1060,49 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-במקרה של סירוב (`401` מפתח שגוי / `403` לא מורשה), אותו נתיב מחזיר
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider`
-קיימים אך ריקים (המפתח מורשה, אך עדיין לא נאסף מידע) מייצגים מצב שונה מסירוב, ורק
-צורת ה-JSON מבדילה בין המצבים.
+בסירוב (`401` bad key / `403` לא מותר) אותו מסלול מחזיר `{ "allowed": false, "error": { "message": "…" } }` — a present-אבל-ריק `personal`/`provider` (מפתח מותר, עדיין לא למדו כלום) הוא מצב שונה מסירוב, ורק צורת JSON מבדילה אותם.
 
-**אימות:** מפתח ה-API מסוג Bearer של המתקשר עצמו, שעבר אימות באמצעות `isValidApiKey` — זה
-אינו ממשק הניהול (`/api/keys/…`), שנשאר מאחורי `requireManagementAuth`.
+**אישור:** מפתח ה-Bearer API של המתקשר עצמו, מאומת עם `isValidApiKey` — זהו _לא_ משטח הניהול (`/api/keys/…`), שנשאר מאחורי `requireManagementAuth`.
 
-### אחוזי מכסה גולמיים לעומת אחוזים מותאמים לסף
+### אחוזי מכסה גולמיים לעומת חתך מותאמים
 
-בעת צריכת `/api/usage/om-usage`, על המתקשרים לשים לב להבדל בין האחוזים המוצגים על ידי
-**פלט הטקסט הפשוט** לבין אלה שבפלט ה-**JSON** המובנה:
+בעת צריכת `/api/usage/om-usage`, המתקשרים צריכים לשים לב להבחנה בין האחוזים שמוצגים על ידי** פלט טקסט רגיל** והמובנה**JSON** :
 
-| היבט                      | תבנית טקסט פשוט (`/api/usage/om-usage` / `@@om-usage`)                                           | תבנית JSON (`?format=json`)                                               |
-| :------------------------ | :----------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
-| **שדה פלט**               | `NN% left` (לדוגמה, `20% left`)                                                                  | `provider.quotas` / `providers[].quotas`                                  |
-| **מדידה**                 | **מכסה שימושית מותאמת לסף**: הקיבולת שנותרה מעל סף החיתוך                                        | **מכסת ספק גולמית**: מדידת הספק ללא התאמות                                |
-| **שינוי קנה מידה לפי סף** | שינוי קנה המידה מתבצע באמצעות `effectiveRemainingPercent()`, כך שהעתודה המוגנת מוצגת כ-`0% left` | ללא שינוי (ערכי תמונת המצב הגולמיים כפי שדווחו על ידי הספק)               |
-| **נתוני סף**              | משולבים באחוז המוצג                                                                              | נשמרים ב-`quotaWindowThresholds` עבור כל חיבור (או בברירות המחדל של השרת) |
-| **צרכן עיקרי**            | ממשקי CLI אינטראקטיביים, הנחיות מסוף, מפעילים אנושיים                                            | אינטגרציות תוכנתיות, לוחות בקרה, ניתוח נתונים, מעקבי חיוב                 |
+| אַספֶּקט            | פורמט טקסט רגיל (`/api/usage/om-usage` / `@@om-usage`)                              | פורמט JSON (`?format=json`)                                        |
+| :------------------ | :---------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
+| **שדה פלט**         | `NN% left` (למשל, `20% left`)                                                       | `provider.quotas` / `providers[].quotas`                           |
+| **מְדִידָה**        | **קצבה שמישה מותאמת לחתוך** : קיבולת שנותרה מעל סף הניתוק                           | **מכסה גולמית במעלה הזרם** : מדידת ספק לא מותאמת                   |
+| **קנה מידה של חתך** | קנה מידה באמצעות `effectiveRemainingPercent()` כך שהשמורה המוגנת תיקרא כ- `0% left` | אין (ערכי תמונת מצב גולמיים כפי שדווחו על ידי הספק)                |
+| **נתוני סף**        | משולב באחוז המוצג                                                                   | מאוחסן ב- `quotaWindowThresholds` לכל חיבור (או ברירת מחדל של שרת) |
+| **צרכן ראשוני**     | CLIs אינטראקטיבי, הנחיות מסוף, מפעילים אנושיים                                      | אינטגרציות פרוגרמטיות, לוחות מחוונים, אנליטיקה, מעקבי חיוב         |
 
-#### הנוסחה להתאמת הסף
+#### נוסחת התאמת ה-Cutoff
 
-OmniRoute תומך בספי חיתוך יזומים של מכסות כדי למנוע התרוקנות של הספק במעלה הזרם (מוגדרים באמצעות
-`quotaWindowThresholds` של החיבור, ברירות המחדל של הספק או הגדרות חוסן גלובליות). כאשר סף חיתוך
-(לדוגמה, `cutoff = 25%`) פעיל בחלון מכסה, מעבד הטקסט מחשב את המכסה שנותרה כך:
+OmniRoute תומך בקיצוץ מכסה יזום כדי למנוע מיצוי במעלה הזרם (מוגדר באמצעות חיבור `quotaWindowThresholds`, ברירות מחדל של ספק או הגדרות חוסן גלובלי). כאשר סף חיתוך (למשל, `cutoff = 25%`) פעיל בחלון מכסה, עורך הטקסט מחשב את הקצבה שנותרה כ:
 
-- אם `remaining <= cutoff`: מוחזר `0%`.
-- אם `remaining > cutoff`: מוחזר `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- אם `remaining <= cutoff`: מחזיר `0%`.
+- אם `remaining > cutoff`: מחזיר `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-פלט הטקסט המעוצב מעגל ערך זה למספר השלם הקרוב ביותר (`Math.round(...)`).
+פלט הטקסט המעוצב מעגל את זה למספר השלם הקרוב ביותר (`Math.round(...)`).
 
 #### דוגמה להמחשה
 
-שקול חלון של ספק עם **60% שימוש גולמי** (ולכן **40% מכסה גולמית שנותרה**) וסף מוגדר של
-**25% מכסה שנותרה**:
+שקול חלון ספק עם** 60% שימוש גולמי** (לָכֵן** 40% מכסה גולמית שנותרה** ) וקובץ מוגדר** קיצוץ מכסה של 25%.** סַף:
 
-| ייצוג                           | חישוב                                              |  נותר   |              שימוש משתמע              |
-| :------------------------------ | :------------------------------------------------- | :-----: | :-----------------------------------: |
-| **JSON גולמי (`?format=json`)** | תמונת מצב במעלה הזרם (`quotas[window]`)            | **40%** |                **60%**                |
-| **תבנית טקסט (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (אם מחשבים `100 - remaining`) |
+| יִצוּג                        | תַחשִׁיב                                           | נוֹתָר  |             מרומז בשימוש              |
+| :---------------------------- | :------------------------------------------------- | :-----: | :-----------------------------------: |
+| **Raw JSON (`?format=json`)** | תמונת מצב במעלה הזרם (`quotas[window]`)            | **40%** |                **60%**                |
+| **פורמט טקסט (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (אם מחשבים `100 - remaining`) |
 
-- **מדוע הטקסט מציג 20% שנותרו:** מתוך 40% מהמכסה הפיזית שנותרה בחשבון, 25% שמורים
-  על ידי מדיניות הסף. למתקשר נותרו רק 15% מתוך 75% מרווח השימוש האפשרי לפני שהנתב יפסיק
-  לנתב אל החיבור הזה. שינוי קנה המידה מבטיח שהחיבור יסמן מיצוי (`0% left`) בדיוק כאשר
-  הניתוב ייפסק.
-- **מדוע JSON משמר את הערכים הגולמיים:** מטען ה-JSON מחזיר את תמונת המצב המדויקת של הספק (`UsageSnapshot`)
-  כך שלכלים חיצוניים יש גישה לניצול בפועל במעלה הזרם ול-`quotaWindowThresholds` ברמת החיבור,
-  ללא שינוי קנה מידה מאבד מידע בצד השרת.
+- **מדוע טקסט מציג 20% שנותרו:** מתוך 40% המכסה הפיזית שנותרה בחשבון, 25% נשמרים במדיניות הקיצוץ. למתקשר נותרו רק 15% מתוך 75% מרווח גחון שמיש לפני שהנתב יפסיק לנתב לחיבור זה. קנה מידה מבטיח שהחיבור מאותת מיצוי (`0% left`) בדיוק כאשר הניתוב ייפסק.
+- **מדוע JSON משמרת ערכים גולמיים:** מטען ה- JSON מחזיר את תמונת המצב המדויקת של הספק (`UsageSnapshot`) כך שלכלים חיצוניים יש גישה לניצול אמת במעלה הזרם ול- `quotaWindowThresholds` ברמת החיבור ללא שינוי קנה מידה מפסיד בצד השרת.
 
-#### הנחיות למעבר של צרכנים
+#### הדרכה להגירה לצרכנים
 
-אם אינטגרציה חיצונית (כגון תוסף לעורך או הרחבה לסוכן) חילצה בעבר נתונים מנקודת הקצה של הטקסט
-(`NN% left`) וחישבה את אחוז השימוש כ-`100 - NN`, המעבר ל-`?format=json` פירושו:
+אם אינטגרציה חיצונית (כגון תוסף עורך או סיומת סוכן) גרדה בעבר את נקודת הקצה של הטקסט (`NN% left`) וחישבה את אחוז השימוש כ- `100 - NN`, העברה ל- `?format=json` פירושה:
 
-- קריאת ערכי JSON גולמיים תשקף את **הצריכה בפועל במעלה הזרם** (60% בשימוש בדוגמה שלעיל).
-- אם האינטגרציה מעוניינת לשמר את המשמעות של הקצבה הזמינה של נקודת הקצה לטקסט, היא יכולה לחשב
-  בצד הלקוח את נוסחת היתרה האפקטיבית באמצעות `quotaWindowThresholds` עבור עקיפות ברמת החיבור.
+- קריאת ערכי JSON גולמיים תשקף** צריכה בפועל במעלה הזרם** (60% בשימוש בדוגמה למעלה).
+- אם האינטגרציה מעוניינת לשמר את סמנטיקה שמישה של נקודת הקצה של הטקסט, היא יכולה להעריך את הנוסחה האפקטיבית שנותרה בצד הלקוח באמצעות `quotaWindowThresholds` לעקיפות ברמת החיבור.
 
 ---
 
@@ -1211,54 +1208,38 @@ https://api.anthropic.com/api/oauth/usage` ואת Codex `GET https://chatgpt.com
 
 ## לוח מחוונים וניהול
 
-נתיבי ניהול (`/api/*`, למעט אימות/כניסה ציבוריים) **אינם** מורשים באמצעות מפתחות API רגילים של הסקת מסקנות. משפחות אישורים, היקפים ודוגמאות curl:
-[אימות ניהול](../guides/MANAGEMENT-AUTH.md).
+מסלולי ניהול (`/api/*` למעט auth/login ציבורי) הם** לֹא** מורשה על ידי מפתחות API רגילים. משפחות אישורים, היקפים ודוגמאות תלתלים: [אימות ניהול](../guides/MANAGEMENT-AUTH.md).
 
 ### אימות
 
-| נקודת קצה                     | שיטה     | תיאור                                                                                                                                                                                                                                                                |
-| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | כניסה                                                                                                                                                                                                                                                                |
-| `/api/auth/logout`            | POST     | יציאה                                                                                                                                                                                                                                                                |
-| `/api/settings/require-login` | GET/POST | סטטוס הכניסה (GET, ציבורי). POST מגדיר את הסיסמה / מחליף את מצב הכניסה: מוגבל למפעיל לאחר שקיימת סיסמה (הפעלת לוח המחוונים, CLI מקומי או כניסה מושבתת — מפתחות API ואסימוני `oma_` מקבלים `403`); הפעלת לוח המחוונים שולחת את `currentPassword` כדי להחליף את הסיסמה |
+| נקודת קצה                     | שִׁיטָה  | תֵאוּר                                                                                                                                                                                                                                                       |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/login`             | POST     | כְּנִיסָה לַמַעֲרֶכֶת                                                                                                                                                                                                                                        |
+| `/api/auth/logout`            | POST     | התנתק                                                                                                                                                                                                                                                        |
+| `/api/settings/require-login` | GET/POST | סטטוס התחברות (GET, ציבורי). POST מגדיר את הסיסמה / מחליף כניסה: למפעיל בלבד ברגע שקיימת סיסמה (הפעלה של לוח המחוונים, CLI מקומי, או כניסה מושבתת מפתחות — API ואסימוני `oma_` מקבלים `403`); הפעלה של לוח המחוונים שולחת `currentPassword` להחליף את הסיסמה |
 
 ### ניהול ספקים
 
-| נקודת קצה                               | שיטה                      | תיאור                                                                                                                                            |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/providers`                        | GET/POST                  | הצגת / יצירת ספקים                                                                                                                               |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | ניהול ספק                                                                                                                                        |
-| `/api/providers/[id]/test`              | POST                      | בדיקת חיבור הספק                                                                                                                                 |
-| `/api/providers/[id]/models`            | GET                       | הצגת מודלי הספק                                                                                                                                  |
-| `/api/providers/validate`               | POST                      | אימות תצורת הספק                                                                                                                                 |
-| `/api/providers/bulk`                   | POST                      | הוספה גורפת של מפתחות API עבור ספק אחד                                                                                                           |
-| `/api/providers/import`                 | POST                      | ייבוא רשימת ספקים הטרוגנית מקובץ CSV/JSON מפוענח (#6836); תוצאות כשל חלקיות לכל שורה                                                             |
-| `/api/provider-nodes*`                  | Various                   | ניהול צומתי ספק                                                                                                                                  |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | מודלים מותאמים אישית ועקיפות לכל מודל (הוספה, עדכון, הסתרה/הצגה, מחיקה)                                                                          |
-| `/api/provider-models/validate-and-add` | POST                      | אימות קפדני של החיבור לפי בחירה, המאומת באמצעות אימות ניהול, ורישום אטומי של מודל מותאם אישית; ראו [אימות מודלים](../guides/MODEL-VALIDATION.md) |
+| נקודת קצה                               | שִׁיטָה                   | תֵאוּר                                                                                                                       |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | רשום/צור ספקים                                                                                                               |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | נהל ספק                                                                                                                      |
+| `/api/providers/[id]/test`              | POST                      | בדוק חיבור ספק                                                                                                               |
+| `/api/providers/[id]/models`            | GET                       | רשימת דגמי ספקים                                                                                                             |
+| `/api/providers/validate`               | POST                      | אמת את תצורת הספק                                                                                                            |
+| `/api/providers/bulk`                   | POST                      | הוסף מפתחות API בכמות גדולה עבור ספק ONE                                                                                     |
+| `/api/providers/import`                 | POST                      | ייבא ספק הטרוגני LIST מקובץ CSV/JSON מנתח (#6836); תוצאות של כשל חלקי בשורה                                                  |
+| `/api/provider-nodes*`                  | שׁוֹנִים                  | ניהול צומת ספק                                                                                                               |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | מודלים מותאמים אישית ועקיפות לכל דגם (הוסף, עדכון, hide/show, מחק)                                                           |
+| `/api/provider-models/validate-and-add` | POST                      | אימות ניהול מאומת, אישור חיבור קפדני להצטרפות ורישום מודל אטומי מותאם אישית; ראה [אימות מודל](../guides/MODEL-VALIDATION.md) |
 
-עבור מודלים מסונכרנים/מיובאים, `PUT /api/provider-models` מקבל את `provider`, `modelId` ו-`
-maxOutputTokenOverride`: מספר שלם חיובי מגדיר את תקרת אסימוני הפלט הידנית, ו-`null`
-מנקה אותה ומשחזר את ברירת המחדל. `GET /api/provider-models?provider=<provider>` מחזיר ערכים אלה
-ב-`modelOutputOverrides`, כולל מודלים ללא רשומת מודל מותאם אישית. העקיפה משתמשת ביכולת זמן הריצה
-`max_output_tokens` ושורדת סנכרון מחדש של מודל. דף הספקים התואמים ל-OpenAI מציע את אותם פקדי עריכה/ניקוי
-ומסמן מודלים עם תמיכה מפורשת בראייה.
+עבור דגמי synced/imported, `PUT /api/provider-models` מקבל `provider`, `modelId` ו- `maxOutputTokenOverride`: מספר שלם חיובי קובע את מכסה אסימון הפלט הידני, ו- `null` מנקה אותו כדי לשחזר את ברירת המחדל. `GET /api/provider-models?provider=<provider>` מחזיר ערכים אלה ב- `modelOutputOverrides`, כולל מודלים ללא שורת מודל מותאם אישית. העקיפה משתמשת ביכולת ה-Runtime `max_output_tokens` ושורדת סנכרון מחדש של המודל. דף הספקים התואם OpenAI מציע את אותם בקרות edit/clear ומסמן דגמים עם תמיכה בראייה מפורשת.
 
-בצומת ספק תואם, נתיבי הכתיבה (`POST`, `PUT`, `PATCH`, `DELETE` ו-`
-/api/provider-models/validate-and-add`) מאחסנים את מזהה המודל כמזהה הגולמי של הספק במעלה הזרם: מזהה
-שהודבק מרשימה עם קידומת מאבד כל רצף מוביל של קידומות הצומת עצמו, והמזהה המאוחסן מוחזר בתגובות.
-מזהים מסומנים בקו נטוי של ספקים קנוניים (לדוגמה `nvidia/nemotron-…`) מאוחסנים כפי שהם. `/v1/models`
-לעולם אינו פולט מזהה מוערם מהצורה `<prefix>/<prefix>/<model>`.
+בצומת ספק תואם, נתיבי הכתיבה (`POST`, `PUT`, `PATCH`, `DELETE` ו- `/api/provider-models/validate-and-add`) מאחסנים את מזהה המודל כמזהה למעלה הזרם החשוף: מזהה שהודבק מרישום עם קידומת ממוטט כל ערימה מובילה של הקידומת של הצומת עצמו, והתגובות מהדהדות את המזהה המאוחסן. המזהים החתוכים של ספקים קנוניים (למשל `nvidia/nemotron-…`) מאוחסנים מילה במילה. `/v1/models` אף פעם לא פולט מזהה `<prefix>/<prefix>/<model>` מוערם.
 
-צמתים מותאמים אישית של Chat Completions מתאימים opt-outs מפורשים של reasoning ל-backend במעלה הזרם. בדיקת חיבור מוצלחת בוחרת אוטומטית פקדי chat-template עבור כל מזהה מודל מדויק
-שהרשומה שלו ב-`/models` מוכיחה ערך `owned_by` מוכר: `vllm`,‏ `sglang` או `llamacpp`.
-עטיפות שקופות התואמות ל-OpenAI עשויות לשמר את רשומת המודל המקורית בתוך אובייקט מקונן
-`openai`; הזיהוי עוקב אחר עד שלוש מעטפות כאלה. מודלים עם בעלות חסרה, לא מוכרת או
-סותרת שומרים על התנהגות OpenAI רגילה. הזיהוי משתמש מחדש בבקשת הקטלוג הקיימת,
-אינו מייצר אסימוני השלמה, ומתבטל כאשר נקודת הקצה של החיבור משתנה.
+צמתים מותאמים אישית להשלמות צ'אט מתאימים את ביטולי הסכמה מפורשים של הסכמה ל-backend במעלה הזרם. בדיקת חיבור מוצלחת בוחרת אוטומטית בקרי תבנית צ'אט עבור כל דגם מדויק ID שהזנת `/models` שלו מוכיחה ערך `owned_by` מוכר: `vllm`, `sglang` או `llamacpp`. עטיפות שקופות תואמות OpenAI עשויות לשמר את ערך הדגם המקורי בתוך אובייקט `openai` מקונן; זיהוי עוקב אחר עד שלוש מעטפות כאלה. מודלים עם בעלות חסרה, לא ידועה או סותרת שומרים על התנהגות OpenAI רגילה. זיהוי עושה שימוש חוזר בבקשת הקטלוג הקיימת, אינו יוצר אסימוני השלמה, והוא אינו חוקי כאשר נקודת הקצה של החיבור משתנה.
 
-כדי לקבע את ההתנהגות עבור backend שאינו חושף מטא-נתונים אלה, השתמשו ב-API הקיים לעדכון
-חלקי של הספק:
+כדי להצמיד את ההתנהגות עבור קצה אחורי שאינו חושף את המטא נתונים הללו, השתמש בעדכון הספק החלקי הקיים API:
 
 ```json
 {
@@ -1268,107 +1249,91 @@ maxOutputTokenOverride`: מספר שלם חיובי מגדיר את תקרת א�
 }
 ```
 
-שלחו גוף זה עם `PUT /api/providers/<connection-id>`. בחיבור זה, מאמץ reasoning מפורש
-של `none` נשלח בתור `chat_template_kwargs.thinking=false` ובתור
-`chat_template_kwargs.enable_thinking=false`. ערכי template מקוריים מפורשים נשארים
-הסמכותיים, אלא אם כלל reasoning בצד השרת כופה מאמץ. ההגדרה חלה רק כאשר חיבור מותאם אישית
-תואם OpenAI מפעיל גוף Chat Completions; בקשות Responses וספקים רגילים שומרים על מבנה
-הבקשה המקורי שלהם. הגדירו את `reasoningControl` ל-`openai` כדי לכפות העברה רגילה של
-`reasoning_effort` של OpenAI, או השמיטו אותו/הגדירו אותו ל-`null` כדי להשתמש בזיהוי אוטומטי.
+שלח את הגוף הזה עם `PUT /api/providers/<connection-id>`. על החיבור הזה, מאמץ חשיבה מפורש של `none` נשלח כ- `chat_template_kwargs.thinking=false` ו- `chat_template_kwargs.enable_thinking=false`. ערכי תבנית מקוריים מפורשים נשארים סמכותיים אלא אם כלל חשיבה בצד השרת מאלץ מאמץ. ההגדרה חלה רק כאשר חיבור מותאם אישית תואם OpenAI שולח גוף השלמות צ'אט; בקשות תגובות וספקים רגילים שומרים על צורת הבקשה המקורית שלהם. הגדר `reasoningControl` ל- `openai` כדי לאלץ מעבר OpenAI `reasoning_effort` רגיל, או השמט את it/set ל- `null` כדי להשתמש בזיהוי אוטומטי.
 
-בקשות מסווג במצב אוטומטי של Claude Code משביתות כברירת מחדל חשיבה מקורית כאשר אינן
-מכילות פקדי reasoning מפורשים. הזיהוי משתמש בסמן המערכת של המסווג בבקשות בפורמט Claude,
-ולא בשמות מודלים או במגבלות השלמה. פקדי גוף מפורשים, כותרות effort/thinking נתמכות,
-כללי ניתוב ומאמץ המודל שנפתר שומרים על העדיפות הקיימת שלהם. שני שלבי המסווג שומרים על
-ההנחיות, מגבלות ההשלמה, רצפי העצירה ופסקי הדין האמיתיים של הרשאות במעלה הזרם; השלב השני
-עדיין יכול להפיק את ה-reasoning הגלוי שביקש כטקסט רגיל.
+סיווג מצב אוטומטי של Claude Code מבקש חשיבה מקומית המוגדרת כברירת מחדל למושבת כאשר הם אינם מכילים פקדי הגיון מפורשים. איתור משתמש בסמן המערכת של המסווגן בבקשות בפורמט קלוד, לא בשמות מודלים או מגבלות השלמה. בקרות גוף מפורשות, כותרות effort/thinking נתמכות, כללי ניתוב ומאמץ מודל פתור שומרים על העדיפות הקיימת שלהם. שני שלבי המסווגים שומרים על ההנחיות, מגבלות ההשלמה, רצפי העצירה ופסיקות ההרשאה האמיתיות במעלה הזרם; השלב השני עדיין יכול לייצר את ההיגיון הגלוי המבוקש שלו כטקסט רגיל.
 
-### תזרימי OAuth
+### OAuth זורמים
 
-| נקודת קצה                        | שיטה    | תיאור             |
-| -------------------------------- | ------- | ----------------- |
-| `/api/oauth/[provider]/[action]` | Various | OAuth ספציפי לספק |
+| נקודת קצה                        | שִׁיטָה  | תֵאוּר            |
+| -------------------------------- | -------- | ----------------- |
+| `/api/oauth/[provider]/[action]` | שׁוֹנִים | OAuth ספציפי לספק |
 
 ### ניתוב ותצורה
 
-| נקודת קצה             | שיטה     | תיאור                      |
-| --------------------- | -------- | -------------------------- |
-| `/api/models`         | GET/PUT  | רשימת מודלים / עדכון כינוי |
-| `/api/models/alias`   | GET/POST | כינויי מודלים              |
-| `/api/models/catalog` | GET      | כל המודלים לפי ספק וסוג    |
-| `/api/combos*`        | Various  | ניהול צירופים              |
-| `/api/keys*`          | Various  | ניהול מפתחות API           |
-| `/api/pricing`        | GET      | תמחור מודלים               |
+| נקודת קצה             | שִׁיטָה  | תֵאוּר                    |
+| --------------------- | -------- | ------------------------- |
+| `/api/models`         | GET/PUT  | רשימת דגמים / עדכון כינוי |
+| `/api/models/alias`   | GET/POST | כינויים של דגם            |
+| `/api/models/catalog` | GET      | כל הדגמים לפי ספק + סוג   |
+| `/api/combos*`        | שׁוֹנִים | ניהול קומבו               |
+| `/api/keys*`          | שׁוֹנִים | ניהול מפתחות API          |
+| `/api/pricing`        | GET      | תמחור דגם                 |
 
-#### מקור מגבלות המודל
+#### מגבלת מוצא הדגם
 
-`GET /api/models?withLimits=1` (גם `true`; הערך `0`/`false`, או השמטתו, משאיר את מטען
-ברירת המחדל ללא שינוי) מוסיף את `contextWindow`,‏ `maxInputTokens`,‏ `maxOutputTokens`
-ואובייקט `capsSource` לכל שורת מודל. `capsSource` מציין את הכלל שסיפק כל מגבלה, כך
-שניתן לעקוב אחר מגבלה מפתיעה (לדוגמה 128k במודל של 1M) עד למקורה. הערכים שנפתרו הם
-אותם ערכים שבהם משתמש הניתוב; הדגל מוסיף שדות בלבד ולעולם אינו משנה ערך. כל ערך אחר של
-`withLimits` נדחה עם `400`.
+`GET /api/models?withLimits=1` (גם `true`; `0`/`false` או השמטה שלו שומר על עומס ברירת המחדל ללא שינוי) מוסיף `contextWindow`, `maxInputTokens`, `maxOutputTokens` ואובייקט `capsSource` לכל שורת דגם. `capsSource` שמה את הכלל שסיפק כל מגבלה, כך שמגבלה מפתיעה (לדוגמה 128k בדגם 1M) ניתן לייחס למקור שלה. הערכים שנפתרו הם אותם הערכים שבהם משתמש הניתוב; הדגל רק מוסיף שדות ולעולם לא משנה ערך. כל ערך `withLimits` אחר נדחה עם `400`.
 
-| ערך `capsSource`                             | מקור                                                           |
+| `capsSource`                                 | מָקוֹר                                                         |
 | -------------------------------------------- | -------------------------------------------------------------- |
-| `override:context`                           | עקיפת חלון ההקשר שנשמרה (`model_context_overrides`)            |
-| `override:max_input` / `override:max_output` | עקיפת יכולת שנשמרה של `max_input_tokens` / `max_output_tokens` |
-| `static-authoritative:<provider>/<model>`    | טבלת חלונות הקשר סטטית וסמכותית                                |
-| `synced:<provider>/<model>`                  | שורת יכולות מסונכרנת של models.dev                             |
-| `registry:<provider>/<model>`                | רשומת רישום של הספק                                            |
-| `spec:<model>`                               | מפרט מודל סטטי                                                 |
-| קידומת `effort-base:`                        | שורה שנלקחה ממודל הבסיס של וריאנט עם סיומת effort              |
-| `none`                                       | אף מקור אינו מצהיר על המגבלה (הערך הוא `null`)                 |
+| `override:context`                           | עקיפה מתמשכת של חלון ההקשר (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | עקיפה מתמשכת של יכולת `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | טבלת הקשר-חלון סטטית סמכותית                                   |
+| `synced:<provider>/<model>`                  | שורת היכולת המסונכרנת models.dev                               |
+| `registry:<provider>/<model>`                | ערך הרישום של הספק                                             |
+| `spec:<model>`                               | מפרט דגם סטטי                                                  |
+| קידומת `effort-base:`                        | שורה שאולה מדגם הבסיס של וריאנט עם סיומת מאמץ                  |
+| `none`                                       | אף מקור לא מצהיר על הגבול (הערך הוא `null`)                    |
 
-מימוש: `getResolvedModelCapabilitiesWithLimitSources()` בתוך `src/lib/modelCapabilities.ts`
-ושרשראות הקדימות בתוך `src/lib/modelCapabilityLimits.ts`.
+יישום: `getResolvedModelCapabilitiesWithLimitSources()` ב- `src/lib/modelCapabilities.ts` ושרשראות הבכורה ב- `src/lib/modelCapabilityLimits.ts`.
 
-### שימוש וניתוח נתונים
+### שימוש ואנליטיקה
 
-| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                          |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/usage/history`             | GET             | היסטוריית שימוש                                                                                                                                                                                                                                                                      |
-| `/api/usage/logs`                | GET             | יומני שימוש                                                                                                                                                                                                                                                                          |
-| `/api/usage/request-logs`        | GET             | יומנים ברמת הבקשה                                                                                                                                                                                                                                                                    |
-| `/api/usage/[connectionId]`      | GET             | שימוש לפי חיבור                                                                                                                                                                                                                                                                      |
-| `/api/usage/token-limits`        | GET/POST/DELETE | מכסות תקציב למגבלות אסימונים לפי מפתח API                                                                                                                                                                                                                                            |
-| `/api/usage/model-latency-stats` | GET             | מצטבר מתגלגל של זמן האחזור לפי ספק/מודל (ממוצע/p50/p95/p99, שיעור הצלחה); מסננים: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                    |
-| `/api/usage/cache-health`        | GET             | סיכום תקינות מטמון ההנחיות לאורך `call_logs` — יחס כתיבה/קריאה, התפלגות גודל הכתיבה p50/p90/p99, ריכוז כתיבות כבדות, פילוח לפי מודל ופסק דין `healthy`/`degraded`/`thrash`/`no-data`; פרמטרי שאילתה `range` (`1h`\|`24h`\|`7d`\|`30d`, ברירת מחדל `24h`) ו-`model` אופציונלי (#8827) |
+| נקודת קצה                        | שִׁיטָה         | תֵאוּר                                                                                                                                                                                                                                                                      |
+| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | היסטוריית שימוש                                                                                                                                                                                                                                                             |
+| `/api/usage/logs`                | GET             | יומני שימוש                                                                                                                                                                                                                                                                 |
+| `/api/usage/request-logs`        | GET             | יומנים ברמת הבקשה                                                                                                                                                                                                                                                           |
+| `/api/usage/[connectionId]`      | GET             | שימוש לכל חיבור                                                                                                                                                                                                                                                             |
+| `/api/usage/token-limits`        | GET/POST/DELETE | תקציבים להגבלת אסימון לכל מפתח ממשק API                                                                                                                                                                                                                                     |
+| `/api/usage/model-latency-stats` | GET             | מצטבר חביון per-provider/model מתגלגל (avg/p50/p95/p99, שיעור הצלחה); מסננים: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                               |
+| `/api/usage/cache-health`        | GET             | סיכום בריאות המטמון על יחס `call_logs` — write/read, הפצת גודל כתיבה p50/p90/p99, ריכוז כתיבה כבדה, פיצול לכל דגם ופסק דין `healthy`/`degraded`/`thrash`/`no-data` ; פרמטרים של שאילתה `range` (`1h`\| `24h`\| `7d`\| `30d`, ברירת מחדל `24h`) ו- `model` (#8827) אופציונלי |
 
-### הרשאות מפתחות API
+### הרשאות מפתח API
 
-`PATCH /api/keys/{id}` מעדכן את ההרשאות של מפתח קיים. כמו כל נתיב `/api/keys*`, הוא דורש הרשאת ניהול (ראו [אימות ניהול](../guides/MANAGEMENT-AUTH.md)), ולא מפתח inference. יש לשלוח רק את השדות שברצונכם לשנות; בקשה ללא אף אחד מהם נדחית עם `No valid fields to update`. השדות הקבילים מוגדרים על ידי `updateKeyPermissionsSchema` בקובץ `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` מעדכן את ההרשאות של מפתח קיים. כמו כל מסלול `/api/keys*` הוא זקוק להרשאת ניהול (ראה [אימות ניהול](../guides/MANAGEMENT-AUTH.md) ), לא מפתח היסק. שלח רק את השדות שברצונך לשנות; בקשה עם אף אחד מהם לא נדחית עם `No valid fields to update`. השדות המקובלים מוגדרים על ידי `updateKeyPermissionsSchema` ב- `src/shared/validation/schemas/keys.ts`.
 
-| שדה                                         | סוג                                                                 | הערות                                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | מחרוזת, 1-200 תווים                                                 |                                                                                                                         |
-| `isActive`                                  | בוליאני                                                             |                                                                                                                         |
-| `isBanned`                                  | בוליאני                                                             |                                                                                                                         |
-| `expiresAt`                                 | תאריך ושעה בתקן ISO 8601 או `null`                                  | `null` מנקה את מועד התפוגה                                                                                              |
-| `modelAccessMode`                           | `all` \| `restricted`                                               | `allowedModels` חייב להיות ריק כאשר המצב הוא `all`                                                                      |
-| `allowedModels`, `blockedModels`            | מערך מחרוזות, עד 1000                                               |                                                                                                                         |
-| `allowedCombos`                             | מערך מחרוזות, עד 500                                                | קובע לאילו שילובים המפתח רשאי לקרוא; מודלים ישירים נשלטים באמצעות `modelAccessMode` / `allowedModels`                   |
-| `connectionAccessMode`                      | `all` \| `restricted`                                               | `allowedConnections` חייב להיות לא-ריק כאשר המצב הוא `restricted` וריק כאשר המצב הוא `all`                              |
-| `allowedConnections`                        | מערך מזהי UUID, עד 100                                              |                                                                                                                         |
-| `allowAutoCombos`                           | בוליאני                                                             | `false` דוחה בקשות למודלי `auto/*` באמצעות מפתח זה; מפתחות שמעולם לא הגדירו אותו מורשים                                 |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                       | מה `GET /v1/models` מציג עבור מפתח זה (שילובים בלבד, מודלים בלבד או שניהם); הוא אינו משנה לאילו מודלים המפתח רשאי לקרוא |
-| `forcedModel`                               | מחרוזת באורך של עד 300 תווים, או `null`                             | מנתב בקשות צ'אט למודל/שילוב זה, בעדיפות על פני `X-Route-Model` ו-`body.model`; מגבלות המפתח עדיין חלות                  |
-| `noLog`, `autoResolve`                      | בוליאני                                                             |                                                                                                                         |
-| `throttleDelayMs`                           | מספר שלם, 0-300000                                                  |                                                                                                                         |
-| `maxSessions`                               | מספר שלם, 0-10000                                                   |                                                                                                                         |
-| `rateLimits`                                | מערך של `{ limit, window }` (מספרים שלמים חיוביים, עד 50) או `null` | `null` מנקה את המגבלות                                                                                                  |
-| `accessSchedule`                            | אובייקט תזמון או `null`                                             | `null` מנקה את התזמון                                                                                                   |
-| `scopes`                                    | מערך מחרוזות, עד 32                                                 |                                                                                                                         |
-| `allowedEndpoints`                          | מערך מחרוזות, עד 20                                                 |                                                                                                                         |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                         |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | ראו [עקיפת מטמון לכל מפתח](#per-key-cache-bypass)                                                                       |
-| `compressionEnabled`                        | בוליאני                                                             |                                                                                                                         |
-| `codexServiceMode`                          | אחד ממצבי השירות של Codex                                           |                                                                                                                         |
-| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                         |
-| `allowUsageCommand`                         | boolean                                                             |                                                                                                                         |
-| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                         |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                               |                                                                                                                         |
-| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                         |
+| שָׂדֶה                                      | סוּג                                                                | הערות                                                                                                                                                                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | מחרוזת, 1-200 תווים                                                 |                                                                                                                                                                                                                                      |
+| `isActive`                                  | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `isBanned`                                  | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | ISO 8601 datetime או `null`                                         | `null` מנקה את התפוגה                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                               | `allowedModels` חייב להיות ריק כאשר המצב הוא `all`                                                                                                                                                                                   |
+| `allowedModels`, `blockedModels`            | מערך מחרוזות, עד 1000                                               |                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | מערך מחרוזות, עד 500                                                | שערים המשלבים את המפתח עשויים לקרוא; מודלים ישירים מנוהלים על ידי `modelAccessMode` / `allowedModels`                                                                                                                                |
+| `connectionAccessMode`                      | `all` \| `restricted`                                               | `allowedConnections` חייב להיות לא ריק כאשר `restricted` וריק כאשר `all`                                                                                                                                                             |
+| `allowedConnections`                        | מערך של UUIDs, עד 100                                               |                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | בוליאני                                                             | `false` דוחה בקשות לדגמי `auto/*` עם מפתח זה; מקשים שמעולם לא מגדירים את זה מותרים                                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                       | מה רשימת `GET /v1/models` עבור מפתח זה (שילובים בלבד, דגמים בלבד, או שניהם); זה לא משנה את מה שהמפתח עשוי לקרוא                                                                                                                      |
+| `forcedModel`                               | מחרוזת עד 300 תווים, או `null`                                      | מנתב בקשות צ'אט ל- model/combo זה, דרך `X-Route-Model` ו- `body.model`; המגבלות של המפתח עדיין חלות                                                                                                                                  |
+| `noLog`, `autoResolve`                      | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | מספר שלם, 0-300000                                                  |                                                                                                                                                                                                                                      |
+| `maxSessions`                               | מספר שלם, 0-10000                                                   |                                                                                                                                                                                                                                      |
+| `rateLimits`                                | מערך של `{ limit, window }` (מספרים שלמים חיוביים, עד 50) או `null` | `null` מנקה את הגבולות                                                                                                                                                                                                               |
+| `accessSchedule`                            | אובייקט לוח זמנים או `null`                                         | `null` מנקה את לוח הזמנים                                                                                                                                                                                                            |
+| `scopes`                                    | מערך מיתרים, עד 32                                                  |                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | מערך מיתרים, עד 20                                                  |                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | ראה [עקיפת מטמון לכל מפתח](#per-key-cache-bypass)                                                                                                                                                                                    |
+| `compressionEnabled`                        | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | אחד ממצבי השירות Codex                                              |                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | מספר >= 0 או `null`                                                 |                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | מספר >= 0 או `null`                                                 | מתגלגל תקציב USD של 5 שעות, נאכף כמו המגבלות היומיות והשבועיות (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` הוא כאשר ההוצאה הוותיקה ביותר בחלון מזדקנת, מה שיכול להשאיר מפתח הרחק מעבר לגבול שלו עדיין חסום. |
+| `chaosModeEnabled`                          | בוליאני                                                             |                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1379,163 +1344,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### הגדרות
 
-| נקודת קצה                             | שיטה          | תיאור                                                                                                                                                                                                                                                            |
-| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | הגדרות כלליות. מפתחות מדיניות האבטחה (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) דורשים `currentPassword` ופרטי התחברות של מפעיל — מפתחות API ואסימוני `oma_` מקבלים `403`; כל שינוי דורש את ה-scope של אסימון הגישה `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | תצורת פרוקסי הרשת                                                                                                                                                                                                                                                |
-| `/api/settings/proxy/test`            | POST          | בדיקת חיבור הפרוקסי                                                                                                                                                                                                                                              |
-| `/api/settings/ip-filter`             | GET/PUT       | רשימת היתרים/חסימות של כתובות IP                                                                                                                                                                                                                                 |
-| `/api/settings/thinking-budget`       | GET/PUT       | מצב שכתוב **בקשות** חשיבה/הסקה (passthrough / auto-strip / custom / adaptive). בלתי תלוי בדחיסה. ראו [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                         |
-| `/api/settings/system-prompt`         | GET/PUT       | הנחיית מערכת גלובלית                                                                                                                                                                                                                                             |
-| `/api/settings/compression`           | GET/PUT       | תצורת דחיסה גלובלית                                                                                                                                                                                                                                              |
-| `/api/settings/purge-request-history` | POST          | ניקוי שורות יומן הבקשות ופריטי יומן הקריאות המקומיים                                                                                                                                                                                                             |
+| נקודת קצה                             | שִׁיטָה       | תֵאוּר                                                                                                                                                                                                                                     |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/settings`                       | GET/PUT/PATCH | הגדרות כלליות. מפתחות מדיניות אבטחה (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) צריכים `currentPassword` ואישור מפעיל — API מפתחות ואסימוני `oma_` מקבלים `403`; כל מוטציה צריכה את היקף הגישה `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | תצורת proxy של רשת                                                                                                                                                                                                                         |
+| `/api/settings/proxy/test`            | POST          | בדוק את חיבור ה-proxy                                                                                                                                                                                                                      |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                     |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** בַּקָשָׁה** מצב כתיבה מחדש (מעבר / רצועה אוטומטית / מותאם אישית / אדפטיבי). ללא תלות בדחיסה. ראה [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                  |
+| `/api/settings/system-prompt`         | GET/PUT       | הודעת מערכת גלובלית                                                                                                                                                                                                                        |
+| `/api/settings/compression`           | GET/PUT       | תצורת דחיסה גלובלית                                                                                                                                                                                                                        |
+| `/api/settings/purge-request-history` | POST          | נקה את שורות יומן הבקשות וחפצי יומן שיחות מקומיים                                                                                                                                                                                          |
 
 ### הקשר ודחיסה
 
-| Endpoint                               | Method         | Description                                                                 |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | תצוגה מקדימה של דחיסה במצבים off/lite/standard/aggressive/ultra/RTK/stacked |
-| `/api/compression/language-packs`      | GET            | הצגת חבילות השפה הזמינות של Caveman                                         |
-| `/api/compression/rules`               | GET            | הצגת מטא-נתונים של כללי Caveman                                             |
-| `/api/context/caveman/config`          | GET/PUT        | כינוי להגדרות ספציפיות של Caveman                                           |
-| `/api/context/rtk/config`              | GET/PUT        | הגדרות ספציפיות של RTK, כולל מסננים מותאמים אישית ושמירת פלט גולמי          |
-| `/api/context/rtk/filters`             | GET            | קטלוג מסנני RTK ואבחון מסננים מותאמים אישית                                 |
-| `/api/context/rtk/test`                | POST           | הפעלת תצוגה מקדימה/בדיקה של RTK על מטען טקסט                                |
-| `/api/context/rtk/raw-output/[id]`     | GET            | קריאת פלט גולמי מצונזר שנשמר באמצעות מזהה מצביע                             |
-| `/api/context/combos`                  | GET/POST       | הצגה/יצירה של רשימת שילובי דחיסה                                            |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | הצגה/עדכון/מחיקה של פרטי שילוב דחיסה                                        |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | הקצאת שילובי דחיסה לשילובי ניתוב                                            |
-| `/api/context/analytics`               | GET            | כינוי לניתוח נתוני דחיסה                                                    |
+| נקודת קצה                              | שִׁיטָה        | תֵאוּר                                                               |
+| -------------------------------------- | -------------- | -------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | תצוגה מקדימה של דחיסת off/lite/standard/aggressive/ultra/RTK/stacked |
+| `/api/compression/language-packs`      | GET            | רשימת חבילות השפה הזמינות של Caveman                                 |
+| `/api/compression/rules`               | GET            | רשום מטא נתונים של כלל איש מערות                                     |
+| `/api/context/caveman/config`          | GET/PUT        | כינוי הגדרות ספציפי לאיש מערות                                       |
+| `/api/context/rtk/config`              | GET/PUT        | הגדרות ספציפיות ל-RTK, כולל מסננים מותאמים אישית ושמירה על פלט גולמי |
+| `/api/context/rtk/filters`             | GET            | קטלוג פילטר RTK ואבחון מסננים מותאם אישית                            |
+| `/api/context/rtk/test`                | POST           | הפעל RTK preview/test נגד מטען טקסט                                  |
+| `/api/context/rtk/raw-output/[id]`     | GET            | קרא פלט גולמי שנשמר על ידי מזהה מצביע                                |
+| `/api/context/combos`                  | GET/POST       | משולבת דחיסה list/create                                             |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | משולבת דחיסה detail/update/delete                                    |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | הקצה שילובי דחיסה לשילובי ניתוב                                      |
+| `/api/context/analytics`               | GET            | כינוי לניתוח דחיסה                                                   |
 
 ### ניטור
 
-| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | מעקב אחר הפעלות פעילות                                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/rate-limits`                   | GET        | מגבלות קצב לכל חשבון                                                                                                                                                                                                                                                                                                                                                                               |
-| `/api/monitoring/health`             | GET        | בדיקת תקינות + סיכום ספקים (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). תצוגת הניהול כוללת את `credentialHealth`: ערכים סקלריים של מטמון הבדיקה, את `failedConnections` כאשר `failed>0`, ואת `staleDbNonOkCount` (`test_status` דביק של SQLite, לא מדד הניטור). ראו [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | נתוני מטמון / ניקוי                                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/modality-bridge/stats`         | GET        | `attempts` בזיכרון, הצלחות/`bridged`, כשלים, פגיעות במטמון, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` המחושב לפי דגימות, וזמן השימוש האחרון (מתאפס לאחר הפעלה מחדש; נדרש אימות ניהול)                                                                                                                                                                                                 |
-| `/api/modality-bridge/video/runtime` | GET        | בדיקת trusted-loopback מחמירה לפני אימות/בדיקה של הניהול; זמינות וגרסאות של FFmpeg/ffprobe לאחר סינון (no-store)                                                                                                                                                                                                                                                                                   |
-| `/api/modality-bridge/video/extract` | POST       | מתווך בתים פנימי ומאומת של trusted-loopback; קלט בנפח 50 MiB, תור מוגבל ופלט בנפח 32 MiB, קיבולת `503`, ניתוק `499`, מועד אחרון `504`; אינו ממשק API ציבורי להעלאות                                                                                                                                                                                                                                |
+| נקודת קצה                            | שִׁיטָה    | תֵאוּר                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | מעקב הפעלה פעיל                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/rate-limits`                   | GET        | מגבלות תעריף לחשבון                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/monitoring/health`             | GET        | בדיקת בריאות תקציר ספק + (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). תצוגת ניהול כוללת `credentialHealth`: סקלרים של probe-cache, `failedConnections` when `failed>0` ו- `staleDbNonOkCount` (SQLite sticky `test_status`, לא המד). ראה [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | סטטיסטיקות מטמון / נקה                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/modality-bridge/stats`         | GET        | `attempts` בזיכרון, הצלחות/`bridged`, כשלים, התאמות מטמון, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` הנקובים לדוגמה וזמן שימוש אחרון (איפוס בהפעלה מחדש; אישור ניהול)                                                                                                                                                                                      |
+| `/api/modality-bridge/video/runtime` | GET        | בדיקה קפדנית של לולאה מהימנה לפני ניהול auth/probe; זמינות וגרסאות FFmpeg/ffprobe מחוטאים (ללא חנות)                                                                                                                                                                                                                                                                    |
+| `/api/modality-bridge/video/extract` | POST       | ברוקר בתים מאומת פנימי מאומת מהימן-loopback; 50 MiB קלט, bounded queue/32 MiB פלט, קיבולת `503`, `499` ניתוק, `504` דדליין; לא העלאה ציבורית API                                                                                                                                                                                                                        |
 
-### גיבוי וייצוא/ייבוא
+### תרגיל מסגרת וידאו
 
-| Endpoint                    | Method | Description                                                             |
-| --------------------------- | ------ | ----------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | הצגת גיבויים זמינים                                                     |
-| `/api/db-backups`           | PUT    | יצירת גיבוי ידני                                                        |
-| `/api/db-backups`           | POST   | שחזור מגיבוי ספציפי                                                     |
-| `/api/db-backups`           | PATCH  | שמירת הגדרות שמירת גיבויים (למפעיל בלבד)                                |
-| `/api/db-backups`           | DELETE | ניקוי גיבויים מאוחסנים בהתאם להגדרות השמירה (למפעיל בלבד)               |
-| `/api/db-backups/export`    | GET    | הורדת מסד הנתונים כקובץ ‎.sqlite                                        |
-| `/api/db-backups/import`    | POST   | העלאת קובץ ‎.sqlite להחלפת מסד הנתונים (`?dryRun=true` מבצע אימות בלבד) |
-| `/api/db-backups/exportAll` | GET    | הורדת גיבוי מלא כארכיון ‎.tar.gz                                        |
+`GET /api/v1/video-bridge/drilldown` קורא ידית אחיזה אטומה המחוברת לדיירים שהוחזרה ב- `x-omniroute-video-drilldown` לאחר בקשת Video Bridge בהסכמה מפורשת. גם הקראות וגם `DELETE` דורשות תמיד מפתח API חוקי והרשאת `modalityBridgeVideoDrilldownRemoteEnabled` עצמאית של המפעיל. שימור ייצור דורש בנוסף `modalityBridgeVideoDrilldownEnabled` ו- `drilldown: true` קפדני לכל חלק. אם למפתח יש רשימת הרשאות לא ריקה של נקודת קצה, עליו לכלול `video` עבור GET ו- DELETE גם יחד, בין אם המתקשר משתמש `/v1` או `/api/v1`.
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` ו-`/api/settings/export-json` מוסרים
-כל אישור שמור, ולכן הם דורשים את סשן לוח הבקרה או את ה-CLI המקומי (או שההתחברות
-תהיה מושבתת). מפתחות API מכל היקף וטוקני גישה מסוג `oma_` מקבלים `403`. השחזורים כפופים
-לאותה הגבלה: `POST /api/db-backups/import` (כולל `dryRun=true`), `POST /api/db-backups` (שחזור
-לפי מזהה) ו-`POST /api/settings/import-json` מחליפים את מסד הנתונים או ההגדרות הפעילים, ולכן
-גם אישור של מכונה מקבל `403` שם; `omniroute sync import` שולח את אישור ה-CLI המקומי. כך גם
-`DELETE /api/db-backups` (ניקוי גיבויים מאוחסנים) ו-`PATCH /api/db-backups` (הגדרות שמירה:
-הערכים שנשמרו קובעים את הניקוי האוטומטי לאחר כל גיבוי). הצגה (`GET`) ויצירת גיבוי ידני
-(`PUT`) ממשיכות להשתמש באימות ניהולי רגיל.
+שאילתת GET : נדרש `handle`; `variant` אופציונלי (`preview`, `standard`, `detail`), `limit` (1–8; מדור קודם `frames` מתקבל אך לא ניתן לשלבו עם `limit`), `page` מבוסס אפס ו- `start`/`end` שניות. כאשר שני גבולות המיקוד מסופקים, `end` חייב להיות גדול מ- `start`. מפתחות שאילתות Duplicate/unknown נדחים. תגובות מוצלחות מכילות `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` ו- `focusWindow` אופציונלי; JSON ללא חנות מוגבלת ל-32 MiB כולל Base64. פלט מגודל מחזיר 413; לבקש פחות מסגרות.
 
-### סנכרון בענן
+`DELETE /api/v1/video-bridge/drilldown?handle=...` מחזיר `{ "removed": 0|1 }`. GETs 404 לא ידועות, שפג תוקפן ו-crosskey הן תגובות 404 שלא ניתן להבחין בהן; cross-key DELETE לא יכול להסיר את הערך של הבעלים. גישה מושבתת מחזירה 403, אימות missing/invalid 401, שאילתות לא חוקיות 400, ביטול 499 ושגיאות זמניות 503. הידיות הן תהליכיות מקומיות, פג לאחר עשר דקות ואינן שורדות הפעלה מחדש. ידיות חדשות משתמשות ב- `v1.` בתוספת אסימון Base64URL אקראי של 32 בתים; רק גיבוב אסימון נשמר. אסימוני 64-hex מדור קודם נשארים קריאים תחבירית לצורך תאימות. ראה [מעקות בטיחות של Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) לקבלת הסכמה, מכסות ופרטי גזירת גרסה.
 
-| Endpoint               | Method  | Description        |
-| ---------------------- | ------- | ------------------ |
-| `/api/sync/cloud`      | Various | פעולות סנכרון בענן |
-| `/api/sync/initialize` | POST    | אתחול הסנכרון      |
-| `/api/cloud/*`         | Various | ניהול הענן         |
+### גיבוי & Export/Import
+
+| נקודת קצה                   | שִׁיטָה | תֵאוּר                                                            |
+| --------------------------- | ------- | ----------------------------------------------------------------- |
+| `/api/db-backups`           | GET     | רשימת גיבויים זמינים                                              |
+| `/api/db-backups`           | PUT     | צור גיבוי ידני                                                    |
+| `/api/db-backups`           | POST    | שחזר מגיבוי ספציפי                                                |
+| `/api/db-backups`           | PATCH   | שמור הגדרות שמירת גיבוי (למפעיל בלבד)                             |
+| `/api/db-backups`           | DELETE  | גזום גיבויים מאוחסנים להגדרות השמירה (למפעיל בלבד)                |
+| `/api/db-backups/export`    | GET     | הורד את מסד הנתונים כקובץ sqlite                                  |
+| `/api/db-backups/import`    | POST    | העלה קובץ sqlite כדי להחליף מסד נתונים (`?dryRun=true` מאמת בלבד) |
+| `/api/db-backups/exportAll` | GET     | הורד גיבוי מלא כארכיון .tar.gz                                    |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` ו- `/api/settings/export-json` מחלקים כל אישור מאוחסן, כך שהם דורשים את הפעלת לוח המחוונים או את CLI המקומי (או הכניסה מושבתת). מפתחות API בכל היקף ואסימוני גישה של `oma_` מקבלים `403`. השחזורים מחזיקים באותו גבול: `POST /api/db-backups/import` (כלול `dryRun=true` ), `POST /api/db-backups` (שחזור לפי id) ו- `POST /api/settings/import-json` מחליפים את מסד הנתונים או ההגדרות החיות, כך שאישור מכונה מקבל `403` גם שם; `omniroute sync import` שולח את אישור CLI המקומי. כך גם `DELETE /api/db-backups` (גזם גיבויים מאוחסנים) ו- `PATCH /api/db-backups` (הגדרות שמירה: הערכים המתמשכים מניעים את הגיזום האוטומטי לאחר כל גיבוי). רישום (`GET`) ויצירת גיבוי ידני (`PUT`) שומרים על אישור ניהול רגיל.
+
+### סנכרון ענן
+
+| נקודת קצה              | שִׁיטָה  | תֵאוּר             |
+| ---------------------- | -------- | ------------------ |
+| `/api/sync/cloud`      | שׁוֹנִים | פעולות סנכרון בענן |
+| `/api/sync/initialize` | POST     | אתחול סנכרון       |
+| `/api/cloud/*`         | שׁוֹנִים | ניהול ענן          |
 
 ### מנהרות
 
-| Endpoint                   | Method | Description                                                         |
-| -------------------------- | ------ | ------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | קריאת מצב ההתקנה וההרצה של Cloudflare Quick Tunnel עבור לוח הבקרה   |
-| `/api/tunnels/cloudflared` | POST   | הפעלה או השבתה של Cloudflare Quick Tunnel (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET    | קריאת מצב ההרצה של מנהרת ngrok עבור לוח הבקרה                       |
-| `/api/tunnels/ngrok`       | POST   | הפעלה או השבתה של מנהרת ngrok (`action=enable/disable`)             |
+| נקודת קצה                  | שִׁיטָה | תֵאוּר                                                                 |
+| -------------------------- | ------- | ---------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET     | קרא את סטטוס Cloudflare Quick Tunnel install/runtime עבור לוח המחוונים |
+| `/api/tunnels/cloudflared` | POST    | הפעל או השבת את ה- Cloudflare Quick Tunnel (`action=enable/disable`)   |
+| `/api/tunnels/ngrok`       | GET     | קרא את סטטוס זמן הריצה ngrok Tunnel עבור לוח המחוונים                  |
+| `/api/tunnels/ngrok`       | POST    | הפעל או השבת את מנהרת ngrok (`action=enable/disable`)                  |
 
-### כלי CLI
+### CLI כלים
 
-| Endpoint                           | Method | Description             |
-| ---------------------------------- | ------ | ----------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | מצב ה-CLI של Claude     |
-| `/api/cli-tools/codex-settings`    | GET    | מצב ה-CLI של Codex      |
-| `/api/cli-tools/droid-settings`    | GET    | מצב ה-CLI של Droid      |
-| `/api/cli-tools/openclaw-settings` | GET    | מצב ה-CLI של OpenClaw   |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | סביבת הרצה כללית של CLI |
+| נקודת קצה                          | שִׁיטָה | תֵאוּר            |
+| ---------------------------------- | ------- | ----------------- |
+| `/api/cli-tools/claude-settings`   | GET     | מצב Claude CLI    |
+| `/api/cli-tools/codex-settings`    | GET     | מצב Codex CLI     |
+| `/api/cli-tools/droid-settings`    | GET     | סטטוס Droid CLI   |
+| `/api/cli-tools/openclaw-settings` | GET     | מצב OpenClaw CLI  |
+| `/api/cli-tools/runtime/[toolId]`  | GET     | זמן ריצה כללי CLI |
 
-תגובות ה-CLI כוללות: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+תגובות CLI כוללות: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### סוכני ACP
+### ACP
 
-| Endpoint          | Method | Description                                            |
-| ----------------- | ------ | ------------------------------------------------------ |
-| `/api/acp/agents` | GET    | הצגת כל הסוכנים שזוהו (מובנים + מותאמים אישית) עם מצבם |
-| `/api/acp/agents` | POST   | הוספת סוכן מותאם אישית או רענון מטמון הזיהוי           |
-| `/api/acp/agents` | DELETE | הסרת סוכן מותאם אישית לפי פרמטר השאילתה `id`           |
+| נקודת קצה         | שִׁיטָה | תֵאוּר                                                  |
+| ----------------- | ------- | ------------------------------------------------------- |
+| `/api/acp/agents` | GET     | רשום את כל הסוכנים שזוהו (מותאם אישית + מובנה) עם סטטוס |
+| `/api/acp/agents` | POST    | הוסף סוכן מותאם אישית או רענן מטמון זיהוי               |
+| `/api/acp/agents` | DELETE  | הסר סוכן מותאם אישית על ידי פרמטר שאילתת `id`           |
 
-תגובת GET כוללת `agents[]` (id, name, binary, version, installed, protocol, isCustom) ו-`summary` (total, installed, notFound, builtIn, custom).
+תגובת GET כוללת `agents[]` (מזהה, שם, בינארי, גרסה, מותקן, פרוטוקול, isCustom) ו- `summary` (סה"כ, מותקן, notFound, builtIn, מותאם אישית).
 
-### עמידות ומגבלות קצב
+### מגבלות חוסן וקצב
 
-| Endpoint                          | Method    | תיאור                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | קבלת/עדכון של תור הבקשות, השהיית החיבור, מפסק הספק והגדרות ההמתנה                                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/reset`           | POST      | איפוס מפסקי המעגל של הספקים                                                                                                                                                                                                                                                                                                                                          |
-| `/api/resilience/model-cooldowns` | GET       | הצגת נעילות פעילות לפי (ספק, חיבור, מודל), ממוינות לפי הזמן שנותר                                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/model-cooldowns` | DELETE    | ניקוי נעילת מודל — גוף `{provider, model}` או `{all: true}` כדי למחוק הכול                                                                                                                                                                                                                                                                                           |
-| `/api/rate-limits`                | GET/POST  | מצב מגבלת הקצב לכל חשבון (GET) או הפעלה/השבתה של הגנת מגבלת הקצב עבור חיבור (POST `{connectionId, enabled}`). נתיב הכתיבה הנתמך עבור `rateLimitProtection` (לעולם לא משתנה באמצעות `PUT /api/providers/[id]`). הערה: `enabled: false` משבית הגנה מפורשת, אך אינו מחריג חיבור פעיל עם מפתח API ממנגנון הבטיחות הגלובלי להפעלה אוטומטית (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | תצורת מגבלת הקצב הגלובלית (הוצא משימוש; כינוי ל־`/api/rate-limits`)                                                                                                                                                                                                                                                                                                  |
+| נקודת קצה                         | שִׁיטָה   | תֵאוּר                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | תור בקשות Get/update, התקררות חיבור, מפסק ספק והגדרות המתנה                                                                                                                                                                                                                                                                                                   |
+| `/api/resilience/reset`           | POST      | אפס מפסקי חשמל של ספק                                                                                                                                                                                                                                                                                                                                         |
+| `/api/resilience/model-cooldowns` | GET       | רשימת נעילות פעילות לפי (ספק, חיבור, דגם), ממוינות לפי הזמן שנותר                                                                                                                                                                                                                                                                                             |
+| `/api/resilience/model-cooldowns` | DELETE    | נקה נעילת דגם — body `{provider, model}` או `{all: true}` כדי לנגב הכל                                                                                                                                                                                                                                                                                        |
+| `/api/rate-limits`                | GET/POST  | סטטוס מגבלת תעריף לכל חשבון (GET) או החלפת הגנת הגבלת תעריף עבור חיבור (POST `{connectionId, enabled}`). נתיב כתיבה נתמך עבור `rateLimitProtection` (אף פעם לא השתנה באמצעות `PUT /api/providers/[id]`). הערה: `enabled: false` משבית הגנה מפורשת אך אינו בוחר בחיבור מפתח API פעיל מחוץ לרשת הביטחון הגלובלית להפעלה אוטומטית (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | תצורת מגבלת תעריף גלובלית (הוצאה משימוש; כינוי ל- `/api/rate-limits`)                                                                                                                                                                                                                                                                                         |
 
-> כל ארבעת הנתיבים `/api/resilience/*` דורשים **אימות ניהולי** (`requireManagementAuth`). ראו [עמידות (מורחב)](#resilience-extended) לפירוט מלא של מפסק הספק לעומת השהיית חיבור לעומת נעילת מודל.
+> כל ארבעת מסלולי `/api/resilience/*` דורשים** אישור ניהול** (`requireManagementAuth`). ראה [חוסן (מורחב)](#resilience-extended) לפירוט מלא של מפסק ספק לעומת התקררות חיבור לעומת נעילת דגם.
 
-### הערכות
+### Evals
 
-| Endpoint     | Method   | תיאור                           |
-| ------------ | -------- | ------------------------------- |
-| `/api/evals` | GET/POST | הצגת חבילות הערכה / הפעלת הערכה |
+| נקודת קצה    | שִׁיטָה  | תֵאוּר                         |
+| ------------ | -------- | ------------------------------ |
+| `/api/evals` | GET/POST | רשימת חבילות eval / הפעל הערכה |
 
 ### מדיניות
 
-| Endpoint        | Method          | תיאור               |
+| נקודת קצה       | שִׁיטָה         | תֵאוּר              |
 | --------------- | --------------- | ------------------- |
 | `/api/policies` | GET/POST/DELETE | ניהול מדיניות ניתוב |
 
-### תאימות
+### הַתאָמָה
 
-| Endpoint                    | Method | תיאור                           |
-| --------------------------- | ------ | ------------------------------- |
-| `/api/compliance/audit-log` | GET    | יומן ביקורת תאימות (N האחרונים) |
+| נקודת קצה                   | שִׁיטָה | תֵאוּר                       |
+| --------------------------- | ------- | ---------------------------- |
+| `/api/compliance/audit-log` | GET     | יומן ביקורת תאימות (N אחרון) |
 
-### v1beta (תואם ל־Gemini)
+### v1beta (תואם Gemini)
 
-| Endpoint                   | Method | תיאור                                  |
-| -------------------------- | ------ | -------------------------------------- |
-| `/v1beta/models`           | GET    | הצגת מודלים בתבנית Gemini              |
-| `/v1beta/models/{...path}` | POST   | נקודת הקצה של Gemini `generateContent` |
+| נקודת קצה                  | שִׁיטָה | תֵאוּר                         |
+| -------------------------- | ------- | ------------------------------ |
+| `/v1beta/models`           | GET     | רשימת דגמים בפורמט Gemini      |
+| `/v1beta/models/{...path}` | POST    | נקודת Gemini `generateContent` |
 
-נקודות קצה אלה משקפות את תבנית ה־API של Gemini עבור לקוחות המצפים לתאימות מקורית ל־SDK של Gemini.
+נקודות קצה אלו משקפות את פורמט API של Gemini עבור לקוחות המצפים לתאימות מקורית Gemini SDK.
 
-### ממשקי API פנימיים / מערכתיים
+### פנימי / מערכת APIs
 
-| Endpoint                 | Method | תיאור                                             |
-| ------------------------ | ------ | ------------------------------------------------- |
-| `/api/init`              | GET    | בדיקת אתחול היישום (בשימוש בהרצה הראשונה)         |
-| `/api/tags`              | GET    | תגיות מודלים תואמות ל־Ollama (עבור לקוחות Ollama) |
-| `/api/restart`           | POST   | הפעלת הפעלה מחדש תקינה של השרת                    |
-| `/api/shutdown`          | POST   | הפעלת כיבוי תקין של השרת                          |
-| `/api/system/env/repair` | POST   | תיקון משתני הסביבה של ספק OAuth                   |
-| `/api/system/version`    | GET    | הגרסה הנוכחית/האחרונה, מצב העדכון וערוץ ההפצה     |
-| `/api/system/version`    | POST   | התחלת עדכון מודע לפריסה לגרסה האחרונה             |
+| נקודת קצה                | שִׁיטָה | תֵאוּר                                       |
+| ------------------------ | ------- | -------------------------------------------- |
+| `/api/init`              | GET     | התחל שירותי סנכרון ברקע (אישור ניהול)        |
+| `/api/tags`              | GET     | תגיות מודל תואמות Ollama (ללקוחות Ollama )   |
+| `/api/restart`           | POST    | הפעל מחדש את השרת בצורה חיננית               |
+| `/api/shutdown`          | POST    | הפעל כיבוי חינני של השרת                     |
+| `/api/system/env/repair` | POST    | תיקון משתני סביבת ספק OAuth                  |
+| `/api/system/version`    | GET     | גרסת Current/latest, סטטוס עדכון, ערוץ שחרור |
+| `/api/system/version`    | POST    | התחל עדכון מודע לפריסה לגרסה העדכנית ביותר   |
 
-> **הערה:** נקודות קצה אלה משמשות את המערכת באופן פנימי או עבור תאימות ללקוחות Ollama. בדרך כלל משתמשי קצה אינם קוראים להן.
+> **פֶּתֶק:** נקודות קצה אלו משמשות באופן פנימי על ידי המערכת או עבור תאימות לקוח Ollama. הם לא נקראים בדרך כלל על ידי משתמשי קצה.
 
-### תיקון סביבת OAuth _(v3.6.1+)_
+### OAuth תיקון סביבה _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1546,7 +1511,7 @@ Content-Type: application/json
 }
 ```
 
-מתקן משתני סביבה חסרים או פגומים של OAuth עבור ספק מסוים. מחזיר:
+תיקון משתני סביבת OAuth חסרים או פגומים עבור ספק ספציפי. החזרות:
 
 ```json
 {
@@ -1556,16 +1521,13 @@ Content-Type: application/json
 }
 ```
 
-### גרסה וערוץ הפצה
+### ערוץ גרסה ושחרור
 
 ```bash
 GET /api/system/version
 ```
 
-מסלול ניהול המוגבל ל־loopback (אימות מנהל). מחזיר את הגרסה הפועלת, את הגרסה האחרונה
-שפורסמה ואת מצב העדכון האוטומטי. השדות `releaseChannel` ו־`channels` הם שדות
-נוספים (rail 3.8.54); `channel` שומר על משמעותו — מצב הפריסה שבו משתמש מעדכן
-לוח הבקרה (`npm`, `source` או `docker-compose`).
+נתיב ניהול Loopback בלבד (אישור אדמין). מחזירה את הגרסה הפועלת, את הגרסה האחרונה שפורסמה ואת סטטוס העדכון האוטומטי. `releaseChannel` ו- `channels` הם שדות תוספים (מסילה 3.8.54); `channel` שומר על המשמעות שלו — את מצב הפריסה שמעדכן לוח המחוונים משתמש בו (`npm`, `source` או `docker-compose`).
 
 ```json
 {
@@ -1581,17 +1543,10 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — ערוץ npm של ה-build הפועל: `nightly` עבור גרסאות `-nightly.*`,
-  `next` עבור גרסאות קדם-הפצה אחרות (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` עבור גרסה יציבה של
-  major ישן יותר מזה של `channels.latest`, ובכל מקרה אחר `latest`. אותם כללים כמו ב־
-  `scripts/release/dist-tag.mjs`, שבוחר את תגית ה־dist של npm בזמן הפרסום.
-- `channels` — הגרסה העדכנית שפורסמה של כל תגית dist, מתוך `npm view omniroute dist-tags` (עם
-  חלופת HTTP מול הרישום), ונשמרת במטמון עם אותו TTL של 10 דקות כמו `latest`. `latest` תמיד קיים
-  (עם חזרה לשדה `latest`, ולאחר מכן ל־`"unavailable"`); `next`, `nightly` ו־`lts` מופיעים
-  רק כאשר תגית ה־dist המתאימה קיימת. בקשה עם `Cache-Control: no-cache` מרעננת את שתי השליפות.
+- ערוץ `releaseChannel` — npm של ה-build הרץ: `nightly` עבור גרסאות `-nightly.*`, `next` עבור מהדורות קדם אחרות (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` עבור גרסה יציבה של מז'ור ישן יותר מ- `channels.latest`, אחרת `latest`. אותם כללים כמו `scripts/release/dist-tag.mjs`, שבוחר את תג npm dist בזמן הפרסום.
+- `channels` — שפורסם ראש של כל dist-tag, מ- `npm view omniroute dist-tags` (registry HTTP fallback), שמור עם אותו TTL של 10 דקות כמו `latest`. `latest` תמיד נוכח (נופל בחזרה לשדה `latest`, ואז `"unavailable"`); `next`, `nightly` ו- `lts` מופיעים רק כאשר תג dist קיים. בקשת `Cache-Control: no-cache` מרעננת את שני החיפושים.
 
-מודל הערוצים (`latest` = v3 עד לגרסת GA 4.0, `next` = rc, `nightly` = גרסאות
-`develop`, `lts` = תיקוני v3 לאחר גרסת GA 4.0) מתואר ב־`docs/ops/RELEASE_STRATEGY.md`.
+מודל הערוץ (`latest` = v3 עד 4.0 GA, `next` = rc, `nightly` = `develop`, תיקון `lts` = v3 אחרי 4.0 GA) מתואר ב- `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1603,10 +1558,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-תמלול קובצי אודיו באמצעות כל ספק STT שהוגדר. מקטע הנתיב הראשון בוחר את
-הספק המקורי (`openai/…`, `deepgram/…`). שערים שמייצאים מחדש מודל של ספק
-אחר משתמשים במזהה מסויג
-(`openrouter/deepgram/nova-3`).
+תמלול קובצי אודיו באמצעות כל ספק STT שהוגדר. מקטע הנתיב הראשון בוחר את הספק
+המקורי (`openai/…`, `deepgram/…`). שערים שמייצאים מחדש מודל של ספק אחר משתמשים במזהה
+מוסמך (`openrouter/deepgram/nova-3`).
 
 **בקשה:**
 
@@ -1634,6 +1588,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` ללא קידומת אינה משתמשת ב-OpenRouter.
 
 **פורמטים נתמכים:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** תמלול במצב קובץ דרך
+WebSocket של Gemini Live (דורש מפתח API של Gemini). ההעלאה מומרת ל-PCM מונו בתדר 16 kHz באמצעות `ffmpeg`
+(חייב להיות ב-`PATH`, אלא אם הקובץ כבר בפורמט WAV מסוג PCM מונו בתדר 16 kHz), מוזרמת לסשן
+והטקסט הסופי מוחזר בתור `{ "text": "..." }`. שדות הטופס האופציונליים `language` ו-`prompt`
+מועברים הלאה. מגבלות: העלאות בנפח העולה על 25 MiB או אודיו מפוענח שאורכו עולה על 10 דקות מחזירים
+`413`; המרה שנמשכת יותר מ-60 שניות מופסקת ומחזירה `504`. מפתח ה-API נשלח בכותרת
+`x-goog-api-key` בלבד, ולעולם לא בכתובת ה-URL של ה-WebSocket.
 
 ---
 

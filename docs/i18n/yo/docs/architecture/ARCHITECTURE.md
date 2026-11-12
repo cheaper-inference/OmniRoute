@@ -14,7 +14,7 @@ OmniRoute jẹ ẹnu-ọna afisona AI agbegbe ati dasibodu ti a ṣe lori Next.j
 
 Awọn agbara koko:
 
-- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 380, awọn modulu alaṣẹ 158)
+- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 381, awọn modulu alaṣẹ 159)
 - Request/response itumọ kọja awọn ọna kika olupese
 - Awoṣe konbo fallback (ọkọọkan awoṣe pupọ)
 - Awọn igbesẹ konbo ti a ṣeto (`provider + model + connection`) pẹlu pipaṣẹ akoko ṣiṣe nipasẹ `compositeTiers`
@@ -42,7 +42,7 @@ Awọn agbara koko:
 - Agbaye eto abẹrẹ kiakia
 - Ipasẹ igba ati itẹka
 - Idiwọn oṣuwọn imudara iwe-iroyin pẹlu awọn profaili kan pato ti olupese
-- Apẹrẹ fifọ Circuit fun resilience olupese
+- Awoṣe fifọ Circuit fun resilience olupese
 - Idaabobo agbo egboogi-ãra pẹlu titiipa mutex
 - Kaṣe yiyọkuro ibeere ti o da lori Ibuwọlu
 - Layer ase: awọn ofin iye owo, eto imupadabọ, eto imulo titiipa
@@ -66,7 +66,7 @@ Awọn agbara koko:
 - Awọn olupese OAuth apọjuwọn (awọn modulu kọọkan 22 labẹ `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall awọn iwe afọwọkọ
 - OAuth ayika titunṣe igbese
-- afara WebSocket fun OpenAI-ibaramu WS onibara (`/v1/ws`)
+- afara WebSocket fun OpenAI-ibaramu WS ibara (`/v1/ws`)
 - Ìṣàkóso àmi ìsiṣẹpọ (issue/revoke, ETag-versioned konfigi edidi gbigba lati ayelujara)
 - GLM Thinking (`glmt`) tito olupese olupese kilasi akọkọ
 - Kika àmi arabara (olupese-ẹgbẹ `/messages/count_tokens` pẹlu ifẹhinti ifoju)
@@ -412,7 +412,7 @@ Aaye orukọ `src/domain/` ṣe agbedemeji awọn ipinnu eto imulo nitorinaa aw�
 - Connection/model ofin joiner: `src/domain/connectionModelRules.ts`
 - Awoṣe wiwa snapshots: `src/domain/modelAvailability.ts`
 - Titele ipari ti olupese: `src/domain/providerExpiration.ts`
-- Kaṣe ipin: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Ipinlẹ ibajẹ: `src/domain/degradation.ts`
 - Ayẹwo iṣeto ni: `src/domain/configAudit.ts`
 - OmniRoute idahun metadata Akole: `src/domain/omnirouteResponseMeta.ts`

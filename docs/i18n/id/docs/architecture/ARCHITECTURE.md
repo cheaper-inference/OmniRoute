@@ -14,7 +14,7 @@ OmniRoute adalah gateway perutean dan dasbor AI lokal yang dibangun di atas Next
 
 Kemampuan inti:
 
-- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (380 penyedia, 158 modul pelaksana)
+- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (381 penyedia, 159 modul pelaksana)
 - terjemahan Request/response lintas format penyedia
 - Penggantian kombo model (urutan multi-model)
 - Langkah kombo terstruktur (`provider + model + connection`) dengan pengurutan waktu proses berdasarkan `compositeTiers`
@@ -32,7 +32,7 @@ Kemampuan inti:
 - Pemeringkatan ulang melalui `/v1/rerank`
 - Pikirkan penguraian tag (`<think>...</think>`) untuk model penalaran
 - Sanitasi respons untuk kompatibilitas OpenAI SDK yang ketat
-- Normalisasi peran (pengembang sistem →, sistem → pengguna) untuk kompatibilitas lintas penyedia
+- Normalisasi peran (pengembang sistem →, pengguna sistem →) untuk kompatibilitas lintas penyedia
 - Konversi keluaran terstruktur (json_schema → Gemini responseSchema)
 - Persistensi lokal untuk penyedia, kunci, alias, kombo, pengaturan, harga (122 modul DB )
 - pelacakan Usage/cost dan pencatatan permintaan
@@ -46,13 +46,13 @@ Kemampuan inti:
 - Perlindungan kawanan anti-guntur dengan penguncian mutex
 - Cache deduplikasi permintaan berbasis tanda tangan
 - Lapisan domain: aturan biaya, kebijakan fallback, kebijakan lockout
-- Relai Konteks: ringkasan penyerahan sesi untuk kontinuitas rotasi akun
+- Relay Konteks: ringkasan serah terima sesi untuk kontinuitas rotasi akun
 - Persistensi status domain (SQLite write-through cache untuk fallback, anggaran, penguncian, pemutus sirkuit)
 - Mesin kebijakan untuk evaluasi permintaan terpusat (lockout → budget → fallback)
 - Minta telemetri dengan agregasi latensi p50/p95/p99
 - Telemetri target kombo dan kesehatan target kombo historis melalui `combo_execution_key` / `combo_step_id`
 - Korelasi ID (X-Request-Id) untuk penelusuran ujung ke ujung
-- Pencatatan audit kepatuhan dengan penyisihan per kunci API
+- Pencatatan audit kepatuhan dengan opt-out per kunci API
 - Kerangka evaluasi untuk jaminan kualitas LLM
 - Dasbor kesehatan dengan status pemutus sirkuit penyedia waktu nyata
 - MCP Server (110 alat) dengan 3 transport (stdio/SSE/Streamable HTTP)
@@ -369,9 +369,9 @@ Kombo Otomatis secara dinamis menilai dan memilih target perutean pada waktu per
 
 Kemampuan utama:
 
-- **20 strategi perutean** (prioritas, berbobot, isi terlebih dahulu, round-robin, P2C, acak, paling jarang digunakan, dioptimalkan biaya, sadar-reset, jendela-reset, ruang kepala, tertimbang kuota, acak-ketat,** mobil** , lkgp, dioptimalkan konteks, dioptimalkan cache, relai konteks,** fusi** , pipeline) — auto adalah tambahan judul di v3.8.0; `fusion` (sintesis juri + fan-out panel, `open-sse/services/fusion.ts`) baru di v3.8.36.
+- **20 strategi perutean** (prioritas, berbobot, isi terlebih dahulu, round-robin, P2C, acak, paling jarang digunakan, dioptimalkan biaya, sadar-reset, jendela-reset, ruang kepala, berbobot kuota, acak-ketat,** mobil** , lkgp, dioptimalkan konteks, dioptimalkan cache, relai konteks,** fusi** , pipeline) — auto adalah tambahan judul di v3.8.0; `fusion` (sintesis juri + fan-out panel, `open-sse/services/fusion.ts`) baru di v3.8.36.
 - **penilaian 16 faktor** : kuota, kesehatan, biaya terbalik, latensi terbalik, kesesuaian tugas, dan sepuluh lainnya. Tabel kanonik faktor-faktor dan bobot defaultnya berada di [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, menyatakannya kembali di sini akan menjadikannya tabel kedua yang akan menjadi basi.
-- **Pabrik maya** mewujudkan kombo sementara ketika tidak ada kombo bernama yang cocok, mengambil kandidat dari koneksi penyedia aktif yang sehat.
+- **Pabrik maya** mewujudkan kombo sementara ketika tidak ada kombo bernama yang cocok, mencari kandidat dari koneksi penyedia aktif yang sehat.
 - **Awalan otomatis** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — masing-masing didukung oleh profil bobot yang disetel.
 - **6 paket mode** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` dan `chaos-mode` — konfigurasi bobot preset yang dapat dipanggil dari dasbor. (Jangan bingung dengan awalan `auto/*` di atas, yang merupakan varian waktu permintaan.)
 
@@ -392,7 +392,7 @@ Untuk penyediaan per agen dan spesifikasi OAuth, lihat [`docs/frameworks/CLOUD_A
 
 ### C.Pagar Pembatas
 
-Modul pagar pembatas adalah lapisan middleware hot-reload yang memeriksa permintaan dan respons untuk PII, injeksi cepat, dan konten penglihatan tidak aman. Pelanggaran menyebabkan hubungan pendek permintaan dengan HTTP** 503** ditambah kode kesalahan terstruktur, memungkinkan penelepon hilir untuk mencoba lagi atau membuat cabang.
+Modul pagar pembatas adalah lapisan middleware hot-reload yang memeriksa permintaan dan respons untuk PII, injeksi cepat, dan konten penglihatan tidak aman. Pelanggaran menyebabkan hubungan arus pendek permintaan dengan HTTP** 503** ditambah kode kesalahan terstruktur, memungkinkan penelepon hilir untuk mencoba lagi atau membuat cabang.
 
 - Akar modul: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - Hot reload: registri mengawasi perubahan konfigurasi dan membangun kembali rantai di tempatnya
@@ -414,7 +414,7 @@ Namespace `src/domain/` memusatkan keputusan kebijakan sehingga penangan rute ti
 - penggabung aturan Connection/model : `src/domain/connectionModelRules.ts`
 - Cuplikan ketersediaan model: `src/domain/modelAvailability.ts`
 - Pelacakan kedaluwarsa penyedia: `src/domain/providerExpiration.ts`
-- Cache kuota: `src/domain/quotaCache.ts`
+- Cache kuota: `src/domain/quotaCache.ts`. Penyedia menambah dan menghapus jendela kuota (OpenAI menghapus jendela Codex 5 jam untuk beberapa paket), jadi pembacaan penggunaan yang dibuktikan oleh adaptor penyedia sebagai selesai (`quotasComplete`, lihat `src/lib/usage/usageReading.ts`) adalah kumpulan jendela lengkap akun: jendela yang diketahui sebelumnya tetapi tidak ada di dalamnya akan dihentikan, di cache, di `quota_snapshots` restart rehydrates (catatan penghentian yang ditambahkan), dalam status kuota Codex yang bertahan dan di ember saturasi Claude. Bukti parsial (header respons, salinan basi) hanya memperbarui jendela yang dibawanya.
 - Keadaan degradasi: `src/domain/degradation.ts`
 - Audit konfigurasi: `src/domain/configAudit.ts`
 - pembuat metadata respons OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -438,7 +438,7 @@ Untuk aturan klasifikasi rute selengkapnya, lihat [`docs/architecture/AUTHZ_GUID
 
 ### F. Alur Kerja FSM dan Router Sadar Tugas
 
-Router yang digerakkan oleh mesin dengan kondisi terbatas yang berlapis di atas pilihan kombo untuk mengarahkan lalu lintas berdasarkan tahap alur kerja yang terdeteksi (perencanaan, pelaksanaan, peninjauan) dan afinitas tugas latar belakang.
+Router yang digerakkan oleh mesin dengan status terbatas yang berlapis di atas pilihan kombo untuk mengarahkan lalu lintas berdasarkan tahap alur kerja yang terdeteksi (perencanaan, pelaksanaan, peninjauan) dan afinitas tugas latar belakang.
 
 - Alur kerja FSM: `open-sse/services/workflowFSM.ts`
 - Router yang sadar tugas: `open-sse/services/taskAwareRouter.ts`

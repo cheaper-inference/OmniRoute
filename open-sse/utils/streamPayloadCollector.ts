@@ -24,6 +24,11 @@ type CollectorOptions = {
   // content) even though the actual served response was correct.
   format?: string | null;
   fallbackModel?: string | null;
+  // Keep a deep copy of each event (getEvents(), build()'s `events`). Off by default: normal
+  // completion reads only the live summary and the counters, and the copies cost a
+  // structuredClone per chunk plus the heap they hold. Counts and the cap's `_truncated` /
+  // `_droppedEvents` metadata are the same with or without it.
+  retainEvents?: boolean;
 };
 
 type BuildOptions = {
@@ -393,6 +398,7 @@ type ResponseSnapshot = {
   output: unknown;
   usage: JsonRecord | null;
   metadata: JsonRecord;
+  error?: unknown;
 };
 
 function createResponsesReducer(fallbackModel?: string | null): SummaryReducer {
@@ -423,6 +429,7 @@ function createResponsesReducer(fallbackModel?: string | null): SummaryReducer {
     output: cloneLogPayload(Array.isArray(resp.output) ? resp.output : []),
     usage: resp.usage && typeof resp.usage === "object" ? { ...asRecord(resp.usage) } : null,
     metadata: cloneLogPayload(asRecord(resp.metadata)),
+    ...(resp.error !== undefined ? { error: cloneLogPayload(resp.error) } : {}),
   });
 
   return {
@@ -472,6 +479,7 @@ function createResponsesReducer(fallbackModel?: string | null): SummaryReducer {
           status: picked.status || (completedSnapshot ? "completed" : "in_progress"),
           created_at: picked.created_at || Math.floor(Date.now() / 1000),
           metadata: picked.metadata,
+          ...(picked.error !== undefined ? { error: picked.error } : {}),
         };
       }
 
@@ -908,8 +916,16 @@ export function compactStructuredStreamPayload(payload: unknown): unknown {
 // and translate mode, all four OPENAI_RESPONSES-shaped build() call sites)
 // now do this consistently.
 export function createStructuredSSECollector(options: CollectorOptions = {}) {
-  const { maxEvents = 2000, maxBytes = 524288, stage, format, fallbackModel } = options;
+  const {
+    maxEvents = 2000,
+    maxBytes = 524288,
+    stage,
+    format,
+    fallbackModel,
+    retainEvents = false,
+  } = options;
   const events: StructuredSSEEvent[] = [];
+  let storedEvents = 0;
   let usedBytes = 0;
   let droppedEvents = 0;
   // Live-updated on every push() regardless of the storage cap above — see
@@ -927,7 +943,7 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
       reducer?.ingest(unwrapEventEnvelope(payload));
 
       const event: StructuredSSEEvent = {
-        index: events.length + droppedEvents,
+        index: storedEvents + droppedEvents,
         timestamp: new Date().toISOString(),
         data: payload,
       };
@@ -938,14 +954,17 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
       }
 
       const serializedSize = jsonLength(event);
-      if (events.length >= maxEvents || usedBytes + serializedSize > maxBytes) {
+      if (storedEvents >= maxEvents || usedBytes + serializedSize > maxBytes) {
         droppedEvents += 1;
         return;
       }
 
-      event.data = cloneLogPayload(payload);
       usedBytes += serializedSize;
-      events.push(event);
+      storedEvents += 1;
+      if (retainEvents) {
+        event.data = cloneLogPayload(payload);
+        events.push(event);
+      }
     },
 
     getEvents() {
@@ -953,7 +972,7 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
     },
 
     getEventCount() {
-      return events.length + droppedEvents;
+      return storedEvents + droppedEvents;
     },
 
     // The reducer-computed summary, built incrementally from EVERY pushed
@@ -973,9 +992,9 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
         _streamed: true,
         _format: "sse-json",
         ...(stage ? { _stage: stage } : {}),
-        _eventCount: events.length + droppedEvents,
+        _eventCount: storedEvents + droppedEvents,
         ...(droppedEvents > 0 ? { _truncated: true, _droppedEvents: droppedEvents } : {}),
-        ...(includeEvents ? { events } : {}),
+        ...(includeEvents && retainEvents ? { events } : {}),
         ...(summary === undefined ? {} : { summary: cloneLogPayload(summary) }),
       };
     },

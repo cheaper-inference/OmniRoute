@@ -21,7 +21,7 @@ OmniRoute是基於Next.js建構的本機AI路由閘道器和儀表板。它提�
 
 核心能力：
 
-- 用於CLI/tools的 OpenAI 相容API表面（380 個提供者，158 個執行器模組）
+- 用於CLI/tools的 OpenAI 相容API表面（381 個提供程序，159 個執行程序模組）
 - 跨提供者格式的Request/response翻譯
 - 模型組合後備（多模型序列）
 - 結構化組合步驟 (`provider + model + connection`)，運行時按`compositeTiers`排序
@@ -417,7 +417,7 @@ Guardrails 模組是一個可熱重載的中間件層，用於檢查PII、提示
 - Connection/model規則加入者： `src/domain/connectionModelRules.ts`
 - 模型可用性快照： `src/domain/modelAvailability.ts`
 - 提供者到期追蹤： `src/domain/providerExpiration.ts`
-- 配額快取： `src/domain/quotaCache.ts`
+- 配額快取： `src/domain/quotaCache.ts`。提供者新增和刪除配額視窗（OpenAI刪除了某些計劃的 5 小時Codex視窗），因此讀取提供者的適配器證明已完成的使用（`quotasComplete`，請參閱`src/lib/usage/usageReading.ts`）是帳戶的完整視窗集：先前已知但不存在的視窗已退休，在快取中，在`quota_snapshots`中重新啟動補水（附加的飽和桶中），在持久的視窗已退休，在快取中，在Codex中重新啟動補水（附加的飽和桶中），在持久的狀態下和功能中Claude退休桶中部分證據（回應標頭、陳舊副本）僅更新其攜帶的視窗。
 - 降解狀態： `src/domain/degradation.ts`
 - 設定審核： `src/domain/configAudit.ts`
 - OmniRoute回應元資料產生器： `src/domain/omnirouteResponseMeta.ts`
@@ -474,7 +474,7 @@ FSM轉換納入 Auto Combo 的評分中，偏向於background/automation任務�
   - DB層： `src/lib/db/reasoningCache.ts`
   - 服務層： `open-sse/services/reasoningCache.ts`
   - 有關重播語義，請參閱[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 。
-- **讀取快取**—短期回應快取，由簽名鍵控，用於崩潰來自損壞的上游SDKs相同重試。
+- **讀取快取**—短期回應快取，由簽章鍵入，用於崩潰來自損壞的上游SDKs相同重試。
   - DB層： `src/lib/db/readCache.ts`
   - 統計端點： `GET /api/cache/stats`，儀表板位於`/dashboard/cache`
 

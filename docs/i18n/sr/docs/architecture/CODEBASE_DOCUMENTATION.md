@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 извршних модула највишег нивоа (`*.ts` минус `base.ts`, `index.ts` и тестови — цоунт `npm run check:docs-counts` мере). Свака класа извршиоца проширује `BaseExecutor` (`base.ts`), директно или преко `DefaultExecutor` или другог извршиоца; преостали модули су помоћници по добављачима (шеме алата, fetch/TTS адаптери, куирк хандлери). Извршиоци укључују:
+159 извршних модула највишег нивоа (`*.ts` минус `base.ts`, `index.ts` и тестови — цоунт `npm run check:docs-counts` мере). Свака класа извршиоца проширује `BaseExecutor` (`base.ts`), директно или преко `DefaultExecutor` или другог извршиоца; преостали модули су помоћници по добављачима (шеме алата, fetch/TTS адаптери, куирк хандлери). Извршиоци укључују:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, плус `devin-desktop`, `claudeIdentity.ts` помоћ (регистратор) `index.ts`
 
-> Напомена: провајдере који нису наведени овде опслужује `default.ts` користећи генерички ОпенАИ-компатибилни извршитељ. Потпуни каталог провајдера (380 провајдера) живи у `src/shared/constants/providers.ts`.
+> Напомена: провајдере који нису наведени овде опслужује `default.ts` користећи генерички ОпенАИ-компатибилни извршитељ. Потпуни каталог провајдера (381 провајдер) живи у `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -541,7 +541,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-Примитиви за стримовање и помоћници добављача: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts` `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts` `ollamaTransform.ts`
+Примитиви за стримовање и помоћници провајдера: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts` `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 

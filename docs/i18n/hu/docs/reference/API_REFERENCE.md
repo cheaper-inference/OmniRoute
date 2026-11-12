@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **Nyelvek:** 🇺🇸 [Angol](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Nyelvek:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Az OmniRoute API alapvető referenciája. A nyilvános `/v1` felületet és a leggyakrabban használt felügyeleti végpontokat ismerteti; a gép által olvasható [`docs/openapi.yaml`](../openapi.yaml) és a `src/app/api/` alatti útvonalfa a teljes körű forrás.
+Az OmniRoute API alapvető referenciája. A nyilvános `/v1` felületet és a leggyakrabban használt felügyeleti végpontokat ismerteti; a géppel olvasható [`docs/openapi.yaml`](../openapi.yaml), valamint a `src/app/api/` alatti útvonalfa a teljes körű forrás.
 
 A célzott, OpenAI-kompatibilis protokollért és a szolgáltatói képességek mátrixáért lásd:
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Minden telepítés a specifikáció saját példányát szolgálja ki a `/openapi.yaml` útvonalon, amely a build során a `docs/openapi.yaml` fájlból jön létre. Ez tartalmazza a build verzióját és egy relatív szerver-URL-t (`./`), így a kérések annál a hosztnál maradnak, amely a dokumentumot kiszolgálta. A letöltött fájlt importáló eszköz nem rendelkezik ilyen hosttal, ezért az alap-URL-t manuálisan kell beállítani.
 
 ---
 
@@ -378,37 +380,22 @@ Content-Type: application/json
 }
 ```
 
-Az elérhető szolgáltatók közé tartozik az OpenAI (GPT Image 2), az xAI (Grok Image), a Together AI (FLUX), a Fireworks AI, a Nebius (FLUX), a Hyperbolic, a NanoBanana, az **OpenRouter**, a **ZenMux**, az SD WebUI (helyi) és a ComfyUI (helyi).
+Az elérhető szolgáltatók közé tartozik OpenAI (GPT Image 2 ), xAI (Grok Image ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (helyi), ComfyUI (helyi).
 
-Az `n` értéke `n` képet ad vissza a `data[]` tömbben. Azok a szolgáltatók, amelyek upstream API-ja hívásonként egy képet ad vissza
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), `n` különálló upstream hívást indítanak, egyszerre legfeljebb 4-et. A rögzített
-`seed` értéket a hívás indexével növeli (`seed`, `seed + 1`, …), így a képek különböznek, de továbbra is reprodukálhatók. Az
-`n` értéke legfeljebb 10 lehet. A teljes kérés sikertelen, ha bármelyik hívás meghiúsul. A fan-out formátumok listája a
-`SINGLE_IMAGE_FANOUT_FORMATS` az
-`open-sse/handlers/imageGeneration/fanOut.ts` fájlban.
+`n` `n` képeket ad vissza `data[]`. Azok a szolgáltatók, akiknek az upstream API hívásonként egy képet ad vissza (Black Forest Labs, Stabilitás AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` külön felfelé irányuló hívást kapnak, legfeljebb 4-et repülés közben. A rögzített `seed` a hívásindex (`seed`, `seed + 1`, …) eltolja, így a képek különböznek, de reprodukálhatók maradnak. `n` felső határa 10. A kérés összességében meghiúsul, ha bármelyik hívás meghiúsul. A fan-out formátumok listája a `SINGLE_IMAGE_FANOUT_FORMATS` `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-A ZenMux újra felhasználja a meglévő API-kulcsos kapcsolatot, és elfogadja a `zenmux/` vagy `zm/` előtagokat:
+ZenMux újrafelhasználja a meglévő API-kulcs kapcsolatot, és elfogadja `zenmux/` vagy `zm/` előtagokat:
 
-- A `zenmux/openai/gpt-image-2` a ZenMux OpenAI Images API-ját használja. A lehetőségek közé tartozik a `size`,
-  a `quality`, az `n`, az `output_format`, az `output_compression`, a `background` és a `response_format`.
-- Más kiadók, például a `zm/meta/muse-image-1.0`, a ZenMux Vertex AI `:predict`
-  végpontját használják. Az `n` a `sampleCount` értékre, az `aspect_ratio` az `aspectRatio` értékre, az `image_size`
-  (`1K`, `2K`, `4K`) pedig a `sampleImageSize` értékre képeződik le. A képpontban megadott `size` csak a képarányt adja meg,
-  a képpontméretek nem garantáltak. A támogatott képarányok, felbontások és darabszámok modellenként eltérnek.
-- A `zm/inclusionai/ming-image-0.1-design` maga választja ki a méreteit. Hagyd el a `size`,
-  az `aspect_ratio` és az `image_size` értékét; a megadott értékek HTTP 400-as hibát eredményeznek. PNG, JPEG és WebP
-  formátum kérhető az `output_format` használatával.
+- `zenmux/openai/gpt-image-2` ZenMuxOpenAI API képeit használja. A lehetőségek közé tartozik `size`, `quality`, `n`, `output_format`, `output_compression`, `background` és `response_format`.
+- Más kiadók, például `zm/meta/muse-image-1.0`, a ZenMux Vertex AI `:predict` végpontját használják. `n` leképez `sampleCount`, `aspect_ratio` t `aspectRatio` és `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. A pixel `size` csak képarányt biztosít, nem garantált pixelméreteket. A támogatott arányok, felbontások és számok típusonként változnak.
+- `zm/inclusionai/ming-image-0.1-design` saját maga választja ki a méreteit. `size`, `aspect_ratio` és `image_size` kihagyása; Az explicit értékek HTTP 400-at adnak vissza. PNG, JPEG és WebP `output_format`-vel kérhető.
 
-Ez az integráció szövegből képgenerálást támogat, referencia-képes szerkesztést nem. A Vertex
-kimenete `data[].b64_json` formátumra normalizálódik; a `response_format: "url"` upstream
-HTTPS URL-t ad vissza, vagy base64 adat-URL-t, ha csak a képbájtok állnak rendelkezésre. Az üres/szűrt kimenetek
-hiba visszaadását eredményezik, nem pedig üres sikeres választ. A modellhez való hozzáférés a ZenMux-fióktól függ.
-Lásd a [ZenMux Vertex API-ját](https://docs.zenmux.ai/api/vertexai/generate-images) és az
-[OpenAI Images API-t](https://docs.zenmux.ai/api/openai/generate-an-image).
+Ez az integráció támogatja a szöveg-kép létrehozását, nem pedig a referencia-képszerkesztést. A csúcs kimenete `data[].b64_json`-ra normalizálva; `response_format: "url"` egy upstream HTTPS URL vagy egy base64 adat URL ad vissza, ha csak képbájtok állnak rendelkezésre. Empty/filtered kimenetek inkább hibát adnak vissza, mint üres sikert. A modellelérés a ZenMux fióktól függ. Lásd [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) és [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+A Microsoft 365 Copilot bejelentkezési kapcsolat `copilot-m365-web/m365-copilot-image` szolgálja ki Copilot beépített képeszközén keresztül: képenként egy Copilot fordulat (`n` 1–4), `size` csak a tájolást irányítja, és a képeket inline küldi vissza (`b64_json` vagy egy URL adat `response_format: "url"` esetén). Lásd: [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Az összes képi modell listázása
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -863,73 +850,42 @@ OpenAI-kompatibilis kötegelt feldolgozás.
 
 ---
 
-## Keresési API
+## Keresés API
 
-Webes/keresési szolgáltatói absztrakció (Tavily, Brave, Exa, Serper stb.).
+Web/search szolgáltató absztrakció (Tavily, Brave, Exa, Serper stb.).
 
-| Metódus | Útvonal                | Leírás                                                                                                       |
-| ------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET     | `/v1/search`           | A konfigurált keresési szolgáltatók és képességeik felsorolása                                               |
-| POST    | `/v1/search`           | Keresési lekérdezés futtatása — a törzset a `v1SearchSchema` ellenőrzi, gyorsítótárazást/összevonást támogat |
-| GET     | `/v1/search/analytics` | Szolgáltatónkénti találati/sebesség-/gyorsítótár-statisztikák                                                |
+| Módszer | Útvonal                | Leírás                                                        |
+| ------- | ---------------------- | ------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit |
+| POST    | `/v1/search`           | `v1SearchSchema` le caching/coalescing keresési —             |
+| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika               |
 
-**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A keresési házirendet az `enforceApiKeyPolicy` érvényesíti.
+**Auth:** Tartó API kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzat `enforceApiKeyPolicy` keresztül érvényesítve.
+
+**Automatikus kiválasztás:** `provider` nélkül a legolcsóbb, konfigurált kapcsolattal rendelkező szolgáltató fut először, és a következő legolcsóbb a feladatátvétel. Az ingyenes utolsó szolgáltatók (`duckduckgo-free`) csak akkor használatosak, ha semmi más nincs beállítva. A saját üzemeltetésű SearXNG konfiguráltnak számít, ha a kapcsolata valódi `baseUrl` (nem a katalógus alapértelmezett `http://localhost:8888/search` `baseUrl` ) tárolja: ezután 0 dolláros szolgáltatóként szerepel a kulcsos szolgáltatók előtt, a legolcsóbb kulcsos szolgáltató pedig feladatátvételként, beleértve azt is, ha SearXNG 400, 401, 403 vagy 404 URL válaszol. `http(s)` -metaadat cím nem számít. A tokent tároló SearXNG kapcsolat csak `https://` vagy loopback `http://` felett rangsorolható. A távoli sima `http://` en soha nem jelent feladatátvételt, és csak az utolsó lehetőség marad, csak akkor használják, ha nincs más szolgáltató konfigurálva, vagy ha név szerint kérik, tehát ebben a két esetben egyértelmű szöveggel küldi el a tokent.
 
 ### Exa és Tavily `provider_options`
 
-Az Exa és a Tavily névterezett tárolóból olvassa a szolgáltatóspecifikus mezőket:
-`provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily`
-(vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsokat továbbítja a rendszer. Mindegyiket
-a saját Zod-sémájával ellenőrzi az
-`open-sse/handlers/search/providerOptionsPassthrough.ts`, a hibás típusú kulcsokat pedig elveti. Minden
-más kulcs figyelmen kívül marad, beleértve a hitelesítést, az alap-URL-t, a
-`stream` és `outputSchema` értékét is. A más szolgáltatók által használt lapos kulcsok (`cx`, `depth`, ...)
-továbbra is ugyanúgy működnek.
+Az Exa és a Tavily beolvassa a szolgáltató-specifikus mezőket egy névteres táskából: `provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily` (vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket ellenőrzik a saját Zod sémájával `open-sse/handlers/search/providerOptionsPassthrough.ts` ben, és egy nem megfelelő típusú kulcs kerül kidobásra. Minden más kulcs figyelmen kívül marad, beleértve az auth, base URL, `stream` és `outputSchema`. A más szolgáltatók által használt lapos billentyűk (`cx`, `depth`, ...) a korábbiak szerint működnek.
 
-| Szolgáltató | Felső szintű mezők                                                                                                                                                                                                                                                                                                                                                        | Beágyazott                                                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lapos primitívek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`, az alapértelmezett `{ text: true, highlights: true }` értékekre összevonva |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                         |
+| Szolgáltató | Legfelső szintű mezők                                                                                                                                                                                                                                                                                                                                                     | Beágyazott                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lapos primitívek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` egyesült az alapértelmezett `{ text: true, highlights: true }` vel |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-Az általános mezők mindig elsőbbséget élveznek: `query`, `max_results`, `filters` (domainek), `country` és a
-`search_type` alapján származtatott téma. Az Exa esetében a `search_type: "news"` megtartja a
-`category: "news"` értéket. A Tavily a `search_type: "finance"` értéket is elfogadja
-(`topic: "finance"`).
+Mindig az általános mezők nyernek: `query`, `max_results`, `filters` (domains), `country` és a `search_type` ből származó téma. Az Exa-n a `search_type: "news"` megtartja `category: "news"`. Tavily `search_type: "finance"` (`topic: "finance"`) is elfogadja.
 
-A Firecrawl keresési költségét minden megkezdett, 10 visszaadott eredményt tartalmazó blokk után
-rögzíti, blokkonként 0,002 dollár (2 kredit) áron, és hívásonként legalább egy blokkot számol
-([Firecrawl számlázás](https://docs.firecrawl.dev/billing)): 11 eredmény költsége 0,004 dollár.
+A Firecrawl keresési költsége 10 visszaadott eredmény elindított blokkjára vonatkozik, blokkonként 0,002 USD (2 kredit) és hívásonként legalább egy blokk ( [Firecrawl-számlázás](https://docs.firecrawl.dev/billing) ): 11 találat 0,004 USD-ba kerül.
 
-Az általános `time_range` most már mindkét szolgáltatóhoz eljut: az Exa
-`startPublishedDate` (ISO-időbélyeg), a Tavily pedig `start_date` (`YYYY-MM-DD`) értéket kap. A
-`provider_options` explicit dátuma felülírja a leképezett értéket.
+Az általános `time_range` mostantól mindkét szolgáltatót eléri: Exa `startPublishedDate` (ISO timestamp), Tavily pedig `start_date` (`YYYY-MM-DD`) kap. Az explicit dátum `provider_options` ben felülírja a leképezett dátumot.
 
-Az Exa eredményei az `id`, `highlights` (minden kiemelést, nem csak az első, a
-`snippet` értékeként használt kiemelést), a `highlight_scores`, `summary`, `subpages`, `entities` és
-`extras` mezőket a `provider_raw` mezőben őrzik meg. A Tavily eredményei az `images` és a `favicon`
-mezőket őrzik meg.
+Az Exa eredmények `id`, `highlights` (minden kiemelés, nem csak az első `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` és `extras` `provider_raw`-ben marad. A Tavily eredmények `images` és `favicon` maradnak.
 
-A Linkup keresési költségét `fast` és `standard` `depth` esetén 0,005 dollár, `deep` esetén pedig
-0,05 dollár értéken rögzíti ([Linkup árképzés](https://docs.linkup.so/pages/documentation/development/pricing)),
-függetlenül attól, hogy a `depth` értéke a `provider_options` beállításból vagy a kapcsolat beállításaiból
-származik.
+A linkup keresési költsége 0,005 USD `depth` `fast` és `standard`, és 0,05 USD `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) esetében, függetlenül attól, hogy `depth` `provider_options` ből vagy a kapcsolat beállításaiból származik.
 
-Az Exa `type: "lite"` (Exa 3.0) kisebb mezőkészletet fogad el, és a teljes kérést elutasítja,
-ha bármely más mező be van állítva. A lite esetében a hívás előtt elveti az
-`additionalQueries`, `systemPrompt` mezőket, valamint a `contents` minden kulcsát a `text` és
-`highlights` kivételével. Az elavult
-`subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` mezőket többé nem
-továbbítja.
+Az Exa `type: "lite"` (Exa 3.0) kisebb mezőket fogad el, és elutasítja a teljes kérést, ha bármely más mező be van állítva. Lite esetén `additionalQueries`, `systemPrompt` és `text` és `highlights` kivételével minden `contents` billentyű eldobásra kerül a hívás előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` továbbítása már nem történik meg.
 
-A költségelszámolás az egyszerű `costPerQuery`-nyilvántartást követi, kivéve az Exát, amely az Exa
-saját árképzését alkalmazza: hívásonként 0,007 dollár az `auto` (és a korábbi `fast`), illetve
-0,004 dollár a `lite` (és a korábbi `instant`) esetén, 10 eredményt lefedve; minden további eredmény
-0,001 dollár; továbbá minden visszaadott eredmény után 0,001 dollár, ha a `contents.summary` be van
-állítva. A Tavily esetében 1 kredit (0,008 dollár) kerül rögzítésre a `search_depth` `basic`, `fast`
-és `ultra-fast` értékeihez, valamint 2 kredit (0,016 dollár) az `advanced` értékhez
-([Tavily API-kreditek](https://docs.tavily.com/documentation/api-credits)). Ha egy
-`auto_parameters: true` értékű hívás során a Tavily `advanced` szintre vált, akkor is 1 kredit kerül
-rögzítésre.
+A költségelszámolás a `costPerQuery` lapos nyilvántartás, kivéve az Exa esetében, amely az Exa saját árait követi: 0,007 USD hívásonként `auto` (és az örökölt `fast`) esetében vagy 0,004 USD `lite` (és az örökölt `instant`) esetében, amely 10 eredményt takar; 0,001 USD minden további eredményért; és 0,001 USD visszaadott eredményenként, ha `contents.summary` be van állítva. A Tavily 1 kreditet (0,008 USD) `search_depth` `basic`, `fast` és `ultra-fast` esetében, és 2 kreditet ($ 0,016) `advanced` esetében ( [Tavily API kredit](https://docs.tavily.com/documentation/api-credits) ). A `auto_parameters: true` folytatott hívást, amelyet Tavily haladó szintre frissít, továbbra is 1 kredittel rögzítenek.
 
 ---
 
@@ -1061,31 +1017,26 @@ Forrás: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Önkiszolgáló használat (`/api/usage/om-usage`)
 
-Bármely API-kulcs lekérdezheti a **saját** használatát és kvótáit — kezelői hitelesítés nélkül. Ezt a
-végpontot használja egy kliens (CLI, az OmniCopilot panel) annak megjelenítésére, hogy egy
-kulcstulajdonos mennyit költött.
+Bármelyik API billentyű képes olvasni** a sajátja** használat és kvóták — nincs kezelési hitelesítés. Ez az a végpont, amelyet az ügyfél (CLI, a OmniCopilot panel) használ a kulcstulajdonosnak a költéseinek megjelenítésére.
 
 ```bash
-# Szöveges forma (a korábbi szerződés — egyszerű szöveg terminálhoz)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturált forma — ezt használja a felhasználói felület
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-A kulcsnál engedélyezve kell lennie az **`allowUsageCommand`** beállításnak (alapértelmezés szerint ki
-van kapcsolva — a vezérlőpult API-kulcskezelője kulcsonként kapcsolja be és ki). Enélkül a végpont
-`403` választ ad.
+A kulcsnak meg kell lennie**`allowUsageCommand`** engedélyezve (alapértelmezés szerint kikapcsolva — az irányítópult API-kulcskezelője kulcsonként kapcsolja át). Enélkül a végpont `403` választ ad.
 
-A `?format=json` diszkriminált struktúrát ad vissza, így a hívó soha nem olvas adatmezőt egy
-elutasításból. Sikeres válasz esetén:
+`?format=json` megkülönböztetett alakzatot ad vissza, így a hívó soha nem olvas le egy adatmezőt az elutasításról. A sikerről:
 
 ```jsonc
 {
   "allowed": true,
-  // csak akkor van jelen, ha a kulcs bekapcsolta a kulcsonkénti használati korlátokat (napi/heti USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1094,9 +1045,9 @@ elutasításból. Sikeres válasz esetén:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // a kiválasztott szolgáltatói kvóta pillanatképe, vagy null, ha még semmi nincs gyorsítótárazva:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // minden kapcsolat pillanatképe, hogy a felhasználói felület több szolgáltatót is egymás mellett jeleníthessen meg:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1104,68 +1055,49 @@ elutasításból. Sikeres válasz esetén:
 }
 ```
 
-Elutasítás esetén (`401` hibás kulcs / `403` nincs engedélyezve) ugyanaz az útvonal a következőt adja
-vissza: `{ "allowed": false, "error": { "message": "…" } }` — a jelen lévő, de üres
-`personal`/`provider` mező (a kulcs engedélyezett, de még semmilyen adat nem került lekérdezésre)
-más állapotot jelent, mint az elutasítás, és ezt csak a JSON-forma különbözteti meg.
+Visszautasításkor (`401` rossz kulcs / `403` nem engedélyezett) ugyanaz az útvonal `{ "allowed": false, "error": { "message": "…" } }` — adja vissza, a jelenlévő, de üres `personal`/`provider` (kulcs engedélyezett, még nem tanultunk semmit) különbözik az elutasítástól, és csak a JSON alak különbözteti meg őket.
 
-**Hitelesítés:** a hívó saját Bearer API-kulcsa, amelyet az `isValidApiKey` segítségével ellenőriz a
-rendszer — ez **nem** a kezelői felület (`/api/keys/…`), amely továbbra is a
-`requireManagementAuth` mögött marad.
+**Auth:** a hívó saját Bearer API kulcsa, `isValidApiKey` — -vel érvényesítve ez _nem_ a kezelőfelület (`/api/keys/…`), amely `requireManagementAuth` mögött marad.
 
-### Nyers és cutoff alapján korrigált kvótaszázalékok
+### Nyers vs. Cutoff-Adjusted kvótaszázalékok
 
-Az `/api/usage/om-usage` használatakor a hívóknak figyelembe kell venniük a **sima szöveges kimenet**
-és a strukturált **JSON-kimenet** által megjelenített százalékok közötti különbséget:
+`/api/usage/om-usage` fogyasztása során a hívóknak figyelniük kell a százalékok közötti különbségre** egyszerű szöveges kimenet** és a strukturált**JSON kimenet** :
 
-| Szempont                   | Sima szöveges forma (`/api/usage/om-usage` / `@@om-usage`)                                                    | JSON-forma (`?format=json`)                                                                    |
-| :------------------------- | :------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
-| **Kimeneti mező**          | `NN% left` (pl. `20% left`)                                                                                   | `provider.quotas` / `providers[].quotas`                                                       |
-| **Mérés**                  | **Cutoff alapján korrigált felhasználható keret**: a cutoffküszöb felett fennmaradó kapacitás                 | **Nyers upstream kvóta**: módosítatlan szolgáltatói mérés                                      |
-| **Cutoff skálázása**       | Az `effectiveRemainingPercent()` segítségével skálázva, így a védett tartalék `0% left` értékként jelenik meg | Nincs (a szolgáltató által jelentett nyers pillanatképértékek)                                 |
-| **Küszöbadatok**           | Beépítve a megjelenített százalékba                                                                           | Kapcsolatonként a `quotaWindowThresholds` mezőben (vagy a szerver alapértelmezéseiben) tárolva |
-| **Elsődleges felhasználó** | Interaktív CLI-k, terminálpromptok, emberi kezelők                                                            | Programozott integrációk, vezérlőpultok, elemzések, számlázási nyomkövetők                     |
+| Vonatkozás               | Egyszerű szöveges formátum (`/api/usage/om-usage` / `@@om-usage`)                                  | JSON formátum (`?format=json`)                                                                       |
+| :----------------------- | :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **Kimeneti mező**        | `NN% left` (pl. `20% left`)                                                                        | `provider.quotas` / `providers[].quotas`                                                             |
+| **Mérés**                | **Levágással korrigált felhasználható pótlék** : fennmaradó kapacitás a küszöbérték felett         | **Nyers upstream kvóta** : korrigálatlan szolgáltatói mérés                                          |
+| **Levágási méretezés**   | `effectiveRemainingPercent()` keresztül skálázva, így a védett tartalék `0% left` ként jelenik meg | Nincs (a szolgáltató által jelentett nyers pillanatkép értékek)                                      |
+| **Küszöb adatok**        | Beépítve a megjelenített százalékba                                                                | Kapcsolatonként `quotaWindowThresholds` -ban tárolva (vagy a szerver alapértelmezett beállításaiban) |
+| **Elsődleges fogyasztó** | Interaktív CLIs, terminál promptok, emberi operátorok                                              | Automatikus integrációk, irányítópultok, elemzések, számlázási nyomkövetők                           |
 
-#### A cutoff-korrekció képlete
+#### A határérték beállítási képlete
 
-Az OmniRoute támogatja a proaktív kvótacutoffokat az upstream kimerülésének megelőzésére (ezek a
-kapcsolat `quotaWindowThresholds` beállításával, a szolgáltatói alapértelmezésekkel vagy globális
-ellenállóképességi beállításokkal konfigurálhatók). Amikor egy kvótaablakban cutoffküszöb van
-érvényben (például `cutoff = 25%`), a szöveges renderelő a fennmaradó keretet a következőképpen
-számítja ki:
+OmniRoute támogatja a proaktív kvóta-lezárásokat, hogy megakadályozza az upstream kimerülést ( `quotaWindowThresholds` kapcsolaton, a szolgáltatói alapértelmezéseken vagy a globális rugalmassági beállításokon keresztül konfigurálva). Ha egy küszöbérték (pl. `cutoff = 25%`) aktív egy kvótaablakban, a szövegmegjelenítő a következőképpen számítja ki a fennmaradó ráhagyást:
 
-- Ha `remaining <= cutoff`: `0%` értéket ad vissza.
-- Ha `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` értéket ad vissza.
+- Ha `remaining <= cutoff`: `0%` t adja vissza.
+- Ha `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` t adja vissza.
 
-A formázott szöveges kimenet ezt a legközelebbi egész számra kerekíti (`Math.round(...)`).
+A formázott szövegkimenet ezt a legközelebbi egész számra kerekíti (`Math.round(...)`).
 
 #### Szemléltető példa
 
-Vegyünk egy szolgáltatói ablakot **60%-os nyers felhasználással** (tehát **40% nyers fennmaradó kvótával**) és egy beállított
-**25%-os fennmaradókvóta-küszöbértékkel**:
+Fontolja meg a szolgáltatói ablakot** 60% nyers felhasználás** (ezért** 40% nyers maradék kvóta** ) és egy konfigurált** 25%-os maradék kvóta-lezárás** küszöb:
 
-| Reprezentáció                      | Számítás                                           | Fennmaradó |                Következtetett felhasználás                 |
-| :--------------------------------- | :------------------------------------------------- | :--------: | :--------------------------------------------------------: |
-| **Nyers JSON (`?format=json`)**    | Felsőbb szintű pillanatkép (`quotas[window]`)      |  **40%**   |                          **60%**                           |
-| **Szöveges formátum (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**   | **80%** (ha a számítás `100 - remaining` alapján történik) |
+| Képviselet                      | Számítás                                           |  Többi  |             Impulzív használt              |
+| :------------------------------ | :------------------------------------------------- | :-----: | :----------------------------------------: |
+| **Nyers JSON (`?format=json`)** | Felfelé irányuló pillanatkép (`quotas[window]`)    | **40%** |                  **60%**                   |
+| **Szövegformátum (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (ha `100 - remaining` t számolunk) |
 
-- **Miért jelenik meg 20% fennmaradó érték a szövegben:** A fiókon fizikailag fennmaradó 40% kvótából 25%-ot a
-  küszöbérték-szabályzat tart fenn. A hívó csak a 75%-os használható keretből fennmaradó 15%-kal rendelkezik, mielőtt az útválasztó
-  leállítja a kérések erre a kapcsolatra történő irányítását. A skálázás biztosítja, hogy a kapcsolat pontosan akkor jelezze a kimerülést
-  (`0% left`), amikor az útválasztás megszűnik.
-- **Miért őrzi meg a JSON a nyers értékeket:** A JSON-tartalom a szolgáltatói pillanatkép pontos értékeit (`UsageSnapshot`) adja vissza,
-  így a külső eszközök hozzáférnek a tényleges felsőbb szintű kihasználtsághoz és a kapcsolat szintű
-  `quotaWindowThresholds` értékekhez, szerveroldali veszteséges skálázás nélkül.
+- **Miért jelenik meg a szövegben a 20% maradt:** A számlán maradt 40%-os fizikai kvótából 25%-ot a lezárási politika lefoglal. A hívó félnek csak 15%-a marad a 75%-ból, mielőtt az útválasztó leállítja az útválasztást ehhez a kapcsolathoz. A méretezés biztosítja, hogy a kapcsolati jelek kimerülése (`0% left`) pontosan akkor történjen, amikor az útválasztás leáll.
+- **Miért őrzi meg JSON a nyers értékeket:** A JSON hasznos adata a pontos szolgáltatói pillanatképet (`UsageSnapshot`) adja vissza, így a külső eszközök hozzáférhetnek az alapszintű upstream hasznosításhoz és a kapcsolatszintű `quotaWindowThresholds` szerveroldali veszteséges skálázás nélkül.
 
-#### Migrációs útmutató a fogyasztók számára
+#### Fogyasztói migrációs útmutató
 
-Ha egy külső integráció (például egy szerkesztőbővítmény vagy ügynökkiterjesztés) korábban a szöveges
-végpontból (`NN% left`) olvasta ki az értékeket, és a felhasznált százalékot `100 - NN` alapján számította,
-a `?format=json` használatára történő áttérés a következőket jelenti:
+Ha egy külső integráció (például egy szerkesztő beépülő modul vagy ügynökbővítmény) korábban lekaparta a szövegvégpontot (`NN% left`), és a használt százalékot `100 - NN` ként számította ki, `?format=json` re való átállás a következőket jelenti:
 
-- A nyers JSON-értékek olvasása a **tényleges felsőbb szintű fogyasztást** tükrözi (a fenti példában 60% felhasználva).
-- Ha az integráció meg szeretné őrizni a szöveges végpont használható keretre vonatkozó szemantikáját, akkor az effektív fennmaradó értéket
-  kliensoldalon is kiértékelheti a kapcsolat szintű felülbírálásokhoz használt `quotaWindowThresholds` alapján.
+- A nyers JSON értékek olvasása tükrözni fogja** tényleges upstream fogyasztás** (a fenti példában használt 60%).
+- Ha az integráció meg akarja őrizni a szövegvégpont felhasználható engedményes szemantikáját, ki tudja értékelni a hatékony fennmaradó képletet ügyféloldalon `quotaWindowThresholds` használatával a kapcsolatszintű felülírásokhoz.
 
 ---
 
@@ -1274,48 +1206,38 @@ A csak következtetésre használható kulcsok `403` választ kapnak. Forrás:
 
 ## Irányítópult és kezelés
 
-A kezelési útvonalakat (`/api/*`, a nyilvános hitelesítés/bejelentkezés kivételével) **nem** engedélyezik a szokásos inference API-kulcsok. A hitelesítési adatok családjai, a hatókörök és a curl-példák:
-[Management Authentication](../guides/MANAGEMENT-AUTH.md).
+A kezelési útvonalak (`/api/*` kivéve a nyilvános auth/login) vannak** nem** közönséges következtetési API billentyűk által engedélyezett. Hitelesítőadat-családok, hatókörök és curl-példák: [Kezelői hitelesítés](../guides/MANAGEMENT-AUTH.md).
 
 ### Hitelesítés
 
-| Végpont                       | Metódus  | Leírás                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Bejelentkezés                                                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/auth/logout`            | POST     | Kijelentkezés                                                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/settings/require-login` | GET/POST | Bejelentkezési állapot (GET, nyilvános). A POST beállítja a jelszót / ki- és bekapcsolja a bejelentkezést: jelszó megléte után csak operátor számára engedélyezett (irányítópult-munkamenet, helyi CLI vagy letiltott bejelentkezés esetén — az API-kulcsok és az `oma_` tokenek `403` értéket kapnak); az irányítópult-munkamenete a `currentPassword` értéket küldi a jelszó lecseréléséhez |
+| Végpont                       | Módszer  | Leírás                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Bejelentkezés                                                                                                                                                                                                                                                                                                              |
+| `/api/auth/logout`            | POST     | Kijelentkezés                                                                                                                                                                                                                                                                                                              |
+| `/api/settings/require-login` | GET/POST | Bejelentkezési állapot (GET, nyilvános). POST beállítja a jelszót / átkapcsolja a bejelentkezést: operátor csak akkor, ha már létezik jelszó (műszerfali munkamenet, helyi CLI vagy bejelentkezés tiltva — API kulcsok és `oma_` tokenek get `403`); a műszerfali munkamenet `currentPassword` küld a jelszó lecserélésére |
 
-### Szolgáltatók kezelése
+### Szolgáltató menedzsment
 
-| Végpont                                 | Metódus                   | Leírás                                                                                                                                                        |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Szolgáltatók listázása / létrehozása                                                                                                                          |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Szolgáltató kezelése                                                                                                                                          |
-| `/api/providers/[id]/test`              | POST                      | Szolgáltatói kapcsolat tesztelése                                                                                                                             |
-| `/api/providers/[id]/models`            | GET                       | Szolgáltatói modellek listázása                                                                                                                               |
-| `/api/providers/validate`               | POST                      | Szolgáltatói konfiguráció ellenőrzése                                                                                                                         |
-| `/api/providers/bulk`                   | POST                      | API-kulcsok tömeges hozzáadása EGY szolgáltatóhoz                                                                                                             |
-| `/api/providers/import`                 | POST                      | Heterogén szolgáltatói LISTA importálása feldolgozott CSV/JSON-fájlból (#6836); soronkénti részleges hibás eredmények                                         |
-| `/api/provider-nodes*`                  | Various                   | Szolgáltatói csomópontok kezelése                                                                                                                             |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Egyéni modellek és modellenkénti felülbírálások (hozzáadás, frissítés, elrejtés/megjelenítés, törlés)                                                         |
-| `/api/provider-models/validate-and-add` | POST                      | Kezelési hitelesítéssel, választható szigorú kapcsolat-ellenőrzés és atomi egyéni modellregisztráció; lásd: [Model validation](../guides/MODEL-VALIDATION.md) |
+| Végpont                                 | Módszer                   | Leírás                                                                                                                                                                   |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/providers`                        | GET/POST                  | Szolgáltatók listázása / létrehozása                                                                                                                                     |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Szolgáltató kezelése                                                                                                                                                     |
+| `/api/providers/[id]/test`              | POST                      | Tesztelje a szolgáltatói kapcsolatot                                                                                                                                     |
+| `/api/providers/[id]/models`            | GET                       | Sorolja fel a szolgáltatói modelleket                                                                                                                                    |
+| `/api/providers/validate`               | POST                      | A szolgáltató konfigurációjának ellenőrzése                                                                                                                              |
+| `/api/providers/bulk`                   | POST                      | API kulcsok tömeges hozzáadása ONE szolgáltatóhoz                                                                                                                        |
+| `/api/providers/import`                 | POST                      | Heterogén szolgáltató LIST importálása elemzett CSV/JSON fájlból (#6836); soronkénti részhibás eredmények                                                                |
+| `/api/provider-nodes*`                  | Különféle                 | Szolgáltatói csomópontok kezelése                                                                                                                                        |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Egyéni modellek és modellenkénti felülírások (hozzáadás, frissítés, hide/show, törlés)                                                                                   |
+| `/api/provider-models/validate-and-add` | POST                      | Menedzsment által hitelesített, opt-in szigorú kapcsolati érvényesítés és atomi egyedi modell regisztráció; lásd [a modell érvényesítése](../guides/MODEL-VALIDATION.md) |
 
-Szinkronizált/importált modellek esetén a `PUT /api/provider-models` a `provider`, `modelId` és
-`maxOutputTokenOverride` értékeket fogadja el: pozitív egész szám beállítja a manuális kimeneti tokenkorlátot, a `null`
-pedig törli azt az alapértelmezés visszaállításához. A `GET /api/provider-models?provider=<provider>` ezekből az értékekből a
-`modelOutputOverrides` mezőben ad vissza adatokat, beleértve az egyéni modellrekord nélküli modelleket is. A felülbírálás a futtatókörnyezet
-`max_output_tokens` képességét használja, és egy modell újbóli szinkronizálása után is megmarad. Az OpenAI-kompatibilis
-szolgáltatói oldal ugyanilyen szerkesztési/törlési vezérlőket kínál, és explicit képtámogatással rendelkezőként jelöli a modelleket.
+synced/imported modelleknél `PUT /api/provider-models` elfogadja `provider`, `modelId` és `maxOutputTokenOverride`: a pozitív egész szám beállítja a kézi kimeneti token korlátot, `null` pedig törli az alapértelmezett érték visszaállításához. `GET /api/provider-models?provider=<provider>` ezeket az értékeket adja vissza `modelOutputOverrides`-ban, beleértve az egyéni modellsor nélküli modelleket is. A felülírás a futásidejű `max_output_tokens` képességet használja, és túléli a modell-újraszinkronizálást. Az OpenAI-kompatibilis szolgáltatói oldal ugyanazokat a edit/clear vezérlőket kínálja, és megjelöli az explicit látástámogatással rendelkező modelleket.
 
-Kompatibilis szolgáltatói csomóponton az írási útvonalak (`POST`, `PUT`, `PATCH`, `DELETE` és
-`/api/provider-models/validate-and-add`) a modellazonosítót a felsőbb szintű szolgáltató csupasz azonosítójaként tárolják: ha egy
-előtaggal ellátott listából beillesztett azonosítóról van szó, a csomópont saját előtagjának összes egymásba ágyazott előfordulása
-összevonásra kerül, a válaszok pedig a tárolt azonosítót adják vissza. A kanonikus szolgáltatók perjeleket tartalmazó azonosítói (például `nvidia/nemotron-…`) változatlanul kerülnek tárolásra. A `/v1/models` soha nem ad vissza egymásba ágyazott `<prefix>/<prefix>/<model>` azonosítót.
+Egy kompatibilis szolgáltatói csomóponton az írási útvonalak (`POST`, `PUT`, `PATCH`, `DELETE` és `/api/provider-models/validate-and-add`) a modellazonosítót csupasz upstream azonosítóként tárolják: egy előtaggal ellátott listából beillesztett azonosító esetén a csomópont saját előtagjának bármely vezető verem összeomlott, és a válaszok a tárolt azonosítót visszhangozzák. A kanonikus szolgáltatók vágott azonosítóit (pl. `nvidia/nemotron-…`) a rendszer szó szerint tárolja. `/v1/models` soha nem ad ki halmozott `<prefix>/<prefix>/<model>` azonosítót.
 
-Az egyéni Chat Completions-csomópontok az explicit reasoning-lemondásokat az upstream háttérrendszerhez igazítják. A sikeres kapcsolatteszt automatikusan kiválasztja a chat-template vezérlőket minden olyan pontos modellazonosítóhoz, amelynek `/models`-bejegyzése felismert `owned_by` értéket igazol: `vllm`, `sglang` vagy `llamacpp`. Az átlátható, OpenAI-kompatibilis burkolók az eredeti modellbejegyzést egy beágyazott
-`openai` objektumban őrizhetik meg; az észlelés legfeljebb három ilyen burkolaton halad keresztül. A hiányzó, ismeretlen vagy egymásnak ellentmondó tulajdonosi adatokkal rendelkező modellek a szokásos OpenAI-viselkedést tartják meg. Az észlelés a meglévő katalóguskérést használja fel, nem generál completion tokeneket, és a kapcsolati végpont megváltozásakor érvénytelenné válik.
+Az egyéni csevegés befejezési csomópontjai az explicit indoklási leiratkozásokat igazítják az upstream háttérrendszerhez. A sikeres kapcsolódási teszt automatikusan kiválasztja a chat-sablon vezérlőket minden olyan pontos ID modellhez, amelynek `/models` bejegyzése felismert `owned_by` értéket igazol: `vllm`, `sglang` vagy `llamacpp`. Az átlátszó OpenAI-kompatibilis burkolók megőrizhetik az eredeti modellbejegyzést egy beágyazott `openai` objektumon belül; az észlelés legfeljebb három ilyen borítékot követ. A hiányzó, ismeretlen vagy ütköző tulajdonjoggal rendelkező modellek megtartják a szokásos OpenAI viselkedést. Az észlelés újra felhasználja a meglévő katalóguskérelmet, nem hoz létre befejezési jogkivonatokat, és érvénytelenítésre kerül, ha a kapcsolat végpontja megváltozik.
 
-Ha olyan háttérrendszerhez szeretné rögzíteni a viselkedést, amely nem teszi közzé ezeket a metaadatokat, használja a meglévő részleges szolgáltatói frissítési API-t:
+Egy olyan háttérrendszer viselkedésének rögzítéséhez, amely nem teszi közzé ezeket a metaadatokat, használja a meglévő API részleges szolgáltatói frissítést:
 
 ```json
 {
@@ -1325,90 +1247,91 @@ Ha olyan háttérrendszerhez szeretné rögzíteni a viselkedést, amely nem tes
 }
 ```
 
-Küldje ezt a törzset a `PUT /api/providers/<connection-id>` végpontra. Ezen a kapcsolaton az explicit `none` reasoning effort `chat_template_kwargs.thinking=false` és `chat_template_kwargs.enable_thinking=false` formában kerül elküldésre. Az explicit natív template-értékek továbbra is elsőbbséget élveznek, kivéve, ha egy szerveroldali reasoning-szabály effortot kényszerít ki. A beállítás csak akkor érvényes, amikor egy egyéni, OpenAI-kompatibilis kapcsolat Chat Completions-törzset küld; a Responses-kérések és a szokásos szolgáltatók megőrzik natív kérésformátumukat. Állítsa a `reasoningControl` értékét `openai` értékre a szokásos OpenAI-`reasoning_effort` átadás kényszerítéséhez, vagy hagyja el/állítsa `null` értékre az automatikus észlelés használatához.
+Küldd el azt a testet `PUT /api/providers/<connection-id>` val. Ezen a kapcsolaton a `none` explicit gondolkodási erőfeszítése `chat_template_kwargs.thinking=false` és `chat_template_kwargs.enable_thinking=false` néven kerül elküldésre. Az explicit natív sablonértékek mérvadóak maradnak, hacsak egy szerveroldali érvelési szabály nem kényszerít rá. A beállítás csak akkor érvényes, ha egy egyéni OpenAI-kompatibilis kapcsolat küldi el a Chat Completions törzset; A válaszkérések és a normál szolgáltatók megtartják natív kérésformájukat. Állítsa `reasoningControl` `openai` -re a normál OpenAI `reasoning_effort` áthárítás kényszerítéséhez, vagy hagyja ki it/set `null` -re az automatikus észlelés használatához.
 
-A Claude Code automatikus módjának osztályozókérései alapértelmezés szerint letiltják a natív gondolkodást, ha nem tartalmaznak explicit reasoning-vezérlőket. Az észlelés az osztályozó rendszerjelölőjét használja a Claude-formátumú kérésekben, nem pedig a modellneveket vagy a completion-korlátokat. Az explicit törzsvezérlők, a támogatott effort/thinking fejlécek, az útválasztási szabályok és a feloldott modell-effort megtartják meglévő prioritásukat. Mindkét osztályozási szakasz megőrzi a promptjait, a completion-korlátait, a leállítási szekvenciáit és a tényleges upstream engedélykimeneteket; a második szakasz továbbra is előállíthatja a kért látható reasoninget szokásos szövegként.
+Claude kód automatikus módú osztályozója az alapértelmezett natív gondolkodás letiltását kéri, ha nem tartalmaznak kifejezett érvelési vezérlőket. Az észlelés az osztályozó rendszerjelölőjét használja a Claude-formátumú kérésekben, nem pedig a modellneveket vagy a befejezési korlátokat. Az explicit törzsvezérlők, a támogatott effort/thinking fejlécek, az útválasztási szabályok és a megoldott modell-erőfeszítések megtartják meglévő prioritásukat. Mindkét osztályozó szakasz megtartja a promptokat, a befejezési korlátokat, a leállítási szekvenciákat és a valós upstream engedélyezési ítéleteket; a második szakasz még közönséges szövegként tudja előállítani a kért látható érvelését.
 
-### OAuth-folyamatok
+### OAuth Flows
 
-| Végpont                          | Metódus | Leírás                      |
-| -------------------------------- | ------- | --------------------------- |
-| `/api/oauth/[provider]/[action]` | Various | Szolgáltatóspecifikus OAuth |
+| Végpont                          | Módszer   | Leírás                       |
+| -------------------------------- | --------- | ---------------------------- |
+| `/api/oauth/[provider]/[action]` | Különféle | Szolgáltató-specifikus OAuth |
 
-### Útválasztás és konfiguráció
+### Routing & Config
 
-| Végpont               | Metódus  | Leírás                                     |
-| --------------------- | -------- | ------------------------------------------ |
-| `/api/models`         | GET/PUT  | Modelllista / alias frissítése             |
-| `/api/models/alias`   | GET/POST | Modellaliasok                              |
-| `/api/models/catalog` | GET      | Minden modell szolgáltató és típus szerint |
-| `/api/combos*`        | Various  | Kombókezelés                               |
-| `/api/keys*`          | Various  | API-kulcsok kezelése                       |
-| `/api/pricing`        | GET      | Modellárazás                               |
+| Végpont               | Módszer   | Leírás                                    |
+| --------------------- | --------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT   | Modelllista / alias frissítése            |
+| `/api/models/alias`   | GET/POST  | Modellálnevek                             |
+| `/api/models/catalog` | GET       | Minden modell szolgáltató szerint + típus |
+| `/api/combos*`        | Különféle | Kombinált menedzsment                     |
+| `/api/keys*`          | Különféle | API kulcskezelés                          |
+| `/api/pricing`        | GET       | Modell árképzés                           |
 
-#### A modellkorlátok eredete
+#### Modell határ eredet
 
-A `GET /api/models?withLimits=1` (valamint a `true`; a `0`/`false`, illetve az elhagyás változatlanul hagyja az alapértelmezett payloadot) minden modellrekordhoz hozzáadja a `contextWindow`, `maxInputTokens`, `maxOutputTokens` mezőket és egy `capsSource` objektumot. A `capsSource` megnevezi az egyes korlátokat szolgáltató szabályt, így egy meglepő korlát (például 1M-es modellen a 128k) visszavezethető az eredetére. A feloldott értékek megegyeznek az útválasztás által használt értékekkel; a jelző csak mezőket ad hozzá, értéket soha nem módosít. A `withLimits` minden más értéke `400` hibával elutasításra kerül.
+`GET /api/models?withLimits=1` (szintén `true`; `0`/`false`, vagy kihagyásával az alapértelmezett hasznos terhelés változatlan marad) minden modellsorhoz hozzáadja `contextWindow`, `maxInputTokens`, `maxOutputTokens` és egy `capsSource` objektumot. `capsSource` megnevezi az egyes limiteket biztosító szabályt, így egy meglepő határérték (például 128k egy 1M modellen) eredetére vezethető vissza. A feloldott értékek ugyanazok, amelyeket az útválasztás használ; a zászló csak mezőket ad hozzá, és soha nem változtat értéket. Minden más `withLimits` értéket a `400` visszautasít.
 
-| `capsSource` értéke                          | Eredet                                                                  |
+| `capsSource` érték                           | Származás                                                               |
 | -------------------------------------------- | ----------------------------------------------------------------------- |
-| `override:context`                           | Tartósított kontextusablak-felülírás (`model_context_overrides`)        |
-| `override:max_input` / `override:max_output` | Tartósított `max_input_tokens` / `max_output_tokens` képesség-felülírás |
-| `static-authoritative:<provider>/<model>`    | Statikus, hiteles kontextusablak-tábla                                  |
-| `synced:<provider>/<model>`                  | A models.dev által szinkronizált képességrekord                         |
-| `registry:<provider>/<model>`                | Szolgáltatói registry-bejegyzés                                         |
-| `spec:<model>`                               | Statikus modell-specifikáció                                            |
-| `effort-base:` prefix                        | Az effort-utótaggal ellátott változat alapmodelljétől átvett rekord     |
-| `none`                                       | Egyetlen forrás sem deklarálja a korlátot (az érték `null`)             |
+| `override:context`                           | Tartós környezet-ablak felülírás (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | Folyamatos `max_input_tokens` / `max_output_tokens` képesség felülírása |
+| `static-authoritative:<provider>/<model>`    | Statikus mérvadó környezeti ablaktábla                                  |
+| `synced:<provider>/<model>`                  | models.dev szinkronizált képességek sora                                |
+| `registry:<provider>/<model>`                | Szolgáltató nyilvántartási bejegyzése                                   |
+| `spec:<model>`                               | Statikus modell specifikáció                                            |
+| `effort-base:` előtag                        | A sor egy erőfeszítés-utótagú változat alapmodelljéből kölcsönzött      |
+| `none`                                       | Egyetlen forrás sem deklarálja a határértéket (az érték `null`)         |
 
-Implementáció: `getResolvedModelCapabilitiesWithLimitSources()` a `src/lib/modelCapabilities.ts` fájlban, valamint a `src/lib/modelCapabilityLimits.ts` fájlban található prioritási láncok.
+Megvalósítás: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapabilities.ts` -ben és a precedencialáncok `src/lib/modelCapabilityLimits.ts` ben.
 
-### Használat és analitika
+### Használat és elemzések
 
-| Endpoint                         | Method          | Leírás                                                                                                                                                                                                                                                                                                                                                                 |
-| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Használati előzmények                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/usage/logs`                | GET             | Használati naplók                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/request-logs`        | GET             | Kérés szintű naplók                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/[connectionId]`      | GET             | Kapcsolatonkénti használat                                                                                                                                                                                                                                                                                                                                             |
-| `/api/usage/token-limits`        | GET/POST/DELETE | API-kulcsonkénti tokenlimit-keretek                                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/model-latency-stats` | GET             | Gördülő, szolgáltató/modell szerinti késleltetési összesítés (átlag/p50/p95/p99, sikerességi arány); szűrők: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                           |
-| `/api/usage/cache-health`        | GET             | A prompt-gyorsítótár állapotának összefoglalása a `call_logs` alapján — írási/olvasási arány, az írási méretek p50/p90/p99 eloszlása, a nagy írások koncentrációja, modellenkénti bontás, valamint `healthy`/`degraded`/`thrash`/`no-data` minősítés; lekérdezési paraméterek: `range` (`1h`\|`24h`\|`7d`\|`30d`, alapértelmezés: `24h`) és opcionális `model` (#8827) |
+| Végpont                          | Módszer         | Leírás                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Használati előzmények                                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/logs`                | GET             | Használati naplók                                                                                                                                                                                                                                                                                                                           |
+| `/api/usage/request-logs`        | GET             | Kérelem szintű naplók                                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/[connectionId]`      | GET             | Csatlakozásonkénti használat                                                                                                                                                                                                                                                                                                                |
+| `/api/usage/token-limits`        | GET/POST/DELETE | API-kulcsonkénti token-limit költségkeretek                                                                                                                                                                                                                                                                                                 |
+| `/api/usage/model-latency-stats` | GET             | Gördülő per-provider/model késleltetési aggregátum (avg/p50/p95/p99, sikerességi arány); szűrők: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                            |
+| `/api/usage/cache-health`        | GET             | A gyorsítótár állapotának összefoglalója `call_logs` — write/read arány, p50/p90/p99 írási méret eloszlás, a nehéz írási koncentráció, a modellenkénti felosztás és a `healthy`/`degraded`/`thrash`/`no-data` ítélet alapján; params `range` (`1h`\| `24h`\| `7d`\| `30d`, alapértelmezett `24h`) és opcionális `model` (#8827) lekérdezése |
 
-### API-kulcs jogosultságai
+### API kulcsengedélyek
 
-A `PATCH /api/keys/{id}` egy meglévő kulcs jogosultságait frissíti. Mint minden `/api/keys*` útvonalnak, ehhez is kezelési jogosultság szükséges (lásd: [Kezelési hitelesítés](../guides/MANAGEMENT-AUTH.md)), nem pedig inferencia-kulcs. Csak a módosítani kívánt mezőket küldje el; ha egyiket sem adja meg, a kérés elutasításra kerül a `No valid fields to update` üzenettel. Az elfogadott mezőket a `src/shared/validation/schemas/keys.ts` fájlban található `updateKeyPermissionsSchema` határozza meg.
+`PATCH /api/keys/{id}` frissíti a meglévő kulcsok engedélyeit. Mint minden `/api/keys*` útvonalnak, ehhez felügyeleti jogosultságra van szüksége (lásd: [Kezelői hitelesítés](../guides/MANAGEMENT-AUTH.md) ), nem pedig következtetési kulcsra. Csak a módosítani kívánt mezőket küldje el; az egyik kérést sem utasítja el `No valid fields to update`. Az elfogadott mezőket `updateKeyPermissionsSchema` határozza meg `src/shared/validation/schemas/keys.ts`-ben.
 
-| Mező                                        | Típus                                                                                     | Megjegyzések                                                                                                                                                    |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | karakterlánc, 1–200 karakter                                                              |                                                                                                                                                                 |
-| `isActive`                                  | logikai                                                                                   |                                                                                                                                                                 |
-| `isBanned`                                  | logikai                                                                                   |                                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 dátum és idő vagy `null`                                                         | A `null` törli a lejáratot                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                     | Az `allowedModels` értékének üresnek kell lennie, ha a mód `all`                                                                                                |
-| `allowedModels`, `blockedModels`            | karakterláncok tömbje, legfeljebb 1000                                                    |                                                                                                                                                                 |
-| `allowedCombos`                             | karakterláncok tömbje, legfeljebb 500                                                     | Meghatározza, hogy a kulcs mely kombinációkat hívhatja; a közvetlen modelleket a `modelAccessMode` / `allowedModels` szabályozza                                |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                     | Az `allowedConnections` értékének nem üresnek kell lennie `restricted` esetén, és üresnek `all` esetén                                                          |
-| `allowedConnections`                        | UUID-k tömbje, legfeljebb 100                                                             |                                                                                                                                                                 |
-| `allowAutoCombos`                           | logikai                                                                                   | A `false` elutasítja az `auto/*` modellekre vonatkozó kéréseket ezzel a kulccsal; azok a kulcsok, amelyek ezt soha nem állították be, engedélyezettek           |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                             | Meghatározza, hogy a `GET /v1/models` mit listáz ehhez a kulcshoz (csak kombinációkat, csak modelleket vagy mindkettőt); nem módosítja, hogy a kulcs mit hívhat |
-| `forcedModel`                               | legfeljebb 300 karakteres karakterlánc vagy `null`                                        | A csevegési kéréseket erre a modellre/kombinációra irányítja az `X-Route-Model` és a `body.model` elé helyezve; a kulcs korlátozásai továbbra is érvényesek     |
-| `noLog`, `autoResolve`                      | logikai                                                                                   |                                                                                                                                                                 |
-| `throttleDelayMs`                           | egész szám, 0–300000                                                                      |                                                                                                                                                                 |
-| `maxSessions`                               | egész szám, 0–10000                                                                       |                                                                                                                                                                 |
-| `rateLimits`                                | `{ limit, window }` elemekből álló tömb (pozitív egész számok, legfeljebb 50) vagy `null` | A `null` törli a korlátozásokat                                                                                                                                 |
-| `accessSchedule`                            | ütemezési objektum vagy `null`                                                            | A `null` törli az ütemezést                                                                                                                                     |
-| `scopes`                                    | karakterláncok tömbje, legfeljebb 32                                                      |                                                                                                                                                                 |
-| `allowedEndpoints`                          | karakterláncok tömbje, legfeljebb 20                                                      |                                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                        |                                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                      | Lásd: [Kulcsonkénti gyorsítótár-megkerülés](#per-key-cache-bypass)                                                                                              |
-| `compressionEnabled`                        | logikai                                                                                   |                                                                                                                                                                 |
-| `codexServiceMode`                          | a Codex szolgáltatási módok egyike                                                        |                                                                                                                                                                 |
-| `disableNonPublicModels`                    | boolean                                                                                   |                                                                                                                                                                 |
-| `allowUsageCommand`                         | boolean                                                                                   |                                                                                                                                                                 |
-| `usageLimitEnabled`                         | boolean                                                                                   |                                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                                     |                                                                                                                                                                 |
-| `chaosModeEnabled`                          | boolean                                                                                   |                                                                                                                                                                 |
+| Mező                                        | Írja be                                                                      | Megjegyzések                                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | karakterlánc, 1-200 karakter                                                 |                                                                                                                                                                                                                                                                                            |
+| `isActive`                                  | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `isBanned`                                  | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `expiresAt`                                 | ISO 8601 datetime vagy `null`                                                | `null` törli a lejáratot                                                                                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` üresnek kell lennie, ha a mód `all`                                                                                                                                                                                                                                        |
+| `allowedModels`, `blockedModels`            | karakterláncok tömbje, 1000-ig                                               |                                                                                                                                                                                                                                                                                            |
+| `allowedCombos`                             | karakterláncok tömbje, legfeljebb 500                                        | Kapuk, amelyek kombinációit a kulcs hívhatja; a közvetlen modelleket a `modelAccessMode` / `allowedModels` szabályozza                                                                                                                                                                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` nem lehet üres, ha `restricted` és üres, ha `all`                                                                                                                                                                                                                     |
+| `allowedConnections`                        | UUIDs tömb, 100-ig                                                           |                                                                                                                                                                                                                                                                                            |
+| `allowAutoCombos`                           | logikai érték                                                                | `false` ezzel a kulccsal elutasítja `auto/*` modellekre vonatkozó kéréseket; olyan kulcsok engedélyezettek, amelyek soha nem állítják be                                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Mit jelenít meg `GET /v1/models` ehhez a kulcshoz (csak kombók, csak modellek vagy mindkettő); ez nem változtat azon, hogy a kulcs mit hívhat                                                                                                                                              |
+| `forcedModel`                               | legfeljebb 300 karakter hosszúságú karakterlánc vagy `null`                  | A csevegési kéréseket erre model/combo irányítja `X-Route-Model` és `body.model` felett; a kulcs korlátai továbbra is érvényesek                                                                                                                                                           |
+| `noLog`, `autoResolve`                      | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `throttleDelayMs`                           | egész szám, 0-300000                                                         |                                                                                                                                                                                                                                                                                            |
+| `maxSessions`                               | egész szám, 0-10000                                                          |                                                                                                                                                                                                                                                                                            |
+| `rateLimits`                                | `{ limit, window }` (pozitív egész számok, legfeljebb 50) vagy `null` tömbje | `null` tisztázza a határokat                                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | ütemezési objektum vagy `null`                                               | `null` törli a menetrendet                                                                                                                                                                                                                                                                 |
+| `scopes`                                    | karakterláncok tömbje, legfeljebb 32                                         |                                                                                                                                                                                                                                                                                            |
+| `allowedEndpoints`                          | karakterláncok tömbje, legfeljebb 20                                         |                                                                                                                                                                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                                                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Lásd: [Kulcsonkénti gyorsítótár megkerülése](#per-key-cache-bypass)                                                                                                                                                                                                                        |
+| `compressionEnabled`                        | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `codexServiceMode`                          | az egyik Codex szolgáltatási mód                                             |                                                                                                                                                                                                                                                                                            |
+| `disableNonPublicModels`                    | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `allowUsageCommand`                         | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `usageLimitEnabled`                         | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | szám >= 0 vagy `null`                                                        |                                                                                                                                                                                                                                                                                            |
+| `fiveHourUsageLimitUsd`                     | szám >= 0 vagy `null`                                                        | Gördülő 5 órás USD költségvetés, a napi és heti limitekhez hasonlóan (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) érvényesítve. `retry-after` az az idő, amikor a legrégebbi költés az ablakban lejár, ami miatt a korlátot jóval meghaladó kulcs továbbra is blokkolva maradhat. |
+| `chaosModeEnabled`                          | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1417,169 +1340,165 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
   -d '{ "allowAutoCombos": false, "catalogScope": "combos" }'
 ```
 
-### Beállítások
+### Beállítások elemre
 
-| Végpont                               | Metódus       | Leírás                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/settings`                       | GET/PUT/PATCH | Általános beállítások. A biztonsági házirend kulcsai (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) `currentPassword` értéket és operátori hitelesítő adatot igényelnek — az API-kulcsok és az `oma_` tokenek `403` választ kapnak; minden módosításhoz szükség van az `admin` hozzáférésitoken-hatókörre |
-| `/api/settings/proxy`                 | GET/PUT       | Hálózati proxy konfigurációja                                                                                                                                                                                                                                                                                                              |
-| `/api/settings/proxy/test`            | POST          | Proxykapcsolat tesztelése                                                                                                                                                                                                                                                                                                                  |
-| `/api/settings/ip-filter`             | GET/PUT       | IP-engedélyezési/-tiltólista                                                                                                                                                                                                                                                                                                               |
-| `/api/settings/thinking-budget`       | GET/PUT       | A gondolkodási/következtetési **kérés** átírási módja (átengedés / automatikus eltávolítás / egyéni / adaptív). A tömörítéstől független. Lásd: [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                                                        |
-| `/api/settings/system-prompt`         | GET/PUT       | Globális rendszerprompt                                                                                                                                                                                                                                                                                                                    |
-| `/api/settings/compression`           | GET/PUT       | Globális tömörítési konfiguráció                                                                                                                                                                                                                                                                                                           |
-| `/api/settings/purge-request-history` | POST          | Kérésnapló-sorok és a helyi hívásnapló-artefaktumok törlése                                                                                                                                                                                                                                                                                |
+| Végpont                               | Módszer       | Leírás                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Általános beállítások. A biztonsági kulcsokhoz (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) `currentPassword` és operátori hitelesítő adatok szükségesek — API kulcsok és `oma_` tokenek `403`; minden mutációnak szüksége van a `admin` hozzáférési token hatókörére |
+| `/api/settings/proxy`                 | GET/PUT       | Hálózati proxy konfig                                                                                                                                                                                                                                                                                    |
+| `/api/settings/proxy/test`            | POST          | Proxy kapcsolat tesztelése                                                                                                                                                                                                                                                                               |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                                   |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** kér** átírási mód (passthrough / auto-strip / custom / adaptive). Független a tömörítéstől. Lásd [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) fájlt.                                                                                                                          |
+| `/api/settings/system-prompt`         | GET/PUT       | Globális rendszerkérdés                                                                                                                                                                                                                                                                                  |
+| `/api/settings/compression`           | GET/PUT       | Globális tömörítési konfiguráció                                                                                                                                                                                                                                                                         |
+| `/api/settings/purge-request-history` | POST          | Törölje a kérésnapló-sorokat és a helyi hívásnapló-műtermékeket                                                                                                                                                                                                                                          |
 
 ### Kontextus és tömörítés
 
-| Endpoint                               | Method         | Description                                                                            |
+| Végpont                                | Módszer        | Leírás                                                                                 |
 | -------------------------------------- | -------------- | -------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Az off/lite/standard/aggressive/ultra/RTK/stacked tömörítés előnézete                  |
-| `/api/compression/language-packs`      | GET            | Az elérhető Caveman nyelvi csomagok listázása                                          |
-| `/api/compression/rules`               | GET            | A Caveman szabálymetaadatainak listázása                                               |
-| `/api/context/caveman/config`          | GET/PUT        | Caveman-specifikus beállítási alias                                                    |
+| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked tömörítés előnézete                     |
+| `/api/compression/language-packs`      | GET            | Sorolja fel az elérhető Caveman nyelvi csomagokat                                      |
+| `/api/compression/rules`               | GET            | Sorolja fel a Caveman-szabály metaadatait                                              |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman-specifikus beállítások álnév                                                   |
 | `/api/context/rtk/config`              | GET/PUT        | RTK-specifikus beállítások, beleértve az egyéni szűrőket és a nyers kimenet megőrzését |
-| `/api/context/rtk/filters`             | GET            | Az RTK-szűrőkatalógus és az egyéni szűrők diagnosztikája                               |
-| `/api/context/rtk/test`                | POST           | RTK-előnézet/teszt futtatása egy szöveges payloadon                                    |
-| `/api/context/rtk/raw-output/[id]`     | GET            | A pointerazonosító alapján megőrzött, kitakart nyers kimenet beolvasása                |
-| `/api/context/combos`                  | GET/POST       | Tömörítési kombinációk listázása/létrehozása                                           |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Tömörítési kombináció részleteinek megtekintése/frissítése/törlése                     |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Tömörítési kombinációk hozzárendelése útválasztási kombinációkhoz                      |
-| `/api/context/analytics`               | GET            | Tömörítési analitikai alias                                                            |
+| `/api/context/rtk/filters`             | GET            | RTK szűrőkatalógus és egyedi szűrődiagnosztika                                         |
+| `/api/context/rtk/test`                | POST           | Futtassa RTK preview/test egy szöveges rakomány ellen                                  |
+| `/api/context/rtk/raw-output/[id]`     | GET            | A megőrzött szerkesztett nyers kimenet beolvasása mutatóazonosítóval                   |
+| `/api/context/combos`                  | GET/POST       | Kompressziós kombó list/create                                                         |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Kompressziós kombó detail/update/delete                                                |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Tömörítési kombókat rendelhet az útválasztási kombókhoz                                |
+| `/api/context/analytics`               | GET            | Tömörítési elemzési álnév                                                              |
 
-### Monitorozás
+### Monitoring
 
-| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Aktív munkamenetek követése                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/rate-limits`                   | GET        | Fiókonkénti sebességkorlátok                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/monitoring/health`             | GET        | Állapotellenőrzés + szolgáltatói összegzés (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). A kezelőfelület nézete tartalmazza a `credentialHealth` értéket: a probe-cache skalárértékeit, a `failedConnections` értéket, amikor `failed>0`, valamint a `staleDbNonOkCount` értéket (SQLite-hoz kötött `test_status`, nem a mérőszám). Lásd: [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Gyorsítótár-statisztikák / törlés                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/modality-bridge/stats`         | GET        | A memóriában tárolt `attempts`, sikerek/`bridged`, hibák, gyorsítótár-találatok, `totalLatencyMs`, `latencySamples`, mintánként meghatározott `averageLatencyMs` és az utolsó használat időpontja (újraindításkor visszaáll; kezelői hitelesítés szükséges)                                                                                                                                                                                                             |
-| `/api/modality-bridge/video/runtime` | GET        | Szigorú, megbízható loopback-ellenőrzés a kezelői hitelesítés/ellenőrzés előtt; az FFmpeg/ffprobe elérhetőségének és verzióinak megtisztított adatai (no-store)                                                                                                                                                                                                                                                                                                         |
-| `/api/modality-bridge/video/extract` | POST       | Belső, hitelesített, megbízható loopback byte-bróker; 50 MiB bemenet, korlátozott sor és 32 MiB kimenet, `503` kapacitáshiány, `499` kapcsolatbontás, `504` határidő; nem nyilvános feltöltési API                                                                                                                                                                                                                                                                      |
+| Végpont                              | Módszer    | Leírás                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Aktív munkamenet-követés                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/rate-limits`                   | GET        | Számlánkénti kamatkorlátok                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/monitoring/health`             | GET        | Az állapotfelmérés + szolgáltató összefoglalója (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). A kezelési nézet tartalmazza `credentialHealth`: probe-cache skalárokat, `failedConnections` amikor `failed>0` és `staleDbNonOkCount` (SQLite ragadós `test_status`, nem a mérőeszköz ). Lásd [MONITORING_GUIDE.md fájlt](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Gyorsítótár statisztika / törlés                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/modality-bridge/stats`         | GET        | Memórián belüli `attempts`, sikerek/`bridged`, meghibásodások, gyorsítótár találatai, `totalLatencyMs`, `latencySamples`, mintaalapú `averageLatencyMs` és utolsó használat ideje (reset újraindításkor; kezelési hitelesítés)                                                                                                                                                                                                  |
+| `/api/modality-bridge/video/runtime` | GET        | Szigorú megbízható visszacsatolási ellenőrzés a menedzsment előtt auth/probe; fertőtlenített FFmpeg/ffprobe elérhetőség és verziók (bolt nélkül)                                                                                                                                                                                                                                                                                |
+| `/api/modality-bridge/video/extract` | POST       | Belső hitelesített, megbízható visszacsatolású bájtközvetítő; 50 MiB bemenet, korlátos queue/32 MiB kimenet, `503` kapacitás, `499` leválasztás, `504` határidő; nem nyilvános feltöltés API                                                                                                                                                                                                                                    |
 
-### Biztonsági mentés és exportálás/importálás
+### Videó képkocka lefúrása
 
-| Endpoint                    | Method | Description                                                                                 |
-| --------------------------- | ------ | ------------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Elérhető biztonsági mentések listázása                                                      |
-| `/api/db-backups`           | PUT    | Kézi biztonsági mentés létrehozása                                                          |
-| `/api/db-backups`           | POST   | Visszaállítás egy adott biztonsági mentésből                                                |
-| `/api/db-backups`           | PATCH  | A biztonsági mentések megőrzési beállításainak mentése (csak operátor)                      |
-| `/api/db-backups`           | DELETE | A tárolt biztonsági mentések ritkítása a megőrzési beállítások szerint (csak operátor)      |
-| `/api/db-backups/export`    | GET    | Az adatbázis letöltése .sqlite-fájlként                                                     |
-| `/api/db-backups/import`    | POST   | .sqlite-fájl feltöltése az adatbázis lecseréléséhez (`?dryRun=true` csak ellenőrzést végez) |
-| `/api/db-backups/exportAll` | GET    | A teljes biztonsági mentés letöltése .tar.gz-archívumként                                   |
+`GET /api/v1/video-bridge/drilldown` beolvas egy bérlőhöz kötött átlátszatlan leírót, amely `x-omniroute-video-drilldown` ben kapott vissza egy kifejezetten jóváhagyott Video Bridge kérés után. Mind az olvasáshoz, mind `DELETE` mindig érvényes API kulcsra és az operátor független `modalityBridgeVideoDrilldownRemoteEnabled` engedélyére van szükség. A termelés megtartásához emellett `modalityBridgeVideoDrilldownEnabled` és szigorú alkatrészenkénti `drilldown: true` is szükséges. Ha a kulcsnak nincs üres végpont-engedélyezőlistája, akkor `video` is tartalmaznia kell GET és DELETE esetében, függetlenül attól, hogy a hívó `/v1` vagy `/api/v1` használja.
 
-Az `/api/db-backups/export`, az `/api/db-backups/exportAll` és az `/api/settings/export-json`
-minden tárolt hitelesítő adatot kiad, ezért irányítópult-munkamenetet vagy a helyi CLI-t
-igénylik (illetve a bejelentkezés le lehet tiltva). Bármilyen hatókörű API-kulcs és az
-`oma_` hozzáférési tokenek `403` választ kapnak. A visszaállításokra ugyanez a határvonal
-vonatkozik: a `POST /api/db-backups/import` (`dryRun=true` értékkel együtt), a
-`POST /api/db-backups` (visszaállítás azonosító alapján) és a
-`POST /api/settings/import-json` az éles adatbázist vagy a beállításokat cseréli le, ezért
-a gépi hitelesítő adat ott is `403` választ kap; az `omniroute sync import` a helyi CLI
-hitelesítő adatát küldi. Ugyanez vonatkozik a `DELETE /api/db-backups` végpontra (tárolt
-biztonsági mentések ritkítása) és a `PATCH /api/db-backups` végpontra (megőrzési beállítások:
-a mentett értékek vezérlik az automatikus ritkítást minden biztonsági mentés után). A listázás
-(`GET`) és a kézi biztonsági mentés létrehozása (`PUT`) továbbra is a szokásos kezelési
-hitelesítést használja.
+GET lekérdezés: kötelező `handle`; opcionális `variant` (`preview`, `standard`, `detail`), `limit` (1–8; az örökölt `frames` elfogadott, de nem kombinálható `limit` vel), nulla alapú `page` és `start`/`end` másodperc. Ha mindkét fókuszhatár meg van adva, `end` nagyobbnak kell lennie, mint `start`. Duplicate/unknown lekérdezési kulcsok elutasítva. A sikeres válaszok a következőket tartalmazzák: `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` és opcionális `focusWindow`; A no-store JSON 32 MiB felső határa, beleértve a Base64-et is. Túlméretezett kimenet 413; kérjen kevesebb képkockát.
 
-### Felhőszinkronizálás
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` adja vissza. Az ismeretlen, lejárt és keresztkulcsos GETs válaszok megkülönböztethetetlenek; keresztbillentyűs DELETE nem tudja eltávolítani a tulajdonos bejegyzését. A letiltott hozzáférés 403-at, missing/invalid hitelesítést 401, az érvénytelen lekérdezéseket 400, a törlést 499 és az 503-as ideiglenes hibákat adja vissza. A fogantyúk folyamat-helyiek, tíz perc után lejárnak, és nem élik túl az újraindítást. Az új leírók `v1.` és egy 32 bájtos véletlenszerű Base64URL tokent használják; csak a token hashek maradnak meg. A régi 64 hexadecimális tokenek szintaktikailag olvashatóak maradnak a kompatibilitás érdekében. Tekintse meg [a Video Bridge védőkorlátjait](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) a beleegyezés, a kvóták és a változatok származtatásának részleteiért.
 
-| Endpoint               | Method  | Description                    |
-| ---------------------- | ------- | ------------------------------ |
-| `/api/sync/cloud`      | Various | Felhőszinkronizálási műveletek |
-| `/api/sync/initialize` | POST    | Szinkronizálás inicializálása  |
-| `/api/cloud/*`         | Various | Felhőkezelés                   |
+### Biztonsági mentés és Export/Import
+
+| Végpont                     | Módszer | Leírás                                                                                    |
+| --------------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET     | Sorolja fel az elérhető biztonsági másolatokat                                            |
+| `/api/db-backups`           | PUT     | Készítsen manuális biztonsági mentést                                                     |
+| `/api/db-backups`           | POST    | Visszaállítás egy adott biztonsági másolatból                                             |
+| `/api/db-backups`           | PATCH   | Biztonsági mentés megőrzési beállításainak mentése (csak kezelő számára)                  |
+| `/api/db-backups`           | DELETE  | A tárolt biztonsági másolatok visszavágása a megőrzési beállításokra (csak kezelő)        |
+| `/api/db-backups/export`    | GET     | Adatbázis letöltése .sqlite fájlként                                                      |
+| `/api/db-backups/import`    | POST    | Töltsön fel .sqlite fájlt az adatbázis lecseréléséhez (csak `?dryRun=true` érvényesítése) |
+| `/api/db-backups/exportAll` | GET     | Töltse le a teljes biztonsági másolatot .tar.gz archívumként                              |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` és `/api/settings/export-json` minden tárolt hitelesítő adatot kiosztanak, ezért szükség van a műszerfali munkamenetre vagy a helyi CLI (vagy letiltva a bejelentkezést). A tetszőleges hatókörű API kulcsok és `oma_` hozzáférési tokenek `403` kapnak. A visszaállítások ugyanazt a határt követik: `POST /api/db-backups/import` (beleértve `dryRun=true` ), `POST /api/db-backups` (helyreállítás azonosító alapján) és `POST /api/settings/import-json` lecseréli az élő adatbázist vagy a beállításokat, így a gép hitelesítő adatai is megkapják `403` ; `omniroute sync import` elküldi a helyi CLI hitelesítő adatokat. Így tesz `DELETE /api/db-backups` (mentett biztonsági másolatok metszése) és `PATCH /api/db-backups` (megőrzési beállítások: a megmaradt értékek hajtják végre az automatikus metszést minden mentés után). A listázás (`GET`) és a kézi biztonsági mentés (`PUT`) létrehozása megőrzi a szokásos felügyeleti hitelesítést.
+
+### Cloud Sync
+
+| Végpont                | Módszer   | Leírás                          |
+| ---------------------- | --------- | ------------------------------- |
+| `/api/sync/cloud`      | Különféle | Felhő szinkronizálási műveletek |
+| `/api/sync/initialize` | POST      | Szinkronizálás inicializálása   |
+| `/api/cloud/*`         | Különféle | Felhőkezelés                    |
 
 ### Alagutak
 
-| Endpoint                   | Method | Description                                                                              |
-| -------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | A Cloudflare Quick Tunnel telepítési/futási állapotának lekérése az irányítópult számára |
-| `/api/tunnels/cloudflared` | POST   | A Cloudflare Quick Tunnel engedélyezése vagy letiltása (`action=enable/disable`)         |
-| `/api/tunnels/ngrok`       | GET    | Az ngrok Tunnel futási állapotának lekérése az irányítópult számára                      |
-| `/api/tunnels/ngrok`       | POST   | Az ngrok Tunnel engedélyezése vagy letiltása (`action=enable/disable`)                   |
+| Végpont                    | Módszer | Leírás                                                                           |
+| -------------------------- | ------- | -------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET     | Olvassa el Cloudflare Quick Tunnel install/runtime állapotát az irányítópulthoz  |
+| `/api/tunnels/cloudflared` | POST    | A Cloudflare Quick Tunnel (`action=enable/disable`) engedélyezése vagy letiltása |
+| `/api/tunnels/ngrok`       | GET     | Olvassa el ngrok Tunnel futásidejű állapotát az irányítópulthoz                  |
+| `/api/tunnels/ngrok`       | POST    | A ngrok alagút (`action=enable/disable`) engedélyezése vagy letiltása            |
 
-### CLI-eszközök
+### CLI Tools
 
-| Endpoint                           | Method | Description                        |
-| ---------------------------------- | ------ | ---------------------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | A Claude CLI állapota              |
-| `/api/cli-tools/codex-settings`    | GET    | A Codex CLI állapota               |
-| `/api/cli-tools/droid-settings`    | GET    | A Droid CLI állapota               |
-| `/api/cli-tools/openclaw-settings` | GET    | Az OpenClaw CLI állapota           |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Általános CLI-futásidejű környezet |
+| Végpont                            | Módszer | Leírás                   |
+| ---------------------------------- | ------- | ------------------------ |
+| `/api/cli-tools/claude-settings`   | GET     | Claude CLI állapot       |
+| `/api/cli-tools/codex-settings`    | GET     | Codex CLI állapot        |
+| `/api/cli-tools/droid-settings`    | GET     | Droid CLI állapot        |
+| `/api/cli-tools/openclaw-settings` | GET     | OpenClaw CLI állapot     |
+| `/api/cli-tools/runtime/[toolId]`  | GET     | Általános CLI futási idő |
 
-A CLI-válaszok a következőket tartalmazzák: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI válaszok a következők: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### ACP-ügynökök
+### ACP ügynökök
 
-| Endpoint          | Method | Description                                                                  |
-| ----------------- | ------ | ---------------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Az összes észlelt ügynök listázása (beépített + egyéni), állapotukkal együtt |
-| `/api/acp/agents` | POST   | Egyéni ügynök hozzáadása vagy az észlelési gyorsítótár frissítése            |
-| `/api/acp/agents` | DELETE | Egyéni ügynök eltávolítása az `id` lekérdezési paraméter alapján             |
+| Végpont           | Módszer | Leírás                                                                 |
+| ----------------- | ------- | ---------------------------------------------------------------------- |
+| `/api/acp/agents` | GET     | Sorolja fel az összes észlelt ügynököt (beépített + custom) állapottal |
+| `/api/acp/agents` | POST    | Egyéni ügynök hozzáadása vagy észlelési gyorsítótár frissítése         |
+| `/api/acp/agents` | DELETE  | Egyéni ügynök eltávolítása `id` lekérdezési paraméterrel               |
 
-A GET-válasz tartalmazza az `agents[]` elemet (id, name, binary, version, installed, protocol, isCustom), valamint a `summary` elemet (total, installed, notFound, builtIn, custom).
+GET válasz tartalmazza `agents[]` (azonosító, név, bináris, verzió, telepített, protokoll, isCustom) és `summary` (teljes, telepített, notFound, builtIn, egyéni).
 
-### Ellenálló képesség és sebességkorlátok
+### Rugalmassági és sebességhatárok
 
-| Endpoint                          | Method    | Leírás                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Kérésvárólista, kapcsolat-lehűlés, szolgáltatói megszakító és várakozási beállítások lekérése/frissítése                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/resilience/reset`           | POST      | A szolgáltatói áramköri megszakítók alaphelyzetbe állítása                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/resilience/model-cooldowns` | GET       | Az aktív, szolgáltató-, kapcsolat- és modellenkénti zárolások listázása, a hátralévő idő szerint rendezve                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/resilience/model-cooldowns` | DELETE    | Modellzárolás törlése — a törzs `{provider, model}`, illetve `{all: true}` értékkel minden zárolás törölhető                                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/rate-limits`                | GET/POST  | Fiókonkénti sebességkorlátozási állapot (GET), illetve a kapcsolat sebességkorlátozás-védelmének be- vagy kikapcsolása (POST `{connectionId, enabled}`). A `rateLimitProtection` támogatott írási útvonala (a `PUT /api/providers/[id]` útvonalon soha nem módosítható). Megjegyzés: az `enabled: false` letiltja az explicit védelmet, de nem zárja ki az aktív API-kulcsos kapcsolatot a globális automatikus engedélyezési biztonsági hálóból (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Globális sebességkorlátozási konfiguráció (elavult; alias a `/api/rate-limits` útvonalhoz)                                                                                                                                                                                                                                                                                                                                                                                      |
+| Végpont                           | Módszer   | Leírás                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/resilience`                 | GET/PATCH | Get/update kérési sor, kapcsolat lehűlés, szolgáltató megszakító és várakozási beállítások                                                                                                                                                                                                                                                                                                                                                                   |
+| `/api/resilience/reset`           | POST      | Állítsa vissza a szolgáltató megszakítóit                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/resilience/model-cooldowns` | GET       | Listázza az aktív (szolgáltatónkénti, kapcsolati, modellenkénti) kizárásokat, hátralévő idő szerint rendezve                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/resilience/model-cooldowns` | DELETE    | Törölje le a modellzár — test `{provider, model}` vagy `{all: true}` mindent törölni                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/rate-limits`                | GET/POST  | Fiókonkénti kamatkorlát állapot (GET) vagy kapcsolja be a rátakorlát védelmét egy kapcsolathoz (POST `{connectionId, enabled}`). Támogatott írási útvonal `rateLimitProtection` számára (soha nem módosítva `PUT /api/providers/[id]` segítségével). Megjegyzés: `enabled: false` letiltja az explicit védelmet, de nem választja ki az aktív API-kulcsos kapcsolatot a globális automatikus engedélyezési biztonsági hálóból (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Globális díjkorlát konfiguráció (elavult; álneve `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                                         |
 
-> Mind a négy `/api/resilience/*` útvonalhoz **kezelői hitelesítés** (`requireManagementAuth`) szükséges. A szolgáltatói megszakító, a kapcsolat lehűlése és a modellzárolás teljes áttekintését lásd a [Resilience (kibővített)](#resilience-extended) szakaszban.
+> Mind a négy `/api/resilience/*` útvonal megköveteli** menedzsment hitelesítés** (`requireManagementAuth`). [A rugalmasság (kiterjesztett)](#resilience-extended) című témakörben a szolgáltatói megszakítás és a kapcsolat lehűlése és a modellzárás teljes lebontása található.
 
-### Értékelések
+### Evals
 
-| Endpoint     | Method   | Leírás                                              |
-| ------------ | -------- | --------------------------------------------------- |
-| `/api/evals` | GET/POST | Értékelési csomagok listázása / értékelés futtatása |
+| Végpont      | Módszer  | Leírás                                       |
+| ------------ | -------- | -------------------------------------------- |
+| `/api/evals` | GET/POST | Eval suites listázás / kiértékelés futtatása |
 
-### Szabályzatok
+### Irányelvek
 
-| Endpoint        | Method          | Leírás                             |
-| --------------- | --------------- | ---------------------------------- |
-| `/api/policies` | GET/POST/DELETE | Útválasztási szabályzatok kezelése |
+| Végpont         | Módszer         | Leírás                           |
+| --------------- | --------------- | -------------------------------- |
+| `/api/policies` | GET/POST/DELETE | Útválasztási házirendek kezelése |
 
-### Megfelelőség
+### Megfelelés
 
-| Endpoint                    | Method | Leírás                                           |
-| --------------------------- | ------ | ------------------------------------------------ |
-| `/api/compliance/audit-log` | GET    | Megfelelőségi auditnapló (az utolsó N bejegyzés) |
+| Végpont                     | Módszer | Leírás                                     |
+| --------------------------- | ------- | ------------------------------------------ |
+| `/api/compliance/audit-log` | GET     | Megfelelőségi ellenőrzési napló (utolsó N) |
 
 ### v1beta (Gemini-kompatibilis)
 
-| Endpoint                   | Method | Leírás                                |
-| -------------------------- | ------ | ------------------------------------- |
-| `/v1beta/models`           | GET    | Modellek listázása Gemini-formátumban |
-| `/v1beta/models/{...path}` | POST   | Gemini `generateContent` végpont      |
+| Végpont                    | Módszer | Leírás                                      |
+| -------------------------- | ------- | ------------------------------------------- |
+| `/v1beta/models`           | GET     | Sorolja fel a modelleket Gemini formátumban |
+| `/v1beta/models/{...path}` | POST    | Gemini `generateContent` végpont            |
 
-Ezek a végpontok a Gemini API-formátumát tükrözik azon kliensek számára, amelyek natív Gemini SDK-kompatibilitást várnak.
+Ezek a végpontok GeminiAPI formátumát tükrözik azon ügyfelek számára, akik natív Gemini SDK kompatibilitást várnak el.
 
-### Belső / rendszer-API-k
+### Belső / Rendszer APIs
 
-| Endpoint                 | Method | Leírás                                                                       |
-| ------------------------ | ------ | ---------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Alkalmazásinicializálási ellenőrzés (az első futtatáskor használatos)        |
-| `/api/tags`              | GET    | Ollama-kompatibilis modellcímkék (Ollama-kliensekhez)                        |
-| `/api/restart`           | POST   | A kiszolgáló szabályos újraindításának kezdeményezése                        |
-| `/api/shutdown`          | POST   | A kiszolgáló szabályos leállításának kezdeményezése                          |
-| `/api/system/env/repair` | POST   | Az OAuth-szolgáltatói környezeti változók javítása                           |
-| `/api/system/version`    | GET    | Jelenlegi/legújabb verzió, frissítési állapot, kiadási csatorna              |
-| `/api/system/version`    | POST   | A legújabb verzióra történő, telepítést figyelembe vevő frissítés elindítása |
+| Végpont                  | Módszer | Leírás                                                                   |
+| ------------------------ | ------- | ------------------------------------------------------------------------ |
+| `/api/init`              | GET     | Háttér szinkronizálási szolgáltatások indítása (felügyeleti hitelesítés) |
+| `/api/tags`              | GET     | Ollama-kompatibilis modellcímkék ( Ollama ügyfelek számára)              |
+| `/api/restart`           | POST    | Indítsa el a kecses szerver újraindítást                                 |
+| `/api/shutdown`          | POST    | Indítsa el a kecses szerverleállást                                      |
+| `/api/system/env/repair` | POST    | Javítsa meg OAuth szolgáltató környezeti változóit                       |
+| `/api/system/version`    | GET     | Current/latest verzió, frissítés állapota, kiadási csatorna              |
+| `/api/system/version`    | POST    | Indítson el egy üzembe helyezés-tudatos frissítést a legújabb verzióra   |
 
-> **Megjegyzés:** Ezeket a végpontokat a rendszer belsőleg, illetve az Ollama-kliensek kompatibilitása érdekében használja. A végfelhasználók jellemzően nem hívják meg őket.
+> **Jegyzet:** Ezeket a végpontokat a rendszer belsőleg vagy Ollama -kliens-kompatibilitás érdekében használja. Általában nem hívják a végfelhasználók.
 
-### OAuth-környezeti javítás _(v3.6.1+)_
+### OAuth környezet javítása _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1590,7 +1509,7 @@ Content-Type: application/json
 }
 ```
 
-Egy adott szolgáltató hiányzó vagy sérült OAuth-környezeti változóit javítja. Ezt adja vissza:
+Kijavítja a hiányzó vagy sérült OAuth környezeti változókat egy adott szolgáltatónál. Visszaküldés:
 
 ```json
 {
@@ -1606,10 +1525,7 @@ Egy adott szolgáltató hiányzó vagy sérült OAuth-környezeti változóit ja
 GET /api/system/version
 ```
 
-Csak loopbackről elérhető kezelési útvonal (adminisztrátori hitelesítéssel). A futó verziót, a legutóbb
-közzétett verziót és az automatikus frissítés állapotát adja vissza. A `releaseChannel` és a `channels` hozzáadott
-mezők (3.8.54-es kiadás); a `channel` megtartja a jelentését — azt a telepítési módot jelöli, amelyet a dashboard frissítője
-használ (`npm`, `source` vagy `docker-compose`).
+Csak visszahurkolt felügyeleti útvonal (admin auth). Visszaadja a futó verziót, a legújabb közzétett verziót és az automatikus frissítés állapotát. `releaseChannel` és `channels` additív mezők (3.8.54-es sín); `channel` megtartja jelentését — az irányítópult-frissítő által használt központi telepítési mód (`npm`, `source` vagy `docker-compose`).
 
 ```json
 {
@@ -1625,21 +1541,14 @@ használ (`npm`, `source` vagy `docker-compose`).
 }
 ```
 
-- `releaseChannel` — a futó build npm-csatornája: `nightly` a `-nightly.*` verziókhoz,
-  `next` az egyéb előzetes kiadásokhoz (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` a
-  `channels.latest` értékénél régebbi főverzió stabil verziójához, egyébként `latest`. Ugyanazok a szabályok vonatkoznak rá, mint a
-  `scripts/release/dist-tag.mjs` fájlra, amely közzétételkor kiválasztja az npm dist-tag értékét.
-- `channels` — az egyes dist-tag-ek közzétett legfrissebb verziója, az `npm view omniroute dist-tags` parancsból
-  (registry HTTP-tartalékmechanizmussal), a `latest` értékével megegyező, 10 perces TTL-lel gyorsítótárazva. A `latest` mindig jelen van
-  (először a `latest` mezőre, majd az `"unavailable"` értékre áll vissza); a `next`, `nightly` és `lts` csak akkor jelennek meg,
-  ha az adott dist-tag létezik. A `Cache-Control: no-cache` kérése mindkét lekérdezést frissíti.
+- A futó build `releaseChannel` — npm csatornája: `nightly` `-nightly.*` verziókhoz, `next` a többi előzetes kiadáshoz (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` `channels.latest`-nál régebbi fő stabil verziójához, egyébként `latest`. Ugyanazok a szabályok, mint `scripts/release/dist-tag.mjs` esetében, amely a közzétételkor választja ki az npm dist-címkét.
+- `channels` — közzétette az egyes dist-címkék fejrészét `npm view omniroute dist-tags` ből (regiszter HTTP tartalék), ugyanazzal a 10 perces TTL gyorsítótárban, mint `latest`. `latest` mindig jelen van (visszaesik a `latest` mezőbe, majd `"unavailable"`); `next`, `nightly` és `lts` csak akkor jelennek meg, ha a dist-tag létezik. A `Cache-Control: no-cache` kérés mindkét keresést frissíti.
 
-A csatornamodellt (`latest` = v3 a 4.0 GA-ig, `next` = rc, `nightly` = `develop` buildjei,
-`lts` = v3-as javítások a 4.0 GA után) a `docs/ops/RELEASE_STRATEGY.md` ismerteti.
+A csatornamodellt (`latest` = v3 a 4.0 GA ig, `next` = rc, `nightly` = `develop` buildek, `lts` = v3 javítások a 4.0 GA után) `docs/ops/RELEASE_STRATEGY.md` írja le.
 
 ---
 
-## Hanganyagok átírása
+## Hangátirat készítése
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1647,10 +1556,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Hangfájlok átírása bármely konfigurált STT-szolgáltató használatával. Az első
-útvonalszegmens a natív szolgáltatót választja ki (`openai/…`, `deepgram/…`). Azok
-az átjárók, amelyek egy másik gyártó modelljét exportálják újra, minősített azonosítót
-használnak (`openrouter/deepgram/nova-3`).
+Hangfájlok átírása bármely konfigurált STT-szolgáltató használatával. Az első útvonalszegmens a natív szolgáltatót választja ki (`openai/…`, `deepgram/…`). Azok az átjárók, amelyek egy másik gyártó modelljét teszik elérhetővé, minősített azonosítót használnak
+(`openrouter/deepgram/nova-3`).
 
 **Kérés:**
 
@@ -1679,7 +1586,12 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Támogatott formátumok:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** fájlalapú átírás a Gemini Live
+WebSocketen keresztül (Gemini API-kulcs szükséges). A feltöltött fájl `ffmpeg` használatával 16 kHz-es monó PCM-re lesz átalakítva
+(`PATH`-on elérhetőnek kell lennie, kivéve, ha a fájl már eleve 16 kHz-es monó PCM WAV), majd a munkamenetbe kerül továbbításra, és
+a véglegesített szöveg `{ "text": "..." }` formátumban kerül visszaadásra. Az opcionális `language` és `prompt` űrlapmezők továbbításra kerülnek. Korlátok: a 25 MiB-nál nagyobb feltöltések, illetve a 10 percnél hosszabb dekódolt hanganyagok esetén a válasz
+`413`; a 60 másodpercnél tovább futó átalakítás leállításra kerül, és a válasz
+`504`. Az API-kulcs csak az `x-goog-api-key` fejlécben kerül elküldésre, a WebSocket URL-jében soha.
 
 ## Ollama-kompatibilitás
 

@@ -16,7 +16,7 @@ OmniRoute je lokalni AI pristupnik za usmjeravanje i nadzorna ploča izgrađena 
 
 Osnovne mogućnosti:
 
-- OpenAI-kompatibilna API površina za CLI/tools (380 pružatelja usluga, 158 izvršnih modula)
+- OpenAI-kompatibilna API površina za CLI/tools (381 pružatelj, 159 izvršnih modula)
 - Request/response prijevod preko formata pružatelja usluga
 - Rezervni kombinirani model (slijed više modela)
 - Strukturirani kombinirani koraci (`provider + model + connection`) s redoslijedom vremena izvođenja prema `compositeTiers`
@@ -416,7 +416,7 @@ Za izradu skupa pravila i podešavanje praga, pogledajte [`docs/security/GUARDRA
 - Connection/model pravilo spajanje: `src/domain/connectionModelRules.ts`
 - Snimke dostupnosti modela: `src/domain/modelAvailability.ts`
 - Praćenje isteka pružatelja: `src/domain/providerExpiration.ts`
-- Kvota predmemorije: `src/domain/quotaCache.ts`
+- Predmemorija kvota: `src/domain/quotaCache.ts`. Pružatelji dodaju i uklanjaju prozore kvota (OpenAI je izbacio 5-satni Codex prozor za neke planove), tako da je očitavanje korištenja davateljeva adaptera potvrđeno kao dovršeno (`quotasComplete`, vidi `src/lib/usage/usageReading.ts`) cijeli je skup prozora računa: prozor koji je bio poznat ranije, ali ga nema u njemu je povučen, u predmemoriju, u `quota_snapshots` ponovno pokretanje hidrira (dodani zapis o povlačenju), u postojanom Codex stanje kvote i u Claude-ovim spremnicima zasićenja. Djelomični dokazi (zaglavlja odgovora, zastarjele kopije) samo ažuriraju prozore koje nose.
 - Stanje razgradnje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - graditelj metapodataka odgovora OmniRoute : `src/domain/omnirouteResponseMeta.ts`

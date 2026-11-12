@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,17 +486,17 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 ਉੱਚ-ਪੱਧਰੀ ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਮਾਇਨਸ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟ — ਦੀ ਗਿਣਤੀ `npm run check:docs-counts` ਮਾਪਾਂ)। ਹਰੇਕ ਐਗਜ਼ੀਕਿਊਟਰ ਕਲਾਸ `BaseExecutor` (`base.ts`), ਸਿੱਧੇ ਜਾਂ `DefaultExecutor` ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ੀਕਿਊਟਰ ਰਾਹੀਂ ਵਧਾਉਂਦਾ ਹੈ; ਬਾਕੀ ਬਚੇ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, fetch/TTS ਅਡਾਪਟਰ, ਕੁਇਰਕ ਹੈਂਡਲਰ)। ਐਗਜ਼ੀਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
+159 ਉੱਚ-ਪੱਧਰੀ ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਮਾਇਨਸ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟ — ਕਾਉਂਟ `npm run check:docs-counts` ਮਾਪਾਂ)। ਹਰੇਕ ਐਗਜ਼ੀਕਿਊਟਰ ਕਲਾਸ `BaseExecutor` (`base.ts`), ਸਿੱਧੇ ਜਾਂ `DefaultExecutor` ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ੀਕਿਊਟਰ ਰਾਹੀਂ ਵਧਾਉਂਦਾ ਹੈ; ਬਾਕੀ ਬਚੇ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, fetch/TTS ਅਡਾਪਟਰ, ਕੁਇਰਕ ਹੈਂਡਲਰ)। ਐਗਜ਼ੀਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, ਪਲੱਸ `claudeIdentity.ts` (ਸਾਂਝੀ ਪਛਾਣ ਸਹਾਇਕ) ਅਤੇ `index.ts` (ਰਜਿਸਟਰੀ) `devin-desktop`
 
-> ਨੋਟ: ਇੱਥੇ ਸੂਚੀਬੱਧ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ `default.ts` ਦੁਆਰਾ ਆਮ OpenAI- ਅਨੁਕੂਲ ਐਗਜ਼ੀਕਿਊਟਰ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਪੂਰਾ ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (380 ਪ੍ਰਦਾਤਾ) `src/shared/constants/providers.ts` ਵਿੱਚ ਰਹਿੰਦਾ ਹੈ।
+> ਨੋਟ: ਇੱਥੇ ਸੂਚੀਬੱਧ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ `default.ts` ਦੁਆਰਾ ਆਮ OpenAI- ਅਨੁਕੂਲ ਐਗਜ਼ੀਕਿਊਟਰ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਪੂਰਾ ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (381 ਪ੍ਰਦਾਤਾ) `src/shared/constants/providers.ts` ਵਿੱਚ ਰਹਿੰਦਾ ਹੈ।
 
 ### 4.3 `open-sse/translator/`
 
 ਹੱਬ-ਐਂਡ-ਸਪੋਕ ਅਨੁਵਾਦ (OpenAI ਹੱਬ ਹੈ)।
 
-- **9 ਅਨੁਵਾਦਕਾਂ ਦੀ ਬੇਨਤੀ ਕਰੋ** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 ਬੇਨਤੀ ਅਨੁਵਾਦਕਾਂ** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **9 ਜਵਾਬ ਅਨੁਵਾਦਕ** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
 - **9 ਸਹਾਇਕ** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ਪਲੱਸ ਸਹਾਇਕ ਟੈਸਟ।
 - **ਚਿੱਤਰ ਸਹਾਇਕ** (`translator/image/sizeMapper.ts`)
@@ -529,9 +529,9 @@ open-sse/
 ### 4.6 `open-sse/mcp-server/`
 
 - **110 ਵਿਲੱਖਣ ਸਾਧਨ** `server.ts` ਵਿੱਚ ਵਾਇਰਡ ( `schemas/tools.ts` + ਮੈਮੋਰੀ ਵਿੱਚ 45 ਕੈਨੋਨੀਕਲ, ਹੁਨਰ, GitHub-ਹੁਨਰ, ਪੂਲ, ਗੇਮੀਫਿਕੇਸ਼ਨ, ਪਲੱਗਇਨ, Notion, Obsidian, ਲੋਕਲ-ਕਾਰਪਸ ਅਤੇ ਕੰਪਰੈਸ਼ਨ ਮੋਡੀਊਲ — ਯੂਨੀਅਨ `countUniqueMcpTools` ਦੁਆਰਾ ਗਿਣਿਆ ਜਾਂਦਾ ਹੈ)।
-- **3 ਆਵਾਜਾਈ** : stdio, HTTP ਸਟ੍ਰੀਮ ਕਰਨ ਯੋਗ, SSE.
+- **3 ਆਵਾਜਾਈ** : stdio, HTTP ਸਟ੍ਰੀਮ ਕਰਨ ਯੋਗ, SSE।
 - **33 ਸਕੋਪ** `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਰਨਟਾਈਮ — ਅਧਾਰ ਸੂਚੀ ਵਿੱਚ ਲਾਗੂ ਕੀਤਾ ਗਿਆ, ਪੂਰਾ ਸੈੱਟ ਹਰੇਕ ਟੂਲ ਮੋਡੀਊਲ ਦੁਆਰਾ ਘੋਸ਼ਿਤ ਕੀਤੇ ਗਏ ਸਕੋਪਾਂ ਦਾ ਸੰਘ ਹੈ।
-- ਆਡਿਟ ਟੇਬਲ: `mcp_tool_audit` ( `audit.ts` ਦੁਆਰਾ ਆਬਾਦੀ)।
+- ਆਡਿਟ ਸਾਰਣੀ: `mcp_tool_audit` ( `audit.ts` ਦੁਆਰਾ ਆਬਾਦੀ)।
 - ਫਾਈਲਾਂ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, ਪਲੱਸ `__tests__/` ਦੇ ਅਧੀਨ ਟੈਸਟ।
 - ਪੂਰੇ ਟੂਲ ਕੈਟਾਲਾਗ ਲਈ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ਦੇਖੋ।
 

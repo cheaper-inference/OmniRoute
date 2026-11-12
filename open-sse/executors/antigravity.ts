@@ -1,3 +1,4 @@
+import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
@@ -362,17 +363,20 @@ const promptNormalizeLog = logger("AG_PROMPT_NORMALIZE");
 /**
  * Normalize systemInstruction.parts text before Antigravity dispatch: strip
  * competing-agent identity sentences (#10420) and rewrite OMP harness markers.
- * Only string `text` parts are touched; every other part and field is kept.
+ * Only string `text` parts are touched; empty objects are dropped. Every other
+ * part and field is kept. Returns undefined when no parts remain.
  * Returns the original reference when nothing matched (no allocation).
  */
 export function normalizeAntigravitySystemInstruction(systemInstruction: unknown): unknown {
   const record = asRecord(systemInstruction);
-  const parts = Array.isArray(record?.parts)
+  const allParts = Array.isArray(record?.parts)
     ? (record.parts as Array<Record<string, unknown>>)
-    : [];
-  if (parts.length === 0) return systemInstruction;
+    : null;
+  if (!allParts) return systemInstruction;
+  const parts = allParts.filter((part) => Object.keys(part).length > 0);
+  if (parts.length === 0) return undefined;
 
-  let changed = false;
+  let changed = parts.length !== allParts.length;
   const newParts = parts.map((part) => {
     if (typeof part.text !== "string" || part.text.length === 0) return part;
     let text = part.text;
@@ -462,9 +466,76 @@ function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, un
 ): T {
   if (!asRecord(request.systemInstruction)) return request;
   const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+  if (systemInstruction === undefined) {
+    const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+    return withoutSystemInstruction as T;
+  }
   return systemInstruction === request.systemInstruction
     ? request
     : { ...request, systemInstruction };
+}
+
+/** Remove empty `{}` systemInstruction parts only; every other part and field is kept. */
+function dropEmptyAntigravitySystemParts<T extends Record<string, unknown>>(request: T): T {
+  const record = asRecord(request.systemInstruction);
+  if (!Array.isArray(record?.parts)) return request;
+  const parts = (record.parts as unknown[]).filter(
+    (p) => Object.keys(asRecord(p) ?? {}).length > 0
+  );
+  if (parts.length === record.parts.length) return request;
+  if (parts.length > 0) return { ...request, systemInstruction: { ...record, parts } };
+  const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+  return withoutSystemInstruction as T;
+}
+
+/**
+ * Vertex AI (via Google Cloud Code for Claude models) enforces Anthropic's strict
+ * tool protocol: every tool_use must be immediately followed by a tool_result.
+ * In Gemini contents format, user turns merging tool results with demoted system/user
+ * turns (e.g. Claude Code's `<total_tokens>` budget notices) had `functionResponse`
+ * sorted to the end by `moveFunctionResponsesLast`, causing Vertex AI HTTP 400
+ * "tool_use ids were found without tool_result blocks immediately after".
+ *
+ * For Claude models, strip synthetic `<total_tokens>` budget blocks and ensure all
+ * `functionResponse` parts are placed first in the user turn.
+ */
+export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown[] {
+  return contents.map((content) => {
+    if (!content || typeof content !== "object") return content;
+    const c = content as { role?: unknown; parts?: unknown[] };
+    if (c.role !== "user" || !Array.isArray(c.parts)) return content;
+
+    const hasFunctionResponse = c.parts.some(
+      (p) => p && typeof p === "object" && "functionResponse" in p
+    );
+    if (!hasFunctionResponse) return content;
+    // Only a pure tool-result turn is reordered: a turn that also carries functionCall
+    // parts is not an Anthropic tool_result message, so its part order is left as-is.
+    const hasFunctionCall = c.parts.some((p) => p && typeof p === "object" && "functionCall" in p);
+    if (hasFunctionCall) return content;
+
+    const filteredParts = c.parts.filter((p) => {
+      if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") {
+        const text = (p as { text: string }).text.trim();
+        if (text.startsWith("<total_tokens>") && text.endsWith("</total_tokens>")) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    const responses: unknown[] = [];
+    const others: unknown[] = [];
+    for (const part of filteredParts) {
+      if (part && typeof part === "object" && "functionResponse" in part) {
+        responses.push(part);
+      } else {
+        others.push(part);
+      }
+    }
+
+    return { ...c, parts: [...responses, ...others] };
+  });
 }
 
 function sanitizeAntigravityGeminiRequest(
@@ -473,14 +544,15 @@ function sanitizeAntigravityGeminiRequest(
   const clean: Record<string, unknown> = {};
 
   if (Array.isArray(request.contents)) {
-    clean.contents = request.contents;
+    clean.contents = normalizeAntigravityClaudeContents(request.contents);
   }
 
   if (asRecord(request.systemInstruction)) {
     // #10420: strip competing-agent identity sentences (e.g. "You are a
     // Claude agent, built on Anthropic's Claude Agent SDK.") that Antigravity
     // flags and answers with 429 RESOURCE_EXHAUSTED.
-    clean.systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+    const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+    if (systemInstruction !== undefined) clean.systemInstruction = systemInstruction;
   }
 
   clean.generationConfig = asRecord(request.generationConfig)
@@ -895,7 +967,9 @@ export class AntigravityExecutor extends BaseExecutor {
         ? stripTrailingAntigravityAssistantTurn(
             normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
           )
-        : rawTransformedRequest;
+        : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
+          // and no identity rewrite, but empty system parts are rejected the same way.
+          dropEmptyAntigravitySystemParts(rawTransformedRequest);
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
     // Identity labels join (never replace) the caller's own labels (#16618).
@@ -1255,7 +1329,13 @@ export class AntigravityExecutor extends BaseExecutor {
         headers: [["Content-Type", "application/json"]],
       });
 
-      return { response: syntheticResponse, url, headers, transformedBody };
+      return {
+        response: syntheticResponse,
+        upstreamHttpSelection: selectHttpResponse(response),
+        url,
+        headers,
+        transformedBody,
+      };
     };
 
     return collect();

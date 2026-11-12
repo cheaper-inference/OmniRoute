@@ -14,7 +14,7 @@ Is geata ródaithe áitiúil AI agus painéal é OmniRoute tógtha ar Next.js. S
 
 Cumais lárnacha:
 
-- Dromchla API atá comhoiriúnach le OpenAI do CLI/tools (380 soláthraí, 158 modúl seiceadóir)
+- Dromchla API -comhoiriúnach le OpenAI do CLI/tools (381 soláthraí, 159 modúl seiceadóir)
 - Request/response aistriúchán thar formáidí soláthraí
 - Cúltaca teaglama samhail (seicheamh ilmhúnlaí)
 - Céimeanna teaglama struchtúrtha (`provider + model + connection`) le hordú ama rite ag `compositeTiers`
@@ -71,7 +71,7 @@ Cumais lárnacha:
 - GLM Smaointeoireacht (`glmt`) soláthraí den chéad scoth réamhshocraithe
 - Comhaireamh dearbhán hibrideach ( `/messages/count_tokens` taobh an tsoláthraí le haisíoc meastacháin)
 - Uathshíolú ailias samhail (30 + normalú canúint tras-seachfhreastalaí ag am tosaithe)
-- Gabh amach sábháilte le garda SSRF, blocáil phríobháideach URL, agus atriail inchumraithe
+- Gabh amach sábháilte le garda SSRF, blocáil príobháideach URL, agus atriail inchumraithe
 - Iarrann comhrá ar an eolas faoi fhuarú arís le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
 - Bailíochtú timpeallacht ama rite le Zod ag am tosaithe
 - Iniúchadh comhlíonta v2 le huimhrigh, imeachtaí an tsoláthraí CRUD, agus logáil bailíochtaithe bactha ag SSRF
@@ -369,8 +369,8 @@ Déanann Auto Combo scóir dinimiciúil agus piocann sé spriocanna ródaithe ag
 Príomhchumais:
 
 - **20 straitéis ródaithe** (tosaíocht, ualaithe, líonadh an chéad, bhabhta-robín, P2C, randamach, is lú úsáid, optamaithe ó thaobh costais, ath-fheasach, athshocrú-fhuinneog, spás cloigeann, cuóta-ualaithe, docht-randamach,** gluaisteán** , lkgp, optamaithe le comhthéacs, optamaithe le taisce, sealaíocht comhthéacs,** comhleá** , píblíne) is é — auto an ceannlíne breise i v3.8.0; Tá `fusion` (lucht leanúna painéil sintéis breitheamh +, `open-sse/services/fusion.ts`) nua in v3.8.36.
-- **Scóráil 16-fachtóir** : cuóta, sláinte, costas inbhéartach, latency inbhéartach, feistiú tascanna agus deich gcinn eile. Sa tábla canónach fachtóirí agus a gcuid meáchain réamhshocraithe, is i [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — é a athlua anseo thabharfadh sé an dara háit le dul i léig.
-- **Monarcha fíorúil** éiríonn sé teaglama gearrshaolacha nuair nach bhfuil aon teaglama ainmnithe meaitseála ann, agus iarrthóirí á bhfoinsiú ó naisc shláintiúla soláthraithe gníomhacha.
+- **Scóráil 16-fachtóir** : cuóta, sláinte, costas inbhéartach, latency inbhéartach, feistiú tascanna agus deich gcinn eile. Sa tábla canónta fachtóirí agus a gcuid meáchain réamhshocraithe, is i [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — é a athlua anseo thabharfadh sé an dara háit le dul i léig.
+- **Monarcha fíorúil** éiríonn sé teaglama gearrshaolacha nuair nach bhfuil aon teaglama ainmnithe comhoiriúnaithe ann, agus iarrthóirí á bhfoinsiú ó naisc shláintiúla soláthraithe gníomhacha.
 - **Réimíreanna uathoibríocha** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — gach ceann acu tacaithe ag próifíl meáchain tiúnta.
 - **6 pacáiste mod** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` agus `chaos-mode` cumraíochtaí meáchain réamhshocraithe — atá inghlaoite ón deais. (Gan a mheascadh suas leis na réimíreanna `auto/*` thuas, ar leaganacha iarratas-am.)
 
@@ -395,7 +395,7 @@ Is ciseal meánearraí te-in-athlódála é modúl na ráillí cosanta a dhéana
 
 - Fréamh an mhodúil: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - Athlódáil te: déanann an clárlann faire ar athruithe cumraíochta agus atógann sí an slabhra atá i bhfeidhm
-- Pointí sreang-isteach: iontráil láimhseálaí comhrá, láimhseálaí giniúna íomhá, sláintitheoir freagartha
+- Pointí sreinge: iontráil láimhseálaí comhrá, láimhseálaí giniúna íomhá, sláintitheoir freagartha
 - conradh HTTP : dromchla sáruithe mar `503` le `error.code = "GUARDRAIL_VIOLATION"`
 
 Le haghaidh údarú tacar rialacha agus tiúnadh tairsí, féach [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
@@ -413,7 +413,7 @@ Déanann an t-ainmspás `src/domain/` cinntí beartais a lárú ionas nach mbío
 - Connection/model riail siúinéir: `src/domain/connectionModelRules.ts`
 - Grianghraif infhaighteachta múnla: `src/domain/modelAvailability.ts`
 - Rianú éaga an tsoláthraí: `src/domain/providerExpiration.ts`
-- Cuóta taisce: `src/domain/quotaCache.ts`
+- Cuóta taisce: `src/domain/quotaCache.ts`. Cuireann soláthraithe agus bainfidh siad fuinneoga cuóta (thit OpenAI an fhuinneog Codex 5-uair an chloig le haghaidh roinnt pleananna), mar sin de réir úsáide a fhianaíonn oiriúntóir an tsoláthraí mar chomhlánú (`quotasComplete`, féach `src/lib/usage/usageReading.ts`) is sraith fuinneoige iomlán an chuntais: fuinneog ar a dtugtar níos luaithe ach nach bhfuil sé ar scor, sa taisce, sa `quota_snapshots` athhiodráití atosaithe (staid scoir aguisín Codex ), i dtaifead scoir a cheanglaítear, agus sa taifead scoir buicéid Claude. Ní dhéanann fianaise pháirteach (ceanntásca freagartha, seanchóipeanna) ach na fuinneoga a iompraíonn sí a nuashonrú.
 - Staid díghrádaithe: `src/domain/degradation.ts`
 - Iniúchadh cumraíochta: `src/domain/configAudit.ts`
 - tógálaí meiteashonraí freagartha OmniRoute : `src/domain/omnirouteResponseMeta.ts`

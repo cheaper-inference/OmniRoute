@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 huipputason suoritusmoduulia (`*.ts` miinus `base.ts`, `index.ts` ja testit — count `npm run check:docs-counts` -mitat). Jokainen suorittajaluokka laajentaa `BaseExecutor` :n (`base.ts`), suoraan tai `DefaultExecutor` tai muun suorittajan kautta; loput moduulit ovat palveluntarjoajakohtaisia avustajia (työkalukaaviot, fetch/TTS -sovittimet, quirk-käsittelijät). Toteuttajiin kuuluvat:
+159 huipputason suoritusmoduulia (`*.ts` miinus `base.ts`, `index.ts` ja testit — count `npm run check:docs-counts` -mitat). Jokainen suorittajaluokka laajentaa `BaseExecutor` :n (`base.ts`), suoraan tai `DefaultExecutor` tai muun suorittajan kautta; loput moduulit ovat palveluntarjoajakohtaisia avustajia (työkalukaaviot, fetch/TTS -sovittimet, quirk-käsittelijät). Toteuttajiin kuuluvat:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex` `devin-desktop` `claudeIdentity.ts` `nlpcloud` jaettu identiteettiapu) ja `index.ts` (rekisteri).
 
-> Huomautus: `default.ts` palvelee palveluntarjoajia, joita ei ole lueteltu tässä, käyttämällä yleistä OpenAI-yhteensopivaa suorittajaa. Täydellinen palveluntarjoajaluettelo (380 tarjoajaa) sijaitsee `src/shared/constants/providers.ts` ssä.
+> Huomautus: `default.ts` palvelee palveluntarjoajia, joita ei ole lueteltu tässä, käyttämällä yleistä OpenAI-yhteensopivaa suorittajaa. Täydellinen tarjoajaluettelo (381 tarjoajaa) sijaitsee `src/shared/constants/providers.ts` ssä.
 
 ### 4.3 `open-sse/translator/`
 

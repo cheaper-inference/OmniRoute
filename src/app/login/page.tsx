@@ -27,6 +27,9 @@ export default function LoginPage() {
   const [oidcEnabled, setOidcEnabled] = useState<boolean | null>(null);
   const [oidcDisablePasswordLogin, setOidcDisablePasswordLogin] = useState<boolean | null>(null);
   const [mounted, setMounted] = useState(false);
+  // Opt-in TOTP: set when the password step answers `mfaRequired`.
+  const [mfaStep, setMfaStep] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
   const [nodeVersion, setNodeVersion] = useState(null);
   const [nodeCompatible, setNodeCompatible] = useState(true);
   const router = useRouter();
@@ -85,6 +88,12 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data?.mfaRequired) {
+          setMfaCode("");
+          setMfaStep(true);
+          return;
+        }
         sessionStorage.setItem("omniroute_login_time", String(Date.now()));
         window.location.href = withBasePath("/dashboard");
       } else {
@@ -97,6 +106,37 @@ export default function LoginPage() {
         setError(data.error || t("invalidPassword"));
       }
     } catch (err) {
+      setError(t("errorOccurredRetry"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMfaVerify = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/mfa/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: mfaCode }),
+      });
+
+      if (res.ok) {
+        sessionStorage.setItem("omniroute_login_time", String(Date.now()));
+        window.location.href = withBasePath("/dashboard");
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (data?.mfaExpired) {
+        // The pending sign-in expired (5 min): start over from the password.
+        setMfaStep(false);
+        setPassword("");
+      }
+      setError(data?.error?.message || t("errorOccurredRetry"));
+    } catch {
       setError(t("errorOccurredRetry"));
     } finally {
       setLoading(false);
@@ -131,6 +171,9 @@ export default function LoginPage() {
         />
       </div>
     ) : null;
+  // One element for every screen below: brand-pages-static.test.ts allows one lockup per file.
+  const brandLockup = <OmniRouteLockup />;
+
   if (
     hasPassword === null ||
     setupComplete === null ||
@@ -157,6 +200,7 @@ export default function LoginPage() {
         <div
           className={`w-full max-w-md transition-all duration-700 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
+          <div className="flex justify-center mb-8">{brandLockup}</div>
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-card bg-bg-subtle border border-border mb-6">
               <Icon name="rocket_launch" size={40} className="text-text-muted" />
@@ -193,6 +237,7 @@ export default function LoginPage() {
         <div
           className={`w-full max-w-md transition-all duration-700 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
+          <div className="flex justify-center mb-8">{brandLockup}</div>
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-card bg-warning-bg border border-border mb-6">
               <Icon name="shield_person" size={40} className="text-warning" />
@@ -234,18 +279,57 @@ export default function LoginPage() {
           >
             <Card padding="lg">
               <div className="mb-8">
-                <div className="mb-8">
-                  <OmniRouteLockup />
-                </div>
+                <div className="mb-8">{brandLockup}</div>
                 <h1 className="ci-heading text-2xl">{t("signIn")}</h1>
                 <p className="text-text-muted mt-1.5">
-                  {oidcEnabled && oidcDisablePasswordLogin
-                    ? t("continueWithOidc")
-                    : t("enterPassword")}
+                  {mfaStep
+                    ? t("mfaPrompt")
+                    : oidcEnabled && oidcDisablePasswordLogin
+                      ? t("continueWithOidc")
+                      : t("enterPassword")}
                 </p>
               </div>
 
-              {oidcEnabled && oidcDisablePasswordLogin ? (
+              {mfaStep ? (
+                <form onSubmit={handleMfaVerify} className="space-y-5 w-full">
+                  <Input
+                    type="text"
+                    inputMode="text"
+                    autoComplete="one-time-code"
+                    label={t("mfaCodeLabel")}
+                    placeholder={t("mfaCodePlaceholder")}
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value)}
+                    required
+                    autoFocus
+                    maxLength={64}
+                    inputClassName="tracking-widest"
+                    error={error || undefined}
+                    hint={t("mfaBackupCodeHint")}
+                  />
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="w-full h-11 text-sm font-medium"
+                    loading={loading}
+                  >
+                    {t("continue")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full h-11 text-sm font-medium"
+                    onClick={() => {
+                      setMfaStep(false);
+                      setMfaCode("");
+                      setError("");
+                    }}
+                  >
+                    {t("backToLogin")}
+                  </Button>
+                </form>
+              ) : oidcEnabled && oidcDisablePasswordLogin ? (
                 <div className="space-y-4">
                   <Button
                     type="button"

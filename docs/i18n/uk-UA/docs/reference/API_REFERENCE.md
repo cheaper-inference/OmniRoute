@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **Мови:** 🇺🇸 [Англійська](./API_REFERENCE.md) | 🇪🇹 [Амхарська](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [Арабська](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Азербайджанська](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Болгарська](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [Бенгальська](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Боснійська](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Чеська](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Данська](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Німецька](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Грецька](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Іспанська](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Естонська](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [Перська](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Фінська](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Французька](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Ірландська](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [Гуджараті](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Хауса](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [Іврит](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [Гінді](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Хорватська](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Угорська](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Вірменська](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Індонезійська](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Ігбо](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Італійська](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [Японська](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [Грузинська](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [Кхмерська](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [Каннада](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [Корейська](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Литовська](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Латиська](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [Малаялам](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [Маратхі](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Малайська](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Мальтійська](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [Бірманська](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [Непальська](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Нідерландська](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Норвезька](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [Одія](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [Панджабі](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Філіппінська](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Польська](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Португальська (Португалія)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Португальська (Бразилія)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Румунська](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Російська](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [Сингальська](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Словацька](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Словенська](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Сербська](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Шведська](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Суахілі](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [Тамільська](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [Телугу](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [Тайська](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Турецька](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [Урду](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Узбецька](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [В'єтнамська](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Йоруба](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [Китайська (спрощена)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [Китайська (традиційна)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Мови:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Основний довідник API OmniRoute. Він охоплює загальнодоступну поверхню `/v1` і найчастіше використовувані кінцеві точки керування; машиночитаний [`docs/openapi.yaml`](../openapi.yaml) і дерево маршрутів у `src/app/api/` є вичерпними джерелами.
+Основний довідник API OmniRoute. Він охоплює загальнодоступну поверхню `/v1` і найчастіше використовувані кінцеві точки керування; машиночитний [`docs/openapi.yaml`](../openapi.yaml) і дерево маршрутів у `src/app/api/` є вичерпними джерелами.
 
-Щоб переглянути спеціалізований протокол, сумісний з OpenAI, і матрицю можливостей постачальників, див.
+Зосереджену матрицю можливостей сумісного з OpenAI протоколу та провайдерів дивіться в
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Кожне розгортання надає власну копію специфікації за адресою `/openapi.yaml`, згенеровану з `docs/openapi.yaml` під час складання. Вона містить версію збірки та відносну URL-адресу сервера (`./`), тому запити залишаються на хості, який надав цей документ. Інструмент, що імпортує завантажений файл, не має такого хоста, тому базову URL-адресу потрібно вказати вручну.
 
 ---
 
@@ -359,33 +361,34 @@ Content-Type: application/json
 }
 ```
 
-Доступні такі провайдери: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (локальний), ComfyUI (локальний).
+Доступні постачальники включають OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (локальний), ComfyUI (локальний).
 
-`n` повертає `n` зображень у `data[]`. Для провайдерів, чиї upstream API повертають одне зображення за виклик
+`n` повертає `n` зображень у `data[]`. Постачальники, чиї API вищого рівня повертають одне зображення за виклик
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), виконуються `n` окремих upstream-викликів, одночасно не більше 4. Фіксований
-`seed` зміщується на індекс виклику (`seed`, `seed + 1`, …), тому зображення відрізняються, але залишаються
-відтворюваними. Значення `n` обмежене до 10. Увесь запит завершується помилкою, якщо будь-який виклик завершується помилкою. Список форматів із розгалуженням викликів — `SINGLE_IMAGE_FANOUT_FORMATS` у
+NVIDIA NIM, Cloudflare Workers AI), отримують `n` окремих викликів API вищого рівня, одночасно виконується не більше 4. Фіксований
+`seed` зміщується на індекс виклику (`seed`, `seed + 1`, …), тому зображення відрізняються, але залишаються відтворюваними. Значення `n` обмежене 10. Запит завершується помилкою повністю, якщо будь-який виклик завершується помилкою. Список форматів із розгалуженням викликів міститься в
+`SINGLE_IMAGE_FANOUT_FORMATS` у
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux повторно використовує наявне підключення з API-ключем і приймає префікси `zenmux/` або `zm/`:
+ZenMux повторно використовує наявне підключення з ключем API та приймає префікси `zenmux/` або `zm/`:
 
-- `zenmux/openai/gpt-image-2` використовує API OpenAI Images від ZenMux. Доступні такі параметри, як `size`,
+- `zenmux/openai/gpt-image-2` використовує API зображень OpenAI від ZenMux. Доступні такі параметри: `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` і `response_format`.
-- Інші видавці, як-от `zm/meta/muse-image-1.0`, використовують кінцеву точку Vertex AI `:predict` від ZenMux.
-  `n` відповідає `sampleCount`, `aspect_ratio` — `aspectRatio`, а `image_size`
-  (`1K`, `2K`, `4K`) — `sampleImageSize`. Піксельний `size` задає лише співвідношення сторін,
+- Інші видавці, як-от `zm/meta/muse-image-1.0`, використовують кінцеву точку Vertex AI `:predict` від ZenMux. `n` відповідає `sampleCount`, `aspect_ratio` — `aspectRatio`, а `image_size`
+  (`1K`, `2K`, `4K`) — `sampleImageSize`. Значення `size` у пікселях задає лише співвідношення сторін,
   а не гарантовані розміри в пікселях. Підтримувані співвідношення сторін, роздільні здатності та кількість зображень залежать від моделі.
-- `zm/inclusionai/ming-image-0.1-design` самостійно обирає розміри. Не вказуйте `size`,
-  `aspect_ratio` та `image_size`; явне задання цих параметрів повертає HTTP 400. Формати PNG, JPEG і WebP
+- `zm/inclusionai/ming-image-0.1-design` самостійно вибирає розміри. Не вказуйте `size`,
+  `aspect_ratio` і `image_size`; явне задання цих параметрів повертає HTTP 400. Формати PNG, JPEG і WebP
   можна запитати за допомогою `output_format`.
 
-Ця інтеграція підтримує генерацію зображень із тексту, але не редагування за референсним зображенням. Вивід Vertex
-нормалізується до `data[].b64_json`; `response_format: "url"` повертає upstream
-URL через HTTPS або URL даних у форматі base64, якщо доступні лише байти зображення. Порожній або відфільтрований результат
-повертає помилку, а не успішну відповідь із порожнім результатом. Доступ до моделей залежить від облікового запису ZenMux.
-Див. [Vertex API ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) та
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Ця інтеграція підтримує генерацію зображень із тексту, але не редагування зображень за еталонним зображенням. Вивід Vertex нормалізується до `data[].b64_json`; `response_format: "url"` повертає URL HTTPS від API вищого рівня або URL даних у форматі base64, якщо доступні лише байти зображення. Порожній або відфільтрований результат повертає помилку, а не успішну відповідь із порожнім результатом. Доступ до моделей залежить від облікового запису ZenMux.
+Див. [Vertex API ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) і
+[API зображень OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Підключення через вхід Microsoft 365 Copilot обслуговує `copilot-m365-web/m365-copilot-image`
+через вбудований інструмент зображень Copilot: один сеанс Copilot на зображення (`n` від 1 до 4), `size` впливає
+лише на орієнтацію, а зображення повертаються вбудованими (`b64_json` або URL даних для
+`response_format: "url"`). Див. [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # Перелік усіх моделей зображень
@@ -847,15 +850,17 @@ POST /v1/providers/{provider}/images/generations
 
 ## API пошуку
 
-Абстракція постачальників вебпошуку/пошуку (Tavily, Brave, Exa, Serper тощо).
+Абстракція постачальника вебпошуку/пошуку (Tavily, Brave, Exa, Serper тощо).
 
-| Метод | Шлях                   | Опис                                                                                                                 |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Список налаштованих постачальників пошуку та їхніх можливостей                                                       |
-| POST  | `/v1/search`           | Виконання пошукового запиту — тіло перевіряється схемою `v1SearchSchema`, підтримуються кешування/об’єднання запитів |
-| GET   | `/v1/search/analytics` | Статистика збігів/затримки/кешу для кожного постачальника                                                            |
+| Метод | Шлях                   | Опис                                                                                                                   |
+| ----- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Список налаштованих постачальників пошуку та їхніх можливостей                                                         |
+| POST  | `/v1/search`           | Виконання пошукового запиту — тіло перевіряється за допомогою `v1SearchSchema`, підтримує кешування/об’єднання запитів |
+| GET   | `/v1/search/analytics` | Статистика звернень/затримок/кешу для кожного постачальника                                                            |
 
 **Автентифікація:** ключ API Bearer (`extractApiKey` + `isValidApiKey`). Політика пошуку застосовується через `enforceApiKeyPolicy`.
+
+**Автоматичний вибір:** якщо `provider` не вказано, спочатку використовується найдешевший постачальник із налаштованим підключенням, а наступний за ціною є резервним. Безкоштовні резервні постачальники останньої інстанції (`duckduckgo-free`) використовуються лише тоді, коли більше нічого не налаштовано. Власний SearXNG вважається налаштованим, щойно його підключення зберігає справжній `baseUrl` (а не типовий URL каталогу `http://localhost:8888/search`): тоді він займає позицію постачальника за $0 перед постачальниками з ключами, а найдешевший постачальник із ключем є резервним, зокрема коли SearXNG відповідає кодом 400, 401, 403 або 404. Значення `baseUrl`, яке не є дійсним URL `http(s)` або вказує на адресу хмарних метаданих, не враховується. Підключення SearXNG, у якому зберігається токен, ранжується таким чином лише для `https://` або loopback `http://`. Для віддаленого звичайного `http://` воно ніколи не є резервним і залишається варіантом останньої інстанції: використовується лише тоді, коли не налаштовано жодного іншого постачальника або коли його запитано за назвою; у цих двох випадках токен справді надсилається у відкритому вигляді.
 
 ### `provider_options` для Exa і Tavily
 
@@ -863,48 +868,43 @@ Exa і Tavily зчитують специфічні для постачальн�
 `provider_options.exa` (або `provider_options["exa-search"]`) і `provider_options.tavily`
 (або `provider_options["tavily-search"]`). Передаються лише наведені нижче ключі. Кожен із них
 перевіряється за власною схемою Zod у `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-а ключ із неправильним типом відкидається. Будь-які інші ключі ігноруються, зокрема auth, базова URL-адреса,
-`stream` і `outputSchema`. Плоскі ключі, які використовують інші постачальники (`cx`, `depth`, ...), працюють
+а ключ із неправильним типом відкидається. Будь-який інший ключ ігнорується, зокрема ключі автентифікації, базовий URL,
+`stream` і `outputSchema`. Плоскі ключі, які використовуються іншими постачальниками (`cx`, `depth`, ...), працюють
 як і раніше.
 
-| Постачальник | Поля верхнього рівня                                                                                                                                                                                                                                                                                                                                                      | Вкладені                                                                                                                                               |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (плоскі примітиви), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` об’єднуються зі стандартним значенням `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                      |
+| Постачальник | Поля верхнього рівня                                                                                                                                                                                                                                                                                                                                                      | Вкладені                                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (плоскі примітиви), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` об’єднуються зі типовим значенням `{ text: true, highlights: true }` |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
 Загальні поля завжди мають пріоритет: `query`, `max_results`, `filters` (домени), `country` і
-тема, отримана з `search_type`. Для Exa `search_type: "news"` зберігає `category: "news"`.
+тема, отримана з `search_type`. Для Exa значення `search_type: "news"` зберігає
+`category: "news"`.
 Tavily також приймає `search_type: "finance"` (`topic: "finance"`).
 
-Вартість пошуку Firecrawl обліковується за кожен розпочатий блок із 10 повернутих результатів — по $0.002 (2
-кредити) за блок, причому за кожен виклик стягується щонайменше один блок
+Вартість пошуку Firecrawl записується за кожен розпочатий блок із 10 повернутих результатів — по $0.002 (2
+кредити) за блок, причому за один виклик стягується плата щонайменше за один блок
 ([тарифи Firecrawl](https://docs.firecrawl.dev/billing)): 11 результатів коштують $0.004.
 
-Загальне поле `time_range` тепер передається обом постачальникам: Exa отримує `startPublishedDate` (мітку часу
-ISO), а Tavily — `start_date` (`YYYY-MM-DD`). Явно вказана дата в `provider_options`
-замінює зіставлену дату.
+Загальний `time_range` тепер передається обом постачальникам: Exa отримує `startPublishedDate` (мітку часу ISO),
+а Tavily — `start_date` (`YYYY-MM-DD`). Явно вказана дата в `provider_options`
+має пріоритет над зіставленою датою.
 
-Результати Exa зберігають `id`, `highlights` (кожен фрагмент, а не лише перший, використаний як
+Результати Exa зберігають `id`, `highlights` (кожне виділення, а не лише перше, використане як
 `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` і `extras` у
 `provider_raw`. Результати Tavily зберігають `images` і `favicon`.
 
-Вартість пошуку Linkup обліковується як $0.005 для `depth` `fast` і `standard` та $0.05 для
-`deep` ([ціни Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+Вартість пошуку Linkup записується як $0.005 для `depth` `fast` і `standard` та $0.05 для
+`deep` ([тарифи Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
 незалежно від того, чи походить `depth` із `provider_options`, чи з налаштувань підключення.
 
-Exa `type: "lite"` (Exa 3.0) приймає менший набір полів і відхиляє весь запит,
-якщо встановлено будь-яке інше поле. Для lite `additionalQueries`, `systemPrompt` і кожен ключ
-`contents`, крім `text` і `highlights`, відкидаються перед викликом. Застарілі
-`subpages`, `subpageTarget`, `highlights.numSentences` і `highlights.highlightsPerUrl` більше не
-передаються.
+Exa `type: "lite"` (Exa 3.0) приймає менший набір полів і відхиляє весь запит, якщо встановлено будь-яке інше поле. Для lite
+`additionalQueries`, `systemPrompt` і кожен ключ `contents`, крім `text` і `highlights`, відкидаються перед викликом. Застарілі
+`subpages`, `subpageTarget`, `highlights.numSentences` і `highlights.highlightsPerUrl` більше не передаються.
 
-Облік вартості використовує плоский реєстр `costPerQuery`, за винятком Exa, який застосовує власні
-тарифи Exa: $0.007 за виклик для `auto` (і застарілого `fast`) або $0.004 для `lite` (і застарілого
-`instant`), що охоплює 10 результатів; $0.001 за кожен наступний результат; і $0.001 за
-кожен повернутий результат, якщо встановлено `contents.summary`. Для Tavily обліковується 1 кредит ($0.008) для
-`search_depth` `basic`, `fast` і `ultra-fast` та 2 кредити ($0.016) для `advanced`
+Облік вартості здійснюється за плоским реєстром `costPerQuery`, за винятком Exa, для якого діють власні тарифи Exa: $0.007 за виклик для `auto` (і застарілого `fast`) або $0.004 для `lite` (і застарілого `instant`), що охоплює 10 результатів; $0.001 за кожен наступний результат; і $0.001 за кожен повернений результат, якщо встановлено `contents.summary`. Tavily обліковується як 1 кредит ($0.008) для `search_depth` `basic`, `fast` і `ultra-fast`, а також як 2 кредити ($0.016) для `advanced`
 ([кредити API Tavily](https://docs.tavily.com/documentation/api-credits)). Виклик із
-`auto_parameters: true`, у якому Tavily підвищує рівень до advanced, усе одно обліковується як 1 кредит.
+`auto_parameters: true`, для якого Tavily підвищує рівень до advanced, усе одно обліковується як 1 кредит.
 
 ---
 
@@ -1031,33 +1031,28 @@ CLI оновлює `base_url + /responses` до WebSocket, а OmniRoute туне
 
 ---
 
-## Самостійний перегляд використання (`/api/usage/om-usage`)
+## Використання самообслуговування (`/api/usage/om-usage`)
 
-Будь-який API-ключ може переглядати **власне** використання та квоти — без прав адміністратора.
-Це кінцева точка, яку клієнт (CLI, панель OmniCopilot) використовує, щоб показати власнику
-ключа його витрати.
+Будь-який ключ API може читати** свій власний** використання та квоти — без авторизації керування. Це кінцева точка, яку використовує клієнт (CLI, панель OmniCopilot ), щоб показати власнику ключа свої витрати.
 
 ```bash
-# Текстовий формат (історичний контракт — звичайний текст для термінала)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Структурований формат — дані, які споживає UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Для ключа має бути ввімкнено **`allowUsageCommand`** (типово вимкнено — менеджер API-ключів
-на панелі керування перемикає цей параметр для кожного ключа). Якщо параметр вимкнено, кінцева
-точка повертає `403`.
+Ключ повинен мати**`allowUsageCommand`** увімкнено (вимкнено за замовчуванням — менеджер ключів API інформаційної панелі вмикає його для кожного ключа). Без нього кінцева точка відповідає `403`.
 
-`?format=json` повертає розрізнену структуру, тому викликач ніколи не зчитує поле даних із
-відмови. У разі успіху:
+`?format=json` повертає дискриміновану форму, тому абонент ніколи не читає поле даних із відмови. На успіх:
 
 ```jsonc
 {
   "allowed": true,
-  // присутнє лише тоді, коли для ключа ввімкнено обмеження використання на рівні ключа (у доларах США на день/тиждень):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1066,9 +1061,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // знімок квоти вибраного провайдера або null, якщо ще нічого не кешовано:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // знімок кожного підключення, щоб UI міг відображати кілька провайдерів поруч:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1076,66 +1071,49 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-У разі відмови (`401` — недійсний ключ / `403` — доступ не дозволено) той самий маршрут повертає
-`{ "allowed": false, "error": { "message": "…" } }` — наявне, але порожнє `personal`/`provider`
-(ключ дозволено, але ще нічого не отримано) є іншим станом, ніж відмова, і лише формат JSON
-дозволяє їх розрізнити.
+При відмові (`401` поганий ключ / `403` не дозволено) той самий маршрут повертає `{ "allowed": false, "error": { "message": "…" } }` — наявний, але порожній `personal`/`provider` (ключ дозволено, нічого ще не вивчено) – це інший стан від відмови, і їх розрізняє лише форма JSON.
 
-**Автентифікація:** власний Bearer API-ключ викликача, перевірений за допомогою `isValidApiKey` —
-це _не_ адміністративний інтерфейс (`/api/keys/…`), який і надалі захищений
-`requireManagementAuth`.
+**авторизація:** власний ключ API носія абонента, перевірений за допомогою `isValidApiKey` — це _не_ поверхня керування (`/api/keys/…`), яка залишається за `requireManagementAuth`.
 
-### Необроблені та скориговані з урахуванням порогу відсотки квоти
+### Необроблені відсотки квот, скориговані за обмеженням
 
-Під час використання `/api/usage/om-usage` викликачам слід враховувати різницю між
-відсотками, представленими **звичайним текстовим виведенням** і структурованим **виведенням JSON**:
+Споживаючи `/api/usage/om-usage`, абоненти повинні звернути увагу на різницю між відсотками, представленими в** виведення звичайного тексту** і структурований** вихід JSON** :
 
-| Аспект                       | Текстовий формат (`/api/usage/om-usage` / `@@om-usage`)                                              | Формат JSON (`?format=json`)                                                                                             |
-| :--------------------------- | :--------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| **Поле виведення**           | `NN% left` (наприклад, `20% left`)                                                                   | `provider.quotas` / `providers[].quotas`                                                                                 |
-| **Вимірювання**              | **Скоригований з урахуванням порогу доступний залишок**: залишкова місткість понад порогове значення | **Необроблена квота upstream**: нескориговане вимірювання провайдера                                                     |
-| **Масштабування за порогом** | Масштабується через `effectiveRemainingPercent()`, тому захищений резерв відображається як `0% left` | Відсутнє (необроблені значення знімка, отримані від провайдера)                                                          |
-| **Дані про поріг**           | Враховуються у відображуваному відсотку                                                              | Зберігаються в `quotaWindowThresholds` для кожного підключення (або використовуються серверні значення за замовчуванням) |
-| **Основний споживач**        | Інтерактивні CLI, термінальні підказки, оператори                                                    | Програмні інтеграції, панелі керування, аналітика, системи відстеження рахунків                                          |
+| Аспект                     | Формат звичайного тексту (`/api/usage/om-usage` / `@@om-usage`)                                 | формат JSON (`?format=json`)                                                                      |
+| :------------------------- | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| **Поле виводу**            | `NN% left` (наприклад, `20% left`)                                                              | `provider.quotas` / `providers[].quotas`                                                          |
+| **Вимірювання**            | **Коригований граничний припуск** : залишкова ємність вище порогу відключення                   | **Необроблена квота вгору** : невідкоригований показник постачальника                             |
+| **Відрізне масштабування** | Масштабується через `effectiveRemainingPercent()`, тому захищений резерв читається як `0% left` | Немає (необроблені значення знімка, як повідомляє постачальник)                                   |
+| **Порогові дані**          | Включено до відображеного відсотка                                                              | Зберігається в `quotaWindowThresholds` для кожного з’єднання (або стандартних параметрів сервера) |
+| **Первинний споживач**     | Інтерактивний CLIs, термінальні підказки, оператори                                             | Програмні інтеграції, інформаційні панелі, аналітика, трекери білінгу                             |
 
-#### Формула коригування порогу
+#### Формула коригування відсічення
 
-OmniRoute підтримує проактивні пороги квоти для запобігання вичерпанню ресурсів upstream
-(налаштовуються через підключення `quotaWindowThresholds`, значення за замовчуванням для
-провайдера або глобальні параметри стійкості). Коли для вікна квоти активний поріг
-(наприклад, `cutoff = 25%`), засіб візуалізації тексту обчислює доступний залишок так:
+OmniRoute підтримує проактивне обмеження квот, щоб запобігти виснаженню висхідного потоку (налаштовується через підключення `quotaWindowThresholds`, стандартні параметри постачальника або глобальні налаштування стійкості). Коли порогове значення відсікання (наприклад, `cutoff = 25%`) активне у вікні квоти, засіб відтворення тексту обчислює залишок дозволу як:
 
-- Якщо `remaining <= cutoff`: повертається `0%`.
-- Якщо `remaining > cutoff`: повертається `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Якщо `remaining <= cutoff`: повертає `0%`.
+- Якщо `remaining > cutoff`: повертає `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Відформатоване текстове виведення округлює це значення до найближчого цілого (`Math.round(...)`).
+Відформатований текст округляє це до найближчого цілого числа (`Math.round(...)`).
 
-#### Показовий приклад
+#### Ілюстративний приклад
 
-Розглянемо вікно провайдера з **60% необробленого використання** (отже, **40% необробленої залишкової квоти**) та налаштованим порогом **25% залишкової квоти**:
+Розглянемо вікно провайдера з** 60% використання в сирому вигляді** (отже** 40% квоти, що залишилася** ) і налаштований** 25% залишкової квоти** поріг:
 
-| Представлення                          | Розрахунок                                         | Залишок |            Передбачене використання             |
-| :------------------------------------- | :------------------------------------------------- | :-----: | :---------------------------------------------: |
-| **Необроблений JSON (`?format=json`)** | Знімок від upstream (`quotas[window]`)             | **40%** |                     **60%**                     |
-| **Текстовий формат (`NN% left`)**      | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (якщо обчислювати як `100 - remaining`) |
+| Представництво                         | Розрахунок                                         | Залишилося |               Мається на увазі                |
+| :------------------------------------- | :------------------------------------------------- | :--------: | :-------------------------------------------: |
+| **Необроблений JSON (`?format=json`)** | Вихідний знімок (`quotas[window]`)                 |  **40%**   |                    **60%**                    |
+| **Текстовий формат (`NN% left`)**      | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**   | **80%** (якщо обчислюється `100 - remaining`) |
 
-- **Чому текст показує 20% left:** Із 40% фізичної квоти, що залишилася в обліковому записі, 25% зарезервовано політикою
-  порогу. Виклику доступно лише 15% із 75% придатного для використання запасу до того, як маршрутизатор припинить
-  направляти запити до цього підключення. Масштабування гарантує, що підключення сигналізує про вичерпання (`0% left`)
-  саме в момент припинення маршрутизації.
-- **Чому JSON зберігає необроблені значення:** JSON-дані повертають точний знімок провайдера (`UsageSnapshot`),
-  тому зовнішні інструменти мають доступ до фактичного використання upstream і `quotaWindowThresholds` на рівні
-  підключення без втратного масштабування на стороні сервера.
+- **Чому текст показує 20% зліва:** З 40% фізичної квоти, що залишилася на рахунку, 25% зарезервовано політикою відключення. Абонент має лише 15% із 75% корисного запасу, перш ніж маршрутизатор припинить маршрутизацію до цього з’єднання. Масштабування забезпечує вичерпання сигналів підключення (`0% left`) саме тоді, коли маршрутизація припиняється.
+- **Чому JSON зберігає необроблені значення:** Корисне навантаження JSON повертає точний знімок провайдера (`UsageSnapshot`), тому зовнішні інструменти мають доступ до використання наземної істини вгорі та `quotaWindowThresholds` на рівні підключення без масштабування з втратами на стороні сервера.
 
-#### Рекомендації щодо міграції для споживачів
+#### Керівництво щодо міграції споживачів
 
-Якщо зовнішня інтеграція (наприклад, плагін редактора або розширення агента) раніше зчитувала дані з текстової
-кінцевої точки (`NN% left`) і обчислювала відсоток використання як `100 - NN`, перехід на `?format=json` означає:
+Якщо зовнішня інтеграція (наприклад, плагін редактора або розширення агента) попередньо скопіювала кінцеву точку тексту (`NN% left`) і обчислювала використаний відсоток як `100 - NN`, перехід на `?format=json` означає:
 
-- Зчитування необроблених значень JSON відображатиме **фактичне споживання upstream** (у наведеному прикладі використано 60%).
-- Якщо інтеграція хоче зберегти семантику придатного для використання залишку текстової кінцевої точки, вона може
-  обчислювати ефективну формулу залишку на стороні клієнта, використовуючи `quotaWindowThresholds` для перевизначень
-  на рівні підключення.
+- Читання необроблених значень JSON відобразить** фактичне споживання нагорі** (60% використано у прикладі вище).
+- Якщо інтеграція бажає зберегти семантику допустимого використання текстової кінцевої точки, вона може оцінити ефективну формулу, що залишилася, на стороні клієнта, використовуючи `quotaWindowThresholds` для перевизначення на рівні підключення.
 
 ---
 
@@ -1240,55 +1218,40 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 
 ---
 
-## Панель керування та керування
+## Інформаційна панель і керування
 
-Маршрути керування (`/api/*`, окрім публічної автентифікації/входу) **не авторизуються** звичайними ключами API для інференсу. Сімейства облікових даних, області дії та приклади curl:
-[Автентифікація керування](../guides/MANAGEMENT-AUTH.md).
+Маршрути керування (`/api/*` крім загальнодоступного auth/login) є** ні** авторизований звичайними ключами API виведення. Сімейства облікових даних, області дії та приклади curl: [автентифікація керування](../guides/MANAGEMENT-AUTH.md).
 
-### Автентифікація
+### Аутентифікація
 
-| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                       |
-| ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Вхід                                                                                                                                                                                                                                                                                                              |
-| `/api/auth/logout`            | POST     | Вихід                                                                                                                                                                                                                                                                                                             |
-| `/api/settings/require-login` | GET/POST | Статус входу (GET, публічний). POST встановлює пароль / перемикає вхід: після встановлення пароля доступ дозволено лише оператору (сесія панелі керування, локальний CLI або вимкнений вхід — ключі API та токени `oma_` отримують `403`); сесія панелі керування надсилає `currentPassword`, щоб замінити пароль |
+| Кінцева точка                 | метод    | опис                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Логін                                                                                                                                                                                                                                                                                        |
+| `/api/auth/logout`            | POST     | Вийти                                                                                                                                                                                                                                                                                        |
+| `/api/settings/require-login` | GET/POST | Статус входу (GET, публічний). POST встановлює пароль/перемикає вхід: лише для оператора, якщо пароль існує (сеанс панелі керування, локальний CLI або вхід вимкнено — API ключі та маркери `oma_` отримують `403`); сеанс інформаційної панелі надсилає `currentPassword` для заміни пароля |
 
-### Керування провайдерами
+### Управління провайдером
 
-| Endpoint                                | Method                    | Description                                                                                                                                                                  |
-| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Перелік / створення провайдерів                                                                                                                                              |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Керування провайдером                                                                                                                                                        |
-| `/api/providers/[id]/test`              | POST                      | Перевірка з’єднання з провайдером                                                                                                                                            |
-| `/api/providers/[id]/models`            | GET                       | Перелік моделей провайдера                                                                                                                                                   |
-| `/api/providers/validate`               | POST                      | Перевірка конфігурації провайдера                                                                                                                                            |
-| `/api/providers/bulk`                   | POST                      | Масове додавання ключів API для ОДНОГО провайдера                                                                                                                            |
-| `/api/providers/import`                 | POST                      | Імпорт неоднорідного СПИСКУ провайдерів із розібраного файлу CSV/JSON (#6836); результати часткових помилок для кожного рядка                                                |
-| `/api/provider-nodes*`                  | Various                   | Керування вузлами провайдерів                                                                                                                                                |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Користувацькі моделі та перевизначення для окремих моделей (додавання, оновлення, приховування/показ, видалення)                                                             |
-| `/api/provider-models/validate-and-add` | POST                      | Сувора перевірка з’єднання за явним дозволом і атомарна реєстрація користувацької моделі з автентифікацією керування; див. [Перевірка моделі](../guides/MODEL-VALIDATION.md) |
+| Кінцева точка                           | метод                     | опис                                                                                                                                                                             |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Список / створення постачальників                                                                                                                                                |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Керуйте провайдером                                                                                                                                                              |
+| `/api/providers/[id]/test`              | POST                      | Перевірте підключення провайдера                                                                                                                                                 |
+| `/api/providers/[id]/models`            | GET                       | Список моделей провайдерів                                                                                                                                                       |
+| `/api/providers/validate`               | POST                      | Перевірте конфігурацію постачальника                                                                                                                                             |
+| `/api/providers/bulk`                   | POST                      | Масове додавання ключів API для постачальника ONE                                                                                                                                |
+| `/api/providers/import`                 | POST                      | Імпорт гетерогенного провайдера LIST з аналізованого файлу CSV/JSON (#6836); результати часткових відмов на рядок                                                                |
+| `/api/provider-nodes*`                  | різноманітні              | Керування вузлом провайдера                                                                                                                                                      |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Спеціальні моделі та перевизначення для кожної моделі (додавання, оновлення, hide/show, видалення)                                                                               |
+| `/api/provider-models/validate-and-add` | POST                      | Автентифікація за допомогою керування, перевірка суворого з’єднання за бажанням і атомарна реєстрація спеціальної моделі; див. [Перевірка моделі](../guides/MODEL-VALIDATION.md) |
 
-Для синхронізованих/імпортованих моделей `PUT /api/provider-models` приймає `provider`, `modelId` і
-`maxOutputTokenOverride`: додатне ціле число встановлює ручне обмеження кількості вихідних токенів, а `null`
-очищає його та відновлює значення за замовчуванням. `GET /api/provider-models?provider=<provider>` повертає ці
-значення в `modelOutputOverrides`, зокрема для моделей без рядка користувацької моделі. Перевизначення використовує
-можливість виконання `max_output_tokens` і зберігається після повторної синхронізації моделі. Сторінка OpenAI-сумісного
-провайдера пропонує такі самі елементи керування для редагування/очищення та позначає моделі з явною підтримкою vision.
+Для моделей synced/imported `PUT /api/provider-models` приймає `provider`, `modelId` і `maxOutputTokenOverride`: додатне ціле число встановлює обмеження ручного виводу токенів, а `null` очищає його, щоб відновити значення за замовчуванням. `GET /api/provider-models?provider=<provider>` повертає ці значення в `modelOutputOverrides`, включаючи моделі без рядка спеціальної моделі. Заміна використовує можливість виконання `max_output_tokens` і зберігається після повторної синхронізації моделі. Сторінка постачальника, сумісного з OpenAI, пропонує ті самі елементи керування edit/clear і позначає моделі з явною підтримкою зору.
 
-На сумісному вузлі провайдера шляхи запису (`POST`, `PUT`, `PATCH`, `DELETE` і
-`/api/provider-models/validate-and-add`) зберігають ідентифікатор моделі як базовий ідентифікатор upstream: ідентифікатор,
-вставлений зі списку з префіксом, очищається від будь-якого початкового ланцюжка префіксів самого вузла, а
-відповіді повертають збережений ідентифікатор. Ідентифікатори канонічних провайдерів із косими рисками (наприклад, `nvidia/nemotron-…`)
-зберігаються без змін. `/v1/models` ніколи не повертає ідентифікатор виду `<prefix>/<prefix>/<model>` із повтореним префіксом.
+На сумісному вузлі постачальника шляхи запису (`POST`, `PUT`, `PATCH`, `DELETE` і `/api/provider-models/validate-and-add`) зберігають ідентифікатор моделі як чистий ідентифікатор висхідного потоку: ідентифікатор, вставлений зі списку з префіксом, має будь-який провідний стек власного префікса вузла згорнутий, а відповіді повторюють збережений ідентифікатор. Розрізнені ідентифікатори канонічних постачальників (наприклад, `nvidia/nemotron-…`) зберігаються дослівно. `/v1/models` ніколи не видає зібраний ідентифікатор `<prefix>/<prefix>/<model>`.
 
-Користувацькі вузли Chat Completions адаптують явні відмови від міркування до upstream-бекенду. Успішний тест підключення автоматично вибирає елементи керування chat-template для кожного точного ідентифікатора моделі,
-чий запис у `/models` підтверджує розпізнане значення `owned_by`: `vllm`, `sglang` або `llamacpp`.
-Прозорі OpenAI-сумісні обгортки можуть зберігати оригінальний запис моделі у вкладеному
-об’єкті `openai`; виявлення проходить крізь щонайбільше три такі оболонки. Для моделей із відсутнім,
-невідомим або суперечливим значенням власника зберігається звичайна поведінка OpenAI. Виявлення повторно використовує наявний запит до каталогу,
-не генерує токенів завершення та стає недійсним, коли змінюється кінцева точка підключення.
+Вузли користувацьких завершень чату адаптують відмову від чітких міркувань до базової версії. Успішний тест з’єднання автоматично вибирає елементи керування шаблону чату для кожної конкретної моделі ID чий запис `/models` підтверджує розпізнане значення `owned_by` : `vllm`, `sglang` або `llamacpp`. Прозорі оболонки, сумісні з OpenAI, можуть зберігати оригінальний запис моделі всередині вкладеного об’єкта `openai` ; виявлення слідує до трьох таких конвертів. Моделі з відсутнім, невідомим або конфліктним правом власності зберігають звичайну поведінку OpenAI. Виявлення повторно використовує наявний запит до каталогу, не генерує маркерів завершення та стає недійсним, коли змінюється кінцева точка підключення.
 
-Щоб зафіксувати поведінку для бекенду, який не надає ці метадані, використовуйте наявний API часткового оновлення провайдера:
+Щоб закріпити поведінку для серверної частини, яка не розкриває ці метадані, скористайтеся наявним частковим оновленням провайдера API:
 
 ```json
 {
@@ -1298,99 +1261,91 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 }
 ```
 
-Надішліть це тіло за допомогою `PUT /api/providers/<connection-id>`. Для цього підключення явне
-зусилля міркування `none` надсилається як `chat_template_kwargs.thinking=false` і
-`chat_template_kwargs.enable_thinking=false`. Явні власні значення шаблону залишаються пріоритетними,
-якщо лише правило на стороні сервера не вимагає певного зусилля. Параметр застосовується лише тоді, коли користувацьке OpenAI-сумісне підключення диспетчеризує тіло Chat Completions; запити Responses і звичайні провайдери зберігають власну форму запиту. Установіть `reasoningControl` у `openai`, щоб примусово передавати звичайний OpenAI `reasoning_effort`, або пропустіть його / установіть у `null`, щоб використовувати автоматичне виявлення.
+Надішліть це тіло за допомогою `PUT /api/providers/<connection-id>`. У такому з’єднанні явні міркування `none` надсилаються як `chat_template_kwargs.thinking=false` і `chat_template_kwargs.enable_thinking=false`. Явні власні значення шаблону залишаються авторитетними, якщо правило міркування на стороні сервера не вимагає зусиль. Параметр застосовується лише тоді, коли спеціальне з’єднання, сумісне з OpenAI, надсилає тіло завершення чату; Запити-відповіді та звичайні постачальники зберігають свою рідну форму запиту. Встановіть для `reasoningControl` `openai`, щоб примусово проходити звичайний OpenAI `reasoning_effort`, або опустіть для it/set значення `null` щоб використовувати автоматичне виявлення.
 
-Запити класифікатора Claude Code в автоматичному режимі типово вимикають власне міркування, якщо не містять явних елементів керування міркуванням. Виявлення використовує системний маркер класифікатора у запитах у форматі Claude, а не назви моделей чи обмеження завершення. Явні елементи керування в тілі запиту, підтримувані заголовки зусилля/міркування, правила маршрутизації та визначене зусилля моделі зберігають наявний пріоритет. Обидва етапи класифікатора зберігають свої підказки, обмеження завершення, послідовності зупинки та фактичні вердикти дозволів upstream; другий етап усе ще може вивести запитане ним видиме міркування як звичайний текст.
+Класифікатор автоматичного режиму коду Claude запитує вимкнути нативне мислення за замовчуванням, якщо воно не містить явних елементів керування аргументацією. Виявлення використовує системний маркер класифікатора в запитах у форматі Claude, а не назви моделей чи обмеження завершення. Явні елементи керування тілом, підтримувані заголовки effort/thinking, правила маршрутизації та дозволена робота моделі зберігають існуючий пріоритет. Обидва етапи класифікатора зберігають свої підказки, ліміти завершення, послідовності зупинок і вердикти реальних дозволів висхідного потоку; друга стадія все ще може створювати необхідне видиме міркування як звичайний текст.
 
-### Потоки OAuth
+### OAuth потоки
 
-| Кінцева точка                    | Метод | Опис                             |
-| -------------------------------- | ----- | -------------------------------- |
-| `/api/oauth/[provider]/[action]` | Різні | OAuth для конкретного провайдера |
+| Кінцева точка                    | метод        | опис                                |
+| -------------------------------- | ------------ | ----------------------------------- |
+| `/api/oauth/[provider]/[action]` | різноманітні | OAuth для конкретного постачальника |
 
 ### Маршрутизація та конфігурація
 
-| Кінцева точка         | Метод    | Опис                                  |
-| --------------------- | -------- | ------------------------------------- |
-| `/api/models`         | GET/PUT  | Список моделей / оновлення псевдоніма |
-| `/api/models/alias`   | GET/POST | Псевдоніми моделей                    |
-| `/api/models/catalog` | GET      | Усі моделі за провайдером і типом     |
-| `/api/combos*`        | Різні    | Керування комбінаціями                |
-| `/api/keys*`          | Різні    | Керування ключами API                 |
-| `/api/pricing`        | GET      | Ціни моделей                          |
+| Кінцева точка         | метод        | опис                                   |
+| --------------------- | ------------ | -------------------------------------- |
+| `/api/models`         | GET/PUT      | Оновлення списку моделей / псевдонімів |
+| `/api/models/alias`   | GET/POST     | Псевдоніми моделей                     |
+| `/api/models/catalog` | GET          | Всі моделі за типом провайдера +       |
+| `/api/combos*`        | різноманітні | Комбінований менеджмент                |
+| `/api/keys*`          | різноманітні | управління ключами API                 |
+| `/api/pricing`        | GET          | Модельне ціноутворення                 |
 
-#### Походження обмежень моделі
+#### Граничне походження моделі
 
-`GET /api/models?withLimits=1` (також `true`; `0`/`false` або пропуск цього параметра залишає типове
-тіло відповіді без змін) додає `contextWindow`, `maxInputTokens`, `maxOutputTokens` і об’єкт
-`capsSource` до кожного рядка моделі. `capsSource` називає правило, яке надало кожне обмеження,
-тому неочікуване обмеження (наприклад, 128k для моделі на 1M) можна відстежити до його джерела. Визначені
-значення є тими самими, які використовує маршрутизація; цей прапорець лише додає поля й ніколи не змінює значення.
-Будь-яке інше значення `withLimits` відхиляється з кодом `400`.
+`GET /api/models?withLimits=1` (також `true`; `0`/`false` або його опущення зберігає корисне навантаження за замовчуванням незмінним) додає `contextWindow`, `maxInputTokens`, `maxOutputTokens` і об’єкт `capsSource` до кожного рядка моделі. `capsSource` називає правило, яке встановлює кожне обмеження, тому дивовижне обмеження (наприклад, 128k на моделі 1M) можна простежити до його походження. Вирішені значення є тими самими, що використовуються в маршрутизації; прапор лише додає поля і ніколи не змінює значення. Будь-яке інше значення `withLimits` відхиляється за допомогою `400`.
 
-| Значення `capsSource`                        | Походження                                                                    |
-| -------------------------------------------- | ----------------------------------------------------------------------------- |
-| `override:context`                           | Збережене перевизначення вікна контексту (`model_context_overrides`)          |
-| `override:max_input` / `override:max_output` | Збережене перевизначення можливостей `max_input_tokens` / `max_output_tokens` |
-| `static-authoritative:<provider>/<model>`    | Статична авторитетна таблиця вікон контексту                                  |
-| `synced:<provider>/<model>`                  | Синхронізований рядок можливостей models.dev                                  |
-| `registry:<provider>/<model>`                | Запис у реєстрі провайдера                                                    |
-| `spec:<model>`                               | Статична специфікація моделі                                                  |
-| Префікс `effort-base:`                       | Рядок, запозичений із базової моделі варіанта із суфіксом зусилля             |
-| `none`                                       | Жодне джерело не оголошує обмеження (значення дорівнює `null`)                |
+| значення `capsSource`                        | Походження                                                                   |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `override:context`                           | Постійне перевизначення контекстного вікна (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | Перевизначення постійної можливості `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Статична авторитетна контекстно-віконна таблиця                              |
+| `synced:<provider>/<model>`                  | рядок синхронізованих можливостей models.dev                                 |
+| `registry:<provider>/<model>`                | Запис у реєстрі постачальників                                               |
+| `spec:<model>`                               | Статична модель спец                                                         |
+| префікс `effort-base:`                       | Ряд, запозичений з базової моделі варіанта з суфіксом зусилля                |
+| `none`                                       | Жодне джерело не оголошує обмеження (значення `null`)                        |
 
-Реалізація: `getResolvedModelCapabilitiesWithLimitSources()` у `src/lib/modelCapabilities.ts`
-та ланцюжки пріоритетів у `src/lib/modelCapabilityLimits.ts`.
+Реалізація: `getResolvedModelCapabilitiesWithLimitSources()` в `src/lib/modelCapabilities.ts` і ланцюжки пріоритету в `src/lib/modelCapabilityLimits.ts`.
 
 ### Використання та аналітика
 
-| Endpoint                         | Метод           | Опис                                                                                                                                                                                                                                                                                                                                    |
-| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Історія використання                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/logs`                | GET             | Журнали використання                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/request-logs`        | GET             | Журнали на рівні запитів                                                                                                                                                                                                                                                                                                                |
-| `/api/usage/[connectionId]`      | GET             | Використання для окремого підключення                                                                                                                                                                                                                                                                                                   |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Ліміти бюджетів токенів для окремих ключів API                                                                                                                                                                                                                                                                                          |
-| `/api/usage/model-latency-stats` | GET             | Зведена ковзна статистика затримки для кожного постачальника/моделі (середнє/p50/p95/p99, показник успішності); фільтри: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                |
-| `/api/usage/cache-health`        | GET             | Зведення стану кешу промптів за `call_logs` — співвідношення записів/читань, розподіл розміру записів p50/p90/p99, концентрація великих записів, розподіл за моделями та висновок `healthy`/`degraded`/`thrash`/`no-data`; параметри запиту `range` (`1h`\|`24h`\|`7d`\|`30d`, за замовчуванням `24h`) і необов’язковий `model` (#8827) |
+| Кінцева точка                    | метод           | опис                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Історія використання                                                                                                                                                                                                                                                                                                                          |
+| `/api/usage/logs`                | GET             | Журнали використання                                                                                                                                                                                                                                                                                                                          |
+| `/api/usage/request-logs`        | GET             | Журнали на рівні запиту                                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/[connectionId]`      | GET             | Використання кожного підключення                                                                                                                                                                                                                                                                                                              |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Бюджети ліміту токенів на ключ API                                                                                                                                                                                                                                                                                                            |
+| `/api/usage/model-latency-stats` | GET             | Сукупний показник затримки per-provider/model (avg/p50/p95/p99, показник успіху); фільтри: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                    |
+| `/api/usage/cache-health`        | GET             | Підсумок стану швидкого кешу щодо співвідношення `call_logs` — write/read, розподілу розміру запису p50/p90/p99, концентрації інтенсивного запису, розподілу за моделлю та вердикту `healthy`/`degraded`/`thrash`/`no-data` ; параметри запиту `range` (`1h`\| `24h`\| `7d`\| `30d`, за замовчуванням `24h`) і необов'язковий `model` (#8827) |
 
-### Дозволи ключа API
+### ключові дозволи API
 
-`PATCH /api/keys/{id}` оновлює дозволи наявного ключа. Як і кожен маршрут `/api/keys*`, він потребує авторизації керування (див. [Аутентифікація керування](../guides/MANAGEMENT-AUTH.md)), а не ключа для виконання запитів. Надсилайте лише поля, які потрібно змінити; запит без жодного з них відхиляється з повідомленням `No valid fields to update`. Прийнятні поля визначаються в `updateKeyPermissionsSchema` у файлі `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` оновлює дозволи існуючого ключа. Як і кожен маршрут `/api/keys*` він потребує авторизації адміністратора (див. [Автентифікація керування](../guides/MANAGEMENT-AUTH.md) ), а не ключа висновку. Надсилайте лише ті поля, які потрібно змінити; запит із жодним із них відхиляється за допомогою `No valid fields to update`. Прийнятні поля визначені `updateKeyPermissionsSchema` у `src/shared/validation/schemas/keys.ts`.
 
-| Поле                                        | Тип                                                              | Примітки                                                                                                                                  |
-| ------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | рядок, 1–200 символів                                            |                                                                                                                                           |
-| `isActive`                                  | логічне значення                                                 |                                                                                                                                           |
-| `isBanned`                                  | логічне значення                                                 |                                                                                                                                           |
-| `expiresAt`                                 | дата й час у форматі ISO 8601 або `null`                         | `null` очищає термін дії                                                                                                                  |
-| `modelAccessMode`                           | `all` \| `restricted`                                            | `allowedModels` має бути порожнім, якщо режим — `all`                                                                                     |
-| `allowedModels`, `blockedModels`            | масив рядків, до 1000                                            |                                                                                                                                           |
-| `allowedCombos`                             | масив рядків, до 500                                             | Визначає, які комбінації може викликати ключ; прямі моделі регулюються параметрами `modelAccessMode` / `allowedModels`                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                            | `allowedConnections` має бути непорожнім, якщо встановлено `restricted`, і порожнім, якщо встановлено `all`                               |
-| `allowedConnections`                        | масив UUID, до 100                                               |                                                                                                                                           |
-| `allowAutoCombos`                           | логічне значення                                                 | `false` відхиляє запити до моделей `auto/*` із цим ключем; ключі, для яких цей параметр ніколи не встановлювався, дозволені               |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                    | Що `GET /v1/models` перелічує для цього ключа (лише комбінації, лише моделі або і те, і інше); це не змінює те, що ключ може викликати    |
-| `forcedModel`                               | рядок до 300 символів або `null`                                 | Перенаправляє запити чату до цієї моделі/комбінації, випереджаючи `X-Route-Model` і `body.model`; обмеження ключа все одно застосовуються |
-| `noLog`, `autoResolve`                      | логічне значення                                                 |                                                                                                                                           |
-| `throttleDelayMs`                           | ціле число, 0–300000                                             |                                                                                                                                           |
-| `maxSessions`                               | ціле число, 0–10000                                              |                                                                                                                                           |
-| `rateLimits`                                | масив `{ limit, window }` (додатні цілі числа, до 50) або `null` | `null` очищає обмеження                                                                                                                   |
-| `accessSchedule`                            | об’єкт розкладу або `null`                                       | `null` очищає розклад                                                                                                                     |
-| `scopes`                                    | масив рядків, до 32                                              |                                                                                                                                           |
-| `allowedEndpoints`                          | масив рядків, до 20                                              |                                                                                                                                           |
-| `streamDefaultMode`                         | `legacy` \| `json`                                               |                                                                                                                                           |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                             | Див. [Обхід кешу для ключа](#per-key-cache-bypass)                                                                                        |
-| `compressionEnabled`                        | логічне значення                                                 |                                                                                                                                           |
-| `codexServiceMode`                          | один із режимів сервісу Codex                                    |                                                                                                                                           |
-| `disableNonPublicModels`                    | boolean                                                          |                                                                                                                                           |
-| `allowUsageCommand`                         | boolean                                                          |                                                                                                                                           |
-| `usageLimitEnabled`                         | boolean                                                          |                                                                                                                                           |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                            |                                                                                                                                           |
-| `chaosModeEnabled`                          | boolean                                                          |                                                                                                                                           |
+| Поле                                        | Тип                                                             | Примітки                                                                                                                                                                                                                                                                          |
+| ------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | рядок, 1-200 символів                                           |                                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601 datetime або `null`                                    | `null` очищає термін дії                                                                                                                                                                                                                                                          |
+| `modelAccessMode`                           | `all` \| `restricted`                                           | `allowedModels` має бути порожнім, якщо режимом є `all`                                                                                                                                                                                                                           |
+| `allowedModels`, `blockedModels`            | масив рядків, до 1000                                           |                                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | масив рядків, до 500                                            | Ворота, комбінації яких може викликати ключ; прямі моделі регулюються `modelAccessMode` / `allowedModels`                                                                                                                                                                         |
+| `connectionAccessMode`                      | `all` \| `restricted`                                           | `allowedConnections` має бути не порожнім, коли `restricted` і порожнім, коли `all`                                                                                                                                                                                               |
+| `allowedConnections`                        | масив UUIDs, до 100                                             |                                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | логічний                                                        | `false` відхиляє запити для моделей `auto/*` із цим ключем; ключі, які ніколи його не встановлюють, дозволені                                                                                                                                                                     |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                   | Що перераховує `GET /v1/models` для цього ключа (лише комбо, лише моделі або обидва); це не змінює те, що може викликати ключ                                                                                                                                                     |
+| `forcedModel`                               | рядок до 300 символів, або `null`                               | Направляє запити на чат до цього model/combo через `X-Route-Model` і `body.model`; обмеження ключа все ще застосовуються                                                                                                                                                          |
+| `noLog`, `autoResolve`                      | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | ціле число, 0-300000                                            |                                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | ціле число, 0-10000                                             |                                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | масив `{ limit, window }` (натуральних чисел, до 50) або `null` | `null` розчищає межі                                                                                                                                                                                                                                                              |
+| `accessSchedule`                            | об'єкт розкладу або `null`                                      | `null` очищає розклад                                                                                                                                                                                                                                                             |
+| `scopes`                                    | масив рядків, до 32                                             |                                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | масив рядків, до 20                                             |                                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                              |                                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                            | Див. [Обхід кешу для кожного ключа](#per-key-cache-bypass)                                                                                                                                                                                                                        |
+| `compressionEnabled`                        | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | один із режимів обслуговування Codex                            |                                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | логічний                                                        |                                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | число >= 0 або `null`                                           |                                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | число >= 0 або `null`                                           | Поступальний 5-годинний бюджет USD, який застосовується як щоденні та тижневі ліміти (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` — це коли старіють найстаріші витрати у вікні, що може залишити ключ, який значно перевищує ліміт, усе ще заблокованим. |
+| `chaosModeEnabled`                          | логічний                                                        |                                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1401,163 +1356,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Налаштування
 
-| Endpoint                              | Method        | Description                                                                                                                                                                                                                                                                              |
-| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Загальні налаштування. Ключі політики безпеки (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) потребують `currentPassword` і облікових даних оператора — ключі API та токени `oma_` отримують `403`; кожна зміна потребує області доступу токена `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Конфігурація мережевого проксі                                                                                                                                                                                                                                                           |
-| `/api/settings/proxy/test`            | POST          | Перевірка підключення до проксі                                                                                                                                                                                                                                                          |
-| `/api/settings/ip-filter`             | GET/PUT       | Список дозволених/заблокованих IP-адрес                                                                                                                                                                                                                                                  |
-| `/api/settings/thinking-budget`       | GET/PUT       | Режим переписування **запиту** на обдумування/міркування (passthrough / auto-strip / custom / adaptive). Не залежить від стиснення. Див. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                             |
-| `/api/settings/system-prompt`         | GET/PUT       | Глобальний системний промпт                                                                                                                                                                                                                                                              |
-| `/api/settings/compression`           | GET/PUT       | Глобальна конфігурація стиснення                                                                                                                                                                                                                                                         |
-| `/api/settings/purge-request-history` | POST          | Очищення рядків журналу запитів і локальних артефактів журналу викликів                                                                                                                                                                                                                  |
+| Кінцева точка                         | метод         | опис                                                                                                                                                                                                                                                                                       |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/settings`                       | GET/PUT/PATCH | Загальні налаштування. Ключі політики безпеки (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) потребують `currentPassword` і облікові дані оператора — API ключі та маркери `oma_` отримують `403`; кожна мутація потребує області маркера доступу `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | Конфігурація мережевого проксі                                                                                                                                                                                                                                                             |
+| `/api/settings/proxy/test`            | POST          | Тест проксі-з'єднання                                                                                                                                                                                                                                                                      |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                     |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** запит** режим перезапису (прохідний / автозачистка / індивідуальний / адаптивний). Незалежний від стиснення. Дивіться [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                             |
+| `/api/settings/system-prompt`         | GET/PUT       | Глобальна системна підказка                                                                                                                                                                                                                                                                |
+| `/api/settings/compression`           | GET/PUT       | Глобальна конфігурація стиснення                                                                                                                                                                                                                                                           |
+| `/api/settings/purge-request-history` | POST          | Очистити рядки журналу запитів і локальні артефакти журналу викликів                                                                                                                                                                                                                       |
 
 ### Контекст і стиснення
 
-| Endpoint                               | Method         | Description                                                                                 |
-| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Попередній перегляд стиснення off/lite/standard/aggressive/ultra/RTK/stacked                |
-| `/api/compression/language-packs`      | GET            | Список доступних мовних пакетів Caveman                                                     |
-| `/api/compression/rules`               | GET            | Список метаданих правил Caveman                                                             |
-| `/api/context/caveman/config`          | GET/PUT        | Псевдонім налаштувань, специфічних для Caveman                                              |
-| `/api/context/rtk/config`              | GET/PUT        | Налаштування, специфічні для RTK, зокрема власні фільтри та збереження необробленого виводу |
-| `/api/context/rtk/filters`             | GET            | Каталог фільтрів RTK і діагностика власних фільтрів                                         |
-| `/api/context/rtk/test`                | POST           | Запуск попереднього перегляду/тесту RTK для текстового payload                              |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Читання збереженого редагованого необробленого виводу за ідентифікатором вказівника         |
-| `/api/context/combos`                  | GET/POST       | Список/створення комбінацій стиснення                                                       |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Перегляд/оновлення/видалення відомостей про комбінацію стиснення                            |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Призначення комбінацій стиснення комбінаціям маршрутизації                                  |
-| `/api/context/analytics`               | GET            | Псевдонім аналітики стиснення                                                               |
+| Кінцева точка                          | метод          | опис                                                                                |
+| -------------------------------------- | -------------- | ----------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Попередній перегляд стиснення off/lite/standard/aggressive/ultra/RTK/stacked        |
+| `/api/compression/language-packs`      | GET            | Список доступних мовних пакетів Caveman                                             |
+| `/api/compression/rules`               | GET            | Перелік метаданих правил печерної людини                                            |
+| `/api/context/caveman/config`          | GET/PUT        | Псевдонім налаштувань печерної людини                                               |
+| `/api/context/rtk/config`              | GET/PUT        | Спеціальні параметри RTK, включаючи спеціальні фільтри та збереження вихідних даних |
+| `/api/context/rtk/filters`             | GET            | каталог фільтрів RTK та діагностика спеціальних фільтрів                            |
+| `/api/context/rtk/test`                | POST           | Запустіть RTK preview/test проти текстового корисного навантаження                  |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Читання збережених відредагованих вихідних даних за ідентифікатором покажчика       |
+| `/api/context/combos`                  | GET/POST       | Комбінація стиснення list/create                                                    |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Комбінація стиснення detail/update/delete                                           |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Призначте комбо стиснення до комбо маршрутизації                                    |
+| `/api/context/analytics`               | GET            | Псевдонім аналітики стиснення                                                       |
 
 ### Моніторинг
 
-| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Відстеження активних сеансів                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/rate-limits`                   | GET        | Обмеження частоти запитів для кожного облікового запису                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/monitoring/health`             | GET        | Перевірка працездатності + зведені дані постачальників (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Представлення керування містить `credentialHealth`: скаляри кешу перевірок, `failedConnections`, якщо `failed>0`, і `staleDbNonOkCount` (липкий `test_status` SQLite, а не показник). Див. [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Статистика кешу / очищення                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/modality-bridge/stats`         | GET        | Збережені в пам’яті `attempts`, успішні операції/`bridged`, помилки, звернення до кешу, `totalLatencyMs`, `latencySamples`, `averageLatencyMs`, виражене у вибірках, і час останнього використання (скидається після перезапуску; автентифікація керування)                                                                                                                                                                   |
-| `/api/modality-bridge/video/runtime` | GET        | Сувора перевірка довіреного loopback перед автентифікацією керування/перевіркою; санітизовані дані про доступність і версії FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                         |
-| `/api/modality-bridge/video/extract` | POST       | Внутрішній автентифікований брокер байтів із довіреним loopback; вхідні дані до 50 MiB, обмежена черга/вивід до 32 MiB, `503` за недостатньої місткості, `499` у разі розриву з’єднання, `504` після завершення крайнього терміну; не є загальнодоступним API завантаження                                                                                                                                                    |
+| Кінцева точка                        | метод      | опис                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Відстеження активної сесії                                                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/rate-limits`                   | GET        | Обмеження ставок для кожного облікового запису                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/monitoring/health`             | GET        | Перевірка працездатності постачальника + (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Перегляд керування включає `credentialHealth`: скаляри зондового кешу, `failedConnections` коли `failed>0`, і `staleDbNonOkCount` (SQLite sticky `test_status`, а не датчик). Перегляньте [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Статистика кешу / очищення                                                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, успіхи/`bridged`, помилки, звернення до кешу, `totalLatencyMs`, `latencySamples`, `averageLatencyMs`, деномінований у вибірці, і час останнього використання (скидання після перезапуску; автентифікація керування)                                                                                                                                                                      |
+| `/api/modality-bridge/video/runtime` | GET        | Сувора перевірка довіреної петлі перед керуванням auth/probe; дезінфекційна доступність і версії FFmpeg/ffprobe (без магазину)                                                                                                                                                                                                                                                                                 |
+| `/api/modality-bridge/video/extract` | POST       | Внутрішній автентифікований байтовий посередник довіреної петлі; 50 MiB вхід, обмежений queue/32 MiB вихід, `503` ємність, `499` відключення, `504` крайній термін; не є публічним завантаженням API                                                                                                                                                                                                           |
 
-### Резервне копіювання та експорт/імпорт
+### Деталізація кадрів відео
 
-| Endpoint                    | Method | Description                                                                                  |
-| --------------------------- | ------ | -------------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Список доступних резервних копій                                                             |
-| `/api/db-backups`           | PUT    | Створення резервної копії вручну                                                             |
-| `/api/db-backups`           | POST   | Відновлення з певної резервної копії                                                         |
-| `/api/db-backups`           | PATCH  | Збереження параметрів зберігання резервних копій (лише для оператора)                        |
-| `/api/db-backups`           | DELETE | Очищення збережених резервних копій відповідно до параметрів зберігання (лише для оператора) |
-| `/api/db-backups/export`    | GET    | Завантаження бази даних як файлу .sqlite                                                     |
-| `/api/db-backups/import`    | POST   | Завантаження файлу .sqlite для заміни бази даних (`?dryRun=true` лише перевіряє)             |
-| `/api/db-backups/exportAll` | GET    | Завантаження повної резервної копії як архіву .tar.gz                                        |
+`GET /api/v1/video-bridge/drilldown` зчитує пов’язаний із орендарем непрозорий дескриптор, який повертається в `x-omniroute-video-drilldown` після явно погодженого запиту Video Bridge. Для читання та `DELETE` завжди потрібен дійсний ключ API і незалежний дозвіл `modalityBridgeVideoDrilldownRemoteEnabled` від оператора. Збереження виробництва додатково вимагає `modalityBridgeVideoDrilldownEnabled` і суворого `drilldown: true` для кожної частини. Якщо ключ має непорожній список дозволених кінцевих точок, він повинен містити `video` як для GET, так і для DELETE, незалежно від того, чи використовує абонент `/v1` чи `/api/v1`.
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` і `/api/settings/export-json` передають
-усі збережені облікові дані, тому для них потрібен сеанс панелі керування або локальний CLI (чи вимкнений
-вхід). Ключі API будь-якої області дії та маркери доступу `oma_` отримують `403`. Відновлення мають те саме
-обмеження: `POST /api/db-backups/import` (включно з `dryRun=true`), `POST /api/db-backups` (відновлення
-за ідентифікатором) і `POST /api/settings/import-json` замінюють активну базу даних або налаштування, тому
-облікові дані машини також отримують `403`; `omniroute sync import` передає облікові дані локального CLI. Так
-само працюють `DELETE /api/db-backups` (очищення збережених резервних копій) і `PATCH /api/db-backups` (параметри
-зберігання: збережені значення визначають автоматичне очищення після кожного резервного копіювання). Перегляд
-(`GET`) і створення резервної копії вручну (`PUT`) використовують звичайну автентифікацію для керування.
+запит GET : потрібно `handle`; необов’язковий `variant` (`preview`, `standard`, `detail`), `limit` (1–8; застарілий `frames` приймається, але не може поєднуватися з `limit`), `page` з нульовою базою та `start`/`end` секунди. Якщо задано обидві межі фокусу, `end` має бути більше, ніж `start`. ключі запиту Duplicate/unknown відхилено. Успішні відповіді містять `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` та необов’язковий `focusWindow`; JSON без зберігання обмежено 32 MiB, включаючи Base64. Надмірний вихід повертає 413; запросити менше кадрів.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` повертає `{ "removed": 0|1 }`. Невідомий, прострочений і перехресний ключ GETs є нерозрізненими відповідями 404; перехресна клавіша DELETE не може видалити запис власника. Вимкнений доступ повертає 403, автентифікація missing/invalid 401, недійсні запити 400, скасування 499 і тимчасові помилки 503. Дескриптори є локальними для процесу, закінчуються через десять хвилин і не виживають після перезавантаження. Нові дескриптори використовують `v1.` плюс 32-байтовий випадковий маркер Base64URL ; зберігаються лише хеші маркерів. Застарілі 64-шістнадцяткові маркери залишаються синтаксично читабельними для сумісності. Перегляньте [огорожі Video Bridge,](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) щоб дізнатися про згоду, квоти та деталі похідних варіантів.
+
+### Резервне копіювання та Export/Import
+
+| Кінцева точка               | метод  | опис                                                                             |
+| --------------------------- | ------ | -------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Список доступних резервних копій                                                 |
+| `/api/db-backups`           | PUT    | Створіть резервну копію вручну                                                   |
+| `/api/db-backups`           | POST   | Відновити з певної резервної копії                                               |
+| `/api/db-backups`           | PATCH  | Зберегти налаштування збереження резервної копії (лише для оператора)            |
+| `/api/db-backups`           | DELETE | Вирізати збережені резервні копії до налаштувань збереження (лише для оператора) |
+| `/api/db-backups/export`    | GET    | Завантажте базу даних як файл .sqlite                                            |
+| `/api/db-backups/import`    | POST   | Завантажте файл .sqlite для заміни бази даних (лише перевірка `?dryRun=true` )   |
+| `/api/db-backups/exportAll` | GET    | Завантажте повну резервну копію як архів .tar.gz                                 |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` і `/api/settings/export-json` передають усі збережені облікові дані, тому їм потрібен сеанс інформаційної панелі або локальний CLI (або вхід вимкнено). ключі API будь-якої області та маркери доступу `oma_` отримують `403`. Відновлення мають ті самі межі: `POST /api/db-backups/import` (включаючи `dryRun=true` ), `POST /api/db-backups` (відновлення за ідентифікатором) і `POST /api/settings/import-json` замінюють поточну базу даних або налаштування, тому облікові дані машини також отримують `403` ; `omniroute sync import` надсилає локальні облікові дані CLI. Так само як і `DELETE /api/db-backups` (вирізати збережені резервні копії) і `PATCH /api/db-backups` (параметри збереження: збережені значення керують автоматичним видаленням після кожного резервного копіювання). Перелік (`GET`) і створення резервної копії вручну (`PUT`) зберігають звичайну авторизацію керування.
 
 ### Хмарна синхронізація
 
-| Endpoint               | Method  | Description                    |
-| ---------------------- | ------- | ------------------------------ |
-| `/api/sync/cloud`      | Various | Операції хмарної синхронізації |
-| `/api/sync/initialize` | POST    | Ініціалізація синхронізації    |
-| `/api/cloud/*`         | Various | Керування хмарою               |
+| Кінцева точка          | метод        | опис                           |
+| ---------------------- | ------------ | ------------------------------ |
+| `/api/sync/cloud`      | різноманітні | Операції хмарної синхронізації |
+| `/api/sync/initialize` | POST         | Ініціалізація синхронізації    |
+| `/api/cloud/*`         | різноманітні | Управління хмарою              |
 
 ### Тунелі
 
-| Endpoint                   | Method | Description                                                                        |
-| -------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | Перегляд стану встановлення та роботи Cloudflare Quick Tunnel для панелі керування |
-| `/api/tunnels/cloudflared` | POST   | Увімкнення або вимкнення Cloudflare Quick Tunnel (`action=enable/disable`)         |
-| `/api/tunnels/ngrok`       | GET    | Перегляд стану роботи тунелю ngrok для панелі керування                            |
-| `/api/tunnels/ngrok`       | POST   | Увімкнення або вимкнення тунелю ngrok (`action=enable/disable`)                    |
+| Кінцева точка              | метод | опис                                                                            |
+| -------------------------- | ----- | ------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET   | Читайте статус Cloudflare Quick Tunnel install/runtime для інформаційної панелі |
+| `/api/tunnels/cloudflared` | POST  | Увімкнути або вимкнути швидкий тунель Cloudflare (`action=enable/disable`)      |
+| `/api/tunnels/ngrok`       | GET   | Читайте статус виконання тунелю ngrok для інформаційної панелі                  |
+| `/api/tunnels/ngrok`       | POST  | Увімкнути або вимкнути тунель ngrok (`action=enable/disable`)                   |
 
 ### Інструменти CLI
 
-| Endpoint                           | Method | Description         |
-| ---------------------------------- | ------ | ------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Стан Claude CLI     |
-| `/api/cli-tools/codex-settings`    | GET    | Стан Codex CLI      |
-| `/api/cli-tools/droid-settings`    | GET    | Стан Droid CLI      |
-| `/api/cli-tools/openclaw-settings` | GET    | Стан OpenClaw CLI   |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Стан загального CLI |
+| Кінцева точка                      | метод | опис                              |
+| ---------------------------------- | ----- | --------------------------------- |
+| `/api/cli-tools/claude-settings`   | GET   | Claude CLI статус                 |
+| `/api/cli-tools/codex-settings`    | GET   | Codex CLI статус                  |
+| `/api/cli-tools/droid-settings`    | GET   | Статус Droid CLI                  |
+| `/api/cli-tools/openclaw-settings` | GET   | OpenClaw CLI статус               |
+| `/api/cli-tools/runtime/[toolId]`  | GET   | Загальне середовище виконання CLI |
 
-Відповіді CLI містять: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+Відповіді CLI включають: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### Агенти ACP
 
-| Endpoint          | Method | Description                                                    |
-| ----------------- | ------ | -------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Список усіх виявлених агентів (вбудованих і власних) зі станом |
-| `/api/acp/agents` | POST   | Додавання власного агента або оновлення кешу виявлення         |
-| `/api/acp/agents` | DELETE | Видалення власного агента за параметром запиту `id`            |
+| Кінцева точка     | метод  | опис                                                                 |
+| ----------------- | ------ | -------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Перелік усіх виявлених агентів (вбудована спеціальна + ) із статусом |
+| `/api/acp/agents` | POST   | Додайте спеціальний агент або оновіть кеш виявлення                  |
+| `/api/acp/agents` | DELETE | Видаліть спеціальний агент за параметром запиту `id`                 |
 
-Відповідь GET містить `agents[]` (id, name, binary, version, installed, protocol, isCustom) і `summary` (total, installed, notFound, builtIn, custom).
+Відповідь GET включає `agents[]` (ідентифікатор, ім’я, двійковий файл, версія, встановлений, протокол, isCustom) і `summary` (загальний, встановлений, notFound, builtIn, налаштований).
 
-### Відмовостійкість і обмеження швидкості
+### Стійкість і обмеження швидкості
 
-| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| --------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Отримати/оновити параметри черги запитів, періоду охолодження підключення, розмикача провайдера та очікування                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/resilience/reset`           | POST      | Скинути розмикачі провайдерів                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/resilience/model-cooldowns` | GET       | Перелік активних блокувань для кожної комбінації (провайдер, підключення, модель), відсортований за часом, що залишився                                                                                                                                                                                                                                                                                                                                                |
-| `/api/resilience/model-cooldowns` | DELETE    | Скасувати блокування моделі — тіло `{provider, model}` або `{all: true}`, щоб очистити все                                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/rate-limits`                | GET/POST  | Стан обмеження частоти запитів для кожного облікового запису (GET) або перемкнути захист від обмеження частоти запитів для підключення (POST `{connectionId, enabled}`). Підтримуваний шлях запису для `rateLimitProtection` (ніколи не змінюється через `PUT /api/providers/[id]`). Примітка: `enabled: false` вимикає явний захист, але не виключає активне підключення з API-ключем із глобального автоматичного захисного механізму (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Глобальна конфігурація обмеження частоти запитів (застарілий маршрут; псевдонім `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                    |
+| Кінцева точка                     | метод     | опис                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | черга запитів Get/update, час відновлення з’єднання, розрив провайдера та налаштування очікування                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/resilience/reset`           | POST      | Скинути автоматичні вимикачі постачальника                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/resilience/model-cooldowns` | GET       | Список активних блокувань (за постачальником, підключенням, моделлю), відсортований за часом, що залишився                                                                                                                                                                                                                                                                                                                                        |
+| `/api/resilience/model-cooldowns` | DELETE    | Очистіть блокування моделі — body `{provider, model}` або `{all: true}`, щоб стерти все                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/rate-limits`                | GET/POST  | Статус обмеження швидкості для кожного облікового запису (GET) або перемикання захисту обмеження швидкості для підключення (POST `{connectionId, enabled}`). Підтримуваний шлях запису для `rateLimitProtection` (ніколи не змінюється через `PUT /api/providers/[id]`). Примітка: `enabled: false` вимикає явний захист, але не виключає активне з’єднання з API-ключем із глобальної автоматичної мережі безпеки (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Конфігурація глобального обмеження швидкості (застаріло; псевдонім `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                            |
 
-> Усі чотири маршрути `/api/resilience/*` потребують **автентифікації керування** (`requireManagementAuth`). Див. [Resilience (extended)](#resilience-extended), щоб отримати повний опис відмінностей між розмикачем провайдера, періодом охолодження підключення та блокуванням моделі.
+> Усі чотири маршрути `/api/resilience/*` вимагають** управління авт** (`requireManagementAuth`). Див. [Стійкість (розширена)](#resilience-extended) для повного аналізу розриву постачальника, часу відновлення з’єднання та блокування моделі.
 
-### Оцінювання
+### Оцінки
 
-| Endpoint     | Method   | Description                                    |
-| ------------ | -------- | ---------------------------------------------- |
-| `/api/evals` | GET/POST | Перелік наборів оцінювання / запуск оцінювання |
+| Кінцева точка | метод    | опис                                          |
+| ------------- | -------- | --------------------------------------------- |
+| `/api/evals`  | GET/POST | Перерахувати набори оцінок / запустити оцінку |
 
-### Політики
+### політики
 
-| Endpoint        | Method          | Description                        |
-| --------------- | --------------- | ---------------------------------- |
-| `/api/policies` | GET/POST/DELETE | Керування політиками маршрутизації |
+| Кінцева точка   | метод           | опис                             |
+| --------------- | --------------- | -------------------------------- |
+| `/api/policies` | GET/POST/DELETE | Керуйте політиками маршрутизації |
 
-### Відповідність вимогам
+### Відповідність
 
-| Endpoint                    | Method | Description                                             |
-| --------------------------- | ------ | ------------------------------------------------------- |
-| `/api/compliance/audit-log` | GET    | Журнал аудиту відповідності вимогам (останні N записів) |
+| Кінцева точка               | метод | опис                                     |
+| --------------------------- | ----- | ---------------------------------------- |
+| `/api/compliance/audit-log` | GET   | Журнал аудиту відповідності (останній N) |
 
 ### v1beta (сумісний із Gemini)
 
-| Endpoint                   | Method | Description                            |
-| -------------------------- | ------ | -------------------------------------- |
-| `/v1beta/models`           | GET    | Перелік моделей у форматі Gemini       |
-| `/v1beta/models/{...path}` | POST   | Кінцева точка Gemini `generateContent` |
+| Кінцева точка              | метод | опис                                   |
+| -------------------------- | ----- | -------------------------------------- |
+| `/v1beta/models`           | GET   | Список моделей у форматі Gemini        |
+| `/v1beta/models/{...path}` | POST  | кінцева точка Gemini `generateContent` |
 
-Ці кінцеві точки відтворюють формат API Gemini для клієнтів, яким потрібна сумісність із нативним SDK Gemini.
+Ці кінцеві точки відображають формат GeminiAPI для клієнтів, які очікують нативної сумісності Gemini SDK.
 
-### Внутрішні / системні API
+### Внутрішній / Системний APIs
 
-| Endpoint                 | Method | Description                                                                   |
-| ------------------------ | ------ | ----------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Перевірка ініціалізації застосунку (використовується під час першого запуску) |
-| `/api/tags`              | GET    | Сумісні з Ollama теги моделей (для клієнтів Ollama)                           |
-| `/api/restart`           | POST   | Запустити коректне перезавантаження сервера                                   |
-| `/api/shutdown`          | POST   | Запустити коректне завершення роботи сервера                                  |
-| `/api/system/env/repair` | POST   | Виправити змінні середовища провайдерів OAuth                                 |
-| `/api/system/version`    | GET    | Поточна/найновіша версія, стан оновлення, канал випуску                       |
-| `/api/system/version`    | POST   | Запустити оновлення до найновішої версії з урахуванням розгортання            |
+| Кінцева точка            | метод | опис                                                               |
+| ------------------------ | ----- | ------------------------------------------------------------------ |
+| `/api/init`              | GET   | Запустити фонові служби синхронізації (автентифікація керування)   |
+| `/api/tags`              | GET   | Сумісні з Ollama теги моделі (для клієнтів Ollama )                |
+| `/api/restart`           | POST  | Виконати плавний перезапуск сервера                                |
+| `/api/shutdown`          | POST  | Запустити плавне завершення роботи сервера                         |
+| `/api/system/env/repair` | POST  | Відновлення змінних середовища постачальника OAuth                 |
+| `/api/system/version`    | GET   | версія Current/latest, статус оновлення, канал випуску             |
+| `/api/system/version`    | POST  | Розпочніть оновлення з урахуванням розгортання до останньої версії |
 
-> **Примітка:** Ці кінцеві точки використовуються системою внутрішньо або для сумісності з клієнтами Ollama. Зазвичай кінцеві користувачі їх не викликають.
+> **Примітка:** Ці кінцеві точки використовуються внутрішньо системою або для сумісності клієнта Ollama. Зазвичай вони не викликаються кінцевими користувачами.
 
-### Відновлення середовища OAuth _(v3.6.1+)_
+### OAuth Environment Repair _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1568,7 +1523,7 @@ Content-Type: application/json
 }
 ```
 
-Виправляє відсутні або пошкоджені змінні середовища OAuth для певного постачальника. Повертає:
+Відновлює відсутні або пошкоджені змінні середовища OAuth для певного постачальника. Повернення:
 
 ```json
 {
@@ -1584,10 +1539,7 @@ Content-Type: application/json
 GET /api/system/version
 ```
 
-Маршрут керування, доступний лише через loopback (автентифікація адміністратора). Повертає поточну версію, останню
-опубліковану версію та стан автоматичного оновлення. `releaseChannel` і `channels` — додаткові
-поля (rail 3.8.54); `channel` зберігає своє значення — режим розгортання, який використовує засіб оновлення
-інформаційної панелі (`npm`, `source` або `docker-compose`).
+Маршрут керування лише петлею (автентифікація адміністратора). Повертає поточну версію, останню опубліковану версію та статус автоматичного оновлення. `releaseChannel` і `channels` — адитивні поля (rail 3.8.54); `channel` зберігає своє значення — режим розгортання, який використовує програма оновлення панелі інструментів (`npm`, `source` або `docker-compose`).
 
 ```json
 {
@@ -1603,21 +1555,14 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — канал npm запущеної збірки: `nightly` для версій `-nightly.*`,
-  `next` для інших попередніх випусків (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` для стабільної версії
-  старшої гілки, ніж `channels.latest`, інакше `latest`. Ті самі правила застосовує
-  `scripts/release/dist-tag.mjs`, який вибирає dist-тег npm під час публікації.
-- `channels` — опублікована головна версія кожного dist-тега, отримана з `npm view omniroute dist-tags` (резервний варіант через HTTP до реєстру), кешована з таким самим 10-хвилинним TTL, як і `latest`. `latest` присутній завжди
-  (резервне значення — поле `latest`, потім `"unavailable"`); `next`, `nightly` і `lts` з’являються
-  лише за наявності відповідного dist-тега. Запит із `Cache-Control: no-cache` оновлює обидва результати пошуку.
+- `releaseChannel` — npm канал поточної збірки: `nightly` для версій `-nightly.*`, `next` для інших попередніх версій (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` для стабільної версії більш старої, ніж `channels.latest`, інакше `latest`. Ті самі правила, що й у `scripts/release/dist-tag.mjs`, який вибирає npm dist-tag під час публікації.
+- `channels` — опублікував заголовок кожного dist-тегу з `npm view omniroute dist-tags` (резервний HTTP реєстру), кешований з тим самим 10-хвилинним TTL що й `latest`. `latest` завжди присутній (повертається до поля `latest`, потім `"unavailable"`); `next`, `nightly` і `lts` з'являються лише тоді, коли цей тег dist існує. Запит `Cache-Control: no-cache` оновлює обидва пошуки.
 
-Модель каналів (`latest` = v3 до випуску 4.0 GA, `next` = rc, `nightly` = збірки
-`develop`, `lts` = виправлення v3 після випуску 4.0 GA) описано в
-`docs/ops/RELEASE_STRATEGY.md`.
+Модель каналу (`latest` = v3 до версії 4.0 GA, `next` = rc, `nightly` = `develop`, виправлення `lts` = v3 після версії 4.0 GA) описано в `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
-## Транскрибування аудіо
+## Транскрипція аудіо
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1648,12 +1593,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Приклади ідентифікаторів моделей:** `openai/whisper-1` (потрібен ключ OpenAI),
-`openrouter/deepgram/nova-3` (потрібен ключ OpenRouter),
-`deepgram/nova-3` (потрібен нативний ключ Deepgram). Запит із простим
-`deepgram/nova-3` **не** використовує OpenRouter.
+**Приклади ідентифікаторів моделей:** `openai/whisper-1` (потребує ключ OpenAI),
+`openrouter/deepgram/nova-3` (потребує ключ OpenRouter),
+`deepgram/nova-3` (потребує нативний ключ Deepgram). Окремий
+запит `deepgram/nova-3` **не** використовує OpenRouter.
 
 **Підтримувані формати:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** транскрипція у файловому режимі через WebSocket Gemini Live
+(потребує ключ API Gemini). Завантаження перетворюється на монофонічний PCM із частотою 16 кГц за допомогою `ffmpeg`
+(`ffmpeg` має бути доступним у `PATH`, якщо файл уже не є монофонічним PCM WAV із частотою 16 кГц), передається до сеансу,
+а фіналізований текст повертається як `{ "text": "..." }`. Необов’язкові поля форми `language` і `prompt`
+передаються далі. Обмеження: для завантажень понад 25 MiB або декодованого аудіо тривалістю понад 10 хвилин повертається
+`413`; перетворення, яке триває понад 60 с, припиняється, і повертається `504`. Ключ API надсилається лише
+в заголовку `x-goog-api-key`, ніколи не додається до URL WebSocket.
 
 ---
 

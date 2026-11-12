@@ -1,6 +1,7 @@
 // Gemini helper functions for translator
 
 import { safeParseJSON } from "./jsonUtil.ts";
+import { videoPartToGemini } from "./mediaContentParts.ts";
 import { coerceSchemaValueShapes } from "./schemaValueShapes.ts";
 import { createSchemaBudget, createSchemaMeter } from "./schemaBudget.ts";
 import type { SchemaBudget, SchemaMeter } from "./schemaBudget.ts";
@@ -129,6 +130,9 @@ export const GEMINI_UNSUPPORTED_SCHEMA_KEYS = new Set([
 
 export const UNSUPPORTED_SCHEMA_CONSTRAINTS = [...GEMINI_UNSUPPORTED_SCHEMA_KEYS];
 
+// Numeric bounds Phase 4 keeps (the length and count bounds are stripped there).
+const NUMERIC_BOUND_KEYS = ["minimum", "maximum", "minProperties", "maxProperties"] as const;
+
 // Default safety settings for the standard Gemini API surface.
 //
 // HARM_CATEGORY_CIVIC_INTEGRITY is intentionally NOT included here (#8231): the
@@ -198,7 +202,31 @@ function normalizeAudioMimeType(format: unknown): string {
   return `audio/${normalized}`;
 }
 
+const GEMINI_MEDIA_RESOLUTIONS = new Set([
+  "MEDIA_RESOLUTION_UNSPECIFIED",
+  "MEDIA_RESOLUTION_LOW",
+  "MEDIA_RESOLUTION_MEDIUM",
+  "MEDIA_RESOLUTION_HIGH",
+  "MEDIA_RESOLUTION_ULTRA_HIGH",
+]);
+
+function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | undefined {
+  for (const value of values) {
+    if (typeof value !== "string" || !value.trim()) continue;
+    let normalized = value
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, "_");
+    if (!normalized.startsWith("MEDIA_RESOLUTION_")) {
+      normalized = `MEDIA_RESOLUTION_${normalized}`;
+    }
+    if (GEMINI_MEDIA_RESOLUTIONS.has(normalized)) return { level: normalized };
+  }
+  return undefined;
+}
+
 // Convert OpenAI content to Gemini parts
+/** Translate OpenAI content to Gemini parts while retaining typed media carriers. */
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
@@ -209,6 +237,9 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
       const rec = toRecord(item);
       if (rec.type === "text") {
         parts.push({ text: rec.text });
+      } else if (rec.type === "video_url" || rec.type === "input_video") {
+        const video = videoPartToGemini(rec);
+        if (video) parts.push(video);
       } else if (rec.type === "input_audio" || rec.type === "audio") {
         const audio = toRecord(rec.input_audio || rec.audio);
         if (typeof audio.data === "string" && audio.data) {
@@ -315,6 +346,18 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
           fileUrl?.url ||
           fileObj?.url ||
           docObj?.url;
+        // Gemini 3 supports per-media-part resolution up to ULTRA_HIGH. OpenAI
+        // Chat Completions has no standard equivalent, so OmniRoute accepts the
+        // provider extension on either the content part or nested image_url.
+        // This is deliberately separate from OpenAI's `detail` field: mapping
+        // detail=high implicitly would change tokenization for every existing
+        // Gemini request, while media_resolution is explicit opt-in.
+        const mediaResolution = normalizeGeminiMediaResolution(
+          rec.media_resolution,
+          rec.mediaResolution,
+          imageUrl?.media_resolution,
+          imageUrl?.mediaResolution
+        );
         if (typeof fileData === "string" && fileData.startsWith("data:")) {
           const commaIndex = fileData.indexOf(",");
           if (commaIndex !== -1) {
@@ -324,6 +367,7 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
 
             parts.push({
               inlineData: { mimeType, data },
+              ...(mediaResolution ? { mediaResolution } : {}),
             });
           }
         } else if (typeof fileData === "string" && /^https?:\/\//i.test(fileData)) {
@@ -335,6 +379,7 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
           // a HEAD request to sniff it; Gemini infers the concrete type on fetch.
           parts.push({
             fileData: { fileUri: fileData, mimeType: "image/*" },
+            ...(mediaResolution ? { mediaResolution } : {}),
           });
         }
       }
@@ -836,7 +881,7 @@ function flattenAnyOfOneOf(obj: unknown): void {
       const bestIdx = selectBest(nonNullSchemas);
       const selected = nonNullSchemas[bestIdx];
       delete record.anyOf;
-      Object.assign(record, toRecord(selected));
+      mergeBranchIntoRecord(record, selected);
     }
   }
 
@@ -846,11 +891,32 @@ function flattenAnyOfOneOf(obj: unknown): void {
       const bestIdx = selectBest(nonNullSchemas);
       const selected = nonNullSchemas[bestIdx];
       delete record.oneOf;
-      Object.assign(record, toRecord(selected));
+      mergeBranchIntoRecord(record, selected);
     }
   }
 
   forEachSubschema(record, flattenAnyOfOneOf);
+}
+
+// A branch may carry its own `properties`/`required` ("at least one of" constraint
+// branches, oneOf variants that add fields); Object.assign would clobber the
+// parent's, silently dropping mandatory parameters, so merge those two keys and
+// assign the rest as before.
+function mergeBranchIntoRecord(record: JsonRecord, selected: unknown): void {
+  const branch = toRecord(selected);
+  const parentProperties = record.properties;
+  const parentRequired = record.required;
+  for (const key of Object.keys(branch)) {
+    if (key === "properties" && parentProperties) {
+      record.properties = { ...toRecord(parentProperties), ...toRecord(branch.properties) };
+    } else if (key === "required" && Array.isArray(parentRequired)) {
+      record.required = Array.from(
+        new Set([...parentRequired, ...(Array.isArray(branch.required) ? branch.required : [])])
+      );
+    } else {
+      record[key] = branch[key];
+    }
+  }
 }
 
 // Gemini only accepts `items` on an ARRAY node and `properties` on an OBJECT node
@@ -974,6 +1040,13 @@ function preserveNullable(obj: unknown): void {
   }
 }
 
+/** Property Phase 6 adds to an empty object schema (stripped again by geminiPlaceholderArgs.ts). */
+export const GEMINI_PLACEHOLDER_KEY = "reason";
+export const GEMINI_PLACEHOLDER_SCHEMA = Object.freeze({
+  type: "string",
+  description: "Brief explanation of why you are calling this tool",
+});
+
 export function cleanJSONSchemaForAntigravity(
   schema: unknown,
   options: {
@@ -1028,6 +1101,32 @@ export function cleanJSONSchemaForAntigravity(
   // Phase 4: Remove all unsupported keywords at ALL levels (including inside arrays).
   removeUnsupportedKeywords(cleaned, GEMINI_UNSUPPORTED_SCHEMA_KEYS);
 
+  // Phase 4b: string-encoded bounds ("5") that survive Phase 4 become numbers. Only the
+  // Gemini request path ran the shared tool-schema coercion; the Antigravity envelope did not.
+  // Not imported from schemaCoercion.ts: that module pulls in the DB layer.
+  function coerceNumericBounds(obj: unknown): void {
+    if (!obj || typeof obj !== "object") return;
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        coerceNumericBounds(item);
+      }
+      return;
+    }
+
+    const record = obj as JsonRecord;
+    for (const key of NUMERIC_BOUND_KEYS) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) {
+        record[key] = Number(value);
+      }
+    }
+
+    forEachSubschema(record, coerceNumericBounds);
+  }
+
+  coerceNumericBounds(cleaned);
+
   // Phase 5: Cleanup required fields recursively.
   function cleanupRequired(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
@@ -1063,7 +1162,10 @@ export function cleanJSONSchemaForAntigravity(
 
   cleanupRequired(cleaned);
 
-  // Phase 6: Add placeholder for empty object schemas (Antigravity requirement).
+  // Phase 6: Add placeholder for empty object schemas. It stays on the request:
+  // Gemini rejects an OBJECT with empty `properties` ("should be non-empty for OBJECT
+  // type") and Claude on Antigravity (VALIDATED mode) needs one required property.
+  // The model fills it, so geminiPlaceholderArgs.ts drops it from the tool-call args.
   function addPlaceholders(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
 
@@ -1077,13 +1179,8 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (record.type === "object") {
       if (!record.properties || Object.keys(toRecord(record.properties)).length === 0) {
-        record.properties = {
-          reason: {
-            type: "string",
-            description: "Brief explanation of why you are calling this tool",
-          },
-        };
-        record.required = ["reason"];
+        record.properties = { [GEMINI_PLACEHOLDER_KEY]: { ...GEMINI_PLACEHOLDER_SCHEMA } };
+        record.required = [GEMINI_PLACEHOLDER_KEY];
       }
     }
 
@@ -1146,6 +1243,32 @@ export function cleanJSONSchemaForAntigravity(
   }
 
   ensureArrayItems(cleaned);
+
+  // Phase 9: Gemini rejects `items` outside ARRAY and `properties`/`required` outside OBJECT.
+  // MCP schemas mix them with other types. Runs last so earlier phases cannot re-add them.
+  function pruneKeywordsByType(obj: unknown): void {
+    if (!obj || typeof obj !== "object") return;
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        pruneKeywordsByType(item);
+      }
+      return;
+    }
+
+    const record = obj as JsonRecord;
+    if (typeof record.type === "string") {
+      if (record.type !== "array") delete record.items;
+      if (record.type !== "object") {
+        delete record.properties;
+        delete record.required;
+      }
+    }
+
+    forEachSubschema(record, pruneKeywordsByType);
+  }
+
+  pruneKeywordsByType(cleaned);
 
   return cleaned;
 }

@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,11 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 modul pelaksana tingkat atas (`*.ts` dikurangi `base.ts`, `index.ts` dan menguji — hitungan `npm run check:docs-counts` mengukur). Setiap kelas eksekutor memperluas `BaseExecutor` (`base.ts`), secara langsung atau melalui `DefaultExecutor` atau eksekutor lain; modul yang tersisa adalah pembantu per penyedia (skema alat, adaptor fetch/TTS, penangan quirk). Pelaksana antara lain:
+159 modul pelaksana tingkat atas (`*.ts` dikurangi `base.ts`, `index.ts` dan menguji — hitungan `npm run check:docs-counts` mengukur). Setiap kelas eksekutor memperluas `BaseExecutor` (`base.ts`), secara langsung atau melalui `DefaultExecutor` atau eksekutor lain; modul yang tersisa adalah pembantu per penyedia (skema alat, adaptor fetch/TTS, penangan quirk). Pelaksana antara lain:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pembantu identitas bersama) dan `index.ts` (registrasi).
 
-> Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan pelaksana generik yang kompatibel dengan OpenAI. Katalog penyedia lengkap (380 penyedia) ada di `src/shared/constants/providers.ts`.
+> Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan pelaksana generik yang kompatibel dengan OpenAI. Katalog penyedia lengkap (381 penyedia) ada di `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -505,7 +505,7 @@ Terjemahan hub-and-spoke (OpenAI adalah hub).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Konverter Penyelesaian Obrolan (digunakan oleh rute `responses/` penampung semua).
+- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Konverter Penyelesaian Obrolan (digunakan oleh rute `responses/` catch-all).
 
 ### 4.5 `open-sse/services/`
 

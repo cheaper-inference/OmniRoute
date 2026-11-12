@@ -66,7 +66,7 @@ describe("Input adapter → kit Field + Input", () => {
     expect(marker?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("forwards a ref to the native <input> (CommandPalette focuses it)", () => {
+  it("forwards a ref to the native <input>", () => {
     const ref = React.createRef<HTMLInputElement>();
     render(<Input id="q" aria-label="Query" ref={ref} />);
     expect(ref.current).toBeInstanceOf(HTMLInputElement);
@@ -76,5 +76,28 @@ describe("Input adapter → kit Field + Input", () => {
   it("an empty-string label renders no <label> element", () => {
     const { container } = render(<Input label="" aria-label="Q" />);
     expect(container.querySelector("label")).toBeNull();
+  });
+
+  // #18068: the adapter dropped the kit's `size` and had no trailing slot.
+  it("forwards size=sm to the kit input and renders a trailing icon or suffix", () => {
+    const { getByLabelText, container, rerender } = render(
+      <Input aria-label="Timeout" size="sm" suffix="ms" />
+    );
+    const input = getByLabelText("Timeout");
+    expect(input.getAttribute("data-size")).toBe("sm");
+    expect(input.className).toContain("ci-input--sm");
+    const shell = container.querySelector(".ci-input-shell")!;
+    expect(shell.className).toContain("ci-input-shell--sm");
+    const slots = shell.querySelectorAll(".ci-input-shell__icon");
+    expect(slots).toHaveLength(1);
+    // the trailing slot comes after the control and stays out of the accessible name
+    expect(shell.lastElementChild).toBe(slots[0]);
+    expect(slots[0].textContent).toBe("ms");
+    expect(slots[0].getAttribute("aria-hidden")).toBe("true");
+    rerender(<Input aria-label="Timeout" icon="search" trailingIcon="close" />);
+    const icons = container.querySelectorAll(".ci-input-shell__icon");
+    expect(icons).toHaveLength(2);
+    expect(icons[1].querySelector("svg.oi-icon")).not.toBeNull();
+    expect(getByLabelText("Timeout").getAttribute("data-size")).toBe("default");
   });
 });

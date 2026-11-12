@@ -444,9 +444,9 @@ server/
 
 ---
 
-## 4. `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ಕಾರ್ಯಸ್ಥಳ
+## 4. `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ಕಾರ್ಯಕ್ಷೇತ್ರ
 
-ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಸ್ಥಳವನ್ನು `@omniroute/open-sse` ಎಂದು ಪ್ರಕಟಿಸಲಾಗಿದೆ. ವಿನಂತಿ ಪ್ರಕ್ರಿಯೆ, ಕಾರ್ಯನಿರ್ವಾಹಕರು, ಅನುವಾದಕರು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ ಅನ್ನು ಹೊಂದಿದ್ದಾರೆ.
+ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಕ್ಷೇತ್ರವನ್ನು `@omniroute/open-sse` ಎಂದು ಪ್ರಕಟಿಸಲಾಗಿದೆ. ವಿನಂತಿ ಪ್ರಕ್ರಿಯೆ, ಕಾರ್ಯನಿರ್ವಾಹಕರು, ಅನುವಾದಕರು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ ಅನ್ನು ಹೊಂದಿದ್ದಾರೆ.
 
 ```
 open-sse/
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 ಉನ್ನತ ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಮೈನಸ್ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳು — ಎಣಿಕೆ `npm run check:docs-counts` ಅಳತೆಗಳು). ಪ್ರತಿ ಎಕ್ಸಿಕ್ಯೂಟರ್ ವರ್ಗವು `BaseExecutor` (`base.ts`) ಅನ್ನು ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕರು (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಕಾರ್ಯನಿರ್ವಾಹಕರು ಸೇರಿವೆ:
+159 ಉನ್ನತ ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಮೈನಸ್ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳು — ಎಣಿಕೆ `npm run check:docs-counts` ಅಳತೆಗಳು). ಪ್ರತಿ ಎಕ್ಸಿಕ್ಯೂಟರ್ ವರ್ಗವು `BaseExecutor` (`base.ts`) ಅನ್ನು ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕರು (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಕಾರ್ಯನಿರ್ವಾಹಕರು ಸೇರಿವೆ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `qoder`, ಜೊತೆಗೆ `devin-desktop` `pollinations` ಹಂಚಿದ ಗುರುತಿನ ಸಹಾಯಕ) ಮತ್ತು `claudeIdentity.ts` (ನೋಂದಣಿ) `index.ts`
 
-> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದಿರುವ ಪೂರೈಕೆದಾರರು ಸಾಮಾನ್ಯ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು `default.ts` ಮೂಲಕ ಸೇವೆ ಸಲ್ಲಿಸುತ್ತಾರೆ. ಪೂರ್ಣ ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (380 ಪೂರೈಕೆದಾರರು) `src/shared/constants/providers.ts` ನಲ್ಲಿ ವಾಸಿಸುತ್ತದೆ.
+> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದಿರುವ ಪೂರೈಕೆದಾರರು ಸಾಮಾನ್ಯ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು `default.ts` ಮೂಲಕ ಸೇವೆ ಸಲ್ಲಿಸುತ್ತಾರೆ. ಪೂರ್ಣ ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (381 ಪೂರೈಕೆದಾರರು) `src/shared/constants/providers.ts` ನಲ್ಲಿ ವಾಸಿಸುತ್ತದೆ.
 
 ### 4.3 `open-sse/translator/`
 
@@ -537,7 +537,7 @@ open-sse/
 
 ### 4.7 `open-sse/config/`
 
-ಪೂರೈಕೆದಾರರ ದಾಖಲಾತಿಗಳು `cliFingerprints.ts` `providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), ಪ್ರತಿ-ಫಾರ್ಮ್ಯಾಟ್ ಮಾಡೆಲ್ ನೋಂದಣಿಗಳು (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ಗುರುತಿನ ಸಹಾಯಕರು (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, ರುಜುವಾತು ಸಹಾಯಕರು (`credentialLoader.ts`, `codexClient.ts`), ಮತ್ತು ಕ್ಲೌಡ್ ಅಡಾಪ್ಟರ್ಗಳು (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `oci.ts`, `maritalk.ts`, `petals.ts`, `runway.ts` `watsonx.ts` `sap.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
+ಪೂರೈಕೆದಾರರ ದಾಖಲಾತಿಗಳು (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), ಪ್ರತಿ-ಫಾರ್ಮ್ಯಾಟ್ ಮಾಡೆಲ್ ನೋಂದಣಿಗಳು (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts` `cliFingerprints.ts` `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ಗುರುತಿನ ಸಹಾಯಕರು (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, ರುಜುವಾತು ಸಹಾಯಕರು (`credentialLoader.ts`, `codexClient.ts`), ಮತ್ತು ಕ್ಲೌಡ್ ಅಡಾಪ್ಟರ್ಗಳು (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `oci.ts`, `maritalk.ts`, `petals.ts`, `runway.ts` `watsonx.ts` `sap.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
 
 ### 4.8 `open-sse/utils/`
 

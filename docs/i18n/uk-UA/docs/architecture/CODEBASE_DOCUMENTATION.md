@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 модулів-виконавців верхнього рівня (`*.ts` мінус `base.ts`, `index.ts` і тести — кількість вимірювань `npm run check:docs-counts` ). Кожен клас виконавця розширює `BaseExecutor` (`base.ts`) безпосередньо або через `DefaultExecutor` або інший виконавець; решта модулів є допоміжними для кожного постачальника (схеми інструментів, адаптери fetch/TTS, обробники особливостей). До виконавців належать:
+159 модулів-виконавців верхнього рівня (`*.ts` мінус `base.ts`, `index.ts` і тести — кількість вимірювань `npm run check:docs-counts` ). Кожен клас виконавця розширює `BaseExecutor` (`base.ts`) безпосередньо або через `DefaultExecutor` або інший виконавець; решта модулів є допоміжними для кожного постачальника (схеми інструментів, адаптери fetch/TTS, обробники особливостей). До виконавців належать:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, а також `claudeIdentity.ts` (помічник спільної ідентифікації) та `index.ts` (реєстр).
 
-> Примітка: постачальники, яких тут немає в списку, обслуговуються `default.ts` за допомогою загального OpenAI-сумісного виконавця. Повний каталог постачальників (380 постачальників) знаходиться в `src/shared/constants/providers.ts`.
+> Примітка: постачальники, яких тут немає в списку, обслуговуються `default.ts` за допомогою загального OpenAI-сумісного виконавця. Повний каталог постачальників (381 постачальник) знаходиться в `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

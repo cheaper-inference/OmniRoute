@@ -296,52 +296,55 @@ function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   return false;
 }
 
-function pickClaudeFlushBuffer(store: ChoiceBufferStore, blockIndex: number): TextBuffers {
-  const own = store.get(`${blockIndex}_0`);
-  if (Object.values(own).some((v) => v.length > 0)) return own;
-  for (const [, candidate] of store.takeAll()) {
-    if (Object.values(candidate).some((v) => v.length > 0)) return candidate;
+// Held-back tails of one Claude content block, each as the delta type the block actually
+// streams (text_delta / thinking_delta / input_json_delta). A single `text_delta` carrying
+// `thinking` or `partial_json` fields is ignored by Anthropic SDK accumulators, so the end
+// of a thinking summary or of a tool input was silently lost.
+function claudeBlockDeltas(index: number, buffers: TextBuffers): Array<Record<string, unknown>> {
+  const frames: Array<Record<string, unknown>> = [];
+  if (buffers.content) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "text_delta", text: buffers.content },
+    });
+    buffers.content = "";
   }
-  return own;
+  const thinking = buffers.reasoning + buffers.reasoning_content;
+  if (thinking) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "thinking_delta", thinking },
+    });
+    buffers.reasoning = "";
+    buffers.reasoning_content = "";
+  }
+  const partialJson = buffers.partialJson + buffers.toolArgs;
+  if (partialJson) {
+    frames.push({
+      type: "content_block_delta",
+      index,
+      delta: { type: "input_json_delta", partial_json: partialJson },
+    });
+    buffers.partialJson = "";
+    buffers.toolArgs = "";
+  }
+  return frames;
 }
 
-function flushClaudeFormat(
-  store: ChoiceBufferStore,
-  lastJson: Record<string, unknown>
-): Record<string, unknown> | null {
-  const blockIndex = typeof lastJson.index === "number" ? lastJson.index : 0;
-  // Claude content blocks buffer under `<blockIndex>_0`; a thinking block at index 0 followed
-  // by a text block at index 1 must not strand the text in a buffer that is never flushed
-  // (#18006). Prefer the block the last frame belongs to, then any non-empty block buffer.
-  const buffers = pickClaudeFlushBuffer(store, blockIndex);
-  const delta: Record<string, unknown> = { type: "text_delta" };
-  let hasDelta = false;
-  if (buffers.content) {
-    delta.text = buffers.content;
-    buffers.content = "";
-    hasDelta = true;
-  }
-  if (buffers.reasoning) {
-    delta.thinking = buffers.reasoning;
-    buffers.reasoning = "";
-    hasDelta = true;
-  }
-  if (buffers.toolArgs) {
-    delta.tool_args = buffers.toolArgs;
-    buffers.toolArgs = "";
-    hasDelta = true;
-  }
-  if (buffers.partialJson) {
-    delta.partial_json = buffers.partialJson;
-    buffers.partialJson = "";
-    hasDelta = true;
-  }
-  if (!hasDelta) return null;
-  return {
-    type: "content_block_delta",
-    index: blockIndex,
-    delta,
-  };
+/** Drain the closing block only; message termination and EOF still drain all remaining blocks. */
+function flushClaudeFormat(store: ChoiceBufferStore, lastJson: Record<string, unknown>): unknown {
+  const frames: Array<Record<string, unknown>> = [];
+  const closingKey = `${typeof lastJson.index === "number" ? lastJson.index : 0}_0`;
+  const entries = store
+    .takeAll()
+    .filter(([key]) => lastJson.type !== "content_block_stop" || key === closingKey)
+    .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
+    .sort((a, b) => a[0] - b[0]);
+  for (const [index, buffers] of entries) frames.push(...claudeBlockDeltas(index, buffers));
+  if (!frames.length) return null;
+  return frames.length === 1 ? frames[0] : frames;
 }
 
 function flushResponsesFormat(
@@ -592,7 +595,8 @@ function flushRemainingByShape(
 ): unknown {
   const last = lastJson as Record<string, unknown>;
   const lastType = typeof last.type === "string" ? (last.type as string) : "";
-  if (lastType.startsWith("message") || lastType.startsWith("content_block"))
+  // A trailing `ping` is still a Claude stream: its buffered tails need typed deltas.
+  if (lastType.startsWith("message") || lastType.startsWith("content_block") || lastType === "ping")
     return flushClaudeFormat(store, last);
   if (Array.isArray(last.choices)) return flushOpenAiTextBuffers(store, last);
   if (lastType.startsWith("response.")) return flushResponsesFormat(store, last, lastType);
@@ -612,6 +616,11 @@ function flushEmptyStream(
   return remaining;
 }
 
+/**
+ * Mask credentials across SSE fragments with bounded per-lane buffers and fail-closed limits,
+ * retaining independent bounded tails for each streamed block. Snapshots are masked directly;
+ * drained Responses lanes release their continuation state.
+ */
 export function createCredentialSseTransform(
   options?: CredentialTransformOptions
 ): TransformStream {
@@ -641,20 +650,31 @@ export function createCredentialSseTransform(
   };
   const getBuffers = store.get;
 
+  /** Finalize only the closing Claude block so other blocks keep their masking context. */
   const onFlush = (
     lastJson: unknown,
     isJsonStream = false,
     lastContentJson: unknown = null
   ): unknown => {
-    for (const [, buffers] of store.takeAll()) {
+    const last = lastJson as Record<string, unknown> | null;
+    const closingKey = `${typeof last?.index === "number" ? last.index : 0}_0`;
+    for (const [index, buffers] of store.takeAll()) {
+      if (last?.type === "content_block_stop" && index !== closingKey) continue;
       for (const key of Object.keys(buffers) as BufferedField[]) {
         if (buffers[key]) buffers[key] = markUnclosedBeginHead(redactOutsideDataUrls(buffers[key]));
       }
     }
+    const flushed = !hasRemainingBuffers(store)
+      ? null
+      : !lastJson
+        ? flushEmptyStream(getBuffers, isJsonStream)
+        : flushRemainingByShape(store, lastJson, lastContentJson);
+    // A per-block flush leaves other tails in memory; keep them charged against the limit.
     bufferedBytes = 0;
-    if (!hasRemainingBuffers(store)) return null;
-    if (!lastJson) return flushEmptyStream(getBuffers, isJsonStream);
-    return flushRemainingByShape(store, lastJson, lastContentJson);
+    for (const buffers of store.buffers.values()) {
+      for (const value of Object.values(buffers)) bufferedBytes += value.length;
+    }
+    return flushed;
   };
 
   const processor = (
@@ -670,5 +690,10 @@ export function createCredentialSseTransform(
     return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
-  return createSseTextTransform(processor, onFlush, undefined, { processToolArgs: true });
+  return createSseTextTransform(processor, onFlush, undefined, {
+    processToolArgs: true,
+    // Only after a Responses lane is drained: dropping the buffer also drops its
+    // WeakMap-backed overflow continuation state without recycling identities.
+    releaseResponsesLane: (index) => store.buffers.delete(index),
+  });
 }

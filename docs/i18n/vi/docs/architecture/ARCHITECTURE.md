@@ -14,7 +14,7 @@ OmniRoute là cổng định tuyến và bảng điều khiển AI cục bộ đ
 
 Khả năng cốt lõi:
 
-- Bề mặt API tương thích OpenAI cho CLI/tools (380 nhà cung cấp, 158 mô-đun thực thi)
+- Bề mặt API tương thích OpenAI cho CLI/tools (381 nhà cung cấp, 159 mô-đun thực thi)
 - dịch Request/response trên các định dạng của nhà cung cấp
 - Dự phòng kết hợp mô hình (trình tự nhiều mô hình)
 - Các bước kết hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`
@@ -414,7 +414,7 @@ Không gian tên `src/domain/` tập trung hóa các quyết định chính sác
 - Trình nối quy tắc Connection/model : `src/domain/connectionModelRules.ts`
 - Ảnh chụp nhanh về tình trạng sẵn có của mẫu: `src/domain/modelAvailability.ts`
 - Theo dõi hết hạn của nhà cung cấp: `src/domain/providerExpiration.ts`
-- Bộ đệm hạn ngạch: `src/domain/quotaCache.ts`
+- Bộ đệm hạn ngạch: `src/domain/quotaCache.ts`. Các nhà cung cấp thêm và xóa khoảng thời gian hạn ngạch (OpenAI đã bỏ cửa sổ Codex 5 giờ đối với một số gói), do đó việc sử dụng đọc bộ điều hợp của nhà cung cấp chứng thực là hoàn tất (`quotasComplete`, xem `src/lib/usage/usageReading.ts`) là tập hợp cửa sổ đầy đủ của tài khoản: một cửa sổ đã biết trước đó nhưng không có trong đó đã bị loại bỏ, trong bộ đệm, trong `quota_snapshots` khởi động lại sẽ bù nước (bản ghi nghỉ hưu được nối thêm), ở trạng thái hạn ngạch Codex được duy trì và trong các nhóm bão hòa của Claude. Bằng chứng một phần (tiêu đề phản hồi, bản sao cũ) chỉ cập nhật các cửa sổ mà nó mang theo.
 - Trạng thái xuống cấp: `src/domain/degradation.ts`
 - Kiểm tra cấu hình: `src/domain/configAudit.ts`
 - Trình tạo siêu dữ liệu phản hồi OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -422,7 +422,7 @@ Không gian tên `src/domain/` tập trung hóa các quyết định chính sác
 
 ### E. Đường dẫn ủy quyền
 
-Quy trình ủy quyền phân loại mọi yêu cầu đến và áp dụng chuỗi chính sách phù hợp trước khi gửi đi.
+Quy trình ủy quyền phân loại mọi yêu cầu đến và áp dụng chuỗi chính sách thích hợp trước khi gửi đi.
 
 - Đầu vào đường ống: `src/server/authz/pipeline.ts`
 - Trình phân loại yêu cầu: `src/server/authz/classify.ts` — phân biệt các tuyến tương thích công khai với các tuyến quản lý
@@ -467,7 +467,7 @@ Một số nhà cung cấp cung cấp các mô-đun tàng hình và khả năng 
   - Lưu trữ: bảng `webhooks` SQLite (thông qua `src/lib/db/webhooks.ts`)
   - Bảng điều khiển: `/dashboard/webhooks` (đăng ký, bí mật, lịch sử thử lại)
   - Để biết phân loại sự kiện và ngữ nghĩa thử lại, hãy xem [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Bộ đệm lý luận** — các khối lý luận có thể chơi lại dành cho các nhà cung cấp phát ra mã thông báo tư duy (Claude, GLMT, v.v.) để các lượt liên tiếp có thể bỏ qua việc suy nghĩ lại.
+- **Bộ đệm lý luận** — khối lý luận có thể chơi lại dành cho các nhà cung cấp phát ra mã thông báo tư duy (Claude, GLMT, v.v.) để các lượt liên tiếp có thể bỏ qua việc suy nghĩ lại.
   - lớp DB : `src/lib/db/reasoningCache.ts`
   - Lớp dịch vụ: `open-sse/services/reasoningCache.ts`
   - Để biết ngữ nghĩa phát lại, hãy xem [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).

@@ -1,5 +1,6 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
 import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
@@ -37,6 +38,7 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "amazon-q": () => import("./kiro.ts").then((m) => new m.KiroExecutor("amazon-q")),
   bedrock: () => import("./bedrock.ts").then((m) => new m.BedrockExecutor()),
   codex: () => import("./codex.ts").then((m) => new m.CodexExecutor()),
+  chatgpt: () => import("./chatgpt.ts").then((m) => new m.ChatGptExecutor()),
   "codex-app-server": () =>
     Promise.all([import("./codex-app-server.ts"), import("./codex.ts")]).then(
       ([appServer, codex]) =>
@@ -76,6 +78,11 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   fb: () => import("./freebuff.ts").then((m) => new m.FreebuffExecutor()), // Alias
   "opencode-zen": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-zen")),
   "opencode-go": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-go")),
+  // Local headless server of the opencode CLI (`opencode serve`). Speaks
+  // session/parts, not the OpenAI wire format, so it needs its own executor;
+  // there is no OpenAI-compatible endpoint to point a generic node at.
+  "opencode-server": () =>
+    import("./opencodeServer.ts").then((m) => new m.OpencodeServerExecutor()),
   vertex: () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   "vertex-partner": () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   cliproxyapi: () => import("./cliproxyapi.ts").then((m) => new m.CliproxyapiExecutor()),
@@ -99,6 +106,8 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "zed-hosted": () => import("./zed-hosted.ts").then((m) => new m.ZedHostedExecutor()),
   "devin-cli": () => import("./devin-cli.ts").then((m) => new m.DevinCliExecutor()),
   zcode: () => import("./zcode.ts").then((m) => new m.ZcodeExecutor()),
+  "minimax-code": () => import("./minimax-code.ts").then((m) => new m.MinimaxCodeExecutor()),
+  mmcode: () => import("./minimax-code.ts").then((m) => new m.MinimaxCodeExecutor()), // Alias
   zc: () => import("./zcode.ts").then((m) => new m.ZcodeExecutor()), // Alias
   "devin-cli-agentic": () =>
     import("./devin-cli-agentic.ts").then((m) => new m.DevinCliAgenticExecutor()),
@@ -239,6 +248,15 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
   }
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
     throw new SearchProviderChatError(provider);
+  }
+  // #14498 — decisions-only providers (TypeSafe Jev) register for credentials,
+  // pricing and discovery but have no chat shape; dispatch is POST /v1/systemone.
+  if (isDecisionsOnlyProvider(provider)) {
+    const err = new Error(
+      `Provider "${provider}" is a System One decisions provider and does not support chat completions; use the /v1/systemone endpoint instead.`
+    );
+    (err as Error & { status?: number }).status = 400;
+    throw err;
   }
   return getDefaultExecutor(provider);
 }

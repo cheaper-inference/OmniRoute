@@ -16,8 +16,6 @@ import type { PlaygroundState } from "@/lib/playground/codeExport";
 export type StudioTab = "chat" | "compare" | "api" | "build";
 
 interface StudioTopBarProps {
-  activeTab: StudioTab;
-  onTabChange: (tab: StudioTab) => void;
   metrics: StreamMetrics;
   /** Optional playground state for the Export code modal. If omitted, a minimal state is used. */
   exportState?: PlaygroundState;
@@ -37,15 +35,11 @@ const TABS: TabConfig[] = [
 ];
 
 /**
- * Top bar with tab switcher, token/cost counter, and export code button.
+ * Top bar with tab switcher, token/cost counter, and export code button. Sits inside the
+ * `SegmentedTabs` that holds the active tab and its panels.
  * Export code modal uses ExportCodeModal (F7) when exportState is provided.
  */
-export default function StudioTopBar({
-  activeTab,
-  onTabChange,
-  metrics,
-  exportState,
-}: StudioTopBarProps) {
+export default function StudioTopBar({ metrics, exportState }: StudioTopBarProps) {
   const t = useTranslations("playground");
   const [exportOpen, setExportOpen] = useState(false);
 
@@ -54,9 +48,8 @@ export default function StudioTopBar({
       <div className="flex items-center justify-between gap-3 px-4 py-2 border-b border-border bg-bg-alt shrink-0">
         {/* Tabs (kit capsule tabs via the SegmentedControl adapter) */}
         <SegmentedControl
+          semantics="tabs"
           options={TABS.map((tab) => ({ value: tab.id, label: t(tab.labelKey), icon: tab.icon }))}
-          value={activeTab}
-          onChange={(value) => onTabChange(value as StudioTab)}
           aria-label={t("playgroundTabs")}
           size="sm"
         />

@@ -19,7 +19,11 @@ function reset() {
 }
 
 test.beforeEach(reset);
-test.after(() => fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true }));
+test.after(() => {
+  core.resetDbInstance();
+  apiKeysDb.resetApiKeyState();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+});
 
 const A = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";

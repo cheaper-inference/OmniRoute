@@ -4,46 +4,47 @@
 
 ---
 
-🌐 **மொழிகள்:** 🇺🇸 [ஆங்கிலம்](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **மொழிகள்:** 🇺🇸 [ஆங்கிலம்](./API_REFERENCE.md) | 🇪🇹 [அம்ஹாரிக்](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [அரபு](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [அசர்பைஜானி](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [பல்கேரியன்](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [வங்காளம்](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [போஸ்னியன்](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [செக்](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [டேனிஷ்](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [ஜெர்மன்](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [கிரேக்கம்](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [ஸ்பானிஷ்](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [எஸ்டோனியன்](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [பாரசீகம்](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [ஃபின்னிஷ்](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [பிரெஞ்சு](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [ஐரிஷ்](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [குஜராத்தி](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [ஹவுசா](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [ஹீப்ரு](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [இந்தி](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [குரோஷியன்](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [ஹங்கேரியன்](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [ஆர்மேனியன்](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [இந்தோனேசியம்](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [இக்போ](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [இத்தாலியன்](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [ஜப்பானியம்](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ஜார்ஜியன்](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [கெமர்](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [கன்னடம்](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [கொரியன்](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [லிதுவேனியன்](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [லாட்வியன்](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [மலையாளம்](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [மராத்தி](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [மலாய்](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [மால்டிஸ்](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [பர்மியம்](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [நேபாளி](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [டச்சு](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [நார்வேஜியன்](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ஒடியா](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [பஞ்சாபி](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [ஃபிலிப்பினோ](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [போலிஷ்](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [போர்ச்சுகீசியம் (போர்ச்சுகல்)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [போர்ச்சுகீசியம் (பிரேசில்)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [ருமேனியன்](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [ரஷ்யன்](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [சிங்களம்](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [ஸ்லோவாக்](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [ஸ்லோவேனியன்](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [செர்பியன்](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [ஸ்வீடிஷ்](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [சுவாஹிலி](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [தெலுங்கு](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [தாய்](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [துருக்கியம்](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [உக்ரைனியம்](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [உருது](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [உஸ்பெக்கியம்](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [வியட்நாமியம்](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [யொரூபா](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [சீனம் (எளிமைப்படுத்தப்பட்டது)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [சீனம் (பாரம்பரியம்)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API-க்கான அடிப்படை குறிப்பு. இது பொது `/v1` மேற்பரப்பையும், அதிகம் பயன்படுத்தப்படும் மேலாண்மை endpoint-களையும் உள்ளடக்கியது; இயந்திரத்தால் படிக்கக்கூடிய [`docs/openapi.yaml`](../openapi.yaml) மற்றும் `src/app/api/`-ன் கீழுள்ள route tree ஆகியவை முழுமையான ஆதாரங்களாகும்.
+OmniRoute API-க்கான மையக் குறிப்பாகும். இது பொது `/v1` மேற்பரப்பையும், அதிகம் பயன்படுத்தப்படும் நிர்வாக முடிவுப்புள்ளிகளையும் உள்ளடக்கியது; இயந்திரம் படிக்கக்கூடிய [`docs/openapi.yaml`](../openapi.yaml) மற்றும் `src/app/api/`-இன் பாதை மரம் ஆகியவையே முழுமையான ஆதாரங்கள்.
 
-OpenAI-உடன் இணக்கமான நெறிமுறை மற்றும் provider திறன் அட்டவணைக்கான குறிப்பிட்ட தகவல்களுக்கு,
-[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) என்பதைப் பார்க்கவும்.
+OpenAI-உடன் இணக்கமான நெறிமுறை மற்றும் வழங்குநர் திறன்களின் கவனம் செலுத்தப்பட்ட அட்டவணைக்கு, [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md)-ஐப் பார்க்கவும்.
+
+ஒவ்வொரு deployment-மும் build-ன் போது `docs/openapi.yaml` இலிருந்து உருவாக்கப்படும் spec-ன் சொந்த நகலை `/openapi.yaml` இல் வழங்குகிறது. இதில் build-ன் version மற்றும் தொடர்புடைய server URL (`./`) ஆகியவை உள்ளன; எனவே கோப்பை வழங்கிய host-இலேயே requests இருக்கும். பதிவிறக்கம் செய்யப்பட்ட கோப்பை இறக்குமதி செய்யும் tool-க்கு அத்தகைய host இருக்காது; ஆகவே base URL-ஐ கைமுறையாக அமைக்க வேண்டும்.
 
 ---
 
-## உள்ளடக்க அட்டவணை
+## பொருளடக்கம்
 
-- [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
-- [Embeddings](#embeddings)
-- [Image Generation](#image-generation)
-- [Document OCR](#document-ocr)
-- [List Models](#list-models)
-- [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
-- [Files API](#files-api)
-- [Batches API](#batches-api)
-- [Search API](#search-api)
-- [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
-- [Semantic Cache](#semantic-cache)
-- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
-- [Combo Management](#combo-management)
-- [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
-- [Agents Protocol](#agents-protocol)
-- [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
-- [Skills](#skills)
-- [Memory](#memory)
-- [MCP Server](#mcp-server)
-- [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
-- [Request Processing](#request-processing)
-- [Authentication](#authentication)
+- [அரட்டை நிறைவுகள்](#chat-completions)
+- [பிரத்தியேக நிர்வகிக்கப்பட்ட அமர்வு குத்தகைகள்](#exclusive-managed-session-leases)
+- [உட்பொதிப்புகள்](#embeddings)
+- [பட உருவாக்கம்](#image-generation)
+- [ஆவணம் OCR](#document-ocr)
+- [பட்டியல் மாதிரிகள்](#list-models)
+- [வழங்குநர் செருகுநிரல் மேனிஃபெஸ்ட்](#provider-plugin-manifest)
+- [பொருந்தக்கூடிய இறுதிப்புள்ளிகள்](#compatibility-endpoints)
+- [கோப்புகள் API](#files-api)
+- [தொகுதிகள் API](#batches-api)
+- [API தேடுங்கள்](#search-api)
+- [WebSocket ஸ்ட்ரீமிங்](#websocket-streaming)
+- [ஒதுக்கீடுகள் & சிக்கல்கள் அறிக்கை](#quotas--issues-reporting)
+- [சொற்பொருள் கேச்](#semantic-cache)
+- [CLIProxyAPI மேலாண்மை இணக்கத்தன்மை](#cliproxyapi-management-compatibility)
+- [டாஷ்போர்டு & மேலாண்மை](#dashboard--management)
+- [சேர்க்கை மேலாண்மை](#combo-management)
+- [வெப்ஹூக்ஸ்](#webhooks)
+- [பதிவு செய்யப்பட்ட விசைகள் (தானியங்கு மேலாண்மை)](#registered-keys-auto-management)
+- [முகவர்கள் நெறிமுறை](#agents-protocol)
+- [மேலாண்மை ப்ராக்ஸிகள்](#management-proxies)
+- [மீள்தன்மை (நீட்டிக்கப்பட்ட)](#resilience-extended)
+- [திறன்கள்](#skills)
+- [நினைவகம்](#memory)
+- [MCP சேவையகம்](#mcp-server)
+- [A2A சேவையகம்](#a2a-server)
+- [கிளவுட், ஏவல்ஸ் & மதிப்பீடு](#cloud-evals--assess)
+- [கோரிக்கை செயலாக்கம்](#request-processing)
+- [அங்கீகாரம்](#authentication)
 
 ---
 
@@ -331,35 +332,22 @@ Content-Type: application/json
 }
 ```
 
-கிடைக்கும் வழங்குநர்களில் OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (உள்ளூர்), ComfyUI (உள்ளூர்) ஆகியவை அடங்கும்.
+கிடைக்கக்கூடிய வழங்குநர்களில் OpenAI (GPT படம் 2), xAI (Grok படம்), Together AI (FLUX), Fireworks AI, Nebius (FLUX), ஹைபர்போலிக், NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (உள்ளூர்), ComfyUI (உள்ளூர்).
 
-`n` என்பது `data[]` இல் `n` படங்களைத் திருப்பி வழங்கும். upstream API ஒவ்வொரு அழைப்பிற்கும் ஒரு படத்தைத் திருப்பி வழங்கும் வழங்குநர்களுக்கு
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), அதிகபட்சம் ஒரே நேரத்தில் 4 அழைப்புகள் இயக்கப்படும் வகையில்
-`n` தனித்தனி upstream அழைப்புகள் செய்யப்படும். நிலையான `seed`, அழைப்பு குறியீட்டால் (`seed`, `seed + 1`, …) மாற்றியமைக்கப்படும்; இதனால் படங்கள் வேறுபட்டவையாக இருந்தாலும் மீண்டும் உருவாக்கக்கூடியவையாக இருக்கும். `n` இன் அதிகபட்ச மதிப்பு 10. ஏதேனும் ஓர் அழைப்பு தோல்வியடைந்தால், கோரிக்கை முழுவதுமாகத் தோல்வியடையும். fan-out வடிவங்களின் பட்டியல்
-`open-sse/handlers/imageGeneration/fanOut.ts` இல் உள்ள `SINGLE_IMAGE_FANOUT_FORMATS` ஆகும்.
+`n` `n` படங்களை `data[]` இல் வழங்குகிறது. ஒரு அழைப்புக்கு ஒரு படத்தை அப்ஸ்ட்ரீம் API வழங்கும் வழங்குநர்கள் (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) அதிகபட்சம் 4 விமானங்களில் `n` தனி அப்ஸ்ட்ரீம் அழைப்புகளைப் பெறுவார்கள். நிலையான `seed` ஆனது அழைப்பு குறியீட்டால் ஈடுசெய்யப்படுகிறது (`seed`, `seed + 1`, …), எனவே படங்கள் வேறுபடும் ஆனால் மீண்டும் உருவாக்கக்கூடியதாக இருக்கும். `n` 10 ஆக உள்ளது. ஏதேனும் அழைப்பு தோல்வியுற்றால் கோரிக்கை முழுவதுமாக தோல்வியடையும். ஃபேன்-அவுட் வடிவங்களின் பட்டியல் `open-sse/handlers/imageGeneration/fanOut.ts` இல் `SINGLE_IMAGE_FANOUT_FORMATS` ஆகும்.
 
-ZenMux, ஏற்கனவே உள்ள API-key இணைப்பை மீண்டும் பயன்படுத்துகிறது; மேலும் `zenmux/` அல்லது `zm/` முன்னொட்டுகளை ஏற்கிறது:
+ZenMux ஏற்கனவே உள்ள API-விசை இணைப்பை மீண்டும் பயன்படுத்துகிறது மற்றும் `zenmux/` அல்லது `zm/` முன்னொட்டுகளை ஏற்கிறது:
 
-- `zenmux/openai/gpt-image-2`, ZenMux-ன் OpenAI Images API-ஐப் பயன்படுத்துகிறது. விருப்பங்களில் `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, மற்றும் `response_format` ஆகியவை அடங்கும்.
-- `zm/meta/muse-image-1.0` போன்ற பிற வெளியீட்டாளர்கள், ZenMux-ன் Vertex AI `:predict`
-  endpoint-ஐப் பயன்படுத்துகின்றனர். `n` என்பது `sampleCount` ஆகவும், `aspect_ratio` என்பது
-  `aspectRatio` ஆகவும், `image_size` (`1K`, `2K`, `4K`) என்பது `sampleImageSize` ஆகவும் மாற்றப்படும். பிக்சல்
-  `size`, உறுதியான பிக்சல் பரிமாணங்களை வழங்காமல், aspect ratio-வை மட்டுமே வழங்கும். ஆதரிக்கப்படும் விகிதங்கள்,
-  தெளிவுத்திறன்கள் மற்றும் எண்ணிக்கைகள் மாதிரிக்கு ஏற்ப மாறுபடும்.
-- `zm/inclusionai/ming-image-0.1-design`, அதன் சொந்த பரிமாணங்களைத் தேர்ந்தெடுக்கும். `size`,
-  `aspect_ratio`, மற்றும் `image_size` ஆகியவற்றைத் தவிர்க்கவும்; வெளிப்படையான மதிப்புகள் HTTP 400-ஐத் திருப்பி வழங்கும். `output_format` மூலம் PNG, JPEG, மற்றும் WebP ஆகியவற்றைக் கோரலாம்.
+- `zenmux/openai/gpt-image-2` ZenMux இன் OpenAI படங்கள் API பயன்படுத்துகிறது. விருப்பங்களில் `size`, `quality`, `n`, `output_format`, `output_compression`, `background` மற்றும் `response_format` ஆகியவை அடங்கும்.
+- `zm/meta/muse-image-1.0` போன்ற பிற வெளியீட்டாளர்கள், ZenMux இன் வெர்டெக்ஸ் AI `:predict` இறுதிப்புள்ளியைப் பயன்படுத்துகின்றனர். `n` வரைபடங்கள் `sampleCount`, `aspect_ratio` to `aspectRatio`, மற்றும் `image_size` (`1K`, `2K`, `4K`) க்கு `sampleImageSize`. ஒரு பிக்சல் `size` ஒரு விகிதத்தை மட்டுமே வழங்குகிறது, பிக்சல் பரிமாணங்களுக்கு உத்தரவாதம் இல்லை. ஆதரிக்கப்படும் விகிதங்கள், தீர்மானங்கள் மற்றும் எண்ணிக்கைகள் மாதிரியைப் பொறுத்து மாறுபடும்.
+- `zm/inclusionai/ming-image-0.1-design` அதன் சொந்த பரிமாணங்களைத் தேர்ந்தெடுக்கிறது. `size`, `aspect_ratio` மற்றும் `image_size` ஐத் தவிர்க்கவும்; வெளிப்படையான மதிப்புகள் HTTP 400 ஐத் தருகின்றன. PNG, JPEG, மற்றும் WebP ஆகியவற்றை `output_format` உடன் கோரலாம்.
 
-இந்த ஒருங்கிணைப்பு, உரையிலிருந்து படத்தை உருவாக்குவதை ஆதரிக்கிறது; reference-image editing-ஐ ஆதரிக்காது. Vertex
-வெளியீடு `data[].b64_json` ஆக இயல்பாக்கப்படுகிறது; `response_format: "url"` என்பது upstream
-HTTPS URL-ஐத் திருப்பி வழங்கும், அல்லது பட bytes மட்டுமே கிடைக்கும்போது base64 data URL-ஐத் திருப்பி வழங்கும். காலியான/வடிகட்டப்பட்ட வெளியீடுகள்,
-காலியான வெற்றிப் பதிலாக அல்லாமல், பிழையைத் திருப்பி வழங்கும். மாதிரி அணுகல், ZenMux கணக்கைப் பொறுத்தது.
-[ZenMux-ன் Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) மற்றும்
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ஆகியவற்றைப் பார்க்கவும்.
+இந்த ஒருங்கிணைப்பு உரை-க்கு-பட உருவாக்கத்தை ஆதரிக்கிறது, குறிப்பு-பட எடிட்டிங் அல்ல. வெர்டெக்ஸ் வெளியீடு `data[].b64_json` க்கு இயல்பாக்கப்படுகிறது; `response_format: "url"` ஒரு அப்ஸ்ட்ரீம் HTTPS URL அல்லது ஒரு base64 தரவு URL பட பைட்டுகள் மட்டுமே இருக்கும் போது வழங்கும். Empty/filtered வெளியீடுகள் வெற்று வெற்றியைக் காட்டிலும் பிழையைத் தரும். மாதிரி அணுகல் ZenMux கணக்கைப் பொறுத்தது. [ZenMux இன் வெர்டெக்ஸ் API](https://docs.zenmux.ai/api/vertexai/generate-images) மற்றும் [OpenAI படங்கள் API](https://docs.zenmux.ai/api/openai/generate-an-image) பார்க்கவும்.
+
+ஒரு Microsoft 365 Copilot உள்நுழைவு இணைப்பு Copilot இன் உள்ளமைக்கப்பட்ட படக் கருவி மூலம் `copilot-m365-web/m365-copilot-image` உதவுகிறது: ஒரு படத்திற்கு ஒரு Copilot திருப்பம் (`n` 1–4), `size` திசையை மட்டும் திசை திருப்பும், மற்றும் படங்கள் இன்லைனில் திரும்பும் (`b64_json`, அல்லது `response_format: "url"` க்கு ஒரு தரவு URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) ஐப் பார்க்கவும்.
 
 ```bash
-# அனைத்து பட மாதிரிகளையும் பட்டியலிடுக
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -779,67 +767,42 @@ OpenAI-இணக்கமான பேட்ச் செயலாக்கம�
 
 ---
 
-## தேடல் API
+## API தேடுங்கள்
 
-வலை/தேடல் வழங்குநர் abstraction (Tavily, Brave, Exa, Serper போன்றவை).
+Web/search வழங்குநர் சுருக்கம் (Tavily, Brave, Exa, Serper, முதலியன).
 
-| Method | Path                   | Description                                                                                                |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்கள் மற்றும் திறன்களின் பட்டியல்                                             |
-| POST   | `/v1/search`           | தேடல் வினவலை இயக்குதல் — உடல் `v1SearchSchema` மூலம் சரிபார்க்கப்படுகிறது; caching/coalescing ஆதரவு உள்ளது |
-| GET    | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்குமான hit/latency/cache புள்ளிவிவரங்கள்                                                 |
+| முறை | பாதை                   | விளக்கம்                                                                                           |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்களின் + திறன்களைப் பட்டியலிடுங்கள்                                  |
+| POST | `/v1/search`           | `v1SearchSchema` ஆல் சரிபார்க்கப்பட்ட தேடல் வினவல் — ஐ இயக்கவும், caching/coalescing ஐ ஆதரிக்கிறது |
+| GET  | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்கும் hit/latency/cache புள்ளிவிவரங்கள்                                          |
 
-**அங்கீகாரம்:** Bearer API key (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` மூலம் அமல்படுத்தப்படுகிறது.
+**அங்கீகாரம்:** தாங்கி API விசை (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` வழியாக செயல்படுத்தப்பட்டது.
+
+**தானாகத் தேர்ந்தெடு:** `provider` இல்லாமல், கட்டமைக்கப்பட்ட இணைப்பைக் கொண்ட மலிவான வழங்குநர் முதலில் இயங்குகிறார், அடுத்த மலிவானது தோல்வியாகும். இலவச லாஸ்ட் ரிசார்ட் வழங்குநர்கள் (`duckduckgo-free`) வேறு எதுவும் கட்டமைக்கப்படாத போது மட்டுமே பயன்படுத்தப்படும். ஒரு சுய-ஹோஸ்ட் செய்யப்பட்ட SearXNG ஆனது அதன் இணைப்பு உண்மையான `baseUrl` சேமித்தவுடன் கட்டமைக்கப்பட்டதாகக் கணக்கிடப்படும் (கேட்லாக் இயல்புநிலை `http://localhost:8888/search` அல்ல): இது விசையை விட $0 வழங்குநராக தரவரிசைப்படுத்துகிறது, SearXNG 400, 401, 40403 `baseUrl` URL `http(s)` கிளவுட்-மெட்டாடேட்டா முகவரியில் உள்ள புள்ளிகள் கணக்கிடப்படாது. டோக்கனைச் சேமிக்கும் SearXNG இணைப்பு `https://` அல்லது loopback `http://` க்கு மேல் மட்டுமே தரவரிசைப்படுத்துகிறது. ரிமோட் ப்ளைன் `http://` இல் இது ஒருபோதும் தோல்வியடைவதில்லை மற்றும் கடைசி முயற்சியாக இருக்கும், வேறு எந்த வழங்குநரும் உள்ளமைக்கப்படாதபோது அல்லது பெயரால் கோரப்படும் போது மட்டுமே பயன்படுத்தப்படும், எனவே அந்த இரண்டு நிகழ்வுகளிலும் டோக்கனை தெளிவான உரையில் அனுப்புகிறது.
 
 ### Exa மற்றும் Tavily `provider_options`
 
-Exa மற்றும் Tavily, namespace செய்யப்பட்ட bag-இலிருந்து வழங்குநர்-குறிப்பிட்ட புலங்களைப் படிக்கின்றன:
-`provider_options.exa` (அல்லது `provider_options["exa-search"]`) மற்றும் `provider_options.tavily`
-(அல்லது `provider_options["tavily-search"]`). கீழே உள்ள keys மட்டுமே முன்னோக்கி அனுப்பப்படும். ஒவ்வொன்றும்
-`open-sse/handlers/search/providerOptionsPassthrough.ts`-இல் உள்ள தனித்தனி Zod schema-க்கு எதிராகச் சரிபார்க்கப்படுகிறது,
-தவறான வகையுடைய key நீக்கப்படும். வேறு எந்த key-யும் புறக்கணிக்கப்படும்; இதில் auth, base URL,
-`stream` மற்றும் `outputSchema` ஆகியவையும் அடங்கும். பிற வழங்குநர்களால் பயன்படுத்தப்படும் flat keys (`cx`, `depth`, ...)
-முன்பைப் போலவே செயல்படும்.
+Exa மற்றும் Tavily ஒரு பெயர் இடைவெளி பையில் இருந்து வழங்குநர்-குறிப்பிட்ட புலங்களைப் படிக்கவும்: `provider_options.exa` (அல்லது `provider_options["exa-search"]`) மற்றும் `provider_options.tavily` (அல்லது `provider_options["tavily-search"]`). கீழே உள்ள விசைகள் மட்டுமே அனுப்பப்படும். ஒவ்வொன்றும் அதன் சொந்த Zod ஸ்கீமாவிற்கு எதிராக `open-sse/handlers/search/providerOptionsPassthrough.ts` இல் சரிபார்க்கப்பட்டது, மேலும் தவறான வகையுடன் ஒரு விசை கைவிடப்பட்டது. அங்கீகாரம், அடிப்படை URL, `stream` மற்றும் `outputSchema` உட்பட வேறு எந்த விசையும் புறக்கணிக்கப்படும். பிற வழங்குநர்கள் பயன்படுத்தும் பிளாட் கீகள் (`cx`, `depth`, ...) முன்பு போலவே செயல்படும்.
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                              |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` இயல்புநிலை `{ text: true, highlights: true }` மீது merge செய்யப்படும் |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
+| வழங்குபவர் | உயர்மட்ட புலங்கள்                                                                                                                                                                                                                                                                                                                                                         | கூடு கட்டப்பட்டது                                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (பிளாட் primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` இயல்புநிலை `{ text: true, highlights: true }` மீது இணைக்கப்பட்டது |
+| தவிலி      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
-பொதுவான புலங்கள் எப்போதும் முன்னுரிமை பெறும்: `query`, `max_results`, `filters` (domains), `country` மற்றும்
-`search_type`-இலிருந்து பெறப்படும் topic. Exa-வில், `search_type: "news"` ஆனது `category: "news"`-ஐத்
-தக்கவைக்கிறது. Tavily, `search_type: "finance"` (`topic: "finance"`) என்பதையும் ஏற்கிறது.
+பொதுவான புலங்கள் எப்போதும் வெற்றி பெறும்: `query`, `max_results`, `filters` (டொமைன்கள்), `country` மற்றும் `search_type` இலிருந்து பெறப்பட்ட தலைப்பு. எக்ஸாவில், `search_type: "news"` `category: "news"` வைத்திருக்கும். Tavily `search_type: "finance"` (`topic: "finance"`) ஐயும் ஏற்றுக்கொள்கிறது.
 
-Firecrawl தேடல் செலவு, திருப்பி வழங்கப்பட்ட முடிவுகளின் ஒவ்வொரு தொடங்கிய 10-முடிவுகள் block-க்கும் $0.002 (2
-credits) என்ற விகிதத்தில், ஒவ்வொரு அழைப்புக்கும் குறைந்தது ஒரு block என்ற அடிப்படையில் பதிவு செய்யப்படுகிறது
-([Firecrawl கட்டண விவரங்கள்](https://docs.firecrawl.dev/billing)): 11 முடிவுகளுக்கு $0.004 செலவாகும்.
+Firecrawl தேடல் செலவு, 10 திரும்பிய முடிவுகளின் தொடக்கத் தொகுதிக்கு, ஒரு தொகுதிக்கு $0.002 (2 வரவுகள்) மற்றும் ஒரு அழைப்புக்கு குறைந்தபட்சம் ஒரு தொகுதி ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 முடிவுகளுக்கு $0.004 செலவாகும்.
 
-பொதுவான `time_range` இப்போது இரு வழங்குநர்களையும் சென்றடைகிறது: Exa-க்கு `startPublishedDate` (ISO
-timestamp), Tavily-க்கு `start_date` (`YYYY-MM-DD`) கிடைக்கும். `provider_options`-இல் வெளிப்படையாகக்
-குறிப்பிடப்பட்ட தேதி, map செய்யப்பட்ட தேதியை மீறுகிறது.
+பொதுவான `time_range` இப்போது இரண்டு வழங்குநர்களையும் சென்றடைகிறது: Exa `startPublishedDate` (ISO நேர முத்திரை) மற்றும் Tavily `start_date` (`YYYY-MM-DD`) பெறுகிறது. `provider_options` இல் ஒரு வெளிப்படையான தேதி மேப் செய்யப்பட்டதை மீறுகிறது.
 
-Exa முடிவுகள் `id`, `highlights` (`snippet`-ஆகப் பயன்படுத்தப்படும் முதல் highlight மட்டும் அல்லாமல், ஒவ்வொரு
-highlight-உம்), `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras` ஆகியவற்றை
-`provider_raw`-இல் தக்கவைத்துக்கொள்கின்றன. Tavily முடிவுகள் `images` மற்றும் `favicon` ஆகியவற்றைத் தக்கவைத்துக்கொள்கின்றன.
+Exa முடிவுகள் `id`, `highlights` (ஒவ்வொரு சிறப்பம்சமும், `snippet` ஆகப் பயன்படுத்தப்படும் முதல் ஒன்று மட்டுமல்ல), `provider_raw` இல் `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras`. Tavily முடிவுகள் `images` மற்றும் `favicon` வைத்திருக்கின்றன.
 
-Linkup தேடல் செலவு `depth` `fast` மற்றும் `standard` ஆகியவற்றுக்கு $0.005 ஆகவும், `deep`-க்கு $0.05 ஆகவும்
-பதிவு செய்யப்படுகிறது ([Linkup விலை நிர்ணயம்](https://docs.linkup.so/pages/documentation/development/pricing)),
-`depth` `provider_options`-இலிருந்து வந்தாலும் அல்லது connection-ன் settings-இலிருந்து வந்தாலும் இதே விதி பொருந்தும்.
+இணைப்புத் தேடல் செலவு `depth` `fast` மற்றும் `standard` க்கு $0.005 ஆகவும், `deep` க்கு $0.05 ஆகவும் ( [Linkup விலை நிர்ணயம்](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` அல்லது இணைப்பின் அமைப்புகளில் இருந்து வந்தாலும்.
 
-Exa `type: "lite"` (Exa 3.0) குறைந்த எண்ணிக்கையிலான புலங்களை மட்டுமே ஏற்கிறது; வேறு ஏதேனும் புலம்
-அமைக்கப்பட்டால் முழு request-ஐயும் நிராகரிக்கிறது. lite-க்கு, `additionalQueries`, `systemPrompt` மற்றும்
-`contents`-இல் உள்ள `text` மற்றும் `highlights` தவிர்ந்த ஒவ்வொரு key-யும் அழைப்புக்கு முன் நீக்கப்படும்.
-நீக்கப்பட்ட `subpages`, `subpageTarget`, `highlights.numSentences` மற்றும் `highlights.highlightsPerUrl`
-இனி முன்னோக்கி அனுப்பப்படாது.
+Exa `type: "lite"` (Exa 3.0) சிறிய புலங்களின் தொகுப்பை ஏற்றுக்கொள்கிறது மற்றும் வேறு ஏதேனும் புலம் அமைக்கப்படும் போது முழு கோரிக்கையையும் நிராகரிக்கிறது. லைட்டிற்கு, `additionalQueries`, `systemPrompt` மற்றும் `text` மற்றும் `highlights` தவிர ஒவ்வொரு `contents` விசையும் அழைப்புக்கு முன் கைவிடப்படும். நிறுத்தப்பட்ட `subpages`, `subpageTarget`, `highlights.numSentences` மற்றும் `highlights.highlightsPerUrl` ஆகியவை இனி அனுப்பப்படாது.
 
-செலவுக் கணக்கீடு flat registry `costPerQuery`-ஆகும்; ஆனால் Exa மட்டும் Exa-வின் சொந்த விலை நிர்ணயத்தைப்
-பின்பற்றுகிறது: `auto` (மற்றும் legacy `fast`)-க்கு ஒவ்வொரு அழைப்புக்கும் $0.007 அல்லது `lite` (மற்றும்
-legacy `instant`)-க்கு $0.004, இது 10 முடிவுகளை உள்ளடக்கியது; அதன் பின்னர் வரும் ஒவ்வொரு முடிவுக்கும்
-$0.001; மேலும் `contents.summary` அமைக்கப்பட்டிருந்தால் திருப்பி வழங்கப்படும் ஒவ்வொரு முடிவுக்கும் $0.001.
-Tavily-க்கு `search_depth` `basic`, `fast` மற்றும் `ultra-fast` ஆகியவற்றில் 1 credit ($0.008), `advanced`-க்கு
-2 credits ($0.016) எனப் பதிவு செய்யப்படுகிறது
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true` கொண்ட
-அழைப்பை Tavily advanced-ஆக மேம்படுத்தினாலும், அது 1 credit-ஆகவே பதிவு செய்யப்படும்.
+எக்ஸாவின் சொந்த `auto` பின்பற்றும் எக்ஸாவைத் தவிர, காஸ்ட் `lite` என்பது பிளாட் `fast` `costPerQuery` `instant`. மேலும் ஒவ்வொரு முடிவுக்கும் $0.001; மற்றும் `contents.summary` அமைக்கப்படும் போது திரும்பிய முடிவு ஒன்றுக்கு $0.001. Tavily `search_depth` `basic`, `fast` மற்றும் `ultra-fast` க்கு 1 கிரெடிட் ($0.008) மற்றும் `advanced` க்கு 2 கிரெடிட்கள் ($0.016) ( [Tavily API கிரெடிட்ஸ்](https://docs.tavily.com/documentation/api-credits) ) என பதிவு செய்யப்பட்டுள்ளது. Tavily மேம்பட்டதாக மேம்படுத்தும் `auto_parameters: true` உடன் அழைப்பு இன்னும் 1 கிரெடிட்டில் பதிவுசெய்யப்படுகிறது.
 
 ---
 
@@ -958,28 +921,28 @@ terminal quota error (`402`/`429`/`503`, அதன் body ஒதுக்கீ
 
 ---
 
-## சுயசேவைப் பயன்பாடு (`/api/usage/om-usage`)
+## சுய சேவை பயன்பாடு (`/api/usage/om-usage`)
 
-எந்த API key-யும் **தனது சொந்த** பயன்பாடு மற்றும் ஒதுக்கீடுகளைப் படிக்கலாம் — management auth தேவையில்லை. ஒரு key holder-க்கு அவர்களின் செலவைக் காட்ட client (CLI, OmniCopilot panel) பயன்படுத்தும் endpoint இதுவாகும்.
+எந்த API விசையையும் படிக்க முடியும்** அதன் சொந்த** பயன்பாடு மற்றும் ஒதுக்கீடுகள் — மேலாண்மை அங்கீகாரம் இல்லை. இது ஒரு கிளையன்ட் (CLI, OmniCopilot குழு) ஒரு முக்கிய வைத்திருப்பவருக்கு அவர்கள் செலவழித்ததைக் காட்டப் பயன்படுத்தும் இறுதிப் புள்ளியாகும்.
 
 ```bash
-# உரை வடிவம் (வரலாற்றுச் contract — terminal-க்கான plain text)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# கட்டமைக்கப்பட்ட வடிவம் — UI பயன்படுத்துவது
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-இந்த key-க்கு **`allowUsageCommand`** இயக்கப்பட்டிருக்க வேண்டும் (இயல்புநிலையில் முடக்கப்பட்டுள்ளது — dashboard-இன் API-key manager இதை ஒவ்வொரு key-க்கும் மாற்றுகிறது). இது இல்லையெனில் endpoint `403` பதிலை வழங்கும்.
+சாவி கண்டிப்பாக இருக்க வேண்டும்**`allowUsageCommand`** இயக்கப்பட்டது (இயல்புநிலையாக — டாஷ்போர்டின் API-விசை மேலாளர் அதை ஒரு விசைக்கு மாற்றுகிறது). அது இல்லாமல் இறுதிப்புள்ளி `403` பதிலளிக்கிறது.
 
-`?format=json` வேறுபடுத்தப்பட்ட வடிவத்தைத் திருப்பி வழங்குகிறது; எனவே ஒரு caller ஒருபோதும் மறுப்புப் பதிலிலிருந்து data field-ஐப் படிக்காது. வெற்றியடைந்தபோது:
+`?format=json` ஒரு பாரபட்சமான வடிவத்தை வழங்குகிறது, எனவே அழைப்பாளர் மறுப்பிலிருந்து தரவு புலத்தைப் படிக்க மாட்டார். வெற்றி குறித்து:
 
 ```jsonc
 {
   "allowed": true,
-  // key தனிப்பட்ட பயன்பாட்டு வரம்புகளை (தினசரி/வாராந்திர USD) தேர்வுசெய்திருந்தால் மட்டுமே இருக்கும்:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -988,9 +951,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // தேர்ந்தெடுக்கப்பட்ட provider-இன் quota snapshot, இதுவரை எதுவும் cache செய்யப்படவில்லை என்றால் null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // ஒவ்வொரு connection-இன் snapshot; இதனால் UI பல provider-களை அருகருகே காட்ட முடியும்:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -998,60 +961,49 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-மறுப்பின்போது (`401` தவறான key / `403` அனுமதிக்கப்படவில்லை), அதே route
-`{ "allowed": false, "error": { "message": "…" } }` என்பதைத் திருப்பி வழங்கும் — காலியாக இருந்தாலும் இருக்கும் `personal`/`provider`
-(key அனுமதிக்கப்பட்டது, இதுவரை எதுவும் அறியப்படவில்லை) என்பது மறுப்பிலிருந்து வேறுபட்ட நிலையாகும்; மேலும் JSON வடிவம் மட்டுமே இந்த இரு நிலைகளையும் வேறுபடுத்திக் காட்டுகிறது.
+மறுத்தால் (`401` மோசமான விசை / `403` அனுமதிக்கப்படவில்லை) அதே பாதையானது `{ "allowed": false, "error": { "message": "…" } }` — தற்போதைய-ஆனால்-வெற்று `personal`/`provider` (விசை அனுமதிக்கப்படுகிறது, இதுவரை எதுவும் கற்றுக் கொள்ளப்படவில்லை) என்பது மறுப்பிலிருந்து வேறுபட்ட நிலையாகும், மேலும் JSON படிவம் மட்டுமே அவற்றை வேறுபடுத்துகிறது.
 
-**அங்கீகாரம்:** caller-இன் சொந்த Bearer API key, `isValidApiKey` மூலம் சரிபார்க்கப்படுகிறது — இது _management surface_ (`/api/keys/…`) அல்ல; அது `requireManagementAuth`-க்கு பின்னால் தொடர்ந்தும் இருக்கும்.
+**அங்கீகாரம்:** அழைப்பவரின் சொந்த தாங்கி API விசை, `isValidApiKey` — உடன் சரிபார்க்கப்பட்டது, இது _not_ மேலாண்மை மேற்பரப்பு (`/api/keys/…`), இது `requireManagementAuth` பின்னால் இருக்கும்.
 
-### Raw மற்றும் Cutoff-Adjusted ஒதுக்கீட்டு சதவீதங்கள்
+### ரா மற்றும் கட்ஆஃப்-சரிசெய்யப்பட்ட ஒதுக்கீடு சதவீதங்கள்
 
-`/api/usage/om-usage`-ஐப் பயன்படுத்தும்போது, **plain-text output** மற்றும் கட்டமைக்கப்பட்ட **JSON output** ஆகியவற்றில் காட்டப்படும் சதவீதங்களுக்கு இடையிலான வேறுபாட்டைக் callers கவனிக்க வேண்டும்:
+`/api/usage/om-usage` உட்கொள்ளும் போது, அழைப்பாளர்கள் வழங்கிய சதவீதங்களுக்கு இடையிலான வேறுபாட்டைக் கவனிக்க வேண்டும்** எளிய உரை வெளியீடு** மற்றும் கட்டமைக்கப்பட்ட**JSON வெளியீடு** :
 
-| Aspect               | Plain-text format (`/api/usage/om-usage` / `@@om-usage`)                                                        | JSON format (`?format=json`)                                                                         |
-| :------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
-| **Output field**     | `NN% left` (எ.கா., `20% left`)                                                                                  | `provider.quotas` / `providers[].quotas`                                                             |
-| **Measurement**      | **Cutoff-adjusted usable allowance**: cutoff threshold-க்கு மேலுள்ள மீதமுள்ள திறன்                              | **Raw upstream quota**: மாற்றப்படாத provider அளவீடு                                                  |
-| **Cutoff scaling**   | `effectiveRemainingPercent()` மூலம் அளவிடப்படுகிறது; இதனால் பாதுகாக்கப்பட்ட reserve `0% left` எனக் காட்டப்படும் | இல்லை (provider தெரிவித்த raw snapshot values)                                                       |
-| **Threshold data**   | காட்டப்படும் சதவீதத்தில் இணைக்கப்பட்டுள்ளது                                                                     | ஒவ்வொரு connection-க்கும் `quotaWindowThresholds`-இல் (அல்லது server defaults-இல்) சேமிக்கப்படுகிறது |
-| **Primary consumer** | Interactive CLIs, terminal prompts, human operators                                                             | Programmatic integrations, dashboards, analytics, billing trackers                                   |
+| அம்சம்                | எளிய உரை வடிவம் (`/api/usage/om-usage` / `@@om-usage`)                                                            | JSON வடிவம் (`?format=json`)                                                          |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| **வெளியீடு புலம்**    | `NN% left` (எ.கா., `20% left`)                                                                                    | `provider.quotas` / `providers[].quotas`                                              |
+| **அளவீடு**            | **கட்ஆஃப்-சரிசெய்யப்பட்ட பயன்படுத்தக்கூடிய கொடுப்பனவு** : வெட்டு வாசலுக்கு மேல் மீதமுள்ள திறன்                    | **ரா அப்ஸ்ட்ரீம் ஒதுக்கீடு** : சரிசெய்யப்படாத வழங்குநர் அளவீடு                        |
+| **கட்ஆஃப் ஸ்கேலிங்**  | `effectiveRemainingPercent()` வழியாக அளவிடப்படுகிறது, எனவே பாதுகாக்கப்பட்ட இருப்பு `0% left` என வாசிக்கப்படுகிறது | எதுவும் இல்லை (வழங்குபவர் அறிக்கையின்படி மூல ஸ்னாப்ஷாட் மதிப்புகள்)                   |
+| **வரம்பு தரவு**       | காட்டப்படும் சதவீதத்தில் இணைக்கப்பட்டது                                                                           | ஒரு இணைப்புக்கு `quotaWindowThresholds` இல் சேமிக்கப்படும் (அல்லது சர்வர் இயல்புநிலை) |
+| **முதன்மை நுகர்வோர்** | ஊடாடும் CLIs, முனையத் தூண்டுதல்கள், மனித ஆபரேட்டர்கள்                                                             | நிரல் ஒருங்கிணைப்புகள், டாஷ்போர்டுகள், பகுப்பாய்வுகள், பில்லிங் டிராக்கர்கள்          |
 
-#### Cutoff Adjustment Formula
+#### கட்ஆஃப் அட்ஜஸ்ட்மெண்ட் ஃபார்முலா
 
-Upstream exhaustion-ஐத் தடுக்க OmniRoute proactive quota cutoffs-ஐ ஆதரிக்கிறது (connection-இன் `quotaWindowThresholds`, provider defaults அல்லது global resilience settings மூலம் கட்டமைக்கப்படுகிறது). ஒரு quota window-இல் cutoff threshold (எ.கா., `cutoff = 25%`) செயல்பாட்டில் இருக்கும்போது, text renderer மீதமுள்ள allowance-ஐ இவ்வாறு கணக்கிடுகிறது:
+OmniRoute அப்ஸ்ட்ரீம் சோர்வைத் தடுக்க முன்முயற்சியான ஒதுக்கீடு வெட்டுக்களை ஆதரிக்கிறது (இணைப்பு `quotaWindowThresholds`, வழங்குநரின் இயல்புநிலைகள் அல்லது உலகளாவிய பின்னடைவு அமைப்புகள் வழியாக உள்ளமைக்கப்பட்டது). ஒதுக்கீட்டுச் சாளரத்தில் ஒரு கட்ஆஃப் த்ரெஷோல்ட் (எ.கா., `cutoff = 25%`) செயல்பாட்டில் இருக்கும்போது, உரை ரெண்டரர் மீதமுள்ள கொடுப்பனவை இவ்வாறு கணக்கிடுகிறார்:
 
-- `remaining <= cutoff` என்றால்: `0%`-ஐத் திருப்பி வழங்கும்.
-- `remaining > cutoff` என்றால்: `((remaining - cutoff) / (100 - cutoff)) * 100`-ஐத் திருப்பி வழங்கும்.
+- `remaining <= cutoff` என்றால்: `0%` ஐத் தருகிறது.
+- `remaining > cutoff` என்றால்: `((remaining - cutoff) / (100 - cutoff)) * 100` ஐத் தருகிறது.
 
-வடிவமைக்கப்பட்ட text output இதை அருகிலுள்ள முழு எண்ணாக (`Math.round(...)`) round செய்கிறது.
+வடிவமைக்கப்பட்ட உரை வெளியீடு இதை அருகிலுள்ள முழு எண்ணுக்கு (`Math.round(...)`) சுற்றும்.
 
 #### விளக்க உதாரணம்
 
-வழங்குநர் சாளரம் **60% மூலப் பயன்பாடு** (அதனால் **40% மூல மீத ஒதுக்கீடு**) மற்றும் அமைக்கப்பட்ட
-**25% மீத-ஒதுக்கீட்டு வெட்டு** வரம்புடன் இருப்பதாகக் கருதுக:
+உடன் வழங்குநர் சாளரத்தைக் கவனியுங்கள்** 60% மூல பயன்பாடு** (எனவே** மீதமுள்ள 40% ஒதுக்கீடு** ) மற்றும் ஒரு கட்டமைக்கப்பட்டது** 25% மீதி-ஒதுக்கீடு வெட்டு** வாசல்:
 
-| பிரதிநிதித்துவம்              | கணக்கீடு                                           |  மீதம்  |            குறிக்கப்படும் பயன்பாடு            |
-| :---------------------------- | :------------------------------------------------- | :-----: | :-------------------------------------------: |
-| **மூல JSON (`?format=json`)** | மேல்நிலை snapshot (`quotas[window]`)               | **40%** |                    **60%**                    |
-| **உரை வடிவம் (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (`100 - remaining` எனக் கணக்கிட்டால்) |
+| பிரதிநிதித்துவம்              | கணக்கீடு                                           | மீதமுள்ளவை |       மறைமுகமாக பயன்படுத்தப்பட்டது        |
+| :---------------------------- | :------------------------------------------------- | :--------: | :---------------------------------------: |
+| **மூல JSON (`?format=json`)** | அப்ஸ்ட்ரீம் ஸ்னாப்ஷாட் (`quotas[window]`)          |  **40%**   |                  **60%**                  |
+| **உரை வடிவம் (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**   | **80%** ( `100 - remaining` கணக்கிட்டால்) |
 
-- **உரை ஏன் 20% மீதம் எனக் காட்டுகிறது:** கணக்கில் உடலளவில் மீதமுள்ள 40% ஒதுக்கீட்டில், வெட்டு கொள்கையால்
-  25% ஒதுக்கப்பட்டுள்ளது. இந்த இணைப்பிற்கான வழியனுப்பலை router நிறுத்துவதற்கு முன், பயன்படுத்தக்கூடிய 75% தலைவாய்ப்பில்
-  அழைப்பாளர் 15% மட்டுமே மீதமாகக் கொண்டுள்ளார். அளவிடுதல், வழியனுப்பல் நிறுத்தப்படும் நேரத்திலேயே இணைப்பு
-  தீர்ந்துவிட்டதைக் (`0% left`) துல்லியமாகச் சுட்டிக்காட்டுவதை உறுதிசெய்கிறது.
-- **JSON ஏன் மூல மதிப்புகளைப் பாதுகாக்கிறது:** JSON payload சரியான வழங்குநர் snapshot-ஐ (`UsageSnapshot`)
-  வழங்குகிறது; எனவே வெளிப்புறக் கருவிகள், சேவையகப் பக்க இழப்புள்ள அளவிடல் இல்லாமல், உண்மையான மேல்நிலைப் பயன்பாடு
-  மற்றும் இணைப்பு-நிலை `quotaWindowThresholds` ஆகியவற்றை அணுக முடியும்.
+- **உரை ஏன் 20% இடதுபுறத்தைக் காட்டுகிறது:** கணக்கில் மீதமுள்ள 40% இயற்பியல் ஒதுக்கீட்டில், 25% வெட்டுக் கொள்கையால் ஒதுக்கப்பட்டுள்ளது. ரூட்டர் இந்த இணைப்பிற்கு ரூட்டிங் செய்வதை நிறுத்தும் முன், 75% பயன்படுத்தக்கூடிய ஹெட்ரூமில் 15% மட்டுமே அழைப்பாளரிடம் உள்ளது. ரூட்டிங் நிறுத்தப்படும் போது, இணைப்பு சமிக்ஞைகள் தீர்ந்து போவதை (`0% left`) அளவிடுதல் உறுதி செய்கிறது.
+- **JSON ஏன் மூல மதிப்புகளைப் பாதுகாக்கிறது:** JSON பேலோட் சரியான வழங்குநரின் ஸ்னாப்ஷாட்டை (`UsageSnapshot`) வழங்குகிறது, எனவே வெளிப்புறக் கருவிகள் சர்வர்-சைட் லாசி ஸ்கேலிங் இல்லாமல் கிரவுண்ட்-ட்ரூத் அப்ஸ்ட்ரீம் பயன்பாடு மற்றும் இணைப்பு-நிலை `quotaWindowThresholds` ஆகியவற்றை அணுகலாம்.
 
-#### நுகர்வோர் இடமாற்ற வழிகாட்டி
+#### நுகர்வோர் இடம்பெயர்வு வழிகாட்டுதல்
 
-வெளிப்புற ஒருங்கிணைப்பு (எடுத்துக்காட்டாக, ஒரு editor plugin அல்லது agent extension) முன்பு உரை
-endpoint-ஐ (`NN% left`) பிரித்து, பயன்படுத்திய சதவீதத்தை `100 - NN` எனக் கணக்கிட்டிருந்தால், `?format=json`-க்கு
-மாறுவதன் பொருள்:
+வெளிப்புற ஒருங்கிணைப்பு (எடிட்டர் செருகுநிரல் அல்லது முகவர் நீட்டிப்பு போன்றவை) முன்பு உரை இறுதிப்புள்ளியை (`NN% left`) ஸ்கிராப் செய்து, பயன்படுத்தப்பட்ட சதவீதத்தை `100 - NN` ஆகக் கணக்கிட்டால், `?format=json` க்கு இடம்பெயர்வது:
 
-- மூல JSON மதிப்புகளைப் படிப்பது **உண்மையான மேல்நிலைப் பயன்பாட்டை** பிரதிபலிக்கும் (மேலுள்ள எடுத்துக்காட்டில் 60% பயன்படுத்தப்பட்டது).
-- ஒருங்கிணைப்பு உரை endpoint-இன் பயன்படுத்தக்கூடிய-அனுமதி பொருளைத் தொடர்ந்து பயன்படுத்த விரும்பினால், இணைப்பு-நிலை
-  மேலெழுதல்களுக்கான `quotaWindowThresholds`-ஐப் பயன்படுத்தி, பயனுள்ள மீதமுள்ள சதவீத சூத்திரத்தை client-side-இல் மதிப்பிடலாம்.
+- raw JSON மதிப்புகளைப் படிப்பது பிரதிபலிக்கும்** உண்மையான அப்ஸ்ட்ரீம் நுகர்வு** (மேலே உள்ள எடுத்துக்காட்டில் 60% பயன்படுத்தப்பட்டது).
+- டெக்ஸ்ட் எண்ட்பாயின்ட்டின் பயன்படுத்தக்கூடிய-அலவன்ஸ் சொற்பொருளைப் பாதுகாக்க ஒருங்கிணைப்பு விரும்பினால், இணைப்பு நிலை மேலெழுதலுக்கு `quotaWindowThresholds` பயன்படுத்தி பயனுள்ள மீதமுள்ள ஃபார்முலா கிளையன்ட் பக்கத்தை மதிப்பீடு செய்யலாம்.
 
 ---
 
@@ -1149,47 +1101,38 @@ https://api.anthropic.com/api/oauth/usage` மற்றும் Codex `GET http
 
 ## டாஷ்போர்டு & மேலாண்மை
 
-மேலாண்மை வழித்தடங்கள் (`/api/*` except பொது auth/login) **வழக்கமான inference API keys மூலம் அங்கீகரிக்கப்படுவதில்லை**. நற்சான்று குடும்பங்கள், வரம்புகள் மற்றும் curl எடுத்துக்காட்டுகளுக்கு:
-[மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md).
+மேலாண்மை வழிகள் (பொது auth/login தவிர `/api/*` )** இல்லை** சாதாரண அனுமானம் API விசைகளால் அங்கீகரிக்கப்பட்டது. நற்சான்றிதழ் குடும்பங்கள், நோக்கங்கள் மற்றும் சுருட்டை எடுத்துக்காட்டுகள்: [மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md).
 
 ### அங்கீகாரம்
 
-| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                                                |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/auth/login`             | POST     | உள்நுழைவு                                                                                                                                                                                                                                                                                                                                  |
-| `/api/auth/logout`            | POST     | வெளியேறுதல்                                                                                                                                                                                                                                                                                                                                |
-| `/api/settings/require-login` | GET/POST | உள்நுழைவு நிலை (GET, பொது). POST கடவுச்சொல்லை அமைக்கிறது / உள்நுழைவை மாற்றுகிறது: கடவுச்சொல் இருந்தவுடன் இயக்குநருக்கு மட்டும் (டாஷ்போர்டு அமர்வு, உள்ளக CLI, அல்லது உள்நுழைவு முடக்கப்பட்டிருந்தால் — API keys மற்றும் `oma_` tokens க்கு `403` கிடைக்கும்); கடவுச்சொல்லை மாற்றுவதற்கு டாஷ்போர்டு அமர்வு `currentPassword`-ஐ அனுப்புகிறது |
+| இறுதிப்புள்ளி                 | முறை     | விளக்கம்                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | உள்நுழைக                                                                                                                                                                                                                                                                                                                            |
+| `/api/auth/logout`            | POST     | வெளியேறு                                                                                                                                                                                                                                                                                                                            |
+| `/api/settings/require-login` | GET/POST | உள்நுழைவு நிலை (GET, பொது). POST கடவுச்சொல்லை அமைக்கிறது / உள்நுழைவை மாற்றுகிறது: ஆபரேட்டர்-ஒருமுறை கடவுச்சொல் இருந்தால் மட்டுமே (டாஷ்போர்டு அமர்வு, உள்ளூர் CLI, அல்லது உள்நுழைவு முடக்கப்பட்ட — API விசைகள் மற்றும் `oma_` டோக்கன்கள் `403` கிடைக்கும் ); ஒரு டாஷ்போர்டு அமர்வு கடவுச்சொல்லை மாற்ற `currentPassword` அனுப்புகிறது |
 
 ### வழங்குநர் மேலாண்மை
 
-| Endpoint                                | Method                    | Description                                                                                                                                                                                        |
-| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | வழங்குநர்களைப் பட்டியலிடுதல் / உருவாக்குதல்                                                                                                                                                        |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | வழங்குநரை நிர்வகித்தல்                                                                                                                                                                             |
-| `/api/providers/[id]/test`              | POST                      | வழங்குநர் இணைப்பைச் சோதித்தல்                                                                                                                                                                      |
-| `/api/providers/[id]/models`            | GET                       | வழங்குநர் மாதிரிகளைப் பட்டியலிடுதல்                                                                                                                                                                |
-| `/api/providers/validate`               | POST                      | வழங்குநர் கட்டமைப்பைச் சரிபார்த்தல்                                                                                                                                                                |
-| `/api/providers/bulk`                   | POST                      | ஒரு வழங்குநருக்கான API keys-ஐ மொத்தமாகச் சேர்த்தல்                                                                                                                                                 |
-| `/api/providers/import`                 | POST                      | பகுக்கப்பட்ட CSV/JSON கோப்பிலிருந்து பல்வகை வழங்குநர் LIST-ஐ இறக்குமதி செய்தல் (#6836); ஒவ்வொரு வரிக்கும் பகுதி-தோல்வி முடிவுகள்                                                                   |
-| `/api/provider-nodes*`                  | Various                   | வழங்குநர் முனை மேலாண்மை                                                                                                                                                                            |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | தனிப்பயன் மாதிரிகள் மற்றும் ஒவ்வொரு மாதிரிக்குமான மேலெழுதல்கள் (சேர்த்தல், புதுப்பித்தல், மறைத்தல்/காண்பித்தல், நீக்குதல்)                                                                         |
-| `/api/provider-models/validate-and-add` | POST                      | மேலாண்மை-அங்கீகரிக்கப்பட்ட, விருப்பமாகத் தேர்ந்தெடுக்கக்கூடிய கடுமையான-இணைப்பு சரிபார்ப்பு மற்றும் அணு தனிப்பயன்-மாதிரி பதிவு; [மாதிரி சரிபார்ப்பு](../guides/MODEL-VALIDATION.md)-ஐப் பார்க்கவும் |
+| இறுதிப்புள்ளி                           | முறை                      | விளக்கம்                                                                                                                                                                |
+| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | வழங்குநர்களை பட்டியலிடவும் / உருவாக்கவும்                                                                                                                               |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | வழங்குநரை நிர்வகிக்கவும்                                                                                                                                                |
+| `/api/providers/[id]/test`              | POST                      | சோதனை வழங்குநர் இணைப்பு                                                                                                                                                 |
+| `/api/providers/[id]/models`            | GET                       | வழங்குநர் மாதிரிகள் பட்டியல்                                                                                                                                            |
+| `/api/providers/validate`               | POST                      | வழங்குநர் கட்டமைப்பை சரிபார்க்கவும்                                                                                                                                     |
+| `/api/providers/bulk`                   | POST                      | ONE வழங்குனருக்கான API விசைகளை மொத்தமாகச் சேர்க்கவும்                                                                                                                   |
+| `/api/providers/import`                 | POST                      | பாகுபடுத்தப்பட்ட CSV/JSON கோப்பிலிருந்து (#6836) ஒரு பன்முக வழங்குநர் LIST இறக்குமதி செய்யவும்; ஒரு வரிசை பகுதி தோல்வி முடிவுகள்                                        |
+| `/api/provider-nodes*`                  | பல்வேறு                   | வழங்குநர் முனை மேலாண்மை                                                                                                                                                 |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | தனிப்பயன் மாதிரிகள் மற்றும் ஒவ்வொரு மாதிரி மேலெழுதுதல்கள் (சேர், புதுப்பித்தல், hide/show, நீக்கு)                                                                      |
+| `/api/provider-models/validate-and-add` | POST                      | மேலாண்மை-அங்கீகரிக்கப்பட்ட, கண்டிப்பான-இணைப்பு சரிபார்ப்பு மற்றும் அணு தனிப்பயன் மாதிரி பதிவு தேர்வு; [மாதிரி சரிபார்ப்பைப்](../guides/MODEL-VALIDATION.md) பார்க்கவும் |
 
-ஒத்திசைக்கப்பட்ட/இறக்குமதி செய்யப்பட்ட மாதிரிகளுக்கு, `PUT /api/provider-models` ஆனது `provider`, `modelId` மற்றும்
-`maxOutputTokenOverride` ஆகியவற்றை ஏற்கிறது: நேர்ம முழு எண் கைமுறை output-token வரம்பை அமைக்கிறது, மேலும் `null`
-அதை அழித்து இயல்புநிலையை மீட்டமைக்கிறது. `GET /api/provider-models?provider=<provider>` ஆனது இந்த மதிப்புகளை
-`modelOutputOverrides`-இல் வழங்குகிறது; இதில் தனிப்பயன்-மாதிரி வரிசை இல்லாத மாதிரிகளும் அடங்கும். இந்த மேலெழுதல்
-runtime `max_output_tokens` திறனைப் பயன்படுத்துகிறது மற்றும் மாதிரி மீண்டும் ஒத்திசைக்கப்பட்டாலும் நீடிக்கிறது. OpenAI-இணக்கமான
-வழங்குநர் பக்கம் அதே திருத்து/அழி கட்டுப்பாடுகளை வழங்குகிறது மற்றும் வெளிப்படையான vision ஆதரவு கொண்ட மாதிரிகளைக் குறிக்கிறது.
+synced/imported மாதிரிகளுக்கு, `PUT /api/provider-models` `provider`, `modelId`, மற்றும் `maxOutputTokenOverride` ஏற்றுக்கொள்கிறது: ஒரு நேர்மறை முழு எண் கையேடு வெளியீடு-டோக்கன் தொப்பியை அமைக்கிறது, மேலும் இயல்புநிலையை மீட்டெடுக்க `null` அதை அழிக்கிறது. `GET /api/provider-models?provider=<provider>` இந்த மதிப்புகளை `modelOutputOverrides` இல் வழங்குகிறது, தனிப்பயன் மாதிரி வரிசை இல்லாத மாதிரிகள் உட்பட. மேலெழுதுதல் இயக்க நேர `max_output_tokens` திறனைப் பயன்படுத்துகிறது மற்றும் ஒரு மாதிரி மறு-ஒத்திசைவைத் தக்கவைக்கிறது. OpenAI-இணக்கமான வழங்குநர் பக்கம் அதே edit/clear கட்டுப்பாடுகளை வழங்குகிறது மற்றும் வெளிப்படையான பார்வை ஆதரவுடன் மாதிரிகளைக் குறிக்கிறது.
 
-இணக்கமான வழங்குநர் முனையில், எழுதும் வழித்தடங்கள் (`POST`, `PUT`, `PATCH`, `DELETE` மற்றும்
-`/api/provider-models/validate-and-add`) மாதிரி id-ஐ upstream-இன் அடிப்படை id ஆகச் சேமிக்கின்றன: முன்னொட்டு கொண்ட பட்டியலிலிருந்து ஒட்டப்பட்ட id-ல், முனையின் சொந்த முன்னொட்டின் தொடக்க அடுக்குகள் ஏதேனும் இருந்தால் அவை சுருக்கப்படுகின்றன, மேலும் பதில்கள் சேமிக்கப்பட்ட id-ஐ எதிரொலிக்கின்றன. canonical வழங்குநர்களின் slash கொண்ட id-கள் (எ.கா. `nvidia/nemotron-…`) அப்படியே சேமிக்கப்படுகின்றன. `/v1/models` ஒருபோதும் அடுக்கப்பட்ட `<prefix>/<prefix>/<model>` id-ஐ வெளியிடாது.
+இணக்கமான வழங்குநர் முனையில், எழுதும் பாதைகள் (`POST`, `PUT`, `PATCH`, `DELETE` மற்றும் `/api/provider-models/validate-and-add`) மாதிரி ஐடியை வெற்று அப்ஸ்ட்ரீம் ஐடியாகச் சேமிக்கிறது: முன்னொட்டு பட்டியலிலிருந்து ஒட்டப்பட்ட ஒரு ஐடியில் முனையின் சொந்த முன்னொட்டுச் சரிந்து, சேமிக்கப்பட்ட பதில்கள் ஐடி எதிரொலிக்கும். நியமன வழங்குநர்களின் slashed idகள் (எ.கா. `nvidia/nemotron-…`) வார்த்தையில் சேமிக்கப்படும். `/v1/models` ஒருபோதும் அடுக்கப்பட்ட `<prefix>/<prefix>/<model>` ஐடியை வெளியிடாது.
 
-தனிப்பயன் Chat Completions முனைகள், வெளிப்படையாகக் குறிப்பிடப்பட்ட reasoning opt-out-களை upstream backend-க்கு ஏற்றவாறு மாற்றியமைக்கின்றன. வெற்றிகரமான இணைப்புச் சோதனை, `/models` பதிவில் அங்கீகரிக்கப்பட்ட `owned_by` மதிப்பு இருப்பது நிரூபிக்கப்படும் ஒவ்வொரு துல்லியமான model ID-க்கும் chat-template கட்டுப்பாடுகளைத் தானாகத் தேர்ந்தெடுக்கிறது: `vllm`, `sglang`, அல்லது `llamacpp`.
-வெளிப்படையான OpenAI-இணக்கமான wrappers, அசல் model பதிவை nested
-`openai` object-க்குள் பாதுகாத்திருக்கலாம்; கண்டறிதல் இத்தகைய envelopes-களில் அதிகபட்சம் மூன்று நிலைகள் வரை தொடர்கிறது. Ownership இல்லாத, அறியப்படாத, அல்லது முரண்படும் ownership கொண்ட models, வழக்கமான OpenAI நடத்தையைத் தொடர்கின்றன. கண்டறிதல் ஏற்கனவே உள்ள catalog request-ஐ மீண்டும் பயன்படுத்துகிறது, completion tokens எதையும் உருவாக்காது, மேலும் connection endpoint மாறும்போது செல்லாததாக்கப்படுகிறது.
+பிரத்தியேக அரட்டை நிறைவு முனைகள் வெளிப்படையான பகுத்தறிவு விலகல்களை அப்ஸ்ட்ரீம் பின்தளத்தில் மாற்றியமைக்கிறது. ஒரு வெற்றிகரமான இணைப்புச் சோதனையானது, ஒவ்வொரு சரியான மாதிரியான ID க்கான அரட்டை-வார்ப்புருக் கட்டுப்பாடுகளைத் தானாகவே தேர்ந்தெடுக்கும், அதன் `/models` உள்ளீடு அங்கீகரிக்கப்பட்ட `owned_by` மதிப்பை நிரூபிக்கிறது: `vllm`, `sglang`, அல்லது `llamacpp`. வெளிப்படையான OpenAI-இணக்கமான ரேப்பர்கள், உள்ளமைக்கப்பட்ட `openai` பொருளின் உள்ளே அசல் மாதிரி உள்ளீட்டைப் பாதுகாக்கலாம்; கண்டறிதல் மூன்று அத்தகைய உறைகளைப் பின்தொடர்கிறது. காணாமல் போன, தெரியாத அல்லது முரண்பட்ட உரிமையுடன் கூடிய மாதிரிகள் சாதாரண OpenAI நடத்தையை வைத்திருக்கின்றன. கண்டறிதல் ஏற்கனவே உள்ள அட்டவணை கோரிக்கையை மீண்டும் பயன்படுத்துகிறது, நிறைவு டோக்கன்களை உருவாக்காது, மேலும் இணைப்பு எண்ட்பாயிண்ட் மாறும்போது செல்லாததாகிவிடும்.
 
-இந்த metadata-வை வெளிப்படுத்தாத backend-க்கு நடத்தையை நிலைநிறுத்த, ஏற்கனவே உள்ள partial provider update API-ஐப் பயன்படுத்தவும்:
+அந்த மெட்டாடேட்டாவை அம்பலப்படுத்தாத பின்தளத்தின் நடத்தையைப் பின் செய்ய, தற்போதுள்ள பகுதி வழங்குநர் புதுப்பிப்பு API பயன்படுத்தவும்:
 
 ```json
 {
@@ -1199,91 +1142,91 @@ runtime `max_output_tokens` திறனைப் பயன்படுத்த
 }
 ```
 
-அந்த body-ஐ `PUT /api/providers/<connection-id>` உடன் அனுப்பவும். அந்த connection-இல், `none` என்ற வெளிப்படையான reasoning effort, `chat_template_kwargs.thinking=false` மற்றும் `chat_template_kwargs.enable_thinking=false` ஆக அனுப்பப்படுகிறது. Server-side reasoning rule ஒன்று effort-ஐ கட்டாயப்படுத்தாவிட்டால், வெளிப்படையான native template values முன்னுரிமை பெறுகின்றன. தனிப்பயன் OpenAI-இணக்கமான connection ஒன்று Chat Completions body-ஐ dispatch செய்யும் போது மட்டுமே இந்த அமைப்பு பொருந்தும்; Responses requests மற்றும் வழக்கமான providers தங்களுடைய native request வடிவத்தையே வைத்திருக்கும். வழக்கமான OpenAI `reasoning_effort` passthrough-ஐ கட்டாயப்படுத்த `reasoningControl`-ஐ `openai` என அமைக்கவும், அல்லது automatic detection-ஐப் பயன்படுத்த அதை விடுபடுத்தவும்/`null` என அமைக்கவும்.
+அந்த உடலை `PUT /api/providers/<connection-id>` உடன் அனுப்புங்கள். அந்த இணைப்பில், `none` இன் வெளிப்படையான பகுத்தறிவு முயற்சி `chat_template_kwargs.thinking=false` மற்றும் `chat_template_kwargs.enable_thinking=false` என அனுப்பப்படுகிறது. ஒரு சர்வர் பக்க பகுத்தறிவு விதி முயற்சியை கட்டாயப்படுத்தாத வரை வெளிப்படையான சொந்த டெம்ப்ளேட் மதிப்புகள் அதிகாரப்பூர்வமாக இருக்கும். தனிப்பயன் OpenAI-இணக்கமான இணைப்பு அரட்டை நிறைவுகளின் அமைப்பை அனுப்பும்போது மட்டுமே இந்த அமைப்பு பொருந்தும்; பதில்கள் கோரிக்கைகள் மற்றும் சாதாரண வழங்குநர்கள் தங்கள் சொந்த கோரிக்கை வடிவத்தை வைத்திருக்கிறார்கள். சாதாரண OpenAI `reasoning_effort` பாஸ்த்ரூவை கட்டாயப்படுத்த `reasoningControl` `openai` ஆக அமைக்கவும் அல்லது தானியங்கி கண்டறிதலைப் பயன்படுத்த it/set ஐ `null` ஆக தவிர்க்கவும்.
 
-Claude Code auto-mode classifier requests-ல் வெளிப்படையான reasoning controls எதுவும் இல்லாதபோது, native thinking இயல்புநிலையாக disabled ஆக அமைக்கப்படுகிறது. கண்டறிதல், model names அல்லது completion limits-ஐ அல்லாமல், Claude-format requests-இல் உள்ள classifier-ன் system marker-ஐப் பயன்படுத்துகிறது. வெளிப்படையான body controls, ஆதரிக்கப்படும் effort/thinking headers, routing rules, மற்றும் resolved model effort ஆகியவை தங்களுடைய முந்தைய முன்னுரிமையைத் தொடர்கின்றன. இரு classifier நிலைகளும் தங்களுடைய prompts, completion limits, stop sequences, மற்றும் உண்மையான upstream permission verdicts-ஐப் பாதுகாக்கின்றன; இரண்டாவது நிலை, கோரிய visible reasoning-ஐ சாதாரண உரையாக இன்னும் உருவாக்கக்கூடும்.
+Claude குறியீடு தானியங்கு முறை வகைப்படுத்தி, வெளிப்படையான காரணக் கட்டுப்பாடுகள் இல்லாதபோது, இயல்புநிலை நேட்டிவ் சிந்தனையை முடக்குமாறு கோருகிறது. கண்டறிதல் கிளாட்-வடிவ கோரிக்கைகளில் வகைப்படுத்தியின் கணினி மார்க்கரைப் பயன்படுத்துகிறது, மாதிரி பெயர்கள் அல்லது நிறைவு வரம்புகள் அல்ல. வெளிப்படையான உடல் கட்டுப்பாடுகள், ஆதரிக்கப்படும் effort/thinking தலைப்புகள், ரூட்டிங் விதிகள் மற்றும் தீர்க்கப்பட்ட மாதிரி முயற்சி ஆகியவை அவற்றின் தற்போதைய முன்னுரிமையை வைத்திருக்கின்றன. இரண்டு வகைப்படுத்தி நிலைகளும் அவற்றின் தூண்டுதல்கள், நிறைவு வரம்புகள், நிறுத்தத் தொடர்கள் மற்றும் உண்மையான அப்ஸ்ட்ரீம் அனுமதி தீர்ப்புகளைத் தக்கவைத்துக்கொள்கின்றன; இரண்டாவது நிலையானது அதன் கோரப்பட்ட புலப்படும் பகுத்தறிவை இன்னும் சாதாரண உரையாக உருவாக்க முடியும்.
 
-### OAuth ஓட்டங்கள்
+### OAuth பாய்கிறது
 
-| Endpoint                         | Method  | Description            |
-| -------------------------------- | ------- | ---------------------- |
-| `/api/oauth/[provider]/[action]` | Various | Provider-சார்ந்த OAuth |
+| இறுதிப்புள்ளி                    | முறை    | விளக்கம்                    |
+| -------------------------------- | ------- | --------------------------- |
+| `/api/oauth/[provider]/[action]` | பல்வேறு | வழங்குநர்-குறிப்பிட்ட OAuth |
 
-### Routing & Config
+### ரூட்டிங் & கட்டமைப்பு
 
-| Endpoint              | Method   | Description                                  |
+| இறுதிப்புள்ளி         | முறை     | விளக்கம்                                     |
 | --------------------- | -------- | -------------------------------------------- |
-| `/api/models`         | GET/PUT  | Model பட்டியல் / alias புதுப்பிப்பு          |
-| `/api/models/alias`   | GET/POST | Model aliases                                |
-| `/api/models/catalog` | GET      | Provider + type அடிப்படையிலான அனைத்து models |
-| `/api/combos*`        | Various  | Combo மேலாண்மை                               |
-| `/api/keys*`          | Various  | API key மேலாண்மை                             |
-| `/api/pricing`        | GET      | Model விலை நிர்ணயம்                          |
+| `/api/models`         | GET/PUT  | மாதிரி பட்டியல் / மாற்றுப்பெயர் புதுப்பிப்பு |
+| `/api/models/alias`   | GET/POST | மாதிரி மாற்றுப்பெயர்கள்                      |
+| `/api/models/catalog` | GET      | வழங்குநர் + வகையின்படி அனைத்து மாடல்களும்    |
+| `/api/combos*`        | பல்வேறு  | சேர்க்கை மேலாண்மை                            |
+| `/api/keys*`          | பல்வேறு  | API முக்கிய மேலாண்மை                         |
+| `/api/pricing`        | GET      | மாதிரி விலை நிர்ணயம்                         |
 
-#### Model limit-ன் மூலம்
+#### மாதிரி வரம்பு ஆதாரம்
 
-`GET /api/models?withLimits=1` (`true` என்பதும் பொருந்தும்; `0`/`false` அல்லது இதை விடுபடுத்துவது இயல்புநிலை payload-ஐ மாற்றமின்றி வைத்திருக்கும்) ஒவ்வொரு model row-க்கும் `contextWindow`, `maxInputTokens`, `maxOutputTokens` மற்றும் `capsSource` object-ஐச் சேர்க்கிறது. ஒவ்வொரு limit-ஐ வழங்கிய rule-ஐ `capsSource` குறிப்பிடுகிறது; இதனால் ஆச்சரியமளிக்கும் limit (உதாரணமாக, 1M model-ல் 128k) அதன் மூலத்திற்குப் பின்தொடரப்படலாம். தீர்மானிக்கப்பட்ட values-களையே routing பயன்படுத்துகிறது; இந்த flag fields-ஐ மட்டுமே சேர்க்கிறது, எந்த value-ஐயும் மாற்றாது. வேறு எந்த `withLimits` value-மும் `400` உடன் நிராகரிக்கப்படும்.
+`GET /api/models?withLimits=1` (மேலும் `true`; `0`/`false` அல்லது அதைத் தவிர்ப்பது இயல்புநிலை பேலோடை மாற்றாமல் வைத்திருக்கும்) ஒவ்வொரு மாதிரி வரிசையிலும் `contextWindow`, `maxInputTokens`, `maxOutputTokens` மற்றும் ஒரு `capsSource` பொருளைச் சேர்க்கிறது. `capsSource` ஒவ்வொரு வரம்பையும் வழங்கிய விதியை பெயரிடுகிறது, எனவே ஒரு ஆச்சரியமான வரம்பு (உதாரணமாக 1M மாடலில் 128k) அதன் தோற்றத்தைக் கண்டறியலாம். தீர்க்கப்பட்ட மதிப்புகள் ரூட்டிங் பயன்பாடுகளாகும்; கொடி புலங்களை மட்டுமே சேர்க்கிறது மற்றும் மதிப்பை மாற்றாது. வேறு எந்த `withLimits` மதிப்பும் `400` உடன் நிராகரிக்கப்படும்.
 
-| `capsSource` value                           | Origin                                                                         |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| `override:context`                           | நிலைநிறுத்தப்பட்ட context-window override (`model_context_overrides`)          |
-| `override:max_input` / `override:max_output` | நிலைநிறுத்தப்பட்ட `max_input_tokens` / `max_output_tokens` capability override |
-| `static-authoritative:<provider>/<model>`    | Static authoritative context-window அட்டவணை                                    |
-| `synced:<provider>/<model>`                  | models.dev-ல் ஒத்திசைக்கப்பட்ட capability row                                  |
-| `registry:<provider>/<model>`                | Provider registry பதிவு                                                        |
-| `spec:<model>`                               | Static model spec                                                              |
-| `effort-base:` prefix                        | effort-suffixed variant-ன் base model-லிருந்து பெறப்பட்ட row                   |
-| `none`                                       | எந்த source-மும் limit-ஐ அறிவிக்கவில்லை (value `null`)                         |
+| `capsSource` மதிப்பு                         | தோற்றம்                                                                            |
+| -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `override:context`                           | தொடர்ந்து சூழல்-சாளர மேலெழுதல் (`model_context_overrides`)                         |
+| `override:max_input` / `override:max_output` | நீடித்த `max_input_tokens` / `max_output_tokens` திறன் மேலெழுதப்பட்டது             |
+| `static-authoritative:<provider>/<model>`    | நிலையான அதிகாரப்பூர்வ சூழல்-சாளர அட்டவணை                                           |
+| `synced:<provider>/<model>`                  | models.dev ஒத்திசைக்கப்பட்ட திறன் வரிசை                                            |
+| `registry:<provider>/<model>`                | வழங்குநர் பதிவேட்டில் உள்ளீடு                                                      |
+| `spec:<model>`                               | நிலையான மாதிரி விவரக்குறிப்பு                                                      |
+| `effort-base:` முன்னொட்டு                    | முயற்சி-பின்னொட்டு மாறுபாட்டின் அடிப்படை மாதிரியிலிருந்து வரிசை கடன் வாங்கப்பட்டது |
+| `none`                                       | எந்த ஆதாரமும் வரம்பை அறிவிக்கவில்லை (மதிப்பு `null`)                               |
 
-Implementation: `src/lib/modelCapabilities.ts`-இல் உள்ள `getResolvedModelCapabilitiesWithLimitSources()`
-மற்றும் `src/lib/modelCapabilityLimits.ts`-இல் உள்ள precedence chains.
+செயல்படுத்தல்: `src/lib/modelCapabilities.ts` இல் `getResolvedModelCapabilitiesWithLimitSources()` மற்றும் `src/lib/modelCapabilityLimits.ts` இல் முன்னுரிமை சங்கிலிகள்.
 
-### பயன்பாடு & Analytics
+### பயன்பாடு & பகுப்பாய்வு
 
-| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                                                                                                                   |
-| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | பயன்பாட்டு வரலாறு                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/usage/logs`                | GET             | பயன்பாட்டுப் பதிவுகள்                                                                                                                                                                                                                                                                                                                                                         |
-| `/api/usage/request-logs`        | GET             | கோரிக்கை-நிலைப் பதிவுகள்                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/[connectionId]`      | GET             | ஒவ்வொரு இணைப்பிற்குமான பயன்பாடு                                                                                                                                                                                                                                                                                                                                               |
-| `/api/usage/token-limits`        | GET/POST/DELETE | ஒவ்வொரு API விசைக்குமான டோக்கன்-வரம்பு பட்ஜெட்டுகள்                                                                                                                                                                                                                                                                                                                           |
-| `/api/usage/model-latency-stats` | GET             | வழங்குநர்/மாடலுக்கு ஏற்ப சுழலும் தாமதத் திரட்டு (avg/p50/p95/p99, வெற்றிவிகிதம்); வடிகட்டிகள்: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                                |
-| `/api/usage/cache-health`        | GET             | `call_logs`-இல் உள்ள அழைப்பு தற்காலிகச் சேமிப்பகத்தின் ஆரோக்கியச் சுருக்கம் — எழுதுதல்/வாசித்தல் விகிதம், p50/p90/p99 எழுதுதல்-அளவு விநியோகம், அதிக-எழுதுதல் செறிவு, ஒவ்வொரு மாடலுக்குமான பிரிப்பு, மேலும் `healthy`/`degraded`/`thrash`/`no-data` தீர்ப்பு; வினவல் அளவுருக்கள் `range` (`1h`\|`24h`\|`7d`\|`30d`, இயல்புநிலை `24h`) மற்றும் விருப்பத்தேர்வான `model` (#8827) |
+| இறுதிப்புள்ளி                    | முறை            | விளக்கம்                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | பயன்பாட்டு வரலாறு                                                                                                                                                                                                                                                                                                                         |
+| `/api/usage/logs`                | GET             | பயன்பாட்டு பதிவுகள்                                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/request-logs`        | GET             | கோரிக்கை நிலை பதிவுகள்                                                                                                                                                                                                                                                                                                                    |
+| `/api/usage/[connectionId]`      | GET             | ஒரு இணைப்பு பயன்பாடு                                                                                                                                                                                                                                                                                                                      |
+| `/api/usage/token-limits`        | GET/POST/DELETE | ஒவ்வொரு ஏபிஐ-விசை டோக்கன் வரம்பு பட்ஜெட்டுகள்                                                                                                                                                                                                                                                                                             |
+| `/api/usage/model-latency-stats` | GET             | ரோலிங் per-provider/model லேட்டன்சி அக்கரகேட் (avg/p50/p95/p99, வெற்றி விகிதம்); வடிகட்டிகள்: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                             |
+| `/api/usage/cache-health`        | GET             | `call_logs` — write/read விகிதம், p50/p90/p99 எழுதும் அளவு விநியோகம், கனமான எழுதும் செறிவு, ஒரு மாதிரி பிரிப்பு மற்றும் ஒரு `healthy`/`degraded`/`thrash`/`no-data` தீர்ப்பு ஆகியவற்றின் மீது உடனடி-கேச் சுகாதார சுருக்கம்; வினவல் அளவுருக்கள் `range` (`1h`\| `24h`\| `7d`\| `30d`, இயல்புநிலை `24h`) மற்றும் விருப்பமான `model` (#8827) |
 
-### API விசை அனுமதிகள்
+### API முக்கிய அனுமதிகள்
 
-`PATCH /api/keys/{id}` ஏற்கனவே உள்ள விசையின் அனுமதிகளைப் புதுப்பிக்கிறது. ஒவ்வொரு `/api/keys*` வழித்தடத்தையும் போலவே, இதற்கும் மேலாண்மை அங்கீகாரம் தேவைப்படுகிறது ([மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md)-ஐப் பார்க்கவும்); inference key தேவையில்லை. நீங்கள் மாற்ற விரும்பும் புலங்களை மட்டும் அனுப்பவும்; அவற்றில் எதுவும் இல்லாத கோரிக்கை `No valid fields to update` என்ற செய்தியுடன் நிராகரிக்கப்படும். ஏற்கப்படும் புலங்கள் `src/shared/validation/schemas/keys.ts`-இல் உள்ள `updateKeyPermissionsSchema` மூலம் வரையறுக்கப்படுகின்றன.
+`PATCH /api/keys/{id}` ஏற்கனவே உள்ள விசையின் அனுமதிகளைப் புதுப்பிக்கிறது. ஒவ்வொரு `/api/keys*` வழியையும் போலவே இதற்கு நிர்வாக அங்கீகாரம் தேவை ( [மேலாண்மை அங்கீகாரத்தைப்](../guides/MANAGEMENT-AUTH.md) பார்க்கவும்), அனுமான விசை அல்ல. நீங்கள் மாற்ற விரும்பும் புலங்களை மட்டும் அனுப்பவும்; அவற்றில் எதுவுமில்லாத கோரிக்கை `No valid fields to update` உடன் நிராகரிக்கப்படுகிறது. ஏற்றுக்கொள்ளப்பட்ட புலங்கள் `src/shared/validation/schemas/keys.ts` இல் `updateKeyPermissionsSchema` ஆல் வரையறுக்கப்படுகின்றன.
 
-| புலம்                                       | வகை                                                                        | குறிப்புகள்                                                                                                                                                                     |
-| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | சரம், 1-200 எழுத்துகள்                                                     |                                                                                                                                                                                 |
-| `isActive`                                  | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `isBanned`                                  | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 தேதி நேரம் அல்லது `null`                                          | `null` காலாவதியை அழிக்கும்                                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | பயன்முறை `all` ஆக இருக்கும்போது `allowedModels` காலியாக இருக்க வேண்டும்                                                                                                         |
-| `allowedModels`, `blockedModels`            | அதிகபட்சம் 1000 சரங்களைக் கொண்ட வரிசை                                      |                                                                                                                                                                                 |
-| `allowedCombos`                             | அதிகபட்சம் 500 சரங்களைக் கொண்ட வரிசை                                       | இந்த விசை அழைக்கக்கூடிய சேர்க்கைகளை நிர்ணயிக்கிறது; நேரடி மாதிரிகள் `modelAccessMode` / `allowedModels` மூலம் கட்டுப்படுத்தப்படுகின்றன                                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `restricted` ஆக இருக்கும்போது `allowedConnections` காலியாக இல்லாமல் இருக்க வேண்டும்; `all` ஆக இருக்கும்போது காலியாக இருக்க வேண்டும்                                             |
-| `allowedConnections`                        | அதிகபட்சம் 100 UUID-களைக் கொண்ட வரிசை                                      |                                                                                                                                                                                 |
-| `allowAutoCombos`                           | பூலியன்                                                                    | `false` ஆக இருந்தால், இந்த விசையுடன் `auto/*` மாதிரிகளுக்கான கோரிக்கைகள் நிராகரிக்கப்படும்; இதை ஒருபோதும் அமைக்காத விசைகள் அனுமதிக்கப்படும்                                     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | இந்த விசைக்காக `GET /v1/models` பட்டியலிடுவது என்ன என்பதை நிர்ணயிக்கிறது (சேர்க்கைகள் மட்டும், மாதிரிகள் மட்டும் அல்லது இரண்டும்); விசை அழைக்கக்கூடியவற்றை இது மாற்றாது         |
-| `forcedModel`                               | அதிகபட்சம் 300 எழுத்துகளைக் கொண்ட சரம் அல்லது `null`                       | `X-Route-Model` மற்றும் `body.model` ஆகியவற்றைக் காட்டிலும் முன்னுரிமையுடன் அரட்டை கோரிக்கைகளை இந்த மாதிரி/சேர்க்கைக்கு வழிமாற்றுகிறது; விசையின் வரம்புகள் தொடர்ந்து பொருந்தும் |
-| `noLog`, `autoResolve`                      | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `throttleDelayMs`                           | முழு எண், 0-300000                                                         |                                                                                                                                                                                 |
-| `maxSessions`                               | முழு எண், 0-10000                                                          |                                                                                                                                                                                 |
-| `rateLimits`                                | `{ limit, window }` வரிசை (நேர்ம முழு எண்கள், அதிகபட்சம் 50) அல்லது `null` | `null` வரம்புகளை அழிக்கும்                                                                                                                                                      |
-| `accessSchedule`                            | அட்டவணைப் பொருள் அல்லது `null`                                             | `null` அட்டவணையை அழிக்கும்                                                                                                                                                      |
-| `scopes`                                    | அதிகபட்சம் 32 சரங்களைக் கொண்ட வரிசை                                        |                                                                                                                                                                                 |
-| `allowedEndpoints`                          | அதிகபட்சம் 20 சரங்களைக் கொண்ட வரிசை                                        |                                                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | [ஒவ்வொரு விசைக்கும் கேச் பைபாஸ்](#per-key-cache-bypass) என்பதைப் பார்க்கவும்                                                                                                    |
-| `compressionEnabled`                        | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `codexServiceMode`                          | Codex சேவை முறைகளில் ஒன்று                                                 |                                                                                                                                                                                 |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                 |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                 |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                      |                                                                                                                                                                                 |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                 |
+| களம்                                        | வகை                                                                   | குறிப்புகள்                                                                                                                                                                                                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | சரம், 1-200 எழுத்துகள்                                                |                                                                                                                                                                                                                                                           |
+| `isActive`                                  | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `isBanned`                                  | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `expiresAt`                                 | ISO 8601 தேதிநேரம் அல்லது `null`                                      | `null` காலாவதியை அழிக்கிறது                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                                 | பயன்முறை `all` ஆக இருக்கும் போது`allowedModels` காலியாக இருக்க வேண்டும்                                                                                                                                                                                   |
+| `allowedModels`, `blockedModels`            | சரங்களின் வரிசை, 1000 வரை                                             |                                                                                                                                                                                                                                                           |
+| `allowedCombos`                             | சரங்களின் வரிசை, 500 வரை                                              | விசையை இணைக்கும் வாயில்கள் அழைக்கலாம்; நேரடி மாதிரிகள் `modelAccessMode` / `allowedModels` ஆல் நிர்வகிக்கப்படுகின்றன                                                                                                                                      |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                 | `restricted` ஆக இருக்கும் போது`allowedConnections` காலியாக இல்லாமல் இருக்க வேண்டும் மற்றும் `all` ஆக இருக்கும் போது காலியாக இருக்க வேண்டும்                                                                                                               |
+| `allowedConnections`                        | UUIDs வரிசை, 100 வரை                                                  |                                                                                                                                                                                                                                                           |
+| `allowAutoCombos`                           | பூலியன்                                                               | இந்த விசையுடன் `auto/*` மாதிரிகளுக்கான கோரிக்கைகளை`false` நிராகரிக்கிறது; ஒருபோதும் அமைக்காத விசைகள் அனுமதிக்கப்படும்                                                                                                                                     |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                         | இந்த விசைக்கு `GET /v1/models` என்ன பட்டியலிடுகிறது (காம்போஸ் மட்டும், மாடல்கள் மட்டும் அல்லது இரண்டும்); விசை என்ன அழைக்கலாம் என்பதை இது மாற்றாது                                                                                                        |
+| `forcedModel`                               | 300 எழுத்துகள் அல்லது `null` வரையிலான சரம்                            | `X-Route-Model` மற்றும் `body.model` வழியாக இந்த model/combo க்கு அரட்டை கோரிக்கைகளை வழிகள் ; விசையின் வரம்புகள் இன்னும் பொருந்தும்                                                                                                                       |
+| `noLog`, `autoResolve`                      | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `throttleDelayMs`                           | முழு எண், 0-300000                                                    |                                                                                                                                                                                                                                                           |
+| `maxSessions`                               | முழு எண், 0-10000                                                     |                                                                                                                                                                                                                                                           |
+| `rateLimits`                                | `{ limit, window }` (நேர்மறை முழு எண்கள், 50 வரை) அல்லது `null` வரிசை | `null` வரம்புகளை அழிக்கிறது                                                                                                                                                                                                                               |
+| `accessSchedule`                            | அட்டவணை பொருள் அல்லது `null`                                          | `null` அட்டவணையை அழிக்கிறது                                                                                                                                                                                                                               |
+| `scopes`                                    | சரங்களின் வரிசை, 32 வரை                                               |                                                                                                                                                                                                                                                           |
+| `allowedEndpoints`                          | சரங்களின் வரிசை, 20 வரை                                               |                                                                                                                                                                                                                                                           |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                    |                                                                                                                                                                                                                                                           |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                  | [ஒவ்வொரு விசை கேச் பைபாஸைப்](#per-key-cache-bypass) பார்க்கவும்                                                                                                                                                                                           |
+| `compressionEnabled`                        | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `codexServiceMode`                          | Codex சேவை முறைகளில் ஒன்று                                            |                                                                                                                                                                                                                                                           |
+| `disableNonPublicModels`                    | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `allowUsageCommand`                         | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `usageLimitEnabled`                         | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | எண் >= 0 அல்லது `null`                                                |                                                                                                                                                                                                                                                           |
+| `fiveHourUsageLimitUsd`                     | எண் >= 0 அல்லது `null`                                                | தினசரி மற்றும் வாராந்திர வரம்புகள் (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) போன்று செயல்படுத்தப்படும் 5 மணிநேர USD பட்ஜெட். `retry-after` என்பது சாளரத்தில் பழமையான செலவினங்கள் வயதாகும்போது, அதன் வரம்பை விட ஒரு விசையை இன்னும் தடுக்கலாம். |
+| `chaosModeEnabled`                          | பூலியன்                                                               |                                                                                                                                                                                                                                                           |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1294,166 +1237,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### அமைப்புகள்
 
-| Endpoint                              | Method        | Description                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | பொதுவான அமைப்புகள். பாதுகாப்புக் கொள்கை விசைகளுக்கு (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) `currentPassword` மற்றும் ஆபரேட்டர் நற்சான்றிதழ் தேவை — API விசைகள் மற்றும் `oma_` டோக்கன்களுக்கு `403` கிடைக்கும்; ஒவ்வொரு மாற்றத்திற்கும் `admin` அணுகல்-டோக்கன் scope தேவை |
-| `/api/settings/proxy`                 | GET/PUT       | பிணைய ப்ராக்ஸி உள்ளமைவு                                                                                                                                                                                                                                                                                           |
-| `/api/settings/proxy/test`            | POST          | ப்ராக்ஸி இணைப்பைச் சோதிக்கிறது                                                                                                                                                                                                                                                                                    |
-| `/api/settings/ip-filter`             | GET/PUT       | IP அனுமதிப்பட்டியல்/தடுப்புப்பட்டியல்                                                                                                                                                                                                                                                                             |
-| `/api/settings/thinking-budget`       | GET/PUT       | சிந்தனை/தர்க்க **கோரிக்கை** மறுஎழுதும் முறை (passthrough / auto-strip / custom / adaptive). சுருக்கத்திலிருந்து தனித்தது. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)-ஐப் பார்க்கவும்.                                                                                                                     |
-| `/api/settings/system-prompt`         | GET/PUT       | உலகளாவிய system prompt                                                                                                                                                                                                                                                                                            |
-| `/api/settings/compression`           | GET/PUT       | உலகளாவிய சுருக்க உள்ளமைவு                                                                                                                                                                                                                                                                                         |
-| `/api/settings/purge-request-history` | POST          | கோரிக்கைப் பதிவு வரிசைகள் மற்றும் உள்ளமைப்பு call-log கலைப்பொருட்களை அழிக்கிறது                                                                                                                                                                                                                                   |
+| இறுதிப்புள்ளி                         | முறை          | விளக்கம்                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | பொது அமைப்புகள். பாதுகாப்பு-கொள்கை விசைகளுக்கு (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) `currentPassword` மற்றும் ஒரு ஆபரேட்டர் நற்சான்றிதழ் — API விசைகள் மற்றும் `oma_` டோக்கன்கள் `403` பெற வேண்டும் ; ஒவ்வொரு பிறழ்வுக்கும் `admin` அணுகல்-டோக்கன் நோக்கம் தேவை |
+| `/api/settings/proxy`                 | GET/PUT       | நெட்வொர்க் ப்ராக்ஸி கட்டமைப்பு                                                                                                                                                                                                                                                                             |
+| `/api/settings/proxy/test`            | POST          | ப்ராக்ஸி இணைப்பைச் சோதிக்கவும்                                                                                                                                                                                                                                                                             |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                                     |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** கோரிக்கை** மீண்டும் எழுதும் முறை (பாஸ்த்ரூ / ஆட்டோ ஸ்ட்ரிப் / தனிப்பயன் / தழுவல்). சுருக்கத்திலிருந்து சுயாதீனமானது. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) ஐப் பார்க்கவும்.                                                                                              |
+| `/api/settings/system-prompt`         | GET/PUT       | உலகளாவிய அமைப்பு ப்ராம்ட்                                                                                                                                                                                                                                                                                  |
+| `/api/settings/compression`           | GET/PUT       | உலகளாவிய சுருக்க கட்டமைப்பு                                                                                                                                                                                                                                                                                |
+| `/api/settings/purge-request-history` | POST          | கோரிக்கை பதிவு வரிசைகள் மற்றும் உள்ளூர் அழைப்பு பதிவு கலைப்பொருட்களை அழிக்கவும்                                                                                                                                                                                                                            |
 
-### சூழல் மற்றும் சுருக்கம்
+### சூழல் & சுருக்கம்
 
-| Endpoint                               | Method         | Description                                                                                      |
-| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked சுருக்கத்தின் முன்னோட்டம்                         |
-| `/api/compression/language-packs`      | GET            | கிடைக்கக்கூடிய Caveman மொழித் தொகுப்புகளைப் பட்டியலிடுதல்                                        |
-| `/api/compression/rules`               | GET            | Caveman விதி மெட்டாடேட்டாவைப் பட்டியலிடுதல்                                                      |
-| `/api/context/caveman/config`          | GET/PUT        | Caveman-சார்ந்த அமைப்புகளுக்கான மாற்றுப்பெயர்                                                    |
-| `/api/context/rtk/config`              | GET/PUT        | தனிப்பயன் வடிப்பான்கள் மற்றும் மூல-வெளியீட்டுத் தக்கவைப்பையும் உள்ளடக்கிய RTK-சார்ந்த அமைப்புகள் |
-| `/api/context/rtk/filters`             | GET            | RTK வடிப்பான் அட்டவணை மற்றும் தனிப்பயன் வடிப்பான் கண்டறிதல்கள்                                   |
-| `/api/context/rtk/test`                | POST           | உரைப் payload-க்கு எதிராக RTK முன்னோட்டம்/சோதனையை இயக்குதல்                                      |
-| `/api/context/rtk/raw-output/[id]`     | GET            | சுட்டி id மூலம் தக்கவைக்கப்பட்ட மறைக்கப்பட்ட மூல வெளியீட்டைப் படித்தல்                           |
-| `/api/context/combos`                  | GET/POST       | சுருக்கக் கூட்டணிகளைப் பட்டியலிடுதல்/உருவாக்குதல்                                                |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | சுருக்கக் கூட்டணி விவரங்களைப் பெறுதல்/புதுப்பித்தல்/நீக்குதல்                                    |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | சுருக்கக் கூட்டணிகளை வழிமாற்றக் கூட்டணிகளுக்கு ஒதுக்குதல்                                        |
-| `/api/context/analytics`               | GET            | சுருக்கப் பகுப்பாய்வுகளுக்கான மாற்றுப்பெயர்                                                      |
+| இறுதிப்புள்ளி                          | முறை           | விளக்கம்                                                                                       |
+| -------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked சுருக்கத்தின் முன்னோட்டம்                       |
+| `/api/compression/language-packs`      | GET            | கிடைக்கும் கேவ்மேன் மொழி தொகுப்புகளை பட்டியலிடுங்கள்                                           |
+| `/api/compression/rules`               | GET            | கேவ்மேன் விதி மெட்டாடேட்டாவை பட்டியலிடுங்கள்                                                   |
+| `/api/context/caveman/config`          | GET/PUT        | கேவ்மேன்-குறிப்பிட்ட அமைப்புகள் மாற்றுப்பெயர்                                                  |
+| `/api/context/rtk/config`              | GET/PUT        | தனிப்பயன் வடிப்பான்கள் மற்றும் மூல-வெளியீட்டுத் தக்கவைப்பு உள்ளிட்ட RTK-குறிப்பிட்ட அமைப்புகள் |
+| `/api/context/rtk/filters`             | GET            | RTK வடிகட்டி பட்டியல் மற்றும் தனிப்பயன் வடிகட்டி கண்டறிதல்                                     |
+| `/api/context/rtk/test`                | POST           | உரை பேலோடுக்கு எதிராக RTK preview/test இயக்கவும்                                               |
+| `/api/context/rtk/raw-output/[id]`     | GET            | சுட்டிக்காட்டி ஐடி மூலம் தக்கவைக்கப்பட்ட திருத்தப்பட்ட மூல வெளியீட்டைப் படிக்கவும்             |
+| `/api/context/combos`                  | GET/POST       | சுருக்க சேர்க்கை list/create                                                                   |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | சுருக்க சேர்க்கை detail/update/delete                                                          |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | ரூட்டிங் காம்போக்களுக்கு சுருக்க காம்போக்களை ஒதுக்கவும்                                        |
+| `/api/context/analytics`               | GET            | சுருக்க பகுப்பாய்வு மாற்றுப்பெயர்                                                              |
 
 ### கண்காணிப்பு
 
-| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | செயலில் உள்ள அமர்வுகளைக் கண்காணித்தல்                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/rate-limits`                   | GET        | ஒவ்வொரு கணக்கிற்குமான விகித வரம்புகள்                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/monitoring/health`             | GET        | ஆரோக்கியச் சரிபார்ப்பு + வழங்குநர் சுருக்கம் (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). நிர்வாகக் காட்சியில் `credentialHealth` அடங்கும்: probe-cache அளவுகோல்கள், `failed>0` ஆக இருக்கும்போது `failedConnections`, மற்றும் `staleDbNonOkCount` (SQLite sticky `test_status`, gauge அல்ல). [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) ஐப் பார்க்கவும். |
-| `/api/cache/stats`                   | GET/DELETE | தற்காலிகச் சேமிப்பு புள்ளிவிவரங்கள் / அழித்தல்                                                                                                                                                                                                                                                                                                                                                                                              |
-| `/api/modality-bridge/stats`         | GET        | நினைவகத்தில் உள்ள `attempts`, வெற்றிகள்/`bridged`, தோல்விகள், தற்காலிகச் சேமிப்பு வெற்றிகள், `totalLatencyMs`, `latencySamples`, மாதிரி-அடிப்படையிலான `averageLatencyMs`, மற்றும் கடைசிப் பயன்பாட்டு நேரம் (மறுதொடக்கத்தில் மீட்டமைக்கப்படும்; நிர்வாக அங்கீகாரம் தேவை)                                                                                                                                                                     |
-| `/api/modality-bridge/video/runtime` | GET        | நிர்வாக அங்கீகாரம்/ஆய்வுக்கு முன் கடுமையான நம்பகமான loopback சரிபார்ப்பு; சுத்திகரிக்கப்பட்ட FFmpeg/ffprobe கிடைப்புத்தன்மை மற்றும் பதிப்புகள் (no-store)                                                                                                                                                                                                                                                                                   |
-| `/api/modality-bridge/video/extract` | POST       | உள்புற அங்கீகரிக்கப்பட்ட நம்பகமான loopback byte broker; 50 MiB உள்ளீடு, வரையறுக்கப்பட்ட queue/32 MiB வெளியீடு, `503` திறன் வரம்பு, `499` துண்டிப்பு, `504` காலக்கெடு; பொதுப் பதிவேற்ற API அல்ல                                                                                                                                                                                                                                              |
+| இறுதிப்புள்ளி                        | முறை       | விளக்கம்                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | செயலில் அமர்வு கண்காணிப்பு                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/rate-limits`                   | GET        | ஒரு கணக்கு வீத வரம்புகள்                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/monitoring/health`             | GET        | சுகாதார சோதனை + வழங்குநர் சுருக்கம் (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). மேலாண்மை பார்வையில் `credentialHealth`: ஆய்வு-கேச் ஸ்கேலர்கள், `failed>0` போது `failedConnections`, மற்றும் `staleDbNonOkCount` (SQLite ஸ்டிக்கி `test_status`, கேஜ் அல்ல) ஆகியவை அடங்கும். [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) ஐப் பார்க்கவும். |
+| `/api/cache/stats`                   | GET/DELETE | கேச் புள்ளிவிவரங்கள் / தெளிவானது                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/modality-bridge/stats`         | GET        | நினைவகத்தில் `attempts`, வெற்றிகள்/`bridged`, தோல்விகள், கேச் ஹிட்ஸ், `totalLatencyMs`, `latencySamples`, மாதிரி-குறிப்பிடப்பட்ட `averageLatencyMs`, மற்றும் கடைசி பயன்பாட்டு நேரம் (மறுதொடக்கத்தில் மீட்டமை; மேலாண்மை அங்கீகாரம்)                                                                                                                                                                                          |
+| `/api/modality-bridge/video/runtime` | GET        | மேலாண்மை auth/probe க்கு முன் கண்டிப்பான நம்பகமான-லூப்பேக் சோதனை; சுத்திகரிக்கப்பட்ட FFmpeg/ffprobe கிடைக்கும் தன்மை மற்றும் பதிப்புகள் (கடை இல்லை)                                                                                                                                                                                                                                                                         |
+| `/api/modality-bridge/video/extract` | POST       | உள் அங்கீகரிக்கப்பட்ட நம்பகமான-லூப்பேக் பைட் தரகர்; 50 MiB உள்ளீடு, எல்லைக்குட்பட்ட queue/32 MiB வெளியீடு, `503` திறன், `499` துண்டிப்பு, `504` காலக்கெடு; பொது பதிவேற்றம் API அல்ல                                                                                                                                                                                                                                         |
 
-### காப்புப்பிரதி & ஏற்றுமதி/இறக்குமதி
+### வீடியோ பிரேம் டிரில்-டவுன்
 
-| Endpoint                    | Method | விளக்கம்                                                                           |
-| --------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | கிடைக்கக்கூடிய காப்புப்பிரதிகளைப் பட்டியலிடு                                       |
-| `/api/db-backups`           | PUT    | கைமுறை காப்புப்பிரதியை உருவாக்கு                                                   |
-| `/api/db-backups`           | POST   | குறிப்பிட்ட காப்புப்பிரதியிலிருந்து மீட்டமை                                        |
-| `/api/db-backups`           | PATCH  | காப்புப்பிரதி தக்கவைப்பு அமைப்புகளைச் சேமி (ஆபரேட்டருக்கு மட்டும்)                 |
-| `/api/db-backups`           | DELETE | தக்கவைப்பு அமைப்புகளின்படி சேமிக்கப்பட்ட காப்புப்பிரதிகளை அகற்று                   |
-| `/api/db-backups/export`    | GET    | தரவுத்தளத்தை .sqlite கோப்பாகப் பதிவிறக்கு                                          |
-| `/api/db-backups/import`    | POST   | தரவுத்தளத்தை மாற்ற .sqlite கோப்பைப் பதிவேற்று (`?dryRun=true` சரிபார்ப்பு மட்டும்) |
-| `/api/db-backups/exportAll` | GET    | முழு காப்புப்பிரதியை .tar.gz காப்பகமாகப் பதிவிறக்கு                                |
+`GET /api/v1/video-bridge/drilldown` வெளிப்படையாக ஒப்புக்கொள்ளப்பட்ட வீடியோ பிரிட்ஜ் கோரிக்கைக்குப் பிறகு, `x-omniroute-video-drilldown` ல் திரும்பிய வாடகைதாரருக்குக் கட்டுப்பட்ட ஒளிபுகா கைப்பிடியைப் படிக்கிறது. ரீட் மற்றும் `DELETE` ஆகிய இரண்டிற்கும் எப்போதும் செல்லுபடியாகும் API விசையும் ஆபரேட்டரின் சுயாதீனமான `modalityBridgeVideoDrilldownRemoteEnabled` அனுமதியும் தேவைப்படும். உற்பத்தித் தக்கவைப்புக்கு கூடுதலாக `modalityBridgeVideoDrilldownEnabled` மற்றும் கண்டிப்பான ஒவ்வொரு பகுதி `drilldown: true` தேவைப்படுகிறது. விசையானது காலியாகாத இறுதிப்புள்ளி அனுமதிப்பட்டியலைக் கொண்டிருந்தால், அழைப்பாளர் `/v1` அல்லது `/api/v1` பயன்படுத்தினாலும், GET மற்றும் DELETE இரண்டிற்கும் `video` உள்ளடக்கியிருக்க வேண்டும்.
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` மற்றும் `/api/settings/export-json` ஆகியவை
-சேமிக்கப்பட்டுள்ள அனைத்து நற்சான்றுகளையும் வழங்குகின்றன; எனவே அவற்றுக்கு டாஷ்போர்டு அமர்வு அல்லது
-உள்ளூர் CLI தேவை (அல்லது உள்நுழைவு முடக்கப்பட்டிருக்க வேண்டும்). எந்த வரம்புடைய API key-களும்
-மற்றும் `oma_` அணுகல் டோக்கன்களும் `403` பிழையைப் பெறும். மீட்டமைப்புகளுக்கும் இதே வரம்பு பொருந்தும்:
-`POST /api/db-backups/import` (`dryRun=true` உட்பட), `POST /api/db-backups` (id மூலம் மீட்டமைத்தல்)
-மற்றும் `POST /api/settings/import-json` ஆகியவை செயல்பாட்டிலுள்ள தரவுத்தளம் அல்லது அமைப்புகளை
-மாற்றுகின்றன; எனவே இயந்திர நற்சான்றும் அங்கே `403` பிழையைப் பெறும்; `omniroute sync import` உள்ளூர்
-CLI நற்சான்றை அனுப்புகிறது. ஆகவே `DELETE /api/db-backups` (சேமிக்கப்பட்ட காப்புப்பிரதிகளை அகற்றுதல்)
-மற்றும் `PATCH /api/db-backups` (தக்கவைப்பு அமைப்புகள்: ஒவ்வொரு காப்புப்பிரதிக்குப் பிறகும் தானியங்கி
-அகற்றலைச் சேமிக்கப்பட்ட மதிப்புகள் கட்டுப்படுத்துகின்றன) ஆகியவற்றைப் பயன்படுத்தவும். பட்டியலிடுதல்
-(`GET`) மற்றும் கைமுறை காப்புப்பிரதியை உருவாக்குதல் (`PUT`) ஆகியவை வழக்கமான மேலாண்மை
-அங்கீகாரத்தைத் தொடர்கின்றன.
+GET வினவல்: தேவையான `handle`; விருப்பமான `variant` (`preview`, `standard`, `detail`), `limit` (1–8; மரபு `frames` ஏற்றுக்கொள்ளப்பட்டது ஆனால் `limit` உடன் இணைக்க முடியாது), பூஜ்ஜிய அடிப்படையிலான `page` மற்றும் `start`/`end` வினாடிகள். இரண்டு ஃபோகஸ் வரம்புகளும் வழங்கப்படும் போது, `end` `start` விட அதிகமாக இருக்க வேண்டும். Duplicate/unknown வினவல் விசைகள் நிராகரிக்கப்பட்டன. வெற்றிகரமான பதில்களில் `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` மற்றும் விருப்பமான `focusWindow` ஆகியவை உள்ளன; ஸ்டோர் இல்லாத JSON ஆனது Base64 உட்பட 32 MiB ஆக மூடப்பட்டுள்ளது. மிகைப்படுத்தப்பட்ட வெளியீடு 413 வருமானம்; குறைவான பிரேம்களைக் கோருங்கள்.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ஐ வழங்குகிறது. தெரியாத, காலாவதியான மற்றும் குறுக்கு-விசை GETs ஆகியவை பிரித்தறிய முடியாத 404 பதில்கள்; குறுக்கு விசை DELETE உரிமையாளரின் உள்ளீட்டை அகற்ற முடியாது. முடக்கப்பட்ட அணுகல் 403, missing/invalid அங்கீகாரம் 401, தவறான வினவல்கள் 400, ரத்துசெய்தல் 499 மற்றும் தற்காலிகப் பிழைகள் 503. கைப்பிடிகள் செயல்முறை-உள்ளூர், பத்து நிமிடங்களுக்குப் பிறகு காலாவதியாகும் மற்றும் மறுதொடக்கம் செய்யப்படாது. புதிய கைப்பிடிகள் `v1.` மற்றும் 32-பைட் சீரற்ற Base64URL டோக்கனைப் பயன்படுத்துகின்றன; டோக்கன் ஹாஷ்கள் மட்டுமே தக்கவைக்கப்படுகின்றன. லெகசி 64-ஹெக்ஸ் டோக்கன்கள் இணக்கத்தன்மைக்காக தொடரியல் ரீதியாக படிக்கக்கூடியதாக இருக்கும். ஒப்புதல், ஒதுக்கீடுகள் மற்றும் மாறுபட்ட வழித்தோன்றல் விவரங்களுக்கு [வீடியோ பிரிட்ஜ் காவலர்களைப்](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) பார்க்கவும்.
+
+### காப்புப்பிரதி & Export/Import
+
+| இறுதிப்புள்ளி               | முறை   | விளக்கம்                                                                                       |
+| --------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | கிடைக்கும் காப்புப்பிரதிகளை பட்டியலிடுங்கள்                                                    |
+| `/api/db-backups`           | PUT    | கைமுறை காப்புப்பிரதியை உருவாக்கவும்                                                            |
+| `/api/db-backups`           | POST   | குறிப்பிட்ட காப்புப்பிரதியிலிருந்து மீட்டமைக்கவும்                                             |
+| `/api/db-backups`           | PATCH  | காப்புப் பிரதி வைத்திருத்தல் அமைப்புகளைச் சேமி (ஆபரேட்டருக்கு மட்டும்)                         |
+| `/api/db-backups`           | DELETE | சேமிக்கப்பட்ட காப்புப்பிரதிகளை தக்கவைப்பு அமைப்புகளுக்கு கத்தரிக்கவும் (ஆபரேட்டருக்கு மட்டும்) |
+| `/api/db-backups/export`    | GET    | தரவுத்தளத்தை .sqlite கோப்பாகப் பதிவிறக்கவும்                                                   |
+| `/api/db-backups/import`    | POST   | தரவுத்தளத்தை மாற்ற .sqlite கோப்பைப் பதிவேற்றவும் (`?dryRun=true` மதிப்பாய்வு மட்டும்)          |
+| `/api/db-backups/exportAll` | GET    | முழு காப்புப்பிரதியையும் .tar.gz காப்பகமாகப் பதிவிறக்கவும்                                     |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` மற்றும் `/api/settings/export-json` சேமிக்கப்பட்ட ஒவ்வொரு நற்சான்றிதழையும் வழங்குகின்றன, எனவே அவர்களுக்கு டாஷ்போர்டு அமர்வு அல்லது உள்ளூர் CLI (அல்லது உள்நுழைவு முடக்கப்பட்டுள்ளது) தேவைப்படுகிறது. எந்த நோக்கத்தின் API விசைகள் மற்றும் `oma_` அணுகல் டோக்கன்கள் `403` பெறுகின்றன. மறுசீரமைப்புகள் அதே எல்லையைக் கொண்டுள்ளன: `POST /api/db-backups/import` (`dryRun=true` சேர்க்கப்பட்டுள்ளது), `POST /api/db-backups` (ஐடி மூலம் மீட்டமைத்தல்) மற்றும் `POST /api/settings/import-json` ஆகியவை நேரடி தரவுத்தளம் அல்லது அமைப்புகளை மாற்றுகின்றன, எனவே ஒரு இயந்திர நற்சான்றிதழ் `403` ஐப் பெறுகிறது; `omniroute sync import` உள்ளூர் CLI நற்சான்றிதழை அனுப்புகிறது. எனவே `DELETE /api/db-backups` (சேமிக்கப்பட்ட காப்புப்பிரதிகளை கத்தரிக்கவும்) மற்றும் `PATCH /api/db-backups` (தக்கவைப்பு அமைப்புகள்: ஒவ்வொரு காப்புப்பிரதிக்குப் பிறகும் தொடர்ந்து இருக்கும் மதிப்புகள் தானியங்கு கத்தரிப்பை இயக்குகின்றன). பட்டியலிடுதல் (`GET`) மற்றும் கையேடு காப்புப்பிரதியை உருவாக்குதல் (`PUT`) சாதாரண நிர்வாக அங்கீகாரத்தை வைத்திருக்கவும்.
 
 ### கிளவுட் ஒத்திசைவு
 
-| Endpoint               | Method  | விளக்கம்                       |
+| இறுதிப்புள்ளி          | முறை    | விளக்கம்                       |
 | ---------------------- | ------- | ------------------------------ |
-| `/api/sync/cloud`      | Various | கிளவுட் ஒத்திசைவு செயல்பாடுகள் |
-| `/api/sync/initialize` | POST    | ஒத்திசைவைத் தொடங்கு            |
-| `/api/cloud/*`         | Various | கிளவுட் மேலாண்மை               |
+| `/api/sync/cloud`      | பல்வேறு | கிளவுட் ஒத்திசைவு செயல்பாடுகள் |
+| `/api/sync/initialize` | POST    | ஒத்திசைவைத் தொடங்கவும்         |
+| `/api/cloud/*`         | பல்வேறு | கிளவுட் மேலாண்மை               |
 
 ### சுரங்கங்கள்
 
-| Endpoint                   | Method | விளக்கம்                                                                  |
-| -------------------------- | ------ | ------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | டாஷ்போர்டுக்கான Cloudflare Quick Tunnel நிறுவல்/இயக்கநேர நிலையைப் படி     |
-| `/api/tunnels/cloudflared` | POST   | Cloudflare Quick Tunnel-ஐ இயக்கு அல்லது முடக்கு (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET    | டாஷ்போர்டுக்கான ngrok Tunnel இயக்கநேர நிலையைப் படி                        |
-| `/api/tunnels/ngrok`       | POST   | ngrok Tunnel-ஐ இயக்கு அல்லது முடக்கு (`action=enable/disable`)            |
+| இறுதிப்புள்ளி              | முறை | விளக்கம்                                                                               |
+| -------------------------- | ---- | -------------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET  | டாஷ்போர்டிற்கான Cloudflare Quick Tunnel install/runtime நிலையைப் படிக்கவும்            |
+| `/api/tunnels/cloudflared` | POST | Cloudflare விரைவு சுரங்கப்பாதையை இயக்கவும் அல்லது முடக்கவும் (`action=enable/disable`) |
+| `/api/tunnels/ngrok`       | GET  | டாஷ்போர்டுக்கான ngrok டன்னல் இயக்க நேர நிலையைப் படிக்கவும்                             |
+| `/api/tunnels/ngrok`       | POST | ngrok சுரங்கப்பாதையை இயக்கவும் அல்லது முடக்கவும் (`action=enable/disable`)             |
 
 ### CLI கருவிகள்
 
-| Endpoint                           | Method | விளக்கம்               |
-| ---------------------------------- | ------ | ---------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Claude CLI நிலை        |
-| `/api/cli-tools/codex-settings`    | GET    | Codex CLI நிலை         |
-| `/api/cli-tools/droid-settings`    | GET    | Droid CLI நிலை         |
-| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI நிலை      |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | பொதுவான CLI இயக்கநேரம் |
+| இறுதிப்புள்ளி                      | முறை | விளக்கம்                |
+| ---------------------------------- | ---- | ----------------------- |
+| `/api/cli-tools/claude-settings`   | GET  | Claude CLI நிலை         |
+| `/api/cli-tools/codex-settings`    | GET  | Codex CLI நிலை          |
+| `/api/cli-tools/droid-settings`    | GET  | Droid CLI நிலை          |
+| `/api/cli-tools/openclaw-settings` | GET  | OpenClaw CLI நிலை       |
+| `/api/cli-tools/runtime/[toolId]`  | GET  | பொதுவான CLI இயக்க நேரம் |
 
-CLI பதில்களில் இவை அடங்கும்: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI பதில்களில் அடங்கும்: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### ACP முகவர்கள்
 
-| Endpoint          | Method | விளக்கம்                                                                           |
-| ----------------- | ------ | ---------------------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | கண்டறியப்பட்ட அனைத்து முகவர்களையும் (உள்ளமைந்த + தனிப்பயன்) நிலைமையுடன் பட்டியலிடு |
-| `/api/acp/agents` | POST   | தனிப்பயன் முகவரைச் சேர் அல்லது கண்டறிதல் தற்காலிக சேமிப்பைப் புதுப்பி              |
-| `/api/acp/agents` | DELETE | `id` query param மூலம் தனிப்பயன் முகவரை அகற்று                                     |
+| இறுதிப்புள்ளி     | முறை   | விளக்கம்                                                                                  |
+| ----------------- | ------ | ----------------------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | கண்டறியப்பட்ட அனைத்து முகவர்களையும் (உள்ளமைக்கப்பட்ட + தனிப்பயன்) நிலையுடன் பட்டியலிடவும் |
+| `/api/acp/agents` | POST   | தனிப்பயன் முகவரைச் சேர்க்கவும் அல்லது கண்டறிதல் தற்காலிக சேமிப்பைப் புதுப்பிக்கவும்       |
+| `/api/acp/agents` | DELETE | `id` query param மூலம் தனிப்பயன் முகவரை அகற்றவும்                                         |
 
-GET பதிலில் `agents[]` (id, name, binary, version, installed, protocol, isCustom) மற்றும் `summary` (total, installed, notFound, builtIn, custom) ஆகியவை அடங்கும்.
+GET பதிலில் `agents[]` (ஐடி, பெயர், பைனரி, பதிப்பு, நிறுவப்பட்டது, நெறிமுறை, isCustom) மற்றும் `summary` (மொத்தம், நிறுவப்பட்டது, notFound, builtIn, தனிப்பயன்) ஆகியவை அடங்கும்.
 
-### மீள்திறன் மற்றும் விகித வரம்புகள்
+### மீள்தன்மை மற்றும் விகித வரம்புகள்
 
-| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/resilience`                 | GET/PATCH | கோரிக்கை வரிசை, இணைப்பு குளிர்விப்பு காலம், வழங்குநர் பிரேக்கர் மற்றும் காத்திருப்பு அமைப்புகளைப் பெறுதல்/புதுப்பித்தல்                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/resilience/reset`           | POST      | வழங்குநர் சர்க்யூட் பிரேக்கர்களை மீட்டமைத்தல்                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/resilience/model-cooldowns` | GET       | செயலில் உள்ள ஒவ்வொரு (வழங்குநர், இணைப்பு, மாதிரி) முடக்கங்களையும், மீதமுள்ள நேரத்தின் அடிப்படையில் வரிசைப்படுத்திப் பட்டியலிடுதல்                                                                                                                                                                                                                                                                                                                                        |
-| `/api/resilience/model-cooldowns` | DELETE    | மாதிரி முடக்கத்தை நீக்குதல் — body `{provider, model}` அல்லது அனைத்தையும் அழிக்க `{all: true}`                                                                                                                                                                                                                                                                                                                                                                           |
-| `/api/rate-limits`                | GET/POST  | ஒவ்வொரு கணக்கிற்குமான விகித வரம்பு நிலை (GET), அல்லது இணைப்பிற்கான விகித-வரம்புப் பாதுகாப்பை மாற்றுதல் (POST `{connectionId, enabled}`). `rateLimitProtection`-க்கான ஆதரிக்கப்படும் எழுதும் வழி (இது `PUT /api/providers/[id]` வழியாக ஒருபோதும் மாற்றப்படாது). குறிப்பு: `enabled: false` என்பது வெளிப்படையான பாதுகாப்பை முடக்கும்; ஆனால் செயலில் உள்ள API-key இணைப்பை உலகளாவிய தானாக-செயல்படுத்தும் பாதுகாப்பு அமைப்பிலிருந்து (`autoEnableApiKeyProviders`) விலக்காது. |
-| `/api/rate-limit`                 | GET       | உலகளாவிய விகித வரம்பு உள்ளமைவு (காலாவதியானது; `/api/rate-limits`-க்கான மாற்றுப்பெயர்)                                                                                                                                                                                                                                                                                                                                                                                    |
+| இறுதிப்புள்ளி                     | முறை      | விளக்கம்                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Get/update கோரிக்கை வரிசை, இணைப்பு கூல்டவுன், வழங்குநர் பிரேக்கர் மற்றும் காத்திருப்பு அமைப்புகள்                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/resilience/reset`           | POST      | வழங்குநர் சர்க்யூட் பிரேக்கர்களை மீட்டமைக்கவும்                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/resilience/model-cooldowns` | GET       | மீதமுள்ள நேரத்தின்படி வரிசைப்படுத்தப்பட்ட, செயலில் உள்ள ஒவ்வொருவருக்கும் (வழங்குபவர், இணைப்பு, மாதிரி) லாக்அவுட்களை பட்டியலிடுங்கள்                                                                                                                                                                                                                                                                                                                   |
+| `/api/resilience/model-cooldowns` | DELETE    | எல்லாவற்றையும் துடைக்க ஒரு மாதிரி லாக்அவுட் — உடல் `{provider, model}` அல்லது `{all: true}` அழிக்கவும்                                                                                                                                                                                                                                                                                                                                                |
+| `/api/rate-limits`                | GET/POST  | ஒவ்வொரு கணக்கு வீத வரம்பு நிலை (GET) அல்லது இணைப்புக்கான வீத வரம்பு பாதுகாப்பை மாற்றவும் (POST `{connectionId, enabled}`). `rateLimitProtection` க்கான ஆதரவு எழுதும் பாதை ( `PUT /api/providers/[id]` வழியாக மாற்றியமைக்கப்படவில்லை). குறிப்பு: `enabled: false` வெளிப்படையான பாதுகாப்பை முடக்குகிறது ஆனால் உலகளாவிய தன்னியக்க-செயல்படுத்தும் பாதுகாப்பு வலையிலிருந்து (`autoEnableApiKeyProviders`) செயலில் உள்ள API-விசை இணைப்பைத் தேர்வு செய்யாது. |
+| `/api/rate-limit`                 | GET       | உலகளாவிய விகித வரம்பு உள்ளமைவு (நிறுத்தப்பட்டது; மாற்றுப்பெயர் `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                    |
 
-> நான்கு `/api/resilience/*` வழித்தடங்களுக்கும் **நிர்வாக அங்கீகாரம்** (`requireManagementAuth`) தேவை. வழங்குநர் பிரேக்கர், இணைப்பு குளிர்விப்பு காலம் மற்றும் மாதிரி முடக்கம் ஆகியவற்றின் முழு விளக்கத்திற்கு [Resilience (விரிவாக்கப்பட்டது)](#resilience-extended) என்பதைப் பார்க்கவும்.
+> நான்கு `/api/resilience/*` வழிகளும் தேவை** மேலாண்மை அங்கீகாரம்** (`requireManagementAuth`) வழங்குநர் பிரேக்கர் vs இணைப்பு கூல்டவுன் vs மாடல் லாக் அவுட்டின் முழு முறிவுக்கு [ரெசிலைன்ஸ் (நீட்டிக்கப்பட்டவை)](#resilience-extended) பார்க்கவும்.
 
-### மதிப்பீடுகள்
+### ஏவல்கள்
 
-| Endpoint     | Method   | Description                                                       |
-| ------------ | -------- | ----------------------------------------------------------------- |
-| `/api/evals` | GET/POST | மதிப்பீட்டுத் தொகுப்புகளைப் பட்டியலிடுதல் / மதிப்பீட்டை இயக்குதல் |
+| இறுதிப்புள்ளி | முறை     | விளக்கம்                                  |
+| ------------- | -------- | ----------------------------------------- |
+| `/api/evals`  | GET/POST | பட்டியல் eval தொகுப்புகள் / ரன் மதிப்பீடு |
 
 ### கொள்கைகள்
 
-| Endpoint        | Method          | Description                          |
-| --------------- | --------------- | ------------------------------------ |
-| `/api/policies` | GET/POST/DELETE | வழிப்படுத்தல் கொள்கைகளை நிர்வகித்தல் |
+| இறுதிப்புள்ளி   | முறை            | விளக்கம்                          |
+| --------------- | --------------- | --------------------------------- |
+| `/api/policies` | GET/POST/DELETE | ரூட்டிங் கொள்கைகளை நிர்வகிக்கவும் |
 
-### இணக்கப்பாடு
+### இணக்கம்
 
-| Endpoint                    | Method | Description                                      |
-| --------------------------- | ------ | ------------------------------------------------ |
-| `/api/compliance/audit-log` | GET    | இணக்கப்பாட்டு தணிக்கைப் பதிவு (கடைசி N பதிவுகள்) |
+| இறுதிப்புள்ளி               | முறை | விளக்கம்                      |
+| --------------------------- | ---- | ----------------------------- |
+| `/api/compliance/audit-log` | GET  | இணக்க தணிக்கை பதிவு (கடைசி N) |
 
-### v1beta (Gemini-இணக்கமானது)
+### v1beta (ஜெமினி-இணக்கமானது)
 
-| Endpoint                   | Method | Description                                 |
-| -------------------------- | ------ | ------------------------------------------- |
-| `/v1beta/models`           | GET    | Gemini வடிவத்தில் மாதிரிகளைப் பட்டியலிடுதல் |
-| `/v1beta/models/{...path}` | POST   | Gemini `generateContent` endpoint           |
+| இறுதிப்புள்ளி              | முறை | விளக்கம்                                     |
+| -------------------------- | ---- | -------------------------------------------- |
+| `/v1beta/models`           | GET  | Gemini வடிவத்தில் மாடல்களைப் பட்டியலிடுங்கள் |
+| `/v1beta/models/{...path}` | POST | Gemini `generateContent` இறுதிப்புள்ளி       |
 
-இந்த endpoint-கள், சொந்த Gemini SDK இணக்கத்தன்மையை எதிர்பார்க்கும் கிளையண்டுகளுக்காக Gemini-யின் API வடிவத்தைப் பின்பற்றுகின்றன.
+இந்த இறுதிப்புள்ளிகள் நேட்டிவ் Gemini SDK இணக்கத்தன்மையை எதிர்பார்க்கும் வாடிக்கையாளர்களுக்கான Gemini இன் API வடிவமைப்பை பிரதிபலிக்கிறது.
 
-### உள் / கணினி API-கள்
+### உள் / அமைப்பு APIs
 
-| Endpoint                 | Method | Description                                                                |
-| ------------------------ | ------ | -------------------------------------------------------------------------- |
-| `/api/init`              | GET    | பயன்பாட்டுத் தொடக்கச் சரிபார்ப்பு (முதல் இயக்கத்தில் பயன்படுத்தப்படுகிறது) |
-| `/api/tags`              | GET    | Ollama-இணக்கமான மாதிரி குறிச்சொற்கள் (Ollama கிளையண்டுகளுக்காக)            |
-| `/api/restart`           | POST   | சேவையகத்தைச் சீராக மறுதொடக்கம் செய்யத் தொடங்குதல்                          |
-| `/api/shutdown`          | POST   | சேவையகத்தைச் சீராக நிறுத்தத் தொடங்குதல்                                    |
-| `/api/system/env/repair` | POST   | OAuth வழங்குநர் சூழல் மாறிகளைச் சரிசெய்தல்                                 |
-| `/api/system/version`    | GET    | தற்போதைய/சமீபத்திய பதிப்பு, புதுப்பிப்பு நிலை, வெளியீட்டு சேனல்            |
-| `/api/system/version`    | POST   | சமீபத்திய பதிப்பிற்கான deployment-aware புதுப்பிப்பைத் தொடங்குதல்          |
+| இறுதிப்புள்ளி            | முறை | விளக்கம்                                                                       |
+| ------------------------ | ---- | ------------------------------------------------------------------------------ |
+| `/api/init`              | GET  | பின்னணி ஒத்திசைவு சேவைகளைத் தொடங்கவும் (மேலாண்மை அங்கீகாரம்)                   |
+| `/api/tags`              | GET  | ஒல்லாமா-இணக்கமான மாதிரி குறிச்சொற்கள் ( Ollama வாடிக்கையாளர்களுக்கு)           |
+| `/api/restart`           | POST | அழகான சேவையக மறுதொடக்கத்தைத் தூண்டவும்                                         |
+| `/api/shutdown`          | POST | அழகான சர்வர் பணிநிறுத்தத்தைத் தூண்டவும்                                        |
+| `/api/system/env/repair` | POST | OAuth வழங்குநர் சூழல் மாறிகளை சரிசெய்தல்                                       |
+| `/api/system/version`    | GET  | Current/latest பதிப்பு, புதுப்பிப்பு நிலை, வெளியீடு சேனல்                      |
+| `/api/system/version`    | POST | சமீபத்திய பதிப்பிற்கான வரிசைப்படுத்தல் விழிப்புணர்வு புதுப்பிப்பைத் தொடங்கவும் |
 
-> **குறிப்பு:** இந்த endpoint-கள் கணினியால் உள்நாட்டில் அல்லது Ollama கிளையண்ட் இணக்கத்தன்மைக்காகப் பயன்படுத்தப்படுகின்றன. இறுதிப் பயனர்களால் இவை வழக்கமாக அழைக்கப்படுவதில்லை.
+> **குறிப்பு:** இந்த இறுதிப்புள்ளிகள் கணினி அல்லது Ollama கிளையன்ட் இணக்கத்தன்மைக்கு உள்நாட்டில் பயன்படுத்தப்படுகின்றன. அவை பொதுவாக இறுதிப் பயனர்களால் அழைக்கப்படுவதில்லை.
 
-### OAuth சூழல் சரிசெய்தல் _(v3.6.1+)_
+### OAuth சுற்றுச்சூழல் பழுது _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1464,7 +1404,7 @@ Content-Type: application/json
 }
 ```
 
-குறிப்பிட்ட வழங்குநருக்கான விடுபட்ட அல்லது சேதமடைந்த OAuth சூழல் மாறிகளைச் சரிசெய்கிறது. திருப்பியளிப்பது:
+ஒரு குறிப்பிட்ட வழங்குநருக்கு விடுபட்ட அல்லது சிதைந்த OAuth சூழல் மாறிகளை சரிசெய்கிறது. வருமானம்:
 
 ```json
 {
@@ -1474,16 +1414,13 @@ Content-Type: application/json
 }
 ```
 
-### பதிப்பு மற்றும் வெளியீட்டு சேனல்
+### பதிப்பு மற்றும் வெளியீடு சேனல்
 
 ```bash
 GET /api/system/version
 ```
 
-Loopback-க்கு மட்டும் கிடைக்கும் மேலாண்மை வழித்தடம் (நிர்வாக அங்கீகாரம்). இயங்கும் பதிப்பு, சமீபத்திய
-வெளியிடப்பட்ட பதிப்பு மற்றும் தானியங்கி புதுப்பிப்பு நிலையைத் திருப்பியளிக்கிறது. `releaseChannel` மற்றும் `channels` ஆகியவை
-கூடுதல் புலங்கள் (rail 3.8.54); `channel` தனது பொருளைத் தக்கவைத்துக்கொள்கிறது — dashboard updater
-பயன்படுத்தும் deployment mode (`npm`, `source` அல்லது `docker-compose`).
+லூப்பேக்-மட்டும் மேலாண்மை வழி (நிர்வாக அங்கீகாரம்). இயங்கும் பதிப்பு, சமீபத்திய வெளியிடப்பட்ட பதிப்பு மற்றும் தானியங்கு புதுப்பிப்பு நிலை ஆகியவற்றை வழங்குகிறது. `releaseChannel` மற்றும் `channels` ஆகியவை சேர்க்கை துறைகள் (ரயில் 3.8.54); `channel` அதன் அர்த்தத்தை — டாஷ்போர்டு புதுப்பிப்பவர் பயன்படுத்தும் வரிசைப்படுத்தல் பயன்முறையை வைத்திருக்கிறது (`npm`, `source` அல்லது `docker-compose`).
 
 ```json
 {
@@ -1499,22 +1436,14 @@ Loopback-க்கு மட்டும் கிடைக்கும் ம�
 }
 ```
 
-- `releaseChannel` — இயங்கும் build-இன் npm channel: `-nightly.*` பதிப்புகளுக்கு `nightly`,
-  பிற pre-release பதிப்புகளுக்கு (`-rc.*`, `-beta.*`, `-alpha.*`) `next`, `channels.latest`-ஐவிட
-  பழைய major-இன் stable பதிப்புக்கு `lts`, இல்லையெனில் `latest`. வெளியிடும் நேரத்தில் npm dist-tag-ஐத்
-  தேர்ந்தெடுக்கும் `scripts/release/dist-tag.mjs`-இல் உள்ள அதே விதிகள் இங்கும் பயன்படுத்தப்படுகின்றன.
-- `channels` — ஒவ்வொரு dist-tag-இன் வெளியிடப்பட்ட head, `npm view omniroute dist-tags`-இலிருந்து
-  (registry HTTP fallback) பெறப்படுகிறது; `latest`-க்குப் பயன்படுத்தப்படும் அதே 10-நிமிட TTL-இல்
-  cache செய்யப்படுகிறது. `latest` எப்போதும் இருக்கும் (`latest` புலத்திற்குத் திரும்பும், பின்னர்
-  `"unavailable"`); அந்த dist-tag இருந்தால் மட்டுமே `next`, `nightly` மற்றும் `lts` தோன்றும்.
-  `Cache-Control: no-cache` கோரிக்கை இரு தேடல்களையும் புதுப்பிக்கும்.
+- இயங்கும் கட்டமைப்பின்`releaseChannel` — npm சேனல்: `-nightly.*` பதிப்புகளுக்கான `nightly`, பிற முன் வெளியீடுகளுக்கு `next` (`-rc.*`, `-beta.*`, `-alpha.*`), `channels.latest` விட பழைய மேஜரின் நிலையான பதிப்பிற்கு `lts`, இல்லையெனில் `latest`. வெளியீட்டு நேரத்தில் npm dist-tagஐத் தேர்ந்தெடுக்கும் `scripts/release/dist-tag.mjs` போன்ற அதே விதிகள்.
+- `channels` —, `npm view omniroute dist-tags` (ரிஜிஸ்ட்ரி HTTP ஃபால்பேக்) இலிருந்து ஒவ்வொரு டிஸ்ட்-டேக்கின் தலையையும் வெளியிட்டது, `latest` போன்ற அதே 10 நிமிட TTL உடன் கேச் செய்யப்பட்டது. `latest` எப்போதும் இருக்கும் ( `latest` புலத்திற்குத் திரும்புகிறது, பின்னர் `"unavailable"`); `next`, `nightly` மற்றும் `lts` அந்த dist-tag இருக்கும் போது மட்டுமே தோன்றும். ஒரு `Cache-Control: no-cache` கோரிக்கை இரண்டு தேடல்களையும் புதுப்பிக்கிறது.
 
-சேனல் மாதிரி (`latest` = 4.0 GA வெளியாகும் வரை v3, `next` = rc, `nightly` = `develop` builds,
-`lts` = 4.0 GA-க்குப் பிறகான v3 patches) `docs/ops/RELEASE_STRATEGY.md`-இல் விவரிக்கப்பட்டுள்ளது.
+சேனல் மாதிரி (`latest` = v3 வரை 4.0 GA, `next` = rc, `nightly` = `develop` பில்ட்ஸ், 4.0 GA க்குப் பிறகு `lts` = v3 இணைப்புகள்) `docs/ops/RELEASE_STRATEGY.md` இல் விவரிக்கப்பட்டுள்ளது.
 
 ---
 
-## ஆடியோ உரைப்படுத்தல்
+## ஆடியோ உரைமாற்றம்
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1522,9 +1451,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-கட்டமைக்கப்பட்ட எந்த STT வழங்குநரையும் பயன்படுத்தி ஆடியோ கோப்புகளை உரைப்படுத்தவும். முதல் பாதைப்
+உள்ளமைக்கப்பட்ட எந்த STT வழங்குநரையும் பயன்படுத்தி ஆடியோ கோப்புகளை உரையாக மாற்றவும். முதல் பாதை
 பகுதி நேட்டிவ் வழங்குநரைத் தேர்ந்தெடுக்கிறது (`openai/…`, `deepgram/…`). மற்றொரு விற்பனையாளரின்
-மாடலை மறுஏற்றுமதி செய்யும் கேட்வேகள் தகுதிப்படுத்தப்பட்ட id-ஐப் பயன்படுத்துகின்றன
+மாதிரியை மறுவெளியிடும் கேட்வேகள் தகுதிப்படுத்தப்பட்ட id-ஐப் பயன்படுத்துகின்றன
 (`openrouter/deepgram/nova-3`).
 
 **கோரிக்கை:**
@@ -1547,12 +1476,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**எடுத்துக்காட்டு மாடல் id-கள்:** `openai/whisper-1` (OpenAI key தேவை),
-`openrouter/deepgram/nova-3` (OpenRouter key தேவை),
-`deepgram/nova-3` (நேட்டிவ் Deepgram key தேவை). வெறும்
-`deepgram/nova-3` கோரிக்கை OpenRouter-ஐப் பயன்படுத்தாது.
+**மாதிரி id-களின் எடுத்துக்காட்டுகள்:** `openai/whisper-1` (OpenAI விசை தேவை),
+`openrouter/deepgram/nova-3` (OpenRouter விசை தேவை),
+`deepgram/nova-3` (நேட்டிவ் Deepgram விசை தேவை). வெறும்
+`deepgram/nova-3` கோரிக்கை OpenRouter-ஐப் **பயன்படுத்தாது**.
 
 **ஆதரிக்கப்படும் வடிவங்கள்:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket வழியாக கோப்பு-முறை உரைமாற்றம் செய்யப்படுகிறது (Gemini API விசை தேவை). பதிவேற்றம்
+`ffmpeg` மூலம் 16 kHz mono PCM ஆக மாற்றப்படுகிறது
+(கோப்பு ஏற்கனவே 16 kHz mono PCM WAV ஆக இல்லாவிட்டால், `PATH`-இல் இருக்க வேண்டும்), பின்னர் அமர்வுக்கு
+ஸ்ட்ரீம் செய்யப்பட்டு, இறுதி செய்யப்பட்ட உரை `{ "text": "..." }` ஆகத் திருப்பி அனுப்பப்படுகிறது. விருப்பமான
+`language` மற்றும் `prompt` படிவப் புலங்கள் முன்னோக்கி அனுப்பப்படுகின்றன. வரம்புகள்: 25 MiB-ஐ விட அதிகமான
+பதிவேற்றங்கள் அல்லது 10 நிமிடங்களுக்கும் அதிகமான நீளம் கொண்ட டிகோட் செய்யப்பட்ட ஆடியோ
+`413` பதிலைப் பெறும்; 60 s-ஐ விட நீண்ட நேரம் இயங்கும் மாற்றம் நிறுத்தப்பட்டு `504` பதிலை அளிக்கும். API விசை
+`x-goog-api-key` தலைப்பில் மட்டுமே அனுப்பப்படுகிறது; WebSocket URL-இல் ஒருபோதும் அனுப்பப்படாது.
 
 ---
 

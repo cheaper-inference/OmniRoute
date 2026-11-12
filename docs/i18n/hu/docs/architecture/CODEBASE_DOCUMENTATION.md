@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -480,17 +480,17 @@ open-sse/
 | `moderations.ts`        | Moderálás                                                                                     |
 | `search.ts`             | Webes keresés                                                                                 |
 | `sseParser.ts`          | SSE eseményelemző                                                                             |
-| `usageExtractor.ts`     | Húzza ki a token számlálását az upstream adatfolyamokból                                      |
+| `usageExtractor.ts`     | Húzza ki a tokenszámlálást az upstream adatfolyamokból                                        |
 | `responseSanitizer.ts`  | Szalagszolgáltató-specifikus zaj                                                              |
 | `responseTranslator.ts` | Ragasztó a szolgáltatói válasz és a fordítói réteg között                                     |
 
 ### 4.2 `open-sse/executors/`
 
-158 legfelső szintű végrehajtó modul (`*.ts` mínusz `base.ts`, `index.ts` és tesztek — a count `npm run check:docs-counts` intézkedések). Minden végrehajtó osztály kiterjeszti `BaseExecutor` (`base.ts`), közvetlenül vagy `DefaultExecutor` vagy egy másik végrehajtón keresztül; a többi modul szolgáltatónkénti segítők (eszközsémák, fetch/TTS adapterek, quirk-kezelők). A végrehajtók közé tartozik:
+159 legfelső szintű végrehajtó modul (`*.ts` mínusz `base.ts`, `index.ts` és tesztek — a count `npm run check:docs-counts` intézkedések). Minden végrehajtó osztály kiterjeszti `BaseExecutor` (`base.ts`), közvetlenül vagy `DefaultExecutor` vagy egy másik végrehajtón keresztül; a többi modul szolgáltatónkénti segítők (eszközsémák, fetch/TTS adapterek, quirk-kezelők). A végrehajtók közé tartozik:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `petals` `pollinations` `qoder` `devin-desktop` `claudeIdentity.ts` ) `index.ts`
 
-> Megjegyzés: az itt fel nem sorolt szolgáltatókat `default.ts` az általános OpenAI-kompatibilis végrehajtóval szolgálja ki. A teljes szolgáltatókatalógus (380 szolgáltató) `src/shared/constants/providers.ts` ben található.
+> Megjegyzés: az itt fel nem sorolt szolgáltatókat `default.ts` az általános OpenAI-kompatibilis végrehajtóval szolgálja ki. A teljes szolgáltatókatalógus (381 szolgáltató) `src/shared/constants/providers.ts` ben található.
 
 ### 4.3 `open-sse/translator/`
 
@@ -531,7 +531,7 @@ Fénypontok (a teljes lista `open-sse/services/` alatt):
 - **110 egyedi eszköz** vezetékes `server.ts` -ban (45 kanonikus `schemas/tools.ts` -ben + memória, készségek, GitHub-készségek, pool, gamification, plugin, Notion, Obsidian, helyi korpusz és tömörítési modulok — unió `countUniqueMcpTools`-vel számolva).
 - **3 szállítás** : stdio, HTTP streamelhető, SSE.
 - **33 távcső** futásidejű — alaplistában érvényesítve `src/shared/constants/mcpScopes.ts` ben, a teljes készlet az egyes eszközmodulok által deklarált hatókörök egyesítése.
-- Audit tábla: `mcp_tool_audit` ( `audit.ts` népesíti be).
+- Ellenőrzési táblázat: `mcp_tool_audit` ( `audit.ts` népesíti be).
 - Fájlok: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plusz tesztek a `__tests__/` alatt.
 - A teljes szerszámkatalógusért lásd [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 

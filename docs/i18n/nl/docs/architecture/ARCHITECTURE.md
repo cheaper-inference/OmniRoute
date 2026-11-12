@@ -14,7 +14,7 @@ OmniRoute is een lokale AI -routeringsgateway en dashboard gebouwd op Next.js. H
 
 Kernmogelijkheden:
 
-- OpenAI-compatibel API oppervlak voor CLI/tools (380 providers, 158 uitvoerdermodules)
+- OpenAI-compatibel API oppervlak voor CLI/tools (381 providers, 159 uitvoerdermodules)
 - Request/response -vertaling in verschillende providerformaten
 - Terugval op modelcombinaties (reeks met meerdere modellen)
 - Gestructureerde combostappen (`provider + model + connection`) met runtime-bestelling door `compositeTiers`
@@ -44,7 +44,7 @@ Kernmogelijkheden:
 - Verbeterde tarieflimieten per account met providerspecifieke profielen
 - Patroon van stroomonderbrekers voor veerkracht van de provider
 - Bescherming tegen donderende kuddes met mutex-vergrendeling
-- Op handtekeningen gebaseerde cache voor deduplicatie van aanvragen
+- Op handtekeningen gebaseerde cache voor deduplicatie van verzoeken
 - Domeinlaag: kostenregels, fallback-beleid, lock-outbeleid
 - Context Relay: samenvattingen van sessieoverdrachten voor continuïteit van accountrotatie
 - Persistentie van domeinstatus (SQLite -schrijfcache voor fallbacks, budgetten, uitsluitingen, stroomonderbrekers)
@@ -68,7 +68,7 @@ Kernmogelijkheden:
 - OAuth milieuherstelactie
 - WebSocket bridge voor OpenAI-compatibele WS clients (`/v1/ws`)
 - Synchronisatietokenbeheer (issue/revoke, download van configuratiebundel met ETag-versie)
-- GLM Thinking (`glmt`) eersteklas providervoorinstelling
+- GLM Thinking (`glmt`) first-class provider preset
 - Hybride token tellen ( `/messages/count_tokens` aan de providerzijde met terugval op schattingen)
 - Automatisch zaaien van modelalias (30 + cross-proxy dialectnormalisaties bij het opstarten)
 - Veilig uitgaand ophalen met SSRF bewaking, privé- URL -blokkering en configureerbaar opnieuw proberen
@@ -382,7 +382,7 @@ Zie [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) voor inrich
 
 ### C. Vangrails
 
-De Guardrails-module is een hot-reloadable middleware-laag die verzoeken en reacties op PII, snelle injectie en onveilige zichtinhoud inspecteert. Overtredingen kortsluiten het verzoek met HTTP** 503** plus een gestructureerde foutcode, waardoor downstream-bellers het opnieuw kunnen proberen of kunnen vertakken.
+De Guardrails-module is een hot-reloadable middleware-laag die verzoeken en reacties op PII, snelle injectie en onveilige zichtinhoud inspecteert. Overtredingen veroorzaken kortsluiting in het verzoek met HTTP** 503** plus een gestructureerde foutcode, waardoor downstream-bellers het opnieuw kunnen proberen of kunnen vertakken.
 
 - Modulewortel: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - Heet herladen: het register let op configuratiewijzigingen en bouwt de keten opnieuw op
@@ -404,10 +404,10 @@ De `src/domain/` naamruimte centraliseert beleidsbeslissingen, zodat route-handl
 - Connection/model regel-joiner: `src/domain/connectionModelRules.ts`
 - Momentopnamen van modelbeschikbaarheid: `src/domain/modelAvailability.ts`
 - Bijhouden van vervaldatum van provider: `src/domain/providerExpiration.ts`
-- Quotumcache: `src/domain/quotaCache.ts`
+- Quotumcache: `src/domain/quotaCache.ts`. Providers voegen quotavensters toe en verwijderen deze (OpenAI heeft voor sommige abonnementen het Codex venster van 5 uur laten vallen), dus een gebruik dat de adapter van de provider als compleet leest (`quotasComplete`, zie `src/lib/usage/usageReading.ts`) is de volledige vensterset van het account: een eerder bekend maar afwezig venster is buiten gebruik gesteld, in de cache, in de `quota_snapshots` wordt een herstart gerehydrateerd (een bijgevoegd pensioenrecord), in de persistente Codex quotumstatus en in de verzadigingsbuckets van Claude. Gedeeltelijk bewijsmateriaal (antwoordkoppen, verouderde kopieën) werkt alleen de vensters bij die het bevat.
 - Afbraaktoestand: `src/domain/degradation.ts`
 - Configuratie-audit: `src/domain/configAudit.ts`
-- OmniRoute -antwoord-metagegevensbouwer: `src/domain/omnirouteResponseMeta.ts`
+- OmniRoute -antwoord-metadatabouwer: `src/domain/omnirouteResponseMeta.ts`
 - Beoordelingssubsysteem: `src/domain/assessment/` — periodieke evaluatiefuncties
 
 ### E. Autorisatiepijplijn

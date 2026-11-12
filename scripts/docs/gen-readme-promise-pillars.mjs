@@ -1,5 +1,5 @@
 // README "the promise" card in the Cheaper Inference UI Kit style (KEA-6307): six pillar tiles
-// in a 3 × 2 grid with a lime highlight sweeping from tile to tile on a 12 s cycle. Output is
+// in a 3 × 2 grid with an accent highlight sweeping from tile to tile on a 12 s cycle. Output is
 // committed as docs/diagrams/promise-pillars.svg; tests/unit/docs/readme-promise-pillars-svg.test.ts
 // fails when the committed file no longer matches this generator, and runs the counts gate's own
 // validators on it (provider total, MCP tool count, free-forever providers).
@@ -20,7 +20,7 @@ const NB = " ";
 export const PROMISE_PILLARS_COPY = {
   kicker: ["THE PROMISE"],
   headline: ["One endpoint. ", " Never stop building — OmniRoute picks ", "."],
-  headlineMarks: ["380 providers.", "the cheapest one that works"],
+  headlineMarks: ["389 providers.", "the cheapest one that works"],
   titles: [
     "Never hit limits",
     "Save up to 95% tokens",
@@ -30,13 +30,13 @@ export const PROMISE_PILLARS_COPY = {
     "Production-grade",
   ],
   bodies: [
-    "Auto-fallback across 380 providers in",
+    "Auto-fallback across 389 providers in",
     "milliseconds. Quota out? The next provider",
     "takes over while a healthy target remains.",
     "RTK + Caveman stacked compression cuts",
     "15–95% of eligible tokens — ~89% average",
     "on tool-heavy sessions.",
-    "150+ providers with a free tier, 53 free",
+    "150+ providers with a free tier, 52 free",
     "forever — Qoder, Pollinations, Cloudflare,",
     "SiliconFlow… No card needed.",
     "39 CLI/agent integrations — Claude Code, Codex,",
@@ -126,7 +126,7 @@ function pillar(i, C) {
   return (
     `  <g>\n` +
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="surface" stroke-width="1"/>\n` +
-    // Sweep highlight: a lime wash + lime border, the one brand emphasis of this card.
+    // Sweep highlight: an accent wash + accent border, the one brand emphasis of this card.
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="accent-soft stroke-accent" stroke-width="2" opacity="0">` +
     `<animate attributeName="opacity" values="${p.sweep.values}" keyTimes="${p.sweep.keyTimes}" dur="12s" begin="3s" repeatCount="indefinite"/></rect>\n` +
     `    <rect x="${x}" y="${y + 16}" width="4" height="132" rx="2" class="${p.tone}"/>\n` +
@@ -148,7 +148,7 @@ export async function renderReadmePromisePillars() {
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
       title:
-        "The OmniRoute promise: one endpoint and 380 providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free tier and 53 recurring or keyless free-forever providers. Every tool works: 39 CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with 110 tools, A2A, memory, guardrails, evals, and 60,000+ static test declarations across 8,400+ tracked test files.",
+        "The OmniRoute promise: one endpoint and 389 providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free tier and 52 recurring or keyless free-forever providers. Every tool works: 39 CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with 110 tools, A2A, memory, guardrails, evals, and 60,000+ static test declarations across 8,400+ tracked test files.",
       desc: "Animated promise card: six pillar tiles in reading order, with a soft highlight sweeping from tile to tile in a continuous cycle.",
     }) +
       gridDefs("pp-grid") +

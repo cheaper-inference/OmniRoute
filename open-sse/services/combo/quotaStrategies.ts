@@ -31,7 +31,7 @@ import {
   type ProviderProfile,
 } from "../accountFallback.ts";
 import { PRE_SCREEN_CONCURRENCY } from "../comboConfig.ts";
-import { getQuotaFetcher } from "../quotaPreflight.ts";
+import { getQuotaFetcher, isCodexPaidCreditsBacked, type QuotaInfo } from "../quotaPreflight.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { MAX_RR_COUNTERS, rrCounters } from "./rrState.ts";
@@ -63,6 +63,7 @@ import {
   getQuotaWeightedRemainingPercent,
   isQuotaExhaustedForRequest,
   getQuotaCache,
+  isQuotaRefusalMarked,
 } from "../../../src/domain/quotaCache.ts";
 
 /**
@@ -310,7 +311,11 @@ async function scoreQuotaAwareTargets<TScore extends object>({
   connectionById: Map<string, Record<string, unknown>>;
   expandedTargets: ResolvedComboTarget[];
   log: { warn?: (...args: unknown[]) => void };
-  scoreQuota: (quota: unknown, target: ResolvedComboTarget) => TScore;
+  scoreQuota: (
+    quota: unknown,
+    target: ResolvedComboTarget,
+    connection?: Record<string, unknown>
+  ) => TScore;
 }): Promise<Array<{ target: ResolvedComboTarget; index: number } & TScore>> {
   const quotaPromises = new Map<string, Promise<unknown>>();
 
@@ -321,10 +326,10 @@ async function scoreQuotaAwareTargets<TScore extends object>({
       let quota: unknown = null;
       const provider = getResetAwareProvider(target);
       const fetcher = provider ? getQuotaFetcher(provider) : null;
+      const connection = target.connectionId ? connectionById.get(target.connectionId) : undefined;
       if (fetcher && provider && target.connectionId) {
         const quotaKey = `${provider}:${target.connectionId}:${getQuotaFetchScope(provider, target.modelStr)}`;
         if (!quotaPromises.has(quotaKey)) {
-          const connection = connectionById.get(target.connectionId);
           quotaPromises.set(
             quotaKey,
             fetchResetAwareQuotaWithCache({
@@ -343,7 +348,7 @@ async function scoreQuotaAwareTargets<TScore extends object>({
         quota = await quotaPromises.get(quotaKey)!;
       }
 
-      return { target, index, ...scoreQuota(quota, target) };
+      return { target, index, ...scoreQuota(quota, target, connection) };
     }
   );
 }
@@ -909,12 +914,20 @@ export async function orderTargetsByHeadroom(
   }
 }
 
-type QuotaWeightedScored = {
+export type QuotaWeightedScored = {
   target: ResolvedComboTarget;
   index: number;
   score: number;
   remainingPercent: number;
   capacity?: number;
+  /**
+   * Codex opted into paid credits and the balance can absorb this request.
+   * A used-up subscription window does not make such a target dead: the
+   * preflight already lets it through, so ordering must not drop it either.
+   */
+  paidCreditsBacked?: boolean;
+  /** Credit balance behind a paid-credits target, used as its draw weight. */
+  paidCreditsBalance?: number | null;
 };
 
 function scoreQuotaWeighted(
@@ -941,8 +954,24 @@ function scoreQuotaWeighted(
   };
 }
 
-function getQuotaWeightedDrawWeight(entry: QuotaWeightedScored): number {
+/**
+ * Draw weight for a credit-backed target whose subscription window is spent,
+ * or null when the entry does not qualify. A spent window scores 0, which would
+ * collapse a credit-backed pool into a uniform draw; the balance is the only
+ * capacity signal left.
+ */
+function paidCreditsDrawWeight(entry: QuotaWeightedScored): number | null {
+  if (entry.paidCreditsBacked !== true) return null;
+  if (entry.remainingPercent > 0) return null;
+  const balance = entry.paidCreditsBalance;
+  if (typeof balance !== "number" || !Number.isFinite(balance)) return 1;
+  return balance > 0 ? balance : 1;
+}
+
+export function getQuotaWeightedDrawWeight(entry: QuotaWeightedScored): number {
   const load = getInflight(entry.target.connectionId ?? "");
+  const creditsWeight = paidCreditsDrawWeight(entry);
+  if (creditsWeight !== null) return creditsWeight / (1 + load);
   // Only pace entries carry capacity; leftover retains its exact historical divisor.
   if (entry.capacity !== undefined) {
     return Math.max(0, entry.score) / (1 + load / entry.capacity);
@@ -980,6 +1009,11 @@ function sortByScoreThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): n
   return a.index - b.index;
 }
 
+function sortByDrawWeightThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): number {
+  const difference = getQuotaWeightedDrawWeight(b) - getQuotaWeightedDrawWeight(a);
+  return difference !== 0 ? difference : a.index - b.index;
+}
+
 function resolveQuotaWeightedFloor(
   configSource: Record<string, unknown> | null | undefined
 ): number {
@@ -992,6 +1026,60 @@ function resolveQuotaWeightedFloor(
       ? Number(configured)
       : Number.NaN;
   return Number.isFinite(raw) ? Math.max(0, Math.min(100, raw)) : 1;
+}
+
+/**
+ * Quota-weighted score for one target, carrying the paid-credits facts the
+ * ordering needs. Kept out of the orderer so its body stays readable.
+ */
+function scoreQuotaWeightedWithCredits(
+  quota: unknown,
+  target: ResolvedComboTarget,
+  connection: Record<string, unknown> | undefined,
+  config: Parameters<typeof scoreQuotaWeighted>[2],
+  scoring: Parameters<typeof scoreQuotaWeighted>[3],
+  scoreNow: number
+): Omit<QuotaWeightedScored, "target" | "index"> {
+  const credits = (quota as Pick<QuotaInfo, "paidCredits"> | null)?.paidCredits;
+  return {
+    ...scoreQuotaWeighted(quota, target, config, scoring, scoreNow),
+    paidCreditsBacked: isCodexPaidCreditsBacked(
+      getResetAwareProvider(target),
+      connection?.providerSpecificData,
+      target.modelStr,
+      credits
+    ),
+    paidCreditsBalance: credits?.balance ?? null,
+  };
+}
+
+/**
+ * The live snapshot outranks the freshly-scored fetch on two counts: a 402
+ * recorded against this connection zeroes it, and an observation older than the
+ * staleness bound is not confident enough to sit in the A pool. The balance
+ * comes from a cached fetch, so a later upstream refusal outranks it too.
+ */
+function overlayQuotaSnapshot<
+  T extends {
+    target: { connectionId?: string | null; modelStr: string };
+    remainingPercent: number;
+    paidCreditsBacked?: boolean;
+  },
+>(scored: T[]): (T & { stale: boolean })[] {
+  const now = Date.now();
+  return scored.map((entry) => {
+    const connectionId = entry.target.connectionId ?? "";
+    const marked = connectionId
+      ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
+      : null;
+    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
+    return {
+      ...entry,
+      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
+      paidCreditsBacked: entry.paidCreditsBacked === true && !isQuotaRefusalMarked(connectionId),
+      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
+    };
+  });
 }
 
 export async function orderTargetsByQuotaWeighted(
@@ -1033,34 +1121,31 @@ export async function orderTargetsByQuotaWeighted(
     connectionById,
     expandedTargets: liveTargets,
     log,
-    scoreQuota: (quota, target) => scoreQuotaWeighted(quota, target, config, scoring, scoreNow),
+    scoreQuota: (quota, target, connection) =>
+      scoreQuotaWeightedWithCredits(quota, target, connection, config, scoring, scoreNow),
   });
 
-  // The live snapshot outranks the freshly-scored fetch on two counts: a 402
-  // recorded against this connection zeroes it, and an observation older than
-  // the staleness bound is not confident enough to sit in the A pool.
-  const now = Date.now();
-  const withSnapshot = scoredTargets.map((entry) => {
-    const connectionId = entry.target.connectionId ?? "";
-    const marked = connectionId
-      ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
-      : null;
-    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
-    return {
-      ...entry,
-      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
-      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
-    };
-  });
+  const withSnapshot = overlayQuotaSnapshot(scoredTargets);
 
+  // A used-up subscription window drops a target only when nothing can absorb
+  // the request. Codex accounts with paid credits still serve it, and the
+  // preflight already lets them through — dropping them here is what turned a
+  // credit-backed combo into "no executable targets". They stay out of A and B
+  // because paid credits are the last resort: their weight is a balance, which
+  // would win any draw against a score, whatever the floor or staleness. Every
+  // other provider keeps the old behaviour: a spent window drops it.
   const eligible = withSnapshot.filter((entry) => entry.remainingPercent > 0);
+  const creditsOnly = withSnapshot.filter(
+    (entry) => entry.remainingPercent <= 0 && entry.paidCreditsBacked
+  );
   const floor = resolveQuotaWeightedFloor(configSource);
   const hasRoom = (entry: (typeof eligible)[number]) =>
     floor === 0 ? true : entry.remainingPercent > floor;
   // A holds only connections we both believe have room AND observed recently.
   const poolA = eligible.filter((entry) => hasRoom(entry) && !entry.stale);
   const poolB = eligible.filter((entry) => !hasRoom(entry) || entry.stale);
-  const selected = poolA.length > 0 ? poolA : poolB;
+  const fromCredits = poolA.length === 0 && poolB.length === 0;
+  const selected = fromCredits ? creditsOnly : poolA.length > 0 ? poolA : poolB;
   if (selected.length === 0) return [];
 
   const weights = selected.map(getQuotaWeightedDrawWeight);
@@ -1082,9 +1167,10 @@ export async function orderTargetsByQuotaWeighted(
   const unusedSelected = selected
     .filter((_, i) => i !== pickIndex)
     .slice()
-    .sort(sortByScoreThenIndex);
+    .sort(fromCredits ? sortByDrawWeightThenIndex : sortByScoreThenIndex);
   const fromA = poolA.length > 0;
   const unusedB = fromA ? poolB.slice().sort(sortByScoreThenIndex) : [];
+  const unusedCredits = fromCredits ? [] : creditsOnly.slice().sort(sortByDrawWeightThenIndex);
 
-  return [winner, ...unusedSelected, ...unusedB].map((entry) => entry.target);
+  return [winner, ...unusedSelected, ...unusedB, ...unusedCredits].map((entry) => entry.target);
 }

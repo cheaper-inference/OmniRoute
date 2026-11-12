@@ -1129,8 +1129,12 @@ async function main() {
         // into a visible failure (same reasoning as the integration ceiling above).
         // Measured 2026-11-02: build:cli took 2237 s and 2372 s on two sweeps of the same day and
         // check:pack-artifact about 150 s, so the 40 min ceiling left seconds of headroom and
-        // killed the second run. 60 min restores the margin; a genuine hang still fails.
-        timeout: 60 * 60 * 1000,
+        // killed the second run. 60 min restored the margin for a while.
+        // Measured 2026-11-05: build:cli now takes about 52 min and check:pack-artifact about
+        // 8 min. Run 42038590490 hit the shared 60 min deadline mid-pack (52.1 + 7.9) and the
+        // green run before it passed by 40 s (51.4 + 7.9). 90 min restores real headroom; a
+        // genuine hang still fails.
+        timeout: 90 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
@@ -1173,8 +1177,10 @@ async function main() {
         });
       } else {
         announce(bootLabel);
+        // Packs and installs the real tarball, so it scales with the package: the translated
+        // docs mirrors (#18869) added 8,885 files, and 15 minutes stopped being enough.
         const { code, out } = await runAsync(npmCmd, ["run", "check:pack-boot"], {
-          timeout: 15 * 60 * 1000,
+          timeout: 40 * 60 * 1000,
         });
         saveGateLog("pack-boot", out);
         record({

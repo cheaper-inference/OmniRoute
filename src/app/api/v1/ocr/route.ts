@@ -24,6 +24,8 @@ import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
+import { recordOcrRequest } from "@/lib/usage/specialtyRequestAccounting";
 
 export { resolveVertexOcrAccessToken };
 
@@ -72,7 +74,8 @@ export async function OPTIONS() {
  * POST /v1/ocr — document OCR
  * Mistral OCR API compatible.
  */
-async function postHandler(request, context) {
+async function postHandler(request, _context) {
+  const startTime = Date.now();
   let rawBody;
   try {
     rawBody = await request.json();
@@ -87,6 +90,9 @@ async function postHandler(request, context) {
   const body = validation.data;
 
   const model = body.model || "mistral-ocr-latest";
+
+  const endpointMismatch = await getRequestedModelEndpointMismatch(model, "ocr");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, model);
@@ -121,7 +127,22 @@ async function postHandler(request, context) {
   const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
   const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
 
-  const response = await handleOcr({ body: { ...body, model }, credentials: ocrCredentials });
+  const response = await handleOcr({
+    body: { ...body, model },
+    credentials: ocrCredentials,
+    onSuccess: (result) =>
+      recordOcrRequest({
+        ...result,
+        apiKeyId: policy.apiKeyInfo?.id,
+        apiKeyName: policy.apiKeyInfo?.name,
+        connectionId:
+          "connectionId" in credentials && typeof credentials.connectionId === "string"
+            ? credentials.connectionId
+            : null,
+        startTime,
+        annotated: Boolean(body.bbox_annotation_format || body.document_annotation_format),
+      }),
+  });
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
   }

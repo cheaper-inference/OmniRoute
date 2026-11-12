@@ -8,37 +8,32 @@
 >
 > Pirminis tiesos šaltinis: `open-sse/mcp-server/server.ts`, naudodamas `countUniqueMcpTools()`, apskaičiuoja **110 unikalių įrankių**: 45 kanoninius aprašus (įskaitant šešis CCR gyvavimo ciklo įrankius, agento įgūdžių trejetą, `omniroute_radar_catalog` ir `omniroute_x_search`), taip pat atminties (3), įgūdžių (4), GitHub įgūdžių (3), telkinio (6), žaidybinimo (8), papildinių (8), Notion (6), Obsidian (22), vietinio tekstyno (3) ir du tik RTK skirtus glaudinimo įrankius.
 
-## Diegimas
+## Montavimas
 
-„OmniRoute MCP“ yra integruotas. Paleiskite jį taip:
+OmniRoute MCP yra įmontuotas. Pradėkite nuo:
 
 ```bash
 omniroute --mcp
 ```
 
-Arba naudodami `open-sse` transportą:
+Arba per atvirą transportą:
 
 ```bash
-# HTTP srautinis transportas (prievadas 20130)
-omniroute --dev  # MCP automatiškai paleidžiamas /mcp galiniame taške
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transportai (`sse` / `streamable-http`, kuriuos tame pačiame procese teikia valdymo skydelio serveris) pagal numatytuosius nustatymus yra
-išjungti ir anksčiau juos buvo galima perjungti tik puslapyje `/dashboard/mcp`. Nuo v3.8.51
-CLI turi tokias pačias galimybes:
+HTTP transportavimas (`sse` / `streamable-http`, procese aptarnaujamas prietaisų skydelio serverio) pagal numatytuosius nustatymus yra išjungtas ir anksčiau juos buvo galima perjungti tik iš `/dashboard/mcp` puslapio. Nuo 3.8.51 versijos CLI paritetas:
 
 ```bash
-omniroute mcp status                                  # įjungimo / veikimo būsena, transportas, įrankių skaičius
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # iš naujo nustato aktyvius sse/streamable-http seansus
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable` / `mcp disable` siunčia PATCH užklausą tam pačiam `mcpEnabled` nustatymui (ir pasirinktinai `mcpTransport`),
-kurį valdymo skydelis perjungia per `/api/settings`. `mcp restart` iškviečia `POST /api/mcp/restart`: jis nutraukia
-aktyvius `sse` / `streamable-http` seansus, kad kita užklausa būtų švariai inicijuota iš naujo, grąžina
-`409`, jei MCP išjungtas, ir `501`, kai naudojamas `stdio` transportas (`stdio` klientai valdo savo
-antrinį procesą — nėra tame pačiame procese veikiančios sąsajos, kurią būtų galima paleisti iš naujo).
+`mcp enable`/`mcp disable` PATCH tas pats `mcpEnabled` (ir pasirinktinai `mcpTransport`) prietaisų skydelio nustatymas perjungiamas per `/api/settings`. `mcp restart` iškviečia `POST /api/mcp/restart`: išardo aktyvias `sse`/`streamable-http` sesijas, todėl kita užklausa iš naujo inicijuojama švariai, grąžina `409` jei MCP išjungtas, ir `501` `stdio` transportavimui (stdio klientai turi savo subprocesą — nėra proceso rankenėlės, kurią būtų galima paleisti iš naujo).
 
 ## Transportai
 
@@ -131,55 +126,42 @@ Cursor, Cline ir suderinamiems MCP klientams nustatyti.
 | `omniroute_cache_stats` | `read:cache`  | Semantinio podėlio, raginimų podėlio ir idempotentiškumo statistika |
 | `omniroute_cache_flush` | `write:cache` | Išvalyti podėlį visuotinai arba pagal parašą / modelį               |
 
-## Glaudinimo įrankiai (13)
+## Suspaudimo įrankiai (13)
 
-| Įrankis                             | Aprėptys            | Aprašymas                                                                                                                                |
-| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Glaudinimo nuostatos, analizės suvestinė ir podėlį įvertinanti statistika (įskaitant `analytics.mcpDescriptionCompression` metaduomenis) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigūruoti glaudinimo režimą, slenkstį, tikslinį santykį, sistemos raginimo išsaugojimą ir MCP aprašymų glaudinimo perjungiklį         |
-| `omniroute_set_compression_engine`  | `write:compression` | Pasirinkti aktyvų variklį (off/caveman/rtk/stacked) ir Caveman / RTK intensyvumą                                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | Pateikti įvardytų glaudinimo derinių ir jų variklių konvejerių sąrašą                                                                    |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analizė, sugrupuota pagal glaudinimo derinį ir variklį                                                                                   |
-| `omniroute_ccr_store`               | `write:compression` | Saugoti nuo kvietėjo izoliuotą turinį ribotoje atmintinėje CCR saugykloje ir grąžinti žymeklį bei `ccr://` nuorodą                       |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Gauti visą CCR turinį arba naudoti head, tail, lines, grep ir stats režimus                                                              |
-| `omniroute_ccr_inspect`             | `read:compression`  | Patikrinti kvietėjui priklausančius CCR metaduomenis negrąžinant turinio                                                                 |
-| `omniroute_ccr_list`                | `read:compression`  | Pateikti puslapiais suskirstytus kvietėjui priklausančių CCR blokų metaduomenis                                                          |
-| `omniroute_ccr_delete`              | `write:compression` | Pašalinti kvietėjui priklausantį CCR bloką                                                                                               |
-| `omniroute_ccr_stats`               | `read:compression`  | Pateikti kvietėjo aprėpties atminties naudojimą, gyvavimo ciklo skaitiklius ir saugyklos ribas                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Aptikti pasikartojantį triukšmą pasirinktiniu būdu pateiktuose RTK išvesties pavyzdžiuose                                                |
-| `omniroute_rtk_learn`               | `read:compression`  | Iš pasirinktiniu būdu pateiktų pavyzdžių sugeneruoti peržiūrimą RTK filtro juodraštį                                                     |
+| Įrankis                             | Taikymo sritis      | Aprašymas                                                                                                                           |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Suspaudimo nustatymai, analizės suvestinė ir talpyklos statistika (įskaitant `analytics.mcpDescriptionCompression` metaduomenis)    |
+| `omniroute_compression_configure`   | `write:compression` | Konfigūruoti glaudinimo režimą, slenkstį, tikslinį santykį, sistemos raginimą išsaugoti, MCP aprašymo glaudinimo jungiklį           |
+| `omniroute_set_compression_engine`  | `write:compression` | Pasirinkite aktyvų variklį (off/caveman/rtk/stacked) ir Caveman/RTK intensyvumą                                                     |
+| `omniroute_list_compression_combos` | `read:compression`  | Išvardykite suspaudimo kombinacijas ir jų variklio vamzdynus                                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analizė, sugrupuota pagal glaudinimo kombinaciją ir variklį                                                                         |
+| `omniroute_ccr_store`               | `write:compression` | Išsaugokite skambinančiojo izoliuotą turinį ribotoje atmintyje esančioje CCR parduotuvėje ir grąžinkite žymeklį ir `ccr://` nuorodą |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Gaukite visą CCR turinį arba naudodami galvos, uodegos, linijų, grep ir statistikos režimus                                         |
+| `omniroute_ccr_inspect`             | `read:compression`  | Patikrinkite skambintojui priklausančius CCR metaduomenis negrąžindami turinio                                                      |
+| `omniroute_ccr_list`                | `read:compression`  | Išvardykite skambintojui priklausančių CCR blokų puslapių metaduomenis                                                              |
+| `omniroute_ccr_delete`              | `write:compression` | Ištrinkite skambintojui priklausantį CCR bloką                                                                                      |
+| `omniroute_ccr_stats`               | `read:compression`  | Praneškite apie skambintojo apimties atminties naudojimą, gyvavimo ciklo skaitiklius ir saugyklos apribojimus                       |
+| `omniroute_rtk_discover`            | `read:compression`  | Atraskite pasikartojantį triukšmą pasirenkamuose RTK išvesties pavyzdžiuose                                                         |
+| `omniroute_rtk_learn`               | `read:compression`  | Sukurkite peržiūrimą RTK filtro juodraštį iš pasirenkamų pavyzdžių                                                                  |
 
-CCR įrašai saugomi tik atmintyje ir paleidus iš naujo išnyksta. Kiekvieno bloko dydis ribojamas iki 2 MiB, kiekvieno
-subjekto — iki 16 MiB, o visos saugyklos — iki 64 MiB. Pagal numatytąsias nuostatas įrašų TTL yra 24 valandos (daugiausia
-septynios dienos). Visas MCP išgavimas ribojamas iki 256 KiB; didesnius blokus vis tiek galima pasiekti naudojant
-diapazonų ir grep režimus. Saugojimas, išgavimas, sąrašų pateikimas, tikrinimas, šalinimas ir statistika izoliuojami pagal
-autentifikuotą API rakto subjektą. Audito įrašuose pateikiamos maišos ir dydžio metaduomenys, bet niekada ne pats turinys.
+CCR įrašai naudoja dviejų pakopų saugyklą: įkaitusią atminties pakopą vietinėse ne debesies vykdymo sąlygomis palaiko patvari SQLite pakopa (`ccr_blocks`, pagal numatytuosius nustatymus įjungta), todėl blokas išliks iškeldintas arba paleistas iš naujo, kol jo TTL baigsis — išskyrus blokus, viršijančius 512 atminties KB -sqf. Kiekvienas blokas apribotas iki 2 MiB, kiekvienas pagrindinis iki 16 MiB, o pasaulinė parduotuvė iki 64 MiB. Įrašai pagal numatytuosius nustatymus yra 24 valandų TTL (daugiausia septynios dienos). Visas MCP gavimas ribojamas iki 256 KiB; didesni blokai lieka pasiekiami per diapazono ir grep režimus. Saugojimas, gavimas, įtraukimas į sąrašą, tikrinimas, ištrynimas ir statistika yra atskirti autentifikuotu API rakto principu. Audito įrašuose yra maišos ir dydžio metaduomenys, niekada nėra turinio. Į operatorių nukreipta informacija (du žymekliai, kliento sąlygos, `codemode:false`, kiekvieno įrankio apimtys, puslapių numeravimas ir diagnostinė matrica) pateikiama [suspaudimo varikliuose → Būtinosios sąlygos / operatoriaus vadovas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` pateikia MCP aprašymų glaudinimą atskirai, skiltyje
-`analytics.mcpDescriptionCompression`. Šios reikšmės yra MCP sąrašuose pateikiamų
-aprašymų (`tools`, `prompts`, `resources` ir `resourceTemplates`) metaduomenų dydžio įverčiai; tai nėra teikėjo naudojimo
-apskaitos įrašai, ir jie pažymėti `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` praneša apie MCP aprašymo glaudinimą atskirai pagal `analytics.mcpDescriptionCompression`. Šios reikšmės yra MCP sąrašo aprašų (`tools`, `prompts`, `resources` ir `resourceTemplates`) metaduomenų dydžio įvertinimai; jie nėra paslaugų teikėjo naudojimo kvitai ir yra pažymėti `source: "mcp_metadata_estimate"`.
 
 ### MCP pritaikymo neįgaliesiems medžio filtras (v3.8.0)
 
-Be pirmiau nurodytų glaudinimo įrankių, OmniRoute apima filtrą, kuris po vykdymo
-suglaudina MCP naršyklės / pritaikymo neįgaliesiems įrankių **rezultatus**, prieš juos grąžinant
-agentui. Pats šis filtras nėra įrankis — jis skaidriai vykdomas bet kokiam įrankio rezultatui, kuriame yra
-išsamus pritaikymo neįgaliesiems medžio arba naršyklės momentinės kopijos tekstas (≥2000 simbolių).
+Atskirai nuo aukščiau pateiktų suspaudimo įrankių, OmniRoute apima filtrą po vykdymo, kuris suspaudžia** įrankio rezultatai** MCP browser/accessibility įrankių prieš grąžinant juos agentui. Šis filtras pats savaime nėra įrankis — jis skaidriai veikia bet kuriame įrankio rezultate, kuriame yra išsamus pritaikymo neįgaliesiems medis arba naršyklės momentinės nuotraukos tekstas (≥ 2000 simbolių).
 
-Pagrindinės ypatybės:
+Pagrindiniai elgesys:
 
-- Sutraukia ≥30 iš eilės pasikartojančių to paties lygmens eilučių į pradžios ir pabaigos suvestinę
-- Išsaugo `[ref=eXX]` inkarus, reikalingus Playwright / kompiuterio valdymui
-- Griežtai sutrumpina per didelį tekstą (>50,000 simbolių), pateikdamas naršymo užuominą
-- Tikėtinas sutaupymas: **60–80%** naršyklės momentinių kopijų duomenims
+- Sutraukia ≥ 30 iš eilės pasikartojančių brolių eilučių į head + uodegos santrauką
+- Išsaugo `[ref=eXX]` inkarus, kurių reikalauja Playwright/computer-use
+- Sunkiai sutrumpinamas per didelis tekstas (> 50 000 simbolių) su naršymo užuomina
+- Tikimasi sutaupyti:** 60–80 proc.** naršyklės momentinių kopijų naudingose apkrovose
 
-Konfigūracija: `compression.mcpAccessibility` visuotinėse nuostatose (migracija 056).
-Įgyvendinimas: `open-sse/services/compression/engines/mcpAccessibility/`.
-Visa dokumentacija: [Glaudinimo varikliai — MCP pritaikymo neįgaliesiems medžio filtras](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigūracija: `compression.mcpAccessibility` visuotiniuose nustatymuose (migracija 056). Įgyvendinimas: `open-sse/services/compression/engines/mcpAccessibility/`. Visi dokumentai: [Kompresiniai varikliai — MCP Prieinamumo medžio filtras](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Žr. [Glaudinimo varikliai](../compression/COMPRESSION_ENGINES.md) ir [RTK glaudinimas](../compression/RTK_COMPRESSION.md), kur aprašytas
-šių įrankių vykdymo metu naudojamas glaudinimo modelis.
+Žr. [Compression Engines](../compression/COMPRESSION_ENGINES.md) ir [RTK Compression,](../compression/RTK_COMPRESSION.md) kad sužinotumėte apie šių įrankių vykdymo laiko suspaudimo modelį.
 
 ## 1Proxy įrankiai (3)
 

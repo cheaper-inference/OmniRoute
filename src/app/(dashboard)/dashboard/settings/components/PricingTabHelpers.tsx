@@ -17,7 +17,7 @@ export function HeroStat({
         {label}
       </div>
       <div
-        className={`text-2xl font-bold tabular-nums leading-tight ${accent || "text-text-main"}`}
+        className={`text-2xl font-semibold tabular-nums leading-tight ${accent || "text-text-main"}`}
       >
         {value}
       </div>

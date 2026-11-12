@@ -19,6 +19,7 @@ import {
   customHeadersSchema,
 } from "./misc.ts";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import { THINKING_REPLAY_MODES } from "@/shared/constants/modelCompat";
 import {
   MODEL_CONCURRENCY_MAX_CAP,
   MODEL_CONCURRENCY_MAX_KEY_LENGTH,
@@ -89,6 +90,7 @@ const ENCRYPTED_ENVELOPE_PREFIX = "enc:v1:";
 export const createProviderSchema = z
   .object({
     provider: z.string().min(1).max(100),
+    proxyEnabled: z.boolean().optional(),
     apiKey: z.string().max(MAX_PROVIDER_CREDENTIAL_LENGTH).optional(),
     name: z.string().min(1).max(200),
     priority: z.number().int().min(1).max(100).optional(),
@@ -317,6 +319,10 @@ export const providerModelMutationSchema = z.object({
   // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
   // catalog. `null` clears a manual override back to the id-based heuristic.
   supportsVision: z.boolean().nullable().optional(),
+  // #18739: per-node thinking-replay contract persisted on the modelCompatOverrides
+  // entry (see open-sse/translator/helpers/thinkingReplayMode.ts). `null` unsets it
+  // back to the default provider-derived handling.
+  thinkingReplay: z.enum(THINKING_REPLAY_MODES).nullable().optional(),
   dimensions: z.number().int().positive().nullable().optional(),
   supportedInputTypes: z.array(z.string()).optional(),
   modelType: z.enum(["chat", "embedding", "image", "rerank"]).optional(),
@@ -802,6 +808,9 @@ export const validateProviderApiKeySchema = z
     runtimeKey: z.string().trim().max(65_536).optional(),
     tunnelId: z.string().trim().max(128).optional(),
     connectorName: z.string().trim().max(200).optional(),
+    // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
+    zdrEnabled: z.boolean().optional(),
+    accountId: z.string().trim().max(200).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.provider === "google-pse-search" && !data.cx) {

@@ -9,13 +9,18 @@ import {
   resolveModelTestTimeoutMs,
 } from "@/lib/api/modelTestRunner";
 import { getRuntimePorts } from "@/lib/runtime/ports";
-import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
+import {
+  CHAT_PROBE_NOT_ISOLATED_MESSAGE,
+  chatProbeLeavesNoConversation,
+  isChatProbeRefusal,
+} from "@/lib/providers/chatProbePolicy";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import type { ComboLike, ResolvedComboTarget } from "@omniroute/open-sse/services/combo/types.ts";
 import { testComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
 import { isAutoComboId, materializeAutoCombo } from "@/lib/combos/autoVirtual";
 import type { ComboRecord } from "@/domain/persistence/comboRepositories";
 
@@ -103,6 +108,18 @@ function buildComboTestResult(
   };
 }
 
+/**
+ * A target the conversation-isolation policy kept off a signed-in account. It carries no
+ * status code: it was never sent, so it must not count as a removable failure.
+ */
+function skippedTarget(target: ResolvedComboTarget): ComboTestResult {
+  return buildComboTestResult(target, {
+    status: "error",
+    error: CHAT_PROBE_NOT_ISOLATED_MESSAGE,
+    latencyMs: 0,
+  });
+}
+
 async function testComboTarget(
   target: ResolvedComboTarget,
   baseInternalUrl: string,
@@ -126,13 +143,9 @@ async function testComboTarget(
         latencyMs: 0,
       });
     }
-    if (requiresWebSessionCredential(target.provider)) {
-      return buildComboTestResult(target, {
-        status: "error",
-        error:
-          "Skipped: web-session providers are excluded from chat probes to avoid creating provider conversations",
-        latencyMs: 0,
-      });
+    // The policy the chat pipeline enforces (#14780), asked before anything is sent.
+    if (!(await chatProbeLeavesNoConversation(String(target.provider ?? "")))) {
+      return skippedTarget(target);
     }
     const modelLower = modelStr.toLowerCase();
     const isEmbedding =
@@ -164,6 +177,9 @@ async function testComboTarget(
         "Content-Type": "application/json",
         ...(internalApiKey ? { Authorization: `Bearer ${internalApiKey}` } : {}),
         "X-Internal-Test": "combo-health-check",
+        // Sent here, not left to the fetch stamp: that only fires for listenPort(), and this
+        // targets apiPort, which differs when the API has its own port.
+        [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
         // Force a fresh execution path so combo tests cannot be satisfied by
         // OmniRoute's semantic cache or other request reuse layers.
         "X-OmniRoute-No-Cache": "true",
@@ -205,6 +221,8 @@ async function testComboTarget(
     let errorMsg = "";
     try {
       const errBody = await res.json();
+      // A target that reached a non-isolated provider indirectly (a nested combo or alias).
+      if (isChatProbeRefusal(errBody)) return skippedTarget(target);
       errorMsg = extractProviderErrorMessage(errBody, res.statusText);
     } catch {
       errorMsg = res.statusText;

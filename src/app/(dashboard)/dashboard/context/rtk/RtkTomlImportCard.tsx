@@ -6,6 +6,7 @@ import { SectionHeader } from "@omniroute/ui-kit/page-header";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Checkbox from "@/shared/components/Checkbox";
+import { FileInput } from "@/shared/components/FileInput";
 import Textarea from "@/shared/components/Textarea";
 
 const RTK_TOML_MAX_BYTES = 1024 * 1024;
@@ -44,6 +45,7 @@ interface RtkTomlEditorProps {
   overwrite: boolean;
   onContentChange: (content: string) => void;
   onFileChange: (file: File | undefined) => void;
+  onFileRejected: () => void;
   onProcess: (action: "validate" | "install") => void;
   onOverwriteChange: (overwrite: boolean) => void;
 }
@@ -63,6 +65,7 @@ function RtkTomlEditor({
   overwrite,
   onContentChange,
   onFileChange,
+  onFileRejected,
   onProcess,
   onOverwriteChange,
 }: RtkTomlEditorProps) {
@@ -70,17 +73,13 @@ function RtkTomlEditor({
   return (
     <>
       <div className="mt-3 flex flex-col gap-3">
-        <label className="text-xs font-medium text-text-main">
-          {t("tomlChooseFile")}
-          {/* kit-exception: Native file picker: the kit has no file input; tokens style its button. */}
-          <input
-            type="file"
-            accept=".toml,text/plain,application/toml"
-            onChange={(event) => onFileChange(event.target.files?.[0])}
-            data-testid="rtk-toml-file"
-            className="mt-1 block w-full text-xs text-text-muted file:mr-3 file:rounded-control file:border file:border-border file:bg-bg-subtle file:px-2.5 file:py-1 file:text-xs file:text-text-main"
-          />
-        </label>
+        <FileInput
+          accept=".toml,text/plain,application/toml"
+          chooseLabel={t("tomlChooseFile")}
+          onFilesChange={(files) => onFileChange(files[0])}
+          onFilesRejected={onFileRejected}
+          data-testid="rtk-toml-file"
+        />
         <Textarea
           value={content}
           onChange={(event) => onContentChange(event.target.value)}
@@ -131,14 +130,14 @@ function RtkTomlResult({ result }: { result: ImportResult }) {
             ? t("tomlValidationPassed")
             : t("tomlValidationFailed")}
       </p>
-      <p className="mt-1 text-[11px] text-text-muted">
+      <p className="mt-1 text-xs text-text-muted">
         {t("tomlValidationSummary", {
           filters: result.filters.length,
           tests: result.outcomes.length,
         })}
       </p>
       {result.backupCreated && (
-        <p className="mt-1 text-[11px] text-text-muted">{t("tomlBackupCreated")}</p>
+        <p className="mt-1 text-xs text-text-muted">{t("tomlBackupCreated")}</p>
       )}
       {result.filters.length > 0 && (
         <ul className="mt-2 space-y-1 text-[11px] text-text-main">
@@ -232,6 +231,7 @@ export default function RtkTomlImportCard({ onInstalled }: RtkTomlImportCardProp
           setResult(null);
         }}
         onFileChange={(file) => void loadFile(file)}
+        onFileRejected={() => setError(t("tomlFileReadError"))}
         onProcess={(action) => void processImport(action)}
         onOverwriteChange={setOverwrite}
       />

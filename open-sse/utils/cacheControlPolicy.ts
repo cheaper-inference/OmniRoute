@@ -110,6 +110,9 @@ const CACHING_PROVIDERS = new Set([
   "alibaba",
   "alibaba-cn",
   "qwen-cloud",
+  // Bedrock Converse caches only at explicit `cachePoint` blocks, which the Bedrock
+  // executor builds from the client's cache_control markers.
+  "bedrock",
 ]);
 
 /**
@@ -132,12 +135,33 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
   "qwen-cloud",
   // #3088 — Xiaomi MiMo honors OpenAI-format cache_control breakpoints.
   "xiaomi-mimo",
+  // The Bedrock executor turns these markers into Converse `cachePoint` blocks.
+  "bedrock",
 ]);
 
 /** Providers whose cache is populated from the longest matching prefix without
  * an explicit `cache_control` breakpoint. This is deliberately narrower than
  * CACHING_PROVIDERS, which also includes explicit-breakpoint providers. */
 const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"]);
+
+// #18787: these provider lanes contain both caching and non-caching upstream models.
+// Enable the implicit-cache guard only for a verified model, or a per-connection
+// explicit automatic-cache override; otherwise avoid suppressing useful compression.
+// `opencode` is the routing alias; chatCore sees its `opencode-zen` registry id.
+const OPENCODE_LANES = new Set(["opencode", "opencode-zen", "opencode-go"]);
+// `deepseek-flash` is the Go registry's alias of DeepSeek V4.1 Flash.
+const OPENCODE_PREFIX_CACHED_MODEL = /^deepseek-(?:v4\.1-)?flash(?:[-:.][a-z0-9]+)*$/;
+
+export function isOpenCodeLane(provider: string | null | undefined): boolean {
+  return !!provider && OPENCODE_LANES.has(provider.toLowerCase());
+}
+
+/** Restrict OpenCode's cache-aligned lane to models verified to use automatic prefixes. */
+function isOpenCodeCacheableModel(provider: string, model?: string | null): boolean {
+  if (!isOpenCodeLane(provider) || !model) return false;
+  const modelId = model.toLowerCase().split("/").filter(Boolean).at(-1) ?? "";
+  return OPENCODE_PREFIX_CACHED_MODEL.test(modelId);
+}
 
 /**
  * Per-connection override for cache behavior, resolved from the connection's
@@ -226,6 +250,11 @@ export function isClaudeCodeClient(userAgent: string | null | undefined): boolea
   return false;
 }
 
+/** Recognize the Claude protocol regardless of casing. */
+function isClaudeTargetFormat(targetFormat?: string | null): boolean {
+  return targetFormat?.toLowerCase() === "claude";
+}
+
 /**
  * Check if a provider supports prompt caching
  * Supports caching if:
@@ -259,12 +288,12 @@ export function providerSupportsCaching(
   // Vertex is a mixed-format provider. Only its Anthropic Claude path accepts
   // cache_control; Gemini and OpenAI-format partner models use other mechanisms.
   if (providerId === "vertex" || providerId === "vertex-partner") {
-    return targetFormat?.toLowerCase() === "claude";
+    return isClaudeTargetFormat(targetFormat);
   }
+  if (isOpenCodeCacheableModel(providerId, model)) return true;
   if (CACHING_PROVIDERS.has(providerId)) return true;
-  // All Claude-protocol providers support prompt caching
-  if (targetFormat === "claude") return true;
-  return false;
+  // All Claude-protocol providers support prompt caching.
+  return isClaudeTargetFormat(targetFormat);
 }
 
 /** Whether a marker-free request can still participate in the provider cache.
@@ -272,7 +301,8 @@ export function providerSupportsCaching(
  * semantic; `supportsPromptCaching` alone does not say how caching is requested. */
 export function providerUsesAutomaticPrefixCaching(
   provider: string | null | undefined,
-  connectionCacheOverride?: ConnectionCacheOverride | null
+  connectionCacheOverride?: ConnectionCacheOverride | null,
+  model?: string | null
 ): boolean {
   if (connectionCacheOverride?.supportsPromptCaching === false) return false;
   const passthrough = connectionCacheOverride?.cacheControlPassthrough;
@@ -281,7 +311,15 @@ export function providerUsesAutomaticPrefixCaching(
     return true;
   }
   if (!provider) return false;
-  return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(provider.toLowerCase());
+  const providerId = provider.toLowerCase();
+  if (isOpenCodeLane(providerId)) {
+    // OpenCode uses implicit prefixes unless a marker passthrough format was selected.
+    return (
+      connectionCacheOverride?.supportsPromptCaching === true ||
+      isOpenCodeCacheableModel(providerId, model)
+    );
+  }
+  return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(providerId);
 }
 
 /**

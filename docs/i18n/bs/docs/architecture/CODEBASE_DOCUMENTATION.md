@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -474,7 +474,7 @@ open-sse/
 | `imageGeneration.ts`    | Generisanje slike                                                                                      |
 | `audioSpeech.ts`        | Pretvaranje teksta u govor                                                                             |
 | `audioTranscription.ts` | Govor u tekst                                                                                          |
-| `videoGeneration.ts`    | Generacija video zapisa                                                                                |
+| `videoGeneration.ts`    | Generacija videa                                                                                       |
 | `musicGeneration.ts`    | Muzička generacija                                                                                     |
 | `rerank.ts`             | Ponovno rangiranje                                                                                     |
 | `moderations.ts`        | Umjerenost                                                                                             |
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-158 izvršnih modula najvišeg nivoa (`*.ts` minus `base.ts`, `index.ts` i testovi — count `npm run check:docs-counts` mjere). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`), direktno ili preko `DefaultExecutor` ili drugog izvršioca; preostali moduli su pomoćnici po provajderu (šeme alata, fetch/TTS adapteri, quirk handleri). Izvršitelji uključuju:
+159 izvršnih modula najvišeg nivoa (`*.ts` minus `base.ts`, `index.ts` i testovi — count `npm run check:docs-counts` mjere). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`), direktno ili preko `DefaultExecutor` ili drugog izvršioca; preostali moduli su pomoćnici po provajderu (šeme alata, fetch/TTS adapteri, quirk handleri). Izvršitelji uključuju:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, plus `claudeIdentity.ts` `index.ts` `devin-desktop`(registrator).
 
-> Napomena: dobavljače koji nisu navedeni ovdje opslužuje `default.ts` koristeći generički OpenAI-kompatibilni izvršitelj. Potpuni katalog provajdera (380 provajdera) živi u `src/shared/constants/providers.ts`.
+> Napomena: dobavljače koji nisu navedeni ovdje opslužuje `default.ts` koristeći generički OpenAI-kompatibilni izvršitelj. Potpuni katalog provajdera (381 provajder) živi u `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
