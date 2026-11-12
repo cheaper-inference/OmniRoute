@@ -298,6 +298,7 @@ import { demonrouteProvider } from "./registry/demonroute/index.ts";
 import { megabrainProvider } from "./registry/megabrain/index.ts";
 import { paraloncloudProvider } from "./registry/paraloncloud/index.ts";
 import { empiriolabsProvider } from "./registry/empiriolabs/index.ts";
+import { llmtrProvider } from "./registry/llmtr/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -599,6 +600,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   demonroute: demonrouteProvider,
   paraloncloud: paraloncloudProvider,
   empiriolabs: empiriolabsProvider,
+  llmtr: llmtrProvider,
   // Last, so its bare upstream ids (anthropic/…, z-ai/…) never shadow another
   // provider's; address them as megabrain/<model>.
   megabrain: megabrainProvider,

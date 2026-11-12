@@ -1,0 +1,1 @@
+- **feat(providers):** add LLMTR as an OpenAI-compatible API-key gateway (`https://llmtr.com/v1`) with live `/v1/models` discovery and passthrough models ([#18537](https://github.com/cheaper-inference/OmniRoute/pull/18537)) — thanks @knowhycodata
