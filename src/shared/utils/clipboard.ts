@@ -4,6 +4,15 @@
  * For HTTP deployments, falls back to execCommand('copy').
  */
 
+// A modal dialog traps focus: a textarea on <body> loses it before execCommand runs and the copy
+// comes back empty. Inside the topmost open dialog (portals append in opening order) it keeps it.
+function fallbackHost(): Element {
+  const dialogs = document.querySelectorAll(
+    '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]'
+  );
+  return dialogs[dialogs.length - 1] ?? document.body;
+}
+
 /**
  * Copy text to clipboard with automatic HTTPS/HTTP fallback.
  * Works in both secure (HTTPS) and non-secure (HTTP) contexts.
@@ -28,20 +37,18 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.style.cssText = "position:fixed;top:0;left:-9999px;opacity:0;pointer-events:none;";
-    let appended = false;
+    const previousFocus = document.activeElement;
 
     try {
-      document.body.appendChild(textArea);
-      appended = true;
-      textArea.focus();
+      fallbackHost().appendChild(textArea);
+      textArea.focus({ preventScroll: true });
       textArea.select();
       return document.execCommand("copy");
     } catch {
       return false;
     } finally {
-      if (appended && document.body.contains(textArea)) {
-        document.body.removeChild(textArea);
-      }
+      textArea.remove();
+      if (previousFocus instanceof HTMLElement) previousFocus.focus({ preventScroll: true });
     }
   }
 

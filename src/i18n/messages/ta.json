@@ -5679,6 +5679,7 @@
     "usageTracking": "பயன்பாட்டுக் கண்காணிப்பு",
     "securityDesc": "உங்கள் டாஷ்போர்டைப் பாதுகாக்க ஒரு கடவுச்சொல்லை அமைக்கவும் அல்லது இப்போதைக்கு தவிர்க்கவும்.",
     "securityDescSkipWarning": "⚠️ கடவுச்சொல் இல்லாமல், அமைவின்போது வழங்குநர்களைச் சேர்க்க முடியாது. கடவுச்சொல்லை அமைத்த பிறகு டாஷ்போர்டிலிருந்து அவற்றைச் சேர்க்கலாம்.",
+    "passwordAlreadySet": "டாஷ்போர்டு கடவுச்சொல் ஏற்கனவே அமைக்கப்பட்டுள்ளது. பின்னர் அமைப்புகளில் அதை மாற்றலாம்.",
     "providerDesc": "உங்கள் முதல் AI வழங்குநரை இணைக்கவும். பின்னர் மேலும் சேர்க்கலாம்.",
     "providerRequiresPassword": "வழங்குநர்களைச் சேர்க்க முதலில் கடவுச்சொல்லை அமைக்க வேண்டும். பாதுகாப்புப் படிக்குத் திரும்பிச் சென்று கடவுச்சொல்லை அமைக்கவும் அல்லது பின்னர் டாஷ்போர்டிலிருந்து வழங்குநர்களைச் சேர்க்கவும்.",
     "apiKeyRequired": "API விசை (கட்டாயம்)",
@@ -7227,7 +7228,8 @@
       "kiro": "இலவச அடுக்கு: 50 கிரெடிட்கள்/மாதம் (~25K–100K டோக்கன்கள்). ⚠️ Kiro ToS மூன்றாம் தரப்பு proxy/harness பயன்பாட்டைத் தடைசெய்கிறது.",
       "codex": "தற்போதுள்ள OAuth செயல்முறையுடன் OpenAI Codex-ஐ இணைக்கவும்.",
       "qwen": "தற்போதுள்ள OAuth செயல்முறையுடன் Qwen Code-ஐ இணைக்கவும்.",
-      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்"
+      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} வழங்குநரின் சொந்த மாதிரி ஐடிகளை ஏற்றுக்கொள்கிறது. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது ரூட்டிங் செய்ய தனிப்பயன் ஐடிகளைச் சேர்க்கவும்.",
     "bedrockModelsDescription": "அமேசான் பெட்ராக் மாதிரிகள் AWS பிராந்தியத்தால் ஸ்கோப் செய்யப்படுகின்றன. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது தேர்ந்தெடுக்கப்பட்ட பகுதியில் செயல்படுத்தப்பட்ட பெட்ராக் மாடல் ஐடிகளைச் சேர்க்கவும்.",
@@ -10258,7 +10260,11 @@
     "mappingInvalidJson": "தவறான JSON.",
     "mappingMustBeObject": "மேப்பிங் ஒரு JSON பொருளாக இருக்க வேண்டும், வரிசை அல்லது எளிய மதிப்பாக இருக்கக்கூடாது.",
     "mappingValueMustBeString": "“{key}” விசைக்கான மதிப்பு ஒரு சரமாக இருக்க வேண்டும்.",
-    "save": "சேமி"
+    "save": "சேமி",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12870,6 +12876,8 @@
     },
     "attempts": "முயற்சிகள்",
     "detail": {
+      "tabOverview": "மேலோட்டம்",
+      "tabPayloads": "பேலோடுகள்",
       "omittedHttpAttempts": "{count} HTTP அனுப்புதல்கள் தக்கவைக்கப்படவில்லை",
       "noHttpResponse": "HTTP பதில் எதுவும் காணப்படவில்லை",
       "transportError": "பரிமாற்றப் பிழை",
