@@ -1,9 +1,12 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
-import { mergeUsageEvidence } from "@/lib/usage/usageEvidence";
+import { mergeUsageEvidence } from "./usageEvidence.ts";
 import { mergeUsageSnapshot, repairClaudeFinalWireUsage } from "./streamUsageMerge.ts";
-import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
+import {
+  resolveStreamAccountingUsage,
+  projectStreamingClientUsage,
+} from "./streamAccountingUsage.ts";
 import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
@@ -993,18 +996,18 @@ export function createSSEStream(options: StreamOptions = {}) {
     providerPayloadCollector.push(payload);
   };
   // Accounting uses native receipt evidence rather than a client projection.
-  const getAccountingUsage = (): UsageLike | null | undefined =>
-    !nativeContent.hasObserved() && !state?.usage && !usage && observedContentLength() === 0
-      ? null
-      : nativeContent.hasObserved()
-        ? (nativeClaudeUsage.getUsage(observedContentLength()) ??
-          finalizeStreamingUsage(null, body, observedContentLength()))
-        : finalizeStreamingUsage(
-            state?.usage ?? usage,
-            body,
-            observedContentLength(),
-            mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat || FORMATS.OPENAI : targetFormat
-          );
+  const getAccountingUsage = (): UsageLike | null =>
+    resolveStreamAccountingUsage({
+      usage: state?.usage ?? usage,
+      native: nativeContent.hasObserved(),
+      nativeUsage: nativeClaudeUsage.getUsage(observedContentLength()),
+      body,
+      contentLength: observedContentLength(),
+      format:
+        mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat || FORMATS.OPENAI : targetFormat,
+    });
+  const getClientUsage = () =>
+    projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
   const sanitizePassthroughUsage = (payload: unknown) => {
     const changed =
       !hasPriorInputForTrailingUsage(payload, usage) &&
@@ -1365,12 +1368,12 @@ export function createSSEStream(options: StreamOptions = {}) {
       !hasValidUsage(itemSanitized.usage as UsageLike) &&
       totalContentLength > 0
     ) {
-      const estimated = getAccountingUsage();
+      const estimated = getClientUsage();
       itemSanitized.usage = timing.withTps(filterUsageForFormat(estimated, sourceFormat));
       state.usage = estimated;
       if (hasValidUsage(estimated)) translateForwardedUsage = true; // finish chunk carries it
     } else if (state?.finishReason && isFinishChunk && state.usage) {
-      const buffered = addBufferToUsage(getAccountingUsage() ?? state.usage);
+      const buffered = addBufferToUsage(getClientUsage());
       itemSanitized.usage = timing.withTps(
         carryCacheCreationMarker(itemSanitized.usage, filterUsageForFormat(buffered, sourceFormat))
       );

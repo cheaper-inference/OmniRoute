@@ -229,7 +229,11 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     nonNegativeOrNull(entry.billingQuantity),
     nonNegativeOrNull(entry.billingUnitPriceUsd),
     serializeUsageEvidence(entry.tokens),
-    resolveUsageProvenance({ tokens: entry.tokens, usageEstimated: false, isSuccess: true })
+    resolveUsageProvenance({
+      tokens: entry.tokens,
+      usageEstimated: false,
+      isSuccess: entry.success !== false,
+    })
   );
 }
 

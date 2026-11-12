@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} tömörített token",
       "reported": "jelentett",
       "estimated": "becsült",
       "unknown": "Nem érhető el",

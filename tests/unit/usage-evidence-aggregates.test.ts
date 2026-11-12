@@ -98,3 +98,52 @@ test("live and archived dashboards retain estimates without inventing old proven
   assert.equal(cache.summary.cachedInputTokens, 7);
   assert.equal(cache.summary.cachedInputTokensComplete, false);
 });
+
+test("archive totals and evidence use the same snapshot when a write arrives during pricing", async () => {
+  const db = getDbInstance();
+  const insert = db.prepare(`INSERT INTO usage_history
+    (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read,
+     usage_evidence, usage_provenance, calculated_cost_usd)
+    VALUES ('snapshot-fixture', 'snapshot-model', ?, ?, 5, ?, ?, 'estimated', 0.01)`);
+  insert.run("2018-01-01T10:00:00.000Z", 20, null, JSON.stringify(evidence));
+  const { rollupUsageHistoryBeforeDate } = await import("../../src/lib/usage/aggregateHistory.ts");
+  // The async function has captured its rows and yielded at pricing. This insertion
+  // must only appear in a subsequent rollup, not in this snapshot's evidence.
+  const pending = rollupUsageHistoryBeforeDate("2018-02-01");
+  insert.run(
+    "2018-01-01T11:00:00.000Z",
+    100,
+    50,
+    JSON.stringify({
+      ...evidence,
+      cacheRead: { source: "reported" },
+    })
+  );
+  assert.equal((await pending).errors, 0);
+  const read = () =>
+    db
+      .prepare(
+        `SELECT total_requests, total_input_tokens,
+    total_cache_read_tokens, estimated_requests, unknown_evidence_requests,
+    cached_input_unknown_requests FROM daily_usage_summary
+    WHERE provider = 'snapshot-fixture'`
+      )
+      .get();
+  assert.deepEqual(read(), {
+    total_requests: 1,
+    total_input_tokens: 20,
+    total_cache_read_tokens: null,
+    estimated_requests: 1,
+    unknown_evidence_requests: 0,
+    cached_input_unknown_requests: 1,
+  });
+  assert.equal((await rollupUsageHistoryBeforeDate("2018-02-01")).errors, 0);
+  assert.deepEqual(read(), {
+    total_requests: 2,
+    total_input_tokens: 120,
+    total_cache_read_tokens: 50,
+    estimated_requests: 2,
+    unknown_evidence_requests: 0,
+    cached_input_unknown_requests: 1,
+  });
+});

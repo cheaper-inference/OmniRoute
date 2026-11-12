@@ -1,4 +1,4 @@
-import { mergeUsageEvidence } from "@/lib/usage/usageEvidence";
+import { mergeUsageEvidence } from "./usageEvidence.ts";
 import type { UsageLike } from "./usageTracking.ts";
 
 export function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLike): UsageLike {
@@ -31,9 +31,11 @@ export function repairClaudeFinalWireUsage(
 ): boolean {
   const event = value as { type?: string; usage?: UsageLike };
   if (event?.type !== "message_delta" || !receipt) return false;
+  const output = receipt.completion_tokens ?? receipt.output_tokens ?? 0;
+  if (event.usage?.output_tokens === output) return false;
   event.usage = {
     ...event.usage,
-    output_tokens: receipt.completion_tokens ?? receipt.output_tokens ?? 0,
+    output_tokens: output,
     usage_evidence: receipt.usage_evidence,
     ...(receipt.estimated ? { estimated: true } : {}),
   };

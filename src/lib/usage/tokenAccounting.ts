@@ -218,7 +218,11 @@ export function getObservedReasoning(message: unknown): ObservedReasoning {
 // vs `0` when the provider explicitly reported zero.
 
 function hasAnyKey(record: JsonRecord, keys: string[]): boolean {
-  return keys.some((k) => usableTokenCounter(record[k]));
+  return keys.some((k) => {
+    const value = record[k];
+    const normalized = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+    return usableTokenCounter(normalized);
+  });
 }
 
 /**

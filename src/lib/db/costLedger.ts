@@ -191,17 +191,21 @@ function getAggRow(row: unknown): LedgerAggregate {
 export function aggregateLedger(
   apiKeyId: string,
   sinceIso: string,
-  opts: { successOnly?: boolean } = {}
+  opts: { successOnly?: boolean; includeEvidence?: boolean } = {}
 ): LedgerAggregate {
   if (!apiKeyId) return { amountUsd: 0, requestCount: 0 };
   const successClause = opts.successOnly === true ? " AND success = 1" : "";
+  // Quota admission stays on its covering index; observed totals share one snapshot with evidence.
+  const evidenceColumn =
+    opts.includeEvidence === false
+      ? ""
+      : `, SUM(CASE WHEN usage_evidence LIKE '%"source":"estimated"%' THEN 1 ELSE 0 END) AS estimated_count`;
   const db = getDbInstance();
   const row = db
     .prepare(
       `SELECT
          COALESCE(SUM(amount_usd), 0) AS amount_usd,
-         COUNT(*) AS request_count,
-         SUM(CASE WHEN usage_evidence LIKE '%"source":"estimated"%' THEN 1 ELSE 0 END) AS estimated_count
+         COUNT(*) AS request_count${evidenceColumn}
        FROM request_cost_ledger
        WHERE api_key_id = ? AND timestamp >= ?${successClause}`
     )
@@ -300,7 +304,7 @@ export function listLedgerEntries(
 export function aggregateLedgerThisMonth(apiKeyId: string, nowIso?: string): LedgerAggregate {
   const now = nowIso ? new Date(nowIso) : new Date();
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-  return aggregateLedger(apiKeyId, monthStart, { successOnly: true });
+  return aggregateLedger(apiKeyId, monthStart, { successOnly: true, includeEvidence: false });
 }
 
 /**

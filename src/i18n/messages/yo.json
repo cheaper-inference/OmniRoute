@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "A ti fún tókìnì {count} pọ̀",
       "reported": "tí a ròyìn",
       "estimated": "tí a fojú díwọ̀n",
       "unknown": "kò sí ìsọfúnni",

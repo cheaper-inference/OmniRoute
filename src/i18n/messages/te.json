@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} టోకెన్లు కుదించబడ్డాయి",
       "reported": "నివేదించబడింది",
       "estimated": "అంచనా వేయబడింది",
       "unknown": "అందుబాటులో లేదు",

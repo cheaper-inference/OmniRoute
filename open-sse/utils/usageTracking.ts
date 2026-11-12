@@ -21,7 +21,7 @@ import {
   hasEstimatedUsageEvidence,
   withoutInvalidCacheCounters,
   type UsageEvidence,
-} from "@/lib/usage/usageEvidence";
+} from "./usageEvidence.ts";
 import { estimateInputTokens, estimateOutputTokens } from "./usageEstimation.ts";
 export { estimateInputTokens, estimateOutputTokens } from "./usageEstimation.ts";
 export { pickCacheCreationTokens };
@@ -566,6 +566,13 @@ function clearCachedTokenDetail<T extends UsageTokenDetail | null | undefined>(v
   return result;
 }
 
+function plausibleReportedInput(input: number, body: unknown): boolean {
+  if (input > 0) return isInputTokenCountPlausible(input, body);
+  if (input !== 0) return false;
+  const bytes = getSerializedBodyBytes(body);
+  return bytes === null || bytes === 0;
+}
+
 /**
  * Replace only physically implausible provider input/cache usage with the local
  * request estimate. Valid usage is returned by reference and remains untouched.
@@ -580,13 +587,7 @@ export function sanitizeProviderUsageForRequest(
   usage = withoutInvalidCacheCounters(usage);
   const format = resolveUsageFormat(usage, targetFormat);
   const reportedInput = getReportedInputTokens(usage, format);
-  // A nontrivial request cannot justify a relay reporting zero input.
-  const bodyBytesForZeroCheck = reportedInput === 0 ? getSerializedBodyBytes(body) : null;
-  const zeroIsPlausible =
-    reportedInput === 0 && (bodyBytesForZeroCheck === null || bodyBytesForZeroCheck === 0);
-  if (zeroIsPlausible || (reportedInput > 0 && isInputTokenCountPlausible(reportedInput, body))) {
-    return usage;
-  }
+  if (plausibleReportedInput(reportedInput, body)) return usage;
 
   const estimatedInput = Math.max(1, estimateInputTokens(body));
   const result: UsageLike & { usage_evidence: UsageEvidence } = {

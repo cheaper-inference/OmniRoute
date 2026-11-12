@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "Стиснуто токенів: {count}",
       "reported": "повідомлено",
       "estimated": "оцінено",
       "unknown": "Немає даних",

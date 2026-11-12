@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "Akpakọtara token {count}",
       "reported": "a kọrọ",
       "estimated": "a tụrụ atụmatụ",
       "unknown": "enweghị ozi",

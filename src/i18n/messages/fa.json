@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} توکن فشرده شد",
       "reported": "گزارش‌شده",
       "estimated": "تخمینی",
       "unknown": "در دسترس نیست",

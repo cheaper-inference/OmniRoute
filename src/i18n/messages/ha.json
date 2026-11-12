@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "An matse token {count}",
       "reported": "an ruwaito",
       "estimated": "ƙiyastacce",
       "unknown": "babu bayanai",

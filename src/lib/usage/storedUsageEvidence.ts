@@ -24,10 +24,10 @@ export type PendingUsageTokens = Partial<ReturnType<typeof liveUsageEvidence>> &
   reasoning: number | null;
   compressed: number | null;
 };
-export function liveUsageEvidence(tokens: unknown) {
+export function liveUsageEvidence(tokens: unknown, usageEstimated = false) {
   const bag = tokens && typeof tokens === "object" ? (tokens as Record<string, unknown>) : {};
   return storedUsageEvidence({
     usage_evidence: readUsageEvidence(tokens),
-    usage_provenance: bag.estimated === true ? "estimated" : bag.usageProvenance,
+    usage_provenance: usageEstimated || bag.estimated === true ? "estimated" : bag.usageProvenance,
   });
 }

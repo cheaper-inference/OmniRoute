@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "Tokeni {count} zimebanwa",
       "reported": "imeripotiwa",
       "estimated": "imekadiriwa",
       "unknown": "Haipatikani",

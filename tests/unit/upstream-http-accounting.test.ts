@@ -189,6 +189,10 @@ test("metadata writer leaves pending usage and final resilience untouched and cr
   assert.equal(wire?.resilienceActions, null);
   assert.deepEqual(final?.resilienceActions, { rotations: 2, continued: 1 });
   assert.deepEqual(history.getPendingById().get(id)?.tokens, {
+    usageEvidence: null,
+    usageProvenance: null,
+    estimated: false,
+    costEstimated: false,
     in: 45,
     out: 9,
     cacheRead: null,

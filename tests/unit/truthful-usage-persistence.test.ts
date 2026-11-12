@@ -136,3 +136,33 @@ test("cost ledger preserves evidence while quota amounts remain conservative", a
   assert.equal(aggregateLedger(e.apiKeyId, "2020-01-01").amountUsd, 0.02);
   assert.equal(aggregateLedger(e.apiKeyId, "2020-01-01").costEstimated, true);
 });
+
+test("failed history keeps success-only aggregate provenance null", () => {
+  attemptWrite({
+    provider: "failed-fixture",
+    model: "fixture",
+    success: false,
+    tokens,
+    timestamp: "2026-01-02T00:00:00Z",
+  });
+  const row = getDbInstance()
+    .prepare(
+      "SELECT success, usage_provenance, usage_evidence FROM usage_history WHERE provider = 'failed-fixture'"
+    )
+    .get() as Record<string, unknown>;
+  assert.equal(row.success, 0);
+  assert.equal(row.usage_provenance, null);
+  assert.deepEqual(JSON.parse(String(row.usage_evidence)), evidence);
+});
+test("nullable cache readers keep supported numeric strings and reject invalid values", async () => {
+  const { getPromptCacheReadTokensOrNull: read, getPromptCacheCreationTokensOrNull: write } =
+    await import("../../src/lib/usage/tokenAccounting.ts");
+  for (const value of ["9", "0", 9, 0]) {
+    assert.equal(write({ cache_creation_input_tokens: value }), Number(value));
+    assert.equal(read({ cache_read_input_tokens: value }), Number(value));
+  }
+  for (const value of ["", " ", "bad", "-1", "Infinity", -1, Infinity, null]) {
+    assert.equal(write({ cache_creation_input_tokens: value }), null);
+    assert.equal(read({ cache_read_input_tokens: value }), null);
+  }
+});

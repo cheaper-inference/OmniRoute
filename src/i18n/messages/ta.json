@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} டோக்கன்கள் சுருக்கப்பட்டன",
       "reported": "அறிக்கையிடப்பட்டது",
       "estimated": "மதிப்பிடப்பட்டது",
       "unknown": "கிடைக்கவில்லை",

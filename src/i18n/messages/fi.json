@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} pakattua tokenia",
       "reported": "ilmoitettu",
       "estimated": "arvioitu",
       "unknown": "Ei saatavilla",

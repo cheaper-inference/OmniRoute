@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} tihendatud tokenit",
       "reported": "teatatud",
       "estimated": "hinnanguline",
       "unknown": "Pole saadaval",

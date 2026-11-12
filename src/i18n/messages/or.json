@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count}ଟି ଟୋକେନ୍ ସଙ୍କୋଚିତ ହୋଇଛି",
       "reported": "ରିପୋର୍ଟ ହୋଇଥିବା",
       "estimated": "ଆନୁମାନିକ",
       "unknown": "ଉପଲବ୍ଧ ନାହିଁ",

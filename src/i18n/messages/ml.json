@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} ടോക്കണുകൾ കംപ്രസ് ചെയ്തു",
       "reported": "റിപ്പോർട്ട് ചെയ്തത്",
       "estimated": "ഏകദേശ കണക്ക്",
       "unknown": "ലഭ്യമല്ല",

@@ -99,6 +99,7 @@ interface RequestBody {
 }
 
 interface Call {
+  headers: Headers;
   url: string;
   method: string;
   body: RequestBody;
@@ -126,6 +127,7 @@ function stubFetch(handlers: StubHandler[]) {
   const calls: Call[] = [];
   const fetchImpl = (async (url: string | URL | Request, init?: RequestInit) => {
     const call: Call = {
+      headers: new Headers(init?.headers),
       url: String(url),
       method: init?.method ?? "GET",
       body: typeof init?.body === "string" ? safeJson(init.body) : {},
@@ -677,4 +679,63 @@ test("BigQuery projection retains mixed evidence as JSON", () => {
   assert.equal(row.usage_estimated, true);
   assert.equal(row.tokens_cache_read, null);
   assert.equal(row.tokens_cache_write, 0);
+});
+
+test("autoCreate adds only nullable evidence fields with an etag and preserves metadata", async () => {
+  const existing = [
+    {
+      name: "id",
+      type: "STRING",
+      mode: "REQUIRED",
+      description: "preserve",
+      policyTags: { names: ["tag"] },
+    },
+  ];
+  let fields: Array<{ name: string }> = existing;
+  const { fetchImpl, calls } = stubFetch([
+    (call) => {
+      if (call.method === "GET")
+        return { status: 200, json: { etag: "revision-1", schema: { fields } } };
+      if (call.method === "PATCH") {
+        assert.equal(call.headers.get("If-Match"), "revision-1");
+        assert.deepEqual(call.body.schema?.fields[0], existing[0]);
+        assert.deepEqual(call.body.schema?.fields.slice(1), [
+          { name: "usage_evidence", type: "STRING", mode: "NULLABLE" },
+          { name: "usage_estimated", type: "BOOL", mode: "NULLABLE" },
+        ]);
+        fields = call.body.schema!.fields;
+        return { status: 200, json: { etag: "revision-2", schema: { fields } } };
+      }
+      return null;
+    },
+  ]);
+  const client = bigquery.createBigQueryClientForTest({ ...CONFIG, autoCreate: true }, fetchImpl);
+  await client.prepare();
+  await client.prepare();
+  assert.equal(calls.filter((call) => call.method === "PATCH").length, 1);
+});
+test("evidence schema repair honors autoCreate false and failed preconditions", async () => {
+  for (const autoCreate of [false, true]) {
+    const { fetchImpl, calls } = stubFetch([
+      (call) => {
+        if (call.method === "GET")
+          return {
+            status: 200,
+            json: { etag: "stale", schema: { fields: [{ name: "id", type: "STRING" }] } },
+          };
+        if (call.method === "PATCH")
+          return { status: 412, json: { error: { message: "schema changed" } } };
+        return null;
+      },
+    ]);
+    const client = bigquery.createBigQueryClientForTest({ ...CONFIG, autoCreate }, fetchImpl);
+    if (autoCreate) await assert.rejects(client.prepare(), /schema changed/);
+    else await client.prepare();
+    await assert.rejects(client.send([{ ...RECORD, estimated: true }]), /usage_evidence/);
+    assert.equal(calls.filter((call) => call.method === "PATCH").length, autoCreate ? 1 : 0);
+    assert.equal(
+      calls.some((call) => call.url.endsWith("/insertAll")),
+      false
+    );
+  }
 });

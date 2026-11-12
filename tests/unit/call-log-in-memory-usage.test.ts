@@ -213,3 +213,15 @@ for (const finalizeFirst of [false, true]) {
     );
   });
 }
+
+test("entry-level estimated marker survives the live reader", async () => {
+  const id = history.trackPendingRequest("fixture", "synthetic", "fixture", true);
+  await saveCallLog({ id, usageEstimated: true, tokens: { input: 12, output: 3 } });
+  const rows = buildCallLogListRows({
+    logs: [],
+    connections: [],
+    pendingDetails: [...history.getPendingById().values()],
+    completedDetails: [],
+  });
+  assert.equal(rows.find((row) => row.id === id)?.estimated, true);
+});

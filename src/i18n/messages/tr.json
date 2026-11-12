@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} token sıkıştırıldı",
       "reported": "bildirilen",
       "estimated": "tahmini",
       "unknown": "Mevcut değil",

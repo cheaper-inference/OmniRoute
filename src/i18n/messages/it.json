@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} token compressi",
       "reported": "dichiarato",
       "estimated": "stimato",
       "unknown": "Non disponibile",

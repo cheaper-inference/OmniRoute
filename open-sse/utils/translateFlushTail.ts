@@ -1,4 +1,4 @@
-import { mergeUsageEvidence } from "@/lib/usage/usageEvidence";
+import { mergeUsageEvidence } from "./usageEvidence.ts";
 /**
  * Shared per-line drain for translate-mode flush.
  *

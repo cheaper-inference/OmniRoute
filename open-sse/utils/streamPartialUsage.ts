@@ -11,9 +11,10 @@
  * Same WeakMap-side-table pattern as `registerStreamTiming` (streamTiming.ts): the stream object
  * is not monkey-patched and the entry dies with it.
  */
+import { canonicalStreamingUsage } from "./streamAccountingUsage.ts";
 import { normalizeUsage, hasValidUsage, type UsageLike } from "./usageTracking.ts";
 import { cacheCreationFields } from "./cacheWriteUsage.ts";
-import { carryUsageEvidence, type UsageEvidence } from "@/lib/usage/usageEvidence";
+import { carryUsageEvidence, type UsageEvidence } from "./usageEvidence.ts";
 import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
 
 export type PartialStreamUsage = {
@@ -93,7 +94,7 @@ export function resolvePartialStreamUsage({
 }): PartialStreamUsage | null {
   const record = reported && typeof reported === "object" ? (reported as UsageLike) : null;
   if (!hasValidUsage(record) && !(contentLength > 0)) return null;
-  const normalized = normalizeUsage(record);
+  const normalized = normalizeUsage(canonicalStreamingUsage(record));
   const result = finalizeStreamingUsage(normalized, body, contentLength);
   if (!(Number(result.prompt_tokens) > 0 || Number(result.completion_tokens) > 0)) return null;
   const partial: PartialStreamUsage = {

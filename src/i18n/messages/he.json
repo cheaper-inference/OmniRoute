@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "נדחסו {count} טוקנים",
       "reported": "מדווח",
       "estimated": "משוער",
       "unknown": "לא זמין",

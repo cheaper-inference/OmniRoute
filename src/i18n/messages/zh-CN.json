@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "已压缩 {count} 个令牌",
       "reported": "已报告",
       "estimated": "估算",
       "unknown": "暂无数据",

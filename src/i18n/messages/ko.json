@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "토큰 {count}개 압축됨",
       "reported": "보고값",
       "estimated": "추정값",
       "unknown": "데이터 없음",

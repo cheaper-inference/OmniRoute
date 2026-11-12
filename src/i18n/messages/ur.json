@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} ٹوکن کمپریس کیے گئے",
       "reported": "رپورٹ کردہ",
       "estimated": "تخمینی",
       "unknown": "دستیاب نہیں",

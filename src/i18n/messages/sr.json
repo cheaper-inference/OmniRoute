@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} компримованих токена",
       "reported": "пријављено",
       "estimated": "процењено",
       "unknown": "Није доступно",

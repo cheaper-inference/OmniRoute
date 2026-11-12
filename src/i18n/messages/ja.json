@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} トークンを圧縮しました",
       "reported": "報告値",
       "estimated": "推定値",
       "unknown": "データなし",

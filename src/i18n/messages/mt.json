@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} tokens ikkompressati",
       "reported": "irrappurtat",
       "estimated": "stmat",
       "unknown": "Mhux disponibbli",

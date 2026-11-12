@@ -92,7 +92,7 @@ export async function getCacheMetrics() {
         COUNT(tokens_cache_read) = COUNT(*) as cachedTokensComplete,
         COUNT(tokens_cache_creation) = COUNT(*) as cacheCreationTokensComplete
       FROM usage_history
-      GROUP BY combo_strategy
+      GROUP BY COALESCE(combo_strategy, 'direct')
     `
       )
       .all() as Array<{

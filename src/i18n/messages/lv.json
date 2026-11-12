@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} saspiestu tokenu",
       "reported": "ziņots",
       "estimated": "aplēsts",
       "unknown": "Nav pieejams",

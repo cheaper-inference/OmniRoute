@@ -934,7 +934,7 @@ export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   // Usage is also needed by the live dashboard when disk history is disabled.
   if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
     updateRequestTokensById(entry.pendingRequestId ?? entry.id, {
-      ...usageEvidence.liveUsageEvidence(entry.tokens),
+      ...usageEvidence.liveUsageEvidence(entry.tokens, entry.usageEstimated === true),
       in: getLoggedInputTokens(entry.tokens),
       out: getLoggedOutputTokens(entry.tokens),
       cacheRead: getPromptCacheReadTokensOrNull(entry.tokens),

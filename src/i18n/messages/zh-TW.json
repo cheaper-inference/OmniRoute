@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "已壓縮 {count} 個權杖",
       "reported": "已回報",
       "estimated": "估算",
       "unknown": "無資料",

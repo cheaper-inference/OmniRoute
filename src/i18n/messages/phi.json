@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} token ang na-compress",
       "reported": "iniulat",
       "estimated": "tinantiya",
       "unknown": "walang datos",

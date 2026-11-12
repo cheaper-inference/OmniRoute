@@ -43,12 +43,18 @@ interface InsertedBatch {
   rows: InsertRow[];
 }
 
-function installFetchStub(options: { failInsert?: boolean; insertDelayMs?: number } = {}) {
+function installFetchStub(
+  options: { failInsert?: boolean; insertDelayMs?: number; schemaConflict?: boolean } = {}
+) {
   const output = path.join(TEST_DATA_DIR, "bigquery-batches.jsonl");
   fs.rmSync(output, { force: true });
   runner.__setLogExportChildOptionsForTest({
     modulePath: path.join(import.meta.dirname, "fixtures/logExportTestDestination.ts"),
-    config: { fixtureFailInsert: options.failInsert, fixtureInsertDelayMs: options.insertDelayMs },
+    config: {
+      fixtureFailInsert: options.failInsert,
+      fixtureInsertDelayMs: options.insertDelayMs,
+      fixtureSchemaConflict: options.schemaConflict,
+    },
   });
   // Preserve the original tests' live collection shape; fetch now runs in a child.
   return new Proxy([] as InsertedBatch[], {
@@ -619,4 +625,15 @@ test("runDestinationExport_MissingArtifact_ExportsSummaryRatherThanFailingTheBat
   const row = batches[0].rows[0].json;
   assert.equal(row.id, "orphan");
   assert.equal(row.request_body, null);
+});
+
+test("failed conditional evidence schema repair keeps the export cursor", async () => {
+  insertCallLogs(2);
+  const destination = createBigQueryDestination();
+  const batches = installFetchStub({ schemaConflict: true });
+  const result = await runner.runDestinationExport(destination);
+  assert.equal(result.success, false);
+  assert.match(result.error ?? "", /schema changed/);
+  assert.equal(destinationsDb.getLogExportDestination(destination.id)?.cursorRowId, 0);
+  assert.equal(batches.length, 0);
 });

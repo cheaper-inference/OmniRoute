@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "الرموز المضغوطة: {count}",
       "reported": "مُبلّغ عنه",
       "estimated": "تقديري",
       "unknown": "غير متاح",

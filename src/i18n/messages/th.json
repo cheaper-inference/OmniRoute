@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "บีบอัดแล้ว {count} โทเค็น",
       "reported": "ตามที่รายงาน",
       "estimated": "โดยประมาณ",
       "unknown": "ไม่มีข้อมูล",

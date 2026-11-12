@@ -252,7 +252,7 @@ function toSpan(row: LogExportRecord, config: OtlpHttpConfig): Span {
   add("gen_ai.usage.output_tokens", row.tokensOut);
   add("gen_ai.usage.cache_read.input_tokens", row.tokensCacheRead);
   if (row.usageEvidence) add("omniroute.usage.evidence", JSON.stringify(row.usageEvidence));
-  if (row.estimated !== undefined) add("omniroute.usage.estimated", row.estimated);
+  add("omniroute.usage.estimated", row.estimated);
   add("gen_ai.usage.cache_creation.input_tokens", row.tokensCacheWrite);
   add("gen_ai.usage.reasoning.output_tokens", row.tokensReasoning);
   add("http.response.status_code", row.status);

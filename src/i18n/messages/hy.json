@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "Սեղմվել է {count} թոքեն",
       "reported": "հաղորդված",
       "estimated": "գնահատված",
       "unknown": "տվյալներ չկան",

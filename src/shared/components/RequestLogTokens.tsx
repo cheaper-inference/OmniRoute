@@ -75,7 +75,7 @@ export default function RequestLogTokens({ log }: { log: TokenLog }) {
           </span>
           <span
             className="font-semibold text-chart-3"
-            title={`${log.tokens.compressed.toLocaleString()} tokens compressed`}
+            title={t("compressedTokens", { count: log.tokens.compressed.toLocaleString() })}
           >
             ↓{log.tokens.compressed.toLocaleString()}
           </span>

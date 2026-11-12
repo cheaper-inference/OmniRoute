@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} komprimovaných tokenov",
       "reported": "nahlásené",
       "estimated": "odhadované",
       "unknown": "Nedostupné",

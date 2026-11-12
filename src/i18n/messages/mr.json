@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} टोकन संकुचित केले",
       "reported": "अहवालानुसार",
       "estimated": "अंदाजित",
       "unknown": "उपलब्ध नाही",

@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "შეიკუმშა {count} ტოკენი",
       "reported": "მოწოდებული",
       "estimated": "სავარაუდო",
       "unknown": "მონაცემები არ არის",

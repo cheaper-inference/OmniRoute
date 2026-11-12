@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} skompresowanych tokenów",
       "reported": "zgłoszone",
       "estimated": "szacowane",
       "unknown": "Brak danych",

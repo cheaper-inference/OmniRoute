@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} ਟੋਕਨ ਸੰਕੁਚਿਤ ਕੀਤੇ ਗਏ",
       "reported": "ਰਿਪੋਰਟ ਕੀਤਾ ਗਿਆ",
       "estimated": "ਅਨੁਮਾਨਿਤ",
       "unknown": "ਉਪਲਬਧ ਨਹੀਂ",

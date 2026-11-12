@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "Đã nén {count} token",
       "reported": "được báo cáo",
       "estimated": "ước tính",
       "unknown": "không có dữ liệu",

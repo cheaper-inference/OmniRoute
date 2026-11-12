@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} ಟೋಕನ್‌ಗಳನ್ನು ಸಂಕುಚಿತಗೊಳಿಸಲಾಗಿದೆ",
       "reported": "ವರದಿಯಾದ",
       "estimated": "ಅಂದಾಜಿಸಿದ",
       "unknown": "ಲಭ್ಯವಿಲ್ಲ",

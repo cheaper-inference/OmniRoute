@@ -1,3 +1,4 @@
+import { ensureUsageEvidenceSchema } from "./usageEvidenceSchema";
 /**
  * db/core.js — Database infrastructure: schema, singleton, utils, migration.
  *
@@ -221,7 +222,6 @@ if (!isCloud && !fs.existsSync(DATA_DIR)) {
 }
 
 // ──────────────── Schema ────────────────
-
 const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS provider_connections (
     id TEXT PRIMARY KEY,
@@ -1005,8 +1005,7 @@ export function getDbInstance(): SqliteDatabase {
       // bindings entirely. The native Statement destructor crashes with SIGABRT
       // when the Next.js build worker thread exits (assertion in
       // node::RemoveEnvironmentCleanupHook, env == nullptr). The DB is never
-      // actually queried during build — it only exists so module-eval that
-      // touches getDbInstance() at build time does not throw. (#10060)
+      // queried during build; the stub permits module evaluation. (#10060)
       const noopStatement: PreparedStatement = {
         run: () => ({ changes: 0, lastInsertRowid: 0 }),
         get: () => undefined,
@@ -1036,6 +1035,7 @@ export function getDbInstance(): SqliteDatabase {
     ensureUsageHistoryAccountIndex(memoryDb);
     ensureCallLogsColumns(memoryDb);
     ensureProviderConnectionsColumns(memoryDb);
+    ensureUsageEvidenceSchema(memoryDb);
     setDb(memoryDb);
     return memoryDb;
   }

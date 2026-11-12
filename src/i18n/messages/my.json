@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "တိုကင် {count} ခုကို ချုံ့ထားသည်",
       "reported": "အစီရင်ခံထားသော",
       "estimated": "ခန့်မှန်းထားသော",
       "unknown": "မရရှိနိုင်ပါ",

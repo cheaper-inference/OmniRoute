@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "ටෝකන {count}ක් සම්පීඩනය කරන ලදී",
       "reported": "වාර්තා කළ",
       "estimated": "ඇස්තමේන්තු කළ",
       "unknown": "ලබාගත නොහැක",

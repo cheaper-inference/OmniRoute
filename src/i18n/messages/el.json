@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} συμπιεσμένα διακριτικά",
       "reported": "αναφερόμενο",
       "estimated": "εκτιμώμενο",
       "unknown": "Μη διαθέσιμο",

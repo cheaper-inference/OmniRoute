@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "Сжато токенов: {count}",
       "reported": "сообщено",
       "estimated": "оценено",
       "unknown": "Нет данных",

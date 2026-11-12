@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "{count} suglaudintų žetonų",
       "reported": "pranešta",
       "estimated": "apytiksliai įvertinta",
       "unknown": "Nėra duomenų",

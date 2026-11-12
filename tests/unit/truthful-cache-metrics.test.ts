@@ -60,3 +60,18 @@ test("cache metrics and trend retain unknown, zero, and mixed completeness", asy
   assert.equal(unknown.tokensSaved, null);
   assert.equal(unknown.estimatedCostSaved, null);
 });
+
+test("null and explicit direct strategies aggregate under one output key", async () => {
+  const db = getDbInstance();
+  db.prepare("DELETE FROM usage_history").run();
+  const insert = db.prepare(
+    "INSERT INTO usage_history(provider,model,combo_strategy,tokens_input,tokens_cache_read,tokens_cache_creation,timestamp) VALUES ('synthetic','fixture',?,100,?,?,?)"
+  );
+  insert.run(null, 12, 0, new Date().toISOString());
+  insert.run("direct", 0, null, new Date().toISOString());
+  const { byStrategy } = await getCacheMetrics();
+  assert.equal(byStrategy.direct.requests, 2);
+  assert.equal(byStrategy.direct.cachedTokens, 12);
+  assert.equal(byStrategy.direct.cachedTokensComplete, true);
+  assert.equal(byStrategy.direct.cacheCreationTokensComplete, false);
+});

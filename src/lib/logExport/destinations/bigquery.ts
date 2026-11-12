@@ -97,7 +97,9 @@ const FIELDS: readonly LogExportConfigField[] = [
   },
   {
     key: "autoCreate",
-    labelFallback: "Create dataset and table if missing",
+    labelFallback: "Create dataset/table and add usage evidence columns",
+    helpFallback:
+      "Adds only nullable usage_evidence and usage_estimated columns to existing tables, with an etag precondition. Other fields and settings are preserved.",
     type: "boolean",
   },
   {
@@ -259,7 +261,11 @@ function estimateRowBytes(record: LogExportRecord, exportedAt: string): number {
 }
 
 interface BigQueryResponseBody {
-  schema?: { fields?: Array<{ name?: string }> };
+  etag?: string;
+  schema?: {
+    fields?: Array<{ name?: string; type?: string; mode?: string; [key: string]: unknown }>;
+    [key: string]: unknown;
+  };
   error?: { message?: string; status?: string };
   insertErrors?: Array<{ index?: number; errors?: Array<{ message?: string }> }>;
 }
@@ -290,7 +296,7 @@ class BigQueryClient implements LogExportClient {
   private readonly key: ServiceAccountKey;
   /** Set when prepare() created the table in this run — see MAX_FRESH_TABLE_ATTEMPTS. */
   private createdTableThisRun = false;
-  /** Only TTFT is optional for legacy tables; all other columns remain strictly checked. */
+  /** Legacy TTFT is optional; evidence is mandatory for evidence-bearing records. */
   private includeTtft = true;
   private includeEvidence = true;
 
@@ -301,13 +307,19 @@ class BigQueryClient implements LogExportClient {
     this.key = parseServiceAccountKey(config.serviceAccountJson);
   }
 
-  private async request(method: string, path: string, body?: unknown): Promise<BigQueryResponse> {
+  private async request(
+    method: string,
+    path: string,
+    body?: unknown,
+    etag?: string
+  ): Promise<BigQueryResponse> {
     const token = await getServiceAccountAccessToken(this.key, BIGQUERY_SCOPE, this.fetchImpl);
     const response = await this.fetchImpl(`${BIGQUERY_API}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        ...(etag ? { "If-Match": etag } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
@@ -358,11 +370,34 @@ class BigQueryClient implements LogExportClient {
     return { ok: false, detail: describeFailure(table.status, table.json) };
   }
 
+  /** Auto-create permits only the two additive nullable evidence columns, never replacement. */
+  private async repairEvidenceSchema(table: BigQueryResponseBody | null): Promise<void> {
+    if (this.includeEvidence || !this.config.autoCreate || !table?.etag || !table.schema?.fields)
+      return;
+    const fields = table.schema.fields;
+    const additions = BIGQUERY_TABLE_SCHEMA.fields.filter(
+      (field) =>
+        ["usage_evidence", "usage_estimated"].includes(field.name) &&
+        !fields.some((existing) => existing.name === field.name)
+    );
+    if (!additions.length) return;
+    const response = await this.request(
+      "PATCH",
+      this.tablePath,
+      { schema: { ...table.schema, fields: [...fields, ...additions] } },
+      table.etag
+    );
+    if (!response.ok) throw new Error(describeFailure(response.status, response.json));
+    // Do not acknowledge a schema update until the returned schema confirms both columns.
+    this.includeEvidence = hasEvidenceFields(response.json);
+  }
+
   async prepare(): Promise<void> {
     const table = await this.request("GET", this.tablePath);
     if (table.ok) {
       this.includeTtft = hasTtftField(table.json);
       this.includeEvidence = hasEvidenceFields(table.json);
+      await this.repairEvidenceSchema(table.json);
       return;
     }
     if (table.status !== 404) throw new Error(describeFailure(table.status, table.json));
@@ -417,6 +452,7 @@ class BigQueryClient implements LogExportClient {
       if (!existing.ok) throw new Error(describeFailure(existing.status, existing.json));
       this.includeTtft = hasTtftField(existing.json);
       this.includeEvidence = hasEvidenceFields(existing.json);
+      await this.repairEvidenceSchema(existing.json);
       return;
     }
     this.includeTtft = true;

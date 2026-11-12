@@ -134,6 +134,7 @@
   },
   "common": {
     "usageEvidence": {
+      "compressedTokens": "បានបង្ហាប់ថូខឹនចំនួន {count}",
       "reported": "បានរាយការណ៍",
       "estimated": "បានប៉ាន់ស្មាន",
       "unknown": "មិនមានទិន្នន័យ",
