@@ -64,8 +64,8 @@ import {
   getAccessToken,
   looksLikeServiceAccountJson,
   parseSAFromApiKey,
-} from "../executors/vertex.ts";
-import { readBoundedResponseText } from "../utils/emptyTurnRetry.ts";
+} from "../executors/vertexAuth.ts";
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 
 interface ClientRawRequest {
@@ -781,6 +781,15 @@ async function prepareBedrockTransport(
   };
 }
 
+/** Bounded read of a Vertex `:predict` body; an oversized or unreadable body is one error. */
+async function readVertexEmbeddingText(response: Response): Promise<string> {
+  try {
+    return await readResponseTextWithinCap(response, VERTEX_EMBEDDING_MAX_RESPONSE_BYTES);
+  } catch {
+    throw new Error("Vertex embedding response was unreadable or too large");
+  }
+}
+
 /**
  * Vertex prepare stage: service-account token, project URL and `:predict` body. Every client
  * mistake throws here, so it surfaces as a 400 and never as a 502 that cools the connection.
@@ -790,7 +799,7 @@ async function prepareVertexTransport(
   prepared: PreparedEmbeddingRequest
 ): Promise<void> {
   const apiKey = runtime.credentials?.apiKey;
-  if (!looksLikeServiceAccountJson(apiKey)) {
+  if (typeof apiKey !== "string" || !looksLikeServiceAccountJson(apiKey)) {
     throw new Error("Vertex embeddings need a Service Account JSON connection");
   }
   const serviceAccount = parseSAFromApiKey(apiKey);
@@ -826,8 +835,7 @@ async function fetchVertexEmbeddingBatch(
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!response.ok) return response;
-  const text = await readBoundedResponseText(response, VERTEX_EMBEDDING_MAX_RESPONSE_BYTES);
-  if (text === null) throw new Error("Vertex embedding response was unreadable or too large");
+  const text = await readVertexEmbeddingText(response);
   return new Response(JSON.stringify(mapVertexEmbeddingResponse(JSON.parse(text), plan)), {
     status: 200,
     headers: response.headers,

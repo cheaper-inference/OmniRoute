@@ -16,12 +16,12 @@ export function isMoonshotRegionProbeEnabled(): boolean {
 }
 
 /** Runs `validate` against the other region hosts; returns the first accepted result, else `first`. */
-export async function probeMoonshotRegions(
+export async function probeMoonshotRegions<R extends ValidationResult>(
   provider: string,
   providerSpecificData: Record<string, unknown> | null | undefined,
-  first: ValidationResult,
-  validate: (providerSpecificData: Record<string, unknown>) => Promise<ValidationResult>
-): Promise<ValidationResult> {
+  first: R,
+  validate: (providerSpecificData: Record<string, unknown>) => Promise<R>
+): Promise<R> {
   if (!isMoonshotRegionProbeEnabled() || provider !== "moonshot") return first;
   if (
     first.valid ||
@@ -34,7 +34,10 @@ export async function probeMoonshotRegions(
   for (const baseUrl of REGION_BASE_URLS) {
     const next = await validate({ ...(providerSpecificData || {}), baseUrl });
     if (next.valid) {
-      return { ...next, providerSpecificData: { ...(next.providerSpecificData || {}), baseUrl } };
+      return {
+        ...next,
+        providerSpecificData: { ...(next.providerSpecificData || {}), baseUrl },
+      } as R;
     }
   }
   return first;

@@ -185,7 +185,9 @@ export async function validateFreebuffProvider({ apiKey }: { apiKey: string }) {
   }
 }
 
-export async function validateProviderApiKey(args: any) {
+export async function validateProviderApiKey(
+  args: any
+): ReturnType<typeof validateProviderApiKeyOnce> {
   const first = await validateProviderApiKeyOnce(args);
   // Opt-in (MOONSHOT_REGION_PROBE): a Moonshot key rejected on the default host may belong to
   // the other region; the probe re-validates there and returns that base URL.
