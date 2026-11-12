@@ -75,3 +75,22 @@ test("rapid edits read the ref, and removal is keyed by value not index", () => 
   assert.doesNotMatch(source, /removeBannedKeyword\(index/);
   assert.doesNotMatch(source, /<Badge key=\{index\}/);
 });
+
+test("banned keywords editor survives a failed resilience-data load", () => {
+  const source = readSrc(RESILIENCE);
+
+  // The card is backed by /api/settings, so a failing /api/resilience must not
+  // hide it — SecurityTab no longer provides an editor (#20078 review).
+  const declaration = source.indexOf("const bannedKeywordsCard = (");
+  const loadingGuard = source.indexOf("if (loading && !data) {");
+  const failedGuard = source.indexOf("if (!data) {");
+  assert.notEqual(declaration, -1, "card must be declared as a standalone element");
+  assert.ok(declaration < loadingGuard, "card declaration must precede the loading guard");
+  assert.ok(loadingGuard < failedGuard, "both resilience-data guards must remain in order");
+
+  const renders = source.match(/\{bannedKeywordsCard\}/g) ?? [];
+  assert.ok(
+    renders.length >= 3,
+    "card must render on the loading, failed and loaded branches"
+  );
+});

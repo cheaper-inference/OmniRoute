@@ -1296,24 +1296,107 @@ export default function ResilienceTab() {
     }
   };
 
+  // The banned-keyword editor reads /api/settings, not /api/resilience.
+  // Keep it outside the resilience-data guards: if /api/resilience fails,
+  // keyword management must still work (SecurityTab no longer has an editor).
+  const bannedKeywordsCard = (
+    <Card
+      icon="report"
+      title={tx("customBannedSignals", "Banned Keywords")}
+      subtitle={tx(
+        "customBannedSignalsDesc",
+        "Additional keywords that trigger permanent account ban detection. Built-in keywords always apply."
+      )}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+          <Input
+            className="flex-1"
+            aria-label={tx("customBannedSignals", "Banned Keywords")}
+            placeholder={tx("customBannedSignalsPlaceholder", "e.g. api key revoked")}
+            value={bannedKeywordInput}
+            maxLength={MAX_BANNED_KEYWORD_LENGTH}
+            disabled={bannedKeywordsBusy}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setBannedKeywordInput(e.target.value)
+            }
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === "Enter") void addBannedKeyword();
+            }}
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="add"
+            onClick={() => void addBannedKeyword()}
+            disabled={bannedKeywordsBusy || !bannedKeywordInput.trim()}
+          >
+            {tx("add", "Add")}
+          </Button>
+        </div>
+        {bannedKeywordsLoadFailed ? (
+          <p className="text-xs text-error">
+            {tx(
+              "failedLoadResilience",
+              "Failed to load banned keywords. Refresh the page to retry."
+            )}
+          </p>
+        ) : bannedKeywordsLoading ? (
+          <Spinner decorative size="sm" />
+        ) : bannedKeywords.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {bannedKeywords.map((keyword) => (
+              <Badge key={keyword} variant="error" className="gap-1 pr-1">
+                {keyword}
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="size-5"
+                  disabled={savingBannedKeywords}
+                  onClick={() => removeBannedKeyword(keyword)}
+                  aria-label={`${tx("remove", "Remove")} ${keyword}`}
+                >
+                  <Icon name="close" size={12} />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-text-muted">
+            {tx(
+              "noCustomBannedSignals",
+              "No custom keywords. Only built-in keywords are active."
+            )}
+          </p>
+        )}
+      </div>
+    </Card>
+  );
+
   if (loading && !data) {
     return (
-      <Card className="p-6">
-        <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
-          <Spinner decorative size="sm" />
-          {tx("loadingResilience", "Loading resilience settings...")}
-        </div>
-      </Card>
+      <div className="space-y-6">
+        {bannedKeywordsCard}
+        <Card className="p-6">
+          <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+            <Spinner decorative size="sm" />
+            {tx("loadingResilience", "Loading resilience settings...")}
+          </div>
+        </Card>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <Card className="p-6">
-        <p className="text-sm text-text-muted">
-          {tx("failedLoadResilience", "Unable to load resilience settings.")}
-        </p>
-      </Card>
+      <div className="space-y-6">
+        {bannedKeywordsCard}
+        <Card className="p-6">
+          <p className="text-sm text-text-muted">
+            {tx("failedLoadResilience", "Unable to load resilience settings.")}
+          </p>
+        </Card>
+      </div>
     );
   }
 
@@ -1339,79 +1422,7 @@ export default function ResilienceTab() {
         />
       )}
 
-      {/* Custom banned keywords: a resilience concern (when a connection is
-          permanently banned and disabled), kept next to AutoDisableCard. */}
-      <Card
-        icon="report"
-        title={tx("customBannedSignals", "Banned Keywords")}
-        subtitle={tx(
-          "customBannedSignalsDesc",
-          "Additional keywords that trigger permanent account ban detection. Built-in keywords always apply."
-        )}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-            <Input
-              className="flex-1"
-              aria-label={tx("customBannedSignals", "Banned Keywords")}
-              placeholder={tx("customBannedSignalsPlaceholder", "e.g. api key revoked")}
-              value={bannedKeywordInput}
-              maxLength={MAX_BANNED_KEYWORD_LENGTH}
-              disabled={bannedKeywordsBusy}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setBannedKeywordInput(e.target.value)
-              }
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") void addBannedKeyword();
-              }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              icon="add"
-              onClick={() => void addBannedKeyword()}
-              disabled={bannedKeywordsBusy || !bannedKeywordInput.trim()}
-            >
-              {tx("add", "Add")}
-            </Button>
-          </div>
-          {bannedKeywordsLoadFailed ? (
-            <p className="text-xs text-error">
-              {tx(
-                "failedLoadResilience",
-                "Failed to load banned keywords. Refresh the page to retry."
-              )}
-            </p>
-          ) : bannedKeywordsLoading ? (
-            <Spinner decorative size="sm" />
-          ) : bannedKeywords.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {bannedKeywords.map((keyword) => (
-                <Badge key={keyword} variant="error" className="gap-1 pr-1">
-                  {keyword}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="size-5"
-                    disabled={savingBannedKeywords}
-                    onClick={() => removeBannedKeyword(keyword)}
-                    aria-label={`${tx("remove", "Remove")} ${keyword}`}
-                  >
-                    <Icon name="close" size={12} />
-                  </Button>
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-text-muted">
-              {tx(
-                "noCustomBannedSignals",
-                "No custom keywords. Only built-in keywords are active."
-              )}
-            </p>
-          )}
-        </div>
-      </Card>
+      {bannedKeywordsCard}
 
       <RequestQueueCard
         value={data.requestQueue}
