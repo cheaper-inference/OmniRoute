@@ -5679,6 +5679,7 @@
     "usageTracking": "Urmărirea utilizării",
     "securityDesc": "Setați o parolă pentru a vă proteja tabloul de bord sau omiteți pentru moment.",
     "securityDescSkipWarning": "⚠️ Fără o parolă, nu veți putea adăuga furnizori în timpul configurării. Îi puteți adăuga ulterior din panoul de control, după setarea unei parole.",
+    "passwordAlreadySet": "O parolă pentru panou este deja setată. O puteți schimba mai târziu din Setări.",
     "providerDesc": "Conectați-vă primul furnizor de AI. Puteți adăuga mai multe mai târziu.",
     "providerRequiresPassword": "Pentru a adăuga furnizori, trebuie mai întâi să setați o parolă. Reveniți la pasul de securitate și setați o parolă sau adăugați furnizorii ulterior din panoul de control.",
     "apiKeyRequired": "Cheie API (obligatorie)",

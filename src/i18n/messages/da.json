@@ -5679,6 +5679,7 @@
     "usageTracking": "Brugssporing",
     "securityDesc": "Indstil en adgangskode for at beskytte dit dashboard, eller spring over indtil videre.",
     "securityDescSkipWarning": "⚠️ Uden en adgangskode kan du ikke tilføje udbydere under opsætningen. Du kan tilføje dem senere fra kontrolpanelet, når du har angivet en adgangskode.",
+    "passwordAlreadySet": "Der er allerede angivet en adgangskode til dashboardet. Du kan ændre den senere under Indstillinger.",
     "providerDesc": "Tilslut din første AI-udbyder. Du kan tilføje flere senere.",
     "providerRequiresPassword": "Du skal først angive en adgangskode for at tilføje udbydere. Gå tilbage til sikkerhedstrinnet, og angiv en adgangskode, eller tilføj udbydere senere fra kontrolpanelet.",
     "apiKeyRequired": "API-nøgle (påkrævet)",

@@ -5679,6 +5679,7 @@
     "usageTracking": "Rastreamento de uso",
     "securityDesc": "Defina uma palavra-passe para proteger seu painel ou pule por enquanto.",
     "securityDescSkipWarning": "⚠️ Sem uma palavra-passe, não poderá adicionar fornecedores durante a configuração. Pode adicioná-los mais tarde a partir do painel depois de definir uma palavra-passe.",
+    "passwordAlreadySet": "Já está definida uma palavra-passe para o painel. Pode alterá-la mais tarde nas Definições.",
     "providerDesc": "Ligue o seu primeiro fornecedor de IA. Pode adicionar mais tarde.",
     "providerRequiresPassword": "Tem de definir uma palavra-passe primeiro para adicionar fornecedores. Volte para a etapa de segurança e defina uma palavra-passe ou adicione fornecedores mais tarde no painel.",
     "apiKeyRequired": "Chave API (obrigatória)",

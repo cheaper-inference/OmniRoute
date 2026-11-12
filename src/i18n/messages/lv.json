@@ -5679,6 +5679,7 @@
     "usageTracking": "Izmantošanas uzskaite",
     "securityDesc": "Iestatiet paroli, lai aizsargātu savu informācijas paneli, vai izlaidiet šo soli.",
     "securityDescSkipWarning": "⚠️ Ja parole nav iestatīta, iestatīšanas laikā nevarēsiet pievienot pakalpojumu sniedzējus. Varat tos pievienot vēlāk informācijas panelī pēc paroles iestatīšanas.",
+    "passwordAlreadySet": "Paneļa parole jau ir iestatīta. Vēlāk to varat mainīt iestatījumos.",
     "providerDesc": "Pievienojiet savu pirmo AI pakalpojumu sniedzēju. Vēlāk varēsiet pievienot vairāk.",
     "providerRequiresPassword": "Lai pievienotu pakalpojumu sniedzējus, vispirms jāiestata parole. Lūdzu, atgriezieties drošības solī un iestatiet paroli vai pievienojiet pakalpojumu sniedzējus vēlāk informācijas panelī.",
     "apiKeyRequired": "API atslēga (obligāta)",

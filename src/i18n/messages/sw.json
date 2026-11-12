@@ -5679,6 +5679,7 @@
     "usageTracking": "Ufuatiliaji wa Matumizi",
     "securityDesc": "Weka nenosiri ili kulinda dashibodi yako, au ruka kwa sasa.",
     "securityDescSkipWarning": "⚠️ Bila nenosiri, hutaweza kuongeza watoa huduma wakati wa usanidi. Unaweza kuwaongeza baadaye kupitia dashibodi baada ya kuweka nenosiri.",
+    "passwordAlreadySet": "Nenosiri la dashibodi tayari limewekwa. Unaweza kulibadilisha baadaye katika Mipangilio.",
     "providerDesc": "Unganisha mtoa huduma wako wa kwanza wa AI. Unaweza kuongeza wengine baadaye.",
     "providerRequiresPassword": "Unahitaji kuweka nenosiri kwanza ili kuongeza watoa huduma. Tafadhali rudi kwenye hatua ya usalama na uweke nenosiri, au ongeza watoa huduma baadaye kupitia dashibodi.",
     "apiKeyRequired": "Ufunguo wa API (unahitajika)",

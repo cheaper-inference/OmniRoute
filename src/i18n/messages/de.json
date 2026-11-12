@@ -5679,6 +5679,7 @@
     "usageTracking": "Nutzungsverfolgung",
     "securityDesc": "Legen Sie ein Passwort fest, um Ihr Dashboard zu schützen, oder überspringen Sie es zunächst.",
     "securityDescSkipWarning": "⚠️ Ohne Passwort können Sie während der Einrichtung keine Anbieter hinzufügen. Sie können sie später über das Dashboard hinzufügen, nachdem Sie ein Passwort festgelegt haben.",
+    "passwordAlreadySet": "Ein Dashboard-Passwort ist bereits festgelegt. Sie können es später in den Einstellungen ändern.",
     "providerDesc": "Verbinden Sie Ihren ersten KI-Anbieter. Sie können später weitere hinzufügen.",
     "providerRequiresPassword": "Sie müssen zuerst ein Passwort festlegen, um Anbieter hinzuzufügen. Kehren Sie zum Sicherheitsschritt zurück und legen Sie ein Passwort fest, oder fügen Sie Anbieter später über das Dashboard hinzu.",
     "apiKeyRequired": "API-Schlüssel (erforderlich)",

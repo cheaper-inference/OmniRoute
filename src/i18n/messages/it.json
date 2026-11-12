@@ -5679,6 +5679,7 @@
     "usageTracking": "Monitoraggio dell'utilizzo",
     "securityDesc": "Imposta una password per proteggere la tua dashboard o salta per ora.",
     "securityDescSkipWarning": "⚠️ Senza una password, non potrai aggiungere provider durante la configurazione. Potrai aggiungerli in seguito dalla dashboard dopo aver impostato una password.",
+    "passwordAlreadySet": "È già impostata una password per la dashboard. Puoi modificarla in seguito dalle Impostazioni.",
     "providerDesc": "Connetti il ​​tuo primo fornitore di intelligenza artificiale. Puoi aggiungerne altri in seguito.",
     "providerRequiresPassword": "Per aggiungere provider, devi prima impostare una password. Torna al passaggio relativo alla sicurezza e imposta una password, oppure aggiungi i provider in seguito dalla dashboard.",
     "apiKeyRequired": "Chiave API (richiesto)",

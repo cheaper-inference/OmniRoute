@@ -5679,6 +5679,7 @@
     "usageTracking": "Käytön seuranta",
     "securityDesc": "Aseta salasana kojelautasi suojaamiseksi tai ohita toistaiseksi.",
     "securityDescSkipWarning": "⚠️ Ilman salasanaa et voi lisätä palveluntarjoajia määrityksen aikana. Voit lisätä niitä myöhemmin hallintapaneelista salasanan asettamisen jälkeen.",
+    "passwordAlreadySet": "Hallintapaneelin salasana on jo asetettu. Voit vaihtaa sen myöhemmin asetuksissa.",
     "providerDesc": "Yhdistä ensimmäinen AI-palveluntarjoajasi. Voit lisätä myöhemmin lisää.",
     "providerRequiresPassword": "Sinun on ensin asetettava salasana, jotta voit lisätä palveluntarjoajia. Palaa suojausvaiheeseen ja aseta salasana tai lisää palveluntarjoajat myöhemmin hallintapaneelista.",
     "apiKeyRequired": "API-avain (pakollinen)",

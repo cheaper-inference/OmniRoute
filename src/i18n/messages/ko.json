@@ -5679,6 +5679,7 @@
     "usageTracking": "사용량 추적",
     "securityDesc": "대시보드를 보호하기 위해 비밀번호를 설정하거나 지금은 건너뛰세요.",
     "securityDescSkipWarning": "⚠️ 비밀번호가 없으면 설정 중에 제공자를 추가할 수 없습니다. 비밀번호를 설정한 후 대시보드에서 나중에 추가할 수 있습니다.",
+    "passwordAlreadySet": "대시보드 비밀번호가 이미 설정되어 있습니다. 나중에 설정에서 변경할 수 있습니다.",
     "providerDesc": "첫 번째 AI 공급자를 연결하세요. 나중에 더 추가할 수 있습니다.",
     "providerRequiresPassword": "제공자를 추가하려면 먼저 비밀번호를 설정해야 합니다. 보안 단계로 돌아가 비밀번호를 설정하거나 나중에 대시보드에서 제공자를 추가하세요.",
     "apiKeyRequired": "API 키(필수)",

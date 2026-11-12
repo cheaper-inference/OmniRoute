@@ -5679,6 +5679,7 @@
     "usageTracking": "Usage Tracking",
     "securityDesc": "Set a password to protect your dashboard, or skip for now.",
     "securityDescSkipWarning": "⚠️ Without a password, you won't be able to add providers during setup. You can add them later from the dashboard after setting a password.",
+    "passwordAlreadySet": "A dashboard password is already set. You can change it later in Settings.",
     "providerDesc": "Connect your first AI provider. You can add more later.",
     "providerRequiresPassword": "You need to set a password first to add providers. Please go back to the security step and set a password, or add providers later from the dashboard.",
     "apiKeyRequired": "API Key (required)",

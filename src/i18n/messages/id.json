@@ -5679,6 +5679,7 @@
     "usageTracking": "Pelacakan Penggunaan",
     "securityDesc": "Tetapkan kata sandi untuk melindungi dasbor Anda, atau lewati saja sekarang.",
     "securityDescSkipWarning": "⚠️ Tanpa kata sandi, Anda tidak akan dapat menambahkan penyedia selama penyiapan. Anda dapat menambahkannya nanti dari dasbor setelah menetapkan kata sandi.",
+    "passwordAlreadySet": "Kata sandi dasbor sudah diatur. Anda dapat mengubahnya nanti di Pengaturan.",
     "providerDesc": "Hubungkan penyedia AI pertama Anda. Anda dapat menambahkan lebih banyak lagi nanti.",
     "providerRequiresPassword": "Anda harus menetapkan kata sandi terlebih dahulu untuk menambahkan penyedia. Silakan kembali ke langkah keamanan dan tetapkan kata sandi, atau tambahkan penyedia nanti dari dasbor.",
     "apiKeyRequired": "Kunci API (wajib)",

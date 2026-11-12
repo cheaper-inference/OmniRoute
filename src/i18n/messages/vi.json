@@ -5679,6 +5679,7 @@
     "usageTracking": "Theo dõi mức sử dụng",
     "securityDesc": "Đặt mật khẩu để bảo vệ bảng điều khiển của bạn, hoặc bỏ qua lúc này.",
     "securityDescSkipWarning": "⚠️ Không có mật khẩu, bạn sẽ không thể thêm nhà cung cấp trong quá trình thiết lập. Bạn có thể thêm sau từ bảng điều khiển sau khi đặt mật khẩu.",
+    "passwordAlreadySet": "Mật khẩu bảng điều khiển đã được đặt. Bạn có thể đổi mật khẩu sau trong Cài đặt.",
     "providerDesc": "Kết nối nhà cung cấp AI đầu tiên của bạn. Bạn có thể thêm nhiều nhà cung cấp khác sau.",
     "providerRequiresPassword": "Bạn cần đặt mật khẩu trước khi thêm nhà cung cấp. Hãy quay lại bước bảo mật và đặt mật khẩu, hoặc thêm nhà cung cấp sau từ bảng điều khiển.",
     "apiKeyRequired": "Khóa API (bắt buộc)",

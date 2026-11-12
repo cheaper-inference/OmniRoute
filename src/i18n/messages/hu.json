@@ -5679,6 +5679,7 @@
     "usageTracking": "Használat követése",
     "securityDesc": "Állítson be jelszót az irányítópult védelméhez, vagy most hagyja ki.",
     "securityDescSkipWarning": "⚠️ Jelszó nélkül a beállítás során nem tud szolgáltatókat hozzáadni. Később, a jelszó beállítása után az irányítópulton adhatja hozzá őket.",
+    "passwordAlreadySet": "Az irányítópult jelszava már be van állítva. Később a Beállításokban módosíthatja.",
     "providerDesc": "Csatlakoztassa első AI-szolgáltatóját. Később továbbiakat is hozzáadhat.",
     "providerRequiresPassword": "Szolgáltatók hozzáadásához először be kell állítania egy jelszót. Lépjen vissza a biztonsági lépéshez, és állítson be egy jelszót, vagy később adjon hozzá szolgáltatókat az irányítópulton.",
     "apiKeyRequired": "API-kulcs (kötelező)",

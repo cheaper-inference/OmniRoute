@@ -5679,6 +5679,7 @@
     "usageTracking": "使用情況追蹤",
     "securityDesc": "設定密碼以保護您的儀表板，或暫時跳過。",
     "securityDescSkipWarning": "⚠️ 若未設定密碼，您將無法在設定期間新增提供者。您可以稍後在設定密碼後，從儀表板新增提供者。",
+    "passwordAlreadySet": "已設定儀表板密碼。你可以稍後在設定中變更。",
     "providerDesc": "連線你的第一個 AI 提供者。你之後還可以繼續新增。",
     "providerRequiresPassword": "您必須先設定密碼才能新增提供者。請返回安全性步驟並設定密碼，或稍後從儀表板新增提供者。",
     "apiKeyRequired": "API 金鑰（必填）",

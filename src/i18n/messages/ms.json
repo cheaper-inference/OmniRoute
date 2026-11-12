@@ -5679,6 +5679,7 @@
     "usageTracking": "Penjejakan Penggunaan",
     "securityDesc": "Tetapkan kata laluan untuk melindungi papan pemuka anda atau langkau buat masa ini.",
     "securityDescSkipWarning": "⚠️ Tanpa kata laluan, anda tidak akan dapat menambah penyedia semasa persediaan. Anda boleh menambahnya kemudian daripada papan pemuka selepas menetapkan kata laluan.",
+    "passwordAlreadySet": "Kata laluan papan pemuka sudah ditetapkan. Anda boleh menukarnya kemudian dalam Tetapan.",
     "providerDesc": "Sambungkan pembekal AI pertama anda. Anda boleh menambah lagi kemudian.",
     "providerRequiresPassword": "Anda perlu menetapkan kata laluan terlebih dahulu untuk menambah penyedia. Sila kembali ke langkah keselamatan dan tetapkan kata laluan, atau tambah penyedia kemudian daripada papan pemuka.",
     "apiKeyRequired": "Kunci API (diperlukan)",

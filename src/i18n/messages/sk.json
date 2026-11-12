@@ -5679,6 +5679,7 @@
     "usageTracking": "Sledovanie používania",
     "securityDesc": "Nastavte si heslo na ochranu svojho informačného panela alebo ho zatiaľ preskočte.",
     "securityDescSkipWarning": "⚠️ Bez hesla nebudete môcť počas nastavenia pridať poskytovateľov. Môžete ich pridať neskôr z ovládacieho panela po nastavení hesla.",
+    "passwordAlreadySet": "Heslo k ovládaciemu panelu je už nastavené. Neskôr ho môžete zmeniť v Nastaveniach.",
     "providerDesc": "Pripojte svojho prvého poskytovateľa AI. Neskôr môžete pridať ďalšie.",
     "providerRequiresPassword": "Ak chcete pridať poskytovateľov, musíte najprv nastaviť heslo. Vráťte sa ku kroku zabezpečenia a nastavte heslo alebo pridajte poskytovateľov neskôr z ovládacieho panela.",
     "apiKeyRequired": "API kľúč (povinné)",

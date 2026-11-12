@@ -5679,6 +5679,7 @@
     "usageTracking": "Rastreamento de Uso",
     "securityDesc": "Defina uma senha para proteger seu painel, ou pule por enquanto.",
     "securityDescSkipWarning": "⚠️ Sem uma senha, você não poderá adicionar provedores durante a configuração. Você poderá adicioná-los depois pelo painel, após definir uma senha.",
+    "passwordAlreadySet": "Uma senha do painel já está definida. Você pode alterá-la depois em Configurações.",
     "providerDesc": "Conecte seu primeiro provedor de IA. Você pode adicionar mais depois.",
     "providerRequiresPassword": "Você precisa definir uma senha primeiro para adicionar provedores. Volte à etapa de segurança e defina uma senha, ou adicione provedores depois pelo painel.",
     "apiKeyRequired": "Chave de API (obrigatório)",

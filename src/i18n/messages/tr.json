@@ -5679,6 +5679,7 @@
     "usageTracking": "Kullanım Takibi",
     "securityDesc": "Kontrol panelini korumak için bir şifre belirle veya şimdilik atla.",
     "securityDescSkipWarning": "⚠️ Parola olmadan kurulum sırasında sağlayıcı ekleyemezsiniz. Parola belirledikten sonra sağlayıcıları kontrol panelinden ekleyebilirsiniz.",
+    "passwordAlreadySet": "Kontrol paneli parolası zaten ayarlanmış. Daha sonra Ayarlar'dan değiştirebilirsiniz.",
     "providerDesc": "İlk AI sağlayıcını bağla. Daha sonra daha fazlasını ekleyebilirsin.",
     "providerRequiresPassword": "Sağlayıcı eklemek için önce bir parola belirlemeniz gerekir. Lütfen güvenlik adımına geri dönüp bir parola belirleyin veya sağlayıcıları daha sonra kontrol panelinden ekleyin.",
     "apiKeyRequired": "API Anahtarı (gerekli)",
