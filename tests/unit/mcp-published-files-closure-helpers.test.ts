@@ -64,7 +64,21 @@ test("findMissingPackageFilesTestNegations flags deleted negations", () => {
     []
   );
   assert.deepEqual(
-    findMissingPackageFilesTestNegations(["bin/", "open-sse/", "!**/*.test.ts"]),
-    REQUIRED_PACKAGE_FILES_TEST_NEGATIONS.filter((e) => e !== "!**/*.test.ts")
+    findMissingPackageFilesTestNegations(["bin/", "open-sse/", "!src/**/*.test.ts"]),
+    REQUIRED_PACKAGE_FILES_TEST_NEGATIONS.filter((e) => e !== "!src/**/*.test.ts")
   );
+});
+
+test("the required test negations are pinned literally", () => {
+  // The guard above derives both sides from the constant, so it stays green when the
+  // constant is reverted. Pinning the literals gives the red-proof gate a case that
+  // fails without the scoped forms.
+  assert.deepEqual(REQUIRED_PACKAGE_FILES_TEST_NEGATIONS, [
+    "!src/**/__tests__",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!open-sse/**/__tests__",
+    "!open-sse/**/*.test.ts",
+    "!@omniroute/**/*.test.ts",
+  ]);
 });

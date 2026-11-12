@@ -181,17 +181,65 @@ test("default pack mode still rejects node_modules under .build/next (tarball gu
 
 test("package.json files[] excludes nested node_modules from the published package", () => {
   // The gate above is defence-in-depth; this pins the actual fix. Without the
-  // "!**/node_modules/**" negation the tarball was 99.4 MB unpacked (31.3 MB
-  // packed) instead of 20.0 MB (5.3 MB).
+  // node_modules negation, a nested install inside @omniroute/* ships its
+  // devDependencies — the 2026 regression this guard pins.
+  //
+  // Directory-only form on purpose: npm 12 (npm-packlist 11) expands every `files[]`
+  // entry with globSync and turns each match into one literal ignore rule (one per
+  // file, two per directory), so the historical `!**/node_modules/**` produced
+  // 201,034 matches / 220,151 rules on the v3.8.54 tree — over eight minutes for
+  // `npm pack --dry-run` (506 s measured), against 104 s on npm 11.
+  // `!**/node_modules` matches the 236 node_modules directories themselves (472
+  // rules) and each directory match re-ignores its whole subtree. The file list is
+  // identical on a fixture covering dist/node_modules and @omniroute/*/node_modules
+  // under npm 11 and npm 12.
   const files: string[] = JSON.parse(
     readFileSync(new URL("../../package.json", import.meta.url), "utf8")
   ).files;
 
   assert.ok(
-    files.includes("!**/node_modules/**"),
-    'package.json "files" must keep the "!**/node_modules/**" negation — without it, ' +
+    files.includes("!**/node_modules"),
+    'package.json "files" must keep the "!**/node_modules" negation — without it, ' +
       "a nested install inside @omniroute/* ships ~79 MB of devDependencies."
   );
+  assert.ok(
+    !files.includes("!**/node_modules/**"),
+    'use the directory-only "!**/node_modules": the "/**" form expands to one ignore ' +
+      "rule per matched file under npm-packlist 11 (201,034 matches / 220,151 rules measured)"
+  );
+});
+
+test("package.json files[] scopes test negations to the published roots", () => {
+  // Same npm 12 expansion as the node_modules entry above: the historical tree-wide
+  // test negations produced 10,559 literal rules on the v3.8.54 tree. The scoped forms
+  // match 216 rules (186 files + 15 `__tests__` directories) and leave `tests/` and
+  // `node_modules` out of the walk; the 131 co-located `.test.ts(x)` files and the 54
+  // `__tests__` entries that can actually ship are a subset (the rest sit under `src/app`,
+  // which `files[]` never publishes).
+  const files: string[] = JSON.parse(
+    readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+  ).files;
+
+  const globals = files.filter(
+    (entry) => entry === "!**/__tests__/**" || /^!\*\*\/\*\.(?:test|spec)\./.test(entry)
+  );
+  assert.deepEqual(
+    globals,
+    [],
+    "tree-wide test negations expand to one ignore rule per matched file under npm 12; " +
+      "scope them to the roots that package.json actually ships"
+  );
+
+  for (const entry of [
+    "!src/**/__tests__",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!open-sse/**/__tests__",
+    "!open-sse/**/*.test.ts",
+    "!@omniroute/**/*.test.ts",
+  ]) {
+    assert.ok(files.includes(entry), `package.json "files" must keep ${entry}`);
+  }
 });
 
 test("build-next-isolated sibling imports are allowed in the published package", () => {
