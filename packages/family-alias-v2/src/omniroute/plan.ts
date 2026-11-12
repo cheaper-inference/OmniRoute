@@ -2,13 +2,24 @@ import type { DesiredCombo, DesiredGraph } from "../graph.ts";
 import { OWNER, parseOwnership, stableHash } from "../ownership.ts";
 import { deletionOrder, validateDesiredDag } from "./dag.ts";
 
+export type LiveComboStep = {
+  id?: string;
+  kind?: string;
+  comboName?: string;
+  model?: string;
+  providerId?: string;
+  connectionId?: string;
+  allowedConnectionIds?: string[];
+  weight?: number;
+};
+
 export type LiveCombo = {
   id: string;
   name: string;
   description?: string | null;
   strategy?: string;
   allowedModelFamilies?: string[];
-  models?: unknown[];
+  models?: LiveComboStep[];
 };
 
 export type TargetPlan = {
@@ -22,7 +33,15 @@ export type TargetPlan = {
   conflicts: Array<{ name: string; liveId: string; reason: string }>;
 };
 
-function comparable(combo: LiveCombo | DesiredCombo): unknown {
+type ComparableCombo = {
+  name: string;
+  description: string | null;
+  strategy: string | null;
+  allowedModelFamilies: string[];
+  models: unknown[];
+};
+
+function comparable(combo: LiveCombo | DesiredCombo): ComparableCombo {
   return {
     name: combo.name,
     description: combo.description ?? null,
