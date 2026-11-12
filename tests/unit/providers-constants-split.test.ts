@@ -66,7 +66,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // deAPI adds one apikey/specialty-media entry — 256.
 // EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
-const APIKEY_PROVIDER_COUNT = 258;
+// cheapaimodel (#18408) adds one apikey/gateways entry — 259.
+const APIKEY_PROVIDER_COUNT = 259;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -96,6 +97,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
   assert.equal(keys.length, APIKEY_PROVIDER_COUNT);
   assert.equal(new Set(keys).size, APIKEY_PROVIDER_COUNT, "duplicate keys after spread-merge");
   assert.ok(keys.includes("ainetcafe"), "ainetcafe must be in APIKEY_PROVIDERS");
+  assert.ok(keys.includes("cheapaimodel"), "cheapaimodel must be in APIKEY_PROVIDERS");
   // the merged object's entry-count equals the sum of the 6 semantic family files plus the
   // beatapi overflow extract; they are a strict partition (every provider in exactly one),
   // so the sum must be exactly APIKEY_PROVIDER_COUNT.
@@ -126,6 +128,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
     `families must partition all ${APIKEY_PROVIDER_COUNT} providers`
   );
   assert.ok(seen.has("ainetcafe"), "ainetcafe must live in a family file");
+  assert.ok(seen.has("cheapaimodel"), "cheapaimodel must live in a family file");
 });
 
 test("AI_PROVIDERS Proxy aggregates all sections; lookups resolve", () => {
