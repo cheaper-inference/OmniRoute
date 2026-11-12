@@ -14,7 +14,10 @@ import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
-import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
+import {
+  isExpiryFirstDeadlineOrder,
+  pickExpiryFirstConnection,
+} from "./expiryFirstAccountSelection.ts";
 import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
 import { isCIPayloadQuotaFailure } from "./ciPayloadQuotaFailure.ts";
 import {
@@ -1827,6 +1830,8 @@ export async function getProviderCredentials(
         fallbackStrategy?: string;
         stickyRoundRobinLimit?: number;
         planWeights?: Record<string, number>;
+        expiryFirstOrder?: "rate" | "deadline";
+        expiryFirstDeadlineTieMinutes?: number;
       }
     >;
     const providerOverride = providerStrategyOverrides[resolvedId] || {};
@@ -2022,11 +2027,16 @@ export async function getProviderCredentials(
       connection = sorted[0];
       // expiry-first (#14533) ranks by the quota closest to being lost; see its leaf module.
       if (strategy === "expiry-first")
-        connection = pickExpiryFirstConnection(orderedConnections, settings, {
-          provider: resolvedId,
-          requestedModel,
-          planWeights: providerOverride.planWeights,
-        });
+        // Provider overrides (e.g. `expiryFirstOrder`) win over the global settings.
+        connection = pickExpiryFirstConnection(
+          orderedConnections,
+          { ...settings, ...providerOverride },
+          {
+            provider: resolvedId,
+            requestedModel,
+            planWeights: providerOverride.planWeights,
+          }
+        );
       // Record the use (#10945). This strategy sorts on the very field it was
       // not writing, so on a pool where every lastUsedAt is null the tie-break
       // fell through to `priority` and returned the SAME connection on every
@@ -2060,10 +2070,17 @@ export async function getProviderCredentials(
       connection = orderedConnections[0];
     }
 
+    // Spread concurrent OAuth sessions over peer accounts — except when expiry-first runs in
+    // deadline order: there the account to spend is chosen on purpose, and spreading moved
+    // every parallel conversation onto the account with the later deadline.
+    const keepDeadlinePick =
+      strategy === "expiry-first" &&
+      isExpiryFirstDeadlineOrder({ ...(settings as object), ...providerOverride });
     if (
       options.reserveOAuthSession === true &&
       connection?.authType === "oauth" &&
-      !selectedByApiKeyPreference
+      !selectedByApiKeyPreference &&
+      !keepDeadlinePick
     ) {
       const selectedPriority = connection.priority || 999;
       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
