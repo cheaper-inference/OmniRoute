@@ -34,13 +34,9 @@ test("temporary 429 preserves last-known-good endpoint", () => {
     result: { ok: false, statusCode: 429, rateLimited: true, retryAfterSeconds: 60 },
   });
   assert.equal(next.status, "temporary_failure");
-  assert.equal(evaluateEndpoint(endpoint(), next).state, "temporarily_unavailable");
-  assert.equal(
-    evaluateEndpoint(endpoint(), next).state === "temporarily_unavailable"
-      ? evaluateEndpoint(endpoint(), next).preserve
-      : false,
-    true,
-  );
+  const state = evaluateEndpoint(endpoint(), next);
+  assert.equal(state.state, "temporarily_unavailable");
+  assert.equal(state.state === "temporarily_unavailable" ? state.preserve : false, true);
 });
 
 test("auth and model-not-supported failures are permanent until resync", () => {

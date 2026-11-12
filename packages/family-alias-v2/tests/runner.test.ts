@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { runReconciliation } from "../src/runner.ts";
 import type { LocalEndpoint } from "../src/types.ts";
+import type { LiveCombo } from "../src/omniroute/plan.ts";
 
 const endpoint: LocalEndpoint = {
   connectionId: "c",
@@ -13,7 +14,7 @@ const endpoint: LocalEndpoint = {
 
 test("CPA failure stays independent and a second run does not reprobe", async () => {
   let probes = 0;
-  const rows: Array<Record<string, unknown>> = [];
+  const rows: LiveCombo[] = [];
   const clients = {
     async probe() {
       probes += 1;
@@ -21,10 +22,10 @@ test("CPA failure stays independent and a second run does not reprobe", async ()
     },
     omniroute: {
       async list() { return structuredClone(rows); },
-      async create(input: Record<string, unknown>) { rows.push({ id: String(rows.length), ...input }); },
-      async update(id: string, input: Record<string, unknown>) {
+      async create(input: LiveCombo) { rows.push({ ...input, id: String(rows.length) }); },
+      async update(id: string, input: LiveCombo) {
         const index = rows.findIndex((row) => row.id === id);
-        rows[index] = { id, ...input };
+        rows[index] = { ...input, id };
       },
       async delete(id: string) {
         const index = rows.findIndex((row) => row.id === id);
