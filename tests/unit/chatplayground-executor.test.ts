@@ -29,6 +29,7 @@ import {
   clearChatPlaygroundCatalogCache,
   expireChatPlaygroundCatalogForTest,
   CHATPLAYGROUND_FALLBACK_MODELS,
+  CHATPLAYGROUND_MODELS_URL,
 } from "../../open-sse/services/chatplaygroundModels.ts";
 import { getChatPlaygroundUsage } from "../../open-sse/services/usage/chatplayground.ts";
 
@@ -246,7 +247,10 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
   // CITATIONS stripping (perplexity endpoint appends metadata — on its own line or inline)
   assert.equal(stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'), "Answer text");
   assert.equal(stripCitationsLine("no citations here"), "no citations here");
-  assert.equal(stripCitationsLine("The capital is **Canberra**.[1]CITATIONS:[\"https://a\",\"https://b\"]"), "The capital is **Canberra**.[1]");
+  assert.equal(
+    stripCitationsLine('The capital is **Canberra**.[1]CITATIONS:["https://a","https://b"]'),
+    "The capital is **Canberra**.[1]"
+  );
 
   // Azure payload mirrors the web client: vendor-prefixed model, botId, noSave
   const modelAzure = resolveChatPlaygroundModel("gpt-6.1-sol")!;
@@ -516,7 +520,14 @@ test("ChatPlayground — StackSocial Lifetime Basic & Pro quota parsing", async 
   }
 });
 
-test("ChatPlaygroundExecutor — 15,000 character limit per message validation", async () => {
+test("ChatPlaygroundExecutor — 15,000 character limit per message validation", async (t) => {
+  clearChatPlaygroundCatalogCache();
+  t.after(clearChatPlaygroundCatalogCache);
+  const catalogFetch = t.mock.method(
+    globalThis,
+    "fetch",
+    async () => new Response(null, { status: 503 })
+  );
   const executor = new ChatPlaygroundExecutor();
   const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
 
@@ -558,9 +569,24 @@ test("ChatPlaygroundExecutor — 15,000 character limit per message validation",
   assert.equal(errResultMultipart.response.status, 400);
   const dataMulti = await errResultMultipart.response.json();
   assert.ok(dataMulti.error.message.includes("15001 characters"));
+
+  assert.equal(catalogFetch.mock.callCount(), 2);
+  for (const {
+    arguments: [url, init],
+  } of catalogFetch.mock.calls) {
+    assert.equal(String(url), CHATPLAYGROUND_MODELS_URL);
+    assert.equal(init?.method, "GET");
+  }
 });
 
-test("ChatPlaygroundExecutor — null or empty model handling", async () => {
+test("ChatPlaygroundExecutor — null or empty model handling", async (t) => {
+  clearChatPlaygroundCatalogCache();
+  t.after(clearChatPlaygroundCatalogCache);
+  const catalogFetch = t.mock.method(
+    globalThis,
+    "fetch",
+    async () => new Response(null, { status: 503 })
+  );
   const executor = new ChatPlaygroundExecutor();
   const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
 
@@ -590,6 +616,14 @@ test("ChatPlaygroundExecutor — null or empty model handling", async () => {
   assert.equal(errResultInvalid.response.status, 400);
   const dataInvalid = await errResultInvalid.response.json();
   assert.ok(dataInvalid.error.message.includes("model not found or invalid"));
+
+  assert.equal(catalogFetch.mock.callCount(), 2);
+  for (const {
+    arguments: [url, init],
+  } of catalogFetch.mock.calls) {
+    assert.equal(String(url), CHATPLAYGROUND_MODELS_URL);
+    assert.equal(init?.method, "GET");
+  }
 });
 
 test("ChatPlaygroundExecutor — streaming whitespace & token formatting preservation", async () => {

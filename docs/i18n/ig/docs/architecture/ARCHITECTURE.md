@@ -8,78 +8,79 @@
 
 _Emelitere ikpeazụ: 2026-06-28_
 
-## Nchịkọta onye isi
+## Nchịkọta Isi
 
-OmniRoute bụ okporo ụzọ AI mpaghara yana dashboard arụnyere na Next.js. Ọ na-enye otu njedebe OpenAI dakọtara (`/v1/*`) yana okporo ụzọ gafere ọtụtụ ndị na-eweta elu nwere ntụgharị asụsụ, ndaghachi azụ, ume ọhụrụ token, na nsochi ojiji.
+OmniRoute bụ ọnụ ụzọ ntụgharị AI mpaghara na dashboard e wuru n’elu Next.js.
+Ọ na-enye otu endpoint dakọtara na OpenAI (`/v1/*`) ma na-eduzi okporo ụzọ n’etiti ọtụtụ ndị na-eweta ọrụ dị n’elu, tinyere ntụgharị, nhọrọ ndabere, mmegharị token, na nsuso ojiji.
 
-Ikike isi:
+Ike ndị bụ isi:
 
-- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 381, modul 159 mmebe)
-- ntụgharị asụsụ Request/response n'ofe ụdị ndị na-eweta
-- Nlereanya combo ọdịda (usoro ihe nlere ọtụtụ)
-- Nzọụkwụ ngwakọta ahaziri ahazi (`provider + model + connection`) yana ịtụ oge ojiri aga site na `compositeTiers`
-- Nlaghachi azụ nke ọkwa akaụntụ (ọtụtụ akaụntụ maka onye na-eweta ya)
-- Quota preflight na oke-maara akaụntụ P2C n'ụzọ nkata bụ isi
-- njikwa njikọ onye na-eweta OAuth + API (modul ndị na-eweta OAuth 27)
-- Na-etinye ọgbọ site na `/v1/embeddings` (ndị na-eweta 18)
-- Ọgbọ onyonyo site na `/v1/images/generations` (ndị na-eweta + 10, ụdị 20 + )
-- Ndegharị ọdịyo site na `/v1/audio/transcriptions` (ndị na-eweta 18)
-- Ederede gaa na-okwu site na `/v1/audio/speech` (ndị na-eweta arụrụ n'ime 24)
-- Ọgbọ vidiyo site na `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Ọgbọ egwu site na `/v1/music/generations` (ComfyUI)
-- Web search via `/v1/search` (20 providers)
-- Mgbanwe site na `/v1/moderations`
-- Ntughari site na `/v1/rerank`
-- Chee echiche mkpado mkpado (`<think>...</think>`) maka ụdị echiche
-- Idocha nzaghachi maka ndakọrịta OpenAI SDK siri ike
-- Nhazi nke ọrụ (usoro → onye nrụpụta, onye ọrụ → sistemụ) maka ndakọrịta ndị na-eweta obe
-- Ntugharị mmepụta ahaziri (json_schema → Gemini responseSchema)
-- Nkwụsi ike mpaghara maka ndị na-eweta, igodo, utu aha, combos, ntọala, ọnụahịa (modul DB 122)
-- Usage/cost nsuso na ịrịọ ndekọ
-- Mmekọrịta igwe ojii nhọrọ maka mmekọrịta multi-device/state
-- IP allowlist/blocklist maka njikwa ohere API
-- Njikwa mmefu ego iche echiche (passthrough/auto/custom/adaptive)
-- Usoro ịgba ọgwụ mgbochi ọrịa zuru ụwa ọnụ
-- Nleba anya na akara mkpịsị aka oge
-- Na-eji profaịlụ ndị na-eweta ndị na-eweta ihe na-eme ka mmachi ọnụego kwa-akaụntụ kwalite
-- Usoro ihe nkesa sekit maka nkwụsi ike nke ndị na-eweta ya
-- Nchekwa igwe mgbochi égbè eluigwe nwere mkpọchi mutex
-- cache mwepu arịrịọ dabere mbinye aka
-- Ngalaba oyi akwa: iwu ọnụ ahịa, amụma ọdịda, amụma mkpọchi
-- Ntugharị ihe dị na ya: nchịkọta aka nke oge maka ngbanwe akaụntụ
-- Nkwụsi ike nke steeti ngalaba (SQLite dee-site na cache maka ndaghachi azụ, mmefu ego, mkpọchi, ndị na-emebi sekit)
-- Injin amụma maka nyocha arịrịọ etiti (mkpọchi → budget → fallback)
-- Rịọ telemetry ya na nchịkọta latency p50/p95/p99
-- Combo lekwasịrị anya telemetry na ahụ ike gbadoro anya akụkọ ihe mere eme site na `combo_execution_key` / `combo_step_id`
-- Mmekọrịta ID (X-Arịrịọ-Id) maka nchụso ngwụcha ruo ọgwụgwụ
-- Ndebanye nyocha nnabata site na ịpụpụ kwa igodo API
-- Eval framework maka mmesi obi ike LLM
-- Dashboard ahụike nwere ọkwa sekit nke na-eweta oge
-- MCP Server (ngwaọrụ 110) nwere ụgbọ njem 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) nwere nkà na usoro ndụ ọrụ
-- Sistemụ ebe nchekwa (mwepụta, ịgba ọgwụ, iweghachi, nchịkọta)
-- Sistemụ nka (ndebanye aha, onye mmebe, igbe ájá, nka arụnyere n'ime)
-- MITM proxy nwere njikwa akwụkwọ yana njikwa DNS
-- Prompt injection guard middleware
-- Pipeline mkpakọ ngwa ngwa na Caveman, RTK, pipeline ekpokọtara, combos mkpakọ, ngwugwu asụsụ, na nyocha.
-- ACP (Agent Communication Protocol) ndekọ
-- Ndị na-enye OAuth modular (modul 22 n'okpuru `src/lib/oauth/providers/`)
-- scripts Uninstall/full-uninstall
-- OAuth mmezi gburugburu ebe obibi edinam
-- akwa mmiri WebSocket maka ndị ahịa WS OpenAI dakọtara (`/v1/ws`)
-- Njikwa mmekọrịta mmekọrịta (issue/revoke, ETag-ụdị config budata)
-- GLM Thinking (`glmt`) preset nke onye na-eweta klas mbụ
-- Ngụkọ ngwakọ ngwakọ ( `/messages/count_tokens` n'akụkụ onye na-eweta ya nwere ndaghachi azụ n'uche)
-- Model utu aha auto-seeding (30 + cross-proxy dialect normalizations na mmalite)
-- Ọpụpụ enweghị nchekwa yana onye nche SSRF, igbochi URL nkeonwe yana nwaa nhazigharị
-- Nchọgharị Cooldown maara nke ọma na `requestRetry` na `maxRetryIntervalSec` nwere ike ịhazi
-- Nkwado gburugburu oge ojiri na Zod na mmalite
-- Nyochaa nnabata v2 nwere pagination, ihe omume CRUD eweta, yana ndenye nkwado egbochiri SSRF
+- Elu API dakọtara na OpenAI maka CLI/ngwaọrụ (ndị na-eweta ọrụ 388, modulu mmebe 159)
+- Ntughari arịrịọ/azịza n’etiti usoro ndị na-eweta ọrụ
+- Nhọrọ ndabere nke ngwakọta model (usoro ọtụtụ model)
+- Usoro ngwakọta ahaziri ahazi (`provider + model + connection`) nwere nhazi n’oge nrụọrụ site na `compositeTiers`
+- Nhọrọ ndabere n’ogo akaụntụ (ọtụtụ akaụntụ maka onye na-eweta ọrụ ọ bụla)
+- Nnyocha quota tupu oge eruo na nhọpụta akaụntụ P2C nke na-eburu quota n’uche n’ụzọ nkata bụ isi
+- Njikwa njikọ ndị na-eweta ọrụ site na OAuth + API-key (modulu ndị na-eweta OAuth 27)
+- Mmepụta embedding site na `/v1/embeddings` (ndị na-eweta ọrụ 18)
+- Mmepụta onyonyo site na `/v1/images/generations` (ndị na-eweta ọrụ 10+, model 20+)
+- Ntughari ọdịyo gaa na ederede site na `/v1/audio/transcriptions` (ndị na-eweta ọrụ 18)
+- Ntughari ederede gaa na olu site na `/v1/audio/speech` (ndị na-eweta ọrụ arụnyere n’ime ya 24)
+- Mmepụta vidiyo site na `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Mmepụta egwu site na `/v1/music/generations` (ComfyUI)
+- Ọchụchọ webụ site na `/v1/search` (ndị na-eweta ọrụ 20)
+- Nnyocha ọdịnaya site na `/v1/moderations`
+- Nhazigharị ọkwa site na `/v1/rerank`
+- Ntụgharị mkpado echiche (`<think>...</think>`) maka model ndị na-atụgharị uche
+- Nhicha azịza maka ndakọrịta siri ike na OpenAI SDK
+- Ịhazigharị role (developer→system, system→user) maka ndakọrịta n’etiti ndị na-eweta ọrụ
+- Ntughari mmepụta ahaziri ahazi (json_schema → Gemini responseSchema)
+- Nchekwa mpaghara maka ndị na-eweta ọrụ, key, alias, ngwakọta, ntọala, na ọnụahịa (modulu DB 122)
+- Nsuso ojiji/ọnụ ahịa na ndekọ arịrịọ
+- Mmekọrịta cloud nke bụ nhọrọ maka mmekọrịta ọtụtụ ngwaọrụ/ọnọdụ
+- Ndepụta IP ndị a na-anabata/ndị a na-egbochi maka njikwa nnweta API
+- Njikwa oke echiche (ngafe ozugbo/akpaaka/ahaziri/adaptive)
+- Ntinye system prompt zuru ụwa ọnụ
+- Nsuso nnọkọ na imepụta akara njirimara
+- Mmachi ọsọ emelitere maka akaụntụ ọ bụla, nwere profaịlụ pụrụ iche maka onye na-eweta ọrụ
+- Usoro circuit breaker maka nkwụsi ike nke ndị na-eweta ọrụ
+- Nchedo megide arịrịọ buru ibu na-abịa n’otu oge site na mkpọchi mutex
+- Cache iwepụ arịrịọ ugboro abụọ dabere na signature
+- Oyi akwa domain: iwu ọnụ ahịa, amụma nhọrọ ndabere, amụma mkpọchi
+- Nbufe Ọnọdụ: nchịkọta nnyefe nnọkọ iji hụ na aga n’ihu mgbe a na-atụgharị akaụntụ
+- Nchekwa ọnọdụ domain (cache SQLite write-through maka nhọrọ ndabere, budget, mkpọchi, na circuit breaker)
+- Igwe amụma maka nyocha arịrịọ n’otu ebe (mkpọchi → budget → nhọrọ ndabere)
+- Telemetry arịrịọ nwere mkpokọta latency p50/p95/p99
+- Telemetry nke ebe ngwakọta na ọnọdụ ahụike akụkọ ihe mere eme nke ebe ngwakọta site na `combo_execution_key` / `combo_step_id`
+- ID mmekọrịta (X-Request-Id) maka nsuso site na mmalite ruo na njedebe
+- Ndekọ audit nrubeisi nwere nhọrọ ịjụ maka API key ọ bụla
+- Framework eval maka mmesi obi ike n’ịdị mma LLM
+- Dashboard ahụike nwere ọnọdụ circuit breaker nke ndị na-eweta ọrụ ozugbo
+- Sava MCP (ngwaọrụ 110) nwere ụzọ mbufe 3 (stdio/SSE/Streamable HTTP)
+- Sava A2A (JSON-RPC 2.0 + SSE) nwere nka na usoro ndụ task
+- Usoro ebe nchekwa (iwepụta, itinye, iweghachite, ime nchịkọta)
+- Usoro nka (registry, executor, sandbox, nka arụnyere n’ime ya)
+- Proxy MITM nwere njikwa certificate na nhazi DNS
+- Middleware nchedo megide ntinye prompt
+- Pipeline mkpakọ prompt nwere Caveman, RTK, pipeline a kwakọtara ọnụ, ngwakọta mkpakọ, ngwugwu asụsụ, na analytics
+- Registry ACP (Protocol Nkwurịta Okwu Agent)
+- Ndị na-eweta OAuth modular (modulu onwe ha 22 n’okpuru `src/lib/oauth/providers/`)
+- Script iwepụ/iwepụ kpamkpam
+- Omume mmezi environment OAuth
+- Àkwà mmiri WebSocket maka client WS dakọtara na OpenAI (`/v1/ws`)
+- Njikwa token mmekọrịta (inye/kagbuo, nbudata ngwugwu nhazi e ji ụdị ETag chịkwaa)
+- GLM Thinking (`glmt`) dịka preset onye na-eweta ọrụ zuru oke
+- Ngụkọta token ngwakọ (`/messages/count_tokens` n’akụkụ onye na-eweta ọrụ, yana atụmatụ dịka nhọrọ ndabere)
+- Ịkụ mkpụrụ alias model na-akpaghị aka (nhazigharị dialect cross-proxy 30+ n’oge mmalite)
+- Fetch mpụga dị nchebe nwere nchedo SSRF, mgbochi URL nkeonwe, na retry a pụrụ ịhazi
+- Retry nkata nke na-eburu cooldown n’uche, nwere `requestRetry` na `maxRetryIntervalSec` a pụrụ ịhazi
+- Nkwado environment runtime site na Zod n’oge mmalite
+- Audit nrubeisi v2 nwere pagination, ihe omume CRUD nke ndị na-eweta ọrụ, na ndekọ nkwado nke SSRF gbochiri
 
-Ụdị oge ojiri agba agba:
+Ụdị runtime bụ isi:
 
-- Ụzọ ngwa Next.js n'okpuru `src/app/api/*` mejuputa ma dashboard APIs yana ndakọrịta APIs
-- Isi SSE/routing kekọrịtara na `src/sse/*` + `open-sse/*` na-ejikwa ogbugbu ndị na-eweta, ntụgharị asụsụ, nkwanye, ndaghachi azụ na ojiji.
+- Route ngwa Next.js n’okpuru `src/app/api/*` na-emejuputa ma API dashboard ma API ndakọrịta
+- Isi SSE/routing a na-ekekọrịta na `src/sse/*` + `open-sse/*` na-ahụ maka mmebe nke ndị na-eweta ọrụ, ntụgharị, streaming, nhọrọ ndabere, na ojiji
 
 ## Eserese Nrụtụaka
 
@@ -857,41 +858,47 @@ flowchart LR
 - `src/lib/db/*`: bubata modul ndị akọwapụtara ozugbo — ejila barrel (ewepụrụ oyi akwa mbupụgharị ochie `localDb.ts`)
 - `src/lib/usageDb.ts`: facade akụkọ ojiji/ndekọ oku dị n'elu tebụl SQLite
 
-## Mkpuchi Executor nke Provider (Ụkpụrụ Strategy)
+## Mkpuchi Onye na-eweta ihe (ụkpụrụ atụmatụ)
 
-Provider ọ bụla nwere executor pụrụ iche nke na-agbatị `BaseExecutor` (na `open-sse/executors/base.ts`), nke na-enye iwu URL, nhazi header, nnwale ọzọ site na exponential backoff, hooks maka ime ka credential dị ọhụrụ, na usoro nhazi ọrụ `execute()`.
+Onye ọ bụla na-enye ọrụ nwere ọkachamara ọkachamara na-agbatị `BaseExecutor` (na `open-sse/executors/base.ts`), nke na-enye ụlọ URL, ihe owuwu nkụnye eji isi mee, gbalịa jiri azụ azụ azụ, nko mgbakwasa nzere, na usoro egwu egwu `execute()`.
 
-| Onye Mmebe                | Ndị Na-enye Ọrụ                                                                                                                                             | Nhazi Pụrụ Iche                                                           |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, wdg. | Nhazi URL/header na-agbanwe dịka onye na-enye ọrụ si dị                   |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID ọrụ/session ahaziri iche, nyocha Retry-After, izochi njehie 429        |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Nduzi dabere na deployment, ịmanye query api-version                      |
-| `BlackboxWebExecutor`     | Blackbox AI (ọnọdụ webụ)                                                                                                                                    | Ntughari session webụ nwere nṅomi akara mkpịsịaka TLS                     |
-| `ClaudeIdentityExecutor`  | Claude.ai (ụzọ CCH)                                                                                                                                         | Usoro constraint + tool-remap, nhazi akara mkpịsịaka                      |
-| `CliProxyApiExecutor`     | Ndị na-enye ọrụ kwekọrọ na CLIProxyAPI                                                                                                                      | Nkwenye njirimara na njikwa protocol ahaziri iche                         |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | Ịtinye ID akaụntụ, nsuso ojiji dabere na Neurons                          |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Na-etinye ntụziaka sistemụ, na-amanye mgbalị ntụgharị uche                |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Njikọ Responses API nke session ihe nchọgharị nwere ịkpọgide thread/turn  |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + ntụgharị header n'otu session                                     |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Protocol ConnectRPC, encoding Protobuf, iji checksum bịanye aka na arịrịọ |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Ijikọta usoro ndụ task Devin site na modul agent cloud                    |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Mmelite token Copilot, header ndị na-eṅomi VSCode                         |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + nduzi nwere oke project                                    |
-| `GlmExecutor`             | Z.AI GLM (gụnyere preset `glmt`)                                                                                                                            | Na-eburu thinking-budget n'uche, constants preset GLMT                    |
-| `GrokWebExecutor`         | xAI Grok webụ                                                                                                                                               | Ntughari session webụ, nhọpụta ọnọdụ (think/standard)                     |
-| `KieExecutor`             | KIE                                                                                                                                                         | Mwepụta token ahaziri iche nwere anchors session na-agbanwe               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Ọdịdị binary AWS EventStream → ntughari SSE                               |
-| `MuseSparkWebExecutor`    | Muse Spark (webụ)                                                                                                                                           | Ntughari session webụ nwere njikọ ozi onyonyo                             |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Ọdịdị body arịrịọ akọwapụtara maka onye na-enye ọrụ                       |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Ntọala onye na-enye ọrụ kwekọrọ na AI SDK                                 |
-| `PerplexityWebExecutor`   | Perplexity webụ                                                                                                                                             | Ntughari session webụ maka ịga n'ihu nkata                                |
-| `PetalsExecutor`          | Petals distributed inference                                                                                                                                | Nduzi swarm gbasasịrị                                                     |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | Achọghị API key, arịrịọ ndị nwere oke ọsọ                                 |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Nkwado PAT na OAuth, ọkwa efu nwere ọtụtụ model                           |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Nkwenye njirimara service account, endpoints dabere na region             |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | API key ebubatara + chat streaming Connect-protobuf                       |
+| Onye mmebe                | Onye na-eweta (ndị)                                                                                                                                             | Ijikwa Pụrụ Iche                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, mgbagwoju anya, Together, Fireworks, Cerebras, Cohere, NVIDIA, wdg. | Nhazi URL/header dị ike maka onye na-eweta ya                            |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                              | Omenala project/session IDs, Nwagharịa-Mgbe nyochachara, 429 obfuscation |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                    | Ntugharị dabere na mbugharị, mmebe ajụjụ api-ụdị                         |
+| `BlackboxWebExecutor`     | Blackbox AI (ụdị webụ)                                                                                                                                          | Webụsaịtị weghachi azụ site na iji nṅomi akara mkpisiaka TLS             |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH ụzọ)                                                                                                                                             | Mgbochi + ngwá ọrụ na-emepe pipeline, ịkpụzi akara mkpisiaka             |
+| `CliProxyApiExecutor`     | Ndị na-eweta CLIProxyAPI dakọtara                                                                                                                               | Nyocha omenala na njikwa protocol                                        |
+| `CloudflareAiExecutor`    | Ndị ọrụ Cloudflare AI                                                                                                                                           | Akaụntụ injection ID, nleba anya ojiji dabere na Neurons                 |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                    | Na-agbanye ntuziaka usoro, na-amanye mgbalị echiche                      |
+| `ChatGptWebCodexExecutor` | Weebụ ChatGPT (Codex)                                                                                                                                           | Nzaghachi-nnọkọ ihe nchọgharị akwa mmiri API nwere pinning thread/turn   |
+| `CommandCodeExecutor`     | Koodu iwu                                                                                                                                                       | OAuth + ntụgharị nkụnye eji isi mee nke ọ bụla                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                      | ConnectRPC protocol, Protobuf encoding, rịọ maka ịbanye site na checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                       | Devin ọrụ ọrụ ndụ okirikiri site na igwe ojii nnọchite modul             |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                  | Copilot token nweta ume, nkụnye eji isi mee VSCode                       |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                      | GitLab OAuth + ntugharị nwere nnukwu ọrụ                                 |
+| `GlmExecutor`             | Z.AI GLM (gụnyere `glmt` preset)                                                                                                                                | Chee echiche-mmefu ego maara, GLMT preset constants                      |
+| `GrokWebExecutor`         | xAI Grok weebụ                                                                                                                                                  | Weebụ-nzube azụ, ụdị nhọrọ (think/standard)                              |
+| `KieExecutor`             | KIE                                                                                                                                                             | Mwepụta akara ngosi omenala nwere arịlịka nnọkọ na-atụgharị              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                          | Ntugharị AWS EventStream ọnụọgụ abụọ → SSE                               |
+| `MuseSparkWebExecutor`    | Muse Spark (webụ)                                                                                                                                               | Weebụ-nnọkọ tụgharịa na-njikwa onyonyo-ozi                               |
+| `NlpCloudExecutor`        | NLP igwe ojii                                                                                                                                                   | Arịrịọ ahụ akọwapụtara nke onye enyemaka                                 |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                        | Ntọlite eweta AI SDK dakọtara                                            |
+| `PerplexityWebExecutor`   | Weebụ mgbagwoju anya                                                                                                                                            | Weebụ-nnọkọ azụ maka ịga n'ihu nkata                                     |
+| `PetalsExecutor`          | Petals kesara inference                                                                                                                                         | Ntugharị iyi enweghị isi                                                 |
+| `PollinationsExecutor`    | Ọnụ ego nke AI                                                                                                                                                  | Enweghị igodo API achọrọ, arịrịọ nwere oke oke                           |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                        | Nkwado PAT na OAuth, ọkwa n'efu ọtụtụ ụdị                                |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                                | Nyocha akaụntụ ọrụ, njedebe dabere na mpaghara                           |
+| `DevinDesktopExecutor`    | Devin na desktọpụ                                                                                                                                               | Igodo API ebubata + Jikọọ-protobuf nkata nkwanye                         |
 
-Ndị na-eweta ọrụ ndị ọzọ niile (gụnyere node dakọtara ahaziri iche) na-eji `DefaultExecutor`.
+Ndị na-enye ndị ọzọ niile (gụnyere ọnụ ọnụ dakọtara) na-eji `DefaultExecutor`.
+
+### Nyocha akpaaka na akaụntụ nnọkọ weebụ
+
+Nlele nlere anya, nwale niile, ule combo na nyocha na-eziga arịrịọ nkata n'ezie. Onye na-eweta nnọkọ weebụ na-eme dị ka onye ọrụ abanyela, ya mere, a ga-echekwa arịrịọ ndị ahụ nke ọ bụla dị ka mkparịta ụka na akaụntụ ahụ; nyocha akpaaka nke hapụrụ mkparịta ụka dị otú ahụ nwetara akaụntụ kwụsịtụrụ (#14780). Ya mere pipeline nkata ahụ na-ajụ ebumnuche ọ bụla, nyocha akpaaka na-erute onye na-eweta ya na-enweta nzere nnọkọ weebụ, ozugbo onye na-eweta ebumnuche ekpebiela na tupu ahọpụtara nzere (`src/lib/providers/chatProbePolicy.ts`). Ọjụjụ ahụ bụ `422` na `error.code` `chat_probe_not_isolated`, na ndị na-agba ọsọ nyocha na-akọ ya dị ka ịwụ elu, ọ bụghị ọdịda.
+
+Onye mmebe nke na-agba nkata ọ bụla na ọnọdụ enweghị akụkọ ihe mere eme nke onye na-eweta ya na-ekwupụta ya na `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); A na-ahapụkwa nyocha nke onye na-eweta ya. ChatGPT Web na-ekwupụta `temporary-chat`. Jiri ule tinye nkwupụta na usoro ya, yabụ na nkwupụta enweghị ike ị gafechara koodu ahụ mere ka ọ bụrụ eziokwu.
 
 ## Matriks Ndakọrịta nke Ndị Na-eweta Ọrụ
 
@@ -1055,11 +1062,11 @@ ndakọrịta na usoro ochie. Nkwekọrịta runtime dị ugbu a na-eji:
 - mbugharị schema SQLite na hook nkwalite akpaka mgbe mmalite
 - ụzọ ndakọrịta maka mbugharị JSON ochie → SQLite
 
-## 6) Ihe Nche SSRF / URL Na-apụ Apụ
+## 6) SSRF / Nchedo URL Na-apụ Apụ
 
-- `src/shared/network/outboundUrlGuard.ts` na-egbochi URL ebumnuche niile nkeonwe/loopback/link-local tupu ha erute ndị na-emezu ọrụ onye na-eweta ọrụ
-- Ụzọ nchọpụta na nkwado model nke onye na-eweta ọrụ na-eji `src/shared/network/safeOutboundFetch.ts`, nke na-etinye ihe nche ahụ n’ọrụ tupu arịrịọ ọ bụla na-apụ apụ
-- Njehie ihe nche na-apụta dịka `URL_GUARD_BLOCKED` nwere HTTP 422, a na-edekwa ha na ndekọ nyocha nrubeisi site na `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) na-etinye `src/shared/network/outboundUrlGuard.ts` n’arịrịọ nkata ndị e zigara site na `BaseExecutor.execute()`. N’ọnọdụ naanị-ọha (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` mgbe agbanyụrụ ọkọlọtọ nkeonwe), ọ na-egbochi ndị nnabata nkeonwe na loopback yana 169.254.0.0/16; n’ọnọdụ ọ bụla ọzọ, ọ na-egbochi ndị nnabata metadata igwe ojii. Ọ na-enyocha aha nnabata ma ọ bụ IP literal dịka e dere ya, tupu nchọgharị DNS ọ bụla. Ndị na-eweta ọrụ mpaghara arụnyere n’ime sistemụ anaghị eji ya.
+- Ụzọ nchọpụta na nkwado ụdị nke ndị na-eweta ọrụ na-eji `src/shared/network/safeOutboundFetch.ts`, nke na-etinye nchedo ahụ tupu arịrịọ ọ bụla na-apụ apụ
+- Njehie nchedo na-apụta dịka `URL_GUARD_BLOCKED` ya na HTTP 503 (`getSafeOutboundFetchErrorStatus`; ụzọ nchọpụta ụdị na-eweghachi 400), a na-edekwa ezigbo mgbochi SSRF ndị mere n’oge nkwado n’akwụkwọ ndekọ nyocha dịka ihe omume `provider.validation.ssrf_blocked`
 
 ## Nlele Ọrụ na Ihe Ngosi Arụmọrụ
 
@@ -1110,7 +1117,7 @@ Mgbanwe gburugburụ ndị koodu na-eji kpọmkwem:
 4. Omume cloud na-adabere na `NEXT_PUBLIC_BASE_URL` ziri ezi yana ike iru ebe njedebe cloud.
 5. A na-ebipụta ndekọ `open-sse/` dị ka **ngwugwu npm workspace** `@omniroute/open-sse`. Koodu isi mmalite na-ebubata ya site na `@omniroute/open-sse/...` (nke Next.js `transpilePackages` na-edozi). Ụzọ faịlụ dị n'akwụkwọ a ka na-eji aha ndekọ `open-sse/` iji nọgide na-enwe nkwekọrịta.
 6. Chaatị ndị dị na dashboard na-eji **Recharts** (nke dabere na SVG) maka ngosipụta nyocha data ndị dị mfe ịnweta ma na-emekọrịta ihe (chaatị ogwe ojiji model, tebụl nkọwa ndị na-eweta ọrụ nwere ọnụego ihe ịga nke ọma).
-7. Nnwale E2E na-eji **Playwright** (`tests/e2e/`), a na-agba ha site na `npm run test:e2e`. Nnwale unit na-eji **onye na-agba nnwale Node.js** (`tests/unit/`), a na-agba ha site na `npm run test:unit`. Koodu isi mmalite dị n'okpuru `src/` bụ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ka bụ JavaScript (`.js`).
+7. Nnwale E2E na-eji **Playwright** (`tests/e2e/`), a na-agba ha site na `npm run test:e2e`. Nnwale unit na-eji **onye na-agba nnwale Node.js** (`tests/unit/`), a na-agba ha site na `npm run test:unit`. Koodu isi mmalite dị n'okpuru `src/` bụ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ka bụ TypeScript (`.ts`).
 8. A haziri ibe Settings n'ime taabụ 7: General, Appearance, AI, Security, Routing, Resilience, Advanced. Ibe Resilience na-ahazi naanị kwụ arịrịọ, oge njikọ ga-anọ jụụ, breaker nke onye na-eweta ọrụ, na omume ichere ka oge ịdị jụụ gwụ; a na-egosi ọnọdụ runtime breaker dị ugbu a na ibe Health.
 9. E kewara atụmatụ **Context Relay** (`context-relay`) n'ígwé abụọ: `combo.ts` na-ekpebi ma a ga-emepụta handoff, `chat.ts` na-etinye handoff ahụ mgbe e dozichara akaụntụ. Data handoff dị na tebụl SQLite `context_handoffs`. Nkewa a bụ ụma n'ihi na ọ bụ naanị `chat.ts` maara ma akaụntụ e ji mee ihe ọ̀ gbanwere n'ezie.
 10. **Mmanye proxy** zuru oke ugbu a: `tokenHealthCheck.ts` na-edozi proxy maka njikọ ọ bụla, `/api/providers/validate` na-eji `runWithProxyContext`, ma `proxyFetch.ts` na-eji `undici.fetch()` iji jigide ndakọrịta dispatcher na Node 22.

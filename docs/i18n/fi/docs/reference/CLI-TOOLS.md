@@ -4,17 +4,17 @@
 
 ---
 
-Viimeksi päivitetty: 23.8.2026
+Päivitetty viimeksi: 2026-08-23
 
-OmniRoute integroituu kolmeen CLI työkaluluokkaan, jotka on jaettu kolmelle omistetulle kojelautasivulle:
+OmniRoute integroituu kolmeen CLI-työkaluluokkaan, jotka on jaettu kolmelle erilliselle hallintapaneelin sivulle:
 
-| Sivu            | Reitti                  | Käsite                                                                              | Laskea          |
-| --------------- | ----------------------- | ----------------------------------------------------------------------------------- | --------------- |
-| **CLI -koodit** | `/dashboard/cli-code`   | Koodaustyökalut, joita osoitat OmniRoute (asiakas → CLI → OmniRoute → Provider)     | 26              |
-| **CLI Agentit** | `/dashboard/cli-agents` | Autonomiset agentit, jotka osoitat OmniRoute (sama virtaus, laajempi soveltamisala) | 11              |
-| **ACP Agentit** | `/dashboard/acp-agents` | CLIs että OmniRoute syntyy taustaohjelmaksi stdio/ACP kautta (käänteinen virtaus)   | katso rekisteri |
+| Sivu            | Reitti                  | Konsepti                                                                                     | Määrä           |
+| --------------- | ----------------------- | -------------------------------------------------------------------------------------------- | --------------- |
+| **CLI-koodit**  | `/dashboard/cli-code`   | Koodaustyökalut, jotka osoitat OmniRouteen (asiakas → CLI → OmniRoute → palveluntarjoaja)    | 28              |
+| **CLI-agentit** | `/dashboard/cli-agents` | Autonomiset agentit, jotka osoitat OmniRouteen (sama kulku, laajempi käyttöalue)             | 11              |
+| **ACP-agentit** | `/dashboard/acp-agents` | CLI:t, jotka OmniRoute käynnistää taustajärjestelmäksi stdio/ACP:n kautta (käänteinen kulku) | katso rekisteri |
 
-Vanhat reitit uudelleenohjaavat 308:n kautta: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Vanhat reitit uudelleenohjataan 308-vastauksella: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,9 @@ ACP-agentit (käänteinen käynnistyskulku):
 
 ---
 
-## Määritä automaattisesti `setup-*`
+## Automaattinen määritys `setup-*`-komennoilla
 
-Sinun ei tarvitse kirjoittaa jokaisen työkalun asetuksia käsin. OmniRoute toimittaa `setup-*` -komennon tuetulle CLI, joka lukee komennon** elää** malliluettelo käynnissä olevasta OmniRoute (paikallinen tai etä) ja kirjoittaa työkalun oman konfiguraation koneellesi:
+Sinun ei tarvitse kirjoittaa jokaisen työkalun määrityksiä käsin. OmniRoute sisältää jokaiselle tuetulle CLI:lle `setup-*`-komennon, joka lukee **reaaliaikaisen** malliluettelon käynnissä olevasta OmniRoute-instanssista (paikallisesta tai etäinstanssista) ja kirjoittaa työkalun omat määritykset koneellesi:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,15 +56,18 @@ omniroute setup-5dive        omniroute setup-zed
 omniroute setup-whycodes
 ```
 
-Jokainen hyväksyy `--remote <url> --api-key <key>` (paikallisen työkalun määrittäminen etä- OmniRoute tä vastaan), `--dry-run` (esikatselu ilman kirjoittamista) ja `--port`. Työkalut, joissa ei ole mallin automaattista etsintää (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ottavat `--model <id>` (ja `--yes` ei-interaktiivisille juoksuille). `setup-5dive` on yksi resepti, joka ei kirjoita `$HOME` alle: se määrittää 5dive-agenttijoukon kirjoittamalla juuriomistetun todennusprofiilin laivaston isäntään, joten se suorittaa uudelleen `sudo` kautta eikä sillä ole omaa etätilaa. Jos haluat käynnistää CLI jossa on oikea env injektoitu ja asetuksia ei ole kirjoitettu ollenkaan, käytä yleistä `omniroute run <target>` käynnistintä (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — kohteet ja aliakset tulevat `bin/cli/cli-manifest.mjs`); vanhat työkalukohtaiset kantoraketit `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) ovat edelleen saatavilla. Gemini CLI on vain käynnistys: se on `omniroute run` kohde, mutta sillä ei ole `setup-*`/`configure` -reseptiä.
+Jokainen niistä hyväksyy valinnat `--remote <url> --api-key <key>` (paikallisen työkalun määrittäminen käyttämään etä-OmniRoutea), `--dry-run` (esikatselu kirjoittamatta) ja `--port`. Työkalut, joissa ei ole mallien automaattista tunnistusta (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes), käyttävät valintaa `--model <id>` (sekä valintaa `--yes` ei-interaktiivisissa suorituksissa). `setup-5dive` on ainoa määritys, joka ei kirjoita hakemiston `$HOME` alle: se määrittää 5dive-agenttijoukon kirjoittamalla pääkäyttäjän omistaman todennusprofiilin joukon isäntäkoneelle, joten se suorittaa itsensä uudelleen `sudo`-komennon kautta eikä sisällä omaa etätilaa. Voit käynnistää CLI:n niin, että oikeat ympäristömuuttujat syötetään eikä määrityksiä kirjoiteta lainkaan, käyttämällä yleistä `omniroute run <target>` -käynnistintä (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — kohteet ja aliakset tulevat tiedostosta `bin/cli/cli-manifest.mjs`); vanhat työkalukohtaiset käynnistimet `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) ovat edelleen käytettävissä. Gemini CLI voidaan vain käynnistää: se on `omniroute run` -kohde, mutta sille ei ole `setup-*`/`configure`-määritystä.
 
-> **Täydellinen viite:** päätaulukko – mitä kukin komento kirjoittaa, jokainen lippu, paikallinen vs. kaukosäädin ja mitkä työkalut haluavat `/v1` liitteen – asuu** [CLI -integraatiot](../guides/CLI-INTEGRATIONS.md)** .
+> **Täydellinen viite:** päätaulukko — mitä kukin komento kirjoittaa, kaikki valinnat, paikallinen vs. etäkäyttö sekä mitkä työkalut tarvitsevat `/v1`-päätteen — löytyy sivulta
+> **[CLI-integraatiot](../guides/CLI-INTEGRATIONS.md)**.
 
-### Näitä ajaa säiliön sisällä
+### Näiden suorittaminen säilössä
 
-OmniRoute säilön sisällä suoritettu `setup-*` komento kirjoittaa säilön omaan kotiin, jota mikään isäntä CLI ei lue ja joka katoaa säilön mukana. OmniRoute havaitsee sen ja poistuu `2` ohjeilla kirjoittamisen sijaan. Kaksi tuettua tapaa edetä – asenna CLI isäntään ja `omniroute connect` säiliöön tai liitä konfigurointihakemistot ja aseta `CLI_CONFIG_HOME` ( `host` profiili). Jokainen `setup-*` komento, sekä `omniroute configure` ja `omniroute config set`, hyväksyy `--allow-container-write` määritettäessä säilön omaa CLIs, mitä todella tarkoitit; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` tekee saman palvelimelle. Katso [Docker -opas → Isäntä- CLI työkalujen määrittäminen](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute-säilössä suoritettu `setup-*`-komento kirjoittaa säilön omaan kotihakemistoon, jota mikään isäntäkoneen CLI ei lue ja joka katoaa säilön mukana. OmniRoute tunnistaa tämän ja lopettaa tilakoodilla `2` sekä näyttää ohjeet kirjoittamisen sijaan. Tuettuja etenemistapoja on kaksi — asenna CLI isäntäkoneelle ja käytä komentoa `omniroute connect` yhteyden muodostamiseen säilöön tai liitä määrityshakemistot bind mount -liitoksilla ja aseta `CLI_CONFIG_HOME` (Compose-profiili `host`). Jokainen `setup-*`-komento sekä `omniroute configure` ja `omniroute config set` hyväksyvät valinnan `--allow-container-write`, kun tarkoituksena on todella määrittää säilön omat CLI:t; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` tekee saman palvelimelle. Katso
+[Docker-opas → Isäntäkoneen CLI-työkalujen määrittäminen](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Kojelaudan** soveltaa päätepistettä** (`POST /api/cli-tools/apply`) pakottaa saman suojan: säilössä vastaa isäntäkoneesta kirjoitus, jonka kohdetta ei ole sidottu**`422`** `containerEphemeralTarget: true` kanssa turvallinen virheteksti ja — työkaluille, joissa on isäntäresepti (claude, codex, opencode, cline, kilo, jatka) — `hostSetupCommand` (esim. `omniroute setup-opencode`), joka suoritetaan sen sijaan isännässä; mitään ei ole kirjoitettu. `dryRun: true` jatkaa työskentelyä säilötilassa ja palauttaa muokatun esikatselun + kohdepolun koskematta levyyn. Esikatselusisältö ei ole valtuustietoja sisältävä konfiguraatio kopioitavaksi tai tuotavaksi. Käytä isäntäkoneen alkuperäisten tool/base URL/API key/model -tulojen kanssa tai käytä ilmoitettua isäntäpuolen asetuskomentoa. Katso [CLI Configuration Security](../security/CLI-CONFIGURATION.md) esikatseluotsikko ja pyyntösopimus. Tämä käyttäytyminen on tahallista ja `tests/unit/api/cli-tools/apply-container-guard.test.ts` n suojaama regressiosta – älä koskaan "korjaa" 422:ta poistamalla suojus.
+Hallintapaneelin **käyttöönoton päätepiste** (`POST /api/cli-tools/apply`) käyttää samaa suojausta: säilössä kirjoitus, jonka kohdetta ei ole liitetty isäntäkoneelta bind mount -liitoksella, saa vastaukseksi **`422`**, jossa ovat `containerEphemeralTarget: true`, turvallinen virheteksti sekä — työkaluilla, joille on isäntäkoneen määritys (claude, codex, opencode, cline, kilo, continue) — isäntäkoneella suoritettava `hostSetupCommand` (esim. `omniroute setup-opencode`); mitään ei kirjoiteta. `dryRun: true` toimii edelleen säilötilassa ja palauttaa peitetyn esikatselun sekä kohdepolun koskematta levyyn. Esikatselun sisältö ei ole tunnistetietoja sisältävä määritys, jota voisi kopioida tai tuoda. Tee käyttöönotto isäntäkoneella alkuperäisillä työkalu-, perus-URL-, API-avain- ja mallisyötteillä tai käytä ilmoitettua isäntäkoneen määrityskomentoa. Katso esikatseluotsikko ja pyyntösopimus sivulta [CLI-määritysten suojaus](../security/CLI-CONFIGURATION.md). Tämä toiminta on tarkoituksellista, ja sitä suojataan regressioilta testillä
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — älä koskaan yritä "korjata" 422-vastausta poistamalla suojausta.
 
 ---
 
@@ -107,61 +110,61 @@ rajapinnalle ilman muita lisätty kohde aiheuttaa testikokonaisuuden epäonnistu
 
 ---
 
-## 1. CLI Coden katalogi (28 työkalua)
+## 1. CLI Coden työkaluluettelo (28 työkalua)
 
-Kaikki työkalut, jotka näkyvät `/dashboard/cli-code`. Ne, joissa on `baseUrlSupport: none` on kytketty MITM tai manuaalisen oppaan kautta mukautetun URL sijasta:
+Kaikki työkalut, jotka näkyvät näkymässä `/dashboard/cli-code`. Työkalut, joiden `baseUrlSupport`-arvo on `none`, yhdistetään MITM:n tai manuaalisen oppaan kautta mukautetun perus-URL:n sijaan:
 
-| id              | nimi                            | myyjä                    | baseUrlSupport | configType           | acpSpawnable |
-| --------------- | ------------------------------- | ------------------------ | -------------- | -------------------- | ------------ |
-| claude          | Claude koodi                    | Anthropic                | koko           | env                  | totta        |
-| koodeksi        | OpenAI Codex CLI                | OpenAI                   | koko           | mukautettu           | totta        |
-| zcode           | ZCode (GLM -koodaussuunnitelma) | Z.ai                     | ei yhtään      | mukautettu           | väärä        |
-| cline           | Cline                           | OSS (entinen Claude Dev) | koko           | mukautettu           | totta        |
-| kilo            | Kilo koodi                      | Kilo-Org                 | koko           | mukautettu           | väärä        |
-| roo             | Roo Code                        | Roo (OSS)                | koko           | opas                 | väärä        |
-| jatkaa          | Jatkaa                          | jatka.dev                | koko           | opas                 | väärä        |
-| auttaja         | Aideri                          | OSS (P. Gauthier)        | koko           | opas                 | totta        |
-| takoa           | ForgeCode                       | Antinomia HQ             | koko           | mukautettu           | totta        |
-| jcode           | jcode                           | 1jehuang (OSS)           | koko           | mukautettu           | väärä        |
-| deepseek-tui    | DeepSeek TUI                    | Hunter Bown (OSS)        | koko           | mukautettu           | väärä        |
-| koodivalas      | CodeWhale                       | hmbown (OSS)             | koko           | mukautettu           | väärä        |
-| avoin koodi     | OpenCode                        | Poikkeama (entinen SST)  | koko           | opas                 | totta        |
-| droidi          | Tehdasdroidi                    | Tehdas AI                | osittainen     | opas                 | väärä        |
-| lentoperämies   | GitHub Copilot CLI              | GitHub/MS                | koko           | mukautettu           | väärä        |
-| kursori-cli     | Cursor CLI                      | Mikä tahansa pallo       | osittainen     | opas                 | totta        |
-| kuore           | Kuore                           | leonardcser (OSS)        | koko           | mukautettu           | väärä        |
-| pi              | Pi (pi-koodausagentti)          | M. Zechner (OSS)         | koko           | mukautettu           | väärä        |
-| grok rakentaa   | Grok Build                      | xAI                      | koko           | mukautettu           | väärä        |
-| murskata        | Murskata                        | OSS (viehätys)           | koko           | mukautettu           | väärä        |
-| qwen            | Qwen koodi                      | Alibaba                  | koko           | opas                 | totta        |
-| openclaude      | OpenClaude                      | Gitlawb (OSS)            | koko           | opas                 | väärä        |
-| zed             | Zed                             | Zed Industries           | koko           | opas                 | väärä        |
-| kohdistin       | Cursor                          | Mikä tahansa pallo       | ei yhtään      | opas                 | väärä        |
-| antigravitaatio | Antigravity                     | Google                   | ei yhtään      | mitm                 | väärä        |
-| hermes          | Hermes                          | Nous Research            | ei yhtään      | opas                 | väärä        |
-| kiro            | Kiro AI                         | Amazon                   | ei yhtään      | mitm                 | väärä        |
-| mukautettu      | Mukautettu CLI                  | —                        | koko           | räätälöity rakentaja | väärä        |
+| id           | nimi                    | toimittaja            | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | --------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic             | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI                | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                  | none           | custom         | false        |
+| cline        | Cline                   | OSS (ent. Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org              | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)             | full           | guide          | false        |
+| continue     | Continue                | continue.dev          | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)     | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ           | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)        | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)     | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)          | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ent. SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI            | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS             | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere             | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)     | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)      | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                   | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)           | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba               | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)         | full           | guide          | false        |
+| zed          | Zed                     | Zed Industries        | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere             | none           | guide          | false        |
+| antigravity  | Antigravity             | Google                | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research         | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon                | none           | mitm           | false        |
+| custom       | Mukautettu CLI          | —                     | full           | custom-builder | false        |
 
-Työkaluissa, joissa on `baseUrlSupport: "partial"` kojelautakortissa on merkki "⚠ Base URL parcial".
+Työkalujen, joiden `baseUrlSupport`-arvo on `"partial"`, hallintapaneelikortissa näkyy tunnus "⚠ Osittainen perus-URL".
 ---
 
-## 2. CLI Agents Catalog (11 työkalua)
+## 2. CLI-agenttiluettelo (11 työkalua)
 
-Autonomiset agentit, jotka esiintyvät `/dashboard/cli-agents`:
+Autonomiset agentit, jotka näkyvät näkymässä `/dashboard/cli-agents`:
 
-| id             | nimi           | myyjä                    | baseUrlSupport | acpSpawnable |
-| -------------- | -------------- | ------------------------ | -------------- | ------------ |
-| hermes-agentti | Hermes agentti | Nous Research            | koko           | väärä        |
-| avoin kynsi    | OpenClaw       | OSS (P. Steinberger)     | koko           | totta        |
-| hanhi          | Hanhi          | Block / Linux Foundation | koko           | totta        |
-| tulkki         | Avaa Tulkki    | OSS                      | koko           | totta        |
-| loimi          | Warp AI        | Warp Inc.                | osittainen     | totta        |
-| agentti-kansi  | Agentti Deck   | ashgoplani (OSS)         | koko           | väärä        |
-| omp            | Voi Pi         | OSS                      | koko           | totta        |
-| letta          | Letta CLI      | Letta                    | koko           | väärä        |
-| pääagentti     | Pääagentti     | Ensisijainen äly (OSS)   | koko           | väärä        |
-| 5 sukellusta   | 5 sukellusta   | OSS (5 sukellus-ai)      | koko           | väärä        |
-| miksi-koodit   | WhyCodes       | Miksi Corporation        | koko           | väärä        |
+| id           | nimi             | toimittaja               | baseUrl-tuki | ACP-käynnistettävä |
+| ------------ | ---------------- | ------------------------ | ------------ | ------------------ |
+| hermes-agent | Hermes Agent     | Nous Research            | full         | false              |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full         | true               |
+| goose        | Goose            | Block / Linux Foundation | full         | true               |
+| interpreter  | Open Interpreter | OSS                      | full         | true               |
+| warp         | Warp AI          | Warp Inc.                | partial      | true               |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full         | false              |
+| omp          | Oh My Pi         | OSS                      | full         | true               |
+| letta        | Letta CLI        | Letta                    | full         | false              |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full         | false              |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full         | false              |
+| whycodes     | WhyCodes         | Why Corporation          | full         | false              |
 
 ---
 
@@ -220,22 +223,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Uusien työkalujen asetuskäsittelijät
+## 6. Uusien työkalujen asetusten käsittelijät
 
-Uusilla `configType: "custom"` työkaluilla on omat asetukset API -reitit:
+Uusilla työkaluilla, joiden `configType: "custom"`, on omat asetusten API-reitit:
 
-| Reitti                                      | Työkalu                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url lippu)                                                       |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, perintö)                                        |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ensisijainen + n vanha `~/.deepseek` synkronointi) |
-| `POST /api/cli-tools/smelt-settings`        | Kuore                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Pi-koodausagentti (`~/.pi/agent/models.json`, `providers.omniroute`)           |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
-| `POST /api/cli-tools/qwen-settings`         | Qwen koodi (`~/.qwen/settings.json` + lle oma `.env` avain)                    |
+| Reitti                                      | Työkalu                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                                  |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url-lippu)                                                                 |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, vanha)                                                    |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ensisijainen + vanhan `~/.deepseek`-hakemiston synkronointi) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi-koodausagentti (`~/.pi/agent/models.json`, `providers.omniroute`)                     |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                                    |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + erillinen `.env`-avain)                             |
 
-Kaikki reitit käyttävät `sanitizeErrorMessage()` virhevastauksiin (kova sääntö 12).
+Kaikki reitit käyttävät virhevastauksissa `sanitizeErrorMessage()`-funktiota (ehdoton sääntö #12).
 
 ---
 
@@ -294,19 +297,19 @@ Täydelliset PT-BR- ja EN-käännökset sisältyvät toimitukseen. 39 muuta kiel
 
 ## 9. Pika-aloitus
 
-### Vaihe 1 — Hanki OmniRoute API -avain
+### Vaihe 1 — Hanki OmniRoute-API-avain
 
-1. Avaa `/dashboard/api-manager` →** Luo API avain**
+1. Avaa `/dashboard/api-manager` → **Luo API-avain**
 2. Anna sille nimi (esim. `cli-tools`) ja valitse kaikki käyttöoikeudet
-3. Kopioi avain — jota tarvitset jokaiseen alla olevaan CLI hen
+3. Kopioi avain — tarvitset sitä kaikissa alla olevissa CLI-työkaluissa
 
 > Avaimesi näyttää tältä: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Vaihe 2 — Asenna CLI Tools
+### Vaihe 2 — Asenna CLI-työkalut
 
-Kaikki npm-pohjaiset työkalut vaativat Node.js 22.22.2 + tai 24.x:
+Kaikki npm-pohjaiset työkalut edellyttävät Node.js-versiota 22.22.2+ tai 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -327,57 +330,58 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (käynnistettävissä komennolla `omniroute run gemini` → /v1beta-rajapinta)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-based
+cargo install smelt  # Rust-pohjainen
 
-# Pi coding agent
+# Pi-koodausagentti
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# see https://github.com/1jehuang/jcode for install
+# katso asennusohjeet osoitteesta https://github.com/1jehuang/jcode
 ```
 
 ---
 
 ### Vaihe 3 — Määritä hallintapaneelin kautta
 
-1. Mene `http://localhost:20128/dashboard/cli-code`
+1. Siirry osoitteeseen `http://localhost:20128/dashboard/cli-code`
 2. Etsi työkalusi ruudukosta
-3. Napsauta korttia avataksesi työkalun tietosivun
-4. Valitse API -avain ja perus- URL
-5. Napsauta** Käytä Config** tai kopioi manuaalinen konfigurointikatkelma
+3. Avaa työkalun tietosivu napsauttamalla korttia
+4. Valitse API-avaimesi ja perus-URL-osoite
+5. Napsauta **Ota määritykset käyttöön** tai kopioi manuaalinen määrityskatkelma
 
 ---
 
-### Vaihe 4 — Aseta globaalit ympäristömuuttujat
+### Vaihe 4 — Aseta yleiset ympäristömuuttujat
 
 ```bash
-# OmniRoute Universal Endpoint
+# OmniRouten yleinen päätepiste
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
+# Gemini CLI lukee GOOGLE_GEMINI_BASE_URL-arvon JUURESTA (sen SDK lisää itse /v1beta/...-osan)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> a** etäpalvelin** korvaa `localhost:20128` palvelimella IP tai verkkotunnuksella, esim. `http://<your-server-ip>:20128`.
+> Jos käytät **etäpalvelinta**, korvaa `localhost:20128` palvelimen IP-osoitteella tai verkkotunnuksella,
+> esimerkiksi `http://<your-server-ip>:20128`.
 
 ---
 
-### Vaihe 4 — Määritä jokainen työkalu
+### Vaihe 4 — Määritä kukin työkalu
 
-#### Claude koodi
+#### Claude Code
 
 ```bash
-# Create ~/.claude/settings.json:
+# Luo ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,15 +392,18 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Käytä yhdistettyä Anthropic yhdyskäytävän juuria Claude koodille. Älä liitä `/v1` tähän.
+Käytä Claude Codessa yhdistetyn Anthropic-yhdyskäytävän juuriosoitetta. Älä lisää tähän `/v1`-osaa.
 
-**Testata:** `claude "say hello"`
+**Testi:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Nykyaikainen Codex (v0.137 +) lukee vain `~/.codex/config.toml` — vanha `config.yaml` kuuluu vanhaan npm CLI ään ja jätetään hiljaa huomiotta. API avain pysyy `OMNIROUTE_API_KEY` ympäristömuuttujassa (`env_key`), ei koskaan tiedoston sisällä:
+Moderni Codex (v0.137+) lukee ainoastaan tiedoston `~/.codex/config.toml` — vanha
+`config.yaml` kuuluu aiemmalle npm CLI -versiolle, ja se ohitetaan ilman ilmoitusta. API-avain
+säilytetään `OMNIROUTE_API_KEY`-ympäristömuuttujassa (`env_key`), eikä koskaan
+tiedoston sisällä:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -411,9 +418,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Täysi viite (profiilit, `wire_api`, kontekstiikkunat): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Täydellinen viite (profiilit, `wire_api`, konteksti-ikkunat): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Testata:** `codex "what is 2+2?"`
+**Testi:** `codex "what is 2+2?"`
 
 ---
 
@@ -442,17 +449,18 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Testata:** `opencode`
+**Testi:** `opencode`
 
-> Käytä `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` ajattelumuunnelmien lähettämiseen.
+> Lähetä päättelyvariantteja komennolla `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
 
 ---
 
-#### Pi-koodausagentti
+#### Pi Coding Agent
 
-Asenna virallinen Pi Coding Agent -paketti `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` kanssa. Pi lukee mukautettuja palveluntarjoajia `~/.pi/agent/models.json`:stä; aseta `PI_CODING_AGENT_DIR` siirtämään koko agenttihakemistoa. Kojelauta seuraa tätä ohitusta. Pi ei löydä malleja mukautetuista päätepisteistä, joten OmniRoute kirjoittaa valitun mallin `models[]` ksi käyttämällä Pi:n `openai-completions` API ja OmniRoute OpenAI-yhteensopivaa `/v1` päätepistettä.
+Asenna virallinen Pi Coding Agent -paketti komennolla `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi lukee mukautetut palveluntarjoajat tiedostosta `~/.pi/agent/models.json`; aseta `PI_CODING_AGENT_DIR` absoluuttiseksi poluksi (tai `~`-alkuiseksi poluksi) siirtääksesi koko agenttihakemiston. Hallintapaneeli noudattaa tätä ohitusta. Pi ei löydä malleja mukautetuista päätepisteistä, joten OmniRoute kirjoittaa valitun mallin kenttään `models[]` käyttäen Pin `openai-completions`-API:a ja OmniRouten OpenAI-yhteensopivaa `/v1`-päätepistettä.
 
-sisään**CLI Työkalut → Pi** , valitse päätepiste, API -avain ja malli, tarkista palveluntarjoajan esikatselu ja käytä sitten. Esikatselu on palveluntarjoajan fragmentti: yhdistä `providers.omniroute` olemassa olevaan `models.json`, kun määrität Pi:n manuaalisesti, jotta muut palveluntarjoajat ja asetukset pysyvät ennallaan.
+Valitse kohdassa **CLI Tools → Pi** päätepiste, API-avain ja malli, tarkista palveluntarjoajan esikatselu ja ota asetukset käyttöön. Esikatselu on palveluntarjoajan fragmentti: yhdistä `providers.omniroute` nykyiseen `models.json`-tiedostoosi määrittäessäsi Pin käsin, jotta muut palveluntarjoajat ja asetukset säilyvät ennallaan.
 
 ```json
 {
@@ -469,19 +477,19 @@ sisään**CLI Työkalut → Pi** , valitse päätepiste, API -avain ja malli, ta
 }
 ```
 
-Pi lataa `models.json` uudelleen, kun avaat `/model`. Testaa määritetty reitti valitsemillasi palveluntarjoajan tunnuksella ja mallitunnuksella:
+Pi lataa `models.json`-tiedoston uudelleen, kun avaat `/model`-näkymän. Testaa määritetty reitti valitsemallasi palveluntarjoajan ja mallin tunnuksella:
 
 ```bash
 pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
 ```
 
-Viitteet: [Pi-mallit ja mukautetut toimittajat](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi-ympäristömuuttujat](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi-asennusohjeet](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+Viitteet: [Pin mallit ja mukautetut palveluntarjoajat](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pin ympäristömuuttujat](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pin asennusohjeet](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 
-#### Cline (CLI tai VS koodi)
+#### Cline (CLI tai VS Code)
 
-**CLI tila:**
+**CLI-tila:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -493,21 +501,22 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS -kooditila:** Cline laajennusasetukset → API Palveluntarjoaja: `OpenAI Compatible` → Perus URL: `http://localhost:20128/v1`
+**VS Code -tila:**
+Cline-laajennuksen asetukset → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-Tai käytä OmniRoute kojelautaa →**CLI Tools → Cline → Apply Config** .
+Vaihtoehtoisesti käytä OmniRoute-hallintapaneelia → **CLI-työkalut → Cline → Ota määritykset käyttöön**.
 
 ---
 
-#### KiloCode (CLI tai VS koodi)
+#### KiloCode (CLI tai VS Code)
 
-**CLI tila:**
+**CLI-tila:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS -koodin asetukset:**
+**VS Code -asetukset:**
 
 ```json
 {
@@ -516,13 +525,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Tai käytä OmniRoute kojelautaa →**CLI Tools → KiloCode → Apply Config** .
+Vaihtoehtoisesti käytä OmniRoute-hallintapaneelia → **CLI-työkalut → KiloCode → Ota määritykset käyttöön**.
 
 ---
 
-#### Jatka (VS Code Extension)
+#### Continue (VS Code -laajennus)
 
-Muokkaa `~/.continue/config.yaml`:
+Muokkaa tiedostoa `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -534,20 +543,20 @@ models:
     default: true
 ```
 
-Käynnistä VS -koodi uudelleen muokkauksen jälkeen.
+Käynnistä VS Code uudelleen muokkaamisen jälkeen.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Käytä tätä, kun VS Code Insiders on määritetty mukautetuille päätepistemalleille ja haluat OmniRoute toimivan ilman mukautettua otsikkokenttää.
+Käytä tätä, kun VS Code Insiders on määritetty käyttämään mukautettuja päätepistemalleja ja haluat OmniRouten toimivan ilman mukautettua otsakekenttää.
 
 **Suositeltu sijainti:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Esimerkki tokenisoidun OmniRoute -aliaksen käytöstä:**
+**Esimerkki tokenisoidun OmniRoute-aliaksen käytöstä:**
 
 ```json
 [
@@ -569,28 +578,29 @@ Käytä tätä, kun VS Code Insiders on määritetty mukautetuille päätepistem
 ]
 ```
 
-**Huomautuksia:**
+**Huomautukset:**
 
-- Korvaa `sk-your-omniroute-key` OmniRoute:ssä luodulla API -avaimella.
-- `url` kentän tulee osoittaa `/api/v1/vscode/{token}/chat/completions`.
-- `modelsUrl` kentän tulee osoittaa `/api/v1/vscode/{token}/models`.
-- Suosi normaalia `/v1` + Bearer header -kulkua, kun asiakas tukee mukautettuja otsikoita.
-- URL-osoitteisiin upotetut tunnukset ovat yhteensopivuuden varaosia, ja ne voivat näkyä editorin lokeissa tai välityspalvelinhistoriassa.
+- Korvaa `sk-your-omniroute-key` OmniRoutessa luodulla API-avaimella.
+- `url`-kentän tulee osoittaa osoitteeseen `/api/v1/vscode/{token}/chat/completions`.
+- `modelsUrl`-kentän tulee osoittaa osoitteeseen `/api/v1/vscode/{token}/models`.
+- Suosi tavallista `/v1` + Bearer-otsake -menetelmää, kun asiakasohjelma tukee mukautettuja otsakkeita.
+- URL-osoitteeseen upotetut tokenit ovat yhteensopivuutta varten tarkoitettu vararatkaisu, ja ne saattavat näkyä editorin lokeissa tai välityspalvelimen historiassa.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Login to your AWS/Kiro account:
+# Kirjaudu AWS/Kiro-tilillesi:
 kiro-cli login
 
-# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
-# Use kiro-cli alongside OmniRoute for other tools.
+# CLI käyttää omaa todennustaan — OmniRoutea ei tarvita itse Kiro CLI:n taustapalveluksi.
+# Käytä kiro-cli:tä OmniRouten rinnalla muita työkaluja varten.
 kiro-cli status
 ```
 
-varten**Kiro IDE** työpöytäsovellus, käytä MITM -päätepistettä, jonka OmniRoute paljastaa kohdassa `/dashboard/cli-tools → Kiro`.
+Käytä **Kiro IDE** -työpöytäsovelluksessa OmniRouten tarjoamaa MITM-päätepistettä
+kohdassa `/dashboard/cli-tools → Kiro`.
 
 ---
 

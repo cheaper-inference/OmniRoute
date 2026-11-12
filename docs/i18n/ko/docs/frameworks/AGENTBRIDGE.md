@@ -20,7 +20,7 @@ IDE 에이전트(예: GitHub Copilot, Cursor, Claude 코드)가 API 호출을 �
 
 이는 다음을 수행할 수 있음을 의미합니다.
 
-- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 381 공급자로 리디렉션하세요.
+- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 388 공급자로 리디렉션하세요.
 - **모델 매핑 적용** : `gemini-3-flash` → `claude-sonnet-4.7` 핸들러 수준에서 투명하게 수행됩니다.
 - **모든 에이전트 트래픽 관찰** : 차단된 모든 요청은 [Traffic Inspector](./TRAFFIC_INSPECTOR.md) 에 게시됩니다.
 - **OmniRoute 탄력성 적용** : IDE 에이전트 트래픽에 대한 콤보 라우팅, 회로 차단기, 폴백 및 비용 추적 작업도 수행됩니다.
@@ -534,7 +534,7 @@ Trae는 비교적 새로운 AI 코딩 어시스턴트입니다. 핸들러를 구
 3. 인증 메커니즘 확인
 4. 이용 약관과 API 검색 가능성을 기준으로 진행 여부 평가
 
-조사가 완료될 때까지 대시보드의 Trae 카드에는 "조사 중" 배지와 "실현 가능성 보고" 링크가 표시됩니다. `src/mitm/handlers/trae.ts`의 핸들러 스텁은 구조화된 `아직 구현되지 않음` 오류를 발생시킵니다.
+조사가 완료될 때까지 대시보드의 Trae 카드에는 "조사 중" 배지와 "실현 가능성 보고" 링크가 표시됩니다. `src/mitm/handlers/trae.ts`의 핸들러 스텁은 구조화된 `Not yet implemented` 오류를 발생시킵니다.
 
 ### 백로그 에이전트(MITM 필요 — 사용자 지정 기본 URL 미지원)
 

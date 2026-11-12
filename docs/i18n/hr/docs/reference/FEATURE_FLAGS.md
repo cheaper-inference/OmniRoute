@@ -44,7 +44,7 @@ Boolean zastavica smatra se **omogućenom** kada je njezina efektivna vrijednost
 
 ## Katalog zastava
 
-120 zastava u 6 kategorija.** Zadano** je zadana definicija — vrijednost koja se koristi kada nije prisutna niti DB nadjačavanje niti varijabla okruženja.
+121 zastava u 6 kategorija.** Zadano** je zadana definicija — vrijednost koja se koristi kada nije prisutna niti DB nadjačavanje niti varijabla okruženja.
 
 ### Sigurnost (11)
 
@@ -115,7 +115,7 @@ Boolean zastavica smatra se **omogućenom** kada je njezina efektivna vrijednost
 
 Kada je `UNPRICED_USAGE_BUDGET_POLICY` eksplicitno konfiguriran (DB nadjačavanje prije okruženja), ima prednost nad `USAGE_LIMIT_IGNORE_UNPRICED`. Bez eksplicitne enum vrijednosti, uzvodno boolean opt-out odabire `count_as_zero`; inače je zadana vrijednost `fail_closed`. Nevažeće enum vrijednosti i nečitljiva pohrana zastavice značajke nisu zatvorena. Niti jedno isključivanje ne umanjuje potrošnju po cijeni niti neuspjelo traženje cijene. Provedba i izvješće administratora rješavaju istu učinkovitu politiku.
 
-### Vrijeme izvođenja (57)
+### Vrijeme izvođenja (58)
 
 | Ključ                                          | Tip        | Zadano  | Ponovno pokretanje | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------- | ---------- | ------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Kada je `UNPRICED_USAGE_BUDGET_POLICY` eksplicitno konfiguriran (DB nadjačavanj
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | Booleov    | `false` |                    | Prestanite nuditi i prosljeđivati `max` pokušaj obrazloženja za Cursor Grok 4.7 (#17386): dokumenti Cursor-a navode samo low/medium/high/xhigh, tako da rezervni alias `grok-4.7-max` nestaje iz kataloga i zahtjev za `max` naporom šalje se bez parametra napor. Isključeno prema zadanim postavkama: `max` ostaje ponuđen i proslijeđen, budući da ga je živa AgentService/Run sonda prihvatila.                                                                                                                                                                                                                                                                                                                                   |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | Booleov    | `false` |                    | Pošaljite Responses keepalive kao prazan redak umjesto response.in_progress događaja, tako da sintetička snimka nikada ne može zamijeniti pravi odgovor u službenom SDK. Prazna linija ne šalje SSE događaj, tako da se nadzorni pas klijenta koji se resetira samo na događaje ne bi resetirao tijekom duge tihe faze. Isključeno prema zadanim postavkama: mjerači vremena šalju specificirano važeći događaj response.in_progress.                                                                                                                                                                                                                                                                                                 |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | Booleov    | `false` |                    | U statistici predmemorije kompresije računajte komprimirani zahtjev pružatelju automatskog predmemoriranja prefiksa (OpenAI, Codex, Azure ili prilagođena veza koja deklarira brzo predmemoriranje s uklanjanjem markera) kao procijenjeni pogodak predmemorije čak i bez `cache_control` markera (#17114). Procjena je signal prihvatljivosti predmemorije, a ne promatrani pogodak, tako da se prijavljena stopa pogodaka za te pružatelje kreće prema 100%. Isključeno prema zadanim postavkama: samo zahtjev koji nosi `cache_control` oznake pružatelju predmemoriranja računa se kao procijenjeni pogodak, tako da pružatelji automatskih prefiksa nastavljaju izvješćivati 0.                                                  |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | Booleov    | `false` |                    | Omogućuje automatskom web pretraživanju bez izričitog `provider` da koristi povezani račun Codex (ChatGPT) putem `codex-search`: kao posljednju opciju prije pružatelja bez ključa kada nijedan pružatelj s vjerodajnicama nije upotrebljiv, te kao rezervu pri pogrešci (#17933). Svako pretraživanje troši kvotu pretplate i traje približno 10–40 s. Zadano isključeno: `codex-search` pokreće se samo kada ga zahtjev izričito navede.                                                                                                                                                                                                                                                                                            |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Vraća svaku oznaku s učinkovitom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

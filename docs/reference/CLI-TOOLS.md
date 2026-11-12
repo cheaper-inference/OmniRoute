@@ -12,7 +12,7 @@ OmniRoute integrates with three categories of CLI tools spread across three dedi
 
 | Page           | Route                   | Concept                                                                   | Count        |
 | -------------- | ----------------------- | ------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Coding tools you point at OmniRoute (Client → CLI → OmniRoute → Provider) | 26           |
+| **CLI Code's** | `/dashboard/cli-code`   | Coding tools you point at OmniRoute (Client → CLI → OmniRoute → Provider) | 28           |
 | **CLI Agents** | `/dashboard/cli-agents` | Autonomous agents you point at OmniRoute (same flow, broader scope)       | 11           |
 | **ACP Agents** | `/dashboard/acp-agents` | CLIs that OmniRoute spawns as backend via stdio/ACP (reverse flow)        | see registry |
 
@@ -498,7 +498,7 @@ EOF
 
 Install the official Pi Coding Agent package with `npm install -g --ignore-scripts
 @earendil-works/pi-coding-agent`. Pi reads custom providers from
-`~/.pi/agent/models.json`; set `PI_CODING_AGENT_DIR` to move the whole agent directory.
+`~/.pi/agent/models.json`; set `PI_CODING_AGENT_DIR` to an absolute path (or a `~`-prefixed path) to move the whole agent directory.
 The dashboard follows that override. Pi does not discover models from custom endpoints,
 so OmniRoute writes the selected model in `models[]` using Pi's `openai-completions` API
 and the OmniRoute OpenAI-compatible `/v1` endpoint.

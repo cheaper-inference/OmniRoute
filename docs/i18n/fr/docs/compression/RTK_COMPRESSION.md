@@ -132,7 +132,7 @@ RTK regroupe les lignes dupliquées à deux niveaux indépendants :
    `collapsePatterns`. Schéma : `deduplicate: z.boolean().default(false)` dans
    `open-sse/services/compression/engines/rtk/filterSchema.ts`.
 2. **`deduplicateThreshold` à l’échelle du moteur (valeur par défaut : `3`).** Une fois tous les filtres exécutés, le moteur regroupe
-   toute séquence d’au moins `deduplicateThreshold` lignes consécutives identiques dans l’ensemble du résultat
+   toute séquence d’au moins `>= deduplicateThreshold` lignes consécutives identiques dans l’ensemble du résultat
    (`deduplicateRepeatedLines`, appliqué dans `engines/rtk/index.ts`). La valeur est limitée à l’intervalle 2–100 lors de
    la normalisation.
 

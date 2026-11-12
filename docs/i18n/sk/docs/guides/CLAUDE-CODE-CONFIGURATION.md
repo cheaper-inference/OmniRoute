@@ -27,25 +27,75 @@ omniroute launch --profile glm52  # Claude Code používajúci glm/glm-5.2 cez O
 
 ## Ako sa Claude Code pripája k bráne
 
-Claude kód hovorí**Anthropic Správy API** a ukazuje na vlastný koncový bod s premennými prostredia (nemá príznak `--base-url` ):
+Claude Code komunikuje prostredníctvom **Anthropic Messages API** a na vlastný
+koncový bod sa nasmeruje pomocou premenných prostredia (nemá príznak `--base-url`):
 
-| Variabilné                                   | Účel                                                                                       |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Koreň brány URL ( kód Claude sa pridáva `/v1/messages`).** Žiadna prípona `/v1`.**         |
-| `ANTHROPIC_AUTH_TOKEN`                       | Odoslané ako `Authorization: Bearer …` — použite váš prístupový token OmniRoute / kľúč API |
-| `ANTHROPIC_API_KEY`                          | Alternatíva: odoslaná ako `x-api-key`. Ak sú obe nastavené, `ANTHROPIC_AUTH_TOKEN` vyhráva |
-| `ANTHROPIC_MODEL`                            | Vynútiť konkrétny model (prepíše predvolený výber `/model` )                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → natívny výber `/model` uvádza modely `claude*`/`anthropic*` od `/v1/models`          |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Obmedzenie výstupných tokenov na odpoveď (napr. `65536`)                                   |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prahová hodnota tokenu pre automatické zhutňovanie                                         |
+| Premenná                                     | Účel                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Koreňová URL brány (Claude Code pridá `/v1/messages`). **Bez prípony `/v1`.**                     |
+| `ANTHROPIC_AUTH_TOKEN`                       | Odosiela sa ako `Authorization: Bearer …` — použite svoj prístupový token / API kľúč OmniRoute    |
+| `ANTHROPIC_API_KEY`                          | Alternatíva: odosiela sa ako `x-api-key`. Ak sú nastavené obe, `ANTHROPIC_AUTH_TOKEN` má prednosť |
+| `ANTHROPIC_MODEL`                            | Vynúti konkrétny model (prepíše predvolenú možnosť vo výbere `/model`)                            |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → natívny výber `/model` zobrazí modely `claude*`/`anthropic*` z `/v1/models`                 |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Obmedzí počet výstupných tokenov na odpoveď (napr. `65536`)                                       |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prahová hodnota tokenov pre automatickú kompakciu                                                 |
 
-> Prečítajú sa premenné env** raz pri spustení** — reštartujte kód Claude po ich zmene.
+> Premenné prostredia sa načítajú **iba raz pri spustení** — po ich zmene reštartujte Claude Code.
 
-Pre poverenie, ktoré sa otáča namiesto pevného reťazca, nastavte `apiKeyHelper` v `~/.claude/settings.json` na príkaz, ktorý vytlačí aktuálne poverenie na stdout. Kód Claude ukladá svoj výstup štandardne na päť minút (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to prepíše) a odošle hodnotu v `Authorization: Bearer` aj `x-api-key`. Skript musí vytlačiť poverenie a nič iné — banner vedľa neho zlyhá pomocníka na v2.1.227 +.
+Pri prihlasovacom údaji, ktorý sa obmieňa namiesto pevného reťazca, nastavte `apiKeyHelper` v `~/.claude/settings.json` na príkaz vypisujúci aktuálny údaj na stdout. Claude Code štandardne ukladá výstup do vyrovnávacej pamäte na päť minút (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` tento čas prepíše) a posiela hodnotu v `Authorization: Bearer` aj v `x-api-key`. Skript musí vypísať iba prihlasovací údaj — dodatočný úvodný text spôsobí zlyhanie pomocníka vo v2.1.227+.
 
-Takto funguje Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` vytlačí krátkodobý prístupový token Entra, ktorý OmniRoute overí namiesto kľúča API. Pozri [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Takto funguje Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` vypíše krátkodobý prístupový token Entra, ktorý OmniRoute overí namiesto kľúča API. Pozrite si [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` nastaví všetko za vás: vyrieši základný token URL + z aktívneho kontextu (takže `omniroute connect <vps>` a potom `omniroute launch` jednoducho funguje), skontroluje stav servera a vykoná `claude`.
+`omniroute launch` nastaví všetky tieto premenné za vás: z aktívneho kontextu
+zistí základnú URL a token (takže po `omniroute connect <vps>` stačí použiť
+`omniroute launch`), skontroluje stav servera a spustí `claude` prostredníctvom `exec`.
+
+---
+
+## Atribúcia použitia: relácie a projekty
+
+OmniRoute zoskupuje požiadavky každého kľúča API do **sedenia agentov** a záznamy, ktoré **projektu** každá relácia pracovala (tabuľka `agent_sessions` ), takže využitie a náklady môžu byť vykazované na člena tímu, na projekt a na reláciu.
+
+Čo sa zaznamenáva bez akéhokoľvek nastavenia klienta:
+
+| Pole    | Zdroj                                                                                                                                                                 |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Relácia | Hlavička `x-claude-code-session-id` (rovnaká hodnota ako `metadata.user_id.session_id`), stabilná na reláciu                                                          |
+| Projekt | Riadok `Primary working directory:` Claude kód vysiela vo svojom prostredí správu; priečinky pracovného stromu pod `.claude/worktrees/` sa rozlíšia na názov úložiska |
+| Pobočka | `Current branch:` zo stavu git Claude kód odosiela s prvou správou                                                                                                    |
+| Klient  | `user-agent` (`claude-cli/<version>`)                                                                                                                                 |
+
+Codex (`<environment_context><cwd>`) a OpenCode (`x-opencode-session`) sa rozpoznávajú rovnakým spôsobom. Kľúče s **no-log** povolené ponechať iba id relácie a polia projektu dodané hlavičkou; neukladá sa nič načítané z výzvy (cesta, vetva).
+
+### Explicitné pomenovanie projektu (odporúča sa)
+
+Pracovný adresár sa medzi strojmi líši, takže rovnaké úložisko sa môže zobraziť pod rôznymi cestami. Namiesto toho pošlite projekt explicitne: Kód Claude pridá všetky hlavičky uvedené v `ANTHROPIC_CUSTOM_HEADERS` ku každej modelovej požiadavke a OmniRoute prečíta dve z nich:
+
+| Hlavička                   | Hodnota                                                                     |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Názov projektu, napr. `omniroute`                                           |
+| `x-omniroute-project-repo` | Normalizované diaľkové ovládanie, napr. `github.com/diegosouzapw/OmniRoute` |
+
+Obidve sa čítajú iba kvôli priradeniu; nikdy sa nepreposielajú poskytovateľovi upstream.
+
+`ANTHROPIC_CUSTOM_HEADERS` sa načíta raz pri spustení a súbory nastavení ukladajú doslovné hodnoty, takže ich vypočítajte pri spustení kódu Claude. Pridajte to do `~/.zshrc` alebo `~/.bashrc` a pokračujte v spúšťaní `claude` z priečinka projektu:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Výraz `sed` odstráni všetky poverenia vložené do vzdialeného URL. Rozšírenia IDE spúšťajú kód Claude bez vášho shellu, takže ich relácie spadajú späť do pracovného adresára.
 
 ---
 

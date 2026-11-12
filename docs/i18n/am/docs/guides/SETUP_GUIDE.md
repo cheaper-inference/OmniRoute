@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ዳሽቦርዱ በ`http://localhost:20128` ይከፈታል፣ የAPI መሠረታዊ URL ደግሞ `http://localhost:20128/v1` ነው።
+ዳሽቦርድ `http://localhost:20128` ላይ ይከፈታል እና API ቤዝ URL `http://localhost:20128/v1` ነው።
+
+> **npm ተጠቃሚዎች፡-** npm የመጫኛ ስክሪፕቶች እንደታገዱ ካስጠነቀቀ (ለምሳሌ `omniroute`፣ `better-sqlite3`)፣ [መላ መፈለግን ተመልከት — npm install-scripts ታግዷል](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ።
 
 ### pnpm
 

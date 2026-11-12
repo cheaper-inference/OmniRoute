@@ -296,16 +296,16 @@ Səhifənin mürəkkəbliyindən asılı olaraq brauzer anlıq görüntüsü al�
 
 ---
 
-## Sıxılma kombinasiyaları
+## Sıxılma birləşmələri
 
-Sıxılma kombinasiyaları marşrutlaşdırma kombinasiyalarına təyin edilə bilən adlandırılmış sıxılma profilləridir:
+Sıxılma kombinləri marşrutlaşdırıcı kombinələrə təyin edilə bilən sıxılma profilləri adlanır:
 
-- `compression_combos`: rejimi, emal konveyerini, RTK konfiqurasiyasını, dil konfiqurasiyasını və standart göstəricini saxlayır
+- `compression_combos`: rejimi, boru xəttini, RTK konfiqurasiyasını, dil konfiqurasiyasını və defolt markeri saxlayır
 - `compression_combo_assignments`: sıxılma kombinasiyasını marşrutlaşdırma kombinasiyası ilə əlaqələndirir
-- icra mühiti inteqrasiyası ümumi kombinasiya əvəzləmələrindən əvvəl təyin edilmiş sıxılma kombinasiyasını müəyyən edir
-- analitikaya `compression_combo_id` və `engine` daxildir
+- iş vaxtı inteqrasiyası təyin edilmiş sıxılma kombinasiyasını ümumi kombin ləğv etməzdən əvvəl həll edir
+- analitika `compression_combo_id` və `engine` daxildir
 
-İdarə panelindəki yeri: `İdarə paneli -> Kontekst və keş -> Sıxılma kombinasiyaları`.
+İdarə panelinin səthi: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## İlkin şərtlər / operator təlimatı (CCR & session-dedup)
 
@@ -394,7 +394,7 @@ Axtarış aləti hazırda `omniroute_ccr_retrieve` adlanır ( `omniroute_` prefi
 
 ### Sessiyanın həyat dövrü
 
-Streamable-HTTP seansları boş qalır və server onları yığır; boş pəncərə `OMNIROUTE_MCP_SESSION_IDLE_MS` tərəfindən təyin edilir (defolt 5 dəqiqə; adla istinad edilir, sabit kodlaşdırılmış dəyər deyil, ona görə də bu səhifə dəyişdikdə sürüşmür). Boş qalan sessiyanın simptomu `Unknown Mcp-Session-Id` — ilə HTTP 404-dür, çarə sessiyanı yenidən qoşmaq və ya yenidən başlatmaqdır,** yox** düyməni fırlatmaq, əhatə dairəsini dəyişdirmək və ya alətin adını dəyişmək üçün.
+Streamable-HTTP seansları boş qalır və server onları yığır; boş pəncərə `open-sse/mcp-server/httpTransport.ts`-də `DEFAULT_MCP_SESSION_IDLE_MS` yə qayıdaraq `OMNIROUTE_MCP_SESSION_IDLE_MS` tərəfindən konfiqurasiya edilir. Boş qalan sessiyanın simptomu `Unknown Mcp-Session-Id` — ilə HTTP 404-dür, çarə sessiyanı yenidən qoşmaq və ya yenidən başlatmaqdır,**yox** düyməni fırlatmaq, əhatə dairəsini dəyişdirmək və ya alətin adını dəyişmək üçün.
 
 ## API interfeysi
 

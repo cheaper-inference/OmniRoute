@@ -4,38 +4,35 @@
 
 ---
 
-## İcmal
+## Ümumi baxış
 
-Redis OmniRoute-da **ixtiyari, yumşaq asılılıqdır** — Redis əlçatan olmadıqda tətbiq işləməyə davam edir və funksionallığı uyğun şəkildə azaldır (yaddaşdaxili
-ehtiyat mexanizmlərindən istifadə edir). İstehsal mühitində Redis-in tənzimlənməsi dörd fərqli
-iş yükü üçün gecikməni azaldır:
+Redis bir **isteğe bağlı, yumşaq asılılıq** OmniRoute — də Redis mövcud olmadıqda proqram zərif şəkildə pisləşir (yaddaşdaxili ehtiyatlar). İstehsalda Redis tənzimlənməsi dörd fərqli iş yükü üçün gecikməni azaldır:
 
-| İş yükü                             | İdarəedici                    | Klient fabriki                                               | Açar nümunəsi                                                    |
-| ----------------------------------- | ----------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| Sorğu tezliyinin məhdudlaşdırılması | `rateLimiter.ts`              | `getRedisClient()` — tənbəl başladılan `ioredis` singleton-u | `<prefix>rl:*` Lua ilə atomik sorğu tezliyi limiti pəncərələri   |
-| Autentifikasiya keşi                | `apiKeys.ts`                  | `rateLimiter` klientindən təkrar istifadə edir               | TTL ilə `<prefix>auth:api_key:<sha256>`                          |
-| Kvota anbarı                        | `redisQuotaStore.ts`          | Ayrı `getRedisClient(url)` singleton-u                       | `<prefix>quota:*`, hər instansiya üçün konfiqurasiya edilə bilər |
-| İlkin qızdırma dövrə kəsicisi       | `redisCircuitBreakerStore.ts` | `circuitBreakerFactory.ts` daxilində ayrıca klient           | `<prefix>warmup:cb:<connectionId>`                               |
+| İş yükü               | Sürücü                        | Müştəri Fabriki                                      | Açar nümunəsi                                              |
+| --------------------- | ----------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
+| Məhdudiyyət dərəcəsi  | `rateLimiter.ts`              | `getRedisClient()` — tənbəl `ioredis` singleton      | `<prefix>rl:*` Lua-atom dərəcəsi limiti pəncərələri        |
+| Auth cache            | `apiKeys.ts`                  | `rateLimiter`-nın müştərisindən təkrar istifadə edir | TTL ilə `<prefix>auth:api_key:<sha256>`                    |
+| Kvota mağazası        | `redisQuotaStore.ts`          | Ayrı `getRedisClient(url)` singleton                 | Hər misal üçün konfiqurasiya edilə bilən `<prefix>quota:*` |
+| İstiləşmə dövrə açarı | `redisCircuitBreakerStore.ts` | `circuitBreakerFactory.ts`-da ayrıca müştəri         | `<prefix>warmup:cb:<connectionId>`                         |
 
-OmniRoute-un digər tətbiqlərlə tək bir Redis instansiyasında (məsələn, `127.0.0.1:6379`) yanaşı işləyə bilməsi üçün bütün dörd iş yükü eyni ad məkanı prefiksindən istifadə edir.
-Baxın: [Açarların ad məkanı üzrə ayrılması](#key-namespacing).
+Dörd iş yükünün hamısı bir ad məkanı prefiksini paylaşır ki, OmniRoute bir Redis instansiyasında (məsələn, `127.0.0.1:6379`) digər proqramlarla birgə mövcud ola bilsin. [Açar ad boşluğuna](#key-namespacing) baxın.
 
 ---
 
-## Cari konfiqurasiya (koddakı standart dəyərlər)
+## Cari Konfiqurasiya (Defolt Kodlar)
 
-| Parametr                               | Dəyər                                                         | Yeri                                                                                  |
-| -------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL` mühit dəyişəni             | `redis://redis:6379` (compose), ixtiyari                      | `rateLimiter.ts:5`, `.env.example`                                                    |
-| `REDIS_KEY_PREFIX` mühit dəyişəni      | `omniroute:` (standart)                                       | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL` mühit dəyişəni | ayrıdır, `REDIS_URL` dəyərindən fərqli ola bilər              | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                   | `"sqlite"` (standart), `"redis"` ixtiyaridir                  | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`         | `3`                                                           | `rateLimiter.ts` klientinin yaradılması                                               |
-| `enableReadyCheck`                     | təyin edilməyib (ioredis standartı: `true`)                   | —                                                                                     |
-| `lazyConnect`                          | təyin edilməyib (ioredis standartı: `false`)                  | —                                                                                     |
-| `retryStrategy`                        | təyin edilməyib (ioredis standartı: 200ms baza, eksponensial) | —                                                                                     |
-| TLS / parol / DB indeksi               | **konfiqurasiya edilməyib**                                   | —                                                                                     |
-| Sentinel / Cluster                     | **konfiqurasiya edilməyib** — yalnız müstəqil tək qovşaq      | —                                                                                     |
+| Parametr                        | Dəyər                                                    | Harada                                                                                |
+| ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (tərtib et), isteğe bağlıdır        | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (defolt)                                    | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | ayrı, `REDIS_URL` dan fərqlənə bilər                     | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (defolt), `"redis"` isteğe bağlıdır           | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                      | `rateLimiter.ts` müştəri yaradılması                                                  |
+| `enableReadyCheck`              | təyin edilməyib (defolt olaraq: `true`)                  | —                                                                                     |
+| `lazyConnect`                   | təyin edilməyib (defolt olaraq: `false`)                 | —                                                                                     |
+| `retryStrategy`                 | təyin edilməyib (defolt olaraq 200ms baza, eksponensial) | —                                                                                     |
+| TLS / parol / DB indeksi        | **konfiqurasiya olunmayıb**                              | —                                                                                     |
+| Sentinel / Çoxluq               | **konfiqurasiya olunmayıb** — müstəqil tək düyünlü       | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Tövsiyə Olunan İstehsal Mühiti Tənzimləmələri
+## Tövsiyə olunan İstehsal Tuning
 
-### 1. Bağlantı Hovuzu / Klient Seçimləri (ioredis `Redis` konstruktoru)
+### 1. Qoşulma Hovuzu / Müştəri Seçimləri (ioredis `Redis` konstruktoru)
 
-Mövcud kod heç bir fərdi seçim olmadan tək bir `new Redis(url)` yaradır. İstehsal
-mühitində çoxsaylı replika yerləşdirmələri üçün kodda klient fabriki ötürün və ya `getRedisClient()` funksiyasını əhatə edən sarmalayıcı yaradın:
+Cari kod heç bir xüsusi seçimləri olmayan tək `new Redis(url)` yaradır. İstehsal çoxlu replika yerləşdirmələri üçün kodda müştəri zavodunu keçin və ya `getRedisClient()` sarın:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // təkrar cəhd limiti yoxdur; qərarı retryStrategy versin
-  enableReadyCheck: true, // çağırışları qəbul etməzdən əvvəl serverin hazır olduğunu yoxla
-  lazyConnect: true, // yaradılarkən qoşulma; ilk çağırışı gözlə
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10 təkrar cəhddən sonra imtina et → daha sonra yenidən qoşul
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, maksimum 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // paralel əmrləri bir TCP yazma əməliyyatında birləşdir
-  keepAlive: 10000, // hər 10s-dən bir TCP bağlantısını aktiv saxla
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Əsas kompromislər:**
+**Əsas mübadilələr:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — müvəqqəti Redis yenidən başladılmalarının
-  hər sorğunu dərhal uğursuz etməməsi üçün istehsal mühitində üstünlük verilən seçimdir. `checkRateLimit()`
-  daxilindəki yaddaşdaxili ehtiyat mexanizmi xəta ssenarisini qarşılayır.
-- `lazyConnect: true` — server bağlantıları qəbul etməyə başlamazdan əvvəl Redis-in
-  işlək olmasına dair başlanğıc asılılığının qarşısını alır.
-- `enableAutoPipelining: true` — paralel sürət limiti yoxlamaları üçün gediş-gəlişlərin sayını azaldır;
-  tək bağlantıda >50 RPS olduqda faydalıdır.
+- `maxRetriesPerRequest: null` + `retryStrategy` — istehsal üçün seçilir, ona görə də keçici Redis yenidən işə salınması hər sorğunu dərhal yerinə yetirmir. `checkRateLimit()` də yaddaşdaxili geriləmə uğursuzluq yolunu udur.
+- `lazyConnect: true` — server bağlantıları qəbul etməyə başlamazdan əvvəl Redis nin işə düşməsindən asılılığın qarşısını alır.
+- `enableAutoPipelining: true` — eyni vaxtda tarif limiti yoxlamaları üçün gediş-gəlişləri azaldır; bir əlaqədə > 50 RPS -də faydalıdır.
 
 ### 2. Redis Server Konfiqurasiyası (`redis.conf`)
 
 ```
-# Yaddaş
-maxmemory 80%                        # ƏS səhifə keşi üçün yer saxla
-maxmemory-policy allkeys-lru         # yük altında köhnəlmiş autentifikasiya keş qeydlərini çıxar
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Davamlılıq (ixtiyaridir — OmniRoute onsuz da qəzalara davamlıdır)
-save 300 1                           # ≥1 açar dəyişibsə, ən azı hər 5 dəqiqədən bir ani görüntü yarat
-appendonly no                        # AOF lazım deyil; məlumatlar yenidən yaradıla bilər
-appendfsync no                       # fsync əlavə yükü yoxdur (RDB kifayətdir)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Şəbəkə
-timeout 0                            # boşdayanma səbəbindən bağlantını kəsmə
-tcp-keepalive 300                    # 5 dəqiqəlik bağlantını aktiv saxlama intervalı
-tcp-backlog 511                      # sıçrayışlı yük üçün bağlantı növbəsi
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Məhsuldarlıq
-hz 10                                # standart; gecikməyə həssas işlər üçün 100
-activedefrag yes                     # fraqmentasiya >10% olduqda avtomatik defraqmentasiya et
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` üçün kompromis:** Yaddaş təzyiqi altında autentifikasiya
-keş qeydləri çıxarıla bilər. Bu təhlükəsizdir — `setCachedApiKey` keş buraxılışı zamanı həmişə
-məlumatı yenidən doldurur və SQLite ehtiyat mexanizmi əsas etibarlı mənbədir. Sürət məhdudlaşdırıcısının Lua skripti
-dizayn etibarilə qısaömürlü olan kiçik açarlar yaradır.
+**`maxmemory-policy allkeys-lru` üçün mübadilə:** Auth cache daxiletmələri yaddaş təzyiqi altında çıxarıla bilər. Bu təhlükəsizdir — `setCachedApiKey` həmişə əldən düşəndə yenidən doldurulur və SQLite ehtiyatı etibarlıdır. Razı məhdudlaşdırıcı Lua skripti dizaynla qısa ömürlü olan kiçik açarlar yaradır.
 
-### 3. Docker Compose Parametrləri
+### 3. Docker Compose Settings
 
-İstehsal compose faylı (`docker-compose.prod.yml`) `redis:8.6.2-alpine` istifadə edir. Əlavə edin:
+Prod compose (`docker-compose.prod.yml`) `redis:8.6.2-alpine` istifadə edir . Əlavə edin:
 
 ```yaml
 redis:
@@ -150,35 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Çoxsaylı İnstanlar / Miqyaslama Mülahizələri
+### 4. Çox Nümunə / Ölçmə Mülahizələri
 
-**Bütün replikalar üçün vahid Redis** — sürət məhdudlaşdırıcısının Lua skripti vahid
-əsas açar fəzasından asılıdır. Replikaların arxasındakı çoxsaylı Redis instansları atomikliyi
-itirər və büdcəni ikiqat artırardı. Bütün tətbiq replikaları üçün vahid Redis-dən (və ya nasazlıq zamanı keçid imkanına malik Redis Sentinel klasterindən)
-istifadə edin.
+**Bütün replikalar üçün tək Redis** — dərəcəsi məhdudlaşdıran Lua skripti tək bir səlahiyyətli açar boşluğundan asılıdır. Replikaların arxasında çoxlu Redis nümunələri atomikliyini itirəcək və büdcəni ikiqat artıracaq. Bütün proqram replikaları üçün tək bir Redis (və ya əvəzetmə ilə Redis Sentinel klaster) istifadə edin.
 
-**Bağlantı sayı:** Hər tətbiq replikası Redis-ə **2 TCP bağlantısı** açır
-(sürət məhdudlaşdırıcısı klienti + kvota yaddaşı klienti). 10 replika olduqda → 20 bağlantı yaranır ki, bu da
-standart Redis instansının 10k bağlantı həddindən xeyli aşağıdır.
+**Bağlantı sayı:** Hər bir proqram replikası açılır **2 TCP bağlantısı** Redis (dərəcə məhdudlaşdırıcı müştəri + kvota mağazası müştərisi). 10 nüsxədə → 20 əlaqə, defolt Redis instansiyasının 10k əlaqə tavanı daxilində.
 
 ### 5. Monitorinq
 
-Sağlamlıq yoxlaması son nöqtəsi vasitəsilə əlçatan edin:
+Sağlamlıq yoxlamasının son nöqtəsi ilə ifşa olun:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts artıq rateLimiter funksiyalarını çağırır
-// Redis-ə məxsus yoxlamaları əlavə edin:
-//   1. ioredis .ping() vasitəsilə PING gecikməsi
-//   2. INFO memory vasitəsilə yaddaş istifadəsi
-//   3. INFO clients vasitəsilə bağlantı sayı
-//   4. maxmemory-policy üçün uyğunluq tezliyi (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-İzlənilməli əsas metriklər:
+Baxılacaq əsas göstəricilər:
 
-- **Çıxarılan açarlar / san** — davamlı olaraq sıfırdan fərqlidirsə, `maxmemory` dəyərini artırın
-- **Bloklanmış klientlər** — sıfırdan fərqli olması yavaş Lua skriptlərinə və ya yüksək rəqabətə işarə edir
-- **Rədd edilmiş bağlantılar** — bağlantı limitinə çatılıb; 20 bağlantıda nadir haldır
+- **Çıxarılan açarlar / san** — davamlı olaraq sıfır deyilsə, `maxmemory` artırın
+- **Bloklanmış müştərilər** — qeyri-sıfır yavaş Lua skriptlərini və ya yüksək mübahisələri təklif edir
+- **Rədd edilmiş əlaqələr** — əlaqə limitinə çatmaq; 20 əlaqədə nadirdir
+
+### 6. Redis-ə uyğun gələn serverlər
+
+Any server used here must run Lua scripts: the rate limiter is one `EVAL`. On a server without Lua, `checkRateLimit()` logs `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` and counts per process, so each replica enforces the limit on its own. The opt-in shared session-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) also reads and updates pins with `EVAL`; without Lua it logs `[SESSION_AFFINITY] Redis error; falling back to SQLite.` and each replica keeps its own pins. Digər iş yükləri sadə əmrlərdən istifadə edir (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashlər və dəstlər) və semantik keşin Redis backend heç bir `FT.*` əmri göndərmir.
+
+OmniRoute 3.8.52 ilə sınaqdan keçirilmişdir: KiviDB 1.2.0 Lua şəkli ilə (`kividb/kividb:v1.2.0-lua`). Dərəcə məhdudlaşdırıcısı (sayğacları paylaşan ikinci proses daxil olmaqla), doğrulama keşi, kvota anbarı, istiləşmə dövrə açarı, semantik keş anbarı və söhbət idarəedicisi vasitəsilə `/v1/chat/completions` sorğusu Redis 8.10.3-də keçən 19 yoxlamadan 18-ni keçdi. Fərqli olan: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` kimi saxlayır, burada Redis `0.3` saxlayır ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvota mağazası hər ikisini `parseFloat` ilə təhlil edir, lakin iki rəqəm son rəqəmlərdə fərqlənir, buna görə də tam olaraq kvota sərhədinə düşən müqayisə fərqli şəkildə çıxa bilər. Sessiya yaxınlıq mağazası bu qaçışın bir hissəsi deyildi. ( [quraşdırma](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [nəticələr](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -201,13 +191,13 @@ flowchart LR
 
 ## İstinadlar
 
-| Fayl                               | Təyinat                                                                                      |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Əsas Redis klienti, Lua sorğu tezliyi məhdudlaşdırma skripti, yaddaşdaxili ehtiyat mexanizmi |
-| `src/lib/db/apiKeys.ts`            | Autentifikasiya keşi — Redis→SQLite ehtiyat mexanizmi                                        |
-| `src/lib/quota/redisQuotaStore.ts` | Opsional kvota anbarı üçün ayrıca Redis klienti                                              |
-| `src/lib/quota/storeFactory.ts`    | `sqlite` və `redis` kvota drayverləri arasında keçid edir                                    |
-| `docker-compose.prod.yml`          | Prod Redis konteyneri (`redis:8.6.2-alpine` obrazı)                                          |
-| `.env.example`                     | Redis mühit dəyişənlərinin sənədləri                                                         |
-| `src/app/api/local/redis/`         | Dev konteynerinin orkestrasiya API marşrutları                                               |
-| `bin/cli/commands/redis.mjs`       | Dev konteynerinin orkestrasiya CLI komandaları                                               |
+| Fayl                               | Məqsəd                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `src/shared/utils/rateLimiter.ts`  | İlkin Redis müştərisi, Lua dərəcəsi limiti skripti, yaddaşdaxili ehtiyat |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite backback                                       |
+| `src/lib/quota/redisQuotaStore.ts` | Əlavə kvota mağazası üçün ayrıca Redis müştərisi                         |
+| `src/lib/quota/storeFactory.ts`    | `sqlite` və `redis` kvota sürücüləri arasında keçid edir                 |
+| `docker-compose.prod.yml`          | Prod Redis konteyneri (şəkil `redis:8.6.2-alpine`)                       |
+| `.env.example`                     | Redis env sənədləri                                                      |
+| `src/app/api/local/redis/`         | Dev konteyner orkestrasiyası üçün API marşrutları                        |
+| `bin/cli/commands/redis.mjs`       | Dev konteyner orkestrasiyası üçün CLI əmrləri                            |

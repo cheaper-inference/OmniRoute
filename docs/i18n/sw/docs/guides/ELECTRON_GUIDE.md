@@ -4,99 +4,105 @@
 
 ---
 
-> **Chanzo cha ukweli:** `electron/` nafasi ya kazi** Mara ya mwisho kusasishwa:** 2026-06-28 — v3.8.40
+> **Chanzo rasmi:** nafasi ya kazi ya `electron/`
+> **Ilisasishwa mwisho:** 2026-06-28 — v3.8.40
 
-OmniRoute husafirisha programu ya kompyuta ya mezani (Windows / macOS / Linux) iliyojengwa juu yake**Electron 41** +** wajenzi wa elektroni 26.10** . Programu ya eneo-kazi hutoa seva ya Next.js inayojitegemea kama mchakato wa mtoto, inaelekeza `BrowserWindow` kwake, na kuongeza trei ya mfumo, kiboreshaji kiotomatiki, daraja la IPC, na mkanda wa siri wa kusanidi sifuri.
+OmniRoute inakuja na programu ya eneo-kazi ya majukwaa mengi (Windows / macOS / Linux) iliyoundwa kwa kutumia
+**Electron 41** + **electron-builder 26.10**. Programu ya eneo-kazi huanzisha seva huru ya Next.js
+kama mchakato mtoto, huelekeza `BrowserWindow` kwake, na huongeza
+ikoni ya trei ya mfumo, kisasishaji kiotomatiki, daraja la IPC, na usanidi wa awali wa siri usiohitaji usanidi.
 
 ## Usanifu
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
+│ Mchakato mkuu wa Electron (electron/main.js) │
+│ ├─ Kufuli la tukio moja                       │
+│ ├─ Mchakato mtoto: seva huru ya Next.js      │
+│ │   (huanzishwa kwa mazingira ya Node ya Electron) │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+│ ├─ Trei ya mfumo + menyu ya muktadha          │
+│ ├─ Usasishaji kiotomatiki kupitia electron-updater │
+│ ├─ Sera ya Usalama wa Maudhui (vichwa vya kipindi) │
+│ └─ Usanidi wa awali wa siri (JWT / API_KEY_SECRET) │
 └──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
+            ↕ Daraja la IPC (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
+│ Kionyeshaji (dashibodi ya Next.js)           │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## Matoleo
 
-Imethibitishwa kutoka kwa `electron/package.json`:
+Yamethibitishwa kutoka `electron/package.json`:
 
-| Kifurushi                 | Toleo                                                       |
-| ------------------------- | ----------------------------------------------------------- |
-| `electron`                | `^43.4.1`                                                   |
-| `electron-builder`        | `^26.15.3`                                                  |
-| `electron-updater`        | `^6.8.9`                                                    |
-| `better-sqlite3`          | mzizi `^13.0.2` (Node-API inajenga upya — hakuna Electron ) |
-| Toleo la programu         | `3.8.0`                                                     |
-| Kitambulisho cha programu | `online.omniroute.desktop`                                  |
-| Jina la bidhaa            | `OmniRoute`                                                 |
+| Kifurushi                 | Toleo                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `electron`                | `^43.4.1`                                                                       |
+| `electron-builder`        | `^26.15.3`                                                                      |
+| `electron-updater`        | `^6.8.9`                                                                        |
+| `better-sqlite3`          | chanzo `^13.0.2` (miundo ya awali ya Node-API — hakuna ujenzi upya wa Electron) |
+| Toleo la programu         | `3.8.0`                                                                         |
+| Kitambulisho cha programu | `online.omniroute.desktop`                                                      |
+| Jina la bidhaa            | `OmniRoute`                                                                     |
 
-## Maandishi (mzizi `package.json`)
+## Hati (mzizi wa `package.json`)
 
-| Hati                              | Kusudi                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Inaanza `npm run dev` + inasubiri `localhost:20128` + itazindua Electron              |
-| `npm run electron:build`          | Huunda Next.js kisha huendesha `electron-builder` kwa OS ya sasa                      |
-| `npm run electron:build:win`      | Huunda kisakinishi cha Windows NSIS + kinachobebeka (x64)                             |
-| `npm run electron:build:mac`      | Hujenga macOS DMG (Intel + Apple Silicon)                                             |
-| `npm run electron:build:linux`    | Hujenga Linux AppImage + DEB (x64 + arm64)                                            |
-| `npm run electron:smoke:packaged` | Inazindua mfumo wa jozi iliyopakiwa na kuchunguza `/login` kwa HTTP 200, kisha huzima |
+| Hati                              | Madhumuni                                                                              |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Huanzisha `npm run dev` + husubiri `localhost:20128` + huzindua Electron               |
+| `npm run electron:build`          | Hujenga Next.js kisha huendesha `electron-builder` kwa Mfumo wa Uendeshaji wa sasa     |
+| `npm run electron:build:win`      | Hujenga kisakinishaji cha Windows NSIS + toleo linalobebeka (x64)                      |
+| `npm run electron:build:mac`      | Hujenga DMG ya macOS (Intel + Apple Silicon)                                           |
+| `npm run electron:build:linux`    | Hujenga Linux AppImage + DEB (x64 + arm64)                                             |
+| `npm run electron:smoke:packaged` | Huzindua faili tekelezi iliyofungashwa na kukagua `/login` kwa HTTP 200, kisha huizima |
 
-Nafasi ya kazi ya `electron/` pia inafichua:
+Nafasi ya kazi ya `electron/` pia hutoa:
 
-- `npm run prepare:bundle` — inaendesha `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — single-arch macOS hujenga
-- `npm run pack` — saraka-tu kujenga kwa majaribio ya ndani (hakuna kisakinishi)
+- `npm run prepare:bundle` — huendesha `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — miundo ya macOS ya usanifu mmoja
+- `npm run pack` — ujenzi wa saraka pekee kwa majaribio ya ndani (bila kisakinishaji)
 
-## Vifurushi vya hiari vya kukimbia
+## Runtime pack za hiari
 
-Miundo ya kompyuta ya mezani inaweza kuchapisha kumbukumbu za hiari za wakati wa utekelezaji pamoja na waliosakinisha. Upakiaji wa seva iliyosakinishwa una `optional-packs.index.json` (chini ya `resources/app` kwenye Windows na Linux). Kwa kiingilio cha `browser-runtime`, soma `packs[].tarball` na upakue** jina halisi la faili kutoka kwa toleo sawa** . Majina ya kumbukumbu ni pamoja na digest SHA-256 ; miundo tofauti inaweza kuhitaji kumbukumbu tofauti. Weka jina la faili lililopakuliwa bila kubadilishwa.
+Build za desktop zinaweza kuchapisha runtime archive za hiari pamoja na installer zake. Server payload iliyosakinishwa ina `optional-packs.index.json` (chini ya `resources/app` kwenye Windows na Linux). Kwa entry ya `browser-runtime`, soma `packs[].tarball` na upakue **jina hilo hilo la faili kutoka release hiyo hiyo**. Majina ya archive yana SHA-256 digest; build tofauti zinaweza kuhitaji archive tofauti. Hifadhi jina la faili lililopakuliwa bila kulibadilisha.
 
-Nakili faharasa ya programu iliyosakinishwa na kumbukumbu iliyochaguliwa kwenye saraka moja, kisha utumie CLI kutoka kwa toleo sawa:
+Nakili index ya app iliyosakinishwa na archive iliyochaguliwa kwenye saraka moja, kisha tumia CLI ya release hiyo hiyo:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` huonyesha hali ya usakinishaji na uthibitishaji, si jina la faili la kumbukumbu. Faharasa iliyounganishwa huchagua kumbukumbu. Usakinishaji huthibitisha hundi yake ya kumbukumbu kabla ya uchimbaji na hundi ya kifurushi chake kabla ya kubadilisha kifurushi kilichosakinishwa. Inasoma faili za ndani; haipakui kumbukumbu zinazokosekana. Anzisha tena programu baada ya usakinishaji. Ikiwa toleo halina kipengee kinacholingana, kifurushi cha hiari hakipatikani kupitia vipengee vya toleo hilo.
+`packs list` huonyesha hali ya usakinishaji na uthibitishaji, si jina la faili la archive. Index iliyoambatanishwa huchagua archive. Usakinishaji huthibitisha checksum ya archive kabla ya kufungua yaliyomo na checksum za package kabla ya kubadilisha pack iliyosakinishwa. Husoma faili za ndani; haupakui archive zinazokosekana. Anzisha application tena baada ya usakinishaji. Ikiwa release haina asset inayolingana, pack ya hiari haipatikani kupitia asset za release hiyo.
 
 ## Mpangilio wa Saraka
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # Vitegemezi vya Electron + usanidi wa electron-builder
+├── main.js                   # Mchakato mkuu (KB 24 — tazama maelezo hapa chini)
+├── preload.js                # Daraja la IPC la contextBridge
+├── types.d.ts                # Aina za AppInfo / ServerStatus / ElectronAPI
+├── README.md                 # Madokezo ya ndani ya workspace
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # Matokeo ya electron-builder (yamepuuzwa na git)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # Huandaa kifurushi cha .next/electron-standalone
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # Jaribio la awali baada ya build
 ```
 
-`main.js` na `preload.js` zote ni** faili CommonJS `.js`** , si TypeScript. Maandishi ya upande wa kionyeshi huishi `electron/types.d.ts`.
+`main.js` na `preload.js` zote ni **faili za CommonJS `.js`**, si TypeScript. Ufafanuzi
+wa aina wa upande wa renderer unapatikana katika `electron/types.d.ts`.
 
-## IPC Bridge (`preload.js`)
+## Daraja la IPC (`preload.js`)
 
-Upakiaji wa awali unaonyesha API iliyoidhinishwa kwenye `window.electronAPI` kwa kutumia `contextBridge` na `contextIsolation: true` na `nodeIntegration: false`.
+Preload hufichua API iliyoidhinishwa kwenye `window.electronAPI` kwa kutumia `contextBridge`
+pamoja na `contextIsolation: true` na `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,51 +121,60 @@ const VALID_CHANNELS = {
 };
 ```
 
-Mbinu zilizowekwa wazi:
+Mbinu zinazofichuliwa:
 
-| Simu ya mtoaji                                                    | Aina                       |
-| ----------------------------------------------------------------- | -------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | omba                       |
-| `openExternal(url)`                                               | omba                       |
-| `getDataDir()`                                                    | omba                       |
-| `restartServer()`                                                 | omba                       |
-| `getAppVersion()`                                                 | omba                       |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | omba                       |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | tuma                       |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | kupokea (hurejesha mtoaji) |
+| Mwito wa renderer                                                 | Aina                         |
+| ----------------------------------------------------------------- | ---------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                       |
+| `openExternal(url)`                                               | invoke                       |
+| `getDataDir()`                                                    | invoke                       |
+| `restartServer()`                                                 | invoke                       |
+| `getAppVersion()`                                                 | invoke                       |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                       |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                         |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (hurejesha disposer) |
 
-Wasaidizi wanaopokea wanarudi a** kazi ya kutupa** badala ya kutegemea `removeAllListeners` — hii inazuia mkusanyiko wa wasikilizaji wakati vipengele vya React vinapoongezeka.
+Vitendaji saidizi vya receive hurejesha **kitendaji cha disposer** badala ya kutegemea
+`removeAllListeners` — hii huzuia mlundikano wa listeners wakati vijenzi vya React
+vinapopachikwa upya.
 
-## Mzunguko wa Maisha ya Seva
+## Mzunguko wa Maisha wa Seva
 
-`main.js` huzalisha kifurushi cha Next.js kilichojitegemea moja kwa moja na wakati wa utekelezaji wa Njia Electron ili kuzuia kutolingana kwa moduli ya ABI na Njia ya mfumo:
+`main.js` huanzisha kifurushi cha standalone cha Next.js moja kwa moja kwa kutumia mazingira
+ya utekelezaji ya Electron Node ili kuepuka kutolingana kwa ABI ya native-module na Node ya mfumo:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
-Vivutio:
+Mambo muhimu:
 
-- `waitForServer()` huchagua URL hadi s 30 kabla ya kuonyesha dirisha (hakuna skrini tupu kwenye kuanza kwa baridi).
-- `stdio: "pipe"` inakamata stdout/stderr; vishazi tayari (`Ready` / `listening`) hutoa `server-status: running` juu ya IPC.
-- `before-quit` inasubiri hadi sekunde 5 kwa SIGTERM nzuri (WAL checkpoint) kisha kutuma SIGKILL.
-- Kibadilishaji cha mlango kwenye trei (`20128`, `3000`, `8080`) husimamisha na kuwasha tena seva, kisha hupakia upya BrowserWindow.
+- `waitForServer()` hukagua URL mara kwa mara kwa hadi sekunde 30 kabla ya kuonyesha dirisha (hakuna skrini tupu wakati wa kuanza upya kabisa).
+- `stdio: "pipe"` hunasa stdout/stderr; vifungu vinavyoashiria utayari (`Ready` / `listening`) hutuma `server-status: running` kupitia IPC.
+- `before-quit` husubiri hadi sekunde 5 kwa SIGTERM kukamilika kwa utaratibu (WAL checkpoint), kisha hutuma SIGKILL.
+- Kibadilisha port kwenye tray (`20128`, `3000`, `8080`) husimamisha na kuanzisha upya seva, kisha hupakia upya BrowserWindow.
 
-## Siri ya Bootstrap ya Siri ya kusanidi sifuri
+## Uanzishaji wa Siri Bila Usanidi
 
-Katika uzinduzi wa kwanza, mchakato mkuu hujizalisha kiotomatiki na huendelea kukosa siri:
+Wakati wa uzinduzi wa kwanza, mchakato mkuu hutengeneza kiotomatiki na kuhifadhi siri ambazo hazipo:
 
-| Siri                     | Chanzo                                                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (inakataa ikiwa hati zilizosimbwa tayari zipo) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                |
+| Siri                     | Chanzo                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                        |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (hukataa ikiwa vitambulisho vilivyosimbwa tayari vipo) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                        |
 
-Iliendelea kwa `<DATA_DIR>/server.env`. `DATA_DIR` anaamua kwa:
+Huhifadhiwa katika `<DATA_DIR>/server.env`. `DATA_DIR` hubainishwa kuwa:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` au `~/.omniroute`
@@ -167,61 +182,70 @@ Iliendelea kwa `<DATA_DIR>/server.env`. `DATA_DIR` anaamua kwa:
 
 ## Utafutaji wa faili ya mazingira
 
-Kabla ya kutoa seva, mchakato kuu (`getPreferredEnvFilePath()` in `electron/main.js`) huchagua** moja** `.env` faili: ya kwanza kati ya hizi zilizopo.
+Kabla ya kuanzisha seva, mchakato mkuu (`getPreferredEnvFilePath()` katika
+`electron/main.js`) huchagua faili **moja** ya `.env`: ya kwanza kati ya hizi inayopatikana.
 
-1. `$DATA_DIR/.env`, wakati `DATA_DIR` imewekwa katika mazingira programu ilizinduliwa nayo.
-2. `<resolved DATA_DIR>/.env`, kwa kutumia chaguo-msingi sawa na hapo juu: `%APPDATA%\omniroute\.env` kwenye Windows, `$XDG_CONFIG_HOME/omniroute/.env` au `~/.omniroute/.env` kwenye Linux na macOS.
-3. `.env` kwenye saraka ya kufanya kazi ya mchakato.
+1. `$DATA_DIR/.env`, wakati `DATA_DIR` imewekwa katika mazingira ambayo programu ilizinduliwa nayo.
+2. `<resolved DATA_DIR>/.env`, kwa kutumia chaguo-msingi zilezile kama hapo juu: `%APPDATA%\omniroute\.env` kwenye
+   Windows, `$XDG_CONFIG_HOME/omniroute/.env` au `~/.omniroute/.env` kwenye Linux na macOS.
+3. `.env` katika saraka ya kazi ya mchakato.
 
-Mchakato kuu unasoma faili hiyo tu; watahiniwa wa baadaye hawajaunganishwa. Mazingira ya seva hujengwa kwa utangulizi huu (ya juu zaidi kwanza):
+Mchakato mkuu husoma faili hiyo pekee; faili zinazofuata hazijumuishwi. Kisha mazingira ya
+seva huundwa kwa mpangilio huu wa kipaumbele (ya juu zaidi kwanza):
 
-1. Mazingira ya mchakato wa Electron (vigeu vilivyorithiwa kutoka kwa chochote kilichozindua programu).
-2. Faili `.env` iliyochaguliwa.
-3. `<DATA_DIR>/server.env` (siri za bootstrap hapo juu).
+1. Mazingira ya mchakato wa Electron (vigezo vilivyorithiwa kutoka kwa chochote kilichozindua programu).
+2. Faili ya `.env` iliyochaguliwa.
+3. `<DATA_DIR>/server.env` (siri za uanzishaji zilizo hapo juu).
 
-Mazingira ya mchakato hunaswa wakati programu inapoanza, kwa hivyo kibadilishaji cha mfumo au mazingira ya mtumiaji kilichowekwa wakati programu inafanya kazi (ikiwa ni pamoja na wakati inakaa kwenye trei baada ya dirisha lake kufungwa) haifikii seva hadi programu itakapozimwa na kuzinduliwa upya. Kwa visu vya wakati wa kukimbia kama vile `CONTEXT_LENGTH_<PROVIDER>` (angalia [Vigezo vya Mazingira: Per-mtoa muktadha urefu](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), pendelea faili `.env`, kisha uache kabisa ( trei,** Acha** ) na kuzindua upya.
+Mazingira ya mchakato hunaswa wakati programu inapoanza, kwa hivyo kigezo cha mazingira cha
+mfumo au mtumiaji kilichowekwa wakati programu inaendelea kufanya kazi (ikiwa ni pamoja na wakati
+iko katika trei baada ya dirisha lake kufungwa) hakifikii seva hadi programu ifungwe kabisa na
+kuzinduliwa upya. Kwa mipangilio ya wakati wa uendeshaji kama vile `CONTEXT_LENGTH_<PROVIDER>` (tazama
+[Vigezo vya Mazingira: Urefu wa muktadha kwa kila mtoa huduma](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+pendelea faili ya `.env`, kisha ufunge programu kabisa (trei, **Toka**) na uizindue upya.
 
-## Dirisha na Tray
+## Dirisha na Trei
 
-- `BrowserWindow`: 1400 × 900 (dk 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, mwanga wa trafiki kwa `{ x: 16, y: 16 }`.
-- Windows/Linux: upau wa kichwa asilia.
-- Kitufe cha kufunga kinapunguza kwenye tray; orodha ya tray ina** Fungua OmniRoute** ,** Fungua Dashibodi** (kivinjari cha nje),** Bandari ya Seva** menyu ndogo,** Angalia Usasisho** ,** Acha** .
+- `BrowserWindow`: 1400×900 (kiwango cha chini 1024×700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, vitufe vya udhibiti wa dirisha katika `{ x: 16, y: 16 }`.
+- Windows/Linux: upau asilia wa kichwa.
+- Kitufe cha kufunga hupunguza programu hadi kwenye trei; menyu ya trei ina **Fungua OmniRoute**, **Fungua Dashibodi** (kivinjari cha nje), menyu ndogo ya **Mlango wa Seva**, **Kagua Masasisho**, **Toka**.
 
 ## Sera ya Usalama wa Maudhui
 
-Weka kupitia `session.defaultSession.webRequest.onHeadersReceived`. Maagizo mashuhuri:
+Huwekwa kupitia `session.defaultSession.webRequest.onHeadersReceived`. Maagizo muhimu:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Hali ya usanidi huongeza `'unsafe-eval'` kwa `script-src` pekee
+- Hali ya usanidi huongeza `'unsafe-eval'` kwenye `script-src` pekee
 
-## Sasisha kiotomatiki
+## Usasishaji otomatiki
 
-Hutumia `electron-updater` na mtoaji GitHub (`diegosouzapw/OmniRoute`).
+Hutumia `electron-updater` pamoja na mtoa huduma wa GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Matukio yanayotumwa kwa mtoaji kupitia `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (na `percent`), `downloaded`, `error`
-- `installUpdate()` inaua seva kisha inaita `autoUpdater.quitAndInstall()`
-- Imerukwa katika hali ya dev (`!app.isPackaged`)
+- Matukio hutumwa kwa kiwasilishaji kupitia IPC ya `update-status`:
+  `checking`, `available`, `not-available`, `downloading` (pamoja na `percent`), `downloaded`, `error`
+- `installUpdate()` husimamisha seva kisha huita `autoUpdater.quitAndInstall()`
+- Hurukwa katika hali ya usanidi (`!app.isPackaged`)
 
-## Kujenga Bomba
+## Mchakato wa Ujenzi
 
 1. `npm run build` → Next.js inayojitegemea katika `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → inaweka hatua tena kuwa `.next/electron-standalone` na kuandika upya njia kamili ndani ya `server.js` + `required-server-files.json` ili kifungu kiweze kuhamishwa.
-3. `electron-builder` vifurushi `main.js`, `preload.js`, `node_modules`, na `extraResources: { ../.next/electron-standalone → app }`.
+2. `prepare-electron-standalone.mjs` → hupanga upya katika `.next/electron-standalone` na kuandika upya njia kamili ndani ya `server.js` + `required-server-files.json` ili kifurushi kiweze kuhamishwa.
+3. `electron-builder` hufungasha `main.js`, `preload.js`, `node_modules`, na `extraResources: { ../.next/electron-standalone → app }`.
 
-### Jenga malengo
+### Malengo ya ujenzi
 
-| OS      | Malengo                                    |
-| ------- | ------------------------------------------ |
-| Windows | kisakinishi cha NSIS + kinachobebeka (x64) |
-| macOS   | DMG (Intel + arm64, buruta-hadi-Maombi)    |
-| Linux   | AppImage + DEB (x64 + arm64)               |
+| Mfumo wa uendeshaji | Malengo                                       |
+| ------------------- | --------------------------------------------- |
+| Windows             | Kisakinishaji cha NSIS + linalobebeka (x64)   |
+| macOS               | DMG (Intel + arm64, buruta hadi Applications) |
+| Linux               | AppImage + DEB (x64 + arm64)                  |
 
-NSIS mipangilio: `oneClick: false`, huruhusu mtumiaji kuchagua saraka ya kusakinisha, huunda Desktop na njia za mkato za Menyu ya Anza.
+Mipangilio ya NSIS: `oneClick: false`, humruhusu mtumiaji kuchagua saraka ya usakinishaji, na huunda njia za mkato kwenye Desktop na menyu ya Start.
 
-## Jengo Lililofungashwa la Kupima Moshi
+## Majaribio ya Msingi ya Toleo Lililofungashwa
 
 ```bash
 npm run electron:smoke:packaged
@@ -229,27 +253,27 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Hugundua kiotomatiki binary iliyopakiwa katika `electron/dist-electron/` kwa jukwaa la sasa.
-- Huzindua na saraka za `HOME`/`APPDATA`/`XDG_*` zilizotengwa ili isiguse data ya msanidi programu.
-- Kura za `http://127.0.0.1:20128/login` kwa HTTP 200 ndani ya sekunde 45.
-- Inatazama stderr/stdout kwa mifumo mbaya (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, nk.).
-- Inasubiri sekunde 2 za muda wa utekelezaji ulio thabiti baada ya kuwa tayari, kisha hutoa SIGTERM na kusubiri lango lifunguliwe.
-- Katika CI, hupita `--no-sandbox --disable-gpu` kiotomatiki (na `--disable-dev-shm-usage` kwenye Linux).
+- Hugundua kiotomatiki faili tekelezi iliyofungashwa katika `electron/dist-electron/` kwa jukwaa la sasa.
+- Huanzisha programu kwa kutumia saraka zilizotengwa za `HOME`/`APPDATA`/`XDG_*` ili isiguse data ya msanidi programu.
+- Hukagua mara kwa mara `http://127.0.0.1:20128/login` ili kupata HTTP 200 ndani ya sekunde 45.
+- Hufuatilia stderr/stdout kwa ruwaza za hitilafu kubwa (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, n.k.).
+- Husubiri sekunde 2 za utekelezaji thabiti baada ya kuwa tayari, kisha hutuma SIGTERM na kusubiri mlango uwe huru.
+- Katika CI, hupitisha kiotomatiki `--no-sandbox --disable-gpu` (na `--disable-dev-shm-usage` kwenye Linux).
 
-Env imebatilisha: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Ubatilishaji kupitia mazingira: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## Kutia Sahihi Msimbo
+## Utiaji Sahihi wa Msimbo
 
-`electron/package.json` hufanya** sivyo** vitambulisho vya kusainiwa kwa waya moja kwa moja. Zipitishe kupitia env vars hadi `electron-builder`:
+`electron/package.json` **haiunganishi** vitambulisho vya utiaji sahihi moja kwa moja. Vipitishe kupitia vigeu vya mazingira kwenda kwa `electron-builder`:
 
 ### macOS
 
 ```bash
-export APPLE_ID=<email>
-export APPLE_APP_SPECIFIC_PASSWORD=<password>
-export APPLE_TEAM_ID=<id>
+export APPLE_ID=<barua-pepe>
+export APPLE_APP_SPECIFIC_PASSWORD=<nenosiri>
+export APPLE_TEAM_ID=<kitambulisho>
 export CSC_LINK=path/to/cert.p12
-export CSC_KEY_PASSWORD=<cert-password>
+export CSC_KEY_PASSWORD=<nenosiri-la-cheti>
 npm run electron:build:mac
 ```
 
@@ -257,38 +281,38 @@ npm run electron:build:mac
 
 ```bash
 export CSC_LINK=path/to/cert.pfx
-export CSC_KEY_PASSWORD=<cert-password>
+export CSC_KEY_PASSWORD=<nenosiri-la-cheti>
 npm run electron:build:win
 ```
 
 ### Linux
 
-kusaini AppImage ni hiari — kuweka `LINUX_GPG_KEY` ikiwa unatia saini.
+Utiaji sahihi wa AppImage ni wa hiari — weka `LINUX_GPG_KEY` ikiwa unatia sahihi.
 
 ## Usambazaji
 
-Vitu vya sanaa hutua `electron/dist-electron/`:
+Vizalishwa huhifadhiwa katika `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Matoleo huchapishwa kwa Matoleo ya GitHub (`diegosouzapw/OmniRoute`), ambapo pia `electron-updater` hukagua matoleo mapya.
+Matoleo huchapishwa kwenye GitHub Releases (`diegosouzapw/OmniRoute`), ambako pia `electron-updater` hukagua matoleo mapya.
 
-## Kutatua matatizo
+## Utatuzi wa Matatizo
 
-| Dalili                                                              | Rekebisha                                                                                                                                                        |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` baada ya Electron bonge kubwa | better-sqlite3 v13 husafirisha Node-API huunda — kuendesha tena `npm install` kwenye mzizi na `prepare:bundle` (inathibitisha muundo wa awali wa jukwaa la sasa) |
-| `ERR_DLOPEN_FAILED` kwa moduli asili                                | Run tena `prepare:bundle` — inashindwa haraka wakati muundo wa Node-API wa jukwaa la sasa haupo.                                                                 |
-| Dirisha inaonekana tupu kwenye Linux                                | Thibitisha seva Next.js inayofungamana na PORT (angalia kumbukumbu za `[Server]` )                                                                               |
-| macOS maduka ya notarization                                        | Hakikisha `APPLE_*` vars zinasafirishwa, sio tu katika `.env`                                                                                                    |
-| Windows SmartScreen                                                 | Ingia na EV cert, au watumiaji bonyeza-kulia → "Kimbia hata hivyo"                                                                                               |
-| Jaribio la moshi halifaulu kwa kutumia lango                        | Simamisha seva yoyote ya ndani mnamo 20128 kabla ya kuendesha `electron:smoke:packaged`                                                                          |
+| Dalili                                                                  | Suluhisho                                                                                                                                                                                    |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` baada ya ongezeko kuu la Electron | better-sqlite3 v13 husambaza matoleo yaliyoundwa mapema ya Node-API — endesha tena `npm install` kwenye mzizi na `prepare:bundle` (huthibitisha toleo lililoundwa mapema kwa jukwaa la sasa) |
+| `ERR_DLOPEN_FAILED` kwa moduli asilia                                   | Endesha tena `prepare:bundle` — husitisha mara moja kwa hitilafu ikiwa toleo lililoundwa mapema la Node-API kwa jukwaa la sasa halipo                                                        |
+| Dirisha linaonekana tupu kwenye Linux                                   | Thibitisha kuwa seva ya Next.js iliunganishwa kwa PORT (angalia kumbukumbu za `[Server]`)                                                                                                    |
+| Uthibitishaji rasmi wa macOS unakwama                                   | Hakikisha vigeu vya `APPLE_*` vimesafirishwa, si kuwekwa tu katika `.env`                                                                                                                    |
+| Onyo la Windows SmartScreen                                             | Tia sahihi kwa cheti cha EV, au watumiaji wabofye kulia → "Run anyway"                                                                                                                       |
+| Jaribio la msingi linashindwa kwa sababu mlango unatumika               | Simamisha seva yoyote ya ndani ya usanidi kwenye 20128 kabla ya kuendesha `electron:smoke:packaged`                                                                                          |
 
 ## Tazama Pia
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Chanzo: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Wasaidizi: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Visaidizi: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

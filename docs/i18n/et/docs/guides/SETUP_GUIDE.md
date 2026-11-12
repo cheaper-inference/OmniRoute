@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Juhtpaneel avaneb aadressil `http://localhost:20128` ja API baas-URL on `http://localhost:20128/v1`.
+Armatuurlaud avaneb `http://localhost:20128` ja API baasis URL on `http://localhost:20128/v1`.
+
+> **npm kasutajad:** Kui npm hoiatab, et installiskriptid on blokeeritud (nt `omniroute`, `better-sqlite3`), vaadake [jaotist — npm installiskriptide tõrkeotsing blokeeritud](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

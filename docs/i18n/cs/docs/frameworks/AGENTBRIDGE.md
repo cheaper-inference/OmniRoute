@@ -20,7 +20,7 @@ Když agent IDE (např. GitHub Copilot, Cursor, Claude Code) zavolá API, připo
 
 To znamená, že můžete:
 
-- **Přesměrujte jakéhokoli agenta k libovolnému poskytovateli** : Copilot mluví s OpenAI? Přesměrujte jej na Anthropic Claude, Gemini nebo kteréhokoli z 381 poskytovatelů OmniRoute.
+- **Přesměrujte jakéhokoli agenta k libovolnému poskytovateli** : Copilot mluví s OpenAI? Přesměrujte jej na Anthropic Claude, Gemini nebo kteréhokoli z 388 poskytovatelů OmniRoute.
 - **Použít mapování modelu** : `gemini-3-flash` → `claude-sonnet-4.7` transparentně na úrovni obsluhy.
 - **Sledujte veškerý provoz agentů** : každá zachycená žádost je zveřejněna [dopravnímu inspektorovi](./TRAFFIC_INSPECTOR.md).
 - **Použijte odolnost OmniRoute** : kombinované směrování, jističe, záložní funkce a sledování nákladů fungují i pro provoz agentů IDE.
@@ -555,7 +555,7 @@ Trae je relativně nový AI asistent pro programování. Před implementací han
 3. Určete mechanismus autentizace
 4. Na základě smluvních podmínek a zjistitelnosti API rozhodněte, zda pokračovat
 
-Dokud nebude průzkum dokončen, karta Trae na řídicím panelu zobrazuje odznak „Probíhá průzkum“ s odkazem „Nahlásit životaschopnost“. Zástupný handler v `src/mitm/handlers/trae.ts` vyvolá strukturovanou chybu `Dosud neimplementováno`.
+Dokud nebude průzkum dokončen, karta Trae na řídicím panelu zobrazuje odznak „Probíhá průzkum“ s odkazem „Nahlásit životaschopnost“. Zástupný handler v `src/mitm/handlers/trae.ts` vyvolá strukturovanou chybu `Not yet implemented`.
 
 ### Agenti v backlogu (vyžadován MITM — bez podpory vlastní základní adresy URL)
 

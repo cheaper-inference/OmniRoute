@@ -54,7 +54,7 @@ Kichupo kipya cha kutoa maudhui kutoka kwa URL kupitia `POST /v1/web/fetch` (ili
 - Ingizo: URL + kigeuzi cha ukurasa mzima + kiteuzi cha umbizo (markdown / maandishi / HTML).
 - Wasilisha → chota → onyesha `ScrapeResult.tsx`.
 - `ScrapeResult` huonyesha onyesho la awali la markdown + kigeuzi cha maudhui ghafi.
-- Kikomo: ikiwa mwili wa jibu ni zaidi ya **256 KB**, UI huonyesha `(imekatwa, angalia maudhui ghafi)` na kufungua maudhui ghafi katika modal ya Monaco (D21).
+- Kikomo: ikiwa mwili wa jibu ni zaidi ya **256 KB**, UI huonyesha `View full raw content` na kufungua maudhui ghafi katika modal (D21).
 - Paneli ya metadata: mtoa huduma (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), muda wa kusubiri, gharama, ukubwa wa jibu, idadi ya viungo.
 - Hutumia hook ya `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Huendesha hoja/URL ileile kwa hadi **watoa huduma 4 kwa sambamba** (D22):
 `ProviderCatalog.tsx` huonyesha orodha kamili ya watoa huduma kutoka `GET /api/search/providers`
 (iliyopanuliwa katika F4 ili kujumuisha watoa huduma wa fetch):
 
-| `kind` | `"search"` (watoa huduma 20) au `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (watoa huduma 23) au `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Hali **hubainishwa wakati wa ombi** kwa kuangalia ikiwa vitambulisho vipo na ikiwa
 funguo zote ziko katika kipindi cha kusubiri kwa sasa.
+
+`codex-search` (Codex Web Search): Hutumia akaunti za Codex (ChatGPT) zilizounganishwa; haihitaji ufunguo tofauti. Kila utafutaji hutumia mgao wa usajili wa ChatGPT na huchukua takriban sekunde 10–40. Huendeshwa ombi linapoitaja; uteuzi wa kiotomatiki unahitaji kuwasha `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, ambayo imezimwa kwa chaguo-msingi.
 
 ---
 

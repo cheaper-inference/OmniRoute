@@ -1,0 +1,1 @@
+- **fix(ci):** Retain explicit UNKNOWN/INCOMPLETE diagnostics when Release-Green setup fails before validation, update tracking issues only with a valid observed branch and revision, and handle missing validation logs without changing verdict enforcement or closing incidents after incomplete runs.

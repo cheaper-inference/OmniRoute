@@ -30,24 +30,44 @@ const formerlyMisclassifiedIds = [
 ];
 
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
-  it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
-    const totals = computeFreeModelTotals();
-    // The 484 inherited identities include 13 onomeo rows added by #16325.
-    // Measured 2026-10-28 inventory subtracts five
-    // priced Ollama grants, three retired offers, two AINative grants and ten OpenCode-only offers.
-    // Includes the release base NVIDIA Nemotron 3.5 identity rename.
-    // 464 → 465 on the v3.8.54 base: #16315/#18579 add two sourced Token Harbor :free routes,
-    // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
-    // Pin identities as well as the total so unrelated replacement is visible.
-    const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 465);
+  it("preserves the public catalog identities plus the explicitly retired Token Harbor campaign", () => {
+    const retiredKey = "tokenharbor/claude-haiku-5.5:free";
+    const retired = FREE_MODEL_BUDGETS.filter(
+      (row) => `${row.provider}/${row.modelId}` === retiredKey
+    );
+    assert.equal(retired.length, 1);
+    assert.equal(retired[0].freeType, "discontinued");
+    assert.equal(retired[0].monthlyTokens, 0);
+    assert.equal(retired[0].creditTokens, 0);
+    assert.equal(isFreeModel(retired[0].provider, { id: retired[0].modelId, isFree: true }), false);
+
+    // Retain the exact public 90ce identity set; only the named negative-evidence
+    // row above is additional. It grants no free access, tokens or recurring pool.
+    const publicIdentities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`)
+      .filter((identity) => identity !== retiredKey)
+      .sort();
+    assert.equal(publicIdentities.length, 465);
+    assert.equal(new Set(publicIdentities).size, 465);
     assert.equal(
-      createHash("sha256").update(identities.join("\n")).digest("hex"),
+      createHash("sha256").update(publicIdentities.join("\n")).digest("hex"),
       "098c2c2eeed42c3c99ad93ec8e92d0d65146e6db8f66c4c920a2b4b414fe7732"
     );
-    assert.equal(totals.modelCount, 465);
+    const totals = computeFreeModelTotals();
+    assert.equal(totals.modelCount, 466);
     assert.equal(totals.poolCount, 34);
+  });
+
+  it("never counts SiliconFlow as a static free model, pool or uncapped provider", () => {
+    const totals = computeFreeModelTotals();
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
+    // Other providers can grow without changing SiliconFlow's paid-only contract.
+    // Aggregate counting and pool deduplication have their own catalog fixtures.
+    const siliconflow = computeFreeModelTotals({
+      entries: FREE_MODEL_BUDGETS.filter((row) => row.provider === "siliconflow"),
+    });
+    assert.equal(siliconflow.modelCount, 0);
+    assert.equal(siliconflow.poolCount, 0);
+    assert.equal(siliconflow.steadyRecurringTokens, 0);
   });
 
   it("vetoes any contradictory paid flag, including nested pricing and is_free badges", () => {

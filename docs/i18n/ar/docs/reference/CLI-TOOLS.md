@@ -6,15 +6,15 @@
 
 آخر تحديث: 2026-08-23
 
-تتكامل OmniRoute مع ثلاث فئات من أدوات CLI المنتشرة عبر ثلاث صفحات مخصصة للوحة المعلومات:
+يتكامل OmniRoute مع ثلاث فئات من أدوات CLI موزعة على ثلاث صفحات مخصصة في لوحة المعلومات:
 
-| صفحة          | طريق                    | مفهوم                                                                     | عدد          |
-| ------------- | ----------------------- | ------------------------------------------------------------------------- | ------------ |
-| **كود CLI**   | `/dashboard/cli-code`   | أدوات البرمجة التي تشير إليها OmniRoute (العميل → CLI → OmniRoute → موفر) | 26           |
-| **وكلاء CLI** | `/dashboard/cli-agents` | الوكلاء المستقلون الذين تشير إليهم OmniRoute (نفس التدفق، ونطاق أوسع)     | 11           |
-| **وكلاء ACP** | `/dashboard/acp-agents` | CLIs الذي يولد OmniRoute كواجهة خلفية عبر stdio/ACP (التدفق العكسي)       | انظر التسجيل |
+| الصفحة                 | المسار                  | المفهوم                                                               | العدد      |
+| ---------------------- | ----------------------- | --------------------------------------------------------------------- | ---------- |
+| **أدوات CLI البرمجية** | `/dashboard/cli-code`   | أدوات برمجة توجهها إلى OmniRoute (العميل ← CLI ← OmniRoute ← المزوّد) | 28         |
+| **وكلاء CLI**          | `/dashboard/cli-agents` | وكلاء مستقلون توجههم إلى OmniRoute (التدفق نفسه، بنطاق أوسع)          | 11         |
+| **وكلاء ACP**          | `/dashboard/acp-agents` | أدوات CLI يشغّلها OmniRoute كواجهة خلفية عبر stdio/ACP (تدفق عكسي)    | راجع السجل |
 
-يتم إعادة توجيه المسارات القديمة عبر 308: `/dashboard/cli-tools` → `/dashboard/cli-code` و `/dashboard/agents` → `/dashboard/acp-agents`.
+تُعاد توجيه المسارات القديمة باستخدام 308:‏ `/dashboard/cli-tools` ← `/dashboard/cli-code`، و`/dashboard/agents` ← `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,11 @@ Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose /
 
 ---
 
-## التكوين التلقائي مع `setup-*`
+## التهيئة التلقائية باستخدام `setup-*`
 
-ليس عليك كتابة تكوين كل أداة يدويًا. يقوم OmniRoute بشحن أمر `setup-*` لكل CLI مدعوم يقرأ ملف** يعيش** كتالوج النموذج من OmniRoute قيد التشغيل (محلي أو بعيد) ويكتب التكوين الخاص بالأداة على جهازك:
+لا يتعين عليك كتابة إعدادات كل أداة يدويًا. يوفّر OmniRoute أمرًا من نوع `setup-*`
+لكل CLI مدعوم، يقرأ كتالوج النماذج **الفعلي** من نسخة OmniRoute قيد التشغيل
+(محلية أو بعيدة)، ثم يكتب إعدادات الأداة نفسها على جهازك:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,15 +58,52 @@ omniroute setup-5dive        omniroute setup-zed
 omniroute setup-whycodes
 ```
 
-يقبل كل منها `--remote <url> --api-key <key>` (تكوين أداة محلية مقابل OmniRoute عن بعد)، `--dry-run` (معاينة بدون كتابة)، و `--port`. الأدوات التي لا تحتوي على الاكتشاف التلقائي للنماذج (Cline و Kilo و Roo و Goose و Aider و Qwen و 5dive و WhyCodes) تأخذ `--model <id>` (و `--yes` لعمليات التشغيل غير التفاعلية). `setup-5dive` هي الوصفة الوحيدة التي لا تُكتب تحت `$HOME`: فهي تقوم بتكوين أسطول وكلاء 5dive عن طريق كتابة ملف تعريف مصادقة مملوك للجذر على مضيف الأسطول، لذلك يتم إعادة تنفيذه من خلال `sudo` وليس لديه وضع بعيد خاص به. لإطلاق CLI مع حقن البيئة الصحيحة وعدم كتابة أي تكوين على الإطلاق، استخدم مشغل `omniroute run <target>` العام (claude، codex، aider، goose، opencode، qwen،gemini، Whycodes - الأهداف والأسماء المستعارة تأتي من `bin/cli/cli-manifest.mjs`)؛ تظل أدوات الإطلاق القديمة لكل أداة `omniroute launch` (رمز Claude ) و `omniroute launch-codex` (Codex) متاحة. Gemini CLI هو إطلاق فقط: إنه هدف `omniroute run` ولكن لا يحتوي على وصفة `setup-*`/`configure`.
+يقبل كل أمر `--remote <url> --api-key <key>` (لتهيئة أداة محلية للعمل مع
+OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--port`. أما الأدوات
+التي لا تدعم الاكتشاف التلقائي للنماذج (Cline وKilo وRoo وGoose وAider وQwen و5dive وWhyCodes)، فتقبل
+`--model <id>` (وكذلك `--yes` للتشغيل غير التفاعلي). تُعد `setup-5dive` الوصفة
+الوحيدة التي لا تكتب ضمن `$HOME`: فهي تهيّئ مجموعة وكلاء 5dive عبر
+كتابة ملف تعريف مصادقة مملوك للمستخدم الجذر على مضيف المجموعة، ولذلك تعيد تنفيذ نفسها من خلال `sudo`
+ولا تملك وضعًا بعيدًا خاصًا بها. لتشغيل CLI مع
+حقن متغيرات البيئة الصحيحة ومن دون كتابة أي إعدادات على الإطلاق، استخدم مشغّل التشغيل العام
+`omniroute run <target>` (claude وcodex وaider وgoose وopencode وqwen وgemini
+وwhycodes — تأتي الأهداف والأسماء البديلة من `bin/cli/cli-manifest.mjs`)؛ وتظل
+مشغّلات التشغيل القديمة المخصصة لكل أداة، وهي `omniroute launch` ‏(Claude Code) و`omniroute launch-codex`
+‏(Codex)، متاحة. يدعم Gemini CLI التشغيل فقط: فهو هدف لـ `omniroute run`
+ولكن لا توجد له وصفة `setup-*`/`configure`.
 
-> **المرجع الكامل:** الجدول الرئيسي - ما يكتبه كل أمر، كل علم، محلي مقابل بعيد، والأدوات التي تريد لاحقة `/v1` - موجود في** [التكامل CLI](../guides/CLI-INTEGRATIONS.md)** .
+> **المرجع الكامل:** يوجد الجدول الرئيسي — الذي يوضّح ما يكتبه كل أمر، وجميع العلامات،
+> والوضع المحلي مقابل البعيد، والأدوات التي تتطلب اللاحقة `/v1` — في
+> **[تكاملات CLI](../guides/CLI-INTEGRATIONS.md)**.
 
-### تشغيل هذه داخل حاوية
+### تشغيل هذه الأوامر داخل حاوية
 
-يتم تنفيذ أمر `setup-*` داخل حاوية OmniRoute ويكتب في الصفحة الرئيسية للحاوية، والتي لا يقرأها أي مضيف CLI والتي تختفي مع الحاوية. يكتشف OmniRoute ذلك ويخرج من `2` بالتعليمات بدلاً من الكتابة. هناك طريقتان مدعومتان للمضي قدمًا - تثبيت CLI على المضيف و `omniroute connect` على الحاوية، أو ربط تثبيت config dirs وتعيين `CLI_CONFIG_HOME` (ملف تعريف `host` للإنشاء). كل أمر `setup-*` ، بالإضافة إلى `omniroute configure` و `omniroute config set`، يقبل `--allow-container-write` عندما يكون تكوين CLIs الخاص بالحاوية هو ما تقصده بالفعل؛ `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` يفعل نفس الشيء بالنسبة للخادم. راجع [دليل Docker → تكوين أدوات المضيف CLI](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+عند تنفيذ أمر `setup-*` داخل حاوية OmniRoute، فإنه يكتب في الدليل الرئيسي
+الخاص بالحاوية، والذي لا تقرؤه أي أداة CLI على المضيف ويختفي مع
+الحاوية. يكتشف OmniRoute ذلك وينهي التنفيذ بالرمز `2` مع عرض إرشادات بدلًا من
+الكتابة. توجد طريقتان مدعومتان للمتابعة — تثبيت CLI على المضيف ثم استخدام
+`omniroute connect` للاتصال بالحاوية، أو ربط أدلة الإعدادات عبر bind mount وضبط
+`CLI_CONFIG_HOME` (ملف تعريف compose المسمى `host`). يقبل كل أمر `setup-*`، بالإضافة إلى
+`omniroute configure` و`omniroute config set`،
+الخيار `--allow-container-write` عندما يكون المقصود فعليًا هو تهيئة أدوات CLI الخاصة بالحاوية؛
+ويؤدي `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` الوظيفة نفسها بالنسبة إلى
+الخادم. راجع
+[دليل Docker ← تهيئة أدوات CLI على المضيف](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-لوحة القيادة** تطبيق نقطة النهاية** (`POST /api/cli-tools/apply`) يفرض نفس الحراسة: في الحاوية، الكتابة التي لا يتم ربط هدفها من المضيف تجيب**`422`** باستخدام `containerEphemeralTarget: true`، نص الخطأ الآمن و- بالنسبة للأدوات التي تحتوي على وصفة مضيف (claude، codex، opencode، cline، Kilo، continue) - `hostSetupCommand` (على سبيل المثال `omniroute setup-opencode`) للتشغيل على المضيف بدلاً من ذلك؛ لم يتم كتابة أي شيء. يستمر `dryRun: true` في العمل في وضع الحاوية ويعيد مسار هدف + للمعاينة المنقحة دون لمس القرص. لا تعد معاينة المحتوى تكوينًا يحمل بيانات الاعتماد للنسخ أو الاستيراد. قم بالتطبيق باستخدام مدخلات tool/base URL/API key/model الأصلية على المضيف، أو استخدم أمر الإعداد من جانب المضيف المشار إليه. راجع [أمان تكوين CLI](../security/CLI-CONFIGURATION.md) لرأس المعاينة وطلب العقد. هذا السلوك مقصود ومحمي من الانحدار بواسطة `tests/unit/api/cli-tools/apply-container-guard.test.ts` - لا "تصلح" 422 أبدًا عن طريق إزالة الحماية.
+تفرض **نقطة نهاية التطبيق** في لوحة المعلومات (`POST /api/cli-tools/apply`)
+القيد نفسه: داخل حاوية، إذا لم يكن هدف الكتابة مرتبطًا من
+المضيف عبر bind mount، فستستجيب بالرمز **`422`** مع `containerEphemeralTarget: true`، ونص الخطأ
+الآمن، وكذلك — للأدوات التي لها وصفة خاصة بالمضيف (claude وcodex وopencode وcline
+وkilo وcontinue) — قيمة `hostSetupCommand` (مثل `omniroute setup-opencode`) لتشغيلها
+على المضيف بدلًا من ذلك؛ ولن تتم كتابة أي شيء. يظل `dryRun: true` يعمل في وضع
+الحاوية، ويعيد معاينة منقّحة ومسار الهدف من دون لمس القرص. محتوى المعاينة
+ليس إعدادًا يحتوي على بيانات اعتماد بغرض نسخه أو استيراده. نفّذ التطبيق باستخدام
+المدخلات الأصلية للأداة/عنوان URL الأساسي/مفتاح API/النموذج على المضيف، أو استخدم أمر
+الإعداد المشار إليه على جانب المضيف. راجع [أمان تهيئة CLI](../security/CLI-CONFIGURATION.md)
+للاطلاع على ترويسة المعاينة وعقد الطلب. هذا السلوك
+مقصود ومحمي من الانحدارات بواسطة
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — لا «تصلح» الخطأ 422 أبدًا
+عن طريق إزالة القيد.
 
 ---
 
@@ -107,61 +146,61 @@ omniroute setup-whycodes
 
 ---
 
-## 1. كتالوج CLI Code (28 أداة)
+## 1. كتالوج CLI Code ‏(28 أداة)
 
-جميع الأدوات التي تظهر في `/dashboard/cli-code`. يتم توصيل الأشخاص الذين لديهم `baseUrlSupport: none` عبر MITM أو دليل يدوي بدلاً من قاعدة مخصصة URL:
+جميع الأدوات التي تظهر في `/dashboard/cli-code`. الأدوات التي تحمل `baseUrlSupport: none` تُربط عبر MITM أو دليل يدوي بدلًا من عنوان URL أساسي مخصص:
 
-| بطاقة تعريف    | اسم                      | بائع                  | baseUrlSupport | configType | acpSpawnable |
-| -------------- | ------------------------ | --------------------- | -------------- | ---------- | ------------ |
-| كلود           | كود Claude               | Anthropic             | ممتلىء         | بيئة       | حقيقي        |
-| المخطوطة       | OpenAI Codex CLI         | OpenAI                | ممتلىء         | مخصص       | حقيقي        |
-| com.zcode      | ZCode (خطة الترميز GLM ) | Z.ai                  | لا أحد         | مخصص       | خطأ شنيع     |
-| كلاين          | Cline                    | OSS (كلود ديف سابقًا) | ممتلىء         | مخصص       | حقيقي        |
-| كيلو           | كود الكيلو               | كيلو-Org              | ممتلىء         | مخصص       | خطأ شنيع     |
-| رو             | كود رو                   | رو (OSS)              | ممتلىء         | مرشد       | خطأ شنيع     |
-| يكمل           | يكمل                     | continue.dev          | ممتلىء         | مرشد       | خطأ شنيع     |
-| مساعد          | مساعد                    | OSS (ب. غوتييه)       | ممتلىء         | مرشد       | حقيقي        |
-| صياغة          | ForgeCode                | تناقض HQ              | ممتلىء         | مخصص       | حقيقي        |
-| jcode          | jcode                    | 1جيهوانغ (OSS)        | ممتلىء         | مخصص       | خطأ شنيع     |
-| Deepseek-tui   | DeepSeek TUI             | هانتر باون (OSS)      | ممتلىء         | مخصص       | خطأ شنيع     |
-| الحوت الكودي   | CodeWhale                | همبون (OSS)           | ممتلىء         | مخصص       | خطأ شنيع     |
-| opencode       | OpenCode                 | شذوذ (SST سابقًا)     | ممتلىء         | مرشد       | حقيقي        |
-| الروبوت        | الروبوت المصنع           | مصنع AI               | جزئي           | مرشد       | خطأ شنيع     |
-| مساعد الطيار   | GitHub Copilot CLI       | GitHub/MS             | ممتلىء         | مخصص       | خطأ شنيع     |
-| المؤشر CLI     | Cursor CLI               | في أي مكان            | جزئي           | مرشد       | حقيقي        |
-| الهف           | الهف                     | ليونارد سيسر (OSS)    | ممتلىء         | مخصص       | خطأ شنيع     |
-| باي            | Pi (عامل ترميز pi)       | م. زيتشنر (OSS)       | ممتلىء         | مخصص       | خطأ شنيع     |
-| grok-build     | بناء Grok                | xAI                   | ممتلىء         | مخصص       | خطأ شنيع     |
-| معجب           | معجب                     | OSS (سحر)             | ممتلىء         | مخصص       | خطأ شنيع     |
-| كوين           | كود Qwen                 | Alibaba               | ممتلىء         | مرشد       | حقيقي        |
-| com.openclaude | OpenClaude               | جيتلاوب (OSS)         | ممتلىء         | مرشد       | خطأ شنيع     |
-| زيد            | Zed                      | صناعات Zed            | ممتلىء         | مرشد       | خطأ شنيع     |
-| المؤشر         | Cursor                   | في أي مكان            | لا أحد         | مرشد       | خطأ شنيع     |
-| مضاد الجاذبية  | Antigravity              | Google                | لا أحد         | ميتم       | خطأ شنيع     |
-| هيرميس         | هيرميس                   | أبحاث نوس             | لا أحد         | مرشد       | خطأ شنيع     |
-| كيرو           | Kiro AI                  | Amazon                | لا أحد         | ميتم       | خطأ شنيع     |
-| مخصص           | CLI مخصصة                | —                     | ممتلىء         | منشئ مخصص  | خطأ شنيع     |
+| المعرّف      | الاسم                   | المورّد             | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-تعرض الأدوات التي تحتوي على `baseUrlSupport: "partial"` شارة "⚠ Base URL parcial" في بطاقة لوحة القيادة.
+تُظهر الأدوات التي تحمل `baseUrlSupport: "partial"` شارة "⚠ عنوان URL الأساسي جزئي" في بطاقة لوحة المعلومات.
 ---
 
-## 2. كتالوج وكلاء CLI (11 أداة)
+## 2. كتالوج وكلاء CLI (11 أدوات)
 
 الوكلاء المستقلون الذين يظهرون في `/dashboard/cli-agents`:
 
-| بطاقة تعريف    | اسم              | بائع               | baseUrlSupport | com.acpSpawnable |
-| -------------- | ---------------- | ------------------ | -------------- | ---------------- |
-| وكيل هيرميس    | وكيل هيرميس      | أبحاث نوس          | ممتلىء         | خطأ شنيع         |
-| openclaw       | OpenClaw         | OSS (ب. شتاينبرجر) | ممتلىء         | حقيقي            |
-| أوزة           | أوزة             | مؤسسة كتلة/ Linux  | ممتلىء         | حقيقي            |
-| مترجم          | افتح المترجم     | OSS                | ممتلىء         | حقيقي            |
-| انفتل          | Warp AI          | شركة Warp          | جزئي           | حقيقي            |
-| سطح السفينة    | وكيل سطح السفينة | اشيشجوبلاني (OSS)  | ممتلىء         | خطأ شنيع         |
-| com.omp        | يا ماي بي        | OSS                | ممتلىء         | حقيقي            |
-| Letta          | ليتا CLI         | ليتا               | ممتلىء         | خطأ شنيع         |
-| الوكيل الرئيسي | الوكيل الرئيسي   | رئيس الفكر (OSS)   | ممتلىء         | خطأ شنيع         |
-| 5dive          | 5dive            | OSS (5dive-ai)     | ممتلىء         | خطأ شنيع         |
-| howcodes       | WhyCodes         | لماذا شركة         | ممتلىء         | خطأ شنيع         |
+| id           | الاسم            | المورّد                  | دعم baseUrl | قابل للتشغيل عبر ACP |
+| ------------ | ---------------- | ------------------------ | ----------- | -------------------- |
+| hermes-agent | Hermes Agent     | Nous Research            | full        | false                |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full        | true                 |
+| goose        | Goose            | Block / Linux Foundation | full        | true                 |
+| interpreter  | Open Interpreter | OSS                      | full        | true                 |
+| warp         | Warp AI          | Warp Inc.                | partial     | true                 |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full        | false                |
+| omp          | Oh My Pi         | OSS                      | full        | true                 |
+| letta        | Letta CLI        | Letta                    | full        | false                |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full        | false                |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full        | false                |
+| whycodes     | WhyCodes         | Why Corporation          | full        | false                |
 
 ---
 
@@ -222,20 +261,20 @@ interface ToolBatchStatus {
 
 ## 6. معالجات الإعدادات للأدوات الجديدة
 
-الأدوات الجديدة مع `configType: "custom"` لها إعدادات مخصصة لمسارات API :
+تحتوي الأدوات الجديدة ذات `configType: "custom"` على مسارات API مخصصة للإعدادات:
 
-| طريق                                        | أداة                                                             |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | جي كود (علم --base-url )                                         |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL، تراث)                             |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | الهف                                                             |
-| `POST /api/cli-tools/pi-settings`           | وكيل ترميز Pi (`~/.pi/agent/models.json`، `providers.omniroute`) |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | كود Qwen (`~/.qwen/settings.json` + مفتاح `.env` مخصص)           |
+| المسار                                      | الأداة                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode ‏(.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode ‏(علامة `--base-url`)                                         |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI ‏(OPENAI_BASE_URL، قديم)                               |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale ‏(OPENAI_BASE_URL، أساسي + مزامنة قديمة مع `~/.deepseek`) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                               |
+| `POST /api/cli-tools/pi-settings`           | وكيل البرمجة Pi (`~/.pi/agent/models.json`, `providers.omniroute`)  |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build ‏(~/.grok/config.toml، `[model.omniroute]`)              |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code ‏(`~/.qwen/settings.json` + مفتاح `.env` مخصص)            |
 
-تستخدم جميع المسارات `sanitizeErrorMessage()` للاستجابات للأخطاء (القاعدة الصعبة رقم 12).
+تستخدم جميع المسارات `sanitizeErrorMessage()` لاستجابات الأخطاء (القاعدة الصارمة رقم 12).
 
 ---
 
@@ -292,21 +331,21 @@ interface ToolBatchStatus {
 
 ---
 
-## 9. البداية السريعة
+## 9. البدء السريع
 
-### الخطوة 1 — احصل على مفتاح OmniRoute API
+### الخطوة 1 — الحصول على مفتاح OmniRoute API
 
-1. افتح `/dashboard/api-manager` →** إنشاء مفتاح API**
-2. أعطه اسمًا (على سبيل المثال `cli-tools`) وحدد كافة الأذونات
-3. انسخ المفتاح — الذي ستحتاج إليه لكل CLI أدناه
+1. افتح `/dashboard/api-manager` ← **إنشاء مفتاح API**
+2. امنحه اسمًا (مثل `cli-tools`) وحدد جميع الأذونات
+3. انسخ المفتاح — ستحتاج إليه مع كل أداة CLI أدناه
 
-> يبدو مفتاحك مثل: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> يبدو مفتاحك على النحو التالي: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
 ### الخطوة 2 — تثبيت أدوات CLI
 
-تتطلب جميع الأدوات المستندة إلى npm Node.js 22.22.2 + أو 24.x:
+تتطلب جميع الأدوات المستندة إلى npm إصدار Node.js 22.22.2+ أو 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -327,57 +366,58 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (يمكن تشغيله عبر `omniroute run gemini` ← واجهة /v1beta)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-based
+cargo install smelt  # مستند إلى Rust
 
-# Pi coding agent
+# وكيل البرمجة Pi
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# see https://github.com/1jehuang/jcode for install
+# راجع https://github.com/1jehuang/jcode لمعرفة كيفية التثبيت
 ```
 
 ---
 
-### الخطوة 3 — قم بالتكوين عبر لوحة المعلومات
+### الخطوة 3 — الإعداد عبر لوحة المعلومات
 
-1. اذهب الى `http://localhost:20128/dashboard/cli-code`
+1. انتقل إلى `http://localhost:20128/dashboard/cli-code`
 2. ابحث عن أداتك في الشبكة
-3. انقر فوق البطاقة لفتح صفحة تفاصيل الأداة
-4. حدد مفتاح API وقاعدة URL
-5. انقر** تطبيق التكوين** أو انسخ مقتطف التكوين اليدوي
+3. انقر على البطاقة لفتح صفحة تفاصيل الأداة
+4. حدد مفتاح API وعنوان URL الأساسي
+5. انقر على **تطبيق الإعداد** أو انسخ مقتطف الإعداد اليدوي
 
 ---
 
-### الخطوة 4 — قم بتعيين متغيرات البيئة العالمية
+### الخطوة 4 — تعيين متغيرات البيئة العامة
 
 ```bash
-# OmniRoute Universal Endpoint
+# نقطة نهاية OmniRoute الموحّدة
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
+# يقرأ Gemini CLI المتغير GOOGLE_GEMINI_BASE_URL عند الجذر (وتضيف حزمة SDK الخاصة به /v1beta/... بنفسها)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> ل** الخادم البعيد** استبدل `localhost:20128` بالخادم IP أو المجال، على سبيل المثال `http://<your-server-ip>:20128`.
+> بالنسبة إلى **خادم بعيد**، استبدل `localhost:20128` بعنوان IP للخادم أو اسم النطاق،
+> مثل `http://<your-server-ip>:20128`.
 
 ---
 
-### الخطوة 4 — قم بتكوين كل أداة
+### الخطوة 4 — إعداد كل أداة
 
-#### كود Claude
+#### Claude Code
 
 ```bash
-# Create ~/.claude/settings.json:
+# أنشئ ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,15 +428,18 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-استخدم جذر بوابة Anthropic الموحد لرمز Claude. لا تقم بإلحاق `/v1` هنا.
+استخدم جذر بوابة Anthropic الموحّدة مع Claude Code. لا تُلحق `/v1` هنا.
 
-**امتحان:** `claude "say hello"`
+**الاختبار:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Codex الحديثة (v0.137 +) تقرأ `~/.codex/config.toml` فقط — ينتمي `config.yaml` القديم إلى npm CLI القديم ويتم تجاهله بصمت. يبقى المفتاح API في متغير البيئة `OMNIROUTE_API_KEY` (`env_key`)، وليس داخل الملف أبدًا:
+يقرأ Codex الحديث (v0.137+) الملف `~/.codex/config.toml` فقط — أما ملف
+`config.yaml` القديم فيخص واجهة npm CLI القديمة ويتم تجاهله بصمت. يبقى مفتاح API
+في متغير البيئة `OMNIROUTE_API_KEY`‏ (`env_key`)، ولا يوضع مطلقًا
+داخل الملف:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -411,9 +454,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-مرجع كامل (ملفات التعريف، `wire_api`، نوافذ السياق): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+المرجع الكامل (ملفات التعريف، `wire_api`، نوافذ السياق): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**امتحان:** `codex "what is 2+2?"`
+**الاختبار:** `codex "what is 2+2?"`
 
 ---
 
@@ -442,17 +485,19 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**امتحان:** `opencode`
+**الاختبار:** `opencode`
 
-> استخدم `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` لإرسال متغيرات التفكير.
+> استخدم `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
+> لإرسال متغيرات التفكير.
 
 ---
 
-#### وكيل ترميز باي
+#### Pi Coding Agent
 
-قم بتثبيت حزمة Pi Coding Agent الرسمية باستخدام `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. يقرأ Pi موفري الخدمة المخصصين من `~/.pi/agent/models.json`؛ اضبط `PI_CODING_AGENT_DIR` لنقل دليل الوكيل بالكامل. تتبع لوحة القيادة هذا التجاوز. لا تكتشف Pi نماذج من نقاط النهاية المخصصة، لذلك يكتب OmniRoute النموذج المحدد في `models[]` باستخدام `openai-completions` API الخاص بـ Pi ونقطة النهاية `/v1` المتوافقة مع OmniRoute OpenAI.
+ثبّت حزمة Pi Coding Agent الرسمية باستخدام `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. يقرأ Pi المزوّدين المخصصين من `~/.pi/agent/models.json`؛ واضبط `PI_CODING_AGENT_DIR` على مسار مطلق (أو مسار يبدأ بـ`~`) لنقل دليل الوكيل كاملًا. تتبع لوحة التحكم هذا التجاوز. لا يكتشف Pi النماذج من نقاط النهاية المخصصة، لذا يكتب OmniRoute النموذج المحدد في `models[]` باستخدام API `openai-completions` الخاص بـPi ونقطة نهاية OmniRoute المتوافقة مع OpenAI وهي `/v1`.
 
-في** أدوات CLI → Pi** ، واختر نقطة النهاية، ومفتاح API ، والنموذج، وراجع معاينة الموفر، ثم قم بالتطبيق. المعاينة عبارة عن جزء من الموفر: قم بدمج `providers.omniroute` في `models.json` الموجود لديك عند تكوين Pi يدويًا حتى يظل الموفرون والإعدادات الأخرى سليمة.
+في **أدوات CLI → Pi**، اختر نقطة نهاية ومفتاح API ونموذجًا، وراجع معاينة المزوّد، ثم طبّق. المعاينة مقطع لمزوّد: ادمج `providers.omniroute` في `models.json` الموجود عند إعداد Pi يدويًا، للحفاظ على المزوّدين والإعدادات الأخرى.
 
 ```json
 {
@@ -469,19 +514,21 @@ EOF
 }
 ```
 
-يقوم Pi بإعادة تحميل `models.json` عند فتح `/model`. اختبر المسار الذي تم تكوينه باستخدام معرف الموفر ومعرف النموذج الذي حددته:
+يعيد Pi تحميل `models.json` عند فتح `/model`. اختبر المسار المضبوط بمعرّف المزوّد ومعرّف النموذج اللذين اخترتهما:
 
 ```bash
 pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
 ```
 
-المراجع: [نماذج Pi والموفرون المخصصون](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md) ، [ومتغيرات بيئة Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md) ، [وتعليمات تثبيت Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+المراجع: [نماذج Pi والمزوّدون المخصصون](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)،
+[متغيرات بيئة Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)،
+[تعليمات تثبيت Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 
-#### Cline (رمز CLI أو VS )
+#### Cline (واجهة CLI أو VS Code)
 
-**وضع CLI :**
+**وضع CLI:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -493,21 +540,22 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**وضع كود VS :** إعدادات ملحق Cline → API الموفر: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
+**وضع VS Code:**
+إعدادات إضافة Cline ← موفر API:‏ `OpenAI Compatible` ← عنوان URL الأساسي: `http://localhost:20128/v1`
 
-أو استخدم لوحة القيادة OmniRoute →** أدوات CLI → Cline → تطبيق التكوين** .
+أو استخدم لوحة معلومات OmniRoute ← **أدوات CLI ← Cline ← تطبيق الإعداد**.
 
 ---
 
-#### KiloCode (رمز CLI أو VS )
+#### KiloCode (واجهة CLI أو VS Code)
 
-**وضع CLI :**
+**وضع CLI:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**إعدادات كود VS :**
+**إعدادات VS Code:**
 
 ```json
 {
@@ -516,13 +564,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-أو استخدم لوحة القيادة OmniRoute →** أدوات CLI → KiloCode → تطبيق التكوين** .
+أو استخدم لوحة معلومات OmniRoute ← **أدوات CLI ← KiloCode ← تطبيق الإعداد**.
 
 ---
 
-#### متابعة (ملحق كود VS )
+#### Continue (إضافة VS Code)
 
-تحرير `~/.continue/config.yaml`:
+حرّر `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -538,16 +586,16 @@ models:
 
 ---
 
-#### VS كود المطلعين (`chatLanguageModels.json`)
+#### VS Code Insiders (`chatLanguageModels.json`)
 
-استخدم هذا عندما يتم تكوين VS Code Insiders لنماذج نقطة النهاية المخصصة وتريد أن يعمل OmniRoute بدون حقل رأس مخصص.
+استخدم هذا عندما يكون VS Code Insiders مهيّأً لنماذج نقاط نهاية مخصصة، وتريد أن يعمل OmniRoute من دون حقل ترويسة مخصص.
 
 **الموقع الموصى به:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**مثال باستخدام الاسم المستعار OmniRoute المميز:**
+**مثال باستخدام الاسم المستعار المرمّز لـ OmniRoute:**
 
 ```json
 [
@@ -569,28 +617,29 @@ models:
 ]
 ```
 
-**ملحوظات:**
+**ملاحظات:**
 
-- استبدل `sk-your-omniroute-key` بمفتاح API الذي تم إنشاؤه في OmniRoute.
+- استبدل `sk-your-omniroute-key` بمفتاح API تم إنشاؤه في OmniRoute.
 - يجب أن يشير الحقل `url` إلى `/api/v1/vscode/{token}/chat/completions`.
 - يجب أن يشير الحقل `modelsUrl` إلى `/api/v1/vscode/{token}/models`.
-- تفضل تدفق رأس `/v1` + Bearer العادي عندما يدعم العميل الرؤوس المخصصة.
-- تعد الرموز المميزة المضمنة في عنوان URL بمثابة بديل للتوافق وقد تظهر في سجلات المحرر أو سجل الوكيل.
+- يُفضّل استخدام المسار المعتاد `/v1` مع ترويسة Bearer عندما يدعم العميل الترويسات المخصصة.
+- تُعد الرموز المضمّنة في عناوين URL خيارًا احتياطيًا للتوافق، وقد تظهر في سجلات المحرر أو سجل الوكيل.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Login to your AWS/Kiro account:
+# سجّل الدخول إلى حساب AWS/Kiro الخاص بك:
 kiro-cli login
 
-# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
-# Use kiro-cli alongside OmniRoute for other tools.
+# تستخدم CLI مصادقتها الخاصة — لا يلزم OmniRoute كخلفية لـ Kiro CLI نفسها.
+# استخدم kiro-cli إلى جانب OmniRoute للأدوات الأخرى.
 kiro-cli status
 ```
 
-ل**Kiro IDE** تطبيق سطح المكتب، استخدم نقطة النهاية MITM التي تم الكشف عنها بواسطة OmniRoute ضمن `/dashboard/cli-tools → Kiro`.
+بالنسبة إلى تطبيق سطح المكتب **Kiro IDE**، استخدم نقطة نهاية MITM التي يوفّرها OmniRoute
+ضمن `/dashboard/cli-tools → Kiro`.
 
 ---
 

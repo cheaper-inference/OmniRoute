@@ -18,18 +18,32 @@ OmniRoute na-ebipụta npm + Docker artifacts. Ọnụ ụzọ ndị a na-enye a
 
 CVE ratchet nke onyonyo na-eji **usoro abụọ** na `docker-publish.yml`: usoro SARIF (`HIGH,CRITICAL`, `exit-code: 0`) na-eme ka HIGH+CRITICAL pụta ìhè na taabụ Nchedo n'egbochighị; usoro _ọnụ ụzọ CRITICAL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) na-eme ka mwepụta ahụ daa na CRITICAL CVE **nke nwere ndozi dịnụ**. `ignore-unfixed` na-egbochi igbochi mwepụta maka CVE onyonyo-isi na-enweghị patch sitere n'elu.
 
-## ⚠️ Ọdịiche CVE (na-egbochi ọnụ ụzọ osv/Trivy)
+## ⚠️ Mgbanwe CVE (ọnụ ụzọ osv/Trivy na-egbochi)
 
-osv na Trivy na-atụnyere deps megide nchekwa data CVE ndị **na-eto eto mgbe niile**. PR nke **na-emetụghị ihe ọ bụla dabere na ya** nwere ike ịghọ ọbara ọbara na mberede n'ihi na ekpughere CVE ọhụrụ na dep dị adị (osv: `vulnCount` tụrụ atụ > baseline; Trivy: CRITICAL ọhụrụ a ga-edozi na onyonyo ahụ). **Nke a bụ omume ọrụ a na-atụ anya ya nke ọnụ ụzọ CVE na-egbochi, ọ bụghị mbelata ngwaahịa.**
+osv na Trivy na-atụnyere ndabere megide ọdụ data CVE ndị **na-eto mgbe niile**. PR
+nke **na-adịghị agbanwe ndabere ọ bụla** nwere ike ịgbanwe na mberede gaa na uhie n’ihi na e
+kpughere CVE ọhụrụ n’ime ndabere dị adị (osv: `vulnCount` a tụrụ > ntọala mbụ; Trivy: CRITICAL
+ọhụrụ a pụrụ idozi n’ime image ahụ). **Nke a bụ omume arụmọrụ A TỤRỤ ANYA nke ọnụ ụzọ
+CVE na-egbochi, ọ bụghị ndaghachi azụ nke ngwaahịa ahụ.**
 
-Mgbe osv ma ọ bụ Trivy ghọrọ ọbara ọbara n'ihi CVE ekpughere ọhụrụ, ngwọta ya bụ:
+Mgbe osv ma ọ bụ Trivy ghọrọ uhie n’ihi CVE ekpughere ọhụrụ, ihe ngwọta bụ:
 
-1.  **Bulie dep emetụtara** (nke kacha mma) — kwalite na ụdị e doziri site na `package.json` `overrides` (transitive deps) ma ọ bụ wughachi onyonyo ahụ na ntọala e doziri.
-2.  **Ọ bụrụ na enweghị ndozi sitere n'elu:**
-    - **osv:** megharịa baseline `metrics.vulnCount` na `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` anaghị ekpuchi ọnụ ụzọ raara onwe ya nye — dezie uru ahụ n'aka, `direction:down`) ya na ndetu nkwado + nsogbu nsochi.
-    - **Trivy:** tinye ntinye na `.trivyignore` (CVE-ID kwa ahịrị) ya na nkọwa nkwado + nsogbu nsochi. `ignore-unfixed: true` ekpuchilarị CVEs na-enweghị patches na-akpaghị aka.
+1. **Bulie ụdị ndabere emetụtara** (nke ka mma) — kwalite gaa na ụdị e doziri site na `package.json`
+   `overrides` (ndabere transitive) ma ọ bụ wughachi image ahụ n’elu base e doziri.
+2. **Ọ bụrụ na mmezi adịghị:** jigide nchoputa a tụrụ wee soro ndabere ma ọ bụ onyonyo emetụtara. Ewelitela usoro adịghị ike iji mee ka onye ndoro-ndoro ochichi dara ada gafere. Trivy's `ignore-unfixed: true` ewepụlarị adịghị ike onyonyo na-enweghị patch dị elu. Ewepụghị ihe ọ bụla chọrọ elele ID adịghị ike , ụzọ ngwugwu kpọmkwem, njedebe na nsochi okwu na amụma; ọ bụghị akpaghị aka nsonaazụ nyocha dara ada.
 
-Ọnụ ụzọ abụọ ahụ **na-agafe nwayọ** (exit 0) mgbe ngwa ọrụ adịghị ma ọ bụ mgbe nlele ahụ daa (osv-scanner adịghị na PATH, osv.dev/network enweghị ike iru, JSON ezighi ezi) — ọdịda **nlele** anaghị egbochi, naanị mbelata **tụrụ atụ** ka na-egbochi.
+Mmezu OSV ndị a chọrọ (`check:vuln-ratchet -- --ratchet`) na-emechi ma daa site na
+`INCOMPLETE` na exit 2 mgbe enweghị ike ịkwado scanner, report, ma ọ bụ baseline.
+Ndaghachi azụ a tụrụ na-eji exit 1. Mmezu advisory ka nwere ike ịkọ `SKIP` na
+exit 0, nke na-adịghị egosi na ndabere gafere scan ahụ. Nzọụkwụ Trivy na-egbochi
+chọkwara nha gara nke ọma: tools ndị adịghị, jobs dara ada, na enweghị ihe akaebe image
+enweghị ike ikwenye na image ahụ dị ọcha.
+
+## Iwu nyocha onyonyo
+
+`.trivyignore.yaml` dị ugbu a enweghị ihe ewepụrụ adịghị ike. `npm run check:trivy-ignore-policy` kwadoro amụma ahaziri na profaịlụ nyocha mpaghara, CI na Ogo. IDs amaghi ama, ụzọ sara mbara, ndenye oyiri na ewepu mebie ajụ; ihe nketa `.trivyignore` abụghị ntinye na nyocha ndị akwagara.
+
+Docker na-enyocha ngwá ọrụ amụma site na `github.workflow_sha` yana amụma isi mmalite ihe oyiyi yana otu onye na-ahọrọ isi mmalite dị ka ihe nrụpụta. Onye na-ahọpụta amụma jụrụ obosara na-adakọghị ma na-akwado otu faịlụ maka nyocha Trivy abụọ ahụ. Isi mmalite akụkọ ihe mere eme na-enweghị amụma ahaziri ahazi anaghị enweta ihe ọ bụla. Abụọ nyochara pin Trivy `v0.70.0`. Nkwenye iwu kwadoro nhazi nhazi; onyonyo ka chọrọ nyocha nke ọma.
 
 ## Ihe egwu ndabere ezumike nka
 

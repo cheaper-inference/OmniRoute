@@ -488,7 +488,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `pollinations`, `qoder`, plus `devin-desktop` `petals` බෙදාගත් අනන්‍යතා සහායකයා) සහ `claudeIdentity.ts` (රෙජිස්ට්‍රිය) `index.ts`
 
-> සටහන: මෙහි ලැයිස්තුගත කර නොමැති සපයන්නන් සඳහා සාමාන්‍ය OpenAI-අනුකූල ක්‍රියාකාරකය භාවිතයෙන් `default.ts` විසින් සේවය කරනු ලැබේ. සම්පූර්ණ සැපයුම්කරුවන්ගේ නාමාවලිය (සපයන්නන් 381) `src/shared/constants/providers.ts` හි වාසය කරයි.
+> සටහන: මෙහි ලැයිස්තුගත කර නොමැති සපයන්නන් සඳහා සාමාන්‍ය OpenAI-අනුකූල ක්‍රියාකාරකය භාවිතයෙන් `default.ts` විසින් සේවය කරනු ලැබේ. සම්පූර්ණ සැපයුම්කරුවන්ගේ නාමාවලිය (සපයන්නන් 388) `src/shared/constants/providers.ts` හි වාසය කරයි.
 
 ### 4.3 `open-sse/translator/`
 
@@ -737,7 +737,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` විස්තාරණය කරන්න).
 2. `src/shared/constants/mcpScopes.ts` තුළ සුදුසු scope එක හෝ scopes පවරන්න.
 3. `open-sse/mcp-server/server.ts` තුළ tool එක ලියාපදිංචි කරන්න.
-4. `open-sse/mcp-server/__tests__/` යටතේ පරීක්ෂණ එක් කරන්න.
+4. `tests/unit/` යටතේ පරීක්ෂණ එක් කරන්න.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) යාවත්කාලීන කරන්න.
 
 ### නව A2A skill එකක් එක් කිරීම
@@ -755,7 +755,7 @@ bin/
 - **නාමකරණය**: files සඳහා `camelCase` හෝ `kebab-case`, components සඳහා `PascalCase`,
   constants සඳහා `UPPER_SNAKE`.
 - **ESLint**: සෑම තැනකම `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/` සහ `tests/` තුළ `no-explicit-any` = `warn`, අනෙක් ස්ථානවල error.
+  `open-sse/**/*.ts` සහ `tests/**/*.ts` තුළ `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (පැරණි ස්ථාවරය). modules අතර සීමා සඳහා
   inference වෙනුවට පැහැදිලි types භාවිත කිරීමට ප්රමුඛත්වය දෙන්න.
 - **දත්ත සමුදාය**: routes හෝ handlers තුළ කිසිවිටෙක raw SQL නොලියන්න — සැමවිටම
@@ -784,8 +784,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. කිසිවිටෙක `main` වෙත සෘජුව commit නොකරන්න.
-- **Husky**: pre-commit විසින් `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ධාවනය කරයි; pre-push විසින් `check:any-budget:t11` + `check:tracked-artifacts` ධාවනය කරයි (වේගවත් gates; `test:unit` බැහැර කරයි).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

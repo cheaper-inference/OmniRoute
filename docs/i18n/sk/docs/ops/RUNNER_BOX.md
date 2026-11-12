@@ -4,68 +4,42 @@
 
 ---
 
-Samostatne hostovaný fond beží na serveri **.113** (`tomni-proxmox-113`). Od 2026-10-18 má každý
-runner OmniRoute **jednu úlohu**, jeden štítok a pamäťový/CPU rozpočet nastavený podľa nameranej
-záťaže. Slot Turbopack má zdroje potrebné na zostavenie; ostatné sloty sú dimenzované podľa svojich
-nameraných špičiek. Server prekračuje dostupnú kapacitu iba vtedy, keď sa zostavenie Turbopack prekrýva
-so zostavením webpack pre Release-Green a úlohou lint; túto situáciu absorbuje swap hostiteľa (16 GB),
-a keďže zostavenia pre pull requesty bežia na hostovanej infraštruktúre, slot Turbopack je väčšinu času nečinný:
+Samoobslužný bazén beží na **.113** box (`tomni-proxmox-113`). Od 2026-10-18 má každý bežec OmniRoute**jednu rolu** , jeden štítok a rozpočet memory/CPU dimenzovaný na to, čo merala jeho pracovná záťaž. Slot Turbopack dostane to, čo zostava potrebuje; ostatné sloty sú dimenzované na ich namerané vrcholy. Box sa prekoná iba vtedy, keď sa zostava Turbopack zhoduje so zostavou webového balíka Release-Green a úlohou lint; swap hostiteľa (16 GB) to absorbuje, a keďže zostavy s požiadavkou na stiahnutie bežia hosťované, slot Turbopack je väčšinu času nečinný:
 
-| runner               | štítok           | úloha                                                                                                                                                  | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`     | zostavenia Turbopack: `ci.yml` `Build` (iba push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nočné zostavenie a11y | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`), zostavenie webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`     | nočné úlohy (Schemathesis, promptfoo, garak, k6) a `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`     | rovnaký fond ako vyššie                                                                                                                                | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (ich repozitáre) | iba Dependabot (špička 155 MB pre každý, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200 % pre každý |
+| bežec                | štítok                          | úlohu                                                                                                                                                  | `MemoryHigh` / `MemoryMax`  | `CPUQuota`  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Zostavy Turbopack : `ci.yml` `Build` (iba push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nočná zostava 11 rokov | 56 GB / 60 GB (swap 0)      | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), zostava webového balíka                                                                                | 20 GB / 24 GB (výmena 4 GB) | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | nočné (Schemathesis, promptfoo, garak, k6) a `quality.yml` `lint-guard`                                                                                | 12 GB / 16 GB (swap 4 GB)   | 600 %       |
+| `omniroute-113`      | `omni-light`                    | rovnaký bazén ako vyššie                                                                                                                               | 8 GB / 12 GB                | 400 %       |
+| OmniHeuris, OmniMind | (ich repo)                      | Iba Dependabot (vrchol 155 MB každý, 2026-10-18)                                                                                                       | 4 GB / 6 GB                 | 200 % každý |
 
 Merané 2026-10-18:
 
-| zdroj     | hodnota                                | čo to znamená pre plánovanie                                                                                                                                                                                                                                                                                                                                                                           |
-| --------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RAM / CPU | **78 GB / 32 jadier**                  | produkčné zostavenie Turbopack dosiahlo bez obmedzenia špičku 49 GB (`tests/unit/ci-build-bundler-webpack.test.ts`); v Next 16.3.8 samotná fáza kompilácie zaberá ~40 GB (36 GB RSS v `next-build` plus 17 procesov loadera po 3 GB, merané 2026-10-18); zostavenie webpack približne 14–16 GB. Jedno zostavenie Turbopack a jedno zostavenie webpack sa zmestia súčasne; dve zostavenia Turbopack nie |
-| swap      | 16 GB                                  | `omniroute-113-5` beží s vypnutým swapom (`MemorySwapMax=0`), takže nekontrolované zostavenie sa ukončí pri dosiahnutí svojho limitu namiesto toho, aby server začal swapovať                                                                                                                                                                                                                          |
-| `/tmp`    | **12 GB tmpfs = RAM**                  | všetko, čo sa tam uloží, zaberá pamäť; zvyšky sa odstraňujú po 3 h                                                                                                                                                                                                                                                                                                                                     |
-| CPU       | zaznamenané zaťaženie 60 na 32 jadrách | pred zavedením kvót jedno zostavenie Turbopack (~1166 % CPU) spolu so súpravou testov pokrytia na tom istom serveri pripravili ostatné listenery o heartbeat komunikáciu (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                         |
-| runnery   | **7 listenerov** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nesie aj `omni-build`; `omniroute-113-3/-4/-8` boli z repozitára odstránené (2026-10-28)                                                                                                                                                                                                                                                        |
+| zdroj     | hodnotu                               | čo to znamená pre plánovanie                                                                                                                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 jadier**                 | produkčná zostava Turbopack dosiahla vrchol na 49 GB bez obmedzenia (`tests/unit/ci-build-bundler-webpack.test.ts`); na Next 16.3.8 samotná fáza kompilácie obsahuje ~ 40 GB (36 GB RSS v `next-build` plus 17 pracovníkov nakladača pri 3 GB, merané 2026-10-18); webový balík zostavený na ~ 14–16 GB. Jedna zostava Turbopack + jeden webpack do seba zapadajú; dve zostavy Turbopack nie |
+| vymeniť   | 16 GB                                 | `omniroute-113-5` beží s vypnutým swapom (`MemorySwapMax=0`), takže bežiaca zostava je odrezaná na vrchu namiesto výmeny krabice                                                                                                                                                                                                                                                             |
+| `/tmp`    | **12 GB tmpfs = RAM**                 | všetko, čo je tam zaparkované, je pamäť; zvyšky sa pozametajú po 3 hodinách                                                                                                                                                                                                                                                                                                                  |
+| CPU       | pozorované zaťaženie 60 na 32 jadrách | pred kvótami jedna zostava Turbopack (~ 1166 % CPU) plus súprava pokrytia na rovnakom boxe vyhladovala tlkot srdca ostatných poslucháčov (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                               |
+| bežcov    | **7 poslucháčov** (2026-10-28)        | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` tiež nesie `omni-build-60gb`; `omniroute-113-3/-4/-8` boli vymazané z repozitára (2026-10-28)                                                                                                                                                                                                                                         |
 
-Limity sa nachádzajú v súbore `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-každej jednotky (predchádzajúce hodnoty sú uložené ako `override.conf.bak-20261018`) a boli aplikované
-za behu pomocou `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez
-reštartu, takže nebola ovplyvnená žiadna spustená úloha. Štítky sa menia prostredníctvom API runnerov (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), takisto za behu.
+Limity platia v `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` každej jednotky (predchádzajúce hodnoty sa uchovávajú ako `override.conf.bak-20261018`) a boli aplikované naživo so `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez reštartu, takže sa nedotkla žiadna spustená úloha. Štítky sa menia prostredníctvom bežcov API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), aj naživo.
 
-## Inštalácia čistiaceho skriptu (jednorazovo, na serveri)
+## Nainštalujte správcu (jednorazovo, na krabici)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): každých 30 min, zapisovať do /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` je povinný: čistiaci skript pred odstránením overí nečinnosť cesty pomocou jednej snímky otvorených
-súborov; bez tohto nástroja nič neodstráni a oznámi to
-(exit 1). Každú zmenu najprv vyskúšajte s `--dry-run` — vypíše presne, čo by
-urobil, a ničoho sa nedotkne.
+Vyžaduje sa `lsof` : správca preukáže, že cesta je nečinná jedným snímkom otvorených súborov pred jej odstránením, a bez nástroja nič neodstráni a povie to (ukončenie 1). Najprv vyskúšajte akúkoľvek zmenu so `--dry-run` — vytlačí presne to, čo by urobil, a ničoho sa nedotkne.
 
-Čo robí pri každom spustení: odstraňuje naše vlastné zvyšky (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) po **3 h na tmpfs** a po 24 h na disku
-v `_work/_temp`; ukončuje proces `next-build` starší ako 75 min (žiadna úloha netrvá tak dlho — dňa
-2026-08-27 jedna bežala 70 min po tom, čo GitHub označil jej úlohu za stratenú); odstraňuje 48 h staré
-pracovné kópie runnerov, ktorých jednotka je **zastavená**; upozorňuje pri využití disku ≥ 85 %, memory PSI
-`full/avg60` ≥ 10 % a pri väčšom počte listenerov, než určuje `MAX_ACTIVE_RUNNERS` (s
-rozdelením na omniroute/ostatné). Exit 1 = vyžaduje sa pozornosť; prečítajte si log.
+Čo robí pri každom spustení: zametá naše vlastné zvyšky (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) po **3 hodiny na tmpfs** a 24 h na disku `_work/_temp`; upozorňuje na `next-build` starší ako 75 minút a udržiava ho v prevádzke; sušené slivky 48 h staré pokladne bežcov, ktorých jednotka je **zastavil** ; výstrahy na disku ≥ 85 %, pamäť PSI `full/avg60` ≥ 10 % a viac poslucháčov ako `MAX_ACTIVE_RUNNERS` (s členením omniroute/other ). Je potrebná pozornosť výstupu 1 = ; prečítať denník.
 
-Pravidlo 75 minút nezachytí zostavenie, ktorého úlohu už GitHub vzdal. Keď
-`Runner.Listener` nedokáže obnoviť svoju úlohu, `_diag/Runner_*.log` obsahuje
-`POST request to …/renewjob timed out after 100 seconds`, API označí úlohu ako `completed`
-(neúspešnú) približne desať minút po poslednom úspešnom obnovení a `next-build` naďalej beží
-bez pripojenej úlohy (2026-10-18: zostavenie #17066 zlyhalo o 19:43 a jeho proces zostavenia
-ešte o päť minút neskôr zaberal 40 GB). Overte ref v najnovšom `_diag/Worker_*.log` a potom
-odošlite SIGTERM iba stromu zostavenia podľa PID — procesom `next-build`, `npm run build`, `build-next-isolated.mjs` a
-workerom v `_work`. Nikdy sa nedotýkajte procesov `Runner.Listener`, `RunnerService.js` ani `Runner.Worker`:
-worker nahlási úlohu ako zrušenú a listener sa sám vráti online.
+Samotný uplynulý čas nedokazuje, že proces je osirelý. Domovník nikdy nevysiela signály na základe veku. Existujúce názvy prostredí `ZOMBIE_BUILD_MAX_MIN` a `ZOMBIE_BUILD_COMM` zostávajú podporované pre konfigurácie cron. Pred vyčistením podozrivej siroty sa uistite, že jej presná úloha GitHub je koncová a identifikujte procesy patriace k tejto úlohe. Keď `Runner.Listener` nemôže obnoviť svoju úlohu, `_diag/Runner_*.log` zobrazí `POST request to …/renewjob timed out after 100 seconds`, API ohlási úlohu `completed` (zlyhanie) asi desať minút po poslednom úspešnom obnovení a `next-build` beží bez pripojenej úlohy (18. 10. 2026: zostavenie #17066 zlyhalo o 19:43 a jeho zostavenie ešte o päť minút držalo 40 GB ). Potvrďte referenciu v najnovšom `_diag/Worker_*.log`, potom SIGTERM iba zostavte strom podľa PID — `next-build`, `npm run build`, `build-next-isolated.mjs` a pracovníkov `_work`. Nikdy sa nedotýkajte `Runner.Listener`, `RunnerService.js` alebo `Runner.Worker`: pracovník nahlási úlohu ako zrušenú a poslucháč sa sám vráti do režimu online.
 
 ## Jednotky runnerov: KillMode
 
@@ -80,7 +54,7 @@ a len keď je nečinný**, pričom kontrola nečinnosti a reštart musia byť v 
 ## Prevádzkové pravidlá
 
 - **Naraz iba jedno zostavenie Turbopack — vynútené štítkom.** Každá úloha, ktorá spúšťa úplné
-  `next build` s Turbopackom, cieli na `[self-hosted, omni-build]`, pričom tento štítok má iba
+  `next build` s Turbopackom, cieli na `[self-hosted, omni-build, omni-build-60gb]`, pričom tento štítok má iba
   **`omniroute-113-5`**: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, nočné zostavenie a11y (#16853) a **amd64** v `docker-publish.yml` (webpack
   v rámci BuildKit — Turbopack tam zlyhal s panic, beh 33253576569). Vetva Docker pre arm64 zostáva

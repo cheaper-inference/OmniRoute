@@ -12,7 +12,8 @@
 // Modelo: COLLECTORS declara explicitamente o glob de cada runner REAL + as fontes
 // (package.json / ci.yml / vitest configs) onde o padrão deve aparecer textualmente
 // (drift-check: mudou o glob na fonte sem atualizar aqui → o gate falha pedindo sync).
-// "Coletado" = casado pelo glob de um runner executado por script npm ou job de CI.
+// Vitest: "coletado" = listado pela CLI instalada, sem executar os casos. Os demais
+// runners usam os globs ancorados. Não reimplementar a semântica de globs do Vitest.
 // Includes de config que NENHUM script executa (ex.: vitest.config.ts sem filtro) NÃO
 // contam — config morta não roda teste.
 //
@@ -27,8 +28,10 @@
 //  - Quarentena tem coletor separado e nunca conta como execução ativa/saudável.
 //  - @omniroute/* ficam fora do walk (têm CI próprio: opencode-*-ci.yml).
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseVitestExcludes, validateQuarantine } from "../quality/quarantine-contract.mjs";
 
 const ROOT = process.cwd();
@@ -48,7 +51,7 @@ const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx|mjs)$/;
 // glob) deve aparecer textualmente — se o runner mudar, este gate exige o sync.
 export const COLLECTORS = [
   // Node native runner — test:unit / test:unit:fast / shards / test:coverage. O CI
-  // (test-unit ×8) agora chama o npm script test:unit:ci:shard
+  // (test-unit ×12) agora chama o npm script test:unit:ci:shard
   // (fonte única, plano mestre testes+CI QW-d) — o wiring é ancorado pelo NOME do script
   // nos workflows (entrada dedicada abaixo), e os globs vivem SÓ no package.json.
   { glob: "tests/unit/*.test.ts", sources: ["package.json"] },
@@ -216,10 +219,72 @@ export function globToRegExp(glob) {
   return new RegExp("^" + re + "$");
 }
 
-/** Arquivos de teste não casados por NENHUM glob de collector (ordem preservada). */
+/** Validate the metadata-only Vitest report; never accept paths outside this checkout. */
+export function parseVitestFileList(report, root) {
+  if (!Array.isArray(report)) throw new Error("Invalid Vitest file-list report");
+  const checkout = fs.realpathSync(root);
+  return new Set(
+    report.map((entry) => {
+      if (!entry || typeof entry.file !== "string" || !path.isAbsolute(entry.file)) {
+        throw new Error("Invalid Vitest file-list entry");
+      }
+      const file = fs.realpathSync(entry.file);
+      const relative = path.relative(checkout, file);
+      if (
+        !relative ||
+        relative === ".." ||
+        relative.startsWith(`..${path.sep}`) ||
+        path.isAbsolute(relative) ||
+        !fs.statSync(file).isFile()
+      ) {
+        throw new Error("Vitest collected a path outside the checkout or a non-file");
+      }
+      return relative.split(path.sep).join("/");
+    })
+  );
+}
+
+/** Ask the installed runner, without importing test modules or executing their cases. */
+export function collectVitestFiles(config, root = ROOT) {
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-test-discovery-"));
+  try {
+    const reportPath = path.join(temporary, "files.json");
+    const cli = path.join(
+      path.dirname(fileURLToPath(import.meta.resolve("vitest/package.json"))),
+      "vitest.mjs"
+    );
+    const result = spawnSync(
+      process.execPath,
+      [cli, "list", "--filesOnly", `--json=${reportPath}`, "--config", path.resolve(root, config)],
+      {
+        cwd: root,
+        stdio: ["ignore", "ignore", "pipe"],
+        timeout: 120000,
+        maxBuffer: 4 * 1024 * 1024,
+      }
+    );
+    if (result.error || result.signal || result.status !== 0) {
+      throw new Error(`Vitest collection failed for ${config}; no glob fallback is allowed`);
+    }
+    if (!fs.existsSync(reportPath) || fs.statSync(reportPath).size > 4 * 1024 * 1024) {
+      throw new Error(`Vitest file-list report missing or too large for ${config}`);
+    }
+    return parseVitestFileList(JSON.parse(fs.readFileSync(reportPath, "utf8")), root);
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+}
+
+/** Arquivos não coletados por nenhum runner (ordem preservada). */
 export function findOrphans(files, globs) {
   const collectors = globs.map((entry) => {
     const collector = typeof entry === "string" ? { glob: entry } : entry;
+    if (Object.hasOwn(collector, "collectedFiles")) {
+      if (!(collector.collectedFiles instanceof Set)) {
+        throw new Error("Actual collector files must be a Set, including when empty");
+      }
+      return { collectedFiles: collector.collectedFiles };
+    }
     return {
       include: globToRegExp(collector.glob),
       exclude: (collector.exclude ?? []).map(globToRegExp),
@@ -227,9 +292,10 @@ export function findOrphans(files, globs) {
   });
   return files.filter(
     (file) =>
-      !collectors.some(
-        (collector) =>
-          collector.include.test(file) && !collector.exclude.some((exclude) => exclude.test(file))
+      !collectors.some((collector) =>
+        collector.collectedFiles
+          ? collector.collectedFiles.has(file)
+          : collector.include.test(file) && !collector.exclude.some((exclude) => exclude.test(file))
       )
   );
 }
@@ -304,9 +370,16 @@ function main() {
 
   // 2) órfãos vs baseline
   const files = collectTestFiles();
+  const actualVitestFiles = new Map();
   const modeled = COLLECTORS.map((collector) => {
     const config = collector.sources.find((source) => /^vitest.*\.config\.ts$/.test(source));
-    return { ...collector, exclude: config ? parseVitestExcludes(contents[config]) : [] };
+    if (!config) return collector;
+    // Keep the literal-exclude contract even though the actual runner applies it.
+    const exclude = parseVitestExcludes(contents[config]);
+    if (!actualVitestFiles.has(config)) {
+      actualVitestFiles.set(config, collectVitestFiles(config));
+    }
+    return { ...collector, exclude, collectedFiles: actualVitestFiles.get(config) };
   });
   const inventory = JSON.parse(
     fs.readFileSync(path.join(ROOT, "config/quality/vitest-exclusions.json"), "utf8")

@@ -44,7 +44,7 @@ Et boolean-flag betragtes som **aktiveret**, når dets effektive værdi er `"tru
 
 ## Flagkatalog
 
-120 flag fordelt på 6 kategorier.** Misligholdelse** er definitionen standard — den værdi, der bruges, når hverken en DB tilsidesættelse eller en miljøvariabel er til stede.
+121 flag fordelt på 6 kategorier.** Misligholdelse** er definitionen standard — den værdi, der bruges, når hverken en DB tilsidesættelse eller en miljøvariabel er til stede.
 
 ### Sikkerhed (11)
 
@@ -115,7 +115,7 @@ Et boolean-flag betragtes som **aktiveret**, når dets effektive værdi er `"tru
 
 Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplicit konfigureret (DB override før miljø), har det forrang over `USAGE_LIMIT_IGNORE_UNPRICED`. Uden nogen eksplicit enum-værdi vælger den opstrøms booleske opt-out `count_as_zero`; ellers er standard `fail_closed`. Ugyldige enum-værdier og ulæselig feature-flag-lagerfejl lukket. Hverken opt-out mindsker prisudgifter eller et mislykket prisopslag. Håndhævelse og administratorrapport løser den samme effektive politik.
 
-### Kørselstid (57)
+### Kørselstid (58)
 
 | Nøgle                                          | Type    | Misligholdelse | Genstart | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------------- | ------- | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -178,6 +178,7 @@ Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplicit konfigureret (DB override før 
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolesk | `false`        |          | Stop med at tilbyde og videresende `max` -begrundelsesindsatsen for Cursor Grok 4.7 (#17386): Cursor's docs-liste kun low/medium/high/xhigh, så `grok-4.7-max` faldback-aliaset forsvinder fra kataloget, og en `max` indsatsanmodning sendes uden en indsatsparameter. Deaktiveret som standard: `max` forbliver tilbudt og videresendt, da en live AgentService/Run sonde accepterede det.                                                                                                                                                                                                                                                                                                                                         |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolesk | `false`        |          | Send Responses keepalives som en tom linje i stedet for en response.in_progress begivenhed, så et syntetisk snapshot kan aldrig erstatte det rigtige svar i den officielle SDK. En tom linje sender ingen SSE begivenhed, så en klientovervågning, der kun nulstiller på hændelser, vil ikke blive nulstillet under en lang stille fase. Fra som standard: timere sender hændelsen spec-valid response.in_progress.                                                                                                                                                                                                                                                                                                                  |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolesk | `false`        |          | I komprimeringscachestatistikken skal du tælle en komprimeret anmodning til en udbyder af automatisk præfiks-caching (OpenAI, Codex, Azure eller en brugerdefineret forbindelse, der erklærer prompt-caching med markør-stripping) som et estimeret cache-hit selv uden `cache_control` -markører (#17114). Estimatet er et cache-kvalificeringssignal, ikke et observeret hit, så den rapporterede hitrate for disse udbydere trender mod 100 %. Deaktiveret som standard: kun en anmodning, der bærer `cache_control` -markører til en cachingudbyder, tæller som et estimeret hit, så udbydere af automatiske præfikser bliver ved med at rapportere 0.                                                                           |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolesk | `false`        |          | Lader en automatisk websøgning uden en udtrykkelig `provider` bruge en tilsluttet Codex-konto (ChatGPT) via `codex-search`: som sidste mulighed før udbydere uden nøgle, når ingen udbyder med legitimationsoplysninger kan bruges, og som reserve ved fejl (#17933). Hver søgning bruger abonnementskvote og tager cirka 10–40 s. Slået fra som standard: `codex-search` kører kun, når en anmodning angiver den udtrykkeligt.                                                                                                                                                                                                                                                                                                      |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Returnerer hvert flag med dets effektive værdi, kilde og en oversigt.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -24,11 +24,12 @@ Hookarna körs **inte** på varje rutt eller varje svar. Läs
 [Täckning och begränsningar](#coverage-and-limits) innan du förlitar dig på en
 guardrail som en säkerhetskontroll.
 
-## Inbyggda skyddsräcken
+## Inbyggda guardrails
 
-Registret laddar automatiskt sex skyddsräcken i prioritetsordning vid import (se `registry.ts` → `registerDefaultGuardrails()`):
+Registret laddar automatiskt sex guardrails i prioritetsordning vid import
+(se `registry.ts` → `registerDefaultGuardrails()`):
 
-| Prioritet | Namn                | Etapp(er)      | Fil                   |
+| Prioritet | Namn                | Steg           | Fil                   |
 | --------- | ------------------- | -------------- | --------------------- |
 | `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -37,111 +38,316 @@ Registret laddar automatiskt sex skyddsräcken i prioritetsordning vid import (s
 | `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Lägre prioritetsnummer körs** första** .
+Lägre prioritetsnummer körs **först**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-GLM 5.3-basmodellen och `glm-5.3-{low,high,max}` har explicita `supportsVision:false` registry/spec metadata. GLM 5.3 Flash-varianterna förblir native-vision-modeller. Claude Codes `/v1/messages` rutt går in i den delade `handleChat` pre-call räckeskedjan** före** Claude-to-OpenAI översättning; kapslade `Read` -verktygsresultatbilder måste beskrivas eller hanteras innan översättningen lyfter dem till OpenAI `image_url` innehåll (#17069).
+Basmodellen GLM 5.3 och `glm-5.3-{low,high,max}` har explicit
+`supportsVision:false`-metadata i registret/specifikationen. GLM 5.3
+Flash-varianterna förblir modeller med inbyggt visionsstöd. Claude Codes
+`/v1/messages`-rutt går in i den delade `handleChat`-guardrailkedjan före
+anrop **innan** Claude-till-OpenAI-översättningen; nästlade
+`Read`-verktygsresultatbilder måste beskrivas eller hanteras innan den
+översättningen lyfter in dem i OpenAI `image_url`-innehåll (#17069).
 
-Fångar upp bildbärande förfrågningar som syftar till** icke-visionsmodeller** och antingen omdirigerar hela begäran till en vision-kapabel modell eller ersätter bilddelarna med textbeskrivningar producerade av en konfigurerbar vision-modell före uppströmsanropet. Detta låter leverantörer av enbart text på ett transparent sätt hantera multimodala nyttolaster.
+Fångar upp bildbärande förfrågningar riktade till **modeller utan
+visionsstöd** och antingen omdirigerar hela förfrågan till en visionskapabel
+modell eller ersätter bilddelarna med textbeskrivningar som produceras av en
+konfigurerbar visionsmodell före uppströmsanropet. Detta låter leverantörer
+som endast stödjer text hantera multimodala nyttolaster transparent.
 
 Flöde:
 
-1. Hoppa över om målmodellen redan stöder syn (såvida den inte visas i listan över forcerad brygga `isVisionBridgeForcedModel`).
-2. Extrahera bilddelar via `extractImageParts(messages)` (`visionBridgeHelpers.ts`), som delegerar till** enhetlig mediadetektor** `detectMediaParts()` i `open-sse/utils/mediaParts.ts` — den enda sanningskällan som delas med combo-kompatibilitetsfiltret. Extraktion är tillåten till formerna `replaceImageParts` kan skarva tillbaka (extraktet ↔ ersätt kontrakt): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` och Responses API `input_image`. Matchande bilder kapslade inuti Claude Code `tool_result.content` och Responses-verktygsutgångar extraheras också och ersätts vid sina ursprungliga sökvägar; Former med endast indikator är kombinationsfiltermaterial och extraheras inte. Hoppa över om ingen hittas.
-3. Lös runtime config via `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): nya `modalityBridge*` -inställningsnycklar vinner; äldre `visionBridge*` nycklar förblir en** reserv i en cykel** (återställningsfönster). Hoppa över före eventuell mediaövergång när bron är inaktiverad.
-4. Lägesväljare (`modalityBridgeVisionMode`, se tabell nedan) bestämmer omdirigering vs beskriv. Omdirigering returnerar `modifiedPayload` med endast `model` bytt, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Beskriv sökväg: kapa bilder vid `maxImages`, komponera den uppgiftsmedvetna prompten, konsultera describe-cachen, ring visionmodellen** parallellt** (`Promise.allSettled`), och injicera `[Image N]: <description>` -textdelar i deras ställe. En misslyckad beskrivning ger `null`: den råa bilden bevaras för unknown/vision-capable mål (#4012), men en** bekräftat direktmål för endast text** eller zero-vision combo får en explicit `(unavailable — no vision-capable provider connected)` -textstub för varje obeskriven bild, inklusive partiella misslyckanden och bilder bortom beskriv-anropsgränsen (#17069). Den befintliga all-misslyckade kombinationsbeskrivningen fallback förblir på plats (#8430).
-6. Returnera `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Hoppa över om målmodellen redan stödjer vision (om den inte finns med i
+   listan över tvingad bryggning `isVisionBridgeForcedModel`).
+2. Extrahera bilddelar via `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), som delegerar till den **enhetliga
+   mediedetektorn** `detectMediaParts()` i `open-sse/utils/mediaParts.ts` —
+   den enda källan till sanning som delas med kombokompatibilitetsfiltret.
+   Extraheringen är vitlistad till de former som `replaceImageParts` kan
+   sätta tillbaka (kontraktet extract↔replace): OpenAI `image_url`, Anthropic
+   base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` och
+   Responses API `input_image`. Matchande bilder nästlade i Claude Code
+   `tool_result.content` och Responses-verktygsutdata extraheras också och
+   ersätts på sina ursprungliga sökvägar; former som endast är indikatorer är
+   material för kombofiltret och extraheras inte.
+   Hoppa över om inga hittas.
+3. Lös körningskonfigurationen via `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): nya
+   `modalityBridge*`-inställningsnycklar vinner; äldre `visionBridge*`-nycklar
+   förblir en **fallback i en cykel** (återställningsfönster). Hoppa över
+   före all medietraversering när bryggan är inaktiverad.
+4. Lägesväljaren (`modalityBridgeVisionMode`, se tabellen nedan) avgör
+   omdirigering kontra beskrivning. Omdirigering returnerar `modifiedPayload`
+   med endast `model` utbytt, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Beskrivningsvägen: begränsa bilderna till `maxImages`, sätt samman den
+   uppgiftsmedvetna prompten, konsultera beskrivningscachen, anropa
+   visionsmodellen **parallellt** (`Promise.allSettled`) och injicera
+   textdelar av formen `[Image N]: <description>` i deras ställe. En
+   misslyckad beskrivning ger `null`: råbilden bevaras för
+   okända/visionskapabla mål (#4012), men ett **bekräftat direktmål som
+   endast stödjer text** eller en kombo utan vision får en explicit
+   textstubbe `(unavailable — no vision-capable provider connected)` för
+   varje obeskriven bild, inklusive partiella fel och bilder bortom taket för
+   beskrivningsanrop (#17069). Den befintliga fallbacken för
+   kombobeskrivningar där alla misslyckats finns kvar (#8430).
+6. Returnera `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
 #### Lägesväljare (`modalityBridgeVisionMode`)
 
-| Läge       | Standard | Beteende                                                                                                                                                                                                                                                                                       |
-| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔        | Äldre heuristik, orörd (#6640/#7204): icke-combo/`auto/` -modeller omdirigeras till den bästa visionmodellen om inte originalmodellen redan har användbara referenser (beskriv sedan); kombinerade mål beskriver alltid.                                                                       |
-| `describe` |          | Beskriv alltid — omdirigeringsblocket hoppas över helt; användarens valda modell svarar alltid.                                                                                                                                                                                                |
-| `reroute`  |          | Tvinga omdirigering: skyddet för behåll-legitimerad modell förbigås. Omvägen-** mål** credential guard tillämpar fortfarande — när det inte finns något användbart synmål, bryggan blockerar med ett tydligt fel snarare än att beskriva eller skicka råa bilder till ett mål med endast text. |
+| Läge       | Standard | Beteende                                                                                                                                                                                                                                                                                                           |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`     | ✔        | Äldre heuristik, orörd (#6640/#7204): icke-kombo-/`auto/`-modeller omdirigeras till den bästa visionsmodellen om inte originalmodellen redan har användbara autentiseringsuppgifter (beskriv i så fall); kombinationsmål beskriver alltid.                                                                         |
+| `describe` |          | Beskriver alltid — omdirigeringsblocket hoppas över helt; användarens valda modell svarar alltid.                                                                                                                                                                                                                  |
+| `reroute`  |          | Tvinga omdirigering: skyddet som behåller den autentiserade modellen kringgås. Skyddet för omdirigerings**målets** autentiseringsuppgifter gäller fortfarande — när inget användbart visionsmål finns blockerar bron med ett tydligt fel i stället för att beskriva eller skicka råa bilder till ett rent textmål. |
 
-Forcerade lägen kortsluter** före** den automatiska heuristiken körs; `auto` beteendet är byte-identiskt med pre-PR-1 räcket.
+Tvingade lägen kortsluter **innan** auto-heuristiken körs; `auto`-beteendet
+är byteidentiskt med skyddsmekanismen före PR-1.
 
 #### API-nyckelomfång (`visionBridgeKeyScope.ts`)
 
-När anroparens API nyckel begränsar `allowedConnections`, kvotpooler (`allowedQuotas`) eller modeller (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), väljer bryggan bara omdirigering och beskriver modeller som nyckeln kan använda, på anslutningar som nyckeln kan använda. Describe-anropet går sedan alltid igenom OmniRoute -självslingan med `x-omniroute-self-loop-key-id` huvudet, så den mottagande chattförfrågan upprätthåller den nyckelns anslutnings- och modellpolicy igen. `enforceApiKeyPolicy()` hedrar den rubriken endast tillsammans med självloopbäraren, så den kan bara begränsa åtkomsten, och ett id som inte löser sig avvisas.
+När anroparens API-nyckel begränsar `allowedConnections`, kvotpooler
+(`allowedQuotas`) eller modeller (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`) väljer bron
+endast omdirigerings- och beskrivningsmodeller som nyckeln får använda, på
+anslutningar som nyckeln får använda. Beskrivningsanropet går då alltid
+genom OmniRoutes självloop med headern `x-omniroute-self-loop-key-id`, så
+att den mottagande chattbegäran återigen upprätthåller nyckelns
+anslutnings- och modellpolicy. `enforceApiKeyPolicy()` respekterar den
+headern endast tillsammans med självloopens bearer, så den kan bara
+inskränka åtkomsten, och ett id som inte kan slås upp avvisas.
 
-Om ingen visionmodell är tillåten för nyckeln, a** bekräftat mål för endast text** avvisar bildbegäran lokalt med en tydlig HTTP 400 istället för att vidarebefordra bildbytes till en oförmögen uppströms (#17069). För mål med okänd eller inbyggd synförmåga, behåller describe-sökvägen sitt tidigare felöppna beteende (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Förfrågningar utan nyckel, och nycklar utan dessa begränsningar, beter sig precis som tidigare.
+Om ingen visionsmodell är tillåten för nyckeln avvisar ett **bekräftat rent
+textmål** bildbegäran lokalt med ett tydligt HTTP 400 i stället för att
+vidarebefordra bildbyte till en oduglig uppström (#17069). För mål med
+okänd eller inbyggd visionskapacitet behåller beskrivningsvägen sitt
+tidigare fail-open-beteende (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Begäranden utan nyckel, och nycklar utan dessa begränsningar, beter sig
+exakt som tidigare.
 
 #### Uppgiftsmedveten beskrivningsprompt (`modalityBridgeVisionTaskAware`)
 
-Standard** sann** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) lägger till texten i** senaste användarmeddelande** (avkortat till 500 tecken) till basbeskrivningsuppmaningen, styr beskrivningen mot vad användaren faktiskt frågade (codex-vision-proxy-mönster) och ber visionmodellen att transkribera synlig text. Med flaggan av — eller ingen användartext — används basprompten oförändrad.
+Standard **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) lägger
+till texten från det **senaste användarmeddelandet** (trunkerat till 500
+tecken) i den grundläggande beskrivningsprompten, vilket styr beskrivningen
+mot vad användaren faktiskt frågade (codex-vision-proxy-mönstret) och ber
+visionsmodellen transkribera synlig text. Med flaggan avstängd — eller utan
+användartext — används basprompten oförändrad.
 
-Describe self-loopens egen OpenAI-kompatibla begäran (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) begär alltid `image_url.detail: "high"` — villkorslöst, för varje caller/provider, inte gated på någon klientsignal. Sampling med låga detaljer försämrar OCR noggrannheten för exakt texttranskriptionsuppgiften som den här prompten efterfrågar, så själva describe-anropet ber alltid om hög detaljnivå oavsett vilken detaljnivå den ursprungliga inkommande begäran använde. Detta påverkar endast den interna beskrivningsbegäran; det ändrar inte hur OmniRoute vidarebefordrar uppringarens egna `image_url.detail` på den primära begäran — att standard tillämpas separat, och endast för upptäckta OpenCode klienter, i `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Anthropic trådformatsgrenen av describe self-loopen har inget `detail` fält och är opåverkad av någondera standardinställningen.
+Beskrivningssjälvloopens egen OpenAI-kompatibla begäran
+(`callVisionModelSingle()` i `visionBridgeHelpers.ts`) begär alltid
+`image_url.detail: "high"` — villkorslöst, för varje anropare/leverantör,
+utan att styras av någon klientsignal. Sampling med låg detaljnivå försämrar
+OCR-noggrannheten för exakt den texttranskriberingsuppgift som denna prompt
+efterfrågar, så beskrivningsanropet i sig begär alltid hög detaljnivå
+oavsett vilken detaljnivå den ursprungliga inkommande begäran använde.
+Detta påverkar endast den interna beskrivningsbegärans brödtext; det ändrar
+inte hur OmniRoute vidarebefordrar anroparens egen `image_url.detail` på den
+primära begäran — den standarden tillämpas separat, och endast för
+upptäckta OpenCode-klienter, i `defaultImageDetail()`
+(`open-sse/handlers/chatCore/upstreamBody.ts`). Anthropic-wireformat-grenen
+i beskrivningssjälvloopen har inget `detail`-fält och påverkas inte av
+någon av standarderna.
 
-#### Beskriv utgångslock (`modalityBridgeVisionMaxChars`)
+#### Tak för beskrivningsutdata (`modalityBridgeVisionMaxChars`)
 
-| Nyckel                         | Standard | Räckvidd             |
-| ------------------------------ | -------- | -------------------- |
-| `modalityBridgeVisionMaxChars` | `0`      | `0` eller 100–50 000 |
+| Nyckel                         | Standard | Intervall           |
+| ------------------------------ | -------- | ------------------- |
+| `modalityBridgeVisionMaxChars` | `0`      | `0` eller 100–50000 |
 
-`0` (standard) betyder** ingen mössa** — beskrivningen som returneras av `callVisionModel()` skickas genom oförändrad, vilket bevarar det befintliga beteendet. Alla värden i intervallet 100–50 000 trunkerar beskrivningen med ett `…` suffix innan det skarvas tillbaka som `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` i `src/lib/guardrails/visionBridge.ts`). Höj detta för detaljtunga OCR uppgifter där nedströmsmodellen behöver hela transkriptionen; sänk den till bunden tokenanvändning på chatty vision-modeller. Instrumentpanelsfältet finns på Vision-flikens avancerade panel (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) och klämmer alla värden mellan 1 och 99 upp till 100-våningen samtidigt som en explicit `0` lämnas orörd. — `0` är ett giltigt Zod värde i sig (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), inte bara standardinställningen "unset".
+`0` (standard) betyder **inget tak** — beskrivningen som returneras av
+`callVisionModel()` skickas vidare oförändrad, vilket bevarar det befintliga
+beteendet. Varje värde i intervallet 100–50000 trunkerar beskrivningen med
+ett `…`-suffix innan den fogas tillbaka som `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` i `src/lib/guardrails/visionBridge.ts`).
+Höj detta för detaljrika OCR-uppgifter där den nedströms modellen behöver
+hela transkriberingen; sänk det för att begränsa tokenanvändningen hos
+pratsamma visionsmodeller. Instrumentpanelfältet finns på Vision-flikens
+avancerade panel (`modality-bridge-max-chars` i
+`ModalityBridgeVisionTab.tsx`) och klämmer upp alla värden mellan 1 och 99
+till gränsen på 100 samtidigt som ett explicit `0` lämnas orört — `0` är
+ett giltigt Zod-värde i sig
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), inte
+bara standardvärdet för "ej angivet".
 
-#### Beskriv cache (`modalityBridge/bridgeCache.ts`)
+#### Beskrivningscache (`modalityBridge/bridgeCache.ts`)
 
-In-memory LRU + TTL cache för beskriva utgångar, delad i hela processen. Nyckel = `sha256(imageRef + composedPrompt + configuredBridgeModel)` med längd-prefix inramning (inga fältgränskollisioner). Modellkomponenten är** konfigurerad** bryggmodell, inte modellen som faktiskt svarade — `callVisionModel` kan falla tillbaka internt, och nycklar per försök skulle fragmentera cachen. Misslyckade beskrivningar cachelagras aldrig. Inställningar:
+Internminnes-LRU + TTL-cache för beskrivningsutdata, delad i hela processen.
+Nyckel = `sha256(imageRef + composedPrompt + configuredBridgeModel)` med
+inramning med längdprefix (inga fältgränskollisioner). Modellkomponenten är
+den **konfigurerade** bryggmodellen, inte modellen som faktiskt svarade —
+`callVisionModel` kan falla tillbaka internt, och att nyckla per försök
+skulle fragmentera cachen. Misslyckade beskrivningar cachas aldrig.
+Inställningar:
 
-| Nyckel                          | Standard | Räckvidd |
-| ------------------------------- | -------- | -------- |
-| `modalityBridgeCacheEnabled`    | `true`   | —        |
-| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440   |
-| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000  |
+| Nyckel                          | Standard | Intervall |
+| ------------------------------- | -------- | --------- |
+| `modalityBridgeCacheEnabled`    | `true`   | —         |
+| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440    |
+| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000   |
 
-#### Fjärrbildsnormalisering (själv-loop describe/base64 hämta)
+#### Normalisering av fjärrbilder (describe/base64-hämtning via self-loop)
 
-När bron hämtar en** avlägsen** själva bilden — den Anthropic beskriver självanrop och claude-wire-format base64-omvandlingen (`ensureBase64ImagesForClaudeWire`), båda via `fetchRemoteImageAsDataUri()` i `visionBridgeHelpers.ts` — den resulterande datan URI skickas genom `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) innan de bäddas in i vision-modellbegäran. Överdimensionerade bilder skalas ner till en** 2048px långsida** (matchar storleksändringslocket OpenAI/Anthropic tillämpas redan på serversidan), vilket minskar uppladdningen av bytes/latency utan att ändra vad visionmodellen ser. Ändra storlek använder `sharp`, laddas via dynamisk import: på en plattform där dess ursprungliga binära inte kan laddas, `normalizeDataUri()`** kastar aldrig** — det faller tillbaka till en passthrough av de ursprungliga byten, så describe/base64-conversion sökvägen fortsätter alltid att fungera. Icke-bildbytes (en hämtning som inte returnerade en avkodningsbar bild) skickas också genom orörda. Denna normalisering är inriktad på bilder som bryggan hämtar för sitt eget självanrop — den tillämpas aldrig på anroparens råa genomkopplingsnyttolast, i överensstämmelse med opt-in-only mutationsprincipen (Hard Rule #20).
+När bridgen själv hämtar en **fjärrbild** — Anthropic-describe-självanropet och
+base64-konverteringen till claude-wire-formatet
+(`ensureBase64ImagesForClaudeWire`), båda via
+`fetchRemoteImageAsDataUri()` i `visionBridgeHelpers.ts` — skickas den
+resulterande data-URI:n genom `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) innan den bäddas in i förfrågan till
+vision-modellen. För stora bilder skalas ner till en **långsida på 2048 px**
+(i linje med det tak för storleksändring som OpenAI/Anthropic redan tillämpar
+på serversidan), vilket minskar uppladdningsbyte/latens utan att ändra vad
+vision-modellen ser. Storleksändringen använder `sharp`, som laddas via
+dynamisk import: på en plattform där dess nativa binär inte kan laddas
+**kastar** `normalizeDataUri()` **aldrig** — den faller tillbaka på en
+passthrough av originalbytena, så att sökvägen för
+describe/base64-konvertering alltid fortsätter fungera. Bytes som inte är
+en bild (en hämtning som inte returnerade en avkodbar bild) skickas också
+vidare orörda. Den här normaliseringen är begränsad till bilder som bridgen
+hämtar för sitt eget självanrop — den tillämpas aldrig på anroparens råa
+passthrough-payload, i linje med principen om mutationer endast efter
+opt-in (Hard Rule #20).
 
-#### Inställningar schema + migration
+#### Inställningsschema + migrering
 
-De nya `modalityBridge*` nycklarna är Zod-validerade i `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` -trion och `modalityBridgeAudio*` gruppen som används av Audio Bridge. Migration `141_modality_bridge_settings.sql` kopierar befintliga äldre `visionBridge*` -värden till de matchande nya nycklarna (idempotent, skriver aldrig över ett operatörsinställt `modalityBridge*` värde); de äldre nycklarna förblir accepterade som en reservläs under en utgivningscykel.
+De nya `modalityBridge*`-nycklarna valideras med Zod i `updateSettingsSchema`
+(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
+`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
+`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
+`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
+`modalityBridgeVisionMaxChars`, trion `modalityBridgeCache*` samt gruppen
+`modalityBridgeAudio*` som används av Audio Bridge. Migreringen
+`141_modality_bridge_settings.sql` kopierar befintliga äldre
+`visionBridge*`-värden till motsvarande nya nycklar (idempotent, skriver
+aldrig över ett `modalityBridge*`-värde som operatören angett); de äldre
+nycklarna accepteras kvar som läs-fallback under en releasecykel.
 
-#### Transparency header + statistik
+#### Transparens-header + statistik
 
-Beskriv-transformerade svar bär `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (byggd av `buildModalityBridgeHeader()` i `modalityBridge/bridgeStats.ts`, stämplad av `withModalityBridgeHeader()` i `src/sse/handlers/chatHelpers.ts`). Omdirigerade förfrågningar får** inga** header — nyttolasten var orörd och modellbytet är redan synligt i svarskroppens `model` fält.
+Describe-transformerade svar bär headern
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+(byggd av `buildModalityBridgeHeader()` i `modalityBridge/bridgeStats.ts`,
+stämplad av `withModalityBridgeHeader()` i `src/sse/handlers/chatHelpers.ts`).
+Omdirigerade förfrågningar får **ingen** header — payloaden var orörd och
+modellbytet syns redan i svarskroppens `model`-fält.
 
-`GET /api/modality-bridge/stats` (management auth, samma nivå som `GET /api/settings`) returnerar räknarna per modalitet i minnet `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` för `vision`, `audio` och `video`. `averageLatencyMs` använder `latencySamples`, inte alla försök, som sin nämnare; en operation utan timing tillverkar inte ett noll millisekundsprov. `bridged` förblir det bakåtkompatibla aliaset för framgångsrika konverteringar; misslyckade försök ökar det inte. Räknare återställs vid processomstart enligt design (telemetri, inte redovisning).
+`GET /api/modality-bridge/stats` (management-autentisering, samma nivå som
+`GET /api/settings`) returnerar räknarna i minnet per modalitet
+`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }` för `vision`, `audio` och
+`video`. `averageLatencyMs` använder `latencySamples` — inte alla försök —
+som nämnare; en operation utan tidsmätning fabricerar inte ett
+nollmillisekundersprov. `bridged` är kvar som det bakåtkompatibla aliaset för
+lyckade konverteringar; misslyckade försök ökar det inte.
+Räknarna nollställs avsiktligt vid omstart av processen
+(telemetri, inte redovisning).
 
-#### Konfiguration av instrumentpanelen
+#### Dashboard-konfiguration
 
-Den dedikerade instrumentpanelsidan är `/dashboard/settings/modality-bridge`. Dess URL-adresserbara `Vision`, `Audio` och `Video` flikar bevarar frågeparametrar samtidigt som `tab` värdet ändras. Fliken Vision visar aktivering, läge, modellval (inklusive automatisk standard), uppgiftsmedvetna meddelanden, avancerade timeout/image/description-length/cache gränser, körtidsräknare och en bevakad provbegäran. Fliken Ljud är också live: den visar aktivering, en modellväljare endast för STT med Auto, timeout/max-clip gränser, ljudräknare och ett `input_audio` provtest. Fliken Video är funktionell: den rapporterar FFmpeg/ffprobe körtidstillståndet — ett av fyra explicita UI tillstånd (`unknown` medan sonden är i flygning eller inte kunde slutföras, `restricted` på en instrumentpanelvärd utan loopback där sonden hoppades över klientsidan, `unavailable` en gång avsökt och bekräftats saknad, eller `available` med FFmpeg/ffprobe modellerna, filtret för att välja enable/model/frame/video/timeout -modeller) vision-kapabla — och exponerar videoräknare.
+Den dedikerade dashboard-sidan är
+`/dashboard/settings/modality-bridge`. Dess URL-adresserbara flikar `Vision`,
+`Audio` och `Video` bevarar frågeparametrarna när värdet på `tab` byts.
+Vision-fliken exponerar aktivering, läge, modellval (inklusive det automatiska
+standardvalet), uppgiftsmedveten prompting, avancerade gränsvärden för
+timeout/bild/beskrivningslängd/cache, körningsräknare och en skyddad
+exempelförfrågan. Audio-fliken är också live: den exponerar aktivering, en
+modellväljare endast för STT med Auto, gränser för timeout/maxklipp,
+ljudräknare och ett `input_audio`-exempeltest. Video-fliken är funktionell:
+den rapporterar FFmpeg/ffprobe-körningstillståndet — ett av fyra explicita
+UI-tillstånd (`unknown` medan sonderingen pågår eller inte kunde slutföras,
+`restricted` på en dashboard-värd som inte är loopback där sonderingen hoppas
+över på klientsidan, `unavailable` när sonderingen genomförts och bekräftat
+att det saknas, eller `available` med FFmpeg/ffprobe-versionerna) — lagrar
+gränsvärden för aktivering/modell/bildrutor/video/timeout, filtrerar
+modellväljaren till modeller med vision-stöd och exponerar videoräknare.
 
-Det tidigare Vision Bridge-kortet under AI -inställningar är en kompatibilitetslänk till den nya sidan; den äger inte längre en andra kopia av formuläret. Medieleverantörer länkar också bild-till-text- och tal-till-text-arbetsflöden till motsvarande Modality Bridge-flikar utan att ta bort den befintliga Speech-to-Text-lekplatsen.
+Det tidigare Vision Bridge-kortet under AI-inställningarna är en
+kompatibilitetslänk till den nya sidan; det äger inte längre en andra kopia av
+formuläret. Media Providers länkar också arbetsflödena Image-to-Text och
+Speech-to-Text till motsvarande Modality Bridge-flikar utan att ta bort den
+befintliga Speech-to-Text-playgrounden.
 
-**Self-loop admission bypass:** när beskriva samtalsvägar genom OmniRoute egen `/v1` -självslinga (icke-standardleverantörsmodell), skickar underbegäran `x-omniroute-admission-bypass: internal` och autentiseras med den lösta självslinga-referenseringen — den lokala `sk_omniroute` `REQUIRE_API_KEY=true` i lokalt läge, eller den operatörskonfigurerade `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env-nyckeln (#1350 deployment kan fortfarande köras) Förbikopplingen hedras endast för dessa exakta referenser, så externa kunder kan inte använda rubriken för att hoppa över antagning.
+**Admission-bypass för self-loop:** när describe-anropet routas genom
+OmniRoutes egen `/v1`-self-loop (providermodell av icke-standardtyp) skickar
+delförfrågan `x-omniroute-admission-bypass: internal` och autentiseras med
+den upplösta self-loop-autentiseringsuppgiften — den lokala
+`sk_omniroute`-sentinelen i lokalt läge, eller den operatörskonfigurerade
+miljönyckeln `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` (#1350), så att
+driftsättningar med `REQUIRE_API_KEY=true` fortfarande kan köra
+describe-anropet. Bypassen respekteras endast för exakt dessa
+autentiseringsuppgifter, så externa klienter kan inte använda headern för att
+kringgå admission-kontrollen.
 
-Legacy defaults live in `src/shared/constants/visionBridgeDefaults.ts`; de nya mode/task-aware/cache standardinställningarna och inställningsresolvern finns i `src/shared/constants/modalityBridgeDefaults.ts`. Skyddsräcket avslöjar ett `deps` konstruktoralternativ så att tester kan injicera falska `getSettings` och `callVisionModel` -implementationer.
+Standardvärdena för legacy ligger i `src/shared/constants/visionBridgeDefaults.ts`;
+de nya standardvärdena för läge/uppgiftsmedvetenhet/cache samt
+inställnings-resolvern ligger i
+`src/shared/constants/modalityBridgeDefaults.ts`. Guardrailen exponerar
+konstruktorns `deps`-alternativ så att tester kan injicera falska
+implementationer av `getSettings` och `callVisionModel`.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Fångar upp ljudbärande chattförfrågningar innan de når ett mål som inte är känt för att acceptera ljudingång. Den dirigerar aldrig om chattförfrågan: ljuddelar transkriberas genom den befintliga OpenAI-kompatibla flerdelade slutpunkten och den valda chattmodellen fortsätter med texttranskriptioner.
+Fångar upp chattförfrågningar som innehåller ljud innan de når ett mål som
+inte är känt för att acceptera ljudinmatning. Den omdirigerar aldrig
+chattförfrågan: ljuddelarna transkriberas via den befintliga
+OpenAI-kompatibla multipart-endpointen och den valda chattmodellen fortsätter
+med texttranskriptionerna.
 
 Flöde:
 
-1. Lös `supportsAudio` till `getResolvedModelCapabilities()`. Explicita leverantörsregistermetadata vinner, sedan statisk modellmetadata och sedan synkroniserad `modalities_input`. En deklarerad indatalista utan `audio` är `false`; inga kapacitetsbevis kvarstår `null`. Både `false` och `null` aktiverar den konservativa bryggan, medan `true` går förbi den.
-2. Lös `modalityBridgeAudio*` inställningar och extrahera skarvbara ljuddelar på högsta nivå från varje meddelande genom den delade `detectMediaParts()` detektorn. Trådformer som stöds är OpenAI `input_audio`, `audio_url` och `source.media_type: "audio/*"`. Kapslat ljud detekteras för routing men tas inte bort av skarvbanan. Arbetet begränsas av `modalityBridgeAudioMaxClips`; senare delar förblir orörda.
-3. Hedra en konfigurerad `provider/model`, eller låt `selectAudioBridgeModel()` gå `AUDIO_TRANSCRIPTION_PROVIDERS` i stabil katalogordning och välj den första modellen med en användbar aktiv leverantörsuppgifter.
-4. `callAudioTranscription()` konverterar base64/data-URI ljud till en `file` med flera delar, eller laddar ner en fjärransluten `audio_url` genom den offentliga utgående guarden med DNS pinning och en 25 MB bound. Den POSTs sedan filen och den valda modellen till den lokala `/v1/audio/transcriptions` -självslingan, autentiserad med `resolveSelfLoopBearer()`. Den befintliga transkriptionsvägen utför normal referenssökning, cooldown/rate-limit hantering och leverantörsutskick.
-5. Framgångsrika samtal ersätter sina delar med `[Audio N]: <transcript>`. Samtal körs med `Promise.allSettled`: ett individuellt fel bevarar den ursprungliga ljuddelen (#4012 kontrakt). Om varje samtal misslyckas och målet bevisas `supportsAudio === false`, blir delarna `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract). För ett okänt mål (`null`) förblir ett resultat av alla misslyckanden orörda. Ett beprövat mål med enbart text utan användbara STT uppgifter får samma explicita stubb utan att skicka ett nätverksanrop.
+1. Slå upp `supportsAudio` via `getResolvedModelCapabilities()`. Explicit
+   metadata från providerregistret vinner, sedan statisk modellmetadata, sedan
+   synkroniserade `modalities_input`. En deklarerad indatalista utan `audio` ger
+   `false`; frånvaro av kapacitetsinformation ger `null`. Både `false` och
+   `null` aktiverar den konservativa bryggan, medan `true` kringgår den.
+2. Slå upp inställningarna `modalityBridgeAudio*` och extrahera utbytbara
+   ljuddelar på toppnivå från varje meddelande via den delade detektorn
+   `detectMediaParts()`. Trådformat som stöds är OpenAI `input_audio`,
+   `audio_url` och `source.media_type: "audio/*"`. Nästlat ljud upptäcks för
+   routing men tas inte bort av utbytesvägen. Arbetet begränsas av
+   `modalityBridgeAudioMaxClips`; senare delar lämnas orörda.
+3. Respektera en konfigurerad `provider/model`, eller låt
+   `selectAudioBridgeModel()` gå igenom `AUDIO_TRANSCRIPTION_PROVIDERS` i stabil
+   katalogordning och välja den första modellen med en användbar aktiv
+   autentiseringsuppgift för providern.
+4. `callAudioTranscription()` konverterar base64-/data-URI-ljud till en
+   multipart-`file`, eller laddar ner en fjärr-`audio_url` via det utgående
+   skyddet som endast tillåter publika adresser, med DNS-pinning och en gräns
+   på 25 MB. Den POST:ar sedan filen och den valda modellen till den lokala
+   självloopen `/v1/audio/transcriptions`, autentiserad med
+   `resolveSelfLoopBearer()`. Den befintliga transkriptionsrouten utför normal
+   uppslagning av autentiseringsuppgifter, hantering av cooldown/rate-limit
+   samt providerdispatch.
+5. Lyckade anrop ersätter sina delar med `[Audio N]: <transcript>`. Anropen
+   körs med `Promise.allSettled`: ett enskilt fel bevarar den ursprungliga
+   ljuddelen (#4012-kontraktet). Om alla anrop misslyckas och målet är bevisat
+   `supportsAudio === false` blir delarna
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430-kontraktet).
+   För ett okänt mål (`null`) lämnas ett resultat där alla anrop misslyckats
+   orört. Ett bevisat mål med endast text som saknar användbar
+   STT-autentiseringsuppgift får samma explicita stub utan att något
+   nätverksanrop görs.
 
-Framgångsrika transkriptioner använder den processomfattande Modality Bridge LRU/TTL cachen. Tangenten kombinerar ljudreferensen, den stabila `audio-transcription` driftetiketten och den valda STT modellen; misslyckanden cachelagras aldrig. Ljudförsök uppdaterar de delade `bridged`, `cacheHits`, `failures` och `lastUsedAt` -räknarna. Transformerade svar bär `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; orörda förfrågningar tar inte emot ett Audio Bridge-segment.
+Lyckade transkript använder den processövergripande Modality Bridge
+LRU/TTL-cachen. Nyckeln kombinerar ljudreferensen, den stabila
+operationsetiketten `audio-transcription` och vald STT-modell; misslyckanden
+cachas aldrig. Ljudförsök uppdaterar de delade räknarna `bridged`,
+`cacheHits`, `failures` och `lastUsedAt`. Transformerade svar bär
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; orörda
+förfrågningar får inget Audio Bridge-segment.
 
-Körtidsinställningar är DB-stödda och Zod-validerade:
+Körningsinställningarna är databasbackade och Zod-validerade:
 
-| Nyckel                        | Standard | Räckvidd          |
-| ----------------------------- | -------- | ----------------- |
-| `modalityBridgeAudioEnabled`  | `true`   | —                 |
-| `modalityBridgeAudioModel`    | `""`     | Auto eller STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000       |
-| `modalityBridgeAudioMaxClips` | `3`      | 1–10              |
+| Nyckel                        | Standardvärde | Intervall         |
+| ----------------------------- | ------------- | ----------------- |
+| `modalityBridgeAudioEnabled`  | `true`        | —                 |
+| `modalityBridgeAudioModel`    | `""`          | Auto eller STT-ID |
+| `modalityBridgeAudioTimeout`  | `60000`       | 1000–300000       |
+| `modalityBridgeAudioMaxClips` | `3`           | 1–10              |
 
-Den delade cachen förblir kontrollerad av `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` och `modalityBridgeCacheMaxEntries`.
+Den delade cachen styrs fortfarande av `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` och `modalityBridgeCacheMaxEntries`.
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -219,81 +425,93 @@ Körtidsinställningar är DB-stödda och Zod-validerade:
 
 ### PII Masker (`piiMasker.ts`)
 
-Kör på** både** etapper.
+Kör på **både** etapper.
 
-- **`preCall`** klonar nyttolasten, går `system`, `messages`, `input` och `prompt` (inklusive vanliga strängobjekt), och tillämpar `processPII()` (från `@/shared/utils/inputSanitizer`) på sträng `content`/`text` -fält. När `PII_REDACTION_ENABLED=true`, detekterad PII redigeras i den utgående nyttolasten. Detta är oberoende av `INPUT_SANITIZER_MODE` (som bara styr policyn för prompt-injektion). När redigering är avstängd räknas detekteringen av samtalsposterna utan att innehållet skrivs om.
+- **`preCall`** klonar nyttolasten, går `system`, `messages`, `input` och `prompt` (inklusive vanliga strängobjekt) och tillämpar `processPII()` (från `@/shared/utils/inputSanitizer`) på sträng `content`/`text` -fält. När `PII_REDACTION_ENABLED=true`, detekterad PII redigeras i den utgående nyttolasten. Detta är oberoende av `INPUT_SANITIZER_MODE` (som endast styr policyn för prompt-injektion). När redigering är avstängd räknas detekteringen av samtalsposterna utan att innehållet skrivs om.
 - **`postCall`** djupklonar svaret, kör `sanitizePIIResponse()` plus Responses-API-formmaskeraren (`maskResponsesOutput` — täcker `output_text` och `output[].content[].text`). Om någon redigering sker ersätter det modifierade svaret originalet.
 
-Skyddsräcket blockerar aldrig; den kommenterar bara (`meta.detections`, `meta.redacted`) eller skriver om.
+Skyddsräcket blockerar aldrig; det bara kommenterar (`meta.detections`, `meta.redacted`) eller skriver om.
 
 #### Val per typ, anpassade mönster och detektionsräknare
 
-**Dashboard → Inställningar → Säkerhet → PII maskering** väljer _vad_ som är maskerat. Den slår inte på maskering: det är fortfarande `PII_REDACTION_ENABLED` (request) och `PII_RESPONSE_SANITIZATION` (response + SSE), båda avstängda som standard.
+**Dashboard → Inställningar → Säkerhet → PII maskering** väljer _vad_ som är maskerat. Den slår inte på maskering: det är fortfarande `PII_REDACTION_ENABLED` (begäran) och `PII_RESPONSE_SANITIZATION` (svar + SSE), båda avstängda som standard.
 
-- **Val per typ** — de inbyggda ID:n är listade i `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset betyder varje typ (beteendet innan den här inställningen fanns). Förfrågningsmotorns `ssn_us` mönster mappas till `ssn`. Mallar (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) fyller bara i kryssrutorna i UI.
-- **GDPR och POPIA identifierare** — tolv inbyggda ID som täcker EU och sydafrikanska personliga identifierare (tabell nedan). Deras regexes, validatorer och jurisdiktionstaggar finns i en tabell, `src/shared/utils/piiPatterns.ts`, som både response sanitizer (`src/lib/piiSanitizer.ts`) och request-masker (`src/shared/utils/inputSanitizer.ts`) använder. En matchning redigeras endast när dess validator accepterar den; bara siffror är aldrig tillräckligt. En operatör som sparade ett begränsat urval innan dessa ID:n fanns behåller sitt beteende tills de nya ID:n är markerade.
-- **Anpassade mönster** — upp till 20 regex- eller jokerteckenmönster (`*` = upp till 64 tecken utan blanksteg, `?` = ett). Matcher blir `[CUSTOM_REDACTED]`. Varje mönster går igenom `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): högst 500 tecken, flaggor begränsade till `g i m s u`, måste kompileras, måste passera `safe-regex` (katastrofisk bakåtspårning) och får inte matcha en tom sträng eller en redigeringsplatshållare. Ett mönster som misslyckas nekas när det sparas och testas, och en lagrad rad som misslyckas hoppas över under körning istället för att kompileras. Anpassade mönster körs bara medan maskering är på.
+- **Val per typ** — de inbyggda ID:n listas i `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset betyder varje typ (beteendet innan den här inställningen fanns). Förfrågningsmotorns `ssn_us` -mönster mappas till `ssn`. Mallar (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) fyller bara i kryssrutorna i UI.
+- **GDPR och POPIA -identifierare** — tolv inbyggda ID som täcker EU och sydafrikanska personliga identifierare (tabell nedan). Deras regexes, validatorer och jurisdiktionstaggar finns i en tabell, `src/shared/utils/piiPatterns.ts`, som både response sanitizer (`src/lib/piiSanitizer.ts`) och request-masker (`src/shared/utils/inputSanitizer.ts`) använder. En matchning redigeras endast när dess validator accepterar den; bara siffror är aldrig tillräckligt. En operatör som sparade ett begränsat urval innan dessa ID:n fanns behåller sitt beteende tills de nya ID:n är markerade.
+- **Anpassade mönster** — upp till 20 regex- eller jokerteckenmönster (`*` = upp till 64 tecken utan blanksteg, `?` = en). Matcher blir `[CUSTOM_REDACTED]`. Varje mönster går igenom `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): högst 500 tecken, flaggor begränsade till `g i m s u`, måste kompileras, måste passera `safe-regex` (katastrofisk bakåtspårning) och får inte matcha en tom sträng eller en redigeringsplatshållare. Ett mönster som misslyckas nekas när det sparas och testas, och en lagrad rad som misslyckas hoppas över under körning istället för att kompileras. Anpassade mönster körs bara medan maskering är på.
 - **Detektionsräknare** — per typ räknas (aldrig matchade värden), hålls i minnet och återställs vid omstart (`src/lib/pii/piiDetectionStats.ts`). De ökar bara medan maskering är på.
 
 Inställningarna finns i `key_value` tabellen (namnutrymme `pii_settings`, `src/lib/db/piiSettings.ts`) och läses genom en 1 s cache. API:
 
-| Metod  | Väg                      | Ändamål                                                             |
+| Metod  | Sökväg                   | Syfte                                                               |
 | ------ | ------------------------ | ------------------------------------------------------------------- |
 | `GET`  | `/api/settings/pii`      | Flaggtillstånd, `enabledTypes`, `customPatterns`, detektionsräknare |
-| `PUT`  | `/api/settings/pii`      | Byt ut `enabledTypes` (`null` = all) and/or `customPatterns`        |
-| `POST` | `/api/settings/pii/test` | Torrkör ett mönster mot ett prov på högst 8 KB; ingenting lagras    |
+| `PUT`  | `/api/settings/pii`      | Ersätt `enabledTypes` (`null` = alla) och/eller `customPatterns`    |
+| `POST` | `/api/settings/pii/test` | Torrkör ett mönster mot ett prov på högst 8 KB; inget lagras        |
 
-Alla tre kräver hanteringsautentisering och validerar kroppen med Zod (`src/shared/validation/schemas/piiSettings.ts`). Med inloggning inaktiverad (`requireLogin=false`) är `GET` och testslutpunkten öppna, men `PUT` behöver fortfarande en instrumentpanelsession, en `manage` -scope API nyckel, en `oma_` åtkomsttoken med skrivomfattning eller högre, eller CLI token eller interntjänsttoken som skickas från loopback.
+Alla tre kräver hanteringsautentisering och validerar kroppen med Zod (`src/shared/validation/schemas/piiSettings.ts`). Med inloggning inaktiverad (`requireLogin=false`) är `GET` och testslutpunkten öppna, men `PUT` behöver fortfarande en instrumentpanelsession, en `manage` -scope API nyckel, en `oma_` åtkomsttoken med skrivomfattning eller högre, eller CLI -token eller interntjänsttoken som skickas från loopback.
 
 #### GDPR (EU) och POPIA (Sydafrika) identifierare
 
-| Id                  | Identifierare             | Godkännande                                                                                         |
-| ------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                      | Känt land, exakt längd för det landet, ISO 13616 MOD-97-10                                          |
-| `eu_vat`            | EU VAT nummer             | Känt medlemslandsprefix och den statens nummerformat (ingen VIES uppslagning)                       |
-| `es_dni_nie`        | Spanska DNI / NIE         | Kontrollbokstav (värde mod 23); NIE är `X/Y/Z` + 7 siffror                                          |
-| `it_codice_fiscale` | Italienska Codice Fiscale | Kontrollbokstav från odd/even -positionstabellerna                                                  |
-| `pl_pesel`          | polska PESEL              | Viktad kontrollsumma och ett kodat födelsedatum som finns                                           |
-| `nl_bsn`            | holländska BSN            | 11-proof (vikter 9..2, -1)                                                                          |
-| `de_steuer_id`      | tyska Steuer-ID           | ISO 7064 Mod 11,10 plus sifferstrukturreglerna (ingen inledande 0)                                  |
-| `se_personnummer`   | Svenskt personnummer      | Luhn över de senaste tio siffrorna och ett rimligt födelsedatum (10 eller 12 siffror)               |
-| `za_id`             | Sydafrikanskt ID nummer   | Luhn över alla 13 siffror, giltig födelse month/day, medborgarskap siffra 0 eller 1                 |
-| `za_phone`          | Sydafrikansk telefon      | `+27` / `27` prefix, eller den nationella `0..` formen skriven med ett mellanslag eller bindestreck |
-| `za_vat`            | Sydafrikanskt VAT nummer  | 10 siffror som börjar med `4`** och** "VAT" / "BTW" i de 48 tecknen innan                           |
-| `za_tax_ref`        | Sydafrikansk skatteref.   | 10 siffror som börjar `0`-`3`, Luhn,** och** "skatt" / "SARS" i de 48 tecknen innan                 |
+| ID                  | Identifierare               | Validering                                                                                      |
+| ------------------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                        | Känt land, exakt längd för landet, ISO 13616 MOD-97-10                                          |
+| `eu_vat`            | EU-momsnummer               | Känt medlemsstatsprefix och statens nummerformat (ingen VIES-uppslagning)                       |
+| `es_dni_nie`        | Spanskt DNI / NIE           | Kontrollbokstav (värde modulo 23); NIE är `X/Y/Z` + 7 siffror                                   |
+| `it_codice_fiscale` | Italiensk Codice Fiscale    | Kontrollbokstav från tabellerna för udda/jämna positioner                                       |
+| `pl_pesel`          | Polskt PESEL                | Viktad kontrollsumma och rimliga intervall för kodad födelsemånad/-dag                          |
+| `nl_bsn`            | Nederländskt BSN            | 11-test (vikter 9..2, -1)                                                                       |
+| `de_steuer_id`      | Tyskt Steuer-ID             | ISO 7064 Mod 11,10 samt reglerna för sifferstruktur (ingen inledande 0)                         |
+| `se_personnummer`   | Svenskt personnummer        | Luhn över de sista tio siffrorna och ett rimligt födelsedatum (10 eller 12 siffror)             |
+| `za_id`             | Sydafrikanskt ID-nummer     | Luhn över alla 13 siffror, giltig födelsemånad/-dag, medborgarskapssiffra 0 eller 1             |
+| `za_phone`          | Sydafrikanskt telefonnummer | Prefix `+27` / `27`, eller den nationella formen `0..` skriven med mellanslag eller bindestreck |
+| `za_vat`            | Sydafrikanskt momsnummer    | 10 siffror som börjar med `4` **och** "VAT" / "BTW" bland de 48 föregående tecknen              |
+| `za_tax_ref`        | Sydafrikansk skattereferens | 10 siffror som börjar med `0`-`3`, Luhn, **och** "tax" / "SARS" bland de 48 föregående tecknen  |
 
-Eftersom formaten med endast siffror kolliderar med ordernummer, byggnummer och tidsstämplar, behöver de svagaste (`za_vat`, `za_tax_ref`) nyckelordet cue, och ett blott tiosiffrigt `0..` nummer behandlas inte som ett sydafrikanskt telefonnummer. Mellanslag IBANs (`GB29 NWBK ...`) matchas inte. På streamingbanan letas köet upp endast i den aktuella biten. ID:n ligger före de generiska telefonmönstren, så en validerad identifierare behåller sin egen platshållare (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` och `popia` mallarna väljer EU respektive sydafrikanska id. Maskeringen i sig förblir opt-in (Hård regel #20): ingenting här ändrar en standard för funktionsflagga.
+Eftersom formaten med endast siffror kolliderar med ordernummer, byggnummer och tidsstämplar, behöver de svagaste (`za_vat`, `za_tax_ref`) nyckelordet, och ett blott tiosiffrigt `0..` nummer behandlas inte som ett sydafrikanskt telefonnummer. Mellanslag IBANs (`GB29 NWBK ...`) matchas inte. På streamingbanan letas köet upp endast i den aktuella biten. ID:n ligger före de generiska telefonmönstren, så en validerad identifierare behåller sin egen platshållare (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` och `popia` mallarna väljer EU respektive Sydafrikanska ID. Maskeringen i sig förblir opt-in (Hård regel #20): ingenting här ändrar en standard för funktionsflagga.
 
-### Snabb injektion (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Upptäcker kontradiktoriska strukturer i innehåll som tillhandahålls av användaren och tillämpar den konfigurerade policyn. Beteendet drivs av miljövariabler och konstruktoralternativ:
+Upptäcker fientliga strukturer i användarskapat innehåll och upprätthåller den
+konfigurerade policyn. Beteendet styrs av miljövariabler och
+konstruktoralternativ:
 
-| Miljö        | Env var                                                                                               | Standard | Effekt                                                                                                                                                                                           |
-| ------------ | ----------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Aktiverad    | `INPUT_SANITIZER_ENABLED`                                                                             | `true`   | När `false`, kortsluter skyddsräcket.                                                                                                                                                            |
-| Läge         | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`   | Injektionspolicy: `block`, `warn` eller `log`. (`redact` accepteras för back-compat men gör det** inte** remsa injektionstext; begäran PII omskrivning kontrolleras av `PII_REDACTION_ENABLED`.) |
-| Blocktröskel | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Minsta svårighetsgrad som krävs för att blockera. Medium är endast observera som standard.                                                                                                       |
+| Inställning        | Miljövariabel                                                                                               | Standard | Effekt                                                                                                                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aktiverad          | `INPUT_SANITIZER_ENABLED`                                                                                   | `true`   | När `false` kortsluts guardrailen.                                                                                                                                                                  |
+| Läge               | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                             | `warn`   | Injektionspolicy: `block`, `warn` eller `log`. (`redact` accepteras för bakåtkompatibilitet men tar **inte** bort injektionstext; omskrivning av PII i förfrågan styrs av `PII_REDACTION_ENABLED`.) |
+| Blockeringströskel | alternativet `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Lägsta allvarlighetsgrad som krävs för att blockera. Medium är endast observation som standard.                                                                                                     |
 
-**Lägets prioritet** (`getMode`): ringer `options.mode` → `INJECTION_GUARD_MODE`**DB funktion-flagga åsidosättande** (Dashboard → Inställningar → Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. En åsidosättning av instrumentpanelen vinner därför över env vars, så Feature Flags UI styr löparvakten live (ingen omstart). DB läsningen är felsäker: om den missar faller skyddet tillbaka till det env-baserade beteendet, och när ingen åsidosättning är inställd är beteendet identiskt med env-only upplösning.
+**Lägesprioritet** (`getMode`): anroparens `options.mode` →
+`INJECTION_GUARD_MODE` **DB-funktionsflaggsöverstyrning** (Dashboard → Settings
+→ Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
+`warn`. En dashboard-överstyrning vinner alltså över miljövariablerna, så
+Feature Flags-gränssnittet styr den körande guardrailen live (utan omstart).
+DB-läsningen är felsäker: om den misslyckas faller guardrailen tillbaka på det
+miljöbaserade beteendet, och när ingen överstyrning är satt är beteendet
+identiskt med upplösning enbart via miljövariabler.
 
 Detektionskällor:
 
-1. `sanitizeRequest()` från `@/shared/utils/inputSanitizer` (delad detektoruppsättning som används någon annanstans i pipelinen).
-2. Inbyggd `DEFAULT_GUARD_PATTERNS` (för närvarande `system_override_inline` och `markdown_system_block`, båda svårighetsgraden `high` ).
-3. Valfri `customPatterns` skickas via konstruktoralternativ (strängar, regex eller `{ name, pattern, severity }` -poster).
+1. `sanitizeRequest()` från `@/shared/utils/inputSanitizer` (delad
+   detektoruppsättning som används på andra ställen i pipelinen).
+2. Inbyggda `DEFAULT_GUARD_PATTERNS` (för närvarande `system_override_inline`
+   och `markdown_system_block`, båda med allvarlighetsgraden `high`).
+3. Valfria `customPatterns` som skickas via konstruktoralternativ (strängar,
+   regex eller poster av typen `{ name, pattern, severity }`).
 
-När `mode === "block"`** och** minst en detektion når tröskeln för allvarlighetsgraden, `preCall` returnerar `{ block: true, message: "Request rejected: suspicious content detected" }`. I `warn`/`log` -lägena loggar skyddsräcket men tillåter anropet. Den delade hjälparen `evaluatePromptInjection()` exporteras också för uppringare som behöver utvärdera uppmaningar utan att gå igenom registret.
+När `mode === "block"` **och** minst en detektering når upp till tröskelvärdet för allvarlighetsgrad returnerar `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }`. I lägena `warn`/`log` loggar skyddsräcket men tillåter anropet. Den delade hjälpfunktionen `evaluatePromptInjection()` exporteras också för anropare som behöver utvärdera promptar utan att gå via registret.
 
-**Skanningsbunden (v3.8.20):** detektorn inspekterar endast** första 16 KB** av sammanfogad prompttext — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) i `src/shared/utils/inputSanitizer.ts`. Både `detectInjection()` och `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` innan du kör mönsterslingan. Injektionsdirektiv sitter nära toppen av en ingång, så detta begränsar regex CPU/GC på nyttolaster på flera hundra kB utan att försvaga detekteringen (jfr #3932, #4041).
+**Skanningsgräns (v3.8.20):** detektorn inspekterar endast de **första 16 KB** av den sammanfogade prompttexten — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) i `src/shared/utils/inputSanitizer.ts`. Både `detectInjection()` och `evaluatePromptInjection()` använder `slice(0, MAX_INJECTION_SCAN_BYTES)` innan mönsterslingan körs. Injektionsdirektiv sitter högst upp i en indata, så detta sätter ett tak för regexens CPU-/GC-belastning vid nyttolaster på flera hundra KB utan att försvaga detekteringen (jfr #3932, #4041).
 
-### Credential Masker (`credentialMasker.ts`)
+### Maskerare för autentiseringsuppgifter (`credentialMasker.ts`)
 
-Kör på** både** steg, sist i standardkedjan (prioritet `95`). Redagerar välkända API-nyckel-/hemliga token-mönster från den utgående nyttolasten (meddelandeinnehåll, verktygsanropsargument, verktygsresultat)** och** leverantörens svar, så att en referens som klistrats in i en prompt (eller återges av ett verktygsresultat) inte läcker till uppströmsleverantören eller tillbaka till klienten.
+Körs i **båda** stadierna, sist i standardkedjan (prioritet `95`). Maskerar välkända mönster för API-nycklar/hemliga token ur den utgående nyttolasten (meddelandeinnehåll, argument för verktygsanrop, verktygsresultat) **och** leverantörens svar, så att en autentiseringsuppgift som klistrats in i en prompt (eller ekats tillbaka av ett verktygsresultat) inte läcks till den uppströms leverantören eller tillbaka till klienten.
 
-- **Endast opt-in** , samma konvention som PII -redaktion (hård regel #20-adjacent): inaktiverad om inte `settings.credentialRedactionEnabled === true`** eller** `CREDENTIAL_REDACTION_ENABLED=true`. Med det avstängt är skyddsräcket en no-op — som aldrig blockerar och aldrig skrivs om.
-- `redactCredentials()` går igenom hela payload/response trädet (`walkValue()`, prototyp-pollution-safe, cycle-safe via `WeakSet`) och ersätter matchningar med en `[REDACTED:<type>]` platshållare, klona bara de grenar som faktiskt ändrades.
-- `CREDENTIAL_PATTERNS` covers LLM provider keys (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), payment keys (Stripe, Square), cloud keys (AWS access key, Twilio, SendGrid, Mailgun), private keys / JWTs, credential-bearing connection strings (`mongodb://user:pass@...`, etc.), and a generic `Authorization`/`x-api-key`/`api-key`/`apikey` header-value pattern. Header-shaped keys (`authorization`, `x-api-key`, `api-key`, `apikey`) are redacted structurally (value only, scheme prefix like `Bearer `/`Basic ` preserved) rather than via the generic text regex.
-- Skyddsräcket blockerar aldrig; den skriver bara om (`modifiedPayload` / `modifiedResponse`) och kommenterar (`meta.credentialsRedacted`, `meta.count`).
+- **Endast opt-in**, samma konvention som PII-maskering (Hard Rule #20-angränsande): inaktiverad om inte `settings.credentialRedactionEnabled === true` **eller** `CREDENTIAL_REDACTION_ENABLED=true`. När den är avstängd är skyddsräcket en no-op — det blockerar aldrig och skriver aldrig om något.
+- `redactCredentials()` går igenom hela nyttolast-/svarsträdet (`walkValue()`, säkert mot prototype pollution, cykelsäkert via `WeakSet`) och ersätter träffar med en `[REDACTED:<type>]`-platshållare, och klonar endast de grenar som faktiskt ändrades.
+- `CREDENTIAL_PATTERNS` täcker LLM-leverantörsnycklar (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS-/SaaS-token (GitHub, Slack, Linear, Notion, npm, Postman, Discord), betalningsnycklar (Stripe, Square), molnnycklar (AWS-åtkomstnyckel, Twilio, SendGrid, Mailgun), privata nycklar/JWT:er, anslutningssträngar som bär autentiseringsuppgifter (`mongodb://user:pass@...` m.m.) samt ett generiskt mönster för header-värden av typen `Authorization`/`x-api-key`/`api-key`/`apikey`. Headerformade nycklar (`authorization`, `x-api-key`, `api-key`, `apikey`) maskeras strukturellt (endast värdet, schemaprefix som `Bearer `/`Basic ` bevaras) i stället för via den generiska textregexen.
+- Skyddsräcket blockerar aldrig; det skriver endast om (`modifiedPayload` / `modifiedResponse`) och annoterar (`meta.credentialsRedacted`, `meta.count`).
 
 Regressionsskydd: `tests/unit/credential-masker-guardrail.test.ts`.
 

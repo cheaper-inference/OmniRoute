@@ -4,47 +4,72 @@
 
 ---
 
-> Ikut serta, dimatikan secara lalai (`modelVisibilityAllowlist`/`modelVisibilityDenylist` kedua-duanya kosong meninggalkan katalog `/v1/models` AND setiap kumpulan calon `auto/*` sama bait). Adik beradik `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) untuk pengendali yang mahukan senarai model yang dipilih susun atas sebab yang tiada kaitan dengan kos.
+> Ikut serta secara pilihan, dilumpuhkan secara lalai (`modelVisibilityAllowlist`/`modelVisibilityDenylist` yang kedua-duanya kosong mengekalkan
+> katalog `/v1/models` DAN setiap kumpulan calon `auto/*` sama sepenuhnya pada peringkat bait). Seting setara dengan
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) untuk pengendali yang mahukan senarai
+> model tersusun atas sebab yang tiada kaitan dengan kos.
 
 ## Mengapa ini wujud
 
-`hidePaidModels` menjawab "adakah model ini percuma?" dan `hideAutoCombos` menjawab "perlukah id maya `auto/*` diiklankan sama sekali?" — juga tidak membenarkan pengendali memilih subset model yang sewenang-wenangnya (cth mempersembahkan dengan tepat model yang harus dilihat oleh Kod Claude / pelanggan OpenCode tertentu, bebas daripada harga). #11481 menambah bahawa sebagai dua tetapan rentetan rentetan ikut serta bebas.
+`hidePaidModels` menjawab "adakah model ini percuma?" dan `hideAutoCombos` menjawab "patutkah id
+maya `auto/*` diiklankan sama sekali?" — kedua-duanya tidak membolehkan pengendali menyusun subset
+model sewenang-wenangnya (cth. memaparkan hanya model yang sepatutnya dilihat oleh klien Claude Code / OpenCode tertentu,
+tanpa bergantung pada harga). #11481 menambahkan keupayaan tersebut sebagai dua seting tatasusunan rentetan yang berasingan dan perlu dipilih untuk diaktifkan.
 
-## tetapan
+## Seting
 
-| kunci                      | taip       | Lalai | Maknanya                                                                        |
-| -------------------------- | ---------- | ----- | ------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`  | Entri yang sepadan dengan calon menyembunyikannya dari kolam catalog/candidate. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`  | Apabila tidak kosong, entri ONLY yang sepadan dengan calon kekal terdedah.      |
+| Kunci                      | Jenis      | Lalai | Maksud                                                                                  |
+| -------------------------- | ---------- | ----- | --------------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`  | Entri yang sepadan dengan calon akan menyembunyikannya daripada katalog/kumpulan calon. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`  | Apabila tidak kosong, HANYA entri yang sepadan dengan calon akan kekal didedahkan.      |
 
-Kedua-duanya menerima sehingga 500 entri sehingga 200 aksara setiap satu (Zod-disahkan dalam `src/shared/validation/settingsSchemas.ts`). Entri adalah sama ada:
+Kedua-duanya menerima sehingga 500 entri dengan panjang sehingga 200 aksara setiap satu (disahkan oleh Zod dalam
+`src/shared/validation/settingsSchemas.ts`). Sesuatu entri boleh berupa:
 
-- id katalog tepat — `"gpt-4o"` (id model kosong) atau `"openai/gpt-4o"` (awalan pembekal), atau
-- corak glob menggunakan `*`/`?` — cth `"openai/gpt-4*"` atau `"anthropic/*"` — diselesaikan melalui pemadanan `globToRegex()` kongsi yang sama (`src/shared/utils/globPattern.ts`) yang telah digunakan oleh pemetaan kombo setiap model `ModelRoutingSection` dan `freeModels.ts::matchesOnlyPaidModels`.
+- id katalog tepat — `"gpt-4o"` (id model sahaja) atau `"openai/gpt-4o"` (dengan awalan penyedia), atau
+- corak glob yang menggunakan `*`/`?` — cth. `"openai/gpt-4*"` atau `"anthropic/*"` — dipadankan melalui
+  pemadan `globToRegex()` dikongsi yang sama (`src/shared/utils/globPattern.ts`) dan sudah digunakan oleh
+  pemetaan kombo bagi setiap model dalam `ModelRoutingSection` serta `freeModels.ts::matchesOnlyPaidModels`.
 
-Keutamaan: senarai penolakan disemak terlebih dahulu (kemasukan yang ditolak sentiasa disembunyikan, walaupun ia juga sepadan dengan senarai yang dibenarkan); apabila senarai yang dibenarkan tidak kosong, hanya entri yang sepadan dengannya akan bertahan.
+Keutamaan: senarai larangan diperiksa terlebih dahulu (entri yang dilarang sentiasa disembunyikan, walaupun entri itu turut
+sepadan dengan senarai kebenaran); apabila senarai kebenaran tidak kosong, hanya entri yang sepadan dengannya akan dikekalkan.
 
-## Dua titik tercekik, bukan satu
+## Dua titik kawalan, bukan satu
 
-Pelajaran daripada #6512 (penapis katalog `hidePaidModels` -only masih membenarkan `auto/*` menghala ke model berbayar, memandangkan kumpulan calon kombo dibina secara berasingan) digunakan secara sama di sini. Predikat sepadan `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) dipanggil daripada BOTH:
+Pengajaran daripada #6512 (penapis katalog `hidePaidModels` sahaja masih membolehkan `auto/*` menghalakan kepada
+model berbayar kerana kumpulan calon kombo dibina secara berasingan) turut terpakai dengan cara yang sama di sini.
+Predikat pemadanan `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) dipanggil daripada KEDUA-DUANYA:
 
-- `src/app/api/v1/models/catalog.ts` — penyenaraian `/v1/models` itu sendiri, pada 5 titik pencekik setiap sumber yang sama `shouldHidePaid()` sudah berpagar ( `PROVIDER_MODELS` statik , baris penyedia disegerakkan, baris tersuai, baris bersandarkan alias, baris sandaran terurus).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — dipanggil dari `virtualFactory.ts::buildPreparedPool`, sejurus selepas panggilan `filterPaidOnlyCandidates()` yang setara, jadi model yang dinafikan tidak boleh dipilih ke dalam kumpulan calon `auto/*` sama ada.
+- `src/app/api/v1/models/catalog.ts` — penyenaraian `/v1/models` itu sendiri, pada 5 titik kawalan bagi setiap sumber
+  yang sama dan sudah dikawal oleh `shouldHidePaid()` (`PROVIDER_MODELS` statik, baris penyedia yang disegerakkan,
+  baris tersuai, baris bersandarkan alias, baris sandaran terurus).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — dipanggil
+  daripada `virtualFactory.ts::buildPreparedPool`, sejurus selepas panggilan
+  `filterPaidOnlyCandidates()` yang setara, supaya model yang dilarang juga tidak akan pernah dipilih ke dalam
+  kumpulan calon `auto/*`.
 
-## Apa yang NOT ditapis
+## Perkara yang TIDAK ditapis
 
-Mencerminkan tingkah laku sedia ada `hideAutoCombos`: id model dihantar** secara eksplisit** (bukan melalui `auto/*`, dan tidak ditemui melalui penyenaraian katalog) tidak pernah disekat semasa penghantaran — hanya keahlian advertisement/candidate-pool ditapis. Ini adalah bebas daripada `hidePaidModels`; pengendali mungkin mahukan set yang dipilih susun atas sebab yang tiada kaitan dengan kos, jadi kedua-dua tetapan digubah sebagai penapis AND-ed bebas, sama seperti komposisi berbilang bendera sedia ada dalam `catalog.ts`.
+Mencerminkan tingkah laku sedia ada `hideAutoCombos`: id model yang dihantar secara **eksplisit** (bukan melalui `auto/*`,
+dan bukan ditemui melalui penyenaraian katalog) tidak pernah disekat semasa penghantaran — hanya
+pengiklanan/keahlian kumpulan calon yang ditapis. Ini tidak bergantung pada `hidePaidModels`;
+pengendali mungkin mahukan set tersusun atas sebab yang tiada kaitan dengan kos, maka kedua-dua
+seting digabungkan sebagai penapis bebas berasaskan AND, sama seperti penggabungan berbilang bendera sedia ada dalam
+`catalog.ts`.
 
-Eksport tetapan (`GET /api/settings/export-json`) termasuk kedua-dua tatasusunan verbatim, seperti mana-mana medan tetapan lain — tidak seperti penapis eksport langkah kombo `hidePaidModels`, tiada risiko penghidratan semula di sini: id yang dinafikan dibenamkan dalam langkah kombo yang dieksport ialah pilihan penghalaan eksplisit pengendali sendiri, bukan sesuatu yang perlu dilucutkan oleh sempadan eksport.
+Eksport seting (`GET /api/settings/export-json`) menyertakan kedua-dua tatasusunan secara verbatim, seperti mana-mana medan
+seting lain — tidak seperti penapis eksport langkah kombo `hidePaidModels`, tiada risiko penghidratan semula
+di sini: id yang dilarang dan dibenamkan dalam langkah kombo yang dieksport ialah pilihan penghalaan eksplisit pengendali sendiri,
+bukannya sesuatu yang perlu dibuang oleh sempadan eksport.
 
-## Penyenaraian kombo sahaja (`exposeCombosOnly`)
+## Penyenaraian combo sahaja (`exposeCombosOnly`)
 
-Boolean yang berasingan, juga ikut serta dan `false` secara lalai, untuk penempatan yang kombo adalah permukaan model awam dan pembekal hanya bahagian belakang. Apabila ia adalah `true`, penyenaraian awam (`GET /v1/models`, `GET /v1` dan laluan penemuan `/v1` lain yang dibina pada `getUnifiedModelsResponse()`) hanya menyimpan baris dengan `owned_by: "combo"`: gabungan pengguna serta gabungan `auto/*` terbina dalam (melainkan `hideAutoCombos` menyembunyikannya). Ia menggunakan ujian baris yang sama seperti `catalogScope: "combos"` per-key , dan penapis allow/deny/scope kunci sendiri masih digunakan di atas.
+Boolean berasingan, juga perlu diaktifkan sendiri dan bernilai `false` secara lalai, untuk pemasangan yang menjadikan combo sebagai model awam sementara penyedia hanya menjadi backend. Apabila nilainya `true`, penyenaraian awam (`GET /v1/models`, `GET /v1` dan laluan penemuan `/v1` lain yang menggunakan `getUnifiedModelsResponse()`) mengekalkan hanya baris dengan `owned_by: "combo"`: combo pengguna serta combo terbina dalam `auto/*` (melainkan disembunyikan oleh `hideAutoCombos`). Ia menggunakan ujian baris yang sama seperti `catalogScope: "combos"` bagi setiap kunci, dan penapis benarkan/tolak/skop kunci itu sendiri masih digunakan di atasnya.
 
-Togol masuk** Tetapan → Penghalaan → Model penyenaraian API** , atau dengan `PATCH /api/settings {"exposeCombosOnly": true}`.
+Togol dalam **Settings → Routing → Models API listing**, atau dengan `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Seperti senarai di atas, ia hanya menukar iklan:
+Seperti senarai di atas, ia hanya mengubah perkara yang diiklankan:
 
-- id `provider/model` yang jelas masih dihantar, dan `GET /v1/models/{id}` masih menyelesaikannya;
-- katalog papan pemuka (`GET /api/models/catalog`, digunakan oleh pemilih model) tidak disempitkan;
-- ia tidak dicerminkan ke dalam kumpulan calon `auto/*`, jadi gabungan `auto/*` mengekalkan kumpulan penuh mereka.
+- id `provider/model` yang dinyatakan secara eksplisit masih dihantar, dan `GET /v1/models/{id}` masih menyelesaikannya;
+- katalog papan pemuka (`GET /api/models/catalog`, digunakan oleh pemilih model) tidak dikecilkan;
+- ia tidak dicerminkan ke dalam kumpulan calon `auto/*`, jadi combo `auto/*` mengekalkan keseluruhan kumpulannya.

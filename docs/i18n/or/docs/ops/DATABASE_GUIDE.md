@@ -403,52 +403,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## କାର୍ଯ୍ୟଦକ୍ଷତା ଟ୍ୟୁନିଂ
+## କାର୍ଯ୍ୟଦକ୍ଷତା ଟ୍ୟୁନିଂ।
 
-### WAL ମୋଡ୍
+### WAL ମୋଡ୍।
 
-WAL ଡିଫଲ୍ଟ ଭାବେ ସକ୍ଷମ ଅଛି। ଅଧିକ ରାଇଟ୍ ଥିବା ୱାର୍କଲୋଡ୍ଗୁଡ଼ିକ ପାଇଁ, ନିମ୍ନଲିଖିତ ବିଚାର କରନ୍ତୁ:
+ଡିଫଲ୍ଟ ଭାବରେWAL ସକ୍ଷମ ହୋଇଛି। ଉଚ୍ଚ-ଲେଖା କାର୍ଯ୍ୟଭାର ପାଇଁ, ବିଚାର କରନ୍ତୁ:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- ପ୍ରତି 1000 ପୃଷ୍ଠାରେ ଚେକ୍ପଏଣ୍ଟ
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL ସୀମା
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### ଇଣ୍ଡେକ୍ସଗୁଡ଼ିକ
+OmniRoute `journal_size_limit` ସେଟ୍ କରେ ନାହିଁ। ଏକ ଚେକପଏଣ୍ଟ WAL ଫ୍ରେମଗୁଡ଼ିକୁ ମୁଖ୍ୟ ଫାଇଲକୁ ଘୁଞ୍ଚାଏ, କିନ୍ତୁ WAL ଫାଇଲ ଏହାର ସର୍ବ ବୃହତ ଆବଣ୍ଟିତ ଆକାର ରଖେ। `OMNIROUTE_WAL_GUARD_MAX_MB` ଗାର୍ଡ କେବଳ `wal_checkpoint(RESTART)` ଚେତାବନୀ ଏବଂ ଚଲାନ୍ତି; ଏହା ଏକ ଡିସ୍କ ଆକାରର କ୍ୟାପ୍ ନୁହେଁ।
 
-କାର୍ଯ୍ୟଦକ୍ଷତା ପାଇଁ ପ୍ରମୁଖ ଇଣ୍ଡେକ୍ସଗୁଡ଼ିକ (ମାଇଗ୍ରେସନ୍ ଦ୍ୱାରା ସ୍ୱୟଂଚାଳିତ ଭାବେ ସୃଷ୍ଟି ହୁଏ):
+### ସୂଚକାଙ୍କ
 
-- `idx_models_provider` — ପ୍ରଦାନକାରୀ ଅନୁସାରେ ମଡେଲ୍ ସନ୍ଧାନ
-- `idx_combo_targets_combo_id` — କମ୍ବୋ ଟାର୍ଗେଟ୍ ବିସ୍ତାର
-- `idx_usage_history_api_key_timestamp` — ବ୍ୟବହାର ବିଶ୍ଳେଷଣ
-- `idx_quota_snapshots_api_key_window` — କୋଟା ଟ୍ରାକିଂ
-- `idx_call_logs_timestamp` — କଲ୍ ଲଗ୍ କ୍ୱେରିଗୁଡ଼ିକ
+କାର୍ଯ୍ୟଦକ୍ଷତା ପାଇଁ ମୁଖ୍ୟ ସୂଚକାଙ୍କ (ସ୍ଥାନାନ୍ତରଣ ଦ୍ୱାରା ସ୍ୱୟଂ-ସୃଷ୍ଟି):
 
-ଏକ ନୂଆ ଇଣ୍ଡେକ୍ସ ଯୋଡ଼ିବା ପାଇଁ, ଏକ ମାଇଗ୍ରେସନ୍ ସୃଷ୍ଟି କରନ୍ତୁ:
+- ପ୍ରଦାନକାରୀ ଦ୍ୱାରା`idx_models_provider` — ମଡେଲ୍ ସନ୍ଧାନ।
+- `idx_combo_targets_combo_id` — କମ୍ବୋ ଲକ୍ଷ୍ୟ ବିସ୍ତାର।
+- `idx_usage_history_api_key_timestamp` — ବ୍ୟବହାର ଆନାଲିଟିକ୍ସ।
+- `idx_quota_snapshots_api_key_window` — କୋଟା ଟ୍ରାକିଂ।
+- `idx_call_logs_timestamp` — କଲ୍ ଲଗ୍ ପ୍ରଶ୍ନଗୁଡିକ।
+
+ଏକ ନୂତନ ସୂଚକାଙ୍କ ଯୋଡିବାକୁ, ଏକ ସ୍ଥାନାନ୍ତରଣ ସୃଷ୍ଟି କରନ୍ତୁ:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### ମେମୋରି-ମ୍ୟାପ୍ଡ I/O
+### ସ୍ମୃତି-ମ୍ୟାପ୍ I/O
 
-ଅତ୍ୟନ୍ତ ବଡ଼ ଡାଟାବେସ୍ଗୁଡ଼ିକ (>10GB) ପାଇଁ, SQLite pragma ମାଧ୍ୟମରେ ମେମୋରି ମ୍ୟାପିଂ ସମନ୍ୱୟ କରାଯାଇପାରିବ:
+ବହୁତ ବଡ ଡାଟାବେସ୍ (> 10GB) ପାଇଁ, SQLite ପ୍ରାଗମା ମାଧ୍ୟମରେ ମେମୋରୀ ମ୍ୟାପିଂ ଆଡଜଷ୍ଟ ହୋଇପାରିବ:
 
 ```sql
--- SQLite pragma ମାଧ୍ୟମରେ ସେଟ୍ କରନ୍ତୁ (core.ts କିମ୍ବା ରନ୍ଟାଇମ୍ରେ ସମନ୍ୱୟ କରନ୍ତୁ)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### କମ୍ପାକ୍ସନ୍
+### ସଙ୍କୋଚନ।
 
-ଦୀର୍ଘ ସମୟ ଧରି ଚାଲୁଥିବା OmniRoute ଇନ୍ଷ୍ଟାନ୍ସଗୁଡ଼ିକ ସମୟେ ସମୟେ `VACUUM` ଚଲାଇବା ଦ୍ୱାରା ଲାଭବାନ ହୁଅନ୍ତି:
+ଦୀର୍ଘ ଚାଲୁଥିବା OmniRoute ଉଦାହରଣଗୁଡ଼ିକ ବେଳେବେଳେ `VACUUM` ଦ୍ୱାରା ଉପକୃତ ହୁଏ:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-କମ୍ ଟ୍ରାଫିକ୍ ଥିବା ସମୟରେ ମାସିକ ଭାବେ ଏହାକୁ ଚଲାନ୍ତୁ। (WAL ମୋଡ୍ ଏହାର ଆବଶ୍ୟକତା କମାଏ, କିନ୍ତୁ ସମ୍ପୂର୍ଣ୍ଣ ଭାବେ ଦୂର କରେ ନାହିଁ।)
+କମ୍ ଟ୍ରାଫିକ୍ ୱିଣ୍ଡୋ ସମୟରେ ମାସିକ ଚଲାନ୍ତୁ। (WAL ମୋଡ୍ ଆବଶ୍ୟକତାକୁ ହ୍ରାସ କରେ, କିନ୍ତୁ ଏହାକୁ ଦୂର କରେ ନାହିଁ।)
 
 ---
 

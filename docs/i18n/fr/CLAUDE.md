@@ -15,7 +15,7 @@ enseignements sur les PII). Lisez-le intégralement ; ne rajoutez pas ici les r�
 
 Le protocole complet et obligatoire concernant les worktrees (confirmation de la branche de
 base, chemin canonique `.claude/worktrees/`, `cp -al` node_modules, règles de démantèlement) se
-trouve dans [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (résumé dans
+trouve dans [`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (résumé dans
 `AGENTS.md` → Workflow Git → « Isolation des worktrees »). Points spécifiques à Claude Code :
 
 - Confirmez la branche de base avec l'opérateur via `AskUserQuestion` (Règle absolue nº 19), sauf

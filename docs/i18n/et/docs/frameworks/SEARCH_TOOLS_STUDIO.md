@@ -54,7 +54,7 @@ Uus vahekaart sisu eraldamiseks URL-ilt `POST /v1/web/fetch` kaudu (loodud plaan
 - Sisend: URL + kogu lehekülje lüliti + vorminguvalija (markdown / tekst / HTML).
 - Saatmine → toomine → `ScrapeResult.tsx` renderdamine.
 - `ScrapeResult` renderdab markdown-eelvaate + toorkuva lüliti.
-- Piirang: kui vastuse keha on suurem kui **256 KB**, kuvab kasutajaliides `(kärbitud, kuva toorandmeid)` ja avab toorandmed Monaco modaalaknas (D21).
+- Piirang: kui vastuse keha on suurem kui **256 KB**, kuvab kasutajaliides `View full raw content` ja avab toorandmed modaalaknas (D21).
 - Metaandmete paneel: pakkuja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentsus, maksumus, vastuse suurus, linkide arv.
 - Kasutab `useScrapeFetch.ts` hook'i.
 
@@ -103,10 +103,12 @@ Käitab sama päringut/URL-i paralleelselt kuni **4 pakkuja kaudu** (D22):
 `ProviderCatalog.tsx` kuvab täieliku pakkujate loendi päringust `GET /api/search/providers`
 (mida laiendati F4-s toomispakkujate lisamiseks):
 
-| `kind` | `"search"` (20 pakkujat) või `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 pakkujat) või `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Olek **tuletatakse päringu ajal**, kontrollides, kas identimisteave on olemas ja kas
 kõik võtmed on parajasti ooteajal.
+
+`codex-search` (Codex Web Search): Kasutab teie ühendatud Codexi (ChatGPT) kontosid ilma eraldi võtmeta. Iga otsing kulutab tellimuse kvooti ja kestab umbes 10–40 s. Käivitub siis, kui päring seda nimetab; automaatne valik nõuab lippu `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, mis on vaikimisi välja lülitatud.
 
 ---
 

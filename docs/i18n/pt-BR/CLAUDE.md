@@ -15,7 +15,7 @@ ao Claude Code — refinamentos operacionais das regras já definidas em `AGENTS
 
 O protocolo obrigatório completo de worktree (confirmação do branch base, caminho canônico
 `.claude/worktrees/`, `cp -al` para node_modules, regras de desmontagem) está em
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (resumido em `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (resumido em `AGENTS.md` →
 Fluxo de Trabalho Git → "Isolamento de worktree"). Pontos específicos do Claude Code:
 
 - Confirme o branch base com o operador via `AskUserQuestion` (Hard Rule #19), a menos que ele

@@ -4,57 +4,52 @@
 
 ---
 
-> **Извор истине:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Последње ажурирање:** 2026-06-28 — v3.8.40
+> **Извор истине:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Последње ажурирано:** 2026-06-28 — в3.8.40
 
-OmniRoute може да шаље HTTP webhook-ове при догађајима на платформи. Користите их за интеграцију са
-Slack-ом, PagerDuty-јем, Datadog-ом, интерним сервисима за упозоравање или било којим HTTP пријемником.
+OmniRoute може покренути HTTP веб-хукове на догађајима платформе. Користите их за интеграцију са Slack, PagerDuty, Датадог, интерним сервисима за упозорење или било којим HTTP пријемником.
 
-Диспечер потписује сваку испоруку помоћу HMAC-SHA256, поново покушава испоруку при привременим
-грешкама, прати стање испоруке за сваки webhook и аутоматски онемогућава крајње тачке које
-настављају да отказују.
+Диспечер потписује сваку испоруку помоћу HMAC-SHA256, покушава поново у случају пролазних грешака, прати здравље испоруке по веб-хуку и аутоматски онемогућава крајње тачке које и даље не успевају.
 
 ## Подржани догађаји
 
-Тип `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, који користи `src/lib/webhookDispatcher.ts`) тренутно моделује тачно четири догађаја:
+`WebhookEvent` тип (`src/lib/webhooks/eventDescriptions.ts`, користи `src/lib/webhookDispatcher.ts`) тренутно моделира седам догађаја:
 
-| Догађај             | Активира се када                                                        |
-| ------------------- | ----------------------------------------------------------------------- |
-| `request.completed` | Проксирани захтев се успешно заврши                                     |
-| `request.failed`    | Проксирани захтев не успе након свих поновних покушаја/резервних опција |
-| `quota.exceeded`    | API кључ пређе праг буџета/квоте                                        |
-| `test.ping`         | Синтетички догађај који користи тестна крајња тачка                     |
+| Догађај                   | Пали када                                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Прокси захтев је успешно завршен                                                                                  |
+| `request.failed`          | Прокси захтев не успева након свих retries/fallback                                                               |
+| `quota.exceeded`          | API кључ прелази budget/quota праг                                                                                |
+| `proxy.set_aside`         | Члан скупа проксија се издваја након поновљених одбијања (само транзиција)                                        |
+| `proxy.pool.exhausted`    | Сваки члан опсега скупа проксија је издвојен                                                                      |
+| `provider.reset_redeemed` | Аутоматска примена банковних ресетовања је искористила кредит за ресетовање или ресетовање Claude седмичне сесије |
+| `test.ping`               | Синтетички догађај који користи крајња тачка теста                                                                |
 
-Претплате прихватају литерал `"*"` за пријем сваког догађаја. Непознати називи
-догађаја у `events` игноришу се у време слања.
+Претплате прихватају буквални `"*"` за пријем сваког догађаја. Непозната имена догађаја у `events` се игноришу у време слања.
 
-> Напомена: API диспечера је повезан, али се продукцијска места позива за неке
-> догађаје који нису `test.ping` још увек уводе. Проверите `grep dispatchEvent` да бисте видели
-> које путање тренутно позивају диспечер у вашем издању.
+> Напомена: диспечерски API је повезан, али локације за производне позиве за неке од догађаја који нису `test.ping` и даље слећу. Проверите `grep dispatchEvent` да видите које путање тренутно позивају диспечера у вашем издању.
 
 ## Архитектура
 
 ```
-Позивалац (руковалац, сервис, монитор)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> филтрирај према webhook.events
-    -> за свако подударање (паралелно):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         направи payload { event, timestamp, data }
-         потпиши тело помоћу HMAC-SHA256 (ако постоји secret)
-         POST са временским ограничењем од 10 s
-         понови до 3 пута при 5xx / мрежној грешци
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Слање се за позиваоца обавља по принципу „покрени и настави“: `Promise.allSettled` потискује
-грешке појединачних webhook-ова, тако да један неисправан пријемник не може да блокира остале.
+Отпремање је пали-и-заборави за позиваоца: `Promise.allSettled` гута грешке по веб-хуку тако да један лош пријемник не може да блокира остале.
 
-## HMAC потписивање
+## Потписивање HMAC
 
-Када webhook има `secret`, OmniRoute потписује JSON тело и шаље:
+Када веб-хук има `secret`, OmniRoute потписује JSON тело и шаље:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Називи заглавља користе префикс `X-Webhook-*` (не `X-OmniRoute-*`). Вредност потписа
-> је `sha256=<hex>` — проверите цео префикс.
+> Имена заглавља користе `X-Webhook-*` префикс (не `X-OmniRoute-*`). Вредност потписа је `sha256=<hex>` — провери пун префикс.
 
-Ако се `createWebhook` позове без тајне, DB модул генерише једну
-(`whsec_<48 hex>`), тако да су сви webhook-ови подразумевано потписани.
+Ако је `createWebhook` позван без тајне, DB модул генерише један (`whsec_<48 hex>`) тако да су сви веб-хукови подразумевано потписани.
 
-### Провера на пријемнику
+### Верификација на пријемнику
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Увек проверавајте у односу на **необрађено** тело захтева, пре било каквог JSON рашчлањивања.
+Увек проверите у односу на **сирово** тело захтева, пре било каквог JSON рашчлањивања.
 
-## Политика поновних покушаја и неуспеха
+## Политика поновног покушаја и неуспеха
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Временско ограничење од 10 секунди по покушају (`AbortController`).
-- HTTP 2xx се сматра успехом.
-- HTTP 3xx/4xx се сматра коначним статусом без поновног покушаја — бележи се као испоручено
-  са `success = res.ok`.
-- За HTTP 5xx и мрежне грешке покушај се понавља уз експоненцијално повећање времена чекања:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Након `maxRetries`, испорука се бележи као неуспешна.
-- Свака испорука ажурира `last_triggered_at`, `last_status` и ресетује
-  или увећава `failure_count`.
-- Диспечер позива `disableWebhooksWithHighFailures(10)` након сваког скупног слања,
-  тако да се сваки webhook са `failure_count >= 10` аутоматски онемогућава.
+- Тајм-аут од 10 секунди по покушају (`AbortController`).
+- HTTP 2кк се рачуна као успех.
+- HTTP 3xx/4xx се рачуна као коначни статус — који се не може поново покушати и који је забележен као испоручен са `success = res.ok`.
+- HTTP 5кк и грешке мреже се поново покушавају са експоненцијалним повлачењем: `2^attempt * 1000 ms` (1с, 2с, 4с).
+- Након `maxRetries`, испорука се евидентира као неуспела.
+- Свака испорука ажурира `last_triggered_at`, `last_status` и ресетује или повећава `failure_count`.
+- Диспечер позива `disableWebhooksWithHighFailures(10)` након сваког одвајања, тако да је сваки веб-хук са `failure_count >= 10` аутоматски онемогућен.
 
 ## База података
 
 Табела `webhooks` (миграција `011_webhooks.sql`):
 
-| Колона              | Тип     | Напомене                                              |
-| ------------------- | ------- | ----------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                  |
-| `url`               | TEXT    | Одредишни URL                                         |
-| `events`            | TEXT    | JSON низ; подразумевано `["*"]`                       |
-| `secret`            | TEXT    | HMAC тајна (аутоматски се генерише ако није наведена) |
-| `enabled`           | INT     | 0/1; подразумевано 1                                  |
-| `description`       | TEXT    | Опционална ознака читљива људима                      |
-| `created_at`        | TEXT    | `datetime('now')`                                     |
-| `last_triggered_at` | TEXT    | Ажурира се при сваком покушају испоруке               |
-| `last_status`       | INT     | HTTP статус последњег покушаја (0 = мрежа)            |
-| `failure_count`     | INT     | Ресетује се на 0 при успеху, +1 при неуспеху          |
+| Колона              | Тип     | Напомене                                                  |
+| ------------------- | ------- | --------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                      |
+| `url`               | TEXT    | Одредиште URL                                             |
+| `events`            | TEXT    | JSON низ; подразумевани `["*"]`                           |
+| `secret`            | TEXT    | HMAC тајна (аутоматски генерисана ако није дата)          |
+| `enabled`           | INT     | 0/1; подразумевано је 1                                   |
+| `description`       | TEXT    | Опциона људска ознака                                     |
+| `created_at`        | TEXT    | `datetime('now')`                                         |
+| `last_triggered_at` | TEXT    | Ажурирано при сваком покушају испоруке                    |
+| `last_status`       | INT     | HTTP статус последњег покушаја (0 = мрежа)                |
+| `failure_count`     | INT     | Ресетује се на 0 у случају успеха, + 1 у случају неуспеха |
 
-Историја испорука се трајно чува у наменској табели `webhook_deliveries`
-(миграција `069_webhook_deliveries.sql`, уписује се преко
-`src/lib/db/webhookDeliveries.ts::insertDelivery` при сваком покушају), поред
-збирних бројача у реду табеле `webhooks`. Метаподаци о врсти (Slack / Discord /
-Telegram / прилагођени трансформатори садржаја) додати су миграцијом `070_webhooks_kind_metadata.sql`.
+Историја испоруке се задржава у наменској `webhook_deliveries` табели (миграција `069_webhook_deliveries.sql`, уписана преко `src/lib/db/webhookDeliveries.ts::insertDelivery` при сваком покушају), поред збирних бројача у `webhooks` реду. Врста метаподатака (Slack / Discord / Telegram / прилагођени трансформатори терета) је додао `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Све крајње тачке захтевају управљачку аутентификацију (`requireManagementAuth`).
+Све крајње тачке захтевају потврду управљања (`requireManagementAuth`).
 
-| Крајња тачка                    | Метод  | Опис                                               |
-| ------------------------------- | ------ | -------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Приказ webhook-ова (тајне су маскиране)            |
-| `/api/webhooks`                 | POST   | Креирање webhook-а                                 |
-| `/api/webhooks/[id]`            | GET    | Детаљи webhook-а (пуна тајна)                      |
-| `/api/webhooks/[id]`            | PUT    | Ажурирање поља                                     |
-| `/api/webhooks/[id]`            | DELETE | Уклањање                                           |
-| `/api/webhooks/[id]/test`       | POST   | Слање догађаја `test.ping` (без поновних покушаја) |
-| `/api/webhooks/[id]/deliveries` | GET    | Недавни покушаји испоруке за један webhook         |
-| `/api/webhooks/validate-url`    | POST   | Прелиминарна валидација URL-а (SSRF заштита)       |
+| Крајња тачка                    | Метод  | Опис                                       |
+| ------------------------------- | ------ | ------------------------------------------ |
+| `/api/webhooks`                 | GET    | Листа веб-хукова (тајне маскиране)         |
+| `/api/webhooks`                 | POST   | Креирајте веб-хук                          |
+| `/api/webhooks/[id]`            | GET    | Детаљи веб-хука (потпуна тајна)            |
+| `/api/webhooks/[id]`            | PUT    | Ажурирајте поља                            |
+| `/api/webhooks/[id]`            | DELETE | Уклони                                     |
+| `/api/webhooks/[id]/test`       | POST   | Покрени `test.ping` (без покушаја)         |
+| `/api/webhooks/[id]/deliveries` | GET    | Недавни покушаји испоруке за један веб-хук |
+| `/api/webhooks/validate-url`    | POST   | URL валидација пре лета (SSRF заштита)     |
 
-`GET /api/webhooks` маскира тајну у облику `<првих 10 знакова>...` како би се спречило њено откривање
-на страницама са списковима. Користите `[id]` GET када вам је тајна заиста потребна.
+`GET /api/webhooks` маскира тајну `<first 10 chars>...` како би се избегло цурење на страницама са листингом. Користите `[id]` GET када вам је тајна заиста потребна.
 
-### Креирање webhook-а
+### Креирајте веб-хук
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ако је `secret` изостављен, сервер генерише тајну `whsec_<hex>` и враћа
-је у одговору.
+Ако је `secret` изостављен, сервер генерише `whsec_<hex>` тајну и враћа је у одговору.
 
-### Тестирање webhook-а
+### Тест вебхоок
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Враћа `{ delivered, status, error }`. Не обављају се поновни покушаји — корисно за
-брзу проверу да ли прималац прихвата садржај и потпис.
+Враћа `{ delivered, status, error }`. Не покушавају се поновљени покушаји. — је користан за брзу проверу да ли прималац прихвата терет и потпис.
 
-## Kontrolna tabla
+## Дасхбоард
 
-Stranica kontrolne table na `/dashboard/webhooks` (pogledajte
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) omogućava:
+Страница контролне табле у `/dashboard/webhooks` (погледајте `src/app/(dashboard)/dashboard/webhooks/page.tsx`) пружа:
 
-- Kreiranje/uređivanje webhook-ova pomoću birača događaja
-- Indikator statusa (aktivan / neaktivan / sa greškom) na osnovu `enabled`,
-  `failure_count` i `last_status`
-- Probnu isporuku jednim klikom
-- Ručno uključivanje/isključivanje
+- Create/edit веб-хукови са бирачем догађаја
+- Индикатор статуса (активан / неактиван / грешка) заснован на `enabled`, `failure_count` и `last_status`
+- Испорука теста једним кликом
+- Ручно пребацивање enable/disable
 
-## Primeri korisnog sadržaja
+## Примери носивости
 
-### request.completed
+### захтев.завршен
 
 ```json
 {
@@ -201,7 +181,7 @@ Stranica kontrolne table na `/dashboard/webhooks` (pogledajte
 }
 ```
 
-### test.ping
+### тест.пинг
 
 ```json
 {
@@ -214,29 +194,19 @@ Stranica kontrolne table na `/dashboard/webhooks` (pogledajte
 }
 ```
 
-Strukture polja za događaje koji nisu `test.ping` definisane su na mestima poziva
-koja ih emituju; tretirajte objekat `data` kao kompatibilan sa budućim verzijama
-(dodajte polja, nemojte se oslanjati na njihovo odsustvo).
+Облици поља за догађаје који нису `test.ping` дефинисани су позивним локацијама које их емитују; третирајте `data` објекат као компатибилан унапред (додајте поља, не зависе од одсуства).
 
-## Najbolje prakse
+## Најбоље праксе
 
-- **Proverite potpis pri svakoj isporuci** u odnosu na neobrađeno telo — time se
-  sprečavaju lažirani POST zahtevi od bilo koga ko pogodi URL vašeg webhook-a.
-- **Odgovorite statusom 2xx u roku od ~5 sekundi** — dispečer prekida zahtev nakon
-  10 s. Spori primaoci će trošiti ponovne pokušaje i povećavati `failure_count`.
-- **Učinite obrađivače idempotentnim** — ponovni pokušaji i semantika isporuke
-  najmanje jednom znače da su duplikati mogući.
-- **Pretplaćujte se minimalno** — navedite samo događaje koje zaista koristite;
-  `"*"` će povećati troškove na primaocima koje ne kontrolišete.
-- **Pratite `failure_count`** — krajnje tačke se automatski onemogućavaju nakon
-  10 uzastopnih neuspeha; resetujte ih pozivom `PUT /api/webhooks/[id]` sa
-  `enabled: true` nakon što popravite primaoca.
-- **Periodično menjajte tajne** — pošaljite novu vrednost `secret` pomoću `PUT`,
-  postavite novu vrednost na primaocu i potvrdite je putem probne krajnje tačke.
+- **Проверите потпис на свакој испоруци** против сировог тела — спречава лажни POSTs од било кога ко погоди ваш вебхоок URL.
+- **Одговорите 2кк унутар ~ 5 секунди** — диспечер истекне на 10 с. Спори пријемници ће појести поновне покушаје и надувати `failure_count`.
+- **Учините руковаоце идемпотентнима** — поновни покушаји и семантика испоруке најмање једном значе да су дупликати могући.
+- **Претплатите се минимално** — наводи само догађаје које стварно конзумирате; `"*"` ће додати трошкове пријемницима које не контролишете.
+- **Гледајте `failure_count`** — крајње тачке се аутоматски деактивирају при 10 узастопних грешака; ресетујте позивањем `PUT /api/webhooks/[id]` са `enabled: true` након поправљања пријемника.
+- **Периодично ротирајте тајне** — `PUT` нови `secret`, примените нову вредност на пријемник и потврдите преко тестне крајње тачке.
 
-## Pogledajte i
+## Види такође
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — kompletan skup funkcionalnosti API-ja za upravljanje
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantika prekidača kola / perioda oporavka
-  iza grešaka dobavljača prikazanih putem `request.failed`
-- Izvor: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.мд](../reference/API_REFERENCE.md) — потпуно управљање API површина
+- [RESILIENCE_GUIDE.мд](../architecture/RESILIENCE_GUIDE.md) — семантика прекидача/хлађења иза кварова провајдера откривена је преко `request.failed`
+- Извор: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

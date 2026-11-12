@@ -15,7 +15,7 @@ PII learnings)။ အပြည့်အစုံဖတ်ရှုပါ၊ ပ�
 
 မဖြစ်မနေလိုက်နာရမည့် worktree protocol အပြည့်အစုံ (base-branch အတည်ပြုခြင်း၊ `.claude/worktrees/` canonical
 path၊ `cp -al` node_modules၊ teardown စည်းမျဉ်းများ) ကို
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) တွင် ကြည့်ရှုနိုင်ပါသည် (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) တွင် ကြည့်ရှုနိုင်ပါသည် (`AGENTS.md` →
 Git Workflow → "Worktree isolation" တွင် အကျဉ်းချုပ်ဖော်ပြထားသည်)။ Claude Code သီးသန့်အချက်များမှာ-
 
 - operator က ကြိုတင်ပြောပြထားပြီးသားမဟုတ်ပါက `AskUserQuestion` (Hard Rule #19) ဖြင့် base branch ကို

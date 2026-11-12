@@ -403,52 +403,53 @@ Hii hutumia API ya hifadhi nakala ya mtandaoni ya SQLite — ni salama kutekelez
 
 ---
 
-## Uboreshaji wa Utendaji
+## Urekebishaji wa Utendaji
 
-### Modi ya WAL
+### Njia ya WAL
 
-WAL imewezeshwa kwa chaguo-msingi. Kwa mizigo ya kazi yenye uandishi mwingi, zingatia:
+WAL imewezeshwa kwa chaguo-msingi. Kwa mzigo wa maandishi ya juu, zingatia:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Weka alama ya ukaguzi kila kurasa 1000
-PRAGMA journal_size_limit = 67108864;  -- Kikomo cha WAL cha 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### Faharasa
+OmniRoute haijaweka `journal_size_limit`. Sehemu ya ukaguzi huhamisha fremu za WAL hadi kwenye faili kuu, lakini faili ya WAL huhifadhi saizi yake kubwa zaidi iliyotengwa. Mlinzi wa `OMNIROUTE_WAL_GUARD_MAX_MB` anaonya tu na kuendesha `wal_checkpoint(RESTART)`; sio kofia ya ukubwa wa diski.
 
-Faharasa muhimu kwa ajili ya utendaji (huundwa kiotomatiki na uhamishaji):
+### Fahirisi
 
-- `idx_models_provider` — utafutaji wa modeli kulingana na mtoa huduma
-- `idx_combo_targets_combo_id` — upanuzi wa malengo ya combo
-- `idx_usage_history_api_key_timestamp` — uchanganuzi wa matumizi
-- `idx_quota_snapshots_api_key_window` — ufuatiliaji wa mgao
-- `idx_call_logs_timestamp` — hoja za kumbukumbu za miito
+Faharasa muhimu za utendakazi (zilizoundwa kiotomatiki na uhamaji):
 
-Ili kuongeza faharasa mpya, unda uhamishaji:
+- Utafutaji wa muundo wa `idx_models_provider` — na mtoaji
+- `idx_combo_targets_combo_id` — combo upanuzi wa shabaha
+- Uchambuzi wa matumizi wa `idx_usage_history_api_key_timestamp` —
+- Ufuatiliaji wa sehemu ya `idx_quota_snapshots_api_key_window` —
+- Maswali ya kumbukumbu ya simu `idx_call_logs_timestamp` —
+
+Ili kuongeza faharasa mpya, tengeneza uhamishaji:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O Iliyopangwa Kwenye Kumbukumbu
+### Kumbukumbu-Ramani I/O
 
-Kwa hifadhidata kubwa sana (>10GB), upangaji kwenye kumbukumbu unaweza kurekebishwa kupitia pragma ya SQLite:
+Kwa hifadhidata kubwa sana (> 10GB), ramani ya kumbukumbu inaweza kubadilishwa kupitia SQLite pragma:
 
 ```sql
--- Weka kupitia pragma ya SQLite (rekebisha katika core.ts au wakati wa utekelezaji)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Mfinyazo
+### Mshikamano
 
-Matukio ya OmniRoute yanayoendeshwa kwa muda mrefu hunufaika na utekelezaji wa mara kwa mara wa `VACUUM`:
+Matukio ya muda mrefu OmniRoute yananufaika na `VACUUM` ya hapa na pale :
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Tekeleza kila mwezi wakati wa vipindi vyenye trafiki ndogo. (Modi ya WAL hupunguza hitaji hilo, lakini hailiondoi.)
+Endesha kila mwezi wakati wa madirisha yenye trafiki ya chini. (Njia WAL inapunguza hitaji, lakini haiondoi.)
 
 ---
 

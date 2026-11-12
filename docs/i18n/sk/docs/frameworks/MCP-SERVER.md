@@ -103,14 +103,14 @@ Cursor, Cline a kompatibilného klienta MCP.
 | `omniroute_x_search`            | `execute:search`      | Vyhľadávať X cez xAI/SuperGrok, alebo zvoliť `xquik-search` pre výsledky Xquik API. Vyžaduje poverenia pre vybraný backend. |
 | `omniroute_web_fetch`           | `execute:search`      | Načítať webový obsah prostredníctvom nakonfigurovaných poskytovateľov načítania                                             |
 
-## Pokročilé nástroje (11) — Fáza 2
+## Pokročilé nástroje (11) Fáza 2 —
 
 | Nástroj                            | Rozsahy                              | Popis                                                                                                                       |
 | :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute_simulate_route`         | `read:health`, `read:combos`         | Simulácia smerovania na nečisto so záložným stromom                                                                         |
 | `omniroute_set_budget_guard`       | `write:budget`                       | Rozpočet relácie s akciou degradácie/blokovania/upozornenia                                                                 |
 | `omniroute_set_routing_strategy`   | `write:combos`                       | Aktualizácia stratégie kombinácie za behu (priorita/vážená/auto/atď.)                                                       |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Použiť predvoľbu odolnosti `agresívna` / `vyvážená` / `konzervatívna`                                                       |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Použiť predvoľbu odolnosti `aggressive` / `balanced` / `conservative`                                                       |
 | `omniroute_test_combo`             | `execute:completions`, `read:combos` | Živý test každého poskytovateľa v kombinácii pomocou skutočného volania upstreamu                                           |
 | `omniroute_get_provider_metrics`   | `read:health`                        | Metriky pre jednotlivých poskytovateľov s latenciou p50/p95/p99 a stavom ističa                                             |
 | `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Odporučiť kombináciu podľa typu úlohy s obmedzeniami rozpočtu/latencie                                                      |

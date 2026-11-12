@@ -20,14 +20,16 @@
 
 ## طرق التثبيت
 
-### npm (موصى به)
+### نبم (مستحسن)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-تُفتح لوحة المعلومات على `http://localhost:20128`، ويكون عنوان URL الأساسي لواجهة API هو `http://localhost:20128/v1`.
+يتم فتح لوحة المعلومات عند قاعدة `http://localhost:20128` و API URL هو `http://localhost:20128/v1`.
+
+> **مستخدمو npm:** إذا حذر npm من حظر البرامج النصية للتثبيت (على سبيل المثال، `omniroute` و `better-sqlite3`) ، فراجع استكشاف [أخطاء تثبيت البرامج النصية — npm وإصلاحها](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

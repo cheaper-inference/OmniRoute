@@ -392,7 +392,7 @@ Nástroj na načítanie sa momentálne volá `omniroute_ccr_retrieve` (predpona 
 
 ### Životný cyklus relácie
 
-Streamovateľné-HTTP relácie sú nečinné a server ich zbiera; nečinné okno je nastavené `OMNIROUTE_MCP_SESSION_IDLE_MS` (predvolené 5 minút; odkazuje sa na názov, nie na pevne zakódovanú hodnotu, takže táto stránka sa pri zmene nehýbe). Príznakom nečinne zozbieranej relácie je HTTP 404 s `Unknown Mcp-Session-Id` — nápravou je opätovné pripojenie alebo reštart relácie,** nie** na otočenie kľúča, zmenu rozsahu alebo premenovanie nástroja.
+Streamovateľné-HTTP relácie sú nečinné a server ich zbiera; nečinné okno je nakonfigurované pomocou `OMNIROUTE_MCP_SESSION_IDLE_MS`, pričom sa vráti späť na `DEFAULT_MCP_SESSION_IDLE_MS` v `open-sse/mcp-server/httpTransport.ts`. Príznakom nečinne zozbieranej relácie je HTTP 404 so `Unknown Mcp-Session-Id` — nápravou je opätovné pripojenie alebo reštart relácie,**nie** na otočenie kľúča, zmenu rozsahu alebo premenovanie nástroja.
 
 ## Rozhranie API
 

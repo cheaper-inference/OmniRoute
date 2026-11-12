@@ -654,9 +654,9 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // nothing was published — the row stores NULL (no wait), never throws.
   const addedWait = readAddedWait();
   // First-upstream-dispatch stamp for queue_wait_ms: how long this execution
-  // waited inside OmniRoute (scheduling, translation, parking) before the
-  // first byte left for the provider. Null when nothing was dispatched
-  // (rejected before egress) — mirrors the addedWait late-read above.
+  // waited inside OmniRoute before the first executor invocation. This is
+  // not a transport-level first-byte measurement. Null when no executor was
+  // invoked — mirrors the addedWait late-read above.
   const upstreamDispatchedAt = readUpstreamDispatchedAt();
   saveCallLog({
     upstreamHttp: upstreamHttp?.total ? upstreamHttp : null,

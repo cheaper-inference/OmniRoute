@@ -78,19 +78,30 @@ function resolveTarget(refs: string[], input = ""): { status: number; target: st
     const bin = path.join(dir, "bin");
     fs.mkdirSync(bin);
     fs.writeFileSync(path.join(dir, "refs"), refs.map((r) => `origin/${r}\n`).join(""));
-    fs.writeFileSync(path.join(bin, "git"), `#!/bin/sh\ncat "${path.join(dir, "refs")}"\n`, {
-      mode: 0o755,
-    });
+    fs.writeFileSync(
+      path.join(bin, "git"),
+      '#!/bin/sh\n[ "$HOME" = "$FIXTURE_HOME" ] || exit 72\n[ "$PWD" = "$FIXTURE_HOME" ] || exit 73\ncat "$FIXTURE_REFS"\n',
+      {
+        mode: 0o755,
+      }
+    );
     const output = path.join(dir, "output");
     fs.writeFileSync(output, "");
-    const run = spawnSync("bash", ["-c", step.run], {
+    const startupMarker = path.join(dir, "startup-marker");
+    fs.writeFileSync(path.join(dir, ".bashrc"), 'printf fixture > "$HOME/startup-marker"\n');
+    const run = spawnSync("bash", ["--noprofile", "--norc", "-c", step.run], {
+      cwd: dir,
       env: {
+        HOME: dir,
         PATH: `${bin}:${process.env.PATH}`,
+        FIXTURE_HOME: dir,
+        FIXTURE_REFS: path.join(dir, "refs"),
         INPUT_BRANCH: input,
         GITHUB_OUTPUT: output,
       },
       encoding: "utf8",
     });
+    assert.equal(fs.existsSync(startupMarker), false, "must not load shell startup files");
     const target = /^target=(.*)$/m.exec(fs.readFileSync(output, "utf8"))?.[1] ?? "";
     return { status: run.status ?? -1, target };
   } finally {

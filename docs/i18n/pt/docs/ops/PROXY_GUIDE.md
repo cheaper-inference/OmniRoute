@@ -393,7 +393,7 @@ Utiliza `wreq-js` para gerar impressões digitais TLS semelhantes às dos navega
 
 ### Correspondência da impressão digital da CLI
 
-O **Botão de impressão digital da CLI** (`Definições → Segurança`) reordena os cabeçalhos HTTP e os campos do corpo JSON para corresponder à assinatura exata dos binários CLI nativos (Claude Code, Codex, etc.). Isto funciona **em conjunto com** o proxy:
+O **Botão de impressão digital da CLI** (`Settings → Security`) reordena os cabeçalhos HTTP e os campos do corpo JSON para corresponder à assinatura exata dos binários CLI nativos (Claude Code, Codex, etc.). Isto funciona **em conjunto com** o proxy:
 
 ```
 O seu IP (bloqueado) → IP do proxy (EUA) → API do fornecedor

@@ -152,18 +152,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tilgængelige færdigheder
 
-OmniRoute afslører 6 A2A -færdigheder kablet i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hvert færdighedsmodul lever i `src/lib/a2a/skills/`.
+OmniRoute afslører 6 A2A færdigheder forbundet med `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hvert færdighedsmodul lever i `src/lib/a2a/skills/`.
 
-| Dygtighed          | ID                   | Beskrivelse                                                                                                                                        | Tags                            | Eksempler                               |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
-| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute combo engine + scoring                                                   | routing, udbydere               | "Rut denne prompt via den bedste model" |
-| Kvotestyring       | `quota-management`   | Rapporterer kvotetilstand pr. udbyder, hjælper opkaldere med at beslutte, hvornår de skal throttle/switch                                          | kvote, udbydere                 | "Tjek kvote for antropisk"              |
-| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med kapaciteter, free-tier flag, OAuth -status                                                                         | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
-| Omkostningsanalyse | `cost-analysis`      | Anslår prisen på en request/conversation givet kataloget + seneste brug                                                                            | omkostninger, brug              | "Estimer pris for denne samtale"        |
-| Sundhedsrapport    | `health-report`      | Aggregerer strømafbryder, nedkøling, lockout-tilstand pr. udbyder                                                                                  | sundhed, robusthed              | "Vis sundhedsstatus for alle udbydere"  |
-| Liste muligheder   | `list-capabilities`  | Returnerer hele 45-indgange Agent Skills-katalog (23 API + 21 CLI + 1 config) som en nedskrivningstabel med rå SKILL.md URLs til kontekstinjektion | katalog, opdagelse, færdigheder | "List alle OmniRoute funktioner"        |
+| Dygtighed          | ID                   | Beskrivelse                                                                                                                                    | Tags                            | Eksempler                               |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
+| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute's combo engine + scoring                                             | routing, udbydere               | "Rut denne prompt via den bedste model" |
+| Kvotestyring       | `quota-management`   | Rapporterer kvotetilstand pr. udbyder, hjælper opkaldere med at beslutte, hvornår de skal throttle/switch                                      | kvote, udbydere                 | "Tjek kvote for antropisk"              |
+| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med kapaciteter, fritliggende flag, OAuth status                                                                   | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
+| Omkostningsanalyse | `cost-analysis`      | Anslår prisen på en request/conversation givet kataloget + seneste brug                                                                        | omkostninger, brug              | "Estimer pris for denne samtale"        |
+| Sundhedsrapport    | `health-report`      | Aggregerer strømafbryder, nedkøling, lockout-tilstand pr. udbyder                                                                              | sundhed, robusthed              | "Vis sundhedsstatus for alle udbydere"  |
+| Liste muligheder   | `list-capabilities`  | Returnerer hele 45-indgange Agent Skills-katalog (23 API + 21 CLI + 1 config) som en markdown-tabel med rå SKILL.md URLs til kontekstinjektion | katalog, opdagelse, færdigheder | "List alle OmniRoute -funktioner"       |
 
-> Agentkortet skal holdes på linje med det levende 381-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
+> Agentkortet skal holdes på linje med det levende 388-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
 
 ### `list-capabilities` Færdighedsdetaljer
 

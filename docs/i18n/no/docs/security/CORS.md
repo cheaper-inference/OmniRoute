@@ -4,209 +4,119 @@
 
 ---
 
-OmniRoute kontrollerer hvilke **nettleseropprinnelser** som kan lese svar på tvers av opprinnelser
-fra én sentralisert tillatelsesliste. Modellen er **lukket som standard**:
-Ingen opprinnelse tillates før du eksplisitt legger den til. Denne siden dokumenterer hvordan tillatelseslisten
-evalueres, hva `CORS_ALLOW_ALL=true` faktisk eksponerer (og, ikke minst, hva den
-**ikke** eksponerer), hvordan utviklings- og produksjonsmiljøer konfigureres sikkert, og kjøretidsadvarselen
-kontrollpanelet viser når et jokertegn er aktivt.
+OmniRoute kontrollerer hvilke **nettleseropprinnelse** kan lese kryssopprinnelsessvar fra en enkelt sentralisert godkjenningsliste. Modellen er **fail-closed som standard** : ingen opprinnelse er tillatt før du melder deg på. Denne siden dokumenterer hvordan godkjenningslisten løser seg, hva `CORS_ALLOW_ALL=true` faktisk avslører (og, viktigere, hva den gjør **ikke** ), hvordan du konfigurerer dev vs produksjon på en sikker måte, og kjøretidsadvarselen dashbordet viser når et jokertegn er live.
 
-**Autoritativ kilde:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Tillatelseslisten brukes én gang, i
-mellomvaren (`src/server/authz/pipeline.ts`) — behandlere for individuelle ruter angir ikke
-`Access-Control-Allow-Origin` selv.
+**Kilde til sannhet:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Godkjenningslisten brukes én gang, i mellomvaren (`src/server/authz/pipeline.ts`) setter ikke — per rute-behandlere `Access-Control-Allow-Origin` selv.
 
-## Hvordan en opprinnelse evalueres
+## Hvordan en opprinnelse løses
 
-For hver forespørsel beregner mellomvaren verdien for `Access-Control-Allow-Origin`
-i denne rekkefølgen:
+For hver forespørsel beregner mellomvaren `Access-Control-Allow-Origin` verdien i denne rekkefølgen:
 
-1. **`CORS_ALLOW_ALL=true`** (eller den eldre `CORS_ORIGIN=*`) → returner innringerens
-   `Origin` (eller `*` når `Origin`-feltet mangler), med `Vary: Origin`
-   slik at mellomlagre fungerer korrekt. Det samme kontrollpunktet `applyCorsHeaders()` legger også til
-   `Vary: Accept-Encoding` for alle 2xx-svar med innhold på den tokenautentiserte
-   `/v1*`/`/v1beta*`-overflaten (`relaxForTokenAuth`, RFC 9110 §12.5.5, sak #6737), slik at
-   nedstrøms/delte mellomlagre kan skille korrekt mellom komprimerte og ukomprimerte
-   varianter.
-2. Ellers normaliseres forespørselens `Origin` (konverteres til små bokstaver, avsluttende skråstrek
-   fjernes) og sammenlignes med den **sammenslåtte tillatelseslisten**:
-   - miljøvariabelen **`CORS_ALLOWED_ORIGINS`** — kommaseparert liste, og
-   - kjøretidsinnstillingen **`corsOrigins`** (Kontrollpanel → Sikkerhet → _Tillatte
-     CORS-opprinnelser_), satt via `setRuntimeAllowedOrigins()` fra
-     `src/lib/config/runtimeSettings.ts`.
-3. Ingen treff → **ingen `Access-Control-Allow-Origin`-header sendes**. Nettleseren
-   blokkerer lesingen på tvers av opprinnelser. Dette er den tiltenkte standardatferden som holder tilgangen lukket.
+1. **`CORS_ALLOW_ALL=true`** (eller den eldre `CORS_ORIGIN=*`) → ekko anroperens `Origin` tilbake (eller `*` når det ikke er noen `Origin` header), med `Vary: Origin` slik at cachene forblir korrekte. Det samme `applyCorsHeaders()` chokepunktet legger også til `Vary: Accept-Encoding` til hver 2xx-med-kropp-respons på den token-autentiserte `/v1*`/`/v1beta*` overflaten (`relaxForTokenAuth`, RFC 9110 §12.5.5, utgave #6737), slik at downstream/shared cacher kan skille komprimerte og ukomprimerte varianter riktig.
+2. Ellers normaliseres forespørselen `Origin` (med små bokstaver, skråstrek fjernet) og matches mot **sammenslått godkjenningsliste** :
+   - env **`CORS_ALLOWED_ORIGINS`** — kommadelt liste, og
+   - kjøretiden **`corsOrigins`** innstilling (Dashboard → Security → _CORS Allowed Origins_), injisert via `setRuntimeAllowedOrigins()` fra `src/lib/config/runtimeSettings.ts`.
+3. Ingen match →**ingen `Access-Control-Allow-Origin` header sendes ut** . Nettleseren blokkerer kryssopprinnelseslesingen. Dette er den tiltenkte feillukkede standarden.
 
-| Miljøvariabel          | Betydning                                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `CORS_ALLOWED_ORIGINS` | Kommaseparert liste over nøyaktige opprinnelser som skal tillates (anbefalt).                          |
-| `CORS_ALLOW_ALL`       | `true`/`1` → returner enhver opprinnelse (jokertegn). Kun for utvikling.                               |
-| `CORS_ORIGIN`          | Eldre variabel. `*` oppfører seg som `CORS_ALLOW_ALL`; én enkelt verdi legges til i tillatelseslisten. |
+| Env var                | Betydning                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| `CORS_ALLOWED_ORIGINS` | CSV av eksakt opprinnelse for å tillate (anbefalt).                                        |
+| `CORS_ALLOW_ALL`       | `true`/`1` → ekko enhver opprinnelse (jokertegn). Kun utvikler.                            |
+| `CORS_ORIGIN`          | Arv. `*` oppfører seg som `CORS_ALLOW_ALL`; en enkelt verdi legges til godkjenningslisten. |
 
-## Trusselmodell — hva `CORS_ALLOW_ALL=true` faktisk eksponerer
+## Trusselmodell — hva `CORS_ALLOW_ALL=true` virkelig avslører
 
-Den generelle OWASP-advarselen («CORS med jokertegn = ethvert nettsted kan kalle API-et ditt») bør
-tas på alvor, men OmniRoutes eksponering er **smalere enn i det generelle tilfellet**,
-på grunn av ett konkret implementasjonsforhold:
+Den generiske OWASP advarselen ("wildcard CORS = ethvert nettsted kan kalle din API") er verdt å ta på alvor, men OmniRoute eksponering er **smalere enn det generiske tilfellet** , på grunn av ett konkret implementeringsfakta:
 
-> **Den sentrale `applyCorsHeaders()` sender aldri
-> `Access-Control-Allow-Credentials`.** En nettleser eksponerer ikke et _legitimert_
-> svar på tvers av opprinnelser (med informasjonskapsler) med mindre serveren sender
-> `Access-Control-Allow-Credentials: true`. OmniRoutes delte CORS-kode gjør aldri
-> dette.
+> **Den sentrale `applyCorsHeaders()` avgir aldri `Access-Control-Allow-Credentials`.** En nettleser vil ikke avsløre et _credentialed_ (cookie-bærende) kryssopprinnelsessvar med mindre serveren sender `Access-Control-Allow-Credentials: true`. OmniRoute delte CORS bane gjør det aldri.
 
-Dette betyr følgende for hver overflate, selv med `CORS_ALLOW_ALL=true`:
+Hva det betyr per overflate, selv med `CORS_ALLOW_ALL=true`:
 
-| Overflate                                    | Autentiseringsmekanisme      | Effekt av CORS med jokertegn                                                                                                                                                                                                                                                                                                                                    |
-| -------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kontrollpanel / ADMINISTRASJON `/api/*`      | Informasjonskapselbasert økt | Opprinnelsen returneres, men **uten `Allow-Credentials`** vil nettleseren **blokkere** den legitimerte lesingen. Et ondsinnet nettsted fra en annen opprinnelse **kan ikke lese** autentiserte svar fra kontrollpanelet, og øktinformasjonskapselen eksponeres ikke.                                                                                            |
-| Klient-API `/v1/*`, `/v1beta/*`              | Bearer-/`x-api-key`-header   | Er allerede åpent **med hensikt** (`relaxForTokenAuth`): Nettlesere legger aldri automatisk ved `Authorization`/`x-api-key`, så en angripers side kan ikke oppgi nøkkelen din. Opprinnelsen speiles bare tilbake når den oppgitte nøkkelen er validert; anonyme svar (`REQUIRE_API_KEY=false`) beholder tillatelseslisten. `CORS_ALLOW_ALL` utvider ikke dette. |
-| Offentlig skrivebeskyttet (`/api/health`, …) | Ingen                        | Ikke sensitivt; jokertegn er ufarlig.                                                                                                                                                                                                                                                                                                                           |
+| Flate                                        | Auth-mekanisme             | Effekt av jokertegn CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`              | Cookie-økt                 | Opprinnelse er ekko, men **uten `Allow-Credentials`** nettleseren **blokker** den legitimerte lesningen. Et ondsinnet nettsted med kryssopprinnelse **kan ikke lese** dine autentiserte dashbordsvar, og øktinformasjonskapselen blir ikke eksponert.                                                                                                                                                                                                                                                                           |
+| Klient API `/v1/*`, `/v1beta/*`              | Bærer / `x-api-key` header | Allerede tillatt **etter design** (`relaxForTokenAuth`): nettlesere legger aldri automatisk ved `Authorization`/`x-api-key`, så en angripers side kan ikke oppgi nøkkelen din. Det avslappede ekkoet krever et autentisert emne (en validert API nøkkel eller dashbordøkt), ikke bare en legitimasjonsoverskrift, og inkluderer aldri `Access-Control-Allow-Credentials`. Anonyme svar (`REQUIRE_API_KEY=false`) bruker den konfigurerte opprinnelsesgodkjenningslisten, inkludert en eksplisitt `CORS_ALLOW_ALL=true` -opt-in. |
+| Offentlig skrivebeskyttet (`/api/health`, …) | Ingen                      | Ikke-sensitiv; jokertegn er ufarlig.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
-Den **gjenværende** eksponeringen ved `CORS_ALLOW_ALL=true` er derfor begrenset til: (a)
-ikke-legitimerte **lesinger** på tvers av opprinnelser av data som allerede er tilgjengelige uten autentisering, og (b)
-å la CORS-**preflight passere** på administrasjonsruter — som fortsatt krever autentisering
-en side fra en annen opprinnelse ikke kan oppgi. Det er **ikke** en vektor for øktkapring eller
-legitimasjonstyveri i den delte CORS-koden.
+Så den **gjenværende** eksponering av `CORS_ALLOW_ALL=true` er begrenset til: (a) ikke-godkjent kryssopprinnelse **leser** av allerede uautentiserte data, og (b) la CORS**preflight pass** på administrasjonsruter — som fortsatt krever godkjenning som en side med kryssopprinnelse ikke kan gi. Det er det **ikke** en øktkapring eller legitimasjonstyveri-vektor på den delte CORS banen.
 
-### Ett reelt unntak — `/api/v1/agents/`
+### Et ekte unntak — `/api/v1/agents/`
 
-Cloud-Agent-rutene (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) angir
-sine **egne** CORS-headere
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) og sender **faktisk**
-`Access-Control-Allow-Origin: <origin>|*` sammen med
-`Access-Control-Allow-Credentials: true`. Dette er den eneste overflaten der
-returnering av opprinnelsen og legitimasjon brukes samtidig, og den er **uavhengig av
-`CORS_ALLOW_ALL`**. Disse rutene er administrasjonsautentiserte
-(`requireManagementAuth`); operatører som eksponerer kontrollpanelet utenfor vertsmaskinen, bør være
-oppmerksomme på at dette er det eneste stedet der svarheaderne tillater en legitimert lesing på tvers av
-opprinnelser. Innstramming til en eksplisitt tillatelsesliste følges opp
-separat fra denne CORS-veiledningen.
+Cloud-Agent-rutene (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) setter sine **egen** CORS overskrifter (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) og **gjøre** sender ut `Access-Control-Allow-Origin: <origin>|*` sammen med `Access-Control-Allow-Credentials: true`. Dette er den eneste overflaten der opprinnelsesekko og legitimasjon eksisterer side om side, og det er det **uavhengig av `CORS_ALLOW_ALL`** . Disse rutene er administrasjonsautentisert (`requireManagementAuth`); operatører som avslører dashbordet utenfor verten, bør være klar over at dette er det eneste stedet en kryssopprinnelseslegitimasjonslesing tillates av svarhodene. Å stramme den til en eksplisitt godkjenningsliste spores separat fra denne CORS veiledningen.
 
 ## Sjekkliste for produksjon
 
-- **Sett aldri `CORS_ALLOW_ALL=true` i produksjon.** La den være udefinert.
-- Angi en **eksplisitt** liste over opphav — enten med miljøvariabelen eller feltet i Security-fanen:
+- **Sett aldri `CORS_ALLOW_ALL=true` i produksjon.** La den være uaktivert.
+- Sett en **eksplisitt** opprinnelsesliste — enten env var eller Sikkerhet-fanen:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Hvis OmniRoute kjører bak en omvendt proxy/tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), er CORS **ikke** den eneste beskyttelsen — rutevernet for
-  loopback beskytter fortsatt ruter som kan starte prosesser (se
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Ikke forfalsk
-  `X-Forwarded-For: 127.0.0.1` for å «fikse» en 403-feil. Det gjenåpner
-  RCE-klassen som rutevernet stenger.
-- Bekreft tilstanden under kjøring: Kontrollpanelet viser et **vedvarende gult banner**
-  under Dashboard → Security → Authorization Inventory når
-  `CORS_ALLOW_ALL=true` er aktiv, og `/api/settings/authz-inventory` returnerer et
-  `cors: { allowAll, allowedOrigins }`-objekt som overvåkingsverktøy kan hente regelmessig.
+- Hvis OmniRoute kjører bak en omvendt proxy / tunnel (nginx, Caddy, Cloudflare Tunnel, Tailscale), er CORS**ikke** din eneste kontroll — loopback-rutevakten beskytter fortsatt spawn-kompatible ruter (se [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Ikke forfal `X-Forwarded-For: 127.0.0.1` for å "fikse" en 403; som gjenåpner RCE klassen, stenger rutevakten.
+- Bekreft kjøretidstilstanden: dashbordet viser en **vedvarende gult banner** under Dashboard → Security → Authorization Inventory når `CORS_ALLOW_ALL=true` er live, og `/api/settings/authz-inventory` returnerer en `cors: { allowAll, allowedOrigins }` konvolutt som overvåkingsverktøy kan polle.
 
-## Praktisk utviklingsoppsett — tillat bestemte lokale opphav
+## Utviklingskomfort — tillater spesifikk lokal opprinnelse
 
-Du trenger sjelden jokertegnet, selv under utvikling. Tillat bare utviklingsserverne du bruker:
+Du trenger sjelden jokertegnet selv i dev. Tillat bare utviklerserverne du bruker:
 
 ```bash
-# Utviklingsservere for Vite (5173) og Next.js (3000) som kaller en lokal OmniRoute
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Opphav sammenlignes uten å skille mellom store og små bokstaver, og avsluttende skråstrek
-ignoreres, slik at `http://localhost:3000` og `http://localhost:3000/` er ekvivalente. Den
-samme CSV-listen kan angis under kjøring i **Dashboard → Security → CORS Allowed Origins**
-uten omstart.
+Opprinnelse matches ufølsomt for store og små bokstaver med den etterfølgende skråstreken ignorert, så `http://localhost:3000` og `http://localhost:3000/` er likeverdige. Den samme CSV kan stilles inn under kjøretid **Dashboard → Sikkerhet → CORS Tillatte opprinnelser** uten omstart.
 
-## API-nøkler kontra informasjonskapseløkter
+## API -nøkler vs informasjonskapseløkter
 
-- **Bearer / `x-api-key` (`/v1/*`-inferensgrensesnittet):** Nettlesere legger aldri
-  ved disse automatisk. CORS er ikke en meningsfull barriere her — API-nøkkelen er
-  barrieren — og derfor er dette grensesnittet med hensikt åpent, slik at nettleser-
-  og Electron-klienter kan lese svar de allerede har tilgang til. Den lempede
-  tilbakespeilingen følger den validerte nøkkelen, ikke bare at headeren finnes: Når
-  `REQUIRE_API_KEY=false` betjener en forespørsel anonymt, beholder det vellykkede svaret
-  tillatelseslisten som er lukket som standard. Autentiseringsavvisninger (401) forblir
-  lesbare slik at klienter kan vise en tilbakekalt eller feilskrevet nøkkel (#5242):
-  Rørledningens egen 401 beholder tilbakespeilingen, og en rute som selv avviser nøkkelen
-  etter at rørledningen betjente forespørselen som anonym (`/v1/models` og
-  `/v1beta/models` når administrasjonsautentisering er konfigurert, de eierbegrensede
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` og kandidatrutene for
-  auto-combo), legger tilbakespeilingen til denne 401-en via
-  `credentialRejectionHeaders()`. Tilbakespeilingen avgjøres av om forespørselen har en
-  header med legitimasjon (`Authorization`, `x-api-key`, `x-goog-api-key` eller
-  informasjonskapselen `auth_token`), ikke av hvilken av dem ruten sjekket, og kombineres
-  aldri med `Access-Control-Allow-Credentials`; innholdet er en fast feilkonvolutt.
-  Administrasjonsruter under `/api/v1/` som er beskyttet av `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`), legger ikke til tilbakespeilingen:
-  Med `REQUIRE_API_KEY=false` kan deres 401/403 ikke leses på tvers av opprinnelser.
-- **Informasjonskapseløkt (kontrollpanelet):** Beskyttes av standardinnstillingen som
-  avviser tilgang ved feil, **og** av fraværet av `Access-Control-Allow-Credentials`
-  på den delte banen. Hold opphav for administrasjon og kontrollpanel utenfor
-  alle åpne konfigurasjoner. De må fortsatt avvises som standard.
+- **Bærer / `x-api-key` (de `/v1/*` slutningsoverflate):** nettlesere legger aldri til disse automatisk. CORS er ikke en meningsfull barriere her — de API nøkkelen er barrieren — som er grunnen til at overflaten er med vilje tillatt så nettleser og Electron klienter kan lese svar de allerede har krav på. Det avslappede ekkoet krever et autentisert emne (en validert API nøkkel- eller dashbordøkt), ikke bare en påloggingsoverskrift, og inkluderer aldri `Access-Control-Allow-Credentials`. Anonyme svar (`REQUIRE_API_KEY=false`) bruk den konfigurerte godkjenningslisten for opprinnelse, inkludert en eksplisitt `CORS_ALLOW_ALL=true` melde deg på. Godkjenningsavvisninger (401) forblir lesbare slik at klienter kan vise en tilbakekalt eller feilskrevet nøkkel (#5242): rørledningens egen 401 holder ekkoet, og en rute som nekter selve nøkkelen etter at rørledningen tjente den som anonym (`/v1/models` og `/v1beta/models` med administrasjonsautorisasjon konfigurert, eieromfanget `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` og auto-combo kandidatruter) legger til ekkoet til den 401 via `credentialRejectionHeaders()`. Ekkoet tastes inn på forespørselen med en legitimasjonsoverskrift (`Authorization`, `x-api-key`, `x-goog-api-key` eller den `auth_token` informasjonskapsel), ikke på hvilken av dem ruten sjekket, og er aldri sammenkoblet med `Access-Control-Allow-Credentials`; kroppen er en fast feilkonvolutt. Forvaltningsruter under `/api/v1/` bevoktet av `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ikke bruk dette unntaket for avvisning av legitimasjon: med `REQUIRE_API_KEY=false`, deres 401/403 svarene følger de konfigurerte CORS opprinnelsespolitikk.
+- **Cookie-økt (dashbordet):** beskyttet av fail-closed standard **og** ved fravær av `Access-Control-Allow-Credentials` på den delte banen. Hold management/dashboard opprinnelse unna enhver tillatende konfigurasjon; de må forbli nøyaktig feillukket.
 
-## WebSocket-håndtrykk (`/v1/responses`, `/v1/ws`)
+## WebSocket -håndtrykk (`/v1/responses`, `/v1/ws`)
 
-Nettlesere bruker ikke CORS på WebSocket, så WebSocket-transportene som returnerer
-inferensutdata, sjekker selv `Origin` i håndtrykket (`src/server/origin/wsOrigin.ts`):
-Responses-WebSocket (`/v1/responses`) og, når OmniRoute kjøres via `npm start` /
-`npm run dev`, broen `/v1/ws` og `/api/v1/ws`, som strømmer `/v1/chat/completions`,
-`/v1/messages` og `/v1/responses` som rammer. Broen spør `/api/v1/ws?handshake=1` om
-avgjørelsen og nekter å oppgradere med mindre den ruten har kjørt kontrollen. Et
-håndtrykk godtas når:
+Nettlesere bruker ikke CORS til WebSocket, så WebSocket transportene som returnerer inferensutgang sjekker selve håndtrykket `Origin` (`src/server/origin/wsOrigin.ts`): Svarene WebSocket (`/v1/responses`) og, når OmniRoute går gjennom `npm start` / `npm run dev`, `/v1/ws` og `/api/v1/ws` broen, som streamer `/v1/chat/completions`, `/v1/messages` og `/v1/responses` som rammer. Broen ber `/api/v1/ws?handshake=1` om dommen og nekter å oppgradere med mindre den ruten kjørte sjekken. Krav til autentisering gjelder fortsatt separat. Opprinnelseskontrollen består når:
 
-- det ikke har noen `Origin`-header (Codex CLI, SDK-er og andre klienter som ikke er
-  nettlesere);
-- `Origin` tillates av tillatelseslisten ovenfor (`CORS_ALLOWED_ORIGINS`, innstillingen
-  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` er en av OmniRoutes egne offentlige opprinnelser (den konfigurerte offentlige
-  basis-URL-en, en klarert proxys videresendte opprinnelse, eller en direkte
-  loopback-/LAN-vert angitt som IP-literal eller `localhost` — de samme kandidatene som
-  kontrollpanelets mutasjonskontroll bruker); eller
-- det har en gyldig API-nøkkel, som på HTTP-grensesnittet `/v1/*`.
+- den har ingen `Origin` header (Codex CLI, SDKs og andre ikke-nettleserklienter);
+- `Origin` er godkjent av tillatelseslisten ovenfor (`CORS_ALLOWED_ORIGINS`, `corsOrigins` -innstillingen, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` er en av OmniRoute egne offentlige opprinnelser (den konfigurerte offentlige basen URL, en pålitelig proxys videresendte opprinnelse, eller en direkte loopback/LAN vert gitt som en IP literal eller `localhost` — de samme kandidatene som mutasjonssjekken på dashbordet bruker); eller
+- den har en gyldig API nøkkel, som på HTTP `/v1/*` overflaten.
 
-Alt annet får `403 ws_origin_forbidden`. En øktinformasjonskapsel for kontrollpanelet
-fritar ikke en fremmed `Origin`, fordi nettleseren legger den ved sokkelen til enhver
-side. `localhost` på en annen port behandles ikke som samme opprinnelse; legg slike
-utviklingsopprinnelser til i `CORS_ALLOWED_ORIGINS`.
+Alt annet får `403 ws_origin_forbidden`. En dashboard-sesjonsinformasjonskapsel fritar ikke en utenlandsk `Origin`, fordi nettleseren kobler den til en hvilken som helst sides socket. `localhost` på en annen port behandles ikke som samme opprinnelse; legg til slike dev-opprinnelser til `CORS_ALLOWED_ORIGINS`.
 
 ## Eksempel: omvendt proxy foran OmniRoute
 
-CORS håndheves av OmniRoute selv, så proxyen bør vanligvis **ikke** legge til eller
-skrive om `Access-Control-*`-headere (doble headere skaper problemer i nettlesere). Terminer TLS
-og videresend — la OmniRoute besvare preflight-forespørsler:
+CORS håndheves av OmniRoute selv, så proxyen bør vanligvis **ikke** legg til eller omskriv `Access-Control-*` overskrifter (doble overskrifter bryter nettlesere). Avslutt TLS og videresend — la OmniRoute svare på forhåndskontroll:
 
 ```nginx
-# nginx — videresend til OmniRoute; IKKE sett inn Access-Control-* her
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Behold videresendingsheaderne: En proxy på samme vert kobler til fra loopback, og det er disse
-    # som forteller OmniRoute at anroperen ikke er den lokale operatøren. En proxy som ikke legger til noen av dem,
-    # får alle eksterne anropere til å se lokale ut. Sett heller aldri X-Forwarded-For til 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Angi de tillatte nettleseropprinnelsene i OmniRoute (`CORS_ALLOWED_ORIGINS` eller
-fanen Security), ikke i proxyen.
+Angi tillatt nettleseropprinnelse i OmniRoute (`CORS_ALLOWED_ORIGINS` eller kategorien Sikkerhet), ikke i proxyen.
 
 ## Kildefiler
 
-| Område                                             | Fil                                                                  |
-| -------------------------------------------------- | -------------------------------------------------------------------- |
-| Løsning av tillatelsesliste + `getCorsStatus()`    | `src/server/cors/origins.ts`                                         |
-| Bruk av mellomvare (én autoritativ kilde)          | `src/server/authz/pipeline.ts`                                       |
-| Innstillinger → innsetting av opphav under kjøring | `src/lib/config/runtimeSettings.ts`                                  |
-| Kjøretidsstatus for kontrollpanelet                | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Varselbanner i kontrollpanelet                     | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Feltet CORS Allowed Origins                        | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS per rute for Cloud-Agent (unntaket)           | `src/lib/cloudAgent/api.ts`                                          |
-| Kontroll av `Origin` ved WebSocket-håndtrykk       | `src/server/origin/wsOrigin.ts`                                      |
+| Bekymring                                        | Fil                                                                  |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| Tillatelseslisteoppløsning + `getCorsStatus()`   | `src/server/cors/origins.ts`                                         |
+| Mellomvareapplikasjon (enkelt kilde til sannhet) | `src/server/authz/pipeline.ts`                                       |
+| Innstillinger → runtime origin injection         | `src/lib/config/runtimeSettings.ts`                                  |
+| Kjøretidsstatus for dashbordet                   | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Dashboard advarselsbanner                        | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS Allowed Origins-feltet                      | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent per rute CORS (unntaket)             | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket -håndtrykk `Origin` sjekk              | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Se også
 
-- [Nivåer for rutebeskyttelse](./ROUTE_GUARD_TIERS.md) — loopback-håndheving for
-  ruter som kan starte prosesser (en separat, komplementær kontroll).
-- [Autorisasjonsveiledning](../architecture/AUTHZ_GUIDE.md) — hele autentiseringsprosessen.
+- [Route Guard Tiers](./ROUTE_GUARD_TIERS.md) — loopback-håndhevelse for spawn-kompatible ruter (en separat, komplementær kontroll).
+- [Autorisasjonsveiledning](../architecture/AUTHZ_GUIDE.md) — hele auth-pipeline.

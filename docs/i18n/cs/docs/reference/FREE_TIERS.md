@@ -130,8 +130,8 @@ záměrně.
 Většina údajů o „bezplatných tokenech za měsíc“ v této oblasti vzniká sečtením limitů jednotlivých modelů. Náš údaj záměrně nikoli:
 
 - **Každý sdílený fond se počítá pouze jednou.** Bezplatný tarif Mistralu představuje jeden limit 1B/měsíc na organizaci; uvedení pod pěti modely z něj neudělá 5B. Při součtu podle jednotlivých modelů by náš vlastní katalog uváděl **~7.4B** (přepočítáno 2026-09-03; tento údaj není kontrolován CI — přeměřte jej při každé změně katalogu) — hlavní údaj uvádí **~1.47B**, protože právě tolik může jeden účet u každého poskytovatele skutečně využít.
-- **Denní limity převádíme, rychlostní limity nikoli.** Zdokumentovaný limit tokenů/den se převede pomocí `× 30`; zdokumentovaný limit požadavků/den se převede pomocí `RPD × ~800 tokenů × 30`; poskytovatel, který zveřejňuje pouze počet požadavků za minutu, **nemá** měsíční údaj a je uveden jako _bez omezení_, nikdy se nezapočítává do součtu. Násobení rychlostního limitu provozem 24/7 je způsob nadsazování, který odmítáme.
-- **Kvóty podmíněné regionálním ověřením identity jsou uvedeny samostatně** (`+~6M za regionálním ověřením identity`), protože je většina čtenářů nemůže využít.
+- **Denní limity převádíme, rychlostní limity nikoli.** Zdokumentovaný limit tokenů/den se převede pomocí `× 30`; zdokumentovaný limit požadavků/den se převede pomocí `RPD × ~800 tokens × 30`; poskytovatel, který zveřejňuje pouze počet požadavků za minutu, **nemá** měsíční údaj a je uveden jako _bez omezení_, nikdy se nezapočítává do součtu. Násobení rychlostního limitu provozem 24/7 je způsob nadsazování, který odmítáme.
+- **Kvóty podmíněné regionálním ověřením identity jsou uvedeny samostatně** (`+~6M behind regional identity verification`), protože je většina čtenářů nemůže využít.
 - **Kredity za registraci platí pouze první měsíc** a uvádějí se jako druhý údaj; nikdy se neslučují se stabilním údajem.
 - **Tento údaj je vynucován prostřednictvím CI.** `npm run check:docs-counts` přepočítává součty z katalogu a způsobí selhání sestavení, pokud se od nich tento soubor, README nebo karta rozpočtu odchýlí.
 

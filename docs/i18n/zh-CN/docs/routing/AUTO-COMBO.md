@@ -174,36 +174,38 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 有关本文所记录的最初困惑，请参阅 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) 和 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)。
 
-## 工作原理（持久化自动组合）
+## 它是如何工作的（持久自动组合）
 
-自动组合引擎使用一个**包含 16 个因素的评分函数**（定义于 `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`），为每个请求动态选择最佳提供者/模型。默认权重之和为 `1.0`；自定义权重由 `normalizeScoringWeights()` 重新归一化。在这 16 个因素中，`cacheAffinity` 和 `resetWindowAffinity` 的默认权重为 `0`；`reliability` 在 `DEFAULT_WEIGHTS` 中为 `0`，但在通用包中为 `0.03`，在 `reliability-first` 中为 `0.04`；而 `quality` 在包中为 `0.02`（在 `quality-first` 中为 `0.03`）：系统仍会为每个候选项计算这些因素，并且 `cacheAffinity` 会在评分之外控制提示词缓存去重，因此默认权重为零的因素默认不参与评分，而在包中则会参与。
+自动组合引擎使用以下参数动态地为每个请求选择最佳的provider/model ：**16因素评分功能**（在`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`中定义）。默认权重总和为`1.0`；自定义权重由`normalizeScoringWeights()`重新标准化。十六个— `cacheAffinity`和`resetWindowAffinity` —中的两个携带默认权重`0`； `reliability`在`DEFAULT_WEIGHTS`中携带`0` ，但在通用包中`0.03` ，在`reliability-first`中携带`0.04` ，而`quality`在包中携带`0.02` （ `quality-first`中携带`0.03` ）：它们仍然针对每个候选者进行计算，并且`cacheAffinity`在分数之外门控提示缓存重复数据删除，因此默认情况下，零默认因子不会投票，而包则默认投票。
 
-![自动组合的 16 因素评分](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> 来源：[diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd)（通过 `npm run docs:render-diagrams` 重新生成）。文件名是历史遗留名称；源文件和渲染后的图表展示了 `DEFAULT_WEIGHTS` 中声明的全部 16 个因素。
+> 来源： [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) （通过`npm run docs:render-diagrams`重新生成）。文件名是历史的；源图和渲染图显示了`DEFAULT_WEIGHTS`中声明的所有 16 个因素。
 
 | 因素                  | 默认权重 | 说明                                                                                                                                                  |
 | :-------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429   | 剩余配额/速率限制余量 [0..1]                                                                                                                          |
-| `health`              | 0.1605   | 来自断路器的健康评分（CLOSED=1.0、HALF_OPEN=0.5、OPEN=0.0）                                                                                           |
-| `costInv`             | 0.1429   | **混合**成本的倒数（60% 输入 token 价格 + 40% 输出 token 价格，并进行归一化）— 越便宜，评分越高                                                       |
-| `latencyInv`          | 0.1143   | 相对于候选池进行归一化的 p95 延迟倒数 — 越快，评分越高                                                                                                |
-| `taskFit`             | 0.0762   | 任务类型适配度（编码、审查、规划、分析、调试、文档）                                                                                                  |
-| `stability`           | 0.0476   | 基于延迟标准差计算的方差稳定性 — 响应时间波动越大的候选项评分越低                                                                                     |
-| `tierPriority`        | 0.0476   | 账户层级优先级 — Ultra=1.0、Pro=0.67、Standard=0.33、Free=0.0                                                                                         |
-| `tierAffinity`        | 0.0476   | 候选项层级与清单建议层级之间的亲和度                                                                                                                  |
-| `specificityMatch`    | 0.0476   | 请求特异性（清单提示）与模型层级之间的匹配度                                                                                                          |
-| `contextAffinity`     | 0.0476   | 请求所需上下文窗口与模型上下文窗口之间的亲和度                                                                                                        |
-| `sessionAvailability` | 0.0476   | 当前会话中候选连接的 OAuth 会话可用性（`getOAuthSessionAvailability()`；非 OAuth 连接的评分为 1.0）                                                   |
-| `connectionDensity`   | 0.0476   | 将负载分散到同一提供者的不同连接上（避免集中）                                                                                                        |
+| `quota`               | 0.1429   | 剩余配额/速率限制空间 [0..1]                                                                                                                          |
+| `health`              | 0.1605   | 断路器的健康评分（CLOSED= 1.0、 HALF_OPEN= 0.5、 OPEN= 0.0）                                                                                          |
+| `costInv`             | 0.1429   | 逆**混合**成本（60% 输入+ 40% 输出代币价格，标准化） —更便宜=得分更高                                                                                 |
+| `latencyInv`          | 0.1143   | 反向 p95 延迟归一化为池—更快=得分更高                                                                                                                 |
+| `taskFit`             | 0.0762   | 任务类型适应性（编码、审查、规划、分析、调试、文档）                                                                                                  |
+| `stability`           | 0.0476   | 延迟标准差的基于方差的稳定性—响应时间波动得分较低的候选者                                                                                             |
+| `tierPriority`        | 0.0476   | 账户级别优先级— Ultra = 1.0、Pro = 0.67、Standard = 0.33、Free = 0.0                                                                                  |
+| `tierAffinity`        | 0.0476   | 候选人层级与清单推荐层级之间的亲和度                                                                                                                  |
+| `specificityMatch`    | 0.0476   | 请求特异性（清单提示）和模型层之间的匹配                                                                                                              |
+| `contextAffinity`     | 0.0476   | 请求的上下文窗口需求与模型的上下文窗口之间的关联性                                                                                                    |
+| `sessionAvailability` | 0.0476   | 此会话的候选连接的OAuth会话可用性（`getOAuthSessionAvailability()`；非 OAuth 连接得分 1.0）                                                           |
+| `connectionDensity`   | 0.0476   | 在同一提供者的连接之间分散负载（反集中）                                                                                                              |
 | `cacheAffinity`       | 0.00     | 通过 Rendezvous 哈希，使请求倾向于选择最有可能已保存该请求提示词缓存前缀的连接（`open-sse/services/combo/promptCacheAffinity.ts`）；默认禁用（#8008） |
-| `resetWindowAffinity` | 0.00     | 倾向于选择配额重置窗口更有利的连接（默认禁用）                                                                                                        |
-| `quality`             | 0.03     | 来自路由事件质量跟踪器、由反馈驱动的输出质量信号；没有观测数据的候选项会获得中性值 0.5                                                                |
-| `reliability`         | 0.00     | 基于过去 24 小时使用历史记录，在至少十个样本的门槛下计算观测成功占比 `1 - failureRate`（否则使用实时指标）；没有观测数据的候选项视为 1.0。默认禁用    |
+| `resetWindowAffinity` | 0.00     | 偏向于配额重置窗口有利的连接（默认禁用）                                                                                                              |
+| `quality`             | 0.03     | 来自路由事件质量跟踪器的反馈驱动的输出质量信号；没有观察结果的候选人得到中性 0.5                                                                      |
+| `reliability`         | 0.00     | 根据 10 个样本楼层的 24 小时使用历史记录观察到的成功份额`1 - failureRate`（否则为实时指标）；没有观察结果的候选读作 1.0。默认禁用                     |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+冷启动后，内存中的`quality`跟踪器 (`open-sse/services/routing/quality.ts`) 为空，因此每个候选者都会获得中立的`0.5`直到第一个观察结果落地。
 
-**总和：** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`，与 `DEFAULT_WEIGHTS` 中的声明一致；用户配置的权重在评分前会由 `normalizeScoringWeights()` 重新归一化为一个分布。
+> **不可读的配额（#15347）。**当提供者有配额获取器但它没有返回任何可读内容（获取失败、缺少凭据、仅使用消息或没有可解析的`windows`且没有有限`percentUsed`格式错误快照，包括`percentUsed: null`）时，候选者在`quota`轴上对`0`进行评分，其最终得分乘以`UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0.5, `autoStrategy.ts`)，与连接状态惩罚相同的软惩罚模式。失败的使用读取是有关遥测的证据，而不是提供者的证据，因此它的排名严格低于任何实际读数，包括已确认的 100%-used读数，但绝不会被硬阻止或驱逐。没有上限的提供者报告`unlimited: true`和分数为完整配额；没有注册配额获取器的提供者根本没有遥测源，并保留默认值`100`。
+
+**和：** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`如`DEFAULT_WEIGHTS`中声明的那样；用户配置的权重在评分之前由`normalizeScoringWeights()`重新归一化为分布。
 
 ## 模式包
 
@@ -297,20 +299,34 @@ OmniRoute的组合引擎支持**20种路由策略**（在`src/shared/constants/r
 
 `weighted`是一个**根据请求按比例随机抽取**(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)，不是均衡器：
 
-- 每个请求都会吸引**一**以概率`weight / totalWeight`步进；其余步骤按权重降序排列，作为该请求的后备链。
-- 权重为`0` （或缺失）的步骤是**从未画过**虽然任何其他步骤的权重为> 0 —但它只能在绘制的步骤失败后作为后备。仅当**全部**权重为 0 时选择变得均匀。
+- 每个请求都会吸引**一**概率为`weight / totalWeight`步骤；其余步骤按权重降序排列，作为该请求的后备链。
+- 权重为`0` （或缺失）的步骤是**从未画过**而任何其他步骤的权重为> 0 —它只能在绘制的步骤失败后作为后备。仅当**全部**权重为 0 时选择变得均匀。
 - 目标全部不可用的—提供者断路器`OPEN`、连接冷却时间、模型锁定—的步骤都会在发生之前从抽签中删除（`open-sse/services/combo/targetResolution.ts`），因此单个健康的步骤可以暂时赢得每个请求。
 - `stickyWeightedLimit` （组合配置，默认`1` =关闭）在重新绘制之前固定多次连续成功的绘制步骤。
 
-对于严格轮换，请使用`round-robin`； `weighted`上的相同权重给出了统计—而不是严格的—平衡。
+对于严格轮换，请使用`round-robin`； `weighted`上的相同权重给出了统计— ，而不是严格的—平衡。
 
 ### 代理管道模式
 
-具有至少两个模型的`pipeline`组合可以选择使用`config.agenticOrchestration.enabled`进行planner/executor路由。第一个目标有规划和最终答案；第二个目标发出客户端本机工具调用。 OmniRoute从请求协议中检测工具结果延续，询问规划器是否需要另一轮工具，并动态地使执行器或规划器成为面向客户端的最后一步。
+具有至少两个模型的`pipeline`组合可以选择使用`config.agenticOrchestration.enabled`进行planner/executor路由。第一个目标有规划和最终答案；第二个目标发出客户端本机工具调用。 OmniRoute从请求协议中检测工具结果延续，询问规划器是否需要另一轮工具，并动态地使执行器或规划器成为面向客户的最后一步。
 
-在工具结果延续上，当两个连续完成的轮次重复相同的工具调用但结果不变时，或者当两个连续轮次中每个显式标记的结果失败时， OmniRoute也会停止执行。更改的结果允许重复调用（例如轮询）。该防护根据新的用户请求进行重置，将并行调用分组为一轮，并支持Anthropic、聊天完成、响应和Gemini历史记录。规划者收到原因并拥有最终答案，即使它请求另一轮工具也是如此。
+可选的`config.agenticOrchestration.contextCompaction`在每个计划者或执行者调度之前应用单独的有效负载预算。显式启用它：
 
-第二个目标之后的其他模型是有序执行程序备份。失败的HTTP响应或传输异常将前进到下一个执行器，携带相同的规划器决策和本机工具，但该执行器自己的步骤提示和已解决的连接。第一个成功响应原样返回，包括SSE流；成功启动流后出现的失败无法在此处重试。如果所有执行器都失败，则返回最后一个失败的执行器。客户端中止停止调度。
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+这些是操作员选择的序列化JSON字符预算，而不是令牌上下文窗口或保证的上游限制。精确模型IDs覆盖默认值。高于阈值时，压缩会删除相同的工具定义，通过摘要修剪过大的工具证据，并根据目标比率删除旧的完整历史记录组。它保留了system/developer指令、最新的用户请求、包括并行calls/results在内的最后一轮工具以及Gemini的领先路由指令。保留顶级指令和工具设置。遗漏标记记录删除的历史记录；这是确定性的修剪，而不是语义总结。如果固定上下文仍然超出预算，则请求在联系模型之前返回 413。当禁用压缩或压缩低于阈值时，请求将保持不变地通过。
+
+在工具结果延续上，当两个连续完成的轮次重复相同的工具调用且结果不变时，或者当两个连续轮次中的每个显式标记结果失败时， OmniRoute也会停止执行。更改的结果允许重复调用（例如轮询）。该防护根据新的用户请求进行重置，将并行调用分组为一轮，并支持Anthropic、聊天完成、响应和Gemini历史记录。规划者收到原因并拥有最终答案，即使它请求另一轮工具也是如此。
+
+第二个目标之后的其他模型是有序执行程序备份。失败的HTTP响应或传输异常将前进到下一个执行器，携带相同的规划器决策和本机工具，但该执行器自己的步骤提示和已解决的连接。第一个成功响应原样返回，包括SSE流；成功的流启动后的失败无法在此处重试。如果所有执行器都失败，则返回最后一个失败的执行器。客户端中止停止调度。
 
 ```json
 {
@@ -322,17 +338,17 @@ OmniRoute的组合引擎支持**20种路由策略**（在`src/shared/constants/r
 }
 ```
 
-执行器可以在一个响应中发出多个独立的调用。相关调用在稍后的客户端工具结果轮流中进行处理，规划人员会审查每个结果。 `maxToolRounds`默认为`8`并接受`1`–`32`；一旦达成，规划者必须给出最佳的最终答案。内部规划器决策被缓冲，而选定的面向客户的响应保留原始的流首选项。
+执行器可以在一个响应中发出多个独立的调用。相关调用在稍后的客户端工具结果轮流中进行处理，规划人员会审查每个结果。 `maxToolRounds`默认为`8` ，接受`1`–`32`；一旦达成，规划者必须给出最佳的最终答案。内部规划器决策被缓冲，而选定的面向客户的响应保留原始的流首选项。
 
 ### `round-robin`粘性批次和账户扩展
 
 循环是批量的，而不是每一步一个请求：
 
 - `stickyRoundRobinLimit` （组合配置，然后`comboStickyRoundRobinLimit`，然后`settings.stickyRoundRobinLimit`，默认**3** ）在轮换之前连续多次成功保持相同的目标。将组合覆盖设置为`1`以进行单请求轮换。组合编辑器显示有效值及其来自哪一层。
-- `connectionAwareExpansion` （组合配置，然后设置，默认**错误的**）在轮换之前将每个提供者级别的步骤扩展为每个帐户的目标。 B 组策略（优先级、加权、循环、随机、p2c、最少使用、成本优化、lkgp、填充优先、严格随机、上下文优化、缓存优化、上下文中继、融合、管道）保持提供者级别的视图，直到启用为止。组合编辑器公开了继承/开/关；继承使用全局默认值（关闭）。
+- `connectionAwareExpansion` （组合配置，然后设置，默认**错误的**) 在轮换之前将每个提供者级别的步骤扩展为每个帐户的目标。 B 组策略（优先级、加权、循环、随机、p2c、最少使用、成本优化、lkgp、填充优先、严格随机、上下文优化、缓存优化、上下文中继、融合、管道）保持提供者级别的视图，直到启用。组合编辑器公开了继承/开/关；继承使用全局默认值（关闭）。
 - 提示缓存局部路由（`promptCacheAffinityEnabled`，默认**真的**) 对固定连接重新排序，以便匹配的缓存密钥保留在一个帐户上。它优先于固定的每个帐户步骤的循环法和加权轮换。如果您需要严格旋转，请在“设置→组合默认值”下将其关闭。没有每个组合的覆盖。
 
-对于一种模型上的多账户轮换，首选**一个动态帐户步骤**（空`connectionId`，整个池）具有粘性限制`1`，而不是三个固定的`connectionId`。即使RR计数器前进，固定步骤加上亲和力也会折叠到同一帐户上。
+对于一种模型上的多账户轮换，首选**一个动态帐户步骤**（空`connectionId`，整个池）具有粘性限制`1`，而不是三个固定的`connectionId`。即使RR计数器前进，固定步骤和亲和力也会折叠到同一帐户上。
 
 ## 融合策略
 

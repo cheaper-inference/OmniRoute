@@ -20,14 +20,16 @@
 
 ## ਇੰਸਟਾਲੇਸ਼ਨ ਵਿਧੀਆਂ
 
-### npm (ਸਿਫ਼ਾਰਸ਼ੀ)
+### npm (ਸਿਫਾਰਸ਼ੀ)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-ਡੈਸ਼ਬੋਰਡ `http://localhost:20128` 'ਤੇ ਖੁੱਲ੍ਹਦਾ ਹੈ ਅਤੇ API ਦਾ ਬੇਸ URL `http://localhost:20128/v1` ਹੈ।
+ਡੈਸ਼ਬੋਰਡ `http://localhost:20128` 'ਤੇ ਖੁੱਲ੍ਹਦਾ ਹੈ ਅਤੇ API ਅਧਾਰ URL `http://localhost:20128/v1` ਹੈ।
+
+> **npm ਉਪਭੋਗਤਾ:** ਜੇਕਰ npm ਚੇਤਾਵਨੀ ਦਿੰਦਾ ਹੈ ਕਿ ਇੰਸਟਾਲ ਸਕ੍ਰਿਪਟਾਂ ਨੂੰ ਬਲੌਕ ਕੀਤਾ ਗਿਆ ਸੀ (ਉਦਾਹਰਨ ਲਈ, `omniroute`, `better-sqlite3`), [ਸਮੱਸਿਆ ਨਿਪਟਾਰਾ — npm ਇੰਸਟਾਲ-ਸਕ੍ਰਿਪਟ ਬਲੌਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ।
 
 ### pnpm
 

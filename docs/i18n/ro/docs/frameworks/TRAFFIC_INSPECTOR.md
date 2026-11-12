@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mecanism:** Utilizează API-urile sistemului de operare pentru a redirecționa tot traficul HTTP/HTTPS prin ascultătorul HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` și setările de gazdă/port HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Acoperire:** Fiecare aplicație de pe mașină care respectă setările proxy ale sistemului
   **Notă:** `source` = `"system-proxy"`
 
 **Mecanisme de siguranță:**
 
-- Temporizator de dezactivare automată (implicit 30 min, configurabil prin `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Starea anterioară a proxy-ului de sistem este salvată în baza de date și restaurată la revenire
-- Tabloul de bord afișează mesajul „Se restabilește proxy-ul de sistem” dacă utilizatorul navighează în altă parte cât timp acesta este activ
-- Interfața cu utilizatorul afișează insigna `⚠ Avansat` + o casetă de validare pentru confirmare explicită
+- Aplicarea proxy-ului programează un temporizator de revenire fără garanție, local procesului (implicit 30 min, configurabil prin `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Temporizatorul nu supraviețuiește încheierii procesului serverului.
+- Starea anterioară a proxy-ului rămâne în memoria procesului; acest depozit al stării de captură nu o persistă într-o bază de date. Revenirea restaurează setările macOS/GNOME salvate; pe Windows resetează proxy-ul WinHTTP în loc să restaureze configurația anterioară.
+- Cât timp proxy-ul este raportat ca aplicat, părăsirea paginii (unload) trimite o cerere keepalive de revenire fără garanție și solicită o confirmare nativă al cărei text este controlat de browser. Demontarea inspectorului în timpul navigării SPA încearcă și ea revenirea, fără acel mesaj al browserului.
+- Bara de captură afișează controlul `System-wide` localizat, cu o pictogramă de avertizare. În prezent, apăsarea lui schimbă doar starea locală a interfeței; nu afișează o casetă de confirmare și nu aplică sau revine asupra proxy-ului sistemului.
 
 ### Modul 5 — Decriptare transparentă TPROXY (Linux, root, opțională)
 
@@ -113,13 +113,13 @@ Acesta este un subsistem substanțial, cu propriul ghid dedicat pentru operatori
 
 ### Compararea modurilor de capturare
 
-| Mod                    | Configurare                      |           Sudo?           | Acoperire                                        | Note                                                                                                                             |
-| ---------------------- | -------------------------------- | :-----------------------: | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automată                         | O dată (certificat+hosts) | 9 agenți IDE                                     | Activat implicit                                                                                                                 |
-| 2. Gazde personalizate | Introducere pentru fiecare gazdă |    Da (fișierul hosts)    | Orice aplicație care utilizează gazda respectivă | Persistat în baza de date                                                                                                        |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`         |            Nu             | Aplicații care respectă variabilele de mediu     | Portul 8080; HTTPS este tunelat prin CONNECT (doar metadate, niciodată decriptat)                                                |
-| 4. La nivel de sistem  | Comutare + confirmare            |            Da             | Toate aplicațiile de pe sistem                   | Dezactivare automată după 30 min                                                                                                 |
-| 5. Decriptare TPROXY   | Comutare (Linux + add-on nativ)  | Da (root + instalare CA)  | Orice gazdă de pe portul țintă                   | Decriptează gazde arbitrare; dezactivată implicit — consultați `docs/security/MITM-TPROXY-DECRYPT.md` (git; neinclus în `/docs`) |
+| Mod                    | Configurare                                                    |           Sudo?           | Acoperire                                        | Note                                                                                                                             |
+| ---------------------- | -------------------------------------------------------------- | :-----------------------: | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automată                                                       | O dată (certificat+hosts) | 9 agenți IDE                                     | Activat implicit                                                                                                                 |
+| 2. Gazde personalizate | Introducere pentru fiecare gazdă                               |    Da (fișierul hosts)    | Orice aplicație care utilizează gazda respectivă | Persistat în baza de date                                                                                                        |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                                       |            Nu             | Aplicații care respectă variabilele de mediu     | Portul 8080; HTTPS este tunelat prin CONNECT (doar metadate, niciodată decriptat)                                                |
+| 4. La nivel de sistem  | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Da             | Toate aplicațiile de pe sistem                   | Temporizator de revenire fără garanție (implicit 30 min)                                                                         |
+| 5. Decriptare TPROXY   | Comutare (Linux + add-on nativ)                                | Da (root + instalare CA)  | Orice gazdă de pe portul țintă                   | Decriptează gazde arbitrare; dezactivată implicit — consultați `docs/security/MITM-TPROXY-DECRYPT.md` (git; neinclus în `/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ va fi adăugat ulterior).
 ### 5.1 Înregistrarea unei sesiuni
 
 1. Faceți clic pe **„● Înregistrați sesiunea”** în bara de instrumente → introduceți un nume (opțional)
-2. Fluxul în timp real continuă în mod normal; un indicator roșu pulsatoriu afișează `◉ ÎNREG. · <nume> · 00:42 · 23 cereri`
+2. Urmărirea în timp real continuă normal; bara de înregistrare arată un punct roșu pulsatoriu, timpul scurs, numele sesiunii când este disponibil și un control Oprire localizat.
 3. Faceți clic pe **„⏹ Oprire”** → instantaneul sesiunii este salvat în `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Vizualizarea unei sesiuni înregistrate
@@ -323,7 +323,7 @@ va fi adăugat ulterior).
 Lista derulantă **Sesiuni** din bara de instrumente afișează sesiunile salvate. Selectarea uneia:
 
 - Încarcă instantaneul sesiunii (stare înghețată)
-- Un banner afișează: `Se vizualizează sesiunea înregistrată „<nume>” — [Înapoi la fluxul în timp real]`
+- Un banner arată o etichetă localizată pentru sesiunea înregistrată și numele sesiunii (sau un text localizat de rezervă pentru o sesiune fără titlu), alături de un buton localizat de revenire la fluxul în direct.
 - Fila Statistici devine disponibilă, cu agregări Recharts
 
 ### 5.3 Formate de export
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-La următoarea încărcare, tabloul de bord va oferi și opțiunea „Dezactivează proxy-ul de sistem” dacă detectează că starea din baza de date indică faptul că proxy-ul era activ.
+Starea salvată a proxy-ului există doar în procesul serverului. După o cădere sau repornire, depozitul actual al stării de captură nu poate restaura acel instantaneu dintr-o bază de date; folosiți comenzile de recuperare ale platformei de mai sus când este necesară recuperarea manuală.
 
 ### Memorie tampon plină
 

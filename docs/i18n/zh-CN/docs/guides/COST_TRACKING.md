@@ -33,7 +33,7 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 
 1. **用户覆盖**—价格在仪表板中或通过`PATCH /api/pricing` （ `pricing`命名空间）设置。
 2. **models.dev 同步**—定价从`https://models.dev/api.json` （ `models_dev_pricing`命名空间）获取。
-3. **LiteLLM同步**—价格从LiteLLM的公共`model_prices_and_context_window.json` （ `pricing_synced`命名空间）获取。
+3. **LiteLLM同步**—价格取自LiteLLM的公共`model_prices_and_context_window.json` （ `pricing_synced`命名空间）。
 4. **硬编码默认值**—费率以[`src/shared/constants/pricing/`](../../src/shared/constants/pricing/)发货。
 
 对于相同的provider/model，来自较高优先级层的值会覆盖较低层中的匹配字段；上层缺少的字段仍然可以来自下层。即使两个独立的同步作业同时运行，顺序也是固定的。 `GET /api/pricing?includeSources=1`返回`pricing`和`sourceMap`，其每个模型标签（`user`、 `modelsDev`、 `litellm`、 `default`）标识包含该模型的最高优先级层。
@@ -46,7 +46,7 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 | `PRICING_SYNC_INTERVAL` | `86400`   | 同步间隔以秒为单位（每天）。                 |
 | `PRICING_SYNC_SOURCES`  | `litellm` | 仅用于此同步的源选择；目前仅支持`litellm` 。 |
 
-**models.dev 同步**与LiteLLM同步是分开的，默认情况下也是禁用的。在设置（models.dev 同步）中启用它或使用这些变量：
+**models.dev 同步**与LiteLLM同步分开，默认情况下也是禁用的。在设置（models.dev 同步）中启用它或使用这些变量：
 
 | 环境变量                   | 默认         | 目的                                                                                            |
 | -------------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
@@ -57,7 +57,7 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 
 ### 成本公式
 
-成本是根据[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) 中的令牌计数和每百万令牌费率计算每个请求的成本：
+成本是根据[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) 中的代币计数和每百万代币费率计算每个请求的成本：
 
 - **输入令牌**（减去缓存读取和缓存创建令牌） × `input`速率。
 - **缓存读取令牌**× `cached`速率（回落到输入速率）。
@@ -65,13 +65,13 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 - **输出代币**× `output`率。
 - **推理标记**× `reasoning`速率（回落到输出速率）。
 
-所有费率均解释为每 1,000,000 个代币的USD 。 Codex “快速”/“优先”或“flex”服务层应用成本乘数 (`getCodexFastCostMultiplier`) —例如，flex 按 50% 代币折扣计费，表现为**弹性储蓄**在仪表板中。
+所有费率均解释为每 1,000,000 个代币的USD 。 Codex “快速”/“优先”或“灵活”服务层应用成本乘数 (`getCodexFastCostMultiplier`) — ，例如，灵活按 50% 代币折扣计费，表现为**弹性储蓄**在仪表板中。
 
-模型名称首先被规范化（提供者路径前缀，例如`openai/`或`accounts/fireworks/models/`被删除），因此历史行仍然与价格匹配。
+首先对模型名称进行规范化（去除`openai/`或`accounts/fireworks/models/`等提供者路径前缀），以便历史行仍然与价格匹配。
 
 ### 如何记录支出
 
-- 每个请求的成本是在响应后计算的，并记录“即发即弃”，因此不会给客户端增加延迟。共享配额消耗通过[`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)安排在下一个事件循环标记上。
+- 每个请求的成本是在请求完成时计算的。共享配额消耗通过[`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)安排在下一个事件循环标记上。
 - API 密钥支出由[`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)批量缓冲和刷新（默认 60 秒刷新间隔，1,000 个条目缓冲区）。可通过以下方式调节：
 
   | 环境变量                            | 默认    | 目的                       |
@@ -79,7 +79,29 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 刷新间隔（以毫秒为单位）。 |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 刷新前的最大缓冲条目。     |
 
-仪表板的成本数字是**不是**从存储的每行美元金额—中读取，每次分析端点运行时，它们都会根据令牌计数和当前定价表动态重新计算。这意味着纠正错误的价格（并重新同步）可追溯更新历史成本估算。
+成本更喜欢提供者报告的确切费用（`provider_cost_usd`），然后是目录定价的请求快照（`calculated_cost_usd`），然后是当前目录中的代币重新定价。存储的成本不会通过其代币计数再次收取。当目录价格发生变化时，旧的仅令牌行仍然会发生变化。
+
+### OCR和嵌入
+
+- 成功的`/v1/ocr`请求使用上游`usage_info.pages_processed`，而不是请求的页面范围或返回的页面对象的数量。估计是页数× `ocr_cost_per_page` （绝对USD/page，**不是**USD/million）。
+- 带有文档或边界框注释的请求需要单独的`ocr_cost_per_annotated_page`费率。如果没有它，成本仍然未知；普通OCR资费并没有悄然被取代。
+- LiteLLM同步将其上游`annotation_cost_per_page`字段映射到`ocr_cost_per_annotated_page`，保留绝对USD/page值和仅注释条目，包括显式零。提供的规范字段优先；无效的别名值将被忽略。用户定价覆盖保留其正常优先级。请参阅[LiteLLM的OCR定价要点](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking)。
+- OCR使用存储页数、单价、计算的USD成本、 API密钥和选定的连接。页面永远不会表示为令牌。呼叫日志包含计费元数据，而不是文档URLs、 PDF字节或提取的文本。
+- 成功的`/v1/embeddings`请求会记录每个物理批次的一个使用行，包括在同一毫秒内完成的单独批次。提供者报告的费用优先于代币估算；组合包装不增加费用。
+- 使用历史记录、成本分析、 provider/account窗口、API 密钥支出限制、请求成本分类账和每日使用情况汇总包含这些费用。无日志键保留数字记录而不保留源文本。
+- 缺少使用量或资费的是**未知**，不是免费的：省略响应成本标头，现有的无价使用策略适用于有限的API密钥。明确配置的零费率仍然有效的零成本使用。
+
+这是仅向前会计。从未写入使用历史记录的旧OCR/embedding调用无法从此迁移中重建。目录估算是USD估算，而不是发票，并且不包括货币兑换、税收或折扣。
+
+### 语音和图像
+
+- 成功的`/v1/audio/transcriptions`、 `/v1/audio/speech`和图像生成尝试共享数值计算。直接呼叫和组合呼叫携带呼叫者的API密钥和所选连接；组合包装绝不会增加第二次借记。
+- 提供者报告的USD胜过目录估算，包括明确的零收费。 OpenRouter的JSON `usage.cost`标准化为`cost_usd`。否则，测量的令牌使用令牌价格，转录秒数使用每秒价格，语音输入使用 Unicode 字符计数，固定价格图像使用实际返回的数字，而不是请求的`n`。
+- 二进制OpenRouter TTS没有JSON使用主体。音频结束或呼叫者取消后， OmniRoute在上查询其生成的ID**相同的**配置OpenRouter原点。 EU请求永远不会回退到全局原点。这是一个有界的、只读的查找；不会重试合成进行记帐。音频结束后会出现计费记录：查找重试在后台运行最多约 52 秒，包括网络截止时间。
+- 在该查找过程中，音频响应具有`X-OmniRoute-Cost-Status: pending`并且没有响应成本标头。其最终费用出现在使用历史记录、分析和对账后的关键账本中。如果元数据不可用，则使用配置的费率快照；否则成本仍然未知。
+- 秒、字符和图像计数具有单独的计费单位字段，绝不会伪造令牌计数。会计仅保留数字用法，而不保留语音文本、文字记录或图像字节。现有的未定价图像豁免保持不变：真正缺失的图像资费不会新锁定有限密钥，并且响应会省略成本标头而不是声明呼叫免费。定价商店故障仍保留故障关闭执行的使用证据。
+
+历史上的speech/image费用没有被发明或回填。提供者账单仍然是发票和未报告费用的电话的参考。
 
 ---
 
@@ -115,50 +137,52 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 
 ---
 
-## API端点
+## API 端点
 
-除非另有说明，所有这些都需要管理身份验证（loopback/JWT，通过`requireManagementAuth`）。
+除非另有说明，否则所有这些端点都需要管理身份验证（环回/JWT，通过 `requireManagementAuth`）。
 
-### 使用情况和成本分析
+### 用量与成本分析
 
-| 方法  | 端点                     | 目的                                                                                                                                                  |
-| ----- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | 完整的cost/usage分析：摘要、每日趋势，作者： provider/model/API key/account/tier.查询： `range`、 `startDate`、 `endDate`、 `apiKeyIds`、 `presets`。 |
-| `GET` | `/api/usage/utilization` | 随着时间的推移，每个提供者的配额利用率。查询： `range` （`1h`/`24h`/`7d`/`30d`）， `provider`。                                                       |
-| `GET` | `/api/usage/history`     | 原始使用历史记录行。                                                                                                                                  |
-| `GET` | `/api/usage/call-logs`   | 每个请求的调用日志（模型、令牌、成本、延迟、状态）。                                                                                                  |
-| `GET` | `/api/usage/quota`       | 提供者配额状态。                                                                                                                                      |
-| `GET` | `/api/usage/proxy-logs`  | 代理请求日志。                                                                                                                                        |
+| 方法  | 端点                     | 用途                                                                                                                                               |
+| ----- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | 完整的成本/用量分析：汇总、每日趋势，以及按提供者/模型/API 密钥/账户/层级统计。查询参数：`range`、`startDate`、`endDate`、`apiKeyIds`、`presets`。 |
+| `GET` | `/api/usage/utilization` | 各提供者随时间变化的配额利用率。查询参数：`range`（`1h`/`24h`/`7d`/`30d`）、`provider`。                                                           |
+| `GET` | `/api/usage/history`     | 原始用量历史记录。                                                                                                                                 |
+| `GET` | `/api/usage/call-logs`   | 每次请求的调用日志（模型、令牌数、成本、延迟、状态）。                                                                                             |
+| `GET` | `/api/usage/quota`       | 提供者配额状态。                                                                                                                                   |
+| `GET` | `/api/usage/proxy-logs`  | 代理请求日志。                                                                                                                                     |
 
 ### 预算
 
-| 方法   | 端点                     | 目的                                                     |
-| ------ | ------------------------ | -------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | 成本摘要+预算检查一个API密钥（需要`apiKeyId`查询参数）。 |
-| `POST` | `/api/usage/budget`      | 设置daily/weekly/monthly USD限制API密钥的+警告阈值。     |
-| `GET`  | `/api/usage/budget/bulk` | 跨API键的批量预算摘要。                                  |
+| 方法   | 端点                     | 用途                                                                |
+| ------ | ------------------------ | ------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | 单个 API 密钥的成本汇总和预算检查（必须提供 `apiKeyId` 查询参数）。 |
+| `POST` | `/api/usage/budget`      | 为 API 密钥设置每日/每周/每月美元限额和警告阈值。                   |
+| `GET`  | `/api/usage/budget/bulk` | 跨 API 密钥批量获取预算汇总。                                       |
 
-> 预算API范围为**API键**（`apiKeyId`）。 `GET /api/usage/budget`返回的限制包括`dailyLimitUsd`、 `weeklyLimitUsd`、 `monthlyLimitUsd`、 a `warningThreshold`和运行总计（`totalCostToday`、 `totalCostMonth`……）。
+> 预算 API 的作用域是每个 **API 密钥**（`apiKeyId`）。由
+> `GET /api/usage/budget` 返回的限额包括 `dailyLimitUsd`、`weeklyLimitUsd`、`monthlyLimitUsd`、
+> `warningThreshold`，以及累计总额（`totalCostToday`、`totalCostMonth` 等）。
 
 ### 定价
 
-| 方法     | 端点                    | 目的                                                                                                  |
+| 方法     | 端点                    | 用途                                                                                                  |
 | -------- | ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | 合并四层定价（用户、models.dev、 LiteLLM、默认值）。 `?includeSources=1`返回`pricing` + `sourceMap`。 |
-| `PATCH`  | `/api/pricing`          | 覆盖`{ provider: { model: { input, output, cached, … } } }`的定价。                                   |
-| `DELETE` | `/api/pricing`          | 删除用户价格覆盖（可选范围由`?provider=&model=`确定）；同步利率或内置默认值仍然作为后备。             |
-| `GET`    | `/api/pricing/defaults` | 显示默认per-1M回退率。                                                                                |
-| `GET`    | `/api/pricing/models`   | 定价按型号确定。                                                                                      |
-| `POST`   | `/api/pricing/sync`     | 从外部源触发手动同步 (LiteLLM)。                                                                      |
+| `GET`    | `/api/pricing`          | 合并四层价格（用户、models.dev、LiteLLM、默认值）。`?includeSources=1` 返回 `pricing` + `sourceMap`。 |
+| `PATCH`  | `/api/pricing`          | 覆盖 `{ provider: { model: { input, output, cached, … } } }` 的定价。                                 |
+| `DELETE` | `/api/pricing`          | 移除用户价格覆盖值（可用 `?provider=&model=` 限定范围）；同步费率或内置默认值仍作为回退来源。         |
+| `GET`    | `/api/pricing/defaults` | 显示每 100 万单位的默认回退费率。                                                                     |
+| `GET`    | `/api/pricing/models`   | 按模型键控的定价。                                                                                    |
+| `POST`   | `/api/pricing/sync`     | 触发从外部来源（LiteLLM）手动同步。                                                                   |
 | `GET`    | `/api/pricing/sync`     | 当前同步状态。                                                                                        |
-| `DELETE` | `/api/pricing/sync`     | 仅清除 LiteLLM 同步定价 (`pricing_synced`)； models.dev 数据是单独的。                                |
+| `DELETE` | `/api/pricing/sync`     | 仅清除 LiteLLM 同步价格（`pricing_synced`）；models.dev 数据单独存储。                                |
 
-### 其他与成本相关的终点
+### 其他与成本相关的端点
 
-| 方法  | 端点                          | 目的                                           |
+| 方法  | 端点                          | 用途                                           |
 | ----- | ----------------------------- | ---------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | 本月使用的免费模型代币总数以及剩余的免费配额。 |
-| `GET` | `/api/quota/pools/[id]/usage` | 共享配额池的使用。                             |
+| `GET` | `/api/free-tier/summary`      | 免费模型的令牌总额、本月已用量和剩余免费额度。 |
+| `GET` | `/api/quota/pools/[id]/usage` | 共享配额池的使用量。                           |
 
 ---
 

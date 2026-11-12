@@ -145,39 +145,61 @@ Relaterede moduler i samme pakke:
 
 ## Antigravity Stealth
 
-Antigravity-anmodninger bevarer kalderens tekst byte for byte. OmniRoute indsætter ikke tegn med nul bredde i prompts og omdøber eller injicerer ikke værktøjer for at efterligne en IDE-klient.
+Antigravity -anmodninger bevarer opkaldstekst byte-for-byte. OmniRoute indsætter ikke nul-bredde-tegn i prompter eller rename/inject værktøjer for at efterligne en IDE klient.
 
 ### `antigravityHeaderScrub.ts`
 
-Fjerner Stainless SDK-markører (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) før videresendelse.
+Striper rustfri SDK -markører (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) før videresendelse.
 
-### ⚠️ Risiko: `ANTIGRAVITY_CREDITS=always` (høj risiko for kontoblokering)
+### ⚠️ risiko: `ANTIGRAVITY_CREDITS=always` (hot spot med kontoforbud)
 
-`ANTIGRAVITY_CREDITS=always` (anvendes af `open-sse/executors/antigravity.ts`) dirigerer **alle** anmodninger gennem Antigravity AI Credit Overages (betalte Google-kreditter) i stedet for at lade Googles gratis kvote begrænse forbruget. Dette er dokumenteret som en funktion, men det er **den absolut mest almindelige rapport om overtrædelse af servicevilkår, vi ser** — flere Google Ultra-konti er blevet blokeret med `403 / "service disabled for ToS violation" / insufficient_quota` efter at have kørt i nogle få timer med `=always`.
+`ANTIGRAVITY_CREDITS=always` (forbrugt af `open-sse/executors/antigravity.ts`) ruter **hver** anmod via Antigravity AI Credit Overages (betalte Google kreditter) i stedet for at lade Google's free-tier kvote gate ting. Dette er dokumenteret som en funktion, men det er det **den mest almindelige ToS-overtrædelsesrapport, vi ser** — flere Google Ultra-konti er blevet forbudt med `403 / "service disabled for ToS violation" / insufficient_quota` efter at have kørt i et par timer med `=always`.
 
-Upstream-håndhævelsen sker på **Googles side** og er ikke noget, OmniRoute kan forhindre. Miljøvariablens navn og den eksisterende dokumentation får det til at lyde som en sikker indstilling at aktivere; det er den ikke.
+Opstrøms håndhævelse er aktiveret **Google's side** , ikke noget OmniRoute kan forhindre. Env var-navnet og de eksisterende dokumenter får det til at lyde som en sikker knap at vende; det er det ikke.
 
-**Derfor udløser dette mere aggressiv registrering af misbrug end brug, der udelukkende benytter gratisniveauet:**
+**Hvorfor dette trækker misbrugsdetektion mere aggressivt end free-tier-kun-brug:**
 
-- Vedvarende automatiseret forbrug på en enkelt Google-konto markeres anderledes end brug af gratisniveauet, der rammer kvoten og stopper.
-- Kreditoverskridelser har intet loft over anmodningsfrekvensen, så en forkert konfigureret klient kan bruge flere hundrede USD på få minutter og ligne videresalg af API-nøgler eller bottrafik.
-- Flere OmniRoute-brugere, der parallelt anvender ekstra kreditter fra den samme eksterne IP-adresse, forstærker signalet.
+- Vedvarende automatiseret forbrug på en enkelt Google konto markerer anderledes end free-tier hits-quota-and-stops.
+- Kreditoverskridelser har ikke noget takstloft, så en forkert konfigureret klient kan brænde igennem flere hundrede USD på få minutter og ligne API-nøgle-gensalg eller bottrafik.
+- Flere OmniRoute brugere, der rammer overskudskreditter parallelt fra den samme eksterne IP forstærker signalet.
 
-**Anbefalet fremgangsmåde:**
+**Anbefalet holdning:**
 
-1. Behold standardindstillingen `ANTIGRAVITY_CREDITS=off`, medmindre operatøren udtrykkeligt accepterer risikoen for betalte kreditter og håndhævelse mod kontoen. `retry` sender først den normale anmodning og injicerer højst kreditter én gang efter en kvalificerende kvote-429; `always` injicerer kreditter ved den første anmodning.
-2. **Fordel belastningen på tværs af udbydere via Auto-Combo** (`model: "auto"` eller `kr/glm/etc`-combo) i stedet for at overbelaste en enkelt Antigravity-konto.
-3. **Angiv RPM-grænser for hver forbindelse** på Antigravity-udbyderens redigeringsside (Dashboard → Providers → Antigravity → forbindelse → frekvensgrænse). 30–60 RPM er en forsvarlig øvre grænse for vedvarende brug.
-4. **Brug stabil upstream-netværksinfrastruktur under operatørens kontrol**, og undgå at dele én konto mellem brugere eller arbejdsbelastninger, der ikke er relaterede.
-5. **Ved blokering**: indsend en appel via `support.google.com` → "Restore Workspace/Account access" med den nøjagtige `quota_exceeded`- / `service disabled`-responsbody, som Google sendte. Gendannelse kan ikke garanteres.
+1. Behold standard `ANTIGRAVITY_CREDITS=off` medmindre operatøren udtrykkeligt accepterer risikoen for betalt kredit og kontohåndhævelse. `retry` sender den normale anmodning først og tilfører kreditter højst én gang efter en berettiget kvote på 429; `always` tilfører kreditter på den første anmodning.
+2. **Fordel belastningen på tværs af udbydere via Auto-Combo** (`model: "auto"` eller `kr/glm/etc` -combo) i stedet for at mætte en enkelt Antigravity konto.
+3. **Indstil RPM -grænser pr. forbindelse** i Antigravity udbyderens redigeringsside (Dashboard → udbydere → Antigravity → forbindelse → hastighedsgrænse). 30–60 RPM er en forsvarlig øvre grænse for vedvarende brug.
+4. **Brug stabilt, operatørstyret upstream-netværk** og undgå at dele én konto på tværs af ikke-relaterede brugere eller arbejdsbelastninger.
+5. **Hvis det er forbudt** : appel via `support.google.com` → "Gendan Workspace/Account adgang" med den nøjagtige `quota_exceeded` / `service disabled` -svarinstans Google sendt. Restaurering er ikke garanteret.
 
-Miljøreferencen dokumenterer konsekvenserne for konto og forbrug for hver kredittilstand.
+Miljøreferencen dokumenterer konto- og forbrugskonsekvenserne for hver kredittilstand.
+
+#### Ikke kun `=always`: Antigravity OAuth routing generelt
+
+Suspensionerne er ikke begrænset til kreditoverskridelser. Rapporter i november 2026 (#19223, #19266) beskriver flere Google konti, der er suspenderet under routing gennem `antigravity` og `agy` udbyderne (Antigravity CLI) med:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Begge udbydere autentificerer med Antigravity produktets OAuth session, hvilket er tilfældet, hvor dashboardets risikomeddelelse ("Denne udbyder bruger dit officielle produkt session/OAuth, som ikke er autoriseret til proxy/router brug") advarer om, før en forbindelse tilføjes. Ingen af anbefalingerne ovenfor gør denne brug autoriseret; de reducerer kun, hvor meget trafik en konto bærer.
+
+**Autoriserede API grænseflader til Gemini modeller.** Google tilbyder programmatisk adgang til Gemini gennem sin APIs, som OmniRoute understøtter som almindelige API-nøgleudbydere:
+
+| Udbyder-id | Dashboard navn            | Legitimationsoplysninger                                                      |
+| ---------- | ------------------------- | ----------------------------------------------------------------------------- |
+| `gemini`   | Gemini (Google AI Studio) | Gemini API nøgle fra Google AI Studio (gratis lag tilgængelig)                |
+| `vertex`   | Vertex AI                 | Servicekonto JSON, OAuth adgangstoken eller Vertex Express API nøgle (Gemini) |
+
+Disse udbydere bruger legitimationsoplysninger Google problemer til API adgang, i modsætning til Antigravity -produktsessionen. De gør ikke enhver brug i overensstemmelse med eller fjerner risikoen for håndhævelse: hver er underlagt sine egne vilkår, som operatøren skal kontrollere for deres implementering. For eksempel tillader [Gemini API Yderligere servicevilkår](https://ai.google.dev/gemini-api/terms) kun betalte tjenester, når API klienter gøres tilgængelige for brugere i Det Europæiske Økonomiske Samarbejdsområde, Schweiz eller Storbritannien, og indhold sendt til ubetalte tjenester kan bruges til at forbedre Google produkter. Vertex AI falder i stedet ind under Google Cloud-vilkårene ( [Service Specific Terms](https://cloud.google.com/terms/service-terms) ). Priser og kvoter følger disse API -vilkår i stedet for et Antigravity abonnement.
+
+Operatører, der ønsker at undgå Antigravity suspenderingerne beskrevet ovenfor, bør dirigere Gemini trafik gennem en af disse udbydere i stedet for `antigravity` / `agy`, efter at have kontrolleret, at deres brug passer til udbyderens vilkår.
 
 Berøringspunkter:
 
 - `open-sse/executors/antigravity.ts` — læser `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — håndtering af legitimationsoplysninger
-- Oprindelig hændelsesrapport: Diskussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `src/lib/oauth/providers/antigravity.ts` — legitimation VVS
+- Original hændelsesrapport: Diskussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -246,9 +268,9 @@ Alle MITM-endepunkter kræver administrationsgodkendelse (`requireCliToolsAuth`)
 
 ---
 
-## User-Agent tilsidesætter — env vars (`.env.example` sektion 12)
+## Tilsidesættelser af User-Agent — miljøvariabler (`.env.example` afsnit 12)
 
-| Variabel            | Misligholdelse                                |
+| Variabel            | Standardværdi                                 |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -257,7 +279,7 @@ Alle MITM-endepunkter kræver administrationsgodkendelse (`requireCliToolsAuth`)
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Forbruges af `open-sse/executors/base.ts::buildHeaders()` via dynamisk opslag.** Bump disse, når udbydere frigiver nye CLI versioner** — forældede UA -strenge begynder at blive afvist som forældede klienter.
+Anvendes af `open-sse/executors/base.ts::buildHeaders()` via dynamisk opslag. **Opdatér disse, når udbyderne udgiver nye CLI-versioner** — forældede UA-strenge bliver afvist som værende fra forældede klienter.
 
 ## Omskiftere for CLI-kompatibilitetstilstand (`.env.example` afsnit 13)
 

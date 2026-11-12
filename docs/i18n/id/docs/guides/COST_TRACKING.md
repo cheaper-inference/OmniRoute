@@ -41,16 +41,16 @@ Karena angka tersebut merupakan perkiraan:
 
 ### Sumber harga
 
-Biaya berasal dari tabel harga gabungan di [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), dalam urutan prioritas ini (** tertinggi terlebih dahulu** ):
+Biaya berasal dari tabel harga gabungan di [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), dalam urutan prioritas ini (**tertinggi terlebih dahulu** ):
 
-1. **Penggantian pengguna** harga — diatur di dasbor atau melalui `PATCH /api/pricing` (namespace `pricing` ).
-2. **sinkronisasi model.dev** harga — diambil dari `https://models.dev/api.json` (namespace `models_dev_pricing` ).
-3. **sinkronisasi LiteLLM** harga — diambil dari `model_prices_and_context_window.json` publik LiteLLM(namespace `pricing_synced` ).
-4. **Default yang di-hardcode** tarif — dikirim dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Penggantian pengguna** Harga — diatur di dashboard atau melalui `PATCH /api/pricing` (namespace `pricing` ).
+2. **sinkronisasi model.dev** Harga — diambil dari `https://models.dev/api.json` (namespace `models_dev_pricing` ).
+3. **Sinkronisasi LiteLLM** Harga — diambil dari `model_prices_and_context_window.json` publik LiteLLM(namespace `pricing_synced` ).
+4. **Default yang di-hardcode** Tarif — dikirim dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
 Untuk provider/model yang sama, nilai dari lapisan dengan prioritas lebih tinggi menimpa bidang yang cocok di lapisan bawah; bidang yang tidak ada di lapisan atas masih bisa berasal dari lapisan bawah. Urutannya tetap bahkan ketika kedua pekerjaan sinkronisasi independen dijalankan pada waktu yang sama. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`, yang label per modelnya (`user`, `modelsDev`, `litellm`, `default`) mengidentifikasi lapisan prioritas tertinggi yang berisi model tersebut.
 
-**sinkronisasi LiteLLM** adalah ikut serta, dinonaktifkan secara default. Variabel lingkungannya (lihat [`.env.example`](../../.env.example) ) adalah:
+**Sinkronisasi LiteLLM** adalah ikut serta, dinonaktifkan secara default. Variabel lingkungannya (lihat [`.env.example`](../../.env.example) ) adalah:
 
 | Env var                 | Bawaan    | Tujuan                                                                                 |
 | ----------------------- | --------- | -------------------------------------------------------------------------------------- |
@@ -60,30 +60,30 @@ Untuk provider/model yang sama, nilai dari lapisan dengan prioritas lebih tinggi
 
 **sinkronisasi model.dev** terpisah dari sinkronisasi LiteLLM dan juga dinonaktifkan secara default. Aktifkan di Pengaturan (sinkronisasi models.dev) atau gunakan variabel berikut:
 
-| Env var                    | Bawaan            | Tujuan                                                                                                                                    |
-| -------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(tidak disetel)_ | Unset mengikuti tombol Pengaturan; `1/true/on/yes` memaksa hidup dan `0/false/off/no` memaksa mati (meskipun Pengaturan mengaktifkannya). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Interval sinkronisasi models.dev default dalam hitungan detik (setiap hari).                                                              |
+| Env var                    | Bawaan            | Tujuan                                                                                                                                |
+| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(tidak disetel)_ | Unset mengikuti tombol Pengaturan; `1/true/on/yes` aktif paksa dan `0/false/off/no` mati paksa (walaupun Pengaturan mengaktifkannya). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Interval sinkronisasi models.dev default dalam hitungan detik (setiap hari).                                                          |
 
-`PRICING_SYNC_SOURCES` melakukannya** bukan** aktifkan model.dev; itu hanya mengontrol sinkronisasi LiteLLM. Menghapus penggantian pengguna tidak akan menghapus namespace yang disinkronkan; lapisan harga berikutnya yang tersedia menjadi efektif. Untuk model tanpa harga, periksa pengaturan sinkronisasi dan `sourceMap` sebelum menambahkan penggantian manual.
+`PRICING_SYNC_SOURCES` melakukannya **bukan** aktifkan model.dev; itu hanya mengontrol sinkronisasi LiteLLM. Menghapus penggantian pengguna tidak akan menghapus namespace yang disinkronkan; lapisan harga berikutnya yang tersedia menjadi efektif. Untuk model tanpa harga, periksa pengaturan sinkronisasi dan `sourceMap` sebelum menambahkan penggantian manual.
 
 ### Rumus biaya
 
-Biaya dihitung per permintaan dari jumlah token dan tarif per juta token dalam [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+Biaya dihitung per permintaan dari jumlah token dan tarif per juta token di [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Token masukan** (dikurangi pembacaan cache dan token pembuatan cache) tingkat × `input`.
-- **Token baca cache** × `cached` rate (kembali ke tingkat input).
-- **Token pembuatan cache** × `cache_creation` rate (kembali ke tingkat input).
-- **Token keluaran** tingkat × `output`.
-- **Token penalaran** × `reasoning` rate (kembali ke tingkat output).
+- **Token masukan** (dikurangi pembacaan cache dan token pembuatan cache) Tingkat × `input`.
+- **Token baca cache** Tingkat × `cached` (kembali ke tingkat input).
+- **Token pembuatan cache** Tingkat × `cache_creation` (kembali ke tingkat input).
+- **Token keluaran** Tingkat × `output`.
+- **Token penalaran** Tingkat × `reasoning` (kembali ke tingkat output).
 
-Semua tarif ditafsirkan sebagai USD per 1.000.000 token. Tingkat layanan Codex "cepat"/"prioritas" atau "fleksibel" menerapkan pengganda biaya (`getCodexFastCostMultiplier`) — misalnya flex ditagih dengan diskon token 50%, muncul sebagai** penghematan fleksibel** di dasbor.
+Semua tarif ditafsirkan sebagai USD per 1.000.000 token. Tingkat layanan Codex "cepat"/"prioritas" atau "fleksibel" menerapkan pengganda biaya (`getCodexFastCostMultiplier`) — misalnya fleksibel ditagih dengan diskon token 50%, muncul sebagai **penghematan fleksibel** di dasbor.
 
 Nama model dinormalisasi terlebih dahulu (awalan jalur penyedia seperti `openai/` atau `accounts/fireworks/models/` dihilangkan) sehingga baris historis tetap sesuai dengan harga.
 
 ### Bagaimana pembelanjaan dicatat
 
-- Biaya per permintaan dihitung setelah respons dan dicatat fire-and-forget sehingga tidak menambah latensi pada klien. Konsumsi kuota bersama dijadwalkan pada event-loop tick berikutnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Biaya per permintaan dihitung pada saat permintaan selesai. Konsumsi kuota bersama dijadwalkan pada event loop tick berikutnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Pembelanjaan kunci API di-buffer dan dihapus secara batch oleh [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval pengosongan default 60 detik, buffer 1.000 entri). Merdu melalui:
 
   | Env var                             | Bawaan  | Tujuan                               |
@@ -91,7 +91,29 @@ Nama model dinormalisasi terlebih dahulu (awalan jalur penyedia seperti `openai/
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval pembilasan dalam milidetik. |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Entri buffer maksimum sebelum flush. |
 
-Angka biaya dashboard adalah** bukan** dibaca dari jumlah dolar per baris yang disimpan — jumlah tersebut dihitung ulang dengan cepat dari jumlah token dan tabel harga saat ini setiap kali titik akhir analitik berjalan. Itu berarti mengoreksi harga yang salah (dan menyinkronkan ulang) memperbarui perkiraan biaya historis secara surut.
+Biaya lebih memilih biaya yang dilaporkan penyedia secara tepat (`provider_cost_usd`), lalu snapshot permintaan dengan harga katalog (`calculated_cost_usd`), lalu penetapan harga token dari katalog saat ini. Biaya yang disimpan tidak dibebankan lagi melalui jumlah tokennya. Baris khusus token lama masih berubah ketika harga katalognya berubah.
+
+### OCR dan penyematan
+
+- Permintaan `/v1/ocr` yang berhasil menggunakan `usage_info.pages_processed` hulu, bukan rentang halaman yang diminta atau jumlah objek halaman yang dikembalikan. Perkiraannya adalah halaman × `ocr_cost_per_page` ( USD/page absolut,**bukan** USD/million).
+- Permintaan dengan dokumen atau anotasi kotak pembatas memerlukan tarif `ocr_cost_per_annotated_page` terpisah. Tanpanya, biayanya masih belum diketahui; tarif OCR biasa tidak diganti secara diam-diam.
+- Sinkronisasi LiteLLM memetakan bidang `annotation_cost_per_page` hulunya ke `ocr_cost_per_annotated_page`, mempertahankan nilai USD/page absolut dan entri hanya anotasi, termasuk nol eksplisit. Bidang kanonik yang disediakan akan diutamakan; nilai alias yang tidak valid diabaikan. Penggantian harga pengguna tetap mempertahankan prioritas normalnya. Lihat [kunci harga OCR LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Penggunaan OCR menyimpan jumlah halaman, harga satuan, biaya USD yang dihitung, kunci API, dan koneksi yang dipilih. Halaman tidak pernah direpresentasikan sebagai token. Log panggilan berisi metadata penagihan, bukan dokumen URLs, byte PDF, atau teks yang diekstraksi.
+- Permintaan `/v1/embeddings` yang berhasil mencatat satu baris penggunaan per batch fisik, termasuk batch terpisah yang diselesaikan dalam milidetik yang sama. Biaya yang dilaporkan penyedia lebih diutamakan daripada perkiraan token; pembungkus kombo tidak menambahkan biaya.
+- Riwayat penggunaan, analisis Biaya, jendela provider/account, batas pengeluaran kunci API, buku besar biaya permintaan, dan pembatalan penggunaan harian mencakup biaya-biaya ini. Kunci tanpa log mempertahankan penghitungan numerik tanpa menyimpan teks sumber.
+- Penggunaan atau tarif tidak ada **tidak dikenal** , tidak gratis: header biaya respons dihilangkan, dan kebijakan penggunaan tanpa harga yang ada berlaku untuk kunci API terbatas. Tarif nol yang dikonfigurasi secara eksplisit tetap berlaku untuk penggunaan tanpa biaya.
+
+Ini adalah akuntansi forward-only. Panggilan OCR/embedding lama yang tidak pernah menulis riwayat penggunaan tidak dapat direkonstruksi dari migrasi ini. Perkiraan katalog adalah perkiraan USD, bukan faktur, dan tidak termasuk konversi mata uang, pajak, atau diskon.
+
+### Pidato dan gambar
+
+- Upaya `/v1/audio/transcriptions`, `/v1/audio/speech` dan pembuatan gambar yang berhasil berbagi penghitungan numerik. Panggilan langsung dan kombo membawa kunci API pemanggil dan koneksi yang dipilih; pembungkus kombo tidak pernah menambahkan debit kedua.
+- USD yang dilaporkan penyedia menang atas perkiraan katalog, termasuk biaya nol yang eksplisit. OpenRouterJSON `usage.cost` dinormalisasi menjadi `cost_usd`. Jika tidak, token yang diukur menggunakan harga token, detik transkripsi menggunakan harga per detik, masukan ucapan menggunakan jumlah karakter Unicode, dan gambar harga tetap menggunakan nomor yang sebenarnya dikembalikan, bukan `n` yang diminta.
+- Biner OpenRouter TTS tidak memiliki badan penggunaan JSON. Setelah audio selesai atau penelepon membatalkan, OmniRoute menanyakan generasi ID di **sama** asal OpenRouter yang dikonfigurasi. Permintaan EU tidak pernah kembali ke asal global. Ini adalah pencarian terbatas dan hanya-baca; sintesis tidak dicoba ulang untuk akuntansi. Catatan penagihan dapat muncul setelah audio selesai: percobaan ulang pencarian dijalankan di latar belakang hingga sekitar 52 detik, termasuk tenggat waktu jaringan.
+- Selama pencarian tersebut, respons audio memiliki `X-OmniRoute-Cost-Status: pending` dan tidak ada header biaya respons. Tagihan akhirnya muncul dalam riwayat penggunaan, analitik, dan buku besar setelah rekonsiliasi. Jika metadata tidak tersedia, snapshot tarif yang dikonfigurasi akan digunakan; jika tidak, biayanya tetap tidak diketahui.
+- Detik, jumlah karakter dan gambar memiliki bidang unit penagihan terpisah, tidak pernah memalsukan jumlah token. Akuntansi hanya mempertahankan penggunaan numerik, bukan teks ucapan, transkrip, atau byte gambar. Pengecualian gambar tanpa harga yang ada tidak berubah: tarif gambar yang benar-benar hilang tidak lagi mengunci kunci terbatas, dan responsnya menghilangkan header biaya daripada menyatakan panggilan itu gratis. Kegagalan penyimpanan harga masih menyimpan bukti penggunaan untuk penegakan yang gagal-ditutup.
+
+Tidak ada muatan speech/image historis yang ditemukan atau diisi ulang. Tagihan penyedia tetap menjadi referensi untuk faktur dan panggilan yang biayanya tidak dilaporkan.
 
 ---
 
@@ -137,50 +159,53 @@ Area Biaya juga mencakup (semuanya di bawah `/dashboard/costs/`):
 
 ---
 
-## titik akhir API
+## Endpoint API
 
-Semua ini memerlukan autentikasi manajemen (loopback/JWT, via `requireManagementAuth`) kecuali disebutkan.
+Semua endpoint berikut memerlukan autentikasi manajemen (loopback/JWT, melalui `requireManagementAuth`), kecuali
+jika dinyatakan lain.
 
-### Analisis penggunaan & biaya
+### Analitik penggunaan & biaya
 
-| Metode | Titik akhir              | Tujuan                                                                                                                                                         |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Analisis cost/usage lengkap: ringkasan, tren harian, oleh provider/model/API key/account/tier. Kueri: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Pemanfaatan kuota per penyedia dari waktu ke waktu. Pertanyaan: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                   |
-| `GET`  | `/api/usage/history`     | Baris riwayat penggunaan mentah.                                                                                                                               |
-| `GET`  | `/api/usage/call-logs`   | Log panggilan per permintaan (model, token, biaya, latensi, status).                                                                                           |
-| `GET`  | `/api/usage/quota`       | Status kuota penyedia.                                                                                                                                         |
-| `GET`  | `/api/usage/proxy-logs`  | Log permintaan proxy.                                                                                                                                          |
+| Metode | Endpoint                 | Tujuan                                                                                                                                                                        |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Analitik biaya/penggunaan lengkap: ringkasan, tren harian, berdasarkan penyedia/model/kunci API/akun/tingkat. Kueri: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Pemanfaatan kuota per penyedia dari waktu ke waktu. Kueri: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                       |
+| `GET`  | `/api/usage/history`     | Baris riwayat penggunaan mentah.                                                                                                                                              |
+| `GET`  | `/api/usage/call-logs`   | Log panggilan per permintaan (model, token, biaya, latensi, status).                                                                                                          |
+| `GET`  | `/api/usage/quota`       | Status kuota penyedia.                                                                                                                                                        |
+| `GET`  | `/api/usage/proxy-logs`  | Log permintaan proksi.                                                                                                                                                        |
 
 ### Anggaran
 
-| Metode | Titik akhir              | Tujuan                                                                                           |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `GET`  | `/api/usage/budget`      | Ringkasan biaya pemeriksaan anggaran + untuk satu kunci API (param kueri `apiKeyId` diperlukan). |
-| `POST` | `/api/usage/budget`      | Tetapkan batas daily/weekly/monthly USD ambang peringatan + untuk kunci API.                     |
-| `GET`  | `/api/usage/budget/bulk` | Ringkasan anggaran massal di seluruh kunci API.                                                  |
+| Metode | Endpoint                 | Tujuan                                                                                          |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Ringkasan biaya + pemeriksaan anggaran untuk satu kunci API (parameter kueri `apiKeyId` wajib). |
+| `POST` | `/api/usage/budget`      | Menetapkan batas USD harian/mingguan/bulanan + ambang peringatan untuk sebuah kunci API.        |
+| `GET`  | `/api/usage/budget/bulk` | Ringkasan anggaran secara massal di seluruh kunci API.                                          |
 
-> Anggaran API dicakup per** kunci API** (`apiKeyId`). Batas yang dikembalikan oleh `GET /api/usage/budget` meliputi `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, dan total berjalan (`totalCostToday`, `totalCostMonth`, …).
+> API anggaran dicakup per **kunci API** (`apiKeyId`). Batas yang dikembalikan oleh
+> `GET /api/usage/budget` mencakup `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> `warningThreshold`, dan total berjalan (`totalCostToday`, `totalCostMonth`, …).
 
 ### Harga
 
-| Metode   | Titik akhir             | Tujuan                                                                                                                                            |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Penggabungan harga empat lapisan (pengguna, models.dev, LiteLLM, defaults). `?includeSources=1` mengembalikan `pricing` + `sourceMap`.            |
-| `PATCH`  | `/api/pricing`          | Ganti harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                                                        |
-| `DELETE` | `/api/pricing`          | Hapus penggantian harga pengguna (opsional dicakup oleh `?provider=&model=`); tarif yang disinkronkan atau default bawaan tetap sebagai cadangan. |
-| `GET`    | `/api/pricing/defaults` | Tampilkan tarif cadangan per-1M default.                                                                                                          |
-| `GET`    | `/api/pricing/models`   | Harga ditentukan berdasarkan model.                                                                                                               |
-| `POST`   | `/api/pricing/sync`     | Memicu sinkronisasi manual dari sumber eksternal (LiteLLM).                                                                                       |
-| `GET`    | `/api/pricing/sync`     | Status sinkronisasi saat ini.                                                                                                                     |
-| `DELETE` | `/api/pricing/sync`     | Hapus harga yang disinkronkan LiteLLM saja (`pricing_synced`); data models.dev terpisah.                                                          |
+| Metode   | Endpoint                | Tujuan                                                                                                                                             |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Harga gabungan dari empat lapisan (pengguna, models.dev, LiteLLM, bawaan). `?includeSources=1` mengembalikan `pricing` + `sourceMap`.              |
+| `PATCH`  | `/api/pricing`          | Mengganti harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                                                     |
+| `DELETE` | `/api/pricing`          | Hapus penggantian harga pengguna, dengan cakupan opsional `?provider=&model=`; tarif tersinkron atau nilai bawaan tetap tersedia sebagai cadangan. |
+| `GET`    | `/api/pricing/defaults` | Menampilkan tarif fallback bawaan per 1 juta.                                                                                                      |
+| `GET`    | `/api/pricing/models`   | Harga yang dikunci berdasarkan model.                                                                                                              |
+| `POST`   | `/api/pricing/sync`     | Memicu sinkronisasi manual dari sumber eksternal (LiteLLM).                                                                                        |
+| `GET`    | `/api/pricing/sync`     | Status sinkronisasi saat ini.                                                                                                                      |
+| `DELETE` | `/api/pricing/sync`     | Hapus hanya harga yang disinkronkan dari LiteLLM (`pricing_synced`); data models.dev terpisah.                                                     |
 
-### Titik akhir lain yang relevan dengan biaya
+### Endpoint lain yang berkaitan dengan biaya
 
-| Metode | Titik akhir                   | Tujuan                                                                         |
-| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
-| `GET`  | `/api/free-tier/summary`      | Total token model gratis, yang digunakan bulan ini, dan sisa tunjangan gratis. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Penggunaan untuk kumpulan kuota bersama.                                       |
+| Metode | Endpoint                      | Tujuan                                                                 |
+| ------ | ----------------------------- | ---------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Total token model gratis, penggunaan bulan ini, dan sisa kuota gratis. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Penggunaan untuk kumpulan kuota bersama.                               |
 
 ---
 

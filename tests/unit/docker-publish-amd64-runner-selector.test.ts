@@ -112,7 +112,7 @@ const ctx = (arch: string, vars: Context): Context => ({
 
 test("amd64 runner per DOCKER_AMD64_RUNNER value", () => {
   const cases: Array<[Context, Value]> = [
-    [VPS_ON, ["self-hosted", "omni-build"]],
+    [VPS_ON, ["self-hosted", "omni-build", "omni-build-60gb"]],
     [{}, "ubuntu-24.04"],
     [
       { ...VPS_ON, ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "true" },
@@ -186,4 +186,49 @@ test("prepare follows the selector; merge follows prepare's budget verdict", () 
     "ubuntu-latest"
   );
   assert.equal(evaluate(merge, {}), "ubuntu-latest");
+});
+
+test("runner offline alert follows the selected self-hosted amd64 leg", () => {
+  const condition = workflow.jobs["runner-alert"].if!;
+  const context = (event: string, overrides: Context = {}): Context => ({
+    "github.event_name": event,
+    "github.repository": "cheaper-inference/OmniRoute",
+    ...VPS_ON,
+    ...overrides,
+  });
+
+  for (const event of ["schedule", "workflow_dispatch"]) {
+    assert.equal(evaluate(condition, context(event)), true);
+    assert.equal(
+      evaluate(condition, context(event, { "vars.DOCKER_AMD64_RUNNER": "custom" })),
+      true,
+      "an unrecognized selector preserves the self-hosted fallback"
+    );
+    for (const runner of ["blacksmith", "hosted"]) {
+      assert.equal(
+        evaluate(condition, context(event, { "vars.DOCKER_AMD64_RUNNER": runner })),
+        false,
+        `${event}: ${runner} does not depend on the omni-build slot`
+      );
+    }
+    for (const disabled of [
+      { "vars.USE_VPS_RUNNER": "false" },
+      { "vars.USE_VPS_BUILD_RUNNER": "false" },
+      { "vars.USE_VPS_RUNNER": "false", "vars.USE_VPS_BUILD_RUNNER": "false" },
+    ]) {
+      assert.equal(evaluate(condition, context(event, disabled)), false);
+    }
+  }
+  for (const event of ["push", "release"]) {
+    assert.equal(evaluate(condition, context(event)), false);
+  }
+  assert.equal(
+    evaluate(condition, context("schedule", { "github.repository": "example/fork" })),
+    false
+  );
+  assert.equal(
+    evaluate(condition, context("workflow_dispatch", { "github.repository": "example/fork" })),
+    true,
+    "the existing manual-dispatch behavior on forks is preserved"
+  );
 });

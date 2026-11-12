@@ -219,6 +219,66 @@ test("a direct turn with a visible text is served", () => {
   assert.equal(directVerdict(VISIBLE_TURN).kind, "pass");
 });
 
+for (const { label, delta, expected } of [
+  { label: "a refusal", delta: { refusal: "I cannot fulfill that request." }, expected: "pass" },
+  {
+    label: "a generated image",
+    delta: { images: [{ type: "image_url", image_url: { url: "data:image/png;base64,AA==" } }] },
+    expected: "pass",
+  },
+  {
+    label: "a padded refusal",
+    delta: { refusal: "  I cannot fulfill that request.  " },
+    expected: "pass",
+  },
+  { label: "a whitespace-only refusal", delta: { refusal: " \t\n " }, expected: "retry" },
+  { label: "a null image", delta: { images: [null] }, expected: "retry" },
+  { label: "an empty image", delta: { images: [{}] }, expected: "retry" },
+  { label: "a string image", delta: { images: ["image"] }, expected: "retry" },
+  {
+    label: "a numeric image URL",
+    delta: { images: [{ image_url: { url: 42 } }] },
+    expected: "retry",
+  },
+  {
+    label: "an empty image URL",
+    delta: { images: [{ image_url: { url: "" } }] },
+    expected: "retry",
+  },
+  {
+    label: "a whitespace image URL",
+    delta: { images: [{ image_url: { url: " \t " } }] },
+    expected: "retry",
+  },
+  {
+    label: "a wrong image key",
+    delta: { images: [{ image: { url: "data:image/png;base64,AA==" } }] },
+    expected: "retry",
+  },
+  {
+    label: "an image without an optional type",
+    delta: { images: [{ image_url: { url: "data:image/png;base64,AA==" } }] },
+    expected: "pass",
+  },
+  {
+    label: "a mixed image array",
+    delta: { images: [null, {}, { image_url: { url: "data:image/png;base64,AA==" } }] },
+    expected: "pass",
+  },
+  {
+    label: "an HTTPS image",
+    delta: { images: [{ image_url: { url: "https://example.invalid/image.png" } }] },
+    expected: "pass",
+  },
+  { label: "empty non-text fields", delta: { refusal: "", images: [] }, expected: "retry" },
+  { label: "malformed non-text fields", delta: { refusal: 42, images: {} }, expected: "retry" },
+]) {
+  test("a direct turn with " + label + " preserves its output verdict", () => {
+    const body = chatStream({ delta }, { delta: {}, finish: "stop" });
+    assert.equal(directVerdict(body).kind, expected);
+  });
+}
+
 test("a direct turn with a tool call is served", () => {
   assert.equal(directVerdict(TOOL_TURN).kind, "pass");
 });

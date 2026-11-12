@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { act, cleanup, renderHook } from "@testing-library/react";
 
 import {
   COMBO_PAGE_SIZE,
@@ -12,6 +13,8 @@ import {
   getComboPageCount,
   getComboPageItems,
 } from "@/app/(dashboard)/dashboard/combos/comboPagination";
+
+import { useComboPagination } from "@/app/(dashboard)/dashboard/combos/useComboPagination";
 
 const makeCombos = (count: number) =>
   Array.from({ length: count }, (_, index) => ({
@@ -81,5 +84,49 @@ describe("combo inventory pagination", () => {
     expect(buildUnfilteredCombosHref("filter=auto")).toBe("/dashboard/combos");
     expect(buildUnfilteredCombosHref("filter=auto&tab=usage")).toBe("/dashboard/combos?tab=usage");
     expect(buildUnfilteredCombosHref("")).toBe("/dashboard/combos");
+  });
+});
+
+describe("combo created-card page intent", () => {
+  afterEach(cleanup);
+
+  it("resets ordinary filter changes to page one", () => {
+    const items = makeCombos(73);
+    const hook = renderHook(({ rows, filter }) => useComboPagination(rows, filter), {
+      initialProps: { rows: items, filter: "all" },
+    });
+    act(() => hook.result.current.setPage(3));
+    hook.rerender({ rows: items.slice(0, 30), filter: "auto" });
+    expect(hook.result.current.page).toBe(1);
+  });
+
+  it("reveals a created combo on its page when the inventory is already unfiltered", () => {
+    const items = makeCombos(73);
+    const hook = renderHook(() => useComboPagination(items, "all"));
+    act(() => hook.result.current.setPage(findComboPage(items, "combo-73")));
+    expect(hook.result.current.page).toBe(4);
+    expect(hook.result.current.pageItems[0].id).toBe("combo-73");
+  });
+
+  it("preserves a requested page through immediate and delayed filter navigation", () => {
+    const items = makeCombos(73);
+    for (const delayedRouter of [false, true]) {
+      const hook = renderHook(({ rows, filter }) => useComboPagination(rows, filter), {
+        initialProps: { rows: items.slice(0, 30), filter: "auto" },
+      });
+      if (delayedRouter) {
+        act(() => hook.result.current.setPage(findComboPage(items, "combo-73"), "all"));
+        expect(hook.result.current.page).toBe(1);
+        hook.rerender({ rows: items, filter: "all" });
+      } else {
+        act(() => {
+          hook.result.current.setPage(findComboPage(items, "combo-73"), "all");
+          hook.rerender({ rows: items, filter: "all" });
+        });
+      }
+      expect(hook.result.current.page).toBe(4);
+      expect(hook.result.current.pageItems[0].id).toBe("combo-73");
+      hook.unmount();
+    }
   });
 });

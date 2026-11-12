@@ -123,15 +123,15 @@ szétválasztást szándékosan tartjuk fenn.
 
 ---
 
-## Miért kisebb a számunk más aggregátorokénál
+## Miért kisebb a számunk más aggregátoroknál
 
-Az ezen a területen szereplő legtöbb „havi ingyenes token” érték modellenkénti keretek összege. A miénk szándékosan nem az:
+A legtöbb „ingyenes tokenek havonta” száma ezen a területen a modellenkénti címkék összege. A miénk nem szándékosan:
 
-- **Minden megosztott keretet egyszer számolunk.** A Mistral ingyenes csomagja szervezetenként egyetlen, havi 1B keretet biztosít; attól, hogy öt modellnél is feltüntetjük, még nem lesz belőle 5B. Modellenként összeadva a saját katalógusunkban **~7.4B** szerepelne (újraszámítva: 2026-09-03; ezt az értéket nem ellenőrzi a CI — a katalógus minden módosításakor újra meg kell mérni), a fő szám azonban **~1.47B**, mert az egyes szolgáltatóknál egy-egy fiók ténylegesen ennyit használhat fel.
-- **A napi korlátokat átváltjuk, a sebességkorlátokat nem.** Egy dokumentált token/nap korlátból `× 30` lesz; egy dokumentált kérés/nap korlátból `RPD × ~800 token × 30`; ha egy szolgáltató csak percenkénti kéréskorlátot tesz közzé, ahhoz **nem** rendelünk havi értéket, hanem _korlátlanként_ tüntetjük fel, és soha nem adjuk hozzá az összeghez. Elutasítjuk azt a felfújt számítási módot, amely egy sebességkorlátot folyamatos, 24/7-es használattal szoroz fel.
-- **A regionális személyazonosság-ellenőrzéshez kötött kvótákat külön tüntetjük fel** (`+~6M regionális személyazonosság-ellenőrzéshez kötve`), mert a legtöbb olvasó nem tudja igénybe venni őket.
-- **A regisztrációs kreditek csak az első hónapban érvényesek**, és külön, második értékként jelennek meg; soha nem vegyítjük őket a tartósan elérhető mennyiséggel.
-- **Az értéket a CI ellenőrzi.** Az `npm run check:docs-counts` újraszámítja az összegeket a katalógusból, és meghiúsítja a buildet, ha ez a fájl, a README vagy a költségkeret-kártya eltér azoktól.
+- **Minden megosztott medence egyszer számít.** Mistral ingyenes csomagja szervezetenként egy 1B/month juttatás; ha öt modell alá soroljuk, még nem lesz az 5B. Modellenként összegezve a saját katalógusunk olvasható **~ 7.4B** (Újraszámítva 2026-09-03; ez a szám nem CI-kapu. — mérje meg újra, amikor a katalógus változik) — a cím azt mondja **~ 1.47B** mert minden szolgáltató egy fiókja ténylegesen ennyit költhet.
+- **A napi felső határokat átváltják, az árfolyamokat nem.** A dokumentált tokens/day sapka `× 30` válik; a dokumentált requests/day sapkából `RPD × ~800 tokens × 30` lesz; egy szolgáltató, amely csak percenkénti kéréseket tesz közzé **nem** havi szám, és _felfüggesztés nélküli_ként szerepel, soha nem összegzik. Ha megszorozzuk a kamatkorlátot 24/7 vel, az az infláció, amelyet elutasítunk.
+- **A regionális személyazonosság-ellenőrzés mögötti kvóták külön jelennek meg** (`+~6M behind regional identity verification`), mert a legtöbb olvasó nem tudja használni őket.
+- **A regisztrációs jóváírások csak az első hónapra érvényesek** és második számként jelentették, soha nem keveredve az állandó számmal.
+- **A számot CI érvényesíti.** `npm run check:docs-counts` újraszámítja az összegeket a katalógusból, és meghiúsul a felépítés, amikor ez a fájl, a README vagy a költségvetési kártya eltávolodik tőlük.
 
 ---
 
@@ -391,12 +391,12 @@ Az ezen a területen szereplő legtöbb „havi ingyenes token” érték modell
 
 ## Szójegyzék
 
-| Kifejezés                | Jelentés                                                                  |
-| ------------------------ | ------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**      | Kérések percenként / naponta / óránként                                   |
-| **TPM / TPD**            | Tokenek percenként / naponta                                              |
-| **Dokumentált keret**    | A szolgáltató explicit napi/havi tokenkorlátot tesz közzé (védhető keret) |
-| **Elméleti felső határ** | `sebességkorlát × 24/7 × 30 nap` — maximum, nem garantált keret           |
-| **Neuron**               | Cloudflare számítási egység (~1 kimeneti token)                           |
+| Term                      | Jelentése                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| **RPM / RPD / RPH**       | Kérések percenként / naponként / óránként                                             |
+| **TPM / TPD**             | Tokenek percenként / nap                                                              |
+| **Dokumentált támogatás** | A szolgáltató kifejezett daily/monthly token sapkát tesz közzé (védhető költségkeret) |
+| **Elméleti mennyezet**    | `rate-limit × 24/7 × 30d` A — maximum, nem pedig engedélyezett költségvetés           |
+| **Neuron**                | Cloudflare számítási egység (~ 1 kimeneti token)                                      |
 
-> Szolgáltatónkénti, 2026-06-05-én végzett kutatás alapján generálva. A frissítéshez futtassa újra a kutatási munkafolyamatot (lásd: `_tasks/features-v3.8.12`).
+> 2026-06-05-i szolgáltatónkénti kutatásból generálva. Futtassa újra a kutatási munkafolyamatot (lásd: `_tasks/features-v3.8.12`) a frissítéshez.

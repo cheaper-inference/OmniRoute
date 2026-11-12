@@ -378,7 +378,7 @@ A na-akpọ ngwá ọrụ eweghachite ugbu a `omniroute_ccr_retrieve` (ngọnar�
 
 ### okirikiri ndụ nke oge
 
-Streamable-HTTP sessions na-abaghị uru ma ihe nkesa na-aghọrọ ha; A na-edozi windo na-abaghị uru site na `OMNIROUTE_MCP_SESSION_IDLE_MS` (nkeji 5 ndabara; ejiri aha na-ezo aka, ọ bụghị uru nwere koodu siri ike, ya mere ibe a anaghị akpafu mgbe ọ gbanwere). Ihe mgbaàmà nke nnọkọ a na-eweghị ihe ubi bụ HTTP 404 nwere `Unknown Mcp-Session-Id` — ọgwụgwọ bụ ijikọ ma ọ bụ malitegharịa nnọkọ ahụ,** ọ bụghị** ka ịtụgharị igodo, gbanwee oghere, ma ọ bụ nyegharịa ngwaọrụ aha.
+Streamable-HTTP sessions na-abaghị uru ma ihe nkesa na-aghọrọ ha; `OMNIROUTE_MCP_SESSION_IDLE_MS` na-ahazi windo na-abaghị uru, na-adaghachi na `DEFAULT_MCP_SESSION_IDLE_MS` na `open-sse/mcp-server/httpTransport.ts`. Ihe mgbaàmà nke nnọkọ a na-eweghị ihe ubi bụ HTTP 404 nwere `Unknown Mcp-Session-Id` — ọgwụgwọ bụ ijikọ ma ọ bụ malitegharịa nnọkọ ahụ,**ọ bụghị** ka ịtụgharị igodo, gbanwee oghere, ma ọ bụ nyegharịa ngwaọrụ aha.
 
 ## Ebe API
 

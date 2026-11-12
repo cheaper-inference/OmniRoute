@@ -20,14 +20,16 @@
 
 ## Installationsmetoder
 
-### npm (anbefalet)
+### npm (anbefales)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboardet åbnes på `http://localhost:20128`, og API'ets basis-URL er `http://localhost:20128/v1`.
+Dashboard åbner ved `http://localhost:20128` og API base URL er `http://localhost:20128/v1`.
+
+> **npm brugere:** Hvis npm advarer om, at installationsscripts blev blokeret (f.eks. `omniroute`, `better-sqlite3`), se [Fejlfinding af — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

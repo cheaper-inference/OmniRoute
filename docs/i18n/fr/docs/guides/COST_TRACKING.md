@@ -44,16 +44,16 @@ Comme ce chiffre est une estimation :
 
 ### La source des prix
 
-Les coûts proviennent du tableau de tarification fusionné dans [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), dans cet ordre de priorité (** le plus élevé en premier** ) :
+Les coûts proviennent du tableau de tarification fusionné dans [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), dans cet ordre de priorité (**le plus élevé en premier** ) :
 
 1. **Remplacements par l'utilisateur** Prix — définis dans le tableau de bord ou via `PATCH /api/pricing` (l'espace de noms `pricing` ).
 2. **synchronisation models.dev** Tarifs — extraits de `https://models.dev/api.json` (l'espace de noms `models_dev_pricing` ).
-3. **synchronisation LiteLLM** prix — extraits du `model_prices_and_context_window.json` public de LiteLLM(l'espace de noms `pricing_synced` ).
-4. **Valeurs par défaut codées en dur** tarifs — expédiés en [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+3. **Synchronisation LiteLLM** Prix — extraits du `model_prices_and_context_window.json` public de LiteLLM(l'espace de noms `pricing_synced` ).
+4. **Valeurs par défaut codées en dur** Tarifs — expédiés en [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
 Pour le même provider/model, les valeurs des couches de priorité supérieure écrasent les champs correspondants des couches inférieures ; des champs absents d'une couche supérieure peuvent néanmoins provenir d'une couche inférieure. L'ordre est fixe même lorsque les deux tâches de synchronisation indépendantes s'exécutent en même temps. `GET /api/pricing?includeSources=1` renvoie `pricing` et `sourceMap`, dont les étiquettes par modèle (`user`, `modelsDev`, `litellm`, `default`) identifient la couche la plus prioritaire contenant ce modèle.
 
-**synchronisation LiteLLM** est opt-in, désactivé par défaut. Ses variables d'environnement (voir [`.env.example`](../../.env.example) ) sont :
+**Synchronisation LiteLLM** est opt-in, désactivé par défaut. Ses variables d'environnement (voir [`.env.example`](../../.env.example) ) sont :
 
 | Variable d'environnement | Défaut    | But                                                                                                          |
 | ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------ |
@@ -68,33 +68,55 @@ Pour le même provider/model, les valeurs des couches de priorité supérieure �
 | `MODELS_DEV_SYNC_ENABLED`  | _(non défini)_ | La désactivation suit la bascule Paramètres ; `1/true/on/yes` force l'activation et `0/false/off/no` force la désactivation (même si les paramètres l'activent). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Intervalle de synchronisation models.dev par défaut en secondes (quotidiennement).                                                                               |
 
-`PRICING_SYNC_SOURCES` fait** pas** activer models.dev ; il contrôle uniquement la synchronisation LiteLLM. La suppression d'un remplacement d'utilisateur n'efface aucun des espaces de noms synchronisés ; la prochaine couche de tarification disponible entre en vigueur. Pour un modèle sans prix, vérifiez les paramètres de synchronisation et le `sourceMap` avant d'ajouter une commande manuelle.
+`PRICING_SYNC_SOURCES` fait **pas** activer models.dev ; il contrôle uniquement la synchronisation LiteLLM. La suppression d'un remplacement d'utilisateur n'efface aucun des espaces de noms synchronisés ; la prochaine couche de tarification disponible entre en vigueur. Pour un modèle sans prix, vérifiez les paramètres de synchronisation et le `sourceMap` avant d'ajouter une commande manuelle.
 
 ### La formule du coût
 
-Le coût est calculé par requête à partir du nombre de jetons et des taux par million de jetons en [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) :
+Le coût est calculé par requête à partir du nombre de jetons et des taux par million de jetons dans [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) :
 
-- **Jetons d'entrée** (moins les lectures de cache et les jetons de création de cache) taux × `input`.
-- **Jetons de lecture du cache** taux × `cached` (retombe au taux d'entrée).
-- **Jetons de création de cache** taux × `cache_creation` (retombe au taux d'entrée).
-- **Jetons de sortie** taux × `output`.
-- **Jetons de raisonnement** taux × `reasoning` (retombe au taux de sortie).
+- **Jetons d'entrée** (moins les lectures de cache et les jetons de création de cache) Taux × `input`.
+- **Jetons de lecture du cache** Taux × `cached` (retombe au taux d'entrée).
+- **Jetons de création de cache** Taux × `cache_creation` (retombe au taux d'entrée).
+- **Jetons de sortie** Taux × `output`.
+- **Jetons de raisonnement** Taux × `reasoning` (retombe au taux de sortie).
 
-Tous les taux sont interprétés en USD pour 1 000 000 de jetons. Un niveau de service Codex « rapide »/« prioritaire » ou « flex » applique un multiplicateur de coût (`getCodexFastCostMultiplier`) — par exemple, flex est facturé avec une remise symbolique de 50 %, présenté comme** économies flexibles** dans le tableau de bord.
+Tous les taux sont interprétés en USD pour 1 000 000 de jetons. Un niveau de service Codex « rapide »/« prioritaire » ou « flex » applique un multiplicateur de coût (`getCodexFastCostMultiplier`). — par exemple, flex est facturé avec une remise symbolique de 50 %, présenté comme **économies flexibles** dans le tableau de bord.
 
-Les noms de modèles sont d'abord normalisés (les préfixes du chemin du fournisseur tels que `openai/` ou `accounts/fireworks/models/` sont supprimés), de sorte que les lignes historiques correspondent toujours à un prix.
+Les noms de modèles sont d'abord normalisés (les préfixes de chemin du fournisseur tels que `openai/` ou `accounts/fireworks/models/` sont supprimés), afin que les lignes historiques correspondent toujours à un prix.
 
 ### Comment les dépenses sont enregistrées
 
-- Le coût par demande est calculé après la réponse et enregistré en mode « feu et oubli » afin de ne jamais ajouter de latence au client. La consommation de quota partagé est planifiée lors du prochain tick de boucle d'événement via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Le coût par demande est calculé à la fin de la demande. La consommation de quota partagé est planifiée lors du prochain tick de boucle d'événement via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Les dépenses en clé API sont mises en mémoire tampon et vidées par lots par le [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervalle de vidage par défaut de 60 s, tampon de 1 000 entrées). Réglable via :
 
   | Variable d'environnement            | Défaut  | But                                                               |
   | ----------------------------------- | ------- | ----------------------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Intervalle de rinçage en millisecondes.                           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Nombre maximal d'entrées mises en mémoire tampon avant le vidage. |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Nombre maximum d'entrées mises en mémoire tampon avant le vidage. |
 
-Les chiffres de coûts du tableau de bord sont** pas** lus à partir d'un montant en dollars par ligne stocké — ils sont recalculés à la volée à partir du nombre de jetons et du tableau de tarification actuel à chaque fois que le point de terminaison d'analyse s'exécute. Cela signifie que la correction d’un prix erroné (et la resynchronisation) met à jour les estimations de coûts historiques de manière rétroactive.
+Les coûts préfèrent les frais exacts déclarés par le fournisseur (`provider_cost_usd`), puis un instantané de la demande au prix du catalogue (`calculated_cost_usd`), puis une retarification symbolique à partir du catalogue actuel. Les coûts stockés ne sont pas facturés à nouveau via leur nombre de jetons. Les anciennes lignes réservées aux jetons changent toujours lorsque leur prix catalogue change.
+
+### OCR et intégrations
+
+- Les requêtes `/v1/ocr` réussies utilisent `usage_info.pages_processed` en amont, et non la plage de pages demandée ou le nombre d'objets de page renvoyés. L'estimation est en pages × `ocr_cost_per_page` ( USD/page absolu,**pas** USD/million).
+- Les demandes avec des annotations de document ou de cadre de délimitation nécessitent un tarif `ocr_cost_per_annotated_page` distinct. Sans cela, le coût reste inconnu ; le tarif OCR ordinaire n’est pas remplacé silencieusement.
+- La synchronisation LiteLLM mappe son champ `annotation_cost_per_page` en amont dans `ocr_cost_per_annotated_page`, en conservant la valeur absolue USD/page et les entrées d'annotation uniquement, y compris le zéro explicite. Un champ canonique fourni est prioritaire ; les valeurs d'alias non valides sont ignorées. Les remplacements de prix utilisateur conservent leur priorité normale. Voir [les clés de tarification OCR de LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- L'utilisation OCR stocke le nombre de pages, le prix unitaire, le coût USD calculé, la clé API et la connexion sélectionnée. Les pages ne sont jamais représentées comme des jetons. Les journaux d'appels contiennent des métadonnées de facturation, et non des documents URLs, des octets PDF ou du texte extrait.
+- Les requêtes `/v1/embeddings` réussies enregistrent une ligne d'utilisation par lot physique, y compris des lots distincts terminés dans la même milliseconde. Les frais signalés par le fournisseur ont priorité sur les estimations de jetons ; Les emballages combo n’ajoutent pas de frais.
+- L'historique d'utilisation, l'analyse des coûts, les fenêtres provider/account, les limites de dépenses des clés API, le grand livre des coûts des demandes et les cumuls d'utilisation quotidienne incluent ces frais. Les clés sans journal conservent la comptabilité numérique sans conserver le texte source.
+- Les utilisations ou tarifs manquants sont **inconnu** , pas gratuit : l'en-tête de coût de réponse est omis et la politique d'utilisation non tarifée existante s'applique aux clés API limitées. Les taux zéro explicitement configurés restent une utilisation valable sans coût.
+
+Il s’agit d’une comptabilité prospective uniquement. Les anciens appels OCR/embedding qui n’ont jamais écrit d’historique d’utilisation ne peuvent pas être reconstruits à partir de cette migration. Les estimations du catalogue sont des estimations USD, et non une facture, et n'incluent pas la conversion de devises, les taxes ou les remises.
+
+### Discours et images
+
+- Les tentatives réussies `/v1/audio/transcriptions`, `/v1/audio/speech` et de génération d'images partagent la comptabilité numérique. Les appels directs et combinés portent la clé API de l'appelant et la connexion sélectionnée ; un wrapper combo n’ajoute jamais de deuxième débit.
+- USD signalé par le fournisseur l'emporte sur une estimation de catalogue, y compris des frais explicites nuls. Le JSON `usage.cost` de OpenRouter est normalisé en `cost_usd`. Sinon, les jetons mesurés utilisent les prix des jetons, les secondes de transcription utilisent les prix à la seconde, la saisie vocale utilise le nombre de caractères Unicode et les images à prix forfaitaire utilisent le nombre réellement renvoyé, et non le `n` demandé.
+- Le binaire OpenRouter TTS n'a pas de corps d'utilisation JSON. Une fois l'audio terminé ou l'appelant annulé, OmniRoute interroge sa génération ID sur le **même** origine OpenRouter configurée. Une requête EU ne revient jamais à l’origine globale. Il s'agit d'une recherche limitée en lecture seule ; la synthèse n’est pas retentée pour la comptabilité. Les enregistrements de facturation peuvent apparaître une fois l'audio terminé : les tentatives de recherche s'exécutent en arrière-plan pendant environ 52 secondes, y compris les délais du réseau.
+- Au cours de cette recherche, la réponse audio comporte `X-OmniRoute-Cost-Status: pending` et aucun en-tête de coût de réponse. Son montant final apparaît dans l'historique d'utilisation, les analyses et le grand livre après rapprochement. Si les métadonnées ne sont pas disponibles, un instantané de tarif configuré est utilisé ; sinon le coût reste inconnu.
+- Les secondes, les caractères et les images ont des champs d'unité de facturation distincts, jamais de faux comptes de jetons. La comptabilité ne conserve que l'utilisation numérique, pas le texte vocal, les transcriptions ou les octets d'image. Les exemptions existantes pour les images non tarifées restent inchangées : un tarif d'image véritablement manquant ne verrouille pas à nouveau une clé limitée, et la réponse omet l'en-tête de coût plutôt que de déclarer l'appel gratuit. Un échec de magasin de tarification conserve toujours des preuves d'utilisation pour l'application de la fermeture en cas d'échec.
+
+Aucune charge speech/image historique n’est inventée ou comblée. La facturation du fournisseur reste la référence pour les factures et pour les appels dont le tarif n'a pas été signalé.
 
 ---
 
@@ -144,50 +166,53 @@ La section Coûts comprend également les pages suivantes (toutes sous
 
 ---
 
-## points de terminaison API
+## Points de terminaison de l’API
 
-Tous ces éléments nécessitent une authentification de gestion (loopback/JWT, via `requireManagementAuth`), sauf indication contraire.
+Tous nécessitent une authentification de gestion (boucle locale/JWT, via
+`requireManagementAuth`), sauf indication contraire.
 
-### Analyse de l'utilisation et des coûts
+### Analyses de l’utilisation et des coûts
 
-| Méthode | Point de terminaison     | But                                                                                                                                                                     |
-| ------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`   | `/api/usage/analytics`   | Analyse cost/usage complète : résumé, tendance quotidienne, par requête provider/model/API key/account/tier. : `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`   | `/api/usage/utilization` | Utilisation des quotas par fournisseur au fil du temps. Requête : `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                          |
-| `GET`   | `/api/usage/history`     | Lignes de l'historique d'utilisation brute.                                                                                                                             |
-| `GET`   | `/api/usage/call-logs`   | Journaux d'appels par requête (modèle, jetons, coût, latence, statut).                                                                                                  |
-| `GET`   | `/api/usage/quota`       | Statut du quota du fournisseur.                                                                                                                                         |
-| `GET`   | `/api/usage/proxy-logs`  | Journaux de demandes de proxy.                                                                                                                                          |
+| Méthode | Point de terminaison     | Objectif                                                                                                                                                                                       |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/analytics`   | Analyses complètes des coûts/de l’utilisation : résumé, tendance quotidienne, par fournisseur/modèle/clé API/compte/niveau. Requête : `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`   | `/api/usage/utilization` | Utilisation des quotas par fournisseur au fil du temps. Requête : `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                 |
+| `GET`   | `/api/usage/history`     | Lignes brutes de l’historique d’utilisation.                                                                                                                                                   |
+| `GET`   | `/api/usage/call-logs`   | Journaux d’appels par requête (modèle, jetons, coût, latence, statut).                                                                                                                         |
+| `GET`   | `/api/usage/quota`       | État des quotas des fournisseurs.                                                                                                                                                              |
+| `GET`   | `/api/usage/proxy-logs`  | Journaux des requêtes du proxy.                                                                                                                                                                |
 
 ### Budgets
 
-| Méthode | Point de terminaison     | But                                                                                                          |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `GET`   | `/api/usage/budget`      | Récapitulatif des coûts, vérification du budget + pour une clé API (paramètre de requête `apiKeyId` requis). |
-| `POST`  | `/api/usage/budget`      | Définir daily/weekly/monthly USD limite le seuil d'avertissement + pour une clé API.                         |
-| `GET`   | `/api/usage/budget/bulk` | Résumés budgétaires groupés sur les clés API.                                                                |
+| Méthode | Point de terminaison     | Objectif                                                                                                   |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/budget`      | Résumé des coûts + contrôle du budget pour une clé API (`apiKeyId` requis comme paramètre de requête).     |
+| `POST`  | `/api/usage/budget`      | Définir les limites quotidiennes/hebdomadaires/mensuelles en USD + le seuil d’avertissement d’une clé API. |
+| `GET`   | `/api/usage/budget/bulk` | Résumés groupés des budgets pour plusieurs clés API.                                                       |
 
-> Le budget API est défini par** clé API** (`apiKeyId`). Les limites renvoyées par `GET /api/usage/budget` incluent `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` et les totaux cumulés (`totalCostToday`, `totalCostMonth`,…).
+> L’API de budget est limitée à chaque **clé API** (`apiKeyId`). Les limites renvoyées par
+> `GET /api/usage/budget` comprennent `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> un `warningThreshold` et les totaux cumulés (`totalCostToday`, `totalCostMonth`, …).
 
-### Tarifs
+### Tarification
 
-| Méthode  | Point de terminaison    | But                                                                                                                                                                                          |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Tarification fusionnée à quatre niveaux (utilisateur, models.dev, LiteLLM, valeurs par défaut). `?includeSources=1` renvoie `pricing` + `sourceMap`.                                         |
-| `PATCH`  | `/api/pricing`          | Remplacer le prix pour `{ provider: { model: { input, output, cached, … } } }`.                                                                                                              |
-| `DELETE` | `/api/pricing`          | Supprimer les remplacements de prix utilisateur (éventuellement limités à `?provider=&model=`) ; les taux synchronisés ou les valeurs par défaut intégrées restent comme solutions de repli. |
-| `GET`    | `/api/pricing/defaults` | Afficher les taux de repli per-1M par défaut.                                                                                                                                                |
-| `GET`    | `/api/pricing/models`   | Prix indiqués par modèle.                                                                                                                                                                    |
-| `POST`   | `/api/pricing/sync`     | Déclenchez une synchronisation manuelle à partir de sources externes (LiteLLM).                                                                                                              |
-| `GET`    | `/api/pricing/sync`     | État de synchronisation actuel.                                                                                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Effacer uniquement la tarification synchronisée avec LiteLLM (`pricing_synced`) ; Les données models.dev sont distinctes.                                                                    |
+| Méthode  | Point de terminaison    | Objectif                                                                                                                                                                          |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Tarification fusionnée de quatre couches (utilisateur, models.dev, LiteLLM, valeurs par défaut). `?includeSources=1` renvoie `pricing` + `sourceMap`.                             |
+| `PATCH`  | `/api/pricing`          | Remplacer la tarification pour `{ provider: { model: { input, output, cached, … } } }`.                                                                                           |
+| `DELETE` | `/api/pricing`          | Supprime les redéfinitions de prix utilisateur (éventuellement limitées par `?provider=&model=`) ; les tarifs synchronisés ou les valeurs intégrées restent disponibles en repli. |
+| `GET`    | `/api/pricing/defaults` | Afficher les tarifs de repli par défaut par million.                                                                                                                              |
+| `GET`    | `/api/pricing/models`   | Tarification indexée par modèle.                                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Déclencher une synchronisation manuelle depuis des sources externes (LiteLLM).                                                                                                    |
+| `GET`    | `/api/pricing/sync`     | État actuel de la synchronisation.                                                                                                                                                |
+| `DELETE` | `/api/pricing/sync`     | Efface uniquement les tarifs synchronisés par LiteLLM (`pricing_synced`) ; les données models.dev sont distinctes.                                                                |
 
-### Autres paramètres liés aux coûts
+### Autres points de terminaison liés aux coûts
 
-| Méthode | Point de terminaison          | But                                                                                       |
-| ------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `GET`   | `/api/free-tier/summary`      | Totaux des jetons du modèle gratuit, utilisés ce mois-ci et allocation gratuite restante. |
-| `GET`   | `/api/quota/pools/[id]/usage` | Utilisation pour un pool à quota partagé.                                                 |
+| Méthode | Point de terminaison          | Objectif                                                                             |
+| ------- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| `GET`   | `/api/free-tier/summary`      | Total des jetons des modèles gratuits, utilisation du mois et quota gratuit restant. |
+| `GET`   | `/api/quota/pools/[id]/usage` | Utilisation d’un pool de quotas partagés.                                            |
 
 ---
 

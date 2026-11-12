@@ -6,8 +6,13 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
+import { closeSharedLoggerResource } from "../../../src/shared/utils/loggerResource.ts";
+
+after(async () => {
+  await closeSharedLoggerResource();
+});
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const comboSrc = readFileSync(join(root, "open-sse/services/combo.ts"), "utf8");

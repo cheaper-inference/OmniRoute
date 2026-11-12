@@ -15,7 +15,7 @@ na Claude Code — ide o prevádzkové spresnenia pravidiel, ktoré sú už defi
 
 Úplný povinný protokol pre worktree (potvrdenie základnej vetvy, kanonická cesta
 `.claude/worktrees/`, `cp -al` node_modules, pravidlá ukončenia) je v
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (zhrnuté v `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (zhrnuté v `AGENTS.md` →
 Pracovný postup Gitu → „Izolácia worktree"). Body špecifické pre Claude Code:
 
 - Potvrďte základnú vetvu s operátorom cez `AskUserQuestion` (Pevné pravidlo č. 19), pokiaľ vám

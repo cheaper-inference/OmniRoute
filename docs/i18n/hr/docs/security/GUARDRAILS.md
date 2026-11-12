@@ -24,11 +24,12 @@ Hookovi se **ne** izvode na svakoj ruti ni za svaki odgovor. Pročitajte
 [Pokrivenost i ograničenja](#coverage-and-limits) prije nego što se oslonite na
 guardrail kao sigurnosnu kontrolu.
 
-## Ugrađene zaštitne ograde
+## Ugrađeni guardraili
 
-Registar automatski učitava šest zaštitnih ograda po prioritetnom redoslijedu pri uvozu (pogledajte `registry.ts` → `registerDefaultGuardrails()`):
+Registar pri uvozu automatski učitava šest guardraila poredanih po prioritetu
+(vidi `registry.ts` → `registerDefaultGuardrails()`):
 
-| Prioritet | Ime                 | Faza(e)        | File                  |
+| Prioritet | Naziv               | Faza(e)        | Datoteka              |
 | --------- | ------------------- | -------------- | --------------------- |
 | `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -37,7 +38,7 @@ Registar automatski učitava šest zaštitnih ograda po prioritetnom redoslijedu
 | `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Pokreću se brojevi nižeg prioriteta** prvi** .
+Guardrails s nižim brojevima prioriteta izvode se **prvi**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
@@ -118,30 +119,63 @@ Bivša kartica Vision Bridge pod AI postavkama poveznica je kompatibilnosti s no
 
 Naslijeđene zadane postavke žive u `src/shared/constants/visionBridgeDefaults.ts`; nove mode/task-aware/cache zadane postavke i razrješivač postavki žive u `src/shared/constants/modalityBridgeDefaults.ts`. Zaštitna ograda otkriva opciju `deps` konstruktora tako da testovi mogu ubaciti lažne `getSettings` i `callVisionModel` implementacije.
 
-### Audio most (`audioBridge.ts`) — Modalitetni PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Presreće zahtjeve za chat koji nose zvuk prije nego što dođu do cilja za koji nije poznato da prihvaća audio unos. Nikada ne preusmjerava zahtjev za chat: audio dijelovi se transkribiraju kroz postojeću višedijelnu krajnju točku kompatibilnu s OpenAI-jem, a odabrani model chata nastavlja se s tekstualnim transkriptima.
+Presreće chat zahtjeve s audio sadržajem prije nego što stignu do cilja za koji nije poznato da prihvaća audio ulaz. Nikad ne preusmjerava chat zahtjev: audio dijelovi transkribiraju se putem postojeće OpenAI-kompatibilne multipart krajnje točke, a odabrani chat model nastavlja s tekstualnim transkriptima.
 
-Protok:
+Tijek:
 
-1. Razriješi `supportsAudio` kroz `getResolvedModelCapabilities()`. Eksplicitni metapodaci registra pružatelja pobjeđuju, zatim metapodaci statičnog modela, zatim sinkronizirani `modalities_input`. Deklarirana ulazna lista bez `audio` je `false`; nema dokaza o sposobnosti `null`. I `false` i `null` aktiviraju konzervativni most, dok ga `true` zaobilazi.
-2. Razriješite `modalityBridgeAudio*` postavke i izdvojite spojive audio dijelove najviše razine iz svake poruke putem zajedničkog `detectMediaParts()` detektora. Podržani oblici žice su OpenAI `input_audio`, `audio_url` i `source.media_type: "audio/*"`. Ugniježđeni zvuk otkriven je za usmjeravanje, ali se ne uklanja stazom spajanja. Rad je ograničen `modalityBridgeAudioMaxClips`; kasniji dijelovi ostaju netaknuti.
-3. Poštujte konfigurirani `provider/model` ili pustite `selectAudioBridgeModel()` da šeta `AUDIO_TRANSCRIPTION_PROVIDERS` u stabilnom kataloškom redoslijedu i odaberite prvi model s upotrebljivom vjerodajnicom aktivnog pružatelja usluga.
-4. `callAudioTranscription()` pretvara base64/data-URI audio u višedijelni `file` ili preuzima udaljeni `audio_url` putem zaštite samo za javnost sa DNS pričvršćivanjem i ograničenjem od 25 MB. Zatim POSTs datoteku i odabrani model u lokalnu `/v1/audio/transcriptions` samopetlju, autentificiranu pomoću `resolveSelfLoopBearer()`. Postojeća ruta transkripcije izvodi normalno traženje vjerodajnica, rukovanje cooldown/rate-limit i slanje pružatelja.
-5. Uspješni pozivi zamjenjuju svoje dijelove sa `[Audio N]: <transcript>`. Pozivi se izvode sa `Promise.allSettled`: pojedinačni kvar čuva taj izvorni audio dio (#4012 ugovor). Ako svaki poziv ne uspije i cilj se dokaže `supportsAudio === false`, dijelovi postaju `[Audio N]: (unavailable — no STT provider connected)` (#8430 ugovor). Za nepoznatu metu (`null`), neuspješan rezultat ostaje netaknut. Dokazani samo tekstualni cilj bez upotrebljive STT vjerodajnice prima isti eksplicitni stub bez upućivanja mrežnog poziva.
+1. Razriješi `supportsAudio` putem `getResolvedModelCapabilities()`. Eksplicitni
+   metapodaci registra pružatelja imaju prednost, zatim statički metapodaci
+   modela, zatim sinkronizirani `modalities_input`. Deklarirani popis ulaza bez
+   `audio` daje `false`; bez dokaza o mogućnostima ostaje `null`. I `false` i
+   `null` aktiviraju konzervativni most, dok ga `true` zaobilazi.
+2. Razriješi postavke `modalityBridgeAudio*` i izdvoji spojive audio dijelove
+   najviše razine iz svake poruke putem zajedničkog detektora
+   `detectMediaParts()`. Podržani mrežni oblici su OpenAI `input_audio`,
+   `audio_url` i `source.media_type: "audio/*"`. Ugniježđeni zvuk detektira se
+   radi usmjeravanja, ali ga putanja spajanja ne uklanja. Opseg rada ograničen
+   je s `modalityBridgeAudioMaxClips`; kasniji dijelovi ostaju netaknuti.
+3. Poštuj konfigurirani `provider/model`, ili dopusti da
+   `selectAudioBridgeModel()` prođe kroz `AUDIO_TRANSCRIPTION_PROVIDERS` u
+   stabilnom redoslijedu kataloga i odabere prvi model s iskoristivom aktivnom
+   vjerodajnicom pružatelja.
+4. `callAudioTranscription()` pretvara base64/data-URI zvuk u multipart
+   `file`, ili preuzima udaljeni `audio_url` kroz izlazni nadzor ograničen na
+   javne adrese s DNS prikvačivanjem i granicom od 25 MB. Zatim šalje POST
+   zahtjev s datotekom i odabranim modelom na lokalnu samopetlju
+   `/v1/audio/transcriptions`, autentificiranu s `resolveSelfLoopBearer()`.
+   Postojeća ruta transkripcije izvodi uobičajeno dohvaćanje vjerodajnica,
+   rukovanje razdobljem hlađenja/ograničavanjem brzine i usmjeravanje prema
+   pružatelju.
+5. Uspješni pozivi zamjenjuju svoje dijelove s `[Audio N]: <transcript>`.
+   Pozivi se izvode s `Promise.allSettled`: pojedinačni neuspjeh zadržava
+   izvorni audio dio (ugovor #4012). Ako svi pozivi ne uspiju i za cilj je
+   dokazano `supportsAudio === false`, dijelovi postaju
+   `[Audio N]: (unavailable — no STT provider connected)` (ugovor #8430). Za
+   nepoznati cilj (`null`), rezultat u kojem su svi pozivi neuspješni ostaje
+   netaknut. Dokazani tekstualni cilj bez iskoristive STT vjerodajnice dobiva
+   isti eksplicitni stub bez slanja mrežnog poziva.
 
-Uspješni prijepisi koriste LRU/TTL predmemoriju Modality Bridge za cijeli proces. Ključ kombinira audio referencu, oznaku stabilnog `audio-transcription` rada i odabrani STT model; kvarovi se nikad ne pohranjuju u predmemoriju. Pokušaji zvuka ažuriraju dijeljene brojače `bridged`, `cacheHits`, `failures` i `lastUsedAt`. Transformirani odgovori nose `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; netaknuti zahtjevi ne primaju segment Audio Bridge.
+Uspješni transkripti koriste LRU/TTL predmemoriju Modality Bridgea na razini
+cijelog procesa. Ključ kombinira referencu na zvuk, stabilnu oznaku operacije
+`audio-transcription` i odabrani STT model; neuspjesi se nikada ne
+predmemoriraju. Pokušaji obrade zvuka ažuriraju zajedničke brojače `bridged`,
+`cacheHits`, `failures` i `lastUsedAt`. Transformirani odgovori nose
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`;
+netaknuti zahtjevi ne dobivaju segment Audio Bridgea.
 
-Postavke vremena izvođenja podržane su DB-om i potvrđene su Zod-om:
+Postavke tijekom izvođenja pohranjene su u bazi podataka i validirane Zodom:
 
-| Ključ                         | Zadano  | Raspon          |
-| ----------------------------- | ------- | --------------- |
-| `modalityBridgeAudioEnabled`  | `true`  | —               |
-| `modalityBridgeAudioModel`    | `""`    | Auto ili STT ID |
-| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000     |
-| `modalityBridgeAudioMaxClips` | `3`     | 1–10            |
+| Ključ                         | Zadano  | Raspon                |
+| ----------------------------- | ------- | --------------------- |
+| `modalityBridgeAudioEnabled`  | `true`  | —                     |
+| `modalityBridgeAudioModel`    | `""`    | Automatski ili STT ID |
+| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000           |
+| `modalityBridgeAudioMaxClips` | `3`     | 1–10                  |
 
-Zajedničku predmemoriju i dalje kontroliraju `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` i `modalityBridgeCacheMaxEntries`.
+Zajedničkom predmemorijom i dalje upravljaju `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` i `modalityBridgeCacheMaxEntries`.
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -219,72 +253,83 @@ Naslijeđene postojane vrijednosti vremenskog ograničenja videozapisa iznad 120
 
 ### PII masker (`piiMasker.ts`)
 
-Radi dalje** oba** faze.
+Radi dalje **oba** faze.
 
-- **`preCall`** klonira korisni teret, hoda `system`, `messages`, `input` i `prompt` (uključujući obične stavke niza) i primjenjuje `processPII()` (iz `@/shared/utils/inputSanitizer`) na polja niza `content`/`text`. Kada je `PII_REDACTION_ENABLED=true`, otkriveni PII se redigira u izlaznom sadržaju. Ovo je neovisno o `INPUT_SANITIZER_MODE` (koji kontrolira samo politiku brzog ubacivanja). Kada je redigiranje isključeno, otkrivanje zapisa poziva računa se bez ponovnog pisanja sadržaja.
+- **`preCall`** klonira korisni teret, šeta `system`, `messages`, `input` i `prompt` (uključujući obične stavke niza) i primjenjuje `processPII()` (iz `@/shared/utils/inputSanitizer`) na polja niza `content`/`text`. Kada je `PII_REDACTION_ENABLED=true`, otkriveni PII se redigira u izlaznom korisnom teretu. Ovo je neovisno o `INPUT_SANITIZER_MODE` (koji kontrolira samo politiku brzog ubacivanja). Kada je redigiranje isključeno, otkrivanje zapisa poziva računa se bez ponovnog pisanja sadržaja.
 - **`postCall`** duboko klonira odgovor, pokreće `sanitizePIIResponse()` plus Responses-API-shape masker (`maskResponsesOutput` — pokriva `output_text` i `output[].content[].text`). Ako dođe do bilo kakvog uređivanja, modificirani odgovor zamjenjuje izvornik.
 
 Zaštitna ograda nikada ne blokira; samo označava (`meta.detections`, `meta.redacted`) ili prepisuje.
 
 #### Odabir po vrsti, prilagođeni uzorci i brojači detekcije
 
-**Nadzorna ploča → Postavke → Sigurnost → PII maskiranje** bira _što_ je maskirano. Ne uključuje maskiranje: to je i dalje `PII_REDACTION_ENABLED` (zahtjev) i `PII_RESPONSE_SANITIZATION` (odgovor + SSE), oba isključena prema zadanim postavkama.
+**Nadzorna ploča → postavke → Sigurnost → PII maskiranje** bira _što_ je maskirano. Ne uključuje maskiranje: to je i dalje `PII_REDACTION_ENABLED` (zahtjev) i `PII_RESPONSE_SANITIZATION` (odgovor + SSE), oba isključena prema zadanim postavkama.
 
-- **Odabir po vrsti** — ugrađeni ID-ovi navedeni su u `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nepostavljeno znači svaku vrstu (ponašanje prije postojanja ove postavke). Uzorak `ssn_us` stroja zahtjeva preslikava se u `ssn`. Predlošci (minimalni, standardni, financijski, brazilski, USA, GDPR, POPIA, puni) ispunjavaju samo potvrdne okvire u UI.
+- **Odabir po vrsti** — ugrađeni ID-ovi navedeni su u `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nepostavljeno znači svaku vrstu (ponašanje prije postojanja ove postavke). `ssn_us` obrazac tražilice preslikava u `ssn`. Predlošci (minimalni, standardni, financijski, brazilski, USA, GDPR, POPIA, puni) ispunjavaju samo potvrdne okvire u UI.
 - **GDPR i POPIA identifikatori** — dvanaest ugrađenih ID-ova koji pokrivaju EU i južnoafričke osobne identifikatore (tablica u nastavku). Njihovi regularni izrazi, validatori i oznake nadležnosti žive u jednoj tablici, `src/shared/utils/piiPatterns.ts`, koju koriste i dezinfekcija odgovora (`src/lib/piiSanitizer.ts`) i masker zahtjeva (`src/shared/utils/inputSanitizer.ts`). Podudaranje se redigira samo kada ga validator prihvati; goli niz znamenki nikada nije dovoljan. Operator koji je spremio suženi odabir prije nego što su ovi ID-ovi postojali zadržava ponašanje koje je imao dok se ne označi novi ID.
-- **Prilagođeni uzorci** — do 20 uzoraka regularnih izraza ili zamjenskih znakova (`*` = do 64 znaka koji nisu razmaci, `?` = jedan). Šibice postaju `[CUSTOM_REDACTED]`. Svaki uzorak prolazi kroz `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): najviše 500 znakova, zastavice ograničene na `g i m s u`, moraju se kompilirati, moraju proći `safe-regex` (katastrofalno praćenje unazad) i ne smiju odgovarati praznom nizu ili rezerviranom mjestu za redigiranje. Uzorak koji ne uspije odbija se prilikom spremanja i testiranja, a pohranjeni redak koji ne uspije preskače se tijekom izvođenja umjesto da se kompajlira. Prilagođeni uzorci pokreću se samo dok je uključeno maskiranje.
-- **Brojači detekcije** — po tipu broji (nikad usklađene vrijednosti), čuva se u memoriji i resetira pri ponovnom pokretanju (`src/lib/pii/piiDetectionStats.ts`). Povećavaju se samo dok je maskiranje uključeno.
+- **Prilagođeni uzorci** — do 20 uzoraka regularnih izraza ili zamjenskih znakova (`*` = do 64 znaka koji nisu razmaci, `?` = jedan). Utakmice postaju `[CUSTOM_REDACTED]`. Svaki uzorak prolazi kroz `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): najviše 500 znakova, oznake ograničene na `g i m s u`, moraju se kompilirati, moraju proći `safe-regex` (katastrofalno praćenje unazad) i ne smiju se podudarati s praznim nizom ili rezerviranim mjestom za redigiranje. Uzorak koji ne uspije odbija se prilikom spremanja i testiranja, a pohranjeni redak koji ne uspije preskače se tijekom izvođenja umjesto da se kompajlira. Prilagođeni uzorci pokreću se samo dok je uključeno maskiranje.
+- **Brojači detekcije** — se broji po tipu (nikada usklađene vrijednosti), čuva se u memoriji i resetira pri ponovnom pokretanju (`src/lib/pii/piiDetectionStats.ts`). Povećavaju se samo dok je maskiranje uključeno.
 
-Postavke žive u `key_value` tablici (namenski prostor `pii_settings`, `src/lib/db/piiSettings.ts`) i čitaju se kroz predmemoriju od 1 s. API:
+Postavke žive u `key_value` tablici (imenski prostor `pii_settings`, `src/lib/db/piiSettings.ts`) i čitaju se kroz predmemoriju od 1 s. API:
 
-| metoda | Put                      | Svrha                                                                   |
-| ------ | ------------------------ | ----------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Stanje zastave, `enabledTypes`, `customPatterns`, brojači detekcije     |
-| `PUT`  | `/api/settings/pii`      | Zamijenite `enabledTypes` (`null` = sve) and/or `customPatterns`        |
-| `POST` | `/api/settings/pii/test` | Ispitajte jedan uzorak na uzorku od najviše 8 KB; ništa nije pohranjeno |
+| Metoda | Putanja                  | Svrha                                                                       |
+| ------ | ------------------------ | --------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Stanje zastavice, `enabledTypes`, `customPatterns`, brojači otkrivanja      |
+| `PUT`  | `/api/settings/pii`      | Zamjena `enabledTypes` (`null` = sve) i/ili `customPatterns`                |
+| `POST` | `/api/settings/pii/test` | Probno pokretanje jednog uzorka na primjeru do 8 KB; ništa se ne pohranjuje |
 
-Sva tri zahtijevaju autorizaciju upravljanja i provjeru valjanosti tijela pomoću Zod (`src/shared/validation/schemas/piiSettings.ts`). S onemogućenom prijavom (`requireLogin=false`) `GET` i testna krajnja točka su otvoreni, ali `PUT` i dalje treba sesiju nadzorne ploče, `manage` -scope API ključ, `oma_` pristupni token s opsegom pisanja ili većim ili CLI token ili token interne usluge poslan iz povratne petlje.
+Sva tri zahtijevaju autorizaciju upravljanja i potvrđuju tijelo sa Zod (`src/shared/validation/schemas/piiSettings.ts`). S onemogućenom prijavom (`requireLogin=false`) `GET` i testna krajnja točka su otvoreni, ali `PUT` i dalje treba sesiju nadzorne ploče, `manage` -scope API ključ, `oma_` pristupni token s opsegom pisanja ili višim ili CLI token ili token interne usluge poslan iz povratne petlje.
 
-#### GDPR (EU) i POPIA (Južna Afrika) identifikatori
+#### GDPR (EU) i POPIA (Južnoafrička Republika) identifikatori
 
-| Id                  | Identifikator             | Validacija                                                                            |
-| ------------------- | ------------------------- | ------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                      | Poznata država, točna dužina za tu zemlju, ISO 13616 MOD-97-10                        |
-| `eu_vat`            | EU VAT broj               | Poznati prefiks države članice i format broja te države (bez traženja VIES )          |
-| `es_dni_nie`        | španjolski DNI / NIE      | Kontrolno slovo (vrijednost mod 23); NIE je `X/Y/Z` + 7 znamenki                      |
-| `it_codice_fiscale` | talijanski Codice Fiscale | Kontrolno pismo iz tablica položaja odd/even                                          |
-| `pl_pesel`          | poljski PESEL             | Ponderirani kontrolni zbroj i kodirani datum rođenja koji postoji                     |
-| `nl_bsn`            | nizozemski BSN            | 11-dokaz (težine 9..2, -1)                                                            |
-| `de_steuer_id`      | njemački Steuer-ID        | ISO 7064 Mod 11,10 plus pravila o strukturi znamenki (bez vodeće 0)                   |
-| `se_personnummer`   | švedski personnummer      | Luhn preko zadnjih deset znamenki i mogući datum rođenja (10 ili 12 znamenki)         |
-| `za_id`             | Južnoafrički ID broj      | Luhn preko svih 13 znamenki, važeće rođenje month/day, znamenka državljanstva 0 ili 1 |
-| `za_phone`          | Južnoafrički telefon      | `+27` / `27` prefiks ili nacionalni `0..` oblik napisan s razmakom ili crticom        |
-| `za_vat`            | Južnoafrički VAT broj     | 10 znamenki koje počinju sa `4`** i** "VAT" / "BTW" u 48 znakova prije                |
-| `za_tax_ref`        | Južnoafrički porezni ref. | 10 znamenki koje počinju `0`-`3`, Luhn,** i** "porez" / "SARS" u 48 znakova prije     |
+| ID                  | Identifikator                      | Provjera                                                                               |
+| ------------------- | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                               | Poznata država, točna duljina za tu državu, ISO 13616 MOD-97-10                        |
+| `eu_vat`            | PDV broj EU-a                      | Poznati prefiks države članice i format broja te države (bez upita VIES)               |
+| `es_dni_nie`        | Španjolski DNI / NIE               | Kontrolno slovo (vrijednost mod 23); NIE je `X/Y/Z` + 7 znamenki                       |
+| `it_codice_fiscale` | Talijanski Codice Fiscale          | Kontrolno slovo iz tablica neparnih/parnih položaja                                    |
+| `pl_pesel`          | Poljski PESEL                      | Ponderirani kontrolni zbroj i prihvatljivi rasponi kodiranog mjeseca/dana rođenja      |
+| `nl_bsn`            | Nizozemski BSN                     | Provjera 11 (težine 9..2, -1)                                                          |
+| `de_steuer_id`      | Njemački Steuer-ID                 | ISO 7064 Mod 11,10 i pravila strukture znamenki (bez početne 0)                        |
+| `se_personnummer`   | Švedski personnummer               | Luhn nad posljednjih deset znamenki i vjerodostojan datum rođenja (10 ili 12 znamenki) |
+| `za_id`             | Južnoafrički identifikacijski broj | Luhn nad svih 13 znamenki, valjan mjesec/dan rođenja, znamenka državljanstva 0 ili 1   |
+| `za_phone`          | Južnoafrički telefon               | Prefiks `+27` / `27` ili nacionalni oblik `0..` napisan s razmakom ili spojnicom       |
+| `za_vat`            | Južnoafrički PDV broj              | 10 znamenki s početnom `4` **i** "VAT" / "BTW" u prethodnih 48 znakova                 |
+| `za_tax_ref`        | Južnoafrička porezna referenca     | 10 znamenki s početnom `0`-`3`, Luhn **i** "tax" / "SARS" u prethodnih 48 znakova      |
 
-Budući da su samo znamenkasti formati u sukobu s brojevima narudžbi, brojevima izrade i vremenskim oznakama, oni najslabiji (`za_vat`, `za_tax_ref`) trebaju ključnu riječ, a goli deseteroznamenkasti `0..` broj ne tretira se kao južnoafrički telefonski broj. Razmaknuti IBANs (`GB29 NWBK ...`) se ne podudaraju. Na stazi strujanja znak se traži samo unutar trenutnog dijela. ID-ovi su ispred generičkih telefonskih uzoraka, tako da potvrđeni identifikator zadržava vlastito rezervirano mjesto (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Predlošci `gdpr` i `popia` odabiru EU i južnoafrički ID redom. Samo maskiranje ostaje uključeno (tvrdo pravilo #20): ništa ovdje ne mijenja zadanu zastavu značajke.
+Budući da su samo znamenkasti formati u sukobu s brojevima narudžbi, brojevima izrade i vremenskim oznakama, oni najslabiji (`za_vat`, `za_tax_ref`) trebaju ključnu riječ, a goli deseteroznamenkasti `0..` broj ne tretira se kao južnoafrički telefonski broj. Razmaknuti IBANs (`GB29 NWBK ...`) se ne podudaraju. Na stazi strujanja znak se traži samo unutar trenutnog dijela. ID-ovi su ispred generičkih telefonskih uzoraka, tako da potvrđeni identifikator zadržava vlastito rezervirano mjesto (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` i `popia` predlošci odabiru EU i Južnoafrički ID redom. Samo maskiranje ostaje uključeno (Hard Rule #20): ništa ovdje ne mijenja zadanu zastavu značajke.
 
-### Brzo ubrizgavanje (`promptInjection.ts`)
+### Umetanje upita (`promptInjection.ts`)
 
-Otkriva kontradiktorne strukture u sadržaju koji dostavljaju korisnici i provodi konfiguriranu politiku. Ponašanje pokreću varijable okoline i opcije konstruktora:
+Otkriva protivničke strukture u sadržaju koji je unio korisnik i provodi
+konfigurirana pravila. Ponašanjem upravljaju varijable okruženja i opcije
+konstruktora:
 
-| Postavka      | Env var                                                                                               | Zadano | Učinak                                                                                                                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Omogućeno     | `INPUT_SANITIZER_ENABLED`                                                                             | `true` | Kada je `false`, zaštitna ograda dolazi do kratkog spoja.                                                                                                                                        |
-| Način rada    | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn` | Politika ubrizgavanja: `block`, `warn` ili `log`. (`redact` je prihvaćen za back-compat ali ne** ne** strip injekcijski tekst; zahtjev za prepisivanjem PII kontrolira `PII_REDACTION_ENABLED`.) |
-| Blokiraj prag | `blockThreshold` opcija / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Minimalna ozbiljnost potrebna za blokiranje. Medij je prema zadanim postavkama samo promatranje.                                                                                                 |
+| Postavka        | Varijabla okruženja                                                                                   | Zadano | Učinak                                                                                                                                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Omogućeno       | `INPUT_SANITIZER_ENABLED`                                                                             | `true` | Kada je `false`, zaštitni mehanizam odmah završava obradu.                                                                                                                                                                   |
+| Način rada      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn` | Pravila za umetanje: `block`, `warn` ili `log`. (`redact` se prihvaća radi kompatibilnosti sa starijim verzijama, ali **ne** uklanja tekst umetanja; izmjenom osobnih podataka u zahtjevu upravlja `PII_REDACTION_ENABLED`.) |
+| Prag blokiranja | opcija `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Najmanja razina ozbiljnosti potrebna za blokiranje. Srednja razina prema zadanim se postavkama samo nadzire.                                                                                                                 |
 
-**Prednost načina rada** (`getMode`): pozivatelj `options.mode` → `INJECTION_GUARD_MODE`**DB nadjačavanje zastavice značajke** (Nadzorna ploča → Postavke → Oznake značajki) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Nadjačavanje nadzorne ploče stoga pobjeđuje nad env vars, tako da zastavice značajki UI kontroliraju live guard (bez ponovnog pokretanja). Čitanje DB -a je sigurno: ako dođe do pogreške, čuvar se vraća na ponašanje temeljeno na env, a kada nije postavljeno nadjačavanje, ponašanje je identično razlučivosti samo env.
+**Redoslijed prvenstva načina rada** (`getMode`): `options.mode` pozivatelja →
+nadjačavanje **zastavicom značajke iz baze podataka** za `INJECTION_GUARD_MODE` (Nadzorna ploča → Postavke →
+Zastavice značajki) → varijabla okruženja `INJECTION_GUARD_MODE` → varijabla okruženja `INPUT_SANITIZER_MODE` →
+`warn`. Nadjačavanje putem nadzorne ploče stoga ima prednost pred varijablama okruženja, pa korisničko sučelje
+Zastavice značajki upravlja aktivnim zaštitnim mehanizmom uživo (bez ponovnog pokretanja). Čitanje iz baze podataka sigurno je u slučaju pogreške:
+ako dođe do pogreške, zaštitni mehanizam vraća se na ponašanje određeno varijablama okruženja, a kada
+nadjačavanje nije postavljeno, ponašanje je jednako određivanju isključivo putem varijabli okruženja.
 
 Izvori otkrivanja:
 
-1. `sanitizeRequest()` od `@/shared/utils/inputSanitizer` (zajednički skup detektora koji se koristi drugdje u cjevovodu).
-2. Ugrađeni `DEFAULT_GUARD_PATTERNS` (trenutno `system_override_inline` i `markdown_system_block`, oba `high` ozbiljnosti).
-3. Izborni `customPatterns` proslijeđen putem opcija konstruktora (nizovi, regex ili `{ name, pattern, severity }` zapisi).
+1. `sanitizeRequest()` iz `@/shared/utils/inputSanitizer` (zajednički skup detektora
+   koji se upotrebljava i drugdje u procesnom lancu).
+2. Ugrađeni `DEFAULT_GUARD_PATTERNS` (trenutačno `system_override_inline` i
+   `markdown_system_block`, oba razine ozbiljnosti `high`).
+3. Neobavezni `customPatterns` proslijeđeni putem opcija konstruktora (nizovi znakova, regularni izrazi
+   ili zapisi `{ name, pattern, severity }`).
 
-Kada `mode === "block"`** i** barem jedno otkrivanje zadovoljava prag ozbiljnosti, `preCall` vraća `{ block: true, message: "Request rejected: suspicious content detected" }`. U načinima `warn`/`log` zaštitna ograda bilježi, ali dopušta poziv. Zajednički pomoćnik `evaluatePromptInjection()` također se izvozi za pozivatelje koji trebaju procijeniti upite bez prolaska kroz registar.
+Kada je `mode === "block"` **i** barem jedno otkrivanje doseže prag ozbiljnosti, `preCall` vraća `{ block: true, message: "Request rejected: suspicious content detected" }`. U načinima `warn`/`log` zaštitna barijera bilježi u dnevnik, ali dopušta poziv. Zajednički pomoćnik `evaluatePromptInjection()` također je izvezen za pozivatelje koji trebaju evaluirati upite bez prolaska kroz registar.
 
-**Veza skeniranja (v3.8.20):** detektor samo pregledava** prvih 16 KB** spojenog teksta upita — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bajta) u `src/shared/utils/inputSanitizer.ts`. I `detectInjection()` i `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` prije pokretanja petlje uzorka. Injection direktive nalaze se pri vrhu unosa, tako da ovo ograničava regex CPU/GC na korisnim učitavanjima od više stotina KB bez slabljenja detekcije (usp. #3932, #4041).
+**Granica skeniranja (v3.8.20):** detektor pregledava samo **prvih 16 KB** spojenog teksta upita — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bajta) u `src/shared/utils/inputSanitizer.ts`. I `detectInjection()` i `evaluatePromptInjection()` primjenjuju `slice(0, MAX_INJECTION_SCAN_BYTES)` prije pokretanja petlje uzoraka. Direktive za ubrizgavanje nalaze se pri vrhu ulaza, pa ovo ograničava potrošnju CPU-a/GC-a za regex na teretima od više stotina KB bez slabljenja detekcije (usp. #3932, #4041).
 
 ### Maska za vjerodajnice (`credentialMasker.ts`)
 

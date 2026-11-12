@@ -350,7 +350,7 @@ Requires management authentication. On a compatible provider node the stored mod
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"provider":"openai","modelId":"gpt-4o-mini"}'
 ```
 
 ### PUT /api/provider-models

@@ -115,7 +115,7 @@ Il-biċċa l-kbira taċ-ċifri ta' "tokens b'xejn fix-xahar" f'dan il-qasam huma
 
 - **Kull pool kondiviż jingħadd darba.** Il-pjan bla ħlas ta' Mistral huwa kwota waħda ta' 1B/fix-xahar għal kull organizzazzjoni; jekk jiġi elenkat taħt ħames mudelli, dan ma jagħmlux 5B. Meta jingħadd għal kull mudell, il-katalgu tagħna stess juri **~7.4B** (ikkalkulat mill-ġdid fit-2026-09-03; din iċ-ċifra mhijiex ivverifikata minn CI — erġa' kejjel kull meta jinbidel il-katalgu) — it-titlu jgħid **~1.47B** għax dak huwa dak li kont wieħed ma' kull fornitur jista' effettivament juża.
 - **Il-limiti ta' kuljum jiġu kkonvertiti, ir-rati le.** Limitu dokumentat ta' tokens/kuljum isir `× 30`; limitu dokumentat ta' talbiet/kuljum isir `RPD × ~800 tokens × 30`; fornitur li jippubblika biss talbiet kull minuta **ma jkollux** ċifra ta' kull xahar u jiġi elenkat bħala _mingħajr limitu_, u qatt ma jiġi inkluż fis-somma. Il-multiplikazzjoni ta' limitu tar-rata b'24/7 hija l-inflazzjoni li nirrifjutaw.
-- **Il-kwoti wara verifika reġjonali tal-identità jintwerew separatament** (`+~6M wara verifika reġjonali tal-identità`), għax il-biċċa l-kbira tal-qarrejja ma jistgħux jużawhom.
+- **Il-kwoti wara verifika reġjonali tal-identità jintwerew separatament** (`+~6M behind regional identity verification`), għax il-biċċa l-kbira tal-qarrejja ma jistgħux jużawhom.
 - **Il-krediti tar-reġistrazzjoni huma għall-ewwel xahar biss** u jiġu rrappurtati bħala ċifra oħra, u qatt ma jitħalltu maċ-ċifra regolari.
 - **Iċ-ċifra tiġi infurzata minn CI.** `npm run check:docs-counts` jerġa' jikkalkula t-totali mill-katalgu u jwaqqaf il-build meta dan il-fajl, ir-README jew il-kard tal-baġit ma jibqgħux jaqblu magħhom.
 

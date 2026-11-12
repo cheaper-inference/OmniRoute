@@ -8,6 +8,7 @@ import http from "node:http";
 import net from "node:net";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createTestProcessStopper } from "../_helpers/stopTestProcess.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-resilience-http-e2e-"));
 const DASHBOARD_PORT = await getFreePort();
@@ -207,6 +208,7 @@ function createServerProcess(dataDir: string, port: number) {
     stdio: ["ignore", "pipe", "pipe"],
   });
 
+  const stop = createTestProcessStopper(child);
   child.once("exit", (code, signal) => {
     exitInfo = { code, signal };
   });
@@ -223,6 +225,7 @@ function createServerProcess(dataDir: string, port: number) {
 
   return {
     child,
+    stop,
     stdoutLines,
     stderrLines,
     baseUrl: `http://127.0.0.1:${port}`,
@@ -276,19 +279,6 @@ async function waitForServer(
       ...logs.stderrLines.slice(-40),
     ].join("\n")
   );
-}
-
-async function stopProcess(child: ReturnType<typeof spawn>) {
-  if (child.killed) return;
-  child.kill("SIGTERM");
-  const exited = await Promise.race([
-    new Promise<boolean>((resolve) => child.once("exit", () => resolve(true))),
-    sleep(5_000).then(() => false),
-  ]);
-  if (!exited && !child.killed) {
-    child.kill("SIGKILL");
-    await new Promise<void>((resolve) => child.once("exit", () => resolve()));
-  }
 }
 
 async function seedCompatibleProvider(prefix: string, apiKey: string, baseUrl: string) {
@@ -440,6 +430,7 @@ const relay = createFakeOpenAiRelay();
 let app:
   | {
       child: ReturnType<typeof spawn>;
+      stop: () => Promise<void>;
       stdoutLines: string[];
       stderrLines: string[];
       baseUrl: string;
@@ -543,7 +534,7 @@ test.before(async () => {
 
 test.after(async () => {
   if (app) {
-    await stopProcess(app.child);
+    await app.stop();
   }
   await relay.stop();
   core.closeDbInstance();
@@ -556,11 +547,13 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
 
   assert.equal(response.status, 200);
   // Exact key set — this is the whole point of the test: configuration only.
+  // `antigravityTimingTelemetry` configures opt-in timing telemetry; it is not runtime state.
   // `providerQuotaOverrides` joined the projection in #9871;
   // `quotaPreflight` joined in #12014 (Settings → Routing Quota Preflight card);
   // `credentialHealthCheck` joined in #12043 (the sweep's intervalMinutes setting);
   // `streamStallCooldown` decides whether a stream content stall cools the account;
   // `p2cLatency` is the opt-in latency weight for p2c account selection.
+  // `preferredAccountFailover` configures timeouts and overrides, not live failover state.
   // `streamRecovery` joined the projection with this change: the route stores the
   // block on every PATCH, so GET exposes it like every other stored block.
   // `antigravityTimingTelemetry` is the stored opt-in for sanitized physical-send timing
@@ -588,6 +581,12 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   ]);
   assert.equal("providerBreakers" in json, false);
   assert.equal("runtime" in json, false);
+  assert.deepEqual(Object.keys(json.preferredAccountFailover).sort(), [
+    "defaultTimeoutMs",
+    "enabled",
+    "modelTimeoutsMs",
+    "providerTimeoutsMs",
+  ]);
 });
 
 test("request queue serializes concurrent requests on the same connection", async () => {

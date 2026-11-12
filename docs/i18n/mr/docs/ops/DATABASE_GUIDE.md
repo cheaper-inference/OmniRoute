@@ -403,52 +403,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## कार्यक्षमता ट्यूनिंग
+## कामगिरी ट्यूनिंग
 
 ### WAL मोड
 
-WAL डीफॉल्टनुसार सक्षम केलेले आहे. मोठ्या प्रमाणात लेखन होणाऱ्या वर्कलोडसाठी, पुढील बाबींचा विचार करा:
+WAL डीफॉल्टनुसार सक्षम आहे. उच्च-लेखन वर्कलोडसाठी, विचार करा:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- प्रत्येक 1000 पृष्ठांनंतर चेकपॉइंट
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL मर्यादा
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### इंडेक्स
+OmniRoute `journal_size_limit` सेट करत नाही. चेकपॉईंट WAL फ्रेम्स मुख्य फाईलमध्ये हलवते, परंतु WAL फाइल तिचा सर्वात मोठा वाटप केलेला आकार ठेवते. `OMNIROUTE_WAL_GUARD_MAX_MB` गार्ड फक्त चेतावणी देतो आणि `wal_checkpoint(RESTART)` चालवतो; ती डिस्क-आकाराची टोपी नाही.
 
-कार्यक्षमतेसाठी महत्त्वाचे इंडेक्स (मायग्रेशनद्वारे आपोआप तयार केले जातात):
+### निर्देशांक
 
-- `idx_models_provider` — प्रदात्यानुसार मॉडेल शोध
+कार्यप्रदर्शनासाठी प्रमुख निर्देशांक (स्थलांतराने स्वयं-निर्मित):
+
+- प्रदात्याद्वारे`idx_models_provider` — मॉडेल लुकअप
 - `idx_combo_targets_combo_id` — कॉम्बो लक्ष्य विस्तार
 - `idx_usage_history_api_key_timestamp` — वापर विश्लेषण
 - `idx_quota_snapshots_api_key_window` — कोटा ट्रॅकिंग
 - `idx_call_logs_timestamp` — कॉल लॉग क्वेरी
 
-नवीन इंडेक्स जोडण्यासाठी, मायग्रेशन तयार करा:
+नवीन अनुक्रमणिका जोडण्यासाठी, एक स्थलांतर तयार करा:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### मेमरी-मॅप्ड I/O
+### मेमरी-मॅप केलेले I/O
 
-अतिशय मोठ्या डेटाबेससाठी (>10GB), SQLite pragma द्वारे मेमरी मॅपिंग समायोजित करता येते:
+खूप मोठ्या डेटाबेससाठी (> 10GB), मेमरी मॅपिंग SQLite pragma द्वारे समायोजित केले जाऊ शकते:
 
 ```sql
--- SQLite pragma द्वारे सेट करा (core.ts किंवा रनटाइममध्ये समायोजित करा)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### कॉम्पॅक्शन
 
-दीर्घकाळ चालणाऱ्या OmniRoute इन्स्टन्सना अधूनमधून `VACUUM` चालवल्याचा फायदा होतो:
+दीर्घकाळ चालू असलेल्या OmniRoute उदाहरणांना अधूनमधून `VACUUM` चा फायदा होतो:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-कमी ट्रॅफिक असलेल्या कालावधीत दर महिन्याला चालवा. (WAL मोडमुळे याची गरज कमी होते, परंतु पूर्णपणे नाहीशी होत नाही.)
+कमी रहदारीच्या खिडक्या दरम्यान मासिक चालवा. (WAL मोड गरज कमी करते, पण ती दूर करत नाही.)
 
 ---
 

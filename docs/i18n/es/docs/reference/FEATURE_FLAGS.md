@@ -44,7 +44,7 @@ Un indicador booleano se considera **habilitado** cuando su valor efectivo es `"
 
 ## Catálogo de banderas
 
-120 banderas en 6 categorías.** Por defecto** es la definición predeterminada — el valor utilizado cuando no están presentes ni una anulación de DB ni una variable de entorno.
+121 banderas en 6 categorías.** Por defecto** es la definición predeterminada — el valor utilizado cuando no están presentes ni una anulación de DB ni una variable de entorno.
 
 ### Seguridad (11)
 
@@ -115,7 +115,7 @@ Un indicador booleano se considera **habilitado** cuando su valor efectivo es `"
 
 Cuando `UNPRICED_USAGE_BUDGET_POLICY` se configura explícitamente (anulación de DB antes del entorno), tiene prioridad sobre `USAGE_LIMIT_IGNORE_UNPRICED`. Sin un valor de enumeración explícito, la opción de exclusión booleana ascendente selecciona `count_as_zero`; de lo contrario, el valor predeterminado es `fail_closed`. Los valores de enumeración no válidos y el almacenamiento de indicadores de características ilegibles fallan al cerrarse. Ninguna opción de exclusión relaja el gasto de precio o una búsqueda de precios fallida. La aplicación y el informe del administrador resuelven la misma política efectiva.
 
-### Tiempo de ejecución (57)
+### Tiempo de ejecución (58)
 
 | Llave                                          | Tipo        | Por defecto | Reanudar | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------- | ----------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Cuando `UNPRICED_USAGE_BUDGET_POLICY` se configura explícitamente (anulación d
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | booleano    | `false`     |          | Deje de ofrecer y reenviar el esfuerzo de razonamiento `max` para Cursor Grok 4.7 (#17386): la lista de documentos de Cursor solo incluye low/medium/high/xhigh, por lo que el alias alternativo `grok-4.7-max` desaparece del catálogo y se envía una solicitud de esfuerzo `max` sin un parámetro de esfuerzo. Desactivado de forma predeterminada: `max` permanece ofrecido y reenviado, ya que una sonda AgentService/Run en vivo lo aceptó.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | booleano    | `false`     |          | Envíe Keepalives de respuestas como una línea en blanco en lugar de un evento de respuesta.in_progress, por lo que una instantánea sintética nunca podrá reemplazar la respuesta real en el SDK oficial. Una línea en blanco no envía ningún evento SSE, por lo que un perro guardián del cliente que se reinicia solo en eventos no se restablecería durante una fase silenciosa larga. Desactivado de forma predeterminada: los temporizadores envían el evento spec-valid Response.in_progress.                                                                                                                                                                                                                                                                                                                                                                  |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booleano    | `false`     |          | En las estadísticas de caché de compresión, cuente una solicitud comprimida a un proveedor de almacenamiento en caché de prefijo automático (OpenAI, Codex, Azure o una conexión personalizada que declare el almacenamiento en caché rápido con eliminación de marcadores) como un acierto de caché estimado incluso sin marcadores `cache_control` (#17114). La estimación es una señal de elegibilidad de caché, no un acierto observado, por lo que la tasa de aciertos reportada por esos proveedores tiende hacia el 100%. Desactivado de forma predeterminada: solo una solicitud que lleva marcadores `cache_control` a un proveedor de almacenamiento en caché cuenta como un acierto estimado, por lo que los proveedores de prefijo automático siguen informando 0.                                                                                      |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | booleano    | `false`     |          | Permite que una búsqueda web automática sin `provider` explícito use una cuenta Codex (ChatGPT) conectada mediante `codex-search`: como último recurso antes de los proveedores sin clave cuando no hay ningún proveedor con credenciales utilizable, y como alternativa ante fallos (#17933). Cada búsqueda consume cuota de la suscripción y tarda aproximadamente 10–40 s. Desactivado de forma predeterminada: `codex-search` solo se ejecuta cuando la solicitud lo indica explícitamente.                                                                                                                                                                                                                                                                                                                                                                     |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Devuelve cada indicador con su valor efectivo, fuente y un resumen.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

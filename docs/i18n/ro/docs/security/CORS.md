@@ -4,208 +4,119 @@
 
 ---
 
-OmniRoute controlează ce **origini ale browserului** pot citi răspunsurile între origini
-printr-o singură listă centralizată de permisiuni. Modelul este **închis implicit în caz de eșec**:
-nicio origine nu este permisă până când nu o autorizați explicit. Această pagină documentează modul în care este
-evaluată lista de permisiuni, ce expune de fapt `CORS_ALLOW_ALL=true` (și, aspect important, ce
-**nu** expune), cum să configurați în siguranță mediile de dezvoltare și de producție și avertismentul din timpul execuției
-pe care îl afișează panoul de control atunci când este activ un wildcard.
+OmniRoute controlează care **originile browserului** poate citi răspunsuri de origine încrucișată dintr-o singură listă de permisiuni centralizată. Modelul este **fail-closed implicit** : nicio origine nu este permisă până când nu vă înscrieți. Această pagină documentează cum se rezolvă lista de permise, ce expune de fapt `CORS_ALLOW_ALL=true` (și, mai important, ce face **nu** ), cum să configurați dev vs. producție în siguranță, iar avertismentul de rulare pe tabloul de bord afișează când un wildcard este activ.
 
-**Sursa adevărului:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Lista de permisiuni este aplicată o singură dată, în
-middleware (`src/server/authz/pipeline.ts`) — gestionarii rutelor individuale nu setează ei înșiși
-`Access-Control-Allow-Origin`.
+**Sursa adevărului:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Lista de permise este aplicată o singură dată, în middleware (`src/server/authz/pipeline.ts`) — per-rută de gestionare nu setează ei înșiși `Access-Control-Allow-Origin`.
 
-## Cum este evaluată o origine
+## Cum se rezolvă o origine
 
-Pentru fiecare solicitare, middleware-ul calculează valoarea `Access-Control-Allow-Origin`
-în această ordine:
+Pentru fiecare cerere, middleware-ul calculează valoarea `Access-Control-Allow-Origin` în această ordine:
 
-1. **`CORS_ALLOW_ALL=true`** (sau opțiunea moștenită `CORS_ORIGIN=*`) → returnează originea
-   `Origin` a apelantului (sau `*` atunci când antetul `Origin` lipsește), împreună cu `Vary: Origin`,
-   astfel încât cache-urile să rămână corecte. Același punct unic de control `applyCorsHeaders()` adaugă și
-   `Vary: Accept-Encoding` la fiecare răspuns 2xx cu corp de pe suprafața
-   `/v1*`/`/v1beta*` autentificată prin token (`relaxForTokenAuth`, RFC 9110 §12.5.5, problema #6737), astfel încât
-   cache-urile din aval/partajate să poată distinge corect variantele comprimate de cele necomprimate.
-2. În caz contrar, valoarea `Origin` a solicitării este normalizată (transformată în litere mici, cu bara oblică
-   finală eliminată) și comparată cu **lista de permisiuni combinată**:
-   - variabila de mediu **`CORS_ALLOWED_ORIGINS`** — listă separată prin virgule și
-   - setarea din timpul execuției **`corsOrigins`** (Panou de control → Securitate → _Origini
-     CORS permise_), injectată prin `setRuntimeAllowedOrigins()` din
-     `src/lib/config/runtimeSettings.ts`.
-3. Nicio potrivire → **nu este emis niciun antet `Access-Control-Allow-Origin`**. Browserul
-   blochează citirea între origini. Acesta este comportamentul implicit intenționat, închis în caz de eșec.
+1. **`CORS_ALLOW_ALL=true`** (sau `CORS_ORIGIN=*` moștenit) → ecou `Origin` înapoi al apelantului (sau `*` când nu există antet `Origin` ), cu `Vary: Origin`, astfel încât cache-urile să rămână corecte. Același punct de sufocare `applyCorsHeaders()` adaugă, de asemenea, `Vary: Accept-Encoding` la fiecare răspuns 2xx-cu-corp pe suprafața `/v1*`/`/v1beta*` autentificată cu jeton (`relaxForTokenAuth`, RFC 9110 §12.5.5, problema #6737), astfel încât cache-urile downstream/shared pot distinge corect variantele comprimate de cele necomprimate.
+2. În caz contrar, cererea `Origin` este normalizată (minuscule, slash final eliminat) și potrivită cu **lista permisă fuzionată** :
+   - înv **`CORS_ALLOWED_ORIGINS`** — listă separată prin virgulă și
+   - timpul de rulare **`corsOrigins`** setare (Dashboard → Security → _CORS Allowed Origins_), injectat prin `setRuntimeAllowedOrigins()` de la `src/lib/config/runtimeSettings.ts`.
+3. Nicio potrivire →**nu este emis niciun antet `Access-Control-Allow-Origin`** . Browserul blochează citirea cu origini încrucișate. Aceasta este valoarea implicită pentru eșec-închis.
 
-| Variabilă de mediu     | Semnificație                                                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | Listă CSV de origini exacte care trebuie permise (recomandat).                                                      |
-| `CORS_ALLOW_ALL`       | `true`/`1` → returnează orice origine (wildcard). Numai pentru dezvoltare.                                          |
-| `CORS_ORIGIN`          | Opțiune moștenită. `*` se comportă precum `CORS_ALLOW_ALL`; o singură valoare este adăugată în lista de permisiuni. |
+| Env var                | Sens                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | CSV de origini exacte pentru a permite (recomandat).                                            |
+| `CORS_ALLOW_ALL`       | `true`/`1` → ecou orice origine (wildcard). Doar Dev.                                           |
+| `CORS_ORIGIN`          | Moştenire. `*` se comportă ca `CORS_ALLOW_ALL`; o singură valoare este adăugată listei permise. |
 
-## Modelul de amenințări — ce expune cu adevărat `CORS_ALLOW_ALL=true`
+## Modelul de amenințare — ceea ce `CORS_ALLOW_ALL=true` expune cu adevărat
 
-Avertismentul generic OWASP („CORS cu wildcard = orice site vă poate apela API-ul”) merită
-luat în serios, însă expunerea OmniRoute este **mai restrânsă decât în cazul generic**,
-datorită unui aspect concret al implementării:
+Avertismentul generic OWASP ("wildcard CORS = orice site poate apela dvs. API") merită luat în serios, dar expunerea OmniRoute este **mai restrâns decât cazul generic** , din cauza unui fapt concret de implementare:
 
-> **Funcția centrală `applyCorsHeaders()` nu emite niciodată
-> `Access-Control-Allow-Credentials`.** Un browser nu va expune un răspuns între origini
-> _cu credențiale_ (care conține cookie-uri), cu excepția cazului în care serverul trimite
-> `Access-Control-Allow-Credentials: true`. Calea CORS partajată a OmniRoute nu face
-> niciodată acest lucru.
+> **`applyCorsHeaders()` central nu emite niciodată `Access-Control-Allow-Credentials`.** Un browser nu va expune un răspuns cu origini încrucișate _credentialed_ (purtător de cookie-uri) decât dacă serverul trimite `Access-Control-Allow-Credentials: true`. Calea CORS comună a lui OmniRoute nu o face niciodată.
 
-Iată ce înseamnă acest lucru pentru fiecare suprafață, chiar și cu `CORS_ALLOW_ALL=true`:
+Ce înseamnă asta pe suprafață, chiar și cu `CORS_ALLOW_ALL=true`:
 
-| Suprafață                                      | Mecanism de autentificare  | Efectul CORS cu wildcard                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Panou de control / MANAGEMENT `/api/*`         | Sesiune prin cookie        | Originea este returnată, dar **fără `Allow-Credentials`** browserul **blochează** citirea cu credențiale. Un site rău intenționat de altă origine **nu poate citi** răspunsurile autentificate ale panoului de control, iar cookie-ul de sesiune nu este expus.                                                                                                                                  |
-| API client `/v1/*`, `/v1beta/*`                | Antet Bearer / `x-api-key` | Este deja permisiv **prin proiectare** (`relaxForTokenAuth`): browserele nu atașează niciodată automat `Authorization`/`x-api-key`, astfel încât pagina unui atacator nu poate furniza cheia dvs. Ecoul se aplică doar atunci când cheia prezentată a fost validată; răspunsurile anonime (`REQUIRE_API_KEY=false`) păstrează lista de permisiuni. `CORS_ALLOW_ALL` nu extinde această expunere. |
-| Acces public doar în citire (`/api/health`, …) | Niciunul                   | Date nesensibile; wildcard-ul este inofensiv.                                                                                                                                                                                                                                                                                                                                                    |
+| Suprafaţă                               | Mecanismul de autentificare  | Efectul wildcardului CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tabloul de bord / MANAGEMENT `/api/*`   | Sesiune cookie               | Originea are ecou, dar **fără `Allow-Credentials`** browserul **blocuri** cititul acreditat. Un site rău intenționat cu origini încrucișate **nu pot citi** răspunsurile dvs. autentificate din tabloul de bord și cookie-ul de sesiune nu este expus.                                                                                                                                                                                                                                                                                                     |
+| Client API `/v1/*`, `/v1beta/*`         | Antet purtător / `x-api-key` | Deja permisiv **prin proiectare** (`relaxForTokenAuth`): browserele nu atașează niciodată automat `Authorization`/`x-api-key`, astfel încât pagina unui atacator nu poate furniza cheia dvs. Ecoul relaxat necesită un subiect autentificat (o cheie API validată sau o sesiune de tablou de bord), nu doar un antet de acreditări și nu include niciodată `Access-Control-Allow-Credentials`. Răspunsurile anonime (`REQUIRE_API_KEY=false`) utilizează lista de autorizare de origine configurată, inclusiv o înscriere explicită `CORS_ALLOW_ALL=true`. |
+| Numai citire publică (`/api/health`, …) | Nici unul                    | nonsensibil; wildcard este inofensiv.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-Prin urmare, expunerea **reziduală** a `CORS_ALLOW_ALL=true` este limitată la: (a)
-**citiri** între origini fără credențiale ale unor date deja neautentificate și (b)
-permiterea reușitei solicitărilor CORS **preflight** pe rutele de administrare — care necesită în continuare o autentificare
-pe care o pagină de altă origine nu o poate furniza. Aceasta **nu** reprezintă un vector pentru deturnarea sesiunii sau
-furtul credențialelor pe calea CORS partajată.
+Deci **rezidual** expunerea `CORS_ALLOW_ALL=true` este limitată la: (a) origine încrucișată neacreditată **citeste** de date deja neautentificate și (b) lăsarea CORS**permisul de preflight** pe rutele de gestionare — care necesită încă o autentificare pe care o pagină cu origini încrucișate nu o poate oferi. Este **nu** un vector de sesiune sau furt de acreditări pe calea CORS partajată.
 
-### O singură excepție reală — `/api/v1/agents/`
+### O excepție autentică — `/api/v1/agents/`
 
-Rutele Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) își setează
-**propriile** anteturi CORS
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) și **emit**
-`Access-Control-Allow-Origin: <origin>|*` împreună cu
-`Access-Control-Allow-Credentials: true`. Aceasta este singura suprafață unde
-returnarea originii și credențialele coexistă și este **independentă de
-`CORS_ALLOW_ALL`**. Aceste rute sunt autentificate pentru administrare
-(`requireManagementAuth`); operatorii care expun panoul de control în afara gazdei trebuie să
-știe că acesta este singurul loc în care anteturile răspunsului permit o citire cu credențiale
-între origini. Restrângerea acesteia la o listă explicită de permisiuni este urmărită
-separat de aceste recomandări CORS.
+Rutele Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) își stabilesc **proprii** Antetele CORS (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) și **do** emit `Access-Control-Allow-Origin: <origin>|*` împreună cu `Access-Control-Allow-Credentials: true`. Aceasta este suprafața unică în care coexistă ecoul originii și acreditările și este **independent de `CORS_ALLOW_ALL`** . Aceste rute sunt autentificate prin management (`requireManagementAuth`); operatorii care expun tabloul de bord în afara gazdei ar trebui să fie conștienți de faptul că acesta este singurul loc în care este permisă citirea cu acreditări de origine încrucișată de antetele răspunsului. Strângerea acesteia la o listă de permise explicită este urmărită separat de acest ghid CORS.
 
-## Listă de verificare pentru producție
+## Lista de verificare a producției
 
-- **Nu setați niciodată `CORS_ALLOW_ALL=true` în producție.** Lăsați variabila nesetată.
-- Setați o listă **explicită** de origini — fie prin variabila de mediu, fie prin câmpul din fila Securitate:
+- **Nu setați niciodată `CORS_ALLOW_ALL=true` în producție.** Lăsați-l neasezat.
+- Setați o **explicit** lista de origine — fie înv var sau câmpul Security-tab:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Dacă OmniRoute rulează în spatele unui proxy invers / tunel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), CORS **nu** este singurul mecanism de control — protecția rutelor
-  loopback continuă să protejeze rutele capabile să lanseze procese (consultați
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Nu falsificați
-  `X-Forwarded-For: 127.0.0.1` pentru a „remedia” o eroare 403; acest lucru redeschide clasa de vulnerabilități RCE pe care
-  protecția rutelor o blochează.
-- Confirmați starea la rulare: tabloul de bord afișează un **banner galben persistent**
-  în Tablou de bord → Securitate → Inventar de autorizare ori de câte ori
-  `CORS_ALLOW_ALL=true` este activ, iar `/api/settings/authz-inventory` returnează o
-  structură `cors: { allowAll, allowedOrigins }` pe care instrumentele de monitorizare o pot interoga.
+- Dacă OmniRoute rulează în spatele unui proxy/tunel invers (nginx, Caddy, Cloudflare Tunnel, Tailscale), CORS este **nu** singurul dvs. control — paza traseului loopback încă protejează rutele capabile de generare (vezi [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Nu falsificați `X-Forwarded-For: 127.0.0.1` pentru a „repara” un 403; care redeschide clasa RCE, paza traseului o închide.
+- Confirmați starea de rulare: tabloul de bord arată a **banner de chihlimbar persistent** în Dashboard → Security → Authorization Inventory ori de câte ori `CORS_ALLOW_ALL=true` este activ și `/api/settings/authz-inventory` returnează un plic `cors: { allowAll, allowedOrigins }` instrumentele de monitorizare pot sonda.
 
-## Comoditate în dezvoltare — permiteți anumite origini locale
+## Confortul de dezvoltare — permite origini locale specifice
 
-Rareori aveți nevoie de wildcard chiar și în dezvoltare. Permiteți doar serverele de dezvoltare pe care le utilizați:
+Rareori aveți nevoie de wildcard chiar și în dev. Permiteți doar serverelor de dezvoltare pe care le utilizați:
 
 ```bash
-# Serverele de dezvoltare Vite (5173) + Next.js (3000) care apelează un OmniRoute local
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Originile sunt comparate fără a ține cont de majuscule și minuscule, iar bara oblică finală este ignorată, astfel încât
-`http://localhost:3000` și `http://localhost:3000/` sunt echivalente. Același CSV
-poate fi setat în timpul rulării în **Tablou de bord → Securitate → Origini CORS permise**, fără
-repornire.
+Originile sunt corelate fără a ține seama de majuscule și minuscule, iar bara oblică finală este ignorată, astfel încât `http://localhost:3000` și `http://localhost:3000/` sunt echivalente. Același CSV poate fi setat la runtime în **Tabloul de bord → Security → CORS Origini permise** fără repornire.
 
-## Chei API vs sesiuni bazate pe cookie-uri
+## Chei API vs sesiuni cookie
 
-- **Bearer / `x-api-key` (suprafața de inferență `/v1/*`):** browserele nu atașează
-  niciodată automat aceste valori. CORS nu reprezintă o barieră relevantă aici — cheia API este
-  bariera — motiv pentru care această suprafață este intenționat permisivă, astfel încât clienții pentru browser și
-  Electron să poată citi răspunsurile la care au deja dreptul.
-  Ecoul relaxat urmează cheia validată, nu simpla prezență a antetului: când
-  `REQUIRE_API_KEY=false` servește o solicitare în mod anonim, răspunsul reușit păstrează
-  lista de permisiuni fail-closed. Respingerile de autentificare (401) rămân lizibile,
-  astfel încât clienții să poată semnala o cheie revocată sau tastată greșit (#5242):
-  propriul 401 al pipeline-ului păstrează ecoul, iar o rută care refuză ea însăși cheia
-  după ce pipeline-ul a servit solicitarea ca anonimă (`/v1/models` și `/v1beta/models`
-  cu autentificarea de management configurată, rutele limitate la proprietar
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` și rutele candidate
-  auto-combo) adaugă ecoul la acel 401 prin `credentialRejectionHeaders()`. Ecoul depinde
-  de faptul că solicitarea poartă un antet de credențiale (`Authorization`, `x-api-key`,
-  `x-goog-api-key` sau cookie-ul `auth_token`), nu de care dintre ele a verificat ruta,
-  și nu este niciodată asociat cu `Access-Control-Allow-Credentials`; corpul este un plic
-  de eroare fix. Rutele de management de sub `/api/v1/` protejate de
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) nu
-  adaugă ecoul: cu `REQUIRE_API_KEY=false`, răspunsurile lor 401/403 nu pot fi citite de
-  pe altă origine.
-- **Sesiune bazată pe cookie-uri (tabloul de bord):** protejată de valoarea implicită care blochează accesul **și**
-  de absența `Access-Control-Allow-Credentials` pe traseul comun. Nu includeți
-  originile de administrare/ale tabloului de bord în nicio configurație permisivă; acestea trebuie să rămână strict
-  blocate în mod implicit.
+- **Purtător / `x-api-key` (suprafața de inferență `/v1/*` ):** browserele nu le atașează niciodată automat. CORS nu este o barieră semnificativă aici — cheia API este bariera —, motiv pentru care acea suprafață este permisivă în mod intenționat, astfel încât clienții browser și Electron să poată citi răspunsurile la care au deja dreptul. Ecoul relaxat necesită un subiect autentificat (o cheie API validată sau o sesiune de tablou de bord), nu doar un antet de acreditări și nu include niciodată `Access-Control-Allow-Credentials`. Răspunsurile anonime (`REQUIRE_API_KEY=false`) utilizează lista de autorizare de origine configurată, inclusiv o înscriere explicită `CORS_ALLOW_ALL=true`. Respingerile de autorizare (401) rămân lizibile, astfel încât clienții să poată scoate la suprafață o cheie revocată sau scrisă greșit (#5242): propriul 401 al conductei păstrează ecoul și o rută care refuză cheia în sine după ce conducta a servit-o ca anonimă (`/v1/models` și `/v1beta/models` cu autorizarea de gestionare configurată, `/v1/files`, `/v1/batches` și ruta candidate auto, `/v1/media` și `/v1/session-leases` ) adaugă ecoul la acel 401 prin `credentialRejectionHeaders()`. Ecoul este introdus pe cerere purtând un antet de acreditări (`Authorization`, `x-api-key`, `x-goog-api-key` sau cookie-ul `auth_token` ), nu pe care dintre ele a verificat ruta și nu este niciodată asociat cu `Access-Control-Allow-Credentials`; corpul este un plic de eroare fix. Rutele de gestionare sub `/api/v1/` păzite de `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) nu folosesc această excepție de respingere a acreditărilor: cu `REQUIRE_API_KEY=false`, răspunsurile lor 401/403 urmează politica de origine CORS configurată.
+- **Sesiune cookie (tabloul de bord):** protejat de default-closed **şi** prin absența `Access-Control-Allow-Credentials` pe calea partajată. Păstrați originile management/dashboard în afara oricărei configurații permisive; trebuie să rămână exact închise.
 
-## Handshake-uri WebSocket (`/v1/responses`, `/v1/ws`)
+## Strângeri de mână WebSocket (`/v1/responses`, `/v1/ws`)
 
-Browserele nu aplică CORS pentru WebSocket, așa că transporturile WebSocket care
-returnează rezultate de inferență verifică ele însele `Origin` din handshake
-(`src/server/origin/wsOrigin.ts`): WebSocket-ul Responses (`/v1/responses`) și, când
-OmniRoute rulează prin `npm start` / `npm run dev`, puntea `/v1/ws` și
-`/api/v1/ws`, care transmite `/v1/chat/completions`, `/v1/messages` și
-`/v1/responses` sub formă de cadre. Puntea cere verdictul de la
-`/api/v1/ws?handshake=1` și refuză upgrade-ul dacă acea rută nu a efectuat verificarea.
-Un handshake este acceptat atunci când:
+Browserele nu aplică CORS la WebSocket, astfel încât transporturile WebSocket care returnează ieșirea de inferență verifică ei înșiși handshake `Origin` (`src/server/origin/wsOrigin.ts`): răspunsurile WebSocket (`/v1/responses`) și, când OmniRoute rulează prin `npm start` / `npm run dev`, `/v1/ws` și `/api/v1/ws` bridge, care transmite `/v1/chat/completions`, `/v1/messages` ca cadre și `/v1/responses`. Podul cere verdictul `/api/v1/ws?handshake=1` și refuză să facă upgrade, cu excepția cazului în care acea rută a fost verificată. Cerințele de autentificare se aplică în continuare separat. Verificarea originii trece atunci când:
 
-- nu are antetul `Origin` (Codex CLI, SDK-uri și alți clienți care nu sunt browsere);
-- `Origin` este admis de lista de permisiuni de mai sus (`CORS_ALLOWED_ORIGINS`, setarea
-  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` este una dintre originile publice proprii ale OmniRoute (URL-ul de bază public
-  configurat, originea redirecționată de un proxy de încredere sau o gazdă loopback/LAN
-  directă indicată ca literal IP sau `localhost` — aceiași candidați pe care îi folosește
-  verificarea mutațiilor din panoul de control); sau
+- nu are antet `Origin` (Codex CLI, SDKs și alți clienți non-browser);
+- `Origin` este admis de lista de permise de mai sus (`CORS_ALLOWED_ORIGINS`, setarea `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` este una dintre originile publice proprii ale OmniRoute(baza publică configurată URL, originea redirecționată a unui proxy de încredere sau o gazdă loopback/LAN directă dată ca un literal IP sau `localhost` — aceiași candidați pe care le folosește verificarea mutațiilor tabloului de bord); sau
 - poartă o cheie API validă, ca pe suprafața HTTP `/v1/*`.
 
-Orice altceva primește `403 ws_origin_forbidden`. Un cookie de sesiune al panoului de
-control nu exceptează o `Origin` străină, deoarece browserul îl atașează la socketul
-oricărei pagini. `localhost` pe alt port nu este tratat ca aceeași origine; adăugați
-astfel de origini de dezvoltare în `CORS_ALLOWED_ORIGINS`.
+Orice altceva primește `403 ws_origin_forbidden`. Un cookie de sesiune de tablou de bord nu scutește un `Origin` străin, deoarece browserul îl atașează la socket-ul oricărei pagini. `localhost` pe alt port nu este tratat ca de aceeași origine; adăugați astfel de origini dev la `CORS_ALLOWED_ORIGINS`.
 
 ## Exemplu: proxy invers în fața OmniRoute
 
-CORS este aplicat chiar de OmniRoute, astfel încât, în general, proxy-ul **nu** ar trebui să adauge sau să
-rescrie antetele `Access-Control-*` (antetele duplicate afectează funcționarea browserelor). Terminați TLS
-și redirecționați traficul — lăsați OmniRoute să răspundă solicitărilor preflight:
+CORS este aplicat chiar de OmniRoute, deci proxy-ul ar trebui, în general **nu** adăugați sau rescrieți anteturi `Access-Control-*` (antetele duble sparg browserele). Închideți TLS și redirecționați —, lăsați OmniRoute să răspundă la zborul prealabil:
 
 ```nginx
-# nginx — redirecționați traficul către OmniRoute; NU injectați Access-Control-* aici
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Păstrați antetele de redirecționare: un proxy de pe aceeași gazdă se conectează din interfața loopback, iar acestea sunt
-    # cele care îi indică lui OmniRoute că apelantul nu este operatorul local. Un proxy care nu adaugă niciunul dintre ele
-    # face ca fiecare apelant de la distanță să pară local. De asemenea, nu setați niciodată X-Forwarded-For la 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Setați originile permise pentru browsere în OmniRoute (`CORS_ALLOWED_ORIGINS` sau fila
-Security), nu în proxy.
+Setați originile browserului permise în OmniRoute (`CORS_ALLOWED_ORIGINS` sau fila Securitate), nu în proxy.
 
 ## Fișiere sursă
 
-| Aspect                                              | Fișier                                                               |
-| --------------------------------------------------- | -------------------------------------------------------------------- |
-| Rezolvarea listei de permisiuni + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
-| Aplicarea middleware-ului (sursa unică de adevăr)   | `src/server/authz/pipeline.ts`                                       |
-| Setări → injectarea originilor la rulare            | `src/lib/config/runtimeSettings.ts`                                  |
-| Starea la rulare pentru tabloul de bord             | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Bannerul de avertizare din tabloul de bord          | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Câmpul Origini CORS permise                         | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS per rută pentru Cloud-Agent (excepția)         | `src/lib/cloudAgent/api.ts`                                          |
-| Verificarea `Origin` la handshake-ul WebSocket      | `src/server/origin/wsOrigin.ts`                                      |
+| Îngrijorare                                     | Fişier                                                               |
+| ----------------------------------------------- | -------------------------------------------------------------------- |
+| Rezoluția listei permise + `getCorsStatus()`    | `src/server/cors/origins.ts`                                         |
+| Aplicație middleware (sursă unică de adevăr)    | `src/server/authz/pipeline.ts`                                       |
+| Setări → runtime origine injectare              | `src/lib/config/runtimeSettings.ts`                                  |
+| Starea de rulare pentru tabloul de bord         | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Banner de avertizare pentru tabloul de bord     | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Câmpul Origini permise CORS                     | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent CORS pe rută (excepție)             | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket strângere de mână Verificare `Origin` | `src/server/origin/wsOrigin.ts`                                      |
 
-## Consultați și
+## Vezi de asemenea
 
-- [Niveluri de protecție a rutelor](./ROUTE_GUARD_TIERS.md) — aplicarea restricției de loopback pentru
-  rutele capabile să genereze procese (un mecanism de control separat și complementar).
-- [Ghid de autorizare](../architecture/AUTHZ_GUIDE.md) — fluxul complet de autentificare și autorizare.
+- [Strat Guard Tiers](./ROUTE_GUARD_TIERS.md) — loopback pentru rutele capabile de spawn (un control separat, complementar).
+- [Ghid de autorizare](../architecture/AUTHZ_GUIDE.md) — canalul complet de autorizare.

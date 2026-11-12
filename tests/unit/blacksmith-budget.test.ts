@@ -1,6 +1,5 @@
-// scripts/ci/blacksmith-budget.mjs keeps docker-publish inside Blacksmith's free 3,000 2-vCPU
-// minutes: past them the runners keep running and are invoiced. These cases pin how a job's
-// minutes are counted, which runs are fetched, and the verdict at the cap.
+// Runner-usage estimation only; these contracts do not certify a financial spending cap.
+// Existing duration weights remain unchanged.
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -60,7 +59,7 @@ test("a job no runner took costs nothing, however long it waited", () => {
   assert.equal(jobMinutes({ ...queued, runner_name: null, completed_at: at(30) }), 0);
 });
 
-test("only finished-with-a-result or live runs are fetched, never this run", () => {
+test("cancelled and live runs are fetched, never this run", () => {
   const runs = [
     { id: 1, status: "completed", conclusion: "success" },
     { id: 2, status: "completed", conclusion: "failure" },
@@ -70,7 +69,7 @@ test("only finished-with-a-result or live runs are fetched, never this run", () 
   ];
   assert.deepEqual(
     runsToCount(runs, { selfRunId: 5 }).map((r) => r.id),
-    [1, 2, 4]
+    [1, 2, 3, 4]
   );
 });
 

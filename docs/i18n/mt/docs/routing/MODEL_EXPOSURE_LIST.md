@@ -4,47 +4,80 @@
 
 ---
 
-> Opt-in, off b'mod awtomatiku (`modelVisibilityAllowlist`/`modelVisibilityDenylist` -tnejn vojta tħalli l-katalgu `/v1/models` AND kull `auto/*` kandidat pool byte identiku). Aħwa ta’ `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) għal operaturi li jridu lista ta’ mudelli kkurata għal raġunijiet li m’għandhom x’jaqsmu xejn mal-ispiża.
+> Għażla volontarja, diżattivata b’mod awtomatiku (meta `modelVisibilityAllowlist`/`modelVisibilityDenylist`
+> ikunu t-tnejn vojta, il-katalgu `/v1/models` U kull ġabra ta’ kandidati `auto/*` jibqgħu identiċi
+> byte b’byte). Issettjar relatat ma’ `hidePaidModels`/`hideAutoCombos`
+> (`src/lib/db/settings.ts`) għall-operaturi li jixtiequ lista kkurata ta’ mudelli għal raġunijiet
+> li m’għandhom x’jaqsmu xejn mal-ispiża.
 
-## Għaliex dan jeżisti
+## Għaliex jeżisti dan
 
-`hidePaidModels` jwieġeb "dan il-mudell huwa b'xejn?" u `hideAutoCombos` iwieġeb "għandhom jiġu reklamati ids virtwali `auto/*` ?" — lanqas iħalli operatur jikkura sottosett arbitrarju ta' mudelli (eż. jippreżenta eżattament il-mudelli li Kodiċi Claude partikolari / klijent OpenCode għandu jara, indipendentement mill-ipprezzar). #11481 iżid li bħala żewġ settings indipendenti, opt-in string-array.
+`hidePaidModels` iwieġeb "dan il-mudell huwa bla ħlas?" u `hideAutoCombos` iwieġeb "l-IDs virtwali
+`auto/*` għandhom jiġu rreklamati?" — l-ebda wieħed minnhom ma jippermetti lil operatur jikkura
+subsett arbitrarju ta’ mudelli (eż. li jippreżenta eżattament il-mudelli li klijent partikolari
+ta’ Claude Code / OpenCode għandu jara, indipendentement mill-ipprezzar). #11481 iżid dan bħala
+żewġ settings indipendenti u volontarji ta’ arrays ta’ strings.
 
 ## Settings
 
-| Ewlenin                    | Tip        | Default | Tifsira                                                                      |
-| -------------------------- | ---------- | ------- | ---------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`    | Entries li jaqblu ma' kandidat jaħbuha mill-pool catalog/candidate.          |
-| `modelVisibilityAllowlist` | `string[]` | `[]`    | Meta ma jkunux vojta, l-entrati ONLY li jaqblu ma' kandidat jibqgħu esposti. |
+| Ċavetta                    | Tip        | Valur awtomatiku | Tifsira                                                                     |
+| -------------------------- | ---------- | ---------------- | --------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`             | Entrati li jaqblu ma’ kandidat jaħbuh mill-katalgu/ġabra ta’ kandidati.     |
+| `modelVisibilityAllowlist` | `string[]` | `[]`             | Meta ma tkunx vojta, jibqgħu esposti BISS l-entrati li jaqblu ma’ kandidat. |
 
-It-tnejn jaċċettaw sa 500 daħla sa 200 karattru kull wieħed (Zod-validat fi `src/shared/validation/settingsSchemas.ts`). Entrata hija jew:
+It-tnejn jaċċettaw sa 500 entrata ta’ mhux aktar minn 200 karattru kull waħda (ivvalidati b’Zod
+f’`src/shared/validation/settingsSchemas.ts`). Entrata tkun jew:
 
-- id katalogu eżatt — `"gpt-4o"` (id tal-mudell vojt) jew `"openai/gpt-4o"` (prefiss tal-fornitur), jew
-- mudell glob li juża `*`/`?` — eż. `"openai/gpt-4*"` jew `"anthropic/*"` — solvut permezz tal-istess kondiviż `globToRegex()` matchr (`src/shared/utils/globPattern.ts`) diġà użat mill-mappings combo għal kull mudell ta' `ModelRoutingSection` u `freeModels.ts::matchesOnlyPaidModels`.
+- ID eżatt tal-katalgu — `"gpt-4o"` (ID tal-mudell mingħajr prefiss) jew `"openai/gpt-4o"` (bil-prefiss tal-fornitur), jew
+- mudell glob li juża `*`/`?` — eż. `"openai/gpt-4*"` jew `"anthropic/*"` — solvut permezz
+  tal-istess matcher kondiviż `globToRegex()` (`src/shared/utils/globPattern.ts`) li diġà jintuża
+  mill-mappings tal-combos għal kull mudell ta’ `ModelRoutingSection` u minn
+  `freeModels.ts::matchesOnlyPaidModels`.
 
-Preċedenza: il-lista taċ-ċaħda tiġi ċċekkjata l-ewwel (daħla miċħuda hija dejjem moħbija, anke jekk taqbel ukoll mal-lista ta' permessi); meta l-lista ta' permessi ma tkunx vojta, l-entrati li taqbel biss jibqgħu ħajjin.
+Preċedenza: l-ewwel tiġi ċċekkjata l-lista ta’ projbizzjonijiet (entrata pprojbita dejjem tinħeba,
+anke jekk taqbel ukoll mal-lista ta’ permessi); meta l-lista ta’ permessi ma tkunx vojta, jibqgħu
+biss l-entrati li jaqblu magħha.
 
-## Żewġ chokepoints, mhux wieħed
+## Żewġ punti kritiċi, mhux wieħed
 
-Il-lezzjoni minn #6512 (filtru tal-katalgu `hidePaidModels` -only xorta tħalli `auto/*` rotta għal mudell imħallas, peress li l-grupp ta 'kandidati combo nbena b'mod indipendenti) tapplika b'mod identiku hawn. Il-predikat li jaqbel `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) jissejjaħ minn BOTH:
+Il-lezzjoni minn #6512 (filtru tal-katalgu għal `hidePaidModels` biss xorta kien jippermetti lil
+`auto/*` jirrotja lejn mudell bi ħlas, peress li l-ġabra ta’ kandidati tal-combo kienet tinbena
+b’mod indipendenti) tapplika bl-istess mod hawnhekk. Il-predikat tat-tqabbil
+`isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) jissejjaħ miż-ŻEWĠ postijiet:
 
-- `src/app/api/v1/models/catalog.ts` — l-elenkar `/v1/models` innifsu, fl-istess 5 chokepoints għal kull sors `shouldHidePaid()` diġà xtiebi ( `PROVIDER_MODELS` statiku , ringieli tal-fornitur issinkronizzati, ringieli personalizzati, ringieli sostnuti minn alias, ringieli ta' riżerva ġestiti).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — imsejħa minn `virtualFactory.ts::buildPreparedPool`, immedjatament wara s-sejħa `filterPaidOnlyCandidates()` ekwivalenti, għalhekk mudell miċħud lanqas ma jista' jintgħażel f'grupp ta' kandidati `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — il-lista `/v1/models` innifisha, fl-istess 5 punti kritiċi
+  għal kull sors li `shouldHidePaid()` diġà jikkontrolla (`PROVIDER_MODELS` statiċi, ringieli
+  sinkronizzati tal-fornituri, ringieli personalizzati, ringieli sostnuti minn alias, ringieli
+  ta’ fallback ġestit).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — jissejjaħ
+  minn `virtualFactory.ts::buildPreparedPool`, immedjatament wara s-sejħa ekwivalenti
+  `filterPaidOnlyCandidates()`, sabiex mudell ipprojbit qatt ma jkun jista’ jintgħażel f’ġabra
+  ta’ kandidati `auto/*`.
 
-## X'inhu NOT ffiltrat
+## X’MHUX iffiltrat
 
-Mirja `hideAutoCombos`'s imġiba eżistenti: mudell id mibgħut** espliċitament** (mhux permezz ta' `auto/*`, u mhux skoperti permezz tal-lista tal-katalgu) qatt ma tiġi mblukkata mad-dispaċċ — biss is-sħubija advertisement/candidate-pool tiġi ffiltrata. Dan huwa indipendenti minn `hidePaidModels`; operatur jista 'jixtieq sett ikkurat għal raġunijiet li m'għandhom xejn x'jaqsmu ma' l-ispiża, għalhekk iż-żewġ settings jikkomponu bħala filtri AND-ed indipendenti, l-istess bħall-kompożizzjoni eżistenti multi-bandiera `catalog.ts`.
+Dan jirrifletti l-imġiba eżistenti ta’ `hideAutoCombos`: ID ta’ mudell mibgħut **b’mod espliċitu**
+(mhux permezz ta’ `auto/*`, u mhux skopert permezz tal-lista tal-katalgu) qatt ma jiġi mblukkat
+waqt id-dispaċċ — jiġu ffiltrati biss ir-reklamar/is-sħubija fil-ġabra ta’ kandidati. Dan huwa
+indipendenti minn `hidePaidModels`; operatur jista’ jkun irid sett ikkurat għal raġunijiet li
+m’għandhom x’jaqsmu xejn mal-ispiża, għalhekk iż-żewġ settings jiġu kkombinati bħala filtri
+indipendenti magħquda b’AND, bħall-istess kompożizzjoni eżistenti ta’ diversi flags
+f’`catalog.ts`.
 
-L-esportazzjoni tas-settings (`GET /api/settings/export-json`) tinkludi ż-żewġ arrays verbatim, bħal kull qasam ta 'settings ieħor — b'differenza mill-filtru ta' esportazzjoni ta 'pass kombo ta `hidePaidModels`, m'hemm l-ebda riskju ta 'idratazzjoni mill-ġdid hawn: id miċħuda inkorporata f'pass kombinat esportat hija l-għażla ta' rotta espliċita tal-operatur stess, mhux xi ħaġa li l-konfini tal-esportazzjoni jeħtieġ li tqaxxar.
+L-esportazzjoni tas-settings (`GET /api/settings/export-json`) tinkludi ż-żewġ arrays kelma
+b’kelma, bħal kull field ieħor tas-settings — għall-kuntrarju tal-filtru tal-esportazzjoni
+tal-passi tal-combo ta’ `hidePaidModels`, hawnhekk m’hemm l-ebda riskju ta’ ridratazzjoni: ID
+ipprojbit inkorporat f’pass esportat ta’ combo huwa l-għażla espliċita tar-routing tal-operatur
+stess, mhux xi ħaġa li l-konfini tal-esportazzjoni jeħtieġ ineħħi.
 
-## Elenku ta' combos biss (`exposeCombosOnly`)
+## Lista ta' combos biss (`exposeCombosOnly`)
 
-Boolean separat, ukoll opt-in u `false` awtomatikament, għal skjeramenti fejn il-combos huma l-wiċċ tal-mudell pubbliku u l-fornituri huma biss backends. Meta jkun `true`, l-elenkar pubbliku (`GET /v1/models`, `GET /v1`, u r-rotot l-oħra ta’ skoperta `/v1` mibnija fuq `getUnifiedModelsResponse()`) iżomm biss ringieli `owned_by: "combo"`: user combos flimkien mal-combos `auto/*` built-in (sakemm `hideAutoCombos` ma jaħbihomx). Juża l-istess test tar-ringiela bħall- `catalogScope: "combos"` għal kull ċavetta, u l-filtri allow/deny/scope taċ-ċavetta stess għadhom japplikaw fuq nett.
+Boolean separat, ukoll b'attivazzjoni espliċita u `false` b'mod awtomatiku, għal deployments fejn il-combos huma l-wiċċ pubbliku tal-mudelli u l-fornituri huma biss backends. Meta jkun `true`, il-lista pubblika (`GET /v1/models`, `GET /v1`, u r-routes l-oħra ta' skoperta `/v1` mibnija fuq `getUnifiedModelsResponse()`) iżżomm biss ringieli b'`owned_by: "combo"`: combos tal-utent flimkien mal-combos integrati `auto/*` (sakemm `hideAutoCombos` ma jaħbihomx). Tuża l-istess test tar-ringiela bħal `catalogScope: "combos"` għal kull ċavetta, u l-filtri allow/deny/scope taċ-ċavetta stess għadhom japplikaw fuqhom.
 
-Aqlebha** Settings → Routing → Mudelli API lista** , jew bi `PATCH /api/settings {"exposeCombosOnly": true}`.
+Ixgħel jew itfi f'**Settings → Routing → Models API listing**, jew b'`PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Bħall-listi ta' hawn fuq, tbiddel biss ir-reklam:
+Bħal-listi ta' hawn fuq, ibiddel biss dak li jiġi reklamat:
 
-- `provider/model` id espliċitu għadu jibgħat, u `GET /v1/models/{id}` għadu jsolviha;
-- il-katalgu tad-dashboard (`GET /api/models/catalog`, użat mill-pickers tal-mudelli) mhuwiex imdejjaq;
-- mhix riflessa fil-pools tal-kandidati `auto/*`, allura `auto/*` combos iżommu l-pool sħiħ tagħhom.
+- ID espliċitu `provider/model` xorta jiġi dispatched, u `GET /v1/models/{id}` xorta jirriżolvih;
+- il-katalgu tad-dashboard (`GET /api/models/catalog`, użat mill-għażliet tal-mudelli) ma jiċċekkinx;
+- ma jiġix rifless fil-pools tal-kandidati `auto/*`, għalhekk il-combos `auto/*` iżommu l-pool sħiħ tagħhom.

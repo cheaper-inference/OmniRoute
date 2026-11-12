@@ -4,201 +4,119 @@
 
 ---
 
-OmniRoute የትኞቹ **የአሳሽ origins** ከአንድ ማዕከላዊ የፈቃድ ዝርዝር ተሻጋሪ-origin ምላሾችን ማንበብ እንደሚችሉ ይቆጣጠራል። ሞዴሉ **በነባሪነት ዝግ-ውድቀት ያለው ነው**፦ በግልጽ እስካልፈቀዱት ድረስ ምንም origin አይፈቀድም። ይህ ገጽ የፈቃድ ዝርዝሩ እንዴት እንደሚፈታ፣ `CORS_ALLOW_ALL=true` በትክክል ምን እንደሚያጋልጥ (እና ከሁሉም በላይ ምን **እንደማያጋልጥ**)፣ የልማት እና የምርት አካባቢዎችን በደህንነት እንዴት ማዋቀር እንደሚቻል፣ እንዲሁም wildcard ንቁ ሲሆን ዳሽቦርዱ የሚያሳየውን የሩጫ-ጊዜ ማስጠንቀቂያ ይመዘግባል።
+OmniRoute የትኛውን ይቆጣጠራል **የአሳሽ አመጣጥ** ከአንድ የተማከለ የተፈቀደ ዝርዝር መነሻ-አቋራጭ ምላሾችን ማንበብ ይችላል። ሞዴሉ ነው።**አልተሳካም - በነባሪ ተዘግቷል** አንዱን መርጠው እስኪገቡ ድረስ መነሻ አይፈቀድም። ይህ ገጽ የፈቃድ ዝርዝሩ እንዴት እንደሚፈታ፣ `CORS_ALLOW_ALL=true` ምን እንደሚያጋልጥ (እና በአስፈላጊነቱ፣ ምን እንደሚሰራ ያሳያል)**አይደለም** ዴቭ vs ፕሮዳክሽንን በአስተማማኝ ሁኔታ እንዴት ማዋቀር እንደሚቻል እና የሩጫ ጊዜ ማስጠንቀቂያ ዳሽቦርዱ የሚያሳየው የዱር ካርድ በቀጥታ ሲሰራ ነው።
 
-**የእውነት ምንጭ፦** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`)። የፈቃድ ዝርዝሩ አንድ ጊዜ ብቻ፣ በmiddleware
-(`src/server/authz/pipeline.ts`) ውስጥ ይተገበራል — የእያንዳንዱ route handlers
-`Access-Control-Allow-Origin`ን በራሳቸው አያዘጋጁም።
+**የእውነት ምንጭ፡-** `src/server/cors/origins.ts` (`resolveAllowedOrigin`፣ `applyCorsHeaders`፣ `getCorsStatus`)። የፈቃድ ዝርዝሩ አንድ ጊዜ ይተገበራል፣ በመሃል ዌር (`src/server/authz/pipeline.ts`) — በየመንገድ ተቆጣጣሪዎች `Access-Control-Allow-Origin` ራሳቸው አያዘጋጁም።
 
-## Origin እንዴት እንደሚፈታ
+## መነሻው እንዴት እንደሚፈታ
 
-ለእያንዳንዱ ጥያቄ middleware የ`Access-Control-Allow-Origin` እሴትን
-በዚህ ቅደም ተከተል ያሰላል፦
+ለእያንዳንዱ ጥያቄ መካከለኛው ዌር የ `Access-Control-Allow-Origin` ዋጋን በዚህ ቅደም ተከተል ያሰላል
 
-1. **`CORS_ALLOW_ALL=true`** (ወይም የቀድሞው `CORS_ORIGIN=*`) → የጠሪውን
-   `Origin` መልሶ ያንጸባርቃል (`Origin` header ከሌለ `*`)፣ caches ትክክለኛ
-   ሆነው እንዲቆዩ `Vary: Origin`ን ያክላል። ያው `applyCorsHeaders()`
-   chokepoint በtoken ማረጋገጫ በተጠበቀው `/v1*`/`/v1beta*` surface ላይ
-   body ላለው እያንዳንዱ 2xx ምላሽ `Vary: Accept-Encoding`ንም ያክላል
-   (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737)፣ በዚህም downstream/shared
-   caches የታመቁ እና ያልታመቁ ልዩነቶችን በትክክል እንዲለዩ ያስችላል።
-2. ያለበለዚያ፣ የጥያቄው `Origin` normalized ይደረጋል (ወደ ትንሽ ፊደላት
-   ይቀየራል፣ በመጨረሻ ያለው slash ይወገዳል) እና ከ**ተዋሃደው የፈቃድ
-   ዝርዝር** ጋር ይመሳሰላል፦
+1. **`CORS_ALLOW_ALL=true`** (ወይም የድሮው `CORS_ORIGIN=*`) → የደዋዩን `Origin` መልሰው (ወይም `*` ምንም `Origin` ራስጌ ከሌለ) በማስተጋባት `Vary: Origin` ስለዚህ መሸጎጫዎች ትክክል ሆነው ይቆያሉ። ተመሳሳይ `applyCorsHeaders()` chokepoint ደግሞ ማስመሰያ-የተረጋገጠ `/v1*`/`/v1beta*` ወለል (`relaxForTokenAuth`, RFC 9110 §12.5.5, እትም #6737) ላይ በእያንዳንዱ 2xx-አካል-ጋር ምላሽ `Vary: Accept-Encoding` ላይ ይጨመራል, ስለዚህ downstream/shared መሸጎጫዎች የታመቀ vs uncompressed ተለዋጮች በትክክል መለየት ይችላሉ.
+2. ያለበለዚያ፣ ጥያቄው `Origin` የተለመደ ነው (ከታች ያለው፣ ተከታይ ስሌሽ ተነቅሏል) እና ከሚከተሉት ጋር ይዛመዳል።**የተዋሃደ የተፈቀደ ዝርዝር** :
    - env **`CORS_ALLOWED_ORIGINS`** — በነጠላ ሰረዝ የተለየ ዝርዝር፣ እና
-   - የሩጫ-ጊዜ **`corsOrigins`** ቅንብር (Dashboard → Security → _CORS Allowed
-     Origins_)፣ ከ`src/lib/config/runtimeSettings.ts` በ`setRuntimeAllowedOrigins()`
-     በኩል የሚገባ።
-3. ምንም ተዛማጅ ካልተገኘ → **ምንም `Access-Control-Allow-Origin` header
-   አይላክም**። አሳሹ የተሻጋሪ-origin ንባቡን ያግዳል። ይህ በዓላማ
-   የተዘጋጀው የነባሪ ዝግ-ውድቀት ባህሪ ነው።
+   - የሩጫ ጊዜ **`corsOrigins`** መቼት (ዳሽቦርድ → ደህንነት → _CORS የተፈቀደላቸው መነሻዎች_)፣ በ `setRuntimeAllowedOrigins()` ከ `src/lib/config/runtimeSettings.ts` የተወጋ።
+3. → ጋር የሚመሳሰል የለም።**ምንም `Access-Control-Allow-Origin` ራስጌ አልወጣም።** . አሳሹ የመነሻውን ንባብ ያግዳል። ይህ የታሰበ ያልተሳካ-የተዘጋ ነባሪ ነው።
 
-| Env var                | ትርጉም                                                                 |
+| ኢንቭ var                | ትርጉም                                                                 |
 | ---------------------- | -------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | ለመፍቀድ የትክክለኛ origins CSV (የሚመከር)።                                    |
-| `CORS_ALLOW_ALL`       | `true`/`1` → ማንኛውንም origin መልሶ ያንጸባርቃል (wildcard)። ለልማት ብቻ።          |
-| `CORS_ORIGIN`          | የቀድሞ አማራጭ። `*` እንደ `CORS_ALLOW_ALL` ይሠራል፤ አንድ እሴት ወደ ፈቃድ ዝርዝሩ ይጨመራል። |
+| `CORS_ALLOWED_ORIGINS` | ለመፍቀድ ትክክለኛ መነሻዎች CSV (የሚመከር)።                                       |
+| `CORS_ALLOW_ALL`       | `true`/`1` → ማንኛውንም መነሻ (የዱር ካርድ) ያስተጋባል። ዴቭ ብቻ                      |
+| `CORS_ORIGIN`          | ቅርስ። `*` እንደ `CORS_ALLOW_ALL` ይሠራል; በተፈቀደ ዝርዝር ውስጥ አንድ ነጠላ እሴት ታክሏል። |
 
-## የስጋት ሞዴል — `CORS_ALLOW_ALL=true` በትክክል ምን ያጋልጣል
+## `CORS_ALLOW_ALL=true` በትክክል የሚያጋልጠውን የማስፈራሪያ ሞዴል —
 
-አጠቃላዩን የOWASP ማስጠንቀቂያ ("wildcard CORS = ማንኛውም ጣቢያ APIዎን
-መጥራት ይችላል") በቁም ነገር መውሰድ ተገቢ ነው፣ ነገር ግን በአንድ ግልጽ
-የአተገባበር እውነታ ምክንያት የOmniRoute ተጋላጭነት **ከአጠቃላዩ ሁኔታ
-ይበልጥ የተገደበ ነው**፦
+አጠቃላይ OWASP ማስጠንቀቂያ ("የዱር ካርድ CORS = ማንኛውም ጣቢያ የእርስዎን API ሊደውል ይችላል") በቁም ነገር ሊታሰብበት የሚገባ ነው፣ ነገር ግን የ OmniRoute ተጋላጭነት ነው።**ከአጠቃላይ መያዣው ጠባብ** በአንድ ተጨባጭ የትግበራ እውነታ ምክንያት፡-
 
-> **ማዕከላዊው `applyCorsHeaders()` በፍጹም
-> `Access-Control-Allow-Credentials`ን አይልክም።** አገልጋዩ
-> `Access-Control-Allow-Credentials: true`ን ካልላከ በስተቀር አሳሽ
-> _ማረጋገጫ ያለው_ (cookie የያዘ) ተሻጋሪ-origin ምላሽን አያጋልጥም።
-> የOmniRoute የጋራ CORS መንገድ ይህን በፍጹም አያደርግም።
+> **ማዕከላዊው `applyCorsHeaders()` በጭራሽ `Access-Control-Allow-Credentials` አይለቅም።** አገልጋዩ `Access-Control-Allow-Credentials: true` ካልላከ በስተቀር አሳሽ _credentialed_ (ኩኪ የሚሸከም) መነሻ ምላሽ አያጋልጥም። የ OmniRoute የጋራ CORS መንገድ በጭራሽ አያደርግም።
 
-ይህ በእያንዳንዱ surface ላይ፣ `CORS_ALLOW_ALL=true` ቢሆንም፣ የሚከተለውን
-ማለት ነው፦
+ከ `CORS_ALLOW_ALL=true` ጋር እንኳን ይህ በአንድ ወለል ላይ ምን ማለት ነው:
 
-| Surface                         | የማረጋገጫ ዘዴ                   | የwildcard CORS ውጤት                                                                                                                                                                                                                                                           |
-| ------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*` | Cookie session              | Origin መልሶ ይንጸባረቃል፣ ነገር ግን **`Allow-Credentials` ስለሌለ** አሳሹ **ማረጋገጫ ያለውን ንባብ ያግዳል**። ጎጂ ተሻጋሪ-origin ጣቢያ ማረጋገጫ ያላቸውን የዳሽቦርድ ምላሾችዎን **ማንበብ አይችልም**፣ እና session cookieው አይጋለጥም።                                                                                                 |
-| Client API `/v1/*`, `/v1beta/*` | Bearer / `x-api-key` header | ቀድሞውኑ **በንድፍ ምክንያት** ፈቃደኛ ነው (`relaxForTokenAuth`)፦ አሳሾች `Authorization`/`x-api-key`ን በራስ-ሰር አያያይዙም፣ ስለዚህ የአጥቂ ገጽ ቁልፍዎን ማቅረብ አይችልም። origin መልሶ የሚላከው (echo) የቀረበው ቁልፍ ሲረጋገጥ ብቻ ነው፤ ስም-አልባ ምላሾች (`REQUIRE_API_KEY=false`) የፈቃድ ዝርዝሩን እንደያዙ ይቆያሉ። `CORS_ALLOW_ALL` ይህን አያሰፋውም። |
-| ይፋዊ ለንባብ-ብቻ (`/api/health`, …)  | ምንም                         | ስሱ ያልሆነ፤ wildcard ጉዳት የለውም።                                                                                                                                                                                                                                                  |
+| ወለል                           | የማረጋገጫ ዘዴ              | የዱር ካርድ CORS ውጤት                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ዳሽቦርድ / MANAGEMENT `/api/*`   | የኩኪ ክፍለ ጊዜ             | መነሻው ተስተጋብቷል፣ ግን **ያለ `Allow-Credentials`** አሳሹ **ብሎኮች** የተረጋገጠው ንባብ. ተንኮል-አዘል መነሻ ጣቢያ **ማንበብ አይችልም** የእርስዎ የተረጋገጠ ዳሽቦርድ ምላሾች፣ እና የክፍለ ጊዜው ኩኪ አልተጋለጠም።                                                                                                                                                                                                                    |
+| ደንበኛ API `/v1/*`, `/v1beta/*` | ተሸካሚ / `x-api-key` ራስጌ | ቀድሞውኑ የተፈቀደ **በንድፍ** (`relaxForTokenAuth`)፡ አሳሾች `Authorization`/`x-api-key` ን በራስ ሰር አያያይዙትም ስለዚህ የአጥቂው ገጽ ቁልፍዎን ሊያቀርብ አይችልም። ዘና ያለ ማሚቶ የተረጋገጠ ርዕሰ ጉዳይ (የተረጋገጠ API ቁልፍ ወይም ዳሽቦርድ ክፍለ ጊዜ) የማረጋገጫ ራስጌ ብቻ ሳይሆን `Access-Control-Allow-Credentials` ፈጽሞ አያካትትም። ስም-አልባ ምላሾች (`REQUIRE_API_KEY=false`) ግልጽ የሆነ `CORS_ALLOW_ALL=true` መርጦ መግባትን ጨምሮ የተዋቀረውን መነሻ ፍቃድ ዝርዝር ይጠቀማሉ። |
+| የህዝብ ንባብ-ብቻ (`/api/health`፣…) | ምንም                    | ስሜታዊ ያልሆነ; የዱር ምልክት ምንም ጉዳት የለውም።                                                                                                                                                                                                                                                                                                                                         |
 
-ስለዚህ የ`CORS_ALLOW_ALL=true` **ቀሪ** ተጋላጭነት በሚከተሉት ብቻ የተገደበ ነው፦
-(a) ቀድሞውኑ ማረጋገጫ የማይፈልግ ውሂብን ማረጋገጫ የሌለው ተሻጋሪ-origin
-**ማንበብ**፣ እና (b) በmanagement routes ላይ CORS **preflight እንዲያልፍ**
-መፍቀድ — እነዚህ routes አሁንም ተሻጋሪ-origin ገጽ ሊያቀርበው የማይችለውን
-ማረጋገጫ ይፈልጋሉ። ይህ በጋራው CORS መንገድ ላይ የsession ጠለፋ ወይም
-የማረጋገጫ መረጃ ስርቆት መንገድ **አይደለም**።
+ስለዚህ የ **ቀሪ** የ `CORS_ALLOW_ALL=true` መጋለጥ በሚከተሉት ብቻ የተገደበ ነው፡ (ሀ) ያልተረጋገጠ ተሻጋሪ መነሻ **ያነባል።** አስቀድሞ ያልተረጋገጠ ውሂብ፣ እና (ለ) CORS በመፍቀድ **የቅድመ በረራ ማለፊያ** በ — አስተዳደር መንገዶች ላይ የመነሻ ተሻጋሪ ገጽ ማቅረብ የማይችለውን አሁንም ማረጋገጥ ይፈልጋል። ነው።**አይደለም** የክፍለ-ጊዜ ጠለፋ ወይም የምስክርነት-ስርቆት ቬክተር በጋራ CORS መንገድ ላይ።
 
-### አንድ እውነተኛ ልዩ ሁኔታ — `/api/v1/agents/`
+### አንድ እውነተኛ ለየት ያለ — `/api/v1/agents/`
 
-የCloud-Agent routes (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`)
-**የራሳቸውን** CORS headers
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ያዘጋጃሉ እና
-`Access-Control-Allow-Origin: <origin>|*`ን ከ
-`Access-Control-Allow-Credentials: true` ጋር **በእርግጥ ይልካሉ**። ይህ
-origin መልሶ ማንጸባረቅ እና credentials አብረው የሚኖሩበት ብቸኛው surface
-ነው፣ እና ከ`CORS_ALLOW_ALL` **ነፃ ነው**። እነዚህ routes በmanagement
-ማረጋገጫ የተጠበቁ ናቸው (`requireManagementAuth`)፤ ዳሽቦርዱን ከhost ውጭ
-የሚያጋልጡ operators በምላሽ headers የተሻጋሪ-origin ማረጋገጫ ያለው ንባብ
-የሚፈቀድበት ብቸኛው ቦታ ይህ መሆኑን ማወቅ አለባቸው። ይህን ወደ ግልጽ
-የፈቃድ ዝርዝር ማጥበቅ ከዚህ CORS መመሪያ ተለይቶ ክትትል እየተደረገበት
-ነው።
+የክላውድ-ኤጀንት መንገዶች (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) አዘጋጁ **የራሱ** CORS ራስጌዎች (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) እና **መ ስ ራ ት** `Access-Control-Allow-Origin: <origin>|*` ከ `Access-Control-Allow-Credentials: true` ጋር ያሰራጩ። ይህ መነሻ-ኢኮ እና ምስክርነቶች አብረው የሚኖሩበት ነጠላ ወለል ነው፣ እና ነው።**ከ `CORS_ALLOW_ALL` ነፃ** . እነዚህ መንገዶች አስተዳደር-የተረጋገጠ (`requireManagementAuth`) ናቸው; ዳሽቦርዱን ከአስተናጋጅ ውጪ የሚያጋልጡ ኦፕሬተሮች መነሻ ተሻጋሪ ምስክርነት ያለው በምላሽ ራስጌዎች የሚፈቀድበት ቦታ መሆኑን ማወቅ አለባቸው። ወደ ግልጽ የተፈቀደ ዝርዝር ማጥበቅ ከዚህ CORS መመሪያ ተለይቶ ተከታትሏል።
 
-## የምርት አካባቢ ማረጋገጫ ዝርዝር
+## የምርት ማረጋገጫ ዝርዝር
 
-- **በምርት አካባቢ `CORS_ALLOW_ALL=true`ን ፈጽሞ አያዘጋጁ።** ሳይዘጋጅ ይተዉት።
-- **በግልጽ የተገለጸ** የመነሻዎች ዝርዝር ያዘጋጁ — የአካባቢ ተለዋዋጩን ወይም በSecurity ትር ውስጥ ያለውን መስክ ይጠቀሙ፦
+- **`CORS_ALLOW_ALL=true` በምርት ውስጥ በጭራሽ አታቀናብር።** ሳይቀናጅ ይተውት።
+- አዘጋጅ **ግልጽ** መነሻ ዝርዝር — ወይ env var ወይም የሴኪዩሪቲ-ታብ መስክ፡-
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- OmniRoute ከreverse proxy / tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale) ጀርባ የሚሰራ ከሆነ፣ CORS **ብቸኛው** መቆጣጠሪያዎ አይደለም — የloopback route
-  guard አሁንም spawn ማድረግ የሚችሉ routesን ይከላከላል ([ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)ን
-  ይመልከቱ)። 403ን «ለማስተካከል»
-  `X-Forwarded-For: 127.0.0.1`ን አይፍጠሩ፤ ይህ route guard የዘጋውን የRCE ምድብ እንደገና
-  ይከፍታል።
-- የruntime ሁኔታውን ያረጋግጡ፦ `CORS_ALLOW_ALL=true` ንቁ በሆነ ጊዜ dashboardው
-  በDashboard → Security → Authorization Inventory ስር **ቋሚ የአምበር ቀለም ባነር**
-  ያሳያል፤ እንዲሁም `/api/settings/authz-inventory` የክትትል መሣሪያዎች በየጊዜው
-  ሊጠይቁት የሚችሉትን `cors: { allowAll, allowedOrigins }` envelope ይመልሳል።
+- OmniRoute ከተገላቢጦሽ ተኪ / መሿለኪያ ጀርባ (nginx፣ Caddy፣ Cloudflare Tunnel፣ Tailscale) የሚሄድ ከሆነ፣ CORS**አይደለም** ብቸኛው መቆጣጠሪያዎ — የ loopback መስመር ጠባቂ አሁንም ስፔን የሚችሉ መንገዶችን ይጠብቃል ( [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ይመልከቱ)። 403 ን "ለማስተካከል" `X-Forwarded-For: 127.0.0.1` አይስጡ; የ RCE ክፍልን እንደገና የሚከፍት የመንገድ ጠባቂው ይዘጋል.
+- የአሂድ ጊዜ ሁኔታን ያረጋግጡ፡ ዳሽቦርዱ ሀ **የማያቋርጥ አምበር ባነር** `CORS_ALLOW_ALL=true` በቀጥታ በሚኖርበት ጊዜ በዳሽቦርድ → ሴኪዩሪቲ → የፈቃድ ኢንቬንቶሪ ስር፣ እና `/api/settings/authz-inventory` የ `cors: { allowAll, allowedOrigins }` ኤንቨሎፕ መከታተያ መሳሪያዎች መጠይቅ ሊመልስ ይችላል።
 
-## የልማት ምቹነት — የተወሰኑ አካባቢያዊ መነሻዎችን መፍቀድ
+## የልማት ምቹነት — የተወሰኑ የአካባቢ መነሻዎችን ይፈቅዳል
 
-በልማት አካባቢም እንኳ በአብዛኛው wildcard አያስፈልግዎትም። የሚጠቀሙባቸውን የdev servers ብቻ ይፍቀዱ፦
+በዴቪ ውስጥ እንኳን የዱር ካርድን እምብዛም አያስፈልገዎትም። የሚጠቀሙባቸውን የዴቭ አገልጋዮች ብቻ ፍቀድ፡-
 
 ```bash
-# አካባቢያዊ OmniRouteን የሚጠሩ Vite (5173) + Next.js (3000) dev servers
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-መነሻዎች የፊደል አቢይነትን ሳይለዩ እና የመጨረሻውን slash ችላ በማለት ይዛመዳሉ፤ ስለዚህ
-`http://localhost:3000` እና `http://localhost:3000/` ተመጣጣኝ ናቸው። ይኸው CSV
-ዳግም ማስጀመር ሳያስፈልግ በruntime ጊዜ በ**Dashboard → Security → CORS Allowed Origins**
-ውስጥ ሊዘጋጅ ይችላል።
+መነሻዎች ከጉዳይ ጋር ይጣጣማሉ ከኋላው ቀርፋፋ ችላ ከተባሉት ጋር፣ ስለዚህ `http://localhost:3000` እና `http://localhost:3000/` አቻ ናቸው። ተመሳሳዩ CSV በማሄድ ጊዜ ሊዘጋጅ ይችላል።**ዳሽቦርድ → ደህንነት → CORS የተፈቀዱ መነሻዎች** ያለ ዳግም ማስጀመር.
 
-## API keys እና cookie sessions
+## API ቁልፎች ከኩኪ ክፍለ ጊዜዎች ጋር
 
-- **Bearer / `x-api-key` (የ`/v1/*` inference ገጽታ)፦** browsers እነዚህን በራስ-ሰር
-  ፈጽሞ አያያይዙም። እዚህ CORS ትርጉም ያለው መከላከያ አይደለም — API key ነው
-  መከላከያው — ለዚህም ነው ያ ገጽታ browser እና Electron clients ቀድሞውኑ
-  የማንበብ ፈቃድ ያላቸውን responses ማንበብ እንዲችሉ ሆን ተብሎ permissive የተደረገው። የላላው echo የሚከተለው የተረጋገጠውን
-  ቁልፍ እንጂ የheaderሩን መኖር ብቻ አይደለም፦ `REQUIRE_API_KEY=false` አንድን ጥያቄ ስም-አልባ ሆኖ ሲያስተናግድ፣ የተሳካ
-  ምላሹ fail-closed የፈቃድ ዝርዝሩን ይጠብቃል። clients የተሻረ ወይም በስህተት የተጻፈ ቁልፍን ማሳየት እንዲችሉ የማረጋገጫ
-  ውድቅቶች (401) ተነባቢ ሆነው ይቆያሉ (#5242)፦ የpipelineው የራሱ 401 echoውን ይይዛል፣ እና pipelineው ጥያቄውን
-  እንደ ስም-አልባ ካስተናገደ በኋላ ቁልፉን ራሱ ውድቅ የሚያደርግ route (management auth ሲዋቀር `/v1/models` እና
-  `/v1beta/models`፣ በባለቤቱ የተገደቡት `/v1/files`፣ `/v1/batches`፣ `/v1/media`፣
-  `/v1/session-leases` እና የauto-combo እጩ routes) በ`credentialRejectionHeaders()` በኩል
-  echoውን ለዚያ 401 ይጨምራል። echoው የሚወሰነው ጥያቄው የምስክርነት header (`Authorization`፣ `x-api-key`፣
-  `x-goog-api-key` ወይም የ`auth_token` cookie) በመያዙ ላይ እንጂ routeው ከእነሱ የትኛውን እንደፈተሸ ላይ
-  አይደለም፣ እና ከ`Access-Control-Allow-Credentials` ጋር ፈጽሞ አይጣመርም፤ bodyው ቋሚ የስህተት ኤንቨሎፕ ነው።
-  በ`requireManagementAuth()` የሚጠበቁ በ`/api/v1/` ስር ያሉ የአስተዳደር routes
-  (`/api/v1/management/*`፣ `/api/v1/registered-keys`) echoውን አይጨምሩም፦
-  `REQUIRE_API_KEY=false` ሲሆን የእነሱ 401/403 ከሌላ origin ሊነበብ አይችልም።
-- **Cookie session (dashboardው)፦** በfail-closed ነባሪው **እና**
-  በጋራው path ላይ `Access-Control-Allow-Credentials` ባለመኖሩ የተጠበቀ ነው።
-  የmanagement/dashboard መነሻዎችን ከማንኛውም permissive config ውጭ ያድርጉ፤ በትክክል
-  fail-closed ሆነው መቆየት አለባቸው።
+- **ተሸካሚ/ `x-api-key` (የ `/v1/*` ግምታዊ ወለል)** አሳሾች እነዚህን በራስ ሰር አያያይዟቸውም። CORS እዚህ ላይ ትርጉም ያለው እንቅፋት አይደለም — የ API ቁልፉ — ማገጃ ነው ለዚህ ነው ላዩን ሆን ተብሎ የሚፈቅድ በመሆኑ አሳሽ እና Electron ተገልጋዮች ቀድሞውንም ማግኘት ያለባቸውን ምላሾች ማንበብ ይችላሉ። ዘና ያለው ማሚቶ የተረጋገጠ ርዕሰ ጉዳይ (የተረጋገጠ API ቁልፍ ወይም ዳሽቦርድ ክፍለ ጊዜ) የማረጋገጫ ራስጌ ብቻ ሳይሆን `Access-Control-Allow-Credentials` ፈጽሞ አያካትትም። ስም-አልባ ምላሾች (`REQUIRE_API_KEY=false`) ግልጽ የሆነ `CORS_ALLOW_ALL=true` መርጦ መግባትን ጨምሮ የተዋቀረውን መነሻ ፍቃድ ዝርዝር ይጠቀማሉ። የማረጋገጫ ውድቀቶች (401) ደንበኞቻቸው የተሻረ ወይም የተሳሳተ የተፃፈ ቁልፍ (#5242) እንዲያዩ ይቆያሉ፡ የቧንቧው የራሱ 401 ማሚቶ ይይዛል፣ እና ቁልፉን ራሱ የማይታወቅ ሆኖ ካገለገለው በኋላ (`/v1/models` እና `/v1beta/models` በአስተዳደር ማረጋገጫ የተዋቀረ፣ በባለቤቱ የተደገፈ `/v1/files`፣ `/v1/batches`- `/v1/media`፣ `/v1/session-leases` ) መንገዶች) በ `credentialRejectionHeaders()` በኩል ወደ 401 ማሚቶ ያክላል። አስተጋባው የማረጋገጫ አርዕስት (`Authorization`, `x-api-key`, `x-goog-api-key` ወይም `auth_token` ኩኪው) በሚይዘው ጥያቄ ላይ ቁልፍ ነው, ከመካከላቸው የትኛው መንገድ እንደተመረጠ አይደለም, እና ከ `Access-Control-Allow-Credentials` ጋር ፈጽሞ አልተጣመረም; ሰውነት የተስተካከለ የስህተት ፖስታ ነው። በ `/api/v1/` ስር ያሉ የአስተዳደር መንገዶች በ `requireManagementAuth()` (`/api/v1/management/*`፣ `/api/v1/registered-keys`፣ `/api/v1/providers/[provider]/limits`፣ `/api/v1/accounts/[id]/limits`፣ `/api/v1/issues/report`) የሚጠበቁ ይህንን የማረጋገጫ ውድቅነት አይጠቀሙም ከ `REQUIRE_API_KEY=false` ጋር 401/403 ምላሻቸው የተዋቀረውን CORS መነሻ ፖሊሲን ይከተላል።
+- **የኩኪ ክፍለ ጊዜ (ዳሽቦርዱ)፡-** ባልተሳካው በተዘጋ ነባሪ የተጠበቀ **እና** በጋራ መንገድ ላይ `Access-Control-Allow-Credentials` ባለመኖሩ. management/dashboard አመጣጥ ከማንኛውም የተፈቀደ ውቅረት ያቆዩ። በትክክል ተዘግተው መቆየት አለባቸው.
 
-## የWebSocket handshakes (`/v1/responses`, `/v1/ws`)
+## WebSocket መጨባበጥ (`/v1/responses`፣ `/v1/ws`)
 
-አሳሾች CORSን በWebSocket ላይ አይተገብሩም፣ ስለዚህ የinference ውጤት የሚመልሱት የWebSocket ማጓጓዣዎች
-የhandshakeውን `Origin` ራሳቸው ይፈትሻሉ (`src/server/origin/wsOrigin.ts`)፦ የResponses WebSocket
-(`/v1/responses`) እና፣ OmniRoute በ`npm start` / `npm run dev` ሲሰራ፣
-`/v1/chat/completions`፣ `/v1/messages` እና `/v1/responses`ን እንደ frames የሚያስተላልፈው
-የ`/v1/ws` እና `/api/v1/ws` ድልድይ። ድልድዩ ውሳኔውን ከ`/api/v1/ws?handshake=1` ይጠይቃል፣ እና ያ route
-ፍተሻውን ካላካሄደ በስተቀር ማሻሻያ (upgrade) ለማድረግ እምቢ ይላል። አንድ handshake ተቀባይነት የሚያገኘው፦
+አሳሾች አይተገበሩም። CORS ወደ WebSocket, ስለዚህ የ WebSocket የማጣቀሻ ውጤትን የሚመልሱ ማጓጓዣዎች የእጅ መጨባበጥን ይፈትሹ `Origin` እራሳቸው (`src/server/origin/wsOrigin.ts`): ምላሾች WebSocket (`/v1/responses`) እና መቼ OmniRoute ያልፋል `npm start` / `npm run dev`፣ የ `/v1/ws` እና `/api/v1/ws` ድልድይ, የትኛው ጅረቶች `/v1/chat/completions`, `/v1/messages` እና `/v1/responses` እንደ ክፈፎች. ድልድዩ ይጠይቃል `/api/v1/ws?handshake=1` ለፍርዱ እና ያ መንገድ ቼኩን እስካልሄደ ድረስ ለማሻሻል ፈቃደኛ አይሆንም። የማረጋገጫ መስፈርቶች አሁንም በተናጥል ይተገበራሉ። የመነሻ ማረጋገጫው ሲያልፍ፡-
 
-- ምንም `Origin` header ከሌለው (Codex CLI፣ SDKዎች እና ሌሎች የአሳሽ ያልሆኑ clients)፤
-- `Origin`ው ከላይ ባለው የፈቃድ ዝርዝር ከተፈቀደ (`CORS_ALLOWED_ORIGINS`፣ የ`corsOrigins` ቅንብር፣
-  `CORS_ORIGIN`፣ `CORS_ALLOW_ALL`)፤
-- `Origin`ው ከOmniRoute የራሱ ይፋዊ origins አንዱ ከሆነ (የተዋቀረው ይፋዊ መሰረታዊ URL፣ የታመነ proxy
-  የሚያስተላልፈው origin፣ ወይም እንደ IP literal ወይም `localhost` የተሰጠ ቀጥተኛ loopback/LAN አስተናጋጅ —
-  የዳሽቦርዱ የለውጥ ፍተሻ የሚጠቀምባቸው ተመሳሳይ እጩዎች)፤ ወይም
-- ልክ እንደ HTTP `/v1/*` ገጽታው ትክክለኛ API key ከያዘ።
+- `Origin` ራስጌ የለውም (Codex CLI, SDKs እና ሌሎች አሳሽ ያልሆኑ ደንበኞች);
+- `Origin` ከላይ ባለው የተፈቀደ ዝርዝር (`CORS_ALLOWED_ORIGINS`, የ `corsOrigins` ቅንብር, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` ከ OmniRoute ህዝባዊ መነሻዎች አንዱ ነው (የተዋቀረው የህዝብ መሰረት URL፣ የታመነ ተኪ የተላለፈ ምንጭ፣ ወይም ቀጥተኛ loopback/LAN አስተናጋጅ እንደ IP በጥሬው ወይም `localhost` — የተሰጠው ተመሳሳይ እጩ ዳሽቦርድ ሚውቴሽን ቼክ ይጠቀማል)። ወይም
+- ልክ እንደ HTTP `/v1/*` ወለል ላይ ልክ የሆነ API ቁልፍ ይይዛል።
 
-ሌላ ማንኛውም ነገር `403 ws_origin_forbidden` ይደርሰዋል። የዳሽቦርድ session cookie የውጭ `Origin`ን ነፃ
-አያደርግም፣ ምክንያቱም አሳሹ ለማንኛውም ገጽ socket ያያይዘዋል። በሌላ port ላይ ያለ `localhost` እንደ ተመሳሳይ origin
-አይቆጠርም፤ እንደነዚህ ያሉ የልማት originsን ወደ `CORS_ALLOWED_ORIGINS` ያክሉ።
+ሌላ ማንኛውም ነገር `403 ws_origin_forbidden` ያገኛል. የዳሽቦርድ ክፍለ ጊዜ ኩኪ የውጭ ዜጋ `Origin` ነፃ አያደርገውም ፣ ምክንያቱም አሳሹ ከማንኛውም ገጽ ሶኬት ጋር ስለሚያያዝ። `localhost` በሌላ ወደብ ላይ እንደ ተመሳሳይ-መነሻ አይቆጠርም; እንደዚህ ያሉ የዴቭ መነሻዎችን ወደ `CORS_ALLOWED_ORIGINS` ያክሉ።
 
-## ምሳሌ፦ በOmniRoute ፊት ያለ reverse proxy
+## ምሳሌ፡ ተገላቢጦሽ ፕሮክሲ ከ OmniRoute ፊት ለፊት
 
-CORS በOmniRoute ራሱ የሚተገበር ስለሆነ፣ proxyው በአጠቃላይ
-የ`Access-Control-*` headers ማከል ወይም እንደገና መጻፍ **የለበትም** (ድርብ headers አሳሾችን ያበላሻሉ)። TLSን ያቋርጡ
-እና ወደፊት ያስተላልፉ — OmniRoute preflightን እንዲመልስ ይተዉት፦
+CORS በራሱ በ OmniRoute ተፈጻሚ ነው፣ ስለዚህ ተኪው በአጠቃላይ አለበት።**አይደለም** `Access-Control-*` ራስጌዎችን ያክሉ ወይም እንደገና ይፃፉ (ድርብ ራስጌዎች የተሰበሩ አሳሾች)። TLS ያቋርጡ እና — አስተላልፍ OmniRoute ቅድመ በረራውን ይመልስ
 
 ```nginx
-# nginx — ወደ OmniRoute ያስተላልፉ፤ Access-Control-*ን እዚህ አያስገቡ
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # የማስተላለፊያ headersን ያቆዩ፦ በተመሳሳይ host ላይ ያለ proxy ከloopback ይገናኛል፣ እና እነሱ
-    # ደዋዩ የአካባቢው operator እንዳልሆነ ለOmniRoute የሚገልጹ ናቸው። ከእነሱ ምንም የማይጨምር proxy
-    # እያንዳንዱን የርቀት ደዋይ የአካባቢ እንዲመስል ያደርጋል። X-Forwarded-Forን ወደ 127.0.0.1 በፍጹም አያዋቅሩ።
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-የተፈቀዱ የአሳሽ originsን በproxyው ሳይሆን በOmniRoute (`CORS_ALLOWED_ORIGINS` ወይም
-በደህንነት ትር) ውስጥ ያዋቅሩ።
+የተፈቀደውን የአሳሽ አመጣጥ በ OmniRoute (`CORS_ALLOWED_ORIGINS` ወይም የሴኪዩሪቲ ትር) ውስጥ ያቀናብሩ፣ በፕሮክሲ ውስጥ አይደለም።
 
-## የምንጭ ፋይሎች
+## ምንጭ ፋይሎች
 
-| ጉዳይ                                 | ፋይል                                                                  |
-| ----------------------------------- | -------------------------------------------------------------------- |
-| የAllowlist ማጣራት + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
-| የMiddleware ትግበራ (ብቸኛ የእውነት ምንጭ)    | `src/server/authz/pipeline.ts`                                       |
-| Settings → runtime መነሻ ማስገባት        | `src/lib/config/runtimeSettings.ts`                                  |
-| ለdashboardው የruntime ሁኔታ            | `src/app/api/settings/authz-inventory/route.ts`                      |
-| የDashboard ማስጠንቀቂያ ባነር              | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| የCORS Allowed Origins መስክ           | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| የCloud-Agent በየroute CORS (ልዩ ሁኔታው) | `src/lib/cloudAgent/api.ts`                                          |
-| የWebSocket handshake `Origin` ፍተሻ   | `src/server/origin/wsOrigin.ts`                                      |
+| ስጋት                               | ፋይል                                                                  |
+| --------------------------------- | -------------------------------------------------------------------- |
+| የፈቃድ ዝርዝር ጥራት + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
+| ሚድልዌር መተግበሪያ (ነጠላ የእውነት ምንጭ)      | `src/server/authz/pipeline.ts`                                       |
+| ቅንብሮች → የአሂድ መነሻ መርፌ              | `src/lib/config/runtimeSettings.ts`                                  |
+| ለዳሽቦርዱ የሩጫ ጊዜ ሁኔታ                 | `src/app/api/settings/authz-inventory/route.ts`                      |
+| ዳሽቦርድ ማስጠንቀቂያ ባነር                 | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS የተፈቀዱ መነሻዎች መስክ              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| የክላውድ ወኪል በየመንገድ CORS (ከዚህ በስተቀር) | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket የመጨባበጥ `Origin` ቼክ      | `src/server/origin/wsOrigin.ts`                                      |
 
-## ተጨማሪ ይመልከቱ
+## በተጨማሪም ይመልከቱ
 
-- [የመንገድ ጥበቃ ደረጃዎች](./ROUTE_GUARD_TIERS.md) — spawn ማድረግ ለሚችሉ መንገዶች የloopback ማስገደጃ (የተለየ፣ አጋዥ ቁጥጥር)።
-- [የፈቃድ መመሪያ](../architecture/AUTHZ_GUIDE.md) — ሙሉው የauth ቧንቧ መስመር።
+- [የመንገድ ጠባቂ Tiers](./ROUTE_GUARD_TIERS.md) — loopback ማስፈጸሚያ ለስፔን ለሚችሉ መንገዶች (የተለየ፣ ተጨማሪ ቁጥጥር)።
+- [የፈቃድ መመሪያ](../architecture/AUTHZ_GUIDE.md) — ሙሉ የማረጋገጫ ቧንቧ መስመር።

@@ -393,7 +393,7 @@ Utilise `wreq-js` pour générer des empreintes TLS similaires à celles des nav
 
 ### Correspondance de l’empreinte CLI
 
-Le **bouton d’activation de l’empreinte CLI** (`Paramètres → Sécurité`) réorganise les en-têtes HTTP et les champs du corps JSON pour correspondre exactement à la signature des binaires CLI natifs (Claude Code, Codex, etc.). Cette fonctionnalité s’applique **en complément** du proxy :
+Le **bouton d’activation de l’empreinte CLI** (`Settings → Security`) réorganise les en-têtes HTTP et les champs du corps JSON pour correspondre exactement à la signature des binaires CLI natifs (Claude Code, Codex, etc.). Cette fonctionnalité s’applique **en complément** du proxy :
 
 ```
 Votre IP (bloquée) → IP du proxy (États-Unis) → API du fournisseur

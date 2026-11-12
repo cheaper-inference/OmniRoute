@@ -488,7 +488,7 @@ Ta obravnava:
 
 | Datoteka                      | Namen                                                 |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Register modelov klepeta prek kataloga 381 ponudnikov |
+| `providerRegistry.ts`         | Register modelov klepeta prek kataloga 388 ponudnikov |
 | `providerModels.ts`           | Vzdevki modela, preslikava formata                    |
 | `constants.ts`                | Časovne omejitve, omejitve, statusne kode             |
 | `defaultThinkingSignature.ts` | Privzeti podpis razmišljanja Claude                   |

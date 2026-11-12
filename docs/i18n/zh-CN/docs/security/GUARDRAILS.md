@@ -17,122 +17,259 @@
 
 ## 内置护栏
 
-注册表在导入时按优先顺序自动加载六个护栏（请参阅`registry.ts` → `registerDefaultGuardrails()`）：
+注册表在导入时会按优先级顺序自动加载六个护栏
+（参见 `registry.ts` → `registerDefaultGuardrails()`）：
 
-| 优先事项 | 姓名                | 阶段           | 文件                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| 优先级 | 名称                | 阶段           | 文件                  |
+| ------ | ------------------- | -------------- | --------------------- |
+| `5`    | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
+| `6`    | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
+| `7`    | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
+| `10`   | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
+| `20`   | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
+| `95`   | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-运行较低优先级的号码**第一的**。
+优先级数字越小，**越先**运行。
 
-### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
+### 视觉桥 Vision Bridge（`visionBridge.ts`）—— 模态桥 PR-1
 
-GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false` registry/spec数据。 GLM 5.3 Flash 变体仍然是原生视觉型号。 Claude Code的`/v1/messages`路由进入共享`handleChat`预调用护栏链**前**Claude 到 OpenAI 的翻译；嵌套的`Read`工具结果图像必须在翻译将其提升为OpenAI `image_url`内容 (#17069) 之前进行描述或处理。
+GLM 5.3 基础模型与 `glm-5.3-{low,high,max}` 在注册表/规格元数据中带有显式的
+`supportsVision:false`。GLM 5.3 Flash 各变体仍是原生视觉模型。
+Claude Code 的 `/v1/messages` 路由会在 Claude 到 OpenAI 的转换**之前**进入共享的
+`handleChat` 调用前护栏链；嵌套的 `Read` 工具结果图像必须在该转换将它们提升为
+OpenAI `image_url` 内容之前完成描述或处理 (#17069)。
 
-拦截针对的图像承载请求**非视觉模型**并将整个请求重新路由到支持视觉的模型，或者在上游调用之前用可配置视觉模型生成的文本描述替换图像部分。这使得纯文本提供者能够透明地处理多模式负载。
+它会拦截发往**非视觉模型**的携图请求，并且要么将整个请求重新路由到具备视觉能力的模型，
+要么在上游调用之前用可配置视觉模型生成的文本描述替换图像部分。
+这使得纯文本提供者能够透明地处理多模态负载。
 
-流动：
+流程：
 
-1. 如果目标模型已经支持视觉，则跳过（除非它出现在强制桥列表`isVisionBridgeForcedModel`中）。
-2. 通过`extractImageParts(messages)` (`visionBridgeHelpers.ts`) 提取图像部分，委托给**统一媒体检测器**`open-sse/utils/mediaParts.ts` —的`detectMediaParts()`与组合兼容性过滤器共享单一事实来源。提取被列入`replaceImageParts`可以拼接回来的形状（提取↔替换合约）： OpenAI `image_url`、 Anthropic base64 `source.type:"base64"`、 Anthropic URL `source.type:"url"`和 Responses API `input_image`。嵌套在Claude代码`tool_result.content`和响应工具输出中的匹配图像也会被提取并替换到其原始路径；仅指示符形状是组合过滤器材料，不会被提取。如果没有找到则跳过。
-3. 通过`resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) 解析运行时配置：新的`modalityBridge*`设置键 win；遗留的`visionBridge*`密钥仍然是**单周期回退**（回滚窗口）。当桥被禁用时，在任何媒体遍历之前跳过。
-4. 模式选择器（`modalityBridgeVisionMode`，见下表）决定重新路由与描述。重新路由返回`modifiedPayload`仅交换`model` ，加上元`{ rerouted, fromModel, toModel, imagesKept }`。
-5. 描述路径：在`maxImages`上捕获图像，编写任务感知提示，查阅描述缓存，调用视觉模型**并联**(`Promise.allSettled`)，并在其位置注入`[Image N]: <description>`文本部分。失败的描述会产生`null`：为unknown/vision-capable目标（#4012）保留原始图像，但**已确认的纯文本直接目标**或者零视觉组合为每个未描述的图像获取显式的`(unavailable — no vision-capable provider connected)`文本存根，包括部分失败和超出描述调用上限 (#17069) 的图像。现有的全部失败的组合描述后备仍然存在（#8430）。
-6. 返回`modifiedPayload` +元（`imagesProcessed`、 `descriptions`、 `processingTimeMs`、 `visionModel`）。
+1. 若目标模型已支持视觉则跳过（除非它出现在强制桥接列表
+   `isVisionBridgeForcedModel` 中）。
+2. 通过 `extractImageParts(messages)`（`visionBridgeHelpers.ts`）提取图像部分，
+   该函数委托给 `open-sse/utils/mediaParts.ts` 中的**统一媒体检测器**
+   `detectMediaParts()`——与组合（combo）兼容性过滤器共享的单一事实来源。
+   提取范围以允许名单限定为 `replaceImageParts` 能够拼回的结构
+   （即 extract↔replace 契约）：OpenAI `image_url`、Anthropic base64
+   `source.type:"base64"`、Anthropic URL `source.type:"url"`，以及 Responses
+   API `input_image`。嵌套在 Claude Code `tool_result.content` 与 Responses
+   工具输出中的匹配图像也会被提取，并在其原始路径处替换；
+   仅作指示用途的结构属于组合过滤器的素材，不会被提取。
+   未找到则跳过。
+3. 通过 `resolveVisionBridgeRuntimeSettings()`
+   （`src/shared/constants/modalityBridgeDefaults.ts`）解析运行时配置：新的
+   `modalityBridge*` 设置键优先生效；旧的 `visionBridge*` 键保留为
+   **单周期回退**（回滚窗口）。桥接被禁用时，在任何媒体遍历之前即跳过。
+4. 模式选择器（`modalityBridgeVisionMode`，见下表）决定重新路由还是描述。
+   重新路由返回的 `modifiedPayload` 仅替换了 `model`，并附带元数据
+   `{ rerouted, fromModel, toModel, imagesKept }`。
+5. 描述路径：将图像数量限制在 `maxImages` 以内，组装任务感知提示词，
+   查询描述缓存，**并行**调用视觉模型（`Promise.allSettled`），并在原位置注入
+   `[Image N]: <description>` 文本部分。描述失败时得到 `null`：对于未知或具备
+   视觉能力的目标，原始图像会被保留 (#4012)；但对于**已确认的纯文本直接目标**
+   或零视觉组合，每一张未被描述的图像都会获得显式的
+   `(unavailable — no vision-capable provider connected)` 文本占位符，
+   包括部分失败以及超出描述调用上限的图像 (#17069)。
+   现有的组合描述全部失败时的回退逻辑保持不变 (#8430)。
+6. 返回 `modifiedPayload` 与元数据（`imagesProcessed`、`descriptions`、
+   `processingTimeMs`、`visionModel`）。
 
-#### 模式选择器 (`modalityBridgeVisionMode`)
+#### 模式选择器（`modalityBridgeVisionMode`）
 
-| 模式       | 默认 | 行为                                                                                                                                                                                   |
-| ---------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔    | 传统启发式，未受影响（#6640/#7204）：非组合/`auto/`模型重新路由到最佳视觉模型，除非原始模型已经具有可用的凭据（然后描述）；组合目标总是描述。                                          |
-| `describe` |      | 始终描述—完全跳过重新路由块；用户选择的模型总是会回答。                                                                                                                                |
-| `reroute`  |      | 强制重新路由：绕过 keep-credentialed-model 防护。改道——**目标**当不存在可用的视觉目标时，Credential Guard 仍然应用— ，桥会阻止并显示明显的错误，而不是描述或发送原始图像到纯文本目标。 |
+| 模式       | 默认值 | 行为                                                                                                                                                                                     |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔      | 传统启发式逻辑，保持不变 (#6640/#7204)：非组合/`auto/` 模型会重路由到最佳视觉模型，除非原始模型已拥有可用凭据（此时执行 describe）；组合目标始终执行 describe。                          |
+| `describe` |        | 始终 describe —— 完全跳过重路由块；始终由用户选择的模型作答。                                                                                                                            |
+| `reroute`  |        | 强制重路由：绕过"保留已配置凭据模型"的守卫。重路由**目标**的凭据守卫仍然生效——当不存在可用的视觉目标时，桥接会以明确的错误中断，而不是执行 describe 或将原始图像发送给仅支持文本的目标。 |
 
-强制模式短路**前**自动启发式运行； `auto`行为与pre-PR-1护栏字节相同。
+强制模式在 auto 启发式逻辑运行**之前**短路；`auto` 行为与 PR-1 之前的防护逻辑
+逐字节一致。
 
-#### API 密钥范围 (`visionBridgeKeyScope.ts`)
+#### API 密钥作用域 (`visionBridgeKeyScope.ts`)
 
-当调用者的API密钥限制`allowedConnections`、配额池 (`allowedQuotas`) 或模型 (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`) 时，桥接器仅在密钥可能使用的连接上选择重新路由并描述密钥可能使用的模型。然后，描述调用始终使用`x-omniroute-self-loop-key-id`标头进行OmniRoute自循环，因此接收聊天请求会再次强制执行该密钥的连接和模型策略。 `enforceApiKeyPolicy()`仅尊重该标头和自环承载，因此它只能缩小访问范围，并且拒绝无法解析的 id。
+当调用方的 API 密钥限制了 `allowedConnections`、配额池
+（`allowedQuotas`）或模型（`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`）时，桥接只会在该密钥
+可使用的连接上，选择该密钥可使用的重路由模型和 describe 模型。随后 describe 调用
+始终通过带有 `x-omniroute-self-loop-key-id` 请求头的 OmniRoute 自环（self-loop）
+进行，因此接收端的 chat 请求会再次强制执行该密钥的连接和模型策略。
+`enforceApiKeyPolicy()` 仅在同时存在自环 bearer 凭据时才认可该请求头，因此它
+只能缩小访问范围；无法解析的 id 将被拒绝。
 
-如果密钥不允许使用视觉模型，则**已确认的纯文本目标**使用明确的HTTP 400 在本地拒绝图像请求，而不是将图像字节转发到无能力的上游 (#17069)。对于具有未知或本机视觉功能的目标，描述路径保留其先前的故障打开行为（meta `{ skipped: true, reason: "no_permitted_vision_model" }`）。没有密钥的请求以及没有这些限制的密钥的行为与以前完全相同。
+如果该密钥不被允许使用任何视觉模型，**已确认的纯文本目标**会在本地以
+明确的 HTTP 400 拒绝图像请求，而不是将图像字节转发给不具备该能力的上游 (#17069)。
+对于视觉能力未知或原生支持视觉的目标，describe 路径保留之前的
+失败开放（fail-open）行为（meta `{ skipped: true, reason: "no_permitted_vision_model" }`）。
+没有密钥的请求，以及没有这些限制的密钥，行为与之前完全一致。
 
-#### 任务感知描述提示（`modalityBridgeVisionTaskAware`）
+#### 任务感知的 describe 提示词 (`modalityBridgeVisionTaskAware`)
 
-默认**真的**。 `composeVisionPrompt()` (`visionBridgeHelpers.ts`) 附加文本**最后一条用户消息**（截断为 500 个字符）到基本描述提示，将描述转向用户实际询问的内容（codex-vision-proxy 模式）并要求视觉模型转录可见文本。当关闭—标志或没有用户文本—时，基本提示符将保持不变。
+默认为 **true**。`composeVisionPrompt()`（`visionBridgeHelpers.ts`）会将
+**最后一条用户消息**的文本（截断至 500 个字符）附加到基础 describe
+提示词之后，使描述倾向于用户实际询问的内容（codex-vision-proxy 模式），
+并要求视觉模型转录可见文本。当该标志关闭——或没有用户文本——时，
+基础提示词原样使用。
 
-对于每个caller/provider，描述自循环自己的 OpenAI 兼容请求（`callVisionModelSingle()` in `visionBridgeHelpers.ts`）始终无条件请求`image_url.detail: "high"` — ，而不是在任何客户端信号上门控。低细节采样会降低该提示所要求的文本转录任务的OCR准确性，因此无论原始入站请求使用什么细节级别，描述调用本身始终要求高细节。这只影响内部描述请求体；它不会更改OmniRoute在主请求—上转发调用者自己的`image_url.detail`方式，默认值单独应用，并且仅适用于`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) 中检测到的OpenCode客户端。描述自循环的Anthropic有线格式分支没有`detail`字段，并且不受任一默认值的影响。
+describe 自环自身的 OpenAI 兼容请求（`visionBridgeHelpers.ts` 中的
+`callVisionModelSingle()`）始终请求 `image_url.detail: "high"` ——
+无条件地，对每个调用方/提供者都是如此，不受任何客户端信号控制。
+低细节采样会降低 OCR 准确率，而这正是该提示词所要求的文本转录任务，
+因此无论原始入站请求使用了什么细节级别，describe 调用本身始终请求
+高细节。这仅影响内部 describe 请求体；它不会改变 OmniRoute 在主请求上
+转发调用方自己的 `image_url.detail` 的方式——该默认值是单独应用的，
+并且仅针对检测到的 OpenCode 客户端，在 `defaultImageDetail()`
+（`open-sse/handlers/chatCore/upstreamBody.ts`）中。describe 自环的
+Anthropic 线格式分支没有 `detail` 字段，不受任一默认值的影响。
 
-#### 描述输出上限（`modalityBridgeVisionMaxChars`）
+#### Describe 输出上限 (`modalityBridgeVisionMaxChars`)
 
-| 钥匙                           | 默认 | 范围            |
-| ------------------------------ | ---- | --------------- |
-| `modalityBridgeVisionMaxChars` | `0`  | `0`或 100–50000 |
+| 键                             | 默认值 | 范围             |
+| ------------------------------ | ------ | ---------------- |
+| `modalityBridgeVisionMaxChars` | `0`    | `0` 或 100–50000 |
 
-`0` （默认）意味着**没有上限**— `callVisionModel()`返回的描述未经修改地传递，保留现有行为。 100–50000 范围内的任何值都会在将描述拼接回`[Image N]: <description>` （ `src/lib/guardrails/visionBridge.ts`中的`VisionBridgeGuardrail.preCall()` ）之前截断带有`…`后缀的描述。对于细节繁重的OCR任务，下游模型需要完整转录，请提高此值；降低它以限制闲聊视觉模型上的令牌使用。仪表板字段位于“Vision”选项卡的“高级”面板（ `ModalityBridgeVisionTab.tsx`中的`modality-bridge-max-chars` ）中，并将 1 到 99 之间的任何值限制在 100 下限，同时保留显式`0`不变— `0`本身就是一个有效的Zod值 (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`)，而不仅仅是“未设置”的默认值。
+`0`（默认）表示**无上限**——`callVisionModel()` 返回的描述将原样
+传递，保留现有行为。100–50000 范围内的任何值都会截断描述并附加
+`…` 后缀，然后再拼回为 `[Image N]: <description>`
+（`src/lib/guardrails/visionBridge.ts` 中的 `VisionBridgeGuardrail.preCall()`）。
+对于下游模型需要完整转录内容的细节密集型 OCR 任务，可提高此值；
+降低它可限制话多的视觉模型的 token 用量。仪表板字段位于 Vision 选项卡的
+Advanced 面板中（`ModalityBridgeVisionTab.tsx` 中的
+`modality-bridge-max-chars`），它会将 1 到 99 之间的任何值向上钳制到
+100 的下限，同时保留显式的 `0` 不变——`0` 本身就是一个有效的 Zod 值
+（`z.union([z.literal(0), z.number().int().min(100).max(50000)])`），
+而不仅仅是"未设置"的默认值。
 
-#### 描述缓存（`modalityBridge/bridgeCache.ts`）
+#### Describe 缓存 (`modalityBridge/bridgeCache.ts`)
 
-用于描述输出的内存中LRU + TTL缓存，在进程范围内共享。具有长度前缀帧的密钥= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （无字段边界冲突）。模型组件是**配置好的**桥接模型，而不是实际回答— `callVisionModel`模型可能会在内部回退，并且每次尝试键入都会使缓存碎片化。失败的描述永远不会被缓存。设置：
+用于 describe 输出的内存内 LRU + TTL 缓存，在整个进程范围内共享。
+键 = `sha256(imageRef + composedPrompt + configuredBridgeModel)`，采用
+长度前缀分帧（无字段边界冲突）。模型部分是**配置的**桥接模型，
+而不是实际作答的模型——`callVisionModel` 可能会在内部回退，而按
+每次尝试做键会使缓存碎片化。失败的 describe 永远不会被缓存。设置：
 
-| 钥匙                            | 默认   | 范围    |
+| 键                              | 默认值 | 范围    |
 | ------------------------------- | ------ | ------- |
 | `modalityBridgeCacheEnabled`    | `true` | —       |
 | `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`  | 10–5000 |
 
-#### 远程图像归一化（自循环describe/base64获取）
+#### 远程图像归一化（自循环 describe/base64 获取）
 
-当桥获取一个**偏僻的**图像本身— Anthropic描述自调用和 claude-wire-format Base64 转换 (`ensureBase64ImagesForClaudeWire`)，两者均通过`visionBridgeHelpers.ts` —中的`fetchRemoteImageAsDataUri()`生成的数据URI在嵌入视觉模型请求之前通过`normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) 传递。超大图像被缩小到**2048px 长边**（匹配调整大小上限OpenAI/Anthropic已经应用于服务器端），这会在不改变视觉模型所看到的内容的情况下削减上传bytes/latency 。调整大小使用`sharp`，通过动态导入加载：在其本机二进制文件无法加载的平台上， `normalizeDataUri()`**从不抛出**—它会回退到原始字节的直通，因此describe/base64-conversion路径始终保持工作。非图像字节（未返回可解码图像的提取）也会原封不动地传递。这种标准化的范围仅限于桥接器为其自己的自调用—获取的图像，它永远不会应用于调用者的原始直通有效负载，这与仅选择加入突变原则（硬规则#20）一致。
+当桥接器自行获取**远程**图像时——Anthropic describe 自调用以及 claude 线格式（wire format）的 base64 转换
+（`ensureBase64ImagesForClaudeWire`），两者都通过
+`visionBridgeHelpers.ts` 中的
+`fetchRemoteImageAsDataUri()`——生成的 data
+URI 会在嵌入视觉模型请求之前先经过 `normalizeDataUri()`
+（`open-sse/utils/imageNormalize.ts`）处理。尺寸过大的图像会被缩放到 **2048px 长边**（与
+OpenAI/Anthropic 在服务端已应用的缩放上限一致），从而在不改变视觉模型所见内容的前提下减少
+上传字节数/延迟。缩放使用 `sharp`，通过动态导入加载：在其原生
+二进制无法加载的平台上，`normalizeDataUri()` **绝不会抛出异常**——它会回退为
+直接透传原始字节，因此 describe/base64 转换路径始终能正常工作。非图像字节（一次
+未能返回可解码图像的获取请求）同样会原样透传。此归一化仅作用于
+桥接器为自身自调用而获取的图像——它永远不会应用于调用方的原始透传负载，
+这与仅可选启用的变更原则（硬性规则 #20）保持一致。
 
-#### 设置架构+迁移
+#### 设置 Schema + 迁移
 
-新的`modalityBridge*`密钥在`updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`) 中经过 Zod 验证： `modalityBridgeVisionEnabled`、 `modalityBridgeVisionMode`、 `modalityBridgeVisionModel`、 `modalityBridgeVisionTaskAware`、 `modalityBridgeVisionPrompt`、 `modalityBridgeVisionTimeout`、 `modalityBridgeVisionMaxImages`、 `modalityBridgeVisionMaxChars`、 `modalityBridgeCache*`三重奏和音频桥使用的`modalityBridgeAudio*`组。迁移`141_modality_bridge_settings.sql`将现有的旧`visionBridge*`值复制到匹配的新键（幂等，永远不会覆盖运算符设置的`modalityBridge*`值）；旧密钥仍然被接受作为一个发布周期的读取回退。
+新的 `modalityBridge*` 键在 `updateSettingsSchema`
+（`src/shared/validation/settingsSchemas.ts`）中通过 Zod 校验：`modalityBridgeVisionEnabled`、
+`modalityBridgeVisionMode`、`modalityBridgeVisionModel`、
+`modalityBridgeVisionTaskAware`、`modalityBridgeVisionPrompt`、
+`modalityBridgeVisionTimeout`、`modalityBridgeVisionMaxImages`、
+`modalityBridgeVisionMaxChars`、`modalityBridgeCache*` 三件套，以及
+Audio Bridge 使用的 `modalityBridgeAudio*` 组。迁移
+`141_modality_bridge_settings.sql` 将现有的旧版
+`visionBridge*` 值复制到对应的新键（幂等，绝不覆盖
+运维人员已设置的 `modalityBridge*` 值）；旧版键仍作为
+读取回退被接受，为期一个发布周期。
 
-#### 透明度标题+统计数据
+#### 透明性标头 + 统计信息
 
-描述转换的响应携带`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` （由`modalityBridge/bridgeStats.ts`中的`buildModalityBridgeHeader()`构建，由`src/sse/handlers/chatHelpers.ts`中的`withModalityBridgeHeader()`标记）。重新路由的请求获取**不**header —有效负载未受影响，并且模型交换已在响应正文的`model`字段中可见。
+经过 describe 转换的响应携带
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+（由 `modalityBridge/bridgeStats.ts` 中的
+`buildModalityBridgeHeader()` 构建，
+由 `src/sse/handlers/chatHelpers.ts` 中的
+`withModalityBridgeHeader()` 盖章附加）。
+被改道的请求**不会**获得该标头——负载未被改动，且模型
+切换已在响应体的 `model` 字段中可见。
 
-`GET /api/modality-bridge/stats` （管理身份验证，与`GET /api/settings`相同层）返回`vision`、 `audio`和`video`的内存中每种模式计数器`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` 。 `averageLatencyMs`使用`latencySamples`（不是所有尝试）作为其分母；没有计时的操作不会产生零毫秒样本。 `bridged`仍然是成功转换的向后兼容别名；失败的尝试不会增加它。根据设计，计数器在进程重新启动时重置（遥测，而不是会计）。
+`GET /api/modality-bridge/stats`（管理鉴权，与
+`GET /api/settings` 同级）返回按模态分类的内存计数器
+`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }`，分别对应 `vision`、`audio` 和
+`video`。`averageLatencyMs` 以 `latencySamples` 而非全部 attempts 作为
+分母；没有计时的操作不会凭空捏造一个零毫秒
+样本。`bridged` 仍是成功转换的向后兼容别名；
+失败的尝试不会使其递增。
+计数器在进程重启时按设计重置
+（属于遥测，而非账务）。
 
-#### 仪表板配置
+#### 仪表盘配置
 
-专用仪表板页面是`/dashboard/settings/modality-bridge`。其 URL 可寻址`Vision`、 `Audio`和`Video`选项卡在切换`tab`值时保留查询参数。 Vision 选项卡公开启用、模式、模型选择（包括自动默认值）、任务感知提示、高级timeout/image/description-length/cache限制、运行时计数器和受保护的示例请求。 “音频”选项卡也是实时的：它公开支持、具有自动功能的仅 STT 模型选择器、 timeout/max-clip限制、音频计数器和`input_audio`样本测试。 “视频”选项卡具有功能性：它报告FFmpeg/ffprobe运行时状态—四种显式UI状态之一（探测正在运行或无法完成时的`unknown` 、客户端跳过探测的非环回仪表板主机上的`restricted` 、探测到并确认丢失后的`unavailable` ，或带有FFmpeg/ffprobe版本的`available` ） —保留enable/model/frame/video/timeout限制，将模型选择器过滤为支持视觉的模型，并公开视频计数器。
+专用仪表盘页面为
+`/dashboard/settings/modality-bridge`。其可通过 URL 寻址的 `Vision`、`Audio`
+和 `Video` 标签页在切换 `tab` 值时保留查询参数。
+Vision 标签页提供启用开关、模式、模型选择（包括自动
+默认值）、任务感知提示词、高级超时/图像/描述长度/缓存
+上限、运行时
+计数器，以及一个受保护的示例请求。Audio 标签页也已上线：它提供
+启用开关、仅 STT 的模型选择器（含 Auto）、超时/片段时长上限、音频
+计数器，以及一个 `input_audio` 示例测试。Video 标签页具备完整功能：它报告
+FFmpeg/ffprobe 运行时状态——四种明确的 UI 状态之一（探测进行中或
+无法完成时为 `unknown`；在非回环
+仪表盘主机上探测在客户端被跳过时为 `restricted`；探测后
+确认缺失时为 `unavailable`；或附带 FFmpeg/ffprobe 版本信息的 `available`）——持久化
+启用/模型/帧数/视频/超时上限，将模型选择器过滤为具备视觉能力的
+模型，并提供视频计数器。
 
-之前AI设置下的Vision Bridge卡是新页面的兼容链接；它不再拥有该表格的第二份副本。媒体提供者还将图像到文本和语音到文本工作流程链接到相应的模态桥选项卡，而无需删除现有的语音到文本游乐场。
+此前位于 AI 设置下的 Vision Bridge 卡片现在是指向
+新页面的兼容性链接；它不再持有表单的第二份副本。Media Providers 也
+将 Image-to-Text 和 Speech-to-Text 工作流链接到相应的 Modality
+Bridge 标签页，同时不移除现有的 Speech-to-Text 演练场。
 
-**Self-loop admission bypass:** when the describe call routes through OmniRoute's own `/v1` self-loop (non-standard provider model), the sub-request sends `x-omniroute-admission-bypass: internal` and is authenticated with the resolved self-loop credential — the local `sk_omniroute` sentinel in local mode, or the operator-configured `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key (#1350) so `REQUIRE_API_KEY=true` deployments can still run the describe call. The bypass is only honored for those exact credentials, so external clients cannot use the header to skip admission.
+**自循环准入绕过：** 当 describe 调用通过 OmniRoute
+自身的 `/v1` 自循环路由时（非标准提供方模型），子请求会发送
+`x-omniroute-admission-bypass: internal`，并使用解析出的
+自循环凭据进行认证——本地模式下的本地 `sk_omniroute` 哨兵值，或
+运维人员配置的 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 环境变量键（#1350），从而
+使 `REQUIRE_API_KEY=true` 的部署仍能运行 describe 调用。该绕过
+仅对这些确切的凭据生效，因此外部客户端无法利用该
+标头跳过准入检查。
 
-旧版默认值位于`src/shared/constants/visionBridgeDefaults.ts`中；新的mode/task-aware/cache默认值和设置解析器位于`src/shared/constants/modalityBridgeDefaults.ts`中。护栏公开了`deps`构造函数选项，因此测试可以注入伪造的`getSettings`和`callVisionModel`实现。
+旧版默认值位于 `src/shared/constants/visionBridgeDefaults.ts`；
+新的模式/任务感知/缓存默认值以及设置解析器位于
+`src/shared/constants/modalityBridgeDefaults.ts`。护栏（guardrail）暴露了一个
+`deps` 构造函数选项，以便测试注入伪造的 `getSettings` 和
+`callVisionModel` 实现。
 
-### 音频桥 (`audioBridge.ts`) —模态桥PR-3
+### Audio Bridge（`audioBridge.ts`）—— Modality Bridge PR-3
 
-在音频聊天请求到达未知接受音频输入的目标之前拦截它们。它永远不会重新路由聊天请求：音频部分通过现有的 OpenAI 兼容的多部分端点进行转录，并且所选的聊天模型继续使用文本转录。
+在携带音频的聊天请求到达未确认接受音频输入的目标之前将其拦截。它绝不会
+改道聊天请求：音频部分通过现有的 OpenAI 兼容 multipart 端点进行
+转写，所选聊天模型继续使用文本转写结果。
 
-流动：
+流程：
 
-1. 通过`getResolvedModelCapabilities()`解析`supportsAudio` 。显式的提供者注册表元数据获胜，然后是静态模型元数据，然后是同步的`modalities_input`。没有`audio`的声明输入列表是`false`；没有能力证据仍然存在`null`。 `false`和`null`都激活保守桥，而`true`绕过它。
-2. 解析`modalityBridgeAudio*`设置并通过共享`detectMediaParts()`检测器从每条消息中提取可拼接的顶级音频部分。支持的线形状为OpenAI `input_audio`、 `audio_url`和`source.media_type: "audio/*"`。检测到嵌套音频以进行路由，但不会被拼接路径删除。工作的上限为`modalityBridgeAudioMaxClips`；后面的部分保持不变。
-3. 尊重已配置的`provider/model`，或让`selectAudioBridgeModel()`按稳定的目录顺序遍历`AUDIO_TRANSCRIPTION_PROVIDERS`并选择具有可用的活动提供者凭证的第一个模型。
-4. `callAudioTranscription()`将base64/data-URI音频转换为多部分`file`，或通过具有DNS固定和 25 MB绑定的仅限公共出站防护下载远程`audio_url` 。然后，它POSTs文件并选择模型到本地`/v1/audio/transcriptions`自循环，并使用`resolveSelfLoopBearer()`进行身份验证。现有的转录路由执行正常的凭证查找、 cooldown/rate-limit处理和提供者调度。
-5. 成功的调用将其部分替换为`[Audio N]: <transcript>`。使用`Promise.allSettled`运行的调用：单个故障保留原始音频部分（#4012合约）。如果每次调用都失败并且目标被证明为`supportsAudio === false`，则这些部分将变成`[Audio N]: (unavailable — no STT provider connected)` （#8430合约）。对于未知目标（`null`），全部失败结果保持不变。没有可用STT凭证的经过验证的纯文本目标会接收相同的显式存根，而不发出网络调用。
+1. 通过 `getResolvedModelCapabilities()` 解析 `supportsAudio`。显式的提供方注册表（provider-registry）元数据优先，其次是静态模型元数据，然后是同步的 `modalities_input`。声明的输入列表中不含 `audio` 则为 `false`；没有任何能力证据时保持为 `null`。`false` 和 `null` 都会激活保守桥接，而 `true` 会绕过桥接。
+2. 解析 `modalityBridgeAudio*` 设置，并通过共享的 `detectMediaParts()` 检测器从每条消息中提取可拼接的顶层音频部分。支持的线上传输格式包括 OpenAI 的 `input_audio`、`audio_url` 和 `source.media_type: "audio/*"`。嵌套音频会被检测以用于路由，但不会被拼接路径移除。工作量受 `modalityBridgeAudioMaxClips` 限制；超出部分保持原样。
+3. 使用配置的 `provider/model`，或让 `selectAudioBridgeModel()` 按稳定的目录顺序遍历 `AUDIO_TRANSCRIPTION_PROVIDERS`，选择第一个具有可用活动提供方凭证的模型。
+4. `callAudioTranscription()` 将 base64/data-URI 音频转换为 multipart `file`，或通过仅公网出站防护（带 DNS 固定和 25 MB 上限）下载远程 `audio_url`。然后它将文件和所选模型 POST 到本地 `/v1/audio/transcriptions` 自循环端点，并使用 `resolveSelfLoopBearer()` 进行认证。现有的转录路由执行常规的凭证查找、冷却/速率限制处理和提供方分发。
+5. 成功的调用会将其对应部分替换为 `[Audio N]: <transcript>`。调用以 `Promise.allSettled` 运行：单个失败会保留该原始音频部分（#4012 契约）。如果所有调用都失败且目标被证明为 `supportsAudio === false`，这些部分将变为 `[Audio N]: (unavailable — no STT provider connected)`（#8430 契约）。对于未知目标（`null`），全部失败的结果保持原样。被证明为纯文本且没有可用 STT 凭证的目标会收到相同的显式占位内容，且不会发起网络调用。
 
-成功的转录使用进程范围的 Modality Bridge LRU/TTL缓存。密钥结合了音频参考、稳定的`audio-transcription`操作标签、以及选定的STT模型；失败永远不会被缓存。音频尝试更新共享`bridged`、 `cacheHits`、 `failures`和`lastUsedAt`计数器。转换后的响应带有`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`；未触及的请求不会接收音频桥段。
+成功的转录使用进程范围的 Modality Bridge LRU/TTL 缓存。缓存键由音频引用、稳定的 `audio-transcription` 操作标签和所选 STT 模型组合而成；失败从不被缓存。音频尝试会更新共享的 `bridged`、`cacheHits`、`failures` 和 `lastUsedAt` 计数器。转换后的响应携带 `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`；未被修改的请求不会携带 Audio Bridge 段。
 
-运行时设置由 DB 支持并经过 Zod 验证：
+运行时设置由数据库支持并经 Zod 验证：
 
-| 钥匙                          | 默认    | 范围         |
-| ----------------------------- | ------- | ------------ |
-| `modalityBridgeAudioEnabled`  | `true`  | —            |
-| `modalityBridgeAudioModel`    | `""`    | 自动或STT ID |
-| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000  |
-| `modalityBridgeAudioMaxClips` | `3`     | 1–10         |
+| 键                            | 默认值  | 范围          |
+| ----------------------------- | ------- | ------------- |
+| `modalityBridgeAudioEnabled`  | `true`  | —             |
+| `modalityBridgeAudioModel`    | `""`    | 自动或 STT ID |
+| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000   |
+| `modalityBridgeAudioMaxClips` | `3`     | 1–10          |
 
-共享缓存仍然由`modalityBridgeCacheEnabled`、 `modalityBridgeCacheTtlMinutes`和`modalityBridgeCacheMaxEntries`控制。
+共享缓存仍由 `modalityBridgeCacheEnabled`、`modalityBridgeCacheTtlMinutes` 和 `modalityBridgeCacheMaxEntries` 控制。
 
 ### 视频桥（`videoBridge.ts`、 `videoBridgePipeline.ts`）
 
@@ -212,8 +349,8 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 运行于**两个都**阶段。
 
-- **`preCall`**克隆有效负载，遍历`system`、 `messages`、 `input`和`prompt` （包括纯字符串项），并将`processPII()` （来自`@/shared/utils/inputSanitizer`）应用于字符串`content`/`text`字段。当`PII_REDACTION_ENABLED=true`时，检测到的PII会在出站负载中进行编辑。这独立于`INPUT_SANITIZER_MODE` （仅控制提示注入策略）。关闭密文后，呼叫会记录检测计数，而不会重写内容。
-- **`postCall`**深度克隆响应，运行`sanitizePIIResponse()`加上 Responses-API-shape masker（`maskResponsesOutput` —覆盖`output_text`和`output[].content[].text`）。如果发生任何编辑，修改后的响应将替换原始响应。
+- **`preCall`**克隆有效负载，遍历`system`、 `messages`、 `input`和`prompt` （包括纯字符串项），并将`processPII()` （来自`@/shared/utils/inputSanitizer`）应用于字符串`content`/`text`字段。当`PII_REDACTION_ENABLED=true`时，检测到的PII会在出站负载中进行编辑。这独立于`INPUT_SANITIZER_MODE` （它仅控制提示注入策略）。关闭密文后，呼叫会记录检测计数，而不会重写内容。
+- **`postCall`**深度克隆响应，运行`sanitizePIIResponse()`加上 Responses-API-shape masker（`maskResponsesOutput` —涵盖`output_text`和`output[].content[].text`）。如果发生任何编辑，修改后的响应将替换原始响应。
 
 护栏永不遮挡；它仅注释（`meta.detections`， `meta.redacted`）或重写。
 
@@ -222,71 +359,98 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 **仪表板→设置→安全→ PII屏蔽**选择_什么_被屏蔽。它不会打开屏蔽：仍然是`PII_REDACTION_ENABLED` （请求）和`PII_RESPONSE_SANITIZATION` （响应+ SSE），默认情况下两者都是关闭的。
 
 - **按类型选择**—内置 ID 列在`src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) 中。未设置意味着每种类型（此设置存在之前的行为）。请求引擎的`ssn_us`模式映射到`ssn`。模板（最小、标准、财务、巴西、 USA、 GDPR、 POPIA、完整）仅填充UI中的复选框。
-- **GDPR和POPIA标识符**—十二个内置 ID，涵盖EU和南非个人标识符（下表）。它们的正则表达式、验证器和管辖权标记位于一张表`src/shared/utils/piiPatterns.ts`中，响应清理器 (`src/lib/piiSanitizer.ts`) 和请求屏蔽器 (`src/shared/utils/inputSanitizer.ts`) 都会使用该表。仅当验证器接受匹配时才会对其进行编辑；仅仅一串数字是远远不够的。在这些 id 存在之前保存缩小选择的操作员将保持其行为，直到勾选新 id。
-- **定制图案**—最多 20 个正则表达式或通配符模式（`*` =最多 64 个非空白字符， `?` = 1 个）。匹配变成`[CUSTOM_REDACTED]`。每个模式都经过`compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`)：最多 500 个字符，标志仅限于`g i m s u`，必须编译，必须通过`safe-regex` （灾难性回溯），并且不得匹配空字符串或密文占位符。保存和测试时会拒绝失败的模式，并且在运行时会跳过失败的存储行而不是进行编译。自定义模式仅在屏蔽打开时运行。
+- **GDPR和POPIA标识符**— 12 个内置 ID，涵盖EU和南非个人标识符（下表）。它们的正则表达式、验证器和管辖权标记位于一张表`src/shared/utils/piiPatterns.ts`中，响应清理器 (`src/lib/piiSanitizer.ts`) 和请求屏蔽器 (`src/shared/utils/inputSanitizer.ts`) 都会使用该表。仅当验证器接受匹配时才会对其进行编辑；仅仅一串数字是远远不够的。在这些 id 存在之前保存缩小选择的操作员将保持其行为，直到勾选新 id。
+- **定制图案**—最多 20 个正则表达式或通配符模式（`*` =最多 64 个非空白字符， `?` = 1 个）。比赛变成`[CUSTOM_REDACTED]`。每个模式都经过`compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`)：最多 500 个字符，标志仅限于`g i m s u`，必须编译，必须通过`safe-regex` （灾难性回溯），并且不得匹配空字符串或密文占位符。保存和测试时会拒绝失败的模式，并且在运行时会跳过失败的存储行而不是进行编译。自定义模式仅在屏蔽打开时运行。
 - **检测计数器**—每个类型计数（从不匹配的值），保存在内存中并在重新启动时重置（`src/lib/pii/piiDetectionStats.ts`）。它们只会在屏蔽开启时增加。
 
-设置位于`key_value`表（命名空间`pii_settings`、 `src/lib/db/piiSettings.ts`）中，并通过 1 秒缓存读取。 API:
+设置位于`key_value`表（命名空间`pii_settings`、 `src/lib/db/piiSettings.ts`）中，并通过 1 秒缓存读取。 API：
 
-| 方法   | 小路                     | 目的                                                        |
-| ------ | ------------------------ | ----------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | 标志状态、 `enabledTypes`、 `customPatterns`、检测计数器    |
-| `PUT`  | `/api/settings/pii`      | 替换`enabledTypes` （`null` =全部） and/or `customPatterns` |
-| `POST` | `/api/settings/pii/test` | 针对最多 8 个KB的样本试运行一种模式；没有存储任何内容       |
+| 方法   | 路径                     | 用途                                                       |
+| ------ | ------------------------ | ---------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | 标志状态、`enabledTypes`、`customPatterns`、检测计数器     |
+| `PUT`  | `/api/settings/pii`      | 替换 `enabledTypes`（`null` = 全部）和/或 `customPatterns` |
+| `POST` | `/api/settings/pii/test` | 针对最多 8 KB 的样本对单个模式进行试运行；不存储任何内容   |
 
-所有这三个都需要管理身份验证并使用Zod (`src/shared/validation/schemas/piiSettings.ts`) 验证主体。禁用登录 (`requireLogin=false`) 后， `GET`和测试端点处于打开状态，但`PUT`仍需要仪表板会话、 `manage` -scope API密钥、具有写入范围或更高范围的`oma_`访问令牌，或者从环回发送的CLI令牌或内部服务令牌。
+所有这三个都需要管理身份验证并使用Zod (`src/shared/validation/schemas/piiSettings.ts`) 验证主体。禁用登录 (`requireLogin=false`) 时， `GET`和测试端点处于打开状态，但`PUT`仍然需要仪表板会话、 `manage` -scope API密钥、具有写入范围或更高范围的`oma_`访问令牌，或者从环回发送的CLI令牌或内部服务令牌。
 
-#### GDPR (EU) 和POPIA （南非）标识符
+#### GDPR (EU) 和POPIA (南非) 标识符
 
-| ID                  | 标识符            | 验证                                                              |
-| ------------------- | ----------------- | ----------------------------------------------------------------- |
-| `iban`              | IBAN              | 已知国家/地区，该国家/地区的确切长度， ISO 13616 MOD-97-10        |
-| `eu_vat`            | EU VAT号码        | 已知的成员国前缀和该州的号码格式（无VIES查找）                    |
-| `es_dni_nie`        | 西班牙语DNI / NIE | 控制字母（值模 23）； NIE是`X/Y/Z` + 7 位数字                     |
-| `it_codice_fiscale` | 意大利法典        | odd/even位置表中的控制字母                                        |
-| `pl_pesel`          | 波兰语PESEL       | 加权校验和以及存在的编码出生日期                                  |
-| `nl_bsn`            | 荷兰语BSN         | 11 级（重量 9..2、-1）                                            |
-| `de_steuer_id`      | 德国Steuer-ID     | ISO 7064 Mod 11,10 加上数字结构规则（无前导 0）                   |
-| `se_personnummer`   | 瑞典人号码        | Luhn 最后十位数字和合理的出生日期（10 或 12 位数字）              |
-| `za_id`             | 南非ID号码        | Luhn 全部 13 位数字，有效出生month/day，公民身份数字 0 或 1       |
-| `za_phone`          | 南非电话          | `+27` / `27`前缀，或用空格或连字符书写的国家`0..`形式             |
-| `za_vat`            | 南非VAT号码       | `4`开头的10位数字**和**“VAT”/“BTW”之前的48个字符                  |
-| `za_tax_ref`        | 南非税务参考号    | 以`0`开头的 10 位数字 -`3`, Luhn,**和**“tax”/“SARS”之前的48个字符 |
+| ID                  | 标识符                | 验证                                                                                  |
+| ------------------- | --------------------- | ------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                  | 已知国家、该国家的精确长度、ISO 13616 MOD-97-10                                       |
+| `eu_vat`            | 欧盟 VAT 号码         | 已知成员国前缀及该国号码格式（不查询 VIES）                                           |
+| `es_dni_nie`        | 西班牙 DNI / NIE      | 校验字母（数值 mod 23）；NIE 为 `X/Y/Z` + 7 位数字                                    |
+| `it_codice_fiscale` | 意大利 Codice Fiscale | 根据奇数/偶数位置表计算校验字母                                                       |
+| `pl_pesel`          | 波兰 PESEL            | 加权校验和及编码出生月/日的合理范围                                                   |
+| `nl_bsn`            | 荷兰 BSN              | 11-proof 校验（权重 9..2, -1）                                                        |
+| `de_steuer_id`      | 德国 Steuer-ID        | ISO 7064 Mod 11,10 及数字结构规则（首位不能为 0）                                     |
+| `se_personnummer`   | 瑞典 personnummer     | 对最后十位数字执行 Luhn 校验，并检查出生日期合理性（10 或 12 位）                     |
+| `za_id`             | 南非身份证号          | 对全部 13 位数字执行 Luhn 校验、有效出生月/日、公民身份位为 0 或 1                    |
+| `za_phone`          | 南非电话号码          | `+27` / `27` 前缀，或包含空格或连字符的国内 `0..` 格式                                |
+| `za_vat`            | 南非 VAT 号码         | 以 `4` 开头的 10 位数字，**并且**前面的 48 个字符内包含 "VAT" / "BTW"                 |
+| `za_tax_ref`        | 南非税务编号          | 以 `0`-`3` 开头的 10 位数字、Luhn 校验，**并且**前面的 48 个字符内包含 "tax" / "SARS" |
 
 由于纯数字格式与订单号、内部版本号和时间戳发生冲突，因此最弱的格式（`za_vat`、 `za_tax_ref`）需要关键字提示，并且裸露的十位`0..`号码不会被视为南非电话号码。间隔IBANs (`GB29 NWBK ...`) 不匹配。在流路径上，仅在当前块内查找提示。 id 位于通用电话模式之前，因此经过验证的标识符保留其自己的占位符（`[IBAN_REDACTED]`、 `[NL_BSN_REDACTED]`等）。 `gdpr`和`popia`模板分别选择EU和南非 id。屏蔽本身保持选择加入（硬规则#20）：这里没有任何内容改变功能标志默认值。
 
-### 立即注射 (`promptInjection.ts`)
+### 提示注入（`promptInjection.ts`）
 
-检测用户提供的内容中的对抗结构并强制执行配置的策略。行为由环境变量和构造函数选项驱动：
+检测用户提供内容中的对抗性结构，并执行所配置的策略。其行为由环境变量和构造函数选项驱动：
 
-| 环境     | 环境变量                                                                                           | 默认   | 影响                                                                                                                                        |
-| -------- | -------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 启用     | `INPUT_SANITIZER_ENABLED`                                                                          | `true` | `false`时，护栏短路。                                                                                                                       |
-| 模式     | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                    | `warn` | 注入策略： `block`、 `warn`或`log`。 （`redact`被接受用于向后兼容，但确实**不是**剥离注入文本；请求PII重写由`PII_REDACTION_ENABLED`控制。） |
-| 区块阈值 | `blockThreshold`选项 / `INPUT_SANITIZER_BLOCK_THRESHOLD` （别名`INJECTION_GUARD_BLOCK_THRESHOLD`） | `high` | 阻止所需的最低严重程度。 Medium 默认情况下仅观察。                                                                                          |
+| 设置     | 环境变量                                                                                            | 默认值 | 作用                                                                                                                                            |
+| -------- | --------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 启用     | `INPUT_SANITIZER_ENABLED`                                                                           | `true` | 为 `false` 时，护栏直接短路跳过。                                                                                                               |
+| 模式     | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                     | `warn` | 注入策略：`block`、`warn` 或 `log`。（为向后兼容仍接受 `redact`，但它**不会**剥离注入文本；请求侧的 PII 改写由 `PII_REDACTION_ENABLED` 控制。） |
+| 阻断阈值 | `blockThreshold` 选项 / `INPUT_SANITIZER_BLOCK_THRESHOLD`（别名 `INJECTION_GUARD_BLOCK_THRESHOLD`） | `high` | 触发阻断所需的最低严重级别。默认配置下，Medium 级别仅观察、不阻断。                                                                             |
 
-**模式优先级**(`getMode`): 呼叫者`options.mode` → `INJECTION_GUARD_MODE`**DB功能标志覆盖**（仪表板→设置→功能标志） → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`。因此，仪表板覆盖会胜过环境变量，因此功能标志UI控制实时运行的防护（无需重新启动）。 DB读取是故障安全的：如果出错，防护程序会回退到基于 env 的行为，并且当未设置覆盖时，行为与仅 env 解析相同。
+**模式优先级**（`getMode`）：调用方 `options.mode` → `INJECTION_GUARD_MODE` 的**数据库功能标志覆盖**（仪表盘 → 设置 → 功能标志）→ `INJECTION_GUARD_MODE` 环境变量 → `INPUT_SANITIZER_MODE` 环境变量 → `warn`。因此，仪表盘中的覆盖优先于环境变量，功能标志 UI 可实时控制运行中的护栏（无需重启）。数据库读取是故障安全的：如果读取出错，护栏将回退到基于环境变量的行为；当未设置覆盖时，行为与仅使用环境变量解析的结果完全一致。
 
 检测来源：
 
-1. `sanitizeRequest()`来自`@/shared/utils/inputSanitizer` （管道中其他地方使用的共享检测器集）。
-2. 内置`DEFAULT_GUARD_PATTERNS` （当前为`system_override_inline`和`markdown_system_block`，均为`high`严重性）。
-3. 通过构造函数选项（字符串、正则表达式或`{ name, pattern, severity }`记录）传递的可选`customPatterns` 。
+1. 来自 `@/shared/utils/inputSanitizer` 的 `sanitizeRequest()`（管道中其他地方也在使用的共享检测器集合）。
+2. 内置的 `DEFAULT_GUARD_PATTERNS`（当前为 `system_override_inline` 和 `markdown_system_block`，均为 `high` 严重级别）。
+3. 通过构造函数选项传入的可选 `customPatterns`（字符串、正则，或 `{ name, pattern, severity }` 记录）。
 
-当`mode === "block"`**和**至少一项检测满足严重性阈值， `preCall`返回`{ block: true, message: "Request rejected: suspicious content detected" }`。在`warn`/`log`模式下，guardrail 会记录但允许呼叫。还为需要评估提示而无需通过注册表的调用者导出共享帮助程序`evaluatePromptInjection()` 。
+当 `mode === "block"` **且**至少有一个检测结果达到严重性
+阈值时，`preCall` 返回 `{ block: true, message: "Request rejected:
+suspicious content detected" }`。在 `warn`/`log` 模式下，护栏仅记录日志
+但放行调用。共享辅助函数 `evaluatePromptInjection()` 也会被导出，
+供需要绕过注册表直接评估提示词的调用方使用。
 
-**扫描绑定（v3.8.20）：**探测器仅检查**前 16 KB** `src/shared/utils/inputSanitizer.ts`中加入的提示文本— `MAX_INJECTION_SCAN_BYTES = 16 * 1024` （16 384 字节）。 `detectInjection()`和`evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)`都在运行模式循环之前。注入指令位于输入顶部附近，因此这可以将正则表达式CPU/GC限制在数百 KB 的有效负载上，而不会削弱检测（参见#3932、 #4041）。
+**扫描上限（v3.8.20）：** 检测器仅检查拼接后提示文本的**前 16 KB**
+——即 `src/shared/utils/inputSanitizer.ts` 中的
+`MAX_INJECTION_SCAN_BYTES = 16 * 1024`（16 384 字节）。`detectInjection()` 和
+`evaluatePromptInjection()` 都会在运行模式匹配循环之前执行
+`slice(0, MAX_INJECTION_SCAN_BYTES)`。注入指令通常位于输入的开头部分，因此该上限
+可在数百 KB 级的负载上限制正则表达式的 CPU/GC 开销，而不会削弱检测能力（参见
+#3932、#4041）。
 
-### 凭证屏蔽器 (`credentialMasker.ts`)
+### 凭据脱敏器（`credentialMasker.ts`）
 
-运行于**两个都**阶段，默认链中的最后一个（优先级`95`）。从出站有效负载（消息内容、工具调用参数、工具结果）中编辑众所周知的 API 密钥/秘密令牌模式**和**提供者响应，因此粘贴到提示中的凭证（或由工具结果回显）不会泄露给上游提供者或返回给客户端。
+在**两个**阶段都会运行，位于默认链的末尾（优先级 `95`）。它会从出站负载
+（消息内容、工具调用参数、工具结果）**以及**提供者响应中抹除
+常见的 API 密钥 / 机密令牌模式，从而避免粘贴进提示词中
+（或被工具结果回显）的凭据泄露给上游提供者或返回给客户端。
 
-- **仅选择加入**，与PII编辑相同的约定（硬规则#20-adjacent）：禁用，除非`settings.credentialRedactionEnabled === true`**或者**`CREDENTIAL_REDACTION_ENABLED=true`.关闭它后，护栏是一个无操作—它永远不会阻塞，也不会重写。
-- `redactCredentials()`遍历完整的payload/response树（`walkValue()`，原型污染安全，通过`WeakSet`循环安全）并用`[REDACTED:<type>]`占位符替换匹配项，仅克隆实际更改的分支。
-- `CREDENTIAL_PATTERNS`涵盖LLM提供者密钥（OpenAI、 OpenAI-proj、 Anthropic、 Google、 Hugging Face、 Replicate）、 VCS/SaaS币（GitHub、 Slack、 Linear、 Notion、 npm、 Postman、 Discord）、支付密钥（Stripe、 Square）、云密钥（AWS访问密钥、 Twilio、 SendGrid、 Mailgun）、私钥 / JWTs、凭证承载连接字符串（`mongodb://user:pass@...`等），以及通用`Authorization`/`x-api-key`/`api-key`/`apikey`标头值模式。标头形状的键（`authorization`、 `x-api-key`、 `api-key`、 `apikey`）在结构上进行编辑（仅值，保留`Bearer `/`Basic `等方案前缀），而不是通过通用文本正则表达式。
-- 护栏永不遮挡；它仅重写（`modifiedPayload` / `modifiedResponse`）和注释（`meta.credentialsRedacted`， `meta.count`）。
+- **仅限显式启用**，与 PII 脱敏采用相同约定（与硬规则 #20 相近）：
+  除非 `settings.credentialRedactionEnabled === true` **或**
+  `CREDENTIAL_REDACTION_ENABLED=true`，否则处于禁用状态。关闭时，该护栏为空操作——
+  既不阻断也不重写。
+- `redactCredentials()` 会遍历完整的负载/响应树（`walkValue()`，
+  可防原型污染，并通过 `WeakSet` 实现循环安全），将匹配项替换为
+  `[REDACTED:<type>]` 占位符，且仅克隆实际发生更改的分支。
+- `CREDENTIAL_PATTERNS` 涵盖 LLM 提供者密钥（OpenAI、OpenAI-proj、
+  Anthropic、Google、Hugging Face、Replicate）、VCS/SaaS 令牌（GitHub、Slack、
+  Linear、Notion、npm、Postman、Discord）、支付密钥（Stripe、Square）、云
+  密钥（AWS 访问密钥、Twilio、SendGrid、Mailgun）、私钥 / JWT、
+  携带凭据的连接字符串（`mongodb://user:pass@...` 等），以及
+  通用的 `Authorization`/`x-api-key`/`api-key`/`apikey` 请求头值
+  模式。请求头形式的键（`authorization`、`x-api-key`、`api-key`、
+  `apikey`）通过结构化方式脱敏（仅处理值，保留
+  `Bearer `/`Basic ` 等方案前缀），而不是使用通用文本正则。
+- 该护栏从不阻断；仅执行重写（`modifiedPayload` /
+  `modifiedResponse`）和标注（`meta.credentialsRedacted`、`meta.count`）。
 
-回归守卫： `tests/unit/credential-masker-guardrail.test.ts`。
+回归防护：`tests/unit/credential-masker-guardrail.test.ts`。
 
 ## 基础契约（`base.ts`）
 

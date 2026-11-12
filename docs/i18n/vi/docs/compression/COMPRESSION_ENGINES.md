@@ -363,7 +363,7 @@ Công cụ truy xuất hiện được đặt tên là `omniroute_ccr_retrieve` 
 
 ### Vòng đời phiên
 
-Các phiên HTTP có thể phát trực tuyến không hoạt động và máy chủ sẽ thu thập chúng; cửa sổ nhàn rỗi được đặt bởi `OMNIROUTE_MCP_SESSION_IDLE_MS` (mặc định là 5 phút; được tham chiếu theo tên, không phải giá trị được mã hóa cứng, vì vậy trang này không bị trôi khi thay đổi). Triệu chứng của phiên không hoạt động là HTTP 404 với `Unknown Mcp-Session-Id` — biện pháp khắc phục là kết nối lại hoặc khởi động lại phiên,** không** để xoay một phím, thay đổi phạm vi hoặc đổi tên một công cụ.
+Các phiên HTTP có thể phát trực tuyến không hoạt động và máy chủ sẽ thu thập chúng; cửa sổ nhàn rỗi được cấu hình bởi `OMNIROUTE_MCP_SESSION_IDLE_MS`, quay trở lại `DEFAULT_MCP_SESSION_IDLE_MS` trong `open-sse/mcp-server/httpTransport.ts`. Triệu chứng của phiên không hoạt động là HTTP 404 với `Unknown Mcp-Session-Id` — Biện pháp khắc phục là kết nối lại hoặc khởi động lại phiên,**không** để xoay một phím, thay đổi phạm vi hoặc đổi tên một công cụ.
 
 ## Bề mặt API
 

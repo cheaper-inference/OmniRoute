@@ -136,41 +136,63 @@ Súvisiace moduly v rovnakom balíku:
 
 ---
 
-## Utajenie Antigravity
+## Antigravity Stealth
 
-Požiadavky Antigravity zachovávajú text volajúceho presne po bajtoch. OmniRoute nevkladá do promptov znaky s nulovou šírkou ani nepremenúva či nevkladá nástroje s cieľom napodobniť klienta IDE.
+Antigravity požaduje zachovať text volajúceho po bajtoch. OmniRoute nevkladá znaky s nulovou šírkou do výziev alebo nástrojov rename/inject na napodobňovanie klienta IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Pred preposlaním odstraňuje značky SDK Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Pred odoslaním odizoluje nerezové značky SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
 
-### ⚠️ Riziko: `ANTIGRAVITY_CREDITS=always` (častý dôvod zablokovania účtu)
+### Riziko ⚠️ : `ANTIGRAVITY_CREDITS=always` (hot spot-ban účtu)
 
-`ANTIGRAVITY_CREDITS=always` (spracovávané súborom `open-sse/executors/antigravity.ts`) smeruje **každú** požiadavku cez nadlimitné kredity Antigravity AI Credit Overages (platené kredity Google) namiesto toho, aby prístup obmedzovala kvóta bezplatnej úrovne Google. Je to zdokumentované ako funkcia, ale ide o **jednoznačne najčastejšie hlásené porušenie zmluvných podmienok, s ktorým sa stretávame** — po niekoľkohodinovej prevádzke s nastavením `=always` bolo zablokovaných viacero účtov Google Ultra s chybou `403 / "service disabled for ToS violation" / insufficient_quota`.
+Trasy `ANTIGRAVITY_CREDITS=always` (spotrebované `open-sse/executors/antigravity.ts`).**každý** požiadať cez Antigravity AI Credit Overages (platené kredity Google ) namiesto toho, aby ste nechali veci Google's free-tier kvóty. Toto je zdokumentované ako vlastnosť, ale je to tak **jediná najbežnejšia správa o porušení zmluvných podmienok, ktorú vidíme** — viaceré účty Google Ultra boli zakázané so `403 / "service disabled for ToS violation" / insufficient_quota` po niekoľkých hodinách behu so `=always`.
 
-Vynucovanie vykonáva **Google**, nie je to niečo, čomu by OmniRoute mohol zabrániť. Názov premennej prostredia a existujúca dokumentácia vyvolávajú dojem, že ide o bezpečný prepínač; nie je to tak.
+Presadzovanie proti prúdu je zapnuté **Strana Google** , ničomu nemôže OmniRoute zabrániť. Názov env var a existujúce dokumenty znejú ako bezpečný gombík na otočenie; nie je.
 
-**Prečo to spúšťa detekciu zneužitia agresívnejšie než používanie iba bezplatnej úrovne:**
+**Prečo to priťahuje detekciu zneužitia agresívnejšie ako používanie iba na voľnej úrovni:**
 
-- Nepretržité automatizované výdavky na jednom účte Google sa vyhodnocujú inak než bezplatná úroveň, ktorá dosiahne kvótu a zastaví sa.
-- Nadlimitné kredity nemajú strop frekvencie požiadaviek, takže nesprávne nakonfigurovaný klient môže za niekoľko minút minúť stovky USD a vyzerať ako ďalší predaj API kľúčov alebo prevádzka botov.
-- Ak viacero používateľov OmniRoute súbežne čerpá nadlimitné kredity z rovnakej externej IP adresy, tento signál sa zosilňuje.
+- Trvalé automatické výdavky na jedinom účte Google sa prejavujú inak ako prístupy, kvóty a zastavenia na voľnej úrovni.
+- Prekročenie kreditu nemá žiadny strop, takže nesprávne nakonfigurovaný klient môže prepáliť niekoľko stoviek USD za pár minút a vyzerať ako ďalší predaj kľúčov API alebo návštevnosť robotov.
+- Viacerí používatelia OmniRoute, ktorí narazia paralelne na kredity prebytku z rovnakého externého IP znásobujú signál.
 
-**Odporúčaný postup:**
+**Odporúčaná poloha:**
 
-1. Ponechajte predvolené nastavenie `ANTIGRAVITY_CREDITS=off`, pokiaľ operátor výslovne neakceptuje riziko platených kreditov a sankcií voči účtu. Režim `retry` najprv odošle bežnú požiadavku a kredity vloží najviac raz po oprávnenej chybe kvóty 429; režim `always` vloží kredity už pri prvej požiadavke.
-2. **Rozložte záťaž medzi poskytovateľov pomocou Auto-Combo** (`model: "auto"` alebo kombinácie `kr/glm/etc`) namiesto preťažovania jedného účtu Antigravity.
-3. **Nastavte limity RPM pre jednotlivé pripojenia** na stránke úprav poskytovateľa Antigravity (Dashboard → Providers → Antigravity → pripojenie → limit frekvencie). Hodnota 30–60 RPM je obhájiteľnou hornou hranicou pri nepretržitom používaní.
-4. **Používajte stabilnú nadradenú sieť spravovanú operátorom** a vyhnite sa zdieľaniu jedného účtu medzi nesúvisiacimi používateľmi alebo pracovnými záťažami.
-5. **V prípade zablokovania**: podajte odvolanie cez `support.google.com` → „Restore Workspace/Account access“ s presným telom odpovede `quota_exceeded` / `service disabled`, ktoré odoslal Google. Obnovenie nie je zaručené.
+1. Ponechajte predvolené `ANTIGRAVITY_CREDITS=off`, pokiaľ prevádzkovateľ výslovne neakceptuje riziko plateného úveru a vymáhania účtu. `retry` odošle normálnu požiadavku ako prvú a vloží kredity maximálne raz po oprávnenej kvóte 429; `always` vloží kredity na prvú žiadosť.
+2. **Rozložte zaťaženie medzi poskytovateľov pomocou funkcie Auto-Combo** (`model: "auto"` alebo `kr/glm/etc` -combo) namiesto nasýtenia jedného účtu Antigravity.
+3. **Nastavte limity RPM na pripojenie** na stránke úprav poskytovateľa Antigravity (Dashboard Poskytovatelia → → Antigravity → pripojenie → limit rýchlosti). 30–60 RPM je obhájiteľná horná hranica pre trvalé používanie.
+4. **Používajte stabilné, operátorom riadené upstream siete** a vyhýbajte sa zdieľaniu jedného účtu medzi nesúvisiacimi používateľmi alebo pracovnými záťažami.
+5. **Ak je zakázané** : odvolanie cez `support.google.com` → "Obnoviť prístup Workspace/Account " s presným odoslaním tela odpovede `quota_exceeded` / `service disabled` Google. Obnova nie je zaručená.
 
-Referenčná dokumentácia prostredia opisuje vplyv každého režimu kreditov na účet a výdavky.
+Referenčné prostredie dokumentuje dôsledky účtu a výdavkov každého režimu kreditov.
 
-Dotknuté miesta:
+#### Nielen `=always`: Smerovanie Antigravity OAuth vo všeobecnosti
 
-- `open-sse/executors/antigravity.ts` — číta `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — spracovanie prihlasovacích údajov
-- Pôvodné hlásenie incidentu: diskusia [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Pozastavenie nie je obmedzené na prekročenie kreditu. Správy z novembra 2026 (#19223, #19266) popisujú niekoľko účtov Google pozastavených pri smerovaní cez poskytovateľov `antigravity` a `agy` (Antigravity CLI), pričom:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Obaja poskytovatelia sa autentifikujú pomocou relácie OAuth produktu Antigravity, čo je prípad, na ktorý sa pred pridaním pripojenia varuje upozornenie na rizikovom paneli („Tento poskytovateľ používa váš oficiálny produkt session/OAuth, ktorý nie je autorizovaný na používanie proxy/router “). Žiadne z vyššie uvedených odporúčaní neoprávňuje toto použitie; iba znižujú návštevnosť jedného účtu.
+
+**Autorizované rozhrania API pre modely Gemini.** Google ponúka programový prístup k Gemini prostredníctvom svojho APIs, ktorý OmniRoute podporuje ako bežní poskytovatelia kľúčov API:
+
+| ID poskytovateľa | Názov informačného panela  | Poverenie                                                                         |
+| ---------------- | -------------------------- | --------------------------------------------------------------------------------- |
+| `gemini`         | Gemini (Štúdio Google AI ) | Kľúč Gemini API od Google AI Studio (dostupná bezplatná úroveň)                   |
+| `vertex`         | Vertex AI                  | Servisný účet JSON, prístupový token OAuth alebo kľúč Vertex Express API (Gemini) |
+
+Títo poskytovatelia na rozdiel od relácie produktu Antigravity používajú problémy so Google povereniami na prístup API. Nie sú v súlade s každým použitím ani neodstraňujú riziko presadzovania: každé sa riadi vlastnými podmienkami, ktoré musí prevádzkovateľ pri ich nasadení skontrolovať. Napríklad [dodatočné zmluvné podmienky Gemini API](https://ai.google.dev/gemini-api/terms) povoľujú iba platené služby, keď sú klienti API sprístupnení používateľom v Európskom hospodárskom priestore, Švajčiarsku alebo Spojenom kráľovstve a obsah odoslaný do neplatených služieb možno použiť na zlepšenie produktov Google. Vertex AI spadá pod podmienky Google Cloud namiesto toho ( [Podmienky špecifické pre službu](https://cloud.google.com/terms/service-terms) ). Ceny a kvóty sa riadia týmito podmienkami API a nie predplatným Antigravity.
+
+Operátori, ktorí sa chcú vyhnúť pozastaveniam Antigravity popísaným vyššie, by mali smerovať prevádzku Gemini cez jedného z týchto poskytovateľov namiesto `antigravity` / `agy`, po skontrolovaní, či ich použitie vyhovuje podmienkam poskytovateľa.
+
+Dotykové body:
+
+- `open-sse/executors/antigravity.ts` — znamená `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — poverenie inštalatérstvo
+- Pôvodná správa o incidente: Diskusia [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -239,9 +261,9 @@ Všetky koncové body MITM vyžadujú autentifikáciu pre správu (`requireCliTo
 
 ---
 
-## User-Agent prepíše — env vars (`.env.example` sekcia 12)
+## Prepísanie reťazcov User-Agent — premenné prostredia (`.env.example`, sekcia 12)
 
-| Variabilné          | Predvolené                                    |
+| Premenná            | Predvolená hodnota                            |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -250,7 +272,7 @@ Všetky koncové body MITM vyžadujú autentifikáciu pre správu (`requireCliTo
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Spotrebované `open-sse/executors/base.ts::buildHeaders()` prostredníctvom dynamického vyhľadávania.** Zvýšte ich, keď poskytovatelia vydajú nové verzie CLI** — zastaralé reťazce UA začínajú byť odmietané ako zastaraní klienti.
+Používa ich `open-sse/executors/base.ts::buildHeaders()` prostredníctvom dynamického vyhľadávania. **Aktualizujte ich, keď poskytovatelia vydajú nové verzie CLI** — zastarané reťazce UA začnú byť odmietané ako neaktuálni klienti.
 
 ## Prepínače režimu kompatibility CLI (`.env.example`, časť 13)
 

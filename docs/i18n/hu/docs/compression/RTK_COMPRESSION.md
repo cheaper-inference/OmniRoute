@@ -132,7 +132,7 @@ Az RTK két egymástól független rétegben vonja össze az ismétlődő soroka
 1. **Szűrőnkénti `deduplicate` (külön engedélyezendő, alapértelmezett értéke `false`).** Egy szűrő beállíthatja a `rules.deduplicate: true` értéket, hogy a csonkolás előtt összevonja az egymást követő ismétlődő sorokat _az adott szűrő által illesztett kimeneten belül_.
    Ez a `lineFilter.ts` fájlban fut. A régi szűrőknél automatikusan engedélyeződik, ha a szűrő definiál `collapsePatterns` értéket. Séma: `deduplicate: z.boolean().default(false)` az
    `open-sse/services/compression/engines/rtk/filterSchema.ts` fájlban.
-2. **Motorszintű `deduplicateThreshold` (alapértelmezett értéke `3`).** Az összes szűrő lefutása után a motor a teljes eredményben összevonja az azonos, egymást követő sorok minden olyan sorozatát, amely legalább `deduplicateThreshold` hosszúságú
+2. **Motorszintű `deduplicateThreshold` (alapértelmezett értéke `3`).** Az összes szűrő lefutása után a motor a teljes eredményben összevonja az azonos, egymást követő sorok minden olyan sorozatát, amely legalább `>= deduplicateThreshold` hosszúságú
    (`deduplicateRepeatedLines`, alkalmazási helye: `engines/rtk/index.ts`). Normalizáláskor az érték a 2–100 tartományra van korlátozva.
 
 Először a szűrőnkénti menet fut le (a szűrőn belül), utoljára pedig a motorszintű menet (az összefűzött kimeneten), így a kettő kettős számlálás nélkül működik együtt.

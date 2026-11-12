@@ -54,7 +54,7 @@ Search Tools Studio, `/dashboard/search-tools`ను ప్రాథమిక �
 - ఇన్పుట్: URL + పూర్తి-పేజీ టాగుల్ + ఫార్మాట్ సెలెక్టర్ (markdown / text / HTML).
 - సమర్పణ → ఫెచ్ → `ScrapeResult.tsx`ను రెండర్ చేయడం.
 - `ScrapeResult` మార్క్డౌన్ ప్రివ్యూ + రా టాగుల్ను రెండర్ చేస్తుంది.
-- పరిమితి: రెస్పాన్స్ బాడీ **256 KB** కంటే ఎక్కువగా ఉంటే, UI `(కుదించబడింది, రాను వీక్షించండి)` అని చూపి, రా కంటెంట్ను Monaco మోడల్లో తెరుస్తుంది (D21).
+- పరిమితి: రెస్పాన్స్ బాడీ **256 KB** కంటే ఎక్కువగా ఉంటే, UI `View full raw content` అని చూపి, రా కంటెంట్ను మోడల్లో తెరుస్తుంది (D21).
 - మెటాడేటా ప్యానెల్: ప్రొవైడర్ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), లేటెన్సీ, ఖర్చు, రెస్పాన్స్ పరిమాణం, లింక్ల సంఖ్య.
 - `useScrapeFetch.ts` హుక్ను ఉపయోగిస్తుంది.
 
@@ -103,9 +103,11 @@ Search Tools Studio, `/dashboard/search-tools`ను ప్రాథమిక �
 `ProviderCatalog.tsx`, `GET /api/search/providers` నుండి పూర్తి ప్రొవైడర్ జాబితాను అందుబాటులో ఉంచుతుంది
 (fetch ప్రొవైడర్లను చేర్చడానికి F4లో విస్తరించబడింది):
 
-| `kind` | `"search"` (20 ప్రొవైడర్లు) లేదా `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ప్రొవైడర్లు) లేదా `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 క్రెడెన్షియల్స్ ఉన్నాయా మరియు అన్ని కీలు ప్రస్తుతం కూల్డౌన్లో ఉన్నాయా అని తనిఖీ చేయడం ద్వారా స్థితి **అభ్యర్థన సమయంలో నిర్ణయించబడుతుంది**.
+
+`codex-search` (Codex Web Search): అనుసంధానించిన Codex (ChatGPT) ఖాతాలను ఉపయోగిస్తుంది; ప్రత్యేక కీ అవసరం లేదు. ప్రతి శోధన ChatGPT సబ్‌స్క్రిప్షన్ కోటాను ఉపయోగిస్తుంది మరియు సుమారు 10–40 సెకన్లు పడుతుంది. అభ్యర్థనలో దాని పేరు పేర్కొంటే నడుస్తుంది; స్వయంచాలక ఎంపిక కోసం డిఫాల్ట్‌గా ఆఫ్‌లో ఉన్న `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ను ఆన్ చేయాలి.
 
 ---
 

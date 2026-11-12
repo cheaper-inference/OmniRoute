@@ -1,4 +1,4 @@
-import { buttonVariants } from "@omniroute/ui-kit/button";
+import { Button } from "@omniroute/ui-kit/button";
 import Icon from "@/shared/components/Icon";
 import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
 import Link from "next/link";
@@ -68,15 +68,12 @@ export default function ErrorPageScaffold({
         )}
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
-          <Link href={resolvedPrimary.href} className={buttonVariants({ size: "lg" })}>
-            {resolvedPrimary.label}
-          </Link>
-          <Link
-            href={resolvedSecondary.href}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            {resolvedSecondary.label}
-          </Link>
+          <Button asChild size="lg">
+            <Link href={resolvedPrimary.href}>{resolvedPrimary.label}</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href={resolvedSecondary.href}>{resolvedSecondary.label}</Link>
+          </Button>
         </div>
       </section>
     </main>

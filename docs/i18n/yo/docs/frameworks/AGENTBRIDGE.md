@@ -20,7 +20,7 @@ Nigbati aṣoju IDE kan (fun apẹẹrẹ, GitHub Copilot, Cursor, koodu Claude 
 
 Eyi tumọ si pe o le:
 
-- **Yipada eyikeyi aṣoju si olupese eyikeyi** : Copilot sọrọ si OpenAI? Ṣe àtúnjúwe sí Anthropic Claude, Gemini, tabi eyikeyi ninu awọn olupese 381 OmniRoute.
+- **Yipada eyikeyi aṣoju si olupese eyikeyi** : Copilot sọrọ si OpenAI? Ṣe àtúnjúwe sí Anthropic Claude, Gemini, tabi eyikeyi ninu awọn olupese 388 OmniRoute.
 - **Waye awọn aworan agbaye** : `gemini-3-flash` → `claude-sonnet-4.7` ni gbangba ni ipele oluṣakoso.
 - **Ṣe akiyesi gbogbo ijabọ aṣoju** : Gbogbo ibeere ti o gba wọle ni a gbejade si [Oluyewo Ijabọ](./TRAFFIC_INSPECTOR.md).
 - **Waye resilience OmniRoute** : ipa ọna konbo, awọn fifọ iyika, awọn ipadasẹhin, ati iṣẹ ipasẹ iye owo fun ijabọ aṣoju IDE paapaa.
@@ -554,7 +554,7 @@ Trae jẹ́ olùrànlọ́wọ́ AI fún kíkọ kóòdù tí ó ṣẹ̀ṣẹ�
 3. Ṣàwárí ọ̀nà authentication tí ó ń lò
 4. Ṣe àyẹ̀wò go/no-go ní ìbámu pẹ̀lú TOS àti bí API ṣe ṣeé ṣàwárí tó
 
-Títí ìwádìí yóò fi parí, káàdì Trae inú dashboard yóò máa fi àmì "Ó wà lábẹ́ ìwádìí" hàn pẹ̀lú ìjápọ̀ "Ṣàlàyé bóyá ó ṣeé ṣe". Àwòṣe handler ní `src/mitm/handlers/trae.ts` máa ń ju àṣìṣe `A kò tíì ṣe é` tí a ṣètò sílẹ̀.
+Títí ìwádìí yóò fi parí, káàdì Trae inú dashboard yóò máa fi àmì "Ó wà lábẹ́ ìwádìí" hàn pẹ̀lú ìjápọ̀ "Ṣàlàyé bóyá ó ṣeé ṣe". Àwòṣe handler ní `src/mitm/handlers/trae.ts` máa ń ju àṣìṣe `Not yet implemented` tí a ṣètò sílẹ̀.
 
 ### Àwọn agent inú backlog (MITM pọndandan — kò sí àtìlẹ́yìn fún custom base URL)
 

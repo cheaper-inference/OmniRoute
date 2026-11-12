@@ -54,7 +54,7 @@ Tab mới để trích xuất nội dung từ một URL thông qua `POST /v1/web
 - Đầu vào: URL + nút bật/tắt toàn trang + bộ chọn định dạng (markdown / văn bản / HTML).
 - Gửi → tìm nạp → hiển thị `ScrapeResult.tsx`.
 - `ScrapeResult` hiển thị bản xem trước markdown + nút bật/tắt nội dung thô.
-- Giới hạn: nếu nội dung phản hồi > **256 KB**, giao diện người dùng hiển thị `(đã cắt bớt, xem nội dung thô)` và mở nội dung thô trong một hộp thoại Monaco (D21).
+- Giới hạn: nếu nội dung phản hồi > **256 KB**, giao diện người dùng hiển thị `View full raw content` và mở nội dung thô trong một hộp thoại (D21).
 - Bảng siêu dữ liệu: nhà cung cấp (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), độ trễ, chi phí, kích thước phản hồi, số lượng liên kết.
 - Sử dụng hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Chạy cùng một truy vấn/URL song song trên tối đa **4 nhà cung cấp*
 `ProviderCatalog.tsx` hiển thị danh sách đầy đủ các nhà cung cấp từ `GET /api/search/providers`
 (được mở rộng trong F4 để bao gồm các nhà cung cấp truy xuất):
 
-| `kind` | `"search"` (20 nhà cung cấp) hoặc `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 nhà cung cấp) hoặc `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Trạng thái được **xác định tại thời điểm yêu cầu** bằng cách kiểm tra xem thông tin xác thực có tồn tại hay không và liệu
 tất cả các khóa hiện có đang trong thời gian chờ hay không.
+
+`codex-search` (Codex Web Search): Dùng các tài khoản Codex (ChatGPT) đã kết nối của bạn, không cần khóa riêng. Mỗi lượt tìm kiếm tiêu tốn hạn mức thuê bao và mất khoảng 10–40 s. Chạy khi yêu cầu chỉ định nó; lựa chọn tự động cần cờ `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, mặc định tắt.
 
 ---
 

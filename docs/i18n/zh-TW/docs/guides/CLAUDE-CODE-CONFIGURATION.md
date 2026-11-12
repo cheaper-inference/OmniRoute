@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # Claude Code 透過 OmniRoute 使用 glm/glm-
 
 ---
 
-## Claude Code 如何連接到網關
+## Claude Code 如何連線至閘道
 
-Claude代碼講述**Anthropic留言API**並指向帶有環境變數的自訂端點（它沒有`--base-url`標誌）：
+Claude Code 使用 **Anthropic Messages API**，並透過環境變數指向自訂
+端點（它沒有 `--base-url` 旗標）：
 
-| 多變的                                       | 目的                                                                       |
-| -------------------------------------------- | -------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | 網關根URL （Claude代碼附加`/v1/messages`）。**沒有`/v1`後綴。**            |
-| `ANTHROPIC_AUTH_TOKEN`                       | 作為`Authorization: Bearer …` —發送，使用您的OmniRoute存取令牌/ API密鑰    |
-| `ANTHROPIC_API_KEY`                          | 替代方案：作為`x-api-key`發送。如果兩者都成立， `ANTHROPIC_AUTH_TOKEN`獲勝 |
-| `ANTHROPIC_MODEL`                            | 強制使用特定模型（覆蓋`/model`選擇器預設值）                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` →原生`/model`選擇器列出`/v1/models`中的`claude*`/`anthropic*`模型      |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 每個回應的輸出代幣上限（例如`65536`）                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 自動壓縮的令牌閾值                                                         |
+| 變數                                         | 用途                                                                              |
+| -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | 閘道根 URL（Claude Code 會附加 `/v1/messages`）。**請勿加上 `/v1` 後綴。**        |
+| `ANTHROPIC_AUTH_TOKEN`                       | 以 `Authorization: Bearer …` 傳送——請使用你的 OmniRoute 存取權杖／API 金鑰        |
+| `ANTHROPIC_API_KEY`                          | 替代方式：以 `x-api-key` 傳送。若兩者皆已設定，則以 `ANTHROPIC_AUTH_TOKEN` 為優先 |
+| `ANTHROPIC_MODEL`                            | 強制使用特定模型（覆寫 `/model` 選擇器的預設值）                                  |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → 原生 `/model` 選擇器會列出 `/v1/models` 中的 `claude*`／`anthropic*` 模型   |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 限制每次回應的輸出 token 數（例如 `65536`）                                       |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 自動壓縮的 token 閾值                                                             |
 
-> 讀取環境變數**啟動時一次**—更改後重新啟動Claude程式碼。
+> 環境變數只會在**啟動時讀取一次**——變更後請重新啟動 Claude Code。
 
-對於輪換而不是固定字串的憑證，請將`~/.claude/settings.json`中的`apiKeyHelper`設定為將目前憑證列印到 stdout 的命令。預設情況下， Claude程式碼將其輸出快取五分鐘（`CLAUDE_CODE_API_KEY_HELPER_TTL_MS`會覆寫它），並在`Authorization: Bearer`和`x-api-key`中發送值。腳本必須列印憑證，而不列印任何其他—橫幅，它會使 v2.1.227 +上的幫助程式失敗。
+若憑證會定期輪替，而不是固定字串，請將 `~/.claude/settings.json` 中的 `apiKeyHelper` 設為向 stdout 輸出目前憑證的命令。Claude Code 預設快取其輸出五分鐘（可透過 `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` 覆寫），並同時在 `Authorization: Bearer` 與 `x-api-key` 中傳送該值。指令碼只能輸出憑證，不得附帶其他內容；在 v2.1.227+ 中，額外的歡迎訊息會使輔助程式失敗。
 
-Entra ID SSO工作原理如下： `scripts/cli/omniroute-sso.mjs token`列印OmniRoute驗證的短期 Entra 存取令牌，而不是API金鑰。參見[`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) 。
+Entra ID SSO 正是如此運作：`scripts/cli/omniroute-sso.mjs token` 輸出短效的 Entra 存取權杖，OmniRoute 驗證該權杖而非 API 金鑰。請參閱 [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)。
 
-`omniroute launch`為您設定所有這些：它從活動上下文解析基本URL +令牌（因此`omniroute connect <vps>`然後`omniroute launch`正常工作），健康檢查伺服器，並執行`claude`。
+`omniroute launch` 會替你設定上述所有項目：它會從目前啟用的情境解析基礎 URL 與權杖
+（因此先執行 `omniroute connect <vps>`，再執行 `omniroute launch` 即可直接運作）、
+檢查伺服器健康狀態，然後執行 `claude`。
+
+---
+
+## 使用歸因：會話和項目
+
+OmniRoute將每個API密鑰的請求分組為**代理會話**並記錄哪些**專案**每個會話都進行（`agent_sessions`表），因此可以報告每個團隊成員、每個項目和每個會話的使用情況和成本。
+
+無需任何客戶端設定即可記錄的內容：
+
+| 場地 | 來源                                                                                                                  |
+| ---- | --------------------------------------------------------------------------------------------------------------------- |
+| 會議 | `x-claude-code-session-id`標頭（與`metadata.user_id.session_id`相同的值），每個會話穩定                               |
+| 專案 | `Primary working directory:`線路Claude程式碼在其環境訊息中傳送； `.claude/worktrees/`下的工作樹資料夾解析為儲存庫名稱 |
+| 分支 | 來自 git status Claude程式碼的`Current branch:`與第一則訊息一起傳送                                                   |
+| 客戶 | `user-agent` (`claude-cli/<version>`)                                                                                 |
+
+Codex （`<environment_context><cwd>`）和OpenCode （`x-opencode-session`）的辨識方式相同。按鍵與**無日誌**啟用僅保留會話 ID 和標頭提供的項目欄位；不會儲存從提示符號（路徑、分支）讀取的任何內容。
+
+### 明確命名項目（推薦）
+
+機器之間的工作目錄不同，因此相同的儲存庫可以顯示在不同的路徑下。明確傳送項目： Claude程式碼將`ANTHROPIC_CUSTOM_HEADERS`中列出的任何標頭新增至每個模型請求中， OmniRoute讀取其中兩個：
+
+| 標頭                       | 價值                                                |
+| -------------------------- | --------------------------------------------------- |
+| `x-omniroute-project`      | 專案名稱，例如`omniroute`                           |
+| `x-omniroute-project-repo` | 標準化遠程，例如`github.com/diegosouzapw/OmniRoute` |
+
+兩者都只是為了歸屬而閱讀；它們永遠不會轉發給上游提供者。
+
+`ANTHROPIC_CUSTOM_HEADERS`在啟動時讀取一次，設定檔案儲存文字值，因此在Claude Code 啟動時計算它。將其新增至`~/.zshrc`或`~/.bashrc`並繼續從專案資料夾啟動`claude` ：
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed`表達式會刪除遠端URL中嵌入的所有憑證。 IDE擴充無需您的 shell 即可啟動Claude程式碼，因此它們的會話會回退到工作目錄。
 
 ---
 

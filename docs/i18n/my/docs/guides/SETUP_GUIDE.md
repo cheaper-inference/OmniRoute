@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard ကို `http://localhost:20128` တွင် ဖွင့်မည်ဖြစ်ပြီး API အခြေခံ URL မှာ `http://localhost:20128/v1` ဖြစ်သည်။
+Dashboard သည် `http://localhost:20128` တွင်ဖွင့်ပြီး API အခြေခံ URL သည် `http://localhost:20128/v1` ဖြစ်သည်။
+
+> **npm အသုံးပြုသူများ** install scripts များကိုပိတ်ဆို့ထားကြောင်း npm မှသတိပေးပါက (ဥပမာ `omniroute`၊ `better-sqlite3`)၊ [Troubleshooting — npm install-scripts များကိုပိတ်ဆို့ထားသည်ကို](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ကြည့်ပါ။
 
 ### pnpm
 

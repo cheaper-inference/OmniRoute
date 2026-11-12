@@ -394,7 +394,7 @@ Uporablja `wreq-js` za ustvarjanje brskalnikom podobnih prstnih odtisov TLS, s �
 
 ### Ujemanje prstnega odtisa CLI
 
-**Preklop prstnega odtisa CLI** (`Nastavitve → Varnost`) preuredi glave HTTP in polja telesa JSON tako, da se ujemajo z natančnim podpisom izvornih binarnih datotek CLI (Claude Code, Codex itd.). To deluje **skupaj s** posredniškim strežnikom:
+**Preklop prstnega odtisa CLI** (`Settings → Security`) preuredi glave HTTP in polja telesa JSON tako, da se ujemajo z natančnim podpisom izvornih binarnih datotek CLI (Claude Code, Codex itd.). To deluje **skupaj s** posredniškim strežnikom:
 
 ```
 Vaš IP (blokiran) → IP posredniškega strežnika (ZDA) → API ponudnika

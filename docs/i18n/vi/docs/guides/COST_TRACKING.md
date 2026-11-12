@@ -40,22 +40,22 @@ Vì con số này là một ước tính:
 
 ### Nguồn định giá
 
-Chi phí đến từ bảng giá hợp nhất trong [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), theo thứ tự ưu tiên này (** cao nhất đầu tiên** ):
+Chi phí đến từ bảng giá hợp nhất trong [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), theo thứ tự ưu tiên này (**cao nhất đầu tiên** ):
 
-1. **Ghi đè người dùng** giá — được đặt trong bảng điều khiển hoặc thông qua `PATCH /api/pricing` (không gian tên `pricing` ).
-2. **đồng bộ hóa mô hình.dev** giá — được lấy từ `https://models.dev/api.json` (không gian tên `models_dev_pricing` ).
-3. **đồng bộ hóa LiteLLM** giá — được lấy từ `model_prices_and_context_window.json` công khai của LiteLLM(không gian tên `pricing_synced` ).
-4. **Mặc định được mã hóa cứng** tỷ lệ — được vận chuyển bằng [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Ghi đè người dùng** Giá — được đặt trong bảng điều khiển hoặc thông qua `PATCH /api/pricing` (không gian tên `pricing` ).
+2. **đồng bộ hóa mô hình.dev** Giá — được lấy từ `https://models.dev/api.json` (không gian tên `models_dev_pricing` ).
+3. **Đồng bộ hóa LiteLLM** Giá — được lấy từ `model_prices_and_context_window.json` công khai của LiteLLM(không gian tên `pricing_synced` ).
+4. **Mặc định được mã hóa cứng** Tỷ giá — được vận chuyển bằng [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Đối với cùng một provider/model, các giá trị từ các lớp có mức độ ưu tiên cao hơn sẽ ghi đè các trường phù hợp ở các lớp thấp hơn; các trường không có ở lớp trên vẫn có thể đến từ lớp dưới. Thứ tự được cố định ngay cả khi cả hai công việc đồng bộ hóa độc lập đều chạy cùng lúc. `GET /api/pricing?includeSources=1` trả về `pricing` và `sourceMap`, có nhãn trên mỗi mô hình (`user`, `modelsDev`, `litellm`, `default`) xác định lớp có mức ưu tiên cao nhất chứa mô hình đó.
+Đối với cùng một provider/model, các giá trị từ các lớp có mức ưu tiên cao hơn sẽ ghi đè các trường phù hợp ở các lớp thấp hơn; các trường không có ở lớp trên vẫn có thể đến từ lớp dưới. Thứ tự được cố định ngay cả khi cả hai công việc đồng bộ hóa độc lập đều chạy cùng lúc. `GET /api/pricing?includeSources=1` trả về `pricing` và `sourceMap`, có nhãn trên mỗi mô hình (`user`, `modelsDev`, `litellm`, `default`) xác định lớp có mức ưu tiên cao nhất chứa mô hình đó.
 
-**đồng bộ hóa LiteLLM** được chọn tham gia, bị tắt theo mặc định. Các biến môi trường của nó (xem [`.env.example`](../../.env.example) ) là:
+**Đồng bộ hóa LiteLLM** được chọn tham gia, bị tắt theo mặc định. Các biến môi trường của nó (xem [`.env.example`](../../.env.example) ) là:
 
-| biến thể Env            | Mặc định  | Mục đích                                                                       |
-| ----------------------- | --------- | ------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Bật đồng bộ hóa giá LiteLLM trong nền.                                         |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Khoảng thời gian đồng bộ hóa tính bằng giây (hàng ngày).                       |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Lựa chọn nguồn chỉ cho đồng bộ hóa này; hiện tại chỉ có `litellm` được hỗ trợ. |
+| biến thể Env            | Mặc định  | Mục đích                                                               |
+| ----------------------- | --------- | ---------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Bật đồng bộ hóa giá LiteLLM nền.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Khoảng thời gian đồng bộ hóa tính bằng giây (hàng ngày).               |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Lựa chọn nguồn chỉ cho đồng bộ hóa này; hiện tại chỉ hỗ trợ `litellm`. |
 
 **đồng bộ hóa mô hình.dev** tách biệt với đồng bộ hóa LiteLLM và cũng bị tắt theo mặc định. Kích hoạt nó trong Cài đặt (đồng bộ hóa models.dev) hoặc sử dụng các biến sau:
 
@@ -64,33 +64,55 @@ Chi phí đến từ bảng giá hợp nhất trong [`src/lib/db/settings/pricin
 | `MODELS_DEV_SYNC_ENABLED`  | _(chưa đặt)_ | Bỏ đặt theo sau chuyển đổi Cài đặt; `1/true/on/yes` buộc bật và `0/false/off/no` buộc tắt (ngay cả khi Cài đặt bật tính năng này). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Khoảng thời gian đồng bộ hóa models.dev mặc định tính bằng giây (hàng ngày).                                                       |
 
-`PRICING_SYNC_SOURCES` làm** không** kích hoạt models.dev; nó chỉ điều khiển đồng bộ hóa LiteLLM. Việc xóa phần ghi đè của người dùng sẽ không xóa cả vùng tên đã được đồng bộ hóa; lớp định giá có sẵn tiếp theo sẽ có hiệu lực. Đối với kiểu máy chưa được định giá, hãy kiểm tra cả cài đặt đồng bộ hóa và `sourceMap` trước khi thêm ghi đè thủ công.
+`PRICING_SYNC_SOURCES` làm **không** kích hoạt models.dev; nó chỉ điều khiển đồng bộ hóa LiteLLM. Việc xóa phần ghi đè của người dùng sẽ không xóa cả vùng tên đã được đồng bộ hóa; lớp định giá có sẵn tiếp theo sẽ có hiệu lực. Đối với kiểu máy chưa được định giá, hãy kiểm tra cả cài đặt đồng bộ hóa và `sourceMap` trước khi thêm ghi đè thủ công.
 
 ### Công thức chi phí
 
-Chi phí được tính theo yêu cầu từ số lượng mã thông báo và tỷ lệ trên một triệu mã thông báo tính bằng [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+Chi phí được tính theo yêu cầu từ số lượng mã thông báo và tỷ lệ trên một triệu mã thông báo trong [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Mã thông báo đầu vào** (trừ số lần đọc bộ đệm và mã thông báo tạo bộ đệm) tốc độ × `input`.
-- **Mã thông báo đọc bộ đệm** tốc độ × `cached` (trở lại tốc độ đầu vào).
-- **Mã thông báo tạo bộ đệm** tốc độ × `cache_creation` (trở lại tốc độ đầu vào).
-- **Mã thông báo đầu ra** tỷ lệ × `output`.
-- **Mã thông báo lý luận** tỷ lệ × `reasoning` (trở lại tỷ lệ đầu ra).
+- **Mã thông báo đầu vào** (trừ số lần đọc bộ đệm và mã thông báo tạo bộ đệm) Tỷ lệ × `input`.
+- **Mã thông báo đọc bộ đệm** Tốc độ × `cached` (trở lại tốc độ đầu vào).
+- **Mã thông báo tạo bộ đệm** Tốc độ × `cache_creation` (trở lại tốc độ đầu vào).
+- **Mã thông báo đầu ra** Tỷ lệ × `output`.
+- **Mã thông báo lý luận** Tỷ lệ × `reasoning` (trở lại tỷ lệ đầu ra).
 
-Tất cả các mức giá được hiểu là USD trên 1.000.000 token. Cấp dịch vụ Codex "nhanh"/"ưu tiên" hoặc "linh hoạt" áp dụng hệ số nhân chi phí (`getCodexFastCostMultiplier`) — ví dụ: flex được tính phí ở mức giảm giá 50% mã thông báo, hiển thị dưới dạng** tiết kiệm linh hoạt** trong bảng điều khiển.
+Tất cả các mức giá được hiểu là USD trên 1.000.000 token. Cấp dịch vụ "nhanh"/"ưu tiên" hoặc "linh hoạt" Codex áp dụng hệ số nhân chi phí (`getCodexFastCostMultiplier`) —, ví dụ: linh hoạt được tính phí ở mức chiết khấu mã thông báo 50%, hiển thị dưới dạng **tiết kiệm linh hoạt** trong bảng điều khiển.
 
-Tên mô hình được chuẩn hóa trước tiên (các tiền tố đường dẫn nhà cung cấp như `openai/` hoặc `accounts/fireworks/models/` bị loại bỏ) để các hàng lịch sử vẫn khớp với một mức giá.
+Tên mô hình được chuẩn hóa trước tiên (tiền tố đường dẫn nhà cung cấp như `openai/` hoặc `accounts/fireworks/models/` bị loại bỏ) để các hàng lịch sử vẫn khớp với giá.
 
 ### Cách ghi lại chi tiêu
 
-- Chi phí cho mỗi yêu cầu được tính toán sau khi phản hồi và được ghi lại hành động quên và không bao giờ làm tăng thêm độ trễ cho khách hàng. Mức tiêu thụ hạn ngạch chia sẻ được lên lịch vào lần đánh dấu vòng lặp sự kiện tiếp theo thông qua [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Chi tiêu khóa API được đệm và xóa theo đợt theo [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (khoảng thời gian xóa mặc định là 60 giây, bộ đệm 1.000 mục nhập). Có thể điều chỉnh thông qua:
+- Chi phí cho mỗi yêu cầu được tính khi hoàn thành yêu cầu. Mức tiêu thụ hạn ngạch chia sẻ được lên lịch vào lần đánh dấu vòng lặp sự kiện tiếp theo thông qua [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Chi tiêu khóa API được [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) lưu vào bộ đệm và xóa theo đợt (khoảng thời gian xử lý mặc định là 60 giây, bộ đệm 1.000 mục nhập). Có thể điều chỉnh thông qua:
 
   | biến thể Env                        | Mặc định | Mục đích                                 |
   | ----------------------------------- | -------- | ---------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Khoảng thời gian xả tính bằng mili giây. |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Các mục được đệm tối đa trước khi xóa.   |
 
-Số liệu chi phí của bảng điều khiển là** không** đọc từ số tiền — được lưu trữ trên mỗi hàng, chúng được tính toán lại nhanh chóng từ số lượng mã thông báo và bảng giá hiện tại mỗi khi điểm cuối phân tích chạy. Điều đó có nghĩa là sửa giá sai (và đồng bộ hóa lại) cập nhật ước tính chi phí trước đây.
+Chi phí ưu tiên mức phí chính xác do nhà cung cấp báo cáo (`provider_cost_usd`), sau đó là ảnh chụp nhanh yêu cầu theo giá danh mục (`calculated_cost_usd`), sau đó định giá lại mã thông báo từ danh mục hiện tại. Chi phí đã lưu trữ không bị tính phí lại thông qua số lượng mã thông báo của chúng. Các hàng chỉ có mã thông báo cũ vẫn thay đổi khi giá danh mục của chúng thay đổi.
+
+### OCR và phần nhúng
+
+- Các yêu cầu `/v1/ocr` thành công sử dụng `usage_info.pages_processed` ngược dòng, không phải phạm vi trang được yêu cầu hoặc số lượng đối tượng trang được trả về. Ước tính là các trang × `ocr_cost_per_page` ( USD/page tuyệt đối ,**không** USD/million).
+- Các yêu cầu có chú thích tài liệu hoặc hộp giới hạn yêu cầu mức thuế `ocr_cost_per_annotated_page` riêng. Không có nó, chi phí vẫn chưa được biết; thuế OCR thông thường không được thay thế một cách âm thầm.
+- Đồng bộ hóa LiteLLM ánh xạ trường `annotation_cost_per_page` ngược dòng của nó vào `ocr_cost_per_annotated_page`, giữ lại giá trị USD/page tuyệt đối và các mục nhập chỉ chú thích, bao gồm cả số 0 rõ ràng. Trường chuẩn được cung cấp sẽ được ưu tiên; giá trị bí danh không hợp lệ sẽ bị bỏ qua. Phần ghi đè giá của người dùng vẫn giữ nguyên mức độ ưu tiên thông thường. Xem [khóa định giá OCR của LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Việc sử dụng OCR lưu trữ số lượng trang, đơn giá, chi phí USD được tính toán, khóa API và kết nối đã chọn. Các trang không bao giờ được thể hiện dưới dạng mã thông báo. Nhật ký cuộc gọi chứa siêu dữ liệu thanh toán, không phải tài liệu URLs, PDF byte hoặc văn bản được trích xuất.
+- Các yêu cầu `/v1/embeddings` thành công ghi lại một hàng sử dụng cho mỗi lô vật lý, bao gồm các lô riêng biệt được hoàn thành trong cùng một mili giây. Các khoản phí do nhà cung cấp báo cáo được ưu tiên hơn các ước tính về mã thông báo; gói kết hợp không tính thêm phí.
+- Lịch sử sử dụng, phân tích chi phí, thời lượng provider/account, giới hạn chi tiêu khóa API, sổ cái chi phí yêu cầu và tổng hợp mức sử dụng hàng ngày bao gồm các khoản phí này. Khóa không ghi nhật ký giữ lại tính toán số mà không giữ lại văn bản nguồn.
+- Thiếu cách sử dụng hoặc thuế quan là **không rõ** , không miễn phí: tiêu đề chi phí phản hồi bị bỏ qua và chính sách sử dụng không định giá hiện tại áp dụng cho các khóa API giới hạn. Mức giá bằng 0 được cấu hình rõ ràng vẫn duy trì mức sử dụng hợp lệ với chi phí bằng 0.
+
+Đây chỉ là kế toán chuyển tiếp. Không thể xây dựng lại các cuộc gọi OCR/embedding cũ chưa bao giờ ghi lịch sử sử dụng từ quá trình di chuyển này. Ước tính danh mục là ước tính USD, không phải hóa đơn và không bao gồm chuyển đổi tiền tệ, thuế hoặc chiết khấu.
+
+### Lời nói và hình ảnh
+
+- Các nỗ lực `/v1/audio/transcriptions`, `/v1/audio/speech` và tạo hình ảnh thành công đều chia sẻ cách tính toán số. Cuộc gọi trực tiếp và kết hợp mang theo khóa API của người gọi và kết nối đã chọn; trình bao bọc kết hợp không bao giờ thêm khoản ghi nợ thứ hai.
+- USD do nhà cung cấp báo cáo chiếm ưu thế so với ước tính trong danh mục, bao gồm cả khoản phí bằng 0 rõ ràng. `usage.cost` JSON của OpenRouter được chuẩn hóa thành `cost_usd`. Mặt khác, mã thông báo được đo sử dụng giá mã thông báo, số giây phiên âm sử dụng giá mỗi giây, đầu vào giọng nói sử dụng số ký tự Unicode và hình ảnh giá cố định sử dụng số thực được trả về chứ không phải `n` được yêu cầu.
+- OpenRouter TTS nhị phân không có nội dung sử dụng JSON. Sau khi âm thanh hoàn tất hoặc người gọi hủy, OmniRoute truy vấn ID thế hệ của nó trên **như nhau** Nguồn gốc OpenRouter được cấu hình. Yêu cầu EU không bao giờ quay trở lại nguồn gốc toàn cầu. Đây là tra cứu có giới hạn, chỉ đọc; tổng hợp không được thử lại cho kế toán. Bản ghi thanh toán có thể xuất hiện sau khi âm thanh kết thúc: các lần thử tra cứu chạy trong nền tối đa khoảng 52 giây, bao gồm cả thời hạn mạng.
+- Trong quá trình tra cứu đó, phản hồi âm thanh có `X-OmniRoute-Cost-Status: pending` và không có tiêu đề chi phí phản hồi. Khoản phí cuối cùng của nó xuất hiện trong lịch sử sử dụng, phân tích và sổ cái chính sau khi đối chiếu. Nếu không có siêu dữ liệu thì ảnh chụp nhanh về giá đã định cấu hình sẽ được sử dụng; nếu không thì chi phí vẫn chưa được biết.
+- Giây, ký tự và số lượng hình ảnh có các trường đơn vị thanh toán riêng biệt, không bao giờ có số lượng mã thông báo giả. Kế toán chỉ giữ lại việc sử dụng số, không giữ lại văn bản lời nói, bản ghi hoặc byte hình ảnh. Các miễn trừ hình ảnh chưa được định giá hiện tại không thay đổi: biểu giá hình ảnh thực sự bị thiếu không khóa khóa giới hạn mới và phản hồi bỏ qua tiêu đề chi phí thay vì tuyên bố cuộc gọi miễn phí. Lỗi cửa hàng định giá vẫn giữ lại bằng chứng sử dụng cho việc thực thi không đóng.
+
+Không có khoản phí speech/image lịch sử nào được phát minh hoặc lấp đầy. Thanh toán của nhà cung cấp vẫn là tài liệu tham khảo cho các hóa đơn và cho các cuộc gọi mà khoản phí không được báo cáo.
 
 ---
 
@@ -136,50 +158,53 @@ Khu vực Chi phí cũng bao gồm (tất cả đều nằm trong `/dashboard/co
 
 ---
 
-## điểm cuối API
+## Các endpoint API
 
-Tất cả những điều này đều yêu cầu xác thực quản lý (loopback/JWT, thông qua `requireManagementAuth`) trừ khi có ghi chú.
+Tất cả các endpoint này đều yêu cầu xác thực quản lý (loopback/JWT, thông qua `requireManagementAuth`), trừ khi
+có ghi chú khác.
 
-### Phân tích mức sử dụng và chi phí
+### Phân tích mức sử dụng & chi phí
 
-| Phương pháp | Điểm cuối                | Mục đích                                                                                                                                                               |
-| ----------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`       | `/api/usage/analytics`   | Phân tích cost/usage đầy đủ: tóm tắt, xu hướng hàng ngày, theo provider/model/API key/account/tier. Truy vấn: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`       | `/api/usage/utilization` | Mức sử dụng hạn ngạch của mỗi nhà cung cấp theo thời gian. Truy vấn: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                      |
-| `GET`       | `/api/usage/history`     | Hàng lịch sử sử dụng thô.                                                                                                                                              |
-| `GET`       | `/api/usage/call-logs`   | Nhật ký cuộc gọi theo yêu cầu (kiểu máy, mã thông báo, chi phí, độ trễ, trạng thái).                                                                                   |
-| `GET`       | `/api/usage/quota`       | Trạng thái hạn ngạch của nhà cung cấp.                                                                                                                                 |
-| `GET`       | `/api/usage/proxy-logs`  | Nhật ký yêu cầu proxy.                                                                                                                                                 |
+| Phương thức | Endpoint                 | Mục đích                                                                                                                                                                                           |
+| ----------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`       | `/api/usage/analytics`   | Phân tích đầy đủ về chi phí/mức sử dụng: tóm tắt, xu hướng hàng ngày, theo nhà cung cấp/mô hình/khóa API/tài khoản/cấp dịch vụ. Truy vấn: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`       | `/api/usage/utilization` | Mức sử dụng hạn ngạch theo thời gian của từng nhà cung cấp. Truy vấn: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                 |
+| `GET`       | `/api/usage/history`     | Các hàng lịch sử sử dụng thô.                                                                                                                                                                      |
+| `GET`       | `/api/usage/call-logs`   | Nhật ký cuộc gọi theo từng yêu cầu (mô hình, token, chi phí, độ trễ, trạng thái).                                                                                                                  |
+| `GET`       | `/api/usage/quota`       | Trạng thái hạn ngạch của nhà cung cấp.                                                                                                                                                             |
+| `GET`       | `/api/usage/proxy-logs`  | Nhật ký yêu cầu proxy.                                                                                                                                                                             |
 
 ### Ngân sách
 
-| Phương pháp | Điểm cuối                | Mục đích                                                                                       |
-| ----------- | ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `GET`       | `/api/usage/budget`      | Kiểm tra ngân sách + tóm tắt chi phí cho một khóa API (yêu cầu thông số truy vấn `apiKeyId` ). |
-| `POST`      | `/api/usage/budget`      | Đặt daily/weekly/monthly USD giới hạn ngưỡng cảnh báo + cho khóa API.                          |
-| `GET`       | `/api/usage/budget/bulk` | Tóm tắt ngân sách hàng loạt trên các khóa API.                                                 |
+| Phương thức | Endpoint                 | Mục đích                                                                                         |
+| ----------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `GET`       | `/api/usage/budget`      | Tóm tắt chi phí + kiểm tra ngân sách cho một khóa API (bắt buộc có tham số truy vấn `apiKeyId`). |
+| `POST`      | `/api/usage/budget`      | Đặt giới hạn USD hàng ngày/hàng tuần/hàng tháng + ngưỡng cảnh báo cho một khóa API.              |
+| `GET`       | `/api/usage/budget/bulk` | Tóm tắt ngân sách hàng loạt trên nhiều khóa API.                                                 |
 
-> Ngân sách API được xác định theo phạm vi** khóa API** (`apiKeyId`). Các giới hạn được trả về bởi `GET /api/usage/budget` bao gồm `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` và tổng số đang chạy (`totalCostToday`, `totalCostMonth`, …).
+> API ngân sách được giới hạn phạm vi theo từng **khóa API** (`apiKeyId`). Các giới hạn do
+> `GET /api/usage/budget` trả về bao gồm `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> một `warningThreshold` và các tổng đang tích lũy (`totalCostToday`, `totalCostMonth`, …).
 
 ### Định giá
 
-| Phương pháp | Điểm cuối               | Mục đích                                                                                                                                                         |
-| ----------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`       | `/api/pricing`          | Giá bốn lớp được hợp nhất (người dùng, models.dev, LiteLLM, mặc định). `?includeSources=1` trả về `pricing` + `sourceMap`.                                       |
-| `PATCH`     | `/api/pricing`          | Ghi đè giá cho `{ provider: { model: { input, output, cached, … } } }`.                                                                                          |
-| `DELETE`    | `/api/pricing`          | Xóa phần ghi đè giá của người dùng (tùy chọn trong phạm vi `?provider=&model=`); tỷ lệ được đồng bộ hóa hoặc giá trị mặc định tích hợp vẫn được coi là dự phòng. |
-| `GET`       | `/api/pricing/defaults` | Hiển thị tỷ lệ dự phòng per-1M mặc định.                                                                                                                         |
-| `GET`       | `/api/pricing/models`   | Giá khóa theo mô hình.                                                                                                                                           |
-| `POST`      | `/api/pricing/sync`     | Kích hoạt đồng bộ hóa thủ công từ các nguồn bên ngoài (LiteLLM).                                                                                                 |
-| `GET`       | `/api/pricing/sync`     | Trạng thái đồng bộ hiện tại.                                                                                                                                     |
-| `DELETE`    | `/api/pricing/sync`     | Chỉ xóa giá được đồng bộ hóa LiteLLM (`pricing_synced`); Dữ liệu models.dev là riêng biệt.                                                                       |
+| Phương thức | Endpoint                | Mục đích                                                                                                                       |
+| ----------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`       | `/api/pricing`          | Giá hợp nhất bốn lớp (người dùng, models.dev, LiteLLM, mặc định). `?includeSources=1` trả về `pricing` + `sourceMap`.          |
+| `PATCH`     | `/api/pricing`          | Ghi đè giá cho `{ provider: { model: { input, output, cached, … } } }`.                                                        |
+| `DELETE`    | `/api/pricing`          | Xóa ghi đè giá của người dùng (có thể giới hạn bằng `?provider=&model=`); giá đồng bộ hoặc mặc định tích hợp vẫn làm dự phòng. |
+| `GET`       | `/api/pricing/defaults` | Hiển thị mức giá dự phòng mặc định trên mỗi 1 triệu đơn vị.                                                                    |
+| `GET`       | `/api/pricing/models`   | Giá được lập chỉ mục theo mô hình.                                                                                             |
+| `POST`      | `/api/pricing/sync`     | Kích hoạt đồng bộ thủ công từ các nguồn bên ngoài (LiteLLM).                                                                   |
+| `GET`       | `/api/pricing/sync`     | Trạng thái đồng bộ hiện tại.                                                                                                   |
+| `DELETE`    | `/api/pricing/sync`     | Chỉ xóa giá đồng bộ LiteLLM (`pricing_synced`); dữ liệu models.dev riêng biệt.                                                 |
 
-### Các điểm cuối liên quan đến chi phí khác
+### Các endpoint khác liên quan đến chi phí
 
-| Phương pháp | Điểm cuối                     | Mục đích                                                                                               |
-| ----------- | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `GET`       | `/api/free-tier/summary`      | Tổng số mã thông báo mô hình miễn phí, số tiền đã sử dụng trong tháng này và số tiền miễn phí còn lại. |
-| `GET`       | `/api/quota/pools/[id]/usage` | Cách sử dụng cho nhóm hạn ngạch được chia sẻ.                                                          |
+| Phương thức | Điểm cuối                     | Mục đích                                                                                    |
+| ----------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
+| `GET`       | `/api/free-tier/summary`      | Tổng số token của mô hình miễn phí, số đã dùng trong tháng này và hạn mức miễn phí còn lại. |
+| `GET`       | `/api/quota/pools/[id]/usage` | Mức sử dụng của một nhóm hạn mức dùng chung.                                                |
 
 ---
 

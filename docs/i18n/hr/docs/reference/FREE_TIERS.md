@@ -123,15 +123,15 @@ zadržano namjerno.
 
 ---
 
-## Zašto je naš broj manji od brojeva drugih agregatora
+## Zašto je naš broj manji od ostalih agregatora
 
-Većina brojki za „besplatne tokene mjesečno” u ovom području zbroj je oznaka po modelu. Naša to namjerno nije:
+Većina brojki "besplatnih tokena mjesečno" u ovom prostoru su zbrojevi oznaka po modelu. Naš nije, namjerno:
 
-- **Svaki zajednički fond računa se jednom.** Mistralov besplatni plan nudi jednu kvotu od 1B mjesečno po organizaciji; navođenjem te kvote uz pet modela ona ne postaje 5B. Kad bi se zbrajalo po modelu, naš bi vlastiti katalog prikazivao **~7.4B** (ponovno izračunato 2026-09-03; ta brojka nije provjeravana putem CI-ja — ponovno je izmjerite kad god se katalog promijeni) — naslov navodi **~1.47B** jer je to ono što jedan račun kod svakog pružatelja usluge doista može potrošiti.
-- **Dnevna ograničenja pretvaraju se, stope ne.** Dokumentirano ograničenje tokena po danu postaje `× 30`; dokumentirano ograničenje zahtjeva po danu postaje `RPD × ~800 tokena × 30`; pružatelj usluge koji objavljuje samo broj zahtjeva u minuti **nema** mjesečnu brojku i navodi se kao _bez ograničenja_, nikad se ne zbraja. Množenje ograničenja stope s 24/7 jest napuhavanje koje odbijamo.
-- **Kvote dostupne tek nakon regionalne provjere identiteta prikazane su zasebno** (`+~6M nakon regionalne provjere identiteta`) jer ih većina čitatelja ne može koristiti.
-- **Krediti za registraciju vrijede samo prvi mjesec** i navode se kao zasebna brojka te se nikad ne spajaju sa stalnom brojkom.
-- **Brojku provodi CI.** `npm run check:docs-counts` ponovno izračunava ukupne vrijednosti iz kataloga i prekida izgradnju kad se ova datoteka, README ili kartica proračuna više ne podudaraju s njima.
+- **Svaki zajednički skup broji se jednom.** Besplatni plan Mistral-e je jedan 1B/month dodatak po organizaciji; navođenje pod pet modela ne znači da je 5B. Zbrojeno po modelu, glasio bi naš vlastiti katalog **~ 7.4B** (ponovno izračunato 2026-09-03; ova brojka nije CI-gated — ponovno je izmjerite kad god se katalog promijeni) — naslov kaže **~ 1.47B** jer to je ono što jedan račun svakog pružatelja zapravo može potrošiti.
+- **Dnevna ograničenja su preračunata, stope nisu.** Dokumentirana tokens/day kapa postaje `× 30`; dokumentirana requests/day kapa postaje `RPD × ~800 tokens × 30`; pružatelj koji objavljuje samo zahtjeve po minuti ima **Ne** mjesečna brojka i naveden je kao _neograničen_, nikad zbrojen. Množenje ograničenja stope sa 24/7 je inflacija koju odbijamo.
+- **Kvote iza regionalne provjere identiteta prikazane su odvojeno** (`+~6M behind regional identity verification`), jer ih većina čitatelja ne može koristiti.
+- **Bonus za registraciju vrijedi samo za prvi mjesec** i prijavljen kao druga brojka, nikada se ne uklapa u stalni broj.
+- **Brojku provodi CI.** `npm run check:docs-counts` ponovno izračunava ukupne iznose iz kataloga i ne uspije u izradi kada ova datoteka, README ili proračunska kartica odstupaju od njih.
 
 ---
 
@@ -389,14 +389,14 @@ Većina brojki za „besplatne tokene mjesečno” u ovom području zbroj je ozn
 - **`voyage-ai`** — Isporučena freeNote „200M besplatnih tokena za ugrađivanja i ponovno rangiranje” u osnovi je točna po pitanju broja tokena, ali dovodi u zabludu — izostavlja činjenicu da je riječ o jednokratnoj alokaciji po računu, a ne ponavljajućoj…
 - **`yi`** — Isporučena freeNote „Besplatni modeli Yi-Light” upućuje na naziv modela („Yi-Light”) koji se ne pojavljuje ni u jednoj trenutačnoj dokumentaciji ili katalogu modela tvrtke 01.AI — nijedan takav model nije naveden na platform.01.ai, …
 
-## Pojmovnik
+## Glosar
 
-| Pojam                   | Značenje                                                                            |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**     | Zahtjevi po minuti / danu / satu                                                    |
-| **TPM / TPD**           | Tokeni po minuti / danu                                                             |
-| **Dokumentirana kvota** | Pružatelj objavljuje izričito dnevno/mjesečno ograničenje tokena (opravdani budžet) |
-| **Teorijski maksimum**  | `ograničenje stope × 24/7 × 30 d` — maksimum, a ne dodijeljeni budžet               |
-| **Neuron**              | Cloudflareova računalna jedinica (~1 izlazni token)                                 |
+| Termin                    | Značenje                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| **RPM / RPD / RPH**       | Zahtjevi po minuti / danu / satu                                                      |
+| **TPM / TPD**             | Tokeni po minuti / danu                                                               |
+| **Dokumentirana potpora** | Pružatelj objavljuje eksplicitno ograničenje daily/monthly tokena (obranjiv proračun) |
+| **Teoretski strop**       | `rate-limit × 24/7 × 30d` — maksimalni, a ne odobreni proračun                        |
+| **Neuron**                | Cloudflare računska jedinica (~ 1 izlazni token)                                      |
 
-> Generirano na temelju istraživanja pojedinačnih pružatelja 2026-06-05. Ponovno pokrenite tijek istraživanja (pogledajte `_tasks/features-v3.8.12`) radi ažuriranja.
+> Generirano iz istraživanja po pružatelju 2026-06-05. Ponovno pokrenite tijek istraživanja (pogledajte `_tasks/features-v3.8.12`) za osvježavanje.

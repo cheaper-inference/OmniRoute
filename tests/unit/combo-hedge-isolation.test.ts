@@ -13,6 +13,7 @@ const { remainderIsHomogeneous, shouldAbortOnInputBoundFailure } =
   await import("../../open-sse/services/combo/executeTargetClassify.ts");
 const { hasIdenticalModelErrorStreak } =
   await import("../../open-sse/services/combo/comboPredicates.ts");
+const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const noop = () => {};
 test.after(() => fs.rmSync(dir, { recursive: true, force: true }));
@@ -91,8 +92,6 @@ async function run(mode: string, hedge = true) {
   await delay(80);
   return { response, dispatched, cancelled };
 }
-const { handleComboChat } = await import("../../open-sse/services/combo.ts");
-
 test("hedges launch different models before sibling accounts, preserving indices", async () => {
   const r = await run("duplicates");
   assert.equal(await r.response.text(), "luna");

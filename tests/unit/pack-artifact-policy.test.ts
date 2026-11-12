@@ -198,6 +198,7 @@ test("build-next-isolated sibling imports are allowed in the published package",
   const buildDependencies = [
     "scripts/build/assembleStandalone.mjs",
     "scripts/build/backendOnlyPages.mjs",
+    "scripts/build/buildPhaseProgress.mjs",
     "scripts/build/build-tproxy-native.mjs",
     "scripts/i18n/generate-global-error-messages.mjs",
   ];
@@ -215,6 +216,22 @@ test("build-next-isolated sibling imports are allowed in the published package",
       prefixPaths: PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
     }),
     ["scripts/i18n/private-catalog.mjs"]
+  );
+  const progressHelper = "scripts/build/buildPhaseProgress.mjs";
+  assert.ok(PACK_ARTIFACT_REQUIRED_PATHS.includes(progressHelper));
+  assert.deepEqual(
+    findMissingArtifactPaths(
+      PACK_ARTIFACT_REQUIRED_PATHS.filter((file) => file !== progressHelper),
+      PACK_ARTIFACT_REQUIRED_PATHS
+    ),
+    [progressHelper]
+  );
+  assert.deepEqual(
+    findUnexpectedArtifactPaths(["scripts/build/buildPhaseProgress.private.mjs"], {
+      exactPaths: PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
+      prefixPaths: PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
+    }),
+    ["scripts/build/buildPhaseProgress.private.mjs"]
   );
 });
 
@@ -362,6 +379,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "dist/systemd-notify.mjs",
     "dist/tls-options.mjs",
     "dist/webdav-handler.mjs",
+    "scripts/build/buildPhaseProgress.mjs",
     "scripts/build/colocateOptionals.mjs",
     "scripts/build/native-binary-compat.mjs",
     "scripts/build/runtime-env.mjs",

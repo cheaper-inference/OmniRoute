@@ -4,9 +4,13 @@
 
 ---
 
-> **Versija:** v3.8.44** Pēdējo reizi atjaunināts:** 2026-10-28** Auditorija:** Inženieri, kas pievieno, uztur vai atkļūdo iegultos pakalpojumus (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versija:** v3.8.44
+> **Pēdējoreiz atjaunināts:** 2026-10-28
+> **Mērķauditorija:** Inženieri, kas pievieno, uztur vai atkļūdo iegultos pakalpojumus (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Iegultie pakalpojumi ir lokāli instalēti procesa blakusvāģu rīki, kurus OmniRoute instalē, uzrauga un atklāj kā pirmšķirīgus maršrutēšanas mērķus. Atšķirībā no ārējiem pakalpojumu sniedzējiem (kuri tiek sasniegti internetā, izmantojot API taustiņus), iegultie pakalpojumi darbojas tajā pašā datorā kā OmniRoute un sazinās, izmantojot atgriezenisko saiti.
+Iegultie pakalpojumi ir lokāli instalēti blakusprocesu rīki, kurus OmniRoute instalē, pārrauga un
+padara pieejamus kā pilnvērtīgus maršrutēšanas mērķus. Atšķirībā no ārējiem pakalpojumu sniedzējiem (kuri ir sasniedzami internetā,
+izmantojot API atslēgas), iegultie pakalpojumi darbojas tajā pašā datorā, kurā darbojas OmniRoute, un sazinās, izmantojot lokālā atgriezeniskā savienojuma interfeisu.
 
 ---
 
@@ -29,34 +33,34 @@ Iegultie pakalpojumi ir lokāli instalēti procesa blakusvāģu rīki, kurus Omn
 
 Ir iegulti astoņi pakalpojumi:
 
-| Serviss            | npm pakete                            | Noklusējuma ports | Mērķis                                                                                                                                                                                                                                                                                                                                              |
-| ------------------ | ------------------------------------- | :---------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9 Maršrutētājs** | `9router`                             |       20130       | AI maršrutētājs, ko OmniRoute var izmantot kā apakšnodrošinātāju. Modeļi, kas eksponēti kā `9router/{sub}/{model}`                                                                                                                                                                                                                                  |
-| **CLIProxyAPI**    | GitHub izlaišanas binārs (`cliproxy`) |       8317        | Vietējais starpniekservera adapteris Anthropic CLI autentifikācijas plūsmām. Nodrošina rezerves maršrutēšanu, kad beidzas OAuth pilnvaru derīguma termiņš                                                                                                                                                                                           |
-| **Mux**            | `mux` (bez galvas `mux server`)       |       8322        | Vietējais aģents-orķestrācijas dēmons (coder/mux). Dzīves cikla pārvaldīts tikai —, nevis maršrutēšanas mērķis (nav LLM starpniekservera).                                                                                                                                                                                                          |
-| **Bifrost**        | `@maximhq/bifrost`                    |       8080        | Iet AI vārtejas releja aizmugursistēmu. Skrienot, automātiski tiek atlasīts pēc stafetes maršruta (`/v1/relay/`)                                                                                                                                                                                                                                    |
-| **Dario**          | `@askalf/dario`                       |       3456        | Claude abonēšanas starpniekserveris — alternative/failover to CLIProxyAPI Kloda koda formas datplūsmai; ievadītā atslēga kļūst `DARIO_ADMIN_TOKEN` kas nodrošina tās `/admin/*` OAuth vadības plakni                                                                                                                                                |
-| **open-wa**        | `@open-wa/wa-automate`                |       8323        | WhatsApp Web automatizācija (bez galvas Chromium, izmantojot Puppeteer). Dzīves cikla pārvaldīts tikai —, nevis maršrutēšanas mērķis.                                                                                                                                                                                                               |
-| **LLMLingua**      | `@atjsh/llmlingua-2`                  |       20135       | Ātrās saspiešanas blakusvāģa — īsts LLMLingua-2 ONNX modelis ( Microsoft algoritma JS/TS ports). `open-sse/services/compression/engines/llmlingua/index.ts` nosūta `/compress` pār HTTP uz to, atgriežoties uz procesā esošā darbinieka pavediena aizmuguri, kad blakusvāģis ir nolaists. Dzīves cikla pārvaldīts tikai — nav maršrutēšanas mērķis. |
-| **dziedāt kaste**  | GitHub izlaišanas binārs (`singbox`)  |       20140       | TPROXY blakusvāģa atbalsta `applyTproxy()` caurspīdīgā starpniekservera pārtveršana (`src/mitm/tproxy/setup.ts`). Instalēšanas programma lejupielādē piesprausto, ar kontrolsummu pārbaudīto laidienu. Dzīves cikla pārvaldīts tikai — nevis maršrutēšanas mērķis (nav LLM starpniekservera)                                                        |
+| Pakalpojums     | npm pakotne                                 | Noklusējuma ports | Mērķis                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------- | :---------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                   |       20130       | MI maršrutētājs, ko OmniRoute var izmantot kā apakšpakalpojumu sniedzēju. Modeļi tiek eksponēti kā `9router/{sub}/{model}`                                                                                                                                                                                                                                                                              |
+| **CLIProxyAPI** | GitHub laidiena binārais fails (`cliproxy`) |       8317        | Lokāls starpniekservera adapteris Anthropic CLI autentifikācijas plūsmām. Nodrošina rezerves maršrutēšanu, kad beidzas OAuth pilnvaru derīgums                                                                                                                                                                                                                                                          |
+| **Mux**         | `mux` (bezgalvas `mux server`)              |       8322        | Lokāls aģentu orķestrēšanas dēmons (coder/mux). Tiek pārvaldīts tikai dzīves cikls — tas nav maršrutēšanas mērķis (bez LLM starpniekservera funkcionalitātes).                                                                                                                                                                                                                                          |
+| **Bifrost**     | `@maximhq/bifrost`                          |       8080        | Go MI vārtejas releja aizmugursistēma. Darbības laikā to automātiski atlasa releja maršruts (`/v1/relay/`)                                                                                                                                                                                                                                                                                              |
+| **Dario**       | `@askalf/dario`                             |       3456        | Claude abonementa starpniekserveris — CLIProxyAPI alternatīva/rezerves risinājums Claude-Code formāta datplūsmai; ievadītā atslēga kļūst par `DARIO_ADMIN_TOKEN`, kas ierobežo piekļuvi tā `/admin/*` OAuth vadības plaknei                                                                                                                                                                             |
+| **open-wa**     | `@open-wa/wa-automate`                      |       8323        | WhatsApp Web automatizācija (bezgalvas Chromium, izmantojot Puppeteer). Tiek pārvaldīts tikai dzīves cikls — tas nav maršrutēšanas mērķis.                                                                                                                                                                                                                                                              |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                        |       20135       | Uzvedņu saspiešanas blakuspakalpojums — īsts LLMLingua-2 ONNX modelis (Microsoft algoritma JS/TS ports). `open-sse/services/compression/engines/llmlingua/index.ts` nosūta `/compress` pieprasījumus tam, izmantojot HTTP, un, ja blakuspakalpojums nedarbojas, pārslēdzas uz procesā iebūvēto darbinieka pavediena aizmugursistēmu. Tiek pārvaldīts tikai dzīves cikls — tas nav maršrutēšanas mērķis. |
+| **sing-box**    | GitHub laidiena binārais fails (`singbox`)  |       20140       | TPROXY palīgprocess, kas nodrošina `applyTproxy()` caurspīdīgā starpniekservera pārtveršanu (`src/mitm/tproxy/setup.ts`). Instalētājs lejupielādē fiksēto laidienu un pārbauda kontrolsummu. Tiek pārvaldīts tikai dzīves cikls: tas nav maršrutēšanas mērķis un nepārsūta LLM pieprasījumus.                                                                                                           |
 
-Visas astoņas ievēro vienu un to pašu uzraudzības modeli:
+Visi astoņi izmanto vienādu pārraudzības modeli:
 
-- OmniRoute instalē tos zem `DATA_DIR/services/{name}/` (izolēts no paša OmniRoute `package.json`)
-- OmniRoute nārsto un uzrauga tos kā bērna procesus
-- OmniRoute ievada īslaicīgu API atslēgu bērna vidē un pagriež to bez dīkstāves (ja piemērojams)
-- Visi pārvaldības maršruti (`/api/services/*`) ir**LOCAL_ONLY** — pieejams tikai no cilpas (cietais noteikums Nr. 17)
+- OmniRoute tos instalē mapē `DATA_DIR/services/{name}/` (izolēti no paša OmniRoute `package.json`)
+- OmniRoute tos palaiž kā bērnprocesus un uzrauga
+- OmniRoute bērnprocesa vidē ievada īslaicīgu API atslēgu un to rotē bez dīkstāves (ja piemērojams)
+- Visi pārvaldības maršruti (`/api/services/*`) ir **TIKAI_LOKĀLI** — pieejami tikai no cilpas interfeisa (stingrais noteikums Nr. 17)
 
-### Galvenie lēmumi (no dizaina plāna)
+### Galvenie lēmumi (no projektējuma plāna)
 
-| Lēmums                                           | Vērtība                                                                             |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| Informācijas paneļa piekļuve 9Router vietējai UI | Reversais starpniekserveris pie `/dashboard/providers/services/9router/embed/*`     |
-| Uzstādīšanas mehānisms                           | `npm install {package}` izmantojot `execFile` (bez čaulas interpolācijas)           |
-| Patēriņa režīms                                  | Pakalpojumu sniedzējs maršrutēšanas programmā reģistrēts kā `9router/{sub}/{model}` |
-| API atslēgu pārvaldība                           | OmniRoute ģenerē, šifrē miera stāvoklī (AES-256-GCM) un ievada, izmantojot env      |
-| Informācijas paneļa atrašanās vieta              | `/dashboard/providers/services` (trīs cilnes)                                       |
-| Automātiskā palaišana                            | Pārslēgt katram pakalpojumam, noklusējuma OFF                                       |
+| Lēmums                                                               | Vērtība                                                                               |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Informācijas paneļa piekļuve 9Router iebūvētajai lietotāja saskarnei | Reversais starpniekserveris adresē `/dashboard/providers/services/9router/embed/*`    |
+| Instalēšanas mehānisms                                               | `npm install {package}`, izmantojot `execFile` (bez čaulas interpolācijas)            |
+| Izmantošanas režīms                                                  | Pakalpojumu sniedzējs maršrutēšanas dzinī reģistrēts kā `9router/{sub}/{model}`       |
+| API atslēgu pārvaldība                                               | OmniRoute tās ģenerē, šifrē glabāšanas laikā (AES-256-GCM) un ievada, izmantojot vidi |
+| Atrašanās vieta informācijas panelī                                  | `/dashboard/providers/services` (trīs cilnes)                                         |
+| Automātiska palaišana                                                | Pārslēdzama katram pakalpojumam, pēc noklusējuma IZSLĒGTA                             |
 
 ---
 
@@ -64,12 +68,12 @@ Visas astoņas ievēro vienu un to pašu uzraudzības modeli:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Layer 1 — UI                                                      │
-│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
-│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
+│  1. slānis — lietotāja saskarne                                   │
+│  /dashboard/providers/services  (cilnes: CLIProxyAPI | 9Router | Mux)│
+│  Žurnāli reāllaikā (SSE), palaišana/apturēšana/restartēšana/atjaunināšana, iestatījumi, instalēšana│
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + tab routing by ?tab=         │
+│    ├── page.tsx               Ietvars + ciļņu maršrutēšana pēc ?tab=│
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -77,7 +81,7 @@ Visas astoņas ievēro vienu un to pašu uzraudzības modeli:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
+│  2. slānis — API (LOCAL_ONLY — tikai atgriezeniskā saite)         │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -86,74 +90,75 @@ Visas astoņas ievēro vienu un to pašu uzraudzības modeli:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
+│    (reversais HTTP + WebSocket starpniekserveris → 9Router augšupstraume)│
 │                                                                    │
-│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│  Vārteja: LOCAL_ONLY_API_PREFIXES ietver "/api/services/" un      │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ in-process calls
+                       │ izsaukumi procesa ietvaros
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
+│  3. slānis — ServiceSupervisor (src/lib/services/)                │
 │                                                                    │
-│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
-│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
-│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 for 9Router (configurable)                │
-│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
-│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
-│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
+│  ServiceSupervisor.ts   Vispārīgs pārraugs (child_process.spawn)  │
+│    ├── instalēšana: execFile('npm', ['install', pkg, '--prefix'])  │
+│    ├── palaišana:   spawn(node, [entrypoint], {env, cwd})          │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY │
+│    ├── ports:      20130 pakalpojumam 9Router (konfigurējams)      │
+│    ├── žurnāli:    stdio gredzenveida buferis 5 MB → SSE notikumi │
+│    ├── veselība:   HTTP GET /health ik pēc 2–5 s, atlikta atkopšana│
+│    └── dzīves cikls: SIGTERM 15 s → SIGKILL                       │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
+│  bootstrap.ts       Inicializē visus SERVICES[] procesa sākumā     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Periodic GET /v1/models → service_models table │
-│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
-│  healthCheck.ts     Polling HTTP health probe                      │
+│  modelSync.ts       Periodisks GET /v1/models → service_models tabula│
+│  ringBuffer.ts      Ciklisks žurnālu buferis (5 MB katram pakalpojumam)│
+│  healthCheck.ts     Periodiska HTTP veselības pārbaude             │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (installer adapters)                          │
+│                      (instalētāju adapteri)                        │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-compatible HTTP (loopback)
+                       │ Ar OpenAI saderīgs HTTP (atgriezeniskā saite)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 4 — Provider / Routing                                      │
+│  4. slānis — nodrošinātājs / maršrutēšana                         │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Re-looks up port and API key per-request (no caching).          │
-│    Strips "9router/" prefix from model id before proxying.         │
-│    Returns 503 service_not_running if supervisor not in "running". │
+│    Katram pieprasījumam no jauna iegūst portu un API atslēgu (bez kešatmiņas).│
+│    Pirms starpniekošanas no modeļa ID noņem prefiksu "9router/".   │
+│    Atgriež 503 service_not_running, ja pārraugs nav stāvoklī "running".│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Entry for "9router": isEmbeddedService: true                    │
+│    Ieraksts "9router": isEmbeddedService: true                     │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Models stored as "9router/{sub}/{model}" (prefixed).            │
-│    Synced every 5 min by modelSync.ts.                             │
+│    Modeļi tiek glabāti kā "9router/{sub}/{model}" (ar prefiksu).   │
+│    modelSync.ts tos sinhronizē ik pēc 5 minūtēm.                   │
 │                                                                    │
-│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
-│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
-│  executor/provider entry and is never a routing target.            │
+│  Mux tiek pārvaldīts TIKAI dzīves cikla līmenī (1.–3. slānis) —   │
+│  tas ir aģentu orķestrēšanas dēmons, nevis LLM starpniekserveris,  │
+│  tāpēc tam nav 4. slāņa izpildītāja/nodrošinātāja ieraksta un tas  │
+│  nekad nav maršrutēšanas mērķis.                                   │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Galvenie avota faili
 
-| Fails                                       | Loma                                                           |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Pamatklase: dzīves cikls, slēdzene, veselība, gredzena buferis |
-| `src/lib/services/bootstrap.ts`             | Procesa līmeņa reģistrācija un automātiskā palaišana           |
-| `src/lib/services/registry.ts`              | Singleton karte `tool → supervisor`                            |
-| `src/lib/services/apiKey.ts`                | Atslēgu ģenerēšana, AES-256-GCM šifrēšana miera stāvoklī       |
-| `src/lib/services/modelSync.ts`             | Periodiskā modeļa sinhronizācija (5 min) + pēc pieprasījuma    |
-| `src/lib/services/ringBuffer.ts`            | 5 MB apļveida žurnālu buferis ar SSE abonementu                |
-| `src/lib/services/healthCheck.ts`           | HTTP veselības zonde (konfigurējams intervāls)                 |
-| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall 9Router                           |
-| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall par CLIProxyAPI                   |
-| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall Mux                               |
-| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall for open-wa                       |
-| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall par LLMLingua                     |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` palīgs                                 |
-| `src/app/api/services/[name]/logs/route.ts` | Koplietots SSE žurnālu galapunkts                              |
-| `open-sse/executors/ninerouter.ts`          | Nodrošinātāja izpildītājs (4. slānis)                          |
+| Fails                                       | Loma                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `src/lib/services/ServiceSupervisor.ts`     | Pamatklase: dzīves cikls, bloķēšana, darbspēja, gredzenbuferis     |
+| `src/lib/services/bootstrap.ts`             | Procesa līmeņa reģistrācija un automātiskā palaišana               |
+| `src/lib/services/registry.ts`              | Vienīginstances karte `tool → supervisor`                          |
+| `src/lib/services/apiKey.ts`                | Atslēgu ģenerēšana, AES-256-GCM šifrēšana glabāšanas laikā         |
+| `src/lib/services/modelSync.ts`             | Periodiska modeļu sinhronizācija (5 min) + pēc pieprasījuma        |
+| `src/lib/services/ringBuffer.ts`            | 5 MB ciklisks žurnāla buferis ar SSE abonēšanu                     |
+| `src/lib/services/healthCheck.ts`           | HTTP darbspējas pārbaude (konfigurējams intervāls)                 |
+| `src/lib/services/installers/ninerouter.ts` | npm instalēšana/atjaunināšana/atinstalēšana 9Router vajadzībām     |
+| `src/lib/services/installers/cliproxy.ts`   | npm instalēšana/atjaunināšana/atinstalēšana CLIProxyAPI vajadzībām |
+| `src/lib/services/installers/mux.ts`        | npm instalēšana/atjaunināšana/atinstalēšana Mux vajadzībām         |
+| `src/lib/services/installers/openwa.ts`     | npm instalēšana/atjaunināšana/atinstalēšana open-wa vajadzībām     |
+| `src/lib/services/installers/llmlingua.ts`  | npm instalēšana/atjaunināšana/atinstalēšana LLMLingua vajadzībām   |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` palīgfunkcija                              |
+| `src/app/api/services/[name]/logs/route.ts` | Koplietots SSE žurnālu galapunkts                                  |
+| `open-sse/executors/ninerouter.ts`          | Nodrošinātāja izpildītājs (4. slānis)                              |
 
 ---
 
@@ -209,50 +214,54 @@ sacensības apstākļus, piemēram, ja automātiskā palaišana un lietotāja sa
 
 ## 4. API atsauce
 
-Visi maršruti zem `/api/services/` ir**LOCAL_ONLY** (tikai cilpa, stingri noteikums Nr. 17). Pieprasījumi bez cilpas saņem `403 LOCAL_ONLY` neatkarīgi no autentifikācijas pilnvaras.
+Visi maršruti zem `/api/services/` ir **LOCAL_ONLY** (tikai atgriezeniskā cilpa, stingrais noteikums #17).
+Pieprasījumi, kas nav no atgriezeniskās cilpas, saņem `403 LOCAL_ONLY` neatkarīgi no autentifikācijas pilnvaras.
 
-### 4.1 9 Maršrutētāja galapunkti (11 maršruti)
+### 4.1 9Router galapunkti (11 maršruti)
 
 #### `POST /api/services/9router/install`
 
-Instalējiet 9Router no npm. Izveido `DATA_DIR/services/9router/` ar savu `package.json` un `node_modules/`. Nav pretrunā ar paša OmniRoute deps.
+Instalē 9Router no npm. Izveido `DATA_DIR/services/9router/` ar savu
+`package.json` un `node_modules/`. Nerada konfliktus ar paša OmniRoute atkarībām.
 
-**Pieprasījuma struktūra** (visi nav obligāti):
+**Pieprasījuma pamatteksts** (visi lauki nav obligāti):
 
 ```json
 { "version": "latest" }
 ```
 
-| Lauks     | Tips     | Noklusējums | Apraksts                                    |
-| --------- | -------- | ----------- | ------------------------------------------- |
-| `version` | `string` | `"latest"`  | npm versijas tagu vai semver, lai instalētu |
+| Lauks     | Tips     | Noklusējums | Apraksts                                  |
+| --------- | -------- | ----------- | ----------------------------------------- |
+| `version` | `string` | `"latest"`  | Instalējamā npm versijas birka vai semver |
 
 **Atbildes:**
 
-| Statuss | Apraksts                                                                         |
-| ------- | -------------------------------------------------------------------------------- |
-| `200`   | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                           |
-| `400`   | Nederīgs pieprasījuma pamatteksts (Zod validācijas kļūme)                        |
-| `409`   | Jau instalēšana (noturēta slēdzene)                                              |
-| `500`   | npm instalēšana neizdevās. — skatiet `message`, lai uzzinātu par draudzīgu kļūdu |
+| Statuss | Apraksts                                                                      |
+| ------- | ----------------------------------------------------------------------------- |
+| `200`   | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                        |
+| `400`   | Nederīgs pieprasījuma pamatteksts (Zod validācijas kļūme)                     |
+| `409`   | Instalēšana jau notiek (bloķējums ir aizņemts)                                |
+| `500`   | npm instalēšana neizdevās — saprotamu kļūdas aprakstu skatiet laukā `message` |
 
-**Piezīmes:** Izmanto `execFile('npm', [...])` — bez apvalka, bez interpolācijas (cietais noteikums Nr. 13). EACCES kļūdas tiek parādītas kā draudzīgi ziņojumi.
+**Piezīmes:** Izmanto `execFile('npm', [...])` — bez čaulas un interpolācijas (stingrais noteikums #13).
+EACCES kļūdas tiek parādītas kā saprotami ziņojumi.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Startējiet 9Router. Reģistrē uzraugu, ja vēl nav reģistrēts, tad zvana `supervisor.start()`. Idempots, kad jau skrien.
+Palaiž 9Router. Reģistrē pārraugu, ja tas vēl nav reģistrēts, un pēc tam izsauc
+`supervisor.start()`. Darbība ir idempotenta, ja pakalpojums jau darbojas.
 
-**Pieprasījuma pamatteksts:** neviens
+**Pieprasījuma pamatteksts:** nav
 
 **Atbildes:**
 
-| Statuss | Apraksts                                                 |
-| ------- | -------------------------------------------------------- |
-| `200`   | `ServiceStatus` objekts (skatiet shēmu zemāk)            |
-| `409`   | 9 Maršrutētājs nav instalēts (`status: "not_installed"`) |
-| `503`   | Sākt neizdevās (procesa kļūda — skatiet `lastError`)     |
+| Statuss | Apraksts                                                  |
+| ------- | --------------------------------------------------------- |
+| `200`   | `ServiceStatus` objekts (skatiet shēmu tālāk)             |
+| `409`   | 9Router nav instalēts (`status: "not_installed"`)         |
+| `503`   | Palaišana neizdevās (procesa kļūda — skatiet `lastError`) |
 
 **ServiceStatus shēma:**
 
@@ -272,34 +281,37 @@ Startējiet 9Router. Reģistrē uzraugu, ja vēl nav reģistrēts, tad zvana `su
 
 #### `POST /api/services/9router/stop`
 
-Graciozi apturiet 9Router. Nosūta SIGTERM, gaida 15 s, tad SIGKILL ja vēl dzīvs. Idempots, kad jau apstājies.
+Korekti aptur 9Router. Nosūta SIGTERM, gaida 15 s un pēc tam nosūta SIGKILL, ja process joprojām darbojas.
+Darbība ir idempotenta, ja pakalpojums jau ir apturēts.
 
-**Pieprasījuma pamatteksts:** neviens
+**Pieprasījuma pamatteksts:** nav
 
 **Atbildes:**
 
-| Statuss | Apraksts                                |
-| ------- | --------------------------------------- |
-| `200`   | `ServiceStatus` (stāvoklis: "apturēts") |
-| `503`   | Apturēšana negaidīti neizdevās          |
+| Statuss | Apraksts                             |
+| ------- | ------------------------------------ |
+| `200`   | `ServiceStatus` (`state: "stopped"`) |
+| `503`   | Apturēšana negaidīti neizdevās       |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Atbilst `stop()` tad `start()` zem darbības bloķēšanas.
+Līdzvērtīgs `stop()` un pēc tam `start()` izsaukšanai darbības bloķējuma ietvaros.
 
-**Pieprasījuma pamatteksts:** neviens
+**Pieprasījuma pamatteksts:** nav
 
-**Atbildes:** tāds pats kā `start` (atgriež galīgo `ServiceStatus`).
+**Atbildes:** tādas pašas kā `start` (atgriež galīgo `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Atjaunina 9Router uz jaunāku npm versiju. Ja pakalpojums darbojas, tas vispirms tiek apturēts, tiek palaista npm instalēšana (jaunākas versijas instalēšana vietā) un pēc tam pakalpojums tiek restartēts.
+Atjaunina 9Router uz jaunāku npm versiju. Ja pakalpojums darbojas, tas vispirms tiek
+apturēts, tiek izpildīta npm instalēšana (instalējot jaunāko versiju esošajā vietā), un pēc tam
+pakalpojums tiek restartēts.
 
-**Pieprasījuma struktūra** (visi nav obligāti):
+**Pieprasījuma pamatteksts** (visi lauki nav obligāti):
 
 ```json
 { "version": "latest" }
@@ -317,30 +329,33 @@ Atjaunina 9Router uz jaunāku npm versiju. Ja pakalpojums darbojas, tas vispirms
 
 #### `POST /api/services/9router/rotate-key`
 
-Ģenerē jaunu API atslēgu 9Router, šifrē to miera stāvoklī un restartē pakalpojumu (ja tas darbojas), lai tas paņemtu jauno atslēgu no savas vides. Vecā atslēga nekavējoties tiek anulēta.
+Ģenerē jaunu 9Router API atslēgu, šifrē to glabāšanai un restartē pakalpojumu
+(ja tas darbojas), lai tas no savas vides ielādētu jauno atslēgu. Vecā atslēga
+tiek nekavējoties padarīta nederīga.
 
-**Pieprasījuma pamatteksts:** neviens
+**Pieprasījuma pamatteksts:** nav
 
 **Atbildes:**
 
 | Statuss | Apraksts                                   |
 | ------- | ------------------------------------------ |
 | `200`   | `{ keyRotated: true, restarted: boolean }` |
-| `500`   | Rotācija neizdevās                         |
+| `500`   | Atslēgas maiņa neizdevās                   |
 
-**Drošība:** Jaunā atslēga nekad netiek atgriezta atbildē (nav akreditācijas datu noplūdes). Tas tiek saglabāts šifrēts (AES-256-GCM) `version_manager` tabulā.
+**Drošība:** Jaunā atslēga nekad netiek atgriezta atbildē (akreditācijas datu noplūde nenotiek).
+Tā tiek glabāta šifrētā veidā (AES-256-GCM) tabulā `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Atgriež kombinēto tiešraides + DB statusu, tostarp versijas metadatus un API atslēgas priekšskatījumu.
+Atgriež apvienotu aktuālo un DB statusu, tostarp versijas metadatus un API atslēgas priekšskatījumu.
 
 **Atbildes:**
 
 | Statuss | Apraksts                     |
 | ------- | ---------------------------- |
-| `200`   | Skatiet shēmu zemāk          |
+| `200`   | Skatiet shēmu tālāk          |
 | `500`   | Statusa nolasīšana neizdevās |
 
 **Atbildes shēma:**
@@ -367,7 +382,8 @@ Atgriež kombinēto tiešraides + DB statusu, tostarp versijas metadatus un API 
 
 #### `POST /api/services/9router/auto-start`
 
-Pārslēdziet automātiskās palaišanas karogu. Kad `enabled: true`, pakalpojums tiek startēts automātiski nākamajā OmniRoute sāknēšanas reizē (ja pakalpojums ir instalēts).
+Pārslēdz automātiskās palaišanas karodziņu. Ja `enabled: true`, pakalpojums tiek automātiski
+palaists nākamajā OmniRoute startēšanas reizē (ja pakalpojums ir instalēts).
 
 **Pieprasījuma pamatteksts:**
 
@@ -386,27 +402,31 @@ Pārslēdziet automātiskās palaišanas karogu. Kad `enabled: true`, pakalpojum
 
 #### `GET /api/services/9router/logs`
 
-SSE dzīvu žurnālu straume no 9Router stdout/stderr gredzenu bufera.
+9Router stdout/stderr gredzenbufera aktuālo žurnālu SSE straume.
 
 **Vaicājuma parametri:**
 
-| Param    | Tips      | Noklusējums | Apraksts                                                       |
-| -------- | --------- | ----------- | -------------------------------------------------------------- |
-| `tail`   | `integer` | 200         | Cik vēsturisko rindiņu vispirms nosūtīt (maks. 1000)           |
-| `filter` | `string`  | neviens     | Apakšvirknes filtrs bez reģistrjutīga (bez regex — ReDoS-safe) |
+| Parametrs | Tips      | Noklusējums | Apraksts                                                                            |
+| --------- | --------- | ----------- | ----------------------------------------------------------------------------------- |
+| `tail`    | `integer` | 200         | Sākumā nosūtāmo vēsturisko rindu skaits (ne vairāk kā 1000)                         |
+| `filter`  | `string`  | nav         | Reģistrnejutīgs apakšvirknes filtrs (bez regulārajām izteiksmēm — drošs pret ReDoS) |
 
 **SSE notikumi:**
 
-| Pasākums    | Dati        | Apraksts                     |
-| ----------- | ----------- | ---------------------------- |
-| `snapshot`  | `LogLine[]` | Sākotnējā vēsturiskā aste    |
-| `log`       | `LogLine`   | Dzīvā žurnāla līnija         |
-| `heartbeat` | `{}`        | Saglabāt dzīvību ik pēc 15 s |
+| Notikums    | Dati        | Apraksts                            |
+| ----------- | ----------- | ----------------------------------- |
+| `snapshot`  | `LogLine[]` | Sākotnējās vēsturiskās beigu rindas |
+| `log`       | `LogLine`   | Aktuālā žurnāla rinda               |
+| `heartbeat` | `{}`        | Savienojuma uzturēšana ik pēc 15 s  |
 
 **LogLine shēma:**
 
 ```json
-{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
+{
+  "ts": 1716633600000,
+  "stream": "stdout",
+  "line": "[9router] Listening on :20130"
+}
 ```
 
 **Atbildes:**
@@ -414,134 +434,176 @@ SSE dzīvu žurnālu straume no 9Router stdout/stderr gredzenu bufera.
 | Statuss | Apraksts                                            |
 | ------- | --------------------------------------------------- |
 | `200`   | `text/event-stream`                                 |
-| `400`   | `filter` parametrs ir pārāk garš (> 200 rakstzīmes) |
+| `400`   | Parametrs `filter` ir pārāk garš (> 200 rakstzīmēm) |
 | `404`   | Pakalpojums nav atrasts (uzraugs nav reģistrēts)    |
 
 ---
 
-### 4,2 CLIProxyAPI galapunkti (10 maršruti)
+### 4.2 CLIProxyAPI galapunkti (10 maršruti)
 
-CLIProxyAPI ir tāda pati galapunkta forma kā 9Router mīnus `rotate-key`, plus `accounts`, `provider-expose` un `auto-restart-adopted`. Tagad tas saņem īpašu datu plaknes API taustiņu, kas tiek ievadīts nārsta laikā (`needsApiKey: true` in `bootstrap.ts`, izmanto modeļa sinhronizēšanai); `status` ietver mazāk lauku.
+CLIProxyAPI galapunktu struktūra ir tāda pati kā 9Router, izņemot `rotate-key`, un papildus ir
+`accounts`, `provider-expose` un `auto-restart-adopted`. Tagad tas saņem
+atsevišķu datu plaknes API atslēgu, kas tiek ievadīta palaišanas brīdī (`needsApiKey: true`
+failā `bootstrap.ts`, izmantota modeļu sinhronizācijai); `status` ietver mazāk lauku.
 
-| Metode | Ceļš                                | Apraksts                                     |
-| ------ | ----------------------------------- | -------------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | Instalējiet CLIProxyAPI no npm               |
-| `POST` | `/api/services/cliproxy/start`      | Sāciet CLIProxyAPI                           |
-| `POST` | `/api/services/cliproxy/stop`       | Beidz CLIProxyAPI                            |
-| `POST` | `/api/services/cliproxy/restart`    | Restartējiet CLIProxyAPI                     |
-| `POST` | `/api/services/cliproxy/update`     | Atjaunināt uz jaunāku versiju                |
-| `GET`  | `/api/services/cliproxy/status`     | Tiešraides + DB statuss (bez `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | Pārslēgt automātisko palaišanu               |
+| Metode | Ceļš                                | Apraksts                                    |
+| ------ | ----------------------------------- | ------------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | Instalēt CLIProxyAPI no npm                 |
+| `POST` | `/api/services/cliproxy/start`      | Palaist CLIProxyAPI                         |
+| `POST` | `/api/services/cliproxy/stop`       | Apturēt CLIProxyAPI                         |
+| `POST` | `/api/services/cliproxy/restart`    | Restartēt CLIProxyAPI                       |
+| `POST` | `/api/services/cliproxy/update`     | Atjaunināt uz jaunāku versiju               |
+| `GET`  | `/api/services/cliproxy/status`     | Aktuālais + DB statuss (bez `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | Ieslēgt vai izslēgt automātisko palaišanu   |
 
-Koplietotais `GET /api/services/{name}/logs` galapunkts (skatiet 4.1. punktu) darbojas visiem četriem pakalpojumiem, kas izmanto `[name]` dinamisko segmentu.
+Koplietojamais galapunkts `GET /api/services/{name}/logs` (skatiet §4.1) darbojas visiem
+četriem pakalpojumiem, izmantojot dinamisko segmentu `[name]`.
 
 ---
 
-### 4.3 Mux galapunkti (8 maršruti)
+### 4.3 Mux galapunkti (8 maršruti)
 
-Mux ir tāda pati beigu punkta forma kā CLIProxyAPI — bez `rotate-key` maršruta API virsmā (nesēja marķieris tiek ģenerēts tāpat kā 9Router, izmantojot `getOrCreateApiKey("mux")` un tiek ievadīts, izmantojot `MUX_SERVER_AUTH_TOKEN` env var, taču vēl nav speciāla rotācijas galapunkta). Mux tiek pārvaldīts tikai dzīves cikla ietvaros: atšķirībā no 9Router tam nav 4. slāņa izpildītāja, un tas nekad nav reģistrēts kā maršrutēšanas nodrošinātājs.
+Mux galapunktu struktūra ir tāda pati kā CLIProxyAPI — API
+saskarnē nav `rotate-key` maršruta (nesēja pilnvara tiek ģenerēta tāpat kā 9Router, izmantojot
+`getOrCreateApiKey("mux")`, un ievadīta ar vides mainīgo `MUX_SERVER_AUTH_TOKEN`, taču
+atsevišķa rotācijas galapunkta vēl nav). Mux tiek pārvaldīts tikai dzīves cikla līmenī: atšķirībā no
+9Router tam nav 4. slāņa izpildītāja, un tas nekad netiek reģistrēts kā maršrutēšanas nodrošinātājs.
 
-| Metode | Ceļš                           | Apraksts                             |
-| ------ | ------------------------------ | ------------------------------------ |
-| `POST` | `/api/services/mux/install`    | Instalējiet Mux no npm (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Start Mux (`mux server`)             |
-| `POST` | `/api/services/mux/stop`       | Apturiet Mux                         |
-| `POST` | `/api/services/mux/restart`    | Restartējiet Mux                     |
-| `POST` | `/api/services/mux/update`     | Atjauniniet uz jaunāku npm versiju   |
-| `GET`  | `/api/services/mux/status`     | Tiešraides + DB statuss              |
-| `POST` | `/api/services/mux/auto-start` | Pārslēgt automātisko palaišanu       |
+| Metode | Ceļš                           | Apraksts                                  |
+| ------ | ------------------------------ | ----------------------------------------- |
+| `POST` | `/api/services/mux/install`    | Instalēt Mux no npm (`npm i mux`)         |
+| `POST` | `/api/services/mux/start`      | Palaist Mux (`mux server`)                |
+| `POST` | `/api/services/mux/stop`       | Apturēt Mux                               |
+| `POST` | `/api/services/mux/restart`    | Restartēt Mux                             |
+| `POST` | `/api/services/mux/update`     | Atjaunināt uz jaunāku npm versiju         |
+| `GET`  | `/api/services/mux/status`     | Aktuālais + DB statuss                    |
+| `POST` | `/api/services/mux/auto-start` | Ieslēgt vai izslēgt automātisko palaišanu |
 
 ---
 
 ### 4.4 Bifrost galapunkti (8 maršruti)
 
-Bifrost ir Go AI vārtejas releja aizmugursistēma (`@maximhq/bifrost`). Tas izmanto to pašu galapunkta formu kā CLIProxyAPI (nav `rotate-key` — Bifrost pārvalda savas nodrošinātāja atslēgas `config.json` zem sava `-app-dir`).
+Bifrost ir Go valodā izstrādāta MI vārtejas releja aizmugursistēma (`@maximhq/bifrost`). Tā izmanto tādu pašu
+galapunktu struktūru kā CLIProxyAPI (bez `rotate-key` — Bifrost pats pārvalda savas nodrošinātāju
+atslēgas failā `config.json` savā `-app-dir`).
 
-| Metode | Ceļš                               | Apraksts                                                              |
-| ------ | ---------------------------------- | --------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Instalējiet Bifrost no npm (`@maximhq/bifrost`)                       |
-| `POST` | `/api/services/bifrost/start`      | Startēt Bifrost portā 8080 (noklusējums)                              |
-| `POST` | `/api/services/bifrost/stop`       | Apturiet Bifrost                                                      |
-| `POST` | `/api/services/bifrost/restart`    | Restartējiet Bifrost                                                  |
-| `POST` | `/api/services/bifrost/update`     | Atjaunināt uz jaunāku versiju                                         |
-| `GET`  | `/api/services/bifrost/status`     | Tiešraides + DB statuss                                               |
-| `POST` | `/api/services/bifrost/auto-start` | Pārslēgt automātisko palaišanu                                        |
-| `GET`  | `/api/services/bifrost/logs`       | SSE baļķa aste (izmantojot kopīgotu `[name]/logs` dinamisko maršrutu) |
+| Metode | Ceļš                               | Apraksts                                                                          |
+| ------ | ---------------------------------- | --------------------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Instalēt Bifrost no npm (`@maximhq/bifrost`)                                      |
+| `POST` | `/api/services/bifrost/start`      | Palaist Bifrost portā 8080 (pēc noklusējuma)                                      |
+| `POST` | `/api/services/bifrost/stop`       | Apturēt Bifrost                                                                   |
+| `POST` | `/api/services/bifrost/restart`    | Restartēt Bifrost                                                                 |
+| `POST` | `/api/services/bifrost/update`     | Atjaunināt uz jaunāku versiju                                                     |
+| `GET`  | `/api/services/bifrost/status`     | Aktuālais + DB statuss                                                            |
+| `POST` | `/api/services/bifrost/auto-start` | Ieslēgt vai izslēgt automātisko palaišanu                                         |
+| `GET`  | `/api/services/bifrost/logs`       | SSE žurnāla beigu daļa (izmantojot koplietojamo dinamisko maršrutu `[name]/logs`) |
 
-**Vadu maršrutēšana:** Kad `BIFROST_BASE_URL` ir atiestatīts un darbojas uzraudzītā Bifrost instance, `getBifrostRoutingConfig()` ( `routingBackend.ts`) automātiski izmanto `http://127.0.0.1:{port}` kā releja bāzi URL. Precīzai `BIFROST_BASE_URL` env vienmēr ir prioritāte.
-
----
-
-### 4.5 Dario galapunkti (12 maršruti)
-
-Tāda pati dzīves cikla forma kā citiem pakalpojumiem (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`), kā arī marķierizēta OAuth vadības plakne zem `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start` `admin/login-complete` `DARIO_ADMIN_TOKEN`).
-
-### 4.6 atvērtie galapunkti (7 maršruti)
-
-Open-wa (`@open-wa/wa-automate`) vada bezgalvu Chromium gadījumu (izmantojot Puppeteer), lai automatizētu WhatsApp Web. Tas izmanto to pašu galapunkta formu kā Mux (vēl nav `rotate-key` maršruta). Tas ir dzīves cikla pārvaldīts tikai —, nevis maršrutēšanas mērķis, nav 4. slāņa executor/provider ieraksta.
-
-| Metode | Ceļš                              | Apraksts                                                              |
-| ------ | --------------------------------- | --------------------------------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | Instalējiet open-wa no npm (`@open-wa/wa-automate`)                   |
-| `POST` | `/api/services/openwa/start`      | Sākt atvērt wa portu 8323 (noklusējums)                               |
-| `POST` | `/api/services/openwa/stop`       | Beidz atvērt-wa                                                       |
-| `POST` | `/api/services/openwa/restart`    | Restartējiet open-wa                                                  |
-| `POST` | `/api/services/openwa/update`     | Atjaunināt uz jaunāku versiju                                         |
-| `GET`  | `/api/services/openwa/status`     | Tiešraides + DB statuss                                               |
-| `POST` | `/api/services/openwa/auto-start` | Pārslēgt automātisko palaišanu                                        |
-| `GET`  | `/api/services/openwa/logs`       | SSE baļķa aste (izmantojot kopīgotu `[name]/logs` dinamisko maršrutu) |
-
-**API atslēga:** ievadīts kā `WA_KEY` — open-wa vispārīgais `WA_*` -prefixed env ignorēšana kartē to uz opciju `--key`/`-k` CLI (`dist/cli/setup.js::envArgs()`, pārbaudīta pret instalēto 4.76.0 pakotni). Prefikss `ow_` kad to ģenerē `generateServiceApiKey()`. open-wa nolasa atslēgu atpakaļ no `key`/`api_key` HTTP galvenes (nevis `Authorization: Bearer`); `/api-docs*` ir nepārprotami atbrīvots no pārbaudes (`setupAuthenticationLayer` in `dist/cli/server.js`), tāpēc veselības zondei nav nepieciešama autentifikācijas galvene.
-
-**Savienošana pārī:** Open-wa ir neoficiāls un nav saistīts ar WhatsApp — pievienotais numurs rada aizlieguma risku no paša WhatsApp automatizācijas noteikšanas. Pirmajā palaišanas reizē savienošanas pārī QR kods tiek izdrukāts uz stdout un tiek parādīts esošajā žurnālu panel/SSE straumē — šajā integrācijā vēl nav speciāla QR attēla galapunkta.
+**Maršrutēšanas sasaiste:** Ja `BIFROST_BASE_URL` nav iestatīts un uzraudzītā Bifrost
+instance darbojas, `getBifrostRoutingConfig()` (failā `routingBackend.ts`) automātiski
+izmanto `http://127.0.0.1:{port}` kā releja bāzes URL. Skaidri iestatītam vides mainīgajam
+`BIFROST_BASE_URL` vienmēr ir prioritāte.
 
 ---
 
-### 4,7 LLMLingua galapunkti (8 maršruti)
+### 4.5 Dario galapunkti (12 maršruti)
 
-LLMLingua ir tūlītējas saspiešanas blakusvāģa iesaiņojums `@atjsh/llmlingua-2` (īsts ONNX marķiera klasifikācijas modelis, kas lejupielādēts no Hugging Face pirmajā `/compress` izsaukumā). Tas izmanto to pašu galapunkta formu kā Bifrost (nav API taustiņa — `needsApiKey: false`, tas nekad neapstrādā akreditācijas datus).
+Tāda pati dzīves cikla struktūra kā citiem pakalpojumiem (`install`, `start`, `stop`, `restart`,
+`update`, `status`, `auto-start`, `auto-restart-adopted`), kā arī ar pilnvaru aizsargāta OAuth
+vadības plakne zem `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
+`admin/login-start`, `admin/login-complete` (visi aizsargāti ar `DARIO_ADMIN_TOKEN`).
 
-| Metode | Ceļš                                           | Apraksts                                                                        |
-| ------ | ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + peers, uzrakstiet blakusvāģa servera skriptu |
-| `POST` | `/api/services/llmlingua/start`                | Iedarbiniet blakusvāģi portā 20135 (noklusējums)                                |
-| `POST` | `/api/services/llmlingua/stop`                 | Apturiet blakusvāģi                                                             |
-| `POST` | `/api/services/llmlingua/restart`              | Restartējiet blakusvāģi                                                         |
-| `POST` | `/api/services/llmlingua/update`               | Atjauniniet uz jaunāku pakotnes versiju                                         |
-| `GET`  | `/api/services/llmlingua/status`               | Tiešraides + DB statuss                                                         |
-| `POST` | `/api/services/llmlingua/auto-start`           | Pārslēgt automātisko palaišanu                                                  |
-| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Pārslēgt pieņemtas (iepriekš esošas) instances automātisko restartēšanu         |
-| `GET`  | `/api/services/llmlingua/logs`                 | SSE baļķa aste (izmantojot kopīgotu `[name]/logs` dinamisko maršrutu)           |
+### 4.6 open-wa galapunkti (7 maršruti)
 
-**Līgums ar blakusvāģi:** servera skripts atklāj `GET /health` (instant — negaida modeli) un `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Modelis slinki ielādējas pirmajā `/compress` izsaukumā.
+open-wa (`@open-wa/wa-automate`) vada bezgalvas Chromium instanci (izmantojot
+Puppeteer), lai automatizētu WhatsApp Web. Tas izmanto tādu pašu galapunktu struktūru kā Mux (pagaidām bez
+`rotate-key` maršruta). Tas tiek pārvaldīts tikai dzīves cikla līmenī — tas nav maršrutēšanas mērķis,
+un tam nav 4. slāņa izpildītāja/nodrošinātāja ieraksta.
 
-**Kompresijas vadi:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` izsauc `LLMLINGUA_BASE_URL` (noklusējuma `http://127.0.0.1:20135`) un pieņem blakusvāģa atbildi tikai tad, ja tā ir stingri īsāka par ievadi; jebkura kļūme (nedarbojas, taimauts, atbilde bez operācijas) tiek atgriezta procesa darbinieka pavediena aizmugurprogrammā (`./worker.ts`).
+| Metode | Ceļš                              | Apraksts                                                                |
+| ------ | --------------------------------- | ----------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Instalēt open-wa no npm (`@open-wa/wa-automate`)                        |
+| `POST` | `/api/services/openwa/start`      | Palaist open-wa portā 8323 (pēc noklusējuma)                            |
+| `POST` | `/api/services/openwa/stop`       | Apturēt open-wa                                                         |
+| `POST` | `/api/services/openwa/restart`    | Restartēt open-wa                                                       |
+| `POST` | `/api/services/openwa/update`     | Atjaunināt uz jaunāku versiju                                           |
+| `GET`  | `/api/services/openwa/status`     | Aktuālais + DB statuss                                                  |
+| `POST` | `/api/services/openwa/auto-start` | Ieslēgt vai izslēgt automātisko palaišanu                               |
+| `GET`  | `/api/services/openwa/logs`       | SSE žurnāla beigas (izmantojot kopīgo `[name]/logs` dinamisko maršrutu) |
+
+**API atslēga:** ievietota kā `WA_KEY` — open-wa vispārīgā `WA_*` prefiksa vides
+mainīgo pārrakstīšana to piesaista `--key`/`-k` CLI opcijai
+(`dist/cli/setup.js::envArgs()`, pārbaudīts ar instalēto 4.76.0
+pakotni). Ģenerējot ar `generateServiceApiKey()`, tiek pievienots prefikss `ow_`. open-wa
+nolasa atslēgu no `key`/`api_key` HTTP galvenes (nevis `Authorization:
+Bearer`); `/api-docs*` ir skaidri atbrīvots no pārbaudes
+(`setupAuthenticationLayer` failā `dist/cli/server.js`), tāpēc darbspējas pārbaudei
+nav nepieciešama autentifikācijas galvene.
+
+**Savienošana pārī:** open-wa ir neoficiāls un nav saistīts ar WhatsApp —
+savienotajam numuram pastāv bloķēšanas risks WhatsApp automatizācijas noteikšanas dēļ.
+Pirmajā palaišanas reizē savienošanas pārī QR kods tiek izvadīts stdout un parādīts,
+izmantojot esošo žurnālu paneli/SSE straumi — šajā integrācijā vēl nav atsevišķa
+QR attēla galapunkta.
 
 ---
 
-### 4,8 sing-box galapunkti (8 maršruti)
+### 4.7 LLMLingua galapunkti (8 maršruti)
 
-sing-box ir tāda pati galapunkta forma kā Mux — bez `rotate-key` maršruta, bez API taustiņu ievadīšanas (`needsApiKey: false` in `bootstrap.ts`). To pārvalda tikai dzīves cikls: nekad nav routing/LLM nodrošinātājs. `install()` lejupielādē oficiālo GitHub izlaiduma bināro failu (`SagerNet/sing-box`) piespraustajai versijai (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) un pārbauda tā SHA256 pret kontrolsummu, kas iestrādāta tajā pašā failā, pirms to ieraksta diskā — un jebkura cita pieprasītā versija tiek noraidīta.
+LLMLingua ir uzvedņu saspiešanas blakusprocess, kas ietver `@atjsh/llmlingua-2` (īstu
+ONNX marķieru klasifikācijas modeli, kas pirmajā `/compress` izsaukumā tiek
+lejupielādēts no Hugging Face). Tas izmanto tādu pašu galapunkta formu kā Bifrost (bez API
+atslēgas — `needsApiKey: false`, tas nekad neapstrādā akreditācijas datus).
 
-| Metode | Ceļš                                         | Apraksts                                                                 |
-| ------ | -------------------------------------------- | ------------------------------------------------------------------------ |
-| `POST` | `/api/services/singbox/install`              | Lejupielādējiet + verify piesprausto sing-box laidienu                   |
-| `POST` | `/api/services/singbox/start`                | Sākt sing-box (`sing-box run -c config.json`)                            |
-| `POST` | `/api/services/singbox/stop`                 | Pietura sing-box                                                         |
-| `POST` | `/api/services/singbox/restart`              | Restartējiet sing-box                                                    |
-| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall piesprausto atbrīvošanu                              |
-| `GET`  | `/api/services/singbox/status`               | Tiešraides + DB statuss                                                  |
-| `POST` | `/api/services/singbox/auto-start`           | Pārslēgt automātisko palaišanu                                           |
-| `POST` | `/api/services/singbox/auto-restart-adopted` | Pārslēgt automātisko restartēšanu pieņemtam (iepriekš esošajam) procesam |
-| `GET`  | `/api/services/singbox/logs`                 | SSE baļķa aste (izmantojot kopīgotu `[name]/logs` dinamisko maršrutu)    |
+| Metode | Ceļš                                           | Apraksts                                                                                             |
+| ------ | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | Ar npm instalēt `@atjsh/llmlingua-2` + saistītās pakotnes un ierakstīt blakusprocesa servera skriptu |
+| `POST` | `/api/services/llmlingua/start`                | Palaist blakusprocesu portā 20135 (pēc noklusējuma)                                                  |
+| `POST` | `/api/services/llmlingua/stop`                 | Apturēt blakusprocesu                                                                                |
+| `POST` | `/api/services/llmlingua/restart`              | Restartēt blakusprocesu                                                                              |
+| `POST` | `/api/services/llmlingua/update`               | Atjaunināt uz jaunāku pakotnes versiju                                                               |
+| `GET`  | `/api/services/llmlingua/status`               | Aktuālais + DB statuss                                                                               |
+| `POST` | `/api/services/llmlingua/auto-start`           | Ieslēgt vai izslēgt automātisko palaišanu                                                            |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Ieslēgt vai izslēgt pārņemtas (iepriekš pastāvējušas) instances automātisko restartēšanu             |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE žurnāla beigas (izmantojot kopīgo `[name]/logs` dinamisko maršrutu)                              |
 
-**TPROXY elektroinstalācija:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) raksta `config.json` un palaiž uzraugu, pirms `applyTproxy()` instalē TPROXY ugunsmūra noteikumus. Ja uzrauga trūkst vai tas nesasniedz `running`, tas tagad reģistrē kļūdu līmenī (nevis klusi norīt kļūmi), lai operators varētu pateikt, ka TPROXY kārtulas tika piemērotas bez strādājoša klausītāja aiz tiem.
+**Blakusprocesa līgums:** servera skripts nodrošina `GET /health` (tūlītējs — tas
+negaida modeli) un `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`). Modelis tiek laiski ielādēts pirmajā
+`/compress` izsaukumā.
+
+**Saspiešanas savienojums:** `open-sse/services/compression/engines/llmlingua/index.ts`
+ietvertais `httpSidecarBackend` izsauc `LLMLINGUA_BASE_URL` (pēc noklusējuma
+`http://127.0.0.1:20135`) un pieņem blakusprocesa atbildi tikai tad, ja tā ir
+nepārprotami īsāka par ievadi; jebkuras kļūmes gadījumā (nav palaists, noildze,
+atbilde bez izmaiņām) tiek izmantots procesā esošais darbināšanas pavediena
+aizmugursistēmas risinājums (`./worker.ts`).
 
 ---
 
-### 4.9. Reversais starpniekserveris (9 maršrutētāja informācijas paneļa iegulšana)
+### 4.8 sing-box galapunkti (8 maršruti)
 
-Informācijas panelis iegulst 9Router web UI iframe iekšpusē, izmantojot iekšējo apgriezto starpniekserveri vietnē:
+sing-box galapunktu struktūra ir tāda pati kā Mux: nav maršruta `rotate-key` un nav API atslēgas ievietošanas (`needsApiKey: false` failā `bootstrap.ts`). Tiek pārvaldīts tikai dzīves cikls; tas nekad nav maršrutēšanas vai LLM nodrošinātājs. `install()` lejupielādē oficiālā GitHub laidiena bināro failu (`SagerNet/sing-box`) fiksētajai versijai (`SINGBOX_PINNED_VERSION` failā `src/lib/services/installers/singbox.ts`) un pirms ierakstīšanas diskā pārbauda tā SHA256 pret tajā pašā failā iekļauto kontrolsummu. Jebkuras citas versijas pieprasījums tiek noraidīts.
+
+| Metode | Ceļš                                         | Apraksts                                                                                        |
+| ------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Lejupielādēt un pārbaudīt fiksēto sing-box laidienu                                             |
+| `POST` | `/api/services/singbox/start`                | Palaist sing-box (`sing-box run -c config.json`)                                                |
+| `POST` | `/api/services/singbox/stop`                 | Apturēt sing-box                                                                                |
+| `POST` | `/api/services/singbox/restart`              | Restartēt sing-box                                                                              |
+| `POST` | `/api/services/singbox/update`               | Atkārtoti pārbaudīt vai pārinstalēt fiksēto laidienu                                            |
+| `GET`  | `/api/services/singbox/status`               | Pašreizējais statuss un DB statuss                                                              |
+| `POST` | `/api/services/singbox/auto-start`           | Ieslēgt vai izslēgt automātisko palaišanu                                                       |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Ieslēgt vai izslēgt automātisko restartēšanu pārņemtam, jau pastāvošam procesam                 |
+| `GET`  | `/api/services/singbox/logs`                 | Sekot žurnāla jaunākajiem ierakstiem ar SSE, izmantojot kopīgo dinamisko maršrutu `[name]/logs` |
+
+**TPROXY savienojums:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ieraksta `config.json` un palaiž pārraugu, pirms `applyTproxy()` uzstāda TPROXY ugunsmūra noteikumus. Ja pārrauga nav vai tas nesasniedz stāvokli `running`, tagad tas tiek reģistrēts kļūdas līmenī, nevis kļūme tiek noklusēta. Operators tādējādi var noteikt, ka TPROXY noteikumi ir piemēroti bez strādājoša klausītāja aiz tiem.
+
+---
+
+### 4.9 Reversais starpniekserveris (9Router informācijas paneļa iegulšana)
+
+Informācijas panelis iegulst 9Router tīmekļa lietotāja saskarni iframe elementā,
+izmantojot iekšēju reverso starpniekserveri šajā adresē:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -549,15 +611,19 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 Šis starpniekserveris:
 
-- Pārsūta pieprasījumu uz `http://127.0.0.1:{port}/{path}` (tikai cilpa)
-- Noņem ienākošās `cookie` un `authorization` galvenes (nav OmniRoute sesijas noplūdes)
-- Ievada `Authorization: Bearer {apiKey}` 9maršrutētāja autentifikācijai
-- Izņem no atbildes `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
-- Pārraksta HTML atbildes, lai ievadītu `<base href>` un normalizētu absolūtos ceļus (`/foo` → `/dashboard/.../embed/foo`)
+- Pārsūta pieprasījumu uz `http://127.0.0.1:{port}/{path}` (tikai atgriezeniskās cilpas saskarne)
+- Noņem ienākošās `cookie` un `authorization` galvenes (OmniRoute sesija netiek nopludināta)
+- Ievieto `Authorization: Bearer {apiKey}` 9Router autentifikācijai
+- No atbildes noņem `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
+- Pārraksta HTML atbildes, lai ievietotu `<base href>` un normalizētu absolūtos ceļus (`/foo` → `/dashboard/.../embed/foo`)
 
-WebSocket jauninājumus iegultajam informācijas panelim apstrādā pavadošais serveris speciālā portā (skatiet `src/lib/services/embedWsProxy.ts`).
+Iegultā informācijas paneļa WebSocket jauninājumus apstrādā pavadošais serveris
+atsevišķā portā (skatiet `src/lib/services/embedWsProxy.ts`).
 
-**Drošība:** Iegulšanas starpniekservera maršruti ir klasificēti zem `LOCAL_ONLY_API_PREFIXES`, un tos var sasniegt tikai no atpakaļcilpas. Uzbrucējs, kurš iegūst JWT izmantojot Cloudflare/Ngrok tuneli, nevar izmantot starpniekserveri iegultos pakalpojumos.
+**Drošība:** iegulšanas starpniekservera maršruti ir klasificēti sadaļā `LOCAL_ONLY_API_PREFIXES`,
+un tiem var piekļūt tikai no atgriezeniskās cilpas saskarnes. Uzbrucējs, kurš iegūst JWT,
+izmantojot Cloudflare/Ngrok tuneli, nevar izmantot starpniekserveri, lai piekļūtu
+iegultajiem pakalpojumiem.
 
 ---
 

@@ -20,14 +20,16 @@
 
 ## ინსტალაციის მეთოდები
 
-### npm (რეკომენდებული)
+### npm (რეკომენდებულია)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-მართვის პანელი იხსნება მისამართზე `http://localhost:20128`, ხოლო API-ის საბაზო URL არის `http://localhost:20128/v1`.
+დაფა იხსნება `http://localhost:20128` ზე და API ბაზაზე URL არის `http://localhost:20128/v1`.
+
+> **npm მომხმარებლები:** თუ npm აფრთხილებს, რომ ინსტალაციის სკრიპტები დაბლოკილია (მაგ., `omniroute`, `better-sqlite3`), იხილეთ [პრობლემების მოგვარება — npm install-scripts დაბლოკილი](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

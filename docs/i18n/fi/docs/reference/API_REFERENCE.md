@@ -846,28 +846,48 @@ Web/search palveluntarjoajan abstraktio (Tavily, Brave, Exa, Serper jne.).
 
 **Automaattinen valinta:** ilman `provider` halvin palveluntarjoaja, jolla on määritetty yhteys, toimii ensimmäisenä ja seuraavaksi halvin on vikasieto. Ilmaisia viimeisen keinon tarjoajia (`duckduckgo-free`) käytetään vain, kun mitään muuta ei ole määritetty. Itseisännöity SearXNG lasketaan määritetyksi, kun sen yhteys tallentaa todellisen `baseUrl` (ei luettelon oletusarvoisen `http://localhost:8888/search`): sen jälkeen se sijoittuu 0 dollarin palveluntarjoajaksi avaimia edeltäviksi, ja halvin avaimella varustettu palveluntarjoaja toimii vikasietoisena, myös silloin, kun SearXNG vastaa 400, 401, 403 tai 404. `baseUrl` ei ole kelvollinen `http(s)` tai URL pilvi-metadata-osoitetta ei lasketa. Tokenin tallentava SearXNG yhteys sijoittuu tällä tavalla vain `https://` tai loopback- `http://` n yli. Pelkän etäkäyttöisen `http://` kautta se ei koskaan ole vikasieto, ja se on viimeinen keino, ja sitä käytetään vain, kun muuta palveluntarjoajaa ei ole määritetty tai kun sitä pyydetään nimellä, joten se lähettää tunnuksen selkeänä tekstinä näissä kahdessa tapauksessa.
 
-### Exa ja Tavily `provider_options`
+### Exan ja Tavilyn `provider_options`
 
-Exa ja Tavily lukevat palveluntarjoajakohtaisia kenttiä nimiavaroidusta pussista: `provider_options.exa` (tai `provider_options["exa-search"]`) ja `provider_options.tavily` (tai `provider_options["tavily-search"]`). Vain alla olevat avaimet välitetään eteenpäin. Jokainen tarkistetaan sen omaan Zod -skeemaan `open-sse/handlers/search/providerOptionsPassthrough.ts` ssä, ja väärän tyyppinen avain pudotetaan. Kaikki muut näppäimet ohitetaan, mukaan lukien auth, base URL, `stream` ja `outputSchema`. Muiden tarjoajien käyttämät litteät näppäimet (`cx`, `depth`, ...) toimivat kuten ennenkin.
+Exa ja Tavily lukevat tarjoajakohtaiset kentät nimiavaruudellisesta säilöstä:
+`provider_options.exa` (tai `provider_options["exa-search"]`) ja `provider_options.tavily`
+(tai `provider_options["tavily-search"]`). Vain alla luetellut avaimet välitetään eteenpäin. Jokainen
+tarkistetaan omalla Zod-skeemallaan tiedostossa `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+ja väärän tyyppinen avain poistetaan. Kaikki muut avaimet ohitetaan, mukaan lukien todennus, perus-URL,
+`stream` ja `outputSchema`. Muiden tarjoajien käyttämät litteät avaimet (`cx`, `depth`, ...) toimivat
+kuten ennenkin.
 
-| Palveluntarjoaja | Huipputason kentät                                                                                                                                                                                                                                                                                                                                                        | Sisäkkäinen                                                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa              | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (litteät primitiivit), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` yhdistettiin oletusarvoiseen `{ text: true, highlights: true }` |
-| Tavily           | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
+| Tarjoaja | Ylimmän tason kentät                                                                                                                                                                                                                                                                                                                                                      | Sisäkkäiset                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (litteät primitiivit), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` yhdistetään oletusarvon `{ text: true, highlights: true }` päälle |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
-Yleiset kentät voittaa aina: `query`, `max_results`, `filters` (domains), `country` ja `search_type`:stä johdettu aihe. Exassa `search_type: "news"` säilyttää `category: "news"`. Tavily hyväksyy myös `search_type: "finance"` (`topic: "finance"`).
+Yleiset kentät voittavat aina: `query`, `max_results`, `filters` (verkkotunnukset), `country` ja
+kohde, joka johdetaan kohteesta `search_type`. Exalla `search_type: "news"` säilyttää arvon
+`category: "news"`. Tavily hyväksyy myös arvon `search_type: "finance"` (`topic: "finance"`).
 
-Firecrawl-haun hinta kirjataan 10 palautetun tuloksen aloitettua lohkoa kohti, 0,002 dollaria (2 krediittiä) lohko ja vähintään yksi lohko per puhelu ( [Firecrawl -laskutus](https://docs.firecrawl.dev/billing) ): 11 tuloksen hinta on 0,004 dollaria.
+Firecrawl-haun kustannus kirjataan jokaista aloitettua 10 palautetun tuloksen lohkoa kohden hintaan
+0,002 $ (2 krediittiä) lohkolta, ja kutsua kohden kirjataan vähintään yksi lohko
+([Firecrawlin laskutus](https://docs.firecrawl.dev/billing)): 11 tulosta maksaa 0,004 $.
 
-Yleinen `time_range` saavuttaa nyt molemmat palveluntarjoajat: Exa saa `startPublishedDate` (ISO -aikaleiman) ja Tavily saa `start_date` (`YYYY-MM-DD`). Selkeä päivämäärä `provider_options` ssä ohittaa kartoitetun päivämäärän.
+Yleinen `time_range` välitetään nyt molemmille tarjoajille: Exa saa `startPublishedDate`-kentän
+(ISO-aikaleima) ja Tavily saa `start_date`-kentän (`YYYY-MM-DD`). Kohteessa `provider_options`
+nimenomaisesti määritetty päivämäärä ohittaa muunnetun arvon.
 
-Exa-tulokset säilyttävät `id`, `highlights` (jokainen kohokohta, ei vain ensimmäinen, jota käytetään `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ja `extras` `provider_raw`:ssä. Tavilyn tulokset pitävät `images` ja `favicon`.
+Exan tulokset säilyttävät kentät `id`, `highlights` (jokaisen korostuksen, ei vain ensimmäistä,
+jota käytetään `snippet`-kenttänä), `highlight_scores`, `summary`, `subpages`, `entities` ja
+`extras` kohteessa `provider_raw`. Tavilyn tulokset säilyttävät kentät `images` ja `favicon`.
 
-Linkkihaun hinta kirjataan 0,005 $ `depth` `fast` lle ja `standard` ja 0,05 $ `deep` lle ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) riippumatta siitä, tuleeko `depth` `provider_options` stä tai yhteyden asetuksista.
+Linkup-haun kustannus kirjataan arvoksi 0,005 $, kun `depth` on `fast` tai `standard`, ja arvoksi
+0,05 $, kun `depth` on `deep` ([Linkupin hinnoittelu](https://docs.linkup.so/pages/documentation/development/pricing)),
+riippumatta siitä, tuleeko `depth` kohteesta `provider_options` vai yhteyden asetuksista.
 
-Exa `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, kun jokin muu kenttä on asetettu. Lite:ssä `additionalQueries`, `systemPrompt` ja kaikki `contents` -näppäimet paitsi `text` ja `highlights` pudotetaan ennen kutsua. Käytöstä poistettuja `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää lähetetä edelleen.
+Exan `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, jos jokin
+muu kenttä on asetettu. Lite-tilassa `additionalQueries`, `systemPrompt` ja kaikki `contents`-avaimet
+lukuun ottamatta avaimia `text` ja `highlights` poistetaan ennen kutsua. Vanhentuneita kenttiä
+`subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää
+välitetä eteenpäin.
 
-Kustannuslaskenta on tasainen rekisteri `costPerQuery`, paitsi Exa, joka noudattaa Exan omaa hinnoittelua: 0,007 $ per puhelu `auto` (ja vanhalle `fast`) tai 0,004 $ `lite` :lle (ja vanhalle `instant`), joka kattaa 10 tulosta; 0,001 dollaria jokaisesta lisätuloksesta; ja 0,001 $ per palautettu tulos, kun `contents.summary` on asetettu. Tavily on kirjattu 1 krediittiin (0,008 dollaria) `search_depth` `basic`, `fast` ja `ultra-fast` ja 2 krediittiä (0,016 dollaria) `advanced` ( [Tavily API krediittejä](https://docs.tavily.com/documentation/api-credits) ). Puhelu `auto_parameters: true` llä, jonka Tavily päivittää edistyneemmäksi, tallennetaan edelleen 1 pisteellä.
+Exa: 0,007 $ per puhelu `auto` (ja vanhalle `fast`) tai 0,004 $ `lite` :lle (ja vanhalle `instant`), joka kattaa 10 tulosta; 0,001 dollaria jokaisesta lisätuloksesta; ja 0,001 $ per palautettu tulos, kun `contents.summary` on asetettu. Tavily on kirjattu 1 krediittiin (0,008 dollaria) `search_depth` `basic`, `fast` ja `ultra-fast` ja 2 krediittiä (0,016 dollaria) `advanced` ( [Tavily API krediittejä](https://docs.tavily.com/documentation/api-credits) ). Puhelu `auto_parameters: true` llä, jonka Tavily päivittää edistyneemmäksi, tallennetaan edelleen 1 pisteellä.
 
 ---
 
@@ -982,14 +1002,14 @@ ja suoratoistaa valmistuneen vastauksen.
 
 ---
 
-## Kiintiöt ja ongelmien raportointi
+## Kiintiöt ja ongelmaraportointi
 
-| Menetelmä | Polku               | Kuvaus                                                                                                        |
-| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
-| GET       | `/v1/quotas/check`  | Tarkistaa kiintiön etukäteen yhdistelmälle `provider` + `accountId` ennen rekisteröidyn avaimen myöntämistä   |
-| POST      | `/v1/issues/report` | Raportoi kiintiö-/avaimenmyöntämisvirheen GitHubiin (edellyttää `GITHUB_ISSUES_REPO`-asetusta ja tunnistetta) |
+| Menetelmä | Polku               | Kuvaus                                                                                       |
+| --------- | ------------------- | -------------------------------------------------------------------------------------------- |
+| GET       | `/v1/quotas/check`  | Vahvista `provider` + `accountId` :n kiintiö ennen rekisteröidyn avaimen myöntämistä         |
+| POST      | `/v1/issues/report` | Ilmoita quota/key n myöntämisvirheestä GitHub lle (vaatii `GITHUB_ISSUES_REPO` + -tunnuksen) |
 
-**Todennus:** Bearer-API-avain (`isAuthenticated`).
+**Todennus:** `/v1/quotas/check` ottaa kantajan API -avaimen (`isAuthenticated`). `/v1/issues/report` on vain hallintaan tarkoitettu (`requireManagementAuth`), kuten `/api/v1/registered-keys`: kojelautaistunto, paikallinen CLI tunnus tai API avain `manage`/`admin` laajuudella; Vain päättelyyn perustuvat API -avaimet saavat `403`.
 
 ### Kiintiöistunnon palautus (valinnainen)
 
@@ -1017,7 +1037,7 @@ että se lähetettäisiin kahdesti. Lähde: `src/lib/quota/quotaSessionRecovery.
 
 ## Itsepalvelukäyttö (`/api/usage/om-usage`)
 
-Mikä tahansa API -näppäin osaa lukea** omansa** käyttö ja kiintiöt — ei hallintatodennusta. Tämä on päätepiste, jota asiakas (CLI, OmniCopilot paneeli) käyttää näyttääkseen kulutuksensa avaimenhaltijalle.
+Mikä tahansa API -avain osaa lukea **omansa** käyttö ja kiintiöt — ei hallinnointitodennusta. Tämä on päätepiste, jota asiakas (CLI, OmniCopilot paneeli) käyttää näyttääkseen kulutuksensa avaimenhaltijalle.
 
 ```bash
 # Text form (the historical contract — plain text for a terminal)
@@ -1029,7 +1049,7 @@ curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Avaimella täytyy olla**`allowUsageCommand`** käytössä (oletusarvoisesti pois päältä — kojelaudan API-avainten hallinta vaihtaa sen avaimen mukaan). Ilman sitä päätepiste vastaa `403`.
+Avaimella täytyy olla **`allowUsageCommand`** käytössä (oletusarvoisesti pois päältä — kojelaudan API-avainten hallinta vaihtaa sen avaimen mukaan). Ilman sitä päätepiste vastaa `403`.
 
 `?format=json` palauttaa erotetun muodon, joten soittaja ei koskaan lue tietokenttää kieltäytymisestä. Menestyksestä:
 
@@ -1055,49 +1075,62 @@ Avaimella täytyy olla**`allowUsageCommand`** käytössä (oletusarvoisesti pois
 }
 ```
 
-Kieltäytyessä (`401` huono avain / `403` ei sallittu) sama reitti palauttaa `{ "allowed": false, "error": { "message": "…" } }` — nykyinen mutta tyhjä `personal`/`provider` (avain sallittu, mitään ei ole vielä opittu) on eri tila kuin hylkääminen, ja vain JSON -muoto erottaa ne.
+Kieltäytyessä (`401` huono avain / `403` ei sallittu) sama reitti palauttaa `{ "allowed": false, "error": { "message": "…" } }` — nykyisen mutta tyhjän `personal`/`provider` (avain sallittu, ei vielä opittu) on eri tila kuin kieltäytyminen, ja vain JSON -lomake erottaa ne.
 
-**Todennus:** soittajan oma Bearer API -avain, vahvistettuna `isValidApiKey` — llä tämä _ei_ ole hallintapinta (`/api/keys/…`), joka jää `requireManagementAuth` taakse.
+**Todennus:** soittajan oma Bearer API -avain, vahvistettu `isValidApiKey` — llä, tämä _ei_ ole hallintapinta (`/api/keys/…`), joka jää `requireManagementAuth` taakse.
 
-### Raaka vs. Cutoff Adjusted -kiintiöprosentit
+### Raakatiedot verrattuna katkaisulla mukautettuihin kiintiöprosentteihin
 
-Kun käytät `/api/usage/om-usage`, soittajien tulee huomioida ero :n esittämien prosenttiosuuksien välillä** pelkkä teksti -tulostus** ja strukturoitu**JSON lähtö** :
+Kun käytetään `/api/usage/om-usage`-päätepistettä, kutsujien tulee huomioida ero
+**pelkän tekstimuodon** ja rakenteisen **JSON-muodon** esittämien prosenttien välillä:
 
-| Aspekti                    | Pelkkä tekstimuoto (`/api/usage/om-usage` / `@@om-usage`)                                 | JSON -muoto (`?format=json`)                                                                |
-| :------------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------ |
-| **Tulostuskenttä**         | `NN% left` (esim. `20% left`)                                                             | `provider.quotas` / `providers[].quotas`                                                    |
-| **Mittaus**                | **Katkoskorjattu käyttövara** : jäljellä oleva kapasiteetti katkaisukynnyksen yläpuolella | **Raaka alkupään kiintiö** : säätämätön palveluntarjoajan mittaus                           |
-| **Katkaisun skaalaus**     | Skaalattu `effectiveRemainingPercent()` kautta, joten suojattu varaus on `0% left`        | Ei mitään (palveluntarjoajan ilmoittamat raakavedosarvot)                                   |
-| **Kynnystiedot**           | Sisältyy näytettävään prosenttiosuuteen                                                   | Tallennettu `quotaWindowThresholds` muodossa yhteyskohtaisesti (tai palvelimen oletusarvot) |
-| **Ensisijainen kuluttaja** | Interaktiivinen CLIs, päätekehotteet, ihmisoperaattorit                                   | Ohjelmalliset integraatiot, hallintapaneelit, analytiikka, laskutusseurannat                |
+| Ominaisuus                 | Pelkkä tekstimuoto (`/api/usage/om-usage` / `@@om-usage`)                                                      | JSON-muoto (`?format=json`)                                                                          |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **Tulostekenttä**          | `NN% left` (esim. `20% left`)                                                                                  | `provider.quotas` / `providers[].quotas`                                                             |
+| **Mittaus**                | **Katkaisulla mukautettu käytettävissä oleva kiintiö**: katkaisukynnyksen ylittävä jäljellä oleva kapasiteetti | **Palveluntarjoajan raaka kiintiö**: mukauttamaton palveluntarjoajan mittaus                         |
+| **Katkaisun skaalaus**     | Skaalataan komennolla `effectiveRemainingPercent()`, jolloin suojattu varaus näkyy muodossa `0% left`          | Ei mitään (palveluntarjoajan ilmoittamat raakatilannearvot)                                          |
+| **Kynnystiedot**           | Sisällytetään näytettävään prosenttiosuuteen                                                                   | Tallennetaan yhteyskohtaisesti kenttään `quotaWindowThresholds` (tai käytetään palvelimen oletuksia) |
+| **Ensisijainen kuluttaja** | Vuorovaikutteiset CLI:t, päätetulosteet ja ihmisoperaattorit                                                   | Ohjelmalliset integraatiot, hallintapaneelit, analytiikka ja laskutuksen seuranta                    |
 
-#### Rajauksen säätökaava
+#### Katkaisumukautuksen kaava
 
-OmniRoute tukee ennakoivia kiintiöiden katkaisuja estämään alkuvirran uupuminen (määritetty yhteyden `quotaWindowThresholds`, palveluntarjoajan oletusasetusten tai globaalien joustavuusasetusten kautta). Kun rajakynnys (esim. `cutoff = 25%`) on aktiivinen kiintiöikkunassa, tekstinrenderöija laskee jäljellä olevan suojan seuraavasti:
+OmniRoute tukee ennakoivia kiintiökatkaisuja, joilla estetään palveluntarjoajan kiintiön loppuminen
+(määritys tehdään yhteyden `quotaWindowThresholds`-asetuksella, palveluntarjoajan oletuksilla tai
+yleisillä toimintavarmuusasetuksilla). Kun kiintiöikkunassa on aktiivinen katkaisukynnys
+(esim. `cutoff = 25%`), tekstin esityskomponentti laskee jäljellä olevan kiintiön seuraavasti:
 
-- Jos `remaining <= cutoff`: palauttaa `0%`.
-- Jos `remaining > cutoff`: palauttaa `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Jos `remaining <= cutoff`: palautetaan `0%`.
+- Jos `remaining > cutoff`: palautetaan `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Muotoiltu tekstitulostus pyöristää tämän lähimpään kokonaislukuun (`Math.round(...)`).
+Muotoiltu tekstimuoto pyöristetään lähimpään kokonaislukuun (`Math.round(...)`).
 
 #### Havainnollistava esimerkki
 
-Harkitse palveluntarjoajan ikkunaa** 60% raakakäyttöä** (siten** 40 % raaka-kiintiöstä** ) ja määritetty** 25 % jäljellä olevasta kiintiöstä** kynnys:
+Tarkastele palveluntarjoajan ikkunaa, jonka **raaka käyttöaste on 60 %** (jäljellä on siis **40 % raakakiintiöstä**) ja määritetty
+**25 %:n jäljellä olevan kiintiön katkaisukynnys**:
 
-| Edustus                         | Laskeminen                                         | Jäljellä |                  Käytetty                  |
+| Esitysmuoto                     | Laskenta                                           | Jäljellä |         Implisiittisesti käytetty          |
 | :------------------------------ | :------------------------------------------------- | :------: | :----------------------------------------: |
-| **raaka JSON (`?format=json`)** | Ylävirran tilannekuva (`quotas[window]`)           | **40%**  |                  **60%**                   |
-| **Tekstimuoto (`NN% left`)**    | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%**  | **80 %** (jos lasketaan `100 - remaining`) |
+| **Raaka JSON (`?format=json`)** | Upstream-tilannevedos (`quotas[window]`)           | **40 %** |                  **60 %**                  |
+| **Tekstimuoto (`NN% left`)**    | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20 %** | **80 %** (jos lasketaan `100 - remaining`) |
 
-- **Miksi tekstissä näkyy 20 % jäljellä:** Tilillä jäljellä olevasta 40 %:n fyysisestä kiintiöstä 25 % on varattu katkaisukäytännön mukaan. Soittajalla on vain 15 % käytettävissä olevasta 75 %:sta jäljellä ennen kuin reititin lopettaa reitityksen tähän yhteyteen. Skaalaus varmistaa, että yhteyssignaalit loppuvat (`0% left`) juuri silloin, kun reititys loppuu.
-- **Miksi JSON säilyttää raaka-arvot:** JSON hyötykuorma palauttaa tarkan palveluntarjoajan tilannekuvan (`UsageSnapshot`), joten ulkoisilla työkaluilla on pääsy maantieteelliseen alkupään käyttöön ja yhteystason `quotaWindowThresholds` ilman palvelinpuolen häviöllistä skaalausta.
+- **Miksi teksti näyttää 20 % jäljellä:** Tilillä fyysisesti jäljellä olevasta 40 %:n kiintiöstä 25 % on varattu
+  katkaisukäytännölle. Kutsujalla on ennen reitittimen reitityksen lopettamista tälle yhteydelle jäljellä vain 15 % käytettävissä
+  olevasta 75 %:n liikkumavarasta. Skaalaus varmistaa, että yhteys ilmoittaa kiintiön loppuneen (`0% left`) täsmälleen silloin, kun
+  reititys loppuu.
+- **Miksi JSON säilyttää raaka-arvot:** JSON-hyötykuorma palauttaa tarkan palveluntarjoajan tilannevedoksen (`UsageSnapshot`),
+  joten ulkoisilla työkaluilla on käytettävissään palveluntarjoajan todellinen käyttöaste sekä yhteystason
+  `quotaWindowThresholds` ilman palvelimen tekemää häviöllistä skaalausta.
 
-#### Kuluttajien siirtolaisuusopas
+#### Kuluttajien siirtymisohjeet
 
-Jos ulkoinen integraatio (kuten muokkauslaajennus tai agenttilaajennus) on aiemmin kaavinnut tekstin päätepisteen (`NN% left`) ja laskenut käytetyn prosenttiosuuden muodossa `100 - NN`, `?format=json` :hen siirtyminen tarkoittaa:
+Jos ulkoinen integraatio (kuten editorilaajennus tai agenttilaajennus) luki aiemmin tekstimuotoista
+päätepistettä (`NN% left`) ja laski käytetyn prosenttiosuuden muodossa `100 - NN`, siirtyminen muotoon `?format=json` tarkoittaa seuraavaa:
 
-- Raaka- JSON -arvojen lukeminen heijastuu** todellinen alkupään kulutus** (60 % käytetty yllä olevassa esimerkissä).
-- Jos integrointi haluaa säilyttää tekstipäätepisteen käyttökelpoisen sallimisen semantiikan, se voi arvioida jäljellä olevan tehokkaan kaavan asiakaspuolella käyttämällä `quotaWindowThresholds` yhteystason ohituksiin.
+- Raak JSON -arvojen lukeminen vastaa **todellista palveluntarjoajan käyttöä** (yllä olevassa esimerkissä käytettynä 60 %).
+- Jos integraatio haluaa säilyttää tekstimuodon käytettävissä olevan kiintiön semantiikan, se voi laskea
+  tehokkaasti jäljellä olevan osuuden kaavan avulla asiakaspuolella käyttämällä yhteystason ohituksiin tarkoitettua
+  `quotaWindowThresholds`-määritystä.
 
 ---
 
@@ -1165,6 +1198,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI-hallinnan yhteensopivuus
 
 OmniRoute vastaa kolmeen [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1179,20 +1214,11 @@ tarjotaan poluissa `/v0/management/*` ja `/api/v0/management/*`.
 | POST      | `/v0/management/api-call`    | Runko `{ auth_index, method, url, header?, data? }`. Lähettää yhden sallittujen luettelossa olevan pyynnön tilin tunnuksella ja palauttaa `{ status_code, body }` |
 | POST      | `/v0/management/reset-quota` | Runko `{ auth_index }`. Tyhjentää yhden tilin yhteyden jäähdytysajan, mallien estot ja Codexin käyttöaluekohtaiset jäähdytysajat                                  |
 
-- `auth_index` on OmniRouten yhteyden tunnus. `provider` on `claude` tai `codex` (vain OAuth-
-  yhteydet; `anthropic` API-avainpalveluntarjoajaa ei luetella). Codexin tapauksessa
-  `id_token.chatgpt_account_id` on tallennettu työtilan tunnus ja `plan_type` tallennettu tilaus.
+- `auth_index` on OmniRoute-yhteyden tunnus. `provider` on `claude` tai `codex` (vain OAuth-yhteydet; API-avainpalveluntarjoajaa `anthropic` ei luetella). Codexissa `id_token.chatgpt_account_id` on tallennettu työtilatunnus ja `plan_type` tallennettu tilaustaso.
 - `api-call` ei ole yleinen välityspalvelin. Se hyväksyy vain Clauden `GET
-https://api.anthropic.com/api/oauth/usage`- ja Codexin `GET https://chatgpt.com/backend-api/wham/usage`-, `GET .../wham/rate-limit-reset-credits`- sekä
-  `POST .../wham/rate-limit-reset-credits/consume`-pyynnöt, kukin vain vastaavan
-  palveluntarjoajan tilille. Kaikki muu palauttaa `403` ottamatta yhteyttä upstreamiin. Kutsujan
-  `Authorization`-otsake (mukaan lukien `$TOKEN$`-paikkamerkki) ohitetaan: OmniRoute lisää
-  yhteyden käyttöoikeustunnuksen ja päivittää sen ensin, jos se on vanhenemassa, ja välittää vain
-  sallittujen luettelossa olevat otsakkeet (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Puuttuva `Chatgpt-Account-Id` käyttää oletuksena tallennettua työtilan tunnusta.
-  Pyyntöjen aikakatkaisu on 15 sekuntia, ja ne käyttävät yhteyden välityspalvelinta.
-- `reset-quota` jättää päätetyt tilat (`banned`, `expired`, `credits_exhausted`) ennalleen. Tuntematon
-  `auth_index` palauttaa `404`.
+https://api.anthropic.com/api/oauth/usage`-kutsun ja Codexin `GET
+https://chatgpt.com/backend-api/wham/usage`-, `GET .../wham/rate-limit-reset-credits`- ja `POST .../wham/rate-limit-reset-credits/consume`-kutsut, jokaisen vain vastaavan palveluntarjoajan tilille. Kaikki muu palauttaa `403` ottamatta yhteyttä upstream-palveluun. Kutsujan `Authorization`-otsake (myös paikkamerkki `$TOKEN$`) ohitetaan: OmniRoute lisää yhteyden käyttötokenin, päivittää sen ensin vanhenemisen lähestyessä ja välittää vain sallitut otsakkeet (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Puuttuvan `Chatgpt-Account-Id`-arvon oletuksena käytetään tallennettua työtilatunnusta. Jos ensimmäinen upstream-vastaus on `401`, päivitys tehdään kerran ja pyyntöä yritetään uudelleen vain käyttötokenin muuttuessa. Jokainen upstream-yritys aikakatkaistaan 15 sekunnin kuluttua ja käyttää yhteyden välityspalvelinta.
+- `reset-quota` jättää lopulliset tilat (banned, expired, credits_exhausted) ennalleen. Tuntematon `auth_index` palauttaa `404`.
 
 **Todennus:** hallintapaneelin istunto tai `manage`-laajuuden API-avain vaaditaan myös silloin, kun kirjautuminen on poistettu käytöstä
 (polut ovat luettelossa `ALWAYS_PROTECTED_API_PATHS`). Vain päättelyyn tarkoitetut avaimet saavat vastauksen `403`. Lähde:
@@ -1200,40 +1226,50 @@ https://api.anthropic.com/api/oauth/usage`- ja Codexin `GET https://chatgpt.com/
 
 ---
 
-## Kojelauta ja hallinta
+## Koontinäyttö ja hallinta
 
-Hallintoreitit (`/api/*` paitsi julkinen auth/login) ovat** ei** valtuutettu tavallisilla päättely- API -näppäimillä. Tunnisteryhmät, laajuudet ja curl-esimerkit: [Hallintotodennus](../guides/MANAGEMENT-AUTH.md).
+Hallintareitit (`/api/*` lukuun ottamatta julkista todennusta/kirjautumista) **eivät** käytä tavallisia päättely-API-avaimia valtuutukseen. Tunnistetietoperheet, käyttöoikeudet ja curl-esimerkit:
+[Hallinnan todennus](../guides/MANAGEMENT-AUTH.md).
 
 ### Todennus
 
-| Päätepiste                    | Menetelmä | Kuvaus                                                                                                                                                                                                                                                                                                                      |
-| ----------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST      | Kirjaudu sisään                                                                                                                                                                                                                                                                                                             |
-| `/api/auth/logout`            | POST      | Kirjaudu ulos                                                                                                                                                                                                                                                                                                               |
-| `/api/settings/require-login` | GET/POST  | Kirjautumistila (GET, julkinen). POST asettaa salasanan / vaihtaa sisäänkirjautumisen: operaattori vain, kun salasana on olemassa (kojelautaistunto, paikallinen CLI tai sisäänkirjautuminen estetty — API -avaimet ja `oma_` -tunnukset saavat `403`); kojelautaistunto lähettää `currentPassword` salasanan vaihtamiseksi |
+| Päätepiste                    | Menetelmä | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST      | Kirjautuminen                                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/auth/logout`            | POST      | Uloskirjautuminen                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/settings/require-login` | GET/POST  | Kirjautumisen tila (GET, julkinen). POST määrittää salasanan / ottaa kirjautumisen käyttöön tai poistaa sen käytöstä: salasanan olemassaolon jälkeen vain operaattori (koontinäyttöistunto, paikallinen CLI tai kirjautuminen poistettu käytöstä — API-avaimet ja `oma_`-tunnukset saavat vastauksen `403`); koontinäyttöistunto lähettää `currentPassword`-arvon salasanan vaihtamiseksi |
 
-### Palveluntarjoajan hallinta
+### Palveluntarjoajien hallinta
 
-| Päätepiste                              | Menetelmä                 | Kuvaus                                                                                                                                                           |
-| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Luettelo / luo palveluntarjoajat                                                                                                                                 |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Hallinnoi palveluntarjoajaa                                                                                                                                      |
-| `/api/providers/[id]/test`              | POST                      | Testaa palveluntarjoajan yhteyttä                                                                                                                                |
-| `/api/providers/[id]/models`            | GET                       | Listaa palveluntarjoajan mallit                                                                                                                                  |
-| `/api/providers/validate`               | POST                      | Tarkista palveluntarjoajan kokoonpano                                                                                                                            |
-| `/api/providers/bulk`                   | POST                      | Lisää API -avaimia joukkona ONE palveluntarjoajalle                                                                                                              |
-| `/api/providers/import`                 | POST                      | Tuo heterogeeninen toimittaja LIST jäsennetystä CSV/JSON -tiedostosta (#6836); rivikohtaiset osittaiset epäonnistumiset                                          |
-| `/api/provider-nodes*`                  | Eri                       | Palveluntarjoajan solmuhallinta                                                                                                                                  |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Mukautetut mallit ja mallikohtaiset ohitukset (lisää, päivitä, hide/show, poista)                                                                                |
-| `/api/provider-models/validate-and-add` | POST                      | Hallinnollinen todennettu, opt-in tiukan yhteyden validointi ja atomin mukautetun mallin rekisteröinti; katso [Mallin validointi](../guides/MODEL-VALIDATION.md) |
+| Päätepiste                              | Menetelmä                 | Kuvaus                                                                                                                                                                      |
+| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Palveluntarjoajien luettelo / luominen                                                                                                                                      |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Palveluntarjoajan hallinta                                                                                                                                                  |
+| `/api/providers/[id]/test`              | POST                      | Palveluntarjoajan yhteyden testaaminen                                                                                                                                      |
+| `/api/providers/[id]/models`            | GET                       | Palveluntarjoajan mallien luettelo                                                                                                                                          |
+| `/api/providers/validate`               | POST                      | Palveluntarjoajan määrityksen vahvistaminen                                                                                                                                 |
+| `/api/providers/bulk`                   | POST                      | Yhden palveluntarjoajan API-avainten joukkolisäys                                                                                                                           |
+| `/api/providers/import`                 | POST                      | Heterogeenisen palveluntarjoajien LUETTELON tuonti jäsennetystä CSV/JSON-tiedostosta (#6836); rivikohtaiset osittaisen epäonnistumisen tulokset                             |
+| `/api/provider-nodes*`                  | Various                   | Palveluntarjoajan solmujen hallinta                                                                                                                                         |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Mukautetut mallit ja mallikohtaiset ohitukset (lisäys, päivitys, piilotus/näyttö, poisto)                                                                                   |
+| `/api/provider-models/validate-and-add` | POST                      | Hallintatodennusta käyttävä, valinnainen tiukka yhteyden vahvistus ja mukautetun mallin atominen rekisteröinti; katso [Mallin vahvistaminen](../guides/MODEL-VALIDATION.md) |
 
-synced/imported -malleissa `PUT /api/provider-models` hyväksyy `provider`, `modelId` ja `maxOutputTokenOverride`: positiivinen kokonaisluku asettaa manuaalisen lähtötunnisteen rajan ja `null` tyhjentää sen palauttaakseen oletusarvon. `GET /api/provider-models?provider=<provider>` palauttaa nämä arvot muodossa `modelOutputOverrides`, mukaan lukien mallit, joissa ei ole mukautettua malliriviä. Ohitus käyttää ajonaikaista `max_output_tokens` -ominaisuutta ja kestää mallin uudelleensynkronoinnin. OpenAI-yhteensopiva toimittajasivu tarjoaa samat edit/clear ohjaimet ja merkitsee mallit, joissa on selkeä näkötuki.
+Synkronoitujen/tuotujen mallien tapauksessa `PUT /api/provider-models` hyväksyy arvot
+`provider`, `modelId` ja `maxOutputTokenOverride`: positiivinen kokonaisluku asettaa manuaalisen tulostetokenien ylärajan, ja `null`
+poistaa sen ja palauttaa oletusarvon. `GET /api/provider-models?provider=<provider>` palauttaa nämä arvot
+kohdassa `modelOutputOverrides`, mukaan lukien mallit, joilla ei ole mukautetun mallin riviä. Ohitus
+käyttää ajonaikaista `max_output_tokens`-ominaisuutta ja säilyy mallin uudelleensynkronoinnin jälkeen. OpenAI-yhteensopivan
+palveluntarjoajan sivulla on samat muokkaus-/tyhjennyssäätimet, ja mallit, joilla on nimenomainen vision tuki, merkitään.
 
-Yhteensopivassa toimittajasolmussa kirjoituspolut (`POST`, `PUT`, `PATCH`, `DELETE` ja `/api/provider-models/validate-and-add`) tallentavat mallin tunnuksen paljaana ylävirran tunnuksena: etuliitteestä liitetyssä tunnuksessa solmun oma etuliite on kutistunut ja vastaukset toistavat tallennettua id:tä. Kanonisten palveluntarjoajien tunnukset (esim. `nvidia/nemotron-…`) tallennetaan sanatarkasti. `/v1/models` ei koskaan lähetä pinottua `<prefix>/<prefix>/<model>` -tunnusta.
+Yhteensopivassa palveluntarjoajan solmussa kirjoituspolut (`POST`, `PUT`, `PATCH`, `DELETE` ja
+`/api/provider-models/validate-and-add`) tallentavat mallin tunnisteen pelkkänä upstream-tunnisteena: jos tunniste
+on liitetty etuliitteellä varustetusta luettelosta, kaikki solmun oman etuliitteen alussa olevat peräkkäiset esiintymät yhdistetään yhdeksi, ja
+vastaukset palauttavat tallennetun tunnisteen. Kanonisten palveluntarjoajien vinoviivalliset tunnisteet (esim. `nvidia/nemotron-…`) tallennetaan sellaisinaan. `/v1/models` ei koskaan palauta pinottua `<prefix>/<prefix>/<model>`-tunnistetta.
 
-Custom Chat Completions -solmut mukauttavat eksplisiittiset päättelyn käytöstäpoistot ylävirran taustajärjestelmään. Onnistunut yhteystesti valitsee automaattisesti chat-mallisäätimet jokaiselle tarkalle mallille ID jonka `/models` merkintä osoittaa tunnistetun `owned_by` arvon: `vllm`, `sglang` tai `llamacpp`. Läpinäkyvät OpenAI-yhteensopivat kääreet voivat säilyttää alkuperäisen mallimerkinnän sisäkkäisen `openai` objektin sisällä; tunnistus seuraa jopa kolmea tällaista kirjekuorta. Mallit, joilla on puuttuva, tuntematon tai ristiriitainen omistajuus, säilyttävät tavallisen OpenAI käyttäytymisen. Tunnistus käyttää uudelleen olemassa olevaa luettelopyyntöä, ei luo valmistumistunnisteita ja mitätöityy, kun yhteyden päätepiste muuttuu.
+Mukautetut Chat Completions -solmut välittävät nimenomaiset päättelyn käytöstä poistamisen pyynnöt taustajärjestelmälle sopivassa muodossa. Onnistunut yhteystesti valitsee chat-mallipohjan ohjaimet automaattisesti jokaiselle täsmälliselle mallin tunnisteelle, jonka `/models`-merkintä osoittaa tunnistetun `owned_by`-arvon: `vllm`, `sglang` tai `llamacpp`. Läpinäkyvät OpenAI-yhteensopivat kääreet voivat säilyttää alkuperäisen mallimerkinnän sisäkkäisessä
+`openai`-objektissa; tunnistus seuraa enintään kolmea tällaista käärettä. Mallit, joilta omistajuustieto puuttuu tai joiden omistajuus on tuntematon tai ristiriitainen, säilyttävät tavallisen OpenAI-toiminnan. Tunnistus käyttää uudelleen olemassa olevaa luettelopyyntöä, ei tuota completion-tunnuksia, ja mitätöityy, kun yhteyden päätepiste muuttuu.
 
-Jos haluat kiinnittää toiminnan taustajärjestelmälle, joka ei paljasta kyseisiä metatietoja, käytä olemassa olevaa osittaista palveluntarjoajan päivitystä API:
+Jos haluat lukita toiminnan taustajärjestelmälle, joka ei tarjoa näitä metatietoja, käytä olemassa olevaa osittaista palveluntarjoajan päivitysrajapintaa:
 
 ```json
 {
@@ -1243,91 +1279,93 @@ Jos haluat kiinnittää toiminnan taustajärjestelmälle, joka ei paljasta kysei
 }
 ```
 
-Lähetä se ruumis `PUT /api/providers/<connection-id>` kanssa. Tässä yhteydessä `none` :n eksplisiittinen päättelyyritys lähetetään muodossa `chat_template_kwargs.thinking=false` ja `chat_template_kwargs.enable_thinking=false`. Eksplisiittiset alkuperäiset mallipohjan arvot pysyvät arvokkaina, ellei palvelinpuolen päättelysääntö pakota ponnistelemaan. Asetus koskee vain, kun mukautettu OpenAI-yhteensopiva yhteys lähettää Chat Completions -tekstin; Vastauspyynnöt ja tavalliset palveluntarjoajat pitävät alkuperäisen pyyntömuotonsa. Aseta `reasoningControl` arvoon `openai` pakottaaksesi tavallisen OpenAI `reasoning_effort` -läpiviennin tai jätä it/set pois arvoksi `null` käyttääksesi automaattista tunnistusta.
+Lähetä tämä runko osoitteeseen `PUT /api/providers/<connection-id>`. Tässä yhteydessä nimenomainen päättelytaso `none` lähetetään muodossa `chat_template_kwargs.thinking=false` ja
+`chat_template_kwargs.enable_thinking=false`. Nimenomaiset natiivin mallipohjan arvot säilyvät ensisijaisina, ellei palvelimen puoleinen päättelysääntö pakota päättelytasoa. Asetusta käytetään vain, kun mukautettu OpenAI-yhteensopiva yhteys välittää Chat Completions -rungon; Responses-pyynnöt ja tavalliset palveluntarjoajat säilyttävät natiivin pyyntömuotonsa. Aseta `reasoningControl` arvoksi `openai`, jos haluat pakottaa tavallisen OpenAI-`reasoning_effort`-välityksen, tai jätä se pois / aseta sen arvoksi `null`, jos haluat käyttää automaattista tunnistusta.
 
-Claude -koodin automaattinen luokitin pyytää alkuperäisen oletusajattelun poistamista käytöstä, jos ne eivät sisällä erityisiä päättelyn hallintalaitteita. Tunnistus käyttää Claude-muotoisissa pyynnöissä luokittelijan järjestelmämerkkiä, ei mallien nimiä tai valmistumisrajoja. Selkeät runko-ohjaimet, tuetut effort/thinking otsikot, reitityssäännöt ja ratkaistu malliponnistukset säilyttävät nykyisen prioriteettinsa. Molemmat luokitteluvaiheet säilyttävät kehotteensa, valmistumisrajansa, pysäytysjaksonsa ja todelliset ylävirran lupapäätökset; toinen vaihe voi edelleen tuottaa pyytämänsä näkyvän päättelyn tavallisena tekstinä.
+Claude Code -automaattitilan luokittelijapyynnöt poistavat natiivin ajattelun oletusarvoisesti käytöstä, kun ne eivät sisällä nimenomaisia päättelyn ohjaimia. Tunnistus käyttää Claude-muotoisten pyyntöjen luokittelijan järjestelmämerkintää, ei mallien nimiä tai completion-rajoja. Nimenomaiset rungon ohjaimet, tuetut effort/thinking-otsakkeet, reitityssäännöt ja ratkaistu mallin päättelytaso säilyttävät nykyisen prioriteettinsa. Molemmat luokittelijavaiheet säilyttävät kehotteensa, completion-rajansa, lopetussekvenssinsä ja todelliset taustajärjestelmän käyttöoikeuspäätöksensä; toinen vaihe voi edelleen tuottaa pyytämänsä näkyvän päättelyn tavallisena tekstinä.
 
-### OAuth Flows
+### OAuth-virrat
 
-| Päätepiste                       | Menetelmä | Kuvaus                          |
-| -------------------------------- | --------- | ------------------------------- |
-| `/api/oauth/[provider]/[action]` | Eri       | Palveluntarjoajakohtainen OAuth |
+| Päätepiste                       | Menetelmä   | Kuvaus                          |
+| -------------------------------- | ----------- | ------------------------------- |
+| `/api/oauth/[provider]/[action]` | Vaihtelevia | Palveluntarjoajakohtainen OAuth |
 
-### Reititys ja konfigurointi
+### Reititys ja määritys
 
-| Päätepiste            | Menetelmä | Kuvaus                                    |
-| --------------------- | --------- | ----------------------------------------- |
-| `/api/models`         | GET/PUT   | Malliluettelon / aliaksen päivitys        |
-| `/api/models/alias`   | GET/POST  | Mallialiakset                             |
-| `/api/models/catalog` | GET       | Kaikki mallit toimittajan + tyypin mukaan |
-| `/api/combos*`        | Eri       | Yhdistelmähallinta                        |
-| `/api/keys*`          | Eri       | API avainten hallinta                     |
-| `/api/pricing`        | GET       | Mallin hinnoittelu                        |
+| Päätepiste            | Menetelmä   | Kuvaus                                           |
+| --------------------- | ----------- | ------------------------------------------------ |
+| `/api/models`         | GET/PUT     | Malliluettelo / aliaksen päivitys                |
+| `/api/models/alias`   | GET/POST    | Mallialiakset                                    |
+| `/api/models/catalog` | GET         | Kaikki mallit palveluntarjoajan ja tyypin mukaan |
+| `/api/combos*`        | Vaihtelevia | Yhdistelmien hallinta                            |
+| `/api/keys*`          | Vaihtelevia | API-avainten hallinta                            |
+| `/api/pricing`        | GET         | Mallien hinnoittelu                              |
 
-#### Mallin alkuperärajoitus
+#### Mallirajoitusten alkuperä
 
-`GET /api/models?withLimits=1` (myös `true`; `0`/`false` tai sen jättäminen pois pitää oletushyötykuorman muuttumattomana) lisää `contextWindow`, `maxInputTokens`, `maxOutputTokens` ja `capsSource` -objektin jokaiselle malliriville. `capsSource` nimeää kunkin rajan antaneen säännön, joten yllättävä raja (esimerkiksi 128k 1M-mallissa) voidaan jäljittää sen alkuperään. Ratkaistut arvot ovat samoja, joita reititys käyttää; lippu lisää vain kenttiä eikä muuta arvoa. Kaikki muut `withLimits` arvot hylätään komennolla `400`.
+`GET /api/models?withLimits=1` (myös `true`; `0`/`false` tai parametrin pois jättäminen säilyttää oletuskuorman muuttumattomana) lisää jokaiseen malliriviin kentät `contextWindow`, `maxInputTokens`, `maxOutputTokens` ja `capsSource`-objektin. `capsSource` ilmoittaa säännön, joka toimitti kunkin rajoituksen, joten yllättävän rajoituksen (esimerkiksi 128k 1M:n mallissa) alkuperä voidaan jäljittää. Ratkaistut arvot ovat samoja, joita reititys käyttää; lippu lisää vain kenttiä eikä koskaan muuta arvoa. Mikä tahansa muu `withLimits`-arvo hylätään vastauksella `400`.
 
-| `capsSource` arvo                            | Alkuperä                                                                |
-| -------------------------------------------- | ----------------------------------------------------------------------- |
-| `override:context`                           | Jatkuva konteksti-ikkunan ohitus (`model_context_overrides`)            |
-| `override:max_input` / `override:max_output` | Jatkuva `max_input_tokens` / `max_output_tokens` -ominaisuuksien ohitus |
-| `static-authoritative:<provider>/<model>`    | Staattinen arvovaltainen konteksti-ikkunataulukko                       |
-| `synced:<provider>/<model>`                  | models.dev synkronoitu ominaisuusrivi                                   |
-| `registry:<provider>/<model>`                | Palveluntarjoajan rekisterimerkintä                                     |
-| `spec:<model>`                               | Staattinen mallin sp                                                    |
-| `effort-base:` etuliite                      | Rivi lainattu ponnistusliitteisen muunnelman perusmallista              |
-| `none`                                       | Mikään lähde ei ilmoita rajaa (arvo on `null`)                          |
+| `capsSource`-arvo                            | Alkuperä                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------- |
+| `override:context`                           | Pysyvä konteksti-ikkunan ohitus (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Pysyvä `max_input_tokens`- / `max_output_tokens`-ominaisuuden ohitus |
+| `static-authoritative:<provider>/<model>`    | Staattinen auktoritatiivinen konteksti-ikkunataulukko                |
+| `synced:<provider>/<model>`                  | models.dev:n synkronoitu ominaisuusrivi                              |
+| `registry:<provider>/<model>`                | Palveluntarjoajan rekisterimerkintä                                  |
+| `spec:<model>`                               | Staattinen mallitieto                                                |
+| `effort-base:`-etuliite                      | Rivi on lainattu effort-päätteisen muunnelman perusmallista          |
+| `none`                                       | Mikään lähde ei ilmoita rajoitusta (arvo on `null`)                  |
 
-Toteutus: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapabilities.ts` :ssä ja ensisijaisuusketjut `src/lib/modelCapabilityLimits.ts`:ssä.
+Toteutus: `getResolvedModelCapabilitiesWithLimitSources()` tiedostossa `src/lib/modelCapabilities.ts`
+sekä etusijaketjut tiedostossa `src/lib/modelCapabilityLimits.ts`.
 
 ### Käyttö ja analytiikka
 
-| Päätepiste                       | Menetelmä       | Kuvaus                                                                                                                                                                                                                                                                                                                                |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Käyttöhistoria                                                                                                                                                                                                                                                                                                                        |
-| `/api/usage/logs`                | GET             | Käyttölokit                                                                                                                                                                                                                                                                                                                           |
-| `/api/usage/request-logs`        | GET             | Pyyntötason lokit                                                                                                                                                                                                                                                                                                                     |
-| `/api/usage/[connectionId]`      | GET             | Yhteyskohtainen käyttö                                                                                                                                                                                                                                                                                                                |
-| `/api/usage/token-limits`        | GET/POST/DELETE | API-avaimen tunnuksen rajabudjetit                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/model-latency-stats` | GET             | Pyörivä per-provider/model -latenssiaggregaatti (avg/p50/p95/p99, onnistumisprosentti); suodattimet: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                  |
-| `/api/usage/cache-health`        | GET             | Pikavälimuistin kuntoyhteenveto `call_logs` — write/read suhteesta, p50/p90/p99 -kirjoituskoon jakaumasta, raskaan kirjoituksen keskittymisestä, mallikohtaisesta jaosta ja `healthy`/`degraded`/`thrash`/`no-data` -päätöksestä; kyselyparametrit `range` (`1h`\| `24h`\| `7d`\| `30d`, oletus `24h`) ja valinnainen `model` (#8827) |
+| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Käyttöhistoria                                                                                                                                                                                                                                                                                                                                    |
+| `/api/usage/logs`                | GET             | Käyttölokit                                                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/request-logs`        | GET             | Pyynnön tason lokit                                                                                                                                                                                                                                                                                                                               |
+| `/api/usage/[connectionId]`      | GET             | Yhteyskohtainen käyttö                                                                                                                                                                                                                                                                                                                            |
+| `/api/usage/token-limits`        | GET/POST/DELETE | API-avainkohtaiset tunnuskiintiöt                                                                                                                                                                                                                                                                                                                 |
+| `/api/usage/model-latency-stats` | GET             | Liukuva palveluntarjoaja-/mallikohtainen viivekooste (keskiarvo/p50/p95/p99, onnistumisaste); suodattimet: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                        |
+| `/api/usage/cache-health`        | GET             | Kehotteen välimuistin kuntayhteenveto `call_logs`-lokien perusteella — kirjoitus-/lukusuhde, p50/p90/p99-kirjoituskokojakauma, suurten kirjoitusten keskittyneisyys, mallikohtainen erittely sekä `healthy`/`degraded`/`thrash`/`no-data`-arvio; kyselyparametrit `range` (`1h`\|`24h`\|`7d`\|`30d`, oletus `24h`) ja valinnainen `model` (#8827) |
 
 ### API -avainoikeudet
 
-`PATCH /api/keys/{id}` päivittää olemassa olevan avaimen käyttöoikeudet. Kuten jokainen `/api/keys*` reitti, se tarvitsee hallinnan valtuutuksen (katso [Hallinnan todennus](../guides/MANAGEMENT-AUTH.md) ), ei päättelyavainta. Lähetä vain kentät, joita haluat muuttaa; pyyntö, jossa ei ole yhtään niistä, hylätään komennolla `No valid fields to update`. Hyväksytyt kentät määritellään `updateKeyPermissionsSchema` :llä `src/shared/validation/schemas/keys.ts` ssä.
+`PATCH /api/keys/{id}` päivittää olemassa olevan avaimen käyttöoikeudet. Kuten jokainen `/api/keys*` -reitti, se tarvitsee hallinnan valtuutuksen (katso [Management Authentication](../guides/MANAGEMENT-AUTH.md) ), ei päättelyavainta. Lähetä vain kentät, joita haluat muuttaa; pyyntö, jossa ei ole yhtään niistä, hylätään `No valid fields to update` llä. Hyväksytyt kentät määrittää `src/shared/validation/schemas/keys.ts` ssä `updateKeyPermissionsSchema`.
 
-| Ala                                         | Tyyppi                                                                          | Huomautuksia                                                                                                                                                                                                                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | merkkijono, 1-200 merkkiä                                                       |                                                                                                                                                                                                                                                                            |
-| `isActive`                                  | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `isBanned`                                  | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `expiresAt`                                 | ISO 8601 datetime tai `null`                                                    | `null` tyhjentää vanhenemisen                                                                                                                                                                                                                                              |
-| `modelAccessMode`                           | `all` \| `restricted`                                                           | `allowedModels` on oltava tyhjä, kun tila on `all`                                                                                                                                                                                                                         |
-| `allowedModels`, `blockedModels`            | joukko merkkijonoja, jopa 1000                                                  |                                                                                                                                                                                                                                                                            |
-| `allowedCombos`                             | joukko merkkijonoja, jopa 500                                                   | Portit, jotka yhdistävät avain voi kutsua; suoria malleja ohjaa `modelAccessMode` / `allowedModels`                                                                                                                                                                        |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                           | `allowedConnections` ei saa olla tyhjä, kun `restricted`, ja tyhjä, kun `all`                                                                                                                                                                                              |
-| `allowedConnections`                        | joukko UUIDs, jopa 100                                                          |                                                                                                                                                                                                                                                                            |
-| `allowAutoCombos`                           | boolean                                                                         | `false` hylkää `auto/*` -mallien pyynnöt tällä avaimella; avaimet, jotka eivät koskaan aseta sitä, ovat sallittuja                                                                                                                                                         |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                   | Mitä `GET /v1/models` näyttää tälle avaimelle (vain yhdistelmät, vain mallit tai molemmat); se ei muuta sitä, mitä avain voi kutsua                                                                                                                                        |
-| `forcedModel`                               | merkkijono enintään 300 merkkiä tai `null`                                      | Reitittää chat-pyynnöt tähän model/combo `X-Route-Model` ja `body.model` kautta; avainten rajoitukset ovat edelleen voimassa                                                                                                                                               |
-| `noLog`, `autoResolve`                      | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `throttleDelayMs`                           | kokonaisluku, 0-300 000                                                         |                                                                                                                                                                                                                                                                            |
-| `maxSessions`                               | kokonaisluku, 0-10 000                                                          |                                                                                                                                                                                                                                                                            |
-| `rateLimits`                                | joukko `{ limit, window }` (positiiviset kokonaisluvut, enintään 50) tai `null` | `null` tyhjentää rajat                                                                                                                                                                                                                                                     |
-| `accessSchedule`                            | aikatauluobjekti tai `null`                                                     | `null` tyhjentää aikataulun                                                                                                                                                                                                                                                |
-| `scopes`                                    | merkkijono, jopa 32                                                             |                                                                                                                                                                                                                                                                            |
-| `allowedEndpoints`                          | merkkijono, jopa 20                                                             |                                                                                                                                                                                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                              |                                                                                                                                                                                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                            | Katso [avainkohtaisen välimuistin ohitus](#per-key-cache-bypass)                                                                                                                                                                                                           |
-| `compressionEnabled`                        | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `codexServiceMode`                          | yksi Codex -palvelutiloista                                                     |                                                                                                                                                                                                                                                                            |
-| `disableNonPublicModels`                    | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `allowUsageCommand`                         | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `usageLimitEnabled`                         | boolean                                                                         |                                                                                                                                                                                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numero >= 0 tai `null`                                                          |                                                                                                                                                                                                                                                                            |
-| `fiveHourUsageLimitUsd`                     | numero >= 0 tai `null`                                                          | Liukuva 5 tunnin USD -budjetti, jota valvotaan kuten päivittäiset ja viikoittaiset rajat (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` on silloin, kun ikkunan vanhin kulutus vanhenee, mikä voi jättää rajansa ylittävän avaimen edelleen tukkoon. |
-| `chaosModeEnabled`                          | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| Kenttä                                      | Tyyppi                                                                                        | Huomautukset                                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | merkkijono, 1–200 merkkiä                                                                     |                                                                                                                                                                                                                                                                              |
+| `isActive`                                  | totuusarvo                                                                                    |                                                                                                                                                                                                                                                                              |
+| `isBanned`                                  | totuusarvo                                                                                    |                                                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | ISO 8601 -päivämäärä ja -aika tai `null`                                                      | `null` poistaa vanhenemisajan                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                                         | `allowedModels`-taulukon on oltava tyhjä, kun tila on `all`                                                                                                                                                                                                                  |
+| `allowedModels`, `blockedModels`            | joukko merkkijonoja, jopa 1000                                                                |                                                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | merkkijonojen taulukko, enintään 500                                                          | Määrittää, mitä yhdistelmiä avain voi kutsua; suoriin malleihin sovelletaan asetuksia `modelAccessMode` / `allowedModels`                                                                                                                                                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                                         | `allowedConnections`-taulukon on oltava epätyhjä, kun tila on `restricted`, ja tyhjä, kun tila on `all`                                                                                                                                                                      |
+| `allowedConnections`                        | UUID-tunnisteiden taulukko, enintään 100                                                      |                                                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | totuusarvo                                                                                    | `false` hylkää tämän avaimen pyynnöt `auto/*`-malleille; avaimet, joissa tätä ei ole koskaan asetettu, ovat sallittuja                                                                                                                                                       |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                                 | Mitä `GET /v1/models` näyttää tälle avaimelle (vain yhdistelmät, vain mallit tai molemmat); tämä ei muuta sitä, mitä avain voi kutsua                                                                                                                                        |
+| `forcedModel`                               | enintään 300 merkin merkkijono tai `null`                                                     | Ohjaa keskustelupyynnöt tähän malliin/yhdistelmään `X-Route-Model`-otsakkeen ja `body.model`-kentän sijaan; avaimen rajoitukset ovat edelleen voimassa                                                                                                                       |
+| `noLog`, `autoResolve`                      | boolean                                                                                       |                                                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | kokonaisluku, 0–300000                                                                        |                                                                                                                                                                                                                                                                              |
+| `maxSessions`                               | kokonaisluku, 0–10000                                                                         |                                                                                                                                                                                                                                                                              |
+| `rateLimits`                                | `{ limit, window }` -alkioiden taulukko (positiivisia kokonaislukuja, enintään 50) tai `null` | `null` poistaa rajoitukset                                                                                                                                                                                                                                                   |
+| `accessSchedule`                            | ajoitusobjekti tai `null`                                                                     | `null` poistaa ajoituksen                                                                                                                                                                                                                                                    |
+| `scopes`                                    | merkkijonojen taulukko, enintään 32                                                           |                                                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | merkkijonojen taulukko, enintään 20                                                           |                                                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                            |                                                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                          | Katso [avainkohtainen välimuistin ohitus](#per-key-cache-bypass)                                                                                                                                                                                                             |
+| `compressionEnabled`                        | totuusarvo                                                                                    |                                                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | jokin Codex-palvelutiloista                                                                   |                                                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | boolean                                                                                       |                                                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | boolean                                                                                       |                                                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | boolean                                                                                       |                                                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numero >= 0 tai `null`                                                                        |                                                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | numero >= 0 tai `null`                                                                        | Liukuva 5 tunnin USD -budjetti, joka on voimassa kuten päivittäiset ja viikoittaiset rajat (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` on silloin, kun ikkunan vanhin kulutus vanhenee, mikä voi jättää rajansa ylittävän avaimen edelleen tukkoon. |
+| `chaosModeEnabled`                          | boolean                                                                                       |                                                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1338,45 +1376,45 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Asetukset
 
-| Päätepiste                            | Menetelmä     | Kuvaus                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Yleiset asetukset. Suojauspolitiikan avaimet (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) tarvitsevat `currentPassword` ja operaattorin tunnistetiedot — API avaimet ja `oma_` -tunnukset saavat `403`; jokainen mutaatio tarvitsee `admin` access-tokenin laajuuden |
-| `/api/settings/proxy`                 | GET/PUT       | Verkon välityspalvelimen asetukset                                                                                                                                                                                                                                                                      |
-| `/api/settings/proxy/test`            | POST          | Testaa välityspalvelinyhteyttä                                                                                                                                                                                                                                                                          |
-| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                                  |
-| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** pyytää** uudelleenkirjoitustila (läpivienti / automaattinen nauha / mukautettu / mukautuva). Kompressiosta riippumaton. Katso [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                  |
-| `/api/settings/system-prompt`         | GET/PUT       | Globaali järjestelmäkehote                                                                                                                                                                                                                                                                              |
-| `/api/settings/compression`           | GET/PUT       | Globaali pakkausasetus                                                                                                                                                                                                                                                                                  |
-| `/api/settings/purge-request-history` | POST          | Tyhjennä pyyntölokin rivit ja paikalliset puhelulokin artefaktit                                                                                                                                                                                                                                        |
+| Endpoint                              | Method        | Kuvaus                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Yleiset asetukset. Tietoturvakäytäntöjen avaimet (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) edellyttävät `currentPassword`-arvoa ja operaattorin tunnistetietoja — API-avaimet ja `oma_`-tunnukset saavat vastaukseksi `403`; jokainen muutos edellyttää `admin`-käyttöoikeustunnisteen laajuutta |
+| `/api/settings/proxy`                 | GET/PUT       | Verkon välityspalvelimen asetukset                                                                                                                                                                                                                                                                                                     |
+| `/api/settings/proxy/test`            | POST          | Välityspalvelinyhteyden testaus                                                                                                                                                                                                                                                                                                        |
+| `/api/settings/ip-filter`             | GET/PUT       | IP-osoitteiden sallittujen ja estettyjen luettelo                                                                                                                                                                                                                                                                                      |
+| `/api/settings/thinking-budget`       | GET/PUT       | Ajattelu-/päättelypyynnön **request** uudelleenkirjoitustila (passthrough / auto-strip / custom / adaptive). Riippumaton pakkauksesta. Lisätietoja on tiedostossa [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                                  |
+| `/api/settings/system-prompt`         | GET/PUT       | Yleinen järjestelmäkehote                                                                                                                                                                                                                                                                                                              |
+| `/api/settings/compression`           | GET/PUT       | Yleiset pakkausasetukset                                                                                                                                                                                                                                                                                                               |
+| `/api/settings/purge-request-history` | POST          | Pyyntölokirivien ja paikallisten kutsulokiartefaktien tyhjennys                                                                                                                                                                                                                                                                        |
 
 ### Konteksti ja pakkaus
 
-| Päätepiste                             | Menetelmä      | Kuvaus                                                                                        |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Esikatsele off/lite/standard/aggressive/ultra/RTK/stacked pakkaus                             |
-| `/api/compression/language-packs`      | GET            | Listaa saatavilla olevat Caveman-kielipaketit                                                 |
-| `/api/compression/rules`               | GET            | Luettelo Caveman-säännön metatiedot                                                           |
-| `/api/context/caveman/config`          | GET/PUT        | Luolamieskohtaiset asetusalias                                                                |
-| `/api/context/rtk/config`              | GET/PUT        | RTK-kohtaiset asetukset, mukaan lukien mukautetut suodattimet ja raakatulosteen säilyttäminen |
-| `/api/context/rtk/filters`             | GET            | RTK -suodatinluettelo ja mukautettu suodatindiagnostiikka                                     |
-| `/api/context/rtk/test`                | POST           | Suorita RTK preview/test tekstin hyötykuormaa vastaan                                         |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Lue säilytetty redaktoitu raakatulos osoittimen tunnuksella                                   |
-| `/api/context/combos`                  | GET/POST       | Kompressioyhdistelmä list/create                                                              |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Kompressioyhdistelmä detail/update/delete                                                     |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Määritä pakkausyhdistelmät reitityskomboihin                                                  |
-| `/api/context/analytics`               | GET            | Pakkausanalytiikan alias                                                                      |
+| Endpoint                               | Method         | Description                                                                              |
+| -------------------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Off/lite/standard/aggressive/ultra/RTK/pinotun pakkauksen esikatselu                     |
+| `/api/compression/language-packs`      | GET            | Käytettävissä olevien Caveman-kielipakettien luettelo                                    |
+| `/api/compression/rules`               | GET            | Caveman-sääntömetatietojen luettelo                                                      |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman-kohtaisten asetusten alias                                                       |
+| `/api/context/rtk/config`              | GET/PUT        | RTK-kohtaiset asetukset, mukaan lukien mukautetut suodattimet ja raakatuotoksen säilytys |
+| `/api/context/rtk/filters`             | GET            | RTK-suodatinluettelo ja mukautettujen suodattimien diagnostiikka                         |
+| `/api/context/rtk/test`                | POST           | Suorita RTK-esikatselu/testi tekstihyötykuormalle                                        |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Lue säilytetty sensuroitu raakatulos pointer-tunnisteella                                |
+| `/api/context/combos`                  | GET/POST       | Pakkausyhdistelmien luettelo/luonti                                                      |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Pakkausyhdistelmän tietojen tarkastelu/päivitys/poisto                                   |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Määritä pakkausyhdistelmiä reititysyhdistelmille                                         |
+| `/api/context/analytics`               | GET            | Pakkauksen analytiikan alias                                                             |
 
 ### Valvonta
 
-| Päätepiste                           | Menetelmä  | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/sessions`                      | GET        | Aktiivinen istunnon seuranta                                                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/rate-limits`                   | GET        | Tilikohtaiset korkorajat                                                                                                                                                                                                                                                                                                                                                                                     |
-| `/api/monitoring/health`             | GET        | Terveystarkastuksen + palveluntarjoajan yhteenveto (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Hallintanäkymä sisältää `credentialHealth`: probe-cache skalaarit, `failedConnections` kun `failed>0` ja `staleDbNonOkCount` (SQLite tahmea `test_status`, ei mittari). Katso [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Välimuistitilastot / tyhjennä                                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/modality-bridge/stats`         | GET        | Muistissa oleva `attempts`, onnistumiset/`bridged`, epäonnistumiset, välimuistin osumat, `totalLatencyMs`, `latencySamples`, näytemääräinen `averageLatencyMs` ja viimeinen käyttöaika (nollaus uudelleenkäynnistyksen yhteydessä; hallinnan todennus)                                                                                                                                                       |
-| `/api/modality-bridge/video/runtime` | GET        | Tiukka luotetun silmukan tarkistus ennen hallintaa auth/probe; desinfioidun FFmpeg/ffprobe saatavuus ja versiot (ei myymälää)                                                                                                                                                                                                                                                                                |
-| `/api/modality-bridge/video/extract` | POST       | Sisäinen todennettu luotetun silmukan tavuvälittäjä; 50 MiB -tulo, rajoitettu queue/32 MiB -lähtö, `503` kapasiteetti, `499` -irrotus, `504` -määräaika; ei julkinen lataus API                                                                                                                                                                                                                              |
+| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Aktiivisten istuntojen seuranta                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `/api/rate-limits`                   | GET        | Tilikohtaiset nopeusrajoitukset                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `/api/monitoring/health`             | GET        | Kuntotarkistus + palveluntarjoajien yhteenveto (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Hallintanäkymä sisältää kohteen `credentialHealth`: koetuloksen välimuistin skalaarit, `failedConnections`, kun `failed>0`, sekä `staleDbNonOkCount` (SQLiten pysyvä `test_status`, ei mittari). Katso [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Välimuistin tilastot / tyhjennys                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/modality-bridge/stats`         | GET        | Muistinsisäiset `attempts`, onnistumiset/`bridged`, epäonnistumiset, välimuumiosumat, `totalLatencyMs`, `latencySamples`, näytteiden määrään perustuva `averageLatencyMs` ja viimeisin käyttöaika (nollautuu uudelleenkäynnistyksen yhteydessä; hallintatodennus)                                                                                                                                                                 |
+| `/api/modality-bridge/video/runtime` | GET        | Tiukka luotetun loopback-yhteyden tarkistus ennen hallintatodennusta/koetta; puhdistetut FFmpeg/ffprobe-käytettävyys- ja versiotiedot (no-store)                                                                                                                                                                                                                                                                                  |
+| `/api/modality-bridge/video/extract` | POST       | Sisäinen todennettu luotetun loopback-yhteyden tavaravälittäjä; 50 MiB:n syöte, rajoitettu jono/32 MiB:n tuloste, `503` kapasiteetti, `499` yhteyden katkeaminen, `504` määräaika; ei julkinen latausrajapinta                                                                                                                                                                                                                    |
 
 ### Videokehyksen poraus
 
@@ -1386,99 +1424,102 @@ GET -kysely: vaaditaan `handle`; valinnainen `variant` (`preview`, `standard`, `
 
 `DELETE /api/v1/video-bridge/drilldown?handle=...` palauttaa `{ "removed": 0|1 }`. Tuntemattomat, vanhentuneet ja ristiavaimet GETs ovat erottamattomia 404 vastauksia; ristinäppäin DELETE ei voi poistaa omistajan merkintää. Estetty käyttö palauttaa 403, missing/invalid -todennus 401, virheelliset kyselyt 400, peruutus 499 ja väliaikaiset virheet 503. Kahvat ovat prosessikohtaisia, vanhenevat kymmenen minuutin kuluttua eivätkä kestä uudelleenkäynnistystä. Uudet kahvat käyttävät `v1.` sekä 32-tavuista satunnaista Base64URL tunnusta; vain merkkihajautus säilytetään. Vanhat 64-hex-tunnukset pysyvät syntaktisesti luettavissa yhteensopivuuden vuoksi. Katso [Video Bridgen suojakaiteet](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) suostumuksista, kiintiöistä ja muunnelmien johtamisesta.
 
-### Varmuuskopiointi ja Export/Import
+### Varmuuskopiointi ja vienti/tuonti
 
-| Päätepiste                  | Menetelmä | Kuvaus                                                                          |
-| --------------------------- | --------- | ------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET       | Listaa käytettävissä olevat varmuuskopiot                                       |
-| `/api/db-backups`           | PUT       | Luo manuaalinen varmuuskopio                                                    |
-| `/api/db-backups`           | POST      | Palauta tietystä varmuuskopiosta                                                |
-| `/api/db-backups`           | PATCH     | Tallenna varmuuskopion säilytysasetukset (vain käyttäjälle)                     |
-| `/api/db-backups`           | DELETE    | Leikkaa tallennetut varmuuskopiot säilytysasetuksiin (vain käyttäjälle)         |
-| `/api/db-backups/export`    | GET       | Lataa tietokanta .sqlite-tiedostona                                             |
-| `/api/db-backups/import`    | POST      | Lataa .sqlite-tiedosto korvataksesi tietokannan (vain `?dryRun=true` vahvistaa) |
-| `/api/db-backups/exportAll` | GET       | Lataa koko varmuuskopio .tar.gz-arkistona                                       |
+| Endpoint                    | Method | Description                                                                                  |
+| --------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Luettele käytettävissä olevat varmuuskopiot                                                  |
+| `/api/db-backups`           | PUT    | Luo manuaalinen varmuuskopio                                                                 |
+| `/api/db-backups`           | POST   | Palauta tietystä varmuuskopiosta                                                             |
+| `/api/db-backups`           | PATCH  | Tallenna varmuuskopioiden säilytysasetukset (vain operaattori)                               |
+| `/api/db-backups`           | DELETE | Karsi tallennetut varmuuskopiot säilytysasetusten mukaisesti (vain operaattori)              |
+| `/api/db-backups/export`    | GET    | Lataa tietokanta .sqlite-tiedostona                                                          |
+| `/api/db-backups/import`    | POST   | Lataa .sqlite-tiedosto tietokannan korvaamiseksi (`?dryRun=true` suorittaa vain validoinnin) |
+| `/api/db-backups/exportAll` | GET    | Lataa täydellinen varmuuskopio .tar.gz-arkistona                                             |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` ja `/api/settings/export-json` jakavat kaikki tallennetut valtuustiedot, joten ne edellyttävät kojelautaistunnon tai paikallisen CLI (tai sisäänkirjautumisen eston). minkä tahansa laajuuden API avaimet ja `oma_` -käyttötunnukset saavat `403`. Palautuksissa on sama raja: `POST /api/db-backups/import` (sisältää `dryRun=true` ), `POST /api/db-backups` (palautus id:llä) ja `POST /api/settings/import-json` korvaavat elävän tietokannan tai asetukset, joten koneen tunnistetiedot saa myös `403` sinne; `omniroute sync import` lähettää paikallisen CLI -tunnuksen. Samoin `DELETE /api/db-backups` (leikaa tallennetut varmuuskopiot) ja `PATCH /api/db-backups` (säilytysasetukset: pysyvät arvot ohjaavat automaattista karsimista jokaisen varmuuskopioinnin jälkeen). Listaus (`GET`) ja manuaalisen varmuuskopion luominen (`PUT`) säilyttävät tavallisen hallinnan todennuksen.
+`/api/db-backups/export`, `/api/db-backups/exportAll` ja `/api/settings/export-json` luovuttavat
+kaikki tallennetut tunnistetiedot, joten ne edellyttävät hallintapaneelin istuntoa tai paikallista CLI:tä (tai että
+kirjautuminen on poistettu käytöstä). Minkä tahansa laajuuden API-avaimet ja `oma_`-käyttöoikeustunnukset saavat vastauksen
+`403`. Palautuksissa on sama rajoitus: `POST /api/db-backups/import` (`dryRun=true` mukaan lukien), `POST /api/db-backups` (palautus tunnuksen perusteella) ja `POST /api/settings/import-json` korvaavat käytössä olevan tietokannan tai asetukset, joten myös koneen tunnistetieto saa siellä vastauksen `403`; `omniroute sync import` lähettää paikallisen CLI:n tunnistetiedon. Sama koskee toimintoja `DELETE /api/db-backups` (tallennettujen varmuuskopioiden karsiminen) ja `PATCH /api/db-backups` (säilytysasetukset: tallennetut arvot ohjaavat automaattista karsimista jokaisen varmuuskopion jälkeen). Luettelointi (`GET`) ja manuaalisen varmuuskopion luominen (`PUT`) käyttävät edelleen tavallista hallintatodennusta.
 
-### Cloud Sync
+### Pilvisynkronointi
 
-| Päätepiste             | Menetelmä | Kuvaus                     |
-| ---------------------- | --------- | -------------------------- |
-| `/api/sync/cloud`      | Eri       | Pilvisynkronointitoiminnot |
-| `/api/sync/initialize` | POST      | Alusta synkronointi        |
-| `/api/cloud/*`         | Eri       | Pilvihallinta              |
+| Endpoint               | Method  | Description                  |
+| ---------------------- | ------- | ---------------------------- |
+| `/api/sync/cloud`      | Various | Pilvisynkronoinnin toiminnot |
+| `/api/sync/initialize` | POST    | Alusta synkronointi          |
+| `/api/cloud/*`         | Various | Pilven hallinta              |
 
 ### Tunnelit
 
-| Päätepiste                 | Menetelmä | Kuvaus                                                                                |
-| -------------------------- | --------- | ------------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET       | Lue Cloudflare Quick Tunnel install/runtime -tila                                     |
-| `/api/tunnels/cloudflared` | POST      | Ota Cloudflare Quick Tunnel (`action=enable/disable`) käyttöön tai poista se käytöstä |
-| `/api/tunnels/ngrok`       | GET       | Lue kojelaudan ngrok Tunnelin ajonaikainen tila                                       |
-| `/api/tunnels/ngrok`       | POST      | Ota ngrok tunneli käyttöön tai poista se käytöstä (`action=enable/disable`)           |
+| Endpoint                   | Method | Description                                                                                   |
+| -------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | Lue Cloudflare Quick Tunnelin asennuksen ja ajonaikaisen tilan tiedot hallintapaneelia varten |
+| `/api/tunnels/cloudflared` | POST   | Ota Cloudflare Quick Tunnel käyttöön tai poista se käytöstä (`action=enable/disable`)         |
+| `/api/tunnels/ngrok`       | GET    | Lue ngrok Tunnelin ajonaikaiset tilatiedot hallintapaneelia varten                            |
+| `/api/tunnels/ngrok`       | POST   | Ota ngrok Tunnel käyttöön tai poista se käytöstä (`action=enable/disable`)                    |
 
-### CLI työkalut
+### CLI-työkalut
 
-| Päätepiste                         | Menetelmä | Kuvaus              |
-| ---------------------------------- | --------- | ------------------- |
-| `/api/cli-tools/claude-settings`   | GET       | Claude CLI status   |
-| `/api/cli-tools/codex-settings`    | GET       | Codex CLI status    |
-| `/api/cli-tools/droid-settings`    | GET       | Droid CLI tila      |
-| `/api/cli-tools/openclaw-settings` | GET       | OpenClaw CLI status |
-| `/api/cli-tools/runtime/[toolId]`  | GET       | Yleinen CLI ajoaika |
+| Endpoint                           | Method | Description                   |
+| ---------------------------------- | ------ | ----------------------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Clauden CLI:n tila            |
+| `/api/cli-tools/codex-settings`    | GET    | Codex CLI:n tila              |
+| `/api/cli-tools/droid-settings`    | GET    | Droid CLI:n tila              |
+| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI:n tila           |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Yleinen CLI-ajonaikainen tila |
 
-CLI vastauksia ovat: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI-vastaukset sisältävät: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### ACP Agentit
+### ACP-agentit
 
-| Päätepiste        | Menetelmä | Kuvaus                                                             |
-| ----------------- | --------- | ------------------------------------------------------------------ |
-| `/api/acp/agents` | GET       | Listaa kaikki havaitut agentit (sisäänrakennettu + custom) tilalla |
-| `/api/acp/agents` | POST      | Lisää mukautettu agentti tai päivitä tunnistusvälimuisti           |
-| `/api/acp/agents` | DELETE    | Poista mukautettu agentti `id` -kyselyparametrilla                 |
+| Endpoint          | Method | Description                                                                       |
+| ----------------- | ------ | --------------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Luettele kaikki havaitut agentit (sisäänrakennetut + mukautetut) sekä niiden tila |
+| `/api/acp/agents` | POST   | Lisää mukautettu agentti tai päivitä tunnistuksen välimuisti                      |
+| `/api/acp/agents` | DELETE | Poista mukautettu agentti kyselyparametrin `id` perusteella                       |
 
-GET vastaus sisältää `agents[]` (tunnus, nimi, binaari, versio, asennettu, protokolla, isCustom) ja `summary` (yhteensä, asennettu, notFound, builtIn, mukautettu).
+GET-vastaus sisältää `agents[]`-taulukon (id, name, binary, version, installed, protocol, isCustom) ja `summary`-yhteenvedon (total, installed, notFound, builtIn, custom).
 
-### Kestävyys ja nopeusrajoitukset
+### Häiriönsietokyky ja nopeusrajoitukset
 
-| Päätepiste                        | Menetelmä | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/resilience`                 | GET/PATCH | Get/update -pyyntöjono, yhteyden jäähdytys, palveluntarjoajan katkaisija ja odotusasetukset                                                                                                                                                                                                                                                                                                                                                |
-| `/api/resilience/reset`           | POST      | Nollaa palveluntarjoajan katkaisijat                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/resilience/model-cooldowns` | GET       | Luettelo aktiiviset lukitukset per (toimittaja, yhteys, malli) jäljellä olevan ajan mukaan lajiteltuna                                                                                                                                                                                                                                                                                                                                     |
-| `/api/resilience/model-cooldowns` | DELETE    | Tyhjennä mallin lukitus — body `{provider, model}` tai `{all: true}` pyyhkiäksesi kaiken                                                                                                                                                                                                                                                                                                                                                   |
-| `/api/rate-limits`                | GET/POST  | Tilikohtainen korkorajoitustila (GET) tai vaihda nopeusrajoitussuojaus yhteydelle (POST `{connectionId, enabled}`). Tuettu kirjoituspolku `rateLimitProtection` (ei koskaan muokattu `PUT /api/providers/[id]` kautta). Huomautus: `enabled: false` poistaa eksplisiittisen suojauksen käytöstä, mutta ei valitse aktiivista API-avainyhteyttä maailmanlaajuisesta automaattisen käyttöönoton turvaverkosta (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Yleisen nopeusrajoituksen määritys (poistettu käytöstä; alias `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                          |
+| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Hae/päivitä pyyntöjonoa, yhteyden jäähdytysaikaa, palveluntarjoajan katkaisinta ja odotusasetuksia                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/resilience/reset`           | POST      | Nollaa palveluntarjoajien piirikatkaisimet                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/resilience/model-cooldowns` | GET       | Luettele aktiiviset palveluntarjoaja-, yhteys- ja mallikohtaiset estot järjestettynä jäljellä olevan ajan mukaan                                                                                                                                                                                                                                                                                                                                                                              |
+| `/api/resilience/model-cooldowns` | DELETE    | Tyhjennä mallin esto — runko `{provider, model}` tai `{all: true}` kaiken poistamiseksi                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/rate-limits`                | GET/POST  | Tilikohtainen nopeusrajoituksen tila (GET) tai ota käyttöön/poista käytöstä yhteyden nopeusrajoitussuojaus (POST `{connectionId, enabled}`). Tuettu kirjoitusreitti kohteelle `rateLimitProtection` (sitä ei koskaan muokata reitillä `PUT /api/providers/[id]`). Huomautus: `enabled: false` poistaa nimenomaisen suojauksen käytöstä, mutta ei poista aktiivista API-avainta käyttävää yhteyttä maailmanlaajuisesta automaattisen käyttöönoton turvaverkosta (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Maailmanlaajuiset nopeusrajoitusasetukset (vanhentunut; alias reitille `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                                                    |
 
-> Kaikki neljä `/api/resilience/*` -reittiä vaativat** johdon todennus** (`requireManagementAuth`). Katso [Resilience (pidennetty)](#resilience-extended) -kohdasta täydellinen erittely palveluntarjoajan katkaisijasta vs. yhteyden jäähtyminen vs. mallin lukitus.
+> Kaikki neljä `/api/resilience/*`-reittiä edellyttävät **hallinnan todennusta** (`requireManagementAuth`). Katso [Resilience (laajennettu)](#resilience-extended) täydellinen erittely palveluntarjoajan katkaisimen, yhteyden jäähdytysajan ja mallin eston eroista.
 
-### Evals
+### Arvioinnit
 
-| Päätepiste   | Menetelmä | Kuvaus                                  |
-| ------------ | --------- | --------------------------------------- |
-| `/api/evals` | GET/POST  | Listaa eval-sviitit / suorita arviointi |
+| Endpoint     | Method   | Description                                         |
+| ------------ | -------- | --------------------------------------------------- |
+| `/api/evals` | GET/POST | Luettele arviointikokonaisuudet / suorita arviointi |
 
 ### Käytännöt
 
-| Päätepiste      | Menetelmä       | Kuvaus                       |
-| --------------- | --------------- | ---------------------------- |
-| `/api/policies` | GET/POST/DELETE | Hallinnoi reitityskäytäntöjä |
+| Endpoint        | Method          | Description                 |
+| --------------- | --------------- | --------------------------- |
+| `/api/policies` | GET/POST/DELETE | Hallitse reitityskäytäntöjä |
 
 ### Vaatimustenmukaisuus
 
-| Päätepiste                  | Menetelmä | Kuvaus                                             |
-| --------------------------- | --------- | -------------------------------------------------- |
-| `/api/compliance/audit-log` | GET       | Vaatimustenmukaisuuden tarkastusloki (viimeinen N) |
+| Endpoint                    | Method | Description                                                   |
+| --------------------------- | ------ | ------------------------------------------------------------- |
+| `/api/compliance/audit-log` | GET    | Vaatimustenmukaisuuden tarkastusloki (viimeiset N tapahtumaa) |
 
 ### v1beta (Gemini-yhteensopiva)
 
-| Päätepiste                 | Menetelmä | Kuvaus                              |
-| -------------------------- | --------- | ----------------------------------- |
-| `/v1beta/models`           | GET       | Listaa mallit Gemini muodossa       |
-| `/v1beta/models/{...path}` | POST      | Gemini `generateContent` päätepiste |
+| Endpoint                   | Method | Description                          |
+| -------------------------- | ------ | ------------------------------------ |
+| `/v1beta/models`           | GET    | Luettele mallit Gemini-muodossa      |
+| `/v1beta/models/{...path}` | POST   | Geminin `generateContent`-päätepiste |
 
-Nämä päätepisteet heijastavat GeminiAPI -muotoa asiakkaille, jotka odottavat natiivia Gemini SDK -yhteensopivuutta.
+Nämä päätepisteet noudattavat Geminin API-muotoa asiakkaille, jotka odottavat natiivin Gemini SDK:n yhteensopivuutta.
 
 ### Sisäinen / Järjestelmä APIs
 
@@ -1494,7 +1535,7 @@ Nämä päätepisteet heijastavat GeminiAPI -muotoa asiakkaille, jotka odottavat
 
 > **Huomautus:** Järjestelmä käyttää näitä päätepisteitä sisäisesti tai Ollama -asiakasyhteensopivuutta varten. Loppukäyttäjät eivät yleensä soita niihin.
 
-### OAuth ympäristön korjaus _(v3.6.1 +)_
+### OAuth-ympäristön korjaus _(v3.6.1+)_
 
 ```bash
 POST /api/system/env/repair
@@ -1505,7 +1546,7 @@ Content-Type: application/json
 }
 ```
 
-Korjaa puuttuvat tai vioittuneet OAuth ympäristömuuttujat tietylle toimittajalle. Palautukset:
+Korjaa tietyn palveluntarjoajan puuttuvat tai vioittuneet OAuth-ympäristömuuttujat. Palauttaa:
 
 ```json
 {
@@ -1521,7 +1562,7 @@ Korjaa puuttuvat tai vioittuneet OAuth ympäristömuuttujat tietylle toimittajal
 GET /api/system/version
 ```
 
-Vain silmukan hallintareitti (admin auth). Palauttaa käynnissä olevan version, viimeisimmän julkaistun version ja automaattisen päivityksen tilan. `releaseChannel` ja `channels` ovat summauskenttiä (raide 3.8.54); `channel` säilyttää merkityksensä — kojelautapäivityksen käyttämä käyttöönottotila (`npm`, `source` tai `docker-compose`).
+Vain loopback-käyttöön tarkoitettu hallintareitti (ylläpitäjän todennus). Palauttaa käynnissä olevan version, uusimman julkaistun version ja automaattisen päivityksen tilan. `releaseChannel` ja `channels` ovat lisäkenttiä (versio 3.8.54); `channel` säilyttää merkityksensä — se on käyttöönottotila, jota hallintapaneelin päivitystoiminto käyttää (`npm`, `source` tai `docker-compose`).
 
 ```json
 {
@@ -1537,10 +1578,10 @@ Vain silmukan hallintareitti (admin auth). Palauttaa käynnissä olevan version,
 }
 ```
 
-- Käynnissä olevan koontiversion `releaseChannel` — npm-kanava: `nightly` `-nightly.*` versioille, `next` muille ennakkojulkaisuille (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` vanhemman majorin vakaalle versiolle kuin `channels.latest`, muuten `latest`. Samat säännöt kuin `scripts/release/dist-tag.mjs`, joka poimii npm dist-tagin julkaisuhetkellä.
-- `channels` — julkaisi jokaisen dist-tunnisteen pään `npm view omniroute dist-tags` stä (rekisterin HTTP varaus), joka on välimuistissa samalla 10 minuutin TTL llä kuin `latest`. `latest` on aina läsnä (putoaa takaisin `latest` kenttään, sitten `"unavailable"`); `next`, `nightly` ja `lts` näkyvät vain, kun kyseinen dist-tunniste on olemassa. `Cache-Control: no-cache` -pyyntö päivittää molemmat haut.
+- `releaseChannel` — käynnissä olevan koontiversion npm-kanava: `nightly` versioille `-nightly.*`, `next` muille esijulkaisuille (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` vanhemman pääversion vakaalle versiolle kuin `channels.latest`, ja muussa tapauksessa `latest`. Samat säännöt kuin tiedostossa `scripts/release/dist-tag.mjs`, joka valitsee npm-jakelutunnisteen julkaisuhetkellä.
+- `channels` — kunkin jakelutunnisteen julkaistu uusin versio lähteestä `npm view omniroute dist-tags` (rekisterin HTTP-varajärjestely), välimuistissa saman 10 minuutin TTL-ajan kuin `latest`. `latest` on aina mukana (varajärjestyksessä käytetään `latest`-kenttää ja sen jälkeen arvoa `"unavailable"`); `next`, `nightly` ja `lts` näkyvät vain, kun kyseinen jakelutunniste on olemassa. `Cache-Control: no-cache` -pyyntö päivittää molemmat haut.
 
-Kanavamalli (`latest` = v3 kunnes 4.0 GA, `next` = rc, `nightly` = `develop` koontiversiot, `lts` = v3 korjaustiedostot 4.0 GA jälkeen) on kuvattu `docs/ops/RELEASE_STRATEGY.md` ssä.
+Kanavamalli (`latest` = v3 ennen versiota 4.0 GA, `next` = rc, `nightly` = `develop`-koontiversiot, `lts` = v3-korjausversiot version 4.0 GA:n jälkeen) on kuvattu tiedostossa `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1765,17 +1806,21 @@ OmniRoute-tapahtumien lähtevät webhook-tilaukset (pyynnön valmistuminen, kiin
 
 ## Rekisteröidyt avaimet (automaattinen hallinta)
 
-Automaattinen avaintenhallintajärjestelmä käyttää tätä API-avainten myöntämiseen ja kiertämiseen taustalla olevan palveluntarjoajan/tilin kautta sekä päivä- ja tuntikohtaisten kiintiöiden hallintaan.
+Automaattisen avainten hallintaalijärjestelmän käyttämä API avaimien myöntäminen ja kiertäminen tausta provider/account vastaan daily/hourly -kiintiöillä.
 
-| Menetelmä | Polku                                 | Kuvaus                                                                                                                                                                                                                           |
-| --------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET       | `/api/v1/registered-keys`             | Luettele rekisteröidyt avaimet (vain peitetty etuliite)                                                                                                                                                                          |
-| POST      | `/api/v1/registered-keys`             | Myönnä uusi rekisteröity avain — runko: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Palauttaa raakamuotoisen avaimen **vain kerran**. Palauttaa `429`, jos kiintiö estää pyynnön. |
-| GET       | `/api/v1/registered-keys/[id]`        | Nouda rekisteröidyn avaimen metatiedot (ei raakamuotoista avainta)                                                                                                                                                               |
-| DELETE    | `/api/v1/registered-keys/[id]`        | Peruuta rekisteröity avain                                                                                                                                                                                                       |
-| POST      | `/api/v1/registered-keys/[id]/revoke` | Nimenomainen peruutuspäätepiste (sama vaikutus kuin komennolla `DELETE`)                                                                                                                                                         |
+| Menetelmä | Polku                                 | Kuvaus                                                                                                                                                                                                     |
+| --------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/api/v1/registered-keys`             | Listaa rekisteröidyt avaimet (vain peitetty etuliite)                                                                                                                                                      |
+| POST      | `/api/v1/registered-keys`             | Anna uusi rekisteröity avain — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Palauttaa raaka-avaimen **kerran** . Palauttaa `429` kiintiön epäämisestä. |
+| GET       | `/api/v1/registered-keys/[id]`        | Hae rekisteröidyn avaimen metatiedot (ei raaka-ainetta)                                                                                                                                                    |
+| DELETE    | `/api/v1/registered-keys/[id]`        | Peruuta rekisteröity avain                                                                                                                                                                                 |
+| POST      | `/api/v1/registered-keys/[id]/revoke` | Eksplisiittinen peruutuspäätepiste (sama vaikutus kuin DELETE)                                                                                                                                             |
+| GET       | `/api/v1/providers/[provider]/limits` | Lue palveluntarjoajan liikkeeseenlaskijat                                                                                                                                                                  |
+| PUT       | `/api/v1/providers/[provider]/limits` | Aseta palveluntarjoajan myöntämisrajat — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                     |
+| GET       | `/api/v1/accounts/[id]/limits`        | Lue tilin myöntämisrajat                                                                                                                                                                                   |
+| PUT       | `/api/v1/accounts/[id]/limits`        | Aseta tilin myöntämisrajat — samalle rungolle kuin palveluntarjoajan reitti                                                                                                                                |
 
-**Todennus:** hallintaistunto/API-avain (`requireManagementAuth`) — sama suojaus kuin kohteessa `/api/keys`: hallintapaneelin istunto, paikallinen CLI-tunnus tai API-avain, jolla on `manage`/`admin`-käyttöoikeusalue; vain päättelyyn tarkoitetut API-avaimet saavat vastauksen `403`. Katso myös `/v1/quotas/check` ja `/v1/issues/report`.
+**Todennus:** hallinta session/API avain (`requireManagementAuth`) — sama suoja kuin `/api/keys`: kojelautaistunto, paikallinen CLI tunnus tai API avain `manage`/`admin` -laajuudella; Vain päättelyyn perustuvat API -avaimet saavat `403`. Katso myös `/v1/quotas/check` ja `/v1/issues/report`.
 
 ---
 
@@ -1901,17 +1946,17 @@ Pysyvä keskustelu-/faktamuistivarasto, jonka laajuus on API-avainkohtainen / is
 
 OmniRoute sisältää upotetun Model Context Protocol -palvelimen, jossa on kolme siirtotapaa (stdio, SSE, streamable-http) ja rajatut työkalut. Alla olevat hallintapaneelin päätepisteet lukevat tila-/auditointitietoja ja välittävät HTTP-siirrot.
 
-| Menetelmä | Polku | Kuvaus |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Sydämenlyönti, siirtotapa, online-tila, viimeisin kutsu, tärkeimmät työkalut, onnistumisprosentti 24 tunnin ajalta |
-| GET | `/api/mcp/tools` | MCP-työkalujen luettelo, joka sisältää `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Avaa SSE-virran SSE-siirtoa varten (palauttaa `503`, jos MCP on poistettu käytöstä tai siirtotapa ei täsmää) |
-| POST | `/api/mcp/sse` | Lähetä JSON-RPC-kehys SSE-siirron kautta |
-| GET | `/api/mcp/stream` | Avaa Streamable HTTP -siirron SSE-puolen (palvelimen aloittamat viestit) |
-| POST | `/api/mcp/stream` | Lähetä JSON-RPC-kehys Streamable HTTP -siirron kautta |
-| DELETE | `/api/mcp/stream` | Lopeta Streamable HTTP -istunto |
-| GET | `/api/mcp/audit` | Kysely auditointilokiin — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Kooste auditointitilastoista (määrät, onnistumisprosentti, keskimääräinen kesto, tärkeimmät työkalut) |
+| Menetelmä | Polku                  | Kuvaus                                                                                                                           |
+| --------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/api/mcp/status`      | Sydämenlyönti, siirtotapa, online-tila, viimeisin kutsu, tärkeimmät työkalut, onnistumisprosentti 24 tunnin ajalta               |
+| GET       | `/api/mcp/tools`       | MCP-työkalujen luettelo, joka sisältää `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                 |
+| GET       | `/api/mcp/sse`         | Avaa SSE-virran SSE-siirtoa varten (palauttaa `503`, jos MCP on poistettu käytöstä tai siirtotapa ei täsmää)                     |
+| POST      | `/api/mcp/sse`         | Lähetä JSON-RPC-kehys SSE-siirron kautta                                                                                         |
+| GET       | `/api/mcp/stream`      | Avaa Streamable HTTP -siirron SSE-puolen (palvelimen aloittamat viestit)                                                         |
+| POST      | `/api/mcp/stream`      | Lähetä JSON-RPC-kehys Streamable HTTP -siirron kautta                                                                            |
+| DELETE    | `/api/mcp/stream`      | Lopeta Streamable HTTP -istunto                                                                                                  |
+| GET       | `/api/mcp/audit`       | Kysely auditointilokiin — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET       | `/api/mcp/audit/stats` | Kooste auditointitilastoista (määrät, onnistumisprosentti, keskimääräinen kesto, tärkeimmät työkalut)                            |
 
 **Todennus:** `sse`/`stream`-siirtotavat noudattavat MCP-kohtaista todennusrajapintaa (Bearer API-avain, jolla on `mcp`-laajuus); `status`/`tools`/`audit*`-reitit ovat luettavissa hallintapaneelista (hallintapaneelin isäntään pääsyyn ei tarvita muuta todennusta).
 

@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ড্যাশবোর্ডটি `http://localhost:20128`-এ খোলে এবং API-এর বেস URL হলো `http://localhost:20128/v1`।
+ড্যাশবোর্ড `http://localhost:20128` এ খোলে এবং API বেস URL হল `http://localhost:20128/v1`।
+
+> **npm ব্যবহারকারী:** যদি npm সতর্ক করে যে ইনস্টল স্ক্রিপ্টগুলি ব্লক করা হয়েছে (যেমন, `omniroute`, `better-sqlite3`), [ট্রাবলশুটিং — npm ইনস্টল-স্ক্রিপ্ট ব্লক করা হয়েছে](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) দেখুন।
 
 ### pnpm
 

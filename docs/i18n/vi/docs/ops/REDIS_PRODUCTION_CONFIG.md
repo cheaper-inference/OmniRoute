@@ -6,36 +6,33 @@
 
 ## Tổng quan
 
-Redis là một **phần phụ thuộc tùy chọn, không bắt buộc** trong OmniRoute — ứng dụng vẫn tiếp tục hoạt động với chức năng suy giảm hợp lý (dùng bộ nhớ trong
-làm phương án dự phòng) khi Redis không khả dụng. Trong môi trường production, việc tinh chỉnh Redis giúp giảm độ trễ cho bốn
-khối lượng công việc riêng biệt:
+Redis là một **tùy chọn, phụ thuộc mềm** trong OmniRoute — ứng dụng xuống cấp một cách nhẹ nhàng (dự phòng trong bộ nhớ) khi Redis không khả dụng. Trong sản xuất, việc điều chỉnh Redis giúp giảm độ trễ cho bốn khối lượng công việc riêng biệt:
 
-| Khối lượng công việc      | Thành phần điều khiển         | Factory tạo client                                       | Mẫu khóa                                                     |
-| ------------------------- | ----------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| Giới hạn tốc độ           | `rateLimiter.ts`              | Singleton `ioredis` khởi tạo lười qua `getRedisClient()` | Các cửa sổ giới hạn tốc độ nguyên tử bằng Lua `<prefix>rl:*` |
-| Bộ nhớ đệm xác thực       | `apiKeys.ts`                  | Tái sử dụng client của `rateLimiter`                     | `<prefix>auth:api_key:<sha256>` với TTL                      |
-| Kho hạn ngạch             | `redisQuotaStore.ts`          | Singleton `getRedisClient(url)` riêng biệt               | `<prefix>quota:*` có thể cấu hình theo từng instance         |
-| Circuit breaker khởi động | `redisCircuitBreakerStore.ts` | Client riêng biệt trong `circuitBreakerFactory.ts`       | `<prefix>warmup:cb:<connectionId>`                           |
+| Khối lượng công việc   | Tài xế                        | Nhà máy khách hàng                                     | Mẫu chìa khóa                                            |
+| ---------------------- | ----------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
+| Giới hạn tỷ lệ         | `rateLimiter.ts`              | `getRedisClient()` — lười biếng `ioredis` đơn          | Cửa sổ giới hạn tốc độ nguyên tử `<prefix>rl:*` Lua      |
+| Bộ đệm xác thực        | `apiKeys.ts`                  | Tái sử dụng ứng dụng khách của `rateLimiter`           | `<prefix>auth:api_key:<sha256>` với TTL                  |
+| Cửa hàng hạn ngạch     | `redisQuotaStore.ts`          | Đơn vị `getRedisClient(url)` riêng biệt                | `<prefix>quota:*` có thể định cấu hình cho mỗi phiên bản |
+| Bộ ngắt mạch khởi động | `redisCircuitBreakerStore.ts` | Khách hàng riêng biệt trong `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>`                       |
 
-Cả bốn khối lượng công việc đều dùng chung một tiền tố namespace để OmniRoute có thể cùng tồn tại với các ứng dụng khác trên
-một instance Redis duy nhất (ví dụ: `127.0.0.1:6379`). Xem [Phân vùng tên khóa](#key-namespacing).
+Tất cả bốn khối lượng công việc đều chia sẻ một tiền tố không gian tên để OmniRoute có thể cùng tồn tại với các ứng dụng khác trên một phiên bản Redis duy nhất (ví dụ: `127.0.0.1:6379`). Xem [Không gian tên chính](#key-namespacing).
 
 ---
 
-## Cấu hình hiện tại (Giá trị mặc định trong mã)
+## Cấu hình hiện tại (Mặc định mã)
 
-| Thiết lập                               | Giá trị                                                             | Vị trí                                                                                |
-| --------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Biến môi trường `REDIS_URL`             | `redis://redis:6379` (compose), tùy chọn                            | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Biến môi trường `REDIS_KEY_PREFIX`      | `omniroute:` (mặc định)                                             | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Biến môi trường `QUOTA_STORE_REDIS_URL` | riêng biệt, có thể khác với `REDIS_URL`                             | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                    | `"sqlite"` (mặc định), tùy chọn `"redis"`                           | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` của ioredis      | `3`                                                                 | quá trình tạo client trong `rateLimiter.ts`                                           |
-| `enableReadyCheck`                      | chưa đặt (mặc định của ioredis: `true`)                             | —                                                                                     |
-| `lazyConnect`                           | chưa đặt (mặc định của ioredis: `false`)                            | —                                                                                     |
-| `retryStrategy`                         | chưa đặt (mặc định của ioredis: cơ sở 200ms, tăng theo cấp số nhân) | —                                                                                     |
-| TLS / mật khẩu / chỉ mục DB             | **chưa được cấu hình**                                              | —                                                                                     |
-| Sentinel / Cluster                      | **chưa được cấu hình** — chỉ hỗ trợ một nút độc lập                 | —                                                                                     |
+| Cài đặt                         | Giá trị                                               | Ở đâu                                                                                 |
+| ------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (soạn), tùy chọn                 | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (mặc định)                               | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | riêng biệt, có thể khác với `REDIS_URL`               | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (mặc định), `"redis"` tùy chọn             | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                   | Tạo ứng dụng khách `rateLimiter.ts`                                                   |
+| `enableReadyCheck`              | chưa được đặt (mặc định của ioredis: `true`)          | —                                                                                     |
+| `lazyConnect`                   | chưa được đặt (mặc định của ioredis: `false`)         | —                                                                                     |
+| `retryStrategy`                 | chưa được đặt (ioredis mặc định: cơ sở 200ms, hàm mũ) | —                                                                                     |
+| Chỉ số TLS / mật khẩu / DB      | **không được cấu hình**                               | —                                                                                     |
+| Trọng điểm/Cụm                  | **không được cấu hình** Chỉ một nút độc lập —         | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Tinh chỉnh được khuyến nghị cho môi trường Production
+## Điều chỉnh sản xuất được đề xuất
 
-### 1. Tùy chọn Connection Pool / Client (hàm khởi tạo `Redis` của ioredis)
+### 1. Tùy chọn nhóm kết nối / máy khách (hàm tạo ioredis `Redis` )
 
-Mã hiện tại tạo một `new Redis(url)` duy nhất mà không có tùy chọn tùy chỉnh. Đối với các
-triển khai production có nhiều replica, hãy truyền một client factory vào mã hoặc bọc `getRedisClient()`:
+Mã hiện tại tạo một `new Redis(url)` duy nhất không có tùy chọn tùy chỉnh. Để triển khai nhiều bản sao sản xuất, hãy chuyển mã hoặc gói `getRedisClient()` cho nhà máy khách:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // không giới hạn số lần thử lại; để retryStrategy quyết định
-  enableReadyCheck: true, // xác minh máy chủ đã sẵn sàng trước khi chấp nhận lời gọi
-  lazyConnect: true, // không kết nối khi khởi tạo; chờ lời gọi đầu tiên
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // từ bỏ sau 10 lần thử lại → kết nối lại sau
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, giới hạn 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // gộp các lệnh đồng thời vào một lần ghi TCP
-  keepAlive: 10000, // TCP keep-alive mỗi 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Các đánh đổi chính:**
+**Sự đánh đổi chính:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — được ưu tiên cho production để các lần
-  khởi động lại Redis tạm thời không làm mọi request thất bại ngay lập tức. Cơ chế dự phòng
-  trong bộ nhớ của `checkRateLimit()` xử lý nhánh lỗi này.
-- `lazyConnect: true` — tránh việc khởi động phụ thuộc vào Redis phải hoạt động trước khi máy chủ
-  bắt đầu chấp nhận kết nối.
-- `enableAutoPipelining: true` — giảm số lượt khứ hồi cho các lần kiểm tra giới hạn tốc độ đồng thời;
-  hữu ích khi >50 RPS trên một kết nối duy nhất.
+- `maxRetriesPerRequest: null` + `retryStrategy` — được ưu tiên cho sản xuất để việc khởi động lại Redis tạm thời không làm thất bại ngay lập tức mọi yêu cầu. Dự phòng trong bộ nhớ trong `checkRateLimit()` hấp thụ đường dẫn lỗi.
+- `lazyConnect: true` — tránh sự phụ thuộc khởi động vào Redis trước khi máy chủ bắt đầu chấp nhận kết nối.
+- `enableAutoPipelining: true` — giảm các chuyến đi khứ hồi để kiểm tra giới hạn tỷ lệ đồng thời; có lợi ở > 50 RPS trên một kết nối.
 
 ### 2. Cấu hình máy chủ Redis (`redis.conf`)
 
 ```
-# Bộ nhớ
-maxmemory 80%                        # chừa không gian cho bộ nhớ đệm trang của hệ điều hành
-maxmemory-policy allkeys-lru         # loại bỏ các mục bộ nhớ đệm xác thực cũ khi thiếu bộ nhớ
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Tính bền vững dữ liệu (tùy chọn — OmniRoute an toàn khi gặp sự cố mà không cần tính năng này)
-save 300 1                           # tạo snapshot ít nhất mỗi 5 phút nếu có ≥1 khóa thay đổi
-appendonly no                        # không cần AOF; dữ liệu có thể được tái tạo
-appendfsync no                       # không có chi phí fsync (RDB là đủ)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Mạng
-timeout 0                            # không ngắt kết nối khi không hoạt động
-tcp-keepalive 300                    # keep-alive 5 phút
-tcp-backlog 511                      # hàng đợi kết nối cho tải tăng đột biến
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Hiệu năng
-hz 10                                # mặc định; dùng 100 nếu nhạy cảm với độ trễ
-activedefrag yes                     # tự động chống phân mảnh khi độ phân mảnh >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Đánh đổi của `maxmemory-policy allkeys-lru`:** Các mục bộ nhớ đệm xác thực có thể bị loại bỏ khi
-thiếu bộ nhớ. Điều này an toàn — `setCachedApiKey` luôn điền lại khi không tìm thấy, và cơ chế
-dự phòng SQLite là nguồn dữ liệu có thẩm quyền. Script Lua của bộ giới hạn tốc độ tạo ra các khóa nhỏ,
-được thiết kế để tồn tại trong thời gian ngắn.
+**Sự đánh đổi cho `maxmemory-policy allkeys-lru`:** Các mục trong bộ đệm xác thực có thể bị xóa dưới áp lực bộ nhớ. Đây là — an toàn `setCachedApiKey` luôn được điền lại khi bị trượt và dự phòng SQLite là có thẩm quyền. Tập lệnh Lua giới hạn tốc độ tạo ra các khóa nhỏ có thời gian tồn tại ngắn theo thiết kế.
 
-### 3. Thiết lập Docker Compose
+### 3. Cài đặt soạn thư Docker
 
-Cấu hình compose production (`docker-compose.prod.yml`) sử dụng `redis:8.6.2-alpine`. Hãy thêm:
+Sản phẩm soạn thảo (`docker-compose.prod.yml`) sử dụng `redis:8.6.2-alpine`. Thêm vào:
 
 ```yaml
 redis:
@@ -150,35 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Các cân nhắc về nhiều instance / khả năng mở rộng
+### 4. Cân nhắc về đa phiên bản / Mở rộng quy mô
 
-**Một Redis duy nhất cho tất cả replica** — script Lua của bộ giới hạn tốc độ phụ thuộc vào một
-không gian khóa có thẩm quyền duy nhất. Việc sử dụng nhiều instance Redis phía sau các replica sẽ làm mất
-tính nguyên tử và tăng gấp đôi hạn mức. Hãy sử dụng một Redis duy nhất (hoặc cụm Redis Sentinel có khả năng
-chuyển đổi dự phòng) cho tất cả replica của ứng dụng.
+**Redis đơn cho tất cả các bản sao** — tập lệnh Lua giới hạn tốc độ phụ thuộc vào một không gian khóa có thẩm quyền duy nhất. Nhiều phiên bản Redis đằng sau các bản sao sẽ mất tính nguyên tử và tăng gấp đôi ngân sách. Sử dụng một Redis (hoặc cụm Redis Sentinel có chuyển đổi dự phòng) cho tất cả các bản sao ứng dụng.
 
-**Số lượng kết nối:** Mỗi replica ứng dụng mở **2 kết nối TCP** đến Redis
-(client của bộ giới hạn tốc độ + client của kho hạn ngạch). Với 10 replica → 20 kết nối, vẫn
-nằm trong giới hạn mặc định 10k kết nối của một instance Redis.
+**Số lượng kết nối:** Mỗi bản sao ứng dụng sẽ mở ra **2 kết nối TCP** đến Redis (máy khách giới hạn tốc độ máy khách lưu trữ hạn ngạch + ). Ở 10 bản sao kết nối → 20, nằm trong giới hạn kết nối 10k của phiên bản Redis mặc định.
 
 ### 5. Giám sát
 
-Cung cấp thông qua endpoint kiểm tra tình trạng:
+Tiếp xúc thông qua điểm cuối kiểm tra sức khỏe:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts đã gọi các hàm rateLimiter
-// Thêm các kiểm tra dành riêng cho Redis:
-//   1. Độ trễ PING thông qua ioredis .ping()
-//   2. Mức sử dụng bộ nhớ thông qua INFO memory
-//   3. Số lượng kết nối thông qua INFO clients
-//   4. Tỷ lệ hit của maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Các chỉ số chính cần theo dõi:
+Các số liệu chính cần theo dõi:
 
-- **Số khóa bị loại bỏ / giây** — nếu liên tục khác 0, hãy tăng `maxmemory`
-- **Client bị chặn** — giá trị khác 0 cho thấy script Lua chạy chậm hoặc mức độ tranh chấp cao
-- **Kết nối bị từ chối** — đã đạt giới hạn kết nối; hiếm khi xảy ra với 20 kết nối
+- **Phím bị loại bỏ / giây** — nếu liên tục khác 0, hãy tăng `maxmemory`
+- **Khách hàng bị chặn** — khác 0 gợi ý các tập lệnh Lua chậm hoặc có mức độ tranh chấp cao
+- **Kết nối bị từ chối** Đã đạt giới hạn kết nối — ; hiếm ở 20 kết nối
+
+### 6. Máy chủ tương thích với Redis
+
+Bất kỳ máy chủ nào được sử dụng ở đây đều phải chạy tập lệnh Lua: giới hạn tốc độ là một `EVAL`. Trên máy chủ không có Lua, `checkRateLimit()` ghi lại `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` và tính trên mỗi quy trình, do đó, mỗi bản sao sẽ tự thực thi giới hạn. Cửa hàng sở thích phiên chia sẻ chọn tham gia (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) cũng đọc và cập nhật các chân bằng `EVAL`; không có Lua, nó ghi lại `[SESSION_AFFINITY] Redis error; falling back to SQLite.` và mỗi bản sao giữ các chân riêng của nó. Các khối lượng công việc khác sử dụng các lệnh đơn giản (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hàm băm và bộ) và phần phụ trợ Redis của bộ nhớ đệm ngữ nghĩa không gửi lệnh `FT.*`.
+
+Đã thử nghiệm với OmniRoute 3.8.52: KiviDB 1.2.0 với hình ảnh Lua của nó (`kividb/kividb:v1.2.0-lua`). Bộ giới hạn tốc độ (bao gồm quy trình thứ hai chia sẻ bộ đếm), bộ nhớ đệm xác thực, bộ nhớ hạn ngạch, bộ ngắt mạch khởi động, bộ nhớ đệm ngữ nghĩa và yêu cầu `/v1/chat/completions` thông qua trình xử lý trò chuyện đã vượt qua 18 trong số 19 bước kiểm tra vượt qua Redis 8.10.3. Một điểm khác biệt: `INCRBYFLOAT` lưu trữ `0.1 + 0.2` dưới dạng `0.30000000000000004` trong đó Redis lưu trữ `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kho hạn ngạch phân tích cả hai bằng `parseFloat`, nhưng hai số khác nhau ở các chữ số cuối, do đó, phép so sánh nằm chính xác trên ranh giới hạn ngạch có thể có kết quả khác nhau. Cửa hàng sở thích phiên không phải là một phần của hoạt động đó. ( [thiết lập](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [kết quả](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -201,13 +191,13 @@ flowchart LR
 
 ## Tài liệu tham khảo
 
-| Tệp                                | Mục đích                                                                          |
-| ---------------------------------- | --------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Client Redis chính, tập lệnh giới hạn tốc độ Lua, phương án dự phòng trong bộ nhớ |
-| `src/lib/db/apiKeys.ts`            | Bộ nhớ đệm xác thực — dự phòng Redis→SQLite                                       |
-| `src/lib/quota/redisQuotaStore.ts` | Client Redis riêng cho kho hạn ngạch tùy chọn                                     |
-| `src/lib/quota/storeFactory.ts`    | Chuyển đổi giữa các trình điều khiển hạn ngạch `sqlite` và `redis`                |
-| `docker-compose.prod.yml`          | Container Redis cho môi trường production (image `redis:8.6.2-alpine`)            |
-| `.env.example`                     | Tài liệu về các biến môi trường Redis                                             |
-| `src/app/api/local/redis/`         | Các tuyến API để điều phối container phát triển                                   |
-| `bin/cli/commands/redis.mjs`       | Các lệnh CLI để điều phối container phát triển                                    |
+| Tài liệu                           | Mục đích                                                                   |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Máy khách Redis chính, tập lệnh giới hạn tốc độ Lua, dự phòng trong bộ nhớ |
+| `src/lib/db/apiKeys.ts`            | Bộ đệm xác thực — Redis→SQLite dự phòng                                    |
+| `src/lib/quota/redisQuotaStore.ts` | Ứng dụng khách Redis riêng biệt cho cửa hàng hạn ngạch tùy chọn            |
+| `src/lib/quota/storeFactory.ts`    | Chuyển đổi giữa trình điều khiển hạn ngạch `sqlite` và `redis`             |
+| `docker-compose.prod.yml`          | Thùng chứa sản phẩm Redis (hình ảnh `redis:8.6.2-alpine`)                  |
+| `.env.example`                     | Tài liệu Redis env vars                                                    |
+| `src/app/api/local/redis/`         | Các tuyến API để điều phối vùng chứa nhà phát triển                        |
+| `bin/cli/commands/redis.mjs`       | Các lệnh CLI để điều phối vùng chứa nhà phát triển                         |

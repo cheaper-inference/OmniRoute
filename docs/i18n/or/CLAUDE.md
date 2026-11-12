@@ -15,7 +15,7 @@ Claude Code ପାଇଁ ପ୍ରଯୁଜ୍ୟ — `AGENTS.md`-ରେ ପୂ�
 
 ସମ୍ପୂର୍ଣ୍ଣ ବାଧ୍ୟତାମୂଳକ worktree ପ୍ରୋଟୋକଲ (base-branch ନିଶ୍ଚିତକରଣ, `.claude/worktrees/` ମାନକ ପଥ,
 `cp -al` node_modules, teardown ନିୟମଗୁଡ଼ିକ)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ରେ ଅଛି (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) ରେ ଅଛି (`AGENTS.md` →
 Git Workflow → "Worktree isolation" ରେ ସାରାଂଶିତ)। Claude-Code-ସମ୍ବନ୍ଧୀୟ ବିଷୟଗୁଡ଼ିକ:
 
 - ଯଦି ଅପରେଟର ଆପଣଙ୍କୁ ପୂର୍ବରୁ କହି ନାହାଁନ୍ତି, ତେବେ `AskUserQuestion` ମାଧ୍ୟମରେ ସେମାନଙ୍କ ସହିତ base

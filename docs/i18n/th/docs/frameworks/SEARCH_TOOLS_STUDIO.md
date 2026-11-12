@@ -54,7 +54,7 @@ Search Tools Studio เปลี่ยน `/dashboard/search-tools` จากพ
 - อินพุต: URL + ตัวเลือกเปิด/ปิดแบบเต็มหน้า + ตัวเลือกรูปแบบ (markdown / ข้อความ / HTML)
 - ส่งคำขอ → ดึงข้อมูล → แสดงผล `ScrapeResult.tsx`
 - `ScrapeResult` แสดงตัวอย่าง markdown + ตัวเลือกเปิด/ปิดข้อมูลดิบ
-- ขีดจำกัด: หากเนื้อหาการตอบกลับมีขนาดมากกว่า **256 KB** UI จะแสดง `(ถูกตัดทอน, ดูข้อมูลดิบ)` และเปิดข้อมูลดิบในโมดัล Monaco (D21)
+- ขีดจำกัด: หากเนื้อหาการตอบกลับมีขนาดมากกว่า **256 KB** UI จะแสดง `View full raw content` และเปิดข้อมูลดิบในโมดัล (D21)
 - แผงข้อมูลเมตา: ผู้ให้บริการ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), เวลาแฝง, ค่าใช้จ่าย, ขนาดการตอบกลับ, จำนวนลิงก์
 - ใช้ฮุก `useScrapeFetch.ts`
 
@@ -103,10 +103,12 @@ Search Tools Studio เปลี่ยน `/dashboard/search-tools` จากพ
 `ProviderCatalog.tsx` แสดงรายการผู้ให้บริการทั้งหมดจาก `GET /api/search/providers`
 (ขยายใน F4 เพื่อรวมผู้ให้บริการสำหรับการดึงข้อมูล):
 
-| `kind` | `"search"` (ผู้ให้บริการ 20 ราย) หรือ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (ผู้ให้บริการ 23 ราย) หรือ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 สถานะจะถูก **คำนวณ ณ เวลาที่ส่งคำขอ** โดยตรวจสอบว่ามีข้อมูลรับรองอยู่หรือไม่ และ
 คีย์ทั้งหมดอยู่ในช่วงพักการใช้งานหรือไม่
+
+`codex-search` (Codex Web Search): ใช้บัญชี Codex (ChatGPT) ที่เชื่อมต่อไว้ โดยไม่ต้องมีคีย์แยกต่างหาก การค้นหาแต่ละครั้งใช้โควตาการสมัครสมาชิก ChatGPT และใช้เวลาประมาณ 10–40 วินาที ทำงานเมื่อคำขอระบุชื่อ ส่วนการเลือกอัตโนมัติต้องเปิด `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ซึ่งปิดไว้โดยค่าเริ่มต้น
 
 ---
 

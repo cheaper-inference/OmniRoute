@@ -103,7 +103,11 @@ export function extractSection(changelog, version) {
 function git(args, opts = {}) {
   // maxBuffer: the default 1 MiB overflows on `git show origin/main:CHANGELOG.md`
   // (the CHANGELOG alone is >1 MiB) — ENOBUFS found live in the v3.8.45 run (2026-07-06).
-  return execFileSync("git", args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, ...opts }).trim();
+  return execFileSync("git", args, {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    ...opts,
+  }).trim();
 }
 
 // The sync-back is the ONE write path to the release branch with no CI gate — a red
@@ -113,6 +117,163 @@ function git(args, opts = {}) {
 export function greenGateArgs(argv) {
   if (argv.includes("--skip-green-gate")) return null;
   return ["scripts/quality/validate-release-green.mjs", "--quick"];
+}
+
+/** Bind a physical worktree to this repository and branch before writing into it. */
+function verifySyncWorktree(root, worktree, branch) {
+  const identity = fs.lstatSync(worktree);
+  if (identity.isSymbolicLink() || !identity.isDirectory()) {
+    throw new Error("[sync-next-cycle] worktree must be a physical directory");
+  }
+  const commonArgs = ["rev-parse", "--path-format=absolute", "--git-common-dir"];
+  if (
+    path.resolve(git(["rev-parse", "--show-toplevel"], { cwd: worktree })) !==
+      path.resolve(worktree) ||
+    git(commonArgs, { cwd: worktree }) !== git(commonArgs, { cwd: root }) ||
+    git(["symbolic-ref", "--short", "HEAD"], { cwd: worktree }) !== branch
+  ) {
+    throw new Error("[sync-next-cycle] worktree repository or branch mismatch; preserving it");
+  }
+  const head = git(["rev-parse", "HEAD"], { cwd: worktree });
+  const registrations = git(["worktree", "list", "--porcelain", "-z"], { cwd: root })
+    .split("\0\0")
+    .map((record) => record.split("\0"))
+    .filter((fields) => fields[0] === `worktree ${path.resolve(worktree)}`);
+  if (
+    !/^[0-9a-f]{40}$/.test(head) ||
+    registrations.length !== 1 ||
+    !registrations[0].includes(`branch refs/heads/${branch}`) ||
+    !registrations[0].includes(`HEAD ${head}`)
+  ) {
+    throw new Error("[sync-next-cycle] worktree registration mismatch; preserving it");
+  }
+  return { dev: identity.dev, ino: identity.ino, head };
+}
+
+/** Prepare physical dependencies and active hooks before any worktree commit. */
+export function prepareSyncWorktree(root, worktree, branch) {
+  const identity = verifySyncWorktree(root, worktree, branch);
+  const created = [];
+  const physicalDirectory = (directory, label) => {
+    const stat = fs.lstatSync(directory);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      throw new Error(`[sync-next-cycle] ${label} must be a physical directory`);
+    }
+    return stat;
+  };
+  const assertOwned = ({ destination, parent, identity, parentIdentity }) => {
+    const currentParent = physicalDirectory(parent, "copy parent");
+    const current = physicalDirectory(destination, "owned copy");
+    if (
+      current.dev !== identity.dev ||
+      current.ino !== identity.ino ||
+      currentParent.dev !== parentIdentity.dev ||
+      currentParent.ino !== parentIdentity.ino
+    ) {
+      throw new Error("[sync-next-cycle] owned copy identity changed; manual recovery required");
+    }
+  };
+  const copyIfMissing = (relative, flags) => {
+    const source = path.join(root, relative);
+    const destination = path.join(worktree, relative);
+    const parent = path.dirname(destination);
+    const parentIdentity = physicalDirectory(parent, `${relative} parent`);
+    let existing;
+    try {
+      existing = fs.lstatSync(destination);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    if (existing) {
+      physicalDirectory(destination, `existing ${relative}`);
+      return;
+    }
+    physicalDirectory(path.dirname(source), `${relative} source parent`);
+    physicalDirectory(source, `source ${relative}`);
+    // Claim only an absent destination. Copy contents, never nest a second directory.
+    fs.mkdirSync(destination);
+    const owned = { destination, parent, identity: fs.lstatSync(destination), parentIdentity };
+    created.push(owned);
+    execFileSync("cp", [flags, "--", `${source}${path.sep}.`, destination], { stdio: "pipe" });
+    assertOwned(owned);
+  };
+  try {
+    copyIfMissing("node_modules", "-al");
+    copyIfMissing(path.join(".husky", "_"), "-a");
+    const hooks = path.join(worktree, ".husky", "_");
+    const preCommit = path.join(hooks, "pre-commit");
+    const hookStat = fs.lstatSync(preCommit);
+    if (hookStat.isSymbolicLink() || !hookStat.isFile() || (hookStat.mode & 0o111) === 0) {
+      throw new Error("[sync-next-cycle] pre-commit must be a regular executable file");
+    }
+    fs.accessSync(preCommit, fs.constants.X_OK);
+    const configured = git(["config", "--get", "core.hooksPath"], { cwd: worktree });
+    if (!configured || path.resolve(worktree, configured) !== path.resolve(hooks)) {
+      throw new Error("[sync-next-cycle] core.hooksPath must activate this worktree's .husky/_");
+    }
+    // Keep the copies for hooks, the quick gate and conflict-resolution retries.
+    return identity;
+  } catch (error) {
+    const cleanupErrors = [];
+    for (const owned of created.reverse()) {
+      try {
+        assertOwned(owned);
+        fs.rmSync(owned.destination, { recursive: true, force: false });
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
+    }
+    if (cleanupErrors.length) {
+      throw new AggregateError(
+        [error, ...cleanupErrors],
+        "[sync-next-cycle] setup failed and rollback is incomplete; manual recovery required"
+      );
+    }
+    throw error;
+  }
+}
+
+/** Publish one immutable source SHA and confirm the exact remote branch before cleanup. */
+export function publishSyncWorktree(worktree, branch, expectedHead) {
+  if (!/^[0-9a-f]{40}$/.test(expectedHead || "")) {
+    throw new Error("[sync-next-cycle] invalid publication HEAD; preserving worktree");
+  }
+  if (git(["rev-parse", "HEAD"], { cwd: worktree }) !== expectedHead) {
+    throw new Error("[sync-next-cycle] worktree HEAD changed before publication; preserving it");
+  }
+  const destination = `refs/heads/${branch}`;
+  git(["push", "origin", `${expectedHead}:${destination}`], { cwd: worktree });
+  const readback = git(["ls-remote", "--exit-code", "--refs", "origin", destination], {
+    cwd: worktree,
+  });
+  if (readback !== `${expectedHead}\t${destination}`) {
+    throw new Error("[sync-next-cycle] remote publication readback mismatch; preserving worktree");
+  }
+  if (git(["rev-parse", "HEAD"], { cwd: worktree }) !== expectedHead) {
+    throw new Error("[sync-next-cycle] worktree HEAD changed during publication; preserving it");
+  }
+  return { expectedHead, confirmedHead: expectedHead };
+}
+
+/** Retain reused worktrees; remove a clean, unchanged worktree owned by this run only. */
+export function finishSyncWorktree(root, worktree, ownership) {
+  if (!ownership.createdWorktreeThisRun) return false;
+  const current = verifySyncWorktree(root, worktree, ownership.branch);
+  if (current.dev !== ownership.identity.dev || current.ino !== ownership.identity.ino) {
+    throw new Error("[sync-next-cycle] worktree identity changed; preserving it");
+  }
+  if (
+    !/^[0-9a-f]{40}$/.test(ownership.publishedHead || "") ||
+    current.head !== ownership.publishedHead
+  ) {
+    throw new Error("[sync-next-cycle] worktree HEAD changed since publication; preserving it");
+  }
+  if (git(["status", "--porcelain", "--untracked-files=normal"], { cwd: worktree })) {
+    throw new Error("[sync-next-cycle] worktree clean state changed; preserving it");
+  }
+  // No --force: Git rechecks cleanliness and must refuse newly arrived work.
+  git(["worktree", "remove", worktree], { cwd: root });
+  return true;
 }
 
 function main() {
@@ -130,9 +291,12 @@ function main() {
   console.log(`[sync-next-cycle] main is v${prevVersion} → syncing into ${BRANCH}`);
 
   // Worktree (idempotent — reuse if a previous run left it for conflict resolution).
+  let createdWorktreeThisRun = false;
   if (!fs.existsSync(WT)) {
     git(["worktree", "add", WT, BRANCH], { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
+    createdWorktreeThisRun = true;
   }
+  const worktreeIdentity = prepareSyncWorktree(ROOT, WT, BRANCH);
   const mergeHeadPath = git(["rev-parse", "--path-format=absolute", "--git-path", "MERGE_HEAD"], {
     cwd: WT,
   });
@@ -162,7 +326,9 @@ function main() {
   const merged = insertNextSection(mainChangelog + "\n", nextSection, NEXT);
   // Assertions: main's latest section intact + next section present.
   if (!merged.includes(`## [${prevVersion}]`)) {
-    console.error(`[sync-next-cycle] ABORT: main's ## [${prevVersion}] section missing after re-insertion`);
+    console.error(
+      `[sync-next-cycle] ABORT: main's ## [${prevVersion}] section missing after re-insertion`
+    );
     process.exit(1);
   }
   if (!merged.includes(`## [${NEXT}]`)) {
@@ -217,14 +383,20 @@ function main() {
     process.exit(1);
   }
 
-  git(["commit", "-m", `chore(release): sync main (v${prevVersion} close) into ${BRANCH} — parallel-cycle sync-back`], { cwd: WT });
+  git(
+    [
+      "commit",
+      "-m",
+      `chore(release): sync main (v${prevVersion} close) into ${BRANCH} — parallel-cycle sync-back`,
+    ],
+    { cwd: WT }
+  );
+  const expectedHead = git(["rev-parse", "HEAD"], { cwd: WT });
 
   // WS0.3 green gate: validate the MERGED tree before it reaches origin. The commit
   // stays local on failure so the captain can inspect/fix in the sync worktree.
   const gate = greenGateArgs(process.argv);
   if (gate) {
-    const nm = path.join(WT, "node_modules");
-    if (!fs.existsSync(nm)) fs.symlinkSync(path.join(ROOT, "node_modules"), nm, "dir");
     console.log("[sync-next-cycle] release-green --quick on the merged tree (pre-push gate)…");
     try {
       execFileSync("node", gate, { cwd: WT, stdio: "inherit", maxBuffer: 64 * 1024 * 1024 });
@@ -236,18 +408,30 @@ function main() {
       );
       process.exit(1);
     }
-    fs.rmSync(nm, { force: true });
   } else {
-    console.warn("[sync-next-cycle] ⚠ --skip-green-gate: pushing WITHOUT release-green validation.");
+    console.warn(
+      "[sync-next-cycle] ⚠ --skip-green-gate: pushing WITHOUT release-green validation."
+    );
   }
 
-  git(["push", "origin", BRANCH], { cwd: WT });
+  const publication = publishSyncWorktree(WT, BRANCH, expectedHead);
 
   const left = git(["rev-list", "--count", `${BRANCH}..origin/main`], { cwd: WT });
-  console.log(`[sync-next-cycle] pushed. origin/main commits not in ${BRANCH}: ${left} (expected 0)`);
+  console.log(
+    `[sync-next-cycle] pushed. origin/main commits not in ${BRANCH}: ${left} (expected 0)`
+  );
 
-  git(["worktree", "remove", "--force", WT], { cwd: ROOT });
-  console.log("[sync-next-cycle] done — worktree removed.");
+  const removed = finishSyncWorktree(ROOT, WT, {
+    createdWorktreeThisRun,
+    identity: worktreeIdentity,
+    branch: BRANCH,
+    publishedHead: publication.confirmedHead,
+  });
+  console.log(
+    removed
+      ? "[sync-next-cycle] done — worktree created by this run removed."
+      : `[sync-next-cycle] done — reused worktree preserved at ${WT}.`
+  );
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();

@@ -14,11 +14,12 @@ Tizim **fail-open** tamoyilida ishlaydi: agar guardrail bajarilish paytida xatol
 
 Hook'lar har bir marshrutda yoki har bir javobda ishga tush**maydi**. Guardrail'ga xavfsizlik nazorati sifatida tayanishdan oldin [Qamrov va cheklovlar](#coverage-and-limits) bo'limini o'qing.
 
-## O'rnatilgan to'siqlar
+## O'rnatilgan guardrail'lar
 
-Ro'yxatga olish kitobi oltita to'siqni import qilishda ustuvor tartibda avtomatik yuklaydi ( `registry.ts` → `registerDefaultGuardrails()` ga qarang):
+Reyestr import paytida oltita guardrail'ni ustuvorlik tartibida avtomatik yuklaydi
+(qarang: `registry.ts` → `registerDefaultGuardrails()`):
 
-| Ustuvorlik | Ism                 | Bosqich(lar)   | Fayl                  |
+| Ustuvorlik | Nomi                | Bosqich(lar)   | Fayl                  |
 | ---------- | ------------------- | -------------- | --------------------- |
 | `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -27,7 +28,7 @@ Ro'yxatga olish kitobi oltita to'siqni import qilishda ustuvor tartibda avtomati
 | `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Pastroq ustuvor raqamlar ishlaydi** birinchi** .
+Kichikroq ustuvorlik raqamlari **birinchi** ishga tushadi.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
@@ -110,28 +111,68 @@ Legacy sukut bo'yicha `src/shared/constants/visionBridgeDefaults.ts` yashaydi; y
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Ovozli chat so‘rovlarini ular audio kiritishni qabul qilishi ma’lum bo‘lmagan maqsadga yetib borishidan oldin ushlab turadi. U hech qachon chat so‘rovini qayta yo‘naltirmaydi: audio qismlar mavjud OpenAI-mos keladigan ko‘p qismli so‘nggi nuqta orqali transkripsiya qilinadi va tanlangan chat modeli matn transkriptlari bilan davom etadi.
+Audio kirishni qabul qilishi nomaʼlum boʻlgan maqsadga yetib borishidan oldin audio qismli chat soʻrovlarini ushlab qoladi. U chat soʻrovini hech qachon qayta yoʻnaltirmaydi: audio qismlar mavjud OpenAI-mos multipart endpoint orqali transkripsiya qilinadi va tanlangan chat modeli matn transkriptlar bilan davom etadi.
 
 Oqim:
 
-1. `supportsAudio` `getResolvedModelCapabilities()` orqali hal qiling. Aniq provayder-registr metama'lumotlari g'alaba qozonadi, so'ngra statik model metama'lumotlari, keyin sinxronlangan `modalities_input`. `audio` e'lon qilingan kirish ro'yxati `false`; hech qobiliyat dalil `null` qoladi. `false` ham, `null` konservativ ko'prikni faollashtiradi, `true` esa uni chetlab o'tadi.
-2. Umumiy `detectMediaParts()` detektori orqali `modalityBridgeAudio*` sozlamalarini hal qiling va har bir xabardan yuqori darajadagi audio qismlarini ajratib oling. Qo'llab-quvvatlanadigan sim shakllari OpenAI `input_audio`, `audio_url` va `source.media_type: "audio/*"` dir. Marshrutlash uchun ichki o'rnatilgan audio aniqlandi, lekin ulanish yo'li bilan olib tashlanmaydi. Ish `modalityBridgeAudioMaxClips` bilan chegaralangan; keyingi qismlar tegmasdan qoladi.
-3. Sozlangan `provider/model` hurmat qiling yoki `selectAudioBridgeModel()` `AUDIO_TRANSCRIPTION_PROVIDERS` barqaror katalog tartibida yurishiga ruxsat bering va faol provayder hisob ma'lumotlariga ega birinchi modelni tanlang.
-4. `callAudioTranscription()` base64/data-URI audioni ko‘p qismli `file` ga o‘zgartiradi yoki DNS pinlash va 25 MB chegarasi bilan faqat umumiy chiquvchi qo‘riqchi orqali masofaviy `audio_url` yuklab oladi. Keyin u faylni va tanlangan modelni `resolveSelfLoopBearer()` bilan autentifikatsiya qilingan mahalliy `/v1/audio/transcriptions` o'z-o'zidan aylanishiga POSTs. Mavjud transkripsiya marshruti oddiy hisob ma'lumotlarini qidirish, cooldown/rate-limit bilan ishlash va provayderni yuborishni amalga oshiradi.
-5. Muvaffaqiyatli qo'ng'iroqlar o'z qismlarini `[Audio N]: <transcript>` bilan almashtiradi. Qo'ng'iroqlar `Promise.allSettled` bilan ishlaydi: individual xatolik asl audio qismini (#4012 shartnomasi) saqlaydi. Har bir qo'ng'iroq muvaffaqiyatsiz bo'lsa va maqsad isbotlangan bo'lsa `supportsAudio === false`, qismlar `[Audio N]: (unavailable — no STT provider connected)` (#8430 shartnoma) bo'ladi. Noma'lum maqsad (`null`) uchun to'liq muvaffaqiyatsizlik natijasi teginmasdan qoladi. Foydalanishga yaroqli STT hisob ma'lumotlariga ega bo'lmagan faqat matn uchun tasdiqlangan maqsad tarmoq qo'ng'irog'ini bermasdan bir xil aniq stubni oladi.
+1. `supportsAudio` ni `getResolvedModelCapabilities()` orqali aniqlang. Aniq
+   provider-registry metama'lumotlari ustun keladi, so'ng statik model
+   metama'lumotlari, keyin sinxronlashtirilgan `modalities_input`. `audio` siz
+   e'lon qilingan kirish ro'yxati `false` deb hisoblanadi; qobiliyat haqida
+   dalil bo'lmasa, `null` qoladi. `false` ham, `null` ham konservativ ko'prikni
+   faollashtiradi, `true` esa uni chetlab o'tadi.
+2. `modalityBridgeAudio*` sozlamalarini aniqlang va umumiy `detectMediaParts()`
+   detektori orqali har bir xabardan kesish mumkin bo'lgan yuqori darajadagi
+   audio qismlarni ajratib oling. Qo'llab-quvvatlanadigan uzatish (wire)
+   shakllari — OpenAI `input_audio`, `audio_url` va
+   `source.media_type: "audio/*"`. Ichma-ich joylashgan audio marshrutlash
+   uchun aniqlanadi, lekin splice yo'li orqali o'chirilmaydi. Ish
+   `modalityBridgeAudioMaxClips` bilan cheklangan; keyingi qismlar
+   o'zgarmaydi.
+3. Sozlangan `provider/model` ga amal qiling, aks holda
+   `selectAudioBridgeModel()` ga `AUDIO_TRANSCRIPTION_PROVIDERS` ni barqaror
+   katalog tartibida kezish va foydalanish mumkin bo'lgan faol provayder hisob
+   ma'lumotiga ega birinchi modelni tanlash imkonini bering.
+4. `callAudioTranscription()` base64/data-URI audioni multipart `file` ga
+   aylantiradi yoki masofaviy `audio_url` ni DNS pinning va 25 MB chegarasi
+   bilan mavjud faqat-ommaviy chiquvchi himoyachi (outbound guard) orqali
+   yuklab oladi. Keyin fayl va tanlangan modelni `resolveSelfLoopBearer()`
+   bilan autentifikatsiya qilingan mahalliy `/v1/audio/transcriptions`
+   self-loop qo'ng'irog'iga POST qiladi. Mavjud transkripsiya marshruti oddiy
+   hisob ma'lumotlarini qidirish, cooldown/rate-limit boshqaruvi va
+   provayderga yo'naltirishni bajaradi.
+5. Muvaffaqiyatli qo'ng'iroqlar o'z qismlarini `[Audio N]: <transcript>` bilan
+   almashtiradi. Qo'ng'iroqlar `Promise.allSettled` bilan bajariladi: alohida
+   xato asl audio qismni saqlab qoladi (#4012 kontrakti). Agar barcha
+   qo'ng'iroqlar muvaffaqiyatsiz bo'lsa va maqsadning `supportsAudio === false`
+   ekanligi isbotlangan bo'lsa, qismlar
+   `[Audio N]: (unavailable — no STT provider connected)` ga aylanadi
+   (#8430 kontrakti). Noma'lum maqsad (`null`) uchun to'liq muvaffaqiyatsiz
+   natija o'zgarmaydi. Foydalanish mumkin bo'lgan STT hisob ma'lumotisiz
+   isbotlangan faqat-matn maqsad tarmoq qo'ng'irog'ini amalga oshirmasdan
+   xuddi shu aniq stubni oladi.
 
-Muvaffaqiyatli transkriptlar jarayon bo'yicha Modality Bridge LRU/TTL keshidan foydalanadi. Kalit audio mos yozuvlar, barqaror `audio-transcription` operatsiya yorlig'i va tanlangan STT modelini birlashtiradi; muvaffaqiyatsizliklar hech qachon keshda saqlanmaydi. Audio urinishlar umumiy `bridged`, `cacheHits`, `failures` va `lastUsedAt` hisoblagichlarini yangilaydi. O'zgartirilgan javoblar `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` olib yuradi; tegmagan so'rovlar Audio Bridge segmentini olmaydi.
+Muvaffaqiyatli transkriptlar butun jarayon bo'ylab Modality Bridge LRU/TTL
+keshidan foydalanadi. Kalit audio havolasi, barqaror `audio-transcription`
+operatsiya yorlig'i va tanlangan STT modelini birlashtiradi; xatolar hech
+qachon keshlanmaydi. Audio urinishlar umumiy `bridged`, `cacheHits`,
+`failures` va `lastUsedAt` hisoblagichlarini yangilaydi. O'zgartirilgan
+javoblar
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` ni olib
+yuradi; o'zgartirilmagan so'rovlar Audio Bridge segmentini olmaydi.
 
-Ish vaqti sozlamalari JB tomonidan qo'llab-quvvatlanadi va Zod tomonidan tasdiqlangan:
+Ish vaqti (runtime) sozlamalari ma'lumotlar bazasida saqlanadi va Zod bilan
+tekshiriladi:
 
-| Kalit                         | Standart | Diapazon              |
-| ----------------------------- | -------- | --------------------- |
-| `modalityBridgeAudioEnabled`  | `true`   | —                     |
-| `modalityBridgeAudioModel`    | `""`     | Avtomatik yoki STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000           |
-| `modalityBridgeAudioMaxClips` | `3`      | 1–10                  |
+| Kalit                         | Standart | Oraliq           |
+| ----------------------------- | -------- | ---------------- |
+| `modalityBridgeAudioEnabled`  | `true`   | —                |
+| `modalityBridgeAudioModel`    | `""`     | Avto yoki STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000      |
+| `modalityBridgeAudioMaxClips` | `3`      | 1–10             |
 
-Umumiy kesh `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` va `modalityBridgeCacheMaxEntries` tomonidan boshqariladi.
+Umumiy kesh `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` va
+`modalityBridgeCacheMaxEntries` orqali boshqariladi.
 
 ### Video ko'prigi (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -209,72 +250,97 @@ Ish vaqti sozlamalari JB tomonidan qo'llab-quvvatlanadi va Zod tomonidan tasdiql
 
 ### PII Masker (`piiMasker.ts`)
 
-Davom etadi** ikkalasi ham** bosqichlari.
+Davom etadi **ikkalasi ham** bosqichlari.
 
-- **`preCall`** foydali yukni klonlaydi, `system`, `messages`, `input` va `prompt` (jumladan, oddiy string elementlari) boʻylab yuradi va `processPII()` ( `@/shared/utils/inputSanitizer` dan) `content`/`text` maydonlariga qoʻllaydi. Qachon `PII_REDACTION_ENABLED=true`, aniqlangan PII chiquvchi foydali yukda tahrirlanadi. Bu `INPUT_SANITIZER_MODE` dan mustaqil (faqat tezkor kiritish siyosatini boshqaradi). Qayta tiklash o'chirilgan bo'lsa, qo'ng'iroq kontentni qayta yozmasdan aniqlashni qayd qiladi.
+- **`preCall`** foydali yukni klonlaydi, `system`, `messages`, `input` va `prompt` (shu jumladan oddiy qator elementlari) yuradi va `content`/`text` qatorlariga `processPII()` ( `@/shared/utils/inputSanitizer` dan) qo'llaniladi. Qachon `PII_REDACTION_ENABLED=true`, aniqlangan PII chiquvchi foydali yukda tahrirlanadi. Bu `INPUT_SANITIZER_MODE` dan mustaqil (faqat tezkor in'ektsiya siyosatini boshqaradi). Qayta tiklash o'chirilgan bo'lsa, qo'ng'iroq kontentni qayta yozmasdan aniqlashni qayd qiladi.
 - **`postCall`** javobni chuqur klonlaydi, `sanitizePIIResponse()` va Responses-API shaklidagi niqobni ishga tushiradi (`maskResponsesOutput` — `output_text` va `output[].content[].text` ni qamrab oladi). Agar biron bir tahrir sodir bo'lsa, o'zgartirilgan javob asl nusxani almashtiradi.
 
 Qo'riqchi hech qachon to'sib qo'ymaydi; u faqat izoh beradi (`meta.detections`, `meta.redacted`) yoki qayta yozadi.
 
 #### Har bir turdagi tanlash, maxsus naqshlar va aniqlash hisoblagichlari
 
-**Boshqaruv paneli → Parametrlari → Xavfsizlik → PII maskalanishi** niqoblangan _nimani tanlaydi. U niqoblashni yoqmaydi: bu hali ham `PII_REDACTION_ENABLED` (so'rov) va `PII_RESPONSE_SANITIZATION` (javob + SSE), ikkalasi ham sukut bo'yicha o'chirilgan.
+**Boshqaruv paneli → sozlamalari → Security → PII maskalanishi** niqoblangan _nimani tanlaydi. U niqoblashni yoqmaydi: bu hali ham `PII_REDACTION_ENABLED` (so'rov) va `PII_RESPONSE_SANITIZATION` (javob + SSE), ikkalasi ham sukut bo'yicha o'chirilgan.
 
-- **Har bir tur uchun tanlov** — o'rnatilgan identifikatorlar `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) da keltirilgan. Oʻrnatilmagan har bir tur (ushbu sozlama mavjud boʻlgunga qadar harakat) degan maʼnoni anglatadi. So‘rov mexanizmining `ssn_us` namunasi `ssn` ga mos keladi. Shablonlar (Minimal, Standart, Moliyaviy, Braziliya, USA, GDPR, POPIA, Toʻliq) faqat UI dagi belgilash katakchalarini toʻldiradi.
-- **GDPR va POPIA identifikatorlari** — EU va Janubiy Afrika shaxsiy identifikatorlarini qamrab oluvchi o'n ikkita o'rnatilgan identifikator (quyidagi jadval). Ularning regexlari, validatorlari va yurisdiktsiya teglari bitta jadvalda, `src/shared/utils/piiPatterns.ts` joylashgan bo'lib, ularni javobni tozalash vositasi (`src/lib/piiSanitizer.ts`) va so'rovni niqoblovchi (`src/shared/utils/inputSanitizer.ts`) iste'mol qiladi. Moslik faqat uning validatori uni qabul qilgan taqdirdagina tahrir qilinadi; raqamlarning yalang'och yugurishi hech qachon etarli emas. Ushbu identifikatorlar mavjud bo'lgunga qadar toraytirilgan tanlovni saqlagan operator yangi identifikatorlar belgilanmaguncha o'zining xatti-harakatlarini saqlab qoladi.
-- **Maxsus naqshlar** — 20 tagacha regex yoki joker belgilar (`*` = 64 ta boʻsh boʻlmagan belgilar, `?` = bitta). Matchlar `[CUSTOM_REDACTED]` aylanadi. Har bir naqsh `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) dan o'tadi: ko'pi bilan 500 ta belgidan iborat, `g i m s u` bilan cheklangan bayroqlar kompilyatsiya qilinishi kerak, `safe-regex` (halokatli orqaga qaytish) dan o'tishi kerak va bo'sh satr yoki redaktsiya to'ldiruvchisiga mos kelmasligi kerak. Muvaffaqiyatsiz bo'lgan naqsh saqlangan va sinovdan o'tkazilganda rad etiladi va bajarilmagan saqlangan qator kompilyatsiya qilish o'rniga ish vaqtida o'tkazib yuboriladi. Maxsus naqshlar faqat niqoblash yoqilganda ishlaydi.
-- **Aniqlash hisoblagichlari** — har bir turdagi hisoblar (hech qachon mos kelmaydigan qiymatlar), xotirada saqlanadi va qayta ishga tushirilganda qayta o'rnatiladi (`src/lib/pii/piiDetectionStats.ts`). Ular faqat niqoblash yoqilganda ortadi.
+- **Har bir tur uchun tanlov** — o'rnatilgan identifikatorlar `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) da ro'yxatga olingan. Oʻrnatilmagan har bir tur (ushbu sozlama mavjud boʻlgunga qadar harakat) degan maʼnoni anglatadi. So‘rov mexanizmining `ssn_us` namunasi `ssn` ga mos keladi. Shablonlar (Minimal, Standart, Moliyaviy, Braziliya, USA, GDPR, POPIA, To'liq) faqat UI dagi katakchalarni to'ldiradi.
+- **GDPR va POPIA identifikatorlari** EU va Janubiy Afrika shaxsiy identifikatorlarini qamrab oluvchi o'n ikkita o'rnatilgan — identifikatori (quyidagi jadval). Ularning regexlari, validatorlari va yurisdiktsiya teglari bitta jadvalda, `src/shared/utils/piiPatterns.ts` joylashgan bo'lib, ularni javobni tozalash vositasi (`src/lib/piiSanitizer.ts`) va so'rovni niqoblovchi (`src/shared/utils/inputSanitizer.ts`) iste'mol qiladi. Moslik faqat uning validatori uni qabul qilgan taqdirdagina tahrir qilinadi; raqamlarning yalang'och yugurishi hech qachon etarli emas. Ushbu identifikatorlar mavjud bo'lgunga qadar toraytirilgan tanlovni saqlagan operator yangi identifikatorlar belgilanmaguncha o'zining xatti-harakatlarini saqlab qoladi.
+- **Maxsus naqshlar** — 20 tagacha regex yoki joker belgilar (`*` = 64 ta boʻsh boʻlmagan belgilar, `?` = bitta). O'yinlar `[CUSTOM_REDACTED]` aylanadi. Har bir naqsh `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) orqali o'tadi: ko'pi bilan 500 ta belgidan iborat bo'lib, `g i m s u` bilan cheklangan bayroqlar kompilyatsiya qilinishi kerak, `safe-regex` (halokatli orqaga qaytish) dan o'tishi kerak va bo'sh satr yoki redaktsiya to'ldiruvchisiga mos kelmasligi kerak. Muvaffaqiyatsiz bo'lgan naqsh saqlangan va sinovdan o'tkazilganda rad etiladi va bajarilmagan saqlangan qator kompilyatsiya qilish o'rniga ish vaqtida o'tkazib yuboriladi. Maxsus naqshlar faqat niqoblash yoqilganda ishlaydi.
+- **Aniqlash hisoblagichlari** Har bir turdagi — hisoblari (hech qachon mos kelmaydigan qiymatlar), xotirada saqlanadi va qayta ishga tushirilganda qayta o'rnatiladi (`src/lib/pii/piiDetectionStats.ts`). Ular faqat niqoblash yoqilganda ortadi.
 
-Sozlamalar `key_value` jadvalida (nomlar maydoni `pii_settings`, `src/lib/db/piiSettings.ts`) yashaydi va 1 s kesh orqali o'qiladi. API:
+Sozlamalar `key_value` jadvalida (nom maydoni `pii_settings`, `src/lib/db/piiSettings.ts`) yashaydi va 1 s kesh orqali o'qiladi. API:
 
-| Usul   | Yo'l                     | Maqsad                                                                                 |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Bayroq holati, `enabledTypes`, `customPatterns`, aniqlash hisoblagichlari              |
-| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = all) and/or `customPatterns` ni almashtiring                  |
-| `POST` | `/api/settings/pii/test` | Bir namunani ko'pi bilan 8 KB bo'lgan namunaga qarshi quriting; hech narsa saqlanmaydi |
+| Metod  | Yo'l                     | Maqsad                                                                                  |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Bayroq holati, `enabledTypes`, `customPatterns`, aniqlash hisoblagichlari               |
+| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = hammasi) va/yoki `customPatterns` ni almashtirish              |
+| `POST` | `/api/settings/pii/test` | Bitta andozani ko'pi bilan 8 KB lik namunada sinovdan o'tkazish; hech narsa saqlanmaydi |
 
-Uchalasi ham boshqaruv authini talab qiladi va tanani Zod (`src/shared/validation/schemas/piiSettings.ts`) bilan tasdiqlaydi. Tizimga kirish oʻchirilgan (`requireLogin=false`) bilan `GET` va test yakuniy nuqtasi ochiq, lekin `PUT` hali ham asboblar paneli seansiga, `manage` -scope API kalitiga, yozish doirasi yoki undan yuqoriroq `oma_` kirish tokeniga yoki CLI tokeniga yoki orqaga qaytishdan yuborilgan ichki xizmat tokeniga muhtoj.
+Uchalasi ham boshqaruv autentifikatsiyasini talab qiladi va Zod (`src/shared/validation/schemas/piiSettings.ts`) bilan tanani tasdiqlaydi. Tizimga kirish oʻchirilgan (`requireLogin=false`) bilan `GET` va sinovning yakuniy nuqtasi ochiq, lekin `PUT` hali ham asboblar paneli seansiga, `manage` -scope API kalitiga, yozish doirasi yoki undan yuqoriroq `oma_` kirish tokeniga yoki orqaga qaytishdan yuborilgan CLI tokeniga yoki ichki xizmat tokeniga muhtoj.
 
 #### GDPR (EU) va POPIA (Janubiy Afrika) identifikatorlari
 
-| Id                  | Identifikator                        | Tasdiqlash                                                                                |
-| ------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                                 | Ma'lum mamlakat, o'sha mamlakat uchun aniq uzunlik, ISO 13616 MOD-97-10                   |
-| `eu_vat`            | EU VAT raqami                        | Ma'lum a'zo davlat prefiksi va bu shtatning raqam formati ( VIES qidiruvi yo'q)           |
-| `es_dni_nie`        | Ispan DNI / NIE                      | Nazorat xati (mod 23 qiymati); NIE `X/Y/Z` + 7 ta raqam                                   |
-| `it_codice_fiscale` | Italiya Kodeksi Fiscale              | odd/even pozitsiyasi jadvallaridan nazorat xati                                           |
-| `pl_pesel`          | Polsha PESEL                         | Og'irlangan nazorat summasi va mavjud kodlangan tug'ilgan sana                            |
-| `nl_bsn`            | Gollandiyalik BSN                    | 11-dalil (og'irliklari 9..2, -1)                                                          |
-| `de_steuer_id`      | Germaniya Steuer-ID                  | ISO 7064 Mod 11,10 va raqamlar tuzilishi qoidalari (boshlovchi 0 yo'q)                    |
-| `se_personnummer`   | Shvetsiya xodimi                     | Oxirgi o'nta raqam ustidagi Luhn va tug'ilgan sanasi (10 yoki 12 raqam)                   |
-| `za_id`             | Janubiy Afrika ID raqami             | Barcha 13 ta raqamdan yuqori Luhn, haqiqiy tug'ilgan month/day, fuqarolik raqami 0 yoki 1 |
-| `za_phone`          | Janubiy Afrika telefon               | `+27` / `27` prefiksi yoki bo'sh joy yoki defis bilan yozilgan milliy `0..` shakli        |
-| `za_vat`            | Janubiy Afrika VAT raqami            | `4` bilan boshlangan 10 ta raqam** va** Oldin 48 belgi ichida "VAT" / "BTW"               |
-| `za_tax_ref`        | Janubiy Afrika soliq ma'lumotnomasi. | `0` boshlanadigan 10 ta raqam -`3`, Luhn,** va** Oldin 48 belgi ichida "tax" / "SARS"     |
+| ID                  | Identifikator                 | Tekshirish                                                                       |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `iban`              | IBAN                          | Ma’lum mamlakat, shu mamlakat uchun aniq uzunlik, ISO 13616 MOD-97-10            |
+| `eu_vat`            | YI VAT raqami                 | Ma’lum a’zo mamlakat prefiksi va uning raqam formati (VIES qidiruvi yo‘q)        |
+| `es_dni_nie`        | Ispan DNI / NIE               | Nazorat harfi (qiymat mod 23); NIE — `X/Y/Z` + 7 raqam                           |
+| `it_codice_fiscale` | Italyan Codice Fiscale        | Toq/juft o‘rin jadvallaridan nazorat harfi                                       |
+| `pl_pesel`          | Polsha PESEL                  | Vaznli nazorat yig‘indisi va kodlangan tug‘ilgan oy/kun uchun mantiqli oraliqlar |
+| `nl_bsn`            | Niderland BSN                 | 11-proof tekshiruvi (vaznlar 9..2, -1)                                           |
+| `de_steuer_id`      | Nemis Steuer-ID               | ISO 7064 Mod 11,10 va raqam tuzilishi qoidalari (boshida 0 yo‘q)                 |
+| `se_personnummer`   | Shved personnummer            | Oxirgi o‘n raqamga Luhn va mantiqli tug‘ilgan sana (10 yoki 12 raqam)            |
+| `za_id`             | Janubiy Afrika shaxsiy raqami | Barcha 13 raqamga Luhn, to‘g‘ri tug‘ilgan oy/kun, fuqarolik raqami 0 yoki 1      |
+| `za_phone`          | Janubiy Afrika telefoni       | `+27` / `27` prefiksi yoki bo‘shliq/defisli milliy `0..` shakli                  |
+| `za_vat`            | Janubiy Afrika VAT raqami     | `4` bilan boshlangan 10 raqam **va** oldingi 48 belgida "VAT" / "BTW"            |
+| `za_tax_ref`        | Janubiy Afrika soliq havolasi | `0`-`3` bilan boshlangan 10 raqam, Luhn **va** oldingi 48 belgida "tax" / "SARS" |
 
-Faqat raqamli formatlar buyurtma raqamlari, raqamlar va vaqt belgilari bilan toʻqnashganligi sababli, eng zaiflari (`za_vat`, `za_tax_ref`) kalit soʻzni talab qiladi va oʻn xonali yalangʻoch `0..` raqami Janubiy Afrika telefon raqami sifatida koʻrib chiqilmaydi. Intervalli IBANs (`GB29 NWBK ...`) mos emas. Oqim yo'lida ishora faqat joriy bo'lak ichida qaraladi. Identifikatorlar umumiy telefon naqshlaridan oldinda joylashgan, shuning uchun tasdiqlangan identifikator o'z o'rnini egallaydi (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` va `popia` shablonlari mos ravishda EU va Janubiy Afrika identifikatorlarini tanlaydi. Maskaning o'zi qo'shilib qoladi (Qattiq qoida #20): bu erda hech narsa standart xususiyat bayrog'ini o'zgartirmaydi.
+Faqat raqamli formatlar buyurtma raqamlari, tuzilish raqamlari va vaqt belgilari bilan to'qnashganligi sababli, eng zaiflari (`za_vat`, `za_tax_ref`) kalit so'z belgisiga muhtoj va yalang'och o'n xonali `0..` raqami Janubiy Afrika telefon raqami sifatida ko'rib chiqilmaydi. Intervalli IBANs (`GB29 NWBK ...`) mos kelmaydi. Oqim yo'lida ishora faqat joriy bo'lak ichida qaraladi. Identifikatorlar umumiy telefon namunalaridan oldinda joylashgan, shuning uchun tasdiqlangan identifikator o'zining o'rnini egallaydi (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` va `popia` shablonlari mos ravishda EU va Janubiy Afrika identifikatorlarini tanlaydi. Maskaning o'zi qo'shilib qoladi (Qattiq qoida #20): bu erda hech narsa standart xususiyat bayrog'ini o'zgartirmaydi.
 
-### Tez in'ektsiya (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Foydalanuvchi tomonidan taqdim etilgan kontentdagi raqib tuzilmalarini aniqlaydi va sozlangan siyosatni amalga oshiradi. Xulq-atvor atrof-muhit o'zgaruvchilari va konstruktor variantlari tomonidan boshqariladi:
+Foydalanuvchi tomonidan taqdim etilgan kontentdagi zararli strukturalarni
+aniqlaydi va sozlangan siyosatni joriy etadi. Xatti-harakat atrof-muhit
+o'zgaruvchilari va konstruktor opsiyalari orqali boshqariladi:
 
-| Sozlama        | Env var                                                                                                    | Standart | Effekt                                                                                                                                                                                                                            |
-| -------------- | ---------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Yoqilgan       | `INPUT_SANITIZER_ENABLED`                                                                                  | `true`   | Qachon `false`, himoya panjarasi qisqa tutashuvi.                                                                                                                                                                                 |
-| Rejim          | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                            | `warn`   | Injection siyosati: `block`, `warn`, yoki `log`. (`redact` back-compat uchun qabul qilinadi, lekin shunday qiladi** emas** chiziqli in'ektsiya matni; PII so'rovini qayta yozish `PII_REDACTION_ENABLED` tomonidan boshqariladi.) |
-| Blok chegarasi | `blockThreshold` varianti / `INPUT_SANITIZER_BLOCK_THRESHOLD` (taxallus `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Bloklash uchun zarur bo'lgan minimal jiddiylik. O'rta sukut bo'yicha faqat kuzatiladi.                                                                                                                                            |
+| Sozlama            | Env o'zgaruvchisi                                                                                       | Sukut bo'yicha | Ta'sir                                                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Yoqilgan           | `INPUT_SANITIZER_ENABLED`                                                                               | `true`         | `false` bo'lganda, guardrail qisqa tutashadi (short-circuit).                                                                                                                                                 |
+| Rejim              | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                         | `warn`         | Injection siyosati: `block`, `warn` yoki `log`. (`redact` orqaga moslik uchun qabul qilinadi, lekin injection matnini olib tashlamaydi; so'rov PII qayta yozuvi `PII_REDACTION_ENABLED` orqali boshqariladi.) |
+| Bloklash chegarasi | `blockThreshold` opsiyasi / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`         | Bloklash uchun talab qilinadigan minimal jiddiylik darajasi. Medium sukut bo'yicha faqat kuzatish uchun (observe-only).                                                                                       |
 
-**Rejim ustunligi** (`getMode`): qo'ng'iroq qiluvchi `options.mode` → `INJECTION_GUARD_MODE`**DB xususiyat-bayroqni bekor qilish** (Boshqaruv paneli → sozlamalari → Xususiyatlar bayroqlari) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Shuning uchun asboblar panelini bekor qilish env varslari ustidan g'alaba qozonadi, shuning uchun Feature Flags UI ishlaydigan qo'riqchini jonli ravishda boshqaradi (qayta ishga tushirilmaydi). DB o'qish xatolikka yo'l qo'ymaydi: agar u xato qilsa, qo'riqchi envga asoslangan xatti-harakatga qaytadi va hech qanday bekor o'rnatilmaganda, xatti-harakatlar faqat env ruxsati bilan bir xil bo'ladi.
+**Rejim ustuvorligi** (`getMode`): chaqiruvchi `options.mode` →
+`INJECTION_GUARD_MODE` **DB feature-flag bekor qilishi (override)** (Dashboard →
+Settings → Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE`
+env → `warn`. Demak, dashboard bekor qilishi env o'zgaruvchilaridan ustun
+keladi, shuning uchun Feature Flags UI ishlayotgan guardni jonli boshqaradi
+(qayta ishga tushirishsiz). DB o'qish xavfsiz ishlamay qolganda ham to'g'ri
+ishlaydi (fail-safe): agar xatolik yuz bersa, guard env-ga asoslangan
+xatti-harakatga qaytadi va hech qanday bekor qilish o'rnatilmaganida xatti-harakat
+faqat env orqali aniqlanish bilan bir xil bo'ladi.
 
 Aniqlash manbalari:
 
-1. `@/shared/utils/inputSanitizer` dan `sanitizeRequest()` (quvurning boshqa joylarida ishlatiladigan umumiy detektorlar to'plami).
-2. Oʻrnatilgan `DEFAULT_GUARD_PATTERNS` (hozirda `system_override_inline` va `markdown_system_block`, ikkalasi ham `high` jiddiyligi).
-3. Ixtiyoriy `customPatterns` konstruktor variantlari (satrlar, regex yoki `{ name, pattern, severity }` yozuvlari) orqali o'tkaziladi.
+1. `@/shared/utils/inputSanitizer` dan `sanitizeRequest()` (pipeline ning
+   boshqa joylarida ham ishlatiladigan umumiy detektorlar to'plami).
+2. O'rnatilgan `DEFAULT_GUARD_PATTERNS` (hozircha `system_override_inline` va
+   `markdown_system_block`, ikkalasi ham `high` jiddiylikda).
+3. Konstruktor opsiyalari orqali uzatilgan ixtiyoriy `customPatterns`
+   (stringlar, regexlar yoki `{ name, pattern, severity }` yozuvlari).
 
-Qachon `mode === "block"`** va** kamida bitta aniqlash jiddiylik chegarasiga javob beradi, `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }` qaytaradi. `warn`/`log` rejimlarida qo'riqchi ro'yxatga oladi, lekin qo'ng'iroq qilishga ruxsat beradi. Umumiy yordamchi `evaluatePromptInjection()` shuningdek, ro'yxatga olish kitobidan o'tmasdan takliflarni baholashi kerak bo'lgan qo'ng'iroq qiluvchilar uchun eksport qilinadi.
+`mode === "block"` **bo'lganda** va kamida bitta aniqlash jiddiylik
+chegarasiga yetganda, `preCall` `{ block: true, message: "Request rejected:
+suspicious content detected" }` qaytaradi. `warn`/`log` rejimlarida guardrail
+jurnalga yozadi, lekin chaqiruvga ruxsat beradi. Umumiy yordamchi
+`evaluatePromptInjection()` ham eksport qilinadi — u reyestr orqali o'tmasdan
+promptlarni baholashi kerak bo'lgan chaqiruvchilar uchun mo'ljallangan.
 
-**Skanerlangan (v3.8.20):** detektor faqat tekshiradi** birinchi 16 KB** `src/shared/utils/inputSanitizer.ts` ichida birlashtirilgan tezkor matn — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bayt) . Naqshli siklni ishga tushirishdan oldin ham `detectInjection()`, ham `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)`. Injection direktivalari kirishning yuqori qismiga yaqin joylashadi, shuning uchun bu aniqlanishni zaiflashtirmasdan ko'p yuz KB foydali yuklarda regex CPU/GC qamrab oladi (qarang #3932, #4041).
+**Skanerlash chegarasi (v3.8.20):** detektor birlashtirilgan prompt matnining
+faqat **dastlabki 16 KB** qismini tekshiradi — `src/shared/utils/inputSanitizer.ts`
+faylidagi `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bayt).
+`detectInjection()` ham, `evaluatePromptInjection()` ham andoza siklini ishga
+tushirishdan oldin `slice(0, MAX_INJECTION_SCAN_BYTES)` qiladi. Injection
+direktivalari kiritmaning boshiga yaqin joylashadi, shuning uchun bu
+aniqlashni zaiflashtirmasdan bir necha yuz KB'lik yuklamalarda regex CPU/GC
+sarfi cheklaydi (qarang: #3932, #4041).
 
 ### Hisob ma'lumotlarini maskalovchi (`credentialMasker.ts`)
 

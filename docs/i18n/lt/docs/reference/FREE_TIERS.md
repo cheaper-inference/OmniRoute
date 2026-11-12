@@ -128,7 +128,7 @@ Dauguma šioje srityje nurodomų „nemokamų žetonų per mėnesį“ skaičių
 
 - **Kiekvienas bendras fondas skaičiuojamas vieną kartą.** Nemokamame „Mistral“ plane organizacijai suteikiamas vienas 1B/mėn. limitas; jo nurodymas prie penkių modelių nepaverčia jo 5B. Susumavus pagal modelius, mūsų pačių kataloge būtų nurodyta **~7.4B** (perskaičiuota 2026-09-03; šis skaičius nėra tikrinamas CI — išmatuokite jį iš naujo kaskart pasikeitus katalogui), tačiau antraštėje nurodyta **~1.47B**, nes būtent tiek iš tikrųjų galima panaudoti turint po vieną kiekvieno paslaugų teikėjo paskyrą.
 - **Dienos limitai konvertuojami, spartos limitai — ne.** Dokumentuotas žetonų per dieną limitas tampa `× 30`; dokumentuotas užklausų per dieną limitas tampa `RPD × ~800 tokens × 30`; jei paslaugų teikėjas skelbia tik užklausų per minutę skaičių, mėnesio skaičius **nenurodomas**, o limitas pažymimas kaip _neribotas_ ir niekada nepridedamas prie sumos. Spartos limito dauginimas iš 24/7 yra skaičių išpūtimas, kurio atsisakome.
-- **Kvotos, kurioms gauti reikia regioninės tapatybės patikros, rodomos atskirai** (`+~6M po regioninės tapatybės patvirtinimo`), nes dauguma skaitytojų negali jomis naudotis.
+- **Kvotos, kurioms gauti reikia regioninės tapatybės patikros, rodomos atskirai** (`+~6M behind regional identity verification`), nes dauguma skaitytojų negali jomis naudotis.
 - **Registracijos kreditai galioja tik pirmąjį mėnesį** ir pateikiami kaip atskiras antrasis skaičius, niekada neįtraukiant jų į nuolatinį skaičių.
 - **Skaičių užtikrina CI.** `npm run check:docs-counts` iš naujo apskaičiuoja bendras sumas pagal katalogą ir sustabdo komponavimą, kai šis failas, README arba biudžeto kortelė nuo jų nukrypsta.
 

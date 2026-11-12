@@ -4,154 +4,119 @@
 
 ---
 
-OmniRoute 透過單一且集中管理的允許清單，控制哪些**瀏覽器來源**可以讀取跨來源回應。此模型**預設為封閉式（fail-closed）**：在您明確允許某個來源之前，任何來源都不會獲准。本頁說明允許清單的解析方式、`CORS_ALLOW_ALL=true` 實際上會暴露哪些內容（以及更重要的是，**不會**暴露哪些內容）、如何安全地設定開發與正式環境，以及萬用字元生效時儀表板顯示的執行階段警告。
+OmniRoute控制哪些**瀏覽器起源**可以從單一集中的白名單中讀取跨來源回應。模型是**預設失敗關閉**：在您選擇加入之前，不允許任何來源。本頁記錄了白名單如何解析、 `CORS_ALLOW_ALL=true`實際公開的內容（以及重要的是，它的作用）**不是**）、如何安全地設定開發與生產，以及當通配符生效時儀表板顯示的運行時警告。
 
-**權威來源：** `src/server/cors/origins.ts`（`resolveAllowedOrigin`、`applyCorsHeaders`、`getCorsStatus`）。允許清單只會在中介軟體（`src/server/authz/pipeline.ts`）中套用一次——各路由處理常式本身不會設定 `Access-Control-Allow-Origin`。
+**事實來源：** `src/server/cors/origins.ts` （`resolveAllowedOrigin`、 `applyCorsHeaders`、 `getCorsStatus`）。允許清單應用一次，在中間件 (`src/server/authz/pipeline.ts`) 中， —每路由處理程序本身不會設定`Access-Control-Allow-Origin` 。
 
-## 如何解析來源
+## 原點是如何解析的
 
-對於每個請求，中介軟體會依照下列順序計算 `Access-Control-Allow-Origin` 值：
+對於每個請求，中間件按以下順序計算`Access-Control-Allow-Origin`值：
 
-1. **`CORS_ALLOW_ALL=true`**（或舊版的 `CORS_ORIGIN=*`）→ 回傳呼叫端的 `Origin`（若沒有 `Origin` 標頭，則回傳 `*`），並設定 `Vary: Origin`，以確保快取正確運作。同一個 `applyCorsHeaders()` 關卡也會在使用權杖驗證的 `/v1*`/`/v1beta*` 介面上，為每個包含主體的 2xx 回應附加 `Vary: Accept-Encoding`（`relaxForTokenAuth`、RFC 9110 §12.5.5、issue #6737），讓下游／共用快取能正確區分壓縮與未壓縮的變體。
-2. 否則，請求的 `Origin` 會經過正規化（轉為小寫並移除尾端斜線），再與**合併後的允許清單**比對：
-   - 環境變數 **`CORS_ALLOWED_ORIGINS`**——以逗號分隔的清單，以及
-   - 執行階段的 **`corsOrigins`** 設定（儀表板 → 安全性 → _CORS 允許的來源_），由 `src/lib/config/runtimeSettings.ts` 透過 `setRuntimeAllowedOrigins()` 注入。
-3. 沒有相符項目 → **不會發出 `Access-Control-Allow-Origin` 標頭**。瀏覽器會封鎖跨來源讀取。這就是預期的預設封閉行為。
+1. **`CORS_ALLOW_ALL=true`** （或傳統的`CORS_ORIGIN=*`） →回顯呼叫者的`Origin` （或`*` ，當沒有`Origin`標頭時），使用`Vary: Origin`以便快取保持正確。相同的`applyCorsHeaders()`阻塞點也將`Vary: Accept-Encoding`附加到令牌驗證的`/v1*`/`/v1beta*`表面上的每個 2xx-with-body 回應（`relaxForTokenAuth`， RFC 9110 §12.5.5，問題#6737），因此downstream/shared快取可以正確區分壓縮與未壓縮變體。
+2. 否則，請求`Origin`會被規範化（小寫，刪除尾部斜線）並與**合併白名單**:
+   - 環境**`CORS_ALLOWED_ORIGINS`** —逗號分隔列表，以及
+   - 運行時**`corsOrigins`**設定（儀表板→安全→ _CORS 允許來源_），透過`setRuntimeAllowedOrigins()`從`src/lib/config/runtimeSettings.ts`注入。
+3. 沒有匹配→**沒有發出`Access-Control-Allow-Origin`標頭**。瀏覽器阻止跨域讀取。這是預期的故障關閉預設值。
 
-| 環境變數               | 含義                                                                   |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | 要允許的確切來源 CSV 清單（建議使用）。                                |
-| `CORS_ALLOW_ALL`       | `true`/`1` → 回傳任何來源（萬用字元）。僅限開發環境。                  |
-| `CORS_ORIGIN`          | 舊版設定。`*` 的行為與 `CORS_ALLOW_ALL` 相同；單一值則會加入允許清單。 |
+| 環境變數               | 意義                                                             |
+| ---------------------- | ---------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | CSV的確切來源允許（建議）。                                      |
+| `CORS_ALLOW_ALL`       | `true`/`1` →回顯任何來源（通配符）。僅限開發。                   |
+| `CORS_ORIGIN`          | 遺產。 `*`行為類似於`CORS_ALLOW_ALL`；將單一值加入到允許清單中。 |
 
-## 威脅模型——`CORS_ALLOW_ALL=true` 實際上會暴露什麼
+## `CORS_ALLOW_ALL=true`真正暴露的威脅模型—
 
-一般性的 OWASP 警告（「萬用字元 CORS = 任何網站都能呼叫您的 API」）值得嚴肅看待，但 OmniRoute 的暴露範圍**比一般情況更窄**，原因在於一項具體的實作事實：
+通用的OWASP警告（「通配符CORS =任何站點都可以呼叫你的API」）值得認真對待，但OmniRoute的曝光是**比一般情況更窄**，因為一個具體的實施事實：
 
-> **中央 `applyCorsHeaders()` 絕不會發出
-> `Access-Control-Allow-Credentials`。** 除非伺服器傳送
-> `Access-Control-Allow-Credentials: true`，否則瀏覽器不會向跨來源網站提供
-> _包含認證資訊_（帶有 Cookie）的跨來源回應。OmniRoute 的共用 CORS 路徑絕不會
-> 這麼做。
+> **中央`applyCorsHeaders()`從不發出`Access-Control-Allow-Credentials`。**除非伺服器發送`Access-Control-Allow-Credentials: true`，否則瀏覽器不會公開_credentialed_（帶有 cookie 的）跨網域回應。 OmniRoute的共享CORS路徑永遠不會。
 
-即使設定了 `CORS_ALLOW_ALL=true`，這對各介面的影響如下：
+即使使用`CORS_ALLOW_ALL=true`，這對每個表面意味著什麼：
 
-| 介面                             | 驗證機制                 | 萬用字元 CORS 的影響                                                                                                                                                                                                                                              |
-| -------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 儀表板／管理 `/api/*`            | Cookie 工作階段          | 來源會被回傳，但因為**沒有 `Allow-Credentials`**，瀏覽器會**封鎖**包含認證資訊的讀取。惡意跨來源網站**無法讀取**您已驗證的儀表板回應，工作階段 Cookie 也不會遭到暴露。                                                                                            |
-| 用戶端 API `/v1/*`、`/v1beta/*`  | Bearer／`x-api-key` 標頭 | **依設計**本來就較寬鬆（`relaxForTokenAuth`）：瀏覽器絕不會自動附加 `Authorization`/`x-api-key`，因此攻擊者的頁面無法提供您的金鑰。只有在所提供的金鑰通過驗證時才會回傳來源；匿名回應（`REQUIRE_API_KEY=false`）仍維持允許清單。`CORS_ALLOW_ALL` 不會擴大此範圍。 |
-| 公開唯讀介面（`/api/health` 等） | 無                       | 不含敏感資訊；使用萬用字元不會造成危害。                                                                                                                                                                                                                          |
+| 表面                           | 認證機制              | 通配符CORS的作用                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------ | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 儀表板 / MANAGEMENT `/api/*`   | Cookie 會話           | 起源已得到回應，但是**沒有`Allow-Credentials`**瀏覽器**區塊**經過認證的閱讀。惡意跨來源站點**無法閱讀**您經過身份驗證的儀表板回應，且會話 cookie 不會公開。                                                                                                                                                                                                           |
+| 客戶API `/v1/*`, `/v1beta/*`   | 承載/ `x-api-key`標頭 | 已經寬容了**按設計**(`relaxForTokenAuth`)：瀏覽器永遠不會自動附加`Authorization`/`x-api-key`，因此攻擊者的頁面無法提供您的金鑰。寬鬆的回顯需要經過驗證的主題（經過驗證的API金鑰或儀表板會話），而不僅僅是憑證標頭，並且從不包含`Access-Control-Allow-Credentials`。匿名回應 (`REQUIRE_API_KEY=false`) 使用配置的來源允許列表，包括明確`CORS_ALLOW_ALL=true`選擇加入。 |
+| 公共只讀（`/api/health`，...） | 沒有任何              | 不敏感；通配符是無害的。                                                                                                                                                                                                                                                                                                                                              |
 
-因此，`CORS_ALLOW_ALL=true` 的**剩餘**暴露範圍僅限於：(a) 對原本就不需要驗證的資料進行未攜帶認證資訊的跨來源**讀取**，以及 (b) 讓管理路由的 CORS **預檢請求通過**——但這些路由仍需要跨來源頁面無法提供的驗證資訊。在共用 CORS 路徑上，這**並非**工作階段劫持或認證資訊竊取的攻擊向量。
+所以**殘差**`CORS_ALLOW_ALL=true`的暴露僅限於： (a) 非認證的跨源**讀**已經未經驗證的數據，以及 (b) 讓CORS**飛行前通行證**在管理路由—上，它仍然需要跨來源頁面無法提供的身份驗證。這是**不是**共享CORS路徑上的會話劫持或憑證盜竊向量。
 
-### 一個真正的例外——`/api/v1/agents/`
+### 正品異常— `/api/v1/agents/`
 
-Cloud-Agent 路由（`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`）會設定其**自己的** CORS 標頭（`src/lib/cloudAgent/api.ts`、`getCloudAgentCorsHeaders`），而且**確實會**同時發出 `Access-Control-Allow-Origin: <origin>|*` 與 `Access-Control-Allow-Credentials: true`。這是唯一同時存在來源回傳與認證資訊的介面，而且它**獨立於 `CORS_ALLOW_ALL`**。這些路由採用管理驗證（`requireManagementAuth`）；若操作人員將儀表板開放給主機以外的存取，應注意這是唯一允許跨來源讀取含認證資訊回應的地方。將其限縮為明確的允許清單，會與本 CORS 指引分開追蹤。
+雲端代理路由（`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`）設定它們的**自己的**CORS標頭（`src/lib/cloudAgent/api.ts`、 `getCloudAgentCorsHeaders`）和**做**與`Access-Control-Allow-Credentials: true`一起發出`Access-Control-Allow-Origin: <origin>|*` 。這是起源迴聲和憑證共存的單一表面，並且它是**獨立於`CORS_ALLOW_ALL`** 。這些路由經過管理驗證（`requireManagementAuth`）；在脫離主機的情況下公開儀表板的操作員應該意識到，這是回應標頭允許跨域憑證讀取的地方。將其收緊到明確的許可名單與此CORS指南分開進行追蹤。
 
-## 正式環境檢查清單
+## 生產清單
 
-- **切勿在正式環境中設定 `CORS_ALLOW_ALL=true`。** 請維持未設定狀態。
-- 設定**明確的**來源清單——可使用環境變數或「Security」分頁中的欄位：
+- **切勿在生產中設定`CORS_ALLOW_ALL=true` 。**保持其未設定狀態。
+- 設定一個**明確的**原始清單—環境變數或安全性選項卡欄位：
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- 如果 OmniRoute 在反向代理／通道（nginx、Caddy、Cloudflare
-  Tunnel、Tailscale）後方執行，CORS **並非**唯一的控制措施——回送位址路由
-  防護仍會保護可啟動程序的路由（請參閱
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)）。請勿偽造
-  `X-Forwarded-For: 127.0.0.1` 來「修正」403；這會重新引入路由防護原本封鎖的
-  RCE 類別漏洞。
-- 確認執行階段狀態：只要 `CORS_ALLOW_ALL=true` 正在生效，儀表板便會在
-  Dashboard → Security → Authorization Inventory 下方顯示**持續存在的琥珀色橫幅**，
-  而 `/api/settings/authz-inventory` 會傳回可供監控工具輪詢的
-  `cors: { allowAll, allowedOrigins }` 封裝。
+- 如果OmniRoute在反向代理/隧道（nginx、Caddy、 Cloudflare Tunnel、 Tailscale）後面運行，則CORS是**不是**您唯一的控制—環迴路由保護仍然保護能夠產生的路由（請參閱[ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ）。不要偽造`X-Forwarded-For: 127.0.0.1`來「修復」403；重新開啟路由防護關閉的RCE類。
+- 確認運行時狀態：儀表板顯示**持久的琥珀色旗幟**每當`CORS_ALLOW_ALL=true`處於活動狀態時， `/api/settings/authz-inventory`都會傳回`cors: { allowAll, allowedOrigins }`信封監控工具可以輪詢的情況下，在儀表板→安全→授權清單下。
 
-## 開發便利性——允許特定的本機來源
+## 開發便利性—允許特定的本地起源
 
-即使在開發環境中，通常也不需要萬用字元。只允許實際使用的開發伺服器：
+即使在開發中，你也很少需要通配符。僅允許您使用的開發伺服器：
 
 ```bash
-# 呼叫本機 OmniRoute 的 Vite (5173) + Next.js (3000) 開發伺服器
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-來源比對不區分大小寫，且會忽略結尾斜線，因此
-`http://localhost:3000` 與 `http://localhost:3000/` 視為相同。相同的 CSV
-也可在執行階段透過 **Dashboard → Security → CORS Allowed Origins** 設定，無須
-重新啟動。
+來源匹配時不區分大小寫，忽略尾部斜杠，因此`http://localhost:3000`和`http://localhost:3000/`是等效的。可以在運行時設定相同的CSV**儀表板→安全→ CORS允許的來源**無需重新啟動。
 
-## API 金鑰與 Cookie 工作階段
+## API金鑰與 cookie 會話
 
-- **Bearer／`x-api-key`（`/v1/*` 推論介面）：**瀏覽器絕不會自動附加
-  這些資訊。CORS 在此並不是有意義的屏障——真正的屏障是 API 金鑰——
-  因此此介面刻意採用寬鬆設定，讓瀏覽器與 Electron 用戶端能夠讀取其原本就有權
-  存取的回應。
-  寬鬆的來源回傳取決於已驗證的金鑰，而非僅取決於標頭是否存在：當
-  `REQUIRE_API_KEY=false` 以匿名方式處理請求時，其成功回應仍維持預設封閉的允許清單。
-  驗證拒絕（401）仍可被讀取，讓用戶端能夠顯示已撤銷或輸入錯誤的金鑰（#5242）：
-  管線本身發出的 401 會保留來源回傳；而在管線以匿名方式處理請求後，由路由自行拒絕
-  金鑰的情況（已設定管理驗證時的 `/v1/models` 與 `/v1beta/models`、限定擁有者範圍的
-  `/v1/files`、`/v1/batches`、`/v1/media`、`/v1/session-leases`，以及 auto-combo
-  候選路由），會透過 `credentialRejectionHeaders()` 在該 401 上加入來源回傳。來源回傳
-  取決於請求是否帶有憑證標頭（`Authorization`、`x-api-key`、`x-goog-api-key` 或
-  `auth_token` Cookie），而非路由實際檢查了其中哪一個，且絕不會與
-  `Access-Control-Allow-Credentials` 搭配；回應主體是固定的錯誤封裝。位於 `/api/v1/`
-  之下、受 `requireManagementAuth()` 保護的管理路由（`/api/v1/management/*`、
-  `/api/v1/registered-keys`）不會加入來源回傳：在 `REQUIRE_API_KEY=false` 時，其
-  401/403 無法被跨來源讀取。
-- **Cookie 工作階段（儀表板）：**受到預設封閉策略**以及**
-  共用路徑上不存在 `Access-Control-Allow-Credentials` 的雙重保護。請勿將
-  管理／儀表板來源加入任何寬鬆設定中；它們必須嚴格維持預設封閉。
+- **承載/ `x-api-key` （ `/v1/*`推理面）：**瀏覽器永遠不會自動附加這些。 CORS在這裡不是一個有意義的障礙— API關鍵是障礙—這就是為什麼該表面是故意允許的，以便瀏覽器和Electron客戶端可以讀取他們已經有權獲得的回應。寬鬆的回顯需要經過驗證的主題（經過驗證的API金鑰或儀表板會話），而不僅僅是憑證標頭，並且從不包含`Access-Control-Allow-Credentials`。匿名回應 (`REQUIRE_API_KEY=false`) 使用配置的來源允許列表，包括明確`CORS_ALLOW_ALL=true`選擇加入。驗證拒絕 (401) 保持可讀，以便客戶端可以顯示已撤銷或輸入錯誤的密鑰 (#5242)：管道本身的 401 保留回顯，並且在管道將其作為匿名服務後拒絕密鑰本身的路由（配置了管理身份驗證的`/v1/models`和`/v1beta/models` ，所有者範圍的`/v1/files`、 `/v1/media`將自動配置`credentialRejectionHeaders()`.回顯以攜帶憑證標頭（`Authorization`、 `x-api-key`、 `x-goog-api-key`或`auth_token` cookie） `/v1/batches` `/v1/session-leases`為關鍵，而不是在路由檢查的其中一個上，並且永遠不會與`Access-Control-Allow-Credentials`配對；主體是一個固定誤差包絡線。由`requireManagementAuth()`保護的`/api/v1/`下的管理路由（`/api/v1/management/*`、 `/api/v1/registered-keys`、 `/api/v1/providers/[provider]/limits`、 `/api/v1/accounts/[id]/limits`、 `/api/v1/issues/report`）不使用此憑證拒絕例外：使用`REQUIRE_API_KEY=false`時，它們的401/403回應遵循配置的CORS來源策略。
+- **Cookie 會話（儀表板）：**受故障關閉預設值保護**和**由於共享路徑上缺少`Access-Control-Allow-Credentials` 。讓management/dashboard起源遠離任何允許的配置；它們必須完全保持故障關閉狀態。
 
-## WebSocket 交握（`/v1/responses`、`/v1/ws`）
+## WebSocket握手（`/v1/responses`、 `/v1/ws`）
 
-瀏覽器不會對 WebSocket 套用 CORS，因此回傳推論輸出的 WebSocket 傳輸會自行檢查交握的 `Origin`（`src/server/origin/wsOrigin.ts`）：包括 Responses WebSocket（`/v1/responses`），以及當 OmniRoute 透過 `npm start` / `npm run dev` 執行時的 `/v1/ws` 與 `/api/v1/ws` 橋接器，後者會以訊框形式串流 `/v1/chat/completions`、`/v1/messages` 與 `/v1/responses`。橋接器會向 `/api/v1/ws?handshake=1` 詢問判定結果，除非該路由已執行檢查，否則拒絕升級連線。符合下列條件時，交握才會被接受：
+瀏覽器不會將CORS應用於WebSocket，因此返回推理輸出的WebSocket傳輸會檢查握手`Origin`本身 (`src/server/origin/wsOrigin.ts`)：回應WebSocket (`/v1/responses`)，並且當OmniRoute運行通過`npm start` / `npm run dev`時， `/v1/ws`和`/api/v1/ws`橋接器將`/v1/chat/completions`、 `/v1/messages`和`/v1/responses`作為幀進行傳輸。橋接器向`/api/v1/ws?handshake=1`請求判決並拒絕升級，除非該路由運行了檢查。身份驗證要求仍然單獨適用。來源檢查在以下情況通過：
 
-- 沒有 `Origin` 標頭（Codex CLI、SDK 及其他非瀏覽器用戶端）；
-- 該 `Origin` 獲上述允許清單接受（`CORS_ALLOWED_ORIGINS`、`corsOrigins` 設定、`CORS_ORIGIN`、`CORS_ALLOW_ALL`）；
-- 該 `Origin` 是 OmniRoute 自身的公開來源之一（已設定的公開基礎 URL、受信任代理轉送的來源，或以 IP 常值或 `localhost` 指定的直接迴路／區域網路主機——與儀表板變更檢查所使用的候選項目相同）；或
-- 帶有有效的 API 金鑰，與 HTTP `/v1/*` 介面相同。
+- 它沒有`Origin`標頭（Codex CLI、 SDKs和其他非瀏覽器客戶端）；
+- `Origin`由上面的白名單允許（`CORS_ALLOWED_ORIGINS`、 `corsOrigins`設定、 `CORS_ORIGIN`、 `CORS_ALLOW_ALL`）；
+- `Origin`是OmniRoute自己的公共來源之一（配置的公共基礎URL、受信任代理的轉發來源或作為IP文字或`localhost` —給出的直接loopback/LAN主機，與儀表板突變檢查使用的候選者相同）；或者
+- 它帶有一個有效的API密鑰，就像在HTTP `/v1/*`表面上一樣。
 
-其他任何情況都會收到 `403 ws_origin_forbidden`。儀表板工作階段 Cookie 無法讓外部 `Origin` 獲得豁免，因為瀏覽器會將它附加到任何頁面的 socket 上。其他連接埠上的 `localhost` 不會被視為同源；請將此類開發來源加入 `CORS_ALLOWED_ORIGINS`。
+其他任何事情都會得到`403 ws_origin_forbidden`。儀表板會話 cookie 不會免除外部`Origin`，因為瀏覽器將其附加到任何頁面的套接字。另一個端口上的`localhost`不被視為同源；將此類開發起源添加到`CORS_ALLOWED_ORIGINS`。
 
-## 範例：OmniRoute 前方的反向代理
+## 範例： OmniRoute前面的反向代理
 
-CORS 由 OmniRoute 本身強制執行，因此代理通常**不應**新增或
-重寫 `Access-Control-*` 標頭（重複的標頭會導致瀏覽器無法正常運作）。終止 TLS
-並進行轉送——讓 OmniRoute 回應預檢請求：
+CORS是由OmniRoute本身強制執行的，因此代理通常應該**不是**新增或重寫`Access-Control-*`標頭（雙標頭會破壞瀏覽器）。終止TLS並轉發—讓OmniRoute應答預檢：
 
 ```nginx
-# nginx — 轉送至 OmniRoute；請勿在此注入 Access-Control-*
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # 保留轉送標頭：同一主機上的代理會從迴路位址連線，而這些標頭
-    # 會告知 OmniRoute 呼叫者並非本機操作員。若代理未新增任何這類標頭，
-    # 每個遠端呼叫者看起來都會像本機呼叫者。也絕不可將 X-Forwarded-For 設為 127.0.0.1。
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-請在 OmniRoute 中（透過 `CORS_ALLOWED_ORIGINS` 或「安全性」分頁）設定允許的瀏覽器來源，而不是在代理中設定。
+在OmniRoute （`CORS_ALLOWED_ORIGINS`或安全性標籤）中設定允許的瀏覽器來源，而不是在代理程式中。
 
-## 原始碼檔案
+## 原始檔
 
-| 關注項目                         | 檔案                                                                 |
-| -------------------------------- | -------------------------------------------------------------------- |
-| 允許清單解析 + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
-| 中介軟體套用（單一真實來源）     | `src/server/authz/pipeline.ts`                                       |
-| Settings → 執行階段來源注入      | `src/lib/config/runtimeSettings.ts`                                  |
-| 儀表板的執行階段狀態             | `src/app/api/settings/authz-inventory/route.ts`                      |
-| 儀表板警告橫幅                   | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| CORS Allowed Origins 欄位        | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| Cloud-Agent 每路由 CORS（例外）  | `src/lib/cloudAgent/api.ts`                                          |
-| WebSocket 交握 `Origin` 檢查     | `src/server/origin/wsOrigin.ts`                                      |
+| 憂慮                            | 文件                                                                 |
+| ------------------------------- | -------------------------------------------------------------------- |
+| 許可名單決議+ `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
+| 中間件應用程式（單一事實來源）  | `src/server/authz/pipeline.ts`                                       |
+| 設定→運行時源注入               | `src/lib/config/runtimeSettings.ts`                                  |
+| 儀表板的運行時狀態              | `src/app/api/settings/authz-inventory/route.ts`                      |
+| 儀表板警告橫幅                  | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS允許的來源字段              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent 每路由CORS （例外） | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket握手`Origin`檢查       | `src/server/origin/wsOrigin.ts`                                      |
 
-## 另請參閱
+## 參見
 
-- [路由防護層級](./ROUTE_GUARD_TIERS.md) — 對具備產生程序能力的路由實施迴路位址強制限制（獨立且互補的控制措施）。
-- [授權指南](../architecture/AUTHZ_GUIDE.md) — 完整的驗證與授權流程。
+- [路由保護層](./ROUTE_GUARD_TIERS.md)—環回強制執行可產生的路由（單獨的補充控制）。
+- [授權指南](../architecture/AUTHZ_GUIDE.md)—完整的身份驗證管道。

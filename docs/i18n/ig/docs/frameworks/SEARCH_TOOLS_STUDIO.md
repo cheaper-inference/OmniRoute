@@ -54,7 +54,7 @@ Taabụ ọhụrụ maka iwepụta ọdịnaya site na URL site na `POST /v1/web
 - Ntinye: URL + mgba ọkụ ibe zuru ezu + ihe nhọpụta usoro (markdown / ederede / HTML).
 - Nyefee → weta → gosipụta `ScrapeResult.tsx`.
 - `ScrapeResult` na-egosipụta nlele markdown + mgba ọkụ maka ọdịnaya raw.
-- Oke: ọ bụrụ na ahụ nzaghachi > **256 KB**, UI na-egosi `(ebelatara, lee raw)` ma mepee ọdịnaya raw na modal Monaco (D21).
+- Oke: ọ bụrụ na ahụ nzaghachi > **256 KB**, UI na-egosi `View full raw content` ma mepee ọdịnaya raw na modal (D21).
 - Paanụ metadata: onye na-eweta ọrụ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, ọnụahịa, nha nzaghachi, ọnụọgụ njikọ.
 - Na-eji hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Na-eme otu ajụjụ/URL ahụ n’ofe ndị na-eweta ọrụ ruru **4 n’otu o
 `ProviderCatalog.tsx` na-egosi ndepụta zuru ezu nke ndị na-enye ọrụ sitere na `GET /api/search/providers`
 (nke a gbasapụrụ na F4 iji tinye ndị na-enye ọrụ fetch):
 
-| `kind` | `"search"` (ndị na-enye ọrụ 20) ma ọ bụ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (ndị na-enye ọrụ 23) ma ọ bụ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 A na-**ewepụta ọkwa ahụ n'oge arịrịọ** site n’ịchọpụta ma ozi nzere dị nakwa ma
 igodo niile hà nọ ugbu a n’oge nchere cooldown.
+
+`codex-search` (Codex Web Search): Ọ na-eji akaụntụ Codex (ChatGPT) ejikọrọ; ọ dịghị mkpa igodo ọzọ. Nchọcha ọ bụla na-eji oke ndenye aha ChatGPT ma na-ewe ihe dị ka sekọnd 10–40. Ọ na-arụ ọrụ mgbe arịrịọ kpọrọ aha ya; nhọrọ akpaka chọrọ ịgbanye `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, nke na-adị gbanyụrụ na mbụ.
 
 ---
 

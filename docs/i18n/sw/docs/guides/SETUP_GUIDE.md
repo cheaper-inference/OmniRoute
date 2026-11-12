@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashibodi hufunguka kwenye `http://localhost:20128` na URL ya msingi ya API ni `http://localhost:20128/v1`.
+Dashibodi hufunguliwa `http://localhost:20128` na API msingi URL ni `http://localhost:20128/v1`.
+
+> **watumiaji wa npm:** Ikiwa npm itaonya kuwa hati za kusakinisha zilizuiwa (kwa mfano, `omniroute`, `better-sqlite3`), angalia [Utatuzi wa Matatizo — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

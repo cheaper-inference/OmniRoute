@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Magbubukas ang dashboard sa `http://localhost:20128` at ang base URL ng API ay `http://localhost:20128/v1`.
+Magbubukas ang Dashboard sa `http://localhost:20128` at API base URL ay `http://localhost:20128/v1`.
+
+> **mga gumagamit ng npm:** Kung nagbabala ang npm na na-block ang mga script sa pag-install (hal., `omniroute`, `better-sqlite3`), tingnan [ang Pag-troubleshoot — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

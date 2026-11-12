@@ -579,6 +579,7 @@
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
+      "modelCatalog",
       "noAuthProvider",
       "oauthModal",
       "providers",

@@ -4,194 +4,194 @@
 
 ---
 
-Uhamishaji endelevu wa kumbukumbu za miito ya OmniRoute kwa nyongeza kwenda kwenye hifadhi ya nje ya uchanganuzi.
+Uhamishaji endelevu na wa hatua kwa hatua wa kumbukumbu za simu za OmniRoute kwenda kwenye hifadhi ya nje ya uchanganuzi.
 
-Kichupo cha Logs kwenye dashibodi huhifadhi historia ya maombi katika SQLite (`call_logs`), ambayo inawekewa mipaka na
-mzunguko wa kumbukumbu na muda wa kuzihifadhi. Uhamishaji wa kumbukumbu hutuma rekodi hizohizo kwa ratiba ili ziweze kudumu zaidi ya
-hifadhidata ya ndani na kuunganishwa na data nyingine. BigQuery ndiyo lengwa la kwanza;
-mfumo wa uchakataji hutumia rejista, hivyo malengwa mengine yanaweza kuongezwa.
+Kichupo cha dashibodi ya Logs huhifadhi historia ya maombi katika SQLite (`call_logs`), ambayo inawekewa kikomo kupitia
+uzungushaji na muda wa kuhifadhi. Uhamishaji wa kumbukumbu husafirisha seti hiyo hiyo ya rekodi kwa ratiba ili iweze kudumu zaidi ya
+hifadhidata ya ndani na kuunganishwa na data nyingine. BigQuery ndilo lengwa la kwanza; mfumo huu ni sajili, kwa hivyo
+malengo zaidi yanaweza kuongezwa.
 
 ---
 
-## 1. Jinsi unavyofanya kazi
+## 1. Jinsi inavyofanya kazi
 
 ```
-server (decrypt + validate config, reconcile cursor)
-  → start IPC → isolated exportChild OS process
-    → read-only storage.sqlite → shared call-log query/mapping
-      → async artifact hydration → destination prepare()/send()
-        → batch IPC → server persists cursor → ack IPC
-          → next batch; done IPC → server records success
+seva (simbua + thibitisha usanidi, sawazisha kishale)
+  → anzisha IPC → mchakato wa OS wa exportChild uliotengwa
+    → storage.sqlite ya kusoma pekee → hoja/ulinganishaji wa pamoja wa kumbukumbu za simu
+      → upakiaji wa vipengee usiolandanishwa → prepare()/send() ya lengwa
+        → IPC ya kundi → seva huhifadhi kishale → IPC ya uthibitisho
+          → kundi linalofuata; IPC ya kukamilika → seva hurekodi mafanikio
 ```
 
-- **Ratiba** — kazi moja ya cron ya `JobRegistry`, `log_export`, yenye thamani chaguomsingi ya `0 * * * *` (kila saa,
+- **Ratiba** — kazi moja ya cron ya `JobRegistry`, `log_export`, yenye chaguo-msingi la `0 * * * *` (kila saa,
   UTC). Imesajiliwa katika `src/lib/initCloudSync.ts`; inaweza kubadilishwa kwa `OMNIROUTE_LOG_EXPORT_CRON`.
-  Kila kichocheo cha ratiba huchakata rekodi zote zinazosubiri kwa kila lengwa **lililowezeshwa**, moja baada ya jingine.
-- **Kielekezi** — `call_logs.rowid` ya SQLite inayopatikana kiotomatiki, inayohifadhiwa kwa kila lengwa katika
-  `log_export_destinations.cursor_row_id`. Kwa makusudi, `timestamp` si kielekezi: waitaji
-  wanaweza kutoa thamani yao wenyewe, hivyo ombi la polepole linaweza kuandikwa baada ya ombi la haraka zaidi lililoanza
-  baadaye, na kielekezi cha muhuri wa muda kingeliruka.
-- **Makundi** — safu `batch_size` kwa kila ombi (chaguomsingi 500), safu `max_rows_per_run` kwa kila utekelezaji
-  (chaguomsingi 10000) ili rekodi nyingi zinazosubiri zichakatwe katika vichocheo kadhaa vya ratiba badala ya kuzuia kimoja.
-- **Uwasilishaji** — kielekezi husonga mbele tu baada ya `send()` kukamilika kwa mafanikio. Kundi lililoshindwa huacha
-  kielekezi pale kilipokuwa, hivyo safu hizohizo hujaribiwa tena katika utekelezaji unaofuata. Dhamana ni
-  uwasilishaji angalau mara moja pamoja na kuondoa nakala rudufu upande wa lengwa, si uwasilishaji halisi wa mara moja tu: BigQuery huweka ufunguo wa kila
-  safu kwa kutumia kitambulisho cha kumbukumbu ya mwito, ambacho hukizingatia kadiri iwezekanavyo ndani ya kipindi chake cha kuondoa nakala rudufu.
-- **Kinga ya mwingiliano** — kichocheo cha cron na `POST .../run` vinaweza kuanzishwa pamoja. Lengwa
-  ambalo tayari linachakatwa hurukwa badala ya kuchakatwa mara mbili (`skipped: true` katika matokeo ya utekelezaji),
-  hivyo utekelezaji sambamba hauwezi kutuma kundi tena au kurudisha kielekezi nyuma.
-- **Urejeshaji baada ya kufuta data yote** — ikiwa `cursor_row_id` itakuwa juu ya `MAX(rowid)` (jedwali lote
-  lilifutwa na rowid zikaanza upya), kiendeshaji hurudisha kielekezi hadi 0 badala ya kushindwa kabisa kuona rekodi mpya.
+  Kila utekelezaji hushughulikia kila lengwa **lililowezeshwa**, moja baada ya jingine.
+- **Kishale** — `call_logs.rowid` fiche ya SQLite, inayohifadhiwa kwa kila lengwa katika
+  `log_export_destinations.cursor_row_id`. `timestamp` haikutumika kimakusudi kama kishale: wapigaji
+  wanaweza kutoa thamani yao wenyewe, kwa hivyo ombi la polepole linaweza kuandikwa baada ya ombi la kasi zaidi lililoanza
+  baadaye, na kishale cha muhuri wa muda kingeliruka ombi hilo.
+- **Ugawaji katika makundi** — safu `batch_size` kwa kila ombi (chaguo-msingi 500), safu `max_rows_per_run` kwa kila utekelezaji
+  (chaguo-msingi 10000) ili mlundikano mkubwa ushughulikiwe katika utekelezaji kadhaa badala ya kuzuia utekelezaji mmoja.
+- **Uwasilishaji** — kishale husogea mbele tu baada ya `send()` kukamilika. Kundi lililoshindwa huacha
+  kishale mahali kilipokuwa, kwa hivyo safu zilezile hujaribiwa tena katika utekelezaji unaofuata. Dhamana ni
+  uwasilishaji wa angalau mara moja pamoja na uondoaji wa nakala upande wa lengwa, si uwasilishaji halisi wa mara moja tu: BigQuery hutambulisha kila
+  safu kwa kitambulisho cha kumbukumbu ya simu, ambacho huheshimu kwa kadiri iwezekanavyo ndani ya kipindi chake cha uondoaji wa nakala.
+- **Kizuizi cha mwingiliano** — utekelezaji wa cron na `POST .../run` vinaweza kuanzishwa kwa pamoja. Lengwa
+  ambalo tayari linashughulikiwa hurukwa badala ya kushughulikiwa mara mbili (`skipped: true` katika matokeo ya utekelezaji),
+  kwa hivyo utekelezaji sambamba hauwezi kutuma tena kundi au kuandika kishale kurudi nyuma.
+- **Urejeshaji baada ya ufutaji** — ikiwa `cursor_row_id` itaishia juu ya `MAX(rowid)` (jedwali lote
+  lilifutwa na rowid zikaanza upya), kiendeshi hurudisha kishale hadi 0 badala ya kubaki bila kuona data kabisa.
 
-### Kiendeshaji kilichotengwa na mipaka
+### Kiendeshi kilichotengwa na vikomo
 
-Kila utekelezaji wa lengwa kwenye Node huanzisha mchakato tofauti wa mtoto wa mfumo endeshi unaodumu kwa muda mfupi (`child_process`
-wenye IPC, si `worker_threads`). Usomaji wa miili, uchanganuzi/ubadilishaji wa data ya JSON, `prepare()`
-ya lengwa na ingizo/tokeo la mtandao la lengwa vyote hutekelezwa humo, si kwenye kitanzi cha matukio cha seva.
-Mipangilio na ujumbe mdogo wa maendeleo pekee ndivyo hupitia IPC; rekodi zilizohamishwa hazirudi
-kwenye seva kamwe. Kazi ya cron na njia ya Run now huhifadhi matokeo yaleyale yanayoonekana kwa umma na kinga ya mwingiliano.
+Kila utekelezaji wa lengwa kwenye Node huanzisha mchakato tofauti wa muda mfupi wa OS (`child_process`
+wenye IPC, si `worker_threads`). Usomaji wa body, uchanganuzi/ugeuzaji wa JSON ya payload kuwa mfuatano, `prepare()`
+ya lengwa na I/O ya mtandao ya lengwa yote huendeshwa humo, si kwenye kitanzi cha matukio cha seva.
+Usanidi na ujumbe mdogo wa maendeleo pekee ndio huvuka IPC; rekodi zilizosafirishwa hazirudi kamwe
+kwenye seva. Kazi ya cron na njia ya Endesha sasa hudumisha matokeo yale yale ya umma na kizuizi cha mwingiliano.
 
-Mchakato wa mtoto hufungua `DATA_DIR/storage.sqlite` iliyobainishwa na seva kwa usomaji tu kwa kutumia `node:sqlite`,
-ikiwa na `busy_timeout=5000` na `query_only=ON`. Hauingizi singleton yoyote ya DB wala kufanya
-uhamishaji wa muundo, nakala rudufu au masasisho ya SQLite. Utunzaji wa taarifa za vizalia vinavyokosekana/vilivyoharibika (ikiwemo
-UPDATE ya kizalia kilichoharibika) hubaki kwenye njia ya maelezo ya dashibodi pekee. Njia zote mbili hutumia kitatuzi kimoja safi cha
-maelezo; uhamishaji hutumia usomaji wa mfumo wa faili usiolandanifu na mpangilio uleule wa utatuzi wa kizalia → data ya zamani
-iliyopachikwa → data ya zamani kwenye diski → hakuna. Utekelezaji huchukua picha ya rowid ya juu zaidi ya uingizaji
-wakati mchakato wa mtoto unapofungua kisomaji chake; rekodi zinazoongezwa baadaye husubiri utekelezaji unaofuata. Huu ni mpaka wa
-uingizaji, si muamala wa SQLite unaodumu kwa muda mrefu: waandishi wa WAL na sehemu za ukaguzi hubaki huru wakati wa
-kusubiri mtandao. Masasisho/ufutaji wa safu zilizopo hauzuiwi na mpaka huu.
+Mchakato mtoto hufungua `DATA_DIR/storage.sqlite` iliyotambuliwa na seva kwa hali ya kusoma pekee kwa kutumia `node:sqlite`,
+ikiwa na `busy_timeout=5000` na `query_only=ON`. Hauleti singleton yoyote ya DB na haufanyi
+uhamishaji, nakala rudufu au masasisho ya SQLite. Uwekaji kumbukumbu wa vipengee vilivyokosekana/vilivyoharibika (ikiwemo
+UPDATE ya kipengee kilichoharibika) hubaki katika njia ya maelezo ya dashibodi pekee. Njia zote mbili hutumia kitatuzi safi
+cha maelezo; usafirishaji hutumia usomaji wa mfumo wa faili usiolandanishwa na mpangilio uleule wa utatuzi wa kipengee → ya zamani
+ya ndani ya mstari → diski ya zamani → hakuna. Utekelezaji hunasa rowid ya juu zaidi ya uingizaji
+mchakato mtoto unapofungua kisomaji chake; miingizo ya baadaye husubiri utekelezaji unaofuata. Huu ni mpaka wa
+uingizaji, si muamala wa SQLite wa muda mrefu: waandishi na vituo hakikishi vya WAL hubaki huru wakati wa
+kusubiri mtandao. Masasisho/ufutaji wa safu zilizopo haufungwi na mpaka huu.
 
-Baada ya kila kundi kukubaliwa, mchakato wa mtoto husubiri uthibitisho. Seva kwanza huhifadhi
-kielekezi kwa `advanceLogExportCursor`, kisha hutuma `ack`; hakuna kundi linalofuata linaloanza kabla ya hapo.
-Hitilafu ya kutuma, kuanguka au kuisha kwa muda hurekodi kushindwa bila kusogeza kielekezi kwa kundi hilo. Makundi
-yaliyothibitishwa awali hubaki yamehifadhiwa; kwa kiwango cha juu, ni kundi moja tu ambalo halijathibitishwa linaloweza kutumwa tena.
-Mafanikio hurekodiwa tu baada ya `done` na mchakato wa mtoto kuondoka bila hitilafu. Hitilafu husitisha mchakato wa mtoto
-kwa SIGTERM, na hatua hiyo kupandishwa hadi SIGKILL baada ya milisekunde 500, huku kiendeshaji kikisubiri mchakato ufungwe.
+Baada ya kila kundi kukubaliwa, mchakato mtoto husubiri uthibitisho. Kwanza seva huhifadhi
+kishale kwa `advanceLogExportCursor`, kisha hutuma `ack`; hakuna kundi linalofuata linaloanza kabla ya hapo.
+Kushindwa kwa utumaji, kuvurugika au kuisha kwa muda hurekodi kutofaulu bila kusogeza mbele kundi hilo. Makundi
+yaliyothibitishwa awali hubaki yamehifadhiwa; kwa kiwango cha juu, kundi moja ambalo halijathibitishwa linaweza kutumwa tena.
+Mafanikio hurekodiwa tu baada ya `done` na mchakato mtoto kutoka bila hitilafu. Hitilafu husimamisha mchakato mtoto
+kwa SIGTERM, ikipandishwa hadi SIGKILL baada ya ms 500, na kiendeshi husubiri mchakato kufungwa.
 
-| Kigezo cha mazingira                          | Chaguomsingi | Kusudi                                                 |
-| --------------------------------------------- | ------------ | ------------------------------------------------------ |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000       | Kikomo cha muda halisi kwa kila lengwa                 |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024         | Kikomo cha old-space ya V8 ya mchakato wa mtoto kwa MB |
+| Kigezo cha mazingira                          | Chaguo-msingi | Kusudi                                                        |
+| --------------------------------------------- | ------------- | ------------------------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000        | Kikomo cha muda halisi kwa kila lengwa                        |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024          | Kikomo cha nafasi ya zamani ya V8 ya mchakato mtoto katika MB |
 
-Thamani zisizo halali/zisizo chanya/zisizo nambari kamili hutumia chaguomsingi. Mpangilio wa heap si kikomo cha
-jumla cha RSS; makundi makubwa sana bado yanaweza kumaliza kumbukumbu ya mchakato wa mtoto na kusababisha utekelezaji kushindwa kwa usalama.
-Chaguomsingi la MB 1024 huacha nafasi ya ziada kwa kundi chaguomsingi la safu 500 za vizalia vya KiB 512 huku
-miili ikiwa imewezeshwa, ikiwemo ubadilishaji wa JSON wa BigQuery unaogawanywa katika vipande vya baiti. Haufanyi kundi
-la safu 10000 lenye miili kuwa salama. Kuisha kwa heap ya V8 hurekodi hitilafu yenye hatua ya kuchukua: punguza ukubwa
-wa kundi au ongeza `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kielekezi hubaki kwenye kundi la mwisho
-lililothibitishwa. Miili ya kihistoria iliyopachikwa/iliyo kwenye diski haijumuishwi katika kikomo cha kisasa cha vizalia.
-Waendeshaji lazima wapangie RSS kando, hasa ndani ya kontena zenye kumbukumbu iliyowekewa kikomo.
+Thamani batili/zisizo chanya/zisizo nambari kamili hutumia chaguo-msingi. Mpangilio wa heap si kikomo cha jumla cha
+RSS; makundi makubwa sana bado yanaweza kumaliza kumbukumbu ya mchakato mtoto na kusababisha utekelezaji kushindwa kwa usalama.
+Chaguo-msingi la MB 1024 huacha nafasi ya ziada kwa kundi chaguo-msingi la safu 500 za vipengee vya KiB 512 huku
+body zikiwa zimewezeshwa, ikijumuisha ugeuzaji wa JSON kuwa mfuatano kwa vipande vya baiti wa BigQuery. Haufanyi
+kundi la body lenye safu 10000 kuwa salama. Kuisha kwa heap ya V8 hurekodi hitilafu inayoweza kushughulikiwa: punguza ukubwa wa
+kundi au ongeza `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kishale hubaki kwenye kundi la mwisho
+lililothibitishwa. Body za kihistoria za ndani ya mstari/diski hazijumuishwi kwenye kikomo cha kisasa cha vipengee.
+Waendeshaji lazima wapangie RSS kando, hasa ndani ya kontena zenye kikomo cha kumbukumbu.
 
-Mchakato mtoto hurithi tu `DATA_DIR` iliyotatuliwa, `NODE_ENV`, `TZ` iliyowekwa wazi (utatuzi wa saa
-za ndani kwa majina ya faili ya mfumo wa zamani), `ELECTRON_RUN_AS_NODE` inapokuwepo, na ingizo zifuatazo za miunganisho inayotoka:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (pamoja na matoleo yake ya herufi ndogo),
+Mchakato mtoto hurithi tu `DATA_DIR` iliyotambuliwa, `NODE_ENV`, `TZ` iliyobainishwa (utatuzi wa muda wa ndani wa
+jina la faili la zamani), `ELECTRON_RUN_AS_NODE` inapokuwepo, na ingizo zifuatazo za mawasiliano ya nje:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (na maumbo yake ya herufi ndogo),
 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Kisambazaji cha kimataifa cha Undici kinatumia utatuzi uleule wa seva wa proksi unaotegemea mazingira pekee na kanuni za
-kupita proksi kwa seva za ndani, ikiwemo `NO_PROXY`; hakiingizi `proxyFetch.ts` wala viashiria vyake vya DB/vipengele.
-Taarifa za uthibitishaji wa proksi hufichwa katika matokeo yanayopitishwa na hitilafu zinazorekodiwa. Taarifa za uthibitishaji wa lengwa
-hutumwa tu katika ujumbe mmoja wa kuanzisha wa IPC, kamwe si kupitia argv au mazingira; matokeo/hitilafu zinazopitishwa
-huongezewa kiambishi awali na kusafishwa. Ni `ExperimentalWarning` pekee inayozimwa katika hoja za utekelezaji za mchakato mtoto ili kuepuka
-kurudia onyo la SQLite la Node katika kila utekelezaji wa cron; aina nyingine za maonyo hubaki kuonekana.
+Kisambazaji cha jumla cha Undici hutumia kwa pamoja utatuzi safi wa proksi wa mazingira wa seva na kanuni za
+kupita moja kwa moja kwa seva pangishi za ndani, ikijumuisha `NO_PROXY`; hakileti `proxyFetch.ts` au alama zake za DB/vipengele.
+Vitambulisho vya proksi hufichwa katika matokeo yaliyosambazwa na hitilafu zilizorekodiwa. Vitambulisho vya lengwa
+husafiri tu katika ujumbe mmoja wa kuanza wa IPC, kamwe si argv wala mazingira; usambazaji wa matokeo/hitilafu
+huwekewa kiambishi awali na kusafishwa. `ExperimentalWarning` pekee ndiyo huzimwa katika hoja za utekelezaji za mchakato mtoto ili kuepuka
+kurudia onyo la SQLite la Node kila cron inapotekelezwa; aina nyingine za maonyo hubaki zikionekana.
 
-Moduli za lengwa lazima ziweze kuingizwa bila vitegemezi vya Next.js/vya seva pekee. Utekelezaji uliopo wa
-BigQuery tayari unatimiza sharti hilo. Akiba za tokeni za ufikiaji hudumu tu wakati wa
-utekelezaji wa mchakato mtoto, si kati ya utekelezaji tofauti. Node ndiyo mazingira ya utekelezaji yanayoungwa mkono (`package.json` engines), lakini sehemu ya usakinishaji wa Bun
-katika README na `Dockerfile.bun` pia zinaeleza njia ya uoanifu wa uzalishaji inayotumia
-`bun:sqlite` (`src/lib/db/core.ts` / adapta). Kwa hiyo, chini ya Bun, uhamishaji huhifadhi njia ya awali
-ya ndani ya mchakato na kutoa onyo mara moja: utenganishaji wa heap/muda wa mwisho wa mchakato mtoto haupatikani. Tumia
-Node kwa utenganishaji wa mzunguko wa matukio na OOM; Bun haichukuliwi hapa kuwa ya maendeleo pekee.
+Moduli lengwa lazima ziweze kuletwa bila vitegemezi vya Next.js/vya upande wa seva pekee. Utekelezaji uliopo wa
+BigQuery tayari unatimiza masharti hayo. Akiba za tokeni za ufikiaji hudumu kwa kipindi cha utekelezaji wa mchakato
+mtoto pekee, si kati ya utekelezaji tofauti. Node ndiyo mazingira ya utekelezaji yanayotumika (`package.json` engines), lakini sehemu ya
+usakinishaji wa Bun katika README na `Dockerfile.bun` pia zinatangaza njia ya uoanifu wa uzalishaji inayotumia
+`bun:sqlite` (`src/lib/db/core.ts` / adapta). Kwa hivyo, chini ya Bun, exports hudumisha njia ya awali
+ya ndani ya mchakato na kutoa onyo la mara moja: utengaji wa heap/muda wa kuisha wa mchakato mtoto haupatikani. Tumia
+Node kwa utengaji wa event-loop na OOM; Bun haichukuliwi kuwa ya mazingira ya uundaji pekee hapa.
 
-`includeBodies` inapowezeshwa, pendelea ratiba ya kiwango cha dakika kama vile
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` badala ya kukusanya mrundikano wa mizigo ya data wa saa nzima.
-Vikomo vya makundi na safu bado vinadhibiti kila utekelezaji. Gharama ya kuanzisha mchakato hulipwa kwa kila lengwa katika kila utekelezaji;
-hii hubadilisha gharama ndogo ya kuanzisha kuwa utenganishaji wa mzunguko wa matukio wa seva, si kupunguza jumla ya matumizi ya CPU.
+Wakati `includeBodies` imewezeshwa, pendelea ratiba ya kila dakika kadhaa kama vile
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` badala ya kukusanya mrundikano wa payload wa kila saa.
+Vikomo vya batch na safu bado hudhibiti kila utekelezaji. Gharama ya kuanzisha mchakato hulipwa kwa kila eneo lengwa katika kila utekelezaji;
+hii hubadilishana gharama ndogo ya kuanzisha kwa utengaji wa event-loop ya seva, si kupunguza jumla ya matumizi ya CPU.
 
-### Mizigo ya data (maagizo na majibu)
+### Payload (maagizo na majibu)
 
-Kwa chaguomsingi uhamishaji hubeba tu sehemu za muhtasari zinazoonyeshwa kwenye **orodha** ya Kumbukumbu. Kuwasha
-**Hamisha maagizo na majibu** (`includeBodies`) pia hutuma yale yanayoonyeshwa kwenye kidirisha cha **maelezo**
-cha Kumbukumbu kwa kila mwito:
+Kwa chaguo-msingi, export hubeba sehemu za muhtasari pekee ambazo **orodha** ya Logs huonyesha. Kuwasha
+**Hamisha maagizo na majibu** (`includeBodies`) pia hutuma kile ambacho kidirisha cha **maelezo**
+cha Logs huonyesha kwa kila mwito:
 
-| Sehemu                           | Inachohifadhi                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Mizigo ya data ya mwito kama dashibodi inavyoionyesha                               |
-| `pipeline_route_decision`        | Lengwa na modeli zilizochaguliwa na kipanga njia                                    |
-| `pipeline_client_request`        | Ombi ghafi kama lilivyotumwa na mteja kabisa                                        |
-| `pipeline_openai_request`        | Baada ya kubadilishwa kuwa muundo wa ndani wa OpenAI                                |
-| `pipeline_provider_request`      | Kama lilivyotumwa kwa mtoa huduma, katika muundo wake                               |
-| `pipeline_provider_response`     | Jibu ghafi kutoka kwa mtoa huduma                                                   |
-| `pipeline_client_response`       | Kilichorudishwa kwa mwitaji                                                         |
-| `pipeline_error`                 | Maelezo ya hitilafu katika kiwango cha mnyororo wa uchakataji kwa mwito ulioshindwa |
-| `bodies_truncated`               | Kweli ikiwa sehemu yoyote hapo juu ilifikia `maxBodyBytes`                          |
+| Sehemu                           | Inachohifadhi                                                     |
+| -------------------------------- | ----------------------------------------------------------------- |
+| `request_body` / `response_body` | Payload za mwito jinsi dashibodi inavyoziwasilisha                |
+| `pipeline_route_decision`        | Lengo na modeli ambazo kipanga-njia kilichagua                    |
+| `pipeline_client_request`        | Ombi ghafi jinsi mteja alivyolituma                               |
+| `pipeline_openai_request`        | Baada ya kutafsiriwa kuwa muundo wa ndani wa OpenAI               |
+| `pipeline_provider_request`      | Jinsi lilivyotumwa kwa mtoa huduma wa nje, katika lahaja yake     |
+| `pipeline_provider_response`     | Jibu ghafi kutoka kwa mtoa huduma wa nje                          |
+| `pipeline_client_response`       | Kilichorejeshwa kwa mwitaji                                       |
+| `pipeline_error`                 | Maelezo ya hitilafu ya kiwango cha pipeline kwa mwito ulioshindwa |
+| `bodies_truncated`               | True wakati sehemu yoyote hapo juu ilifikia `maxBodyBytes`        |
 
-Haya ni maudhui ya maagizo, kwa hiyo **yamezimwa kwa chaguomsingi** na kwa makusudi huchaguliwa kwa kila lengwa.
-Kinachotumwa ndicho kinachoonyeshwa na dashibodi, kwa sababu uhamishaji na `getCallLogById` hutumia utatuzi uleule
-wa maelezo: mizigo ya data
-tayari husafishwa taarifa binafsi zinazoweza kumtambulisha mtu na kufichwa siri inapoandikwa, na mwito unaofanywa kwa
-ufunguo wa API wa `noLog` hauhifadhi mzigo wowote wa data, hivyo hakuna cha kuhamisha.
+Haya ni maudhui ya maagizo, kwa hivyo **yamezimwa kwa chaguo-msingi** na kwa makusudi ni chaguo la kila eneo lengwa.
+Kinachotumwa ndicho dashibodi inachoonyesha, kwa sababu export na `getCallLogById` hushiriki utatuzi wa
+maelezo: payload huwa
+tayari zimesafishwa PII na taarifa za siri zimefichwa zinapoandikwa, na mwito unaofanywa kwa kutumia
+ufunguo wa API wa `noLog` hauhifadhi payload yoyote, kwa hivyo hakuna kitu cha kuhamisha.
 
-Mizigo ya data husomwa kwa kila safu kutoka kwenye faili ya mfumo wa faili, kwa hiyo ujazaji wa data hufanyika tu kwa malengwa
-yaliyouomba. Faili inayokosekana au iliyoharibika huhamisha muhtasari wake huku mizigo ya data ikiwa null badala ya
-kusababisha kundi kushindwa na kukwamisha kishale.
+Payload husomwa kwa kila safu kutoka kwenye artifact ya mfumo wa faili, kwa hivyo hydration huendeshwa tu kwa maeneo lengwa
+yaliyoomba itumike. Artifact inayokosekana au iliyoharibika huhamisha muhtasari wake ikiwa na payload za null badala
+ya kufanya batch ishindwe na kuzuia cursor kusonga mbele.
 
-`maxBodyBytes` (chaguomsingi 262144) huweka kikomo kwa kila sehemu. Mizigo mirefu zaidi ya data **hukatwa badala ya
+`maxBodyBytes` (chaguo-msingi 262144) huweka kikomo kwa kila sehemu. Payload ndefu zaidi **hukatwa badala ya
 kuondolewa** — agizo lililokatwa bado hujibu "nini kiliulizwa" — na safu huwekewa alama ya
-`bodies_truncated`. Mabadiliko yanayotiririshwa kipande kwa kipande hayahamishwi; jibu lililounganishwa
-tayari liko katika `pipeline_provider_response` na `pipeline_client_response`.
+`bodies_truncated`. Delta zilizotiririshwa kipande kwa kipande hazihamishwi; jibu lililounganishwa tayari limo
+katika `pipeline_provider_response` na `pipeline_client_response`.
 
 ---
 
 ## 2. Faili
 
-| Kipengele                                    | Mahali                                       |
-| -------------------------------------------- | -------------------------------------------- |
-| Mkataba wa lengwa                            | `src/lib/logExport/types.ts`                 |
-| Rejista                                      | `src/lib/logExport/registry.ts`              |
-| Ushughulikiaji wa siri                       | `src/lib/logExport/secrets.ts`               |
-| Kiendeshaji (IPC ya mchakato mzazi)          | `src/lib/logExport/runner.ts`                |
-| Mzunguko wa maisha wa mchakato               | `src/lib/logExport/childRunner.ts`           |
-| Sehemu ya kuanzia ya mchakato mtoto          | `src/lib/logExport/exportChild.ts`           |
-| Kifunguzi cha kusoma tu                      | `src/lib/db/logExportReadOnly.ts`            |
-| Hoja/ulinganishaji unaoshirikiwa             | `src/lib/usage/callLogExportQueries.ts`      |
-| Kitatuzi cha maelezo                         | `src/lib/usage/callLogDetailResolver.ts`     |
-| Uwasilishaji wa API                          | `src/lib/logExport/presenter.ts`             |
-| Lengwa la BigQuery                           | `src/lib/logExport/destinations/bigquery.ts` |
-| Uthibitishaji wa akaunti ya huduma ya Google | `src/lib/logExport/googleServiceAccount.ts`  |
-| Chanzo cha kumbukumbu za miito               | `src/lib/usage/callLogExportSource.ts`       |
-| Uhifadhi wa kudumu                           | `src/lib/db/logExportDestinations.ts`        |
-| Kazi ya Cron                                 | `src/lib/jobs/logExportJob.ts`               |
-| Tabaka la REST                               | `src/app/api/log-export/`                    |
-| Ukurasa wa dashibodi                         | `src/app/(dashboard)/dashboard/log-export/`  |
+| Sehemu                         | Mahali                                       |
+| ------------------------------ | -------------------------------------------- |
+| Mkataba wa lengwa              | `src/lib/logExport/types.ts`                 |
+| Sajili                         | `src/lib/logExport/registry.ts`              |
+| Ushughulikiaji wa siri         | `src/lib/logExport/secrets.ts`               |
+| Kiendeshaji (IPC mzazi)        | `src/lib/logExport/runner.ts`                |
+| Mzunguko wa maisha ya mchakato | `src/lib/logExport/childRunner.ts`           |
+| Kiingilio cha mchakato mtoto   | `src/lib/logExport/exportChild.ts`           |
+| Kifunguaji cha kusoma pekee    | `src/lib/db/logExportReadOnly.ts`            |
+| Hoja/ulinganishaji wa pamoja   | `src/lib/usage/callLogExportQueries.ts`      |
+| Kitatuzi cha maelezo           | `src/lib/usage/callLogDetailResolver.ts`     |
+| Uwasilishaji wa API            | `src/lib/logExport/presenter.ts`             |
+| Lengwa la BigQuery             | `src/lib/logExport/destinations/bigquery.ts` |
+| Uthibitishaji wa Google SA     | `src/lib/logExport/googleServiceAccount.ts`  |
+| Chanzo cha kumbukumbu za simu  | `src/lib/usage/callLogExportSource.ts`       |
+| Uhifadhi                       | `src/lib/db/logExportDestinations.ts`        |
+| Kazi ya cron                   | `src/lib/jobs/logExportJob.ts`               |
+| Safu ya REST                   | `src/app/api/log-export/`                    |
+| Ukurasa wa dashibodi           | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skima: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
 ---
 
-## 3. REST API
+## 3. API ya REST
 
 Njia zote zinahitaji uthibitishaji wa usimamizi (`requireManagementAuth`). Siri hazirejeshwi kamwe:
-siri iliyohifadhiwa hurejeshwa kama thamani halisi `__stored__`, na kutuma thamani hiyo tena wakati wa kusasisha
+siri iliyohifadhiwa hurudishwa kama thamani halisi `__stored__`, na kutuma thamani hiyo tena wakati wa kusasisha
 huhifadhi kitambulisho kilichopo.
 
-Kuunda au kusasisha lengwa ambalo aina yake inabainisha siri **kunahitaji
-`STORAGE_ENCRYPTION_KEY`**. Bila hiyo, `encrypt()` hupitisha data bila kuibadilisha wala kutoa onyo, hivyo uandishi
-hukataliwa kwa msimbo wa 400 badala ya kuweka kitambulisho katika SQLite kama maandishi yasiyosimbwa (kinga ileile ambayo
-webhook ya Telegram hutumia).
+Kuunda au kusasisha lengwa ambalo aina yake imetangaza siri **kunahitaji
+`STORAGE_ENCRYPTION_KEY`**. Bila hiyo, `encrypt()` hupitisha thamani kimyakimya bila kuibadilisha, kwa hiyo uandishi
+hukataliwa kwa 400 badala ya kuweka kitambulisho katika SQLite kama maandishi wazi (ulinzi uleule
+unaotumiwa na webhook ya Telegram).
 
-| Mbinu    | Njia                                     | Kusudi                                                                               |
-| -------- | ---------------------------------------- | ------------------------------------------------------------------------------------ |
-| `GET`    | `/api/log-export/types`                  | Aina za malengwa + orodha ya sehemu zake za usanidi                                  |
-| `GET`    | `/api/log-export/destinations`           | Kuorodhesha malengwa (siri zimefichwa)                                               |
-| `POST`   | `/api/log-export/destinations`           | Kuunda lengwa                                                                        |
-| `GET`    | `/api/log-export/destinations/{id}`      | Kusoma lengwa moja                                                                   |
-| `PUT`    | `/api/log-export/destinations/{id}`      | Kusasisha jina / hali ya kuwashwa / usanidi / upangaji wa mafungu                    |
-| `DELETE` | `/api/log-export/destinations/{id}`      | Kufuta                                                                               |
-| `POST`   | `/api/log-export/destinations/{id}/test` | Kupima vitambulisho, bila kuandika chochote                                          |
-| `POST`   | `/api/log-export/destinations/{id}/run`  | Kuhamisha rekodi zote zinazosubiri sasa, kwa njia ileile ya utekelezaji ulioratibiwa |
-| `GET`    | `/api/log-export/status`                 | Hali ya Cron, utekelezaji wa karibuni, rekodi zinazosubiri kwa kila lengwa           |
+| Mbinu    | Njia                                     | Kusudi                                                                 |
+| -------- | ---------------------------------------- | ---------------------------------------------------------------------- |
+| `GET`    | `/api/log-export/types`                  | Aina za lengwa + orodha ya sehemu zake za usanidi                      |
+| `GET`    | `/api/log-export/destinations`           | Orodhesha malengwa (siri zimefichwa)                                   |
+| `POST`   | `/api/log-export/destinations`           | Unda lengwa                                                            |
+| `GET`    | `/api/log-export/destinations/{id}`      | Soma lengwa moja                                                       |
+| `PUT`    | `/api/log-export/destinations/{id}`      | Sasisha jina / kuwezeshwa / usanidi / uwekaji katika makundi           |
+| `DELETE` | `/api/log-export/destinations/{id}`      | Futa                                                                   |
+| `POST`   | `/api/log-export/destinations/{id}/test` | Jaribu vitambulisho, usiandike chochote                                |
+| `POST`   | `/api/log-export/destinations/{id}/run`  | Hamisha sasa, kwa njia sawa na utekelezaji ulioratibiwa                |
+| `GET`    | `/api/log-export/status`                 | Hali ya Cron, utekelezaji wa hivi karibuni, mlundikano kwa kila lengwa |
 
-`GET /api/log-export/types` ndiyo inayofanya UI itumike kwa aina zote: fomu ya dashibodi huundwa kutokana na
-vifafanuzi vya sehemu vinavyorejeshwa, hivyo lengwa jipya halihitaji mabadiliko ya UI.
+`GET /api/log-export/types` ndiyo inayofanya UI iwe ya jumla: fomu ya dashibodi huonyeshwa kutokana na
+vifafanuzi vya sehemu vinavyorejeshwa, kwa hiyo lengwa jipya halihitaji mabadiliko ya UI.
 
 ---
 
@@ -199,58 +199,58 @@ vifafanuzi vya sehemu vinavyorejeshwa, hivyo lengwa jipya halihitaji mabadiliko 
 
 Vifunguo vya usanidi (`type: "bigquery"`):
 
-| Ufunguo              | Maelezo                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `projectId`          | Mradi wa GCP unaohifadhi seti ya data                                                         |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                               |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                               |
-| `location`           | Hutumika tu inapobidi kuunda seti ya data (chaguomsingi `EU`)                                 |
-| `serviceAccountJson` | Ufunguo wa akaunti ya huduma. Siri: husimbwa kwa njia fiche inapohifadhiwa, hairudishwi kamwe |
-| `autoCreate`         | Unda seti ya data na jedwali wakati wa uhamishaji wa kwanza (chaguomsingi `true`)             |
+| Ufunguo              | Maelezo                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `projectId`          | Mradi wa GCP unaohifadhi seti ya data                                                          |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                |
+| `location`           | Hutumiwa tu wakati seti ya data inapaswa kuundwa (chaguo-msingi `EU`)                          |
+| `serviceAccountJson` | Ufunguo wa akaunti ya huduma. Siri: umesimbwa kwa njia fiche unapohifadhiwa, haurejeshwi kamwe |
+| `autoCreate`         | Unda seti ya data na jedwali wakati wa uhamishaji wa kwanza (chaguo-msingi `true`)             |
 
 Akaunti ya huduma inahitaji `bigquery.tables.updateData` kwenye jedwali lengwa, pamoja na
 `bigquery.datasets.create` / `bigquery.tables.create` wakati `autoCreate` imewashwa.
 
 Kundi lililosanidiwa ni kitengo cha **kishale**, si cha HTTP: `send()` huligawanya katika miito ya insertAll
-yenye safu mlalo zisizozidi 500, hivyo `batch_size` kubwa haiwezi kukiuka kikomo cha ombi cha MB 10 cha BigQuery.
-Hali za muda mfupi (408/429/500/502/503/504) hujaribiwa tena hadi mara tatu kwa kuongeza muda wa kusubiri
-kwa kiwango cha kielelezo, zikitumia tena insertIds zilezile; hitilafu za uthibitishaji na skima husababisha hitilafu kurushwa katika jaribio la kwanza badala
-ya kupoteza muda wa utekelezaji.
+yenye upeo wa safu mlalo 500, kwa hiyo `batch_size` kubwa haiwezi kuzidi kikomo cha ombi cha MB 10 cha BigQuery.
+Hali za muda (408/429/500/502/503/504) hujaribiwa tena hadi mara tatu kwa ucheleweshaji unaoongezeka
+kwa kasi ya kielelezo, huku insertIds zilezile zikitumiwa tena; hitilafu za uthibitishaji na skima hutupa hitilafu katika jaribio la kwanza
+badala ya kupoteza utekelezaji.
 
-Jedwali lililoundwa muda mfupi uliopita bado halionekani kwenye sehemu ya mwisho ya utiririshaji, ambayo hujibu
-404 kwa sekunde chache. Ombi lenye 404 hiyo hujaribiwa tena, lakini **ikiwa tu utekelezaji huu uliunda jedwali** —
-jedwali ambalo halipo kweli bado husababisha kushindwa haraka. Kumbuka kuwa kuunda upya jedwali kwa jina ambalo
-lilifutwa hivi karibuni hufanya BigQuery ikatae uingizaji kwa utiririshaji kwa dakika kadhaa; hiyo ni
-tabia ya kufuta kisha kuunda upya, kwa hiyo pendelea jina jipya la jedwali badala ya kufuta na kuongeza tena lilelile.
+Jedwali lililoundwa muda mfupi uliopita bado halionekani kwa kituo cha utiririshaji, ambacho hujibu
+404 kwa sekunde chache. 404 hiyo hujaribiwa tena, lakini **ikiwa tu utekelezaji huu uliunda jedwali** —
+jedwali ambalo kwa kweli halipo bado hushindwa mara moja. Kumbuka kuwa kuunda upya jedwali kwa jina ambalo
+lilifutwa hivi karibuni hufanya BigQuery ikatae uingizaji wa kutiririsha kwa dakika kadhaa; hiyo ni
+sifa ya kufuta-kisha-kuunda-upya, kwa hiyo ni bora kutumia jina jipya la jedwali badala ya kuliondoa na kuliongeza tena.
 
-**Kushindwa kwa sehemu huwasilishwa kama HTTP 200 yenye `insertErrors[]` isiyo tupu.** Huko huchukuliwa kama
-kushindwa na husababisha hitilafu kurushwa, jambo linalozuia kishale kusonga kupita safu mlalo ambazo BigQuery haikuwahi
-kukubali; `tests/unit/log-export-bigquery.test.ts` huhakikisha tabia hiyo.
+**Hitilafu ya sehemu huwasili kama HTTP 200 yenye `insertErrors[]` isiyo tupu.** Hiyo huchukuliwa kama
+hitilafu na hutupa hitilafu, jambo linalozuia kishale kusonga mbele kupita safu mlalo ambazo BigQuery
+haikukubali; `tests/unit/log-export-bigquery.test.ts` huthibitisha tabia hiyo.
 
-Usafirishaji hutumia REST ya kawaida — tamko la RS256 lililotiwa saini yenyewe hubadilishwa kuwa tokeni ya ufikiaji kwenye
-`https://oauth2.googleapis.com/token`, kisha safu mlalo hutumwa kwa `tabledata.insertAll`. Hakuna Google SDK
-inayoingizwa. Tokeni za ufikiaji huhifadhiwa kwenye akiba ndani ya mchakato kwa kila jozi ya (akaunti ya huduma, wigo).
+Usafirishaji hutumia REST ya kawaida — dai la RS256 lililotiwa saini kibinafsi hubadilishwa kuwa tokeni ya ufikiaji katika
+`https://oauth2.googleapis.com/token`, kisha safu mlalo hutumwa kwa `tabledata.insertAll`. Hakuna SDK ya Google
+inayoongezwa. Tokeni za ufikiaji huhifadhiwa kwa muda ndani ya mchakato kwa kila jozi ya (akaunti ya huduma, upeo).
 
-Jedwali linaloundwa lina safu wima moja kwa kila sehemu ya kichupo cha Logs pamoja na `exported_at`, na limepangwa kulingana na
-jinsi kumbukumbu za miito zinavyouliziwa kwa vitendo:
+Jedwali linaloundwa huwa na safu wima moja kwa kila sehemu ya kichupo cha Logs pamoja na `exported_at`, na hupangwa kwa
+jinsi kumbukumbu za miito zinavyoulizwa:
 
-- **Limegawanywa katika sehemu za kila siku kwa `timestamp`**, hivyo hoja yenye mipaka ya tarehe hukagua siku hizo pekee.
-- **Limewekwa katika makundi kwa `api_key_name`, `provider`, `model`, `status`** (kwa mpangilio huo), hivyo kuchuja kulingana na
-  nani aliyeitekeleza, ilikoenda, au kama ilishindwa huondoa vitalu visivyohitajika ndani ya kila sehemu. BigQuery
-  huruhusu safu wima zisizozidi nne za kupanga makundi na mpangilio una umuhimu: kichujio cha `api_key_name` pekee
-  huondoa vitalu visivyohitajika, lakini kichujio cha `status` pekee hakifanyi hivyo.
-- **Muda wa hiari wa kuhifadhi sehemu** kupitia `partitionExpirationDays` (0 huhifadhi kila kitu), unaotumika
-  wakati jedwali linapoundwa.
+- **Hugawanywa kwa siku kulingana na `timestamp`**, kwa hiyo hoja iliyowekewa mipaka ya tarehe huchanganua siku hizo pekee.
+- **Hupangwa katika makundi kulingana na `api_key_name`, `provider`, `model`, `status`** (kwa mpangilio huo), kwa hiyo kuchuja kulingana na
+  nani aliyeiendesha, ilikoenda, au kama ilishindwa huondoa vizuizi visivyohitajika ndani ya kila sehemu. BigQuery
+  huruhusu safu wima zisizozidi nne za upangaji katika makundi na mpangilio ni muhimu: kichujio cha `api_key_name` pekee
+  huondoa vizuizi visivyohitajika, lakini kichujio cha `status` pekee hakifanyi hivyo.
+- **Uhifadhi wa hiari wa sehemu** kupitia `partitionExpirationDays` (0 huhifadhi kila kitu), unaotumika
+  jedwali linapoundwa.
 
-Mipangilio yote miwili hutumika wakati wa kuunda. Jedwali lililopo huhifadhi mpangilio wowote lilionao tayari, kwa hiyo
-elekeza lengwa kwenye kitambulisho kipya cha jedwali ikiwa unataka kuitumia.
+Mipangilio yote miwili hutumika wakati wa kuunda. Jedwali lililopo huhifadhi mpangilio wowote ambao tayari linao, kwa hivyo
+elekeza lengwa kwenye kitambulisho kipya cha jedwali ikiwa ungependa kuitumia.
 
-`tests/unit/log-export-bigquery.test.ts` huthibitisha kuwa kilinganishi na skima ya jedwali hubaki zikiwa
-zimesawazishwa, ili safu wima mpya ya kumbukumbu za miito isiweze kuachwa kimyakimya wakati wa kuhamisha.
+`tests/unit/log-export-bigquery.test.ts` huhakikisha kuwa kipangaji na skima ya jedwali zinaendelea
+kuwiana, ili safu wima mpya ya kumbukumbu za simu isipotezwe kimyakimya wakati wa kuhamishwa.
 
-Makundi hugawanywa kulingana na **vyote viwili**, idadi ya safu mlalo na baiti zilizosanifiwa kwa uhamishaji. Idadi ya safu mlalo pekee haitoshi
-mara data za maombi zinapohamishwa: safu mlalo 500 zenye maelekezo zinaweza kuwa makumi ya megabaiti, na insertAll
-hukataa ombi linalozidi MB 10. Kipande hufungwa kinapofikia safu mlalo 500 au MB 9, chochote kinachotangulia.
+Makundi hugawanywa kulingana na **vyote viwili**, idadi ya safu mlalo na baiti zilizobadilishwa kuwa mfuatano. Idadi ya safu mlalo pekee haitoshi
+mara tu payload zinaposafirishwa: safu mlalo 500 zenye prompts zinaweza kufikia makumi ya megabaiti, na insertAll
+hukataa ombi linalozidi MB 10. Vipande hufungwa vinapofikia safu mlalo 500 au MB 9, chochote kinachotangulia.
 
 ---
 
@@ -402,7 +402,7 @@ utaratibu wake tofauti wa kuficha taarifa.
 hali ya HTTP bila kuandika span za kumbukumbu za miito.
 
 Vitambulisho vya trace na span ni tarakimu 32/16 za kwanza za heksadesimali za SHA-256 ya
-`"omniroute.trace\\0" + callLogId` na `"omniroute.span\\0" + callLogId`. Utumaji upya hubeba
+`"omniroute.trace\0" + callLogId` na `"omniroute.span\0" + callLogId`. Utumaji upya hubeba
 vitambulisho vilevile. Hii si dhamana ya kuondoa nakala rudufu: baadhi ya mifumo ya nyuma, ikijumuisha upokeaji wa Langfuse
 v4, haiondoi span rudufu zenye kitambulisho kilekile. Kuanguka kwa programu au kushindwa kwa sehemu ya kipande kunaweza
 kusababisha kutumwa upya kwa kundi moja tu la kishale ambalo halijathibitishwa; kundi hilo lote linaweza kurudiwa,
@@ -467,33 +467,33 @@ za ziada zinazohitajika; sehemu nyingine zote za safu mlalo zinaendelea kukaguli
 ## 6. Kuongeza lengwa
 
 1. Unda `src/lib/logExport/destinations/<name>.ts` inayohamisha `LogExportDestinationType`:
-   `configSchema` ya Zod, safu ya vifafanuzi vya `fields` kwa ajili ya kiolesura cha mtumiaji, `secretFields`, na
+   `configSchema` ya Zod, safu ya vifafanuzi vya `fields` kwa ajili ya UI, `secretFields`, na
    `createClient(config)` inayorejesha `test()` / `prepare()` / `send(records)`.
 2. Iongeze kwenye safu ya `DESTINATIONS` katika `src/lib/logExport/registry.ts`.
-3. Andika majaribio ndani ya `tests/unit/`.
+3. Andika majaribio chini ya `tests/unit/`.
 
-Hayo ndiyo mabadiliko yote: uhifadhi wa kudumu, kazi ya cron, safu ya REST, usimbaji fiche wa siri na
-fomu ya dashibodi vyote husoma sajili hiyo.
+Hayo ndiyo mabadiliko yote: uhifadhi, kazi ya cron, safu ya REST, usimbaji fiche wa siri na
+fomu ya dashibodi zote husoma sajili.
 
-Kanuni mbili za lengwa jipya:
+Sheria mbili za lengwa jipya:
 
-- `send()` **lazima itupe hitilafu** iwapo sehemu ya operesheni itashindwa. Kukamilika bila hitilafu kunamaanisha "lengwa lina safu mlalo hizi",
-  na kishale cha ufuatiliaji huzipita kabisa.
-- Lengwa linalopokea URL iliyotolewa na mtumiaji lazima liithibitishe kupitia
-  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) kabla ya kuleta data,
-  kwa namna ileile inayotumiwa na webhook. BigQuery haihitaji hili: anwani za seva zake ni thamani zisizobadilika.
+- `send()` **lazima itupe hitilafu** ikiwa kuna kutofaulu kwa sehemu. Kukamilika kunamaanisha "lengwa lina safu hizi",
+  na kishale husogea mbele yao kabisa.
+- Lengwa linalotumia URL iliyotolewa na mtumiaji lazima liithibitishe kupitia
+  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) kabla ya kuichota,
+  kwa njia ileile inayotumiwa na webhooks. BigQuery haihitaji hili: vipangishi vyake ni thabiti.
 
 ---
 
 ## 7. Kuiendesha
 
-- **Dashibodi**: Miunganisho → Uhamishaji wa kumbukumbu. Ongeza lengwa, endesha **Jaribu** ili kukagua taarifa za uthibitishaji
-  bila kuandika safu mlalo, kisha uliwashe.
-- **Mlundikano unaosubiri**: kila kadi ya lengwa huonyesha safu mlalo zinazosubiri na kishale cha ufuatiliaji; `GET
+- **Dashibodi**: Integrations → Log export. Ongeza lengwa, tumia **Test** kukagua vitambulisho
+  bila kuandika safu, kisha liwashe.
+- **Mlundikano**: kila kadi ya lengwa huonyesha safu zinazosubiri na kishale; `GET
 /api/log-export/status` hurejesha takwimu hizohizo pamoja na utekelezaji 20 wa mwisho wa kazi.
-- **Kushindwa kwa lengwa moja hakusababishi mengine kushindwa** — muhtasari wa utekelezaji hurekodi hali ya kila lengwa
-  katika `last_status` / `last_error`, na historia ya utekelezaji wa kazi huhifadhi hali ya jumla.
-- **Kufuta lengwa hufuta kishale chake cha ufuatiliaji.** Kuliongeza tena huanza kutoka kwenye kumbukumbu ya zamani zaidi ya
-  mwito iliyohifadhiwa, jambo linalotuma tena safu mlalo ambazo huenda lengwa tayari linazo. Katika BigQuery,
-  `insertId` ya kila safu mlalo huzuia urudufu huo ndani tu ya kipindi cha BigQuery chenyewe cha kuondoa urudufu, kwa hiyo ni bora kuzima
-  lengwa badala ya kulifuta.
+- **Lengwa linaloshindwa halisababishi mengine yashindwe** — muhtasari wa utekelezaji hurekodi hali ya kila lengwa
+  katika `last_status` / `last_error`, na historia ya utekelezaji wa kazi huhifadhi jumla.
+- **Kufuta lengwa hufuta kishale chake.** Kuliongeza tena huanzia kwenye kumbukumbu ya zamani zaidi ya simu
+  iliyohifadhiwa, jambo ambalo hutuma upya safu ambazo huenda lengwa tayari linazo. Kwenye BigQuery, `insertId`
+  ya kila safu hushughulikia hilo ndani tu ya kipindi cha BigQuery chenyewe cha kuondoa nakala, kwa hivyo ni bora
+  kuzima lengwa badala ya kulifuta.

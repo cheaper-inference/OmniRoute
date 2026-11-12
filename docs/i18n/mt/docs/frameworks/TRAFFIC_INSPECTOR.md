@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekkaniżmu:** Juża APIs tas-sistema operattiva biex jirridirezzjona t-traffiku HTTP/HTTPS kollu permezz tal-listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` u s-settings tal-host/port HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Kopertura:** Kull applikazzjoni fuq il-magna li tirrispetta s-settings tal-proxy tas-sistema
   **Nota:** `source` = `"system-proxy"`
 
 **Mekkaniżmi ta’ sikurezza:**
 
-- Timer ta’ diżattivazzjoni awtomatika (predefinit għal 30 minuta, konfigurabbli permezz ta’ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- L-istat preċedenti tal-proxy tas-sistema jiġi ssejvjat fid-DB u rrestawrat meta l-bidla titreġġa’ lura
-- Id-dashboard juri l-messaġġ "Qed jitreġġa’ lura l-proxy tas-sistema" jekk l-utent jinnaviga ’l bogħod waqt li jkun attiv
-- L-UI turi l-badge `⚠ Avvanzat` + checkbox ta’ konferma espliċita
+- L-applikazzjoni tal-proxy tiskeda timer ta’ treġġigħ lura mingħajr garanzija, lokali għall-proċess (30 minuta b’mod predefinit, konfigurabbli permezz ta’ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). It-timer ma jibqax jeżisti meta jintemm il-proċess tas-server.
+- L-istat preċedenti tal-proxy jinżamm fil-memorja tal-proċess; dan il-maħżen tal-istat tal-qbid ma jippersistihx f’database. It-treġġigħ lura jirrestawra s-settings salvati ta’ macOS/GNOME; fuq Windows jirrisettja l-proxy WinHTTP minflok jirrestawra l-konfigurazzjoni preċedenti.
+- Waqt li l-proxy jiġi rrappurtat bħala applikat, il-ħatt tal-paġna jibgħat talba keepalive għat-treġġigħ lura mingħajr garanzija u jitlob konferma nattiva li l-kliem tagħha jikkontrollah il-browser. It-tneħħija tal-ispettur waqt navigazzjoni SPA wkoll tipprova t-treġġigħ lura, mingħajr dak il-messaġġ tal-browser.
+- Il-bar tal-qbid turi l-kontroll lokalizzat `System-wide` b’ikona ta’ twissija. Bħalissa klikk tibdel biss l-istat lokali tal-interface; ma turix kaxxa ta’ konferma u ma tapplikax jew treġġax lura l-proxy tas-sistema.
 
 ### Modalità 5 — Dekriptaġġ trasparenti TPROXY (Linux, root, b’attivazzjoni volontarja)
 
@@ -113,13 +113,13 @@ Din hija subsistema sostanzjali bil-gwida ddedikata tagħha għall-operaturi —
 
 ### Tqabbil tal-modi ta’ qbid
 
-| Modalità                | Konfigurazzjoni              |               Sudo?                | Kopertura                           | Noti                                                                                                                                   |
-| ----------------------- | ---------------------------- | :--------------------------------: | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge          | Awtomatika                   |      Darba (ċertifikat+hosts)      | 9 aġenti tal-IDE                    | Attiva b’mod awtomatiku                                                                                                                |
-| 2. Hosts Personalizzati | Input għal kull host         |          Iva (fajl hosts)          | Kwalunkwe app li tuża dak il-host   | Issejvjata fid-DB                                                                                                                      |
-| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`     |                 Le                 | Apps li jirrispettaw l-env          | Port 8080; HTTPS jgħaddi minn mina CONNECT (metadata biss, qatt ma jiġi deċifrat)                                                      |
-| 4. Għas-sistema kollha  | Aqleb + ikkonferma           |                Iva                 | L-apps kollha fuq il-magna          | Jiġi diżattivat awtomatikament wara 30 minuta                                                                                          |
-| 5. Deċifrar TPROXY      | Aqleb (Linux + addon nattiv) | Iva (root + installazzjoni tas-CA) | Kwalunkwe host fuq il-port fil-mira | Jiddeċifra hosts arbitrarji; diżattivat b’mod awtomatiku — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`) |
+| Modalità                | Konfigurazzjoni                                                |               Sudo?                | Kopertura                           | Noti                                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------- | :--------------------------------: | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge          | Awtomatika                                                     |      Darba (ċertifikat+hosts)      | 9 aġenti tal-IDE                    | Attiva b’mod awtomatiku                                                                                                                |
+| 2. Hosts Personalizzati | Input għal kull host                                           |          Iva (fajl hosts)          | Kwalunkwe app li tuża dak il-host   | Issejvjata fid-DB                                                                                                                      |
+| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`                                       |                 Le                 | Apps li jirrispettaw l-env          | Port 8080; HTTPS jgħaddi minn mina CONNECT (metadata biss, qatt ma jiġi deċifrat)                                                      |
+| 4. Għas-sistema kollha  | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |                Iva                 | L-apps kollha fuq il-magna          | Timer ta’ treġġigħ lura mingħajr garanzija (30 minuta b’mod predefinit)                                                                |
+| 5. Deċifrar TPROXY      | Aqleb (Linux + addon nattiv)                                   | Iva (root + installazzjoni tas-CA) | Kwalunkwe host fuq il-port fil-mira | Jiddeċifra hosts arbitrarji; diżattivat b’mod awtomatiku — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ huwa titjib sussegwenti).
 ### 5.1 Reġistrazzjoni ta' sessjoni
 
 1. Ikklikkja **"● Irreġistra sessjoni"** fl-għodda → daħħal isem (mhux obbligatorju)
-2. Il-fluss dirett ikompli bħas-soltu; indikatur aħmar li jteptep juri `◉ REĠ · <isem> · 00:42 · 23 talba`
+2. Il-wiri dirett ikompli normalment; il-bar tar-reġistrazzjoni turi tikka ħamra li tħabbat, il-ħin li għadda, l-isem tas-sessjoni meta jkun disponibbli, u kontroll lokalizzat biex twaqqaf.
 3. Ikklikkja **"⏹ Waqqaf"** → l-istampa tas-sessjoni tiġi ssejvjata f'`inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Wiri ta' sessjoni rreġistrata
@@ -323,7 +323,7 @@ huwa titjib sussegwenti).
 Il-lista li tinżel **Sessjonijiet** fl-għodda telenka s-sessjonijiet issejvjati. Meta tagħżel waħda:
 
 - Tittella' l-istampa tas-sessjoni (stat iffriżat)
-- Jidher banner: `Qed tara s-sessjoni rreġistrata "<isem>" — [Lura għad-dirett]`
+- Banner juri tikketta lokalizzata għal sessjoni rreġistrata u l-isem tas-sessjoni (jew test sostitut lokalizzat għal sessjoni bla titlu), maġenb buttuna lokalizzata biex terġa’ lura għall-wiri dirett.
 - It-tab tal-Istatistika ssir disponibbli b'aggregati ta' Recharts
 
 ### 5.3 Formati tal-esportazzjoni
@@ -347,7 +347,7 @@ Traffic Inspector juri **t-traffiku HTTPS interċettat kollu**, inklużi l-heade
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                        | Ir-routes kollha u l-endpoint WebSocket huma aċċessibbli biss permezz tal-loopback (infurzat f’`routeGuard.ts` qabel l-awtentikazzjoni)                                                                              |
 | **Maskra tas-sigrieti**               | L-iskaner lineari `maskSecret()` jaħbi l-kredenzjali Bearer ta’ RFC 6750, iċ-ċwievet bi prefiss tal-fornitur u t-tokens opaki twal qabel `TrafficBuffer.push()`                                                      |
-| **Limitu tad-daqs tal-body**          | Il-bodies > `INSPECTOR_MAX_BODY_KB` (valur predefinit 1024 KB) jiġu maqtugħa b’avviż `"(maqtugħ għall-prestazzjoni)"`                                                                                                |
+| **Limitu tad-daqs tal-body**          | Il-bodies > `INSPECTOR_MAX_BODY_KB` (valur predefinit 1024 KB) jiġu maqtugħa b’avviż `"(truncated for performance)"`                                                                                                 |
 | **Sanitizzazzjoni tal-headers**       | L-ismijiet jiġu kkonvertiti f’ittri żgħar; il-headers tal-framing/hop-by-hop u tal-awtentikazzjoni tal-proxy jitneħħew; il-cookies jinħbew kompletament; il-valuri tal-kredenzjali jiġu ddelegati lil `maskSecret()` |
 | **CSP**                               | Politika stretta tas-Sigurtà tal-Kontenut fuq il-paġni ta’ Traffic Inspector biex tipprevjeni XSS permezz ta’ bodies tar-rispons injettati                                                                           |
 | **Ebda persistenza b’mod predefinit** | It-`TrafficBuffer` jinżamm fil-memorja u jintilef meta jerġa’ jinbeda s-server. Is-sessjonijiet jinżammu b’mod persistenti biss meta jiġu rreġistrati espliċitament                                                  |
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Fid-dħul li jmiss, id-dashboard se joffri wkoll "Irriversja l-proxy tas-sistema" jekk jinduna li l-istat fid-DB jindika li l-proxy kien attiv.
+L-istat salvat tal-proxy jeżisti biss fil-proċess tas-server. Wara ħabta jew bidu mill-ġdid, il-maħżen attwali tal-istat tal-qbid ma jistax jirrestawra dik l-istampa minn database; uża l-kmandi ta’ rkupru tal-pjattaforma ta’ hawn fuq meta jkun meħtieġ irkupru manwali.
 
 ### Buffer mimli
 

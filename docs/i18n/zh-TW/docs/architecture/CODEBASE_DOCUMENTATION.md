@@ -4,14 +4,7 @@
 
 ---
 
-title: "OmniRoute 程式碼基礎文件"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# OmniRoute 程式碼基礎文件
-
-> **版本：** v3.8.0
+> **版本：** v3.8.51
 > **最後更新：** 2026-06-28
 > **讀者對象：** 為 OmniRoute 貢獻程式碼或在其之上建立整合的工程師。
 >
@@ -446,104 +439,144 @@ server/
 
 ---
 
-## 4. `open-sse/` —串流引擎工作區
+## 4. `open-sse/` — 串流引擎工作區
 
-單獨的 npm 工作區發佈為`@omniroute/open-sse`。擁有請求處理、執行器、翻譯器、服務、變壓器和MCP伺服器。
+獨立的 npm 工作區，以 `@omniroute/open-sse` 套件名稱發布。負責請求處理、執行器、轉譯器、服務、轉換器及 MCP 伺服器。
 
 ```
 open-sse/
-├── index.ts                Public exports
-├── package.json            Workspace manifest
+├── index.ts                公開匯出
+├── package.json            工作區資訊清單
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries, header profiles, identity, …
-├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
-├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               80+ service modules (combos, fallback, quotas, identity, …)
-├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
+├── config/                 提供者登錄、標頭設定檔、身分識別，……
+├── handlers/               請求處理常式（聊天、嵌入、音訊、影像，……）
+├── executors/              159 個提供者執行器模組（執行器類別 + 各提供者的輔助程式）
+├── translator/             格式轉換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
+├── transformer/            Responses API ↔ Chat Completions 串流轉換器
+├── services/               80 多個服務模組（組合、後備、配額、身分識別，……）
+├── utils/                  串流輔助程式、TLS 用戶端、AWS SigV4、代理 fetch，……
+└── mcp-server/             MCP 伺服器（3 種傳輸方式、33 個範圍、110 項工具）
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| 處理程式                | 目的                                                 |
+| 處理常式                | 用途                                                 |
 | ----------------------- | ---------------------------------------------------- |
-| `chatCore.ts`           | 主聊天管道（快取、速率限制、組合路由、執行程式調度） |
-| `responsesHandler.ts`   | OpenAI回應API入口點                                  |
+| `chatCore.ts`           | 主要聊天管線（快取、速率限制、組合路由、執行器分派） |
+| `responsesHandler.ts`   | OpenAI Responses API 進入點                          |
 | `embeddings.ts`         | 嵌入                                                 |
 | `imageGeneration.ts`    | 影像生成                                             |
 | `audioSpeech.ts`        | 文字轉語音                                           |
 | `audioTranscription.ts` | 語音轉文字                                           |
 | `videoGeneration.ts`    | 影片生成                                             |
-| `musicGeneration.ts`    | 音樂世代                                             |
-| `rerank.ts`             | 重新排名                                             |
-| `moderations.ts`        | 適度                                                 |
+| `musicGeneration.ts`    | 音樂生成                                             |
+| `rerank.ts`             | 重新排序                                             |
+| `moderations.ts`        | 內容審核                                             |
 | `search.ts`             | 網頁搜尋                                             |
-| `sseParser.ts`          | SSE事件解析器                                        |
-| `usageExtractor.ts`     | 從上游流中提取令牌計數                               |
-| `responseSanitizer.ts`  | 剝離提供者特定的噪音                                 |
-| `responseTranslator.ts` | 提供者回應和翻譯層之間的黏合劑                       |
+| `sseParser.ts`          | SSE 事件剖析器                                       |
+| `usageExtractor.ts`     | 從上游串流中擷取權杖計數                             |
+| `responseSanitizer.ts`  | 移除提供者特有的雜訊                                 |
+| `responseTranslator.ts` | 銜接提供者回應與轉譯器層                             |
 
 ### 4.2 `open-sse/executors/`
 
-159 個頂級執行器模組（`*.ts`減去`base.ts`、 `index.ts`並測試—計數`npm run check:docs-counts`測量值）。每個執行器類別直接或透過`DefaultExecutor`或另一個執行器擴展`BaseExecutor` (`base.ts`)；其餘模組是每個提供者的幫助程式（工具模式、 fetch/TTS適配器、怪異處理程序）。執行者包括：
+共有 159 個頂層執行器模組（`*.ts`，不含 `base.ts`、`index.ts` 與測試——此數量由
+`npm run check:docs-counts` 測量）。每個執行器類別都直接或透過 `DefaultExecutor`
+或其他執行器繼承自 `BaseExecutor`（`base.ts`）；其餘模組則是各提供者專用的輔助程式
+（工具結構描述、fetch/TTS 配接器、特殊行為處理常式）。執行器包括：
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
+`antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
+`chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、
+`muse-spark-web`、`nlpcloud`、`opencode`、`perplexity-web`、`petals`、
+`pollinations`、`qoder`、`vertex`、`devin-desktop`，以及 `claudeIdentity.ts`
+（共用的身分識別輔助程式）和 `index.ts`（登錄表）。
 
-> 注意：此處未列出的提供者由`default.ts`使用通用 OpenAI 相容執行器提供服務。完整的提供者目錄（381 個提供者）位於`src/shared/constants/providers.ts`。
+> 注意：此處未列出的提供者由 `default.ts` 使用通用的 OpenAI 相容執行器提供服務。
+> 完整的提供者目錄（388 個提供者）位於
+> `src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`
 
-中心輻射型翻譯（OpenAI是中心）。
+樞紐輻射式轉譯架構（以 OpenAI 為樞紐）。
 
-- **9 請求翻譯**(`translator/request/`): `antigravity-to-openai`、 `claude-to-gemini`、 `claude-to-openai`、 `gemini-to-openai`、 `openai-responses`、 `openai-to-claude`、 `openai-to-cursor`、 `openai-to-gemini`、 `openai-to-kiro`。
-- **9 回覆翻譯員**(`translator/response/`): `claude-to-openai`、 `cursor-to-openai`、 `gemini-to-claude`、 `gemini-to-openai`、 `kiro-to-openai`、 `openai-responses`、 `openai-to-antigravity`、 `openai-to-claude`。
-- **9 幫手**(`translator/helpers/`)： `claudeHelper`、 `geminiHelper`、 `geminiToolsSanitizer`、 `maxTokensHelper`、 `openaiHelper`、 `responsesApiHelper`、 `schemaCoercion`、 `toolCallHelper`，以及輔助測試。
-- **影像助手**（`translator/image/sizeMapper.ts`）。
-- 頂級： `bootstrap.ts`、 `formats.ts`、 `registry.ts`、 `index.ts`。
+- **9 個請求轉譯器**（`translator/request/`）：
+  `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、
+  `gemini-to-openai`、`openai-responses`、`openai-to-claude`、
+  `openai-to-cursor`、`openai-to-gemini`、`openai-to-kiro`。
+- **9 個回應轉譯器**（`translator/response/`）：
+  `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、
+  `kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、
+  `openai-to-claude`。
+- **9 個輔助程式**（`translator/helpers/`）：
+  `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`maxTokensHelper`、
+  `openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`toolCallHelper`，以及
+  輔助程式測試。
+- **影像輔助程式**（`translator/image/sizeMapper.ts`）。
+- 頂層：`bootstrap.ts`、`formats.ts`、`registry.ts`、`index.ts`。
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based回應API ↔聊天完成轉換器（由`responses/`路由包羅萬象使用）。
+- `responsesTransformer.ts` — 以 `TransformStream` 為基礎的 Responses API ↔ Chat
+  Completions 轉換器（由 `responses/` 路由的全捕捉處理使用）。
 
 ### 4.5 `open-sse/services/`
 
-亮點（ `open-sse/services/`下的完整列表）：
+重點項目（完整清單位於 `open-sse/services/` 下）：
 
-| 憂慮           | 文件                                                                                                                                                                                                                                                     |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 組合路由       | `combo.ts` (20 個策略), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
-| 汽車組合發動機 | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| 彈性           | `accountFallback.ts` (冷卻+鎖定), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                                  |
-| 配額           | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| 快取           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| 路由智能       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| 模型處理       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| 壓縮           | `compression/` —全壓縮引擎接線                                                                                                                                                                                                                           |
-| 令牌+會話      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| 等級/清單      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP /網絡       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| 批次           | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| 用法           | `usage.ts`                                                                                                                                                                                                                                               |
+| 關注面向        | 檔案                                                                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Combo 路由      | `combo.ts`（20 種策略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                       |
+| 自動 Combo 引擎 | `autoCombo/` — `engine.ts`、`scoring.ts`、`taskFitness.ts`、`virtualFactory.ts`、`modePacks.ts`、`autoPrefix.ts`、`persistence.ts`、`providerDiversity.ts`、`providerRegistryAccessor.ts`、`routerStrategy.ts`、`selfHealing.ts`、`index.ts`             |
+| 韌性            | `accountFallback.ts`（冷卻 + 鎖定）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                                               |
+| 配額            | `quotaMonitor.ts`、`quotaPreflight.ts`、`bailianQuotaFetcher.ts`、`codexQuotaFetcher.ts`、`deepseekQuotaFetcher.ts`、`openrouterQuotaFetcher.ts`、`openrouterFreeWindow.ts`、`llmgatewayQuotaFetcher.ts`、`crofUsageFetcher.ts`、`antigravityCredits.ts` |
+| 快取            | `reasoningCache.ts`、`searchCache.ts`、`signatureCache.ts`、`requestDedup.ts`                                                                                                                                                                            |
+| 路由智慧        | `intentClassifier.ts`、`taskAwareRouter.ts`、`backgroundTaskDetector.ts`、`volumeDetector.ts`、`wildcardRouter.ts`、`workflowFSM.ts`、`specificityDetector.ts`、`specificityRules.ts`、`specificityTypes.ts`                                             |
+| 模型處理        | `modelCapabilities.ts`、`modelDeprecation.ts`、`modelFamilyFallback.ts`、`modelStrip.ts`、`model.ts`、`provider.ts`、`providerRequestDefaults.ts`、`providerCostData.ts`、`payloadRules.ts`                                                              |
+| 壓縮            | `compression/` — 完整的壓縮引擎接線                                                                                                                                                                                                                      |
+| 權杖 + 工作階段 | `tokenRefresh.ts`、`sessionManager.ts`、`apiKeyRotator.ts`、`contextManager.ts`、`contextHandoff.ts`、`systemPrompt.ts`、`roleNormalizer.ts`、`responsesInputSanitizer.ts`、`toolSchemaSanitizer.ts`、`toolLimitDetector.ts`、`thinkingBudget.ts`        |
+| 層級 / 資訊清單 | `tierResolver.ts`、`tierConfig.ts`、`tierDefaults.json`、`tierTypes.ts`、`manifestAdapter.ts`                                                                                                                                                            |
+| IP / 網路       | `ipFilter.ts`、`webSearchFallback.ts`                                                                                                                                                                                                                    |
+| 批次            | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| 使用量          | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 個獨特的工具**連接到`server.ts` （ `schemas/tools.ts` +記憶體、技能、GitHub 技能、池、遊戲化、插件、 Notion、 Obsidian、本地語料庫和壓縮模組—聯合中的 45 個規範由`countUniqueMcpTools`計數）。
-- **3 次運輸**：stdio、 HTTP可串流、 SSE。
-- **33 個範圍**在運行時強制執行`src/shared/constants/mcpScopes.ts`中的—基列表，完整集是每個工具模組聲明的範圍的並集。
-- 審核表： `mcp_tool_audit` （由`audit.ts`填充）。
-- 檔案： `server.ts`、 `index.ts`、 `httpTransport.ts`、 `audit.ts`、 `scopeEnforcement.ts`、 `runtimeHeartbeat.ts`、 `descriptionCompressor.ts`、 `schemas/{tools, a2a, audit, index}.ts`、 `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，以及`__tests__/`下的測試。
-- 請參閱[MCP-SERVER.md](../frameworks/MCP-SERVER.md)以了解完整的工具目錄。
+- 在 `server.ts` 中接線了 **110 個不重複的工具**（`schemas/tools.ts` 中有 45 個標準工具，另加記憶、技能、GitHub 技能、集區、遊戲化、外掛程式、Notion、Obsidian、本機語料庫及壓縮模組——聯集由 `countUniqueMcpTools` 計算）。
+- **3 種傳輸方式**：stdio、HTTP Streamable、SSE。
+- 執行階段強制執行 **33 個作用域**——基礎清單位於 `src/shared/constants/mcpScopes.ts`，完整集合則是各工具模組所宣告作用域的聯集。
+- 稽核資料表：`mcp_tool_audit`（由 `audit.ts` 填入資料）。
+- 檔案：`server.ts`、`index.ts`、`httpTransport.ts`、`audit.ts`、`scopeEnforcement.ts`、
+  `runtimeHeartbeat.ts`、`descriptionCompressor.ts`、`schemas/{tools, a2a, audit, index}.ts`、
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，
+  以及 `__tests__/` 下的測試。
+- 如需完整的工具目錄，請參閱 [MCP-SERVER.md](../frameworks/MCP-SERVER.md)。
 
 ### 4.7 `open-sse/config/`
 
-提供程式登錄（`providerRegistry.ts`、 `providerModels.ts`、 `providerHeaderProfiles.ts`）、依格式模型登錄（`audioRegistry.ts`、 `embeddingRegistry.ts`、 `imageRegistry.ts`、 `moderationRegistry.ts`、 `musicRegistry.ts`、 `rerankRegistry.ts`、 `searchRegistry.ts`、 `videoRegistry.ts`）、身分助手（`codexIdentity.ts`、 `codexInstructions.ts`、 `anthropicHeaders.ts`、 `antigravityModelAliases.ts`）、身分助手（ `defaultThinkingSignature.ts`、 `cliFingerprints.ts` `antigravityUpstream.ts` `toolCloaking.ts` `credentialLoader.ts` `codexClient.ts`）和雲適配器（`azureAi.ts`、 `bedrock.ts`、 `datarobot.ts`、 `glmProvider.ts`、 `petals.ts` `maritalk.ts` `oci.ts` `runway.ts` `sap.ts`、 `watsonx.ts`、 `ollamaModels.ts`、 `errorConfig.ts`、 `constants.ts`、 `registryUtils.ts`）。
+提供者登錄檔（`providerRegistry.ts`、`providerModels.ts`、
+`providerHeaderProfiles.ts`）、各格式的模型登錄檔（`audioRegistry.ts`、
+`embeddingRegistry.ts`、`imageRegistry.ts`、`moderationRegistry.ts`、
+`musicRegistry.ts`、`rerankRegistry.ts`、`searchRegistry.ts`、`videoRegistry.ts`）、
+身分識別輔助工具（`codexIdentity.ts`、`codexInstructions.ts`、
+`anthropicHeaders.ts`、`antigravityUpstream.ts`、`antigravityModelAliases.ts`、
+`cliFingerprints.ts`、`toolCloaking.ts`、`defaultThinkingSignature.ts`）、
+認證資訊輔助工具（`credentialLoader.ts`、`codexClient.ts`）以及雲端
+配接器（`azureAi.ts`、`bedrock.ts`、`datarobot.ts`、`glmProvider.ts`、
+`maritalk.ts`、`oci.ts`、`petals.ts`、`runway.ts`、`sap.ts`、`watsonx.ts`、
+`ollamaModels.ts`、`errorConfig.ts`、`constants.ts`、`registryUtils.ts`）。
 
 ### 4.8 `open-sse/utils/`
 
-串流原語和提供者助手： `stream.ts`、 `streamHandler.ts`、 `streamHelpers.ts`、 `streamPayloadCollector.ts`、 `streamReadiness.ts`、 `sseHeartbeat.ts`、 `proxyFetch.ts`、 `proxyDispatcher.ts`、 `tlsClient.ts`、 `networkProxy.ts`、 `awsSigV4.ts`、 `cacheControlPolicy.ts`、 `cursorChecksum.ts`、 `cursorAgentProtobuf.ts`、 `cursorVersionDetector.ts` `ollamaTransform.ts` `comfyuiClient.ts`、 `kieTask.ts`、 `bypassHandler.ts`、 `aiSdkCompat.ts`、 `thinkTagParser.ts`、 `urlSanitize.ts`、 `usageTracking.ts`、 `requestLogger.ts`、 `progressTracker.ts`、 `cors.ts`、 `error.ts`、 `logger.ts`、 `sleep.ts`。
+串流基本元件與提供者輔助工具：`stream.ts`、`streamHandler.ts`、
+`streamHelpers.ts`、`streamPayloadCollector.ts`、`streamReadiness.ts`、
+`sseHeartbeat.ts`、`proxyFetch.ts`、`proxyDispatcher.ts`、`tlsClient.ts`、
+`networkProxy.ts`、`awsSigV4.ts`、`cacheControlPolicy.ts`、
+`cursorChecksum.ts`、`cursorAgentProtobuf.ts`、`cursorVersionDetector.ts`、
+`comfyuiClient.ts`、`kieTask.ts`、`bypassHandler.ts`、`aiSdkCompat.ts`、
+`thinkTagParser.ts`、`urlSanitize.ts`、`usageTracking.ts`、`requestLogger.ts`、
+`progressTracker.ts`、`cors.ts`、`error.ts`、`logger.ts`、`sleep.ts`、
+`ollamaTransform.ts`。
 
 ---
 
@@ -601,28 +634,28 @@ bin/
 
 ## 7. `tests/`
 
-| 目錄                                                 | 類型                                                                                     |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `tests/unit/`                                        | 透過 Node 原生測試執行器的單元測試（1821 個檔案，加上 `api/`、`auth/`、`authz/` 子目錄） |
-| `tests/integration/`                                 | 跨模組 + 資料庫狀態測試                                                                  |
-| `tests/e2e/`                                         | Playwright UI 測試                                                                       |
-| `tests/protocols-e2e/`                               | MCP/A2A 協定 e2e 測試                                                                    |
-| `tests/translator/`                                  | 翻譯器專用測試                                                                           |
-| `tests/security/`                                    | 安全性回歸測試                                                                           |
-| `tests/load/`                                        | 負載/壓力測試                                                                            |
-| `tests/golden-set/`                                  | 翻譯器回歸測試的參考輸出                                                                 |
-| `tests/helpers/`、`tests/fixtures/`、`tests/manual/` | 支援                                                                                     |
+| 目錄                                                 | 類型                                                                                         |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `tests/unit/`                                        | 使用 Node 原生測試執行器執行的單元測試（1821 個檔案，另含 `api/`、`auth/`、`authz/` 子目錄） |
+| `tests/integration/`                                 | 跨模組與資料庫狀態測試                                                                       |
+| `tests/e2e/`                                         | Playwright UI 測試                                                                           |
+| `tests/e2e/protocol-clients.test.ts`                 | MCP/A2A 協定端對端測試                                                                       |
+| `tests/translator/`                                  | 翻譯器專用測試                                                                               |
+| `tests/security/`                                    | 安全性迴歸測試                                                                               |
+| `tests/load/`                                        | 負載／壓力測試                                                                               |
+| `tests/golden-set/`                                  | 用於翻譯器迴歸測試的參考輸出                                                                 |
+| `tests/helpers/`, `tests/fixtures/`, `tests/manual/` | 支援工具                                                                                     |
 
 常用命令：
 
-| 命令                                                     | 執行內容                                                      |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| `npm run test:unit`                                      | 所有 `tests/unit/*.test.ts` 透過 Node 測試執行器（並發數 10） |
-| `npm run test:vitest`                                    | Vitest 套件（MCP、autoCombo、快取）                           |
-| `npm run test:e2e`                                       | Playwright UI 套件                                            |
-| `npm run test:protocols:e2e`                             | MCP + A2A 協定 e2e                                            |
-| `npm run test:coverage`                                  | 覆蓋率門檻（≥60% 行/陳述式/函式/分支）                        |
-| `node --import tsx/esm --test tests/unit/<file>.test.ts` | 單一檔案執行                                                  |
+| 命令                                                     | 執行內容                                                         |
+| -------------------------------------------------------- | ---------------------------------------------------------------- |
+| `npm run test:unit`                                      | 透過 Node 測試執行器執行所有 `tests/unit/*.test.ts`（並行數 10） |
+| `npm run test:vitest`                                    | Vitest 測試套件（MCP、autoCombo、快取）                          |
+| `npm run test:e2e`                                       | Playwright UI 測試套件                                           |
+| `npm run test:protocols:e2e`                             | MCP + A2A 協定端對端測試                                         |
+| `npm run test:coverage`                                  | 覆蓋率門檻（行／陳述式／函式／分支皆須 ≥60%）                    |
+| `node --import tsx/esm --test tests/unit/<file>.test.ts` | 執行單一檔案                                                     |
 
 ---
 
@@ -706,73 +739,102 @@ bin/
 
 ### 新增提供者
 
-1. 在 `src/shared/constants/providers.ts` 中註冊（載入時以 Zod 驗證）。
-2. 若需要自訂邏輯，在 `open-sse/executors/` 中新增執行器（繼承 `BaseExecutor`）。
-3. 若該提供者不支援 OpenAI 格式，在 `open-sse/translator/` 中新增翻譯器。
-4. 若為 OAuth 基礎，在 `src/lib/oauth/providers/` 和 `src/lib/oauth/services/` 下新增設定。
-5. 在 `open-sse/config/providerRegistry.ts`（或 `open-sse/config/` 下格式專屬的註冊表）中註冊模型。
+1. 在 `src/shared/constants/providers.ts` 中註冊（載入時會經過 Zod 驗證）。
+2. 如果需要自訂邏輯，請在 `open-sse/executors/` 中新增執行器
+   （繼承 `BaseExecutor`）。
+3. 如果該提供者不使用 OpenAI 格式，請在 `open-sse/translator/` 中新增轉換器。
+4. 如果採用 OAuth，請在 `src/lib/oauth/providers/` 和
+   `src/lib/oauth/services/` 下新增設定。
+5. 在 `open-sse/config/providerRegistry.ts`（或 `open-sse/config/` 下特定格式的
+   登錄檔）中註冊模型。
 6. 在 `tests/unit/` 下撰寫測試。
 
 ### 新增 API 路由
 
 1. 建立 `src/app/api/your-route/route.ts`。
-2. 遵循模式：CORS → Zod 請求體驗證 → 認證 → 處理器委派。
-3. 若為新的請求形狀：在 `src/shared/validation/schemas.ts` 中新增 Zod 架構。
-4. 若僅限管理：將路徑加入 `src/shared/constants/publicApiRoutes.ts`（公開 API 表面的封鎖清單）。
+2. 遵循以下模式：CORS → Zod 請求本文驗證 → 驗證身分 → 委派給處理常式。
+3. 如果是新的請求結構：請在 `src/shared/validation/schemas.ts` 中新增 Zod 結構描述。
+4. 如果僅供管理使用：請將路徑新增至 `src/shared/constants/publicApiRoutes.ts`
+   （公開 API 介面的拒絕清單）。
 5. 在 `tests/unit/` 下新增測試。
 6. 更新 `docs/reference/API_REFERENCE.md` 和 `docs/openapi.yaml`。
 
 ### 新增資料庫模組
 
-1. 建立 `src/lib/db/yourModule.ts` 並從 `./core.ts` 匯入 `getDbInstance()`。
-2. 匯出您領域的 CRUD 函式。
-3. 若需新建資料表：在 `src/lib/db/migrations/` 下新增遷移檔案，依序編號、冪等、事務性。
-4. 從 `src/lib/localDb.ts` 重新匯出（僅重新匯出 — **不含邏輯**）。
+1. 建立 `src/lib/db/yourModule.ts`，並從 `./core.ts` 匯入 `getDbInstance()`。
+2. 匯出適用於你的領域的 CRUD 函式。
+3. 如果有新資料表：請在 `src/lib/db/migrations/` 下新增遷移，並確保其依序編號、
+   具備冪等性且使用交易。
+4. 匯入端應直接從 `@/lib/db/yourModule` 匯入（不使用彙整匯出檔——舊的 `localDb.ts` 重新匯出層已移除）。
 5. 在 `tests/unit/` 下新增測試。
 
 ### 新增 MCP 工具
 
-1. 在 `open-sse/mcp-server/tools/` 下新增工具定義（或擴充 `open-sse/mcp-server/schemas/tools.ts`）。
+1. 在 `open-sse/mcp-server/tools/` 下新增工具定義（或擴充
+   `open-sse/mcp-server/schemas/tools.ts`）。
 2. 在 `src/shared/constants/mcpScopes.ts` 中指派適當的範圍。
-3. 在 `open-sse/mcp-server/server.ts` 中註冊該工具。
-4. 在 `open-sse/mcp-server/__tests__/` 下新增測試。
+3. 在 `open-sse/mcp-server/server.ts` 中註冊工具。
+4. 在 `tests/unit/` 下新增測試。
 5. 更新 [MCP-SERVER.md](../frameworks/MCP-SERVER.md)。
 
 ### 新增 A2A 技能
 
-參見 [A2A-SERVER.md § 新增技能](../frameworks/A2A-SERVER.md)。技能位於
-`src/lib/a2a/skills/`，並透過 A2A 任務管理器註冊。
+請參閱 [A2A-SERVER.md § 新增技能](../frameworks/A2A-SERVER.md)。技能位於
+`src/lib/a2a/skills/`，並透過 A2A 工作管理器註冊。
 
 ---
 
 ## 11. 慣例
 
-- **程式碼風格**：2 空格縮排、雙引號、100 字元寬度、分號、`es5` 結尾逗號 — 由 Prettier 透過 `lint-staged` 強制執行。
-- **匯入順序**：外部 → 內部（`@/`、`@omniroute/open-sse`）→ 相對。
-- **命名**：檔案 `camelCase` 或 `kebab-case`，元件 `PascalCase`，常數 `UPPER_SNAKE`。
-- **ESLint**：`no-eval`、`no-implied-eval`、`no-new-func` = `error` 適用於所有地方；`no-explicit-any` = `warn` 在 `open-sse/` 和 `tests/` 中，其他位置為 error。
-- **TypeScript**：`strict: false`（舊有設定）。在跨模組邊界處優先使用明確型別而非推斷。
-- **資料庫**：切勿在路由或處理器中撰寫原始 SQL — 務必透過 `src/lib/db/` 模組操作。切勿在 `src/lib/localDb.ts` 中新增邏輯。
-- **資料庫實體型別（#3512）**：一個寫入或讀取資料表列形狀的函式，應接收/回傳一個與該資料表欄位 1:1 對應的命名 TS 介面，而非 `any` 或呼叫處的內聯匿名型別。將該介面置於函式旁邊（例如將 `export interface UsageEntry` 放在 `src/lib/usage/usageHistory.ts` 中 `saveRequestUsage` 之上），在不同寫入者逐步填充該列時，將個別欄位保持為可選/可為 null，並對在不同呼叫者間形狀各異的欄位優先使用 `unknown` 而非 `any`（在欄位上註明，例如 `UsageEntry.tokens` 接受原始提供者形狀的用量和正規化後的形狀）。一旦某個檔案的 `any` 計數以此方式歸零，將其加入 `check:any-budget:t11` 白名單（`scripts/check/check-t11-any-budget.mjs`、`maxAny: 0`），使其不會回歸。這是首批適用的慣例 — 更廣泛的「無匿名 `any`」清理將在其餘程式碼庫中迭代進行。
-- **錯誤處理**：使用特定錯誤型別的 try/catch，以 pino 上下文記錄日誌。切勿在 SSE 串流中默默吞嚥錯誤；使用中止信號進行清理。
-- **安全性**：切勿使用 `eval()` / `new Function()` / 隱含 eval。使用 Zod 驗證所有輸入。加密靜態憑證（AES-256-GCM）。保持 `src/shared/constants/upstreamHeaders.ts` 封鎖清單與清理/驗證層一致。
-- **提交訊息**：約定式提交 — `feat(scope): subject`。允許的範圍：`db`、`sse`、`oauth`、`dashboard`、`api`、`cli`、`docker`、`ci`、`mcp`、`a2a`、`memory`、`skills`。
-- **分支**：前綴 `feat/`、`fix/`、`refactor/`、`docs/`、`test/`、`chore/`。切勿直接提交到 `main`。
-- **Husky**：pre-commit 執行 `lint-staged` + `check:docs-sync` + `check:any-budget:t11`；pre-push 執行 `check:any-budget:t11` + `check:tracked-artifacts`（快速閘道；不包含 `test:unit`）。
+- **程式碼風格**：2 個空格縮排、雙引號、100 字元寬度、分號、
+  `es5` 尾隨逗號——由 Prettier 透過 `lint-staged` 強制執行。
+- **匯入**：外部 → 內部（`@/`、`@omniroute/open-sse`）→ 相對路徑。
+- **命名**：檔案使用 `camelCase` 或 `kebab-case`，元件使用 `PascalCase`，
+  常數使用 `UPPER_SNAKE`。
+- **ESLint**：所有位置的 `no-eval`、`no-implied-eval`、`no-new-func` = `error`；
+  `open-sse/**/*.ts` 與 `tests/**/*.ts` 中的 `no-explicit-any` = `error`。
+- **TypeScript**：`strict: false`（為相容舊程式碼的設定）。跨模組邊界時，應優先使用明確類型，
+  而非類型推斷。
+- **資料庫**：絕不可在路由或處理常式中撰寫原始 SQL——一律透過
+  `src/lib/db/` 模組。絕不可使用彙總匯入——請直接使用特定的 `src/lib/db/*` 模組。
+- **資料庫實體類型（#3512）**：寫入或讀取資料庫資料表
+  資料列結構的函式，應接受／回傳具名 TS 介面，並以 1:1 方式對應該資料表的
+  欄位，而非在呼叫端使用 `any` 或行內匿名類型。將
+  介面放在函式旁（例如在 `src/lib/usage/usageHistory.ts` 中，
+  將 `export interface UsageEntry` 放在 `saveRequestUsage` 上方）；當不同寫入方會逐步填入資料列時，
+  應讓個別欄位保持為選用／可為 null；如果某欄位的結構
+  會因呼叫端而異，應優先使用 `unknown` 而非 `any`（並在欄位上加以說明，例如 `UsageEntry.tokens`
+  同時接受提供者原始格式的使用量資料與正規化後的格式）。當某個
+  檔案透過此方式使 `any` 數量降至零後，請將其加入
+  `check:any-budget:t11` 允許清單（`scripts/check/check-t11-any-budget.mjs`，
+  `maxAny: 0`），以防止退步。這是第一階段的慣例——更廣泛的「禁止匿名 `any`」清理工作，
+  將在其餘程式碼庫中逐步進行。
+- **錯誤**：使用帶有特定錯誤類型的 try/catch，並以 pino 上下文記錄。絕不可
+  在 SSE 串流中默默忽略錯誤；應使用中止訊號進行清理。
+- **安全性**：絕不可使用 `eval()`／`new Function()`／隱含 eval。使用 Zod 驗證
+  所有輸入。以加密形式儲存憑證（AES-256-GCM）。確保
+  `src/shared/constants/upstreamHeaders.ts` 拒絕清單與
+  清理／驗證層保持一致。
+- **提交**：遵循 Conventional Commits——`feat(scope): subject`。允許的範圍：
+  `db`、`sse`、`oauth`、`dashboard`、`api`、`cli`、`docker`、`ci`、`mcp`、
+  `a2a`、`memory`、`skills`。
+- **分支**：使用前綴 `feat/`、`fix/`、`refactor/`、`docs/`、`test/`、
+  `chore/`。絕不可直接提交至 `main`。
+- **Husky**：[`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 
-## 12. 硬性規則（來自 CLAUDE.md）
+## 12. 強制規則（來自 CLAUDE.md）
 
-1. 切勿提交機密或憑證。
-2. 切勿在 `src/lib/localDb.ts` 中新增邏輯。
-3. 切勿使用 `eval()` / `new Function()` / 隱含 eval。
-4. 切勿直接提交到 `main`。
-5. 切勿在路由中撰寫原始 SQL — 務必透過 `src/lib/db/` 模組操作。
-6. 切勿在 SSE 串流中默默吞嚥錯誤。
-7. 務必使用 Zod 架構驗證輸入。
-8. 變更正式環境程式碼時務必包含測試。
-9. 覆蓋率必須保持 ≥ 60%（陳述式、行、函式、分支）。
+1. 絕不可提交機密或憑證。
+2. 絕不可使用桶狀匯入（barrel import）——請直接使用特定的 `src/lib/db/*` 模組。
+3. 絕不可使用 `eval()` / `new Function()` / 隱含的 eval。
+4. 絕不可直接提交至 `main`。
+5. 絕不可在路由中撰寫原始 SQL——一律透過 `src/lib/db/` 模組。
+6. 絕不可在 SSE 串流中無聲地忽略錯誤。
+7. 一律使用 Zod schema 驗證輸入。
+8. 變更正式環境程式碼時，一律必須包含測試。
+9. 覆蓋率必須維持在 ≥ 60%（陳述式、程式行、函式、分支）。
 
 ---
 

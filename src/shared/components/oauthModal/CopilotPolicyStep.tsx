@@ -30,15 +30,19 @@ export default function CopilotPolicyStep({ startOAuthFlow, onClose }: CopilotPo
 
       <ul className="flex flex-col gap-2 text-sm text-text-muted list-none">
         <li className="flex gap-2">
-          <Icon name="info" size={14} className="mt-0.5 text-text-secondary" />
+          <Icon name="info" size={14} className="leading-5 shrink-0 mt-0.5 text-text-secondary" />
           {t("copilotPolicyLine1")}
         </li>
         <li className="flex gap-2">
-          <Icon name="person" size={14} className="mt-0.5 text-text-secondary" />
+          <Icon name="person" size={14} className="leading-5 shrink-0 mt-0.5 text-text-secondary" />
           {t("copilotPolicyLine2")}
         </li>
         <li className="flex gap-2">
-          <Icon name="auto_awesome" size={14} className="mt-0.5 text-text-secondary" />
+          <Icon
+            name="auto_awesome"
+            size={14}
+            className="leading-5 shrink-0 mt-0.5 text-text-secondary"
+          />
           {t("copilotPolicyLine3")}
         </li>
       </ul>

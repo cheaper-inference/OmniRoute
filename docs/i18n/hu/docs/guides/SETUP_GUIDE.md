@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-A vezérlőpult a `http://localhost:20128` címen nyílik meg, az API alap-URL-je pedig `http://localhost:20128/v1`.
+A műszerfal `http://localhost:20128` nál nyílik meg, API alap URL pedig `http://localhost:20128/v1`.
+
+> **npm felhasználók:** Ha az npm arra figyelmeztet, hogy a telepítési szkriptek blokkolva voltak (pl. `omniroute`, `better-sqlite3`), lásd: [— npm telepítési parancsfájlok blokkolása hibaelhárítása](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

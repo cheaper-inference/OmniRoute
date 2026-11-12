@@ -393,7 +393,7 @@ Verwendet `wreq-js`, um browserähnliche TLS-Fingerprints zu erzeugen und dadurc
 
 ### CLI-Fingerprint-Abgleich
 
-Der **CLI-Fingerprint-Schalter** (`Einstellungen → Sicherheit`) ordnet HTTP-Header und Felder im JSON-Textkörper neu an, um exakt der Signatur nativer CLI-Binärdateien (Claude Code, Codex usw.) zu entsprechen. Dies funktioniert **zusätzlich zum** Proxy:
+Der **CLI-Fingerprint-Schalter** (`Settings → Security`) ordnet HTTP-Header und Felder im JSON-Textkörper neu an, um exakt der Signatur nativer CLI-Binärdateien (Claude Code, Codex usw.) zu entsprechen. Dies funktioniert **zusätzlich zum** Proxy:
 
 ```
 Ihre IP (blockiert) → Proxy-IP (USA) → Anbieter-API

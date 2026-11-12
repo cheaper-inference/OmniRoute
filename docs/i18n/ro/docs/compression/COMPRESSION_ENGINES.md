@@ -9,16 +9,16 @@ Compresia OmniRoute este construită în jurul contractelor motoarelor. Un mod p
 
 ## Moduri
 
-| Mod          | Cale motor                                                                                                                                            | Intrare intenționată                            |
-| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------- |
-| `off`        | niciuna                                                                                                                                               | Păstrarea exactă a promptului                   |
-| `lite`       | Ajutoare Caveman lite                                                                                                                                 | Curățare permanentă cu risc scăzut              |
-| `standard`   | Caveman                                                                                                                                               | Condensarea promptului în limbaj natural        |
-| `aggressive` | Caveman + sumarizatoare istoric/instrumente                                                                                                           | Sesiuni lungi de chat                           |
-| `ultra`      | Caveman + ajutoare de tăiere                                                                                                                          | Recuperare limită de context                    |
-| `rtk`        | RTK                                                                                                                                                   | Ieșire terminal, shell, build, test și git      |
-| `omniglyph`  | OmniGlyph                                                                                                                                             | Context ca imagine pe cablul furnizorului nativ |
-| `stacked`    | Pipeline. Implicit pentru cerere este `session-dedup -> lite`. `rtk -> caveman` este opțional. Jurnale mixte de instrumente și proză, economii maxime |
+| Mod          | Cale motor                                                                              | Intrare intenționată                             |
+| ------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `off`        | niciuna                                                                                 | Păstrarea exactă a promptului                    |
+| `lite`       | Ajutoare Caveman lite                                                                   | Curățare permanentă cu risc scăzut               |
+| `standard`   | Caveman                                                                                 | Condensarea promptului în limbaj natural         |
+| `aggressive` | Rezumate Caveman + history/tool                                                         | Sesiuni lungi de chat                            |
+| `ultra`      | Caveman + ajutoare de tăiere                                                            | Recuperare limită de context                     |
+| `rtk`        | RTK                                                                                     | Ieșire terminal, shell, build, test și git       |
+| `omniglyph`  | OmniGlyph                                                                               | Context ca imagine pe cablul furnizorului nativ  |
+| `stacked`    | Conductă. Cererea implicită este `session-dedup -> lite`. `rtk -> caveman` este opt-in. | Bușteni de scule mixte și proză, economii maxime |
 
 ### Profile de compresie OmniGlyph
 
@@ -389,7 +389,7 @@ Instrumentul de recuperare se numește în prezent `omniroute_ccr_retrieve` (pre
 
 ### Ciclul de viață al sesiunii
 
-Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le recunoaște; fereastra inactivă este setată de `OMNIROUTE_MCP_SESSION_IDLE_MS` (implicit 5 minute; referit după nume, nu o valoare codificată, astfel încât această pagină nu se deplasează atunci când se schimbă). Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,** nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
+Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le recunoaște; fereastra inactivă este configurată de `OMNIROUTE_MCP_SESSION_IDLE_MS`, revenind la `DEFAULT_MCP_SESSION_IDLE_MS` în `open-sse/mcp-server/httpTransport.ts`. Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,**nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
 
 ## Suprafața API
 

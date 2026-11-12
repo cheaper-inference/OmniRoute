@@ -20,7 +20,7 @@ Kui IDE agent (nt GitHub Copilot, Cursor, Claude kood) teeb API -kõne, ühendub
 
 See tähendab, et saate:
 
-- **Suunake mis tahes agent mis tahes teenusepakkuja juurde** : Copilot räägid OpenAI-ga? Suunake see ümber Anthropic Claude, Gemini või mõnele OmniRoute 381 pakkujale.
+- **Suunake mis tahes agent mis tahes teenusepakkuja juurde** : Copilot räägid OpenAI-ga? Suunake see ümber Anthropic Claude, Gemini või mõnele OmniRoute 388 pakkujale.
 - **Rakendage mudeli vastendusi** : `gemini-3-flash` → `claude-sonnet-4.7` läbipaistvalt käitleja tasemel.
 - **Jälgige kogu agendiliiklust** : iga pealtkuulatud päring avaldatakse [liiklusinspektorile](./TRAFFIC_INSPECTOR.md).
 - **Rakendage OmniRoute vastupidavust** : kombineeritud marsruutimine, kaitselülitid, varud ja kulude jälgimine ka IDE agendi liikluse jaoks.
@@ -546,7 +546,7 @@ Trae on suhteliselt uus tehisintellektil põhinev programmeerimisassistent. Enne
 3. Tehke kindlaks autentimismehhanism
 4. Hinnake kasutustingimuste ja API tuvastatavuse põhjal, kas jätkata või mitte
 
-Kuni uurimine on lõpule viidud, kuvatakse Trae kaardil juhtpaneelil märk „Uurimisel“ koos lingiga „Teata teostatavusest“. Töötleja toes failis `src/mitm/handlers/trae.ts` väljastab struktureeritud vea `Pole veel rakendatud`.
+Kuni uurimine on lõpule viidud, kuvatakse Trae kaardil juhtpaneelil märk „Uurimisel“ koos lingiga „Teata teostatavusest“. Töötleja toes failis `src/mitm/handlers/trae.ts` väljastab struktureeritud vea `Not yet implemented`.
 
 ### Ootel olevad agendid (MITM on nõutav — kohandatud baas-URL-i tugi puudub)
 

@@ -4,7 +4,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { PROVIDER_COLLECTION_NAMES } from "./lib/count-facts.mjs";
 import {
   FREE_PROVIDERS,
   NOAUTH_PROVIDERS,
@@ -29,7 +30,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..", "..");
 const OUT_FILE = path.join(ROOT, "docs", "reference", "PROVIDER_REFERENCE.md");
 
-type ProviderRecord = {
+export type ProviderRecord = {
   id: string;
   alias?: string | undefined;
   name: string;
@@ -114,15 +115,11 @@ function buildSection(title: string, rows: ProviderRecord[], category: string): 
   return lines.join("\n");
 }
 
-function buildHeader(total: number): string {
-  const date = new Date().toISOString().slice(0, 10);
-  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")) as {
-    version?: string;
-  };
+function buildHeader(total: number, version: string, date: string): string {
   return [
     "---",
     'title: "Provider Reference"',
-    `version: ${pkg.version || "unknown"}`,
+    `version: ${version}`,
     `lastUpdated: ${date}`,
     "---",
     "",
@@ -161,7 +158,7 @@ function buildHeader(total: number): string {
   ].join("\n");
 }
 
-function countExecutorImpls(): number {
+export function countExecutorImpls(): number {
   const dir = path.join(ROOT, "open-sse", "executors");
   const nonImpl = new Set(["index.ts", "index.mts", "types.ts", "base.ts", "constants.ts"]);
   return fs
@@ -171,32 +168,58 @@ function countExecutorImpls(): number {
     ).length;
 }
 
-function main() {
-  const free = asRecords(FREE_PROVIDERS);
-  const noauth = asRecords(NOAUTH_PROVIDERS as Record<string, ProviderRecord>);
-  const oauth = asRecords(OAUTH_PROVIDERS);
-  const webCookie = asRecords(WEB_COOKIE_PROVIDERS);
-  const apiKey = asRecords(APIKEY_PROVIDERS);
-  const local = asRecords(LOCAL_PROVIDERS);
-  const search = asRecords(SEARCH_PROVIDERS);
-  const audio = asRecords(AUDIO_ONLY_PROVIDERS);
-  const upstreamProxy = asRecords(UPSTREAM_PROXY_PROVIDERS);
-  const cloudAgent = asRecords(CLOUD_AGENT_PROVIDERS);
-  const system = asRecords(SYSTEM_PROVIDERS);
+export const PROVIDER_CATALOG = {
+  FREE_PROVIDERS,
+  NOAUTH_PROVIDERS,
+  OAUTH_PROVIDERS,
+  WEB_COOKIE_PROVIDERS,
+  APIKEY_PROVIDERS,
+  LOCAL_PROVIDERS,
+  SEARCH_PROVIDERS,
+  AUDIO_ONLY_PROVIDERS,
+  UPSTREAM_PROXY_PROVIDERS,
+  CLOUD_AGENT_PROVIDERS,
+  SYSTEM_PROVIDERS,
+};
 
-  const allIds = new Set<string>([
-    ...free.map((p) => p.id),
-    ...noauth.map((p) => p.id),
-    ...oauth.map((p) => p.id),
-    ...webCookie.map((p) => p.id),
-    ...apiKey.map((p) => p.id),
-    ...local.map((p) => p.id),
-    ...search.map((p) => p.id),
-    ...audio.map((p) => p.id),
-    ...upstreamProxy.map((p) => p.id),
-    ...cloudAgent.map((p) => p.id),
-    ...system.map((p) => p.id),
-  ]);
+type ReferenceOptions = {
+  catalog?: Record<string, Record<string, ProviderRecord>>;
+  version: string;
+  generatedDate: string;
+  executorCount: number;
+};
+
+export function renderProviderReference({
+  catalog = PROVIDER_CATALOG,
+  version,
+  generatedDate,
+  executorCount,
+}: ReferenceOptions) {
+  if (
+    !version ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(generatedDate) ||
+    !Number.isSafeInteger(executorCount) ||
+    executorCount < 0
+  )
+    throw new Error("COUNT_REFERENCE_INPUT_INVALID");
+  const free = asRecords(catalog.FREE_PROVIDERS);
+  const noauth = asRecords(catalog.NOAUTH_PROVIDERS);
+  const oauth = asRecords(catalog.OAUTH_PROVIDERS);
+  const webCookie = asRecords(catalog.WEB_COOKIE_PROVIDERS);
+  const apiKey = asRecords(catalog.APIKEY_PROVIDERS);
+  const local = asRecords(catalog.LOCAL_PROVIDERS);
+  const search = asRecords(catalog.SEARCH_PROVIDERS);
+  const audio = asRecords(catalog.AUDIO_ONLY_PROVIDERS);
+  const upstreamProxy = asRecords(catalog.UPSTREAM_PROXY_PROVIDERS);
+  const cloudAgent = asRecords(catalog.CLOUD_AGENT_PROVIDERS);
+  const system = asRecords(catalog.SYSTEM_PROVIDERS);
+
+  const allIds = new Set<string>(
+    PROVIDER_COLLECTION_NAMES.flatMap((name) => {
+      if (!catalog[name]) throw new Error("COUNT_REFERENCE_COLLECTION_MISSING");
+      return Object.values(catalog[name]).map((provider) => provider.id);
+    })
+  );
 
   const sections = [
     buildSection("Free Tier (OAuth-first or no-key)", free, "Free"),
@@ -217,7 +240,7 @@ function main() {
     "",
     "- Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)",
     "- Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)",
-    `- Executors: [\`open-sse/executors/\`](../../open-sse/executors/) (${countExecutorImpls()} implementations)`,
+    `- Executors: [\`open-sse/executors/\`](../../open-sse/executors/) (${executorCount} implementations)`,
     "- Translators: [`open-sse/translator/`](../../open-sse/translator/)",
     "",
     "## See Also",
@@ -228,16 +251,47 @@ function main() {
     "",
   ].join("\n");
 
-  const content = buildHeader(allIds.size) + sections.join("\n") + "\n" + footer;
-  fs.writeFileSync(OUT_FILE, content);
-  console.log(`✓ Wrote ${OUT_FILE}`);
-  console.log(`  Providers: ${allIds.size} unique IDs`);
-  console.log(
-    `  Sections: free=${free.length}, noauth=${noauth.length}, oauth=${oauth.length}, ` +
-      `web=${webCookie.length}, apikey=${apiKey.length}, local=${local.length}, ` +
-      `search=${search.length}, audio=${audio.length}, proxy=${upstreamProxy.length}, ` +
-      `cloud=${cloudAgent.length}, system=${system.length}`
-  );
+  return buildHeader(allIds.size, version, generatedDate) + sections.join("\n") + "\n" + footer;
 }
 
-main();
+export async function planProviderReference(
+  options: Omit<ReferenceOptions, "generatedDate"> & {
+    existing: string;
+    today: string;
+    format?: (text: string) => string | Promise<string>;
+  }
+) {
+  const oldDate = options.existing.match(/^> \*\*Last generated:\*\* (\d{4}-\d{2}-\d{2})$/m)?.[1];
+  if (!oldDate) throw new Error("COUNT_REFERENCE_DATE_MISSING");
+  const format = options.format ?? ((text: string) => text);
+  const stable = await format(renderProviderReference({ ...options, generatedDate: oldDate }));
+  // Formatting-only drift must not rewrite a translated source or advance its date.
+  if (stable === options.existing || stable === (await format(options.existing)))
+    return options.existing;
+  return format(renderProviderReference({ ...options, generatedDate: options.today }));
+}
+
+async function main() {
+  const existing = fs.readFileSync(OUT_FILE, "utf8");
+  const version = String(
+    JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version ?? ""
+  );
+  const prettier = await import("prettier");
+  const options = await prettier.resolveConfig(OUT_FILE);
+  const content = await planProviderReference({
+    existing,
+    version,
+    executorCount: countExecutorImpls(),
+    today: new Date().toISOString().slice(0, 10),
+    format: (text) => prettier.format(text, { ...options, filepath: OUT_FILE }),
+  });
+  if (content !== existing) fs.writeFileSync(OUT_FILE, content);
+  console.log(content === existing ? "Provider reference is current" : `Wrote ${OUT_FILE}`);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch(() => {
+    console.error("Provider reference generation failed");
+    process.exitCode = 1;
+  });
+}

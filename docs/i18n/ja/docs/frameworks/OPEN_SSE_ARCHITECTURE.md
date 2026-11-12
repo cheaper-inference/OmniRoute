@@ -486,13 +486,13 @@ createResponsesApiTransformStream(): TransformStream
 
 `open-sse/config/`構成レイヤーを保持します。
 
-| ファイル                      | 目的                                                    |
-| ----------------------------- | ------------------------------------------------------- |
-| `providerRegistry.ts`         | 381 プロバイダー カタログ上のチャット モデル レジストリ |
-| `providerModels.ts`           | モデルの別名、形式のマッピング                          |
-| `constants.ts`                | タイムアウト、制限、ステータスコード                    |
-| `defaultThinkingSignature.ts` | デフォルトのClaude思考署名                              |
-| `modelStrip.ts` (サービス内)  | プロバイダーごとのフィールドストリッピング              |
+| ファイル                       | 目的                                                    |
+| ------------------------------ | ------------------------------------------------------- |
+| `providerRegistry.ts`          | 388 プロバイダー カタログ上のチャット モデル レジストリ |
+| `providerModels.ts`            | モデルの別名、形式のマッピング                          |
+| `constants.ts`                 | タイムアウト、制限、ステータスコード                    |
+| `defaultThinkingSignature.ts`  | デフォルトのClaude思考署名                              |
+| `modelStrip.ts` （サービス中） | プロバイダーごとのフィールドストリッピング              |
 
 ### プロバイダー レジストリ スキーマ
 

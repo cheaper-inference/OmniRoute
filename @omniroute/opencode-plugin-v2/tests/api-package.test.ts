@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { publishCatalog } from "../src/catalog.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 type BetaDraft = {
   provider: {
     list?: () => unknown[];
@@ -66,12 +67,15 @@ function apiPackageOf(m: Record<string, any> | undefined): string {
 describe("catalog api package (models + combos)", () => {
   it("every published entry carries a non-empty supported api.package", async () => {
     const { models, draft } = fakeDraft();
-    const res = await publishCatalog(draft, baseOpts, {
-      fetcher: async () => [{ id: "gpt-x", context_length: 128000, max_output_tokens: 4096 }],
-      combosFetcher: async () => [
-        { id: "combo-a", name: "Combo A", models: [{ kind: "model", model: "gpt-x" }] },
-      ],
-    });
+    const res = await withEmptyEnrichment((enrichmentFetcher) =>
+      publishCatalog(draft, baseOpts, {
+        enrichmentFetcher,
+        fetcher: async () => [{ id: "gpt-x", context_length: 128000, max_output_tokens: 4096 }],
+        combosFetcher: async () => [
+          { id: "combo-a", name: "Combo A", models: [{ kind: "model", model: "gpt-x" }] },
+        ],
+      })
+    );
     assert.deepEqual(res, { models: 1, combos: 1 });
     for (const key of ["omniroute/gpt-x", "omniroute/Combo A"]) {
       const pkg = apiPackageOf(models.get(key));
@@ -82,16 +86,19 @@ describe("catalog api package (models + combos)", () => {
 
   it("models keep their gateway ids and api blocks after the virtual-entries removal", async () => {
     const { models, draft } = fakeDraft();
-    const res = await publishCatalog(
-      draft,
-      {
-        ...baseOpts,
-        apiFormat: { allowAnthropic: true, anthropicModels: ["anthropic/claude-x"] },
-      },
-      {
-        fetcher: async () => [{ id: "anthropic/claude-x" }, { id: "auto/coding" }],
-        combosFetcher: async () => [],
-      }
+    const res = await withEmptyEnrichment((enrichmentFetcher) =>
+      publishCatalog(
+        draft,
+        {
+          ...baseOpts,
+          apiFormat: { allowAnthropic: true, anthropicModels: ["anthropic/claude-x"] },
+        },
+        {
+          enrichmentFetcher,
+          fetcher: async () => [{ id: "anthropic/claude-x" }, { id: "auto/coding" }],
+          combosFetcher: async () => [],
+        }
+      )
     );
     assert.deepEqual(res, { models: 2, combos: 0 });
     assert.equal(apiPackageOf(models.get("omniroute/anthropic/claude-x")), "@ai-sdk/anthropic");

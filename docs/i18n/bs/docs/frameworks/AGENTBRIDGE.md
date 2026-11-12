@@ -4,13 +4,9 @@
 
 ---
 
-# AgentBridge
+AgentBridge je OmniRoute-ov MITM (Man-in-the-Middle) proxy koji presreće HTTPS promet od IDE AI agenata i preusmjerava ga kroz OmniRoute-ov unificirani mehanizam za rutiranje. Podržava **10 IDE agenata** — Antigravity, Kiro, GitHub Copilot, GHE Copilot, OpenAI Codex, Cursor, Zed, Claude kod, otvoreni kod i Trae (istraživanje) — čineći OmniRoute najširim MITM proxyjem za AI pomoćnike za kodiranje na tržištu.
 
-AgentBridge je OmniRoute-ov MITM (Man-in-the-Middle) proxy koji presreće HTTPS saobraćaj od IDE AI agenata i preusmjerava ga kroz OmniRoute-ov jedinstveni mehanizam za rutiranje. Podržava **10 IDE agenata** — Antigravity, Kiro, GitHub Copilot, GHE Copilot, OpenAI Codex, Cursor, Zed, Claude Code, Open Code i Trae (u fazi istraživanja) — čineći OmniRoute MITM proxyjem sa najširom pokrivenošću za AI asistente za kodiranje na tržištu.
-
-**Lokacija kontrolne ploče (Dashboard):** `/dashboard/tools/agent-bridge`
-**Grupa u bočnoj traci (Sidebar):** Tools (nakon Cloud Agents)
-**Pogledajte također:** [`TRAFFIC_INSPECTOR.md`](./TRAFFIC_INSPECTOR.md) — nadgledajte sav presretnuti saobraćaj u realnom vremenu; `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije kompajlirano u `/docs`) — Linux TPROXY transparentni-dešifrujući režim snimanja pokretan putem rute `/api/tools/agent-bridge/tproxy`.
+**Lokacija kontrolne table:** `/dashboard/tools/agent-bridge`**Grupa bočne trake:** Alati (nakon Cloud Agenta)**Vidi također:** [`TRAFFIC_INSPECTOR.md`](./TRAFFIC_INSPECTOR.md) — prati sav presretnuti saobraćaj u realnom vremenu; `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije kompajliran u `/docs`) — Linux TPROXY režim transparentnog dešifrovanja hvatanja koji pokreće `/api/tools/agent-bridge/tproxy` ruta.
 
 ---
 
@@ -22,7 +18,7 @@ Kada IDE agent (npr. GitHub Copilot, Cursor, Claude kod) uputi API poziv, on se 
 
 To znači da možete:
 
-- **Preusmjerite bilo kojeg agenta na bilo kojeg provajdera** : Copilot razgovara sa OpenAI? Preusmjerite ga na Anthropic Claude, Gemini ili bilo koji od OmniRoute 381 provajdera.
+- **Preusmjerite bilo kojeg agenta na bilo kojeg provajdera** : Copilot razgovara sa OpenAI? Preusmjerite ga na Anthropic Claude, Gemini ili bilo koji od OmniRoute 388 provajdera.
 - **Primijenite mapiranja modela** : `gemini-3-flash` → `claude-sonnet-4.7` transparentno na nivou rukovaoca.
 - **Posmatrajte sav promet agenta** : svaki presretnuti zahtjev objavljuje se [Saobraćajnom inspektoru](./TRAFFIC_INSPECTOR.md).
 - **Primijenite OmniRoute otpornost** : kombinovano rutiranje, prekidači, rezervni dijelovi i praćenje troškova rade i za promet IDE agenta.

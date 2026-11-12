@@ -48,7 +48,7 @@ boʻlsa, u **yoqilgan** hisoblanadi (`isFeatureFlagEnabled()`ga qarang).
 
 ## Bayroq katalogi
 
-6 toifadagi 120 ta bayroq.** Standart** standart — ta'rifi, na DB bekor qilish, na muhit o'zgaruvchisi mavjud bo'lmaganda ishlatiladigan qiymat.
+6 toifadagi 121 ta bayroq.** Standart** standart — ta'rifi, na DB bekor qilish, na muhit o'zgaruvchisi mavjud bo'lmaganda ishlatiladigan qiymat.
 
 ### Xavfsizlik (11)
 
@@ -119,7 +119,7 @@ boʻlsa, u **yoqilgan** hisoblanadi (`isFeatureFlagEnabled()`ga qarang).
 
 `UNPRICED_USAGE_BUDGET_POLICY` aniq konfiguratsiya qilinganida (DB muhitdan oldin bekor qilinadi), u `USAGE_LIMIT_IGNORE_UNPRICED` dan ustun turadi. Aniq enum qiymati bo'lmagan holda, yuqori oqim boolean rad etish `count_as_zero` tanlaydi; aks holda sukut bo'yicha `fail_closed` bo'ladi. Yaroqsiz enum qiymatlari va o‘qib bo‘lmaydigan xususiyat bayrog‘i xotirasi yopilmadi. Birorta ham voz kechish narxlangan sarf-xarajatlarni yoki narxni qidirishda muvaffaqiyatsizlikka olib kelmaydi. Amalga oshirish va administrator hisoboti bir xil samarali siyosatni hal qiladi.
 
-### Ish vaqti (57)
+### Ish vaqti (58)
 
 | Kalit                                          | Turi     | Standart | Qayta ishga tushirish | Tavsif                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | -------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -182,6 +182,7 @@ boʻlsa, u **yoqilgan** hisoblanadi (`isFeatureFlagEnabled()`ga qarang).
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | mantiqiy | `false`  |                       | Cursor Grok 4.7 (#17386) uchun `max` fikrlash harakatini taklif qilish va yo‘naltirishni to‘xtating: Cursor ning hujjatlar ro‘yxati faqat low/medium/high/xhigh, shuning uchun `grok-4.7-max` zaxira taxallus katalogdan yo‘qoladi va `max` harakat so‘rovi harakat parametrisiz yuboriladi. Sukut bo'yicha o'chirilgan: `max` taklif qilinadi va uzatiladi, chunki jonli AgentService/Run tekshiruvi buni qabul qilgan.                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | mantiqiy | `false`  |                       | Javoblarni saqlovchi maʼlumotlarini respond.in_progress hodisasi oʻrniga boʻsh satr sifatida yuboring, shuning uchun sintetik snapshot hech qachon rasmiy SDK haqiqiy javob oʻrnini bosa olmaydi. Bo'sh satr hech qanday SSE hodisasini jo'natmaydi, shuning uchun faqat voqealar bo'yicha qayta tiklanadigan mijoz kuzatuvi uzoq davom etadigan jim fazada tiklanmaydi. Sukut bo'yicha o'chirilgan: taymerlar spec-valid response.in_progress hodisasini yuboradi.                                                                                                                                                                                                                                                                                                                                                                                    |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | mantiqiy | `false`  |                       | Siqish kesh statistikasida avtomatik-prefiks-keshlash provayderiga (OpenAI, Codex, Azure yoki markerni olib tashlash bilan tezkor keshlashni e'lon qiladigan maxsus ulanish) siqilgan so'rovni `cache_control` markerlari (#17114) bo'lmasa ham taxminiy kesh urishi deb hisoblang. Hisob-kitob kuzatilgan zarba emas, keshga moslik signalidir, shuning uchun ushbu provayderlar uchun xabar qilingan hit darajasi 100% ga to'g'ri keladi. Sukut bo'yicha o'chirilgan: faqat keshlash provayderiga `cache_control` markerlarini olib boradigan so'rov taxminiy zarba sifatida hisoblanadi, shuning uchun avtomatik prefiks provayderlari 0 ni hisobot berishda davom etadilar.                                                                                                                                                                        |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | mantiqiy | `false`  |                       | `provider` aniq ko‘rsatilmaganda, ulangan Codex hisobi bilan `codex-search` orqali avtomatik veb-qidiruvga ruxsat beradi. Kirish ma’lumotlari bor yaroqli provayder topilmasa, bu kalitsiz provayderlardan oldingi so‘nggi imkoniyat hamda nosozlik paytidagi muqobil yo‘ldir (#17933). Har bir qidiruv ChatGPT obunasi kvotasini sarflaydi va taxminan 10–40 soniya davom etadi. Odatda o‘chiq; `codex-search` faqat aniq so‘ralganda ishlaydi.                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### CLI (5)
 
@@ -252,10 +253,10 @@ Har bir bayroqni samarali qiymati, manbasi va xulosasi bilan qaytaradi.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

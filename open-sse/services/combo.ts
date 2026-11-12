@@ -422,6 +422,7 @@ export async function buildAutoCandidates(
       }
       targetsForExpansion = expandTargetsWithinConnectionScope(targets, grouped, connectionScope);
     } catch {
+      // no-effect: authorization stays fail-closed; unknown membership cannot admit a target.
       targetsForExpansion = [];
     }
   } else {
@@ -768,6 +769,7 @@ async function lookupConnectionDeclaredTimeoutMs(
     const connection = await getCachedProviderConnectionById(connectionId);
     return resolveConnectionTimeoutMs(connection?.providerSpecificData);
   } catch (err) {
+    // no-effect: the caller retains registry budgets when this optional override is unavailable.
     log?.debug?.(
       "COMBO",
       `resolveDeclaredTargetBudgetMs connection lookup failed: ${

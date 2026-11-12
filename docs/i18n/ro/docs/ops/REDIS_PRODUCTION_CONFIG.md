@@ -6,36 +6,33 @@
 
 ## Prezentare generală
 
-Redis este o **dependență opțională, neesențială** în OmniRoute — aplicația își reduce funcționalitatea în mod controlat (folosind
-mecanisme de rezervă în memorie) atunci când Redis nu este disponibil. În producție, optimizarea Redis reduce latența pentru patru
-sarcini de lucru distincte:
+Redis este un **dependență opțională, soft** în OmniRoute — aplicația se degradează în mod grațios (in-memory fallbacks) atunci când Redis nu este disponibil. În producție, reglarea Redis reduce latența pentru patru sarcini de lucru distincte:
 
-| Sarcină de lucru                         | Implementare                  | Fabrică de clienți                                                       | Model de cheie                                          |
-| ---------------------------------------- | ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------- |
-| Limitarea ratei                          | `rateLimiter.ts`              | `getRedisClient()` — instanță singleton `ioredis` inițializată la cerere | Ferestre de limitare a ratei Lua atomice `<prefix>rl:*` |
-| Cache de autentificare                   | `apiKeys.ts`                  | Reutilizează clientul din `rateLimiter`                                  | `<prefix>auth:api_key:<sha256>` cu TTL                  |
-| Stocare pentru cote                      | `redisQuotaStore.ts`          | Instanță singleton `getRedisClient(url)` separată                        | `<prefix>quota:*`, configurabil per instanță            |
-| Întrerupător de circuit pentru încălzire | `redisCircuitBreakerStore.ts` | Client separat în `circuitBreakerFactory.ts`                             | `<prefix>warmup:cb:<connectionId>`                      |
+| Volumul de muncă          | Șofer                         | Fabrica Client                                 | Model cheie                                           |
+| ------------------------- | ----------------------------- | ---------------------------------------------- | ----------------------------------------------------- |
+| Limitarea ratei           | `rateLimiter.ts`              | `getRedisClient()` — leneș `ioredis` singleton | Ferestre de limită a ratei atomice `<prefix>rl:*` Lua |
+| Cache de autentificare    | `apiKeys.ts`                  | Refolosește clientul lui `rateLimiter`         | `<prefix>auth:api_key:<sha256>` cu TTL                |
+| Magazin de cote           | `redisQuotaStore.ts`          | Singleton `getRedisClient(url)` separat        | `<prefix>quota:*` configurabil per-instanță           |
+| Întrerupător de încălzire | `redisCircuitBreakerStore.ts` | Client separat în `circuitBreakerFactory.ts`   | `<prefix>warmup:cb:<connectionId>`                    |
 
-Toate cele patru sarcini de lucru folosesc același prefix de spațiu de nume, astfel încât OmniRoute să poată coexista cu alte aplicații pe o
-singură instanță Redis (de exemplu, `127.0.0.1:6379`). Consultați [Spațiul de nume al cheilor](#key-namespacing).
+Toate cele patru sarcini de lucru partajează un prefix de spațiu de nume, astfel încât OmniRoute să poată coexista cu alte aplicații pe o singură instanță Redis (de exemplu, `127.0.0.1:6379`). Consultați [Spațierea numelor cheilor](#key-namespacing).
 
 ---
 
-## Configurația actuală (valorile implicite din cod)
+## Configurație curentă (Valori implicite ale codului)
 
-| Setare                                     | Valoare                                                                   | Locație                                                                               |
-| ------------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Variabila de mediu `REDIS_URL`             | `redis://redis:6379` (compose), opțională                                 | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Variabila de mediu `REDIS_KEY_PREFIX`      | `omniroute:` (implicit)                                                   | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Variabila de mediu `QUOTA_STORE_REDIS_URL` | separată, poate fi diferită de `REDIS_URL`                                | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                       | `"sqlite"` (implicit), `"redis"` opțional                                 | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` pentru ioredis      | `3`                                                                       | crearea clientului în `rateLimiter.ts`                                                |
-| `enableReadyCheck`                         | nesetat (valoare implicită ioredis: `true`)                               | —                                                                                     |
-| `lazyConnect`                              | nesetat (valoare implicită ioredis: `false`)                              | —                                                                                     |
-| `retryStrategy`                            | nesetat (valoare implicită ioredis: bază de 200ms, creștere exponențială) | —                                                                                     |
-| TLS / parolă / index DB                    | **neconfigurate**                                                         | —                                                                                     |
-| Sentinel / Cluster                         | **neconfigurate** — este acceptat doar un singur nod independent          | —                                                                                     |
+| Setare                          | Valoare                                                 | Unde                                                                                  |
+| ------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (compune), opțional                | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (implicit)                                 | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | separat, poate diferi de `REDIS_URL`                    | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (implicit), `"redis"` opțional               | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                     | Crearea clientului `rateLimiter.ts`                                                   |
+| `enableReadyCheck`              | nesetat (ioredis implicit: `true`)                      | —                                                                                     |
+| `lazyConnect`                   | nesetat (ioredis implicit: `false`)                     | —                                                                                     |
+| `retryStrategy`                 | nesetat (ioredis implicit: 200 ms de bază, exponențial) | —                                                                                     |
+| TLS / parola / index DB         | **neconfigurat**                                        | —                                                                                     |
+| Santinela / Cluster             | **neconfigurat** Doar un singur nod autonom —           | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Ajustări recomandate pentru producție
+## Reglajul de producție recomandat
 
-### 1. Opțiuni pentru pool-ul de conexiuni / client (constructorul ioredis `Redis`)
+### 1. Pool de conexiuni / Opțiuni client (constructor ioredis `Redis` )
 
-Codul actual creează o singură instanță `new Redis(url)`, fără opțiuni personalizate. Pentru implementări de producție
-cu mai multe replici, transmiteți în cod o fabrică de clienți sau încapsulați `getRedisClient()`:
+Codul actual creează un singur `new Redis(url)` fără opțiuni personalizate. Pentru implementări multi-replica de producție, treceți o fabrică de client în cod sau includeți `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // fără limită de reîncercări; retryStrategy va decide
-  enableReadyCheck: true, // verifică dacă serverul este pregătit înainte de a accepta apeluri
-  lazyConnect: true, // nu se conectează la inițializare; așteaptă primul apel
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // renunță după 10 reîncercări → se reconectează mai târziu
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, limită de 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // combină comenzile concurente într-o singură scriere TCP
-  keepAlive: 10000, // TCP keep-alive la fiecare 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Compromisuri principale:**
+**Principalele compromisuri:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — opțiune preferată pentru producție, astfel încât repornirile
-  temporare ale Redis să nu provoace imediat eșecul fiecărei cereri. Mecanismul de rezervă din memorie din
-  `checkRateLimit()` preia gestionarea cazului de eșec.
-- `lazyConnect: true` — evită dependența la pornire de disponibilitatea Redis înainte ca serverul
-  să înceapă să accepte conexiuni.
-- `enableAutoPipelining: true` — reduce numărul de călătorii dus-întors pentru verificările concurente ale limitei de rată;
-  este benefic la >50 RPS pe o singură conexiune.
+- `maxRetriesPerRequest: null` + `retryStrategy` — preferat pentru producție, astfel încât repornirile Redis tranzitorii să nu eșueze imediat fiecare solicitare. Funcția de rezervă în memorie în `checkRateLimit()` absoarbe calea de defecțiune.
+- `lazyConnect: true` — evită o dependență de pornire de activarea Redis înainte ca serverul să înceapă să accepte conexiuni.
+- `enableAutoPipelining: true` — reduce călătoriile dus-întors pentru verificări concurente ale limitelor de rată; benefic la > 50 RPS pe o singură conexiune.
 
-### 2. Configurarea serverului Redis (`redis.conf`)
+### 2. Configurare server Redis (`redis.conf`)
 
 ```
-# Memorie
-maxmemory 80%                        # păstrează spațiu pentru cache-ul de pagini al sistemului de operare
-maxmemory-policy allkeys-lru         # elimină intrările învechite din cache-ul de autentificare în condiții de presiune
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistență (opțională — OmniRoute este sigur în caz de oprire neașteptată și fără aceasta)
-save 300 1                           # creează un instantaneu cel puțin la fiecare 5 min dacă s-a modificat ≥1 cheie
-appendonly no                        # AOF nu este necesar; datele pot fi regenerate
-appendfsync no                       # fără costul suplimentar al fsync (RDB este suficient)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Rețea
-timeout 0                            # fără deconectare în stare de inactivitate
-tcp-keepalive 300                    # keep-alive la 5 min
-tcp-backlog 511                      # coadă de conexiuni pentru sarcini în rafale
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Performanță
-hz 10                                # valoare implicită; 100 pentru aplicații sensibile la latență
-activedefrag yes                     # defragmentare automată când fragmentarea este >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Compromis pentru `maxmemory-policy allkeys-lru`:** Intrările din cache-ul de autentificare pot fi eliminate în
-condiții de presiune asupra memoriei. Acest lucru este sigur — `setCachedApiKey` repopulează întotdeauna cache-ul în cazul unei absențe, iar
-mecanismul de rezervă SQLite reprezintă sursa autoritară. Scriptul Lua pentru limitarea ratei creează chei mici care sunt
-proiectate să aibă o durată scurtă de viață.
+**Compensație pentru `maxmemory-policy allkeys-lru`:** Intrările din memoria cache de autentificare pot fi evacuate sub presiunea memoriei. Acesta este sigur — `setCachedApiKey` se repopulează întotdeauna la ratare, iar alternativa SQLite este autoritară. Scriptul Lua de limitare a ratei creează chei mici care sunt de scurtă durată prin proiectare.
 
 ### 3. Setări Docker Compose
 
-Configurația Compose pentru producție (`docker-compose.prod.yml`) utilizează `redis:8.6.2-alpine`. Adăugați:
+Prod compose (`docker-compose.prod.yml`) folosește `redis:8.6.2-alpine`. Adăuga:
 
 ```yaml
 redis:
@@ -150,35 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Considerații privind instanțele multiple / scalarea
+### 4. Considerații multi-instanță / scalare
 
-**Un singur Redis pentru toate replicile** — scriptul Lua pentru limitarea ratei depinde de un singur
-spațiu autoritar de chei. Utilizarea mai multor instanțe Redis în spatele replicilor ar elimina atomicitatea
-și ar dubla bugetul. Utilizați un singur Redis (sau un cluster Redis Sentinel cu failover) pentru
-toate replicile aplicației.
+**Redis unic pentru toate replicile** — scriptul Lua cu limitator de viteză depinde de un singur spațiu de cheie autorizat. Mai multe instanțe Redis din spatele replicilor ar pierde atomicitatea și ar dubla bugetul. Utilizați un singur Redis (sau cluster Redis Sentinel cu failover) pentru toate replicile aplicației.
 
-**Numărul de conexiuni:** Fiecare replică a aplicației deschide **2 conexiuni TCP** către Redis
-(clientul limitatorului de rată + clientul depozitului de cote). La 10 replici → 20 de conexiuni, valoare aflată
-cu mult sub limita implicită de 10.000 de conexiuni a unei instanțe Redis.
+**Număr de conexiuni:** Fiecare replică a aplicației se deschide **2 conexiuni TCP** la Redis (client limitator de rată + client magazin de cote). La 10 replici conexiuni → 20, bine în limitele plafonului de conexiune de 10k al unei instanțe Redis implicite.
 
 ### 5. Monitorizare
 
-Expuneți prin intermediul endpointului de verificare a stării de funcționare:
+Expuneți prin punctul final de verificare a stării de sănătate:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts apelează deja funcțiile rateLimiter
-// Adăugați verificări specifice Redis:
-//   1. Latența PING prin ioredis .ping()
-//   2. Utilizarea memoriei prin INFO memory
-//   3. Numărul de conexiuni prin INFO clients
-//   4. Rata de succes pentru maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Metrici principale de urmărit:
+Valori cheie de urmărit:
 
-- **Chei eliminate / sec** — dacă valoarea este persistent diferită de zero, măriți `maxmemory`
-- **Clienți blocați** — o valoare diferită de zero sugerează scripturi Lua lente sau un nivel ridicat de concurență
-- **Conexiuni respinse** — limita de conexiuni a fost atinsă; situație rară la 20 de conexiuni
+- **Chei evacuate / sec** — dacă este constant diferit de zero, crește `maxmemory`
+- **Clienți blocați** — non-zero sugerează scripturi Lua lente sau disputa ridicată
+- **Conexiuni respinse** Atinge limita de conexiune — ; rar la 20 de conexiuni
+
+### 6. Servere compatibile cu Redis
+
+Orice server folosit aici trebuie să ruleze scripturi Lua: limitatorul de rată este un `EVAL`. Pe un server fără Lua, `checkRateLimit()` înregistrează `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` și contorizează per proces, astfel încât fiecare replică impune limita singură. Magazinul de afinitate de sesiune partajat (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) cu înscriere citește și actualizează, de asemenea, pinii cu `EVAL`; fără Lua înregistrează `[SESSION_AFFINITY] Redis error; falling back to SQLite.` și fiecare replică își păstrează propriile ace. Celelalte sarcini de lucru folosesc comenzi simple (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes și seturi), iar backend-ul Redis al cache-ului semantic nu trimite comenzi `FT.*`.
+
+Testat cu OmniRoute 3.8.52: KiviDB 1.2.0 cu imaginea sa Lua (`kividb/kividb:v1.2.0-lua`). Limitatorul de rată (inclusiv un al doilea proces care partajează contoarele), memoria cache de autentificare, stocarea cotelor, întrerupătorul de circuit de încălzire, stocarea cache semantică și o solicitare `/v1/chat/completions` prin gestionarea de chat au trecut 18 din cele 19 verificări care trec pe Redis 8.10.3. Cel care diferă: `INCRBYFLOAT` stochează `0.1 + 0.2` ca `0.30000000000000004` unde Redis stochează `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Magazinul de cote le analizează pe ambele cu `parseFloat`, dar cele două numere diferă în ultimele cifre, așa că o comparație care se încadrează exact pe o limită de cotă poate ieși diferit. Magazinul de afinitate sesiune nu a făcut parte din acea rulare. ( [configurare](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [rezultate](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -201,13 +191,13 @@ flowchart LR
 
 ## Referințe
 
-| Fișier                             | Scop                                                                                         |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Clientul Redis principal, scriptul Lua pentru limitarea ratei, soluția de rezervă în memorie |
-| `src/lib/db/apiKeys.ts`            | Cache de autentificare — soluție de rezervă Redis→SQLite                                     |
-| `src/lib/quota/redisQuotaStore.ts` | Client Redis separat pentru stocul opțional de cote                                          |
-| `src/lib/quota/storeFactory.ts`    | Comută între driverele de cote `sqlite` și `redis`                                           |
-| `docker-compose.prod.yml`          | Containerul Redis pentru producție (imaginea `redis:8.6.2-alpine`)                           |
-| `.env.example`                     | Documentația variabilelor de mediu Redis                                                     |
-| `src/app/api/local/redis/`         | Rute API pentru orchestrarea containerului de dezvoltare                                     |
-| `bin/cli/commands/redis.mjs`       | Comenzi CLI pentru orchestrarea containerului de dezvoltare                                  |
+| Fişier                             | Scop                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `src/shared/utils/rateLimiter.ts`  | Client Redis principal, script de limită de rată Lua, rezervă în memorie |
+| `src/lib/db/apiKeys.ts`            | Cache de autentificare — Redis→SQLite alternativă                        |
+| `src/lib/quota/redisQuotaStore.ts` | Client Redis separat pentru stocarea cotelor opționale                   |
+| `src/lib/quota/storeFactory.ts`    | Comută între driverele de cotă `sqlite` și `redis`                       |
+| `docker-compose.prod.yml`          | Container Prod Redis (imagine `redis:8.6.2-alpine`)                      |
+| `.env.example`                     | Redis env vars documentație                                              |
+| `src/app/api/local/redis/`         | Rute API pentru orchestrarea containerelor de dezvoltare                 |
+| `bin/cli/commands/redis.mjs`       | Comenzi CLI pentru orchestrarea containerelor de dezvoltare              |

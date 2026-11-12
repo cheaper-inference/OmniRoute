@@ -4,52 +4,52 @@
 
 ---
 
-> **සත්යයේ මූලාශ්රය:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **අවසන් වරට යාවත්කාලීන කළේ:** 2026-06-28 — v3.8.40
+> **සත්‍ය මූලාශ්‍රය:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**අවසන් වරට යාවත්කාලීන කළේ:** 2026-06-28 — v3.8.40
 
-OmniRoute හට වේදිකා සිදුවීම් මත HTTP webhooks ක්රියාත්මක කළ හැක. Slack, PagerDuty, Datadog, අභ්යන්තර අනතුරු ඇඟවීමේ සේවා, හෝ ඕනෑම HTTP ප්රතිග්රාහකයක් සමඟ ඒකාබද්ධ වීමට ඒවා භාවිත කරන්න.
+OmniRoute හට වේදිකා සිදුවීම් මත HTTP webhooks වෙඩි තැබිය හැක. Slack, PagerDuty, Datadog, අභ්‍යන්තර අනතුරු ඇඟවීමේ සේවා, හෝ ඕනෑම HTTP ග්‍රාහකයක් සමඟ ඒකාබද්ධ කිරීමට ඒවා භාවිතා කරන්න.
 
-dispatcher එක සෑම බෙදාහැරීමක්ම HMAC-SHA256 සමඟ අත්සන් කරයි, තාවකාලික අසාර්ථකවීම්වලදී නැවත උත්සාහ කරයි, එක් එක් webhook එක අනුව බෙදාහැරීමේ සෞඛ්ය තත්ත්වය නිරීක්ෂණය කරයි, සහ දිගින් දිගටම අසාර්ථක වන endpoints ස්වයංක්රීයව අක්රිය කරයි.
+පිටත් කරන්නා සෑම බෙදාහැරීමක්ම HMAC-SHA256 සමඟ අත්සන් කරයි, තාවකාලික අසාර්ථකත්වයන් නැවත උත්සාහ කරයි, webhook එකකට බෙදා හැරීමේ සෞඛ්‍යය නිරීක්ෂණය කරයි, සහ අසාර්ථක වන අන්ත ලක්ෂ්‍ය ස්වයංක්‍රීයව අක්‍රීය කරයි.
 
 ## සහාය දක්වන සිදුවීම්
 
-`WebhookEvent` වර්ගය (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` මඟින් භාවිත කරයි) දැනට නිශ්චිතව සිදුවීම් හතරක් නිරූපණය කරයි:
+`WebhookEvent` වර්ගය (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` විසින් පරිභෝජනය කරනු ලැබේ ) දැනට සිදුවීම් හතක් ආකෘති කරයි:
 
-| සිදුවීම             | ක්රියාත්මක වන්නේ                                                   |
-| ------------------- | ------------------------------------------------------------------ |
-| `request.completed` | proxy කළ ඉල්ලීමක් සාර්ථකව සම්පූර්ණ වූ විට                          |
-| `request.failed`    | සියලු නැවත උත්සාහ/විකල්පවලින් පසු proxy කළ ඉල්ලීමක් අසාර්ථක වූ විට |
-| `quota.exceeded`    | API යතුරක් අයවැය/quota සීමාවක් ඉක්මවා ගිය විට                      |
-| `test.ping`         | පරීක්ෂණ endpoint එක භාවිත කරන කෘත්රිම සිදුවීමක්                    |
+| සිදුවීම                   | විට ගිනි                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `request.completed`       | ප්‍රොක්සි ඉල්ලීමක් සාර්ථකව සම්පූර්ණ වේ                                                                       |
+| `request.failed`          | සියලුම retries/fallback වලින් පසු ප්‍රොක්සි ඉල්ලීමක් අසාර්ථක වේ                                              |
+| `quota.exceeded`          | API යතුරක් budget/quota සීමාවක් තරණය කරයි                                                                    |
+| `proxy.set_aside`         | ප්‍රොක්සි සංචිත සාමාජිකයෙකු නැවත නැවත ප්‍රතික්ෂේප කිරීමෙන් පසු වෙන් කරනු ලැබේ (සංක්‍රමණය පමණි)               |
+| `proxy.pool.exhausted`    | ප්‍රොක්සි සංචිත විෂය පථයක සෑම සාමාජිකයෙකුම වෙන් කර ඇත                                                        |
+| `provider.reset_redeemed` | ස්වයංක්‍රීයව යොදන බැංකු යළි පිහිටුවීම් යළි පිහිටුවීමේ ණයක් හෝ Claude සතිපතා සැසි යළි පිහිටුවීම මුදා හරින ලදී |
+| `test.ping`               | පරීක්ෂණ අන්ත ලක්ෂ්‍යයෙන් භාවිතා කරන කෘතිම සිදුවීම                                                            |
 
-සෑම සිදුවීමක්ම ලබා ගැනීමට subscriptions විසින් නියමිත `"*"` අගය පිළිගනී. `events` තුළ ඇති නොදන්නා සිදුවීම් නම් dispatch කරන අවස්ථාවේ නොසලකා හරිනු ලැබේ.
+දායකත්වයන් සෑම සිදුවීමක්ම ලබා ගැනීම සඳහා වචනාර්ථයෙන් `"*"` පිළිගනී. `events` හි නොදන්නා සිදුවීම් නම් යැවීමේ වේලාවේදී නොසලකා හරිනු ලැබේ.
 
-> සටහන: dispatcher API එක සම්බන්ධ කර ඇත, නමුත් `test.ping` නොවන සමහර
-> සිදුවීම් සඳහා production call sites තවමත් එක් කෙරෙමින් පවතී. ඔබේ නිකුතුවේ
-> දැනට dispatcher එක කැඳවන paths මොනවාදැයි බැලීමට `grep dispatchEvent` පරීක්ෂා කරන්න.
+> සටහන: ඩිස්පැචර් API රැහැන්ගත කර ඇත, නමුත් සමහර `test.ping` නොවන සිදුවීම් සඳහා නිෂ්පාදන ඇමතුම් අඩවි තවමත් ගොඩබසිමින් පවතී. ඔබගේ නිකුතුවේ දැනට ඩිස්පෑචර් ඉල්ලා සිටින්නේ කුමන මාර්ගදැයි බැලීමට `grep dispatchEvent` පරීක්ෂා කරන්න.
 
-## ගෘහනිර්මාණය
+## ගෘහ නිර්මාණ ශිල්පය
 
 ```
-කැඳවුම්කරු (handler, service, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> webhook.events අනුව පෙරහන් කරන්න
-    -> ගැළපෙන සෑම එකක් සඳහාම (සමාන්තරව):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         payload එක සාදන්න { event, timestamp, data }
-         HMAC-SHA256 සමඟ body එක අත්සන් කරන්න (secret තිබේ නම්)
-         තත්පර 10ක කාල සීමාවක් සහිතව POST කරන්න
-         5xx / ජාල දෝෂයකදී උපරිම වාර 3ක් නැවත උත්සාහ කරන්න
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Dispatch කිරීම කැඳවුම්කරු සඳහා ප්රතිඵලය බලා නොසිට ඉදිරියට යන ආකාරයෙන් සිදු වේ: එක් දෝෂ සහිත ප්රතිග්රාහකයකට අනෙක් ඒවා අවහිර කළ නොහැකි වන පරිදි `Promise.allSettled` විසින් එක් එක් webhook එකේ දෝෂ යටපත් කරයි.
+Dispatch යනු ඇමතුම්කරුට ගින්නක් සහ අමතක වීමකි: `Promise.allSettled` එක් වෙබ් හූක් දෝෂ ගිලින බැවින් එක් නරක ග්‍රාහකයෙකුට අනෙක් ඒවා අවහිර කළ නොහැක.
 
 ## HMAC අත්සන් කිරීම
 
-webhook එකකට `secret` එකක් ඇති විට, OmniRoute විසින් JSON body එක අත්සන් කර පහත දෑ යවයි:
+webhook එකක `secret` ඇති විට, OmniRoute JSON ශරීරයට අත්සන් කර යවන්නේ:
 
 ```
 Content-Type: application/json
@@ -59,12 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Header නම් `X-OmniRoute-*` වෙනුවට `X-Webhook-*` උපසර්ගය භාවිත කරයි. signature
-> අගය `sha256=<hex>` වේ — සම්පූර්ණ උපසර්ගය සත්යාපනය කරන්න.
+> ශීර්ෂ නාම `X-Webhook-*` උපසර්ගය භාවිතා කරයි ( `X-OmniRoute-*` නොවේ). අත්සන අගය `sha256=<hex>` — සම්පූර්ණ උපසර්ගය සත්‍යාපනය කරන්න.
 
-secret එකක් නොමැතිව `createWebhook` කැඳවනු ලැබුවහොත්, සියලු webhooks පෙරනිමියෙන් අත්සන් වන පරිදි DB module එක විසින් එකක් (`whsec_<48 hex>`) ජනනය කරයි.
+`createWebhook` රහසක් නොමැතිව කැඳවනු ලැබුවහොත්, DB මොඩියුලය එකක් (`whsec_<48 hex>`) ජනනය කරයි, එබැවින් සියලුම webhooks පෙරනිමියෙන් අත්සන් කරනු ලැබේ.
 
-### ප්රතිග්රාහකයේදී සත්යාපනය කිරීම
+### ග්‍රාහකයේ සත්‍යාපනය කිරීම
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -77,63 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-කිසියම් JSON parsing කිරීමකට පෙර, සෑම විටම **අමු** request body එකට එරෙහිව සත්යාපනය කරන්න.
+ට එරෙහිව සැමවිටම සත්‍යාපනය කරන්න **අමු** ඕනෑම JSON විග්‍රහ කිරීමට පෙර ශරීරය ඉල්ලා සිටින්න.
 
-## නැවත උත්සාහ කිරීමේ සහ අසාර්ථක වීමේ ප්රතිපත්තිය
+## නැවත උත්සාහ කිරීම සහ අසාර්ථක වීමේ ප්‍රතිපත්තිය
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- සෑම උත්සාහයකටම තත්පර 10ක කාල සීමාවක් ඇත (`AbortController`).
-- HTTP 2xx සාර්ථක ලෙස සැලකේ.
-- HTTP 3xx/4xx නැවත උත්සාහ නොකරන අවසාන තත්ත්වයක් ලෙස සැලකේ — `success = res.ok` සමඟ බෙදාහැර ඇති බවට සටහන් කෙරේ.
-- HTTP 5xx සහ ජාල දෝෂ සඳහා ඝාතීය ප්රමාදයක් සමඟ නැවත උත්සාහ කෙරේ:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- `maxRetries` පසු, බෙදාහැරීම අසාර්ථක වූ බවට සටහන් කෙරේ.
-- සෑම බෙදාහැරීමකදීම `last_triggered_at`, `last_status` යාවත්කාලීන කෙරෙන අතර `failure_count` යළි සකසනු හෝ වැඩි කරනු ලැබේ.
-- සෑම fan-out එකකටම පසු dispatcher එක `disableWebhooksWithHighFailures(10)` අමතන බැවින්, `failure_count >= 10` වන ඕනෑම webhook එකක් ස්වයංක්රීයව අක්රිය කෙරේ.
+- එක් උත්සාහයකට තත්පර 10 කල් ඉකුත්වීම (`AbortController`).
+- HTTP 2xx සාර්ථකත්වය ලෙස ගණන් ගනී.
+- HTTP 3xx/4xx `success = res.ok` සමඟ බෙදාහැර ඇති පරිදි වාර්තා කර ඇති — නැවත උත්සාහ කළ නොහැකි අවසාන තත්ත්වය ලෙස ගණන් ගනී.
+- HTTP 5xx සහ ජාල දෝෂ ඝාතීය පසුබෑම සමඟ නැවත උත්සාහ කරනු ලැබේ: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- `maxRetries` ට පසුව, බෙදා හැරීම අසාර්ථක වූ බවට සටහන් වේ.
+- සෑම බෙදාහැරීමක්ම `last_triggered_at`, `last_status` යාවත්කාලීන කරන අතර `failure_count` නැවත සකසයි හෝ වැඩි කරයි.
+- එක් එක් විදුලි පංකා පිටවීමෙන් පසු පිටත් කරන්නා `disableWebhooksWithHighFailures(10)` අමතයි, එබැවින් `failure_count >= 10` සහිත ඕනෑම වෙබ්හුක් ස්වයංක්‍රීයව අක්‍රිය වේ.
 
 ## දත්ත සමුදාය
 
-`webhooks` වගුව (migration `011_webhooks.sql`):
+වගුව `webhooks` (සංක්‍රමණය `011_webhooks.sql`):
 
-| තීරුව               | වර්ගය   | සටහන්                                             |
-| ------------------- | ------- | ------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                              |
-| `url`               | TEXT    | ගමනාන්ත URL එක                                    |
-| `events`            | TEXT    | JSON අරාව; පෙරනිමිය `["*"]`                       |
-| `secret`            | TEXT    | HMAC රහස (ලබා නොදුන්නේ නම් ස්වයංක්රීයව ජනනය කෙරේ) |
-| `enabled`           | INT     | 0/1; පෙරනිමිය 1 වේ                                |
-| `description`       | TEXT    | විකල්ප, මිනිසුන්ට කියවිය හැකි ලේබලය               |
-| `created_at`        | TEXT    | `datetime('now')`                                 |
-| `last_triggered_at` | TEXT    | සෑම බෙදාහැරීමේ උත්සාහයකදීම යාවත්කාලීන කෙරේ        |
-| `last_status`       | INT     | අවසන් උත්සාහයේ HTTP තත්ත්වය (0 = ජාලය)            |
-| `failure_count`     | INT     | සාර්ථක වූ විට 0 වෙත යළි සකසයි, අසාර්ථක වූ විට +1  |
+| තීරුව               | ටයිප් කරන්න | සටහන්                                               |
+| ------------------- | ----------- | --------------------------------------------------- |
+| `id`                | TEXT PK     | UUID                                                |
+| `url`               | TEXT        | ගමනාන්තය URL                                        |
+| `events`            | TEXT        | JSON අරාව; පෙරනිමි `["*"]`                          |
+| `secret`            | TEXT        | HMAC රහස (නොදුන්නේ නම් ස්වයංක්‍රීයව ජනනය වේ)        |
+| `enabled`           | INT         | 0/1; පෙරනිමි 1                                      |
+| `description`       | TEXT        | විකල්ප මානව ලේබලය                                   |
+| `created_at`        | TEXT        | `datetime('now')`                                   |
+| `last_triggered_at` | TEXT        | සෑම බෙදා හැරීමේ උත්සාහයකම යාවත්කාලීන වේ             |
+| `last_status`       | INT         | අවසාන උත්සාහයේHTTP තත්ත්වය (0 = ජාලය)               |
+| `failure_count`     | INT         | සාර්ථක වූ විට 0 ට, අසාර්ථක වූ විට + 1 වෙත යළි සකසයි |
 
-සමස්ත කවුන්ටර `webhooks` පේළියේ තබාගැනීමට අමතරව, බෙදාහැරීම් ඉතිහාසය වෙන් කළ `webhook_deliveries` වගුවෙහි ස්ථිරව ගබඩා කෙරේ
-(migration `069_webhook_deliveries.sql`, සෑම උත්සාහයකදීම
-`src/lib/db/webhookDeliveries.ts::insertDelivery` හරහා ලියනු ලැබේ).
-වර්ගයට අදාළ metadata (Slack / Discord / Telegram / අභිරුචි payload පරිවර්තක)
-`070_webhooks_kind_metadata.sql` මඟින් එක් කරන ලදී.
+බෙදාහැරීමේ ඉතිහාසය `webhooks` පේළියේ ඇති සමස්ථ කවුන්ටර වලට අමතරව කැප වූ `webhook_deliveries` වගුවේ (සංක්‍රමණය `069_webhook_deliveries.sql`, සෑම උත්සාහයක්ම `src/lib/db/webhookDeliveries.ts::insertDelivery` හරහා ලියා ඇත) පවතී. කාරුණික පාරදත්ත (Slack / Discord / Telegram / අභිරුචි ගෙවීම් ට්‍රාන්ස්ෆෝමර්) `070_webhooks_kind_metadata.sql` විසින් එකතු කරන ලදී.
 
 ## REST API
 
-සියලු endpoint සඳහා කළමනාකරණ සත්යාපනය (`requireManagementAuth`) අවශ්ය වේ.
+සියලුම අන්ත ලක්ෂ්‍ය සඳහා කළමනාකරණ auth (`requireManagementAuth`) අවශ්‍ය වේ.
 
-| Endpoint                        | ක්රමය  | විස්තරය                                     |
-| ------------------------------- | ------ | ------------------------------------------- |
-| `/api/webhooks`                 | GET    | webhook ලැයිස්තුගත කරන්න (රහස් ආවරණය කර ඇත) |
-| `/api/webhooks`                 | POST   | webhook එකක් සාදන්න                         |
-| `/api/webhooks/[id]`            | GET    | webhook විස්තර (සම්පූර්ණ රහස)               |
-| `/api/webhooks/[id]`            | PUT    | ක්ෂේත්ර යාවත්කාලීන කරන්න                    |
-| `/api/webhooks/[id]`            | DELETE | ඉවත් කරන්න                                  |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping` එකක් යවන්න (නැවත උත්සාහ නොකරයි) |
-| `/api/webhooks/[id]/deliveries` | GET    | එක් webhook එකක මෑත බෙදාහැරීමේ උත්සාහ       |
-| `/api/webhooks/validate-url`    | POST   | පෙර-පරීක්ෂණ URL වලංගුකරණය (SSRF ආරක්ෂාව)    |
+| අන්ත ලක්ෂ්‍යය                   | ක්රමය  | විස්තරය                                       |
+| ------------------------------- | ------ | --------------------------------------------- |
+| `/api/webhooks`                 | GET    | වෙබ් හූක් ලැයිස්තුගත කරන්න (රහස් ආවරණය කර ඇත) |
+| `/api/webhooks`                 | POST   | webhook සාදන්න                                |
+| `/api/webhooks/[id]`            | GET    | Webhook විස්තරය (සම්පූර්ණ රහස)                |
+| `/api/webhooks/[id]`            | PUT    | ක්ෂේත්ර යාවත්කාලීන කරන්න                      |
+| `/api/webhooks/[id]`            | DELETE | ඉවත් කරන්න                                    |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping` වෙඩි තියන්න (නැවත උත්සාහයක් නැත)  |
+| `/api/webhooks/[id]/deliveries` | GET    | එක් webhook සඳහා මෑත බෙදාහැරීමේ උත්සාහයන්     |
+| `/api/webhooks/validate-url`    | POST   | පෙර පියාසර URL වලංගුකරණය (SSRF ගාඩ්)          |
 
-ලැයිස්තුගත කිරීමේ පිටු හරහා රහස හෙළිවීම වැළැක්වීමට `GET /api/webhooks` එය
-`<first 10 chars>...` ලෙස ආවරණය කරයි. ඔබට සැබවින්ම රහස අවශ්ය වූ විට `[id]` GET භාවිත කරන්න.
+ලැයිස්තුගත පිටු මත කාන්දු වීම වැළැක්වීම සඳහා`GET /api/webhooks` `<first 10 chars>...` හි රහස වසන් කරයි. ඔබට සැබවින්ම රහස අවශ්‍ය වූ විට `[id]` GET භාවිතා කරන්න.
 
-### webhook එකක් සාදන්න
+### webhook සාදන්න
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -147,29 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` අත්හැර තිබේ නම්, සේවාදායකය `whsec_<hex>` රහසක් ජනනය කර එය ප්රතිචාරය තුළ ආපසු ලබා දෙයි.
+`secret` ඉවත් කර ඇත්නම්, සේවාදායකය `whsec_<hex>` රහසක් ජනනය කර එය ප්‍රතිචාරයේ ආපසු ලබා දෙයි.
 
-### webhook එකක් පරීක්ෂා කරන්න
+### ටෙස්ට් webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }` ආපසු ලබා දෙයි. නැවත උත්සාහ නොකෙරේ — ග්රාහකයා payload එක සහ අත්සන පිළිගන්නේදැයි ඉක්මනින් තහවුරු කිරීමට මෙය ප්රයෝජනවත් වේ.
+`{ delivered, status, error }` ආපසු ලබා දෙයි. ප්‍රතිග්‍රාහකයා ගෙවීම සහ අත්සන පිළිගන්නා බව ඉක්මනින් තහවුරු කිරීම සඳහා — ප්‍රයෝජනවත් නැවත උත්සාහ නොකරයි.
 
 ## උපකරණ පුවරුව
 
-`/dashboard/webhooks` හි ඇති උපකරණ පුවරු පිටුව (`src/app/(dashboard)/dashboard/webhooks/page.tsx` බලන්න) පහත පහසුකම් සපයයි:
+`/dashboard/webhooks` හි උපකරණ පුවරු පිටුව ( `src/app/(dashboard)/dashboard/webhooks/page.tsx` බලන්න) සපයයි:
 
-- සිදුවීම් තේරීම්කාරකයක් සමඟ webhooks සෑදීම/සංස්කරණය කිරීම
-- `enabled`, `failure_count`, සහ `last_status` මත පදනම් වූ තත්ත්ව දර්ශකය (සක්රිය / අක්රිය / දෝෂ සහිත)
-- එක් ක්ලික් කිරීමකින් පරීක්ෂණ බෙදාහැරීම
-- අතින් සක්රිය/අක්රිය කිරීමේ ටොගලය
+- Create/edit webhooks with events picker
+- `enabled`, `failure_count`, සහ `last_status` මත පදනම්ව තත්ව දර්ශකය (ක්‍රියාකාරී / අක්‍රිය / දෝෂ සහිත)
+- එක්-ක්ලික් පරීක්ෂණ බෙදා හැරීම
+- අතින් enable/disable ටොගල කිරීම
 
-## Payload උදාහරණ
+## ගෙවීමේ උදාහරණ
 
-### request.completed
+### ඉල්ලීම.සම්පූර්ණයි
 
 ```json
 {
@@ -195,25 +188,25 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "OmniRoute වෙතින් පරීක්ෂණ webhook බෙදාහැරීම",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-`test.ping` නොවන සිදුවීම් සඳහා ක්ෂේත්රවල හැඩයන් ඒවා නිකුත් කරන ඇමතුම් ස්ථාන මඟින් නිර්වචනය වේ; `data` වස්තුව ඉදිරි අනුවාද සමඟ ගැළපෙන ලෙස සලකන්න (ක්ෂේත්ර එක් කරන්න, ඒවා නොමැති වීම මත රඳා නොපවතින්න).
+`test.ping` නොවන සිදුවීම් සඳහා ක්ෂේත්‍ර හැඩතල නිර්වචනය කරනු ලබන්නේ ඒවා නිකුත් කරන ඇමතුම් අඩවි මගිනි; `data` වස්තුව ඉදිරියට ගැළපෙන ලෙස සලකන්න (ක්ෂේත්‍ර එකතු කරන්න, නොපැමිණීම මත රඳා නොසිටින්න).
 
 ## හොඳම භාවිතයන්
 
-- **සෑම බෙදාහැරීමකදීම අත්සන සත්යාපනය කරන්න** — raw body එකට එරෙහිව සත්යාපනය කිරීම, ඔබේ webhook URL එක අනුමාන කරන ඕනෑම අයෙකුගෙන් ලැබෙන ව්යාජ POST ඉල්ලීම් වළක්වයි.
-- **තත්පර ~5ක් ඇතුළත 2xx ප්රතිචාරයක් ලබා දෙන්න** — dispatcher එක තත්පර 10කදී කල් ඉකුත් වේ. මන්දගාමී receivers නැවත උත්සාහ වැය කර `failure_count` වැඩි කරයි.
-- **Handlers idempotent ලෙස සකසන්න** — නැවත උත්සාහ කිරීම් සහ අවම වශයෙන් එක් වරක්වත් බෙදාහැරීමේ semantics නිසා අනුපිටපත් ඇති විය හැක.
-- **අවම වශයෙන් දායක වන්න** — ඔබ සැබවින්ම භාවිත කරන සිදුවීම් පමණක් ලැයිස්තුගත කරන්න; `"*"` මඟින් ඔබ පාලනය නොකරන receivers මත පිරිවැය එක් වේ.
-- **`failure_count` නිරීක්ෂණය කරන්න** — අඛණ්ඩ අසාර්ථකවීම් 10කදී endpoints ස්වයංක්රීයව අක්රිය කෙරේ; receiver එක නිවැරදි කිරීමෙන් පසු `enabled: true` සමඟ `PUT /api/webhooks/[id]` ඇමතීමෙන් යළි සකසන්න.
-- **Secrets වරින් වර මාරු කරන්න** — නව `secret` එකක් `PUT` කරන්න, නව අගය receiver වෙත deploy කරන්න, සහ test endpoint එක හරහා තහවුරු කරන්න.
+- **සෑම භාරදීමකදීම අත්සන තහවුරු කරන්න** අමු සිරුරට එරෙහිව — ඔබේ webhook URL අනුමාන කරන ඕනෑම කෙනෙකුට වංචා කළ POSTs වළක්වයි.
+- **~ තත්පර 5ක් ඇතුළත 2xx ප්‍රතිචාර දක්වන්න** — ඩිස්පචර් කාලය තත්පර 10 ට අවසන් වේ. මන්දගාමී ප්‍රතිග්‍රාහක නැවත උත්සාහයන් අනුභව කර `failure_count` පුම්බනු ඇත.
+- **හසුරුවන්නන් දුර්වල කරන්න** — නැවත උත්සාහ කරන අතර අවම වශයෙන් එක් වරක් බෙදා හැරීමේ අර්ථකථනය යනු අනුපිටපත් හැකි බවයි.
+- **අවම වශයෙන් දායක වන්න** — ලැයිස්තුගත කරන්නේ ඔබ සැබවින්ම පරිභෝජනය කරන සිදුවීම් පමණි; `"*"` ඔබ පාලනය නොකරන ග්‍රාහක මත පිරිවැය එකතු කරනු ඇත.
+- **`failure_count` නරඹන්න** — අන්ත ලක්ෂ්‍ය අඛණ්ඩව අසාර්ථකවීම් 10කදී ස්වයංක්‍රීයව අක්‍රිය කර ඇත; ග්‍රාහකය සවි කිරීමෙන් පසු `enabled: true` සමඟ `PUT /api/webhooks/[id]` ඇමතීමෙන් යළි පිහිටුවන්න.
+- **වරින් වර රහස් කරකවන්න** — `PUT` නව `secret`, නව අගය ග්‍රාහකයා වෙත යොදවා, පරීක්ෂණ අන්ත ලක්ෂ්‍යය හරහා තහවුරු කරන්න.
 
-## මෙයද බලන්න
+## එසේම බලන්න
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — සම්පූර්ණ කළමනාකරණ API පරාසය
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — `request.failed` හරහා නිරාවරණය වන provider අසාර්ථකවීම් පිටුපස ඇති circuit breaker / cooldown semantics
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — පූර්ණ කළමනාකරණය API මතුපිට
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — පරිපථ කඩනය / සැපයුම්කරුගේ අසාර්ථකත්වය පිටුපස ඇති කූල්ඩවුන් අර්ථ නිරූපණය `request.failed` හරහා මතු විය
 - මූලාශ්රය: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

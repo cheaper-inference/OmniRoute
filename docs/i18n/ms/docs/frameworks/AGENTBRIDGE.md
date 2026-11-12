@@ -20,7 +20,7 @@ Apabila ejen IDE (cth, GitHub Copilot, Cursor, Claude Code) membuat panggilan AP
 
 Ini bermakna anda boleh:
 
-- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 381 OmniRoute.
+- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 388 OmniRoute.
 - **Gunakan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara telus di peringkat pengendali.
 - **Perhatikan semua trafik ejen** : setiap permintaan yang dipintas diterbitkan kepada [Pemeriksa Trafik](./TRAFFIC_INSPECTOR.md).
 - **Terapkan ketahanan OmniRoute** : penghalaan kombo, pemutus litar, sandaran dan kerja pengesanan kos untuk trafik ejen IDE juga.
@@ -554,7 +554,7 @@ Trae ialah pembantu pengekodan AI yang agak baharu. Sebelum melaksanakan pengend
 3. Tentukan mekanisme pengesahan
 4. Nilai teruskan/hentikan berdasarkan TOS dan kebolehkesanan API
 
-Sehingga siasatan selesai, kad Trae dalam papan pemuka memaparkan lencana "Sedang Disiasat" dengan pautan "Laporkan kebolehlaksanaan". Rangka pengendali di `src/mitm/handlers/trae.ts` melontarkan ralat berstruktur `Belum dilaksanakan`.
+Sehingga siasatan selesai, kad Trae dalam papan pemuka memaparkan lencana "Sedang Disiasat" dengan pautan "Laporkan kebolehlaksanaan". Rangka pengendali di `src/mitm/handlers/trae.ts` melontarkan ralat berstruktur `Not yet implemented`.
 
 ### Ejen tertunggak (MITM diperlukan — tiada sokongan URL asas tersuai)
 

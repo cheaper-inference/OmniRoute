@@ -53,7 +53,7 @@ Search Tools Studio ले `/dashboard/search-tools` लाई सामान�
 - इनपुट: URL + पूर्ण-पृष्ठ टगल + ढाँचा चयनकर्ता (markdown / text / HTML)।
 - पेस गर्नुहोस् → फेच गर्नुहोस् → `ScrapeResult.tsx` रेन्डर गर्नुहोस्।
 - `ScrapeResult` ले markdown पूर्वावलोकन + कच्चा सामग्री टगल रेन्डर गर्छ।
-- सीमा: यदि प्रतिक्रिया बडी **256 KB** भन्दा ठूलो छ भने, UI ले `(काटिएको, कच्चा सामग्री हेर्नुहोस्)` देखाउँछ र कच्चा सामग्रीलाई Monaco मोडलमा खोल्छ (D21)।
+- सीमा: यदि प्रतिक्रिया बडी **256 KB** भन्दा ठूलो छ भने, UI ले `View full raw content` देखाउँछ र कच्चा सामग्रीलाई मोडलमा खोल्छ (D21)।
 - मेटाडेटा प्यानल: प्रदायक (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), विलम्बता, लागत, प्रतिक्रिया आकार, लिङ्क सङ्ख्या।
 - `useScrapeFetch.ts` हुक प्रयोग गर्छ।
 
@@ -102,9 +102,11 @@ Search Tools Studio ले `/dashboard/search-tools` लाई सामान�
 `ProviderCatalog.tsx` ले `GET /api/search/providers` बाट प्राप्त पूर्ण प्रदायक सूची उपलब्ध गराउँछ
 (fetch प्रदायकहरू समावेश गर्न F4 मा विस्तार गरिएको):
 
-| `kind` | `"search"` (20 प्रदायकहरू) वा `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 प्रदायकहरू) वा `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 क्रेडेन्सियलहरू अवस्थित छन् कि छैनन् र हाल सबै कुञ्जीहरू कूलडाउनमा छन् कि छैनन् भन्ने जाँच गरेर स्थिति **अनुरोधको समयमा निर्धारण गरिन्छ**।
+
+`codex-search` (Codex Web Search): जडान गरिएका Codex (ChatGPT) खाताहरू प्रयोग गर्छ; छुट्टै कुञ्जी चाहिँदैन। प्रत्येक खोजले ChatGPT सदस्यताको कोटा खर्च गर्छ र करिब 10–40 सेकेन्ड लाग्छ। अनुरोधमा यसको नाम उल्लेख भएमा चल्छ; स्वचालित छनोटका लागि पूर्वनिर्धारित रूपमा बन्द रहेको `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` खोल्नुपर्छ।
 
 ---
 

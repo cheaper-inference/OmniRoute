@@ -54,7 +54,7 @@ Nowa karta do wyodrębniania treści z adresu URL za pośrednictwem `POST /v1/we
 - Dane wejściowe: URL + przełącznik pełnej strony + selektor formatu (markdown / tekst / HTML).
 - Prześlij → pobierz → wyrenderuj `ScrapeResult.tsx`.
 - `ScrapeResult` renderuje podgląd markdown + przełącznik widoku surowego.
-- Limit: jeśli treść odpowiedzi przekracza **256 KB**, interfejs wyświetla `(obcięto, wyświetl surowe dane)` i otwiera surowe dane w oknie modalnym Monaco (D21).
+- Limit: jeśli treść odpowiedzi przekracza **256 KB**, interfejs wyświetla `View full raw content` i otwiera surowe dane w oknie modalnym (D21).
 - Panel metadanych: dostawca (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), opóźnienie, koszt, rozmiar odpowiedzi, liczba linków.
 - Używa hooka `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Uruchamia to samo zapytanie/ten sam adres URL równolegle u maksymalnie **4 dost
 `ProviderCatalog.tsx` udostępnia pełną listę dostawców z `GET /api/search/providers`
 (rozszerzoną w F4 o dostawców pobierania):
 
-| `kind` | `"search"` (20 dostawców) lub `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 dostawców) lub `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status jest **ustalany w momencie żądania** poprzez sprawdzenie, czy dane uwierzytelniające istnieją oraz czy
 wszystkie klucze są obecnie w okresie karencji.
+
+`codex-search` (Codex Web Search): Korzysta z połączonych kont Codex (ChatGPT), bez osobnego klucza. Każde wyszukiwanie zużywa limit subskrypcji i trwa około 10–40 s. Uruchamia się, gdy żądanie go wskaże; automatyczny wybór wymaga flagi `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, domyślnie wyłączonej.
 
 ---
 

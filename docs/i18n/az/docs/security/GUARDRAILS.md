@@ -25,10 +25,10 @@ Hook-lar hər marşrutda və ya hər cavabda **işləmir**. Guardrail-dan
 təhlükəsizlik nəzarəti kimi istifadə etməzdən əvvəl
 [Əhatə və məhdudiyyətlər](#coverage-and-limits) bölməsini oxuyun.
 
-## Daxili qoruyucu mexanizmlər
+## Daxili Guardrail-lər
 
-Reyestr idxal zamanı prioritet sırası ilə altı qoruyucu mexanizmi avtomatik yükləyir
-(bax: `registry.ts` → `registerDefaultGuardrails()`):
+Reyestr import zamanı prioritet sırası ilə altı guardrail-i avtomatik yükləyir
+(`registry.ts` → `registerDefaultGuardrails()` bölməsinə baxın):
 
 | Prioritet | Ad                  | Mərhələ(lər)   | Fayl                  |
 | --------- | ------------------- | -------------- | --------------------- |
@@ -41,108 +41,107 @@ Reyestr idxal zamanı prioritet sırası ilə altı qoruyucu mexanizmi avtomatik
 
 Daha aşağı prioritet nömrələri **əvvəl** icra olunur.
 
-### Vision Bridge (`visionBridge.ts`) — Modallıq körpüsü PR-1
+### Vision Körpüsü (`visionBridge.ts`) — Modallıq Körpüsü PR-1
 
-GLM 5.3 baza modeli və `glm-5.3-{low,high,max}` açıq şəkildə
+GLM 5.3 əsas modeli və `glm-5.3-{low,high,max}` modelləri açıq şəkildə
 `supportsVision:false` reyestr/spec metadatasına malikdir. GLM 5.3 Flash variantları
-yerli görmə modelləri olaraq qalır. Claude Code-un `/v1/messages` marşrutu Claude-dan-OpenAI-a
-tərcümədən **əvvəl** paylaşılan `handleChat` pre-call qoruyucu mexanizmlər zəncirinə daxil olur;
-iç-içə `Read` alət-nəticəsi şəkilləri OpenAI `image_url` məzmununa qaldırılmadan əvvəl
-təsvir edilməli və ya işlənməlidir (#17069).
+isə yerli görmə dəstəkli modellər olaraq qalır. Claude Code-un `/v1/messages` marşrutu
+Claude-dan OpenAI-yə tərcümədən **əvvəl** paylaşılan `handleChat` pre-call guardrail
+zəncirinə daxil olur; iç-içə `Read` alət-nəticəsi şəkilləri OpenAI
+`image_url` məzmununa qaldırılmadan əvvəl təsvir edilməli və ya işlənməlidir (#17069).
 
-Şəkil daşıyan sorğuları **görmə qabiliyyəti olmayan modellərə** yönəldildikdə ələ keçirir
-və ya bütün sorğunu görmə qabiliyyətli modelə yenidən yönləndirir, ya da upstream çağırışından
-əvvəl konfiqurasiya edilə bilən görmə modeli tərəfindən yaradılan mətn təsvirləri ilə şəkil
-hissələrini əvəz edir. Bu, yalnız mətnli provayderlərə multimodal yükləri şəffaf şəkildə
-emal etməyə imkan verir.
+**Görmə dəstəyi olmayan modellərə** yönəlmiş şəkil ehtiva edən sorğuları
+tutur və ya bütün sorğunu görmə dəstəyi olan modelə yönləndirir, ya da yuxarı axın
+çağırışından əvvəl şəkil hissələrini konfiqurasiya edilə bilən görmə modeli
+tərəfindən yaradılan mətn təsvirləri ilə əvəz edir. Bu, yalnız mətn dəstəkləyən
+provayderlərə multimodal payload-ları şəffaf şəkildə emal etməyə imkan verir.
 
 Axın:
 
-1. Hədəf model artıq görməni dəstəkləyirsə, buraxılır (`isVisionBridgeForcedModel` məcburi körpü siyahısında görünməsi istisnadır).
-2. Şəkil hissələrini `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`) vasitəsilə çıxarır; bu funksiya **vahid media detektoruna**
-   `open-sse/utils/mediaParts.ts` daxilindəki `detectMediaParts()`-a həvalə edir — combo
-   uyğunluq filtri ilə paylaşılan yeganə həqiqət mənbəyinə.
-   Çıxarış `replaceImageParts` funksiyasının geri yerləşdirə biləcəyi formalara icazə siyahısı
-   ilə məhdudlaşdırılır (extract↔replace müqaviləsi): OpenAI `image_url`, Anthropic-in
-   `source.type:"base64"` base64 forması, Anthropic URL `source.type:"url"` forması və
-   Responses API `input_image`. Claude Code-un `tool_result.content` daxilində və Responses
-   alət çıxışlarında iç-içə yerləşən uyğun şəkillər də çıxarılır və ilkin yollarında əvəz olunur;
-   yalnız indikator olan formalar combo-filtr materialıdır və çıxarılmır.
-   Heç biri tapılmazsa, buraxılır.
-3. İşləmə zamanı konfiqurasiyanı `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`) vasitəsilə həll edir: yeni
-   `modalityBridge*` parametr açarları üstün tutulur; köhnə `visionBridge*` açarları
-   **bir dövrəlik ehtiyat** olaraq qalır (geri qaytarma pəncərəsi). Körpü söndürülübsə,
-   istənilən media keçidindən əvvəl buraxılır.
-4. Rejim seçicisi (`modalityBridgeVisionMode`, aşağıdakı cədvələ baxın) yenidən yönləndirmə
-   və ya təsvir etmə arasında qərar verir. Yenidən yönləndirmə yalnız `model` dəyişdirilmiş
-   `modifiedPayload`, həmçinin `{ rerouted, fromModel, toModel, imagesKept }` metadatasını qaytarır.
-5. Təsvir yolunda şəkilləri `maxImages` ilə məhdudlaşdırır, tapşırıqdan xəbərdar sorğunu
-   formalaşdırır, təsvir keşinə müraciət edir, görmə modelini **paralel** çağırır
-   (`Promise.allSettled`) və onların yerinə `[Image N]: <description>` mətn hissələrini daxil edir.
-   Uğursuz təsvir `null` qaytarır: xam şəkil naməlum/görmə qabiliyyətli hədəflər üçün qorunur
-   (#4012), lakin **təsdiqlənmiş yalnız mətnli birbaşa hədəf** və ya sıfır görmə qabiliyyətli
-   combo üçün təsvir edilməmiş hər bir şəklə, o cümlədən qismən uğursuzluqlarda və təsvir
-   çağırışı limitini aşan şəkillərdə açıq
-   `(unavailable — no vision-capable provider connected)` mətn əvəzedicisi əlavə olunur (#17069).
-   Mövcud bütün cəhdlərin uğursuz olduğu combo təsvir ehtiyat mexanizmi qüvvədə qalır (#8430).
-6. `modifiedPayload` və meta məlumatlarını (`imagesProcessed`, `descriptions`,
+1. Hədəf model artıq görməni dəstəkləyirsə, buraxılır (`isVisionBridgeForcedModel`
+   məcburi körpü siyahısında görünməsi istisnadır).
+2. `extractImageParts(messages)` vasitəsilə şəkil hissələrini çıxarır
+   (`visionBridgeHelpers.ts`); bu funksiya `open-sse/utils/mediaParts.ts` daxilindəki
+   combo uyğunluq filtri ilə paylaşılan vahid həqiqət mənbəyi olan **vahid media
+   detektoru** `detectMediaParts()` funksiyasına delegasiya edir.
+   Çıxarma yalnız `replaceImageParts` funksiyasının geri yerləşdirə biləcəyi formalara
+   allowlist ilə məhdudlaşdırılır (çıxarma↔əvəzləmə müqaviləsi): OpenAI
+   `image_url`, Anthropic `source.type:"base64"`, Anthropic URL
+   `source.type:"url"` və Responses API `input_image`. Claude Code
+   `tool_result.content` daxilində və Responses alət çıxışlarında iç-içə yerləşən
+   uyğun şəkillər də çıxarılır və ilkin yollarında əvəzlənir; yalnız indikator olan
+   formalar combo-filtr materialıdır və çıxarılmır.
+   Heç biri tapılmadıqda buraxılır.
+3. İşləmə zamanı konfiqurasiyanı `resolveVisionBridgeRuntimeSettings()` vasitəsilə
+   həll edir (`src/shared/constants/modalityBridgeDefaults.ts`): yeni
+   `modalityBridge*` parametr açarları üstünlük qazanır; köhnə `visionBridge*`
+   açarları **bir dövrəlik geri dönüş** kimi saxlanılır (geri qaytarma pəncərəsi).
+   Körpü deaktiv edilibsə, hər hansı media keçidindən əvvəl buraxılır.
+4. Rejim seçicisi (`modalityBridgeVisionMode`, aşağıdakı cədvələ baxın)
+   yönləndirmə və təsvir etmə arasında seçim edir. Yönləndirmə yalnız `model` sahəsi
+   dəyişdirilmiş `modifiedPayload`, həmçinin `{ rerouted, fromModel, toModel, imagesKept }`
+   metadatasını qaytarır.
+5. Təsvir yolunda: şəkillərin sayını `maxImages` ilə məhdudlaşdırır, tapşırığa uyğun
+   sorğunu formalaşdırır, təsvir keşinə müraciət edir, görmə modelini **paralel**
+   çağırır (`Promise.allSettled`) və onların yerinə `[Image N]: <description>` mətn
+   hissələrini daxil edir. Uğursuz təsvir `null` qaytarır: xam şəkil naməlum/görmə
+   dəstəyi olan hədəflər üçün qorunur (#4012), lakin **görmə dəstəyi olmayan olduğu
+   təsdiqlənmiş birbaşa hədəfə** və ya sıfır görmə dəstəyi olan combo-ya hər
+   təsvir olunmamış şəkil üçün, qismən uğursuzluqlar və təsvir çağırışı limitini
+   aşan şəkillər də daxil olmaqla, açıq
+   `(unavailable — no vision-capable provider connected)` mətn stub-ı əlavə edilir
+   (#17069). Mövcud bütün çağırışların uğursuz olduğu combo təsviri üçün geri dönüş
+   mexanizmi qüvvədə qalır (#8430).
+6. `modifiedPayload` və meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`) qaytarır.
 
 #### Rejim seçicisi (`modalityBridgeVisionMode`)
 
-| Rejim      | Standart | Davranış                                                                                                                                                                                                                                                                                                                    |
-| ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔        | Köhnə evristika dəyişdirilmədən qalır (#6640/#7204): combo olmayan/`auto/` modellər ən yaxşı görmə modelinə yenidən yönləndirilir, ilkin modelin artıq istifadə edilə bilən etimadnamələri olduğu hallar istisnadır (bu halda təsvir edilir); combo hədəfləri həmişə təsvir edir.                                           |
-| `describe` |          | Həmişə təsvir edir — yenidən yönləndirmə bloku tamamilə ötürülür; istifadəçinin seçdiyi model həmişə cavab verir.                                                                                                                                                                                                           |
-| `reroute`  |          | Yenidən yönləndirməni məcbur edir: etimadnamələri olan modeli qoruma yoxlaması keçilir. Yenidən yönləndirmə-**hədəfinin** etimadnamə yoxlaması yenə tətbiq olunur — istifadə edilə bilən görmə hədəfi olmadıqda körpü təsvir etmədən və ya xam şəkilləri yalnız mətnli hədəfə göndərmədən aydın xəta ilə prosesi bloklayır. |
+| Rejim      | Defolt | Davranış                                                                                                                                                                                                                                                                                                      |
+| ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔      | Dəyişdirilməmiş köhnə evristika (#6640/#7204): combo olmayan/`auto/` modelləri, ilkin modelin artıq istifadə edilə bilən kredensialları olduğu halda (bu zaman təsvir edilir) ən yaxşı görmə modelinə yönləndirir; combo hədəfləri isə həmişə təsvir edilir.                                                  |
+| `describe` |        | Həmişə təsvir edir — yönləndirmə bloku tamamilə ötürülür; istifadəçinin seçdiyi model həmişə cavab verir.                                                                                                                                                                                                     |
+| `reroute`  |        | Məcburi yönləndirmə: kredensialı olan modeli qoruma yoxlaması ötürülür. Yönləndirmə-**hədəfi** kredensial yoxlaması isə qüvvədə qalır — istifadə edilə bilən görmə hədəfi olmadıqda körpü təsvir etmək və ya xam şəkilləri yalnız mətn dəstəkləyən hədəfə göndərmək əvəzinə aydın xəta ilə prosesi bloklayır. |
 
 Məcburi rejimlər `auto` evristikası işə düşməzdən **əvvəl** qısa yoldan icra olunur;
-`auto` davranışı PR-1-dən əvvəlki qoruyucu mexanizmlə bayt səviyyəsində eynidir.
+`auto` davranışı PR-1-dən əvvəlki guardrail ilə bayt səviyyəsində eynidir.
 
 #### API açarı əhatə dairəsi (`visionBridgeKeyScope.ts`)
 
-Çağıranın API açarı `allowedConnections`, kvota hovuzlarını
+Zəng edən tərəfin API açarı `allowedConnections`, kvota hovuzlarını
 (`allowedQuotas`) və ya modelləri (`allowedModels` / `blockedModels` /
-`modelAccessMode: "restricted"` / `disableNonPublicModels`) məhdudlaşdırdıqda, körpü yalnız açarın istifadə edə bildiyi bağlantılardakı, açarın istifadə edə bildiyi yönləndirmə və təsvir modellərini seçir. Təsvir çağırışı bundan sonra həmişə `x-omniroute-self-loop-key-id` başlığı ilə OmniRoute öz-dövrəsi üzərindən həyata keçirilir; beləliklə, qəbul edilən çat sorğusu həmin açarın bağlantı və model siyasətini yenidən tətbiq edir. `enforceApiKeyPolicy()` bu başlığa yalnız öz-dövrə bearer-i ilə birlikdə etibar edir, buna görə giriş yalnız daraldıla bilər və həll olunmayan id rədd edilir.
+`modelAccessMode: "restricted"` / `disableNonPublicModels`) məhdudlaşdırdıqda, bridge yalnız açarın istifadə edə bildiyi bağlantılarda, açarın istifadə edə bildiyi reroute və describe modellərini seçir. Describe çağırışı daha sonra həmişə `x-omniroute-self-loop-key-id` başlığı ilə OmniRoute self-loop vasitəsilə həyata keçirilir, beləliklə qəbul edən chat sorğusu həmin açarın bağlantı və model siyasətini yenidən tətbiq edir. `enforceApiKeyPolicy()` həmin başlığa yalnız self-loop bearer ilə birlikdə riayət edir; buna görə də giriş imkanlarını yalnız daralda bilər və həll olunmayan ID rədd edilir.
 
-Açar üçün heç bir vision modelinə icazə verilmədikdə, **təsdiqlənmiş yalnız mətn hədəfi** şəkil sorğusunu lokal olaraq aydın HTTP 400 xətası ilə rədd edir və şəkil baytlarını imkanları olmayan upstream-ə yönləndirmir (#17069). Naməlum və ya yerli vision imkanlarına malik hədəflər üçün təsvir yolu əvvəlki fail-open davranışını saxlayır (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Açar olmadan edilən sorğular və bu məhdudiyyətlərə malik olmayan açarlar əvvəlki kimi tamamilə eyni davranır.
+Açar üçün heç bir vision modelinə icazə verilmirsə, **təsdiqlənmiş yalnız mətn hədəfi** şəkil sorğusunu uyğun olmayan upstream-ə şəkil baytlarını yönləndirmək əvəzinə, yerli olaraq aydın HTTP 400 xətası ilə rədd edir (#17069). Naməlum və ya native vision imkanına malik hədəflər üçün describe yolu əvvəlki fail-open davranışını saxlayır (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Açar olmadan edilən sorğular və bu məhdudiyyətləri olmayan açarlar əvvəlki kimi davranır.
 
-#### Tapşırığa uyğun təsvir promptu (`modalityBridgeVisionTaskAware`)
+#### Tapşırıqdan xəbərdar describe prompt-u (`modalityBridgeVisionTaskAware`)
 
-Defolt dəyər **true**-dur. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) əsas təsvir promptuna **son istifadəçi mesajının** mətnini (500 simvola qədər qısaldılmış) əlavə edir; bu, təsviri istifadəçinin əslində nə istədiyinə yönəldir (codex-vision-proxy nümunəsi) və vision modelindən görünən mətni transkripsiya etməyi xahiş edir. Bayraq söndürüldükdə və ya istifadəçi mətni olmadıqda, əsas prompt dəyişdirilmədən istifadə olunur.
+Defolt **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) əsas describe prompt-una **son istifadəçi mesajının** mətnini (500 simvola qədər qısaldılmış) əlavə edir; bu, təsviri istifadəçinin əslində nə istədiyinə yönəldir (codex-vision-proxy nümunəsi) və vision modelindən görünən mətni transkripsiya etməyi xahiş edir. Flag deaktiv olduqda — və ya istifadəçi mətni olmadıqda — əsas prompt dəyişdirilmədən istifadə olunur.
 
-Təsvir öz-dövrəsinin OpenAI-uyğun sorğusu (`visionBridgeHelpers.ts` daxilindəki
-`callVisionModelSingle()`) həmişə `image_url.detail: "high"` tələb edir —
-şərtsiz olaraq, hər bir çağıran/provayder üçün. Aşağı detallı nümunələndirmə məhz bu promptun tələb etdiyi mətn transkripsiyası tapşırığı üçün OCR dəqiqliyini aşağı salır; buna görə təsvir çağırışı ilkin daxil olan sorğuda hansı detal səviyyəsindən istifadə edilməsindən asılı olmayaraq həmişə yüksək detal tələb edir. Bu, yalnız daxili təsvir sorğusunun gövdəsinə təsir edir; OmniRoute-un çağıranın öz `image_url.detail` dəyərini əsas sorğuda necə yönləndirdiyini dəyişmir — həmin defolt ayrıca və yalnız aşkar edilmiş OpenCode klientləri üçün `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) daxilində tətbiq edilir. Təsvir öz-dövrəsinin Anthropic naqil formatı budağında `detail` sahəsi yoxdur və bu defoltların heç birindən təsirlənmir.
+Describe self-loop-un öz OpenAI-uyğun sorğusu (`visionBridgeHelpers.ts` daxilindəki `callVisionModelSingle()`) həmişə `image_url.detail: "high"` tələb edir — hər bir caller/provider üçün qeyd-şərtsiz və heç bir client siqnalına əsaslanmadan. Aşağı detal səviyyəsində nümunə götürülməsi məhz bu prompt-un tələb etdiyi mətn transkripsiyası tapşırığı üçün OCR dəqiqliyini azaldır; buna görə describe çağırışı ilkin inbound sorğuda istifadə olunan detal səviyyəsindən asılı olmayaraq həmişə yüksək detal tələb edir. Bu, yalnız daxili describe sorğusunun body-sinə təsir edir; OmniRoute-un caller-in öz `image_url.detail` dəyərini əsas sorğuda necə yönləndirdiyini dəyişmir — həmin defolt ayrıca və yalnız aşkarlanmış OpenCode client-ləri üçün `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) daxilində tətbiq edilir. Describe self-loop-un Anthropic wire-format qolu `detail` sahəsinə malik deyil və hər iki defoltdan təsirlənmir.
 
-#### Təsvir çıxışının yuxarı həddi (`modalityBridgeVisionMaxChars`)
+#### Describe çıxış limiti (`modalityBridgeVisionMaxChars`)
 
-| Açar                           | Defolt | Aralıq              |
+| Açar                           | Defolt | Diapazon            |
 | ------------------------------ | ------ | ------------------- |
 | `modalityBridgeVisionMaxChars` | `0`    | `0` və ya 100–50000 |
 
-`0` (defolt) **heç bir yuxarı həddin olmaması** deməkdir — `callVisionModel()` tərəfindən qaytarılan təsvir dəyişdirilmədən ötürülür və mövcud davranış qorunur. 100–50000 aralığındakı istənilən dəyər təsviri `[Image N]: <description>` kimi mətnə yerləşdirilməzdən əvvəl `…` şəkilçisi ilə qısaldır (`src/lib/guardrails/visionBridge.ts` daxilində `VisionBridgeGuardrail.preCall()`). Aşağı axın modelinin tam transkripsiyaya ehtiyacı olduğu detallı OCR tapşırıqları üçün bu dəyəri artırın; çoxsözlü vision modellərində token istifadəsini məhdudlaşdırmaq üçün azaldın. İdarə panelindəki sahə Vision bölməsinin Advanced panelində yerləşir (`ModalityBridgeVisionTab.tsx` daxilində `modality-bridge-max-chars`) və 1–99 arasındakı istənilən dəyəri 100 həddinə qədər qaldırır, açıq şəkildə daxil edilmiş `0` dəyərinə isə toxunmur — `0` özlüyündə etibarlı Zod dəyəridir
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), sadəcə “təyin edilməyib” defoltu deyil.
+`0` (defolt) **heç bir limitin olmaması** deməkdir — `callVisionModel()` tərəfindən qaytarılan təsvir dəyişdirilmədən ötürülür və mövcud davranış qorunur. 100–50000 diapazonundakı istənilən dəyər təsviri `[Image N]: <description>` kimi yenidən yerləşdirilməzdən əvvəl `…` suffiksi ilə qısaldır (`src/lib/guardrails/visionBridge.ts` daxilində `VisionBridgeGuardrail.preCall()`). Downstream modelə tam transkripsiya lazım olan, detallı OCR tapşırıqları üçün bu dəyəri artırın; çox danışan vision modellərində token istifadəsini məhdudlaşdırmaq üçün azaldın. Dashboard sahəsi Vision tab-ının Advanced panelində yerləşir (`ModalityBridgeVisionTab.tsx` daxilində `modality-bridge-max-chars`) və 1 ilə 99 arasındakı istənilən dəyəri 100 minimumuna qaldırır, açıq şəkildə verilmiş `0` dəyərini isə dəyişməz saxlayır — `0` sadəcə “təyin edilməyib” defoltu deyil, ayrıca etibarlı Zod dəyəridir (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`).
 
-#### Təsvir keşləşdirməsi (`modalityBridge/bridgeCache.ts`)
+#### Describe keşi (`modalityBridge/bridgeCache.ts`)
 
-Təsvir çıxışları üçün proses səviyyəsində paylaşılan yaddaşdaxili LRU + TTL keşi. Açar uzunluq prefiksli çərçivələmə ilə (sahə sərhədlərinin toqquşmasının qarşısını alaraq) `sha256(imageRef + composedPrompt + configuredBridgeModel)`-ə bərabərdir. Model komponenti faktiki cavabı verən model deyil, **konfiqurasiya edilmiş** körpü modelidir —
-`callVisionModel` daxilən ehtiyat modelə keçə bilər və hər cəhd üzrə açar yaratmaq keşi parçalayardı. Uğursuz təsvirlər heç vaxt keşə yazılmır. Parametrlər:
+Describe çıxışları üçün proses boyu paylaşılan yaddaşdaxili LRU + TTL keşi.
+Açar uzunluq prefiksi ilə çərçivələnmiş `sha256(imageRef + composedPrompt + configuredBridgeModel)` dəyəridir (sahə sərhədləri arasında toqquşma yoxdur). Model komponenti faktiki cavabı verən model deyil, **konfiqurasiya edilmiş** bridge modelidir — `callVisionModel` daxildə fallback edə bilər və hər cəhd üzrə açar yaratmaq keşi parçalayardı. Uğursuz describe nəticələri heç vaxt keşlənmir. Parametrlər:
 
-| Açar                            | Defolt | Aralıq  |
-| ------------------------------- | ------ | ------- |
-| `modalityBridgeCacheEnabled`    | `true` | —       |
-| `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440  |
-| `modalityBridgeCacheMaxEntries` | `200`  | 10–5000 |
+| Açar                            | Defolt | Diapazon |
+| ------------------------------- | ------ | -------- |
+| `modalityBridgeCacheEnabled`    | `true` | —        |
+| `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440   |
+| `modalityBridgeCacheMaxEntries` | `200`  | 10–5000  |
 
-#### Uzaq şəkillərin normallaşdırılması (öz-dövrə təsviri/base64 gətirilməsi)
+#### Uzaq şəkillərin normallaşdırılması (self-loop describe/base64 fetch)
 
-Körpü **uzaq** şəkli özü gətirdikdə — həm Anthropic təsvir öz-çağırışı, həm də claude-naqil-formatlı base64 çevirməsi
-(`ensureBase64ImagesForClaudeWire`), hər ikisi `visionBridgeHelpers.ts` daxilindəki
-`fetchRemoteImageAsDataUri()` vasitəsilə — nəticədə alınan data URI vision-model sorğusuna yerləşdirilməzdən əvvəl `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) funksiyasından keçirilir. Həddən artıq böyük şəkillər **2048px uzun kənara** qədər kiçildilir (OpenAI/Anthropic-in server tərəfində artıq tətbiq etdiyi ölçü həddinə uyğun olaraq); bu, vision modelinin gördüyünü dəyişmədən yükləmə baytlarını/gecikməni azaldır. Ölçünün dəyişdirilməsi dinamik import vasitəsilə yüklənən `sharp` istifadə edir: native ikilisinin yüklənməsi hansısa platformada uğursuz olduqda `normalizeDataUri()` **heç vaxt xəta atmır** — ilkin baytların olduğu kimi ötürülməsinə qayıdır və beləliklə, təsvir/base64 çevirmə yolu həmişə işlək qalır. Şəkil olmayan baytlar (decodlana bilən şəkil qaytarmayan gətirmə əməliyyatı) da toxunulmadan ötürülür. Bu normallaşdırma yalnız körpünün öz çağırışı üçün gətirdiyi şəkillərə tətbiq olunur — opt-in-only dəyişiklik prinsipinə (Hard Rule #20) uyğun olaraq çağıranın xam passthrough yükünə heç vaxt tətbiq edilmir.
+Bridge **uzaq** şəkli özü gətirdikdə — həm Anthropic describe self-call, həm də claude-wire-format base64 çevrilməsi (`ensureBase64ImagesForClaudeWire`), hər ikisi `visionBridgeHelpers.ts` daxilindəki `fetchRemoteImageAsDataUri()` vasitəsilə — alınan data URI vision-model sorğusuna yerləşdirilməzdən əvvəl `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) funksiyasından keçirilir. Həddən artıq böyük şəkillər **2048px uzun kənara** qədər kiçildilir (bu, OpenAI/Anthropic-in artıq server tərəfində tətbiq etdiyi ölçü limitinə uyğundur); beləliklə vision modelin gördüyü məzmun dəyişmədən yükləmə baytları və gecikmə azalır. Ölçüləndirmə dinamik import vasitəsilə yüklənən `sharp` istifadə edir: platformada onun native binary-si yüklənə bilmədikdə, `normalizeDataUri()` **heç vaxt xəta yaratmır** — ilkin baytları olduğu kimi ötürür; beləliklə describe/base64-conversion yolu həmişə işlək qalır. Şəkil olmayan baytlar (decodable şəkil qaytarmayan fetch) da dəyişdirilmədən ötürülür. Bu normallaşdırma yalnız bridge-in öz self-call üçün gətirdiyi şəkillərə tətbiq olunur — opt-in-only mutation prinsipinə (Hard Rule #20) uyğun olaraq caller-in xam passthrough payload-ına heç vaxt tətbiq edilmir.
 
 #### Parametrlər sxemi + miqrasiya
 
@@ -152,86 +151,52 @@ Yeni `modalityBridge*` açarları
 `modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
 `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
 `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, `modalityBridgeCache*` üçlüyü və Audio Bridge tərəfindən istifadə olunan
-`modalityBridgeAudio*` qrupu. `141_modality_bridge_settings.sql` miqrasiyası mövcud köhnə
-`visionBridge*` dəyərlərini uyğun yeni açarlara köçürür (idempotentdir, operator tərəfindən təyin edilmiş
-`modalityBridge*` dəyərinin üzərinə heç vaxt yazmır); köhnə açarlar bir buraxılış dövrü ərzində oxuma
-ehtiyatı kimi qəbul edilməyə davam edir.
+`modalityBridgeVisionMaxChars`, `modalityBridgeCache*` üçlüyü və Audio Bridge tərəfindən istifadə olunan `modalityBridgeAudio*` qrupu. `141_modality_bridge_settings.sql` miqrasiyası mövcud köhnə `visionBridge*` dəyərlərini uyğun yeni açarlara köçürür (idempotentdir, operator tərəfindən təyin edilmiş `modalityBridge*` dəyərinin üzərinə heç vaxt yazmır); köhnə açarlar bir buraxılış dövrü ərzində oxuma ehtiyatı kimi qəbul edilməyə davam edir.
 
 #### Şəffaflıq başlığı + statistika
 
-Təsvir çevrilmiş cavablar
+Təsvirə çevrilmiş cavablar
 `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-başlığını daşıyır (`modalityBridge/bridgeStats.ts` daxilindəki `buildModalityBridgeHeader()` tərəfindən
-qurulur və `src/sse/handlers/chatHelpers.ts` daxilindəki `withModalityBridgeHeader()` tərəfindən əlavə edilir).
-Yenidən istiqamətləndirilmiş sorğular heç bir başlıq almır — faydalı yük dəyişdirilməyib və model dəyişimi
-artıq cavab gövdəsinin `model` sahəsində görünür.
+daşıyır (bu başlıq `modalityBridge/bridgeStats.ts` daxilindəki
+`buildModalityBridgeHeader()` tərəfindən yaradılır və
+`src/sse/handlers/chatHelpers.ts` daxilindəki
+`withModalityBridgeHeader()` tərəfindən əlavə olunur). Yenidən yönləndirilmiş sorğular heç bir başlıq almır — payload dəyişdirilməyib və model dəyişməsi cavab gövdəsinin `model` sahəsində artıq görünür.
 
-`GET /api/modality-bridge/stats` (idarəetmə autentifikasiyası, `GET /api/settings` ilə eyni səviyyədə)
-`vision`, `audio` və `video` üçün yaddaşdaxili modallıq üzrə sayğacları
+`GET /api/modality-bridge/stats` (idarəetmə autentifikasiyası, `GET /api/settings` ilə eyni səviyyə) `vision`, `audio` və `video` üçün yaddaşdakı modallıq üzrə sayğacları
 `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` qaytarır. `averageLatencyMs` məxrəc kimi bütün cəhdlərdən
-deyil, `latencySamples` dəyərindən istifadə edir; vaxt ölçümü olmayan əməliyyat sıfır millisaniyəlik nümunə
-uydurmur. `bridged` uğurlu çevrilmələr üçün geriyə uyğun ləqəb olaraq qalır; uğursuz cəhdlər onu artırmır.
-Sayğaclar dizayn üzrə proses yenidən başladıqda sıfırlanır
-(telemetriya, uçot deyil).
+latencySamples, averageLatencyMs, lastUsedAt }` qaytarır. `averageLatencyMs` məxrəc kimi bütün cəhdlərdən deyil, `latencySamples`-dan istifadə edir; zaman ölçümü olmayan əməliyyat sıfır millisaniyəlik nümunə yaratmır. `bridged` uğurlu çevirmələr üçün geriyə uyğun ləqəb olaraq qalır; uğursuz cəhdlər onu artırmır.
+Sayğaclar dizayn üzrə proses yenidən başladıldıqda sıfırlanır
+(mühasibat uçotu deyil, telemetriyadır).
 
 #### İdarə panelinin konfiqurasiyası
 
 Xüsusi idarə paneli səhifəsi
-`/dashboard/settings/modality-bridge` ünvanındadır. URL ilə ünvanlana bilən `Vision`, `Audio`
-və `Video` tabları `tab` dəyərini dəyişərkən sorğu parametrlərini qoruyur.
-Vision tabı aktivləşdirmə, rejim, model seçimi (avtomatik standart daxil olmaqla), tapşırıqdan xəbərdar
-promptinqi, genişləndirilmiş timeout/şəkil/təsvir uzunluğu/cache məhdudiyyətlərini, icra zamanı
-sayğaclarını və qorunan nümunə sorğusunu təqdim edir. Audio tabı da işləkdir: aktivləşdirmə,
-yalnız STT üçün Auto seçimi olan model seçicisini, timeout/maksimum klip məhdudiyyətlərini, audio
-sayğaclarını və `input_audio` nümunə testini təqdim edir. Video tabı funksionaldır: FFmpeg/ffprobe
-icra mühitinin vəziyyətini — dörd açıq UI vəziyyətindən birini — göstərir (`unknown`, probe icra
-olunduğu və ya tamamlana bilmədiyi müddətdə; client tərəfində probe-un ötürülməsi üçün loopback
-olmayan idarə paneli hostunda `restricted`; probe edildikdən və çatışmadığı təsdiqləndikdən sonra
-`unavailable`; FFmpeg/ffprobe versiyaları ilə birlikdə `available`) — saxlayır, model/kadr/video/timeout
-məhdudiyyətlərini yadda saxlayır, model seçicisini görmə qabiliyyətli modellərlə məhdudlaşdırır və
-video sayğaclarını təqdim edir.
+`/dashboard/settings/modality-bridge` ünvanındadır. URL ilə ünvanlana bilən `Vision`, `Audio` və `Video` tabları `tab` dəyərini dəyişərkən sorğu parametrlərini qoruyur.
+Vision tabı aktivləşdirmə, rejim, model seçimi (avtomatik standart seçim daxil olmaqla), tapşırıqdan xəbərdar prompt qurulması, qabaqcıl timeout/şəkil/təsvir uzunluğu/cache limitlərini, icra zamanı sayğaclarını və qorunan nümunə sorğusunu təqdim edir. Audio tabı da aktivdir: aktivləşdirməni, yalnız STT üçün Auto seçiminə malik model seçicisini, timeout/maksimum klip limitlərini, audio sayğaclarını və `input_audio` nümunə testini təqdim edir. Video tabı funksionaldır: FFmpeg/ffprobe icra mühitinin vəziyyətini — dörd açıq UI vəziyyətindən birini — göstərir (`unknown`, yoxlama davam edərkən və ya tamamlana bilmədikdə; `restricted`, yoxlama müştəri tərəfində loopback olmayan idarə paneli hostunda ötürüldükdə; `unavailable`, yoxlamadan sonra çatışmadığı təsdiqləndikdə; yaxud FFmpeg/ffprobe versiyaları ilə birlikdə `available`), enable/model/frame/video/timeout limitlərini yadda saxlayır, model seçicisini vision qabiliyyətli modellərlə məhdudlaşdırır və video sayğaclarını təqdim edir.
 
-AI settings daxilindəki əvvəlki Vision Bridge kartı yeni səhifəyə uyğunluq keçididir; artıq formanın
-ikinci nüsxəsinə sahib deyil. Media Providers də mövcud Speech-to-Text playground-ını silmədən
-Image-to-Text və Speech-to-Text iş axınlarını uyğun Modality Bridge tablarına bağlayır.
+AI parametrləri altındakı əvvəlki Vision Bridge kartı yeni səhifəyə uyğunluq keçididir; artıq formanın ikinci nüsxəsinə sahib deyil. Media Providers də mövcud Speech-to-Text playground-ını silmədən Image-to-Text və Speech-to-Text iş axınlarını uyğun Modality Bridge tablarına yönləndirir.
 
-**Self-loop qəbulundan yan keçmə:** təsvir çağırışı OmniRoute-un öz
-`/v1` self-loop-u (standart olmayan provider modeli) üzərindən yönləndirildikdə, alt sorğu
-`x-omniroute-admission-bypass: internal` göndərir və həll edilmiş self-loop credential-i ilə
-autentifikasiya olunur — local rejimdə lokal `sk_omniroute` sentinel-i və ya operator tərəfindən
-konfiqurasiya edilmiş `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` mühit açarı (#1350); beləliklə
-`REQUIRE_API_KEY=true` yerləşdirmələri də təsvir çağırışını icra edə bilər. Bypass yalnız həmin dəqiq
-credential-lər üçün qəbul edilir, buna görə xarici client-lər qəbul mərhələsini keçmək üçün başlıqdan
-istifadə edə bilməz.
+**Öz-özünə dövrə üçün qəbul bypass-ı:** təsvir sorğusu OmniRoute-un öz `/v1` self-loop-u üzərindən (standart olmayan provider modelində) yönləndirildikdə, alt sorğu `x-omniroute-admission-bypass: internal` göndərir və həll edilmiş self-loop credential-ı ilə autentifikasiya olunur — local rejimdə lokal `sk_omniroute` sentinel-i, yaxud operator tərəfindən konfiqurasiya edilmiş `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env açarı (#1350); beləliklə `REQUIRE_API_KEY=true` yerləşdirmələri təsvir sorğusunu yenə də icra edə bilər. Bypass yalnız həmin dəqiq credential-lar üçün nəzərə alınır; buna görə xarici müştərilər qəbul yoxlamasını keçmək üçün başlıqdan istifadə edə bilməz.
 
-Köhnə standartlar `src/shared/constants/visionBridgeDefaults.ts` daxilində yerləşir; yeni
-rejim/tapşırıqdan xəbərdar/cache standartları və settings resolver
-`src/shared/constants/modalityBridgeDefaults.ts` daxilində yerləşir. Guardrail testlərin saxta
-`getSettings` və `callVisionModel` implementasiyalarını daxil etməsi üçün `deps` konstruktor seçimini
-təqdim edir.
+Köhnə standartlar `src/shared/constants/visionBridgeDefaults.ts` daxilində yerləşir; yeni mode/task-aware/cache standartları və settings resolver `src/shared/constants/modalityBridgeDefaults.ts` daxilindədir. Guardrail konstruktor seçimi kimi `deps` təqdim edir ki, testlər saxta `getSettings` və `callVisionModel` implementasiyalarını daxil edə bilsin.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Audio daşıyan chat sorğularını audio girişini qəbul etdiyi məlum olmayan hədəfə çatmazdan əvvəl
-tutur. O, chat sorğusunu heç vaxt yenidən istiqamətləndirmir: audio hissələri mövcud
-OpenAI-uyğun multipart endpoint vasitəsilə mətnə transkripsiya edilir və seçilmiş chat modeli
-mətn transkriptləri ilə işləməyə davam edir.
+Audio daşıyan chat sorğularını audio girişini qəbul etdiyi məlum olmayan hədəfə çatmazdan əvvəl tutur. O, chat sorğusunu heç vaxt yenidən yönləndirmir: audio hissələri mövcud OpenAI-uyğun multipart endpoint vasitəsilə mətnə transkripsiya olunur və seçilmiş chat modeli mətn transkriptləri ilə davam edir.
 
 Axın:
 
-1. `supportsAudio` dəyərini `getResolvedModelCapabilities()` vasitəsilə müəyyənləşdirin. Əvvəlcə provayder reyestrinin açıq metadata-sı, sonra statik model metadata-sı, daha sonra isə sinxronlaşdırılmış `modalities_input` nəzərə alınır. `audio` olmayan elan edilmiş giriş siyahısı `false` deməkdir; heç bir imkan sübutu qalmadıqda nəticə `null` olur. Həm `false`, həm də `null` konservativ körpünü aktivləşdirir, `true` isə onu yan keçir.
-2. `modalityBridgeAudio*` parametrlərini müəyyənləşdirin və paylaşılan `detectMediaParts()` detektoru vasitəsilə hər mesajdan splice edilə bilən, üst səviyyədəki audio hissələrini çıxarın. Dəstəklənən wire formaları OpenAI `input_audio`, `audio_url` və `source.media_type: "audio/*"`-dır. İç-içə audio marşrutlaşdırma üçün aşkarlanır, lakin splice yolu ilə silinmir. İş `modalityBridgeAudioMaxClips` ilə məhdudlaşdırılır; sonrakı hissələr toxunulmaz qalır.
-3. Konfiqurasiya edilmiş `provider/model` dəyərinə üstünlük verin və ya `selectAudioBridgeModel()` funksiyasına `AUDIO_TRANSCRIPTION_PROVIDERS` siyahısını sabit kataloq ardıcıllığı ilə nəzərdən keçirərək aktiv provayder üçün istifadə edilə bilən kredensiala malik ilk modeli seçməyə icazə verin.
-4. `callAudioTranscription()` base64/data-URI audio məlumatını multipart `file`-a çevirir və ya uzaqdakı `audio_url`-i DNS pinləməsi və 25 MB limiti olan yalnız ictimai resurslara icazə verən outbound qoruması vasitəsilə endirir. Daha sonra faylı və seçilmiş modeli `resolveSelfLoopBearer()` ilə autentifikasiya edilən lokal `/v1/audio/transcriptions` self-loop ünvanına POST edir. Mövcud transkripsiya marşrutu adi kredensial axtarışını, cooldown/rate-limit idarəetməsini və provayderə yönləndirməni həyata keçirir.
-5. Uğurlu çağırışlar öz hissələrini `[Audio N]: <transcript>` ilə əvəz edir. Çağırışlar `Promise.allSettled` ilə icra olunur: ayrı-ayrı uğursuzluqlar həmin ilkin audio hissəsini qoruyur (#4012 müqaviləsi). Bütün çağırışlar uğursuz olduqda və hədəfin `supportsAudio === false` olduğu sübut edildikdə, hissələr
-   `[Audio N]: (unavailable — no STT provider connected)` (#8430 müqaviləsi) ilə əvəz olunur. Naməlum hədəf (`null`) üçün bütün çağırışların uğursuz nəticəsi toxunulmaz qalır. Yalnız mətn qəbul etdiyi sübut edilmiş və istifadə edilə bilən STT kredensialı olmayan hədəf şəbəkə çağırışı edilmədən eyni açıq stub-u alır.
+1. `supportsAudio` göstəricisini `getResolvedModelCapabilities()` vasitəsilə həll edin. Əvvəlcə provayder reyestrinin açıq metadata-sı, sonra statik model metadata-sı, daha sonra isə sinxronlaşdırılmış `modalities_input` nəzərə alınır. Elan edilmiş giriş siyahısında `audio` yoxdursa, nəticə `false`; heç bir imkan sübutu qalmadıqda isə `null` olur. Həm `false`, həm də `null` konservativ körpünü aktivləşdirir, `true` isə onu yan keçir.
+2. `modalityBridgeAudio*` parametrlərini həll edin və paylaşılan `detectMediaParts()` detektoru vasitəsilə hər mesajdakı splice edilə bilən üst səviyyəli audio hissələrini çıxarın. Dəstəklənən naqil formaları OpenAI `input_audio`, `audio_url` və `source.media_type: "audio/*"`-dır. Marşrutlaşdırma üçün iç-içə audio aşkarlanır, lakin splice yolu ilə silinmir. İş `modalityBridgeAudioMaxClips` ilə məhdudlaşdırılır; sonrakı hissələr toxunulmaz qalır.
+3. Konfiqurasiya edilmiş `provider/model` dəyərinə üstünlük verin və ya `selectAudioBridgeModel()` funksiyasına `AUDIO_TRANSCRIPTION_PROVIDERS` siyahısını sabit kataloq sırası ilə gəzməyə və istifadə edilə bilən aktiv provayder məlumatlarına malik ilk modeli seçməyə icazə verin.
+4. `callAudioTranscription()` base64/data-URI audio məlumatını multipart `file` obyektinə çevirir və ya uzaq `audio_url` ünvanından yalnız ictimai resurslara icazə verən, DNS pinləməli və 25 MB limitli çıxış qoruyucusu vasitəsilə yükləyir. Daha sonra faylı və seçilmiş modeli `resolveSelfLoopBearer()` ilə autentifikasiya edilmiş lokal `/v1/audio/transcriptions` self-loop ünvanına POST edir. Mövcud transkripsiya marşrutu adi credential axtarışını, cooldown/rate-limit idarəetməsini və provayderə yönləndirməni həyata keçirir.
+5. Uğurlu çağırışlar öz hissələrini `[Audio N]: <transcript>` ilə əvəz edir. Çağırışlar `Promise.allSettled` ilə icra olunur: ayrı-ayrı uğursuzluqlar həmin orijinal audio hissəsini saxlayır (#4012 müqaviləsi). Bütün çağırışlar uğursuz olarsa və hədəfin `supportsAudio === false` olduğu sübut edilərsə, hissələr
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430 müqaviləsi) şəklinə çevrilir. Naməlum hədəf (`null`) üçün bütün çağırışların uğursuz nəticəsi dəyişdirilmədən qalır. Yalnız mətn dəstəyi olduğu sübut edilən hədəf heç bir istifadə edilə bilən STT məlumatına malik deyilsə, şəbəkə çağırışı edilmədən eyni açıq stubu alır.
 
-Uğurlu transkriptlər proses üzrə paylaşılan Modality Bridge LRU/TTL keşindən istifadə edir. Açar audio istinadını, sabit `audio-transcription` əməliyyat etiketini və seçilmiş STT modelini birləşdirir; uğursuzluqlar heç vaxt keşlənmir. Audio cəhdləri paylaşılan `bridged`, `cacheHits`, `failures` və `lastUsedAt` sayğaclarını yeniləyir. Çevrilmiş cavablar
+Uğurlu transkripsiyalar proses səviyyəsindəki Modality Bridge LRU/TTL keşindən istifadə edir. Açar audio istinadını, sabit `audio-transcription` əməliyyat etiketini və seçilmiş STT modelini birləşdirir; uğursuzluqlar heç vaxt keşlənmir. Audio cəhdləri paylaşılan `bridged`, `cacheHits`, `failures` və `lastUsedAt` sayğaclarını yeniləyir. Çevrilmiş cavablar
 `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` daşıyır; toxunulmamış sorğulara Audio Bridge seqmenti əlavə edilmir.
 
-İşləmə zamanı parametrlər DB-də saxlanılır və Zod ilə yoxlanılır:
+İşləmə parametrləri DB-də saxlanılır və Zod ilə təsdiqlənir:
 
 | Açar                          | Standart | Aralıq            |
 | ----------------------------- | -------- | ----------------- |
@@ -241,7 +206,7 @@ Uğurlu transkriptlər proses üzrə paylaşılan Modality Bridge LRU/TTL keşin
 | `modalityBridgeAudioMaxClips` | `3`      | 1–10              |
 
 Paylaşılan keş `modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` və `modalityBridgeCacheMaxEntries` parametrləri ilə idarə olunmağa davam edir.
+`modalityBridgeCacheTtlMinutes` və `modalityBridgeCacheMaxEntries` tərəfindən idarə olunmağa davam edir.
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -413,188 +378,122 @@ kəsildikdə `499`, sabit broker deadline-ı keçdikdə isə `504` qaytarılır.
 `video->text;model=<visionModel>;parts=<videos>` əlavə edir, Vision və ya Audio
 seqmentlərini silmir.
 
-### PII maskalayıcısı (`piiMasker.ts`)
+### PII Maskeri (`piiMasker.ts`)
 
-Hər iki mərhələdə işləyir.
+Davam edir **hər ikisi** mərhələləri.
 
-- **`preCall`** payload-un klonunu yaradır, `system`, `messages`, `input` və
-  `prompt` sahələrini (sadə sətir elementləri də daxil olmaqla) gəzir və
-  `@/shared/utils/inputSanitizer` modulundakı `processPII()` funksiyasını sətir
-  tipli `content`/`text` sahələrinə tətbiq edir. `PII_REDACTION_ENABLED=true`
-  olduqda aşkarlanmış PII gedən payload-da redaktə edilir. Bu,
-  `INPUT_SANITIZER_MODE` parametrindən asılı deyil (o yalnız prompt-injection
-  siyasətinə nəzarət edir). Redaktə deaktiv olduqda çağırış aşkarlama saylarını
-  qeyd edir, lakin məzmunu yenidən yazmır.
-- **`postCall`** cavabı dərin klonlayır, `sanitizePIIResponse()` funksiyasını və
-  Responses API formasının maskalayıcısını (`maskResponsesOutput` —
-  `output_text` və `output[].content[].text` sahələrini əhatə edir) işlədir.
-  Hər hansı redaktə baş verərsə, dəyişdirilmiş cavab orijinalı əvəz edir.
+- **`preCall`** faydalı yükü klonlayır, `system`, `messages`, `input` və `prompt` (sadə sətir elementləri daxil olmaqla) gəzir və `content`/`text` sətirlərinə `processPII()` tətbiq edir ( `@/shared/utils/inputSanitizer` dən). `PII_REDACTION_ENABLED=true` olduqda, aşkar edilmiş PII gedən yükda redaktə edilir. Bu, `INPUT_SANITIZER_MODE` dən (yalnız operativ inyeksiya siyasətinə nəzarət edən) müstəqildir. Redaksiya söndürüldükdə, zəng məzmunu yenidən yazmadan aşkarlama saymalarını qeyd edir.
+- **`postCall`** cavabı dərin klonlayır, `sanitizePIIResponse()` üstəgəl Responses-API formalı maskalayıcını işə salır (`maskResponsesOutput` — `output_text` və `output[].content[].text` əhatə edir). Hər hansı redaksiya baş verərsə, dəyişdirilmiş cavab orijinalı əvəz edir.
 
-Guardrail heç vaxt bloklamır; yalnız annotasiya edir (`meta.detections`,
-`meta.redacted`) və ya yenidən yazır.
+Qoruyucu barmaqlıq heç vaxt maneə törətmir; o, yalnız annotasiya edir (`meta.detections`, `meta.redacted`) və ya yenidən yazır.
 
-#### Növə görə seçim, xüsusi nümunələr və aşkarlama sayğacları
+#### Hər növ seçim, xüsusi nümunələr və aşkarlama sayğacları
 
-**Dashboard → Settings → Security → PII masking** hansı məlumatların
-maskalanacağını seçir. Bu, maskalamanı aktivləşdirmir: maskalama hələ də
-`sorğu` üçün `PII_REDACTION_ENABLED`, cavab + SSE üçün isə
-`PII_RESPONSE_SANITIZATION` vasitəsilə idarə olunur və hər ikisi ilkin olaraq
-deaktivdir.
+**Dashboard → Parametrləri → Security → PII maskalanması** maskalı olanı seçir. O, maskalanmağı yandırmır: bu, hələ də `PII_REDACTION_ENABLED` (sorğu) və `PII_RESPONSE_SANITIZATION` (cavab + SSE), hər ikisi defolt olaraq söndürülür.
 
-- **Növə görə seçim** — daxili identifikatorlar
-  `src/shared/constants/piiTypes.ts` faylında (`PII_BUILTIN_TYPES`) sadalanır.
-  Dəyər təyin edilmədikdə bütün növlər seçilir (bu parametr mövcud olmamışdan
-  əvvəlki davranış). Sorğu mühərrikinin `ssn_us` nümunəsi `ssn`-ə uyğun gəlir.
-  Şablonlar (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)
-  yalnız UI-dakı checkbox-ları doldurur.
-- **GDPR və POPIA identifikatorları** — Aİ və Cənubi Afrikadakı şəxsi
-  identifikatorları əhatə edən on iki daxili identifikator (aşağıdakı cədvəl).
-  Onların regex-ləri, validatorları və yurisdiksiya teqləri həm cavab
-  təmizləyicisinin (`src/lib/piiSanitizer.ts`), həm də sorğu
-  maskalayıcısının (`src/shared/utils/inputSanitizer.ts`) istifadə etdiyi
-  `src/shared/utils/piiPatterns.ts` faylındakı vahid cədvəldə yerləşir.
-  Uyğunluq yalnız validator onu qəbul etdikdə redaktə edilir; rəqəmlərdən ibarət
-  sadə ardıcıllıq heç vaxt kifayət deyil. Bu identifikatorlar mövcud olmamışdan
-  əvvəl seçimlərini daraldaraq saxlamış operator yeni identifikatorları seçənə
-  qədər əvvəlki davranışı saxlayır.
-- **Xüsusi nümunələr** — ən çox 20 regex və ya wildcard nümunəsi (`*` = boşluq
-  olmayan ən çox 64 simvol, `?` = bir simvol). Uyğunluqlar
-  `[CUSTOM_REDACTED]` ilə əvəz edilir. Hər nümunə
-  `src/shared/utils/piiCustomPatterns.ts` modulundakı
-  `compilePiiCustomPattern()` funksiyasından keçir: uzunluq ən çox 500 simvol
-  olmalı, bayraqlar `g i m s u` ilə məhdudlaşmalı, nümunə kompilyasiya edilməli,
-  `safe-regex` yoxlamasından (katastrofik backtracking) keçməli və boş sətirə
-  və ya redaktə placeholder-inə uyğun gəlməməlidir. Uğursuz nümunə yadda
-  saxlanılarkən və sınaqdan keçirilərkən rədd edilir, saxlanılmış və uğursuz
-  olan sətir isə iş vaxtında kompilyasiya edilmədən ötürülür. Xüsusi nümunələr
-  yalnız maskalama aktiv olduqda işlədilir.
-- **Aşkarlama sayğacları** — növ üzrə saylar (heç vaxt uyğun gələn dəyərlər
-  deyil) yaddaşda saxlanılır və restart zamanı sıfırlanır
-  (`src/lib/pii/piiDetectionStats.ts`). Onlar yalnız maskalama aktiv olduqda
-  artır.
+- **Hər növ seçim** — daxili id-lər `src/shared/constants/piiTypes.ts` də (`PII_BUILTIN_TYPES`) siyahıya alınmışdır. Ayarlanmamış hər növ (bu parametr mövcud olmamışdan əvvəlki davranış) deməkdir. Sorğu mühərrikinin `ssn_us` nümunəsi `ssn` ilə əlaqələndirilir. Şablonlar (Minimal, Standart, Maliyyə, Braziliya, USA, GDPR, POPIA, Tam) yalnız UI də qeyd xanalarını doldurur.
+- **GDPR və POPIA identifikatorları** EU və Cənubi Afrika şəxsi identifikatorlarını əhatə edən — on iki daxili id (aşağıdakı cədvəl). Onların regexləri, təsdiqləyiciləri və yurisdiksiya teqləri həm cavab dezinfeksiyaedicisinin (`src/lib/piiSanitizer.ts`) həm də sorğu maskasının (`src/shared/utils/inputSanitizer.ts`) istehlak etdiyi bir cədvəldə, `src/shared/utils/piiPatterns.ts` də yaşayır. Uyğunluq yalnız onun təsdiqləyicisi onu qəbul etdikdə redaktə edilir; çılpaq rəqəmlər heç vaxt kifayət etmir. Bu id-lər mövcud olmamışdan əvvəl daralmış seçimi yadda saxlayan operator, yeni idlər işarələnənə qədər öz davranışını saxlayır.
+- **Fərdi naxışlar** — 20-yə qədər regex və ya wildcard nümunələri (`*` = 64 boşluq olmayan simvol, `?` = bir). Matçlar `[CUSTOM_REDACTED]` olur. Hər bir nümunə `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) vasitəsilə keçir: ən çoxu 500 simvol, `g i m s u` ilə məhdudlaşan bayraqlar tərtib edilməlidir, `safe-regex` keçməlidir (fəlakətli geri izləmə) və boş sətir və ya redaksiya yertutucusu ilə uyğun gəlməməlidir. Uğursuz olan nümunə yadda saxlandıqda və sınaqdan keçirildikdə rədd edilir və uğursuz olan saxlanılan sətir tərtib edilmək əvəzinə icra zamanı atlanır. Fərdi nümunələr yalnız maskalama aktiv olduqda işləyir.
+- **Aşkarlama sayğacları** Hər növ — hesabları (heç vaxt uyğun olmayan dəyərlər), yaddaşda saxlanılır və yenidən başladıqda sıfırlanır (`src/lib/pii/piiDetectionStats.ts`). Onlar yalnız maskalanma aktiv olduqda artır.
 
-Parametrlər `key_value` cədvəlində (`pii_settings` namespace-i,
-`src/lib/db/piiSettings.ts`) saxlanılır və 1 saniyəlik keş vasitəsilə oxunur.
-API:
+Parametrlər `key_value` cədvəlində yaşayır (ad sahəsi `pii_settings`, `src/lib/db/piiSettings.ts`) və 1 s keş vasitəsilə oxunur. API:
 
-| Method | Path                     | Purpose                                                                                  |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Bayraq vəziyyəti, `enabledTypes`, `customPatterns`, aşkarlama sayğacları                 |
-| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = hamısı) və/və ya `customPatterns` dəyərlərini əvəz edir         |
-| `POST` | `/api/settings/pii/test` | Ən çox 8 KB ölçüsündə nümunə üzərində bir pattern-i sınaqdan keçirir; heç nə saxlanılmır |
+| Metod  | Yol                      | Təyinat                                                                               |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Bayrağın vəziyyəti, `enabledTypes`, `customPatterns`, aşkarlama sayğacları            |
+| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = hamısı) və/və ya `customPatterns` dəyərlərini əvəz etmək     |
+| `POST` | `/api/settings/pii/test` | Bir nümunəni ən çox 8 KB ölçülü nümunə üzərində sınaqdan keçirmək; heç nə saxlanılmır |
 
-Bu üç endpoint-in hamısı idarəetmə autentifikasiyası tələb edir və gövdəni Zod ilə yoxlayır
-(`src/shared/validation/schemas/piiSettings.ts`). Giriş deaktiv edildikdə
-(`requireLogin=false`) `GET` və test endpoint-i açıq olur, lakin `PUT` hələ də
-dashboard sessiyası, `manage` əhatə dairəli API açarı, yazma əhatə dairəsi və ya daha
-yüksək səviyyəyə malik `oma_` access token-i, yaxud loopback-dən göndərilən CLI token-i
-və ya daxili xidmət token-i tələb edir.
+Hər üçü idarəetmə auputasiyasını tələb edir və bədəni Zod (`src/shared/validation/schemas/piiSettings.ts`) ilə təsdiq edir. Giriş qeyri-aktiv olduqda (`requireLogin=false`) `GET` və testin son nöqtəsi açıqdır, lakin `PUT` hələ də idarə paneli seansına, `manage` -scope API açarına, yazma əhatə dairəsi və ya daha yüksək olan `oma_` giriş nişanına və ya geri dönmədən göndərilən CLI işarəsinə və ya daxili xidmət nişanına ehtiyac duyur.
 
-#### GDPR (Aİ) və POPIA (Cənubi Afrika) identifikatorları
+#### GDPR (EU) və POPIA (Cənubi Afrika) identifikatorları
 
-| Id                  | Identifier                    | Validation                                                                           |
+| ID                  | İdentifikator                 | Yoxlama                                                                              |
 | ------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
-| `iban`              | IBAN                          | Tanınmış ölkə, həmin ölkə üçün dəqiq uzunluq, ISO 13616 MOD-97-10                    |
-| `eu_vat`            | Aİ ƏDV nömrəsi                | Tanınmış üzv dövlət prefiksi və həmin dövlətin nömrə formatı (VIES axtarışı yoxdur)  |
-| `es_dni_nie`        | İspan DNI / NIE               | Nəzarət hərfi (qiymət mod 23); NIE `X/Y/Z` + 7 rəqəmdir                              |
-| `it_codice_fiscale` | İtaliya Codice Fiscale        | Tək/cüt mövqe cədvəllərindən hesablanan nəzarət hərfi                                |
-| `pl_pesel`          | Polşa PESEL                   | Çəkili yoxlama cəmi və mövcud olan kodlaşdırılmış doğum tarixi                       |
-| `nl_bsn`            | Niderland BSN                 | 11 yoxlaması (9..2, -1 çəkiləri)                                                     |
+| `iban`              | IBAN                          | Məlum ölkə, həmin ölkə üçün dəqiq uzunluq, ISO 13616 MOD-97-10                       |
+| `eu_vat`            | Aİ ƏDV nömrəsi                | Məlum üzv dövlət prefiksi və həmin dövlətin nömrə formatı (VIES yoxlaması aparılmır) |
+| `es_dni_nie`        | İspan DNI / NIE               | Nəzarət hərfi (qiymət mod 23); NIE `X/Y/Z` + 7 rəqəmdən ibarətdir                    |
+| `it_codice_fiscale` | İtaliya Codice Fiscale        | Tək/cüt mövqe cədvəllərindən alınan nəzarət hərfi                                    |
+| `pl_pesel`          | Polşa PESEL                   | Çəkili yoxlama cəmi və kodlanmış doğum ayı/günü üçün ağlabatan aralıqlar             |
+| `nl_bsn`            | Niderland BSN                 | 11 yoxlaması (9..2 çəkiləri, -1)                                                     |
 | `de_steuer_id`      | Alman Steuer-ID               | ISO 7064 Mod 11,10 və rəqəm strukturu qaydaları (ilk rəqəm 0 ola bilməz)             |
-| `se_personnummer`   | İsveç personnummer            | Son on rəqəm üzərində Luhn və məntiqli doğum tarixi (10 və ya 12 rəqəm)              |
+| `se_personnummer`   | İsveç personnummer            | Son on rəqəm üzərində Luhn və etibarlı doğum tarixi (10 və ya 12 rəqəm)              |
 | `za_id`             | Cənubi Afrika ID nömrəsi      | Bütün 13 rəqəm üzərində Luhn, etibarlı doğum ayı/günü, vətəndaşlıq rəqəmi 0 və ya 1  |
-| `za_phone`          | Cənubi Afrika telefon nömrəsi | `+27` / `27` prefiksi və ya boşluq və ya defislə yazılmış milli `0..` forması        |
-| `za_vat`            | Cənubi Afrika ƏDV nömrəsi     | `4` ilə başlayan 10 rəqəm **və** ondan əvvəlki 48 simvolda "VAT" / "BTW"             |
-| `za_tax_ref`        | Cənubi Afrika vergi istinadı  | `0`-`3` ilə başlayan 10 rəqəm, Luhn, **və** ondan əvvəlki 48 simvolda "tax" / "SARS" |
+| `za_phone`          | Cənubi Afrika telefon nömrəsi | `+27` / `27` prefiksi və ya boşluqla və ya tire ilə yazılmış milli `0..` forması     |
+| `za_vat`            | Cənubi Afrika ƏDV nömrəsi     | `4` ilə başlayan 10 rəqəm **və** əvvəlki 48 simvolda "VAT" / "BTW"                   |
+| `za_tax_ref`        | Cənubi Afrika vergi ref.      | `0`-`3` ilə başlayan 10 rəqəm, Luhn, **və** əvvəlki 48 simvolda "tax" / "SARS"       |
 
-Yalnız rəqəmlərdən ibarət formatlar sifariş nömrələri, build nömrələri və
-vaxt damğaları ilə toqquşduğuna görə, ən zəif olanlar (`za_vat`, `za_tax_ref`)
-açar söz siqnalı tələb edir və ayrıca yazılmış onrəqəmli `0..` nömrəsi Cənubi Afrika
-telefon nömrəsi kimi qəbul edilmir. Boşluqlu IBAN-lar (`GB29 NWBK ...`) uyğunlaşdırılmır.
-Axın yolu üzrə siqnal yalnız cari hissənin daxilində axtarılır. ID-lər ümumi telefon
-pattern-lərindən əvvəl yerləşir, buna görə də yoxlanılmış identifikator öz placeholder-ını
-saxlayır
-(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` və `popia` şablonları müvafiq olaraq
-Aİ və Cənubi Afrika ID-lərini seçir. Maskalama özü opt-in olaraq qalır (Sərt Qayda #20):
-buradakı heç nə feature-flag defoltunu dəyişmir.
+Yalnız rəqəmlərdən ibarət formatlar sifariş nömrələri ilə toqquşduğundan, nömrələr və vaxt ştamplarını qurur, ən zəif olanlar (`za_vat`, `za_tax_ref`) açar sözə ehtiyac duyur və çılpaq on rəqəmli `0..` nömrəsi Cənubi Afrika telefon nömrəsi kimi qəbul edilmir. Aralıqlı IBANs (`GB29 NWBK ...`) uyğun gəlmir. Axın yolunda replika yalnız cari yığının içərisində yuxarıya baxılır. İdlər ümumi telefon nümunələrindən qabaqda oturur, ona görə də təsdiqlənmiş identifikator öz yertutanını saxlayır (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` və `popia` şablonları müvafiq olaraq EU və Cənubi Afrika identifikatorlarını seçir. Maskalanmanın özü aktiv olaraq qalır (Hard Rule #20): burada heç bir şey funksiya bayrağının defoltunu dəyişdirmir.
 
 ### Prompt Injection (`promptInjection.ts`)
 
-İstifadəçi tərəfindən təqdim olunan məzmunda rəqib strukturları aşkarlayır və
-konfiqurasiya edilmiş siyasəti tətbiq edir. Davranış mühit dəyişənləri və konstruktor
-seçimləri ilə idarə olunur:
+İstifadəçi tərəfindən təqdim edilən məzmunda əks-təsirli strukturları aşkarlayır və
+konfiqurasiya edilmiş siyasəti tətbiq edir. Davranış mühit dəyişənləri və konstruktor seçimləri ilə idarə olunur:
 
-| Setting        | Env var                                                                                               | Default | Effect                                                                                                                                                                                                          |
-| -------------- | ----------------------------------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aktivdir       | `INPUT_SANITIZER_ENABLED`                                                                             | `true`  | `false` olduqda qoruyucu mexanizm qısa dövrə ilə dayandırılır.                                                                                                                                                  |
-| Rejim          | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`  | Injection siyasəti: `block`, `warn` və ya `log`. (`redact` geriyə uyğunluq üçün qəbul edilir, lakin injection mətnini silmir; sorğudakı PII yenidən yazılması `PII_REDACTION_ENABLED` tərəfindən idarə olunur.) |
-| Bloklama həddi | `blockThreshold` seçimi / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | Bloklama üçün tələb olunan minimum ciddilik səviyyəsi. Defolt olaraq orta səviyyə yalnız müşahidə edilir.                                                                                                       |
+| Setting        | Env var                                                                                               | Default | Effect                                                                                                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aktivdir       | `INPUT_SANITIZER_ENABLED`                                                                             | `true`  | `false` olduqda qoruyucu qısa dövrə ilə dayandırılır.                                                                                                                                                          |
+| Rejim          | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`  | İnjeksiya siyasəti: `block`, `warn` və ya `log`. (`redact` geriyə uyğunluq üçün qəbul edilir, lakin injeksiya mətnini silmir; sorğunun PII yenidən yazılması `PII_REDACTION_ENABLED` tərəfindən idarə olunur.) |
+| Bloklama həddi | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | Bloklama üçün tələb olunan minimum ciddilik səviyyəsi. Defolt olaraq orta səviyyə yalnız müşahidə edilir.                                                                                                      |
 
-**Rejim prioriteti** (`getMode`): çağıranın `options.mode`-u →
-`INJECTION_GUARD_MODE` **DB feature-flag override-ı** (Dashboard → Settings →
+**Rejim üstünlüyü** (`getMode`): çağıranın `options.mode` →
+`INJECTION_GUARD_MODE` **DB funksiya bayrağı override-ı** (Dashboard → Settings →
 Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
 `warn`. Buna görə dashboard override-ı env dəyişənlərindən üstün gəlir və Feature
-Flags UI işləyən qoruyucu mexanizmi canlı şəkildə idarə edir (yenidən başlatma
-tələb olunmur). DB oxunması fail-safe davranır: xəta baş verərsə, qoruyucu mexanizm
-env əsaslı davranışa qayıdır və heç bir override təyin edilmədikdə davranış yalnız
-env əsasında həll ilə eyni olur.
+Flags UI-si işləyən qoruyucunu canlı şəkildə idarə edir (yenidən başlatma tələb olunmur).
+DB oxunması təhlükəsiz şəkildə geriyə qayıdır:
+xəta baş verərsə, qoruyucu env əsaslı davranışa qayıdır və override
+təyin edilmədikdə davranış yalnız env dəyişənləri ilə həll edilən davranışla eyni olur.
 
 Aşkarlama mənbələri:
 
-1. `sanitizeRequest()` from `@/shared/utils/inputSanitizer` (pipeline-da başqa
-   yerlərdə istifadə olunan ümumi detektor dəsti).
-2. Daxili `DEFAULT_GUARD_PATTERNS` (`system_override_inline` və
-   `markdown_system_block`, hər ikisi `high` ciddilik səviyyəsində).
+1. `@/shared/utils/inputSanitizer` modulundan `sanitizeRequest()` (pipeline-ın
+   başqa yerlərində istifadə olunan ümumi detektor dəsti).
+2. Daxili `DEFAULT_GUARD_PATTERNS` (hazırda hər ikisi `high` ciddilik səviyyəsinə
+   malik `system_override_inline` və `markdown_system_block`).
 3. Konstruktor seçimləri vasitəsilə ötürülən ixtiyari `customPatterns` (sətirlər,
-   regex və ya `{ name, pattern, severity }` qeydləri).
+   regex-lər və ya `{ name, pattern, severity }` qeydləri).
 
-`mode === "block"` olduqda **və** ən azı bir aşkarlama ciddilik həddinə
-uyğun gəldikdə, `preCall` `{ block: true, message: "Request rejected:
+`mode === "block"` olduqda **və** ən azı bir aşkarlama ciddilik həddinə çatdıqda,
+`preCall` `{ block: true, message: "Request rejected:
 suspicious content detected" }` qaytarır. `warn`/`log` rejimlərində qoruyucu
-mexanizm qeydə alır, lakin çağırışa icazə verir. Ümumi
-`evaluatePromptInjection()` köməkçisi də reyestrdən keçmədən promptları
-qiymətləndirməyə ehtiyacı olan çağırışçılar üçün ixrac olunur.
+jurnala yazır, lakin çağırışa icazə verir. Paylaşılan
+`evaluatePromptInjection()` köməkçi funksiyası da ixrac olunur ki, çağırış edənlər prompt-ları reyestrdən keçirmədən qiymətləndirə bilsinlər.
 
 **Skan həddi (v3.8.20):** detektor birləşdirilmiş prompt mətninin yalnız
-**ilk 16 KB** hissəsini yoxlayır — `MAX_INJECTION_SCAN_BYTES = 16 * 1024`
-(16 384 bayt) `src/shared/utils/inputSanitizer.ts` faylında müəyyən edilir.
-Həm `detectInjection()`, həm də `evaluatePromptInjection()` pattern dövrünü
-işə salmazdan əvvəl `slice(0, MAX_INJECTION_SCAN_BYTES)` tətbiq edir.
-İnyeksiya direktivləri girişin başlanğıcına yaxın yerləşir, buna görə bu hədd
-bir neçə yüz KB-lıq yüklərdə regex CPU/GC xərclərini artırmadan aşkarlamanı
-zəiflətmir (bax: #3932, #4041).
+**ilk 16 KB** hissəsini yoxlayır — `src/shared/utils/inputSanitizer.ts` daxilində
+`MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bayt). Həm
+`detectInjection()`, həm də `evaluatePromptInjection()` şablon dövrünü
+işə salmazdan əvvəl `slice(0, MAX_INJECTION_SCAN_BYTES)` tətbiq edir. İnjeksiya direktivləri girişin yuxarı hissəsinə yaxın yerləşir, buna görə bu yanaşma çox yüz KB-lıq yüklərdə regex CPU/GC istifadəsini məhdudlaşdırır və aşkarlamanı zəiflətmir (bax: #3932, #4041).
 
 ### Credential Masker (`credentialMasker.ts`)
 
-Hər iki mərhələdə, standart zəncirin sonunda (prioritet `95`) işləyir. Gedən
-yükdə (mesaj məzmunu, alət çağırışının arqumentləri, alət nəticələri) **və**
-provayder cavabında məlum API açarı / məxfi token pattern-lərini redaktə edir;
-beləliklə prompta əlavə edilmiş (və ya alət nəticəsi tərəfindən geri qaytarılmış)
-məlumat provayderə göndərilərkən və ya müştəriyə qaytarılarkən sızmır.
+Hər iki mərhələdə, defolt zəncirin sonunda (prioritet `95`) işləyir. Çıxış
+payload-ından (mesaj məzmunu, alət çağırışının arqumentləri, alət nəticələri)
+**və** provayder cavabından tanınmış API açarı / məxfi token şablonlarını redaktə edir ki,
+prompt-a yapışdırılmış credential (və ya alət nəticəsi tərəfindən geri əks etdirilən
+credential) nə yuxarı axındakı provayderə, nə də klientə sızmasın.
 
-- **Yalnız aktivləşdirildikdə işləyir**, PII redaksiyası ilə eyni konvensiyadan
-  istifadə edir (Hard Rule #20-yə yaxın): yalnız
-  `settings.credentialRedactionEnabled === true` **və ya**
-  `CREDENTIAL_REDACTION_ENABLED=true` olduqda aktivdir. Söndürülü olduqda
-  qoruyucu mexanizm heç nə etmir — heç vaxt bloklamır və heç nəyi yenidən
-  yazmır.
-- `redactCredentials()` bütün yük/cavab ağacını (`walkValue()`,
-  prototip çirkləndirilməsinə qarşı təhlükəsiz, `WeakSet` vasitəsilə
-  dövrələrə qarşı təhlükəsiz) gəzir və uyğunluqları `[REDACTED:<type>]`
-  yer tutucusu ilə əvəz edir; yalnız həqiqətən dəyişmiş budaqları klonlayır.
-- `CREDENTIAL_PATTERNS` LLM provayder açarlarını (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokenlərini (GitHub,
-  Slack, Linear, Notion, npm, Postman, Discord), ödəniş açarlarını (Stripe,
-  Square), bulud açarlarını (AWS access key, Twilio, SendGrid, Mailgun), məxfi
-  açarları / JWT-ləri, etimadnamə daşıyan bağlantı sətirlərini
+- **Yalnız opt-in**, PII redaksiyası ilə eyni qayda (Sərt Qayda #20-yə yaxın):
+  yalnız `settings.credentialRedactionEnabled === true` **və ya**
+  `CREDENTIAL_REDACTION_ENABLED=true` olduqda aktivdir. Söndürülmüş vəziyyətdə qoruyucu
+  heç nə etmir — heç vaxt bloklamır və heç vaxt yenidən yazmır.
+- `redactCredentials()` tam payload/cavab ağacını (`walkValue()`,
+  prototip çirkləndirilməsinə qarşı təhlükəsiz, `WeakSet` vasitəsilə dövrələrə qarşı
+  təhlükəsiz) gəzir və uyğunluqları `[REDACTED:<type>]` placeholder-ı ilə əvəz edir,
+  yalnız faktiki dəyişmiş budaqları klonlayır.
+- `CREDENTIAL_PATTERNS` LLM provayderlərinin açarlarını (OpenAI, OpenAI-proj,
+  Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokenlərini (GitHub, Slack,
+  Linear, Notion, npm, Postman, Discord), ödəniş açarlarını (Stripe, Square), bulud
+  açarlarını (AWS access key, Twilio, SendGrid, Mailgun), private key / JWT-ləri,
+  credential daşıyan bağlantı sətirlərini
   (`mongodb://user:pass@...` və s.) və ümumi
-  `Authorization`/`x-api-key`/`api-key`/`apikey` başlıq-dəyəri pattern-ini
-  əhatə edir. Başlıq formasında olan açarlar (`authorization`, `x-api-key`,
-  `api-key`, `apikey`) ümumi mətn regex-i ilə deyil, struktur üzrə (yalnız dəyər;
-  `Bearer `/`Basic ` kimi sxem prefiksi saxlanılmaqla) redaktə edilir.
-- Qoruyucu mexanizm heç vaxt bloklamır; yalnız yenidən yazır
-  (`modifiedPayload` / `modifiedResponse`) və annotasiya əlavə edir
-  (`meta.credentialsRedacted`, `meta.count`).
+  `Authorization`/`x-api-key`/`api-key`/`apikey` başlıq-dəyəri
+  şablonunu əhatə edir. Başlıq formasındakı açarlar (`authorization`, `x-api-key`,
+  `api-key`, `apikey`) struktur üzrə (yalnız dəyər; `Bearer `/`Basic ` kimi sxem
+  prefiksi saxlanılmaqla), ümumi mətn regex-i vasitəsilə deyil, redaktə olunur.
+- Qoruyucu heç vaxt bloklamır; yalnız yenidən yazır (`modifiedPayload` /
+  `modifiedResponse`) və annotasiya edir (`meta.credentialsRedacted`, `meta.count`).
 
 Reqressiya qoruması: `tests/unit/credential-masker-guardrail.test.ts`.
 

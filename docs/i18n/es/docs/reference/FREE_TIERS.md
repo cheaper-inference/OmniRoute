@@ -130,7 +130,7 @@ La mayoría de las cifras de «tokens gratuitos al mes» de este sector son suma
 
 - **Cada fondo compartido se cuenta una sola vez.** El plan gratuito de Mistral ofrece una asignación de 1B al mes por organización; incluirla bajo cinco modelos no la convierte en 5B. Sumado por modelo, nuestro propio catálogo indicaría **~7.4B** (recalculado el 2026-09-03; esta cifra no está validada por CI; vuelva a medirla cada vez que cambie el catálogo), pero el titular dice **~1.47B** porque eso es lo que realmente puede gastar una cuenta de cada proveedor.
 - **Los límites diarios se convierten; las tasas, no.** Un límite documentado de tokens/día se convierte en `× 30`; un límite documentado de solicitudes/día se convierte en `RPD × ~800 tokens × 30`; un proveedor que solo publica solicitudes por minuto **no** tiene una cifra mensual y aparece como _sin límite_, sin sumarse nunca. Multiplicar un límite de tasa suponiendo uso ininterrumpido 24/7 es la inflación que nos negamos a aplicar.
-- **Las cuotas sujetas a una verificación de identidad regional se muestran por separado** (`+~6M tras una verificación de identidad regional`), porque la mayoría de los lectores no puede utilizarlas.
+- **Las cuotas sujetas a una verificación de identidad regional se muestran por separado** (`+~6M behind regional identity verification`), porque la mayoría de los lectores no puede utilizarlas.
 - **Los créditos de registro solo se aplican al primer mes** y se indican como una segunda cifra, sin mezclarlos nunca con la cifra recurrente.
 - **La cifra se comprueba mediante CI.** `npm run check:docs-counts` recalcula los totales a partir del catálogo y hace que la compilación falle cuando este archivo, el README o la tarjeta de presupuesto dejan de coincidir con ellos.
 

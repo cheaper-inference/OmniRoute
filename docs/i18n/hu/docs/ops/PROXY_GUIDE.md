@@ -393,7 +393,7 @@ A `wreq-js` használatával böngészőszerű TLS-ujjlenyomatokat generál, megk
 
 ### CLI-ujjlenyomat egyeztetése
 
-A **CLI-ujjlenyomat kapcsoló** (`Beállítások → Biztonság`) átrendezi a HTTP-fejléceket és a JSON-törzs mezőit, hogy azok pontosan megfeleljenek a natív CLI-binárisok (Claude Code, Codex stb.) aláírásának. Ez a proxy használatán **felül** működik:
+A **CLI-ujjlenyomat kapcsoló** (`Settings → Security`) átrendezi a HTTP-fejléceket és a JSON-törzs mezőit, hogy azok pontosan megfeleljenek a natív CLI-binárisok (Claude Code, Codex stb.) aláírásának. Ez a proxy használatán **felül** működik:
 
 ```
 Az Ön IP-je (blokkolva) → Proxy IP-je (USA) → Szolgáltatói API

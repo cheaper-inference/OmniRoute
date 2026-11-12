@@ -1,65 +1,66 @@
-# REASONING_REPLAY (Yorùbá)
+# Reasoning Replay Cache (Yorùbá)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../routing/REASONING_REPLAY.md) · 🇪🇹 [am](../../../am/docs/routing/REASONING_REPLAY.md) · 🇸🇦 [ar](../../../ar/docs/routing/REASONING_REPLAY.md) · 🇦🇿 [az](../../../az/docs/routing/REASONING_REPLAY.md) · 🇧🇬 [bg](../../../bg/docs/routing/REASONING_REPLAY.md) · 🇧🇩 [bn](../../../bn/docs/routing/REASONING_REPLAY.md) · 🇧🇦 [bs](../../../bs/docs/routing/REASONING_REPLAY.md) · 🇨🇿 [cs](../../../cs/docs/routing/REASONING_REPLAY.md) · 🇩🇰 [da](../../../da/docs/routing/REASONING_REPLAY.md) · 🇩🇪 [de](../../../de/docs/routing/REASONING_REPLAY.md) · 🇬🇷 [el](../../../el/docs/routing/REASONING_REPLAY.md) · 🇪🇸 [es](../../../es/docs/routing/REASONING_REPLAY.md) · 🇪🇪 [et](../../../et/docs/routing/REASONING_REPLAY.md) · 🇮🇷 [fa](../../../fa/docs/routing/REASONING_REPLAY.md) · 🇫🇮 [fi](../../../fi/docs/routing/REASONING_REPLAY.md) · 🇫🇷 [fr](../../../fr/docs/routing/REASONING_REPLAY.md) · 🇮🇪 [ga](../../../ga/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [gu](../../../gu/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ha](../../../ha/docs/routing/REASONING_REPLAY.md) · 🇮🇱 [he](../../../he/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [hi](../../../hi/docs/routing/REASONING_REPLAY.md) · 🇭🇷 [hr](../../../hr/docs/routing/REASONING_REPLAY.md) · 🇭🇺 [hu](../../../hu/docs/routing/REASONING_REPLAY.md) · 🇦🇲 [hy](../../../hy/docs/routing/REASONING_REPLAY.md) · 🇮🇩 [id](../../../id/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ig](../../../ig/docs/routing/REASONING_REPLAY.md) · 🇮🇹 [it](../../../it/docs/routing/REASONING_REPLAY.md) · 🇯🇵 [ja](../../../ja/docs/routing/REASONING_REPLAY.md) · 🇬🇪 [ka](../../../ka/docs/routing/REASONING_REPLAY.md) · 🇰🇭 [km](../../../km/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [kn](../../../kn/docs/routing/REASONING_REPLAY.md) · 🇰🇷 [ko](../../../ko/docs/routing/REASONING_REPLAY.md) · 🇱🇹 [lt](../../../lt/docs/routing/REASONING_REPLAY.md) · 🇱🇻 [lv](../../../lv/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ml](../../../ml/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [mr](../../../mr/docs/routing/REASONING_REPLAY.md) · 🇲🇾 [ms](../../../ms/docs/routing/REASONING_REPLAY.md) · 🇲🇹 [mt](../../../mt/docs/routing/REASONING_REPLAY.md) · 🇲🇲 [my](../../../my/docs/routing/REASONING_REPLAY.md) · 🇳🇵 [ne](../../../ne/docs/routing/REASONING_REPLAY.md) · 🇳🇱 [nl](../../../nl/docs/routing/REASONING_REPLAY.md) · 🇳🇴 [no](../../../no/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [or](../../../or/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [pa](../../../pa/docs/routing/REASONING_REPLAY.md) · 🇵🇭 [phi](../../../phi/docs/routing/REASONING_REPLAY.md) · 🇵🇱 [pl](../../../pl/docs/routing/REASONING_REPLAY.md) · 🇵🇹 [pt](../../../pt/docs/routing/REASONING_REPLAY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/REASONING_REPLAY.md) · 🇷🇴 [ro](../../../ro/docs/routing/REASONING_REPLAY.md) · 🇷🇺 [ru](../../../ru/docs/routing/REASONING_REPLAY.md) · 🇱🇰 [si](../../../si/docs/routing/REASONING_REPLAY.md) · 🇸🇰 [sk](../../../sk/docs/routing/REASONING_REPLAY.md) · 🇸🇮 [sl](../../../sl/docs/routing/REASONING_REPLAY.md) · 🇷🇸 [sr](../../../sr/docs/routing/REASONING_REPLAY.md) · 🇸🇪 [sv](../../../sv/docs/routing/REASONING_REPLAY.md) · 🇰🇪 [sw](../../../sw/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ta](../../../ta/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [te](../../../te/docs/routing/REASONING_REPLAY.md) · 🇹🇭 [th](../../../th/docs/routing/REASONING_REPLAY.md) · 🇹🇷 [tr](../../../tr/docs/routing/REASONING_REPLAY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/REASONING_REPLAY.md) · 🇵🇰 [ur](../../../ur/docs/routing/REASONING_REPLAY.md) · 🇺🇿 [uz](../../../uz/docs/routing/REASONING_REPLAY.md) · 🇻🇳 [vi](../../../vi/docs/routing/REASONING_REPLAY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/REASONING_REPLAY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/REASONING_REPLAY.md)
 
 ---
 
-> **Orisun otitọ:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Imudojuiwọn to kẹhin:** 2026-06-28 — v3.8.40
+> **Orísun òtítọ́:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
+> **Ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-06-28 — v3.8.40
 
-OmniRoute ya oluranlọwọ `reasoning_content` ti a ṣe nipasẹ awọn awoṣe-ipo ero ati tun ṣe atunṣe ni gbangba lori awọn ibeere titan-pupọ nigbati olupese oke ba nilo rẹ. Eyi yọkuro awọn aṣiṣe HTTP 400 ti awọn olupese ti o muna dide nigbati itan-akọọlẹ ibaraẹnisọrọ alabara kan nsọnu ero-iṣaaju titan.
+OmniRoute ń gba `reasoning_content` olùrànlọ́wọ́ tí àwọn àwòṣe ipò-ìrònú ṣẹ̀dá, ó sì ń tún un ṣe ní gbangba lórí àwọn ìbéèrè olóríṣiríṣi ìyípadà nígbà tí olùpèsè upstream bá nílò rẹ̀. Èyí ń mú àwọn àṣìṣe HTTP 400 tí àwọn olùpèsè tó muna ń gbé jáde kúrò, nígbà tí ìtàn ìjíròrò oníbàárà kò bá ní èrò láti ìyípadà tó ṣáájú.
 
-## Kini idi ti Eyi Fi Wa
+## Ìdí Tí Èyí Fi Wà
 
-Ọpọlọpọ awọn olupese ipo ero kọ ipasẹ atẹle ayafi ti** Ifiranṣẹ oluranlọwọ iṣaaju pẹlu `reasoning_content` atilẹba** . Ilọsiwaju pada 400 pẹlu awọn ifiranṣẹ bii:
-
-```
-Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
-```
-
-Ṣugbọn awọn onibara aṣoju (Cursor, Cline, Roo Code, OpenAI SDK) yọ `reasoning_content` kuro ninu itan-akọọlẹ ti wọn tun ṣe. OmniRoute mu pada lati kaṣe ẹgbẹ olupin nitoribẹẹ ibeere ti awọn iwo oke n rii ni ibamu. Ọrọ #1628 ṣe afihan itẹramọṣẹ arabara memory/SQLite nitorinaa kaṣe ye ilana ilana tun bẹrẹ.
-
-## Faaji
+Ọ̀pọ̀ àwọn olùpèsè ipò-ìrònú máa ń kọ ìyípadà àtẹ̀lé bí **ìfiránṣẹ́ olùrànlọ́wọ́ tó ṣáájú kò bá ní `reasoning_content` ojúlówó náà**. Upstream máa ń dá 400 padà pẹ̀lú àwọn ìfiránṣẹ́ bíi:
 
 ```
-Turn N (assistant generates):
-  → response contains reasoning_content + tool_calls
-  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
-  → forward response to client (which may or may not retain reasoning)
-
-Turn N+1 (client sends follow-up):
-  → translator detects: requiresReasoningReplay(provider, model) === true
-  → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
-      hit  → msg.reasoning_content = cached; recordReplay()
-      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
-  → upstream sees consistent history → no 400
+Párámítà Kò Tọ̀nà: A gbọ́dọ̀ fi reasoning_content inú ipò ìrònú padà sí API náà.
 ```
 
-Yaworan ṣẹlẹ ni `open-sse/handlers/chatCore.ts` (ojula meji, ni awọn aaye ipe `cacheReasoningFromAssistantMessage` meji). Sisisẹsẹhin ṣẹlẹ ni `open-sse/translator/index.ts` lẹhin ifipabanilopo ero ṣugbọn ṣaaju fifiranṣẹ.
+Ṣùgbọ́n àwọn oníbàárà tí a sábà máa ń lò (Cursor, Cline, Roo Code, OpenAI SDK) máa ń yọ `reasoning_content` kúrò nínú ìtàn tí wọ́n tún ń fi ránṣẹ́. OmniRoute máa ń mú un padà láti inú cache ẹgbẹ́ server kí ìbéèrè tí upstream rí lè wà ní ìbámu. Issue #1628 ló mú ìtọ́jú àkópọ̀ memory/SQLite wọlé kí cache náà lè yè lẹ́yìn ìbẹ̀rẹ̀ process tuntun.
 
-Itele (ti kii ṣe ipe-ipe) oluranlọwọ ti wa ni ṣiṣafihan lọtọtọ: `buildAssistantMessageCacheKey()` ṣe aropin ipari igba pẹlu itọka iwe kika OpenAI-to deede titi di titan yẹn, nitori DeepSeek nilo ero ti _every_ saju titan ni kete ti `tools` ba wa. Fun Awọn ibi-idahun-API (fun apẹẹrẹ `opencode-go/deepseek-v4-flash`, routed si `/responses`) ara ti o wa ni oke n gbe `input`, kii ṣe `messages`, nitorina `translateRequest()` (`open-sse/translator/index.ts`) ṣe ijabọ tiransikiripiti pivot ti o digested nipasẹ aṣayan ipe pada ati awọn aaye ti o yaworan n gba iwe-kikọsilẹ kanna naa. Awọn Idahun Sisisẹsẹhin n ṣiṣẹ lori pivot OpenAI fun gbogbo ọna kika orisun, nitorinaa awọn alabara Awọn ifiranṣẹ Anthropic (Awọn idahun Claude → OpenAI → ) tun tun ṣe.
+## Àwòrán-ẹ̀rọ
 
-## Ibi ipamọ — arabara Memory + SQLite
+```
+Ìyípo N (olùrànlọ́wọ́ ń ṣe àgbéjáde):
+  → èsì ní reasoning_content + tool_calls
+  → bí requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
+      kọ̀wé sí (ìrántí + DB), pẹ̀lú gbogbo tool_call.id gẹ́gẹ́ bí kọ́kọ́rọ́
+  → fi èsì ránṣẹ́ sí oníbàárà (èyí tí ó lè pa ìrònú mọ́ tàbí kí ó má pa á mọ́)
 
-Ọna gbigbona nlo `Map` -in-memory (LRU-nipasẹ-ẹda) ti o ṣe atilẹyin nipasẹ tabili SQLite fun imularada jamba ati hihan dasibodu.
+Ìyípo N+1 (oníbàárà fi ìtẹ̀lé ránṣẹ́):
+  → olùtumọ̀ ṣàwárí pé: requiresReasoningReplay(provider, model) === true
+  → fún ọ̀kọ̀ọ̀kan àwọn ìfiránṣẹ́ olùrànlọ́wọ́ tí ó ní tool_calls ṣùgbọ́n tí kò ní reasoning_content:
+      lookupReasoning(toolCalls[0].id) → ìrántí → DB
+      bá rí i  → msg.reasoning_content = cached; recordReplay()
+      bí kò bá rí i → msg.reasoning_content = "" (ìpadàsẹ́yìn àtijọ́ fún DeepSeek àgbà)
+  → ẹ̀ka òkè rí ìtàn tí ó bá ara rẹ̀ mu → kò sí 400
+```
 
-| Layer  | imuse                                            | Idi                                           |
-| ------ | ------------------------------------------------ | --------------------------------------------- |
-| Iranti | `Map` ninu `open-sse/services/reasoningCache.ts` | Wiwa ni iyara, ti o dagba julọ ni 200         |
-| DB     | tabili `reasoning_cache` (`src/lib/db/`)         | Tẹsiwaju kọja awọn atunbẹrẹ, awọn iṣiro awakọ |
+Ìgbàkọsílẹ̀ ń ṣẹlẹ̀ nínú `open-sse/handlers/chatCore.ts` (ní ibi méjì, ní àwọn ibi méjèèjì tí a ti pe `cacheReasoningFromAssistantMessage`). Ìtúnṣàgbéjáde ń ṣẹlẹ̀ nínú `open-sse/translator/index.ts` lẹ́yìn ìfipámú schema ṣùgbọ́n ṣáájú fífi ránṣẹ́.
 
-Awọn kikọ lọ si mejeji. Ka iranti iranti ni akọkọ, lẹhinna ṣubu pada si DB (DB hits ti wa ni igbega pada sinu iranti). awọn ikuna DB kii ṣe buburu — kaṣe iranti ti n tẹsiwaju lati sin ọna ti o gbona.
+Àwọn ìyípo olùrànlọ́wọ́ lasan (tí kì í ṣe tool-call) ní ọ̀nà míì tí a fi ń ṣe kọ́kọ́rọ́ wọn: `buildAssistantMessageCacheKey()` ń ṣe digest ti ààlà session pẹ̀lú transcript tó ti jẹ́ normalized ní OpenAI-format títí dé ìyípo yẹn, nítorí DeepSeek nílò ìrònú ti _gbogbo_ ìyípo ṣáájú nígbà tí `tools` bá wà. Fún àwọn ibi-àfojúsùn Responses-API (fún àpẹẹrẹ `opencode-go/deepseek-v4-flash`, tí a darí sí `/responses`), body tí a rán sí ẹ̀ka òkè ní `input`, kì í ṣe `messages`, nítorí náà `translateRequest()` (`open-sse/translator/index.ts`) ń jabo pivot transcript tí ó ṣe digest rẹ̀ nípasẹ̀ aṣàyàn callback, àwọn ibi ìgbàkọsílẹ̀ náà sì ń ṣe digest transcript kan náà. Ìpele ìtúnṣàgbéjáde Responses ń ṣiṣẹ́ lórí pivot OpenAI fún gbogbo source format, nítorí náà àwọn oníbàárà Anthropic Messages (Claude → OpenAI → Responses) tún ń gba ìtúnṣàgbéjáde.
 
-**Awọn aṣiṣe:**
+## Ìpamọ́ — Àkópọ̀ Memory + SQLite
+
+Ọ̀nà tí a sábà ń lò máa ń lo `Map` inú memory (LRU-gẹ́gẹ́-bí-àkókò-ẹ̀dá), tí tábìlì SQLite ń ṣe àtìlẹ́yìn fún un láti mú padà lẹ́yìn ìdálẹ́kun àti fún híhàn lórí dashboard.
+
+| Ìpele  | Ìmúlò                                            | Ète                                        |
+| ------ | ------------------------------------------------ | ------------------------------------------ |
+| Memory | `Map` nínú `open-sse/services/reasoningCache.ts` | Ìṣàwárí kíákíá, yọ èyí tó ti pẹ́ jù ní 200  |
+| DB     | Tábìlì `reasoning_cache` (`src/lib/db/`)         | Wà títí lẹ́yìn ìbẹ̀rẹ̀ tuntun, ó ń pèsè stats |
+
+A máa ń kọ sí méjèèjì. Ìkà máa ń kọ́kọ́ ṣàyẹ̀wò memory, lẹ́yìn náà ó máa ń lo DB bí kò bá rí i (àwọn àbájáde DB ni a máa ń gbé padà sínú memory). Ìkùnà DB kì í dá iṣẹ́ dúró — cache inú memory máa ń tẹ̀síwájú láti ṣiṣẹ́ fún ọ̀nà tí a sábà ń lò.
+
+**Àwọn iye àkọ́kọ́:**
 
 - TTL: `2h` (`TTL_MS = 2 * 60 * 60 * 1000`)
-- Awọn titẹ sii iranti ti o pọju: `200` (`MAX_MEMORY_ENTRIES`)
-- Iyọkuro: `createdAt` atijọ akọkọ
+- Àpapọ̀ àkọọlẹ̀ memory tó pọ̀ jù: `200` (`MAX_MEMORY_ENTRIES`)
+- Ìyọkúrò: `createdAt` tó ti pẹ́ jù ni àkọ́kọ́
 
-## Eto aaye data
+## Àwòrán Ìpìlẹ̀ Data
 
-Iṣilọ: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+Ìṣíkiri: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (
@@ -73,13 +74,13 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-Awọn atọka: `expires_at`, `provider`, `model`, `created_at`. `expires_at` ti wa ni ipamọ bi Unix epoch aaya; Layer SELECT n ṣe deede awọn iye ọrọ ti ogún nipasẹ `EXPIRES_AT_EPOCH_SQL`.
+Àwọn atọ́ka: `expires_at`, `provider`, `model`, `created_at`. A máa ń tọ́jú `expires_at` gẹ́gẹ́ bí ìṣẹ́jú-àáyá epoch Unix; ipele SELECT máa ń ṣe àwọn iye ọ̀rọ̀ àtijọ́ ní ìbámu pẹ̀lú ìlànà kan náà nípasẹ̀ `EXPIRES_AT_EPOCH_SQL`.
 
-## Olupese / Awoṣe erin
+## Ìṣàwárí Olùpèsè / Mọ́dẹ́lì
 
-Sisisẹsẹhin ti ṣiṣẹ nigbati `requiresReasoningReplay(provider, model)` ba da `true` pada. Iṣẹ naa ṣayẹwo awọn atokọ meji ni `open-sse/services/reasoningCache.ts`.
+A máa ń mú àtúnṣeré ṣiṣẹ́ nígbà tí `requiresReasoningReplay(provider, model)` bá dá `true` padà. Fọ́ńṣọ̀nù náà ń ṣàyẹ̀wò àkójọ méjì nínú `open-sse/services/reasoningCache.ts`.
 
-**Olupese IDs (baramu gangan, ọran-aibikita):**
+**Àwọn ID olùpèsè (ìbámu pípé, láìka lẹ́tà ńlá tàbí kékeré sí):**
 
 - `deepseek`
 - `opencode-go`
@@ -93,12 +94,12 @@ Sisisẹsẹhin ti ṣiṣẹ nigbati `requiresReasoningReplay(provider, model)`
 - `kimi-coding-apikey`
 - `xiaomi-mimo`
 
-**Awoṣe awọn ilana regex (aibikita ọran):**
+**Àwọn àpẹẹrẹ regex mọ́dẹ́lì (láìka lẹ́tà ńlá tàbí kékeré sí):**
 
 - `/deepseek-r1/i`
 - `/deepseek-reasoner/i`
 - `/deepseek-chat/i`
-- `/deepseek[-/]?v4[-.]flash/i` ati `/deepseek[-/]?v4[-.]pro/i` (Filaṣi V4 / Pro, suffix `-free` iyan)
+- `/deepseek[-/]?v4[-.]flash/i` àti `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, àfikún `-free` tí kò pọndandan)
 - `/(deepseek|zen\/deepseek)-v4/i`
 - `/kimi[-/]k\d/i`
 - `/qwq/i`
@@ -106,21 +107,21 @@ Sisisẹsẹhin ti ṣiṣẹ nigbati `requiresReasoningReplay(provider, model)`
 - `/glm.*think/i`
 - `/^mimo[-.]?v\d/i`
 
-Ṣafikun provider/model tuntun ti o muna tumọ si isunmọ si ọkan ninu awọn atokọ wọnyi ati kikọ idanwo ẹyọkan ti n sọ abẹrẹ atunwi. Apejuwe PR yẹ ki o tọka si gangan okun 400 oke ti o ni iwuri iyipada naa.
+Fífi olùpèsè/mọ́dẹ́lì tó muna tuntun kún un túmọ̀ sí fífi í sí ọ̀kan lára àwọn àkójọ wọ̀nyí àti kíkọ ìdánwò ẹyọ kan tó jẹ́rìí fífi àtúnṣeré sínú rẹ̀. Àpèjúwe PR gbọ́dọ̀ tọ́ka sí gbolóhùn upstream 400 gan-an tó fa ìyípadà náà.
 
 ## REST API
 
-Kaṣe naa ṣafihan awọn aaye ipari meji labẹ `src/app/api/cache/reasoning/route.ts`. Mejeeji nilo ijẹrisi iṣakoso (`isAuthenticated` lati `@/shared/utils/apiAuth`).
+Kaṣe náà ṣí àwọn endpoint méjì sílẹ̀ lábẹ́ `src/app/api/cache/reasoning/route.ts`. Àwọn méjèèjì nílò ìfàṣẹsí ìṣàkóso (`isAuthenticated` láti `@/shared/utils/apiAuth`).
 
-| Ọna    | Opin ipari                                                | Apejuwe                                                           |
-| ------ | --------------------------------------------------------- | ----------------------------------------------------------------- |
-| GET    | `/api/cache/reasoning`                                    | Awọn iṣiro + paginated awọn titẹ sii                              |
-| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | Atokọ ti a sisẹ (`limit` dimọ si `[1, 200]`)                      |
-| DELETE | `/api/cache/reasoning`                                    | Ko ohun gbogbo kuro (iranti + DB) ki o tun awọn iṣiro hit/miss to |
-| DELETE | `/api/cache/reasoning?provider=deepseek`                  | Ko awọn titẹ sii nikan kuro fun olupese kan                       |
-| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | Pa titẹ ẹyọkan rẹ rẹ                                              |
+| Ọ̀nà    | Endpoint                                                  | Àpèjúwe                                                      |
+| ------ | --------------------------------------------------------- | ------------------------------------------------------------ |
+| GET    | `/api/cache/reasoning`                                    | Ìṣirò + àwọn àkọọlẹ̀ tí a pín sí ojúewé                       |
+| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | Àkójọ tí a ti ṣàlẹ̀mọ́ (`limit` ni a fi mọ́ àárín `[1, 200]`)   |
+| DELETE | `/api/cache/reasoning`                                    | Pa gbogbo rẹ̀ rẹ́ (memory + DB), kí o sì tún iye hit/miss ṣètò |
+| DELETE | `/api/cache/reasoning?provider=deepseek`                  | Pa àwọn àkọọlẹ̀ olùpèsè kan ṣoṣo rẹ́                           |
+| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | Pa àkọọlẹ̀ kan ṣoṣo rẹ́                                        |
 
-**apẹrẹ idahun GET :**
+**Ìrísí ìdáhùn GET:**
 
 ```json
 {
@@ -152,35 +153,35 @@ Kaṣe naa ṣafihan awọn aaye ipari meji labẹ `src/app/api/cache/reasoning/
 }
 ```
 
-## Awọn akọsilẹ isẹ
+## Àwọn Àkíyèsí Ìṣiṣẹ́
 
-- **Nu kuro:** `cleanupReasoningCache()` wẹ awọn titẹ sii iranti ti pari ati ṣiṣe `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')`. Awọn oṣiṣẹ ayẹwo ilera n pe eyi lorekore.
-- **Imularada jamba:** Lẹhin atunbẹrẹ, iranti ti ṣofo ṣugbọn DB tun ni awọn titẹ sii ti ko pari. Wiwa akọkọ fun `tool_call_id` ti a fun ni lilu DB ; awọn wiwa atẹle jẹ awọn deba iranti.
-- **Ko si ero, ko si kaṣe:** `cacheReasoningFromAssistantMessage` da `0` pada nigbati ifiranṣẹ oluranlọwọ ko ni aaye `reasoning_content` / `reasoning`, nitorinaa awọn idahun ti kii ṣe ironu ko san nkankan.
-- **Kọ ti wa ni gated tun:** awọn aaye ipe mejeeji ni `chatCore.ts` (ti kii ṣe ṣiṣanwọle ati ṣiṣanwọle) pe `cacheReasoningFromAssistantMessage()` nikan nigbati `requiresReasoningReplay(provider, model)` jẹ `true` — kanna ṣe asọtẹlẹ awọn sọwedowo ẹgbẹ kika. Awọn fifi sori ẹrọ ti ko fi ọwọ kan olupese atunwi kan dẹkun sisanwo fun kikọ, imudojuiwọn atọka, ati try/catch lori gbogbo idahun ti o ni ero.
-- **Awọn olupese ti ko ni ihamọ:** Nigbati `requiresReasoningReplay` jẹ `false` ati ọna kika ibi-afẹde jẹ OpenAI, onitumọ** awọn ila** eyikeyi aaye `reasoning_content` lati awọn ifiranṣẹ ti njade — OpenAI Iwiregbe Ipari ko gba.
+- **Ìfọ̀mọ́:** `cleanupReasoningCache()` ń yọ àwọn àkọọlẹ̀ memory tí àkókò wọn ti parí, ó sì ń ṣiṣẹ́ `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')`. Àwọn worker àyẹ̀wò ìlera máa ń pe èyí lẹ́ẹ̀kọ̀ọ̀kan.
+- **Ìmúpadàbọ̀sípò lẹ́yìn ìjákulẹ̀:** Lẹ́yìn àtún bẹ̀rẹ̀, memory máa ṣófo ṣùgbọ́n DB ṣì máa ní àwọn àkọọlẹ̀ tí àkókò wọn kò tíì parí. Ìṣàwárí àkọ́kọ́ fún `tool_call_id` kan jẹ́ hit DB; àwọn ìṣàwárí tó tẹ̀ lé e jẹ́ hit memory.
+- **Kò sí ìrònú, kò sí kaṣe:** `cacheReasoningFromAssistantMessage` máa dá `0` padà nígbà tí ìfiránṣẹ́ olùrànlọ́wọ́ kò bá ní pápá `reasoning_content` / `reasoning`, nítorí náà àwọn ìdáhùn tí kì í ṣe ti ìrònú kò ná ohunkóhun.
+- **A tún ń ṣàkóso ìkọ̀wé:** àwọn ibi ìpè méjèèjì nínú `chatCore.ts` (èyí tí kì í ṣe streaming àti èyí tí ó jẹ́ streaming) máa ń pe `cacheReasoningFromAssistantMessage()` nìkan nígbà tí `requiresReasoningReplay(provider, model)` bá jẹ́ `true` — predicate kan náà tí apá kíkà ń ṣàyẹ̀wò. Àwọn ìfisílẹ̀ tí kò bá lo olùpèsè àtúnṣeré láéláé kò ní san owó iṣẹ́ ìkọ̀wé, ìmúdójúìwọ̀n index, àti try/catch lórí gbogbo ìdáhùn tó ní ìrònú mọ́.
+- **Àwọn olùpèsè tí kò muna:** Nígbà tí `requiresReasoningReplay` bá jẹ́ `false` tí fọ́ọ̀mù àfojúsùn sì jẹ́ OpenAI, atúmọ̀ náà máa ń **yọ** pápá `reasoning_content` èyíkéyìí kúrò nínú àwọn ìfiránṣẹ́ tí ń jáde — OpenAI Chat Completions kò gbà á.
 
-## Muse Opaque-Reasoning Olohun
+## Ìní opaque reasoning ti Muse
 
-Muse (`muse-code`) da ero-opaque ti o so mọ olupe pada (`encrypted_content`). Sisisẹsẹhin rẹ labẹ akọọlẹ oriṣiriṣi tabi iwe-ẹri ti o leti kuna ni oke, nitorinaa awọn ibeere OAuth abinibi lo nini ipele-igba dipo yiyi ibeere-kọọkan (`src/sse/services/museSessionOwnership.ts`, ti fi agbara mu ni `src/sse/handlers/chat.ts`). Awọn asopọ bọtini API ti a ti yan ni gbangba ati awọn atunto bọtini API-nikan ṣe idaduro ipa ọna wọn ti o wa laisi ipo nini.
+Muse (`muse-code`) ń dá opaque reasoning tí a so mọ́ ẹni tó pè é padà (`encrypted_content`). Ṣíṣe replay rẹ̀ ní abẹ́ àkọọ́lẹ̀ mìíràn tàbí pẹ̀lú ìwé-ẹ̀rí ìwọlé tí a tún pèsè ń kùnà ní upstream, nítorí náà native OAuth request ń lo ìní ní ìpele session dípò ìyípadà fún request kọ̀ọ̀kan (`src/sse/services/museSessionOwnership.ts`, tí a ń fi òfin mú ní `src/sse/handlers/chat.ts`). API-key connection tí a yàn ní kedere àti configuration API key nìkan ń pa routing tó wà tẹ́lẹ̀ mọ́ láì lo ownership mode yìí.
 
-- Pese igba iduroṣinṣin ID ni gbogbo igba: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id`, tabi `x-codex-session-id`; ni idakeji lo `prompt_cache_key`, `session_id`, `conversation_id`, tabi `metadata.session_id` ninu ara (ni ilana iṣaaju yẹn). Sonu tabi òfo IDs pada 400 nigbati meji tabi diẹ ẹ sii awọn iroyin OAuth abinibi ṣiṣẹ; pẹlu akọọlẹ OAuth kan ko si nkankan lati yi si, nitorina iru ibeere bẹẹ ntọju ipa-ọna ti a ko pin. Iwọn naa pẹlu OmniRoute API-bọtini ID ti olupe naa.
-- Awọn akoko ominira tuntun yika-robin kọja awọn akọọlẹ OAuth abinibi ti nṣiṣe lọwọ ti a gba laaye nipasẹ eto imulo asopọ bọtini API, ti paṣẹ nipasẹ asopọ ID. Yika-robin fo awọn akọọlẹ ni asopọ itutu agbaiye, pẹlu ipo ebute (`banned`, `expired`, `credits_exhausted`), tabi awoṣe-titiipa fun awoṣe ti o beere; Awọn ikuna ti oke Muse ṣe igbasilẹ itutu agbaiye ati ipo fifọ bi awọn olupese miiran. Asopọmọra ti o fi agbara mu ni gbangba n kọja yika-robin fun igba titun ṣugbọn ko le fagilee oniwun to wa tẹlẹ.
-- Titi ti oniwun yoo fi ṣe idahun esi aṣeyọri, igba kan ti oniwun rẹ ti di aini si ni a tun ni ẹtọ sori akọọlẹ ilera kan. Lẹhin idahun aṣeyọri akọkọ, igba naa duro ni ṣoki si oniwun yẹn titi ti o fi jẹ laišišẹ fun 30 ọjọ (`MUSE_SESSION_IDLE_TTL_MS`).
-- Gbogbo itesiwaju ati abajade esi-irinṣẹ duro si oniwun igba: asopọ, idanimọ akọọlẹ, ati iran-ijẹri, ṣayẹwo lẹẹkansi ṣaaju awọn igbiyanju oke, pẹlu awọn atunwo atunwo ijẹrisi. Awọn idahun pe awọn itọkasi IDs/item ati Iwiregbe Ipari irinṣẹ-ipe IDs gbọdọ ti gba silẹ fun igba yẹn ati iran.
-- awọn igbasilẹ SQLite `key_value` ni aaye orukọ `muse_session_ownership` (`src/lib/db/museSessionOwnership.ts`) duro nini nini ati kọsọ iyipo kọja awọn atunbẹrẹ. Ipeere kọọkan ati esi iṣẹ ntu ontẹ iṣẹ igba ti igba; igba laišišẹ to gun ju `MUSE_SESSION_IDLE_TTL_MS` jẹ piruni (pin oniwun, asia ti o ṣiṣẹ ati awọn hashes opaque/reference ti o gbasilẹ), ni pupọ julọ lẹẹkan ni gbogbo iṣẹju mẹwa 10 ati ni awọn ipele ti o ni opin, nitorinaa atunwi itan rẹ nigbamii kuna ni pipade bi oniwun aimọ. Awọn igbasilẹ ni asopọ ni IDs ati hashes ti idanimọ akọọlẹ, awọn iwe-ẹri, akoonu akomo, ati awọn itọkasi itesiwaju, kii ṣe awọn aṣiri tabi itan-akọọlẹ ibaraẹnisọrọ. Awọn alabara gbọdọ ni idaduro ati firanṣẹ itan-akọọlẹ kikun wọn ati ironu opaque.
-- Aimọ tabi ironu opaque ajeji, oniwun ti o nsọnu, akọọlẹ oniwun ti ko si, tabi iyipada iran kan pẹlu itan-akọọlẹ ti o gbasilẹ kuna ni pipade pẹlu 4xx/503 — ti o fojuhan ko dakẹ rara-iroyin-iroyin ikuna ati pe ko sọ asọye rara.
-- Bọtini akọọlẹ kanna ti o leti jẹ gbigba nikan nigbati igba igbasilẹ ko si itan-akọọlẹ atunṣe; awọn akoko ti o gbasilẹ ma kuna ni pipade titi ti o fi bẹrẹ titun.
-- Idahun oke ti o ṣofo (`upstream_empty_response` / `empty_response`, ko si ohun ti o jade si olupe) ni a tun gbiyanju ni pupọ julọ lẹmeji lori oniwun kanna, lẹhin 0.5 s lẹhinna 1.5 s (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). Ti gbogbo awọn igbiyanju ba ṣofo, atilẹba 502 yoo pada laisi itutu agbaiye tabi isamisi fifọ, nitorinaa idahun ti o fẹsẹmulẹ kii ṣe titiipa oniwun naa.
-- Gbogbo awọn ibeere `muse-code` fori kaṣe-itumọ kika ati kikọ, pẹlu awọn kikọ ṣiṣanwọle, nitorinaa iṣelọpọ akomo ko le gba oniwun igba miiran.
+- Pèsè session ID tó dúró ṣinṣin lórí turn kọ̀ọ̀kan: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id`, tàbí `x-codex-session-id`; tàbí lo `prompt_cache_key`, `session_id`, `conversation_id`, tàbí `metadata.session_id` nínú body (ní ọ̀nà ìṣáájú yẹn). ID tí kò sí tàbí tí ó ṣófo ń dá 400 padà nígbà tí native OAuth account méjì tàbí ju bẹ́ẹ̀ lọ bá ń ṣiṣẹ́; pẹ̀lú OAuth account kan, kò sí òmíràn láti yí sí, nítorí náà request yẹn ń pa routing tí kò ní pin mọ́. Scope náà ní OmniRoute API-key ID ẹni tó pè é nínú.
+- Session tuntun tí kò gbára lé ara wọn ń ṣe round-robin láàárín native OAuth account tí ń ṣiṣẹ́ tí API-key connection policy yọ̀ǹda, ní ìtòlẹ́sẹẹsẹ connection ID. Round-robin ń fo àkọọ́lẹ̀ tó wà ní connection cooldown, tó ní terminal status (`banned`, `expired`, `credits_exhausted`), tàbí tí ó ní model-lock fún model tí a béèrè. Ìkùnà upstream Muse ń ṣe àkọsílẹ̀ cooldown àti breaker state bí àwọn provider yòókù. Connection tí a fi tipátipá yàn ní kedere ń fo round-robin fún session tuntun, ṣùgbọ́n kò lè rọ́pò ẹni tó ní i lẹ́yìn tó ti fúnni ní ìdáhùn tó ṣàṣeyọrí.
+- Títí ẹni tó ní i yóò fi pèsè ìdáhùn tó ṣàṣeyọrí, session tí ẹni tó ní i kò sí mọ́ ni a ń tún fi lé àkọọ́lẹ̀ tó dára lọ́wọ́. Lẹ́yìn ìdáhùn àkọ́kọ́ tó ṣàṣeyọrí, session ń bá ẹni tó ní i dúró títí yóò fi wà láì ṣiṣẹ́ fún ọjọ́ 30 (`MUSE_SESSION_IDLE_TTL_MS`).
+- Continuation àti tool-result turn kọ̀ọ̀kan ń bá ẹni tó ní session dúró: connection, account identity àti generation inference credential, tí a ń tún ṣàyẹ̀wò ṣáájú upstream attempt, pẹ̀lú credential-refresh retry. A gbọ́dọ̀ ti ṣe àkọsílẹ̀ Responses call ID/item reference àti Chat Completions tool-call ID fún session àti generation yẹn.
+- SQLite `key_value` record nínú namespace `muse_session_ownership` (`src/lib/db/museSessionOwnership.ts`) ń pa ownership àti rotation cursor mọ́ kọjá restart. Claim kọ̀ọ̀kan àti ìdáhùn tí a pèsè ń sọ àmì ìṣiṣẹ́ session di tuntun; session tí kò ṣiṣẹ́ fún àkókò tó ju `MUSE_SESSION_IDLE_TTL_MS` lọ ni a ń fọ mọ́ (owner pin, served flag àti opaque/reference hash tí a ṣe àkọsílẹ̀), kì í ju ẹ̀ẹ̀kan lọ nínú ìṣẹ́jú 10, nínú batch tí ó ní ààlà, kí replay ìtàn rẹ̀ lẹ́yìn náà lè jẹ́ kíkọ̀ fún ààbò bí ẹni tó ní i kò ṣe jẹ́ mímọ̀. Record ní connection ID àti hash account identity, credential, opaque content àti continuation reference, kì í ṣe àṣírí tàbí ìtàn ìjíròrò. Client gbọ́dọ̀ pa gbogbo ìtàn àti opaque reasoning wọn mọ́, kí wọ́n sì rán wọn.
+- Opaque reasoning tí a kò mọ̀ tàbí ti ẹlòmíràn, ẹni tó ní i tí ó sọnù, àkọọ́lẹ̀ ẹni tó ní i tí kò sí, tàbí ìyípadà generation nígbà tí ìtàn ti wà ní àkọsílẹ̀ ń jẹ́ kíkọ̀ fún ààbò pẹ̀lú 4xx/503 tó hàn kedere; kò sí failover ìkọ̀kọ̀ sí àkọọ́lẹ̀ mìíràn, a kò sì ju reasoning nù.
+- Key tí a tún pèsè fún àkọọ́lẹ̀ kan náà ni a ń gba kìkì bí session kò bá ti ṣe àkọsílẹ̀ ìtàn tí a lè replay; session tí ó ní àkọsílẹ̀ ń tẹ̀síwájú nínú kíkọ̀ fún ààbò títí a ó fi bẹ̀rẹ̀ tuntun.
+- Ìdáhùn upstream ṣófo (`upstream_empty_response` / `empty_response`, kò sí ohun tí a fi rán ẹni tó pè é) ni a ń tún gbìyànjú láì ju ẹ̀ẹ̀mejì lọ lórí ẹni tó ní i kan náà, lẹ́yìn 0.5 s, lẹ́yìn náà 1.5 s (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). Bí gbogbo attempt bá ṣófo, a ń dá 502 àkọ́kọ́ padà láì fi àmì cooldown tàbí breaker sí i, kí ìdáhùn tí kò dúró ṣinṣin má bàa ti ẹni tó ní i síta.
+- Gbogbo request `muse-code` ń fo semantic-cache read àti write, pẹ̀lú streaming write, kí opaque output tí ó wà ní cache má bàa gba ẹni tó ní session mìíràn.
 
-Awọn oluso ipadasẹhin: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts`, ati `tests/unit/chatcore-semantic-cache.test.ts`.
+Àwọn ìdáàbòbo regression: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts`, àti `tests/unit/chatcore-semantic-cache.test.ts`.
 
-## Wo Tun
+## Tún Wo Èyí Pẹ̀lú
 
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — Circuit breakers, cooldowns, awoṣe lockouts
-- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — ṣe iwadii aisan oke 400s
-- Orisun: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
-- Iṣilọ: `src/lib/db/migrations/033_create_reasoning_cache.sql`
-- API ọna: `src/app/api/cache/reasoning/route.ts`
-- Atilẹba atejade: # #1628
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — àwọn olùdáwọ́dúró àyíká, àwọn àkókò ìtútù, àti dídènà àwọn àwòṣe
+- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — ṣíṣe àyẹ̀wò àwọn àṣìṣe 400 láti upstream
+- Kóòdù ìpilẹ̀ṣẹ̀: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
+- Ìṣíkiri: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+- Ojú-ọ̀nà API: `src/app/api/cache/reasoning/route.ts`
+- Ọ̀ràn ìpilẹ̀ṣẹ̀: #1628

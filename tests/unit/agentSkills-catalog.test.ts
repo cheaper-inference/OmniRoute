@@ -49,6 +49,13 @@ test("getCatalog() contains exactly 1 config skill", () => {
   assert.equal(configSkills.length, 1);
 });
 
+test("provider skill describes the live provider catalog size", async () => {
+  const { AI_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
+  const count = new Set(Object.values(AI_PROVIDERS).map((provider) => provider.id)).size;
+  assert.ok(count > 0);
+  assert.match(getSkillById("omni-providers").description, new RegExp(`\\b${count}-provider\\b`));
+});
+
 // ─── ID format ────────────────────────────────────────────────────────────────
 
 test("all skill IDs match regex ^[a-z][a-z0-9-]*$", () => {

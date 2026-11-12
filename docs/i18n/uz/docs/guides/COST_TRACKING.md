@@ -42,57 +42,79 @@ Raqam taxminiy boʻlgani sababli:
 
 ### Narxlar manbai
 
-Xarajatlar [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) dagi birlashtirilgan narxlar jadvalidan kelib chiqadi, bu ustuvorlik tartibida (** birinchi navbatda eng yuqori** ):
+Xarajatlar [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) birlashtirilgan narxlar jadvalidan kelib chiqadi, bu ustuvorlik tartibida (**birinchi navbatda eng yuqori** ):
 
 1. **Foydalanuvchi bekor qiladi** — narxlari asboblar panelida yoki `PATCH /api/pricing` ( `pricing` nom maydoni) orqali o'rnatiladi.
 2. **models.dev sinxronlash** — narxi `https://models.dev/api.json` ( `models_dev_pricing` nom maydoni) dan olingan.
-3. **LiteLLM sinxronlash** — narxlari LiteLLM ning umumiy `model_prices_and_context_window.json` ( `pricing_synced` nom maydoni) dan olingan.
-4. **Qattiq kodlangan standart sozlamalar** — stavkalari [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) da yuboriladi.
+3. **LiteLLM sinxronlash** — narxlari LiteLLM ning ommaviy `model_prices_and_context_window.json` ( `pricing_synced` nom maydoni) dan olingan.
+4. **Qattiq kodlangan standart sozlamalar** [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) da yuborilgan — stavkalari.
 
-Xuddi shu provider/model uchun yuqoriroq qatlamlardagi qiymatlar pastki qatlamlardagi mos keladigan maydonlarning ustiga yoziladi; Yuqori qatlamda mavjud bo'lmagan maydonlar pastki qatlamdan ham paydo bo'lishi mumkin. Har ikkala mustaqil sinxronlash ishlari bir vaqtning o'zida bajarilganda ham tartib o'rnatiladi. `GET /api/pricing?includeSources=1` `pricing` va `sourceMap` ni qaytaradi, ularning har bir modeldagi teglari (`user`, `modelsDev`, `litellm`, `default`) ushbu modelni o‘z ichiga olgan eng yuqori ustuvor qatlamni aniqlaydi.
+Xuddi shu provider/model uchun yuqoriroq qatlamlardagi qiymatlar pastki qatlamlardagi mos keladigan maydonlarning ustiga yoziladi; Yuqori qatlamda mavjud bo'lmagan maydonlar pastki qatlamdan ham paydo bo'lishi mumkin. Har ikkala mustaqil sinxronlash ishlari bir vaqtning o'zida bajarilganda ham tartib o'rnatiladi. `GET /api/pricing?includeSources=1` `pricing` va `sourceMap` ni qaytaradi, ularning har bir modeldagi teglari (`user`, `modelsDev`, `litellm`, `default`) ushbu modelni o'z ichiga olgan eng yuqori ustuvor qatlamni aniqlaydi.
 
-**LiteLLM sinxronlash** qo'shilgan, sukut bo'yicha o'chirilgan. Uning muhit o'zgaruvchilari (qarang: [`.env.example`](../../.env.example) ) :
+**LiteLLM sinxronlash** qo'shilgan, sukut bo'yicha o'chirilgan. Uning muhit o'zgaruvchilari (qarang [`.env.example`](../../.env.example) ) quyidagilardir:
 
 | Env var                 | Standart  | Maqsad                                                                                   |
 | ----------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Fon LiteLLM narxlari sinxronlashni yoqing.                                               |
+| `PRICING_SYNC_ENABLED`  | `false`   | Fonda LiteLLM narxlari sinxronlashni yoqish.                                             |
 | `PRICING_SYNC_INTERVAL` | `86400`   | Sinxronlash oralig'i soniyalarda (kunlik).                                               |
 | `PRICING_SYNC_SOURCES`  | `litellm` | Faqat shu sinxronlash uchun manba tanlash; hozirda faqat `litellm` qo'llab-quvvatlanadi. |
 
 **models.dev sinxronlash** LiteLLM sinxronlashdan alohida va sukut bo'yicha ham o'chirilgan. Uni Sozlamalar (models.dev sync) orqali yoqing yoki quyidagi o‘zgaruvchilardan foydalaning:
 
-| Env var                    | Standart          | Maqsad                                                                                                                                                     |
-| -------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(o'rnatilmagan)_ | Sozlamalarni oʻchirish tugmasidan keyin bekor qilinadi; `1/true/on/yes` kuchlarini yoqadi va `0/false/off/no` o‘chiradi (hatto Sozlamalar buni yoqsa ham). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standart models.dev sinxronlash oralig'i soniyalarda (kunlik).                                                                                             |
+| Env var                    | Standart          | Maqsad                                                                                                                                                 |
+| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(o'rnatilmagan)_ | Sozlamalarni oʻchirish tugmasidan keyin bekor qilinadi; `1/true/on/yes` kuchga kiradi va `0/false/off/no` o‘chiradi (hatto Sozlamalar buni yoqsa ham). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standart models.dev sinxronlash oralig'i soniyalarda (kunlik).                                                                                         |
 
-`PRICING_SYNC_SOURCES` qiladi** emas** models.devni yoqish; u faqat LiteLLM sinxronlashni boshqaradi. Foydalanuvchining bekor qilinishini o'chirish sinxronlangan nom maydonini ham tozalamaydi; keyingi mavjud narxlash qatlami kuchga kiradi. Narxsiz model uchun qo'lda bekor qilishni qo'shishdan oldin sinxronlash sozlamalarini va `sourceMap` tekshiring.
+`PRICING_SYNC_SOURCES` qiladi **emas** models.devni yoqish; u faqat LiteLLM sinxronlashni boshqaradi. Foydalanuvchining bekor qilinishini o'chirish sinxronlangan nom maydonini ham tozalamaydi; keyingi mavjud narxlash qatlami kuchga kiradi. Narxsiz model uchun qo'lda bekor qilishni qo'shishdan oldin sinxronlash sozlamalarini va `sourceMap` tekshiring.
 
 ### Narx formulasi
 
-Xarajat so'rov bo'yicha tokenlar soni va [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) dagi million token stavkalari bo'yicha hisoblanadi:
+Narx [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) da tokenlar soni va million token stavkalari bo'yicha so'rov bo'yicha hisoblanadi:
 
 - **Kirish belgilari** (minus kesh o'qishlari va kesh yaratish tokenlari) × `input` tezligi.
-- **Kesh-o'qish tokenlari** × `cached` tezligi (kirish tezligiga qaytadi).
-- **Kesh yaratish tokenlari** × `cache_creation` tezligi (kirish tezligiga qaytadi).
+- **Keshni o'qish tokenlari** × `cached` tezligi (kiritish tezligiga qaytadi).
+- **Kesh yaratish tokenlari** × `cache_creation` tezligi (kiritish tezligiga qaytadi).
 - **Chiqish belgilari** × `output` darajasi.
 - **Fikrlash belgilari** × `reasoning` tezligi (chiqish tezligiga qaytadi).
 
-Barcha kurslar 1 000 000 token uchun USD sifatida talqin qilinadi. Codex "tezkor"/"prioritet" yoki "moslashuvchan" xizmat darajasi xarajat multiplikatorini (`getCodexFastCostMultiplier`) qo'llaydi —, masalan, flex 50% token chegirmasi bilan to'lanadi.** moslashuvchan tejash** asboblar panelida.
+Barcha stavkalar 1 000 000 token uchun USD sifatida talqin qilinadi. Codex "tezkor"/"prioritet" yoki "moslashuvchan" xizmat darajasi xarajat multiplikatorini (`getCodexFastCostMultiplier`) qo'llaydi, masalan, — 50% token chegirmasi bilan to'lanadi.**moslashuvchan tejash** asboblar panelida.
 
 Model nomlari avval normallashtiriladi ( `openai/` yoki `accounts/fireworks/models/` kabi provayder yo‘li prefikslari olib tashlanadi), shuning uchun tarixiy qatorlar narxga mos keladi.
 
 ### Qanday sarflanganligi qayd etiladi
 
-- Har bir so'rovning narxi javobdan so'ng hisoblab chiqiladi va "yong'in va unut" qayd etiladi, shuning uchun u hech qachon mijozga kechikishni qo'shmaydi. Birgalikda kvota iste'moli [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) orqali keyingi voqea-loop belgisiga rejalashtirilgan.
-- API kaliti sarfi buferlanadi va [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tomonidan to'plamlarda tozalanadi (standart 60-yillarni tozalash oralig'i, 1000 kirish buferi). Quyidagi orqali sozlash mumkin:
+- Har bir so'rovning narxi so'rov tugagandan so'ng hisoblanadi. Birgalikda kvota iste'moli [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) orqali keyingi voqea-loop belgisida rejalashtirilgan.
+- API kaliti sarfi [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tomonidan buferlanadi va to'plamlarda tozalanadi (standart 60-yillarni tozalash oralig'i, 1000 kirish buferi). Quyidagi orqali sozlash mumkin:
 
   | Env var                             | Standart | Maqsad                                           |
   | ----------------------------------- | -------- | ------------------------------------------------ |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Yuvish oralig'i millisekundlarda.                |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Tozalashdan oldin maksimal buferlangan yozuvlar. |
 
-Boshqaruv panelidagi xarajatlar ko'rsatkichlari** emas** Har bir satrda saqlangan dollar miqdoridan o'qing — ular tokenlar soni va joriy narxlar jadvalidan har safar tahlil so'nggi nuqtasi ishga tushganda qayta hisoblab chiqiladi. Bu noto'g'ri narxni to'g'irlash (va qayta sinxronlash) tarixiy xarajatlar smetasini orqaga qarab yangilashni anglatadi.
+Xarajatlar provayder tomonidan bildirilgan aniq to‘lovni (`provider_cost_usd`), so‘ngra katalog bahosidagi so‘rov snapshotini (`calculated_cost_usd`), so‘ngra joriy katalogdagi tokenlarni qayta baholashni afzal ko‘radi. Saqlangan xarajatlar tokenlar hisobi orqali qayta undirilmaydi. Katalog narxi o'zgarganda faqat eski token qatorlari o'zgaradi.
+
+### OCR va o'rnatish
+
+- Muvaffaqiyatli `/v1/ocr` so'rovlari so'ralgan sahifa diapazoni yoki qaytarilgan sahifa ob'ektlari sonini emas, balki yuqori oqim `usage_info.pages_processed` foydalanadi. Taxminiy sahifalar × `ocr_cost_per_page` (mutlaq USD/page,**emas** USD/million).
+- Hujjat yoki cheklov qutisi izohli so'rovlar alohida `ocr_cost_per_annotated_page` tarifini talab qiladi. Busiz, xarajat noma'lum bo'lib qoladi; oddiy OCR tarifi jimgina almashtirilmaydi.
+- LiteLLM sinxronlash o'zining yuqori oqimidagi `annotation_cost_per_page` maydonini `ocr_cost_per_annotated_page` ga moslashtiradi, mutlaq USD/page qiymatini va faqat izohli yozuvlarni, shu jumladan aniq nolni saqlaydi. Ta'minlangan kanonik maydon ustunlik qiladi; noto'g'ri taxallus qiymatlari e'tiborga olinmaydi. Foydalanuvchi narxlarini bekor qilish odatdagi ustuvorligini saqlab qoladi. [LiteLLM ning OCR narxlash kalitlariga](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) qarang.
+- OCR foydalanish sahifalar sonini, birlik narxini, hisoblangan USD narxini, API kalitini va tanlangan ulanishni saqlaydi. Sahifalar hech qachon token sifatida taqdim etilmaydi. Qo'ng'iroqlar jurnallarida URLs hujjati, PDF baytlari yoki ajratilgan matn emas, balki hisob-kitob metama'lumotlari mavjud.
+- Muvaffaqiyatli `/v1/embeddings` so'rovlari har bir jismoniy partiya uchun bitta foydalanish qatorini, shu jumladan bir xil millisekundda yakunlangan alohida partiyalarni qayd qiladi. Provayder tomonidan bildirilgan to'lovlar token hisob-kitoblaridan ustun turadi; kombinatsiyalangan o'ramlar to'lovni qo'shmaydi.
+- Foydalanish tarixi, Xarajatlar tahlili, provider/account oynalari, API-kaliti sarflama limitlari, so‘rovlar-xarajat kitobi va kundalik foydalanish to‘plamlari ushbu to‘lovlarni o‘z ichiga oladi. Jurnalsiz kalitlar manba matnini saqlamasdan raqamli hisobni saqlaydi.
+- Foydalanish yoki tariflar etishmayotgan **noma'lum** , bepul emas: javob-xarajat sarlavhasi o'tkazib yuborilgan va mavjud narxsiz foydalanish siyosati cheklangan API kalitlari uchun amal qiladi. Aniq sozlangan nol stavkalari nol xarajatli foydalanishda amal qiladi.
+
+Bu faqat oldinga mo'ljallangan buxgalteriya hisobi. Foydalanish tarixini hech qachon yozmagan eski OCR/embedding qo'ng'iroqlarini bu migratsiyadan qayta tiklab bo'lmaydi. Katalog baholari hisob-faktura emas, USD hisob-kitoblari bo‘lib, valyuta konvertatsiyasi, soliq yoki chegirmalarni o‘z ichiga olmaydi.
+
+### Nutq va tasvirlar
+
+- Muvaffaqiyatli `/v1/audio/transcriptions`, `/v1/audio/speech` va tasvir yaratishga urinishlar soni hisobini almashadi. To'g'ridan-to'g'ri va kombinatsiyalangan qo'ng'iroqlar qo'ng'iroq qiluvchining API kalitini va tanlangan ulanishni olib yuradi; kombinatsiyalangan o'ram hech qachon ikkinchi debetni qo'shmaydi.
+- Provayder tomonidan bildirilgan USD aniq nol to‘lovni o‘z ichiga olgan katalog bahosi ustidan g‘alaba qozonadi. OpenRouter ning JSON `usage.cost` `cost_usd` ga normallashtiriladi. Aks holda, oʻlchangan tokenlar token narxlaridan, transkripsiya soniyalarida soniya narxlaridan, nutq matnida Unicode belgilar sonidan foydalaniladi va tekis narxdagi tasvirlar soʻralgan `n` emas, balki aslida qaytarilgan raqamdan foydalanadi.
+- Ikkilik OpenRouter TTS JSON foydalanish tanasiga ega emas. Ovoz tugallangandan yoki qo'ng'iroq qiluvchi bekor qilingandan so'ng, OmniRoute o'z avlodi ID so'raydi **bir xil** konfiguratsiya qilingan OpenRouter kelib chiqishi. EU so'rovi hech qachon global kelib chiqishiga qaytmaydi. Bu cheklangan, faqat o'qish uchun qidiruv; sintez buxgalteriya hisobi uchun qayta urinilmaydi. Toʻlov yozuvlari audio tugagandan soʻng paydo boʻlishi mumkin: qayta qidirish urinishlari fonda taxminan 52 soniyagacha ishlaydi, shu jumladan tarmoq muddatlari.
+- Ushbu qidiruv paytida audio javobda `X-OmniRoute-Cost-Status: pending` mavjud va javob narxi sarlavhasi yo'q. Uning yakuniy to'lovi foydalanish tarixida, tahliliy ma'lumotlarda va yarashuvdan so'ng kalit kitobida ko'rinadi. Agar metadata mavjud bo'lmasa, sozlangan tarif surati ishlatiladi; aks holda xarajat noma'lum bo'lib qoladi.
+- Soniyalar, belgilar va tasvirlar hisob-kitoblari alohida maydonlarga ega, hech qachon soxta tokenlar hisoblanmaydi. Buxgalteriya hisobi nutq matni, transkript yoki tasvir baytlarini emas, faqat raqamli foydalanishni saqlaydi. Mavjud narxsiz tasvir imtiyozlari o'zgarmadi: haqiqatan ham etishmayotgan tasvir tarifi cheklangan kalitni yangidan bloklamaydi va javob qo'ng'iroqni bepul deb e'lon qilish o'rniga narx sarlavhasini o'tkazib yuboradi. Narxlar do'konidagi nosozlik hali ham muvaffaqiyatsiz yopilgan ijro uchun foydalanish dalillarini saqlab qoladi.
+
+Hech qanday tarixiy speech/image to'lovi ixtiro qilinmaydi yoki to'ldirilmaydi. Provayder hisob-kitobi hisob-fakturalar va toʻlovi haqida xabar berilmagan qoʻngʻiroqlar uchun maʼlumotnoma boʻlib qoladi.
 
 ---
 
@@ -143,50 +165,54 @@ Xarajatlar bo‘limida quyidagi sahifalar ham mavjud (barchasi `/dashboard/costs
 
 ---
 
-## API oxirgi nuqtalari
+## API yakuniy nuqtalari
 
-Bularning barchasi, agar qayd qilinmasa, boshqaruv authini (loopback/JWT, `requireManagementAuth` orqali) talab qiladi.
+Quyidagilarning barchasi, alohida qayd etilmagan bo‘lsa, boshqaruv autentifikatsiyasini
+(`requireManagementAuth` orqali loopback/JWT) talab qiladi.
 
 ### Foydalanish va xarajatlar tahlili
 
-| Usul  | Yakuniy nuqta            | Maqsad                                                                                                                                                          |
-| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Toʻliq cost/usage tahlili: xulosa, kunlik trend, provider/model/API key/account/tier. boʻyicha Soʻrov: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Vaqt o'tishi bilan provayder uchun kvotadan foydalanish. So'rov: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                   |
-| `GET` | `/api/usage/history`     | Xom foydalanish tarixi qatorlari.                                                                                                                               |
-| `GET` | `/api/usage/call-logs`   | Har bir so'rov bo'yicha qo'ng'iroq jurnallari (model, tokenlar, narx, kechikish, holat).                                                                        |
-| `GET` | `/api/usage/quota`       | Provayder kvotasi holati.                                                                                                                                       |
-| `GET` | `/api/usage/proxy-logs`  | Proksi so'rov jurnallari.                                                                                                                                       |
+| Metod | Yakuniy nuqta            | Maqsad                                                                                                                                                                            |
+| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | To‘liq xarajat/foydalanish tahlili: xulosa, kunlik tendensiya, provayder/model/API kaliti/hisob/daraja bo‘yicha. So‘rov: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Vaqt davomida har bir provayder bo‘yicha kvotadan foydalanish. So‘rov: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                               |
+| `GET` | `/api/usage/history`     | Foydalanish tarixining xom qatorlari.                                                                                                                                             |
+| `GET` | `/api/usage/call-logs`   | Har bir so‘rov bo‘yicha chaqiruv jurnallari (model, tokenlar, xarajat, kechikish, holat).                                                                                         |
+| `GET` | `/api/usage/quota`       | Provayder kvotasi holati.                                                                                                                                                         |
+| `GET` | `/api/usage/proxy-logs`  | Proksi so‘rovlari jurnallari.                                                                                                                                                     |
 
-### Byudjetlar
+### Budjetlar
 
-| Usul   | Yakuniy nuqta            | Maqsad                                                                                                |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Bitta API kaliti uchun xarajatlar sarhisobi + budjet tekshiruvi (`apiKeyId` so‘rovi parametri kerak). |
-| `POST` | `/api/usage/budget`      | API kaliti uchun daily/weekly/monthly USD limitlari + ogohlantirish chegarasini o‘rnating.            |
-| `GET`  | `/api/usage/budget/bulk` | API kalitlari boʻyicha ommaviy byudjet xulosalari.                                                    |
+| Metod  | Yakuniy nuqta            | Maqsad                                                                                                       |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `GET`  | `/api/usage/budget`      | Bitta API kaliti uchun xarajatlar xulosasi + budjet tekshiruvi (`apiKeyId` so‘rov parametri talab qilinadi). |
+| `POST` | `/api/usage/budget`      | API kaliti uchun kunlik/haftalik/oylik USD limitlari va ogohlantirish chegarasini belgilash.                 |
+| `GET`  | `/api/usage/budget/bulk` | API kalitlari bo‘yicha ommaviy budjet xulosalari.                                                            |
 
-> Byudjet API boshiga qamrovlangan**API kaliti** (`apiKeyId`). `GET /api/usage/budget` tomonidan qaytariladigan chegaralar `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` va bajariladigan jami (`totalCostToday`, `totalCostMonth`, …) ni o‘z ichiga oladi.
+> Budjet API’si har bir **API kaliti** (`apiKeyId`) doirasida ishlaydi.
+> `GET /api/usage/budget` tomonidan qaytariladigan limitlar `dailyLimitUsd`,
+> `weeklyLimitUsd`, `monthlyLimitUsd`, `warningThreshold` va joriy jami qiymatlarni
+> (`totalCostToday`, `totalCostMonth`, …) o‘z ichiga oladi.
 
 ### Narxlash
 
-| Usul     | Yakuniy nuqta           | Maqsad                                                                                                                                                                                                     |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Birlashtirilgan to'rt qavatli narxlash (foydalanuvchi, models.dev, LiteLLM, sukut bo'yicha). `?includeSources=1` `pricing` + `sourceMap` qaytaradi.                                                        |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` uchun narxlarni bekor qilish.                                                                                                                      |
-| `DELETE` | `/api/pricing`          | Foydalanuvchi narxini bekor qilishni olib tashlash (ixtiyoriy ravishda `?provider=&model=` tomonidan qamrab olingan); sinxronlangan stavkalar yoki o'rnatilgan standart sozlamalar zaxira sifatida qoladi. |
-| `GET`    | `/api/pricing/defaults` | Standart per-1M qaytarilish stavkalarini ko‘rsatish.                                                                                                                                                       |
-| `GET`    | `/api/pricing/models`   | Narxlar modelga qarab belgilanadi.                                                                                                                                                                         |
-| `POST`   | `/api/pricing/sync`     | Tashqi manbalardan qo'lda sinxronlashni ishga tushiring (LiteLLM).                                                                                                                                         |
-| `GET`    | `/api/pricing/sync`     | Joriy sinxronlash holati.                                                                                                                                                                                  |
-| `DELETE` | `/api/pricing/sync`     | Faqat LiteLLM bilan sinxronlangan narxlarni tozalash (`pricing_synced`); models.dev ma'lumotlari alohida.                                                                                                  |
+| Metod    | Yakuniy nuqta           | Maqsad                                                                                                                                                                |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | To‘rt qatlamning birlashgan narxlari (foydalanuvchi, models.dev, LiteLLM, standartlar). `?includeSources=1` so‘rovi `pricing` + `sourceMap` qaytaradi.                |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` uchun narxlarni qayta belgilash.                                                                              |
+| `DELETE` | `/api/pricing`          | Foydalanuvchi narx almashtirishlarini olib tashlaydi (ixtiyoriy `?provider=&model=` doirasida); sinxronlangan tariflar yoki ichki standartlar zaxira sifatida qoladi. |
+| `GET`    | `/api/pricing/defaults` | Har 1M uchun standart zaxira tariflarini ko‘rsatish.                                                                                                                  |
+| `GET`    | `/api/pricing/models`   | Model bo‘yicha kalitlangan narxlar.                                                                                                                                   |
+| `POST`   | `/api/pricing/sync`     | Tashqi manbalardan (LiteLLM) qo‘lda sinxronlashni boshlash.                                                                                                           |
+| `GET`    | `/api/pricing/sync`     | Joriy sinxronlash holati.                                                                                                                                             |
+| `DELETE` | `/api/pricing/sync`     | Faqat LiteLLM sinxronlagan narxlarni (`pricing_synced`) tozalaydi; models.dev ma’lumotlari alohida.                                                                   |
 
-### Xarajat bilan bog'liq boshqa so'nggi nuqtalar
+### Xarajatlarga aloqador boshqa yakuniy nuqtalar
 
-| Usul  | Yakuniy nuqta                 | Maqsad                                                                         |
-| ----- | ----------------------------- | ------------------------------------------------------------------------------ |
-| `GET` | `/api/free-tier/summary`      | Bepul namunadagi tokenlar jami, shu oyda foydalanilgan va qolgan bepul nafaqa. |
-| `GET` | `/api/quota/pools/[id]/usage` | Umumiy kvotali hovuz uchun foydalanish.                                        |
+| Metod | Endpoint                      | Maqsad                                                                               |
+| ----- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| `GET` | `/api/free-tier/summary`      | Bepul model tokenlarining jami miqdori, shu oyda ishlatilgani va qolgan bepul limit. |
+| `GET` | `/api/quota/pools/[id]/usage` | Umumiy kvota puli uchun foydalanish miqdori.                                         |
 
 ---
 

@@ -128,7 +128,7 @@ A maioria dos números de "tokens gratuitos por mês" nesse espaço é a soma do
 
 - **Cada pool compartilhado é contabilizado uma única vez.** O plano gratuito da Mistral oferece uma franquia de 1B/mês por organização; listá-la em cinco modelos não a transforma em 5B. Se somado por modelo, nosso próprio catálogo indicaria **~7.4B** (recalculado em 2026-09-03; esse número não é controlado pela CI — meça-o novamente sempre que o catálogo mudar) — o destaque mostra **~1.47B** porque isso é o que uma conta de cada provedor realmente pode consumir.
 - **Limites diários são convertidos; taxas, não.** Um limite documentado de tokens/dia torna-se `× 30`; um limite documentado de solicitações/dia torna-se `RPD × ~800 tokens × 30`; um provedor que publica apenas solicitações por minuto **não** recebe um número mensal e é listado como _sem limite_, sem nunca ser incluído na soma. Multiplicar um limite de taxa por 24/7 é a inflação que nos recusamos a fazer.
-- **Cotas que exigem uma verificação regional de identidade são mostradas separadamente** (`+~6M mediante verificação regional de identidade`), porque a maioria dos leitores não pode usá-las.
+- **Cotas que exigem uma verificação regional de identidade são mostradas separadamente** (`+~6M behind regional identity verification`), porque a maioria dos leitores não pode usá-las.
 - **Créditos de cadastro valem apenas para o primeiro mês** e são informados como um segundo número, nunca combinados com o número recorrente.
 - **O número é verificado pela CI.** `npm run check:docs-counts` recalcula os totais a partir do catálogo e faz a compilação falhar quando este arquivo, o README ou o cartão de orçamento divergem deles.
 

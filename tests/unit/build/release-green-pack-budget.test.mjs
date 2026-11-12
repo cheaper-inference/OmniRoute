@@ -8,21 +8,29 @@ const source = readFileSync(
 );
 
 // Wiring regressions, not evidence that a real build finishes within this budget.
-test("the full package lane receives the 90 minute shared deadline", () => {
+test("the full package lane keeps 90 minutes total with an independent policy budget", () => {
   const lane = source.slice(source.indexOf('id: "pack-artifact"'));
   const laneEnd = lane.indexOf("\n      });");
   assert.ok(laneEnd > 0, "the package lane must have a bounded declaration");
-  assert.match(lane.slice(0, laneEnd), /run: runPackArtifactGate,[\s\S]*timeout: 90 \* 60 \* 1000/);
+  assert.match(
+    lane.slice(0, laneEnd),
+    /run: \(timeout\) => runPackArtifactGate\(timeout, \{ independentPolicy: FULL_CI \}\),[\s\S]*timeout: 90 \* 60 \* 1000/
+  );
+  assert.match(source, /PACK_LANE_TIMEOUT_MS = 90 \* 60 \* 1000/);
+  assert.match(source, /PACK_POLICY_TIMEOUT_MS = 3 \* 60 \* 1000/);
   assert.match(source, /g\.run\(g\.timeout\)/);
   const runner = source.slice(
     source.indexOf("async function runPackArtifactGate"),
     source.indexOf("async function runUnitShards")
   );
-  assert.match(runner, /const deadline = Date\.now\(\) \+ timeoutMs/);
-  assert.match(runner, /const remaining = deadline - Date\.now\(\)/);
-  assert.match(runner, /if \(remaining <= 0\) return classifyRunError/);
+  assert.match(runner, /const deadline = now\(\) \+ preparationBudgetMs/);
+  assert.match(
+    runner,
+    /independentPolicy && step\.phaseId === "validate-pack-artifact"[\s\S]*\? PACK_POLICY_TIMEOUT_MS[\s\S]*: deadline - now\(\)/
+  );
+  assert.match(runner, /if \(remaining <= 0\)[\s\S]*classifyRunError/);
   assert.match(runner, /timeout: remaining/);
-  assert.match(runner, /if \(result\.code !== 0\) return/);
+  assert.match(runner, /if \(result\.code !== 0 \|\| result\.receipt\?\.outcome !== "PASS"\)/);
 });
 
 test("the nightly full sweep selects the full package lane, not the quick path", () => {

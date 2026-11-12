@@ -484,15 +484,15 @@ Wannan yana sarrafa:
 
 ## Kanfigareshan
 
-`open-sse/config/` tana ƙunshe da Layer ɗin sanyi:
+`open-sse/config/` yana riƙe da Layer ɗin sanyi:
 
-| Fayil                         | Manufar                                          |
-| ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Rijista-samfurin taɗi akan kundin masu ba da 381 |
-| `providerModels.ts`           | Laƙabin ƙira, tsara taswira                      |
-| `constants.ts`                | Ƙayyadaddun lokaci, iyaka, lambobin matsayi      |
-| `defaultThinkingSignature.ts` | Claude hannu na tunani na asali                  |
-| `modelStrip.ts` (in services) | Filayen kowane mai bayarwa                       |
+| Fayil                           | Manufar                                                 |
+| ------------------------------- | ------------------------------------------------------- |
+| `providerRegistry.ts`           | Rijista-samfurin taɗi akan kundin masu ba da labari 388 |
+| `providerModels.ts`             | Laƙabin ƙira, tsara taswira                             |
+| `constants.ts`                  | Ƙayyadaddun lokaci, iyaka, lambobin matsayi             |
+| `defaultThinkingSignature.ts`   | Claude hannu na tunani na asali                         |
+| `modelStrip.ts` (a cikin sabis) | Filayen kowane mai bayarwa                              |
 
 ### Tsarin Rijistar mai bayarwa
 

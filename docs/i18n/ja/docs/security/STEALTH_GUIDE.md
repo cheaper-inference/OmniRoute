@@ -138,41 +138,63 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ---
 
-## Antigravity ステルス
+## Antigravityステルス
 
-Antigravity リクエストは、呼び出し元のテキストをバイト単位でそのまま保持します。OmniRoute は、IDE クライアントを模倣する目的でプロンプトにゼロ幅文字を挿入したり、ツールの名前変更や注入を行ったりしません。
+Antigravityリクエストは、呼び出し元のテキストをバイトごとに保持します。 OmniRoute 、 IDEクライアントを模倣するためにプロンプトまたはrename/injectツールにゼロ幅文字を挿入しません。
 
 ### `antigravityHeaderScrub.ts`
 
-転送前に Stainless SDK マーカー（`x-stainless-lang`、`x-stainless-package-version`、`x-stainless-os`、`x-stainless-arch`、`x-stainless-runtime`、`x-stainless-runtime-version`、`x-stainless-timeout`、`x-stainless-retry-count`、`x-stainless-helper-method`）を削除します。
+転送前にステンレスSDKマーカー (`x-stainless-lang`、 `x-stainless-package-version`、 `x-stainless-os`、 `x-stainless-arch`、 `x-stainless-runtime`、 `x-stainless-runtime-version`、 `x-stainless-timeout`、 `x-stainless-retry-count`、 `x-stainless-helper-method`) を除去します。
 
-### ⚠️ リスク: `ANTIGRAVITY_CREDITS=always`（アカウント停止が多発する要注意箇所）
+### ⚠️リスク: `ANTIGRAVITY_CREDITS=always` (アカウント禁止ホット スポット)
 
-`ANTIGRAVITY_CREDITS=always`（`open-sse/executors/antigravity.ts` が使用）は、Google の無料枠クォータによる制限を受ける代わりに、**すべての**リクエストを Antigravity AI Credit Overages（有料の Google クレジット）経由でルーティングします。これは機能として文書化されていますが、**私たちが確認している中で最も一般的な ToS 違反報告の原因です**。複数の Google Ultra アカウントが `=always` で数時間実行した後、`403 / "service disabled for ToS violation" / insufficient_quota` により停止されています。
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts`によって消費される) ルート**毎**Googleの無料枠クォータで物事を制御するのではなく、 Antigravity AIクレジット超過 (有料Googleクレジット) を通じてリクエストします。これは機能として文書化されていますが、**私たちが目にする最も一般的な ToS 違反レポート**—複数のGoogle Ultra アカウントは、 `=always`で数時間実行した後、 `403 / "service disabled for ToS violation" / insufficient_quota`で禁止されました。
 
-上流での取り締まりは **Google 側**で行われるものであり、OmniRoute が防止できるものではありません。環境変数名と既存のドキュメントからは、安全に切り替えられる設定のように見えますが、実際にはそうではありません。
+アップストリームの強制がオンになっています**Google側**、 OmniRoute防ぐことはできません。環境変数名と既存のドキュメントを見ると、ノブを安全に切り替えることができるように思えます。そうではありません。
 
-**無料枠のみの使用よりも積極的に不正利用検出の対象となる理由:**
+**これが無料枠のみの使用よりも積極的に不正行為の検出を行う理由:**
 
-- 単一の Google アカウントで自動化された継続的な支出が発生すると、無料枠を使い切って停止する場合とは異なる形でフラグが立ちます。
-- クレジット超過にはレート上限がないため、設定ミスのあるクライアントが数分で数百 USD を消費し、API キーの転売やボットトラフィックのように見える可能性があります。
-- 同じ外部 IP から複数の OmniRoute ユーザーが並行して超過クレジットを使用すると、そのシグナルがさらに強まります。
+- 単一のGoogleアカウントに対する継続的な自動支出は、無料枠のヒットクォータ アンド ストップとは異なるフラグを立てます。
+- クレジット超過にはレートの上限がないため、設定を誤ったクライアントは数分で数百のUSDを使い果たし、API キーの再販またはボット トラフィックのように見える可能性があります。
+- 複数のOmniRouteユーザーが同じ外部IPから並行して超過クレジットに達すると、信号がさらに大きくなります。
 
-**推奨される運用方針:**
+**推奨姿勢：**
 
-1. オペレーターが有料クレジットとアカウント取り締まりのリスクを明示的に受け入れない限り、デフォルトの `ANTIGRAVITY_CREDITS=off` を維持してください。`retry` は最初に通常のリクエストを送信し、対象となるクォータの 429 が返された場合に限り、最大 1 回クレジットを注入します。`always` は最初のリクエストからクレジットを注入します。
-2. 単一の Antigravity アカウントに負荷を集中させるのではなく、**Auto-Combo を介してプロバイダー間に負荷を分散してください**（`model: "auto"` または `kr/glm/etc`-combo）。
-3. Antigravity プロバイダーの編集ページ（Dashboard → Providers → Antigravity → connection → rate limit）で、**接続ごとの RPM 制限を設定してください**。継続的な使用では 30～60 RPM が妥当な上限です。
-4. **オペレーターが管理する安定した上流ネットワークを使用し**、無関係なユーザーやワークロード間で 1 つのアカウントを共有しないでください。
-5. **停止された場合**: `support.google.com` →「Restore Workspace/Account access」から、Google が送信した正確な `quota_exceeded` / `service disabled` レスポンス本文を添えて異議申し立てを行ってください。復旧は保証されません。
+1. オペレータが有料クレジットとアカウント強制のリスクを明示的に受け入れる場合を除き、デフォルトの`ANTIGRAVITY_CREDITS=off`維持します。 `retry`最初に通常のリクエストを送信し、適格なクォータ 429 の後で最大 1 回クレジットを注入します。 `always`最初のリクエストでクレジットを挿入します。
+2. **自動コンボを介してプロバイダー間で負荷を分散します。** (`model: "auto"`または`kr/glm/etc` -combo) 単一のAntigravityアカウントを飽和させる代わりに。
+3. **接続ごとのRPM制限を設定する**Antigravityプロバイダーの編集ページ (ダッシュボード→プロバイダー→ Antigravity →接続→レート制限)。 30 ～ 60 RPMは、継続的な使用に対する防御可能な上限です。
+4. **安定したオペレータ制御の上流ネットワーキングを使用する**また、無関係なユーザーやワークロード間で 1 つのアカウントを共有することは避けてください。
+5. **禁止されている場合**: Google送信した正確な`quota_exceeded` / `service disabled`応答ボディを使用して、 `support.google.com` → 「 Workspace/Accountアクセスを復元」を介してアピールします。復元は保証されません。
 
-環境変数リファレンスには、各クレジットモードがアカウントと支出に与える影響が記載されています。
+環境リファレンスには、各クレジット モードのアカウントと支出への影響が文書化されています。
 
-関連箇所:
+#### `=always`だけでなく、 Antigravity OAuthルーティング全般
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` を読み込み
-- `src/lib/oauth/providers/antigravity.ts` — 認証情報の受け渡し
-- 元のインシデント報告: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+停止はクレジット超過に限定されません。 2026 年 11 月のレポート (#19223、 #19266) には、 `antigravity`および`agy` (Antigravity CLI) プロバイダーを介したルーティング中に一時停止されたいくつかのGoogleアカウントが記載されています。
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+どちらのプロバイダーも、 Antigravity製品OAuthセッションで認証します。これは、接続が追加される前に、ダッシュボードのリスク通知 (「このプロバイダーは、 proxy/router使用が許可されていない公式製品session/OAuth使用しています」) で警告される場合です。上記の推奨事項のいずれも、その使用を許可するものではありません。 1 つのアカウントが運ぶトラフィック量を減らすだけです。
+
+**Geminiモデル用の認定されたAPIインターフェイス。** Google 、 APIsを介してGeminiへのプログラムによるアクセスを提供します。 OmniRoute通常の API キー プロバイダーとしてサポートします。
+
+| プロバイダーID | ダッシュボード名             | 資格情報                                                                                 |
+| -------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `gemini`       | Gemini （Google AIスタジオ） | Google AI Studio のGemini APIキー (無料利用枠あり)                                       |
+| `vertex`       | 頂点AI                       | サービス アカウントJSON、 OAuthアクセス トークン、または Vertex Express APIキー (Gemini) |
+
+これらのプロバイダーは、 Antigravity製品セッションとは異なり、 APIアクセスにGoogle発行の資格情報を使用します。これらは、すべての使用法を準拠させたり、施行のリスクを排除したりするものではありません。それぞれの使用法には独自の条件が適用され、運用者はその使用条件を確認する必要があります。たとえば、 [Gemini API追加利用規約で](https://ai.google.dev/gemini-api/terms)は、 APIクライアントが欧州経済領域、スイス、または英国のユーザーに利用可能になっている場合、有料サービスのみが許可されており、無料サービスに送信されたコンテンツはGoogleの製品を改善するために使用される場合があります。 Vertex AI 、代わりにGoogleクラウド規約 ([サービス固有の規約](https://cloud.google.com/terms/service-terms)) に該当します。価格と割り当ては、 Antigravityサブスクリプションではなく、 API条件に従います。
+
+上記のAntigravity一時停止を回避したい事業者は、その使用がプロバイダーの条件に適合していることを確認した後、 `antigravity` / `agy`の代わりにこれらのプロバイダーのいずれかを介してGeminiトラフィックをルーティングする必要があります。
+
+タッチポイント:
+
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`を読み取ります
+- `src/lib/oauth/providers/antigravity.ts` —認証情報の配管
+- 元のインシデント レポート: ディスカッション[#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -241,9 +263,9 @@ interface CliFingerprint {
 
 ---
 
-## ユーザーエージェントによる—環境変数のオーバーライド (`.env.example`セクション 12)
+## User-Agent のオーバーライド — 環境変数（`.env.example` セクション 12）
 
-| 変数                | デフォルト                                    |
+| 変数                | デフォルト値                                  |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -252,7 +274,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-動的検索を介して`open-sse/executors/base.ts::buildHeaders()`によって消費されます。**プロバイダーが新しいCLIバージョンをリリースするときにこれらをバンプします**—古いUA文字列は、古いクライアントとして拒否され始めます。
+`open-sse/executors/base.ts::buildHeaders()` によって動的ルックアップを介して使用されます。**プロバイダーが新しい CLI バージョンをリリースした際は、これらを更新してください** — 古い UA 文字列は、旧式のクライアントとして拒否されるようになります。
 
 ## CLI 互換モードの切り替え（`.env.example` セクション 13）
 

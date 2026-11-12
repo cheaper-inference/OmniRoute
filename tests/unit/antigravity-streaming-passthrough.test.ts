@@ -25,7 +25,10 @@ const { bindAbortLifecycle } =
 const { createByteLengthQueueStrategy } = await import("../../open-sse/utils/byteQueueStrategy.ts");
 const core = await import("../../src/lib/db/core.ts");
 
-test.after(() => {
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
+
+test.after(async () => {
+  await closeSharedLoggerResource();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });

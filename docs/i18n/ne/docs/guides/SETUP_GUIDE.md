@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ड्यासबोर्ड `http://localhost:20128` मा खुल्छ र API को आधार URL `http://localhost:20128/v1` हो।
+ड्यासबोर्ड `http://localhost:20128` मा खुल्छ र API आधार URL `http://localhost:20128/v1` हो।
+
+> **एनपीएम प्रयोगकर्ताहरू:** यदि npm ले चेतावनी दिन्छ कि स्थापना स्क्रिप्टहरू अवरुद्ध छन् (जस्तै, `omniroute`, `better-sqlite3`), [समस्या निवारण हेर्नुहोस् — npm स्थापना-स्क्रिप्टहरू अवरुद्ध](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ।
 
 ### pnpm
 

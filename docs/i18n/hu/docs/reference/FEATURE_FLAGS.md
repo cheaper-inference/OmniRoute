@@ -45,7 +45,7 @@ Egy logikai jelző akkor tekinthető **engedélyezettnek**, ha tényleges érté
 
 ## Zászló katalógus
 
-120 zászló 6 kategóriában.** Alapértelmezett** az alapértelmezett — definíció, amely akkor használatos, ha sem DB felülírás, sem környezeti változó nincs jelen.
+121 zászló 6 kategóriában.** Alapértelmezett** az alapértelmezett — definíció, amely akkor használatos, ha sem DB felülírás, sem környezeti változó nincs jelen.
 
 ### Biztonság (11)
 
@@ -116,7 +116,7 @@ Egy logikai jelző akkor tekinthető **engedélyezettnek**, ha tényleges érté
 
 Ha `UNPRICED_USAGE_BUDGET_POLICY` kifejezetten be van állítva (DB felülírása a környezet előtt), elsőbbséget élvez `USAGE_LIMIT_IGNORE_UNPRICED` szemben. Explicit enum érték nélkül az upstream logikai opt-out `count_as_zero` választja; egyébként az alapértelmezett a `fail_closed`. Érvénytelen felsorolásértékek és olvashatatlan jellemző-jelző tárhely-hiba zárva. Egyik leiratkozás sem enyhíti az árköltést vagy a sikertelen árlekérdezést. A végrehajtás és a rendszergazdai jelentés ugyanazt a hatékony házirendet oldja meg.
 
-### Futásidő (57)
+### Futásidő (58)
 
 | Kulcsfontosságú                                | Írja be       | Alapértelmezett | Indítsa újra | Leírás                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------- | ------------- | --------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -179,6 +179,7 @@ Ha `UNPRICED_USAGE_BUDGET_POLICY` kifejezetten be van állítva (DB felülírás
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | logikai érték | `false`         |              | Hagyja abba a `max` okfejtési erőfeszítés felajánlását és továbbítását a Cursor Grok 4.7-hez (#17386): Cursor dokumentumlistája csak low/medium/high/xhigh, így a `grok-4.7-max` tartalék alias eltűnik a katalógusból, és a `max` erőfeszítési kérés erőfeszítési paraméter nélkül kerül elküldésre. Alapértelmezés szerint kikapcsolva: `max` továbbra is felajánlott és továbbított marad, mivel egy élő AgentService/Run vizsgáló elfogadta.                                                                                                                                                                                                                                                                                                                        |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | logikai érték | `false`         |              | A Responses Keepalves üzenet küldése üres sorként a response.in_progress esemény helyett, így a szintetikus pillanatkép soha nem helyettesítheti a hivatalos SDK valódi választ. Az üres sor nem küld SSE eseményt, így a csak eseményekre visszaállító kliensfigyelő nem indul vissza egy hosszú néma fázis alatt. Alapértelmezés szerint ki: az időzítők elküldik a spec-valid response.in_progress eseményt.                                                                                                                                                                                                                                                                                                                                                         |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | logikai érték | `false`         |              | A tömörítési gyorsítótár statisztikáiban az automatikus előtag-gyorsítótárazási szolgáltatóhoz (OpenAI, Codex, Azure vagy olyan egyéni kapcsolathoz intézett tömörített kérést, amely a gyorsítótárazást jelölőeltávolítással deklarálja), becsült gyorsítótár-találatnak számítson még `cache_control` -jelölők (#17114) nélkül is. A becslés a gyorsítótár-jogosultság jele, nem pedig megfigyelt találat, így ezeknek a szolgáltatóknak a jelentett találati aránya 100% felé tart. Alapértelmezés szerint kikapcsolva: csak a gyorsítótárazó szolgáltatóhoz küldött `cache_control` -jelölőket tartalmazó kérés számít becsült találatnak, így az automatikus előtagot használó szolgáltatók folyamatosan 0-t jelentenek.                                           |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | logikai érték | `false`         |              | Lehetővé teszi, hogy a kifejezett `provider` nélküli automatikus webes keresés csatlakoztatott Codex- (ChatGPT-) fiókot használjon a `codex-search` révén: utolsó lehetőségként a kulcs nélküli szolgáltatók előtt, ha nincs használható, hitelesítő adatokkal rendelkező szolgáltató, illetve tartalékként hiba esetén (#17933). Minden keresés fogyasztja az előfizetés kvótáját, és körülbelül 10–40 s ideig tart. Alapértelmezetten kikapcsolva: a `codex-search` csak akkor fut, ha a kérés kifejezetten megnevezi.                                                                                                                                                                                                                                                |
 
 ### CLI (5)
 
@@ -249,10 +250,10 @@ Minden jelzőt visszaad a tényleges értékével, forrásával és összegzés�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

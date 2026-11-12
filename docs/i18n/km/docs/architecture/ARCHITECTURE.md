@@ -8,78 +8,79 @@
 
 _បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖ 2026-06-28_
 
-## សង្ខេបប្រតិបត្តិ
+## សេចក្តីសង្ខេបសម្រាប់ថ្នាក់ដឹកនាំ
 
-OmniRoute គឺជាច្រកចេញដំណើរតាមទីតាំង AI និងផ្ទាំងគ្រប់គ្រងដែលបានបង្កើតឡើងនៅលើ Next.js។ វាផ្តល់នូវចំណុចបញ្ចប់ដែលត្រូវគ្នាជាមួយ OpenAI តែមួយ (`/v1/*`) និងបញ្ជូនចរាចរឆ្លងកាត់អ្នកផ្តល់សេវាខាងលើជាច្រើនជាមួយនឹងការបកប្រែ ការធ្លាក់ចុះ ការធ្វើឱ្យស្រស់សញ្ញាសម្ងាត់ និងការតាមដានការប្រើប្រាស់។
+OmniRoute គឺជា gateway សម្រាប់បញ្ជូនផ្លូវ AI មូលដ្ឋាន និង dashboard ដែលត្រូវបានបង្កើតឡើងលើ Next.js។
+វាផ្តល់ endpoint តែមួយដែលឆបគ្នាជាមួយ OpenAI (`/v1/*`) និងបញ្ជូនចរាចរណ៍ឆ្លងកាត់ upstream providers ជាច្រើន ដោយមានការបម្លែងទ្រង់ទ្រាយ ការបម្រុងទុក ការធ្វើឱ្យ token ស្រស់ឡើងវិញ និងការតាមដានការប្រើប្រាស់។
 
 សមត្ថភាពស្នូល៖
 
-- ផ្ទៃ API ដែលត្រូវគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (អ្នកផ្តល់សេវា 381, ម៉ូឌុលប្រតិបត្តិ 159)
-- ការបកប្រែRequest/response ឆ្លងកាត់ទម្រង់អ្នកផ្តល់សេវា
-- បន្សំគំរូថយក្រោយ (លំដាប់ច្រើនម៉ូដែល)
-- ជំហានបន្សំដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយនឹងការបញ្ជាពេលវេលាដំណើរការដោយ `compositeTiers`
-- ការថយក្រោយកម្រិតគណនី (គណនីច្រើនក្នុងមួយអ្នកផ្តល់សេវា)
-- Quota preflight និង quota-aware P2C ការជ្រើសរើសគណនីនៅក្នុងផ្លូវជជែកសំខាន់
-- OAuth + ការគ្រប់គ្រងការតភ្ជាប់អ្នកផ្តល់សេវាគន្លឹះ API (ម៉ូឌុលអ្នកផ្តល់សេវា OAuth 27)
-- ការបញ្ចូលជំនាន់តាមរយៈ `/v1/embeddings` (អ្នកផ្តល់សេវា 18 នាក់)
-- ការបង្កើតរូបភាពតាមរយៈ `/v1/images/generations` (អ្នកផ្តល់សេវា 10 +, 20 គំរូ+ )
-- ការចម្លងសំឡេងតាមរយៈ `/v1/audio/transcriptions` (អ្នកផ្តល់សេវា 18 នាក់)
-- អត្ថបទទៅការនិយាយតាមរយៈ `/v1/audio/speech` (អ្នកផ្តល់សេវាដែលភ្ជាប់មកជាមួយ 24)
+- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (388 providers, 159 executor modules)
+- ការបម្លែង request/response រវាងទ្រង់ទ្រាយរបស់ provider ផ្សេងៗ
+- ការបម្រុងទុកដោយប្រើ model combo (លំដាប់ multi-model)
+- ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការរៀបលំដាប់ពេលដំណើរការដោយ `compositeTiers`
+- ការបម្រុងទុកនៅកម្រិត account (account ច្រើនសម្រាប់ provider នីមួយៗ)
+- ការត្រួតពិនិត្យ quota ជាមុន និងការជ្រើសរើស account តាម P2C ដែលគិតគូរពី quota នៅក្នុងផ្លូវ chat ចម្បង
+- ការគ្រប់គ្រងការតភ្ជាប់ provider តាម OAuth + API key (27 OAuth provider modules)
+- ការបង្កើត embedding តាមរយៈ `/v1/embeddings` (18 providers)
+- ការបង្កើតរូបភាពតាមរយៈ `/v1/images/generations` (10+ providers, 20+ models)
+- ការចម្លងសំឡេងទៅជាអត្ថបទតាមរយៈ `/v1/audio/transcriptions` (18 providers)
+- ការបម្លែងអត្ថបទទៅជាសំឡេងតាមរយៈ `/v1/audio/speech` (24 built-in providers)
 - ការបង្កើតវីដេអូតាមរយៈ `/v1/videos/generations` (ComfyUI + SD WebUI)
 - ការបង្កើតតន្ត្រីតាមរយៈ `/v1/music/generations` (ComfyUI)
-- ការស្វែងរកតាមអ៊ីនធឺណិតតាមរយៈ `/v1/search` (អ្នកផ្តល់សេវាចំនួន 20)
-- ការសម្របសម្រួលតាមរយៈ `/v1/moderations`
-- ចំណាត់ថ្នាក់ឡើងវិញតាមរយៈ `/v1/rerank`
-- គិតការញែកស្លាក (`<think>...</think>`) សម្រាប់គំរូហេតុផល
-- ការឆ្លើយតបអនាម័យសម្រាប់ភាពឆបគ្នា OpenAI SDK ដ៏តឹងរឹង
-- ការធ្វើឱ្យមុខងារធម្មតា (ប្រព័ន្ធ → អ្នកអភិវឌ្ឍន៍ អ្នកប្រើប្រាស់ប្រព័ន្ធ →) សម្រាប់ភាពឆបគ្នារវាងអ្នកផ្តល់សេវាឆ្លង
-- ការបម្លែងលទ្ធផលដែលមានរចនាសម្ព័ន្ធ (json_schema → Gemini responseSchema)
-- ការតស៊ូក្នុងតំបន់សម្រាប់អ្នកផ្តល់សេវា កូនសោ ឈ្មោះក្លែងក្លាយ បន្សំ ការកំណត់ តម្លៃ (ម៉ូឌុល DB 122)
-- Usage/cost តាមដាននិងស្នើសុំការកាប់ឈើ
-- សមកាលកម្មពពកស្រេចចិត្តសម្រាប់ការធ្វើសមកាលកម្ម multi-device/state
-- IP allowlist/blocklist សម្រាប់ការគ្រប់គ្រងការចូលប្រើ API
-- ការគ្រប់គ្រងថវិកាគិត (passthrough/auto/custom/adaptive)
-- ការចាក់បញ្ចូលប្រព័ន្ធសកល
-- ការតាមដានវគ្គ និងការបោះពុម្ពស្នាមម្រាមដៃ
-- ការកំណត់អត្រាការធ្វើឱ្យប្រសើរឡើងក្នុងមួយគណនីជាមួយនឹងទម្រង់ជាក់លាក់របស់អ្នកផ្តល់សេវា
-- គំរូឧបករណ៍បំលែងសៀគ្វីសម្រាប់ភាពធន់របស់អ្នកផ្តល់សេវា
-- ការការពារហ្វូងសត្វផ្គរលាន់ជាមួយនឹងការចាក់សោ mutex
-- ឃ្លាំងសម្ងាត់ការដកស្ទួនសំណើផ្អែកលើហត្ថលេខា
-- ស្រទាប់ដែន៖ ច្បាប់ចំណាយ គោលការណ៍ថយក្រោយ គោលការណ៍ចាក់សោ
-- ការបញ្ជូនបន្តតាមបរិបទ៖ វគ្គសង្ខេបការបញ្ជូនបន្តសម្រាប់វគ្គបន្តនៃការបង្វិលគណនី
-- ភាពស្ថិតស្ថេរនៃរដ្ឋដែន (SQLite សរសេរតាមរយៈឃ្លាំងសម្ងាត់សម្រាប់ការធ្លាក់ចុះ ថវិកា ការចាក់សោរ ឧបករណ៍បំបែកសៀគ្វី)
-- ម៉ាស៊ីនគោលការណ៍សម្រាប់ការវាយតម្លៃសំណើកណ្តាល (ចាក់សោរ → ថវិកា → ថយក្រោយ)
-- ស្នើសុំ telemetry ជាមួយ p50/p95/p99 latency សរុប
-- ការរួមបញ្ចូលគ្នានៃ telemetry គោលដៅ និងសុខភាពគោលដៅបន្សំជាប្រវត្តិសាស្ត្រតាមរយៈ `combo_execution_key` / `combo_step_id`
-- ទំនាក់ទំនង ID (X-Request-Id) សម្រាប់ការតាមដានពីចុងដល់ចប់
-- ការចុះកំណត់ហេតុសវនកម្មអនុលោមភាពជាមួយនឹងការបដិសេធក្នុងមួយគ្រាប់ចុច API
-- ក្របខ័ណ្ឌ Eval សម្រាប់ការធានាគុណភាព LLM
-- ផ្ទាំងគ្រប់គ្រងសុខភាពជាមួយនឹងស្ថានភាពឧបករណ៍បំប្លែងសៀគ្វីរបស់អ្នកផ្តល់សេវាតាមពេលវេលាជាក់ស្តែង
-- ម៉ាស៊ីនមេMCP (110 ឧបករណ៍) ជាមួយនឹងការដឹកជញ្ជូន 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) ជាមួយនឹងជំនាញ និងវដ្តជីវិតការងារ
-- ប្រព័ន្ធសតិ (ស្រង់ចេញ ចាក់ ទាញយក សង្ខេប)
-- ប្រព័ន្ធជំនាញ (បញ្ជីឈ្មោះ ប្រតិបត្តិករ ប្រអប់ខ្សាច់ ជំនាញដែលភ្ជាប់មកជាមួយ)
-- MITM ប្រូកស៊ីជាមួយនឹងការគ្រប់គ្រងវិញ្ញាបនបត្រនិងការគ្រប់គ្រង DNS
-- Prompt injection guard middleware
-- ជម្រុញបំពង់បង្ហាប់ជាមួយ Caveman, RTK, បំពង់ដាក់ជង់, បន្សំបង្ហាប់, កញ្ចប់ភាសា និងការវិភាគ
-- ACP (ពិធីសារទំនាក់ទំនងភ្នាក់ងារ) បញ្ជីឈ្មោះ
-- អ្នកផ្តល់សេវា OAuth ម៉ូឌុល (ម៉ូឌុលបុគ្គលចំនួន 22 នៅក្រោម `src/lib/oauth/providers/`)
-- ស្គ្រីប Uninstall/full-uninstall
-- សកម្មភាពជួសជុលបរិស្ថាន OAuth
-- ស្ពាន WebSocket សម្រាប់អតិថិជន WS ដែលត្រូវគ្នាជាមួយ OpenAI (`/v1/ws`)
-- ការគ្រប់គ្រងនិមិត្តសញ្ញាសមកាលកម្ម (issue/revoke, ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) កំណត់ជាមុនអ្នកផ្តល់សេវាលំដាប់ទីមួយ
-- ការរាប់និមិត្តសញ្ញាកូនកាត់ ( `/messages/count_tokens` ខាងអ្នកផ្តល់សេវាជាមួយនឹងការប៉ាន់ស្មានថយក្រោយ)
-- គំរូឈ្មោះក្លែងក្លាយការបណ្ដុះដោយស្វ័យប្រវត្តិ (ការធ្វើឱ្យប្រក្រតីនៃគ្រាមភាសាឆ្លងប្រូកស៊ី 30 + ពេលចាប់ផ្ដើម)
-- ការនាំយកចេញដោយសុវត្ថិភាពជាមួយនឹង SSRF guard ការទប់ស្កាត់ URL ឯកជន និងការព្យាយាមម្ដងទៀតដែលអាចកំណត់រចនាសម្ព័ន្ធបាន។
-- Cooldown-aware Chat ព្យាយាមម្តងទៀតជាមួយនឹង `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន។
-- ការផ្ទៀងផ្ទាត់បរិស្ថានពេលដំណើរការជាមួយ Zod នៅពេលចាប់ផ្តើម
-- សវនកម្មអនុលោមភាព v2 ជាមួយនឹងការបិទទំព័រ ព្រឹត្តិការណ៍ CRUD អ្នកផ្តល់សេវា និងការកត់ត្រាសុពលភាពដែលត្រូវបានទប់ស្កាត់ SSRF
+- ការស្វែងរកលើបណ្ដាញតាមរយៈ `/v1/search` (20 providers)
+- ការត្រួតពិនិត្យខ្លឹមសារតាមរយៈ `/v1/moderations`
+- ការរៀបចំណាត់ថ្នាក់ឡើងវិញតាមរយៈ `/v1/rerank`
+- ការញែក think tag (`<think>...</think>`) សម្រាប់ reasoning models
+- ការសម្អាត response ដើម្បីឱ្យឆបគ្នាយ៉ាងតឹងរ៉ឹងជាមួយ OpenAI SDK
+- ការធ្វើឱ្យ role មានស្តង់ដារ (developer→system, system→user) ដើម្បីឱ្យឆបគ្នារវាង providers
+- ការបម្លែង structured output (json_schema → Gemini responseSchema)
+- ការរក្សាទុកទិន្នន័យក្នុងមូលដ្ឋានសម្រាប់ providers, keys, aliases, combos, settings និង pricing (122 DB modules)
+- ការតាមដានការប្រើប្រាស់/ការចំណាយ និងការកត់ត្រា request
+- ជម្រើស cloud sync សម្រាប់ធ្វើសមកាលកម្មឧបករណ៍ច្រើន/ស្ថានភាព
+- បញ្ជី IP ដែលអនុញ្ញាត/ទប់ស្កាត់ សម្រាប់ការគ្រប់គ្រងសិទ្ធិចូលប្រើ API
+- ការគ្រប់គ្រង thinking budget (passthrough/auto/custom/adaptive)
+- ការបញ្ចូល global system prompt
+- ការតាមដាន session និងការកំណត់ fingerprint
+- ការកំណត់កម្រិតអត្រាដែលប្រសើរឡើងតាម account នីមួយៗ ជាមួយ profile ជាក់លាក់តាម provider
+- លំនាំ circuit breaker សម្រាប់ភាពធន់របស់ provider
+- ការការពារបាតុភូត anti-thundering herd ដោយប្រើ mutex locking
+- cache សម្រាប់លុប request ស្ទួនដោយផ្អែកលើ signature
+- ស្រទាប់ domain៖ ច្បាប់ចំណាយ គោលការណ៍ fallback និងគោលការណ៍ lockout
+- Context Relay៖ សេចក្តីសង្ខេបសម្រាប់ផ្ទេរ session ដើម្បីរក្សាភាពបន្តនៅពេលប្ដូរ account
+- ការរក្សាទុកស្ថានភាព domain (SQLite write-through cache សម្រាប់ fallbacks, budgets, lockouts និង circuit breakers)
+- policy engine សម្រាប់វាយតម្លៃ request ជាកណ្តាល (lockout → budget → fallback)
+- telemetry របស់ request ជាមួយការប្រមូលផ្តុំ latency p50/p95/p99
+- telemetry របស់ combo target និងសុខភាព combo target ជាប្រវត្តិសាស្ត្រ តាមរយៈ `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) សម្រាប់ការតាមដានពីដើមដល់ចប់
+- ការកត់ត្រាសវនកម្មអនុលោមភាព ជាមួយជម្រើសដកខ្លួនតាម API key នីមួយៗ
+- eval framework សម្រាប់ការធានាគុណភាព LLM
+- health dashboard ជាមួយស្ថានភាព circuit breaker របស់ provider តាមពេលវេលាជាក់ស្តែង
+- MCP Server (110 tools) ជាមួយ 3 transports (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) ជាមួយ skills និងវដ្តជីវិត task
+- ប្រព័ន្ធ memory (ការស្រង់ ការបញ្ចូល ការទាញយក និងការសង្ខេប)
+- ប្រព័ន្ធ skills (registry, executor, sandbox និង built-in skills)
+- MITM proxy ជាមួយការគ្រប់គ្រង certificate និងការដោះស្រាយ DNS
+- middleware ការពារ prompt injection
+- pipeline បង្ហាប់ prompt ជាមួយ Caveman, RTK, stacked pipelines, compression combos, language packs និង analytics
+- registry របស់ ACP (Agent Communication Protocol)
+- OAuth providers បែប modular (22 individual modules ក្រោម `src/lib/oauth/providers/`)
+- scripts សម្រាប់ uninstall/full-uninstall
+- សកម្មភាពជួសជុល OAuth environment
+- WebSocket bridge សម្រាប់ OpenAI-compatible WS clients (`/v1/ws`)
+- ការគ្រប់គ្រង sync token (ការចេញ/ដកហូត និងការទាញយក config bundle ដែលមាន version តាម ETag)
+- GLM Thinking (`glmt`) ជា provider preset កម្រិត first-class
+- ការរាប់ token បែប hybrid (តាម provider-side `/messages/count_tokens` ជាមួយ estimation fallback)
+- ការបង្កើត model alias ដោយស្វ័យប្រវត្តិជាមុន (30+ cross-proxy dialect normalizations នៅពេលចាប់ផ្ដើម)
+- outbound fetch ប្រកបដោយសុវត្ថិភាព ជាមួយ SSRF guard, ការទប់ស្កាត់ private URL និង retry ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន
+- chat retries ដែលគិតគូរពី cooldown ជាមួយ `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន
+- ការផ្ទៀងផ្ទាត់ runtime environment ជាមួយ Zod នៅពេលចាប់ផ្ដើម
+- ការធ្វើសវនកម្មអនុលោមភាព v2 ជាមួយ pagination, provider CRUD events និងការកត់ត្រាការផ្ទៀងផ្ទាត់ដែល SSRF បានទប់ស្កាត់
 
-គំរូពេលវេលាដំណើរការបឋម៖
+ម៉ូដែលដំណើរការចម្បង៖
 
-- ផ្លូវកម្មវិធីNext.js ក្រោម `src/app/api/*` អនុវត្តទាំងផ្ទាំងគ្រប់គ្រង APIs និងភាពឆបគ្នា APIs
-- ស្នូល SSE/routing ចែករំលែកនៅក្នុង `src/sse/*` + `open-sse/*` ដោះស្រាយការប្រតិបត្តិ ការបកប្រែ ការចាក់ផ្សាយ ការធ្លាក់ចុះ និងការប្រើប្រាស់របស់អ្នកផ្តល់សេវា
+- Next.js app routes ក្រោម `src/app/api/*` អនុវត្តទាំង dashboard APIs និង compatibility APIs
+- ស្នូល SSE/routing រួមក្នុង `src/sse/*` + `open-sse/*` គ្រប់គ្រងការប្រតិបត្តិ provider ការបម្លែងទ្រង់ទ្រាយ streaming fallback និងការប្រើប្រាស់
 
 ## ដ្យាក្រាមយោង
 
@@ -858,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: នាំចូលម៉ូឌុលជាក់លាក់ដោយផ្ទាល់ — មិនប្រើ barrel ទេ (ស្រទាប់នាំចេញបន្ត `localDb.ts` ចាស់ត្រូវបានដកចេញ)
 - `src/lib/usageDb.ts`: ចំណុចប្រទាក់សម្រាប់ប្រវត្តិការប្រើប្រាស់/កំណត់ហេតុការហៅនៅលើតារាង SQLite
 
-## វិសាលភាព Executor របស់ Provider (លំនាំ Strategy)
+## គ្របដណ្តប់ប្រតិបត្តិករអ្នកផ្តល់សេវា (លំនាំយុទ្ធសាស្រ្ត)
 
-Provider នីមួយៗមាន executor ឯកទេសមួយដែលពង្រីកពី `BaseExecutor` (នៅក្នុង `open-sse/executors/base.ts`) ដែលផ្តល់នូវការបង្កើត URL, ការស្ថាបនា header, ការព្យាយាមម្តងទៀតដោយប្រើ exponential backoff, hooks សម្រាប់ធ្វើឱ្យ credential ថ្មីឡើងវិញ និង method `execute()` សម្រាប់រៀបចំលំហូរការងារ។
+អ្នកផ្តល់សេវានីមួយៗមានប្រតិបត្តិករឯកទេសដែលពង្រីក `BaseExecutor` (នៅក្នុង `open-sse/executors/base.ts`) ដែលផ្តល់នូវអគារ URL ការសាងសង់បឋមកថា ព្យាយាមម្តងទៀតជាមួយនឹងការបិទឡើងវិញអិចស្ប៉ូណង់ស្យែល ទំពក់ផ្ទុកព័ត៌មានសម្ងាត់ និងវិធីសាស្ត្ររៀបចំ `execute()` ។
 
-| កម្មវិធីប្រតិបត្តិ        | អ្នកផ្តល់សេវា                                                                                                                                               | ការដោះស្រាយពិសេស                                                            |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA ជាដើម | ការកំណត់រចនាសម្ព័ន្ធ URL/header បែបឌីណាមិកសម្រាប់អ្នកផ្តល់សេវានីមួយៗ        |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID គម្រោង/សម័យផ្ទាល់ខ្លួន ការញែកតម្លៃ Retry-After និងការបិទបាំង 429         |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | ការបញ្ជូនតាម deployment និងការបង្ខំឱ្យប្រើ query api-version                |
-| `BlackboxWebExecutor`     | Blackbox AI (មុខងារវេប)                                                                                                                                     | ការធ្វើ reverse សម័យវេបជាមួយការត្រាប់តាម TLS fingerprint                    |
-| `ClaudeIdentityExecutor`  | Claude.ai (ផ្លូវ CCH)                                                                                                                                       | ខ្សែដំណើរការ constraint + tool-remap និងការកែទម្រង់ fingerprint             |
-| `CliProxyApiExecutor`     | អ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ CLIProxyAPI                                                                                                                     | ការដោះស្រាយការផ្ទៀងផ្ទាត់ និង protocol ផ្ទាល់ខ្លួន                          |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | ការបញ្ចូល Account ID និងការតាមដានការប្រើប្រាស់ផ្អែកលើ Neurons               |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | បញ្ចូលសេចក្តីណែនាំប្រព័ន្ធ និងបង្ខំកម្រិតការគិតពិចារណា                      |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | ស្ពាន Responses API របស់សម័យ browser ជាមួយការចងភ្ជាប់ thread/turn           |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + ការបង្វិល header តាមសម័យនីមួយៗ                                      |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | protocol ConnectRPC ការអ៊ិនកូដ Protobuf និងការចុះហត្ថលេខាលើសំណើតាម checksum |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | ការតភ្ជាប់វដ្តជីវិតភារកិច្ច Devin តាមម៉ូឌុល cloud agent                     |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | ការធ្វើឱ្យ token Copilot ស្រស់ឡើងវិញ និង header ដែលត្រាប់តាម VSCode         |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + ការបញ្ជូនតាមវិសាលភាពគម្រោង                                   |
-| `GlmExecutor`             | Z.AI GLM (រួមទាំង preset `glmt`)                                                                                                                            | យល់ដឹងអំពីថវិកាការគិត និងតម្លៃថេរ preset GLMT                               |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | ការធ្វើ reverse សម័យវេប និងការជ្រើសរើសមុខងារ (គិត/ស្តង់ដារ)                 |
-| `KieExecutor`             | KIE                                                                                                                                                         | ការចេញ token ផ្ទាល់ខ្លួនជាមួយ anchor សម័យដែលបង្វិលផ្លាស់ប្តូរ               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | ទម្រង់គោលពីរ AWS EventStream → ការបម្លែង SSE                                |
-| `MuseSparkWebExecutor`    | Muse Spark (វេប)                                                                                                                                            | ការធ្វើ reverse សម័យវេបជាមួយការតភ្ជាប់សាររូបភាព                             |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | ទម្រង់ request body ជាក់លាក់សម្រាប់អ្នកផ្តល់សេវា                            |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | ការរៀបចំអ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ AI SDK                                  |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                              | ការធ្វើ reverse សម័យវេបសម្រាប់ការបន្តការជជែក                                |
-| `PetalsExecutor`          | ការសន្និដ្ឋានចែកចាយ Petals                                                                                                                                  | ការបញ្ជូនតាម swarm វិមជ្ឈការ                                                |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | មិនត្រូវការ API key និងសំណើដែលកំណត់អត្រា                                    |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | គាំទ្រ PAT និង OAuth ព្រមទាំងកម្រិតឥតគិតថ្លៃពហុម៉ូដែល                       |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | ការផ្ទៀងផ្ទាត់ service account និង endpoint ផ្អែកលើតំបន់                    |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | API key ដែលបាននាំចូល + ការផ្សាយ chat តាម Connect-protobuf                   |
+| ប្រតិបត្តិករ              | អ្នកផ្គត់ផ្គង់                                                                                                                                              | ការគ្រប់គ្រងពិសេស                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, ងឿងឆ្ងល់ , Together, Fireworks, Cerebras, Cohere, NVIDIA ជាដើម។ | ការកំណត់រចនាសម្ព័ន្ធ URL/header ថាមវន្តសម្រាប់អ្នកផ្តល់សេវា                          |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | project/session IDs ផ្ទាល់ខ្លួន, ព្យាយាមម្តងទៀត-បន្ទាប់ពីការញែក, ភាពច្របូកច្របល់ 429 |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | ការកំណត់ផ្លូវផ្អែកលើការដាក់ឱ្យប្រើប្រាស់ ការអនុវត្តសំណួរកំណែ api                     |
+| `BlackboxWebExecutor`     | ប្រអប់ខ្មៅ AI (របៀបគេហទំព័រ)                                                                                                                                | វេនវេនបណ្តាញជាមួយការត្រាប់តាមស្នាមម្រាមដៃ TLS                                        |
+| `ClaudeIdentityExecutor`  | Claude.ai (ផ្លូវ CCH )                                                                                                                                      | ឧបសគ្គ + ឧបករណ៍-remap pipelines រាងស្នាមម្រាមដៃ                                      |
+| `CliProxyApiExecutor`     | អ្នកផ្តល់សេវាដែលត្រូវគ្នា CLIProxyAPI                                                                                                                       | ការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវផ្ទាល់ខ្លួន និងការគ្រប់គ្រងពិធីការ                        |
+| `CloudflareAiExecutor`    | កម្មករ Cloudflare AI                                                                                                                                        | ការចាក់ ID គណនី, ការតាមដានការប្រើប្រាស់ផ្អែកលើណឺរ៉ូន                                 |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | ចាក់បញ្ចូលសេចក្តីណែនាំអំពីប្រព័ន្ធ បង្ខំឱ្យមានការប្រឹងប្រែងវែកញែក                    |
+| `ChatGptWebCodexExecutor` | គេហទំព័រ ChatGPT (Codex)                                                                                                                                    | ការឆ្លើយតបរបស់កម្មវិធីរុករកតាមអ៊ីនធឺណិត ស្ពាន API ជាមួយការខ្ទាស់ thread/turn         |
+| `CommandCodeExecutor`     | កូដបញ្ជា                                                                                                                                                    | ការបង្វិលបឋមកថាOAuth + ក្នុងមួយវគ្គ                                                  |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | ពិធីការ ConnectRPC, ការអ៊ិនកូដ Protobuf, ស្នើសុំចុះហត្ថលេខាតាមរយៈ checksum           |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | ការភ្ជាប់វដ្តជីវិតការងារ Devin តាមរយៈម៉ូឌុលភ្នាក់ងារពពក                              |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Copilot token refresh, បឋមកថា VSCode-ត្រាប់តាម                                       |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + ផ្លូវកំណត់គម្រោង                                                      |
+| `GlmExecutor`             | Z.AI GLM (រួមទាំងការកំណត់ជាមុន `glmt` )                                                                                                                     | ការគិត-ថវិកាដឹង, GLMT កំណត់ជាមុនថេរ                                                  |
+| `GrokWebExecutor`         | គេហទំព័រ xAI Grok                                                                                                                                           | វេនវេនបណ្តាញ ការជ្រើសរើសរបៀប (think/standard)                                        |
+| `KieExecutor`             | KIE                                                                                                                                                         | ការចេញសញ្ញាសម្ងាត់ផ្ទាល់ខ្លួនជាមួយនឹងយុថ្កាសម័យបង្វិល                                |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | ការបំប្លែង AWS EventStream ទម្រង់គោលពីរ → SSE                                        |
+| `MuseSparkWebExecutor`    | Muse Spark (គេហទំព័រ)                                                                                                                                       | វេននៃបណ្តាញបញ្ច្រាសជាមួយនឹងការភ្ជាប់រូបភាព-សារ                                       |
+| `NlpCloudExecutor`        | NLP ពពក                                                                                                                                                     | ទម្រង់រាងកាយសំណើជាក់លាក់របស់អ្នកផ្តល់សេវា                                            |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | ការដំឡើងអ្នកផ្តល់សេវាដែលត្រូវគ្នាAI SDK                                              |
+| `PerplexityWebExecutor`   | បណ្តាញភាពច្របូកច្របល់                                                                                                                                       | វេនវេនបណ្តាញសម្រាប់ការបន្តការជជែក                                                    |
+| `PetalsExecutor`          | Petals ចែកចាយសេចក្តីសន្និដ្ឋាន                                                                                                                              | ផ្លូវនៃហ្វូងវិមជ្ឈការ                                                                |
+| `PollinationsExecutor`    | ការបំពុល AI                                                                                                                                                 | មិនទាមទារសោ API សំណើមានកំណត់អត្រា                                                    |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                    | ការគាំទ្រ PAT និង OAuth ថ្នាក់ឥតគិតថ្លៃច្រើនម៉ូដែល                                   |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | ការផ្ទៀងផ្ទាត់គណនីសេវាកម្ម ចំណុចបញ្ចប់ផ្អែកលើតំបន់                                   |
+| `DevinDesktopExecutor`    | ផ្ទៃតុDevin                                                                                                                                                 | បាននាំចូលគន្លឹះ API + Connect-protobuf ស្ទ្រីមជជែក                                   |
 
-អ្នកផ្តល់សេវាផ្សេងទៀតទាំងអស់ (រួមទាំងថ្នាំងឆបគ្នាផ្ទាល់ខ្លួន) ប្រើ `DefaultExecutor`។
+អ្នកផ្តល់សេវាផ្សេងទៀតទាំងអស់ (រួមទាំងថ្នាំងដែលឆបគ្នាផ្ទាល់ខ្លួន) ប្រើ `DefaultExecutor`។
+
+### ការស៊ើបអង្កេតដោយស្វ័យប្រវត្តិ និងគណនីសម័យបណ្ដាញ
+
+ការធ្វើតេស្តគំរូ សាកល្បងទាំងអស់ ការធ្វើតេស្តបន្សំ និងការវាយតម្លៃផ្ញើសំណើជជែកពិតប្រាកដ។ អ្នកផ្តល់សេវាវគ្គគេហទំព័រដើរតួជាអ្នកប្រើប្រាស់ដែលបានចូល ដូច្នេះរាល់សំណើទាំងនោះនឹងត្រូវបានរក្សាទុកជាការសន្ទនានៅលើគណនីនោះ។ ការស៊ើបអង្កេតដោយស្វ័យប្រវត្តិដែលចាកចេញពីការសន្ទនាបែបនេះត្រូវបានផ្អាកគណនី (#14780) ។ ដូច្នេះ បំពង់ជជែកដេញដោលបដិសេធរាល់គោលដៅដែលការស៊ើបអង្កេតស្វ័យប្រវត្តិទៅដល់អ្នកផ្តល់សេវារបស់ពួកគេទទួលយកព័ត៌មានសម្ងាត់នៃវគ្គបណ្ដាញ នៅពេលដែលអ្នកផ្តល់សេវារបស់គោលដៅត្រូវបានដោះស្រាយ និងមុនពេលជ្រើសរើសព័ត៌មានសម្ងាត់ (`src/lib/providers/chatProbePolicy.ts`) ។ ការបដិសេធគឺ `422` ជាមួយ `error.code` `chat_probe_not_isolated` ហើយអ្នករត់ការស៊ើបអង្កេតរាយការណ៍ថាវាជាការរំលង មិនមែនជាការបរាជ័យទេ។
+
+ប្រតិបត្តិករដែលដំណើរការរាល់ការជជែកនៅក្នុងរបៀបគ្មានប្រវត្តិផ្ទាល់ខ្លួនរបស់អ្នកផ្តល់សេវាប្រកាសវាជាមួយ `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); បន្ទាប់មកការស៊ើបអង្កេតទៅកាន់អ្នកផ្តល់សេវានោះត្រូវបានអនុញ្ញាត។ គេហទំព័រ ChatGPT ប្រកាស `temporary-chat`។ ខ្ទាស់ការប្រកាសទៅនឹងយន្តការរបស់វាជាមួយនឹងការធ្វើតេស្ត ដូច្នេះការទាមទារមិនអាចលើសពីកូដដែលធ្វើឱ្យវាពិតនោះទេ។
 
 ## ម៉ាទ្រីសភាពឆបគ្នារបស់អ្នកផ្តល់សេវា
 
@@ -1056,11 +1063,11 @@ Provider នីមួយៗមាន executor ឯកទេសមួយដែល�
 - migration របស់ schema SQLite និង hook ដំឡើងកំណែដោយស្វ័យប្រវត្តិនៅពេលចាប់ផ្តើម
 - ផ្លូវភាពឆបគ្នាសម្រាប់ migration ពី JSON ចាស់ → SQLite
 
-## 6) របាំង SSRF / URL ចេញក្រៅ
+## 6) ការការពារ SSRF / URL ចេញក្រៅ
 
-- `src/shared/network/outboundUrlGuard.ts` រារាំង URL គោលដៅ private/loopback/link-local ទាំងអស់ មុនពេលពួកវាទៅដល់ executor របស់អ្នកផ្តល់សេវា
-- route សម្រាប់ការស្វែងរក និងផ្ទៀងផ្ទាត់ model របស់អ្នកផ្តល់សេវា ប្រើ `src/shared/network/safeOutboundFetch.ts` ដែលអនុវត្ត guard មុនរាល់សំណើចេញក្រៅ
-- កំហុស guard ត្រូវបានបង្ហាញជា `URL_GUARD_BLOCKED` ជាមួយ HTTP 422 ហើយត្រូវបានកត់ត្រាទៅក្នុងប្រវត្តិសវនកម្មអនុលោមភាពតាមរយៈ `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) អនុវត្ត `src/shared/network/outboundUrlGuard.ts` ចំពោះសំណើជជែកដែលត្រូវបានបញ្ជូនតាមរយៈ `BaseExecutor.execute()`។ នៅក្នុងរបៀបសាធារណៈតែប៉ុណ្ណោះ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ដោយបិទទង់ឯកជន) វាទប់ស្កាត់ម៉ាស៊ីនមេឯកជន ម៉ាស៊ីនមេ loopback និង 169.254.0.0/16; នៅក្នុងរបៀបផ្សេងទៀតទាំងអស់ វាទប់ស្កាត់ម៉ាស៊ីនមេ cloud-metadata។ វាពិនិត្យឈ្មោះម៉ាស៊ីនមេ ឬ IP literal តាមដែលបានសរសេរ មុនពេលធ្វើការស្វែងរក DNS ណាមួយ។ អ្នកផ្តល់សេវាមូលដ្ឋានដែលមានស្រាប់នឹងរំលងការពារនេះ។
+- ផ្លូវសម្រាប់ការស្វែងរក និងផ្ទៀងផ្ទាត់ម៉ូដែលរបស់អ្នកផ្តល់សេវា ប្រើ `src/shared/network/safeOutboundFetch.ts` ដែលអនុវត្តការការពារមុនពេលសំណើចេញក្រៅនីមួយៗ
+- កំហុសនៃការការពារត្រូវបានបង្ហាញជា `URL_GUARD_BLOCKED` ជាមួយ HTTP 503 (`getSafeOutboundFetchErrorStatus`; ផ្លូវស្វែងរកម៉ូដែលត្រឡប់ 400) ហើយការទប់ស្កាត់ SSRF ពិតប្រាកដក្នុងអំឡុងពេលផ្ទៀងផ្ទាត់ ត្រូវបានកត់ត្រាទៅក្នុងកំណត់ហេតុសវនកម្មជា event `provider.validation.ssrf_blocked`
 
 ## ភាពអាចសង្កេតបាន និងសញ្ញាប្រតិបត្តិការ
 
@@ -1111,7 +1118,7 @@ Provider នីមួយៗមាន executor ឯកទេសមួយដែល�
 4. ឥរិយាបថរបស់ cloud ពឹងផ្អែកលើ `NEXT_PUBLIC_BASE_URL` ដែលត្រឹមត្រូវ និងលទ្ធភាពចូលដំណើរការចំណុចបញ្ចប់របស់ cloud។
 5. ថត `open-sse/` ត្រូវបានបោះផ្សាយជា **npm workspace package** `@omniroute/open-sse`។ កូដប្រភព import វាតាមរយៈ `@omniroute/open-sse/...` (ដោះស្រាយដោយ `transpilePackages` របស់ Next.js)។ ផ្លូវឯកសារក្នុងឯកសារនេះនៅតែប្រើឈ្មោះថត `open-sse/` ដើម្បីរក្សាភាពស៊ីសង្វាក់គ្នា។
 6. គំនូសតាងក្នុង dashboard ប្រើ **Recharts** (ផ្អែកលើ SVG) សម្រាប់ការមើលឃើញទិន្នន័យវិភាគដែលអាចចូលប្រើបាន និងអន្តរកម្ម (គំនូសតាងបារនៃការប្រើប្រាស់ model និងតារាងបែងចែកតាមអ្នកផ្តល់សេវា ជាមួយអត្រាជោគជ័យ)។
-7. ការធ្វើតេស្ត E2E ប្រើ **Playwright** (`tests/e2e/`) និងដំណើរការតាមរយៈ `npm run test:e2e`។ ការធ្វើតេស្ត unit ប្រើ **Node.js test runner** (`tests/unit/`) និងដំណើរការតាមរយៈ `npm run test:unit`។ កូដប្រភពនៅក្រោម `src/` គឺជា **TypeScript** (`.ts`/`.tsx`) ខណៈដែល workspace `open-sse/` នៅតែជា JavaScript (`.js`)។
+7. ការធ្វើតេស្ត E2E ប្រើ **Playwright** (`tests/e2e/`) និងដំណើរការតាមរយៈ `npm run test:e2e`។ ការធ្វើតេស្ត unit ប្រើ **Node.js test runner** (`tests/unit/`) និងដំណើរការតាមរយៈ `npm run test:unit`។ កូដប្រភពនៅក្រោម `src/` គឺជា **TypeScript** (`.ts`/`.tsx`) ខណៈដែល workspace `open-sse/` នៅតែជា TypeScript (`.ts`)។
 8. ទំព័រការកំណត់ត្រូវបានរៀបចំជា 7 ផ្ទាំង៖ ទូទៅ, រូបរាង, AI, សុវត្ថិភាព, ការកំណត់ផ្លូវ, ភាពធន់ និងកម្រិតខ្ពស់។ ទំព័រភាពធន់ កំណត់រចនាសម្ព័ន្ធតែជួរសំណើ រយៈពេលរង់ចាំនៃការតភ្ជាប់ ឧបករណ៍ផ្តាច់សៀគ្វីរបស់អ្នកផ្តល់សេវា និងឥរិយាបថរង់ចាំរហូតដល់ផុតរយៈពេលរង់ចាំប៉ុណ្ណោះ។ ស្ថានភាព runtime ផ្ទាល់របស់ឧបករណ៍ផ្តាច់សៀគ្វី ត្រូវបានបង្ហាញនៅលើទំព័រសុខភាព។
 9. យុទ្ធសាស្ត្រ **Context Relay** (`context-relay`) ត្រូវបានបែងចែកជាពីរស្រទាប់៖ `combo.ts` សម្រេចថាតើគួរបង្កើត handoff ឬអត់ ហើយ `chat.ts` បញ្ចូល handoff បន្ទាប់ពីដោះស្រាយគណនីរួច។ ទិន្នន័យ handoff ស្ថិតនៅក្នុងតារាង SQLite `context_handoffs`។ ការបែងចែកនេះគឺដោយចេតនា ព្រោះមានតែ `chat.ts` ប៉ុណ្ណោះដែលដឹងថាតើគណនីជាក់ស្តែងបានផ្លាស់ប្តូរឬអត់។
 10. **ការអនុវត្ត Proxy ជាកំហិត** ឥឡូវនេះមានភាពគ្រប់ជ្រុងជ្រោយ៖ `tokenHealthCheck.ts` ដោះស្រាយ proxy សម្រាប់ការតភ្ជាប់នីមួយៗ, `/api/providers/validate` ប្រើ `runWithProxyContext` ហើយ `proxyFetch.ts` ប្រើ `undici.fetch()` ដើម្បីរក្សាភាពឆបគ្នាជាមួយ dispatcher នៅលើ Node 22។

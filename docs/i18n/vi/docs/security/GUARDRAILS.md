@@ -25,124 +25,320 @@ Các hook **không** chạy trên mọi route hay mọi response. Hãy đọc
 [Mức độ bao phủ và giới hạn](#coverage-and-limits) trước khi dựa vào một
 guardrail như một biện pháp kiểm soát bảo mật.
 
-## Lan can tích hợp
+## Guardrail tích hợp sẵn
 
-Cơ quan đăng ký tự động tải sáu lan can theo thứ tự ưu tiên khi nhập (xem `registry.ts` → `registerDefaultGuardrails()`):
+Registry tự động nạp sáu guardrail theo thứ tự ưu tiên khi import
+(xem `registry.ts` → `registerDefaultGuardrails()`):
 
-| Sự ưu tiên | Tên                 | (Các) giai đoạn | Tài liệu              |
-| ---------- | ------------------- | --------------- | --------------------- |
-| `5`        | `vision-bridge`     | `preCall`       | `visionBridge.ts`     |
-| `6`        | `audio-bridge`      | `preCall`       | `audioBridge.ts`      |
-| `7`        | `video-bridge`      | `preCall`       | `videoBridge.ts`      |
-| `10`       | `pii-masker`        | `pre` + `post`  | `piiMasker.ts`        |
-| `20`       | `prompt-injection`  | `preCall`       | `promptInjection.ts`  |
-| `95`       | `credential-masker` | `pre` + `post`  | `credentialMasker.ts` |
+| Ưu tiên | Tên                 | (Các) giai đoạn | Tệp                   |
+| ------- | ------------------- | --------------- | --------------------- |
+| `5`     | `vision-bridge`     | `preCall`       | `visionBridge.ts`     |
+| `6`     | `audio-bridge`      | `preCall`       | `audioBridge.ts`      |
+| `7`     | `video-bridge`      | `preCall`       | `videoBridge.ts`      |
+| `10`    | `pii-masker`        | `pre` + `post`  | `piiMasker.ts`        |
+| `20`    | `prompt-injection`  | `preCall`       | `promptInjection.ts`  |
+| `95`    | `credential-masker` | `pre` + `post`  | `credentialMasker.ts` |
 
-Số ưu tiên thấp hơn chạy** Đầu tiên** .
+Số ưu tiên thấp hơn chạy **trước**.
 
-### Cầu tầm nhìn (`visionBridge.ts`) — Cầu phương thức PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Mô hình cơ sở GLM 5.3 và `glm-5.3-{low,high,max}` có siêu dữ liệu `supportsVision:false` registry/spec rõ ràng. Các biến thể GLM 5.3 Flash vẫn là mô hình có tầm nhìn gốc. Tuyến đường `/v1/messages` của Claude Code đi vào chuỗi lan can bảo vệ trước cuộc gọi `handleChat` được chia sẻ** trước** Bản dịch Claude-to-OpenAI; Các hình ảnh kết quả của công cụ `Read` lồng nhau phải được mô tả hoặc xử lý trước khi bản dịch đó chuyển chúng thành nội dung OpenAI `image_url` (#17069).
+Model cơ sở GLM 5.3 và `glm-5.3-{low,high,max}` có metadata registry/spec
+tường minh là `supportsVision:false`. Các biến thể GLM 5.3 Flash vẫn là các
+model vision gốc. Route `/v1/messages` của Claude Code đi vào chuỗi guardrail
+pre-call dùng chung `handleChat` **trước** khi diễn ra quá trình dịch
+Claude-sang-OpenAI; các ảnh lồng trong kết quả tool `Read` phải được mô tả
+hoặc xử lý trước khi quá trình dịch đó đưa chúng thành nội dung `image_url`
+của OpenAI (#17069).
 
-Chặn các yêu cầu mang hình ảnh nhằm mục đích** mô hình không có tầm nhìn** và định tuyến lại toàn bộ yêu cầu đến một mô hình có khả năng hiển thị hoặc thay thế các phần hình ảnh bằng mô tả văn bản do mô hình tầm nhìn có thể định cấu hình tạo ra trước lệnh gọi ngược dòng. Điều này cho phép các nhà cung cấp chỉ có văn bản xử lý tải trọng đa phương thức một cách minh bạch.
+Chặn các request chứa ảnh nhắm tới **các model không hỗ trợ vision** và hoặc
+định tuyến lại toàn bộ request sang một model có khả năng vision, hoặc thay
+thế các phần ảnh bằng các mô tả văn bản do một model vision có thể cấu hình
+tạo ra trước khi gọi upstream. Điều này cho phép các nhà cung cấp chỉ hỗ trợ
+văn bản xử lý payload đa phương thức một cách trong suốt.
 
-Chảy:
+Luồng xử lý:
 
-1. Bỏ qua nếu mô hình mục tiêu đã hỗ trợ tầm nhìn (trừ khi nó xuất hiện trong danh sách cầu nối bắt buộc `isVisionBridgeForcedModel`).
-2. Trích xuất các phần hình ảnh thông qua `extractImageParts(messages)` (`visionBridgeHelpers.ts`), ủy quyền cho** máy dò phương tiện thống nhất** `detectMediaParts()` trong `open-sse/utils/mediaParts.ts` — nguồn sự thật duy nhất được chia sẻ với bộ lọc tương thích kết hợp. Việc trích xuất được đưa vào danh sách cho phép đối với các hình dạng mà `replaceImageParts` có thể ghép lại (hợp đồng thay thế ↔ trích xuất): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` và Responses API `input_image`. Các hình ảnh phù hợp được lồng bên trong đầu ra của công cụ Claude Code `tool_result.content` và Responses cũng được trích xuất và thay thế tại đường dẫn ban đầu của chúng; các hình dạng chỉ có chỉ báo là vật liệu lọc kết hợp và không được trích xuất. Bỏ qua nếu không tìm thấy.
-3. Giải quyết cấu hình thời gian chạy thông qua `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): các phím cài đặt `modalityBridge*` mới giành chiến thắng; khóa `visionBridge*` kế thừa vẫn là một** dự phòng một chu kỳ** (cửa sổ quay lui). Bỏ qua trước bất kỳ quá trình truyền tải phương tiện nào khi cầu nối bị vô hiệu hóa.
-4. Bộ chọn chế độ (`modalityBridgeVisionMode`, xem bảng bên dưới) quyết định định tuyến lại hay mô tả. Định tuyến lại trả về `modifiedPayload` chỉ với `model` được hoán đổi, cộng với meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Đường dẫn mô tả: giới hạn hình ảnh tại `maxImages`, soạn lời nhắc nhận biết tác vụ, tham khảo bộ đệm mô tả, gọi mô hình tầm nhìn** song song** (`Promise.allSettled`) và chèn các phần văn bản `[Image N]: <description>` vào vị trí của chúng. Một mô tả không thành công mang lại `null`: hình ảnh thô được giữ nguyên cho các mục tiêu unknown/vision-capable (#4012), nhưng một** mục tiêu trực tiếp chỉ có văn bản đã được xác nhận** hoặc kết hợp không tầm nhìn nhận được một đoạn văn bản `(unavailable — no vision-capable provider connected)` rõ ràng cho mọi hình ảnh không được mô tả, bao gồm cả lỗi một phần và hình ảnh vượt quá giới hạn lệnh gọi mô tả (#17069). Dự phòng mô tả kết hợp hoàn toàn thất bại hiện có vẫn được giữ nguyên (#8430).
-6. Trả về meta `modifiedPayload` + (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Bỏ qua nếu model đích đã hỗ trợ vision (trừ khi nó xuất hiện trong danh
+   sách bắt buộc bridge `isVisionBridgeForcedModel`).
+2. Trích xuất các phần ảnh qua `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), hàm này ủy quyền cho **bộ phát hiện media
+   thống nhất** `detectMediaParts()` trong `open-sse/utils/mediaParts.ts` —
+   nguồn chính xác duy nhất được chia sẻ với bộ lọc tương thích combo.
+   Việc trích xuất được giới hạn trong danh sách cho phép gồm các dạng mà
+   `replaceImageParts` có thể ghép lại (hợp đồng extract↔replace): `image_url`
+   của OpenAI, base64 của Anthropic `source.type:"base64"`, URL của Anthropic
+   `source.type:"url"`, và `input_image` của Responses API. Các ảnh khớp nằm
+   lồng bên trong `tool_result.content` của Claude Code và output của tool
+   Responses cũng được trích xuất và thay thế tại đường dẫn gốc của chúng;
+   các dạng chỉ mang tính chỉ báo (indicator-only) thuộc phạm vi của bộ lọc
+   combo và không được trích xuất. Bỏ qua nếu không tìm thấy ảnh nào.
+3. Phân giải cấu hình runtime qua `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): các khóa cài đặt mới
+   `modalityBridge*` được ưu tiên; các khóa cũ `visionBridge*` vẫn đóng vai
+   trò **phương án dự phòng trong một chu kỳ** (cửa sổ rollback). Bỏ qua
+   trước mọi thao tác duyệt media khi bridge bị tắt.
+4. Bộ chọn chế độ (`modalityBridgeVisionMode`, xem bảng bên dưới) quyết định
+   reroute hay describe. Reroute trả về `modifiedPayload` chỉ với `model`
+   được đổi, kèm meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Nhánh describe: giới hạn số ảnh ở `maxImages`, tạo prompt có nhận biết
+   theo tác vụ, tra cứu cache describe, gọi model vision **song song**
+   (`Promise.allSettled`), và chèn các phần văn bản `[Image N]: <description>`
+   vào vị trí tương ứng. Một lần describe thất bại trả về `null`: ảnh gốc
+   được giữ lại cho các đích chưa xác định/có khả năng vision (#4012), nhưng
+   một **đích trực tiếp đã xác nhận chỉ hỗ trợ văn bản** hoặc combo không có
+   khả năng vision sẽ nhận được một đoạn văn bản thay thế tường minh
+   `(unavailable — no vision-capable provider connected)` cho mỗi ảnh không
+   được mô tả, bao gồm cả các thất bại từng phần và các ảnh vượt quá ngưỡng
+   lượt gọi describe (#17069). Phương án dự phòng describe hiện có cho combo
+   khi tất cả đều thất bại vẫn được giữ nguyên (#8430).
+6. Trả về `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
 #### Bộ chọn chế độ (`modalityBridgeVisionMode`)
 
-| Cách thức  | Mặc định | Hành vi                                                                                                                                                                                                                                                                                                    |
-| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔        | Heuristic kế thừa, không bị ảnh hưởng (#6640/#7204): các mô hình không kết hợp/`auto/` định tuyến lại đến mô hình tầm nhìn tốt nhất trừ khi mô hình ban đầu đã có thông tin xác thực có thể sử dụng được (sau đó mô tả); mục tiêu kết hợp luôn mô tả.                                                      |
-| `describe` |          | Luôn mô tả — khối định tuyến lại bị bỏ qua hoàn toàn; mô hình người dùng đã chọn luôn trả lời.                                                                                                                                                                                                             |
-| `reroute`  |          | Buộc định tuyến lại: bộ phận bảo vệ mô hình giữ thông tin xác thực bị bỏ qua. Định tuyến lại-** mục tiêu** trình bảo vệ thông tin xác thực vẫn áp dụng — khi không có mục tiêu tầm nhìn nào có thể sử dụng được, cầu nối chặn lỗi rõ ràng thay vì mô tả hoặc gửi hình ảnh thô đến mục tiêu chỉ có văn bản. |
+| Chế độ     | Mặc định | Hành vi                                                                                                                                                                                                                                                                |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔        | Heuristic legacy, giữ nguyên không đổi (#6640/#7204): các model không phải combo/`auto/` được reroute sang model vision tốt nhất trừ khi model gốc đã có credential khả dụng (khi đó thì describe); các target combo luôn describe.                                    |
+| `describe` |          | Luôn describe — khối reroute bị bỏ qua hoàn toàn; model do người dùng chọn luôn là model trả lời.                                                                                                                                                                      |
+| `reroute`  |          | Buộc reroute: guard giữ lại model có credential bị bỏ qua. Guard credential của **target** reroute vẫn áp dụng — khi không tồn tại target vision khả dụng nào, bridge sẽ chặn với một lỗi rõ ràng thay vì describe hoặc gửi ảnh thô tới một target chỉ hỗ trợ văn bản. |
 
-Chế độ cưỡng bức ngắn mạch** trước** các lần chạy heuristic tự động; hành vi `auto` giống hệt byte với lan can pre-PR-1.
+Các chế độ bắt buộc sẽ short-circuit **trước khi** heuristic auto chạy; hành vi của `auto`
+giống hệt từng byte với guardrail trước PR-1.
 
-#### Phạm vi khóa API (`visionBridgeKeyScope.ts`)
+#### Phạm vi API key (`visionBridgeKeyScope.ts`)
 
-Khi khóa API của người gọi hạn chế `allowedConnections`, nhóm hạn ngạch (`allowedQuotas`) hoặc mô hình (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), cầu nối chỉ chọn định tuyến lại và mô tả các mô hình mà khóa có thể sử dụng, trên các kết nối mà khóa có thể sử dụng. Sau đó, lệnh gọi mô tả luôn đi qua vòng lặp OmniRoute với tiêu đề `x-omniroute-self-loop-key-id`, do đó, yêu cầu trò chuyện nhận được sẽ thực thi lại chính sách mô hình và kết nối của khóa đó. `enforceApiKeyPolicy()` chỉ tôn trọng tiêu đề đó cùng với trình mang vòng lặp tự, do đó, nó chỉ có thể thu hẹp quyền truy cập và id không giải quyết được sẽ bị từ chối.
+Khi API key của người gọi giới hạn `allowedConnections`, các pool quota
+(`allowedQuotas`) hoặc các model (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), bridge chỉ
+chọn các model reroute và describe mà key được phép dùng, trên các connection
+mà key được phép dùng. Lệnh gọi describe sau đó luôn đi qua self-loop của
+OmniRoute với header `x-omniroute-self-loop-key-id`, để chat request
+nhận được sẽ tự thực thi lại chính sách connection và model của key đó.
+`enforceApiKeyPolicy()` chỉ công nhận header đó khi đi cùng với bearer
+self-loop, vì vậy nó chỉ có thể thu hẹp quyền truy cập, và một id không
+phân giải được sẽ bị từ chối.
 
-Nếu không có mô hình tầm nhìn nào được phép cho khóa,** mục tiêu chỉ có văn bản đã được xác nhận** từ chối yêu cầu hình ảnh cục bộ với HTTP 400 rõ ràng thay vì chuyển tiếp byte hình ảnh lên thượng nguồn không có khả năng (#17069). Đối với các mục tiêu có khả năng nhìn không xác định hoặc có sẵn, đường dẫn mô tả vẫn giữ nguyên trạng thái không mở được trước đó (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Các yêu cầu không có khóa và các khóa không có những hạn chế này sẽ hoạt động chính xác như trước.
+Nếu không có model vision nào được phép cho key, một **target đã xác nhận
+chỉ hỗ trợ văn bản** sẽ từ chối request ảnh ngay tại chỗ với lỗi HTTP 400
+rõ ràng thay vì chuyển tiếp các byte ảnh tới một upstream không có khả năng
+xử lý (#17069). Với các target có khả năng vision chưa biết hoặc vision
+native, đường describe giữ nguyên hành vi fail-open trước đây
+(meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Các request không có key, và các key không có những giới hạn này,
+hoạt động giống hệt như trước.
 
-#### Lời nhắc mô tả nhận biết nhiệm vụ (`modalityBridgeVisionTaskAware`)
+#### Prompt describe nhận biết tác vụ (`modalityBridgeVisionTaskAware`)
 
-Mặc định** ĐÚNG VẬY** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) nối thêm văn bản của** tin nhắn của người dùng cuối cùng** (cắt ngắn còn 500 ký tự) vào lời nhắc mô tả cơ sở, hướng mô tả đến những gì người dùng thực sự yêu cầu (mẫu codex-vision-proxy) và yêu cầu mô hình tầm nhìn ghi lại văn bản hiển thị. Với cờ tắt — hoặc không có văn bản người dùng — dấu nhắc cơ sở được sử dụng không thay đổi.
+Mặc định **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) nối thêm
+văn bản của **tin nhắn user cuối cùng** (cắt ngắn còn 500 ký tự) vào prompt
+describe cơ sở, điều hướng mô tả theo điều người dùng thực sự hỏi
+(pattern codex-vision-proxy) và yêu cầu model vision phiên lại phần văn bản
+nhìn thấy được. Khi flag tắt — hoặc không có văn bản user — prompt cơ sở
+được dùng nguyên bản.
 
-Yêu cầu tương thích OpenAI của chính mô tả vòng lặp (`callVisionModelSingle()` trong `visionBridgeHelpers.ts`) luôn yêu cầu `image_url.detail: "high"` — vô điều kiện, đối với mọi caller/provider, không bị kiểm soát trên bất kỳ tín hiệu máy khách nào. Việc lấy mẫu chi tiết thấp làm giảm độ chính xác OCR đối với chính xác tác vụ phiên âm văn bản mà lời nhắc này yêu cầu, do đó, lệnh gọi mô tả luôn yêu cầu độ chi tiết cao bất kể yêu cầu gửi đến ban đầu được sử dụng ở mức độ chi tiết nào. Điều này chỉ ảnh hưởng đến nội dung yêu cầu mô tả nội bộ; nó không thay đổi cách OmniRoute chuyển tiếp `image_url.detail` của chính người gọi theo — yêu cầu chính mà mặc định đó được áp dụng riêng và chỉ dành cho các máy khách OpenCode được phát hiện, trong `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Nhánh định dạng dây Anthropic của vòng tự mô tả không có trường `detail` và không bị ảnh hưởng theo mặc định.
+Request tương thích OpenAI của chính self-loop describe (`callVisionModelSingle()`
+trong `visionBridgeHelpers.ts`) luôn yêu cầu `image_url.detail: "high"` —
+vô điều kiện, cho mọi caller/provider, không bị ràng buộc bởi bất kỳ tín hiệu
+client nào. Việc lấy mẫu ở độ chi tiết thấp làm giảm độ chính xác OCR đúng
+cho tác vụ phiên văn bản mà prompt này yêu cầu, nên bản thân lệnh gọi describe
+luôn yêu cầu độ chi tiết cao bất kể request đến ban đầu dùng mức chi tiết nào.
+Điều này chỉ ảnh hưởng đến body của request describe nội bộ; nó không thay đổi
+cách OmniRoute chuyển tiếp `image_url.detail` của chính caller trên request
+chính — mặc định đó được áp dụng riêng, và chỉ cho các client OpenCode được
+phát hiện, trong `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`).
+Nhánh định dạng wire của Anthropic trong self-loop describe không có trường
+`detail` và không bị ảnh hưởng bởi cả hai mặc định đó.
 
-#### Mô tả giới hạn đầu ra (`modalityBridgeVisionMaxChars`)
+#### Giới hạn đầu ra describe (`modalityBridgeVisionMaxChars`)
 
-| Chìa khóa                      | Mặc định | Phạm vi            |
+| Khóa                           | Mặc định | Khoảng             |
 | ------------------------------ | -------- | ------------------ |
 | `modalityBridgeVisionMaxChars` | `0`      | `0` hoặc 100–50000 |
 
-`0` (mặc định) có nghĩa là** không có nắp** — mô tả được trả về bởi `callVisionModel()` được chuyển qua chưa sửa đổi, duy trì hành vi hiện có. Bất kỳ giá trị nào trong phạm vi 100–50000 sẽ cắt bớt mô tả bằng hậu tố `…` trước khi nó được ghép lại thành `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` trong `src/lib/guardrails/visionBridge.ts`). Tăng giá trị này cho các tác vụ OCR nặng về chi tiết trong đó mô hình xuôi dòng cần phiên âm đầy đủ; hạ thấp nó xuống mức sử dụng mã thông báo bị ràng buộc trên các mô hình tầm nhìn trò chuyện. Trường bảng điều khiển nằm trên bảng Nâng cao của tab Tầm nhìn (`modality-bridge-max-chars` trong `ModalityBridgeVisionTab.tsx`) và kẹp bất kỳ giá trị nào từ 1 đến 99 cho đến tầng 100 trong khi để lại `0` rõ ràng — `0` là một giá trị Zod hợp lệ theo đúng nghĩa của nó (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), không chỉ đơn thuần là mặc định "không được đặt".
+`0` (mặc định) nghĩa là **không giới hạn** — mô tả do
+`callVisionModel()` trả về được chuyển qua nguyên bản, giữ nguyên hành vi
+hiện có. Bất kỳ giá trị nào trong khoảng 100–50000 sẽ cắt ngắn mô tả với
+hậu tố `…` trước khi nó được ghép lại dưới dạng `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` trong `src/lib/guardrails/visionBridge.ts`).
+Tăng giá trị này cho các tác vụ OCR nhiều chi tiết khi model downstream cần
+bản phiên đầy đủ; giảm nó để giới hạn mức dùng token trên các model vision
+nhiều lời. Trường trên dashboard nằm ở panel Advanced của tab Vision
+(`modality-bridge-max-chars` trong `ModalityBridgeVisionTab.tsx`) và kẹp (clamp)
+mọi giá trị từ 1 đến 99 lên ngưỡng sàn 100 trong khi vẫn giữ nguyên giá trị
+`0` tường minh — `0` là một giá trị Zod hợp lệ theo đúng nghĩa của nó
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), chứ không
+chỉ là mặc định "chưa đặt".
 
-#### Mô tả bộ đệm (`modalityBridge/bridgeCache.ts`)
+#### Cache describe (`modalityBridge/bridgeCache.ts`)
 
-Bộ đệm LRU + TTL trong bộ nhớ để mô tả kết quả đầu ra, được chia sẻ trên toàn quy trình. Khóa = `sha256(imageRef + composedPrompt + configuredBridgeModel)` có khung tiền tố độ dài (không có xung đột ranh giới trường). Thành phần mô hình là** được cấu hình** mô hình cầu nối, không phải mô hình thực sự trả lời — `callVisionModel` có thể quay trở lại nội bộ và việc khóa mỗi lần thử sẽ phân mảnh bộ đệm. Mô tả không thành công sẽ không bao giờ được lưu vào bộ nhớ đệm. Cài đặt:
+Cache LRU + TTL trong bộ nhớ cho các đầu ra describe, dùng chung toàn tiến trình.
+Khóa = `sha256(imageRef + composedPrompt + configuredBridgeModel)` với cơ chế
+khung tiền tố độ dài (không xung đột biên trường). Thành phần model là model
+bridge **được cấu hình**, không phải model thực sự trả lời — `callVisionModel`
+có thể tự fallback bên trong, và tạo khóa theo từng lần thử sẽ làm phân mảnh
+cache. Các describe thất bại không bao giờ được cache. Cài đặt:
 
-| Chìa khóa                       | Mặc định | Phạm vi |
+| Khóa                            | Mặc định | Khoảng  |
 | ------------------------------- | -------- | ------- |
 | `modalityBridgeCacheEnabled`    | `true`   | —       |
 | `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`    | 10–5000 |
 
-#### Chuẩn hóa hình ảnh từ xa (tìm nạp describe/base64 tự lặp)
+#### Chuẩn hóa ảnh từ xa (tải describe/base64 qua self-loop)
 
-Khi cây cầu lấy một** xa** chính hình ảnh — Anthropic mô tả tự gọi và chuyển đổi base64 định dạng dây claude (`ensureBase64ImagesForClaudeWire`), cả hai đều thông qua `fetchRemoteImageAsDataUri()` trong `visionBridgeHelpers.ts` — dữ liệu kết quả URI được chuyển qua `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) trước khi được nhúng vào yêu cầu mô hình tầm nhìn. Hình ảnh quá khổ được thu nhỏ lại thành** Cạnh dài 2048px** (khớp với giới hạn thay đổi kích thước OpenAI/Anthropic đã áp dụng phía máy chủ), giúp cắt bytes/latency tải lên mà không thay đổi những gì mô hình tầm nhìn nhìn thấy. Việc thay đổi kích thước sử dụng `sharp`, được tải thông qua nhập động: trên nền tảng mà nhị phân gốc của nó không tải được, `normalizeDataUri()`** không bao giờ ném** — nó sẽ quay trở lại việc chuyển các byte ban đầu, vì vậy đường dẫn describe/base64-conversion luôn tiếp tục hoạt động. Các byte không phải hình ảnh (một lần tìm nạp không trả về hình ảnh có thể giải mã được) cũng được truyền qua mà không bị ảnh hưởng. Quá trình chuẩn hóa này được áp dụng cho các hình ảnh mà cầu nối tìm nạp cho — tự gọi của chính nó. Nó không bao giờ được áp dụng cho tải trọng truyền qua thô của người gọi, nhất quán với nguyên tắc đột biến chỉ chọn tham gia (Quy tắc cứng #20).
+Khi bridge tự tải một ảnh **từ xa** — lệnh tự gọi (self-call) describe của Anthropic
+và quá trình chuyển đổi base64 theo định dạng claude-wire
+(`ensureBase64ImagesForClaudeWire`), cả hai đều thông qua
+`fetchRemoteImageAsDataUri()` trong `visionBridgeHelpers.ts` — data URI thu được
+sẽ được truyền qua `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) trước khi được nhúng vào request gửi tới
+vision model. Các ảnh quá lớn sẽ được thu nhỏ xuống còn **cạnh dài 2048px** (tương
+ứng với giới hạn resize mà OpenAI/Anthropic đã áp dụng phía server), giúp giảm
+số byte/độ trễ khi upload mà không thay đổi những gì vision model nhìn thấy.
+Việc resize sử dụng `sharp`, được nạp qua dynamic import: trên nền tảng mà native
+binary của nó không nạp được, `normalizeDataUri()` **không bao giờ throw** — nó
+chuyển về chế độ passthrough các byte gốc, nhờ đó đường dẫn
+describe/chuyển đổi base64 luôn tiếp tục hoạt động. Các byte không phải ảnh (một
+lượt fetch không trả về ảnh có thể giải mã được) cũng được truyền thẳng qua mà
+không thay đổi. Việc chuẩn hóa này chỉ giới hạn ở các ảnh mà bridge tự tải cho
+lệnh self-call của chính nó — nó không bao giờ được áp dụng cho payload
+passthrough thô của caller, phù hợp với nguyên tắc chỉ biến đổi khi được chọn
+tham gia (Hard Rule #20).
 
-#### Lược đồ cài đặt di chuyển +
+#### Schema cài đặt + migration
 
-Các khóa `modalityBridge*` mới được Zod xác thực trong `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, bộ ba `modalityBridgeCache*` và nhóm `modalityBridgeAudio*` được Audio Bridge sử dụng. Di chuyển `141_modality_bridge_settings.sql` sao chép các giá trị `visionBridge*` kế thừa hiện có sang các khóa mới phù hợp (bình thường, không bao giờ ghi đè giá trị `modalityBridge*` do toán tử đặt); các khóa cũ vẫn được chấp nhận dưới dạng dự phòng đọc trong một chu kỳ phát hành.
+Các key `modalityBridge*` mới được validate bằng Zod trong `updateSettingsSchema`
+(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
+`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
+`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
+`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
+`modalityBridgeVisionMaxChars`, bộ ba `modalityBridgeCache*`, và nhóm
+`modalityBridgeAudio*` được Audio Bridge sử dụng. Migration
+`141_modality_bridge_settings.sql` sao chép các giá trị legacy
+`visionBridge*` hiện có sang các key mới tương ứng (idempotent, không bao giờ
+ghi đè giá trị `modalityBridge*` do operator đặt); các key legacy vẫn được chấp
+nhận như một phương án đọc dự phòng trong một chu kỳ phát hành.
 
-#### Số liệu thống kê + tiêu đề minh bạch
+#### Header minh bạch + thống kê
 
-Các phản hồi được chuyển đổi mô tả mang theo `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (được xây dựng bởi `buildModalityBridgeHeader()` trong `modalityBridge/bridgeStats.ts`, được đóng dấu bởi `withModalityBridgeHeader()` trong `src/sse/handlers/chatHelpers.ts`). Yêu cầu được định tuyến lại nhận được** KHÔNG** tiêu đề — tải trọng không bị ảnh hưởng và việc hoán đổi mô hình đã hiển thị trong trường `model` của nội dung phản hồi.
+Các response đã được describe biến đổi mang header
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+(được xây dựng bởi `buildModalityBridgeHeader()` trong `modalityBridge/bridgeStats.ts`,
+được gắn bởi `withModalityBridgeHeader()` trong `src/sse/handlers/chatHelpers.ts`).
+Các request được reroute **không** nhận header — vì payload không bị thay đổi và
+việc đổi model đã hiển thị trong trường `model` của response body.
 
-`GET /api/modality-bridge/stats` (xác thực quản lý, cùng cấp với `GET /api/settings`) trả về bộ đếm trong bộ nhớ theo từng phương thức `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` cho `vision`, `audio` và `video`. `averageLatencyMs` sử dụng `latencySamples`, không phải tất cả các lần thử, làm mẫu số của nó; một thao tác không có thời gian sẽ không tạo ra mẫu 0 mili giây. `bridged` vẫn là bí danh tương thích ngược để chuyển đổi thành công; những lần thử thất bại không làm tăng nó. Thiết lập lại bộ đếm khi khởi động lại quá trình theo thiết kế (đo từ xa, không tính toán).
+`GET /api/modality-bridge/stats` (xác thực quản trị, cùng cấp với
+`GET /api/settings`) trả về các bộ đếm trong bộ nhớ theo từng modality
+`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }` cho `vision`, `audio`, và
+`video`. `averageLatencyMs` dùng `latencySamples`, chứ không phải tất cả các lần
+thử, làm mẫu số; một thao tác không có dữ liệu thời gian sẽ không bịa ra một mẫu
+0 mili giây. `bridged` vẫn là alias tương thích ngược cho các lượt chuyển đổi
+thành công; các lần thử thất bại không làm tăng nó.
+Các bộ đếm được reset khi tiến trình khởi động lại, theo thiết kế
+(đây là telemetry, không phải kế toán).
 
-#### Cấu hình bảng điều khiển
+#### Cấu hình dashboard
 
-Trang bảng điều khiển chuyên dụng là `/dashboard/settings/modality-bridge`. Các tab `Vision`, `Audio` và `Video` có thể định địa chỉ URL của nó bảo toàn các tham số truy vấn trong khi chuyển đổi giá trị `tab`. Tab Tầm nhìn hiển thị khả năng hỗ trợ, chế độ, lựa chọn mô hình (bao gồm mặc định tự động), nhắc nhở nhận biết nhiệm vụ, giới hạn timeout/image/description-length/cache nâng cao, bộ đếm thời gian chạy và yêu cầu mẫu được bảo vệ. Tab Âm thanh cũng hoạt động: nó hiển thị khả năng hỗ trợ, bộ chọn mô hình chỉ dành cho STT với Tự động, giới hạn timeout/max-clip, bộ đếm âm thanh và kiểm tra mẫu `input_audio`. Tab Video có chức năng: nó báo cáo trạng thái thời gian chạy FFmpeg/ffprobe — một trong bốn trạng thái UI rõ ràng (`unknown` trong khi đầu dò đang bay hoặc không thể hoàn thành, `restricted` trên máy chủ bảng thông tin không vòng lặp ngược trong đó đầu dò bị bỏ qua phía máy khách, `unavailable` sau khi được thăm dò và xác nhận bị thiếu hoặc `available` với các phiên bản FFmpeg/ffprobe ) — duy trì giới hạn enable/model/frame/video/timeout, lọc bộ chọn mô hình cho các mô hình có khả năng hiển thị và hiển thị bộ đếm video.
+Trang dashboard chuyên dụng là
+`/dashboard/settings/modality-bridge`. Các tab `Vision`, `Audio`,
+và `Video` có thể truy cập trực tiếp qua URL, đồng thời giữ nguyên các query
+parameter khi chuyển đổi giá trị `tab`.
+Tab Vision hiển thị các tùy chọn bật/tắt, chế độ, lựa chọn model (bao gồm mặc định
+tự động), prompt theo ngữ cảnh tác vụ (task-aware), các giới hạn nâng cao về
+timeout/số ảnh/độ dài mô tả/cache, các bộ đếm runtime, và một sample request được
+bảo vệ. Tab Audio cũng đã hoạt động: nó hiển thị tùy chọn bật/tắt, bộ chọn model
+chỉ-STT với tùy chọn Auto, giới hạn timeout/độ dài clip tối đa, các bộ đếm audio,
+và một bài test mẫu `input_audio`. Tab Video đã hoạt động: nó báo cáo trạng thái
+runtime của FFmpeg/ffprobe — một trong bốn trạng thái UI rõ ràng (`unknown` khi
+lượt probe đang chạy hoặc không thể hoàn tất, `restricted` trên host dashboard
+không phải loopback nơi probe bị bỏ qua phía client, `unavailable` sau khi đã
+probe và xác nhận không có sẵn, hoặc `available` kèm phiên bản FFmpeg/ffprobe) —
+lưu trữ các giới hạn bật/model/frame/video/timeout, lọc bộ chọn model chỉ còn
+các model có khả năng vision, và hiển thị các bộ đếm video.
 
-Thẻ Vision Bridge trước đây trong cài đặt AI là liên kết tương thích với trang mới; nó không còn sở hữu bản sao thứ hai của biểu mẫu nữa. Nhà cung cấp phương tiện cũng liên kết các luồng công việc Chuyển từ hình ảnh thành văn bản và Chuyển giọng nói thành văn bản với các tab Cầu nối phương thức tương ứng mà không xóa sân chơi Chuyển giọng nói thành văn bản hiện có.
+Card Vision Bridge trước đây trong phần cài đặt AI giờ chỉ là một liên kết tương
+thích tới trang mới; nó không còn sở hữu bản sao thứ hai của form nữa. Media
+Providers cũng liên kết các workflow Image-to-Text và Speech-to-Text tới các tab
+Modality Bridge tương ứng mà không xóa playground Speech-to-Text hiện có.
 
-**Self-loop admission bypass:** when the describe call routes through OmniRoute's own `/v1` self-loop (non-standard provider model), the sub-request sends `x-omniroute-admission-bypass: internal` and is authenticated with the resolved self-loop credential — the local `sk_omniroute` sentinel in local mode, or the operator-configured `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key (#1350) so `REQUIRE_API_KEY=true` deployments can still run the describe call. The bypass is only honored for those exact credentials, so external clients cannot use the header to skip admission.
+**Bỏ qua kiểm soát admission qua self-loop:** khi lệnh gọi describe được định
+tuyến qua self-loop `/v1` của chính OmniRoute (model provider không chuẩn),
+sub-request gửi `x-omniroute-admission-bypass: internal` và được xác thực bằng
+credential self-loop đã được phân giải — sentinel `sk_omniroute` cục bộ ở chế độ
+local, hoặc env key `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` do operator cấu hình
+(#1350) để các triển khai có `REQUIRE_API_KEY=true` vẫn có thể chạy lệnh gọi
+describe. Cơ chế bypass chỉ được chấp nhận với đúng những credential đó, vì vậy
+client bên ngoài không thể dùng header này để bỏ qua admission.
 
-Giá trị mặc định kế thừa tồn tại ở `src/shared/constants/visionBridgeDefaults.ts`; các giá trị mặc định mode/task-aware/cache mới và trình phân giải cài đặt có trong `src/shared/constants/modalityBridgeDefaults.ts`. Lan can hiển thị tùy chọn hàm tạo `deps` để các thử nghiệm có thể đưa vào các triển khai `getSettings` và `callVisionModel` giả.
+Các giá trị mặc định legacy nằm trong `src/shared/constants/visionBridgeDefaults.ts`;
+các giá trị mặc định mới về mode/task-aware/cache và trình phân giải cài đặt nằm
+trong `src/shared/constants/modalityBridgeDefaults.ts`. Guardrail cung cấp tùy
+chọn constructor `deps` để các test có thể inject các implementation giả của
+`getSettings` và `callVisionModel`.
 
-### Cầu âm thanh (`audioBridge.ts`) — Cầu phương thức PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Chặn các yêu cầu trò chuyện chứa âm thanh trước khi chúng tiếp cận mục tiêu không chấp nhận đầu vào âm thanh. Nó không bao giờ định tuyến lại yêu cầu trò chuyện: các phần âm thanh được sao chép thông qua điểm cuối nhiều phần tương thích với OpenAI hiện có và mô hình trò chuyện đã chọn sẽ tiếp tục với bản ghi văn bản.
+Chặn các chat request có chứa audio trước khi chúng đến một target không được
+biết là chấp nhận đầu vào audio. Nó không bao giờ reroute chat request: các phần
+audio được phiên âm qua endpoint multipart tương thích OpenAI hiện có và chat
+model đã chọn tiếp tục với các bản phiên âm dạng văn bản.
 
-Chảy:
+Luồng xử lý:
 
-1. Giải quyết `supportsAudio` thông qua `getResolvedModelCapabilities()`. Siêu dữ liệu đăng ký nhà cung cấp rõ ràng sẽ giành chiến thắng, sau đó là siêu dữ liệu mô hình tĩnh, sau đó được đồng bộ hóa `modalities_input`. Danh sách đầu vào được khai báo không có `audio` là `false`; không còn bằng chứng về khả năng `null`. Cả `false` và `null` đều kích hoạt cầu bảo thủ, trong khi `true` bỏ qua nó.
-2. Giải quyết cài đặt `modalityBridgeAudio*` và trích xuất các phần âm thanh cấp cao nhất có thể ghép nối từ mọi tin nhắn thông qua trình phát hiện `detectMediaParts()` được chia sẻ. Các hình dạng dây được hỗ trợ là OpenAI `input_audio`, `audio_url` và `source.media_type: "audio/*"`. Âm thanh lồng nhau được phát hiện để định tuyến nhưng không bị đường dẫn nối loại bỏ. Công việc bị giới hạn bởi `modalityBridgeAudioMaxClips`; các phần sau không bị ảnh hưởng
-3. Tôn trọng `provider/model` đã định cấu hình hoặc để `selectAudioBridgeModel()` hướng dẫn `AUDIO_TRANSCRIPTION_PROVIDERS` theo thứ tự danh mục ổn định và chọn mô hình đầu tiên có thông tin xác thực nhà cung cấp đang hoạt động có thể sử dụng được.
-4. `callAudioTranscription()` chuyển đổi âm thanh base64/data-URI thành nhiều phần `file` hoặc tải xuống `audio_url` từ xa thông qua bộ bảo vệ gửi đi chỉ công khai với ghim DNS và giới hạn 25 MB. Sau đó, nó POSTs tệp và mô hình đã chọn vào vòng lặp `/v1/audio/transcriptions` cục bộ, được xác thực bằng `resolveSelfLoopBearer()`. Tuyến phiên mã hiện tại thực hiện tra cứu thông tin xác thực thông thường, xử lý cooldown/rate-limit và gửi nhà cung cấp.
-5. Các cuộc gọi thành công thay thế các phần của chúng bằng `[Audio N]: <transcript>`. Các cuộc gọi chạy với `Promise.allSettled`: một lỗi riêng lẻ sẽ giữ nguyên phần âm thanh gốc đó ( hợp đồng #4012 ). Nếu mọi cuộc gọi đều thất bại và mục tiêu được chứng minh `supportsAudio === false`, các phần sẽ trở thành `[Audio N]: (unavailable — no STT provider connected)` ( hợp đồng #8430 ). Đối với một mục tiêu không xác định (`null`), kết quả hoàn toàn thất bại sẽ không bị ảnh hưởng. Mục tiêu chỉ có văn bản đã được chứng minh và không có thông tin xác thực STT có thể sử dụng được sẽ nhận được cùng một sơ khai rõ ràng mà không thực hiện lệnh gọi mạng.
+1. Phân giải `supportsAudio` thông qua `getResolvedModelCapabilities()`. Metadata
+   provider-registry khai báo tường minh được ưu tiên trước, sau đó đến metadata
+   model tĩnh, rồi đến `modalities_input` đã đồng bộ. Một danh sách input đã khai
+   báo mà không chứa `audio` thì kết quả là `false`; không có bằng chứng
+   capability nào thì vẫn giữ `null`. Cả `false` và `null` đều kích hoạt bridge
+   bảo thủ, trong khi `true` bỏ qua nó.
+2. Phân giải các thiết lập `modalityBridgeAudio*` và trích xuất các phần audio
+   cấp cao nhất có thể splice từ mọi message thông qua detector dùng chung
+   `detectMediaParts()`. Các dạng wire được hỗ trợ là `input_audio` của OpenAI,
+   `audio_url`, và `source.media_type: "audio/*"`. Audio lồng nhau được phát hiện
+   để routing nhưng không bị loại bỏ bởi đường splice. Khối lượng công việc bị
+   giới hạn bởi `modalityBridgeAudioMaxClips`; các phần đứng sau được giữ nguyên.
+3. Tuân theo `provider/model` đã được cấu hình, hoặc để `selectAudioBridgeModel()`
+   duyệt qua `AUDIO_TRANSCRIPTION_PROVIDERS` theo thứ tự catalog ổn định và chọn
+   model đầu tiên có credential provider đang hoạt động và khả dụng.
+4. `callAudioTranscription()` chuyển đổi audio base64/data-URI thành một `file`
+   multipart, hoặc tải xuống một `audio_url` từ xa thông qua guard outbound
+   chỉ-public với DNS pinning và giới hạn 25 MB. Sau đó nó POST file cùng model
+   đã chọn đến self-loop cục bộ `/v1/audio/transcriptions`, được xác thực bằng
+   `resolveSelfLoopBearer()`. Route transcription hiện có thực hiện tra cứu
+   credential thông thường, xử lý cooldown/rate-limit, và điều phối provider.
+5. Các lời gọi thành công thay thế các phần của chúng bằng
+   `[Audio N]: <transcript>`. Các lời gọi chạy với `Promise.allSettled`: một
+   thất bại riêng lẻ sẽ giữ nguyên phần audio gốc tương ứng (contract #4012).
+   Nếu mọi lời gọi đều thất bại và đích được chứng minh là
+   `supportsAudio === false`, các phần sẽ trở thành
+   `[Audio N]: (unavailable — no STT provider connected)` (contract #8430). Với
+   đích không xác định (`null`), kết quả toàn bộ-thất-bại được giữ nguyên không
+   thay đổi. Một đích được chứng minh là chỉ-text và không có credential STT khả
+   dụng sẽ nhận cùng một stub tường minh đó mà không phát sinh bất kỳ lời gọi
+   mạng nào.
 
-Bản ghi thành công sử dụng bộ nhớ đệm LRU/TTL của Modality Bridge trên toàn quy trình. Phím kết hợp tham chiếu âm thanh, nhãn hoạt động `audio-transcription` ổn định và mô hình STT đã chọn; lỗi không bao giờ được lưu trữ. Các nỗ lực âm thanh cập nhật các bộ đếm `bridged`, `cacheHits`, `failures` và `lastUsedAt` được chia sẻ. Các phản hồi được chuyển đổi mang `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; các yêu cầu chưa được xử lý sẽ không nhận được phân đoạn Cầu nối âm thanh.
+Các transcript thành công sử dụng cache LRU/TTL phạm vi toàn-process của
+Modality Bridge. Key kết hợp tham chiếu audio, nhãn operation ổn định
+`audio-transcription`, và model STT đã chọn; các thất bại không bao giờ được
+cache. Các lần thử audio cập nhật các bộ đếm dùng chung `bridged`, `cacheHits`,
+`failures`, và `lastUsedAt`. Các response đã được biến đổi mang theo
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; các
+request không bị động vào sẽ không nhận segment Audio Bridge.
 
-Cài đặt thời gian chạy được DB hỗ trợ và xác thực Zod:
+Các thiết lập runtime được lưu trữ trong DB và được validate bằng Zod:
 
-| Chìa khóa                     | Mặc định | Phạm vi             |
+| Key                           | Mặc định | Khoảng              |
 | ----------------------------- | -------- | ------------------- |
 | `modalityBridgeAudioEnabled`  | `true`   | —                   |
 | `modalityBridgeAudioModel`    | `""`     | Tự động hoặc STT ID |
 | `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000         |
 | `modalityBridgeAudioMaxClips` | `3`      | 1–10                |
 
-Bộ nhớ đệm dùng chung vẫn được kiểm soát bởi `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` và `modalityBridgeCacheMaxEntries`.
+Cache dùng chung vẫn được kiểm soát bởi `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes`, và `modalityBridgeCacheMaxEntries`.
 
 ### Cầu Video (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -220,83 +416,95 @@ Các giá trị thời gian chờ video vẫn tồn tại kế thừa trên 120 
 
 ### Mặt nạ PII (`piiMasker.ts`)
 
-Chạy tiếp** cả hai** các giai đoạn.
+Chạy tiếp **cả hai** các giai đoạn.
 
-- **`preCall`** sao chép tải trọng, đi `system`, `messages`, `input` và `prompt` (bao gồm các mục chuỗi đơn giản) và áp dụng `processPII()` (từ `@/shared/utils/inputSanitizer`) cho các trường chuỗi `content`/`text`. Khi `PII_REDACTION_ENABLED=true`, PII được phát hiện sẽ được loại bỏ trong tải trọng gửi đi. Điều này độc lập với `INPUT_SANITIZER_MODE` (chỉ kiểm soát chính sách nhắc nhở). Khi tính năng biên tập bị tắt, tính năng phát hiện bản ghi cuộc gọi sẽ được tính mà không cần ghi lại nội dung.
-- **`postCall`** sao chép sâu phản hồi, chạy `sanitizePIIResponse()` cộng với trình che dấu hình dạng API phản hồi (`maskResponsesOutput` — bao gồm `output_text` và `output[].content[].text`). Nếu có bất kỳ sự chỉnh sửa nào xảy ra, phản hồi đã sửa đổi sẽ thay thế phản hồi ban đầu.
+- **`preCall`** sao chép tải trọng, chuyển `system`, `messages`, `input` và `prompt` (bao gồm các mục chuỗi đơn giản) và áp dụng `processPII()` (từ `@/shared/utils/inputSanitizer`) cho các trường `content`/`text` chuỗi. Khi `PII_REDACTION_ENABLED=true`, PII được phát hiện sẽ được loại bỏ trong tải trọng gửi đi. Điều này độc lập với `INPUT_SANITIZER_MODE` (chỉ kiểm soát chính sách nhắc nhở). Khi tính năng biên tập bị tắt, tính năng phát hiện bản ghi cuộc gọi sẽ được tính mà không cần ghi lại nội dung.
+- **`postCall`** sao chép sâu phản hồi, chạy `sanitizePIIResponse()` cùng với trình che dấu hình dạng API phản hồi (`maskResponsesOutput` — bao gồm `output_text` và `output[].content[].text`). Nếu có bất kỳ sự chỉnh sửa nào xảy ra, phản hồi đã sửa đổi sẽ thay thế phản hồi ban đầu.
 
 Lan can không bao giờ chặn; nó chỉ chú thích (`meta.detections`, `meta.redacted`) hoặc viết lại.
 
 #### Lựa chọn theo loại, mẫu tùy chỉnh và bộ đếm phát hiện
 
-**Bảng điều khiển → Cài → Bảo mật → PII che** chọn _cái_được che giấu. Nó không bật mặt nạ: đó vẫn là `PII_REDACTION_ENABLED` (yêu cầu) và `PII_RESPONSE_SANITIZATION` (phản hồi + SSE), cả hai đều tắt theo mặc định.
+**Trang tổng quan Cài đặt → Bảo mật → Mặt nạ → PII** chọn _cái_được che giấu. Nó không bật mặt nạ: đó vẫn là `PII_REDACTION_ENABLED` (yêu cầu) và `PII_RESPONSE_SANITIZATION` (phản hồi + SSE), cả hai đều tắt theo mặc định.
 
 - **Lựa chọn theo loại** — các id tích hợp được liệt kê trong `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Không đặt nghĩa là mọi loại (hành vi trước khi cài đặt này tồn tại). Mẫu `ssn_us` của công cụ yêu cầu ánh xạ tới `ssn`. Các mẫu (Tối thiểu, Tiêu chuẩn, Tài chính, Brazil, USA, GDPR, POPIA, Đầy đủ) chỉ điền vào các hộp kiểm trong UI.
-- **mã định danh GDPR và POPIA** — mười hai id tích hợp bao gồm số nhận dạng cá nhân EU và Nam Phi (bảng bên dưới). Các biểu thức chính quy, trình xác thực và thẻ quyền hạn của chúng nằm trong một bảng, `src/shared/utils/piiPatterns.ts`, mà cả trình khử trùng phản hồi (`src/lib/piiSanitizer.ts`) và trình che dấu yêu cầu (`src/shared/utils/inputSanitizer.ts`) đều sử dụng. Một kết quả trùng khớp chỉ được xử lý lại khi người xác nhận nó chấp nhận nó; một dãy chữ số không bao giờ là đủ. Toán tử đã lưu lựa chọn thu hẹp trước khi các id này tồn tại sẽ giữ nguyên hành vi của nó cho đến khi các id mới được đánh dấu.
-- **Mẫu tùy chỉnh** — lên đến 20 mẫu biểu thức chính quy hoặc ký tự đại diện (`*` = tối đa 64 ký tự không phải khoảng trắng, `?` = một). Các trận đấu trở thành `[CUSTOM_REDACTED]`. Mọi mẫu đều trải qua `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): tối đa 500 ký tự, cờ giới hạn ở `g i m s u`, phải biên dịch, phải vượt qua `safe-regex` (quay ngược thảm khốc) và không được khớp với một chuỗi trống hoặc trình giữ chỗ biên tập lại. Một mẫu không thành công sẽ bị từ chối khi lưu và kiểm tra, đồng thời một hàng được lưu trữ không thành công sẽ bị bỏ qua trong thời gian chạy thay vì được biên dịch. Các mẫu tùy chỉnh chỉ chạy khi mặt nạ được bật.
-- **Bộ đếm phát hiện** số lượng — trên mỗi loại (giá trị không bao giờ khớp), được giữ trong bộ nhớ và đặt lại khi khởi động lại (`src/lib/pii/piiDetectionStats.ts`). Chúng chỉ tăng khi mặt nạ được bật.
+- **Mã định danh GDPR và POPIA** — mười hai id tích hợp bao gồm EU và số nhận dạng cá nhân Nam Phi (bảng bên dưới). Các biểu thức chính quy, trình xác thực và thẻ quyền tài phán của họ nằm trong một bảng, `src/shared/utils/piiPatterns.ts`, mà cả trình khử trùng phản hồi (`src/lib/piiSanitizer.ts`) và trình che dấu yêu cầu (`src/shared/utils/inputSanitizer.ts`) đều sử dụng. Một kết quả trùng khớp chỉ được xử lý lại khi người xác nhận nó chấp nhận nó; một dãy chữ số không bao giờ là đủ. Toán tử đã lưu lựa chọn thu hẹp trước khi các id này tồn tại sẽ giữ nguyên hành vi của nó cho đến khi các id mới được đánh dấu.
+- **Mẫu tùy chỉnh** — tối đa 20 mẫu biểu thức chính quy hoặc ký tự đại diện (`*` = tối đa 64 ký tự không phải khoảng trắng, một ký tự `?` = ). Các trận đấu trở thành `[CUSTOM_REDACTED]`. Mọi mẫu đều đi qua `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): tối đa 500 ký tự, cờ được giới hạn ở `g i m s u`, phải biên dịch, phải vượt qua `safe-regex` (quay ngược thảm khốc) và không được khớp với chuỗi trống hoặc trình giữ chỗ biên tập. Một mẫu không thành công sẽ bị từ chối khi lưu và kiểm tra, đồng thời một hàng được lưu trữ không thành công sẽ bị bỏ qua trong thời gian chạy thay vì được biên dịch. Các mẫu tùy chỉnh chỉ chạy khi mặt nạ được bật.
+- **Bộ đếm phát hiện** Số lượng — trên mỗi loại (giá trị không bao giờ khớp), được giữ trong bộ nhớ và đặt lại khi khởi động lại (`src/lib/pii/piiDetectionStats.ts`). Chúng chỉ tăng khi mặt nạ được bật.
 
 Các cài đặt nằm trong bảng `key_value` (không gian tên `pii_settings`, `src/lib/db/piiSettings.ts`) và được đọc qua bộ đệm 1 giây. API:
 
-| Phương pháp | Con đường                | Mục đích                                                             |
-| ----------- | ------------------------ | -------------------------------------------------------------------- |
-| `GET`       | `/api/settings/pii`      | Trạng thái cờ, `enabledTypes`, `customPatterns`, bộ đếm phát hiện    |
-| `PUT`       | `/api/settings/pii`      | Thay thế `enabledTypes` (`null` = tất cả) and/or `customPatterns`    |
-| `POST`      | `/api/settings/pii/test` | Chạy khô một mẫu so với mẫu có tối đa 8 KB; không có gì được lưu trữ |
+| Phương thức | Đường dẫn                | Mục đích                                                                 |
+| ----------- | ------------------------ | ------------------------------------------------------------------------ |
+| `GET`       | `/api/settings/pii`      | Trạng thái cờ, `enabledTypes`, `customPatterns`, bộ đếm phát hiện        |
+| `PUT`       | `/api/settings/pii`      | Thay thế `enabledTypes` (`null` = tất cả) và/hoặc `customPatterns`       |
+| `POST`      | `/api/settings/pii/test` | Chạy thử (dry-run) một mẫu trên dữ liệu mẫu tối đa 8 KB; không lưu gì cả |
 
-Cả ba đều yêu cầu xác thực quản lý và xác thực nội dung bằng Zod (`src/shared/validation/schemas/piiSettings.ts`). Khi đăng nhập bị vô hiệu hóa (`requireLogin=false`) `GET` và điểm cuối kiểm tra đang mở, nhưng `PUT` vẫn cần phiên bảng điều khiển, khóa `manage` -scope API, mã thông báo truy cập `oma_` có phạm vi ghi trở lên hoặc mã thông báo CLI hoặc mã thông báo dịch vụ nội bộ được gửi từ loopback.
+Cả ba đều yêu cầu xác thực quản lý và xác thực nội dung bằng Zod (`src/shared/validation/schemas/piiSettings.ts`). Khi đăng nhập bị vô hiệu hóa (`requireLogin=false`) `GET` và điểm cuối kiểm tra đang mở, nhưng `PUT` vẫn cần phiên bảng điều khiển, khóa `manage` -scope API, mã thông báo truy cập `oma_` có phạm vi ghi trở lên hoặc mã thông báo CLI hoặc mã thông báo dịch vụ nội bộ được gửi từ vòng lặp.
 
-#### mã định danh GDPR (EU) và POPIA (Nam Phi)
+#### Mã định danh GDPR (EU) và POPIA (Nam Phi)
 
-| Nhận dạng           | Mã định danh                | Xác thực                                                                                          |
-| ------------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                        | Quốc gia đã biết, độ dài chính xác của quốc gia đó, ISO 13616 MOD-97-10                           |
-| `eu_vat`            | số EU VAT                   | Tiền tố trạng thái thành viên đã biết và định dạng số của trạng thái đó (không cần tra cứu VIES ) |
-| `es_dni_nie`        | DNI / NIE tiếng Tây Ban Nha | Thư kiểm soát (giá trị mod 23); NIE là `X/Y/Z` + 7 chữ số                                         |
-| `it_codice_fiscale` | Codice Fiscale của Ý        | Thư kiểm soát từ bảng vị trí odd/even                                                             |
-| `pl_pesel`          | PESEL Lan                   | Tổng kiểm tra có trọng số và ngày sinh được mã hóa tồn tại                                        |
-| `nl_bsn`            | BSN Hà Lan                  | 11 bằng chứng (trọng lượng 9..2, -1)                                                              |
-| `de_steuer_id`      | Steuer-ID tiếng Đức         | ISO 7064 Mod 11,10 cộng với quy tắc cấu trúc chữ số (không có số 0 đứng đầu)                      |
-| `se_personnummer`   | người Thụy Điển             | Luhn trong mười chữ số cuối cùng và ngày sinh hợp lý (10 hoặc 12 chữ số)                          |
-| `za_id`             | Số ID Nam Phi               | Luhn trên tất cả 13 chữ số, ngày sinh hợp lệ month/day, chữ số công dân 0 hoặc 1                  |
-| `za_phone`          | Điện thoại Nam Phi          | tiền tố `+27` / `27` hoặc dạng `0..` quốc gia được viết bằng dấu cách hoặc dấu gạch nối           |
-| `za_vat`            | Số VAT Nam Phi              | 10 chữ số bắt đầu bằng `4`** Và** "VAT" / "BTW" trong 48 ký tự trước                              |
-| `za_tax_ref`        | Giới thiệu thuế Nam Phi.    | 10 chữ số bắt đầu từ `0`-`3`, Luhn,** Và** "tax" / "SARS" trong 48 ký tự trước                    |
+| ID                  | Định danh                  | Xác thực                                                                                 |
+| ------------------- | -------------------------- | ---------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                       | Quốc gia đã biết, độ dài chính xác của quốc gia đó, ISO 13616 MOD-97-10                  |
+| `eu_vat`            | Mã số VAT của EU           | Tiền tố quốc gia thành viên đã biết và định dạng số của quốc gia đó (không tra cứu VIES) |
+| `es_dni_nie`        | DNI / NIE Tây Ban Nha      | Chữ cái kiểm tra (giá trị mod 23); NIE là `X/Y/Z` + 7 chữ số                             |
+| `it_codice_fiscale` | Codice Fiscale Ý           | Chữ cái kiểm tra từ các bảng vị trí lẻ/chẵn                                              |
+| `pl_pesel`          | PESEL Ba Lan               | Checksum có trọng số và khoảng tháng/ngày sinh được mã hóa hợp lý                        |
+| `nl_bsn`            | BSN Hà Lan                 | 11-proof (trọng số 9..2, -1)                                                             |
+| `de_steuer_id`      | Steuer-ID Đức              | ISO 7064 Mod 11,10 cùng quy tắc cấu trúc chữ số (không bắt đầu bằng 0)                   |
+| `se_personnummer`   | personnummer Thụy Điển     | Luhn trên mười chữ số cuối và ngày sinh hợp lý (10 hoặc 12 chữ số)                       |
+| `za_id`             | Số định danh Nam Phi       | Luhn trên toàn bộ 13 chữ số, tháng/ngày sinh hợp lệ, chữ số quốc tịch 0 hoặc 1           |
+| `za_phone`          | Số điện thoại Nam Phi      | Tiền tố `+27` / `27`, hoặc dạng nội địa `0..` có dấu cách hay gạch nối                   |
+| `za_vat`            | Mã số VAT Nam Phi          | 10 chữ số bắt đầu bằng `4` **và** "VAT" / "BTW" trong 48 ký tự đứng trước                |
+| `za_tax_ref`        | Mã tham chiếu thuế Nam Phi | 10 chữ số bắt đầu bằng `0`-`3`, Luhn, **và** "tax" / "SARS" trong 48 ký tự đứng trước    |
 
-Bởi vì các định dạng chỉ có chữ số xung đột với số thứ tự, số bản dựng và dấu thời gian, nên những định dạng yếu nhất (`za_vat`, `za_tax_ref`) cần gợi ý từ khóa và số `0..` chỉ có mười chữ số không được coi là số điện thoại Nam Phi. IBANs cách nhau (`GB29 NWBK ...`) không khớp. Trên đường dẫn phát trực tuyến, tín hiệu chỉ được tra cứu bên trong đoạn hiện tại. Các id nằm phía trước các mẫu điện thoại chung, do đó, số nhận dạng được xác thực sẽ giữ phần giữ chỗ riêng của nó (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Các mẫu `gdpr` và `popia` lần lượt chọn id EU và Nam Phi. Bản thân việc che dấu vẫn được chọn tham gia (Quy tắc cứng #20): không có gì ở đây thay đổi mặc định cờ tính năng.
+Bởi vì các định dạng chỉ có chữ số xung đột với số thứ tự, số bản dựng và dấu thời gian, nên những định dạng yếu nhất (`za_vat`, `za_tax_ref`) cần gợi ý từ khóa và số `0..` chỉ có mười chữ số không được coi là số điện thoại Nam Phi. IBANs cách nhau (`GB29 NWBK ...`) không khớp. Trên đường dẫn phát trực tuyến, tín hiệu chỉ được tra cứu bên trong đoạn hiện tại. Các id nằm phía trước các mẫu điện thoại chung, do đó, số nhận dạng được xác thực sẽ giữ phần giữ chỗ riêng (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Các mẫu `gdpr` và `popia` lần lượt chọn id EU và Nam Phi. Bản thân việc che dấu vẫn được chọn tham gia (Quy tắc cứng #20): không có gì ở đây thay đổi mặc định cờ tính năng.
 
-### Tiêm nhanh (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Phát hiện các cấu trúc đối nghịch trong nội dung do người dùng cung cấp và thực thi chính sách đã định cấu hình. Hành vi được điều khiển bởi các biến môi trường và các tùy chọn hàm tạo:
+Phát hiện các cấu trúc tấn công (adversarial) trong nội dung do người dùng cung cấp
+và thực thi chính sách đã cấu hình. Hành vi được điều khiển bởi các biến môi trường
+và các tùy chọn constructor:
 
-| Cài đặt     | biến thể Env                                                                                              | Mặc định | Tác dụng                                                                                                                                                                                              |
-| ----------- | --------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Đã bật      | `INPUT_SANITIZER_ENABLED`                                                                                 | `true`   | Khi `false`, lan can bị đoản mạch.                                                                                                                                                                    |
-| Cách thức   | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                           | `warn`   | Chính sách tiêm: `block`, `warn` hoặc `log`. (`redact` được chấp nhận để tương thích ngược nhưng không** không** văn bản tiêm dải; yêu cầu viết lại PII được điều khiển bởi `PII_REDACTION_ENABLED`.) |
-| Ngưỡng chặn | tùy chọn `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (bí danh `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Mức độ nghiêm trọng tối thiểu cần thiết để chặn. Phương tiện theo mặc định chỉ được quan sát.                                                                                                         |
+| Cài đặt     | Biến môi trường                                                                                           | Mặc định | Tác động                                                                                                                                                                                                  |
+| ----------- | --------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bật         | `INPUT_SANITIZER_ENABLED`                                                                                 | `true`   | Khi `false`, guardrail sẽ thoát sớm (short-circuit).                                                                                                                                                      |
+| Chế độ      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                           | `warn`   | Chính sách injection: `block`, `warn` hoặc `log`. (`redact` được chấp nhận để tương thích ngược nhưng **không** xóa văn bản injection; việc ghi đè PII của request do `PII_REDACTION_ENABLED` kiểm soát.) |
+| Ngưỡng chặn | tùy chọn `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (bí danh `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Mức độ nghiêm trọng tối thiểu cần có để chặn. Với mặc định, mức Medium chỉ được quan sát.                                                                                                                 |
 
-**Ưu tiên chế độ** (`getMode`): người gọi `options.mode` → `INJECTION_GUARD_MODE`** ghi đè cờ tính năng DB** (Cài đặt → trên bảng điều khiển → Cờ tính năng) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Do đó, việc ghi đè bảng điều khiển sẽ giành chiến thắng trước các biến env, do đó, Cờ tính năng UI sẽ điều khiển trực tiếp bộ bảo vệ đang chạy (không cần khởi động lại). Quá trình đọc DB không an toàn: nếu có lỗi, bộ bảo vệ sẽ quay trở lại hành vi dựa trên env và khi không đặt ghi đè, hành vi sẽ giống hệt với độ phân giải chỉ dành cho env.
+**Thứ tự ưu tiên chế độ** (`getMode`): `options.mode` của phía gọi →
+**ghi đè feature-flag từ DB** cho `INJECTION_GUARD_MODE` (Dashboard → Cài đặt →
+Feature Flags) → env `INJECTION_GUARD_MODE` → env `INPUT_SANITIZER_MODE` →
+`warn`. Do đó, một ghi đè từ dashboard sẽ thắng các biến môi trường, nên giao
+diện Feature Flags điều khiển guard đang chạy theo thời gian thực (không cần
+khởi động lại). Việc đọc DB là an toàn khi lỗi (fail-safe): nếu gặp lỗi, guard
+quay về hành vi dựa trên env, và khi không có ghi đè nào được thiết lập thì hành
+vi giống hệt với cách phân giải chỉ dùng env.
 
 Nguồn phát hiện:
 
-1. `sanitizeRequest()` từ `@/shared/utils/inputSanitizer` (bộ trình phát hiện dùng chung được sử dụng ở nơi khác trong quy trình).
-2. `DEFAULT_GUARD_PATTERNS` tích hợp (hiện tại là `system_override_inline` và `markdown_system_block`, cả hai đều có mức độ nghiêm trọng `high` ).
-3. `customPatterns` tùy chọn được chuyển qua các tùy chọn hàm tạo (chuỗi, biểu thức chính quy hoặc bản ghi `{ name, pattern, severity }` ).
+1. `sanitizeRequest()` từ `@/shared/utils/inputSanitizer` (tập detector dùng chung
+   được sử dụng ở những nơi khác trong pipeline).
+2. `DEFAULT_GUARD_PATTERNS` tích hợp sẵn (hiện tại gồm `system_override_inline` và
+   `markdown_system_block`, cả hai đều ở mức độ nghiêm trọng `high`).
+3. `customPatterns` tùy chọn được truyền qua các tùy chọn constructor (chuỗi,
+   regex, hoặc các bản ghi `{ name, pattern, severity }`).
 
-Khi `mode === "block"`** Và** ít nhất một phát hiện đáp ứng ngưỡng nghiêm trọng, `preCall` trả về `{ block: true, message: "Request rejected: suspicious content detected" }`. Trong chế độ `warn`/`log`, lan can ghi nhật ký nhưng cho phép cuộc gọi. Trình trợ giúp chia sẻ `evaluatePromptInjection()` cũng được xuất cho những người gọi cần đánh giá lời nhắc mà không cần thông qua sổ đăng ký.
+Khi `mode === "block"` **và** có ít nhất một phát hiện đạt đến ngưỡng mức độ nghiêm trọng, `preCall` trả về `{ block: true, message: "Request rejected: suspicious content detected" }`. Ở chế độ `warn`/`log`, guardrail chỉ ghi log nhưng vẫn cho phép lệnh gọi. Hàm helper dùng chung `evaluatePromptInjection()` cũng được export cho những caller cần đánh giá prompt mà không phải đi qua registry.
 
-**Quét bị ràng buộc (v3.8.20):** máy dò chỉ kiểm tra** 16 KB đầu tiên** của văn bản nhắc nhở được nối — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) trong `src/shared/utils/inputSanitizer.ts`. Cả `detectInjection()` và `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` trước khi chạy vòng lặp mẫu. Lệnh chèn nằm gần đầu đầu vào, do đó, lệnh này giới hạn biểu thức chính CPU/GC trên tải trọng nhiều trăm KB mà không làm suy yếu khả năng phát hiện (xem #3932, #4041).
+**Giới hạn quét (v3.8.20):** bộ phát hiện chỉ kiểm tra **16 KB đầu tiên** của văn bản prompt đã nối — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) trong `src/shared/utils/inputSanitizer.ts`. Cả `detectInjection()` và `evaluatePromptInjection()` đều `slice(0, MAX_INJECTION_SCAN_BYTES)` trước khi chạy vòng lặp mẫu. Các chỉ thị injection thường nằm gần đầu của đầu vào, vì vậy điều này giới hạn CPU/GC của regex trên các payload hàng trăm KB mà không làm suy yếu khả năng phát hiện (xem #3932, #4041).
 
-### Trình che dấu thông tin xác thực (`credentialMasker.ts`)
+### Trình che giấu thông tin xác thực (`credentialMasker.ts`)
 
-Chạy tiếp** cả hai** các giai đoạn, cuối cùng trong chuỗi mặc định (ưu tiên `95`). Sắp xếp lại các mẫu khóa API/mã thông báo bí mật nổi tiếng từ tải trọng gửi đi (nội dung tin nhắn, đối số lệnh gọi công cụ, kết quả công cụ)** Và** phản hồi của nhà cung cấp, do đó thông tin xác thực được dán vào lời nhắc (hoặc được phản hồi bởi kết quả của công cụ) không bị rò rỉ cho nhà cung cấp ngược dòng hoặc quay lại máy khách.
+Chạy ở **cả hai** giai đoạn, đứng cuối trong chuỗi mặc định (độ ưu tiên `95`). Che giấu các mẫu API-key / secret-token phổ biến khỏi payload gửi đi (nội dung tin nhắn, tham số tool-call, kết quả tool) **và** phản hồi của provider, để thông tin xác thực được dán vào prompt (hoặc được tool result trả về) không bị rò rỉ đến provider upstream hoặc quay ngược lại client.
 
-- **Chỉ chọn tham gia** , quy ước tương tự như xử lý PII (Quy tắc cứng #20- liền kề): bị vô hiệu hóa trừ khi `settings.credentialRedactionEnabled === true`** hoặc** `CREDENTIAL_REDACTION_ENABLED=true`. Khi tắt nó đi, lan can sẽ là một — no-op, nó không bao giờ chặn và không bao giờ viết lại.
-- `redactCredentials()` đi qua cây payload/response đầy đủ (`walkValue()`, an toàn ô nhiễm nguyên mẫu, an toàn chu kỳ thông qua `WeakSet`) và thay thế các kết quả khớp bằng trình giữ chỗ `[REDACTED:<type>]`, chỉ nhân bản các nhánh thực sự đã thay đổi.
-- `CREDENTIAL_PATTERNS` bao gồm các khóa của nhà cung cấp LLM (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), mã thông báo VCS/SaaS (GitHub, Slack, Linear, Notion, npm, Postman, Discord), khóa thanh toán (Stripe, Square), khóa đám mây ( khóa truy cập AWS, Twilio, SendGrid, Mailgun), khóa riêng / JWTs, chuỗi kết nối mang thông tin xác thực (`mongodb://user:pass@...`, v.v.) và mẫu giá trị tiêu đề `Authorization`/`x-api-key`/`api-key`/`apikey` chung. Các khóa có hình tiêu đề (`authorization`, `x-api-key`, `api-key`, `apikey`) được sắp xếp lại về mặt cấu trúc (chỉ giá trị, tiền tố lược đồ như `Bearer `/`Basic ` được giữ nguyên) thay vì thông qua biểu thức chính quy văn bản chung.
-- Lan can không bao giờ chặn; nó chỉ viết lại (`modifiedPayload` / `modifiedResponse`) và chú thích (`meta.credentialsRedacted`, `meta.count`).
+- **Chỉ bật khi chọn tham gia (opt-in)**, cùng quy ước với việc che giấu PII (liên quan Quy tắc cứng #20): bị tắt trừ khi `settings.credentialRedactionEnabled === true` **hoặc** `CREDENTIAL_REDACTION_ENABLED=true`. Khi tắt, guardrail là no-op — không bao giờ chặn và không bao giờ ghi đè.
+- `redactCredentials()` duyệt toàn bộ cây payload/response (`walkValue()`, an toàn với prototype pollution, an toàn với tham chiếu vòng nhờ `WeakSet`) và thay thế các kết quả khớp bằng placeholder `[REDACTED:<type>]`, chỉ clone những nhánh thực sự thay đổi.
+- `CREDENTIAL_PATTERNS` bao gồm các khóa của LLM provider (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), token VCS/SaaS (GitHub, Slack, Linear, Notion, npm, Postman, Discord), khóa thanh toán (Stripe, Square), khóa cloud (AWS access key, Twilio, SendGrid, Mailgun), private key / JWT, các chuỗi kết nối chứa thông tin xác thực (`mongodb://user:pass@...`, v.v.), và một mẫu giá trị header chung `Authorization`/`x-api-key`/`api-key`/`apikey`. Các khóa dạng header (`authorization`, `x-api-key`, `api-key`, `apikey`) được che giấu theo cấu trúc (chỉ giá trị, giữ nguyên tiền tố scheme như `Bearer `/`Basic `) thay vì qua regex văn bản chung.
+- Guardrail không bao giờ chặn; nó chỉ ghi đè (`modifiedPayload` / `modifiedResponse`) và chú thích (`meta.credentialsRedacted`, `meta.count`).
 
-Bảo vệ hồi quy: `tests/unit/credential-masker-guardrail.test.ts`.
+Kiểm thử hồi quy: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Hợp đồng cơ sở (`base.ts`)
 

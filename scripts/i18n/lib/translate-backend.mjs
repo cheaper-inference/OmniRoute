@@ -123,7 +123,10 @@ export function noteLlmSuccess() {
 }
 
 function useGoogleFirst(backend) {
-  return (backend?.engine ?? translationEngine()) === "google" || llmCircuit.open;
+  return (
+    (backend?.engine ?? translationEngine()) === "google" ||
+    ((backend?.googleFallback ?? googleFallbackEnabled()) && llmCircuit.open)
+  );
 }
 
 /**
@@ -140,7 +143,7 @@ export async function withGoogleFallback(llm, google, label = "translation", bac
     const fallback = backend?.googleFallback ?? googleFallbackEnabled();
     // A malformed request (400/413/422) is the caller's bug and stays loud, like the model chain
     // treats it; quota, credits, auth, 5xx, timeouts and network failures go to Google.
-    if (!fallback || !(isFallbackWorthy(err) || isQuotaLike(err))) throw err;
+    if (!fallback || !isFallbackWorthy(err)) throw err;
     if (noteLlmFailure(err)) {
       logWarn(`LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`);
     } else {
@@ -601,6 +604,7 @@ export async function translateMultiLocaleBatch(keyEntries, localeEntries, backe
   let out;
   try {
     out = await (backend.callChat ?? callChat)(messages, backend);
+    noteLlmSuccess();
   } catch (err) {
     return withGoogleFallback(
       () => Promise.reject(err),

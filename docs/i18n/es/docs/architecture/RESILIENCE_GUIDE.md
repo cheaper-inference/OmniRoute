@@ -207,6 +207,45 @@ Estos estados persisten hasta que cambien las credenciales o un operador los res
 Protecciones contra regresiones: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Aplicar automáticamente restablecimientos bancarios
+
+**Alcance:** Conexiones de suscripción Codex y Claude (OAuth).**Inscribirse** : la configuración `bankedResetAutoApply` está desactivada y en modo `dry-run` de forma predeterminada (Configuración → AI → Auto-aplicar restablecimientos bancarios).
+
+**Objetivo:** gastar los reinicios bancarios por su cuenta cuando una cuenta llega a un límite de uso, en lugar de esperar a que un operador presione "Canjear" en la página de Límites del proveedor.
+
+| Tipo de crédito (`creditTypes`) | lo que se redime                                              | donde corre                                                                    |
+| ------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `codexCredits`                  | Créditos de reinicio Codex                                    | trabajo en segundo plano, cada 60 s                                            |
+| `claudeCredits`                 | Ayudas bancarias Claude (créditos `GRANT` )                   | trabajo en segundo plano, cada 60 s                                            |
+| `claudeSessionReset`            | Restablecimiento del límite de sesión semanal Claude (arriba) | ruta de solicitud, a través de la misma política que la alternancia por cuenta |
+
+**Implementación:**
+
+- Decisión pura (una regla establecida para ambos caminos): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Trabajo en segundo plano: `src/lib/services/bankedResetAutoApply.ts` (iniciado en `src/instrumentation-node.ts`)
+- Puerta de ruta de solicitud Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, registrada a través de `setClaudeLimitResetPolicy()` en `open-sse/services/claudeLimitReset.ts`
+- Historia, mayúsculas y webhook: `src/lib/usage/bankedResetAudit.ts`
+- Historia API: `GET /api/settings/banked-reset-auto/history?limit=50` (autenticación de gestión)
+
+**Orden de decisión** (la primera regla fallida es el motivo registrado):
+
+1. Función desactivada, tipo de crédito desactivado o cuenta fuera de alcance (`accountScope` `all` / `selected` más el mapa `connections` por cuenta).
+2. Fuera del horario opcional UTC (`startHourUtc` > `endHourUtc` cruza la medianoche).
+3. Límites en las últimas 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3) y `minSpacingMinutes` (30) entre dos reembolsos cualesquiera.
+4. Activador: una ventana `session` o `weekly` bloqueada (leída de `getQuotaWindowStatus().reachedThreshold`, no `isAccountQuotaExhausted()`, que solo informa una cuenta con cada ventana gastada), o un crédito que vence dentro de `expiringCreditHours` (24) en una cuenta que ha utilizado al menos `expiringCreditMinUsedPercent` (50).
+5. Guardia de reinicio natural: omita cuando la ventana amurallada de 5 horas se reinicie dentro de `sessionResetGuardMinutes` (90), o la ventana amurallada semanal dentro de `weeklyResetGuardHours` (12).
+6. Piso semanal: omita un reinicio de 5 horas cuando el resto semanal esté por debajo de `weeklyFloorPercent` (10).
+7. Modo `last-resort` : omita mientras a otra cuenta dentro del alcance del mismo proveedor le queden al menos `poolHeadroomPercent` (10) en ambas ventanas. Los desencadenantes del crédito vencido evitan esto.
+8. `dry-run` registra una fila y no canjea nada; Canje `last-resort` y `eager`.
+
+La falta de datos de cuota nunca desbloquea un canje: un tiempo de reinicio desconocido o saltos de uso semanal.
+
+**Restablecimiento de sesión Claude :** Con la función desactivada o `claudeSessionReset` desactivado, el interruptor `autoLimitReset` por cuenta decide exactamente como antes. Con ambos activados, la función reemplaza las alternancias por cuenta: una cuenta dentro del alcance puede reclamar solo cuando la póliza lo permite, y en el modo `dry-run` no se realiza ningún reclamo.
+
+**Seguridad:** el trabajo canjea como máximo un crédito por tick, decide antes de enumerar los créditos (una cuenta omitida nunca aparece en la lista), utiliza claves de idempotencia `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` y respalda una cuenta durante 1 hora después de una inclusión o canje fallido. Cada decisión de canje, fracaso y ejecución en seco se escribe en `audit_log` (`action: "bankedReset.redeem"`, sin tokens ni identificadores de crédito); los límites se cuentan a partir de esas filas, por lo que sobreviven a los reinicios. Los canjes exitosos también activan el webhook `provider.reset_redeemed`.
+
+Guardias de regresión: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinidad de sesión (#7274)
 
 **Alcance:** una sesión de cliente (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) fijada a una conexión, para **cualquier** proveedor.
@@ -375,26 +414,17 @@ bloqueos es efímero.
 
 ---
 
-## 4. Control de concurrencia de cuota compartida (v3.8.36)
+## 4. Control de concurrencia de cuotas compartidas (v3.8.36)
 
-Las cuentas de suscripción (GLM, MiniMax, etc.) a menudo aceptan solo ~1–3
-solicitudes simultáneas; superar ese límite activa respuestas 429 y períodos de
-espera. Esto es especialmente problemático con las combinaciones de
-**cuota compartida** (`qtSd/…`), donde varias claves de API comparten una cuenta
-ascendente. Tres capas evitan que una cuenta compartida se inunde.
+Las cuentas de suscripción (GLM, MiniMax, etc.) a menudo aceptan solo entre 1 y 3 solicitudes ~ simultáneas; exceder eso activa 429 y tiempos de reutilización. Esto es agudo bajo **cuota compartida** (`qtSd/…`), donde varias claves API comparten una cuenta ascendente. Tres capas evitan que una cuenta compartida se inunde.
 
-### Límite de concurrencia por conexión (`max_concurrent`)
+### Límite de simultaneidad por conexión (`max_concurrent`)
 
-Cada conexión de proveedor puede declarar un límite máximo de `max_concurrent`
-(`provider_connections.max_concurrent`, establecido en el modal de conexión / API / DB).
-Déjelo vacío para no aplicar ningún límite. Este es el único parámetro que controla
-la capa de serialización descrita a continuación: establézcalo en la concurrencia
-real de la cuenta (por ejemplo, GLM ~1, MiniMax ~2).
+Cada conexión de proveedor puede declarar un techo `max_concurrent` (`provider_connections.max_concurrent`, establecido en el modal de conexión / API / DB). Déjalo vacío sin límite. Esta es la perilla única que controla la capa de serialización debajo de — y la configura en la simultaneidad real de la cuenta (por ejemplo GLM ~ 1, MiniMax ~ 2).
 
-### Límites de concurrencia por modelo (`modelConcurrency`)
+### Límites de simultaneidad por modelo (`modelConcurrency`)
 
-Una conexión también puede declarar límites exactos de concurrencia por modelo
-dentro de su mapa `rateLimitOverrides`:
+Una conexión también puede declarar límites de simultaneidad exactos por modelo dentro de su mapa `rateLimitOverrides` :
 
 ```json
 {
@@ -405,32 +435,13 @@ dentro de su mapa `rateLimitOverrides`:
 }
 ```
 
-Establézcalo en el modal de conexión (**Anulaciones del límite de velocidad →
-Límites de concurrencia por modelo**, un `model=cap` por línea) o mediante
-`PATCH /api/providers/[id]` con la misma estructura JSON. Semántica de las claves:
+Configúrelo en el modal de conexión (**El límite de tasa anula los límites de simultaneidad por modelo →** , una `model=cap` por línea) o mediante `PATCH /api/providers/[id]` con la misma forma JSON. Semántica clave:
 
-- **Límite para toda la conexión frente a límite específico del modelo:** `maxConcurrent` sigue siendo el límite compartido para toda la conexión. Cuando se aplican ambos, las dos puertas se adquieren atómicamente en la misma puerta compuesta
-  (`global → provider → account → model`); el comportamiento efectivo es el límite
-  aplicable más estricto.
-- **Coincidencia exacta de la clave del modelo:** la clave es la cadena del modelo
-  que se pasa al ejecutor después de resolver el enrutamiento —normalmente el
-  identificador de modelo ascendente sin prefijo (`glm-5`), no un alias
-  `provider/model` del cliente (`zai/glm-5` no coincide con `glm-5`). Los valores
-  son límites de solicitudes simultáneas expresados como enteros positivos.
-- **Cola local, sin descubrimiento:** las solicitudes excedentes esperan en la cola
-  local con la semántica existente de cola/tiempo de espera (errores de admisión
-  tipados `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute no descubre ni
-  infiere la política ascendente: aplica los límites exactos configurados por el
-  operador. Una puerta de modelo saturada nunca desactiva el proveedor ni crea un
-  bloqueo permanente del modelo; el comportamiento de respuestas 429, período de
-  espera y alternativa del proveedor ascendente sigue siendo el mecanismo de
-  respaldo ante errores.
-- **Ámbito por conexión y por proceso:** los límites se aplican por conexión de
-  base de datos y se mantienen en memoria, por lo que dos conexiones que
-  reutilicen la misma clave de API ascendente no se coordinan entre sí.
-- **Sin configuración significa sin cambios:** omitir el mapa (o dejar vacío el
-  campo del panel) no añade ninguna puerta de modelo. Ejemplo de configuración
-  sin afirmar ningún límite universal del proveedor:
+- **Para toda la conexión frente a un modelo específico:** `maxConcurrent` sigue siendo el límite máximo compartido para toda la conexión. Cuando se aplican ambas, ambas puertas se adquieren atómicamente en la misma puerta compuesta (`global → provider → account → model`); el comportamiento efectivo es el límite aplicable más estricto.
+- **Coincidencia exacta de modelo-clave:** la clave es la cadena del modelo pasada al ejecutor después de la resolución de enrutamiento — normalmente la identificación del modelo ascendente (`glm-5`), no un alias `provider/model` del lado del cliente (`zai/glm-5` no coincide con `glm-5`). Los valores son límites máximos de solicitudes simultáneas de números enteros positivos.
+- **Cola local, sin descubrimiento:** Las solicitudes excedentes se ponen en cola localmente con la semántica queue/timeout existente (errores de admisión `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` escritos). OmniRoute no descubre ni infiere la política ascendente — aplica los límites exactos que configuró el operador. Una puerta de modelo saturada nunca desactiva al proveedor y nunca crea un bloqueo de modelo permanente; El comportamiento 429/cooldown/fallback ascendente sigue siendo el mecanismo de protección contra errores.
+- **Alcance por conexión y por proceso:** los límites son por conexión de base de datos y se mantienen en la memoria, por lo que dos conexiones que reutilizan la misma clave API ascendente no se coordinan entre sí.
+- **Sin configurar significa sin cambios:** omitir el mapa (o dejar el campo del tablero en blanco) no agrega ninguna puerta de modelo. Configuración de ejemplo sin afirmar ningún límite de proveedor universal:
 
 ```text
 glm-5=1
@@ -439,55 +450,17 @@ glm-4.7=3
 
 ### Serialización de solicitudes de cuota compartida
 
-Cuando un despacho de cuota compartida apunta a una conexión que declara un
-`max_concurrent` positivo, las solicitudes simultáneas a esa **cuenta** se
-serializan mediante un semáforo por conexión (`qsconn:<connectionId>`): las
-solicitudes excedentes **esperan en la cola** en lugar de inundar la cuenta. Es
-de **apertura ante fallos**: una cola saturada o un tiempo de espera agotado
-continúa sin un espacio, en lugar de rechazar una solicitud que se puede
-despachar. Se activa en **Configuración → Resiliencia → Concurrencia de cuota
-compartida por conexión**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, activado de forma
-predeterminada). Sin un límite `max_concurrent`, el comportamiento no cambia.
+Cuando un envío de cuota compartida apunta a una conexión que declara un `max_concurrent` positivo, las solicitudes simultáneas a esa **cuenta** se serializan a través de un semáforo por conexión (clave `qsconn:<connectionId>`): solicitudes excesivas **espera en la cola** en lugar de inundar la cuenta. Es **falla de apertura** — una cola saturada o un tiempo de espera continúa sin un espacio en lugar de rechazar una solicitud despachable. Alternar **Configuración → Resiliencia → Simultaneidad de cuota compartida por conexión** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, activado por defecto). Sin un límite `max_concurrent` el comportamiento no cambia.
 
-> La puerta de enrutamiento de cuota compartida (`selectQuotaShareTarget`, DRR + P2C) es
-> por sí misma de **apertura ante fallos** y solo _reduce la prioridad_ de una
-> conexión que ha alcanzado su límite; con un grupo de una sola conexión no puede
-> imponer un límite estricto, por lo que este semáforo es el que realmente
-> contiene la avalancha.
+> La puerta de enrutamiento de cuota compartida (`selectQuotaShareTarget`, DRR + P2C) en sí misma se abre a prueba de fallos y solo _desprioriza_ una conexión — con límite máximo con un grupo de conexiones únicas que no puede limitar, por lo que este semáforo es lo que realmente contiene la inundación.
 
-### Reintento de combinaciones teniendo en cuenta el período de espera
+### Reintento combinado con tiempo de reutilización
 
-Para cada estrategia de combinación (cuando está activada), una solicitud que
-provocaría una respuesta 429 durante un período de espera transitorio CORTO
-espera a que transcurra y vuelve a despacharse en lugar de devolver la respuesta 429. Esto incluye las ventanas TPM/RPM de tipo Gemini (~60 s de
-`retry-after`) en combinaciones de varios modelos; por ejemplo, cuando ambos
-destinos de una combinación de 2 modelos alcanzan un límite de velocidad por
-modelo. Está limitado por `comboCooldownWait` (`enabled`, `maxWaitMs`,
-`maxAttempts`, `budgetMs`) en **Configuración → Resiliencia**. Nunca espera ante
-`quota_exhausted` (bloqueado hasta medianoche) ni ante motivos de autenticación o
-de recurso no encontrado.
+Para cada estrategia de combo (cuando está habilitada), una solicitud que cristalizaría un 429 para un tiempo de reutilización transitorio SHORT espera y se vuelve a enviar en lugar de devolver el 429 — Esto cubre ventanas TPM/RPM de clase Gemini (reintento posterior de ~ 60) en combos de múltiples modelos, por ejemplo, ambos objetivos de un combo de 2 modelos que alcanzan un límite de velocidad por modelo. Delimitado por `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) en **Configuración Resiliencia →** . Nunca espera por motivos `quota_exhausted` (bloqueado hasta medianoche) o auth/not-found. Con `comboTimeoutMs` configurado, una espera que no puede terminar antes de ese plazo no comienza (#18998): el combo responde de inmediato con su respuesta terminal en lugar de un `COMBO_TIMEOUT` 504.
 
-Una combinación puede excluirse mediante `config.comboCooldownWaitEnabled: false`.
-Solo `false` literal desactiva estas esperas compartidas de combinación (espera
-de período de espera posterior al despacho y esperas previas al despacho por
-circuito abierto/bloqueo del modelo), así como su extensión del límite inferior
-del tiempo de espera según el presupuesto. La ausencia del valor o `true`
-mantiene la política global; `true` no puede activar globalmente una espera que
-esté desactivada. Un `targetTimeoutMs` explícito sigue teniendo prioridad. Esta
-exclusión no cambia la espera previa al despacho independiente de fijación de
-turno de Codex nativo.
+Un combo puede optar por no participar con `config.comboCooldownWaitEnabled: false`. Solo `false` literal deshabilita estas esperas combinadas compartidas (esperas de enfriamiento posteriores al envío y esperas circuit-open/model-lock previas al envío) y su extensión de límite de tiempo de espera del presupuesto de espera. Falta o `true` preserva la política global; `true` no puede habilitar la espera deshabilitada globalmente. Un `targetTimeoutMs` explícito sigue ganando. Esta exclusión voluntaria no cambia la espera previa al envío separada del Codex nativo.
 
-La misma puerta cubre el caso previo al despacho (#16319): cuando todos los
-destinos de una combinación se omiten antes de realizar cualquier intento porque
-su modelo se encuentra en un bloqueo transitorio corto, la ruta sin intentos
-espera a que termine el bloqueo bajo los mismos límites y vuelve a despacharse,
-en lugar de responder con un `503 ALL_TARGETS_SKIPPED` sin indicación. Cuando no
-se permite esperar (se agotó el límite, el número de intentos o el presupuesto,
-o la función está desactivada), la respuesta terminal se actualiza a
-`429 rate_limit_error` e incluye `retry_after` / `reset_at` del vencimiento más
-temprano del bloqueo transitorio; los bloqueos por cuota, autenticación y
-recurso no encontrado mantienen el 503 sin indicación.
+La misma puerta cubre el caso previo al envío (#16319): cuando cada objetivo de un combo se omite antes de realizar cualquier intento porque su modelo se encuentra en un bloqueo transitorio corto, la ruta de intento cero espera el bloqueo bajo los mismos techos y vuelve a enviar, en lugar de responder a un `503 ALL_TARGETS_SKIPPED` sin pistas. Cuando no se permite ninguna espera (techo, intento o presupuesto agotado, o función desactivada), la respuesta del terminal se actualiza a `429 rate_limit_error` llevando `retry_after` / `reset_at` desde la primera expiración del bloqueo transitorio; Los bloqueos de cuota, autenticación y no encontrado mantienen el 503 sin pistas.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

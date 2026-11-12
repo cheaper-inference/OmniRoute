@@ -147,39 +147,61 @@ Aynı paketteki kardeş modüller:
 
 ## Antigravity Gizliliği
 
-Antigravity istekleri, çağıranın metnini bayt bayt korur. OmniRoute, istemlere sıfır genişlikli karakterler eklemez veya bir IDE istemcisini taklit etmek için araçları yeniden adlandırmaz/eklemez.
+Antigravity istekleri arayan metnini bayt bayt olarak korur. OmniRoute bir IDE istemcisini taklit etmek için istemlere veya rename/inject araçlarına sıfır genişlikli karakterler eklemez.
 
 ### `antigravityHeaderScrub.ts`
 
-İletmeden önce Stainless SDK işaretleyicilerini (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) kaldırır.
+İletimden önce Paslanmaz SDK işaretleyicilerini (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) sıyırır.
 
-### ⚠️ Risk: `ANTIGRAVITY_CREDITS=always` (hesap yasaklama açısından yüksek riskli nokta)
+### ⚠️ Riski: `ANTIGRAVITY_CREDITS=always` (hesap yasaklama sıcak noktası)
 
-`ANTIGRAVITY_CREDITS=always` (`open-sse/executors/antigravity.ts` tarafından kullanılır), Google'ın ücretsiz katman kotasının istekleri sınırlamasına izin vermek yerine **her** isteği Antigravity AI Credit Overage (ücretli Google kredileri) üzerinden yönlendirir. Bu bir özellik olarak belgelenmiştir ancak **gördüğümüz en yaygın Hizmet Şartları ihlali bildiriminin açık ara birinci nedenidir** — birden fazla Google Ultra hesabı, `=always` ile birkaç saat çalıştırıldıktan sonra `403 / "service disabled for ToS violation" / insufficient_quota` hatasıyla yasaklanmıştır.
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` tarafından tüketilen) rotaları **Her** Google ücretsiz katmanlı kota kapısı işlemlerine izin vermek yerine Antigravity AI Kredi Aşımları (ücretli Google kredileri) aracılığıyla talepte bulunun. Bu bir özellik olarak belgelenmiştir, ancak **gördüğümüz en yaygın Hizmet Şartları ihlali raporu** — birden fazla Google Ultra hesabı, `=always` ile birkaç saat çalıştırıldıktan sonra `403 / "service disabled for ToS violation" / insufficient_quota` ile yasaklandı.
 
-Üst sistem uygulaması **Google tarafındadır** ve OmniRoute'un önleyebileceği bir şey değildir. Ortam değişkeninin adı ve mevcut belgeler, bunun güvenle açılabilecek bir ayar olduğu izlenimini verir; ancak öyle değildir.
+Yukarı yöndeki yaptırım açık **Google tarafı** OmniRoute önleyebileceği hiçbir şey yoktur. env var adı ve mevcut dokümanlar, çevrilmesi güvenli bir düğme gibi görünmesini sağlar; öyle değil.
 
-**Bunun kötüye kullanım tespitini yalnızca ücretsiz katman kullanımından daha agresif biçimde tetiklemesinin nedenleri:**
+**Bu neden kötüye kullanım tespitini yalnızca ücretsiz kullanıma göre daha agresif bir şekilde ortaya koyuyor:**
 
-- Tek bir Google hesabındaki sürekli otomatik harcama, ücretsiz katmanda kotaya ulaşıp durmaktan farklı şekilde işaretlenir.
-- Kredi aşımı kullanımında hız üst sınırı yoktur; bu nedenle yanlış yapılandırılmış bir istemci dakikalar içinde birkaç yüz USD tüketebilir ve API anahtarı satışı veya bot trafiği gibi görünebilir.
-- Aynı harici IP'den paralel olarak kredi aşımı kullanan birden fazla OmniRoute kullanıcısı sinyali güçlendirir.
+- Tek bir Google hesabındaki sürekli otomatik harcama, ücretsiz katmanlı isabet kota ve durdurmalardan farklı şekilde işaretlenir.
+- Kredi aşımlarının oran tavanı yoktur, bu nedenle yanlış yapılandırılmış bir istemci birkaç yüz USD dakikalar içinde tüketebilir ve API anahtarı yeniden satışı veya bot trafiği gibi görünebilir.
+- Birden fazla OmniRoute kullanıcısının aynı harici IP paralel olarak fazla kredi alması sinyali güçlendirir.
 
-**Önerilen yaklaşım:**
+**Önerilen duruş:**
 
-1. Operatör, ücretli kredi ve hesap yaptırımı riskini açıkça kabul etmediği sürece varsayılan `ANTIGRAVITY_CREDITS=off` ayarını koruyun. `retry`, önce normal isteği gönderir ve uygun bir kota 429 hatasından sonra en fazla bir kez kredi ekler; `always` ise ilk istekte kredi ekler.
-2. Tek bir Antigravity hesabını kapasitesinin sonuna kadar kullanmak yerine **Auto-Combo aracılığıyla yükü sağlayıcılar arasında dağıtın** (`model: "auto"` veya `kr/glm/etc`-combo).
-3. Antigravity sağlayıcısının düzenleme sayfasında **bağlantı başına RPM sınırları belirleyin** (Dashboard → Providers → Antigravity → connection → rate limit). Sürekli kullanım için 30–60 RPM savunulabilir bir üst sınırdır.
-4. **Kararlı ve operatör tarafından kontrol edilen üst sistem ağ bağlantısı kullanın** ve tek bir hesabı birbiriyle ilgisiz kullanıcılar veya iş yükleri arasında paylaşmaktan kaçının.
-5. **Yasaklanmanız durumunda**: Google'ın gönderdiği tam `quota_exceeded` / `service disabled` yanıt gövdesiyle birlikte `support.google.com` → "Restore Workspace/Account access" üzerinden itiraz edin. Hesabın geri açılması garanti edilmez.
+1. Operatör ücretli kredi ve hesap icra riskini açıkça kabul etmediği sürece varsayılan `ANTIGRAVITY_CREDITS=off` koruyun. `retry` önce normal isteği gönderir ve uygun kota 429'dan sonra en fazla bir kez kredi enjekte eder; `always` ilk istek üzerine kredileri enjekte eder.
+2. **Auto-Combo aracılığıyla yükü sağlayıcılara dağıtın** (`model: "auto"` veya `kr/glm/etc` -combo) tek bir Antigravity hesabını doyurmak yerine.
+3. **Bağlantı başına RPM sınırlarını ayarlayın** Antigravity sağlayıcısının düzenleme sayfasında (Kontrol Paneli → Sağlayıcıları → Antigravity → bağlantısı → hız sınırı). 30-60 RPM, sürekli kullanım için savunulabilir bir üst sınırdır.
+4. **Kararlı, operatör kontrollü yukarı akış ağı kullanın** ve bir hesabı ilgisiz kullanıcılar veya iş yükleri arasında paylaşmaktan kaçının.
+5. **Yasaklanmışsa** : Google gönderdiği tam `quota_exceeded` / `service disabled` yanıt gövdesiyle `support.google.com` → " Workspace/Account erişimini geri yükle" yoluyla itiraz. Restorasyon garanti edilmez.
 
-Ortam referansı, her kredi modunun hesap ve harcama üzerindeki etkilerini belgeler.
+Ortam referansı, her kredi modunun hesap ve harcama sonuçlarını belgelemektedir.
+
+#### Yalnızca `=always` değil: Antigravity Genel olarak OAuth yönlendirmesi
+
+Askıya almalar kredi aşımlarıyla sınırlı değildir. Kasım 2026'daki raporlar (#19223, #19266), `antigravity` ve `agy` (Antigravity CLI) sağlayıcıları üzerinden yönlendirme sırasında askıya alınan birkaç Google hesabını açıklamaktadır:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Her iki sağlayıcı da Antigravity ürünü OAuth oturumuyla kimlik doğrulaması yapar; bu, kontrol panelinin risk bildiriminin ("Bu sağlayıcı, proxy/router kullanımı için yetkili olmayan resmi session/OAuth ürününüzü kullanıyor") bir bağlantı eklenmeden önce uyardığı durumdur. Yukarıdaki önerilerin hiçbiri bu kullanıma izin vermez; yalnızca bir hesabın taşıdığı trafiği azaltırlar.
+
+**Gemini modelleri için yetkili API arayüzleri.** Google, OmniRoute sıradan API anahtarı sağlayıcıları olarak desteklediği APIs aracılığıyla Gemini programlı erişim sunar:
+
+| Sağlayıcı kimliği | Kontrol paneli adı          | Kimlik bilgisi                                                                       |
+| ----------------- | --------------------------- | ------------------------------------------------------------------------------------ |
+| `gemini`          | Gemini (Google AI Stüdyosu) | Google AI Studio'dan Gemini API anahtarı (ücretsiz katman mevcuttur)                 |
+| `vertex`          | Vertex AI                   | Hizmet Hesabı JSON, OAuth erişim belirteci veya Vertex Express API anahtarı (Gemini) |
+
+Bu sağlayıcılar, Antigravity ürün oturumunun aksine, API erişimi için Google kimlik bilgilerini kullanır. Her kullanımı uyumlu hale getirmezler veya yaptırım riskini ortadan kaldırmazlar: her biri kendi şartlarına tabidir ve operatörün bunların dağıtımını kontrol etmesi gerekir. Örneğin, [Gemini API Ek Hizmet Koşulları](https://ai.google.dev/gemini-api/terms) yalnızca API müşterileri Avrupa Ekonomik Alanı, İsviçre veya Birleşik Krallık'taki kullanıcılara sunulduğunda Ücretli Hizmetlere izin verir ve Ücretsiz Hizmetlere gönderilen içerik Google ürünlerini geliştirmek için kullanılabilir. Vertex AI bunun yerine Google Cloud şartlarının ( [Hizmete Özel Şartlar](https://cloud.google.com/terms/service-terms) ) kapsamına girer. Fiyatlandırma ve kotalar, Antigravity aboneliği yerine bu API koşullarına göre yapılır.
+
+Yukarıda açıklanan Antigravity askıya alma durumlarından kaçınmak isteyen operatörler, kullanımlarının sağlayıcının şartlarına uygun olup olmadığını kontrol ettikten sonra Gemini trafiğini `antigravity` / `agy` yerine bu sağlayıcılardan birine yönlendirmelidir.
 
 Temas noktaları:
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` değerini okur
-- `src/lib/oauth/providers/antigravity.ts` — kimlik bilgisi altyapısı
-- İlk olay bildirimi: Tartışma [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` okur
+- `src/lib/oauth/providers/antigravity.ts` — kimlik bilgileri sıhhi tesisat
+- Orijinal olay raporu: Tartışma [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -248,7 +270,7 @@ Tüm MITM uç noktaları yönetim kimlik doğrulaması (`requireCliToolsAuth`) g
 
 ---
 
-## Kullanıcı Aracısı — env değişkenlerini Geçersiz Kılır (`.env.example` bölüm 12)
+## User-Agent Geçersiz Kılmaları — ortam değişkenleri (`.env.example` bölüm 12)
 
 | Değişken            | Varsayılan                                    |
 | ------------------- | --------------------------------------------- |
@@ -259,7 +281,7 @@ Tüm MITM uç noktaları yönetim kimlik doğrulaması (`requireCliToolsAuth`) g
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dinamik arama aracılığıyla `open-sse/executors/base.ts::buildHeaders()` tarafından tüketilir.** Sağlayıcılar yeni CLI sürümlerini yayınladığında bunları artırın** — eski UA dizeleri, eski istemciler olarak reddedilmeye başlar.
+Dinamik arama yoluyla `open-sse/executors/base.ts::buildHeaders()` tarafından kullanılır. **Sağlayıcılar yeni CLI sürümleri yayımladığında bunların sürümlerini yükseltin** — güncelliğini yitirmiş UA dizeleri, eski istemciler oldukları gerekçesiyle reddedilmeye başlar.
 
 ## CLI Uyumluluk Modu Anahtarları (`.env.example` bölüm 13)
 

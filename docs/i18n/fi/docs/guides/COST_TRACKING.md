@@ -41,49 +41,49 @@ Koska luku on arvio:
 
 ### Hinnoittelun lähde
 
-Kustannukset tulevat yhdistetystä hinnoittelutaulukosta [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) :ssa tässä tärkeysjärjestyksessä (** korkein ensin** ):
+Kustannukset tulevat [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) :n yhdistetystä hinnoittelutaulukosta tässä tärkeysjärjestyksessä (**korkein ensin** ):
 
-1. **Käyttäjä ohittaa** — -hinnat asetettu kojelaudassa tai `PATCH /api/pricing` ( `pricing` nimiavaruuden) kautta.
-2. **mallit.dev-synkronointi** — -hinnoittelu haettu `https://models.dev/api.json` ( `models_dev_pricing` nimiavaruudesta).
-3. **LiteLLM synkronointi** — hinnat haettu LiteLLM:n julkisesta `model_prices_and_context_window.json` ( `pricing_synced` nimiavaruudesta).
+1. **Käyttäjä ohittaa** — hinnat on asetettu kojelaudassa tai `PATCH /api/pricing` ( `pricing` nimiavaruuden) kautta.
+2. **mallit.dev-synkronointi** — -hinnoittelu haettu `https://models.dev/api.json` :stä ( `models_dev_pricing` nimitila).
+3. **LiteLLM -synkronointi** — hinnat haettu LiteLLM:n julkisesta `model_prices_and_context_window.json` ( `pricing_synced` nimiavaruudesta).
 4. **Kovakoodatut oletukset** — hinnat toimitetaan [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ssä.
 
-Samalle provider/model:lle korkeamman prioriteetin tasojen arvot korvaavat alempien kerrosten vastaavat kentät; ylemmästä kerroksesta puuttuvat kentät voivat silti tulla alemmasta kerroksesta. Järjestys on kiinteä, vaikka molemmat itsenäiset synkronointityöt suoritetaan samanaikaisesti. `GET /api/pricing?includeSources=1` palauttaa `pricing` ja `sourceMap`, joiden mallikohtaiset tunnisteet (`user`, `modelsDev`, `litellm`, `default`) tunnistavat korkeimman prioriteetin kerroksen, joka sisältää kyseisen mallin.
+Saman provider/model kohdalla korkeamman prioriteetin tasojen arvot korvaavat alempien kerrosten vastaavat kentät; ylemmästä kerroksesta puuttuvat kentät voivat silti tulla alemmasta kerroksesta. Järjestys on kiinteä, vaikka molemmat itsenäiset synkronointityöt suoritetaan samanaikaisesti. `GET /api/pricing?includeSources=1` palauttaa `pricing` ja `sourceMap`, joiden mallikohtaiset tunnisteet (`user`, `modelsDev`, `litellm`, `default`) tunnistavat korkeimman prioriteetin kerroksen, joka sisältää kyseisen mallin.
 
-**LiteLLM synkronointi** on valinnainen, oletuksena poistettu käytöstä. Sen ympäristömuuttujat (katso [`.env.example`](../../.env.example) ) ovat:
+**LiteLLM -synkronointi** on valinnainen, oletuksena poistettu käytöstä. Sen ympäristömuuttujat (katso [`.env.example`](../../.env.example) ) ovat:
 
-| Env var                 | Oletus    | Tarkoitus                                                                            |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Ota käyttöön tausta LiteLLM -hinnoittelun synkronointi.                              |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synkronointiväli sekunneissa (päivittäin).                                           |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Lähteen valinta vain tälle synkronoinnille; tällä hetkellä vain `litellm` on tuettu. |
+| Env var                 | Oletus    | Tarkoitus                                                                             |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Ota käyttöön tausta LiteLLM -hinnoittelun synkronointi.                               |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synkronointiväli sekunneissa (päivittäin).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Lähteen valinta vain tälle synkronoinnille; tällä hetkellä vain `litellm` ta tuetaan. |
 
-**mallit.dev-synkronointi** on erillinen LiteLLM -synkronista, ja se on myös oletuksena poistettu käytöstä. Ota se käyttöön asetuksissa (models.dev sync) tai käytä näitä muuttujia:
+**mallit.dev-synkronointi** on erillinen LiteLLM -synkronoinnista ja on myös oletusarvoisesti poistettu käytöstä. Ota se käyttöön asetuksissa (models.dev sync) tai käytä näitä muuttujia:
 
 | Env var                    | Oletus    | Tarkoitus                                                                                                                                  |
 | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `MODELS_DEV_SYNC_ENABLED`  | _(unset)_ | Unset seuraa Asetukset-kytkintä; `1/true/on/yes` pakottaa päälle ja `0/false/off/no` pakottaa pois päältä (vaikka Asetukset sallivat sen). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Model.dev-oletussynkronointiväli sekunneissa (päivittäin).                                                                                 |
 
-`PRICING_SYNC_SOURCES` tekee** ei** salli mallit.dev; se ohjaa vain LiteLLM -synkronointia. Käyttäjän ohituksen poistaminen ei tyhjennä kumpaakaan synkronoitua nimiavaruutta. seuraava käytettävissä oleva hinnoittelutaso astuu voimaan. Jos malli on hinnoiteltu, tarkista sekä synkronointiasetukset että `sourceMap` ennen manuaalisen ohituksen lisäämistä.
+`PRICING_SYNC_SOURCES` tekee **ei** salli mallit.dev; se ohjaa vain LiteLLM -synkronointia. Käyttäjän ohituksen poistaminen ei tyhjennä kumpaakaan synkronoitua nimiavaruutta. seuraava käytettävissä oleva hinnoittelutaso astuu voimaan. Jos malli on hinnoiteltu, tarkista sekä synkronointiasetukset että `sourceMap` ennen manuaalisen ohituksen lisäämistä.
 
 ### Kustannuskaava
 
-Kustannukset lasketaan pyyntöä kohti merkkien määrästä ja miljoonan tunnuksen hinnasta [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) ssa (`computeCostFromPricing` / `calculateCost`):
+Kustannukset lasketaan pyyntöä kohden [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) ssa (`computeCostFromPricing` / `calculateCost`) tunnistemäärästä ja miljoonakohtaisista tokeneista:
 
-- **Syöttötunnukset** (miinus välimuistin lukuja ja välimuistin luontitokeneita) × `input` rate.
-- **Välimuistin lukutunnukset** × `cached` rate (laskee takaisin syöttönopeudeksi).
-- **Välimuistin luontitunnukset** × `cache_creation` rate (laskee takaisin syöttönopeudeksi).
+- **Syöttötunnukset** (miinus välimuistin lukemat ja välimuistin luontitunnukset) × `input` rate.
+- **Välimuistin lukutunnukset** × `cached` nopeus (laskee takaisin syöttönopeudeksi).
+- **Välimuistin luontitunnukset** × `cache_creation` nopeus (laskee takaisin syöttönopeudeksi).
 - **Tulostustunnukset** × `output` korko.
 - **Perustelut** × `reasoning` nopeus (laskee takaisin lähtönopeudeksi).
 
-Kaikki hinnat tulkitaan USD :ksi 1 000 000 tokenia kohti. Codex "fast"/"priority" tai "flex" palvelutaso käyttää kustannuskerrointa (`getCodexFastCostMultiplier`) — esim. flex laskutetaan 50 % token-alennuksella, joka julkaistaan** flex säästöjä** kojelaudassa.
+Kaikki hinnat tulkitaan USD :ksi 1 000 000 tokenia kohti. Codex "fast"/"priority" tai "flex" palvelutaso käyttää kustannuskerrointa (`getCodexFastCostMultiplier`) — esim. flex laskutetaan 50 %:n token-alennuksella, joka julkaistaan **flex säästöjä** kojelaudassa.
 
-Mallinimet normalisoidaan ensin (palveluntarjoajan polun etuliitteet, kuten `openai/` tai `accounts/fireworks/models/` poistetaan), joten historialliset rivit vastaavat silti hintaa.
+Mallinimet normalisoidaan ensin (palveluntarjoajan polun etuliitteet, kuten `openai/` tai `accounts/fireworks/models/` poistetaan), joten historialliset rivit vastaavat edelleen hintaa.
 
 ### Miten kulutus kirjataan
 
-- Pyyntökohtainen hinta lasketaan vastauksen jälkeen ja tallennetaan tule ja unohda, joten se ei koskaan lisää viivettä asiakkaalle. Jaetun kiintiön kulutus ajoitetaan seuraavan tapahtumasilmukan rastiin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kautta.
+- Pyyntökohtainen hinta lasketaan pyynnön valmistuttua. Jaetun kiintiön kulutus ajoitetaan seuraavan tapahtumasilmukan rastiin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kautta.
 - API-avaimen kulutus puskuroidaan ja tyhjennetään erissä [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) lla (oletusarvoinen 60 sekunnin huuhteluväli, 1 000 merkinnän puskuri). Viritettävä kautta:
 
   | Env var                             | Oletus  | Tarkoitus                                      |
@@ -91,7 +91,29 @@ Mallinimet normalisoidaan ensin (palveluntarjoajan polun etuliitteet, kuten `ope
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Huuhteluväli millisekunteina.                  |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Enimmäispuskuroidut merkinnät ennen huuhtelua. |
 
-Kojelaudan hintaluvut ovat** ei** luetaan tallennetusta rivikohtaisesta dollarimäärästä — ne lasketaan uudelleen lennossa token-määrästä ja nykyisestä hinnoittelutaulukosta aina, kun analytiikan päätepiste suoritetaan. Tämä tarkoittaa, että väärän hinnan korjaaminen (ja uudelleensynkronointi) päivittää historialliset kustannusarviot takautuvasti.
+Kustannukset valitsevat tarkan palveluntarjoajan ilmoittaman veloituksen (`provider_cost_usd`), sitten luettelohintaisen pyynnön tilannevedoksen (`calculated_cost_usd`) ja sitten token-uudelleenhinnoittelun nykyisestä luettelosta. Tallennettuja kuluja ei veloiteta uudelleen niiden tunnuslukujen kautta. Vanhat vain tunnusrivit muuttuvat edelleen, kun niiden luettelohinta muuttuu.
+
+### OCR ja upotukset
+
+- Onnistuneet `/v1/ocr` -pyynnöt käyttävät ylävirran `usage_info.pages_processed`, eivät pyydettyä sivualuetta tai palautettujen sivuobjektien määrää. Arvio on sivua × `ocr_cost_per_page` (absoluuttinen USD/page,**ei** USD/million).
+- Pyynnöt, joissa on asiakirja- tai rajoituslaatikon huomautuksia, vaativat erillisen `ocr_cost_per_annotated_page` tariffin. Ilman sitä kustannukset jäävät tuntemattomiksi; tavallista OCR tariffia ei korvata hiljaa.
+- LiteLLM -synkronointi kuvaa ylävirran `annotation_cost_per_page` kenttänsä `ocr_cost_per_annotated_page` ksi säilyttäen absoluuttisen USD/page arvon ja vain huomautuksia sisältävät merkinnät, mukaan lukien eksplisiittisen nollan. Toimitettu kanoninen kenttä on etusijalla; virheelliset aliasarvot ohitetaan. Käyttäjähinnoittelun ohitukset säilyttävät normaalin prioriteettinsa. Katso [LiteLLM:n OCR hinnoitteluavaimet](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -käyttö tallentaa sivumäärän, yksikköhinnan, lasketun USD hinnan, API -avaimen ja valitun yhteyden. Sivuja ei koskaan esitetä tokeneina. Puhelulokit sisältävät laskutuksen metatietoja, eivät asiakirjaa URLs, PDF tavuja tai purettua tekstiä.
+- Onnistuneet `/v1/embeddings` pyynnöt tallentavat yhden käyttörivin fyysistä erää kohti, mukaan lukien erilliset erät, jotka on suoritettu samassa millisekunnissa. Palveluntarjoajan ilmoittamat maksut ovat etusijalla token-arvioihin nähden; yhdistelmäkääreet eivät lisää maksua.
+- Käyttöhistoria, kustannusanalytiikka, provider/account ikkunat, API-avaimen kulutusrajat, pyyntö-kustannuskirjaus ja päivittäiset käyttökertoimet sisältävät nämä maksut. No-log-avaimet säilyttävät numeerisen kirjanpidon säilyttämättä lähdetekstiä.
+- Puuttuva käyttö tai tariffit ovat **tuntematon** , ei ilmainen: vastauskustannusotsikko jätetään pois, ja nykyinen hinnoittelemattoman käytön käytäntö koskee rajoitettuja API avaimia. Eksplisiittisesti määritetyt nollahinnat pysyvät voimassa ilman kustannuksia.
+
+Tämä on vain eteenpäin suuntautuvaa kirjanpitoa. Vanhoja OCR/embedding -kutsuja, jotka eivät koskaan kirjoittaneet käyttöhistoriaa, ei voida rekonstruoida tästä siirrosta. Luetteloarviot ovat USD -arvioita, eivät laskuja, eivätkä sisällä valuuttamuunnoksia, veroja tai alennuksia.
+
+### Puhetta ja kuvia
+
+- Onnistuneet `/v1/audio/transcriptions`, `/v1/audio/speech` ja kuvanluontiyritykset jakavat numeerisen kirjanpidon. Suorat ja yhdistelmäpuhelut sisältävät soittajan API -näppäimen ja valitun yhteyden; yhdistelmäkääre ei koskaan lisää toista veloitusta.
+- Toimittajan ilmoittama USD voittaa luetteloarvion, joka sisältää nimenomaisen nollamaksun. OpenRouter:n JSON `usage.cost` on normalisoitu `cost_usd`:ksi. Muussa tapauksessa mitatut tunnukset käyttävät merkkien hintoja, transkriptiosekunnit sekuntihintoja, puhesyöte Unicode-merkkimäärää ja kiinteähintaiset kuvat käyttävät tosiasiallisesti palautettua numeroa, ei pyydettyä `n`.
+- Binääri- OpenRouter TTS llä ei ole JSON käyttörunkoa. Kun ääni on päättynyt tai soittaja peruuttaa, OmniRoute kysyy sukupolveaan ID**sama** määritetty OpenRouter alkuperä. EU pyyntö ei koskaan palaa globaaliin alkuperään. Tämä on rajoitettu, vain luku -haku; synteesiä ei yritetä uudelleen kirjanpitoa varten. Laskutustietueet voivat ilmestyä, kun ääni on päättynyt: uudelleenhakuja suoritetaan taustalla noin 52 sekuntia, mukaan lukien verkon määräajat.
+- Tämän haun aikana äänivasteessa on `X-OmniRoute-Cost-Status: pending` eikä vastauskustannusotsikkoa. Sen lopullinen veloitus näkyy käyttöhistoriassa, analytiikassa ja avainkirjassa täsmäytyksen jälkeen. Jos metatietoja ei ole saatavilla, käytetään määritettyä tariffivedosta. muuten hinta jää tuntemattomaksi.
+- Sekunneilla, merkeillä ja kuvilla on erilliset laskutusyksikkökentät, ei koskaan väärennettyjä tunnuksia. Kirjanpito säilyttää vain numeerisen käytön, ei puhetekstiä, transkriptioita tai kuvatavuja. Nykyiset hinnoiteltujen kuvien poikkeukset ovat ennallaan: aidosti puuttuva kuvatariffi ei lukitse rajoitettua avainta uudelleen, ja vastauksesta jätetään pois kustannusotsikko sen sijaan, että puhelu julistettaisiin ilmaiseksi. Hinnoittelumyymälän virhe säilyttää edelleen käyttötodisteet epäonnistuneen sulkemisen vuoksi.
+
+Mitään historiallista speech/image maksua ei ole keksitty tai täytetty. Palveluntarjoajan laskutus on edelleen viite laskuissa ja puheluissa, joiden veloitusta ei raportoitu.
 
 ---
 
@@ -139,50 +161,53 @@ Kustannukset-alue sisältää myös seuraavat sivut (kaikki polun `/dashboard/co
 
 ---
 
-## API päätepisteitä
+## API-päätepisteet
 
-Kaikki nämä vaativat hallinnan todennusta (loopback/JWT, `requireManagementAuth` kautta), ellei toisin mainita.
+Kaikki nämä edellyttävät hallinnan todennusta (loopback/JWT, `requireManagementAuth`-toiminnon
+kautta), ellei toisin mainita.
 
 ### Käyttö- ja kustannusanalytiikka
 
-| Menetelmä | Päätepiste               | Tarkoitus                                                                                                                                                                   |
-| --------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`     | `/api/usage/analytics`   | Täydellinen cost/usage -analytiikka: yhteenveto, päivittäinen trendi, provider/model/API key/account/tier. Kysely: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`     | `/api/usage/utilization` | Palveluntarjoajakohtainen kiintiön käyttöaste ajan mittaan. Kysely: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                            |
-| `GET`     | `/api/usage/history`     | Raakakäyttöhistoriarivit.                                                                                                                                                   |
-| `GET`     | `/api/usage/call-logs`   | Pyyntökohtaiset puhelulokit (malli, tunnukset, hinta, viive, tila).                                                                                                         |
-| `GET`     | `/api/usage/quota`       | Palveluntarjoajan kiintiön tila.                                                                                                                                            |
-| `GET`     | `/api/usage/proxy-logs`  | Välityspalvelinpyyntölokit.                                                                                                                                                 |
+| Menetelmä | Päätepiste               | Tarkoitus                                                                                                                                                                                                                  |
+| --------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`     | `/api/usage/analytics`   | Täydellinen kustannus- ja käyttöanalytiikka: yhteenveto, päivittäinen kehitys sekä tiedot palveluntarjoajan/mallin/API-avaimen/tilin/palvelutason mukaan. Kysely: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`     | `/api/usage/utilization` | Palveluntarjoajakohtainen kiintiön käyttöaste ajan kuluessa. Kysely: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                                          |
+| `GET`     | `/api/usage/history`     | Raakamuotoiset käyttöhistorian rivit.                                                                                                                                                                                      |
+| `GET`     | `/api/usage/call-logs`   | Pyyntökohtaiset kutsulokit (malli, tokenit, kustannus, viive, tila).                                                                                                                                                       |
+| `GET`     | `/api/usage/quota`       | Palveluntarjoajan kiintiön tila.                                                                                                                                                                                           |
+| `GET`     | `/api/usage/proxy-logs`  | Välityspalvelimen pyyntölokit.                                                                                                                                                                                             |
 
 ### Budjetit
 
-| Menetelmä | Päätepiste               | Tarkoitus                                                                                               |
-| --------- | ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `GET`     | `/api/usage/budget`      | Kustannusyhteenveto + -budjetin tarkistus yhdelle API avaimelle (`apiKeyId` kyselyparametri vaaditaan). |
-| `POST`    | `/api/usage/budget`      | Aseta daily/weekly/monthly USD rajoittaa + varoituskynnystä API näppäimelle.                            |
-| `GET`     | `/api/usage/budget/bulk` | Joukkobudjettiyhteenvedot API -näppäimillä.                                                             |
+| Menetelmä | Päätepiste               | Tarkoitus                                                                                              |
+| --------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `GET`     | `/api/usage/budget`      | Kustannusyhteenveto ja budjettitarkistus yhdelle API-avaimelle (`apiKeyId`-kyselyparametri vaaditaan). |
+| `POST`    | `/api/usage/budget`      | Määritä API-avaimelle päivittäiset, viikoittaiset ja kuukausittaiset USD-rajat sekä varoituskynnys.    |
+| `GET`     | `/api/usage/budget/bulk` | API-avainten budjettiyhteenvetojen joukkohaku.                                                         |
 
-> Budjetti API on rajattu per**API avain** (`apiKeyId`). `GET /api/usage/budget` :n palauttamat rajat sisältävät `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` ja juoksevat kokonaissummat (`totalCostToday`, `totalCostMonth`, …).
+> Budjetti-API:n käyttöalue määritetään **API-avaimittain** (`apiKeyId`). Päätepisteen
+> `GET /api/usage/budget` palauttamiin rajoihin sisältyvät `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> `warningThreshold` sekä juoksevat kokonaismäärät (`totalCostToday`, `totalCostMonth`, …).
 
 ### Hinnoittelu
 
-| Menetelmä | Päätepiste              | Tarkoitus                                                                                                                                                            |
-| --------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`     | `/api/pricing`          | Yhdistetty nelitasoinen hinnoittelu (käyttäjä, mallit.dev, LiteLLM, oletusarvot). `?includeSources=1` palauttaa `pricing` + `sourceMap`.                             |
-| `PATCH`   | `/api/pricing`          | Ohita `{ provider: { model: { input, output, cached, … } } }` hinnoittelu.                                                                                           |
-| `DELETE`  | `/api/pricing`          | Poista käyttäjähintojen ohitukset (valinnaisesti `?provider=&model=` rajoittaa); synkronoidut hinnat tai sisäänrakennetut oletusasetukset pysyvät varavaihtoehtoina. |
-| `GET`     | `/api/pricing/defaults` | Näytä oletusarvoiset per-1M varahinnat.                                                                                                                              |
-| `GET`     | `/api/pricing/models`   | Hinta mallin mukaan.                                                                                                                                                 |
-| `POST`    | `/api/pricing/sync`     | Käynnistä manuaalinen synkronointi ulkoisista lähteistä (LiteLLM).                                                                                                   |
-| `GET`     | `/api/pricing/sync`     | Nykyinen synkronointitila.                                                                                                                                           |
-| `DELETE`  | `/api/pricing/sync`     | Vain selkeä LiteLLM-synkronoitu hinnoittelu (`pricing_synced`); models.dev-tiedot ovat erillisiä.                                                                    |
+| Menetelmä | Päätepiste              | Tarkoitus                                                                                                                                                                    |
+| --------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`     | `/api/pricing`          | Neljän kerroksen yhdistetty hinnoittelu (käyttäjä, models.dev, LiteLLM, oletusarvot). `?includeSources=1` palauttaa `pricing` + `sourceMap`.                                 |
+| `PATCH`   | `/api/pricing`          | Ohita hinnoittelu rakenteelle `{ provider: { model: { input, output, cached, … } } }`.                                                                                       |
+| `DELETE`  | `/api/pricing`          | Poistaa käyttäjän hintaohitukset (valinnaisesti rajattuna parametrilla `?provider=&model=`); synkronoidut hinnat ja sisäänrakennetut oletusarvot säilyvät varavaihtoehtoina. |
+| `GET`     | `/api/pricing/defaults` | Näytä oletusarvoiset varahinnat miljoonaa yksikköä kohti.                                                                                                                    |
+| `GET`     | `/api/pricing/models`   | Mallin mukaan avainnettu hinnoittelu.                                                                                                                                        |
+| `POST`    | `/api/pricing/sync`     | Käynnistä manuaalinen synkronointi ulkoisista lähteistä (LiteLLM).                                                                                                           |
+| `GET`     | `/api/pricing/sync`     | Nykyinen synkronoinnin tila.                                                                                                                                                 |
+| `DELETE`  | `/api/pricing/sync`     | Tyhjentää vain LiteLLM-synkronoidut hinnat (`pricing_synced`); models.dev-tiedot ovat erilliset.                                                                             |
 
 ### Muut kustannuksiin liittyvät päätepisteet
 
-| Menetelmä | Päätepiste                    | Tarkoitus                                                                                               |
-| --------- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `GET`     | `/api/free-tier/summary`      | Ilmaisen mallin tunnuksen kokonaismäärä, käytetty tässä kuussa ja jäljellä oleva ilmainen päästöoikeus. |
-| `GET`     | `/api/quota/pools/[id]/usage` | Käyttö jaetussa kiintiöpoolissa.                                                                        |
+| Menetelmä | Päätepiste                    | Tarkoitus                                                                                          |
+| --------- | ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `GET`     | `/api/free-tier/summary`      | Ilmaismallin tokenien kokonaismäärä, tässä kuussa käytetyt ja jäljellä oleva ilmainen käyttömäärä. |
+| `GET`     | `/api/quota/pools/[id]/usage` | Jaetun kiintiöpoolin käyttö.                                                                       |
 
 ---
 

@@ -357,7 +357,7 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 joylashtirish
+## 🚀 Joylashtirish
 
 ### Global npm o'rnatish (Tavsiya etiladi)
 
@@ -378,61 +378,61 @@ omniroute --port 3000
 
 CLI avtomatik ravishda `.env` `~/.omniroute/.env` yoki `./.env` dan yuklaydi. Ishchi katalogdagi `./.env` faqat kalitlarning qisqa ruxsat etilgan ro'yxatini o'rnatishi mumkin (portlar, `REQUIRE_API_KEY`, mahalliy va rang sozlamalari); qolgan hamma narsani `~/.omniroute/.env` ga qo'ying. [CLI ishga tushirish shartnomalariga](CLI-LAUNCH-CONTRACTS.md#working-directory-env) qarang.
 
-### Tovoqlar rejimi
+### Tizim treyi rejimi
 
-Tizim tepsisida OmniRoute ishga tushiring:
+OmniRouteʼni tizim treyida ishga tushiring:
 
 ```bash
 omniroute serve --tray
 ```
 
-Buyruq server va laganda tayyor bo'lgandan keyin qaytadi.
+Server va trey tayyor bo‘lgach, buyruq yakunlanadi.
 
-Server terminalsiz davom etadi.
+Server terminalsiz ishlashda davom etadi.
 
-Tovoqlar rejimi macOS, Windows va grafik Linux seanslarini qo'llab-quvvatlaydi. Tovoqlar rejimi asboblar panelini avtomatik ravishda ochmaydi.
+Tizim treyi rejimi macOS, Windows va grafik Linux seanslarini qo‘llab-quvvatlaydi. Tizim treyi rejimi boshqaruv panelini avtomatik ochmaydi.
 
-Ushbu amallar uchun laganda menyusidan foydalaning:
+Quyidagi amallar uchun trey menyusidan foydalaning:
 
-- Boshqaruv panelini oching.
-- `/dashboard/logs` ni oching.
-- Avtomatik ishga tushirishni o'zgartiring.
-- OmniRoute to'xtating.
+- Boshqaruv panelini ochish.
+- `/dashboard/logs` sahifasini ochish.
+- Avtomatik ishga tushirish sozlamasini o‘zgartirish.
+- OmniRouteʼni to‘xtatish.
 
-`--tray` quyidagi variantlar bilan birlashtirmang:
+`--tray` parametrini quyidagi parametrlar bilan birga ishlatmang:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Bu rejimlar turli jarayon egaligini talab qiladi.
+Bu rejimlar jarayonni boshqarishning turli usullarini talab qiladi.
 
-Keyingi tizimga kirishda ishga tushirishni yoqing:
+Kompyuterga keyingi kirishda ishga tushirishni yoqing:
 
 ```bash
 omniroute autostart enable
 ```
 
-Avtomatik ishga tushirish macOS, Windows va grafik Linux seanslarida laganda rejimidan foydalanadi. Headless Linux mavjud systemd foydalanuvchi xizmatidan foydalanadi.
+Avtomatik ishga tushirish macOS, Windows va grafik Linux seanslarida tizim treyi rejimidan foydalanadi. Grafik interfeyssiz Linux mavjud systemd foydalanuvchi xizmatidan foydalanadi.
 
-Kirish paytida ishga tushirishni o'chirib qo'ying:
+Tizimga kirishda ishga tushirishni o‘chiring:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Oʻchirish
+### O‘chirish
 
-Sizga OmniRoute kerak bo'lmaganda, toza o'chirish uchun ikkita tezkor skriptni taqdim etamiz:
+OmniRoute endi kerak bo‘lmasa, uni toza olib tashlash uchun ikkita tezkor skriptni taqdim etamiz:
 
-| Buyruq                   | Harakat                                                                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Tizim ilovasini olib tashlaydi, lekin** DB va konfiguratsiyalaringizni saqlaydi** `~/.omniroute` ichida.               |
-| `npm run uninstall:full` | AND ilovasini butunlay oʻchirib tashlaydi** barcha konfiguratsiyalar, kalitlar va ma'lumotlar bazalarini o'chiradi** . |
+| Buyruq                   | Amal                                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Tizim ilovasini o‘chiradi, ammo `~/.omniroute` ichidagi **maʼlumotlar bazasi va konfiguratsiyalaringizni saqlab qoladi**. |
+| `npm run uninstall:full` | Ilovani o‘chiradi VA **barcha konfiguratsiyalar, kalitlar va maʼlumotlar bazalarini butunlay yo‘q qiladi**.               |
 
-> Eslatma: Ushbu buyruqlarni bajarish uchun OmniRoute loyiha jildiga o'ting (agar siz uni klonlagan bo'lsangiz) va ularni ishga tushiring. Shu bilan bir qatorda, agar global o'rnatilgan bo'lsa, siz oddiygina `npm uninstall -g omniroute` ishga tushirishingiz mumkin.
+> Eslatma: Bu buyruqlarni ishga tushirish uchun OmniRoute loyihasi jildiga o‘ting (agar uni klonlagan bo‘lsangiz) va ularni bajaring. Agar u global o‘rnatilgan bo‘lsa, muqobil ravishda `npm uninstall -g omniroute` buyrug‘ini bajarishingiz mumkin.
 
-### VPS joylashtirish
+### VPSʼga joylashtirish
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -448,25 +448,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Or: pm2 start npm --name omniroute -- start
+# Yoki: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 Deployment (past xotira)
+### PM2 orqali joylashtirish (Kam xotira)
 
-Cheklangan RAM bo'lgan serverlar uchun xotira chegarasi opsiyasidan foydalaning:
+Operativ xotirasi cheklangan serverlar uchun xotira chegarasi parametridan foydalaning:
 
 ```bash
-# With 512MB limit (default)
+# 512MB chegarasi bilan (standart)
 pm2 start npm --name omniroute -- start
 
-# Or with custom memory limit
+# Yoki maxsus xotira chegarasi bilan
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Or using ecosystem.config.js
+# Yoki ecosystem.config.js yordamida
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` yaratish:
+`ecosystem.config.js` faylini yarating:
 
 ```javascript
 module.exports = {
@@ -491,24 +491,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Build image (default = runner-cli with codex/claude/droid preinstalled)
+# Tasvirni yarating (standart = codex/claude/droid oldindan o‘rnatilgan runner-cli)
 docker build -t omniroute:cli .
 
-# Portable mode (recommended)
+# Portativ rejim (tavsiya etiladi)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ikkiliklari bilan xost bilan birlashtirilgan rejim uchun asosiy hujjatlardagi Docker bo'limiga qarang.
+CLI ikkilik fayllari bilan xostga integratsiyalashgan rejim uchun asosiy hujjatlardagi Docker bo‘limiga qarang.
 
 ### Void Linux (xbps-src)
 
-Void Linux foydalanuvchilari `xbps-src` o'zaro kompilyatsiya tizimidan foydalangan holda OmniRoute mahalliy ravishda paketlashi va o'rnatishi mumkin. Bu Node.js mustaqil tuzilishini zarur `better-sqlite3` mahalliy ulanishlari bilan avtomatlashtiradi.
+Void Linux foydalanuvchilari OmniRouteʼni `xbps-src` kross-kompilyatsiya freymvorki yordamida mahalliy paketlashi va oʻrnatishi mumkin. Bu talab qilinadigan `better-sqlite3` mahalliy bogʻlamalari bilan birga Node.js mustaqil yigʻilishini avtomatlashtiradi.
 
 <details>
-<summary><b>xbps-src shablonini ko'rish</b></summary>
+<summary><b>xbps-src shablonini koʻrish</b></summary>
 
 ```bash
-# Template file for 'omniroute'
+# 'omniroute' uchun shablon fayli
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -529,7 +529,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Determine target CPU arch for node-gyp
+	# node-gyp uchun maqsadli CPU arxitekturasini aniqlash
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -538,29 +538,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Install all deps – skip scripts
+	# 1) Barcha bogʻliqliklarni oʻrnatish — skriptlarni oʻtkazib yuborish
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Build the Next.js standalone bundle
+	# 2) Next.js mustaqil toʻplamini yigʻish
 	npm run build
 
-	# 3) Copy static assets into standalone
+	# 3) Statik resurslarni mustaqil toʻplamga nusxalash
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compile better-sqlite3 native binding
+	# 4) better-sqlite3 mahalliy bogʻlamasini kompilyatsiya qilish
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Place the compiled binding into the standalone bundle
+	# 5) Kompilyatsiya qilingan bogʻlamani mustaqil toʻplamga joylashtirish
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Remove arch-specific sharp bundles
+	# 6) Arxitekturaga xos sharp toʻplamlarini olib tashlash
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copy pino runtime deps omitted by Next.js static analysis:
+	# 7) Next.js statik tahlili tashlab ketgan pino ish vaqti bogʻliqliklarini nusxalash:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -574,7 +574,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Prevent removal of empty Next.js app router dirs by the post-install hook
+	# Oʻrnatishdan keyingi xuk bo‘sh Next.js ilova marshrutizatori kataloglarini olib tashlashining oldini olish
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -600,32 +600,32 @@ post_install() {
 
 </details>
 
-### Atrof-muhit o'zgaruvchilari
+### Muhit oʻzgaruvchilari
 
-| O'zgaruvchan                            | Standart                 | Tavsif                                                                                                                                                                        |
-| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(avtomatik yaratilgan)_ | JWT imzolash siri — birinchi ishga tushirishda avtomatik tarzda yaratiladi va `server.env` ga qadar davom etadi; ma'lumotlar katalogi vaqtinchalik bo'lsa, uni aniq belgilang |
-| `INITIAL_PASSWORD`                      | _(o'rnatilmagan)_        | Birinchi kirish paroli. npm/source o'rnatish `CHANGEME` bilan boshlanadi: uni almashtiring. Sozlanmagan: ishga tushirish ustasi                                               |
-| `DATA_DIR`                              | `~/.omniroute`           | Ma'lumotlar katalogi (db, foydalanish, jurnallar)                                                                                                                             |
-| `PORT`                                  | standart ramka           | Xizmat porti (misollarda `20128` )                                                                                                                                            |
-| `HOSTNAME`                              | standart ramka           | Xostni bog'lash (Docker standarti `0.0.0.0`)                                                                                                                                  |
-| `NODE_ENV`                              | standart ish vaqti       | O'rnatish uchun `production` o'rnating                                                                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Umumiy URL bazasi asboblar panelida paydo bo'ldi va serverga ochildi (eski `BASE_URL` o'rnini bosadi)                                                                         |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Bulutli sinxronlash so‘nggi nuqtasi URL bazasi (eski `CLOUD_URL` o‘rnini bosadi)                                                                                              |
-| `API_KEY_SECRET`                        | _(avtomatik yaratilgan)_ | yaratilgan API kalitlari uchun HMAC siri — birinchi ishga tushirishda avtomatik tarzda yaratilgan va `server.env` davom etgan                                                 |
-| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*`-da Bearer API kalitini majburlash                                                                                                                                     |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Autentifikatsiya qilingan asboblar paneli foydalanuvchilariga so'ralganda to'liq saqlangan API kalit qiymatlarini ochishga ruxsat bering                                      |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Keshlangan Provayder chegaralari ma'lumotlari uchun server tomonidagi yangilash kadensi; UI yangilash tugmalari hali ham qo'lda sinxronlashni ishga tushiradi                 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore dan oldin avtomatik SQLite snapshotlarini o'chirib qo'ying; qo'lda zaxiralash hali ham ishlaydi                                                         |
-| `APP_LOG_TO_FILE`                       | `true`                   | Ilova va audit jurnalini diskka chiqarish imkonini beradi                                                                                                                     |
-| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth cookie-faylini majburlash ( HTTPS teskari proksi-server ortida)                                                                                                 |
-| `CLOUDFLARED_BIN`                       | sozlanmagan              | Boshqariladigan yuklab olish oʻrniga mavjud `cloudflared` ikkilik faylidan foydalaning                                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Boshqariladigan tezkor tunnellar uchun transport (`http2`, `quic` yoki `auto`)                                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js to'p chegarasi MB                                                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maksimal tezkor kesh yozuvlari                                                                                                                                                |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimal semantik kesh yozuvlari                                                                                                                                              |
+| Oʻzgaruvchi                             | Standart qiymat           | Tavsif                                                                                                                                                                                           |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(avtomatik yaratiladi)_  | JWT imzolash siri — birinchi ishga tushirishda avtomatik yaratiladi va `server.env` faylida doimiy saqlanadi; maʼlumotlar katalogi vaqtinchalik bo‘lsa, uni aniq sozlang                         |
+| `INITIAL_PASSWORD`                      | _(sozlanmagan)_           | Birinchi kirish paroli. npm/manba o‘rnatishlari `CHANGEME` bilan boshlanadi: uni almashtiring. Sozlanmagan: boshlang‘ich sozlash ustasi                                                          |
+| `DATA_DIR`                              | `~/.omniroute`            | Maʼlumotlar katalogi (maʼlumotlar bazasi, foydalanish maʼlumotlari, jurnallar)                                                                                                                   |
+| `PORT`                                  | freymvork standarti       | Xizmat porti (misollarda `20128`)                                                                                                                                                                |
+| `HOSTNAME`                              | freymvork standarti       | Bogʻlanish hosti (Docker uchun standart qiymat — `0.0.0.0`)                                                                                                                                      |
+| `NODE_ENV`                              | bajarish muhiti standarti | Joylashtirish uchun `production` qiymatini oʻrnating                                                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Boshqaruv panelida koʻrsatiladigan va serverga taqdim etiladigan ommaviy asosiy URL (eski `BASE_URL` oʻrnini bosadi)                                                                             |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Bulut bilan sinxronlash yakuniy nuqtasining asosiy URL manzili (eski `CLOUD_URL` oʻrnini bosadi)                                                                                                 |
+| `API_KEY_SECRET`                        | _(avtomatik yaratiladi)_  | Qurilmaga bog‘langan API kalitlari uchun nazorat yig‘indisi siri — ishga tushirish bootstrap’i sozlanmagan bo‘lsa, uni avtomatik yaratadi va yozish mumkin bo‘lgan `server.env` fayliga saqlaydi |
+| `REQUIRE_API_KEY`                       | `false`                   | `/v1/*` uchun Bearer API kalitini majburiy qilish                                                                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Autentifikatsiyadan oʻtgan boshqaruv paneli foydalanuvchilariga saqlangan API kalitlarining toʻliq qiymatlarini koʻrishga ruxsat berish                                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Keshlangan provayder limitlari maʼlumotlarini server tomonida yangilash davriyligi; interfeysdagi yangilash tugmalari qoʻlda sinxronlashni hamon ishga tushiradi                                 |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Yozish/import/tiklashdan oldin avtomatik SQLite oniy nusxalarini yaratishni oʻchirish; qoʻlda zaxiralash ishlashda davom etadi                                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                    | Ilova va audit jurnallarini diskka yozishni yoqadi                                                                                                                                               |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | `Secure` autentifikatsiya cookie-faylidan majburiy foydalanish (HTTPS teskari proksisi ortida)                                                                                                   |
+| `CLOUDFLARED_BIN`                       | oʻrnatilmagan             | Boshqariladigan yuklab olish oʻrniga mavjud `cloudflared` ikkilik faylidan foydalanish                                                                                                           |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Boshqariladigan Quick Tunnels uchun transport protokoli (`http2`, `quic` yoki `auto`)                                                                                                            |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js uyum xotirasi chegarasi, MB hisobida                                                                                                                                                     |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Prompt keshi yozuvlarining maksimal soni                                                                                                                                                         |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Semantik kesh yozuvlarining maksimal soni                                                                                                                                                        |
 
-To'liq muhit o'zgaruvchisi ma'lumoti uchun [README](../README.md) qarang.
+Muhit oʻzgaruvchilarining toʻliq maʼlumotnomasi uchun [README](../README.md) fayliga qarang.
 
 ---
 
@@ -688,58 +688,74 @@ To'liq muhit o'zgaruvchisi ma'lumoti uchun [README](../README.md) qarang.
 
 ---
 
-## 🧩 Kengaytirilgan xususiyatlar
+## 🧩 Kengaytirilgan imkoniyatlar
 
 ### Maxsus modellar
 
-Ilova yangilanishini kutmasdan istalgan provayderga istalgan model ID qo‘shing:
+Ilova yangilanishini kutmasdan istalgan provayderga istalgan model ID sini qoʻshing:
 
 ```bash
-# Via API
+# API orqali
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# List: curl http://localhost:20128/api/provider-models?provider=openai
-# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# Roʻyxat: curl http://localhost:20128/api/provider-models?provider=openai
+# Olib tashlash: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Yoki asboblar panelidan foydalaning:** Provayderlar → [Provayder] → Maxsus Modellar** .
+Yoki boshqaruv panelidan foydalaning: **Provayderlar → [Provayder] → Maxsus modellar**.
 
 Eslatmalar:
 
-- OpenRouter va OpenAI/Anthropic-compatible provayderlari tomonidan boshqariladi** Mavjud modellar** faqat. Bir xil mavjud modellar ro'yxatidagi barcha erlarni qo'lda qo'shish, import qilish va avtomatik sinxronlash, shuning uchun ushbu provayderlar uchun alohida Maxsus Modellar bo'limi mavjud emas.
-- The** Maxsus modellar** bo'lim boshqariladigan mavjud model importlarini oshkor qilmaydigan provayderlar uchun mo'ljallangan.
+- OpenRouter va OpenAI/Anthropic bilan mos provayderlar faqat **Mavjud modellar** orqali boshqariladi. Qoʻlda qoʻshish, import qilish va avtomatik sinxronlashning barchasi bir xil mavjud modellar roʻyxatiga tushadi, shu sababli bu provayderlar uchun alohida Maxsus modellar boʻlimi mavjud emas.
+- **Maxsus modellar** boʻlimi boshqariladigan mavjud model importlarini taqdim etmaydigan provayderlar uchun moʻljallangan.
 
-### Maxsus OpenAI-mos provayderlar
+### OpenAI bilan mos maxsus provayderlar
 
-OpenAI API (o'z-o'zidan joylashtirilgan proksi-server, vLLM, uchinchi tomon agregatori) tilida gapiradigan har qanday shlyuzni o'zining provayder tuguniga qo'shish mumkin:
+OpenAI API bilan ishlaydigan istalgan shlyuzni (mustaqil joylashtirilgan proksi, vLLM, uchinchi tomon agregatori)
+alohida provayder tuguni sifatida qoʻshish mumkin:
 
-1. **Provayderlar → Qo'shish OpenAI Mos keladi** .
-2. **Ism** : tugun uchun ekran yorlig'i.
-3. **Prefiks** : marshrutlash nomi. Mijozlar modellarni `<prefix>/<model>` deb atashadi, shuning uchun `mygw` prefiksi bo'lgan tugun `mygw/gpt-4o-mini` xizmat qiladi. Majburiy; hech qanday belgi cheklovi yo'q.
-4. **API turi** : shlyuz xizmat ko'rsatadigan so'nggi nuqta oilasi (Chatni yakunlash, javoblar, o'rnatishlar, audio, tasvirlar).
-5. **Asosiy URL** : API ildizi, `/v1` gacha va shu jumladan (masalan `https://gateway.example.com/v1`), toʻliq `/chat/completions` yoʻli emas. Nostandart yo'llari bo'lgan shlyuzlar ularni o'rnatadi** Kengaytirilgan sozlamalar** (chat yo'li, modellar yo'li).
-6. The**API kaliti (tekshirish uchun)** maydon faqat ulanishni tekshiradi. Tugunni yaratgandan so'ng, uni oching va foydalaning** Ulanish qo'shish** so'rovlar foydalanadigan kalitni saqlash uchun.
+1. **Provayderlar → OpenAI bilan mos provayder qoʻshish**.
+2. **Nomi**: tugun uchun koʻrsatiladigan nom.
+3. **Prefiks**: yoʻnaltirish nomi. Mijozlar modellarni `<prefix>/<model>` shaklida chaqiradi, shuning uchun
+   `mygw` prefiksli tugun `mygw/gpt-4o-mini` modeliga xizmat koʻrsatadi. Majburiy; belgilar boʻyicha cheklov yoʻq.
+4. **API turi**: shlyuz xizmat koʻrsatadigan endpointlar oilasi (Chat Completions, Responses,
+   Embeddings, audio, tasvirlar).
+5. **Asosiy URL**: `/v1` gacha, shu jumladan, boʻlgan API ildiz manzili (masalan,
+   `https://gateway.example.com/v1`), toʻliq `/chat/completions` yoʻli emas. Nostandart
+   yoʻllarga ega shlyuzlarda ular **Kengaytirilgan sozlamalar** ostida belgilanadi (chat yoʻli, modellar yoʻli).
+6. **API kaliti (tekshirish uchun)** maydoni faqat ulanishni sinaydi. Tugunni yaratgandan soʻng,
+   uni oching va soʻrovlar foydalanadigan kalitni saqlash uchun **Ulanish qoʻshish** tugmasidan foydalaning.
 
-Tugun `openai-compatible-<apiType>-<uuid>` shaklining ichki identifikatorini oladi; uni hech qachon yozishingiz shart emas, prefiks umumiy nomdir.
+Tugun `openai-compatible-<apiType>-<uuid>` koʻrinishidagi ichki id oladi; uni hech qachon
+kiritishingiz shart emas, prefiks ommaviy nom hisoblanadi.
 
 #### Zaxiralangan prefikslar
 
-Prefiks o'rnatilgan provayderning identifikatori yoki taxalluslari (masalan `openai`, `cf`) yoki iste'fodagi provayderning identifikatori bo'lishi mumkin emas. Modelni hal qiluvchi maxsus tugunlardan oldin o'rnatilgan identifikatorlar va taxalluslarni tekshiradi, shuning uchun bu prefikslardan birini ishlatadigan tugun hech qachon trafikni qabul qilmaydi: `<prefix>/model` uning o'rniga o'rnatilgan provayderga o'tadi yoki agar provayder iste'foga chiqqan bo'lsa, yopilmaydi. Bunday prefiksli tugun yaratish yoki tahrirlash quyidagi hollarda rad etiladi:
+Prefiks ichki provayderning id yoki taxallusi (masalan, `openai`, `cf`) hamda
+foydalanishdan chiqarilgan provayderning id si boʻlishi mumkin emas. Model aniqlagichi maxsus
+tugunlardan oldin ichki id va taxalluslarni tekshiradi, shuning uchun bunday prefiksdan foydalanadigan
+tugun hech qachon trafik qabul qilmaydi: `<prefix>/model` ichki provayderga yoʻnaltiriladi yoki
+oʻsha provayder foydalanishdan chiqarilgan boʻlsa, xavfsiz tarzda rad etiladi. Bunday prefiksli
+tugunni yaratish yoki tahrirlash quyidagi xato bilan rad etiladi:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Aniq prefiksni tanlang (`mygw`, `acme-proxy`). Agar maxsus tugunga so'rovlar o'rnatilgan provayder yoki uning hisobga olish ma'lumotlarini nomlashda xatolik bilan bajarilmasa, tugunning prefiksi saqlanganligini tekshiring: ushbu qoida mavjud bo'lgunga qadar saqlangan tugunlar hali ham saqlanadi, lekin ularning o'rnatilgan provayderga prefiks yo'nalishlari. Tugunni tahrirlang va unga yangi prefiks bering.
+Oʻziga xos prefiksni tanlang (`mygw`, `acme-proxy`). Agar maxsus tugunga yuborilgan soʻrovlar
+ichki provayder yoki uning hisob maʼlumotlarini koʻrsatuvchi xato bilan bajarilmasa, tugun prefiksi
+zaxiralanganligini tekshiring: ushbu qoida paydo boʻlishidan oldin saqlangan tugunlar hamon saqlanadi,
+ammo ularning prefiksi ichki provayderga yoʻnaltiriladi. Tugunni tahrirlang va unga yangi prefiks bering.
 
-#### Har bir ulanish uchun shlyuz variantlari
+#### Har bir ulanish uchun gateway parametrlari
 
-Bu kalitlar ulanishning `providerSpecificData` ga kiradi (masalan, `PUT /api/providers/{id}` orqali):
+Bu kalitlar ulanishning `providerSpecificData` maydoniga joylashtiriladi (masalan,
+`PUT /api/providers/{id}` orqali):
 
-- `toolNameMaxLength` (integer, 1–1024) — shlyuzi uzun asbob nomlarini rad etadigan OpenAI chat formatiga mos ulanishlar uchun. Uzunroq nomlar qisqa taxalluslar sifatida yuboriladi va javobda tiklanadi.
-- `quotaEndpoint` — shlyuzning quota/credits so‘nggi nuqtasi, asboblar panelidagi kvotalar chizig‘i va kvotadan xabardor marshrutlash uchun o‘qing. OpenAI va antropik mos keladigan ulanishlarda ishlaydi; to'liq shakli `open-sse/services/usage/openaiCompatible.ts` hujjatlashtirilgan.
+- `toolNameMaxLength` (butun son, 1–1024) — gateway'i uzun vosita nomlarini rad etadigan, OpenAI chat formatiga mos ulanishlar uchun. Uzunroq nomlar qisqa taxalluslar sifatida yuboriladi va javobda tiklanadi.
+- `quotaEndpoint` — dashboard'dagi kvota tasmasi va kvotani hisobga oluvchi yoʻnaltirish uchun oʻqiladigan gateway kvota/kreditlar endpoint'i. OpenAI va Anthropic bilan mos ulanishlarning ikkalasida ham ishlaydi; toʻliq tuzilma `open-sse/services/usage/openaiCompatible.ts` faylida hujjatlashtirilgan.
 
 ```json
 {
@@ -754,11 +770,13 @@ Bu kalitlar ulanishning `providerSpecificData` ga kiradi (masalan, `PUT /api/pro
 }
 ```
 
-### Zanjirlash OmniRoute tengdoshlari
+### OmniRoute teng tugunlarini zanjirlash
 
-Boshqa OmniRoute shlyuzini a sifatida qo'shish mumkin** Maxsus OpenAI-mos** provayder. Tengdoshning `/v1` bazasi URL va ushbu tengdosh tomonidan chiqarilgan maxsus, eng kam imtiyozli API kalitidan foydalaning.
+Boshqa OmniRoute shlyuzini **OpenAI bilan mos maxsus** provayder sifatida qoʻshish mumkin.
+Teng tugunning `/v1` asosiy URL manzili va shu teng tugun tomonidan berilgan, eng kam
+imtiyozli maxsus API kalitidan foydalaning.
 
-O'zaro yoki ko'p tarmoqli zanjirlar uchun har bir shlyuzda ulanish halqasi himoyasini yoqing:
+Oʻzaro yoki koʻp bosqichli zanjirlar uchun har bir shlyuzda ixtiyoriy sikl himoyasini yoqing:
 
 ```bash
 # gateway-a
@@ -774,13 +792,20 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Faqat aniq ruxsat berilgan peer URL ga yuborilgan so'rovlar `X-OmniRoute-Peer-Trace` sarlavhasini oladi. Shlyuz takroriy ID yoki HTTP `508 Loop Detected` bilan tugagan hop byudjetini rad etadi; oddiy yuqori oqim provayderlari tengdosh metama'lumotlarini olmaydilar.
+Faqat aniq ruxsat berilgan teng tugun URL manziliga yuborilgan soʻrovlar
+`X-OmniRoute-Peer-Trace` sarlavhasini oladi. Shlyuz takrorlangan nusxa ID sini yoki tugagan
+oʻtishlar limitini HTTP `508 Loop Detected` bilan rad etadi; oddiy yuqori oqim provayderlari
+teng tugun metamaʼlumotlarini olmaydi.
 
-Tengdosh zanjiri ma'lumotlar bazasi replikatsiyasi yoki xostni o'zgartirish emas. Har bir shlyuz mustaqil SQLite holatini, keshlarni, tarif hisoblagichlarini va seanslarni saqlaydi. active/passive yoki active/active mavjudligi uchun sog'liq tekshirilgan teskari proksi-server yoki mijozning o'zgartirilishidan foydalaning va hech qachon bitta SQLite ma'lumotlar bazasini bir nechta ishlaydigan OmniRoute misollariga o'rnatmang.
+Teng tugunlarni zanjirlash maʼlumotlar bazasini replikatsiya qilish yoki xostning nosozlikdan
+himoyasi emas. Har bir shlyuz mustaqil SQLite holati, keshlar, tezlik hisoblagichlari va seanslarini
+saqlaydi. Faol/passiv yoki faol/faol mavjudlik uchun holati tekshiriladigan teskari proksi yoki mijoz
+tomonidagi zaxiraga oʻtishdan foydalaning va bitta SQLite maʼlumotlar bazasini hech qachon bir nechta
+ishlayotgan OmniRoute nusxasiga ulamang.
 
-### Maxsus provayder marshrutlari
+### Maxsus provayder yoʻnalishlari
 
-Model tekshiruvi bilan so'rovlarni to'g'ridan-to'g'ri ma'lum bir provayderga yo'naltiring:
+Modelni tekshirish bilan soʻrovlarni bevosita muayyan provayderga yoʻnaltiring:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -788,137 +813,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Agar yo'q bo'lsa, provayder prefiksi avtomatik ravishda qo'shiladi. Mos kelmaydigan modellar `400` qaytaradi.
+Agar provayder prefiksi mavjud boʻlmasa, u avtomatik ravishda qoʻshiladi. Mos kelmaydigan modellar `400` qaytaradi.
 
-### Tarmoq proksi konfiguratsiyasi
+### Tarmoq proksisini sozlash
 
 ```bash
-# Set global proxy
+# Global proksini oʻrnatish
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Per-provider proxy
+# Har bir provayder uchun proksi
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Test proxy
+# Proksini sinash
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Ustunlik:** Kalitga xos → Kombo-maxsus → Provayderga xos → Global → Atrof-muhit.
+**Ustuvorlik:** Kalitga xos → Kombinatsiyaga xos → Provayderga xos → Global → Muhit.
 
-### Modellar katalogi API
+### Modellar katalogi API si
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Modellarni provayder bo‘yicha turlari bo‘yicha (`chat`, `embedding`, `image`) qaytaradi.
+Turlar (`chat`, `embedding`, `image`) bilan provayder boʻyicha guruhlangan modellarni qaytaradi.
 
-### Cloud Sync
+### Bulutli sinxronlash
 
-- Provayderlar, kombinatsiyalar va sozlamalarni barcha qurilmalarda sinxronlashtiring
-- Vaqt tugashi bilan avtomatik fon sinxronlash + muvaffaqiyatsiz
-- Ishlab chiqarishda server tomonidagi `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ga ustunlik bering
+- Provayderlar, kombinatsiyalar va sozlamalarni qurilmalar oʻrtasida sinxronlash
+- Vaqt chegarasi va tezkor xato bilan avtomatik fon sinxronlashi
+- Ishlab chiqarish muhitida server tomonidagi `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ni afzal koʻring
 
-### Cloudflare Tez tunnel
+### Cloudflare tezkor tunneli
 
-- mavjud** Boshqaruv paneli → Endpoints** Docker va boshqa o'z-o'zidan joylashtirilgan joylashtirishlar uchun
-- Joriy OpenAI-ga mos keladigan `/v1` so‘nggi nuqtasiga yo‘naltiruvchi vaqtinchalik `https://*.trycloudflare.com` URL yaratadi.
-- Avval `cloudflared` o'rnatishni faqat kerak bo'lganda yoqing; keyinchalik qayta ishga tushirishlar bir xil boshqariladigan ikkilik faylni qayta ishlatadi
-- Tez tunnellar OmniRoute yoki konteyner qayta ishga tushirilgandan keyin avtomatik tiklanmaydi; kerak bo'lganda ularni asboblar panelidan qayta yoqing
-- Tunnel URLs vaqtinchalik va tunnelni har safar stop/start o'zgartirganda
-- Cheklangan konteynerlarda shovqinli QUIC UDP bufer ogohlantirishlarining oldini olish uchun boshqariladigan Tez tunnellar sukut bo‘yicha HTTP/2 transportiga o‘rnatiladi.
-- Boshqariladigan transport tanlovini bekor qilmoqchi bo'lsangiz, `CLOUDFLARED_PROTOCOL=quic` yoki `auto` ni o'rnating
-- Boshqariladigan yuklab olish o‘rniga oldindan o‘rnatilgan `cloudflared` ikkilik fayldan foydalanishni istasangiz `CLOUDFLARED_BIN` o‘rnating
-- Cloudflare Quick Tunnel, Tailscale Funnel va ngrok Tunnel panellari bu yerda ko‘rsatilishi yoki berkitilishi mumkin.** Sozlamalar → Tashqi ko'rinish** . Panelni yashirish ishlaydigan tunnelni to'xtatmaydi.
+- Docker va boshqa mustaqil joylashtirilgan o‘rnatmalar uchun **Boshqaruv paneli → Endpointlar** bo‘limida mavjud
+- Joriy OpenAI bilan mos `/v1` endpointingizga yo‘naltiradigan vaqtinchalik `https://*.trycloudflare.com` URL manzilini yaratadi
+- Birinchi marta yoqilganda `cloudflared` faqat zarur bo‘lsa o‘rnatiladi; keyingi qayta ishga tushirishlarda o‘sha boshqariladigan ikkilik fayldan qayta foydalaniladi
+- Quick Tunnel’lar OmniRoute yoki konteyner qayta ishga tushirilgandan keyin avtomatik tiklanmaydi; zarur bo‘lganda ularni boshqaruv panelidan qayta yoqing
+- Tunnel URL manzillari vaqtinchalik bo‘lib, tunnelni har safar to‘xtatib/ishga tushirganingizda o‘zgaradi
+- Cheklangan konteynerlarda QUIC UDP buferi haqidagi ortiqcha ogohlantirishlarning oldini olish uchun boshqariladigan Quick Tunnel’lar standart holatda HTTP/2 transportidan foydalanadi
+- Boshqariladigan transport tanlovini bekor qilmoqchi bo‘lsangiz, `CLOUDFLARED_PROTOCOL=quic` yoki `auto` qiymatini o‘rnating
+- Boshqariladigan yuklab olish o‘rniga oldindan o‘rnatilgan `cloudflared` ikkilik faylidan foydalanishni afzal ko‘rsangiz, `CLOUDFLARED_BIN` qiymatini o‘rnating
+- Cloudflare Quick Tunnel, Tailscale Funnel va ngrok Tunnel panellarini **Sozlamalar → Tashqi ko‘rinish** bo‘limida ko‘rsatish yoki yashirish mumkin. Panelni yashirish ishlayotgan tunnelni to‘xtatmaydi.
 
-### LLM Gateway Intelligence (9-bosqich)
+### LLM shlyuzi intellekti (9-bosqich)
 
-- **Semantik kesh** - Oqimsiz avtomatik keshlar, harorat = 0 javoblar ( `X-OmniRoute-No-Cache: true` bilan chetlab o'tish)
-- **Imkoniyatsizlikni so'rang** — `Idempotency-Key` yoki `X-Request-Id` sarlavhasi orqali so‘rovlarni 5 soniya ichida takrorlaydi
-- **Jarayonni kuzatish** — `X-OmniRoute-Progress: true` sarlavhasi orqali SSE `event: progress` hodisalariga kirish
+- **Semantik kesh** — Oqimli bo‘lmagan, temperature=0 javoblarini avtomatik keshlaydi (`X-OmniRoute-No-Cache: true` bilan chetlab o‘tish mumkin)
+- **So‘rov idempotentligi** — `Idempotency-Key` yoki `X-Request-Id` sarlavhasi orqali 5 soniya ichidagi takroriy so‘rovlarni birlashtiradi
+- **Jarayonni kuzatish** — `X-OmniRoute-Progress: true` sarlavhasi orqali ixtiyoriy SSE `event: progress` hodisalarini yoqadi
 
 ---
 
-### Tarjimon o'yin maydonchasi
+### Tarjimon sinov maydonchasi
 
-orqali kirish** Boshqaruv paneli → tarjimon** . Nosozliklarni tuzatish va OmniRoute provayderlar o‘rtasida API so‘rovlarini qanday tarjima qilishini tasavvur qiling.
+**Boshqaruv paneli → Tarjimon** orqali kiring. OmniRoute API so‘rovlarini provayderlar o‘rtasida qanday tarjima qilishini nosozliklarni aniqlash uchun tekshiring va vizuallashtiring.
 
-| Rejim                 | Maqsad                                                                                                      |
-| --------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **O'yin maydonchasi** | source/target formatlarini tanlang, so'rovni joylashtiring va tarjima qilingan natijani darhol ko'ring      |
-| **Chat tester**       | Proksi-server orqali jonli chat xabarlarini yuboring va to'liq request/response siklini tekshiring          |
-| **Sinov dastgohi**    | Tarjimaning to'g'riligini tekshirish uchun bir nechta format kombinatsiyalarida ommaviy testlarni o'tkazing |
-| **Jonli monitor**     | So‘rovlar proksi-server orqali o‘tishi bilan real vaqtda tarjimalarni tomosha qiling                        |
+| Rejim                 | Maqsad                                                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Sinov maydonchasi** | Manba/maqsad formatlarini tanlang, so‘rovni joylashtiring va tarjima qilingan natijani darhol ko‘ring          |
+| **Chat sinovchisi**   | Proksi orqali jonli chat xabarlarini yuboring va so‘rov/javob siklini to‘liq tekshiring                        |
+| **Sinov stendi**      | Tarjima to‘g‘riligini tekshirish uchun bir nechta format kombinatsiyalari bo‘yicha ommaviy sinovlarni bajaring |
+| **Jonli kuzatuv**     | So‘rovlar proksi orqali o‘tayotganda real vaqt rejimidagi tarjimalarni kuzating                                |
 
 **Foydalanish holatlari:**
 
-- Muayyan client/provider kombinatsiyasi nima uchun ishlamay qolganligini aniqlang
-- Fikrlash teglari, asboblar qo'ng'iroqlari va tizim takliflari to'g'ri tarjima qilinganligini tekshiring
-- OpenAI, Claude, Gemini va Responses API formatlari orasidagi format farqlarini solishtiring
+- Muayyan mijoz/provayder kombinatsiyasi nima uchun ishlamayotganini aniqlash
+- Fikrlash teglari, vosita chaqiruvlari va tizim promptlari to‘g‘ri tarjima qilinishini tekshirish
+- OpenAI, Claude, Gemini va Responses API formatlari o‘rtasidagi format farqlarini taqqoslash
 
 ---
 
 ### Marshrutlash strategiyalari
 
-orqali sozlang** Boshqaruv paneli → sozlamalari → Routing** . Boshqaruv paneli eng ko'p ishlatiladigan oltita strategiyani ochib beradi; kombinatsiyalar va avtomatik router ichki kengroq to'plamni qo'llab-quvvatlaydi.
+**Boshqaruv paneli → Sozlamalar → Marshrutlash** orqali sozlang. Boshqaruv panelida eng ko‘p ishlatiladigan oltita strategiya ko‘rsatiladi; kombinatsiyalar va avtomatik marshrutizator ichki tarzda kengroq to‘plamni qo‘llab-quvvatlaydi.
 
-**Boshqaruv panelida ko'rinadigan strategiyalar (hisob darajasidagi marshrutlash):**
+**Boshqaruv panelida ko‘rinadigan strategiyalar (hisob darajasidagi marshrutlash):**
 
-| Strategiya                      | Tavsif                                                                                                                             |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Avval to'ldirish**            | Hisoblardan ustuvor tartibda foydalanadi - asosiy hisob mavjud bo'lmaguncha barcha so'rovlarni bajaradi                            |
-| **Round Robin**                 | Sozlanishi mumkin bo'lgan yopishqoq chegara bilan barcha hisoblar bo'ylab aylanish (standart: har bir hisob uchun 3 ta qo'ng'iroq) |
-| **P2C (ikki tanlov kuchi)**     | 2 ta tasodifiy hisob va sog'lomroq bo'lgan yo'nalishni tanlaydi - salomatlik haqida xabardorlik bilan yukni muvozanatlashtiradi    |
-| **Tasodifiy**                   | Fisher-Yates shuffle yordamida har bir so'rov uchun tasodifiy hisob qaydnomasini tanlaydi                                          |
-| **Eng kam ishlatilgan**         | Trafikni teng ravishda taqsimlovchi eng qadimgi `lastUsedAt` vaqt tamg'asi bilan hisob qaydnomasiga yo'nalishlar                   |
-| **Xarajat optimallashtirilgan** | Eng past ustuvor qiymatga ega hisob qaydnomasiga marshrutlar, eng arzon provayderlar uchun optimallashtirish                       |
+| Strategiya                               | Tavsif                                                                                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Birinchisini to‘ldirish**              | Hisoblardan ustuvorlik tartibida foydalanadi — asosiy hisob mavjud bo‘lmaguncha barcha so‘rovlarni boshqaradi                         |
+| **Navbatma-navbat**                      | Sozlanadigan biriktirish chegarasi bilan barcha hisoblar bo‘ylab navbatma-navbat o‘tadi (standart: har bir hisob uchun 3 ta chaqiruv) |
+| **P2C (Ikki tanlov kuchi)**              | 2 ta tasodifiy hisobni tanlaydi va sog‘lomrog‘iga yo‘naltiradi — tizim holatini hisobga olgan holda yuklamani muvozanatlashtiradi     |
+| **Tasodifiy**                            | Fisher-Yates aralashtirishidan foydalanib, har bir so‘rov uchun hisobni tasodifiy tanlaydi                                            |
+| **Eng kam ishlatilgan**                  | Trafikni teng taqsimlab, eng eski `lastUsedAt` vaqt belgisiga ega hisobga yo‘naltiradi                                                |
+| **Xarajat bo‘yicha optimallashtirilgan** | Eng past ustuvorlik qiymatiga ega hisobga yo‘naltirib, eng kam xarajatli provayderlar uchun optimallashtiradi                         |
 
-**Kengaytirilgan kombinatsiyalangan va avtomatik strategiyalar** (har bir kombinatsiya yoki `auto/*` prefikslari orqali sozlanishi mumkin - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ga qarang):
+**Kengaytirilgan kombinatsiya va avtomatik strategiyalar** (har bir kombinatsiya uchun yoki `auto/*` prefikslari orqali sozlanadi — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) fayliga qarang):
 
-- `priority` - qat'iy tartib, hech qachon round-robins
-- `weighted` - har bir model og'irliklari bo'yicha proportsional trafik taqsimoti
-- `fill-first` - chegaraga yetguncha birinchi modelni to'kib tashlang
+- `priority` — qat’iy tartib, hech qachon navbatma-navbat o‘tmaydi
+- `weighted` — har bir model vazniga ko‘ra trafikni mutanosib taqsimlash
+- `fill-first` — cheklovlarga yetguncha birinchi modeldan foydalanadi
 - `round-robin` / `strict-random` / `random`
-- `p2c` (ikki tanlov kuchi)
+- `p2c` (Ikki tanlov kuchi)
 - `least-used` va `cost-optimized`
-- `auto` - barcha nomzodlar bo'yicha ballga asoslangan
-- `lkgp` (Oxirgi ma'lum bo'lgan yaxshi provayder) - oxirgi muvaffaqiyatli provayderni bog'laydi, keyin qoidalarga qaytadi
-- `context-optimized` — eng katta bepul kontekst oynasiga ega modelni tanlaydi
-- `context-relay` - keyingi burilishlar uchun zanjirlar uzoq kontekstli modellar
+- `auto` — barcha nomzodlar orasida baholashga asoslangan tanlov
+- `lkgp` (So‘nggi ma’lum yaxshi provayder) — so‘nggi muvaffaqiyatli provayderga biriktiradi, so‘ng qoidalarga qaytadi
+- `context-optimized` — eng katta bo‘sh kontekst oynasiga ega modelni tanlaydi
+- `context-relay` — keyingi muloqot navbatlari uchun uzun kontekstli modellarni zanjirlaydi
 
-#### Tashqi yopishqoq seans sarlavhasi
+#### Tashqi biriktirilgan seans sarlavhasi
 
-Tashqi seansga yaqinlik uchun (masalan, teskari proksi-serverlar ortidagi Claude Code/Codex agentlari) quyidagini yuboring:
+Tashqi seansga bog‘lash uchun (masalan, teskari proksilar ortidagi Claude Code/Codex agentlari) quyidagini yuboring:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute ham `x_session_id` qabul qiladi va `X-OmniRoute-Session-Id` da samarali seans kalitini qaytaradi.
+OmniRoute, shuningdek, `x_session_id` qiymatini qabul qiladi va amaldagi seans kalitini `X-OmniRoute-Session-Id` orqali qaytaradi.
 
-Agar siz Nginx-dan foydalansangiz va pastki chiziqli shakl sarlavhalarini yuborsangiz, quyidagilarni yoqing:
+Agar Nginx’dan foydalansangiz va pastki chiziqli sarlavhalarni yuborsangiz, quyidagini yoqing:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Joker belgilar modeli taxalluslari
+#### Model nomlari uchun joker belgili taxalluslar
 
-Model nomlarini qayta ko‘rsatish uchun joker belgilar yarating:
+Model nomlarini qayta moslashtirish uchun joker belgili andozalar yarating:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Joker belgilar `*` (har qanday belgilar) va `?` (bitta belgi) ni qo'llab-quvvatlaydi.
+Joker belgilar `*` (istalgan belgilar) va `?` (bitta belgi) ni qo‘llab-quvvatlaydi.
 
-#### Qayta zanjirlar
+#### Zaxira zanjirlari
 
-Barcha so'rovlarda qo'llaniladigan global zaxira zanjirlarini aniqlang:
+Barcha so‘rovlarga qo‘llanadigan global zaxira zanjirlarini belgilang:
 
 ```
 Chain: production-fallback
@@ -929,22 +954,22 @@ Chain: production-fallback
 
 ---
 
-### Umumiy provayder kombinatsiyalari va marshrutlash naqshlari
+### Keng tarqalgan provayder kombinatsiyalari va marshrutlash andozalari
 
-OmniRoute da bir nechta provayderlarni birlashtirish va ular o'rtasida marshrutlash uchun misol namunalari:
+Quyida OmniRoute’da bir nechta provayderni birlashtirish va ular o‘rtasida marshrutlash uchun namunaviy andozalar keltirilgan:
 
-#### 1. Kodlash agenti kombinatsiyasi: Cost/Speed Fallback bilan yuqori darajadagi fikrlash
+#### 1. Dasturlash agenti kombinatsiyasi: xarajat/tezlik bo‘yicha zaxiraga ega yuqori darajali mulohaza yuritish
 
-Kodlash agentlari uchun ideal (OpenCode, Claude Code, Cursor, Cline). Dastlab chegaraviy fikrlash modellariga yo'nalishlar, kvotalar tugashi yoki xatolar bo'yicha tez kodlash modellariga qaytish.
+Dasturlash agentlari (OpenCode, Claude Code, Cursor, Cline) uchun juda mos. Dastlab ilg‘or mulohaza yuritish modellariga yo‘naltiradi, kvota tugaganda yoki xatolar yuz berganda esa tezkor dasturlash modellariga o‘tadi.
 
-- **Boshqaruv paneli** : Combos → New Combo → Nomi: `agent-coding` → Strategiya: `Priority`
-- **Modellar** :
-  1. `claude/claude-sonnet-4-6` (Birlamchi kodlash agenti)
-  2. `openai/gpt-4o` (Ikkinchi darajali yuqori quvvatli zaxira)
-  3. `deepseek/deepseek-v4-flash` (yuqori samaradorlik, tejamkor qayta tiklash)
+- **Boshqaruv paneli**: Kombinatsiyalar → Yangi kombinatsiya → Nomi: `agent-coding` → Strategiya: `Priority`
+- **Modellar**:
+  1. `claude/claude-sonnet-4-6` (Asosiy dasturlash agenti)
+  2. `openai/gpt-4o` (Yuqori sig‘imli ikkilamchi zaxira)
+  3. `deepseek/deepseek-v4-flash` (Yuqori samarali, tejamkor zaxira)
 
 ```bash
-# Example via API
+# API orqali misol
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -959,174 +984,178 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Free-Tier Auto Failover Combo
+#### 2. Bepul tarifli avtomatik zaxiraga oʻtish kombinatsiyasi
 
-API xarajatlarisiz ish vaqtini maksimal darajada oshirish uchun bir nechta bepul va kalitsiz provayderlarni bog'laydi.
+API xarajatlarisiz uzluksiz ishlash vaqtini maksimal darajada oshirish uchun bir nechta bepul tarifli va kalitsiz provayderlarni zanjir shaklida birlashtiradi.
 
-- **Strategiya** : `Least Used` yoki `Round Robin` (kvotalar bo'yicha yukni taqsimlaydi)
-- **Modellar** :
+- **Strategiya**: `Least Used` yoki `Round Robin` (yuklamani kvotalar boʻylab taqsimlaydi)
+- **Modellar**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Example via CLI
+# CLI orqali misol
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Multimodal / Vision & Text Pipeline
+#### 3. Multimodal / Tasvir va matn konveyeri
 
-Tasvirni tushunish va kod ishlab chiqarishni o'z ichiga olgan ish oqimlari uchun yuqori tezlikda matn yaratish bilan maxsus ko'rish modellarini ulash.
+Tasvirlarni tushunish va kod yaratishni oʻz ichiga olgan ish jarayonlari uchun ixtisoslashgan tasvir modellarini yuqori tezlikdagi matn yaratish bilan birlashtirish.
 
-- **Naqsh** : Birinchi boʻlib koʻrish qobiliyatiga ega modellar roʻyxatini koʻrsatadigan `Priority` kombinatsiyasi va oxirgi oʻrinda yuqori oʻtkazuvchanlik text/code modeli.
-- **Modellar** :
-  1. `gemini/gemini-2.5-pro` (kuchli image/multimodal tushunish)
-  2. `openai/gpt-4o` (Muvozanatli ko'rish va asboblardan foydalanish)
-  3. `deepseek/deepseek-v4-flash` (Text/code avlodi)
-
----
-
-### Chidamlilik va o'chirish to'xtatuvchilari
-
-orqali sozlang** Boshqaruv paneli → sozlamalari → Moslashuvchanlik** .
-
-OmniRoute besh komponentdan iborat provayder darajasidagi chidamlilikni amalga oshiradi:
-
-1. **Navbat va tezlikni soʻrash** - Tizim darajasidagi so'rovni shakllantirish:
-   - **Daqiqada so'rovlar (RPM)** — Hisob uchun daqiqada maksimal so'rovlar
-   - **So'rovlar orasidagi minimal vaqt** — So'rovlar orasidagi minimal bo'shliq millisekundlarda
-   - **Bir vaqtning o'zida maksimal so'rovlar** — Bir hisob uchun bir vaqtning o'zida maksimal so'rovlar
-
-2. **Ulanishni sovutish** — Qayta urinib ko‘rish mumkin bo‘lgan nosozliklardan so‘ng bitta ulanish uchun autent turidagi konfiguratsiya:
-   - **Asosiy sovutish** — Qayta urinish mumkin bo'lgan yuqori oqimdagi nosozliklar uchun standart sovutish oynasi
-   - **Upstream qayta urinish boʻyicha maslahatlardan foydalaning** — Taqdim etilganda nufuzli `Retry-After` hurmat qiladi yoki maslahatlarni tiklash
-   - **Maksimal orqaga qaytish qadamlari** — Takroriy nosozliklar uchun maksimal eksponensial orqaga qaytish darajasi
-
-3. **Provayder o'chirgich** — Oxir-oqibat provayder nosozliklarini kuzatib boradi, sozlangan ogohlantirish chegarasida yomonlashgan provayderni belgilaydi va sozlangan nosozlik chegarasiga erishilganda to‘xtatuvchini ochadi:
-   - **Degradatsiya chegarasi** — `DEGRADED` kirishdan oldin provayderning ketma-ket nosozliklari
-   - **Muvaffaqiyatsizlik chegarasi** — `OPEN` kirishdan oldin provayderning ketma-ket nosozliklari
-   - **Vaqt tugashini tiklash** — Provayder yana sinovdan o'tishidan oldingi vaqt oynasi
-   - **CLOSED** (Sog'lom) - So'rovlar odatdagidek oqadi
-   - **DEGRADED** — Yuqori nosozliklar kuzatilganda, so'rovlar davom etmoqda
-   - **OPEN** — Takroriy nosozliklardan keyin provayder vaqtincha bloklanadi
-   - **HALF_OPEN** — Provayder tiklanganligini tekshirish
-
-   Ulanish doirasidagi `429` tarifi chegaralari saqlanib qoladi** Ulanishni sovutish** va provayder to'xtatuvchisi tomon hisoblamang.
-
-   Provayderni to'xtatuvchining ish vaqti holati yoniqda ko'rsatiladi** Boshqarish paneli → Health** faqat.
-
-4. **Sovutishni kuting** — Agar har bir nomzod aloqasi allaqachon sovigan bo'lsa, OmniRoute eng erta sovishini kutishi va xuddi shu mijoz so'rovini avtomatik ravishda qaytadan sinab ko'rishi mumkin.
-
-5. **Tezlik chegarasini avtomatik aniqlash** — Yuqori oqim provayderlari aniq kutish oynalarini qaytarganda, sozlama yoqilganda, bu maslahatlar mahalliy ulanishning sovishini bekor qiladi.
-
-**Professional maslahat:** dan foydalaning** Salomatlik** uzilishdan keyin jonli provayder o'chirgichlarini tekshirish va qayta o'rnatish uchun sahifa. Moslashuvchanlik sahifasi faqat konfiguratsiyani o'zgartiradi.
+- **Andoza**: Avval tasvir bilan ishlay oladigan modellarni, oxirida esa yuqori oʻtkazuvchanlikka ega matn/kod modelini koʻrsatadigan `Priority` kombinatsiyasi.
+- **Modellar**:
+  1. `gemini/gemini-2.5-pro` (Tasvirlarni/multimodal kontentni kuchli tushunish)
+  2. `openai/gpt-4o` (Tasvir va vositalardan muvozanatli foydalanish)
+  3. `deepseek/deepseek-v4-flash` (Matn/kod yaratish)
 
 ---
 
-### Ma'lumotlar bazasini eksport qilish / import qilish
+### Barqarorlik va avtomatik uzgichlar
 
-Ma'lumotlar bazasi zahiralarini boshqarish** Boshqaruv paneli → sozlamalari → Tizim va saqlash** .
+**Boshqaruv paneli → Sozlamalar → Barqarorlik** orqali sozlang.
 
-| Harakat                                 | Tavsif                                                                                                                                                                              |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ma'lumotlar bazasini eksport qilish** | Joriy SQLite ma'lumotlar bazasini `.sqlite` fayli sifatida yuklaydi                                                                                                                 |
-| **Hammasini eksport qilish (.tar.gz)**  | To'liq zaxira arxivini yuklab oladi, jumladan: ma'lumotlar bazasi, sozlamalar, kombinatsiyalar, provayder ulanishlari (hisob ma'lumotlari yo'q), API kalit metadata                 |
-| **Import ma'lumotlar bazasi**           | Joriy ma'lumotlar bazasini almashtirish uchun `.sqlite` faylini yuklang. Importdan oldingi zahira nusxasi `DISABLE_SQLITE_AUTO_BACKUP=true` bo'lmasa, avtomatik ravishda yaratiladi |
+OmniRoute provayder darajasidagi barqarorlikni beshta komponent yordamida taʼminlaydi:
+
+1. **Soʻrovlar navbati va surʼatini boshqarish** — Tizim darajasida soʻrovlar oqimini shakllantirish:
+   - **Daqiqasiga soʻrovlar (RPM)** — Har bir hisob uchun daqiqasiga ruxsat etilgan maksimal soʻrovlar soni
+   - **Soʻrovlar orasidagi minimal vaqt** — Soʻrovlar orasidagi millisekundlarda minimal tanaffus
+   - **Bir vaqtdagi maksimal soʻrovlar** — Har bir hisob uchun bir vaqtda bajariladigan maksimal soʻrovlar soni
+
+2. **Ulanishni vaqtincha toʻxtatish** — Qayta urinish mumkin boʻlgan xatolardan soʻng bitta ulanish uchun har bir autentifikatsiya turi boʻyicha konfiguratsiya:
+   - **Asosiy kutish vaqti** — Yuqori oqimdagi qayta urinish mumkin boʻlgan xatolar uchun standart kutish oynasi
+   - **Yuqori oqimdagi qayta urinish koʻrsatmalaridan foydalanish** — Taqdim etilganda ishonchli `Retry-After` yoki tiklash koʻrsatmalariga amal qiladi
+   - **Maksimal ortga chekinish bosqichlari** — Takroriy xatolar uchun eksponensial ortga chekinishning maksimal darajasi
+
+3. **Provayder avtomatik uzgichi** — Provayderning boshidan oxirigacha yuz bergan xatolarini kuzatadi, sozlangan ogohlantirish chegarasida provayderni yomonlashgan deb belgilaydi va sozlangan xatolik chegarasiga yetilganda uzgichni ochadi:
+   - **Yomonlashish chegarasi** — `DEGRADED` holatiga oʻtishdan oldingi ketma-ket provayder xatolari soni
+   - **Xatolik chegarasi** — `OPEN` holatiga oʻtishdan oldingi ketma-ket provayder xatolari soni
+   - **Tiklash taymauti** — Provayder qayta sinovdan oʻtkazilishidan oldingi vaqt oraligʻi
+   - **CLOSED** (Sogʻlom) — Soʻrovlar odatdagidek uzatiladi
+   - **DEGRADED** — Koʻpaygan xatolar kuzatilayotgan paytda ham soʻrovlar uzatilishda davom etadi
+   - **OPEN** — Takroriy xatolardan soʻng provayder vaqtincha bloklanadi
+   - **HALF_OPEN** — Provayder tiklangan-tiklanmaganligi tekshirilmoqda
+
+   Ulanish doirasidagi `429` tezlik cheklovlari **Ulanishni vaqtincha toʻxtatish** holatida qoladi va provayder uzgichi hisobiga kiritilmaydi.
+
+   Provayder uzgichining ish vaqtidagi holati faqat **Boshqaruv paneli → Salomatlik** sahifasida koʻrsatiladi.
+
+4. **Kutish muddati tugashini kutish** — Agar barcha nomzod ulanishlar allaqachon kutish holatida boʻlsa, OmniRoute eng erta kutish muddati tugashini kutishi va ayni mijoz soʻrovini avtomatik ravishda qayta yuborishi mumkin.
+
+5. **Tezlik cheklovini avtomatik aniqlash** — Yuqori oqim provayderlari aniq kutish oynalarini qaytarganda, sozlama yoqilgan boʻlsa, ushbu koʻrsatmalar mahalliy ulanishning kutish muddatini bekor qiladi.
+
+**Professional maslahat:** Uzilishdan soʻng faol provayder uzgichlarini tekshirish va tiklash uchun **Salomatlik** sahifasidan foydalaning. Barqarorlik sahifasi faqat konfiguratsiyani oʻzgartiradi.
+
+---
+
+### Maʼlumotlar bazasini eksport/import qilish
+
+Maʼlumotlar bazasi zaxira nusxalarini **Boshqaruv paneli → Sozlamalar → Tizim va saqlash** boʻlimida boshqaring.
+
+| Amal                                    | Tavsif                                                                                                                                                                                          |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Maʼlumotlar bazasini eksport qilish** | Joriy SQLite maʼlumotlar bazasini `.sqlite` fayli sifatida yuklab oladi                                                                                                                         |
+| **Barchasini eksport qilish (.tar.gz)** | Quyidagilarni oʻz ichiga olgan toʻliq zaxira arxivini yuklab oladi: maʼlumotlar bazasi, sozlamalar, kombinatsiyalar, provayder ulanishlari (hisob maʼlumotlarisiz), API kaliti metamaʼlumotlari |
+| **Maʼlumotlar bazasini import qilish**  | Joriy maʼlumotlar bazasini almashtirish uchun `.sqlite` faylini yuklaydi. `DISABLE_SQLITE_AUTO_BACKUP=true` boʻlmasa, importdan oldingi zaxira nusxasi avtomatik ravishda yaratiladi            |
 
 ```bash
-# API: Export database
+# API: Maʼlumotlar bazasini eksport qilish
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Export all (full archive)
+# API: Barchasini eksport qilish (toʻliq arxiv)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Import database
+# API: Maʼlumotlar bazasini import qilish
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Import tekshiruvi:** Import qilingan fayl yaxlitligi (SQLite pragma tekshiruvi), kerakli jadvallar (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) va hajmi (maksimal 100MB) uchun tasdiqlangan.
+**Importni tekshirish:** Import qilingan fayl yaxlitlik (SQLite pragma tekshiruvi), talab qilinadigan jadvallar (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) va hajm (maksimal 100MB) boʻyicha tekshiriladi.
 
 **Foydalanish holatlari:**
 
-- Mashinalar o'rtasida OmniRoute ko'chiring
-- Favqulodda vaziyatlarni tiklash uchun tashqi zaxira nusxalarini yarating
-- Jamoa a'zolari o'rtasida konfiguratsiyalarni almashish (barcha → almashish arxivini eksport qilish)
+- OmniRouteʼni kompyuterlar oʻrtasida koʻchirish
+- Favqulodda holatdan tiklash uchun tashqi zaxira nusxalarini yaratish
+- Konfiguratsiyalarni jamoa aʼzolari bilan ulashish (barchasini eksport qilish → arxivni ulashish)
 
 ---
 
-### Sozlamalar paneli
+### Sozlamalar boshqaruv paneli
 
-Sozlamalar sahifasi tartiblangan** 7 ta yorliq** oson navigatsiya uchun:
+Qulay navigatsiya uchun sozlamalar sahifasi **7 ta ichki sahifa**ga ajratilgan:
 
-| Tab                  | Tarkib                                                                                                                                                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **General**          | Tizimni saqlash vositalari, standart xatti-harakatlar, oxirgi nuqta tunnelining ko'rinishi                                                                                                                                 |
-| **Tashqi ko'rinish** | Mavzuni boshqarish elementlari (light/dark/system), yon panel koʻrinishi, Cloudflare/Tailscale/ngrok tunnel kartalari uchun panelni almashtirish                                                                           |
-| **AI**               | Fikrlash byudjeti (o'tish / avtomatik chiziq / moslashtirilgan / moslash - [THINKING_BUDGET.md](./THINKING_BUDGET.md) ga qarang), global tizim tezkor, tezkor kesh statistikasi                                            |
-| **Xavfsizlik**       | Login/Password sozlamalari, IP Access Control, `/models` uchun API auth, Provayderni bloklash, tezkor inyeksiya himoyasi                                                                                                   |
-| **Marshrutlash**     | Global marshrutlash strategiyasi (Birinchi to‘ldirish / Round Robin / P2C / Tasodifiy / Eng kam foydalanilgan / Narx optimallashtirilgan), joker model taxalluslari, zaxira zanjirlar, birlashtirilgan standart sozlamalar |
-| **Chidamlilik**      | So‘rov navbati, ulanishni sovutish, provayderni to‘xtatuvchini sozlash va sovishini kutish                                                                                                                                 |
-| **Murakkab**         | Global proksi-server konfiguratsiyasi (HTTP/SOCKS5), har bir provayder uchun proksi-serverni bekor qilish                                                                                                                  |
+| Varaq                | Tarkibi                                                                                                                                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Umumiy**           | Tizim saqlash vositalari, standart xatti-harakat, Endpoint tunnel ko‘rinishi                                                                                                                                                                |
+| **Tashqi ko‘rinish** | Mavzu boshqaruvlari (yorug‘/qorong‘i/tizim), yon panel ko‘rinishi, Cloudflare/Tailscale/ngrok tunnel kartalari uchun panel almashtirgichlari                                                                                                |
+| **AI**               | Fikrlash byudjeti (o‘zgartirmasdan uzatish / avtomatik olib tashlash / maxsus / moslashuvchan — [THINKING_BUDGET.md](./THINKING_BUDGET.md) ga qarang), global tizim prompti, prompt keshi statistikasi                                      |
+| **Xavfsizlik**       | Login/parol sozlamalari, IP kirish nazorati, `/models` uchun API autentifikatsiyasi, provayderlarni bloklash, prompt-inyeksiyadan himoya                                                                                                    |
+| **Marshrutlash**     | Global marshrutlash strategiyasi (birinchisini to‘ldirish / navbatma-navbat / P2C / tasodifiy / eng kam ishlatilgan / xarajat bo‘yicha optimallashtirilgan), joker belgili model taxalluslari, zaxira zanjirlari, kombinatsiya standartlari |
+| **Barqarorlik**      | So‘rovlar navbati, ulanishning kutish davri, provayder uzgichi konfiguratsiyasi va kutish davri tugashini kutish xatti-harakati                                                                                                             |
+| **Kengaytirilgan**   | Global proksi konfiguratsiyasi (HTTP/SOCKS5), har bir provayder uchun proksi sozlamalarini alohida belgilash                                                                                                                                |
 
-General endi faqat o‘qish uchun jurnallar va kesh qaydlarini takrorlamaydi. Ma'lumotlar bazasini saqlash va optimallashtirish sozlamalari `/api/settings/database` orqali davom ettiriladi; qo'lda keshni tozalash `DELETE /api/cache` foydalanadi. So'rov va proksi jurnali satr boshlari `CALL_LOGS_TABLE_MAX_ROWS` va `PROXY_LOGS_TABLE_MAX_ROWS` tomonidan boshqariladi.
+Umumiy bo‘lim endi faqat o‘qish uchun mo‘ljallangan jurnal yuritish va kesh qaydlarini takrorlamaydi. Ma’lumotlar bazasini saqlash muddati va
+optimallashtirish sozlamalari `/api/settings/database` orqali saqlanadi; keshni qo‘lda tozalash uchun
+`DELETE /api/cache` ishlatiladi. So‘rov va proksi jurnali qatorlari limitlari
+`CALL_LOGS_TABLE_MAX_ROWS` va `PROXY_LOGS_TABLE_MAX_ROWS` orqali boshqariladi.
 
 ---
 
 ### Xarajatlar va byudjetni boshqarish
 
-orqali kirish** Boshqaruv paneli → xarajatlari** .
+**Boshqaruv paneli → Xarajatlar** orqali kiring.
 
-| Tab          | Maqsad                                                                                                              |
-| ------------ | ------------------------------------------------------------------------------------------------------------------- |
-| **Byudjet**  | daily/weekly/monthly budjetlari va real vaqtda kuzatish bilan API kaliti uchun sarf-xarajat chegaralarini belgilang |
-| **Narxlash** | Model narxlari haqidagi yozuvlarni ko‘rish va tahrirlash — har bir provayder uchun 1K input/output tokeni narxi     |
+| Varaq       | Maqsad                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Byudjet** | Kunlik/haftalik/oylik byudjetlar va real vaqt kuzatuvi bilan har bir API kaliti uchun xarajat limitlarini belgilang |
+| **Narxlar** | Model narxlari yozuvlarini ko‘ring va tahrirlang — har bir provayder bo‘yicha 1 mingta kirish/chiqish tokeni narxi  |
 
 ```bash
-# API: Set a budget
+# API: Byudjetni belgilash
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Get current budget status
+# API: Joriy byudjet holatini olish
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Xarajatlarni kuzatish:** Har bir so'rov tokendan foydalanishni qayd qiladi va narxlash jadvali yordamida xarajatlarni hisoblab chiqadi. Bo'limlarni ko'rish** Boshqaruv paneli → foydalanish** provayder, model va API kaliti bo'yicha.
+**Xarajatlarni kuzatish:** Har bir so‘rov tokenlardan foydalanishni jurnalga yozadi va narxlar jadvali asosida xarajatni hisoblaydi. Provayder, model va API kaliti bo‘yicha tafsilotlarni **Boshqaruv paneli → Foydalanish** bo‘limida ko‘ring.
 
 ---
 
 ### Audio transkripsiya
 
-OmniRoute OpenAI-ga mos keladigan so'nggi nuqta orqali audio transkripsiyani qo'llab-quvvatlaydi:
+OmniRoute OpenAI bilan mos endpoint orqali audio transkripsiyani qo‘llab-quvvatlaydi:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Example with curl
+# curl bilan misol
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` mahalliy Deepgram marshrutidir va Deepgram API kalitiga muhtoj. Agar faqat OpenRouter sozlangan bo'lsa, `openrouter/deepgram/nova-3` foydalaning.
+`deepgram/nova-3` mahalliy Deepgram marshruti bo‘lib, Deepgram API kalitini talab qiladi.
+Agar faqat OpenRouter sozlangan bo‘lsa, `openrouter/deepgram/nova-3` dan foydalaning.
 
-**Nutqdan matnga (transkripsiya)** provayderlar:
+**Nutqdan matnga (transkripsiya)** provayderlari:
 
-- `openai/` (pichirlash mos)
+- `openai/` (whisper bilan mos)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (Nova oilasi)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Kanareykalar)
-- `huggingface/` (pichirlash variantlari)
+- `nvidia/` (Parakeet, Canary)
+- `huggingface/` (whisper variantlari)
 - `qwen/`
 
-**Matndan nutqqa (`POST /v1/audio/speech`)** provayderlar:
+**Matndan nutqqa (`POST /v1/audio/speech`)** provayderlari:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1143,45 +1172,52 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Transkripsiya uchun qo'llab-quvvatlanadigan audio formatlar: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS chiqish formatlari provayderga bog'liq (mp3, wav, opus, pcm, mulaw).
+Transkripsiya uchun qo‘llab-quvvatlanadigan audio formatlari: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS chiqish formatlari provayderga bog‘liq (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Kombo balanslash strategiyalari
+### Kombinatsiyani muvozanatlash strategiyalari
 
-Har bir kombinatsiya balansini sozlang** Boshqaruv paneli → Combos → Create/Edit → strategiyasi** .
+Har bir kombinatsiya uchun muvozanatlashni **Boshqaruv paneli → Kombinatsiyalar → Yaratish/Tahrirlash → Strategiya** bo‘limida sozlang.
 
-| Strategiya                       | Tavsif                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| **Raund-Robin**                  | Modellar bo'ylab ketma-ket aylanadi                                                      |
-| **Ustuvorlik**                   | Har doim birinchi modelni sinab ko'radi; faqat xatoga to'g'ri keladi                     |
-| **Tasodifiy**                    | Har bir so'rov uchun kombinatsiyadan tasodifiy modelni tanlaydi                          |
-| **Og'irlangan**                  | Har bir model uchun belgilangan og'irliklarga asoslangan marshrutlar mutanosib ravishda  |
-| **Eng kam ishlatilgan**          | Eng soʻnggi soʻrovlari boʻlgan modelga marshrutlar (kombo koʻrsatkichlardan foydalanadi) |
-| **Narxlari optimallashtirilgan** | Eng arzon modelga marshrutlar (narxlar jadvalidan foydalanadi)                           |
+| Strategiya                               | Tavsif                                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Navbatma-navbat**                      | Modellardan ketma-ket foydalanadi                                                                 |
+| **Ustuvorlik**                           | Har doim birinchi modelni sinaydi; faqat xatolik yuz berganda zaxira modelga o‘tadi               |
+| **Tasodifiy**                            | Har bir so‘rov uchun kombinatsiyadan tasodifiy modelni tanlaydi                                   |
+| **Vaznli**                               | Har bir modelga tayinlangan vaznlar asosida mutanosib ravishda marshrutlaydi                      |
+| **Eng kam ishlatilgan**                  | Eng kam yaqindagi so‘rovlarga ega modelga marshrutlaydi (kombinatsiya metrikalaridan foydalanadi) |
+| **Xarajat bo‘yicha optimallashtirilgan** | Eng arzon mavjud modelga marshrutlaydi (narxlar jadvalidan foydalanadi)                           |
 
-Global birlashtirilgan standart sozlamalarni o'rnatish mumkin** Boshqaruv paneli → sozlamalari → Marshrutlash → Combo Standart sozlamalar** . Kombo maqsadli vaqt tugashlari sukut bo'yicha joriy so'rovni kutish vaqtini meros qilib oladi. Foydalanish** Maqsadli vaqt tugashi (sekundlar)** Kombo standartlarida yoki individual kombinatsiyada faqat har bir maqsad uchun qisqaroq chegara tezroq qaytishni boshlashi kerak.
+Global kombinatsiya standartlarini **Boshqaruv paneli → Sozlamalar → Marshrutlash → Kombinatsiya standartlari** bo‘limida belgilash mumkin.
+Kombinatsiya maqsadlarining kutish vaqti sukut bo‘yicha joriy so‘rov kutish vaqtini meros qilib oladi. Faqat har bir maqsad uchun qisqaroq limit
+tezroq zaxira variantiga o‘tishni ishga tushirishi kerak bo‘lganda kombinatsiya standartlari yoki alohida kombinatsiyadagi **Maqsad kutish vaqti
+(soniya)** parametridan foydalaning.
 
-Nol kechikishli kombinatsiyalangan optimallashtirishlar qo'shiladi. Tashlab ket** Nol kechikish optimallashtirish** bu kechikish funksiyalarining zaxira maqsadlarga erishish, TTFT tarixiga asoslangan maqsadlarni o‘tkazib yuborish yoki zaxira so‘rovlarini siqishni oldini olish uchun o‘chirib qo‘yilgan; routing/request yoqish sozlangan xedjlash, bashoratli TTFT oʻtkazib yuborish va proaktiv qayta siqish imkonini beradi.
+Nol kechikishli kombinatsiya optimallashtirishlari ixtiyoriy ravishda yoqiladi. Ushbu kechikish funksiyalarining zaxira maqsadlari bilan poygalashishi, TTFT
+tarixiga asoslangan maqsadlarni o‘tkazib yuborishi yoki zaxira so‘rovlarini siqishiga yo‘l qo‘ymaslik uchun **Nol kechikishli optimallashtirishlar** parametrini o‘chirib
+qoldiring; uni yoqish sozlangan parallel himoyalash, bashoratli TTFT
+o‘tkazib yuborishlari va proaktiv zaxira siqishiga marshrutlash/so‘rov aniqligini pastroq oxirgi
+kechikishga almashtirish imkonini beradi.
 
-Oʻchirish** Fikrlash tokeni buferi** yuqori oqim provayderlari qattiq `max_tokens` / `maxOutputTokens` chegaralarini talab qilganda. Yoqilganda, kombinatsiyalangan marshrutlash faqat ma'lum chiqish qopqog'i bo'lgan modellar uchun mantiqiy model bo'sh joyini qo'shadi va xavfsiz buferlangan qiymat ushbu chegaradan oshib ketganda mijoz token chegarasini o'zgarishsiz qoldiradi. Agar mijoz chegarasi allaqachon ma'lum bo'lgan chegaradan yuqori bo'lsa, OmniRoute yuqori oqim so'rovini yuborishdan oldin uni o'sha chegaraga qisqartiradi.
+Yuqori oqim provayderlari qatʼiy `max_tokens` / `maxOutputTokens` cheklovlarini talab qilganda, **Mulohaza tokenlari buferi**ni o‘chirib qo‘ying. U yoqilganda, kombinatsiyalangan marshrutlash faqat chiqish chegarasi maʼlum bo‘lgan modellar uchun mulohaza yuritish modeliga qo‘shimcha zaxira qo‘shadi va xavfsiz buferlangan qiymat ushbu chegaradan oshib ketadigan bo‘lsa, mijoz tokenlari limitini o‘zgarishsiz qoldiradi. Agar mijoz limiti maʼlum chegaradan allaqachon yuqori bo‘lsa, OmniRoute yuqori oqim so‘rovini yuborishdan oldin uni shu chegaragacha qisqartiradi.
 
 ---
 
-### Salomatlik boshqaruv paneli
+### Holat boshqaruv paneli
 
-orqali kirish** Boshqarish paneli → Health** . 6 ta karta bilan real vaqtda tizim sog'lig'i haqida umumiy ma'lumot:
+**Boshqaruv paneli → Holat** orqali kiring. 6 ta kartadan iborat real vaqt rejimidagi tizim holati ko‘rinishi:
 
-| Karta                       | U nimani ko'rsatadi                                             |
-| --------------------------- | --------------------------------------------------------------- |
-| **Tizim holati**            | Ish vaqti, versiya, xotiradan foydalanish, ma'lumotlar katalogi |
-| **Provayder salomatligi**   | Global provayder avtomatik to'xtatuvchisi ish vaqti holati      |
-| **Tarif chegaralari**       | Qolgan vaqt bilan har bir hisob uchun faol ulanishni sovutish   |
-| **Faol blokirovkalar**      | Model doirasidagi faol blokirovkalar va vaqtinchalik istisnolar |
-| **Imzo keshi**              | Deduplication kesh statistikasi (faol kalitlar, urish tezligi)  |
-| **Kechikish telemetriyasi** | har bir provayder uchun p50/p95/p99 kechikish yig'indisi        |
+| Karta                       | Nimani ko‘rsatadi                                                           |
+| --------------------------- | --------------------------------------------------------------------------- |
+| **Tizim holati**            | Ishlash vaqti, versiya, xotiradan foydalanish, maʼlumotlar katalogi         |
+| **Provayder holati**        | Global provayder zanjir uzgichining joriy holati                            |
+| **Tezlik cheklovlari**      | Har bir hisob uchun qolgan vaqt bilan faol ulanish kutish muddatlari        |
+| **Faol bloklashlar**        | Muayyan modellarga doir faol bloklashlar va vaqtinchalik istisnolar         |
+| **Imzo keshi**              | Takrorlarni yo‘q qilish keshi statistikasi (faol kalitlar, topish darajasi) |
+| **Kechikish telemetriyasi** | Har bir provayder bo‘yicha p50/p95/p99 kechikish agregatsiyasi              |
 
-**Professional maslahat:** Salomatlik sahifasi har 10 soniyada avtomatik yangilanadi. Qaysi provayderlar muammoga duch kelayotganini aniqlash uchun o'chirgich kartasidan foydalaning.
+**Foydali maslahat:** Holat sahifasi har 10 soniyada avtomatik yangilanadi. Qaysi provayderlarda muammolar yuz berayotganini aniqlash uchun zanjir uzgich kartasidan foydalaning.
 
 ---
 

@@ -53,7 +53,7 @@ Mövcud `SearchForm` + `ResultsPanel` + `RerankPanel` komponentlərini taba çev
 - Giriş: URL + tam səhifə keçidi + format seçicisi (markdown / mətn / HTML).
 - Göndər → əldə et → `ScrapeResult.tsx` komponentində göstər.
 - `ScrapeResult` markdown önizləməsini və xam görünüş keçidini göstərir.
-- Məhdudiyyət: cavab gövdəsi **256 KB**-dan böyükdürsə, UI `(qısaldılıb, xam versiyaya baxın)` göstərir və xam məzmunu Monaco modal pəncərəsində açır (D21).
+- Məhdudiyyət: cavab gövdəsi **256 KB**-dan böyükdürsə, UI `View full raw content` göstərir və xam məzmunu modal pəncərəsində açır (D21).
 - Metadata paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), gecikmə, xərc, cavab ölçüsü, keçid sayı.
 - `useScrapeFetch.ts` hook-undan istifadə edir.
 
@@ -102,10 +102,12 @@ Eyni sorğunu/URL-i paralel olaraq maksimum **4 provayder** üzrə icra edir (D2
 `ProviderCatalog.tsx`, `GET /api/search/providers` vasitəsilə tam provayder siyahısını təqdim edir
 (F4-də fetch provayderlərini daxil etmək üçün genişləndirilib):
 
-| `kind` | `"search"` (20 provayder) və ya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 provayder) və ya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status sorğu zamanı etimadnamələrin mövcud olub-olmadığı və bütün
 açarların hazırda gözləmə müddətində olub-olmadığı yoxlanılaraq **müəyyən edilir**.
+
+`codex-search` (Codex Web Search): Ayrıca açar olmadan qoşulmuş Codex (ChatGPT) hesablarınızdan istifadə edir. Hər axtarış abunəlik kvotasını sərf edir və təxminən 10–40 s çəkir. Sorğu onu göstərdikdə işləyir; avtomatik seçim standart olaraq söndürülmüş `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` bayrağını tələb edir.
 
 ---
 

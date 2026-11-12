@@ -186,6 +186,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/build/backendOnlyPages.mjs",
   "scripts/build/build-tproxy-native.mjs",
   "scripts/build/build-next-isolated.mjs",
+  // Imported by the published build entrypoint; keep this exact sibling available.
+  "scripts/build/buildPhaseProgress.mjs",
   "scripts/i18n/generate-global-error-messages.mjs",
   "scripts/check/check-supported-node-runtime.ts",
   "scripts/build/native-binary-compat.mjs",
@@ -309,6 +311,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/postinstall.mjs",
   "scripts/build/postinstallSupport.mjs",
+  // The build entrypoint imports this helper before any progress option is read.
+  "scripts/build/buildPhaseProgress.mjs",
   "scripts/build/colocateOptionals.mjs",
   "scripts/build/runtime-env.mjs",
   "scripts/build/wreqJsNative.mjs",
@@ -447,4 +451,14 @@ export function findMissingArtifactPaths(
     .filter(Boolean)
     .filter((requiredPath) => !normalizedPaths.has(requiredPath))
     .sort();
+}
+
+/** Require prepared runtime staging when an observer already spent its build budget. */
+export function needsPackStagingBuild(
+  missingPaths: readonly string[],
+  requireStaging = false
+): boolean {
+  if (missingPaths.length === 0) return false;
+  if (requireStaging) throw new Error("PACK_STAGING_MISSING: prepared runtime files are required");
+  return true;
 }

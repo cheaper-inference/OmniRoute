@@ -393,7 +393,7 @@ Använder `wreq-js` för att generera webbläsarliknande TLS-fingeravtryck och d
 
 ### Matchning av CLI-fingeravtryck
 
-**Reglaget för CLI-fingeravtryck** (`Inställningar → Säkerhet`) ändrar ordningen på HTTP-rubriker och fält i JSON-brödtexten så att de matchar den exakta signaturen för inbyggda CLI-binärfiler (Claude Code, Codex osv.). Detta fungerar **ovanpå** proxyn:
+**Reglaget för CLI-fingeravtryck** (`Settings → Security`) ändrar ordningen på HTTP-rubriker och fält i JSON-brödtexten så att de matchar den exakta signaturen för inbyggda CLI-binärfiler (Claude Code, Codex osv.). Detta fungerar **ovanpå** proxyn:
 
 ```
 Din IP (blockerad) → Proxy-IP (USA) → Leverantörens API

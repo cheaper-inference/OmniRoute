@@ -20,14 +20,16 @@
 
 ## 설치 방법
 
-### npm (권장)
+### npm(권장)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-대시보드는 `http://localhost:20128`에서 열리며 API 기본 URL은 `http://localhost:20128/v1`입니다.
+대시보드는 `http://localhost:20128` 및 API 기반에서 열립니다. URL 는 `http://localhost:20128/v1` 입니다.
+
+> **npm 사용자:** npm이 설치 스크립트가 차단되었음을 경고하는 경우(예: `omniroute`, `better-sqlite3`) [— npm install-scripts 차단 문제 해결을](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) 참조하세요.
 
 ### pnpm
 

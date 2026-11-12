@@ -14,6 +14,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import * as yaml from "js-yaml";
+import { desktopAssets } from "../../../scripts/release/upload-desktop-assets.mjs";
 
 const root = path.resolve(import.meta.dirname, "../../..");
 type Step = { name?: string; uses?: string; run?: string; with?: { files?: string } };
@@ -86,19 +87,22 @@ test("Electron release collection preserves the generated browser-runtime pack",
   }
 });
 
-test("Electron release attachment selection includes browser-runtime tarballs", () => {
+test("Electron release attachment selection includes content-addressed browser-runtime tarballs", () => {
   const release = workflow.jobs.release.steps.find((s) =>
-    s.uses?.startsWith("softprops/action-gh-release@")
+    s.run?.includes("node scripts/release/upload-desktop-assets.mjs")
   );
-  const patterns = release?.with?.files?.split(/\s+/).filter(Boolean) ?? [];
-  assert.ok(
-    patterns.some((pattern) => path.matchesGlob("release-assets/OmniRoute.AppImage", pattern)),
-    "installer control published"
-  );
-  assert.ok(
-    patterns.some((pattern) =>
-      path.matchesGlob("release-assets/optional-pack-browser-runtime.tar.gz", pattern)
-    ),
-    "collected browser-runtime pack must be selected for GitHub release upload"
-  );
+  assert.ok(release, "reviewed uploader is wired to the release step");
+  const fixture = mkdtempSync(path.join(tmpdir(), "desktop-pack-selection-"));
+  try {
+    const installer = "OmniRoute.AppImage";
+    const pack = `optional-pack-browser-runtime-${"b".repeat(64)}.tar.gz`;
+    for (const name of [installer, pack, "optional-pack-browser-runtime.tar.gz", "private.tar.gz"])
+      writeFileSync(path.join(fixture, name), "fixture");
+    assert.deepEqual(
+      desktopAssets(fixture),
+      [installer, pack].map((name) => path.join(fixture, name)).sort()
+    );
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });

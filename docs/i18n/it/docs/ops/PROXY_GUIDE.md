@@ -10,20 +10,20 @@ OmniRoute include un sistema completo di gestione dei proxy che consente di inst
 
 ---
 
-## Indice
+## Sommario
 
-- [Perché usare i proxy?](#perché-usare-i-proxy)
-- [Panoramica dell'architettura](#panoramica-dellarchitettura)
-- [Sistema proxy a 4 livelli](#sistema-proxy-a-4-livelli)
-- [Registro dei proxy (CRUD)](#registro-dei-proxy-crud)
-- [Marketplace gratuito 1proxy](#marketplace-gratuito-1proxy)
-- [Rotazione dei proxy](#rotazione-dei-proxy)
-- [Anti-rilevamento e modalità stealth](#anti-rilevamento-e-modalità-stealth)
-- [Modalità proxy upstream](#modalità-proxy-upstream)
-- [Interfaccia della dashboard](#interfaccia-della-dashboard)
-- [Riferimento API](#riferimento-api)
-- [Variabili d'ambiente](#variabili-dambiente)
-- [Risoluzione dei problemi](#risoluzione-dei-problemi)
+- [Perché utilizzare i proxy?](#why-use-proxies)
+- [Panoramica dell'architettura](#architecture-overview)
+- [Sistema proxy a 4 livelli](#4-level-proxy-system)
+- [Registro dei proxy (CRUD)](#proxy-registry-crud)
+- [1mercato gratuito proxy](#1proxy-free-proxy-marketplace)
+- [Rotazione per procura](#proxy-rotation)
+- [Anti-rilevamento e azione furtiva](#anti-detection--stealth)
+- [Modalità proxy upstream](#upstream-proxy-modes)
+- [Cruscotto UI](#dashboard-ui)
+- [Riferimento API](#api-reference)
+- [Variabili d'ambiente](#environment-variables)
+- [Risoluzione dei problemi](#troubleshooting)
 
 ---
 
@@ -391,17 +391,17 @@ OmniRoute non si limita a instradare il traffico attraverso un proxy, ma fa in m
 
 Utilizza `wreq-js` per generare impronte digitali TLS simili a quelle dei browser, aggirando i sistemi di rilevamento dei bot che segnalano gli handshake TLS non provenienti da browser.
 
-### Corrispondenza dell'impronta digitale della CLI
+### Corrispondenza delle impronte digitali CLI
 
-L'**interruttore dell'impronta digitale della CLI** (`Impostazioni → Sicurezza`) riordina le intestazioni HTTP e i campi del corpo JSON affinché corrispondano esattamente alla firma dei binari CLI nativi (Claude Code, Codex, ecc.). Questa funzionalità opera **in aggiunta al** proxy:
+IL **Attiva/disattiva impronta digitale CLI** (`Settings → Security`) riordina le intestazioni HTTP e i campi del corpo JSON in modo che corrispondano alla firma esatta dei binari CLI nativi ( codice Claude, Codex, ecc.). Funziona **sopra** la procura:
 
 ```
-Il tuo IP (bloccato) → IP del proxy (USA) → API del provider
-                        + spoofing TLS
-                        + impronta digitale CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-In questo modo ottieni simultaneamente sia il **mascheramento dell'IP** sia l'**autenticità delle richieste**.
+Ottieni entrambi **Mascheramento IP** E **richiedere l'autenticità** contemporaneamente.
 
 ### Conservazione dell'IP del proxy
 

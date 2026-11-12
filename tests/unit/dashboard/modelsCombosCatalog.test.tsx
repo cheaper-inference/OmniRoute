@@ -16,21 +16,31 @@ beforeAll(() => {
 
 import enMessages from "@/i18n/messages/en.json";
 
-vi.mock("next-intl", () => ({
-  useTranslations: (ns: string = "common") => {
-    const bag = ((enMessages as Record<string, unknown>)[ns] || {}) as Record<string, string>;
-    const translate = (key: string, params?: Record<string, unknown>) => {
-      let str = bag[key] ?? key;
-      if (params) {
-        for (const [pKey, pVal] of Object.entries(params)) {
-          str = str.replace(new RegExp(`\\{${pKey}\\}`, "g"), String(pVal));
+vi.mock("next-intl", () => {
+  type Translator = ((key: string, params?: Record<string, unknown>) => string) & {
+    has: (key: string) => boolean;
+  };
+  const translators = new Map<string, Translator>();
+  return {
+    useTranslations: (ns: string = "common") => {
+      const cached = translators.get(ns);
+      if (cached) return cached;
+      const bag = ((enMessages as Record<string, unknown>)[ns] || {}) as Record<string, string>;
+      const translate = (key: string, params?: Record<string, unknown>) => {
+        let str = bag[key] ?? key;
+        if (params) {
+          for (const [pKey, pVal] of Object.entries(params)) {
+            str = str.replace(new RegExp(`\\{${pKey}\\}`, "g"), String(pVal));
+          }
         }
-      }
-      return str;
-    };
-    return Object.assign(translate, { has: (key: string) => key in bag });
-  },
-}));
+        return str;
+      };
+      const translator = Object.assign(translate, { has: (key: string) => key in bag });
+      translators.set(ns, translator);
+      return translator;
+    },
+  };
+});
 
 import ModelCatalogPage from "@/app/(dashboard)/dashboard/models/page";
 import {

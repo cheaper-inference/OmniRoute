@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Informācijas panelis tiek atvērts adresē `http://localhost:20128`, un API bāzes URL ir `http://localhost:20128/v1`.
+Informācijas panelis tiek atvērts `http://localhost:20128` un API bāzes URL ir `http://localhost:20128/v1`.
+
+> **npm lietotāji:** Ja npm brīdina, ka instalēšanas skripti ir bloķēti (piemēram, `omniroute`, `better-sqlite3`), skatiet [— npm instalēšanas skriptu bloķēšana problēmu novēršana](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

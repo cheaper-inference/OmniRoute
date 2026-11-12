@@ -54,7 +54,7 @@ Nuova scheda per estrarre contenuti da un URL tramite `POST /v1/web/fetch` (crea
 - Input: URL + opzione pagina intera + selettore del formato (markdown / testo / HTML).
 - Invio → recupero → rendering di `ScrapeResult.tsx`.
 - `ScrapeResult` mostra l'anteprima markdown e un'opzione per visualizzare il contenuto non elaborato.
-- Limite: se il corpo della risposta supera **256 KB**, l'interfaccia mostra `(troncato, visualizza contenuto non elaborato)` e apre il contenuto non elaborato in una finestra modale Monaco (D21).
+- Limite: se il corpo della risposta supera **256 KB**, l'interfaccia mostra `View full raw content` e apre il contenuto non elaborato in una finestra modale (D21).
 - Pannello dei metadati: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenza, costo, dimensione della risposta, numero di link.
 - Utilizza l'hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Esegue la stessa query/lo stesso URL su un massimo di **4 provider in parallelo*
 `ProviderCatalog.tsx` espone l'elenco completo dei provider da `GET /api/search/providers`
 (esteso in F4 per includere i provider di recupero):
 
-| `kind` | `"search"` (20 provider) oppure `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 provider) oppure `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Lo stato viene **determinato al momento della richiesta** verificando se esistono credenziali e se
 tutte le chiavi sono attualmente in cooldown.
+
+`codex-search` (Codex Web Search): Usa i tuoi account Codex (ChatGPT) collegati, senza una chiave separata. Ogni ricerca consuma la quota dell’abbonamento e richiede circa 10–40 s. Viene eseguito quando la richiesta lo indica; la selezione automatica richiede il flag `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, disattivato per impostazione predefinita.
 
 ---
 

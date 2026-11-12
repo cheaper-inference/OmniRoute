@@ -1,0 +1,1 @@
+- Pin CI security scanners to the reviewed auditor versions, preserve failed installations as failures, and run Bun compatibility checks with the runtime installed from the npm lockfile on Linux and Windows.

@@ -48,13 +48,38 @@ async function serve(scope: string, generation: string) {
   ).text();
 }
 
+function assertMusePersistenceBoundary(source: string) {
+  assert.match(source, /export function claimMuseSession\s*\(/, "ownership service must exist");
+  assert.match(
+    source,
+    /from ["']@\/lib\/db\/museSessionOwnership["']/,
+    "ownership persistence must use the DB domain module"
+  );
+  assert.doesNotMatch(source, /getDbInstance|\.prepare\(|key_value/);
+}
+
 test("service keeps no raw SQL: persistence goes through src/lib/db", () => {
   const source = readFileSync(
     new URL("../../src/sse/services/museSessionOwnership.ts", import.meta.url),
     "utf8"
   );
-  assert.match(source, /export /);
-  assert.doesNotMatch(source, /getDbInstance|\.prepare\(|key_value/);
+  assertMusePersistenceBoundary(source);
+});
+
+test("persistence boundary rejects empty sources, missing DB seams and direct SQL", () => {
+  const source = readFileSync(
+    new URL("../../src/sse/services/museSessionOwnership.ts", import.meta.url),
+    "utf8"
+  );
+  assertMusePersistenceBoundary(source);
+  assert.throws(() => assertMusePersistenceBoundary(""), /ownership service must exist/);
+  assert.throws(
+    () => assertMusePersistenceBoundary(source.replace("@/lib/db/museSessionOwnership", "./other")),
+    /ownership persistence must use the DB domain module/
+  );
+  assert.throws(() =>
+    assertMusePersistenceBoundary(source + '\ngetDbInstance().prepare("SELECT 1");')
+  );
 });
 
 test("an idle session is pruned with its owner pin and recorded items; active ones stay", async () => {

@@ -17,9 +17,10 @@ Gli hook **non** vengono eseguiti su ogni route né su ogni risposta. Leggere
 
 ## Guardrail integrati
 
-Il registro carica automaticamente sei guardrail in ordine di priorità all'importazione (vedi `registry.ts` → `registerDefaultGuardrails()`):
+Il registro carica automaticamente sei guardrail in ordine di priorità all'importazione
+(vedi `registry.ts` → `registerDefaultGuardrails()`):
 
-| Priorità | Nome                | Fase(i)        | File                  |
+| Priorità | Nome                | Fase           | File                  |
 | -------- | ------------------- | -------------- | --------------------- |
 | `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -28,7 +29,7 @@ Il registro carica automaticamente sei guardrail in ordine di priorità all'impo
 | `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Vengono eseguiti i numeri con priorità inferiore** Primo** .
+I numeri di priorità più bassi vengono eseguiti **per primi**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modalità Bridge PR-1
 
@@ -109,30 +110,68 @@ La precedente scheda Vision Bridge nelle impostazioni AI è un collegamento di c
 
 Le impostazioni predefinite legacy risiedono in `src/shared/constants/visionBridgeDefaults.ts`; le nuove impostazioni predefinite mode/task-aware/cache e il risolutore delle impostazioni risiedono in `src/shared/constants/modalityBridgeDefaults.ts`. Il guardrail espone un'opzione del costruttore `deps` in modo che i test possano iniettare implementazioni `getSettings` e `callVisionModel` false.
 
-### Audio Bridge (`audioBridge.ts`) — Modalità Bridge PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Intercetta le richieste di chat contenenti audio prima che raggiungano una destinazione che non è nota per accettare input audio. Non reindirizza mai la richiesta di chat: le parti audio vengono trascritte attraverso l'endpoint multiparte compatibile con OpenAI esistente e il modello di chat scelto continua con le trascrizioni del testo.
+Intercetta le richieste chat che trasportano audio prima che raggiungano una destinazione che non è nota accettare input audio. Non reindirizza mai la richiesta chat: le parti audio vengono trascritte tramite l'endpoint multipart esistente compatibile con OpenAI e il modello chat scelto prosegue con le trascrizioni testuali.
 
-Fluire:
+Flusso:
 
-1. Risolvi `supportsAudio` tramite `getResolvedModelCapabilities()`. Prevalgono i metadati espliciti del registro del provider, quindi i metadati del modello statico, quindi sincronizzati `modalities_input`. Una lista di input dichiarata senza `audio` è `false`; non rimane alcuna prova di capacità `null`. Sia `false` che `null` attivano il ponte conservativo, mentre `true` lo bypassa.
-2. Risolvi le impostazioni `modalityBridgeAudio*` ed estrai parti audio di livello superiore unibili da ogni messaggio attraverso il rilevatore `detectMediaParts()` condiviso. Le forme dei fili supportate sono OpenAI `input_audio`, `audio_url` e `source.media_type: "audio/*"`. L'audio nidificato viene rilevato per l'instradamento ma non rimosso dal percorso di giunzione. Il lavoro è limitato da `modalityBridgeAudioMaxClips`; le parti successive rimangono intatte.
-3. Onora uno `provider/model` configurato o lascia che `selectAudioBridgeModel()` cammini `AUDIO_TRANSCRIPTION_PROVIDERS` nell'ordine del catalogo stabile e seleziona il primo modello con una credenziale di fornitore attivo utilizzabile.
-4. `callAudioTranscription()` converte l'audio base64/data-URI in uno `file` multiparte o scarica uno `audio_url` remoto tramite la protezione in uscita solo pubblica con blocco DNS e limite 25 MB. Quindi POSTs il file e il modello selezionato nel self-loop `/v1/audio/transcriptions` locale, autenticato con `resolveSelfLoopBearer()`. Il percorso di trascrizione esistente esegue la normale ricerca delle credenziali, la gestione cooldown/rate-limit e l'invio del provider.
-5. Le chiamate riuscite sostituiscono le loro parti con `[Audio N]: <transcript>`. Chiamate eseguite con `Promise.allSettled`: un singolo errore preserva quella parte audio originale (contratto #4012 ). Se ogni chiamata fallisce e l'obiettivo viene dimostrato `supportsAudio === false`, le parti diventano `[Audio N]: (unavailable — no STT provider connected)` (contratto #8430 ). Per un bersaglio sconosciuto (`null`), un risultato di fallimento totale rimane inalterato. Un target comprovato di solo testo senza credenziali STT utilizzabili riceve lo stesso stub esplicito senza emettere una chiamata di rete.
+1. Risolve `supportsAudio` tramite `getResolvedModelCapabilities()`. I metadati
+   espliciti del provider-registry hanno la precedenza, seguiti dai metadati
+   statici del modello e poi da `modalities_input` sincronizzato. Una lista di
+   input dichiarata priva di `audio` vale `false`; l'assenza di evidenze sulle
+   capacità resta `null`. Sia `false` che `null` attivano il bridge conservativo,
+   mentre `true` lo bypassa.
+2. Risolve le impostazioni `modalityBridgeAudio*` ed estrae le parti audio di
+   primo livello processabili tramite splice da ogni messaggio attraverso il
+   rilevatore condiviso `detectMediaParts()`. I formati wire supportati sono
+   OpenAI `input_audio`, `audio_url` e `source.media_type: "audio/*"`. L'audio
+   annidato viene rilevato ai fini del routing ma non rimosso dal percorso di
+   splice. Il lavoro è limitato da `modalityBridgeAudioMaxClips`; le parti
+   successive restano intatte.
+3. Onora un `provider/model` configurato, oppure lascia che
+   `selectAudioBridgeModel()` scorra `AUDIO_TRANSCRIPTION_PROVIDERS` nell'ordine
+   stabile del catalogo e selezioni il primo modello con una credenziale di
+   provider attiva e utilizzabile.
+4. `callAudioTranscription()` converte l'audio base64/data-URI in un `file`
+   multipart, oppure scarica un `audio_url` remoto attraverso il guard per le
+   connessioni in uscita verso sole destinazioni pubbliche, con DNS pinning e un
+   limite di 25 MB. Invia quindi in POST il file e il modello selezionato al
+   self-loop locale `/v1/audio/transcriptions`, autenticato con
+   `resolveSelfLoopBearer()`. La route di trascrizione esistente esegue la
+   normale ricerca delle credenziali, la gestione di cooldown/rate-limit e il
+   dispatch al provider.
+5. Le chiamate riuscite sostituiscono le rispettive parti con
+   `[Audio N]: <transcript>`. Le chiamate vengono eseguite con
+   `Promise.allSettled`: un singolo fallimento preserva la parte audio originale
+   corrispondente (contratto #4012). Se tutte le chiamate falliscono e per il
+   target è accertato `supportsAudio === false`, le parti diventano
+   `[Audio N]: (unavailable — no STT provider connected)` (contratto #8430). Per
+   un target sconosciuto (`null`), un esito di fallimenti totali resta intatto.
+   Un target accertato come solo testo e privo di una credenziale STT
+   utilizzabile riceve lo stesso stub esplicito senza emettere alcuna chiamata
+   di rete.
 
-Le trascrizioni riuscite utilizzano la cache Modality Bridge LRU/TTL a livello di processo. La chiave combina il riferimento audio, l'etichetta operativa `audio-transcription` stabile e il modello STT selezionato; gli errori non vengono mai memorizzati nella cache. I tentativi audio aggiornano i contatori `bridged`, `cacheHits`, `failures` e `lastUsedAt` condivisi. Le risposte trasformate portano `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; le richieste non modificate non ricevono un segmento Audio Bridge.
+Le trascrizioni riuscite usano la cache LRU/TTL del Modality Bridge, condivisa a
+livello di processo. La chiave combina il riferimento audio, l'etichetta stabile
+dell'operazione `audio-transcription` e il modello STT selezionato; i fallimenti
+non vengono mai memorizzati in cache. I tentativi audio aggiornano i contatori
+condivisi `bridged`, `cacheHits`, `failures` e `lastUsedAt`. Le risposte
+trasformate recano
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; le
+richieste non modificate non ricevono alcun segmento Audio Bridge.
 
-Le impostazioni di runtime sono supportate da DB e convalidate da Zod:
+Le impostazioni di runtime sono persistite su DB e validate tramite Zod:
 
-| Chiave                        | Predefinito | Allineare     |
-| ----------------------------- | ----------- | ------------- |
-| `modalityBridgeAudioEnabled`  | `true`      | —             |
-| `modalityBridgeAudioModel`    | `""`        | Auto o STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`     | 1000–300000   |
-| `modalityBridgeAudioMaxClips` | `3`         | 1–10          |
+| Chiave                        | Predefinito | Intervallo         |
+| ----------------------------- | ----------- | ------------------ |
+| `modalityBridgeAudioEnabled`  | `true`      | —                  |
+| `modalityBridgeAudioModel`    | `""`        | Auto oppure ID STT |
+| `modalityBridgeAudioTimeout`  | `60000`     | 1000–300000        |
+| `modalityBridgeAudioMaxClips` | `3`         | 1–10               |
 
-La cache condivisa rimane controllata da `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` e `modalityBridgeCacheMaxEntries`.
+La cache condivisa resta controllata da `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` e `modalityBridgeCacheMaxEntries`.
 
 ### Ponte video (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -208,74 +247,99 @@ Le impostazioni di runtime sono supportate da DB e convalidate da Zod:
 
 I valori di timeout video persistenti legacy superiori a 120 secondi sono limitati alla scadenza del broker; le scritture di nuove impostazioni al di sopra di tale limite vengono rifiutate. `GET /api/modality-bridge/video/runtime` richiede una località di loopback timbrata attendibile prima dell'autenticazione o del sondaggio di runtime, quindi richiede l'autenticazione di gestione. Restituisce solo `available`, versioni FFmpeg/ffprobe disinfettate e un motivo fisso quando il runtime non è disponibile. L'endpoint di estrazione interno non è un caricamento pubblico API: la saturazione della coda restituisce `503` più `Retry-After`, la disconnessione del chiamante restituisce `499` e la scadenza fissa del broker restituisce `504`. Le risposte convertite aggiungono `video->text;model=<visionModel>;parts=<videos>` all'intestazione `x-omniroute-modality-bridge` centrale senza rimuovere i segmenti Vision o Audio.
 
-### PII Mascheratore (`piiMasker.ts`)
+### Mascheratore PII (`piiMasker.ts`)
 
-Continua a funzionare** Entrambi** fasi.
+Continua a funzionare **Entrambi** fasi.
 
-- **`preCall`** clona il payload, cammina `system`, `messages`, `input` e `prompt` (inclusi gli elementi stringa semplici) e applica `processPII()` (da `@/shared/utils/inputSanitizer`) ai campi stringa `content`/`text`. Quando `PII_REDACTION_ENABLED=true`, PII rilevato viene oscurato nel payload in uscita. Questo è indipendente da `INPUT_SANITIZER_MODE` (che controlla solo la politica di prompt-injection). Quando la redazione è disattivata, il rilevamento dei record delle chiamate conta senza riscrivere il contenuto.
+- **`preCall`** clona il payload, percorre `system`, `messages`, `input` e `prompt` (inclusi elementi di stringa semplici) e applica `processPII()` (da `@/shared/utils/inputSanitizer`) ai campi di stringa `content`/`text`. Quando `PII_REDACTION_ENABLED=true`, PII rilevato viene oscurato nel payload in uscita. Questo è indipendente da `INPUT_SANITIZER_MODE` (che controlla solo la politica di prompt-injection). Quando la redazione è disattivata, il rilevamento dei record delle chiamate conta senza riscrivere il contenuto.
 - **`postCall`** clona in profondità la risposta, esegue `sanitizePIIResponse()` più il mascheratore della forma dell'API di risposta (`maskResponsesOutput` — copre `output_text` e `output[].content[].text`). In caso di oscuramento, la risposta modificata sostituisce l'originale.
 
 Il guardrail non si blocca mai; annota solo (`meta.detections`, `meta.redacted`) o riscrive.
 
 #### Selezione per tipo, modelli personalizzati e contatori di rilevamento
 
-**Dashboard → Impostazioni → Sicurezza → PII Mascheramento** sceglie _cosa_ è mascherato. Non attiva il mascheramento: ovvero rimane `PII_REDACTION_ENABLED` (richiesta) e `PII_RESPONSE_SANITIZATION` (risposta + SSE), entrambi disattivati per impostazione predefinita.
+**Dashboard → Impostazioni → Sicurezza → PII mascheramento** sceglie _cosa_ è mascherato. Non attiva il mascheramento: ovvero rimane `PII_REDACTION_ENABLED` (richiesta) e `PII_RESPONSE_SANITIZATION` (risposta + SSE), entrambi disattivati per impostazione predefinita.
 
-- **Selezione per tipo** — gli ID integrati sono elencati in `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Non impostato significa ogni tipo (il comportamento prima che esistesse questa impostazione). Il modello `ssn_us` del motore di richiesta viene mappato su `ssn`. I modelli (Minimal, Standard, Financial, Brasiliano, USA, GDPR, POPIA, Full) riempiono solo le caselle di controllo in UI.
-- **identificatori GDPR e POPIA** — dodici ID integrati che coprono EU e identificatori personali sudafricani (tabella seguente). Le loro espressioni regolari, i validatori e i tag di giurisdizione risiedono in una tabella, `src/shared/utils/piiPatterns.ts`, che viene utilizzata sia dal sanitizzatore della risposta (`src/lib/piiSanitizer.ts`) che dal mascheratore di richiesta (`src/shared/utils/inputSanitizer.ts`). Una corrispondenza viene redatta solo quando il suo validatore la accetta; una semplice sequenza di cifre non è mai sufficiente. Un operatore che ha salvato una selezione ristretta prima che esistessero questi ID mantiene il comportamento che aveva fino a quando non vengono selezionati i nuovi ID.
-- **Modelli personalizzati** — fino a 20 modelli regex o caratteri jolly (`*` = fino a 64 caratteri non spazi bianchi, `?` = uno). Le corrispondenze diventano `[CUSTOM_REDACTED]`. Ogni modello passa attraverso `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): al massimo 500 caratteri, flag limitati a `g i m s u`, devono essere compilati, devono passare `safe-regex` (backtracking catastrofico) e non devono corrispondere a una stringa vuota o a un segnaposto di redazione. Un modello che fallisce viene rifiutato al momento del salvataggio e del test e una riga memorizzata che fallisce viene ignorata in fase di esecuzione invece di essere compilata. I modelli personalizzati vengono eseguiti solo mentre il mascheramento è attivo.
-- **Contatori di rilevamento** conteggi — per tipo (valori mai corrispondenti), mantenuti in memoria e reimpostati al riavvio (`src/lib/pii/piiDetectionStats.ts`). Aumentano solo mentre il mascheramento è attivo.
+- **Selezione per tipo** — gli ID integrati sono elencati in `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Non impostato significa ogni tipo (il comportamento prima che esistesse questa impostazione). Il modello `ssn_us` del motore di richiesta viene mappato su `ssn`. I modelli (minimo, standard, finanziario, brasiliano, USA, GDPR, POPIA, completo) riempiono solo le caselle di controllo in UI.
+- **Identificatori GDPR e POPIA** — dodici ID integrati che coprono EU e identificatori personali sudafricani (tabella seguente). Le loro espressioni regolari, i validatori e i tag di giurisdizione risiedono in un'unica tabella, `src/shared/utils/piiPatterns.ts`, utilizzata sia dal sanitizzatore di risposta (`src/lib/piiSanitizer.ts`) che dal mascheratore di richiesta (`src/shared/utils/inputSanitizer.ts`). Una corrispondenza viene redatta solo quando il suo validatore la accetta; una semplice sequenza di cifre non è mai sufficiente. Un operatore che ha salvato una selezione ristretta prima che esistessero questi ID mantiene il comportamento che aveva fino a quando non vengono selezionati i nuovi ID.
+- **Modelli personalizzati** — fino a 20 modelli regex o caratteri jolly (`*` = fino a 64 caratteri non spazi bianchi, `?` = uno). Le partite diventano `[CUSTOM_REDACTED]`. Ogni modello passa attraverso `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): al massimo 500 caratteri, flag limitati a `g i m s u`, devono essere compilati, devono superare `safe-regex` (backtracking catastrofico) e non devono corrispondere a una stringa vuota o a un segnaposto di redazione. Un modello che fallisce viene rifiutato al momento del salvataggio e del test e una riga memorizzata che fallisce viene ignorata in fase di esecuzione invece di essere compilata. I modelli personalizzati vengono eseguiti solo mentre il mascheramento è attivo.
+- **Contatori di rilevamento** Conteggi — per tipo (valori mai corrispondenti), mantenuti in memoria e reimpostati al riavvio (`src/lib/pii/piiDetectionStats.ts`). Aumentano solo mentre il mascheramento è attivo.
 
-Le impostazioni risiedono nella tabella `key_value` (spazio dei nomi `pii_settings`, `src/lib/db/piiSettings.ts`) e vengono lette tramite una cache di 1 s. API:
+Le impostazioni risiedono nella tabella `key_value` (spazio dei nomi `pii_settings`, `src/lib/db/piiSettings.ts`) e vengono lette tramite una cache da 1 s. API:
 
-| Metodo | Sentiero                 | Scopo                                                                                                          |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Stato di bandiera, `enabledTypes`, `customPatterns`, contatori di rilevamento                                  |
-| `PUT`  | `/api/settings/pii`      | Sostituisci `enabledTypes` (`null` = tutto) and/or `customPatterns`                                            |
-| `POST` | `/api/settings/pii/test` | Eseguire un test di verifica su un campione rispetto a un campione di al massimo 8 KB; nulla viene memorizzato |
+| Metodo | Percorso                 | Scopo                                                                         |
+| ------ | ------------------------ | ----------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Stato dei flag, `enabledTypes`, `customPatterns`, contatori di rilevamento    |
+| `PUT`  | `/api/settings/pii`      | Sostituisce `enabledTypes` (`null` = tutti) e/o `customPatterns`              |
+| `POST` | `/api/settings/pii/test` | Prova un pattern (dry-run) su un campione di al massimo 8 KB; nulla è salvato |
 
 Tutti e tre richiedono l'autenticazione della gestione e convalidano il corpo con Zod (`src/shared/validation/schemas/piiSettings.ts`). Con l'accesso disabilitato (`requireLogin=false`) `GET` e l'endpoint di test sono aperti, ma `PUT` necessita comunque di una sessione del dashboard, di una chiave `manage` -scope API, di un token di accesso `oma_` con ambito di scrittura o superiore oppure del token CLI o del token di servizio interno inviato dal loopback.
 
-#### identificatori GDPR (EU) e POPIA (Sudafrica).
+#### Identificatori GDPR (EU) e POPIA (Sudafrica).
 
-| Id                  | Identificatore            | Validazione                                                                                 |
-| ------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                      | Paese conosciuto, lunghezza esatta per quel paese, ISO 13616 MOD-97-10                      |
-| `eu_vat`            | numero EU VAT             | Prefisso noto dello stato membro e formato numerico dello stato (nessuna ricerca VIES )     |
-| `es_dni_nie`        | spagnolo DNI / NIE        | Lettera di controllo (valore mod 23); NIE è `X/Y/Z` + 7 cifre                               |
-| `it_codice_fiscale` | Codice Fiscale Italiano   | Lettera di controllo dalle tabelle di posizione odd/even                                    |
-| `pl_pesel`          | PESEL polacco             | Checksum ponderato e una data di nascita codificata esistente                               |
-| `nl_bsn`            | BSN                       | 11 prove (pesi 9..2, -1)                                                                    |
-| `de_steuer_id`      | Steuer-ID tedesco         | ISO 7064 Mod 11,10 più le regole sulla struttura delle cifre (senza 0 iniziale)             |
-| `se_personnummer`   | Numero di persona svedese | Luhn nelle ultime dieci cifre e una data di nascita plausibile (10 o 12 cifre)              |
-| `za_id`             | Numero ID sudafricano     | Luhn su tutte le 13 cifre, month/day di nascita valido, cifra di cittadinanza 0 o 1         |
-| `za_phone`          | Telefono sudafricano      | prefisso `+27` / `27` o la forma nazionale `0..` scritta con uno spazio o un trattino       |
-| `za_vat`            | Numero VAT sudafricano    | 10 cifre che iniziano con `4`** E** "VAT" / "BTW" nei 48 caratteri precedenti               |
-| `za_tax_ref`        | Rif. fiscale sudafricano  | 10 cifre che iniziano con `0`-`3`, Luhn,** E** "tassa" / "SARS" nei 48 caratteri precedenti |
+| ID                  | Identificatore                  | Validazione                                                                                |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                            | Paese noto, lunghezza esatta per quel paese, ISO 13616 MOD-97-10                           |
+| `eu_vat`            | Numero VAT dell'UE              | Prefisso noto dello Stato membro e formato numerico di quello Stato (nessuna ricerca VIES) |
+| `es_dni_nie`        | DNI / NIE spagnolo              | Lettera di controllo (valore mod 23); NIE è `X/Y/Z` + 7 cifre                              |
+| `it_codice_fiscale` | Codice Fiscale italiano         | Lettera di controllo dalle tabelle delle posizioni dispari/pari                            |
+| `pl_pesel`          | PESEL polacco                   | Checksum ponderato e intervalli plausibili del mese/giorno di nascita codificati           |
+| `nl_bsn`            | BSN olandese                    | Prova dell'11 (pesi 9..2, -1)                                                              |
+| `de_steuer_id`      | Steuer-ID tedesco               | ISO 7064 Mod 11,10 più le regole di struttura delle cifre (nessuno 0 iniziale)             |
+| `se_personnummer`   | personnummer svedese            | Luhn sulle ultime dieci cifre e una data di nascita plausibile (10 o 12 cifre)             |
+| `za_id`             | Numero ID sudafricano           | Luhn su tutte le 13 cifre, mese/giorno di nascita validi, cifra di cittadinanza 0 o 1      |
+| `za_phone`          | Telefono sudafricano            | Prefisso `+27` / `27`, oppure forma nazionale `0..` scritta con uno spazio o un trattino   |
+| `za_vat`            | Numero VAT sudafricano          | 10 cifre che iniziano con `4` **e** "VAT" / "BTW" nei 48 caratteri precedenti              |
+| `za_tax_ref`        | Riferimento fiscale sudafricano | 10 cifre che iniziano con `0`-`3`, Luhn **e** "tax" / "SARS" nei 48 caratteri precedenti   |
 
-Poiché i formati di sole cifre entrano in conflitto con numeri d'ordine, numeri di build e timestamp, quelli più deboli (`za_vat`, `za_tax_ref`) necessitano dell'indicazione della parola chiave e un numero `0..` di dieci cifre non viene trattato come un numero di telefono sudafricano. IBANs spaziati (`GB29 NWBK ...`) non corrispondono. Nel percorso di streaming la cue viene cercata solo all'interno del blocco corrente. Gli ID si trovano prima dei modelli telefonici generici, quindi un identificatore convalidato mantiene il proprio segnaposto (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). I modelli `gdpr` e `popia` selezionano rispettivamente gli ID EU e sudafricani. Il mascheramento stesso rimane opt-in (regola dura #20): qui nulla cambia l'impostazione predefinita di un flag di funzionalità.
+Poiché i formati di sole cifre entrano in conflitto con numeri d'ordine, numeri di build e timestamp, quelli più deboli (`za_vat`, `za_tax_ref`) necessitano dell'indicazione della parola chiave e un numero `0..` di dieci cifre non viene trattato come un numero di telefono sudafricano. IBANs distanziati (`GB29 NWBK ...`) non corrispondono. Nel percorso di streaming la cue viene cercata solo all'interno del blocco corrente. Gli ID si trovano prima dei modelli telefonici generici, quindi un identificatore convalidato mantiene il proprio segnaposto (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). I modelli `gdpr` e `popia` selezionano rispettivamente gli ID EU e sudafricani. Il mascheramento stesso rimane opt-in (regola dura #20): nulla qui cambia l'impostazione predefinita di un flag di funzionalità.
 
-### Iniezione rapida (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Rileva le strutture antagoniste nei contenuti forniti dagli utenti e applica la policy configurata. Il comportamento è guidato dalle variabili di ambiente e dalle opzioni del costruttore:
+Rileva strutture avversariali nei contenuti forniti dall'utente e applica la
+policy configurata. Il comportamento è controllato dalle variabili d'ambiente
+e dalle opzioni del costruttore:
 
-| Collocamento     | Inv.var                                                                                                | Predefinito | Effetto                                                                                                                                                                                                                        |
-| ---------------- | ------------------------------------------------------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Abilitato        | `INPUT_SANITIZER_ENABLED`                                                                              | `true`      | Quando `false`, il guardrail va in cortocircuito.                                                                                                                                                                              |
-| Modalità         | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                        | `warn`      | Politica di iniezione: `block`, `warn` o `log`. (`redact` è accettato per la retrocompatibilità ma lo fa** non** testo di iniezione della striscia; la richiesta di riscrittura PII è controllata da `PII_REDACTION_ENABLED`.) |
-| Soglia di blocco | opzione `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`      | Gravità minima richiesta per il blocco. Per impostazione predefinita, il mezzo è di sola osservazione.                                                                                                                         |
+| Impostazione     | Variabile d'ambiente                                                                                   | Predefinito | Effetto                                                                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Abilitato        | `INPUT_SANITIZER_ENABLED`                                                                              | `true`      | Quando `false`, il guardrail viene cortocircuitato.                                                                                                                                                                      |
+| Modalità         | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                        | `warn`      | Policy di injection: `block`, `warn` o `log`. (`redact` è accettato per retrocompatibilità ma **non** rimuove il testo di injection; la riscrittura delle PII nella richiesta è controllata da `PII_REDACTION_ENABLED`.) |
+| Soglia di blocco | opzione `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`      | Gravità minima richiesta per bloccare. Con il valore predefinito, il livello medium comporta solo osservazione.                                                                                                          |
 
-**Precedenza della modalità** (`getMode`): chiamante `options.mode` → `INJECTION_GUARD_MODE`**DB override del flag di funzionalità** (Dashboard → Impostazioni → Flag funzionalità) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Un override del dashboard quindi prevale su env vars, quindi i Feature Flags UI controllano la guardia in esecuzione in tempo reale (nessun riavvio). La lettura DB è a prova di errore: se si verifica un errore, la guardia ritorna al comportamento basato su env e quando non viene impostato alcun override il comportamento è identico alla risoluzione solo env.
+**Precedenza delle modalità** (`getMode`): `options.mode` del chiamante →
+**override del feature flag nel DB** di `INJECTION_GUARD_MODE` (Dashboard →
+Impostazioni → Flag di funzionalità) → env `INJECTION_GUARD_MODE` → env
+`INPUT_SANITIZER_MODE` → `warn`. Un override dalla dashboard prevale quindi
+sulle variabili d'ambiente, per cui l'interfaccia dei Flag di funzionalità
+controlla dal vivo il guardrail in esecuzione (senza riavvio). La lettura dal
+DB è fail-safe: se genera un errore, il guardrail torna al comportamento
+basato sulle variabili d'ambiente e, quando non è impostato alcun override, il
+comportamento è identico alla risoluzione basata solo sulle env.
 
 Fonti di rilevamento:
 
-1. `sanitizeRequest()` da `@/shared/utils/inputSanitizer` (set di rilevatori condivisi utilizzato altrove nella pipeline).
-2. `DEFAULT_GUARD_PATTERNS` integrato (attualmente `system_override_inline` e `markdown_system_block`, entrambi con gravità `high` ).
-3. `customPatterns` facoltativo passato tramite le opzioni del costruttore (stringhe, regex o record `{ name, pattern, severity }` ).
+1. `sanitizeRequest()` da `@/shared/utils/inputSanitizer` (set di rilevatori
+   condiviso usato altrove nella pipeline).
+2. `DEFAULT_GUARD_PATTERNS` integrati (attualmente `system_override_inline` e
+   `markdown_system_block`, entrambi con gravità `high`).
+3. `customPatterns` opzionali passati tramite le opzioni del costruttore
+   (stringhe, regex o record `{ name, pattern, severity }`).
 
-Quando `mode === "block"`** E** almeno un rilevamento soddisfa la soglia di gravità, `preCall` restituisce `{ block: true, message: "Request rejected: suspicious content detected" }`. Nelle modalità `warn`/`log` il guardrail registra ma consente la chiamata. L'helper condiviso `evaluatePromptInjection()` viene esportato anche per i chiamanti che devono valutare i prompt senza passare attraverso il registro.
+Quando `mode === "block"` **e** almeno un rilevamento raggiunge la soglia di
+severità, `preCall` restituisce `{ block: true, message: "Request rejected:
+suspicious content detected" }`. Nelle modalità `warn`/`log` il guardrail
+registra l'evento ma consente la chiamata. L'helper condiviso
+`evaluatePromptInjection()` è esportato anche per i chiamanti che devono
+valutare i prompt senza passare attraverso il registry.
 
-**Scansione vincolata (v3.8.20):** il rilevatore ispeziona solo il** primi 16 KB** di testo del prompt unito — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) in `src/shared/utils/inputSanitizer.ts`. Sia `detectInjection()` che `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` prima di eseguire il ciclo pattern. Le direttive di injection si trovano vicino alla parte superiore di un input, quindi questo limita la regex CPU/GC su payload di centinaia di KB senza indebolire il rilevamento (cfr. #3932, #4041).
+**Limite di scansione (v3.8.20):** il rilevatore ispeziona solo i **primi 16 KB**
+del testo del prompt concatenato — `MAX_INJECTION_SCAN_BYTES = 16 * 1024`
+(16 384 byte) in `src/shared/utils/inputSanitizer.ts`. Sia `detectInjection()`
+che `evaluatePromptInjection()` eseguono `slice(0, MAX_INJECTION_SCAN_BYTES)`
+prima di avviare il ciclo dei pattern. Le direttive di injection si trovano
+vicino all'inizio di un input, quindi questo limita il consumo di CPU/GC delle
+regex su payload di diverse centinaia di KB senza indebolire il rilevamento
+(cfr. #3932, #4041).
 
 ### Mascheratore credenziali (`credentialMasker.ts`)
 

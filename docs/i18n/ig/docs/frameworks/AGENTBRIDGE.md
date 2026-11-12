@@ -16,14 +16,14 @@ AgentBridge bụ proxy MITM (Man-in-the-Middle) nke OmniRoute, nke na-egbochi ok
 
 ### Kedu ihe bụ AgentBridge?
 
-Mgbe onye nnọchite IDE (dịka, GitHub Copilot, Cursor, koodu Claude ) kpọrọ oku API, ọ na-ejikọ ozugbo na onye na-eweta AI dị elu (OpenAI, Anthropic, wdg). AgentBridge na-egbochi njikọ ahụ n'ụzọ doro anya na ọkwa TLS — na-achọghị nhazi onye ọrụ ọ bụla gbanwee — wee degharịa arịrịọ ahụ site na OmniRoute.
+Mgbe onye ọrụ IDE (dịka, GitHub Copilot, Cursor, Claude Code) na-akpọ oku API, ọ na-ejikọ ozugbo na onye na-eweta AI dị elu (OpenAI, Anthropic, wdg). AgentBridge na-egbochi njikọ ahụ n'ụzọ doro anya na ọkwa TLS — na-achọghị ka nhazi onye ọrụ ọ bụla gbanwee — wee degharịa arịrịọ ahụ site na OmniRoute.
 
 Nke a pụtara na ị nwere ike:
 
-- **Bugharịa onye ọrụ ọ bụla na onye na-eweta ọ bụla** : Copilot na-agwa OpenAI? Bugharịa ya na Anthropic Claude, Gemini, ma ọ bụ nke ọ bụla n'ime ndị na-eweta OmniRoute 381.
+- **Bugharịa onye ọrụ ọ bụla na onye na-eweta ọ bụla** : Copilot na-agwa OpenAI okwu? Bugharịa ya na Anthropic Claude, Gemini, ma ọ bụ nke ọ bụla n'ime ndị na-eweta OmniRoute 388.
 - **Tinye eserese ngosi** : `gemini-3-flash` → `claude-sonnet-4.7` n'ụzọ doro anya na ọkwa njikwa.
 - **Lelee okporo ụzọ ndị nnọchi anya niile** : A na-ebipụta arịrịọ ọ bụla anabatara n'aka [onye nyocha okporo ụzọ](./TRAFFIC_INSPECTOR.md).
-- **Tinye OmniRoute** : combo routing, sekit breakers, fallbacks, na ọnụ ahịa nsochi ọrụ maka IDE nnọchite okporo ụzọ kwa.
+- **Tinye nkwụghachi OmniRoute** : ụzọ mgbagharị combo, ndị na-agbaji sekit, ndaghachi azụ, na ọrụ nsochi ọnụ ahịa maka okporo ụzọ nnọchite IDE kwa.
 
 ### Ndokwa vs. ahịa
 

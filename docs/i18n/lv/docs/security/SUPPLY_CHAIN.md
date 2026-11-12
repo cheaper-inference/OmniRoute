@@ -25,29 +25,32 @@ nebloķējot; _KRITISKO vārtu_ solis (`severity: CRITICAL`, `ignore-unfixed: tr
 `exit-code: 1`) aptur izlaišanu, ja ir KRITISKS CVE **ar pieejamu labojumu**. `ignore-unfixed`
 novērš izlaišanas bloķēšanu bāzes attēla CVE gadījumā bez augšupējā labojuma.
 
-## ⚠️ CVE Novirze (bloķējošie osv/Trivy vārti)
+## ⚠️ CVE mainīgums (bloķējošās osv/Trivy pārbaudes)
 
 osv un Trivy salīdzina atkarības ar CVE datubāzēm, kas **nepārtraukti aug**. PR,
-kas **neskar nekādas atkarības**, pēkšņi var kļūt sarkans, jo esošā atkarībā tika
-atklāts jauns CVE (osv: izmērītais `vulnCount` > bāzes līmenis; Trivy: jauns
-labojams KRITISKS attēlā). **Šī ir GAIDĀMA bloķējošu CVE vārtu darbības uzvedība,
-nevis produkta regresija.**
+kurā **netiek mainīta neviena atkarība**, var pēkšņi kļūt sarkans, jo esošā
+atkarībā ir atklāta jauna CVE (osv: izmērītais `vulnCount` > bāzes vērtība; Trivy:
+attēlā ir jauna labojama CRITICAL ievainojamība). **Tā ir PAREDZAMA bloķējošas
+CVE pārbaudes darbība, nevis produkta regresija.**
 
-Kad osv vai Trivy kļūst sarkans jaunatklāta CVE dēļ, risinājums ir:
+Ja osv vai Trivy kļūst sarkans jaunatklātas CVE dēļ, risinājums ir šāds:
 
-1.  **Atjaunināt ietekmēto atkarību** (vēlams) — jaunināt uz laboto versiju, izmantojot `package.json`
-    `overrides` (tranzitīvās atkarības), vai pārbūvēt attēlu uz labotas bāzes.
-2.  **Ja nav augšupējā labojuma:**
-    - **osv:** atkārtoti noteikt bāzes līmeni `metrics.vulnCount` failā `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` neattiecas uz īpašiem vārtiem — rediģējiet vērtību
-      manuāli, `direction:down`) ar pamatojuma piezīmi + izsekošanas problēmu.
-    - **Trivy:** pievienojiet ierakstu failā `.trivyignore` (CVE-ID katrā rindā) ar pamatojuma
-      komentāru + izsekošanas problēmu. `ignore-unfixed: true` jau automātiski aptver CVE bez
-      labojumiem.
+1. **Atjauniniet skarto atkarību** (ieteicams) — jauniniet uz izlaboto versiju, izmantojot `package.json`
+   `overrides` (tranzitīvajām atkarībām), vai no jauna izveidojiet attēlu uz izlabātas bāzes.
+2. **Ja atlīdzināšana nav pieejama:** saglabāt izmērīto atradumu un izsekot ietekmētajai atkarībai vai attēlam. Nepalieliniet ievainojamības pamatlīmeni, lai izturētu nesekmīgu kandidātu. Trivy's `ignore-unfixed: true` jau izslēdz attēla ievainojamības bez augšpus ielāpa. Jebkuru izņēmumu gadījumā politikā ir nepieciešama pārskatīta ievainojamība ID, precīzs pakotnes ceļš, derīguma termiņš un izsekošanas problēma; tās nav automātiskas neveiksmīgas skenēšanas sekas.
 
-Abi vārti **eleganti IZLAIŽ** (exit 0), ja rīks nav pieejams vai mērījums
-neizdodas (osv-scanner nav PATH, osv.dev/network nav sasniedzams, nederīgs JSON) —
-**mērījuma** kļūme nekad nebloķē, bloķē tikai **izmērīta** regresija.
+Obligātās OSV izpildes (`check:vuln-ratchet -- --ratchet`) drošības nolūkā beidzas ar
+`INCOMPLETE` un izejas kodu 2, ja skeneri, pārskatu vai bāzes vērtību nevar validēt.
+Izmērīta regresija beidzas ar izejas kodu 1. Konsultatīva izpilde joprojām var ziņot `SKIP` ar
+izejas kodu 0, taču tas neapliecina, ka atkarības ir sekmīgi izturējušas skenēšanu. Arī bloķējošajai
+Trivy darbībai ir nepieciešams sekmīgs mērījums: nepieejami rīki, neizdevušies uzdevumi
+un trūkstoši attēla pārbaudes dati nevar apliecināt, ka attēls ir tīrs.
+
+## Attēlu skenēšanas politika
+
+Pašreizējā `.trivyignore.yaml` nesatur ievainojamības izņēmumus. `npm run check:trivy-ignore-policy` apstiprina strukturēto politiku lokālajos skenēšanas profilos, CI un Kvalitātē. Nezināms IDs, plašāki ceļi, dublēti ieraksti un izņēmumi, kuriem beidzies derīguma termiņš, tiek noraidīti; mantotais `.trivyignore` nav ievade migrētajiem skenējumiem.
+
+Docker pārbauda politikas rīkus no `github.workflow_sha` un attēla avota politiku, izmantojot to pašu avota atlasītāju kā būvei. Politikas atlasītājs noraida nesaderīgus tvērumus un sagatavo vienu failu abām Trivy skenācijām. Vēstures avots bez strukturētas politikas nesaņem izņēmumus. Abas skenēšanas piesprauž Trivy `v0.70.0`. Politikas validācija pierāda konfigurācijas konsekvenci; attēlam joprojām ir nepieciešama veiksmīga skenēšana.
 
 ## Atkarības risks pensijā
 

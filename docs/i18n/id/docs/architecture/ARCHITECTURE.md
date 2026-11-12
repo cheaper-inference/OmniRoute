@@ -10,76 +10,77 @@ _Terakhir diperbarui: 2026-06-28_
 
 ## Ringkasan Eksekutif
 
-OmniRoute adalah gateway perutean dan dasbor AI lokal yang dibangun di atas Next.js. Ini menyediakan satu titik akhir yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas di beberapa penyedia upstream dengan terjemahan, fallback, penyegaran token, dan pelacakan penggunaan.
+OmniRoute adalah gateway perutean AI lokal dan dasbor yang dibangun menggunakan Next.js.
+OmniRoute menyediakan satu endpoint yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas ke beberapa penyedia upstream dengan penerjemahan, fallback, penyegaran token, dan pelacakan penggunaan.
 
-Kemampuan inti:
+Kemampuan utama:
 
-- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (381 penyedia, 159 modul pelaksana)
-- terjemahan Request/response lintas format penyedia
-- Penggantian kombo model (urutan multi-model)
-- Langkah kombo terstruktur (`provider + model + connection`) dengan pengurutan waktu proses berdasarkan `compositeTiers`
-- Penggantian tingkat akun (multi-akun per penyedia)
-- Pilihan akun P2C pra-penerbangan dan kuota-sadar kuota di jalur obrolan utama
-- OAuth + Manajemen koneksi penyedia kunci API (27 modul penyedia OAuth )
-- Menanamkan generasi melalui `/v1/embeddings` (18 penyedia)
-- Pembuatan gambar melalui `/v1/images/generations` (10 penyedia +, 20 model + )
+- Antarmuka API yang kompatibel dengan OpenAI untuk CLI/alat (388 penyedia, 159 modul eksekutor)
+- Penerjemahan permintaan/respons di antara berbagai format penyedia
+- Fallback kombinasi model (urutan multi-model)
+- Langkah kombinasi terstruktur (`provider + model + connection`) dengan pengurutan runtime berdasarkan `compositeTiers`
+- Fallback tingkat akun (multi-akun per penyedia)
+- Prapemeriksaan kuota dan pemilihan akun P2C yang mempertimbangkan kuota dalam alur chat utama
+- Pengelolaan koneksi penyedia OAuth + kunci API (27 modul penyedia OAuth)
+- Pembuatan embedding melalui `/v1/embeddings` (18 penyedia)
+- Pembuatan gambar melalui `/v1/images/generations` (10+ penyedia, 20+ model)
 - Transkripsi audio melalui `/v1/audio/transcriptions` (18 penyedia)
-- Text-to-speech melalui `/v1/audio/speech` (24 penyedia bawaan)
+- Teks-ke-ucapan melalui `/v1/audio/speech` (24 penyedia bawaan)
 - Pembuatan video melalui `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Pembuatan musik melalui `/v1/music/generations` (ComfyUI)
 - Pencarian web melalui `/v1/search` (20 penyedia)
 - Moderasi melalui `/v1/moderations`
 - Pemeringkatan ulang melalui `/v1/rerank`
-- Pikirkan penguraian tag (`<think>...</think>`) untuk model penalaran
-- Sanitasi respons untuk kompatibilitas OpenAI SDK yang ketat
-- Normalisasi peran (pengembang sistem →, pengguna sistem →) untuk kompatibilitas lintas penyedia
+- Penguraian tag Think (`<think>...</think>`) untuk model penalaran
+- Sanitasi respons untuk kompatibilitas ketat dengan OpenAI SDK
+- Normalisasi peran (developer→system, system→user) untuk kompatibilitas lintas penyedia
 - Konversi keluaran terstruktur (json_schema → Gemini responseSchema)
-- Persistensi lokal untuk penyedia, kunci, alias, kombo, pengaturan, harga (122 modul DB )
-- pelacakan Usage/cost dan pencatatan permintaan
-- Sinkronisasi cloud opsional untuk sinkronisasi multi-device/state
-- IP allowlist/blocklist untuk kontrol akses API
-- Berpikir manajemen anggaran (passthrough/auto/custom/adaptive)
-- Injeksi cepat sistem global
-- Pelacakan sesi dan sidik jari
-- Pembatasan tarif yang ditingkatkan per akun dengan profil khusus penyedia
-- Pola pemutus sirkuit untuk ketahanan penyedia layanan
-- Perlindungan kawanan anti-guntur dengan penguncian mutex
+- Persistensi lokal untuk penyedia, kunci, alias, kombinasi, pengaturan, dan harga (122 modul DB)
+- Pelacakan penggunaan/biaya dan pencatatan permintaan
+- Sinkronisasi cloud opsional untuk sinkronisasi multi-perangkat/status
+- Daftar izin/daftar blokir IP untuk kontrol akses API
+- Pengelolaan anggaran thinking (passthrough/auto/custom/adaptive)
+- Injeksi prompt sistem global
+- Pelacakan sesi dan fingerprinting
+- Pembatasan laju yang disempurnakan per akun dengan profil khusus penyedia
+- Pola circuit breaker untuk ketahanan penyedia
+- Perlindungan anti-thundering herd dengan penguncian mutex
 - Cache deduplikasi permintaan berbasis tanda tangan
 - Lapisan domain: aturan biaya, kebijakan fallback, kebijakan lockout
-- Relay Konteks: ringkasan serah terima sesi untuk kontinuitas rotasi akun
-- Persistensi status domain (SQLite write-through cache untuk fallback, anggaran, penguncian, pemutus sirkuit)
-- Mesin kebijakan untuk evaluasi permintaan terpusat (lockout → budget → fallback)
-- Minta telemetri dengan agregasi latensi p50/p95/p99
-- Telemetri target kombo dan kesehatan target kombo historis melalui `combo_execution_key` / `combo_step_id`
-- Korelasi ID (X-Request-Id) untuk penelusuran ujung ke ujung
-- Pencatatan audit kepatuhan dengan opt-out per kunci API
-- Kerangka evaluasi untuk jaminan kualitas LLM
-- Dasbor kesehatan dengan status pemutus sirkuit penyedia waktu nyata
-- MCP Server (110 alat) dengan 3 transport (stdio/SSE/Streamable HTTP)
+- Context Relay: ringkasan serah terima sesi untuk menjaga kontinuitas saat rotasi akun
+- Persistensi status domain (cache write-through SQLite untuk fallback, anggaran, lockout, dan circuit breaker)
+- Mesin kebijakan untuk evaluasi permintaan terpusat (lockout → anggaran → fallback)
+- Telemetri permintaan dengan agregasi latensi p50/p95/p99
+- Telemetri target kombinasi dan riwayat kesehatan target kombinasi melalui `combo_execution_key` / `combo_step_id`
+- ID korelasi (X-Request-Id) untuk penelusuran menyeluruh
+- Pencatatan audit kepatuhan dengan pilihan menonaktifkan per kunci API
+- Kerangka kerja evaluasi untuk jaminan kualitas LLM
+- Dasbor kesehatan dengan status circuit breaker penyedia secara real-time
+- MCP Server (110 alat) dengan 3 transportasi (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) dengan keterampilan dan siklus hidup tugas
-- Sistem memori (ekstraksi, injeksi, pengambilan, ringkasan)
-- Sistem keterampilan (registrasi, eksekutor, kotak pasir, keterampilan bawaan)
-- proksi MITM dengan manajemen sertifikat dan penanganan DNS
-- Middleware pelindung injeksi yang cepat
-- Pipeline kompresi cepat dengan Caveman, RTK, pipeline bertumpuk, kombo kompresi, paket bahasa, dan analitik
-- ACP (Agen Protokol Komunikasi) registri
+- Sistem memori (ekstraksi, injeksi, pengambilan, peringkasan)
+- Sistem keterampilan (registri, eksekutor, sandbox, keterampilan bawaan)
+- Proksi MITM dengan pengelolaan sertifikat dan penanganan DNS
+- Middleware perlindungan terhadap injeksi prompt
+- Pipeline kompresi prompt dengan Caveman, RTK, pipeline bertumpuk, kombinasi kompresi, paket bahasa, dan analitik
+- Registri ACP (Agent Communication Protocol)
 - Penyedia OAuth modular (22 modul individual di bawah `src/lib/oauth/providers/`)
-- skrip Uninstall/full-uninstall
-- tindakan perbaikan lingkungan OAuth
-- jembatan WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
-- Manajemen token sinkronisasi (issue/revoke, unduhan bundel konfigurasi berversi ETag)
-- GLM Thinking (`glmt`) preset penyedia kelas satu
-- Penghitungan token hibrid ( `/messages/count_tokens` sisi penyedia dengan estimasi fallback)
-- Model alias penyemaian otomatis (30 + normalisasi dialek lintas-proksi saat startup)
-- Pengambilan keluar yang aman dengan SSRF guard, pemblokiran URL pribadi, dan percobaan ulang yang dapat dikonfigurasi
-- Percobaan ulang obrolan yang sadar masa cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
+- Skrip penghapusan instalasi/penghapusan instalasi penuh
+- Tindakan perbaikan lingkungan OAuth
+- Bridge WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
+- Pengelolaan token sinkronisasi (penerbitan/pencabutan, pengunduhan bundel konfigurasi berversi ETag)
+- GLM Thinking (`glmt`) sebagai preset penyedia kelas utama
+- Penghitungan token hibrida (`/messages/count_tokens` dari sisi penyedia dengan fallback estimasi)
+- Penyemaian otomatis alias model (30+ normalisasi dialek lintas proksi saat startup)
+- Pengambilan outbound yang aman dengan perlindungan SSRF, pemblokiran URL privat, dan percobaan ulang yang dapat dikonfigurasi
+- Percobaan ulang chat yang mempertimbangkan cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
 - Validasi lingkungan runtime dengan Zod saat startup
-- Audit kepatuhan v2 dengan penomoran halaman, peristiwa CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
+- Audit kepatuhan v2 dengan paginasi, peristiwa CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
 
-Model waktu proses utama:
+Model runtime utama:
 
-- rute aplikasi Next.js di bawah `src/app/api/*` mengimplementasikan dasbor APIs dan kompatibilitas APIs
-- Inti SSE/routing bersama di `src/sse/*` + `open-sse/*` menangani eksekusi penyedia, terjemahan, streaming, fallback, dan penggunaan
+- Rute aplikasi Next.js di bawah `src/app/api/*` mengimplementasikan API dasbor dan API kompatibilitas
+- Inti SSE/perutean bersama di `src/sse/*` + `open-sse/*` menangani eksekusi penyedia, penerjemahan, streaming, fallback, dan penggunaan
 
 ## Diagram Referensi
 
@@ -858,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: impor modul tertentu secara langsung — tanpa barrel (lapisan ekspor ulang `localDb.ts` yang lama telah dihapus)
 - `src/lib/usageDb.ts`: fasad riwayat penggunaan/log panggilan di atas tabel SQLite
 
-## Cakupan Eksekutor Penyedia (Pola Strategi)
+## Cakupan Pelaksana Penyedia (Pola Strategi)
 
-Setiap penyedia memiliki eksekutor khusus yang memperluas `BaseExecutor` (di `open-sse/executors/base.ts`), yang menyediakan pembuatan URL, penyusunan header, percobaan ulang dengan backoff eksponensial, hook penyegaran kredensial, dan metode orkestrasi `execute()`.
+Setiap penyedia memiliki pelaksana khusus yang memperluas `BaseExecutor` (dalam `open-sse/executors/base.ts`), yang menyediakan pembuatan URL, konstruksi header, percobaan ulang dengan backoff eksponensial, kait penyegaran kredensial, dan metode orkestrasi `execute()`.
 
-| Eksekutor                 | Penyedia                                                                                                                                                    | Penanganan Khusus                                                                   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, dll. | Konfigurasi URL/header dinamis per penyedia                                         |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID proyek/sesi khusus, parsing Retry-After, obfuscation 429                         |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Perutean berbasis deployment, pemberlakuan kueri api-version                        |
-| `BlackboxWebExecutor`     | Blackbox AI (mode web)                                                                                                                                      | Rekayasa balik sesi web dengan emulasi fingerprint TLS                              |
-| `ClaudeIdentityExecutor`  | Claude.ai (jalur CCH)                                                                                                                                       | Pipeline constraint + pemetaan ulang alat, pembentukan fingerprint                  |
-| `CliProxyApiExecutor`     | Penyedia yang kompatibel dengan CLIProxyAPI                                                                                                                 | Penanganan autentikasi dan protokol khusus                                          |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | Injeksi ID akun, pelacakan penggunaan berbasis Neurons                              |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Menginjeksi instruksi sistem, memaksakan upaya penalaran                            |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Jembatan Responses API sesi browser dengan penguncian thread/turn                   |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + rotasi header per sesi                                                      |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Protokol ConnectRPC, encoding Protobuf, penandatanganan permintaan melalui checksum |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Menjembatani siklus hidup tugas Devin melalui modul agen cloud                      |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Penyegaran token Copilot, header yang meniru VSCode                                 |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + perutean dengan cakupan proyek                                       |
-| `GlmExecutor`             | Z.AI GLM (termasuk preset `glmt`)                                                                                                                           | Sadar akan anggaran thinking, konstanta preset GLMT                                 |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | Rekayasa balik sesi web, pemilihan mode (think/standard)                            |
-| `KieExecutor`             | KIE                                                                                                                                                         | Penerbitan token khusus dengan anchor sesi yang berotasi                            |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Format biner AWS EventStream → konversi SSE                                         |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                            | Rekayasa balik sesi web dengan penjembatanan pesan gambar                           |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Bentuk body permintaan khusus penyedia                                              |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Penyiapan penyedia yang kompatibel dengan AI SDK                                    |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                              | Rekayasa balik sesi web untuk kelanjutan chat                                       |
-| `PetalsExecutor`          | Inferensi terdistribusi Petals                                                                                                                              | Perutean swarm terdesentralisasi                                                    |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | Tidak memerlukan kunci API, permintaan dibatasi berdasarkan laju                    |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Dukungan PAT dan OAuth, tingkat gratis multi-model                                  |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Autentikasi akun layanan, endpoint berbasis wilayah                                 |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Kunci API yang diimpor + streaming chat Connect-protobuf                            |
+| Pelaksana                 | Penyedia                                                                                                                                                     | Penanganan Khusus                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Kebingungan, Together, Fireworks, Cerebras, Cohere, NVIDIA, dll. | Konfigurasi URL/header dinamis per penyedia                                           |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | project/session IDs Khusus, Coba Lagi-Setelah penguraian, 429 kebingungan             |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | Perutean berbasis penerapan, penerapan kueri versi api                                |
+| `BlackboxWebExecutor`     | Blackbox AI (mode web)                                                                                                                                       | Pembalikan sesi web dengan emulasi sidik jari TLS                                     |
+| `ClaudeIdentityExecutor`  | Claude.ai (jalur CCH )                                                                                                                                       | Batasan pipeline pemetaan ulang alat +, pembentukan sidik jari                        |
+| `CliProxyApiExecutor`     | Penyedia yang kompatibel dengan CLIProxyAPI                                                                                                                  | Penanganan autentikasi dan protokol khusus                                            |
+| `CloudflareAiExecutor`    | Pekerja Cloudflare AI                                                                                                                                        | Injeksi ID akun, pelacakan penggunaan berbasis Neuron                                 |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | Menyuntikkan instruksi sistem, memaksakan upaya penalaran                             |
+| `ChatGptWebCodexExecutor` | Web ChatGPT (Codex)                                                                                                                                          | Sesi browser Merespons jembatan API dengan penyematan thread/turn                     |
+| `CommandCodeExecutor`     | Kode Perintah                                                                                                                                                | OAuth + rotasi header per sesi                                                        |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | Protokol ConnectRPC, pengkodean Protobuf, penandatanganan permintaan melalui checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Jembatan siklus hidup tugas Devin melalui modul agen cloud                            |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Penyegaran token Copilot, header yang meniru VSCode                                   |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | Perutean cakupan proyek GitLab OAuth +                                                |
+| `GlmExecutor`             | Z.AI GLM (termasuk preset `glmt` )                                                                                                                           | Sadar berpikir-anggaran, konstanta preset GLMT                                        |
+| `GrokWebExecutor`         | Jaringan xAI Grok                                                                                                                                            | Pembalikan sesi web, pemilihan mode (think/standard)                                  |
+| `KieExecutor`             | KIE                                                                                                                                                          | Penerbitan token khusus dengan jangkar sesi berputar                                  |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | Konversi AWS EventStream format biner → SSE                                           |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                             | Pembalikan sesi web dengan penghubung pesan gambar                                    |
+| `NlpCloudExecutor`        | NLP Awan                                                                                                                                                     | Bentuk tubuh permintaan khusus penyedia                                               |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | Pengaturan penyedia yang kompatibel dengan AI SDK                                     |
+| `PerplexityWebExecutor`   | Jaringan kebingungan                                                                                                                                         | Pembalikan sesi web untuk kelanjutan obrolan                                          |
+| `PetalsExecutor`          | Kelopak mendistribusikan inferensi                                                                                                                           | Perutean gerombolan yang terdesentralisasi                                            |
+| `PollinationsExecutor`    | Penyerbukan AI                                                                                                                                               | Tidak diperlukan kunci API, permintaan dengan tarif terbatas                          |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                     | Dukungan PAT dan OAuth, tingkat gratis multi-model                                    |
+| `VertexExecutor`          | Google Verteks AI                                                                                                                                            | Otentikasi akun layanan, titik akhir berbasis wilayah                                 |
+| `DevinDesktopExecutor`    | Desktop Devin                                                                                                                                                | Kunci API yang diimpor + Connect-protobuf streaming obrolan                           |
 
-Semua penyedia lainnya (termasuk node kompatibel khusus) menggunakan `DefaultExecutor`.
+Semua penyedia lain (termasuk node khusus yang kompatibel) menggunakan `DefaultExecutor`.
+
+### Pemeriksaan otomatis dan akun sesi web
+
+Tes model, Tes Semua, tes kombo, dan penilaian mengirimkan permintaan obrolan nyata. Penyedia sesi web bertindak sebagai pengguna yang masuk, sehingga setiap permintaan tersebut akan disimpan sebagai percakapan di akun tersebut; penyelidikan otomatis yang meninggalkan percakapan seperti itu membuat akun ditangguhkan (#14780). Oleh karena itu, saluran obrolan menolak setiap target yang dicapai penyelidikan otomatis yang penyedianya mengambil kredensial sesi web, setelah penyedia target diselesaikan dan sebelum kredensial dipilih (`src/lib/providers/chatProbePolicy.ts`). Penolakannya adalah `422` dengan `error.code` `chat_probe_not_isolated`, dan pelari probe melaporkannya sebagai lompatan, bukan kegagalan.
+
+Pelaksana yang menjalankan setiap obrolan dalam mode tanpa riwayat milik penyedia mendeklarasikannya dengan `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); penyelidikan ke penyedia itu kemudian diizinkan. ChatGPT Web mendeklarasikan `temporary-chat`. Sematkan deklarasi ke mekanismenya dengan pengujian, sehingga klaim tidak dapat bertahan lebih lama dari kode yang menjadikannya benar.
 
 ## Matriks Kompatibilitas Penyedia
 
@@ -1056,11 +1063,11 @@ kompatibilitas lama. Kontrak runtime saat ini menggunakan:
 - migrasi skema SQLite dan hook peningkatan otomatis saat startup
 - jalur kompatibilitas migrasi JSON lama → SQLite
 
-## 6) Pelindung SSRF / URL Keluar
+## 6) SSRF / Perlindungan URL Keluar
 
-- `src/shared/network/outboundUrlGuard.ts` memblokir semua URL target privat/loopback/link-local sebelum mencapai eksekutor penyedia
-- Rute penemuan dan validasi model penyedia menggunakan `src/shared/network/safeOutboundFetch.ts` yang menerapkan pelindung sebelum setiap permintaan keluar
-- Kesalahan pelindung ditampilkan sebagai `URL_GUARD_BLOCKED` dengan HTTP 422 dan dicatat ke jejak audit kepatuhan melalui `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) menerapkan `src/shared/network/outboundUrlGuard.ts` pada permintaan chat yang dikirim melalui `BaseExecutor.execute()`. Dalam mode khusus publik (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` dengan flag privat dinonaktifkan), mekanisme ini memblokir host privat dan loopback serta 169.254.0.0/16; dalam setiap mode lainnya, mekanisme ini memblokir host metadata cloud. Pemeriksaan dilakukan terhadap hostname atau literal IP sebagaimana ditulis, sebelum pencarian DNS apa pun. Penyedia lokal bawaan tidak menjalani pemeriksaan ini.
+- Rute penemuan dan validasi model penyedia menggunakan `src/shared/network/safeOutboundFetch.ts`, yang menerapkan perlindungan sebelum setiap permintaan keluar
+- Kesalahan perlindungan muncul sebagai `URL_GUARD_BLOCKED` dengan HTTP 503 (`getSafeOutboundFetchErrorStatus`; rute penemuan model mengembalikan 400), dan pemblokiran SSRF yang sebenarnya selama validasi dicatat ke dalam jejak audit sebagai peristiwa `provider.validation.ssrf_blocked`
 
 ## Observabilitas dan Sinyal Operasional
 
@@ -1111,7 +1118,7 @@ Variabel lingkungan yang secara aktif digunakan oleh kode:
 4. Perilaku cloud bergantung pada `NEXT_PUBLIC_BASE_URL` yang benar dan keterjangkauan endpoint cloud.
 5. Direktori `open-sse/` dipublikasikan sebagai **paket workspace npm** `@omniroute/open-sse`. Kode sumber mengimpornya melalui `@omniroute/open-sse/...` (diresolusi oleh `transpilePackages` Next.js). Jalur berkas dalam dokumen ini tetap menggunakan nama direktori `open-sse/` demi konsistensi.
 6. Bagan di dasbor menggunakan **Recharts** (berbasis SVG) untuk visualisasi analitik yang mudah diakses dan interaktif (bagan batang penggunaan model, tabel perincian penyedia dengan tingkat keberhasilan).
-7. Pengujian E2E menggunakan **Playwright** (`tests/e2e/`), dijalankan melalui `npm run test:e2e`. Pengujian unit menggunakan **runner pengujian Node.js** (`tests/unit/`), dijalankan melalui `npm run test:unit`. Kode sumber dalam `src/` menggunakan **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` tetap menggunakan JavaScript (`.js`).
+7. Pengujian E2E menggunakan **Playwright** (`tests/e2e/`), dijalankan melalui `npm run test:e2e`. Pengujian unit menggunakan **runner pengujian Node.js** (`tests/unit/`), dijalankan melalui `npm run test:unit`. Kode sumber dalam `src/` menggunakan **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` tetap menggunakan TypeScript (`.ts`).
 8. Halaman pengaturan diatur ke dalam 7 tab: Umum, Tampilan, AI, Keamanan, Perutean, Ketahanan, Lanjutan. Halaman Ketahanan hanya mengonfigurasi antrean permintaan, masa jeda koneksi, pemutus penyedia, dan perilaku menunggu masa jeda; status runtime pemutus secara langsung ditampilkan pada halaman Kesehatan.
 9. Strategi **Context Relay** (`context-relay`) dibagi menjadi dua lapisan: `combo.ts` memutuskan apakah serah terima harus dibuat, sedangkan `chat.ts` menyisipkan serah terima setelah resolusi akun. Data serah terima disimpan dalam tabel SQLite `context_handoffs`. Pemisahan ini disengaja karena hanya `chat.ts` yang mengetahui apakah akun yang sebenarnya berubah.
 10. **Penerapan proksi** kini bersifat menyeluruh: `tokenHealthCheck.ts` menentukan proksi per koneksi, `/api/providers/validate` menggunakan `runWithProxyContext`, dan `proxyFetch.ts` menggunakan `undici.fetch()` untuk mempertahankan kompatibilitas dispatcher pada Node 22.

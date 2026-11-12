@@ -4,206 +4,119 @@
 
 ---
 
-OmniRoute na-achịkwa **isi mmalite ihe nchọgharị** ndị nwere ike ịgụ nzaghachi sitere n’isi mmalite ọzọ site na otu ndepụta ikike etiti. Ụdị a bụ **imechi ma ọ bụrụ na e nyeghị ikike na ndabara**:
-anaghị ekwe isi mmalite ọ bụla ruo mgbe i tinyere ya n’ime ndị e nyere ikike. Ibe a na-akọwa etu e si ekpebi ndepụta ikike ahụ,
-ihe `CORS_ALLOW_ALL=true` na-eme ka ọ pụta ìhè n’ezie (na, nke dị mkpa, ihe ọ
-**na-adịghị** eme ka ọ pụta ìhè), etu e si ahazi gburugburu mmepe na mmepụta n’enweghị nsogbu, yana ịdọ aka ná ntị n’oge ọsọ
-nke dashboard na-egosi mgbe wildcard nọ n’ọrụ.
+OmniRoute na-achịkwa nke **mmalite nchọgharị** nwere ike gụọ nzaghachi ndị sitere na otu ndepụta ikike nke etiti. Ihe nlereanya bụ **ada-emechi na ndabara** : ọnweghị ebe a na-anabata ruo mgbe ị ga-ahọrọ otu n'ime ibe a. Ibe a na-edepụta ka listi ohere si ekpebi, ihe `CORS_ALLOW_ALL=true` na-ekpughe n'ezie (yana, nke kachasị, ihe ọ na-eme.**ọ bụghị** ), otu esi ahazi dev vs mmepụta n'enweghị nsogbu, yana ịdọ aka ná ntị nke oge ịgba ọsọ na dashboard na-egosi mgbe kaadị anụ ọhịa dị ndụ.
 
-**Ebe eziokwu sitere:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). A na-etinye ndepụta ikike ahụ otu ugboro, n’ime
-middleware (`src/server/authz/pipeline.ts`) — ndị na-ahụ maka route n’otu n’otu anaghị edobe
-`Access-Control-Allow-Origin` n’onwe ha.
+**Isi mmalite nke eziokwu:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). A na-etinye ndepụta ikike otu ugboro, na etiti (`src/server/authz/pipeline.ts`) — ndị na-ahụ maka ụzọ ọ bụla anaghị edobe `Access-Control-Allow-Origin` n'onwe ha.
 
-## Etu e si ekpebi isi mmalite
+## Otu esi edozi isi mmalite
 
-Maka arịrịọ ọ bụla, middleware na-agbakọ uru `Access-Control-Allow-Origin`
-n’usoro a:
+Maka arịrịọ ọ bụla, middleware na-agbakọ uru `Access-Control-Allow-Origin` n'usoro a:
 
-1. **`CORS_ALLOW_ALL=true`** (ma ọ bụ `CORS_ORIGIN=*` ochie) → zighachi `Origin` nke onye kpọrọ
-   ya (ma ọ bụ `*` mgbe header `Origin` adịghị), tinyere `Vary: Origin`
-   ka cache wee nọgide na-arụ ọrụ nke ọma. Otu ebe njikwa `applyCorsHeaders()` ahụ na-agbakwụnyekwa
-   `Vary: Accept-Encoding` na nzaghachi ọ bụla nke bụ 2xx ma nwee body n’elu interface
-   `/v1*`/`/v1beta*` nke token na-eme nyocha njirimara ya (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737), ka
-   cache ndị dị n’okpuru ma ọ bụ ndị a na-ekekọrịta nwee ike ịmata nke ọma ọdịiche dị n’etiti ụdị
-   e tinyere mkpakọ na nke a na-etinyeghị mkpakọ.
-2. Ma ọ bụghị ya, a na-eme ka `Origin` nke arịrịọ bụrụ otu ụdị (tụgharịa ya ka ọ bụrụ mkpụrụedemede nta, wepụ slash
-   dị n’azụ) ma tụnyere ya na **ndepụta ikike ejikọtara ọnụ**:
-   - env **`CORS_ALLOWED_ORIGINS`** — ndepụta e ji kọma kewaa, na
-   - ntọala **`corsOrigins`** nke oge ọsọ (Dashboard → Security → _Isi Mmalite Ndị CORS
-     Kwere_), nke `setRuntimeAllowedOrigins()` si na
-     `src/lib/config/runtimeSettings.ts` tinye.
-3. Enweghị ihe dabara → **anaghị ewepụta header `Access-Control-Allow-Origin` ọ bụla**. Ihe nchọgharị
-   na-egbochi ịgụ sitere n’isi mmalite ọzọ. Nke a bụ omume ndabara e bu n’obi nke na-emechi ma ọ bụrụ na e nyeghị ikike.
+1. **`CORS_ALLOW_ALL=true`** (ma ọ bụ ihe nketa `CORS_ORIGIN=*`) → na-ekwughachi `Origin` onye na-akpọ oku azụ (ma ọ bụ `*` mgbe enweghị nkụnye eji isi mee `Origin` ), yana `Vary: Origin` ya mere cache ga-adị mma. Otu `applyCorsHeaders()` chokepoint na-agbakwunyere `Vary: Accept-Encoding` na nzaghachi 2xx ọ bụla na elu `/v1*`/`/v1beta*` token-authenticated (`relaxForTokenAuth`, RFC 9110 §12.5.5, mbipụta #6737), yabụ caches downstream/shared nwere ike ịmata ọdịiche dị iche iche abịakọrọ vs uncompressed variants.
+2. Ma ọ bụghị ya, a na-ahazi arịrịọ `Origin` (nke dị ala, slash ewepụghị) ma kwekọọ na nke ahụ.**ndepụta ikike jikọtara ọnụ** :
+   - env **`CORS_ALLOWED_ORIGINS`** Ndepụta nke rịkọm —, na
+   - oge ịgba ọsọ **`corsOrigins`** ntọala (Dashboard → Security → _CORS Allowed Origins_), agbanyere site na `setRuntimeAllowedOrigins()` sitere na `src/lib/config/runtimeSettings.ts`.
+3. Ọ nweghị egwuregwu →**enweghị nkụnye eji isi mee `Access-Control-Allow-Origin` ewepụtara** . Ihe nchọgharị ahụ na-egbochi ọgụgụ isi mmalite. Nke a bụ ndabara emechiri emechi echere.
 
-| Env var                | Ihe ọ pụtara                                                                               |
-| ---------------------- | ------------------------------------------------------------------------------------------ |
-| `CORS_ALLOWED_ORIGINS` | CSV nke isi mmalite kpọmkwem a ga-ekwe (nke akwadoro).                                     |
-| `CORS_ALLOW_ALL`       | `true`/`1` → zighachi isi mmalite ọ bụla (wildcard). Maka mmepe naanị.                     |
-| `CORS_ORIGIN`          | Nke ochie. `*` na-arụ ọrụ dịka `CORS_ALLOW_ALL`; a na-agbakwunye otu uru na ndepụta ikike. |
+| Env var                | Pụtara                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | CSV nke kpọmkwem mmalite inye ohere (atụ aro).                                              |
+| `CORS_ALLOW_ALL`       | `true`/`1` → na-ekwughachi mmalite ọ bụla (kaadị ọhịa). naanị Dev.                          |
+| `CORS_ORIGIN`          | Ihe nketa. `*` na-akpa àgwà dị ka `CORS_ALLOW_ALL`; A na-agbakwunye otu uru na listi ohere. |
 
-## Ụdị iyi egwu — ihe `CORS_ALLOW_ALL=true` na-eme ka ọ pụta ìhè n’ezie
+## Ihe atụ egwu — ihe `CORS_ALLOW_ALL=true` na-ekpughe n'ezie
 
-Ịdọ aka ná ntị OWASP izugbe ("wildcard CORS = saịtị ọ bụla nwere ike ịkpọ API gị") kwesịrị
-ka e were ya nke ọma, mana ihe OmniRoute na-eme ka ọ pụta ìhè **pere mpe karịa ọnọdụ izugbe**,
-n’ihi otu eziokwu doro anya gbasara mmejuputa ya:
+Ịdọ aka ná ntị OWASP ọnyà ("wildcard CORS = saịtị ọ bụla nwere ike ịkpọ API gị") bara uru iji kpọrọ ihe, mana ikpughe OmniRoute bụ.**dị warara karịa ikpe izugbe** , n'ihi otu eziokwu mmejuputa atumatu:
 
-> **`applyCorsHeaders()` etiti anaghị ewepụta
-> `Access-Control-Allow-Credentials` ma ọlị.** Ihe nchọgharị agaghị eme ka nzaghachi sitere n’isi mmalite ọzọ nke _nwere nzere_
-> (nke nwere cookie) dị maka ịgụ ma ọ bụrụ na sava ezipụghị
-> `Access-Control-Allow-Credentials: true`. Ụzọ CORS nkịtị nke OmniRoute anaghị
-> eme nke ahụ.
+> **`applyCorsHeaders()` etiti anaghị ewepụta `Access-Control-Allow-Credentials`.** Ihe nchọgharị agaghị ekpughe nzaghachi obe nke _credentialed_ (kuki-bearing) ma ọ bụrụ na ihe nkesa ezipụ `Access-Control-Allow-Credentials: true`. Ụzọ CORS kekọrịtara OmniRoute anaghị eme.
 
-Ihe nke ahụ pụtara n’elu interface ọ bụla, ọbụna mgbe `CORS_ALLOW_ALL=true`:
+Ihe nke ahụ pụtara kwa elu, ọbụlagodi na `CORS_ALLOW_ALL=true`:
 
-| Interface                           | Usoro nyocha njirimara      | Mmetụta wildcard CORS                                                                                                                                                                                                                                                                                                                                                              |
-| ----------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Oge njikọ cookie            | A na-ezighachi isi mmalite ahụ, mana **n’enweghị `Allow-Credentials`** ihe nchọgharị na-**egbochi** ịgụ nwere nzere. Saịtị ọjọọ sitere n’isi mmalite ọzọ **enweghị ike ịgụ** nzaghachi dashboard gị a nyochara njirimara ya, a naghịkwa ekpughe cookie oge njikọ ahụ.                                                                                                              |
-| Client API `/v1/*`, `/v1beta/*`     | Header Bearer / `x-api-key` | Ọ dịlarị mfe ịnweta **site na nhazi** (`relaxForTokenAuth`): ihe nchọgharị anaghị etinye `Authorization`/`x-api-key` na-akpaghị aka, ya mere ibe onye na-awakpo enweghị ike iweta key gị. A na-eweghachi origin naanị mgbe e kwadoro key e gosiri; nzaghachi ndị na-enweghị aha (`REQUIRE_API_KEY=false`) na-edebe ndepụta ikike ahụ. `CORS_ALLOW_ALL` anaghị eme ka nke a gbasaa. |
-| Ọha na-agụ naanị (`/api/health`, …) | Ọ dịghị                     | Ọ bụghị ozi nwere mmetụta; wildcard adịghị emerụ ahụ.                                                                                                                                                                                                                                                                                                                              |
+| Elu                                | Usoro nyocha                            | Mmetụta nke wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`    | Oge kuki                                | A na-ekwughachi mmalite, mana **na-enweghị `Allow-Credentials`** ihe nchọgharị **ihe mgbochi** na nzere agụ. Ebe sitere n'ofe obi ọjọọ **enweghị ike ịgụ ihe** nzaghachi dashboard gị ezitere na ekpughere kuki nnọkọ ahụ.                                                                                                                                                                                                                                                                                  |
+| Onye ahịa API `/v1/*`, `/v1beta/*` | Bearer / `x-api-key` nkụnye eji isi mee | Ugbua ekwe **site imewe** (`relaxForTokenAuth`): ihe nchọgharị anaghị ejikọta `Authorization`/`x-api-key` na akpaghị aka, yabụ ibe onye mwakpo enweghị ike ịnye igodo gị. Nkwughachi ahụ dị jụụ chọrọ isiokwu akwadoro ( igodo API ma ọ bụ nnọkọ dashboard akwadoro), ọ bụghị naanị nkụnye eji isi mee nzere, ọ dịghịkwa agụnye `Access-Control-Allow-Credentials`. Ọzịza ndị na-amaghị aha (`REQUIRE_API_KEY=false`) na-eji ndepụta ikike mmalite ahaziri, gụnyere nbanye `CORS_ALLOW_ALL=true` doro anya. |
+| Naanị ọgụgụ ọha (`/api/health`,…)  | Ọ dịghị                                 | Na-enweghị mmetụta; akara ngosi adịghị njọ.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-Ya mere, mkpughe **fọdụrụ** nke `CORS_ALLOW_ALL=true` nwere oke naanị na: (a)
-ịgụ sitere n’isi mmalite ọzọ **na-enweghị nzere** nke data na-achọghị nyocha njirimara, na (b)
-ikwe ka **preflight CORS gafere** na route njikwa — nke ka na-achọ nyocha njirimara
-nke ibe sitere n’isi mmalite ọzọ na-enweghị ike inye. Ọ **abụghị** ụzọ iji zuo oge njikọ ma ọ bụ
-nzere n’ụzọ CORS nkịtị ahụ.
+Yabụ na **fọdụrụnụ** mkpughe nke `CORS_ALLOW_ALL=true` nwere oke na: (a) obe-esighị n'aka **na-agụ** nke data emebeghị nke ọma, na (b) ịhapụ CORS**ngafe ụgbọ elu** na ụzọ njikwa — nke ka na-achọ auth na ibe obe-enweghị ike ịnye. Ọ bụ **ọ bụghị** a nnọkọ-hijack ma ọ bụ nzere-ohi vector na-ekekọrịtara ụzọ CORS.
 
-### Otu ezigbo mwepu — `/api/v1/agents/`
+### Otu ezi ewepụrụ — `/api/v1/agents/`
 
-Route Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) na-edobe
-header CORS **nke ha**
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ma **na-ewepụta**
-`Access-Control-Allow-Origin: <origin>|*` tinyere
-`Access-Control-Allow-Credentials: true`. Nke a bụ naanị interface ebe
-izighachi isi mmalite na nzere na-adịkọ ọnụ, ọ **dabereghị na
-`CORS_ALLOW_ALL`**. A na-eji njikwa eme nyocha njirimara nke route ndị a
-(`requireManagementAuth`); ndị ọrụ na-eme ka dashboard dị n’èzí host kwesịrị
-ịma na nke a bụ naanị ebe header nzaghachi na-ekwe ka a gụọ nzaghachi nwere nzere site n’isi mmalite ọzọ.
-A na-enyocha ime ka ọ sie ike site n’iji ndepụta ikike doro anya
-iche na ntuziaka CORS a.
+Ụzọ Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) setịpụrụ ha **nke onwe** CORS nkụnye eji isi mee (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) na **mee** emeputa `Access-Control-Allow-Origin: <origin>|*` yana `Access-Control-Allow-Credentials: true`. Nke a bụ otu elu ebe mmalite-echo na nzere na-ebikọ ọnụ, ọ dịkwa **n'adabereghị na `CORS_ALLOW_ALL`** . Ụzọ ndị a bụ njikwa-nke kwadoro (`requireManagementAuth`); ndị na-arụ ọrụ na-ekpughere dashboard na-anọghị n'ụlọ kwesịrị ịma na nke a bụ ebe ndị isi nzaghachi na-ekwe ka agụ akwụkwọ nzere sitere na mmalite. A na-enyocha ikechi ya na listi ikike doro anya na ntụzịaka CORS a.
 
-## Ndepụta nyocha maka production
+## Ndepụta mmepụta ihe
 
-- **Edokwala `CORS_ALLOW_ALL=true` na production.** Hapụ ya n’enweghị nhazi.
-- Tọọ ndepụta origin **kpọmkwem** — ma ọ bụ site na env var ma ọ bụ mpaghara dị na taabụ Security:
+- **Ọ dịghị mgbe ịtọ `CORS_ALLOW_ALL=true` na mmepụta.** Hapụ ya na ịtọghị ya.
+- Tọọ otu **doro anya** ndepụta mmalite — ma env var ma ọ bụ ogige nchekwa-taabụ:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Ọ bụrụ na OmniRoute na-arụ ọrụ n’azụ reverse proxy / tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), CORS **abụghị** naanị njikwa nche gị — ihe nchebe loopback route
-  ka na-echebe route ndị nwere ike ịmalite usoro (lee
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Emepụtala
-  `X-Forwarded-For: 127.0.0.1` adịgboroja iji “dozie” 403; nke ahụ ga-emepeghachi ụdị RCE nke
-  route guard mechiri.
-- Kwenye ọnọdụ runtime: dashboard na-egosi **ọkọlọtọ amber na-adịgide adịgide**
-  n’okpuru Dashboard → Security → Authorization Inventory mgbe ọ bụla
-  `CORS_ALLOW_ALL=true` na-arụ ọrụ, ebe `/api/settings/authz-inventory` na-eweghachi
-  envelopu `cors: { allowAll, allowedOrigins }` nke ngwaọrụ nlekota nwere ike ịjụ mgbe niile.
+- Ọ bụrụ na OmniRoute na-agba ọsọ n'azụ proxy / ọwara (nginx, Caddy, Cloudflare Tunnel, Tailscale), CORS bụ **ọ bụghị** Naanị njikwa gị — onye nche ụzọ azụ azụ ka na-echekwa ụzọ ndị nwere ike ime (lee [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Emela `X-Forwarded-For: 127.0.0.1` ka ọ "dozie" a 403; nke meghere klaasị RCE onye nche ụzọ na-emechi.
+- Kwenye ọnọdụ oge ojiri gaa: dashboard na-egosi a **ọkọlọtọ amber na-adịgide adịgide** n'okpuru Dashboard → Nche → ikike Ndepụta ikike mgbe ọ bụla `CORS_ALLOW_ALL=true` dị ndụ, na `/api/settings/authz-inventory` na-eweghachite ngwá ọrụ nlekota envelopu `cors: { allowAll, allowedOrigins }` nwere ike ịme ntuli aka.
 
-## Mfe maka development — kwe ka origin local ndị akọwapụtara
+## Ọdịmma mmepe — na-enye ohere mmalite mpaghara
 
-Ọbụna na dev, wildcard anaghị adịkarị mkpa. Kwe naanị dev server ndị ị na-eji:
+Ị adịkarịghị mkpa kaadị egwu ọbụlagodi na dev. Hapụ naanị sava dev ị na-eji:
 
 ```bash
-# Dev server Vite (5173) + Next.js (3000) na-akpọ OmniRoute local
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-A na-atụnyere origin n’agbanyeghị mkpụrụedemede ukwu ma ọ bụ nta, a na-elegharakwa slash dị n’azụ anya, ya mere
-`http://localhost:3000` na `http://localhost:3000/` bụ otu ihe. Enwere ike ịtọ otu CSV ahụ
-n’oge runtime na **Dashboard → Security → CORS Allowed Origins** n’enweghị
-restart.
+Dakọtara mmalite ya na ikpe-enweghị mmetụta na slash a na-eleghara anya, yabụ `http://localhost:3000` na `http://localhost:3000/` bụ otu. Enwere ike ịtọ otu CSV ahụ n'oge ọsọ ọsọ **Dashboard → → CORS anabatara mmalite** na-enweghị Malitegharịa ekwentị.
 
-## API key ma e jiri ya tụnyere cookie session
+## Igodo API vs nnọkọ kuki
 
-- **Bearer / `x-api-key` (elu inference `/v1/*`):** browser anaghị etinye
-  ihe ndị a n’onwe ya. CORS abụghị ihe mgbochi bara uru ebe a — API key bụ
-  ihe mgbochi ahụ — ọ bụkwa ya mere e ji kpachapụ anya mee ka elu ahụ nabata ọtụtụ origin ka browser na
-  Electron client nwee ike ịgụ response ndị ha nwere ikike inweta. Nweghachi origin a mere
-  ka ọ dị nro na-agbaso key e kwadoro, ọ bụghị naanị ịdị adị nke header ahụ: mgbe
-  `REQUIRE_API_KEY=false` na-ejere arịrịọ ozi n’enweghị aha, nzaghachi ya gara nke ọma
-  na-edebe ndepụta ikike fail-closed ahụ. Ọjụjụ auth (401) na-anọgide na-agụ agụ ka client
-  nwee ike igosi key a kagburu ma ọ bụ nke e dehiere ihe (#5242): 401 nke pipeline n’onwe
-  ya na-edebe nweghachi ahụ, na route nke n’onwe ya na-ajụ key ahụ mgbe pipeline jesịrị
-  arịrịọ ahụ ozi dị ka nke na-enweghị aha (`/v1/models` na `/v1beta/models` mgbe a haziri
-  management auth, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ndị e
-  kenyere onye nwe ha, na route ndị a na-atụle maka auto-combo) na-agbakwunye nweghachi
-  ahụ na 401 ahụ site na `credentialRejectionHeaders()`. Ihe na-ekpebi nweghachi ahụ bụ ma
-  arịrịọ ahụ ọ na-ebu header nke nzere (`Authorization`, `x-api-key`, `x-goog-api-key` ma
-  ọ bụ cookie `auth_token`), ọ bụghị nke n’ime ha route ahụ lelere, a naghịkwa ejikọ ya
-  ọnụ na `Access-Control-Allow-Credentials`; body ya bụ envelope njehie a kapịrị ọnụ.
-  Route management ndị dị n’okpuru `/api/v1/` nke `requireManagementAuth()` na-echekwa
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) anaghị agbakwunye nweghachi ahụ:
-  mgbe `REQUIRE_API_KEY=false`, a pụghị ịgụ 401/403 ha site n’isi mmalite ọzọ.
-- **Cookie session (dashboard):** ndabara **fail-closed** na
-  enweghị `Access-Control-Allow-Credentials` n’ụzọ a na-ekekọrịta na-echebe ya. Etinyela
-  origin management/dashboard na config ọ bụla na-enye ohere sara mbara; ha ga-anọrịrị kpọmkwem
-  n’ọnọdụ fail-closed.
+- **Onye na-ebu / `x-api-key` (elu ọnụ ọgụgụ `/v1/*` ):** ihe nchọgharị anaghị ejikọta ndị a na-akpaghị aka. CORS abụghị ihe mgbochi bara uru ebe a — igodo API bụ ihe mgbochi — nke mere na elu ahụ na-ama ụma na-ekwe ka ihe nchọgharị na ndị ahịa Electron nwee ike ịgụ azịza ha nwere ikike. Nkwughachi ahụ dị jụụ chọrọ isiokwu akwadoro ( igodo API ma ọ bụ nnọkọ dashboard akwadoro), ọ bụghị naanị nkụnye eji isi mee nzere, ọ dịghịkwa agụnye `Access-Control-Allow-Credentials`. Ọzịza ndị na-amaghị aha (`REQUIRE_API_KEY=false`) na-eji ndepụta ikike mmalite ahaziri, gụnyere nbanye `CORS_ALLOW_ALL=true` doro anya. Auth rejections (401) nọrọ na-agụ ka ndị ahịa nwee ike wepụta igodo ewepụrụ ma ọ bụ mejọrọ (#5242): pipeline nke 401 na-edobe ụda olu, yana ụzọ na-ajụ igodo ahụ n'onwe ya mgbe pipeline jere ozi dị ka amaghị aha (`/v1/models` na `/v1beta/models` nwere njikwa njikwa ahaziri, onye nwe `/v1/batches` `/v1/files` `/v1/media` na onye nyocha `/v1/session-leases` ụzọ) na-agbakwụnye nkwughachi ahụ na 401 site na `credentialRejectionHeaders()`. A na-eme ka mgbanaka ahụ na arịrịọ na-ebu isi nzere nzere (`Authorization`, `x-api-key`, `x-goog-api-key` ma ọ bụ kuki `auth_token` ), ọ bụghị nke n'ime ha na-enyocha ụzọ, ọ dịghịkwa mgbe ejikọtara ya na `Access-Control-Allow-Credentials`; ahụ bụ envelopu njehie edobere. Ụzọ nchịkwa n'okpuru `/api/v1/` nke `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) na-echekwa adịghị eji nkwenye nkwenye a: na `REQUIRE_API_KEY=false`, nzaghachi 401/403 ha na-agbaso iwu mmalite CORS ahaziri.
+- **Oge kuki (dashboard):** ndabara mechiri emechi echekwabara **na** site na enweghị `Access-Control-Allow-Credentials` na ụzọ nkekọrịta. Debe mmalite management/dashboard na nhazi ọ bụla na-enye ohere; ha ga-anọrịrị nke ọma-emechi.
 
-## Njikọ mbido WebSocket (`/v1/responses`, `/v1/ws`)
+## WebSocket mmakwa aka (`/v1/responses`, `/v1/ws`)
 
-Ihe nchọgharị anaghị etinye CORS n’ọrụ maka WebSocket, ya mere ụzọ WebSocket ndị
-na-eweghachi mmepụta inference na-enyocha `Origin` nke njikọ mbido ahụ n’onwe ha
-(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) na, mgbe
-OmniRoute na-arụ ọrụ site na `npm start` / `npm run dev`, akwa mmiri `/v1/ws` na
-`/api/v1/ws`, nke na-ezipụ `/v1/chat/completions`, `/v1/messages` na `/v1/responses` dị
-ka frame. Akwa mmiri ahụ na-ajụ `/api/v1/ws?handshake=1` maka mkpebi ma na-ajụ ịme
-upgrade ma ọ bụrụ na route ahụ emeghị nlele ahụ. A na-anabata njikọ mbido mgbe:
+Ihe nchọgharị anaghị etinye CORS na WebSocket, yabụ WebSocket na-ebufe na-eweghachi mmepụta ntinye na-elele aka aka `Origin` n'onwe ha (`src/server/origin/wsOrigin.ts`): Zaghachi WebSocket (`/v1/responses`) na, mgbe OmniRoute na-agafe `npm start` / `npm run dev`, `/v1/ws` na `/api/v1/ws` àkwà mmiri, nke iyi `/v1/chat/completions`, `/v1/messages` dị ka etiti na `/v1/responses`. Àkwà mmiri ahụ jụrụ `/api/v1/ws?handshake=1` maka mkpebi ahụ wee jụ ịkwalite ọ gwụla ma ụzọ ahụ mere nlele ahụ. Ihe nyocha ka na-emetụta iche. Nyocha mmalite na-agafe mgbe:
 
-- o nweghị header `Origin` (Codex CLI, SDK na client ndị ọzọ na-abụghị ihe nchọgharị);
-- ndepụta ikike dị n’elu kwere `Origin` ahụ (`CORS_ALLOWED_ORIGINS`, ntọala
-  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` ahụ bụ otu n’ime origin ọha nke OmniRoute n’onwe ya (base URL ọha a haziri,
-  origin nke proxy a tụkwasịrị obi zigaara, ma ọ bụ host loopback/LAN kpọmkwem e nyere dị
-  ka IP literal ma ọ bụ `localhost` — otu ndị a na-atụle nke nlele mgbanwe dashboard
-  na-eji); ma ọ bụ
-- o bu API key ziri ezi, dị ka ọ dị n’elu HTTP `/v1/*`.
+- ọ nweghị `Origin` nkụnye eji isi mee (Codex CLI, SDKs na ndị ọzọ na-abụghị ihe nchọgharị ahịa);
+- A nabatara `Origin` site na listi ohere n'elu (`CORS_ALLOWED_ORIGINS`, ntọala `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` bụ otu n'ime mmalite ọha nke OmniRoute(ahaziri ọha na eze URL, onye nnọchite anya proxy a tụkwasịrị obi, ma ọ bụ onye ọbịa loopback/LAN kpọmkwem nyere dị ka IP nkịtị ma ọ bụ `localhost` — otu ndị na-aga ime nlele dashboard mutation na-eji); ma ọ bụ
+- ọ na-ebu igodo API bara uru, dịka ọ dị na elu HTTP `/v1/*`.
 
-Ihe ọ bụla ọzọ na-enweta `403 ws_origin_forbidden`. Cookie session nke dashboard anaghị
-ewepụ `Origin` si mba ọzọ, n’ihi na ihe nchọgharị na-etinye ya na socket nke ibe ọ bụla.
-A naghị ewere `localhost` na port ọzọ dị ka otu origin; tinye origin mmepe ndị dị otú
-ahụ na `CORS_ALLOWED_ORIGINS`.
+Ihe ọ bụla ọzọ na-enweta `403 ws_origin_forbidden`. Kuki nnọkọ dashboard anaghị ahapụ `Origin` mba ofesi, n'ihi na ihe nchọgharị ahụ na-ejikọta ya na oghere ibe ọ bụla. `localhost` na ọdụ ụgbọ mmiri ọzọ adịghị emeso ya dị ka otu-si; tinye ụdị dev sitere na `CORS_ALLOWED_ORIGINS`.
 
-## Ọmụmaatụ: reverse proxy n'ihu OmniRoute
+## Ọmụmaatụ: tụgharịa proxy n'ihu OmniRoute
 
-OmniRoute n'onwe ya na-amanye CORS, ya mere proxy ekwesịghị **ịgbakwunye** ma ọ bụ
-idegharị headers `Access-Control-*` (headers abụọ na-eme ka ihe nchọgharị ghara ịrụ ọrụ). Kwụsị TLS
-ma zipụ arịrịọ ahụ n'ihu — hapụ OmniRoute ka ọ zaa preflight:
+CORS na-amanye OmniRoute n'onwe ya, yabụ proxy n'ozuzu kwesịrị **ọ bụghị** tinye ma ọ bụ degharịa `Access-Control-*` nkụnye eji isi mee (abụọ nkụnye eji isi mee agbaji nchọgharị). Kwụsị TLS wee bugharịa — ka OmniRoute zaa mbugharị ụgbọ elu:
 
 ```nginx
-# nginx — zipụ n'ihu na OmniRoute; etinyekwala Access-Control-* ebe a
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Debe headers ndị a na-eji eziga arịrịọ n'ihu: proxy dị n'otu host na-ejikọ site na loopback, ma ọ bụ
-    # ha na-agwa OmniRoute na onye na-akpọ ya abụghị onye nchịkwa mpaghara. Proxy na-adịghị etinye nke ọ bụla n'ime ha
-    # na-eme ka onye ọ bụla na-akpọ site n'ebe dị anya yie onye mpaghara. Etinyekwala X-Forwarded-For ka ọ bụrụ 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Tọọ origins ihe nchọgharị ndị a na-ekwe ka ha rụọ ọrụ n'ime OmniRoute (`CORS_ALLOWED_ORIGINS` ma ọ bụ
-taabụ Security), ọ bụghị n'ime proxy.
+Tọọ mmalite ihe nchọgharị ekwenyere na OmniRoute (`CORS_ALLOWED_ORIGINS` ma ọ bụ taabụ nchekwa), ọ bụghị na proxy.
 
-## Faịlụ source
+## Isi mmalite faịlụ
 
-| Ihe metụtara                                 | Faịlụ                                                                |
-| -------------------------------------------- | -------------------------------------------------------------------- |
-| Mkpebi allowlist + `getCorsStatus()`         | `src/server/cors/origins.ts`                                         |
-| Itinye middleware n’ọrụ (otu isi eziokwu)    | `src/server/authz/pipeline.ts`                                       |
-| Settings → itinye origin n’ime runtime       | `src/lib/config/runtimeSettings.ts`                                  |
-| Ọnọdụ runtime maka dashboard                 | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Ọkọlọtọ ịdọ aka ná ntị nke dashboard         | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Mpaghara CORS Allowed Origins                | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS kwa route nke Cloud-Agent (ihe dị iche) | `src/lib/cloudAgent/api.ts`                                          |
-| Nlele `Origin` n’oge njikọ WebSocket         | `src/server/origin/wsOrigin.ts`                                      |
+| Nchegbu                                       | Faịlụ                                                                |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| Mkpebi ndepụta inye ohere + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
+| Ngwa Middleware (otu isi iyi nke eziokwu)     | `src/server/authz/pipeline.ts`                                       |
+| Ntọala ịgba oge mmalite →                     | `src/lib/config/runtimeSettings.ts`                                  |
+| Ọkwa ọsọ ọsọ maka dashboard                   | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Ọkọlọtọ ịdọ aka ná ntị dashboard              | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Ogige mmalite nke CORS anabatara              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent kwa ụzọ CORS (ewezuga)            | `src/lib/cloudAgent/api.ts`                                          |
+| nlele WebSocket `Origin`                      | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Hụkwa
 
-- [Ọkwa Nchedo Route](./ROUTE_GUARD_TIERS.md) — mmanye loopback maka
-  route ndị nwere ike ime spawn (njikwa dị iche ma na-emeju nke ọzọ).
-- [Ntuziaka Ikike Nnweta](../architecture/AUTHZ_GUIDE.md) — usoro auth zuru ezu.
+- [Ụzọ nchekwa Tiers](./ROUTE_GUARD_TIERS.md) — loopback mmanye maka ụzọ ndị nwere ike ịgbasa (nchịkwa dị iche, njikwa mmekọ).
+- [Ntuziaka ikike](../architecture/AUTHZ_GUIDE.md) — pipeline nyocha zuru oke.

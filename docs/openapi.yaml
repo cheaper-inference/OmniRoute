@@ -1640,7 +1640,7 @@ paths:
               schema:
                 type: string
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          $ref: "#/components/responses/ClientAuthenticationRequired"
         "502":
           description: All upstream providers failed
 
@@ -2177,6 +2177,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ClientAuthenticationRequired"
 
   /api/v1/models/query:
     post:
@@ -2715,6 +2717,7 @@ paths:
         required: true
         content:
           application/json:
+            example: { provider: openai, modelId: gpt-4o-mini }
             schema:
               type: object
               required: [provider, modelId]
@@ -3218,6 +3221,29 @@ paths:
           description: Invalid management API key or insufficient API-key/access-token scope
         "409":
           description: ID/value conflict, duplicate value or reserved credential; no other ID disclosed
+        "413":
+          description: Declared request body exceeds the configured limit; rejected before authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [error]
+                properties:
+                  error:
+                    type: object
+                    additionalProperties: false
+                    required: [message, type, code]
+                    properties:
+                      message:
+                        type: string
+                        minLength: 1
+                      type:
+                        type: string
+                        enum: [payload_too_large]
+                      code:
+                        type: string
+                        enum: [PAYLOAD_TOO_LARGE]
         "500":
           description: Sanitized import/storage failure; transaction rolls back on insertion failure
         "503":
@@ -3385,6 +3411,29 @@ paths:
                           - key_allows_all_combos
                       message:
                         type: string
+        "413":
+          description: Declared request body exceeds the configured limit; rejected before authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [error]
+                properties:
+                  error:
+                    type: object
+                    additionalProperties: false
+                    required: [message, type, code]
+                    properties:
+                      message:
+                        type: string
+                        minLength: 1
+                      type:
+                        type: string
+                        enum: [payload_too_large]
+                      code:
+                        type: string
+                        enum: [PAYLOAD_TOO_LARGE]
 
   /api/combos:
     get:
@@ -7183,6 +7232,7 @@ paths:
         required: true
         content:
           application/json:
+            example: { enabled: false }
             schema:
               type: object
               required: [enabled]
@@ -7215,6 +7265,7 @@ paths:
         required: true
         content:
           application/json:
+            example: { enabled: false }
             schema:
               type: object
               required: [enabled]
@@ -10933,10 +10984,17 @@ paths:
     get:
       tags:
         - Auth
-      summary: "GET auth › csrf"
+      summary: GET auth › csrf
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
   /api/auth/status:
     get:
       tags:
@@ -12199,26 +12257,61 @@ paths:
     post:
       tags:
         - Keys
-      summary: "POST keys › <id> › regenerate"
+      summary: POST keys › <id> › regenerate
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Key not found
+        "400":
+          description: Missing key ID
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
   /api/keys/{id}/reveal:
     get:
       tags:
         - Keys
-      summary: "GET keys › <id> › reveal"
+      summary: GET keys › <id> › reveal
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Key reveal is disabled, or management credentials are invalid or lack the required scope
+        "404":
+          description: Key not found
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
   /api/keys/{id}/usage-limits:
     get:
       tags:
         - Keys
-      summary: "GET keys › <id> › usage limits"
+      summary: GET keys › <id> › usage limits
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Key not found
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
   /api/keys/{id}/self-service:
     get:
       tags:
@@ -12310,89 +12403,285 @@ paths:
     get:
       tags:
         - Keys
-      summary: "GET keys › groups"
+      summary: GET keys › groups
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
     post:
       tags:
         - Keys
-      summary: "POST keys › groups"
+      summary: POST keys › groups
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created group
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "400":
+          description: Invalid request body
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  pattern: \S
+                description:
+                  type: string
+                  default: ""
   /api/keys/groups/{id}:
     delete:
       tags:
         - Keys
-      summary: "DELETE keys › groups › <id>"
+      summary: DELETE keys › groups › <id>
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
     get:
       tags:
         - Keys
-      summary: "GET keys › groups › <id>"
+      summary: GET keys › groups › <id>
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
     put:
       tags:
         - Keys
-      summary: "PUT keys › groups › <id>"
-      description: >-
-        Updates the group. Setting isActive to false pauses its allow rules while
-        preserving membership restrictions and deny rules. Other active groups may
-        still grant access unless a deny matches. Keys belonging only to inactive
-        groups have no group grants. Keys without groups remain unrestricted by
-        group policy; per-key restrictions still apply.
+      summary: PUT keys › groups › <id>
+      description: Updates the group. Setting isActive to false pauses its allow rules while preserving membership restrictions and deny rules. Other active groups may still grant access unless a deny matches. Keys belonging only to inactive groups have no group grants. Keys without groups remain unrestricted by group policy; per-key restrictions still apply.
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+        "400":
+          description: Invalid request body
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  pattern: \S
+                description:
+                  type: string
+                isActive:
+                  type: boolean
+              anyOf:
+                - required:
+                    - name
+                - required:
+                    - description
+                - required:
+                    - isActive
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
   /api/keys/groups/{id}/keys:
     delete:
       tags:
         - Keys
-      summary: "DELETE keys › groups › <id> › keys"
+      summary: DELETE keys › groups › <id> › keys
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+        "400":
+          description: keyId query parameter is required
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      parameters:
+        - name: keyId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
     get:
       tags:
         - Keys
-      summary: "GET keys › groups › <id> › keys"
+      summary: GET keys › groups › <id> › keys
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
     post:
       tags:
         - Keys
-      summary: "POST keys › groups › <id> › keys"
+      summary: POST keys › groups › <id> › keys
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Group membership created
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+        "400":
+          description: Invalid request body
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - keyId
+              properties:
+                keyId:
+                  type: string
+                  minLength: 1
+                  pattern: \S
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
   /api/keys/groups/{id}/permissions:
     delete:
       tags:
         - Keys
-      summary: "DELETE keys › groups › <id> › permissions"
+      summary: DELETE keys › groups › <id> › permissions
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+        "400":
+          description: permissionId query parameter is required
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      parameters:
+        - name: permissionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
     get:
       tags:
         - Keys
-      summary: "GET keys › groups › <id> › permissions"
+      summary: GET keys › groups › <id> › permissions
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
     post:
       tags:
         - Keys
-      summary: "POST keys › groups › <id> › permissions"
+      summary: POST keys › groups › <id> › permissions
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Group permission created
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          description: Management credentials are invalid or lack the required scope
+        "404":
+          description: Group not found
+        "400":
+          description: Invalid request body
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - modelPattern
+                - accessType
+              properties:
+                modelPattern:
+                  type: string
+                  minLength: 1
+                  pattern: \S
+                accessType:
+                  type: string
+                  enum:
+                    - allow
+                    - deny
+                provider:
+                  type: string
+                  minLength: 1
+                  pattern: \S
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
   /api/local/redis/start:
     post:
       tags:
@@ -16047,7 +16336,11 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › sessions › <id>"
-      description: Get details and recent requests of a session owned by the calling API key.
+      description: >-
+        Get details and recent requests of a session owned by the calling API key.
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
+      security:
+        - BearerAuth: []
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -16075,6 +16368,10 @@ paths:
                         latencyMs: { type: integer }
                         status: { type: [string, "null"] }
                         success: { type: boolean }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
         "404":
           description: Session not found
   /api/v1/models/{model}:
@@ -16335,8 +16632,8 @@ paths:
       description: >-
         One `state` plus typed `questions` (`noul` / `choice` / `score`); the
         backend is selected by the model id — `typesafe/jev-*` or a bare
-        `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
-        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
+        `jev-*` alias routes natively to api.typesafe.ai,
+        `openrouter/<vendor>/<model>` routes to OpenRouter's alpha decisions endpoint. Answers,
         probabilities and usage (tokens, cost) pass through untouched.
       security:
         - BearerAuth: []
@@ -16344,6 +16641,13 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              model: typesafe/jev-latest
+              state: The customer asks for a refund
+              questions:
+                risk:
+                  type: choice
+                  choices: [low, high]
             schema:
               type: object
               required: [state, questions]
@@ -17246,6 +17550,12 @@ components:
             error:
               type: authentication_error
               message: Invalid API key
+    ClientAuthenticationRequired:
+      description: Missing or invalid client API credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     ManagementAuthenticationRequired:
       description: Authentication required for management routes
       content:

@@ -4,14 +4,7 @@
 
 ---
 
-title: "📖 Przewodnik instalacji — OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# 📖 Przewodnik instalacji — OmniRoute
-
-> Kompletne odniesienie do instalacji OmniRoute. Szybka wersja: [Szybki start w README](../README.md#-quick-start).
+> Kompletne informacje dotyczące konfiguracji dla OmniRoute. Aby zapoznać się z szybką wersją, zobacz [Szybki start w README](../README.md#-quick-start).
 
 ## Spis treści
 
@@ -34,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard otwiera się pod adresem `http://localhost:20128`, a bazowy URL API to `http://localhost:20128/v1`.
+Panel otwiera się w `http://localhost:20128`, a baza API URL to `http://localhost:20128/v1`.
+
+> **użytkownicy npm:** Jeśli npm ostrzeże, że skrypty instalacyjne zostały zablokowane (np. `omniroute`, `better-sqlite3`), zobacz [Rozwiązywanie problemów — npm install-scripts zablokowane](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -54,14 +49,16 @@ systemctl --user enable --now omniroute.service
 
 [Pakiet AUR](https://aur.archlinux.org/packages/omniroute-bin) instaluje OmniRoute i udostępnia usługę użytkownika systemd.
 
-### Ze źródeł
+### Ze Źródła
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Uwaga:** `npm install` przy pierwszym uruchomieniu automatycznie generuje `.env` z `.env.example`. Kolejne instalacje nie nadpisują istniejącego `.env`, więc Twoje zmiany są zachowane. Aby ponownie zainicjować, usuń `.env` przed ponownym uruchomieniem.
+> **Uwaga Windows :** Domyślnie OmniRoute używa `%APPDATA%\omniroute`, gdy nie ma starszego katalogu `%USERPROFILE%\.omniroute`. Ustaw `DATA_DIR` tak, aby wybierał inną lokalizację katalogu danych.
+
+> **Notatka:** `npm install` automatycznie generuje `.env` z `.env.example` przy pierwszym uruchomieniu. Kolejne instalacje nie zastąpią istniejącego `.env`, więc dostosowania zostaną zachowane. Aby ponownie zasiać, usuń `.env` przed ponownym uruchomieniem.
 
 ### Docker
 

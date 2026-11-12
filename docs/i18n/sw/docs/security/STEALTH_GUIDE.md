@@ -136,41 +136,63 @@ Moduli husika katika kifurushi hicho hicho:
 
 ---
 
-## Usiri wa Antigravity
+## Antigravity Stealth
 
-Maombi ya Antigravity huhifadhi maandishi ya mwombaji byte-kwa-byte. OmniRoute haiingizi herufi zisizo na upana kwenye vidokezo wala kubadilisha majina/kuingiza zana ili kuiga kiteja cha IDE.
+Ombi la Antigravity lihifadhi maandishi ya mpigaji simu byte-for-byte. OmniRoute haiingizi vibambo vya upana sifuri kwenye vidokezo au zana za rename/inject ili kuiga kiteja cha IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Huondoa viashiria vya Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) kabla ya kusambaza.
+Huondoa alama za Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) kabla ya kusambaza.
 
-### ⚠️ Hatari: `ANTIGRAVITY_CREDITS=always` (eneo hatari la kufungiwa akaunti)
+### Hatari ya ⚠️ : `ANTIGRAVITY_CREDITS=always` (mahali pa moto wa kupiga marufuku akaunti)
 
-`ANTIGRAVITY_CREDITS=always` (inayotumiwa na `open-sse/executors/antigravity.ts`) huelekeza **kila** ombi kupitia Matumizi ya Ziada ya Salio la Antigravity AI (salio linalolipiwa la Google) badala ya kuruhusu mgao wa kiwango kisicholipishwa wa Google kudhibiti matumizi. Hili limeandikwa kama kipengele, lakini ni **ripoti inayotokea mara nyingi zaidi ya ukiukaji wa ToS tunayoiona** — akaunti nyingi za Google Ultra zimefungiwa kwa `403 / "service disabled for ToS violation" / insufficient_quota` baada ya kuendesha kwa saa chache kwa kutumia `=always`.
+`ANTIGRAVITY_CREDITS=always` (inatumiwa na `open-sse/executors/antigravity.ts`) njia **kila** ombi kupitia Antigravity AI Credit Overages (kulipwa mikopo Google ) badala ya kuruhusu Google's free-tier upendeleo lango mambo. Hii imeandikwa kama kipengele, lakini ni **ripoti moja ya kawaida ya ukiukaji wa ToS tunayoona** Akaunti nyingi Google — zimepigwa marufuku na `403 / "service disabled for ToS violation" / insufficient_quota` baada ya kufanya kazi kwa saa chache na `=always`.
 
-Utekelezaji wa masharti wa upstream uko **upande wa Google**, na si jambo ambalo OmniRoute inaweza kuzuia. Jina la kigezo cha mazingira na nyaraka zilizopo hulifanya lionekane kama chaguo salama kuwasha; sivyo.
+Utekelezaji wa mkondo wa juu umewashwa **Upande wa Google** , hakuna chochote OmniRoute kinaweza kuzuia. Jina la env var na hati zilizopo hufanya isikike kama kisu salama cha kugeuza; sivyo.
 
-**Kwa nini hili huchochea utambuzi wa matumizi mabaya kwa ukali zaidi kuliko matumizi ya kiwango kisicholipishwa pekee:**
+**Kwa nini hii inavutia ugunduzi wa unyanyasaji kwa ukali zaidi kuliko utumiaji wa kiwango cha bure tu:**
 
-- Matumizi endelevu ya kiotomatiki kwenye akaunti moja ya Google huwekewa alama tofauti na kiwango kisicholipishwa kinapofikia mgao na kusimama.
-- Matumizi ya ziada ya salio hayana kikomo cha kasi, kwa hivyo kiteja kilichosanidiwa vibaya kinaweza kutumia mamia kadhaa ya USD ndani ya dakika na kuonekana kama uuzaji upya wa API key au trafiki ya bot.
-- Watumiaji wengi wa OmniRoute wanaotumia salio la ziada kwa wakati mmoja kutoka kwenye IP ileile ya nje huongeza uzito wa ishara hiyo.
+- Matumizi endelevu ya kiotomatiki kwenye alamisho za akaunti moja Google tofauti na viwango vya bure vya vibao na vituo.
+- Kuzidisha kwa mkopo hakuna kiwango cha juu, kwa hivyo mteja aliyesanidiwa vibaya anaweza kuteketeza USD mia kadhaa kwa dakika na kuonekana kama uuzaji wa ufunguo wa API au trafiki ya bot.
+- Watumiaji wengi OmniRoute wanaopata mikopo ya ziada sambamba na IP ya nje huchanganya mawimbi.
 
-**Msimamo unaopendekezwa:**
+**Mkao unaopendekezwa:**
 
-1. Weka chaguomsingi ya `ANTIGRAVITY_CREDITS=off` isipokuwa opereta akubali wazi hatari ya salio linalolipiwa na utekelezaji wa masharti kwenye akaunti. `retry` hutuma ombi la kawaida kwanza na kuingiza salio mara moja tu baada ya kosa la mgao linalostahiki la 429; `always` huingiza salio kwenye ombi la kwanza.
-2. **Sambaza mzigo kati ya watoa huduma kupitia Auto-Combo** (`model: "auto"` au combo ya `kr/glm/etc`) badala ya kuijaza kupita kiasi akaunti moja ya Antigravity.
-3. **Weka vikomo vya RPM kwa kila muunganisho** kwenye ukurasa wa kuhariri wa mtoa huduma wa Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). RPM 30–60 ni kikomo cha juu kinachoweza kutetewa kwa matumizi endelevu.
-4. **Tumia mtandao thabiti wa upstream unaodhibitiwa na opereta** na uepuke kushiriki akaunti moja miongoni mwa watumiaji au mizigo ya kazi isiyohusiana.
-5. **Ikiwa umefungiwa**: kata rufaa kupitia `support.google.com` → "Restore Workspace/Account access" ukitumia response body kamili ya `quota_exceeded` / `service disabled` iliyotumwa na Google. Urejeshaji haujahakikishwa.
+1. Weka `ANTIGRAVITY_CREDITS=off` chaguo-msingi isipokuwa opereta anakubali kwa uwazi hatari ya kulipwa kwa mkopo na utekelezaji wa akaunti. `retry` hutuma ombi la kawaida kwanza na kuingiza mikopo mara moja baada ya mgawo unaostahiki 429; `always` inaingiza mikopo kwa ombi la kwanza.
+2. **Sambaza mzigo kwa watoa huduma kupitia Mchanganyiko Kiotomatiki** (`model: "auto"` au `kr/glm/etc` -combo) badala ya kueneza akaunti moja Antigravity.
+3. **Weka mipaka RPM kwa kila muunganisho** katika ukurasa wa kuhariri wa mtoa huduma wa Antigravity (Dashibodi ya Watoa Huduma → → Antigravity → kiwango cha juu cha muunganisho wa → ). 30–60 RPM ni sehemu ya juu inayoweza kulindwa kwa matumizi endelevu.
+4. **Tumia mtandao thabiti, unaodhibitiwa na opereta** na uepuke kushiriki akaunti moja kwa watumiaji au mzigo wa kazi ambao hauhusiani.
+5. **Ikiwa imepigwa marufuku** : rufaa kupitia `support.google.com` → "Rejesha ufikiaji Workspace/Account " na mwili halisi wa majibu wa `quota_exceeded` / `service disabled` Google umetumwa. Urejeshaji haujahakikishiwa.
 
-Rejeleo la mazingira linaeleza athari kwa akaunti na matumizi ya fedha za kila hali ya salio.
+Rejeleo la mazingira huandika akaunti na matumizi ya athari za kila hali ya mikopo.
 
-Sehemu zinazohusika:
+#### Sio tu `=always`: Antigravity OAuth routing kwa ujumla
 
-- `open-sse/executors/antigravity.ts` — husoma `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — upitishaji wa kitambulisho
-- Ripoti ya awali ya tukio: Mjadala [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Kusimamishwa sio tu kwa kuzidisha kwa mkopo. Ripoti za mwezi Novemba 2026 (#19223, #19266) zinaelezea akaunti kadhaa za Google zilizosimamishwa wakati zikipitia watoa huduma wa `antigravity` na `agy` (Antigravity CLI), zikiwa na:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Watoa huduma wote wawili wanathibitisha na kipindi cha Antigravity bidhaa OAuth, hali ambayo ni notisi ya hatari ya dashibodi ("Mtoa huduma huyu anatumia bidhaa yako rasmi session/OAuth, ambayo haijaidhinishwa kwa matumizi proxy/router ") inaonya kuhusu kabla ya muunganisho kuongezwa. Hakuna mapendekezo yoyote hapo juu yanayoruhusu matumizi hayo kuidhinishwa; wanapunguza tu kiasi cha trafiki ambacho akaunti moja hubeba.
+
+**Miingiliano API iliyoidhinishwa kwa miundo ya Gemini.** Google inatoa ufikiaji wa kiprogramu kwa Gemini kupitia APIs yake, ambayo OmniRoute inasaidia kama watoa huduma wa kawaida wa ufunguo wa API:
+
+| Kitambulisho cha mtoa huduma | Jina la dashibodi         | Hati miliki                                                                                |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------ |
+| `gemini`                     | Gemini (Google AI Studio) | Kitufe cha Gemini API kutoka Studio ya Google AI (tija ya bure inapatikana)                |
+| `vertex`                     | Kipeo AI                  | Akaunti ya Huduma JSON, tokeni ya ufikiaji OAuth au kitufe cha Vertex Express API (Gemini) |
+
+Watoa huduma hawa hutumia vitambulisho vya masuala ya Google kwa ufikiaji wa API, tofauti na kipindi cha bidhaa Antigravity. Hazifanyi kila matumizi kuambatana au kuondoa hatari ya kutekelezwa: kila moja inatawaliwa na masharti yake, ambayo operator anapaswa kuangalia kwa kupelekwa kwao. Kwa mfano, [Sheria na Masharti ya Ziada Gemini API](https://ai.google.dev/gemini-api/terms) huruhusu tu Huduma Zinazolipishwa wakati wateja wa API wanapatikana kwa watumiaji katika Eneo la Kiuchumi la Ulaya, Uswizi au Uingereza, na maudhui yanayotumwa kwa Huduma Zisizolipwa yanaweza kutumika kuboresha bidhaa za Google. Vertex AI iko chini ya masharti ya Wingu la Google badala yake ( [Masharti Maalum ya Huduma](https://cloud.google.com/terms/service-terms) ). Bei na viwango vinafuata masharti hayo API badala ya usajili wa Antigravity.
+
+Waendeshaji wanaotaka kuepuka kusimamishwa kwa Antigravity ilivyoelezwa hapo juu wanapaswa kuelekeza trafiki ya Gemini kupitia mmoja wa watoa huduma hawa badala ya `antigravity` / `agy`, baada ya kuangalia kwamba matumizi yao yanalingana na masharti ya mtoa huduma.
+
+Pointi za kugusa:
+
+- `open-sse/executors/antigravity.ts` — inasomeka `process.env.ANTIGRAVITY_CREDITS`
+- Mabomba ya kitambulisho ya `src/lib/oauth/providers/antigravity.ts` —
+- Ripoti ya tukio asilia: Majadiliano [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -237,9 +259,9 @@ Zaidi ya hayo, `updateNssDatabases()` husakinisha kwenye hifadhidata za NSS za k
 
 Vituo vyote vya ufikiaji vya MITM vinahitaji uthibitishaji wa usimamizi (`requireCliToolsAuth`). Nenosiri la sudo huhifadhiwa kwenye akiba ndani ya upeo wa moduli (kamwe si `globalThis`) na huondolewa wakati wa `stopMitm()`.
 
-## Wakala wa Mtumiaji Anabatilisha — env vars (`.env.example` sehemu ya 12)
+## Ubatilishaji wa User-Agent — vibadala vya mazingira (`.env.example` sehemu ya 12)
 
-| Inaweza kubadilika  | Chaguomsingi                                  |
+| Kibadala            | Chaguo-msingi                                 |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -248,7 +270,7 @@ Vituo vyote vya ufikiaji vya MITM vinahitaji uthibitishaji wa usimamizi (`requir
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Inatumiwa na `open-sse/executors/base.ts::buildHeaders()` kupitia utaftaji wa nguvu.** Bomba hizi wakati watoa huduma wanatoa matoleo mapya CLI** — stale UA strings kuanza kukataliwa kama wateja waliopitwa na wakati.
+Hutumiwa na `open-sse/executors/base.ts::buildHeaders()` kupitia utafutaji unaobadilika. **Ongeza matoleo haya watoa huduma wanapotoa matoleo mapya ya CLI** — mifuatano ya UA iliyopitwa na wakati huanza kukataliwa kama viteja vilivyopitwa na wakati.
 
 ## Vigeuzi vya Hali ya Upatanifu wa CLI (`.env.example` sehemu ya 13)
 

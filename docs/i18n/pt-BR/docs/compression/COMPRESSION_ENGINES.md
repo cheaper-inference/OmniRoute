@@ -9,17 +9,16 @@ A compactação do OmniRoute é estruturada em torno de contratos de mecanismos.
 
 ## Modos
 
-| Modo | Caminho do motor  
-| Entrada pretendida |
-| ------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `off` | nenhum | Preservação exata do prompt |
-| `lite` | Ajudantes Caveman lite | Limpeza de baixo risco sempre ativa |
-| `standard` | Caveman | Condensação de prompt em linguagem natural |
-| `aggressive` | Caveman + sumarizadores de histórico/ferramentas | Sessões de chat longas |
-| `ultra` | Caveman + ajudantes de poda | Recuperação de limite de contexto |
-| `rtk` | RTK | Saída de terminal, shell, build, teste e git |
-| `omniglyph` | OmniGlyph | Contexto como imagem no provedor nativo |
-| `stacked` | Pipeline. O padrão da requisição é `session-dedup -> lite`. `rtk -> caveman` é opcional. | Logs de ferramentas mistos e prosa, economia máxima |
+| Modo         | Caminho do motor                                                                         | Entrada pretendida                                  |
+| ------------ | ---------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `off`        | nenhum                                                                                   | Preservação exata do prompt                         |
+| `lite`       | Ajudantes Caveman lite                                                                   | Limpeza de baixo risco sempre ativa                 |
+| `standard`   | Caveman                                                                                  | Condensação de prompt em linguagem natural          |
+| `aggressive` | Resumidores do homem das cavernas + history/tool                                         | Longas sessões de bate-papo                         |
+| `ultra`      | Caveman + ajudantes de poda                                                              | Recuperação de limite de contexto                   |
+| `rtk`        | RTK                                                                                      | Saída de terminal, shell, build, teste e git        |
+| `omniglyph`  | OmniGlyph                                                                                | Contexto como imagem no provedor nativo             |
+| `stacked`    | Pipeline. O padrão da requisição é `session-dedup -> lite`. `rtk -> caveman` é opcional. | Logs de ferramentas mistos e prosa, economia máxima |
 
 ### Perfis de compressão OmniGlyph
 
@@ -393,7 +392,7 @@ A ferramenta de recuperação atualmente é chamada `omniroute_ccr_retrieve` (o 
 
 ### Ciclo de vida da sessão
 
-As sessões Streamable-HTTP ficam inativas e o servidor as colhe; a janela inativa é definida por `OMNIROUTE_MCP_SESSION_IDLE_MS` (padrão 5 minutos; referenciada pelo nome, não por um valor codificado, portanto, esta página não oscila quando muda). O sintoma de uma sessão ociosa é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é reconectar ou reiniciar a sessão,** não** para girar uma chave, alterar um escopo ou renomear uma ferramenta.
+As sessões Streamable-HTTP ficam inativas e o servidor as colhe; a janela inativa é configurada pelo `OMNIROUTE_MCP_SESSION_IDLE_MS`, retornando ao `DEFAULT_MCP_SESSION_IDLE_MS` no `open-sse/mcp-server/httpTransport.ts`. O sintoma de uma sessão ociosa é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é reconectar ou reiniciar a sessão,**não** para girar uma chave, alterar um escopo ou renomear uma ferramenta.
 
 ## Superfície da API
 

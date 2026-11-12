@@ -4,73 +4,66 @@
 
 ---
 
-> **Chanzo rasmi:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Ilisasishwa mwisho:** 2026-06-28 — v3.8.40
+> **Chanzo cha ukweli:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Mara ya mwisho kusasishwa:** 2026-06-28 — v3.8.40
 
-OmniRoute inaweza kutuma webhooks za HTTP wakati matukio ya jukwaa yanapotokea. Zitumie kuunganisha na
-Slack, PagerDuty, Datadog, huduma za ndani za arifa, au kipokeaji chochote cha HTTP.
+OmniRoute inaweza kurusha vijiti vya wavuti HTTP kwenye hafla za jukwaa. Zitumie kuunganishwa na Slack, PagerDuty, Datadog, huduma za arifa za ndani, au kipokezi chochote cha HTTP.
 
-Kisambazaji hutia saini kila uwasilishaji kwa HMAC-SHA256, hujaribu tena baada ya
-hitilafu za muda, hufuatilia hali ya uwasilishaji kwa kila webhook, na huzima kiotomatiki
-endpoints zinazoendelea kushindwa.
+Mtumaji hutia sahihi kila uwasilishaji kwa HMAC-SHA256, hujaribu tena kushindwa kwa muda mfupi, hufuatilia afya ya uwasilishaji kwa kila mtandao, na kuzima kiotomatiki vituo vinavyoendelea kutofaulu.
 
 ## Matukio Yanayotumika
 
-Aina ya `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, inayotumiwa na `src/lib/webhookDispatcher.ts`) kwa sasa inawakilisha matukio manne pekee:
+Aina ya `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, inayotumiwa na `src/lib/webhookDispatcher.ts`) kwa sasa ni mifano ya matukio saba:
 
-| Tukio               | Hutokea wakati                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| `request.completed` | Ombi lililopitishwa kupitia proksi linakamilika kwa mafanikio                            |
-| `request.failed`    | Ombi lililopitishwa kupitia proksi linashindwa baada ya majaribio yote/utaratibu mbadala |
-| `quota.exceeded`    | Ufunguo wa API unavuka kiwango cha bajeti/kikomo                                         |
-| `test.ping`         | Tukio bandia linalotumiwa na endpoint ya majaribio                                       |
+| Tukio                     | Moto wakati                                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `request.completed`       | Ombi la proksi linakamilika kwa mafanikio                                                                                            |
+| `request.failed`          | Ombi la wakala halifaulu baada ya retries/fallback yote                                                                              |
+| `quota.exceeded`          | Kitufe cha API kinavuka kizingiti cha budget/quota                                                                                   |
+| `proxy.set_aside`         | Mwanachama wa hifadhi ya wakala huwekwa kando baada ya kukataa mara kwa mara (mpito pekee)                                           |
+| `proxy.pool.exhausted`    | Kila mwanachama wa wigo wa bwawa la wakala ametengwa                                                                                 |
+| `provider.reset_redeemed` | Kutuma otomatiki uwekaji upya uliowekwa kwenye benki kumekomboa mkopo uliowekwa upya au uwekaji upya wa kipindi cha kila wiki Claude |
+| `test.ping`               | Tukio la usanifu linalotumiwa na sehemu ya mwisho ya jaribio                                                                         |
 
-Usajili hukubali thamani halisi `"*"` ili kupokea kila tukio. Majina yasiyojulikana ya
-matukio katika `events` hupuuzwa wakati wa usambazaji.
+Usajili unakubali `"*"` halisi ili kupokea kila tukio. Majina ya matukio yasiyojulikana katika `events` yanapuuzwa wakati wa kutuma.
 
-> Kumbuka: API ya kisambazaji imeunganishwa, lakini sehemu za kuitisha katika mazingira ya uzalishaji kwa baadhi ya
-> matukio yasiyo ya `test.ping` bado zinaongezwa. Angalia `grep dispatchEvent` ili kuona
-> ni njia zipi zinazoita kisambazaji kwa sasa katika toleo lako.
+> Kumbuka: kisambazaji API kimeunganishwa, lakini tovuti za simu za uzalishaji kwa baadhi ya matukio yasiyo ya `test.ping` bado zinatua. Angalia `grep dispatchEvent` ili kuona ni njia zipi zinazoomba mtumaji kwa sasa katika toleo lako.
 
 ## Usanifu
 
 ```
-Mwitaji (kishughulikiaji, huduma, kifuatiliaji)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> chuja kwa webhook.events
-    -> kwa kila inayolingana (kwa sambamba):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         unda payload { event, timestamp, data }
-         tia saini body kwa HMAC-SHA256 (ikiwa secret ipo)
-         POST kwa muda wa juu wa sekunde 10
-         jaribu tena hadi mara 3 kwa 5xx / hitilafu ya mtandao
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Usambazaji hufanyika bila mwitaji kusubiri matokeo: `Promise.allSettled` huficha
-hitilafu za kila webhook ili kipokeaji kimoja kibaya kisiweze kuzuia vingine.
+Utumaji ni moto-na-kusahau kwa mpigaji simu: `Promise.allSettled` humeza makosa ya kila-webhook ili mpokeaji mmoja mbaya asiweze kuzuia wengine.
 
-## Utiaji Saini wa HMAC
+## Kusainiwa HMAC
 
-Webhook inapokuwa na `secret`, OmniRoute hutia saini body ya JSON na kutuma:
+Wakati webhook ina `secret`, OmniRoute hutia sahihi mwili wa JSON na kutuma:
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <tukio>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<HMAC-SHA256 ya heksadesimali(secret, body)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Majina ya headers hutumia kiambishi awali cha `X-Webhook-*` (si `X-OmniRoute-*`). Thamani ya saini
-> ni `sha256=<hex>` — thibitisha kiambishi awali chote.
+> Majina ya vichwa hutumia kiambishi awali cha `X-Webhook-*` (sio `X-OmniRoute-*`). Thamani ya sahihi ni `sha256=<hex>` — thibitisha kiambishi awali kamili.
 
-Ikiwa `createWebhook` itaitwa bila secret, moduli ya DB hutengeneza moja
-(`whsec_<48 hex>`) ili webhooks zote zitiwe saini kwa chaguo-msingi.
+Ikiwa `createWebhook` inaitwa bila siri, moduli ya DB inazalisha moja (`whsec_<48 hex>`) hivyo vijiti vyote vya wavuti vinatiwa saini kwa chaguo-msingi.
 
-### Kuthibitisha kwenye kipokeaji
+### Inathibitisha kwenye mpokeaji
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Daima thibitisha dhidi ya body **ghafi** ya ombi, kabla ya uchanganuzi wowote wa JSON.
+Daima thibitisha dhidi ya **mbichi** ombi la mwili, kabla ya uchanganuzi wowote JSON.
 
-## Sera ya Kujaribu Tena na Kushindwa
+## Sera ya Kujaribu tena na Kushindwa
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Kikomo cha muda cha sekunde 10 kwa kila jaribio (`AbortController`).
-- HTTP 2xx huhesabiwa kama mafanikio.
-- HTTP 3xx/4xx huhesabiwa kama hali ya mwisho isiyoweza kujaribiwa tena — hurekodiwa kuwa imewasilishwa
-  ikiwa na `success = res.ok`.
-- HTTP 5xx na hitilafu za mtandao hujaribiwa tena kwa muda wa kusubiri unaoongezeka kwa kasi:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Baada ya `maxRetries`, uwasilishaji hurekodiwa kuwa umeshindwa.
-- Kila uwasilishaji husasisha `last_triggered_at`, `last_status`, na ama huweka upya
-  au huongeza `failure_count`.
-- Kisambazaji huita `disableWebhooksWithHighFailures(10)` baada ya kila usambazaji,
-  hivyo webhook yoyote yenye `failure_count >= 10` huzimwa kiotomatiki.
+- Muda wa kuisha kwa sekunde 10 kwa kila jaribio (`AbortController`).
+- HTTP 2xx inahesabiwa kuwa mafanikio.
+- HTTP 3xx/4xx inahesabiwa kama hali ya mwisho isiyoweza kujaribu tena — iliyorekodiwa kama ilivyowasilishwa kwa `success = res.ok`.
+- HTTP 5xx na hitilafu za mtandao zinajaribiwa tena kwa urejesho wa kielelezo: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Baada ya `maxRetries`, uwasilishaji unarekodiwa kama umeshindwa.
+- Kila utoaji husasisha `last_triggered_at`, `last_status`, na ama kuweka upya au kuongeza `failure_count`.
+- Kisambazaji huita `disableWebhooksWithHighFailures(10)` baada ya kila feni kuisha, kwa hivyo mtandao wowote wenye `failure_count >= 10` huzimwa kiotomatiki.
 
 ## Hifadhidata
 
-Jedwali `webhooks` (uhamishaji `011_webhooks.sql`):
+Jedwali `webhooks` ( `011_webhooks.sql` ya uhamiaji ):
 
-| Safu                | Aina    | Maelezo                                          |
-| ------------------- | ------- | ------------------------------------------------ |
-| `id`                | TEXT PK | UUID                                             |
-| `url`               | TEXT    | URL lengwa                                       |
-| `events`            | TEXT    | Safu ya JSON; chaguo-msingi `["*"]`              |
-| `secret`            | TEXT    | Siri ya HMAC (huzalishwa kiotomatiki isipowekwa) |
-| `enabled`           | INT     | 0/1; chaguo-msingi ni 1                          |
-| `description`       | TEXT    | Lebo ya hiari inayosomeka na binadamu            |
-| `created_at`        | TEXT    | `datetime('now')`                                |
-| `last_triggered_at` | TEXT    | Husasishwa katika kila jaribio la uwasilishaji   |
-| `last_status`       | INT     | Hali ya HTTP ya jaribio la mwisho (0 = mtandao)  |
-| `failure_count`     | INT     | Huwekwa upya kuwa 0 ikifaulu, +1 ikishindwa      |
+| Safu                | Aina    | Vidokezo                                                    |
+| ------------------- | ------- | ----------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                        |
+| `url`               | TEXT    | Marudio ya URL                                              |
+| `events`            | TEXT    | safu ya JSON ; `["*"]` chaguo-msingi                        |
+| `secret`            | TEXT    | Siri ya HMAC (inayozalishwa otomatiki ikiwa haijatolewa)    |
+| `enabled`           | INT     | 0/1; chaguo-msingi kwa 1                                    |
+| `description`       | TEXT    | Lebo ya hiari ya binadamu                                   |
+| `created_at`        | TEXT    | `datetime('now')`                                           |
+| `last_triggered_at` | TEXT    | Inasasishwa kwa kila jaribio la uwasilishaji                |
+| `last_status`       | INT     | Hali ya HTTP ya jaribio la mwisho (mtandao = 0)             |
+| `failure_count`     | INT     | Huweka upya hadi 0 kwenye mafanikio, + 1 baada ya kutofaulu |
 
-Historia ya uwasilishaji huhifadhiwa katika jedwali maalumu la `webhook_deliveries`
-(uhamishaji `069_webhook_deliveries.sql`, ikiandikwa kupitia
-`src/lib/db/webhookDeliveries.ts::insertDelivery` katika kila jaribio), pamoja
-na vihesabu vya jumla kwenye safu ya `webhooks`. Metadata ya aina (Slack / Discord /
-Telegram / vibadilishaji maalumu vya payload) iliongezwa na `070_webhooks_kind_metadata.sql`.
+Historia ya uwasilishaji imeendelezwa katika jedwali maalum la `webhook_deliveries` (uhamiaji `069_webhook_deliveries.sql`, iliyoandikwa kupitia `src/lib/db/webhookDeliveries.ts::insertDelivery` kwa kila jaribio), pamoja na vihesabio vya jumla kwenye safu mlalo `webhooks`. Metadata ya aina (Slack / Discord / Telegram / transfoma maalum ya upakiaji) iliongezwa na `070_webhooks_kind_metadata.sql`.
 
-## API ya REST
+## REST API
 
-Vituo vyote vinahitaji uthibitishaji wa usimamizi (`requireManagementAuth`).
+Miisho yote inahitaji uthibitisho wa usimamizi (`requireManagementAuth`).
 
-| Kituo                           | Mbinu  | Maelezo                                                     |
-| ------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Orodhesha webhook (siri zimefichwa)                         |
-| `/api/webhooks`                 | POST   | Unda webhook                                                |
-| `/api/webhooks/[id]`            | GET    | Maelezo ya webhook (siri kamili)                            |
-| `/api/webhooks/[id]`            | PUT    | Sasisha sehemu                                              |
-| `/api/webhooks/[id]`            | DELETE | Ondoa                                                       |
-| `/api/webhooks/[id]/test`       | POST   | Tuma `test.ping` (hakuna majaribio ya kurudia)              |
-| `/api/webhooks/[id]/deliveries` | GET    | Majaribio ya hivi karibuni ya uwasilishaji kwa webhook moja |
-| `/api/webhooks/validate-url`    | POST   | Uthibitishaji wa awali wa URL (ulinzi wa SSRF)              |
+| Mwisho                          | Mbinu  | Maelezo                                                               |
+| ------------------------------- | ------ | --------------------------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Orodhesha vijiti vya wavuti (siri zilizofichwa)                       |
+| `/api/webhooks`                 | POST   | Unda kitabu cha wavuti                                                |
+| `/api/webhooks/[id]`            | GET    | Maelezo ya wavuti (siri kamili)                                       |
+| `/api/webhooks/[id]`            | PUT    | Sasisha sehemu                                                        |
+| `/api/webhooks/[id]`            | DELETE | Ondoa                                                                 |
+| `/api/webhooks/[id]/test`       | POST   | Zima `test.ping` (hakuna majaribio tena)                              |
+| `/api/webhooks/[id]/deliveries` | GET    | Majaribio ya hivi majuzi ya uwasilishaji kwa kitabu kimoja cha wavuti |
+| `/api/webhooks/validate-url`    | POST   | Uthibitishaji wa URL kabla ya safari ya ndege (SSRF guard)            |
 
-`GET /api/webhooks` huficha siri kuwa `<first 10 chars>...` ili kuepuka kuivujisha
-kwenye kurasa za orodha. Tumia GET ya `[id]` unapohitaji siri hiyo kwa hakika.
+`GET /api/webhooks` inaficha siri ya `<first 10 chars>...` ili kuepuka kuvuja kwenye kurasa za kuorodhesha. Tumia `[id]` GET wakati unahitaji siri.
 
-### Unda webhook
+### Unda kitabu cha wavuti
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ikiwa `secret` imeachwa, seva huzalisha siri ya `whsec_<hex>` na kuirejesha
-katika jibu.
+Ikiwa `secret` itaachwa, seva hutoa siri `whsec_<hex>` na kuirudisha katika jibu.
 
-### Jaribu webhook
+### Mtihani webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Hurejesha `{ delivered, status, error }`. Hakuna majaribio ya kurudia yanayofanywa — ni muhimu kwa
-kuthibitisha kwa haraka kwamba kipokezi kinakubali payload na sahihi.
+Hurejesha `{ delivered, status, error }`. Hakuna majaribio tena yanayojaribiwa — muhimu kwa kuthibitisha kwa haraka kwamba mpokeaji anakubali mzigo wa malipo na saini.
 
 ## Dashibodi
 
-Ukurasa wa dashibodi katika `/dashboard/webhooks` (angalia
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) hutoa:
+Ukurasa wa dashibodi katika `/dashboard/webhooks` (tazama `src/app/(dashboard)/dashboard/webhooks/page.tsx`) hutoa:
 
-- Kuunda/kuhariri webhooks kwa kutumia kiteua tukio
-- Kiashiria cha hali (inatumika / haitumiki / ina hitilafu) kulingana na `enabled`,
-  `failure_count`, na `last_status`
-- Uwasilishaji wa majaribio kwa mbofyo mmoja
-- Kitufe cha kuwezesha/kuzima kwa mikono
+- Create/edit inashirikiana na kiteua tukio
+- Kiashiria cha hali (inafanya kazi / haifanyi kazi / ina makosa) kulingana na `enabled`, `failure_count`, na `last_status`
+- Uwasilishaji wa jaribio la kubofya mara moja
+- Kugeuza enable/disable kwa mikono
 
-## Mifano ya Payload
+## Mifano ya Upakiaji
 
-### request.completed
+### ombi.limekamilika
 
 ```json
 {
@@ -201,7 +181,7 @@ Ukurasa wa dashibodi katika `/dashboard/webhooks` (angalia
 }
 ```
 
-### test.ping
+### mtihani.ping
 
 ```json
 {
@@ -214,29 +194,19 @@ Ukurasa wa dashibodi katika `/dashboard/webhooks` (angalia
 }
 ```
 
-Miundo ya sehemu za matukio yasiyo ya `test.ping` hufafanuliwa na sehemu za msimbo zinazoyatoa;
-chukulia kipengee cha `data` kuwa kinachooana na matoleo yajayo (ongeza sehemu, usitegemee
-kutokuwepo kwake).
+Maumbo ya uwanja kwa matukio yasiyo ya `test.ping` yanafafanuliwa na tovuti za simu zinazozitoa; chukulia kitu cha `data` kama kinachoendana mbele (ongeza uwanja, usitegemee kutokuwepo).
 
-## Mbinu Bora
+## Mazoea Bora
 
-- **Thibitisha sahihi katika kila uwasilishaji** dhidi ya mwili ghafi — hii huzuia
-  maombi bandia ya POST kutoka kwa yeyote anayekisia URL ya webhook yako.
-- **Jibu kwa 2xx ndani ya takriban sekunde 5** — kisambazaji hukatiza baada ya sekunde 10. Vipokezi
-  vya polepole vitatumia majaribio ya kurudia na kuongeza `failure_count`.
-- **Fanya vishughulikiaji viwe idempotent** — majaribio ya kurudia na semantiki za uwasilishaji
-  wa angalau mara moja humaanisha kuwa nakala rudufu zinaweza kutokea.
-- **Jisajili kwa kiwango cha chini** — orodhesha tu matukio unayotumia; `"*"` itaongeza
-  gharama kwa vipokezi usivyovidhibiti.
-- **Fuatilia `failure_count`** — endpoints huzimwa kiotomatiki baada ya hitilafu 10
-  mfululizo; iweke upya kwa kuita `PUT /api/webhooks/[id]` ukiwa na `enabled: true`
-  baada ya kurekebisha kipokezi.
-- **Badilisha siri mara kwa mara** — tumia `PUT` kuweka `secret` mpya, peleka thamani mpya
-  kwa kipokezi, na uthibitishe kupitia endpoint ya majaribio.
+- **Thibitisha saini kwenye kila usafirishaji** dhidi ya mwili mbichi — huzuia POSTs potofu kutoka kwa mtu yeyote anayekisia URL yako ya wavuti.
+- **Jibu 2xx ndani ya ~ sekunde 5** — mtumaji anatoka nje kwa sekunde 10. Wapokezi wa polepole watakula majaribio tena na kuongeza `failure_count`.
+- **Wafanye washikaji wasiwe na uwezo** — inajaribu tena na semantiki za uwasilishaji angalau mara moja inamaanisha kuwa nakala zinawezekana.
+- **Jisajili kwa uchache** — orodhesha matukio tu unayotumia; `"*"` itaongeza gharama kwa vipokezi usivyovidhibiti.
+- **Tazama `failure_count`** Vituo vya mwisho — vimezimwa kiotomatiki kwa kushindwa mara 10 mfululizo; weka upya kwa kupiga `PUT /api/webhooks/[id]` na `enabled: true` baada ya kurekebisha mpokeaji.
+- **Zungusha siri mara kwa mara** — `PUT` `secret` mpya, peleka thamani mpya kwa mpokeaji, na uthibitishe kupitia sehemu ya mwisho ya jaribio.
 
-## Angalia Pia
+## Tazama Pia
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — kiolesura kamili cha API ya usimamizi
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantiki za circuit breaker / cooldown
-  zinazosababisha hitilafu za watoa huduma kuonyeshwa kupitia `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — usimamizi kamili uso wa API
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — kivunja mzunguko / semantiki za kupoeza nyuma ya hitilafu za mtoa huduma zilijitokeza kupitia `request.failed`
 - Chanzo: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

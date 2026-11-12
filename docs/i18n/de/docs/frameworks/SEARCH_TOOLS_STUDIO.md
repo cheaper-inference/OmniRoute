@@ -54,7 +54,7 @@ Neuer Tab zum Extrahieren von Inhalten aus einer URL über `POST /v1/web/fetch` 
 - Eingabe: URL + Umschalter für vollständige Seite + Formatauswahl (Markdown / Text / HTML).
 - Absenden → abrufen → `ScrapeResult.tsx` rendern.
 - `ScrapeResult` rendert eine Markdown-Vorschau + Umschalter für Rohdaten.
-- Begrenzung: Wenn der Antworttext größer als **256 KB** ist, zeigt die Benutzeroberfläche `(gekürzt, Rohdaten anzeigen)` an und öffnet die Rohdaten in einem Monaco-Modal (D21).
+- Begrenzung: Wenn der Antworttext größer als **256 KB** ist, zeigt die Benutzeroberfläche `View full raw content` an und öffnet die Rohdaten in einem Modal (D21).
 - Metadatenbereich: Anbieter (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), Latenz, Kosten, Antwortgröße, Anzahl der Links.
 - Verwendet den Hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Führt dieselbe Abfrage/URL bei bis zu **4 Anbietern parallel** aus (D22):
 `ProviderCatalog.tsx` stellt die vollständige Anbieterliste aus `GET /api/search/providers` bereit
 (in F4 um Abrufanbieter erweitert):
 
-| `kind` | `"search"` (20 Anbieter) oder `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 Anbieter) oder `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Der Status wird **zum Zeitpunkt der Anfrage abgeleitet**, indem geprüft wird, ob Anmeldedaten vorhanden sind und ob
 sich derzeit alle Schlüssel in der Abklingzeit befinden.
+
+`codex-search` (Codex Web Search): Verwendet deine verbundenen Codex-Konten (ChatGPT), ohne einen separaten Schlüssel. Jede Suche verbraucht Abonnementkontingent und dauert etwa 10–40 s. Wird ausgeführt, wenn eine Anfrage den Anbieter nennt; die automatische Auswahl erfordert das standardmäßig deaktivierte Flag `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`.
 
 ---
 

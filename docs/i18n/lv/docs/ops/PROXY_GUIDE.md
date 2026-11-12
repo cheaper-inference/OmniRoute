@@ -394,7 +394,7 @@ Izmanto `wreq-js`, lai ģenerētu pārlūkprogrammai līdzīgus TLS digitālos n
 
 ### CLI digitālā nospieduma atbilstība
 
-**CLI digitālā nospieduma pārslēgs** (`Iestatījumi → Drošība`) pārkārto HTTP galvenes un JSON pamatteksta laukus, lai tie precīzi atbilstu vietējo CLI bināro failu (Claude Code, Codex u.c.) signatūrai. Tas darbojas **papildus** starpniekserverim:
+**CLI digitālā nospieduma pārslēgs** (`Settings → Security`) pārkārto HTTP galvenes un JSON pamatteksta laukus, lai tie precīzi atbilstu vietējo CLI bināro failu (Claude Code, Codex u.c.) signatūrai. Tas darbojas **papildus** starpniekserverim:
 
 ```
 Jūsu IP (bloķēta) → Starpniekservera IP (ASV) → Pakalpojumu sniedzēja API

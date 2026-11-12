@@ -4,14 +4,7 @@
 
 ---
 
-title: "Routing rozumowania"
----
-
-# Routing rozumowania
-
-Reguły routingu rozumowania rozszerzają istniejący routing modeli i combo. Gdy żadna aktywna reguła nie pasuje,
-dotychczasowe zachowanie thinking, suffix, connection-default oraz translacji providera pozostaje
-bez zmian.
+Reguły routingu rozumującego rozszerzają istniejący routing modelowy i kombinowany. Gdy nie pasuje żadna aktywna reguła, istniejące myślenie, sufiks, domyślne połączenie i zachowanie dostawcy-tłumaczenia pozostają niezmienione.
 
 ## Zarządzanie
 

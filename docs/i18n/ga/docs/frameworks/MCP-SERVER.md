@@ -37,7 +37,7 @@ omniroute mcp restart                                 # resets active sse/stream
 
 ## Iompar
 
-Nochtaíonn an freastalaí MCP trí iompar, go léir bunaithe ar an mbonn chruthaitheoir céanna `createMcpServer()`:
+Nochtann freastalaí MCP trí iompar, agus iad ar fad le tacaíocht ón monarcha `createMcpServer()` céanna:
 
 | Iompar            | An áit                                      | Cathain le húsáid                                                  |
 | :---------------- | :------------------------------------------ | :----------------------------------------------------------------- |
@@ -45,7 +45,7 @@ Nochtaíonn an freastalaí MCP trí iompar, go léir bunaithe ar an mbonn chruth
 | `sse`             | `POST/GET /api/mcp/sse` trí `httpTransport` | Cliaint brabhsálaí/oibríochtaí a dteastaíonn sruth imeachtaí uathu |
 | `streamable-http` | `POST/GET/DELETE /api/mcp/stream`           | Cliaint HTTP il-seisiún (`mcp-session-id` ceanntásc)               |
 
-Roghnaítear an t-iompar HTTP gníomhach (`sse` nó `streamable-http') le socrúchán `mcpTransport`. Nuair a athraítear iompair, dúnann sé seisiúin reatha ar an iompar eile.
+Roghnaíonn an socrú `mcpTransport` iompar gníomhach HTTP (`sse` nó `streamable-http`). Dúnann malartú iompair na seisiúin atá ann cheana féin ar an iompar eile.
 
 ### Rochtain iargúlta (tearmann scóip an bhainistíochta)
 
@@ -110,7 +110,7 @@ Cursor, Cline, agus socrú cliaint MCP comhoiriúnach.
 | `omniroute_simulate_route`         | `read:health`, `read:combos`         | Insamhladh ródaithe tirim le crann titim-siar                                                                |
 | `omniroute_set_budget_guard`       | `write:budget`                       | Buiséad seisiúin le gníomh díghrádaithe/coisc/foláirimh                                                      |
 | `omniroute_set_routing_strategy`   | `write:combos`                       | Nuashonraigh straitéis combo ag am rite (tosaíocht/meáite/uathoibríoch/srl.)                                 |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Cuir i bhfeidhm réamhshocrú athléimneachta `ionsaitheach` / `cothrom` / `coimeádach`                         |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Cuir réamhshocrú athléimneachta `aggressive` / `balanced` / `conservative` i bhfeidhm                        |
 | `omniroute_test_combo`             | `execute:completions`, `read:combos` | Tástáil bheo ar gach soláthróir i gcombo ag úsáid glao fíor-uasshrutha                                       |
 | `omniroute_get_provider_metrics`   | `read:health`                        | Méadracht in aghaidh an tsoláthróra le latency p50/p95/p99 agus staid scoradáin chiorcaid                    |
 | `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Mol combo de réir chineál tasc le srianta buiséid/latency                                                    |

@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Kontrollpanelet åpnes på `http://localhost:20128`, og API-ens grunn-URL er `http://localhost:20128/v1`.
+Dashboard åpnes ved `http://localhost:20128` og API base URL er `http://localhost:20128/v1`.
+
+> **npm-brukere:** Hvis npm advarer om at installasjonsskript ble blokkert (f.eks. `omniroute`, `better-sqlite3`), se [Feilsøking av — npm install-skript blokkert](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

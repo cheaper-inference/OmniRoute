@@ -20,7 +20,7 @@ Kad IDE aģents (piemēram, GitHub Copilot, Cursor, Claude kods) veic API zvanu,
 
 Tas nozīmē, ka jūs varat:
 
-- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 381 nodrošinātājiem.
+- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 388 nodrošinātājiem.
 - **Izmantojiet modeļu kartējumus** : `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
 - **Ievērojiet visu aģentu satiksmi** : katrs pārtvertais pieprasījums tiek publicēts [satiksmes inspektoram](./TRAFFIC_INSPECTOR.md).
 - **Pielietojiet OmniRoute elastību** : kombinētā maršrutēšana, automātiskie slēdži, atkāpšanās un izmaksu izsekošanas darbi arī IDE aģentu datplūsmai.
@@ -558,7 +558,7 @@ Trae ir salīdzinoši jauns MI programmēšanas asistents. Pirms apdarinātāja 
 3. Nosakiet autentifikācijas mehānismu
 4. Izvērtējiet ieviešanas lietderību, pamatojoties uz pakalpojuma noteikumiem un API atklājamību
 
-Līdz izpētes pabeigšanai Trae kartītē informācijas panelī tiek rādīta emblēma „Notiek izpēte” ar saiti „Ziņot par īstenojamību”. Apdarinātāja aizmetnis failā `src/mitm/handlers/trae.ts` izmet strukturētu kļūdu `Vēl nav ieviests`.
+Līdz izpētes pabeigšanai Trae kartītē informācijas panelī tiek rādīta emblēma „Notiek izpēte” ar saiti „Ziņot par īstenojamību”. Apdarinātāja aizmetnis failā `src/mitm/handlers/trae.ts` izmet strukturētu kļūdu `Not yet implemented`.
 
 ### Neizpildīto darbu aģenti (nepieciešams MITM — pielāgota bāzes URL atbalsta nav)
 

@@ -20,14 +20,16 @@
 
 ## Способы установки
 
-### npm (рекомендуется)
+### НПМ (рекомендуется)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Панель управления откроется по адресу `http://localhost:20128`, а базовый URL API — `http://localhost:20128/v1`.
+Панель мониторинга открывается в `http://localhost:20128`, а база API URL — `http://localhost:20128/v1`.
+
+> **Пользователи нпм:** Если npm предупреждает, что сценарии установки заблокированы (например, `omniroute`, `better-sqlite3`), см. [раздел Устранение неполадок — заблокированные сценарии установки npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

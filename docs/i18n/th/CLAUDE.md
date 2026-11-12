@@ -15,7 +15,7 @@
 
 โปรโตคอล worktree แบบบังคับฉบับสมบูรณ์ (การยืนยัน base branch, เส้นทางมาตรฐาน `.claude/worktrees/`,
 `cp -al` node_modules, กฎการ teardown) อยู่ที่
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (สรุปไว้ใน `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (สรุปไว้ใน `AGENTS.md` →
 Git Workflow → "Worktree isolation") ประเด็นเฉพาะสำหรับ Claude Code:
 
 - ยืนยัน base branch กับผู้ใช้งานผ่าน `AskUserQuestion` (Hard Rule #19) เว้นแต่พวกเขาจะ

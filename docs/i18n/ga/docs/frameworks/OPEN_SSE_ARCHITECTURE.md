@@ -486,13 +486,13 @@ Láimhseálann sé seo:
 
 Coinníonn `open-sse/config/` an ciseal cumraíochta:
 
-| Comhad                        | Cuspóir                                           |
-| ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Clár comhrá-mhúnla thar an gcatalóg 381-soláthraí |
-| `providerModels.ts`           | Ailiasanna múnla, mapáil formáide                 |
-| `constants.ts`                | Amanna ama, teorainneacha, cóid stádais           |
-| `defaultThinkingSignature.ts` | Síniú smaoineamh Claude réamhshocraithe           |
-| `modelStrip.ts` (i seirbhísí) | Bearradh páirce in aghaidh an tsoláthraí          |
+| Comhad                        | Cuspóir                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `providerRegistry.ts`         | Clár comhrá samhail thar an gcatalóg 388-soláthraí |
+| `providerModels.ts`           | Ailiasanna múnla, mapáil formáide                  |
+| `constants.ts`                | Amanna ama, teorainneacha, cóid stádais            |
+| `defaultThinkingSignature.ts` | Síniú smaoineamh Claude réamhshocraithe            |
+| `modelStrip.ts` (i seirbhísí) | Bearradh páirce in aghaidh an tsoláthraí           |
 
 ### Scéimre Chlárlann Soláthraí
 

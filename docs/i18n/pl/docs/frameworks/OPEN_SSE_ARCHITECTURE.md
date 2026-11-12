@@ -4,16 +4,9 @@
 
 ---
 
-title: "Architektura open-sse"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
+> **TL;DR** : `open-sse/` to podstawowy silnik przesyłania strumieniowego, który obsługuje każde żądanie LLM w OmniRoute. Zawiera 1400 plików ~ implementujących potok żądań, executory, usługi, serwer MCP i warstwę tłumaczeniową. W tym przewodniku wyjaśniono, w jaki sposób elementy pasują do siebie.
 
-# Architektura open-sse
-
-> **TL;DR**: `open-sse/` to rdzeń silnika strumieniowania, który obsługuje każde żądanie LLM w OmniRoute. Zawiera ~900 plików implementujących pipeline żądań, executory, serwisy, serwer MCP oraz warstwę tłumaczenia formatów. Ten przewodnik wyjaśnia, jak te elementy współgrają ze sobą.
-
-**Źródło:** `open-sse/` (pakiet workspace, ~900 plików; 811 `.ts`)
+**Źródło:** `open-sse/` (pakiet obszaru roboczego, ~ 1440 nietestowych plików `.ts` )
 
 ---
 
@@ -495,7 +488,7 @@ Obsługuje:
 
 | Plik                          | Zamiar                                            |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Rejestracja modelu czatu w katalogu 381 dostawców |
+| `providerRegistry.ts`         | Rejestracja modelu czatu w katalogu 388 dostawców |
 | `providerModels.ts`           | Aliasy modeli, mapowanie formatów                 |
 | `constants.ts`                | Limity czasu, limity, kody stanu                  |
 | `defaultThinkingSignature.ts` | Domyślny podpis myślenia Claude                   |

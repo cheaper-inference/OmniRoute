@@ -366,7 +366,7 @@ MCP工具文字結果被裁切在`mcpAccessibility.maxTextChars` （預設`50000
 
 ### 會話生命週期
 
-Streamable-HTTP 會話空閒，伺服器取得它們；空閒視窗由`OMNIROUTE_MCP_SESSION_IDLE_MS`設定（預設 5 分鐘；透過名稱引用，而不是硬編碼值，因此該頁面在更改時不會漂移）。空閒會話的症狀是HTTP 404 和`Unknown Mcp-Session-Id` —補救措施是重新連接或重新啟動會話，**不是**旋轉關鍵點、變更範圍或重新命名工具。
+Streamable-HTTP sessions idle out and the server reaps them; the idle window is configured by `OMNIROUTE_MCP_SESSION_IDLE_MS`, falling back to `DEFAULT_MCP_SESSION_IDLE_MS` in `open-sse/mcp-server/httpTransport.ts`. The symptom of an idle-reaped session is an HTTP 404 with `Unknown Mcp-Session-Id` — the remedy is to reconnect or restart the session,**不是**旋轉關鍵點、變更範圍或重新命名工具。
 
 ## API 介面
 

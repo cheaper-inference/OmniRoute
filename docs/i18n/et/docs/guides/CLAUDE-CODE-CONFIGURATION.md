@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # Claude Code kasutab mudelit glm/glm-5.2 Omni
 
 ---
 
-## Kuidas Claude kood lüüsiga ühendub
+## Kuidas Claude Code lüüsiga ühenduse loob
 
-Claude kood räägib**Anthropic Sõnumid API** ja on suunatud keskkonnamuutujatega kohandatud lõpp-punktile (sellel pole `--base-url` lippu):
+Claude Code suhtleb **Anthropic Messages API-ga** ja suunatakse kohandatud
+lõpp-punktile keskkonnamuutujate abil (sellel pole lippu `--base-url`):
 
-| Muutuv                                       | Eesmärk                                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Lüüsi juur URL (Claude Kood lisab `/v1/messages`).** `/v1` järelliide puudub.**             |
-| `ANTHROPIC_AUTH_TOKEN`                       | Saadetud kui `Authorization: Bearer …` — kasutage oma OmniRoute juurdepääsuluba / API võtit |
-| `ANTHROPIC_API_KEY`                          | Alternatiiv: saadetud kui `x-api-key`. Kui mõlemad on seatud, võidab `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Konkreetse mudeli sundimine (alistab `/model` valija vaikeseaded)                           |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → algne `/model` -valija loetleb `claude*` `/v1/models` `anthropic*` mudelid            |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Väljundlubade piiramine vastuse kohta (nt `65536`)                                          |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Automaatse tihendamise märgilävi                                                            |
+| Muutuja                                      | Otstarve                                                                                                   |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Lüüsi juur-URL (Claude Code lisab `/v1/messages`). **Ilma `/v1` järelliiteta.**                            |
+| `ANTHROPIC_AUTH_TOKEN`                       | Saadetakse kujul `Authorization: Bearer …` — kasuta oma OmniRoute'i juurdepääsutõendit / API-võtit         |
+| `ANTHROPIC_API_KEY`                          | Alternatiiv: saadetakse kujul `x-api-key`. Kui mõlemad on määratud, eelistatakse `ANTHROPIC_AUTH_TOKEN`-it |
+| `ANTHROPIC_MODEL`                            | Sunnib kasutama kindlat mudelit (alistab valija `/model` vaikeväärtuse)                                    |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → omavalija `/model` loetleb lõpp-punkti `/v1/models` mudelid `claude*`/`anthropic*`                   |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Piirab väljundtokenite arvu vastuse kohta (nt `65536`)                                                     |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokenite lävend automaatseks tihendamiseks                                                                 |
 
-> Env vars loetakse** üks kord käivitamisel** — taaskäivitage Claude kood pärast nende muutmist.
+> Keskkonnamuutujaid loetakse **ainult üks kord käivitamisel** — pärast nende muutmist taaskäivita Claude Code.
 
-Fikseeritud stringi asemel pöörleva mandaadi puhul määrake `apiKeyHelper` in `~/.claude/settings.json` käsuks, mis prindib praeguse mandaadi stdout. Claude -kood salvestab oma väljundi vaikimisi viis minutit vahemällu (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` alistab selle) ja saadab väärtuse nii `Authorization: Bearer` kui ka `x-api-key`. Skript peab printima mandaadi ja miski muu — bänneriga kõrvuti ei vea abistajat versioonil 2.1.227 +.
+Fikseeritud stringi asemel vahetuva mandaadi kasutamiseks määra `~/.claude/settings.json` failis `apiKeyHelper` käsuks, mis väljastab praeguse mandaadi stdouti. Claude Code hoiab selle väljundit vaikimisi viis minutit vahemälus (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` muudab seda aega) ning saadab väärtuse nii `Authorization: Bearer` kui ka `x-api-key` päises. Skript peab väljastama ainult mandaadi; sellele lisatud teavitusbanner põhjustab abilise tõrke versioonis v2.1.227+.
 
-Entra ID SSO töötab nii: `scripts/cli/omniroute-sso.mjs token` prindib lühiajalise Entra juurdepääsuloa, mida OmniRoute kontrollib API võtme asemel. Vaata [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Nii töötab Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` väljastab lühikese kehtivusajaga Entra pääsutõendi, mida OmniRoute kontrollib API võtme asemel. Vt [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` määrab need kõik teie eest: see lahendab aktiivsest kontekstist URL + põhimärgi (nii et `omniroute connect <vps>` ja `omniroute launch` lihtsalt töötab), kontrollib serveri seisundit ja teostab `claude`.
+`omniroute launch` määrab kõik need sinu eest: see tuvastab aktiivse konteksti
+põhjal baas-URL-i ja tõendi (seega pärast `omniroute connect <vps>` käsku
+`omniroute launch` lihtsalt töötab), kontrollib serveri seisundit ning käivitab käsu `claude`.
+
+---
+
+## Kasutamise omistamine: seansid ja projektid
+
+OmniRoute rühmitab iga API võtme taotlused **agentide istungid** ja salvestab, mis **projekt** iga seansi kallal töötati (`agent_sessions` tabel), nii et kasutust ja kulusid saab esitada meeskonnaliikme, projekti ja seansi kohta.
+
+Mis salvestatakse ilma kliendi seadistamiseta:
+
+| Väli    | Allikas                                                                                                                                        |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seanss  | `x-claude-code-session-id` päis (sama väärtus kui `metadata.user_id.session_id`), stabiilne seansi kohta                                       |
+| Projekt | `Primary working directory:` rida Claude kood saadab oma keskkonnateate; `.claude/worktrees/` all olevad tööpuu kaustad lahendavad hoidla nime |
+| Filiaal | `Current branch:` git-olekust Claude -kood saadab esimese sõnumiga                                                                             |
+| Klient  | `user-agent` (`claude-cli/<version>`)                                                                                                          |
+
+Codex (`<environment_context><cwd>`) ja OpenCode (`x-opencode-session`) tuvastatakse samal viisil. Võtmed koos **no-log** lubatud säilitab ainult seansi ID ja päisega antud projektiväljad; midagi viipast loetut (tee, haru) ei salvestata.
+
+### Projekti selgesõnaline nimetamine (soovitatav)
+
+Töökataloog erineb masinate vahel, seega võib sama hoidla kuvada erinevatel teedel. Selle asemel saatke projekt selgesõnaliselt: Claude kood lisab igale mudelipäringule kõik `ANTHROPIC_CUSTOM_HEADERS` loetletud päised ja OmniRoute loeb neist kaks:
+
+| Päis                       | Väärtus                                                                  |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Projekti nimi, nt `omniroute`                                            |
+| `x-omniroute-project-repo` | Normaliseeritud kaugjuhtimispult, nt `github.com/diegosouzapw/OmniRoute` |
+
+Mõlemat loetakse ainult omistamiseks; neid ei edastata kunagi ülesvoolu pakkujale.
+
+`ANTHROPIC_CUSTOM_HEADERS` loetakse käivitamisel üks kord ja seadete failid salvestavad sõnasõnalisi väärtusi, nii et arvutage see Claude -koodi käivitamisel. Lisage see `~/.zshrc` sse või `~/.bashrc` ja jätkake `claude` käivitamist projekti kaustast:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` avaldis eemaldab kõik kaug URL sse manustatud mandaadid. IDE laiendused käivitavad Claude koodi ilma teie kestata, nii et nende seansid langevad tagasi töökataloogi.
 
 ---
 

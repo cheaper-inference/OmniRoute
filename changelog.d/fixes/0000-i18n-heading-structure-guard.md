@@ -1,0 +1,1 @@
+- **fix(i18n):** Reject translated chunks and cached mirrors with added, missing, or reordered ATX heading levels while preserving translated titles, fenced examples, and indented code.

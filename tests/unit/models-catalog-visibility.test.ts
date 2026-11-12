@@ -11,12 +11,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { installOfflineCatalogNetwork } from "../_helpers/offlineCatalogNetwork.ts";
+
+const network = installOfflineCatalogNetwork();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-catalog-visibility-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const { mergeModelCompatOverride } = await import("@/lib/db/models");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const catalogRoute = await import("../../src/app/api/models/catalog/route.ts");
@@ -25,12 +29,16 @@ const catalogUtils =
 const visibilityUtils =
   await import("../../src/app/(dashboard)/dashboard/models/catalogVisibility.ts");
 
+network.activate();
+
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
+  // These contracts cover saved rows; synthesized auto/* models and live quota APIs are separate.
+  await settingsDb.updateSettings({ hideAutoCombos: true });
 }
 
 test.beforeEach(async () => {
@@ -38,8 +46,17 @@ test.beforeEach(async () => {
 });
 
 test.after(async () => {
-  core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  try {
+    await v1ModelsCatalog.__flushCatalogBackgroundRefreshForTest();
+    assert.deepEqual(network.unexpectedRequests, [], "catalog contracts must stay offline");
+  } finally {
+    try {
+      core.resetDbInstance();
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    } finally {
+      await network.restore();
+    }
+  }
 });
 
 type CatalogEntry = {

@@ -393,7 +393,7 @@ Koristi `wreq-js` za generiranje TLS otisaka nalik onima iz preglednika, čime z
 
 ### Usklađivanje CLI otiska
 
-**Prekidač CLI otiska** (`Postavke → Sigurnost`) mijenja redoslijed HTTP zaglavlja i polja JSON tijela kako bi odgovarali točnom potpisu izvornih CLI izvršnih datoteka (Claude Code, Codex itd.). Ovo funkcionira **povrh** proxyja:
+**Prekidač CLI otiska** (`Settings → Security`) mijenja redoslijed HTTP zaglavlja i polja JSON tijela kako bi odgovarali točnom potpisu izvornih CLI izvršnih datoteka (Claude Code, Codex itd.). Ovo funkcionira **povrh** proxyja:
 
 ```
 Vaš IP (blokiran) → IP proxyja (SAD) → API pružatelja

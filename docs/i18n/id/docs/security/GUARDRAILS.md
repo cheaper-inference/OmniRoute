@@ -26,11 +26,12 @@ Hook **tidak** berjalan pada setiap rute atau setiap respons. Baca
 [Cakupan dan batasan](#coverage-and-limits) sebelum mengandalkan guardrail
 sebagai kontrol keamanan.
 
-## Pagar Pembatas Bawaan
+## Guardrail Bawaan
 
-Registri secara otomatis memuat enam pagar pembatas dalam urutan prioritas saat impor (lihat `registry.ts` → `registerDefaultGuardrails()`):
+Registry memuat enam guardrail secara otomatis dalam urutan prioritas saat
+impor (lihat `registry.ts` → `registerDefaultGuardrails()`):
 
-| Prioritas | Nama                | Panggung       | Mengajukan            |
+| Prioritas | Nama                | Tahap          | Berkas                |
 | --------- | ------------------- | -------------- | --------------------- |
 | `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -39,111 +40,253 @@ Registri secara otomatis memuat enam pagar pembatas dalam urutan prioritas saat 
 | `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Nomor dengan prioritas lebih rendah dijalankan** Pertama** .
+Angka prioritas yang lebih kecil berjalan **lebih dulu**.
 
-### Jembatan Visi (`visionBridge.ts`) — Jembatan Modalitas PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Model dasar GLM 5.3 dan `glm-5.3-{low,high,max}` memiliki metadata `supportsVision:false` registry/spec yang eksplisit. Varian GLM 5.3 Flash tetap menjadi model native-vision. Rute `/v1/messages` Kode Claude memasuki rantai pagar pembatas pra-panggilan `handleChat` bersama** sebelum** Terjemahan Claude-ke-OpenAI; gambar hasil alat `Read` yang disarangkan harus dideskripsikan atau ditangani sebelum terjemahan tersebut mengangkatnya ke dalam konten OpenAI `image_url` (#17069).
+Model dasar GLM 5.3 dan `glm-5.3-{low,high,max}` memiliki metadata
+registry/spec `supportsVision:false` yang eksplisit. Varian GLM 5.3 Flash
+tetap menjadi model vision native. Rute `/v1/messages` milik Claude Code
+memasuki rantai guardrail pre-call `handleChat` bersama **sebelum** translasi
+Claude-ke-OpenAI; gambar tool-result `Read` yang bersarang harus
+dideskripsikan atau ditangani sebelum translasi tersebut mengangkatnya ke
+dalam konten `image_url` OpenAI (#17069).
 
-Mencegat permintaan yang mengandung gambar yang ditujukan** model non-visi** dan merutekan ulang seluruh permintaan ke model berkemampuan visi atau mengganti bagian gambar dengan deskripsi teks yang dihasilkan oleh model visi yang dapat dikonfigurasi sebelum panggilan upstream. Hal ini memungkinkan penyedia layanan teks saja menangani muatan multimoda secara transparan.
+Mencegat permintaan pembawa gambar yang ditujukan ke **model non-vision** dan
+mengalihkan rute seluruh permintaan ke model berkemampuan vision, atau
+mengganti bagian-bagian gambar dengan deskripsi teks yang dihasilkan oleh
+model vision yang dapat dikonfigurasi sebelum panggilan upstream. Ini
+memungkinkan penyedia khusus-teks menangani payload multimodal secara
+transparan.
 
-Mengalir:
+Alur:
 
-1. Lewati jika model target sudah mendukung visi (kecuali jika muncul dalam daftar jembatan paksa `isVisionBridgeForcedModel`).
-2. Ekstrak bagian gambar melalui `extractImageParts(messages)` (`visionBridgeHelpers.ts`), yang didelegasikan ke** detektor media terpadu** `detectMediaParts()` di `open-sse/utils/mediaParts.ts` — satu-satunya sumber kebenaran yang dibagikan dengan filter kompatibilitas kombo. Ekstraksi diperbolehkan ke bentuk `replaceImageParts` dapat sambung kembali (ekstrak ↔ ganti kontrak): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, dan Responses API `input_image`. Gambar yang cocok yang disarangkan di dalam kode Claude `tool_result.content` dan keluaran alat Respons juga diekstraksi dan diganti di jalur aslinya; bentuk hanya indikator adalah bahan filter kombo dan tidak diekstraksi. Lewati jika tidak ada yang ditemukan.
-3. Selesaikan konfigurasi runtime melalui `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): kunci pengaturan `modalityBridge*` baru menang; kunci `visionBridge*` warisan tetap a** fallback satu siklus** (jendela kembalikan). Lewati sebelum traversal media apa pun saat jembatan dinonaktifkan.
-4. Pemilih mode (`modalityBridgeVisionMode`, lihat tabel di bawah) memutuskan rute ulang vs deskripsi. Rute ulang mengembalikan `modifiedPayload` dengan hanya `model` yang ditukar, ditambah meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Jelaskan jalur: batasi gambar di `maxImages`, buat prompt sadar tugas, lihat cache deskripsi, panggil model visi** secara paralel** (`Promise.allSettled`), dan masukkan bagian teks `[Image N]: <description>` di tempatnya. Deskripsi yang gagal menghasilkan `null`: gambar mentah dipertahankan untuk target unknown/vision-capable (#4012), tetapi a** target langsung hanya teks yang dikonfirmasi** atau kombo zero-vision mendapatkan rintisan teks `(unavailable — no vision-capable provider connected)` eksplisit untuk setiap gambar yang tidak dideskripsikan, termasuk kegagalan sebagian dan gambar di luar batas panggilan deskripsi (#17069). Kombo semua gagal yang ada menjelaskan fallback tetap di tempatnya (#8430).
-6. Kembalikan `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Lewati jika model target sudah mendukung vision (kecuali jika model
+   tersebut tercantum dalam daftar forced-bridge `isVisionBridgeForcedModel`).
+2. Ekstrak bagian gambar melalui `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), yang mendelegasikan ke **detektor media
+   terpadu** `detectMediaParts()` di `open-sse/utils/mediaParts.ts` — sumber
+   acuan tunggal yang dipakai bersama dengan filter kompatibilitas combo.
+   Ekstraksi dibatasi (allowlist) pada bentuk-bentuk yang dapat disisipkan
+   kembali oleh `replaceImageParts` (kontrak extract↔replace): `image_url`
+   OpenAI, base64 Anthropic `source.type:"base64"`, URL Anthropic
+   `source.type:"url"`, dan `input_image` Responses API. Gambar yang cocok
+   dan bersarang di dalam `tool_result.content` Claude Code serta output tool
+   Responses juga diekstrak dan diganti di jalur aslinya; bentuk
+   khusus-indikator adalah materi filter combo dan tidak diekstrak.
+   Lewati jika tidak ada yang ditemukan.
+3. Selesaikan konfigurasi runtime melalui `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): kunci pengaturan
+   `modalityBridge*` yang baru didahulukan; kunci `visionBridge*` lawas tetap
+   menjadi **fallback satu siklus** (jendela rollback). Lewati sebelum
+   penelusuran media apa pun ketika bridge dinonaktifkan.
+4. Pemilih mode (`modalityBridgeVisionMode`, lihat tabel di bawah) memutuskan
+   reroute vs describe. Reroute mengembalikan `modifiedPayload` dengan hanya
+   `model` yang ditukar, ditambah meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Jalur describe: batasi gambar hingga `maxImages`, susun prompt yang
+   disesuaikan dengan tugas, periksa cache describe, panggil model vision
+   **secara paralel** (`Promise.allSettled`), dan sisipkan bagian teks
+   `[Image N]: <description>` sebagai penggantinya. Describe yang gagal
+   menghasilkan `null`: gambar mentah dipertahankan untuk target yang tidak
+   diketahui/berkemampuan vision (#4012), tetapi **target langsung yang
+   terkonfirmasi khusus-teks** atau combo tanpa vision mendapatkan stub teks
+   eksplisit `(unavailable — no vision-capable provider connected)` untuk
+   setiap gambar yang tidak terdeskripsikan, termasuk kegagalan parsial dan
+   gambar yang melebihi batas panggilan describe (#17069). Fallback describe
+   combo untuk kasus semua-gagal yang sudah ada tetap berlaku (#8430).
+6. Kembalikan `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
 #### Pemilih mode (`modalityBridgeVisionMode`)
 
-| Mode       | Bawaan | Perilaku                                                                                                                                                                                                                                                                                                    |
-| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔      | Heuristik lama, tidak tersentuh (#6640/#7204): model non-combo/`auto/` dialihkan ke model visi terbaik kecuali model asli sudah memiliki kredensial yang dapat digunakan (lalu jelaskan); target kombo selalu dijelaskan.                                                                                   |
-| `describe` |        | Selalu jelaskan — blok rute ulang dilewati seluruhnya; model yang dipilih pengguna selalu menjawab.                                                                                                                                                                                                         |
-| `reroute`  |        | Perutean ulang paksa: penjaga model tetap-berkredensial dilewati. Rute ulang-** target** penjaga kredensial masih menerapkan — ketika tidak ada target visi yang dapat digunakan, jembatan memblokir dengan kesalahan yang jelas daripada mendeskripsikan atau mengirim gambar mentah ke target hanya teks. |
+| Mode       | Default | Perilaku                                                                                                                                                                                                                                                                                   |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`     | ✔       | Heuristik lama, tidak diubah (#6640/#7204): model non-combo/`auto/` di-reroute ke model visi terbaik kecuali model aslinya sudah memiliki kredensial yang dapat digunakan (maka describe); target combo selalu describe.                                                                   |
+| `describe` |         | Selalu describe — blok reroute dilewati sepenuhnya; model yang dipilih pengguna selalu menjawab.                                                                                                                                                                                           |
+| `reroute`  |         | Paksa reroute: penjaga keep-credentialed-model dilewati. Penjaga kredensial **target** reroute tetap berlaku — ketika tidak ada target visi yang dapat digunakan, bridge memblokir dengan error yang jelas alih-alih melakukan describe atau mengirim gambar mentah ke target khusus teks. |
 
-Hubungan pendek mode paksa** sebelum** heuristik otomatis berjalan; Perilaku `auto` identik dengan byte dengan pagar pembatas pre-PR-1.
+Mode paksa melakukan short-circuit **sebelum** heuristik auto berjalan; perilaku `auto`
+identik secara byte dengan guardrail pra-PR-1.
 
 #### Cakupan kunci API (`visionBridgeKeyScope.ts`)
 
-Ketika kunci API pemanggil membatasi `allowedConnections`, kumpulan kuota (`allowedQuotas`) atau model (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), jembatan hanya mengambil rute ulang dan menjelaskan model yang mungkin digunakan kunci tersebut, pada koneksi yang mungkin digunakan kunci tersebut. Panggilan deskripsikan kemudian selalu melewati loop mandiri OmniRoute dengan header `x-omniroute-self-loop-key-id`, sehingga permintaan obrolan penerima menerapkan kembali kebijakan koneksi dan model kunci tersebut. `enforceApiKeyPolicy()` menghormati header itu hanya bersama dengan pembawa loop mandiri, sehingga hanya dapat mempersempit akses, dan id yang tidak terselesaikan akan ditolak.
+Ketika kunci API pemanggil membatasi `allowedConnections`, pool kuota
+(`allowedQuotas`) atau model (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), bridge hanya
+memilih model reroute dan describe yang boleh digunakan kunci tersebut, pada
+koneksi yang boleh digunakan kunci tersebut. Panggilan describe kemudian selalu
+melewati self-loop OmniRoute dengan header `x-omniroute-self-loop-key-id`,
+sehingga permintaan chat penerima menerapkan kembali kebijakan koneksi dan
+model kunci tersebut. `enforceApiKeyPolicy()` menghormati header tersebut hanya
+bersama dengan bearer self-loop, sehingga hanya dapat mempersempit akses, dan
+id yang tidak dapat di-resolve akan ditolak.
 
-Jika tidak ada model visi yang diizinkan untuk kunci tersebut, a** target hanya teks yang dikonfirmasi** menolak permintaan gambar secara lokal dengan HTTP 400 yang jelas alih-alih meneruskan byte gambar ke upstream yang tidak mampu (#17069). Untuk target dengan kemampuan visi asli atau tidak diketahui, jalur deskripsikan mempertahankan perilaku gagal-terbuka sebelumnya (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Permintaan tanpa kunci, dan kunci tanpa batasan ini, berperilaku persis seperti sebelumnya.
+Jika tidak ada model visi yang diizinkan untuk kunci tersebut, **target khusus
+teks yang terkonfirmasi** menolak permintaan gambar secara lokal dengan HTTP 400
+yang jelas alih-alih meneruskan byte gambar ke upstream yang tidak mampu
+(#17069). Untuk target dengan kemampuan visi yang tidak diketahui atau native,
+jalur describe mempertahankan perilaku fail-open sebelumnya (meta
+`{ skipped: true, reason: "no_permitted_vision_model" }`). Permintaan tanpa
+kunci, dan kunci tanpa pembatasan ini, berperilaku persis seperti sebelumnya.
 
-#### Prompt deskripsi sadar tugas (`modalityBridgeVisionTaskAware`)
+#### Prompt describe yang sadar tugas (`modalityBridgeVisionTaskAware`)
 
-Bawaan** BENAR** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) menambahkan teks** pesan pengguna terakhir** (dipotong menjadi 500 karakter) ke perintah deskripsi dasar, mengarahkan deskripsi ke arah yang sebenarnya ditanyakan pengguna (pola codex-vision-proxy) dan meminta model visi untuk menyalin teks yang terlihat. Dengan tanda — dinonaktifkan atau tidak ada teks pengguna — prompt dasar digunakan tanpa perubahan.
+Default **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) menambahkan
+teks **pesan pengguna terakhir** (dipotong hingga 500 karakter) ke prompt
+describe dasar, mengarahkan deskripsi ke apa yang sebenarnya ditanyakan pengguna
+(pola codex-vision-proxy) dan meminta model visi untuk mentranskripsikan teks
+yang terlihat. Dengan flag mati — atau tanpa teks pengguna — prompt dasar
+digunakan tanpa perubahan.
 
-Permintaan yang kompatibel dengan OpenAI dari loop mandiri (`callVisionModelSingle()` dalam `visionBridgeHelpers.ts`) selalu meminta `image_url.detail: "high"` — tanpa syarat, untuk setiap caller/provider, tidak dibatasi pada sinyal klien mana pun. Pengambilan sampel dengan detail rendah menurunkan keakuratan OCR untuk tugas transkripsi teks yang diminta oleh perintah ini, sehingga panggilan deskripsikan itu sendiri selalu meminta detail tinggi terlepas dari tingkat detail apa yang digunakan permintaan masuk asli. Ini hanya mempengaruhi badan permintaan deskripsi internal; itu tidak mengubah cara OmniRoute meneruskan `image_url.detail` milik pemanggil pada permintaan utama — yang defaultnya diterapkan secara terpisah, dan hanya untuk klien OpenCode yang terdeteksi, di `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Cabang format kawat Anthropic dari deskripsikan self-loop tidak memiliki bidang `detail` dan tidak terpengaruh secara default.
+Permintaan OpenAI-compatible milik self-loop describe itu sendiri
+(`callVisionModelSingle()` di `visionBridgeHelpers.ts`) selalu meminta
+`image_url.detail: "high"` — tanpa syarat, untuk setiap pemanggil/provider,
+tidak bergantung pada sinyal klien apa pun. Sampling detail rendah menurunkan
+akurasi OCR tepat untuk tugas transkripsi teks yang diminta prompt ini,
+sehingga panggilan describe itu sendiri selalu meminta detail tinggi terlepas
+dari tingkat detail apa yang digunakan permintaan masuk asli. Ini hanya
+memengaruhi body permintaan describe internal; tidak mengubah cara OmniRoute
+meneruskan `image_url.detail` milik pemanggil pada permintaan utama — default
+tersebut diterapkan secara terpisah, dan hanya untuk klien OpenCode yang
+terdeteksi, di `defaultImageDetail()`
+(`open-sse/handlers/chatCore/upstreamBody.ts`). Cabang wire-format Anthropic
+dari self-loop describe tidak memiliki field `detail` dan tidak terpengaruh oleh
+kedua default tersebut.
 
-#### Jelaskan batas keluaran (`modalityBridgeVisionMaxChars`)
+#### Batas output describe (`modalityBridgeVisionMaxChars`)
 
-| Kunci                          | Bawaan | Jangkauan          |
-| ------------------------------ | ------ | ------------------ |
-| `modalityBridgeVisionMaxChars` | `0`    | `0` atau 100–50000 |
+| Kunci                          | Default | Rentang            |
+| ------------------------------ | ------- | ------------------ |
+| `modalityBridgeVisionMaxChars` | `0`     | `0` atau 100–50000 |
 
-`0` (default) artinya** tidak ada batasan** — deskripsi yang dikembalikan oleh `callVisionModel()` diteruskan tanpa dimodifikasi, mempertahankan perilaku yang ada. Nilai apa pun dalam rentang 100–50000 akan memotong deskripsi dengan akhiran `…` sebelum digabungkan kembali menjadi `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` di `src/lib/guardrails/visionBridge.ts`). Naikkan ini untuk tugas OCR yang sangat detail di mana model hilir memerlukan transkripsi penuh; turunkan ke penggunaan token terikat pada model visi cerewet. Bidang dasbor berada di panel Lanjutan pada tab Vision (`modality-bridge-max-chars` dalam `ModalityBridgeVisionTab.tsx`) dan menjepit nilai apa pun antara 1 dan 99 hingga lantai 100 sambil membiarkan `0` tidak tersentuh secara eksplisit — `0` adalah nilai Zod yang valid dengan sendirinya (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), bukan hanya nilai default yang "tidak disetel".
+`0` (default) berarti **tanpa batas** — deskripsi yang dikembalikan oleh
+`callVisionModel()` diteruskan tanpa modifikasi, mempertahankan perilaku yang
+ada. Nilai apa pun dalam rentang 100–50000 memotong deskripsi dengan akhiran
+`…` sebelum disisipkan kembali sebagai `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` di `src/lib/guardrails/visionBridge.ts`).
+Naikkan nilai ini untuk tugas OCR yang padat detail di mana model hilir
+membutuhkan transkripsi lengkap; turunkan untuk membatasi penggunaan token pada
+model visi yang cerewet. Field dashboard berada di panel Advanced pada tab
+Vision (`modality-bridge-max-chars` di `ModalityBridgeVisionTab.tsx`) dan
+menaikkan nilai apa pun antara 1 dan 99 ke batas bawah 100 sambil membiarkan
+`0` eksplisit tidak tersentuh — `0` adalah nilai Zod yang valid dengan
+sendirinya (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`),
+bukan sekadar default "belum diatur".
 
-#### Jelaskan cache (`modalityBridge/bridgeCache.ts`)
+#### Cache describe (`modalityBridge/bridgeCache.ts`)
 
-Cache LRU + TTL dalam memori untuk mendeskripsikan keluaran, dibagikan di seluruh proses. Kunci = `sha256(imageRef + composedPrompt + configuredBridgeModel)` dengan framing awalan panjang (tidak ada benturan batas bidang). Komponen modelnya adalah** dikonfigurasi** model jembatan, bukan model yang benar-benar menjawab — `callVisionModel` mungkin mundur secara internal, dan mengetik setiap upaya akan memecah-mecah cache. Penjelasan yang gagal tidak pernah di-cache. Pengaturan:
+Cache LRU + TTL dalam memori untuk output describe, dibagikan di seluruh proses.
+Kunci = `sha256(imageRef + composedPrompt + configuredBridgeModel)` dengan
+framing length-prefix (tanpa tabrakan batas field). Komponen model adalah model
+bridge yang **dikonfigurasi**, bukan model yang benar-benar menjawab —
+`callVisionModel` dapat melakukan fallback secara internal, dan keying per
+percobaan akan memecah cache. Describe yang gagal tidak pernah di-cache.
+Pengaturan:
 
-| Kunci                           | Bawaan | Jangkauan |
-| ------------------------------- | ------ | --------- |
-| `modalityBridgeCacheEnabled`    | `true` | —         |
-| `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440    |
-| `modalityBridgeCacheMaxEntries` | `200`  | 10–5000   |
+| Kunci                           | Default | Rentang |
+| ------------------------------- | ------- | ------- |
+| `modalityBridgeCacheEnabled`    | `true`  | —       |
+| `modalityBridgeCacheTtlMinutes` | `60`    | 1–1440  |
+| `modalityBridgeCacheMaxEntries` | `200`   | 10–5000 |
 
-#### Normalisasi gambar jarak jauh (pengambilan describe/base64 loop mandiri)
+#### Normalisasi gambar remote (self-loop describe/base64 fetch)
 
-Ketika jembatan mengambil a** terpencil** gambar itu sendiri — Anthropic mendeskripsikan panggilan mandiri dan konversi base64 format claude-wire (`ensureBase64ImagesForClaudeWire`), keduanya melalui `fetchRemoteImageAsDataUri()` di `visionBridgeHelpers.ts` — data yang dihasilkan URI dilewatkan melalui `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) sebelum disematkan dalam permintaan model visi. Gambar yang terlalu besar diperkecil menjadi a** Tepi panjang 2048 piksel** (mencocokkan batas pengubahan ukuran OpenAI/Anthropic sudah diterapkan di sisi server), yang memotong bytes/latency unggahan tanpa mengubah apa yang dilihat model visi. Mengubah ukuran menggunakan `sharp`, dimuat melalui impor dinamis: pada platform di mana biner aslinya gagal dimuat, `normalizeDataUri()`** tidak pernah melempar** — itu jatuh kembali ke passthrough byte asli, sehingga jalur describe/base64-conversion selalu berfungsi. Byte non-gambar (pengambilan yang tidak mengembalikan gambar yang dapat didekodekan) juga diteruskan tanpa disentuh. Normalisasi ini mencakup gambar yang diambil jembatan untuk panggilan mandiri — Normalisasi ini tidak pernah diterapkan pada payload passthrough mentah pemanggil, konsisten dengan prinsip mutasi opt-in-only (Hard Rule #20).
+Ketika bridge mengambil gambar **remote** itu sendiri — panggilan mandiri (self-call) describe Anthropic dan konversi base64 claude-wire-format (`ensureBase64ImagesForClaudeWire`), keduanya melalui `fetchRemoteImageAsDataUri()` di `visionBridgeHelpers.ts` — data URI yang dihasilkan dilewatkan melalui `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) sebelum disematkan ke dalam permintaan vision-model. Gambar berukuran besar diturunkan skalanya ke **sisi panjang 2048px** (sesuai dengan batas resize yang sudah diterapkan OpenAI/Anthropic di sisi server), yang memangkas byte/latensi upload tanpa mengubah apa yang dilihat model vision. Resize menggunakan `sharp`, yang dimuat melalui dynamic import: pada platform di mana binary native-nya gagal dimuat, `normalizeDataUri()` **tidak pernah melempar error** — ia melakukan fallback ke passthrough byte asli, sehingga jalur describe/konversi-base64 selalu tetap berfungsi. Byte non-gambar (fetch yang tidak mengembalikan gambar yang dapat didekode) juga dilewatkan apa adanya tanpa perubahan. Normalisasi ini dibatasi hanya untuk gambar yang diambil bridge bagi panggilan mandirinya — tidak pernah diterapkan pada payload passthrough mentah milik pemanggil, konsisten dengan prinsip mutasi khusus opt-in (Hard Rule #20).
 
-#### Pengaturan skema migrasi +
+#### Skema pengaturan + migrasi
 
-Kunci `modalityBridge*` baru divalidasi Zod di `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, trio `modalityBridgeCache*`, dan grup `modalityBridgeAudio*` yang digunakan oleh Audio Bridge. Migrasi `141_modality_bridge_settings.sql` menyalin nilai `visionBridge*` lama yang ada ke kunci baru yang cocok (idempoten, tidak pernah menimpa nilai `modalityBridge*` yang ditetapkan operator); kunci lama tetap diterima sebagai cadangan baca untuk satu siklus rilis.
+Kunci `modalityBridge*` yang baru divalidasi dengan Zod di `updateSettingsSchema`
+(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
+`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
+`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
+`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
+`modalityBridgeVisionMaxChars`, trio `modalityBridgeCache*`, dan grup `modalityBridgeAudio*` yang digunakan oleh Audio Bridge. Migrasi `141_modality_bridge_settings.sql` menyalin nilai `visionBridge*` lama yang sudah ada ke kunci baru yang sesuai (idempoten, tidak pernah menimpa nilai `modalityBridge*` yang telah diatur operator); kunci lama tetap diterima sebagai fallback baca selama satu siklus rilis.
 
-#### Statistik + header transparansi
+#### Header transparansi + statistik
 
-Respons yang ditransformasikan membawa `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (dibangun oleh `buildModalityBridgeHeader()` di `modalityBridge/bridgeStats.ts`, dicap oleh `withModalityBridgeHeader()` di `src/sse/handlers/chatHelpers.ts`). Permintaan yang dialihkan diterima** TIDAK** header — payload tidak tersentuh dan pertukaran model sudah terlihat di bidang `model` badan respons.
+Respons hasil transformasi describe membawa
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+(dibangun oleh `buildModalityBridgeHeader()` di `modalityBridge/bridgeStats.ts`, ditandai oleh `withModalityBridgeHeader()` di `src/sse/handlers/chatHelpers.ts`). Permintaan yang di-reroute **tidak** mendapatkan header — payload tidak diubah dan pertukaran model sudah terlihat pada field `model` di body respons.
 
-`GET /api/modality-bridge/stats` (auth manajemen, tingkat yang sama dengan `GET /api/settings`) mengembalikan penghitung per modalitas dalam memori `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` untuk `vision`, `audio`, dan `video`. `averageLatencyMs` menggunakan `latencySamples`, tidak semua upaya, sebagai penyebutnya; operasi tanpa pengaturan waktu tidak menghasilkan sampel nol milidetik. `bridged` tetap merupakan alias yang kompatibel dengan versi sebelumnya untuk konversi yang berhasil; upaya yang gagal tidak menambahnya. Penghitung disetel ulang pada proses dimulai ulang berdasarkan desain (telemetri, bukan akuntansi).
+`GET /api/modality-bridge/stats` (autentikasi manajemen, tier yang sama dengan
+`GET /api/settings`) mengembalikan penghitung per-modalitas di dalam memori
+`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }` untuk `vision`, `audio`, dan
+`video`. `averageLatencyMs` menggunakan `latencySamples`, bukan semua percobaan, sebagai penyebutnya; operasi tanpa pengukuran waktu tidak mengarang sampel nol milidetik. `bridged` tetap menjadi alias kompatibel-mundur untuk konversi yang berhasil; percobaan yang gagal tidak menambahnya.
+Penghitung direset saat proses dimulai ulang, sesuai desain
+(telemetri, bukan akuntansi).
 
-#### Konfigurasi dasbor
+#### Konfigurasi dashboard
 
-Halaman dasbor khusus adalah `/dashboard/settings/modality-bridge`. Tab `Vision`, `Audio`, dan `Video` yang dapat dialamatkan URL mempertahankan parameter kueri sambil mengalihkan nilai `tab`. Tab Vision memperlihatkan pengaktifan, mode, pemilihan model (termasuk default otomatis), perintah sadar tugas, batas timeout/image/description-length/cache lanjutan, penghitung waktu proses, dan permintaan sampel yang dilindungi. Tab Audio juga aktif: tab ini menampilkan pengaktifan, pemilih model khusus STT dengan Otomatis, batas timeout/max-clip, penghitung audio, dan pengujian sampel `input_audio`. Tab Video berfungsi: melaporkan status waktu proses FFmpeg/ffprobe — salah satu dari empat status UI eksplisit (`unknown` saat probe sedang terbang atau tidak dapat diselesaikan, `restricted` pada host dasbor non-loopback tempat probe dilewati di sisi klien, `unavailable` setelah diperiksa dan dikonfirmasi hilang, atau `available` dengan versi FFmpeg/ffprobe ) — tetap mempertahankan batas enable/model/frame/video/timeout, memfilter pemilih model ke model berkemampuan penglihatan, dan mengekspos penghitung video.
+Halaman dashboard khususnya adalah
+`/dashboard/settings/modality-bridge`. Tab `Vision`, `Audio`, dan `Video` yang dapat dialamatkan melalui URL mempertahankan parameter query saat mengganti nilai `tab`. Tab Vision mengekspos pengaktifan, mode, pemilihan model (termasuk default otomatis), prompting task-aware, batas lanjutan untuk timeout/jumlah-gambar/panjang-deskripsi/cache, penghitung runtime, dan permintaan sampel yang dijaga. Tab Audio juga sudah aktif: mengekspos pengaktifan, pemilih model khusus STT dengan opsi Auto, batas timeout/klip-maks, penghitung audio, dan uji sampel `input_audio`. Tab Video sudah fungsional: ia melaporkan status runtime FFmpeg/ffprobe — salah satu dari empat status UI eksplisit (`unknown` saat probe sedang berlangsung atau tidak dapat diselesaikan, `restricted` pada host dashboard non-loopback di mana probe dilewati di sisi klien, `unavailable` setelah diprobe dan dipastikan tidak ada, atau `available` beserta versi FFmpeg/ffprobe) — menyimpan batas enable/model/frame/video/timeout, memfilter pemilih model hanya ke model berkemampuan vision, dan mengekspos penghitung video.
 
-Kartu Vision Bridge sebelumnya di bawah pengaturan AI adalah tautan kompatibilitas ke halaman baru; ia tidak lagi memiliki salinan kedua formulir tersebut. Penyedia Media juga menautkan alur kerja Gambar-ke-Teks dan Ucapan-ke-Teks ke tab Jembatan Modalitas yang sesuai tanpa menghapus taman bermain Ucapan-ke-Teks yang ada.
+Kartu Vision Bridge lama di bawah pengaturan AI kini menjadi tautan kompatibilitas ke halaman baru; ia tidak lagi memiliki salinan kedua dari formulir tersebut. Media Providers juga menautkan alur kerja Image-to-Text dan Speech-to-Text ke tab Modality Bridge yang sesuai tanpa menghapus playground Speech-to-Text yang sudah ada.
 
-**Bypass penerimaan loop mandiri:** ketika panggilan deskripsikan dirutekan melalui loop mandiri `/v1` milik OmniRoute(model penyedia non-standar), sub-permintaan mengirimkan `x-omniroute-admission-bypass: internal` dan diautentikasi dengan kredensial loop mandiri yang diselesaikan — penjaga `sk_omniroute` lokal dalam mode lokal, atau kunci `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env (#1350) yang dikonfigurasi oleh operator sehingga penerapan `REQUIRE_API_KEY=true` masih dapat menjalankan panggilan deskripsikan. Bypass hanya berlaku untuk kredensial yang tepat, sehingga klien eksternal tidak dapat menggunakan header untuk melewati penerimaan.
+**Bypass admission self-loop:** ketika panggilan describe dirutekan melalui self-loop `/v1` milik OmniRoute sendiri (model penyedia non-standar), sub-permintaan mengirim
+`x-omniroute-admission-bypass: internal` dan diautentikasi dengan kredensial self-loop yang terselesaikan — sentinel `sk_omniroute` lokal dalam mode lokal, atau kunci env `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` yang dikonfigurasi operator (#1350) agar deployment `REQUIRE_API_KEY=true` tetap dapat menjalankan panggilan describe. Bypass hanya berlaku untuk kredensial yang persis tersebut, sehingga klien eksternal tidak dapat menggunakan header itu untuk melewati admission.
 
-Default lama ada di `src/shared/constants/visionBridgeDefaults.ts`; default mode/task-aware/cache baru dan penyelesai pengaturan ada di `src/shared/constants/modalityBridgeDefaults.ts`. Pagar pembatas memperlihatkan opsi konstruktor `deps` sehingga pengujian dapat memasukkan implementasi `getSettings` dan `callVisionModel` palsu.
+Default legacy berada di `src/shared/constants/visionBridgeDefaults.ts`; default mode/task-aware/cache yang baru beserta resolver pengaturan berada di
+`src/shared/constants/modalityBridgeDefaults.ts`. Guardrail mengekspos opsi konstruktor `deps` sehingga pengujian dapat menyuntikkan implementasi `getSettings` dan `callVisionModel` tiruan.
 
-### Jembatan Audio (`audioBridge.ts`) — Jembatan Modalitas PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Mencegat permintaan obrolan berisi audio sebelum mencapai target yang tidak diketahui menerima input audio. Itu tidak pernah merutekan ulang permintaan obrolan: bagian audio ditranskripsi melalui titik akhir multibagian yang kompatibel dengan OpenAI dan model obrolan yang dipilih dilanjutkan dengan transkrip teks.
+Mencegat permintaan chat bermuatan audio sebelum mencapai target yang tidak diketahui menerima input audio. Ia tidak pernah me-reroute permintaan chat: bagian audio ditranskripsikan melalui endpoint multipart kompatibel-OpenAI yang sudah ada, dan model chat yang dipilih melanjutkan dengan transkrip teks.
 
-Mengalir:
+Alur:
 
-1. Selesaikan `supportsAudio` melalui `getResolvedModelCapabilities()`. Metadata registrasi penyedia eksplisit menang, lalu metadata model statis, lalu `modalities_input` yang disinkronkan. Daftar masukan yang dideklarasikan tanpa `audio` adalah `false`; tidak ada bukti kemampuan yang tersisa `null`. Baik `false` maupun `null` mengaktifkan jembatan konservatif, sementara `true` melewatinya.
-2. Selesaikan pengaturan `modalityBridgeAudio*` dan ekstrak bagian audio tingkat atas yang dapat disambung dari setiap pesan melalui detektor `detectMediaParts()` bersama. Bentuk kawat yang didukung adalah OpenAI `input_audio`, `audio_url`, dan `source.media_type: "audio/*"`. Audio yang disarangkan terdeteksi untuk perutean tetapi tidak dihapus oleh jalur sambungan. Pekerjaan dibatasi oleh `modalityBridgeAudioMaxClips`; bagian selanjutnya tetap tidak tersentuh.
-3. Hormati `provider/model` yang dikonfigurasi, atau biarkan `selectAudioBridgeModel()` menjalankan `AUDIO_TRANSCRIPTION_PROVIDERS` dalam urutan katalog yang stabil dan pilih model pertama dengan kredensial penyedia aktif yang dapat digunakan.
-4. `callAudioTranscription()` mengonversi audio base64/data-URI menjadi `file` multibagian, atau mengunduh `audio_url` jarak jauh melalui penjaga keluar khusus publik dengan penyematan DNS dan batasan 25 MB. Kemudian POSTs file dan model yang dipilih ke self-loop `/v1/audio/transcriptions` lokal, diautentikasi dengan `resolveSelfLoopBearer()`. Rute transkripsi yang ada melakukan pencarian kredensial normal, penanganan cooldown/rate-limit, dan pengiriman penyedia.
-5. Panggilan yang berhasil mengganti bagiannya dengan `[Audio N]: <transcript>`. Panggilan dijalankan dengan `Promise.allSettled`: kegagalan individual mempertahankan bagian audio asli ( kontrak #4012 ). Jika setiap panggilan gagal dan target terbukti `supportsAudio === false`, bagiannya menjadi `[Audio N]: (unavailable — no STT provider connected)` ( kontrak #8430 ). Untuk target yang tidak diketahui (`null`), hasil yang semuanya gagal tetap tidak tersentuh. Target hanya teks yang terbukti tanpa kredensial STT yang dapat digunakan menerima stub eksplisit yang sama tanpa mengeluarkan panggilan jaringan.
+1. Selesaikan `supportsAudio` melalui `getResolvedModelCapabilities()`. Metadata
+   registri provider yang eksplisit diutamakan, kemudian metadata model statis,
+   lalu `modalities_input` yang tersinkron. Daftar input yang dideklarasikan tanpa
+   `audio` bernilai `false`; tanpa bukti kapabilitas nilainya tetap `null`. Baik
+   `false` maupun `null` mengaktifkan bridge konservatif, sedangkan `true`
+   melewatinya.
+2. Selesaikan pengaturan `modalityBridgeAudio*` dan ekstrak bagian audio tingkat
+   atas yang dapat di-splice dari setiap pesan melalui detektor bersama
+   `detectMediaParts()`. Bentuk wire yang didukung adalah `input_audio` OpenAI,
+   `audio_url`, dan `source.media_type: "audio/*"`. Audio bersarang terdeteksi
+   untuk perutean tetapi tidak dihapus oleh jalur splice. Pekerjaan dibatasi oleh
+   `modalityBridgeAudioMaxClips`; bagian-bagian berikutnya dibiarkan utuh.
+3. Hormati `provider/model` yang dikonfigurasi, atau biarkan
+   `selectAudioBridgeModel()` menelusuri `AUDIO_TRANSCRIPTION_PROVIDERS` dalam
+   urutan katalog yang stabil dan memilih model pertama dengan kredensial
+   provider aktif yang dapat digunakan.
+4. `callAudioTranscription()` mengonversi audio base64/data-URI menjadi `file`
+   multipart, atau mengunduh `audio_url` jarak jauh melalui pelindung outbound
+   khusus-publik dengan DNS pinning dan batas 25 MB. Kemudian ia mengirimkan
+   (POST) file dan model terpilih ke self-loop lokal `/v1/audio/transcriptions`,
+   yang diautentikasi dengan `resolveSelfLoopBearer()`. Rute transkripsi yang ada
+   melakukan pencarian kredensial normal, penanganan cooldown/rate-limit, dan
+   dispatch provider.
+5. Panggilan yang berhasil menggantikan bagiannya dengan
+   `[Audio N]: <transcript>`. Panggilan dijalankan dengan `Promise.allSettled`:
+   kegagalan individual mempertahankan bagian audio asli tersebut (kontrak
+   #4012). Jika setiap panggilan gagal dan target terbukti
+   `supportsAudio === false`, bagian-bagian tersebut menjadi
+   `[Audio N]: (unavailable — no STT provider connected)` (kontrak #8430). Untuk
+   target yang tidak diketahui (`null`), hasil kegagalan total dibiarkan utuh.
+   Target yang terbukti hanya-teks tanpa kredensial STT yang dapat digunakan
+   menerima stub eksplisit yang sama tanpa melakukan panggilan jaringan.
 
-Transkrip yang berhasil menggunakan cache LRU/TTL Modality Bridge di seluruh proses. Kuncinya menggabungkan referensi audio, label operasi `audio-transcription` yang stabil, dan model STT yang dipilih; kegagalan tidak pernah di-cache. Upaya audio memperbarui penghitung `bridged`, `cacheHits`, `failures`, dan `lastUsedAt` bersama. Respons yang diubah membawa `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; permintaan yang tidak tersentuh tidak menerima segmen Audio Bridge.
+Transkrip yang berhasil menggunakan cache LRU/TTL Modality Bridge lingkup-proses.
+Kuncinya menggabungkan referensi audio, label operasi `audio-transcription` yang
+stabil, dan model STT terpilih; kegagalan tidak pernah di-cache. Upaya audio
+memperbarui counter bersama `bridged`, `cacheHits`, `failures`, dan `lastUsedAt`.
+Respons yang ditransformasikan membawa
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; permintaan
+yang tidak tersentuh tidak menerima segmen Audio Bridge.
 
 Pengaturan runtime didukung DB dan divalidasi Zod:
 
-| Kunci                         | Bawaan  | Jangkauan            |
+| Kunci                         | Default | Rentang              |
 | ----------------------------- | ------- | -------------------- |
 | `modalityBridgeAudioEnabled`  | `true`  | —                    |
-| `modalityBridgeAudioModel`    | `""`    | Otomatis atau STT ID |
+| `modalityBridgeAudioModel`    | `""`    | Otomatis atau ID STT |
 | `modalityBridgeAudioTimeout`  | `60000` | 1000–300000          |
 | `modalityBridgeAudioMaxClips` | `3`     | 1–10                 |
 
-Cache bersama tetap dikontrol oleh `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, dan `modalityBridgeCacheMaxEntries`.
+Cache bersama tetap dikendalikan oleh `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes`, dan `modalityBridgeCacheMaxEntries`.
 
 ### Jembatan Video (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -219,11 +362,11 @@ Pengaturan runtime didukung DB dan divalidasi Zod:
 
 Nilai batas waktu video yang bertahan lama di atas 120 detik disesuaikan dengan tenggat waktu broker; pengaturan baru yang menulis di atas batas itu ditolak. `GET /api/modality-bridge/video/runtime` memerlukan lokalitas loopback yang diberi stempel tepercaya sebelum autentikasi atau pemeriksaan runtime, kemudian memerlukan autentikasi manajemen. Ia hanya mengembalikan `available`, versi FFmpeg/ffprobe yang sudah dibersihkan, dan alasan tetap ketika runtime tidak tersedia. Titik akhir ekstraksi internal bukan unggahan publik API: saturasi antrean mengembalikan `503` plus `Retry-After`, pemutusan pemanggil mengembalikan `499`, dan tenggat waktu broker tetap mengembalikan `504`. Respons yang dikonversi menambahkan `video->text;model=<visionModel>;parts=<videos>` ke header `x-omniroute-modality-bridge` pusat tanpa menghapus segmen Vision atau Audio.
 
-### PII Masker (`piiMasker.ts`)
+### Masker PII (`piiMasker.ts`)
 
-Berjalan terus** keduanya** tahapan.
+Berjalan terus **keduanya** tahapan.
 
-- **`preCall`** mengkloning payload, berjalan `system`, `messages`, `input`, dan `prompt` (termasuk item string biasa), dan menerapkan `processPII()` (dari `@/shared/utils/inputSanitizer`) ke kolom string `content`/`text`. Ketika `PII_REDACTION_ENABLED=true`, PII yang terdeteksi disunting dalam payload keluar. Ini tidak bergantung pada `INPUT_SANITIZER_MODE` (yang hanya mengontrol kebijakan injeksi cepat). Saat redaksi dinonaktifkan, deteksi catatan panggilan dihitung tanpa menulis ulang konten.
+- **`preCall`** mengkloning payload, menjalankan `system`, `messages`, `input`, dan `prompt` (termasuk item string biasa), dan menerapkan `processPII()` (dari `@/shared/utils/inputSanitizer`) ke kolom string `content`/`text`. Ketika `PII_REDACTION_ENABLED=true`, PII yang terdeteksi disunting dalam payload keluar. Ini tidak bergantung pada `INPUT_SANITIZER_MODE` (yang hanya mengontrol kebijakan injeksi cepat). Saat redaksi dinonaktifkan, deteksi catatan panggilan dihitung tanpa menulis ulang konten.
 - **`postCall`** mengkloning respons secara mendalam, menjalankan `sanitizePIIResponse()` plus masker berbentuk Responses-API (`maskResponsesOutput` — mencakup `output_text` dan `output[].content[].text`). Jika ada redaksi yang terjadi, respons yang dimodifikasi akan menggantikan respons asli.
 
 Pagar pembatas tidak pernah menghalangi; itu hanya memberi anotasi (`meta.detections`, `meta.redacted`) atau menulis ulang.
@@ -232,70 +375,111 @@ Pagar pembatas tidak pernah menghalangi; itu hanya memberi anotasi (`meta.detect
 
 **Dasbor → Pengaturan → Keamanan → PII masking** memilih _apa_ yang disamarkan. Itu tidak mengaktifkan masking: itu masih `PII_REDACTION_ENABLED` (permintaan) dan `PII_RESPONSE_SANITIZATION` (respons + SSE), keduanya dinonaktifkan secara default.
 
-- **Pilihan per jenis** — id bawaan tercantum di `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tidak disetel berarti setiap jenis (perilaku sebelum pengaturan ini ada). Pola `ssn_us` mesin permintaan dipetakan ke `ssn`. Template (Minimal, Standar, Finansial, Brazil, USA, GDPR, POPIA, Full) hanya mengisi kotak centang di UI.
-- **pengidentifikasi GDPR dan POPIA** — dua belas id bawaan yang mencakup EU dan pengenal pribadi Afrika Selatan (tabel di bawah). Regex, validator, dan tag yurisdiksinya berada dalam satu tabel, `src/shared/utils/piiPatterns.ts`, yang digunakan oleh pembersih respons (`src/lib/piiSanitizer.ts`) dan masker permintaan (`src/shared/utils/inputSanitizer.ts`). Kecocokan disunting hanya jika validatornya menerimanya; jumlah digit saja tidak pernah cukup. Operator yang menyimpan pilihan yang dipersempit sebelum id ini ada akan mempertahankan perilakunya hingga id baru dicentang.
-- **Pola khusus** — hingga 20 pola regex atau wildcard (`*` = hingga 64 karakter non-spasi, `?` = satu). Cocok menjadi `[CUSTOM_REDACTED]`. Setiap pola melewati `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): paling banyak 500 karakter, bendera dibatasi hingga `g i m s u`, harus dikompilasi, harus melewati `safe-regex` (pelacakan balik bencana), dan tidak boleh cocok dengan string kosong atau placeholder redaksi. Pola yang gagal ditolak saat disimpan dan diuji, dan baris tersimpan yang gagal dilewati saat runtime alih-alih dikompilasi. Pola khusus hanya berjalan saat penyembunyian aktif.
-- **Penghitung deteksi** — jumlah per jenis (nilai tidak pernah cocok), disimpan di memori dan disetel ulang saat restart (`src/lib/pii/piiDetectionStats.ts`). Mereka hanya meningkat saat masking aktif.
+- **Pilihan per jenis** — id bawaan tercantum di `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tidak disetel berarti setiap jenis (perilaku sebelum pengaturan ini ada). Pola `ssn_us` mesin permintaan dipetakan ke `ssn`. Templat (Minimal, Standar, Keuangan, Brasil, USA, GDPR, POPIA, Penuh) hanya mengisi kotak centang di UI.
+- **Pengidentifikasi GDPR dan POPIA** — dua belas id bawaan yang mencakup EU dan pengenal pribadi Afrika Selatan (tabel di bawah). Regex, validator, dan tag yurisdiksinya berada dalam satu tabel, `src/shared/utils/piiPatterns.ts`, yang digunakan oleh pembersih respons (`src/lib/piiSanitizer.ts`) dan masker permintaan (`src/shared/utils/inputSanitizer.ts`). Kecocokan disunting hanya jika validatornya menerimanya; jumlah digit saja tidak pernah cukup. Operator yang menyimpan pilihan yang dipersempit sebelum id ini ada akan mempertahankan perilakunya hingga id baru dicentang.
+- **Pola khusus** — hingga 20 pola regex atau wildcard (`*` = hingga 64 karakter non-spasi, `?` = satu). Pertandingan menjadi `[CUSTOM_REDACTED]`. Setiap pola melewati `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): paling banyak 500 karakter, bendera terbatas pada `g i m s u`, harus dikompilasi, harus melewati `safe-regex` (catastrophic backtracking), dan tidak boleh cocok dengan string kosong atau placeholder redaksi. Pola yang gagal ditolak saat disimpan dan diuji, dan baris tersimpan yang gagal dilewati saat runtime alih-alih dikompilasi. Pola khusus hanya berjalan saat penyembunyian aktif.
+- **Penghitung deteksi** — per jenis dihitung (nilai tidak pernah cocok), disimpan di memori dan disetel ulang saat restart (`src/lib/pii/piiDetectionStats.ts`). Mereka hanya meningkat saat masking aktif.
 
-Pengaturannya ada di tabel `key_value` (namespace `pii_settings`, `src/lib/db/piiSettings.ts`) dan dibaca melalui cache 1 detik. API:
+Pengaturan berada di tabel `key_value` (namespace `pii_settings`, `src/lib/db/piiSettings.ts`) dan dibaca melalui cache 1 detik. API:
 
-| Metode | Jalur                    | Tujuan                                                                                |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Negara bendera, `enabledTypes`, `customPatterns`, penghitung deteksi                  |
-| `PUT`  | `/api/settings/pii`      | Ganti `enabledTypes` (`null` = semua) and/or `customPatterns`                         |
-| `POST` | `/api/settings/pii/test` | Jalankan kering satu pola terhadap sampel paling banyak 8 KB; tidak ada yang disimpan |
+| Method | Path                     | Tujuan                                                                    |
+| ------ | ------------------------ | ------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Status flag, `enabledTypes`, `customPatterns`, penghitung deteksi         |
+| `PUT`  | `/api/settings/pii`      | Mengganti `enabledTypes` (`null` = semua) dan/atau `customPatterns`       |
+| `POST` | `/api/settings/pii/test` | Uji coba satu pola terhadap sampel maksimal 8 KB; tidak ada yang disimpan |
 
 Ketiganya memerlukan autentikasi manajemen dan memvalidasi isi dengan Zod (`src/shared/validation/schemas/piiSettings.ts`). Dengan login dinonaktifkan (`requireLogin=false`) `GET` dan titik akhir pengujian terbuka, namun `PUT` masih memerlukan sesi dasbor, kunci `manage` -scope API, token akses `oma_` dengan cakupan tulis atau lebih tinggi, atau token CLI atau token layanan internal yang dikirim dari loopback.
 
-#### pengidentifikasi GDPR (EU) dan POPIA (Afrika Selatan).
+#### Pengidentifikasi GDPR (EU) dan POPIA (Afrika Selatan).
 
-| Pengenal            | Pengidentifikasi                | Validasi                                                                                                 |
-| ------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                            | Negara yang diketahui, panjang persisnya untuk negara tersebut, ISO 13616 MOD-97-10                      |
-| `eu_vat`            | nomor EU VAT                    | Awalan negara anggota yang diketahui dan format nomor negara bagian tersebut (tidak ada pencarian VIES ) |
-| `es_dni_nie`        | DNI Spanyol / NIE               | Surat kendali (nilai mod 23); NIE adalah `X/Y/Z` + 7 digit                                               |
-| `it_codice_fiscale` | Skala Fiskal Kodeks Italia      | Surat kendali dari tabel posisi odd/even                                                                 |
-| `pl_pesel`          | PESEL Polandia                  | Checksum tertimbang dan tanggal lahir yang dikodekan yang ada                                            |
-| `nl_bsn`            | BSN belanda                     | 11-bukti (bobot 9..2, -1)                                                                                |
-| `de_steuer_id`      | Steuer-ID Jerman                | ISO 7064 Mod 11,10 ditambah aturan struktur digit (tanpa awalan 0)                                       |
-| `se_personnummer`   | Nomor orang Swedia              | Luhn atas sepuluh digit terakhir dan tanggal lahir yang masuk akal (10 atau 12 digit)                    |
-| `za_id`             | Nomor ID Afrika Selatan         | Luhn atas semua 13 digit, month/day kelahiran yang valid, digit kewarganegaraan 0 atau 1                 |
-| `za_phone`          | Telepon Afrika Selatan          | awalan `+27` / `27`, atau bentuk `0..` nasional yang ditulis dengan spasi atau tanda hubung              |
-| `za_vat`            | Nomor VAT Afrika Selatan        | 10 digit dimulai dengan `4`** Dan** "VAT" / "BTW" pada 48 karakter sebelumnya                            |
-| `za_tax_ref`        | Referensi pajak Afrika Selatan. | 10 digit dimulai dengan `0`-`3`, Luhn,** Dan** "tax" / "SARS" pada 48 karakter sebelumnya                |
+| Id                  | Pengenal                       | Validasi                                                                                     |
+| ------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | Negara dikenal, panjang tepat untuk negara tersebut, ISO 13616 MOD-97-10                     |
+| `eu_vat`            | Nomor VAT Uni Eropa            | Prefiks negara anggota dikenal dan format nomor negara tersebut (tanpa pencarian VIES)       |
+| `es_dni_nie`        | DNI / NIE Spanyol              | Huruf kontrol (nilai mod 23); NIE berupa `X/Y/Z` + 7 angka                                   |
+| `it_codice_fiscale` | Codice Fiscale Italia          | Huruf kontrol dari tabel posisi ganjil/genap                                                 |
+| `pl_pesel`          | PESEL Polandia                 | Checksum berbobot dan rentang bulan/hari lahir terenkode yang masuk akal                     |
+| `nl_bsn`            | BSN Belanda                    | Uji 11 (bobot 9..2, -1)                                                                      |
+| `de_steuer_id`      | Steuer-ID Jerman               | ISO 7064 Mod 11,10 serta aturan struktur angka (tanpa 0 di awal)                             |
+| `se_personnummer`   | personnummer Swedia            | Luhn pada sepuluh angka terakhir dan tanggal lahir yang masuk akal (10 atau 12 angka)        |
+| `za_id`             | Nomor ID Afrika Selatan        | Luhn pada seluruh 13 angka, bulan/hari lahir valid, angka kewarganegaraan 0 atau 1           |
+| `za_phone`          | Telepon Afrika Selatan         | Prefiks `+27` / `27`, atau bentuk nasional `0..` yang ditulis dengan spasi atau tanda hubung |
+| `za_vat`            | Nomor VAT Afrika Selatan       | 10 angka yang diawali `4` **dan** "VAT" / "BTW" dalam 48 karakter sebelumnya                 |
+| `za_tax_ref`        | Referensi pajak Afrika Selatan | 10 angka yang diawali `0`-`3`, Luhn, **dan** "tax" / "SARS" dalam 48 karakter sebelumnya     |
 
-Karena format hanya digit bertabrakan dengan nomor pesanan, nomor pembuatan, dan stempel waktu, format terlemah (`za_vat`, `za_tax_ref`) memerlukan isyarat kata kunci, dan sepuluh digit nomor `0..` tidak diperlakukan sebagai nomor telepon Afrika Selatan. Spasi IBANs (`GB29 NWBK ...`) tidak cocok. Di jalur streaming, isyarat hanya dilihat di dalam potongan saat ini. Id berada di depan pola telepon umum, sehingga pengidentifikasi yang divalidasi menyimpan placeholdernya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Templat `gdpr` dan `popia` masing-masing memilih EU dan id Afrika Selatan. Masking itu sendiri tetap ikut serta (Aturan Keras #20): tidak ada apa pun di sini yang mengubah default bendera fitur.
+Karena format hanya digit bertabrakan dengan nomor pesanan, nomor pembuatan, dan stempel waktu, format yang paling lemah (`za_vat`, `za_tax_ref`) memerlukan isyarat kata kunci, dan sepuluh digit nomor `0..` tidak diperlakukan sebagai nomor telepon Afrika Selatan. Spasi IBANs (`GB29 NWBK ...`) tidak cocok. Di jalur streaming, isyarat hanya dilihat di dalam potongan saat ini. Id berada di depan pola telepon umum, sehingga pengidentifikasi yang divalidasi menyimpan placeholdernya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Templat `gdpr` dan `popia` masing-masing memilih id EU dan Afrika Selatan. Masking itu sendiri tetap ikut serta (Hard Rule #20): tidak ada apa pun di sini yang mengubah default tanda fitur.
 
-### Injeksi Cepat (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Mendeteksi struktur permusuhan dalam konten yang disediakan pengguna dan menerapkan kebijakan yang dikonfigurasi. Perilaku didorong oleh variabel lingkungan dan opsi konstruktor:
+Mendeteksi struktur adversarial dalam konten yang diberikan pengguna dan
+menegakkan kebijakan yang dikonfigurasi. Perilaku dikendalikan oleh environment
+variable dan opsi konstruktor:
 
-| Pengaturan        | Env var                                                                                             | Bawaan | Memengaruhi                                                                                                                                                                                                       |
-| ----------------- | --------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Diaktifkan        | `INPUT_SANITIZER_ENABLED`                                                                           | `true` | Ketika `false`, pagar pembatas mengalami hubungan pendek.                                                                                                                                                         |
-| Mode              | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                     | `warn` | Kebijakan injeksi: `block`, `warn`, atau `log`. (`redact` diterima untuk back-compat tetapi diterima** bukan** menghapus teks injeksi; permintaan PII penulisan ulang dikendalikan oleh `PII_REDACTION_ENABLED`.) |
-| Ambang batas blok | opsi `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Tingkat keparahan minimum diperlukan untuk memblokir. Medium hanya dapat diamati secara default.                                                                                                                  |
+| Pengaturan      | Env var                                                                                             | Default | Efek                                                                                                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enabled         | `INPUT_SANITIZER_ENABLED`                                                                           | `true`  | Saat `false`, guardrail melakukan short-circuit.                                                                                                                                                                    |
+| Mode            | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                     | `warn`  | Kebijakan injeksi: `block`, `warn`, atau `log`. (`redact` diterima demi kompatibilitas mundur tetapi **tidak** menghapus teks injeksi; penulisan ulang PII pada request dikendalikan oleh `PII_REDACTION_ENABLED`.) |
+| Block threshold | Opsi `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | Tingkat keparahan minimum yang diperlukan untuk memblokir. Medium hanya bersifat observasi pada pengaturan default.                                                                                                 |
 
-**Modus diutamakan** (`getMode`): penelepon `options.mode` → `INJECTION_GUARD_MODE`**DB penggantian bendera fitur** (Dasbor → Pengaturan → Fitur Bendera) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Oleh karena itu, penggantian dasbor menang atas env vars, sehingga Feature Flags UI mengontrol running guard secara langsung (tidak ada restart). Pembacaan DB aman dari kegagalan: jika terjadi kesalahan, penjaga akan kembali ke perilaku berbasis env, dan ketika tidak ada override yang disetel, perilakunya identik dengan resolusi khusus env.
+**Presedensi mode** (`getMode`): `options.mode` dari pemanggil → **override
+feature-flag DB** `INJECTION_GUARD_MODE` (Dashboard → Settings → Feature Flags)
+→ env `INJECTION_GUARD_MODE` → env `INPUT_SANITIZER_MODE` → `warn`. Karena itu,
+override dashboard mengalahkan env var, sehingga UI Feature Flags mengendalikan
+guard yang sedang berjalan secara langsung (tanpa restart). Pembacaan DB bersifat
+fail-safe: jika terjadi error, guard kembali ke perilaku berbasis env, dan saat
+tidak ada override yang diatur, perilakunya identik dengan resolusi env saja.
 
 Sumber deteksi:
 
-1. `sanitizeRequest()` dari `@/shared/utils/inputSanitizer` (set detektor bersama yang digunakan di tempat lain dalam pipa).
-2. `DEFAULT_GUARD_PATTERNS` bawaan (saat ini `system_override_inline` dan `markdown_system_block`, keduanya tingkat keparahan `high` ).
-3. `customPatterns` opsional diteruskan melalui opsi konstruktor (string, regex, atau catatan `{ name, pattern, severity }` ).
+1. `sanitizeRequest()` dari `@/shared/utils/inputSanitizer` (kumpulan detektor
+   bersama yang digunakan di tempat lain dalam pipeline).
+2. `DEFAULT_GUARD_PATTERNS` bawaan (saat ini `system_override_inline` dan
+   `markdown_system_block`, keduanya berseverity `high`).
+3. `customPatterns` opsional yang diberikan melalui opsi konstruktor (string,
+   regex, atau record `{ name, pattern, severity }`).
 
-Ketika `mode === "block"`** Dan** setidaknya satu deteksi memenuhi ambang batas keparahan, `preCall` mengembalikan `{ block: true, message: "Request rejected: suspicious content detected" }`. Dalam mode `warn`/`log`, pagar pembatas mencatat tetapi mengizinkan panggilan. `evaluatePromptInjection()` pembantu bersama juga diekspor untuk penelepon yang perlu mengevaluasi perintah tanpa melalui registri.
+Ketika `mode === "block"` **dan** setidaknya satu deteksi memenuhi ambang
+severity, `preCall` mengembalikan `{ block: true, message: "Request rejected:
+suspicious content detected" }`. Dalam mode `warn`/`log`, guardrail hanya
+mencatat tetapi tetap mengizinkan panggilan. Helper bersama
+`evaluatePromptInjection()` juga diekspor untuk pemanggil yang perlu
+mengevaluasi prompt tanpa melalui registry.
 
-**Pemindaian terikat (v3.8.20):** detektor hanya memeriksa** 16 KB pertama** dari teks prompt yang digabungkan — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16.384 byte) di `src/shared/utils/inputSanitizer.ts`. Baik `detectInjection()` dan `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` sebelum menjalankan loop pola. Arahan injeksi berada di dekat bagian atas masukan, jadi ini membatasi regex CPU/GC pada muatan multi-ratus KB tanpa melemahkan deteksi (lih. #3932, #4041).
+**Batas pemindaian (v3.8.20):** detektor hanya memeriksa **16 KB pertama**
+dari teks prompt yang digabungkan — `MAX_INJECTION_SCAN_BYTES = 16 * 1024`
+(16 384 byte) di `src/shared/utils/inputSanitizer.ts`. Baik `detectInjection()`
+maupun `evaluatePromptInjection()` menjalankan `slice(0, MAX_INJECTION_SCAN_BYTES)`
+sebelum menjalankan perulangan pola. Direktif injeksi berada di dekat bagian
+atas input, sehingga ini membatasi CPU/GC regex pada payload berukuran ratusan
+KB tanpa melemahkan deteksi (lihat #3932, #4041).
 
-### Masker Kredensial (`credentialMasker.ts`)
+### Credential Masker (`credentialMasker.ts`)
 
-Berjalan terus** keduanya** tahapan, terakhir dalam rantai default (prioritas `95`). Menyunting pola kunci API/token rahasia yang terkenal dari payload keluar (konten pesan, argumen panggilan alat, hasil alat)** Dan** respons penyedia, sehingga kredensial yang ditempelkan ke prompt (atau digaungkan kembali oleh hasil alat) tidak bocor ke penyedia upstream atau kembali ke klien.
+Berjalan pada **kedua** tahap, paling akhir dalam rantai default (prioritas
+`95`). Menyensor pola API-key / secret-token yang umum dikenal dari payload
+keluar (konten pesan, argumen tool-call, hasil tool) **dan** respons provider,
+sehingga kredensial yang ditempelkan ke dalam prompt (atau digaungkan kembali
+oleh hasil tool) tidak bocor ke provider upstream atau kembali ke klien.
 
-- **Hanya ikut serta** , konvensi yang sama dengan redaksi PII (Aturan Keras #20-berdekatan): dinonaktifkan kecuali `settings.credentialRedactionEnabled === true`** atau** `CREDENTIAL_REDACTION_ENABLED=true`. Jika dimatikan, pagar pembatas tidak — pernah diblokir dan tidak akan pernah ditulis ulang.
-- `redactCredentials()` menelusuri pohon payload/response lengkap (`walkValue()`, prototype-pollution-safe, cycle-safe via `WeakSet`) dan mengganti kecocokan dengan placeholder `[REDACTED:<type>]`, hanya mengkloning cabang yang benar-benar berubah.
-- `CREDENTIAL_PATTERNS` mencakup kunci penyedia LLM (OpenAI, OpenAI-proj, Anthropic, Google, Memeluk Wajah, Replikasi), token VCS/SaaS (GitHub, Slack, Linear, Notion, npm, Postman, Discord), kunci pembayaran (Stripe, Square), kunci cloud ( kunci akses AWS, Twilio, SendGrid, Mailgun), kunci pribadi / JWTs, string koneksi yang mengandung kredensial (`mongodb://user:pass@...`, dll.), dan pola nilai header `Authorization`/`x-api-key`/`api-key`/`apikey` generik. Kunci berbentuk header (`authorization`, `x-api-key`, `api-key`, `apikey`) disunting secara struktural (hanya nilai, awalan skema seperti `Bearer `/`Basic ` dipertahankan) daripada melalui regex teks umum.
-- Pagar pembatas tidak pernah menghalangi; itu hanya menulis ulang (`modifiedPayload` / `modifiedResponse`) dan memberi anotasi (`meta.credentialsRedacted`, `meta.count`).
+- **Hanya opt-in**, konvensi yang sama seperti redaksi PII (berdekatan dengan
+  Hard Rule #20): dinonaktifkan kecuali `settings.credentialRedactionEnabled === true`
+  **atau** `CREDENTIAL_REDACTION_ENABLED=true`. Jika nonaktif, guardrail
+  bersifat no-op — tidak pernah memblokir dan tidak pernah menulis ulang.
+- `redactCredentials()` menelusuri seluruh pohon payload/respons (`walkValue()`,
+  aman terhadap prototype-pollution, aman terhadap siklus via `WeakSet`) dan
+  mengganti kecocokan dengan placeholder `[REDACTED:<type>]`, hanya meng-kloning
+  cabang yang benar-benar berubah.
+- `CREDENTIAL_PATTERNS` mencakup kunci provider LLM (OpenAI, OpenAI-proj,
+  Anthropic, Google, Hugging Face, Replicate), token VCS/SaaS (GitHub, Slack,
+  Linear, Notion, npm, Postman, Discord), kunci pembayaran (Stripe, Square),
+  kunci cloud (AWS access key, Twilio, SendGrid, Mailgun), private key / JWT,
+  connection string yang membawa kredensial (`mongodb://user:pass@...`, dll.),
+  dan pola nilai header generik `Authorization`/`x-api-key`/`api-key`/`apikey`.
+  Kunci berbentuk header (`authorization`, `x-api-key`, `api-key`, `apikey`)
+  disensor secara struktural (hanya nilainya, prefiks skema seperti
+  `Bearer `/`Basic ` dipertahankan) bukan melalui regex teks generik.
+- Guardrail tidak pernah memblokir; ia hanya menulis ulang (`modifiedPayload` /
+  `modifiedResponse`) dan memberi anotasi (`meta.credentialsRedacted`, `meta.count`).
 
 Penjaga regresi: `tests/unit/credential-masker-guardrail.test.ts`.
 

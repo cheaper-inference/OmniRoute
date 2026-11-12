@@ -17,11 +17,11 @@ import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const workflow = readFileSync(path.join(root, ".github/workflows/docker-publish.yml"), "utf8");
 const buildJob = workflow.slice(workflow.indexOf("\n  build:"), workflow.indexOf("\n  merge:"));
-const mergeJob = workflow.slice(workflow.indexOf("\n  merge:"));
 
 const AMD64 = "a".repeat(64);
 const ARM64 = "b".repeat(64);
@@ -508,7 +508,22 @@ test("backfills use current validation scripts but build the requested release s
     workflow.indexOf("\n  runner-preflight:")
   );
   assert.doesNotMatch(prepare, /ref:.*inputs.version/);
-  assert.doesNotMatch(mergeJob, /ref:.*inputs.version/);
+  const checkouts = load(workflow).jobs.merge.steps.filter((entry) =>
+    entry.uses?.startsWith("actions/checkout@")
+  );
+  const rootCheckout = checkouts.filter((entry) => !entry.with?.path);
+  assert.equal(rootCheckout.length, 1);
+  assert.equal(rootCheckout[0].with?.ref, undefined);
+  for (const checkout of checkouts) {
+    if (checkout.with?.path === ".ci-trivy-candidate") {
+      // This isolated checkout supplies data, never scripts from the old release.
+      assert.equal(checkout.with["sparse-checkout"].trim(), "/.trivyignore.yaml");
+      assert.equal(checkout.with["sparse-checkout-cone-mode"], false);
+      assert.equal(checkout.with["persist-credentials"], false);
+    } else {
+      assert.doesNotMatch(String(checkout.with?.ref || ""), /inputs.version/);
+    }
+  }
   assert.match(buildJob, /ref:.*inputs.version/);
 });
 

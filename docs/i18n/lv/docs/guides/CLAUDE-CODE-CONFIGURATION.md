@@ -25,27 +25,78 @@ omniroute launch --profile glm52  # Claude Code izmanto glm/glm-5.2, izmantojot 
 
 ---
 
-## Kā Claude kods savienojas ar vārteju
+## Kā Claude Code savienojas ar vārteju
 
-Claude Code runā par**Anthropic Ziņojumi API** un ir norādīts uz pielāgotu beigu punktu ar vides mainīgajiem (tam nav `--base-url` karoga):
+Claude Code sazinās, izmantojot **Anthropic Messages API**, un tiek novirzīts uz
+pielāgotu galapunktu ar vides mainīgajiem (tam nav karodziņa `--base-url`):
 
-| Mainīgs                                      | Mērķis                                                                                              |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Vārtejas sakne URL (Claude kods pievieno `/v1/messages`).** Nav `/v1` sufiksa.**                    |
-| `ANTHROPIC_AUTH_TOKEN`                       | Nosūtīts kā `Authorization: Bearer …` — izmantojiet savu OmniRoute piekļuves pilnvaru / API atslēgu |
-| `ANTHROPIC_API_KEY`                          | Alternatīva: nosūtīts kā `x-api-key`. Ja abi ir iestatīti, `ANTHROPIC_AUTH_TOKEN` uzvar             |
-| `ANTHROPIC_MODEL`                            | Konkrēta modeļa piespiedu izmantošana (ignorē `/model` atlasītāja noklusējuma iestatījumu)          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → vietējā `/model` atlasītājā ir uzskaitīti `claude*`/`anthropic*` modeļi no `/v1/models`       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ierobežot izvades marķierus vienai atbildei (piemēram, `65536`)                                     |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokena slieksnis automātiskai sablīvēšanai                                                          |
+| Mainīgais                                    | Nolūks                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | Vārtejas saknes URL (Claude Code pievieno `/v1/messages`). **Bez `/v1` sufiksa.**                      |
+| `ANTHROPIC_AUTH_TOKEN`                       | Tiek nosūtīts kā `Authorization: Bearer …` — izmantojiet savu OmniRoute piekļuves pilnvaru/API atslēgu |
+| `ANTHROPIC_API_KEY`                          | Alternatīva: tiek nosūtīts kā `x-api-key`. Ja iestatīti abi, priekšroka ir `ANTHROPIC_AUTH_TOKEN`      |
+| `ANTHROPIC_MODEL`                            | Piespiedu kārtā izmanto konkrētu modeli (ignorē `/model` izvēlnes noklusējumu)                         |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → iebūvētajā `/model` izvēlnē tiek rādīti `claude*`/`anthropic*` modeļi no `/v1/models`            |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ierobežo izvades marķieru skaitu katrai atbildei (piem., `65536`)                                      |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Marķieru slieksnis automātiskajai saspiešanai                                                          |
 
-> Env vars tiek lasīti** vienreiz palaišanas laikā** — restartējiet Claude kodu pēc to maiņas.
+> Vides mainīgie tiek nolasīti **vienu reizi palaišanas laikā** — pēc to maiņas
+> restartējiet Claude Code.
 
-Akreditācijas datiem, kas rotē fiksētas virknes vietā, iestatiet `apiKeyHelper` `~/.claude/settings.json` uz komandu, kas drukā pašreizējos akreditācijas datus stdout. Claude kods pēc noklusējuma kešatmiņā saglabā savu izvadi piecas minūtes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to ignorē) un nosūta vērtību gan `Authorization: Bearer` gan `x-api-key`. Skriptam ir jādrukā akreditācijas dati un nekas cits — reklāmkarogs līdzās tam neizdodas palīgs versijā v2.1.227 +.
+Akreditācijas datiem, kas tiek periodiski nomainīti, nevis ir fiksēta virkne, iestatiet `apiKeyHelper` failā `~/.claude/settings.json` uz komandu, kas pašreizējo akreditācijas vērtību izvada stdout. Claude Code pēc noklusējuma glabā izvadi kešatmiņā piecas minūtes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` aizstāj šo ilgumu) un vērtību nosūta gan `Authorization: Bearer`, gan `x-api-key`. Skripts drīkst izvadīt tikai akreditācijas vērtību: papildu reklāmkarogs izraisa palīgrīka kļūmi versijā v2.1.227+.
 
-Šādi darbojas Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` API atslēgas vietā izdrukā īslaicīgu Entra piekļuves pilnvaru, ko OmniRoute pārbauda. Skatiet [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Tā darbojas Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` izvada īslaicīgu Entra piekļuves pilnvaru, kuru OmniRoute pārbauda API atslēgas vietā. Skatiet [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` iestata to visu jūsu vietā: tas atrisina pamata URL + marķieri no aktīvā konteksta (tātad `omniroute connect <vps>` pēc tam `omniroute launch` vienkārši darbojas), pārbauda servera stāvokli un izpilda `claude`.
+`omniroute launch` iestata tos visus jūsu vietā: tas nosaka bāzes URL un pilnvaru
+no aktīvā konteksta (tādēļ pēc `omniroute connect <vps>` komanda `omniroute launch`
+vienkārši darbojas), pārbauda servera darbspēju un izpilda `claude`.
+
+---
+
+## Lietošanas attiecinājums: sesijas un projekti
+
+OmniRoute grupē katru API atslēgas pieprasījumus **aģentu sesijas** un ieraksti, kas **projektu** katrā sesijā tika strādāts (`agent_sessions` tabula), tāpēc lietojumu un izmaksas var ziņot katram komandas dalībniekam, vienam projektam un sesijai.
+
+Kas tiek ierakstīts bez klienta iestatīšanas:
+
+| Lauks    | Avots                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesija   | `x-claude-code-session-id` galvene (tā pati vērtība kā `metadata.user_id.session_id`), stabila katrā sesijā                                       |
+| Projekts | `Primary working directory:` līnijas Claude kods savā vidē sūta ziņojumu; darbkoka mapes zem `.claude/worktrees/` atrisina repozitorija nosaukumu |
+| Filiāle  | `Current branch:` no git statusa Claude kods tiek nosūtīts ar pirmo ziņojumu                                                                      |
+| Klients  | `user-agent` (`claude-cli/<version>`)                                                                                                             |
+
+Codex (`<environment_context><cwd>`) un OpenCode (`x-opencode-session`) tiek atpazīti vienādi. Atslēgas ar **bez žurnāla** iespējots saglabāt tikai sesijas ID un galvenes nodrošinātos projekta laukus; nekas no uzvednes lasītais (ceļš, atzars) netiek saglabāts.
+
+### Skaidri nosaukt projektu (ieteicams)
+
+Darba direktorijs dažādās mašīnās atšķiras, tāpēc viena un tā pati krātuve var tikt parādīta dažādos ceļos. Tā vietā skaidri nosūtiet projektu: Claude kods katram modeļa pieprasījumam pievieno visas `ANTHROPIC_CUSTOM_HEADERS` norādītās galvenes, un OmniRoute nolasa divas no tām:
+
+| Virsraksts                 | Vērtība                                                                    |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekta nosaukums, piemēram `omniroute`                                   |
+| `x-omniroute-project-repo` | Normalizēta tālvadības pults, piemēram `github.com/diegosouzapw/OmniRoute` |
+
+Abi tiek lasīti tikai attiecinājumam; tie nekad netiek pārsūtīti augšupējam pakalpojumu sniedzējam.
+
+`ANTHROPIC_CUSTOM_HEADERS` tiek nolasīta vienreiz startēšanas laikā, un iestatījumu faili saglabā burtiskās vērtības, tāpēc aprēķiniet to, kad Claude kods tiek palaists. Pievienojiet to `~/.zshrc` vai `~/.bashrc` un turpiniet startēt `claude` no projekta mapes:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` izteiksme noņem visus attālajā URL iegultos akreditācijas datus. IDE paplašinājumi palaiž Claude kodu bez čaulas, tāpēc to sesijas tiek atgrieztas darba direktorijā.
 
 ---
 

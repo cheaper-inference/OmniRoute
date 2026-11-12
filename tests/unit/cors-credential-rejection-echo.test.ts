@@ -19,6 +19,7 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cors-reje
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-secret-cors-rejection";
 
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsModule = await import("../../src/lib/db/settings.ts");
@@ -37,6 +38,8 @@ async function resetStorage() {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
+  // CORS response policy does not depend on the live provider catalog.
+  aiHordeImageCatalog.replace([]);
 }
 
 test.beforeEach(async () => {
@@ -47,6 +50,7 @@ test.beforeEach(async () => {
 });
 
 test.after(() => {
+  aiHordeImageCatalog.clear();
   if (originalRequireApiKey === undefined) delete process.env.REQUIRE_API_KEY;
   else process.env.REQUIRE_API_KEY = originalRequireApiKey;
   core.resetDbInstance();

@@ -4,99 +4,105 @@
 
 ---
 
-> **Patiesības avots:** `electron/` darbvieta** Pēdējo reizi atjaunināts:** 2026-06-28 — v3.8.40
+> **Patiesības avots:** `electron/` darbvieta
+> **Pēdējoreiz atjaunināts:** 2026-06-28 — v3.8.40
 
-OmniRoute piegādā vairāku platformu darbvirsmas lietotni (Windows / macOS / Linux), kas balstīta uz**Electron 41** +** elektronu veidotājs 26.10** . Darbvirsmas lietotne izveido Next.js savrupo serveri kā bērnu procesu, norāda uz to `BrowserWindow` un pievieno sistēmas tekni, automātisko atjauninātāju, IPC tiltu un nulles konfigurācijas slepeno sāknēšanas programmu.
+OmniRoute ietver vairākplatformu darbvirsmas lietotni (Windows / macOS / Linux), kas veidota,
+izmantojot **Electron 41** un **electron-builder 26.10**. Darbvirsmas lietotne palaiž Next.js
+savrupserveri kā bērnprocesu, novirza uz to `BrowserWindow` un pievieno
+sistēmas tekni, automātisko atjauninātāju, IPC tiltu un bezkonfigurācijas noslēpumu inicializāciju.
 
 ## Arhitektūra
 
 ```
-┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
-│ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
-└──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
-┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
-│   window.electronAPI.* (contextIsolation)     │
-└──────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│ Electron galvenais process (electron/main.js)        │
+│ ├─ Vienas instances bloķēšana                        │
+│ ├─ Bērnprocess: Next.js savrupserveris               │
+│ │   (palaists ar Electron Node izpildlaika vidi)      │
+│ ├─ BrowserWindow → http://localhost:PORT             │
+│ ├─ Sistēmas tekne + kontekstizvēlne                  │
+│ ├─ Automātiskā atjaunināšana ar electron-updater     │
+│ ├─ Satura drošības politika (sesijas galvenes)       │
+│ └─ Noslēpumu inicializācija (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────────────┘
+            ↕ IPC tilts (electron/preload.js)
+┌──────────────────────────────────────────────────────┐
+│ Renderētājs (Next.js informācijas panelis)           │
+│   window.electronAPI.* (contextIsolation)            │
+└──────────────────────────────────────────────────────┘
 ```
 
 ## Versijas
 
-Apstiprināts no `electron/package.json`:
+Apstiprināts, izmantojot `electron/package.json`:
 
-| Iepakojums         | Versija                                                        |
-| ------------------ | -------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                      |
-| `electron-builder` | `^26.15.3`                                                     |
-| `electron-updater` | `^6.8.9`                                                       |
-| `better-sqlite3`   | saknes `^13.0.2` (Node-API priekšbūvē — bez Electron pārbūves) |
-| Lietotnes versija  | `3.8.0`                                                        |
-| Lietotnes id       | `online.omniroute.desktop`                                     |
-| Produkta nosaukums | `OmniRoute`                                                    |
+| Pakotne            | Versija                                                             |
+| ------------------ | ------------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                           |
+| `electron-builder` | `^26.15.3`                                                          |
+| `electron-updater` | `^6.8.9`                                                            |
+| `better-sqlite3`   | saknes `^13.0.2` (Node-API priekšbūvējumi — Electron nav jāpārbūvē) |
+| Lietotnes versija  | `3.8.0`                                                             |
+| Lietotnes ID       | `online.omniroute.desktop`                                          |
+| Produkta nosaukums | `OmniRoute`                                                         |
 
-## Skripti (root `package.json`)
+## Skripti (saknes `package.json`)
 
-| Skripts                           | Mērķis                                                                     |
-| --------------------------------- | -------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Sāk `npm run dev` + gaida `localhost:20128` + palaiž Electron              |
-| `npm run electron:build`          | Veido Next.js pēc tam palaiž `electron-builder` pašreizējam OS             |
-| `npm run electron:build:win`      | Veido Windows NSIS instalētāju + portable (x64)                            |
-| `npm run electron:build:mac`      | Veido macOS DMG (Intel + Apple Silicon)                                    |
-| `npm run electron:build:linux`    | Veido Linux AppImage + DEB (x64 + arm64)                                   |
-| `npm run electron:smoke:packaged` | Palaiž iepakotu bināro failu un zondē `/login` HTTP 200, pēc tam izslēdzas |
+| Skripts                           | Mērķis                                                                                                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Palaiž `npm run dev`, gaida `localhost:20128` un palaiž Electron                                           |
+| `npm run electron:build`          | Būvē Next.js un pēc tam izpilda `electron-builder` pašreizējai operētājsistēmai                            |
+| `npm run electron:build:win`      | Būvē Windows NSIS instalētāju un portatīvo versiju (x64)                                                   |
+| `npm run electron:build:mac`      | Būvē macOS DMG (Intel + Apple Silicon)                                                                     |
+| `npm run electron:build:linux`    | Būvē Linux AppImage un DEB (x64 + arm64)                                                                   |
+| `npm run electron:smoke:packaged` | Palaiž sapakoto bināro failu un pārbauda, vai `/login` atgriež HTTP 200, pēc tam pabeidz lietotnes darbību |
 
-`electron/` darbvietā ir arī redzams:
+Darbvieta `electron/` nodrošina arī:
 
-- `npm run prepare:bundle` — palaiž `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — vienas arkas macOS būves
-- `npm run pack` — tikai direktoriju būvējums vietējai testēšanai (nav instalētāja)
+- `npm run prepare:bundle` — izpilda `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — vienas arhitektūras macOS būvējumi
+- `npm run pack` — būvējums tikai direktorijā lokālai testēšanai (bez instalētāja)
 
 ## Izvēles izpildlaika pakotnes
 
-Darbvirsmas versijas var publicēt papildu izpildlaika arhīvus kopā ar instalētājiem. Instalētā servera slodze satur `optional-packs.index.json` (zem `resources/app` uz Windows un Linux). Lai iegūtu `browser-runtime` ierakstu, izlasiet `packs[].tarball` un lejupielādējiet** precīzs faila nosaukums no tā paša laidiena** . Arhīvu nosaukumos ir iekļauts SHA-256 īssavilkums; dažādām būvēm var būt nepieciešami dažādi arhīvi. Saglabājiet lejupielādētā faila nosaukumu nemainīgu.
+Darbvirsmas būvējumi līdzās instalētājiem var publicēt izvēles izpildlaika arhīvus. Instalētā servera saturs ietver `optional-packs.index.json` (Windows un Linux sistēmās zem `resources/app`). Ierakstam `browser-runtime` nolasiet `packs[].tarball` un lejupielādējiet **tieši šo faila nosaukumu no tā paša laidiena**. Arhīvu nosaukumos ir SHA-256 kopsavilkums; dažādiem būvējumiem var būt vajadzīgi atšķirīgi arhīvi. Nemainiet lejupielādētā faila nosaukumu.
 
-Kopējiet instalētās lietotnes indeksu un atlasīto arhīvu vienā direktorijā, pēc tam izmantojiet CLI no tā paša laidiena:
+Kopējiet instalētās lietotnes indeksu un izvēlēto arhīvu vienā direktorijā un izmantojiet tā paša laidiena CLI:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` parāda instalēšanas un verifikācijas stāvokli, nevis arhīva faila nosaukumu. Komplektētais rādītājs atlasa arhīvu. Instalēšana pārbauda arhīva kontrolsummu pirms izvilkšanas un pakotnes kontrolsummu pirms instalētās pakotnes nomaiņas. Tas nolasa vietējos failus; tas nelejupielādē trūkstošos arhīvus. Pēc instalēšanas restartējiet lietojumprogrammu. Ja laidienam nav atbilstoša īpašuma, izvēles pakotne nav pieejama, izmantojot šī laidiena līdzekļus.
+`packs list` parāda instalēšanas un pārbaudes stāvokli, nevis arhīva faila nosaukumu. Arhīvu izvēlas komplektācijā iekļautais indekss. Instalēšana pārbauda arhīva kontrolsummu pirms izpakošanas un pakotņu kontrolsummas pirms instalētas pakotnes aizstāšanas. Tā lasa lokālus failus; tā nelejupielādē trūkstošus arhīvus. Pēc instalēšanas pārstartējiet lietotni. Ja laidienam nav atbilstoša faila, izvēles pakotne nav pieejama šī laidiena failos.
 
-## Direktorija izkārtojums
+## Direktoriju izkārtojums
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # Electron atkarības + electron-builder konfigurācija
+├── main.js                   # Galvenais process (24 KB — skatiet anotācijas tālāk)
+├── preload.js                # contextBridge IPC tilts
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI tipi
+├── README.md                 # Piezīmes darbvietā
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # electron-builder izvade (git ignorēta)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # Sagatavo .next/electron-standalone komplektu
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # Pēcbūvējuma ātrā pārbaude
 ```
 
-Gan `main.js`, gan `preload.js` ir**CommonJS `.js` faili** , nevis TypeScript. Renderētāja puses ieraksti ir `electron/types.d.ts` formātā.
+Gan `main.js`, gan `preload.js` ir **CommonJS `.js` faili**, nevis TypeScript.
+Renderētāja puses tipu definīcijas atrodas failā `electron/types.d.ts`.
 
 ## IPC tilts (`preload.js`)
 
-Iepriekšēja ielāde parāda baltajā sarakstā iekļauto API `window.electronAPI`, izmantojot `contextBridge` ar `contextIsolation: true` un `nodeIntegration: false`.
+Priekšielādes skripts, izmantojot `contextBridge`, nodrošina baltajā sarakstā iekļautu API objektā `window.electronAPI`
+ar `contextIsolation: true` un `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,113 +121,131 @@ const VALID_CHANNELS = {
 };
 ```
 
-Atklātās metodes:
+Pieejamās metodes:
 
-| Renderētāja izsaukums                                             | Tips                                  |
-| ----------------------------------------------------------------- | ------------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | piesaukt                              |
-| `openExternal(url)`                                               | piesaukt                              |
-| `getDataDir()`                                                    | piesaukt                              |
-| `restartServer()`                                                 | piesaukt                              |
-| `getAppVersion()`                                                 | piesaukt                              |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | piesaukt                              |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | nosūtīt                               |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | saņemt (atdod atkritumu iznīcinātāju) |
+| Renderētāja izsaukums                                             | Tips                       |
+| ----------------------------------------------------------------- | -------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                     |
+| `openExternal(url)`                                               | invoke                     |
+| `getDataDir()`                                                    | invoke                     |
+| `restartServer()`                                                 | invoke                     |
+| `getAppVersion()`                                                 | invoke                     |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                     |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                       |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (atgriež noņēmēju) |
 
-Saņemtie palīgi atgriežas a** iznīcināšanas funkcija** tā vietā, lai paļautos uz `removeAllListeners` — tas novērš klausītāju uzkrāšanos, kad React komponenti tiek atkārtoti uzstādīti.
+Saņemšanas palīgfunkcijas atgriež **noņēmēja funkciju**, nevis paļaujas uz
+`removeAllListeners` — tas novērš klausītāju uzkrāšanos, kad React komponenti
+tiek atkārtoti montēti.
 
 ## Servera dzīves cikls
 
-`main.js` izveido Next.js savrupo komplektu tieši ar Electron Node izpildlaiku, lai izvairītos no sākotnējā moduļa ABI neatbilstības sistēmas mezglam:
+`main.js` palaiž Next.js savrupo komplektu tieši ar Electron Node
+izpildlaiku, lai izvairītos no iebūvēto moduļu ABI neatbilstības sistēmas Node versijai:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
-Svarīgākie:
+Svarīgākais:
 
-- `waitForServer()` aptauj URL līdz 30 s pirms loga parādīšanas (aukstā palaišanas gadījumā bez tukša ekrāna).
-- `stdio: "pipe"` uztver stdout/stderr; gatavas frāzes (`Ready` / `listening`) izstaro `server-status: running` pa IPC.
-- `before-quit` gaida līdz 5 s, lai iegūtu graciozo SIGTERM (WAL kontrolpunktu), pēc tam nosūta SIGKILL.
-- Portu pārslēdzējs teknē (`20128`, `3000`, `8080`) aptur un restartē serveri, pēc tam atkārtoti ielādē BrowserWindow.
+- `waitForServer()` aptaujā URL līdz 30 s, pirms tiek parādīts logs (aukstās palaišanas laikā nav tukša ekrāna).
+- `stdio: "pipe"` tver stdout/stderr; gatavības frāzes (`Ready` / `listening`) nosūta `server-status: running`, izmantojot IPC.
+- `before-quit` gaida līdz 5 s korektai SIGTERM pabeigšanai (WAL kontrolpunkta izveidei) un pēc tam nosūta SIGKILL.
+- Portu pārslēdzējs sistēmas teknē (`20128`, `3000`, `8080`) aptur un restartē serveri, pēc tam atkārtoti ielādē BrowserWindow.
 
-## Zero-config Secret Bootstrap
+## Beznkonfigurācijas noslēpumu sāknēšana
 
-Pirmajā palaišanas reizē galvenais process tiek automātiski ģenerēts un saglabā trūkstošos noslēpumus:
+Pirmajā palaišanas reizē galvenais process automātiski ģenerē un saglabā trūkstošos noslēpumus:
 
-| Noslēpums                | Avots                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                       |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (atsaka, ja šifrēti creds jau pastāv) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                       |
+| Noslēpums                | Avots                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                     |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (atsakās, ja šifrēti akreditācijas dati jau pastāv) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                     |
 
-Turējās līdz `<DATA_DIR>/server.env`. `DATA_DIR` atrisina:
+Tie tiek saglabāti failā `<DATA_DIR>/server.env`. `DATA_DIR` tiek noteikts šādi:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` vai `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Vides failu meklēšana
+## Vides faila meklēšana
 
-Pirms servera izveidošanas tiek izvēlēts galvenais process (`getPreferredEnvFilePath()` in `electron/main.js`).** viens** `.env` fails: pirmais no tiem, kas pastāv.
+Pirms servera procesa palaišanas galvenais process (`getPreferredEnvFilePath()` failā
+`electron/main.js`) izvēlas **vienu** `.env` failu: pirmo no tālāk norādītajiem, kas pastāv.
 
-1. `$DATA_DIR/.env`, kad `DATA_DIR` ir iestatīts vidē, ar kuru lietotne tika palaista.
-2. `<resolved DATA_DIR>/.env`, izmantojot tos pašus noklusējuma iestatījumus kā iepriekš: `%APPDATA%\omniroute\.env` uz Windows, `$XDG_CONFIG_HOME/omniroute/.env` vai `~/.omniroute/.env` uz Linux un macOS.
+1. `$DATA_DIR/.env`, ja `DATA_DIR` ir iestatīts vidē, ar kuru tika palaista lietotne.
+2. `<resolved DATA_DIR>/.env`, izmantojot tos pašus iepriekš norādītos noklusējumus: `%APPDATA%\omniroute\.env`
+   operētājsistēmā Windows, `$XDG_CONFIG_HOME/omniroute/.env` vai `~/.omniroute/.env` operētājsistēmās Linux un macOS.
 3. `.env` procesa darba direktorijā.
 
-Galvenais process nolasa tikai šo failu; vēlākie kandidāti netiek apvienoti. Pēc tam servera vide tiek veidota ar šādu prioritāti (vispirms augstākā):
+Galvenais process nolasa tikai šo failu; vēlākie kandidāti netiek apvienoti. Pēc tam servera
+vide tiek izveidota ar šādu prioritāti (sākot ar augstāko):
 
-1. Electron procesa vide (mainīgie, kas mantoti no jebkuras lietotnes palaišanas).
-2. Atlasītais `.env` fails.
+1. Electron procesa vide (mainīgie, kas mantoti no procesa, kurš palaida lietotni).
+2. Izvēlētais `.env` fails.
 3. `<DATA_DIR>/server.env` (iepriekš minētie sāknēšanas noslēpumi).
 
-Procesa vide tiek tverta, kad lietotne tiek startēta, tāpēc sistēmas vai lietotāja vides mainīgais, kas iestatīts lietojumprogrammas darbības laikā (tostarp, kamēr tas atrodas teknē pēc loga aizvēršanas), nesasniedz serveri, kamēr lietotne nav pilnībā aizvērta un palaists atkārtoti. Izpildlaika pogām, piemēram, `CONTEXT_LENGTH_<PROVIDER>` (skatiet [sadaļu Vides mainīgie: konteksta garums katram nodrošinātājam](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), dodiet priekšroku `.env` failam, pēc tam pilnībā aizveriet (paplāte,** Iziet** ) un atsākt.
+Procesa vide tiek fiksēta lietotnes palaišanas brīdī, tāpēc sistēmas vai lietotāja vides
+mainīgais, kas iestatīts lietotnes darbības laikā (tostarp laikā, kad pēc loga aizvēršanas tā
+atrodas sistēmas teknē), nenonāk serverī, kamēr lietotne nav pilnībā aizvērta un palaista no jauna.
+Izpildlaika iestatījumiem, piemēram, `CONTEXT_LENGTH_<PROVIDER>` (skatiet
+[Vides mainīgie: konteksta garums katram nodrošinātājam](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+ieteicams izmantot `.env` failu, pēc tam pilnībā aizvērt lietotni (sistēmas teknē izvēloties **Iziet**) un palaist to no jauna.
 
-## Logs un paplāte
+## Logs un sistēmas tekne
 
-- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, luksofors pie `{ x: 16, y: 16 }`.
-- Windows/Linux: vietējā virsrakstjosla.
-- Aizvērt poga samazina paplāti; paplātes izvēlnē ir** Atveriet OmniRoute** ,** Atveriet informācijas paneli** (ārējā pārlūkprogramma),** Servera ports** apakšizvēlne,** Pārbaudiet atjauninājumus** ,** Iziet** .
+- `BrowserWindow`: 1400×900 (min. 1024×700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, loga vadības pogas atrodas `{ x: 16, y: 16 }`.
+- Windows/Linux: sistēmas virsrakstjosla.
+- Aizvēršanas poga minimizē lietotni sistēmas teknē; teknes izvēlnē ir **Atvērt OmniRoute**, **Atvērt informācijas paneli** (ārējā pārlūkprogrammā), apakšizvēlne **Servera ports**, **Pārbaudīt atjauninājumus**, **Iziet**.
 
 ## Satura drošības politika
 
-Iestatīt, izmantojot `session.defaultSession.webRequest.onHeadersReceived`. Ievērojamās direktīvas:
+Iestatīta, izmantojot `session.defaultSession.webRequest.onHeadersReceived`. Būtiskākās direktīvas:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Izstrādātāja režīms `'unsafe-eval'` pievieno tikai `script-src`
+- Izstrādes režīmā tikai direktīvai `script-src` tiek pievienots `'unsafe-eval'`
 
-## Automātiska atjaunināšana
+## Automātiskā atjaunināšana
 
 Izmanto `electron-updater` ar GitHub nodrošinātāju (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Notikumi, kas pārsūtīti renderētājam, izmantojot `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (ar `percent`), `downloaded`, `error`
-- `installUpdate()` nogalina serveri un pēc tam izsauc `autoUpdater.quitAndInstall()`
-- Izlaists izstrādātāja režīmā (`!app.isPackaged`)
+- Notikumi tiek pārsūtīti renderēšanas procesam, izmantojot `update-status` IPC:
+  `checking`, `available`, `not-available`, `downloading` (ar `percent`), `downloaded`, `error`
+- `installUpdate()` aptur serveri un pēc tam izsauc `autoUpdater.quitAndInstall()`
+- Izstrādes režīmā tiek izlaists (`!app.isPackaged`)
 
-## Izbūvēt cauruļvadu
+## Būvēšanas konveijers
 
-1. `npm run build` → Next.js savrups `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → pārveido par `.next/electron-standalone` un pārraksta absolūtos ceļus `server.js` + `required-server-files.json`, lai komplektu varētu pārvietot.
-3. `electron-builder` pakotnes `main.js`, `preload.js`, `node_modules` un `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js savrupais būvējums mapē `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → atkārtoti sagatavo failus mapē `.next/electron-standalone` un pārraksta absolūtos ceļus failos `server.js` + `required-server-files.json`, lai pakotni varētu pārvietot.
+3. `electron-builder` iepako `main.js`, `preload.js`, `node_modules` un `extraResources: { ../.next/electron-standalone → app }`.
 
-### Veidojiet mērķus
+### Būvēšanas mērķi
 
-| OS      | Mērķi                                     |
-| ------- | ----------------------------------------- |
-| Windows | NSIS instalētājs + portable (x64)         |
-| macOS   | DMG (Intel + arm64, drag-to-Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)              |
+| OS      | Mērķi                                             |
+| ------- | ------------------------------------------------- |
+| Windows | NSIS instalētājs + portatīvā versija (x64)        |
+| macOS   | DMG (Intel + arm64, ievilkšana Applications mapē) |
+| Linux   | AppImage + DEB (x64 + arm64)                      |
 
-NSIS iestatījumi: `oneClick: false`, ļauj lietotājam izvēlēties instalēšanas direktoriju, izveido darbvirsmas un sākuma izvēlnes saīsnes.
+NSIS iestatījumi: `oneClick: false`, ļauj lietotājam izvēlēties instalēšanas direktoriju, izveido saīsnes darbvirsmā un izvēlnē Sākt.
 
-## Dūmu testēšanas pakotne
+## Iepakotā būvējuma pamata darbspējas pārbaude
 
 ```bash
 npm run electron:smoke:packaged
@@ -229,18 +253,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Pašreizējai platformai automātiski atklāj iepakoto bināro failu `electron/dist-electron/`.
-- Tiek palaists ar izolētiem `HOME`/`APPDATA`/`XDG_*` direktorijiem, lai tas neskartu izstrādātāja datus.
-- Aptaujas `http://127.0.0.1:20128/login` par HTTP 200 45 s laikā.
-- Pulksteņi stderr/stdout nāvējošiem modeļiem (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` utt.).
-- Pēc gatavības gaida 2 s stabila izpildes laika, pēc tam izdod SIGTERM un gaida, kamēr ports atbrīvosies.
-- In CI automātiski nodod `--no-sandbox --disable-gpu` (un `--disable-dev-shm-usage` uz Linux).
+- Automātiski atrod pašreizējai platformai paredzēto iepakoto izpildāmo failu mapē `electron/dist-electron/`.
+- Palaiž to ar izolētām `HOME`/`APPDATA`/`XDG_*` direktorijām, lai netiktu skarti izstrādātāja dati.
+- 45 s laikā periodiski pārbauda, vai `http://127.0.0.1:20128/login` atgriež HTTP 200.
+- Pārrauga stderr/stdout, meklējot kritisku kļūdu paraugus (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` u.c.).
+- Pēc gatavības sasniegšanas nogaida 2 s stabilas darbības, pēc tam nosūta SIGTERM un gaida, līdz ports tiek atbrīvots.
+- CI vidē automātiski nodod `--no-sandbox --disable-gpu` (un `--disable-dev-shm-usage` operētājsistēmā Linux).
 
-Env ignorē: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Vides mainīgo pārrakstīšanas iespējas: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Koda parakstīšana
 
-`electron/package.json` dara** nē** vadu parakstīšanas akreditācijas datus. Nosūtiet tos caur env vars uz `electron-builder`:
+`electron/package.json` **neiekļauj** parakstīšanas akreditācijas datus tieši. Nododiet tos `electron-builder`, izmantojot vides mainīgos:
 
 ### macOS
 
@@ -263,32 +287,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage parakstīšana nav obligāta — iestatiet `LINUX_GPG_KEY` parakstīšanas gadījumā.
+AppImage parakstīšana nav obligāta — iestatiet `LINUX_GPG_KEY`, ja nepieciešama parakstīšana.
 
 ## Izplatīšana
 
-Artefakti nokļūst `electron/dist-electron/`:
+Artefakti tiek ievietoti mapē `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Laidieni tiek publicēti GitHub Releases (`diegosouzapw/OmniRoute`), kur arī `electron-updater` pārbauda jaunas versijas.
+Laidieni tiek publicēti GitHub Releases (`diegosouzapw/OmniRoute`), kur `electron-updater` arī pārbauda jaunu versiju pieejamību.
 
 ## Problēmu novēršana
 
-| Simptoms                                                           | Labot                                                                                                                                                            |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` pēc Electron liela trieciena | better-sqlite3 v13 piegādā Node-API priekšbūvējumus — atkārtoti palaist `npm install` saknē un `prepare:bundle` (tas pārbauda pašreizējās platformas priekšbūvi) |
-| `ERR_DLOPEN_FAILED` vietējam modulim                               | Atkārtoti palaist `prepare:bundle` — tas ātri neizdodas, ja trūkst Node-API priekšbūvējuma pašreizējai platformai                                                |
-| Uz Linux logs ir tukšs                                             | Apstipriniet, vai Next.js serveris patiešām ir saistīts ar PORT (pārbaudiet `[Server]` žurnālus)                                                                 |
-| macOS notariālie stendi                                            | Nodrošiniet `APPLE_*` vars eksportēšanu, nevis tikai `.env`                                                                                                      |
-| Windows SmartScreen brīdinājums                                    | Parakstieties ar EV sertifikātu vai lietotāji ar peles labo pogu noklikšķiniet uz → "Palaist jebkurā gadījumā"                                                   |
-| Dūmu tests neizdodas, izmantojot portu                             | Pirms `electron:smoke:packaged` palaišanas apturiet jebkuru vietējo izstrādātāju serveri 20128. gadā                                                             |
+| Simptoms                                                                             | Risinājums                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Cannot find module 'better-sqlite3'` pēc Electron galvenās versijas paaugstināšanas | better-sqlite3 v13 nodrošina Node-API iepriekš būvētas pakotnes — vēlreiz palaidiet `npm install` saknes direktorijā un `prepare:bundle` (tas pārbauda pašreizējās platformas iepriekš būvēto pakotni) |
+| `ERR_DLOPEN_FAILED` vietējam modulim                                                 | Vēlreiz palaidiet `prepare:bundle` — tas nekavējoties pārtrauc darbību, ja pašreizējās platformas Node-API iepriekš būvētās pakotnes nav                                                               |
+| Linux vidē logs ir tukšs                                                             | Pārliecinieties, ka Next.js serveris patiešām piesaistījās PORT (pārbaudiet `[Server]` žurnālus)                                                                                                       |
+| macOS notariālā apstiprināšana iestrēgst                                             | Pārliecinieties, ka `APPLE_*` mainīgie ir eksportēti, nevis tikai norādīti `.env`                                                                                                                      |
+| Windows SmartScreen brīdinājums                                                      | Parakstiet ar EV sertifikātu vai lietotājiem jāveic labais klikšķis → "Tomēr palaist"                                                                                                                  |
+| Pamata darbspējas pārbaude neizdodas aizņemta porta dēļ                              | Pirms `electron:smoke:packaged` palaišanas apturiet jebkuru lokālo izstrādes serveri, kas izmanto portu 20128                                                                                          |
 
-## Skatīt arī
+## Skatiet arī
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Avots: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Palīgi: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Palīgskripti: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

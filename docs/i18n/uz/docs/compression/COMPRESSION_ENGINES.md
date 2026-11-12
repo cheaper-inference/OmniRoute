@@ -383,7 +383,7 @@ Qayta tiklash vositasi hozirda `omniroute_ccr_retrieve` deb nomlangan ( `omnirou
 
 ### Seansning hayot aylanishi
 
-Streamable-HTTP seanslari ishlamay qoladi va server ularni yig'adi; bo'sh turgan oyna `OMNIROUTE_MCP_SESSION_IDLE_MS` tomonidan o'rnatiladi (standart 5 daqiqa; qattiq kodlangan qiymat emas, nomi bilan havola qilingan, shuning uchun bu sahifa o'zgarganda siljimaydi). Bekor qilingan seansning alomati HTTP 404 bilan `Unknown Mcp-Session-Id` — bo'lib, chora seansni qayta ulash yoki qayta boshlashdir,** emas** tugmani aylantirish, doirani o'zgartirish yoki asbob nomini o'zgartirish uchun.
+Streamable-HTTP seanslari ishlamay qoladi va server ularni yig'adi; bo'sh oyna `open-sse/mcp-server/httpTransport.ts` yilda `DEFAULT_MCP_SESSION_IDLE_MS` qaytib tushib, `OMNIROUTE_MCP_SESSION_IDLE_MS` tomonidan tuzilgan. Bekor qilingan seansning alomati `Unknown Mcp-Session-Id` — bilan HTTP 404 bo'lib, chorasi seansni qayta ulash yoki qayta boshlashdir,**emas** tugmani aylantirish, doirani o'zgartirish yoki asbob nomini o'zgartirish uchun.
 
 ## API interfeysi
 

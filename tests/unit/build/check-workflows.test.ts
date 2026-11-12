@@ -68,11 +68,212 @@ function readWorkflowFiles(): string[] {
 
 test("scheduled runs carry the upstream-only guard on every job", () => {
   const dir = new URL("../../../.github/workflows/", import.meta.url);
-  const files = EXPECTED_SCHEDULED_WORKFLOWS.map((f) => new URL(f, dir).pathname);
-  assert.ok(readWorkflowFiles().length >= files.length);
+  const files = readWorkflowFiles();
+  for (const workflow of EXPECTED_SCHEDULED_WORKFLOWS) {
+    assert.ok(files.includes(new URL(workflow, dir).pathname), workflow);
+  }
   const findings = scheduledGuard(files);
   assert.deepEqual(findings, []);
 });
+
+// Prove the real scheduled-job check, including stricter equivalent guards and bypasses.
+const SCHEDULED_GUARD_CASES = [
+  {
+    name: "unconditional canonical repository",
+    condition: "github.repository == 'cheaper-inference/OmniRoute'",
+    protected: true,
+  },
+  {
+    name: "wrapped unconditional canonical repository",
+    condition: "${{ github.repository == 'cheaper-inference/OmniRoute' }}",
+    protected: true,
+  },
+  {
+    name: "parenthesized unconditional canonical repository",
+    condition: "((github.repository == 'cheaper-inference/OmniRoute'))",
+    protected: true,
+  },
+  {
+    name: "canonical schedule guard",
+    condition:
+      "${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}",
+    protected: true,
+  },
+  {
+    name: "guard with mandatory status condition",
+    condition:
+      "always() && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')",
+    protected: true,
+  },
+  {
+    name: "guard with extra cron restriction",
+    condition:
+      "github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')",
+    protected: true,
+  },
+  {
+    name: "operators and escaped quotes in opaque call",
+    condition:
+      "contains('don''t || true && false', github.ref) && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')",
+    protected: true,
+  },
+  {
+    name: "whitespace outside protected literals",
+    condition:
+      "github.event_name\t!=\t'schedule' || github.repository\t==\t'cheaper-inference/OmniRoute'",
+    protected: true,
+  },
+  {
+    name: "schedule branch disabled entirely",
+    condition: "github.event_name != 'schedule'",
+    protected: true,
+  },
+  {
+    name: "OR true bypass",
+    condition:
+      "(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') || true",
+    protected: false,
+  },
+  {
+    name: "OR unknown bypass",
+    condition:
+      "vars.ALLOW_FORKS == 'true' || (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')",
+    protected: false,
+  },
+  {
+    name: "unconditional repository OR true bypass",
+    condition: "github.repository == 'cheaper-inference/OmniRoute' || true",
+    protected: false,
+  },
+  {
+    name: "incorrect repository",
+    condition: "github.event_name != 'schedule' || github.repository == 'someone/else'",
+    protected: false,
+  },
+  {
+    name: "repository inequality",
+    condition:
+      "github.event_name != 'schedule' || github.repository != 'cheaper-inference/OmniRoute'",
+    protected: false,
+  },
+  {
+    name: "negated guard",
+    condition:
+      "!(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')",
+    protected: false,
+  },
+  {
+    name: "guard compared with false",
+    condition:
+      "(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') == false",
+    protected: false,
+  },
+  {
+    name: "guard inside a literal",
+    condition:
+      "'github.event_name != ''schedule'' || github.repository == ''cheaper-inference/OmniRoute'''",
+    protected: false,
+  },
+  {
+    name: "guard passed to an opaque call",
+    condition:
+      "contains('github.event_name != ''schedule'' || github.repository == ''cheaper-inference/OmniRoute''', github.ref)",
+    protected: false,
+  },
+  {
+    name: "schedule literal trailing whitespace",
+    condition:
+      "github.event_name != 'schedule ' || github.repository == 'cheaper-inference/OmniRoute'",
+    protected: false,
+  },
+  {
+    name: "repository literal trailing whitespace",
+    condition:
+      "github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute '",
+    protected: false,
+  },
+  {
+    name: "different escaped schedule literal",
+    condition:
+      "github.event_name != 'schedu''le' || github.repository == 'cheaper-inference/OmniRoute'",
+    protected: false,
+  },
+  {
+    name: "different schedule literal containing operator",
+    condition:
+      "github.event_name != 'schedule || true' || github.repository == 'cheaper-inference/OmniRoute'",
+    protected: false,
+  },
+  {
+    name: "unclosed parenthesis",
+    condition:
+      "(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute'",
+    protected: false,
+  },
+  {
+    name: "unclosed quoted literal",
+    condition:
+      "always('unfinished) && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')",
+    protected: false,
+  },
+  {
+    name: "dangling logical operator",
+    condition:
+      "(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') &&",
+    protected: false,
+  },
+  {
+    name: "consecutive logical operators",
+    condition:
+      "(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && || true",
+    protected: false,
+  },
+  {
+    name: "malformed expression wrapper",
+    condition:
+      "${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }} || true",
+    protected: false,
+  },
+  {
+    name: "single bitwise operator",
+    condition:
+      "(github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') & true",
+    protected: false,
+  },
+  {
+    name: "excessive grouping depth",
+    condition:
+      "(".repeat(65) +
+      "github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute'" +
+      ")".repeat(65),
+    protected: false,
+  },
+  {
+    name: "excessive condition length",
+    condition:
+      "x".repeat(16385) +
+      " && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')",
+    protected: false,
+  },
+];
+
+for (const sample of SCHEDULED_GUARD_CASES) {
+  test(`scheduled guard: ${sample.name}`, () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "check-workflows-guard-case-"));
+    try {
+      const file = path.join(dir, "nightly-case.yml");
+      fs.writeFileSync(
+        file,
+        "on:\n  schedule:\n    - cron: '0 0 * * *'\njobs:\n  demo:\n    if: " +
+          JSON.stringify(sample.condition) +
+          "\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n"
+      );
+      assert.equal(scheduledGuard([file]).length, sample.protected ? 0 : 1);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}
 
 test("a scheduled job without the guard is reported", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "check-workflows-guard-"));

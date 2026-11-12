@@ -1,0 +1,1 @@
+- **test(ci):** Synchronize the hedge ordering fixture on the third dispatch, preserving exact launch-order and loser-cancellation assertions without relying on a 20ms scheduling window.

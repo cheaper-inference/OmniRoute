@@ -13,7 +13,7 @@
 
 ## Cad É
 
-cláraíonn OmniRoute 381 soláthraí, lena n-áirítear 155 iontráil catalóige marcáilte**free/no-auth** (no-auth, free-tier OAuth, nó eochair API sraithe saor in aisce — féach an [Treoir Sraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) agus [eolaire iomlán na Sraitheanna Saora](../reference/FREE_TIERS.md) ). An ghabháil: athraíonn soláthraithe saor in aisce go fiáin i gcáilíocht na samhla. Tá sé i bhfad níos úsáidí soláthraí gan údarás a fhreastalaíonn ar shamhail teorann ná soláthraí a fhreastalaíonn ar mhúnla beag leagáide.
+cláraíonn OmniRoute 388 soláthraí, lena n-áirítear 155 iontráil catalóige marcáilte**free/no-auth** (no-auth, free-tier OAuth, nó eochair API sraithe saor in aisce — féach an [Treoir Sraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) agus [eolaire iomlán na Sraitheanna Saora](../reference/FREE_TIERS.md) ). An ghabháil: athraíonn soláthraithe saor in aisce go fiáin i gcáilíocht na samhla. Tá sé i bhfad níos úsáidí soláthraí gan údarás a fhreastalaíonn ar shamhail teorann ná soláthraí a fhreastalaíonn ar mhúnla beag leagáide.
 
 **Ranganna soláthraithe saor in aisce,** freagraí"** cén soláthraí saor in aisce a thugann an tsamhail is fearr dom?** " trí bheith páirteach i gcatalóg gach soláthraí saor in aisce le** scóir cháilíochta sluafhoinsithe** ó na** Clár ceannairí arena AI** (daonna-rogha ELO, an smaoineamh céanna taobh thiar den LMArena chatbot réimse). Rangaítear soláthraithe ansin de réir láidreacht a gcuid** Múnla is fearr saor in aisce,** .
 

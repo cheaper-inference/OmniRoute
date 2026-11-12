@@ -44,7 +44,7 @@ Ana ɗaukar alamar boolean a matsayin **mai aiki** idan ƙimarta mai aiki ita ce
 
 ## Tuta Catalog
 
-Tutoci 120 a cikin rukunan 6.** Default** ita ce ma'anar tsohowar — ƙimar da ake amfani da ita lokacin da DB ba ta soke ko canjin yanayi ba.
+Tutoci 121 a cikin rukunan 6.** Default** ita ce ma'anar tsohowar — ƙimar da ake amfani da ita lokacin da DB ba ta soke ko canjin yanayi ba.
 
 ### Tsaro (11)
 
@@ -115,7 +115,7 @@ Tutoci 120 a cikin rukunan 6.** Default** ita ce ma'anar tsohowar — ƙimar da 
 
 Lokacin da aka saita `UNPRICED_USAGE_BUDGET_POLICY` a sarari (DB ya soke kafin muhalli), yana ɗaukar fifiko akan `USAGE_LIMIT_IGNORE_UNPRICED`. Ba tare da ƙayyadadden ƙimar ƙima ba, zaɓin zaɓin boolean na sama yana zaɓar `count_as_zero`; in ba haka ba tsoho shine `fail_closed`. Ƙimar ƙididdiga mara inganci da ma'ajiya ta tuta ta kasa rufe. Babu ficewa yana sassauta farashin kashe kuɗi ko gazawar binciken farashi. Ƙaddamarwa da rahoton mai gudanarwa suna warware manufa iri ɗaya mai tasiri.
 
-### Lokacin gudu (57)
+### Lokacin gudu (58)
 
 | Maɓalli                                        | Nau'in  | Default | Sake kunnawa | Bayani                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -178,6 +178,7 @@ Lokacin da aka saita `UNPRICED_USAGE_BUDGET_POLICY` a sarari (DB ya soke kafin m
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |              | Dakatar da miƙawa da tura ƙoƙarin tunanin `max` don Cursor Grok 4.7 (#17386): jerin docs Cursor kawai low/medium/high/xhigh, don haka `grok-4.7-max` fallback alias ɗin ya ɓace daga kasidar kuma ana aika buƙatar ƙoƙarin `max` ba tare da ma'aunin ƙoƙari ba. Kashe ta tsohuwa: `max` yana tsayawa ana miƙawa kuma ana tura shi, azaman binciken AgentService/Run kai tsaye ya karɓa.                                                                                                                                                                                                                                                                                                                |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |              | Aika Amsoshi masu kiyaye rai azaman layin mara komai maimakon amsawa.in_progress lamarin, don haka hoton roba ba zai taɓa maye gurbin ainihin martani a cikin SDK na hukuma ba. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Kashe ta tsohuwa: masu ƙididdigewa suna aika da takamaiman amsawar amsawa.in_progress.                                                                                                                                                                                                                                                                                            |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |              | A cikin ƙididdigar cache na matsawa, ƙidaya buƙatun da aka matsa zuwa mai ba da caching prefix ta atomatik (OpenAI, Codex, Azure, ko haɗin al'ada wanda ke bayyana saurin caching tare da cire alamar alama) azaman kiyasin cache da aka buga koda ba tare da alamun `cache_control` ba (#17114). Ƙididdiga siginar cancantar cache ne, ba bugun gani ba, don haka ƙimar bugu da aka ruwaito na waɗannan masu samarwa yana tafiya zuwa 100%. Kashe ta tsohuwa: kawai buƙatun ɗauke da alamomin `cache_control` zuwa mai bada caching ana ƙidaya azaman kiyasin bugawa, don haka masu samar da prefix ta atomatik suna ci gaba da bayar da rahoton 0.                                                   |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |              | Yana ba da damar binciken yanar gizo ta atomatik ta `codex-search` da asusun Codex da aka haɗa idan ba a bayyana `provider` ba. Idan babu mai bayarwa mai bayanan shiga da za a iya amfani da shi, shi ne zaɓin ƙarshe kafin masu bayarwa marasa maɓalli, kuma madadi ne idan wani ya gaza (#17933). Kowane bincike yana cin rabon biyan kuɗin ChatGPT kuma yana ɗaukar kusan daƙiƙa 10–40. A kashe yake tun farko; `codex-search` yana aiki ne kawai idan an nema kai tsaye.                                                                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Yana dawo da kowace tuta tare da ingantaccen ƙimarta, tushenta, da taƙaice.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

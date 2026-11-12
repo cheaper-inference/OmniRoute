@@ -404,7 +404,7 @@ their separate redaction.
 HTTP status without writing call-log spans.
 
 Trace ids and span ids are the first 32/16 hex digits of SHA-256 over
-`"omniroute.trace\\0" + callLogId` and `"omniroute.span\\0" + callLogId`. Re-sends carry
+`"omniroute.trace\0" + callLogId` and `"omniroute.span\0" + callLogId`. Re-sends carry
 identical ids. This is not a deduplication guarantee: some backends, including Langfuse
 v4 ingestion, do not deduplicate same-id spans. A crash or partial chunk failure can
 re-send at most the one unacknowledged cursor batch; that entire batch may be duplicated,

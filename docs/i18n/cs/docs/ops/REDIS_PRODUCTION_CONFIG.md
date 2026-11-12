@@ -6,33 +6,33 @@
 
 ## Přehled
 
-Redis je v OmniRoute **volitelná, měkká závislost** — pokud Redis není dostupný, aplikace se elegantně přepne na náhradní řešení v paměti. V produkčním prostředí snižuje vyladění Redis latenci u čtyř různých typů zátěže:
+Redis je **volitelná, měkká závislost** v OmniRoute — aplikace ladně degraduje (výpadky v paměti), když Redis není k dispozici. V produkci snižuje ladění Redis latenci u čtyř různých pracovních zátěží:
 
-| Typ zátěže          | Ovladač                       | Továrna klienta                                              | Vzor klíče                                                          |
-| ------------------- | ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| Omezení rychlosti   | `rateLimiter.ts`              | `getRedisClient()` — líně inicializovaný singleton `ioredis` | `<prefix>rl:*` atomická okna omezení rychlosti implementovaná v Lua |
-| Mezipaměť ověřování | `apiKeys.ts`                  | Znovu používá klienta z `rateLimiter`                        | `<prefix>auth:api_key:<sha256>` s TTL                               |
-| Úložiště kvót       | `redisQuotaStore.ts`          | Samostatný singleton `getRedisClient(url)`                   | `<prefix>quota:*` konfigurovatelné pro každou instanci              |
-| Jistič zahřívání    | `redisCircuitBreakerStore.ts` | Samostatný klient v `circuitBreakerFactory.ts`               | `<prefix>warmup:cb:<connectionId>`                                  |
+| Pracovní zátěž   | Řidič                         | Klientská továrna                              | Klíčový vzor                                           |
+| ---------------- | ----------------------------- | ---------------------------------------------- | ------------------------------------------------------ |
+| Omezení sazby    | `rateLimiter.ts`              | `getRedisClient()` — líný `ioredis` singleton  | Okna limitu atomové rychlosti `<prefix>rl:*` Lua       |
+| Auth cache       | `apiKeys.ts`                  | Znovu používá klienta `rateLimiter`            | `<prefix>auth:api_key:<sha256>` se TTL                 |
+| Obchod s kvótami | `redisQuotaStore.ts`          | Samostatný singleton `getRedisClient(url)`     | `<prefix>quota:*` konfigurovatelné pro každou instanci |
+| Zahřívací jistič | `redisCircuitBreakerStore.ts` | Samostatný klient v `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>`                     |
 
-Všechny čtyři typy zátěže sdílejí jednu předponu jmenného prostoru, takže OmniRoute může na jedné instanci Redis (např. `127.0.0.1:6379`) koexistovat s dalšími aplikacemi. Viz [Jmenné prostory klíčů](#jmenné-prostory-klíčů).
+Všechny čtyři pracovní zátěže sdílejí jednu předponu jmenného prostoru, takže OmniRoute může koexistovat s jinými aplikacemi v jedné instanci Redis (např. `127.0.0.1:6379`). Viz [Key Namespace](#key-namespacing).
 
 ---
 
-## Aktuální konfigurace (výchozí hodnoty v kódu)
+## Aktuální konfigurace (výchozí kód)
 
-| Nastavení                                  | Hodnota                                                               | Kde                                                                                   |
-| ------------------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Proměnná prostředí `REDIS_URL`             | `redis://redis:6379` (compose), volitelné                             | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Proměnná prostředí `REDIS_KEY_PREFIX`      | `omniroute:` (výchozí)                                                | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Proměnná prostředí `QUOTA_STORE_REDIS_URL` | samostatná, může se lišit od `REDIS_URL`                              | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                       | `"sqlite"` (výchozí), volitelně `"redis"`                             | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` v ioredis           | `3`                                                                   | vytvoření klienta v `rateLimiter.ts`                                                  |
-| `enableReadyCheck`                         | nenastaveno (výchozí hodnota ioredis: `true`)                         | —                                                                                     |
-| `lazyConnect`                              | nenastaveno (výchozí hodnota ioredis: `false`)                        | —                                                                                     |
-| `retryStrategy`                            | nenastaveno (výchozí nastavení ioredis: základ 200 ms, exponenciální) | —                                                                                     |
-| TLS / heslo / index DB                     | **nenakonfigurováno**                                                 | —                                                                                     |
-| Sentinel / Cluster                         | **nenakonfigurováno** — podporován je pouze samostatný uzel           | —                                                                                     |
+| Nastavení                       | Hodnota                                                        | Kde                                                                                   |
+| ------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (compose), volitelné                      | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (výchozí)                                         | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | samostatné, může se lišit od `REDIS_URL`                       | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (výchozí), `"redis"` volitelné                      | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                            | Vytvoření klienta `rateLimiter.ts`                                                    |
+| `enableReadyCheck`              | není nastaveno (ioredis výchozí: `true`)                       | —                                                                                     |
+| `lazyConnect`                   | není nastaveno (ioredis výchozí: `false`)                      | —                                                                                     |
+| `retryStrategy`                 | není nastaveno (ioredis výchozí: 200 ms základ, exponenciální) | —                                                                                     |
+| TLS / heslo / index DB          | **není nakonfigurováno**                                       | —                                                                                     |
+| Sentinel / Cluster              | **není nakonfigurováno** Pouze samostatný uzel —               | —                                                                                     |
 
 ---
 
@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Doporučené nastavení pro produkční prostředí
+## Doporučené ladění výroby
 
-### 1. Fond připojení / možnosti klienta (konstruktor `Redis` z ioredis)
+### 1. Fond připojení / Možnosti klienta (ioredis `Redis` konstruktor)
 
-Aktuální kód vytváří jedinou instanci `new Redis(url)` bez vlastních možností. Pro produkční
-nasazení s více replikami předejte v kódu továrnu klientů nebo obalte `getRedisClient()`:
+Aktuální kód vytváří jeden `new Redis(url)` bez vlastních možností. Pro produkční nasazení s více replikami předejte továrnu klienta v kódu nebo zabalte `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // bez omezení počtu opakování; rozhoduje retryStrategy
-  enableReadyCheck: true, // před přijetím volání ověří, že je server připraven
-  lazyConnect: true, // nepřipojuje se při vytvoření; čeká na první volání
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // po 10 pokusech to vzdá → znovu se připojí později
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, maximum 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // sloučí souběžné příkazy do jednoho zápisu TCP
-  keepAlive: 10000, // TCP keep-alive každých 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Klíčové kompromisy:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — preferované nastavení pro produkci, aby dočasné
-  restarty Redis nezpůsobily okamžité selhání každého požadavku. Záložní mechanismus v paměti
-  v `checkRateLimit()` zpracuje cestu při selhání.
-- `lazyConnect: true` — zabraňuje tomu, aby spuštění serveru záviselo na dostupnosti Redis předtím,
-  než server začne přijímat připojení.
-- `enableAutoPipelining: true` — snižuje počet síťových cest při souběžných kontrolách omezení rychlosti;
-  přínosné při více než 50 RPS na jednom připojení.
+- `maxRetriesPerRequest: null` + `retryStrategy` — upřednostňován pro výrobu, takže přechodné restarty Redis okamžitě nezdaří každý požadavek. Záložní funkce v paměti v `checkRateLimit()` absorbuje cestu selhání.
+- `lazyConnect: true` — se vyhýbá spouštěcí závislosti na tom, že Redis je spuštěno dříve, než server začne přijímat připojení.
+- `enableAutoPipelining: true` — omezuje zpáteční lety pro souběžné kontroly rychlostního limitu; výhodné při > 50 RPS na jednom připojení.
 
 ### 2. Konfigurace serveru Redis (`redis.conf`)
 
 ```
-# Paměť
-maxmemory 80%                        # ponechá prostor pro stránkovací mezipaměť OS
-maxmemory-policy allkeys-lru         # při nedostatku paměti odstraní zastaralé položky ověřovací mezipaměti
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Perzistence (volitelné — OmniRoute je bezpečný při pádu i bez ní)
-save 300 1                           # snímek alespoň každých 5 min, pokud se změnil ≥1 klíč
-appendonly no                        # AOF není potřeba; data lze znovu vygenerovat
-appendfsync no                       # žádná režie fsync (RDB je dostačující)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Síť
-timeout 0                            # žádné odpojování při nečinnosti
-tcp-keepalive 300                    # keep-alive po 5 min
-tcp-backlog 511                      # fronta připojení pro nárazovou zátěž
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Výkon
-hz 10                                # výchozí hodnota; 100 pro provoz citlivý na latenci
-activedefrag yes                     # automatická defragmentace při fragmentaci >10 %
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Kompromis u `maxmemory-policy allkeys-lru`:** Při nedostatku paměti mohou být položky
-ověřovací mezipaměti odstraněny. Je to bezpečné — `setCachedApiKey` při nenalezení položky
-mezipaměť vždy znovu naplní a záložní úložiště SQLite je autoritativní. Skript Lua omezovače
-rychlosti vytváří malé klíče, které mají záměrně krátkou životnost.
+**Kompromis za `maxmemory-policy allkeys-lru`:** Položky auth cache mohou být vyřazeny pod tlakem paměti. To je bezpečné, — `setCachedApiKey` se vždy znovu naplní, když dojde k chybě, a záložní SQLite je směrodatný. Skript Lua s omezovačem rychlosti vytváří malé klávesy, které mají krátkou životnost.
 
 ### 3. Nastavení Docker Compose
 
-Produkční konfigurace Compose (`docker-compose.prod.yml`) používá `redis:8.6.2-alpine`. Přidejte:
+Prod compose (`docker-compose.prod.yml`) používá `redis:8.6.2-alpine`. Přidat:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Aspekty více instancí / škálování
+### 4. Úvahy o více instancích / škálování
 
-**Jediný Redis pro všechny repliky** — skript Lua omezovače rychlosti závisí na jediném
-autoritativním prostoru klíčů. Více instancí Redis pro jednotlivé repliky by vedlo ke ztrátě
-atomicity a zdvojnásobení rozpočtu. Pro všechny repliky aplikace používejte jediný Redis
-(nebo cluster Redis Sentinel s podporou převzetí služeb při selhání).
+**Jediný Redis pro všechny repliky** — Lua skript omezovače rychlosti závisí na jediném autoritativním klíčovém prostoru. Více instancí Redis za replikami by ztratilo atomicitu a zdvojnásobilo rozpočet. Použijte jeden Redis (nebo Redis Sentinel cluster s převzetím služeb při selhání) pro všechny repliky aplikací.
 
-**Počet připojení:** Každá replika aplikace otevírá **2 připojení TCP** k Redis
-(klient omezovače rychlosti + klient úložiště kvót). Při 10 replikách → 20 připojení, což je
-hluboko pod výchozím limitem 10 tisíc připojení jedné instance Redis.
+**Počet připojení:** Otevře se každá replika aplikace **2 připojení TCP** na Redis (klient úložiště kvót + s omezovačem rychlosti). Při 10 replikách připojení → 20, v rámci výchozího stropu 10k připojení instance Redis.
 
 ### 5. Monitorování
 
-Zpřístupněte prostřednictvím koncového bodu kontroly stavu:
+Vystavit prostřednictvím koncového bodu kontroly stavu:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts již volá funkce rateLimiter
-// Přidejte kontroly specifické pro Redis:
-//   1. Latence PING prostřednictvím ioredis .ping()
-//   2. Využití paměti prostřednictvím INFO memory
-//   3. Počet připojení prostřednictvím INFO clients
-//   4. Míra zásahů pro maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
 Klíčové metriky ke sledování:
 
-- **Odstraněné klíče / s** — pokud je hodnota trvale nenulová, zvyšte `maxmemory`
-- **Blokovaní klienti** — nenulová hodnota značí pomalé skripty Lua nebo vysoký souběh
-- **Odmítnutá připojení** — byl dosažen limit připojení; při 20 připojeních nepravděpodobné
+- **Vysunuté klíče / sec** Pokud je — trvale nenulové, zvyšte `maxmemory`
+- **Blokovaní klienti** Nenulová hodnota — naznačuje pomalé skripty Lua nebo vysokou konverzaci
+- **Odmítnutá spojení** Dosažení limitu připojení — ; vzácné na 20 spojení
+
+### 6. Servery kompatibilní s Redis
+
+Každý zde použitý server musí spouštět skripty Lua: omezovač rychlosti je jeden `EVAL`. Na serveru bez Lua `checkRateLimit()` zaznamenává `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` a počítá za proces, takže každá replika vynucuje limit samostatně. Volitelné úložiště sdílené relace-afinity (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) také čte a aktualizuje piny pomocí `EVAL`; bez Lua loguje `[SESSION_AFFINITY] Redis error; falling back to SQLite.` a každá replika si uchovává své vlastní piny. Ostatní úlohy používají prosté příkazy (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashe a sady) a backend Redis sémantické mezipaměti neposílá žádné příkazy `FT.*`.
+
+Testováno s OmniRoute 3.8.52: KiviDB 1.2.0 s obrazem Lua (`kividb/kividb:v1.2.0-lua`). Omezovač rychlosti (včetně druhého procesu sdílejícího počítadla), mezipaměť ověřování, úložiště kvót, jistič zahřívacího obvodu, úložiště sémantické mezipaměti a požadavek `/v1/chat/completions` přes obslužný program chatu prošly 18 z 19 kontrol, které přešly na Redis 8.10.3. Ten, který se liší: `INCRBYFLOAT` ukládá `0.1 + 0.2` jako `0.30000000000000004`, kde Redis ukládá `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Úložiště kvót analyzuje obě pomocí `parseFloat`, ale tato dvě čísla se liší v posledních číslicích, takže srovnání, které spadá přesně na hranici kvóty, může vyjít jinak. Úložiště afinity relace nebylo součástí tohoto běhu. ( [nastavení](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [výsledky](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -190,13 +183,13 @@ flowchart LR
 
 ## Reference
 
-| Soubor                             | Účel                                                                             |
-| ---------------------------------- | -------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Primární klient Redis, skript Lua pro omezení rychlosti, záložní řešení v paměti |
-| `src/lib/db/apiKeys.ts`            | Mezipaměť ověřování — přechod z Redis na SQLite                                  |
-| `src/lib/quota/redisQuotaStore.ts` | Samostatný klient Redis pro volitelné úložiště kvót                              |
-| `src/lib/quota/storeFactory.ts`    | Přepíná mezi ovladači kvót `sqlite` a `redis`                                    |
-| `docker-compose.prod.yml`          | Produkční kontejner Redis (image `redis:8.6.2-alpine`)                           |
-| `.env.example`                     | Dokumentace proměnných prostředí pro Redis                                       |
-| `src/app/api/local/redis/`         | Trasy API pro orchestraci vývojového kontejneru                                  |
-| `bin/cli/commands/redis.mjs`       | Příkazy CLI pro orchestraci vývojového kontejneru                                |
+| Soubor                             | Účel                                                            |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Primary Redis client, Lua rate-limit script, in-memory fallback |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite záložní                               |
+| `src/lib/quota/redisQuotaStore.ts` | Samostatný klient Redis pro volitelné úložiště kvót             |
+| `src/lib/quota/storeFactory.ts`    | Přepíná mezi ovladači kvóty `sqlite` a `redis`                  |
+| `docker-compose.prod.yml`          | Prod Redis kontejner (obrázek `redis:8.6.2-alpine`)             |
+| `.env.example`                     | Dokumentace Redis env vars                                      |
+| `src/app/api/local/redis/`         | Cesty API pro orchestraci kontejnerů pro vývojáře               |
+| `bin/cli/commands/redis.mjs`       | Příkazy CLI pro dev kontejnerovou orchestraci                   |

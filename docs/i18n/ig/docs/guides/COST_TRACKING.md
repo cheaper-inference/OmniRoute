@@ -40,57 +40,79 @@ N'ihi na ọnụọgụ ahụ bụ atụmatụ:
 
 ### Isi mmalite ọnụahịa
 
-Ọnụ ahịa na-abịa site na tebụl ọnụahịa ejikọtara na [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), n'usoro nke ụzọ a (** mbụ kacha elu** ):
+Ọnụ ahịa na-abịa site na tebụl ọnụahịa ejikọta ọnụ na [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), n'usoro nke ụzọ a (**mbụ kacha elu** ):
 
-1. **Onye ọrụ gafere** ọnụ ahịa — edobere na dashboard ma ọ bụ site na `PATCH /api/pricing` (ebe aha `pricing` ).
-2. **ụdị.dev mmekọrịta** ọnụahịa — enwetara site na `https://models.dev/api.json` (ebe aha `models_dev_pricing` ).
-3. **LiteLLM sync** ọnụ ahịa — sitere na `model_prices_and_context_window.json` ọha LiteLLM(ebe aha `pricing_synced` ).
-4. **Edebere koodu siri ike** ọnụego — ebugara na [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Onye ọrụ gafere** Ọnụ ahịa — edobere na dashboard ma ọ bụ site na `PATCH /api/pricing` (ebe aha `pricing` ).
+2. **ụdị.dev mmekọrịta** Ọnụ ahịa — sitere na `https://models.dev/api.json` (ebe aha `models_dev_pricing` ).
+3. **LiteLLM mmekọrịta** Ọnụ ahịa — nwetara site na `model_prices_and_context_window.json` ọha LiteLLM(ebe aha `pricing_synced` ).
+4. **Edebere koodu siri ike** Ebugoro ọnụego — na [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Maka otu provider/model, ụkpụrụ sitere na ọkwa dị elu-ebute ụzọ na-edegharị ubi dakọtara na ọkwa dị ala; Oghere ndị na-anọghị na oyi akwa dị elu ka nwere ike isi na oyi akwa dị ala pụta. A na-edozi usoro ahụ ọbụlagodi mgbe ọrụ mmekọrịta abụọ nke onwe ha na-arụ n'otu oge. `GET /api/pricing?includeSources=1` na-eweghachi `pricing` na `sourceMap`, nke akara ụdịdị ha (`user`, `modelsDev`, `litellm`, `default`) na-achọpụta oyi akwa kacha dị mkpa nwere ụdị ahụ.
+Maka otu provider/model, ụkpụrụ sitere na ọkwa dị elu-ebute ụzọ na-edegharị ubi dakọtara na ọkwa dị ala; Oghere ndị na-anọghị na oyi akwa dị elu ka nwere ike isi na oyi akwa dị ala pụta. A na-edozi usoro ahụ ọbụlagodi mgbe ọrụ mmekọrịta abụọ nke onwe ha na-arụ n'otu oge. `GET /api/pricing?includeSources=1` na-eweghachite `pricing` na `sourceMap`, nke akara ngosi nke ọ bụla (`user`, `modelsDev`, `litellm`, `default`) na-achọpụta oyi akwa kachasị elu nke nwere ụdị ahụ.
 
-**LiteLLM sync** bụ Nwepu-nbanye, nwere nkwarụ na ndabara. Ngbanwe gburugburu ya (lee [`.env.example`](../../.env.example) ) bụ:
+**LiteLLM mmekọrịta** bụ Nwepu-nbanye, nwere nkwarụ na ndabara. Ngbanwe gburugburu ya (lee [`.env.example`](../../.env.example) ) bụ:
 
-| Env var                 | Ọdabara   | Ebumnuche                                                                        |
-| ----------------------- | --------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Kwado mmekọrịta ọnụahịa LiteLLM ndabere.                                         |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Oge mmekọrịta n'ime sekọnd (kwa ụbọchị).                                         |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Nhọrọ isi mmalite maka mmekọrịta a naanị; ugbu a naanị `litellm` ka a na-akwado. |
+| Env var                 | Ọdabara   | Ebumnuche                                                                     |
+| ----------------------- | --------- | ----------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Kwado mmekọrịta ọnụahịa LiteLLM ndabere.                                      |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Oge mmekọrịta n'ime sekọnd (kwa ụbọchị).                                      |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Nhọrọ isi mmalite maka mmekọrịta a naanị; ugbu a naanị `litellm` ka akwadoro. |
 
-**ụdịdị.dev mmekọrịta** dị iche na mmekọrịta LiteLLM ma nweekwa nkwarụ na ndabara. Kwado ya na Ntọala (models.dev sync) ma ọ bụ jiri mgbanwe ndị a:
+**ụdị.dev mmekọrịta** dị iche na mmekọrịta LiteLLM ma bụrụkwa nke ndabara nwere nkwarụ. Kwado ya na Ntọala (models.dev sync) ma ọ bụ jiri mgbanwe ndị a:
 
-| Env var                    | Ọdabara      | Ebumnuche                                                                                                                            |
-| -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `MODELS_DEV_SYNC_ENABLED`  | _(Edobeghi)_ | Iweghachite na-esochi ngbanwe ntọala; `1/true/on/yes` na-agbanyụ ma gbanyụọ `0/false/off/no` (ọbụlagodi na ntọala na-enyere ya aka). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Model.dev ndabara na nkeji oge mmekọrịta na sekọnd (kwa ụbọchị).                                                                     |
+| Env var                    | Ọdabara      | Ebumnuche                                                                                                                                    |
+| -------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(Edobeghi)_ | Iweghachite na-esochi ngbanwe ntọala; Ndị agha `1/true/on/yes` na-amanye ma gbanyụọ `0/false/off/no` (ọbụlagodi ma ntọala na-enyere ya aka). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Model.dev ndabara na nkeji oge mmekọrịta na sekọnd (kwa ụbọchị).                                                                             |
 
-`PRICING_SYNC_SOURCES` eme** ọ bụghị** mee ka ụdịdị.dev; ọ na-ejikwa naanị LiteLLM mmekọrịta. Ihichapụ onye ọrụ mbugharị anaghị ekpochapụ oghere aha synced ; oyi akwa ọnụahịa dịnụ na-adị irè. Maka ụdị akwụghị ụgwọ, lelee ma ntọala mmekọrịta yana `sourceMap` tupu ịtinye mbugharị akwụkwọ ntuziaka.
+`PRICING_SYNC_SOURCES` na-eme ya **ọ bụghị** mee ka ụdịdị.dev; ọ na-ejikwa naanị mmekọrịta LiteLLM. Ihichapụ onye ọrụ mbugharị anaghị ekpochapụ oghere aha synced ; oyi akwa ọnụahịa dịnụ na-adị irè. Maka ụdị akwụghị ụgwọ, lelee ma ntọala mmekọrịta yana `sourceMap` tupu ịtinye mbugharị akwụkwọ ntuziaka.
 
 ### Usoro ego
 
-A na-agbakọ ọnụ ahịa n'otu arịrịọ site na ọnụ ọgụgụ token na ọnụego otu nde otu nde na [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+A na-agbakọ ọnụ ahịa n'otu arịrịọ site na ọnụ ọgụgụ token yana ọnụego nde otu nde na [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Ntinye akara** (mwepu cache na-agụ na akara mmalite-emepụta ihe) × `input` ọnụego.
-- **Ihe nleba anya na-agụ cache** × `cached` ọnụego (dabere azụ na ọnụego ntinye).
-- **Ihe nrịbama-mmepụta cache** × `cache_creation` ọnụego (dabere azụ na ọnụego ntinye).
-- **Ngosipụta mmepụta** × `output` ọnụego.
-- **Ntụle echiche** × `reasoning` ọnụego (dabere azụ na ọnụego mmepụta).
+- **Ntinye akara** (mwepu cache na-agụ na akara ihe nrụpụta cache) ọnụego × `input`.
+- **Ihe nleba anya na-agụ cache** Ọnụego × `cached` (dabere azụ na ọnụego ntinye).
+- **Ihe nrịbama-mmepụta cache** Ọnụego × `cache_creation` (dabere azụ na ọnụego ntinye).
+- **Ngosipụta mmepụta** Ọnụ ego × `output`.
+- **Ntụle echiche** Ọnụego × `reasoning` (dabere azụ na ọnụego mmepụta).
 
-A tụgharịrị ọnụego niile dị ka USD kwa 1,000,000 token. A Codex "ngwa ngwa"/" ụzọ" ma ọ bụ "flex" ọkwa ọrụ na-emetụta ọnụọgụ ọnụ ahịa (`getCodexFastCostMultiplier`) — eg flex ka a na-akwụ ụgwọ na mbelata akara ngosi 50%, pụtara dị ka** mgbanwe mgbanwe** na dashboard.
+A na-atụgharịrị ọnụego niile dị ka USD kwa 1,000,000 token. A na-akwụ ụgwọ ọrụ Codex "ngwa ngwa"/"ihe mbụ" ma ọ bụ "flex" na-emetụta ọnụọgụ ọnụ ahịa (`getCodexFastCostMultiplier`) — dịka ọmụmaatụ flex ka a na-akwụ ụgwọ na mbelata akara ngosi 50%, pụtara dị ka **mgbanwe mgbanwe** na dashboard.
 
-A na-ebu ụzọ hazie aha ụdịdị (ntụgharị ụzọ ndị na-eweta ụzọ dịka `openai/` ma ọ bụ `accounts/fireworks/models/` ) yabụ ahịrị akụkọ ihe mere eme ka dabara na ọnụahịa.
+A na-ebu ụzọ ahazi aha ụdịdị (ntụgharị ụzọ ndị na-eweta ụzọ dịka `openai/` ma ọ bụ `accounts/fireworks/models/` ) yabụ ahịrị akụkọ ihe mere eme ka dabara na ọnụahịa.
 
 ### Otu esi emefu ego na-edekọ
 
-- A na-agbakọ ọnụ ahịa arịrịọ ọ bụla mgbe nzaghachi ahụ wee dekọọ ọkụ-na-echefu ka ọ ghara ịgbakwunye onye ahịa latency. A na-ahazi oriri oke-oke na akara mmemme na-esote site na [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- A na-echekwa ego igodo API ma wụsa ya n'ọkwa site na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (n'oge 60s flush ndabara, ihe ntinye ntinye 1,000). A na-emegharị site na:
+- A na-agbakọ ọnụ ahịa otu arịrịọ mgbe emechara arịrịọ. A na-ahazi oriri oke-oke na akara mmemme na-esote site na [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- A na-echekwa ego igodo API ma na-ekpochapụ ya na batches site na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (n'oge 60s flush ndabara, ihe ntinye ntinye 1,000). A na-emegharị site na:
 
   | Env var                             | Ọdabara | Ebumnuche                               |
   | ----------------------------------- | ------- | --------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Ghichaa oge n'ime millisekọnd.          |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Ghichaa nkeji oge n'ime millisekọnd.    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Ndenye kacha echekwabara tupu ịsachapụ. |
 
-The dashboard's cost figures are **not** read from a stored per-row dollar amount — they are recomputed on the fly from token counts and the current pricing table each time the analytics endpoint runs. That means correcting a wrong price (and re-syncing) updates historical cost estimates retroactively.
+Ọnụ ego na-ahọrọ kpọmkwem ụgwọ a na-akọ na onye na-eweta (`provider_cost_usd`), wee nweta ọnụ ahịa ọnụahịa katalọgụ (`calculated_cost_usd`), wee nwetaghachi akara ngosi site na katalọgụ dị ugbu a. A naghị akwụkwa ụgwọ echekwabara ọzọ site na ọnụọgụ akara ha. Ahịrị naanị token ka na-agbanwe mgbe ọnụahịa katalọgụ ha gbanwere.
+
+### OCR na ntinye
+
+- Arịrịọ `/v1/ocr` na-aga nke ọma na-eji `usage_info.pages_processed` elu, ọ bụghị oke ihu akwụkwọ a rịọrọ ma ọ bụ ọnụọgụ nke ihe ibe eweghachiri. Atụmatụ ahụ bụ ibe × `ocr_cost_per_page` ( USD/page zuru oke,**ọ bụghị** USD/million).
+- Arịrịọ nwere nkọwa akwụkwọ ma ọ bụ nkọwa igbe chọrọ tarifu `ocr_cost_per_annotated_page` dị iche. Na-enweghị ya, ọnụ ahịa na-anọgide na-amaghị; A naghị edochi tarifu OCR nkịtị.
+- LiteLLM mekọrịta maapụ mpaghara `annotation_cost_per_page` elu ya na `ocr_cost_per_annotated_page`, na-ejigide uru USD/page zuru oke yana ndenye naanị nkọwa, gụnyere efu efu. A na-enye ubi canonical na-ebute ụzọ; eleghara ụkpụrụ utu aha na-ezighi ezi anya. Ịkwụ ụgwọ ọnụahịa onye ọrụ na-ejigide ụzọ ha kwesịrị ekwesị. Hụ [igodo ọnụahịa LiteLLM nke OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Ojiji OCR na-echekwa ọnụ ọgụgụ ibe, ọnụ ahịa otu, ọnụ ahịa USD agbakọrọ, igodo API na njikọ ahọpụtara. Agaghị egosipụta ibe dị ka akara. Ndekọ oku nwere metadata ịgba ụgwọ, ọ bụghị akwụkwọ URLs, bytes PDF ma ọ bụ ederede ewepụtara.
+- Arịrịọ `/v1/embeddings` na-aga nke ọma dekọọ otu ahịrị ojiji n'otu ogbe anụ ahụ, gụnyere batches dị iche iche emechara n'otu millisekọnd. Ụgwọ ndị na-enye ndị na-eweta akụkọ na-ebute ụzọ karịa atụmatụ token; ihe mkpuchi combo anaghị atụkwasị ụgwọ.
+- Akụkọ ihe eji eme ihe, nyocha ọnụ ahịa, windo provider/account, oke imefu igodo API, akwụkwọ ndekọ ọnụ ahịa arịrịọ na mpịakọta ojiji kwa ụbọchị gụnyere ụgwọ ndị a. Igodo enweghị ndekọ na-ejigide ndekọ ọnụọgụgụ na-ejigideghị ederede isi mmalite.
+- Ojiji ma ọ bụ tarifụ na-efu efu **amaghị** , ọ bụghị n'efu: ewepụrụ nkụnye eji akwụ ụgwọ nzaghachi, yana amụma ojiji anaghị akwụ ụgwọ dị adị na-emetụta igodo API nwere oke. Ọnụego efu ahaziri nke ọma ka na-eji ọnụ efu efu efu.
+
+Nke a bụ naanị ndekọ ego n'ihu. Enweghị ike iwulite oku OCR/embedding ochie nke na-edebeghị akụkọ ihe mere eme ojiji site na mbugharị a. Atụmatụ katalọgụ bụ atụmatụ USD, ọ bụghị akwụkwọ ọnụahịa, na etinyeghị mgbanwe ego, ụtụ isi ma ọ bụ mbelata.
+
+### Okwu na onyonyo
+
+- `/v1/audio/transcriptions` na-aga nke ọma, `/v1/audio/speech` na mbọ-ọgbọ onyonyo na-ekekọrịta ndekọ ọnụ ọgụgụ. Kpọmkwem na oku combo na-ebu igodo API onye ọkpụkpọ na njikọ ahọpụtara; ihe mkpuchi combo anaghị atụkwasị ụgwọ ụgwọ nke abụọ.
+- USD nke onye na-eweta na-akọ na-emeri atụmatụ katalọgụ, gụnyere ụgwọ efu efu. JSON nke OpenRouter `usage.cost` na-eme ka ọ bụrụ `cost_usd`. Ma ọ bụghị ya, akara ndị a tụrụ atụ na-eji ọnụ ahịa token, nkeji ntụgharị ederede na-eji ọnụ ahịa nkeji nke abụọ, ntinye okwu na-eji ọnụọgụ mkpụrụedemede Unicode, na onyonyo ọnụ ala na-eji ọnụọgụ eweghachiri n'ezie, ọ bụghị `n` a rịọrọ.
+- ọnụọgụ abụọ OpenRouter TTS enweghị ahụ ojiji JSON. Mgbe audio mechara ma ọ bụ onye na-akpọ oku kagburu, OmniRoute jụrụ ọgbọ ya ID na **otu** ahaziri mmalite OpenRouter. Arịrịọ EU anaghị ada azụ na mmalite zuru ụwa ọnụ. Nke a bụ nlebanya nwere oke, naanị ọgụgụ; A naghị anwale njikọ maka ngụkọ. Ndekọ ịgba ụgwọ nwere ike ịpụta ka emechara ọdịyo ahụ: nyochagharị na-agba ọsọ n'azụ ruo ihe dị ka sekọnd 52, gụnyere oge njedebe netwọkụ.
+- N'oge nleba anya ahụ, nzaghachi ọdịyo nwere `X-OmniRoute-Cost-Status: pending` na enweghị isi okwu nzaghachi-ọnụ. Ebubo ikpeazụ ya pụtara na akụkọ ojiji, nyocha na akwụkwọ ndekọ aha mgbe emechara ya. Ọ bụrụ na metadata adịghị, a na-eji foto tarifu ahaziri ahazi; ma ọ bụghị ya, ọnụ ahịa na-anọ amaghị.
+- Sekọnd, mkpụrụedemede na ọnụ ọgụgụ onyonyo nwere mpaghara ịgba ụgwọ dị iche iche, ọ dịghị mgbe ọnụọgụ token adịgboroja. Akaụntụ na-ejigide naanị ojiji ọnụọgụ, ọ bụghị ederede okwu, transcript ma ọ bụ bytes onyonyo. Mwepu onyonyo enweghị ọnụ ahịa dị adị anaghị agbanwe agbanwe: tarifu onyonyo na-efu efu anaghị ekpochi igodo nwere oke ọhụrụ, yana nzaghachi na-ewepụ nkụnye eji isi mee ọnụ ahịa karịa ikwuwapụta oku a n'efu. Ọdịda ụlọ ahịa ọnụahịa ka na-ejigide akaebe ojiji maka mmanye emechiri emechi.
+
+Ọ nweghị ụgwọ speech/image akụkọ ihe mere eme echepụtara ma ọ bụ mejupụta azụ. Ịgba ụgwọ ndị na-enye ndị na-eweta ọrụ ka bụ ntụaka maka akwụkwọ ọnụahịa yana maka oku nke akwụghị ụgwọ ya.
 
 ---
 
@@ -135,50 +157,53 @@ Mpaghara Costs nwekwara ihe ndị a (ha niile dị n'okpuru `/dashboard/costs/`)
 
 ---
 
-## API njedebe
+## Endpoint API
 
-Ihe ndị a niile chọrọ nyocha njikwa (loopback/JWT, site na `requireManagementAuth`) belụsọ na edeturu ya.
+Ihe ndị a niile chọrọ management auth (loopback/JWT, site na `requireManagementAuth`) ma e wezụga
+ebe e kwuru ihe ọzọ.
 
-### Ojiji & nyocha ọnụ ahịa
+### Nyocha ojiji na ọnụahịa
 
-| Usoro | Ebe njedebe              | Ebumnuche                                                                                                                                                           |
-| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Ntụle cost/usage zuru ezu: nchịkọta, omume kwa ụbọchị, site na provider/model/API key/account/tier. Ajụjụ: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Iji oke onye na-eweta ihe n'ime oge. Ajụjụ: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                            |
-| `GET` | `/api/usage/history`     | Ahịrị akụkọ ojiji dị ụkọ.                                                                                                                                           |
-| `GET` | `/api/usage/call-logs`   | Ndekọ oku na-arịọ arịrịọ (ụdị, akara ngosi, ọnụ ahịa, latency, ọkwa).                                                                                               |
-| `GET` | `/api/usage/quota`       | Ọkwa oke ndị na-eweta ya.                                                                                                                                           |
-| `GET` | `/api/usage/proxy-logs`  | Ndekọ arịrịọ proxy.                                                                                                                                                 |
+| Usoro | Endpoint                 | Ebumnuche                                                                                                                                                                     |
+| ----- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | Nyocha ọnụahịa/ojiji zuru ezu: nchịkọta, usoro kwa ụbọchị, dịka onye na-eweta ọrụ/ụdịdị/API key/akaụntụ/ọkwa. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Ojiji quota nke onye na-eweta ọrụ ọ bụla n'ime oge. Query: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                       |
+| `GET` | `/api/usage/history`     | Ahịrị akụkọ ojiji raw.                                                                                                                                                        |
+| `GET` | `/api/usage/call-logs`   | Log oku kwa arịrịọ (ụdịdị, token, ọnụahịa, latency, status).                                                                                                                  |
+| `GET` | `/api/usage/quota`       | Ọnọdụ quota onye na-eweta ọrụ.                                                                                                                                                |
+| `GET` | `/api/usage/proxy-logs`  | Log arịrịọ proxy.                                                                                                                                                             |
 
-### Ego mmefu
+### Budget
 
-| Usoro  | Ebe njedebe              | Ebumnuche                                                          |
-| ------ | ------------------------ | ------------------------------------------------------------------ |
-| `GET`  | `/api/usage/budget`      | Nleba ego mmefu ego + maka otu igodo API (njụjụ `apiKeyId` chọrọ). |
-| `POST` | `/api/usage/budget`      | Tọọ daily/weekly/monthly USD oke ịdọ aka ná ntị + maka igodo API.  |
-| `GET`  | `/api/usage/budget/bulk` | Nchịkọta mmefu ego buru ibu gafee igodo API.                       |
+| Usoro  | Endpoint                 | Ebumnuche                                                                           |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Nchịkọta ọnụahịa + nyocha budget maka otu API key (`apiKeyId` query param dị mkpa). |
+| `POST` | `/api/usage/budget`      | Tọọ oke USD kwa ụbọchị/izu/ọnwa + warning threshold maka API key.                   |
+| `GET`  | `/api/usage/budget/bulk` | Nchịkọta budget n'ọtụtụ API key.                                                    |
 
-> Ọnụ ego API bụ kwa** igodo API** (`apiKeyId`). Oke nke `GET /api/usage/budget` weghachiri gụnyere `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, na mkpokọta ọsọ (`totalCostToday`, `totalCostMonth`, ...).
+> API budget ahụ bụ nke ahaziri maka **API key** ọ bụla (`apiKeyId`). Oke ndị
+> `GET /api/usage/budget` weghachiri gụnyere `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> `warningThreshold`, na mkpokọta ndị na-aga n'ihu (`totalCostToday`, `totalCostMonth`, …).
 
-### Ịnye ọnụ ahịa
+### Pricing
 
-| Usoro    | Ebe njedebe             | Ebumnuche                                                                                                                                                   |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Ejikọtara ọnụ ọnụ ahịa oyi akwa anọ (onye ọrụ, model.dev, LiteLLM, ndabara). `?includeSources=1` na-alaghachi `pricing` + `sourceMap`.                      |
-| `PATCH`  | `/api/pricing`          | Wepụ ọnụahịa maka `{ provider: { model: { input, output, cached, … } } }`.                                                                                  |
-| `DELETE` | `/api/pricing`          | Wepu ihe nbibi nke ọnụ ahịa onye ọrụ (nhọrọ nke `?provider=&model=` kpuchiri ya); Ọnụego emekọrịtara ma ọ bụ ndabara arụnyere n'ime ka dị ka ndaghachi azụ. |
-| `GET`    | `/api/pricing/defaults` | Gosi ndabara ndabara ndabara per-1M.                                                                                                                        |
-| `GET`    | `/api/pricing/models`   | E ji ihe nlereanya kpọchiri ọnụ ahịa.                                                                                                                       |
-| `POST`   | `/api/pricing/sync`     | Kpalite mmekọrịta akwụkwọ ntuziaka sitere na isi mmalite mpụga (LiteLLM).                                                                                   |
-| `GET`    | `/api/pricing/sync`     | Ọkwa mmekọrịta dị ugbu a.                                                                                                                                   |
-| `DELETE` | `/api/pricing/sync`     | Kpochapụ naanị ọnụ ahịa emekọrịtara ọnụ LiteLLM (`pricing_synced`); model.dev data dị iche.                                                                 |
+| Usoro    | Endpoint                | Ebumnuche                                                                                                                                                                                                   |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Ọnụahịa ejikọtara site n’ọkwa anọ (onye ọrụ, models.dev, LiteLLM, uru ndabara). `?includeSources=1` na-eweghachi `pricing` + `sourceMap`.                                                                   |
+| `PATCH`  | `/api/pricing`          | Gbanwee pricing maka `{ provider: { model: { input, output, cached, … } } }`.                                                                                                                               |
+| `DELETE` | `/api/pricing`          | Wepụ uru nnọchi ọnụahịa onye ọrụ, jiri `?provider=&model=` kpachie ebe ọ metụtara ma ọ bụrụ na ịchọrọ; ọnụego e wetara site na mmekọrịta ma ọ bụ uru ndabara etinyere na usoro ga-anọgide dị ka ihe nnọchi. |
+| `GET`    | `/api/pricing/defaults` | Gosi fallback rate ndabara kwa 1M.                                                                                                                                                                          |
+| `GET`    | `/api/pricing/models`   | Pricing nke e ji model mee key.                                                                                                                                                                             |
+| `POST`   | `/api/pricing/sync`     | Malite mmekọrịta aka site na isi mmalite mpụga (LiteLLM).                                                                                                                                                   |
+| `GET`    | `/api/pricing/sync`     | Ọnọdụ sync ugbu a.                                                                                                                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | Hichapụ naanị ọnụahịa e wetara site na mmekọrịta LiteLLM (`pricing_synced`); data models.dev nọ iche.                                                                                                       |
 
-### Ebe njedebe ndị ọzọ bara uru
+### Endpoint ndị ọzọ metụtara ọnụahịa
 
-| Usoro | Ebe njedebe                   | Ebumnuche                                                         |
-| ----- | ----------------------------- | ----------------------------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | Ngụkọta akara ngosi n'efu, ejiri-ọnwa a, yana ohere n'efu fọdụrụ. |
-| `GET` | `/api/quota/pools/[id]/usage` | Ojiji maka ọdọ mmiri oke oke.                                     |
+| Usoro | Endpoint                      | Ebumnuche                                                                  |
+| ----- | ----------------------------- | -------------------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | Ngụkọta token nke ụdị efu, nke e jirila n'ọnwa a, na oke ojiji efu fọdụrụ. |
+| `GET` | `/api/quota/pools/[id]/usage` | Ojiji maka pool oke ojiji a na-ekekọrịta.                                  |
 
 ---
 

@@ -152,18 +152,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dabarun Dabaru
 
-OmniRoute ta fallasa ƙwarewar A2A guda 6 da aka haɗa cikin `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kowane ƙirar fasaha yana rayuwa a cikin `src/lib/a2a/skills/`.
+OmniRoute yana fallasa ƙwarewar A2A guda 6 da aka haɗa a cikin `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kowane ƙirar fasaha yana rayuwa a cikin `src/lib/a2a/skills/`.
 
 | Ƙwarewa          | ID                   | Bayani                                                                                                                                                    | Tags                    | Misalai                                                      |
 | :--------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :----------------------------------------------------------- |
 | Smart Routing    | `smart-routing`      | Yana tafiyar da hanzari ta hanyar mafi kyawun provider/combo ta amfani da OmniRoute's combo engine +                                                      | hanya, masu bayarwa     | "Tabbatar da wannan tambayar ta hanyar mafi kyawun samfurin" |
-| Gudanar da ƙima  | `quota-management`   | Rahoton kowane mai bayarwa jihar keɓe, yana taimaka wa masu kira su yanke shawarar lokacin throttle/switch                                                | rabo, masu bayarwa      | "Duba adadin don ɗan adam"                                   |
+| Gudanar da ƙima  | `quota-management`   | Rahoton jihar keɓaɓɓen mai bayarwa, yana taimaka wa masu kira su yanke shawarar lokacin da za su throttle/switch                                          | rabo, masu bayarwa      | "Duba adadin don ɗan adam"                                   |
 | Gano Mai bayarwa | `provider-discovery` | Lissafin shigar da masu samarwa tare da iyawa, tutoci masu kyauta, matsayin OAuth                                                                         | masu bayarwa, ganowa    | "Waɗanne masu samarwa suke samuwa?"                          |
-| Tattalin Arziki  | `cost-analysis`      | Ƙididdiga farashin request/conversation da aka ba da kasidar + amfanin kwanan nan                                                                         | kudin, amfani           | "Kimanin farashin wannan zance"                              |
+| Tattalin Arziki  | `cost-analysis`      | Ƙididdiga farashin request/conversation da aka ba da kasida ta + amfani kwanan nan                                                                        | kudin, amfani           | "Kimanin farashin wannan zance"                              |
 | Rahoton Lafiya   | `health-report`      | Haɗa mai watsewar kewayawa, sanyi, yanayin kulle kowane mai bayarwa                                                                                       | lafiya, juriya          | "Nuna halin kiwon lafiya na duk masu bayarwa"                |
-| Ƙarfin Lissafi   | `list-capabilities`  | Yana dawo da cikakken katalogin Ƙwararrun Agent 45 (23 API + 21 CLI + 1 config) azaman tebur mai alamar tare da danyen SKILL.md URLs don allurar mahallin | catalog, ganowa, basira | "Jera duk damar OmniRoute "                                  |
+| Ƙarfin Lissafi   | `list-capabilities`  | Yana dawo da cikakken katalogin Ƙwararrun Agent 45 (23 API + 21 CLI + 1 config) azaman tebur mai alamar tare da danyen SKILL.md URLs don allurar mahallin | catalog, ganowa, basira | "Jerin duk damar OmniRoute "                                 |
 
-> Katin Wakilin ya kamata a kiyaye shi daidai da kundin mai ba da 381 mai rai; Ƙididdigar masu badawa da free/no-auth metadata an samo su daga wurin yin rajistar lokacin aiki.
+> Katin Wakilin yakamata a kiyaye shi daidai da kundin mai ba da 388 mai rai; Ƙididdigar mai badawa da metadata free/no-auth an samo su daga wurin yin rajistar lokacin aiki.
 
 ### `list-capabilities` Skill Detail
 

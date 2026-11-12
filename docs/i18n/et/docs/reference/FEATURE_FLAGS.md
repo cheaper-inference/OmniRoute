@@ -44,7 +44,7 @@ Tõeväärtusega lipp loetakse **lubatuks**, kui selle tegelik väärtus on `"tr
 
 ## Lipu kataloog
 
-120 lippu 6 kategoorias.** Vaikimisi** on definitsiooni vaikeväärtus —, mida kasutatakse siis, kui DB alistamist ega keskkonnamuutujat pole.
+121 lippu 6 kategoorias.** Vaikimisi** on definitsiooni vaikeväärtus —, mida kasutatakse siis, kui DB alistamist ega keskkonnamuutujat pole.
 
 ### Turvalisus (11)
 
@@ -115,7 +115,7 @@ Tõeväärtusega lipp loetakse **lubatuks**, kui selle tegelik väärtus on `"tr
 
 Kui `UNPRICED_USAGE_BUDGET_POLICY` on selgesõnaliselt konfigureeritud (DB alistamine enne keskkonda), on see `USAGE_LIMIT_IGNORE_UNPRICED` suhtes ülimuslik. Ilma selgesõnalise enum väärtuseta valib ülesvoolu tõeväärtuse loobumine `count_as_zero`; muidu on vaikeväärtus `fail_closed`. Vale loendi väärtused ja loetamatu funktsioonilipu salvestustõrke sulgemine. Kumbki loobumine ei leevenda hinnakulusid ega ebaõnnestunud hinnaotsingut. Jõustamine ja administraatori aruanne lahendavad sama tõhusa poliitika.
 
-### Kestus (57)
+### Kestus (58)
 
 | Võti                                           | Tüüp       | Vaikimisi | Taaskäivitage | Kirjeldus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------------------------- | ---------- | --------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Kui `UNPRICED_USAGE_BUDGET_POLICY` on selgesõnaliselt konfigureeritud (DB alist
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | tõeväärtus | `false`   |               | Lõpetage `max` arutluskäigu pakkumine ja edastamine versioonile Cursor Grok 4.7 (#17386): Cursor dokumentide loendis on ainult low/medium/high/xhigh, nii et `grok-4.7-max` varualias kaob kataloogist ja `max` pingutustaotlus saadetakse ilma pingutusparameetrita. Vaikimisi väljas: `max` jääb pakutavaks ja edastatuks, kuna reaalajas AgentService/Run -sond võttis selle vastu.                                                                                                                                                                                                                                                                                                              |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | tõeväärtus | `false`   |               | Saatke vastused püsima tühja reana, mitte sündmuse response.in_progress asemel, nii et sünteetiline hetktõmmis ei saa kunagi asendada ametliku SDK tegelikku vastust. Tühi rida ei edasta SSE -sündmust, seega ei lähtestata kliendi valvekoera, mis lähtestab ainult sündmuste korral, pika vaikse faasi ajal. Vaikimisi väljas: taimerid saadavad sündmuse spec-valid response.in_progress.                                                                                                                                                                                                                                                                                                       |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | tõeväärtus | `false`   |               | Tihendusvahemälu statistikas arvestage tihendatud päring automaatse prefiksi vahemällu salvestamise pakkujale (OpenAI, Codex, Azure või kohandatud ühendus, mis deklareerib kiire vahemälu koos markeri eemaldamisega) hinnangulise vahemälu tabamusena isegi ilma `cache_control` markeriteta (#17114). Prognoos on vahemälu sobivuse signaal, mitte täheldatud tabamus, seega on nende pakkujate teatatud tabamusmäär 100% suunas. Vaikimisi välja lülitatud: hinnangulise tabamusena loetakse ainult `cache_control` -markereid sisaldav taotlus vahemällu salvestamise pakkujale, nii et automaatse prefiksiga pakkujad teatavad jätkuvalt 0-st.                                                |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | tõeväärtus | `false`   |               | Lubab automaatsel veebiotsingul ilma otseselt määratud `provider` väärtuseta kasutada ühendatud Codexi (ChatGPT) kontot teenuse `codex-search` kaudu: viimase võimalusena enne võtmeta pakkujaid, kui ükski autentimisandmetega pakkuja pole kasutatav, ning varuvariandina tõrke korral (#17933). Iga otsing kulutab tellimuse kvooti ja kestab umbes 10–40 s. Vaikimisi välja lülitatud: `codex-search` käivitub ainult siis, kui päring seda otseselt nimetab.                                                                                                                                                                                                                                   |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Tagastab iga lipu koos selle tegeliku väärtuse, allika ja kokkuvõttega.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

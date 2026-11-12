@@ -53,7 +53,7 @@
 - اِن پٹ: URL + مکمل صفحہ ٹوگل + فارمیٹ سلیکٹر (markdown / متن / HTML)۔
 - جمع کریں → حاصل کریں → `ScrapeResult.tsx` رینڈر کریں۔
 - `ScrapeResult`، markdown پیش منظر + خام مواد کا ٹوگل رینڈر کرتا ہے۔
-- حد: اگر رسپانس باڈی **256 KB** سے زیادہ ہو تو UI، `(مختصر کیا گیا، خام مواد دیکھیں)` دکھاتا ہے اور خام مواد کو Monaco موڈل (D21) میں کھولتا ہے۔
+- حد: اگر رسپانس باڈی **256 KB** سے زیادہ ہو تو UI، `View full raw content` دکھاتا ہے اور خام مواد کو موڈل (D21) میں کھولتا ہے۔
 - میٹا ڈیٹا پینل: فراہم کنندہ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)، تاخیر، لاگت، رسپانس سائز، لنکس کی تعداد۔
 - `useScrapeFetch.ts` ہُک استعمال کرتا ہے۔
 
@@ -102,10 +102,12 @@
 `ProviderCatalog.tsx`، `GET /api/search/providers` سے فراہم کنندگان کی مکمل فہرست ظاہر کرتا ہے
 (جسے F4 میں fetch فراہم کنندگان شامل کرنے کے لیے توسیع دی گئی ہے):
 
-| `kind` | `"search"` (20 فراہم کنندگان) یا `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 فراہم کنندگان) یا `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 اسٹیٹس کو **درخواست کے وقت اخذ کیا جاتا ہے**، اس بات کی جانچ کرکے کہ آیا اسناد موجود ہیں اور آیا
 تمام کلیدیں فی الحال cooldown میں ہیں۔
+
+`codex-search` (Codex Web Search): الگ کلید کے بغیر آپ کے منسلک Codex (ChatGPT) اکاؤنٹس استعمال کرتا ہے۔ ہر تلاش سبسکرپشن کا کوٹا استعمال کرتی ہے اور تقریباً 10–40 s لیتی ہے۔ جب درخواست اس کا نام بتائے تو چلتا ہے؛ خودکار انتخاب کے لیے `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` فلیگ درکار ہے، جو بطور ڈیفالٹ بند ہے۔
 
 ---
 

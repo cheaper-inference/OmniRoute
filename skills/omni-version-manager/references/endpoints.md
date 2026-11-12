@@ -966,7 +966,7 @@ When enabled, sing-box starts automatically on the next OmniRoute boot. **LOCAL_
 curl -X POST http://localhost:20128/api/services/singbox/auto-start \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"enabled":false}'
 ```
 
 ### POST /api/services/singbox/auto-restart-adopted
@@ -979,7 +979,7 @@ When enabled, an externally-adopted (not OmniRoute-spawned) sing-box process is 
 curl -X POST http://localhost:20128/api/services/singbox/auto-restart-adopted \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"enabled":false}'
 ```
 
 ### GET /api/services/{name}/logs

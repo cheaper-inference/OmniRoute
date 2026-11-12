@@ -25,20 +25,21 @@ Kabliukai **nevykdomi** kiekviename maršrute ir ne su kiekvienu atsakymu. Prie�
 pasikliaudami apsauga kaip saugumo priemone, perskaitykite
 [Aprėptis ir apribojimai](#coverage-and-limits).
 
-## Įmontuoti apsauginiai turėklai
+## Integruotos apsaugos
 
-Registras automatiškai įkelia šešis apsauginius turėklus pirmumo tvarka importuojant (žr. `registry.ts` → `registerDefaultGuardrails()`):
+Importuojant registras automatiškai įkelia šešias apsaugas prioritetų tvarka
+(žr. `registry.ts` → `registerDefaultGuardrails()`):
 
-| Pirmenybė | Vardas              | Etapas (-ai)   | Failas                |
-| --------- | ------------------- | -------------- | --------------------- |
-| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Prioritetas | Pavadinimas         | Etapas(-ai)    | Failas                |
+| ----------- | ------------------- | -------------- | --------------------- |
+| `5`         | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
+| `6`         | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
+| `7`         | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
+| `10`        | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
+| `20`        | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
+| `95`        | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Paleidžiami žemesnio prioriteto numeriai** pirma** .
+Mažesni prioriteto numeriai vykdomi **pirmiausia**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
@@ -119,30 +120,65 @@ Buvusi Vision Bridge kortelė AI nustatymuose yra suderinamumo nuoroda į naują
 
 Pasenusios numatytosios nuostatos gyvena `src/shared/constants/visionBridgeDefaults.ts`; nauji mode/task-aware/cache numatytieji nustatymai ir nustatymų sprendiklis veikia `src/shared/constants/modalityBridgeDefaults.ts`. Apsauginis turėklas atskleidžia `deps` konstruktoriaus parinktį, todėl bandymai gali įterpti netikrus `getSettings` ir `callVisionModel` diegimus.
 
-### Garso tiltas (`audioBridge.ts`) — Modality Bridge PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Perima garsą turinčias pokalbių užklausas, kol jos pasiekia tikslą, kuris, kaip žinoma, nepriima garso įvesties. Jis niekada neperadresuoja pokalbio užklausos: garso dalys perrašomos naudojant esamą su OpenAI suderinamą kelių dalių galinį tašką, o pasirinktas pokalbio modelis tęsiamas su teksto nuorašais.
+Perima garsą turinčias pokalbių (chat) užklausas prieš joms pasiekiant tikslą, apie kurį
+nežinoma, kad jis priima garso įvestį. Jis niekada neperadresuoja pokalbių
+užklausos: garso dalys transkribuojamos per esamą su OpenAI suderinamą multipart
+galinį tašką, o pasirinktas pokalbių modelis tęsia darbą su tekstinėmis transkripcijomis.
 
-Srautas:
+Eiga:
 
-1. Išspręskite `supportsAudio` per `getResolvedModelCapabilities()`. Laimi aiškūs teikėjo registro metaduomenys, tada statiniai modelio metaduomenys, tada sinchronizuojami `modalities_input`. Deklaruotas įvesties sąrašas be `audio` yra `false`; `null` nelieka jokių pajėgumų įrodymų. Tiek `false`, tiek `null` suaktyvina konservatyvųjį tiltą, o `true` jį apeina.
-2. Išspręskite `modalityBridgeAudio*` nustatymus ir iš kiekvieno pranešimo ištraukite sujungiamas aukščiausio lygio garso dalis per bendrinamą `detectMediaParts()` detektorių. Palaikomos vielos formos yra OpenAI `input_audio`, `audio_url` ir `source.media_type: "audio/*"`. Įdėtas garsas aptinkamas nukreipiant, bet nepašalinamas sujungimo keliu. Darbas apribotas `modalityBridgeAudioMaxClips`; vėlesnės dalys lieka nepaliestos.
-3. Gerbkite sukonfigūruotą `provider/model` arba leiskite `selectAudioBridgeModel()` vaikščioti `AUDIO_TRANSCRIPTION_PROVIDERS` stabilia katalogo tvarka ir pasirinkite pirmąjį modelį su tinkamu naudoti aktyviu teikėjo kredencialu.
-4. `callAudioTranscription()` konvertuoja base64/data-URI garsą į kelių dalių `file` arba atsisiunčia nuotolinį `audio_url` per tik viešą išeinančią apsaugą su DNS prisegimu ir 25 MB susiejimu. Tada POSTs failas ir pasirinktas modelis į vietinę `/v1/audio/transcriptions` saviciklą, autentifikuotą naudojant `resolveSelfLoopBearer()`. Esamas transkripcijos maršrutas atlieka įprastą kredencialų paiešką, cooldown/rate-limit tvarkymą ir teikėjo siuntimą.
-5. Sėkmingų skambučių dalis pakeičiama `[Audio N]: <transcript>`. Skambučiai vykdomi naudojant `Promise.allSettled`: atskiras gedimas išsaugo originalią garso dalį (#4012 sutartis). Jei kiekvienas skambutis nepavyksta ir taikinys įrodomas `supportsAudio === false`, dalys tampa `[Audio N]: (unavailable — no STT provider connected)` (#8430 sutartis). Jei tai nežinomas tikslas (`null`), visos nesėkmės rezultatas lieka nepaliestas. Įrodyta, kad tik teksto taikinys, neturintis tinkamų STT kredencialų, gauna tą patį aiškų stulpelį, neskelbdamas tinklo skambučio.
+1. `supportsAudio` nustatoma per `getResolvedModelCapabilities()`. Pirmenybė
+   teikiama aiškiems teikėjo registro metaduomenims, tada statiniams modelio
+   metaduomenims, tada sinchronizuotiems `modalities_input`. Deklaruotas įvesčių
+   sąrašas be `audio` reiškia `false`; jei gebėjimų įrodymų nėra, lieka `null`.
+   Tiek `false`, tiek `null` aktyvuoja konservatyvųjį tiltą, o `true` jį aplenkia.
+2. Nustatomi `modalityBridgeAudio*` nustatymai ir iš kiekvienos žinutės bendruoju
+   `detectMediaParts()` detektoriumi išskiriamos iškerpamos aukščiausio lygio
+   garso dalys. Palaikomos perdavimo formos: OpenAI `input_audio`, `audio_url` ir
+   `source.media_type: "audio/*"`. Įdėtasis garsas aptinkamas maršrutizavimui,
+   bet iškėlimo (splice) kelias jo nepašalina. Darbo apimtį riboja
+   `modalityBridgeAudioMaxClips`; vėlesnės dalys lieka nepaliestos.
+3. Silaikoma sukonfigūruoto `provider/model`, arba `selectAudioBridgeModel()`
+   pereina `AUDIO_TRANSCRIPTION_PROVIDERS` stabilia katalogo tvarka ir parenka
+   pirmą modelį, turintį tinkamą aktyvų teikėjo kredencialą.
+4. `callAudioTranscription()` konvertuoja base64/data-URI garsą į daugiadalį
+   (multipart) `file` arba atsisiunčia nuotolinį `audio_url` per tik viešųjų
+   adresų išeinančių užklausų apsaugą su DNS fiksavimu ir 25 MB riba. Tada failas
+   ir pasirinktas modelis siunčiami POST užklausa į vietinę
+   `/v1/audio/transcriptions` savitarnos kilpą, autentifikuojant su
+   `resolveSelfLoopBearer()`. Esamas transkripcijos maršrutas atlieka įprastą
+   kredencialų paiešką, cooldown / užklausų dažnio apribojimo tvarkymą ir
+   paskirstymą teikėjams.
+5. Sėkmingi iškvietimai pakeičia atitinkamas dalis į `[Audio N]: <transcript>`.
+   Iškviestys vykdomi su `Promise.allSettled`: atskira nesėkmė išsaugo tą pradinę
+   garso dalį (#4012 sutartis). Jei visi iškvietimai nepavyksta ir tikslui
+   įrodytai galioja `supportsAudio === false`, dalys pakeičiamos į
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430 sutartis).
+   Nežinomo tikslo (`null`) atveju visiškas nesėkmių rezultatas lieka nepaliestas.
+   Įrodytas tik tekstą palaikantis tikslas, neturintis tinkamo STT kredencialo,
+   gauna tą patį aiškų užpildą (stub) neišsiunčiant jokios tinklo užklausos.
 
-Sėkminguose nuorašuose naudojama viso proceso Modality Bridge LRU/TTL talpykla. Raktas sujungia garso nuorodą, stabilios `audio-transcription` operacijos etiketę ir pasirinktą STT modelį; gedimai niekada nėra talpinami. Garso bandymai atnaujina bendrinamus `bridged`, `cacheHits`, `failures` ir `lastUsedAt` skaitiklius. Transformuoti atsakymai neša `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; nepaliestos užklausos negauna garso tilto segmento.
+Sėkmingos transkripcijos naudoja viso proceso Modalumų tilto LRU/TTL talpyklą.
+Raktą sudaro garso nuoroda, stabili `audio-transcription` operacijos žyma ir
+pasirinktas STT modelis; nesėkmės niekada netalpinamos talpykloje. Garso bandymai
+atnaujina bendruosius `bridged`, `cacheHits`, `failures` ir `lastUsedAt`
+skaitiklius. Transformuotuose atsakuose pateikiama
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; nepaliestos
+užklausos Garso tilto segmento negauna.
 
-Vykdymo laiko nustatymai palaikomi DB ir patvirtinami Zod:
+Vykdymo meto nustatymai saugomi duomenų bazėje ir tikrinami su Zod:
 
-| Raktas                        | Numatytoji | Diapazonas       |
-| ----------------------------- | ---------- | ---------------- |
-| `modalityBridgeAudioEnabled`  | `true`     | —                |
-| `modalityBridgeAudioModel`    | `""`       | Auto arba STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`    | 1000–300000      |
-| `modalityBridgeAudioMaxClips` | `3`        | 1–10             |
+| Raktas                        | Numatytoji reikšmė | Intervalas              |
+| ----------------------------- | ------------------ | ----------------------- |
+| `modalityBridgeAudioEnabled`  | `true`             | —                       |
+| `modalityBridgeAudioModel`    | `""`               | Automatinis arba STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`            | 1000–300000             |
+| `modalityBridgeAudioMaxClips` | `3`                | 1–10                    |
 
-Bendrinamą talpyklą ir toliau valdo `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` ir `modalityBridgeCacheMaxEntries`.
+Bendrąją talpyklą ir toliau valdo `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` ir `modalityBridgeCacheMaxEntries`.
 
 ### Vaizdo įrašų tiltas (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -218,74 +254,99 @@ Vykdymo laiko nustatymai palaikomi DB ir patvirtinami Zod:
 
 Pasenusios išliekančios vaizdo įrašo skirtojo laiko vertės, viršijančios 120 sekundžių, priskiriamos prie tarpininko termino; nauji nustatymai rašo virš tos ribos yra atmetami. `GET /api/modality-bridge/video/runtime` reikalauja patikimos antspauduotos kilpos vietos prieš autentifikavimą arba vykdymo laiką, tada reikia valdymo autentifikavimo. Jis pateikia tik `available`, išvalytas FFmpeg/ffprobe versijas ir fiksuotą priežastį, kai vykdymo laikas nepasiekiamas. Vidinis ištraukimo galutinis taškas nėra viešas įkėlimas API: eilės prisotinimas grąžina `503` plius `Retry-After`, skambintojo atsijungimas grąžina `499`, o fiksuotas tarpininko terminas grąžina `504`. Konvertuoti atsakymai prideda `video->text;model=<visionModel>;parts=<videos>` prie centrinės `x-omniroute-modality-bridge` antraštės nepašalinant „Vision“ ar „Audio“ segmentų.
 
-### PII masker (`piiMasker.ts`)
+### PII maskuoklis (`piiMasker.ts`)
 
-Važiuoja toliau** tiek** etapai.
+Važiuoja toliau **tiek** etapai.
 
-- **`preCall`** klonuoja naudingą apkrovą, eina `system`, `messages`, `input` ir `prompt` (įskaitant paprastos eilutės elementus) ir pritaiko `processPII()` (iš `@/shared/utils/inputSanitizer`) eilutės `content`/`text` laukams. Kai `PII_REDACTION_ENABLED=true`, aptiktas PII yra redaguojamas išsiunčiamoje naudingojoje apkrovoje. Tai nepriklauso nuo `INPUT_SANITIZER_MODE` (kuris valdo tik greito įpurškimo politiką). Kai redagavimas išjungtas, skambutis įrašo aptikimo skaičių neperrašant turinio.
-- **`postCall`** giliai klonuoja atsakymą, paleidžia `sanitizePIIResponse()` ir Responses-API formos maskavimo priemonę (`maskResponsesOutput` — apima `output_text` ir `output[].content[].text`). Jei įvyksta koks nors redagavimas, pakeistas atsakymas pakeičia originalą.
+- **`preCall`** klonuoja naudingą apkrovą, eina `system`, `messages`, `input` ir `prompt` (įskaitant paprastos eilutės elementus) ir taiko `processPII()` (iš `@/shared/utils/inputSanitizer`) eilutės `content`/`text` laukams. Kai `PII_REDACTION_ENABLED=true`, aptiktas PII pašalinamas siunčiamoje naudingojoje apkrovoje. Tai nepriklauso nuo `INPUT_SANITIZER_MODE` (kuris valdo tik greito įpurškimo politiką). Kai redagavimas išjungtas, skambutis įrašo aptikimo skaičių neperrašant turinio.
+- **`postCall`** giliai klonuoja atsaką, paleidžia `sanitizePIIResponse()` ir Responses-API formos maskavimo priemonę (`maskResponsesOutput` — apima `output_text` ir `output[].content[].text`). Jei įvyksta koks nors redagavimas, pakeistas atsakymas pakeičia originalą.
 
-Apsauginis turėklas niekada neužblokuoja; jis tik anotuoja (`meta.detections`, `meta.redacted`) arba perrašo.
+Apsauginis turėklas niekada neužblokuoja; jis tik komentuoja (`meta.detections`, `meta.redacted`) arba perrašo.
 
 #### Pasirinkimas pagal tipą, pasirinktiniai modeliai ir aptikimo skaitikliai
 
-**Prietaisų skydelis → Nustatymai → Sauga → PII maskavimas** pasirenka _kas_ yra užmaskuota. Jis neįjungia maskavimo: tai vis tiek yra `PII_REDACTION_ENABLED` (užklausa) ir `PII_RESPONSE_SANITIZATION` (atsakymas + SSE), abu pagal numatytuosius nustatymus išjungti.
+**Prietaisų skydelis → nustatymai → sauga → PII maskavimas** pasirenka _kas_ yra užmaskuota. Jis neįjungia maskavimo: tai vis tiek yra `PII_REDACTION_ENABLED` (užklausa) ir `PII_RESPONSE_SANITIZATION` (atsakymas + SSE), abu pagal numatytuosius nustatymus išjungti.
 
-- **Pasirinkimas pagal tipą** — įtaisytieji ID yra išvardyti `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nenustatytas reiškia kiekvieną tipą (elgseną prieš šį nustatymą). Užklausos variklio `ssn_us` šablonas susietas su `ssn`. Šablonai (minimalus, standartinis, finansinis, braziliškas, USA, GDPR, POPIA, pilnas) užpildo tik UI žymimuosius laukelius.
-- **GDPR ir POPIA identifikatoriai** — dvylika integruotų ID, apimančių EU ir Pietų Afrikos asmens identifikatorius (lentelė toliau). Jų regex, tikrintuvai ir jurisdikcijos žymos yra vienoje lentelėje `src/shared/utils/piiPatterns.ts`, kurią naudoja ir atsako dezinfekavimo priemonė (`src/lib/piiSanitizer.ts`), ir užklausų maskuoklis (`src/shared/utils/inputSanitizer.ts`). Atitiktis redukuojama tik tada, kai jos tikrintojas ją priima; vien skaitmenų eigos niekada neužtenka. Operatorius, išsaugojęs susiaurintą pasirinkimą prieš egzistuojant šiems ID, elgiasi taip, kaip buvo, kol bus pažymėti nauji ID.
-- **Individualūs modeliai** — iki 20 reguliariųjų arba pakaitos simbolių šablonų (`*` = iki 64 ne tarpo simbolių, `?` = vienas). Degtukai tampa `[CUSTOM_REDACTED]`. Kiekvienas šablonas eina per `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): daugiausia 500 simbolių, vėliavėlės ribojamos iki `g i m s u`, turi būti kompiliuojamos, turi praeiti `safe-regex` (katastrofiškas atšaukimas) ir neturi atitikti tuščios eilutės arba redagavimo vietos rezervavimo ženklo. Neveikiantis šablonas išsaugomas ir išbandomas atmetamas, o išsaugota nesėkminga eilutė praleidžiama vykdymo metu, o ne kompiliuojama. Priskirti šablonai veikia tik tada, kai įjungtas maskavimas.
-- **Aptikimo skaitikliai** — skaičiai kiekvienam tipui (niekada nesutampa reikšmės), saugomi atmintyje ir nustatomi iš naujo paleidus iš naujo (`src/lib/pii/piiDetectionStats.ts`). Jie tik didėja, kai veikia maskavimas.
+- **Pasirinkimas pagal tipą** — įtaisytieji ID yra išvardyti `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nenustatytas reiškia kiekvieną tipą (elgseną prieš šį nustatymą). Užklausos variklio `ssn_us` šablonas susietas su `ssn`. Šablonai (minimalus, standartinis, finansinis, braziliškas, USA, GDPR, POPIA, pilnas) užpildo tik žymimuosius laukelius UI.
+- **GDPR ir POPIA identifikatoriai** — dvylika integruotų ID, apimančių EU ir Pietų Afrikos asmens identifikatorius (lentelė toliau). Jų taisyklės, tikrintuvai ir jurisdikcijos žymos yra vienoje lentelėje `src/shared/utils/piiPatterns.ts`, kurią naudoja ir atsako dezinfekavimo priemonė (`src/lib/piiSanitizer.ts`), ir užklausų maskuoklė (`src/shared/utils/inputSanitizer.ts`). Atitiktis redukuojama tik tada, kai jos tikrintojas ją priima; vien skaitmenų eigos niekada neužtenka. Operatorius, išsaugojęs susiaurintą pasirinkimą prieš egzistuojant šiems ID, elgiasi taip, kaip buvo, kol bus pažymėti nauji ID.
+- **Individualūs modeliai** — iki 20 reguliariųjų reiškinių arba pakaitos simbolių šablonų (`*` = iki 64 simbolių be tarpų, `?` = vienas). Rungtynės tampa `[CUSTOM_REDACTED]`. Kiekvienas šablonas eina per `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): daugiausia 500 simbolių, vėliavėlės ribojamos iki `g i m s u`, turi būti kompiliuojamos, turi praeiti `safe-regex` (katastrofiškas atšaukimas) ir neturi atitikti tuščios eilutės arba redagavimo vietos rezervavimo ženklo. Neveikiantis šablonas išsaugomas ir išbandomas atmetamas, o išsaugota nesėkminga eilutė praleidžiama vykdymo metu, o ne kompiliuojama. Priskirti šablonai veikia tik tada, kai įjungtas maskavimas.
+- **Aptikimo skaitikliai** — skaičiai pagal tipą (niekada nesutampa reikšmės), saugomi atmintyje ir nustatomi iš naujo paleidus iš naujo (`src/lib/pii/piiDetectionStats.ts`). Jie tik didėja, kai veikia maskavimas.
 
 Nustatymai yra `key_value` lentelėje (vardų erdvė `pii_settings`, `src/lib/db/piiSettings.ts`) ir nuskaitomi per 1 s talpyklą. API:
 
-| Metodas | Kelias                   | Tikslas                                                                             |
-| ------- | ------------------------ | ----------------------------------------------------------------------------------- |
-| `GET`   | `/api/settings/pii`      | Vėliavos būsena, `enabledTypes`, `customPatterns`, aptikimo skaitikliai             |
-| `PUT`   | `/api/settings/pii`      | Pakeiskite `enabledTypes` (`null` = all) and/or `customPatterns`                    |
-| `POST`  | `/api/settings/pii/test` | Sausai paleisti vieną modelį pagal ne daugiau kaip 8 KB pavyzdį; nieko nėra saugoma |
+| Metodas | Kelias                   | Paskirtis                                                                               |
+| ------- | ------------------------ | --------------------------------------------------------------------------------------- |
+| `GET`   | `/api/settings/pii`      | Vėliavėlių būsena, `enabledTypes`, `customPatterns`, aptikimų skaitikliai               |
+| `PUT`   | `/api/settings/pii`      | Pakeičia `enabledTypes` (`null` = visi) ir (arba) `customPatterns`                      |
+| `POST`  | `/api/settings/pii/test` | Bandomasis vieno šablono patikrinimas su ne didesne kaip 8 KB imtimi; niekas nesaugo ma |
 
-Visiems trims reikia valdymo autentifikavimo ir patvirtinti kūną Zod (`src/shared/validation/schemas/piiSettings.ts`). Kai prisijungimas išjungtas (`requireLogin=false`), `GET` ir bandomasis galutinis taškas yra atidaryti, bet `PUT` vis tiek reikia prietaisų skydelio seanso, `manage` -scope API rakto, `oma_` prieigos prieigos rakto su rašymo apimtimi arba didesne arba CLI prieigos rakto arba vidinės paslaugos prieigos rakto, išsiųsto iš grįžtamojo ryšio.
+Visiems trims reikia valdymo autentifikavimo ir patvirtinti kūną naudojant Zod (`src/shared/validation/schemas/piiSettings.ts`). Kai prisijungimas išjungtas (`requireLogin=false`), `GET` ir bandomasis galutinis taškas yra atidaryti, bet `PUT` vis tiek reikia prietaisų skydelio seanso, `manage` -scope API rakto, `oma_` prieigos rakto su rašymo apimtimi arba didesne arba CLI prieigos rakto arba vidinės paslaugos prieigos rakto, siunčiamo iš grįžtamojo ryšio.
 
 #### GDPR (EU) ir POPIA (Pietų Afrika) identifikatoriai
 
-| Id                  | Identifikatorius            | Patvirtinimas                                                                             |
-| ------------------- | --------------------------- | ----------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                        | Žinoma šalis, tikslus tos šalies ilgis, ISO 13616 MOD-97-10                               |
-| `eu_vat`            | EU VAT numeris              | Žinomas valstybės narės priešdėlis ir tos valstybės numerio formatas (be VIES paieškos)   |
-| `es_dni_nie`        | ispanų DNI / NIE            | Kontrolinė raidė (reikšmė mod 23); NIE yra `X/Y/Z` + 7 skaitmenys                         |
-| `it_codice_fiscale` | Itališkas Codice Fiscale    | Kontrolinė raidė iš odd/even padėties lentelių                                            |
-| `pl_pesel`          | Lenkijos PESEL              | Svertinė kontrolinė suma ir užkoduota gimimo data                                         |
-| `nl_bsn`            | olandų BSN                  | 11 atsparumas (svoriai 9..2, -1)                                                          |
-| `de_steuer_id`      | Vokietijos Steuer-ID        | ISO 7064 Mod 11,10 plius skaitmenų struktūros taisyklės (be 0 priekyje)                   |
-| `se_personnummer`   | Švedijos personalas         | Luhn per pastaruosius dešimt skaitmenų ir tikėtiną gimimo datą (10 arba 12 skaitmenų)     |
-| `za_id`             | Pietų Afrikos ID numeris    | Luhn per visus 13 skaitmenų, galiojantis gimimo month/day, pilietybės skaitmuo 0 arba 1   |
-| `za_phone`          | Pietų Afrikos telefonas     | `+27` / `27` priešdėlis arba nacionalinė `0..` forma, parašyta tarpu arba brūkšneliu      |
-| `za_vat`            | Pietų Afrikos VAT numeris   | 10 skaitmenų, prasidedančių `4`** ir** "VAT" / "BTW" ankstesniuose 48 simboliuose         |
-| `za_tax_ref`        | Pietų Afrikos mokesčių ref. | 10 skaitmenų, prasidedančių `0`–`3`, Luhn,** ir** „tax“ / „SARS“ 48 simboliuose prieš tai |
+| ID                  | Identifikatorius               | Tikrinimas                                                                                 |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                           | Žinoma šalis, tikslus tos šalies ilgis, ISO 13616 MOD-97-10                                |
+| `eu_vat`            | ES PVM numeris                 | Žinomas valstybės narės prefiksas ir jos numerio formatas (be VIES užklausos)              |
+| `es_dni_nie`        | Ispanijos DNI / NIE            | Kontrolinė raidė (reikšmė mod 23); NIE yra `X/Y/Z` + 7 skaitmenys                          |
+| `it_codice_fiscale` | Italijos Codice Fiscale        | Kontrolinė raidė iš nelyginių/lyginių pozicijų lentelių                                    |
+| `pl_pesel`          | Lenkijos PESEL                 | Svertinė kontrolinė suma ir tikėtini užkoduoto gimimo mėnesio/dienos intervalai            |
+| `nl_bsn`            | Nyderlandų BSN                 | 11 patikra (svoriai 9..2, -1)                                                              |
+| `de_steuer_id`      | Vokietijos Steuer-ID           | ISO 7064 Mod 11,10 ir skaitmenų struktūros taisyklės (be pradinio 0)                       |
+| `se_personnummer`   | Švedijos personnummer          | Luhn paskutiniams dešimčiai skaitmenų ir tikėtina gimimo data (10 arba 12 skaitmenų)       |
+| `za_id`             | Pietų Afrikos ID numeris       | Luhn visiems 13 skaitmenų, galiojantis gimimo mėnuo/diena, pilietybės skaitmuo 0 arba 1    |
+| `za_phone`          | Pietų Afrikos telefonas        | Prefiksas `+27` / `27` arba nacionalinė `0..` forma su tarpu ar brūkšneliu                 |
+| `za_vat`            | Pietų Afrikos PVM numeris      | 10 skaitmenų, prasidedančių `4`, **ir** "VAT" / "BTW" ankstesniuose 48 ženkluose           |
+| `za_tax_ref`        | Pietų Afrikos mokesčių nuoroda | 10 skaitmenų, prasidedančių `0`-`3`, Luhn **ir** "tax" / "SARS" ankstesniuose 48 ženkluose |
 
-Kadangi tik skaitmenų formatai susiduria su užsakymų numeriais, kūrimo numeriais ir laiko žymomis, silpniausiems (`za_vat`, `za_tax_ref`) reikia raktinio žodžio cue, o tuščias dešimties skaitmenų `0..` numeris nėra traktuojamas kaip Pietų Afrikos telefono numeris. Tarpais esantys IBANs (`GB29 NWBK ...`) nesutampa. Srautinio perdavimo kelyje užuomina ieškoma tik dabartinės dalies viduje. ID yra prieš bendruosius telefono modelius, todėl patvirtintas identifikatorius išlaiko savo rezervuotąją vietą (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` ir `popia` šablonai parenka atitinkamai EU ir Pietų Afrikos ID. Pats maskavimas lieka pasirenkamas (Hard Rule #20): niekas čia nekeičia numatytosios funkcijos vėliavėlės.
+Kadangi tik skaitmenų formatai susiduria su užsakymų numeriais, kūrimo numeriais ir laiko žymomis, silpniausiems (`za_vat`, `za_tax_ref`) reikia raktinio žodžio užuomina, o tuščias dešimties skaitmenų `0..` numeris nelaikomas Pietų Afrikos telefono numeriu. Tarpais esantys IBANs (`GB29 NWBK ...`) nesutampa. Srautinio perdavimo kelyje užuomina ieškoma tik dabartinės dalies viduje. ID yra prieš bendruosius telefono modelius, todėl patvirtintas identifikatorius išlaiko savo rezervuotąją vietą (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` ir `popia` šablonai parenka atitinkamai EU ir Pietų Afrikos ID. Pats maskavimas lieka pasirenkamas (Hard Rule #20): niekas čia nekeičia numatytosios funkcijos vėliavėlės.
 
-### Greitas įpurškimas (`promptInjection.ts`)
+### Raginimų injekcija (`promptInjection.ts`)
 
-Aptinka priešiškas struktūras vartotojo pateiktame turinyje ir įgyvendina sukonfigūruotą politiką. Elgesį lemia aplinkos kintamieji ir konstruktoriaus parinktys:
+Aptinka priešiškas struktūras naudotojo pateiktame turinyje ir vykdo
+sukonfigūruotą politiką. Elgesį nulemia aplinkos kintamieji ir konstruktoriaus
+parametrai:
 
-| Nustatymas        | Env var                                                                                                  | Numatytoji | Efektas                                                                                                                                                                                           |
-| ----------------- | -------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Įjungta           | `INPUT_SANITIZER_ENABLED`                                                                                | `true`     | Kai `false`, apsauginiai turėklai trumpi jungimai.                                                                                                                                                |
-| Režimas           | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                          | `warn`     | Įpurškimo politika: `block`, `warn` arba `log`. (`redact` yra priimtas naudojant back-compat, bet taip** ne** juostelės įpurškimo tekstas; užklausą PII perrašyti valdo `PII_REDACTION_ENABLED`.) |
-| Blokuoti slenkstį | `blockThreshold` parinktis / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | Užblokavimui reikalingas minimalus sunkumas. Numatytoji priemonė yra tik stebėjimo priemonė.                                                                                                      |
+| Nustatymas          | Aplinkos kintamasis                                                                                           | Numatytoji | Poveikis                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Įjungta             | `INPUT_SANITIZER_ENABLED`                                                                                     | `true`     | Kai `false`, saugiklis apeinamas be tikrinimo.                                                                                                                                               |
+| Režimas             | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                               | `warn`     | Injekcijos politika: `block`, `warn` arba `log`. (`redact` priimamas dėl atgalinio suderinamumo, bet **ne**šalina injekcijos teksto; užklausos PII perrašymą valdo `PII_REDACTION_ENABLED`.) |
+| Blokavimo slenkstis | `blockThreshold` parametras / `INPUT_SANITIZER_BLOCK_THRESHOLD` (sinonimas `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | Mažiausias rimtumo lygis, reikalingas blokavimui. Numatytuoju atveju vidutinis lygis tik stebimas.                                                                                           |
 
-**Režimo pirmenybė** (`getMode`): skambinantis `options.mode` → `INJECTION_GUARD_MODE`**DB funkcijos-vėliavos nepaisymas** (Prietaisų skydelio → nustatymai → funkcijų vėliavėlės) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Todėl prietaisų skydelio nepaisymas laimi prieš env vars, todėl funkcijų vėliavėlės UI valdo važiavimo apsaugą tiesiogiai (nepaleidžiama iš naujo). DB skaitymas yra saugus nuo gedimų: jei jis sugenda, apsauga grįžta prie env pagrįstos elgsenos, o kai nenustatytas nepaisymas, elgsena yra identiška tik env skiriamajai gebai.
+**Režimo pirmenybė** (`getMode`): iškvietėjo `options.mode` →
+`INJECTION_GUARD_MODE` **DB funkcijų vėliavėlių perrašymas** (Valdymo skydas →
+Nustatymai → Funkcijų vėliavėlės) → `INJECTION_GUARD_MODE` aplinkos kintamasis →
+`INPUT_SANITIZER_MODE` aplinkos kintamasis → `warn`. Todėl valdymo skyde nustatytas
+perrašymas turi pirmenybę prieš aplinkos kintamuosius, tad Funkcijų vėliavėlių
+sąsaja valdo veikiantį saugiklį realiu laiku (be paleidimo iš naujo). DB skaitymas
+yra atsparus klaidoms: jei jis nepavyksta, saugiklis grįžta prie aplinkos
+kintamaisiais paremto elgesio, o kai perrašymas nenustatytas, elgesys identiškas
+sprendimui tik pagal aplinkos kintamuosius.
 
 Aptikimo šaltiniai:
 
-1. `sanitizeRequest()` iš `@/shared/utils/inputSanitizer` (bendras detektorių rinkinys, naudojamas kitur vamzdyne).
-2. Integruotas `DEFAULT_GUARD_PATTERNS` (šiuo metu `system_override_inline` ir `markdown_system_block`, abiejų `high` sunkumas).
-3. Pasirenkama `customPatterns` perduodama per konstruktoriaus parinktis (eilutės, reguliarioji išraiška arba `{ name, pattern, severity }` įrašai).
+1. `sanitizeRequest()` iš `@/shared/utils/inputSanitizer` (bendras detektorių
+   rinkinys, naudojamas ir kitur apdorojimo grandinėje).
+2. Integruotieji `DEFAULT_GUARD_PATTERNS` (šiuo metu `system_override_inline` ir
+   `markdown_system_block`, abu `high` rimtumo lygio).
+3. Pasirinktiniai `customPatterns`, perduodami per konstruktoriaus parametrus
+   (eilutės, reguliariosios išraiškos arba `{ name, pattern, severity }` įrašai).
 
-Kai `mode === "block"`** ir** bent vienas aptikimas atitinka sunkumo slenkstį, `preCall` grąžina `{ block: true, message: "Request rejected: suspicious content detected" }`. `warn`/`log` režimais apsauginis turėklas registruojasi, bet leidžia skambinti. Bendrinamas pagalbininkas `evaluatePromptInjection()` taip pat eksportuojamas skambintojams, kuriems reikia įvertinti raginimus neperžiūrėjus registro.
+Kai `mode === "block"` **ir** bent vienas aptikimas pasiekia sunkumo
+slenkstį, `preCall` grąžina `{ block: true, message: "Request rejected:
+suspicious content detected" }`. Režimais `warn`/`log` apsaugos mechanizmas
+užfiksuoja įvykį žurnale, bet leidžia iškvietimą. Bendroji pagalbinė funkcija
+`evaluatePromptInjection()` taip pat eksportuojama kvietėjams, kuriems reikia
+įvertinti užklausas apeinant registrą.
 
-**Nuskaitymas susietas (v3.8.20):** detektorius tik tikrina** pirmieji 16 KB** sujungto raginimo teksto — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 baitai) `src/shared/utils/inputSanitizer.ts`. Tiek `detectInjection()`, tiek `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` prieš paleidžiant šablono kilpą. Įpurškimo direktyvos yra šalia įvesties viršaus, todėl kelių šimtų KB naudingosiose apkrovose ji apriboja regex CPU/GC nesusilpnindama aptikimo (plg. #3932, #4041).
+**Skenavimo riba (v3.8.20):** detektorius tikrina tik **pirmuosius 16 KB**
+sujungto užklausos teksto — `MAX_INJECTION_SCAN_BYTES = 16 * 1024`
+(16 384 baitai) faile `src/shared/utils/inputSanitizer.ts`. Tiek
+`detectInjection()`, tiek `evaluatePromptInjection()` prieš paleisdamos
+šablonų ciklą atlieka `slice(0, MAX_INJECTION_SCAN_BYTES)`. Injekcijos
+direktyvos būna netoli įvesties pradžios, todėl tai apriboja reguliariųjų
+išraiškų CPU/GC apkrovą apdorojant kelių šimtų KB dydžio duomenis,
+nesusilpninant aptikimo (žr. #3932, #4041).
 
 ### Credential Masker (`credentialMasker.ts`)
 

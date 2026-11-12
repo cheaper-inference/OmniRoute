@@ -23,6 +23,8 @@ const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
 
 type ModelsResponseBody = { data: Array<{ id: string }> };
 
@@ -43,11 +45,17 @@ async function getIds(): Promise<Set<string>> {
 
 test.beforeEach(async () => {
   await resetStorage();
+  // Anonymous image discovery is unrelated to the auto-provider blocking contract.
+  // Inject the HTTP boundary so even an expired Horde snapshot stays offline.
+  aiHordeImageCatalog.clear();
+  aiHordeImageCatalog.setFetch(async () => Response.json([]));
 });
 
 test.after(async () => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
+  aiHordeImageCatalog.clear();
+  await closeSharedLoggerResource();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

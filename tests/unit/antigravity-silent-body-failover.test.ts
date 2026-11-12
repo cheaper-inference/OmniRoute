@@ -1,4 +1,4 @@
-import { describe, it, mock } from "node:test";
+import { after, describe, it, mock } from "node:test";
 import assert from "node:assert/strict";
 import {
   peekFirstAntigravitySseEvent,
@@ -10,7 +10,12 @@ import {
   clearAntigravityVersionCaches,
 } from "../../open-sse/services/antigravityVersion.ts";
 import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
 import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../../open-sse/config/antigravityUpstream.ts";
+
+after(async () => {
+  await closeSharedLoggerResource();
+});
 
 // The execute() tests below run the readiness watchdog on mocked timers. With a real
 // wall-clock budget (it used to be 50ms) the same budget also covers the healthy attempt,

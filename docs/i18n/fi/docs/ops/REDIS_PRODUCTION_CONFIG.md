@@ -6,37 +6,33 @@
 
 ## Yleiskatsaus
 
-Redis on OmniRoutessa **valinnainen, pehmeä riippuvuus** — sovellus jatkaa toimintaansa hallitusti
-(käyttäen muistipohjaisia vararatkaisuja), kun Redis ei ole käytettävissä. Tuotannossa Redisin
-virittäminen vähentää viivettä neljässä erillisessä työkuormassa:
+Redis on **valinnainen, pehmeä riippuvuus** OmniRoute — ssä sovellus heikkenee sulavasti (muistin varaosat), kun Redis ei ole käytettävissä. Tuotannossa Redis viritys vähentää viivettä neljällä eri työkuormalla:
 
-| Työkuorma               | Ajuri                         | Asiakastehdas                                                  | Avainmalli                                                 |
-| ----------------------- | ----------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
-| Pyyntönopeuden rajoitus | `rateLimiter.ts`              | `getRedisClient()` — laiskasti alustettava `ioredis`-singleton | `<prefix>rl:*` Lua-atomiset pyyntönopeuden rajoitusikkunat |
-| Todennusvälimuisti      | `apiKeys.ts`                  | Käyttää uudelleen `rateLimiter`-moduulin asiakasta             | `<prefix>auth:api_key:<sha256>` TTL-arvolla                |
-| Kiintiötallennus        | `redisQuotaStore.ts`          | Erillinen `getRedisClient(url)`-singleton                      | `<prefix>quota:*`, määritettävissä instanssikohtaisesti    |
-| Lämmityksen katkaisija  | `redisCircuitBreakerStore.ts` | Erillinen asiakas tiedostossa `circuitBreakerFactory.ts`       | `<prefix>warmup:cb:<connectionId>`                         |
+| Työmäärä               | Kuljettaja                    | Asiakastehdas                                    | Näppäinkuvio                                             |
+| ---------------------- | ----------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| Nopeuden rajoittaminen | `rateLimiter.ts`              | `getRedisClient()` — laiska `ioredis` singleton  | `<prefix>rl:*` Lua-atomin nopeusrajoitusikkunat          |
+| Auth välimuisti        | `apiKeys.ts`                  | Käyttää uudelleen `rateLimiter`:n asiakasta      | `<prefix>auth:api_key:<sha256>` TTL kanssa               |
+| Kiintiökauppa          | `redisQuotaStore.ts`          | Erillinen `getRedisClient(url)` singleton        | `<prefix>quota:*` konfiguroitavissa esiintymäkohtaisesti |
+| Lämmityskytkin         | `redisCircuitBreakerStore.ts` | Erillinen asiakas `circuitBreakerFactory.ts`:ssa | `<prefix>warmup:cb:<connectionId>`                       |
 
-Kaikki neljä työkuormaa käyttävät samaa nimiavaruuden etuliitettä, jotta OmniRoute voi toimia
-samassa Redis-instanssissa muiden sovellusten kanssa (esim. `127.0.0.1:6379`). Katso
-[Avainnimien nimiavaruudet](#key-namespacing).
+Kaikilla neljällä työkuormalla on yksi nimitilan etuliite, joten OmniRoute voi olla rinnakkain muiden sovellusten kanssa yhdessä Redis esiintymässä (esim. `127.0.0.1:6379`). Katso [Avaimen nimivälit](#key-namespacing).
 
 ---
 
-## Nykyinen määritys (koodin oletusarvot)
+## Nykyinen kokoonpano (koodin oletusasetukset)
 
-| Asetus                                    | Arvo                                                                 | Sijainti                                                                              |
-| ----------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL`-ympäristömuuttuja             | `redis://redis:6379` (compose), valinnainen                          | `rateLimiter.ts:5`, `.env.example`                                                    |
-| `REDIS_KEY_PREFIX`-ympäristömuuttuja      | `omniroute:` (oletus)                                                | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL`-ympäristömuuttuja | erillinen, voi poiketa muuttujasta `REDIS_URL`                       | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                      | `"sqlite"` (oletus), `"redis"` valinnainen                           | `quota/storeFactory.ts`                                                               |
-| ioredis-asetus `maxRetriesPerRequest`     | `3`                                                                  | asiakkaan luonti tiedostossa `rateLimiter.ts`                                         |
-| `enableReadyCheck`                        | ei asetettu (ioredis-oletus: `true`)                                 | —                                                                                     |
-| `lazyConnect`                             | ei asetettu (ioredis-oletus: `false`)                                | —                                                                                     |
-| `retryStrategy`                           | ei asetettu (ioredis-oletus: 200 ms:n perusviive, eksponentiaalinen) | —                                                                                     |
-| TLS / salasana / tietokantaindeksi        | **ei määritetty**                                                    | —                                                                                     |
-| Sentinel / Cluster                        | **ei määritetty** — vain itsenäinen yhden solmun kokoonpano          | —                                                                                     |
+| Asetus                          | Arvo                                                          | Jossa                                                                                 |
+| ------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (kirjoita), valinnainen                  | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (oletus)                                         | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | erillinen, voi erota `REDIS_URL` sta                          | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (oletus), `"redis"` valinnainen                    | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                           | `rateLimiter.ts` asiakkaan luominen                                                   |
+| `enableReadyCheck`              | ei asetettu (ioredis oletusarvo: `true`)                      | —                                                                                     |
+| `lazyConnect`                   | ei asetettu (ioredis oletusarvo: `false`)                     | —                                                                                     |
+| `retryStrategy`                 | ei asetettu (ioredisin oletusarvo: 200 ms, eksponentiaalinen) | —                                                                                     |
+| TLS / salasana / DB -indeksi    | **ei ole määritetty**                                         | —                                                                                     |
+| Sentinel / klusteri             | **ei ole määritetty** Vain — erillinen yksisolmu              | —                                                                                     |
 
 ---
 
@@ -69,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Suositeltu tuotantoympäristön optimointi
+## Suositeltu tuotannon viritys
 
-### 1. Yhteyspoolin / asiakkaan asetukset (ioredis-`Redis`-konstruktori)
+### 1. Yhteysvarasto/asiakasasetukset (ioredis `Redis` -konstruktori)
 
-Nykyinen koodi luo yhden `new Redis(url)` -instanssin ilman mukautettuja asetuksia. Tuotantoympäristön
-usean replikan käyttöönotossa välitä asiakastehdas koodissa tai kääri `getRedisClient()`:
+Nykyinen koodi luo yhden `new Redis(url)` ilman mukautettuja vaihtoehtoja. Tuotavien useiden replikoiden käyttöönotoissa välitä asiakastehdas koodiin tai kääri `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // ei uudelleenyritysten rajaa; anna retryStrategy-funktion päättää
-  enableReadyCheck: true, // varmista palvelimen valmius ennen kutsujen hyväksymistä
-  lazyConnect: true, // älä muodosta yhteyttä luonnin yhteydessä; odota ensimmäistä kutsua
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // luovuta 10 uudelleenyrityksen jälkeen → muodosta yhteys myöhemmin uudelleen
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, enintään 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // yhdistä samanaikaiset komennot yhdeksi TCP-kirjoitukseksi
-  keepAlive: 10000, // TCP:n keep-alive 10 s:n välein
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Keskeiset kompromissit:**
+**Tärkeimmät kompromissit:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — suositeltava tuotantoympäristössä, jotta tilapäiset
-  Redis-uudelleenkäynnistykset eivät aiheuta välittömästi jokaisen pyynnön epäonnistumista. Muistinsisäinen varajärjestelmä
-  `checkRateLimit()`-funktiossa käsittelee virhepolun.
-- `lazyConnect: true` — estää sen, että käynnistys riippuisi Redisin käytettävyydestä ennen kuin palvelin
-  alkaa hyväksyä yhteyksiä.
-- `enableAutoPipelining: true` — vähentää edestakaisia verkkokierroksia samanaikaisissa nopeusrajoituksen tarkistuksissa;
-  hyödyllinen, kun yhdellä yhteydellä käsitellään yli 50 pyyntöä sekunnissa.
+- `maxRetriesPerRequest: null` + `retryStrategy` — suositaan tuotannossa, joten ohimenevät Redis uudelleenkäynnistykset eivät heti epäonnistu jokaisessa pyynnössä. `checkRateLimit()` :n muistin varatoiminto absorboi vikapolun.
+- `lazyConnect: true` — välttää käynnistysriippuvuuden Redis toiminnasta ennen kuin palvelin alkaa hyväksyä yhteyksiä.
+- `enableAutoPipelining: true` — vähentää meno-paluumatkoja samanaikaisissa nopeusrajatarkistuksissa; hyödyllinen > 50 RPS yhdellä liitännällä.
 
-### 2. Redis-palvelimen määritykset (`redis.conf`)
+### 2. Redis palvelimen määritys (`redis.conf`)
 
 ```
-# Muisti
-maxmemory 80%                        # jätä tilaa käyttöjärjestelmän sivuvälimuistille
-maxmemory-policy allkeys-lru         # poista vanhentuneita todennusvälimuistin merkintöjä kuormituksen kasvaessa
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Pysyvyys (valinnainen — OmniRoute on vikasietoinen ilman sitä)
-save 300 1                           # luo tilannevedos vähintään 5 minuutin välein, jos ≥1 avain on muuttunut
-appendonly no                        # AOF:ää ei tarvita; tiedot voidaan luoda uudelleen
-appendfsync no                       # ei fsync-yleiskustannusta (RDB riittää)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Verkko
-timeout 0                            # ei käyttämättömän yhteyden katkaisua
-tcp-keepalive 300                    # 5 minuutin keep-alive
-tcp-backlog 511                      # yhteysjono kuormituspiikkejä varten
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Suorituskyky
-hz 10                                # oletus; 100 viiveherkkiin käyttötapauksiin
-activedefrag yes                     # eheytä automaattisesti, kun pirstoutuminen on >10 %
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Asetuksen `maxmemory-policy allkeys-lru` kompromissi:** Todennusvälimuistin merkintöjä voidaan poistaa
-muistipaineen aikana. Tämä on turvallista — `setCachedApiKey` täyttää välimuistin aina uudelleen hutihaun jälkeen, ja
-SQLite-varajärjestelmä on määräävä tietolähde. Nopeusrajoittimen Lua-komentosarja luo pieniä avaimia, jotka ovat
-tarkoituksellisesti lyhytikäisiä.
+**Vaihtoehto `maxmemory-policy allkeys-lru`:lle:** Todennusvälimuistin merkinnät voidaan poistaa muistin paineen alaisena. Tämä on turvallista. — `setCachedApiKey` täyttyy aina uudelleen miss-tilanteessa, ja SQLite -varavaihtoehto on arvovaltainen. Nopeutta rajoittava Lua-skripti luo pieniä avaimia, jotka ovat suunnittelultaan lyhytikäisiä.
 
 ### 3. Docker Compose -asetukset
 
-Tuotantoympäristön compose-tiedosto (`docker-compose.prod.yml`) käyttää näköistiedostoa `redis:8.6.2-alpine`. Lisää:
+Tuotantomuodossa (`docker-compose.prod.yml`) käytetään `redis:8.6.2-alpine`. Lisätä:
 
 ```yaml
 redis:
@@ -154,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Usean instanssin käyttöön / skaalaukseen liittyvät näkökohdat
+### 4. Moniinstanssi-/skaalausnäkökohdat
 
-**Yksi Redis kaikille replikoille** — nopeusrajoittimen Lua-komentosarja riippuu yhdestä
-määräävästä avainavaruudesta. Useiden Redis-instanssien käyttäminen replikoiden taustalla poistaisi atomisuuden
-ja kaksinkertaistaisi kiintiön. Käytä yhtä Redisiä (tai vikasietoista Redis Sentinel -klusteria)
-kaikille sovellusreplikoille.
+**Yksi Redis kaikille kopioille** — nopeudenrajoittimen Lua-skripti riippuu yhdestä arvovaltaisesta avainavaruudesta. Useat Redis esiintymät replikoiden takana menettäisivät atomisuutensa ja kaksinkertaistavat budjetin. Käytä yhtä Redis (tai Redis Sentinel -klusteria vikasietoineen) kaikille sovelluskopioille.
 
-**Yhteyksien määrä:** Jokainen sovellusreplika avaa **2 TCP-yhteyttä** Redisiin
-(nopeusrajoittimen asiakas + kiintiötallennuksen asiakas). 10 replikalla → 20 yhteyttä, mikä on
-selvästi Redis-oletusinstanssin 10 000 yhteyden enimmäismäärän sisällä.
+**Yhteysmäärä:** Jokainen sovelluksen replika avautuu **2 TCP -liitäntää** Redis :hen (rate limiter client + quota store client). 10 → 20 -yhteyden replikalla, selvästi Redis oletusilmentymän 10 000 yhteyskaton sisällä.
 
 ### 5. Valvonta
 
-Tarjoa seuraavat tiedot kuntotarkistuksen päätepisteen kautta:
+Paljasta terveystarkastuksen päätepisteen kautta:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts kutsuu jo rateLimiter-funktioita
-// Lisää Redis-kohtaiset tarkistukset:
-//   1. PING-viive ioredis-kirjaston .ping()-kutsulla
-//   2. Muistinkäyttö komennolla INFO memory
-//   3. Yhteyksien määrä komennolla INFO clients
-//   4. maxmemory-policy-asetuksen osumaprosentti (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Seurattavat keskeiset mittarit:
+Tärkeimmät katsottavat mittarit:
 
-- **Poistetut avaimet / s** — jos arvo on jatkuvasti muu kuin nolla, kasvata `maxmemory`-arvoa
-- **Estetyt asiakkaat** — nollasta poikkeava arvo viittaa hitaisiin Lua-komentosarjoihin tai suureen kilpailuun
-- **Hylätyt yhteydet** — yhteysraja saavutettu; harvinaista 20 yhteydellä
+- **Häädetty avaimet / s** Jos — on jatkuvasti eri kuin nolla, lisää `maxmemory`
+- **Estetyt asiakkaat** — ei-nolla ehdottaa hitaita Lua-skriptejä tai kovaa kilpailua
+- **Hylätyt yhteydet** — yhteysraja osuma; harvinainen 20 yhteydellä
+
+### 6. Redis-yhteensopivat palvelimet
+
+Kaikkien tässä käytettävien palvelinten on suoritettava Lua-komentosarjat: nopeuden rajoitin on yksi `EVAL`. Palvelimella, jossa ei ole Luaa, `checkRateLimit()` kirjaa `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` lokiin ja laskee prosessikohtaisesti, joten jokainen replika panee rajoituksen täytäntöön itse. Opt-in jaettu istunto-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) myös lukee ja päivittää nastat `EVAL` llä; ilman Luaa se kirjaa `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ja jokainen replika säilyttää omat nastansa. Muut työkuormat käyttävät tavallisia komentoja (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, tiivisteet ja joukot), ja semanttisen välimuistin Redis -taustaohjelma ei lähetä `FT.*` -komentoja.
+
+Testattu OmniRoute 3.8.52:lla: KiviDB 1.2.0 ja sen Lua-kuva (`kividb/kividb:v1.2.0-lua`). Nopeuden rajoitin (mukaan lukien toinen prosessi, joka jakaa laskurit), todennusvälimuisti, kiintiövarasto, lämmityskatkaisija, semanttisen välimuistin varasto ja `/v1/chat/completions` pyyntö chat-käsittelijän kautta läpäisivät 18 19 tarkistuksesta, jotka läpäisivät Redis 8.10.3:n. Yksi, joka eroaa: `INCRBYFLOAT` tallentaa `0.1 + 0.2` :n `0.30000000000000004`, missä Redis tallentaa `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kiintiökauppa jäsentää molemmat `parseFloat`, mutta kaksi numeroa eroavat viimeisistä numeroista, joten täsmälleen kiintiön rajalle osuva vertailu voi tulla eri tavalla. Istunto-affinity store ei ollut osa tätä ajoa. ( [asetukset](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [tulokset](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -205,13 +194,13 @@ flowchart LR
 
 ## Viitteet
 
-| Tiedosto                           | Tarkoitus                                                                                       |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Ensisijainen Redis-asiakasohjelma, Lua-nopeusrajoitusskripti ja muistinsisäinen varajärjestelmä |
-| `src/lib/db/apiKeys.ts`            | Todennusvälimuisti — Redis→SQLite-varajärjestelmä                                               |
-| `src/lib/quota/redisQuotaStore.ts` | Erillinen Redis-asiakasohjelma valinnaista kiintiötallennusta varten                            |
-| `src/lib/quota/storeFactory.ts`    | Vaihtaa `sqlite`- ja `redis`-kiintiöajureiden välillä                                           |
-| `docker-compose.prod.yml`          | Tuotannon Redis-säilö (image `redis:8.6.2-alpine`)                                              |
-| `.env.example`                     | Redis-ympäristömuuttujien dokumentaatio                                                         |
-| `src/app/api/local/redis/`         | API-reitit kehityssäilön orkestrointiin                                                         |
-| `bin/cli/commands/redis.mjs`       | CLI-komennot kehityssäilön orkestrointiin                                                       |
+| Tiedosto                           | Tarkoitus                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Ensisijainen Redis asiakas, Lua-nopeusrajoituskomentosarja, varamuisti |
+| `src/lib/db/apiKeys.ts`            | Todennusvälimuisti — Redis→SQLite varavaihtoehto                       |
+| `src/lib/quota/redisQuotaStore.ts` | Erillinen Redis asiakas valinnaista kiintiökauppaa varten              |
+| `src/lib/quota/storeFactory.ts`    | Vaihtaa `sqlite` ja `redis` -kiintiöohjainten välillä                  |
+| `docker-compose.prod.yml`          | Prod Redis -säiliö (kuva `redis:8.6.2-alpine`)                         |
+| `.env.example`                     | Redis env vars -dokumentaatio                                          |
+| `src/app/api/local/redis/`         | API -reitit kehittäjän kontin orkestrointiin                           |
+| `bin/cli/commands/redis.mjs`       | CLI -komennot dev-säilön orkestrointiin                                |

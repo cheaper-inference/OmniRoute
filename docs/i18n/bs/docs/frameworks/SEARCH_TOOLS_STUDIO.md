@@ -4,8 +4,6 @@
 
 ---
 
-# Search Tools Studio
-
 > **Funkcionalnost:** Search Tools Studio — jedinstveni radni prostor za web alate na `/dashboard/search-tools`.
 > **Planovi:** `18-search-tools-studio-redesign.plan.md` + `_orchestration/master-plan-group-C.md`
 > **Status:** Objavljeno u v3.8.6
@@ -55,7 +53,7 @@ Nova kartica za izdvajanje sadržaja s URL-a putem `POST /v1/web/fetch` (kreiran
 - Unos: URL + prekidač za cijelu stranicu + odabir formata (markdown / tekst / HTML).
 - Slanje → dohvaćanje → prikazivanje `ScrapeResult.tsx`.
 - `ScrapeResult` prikazuje pregled markdowna + prekidač za sirovi prikaz.
-- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `(skraćeno, prikaži sirovo)` i otvara sirovi sadržaj u Monaco modalnom prozoru (D21).
+- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `View full raw content` i otvara sirovi sadržaj u modalnom prozoru (D21).
 - Ploča s metapodacima: pružatelj (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencija, trošak, veličina odgovora, broj linkova.
 - Koristi hook `useScrapeFetch.ts`.
 
@@ -77,9 +75,9 @@ Pokreće isti upit/URL paralelno kod najviše **4 pružatelja** (D22):
 | Polje           | Napomene                                                                          |
 | --------------- | --------------------------------------------------------------------------------- |
 | Provajder       | Padajući meni sa statusnom oznakom (konfigurisano / nedostaje / ograničena stopa) |
-| Tip             | `web` ili `vijesti` (samo pretraga)                                               |
+| Tip             | `web` ili `news` (samo pretraga)                                                  |
 | Cijela stranica | Prekidač za scrape — dohvaća cijelu stranicu naspram prvog vidljivog sadržaja     |
-| Format          | `markdown`, `tekst`, ili `html` (samo scrape)                                     |
+| Format          | `markdown`, `text`, ili `html` (samo scrape)                                      |
 | Model za rerank | Opcioni model za rerank nakon pretrage                                            |
 | Istorija        | Sekcija istorije pretrage koja se može skupiti                                    |
 
@@ -104,10 +102,12 @@ Pokreće isti upit/URL paralelno kod najviše **4 pružatelja** (D22):
 `ProviderCatalog.tsx` prikazuje potpunu listu pružatelja usluga iz `GET /api/search/providers`
 (proširenu u F4 kako bi uključivala pružatelje usluga dohvaćanja):
 
-| `kind` | `"search"` (20 pružatelja usluga) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 pružatelja usluga) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status se **izvodi u trenutku zahtjeva** provjerom postoje li pristupni podaci i jesu li
 svi ključevi trenutno u periodu čekanja.
+
+`codex-search` (Codex Web Search): Koristi vaše povezane Codex (ChatGPT) račune, bez zasebnog ključa. Svaka pretraga troši kvotu pretplate i traje približno 10–40 s. Pokreće se kada ga zahtjev navede; automatski odabir zahtijeva zastavicu `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, koja je podrazumijevano isključena.
 
 ---
 

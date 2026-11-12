@@ -24,275 +24,203 @@ Hook-urile **nu** rulează pe fiecare rută sau pe fiecare răspuns. Citiți
 [Acoperire și limite](#coverage-and-limits) înainte de a vă baza pe un guardrail
 ca mecanism de securitate.
 
-## Mecanisme de protecție integrate
+## Guardrail-uri integrate
 
-Registry-ul încarcă automat șase mecanisme de protecție în ordinea priorității la import
-(consultați `registry.ts` → `registerDefaultGuardrails()`):
+Registrul încarcă automat șase guardrail-uri în ordinea priorității la import
+(vezi `registry.ts` → `registerDefaultGuardrails()`):
 
-| Priority | Name                | Stage(s)       | File                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Prioritate | Nume                | Etapă(e)       | Fișier                |
+| ---------- | ------------------- | -------------- | --------------------- |
+| `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
+| `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
+| `7`        | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
+| `10`       | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
+| `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
+| `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Numerele de prioritate mai mici rulează **primele**.
+Valorile de prioritate mai mici rulează **primele**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
 Modelul de bază GLM 5.3 și `glm-5.3-{low,high,max}` au metadate explicite
 `supportsVision:false` în registry/spec. Variantele GLM 5.3 Flash rămân modele
-native cu suport pentru viziune. Ruta `/v1/messages` din Claude Code intră în lanțul
-comun de mecanisme de protecție `handleChat` pentru apeluri preliminare **înainte** de traducerea Claude-în-OpenAI; imaginile din rezultatele instrumentului `Read` imbricate trebuie descrise sau procesate înainte ca traducerea respectivă să le transforme în conținut OpenAI `image_url` (#17069).
+cu viziune nativă. Ruta `/v1/messages` din Claude Code intră în lanțul comun de
+guardrail-uri pre-call `handleChat` **înainte** de traducerea Claude-to-OpenAI;
+imaginile imbricate din rezultatele instrumentului `Read` trebuie descrise sau
+tratate înainte ca acea traducere să le ridice în conținut OpenAI `image_url` (#17069).
 
-Interceptează cererile care conțin imagini și sunt adresate **modelelor fără suport pentru viziune** și fie redirecționează întreaga cerere către un model compatibil cu viziunea, fie înlocuiește părțile cu imagini cu descrieri text produse de un model de viziune configurabil, înainte de apelul upstream. Astfel, furnizorii care acceptă doar text pot gestiona transparent payload-uri multimodale.
+Interceptează cererile care conțin imagini și vizează **modele fără viziune** și
+fie redirecționează întreaga cerere către un model cu capacitate de viziune, fie
+înlocuiește părțile cu imagini cu descrieri text produse de un model de viziune
+configurabil înainte de apelul upstream. Acest lucru permite furnizorilor doar-text
+să gestioneze transparent payload-uri multimodale.
 
 Flux:
 
-1. Omite procesarea dacă modelul țintă acceptă deja viziunea (cu excepția cazului în care apare în lista forțată pentru puntea de viziune `isVisionBridgeForcedModel`).
-2. Extrage părțile cu imagini prin `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), care delegă detectarea unificată a mediilor
-   `detectMediaParts()` din `open-sse/utils/mediaParts.ts` — sursa unică de adevăr
-   partajată cu filtrul de compatibilitate combo.
-   Extragerea este permisă numai pentru formele pe care `replaceImageParts` le poate reinsera
-   (contractul extragere↔înlocuire): OpenAI `image_url`, Anthropic base64
-   `source.type:"base64"`, URL Anthropic `source.type:"url"` și Responses
-   API `input_image`. Imaginile corespunzătoare imbricate în
-   `tool_result.content` din Claude Code și în rezultatele instrumentelor Responses sunt, de asemenea, extrase și înlocuite la căile lor originale; formele care conțin doar indicatori sunt material pentru filtrul combo și nu sunt extrase.
-   Omite procesarea dacă nu este găsită nicio imagine.
-3. Rezolvă configurația de rulare prin `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): noile chei de configurare
-   `modalityBridge*` au prioritate; cheile moștenite `visionBridge*` rămân un
-   **fallback pentru un singur ciclu** (fereastră de rollback). Omite procesarea înainte de orice parcurgere a mediilor dacă puntea este dezactivată.
-4. Selectorul de mod (`modalityBridgeVisionMode`, consultați tabelul de mai jos) decide între redirecționare și descriere. Redirecționarea returnează `modifiedPayload` cu doar
-   `model` înlocuit, împreună cu metadatele `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Calea de descriere: limitează imaginile la `maxImages`, compune promptul adaptat sarcinii,
-   consultă memoria cache pentru descrieri, apelează modelul de viziune **în paralel**
-   (`Promise.allSettled`) și inserează în locul lor părți text `[Image N]: <description>`.
-   O descriere eșuată produce `null`: imaginea brută este păstrată pentru ținte necunoscute/cu suport pentru viziune (#4012), însă pentru o **țintă directă confirmată ca acceptând doar text** sau pentru un combo fără suport pentru viziune se introduce un substituent text explicit
-   `(unavailable — no vision-capable provider connected)` pentru fiecare imagine fără descriere, inclusiv în cazul eșecurilor parțiale și al imaginilor care depășesc limita apelurilor de descriere (#17069). Fallback-ul existent pentru descrierea combo în cazul în care toate apelurile eșuează rămâne activ (#8430).
-6. Returnează `modifiedPayload` + metadate (`imagesProcessed`, `descriptions`,
+1. Se omite dacă modelul țintă acceptă deja viziune (cu excepția cazului în care
+   apare în lista de bridge forțat `isVisionBridgeForcedModel`).
+2. Se extrag părțile cu imagini prin `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), care deleagă către **detectorul media unificat**
+   `detectMediaParts()` din `open-sse/utils/mediaParts.ts` — singura sursă de
+   adevăr partajată cu filtrul de compatibilitate combo. Extracția este limitată
+   prin listă albă la formele pe care `replaceImageParts` le poate insera înapoi
+   (contractul extract↔replace): OpenAI `image_url`, Anthropic base64
+   `source.type:"base64"`, Anthropic URL `source.type:"url"` și Responses API
+   `input_image`. Imaginile corespondente imbricate în `tool_result.content` din
+   Claude Code și în ieșirile instrumentelor Responses sunt, de asemenea, extrase
+   și înlocuite la căile lor originale; formele doar-indicator sunt material pentru
+   filtrul combo și nu sunt extrase.
+   Se omite dacă nu se găsește niciuna.
+3. Se rezolvă configurația de rulare prin `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): noile chei de setări
+   `modalityBridge*` au prioritate; cheile vechi `visionBridge*` rămân un
+   **fallback pe un singur ciclu** (fereastră de rollback). Se omite înainte de
+   orice parcurgere media atunci când bridge-ul este dezactivat.
+4. Selectorul de mod (`modalityBridgeVisionMode`, vezi tabelul de mai jos) decide
+   între redirecționare și descriere. Redirecționarea returnează `modifiedPayload`
+   doar cu `model` înlocuit, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Calea de descriere: se limitează imaginile la `maxImages`, se compune promptul
+   conștient de sarcină, se consultă cache-ul de descrieri, se apelează modelul de
+   viziune **în paralel** (`Promise.allSettled`) și se injectează părți text
+   `[Image N]: <description>` în locul lor. O descriere eșuată produce `null`:
+   imaginea brută este păstrată pentru ținte necunoscute/cu capacitate de viziune
+   (#4012), dar o **țintă directă confirmată doar-text** sau un combo cu zero
+   viziune primește un stub text explicit
+   `(unavailable — no vision-capable provider connected)` pentru fiecare imagine
+   nedescrisă, inclusiv pentru eșecurile parțiale și imaginile dincolo de limita
+   apelurilor de descriere (#17069). Fallback-ul existent pentru descrierile combo
+   complet eșuate rămâne în vigoare (#8430).
+6. Se returnează `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
-#### Selectorul de mod (`modalityBridgeVisionMode`)
+#### Selector de mod (`modalityBridgeVisionMode`)
 
-| Mode       | Default | Behavior                                                                                                                                                                                                                                                                                                                                                       |
-| ---------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔       | Euristică moștenită, neschimbată (#6640/#7204): modelele non-combo/`auto/` sunt redirecționate către cel mai bun model de viziune, cu excepția cazului în care modelul original are deja credențiale utilizabile (atunci se folosește descrierea); țintele combo folosesc întotdeauna descrierea.                                                              |
-| `describe` |         | Descrie întotdeauna — blocul de redirecționare este omis complet; modelul ales de utilizator oferă întotdeauna răspunsul.                                                                                                                                                                                                                                      |
-| `reroute`  |         | Forțează redirecționarea: protecția modelului cu credențiale păstrate este ignorată. Protecția credențialelor **țintei** de redirecționare se aplică în continuare — atunci când nu există nicio țintă de viziune utilizabilă, puntea blochează cererea cu o eroare clară în loc să descrie sau să trimită imagini brute către o țintă care acceptă doar text. |
+| Mod        | Implicit | Comportament                                                                                                                                                                                                                                                                                                                                    |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔        | Euristică legacy, neatinsă (#6640/#7204): modelele non-combo/`auto/` redirecționează către cel mai bun model de viziune, cu excepția cazului în care modelul original are deja credențiale utilizabile (atunci describe); țintele combo fac întotdeauna describe.                                                                               |
+| `describe` |          | Întotdeauna describe — blocul de redirecționare este omis complet; modelul ales de utilizator răspunde întotdeauna.                                                                                                                                                                                                                             |
+| `reroute`  |          | Forțează redirecționarea: protecția de păstrare a modelului cu credențiale este ocolită. Protecția credențialelor pentru **ținta** de redirecționare se aplică în continuare — atunci când nu există o țintă de viziune utilizabilă, puntea blochează cu o eroare clară în loc să descrie sau să trimită imagini brute către o țintă doar-text. |
 
-Modurile forțate întrerup procesarea înainte de rularea euristicii `auto`;
-comportamentul `auto` este identic la nivel de octeți cu mecanismul de protecție de dinaintea PR-1.
+Modurile forțate scurtcircuitează **înainte** ca euristica auto să ruleze; comportamentul `auto`
+este identic la nivel de octet cu protecția de dinainte de PR-1.
 
 #### Domeniul cheii API (`visionBridgeKeyScope.ts`)
 
-Când cheia API a apelantului restricționează `allowedConnections`, grupurile de cote
+Atunci când cheia API a apelantului restricționează `allowedConnections`, grupurile de cote
 (`allowedQuotas`) sau modelele (`allowedModels` / `blockedModels` /
-`modelAccessMode: "restricted"` / `disableNonPublicModels`), puntea alege pentru
-rerutare și descriere doar modelele pe care cheia le poate utiliza, pe conexiunile
-pe care cheia le poate utiliza. Apelul de descriere trece apoi întotdeauna prin
-bucla proprie OmniRoute cu antetul `x-omniroute-self-loop-key-id`, astfel încât
-cererea de chat recepționată aplică din nou politica de conexiuni și modele a
-cheii respective. `enforceApiKeyPolicy()` respectă acel antet numai împreună cu
-bearer-ul buclei proprii, astfel încât poate doar restrânge accesul, iar un ID
-care nu poate fi rezolvat este respins.
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), puntea alege doar
+modele de redirecționare și describe pe care cheia are voie să le folosească, pe conexiuni
+pe care cheia are voie să le folosească. Apelul describe trece apoi întotdeauna prin
+self-loop-ul OmniRoute cu antetul `x-omniroute-self-loop-key-id`, astfel încât cererea
+de chat receptoare aplică din nou politica de conexiuni și modele a acelei chei.
+`enforceApiKeyPolicy()` respectă acel antet doar împreună cu bearer-ul self-loop, deci
+poate doar restrânge accesul, iar un id care nu se rezolvă este respins.
 
 Dacă niciun model de viziune nu este permis pentru cheie, o **țintă confirmată
-doar text** respinge local cererea de imagine cu un HTTP 400 clar, în loc să
-redirecționeze octeții imaginii către un upstream incapabil (#17069). Pentru
-țintele cu o capacitate de viziune necunoscută sau nativă, calea de descriere își
-păstrează comportamentul anterior de tip fail-open (meta
-`{ skipped: true, reason: "no_permitted_vision_model" }`).
+doar-text** respinge local cererea cu imagine cu un HTTP 400 clar în loc să
+redirecționeze octeții imaginii către un upstream incapabil (#17069). Pentru ținte cu
+capabilitate de viziune necunoscută sau nativă, calea describe își păstrează
+comportamentul fail-open anterior (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
 Cererile fără cheie și cheile fără aceste restricții se comportă exact ca înainte.
 
-#### Prompt de descriere adaptat sarcinii (`modalityBridgeVisionTaskAware`)
+#### Prompt describe sensibil la sarcină (`modalityBridgeVisionTaskAware`)
 
-Valoare implicită **`true`**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`)
-adaugă textul **ultimul mesaj al utilizatorului** (trunchiat la 500 de caractere)
-la promptul de bază pentru descriere, orientând descrierea către ceea ce a cerut
-efectiv utilizatorul (modelul codex-vision-proxy) și solicitând modelului de
-viziune să transcrie textul vizibil. Când opțiunea este dezactivată — sau nu
-există text de la utilizator — este utilizat promptul de bază, neschimbat.
+Implicit **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) adaugă
+textul **ultimului mesaj al utilizatorului** (trunchiat la 500 de caractere) la
+promptul describe de bază, orientând descrierea către ceea ce utilizatorul a cerut
+de fapt (modelul codex-vision-proxy) și cerând modelului de viziune să transcrie
+textul vizibil. Cu flag-ul dezactivat — sau fără text de la utilizator — promptul
+de bază este folosit neschimbat.
 
-Cererea proprie compatibilă cu OpenAI a buclei de descriere
-(`callVisionModelSingle()` din `visionBridgeHelpers.ts`) solicită întotdeauna
-`image_url.detail: "high"` — necondiționat, pentru fiecare apelant/furnizor,
-fără a depinde de vreun semnal al clientului. Eșantionarea cu nivel scăzut de
-detalii reduce acuratețea OCR tocmai pentru sarcina de transcriere a textului pe
-care o solicită acest prompt, astfel încât apelul de descriere solicită
-întotdeauna un nivel ridicat de detalii, indiferent de nivelul de detalii utilizat
-în cererea inițială primită. Acest lucru afectează doar corpul cererii interne de
-descriere; nu modifică modul în care OmniRoute redirecționează propriul
-`image_url.detail` al apelantului în cererea principală — valoarea implicită este
-aplicată separat și numai pentru clienții OpenCode detectați, în
-`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Ramura
-formatului de date Anthropic a buclei de descriere nu are câmpul `detail` și nu
-este afectată de niciuna dintre valorile implicite.
+Propria cerere compatibilă OpenAI a self-loop-ului describe (`callVisionModelSingle()`
+în `visionBridgeHelpers.ts`) solicită întotdeauna `image_url.detail: "high"` —
+necondiționat, pentru fiecare apelant/furnizor, fără a depinde de vreun semnal de la client.
+Eșantionarea cu detaliu scăzut degradează acuratețea OCR exact pentru sarcina de
+transcriere a textului pe care o cere acest prompt, deci apelul describe în sine
+solicită întotdeauna detaliu ridicat, indiferent de nivelul de detaliu folosit de
+cererea inițială de intrare. Acest lucru afectează doar corpul cererii interne
+describe; nu schimbă modul în care OmniRoute redirecționează propriul `image_url.detail`
+al apelantului în cererea principală — acel implicit este aplicat separat, și doar
+pentru clienții OpenCode detectați, în `defaultImageDetail()`
+(`open-sse/handlers/chatCore/upstreamBody.ts`). Ramura în format wire Anthropic a
+self-loop-ului describe nu are câmp `detail` și nu este afectată de niciunul dintre
+implicite.
 
-#### Limită pentru rezultatul descrierii (`modalityBridgeVisionMaxChars`)
+#### Limita ieșirii describe (`modalityBridgeVisionMaxChars`)
 
-| Cheie                          | Valoare implicită | Interval          |
-| ------------------------------ | ----------------- | ----------------- |
-| `modalityBridgeVisionMaxChars` | `0`               | `0` sau 100–50000 |
+| Cheie                          | Implicit | Interval          |
+| ------------------------------ | -------- | ----------------- |
+| `modalityBridgeVisionMaxChars` | `0`      | `0` sau 100–50000 |
 
-`0` (valoarea implicită) înseamnă **fără limită** — descrierea returnată de
-`callVisionModel()` este transmisă nemodificată, păstrând comportamentul existent.
-Orice valoare din intervalul 100–50000 trunchiază descrierea cu un sufix `…`
-înainte de a fi inserată din nou ca `[Image N]: <description>`
+`0` (implicit) înseamnă **fără limită** — descrierea returnată de
+`callVisionModel()` este transmisă nemodificată, păstrând comportamentul
+existent. Orice valoare în intervalul 100–50000 trunchiază descrierea cu un
+sufix `…` înainte de a fi inserată înapoi ca `[Image N]: <description>`
 (`VisionBridgeGuardrail.preCall()` în `src/lib/guardrails/visionBridge.ts`).
-Măriți această valoare pentru sarcini OCR cu multe detalii, în care modelul din
-aval are nevoie de transcrierea completă; micșorați-o pentru a limita consumul de
-tokeni în cazul modelelor de viziune verbose.
-Câmpul din tabloul de bord se află în panoul Advanced al filei Vision
-(`modality-bridge-max-chars` în `ModalityBridgeVisionTab.tsx`) și limitează orice
-valoare între 1 și 99 la limita minimă de 100, lăsând nealterat un `0` explicit —
-`0` este o valoare Zod validă de sine stătătoare
+Creșteți această valoare pentru sarcini OCR cu multe detalii, unde modelul din
+aval are nevoie de transcrierea completă; reduceți-o pentru a limita utilizarea
+de tokeni la modelele de viziune verboase. Câmpul din tabloul de bord se află
+în panoul Advanced al filei Vision (`modality-bridge-max-chars` în
+`ModalityBridgeVisionTab.tsx`) și limitează orice valoare între 1 și 99 la
+pragul inferior de 100, lăsând un `0` explicit neatins — `0` este o valoare
+Zod validă de sine stătătoare
 (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), nu doar
-valoarea implicită „nesetată”.
+valoarea implicită „nesetată".
 
-#### Cache pentru descrieri (`modalityBridge/bridgeCache.ts`)
+#### Cache describe (`modalityBridge/bridgeCache.ts`)
 
-Cache LRU + TTL în memorie pentru rezultatele descrierilor, partajat la nivelul
-întregului proces.
-Cheia = `sha256(imageRef + composedPrompt + configuredBridgeModel)` cu delimitare
-bazată pe prefixul lungimii (fără coliziuni la granițele câmpurilor). Componenta
-modelului este modelul de punte **configurat**, nu modelul care a furnizat efectiv
-răspunsul — `callVisionModel` poate utiliza intern un model de rezervă, iar
-generarea cheii pentru fiecare încercare ar fragmenta cache-ul. Descrierile eșuate
-nu sunt niciodată memorate în cache. Setări:
+Cache LRU + TTL în memorie pentru ieșirile describe, partajat la nivel de proces.
+Cheia = `sha256(imageRef + composedPrompt + configuredBridgeModel)` cu încadrare
+prin prefix de lungime (fără coliziuni la granițele câmpurilor). Componenta
+modelului este modelul de punte **configurat**, nu modelul care a răspuns efectiv —
+`callVisionModel` poate face fallback intern, iar cheierea per încercare ar
+fragmenta cache-ul. Descrierile eșuate nu sunt niciodată puse în cache. Setări:
 
-| Cheie                           | Valoare implicită | Interval |
-| ------------------------------- | ----------------- | -------- |
-| `modalityBridgeCacheEnabled`    | `true`            | —        |
-| `modalityBridgeCacheTtlMinutes` | `60`              | 1–1440   |
-| `modalityBridgeCacheMaxEntries` | `200`             | 10–5000  |
+| Cheie                           | Implicit | Interval |
+| ------------------------------- | -------- | -------- |
+| `modalityBridgeCacheEnabled`    | `true`   | —        |
+| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440   |
+| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000  |
 
-#### Normalizarea imaginilor la distanță (preluare self-loop descriere/base64)
+#### Normalizarea imaginilor remote (preluare describe/base64 prin self-loop)
 
-Când puntea preia singură o imagine **la distanță** — apelul propriu Anthropic
-pentru descriere și conversia în base64 pentru formatul de date claude
-(`ensureBase64ImagesForClaudeWire`), ambele prin
-`fetchRemoteImageAsDataUri()` din `visionBridgeHelpers.ts` — URI-ul de date
-rezultat este trecut prin `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) înainte de a fi încorporat în cererea
-modelului de viziune. Imaginile prea mari sunt redimensionate la o **latură
-lungă de 2048px** (corespunzător limitei de redimensionare pe care OpenAI/Anthropic
-o aplică deja pe server), ceea ce reduce numărul de octeți încărcați și latența,
-fără a schimba ceea ce vede modelul de viziune. Redimensionarea utilizează
-`sharp`, încărcat prin import dinamic: pe o platformă pe care binarul său nativ
-nu se poate încărca, `normalizeDataUri()` **nu generează niciodată o excepție** —
-revine la transmiterea directă a octeților originali, astfel încât calea de
-descriere/conversie base64 continuă întotdeauna să funcționeze. Octeții care nu
-sunt imagini (o preluare care nu a returnat o imagine decodificabilă) sunt, de
-asemenea, transmiși nemodificați. Această normalizare se aplică doar imaginilor
-pe care puntea le preia pentru propriul apel intern — nu este aplicată niciodată
-încărcăturii brute transmise direct de apelant, în conformitate cu principiul
-modificării exclusive la cerere explicită (Hard Rule #20).
+Când bridge-ul preia singur o imagine **remote** — auto-apelul describe Anthropic și conversia base64 în format claude-wire (`ensureBase64ImagesForClaudeWire`), ambele prin `fetchRemoteImageAsDataUri()` în `visionBridgeHelpers.ts` — URI-ul de date rezultat este trecut prin `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) înainte de a fi încorporat în cererea către modelul de viziune. Imaginile supradimensionate sunt reduse la o **margine lungă de 2048px** (corespunzând limitei de redimensionare pe care OpenAI/Anthropic o aplică deja pe server), ceea ce reduce octeții/latența de încărcare fără a schimba ceea ce vede modelul de viziune. Redimensionarea folosește `sharp`, încărcat prin import dinamic: pe o platformă unde binarul său nativ nu se încarcă, `normalizeDataUri()` **nu aruncă niciodată** — revine la o transmitere directă (passthrough) a octeților originali, astfel încât calea describe/conversie-base64 continuă să funcționeze întotdeauna. Octeții care nu sunt imagini (o preluare care nu a returnat o imagine decodabilă) sunt, de asemenea, transmiși nemodificați. Această normalizare este limitată la imaginile pe care bridge-ul le preia pentru propriul auto-apel — nu este niciodată aplicată payload-ului brut transmis direct de apelant, în concordanță cu principiul mutației doar prin opt-in (Regula strictă #20).
 
-#### Schema setărilor + migrare
+#### Schema de setări + migrare
 
-Noile chei `modalityBridge*` sunt validate de Zod în `updateSettingsSchema`
-(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
-`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
-`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
-`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, grupul de trei chei `modalityBridgeCache*` și
-grupul `modalityBridgeAudio*` utilizat de Audio Bridge. Migrarea
-`141_modality_bridge_settings.sql` copiază valorile legacy `visionBridge*` în
-cheile noi corespunzătoare (idempotent, nu suprascrie niciodată o valoare
-`modalityBridge*` setată de operator); cheile legacy rămân acceptate ca
-fallback la citire pentru un ciclu de lansare.
+Noile chei `modalityBridge*` sunt validate cu Zod în `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, trioul `modalityBridgeCache*` și grupul `modalityBridgeAudio*` folosit de Audio Bridge. Migrarea `141_modality_bridge_settings.sql` copiază valorile existente ale cheilor vechi `visionBridge*` în noile chei corespondente (idempotent, nu suprascrie niciodată o valoare `modalityBridge*` setată de operator); cheile vechi rămân acceptate ca rezervă de citire pentru un ciclu de lansare.
 
 #### Antet de transparență + statistici
 
-Răspunsurile transformate pentru descriere includ
-`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-(generat de `buildModalityBridgeHeader()` în `modalityBridge/bridgeStats.ts`,
-adăugat de `withModalityBridgeHeader()` în `src/sse/handlers/chatHelpers.ts`).
-Solicitările redirecționate nu primesc niciun antet — payloadul nu a fost
-modificat, iar schimbarea modelului este deja vizibilă în câmpul `model` al
-corpului răspunsului.
+Răspunsurile transformate prin describe poartă antetul `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (construit de `buildModalityBridgeHeader()` în `modalityBridge/bridgeStats.ts`, aplicat de `withModalityBridgeHeader()` în `src/sse/handlers/chatHelpers.ts`). Cererile redirecționate nu primesc **niciun** antet — payload-ul a rămas neatins, iar schimbarea modelului este deja vizibilă în câmpul `model` din corpul răspunsului.
 
-`GET /api/modality-bridge/stats` (autentificare de management, același nivel ca
-`GET /api/settings`) returnează contoarele în memorie pentru fiecare modalitate
-`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` pentru `vision`, `audio` și
-`video`. `averageLatencyMs` utilizează `latencySamples`, nu toate încercările,
-ca numitor; o operațiune fără măsurarea duratei nu inventează un eșantion de
-zero milisecunde. `bridged` rămâne aliasul compatibil retroactiv pentru
-conversiile reușite; încercările eșuate nu îl incrementează.
-Contoarele sunt resetate la repornirea procesului, conform proiectării
-(telemetrie, nu contabilitate).
+`GET /api/modality-bridge/stats` (autentificare de management, același nivel ca `GET /api/settings`) returnează contoarele în memorie per modalitate `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` pentru `vision`, `audio` și `video`. `averageLatencyMs` folosește `latencySamples`, nu toate încercările, ca numitor; o operațiune fără măsurarea timpului nu fabrică un eșantion de zero milisecunde. `bridged` rămâne aliasul compatibil retroactiv pentru conversiile reușite; încercările eșuate nu îl incrementează. Contoarele se resetează la repornirea procesului, prin design (telemetrie, nu contabilitate).
 
-#### Configurarea tabloului de bord
+#### Configurarea panoului de bord
 
-Pagina dedicată a tabloului de bord este
-`/dashboard/settings/modality-bridge`. Filele `Vision`, `Audio` și `Video`,
-accesibile prin URL, păstrează parametrii de interogare la schimbarea valorii
-`tab`. Fila Vision expune activarea, modul, selectarea modelului (inclusiv
-valoarea implicită automată), solicitarea conștientă de sarcină, limitele
-avansate pentru timeout/imagini/lungimea descrierii/cache, contoarele de rulare
-și o solicitare de eșantion protejată. Fila Audio este, de asemenea, activă:
-expune activarea, un selector de modele exclusiv STT cu opțiunea Auto, limitele
-pentru timeout/durata maximă a clipului, contoarele audio și un test de eșantion
-`input_audio`. Fila Video este funcțională: raportează starea de rulare
-FFmpeg/ffprobe — una dintre cele patru stări explicite ale interfeței (`unknown`
-cât timp verificarea este în curs sau nu a putut fi finalizată, `restricted` pe
-un gazdă a tabloului de bord care nu este loopback, unde verificarea este omisă
-de client, `unavailable` după ce s-a verificat și s-a confirmat lipsa sau
-`available` împreună cu versiunile FFmpeg/ffprobe) — persistă limitele pentru
-activare/model/cadru/video/timeout, filtrează selectorul de modele pentru a
-include doar modelele compatibile cu viziunea și expune contoarele video.
+Pagina dedicată din panoul de bord este `/dashboard/settings/modality-bridge`. Filele sale adresabile prin URL `Vision`, `Audio` și `Video` păstrează parametrii de interogare la schimbarea valorii `tab`. Fila Vision expune activarea, modul, selecția modelului (inclusiv valoarea implicită automată), promptingul adaptat la sarcină, limitele avansate de timeout/imagini/lungimea descrierii/cache, contoarele de rulare și o cerere de probă protejată. Fila Audio este, de asemenea, activă: expune activarea, un selector de model doar STT cu Auto, limite de timeout/durată maximă a clipului, contoare audio și un test de probă `input_audio`. Fila Video este funcțională: raportează starea de rulare FFmpeg/ffprobe — una dintre cele patru stări UI explicite (`unknown` cât timp sonda este în curs sau nu a putut fi finalizată, `restricted` pe o gazdă de panou de bord non-loopback unde sonda este omisă pe partea de client, `unavailable` după ce a fost sondat și confirmat ca lipsă, sau `available` cu versiunile FFmpeg/ffprobe) — persistă limitele de activare/model/cadre/video/timeout, filtrează selectorul de model la modelele capabile de viziune și expune contoarele video.
 
-Fosta casetă Vision Bridge din setările AI este un link de compatibilitate către
-noua pagină; nu mai deține o a doua copie a formularului. Media Providers
-include, de asemenea, linkuri pentru fluxurile Image-to-Text și
-Speech-to-Text către filele corespunzătoare Modality Bridge, fără a elimina
-spațiul de testare Speech-to-Text existent.
+Fostul card Vision Bridge din setările AI este un link de compatibilitate către noua pagină; nu mai deține o a doua copie a formularului. Media Providers leagă, de asemenea, fluxurile de lucru Image-to-Text și Speech-to-Text de filele Modality Bridge corespunzătoare, fără a elimina playground-ul Speech-to-Text existent.
 
-**Ocolirea verificării pentru bucla proprie:** atunci când apelul de descriere
-trece prin bucla proprie `/v1` a OmniRoute (model de furnizor non-standard),
-subsolicitarea trimite `x-omniroute-admission-bypass: internal` și este
-autentificată cu acreditarea rezolvată pentru bucla proprie — sentinelul local
-`sk_omniroute` în modul local sau cheia de mediu `OMNIROUTE_API_KEY` /
-`ROUTER_API_KEY` configurată de operator (#1350), astfel încât implementările
-cu `REQUIRE_API_KEY=true` să poată executa în continuare apelul de descriere.
-Ocolirea este onorată numai pentru acreditările exacte respective, astfel încât
-clienții externi nu pot utiliza antetul pentru a omite verificarea.
+**Ocolirea admiterii prin self-loop:** când apelul describe este rutat prin propriul self-loop `/v1` al OmniRoute (model de furnizor non-standard), sub-cererea trimite `x-omniroute-admission-bypass: internal` și este autentificată cu credențialul self-loop rezolvat — santinela locală `sk_omniroute` în modul local sau cheia de mediu `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` configurată de operator (#1350), astfel încât implementările cu `REQUIRE_API_KEY=true` pot rula în continuare apelul describe. Ocolirea este onorată doar pentru acele credențiale exacte, astfel încât clienții externi nu pot folosi antetul pentru a sări peste admitere.
 
-Valorile implicite legacy se află în
-`src/shared/constants/visionBridgeDefaults.ts`; noile valori implicite pentru
-mod, solicitări conștiente de sarcină și cache, precum și resolverul setărilor,
-se află în `src/shared/constants/modalityBridgeDefaults.ts`. Mecanismul de
-protecție expune o opțiune de constructor `deps`, astfel încât testele să poată
-injecta implementări fictive pentru `getSettings` și `callVisionModel`.
+Valorile implicite vechi se află în `src/shared/constants/visionBridgeDefaults.ts`; noile valori implicite pentru mod/task-aware/cache și resolverul de setări se află în `src/shared/constants/modalityBridgeDefaults.ts`. Guardrail-ul expune o opțiune de constructor `deps`, astfel încât testele pot injecta implementări false de `getSettings` și `callVisionModel`.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Interceptează solicitările de chat care conțin audio înainte ca acestea să
-ajungă la o țintă despre care nu se știe că acceptă intrare audio. Nu
-redirecționează niciodată solicitarea de chat: componentele audio sunt
-transcrise prin endpointul multipart compatibil cu OpenAI existent, iar
-modelul de chat ales continuă cu transcrierile text.
+Interceptează cererile de chat care conțin audio înainte ca acestea să ajungă la o țintă despre care nu se știe că acceptă intrări audio. Nu redirecționează niciodată cererea de chat: părțile audio sunt transcrise prin endpoint-ul multipart existent compatibil OpenAI, iar modelul de chat ales continuă cu transcrierile text.
 
 Flux:
 
-1. Rezolvă `supportsAudio` prin `getResolvedModelCapabilities()`. Metadatele explicite din registrul furnizorilor au prioritate, urmate de metadatele statice ale modelului, apoi de `modalities_input` sincronizat. O listă de intrări declarată fără `audio` înseamnă `false`; în absența dovezilor privind capabilitatea, valoarea rămâne `null`. Atât `false`, cât și `null` activează puntea conservatoare, în timp ce `true` o ocolește.
-2. Rezolvă setările `modalityBridgeAudio*` și extrage părțile audio de nivel superior care pot fi înlocuite din fiecare mesaj, prin detectorul partajat `detectMediaParts()`. Formele wire acceptate sunt `input_audio`, `audio_url` și `source.media_type: "audio/*"` din OpenAI. Audio-ul imbricat este detectat pentru rutare, dar nu este eliminat de calea de înlocuire. Volumul de lucru este limitat de `modalityBridgeAudioMaxClips`; părțile ulterioare rămân neatinse.
-3. Respectă un `provider/model` configurat sau permite ca `selectAudioBridgeModel()` să parcurgă `AUDIO_TRANSCRIPTION_PROVIDERS` în ordinea stabilă a catalogului și să selecteze primul model cu acreditări active și utilizabile ale furnizorului.
-4. `callAudioTranscription()` convertește datele audio codificate în base64/data-URI într-un `file` multipart sau descarcă un `audio_url` de la distanță prin mecanismul de protecție outbound disponibil doar pentru destinații publice, cu fixarea DNS și o limită de 25 MB. Apoi face POST pentru fișier și modelul selectat către self-loop-ul local `/v1/audio/transcriptions`, autentificat cu `resolveSelfLoopBearer()`. Ruta de transcriere existentă efectuează căutarea normală a acreditărilor, gestionarea perioadelor de cooldown/limitare a ratei și distribuirea către furnizor.
-5. Apelurile reușite își înlocuiesc părțile cu `[Audio N]: <transcript>`. Apelurile rulează cu `Promise.allSettled`: un eșec individual păstrează partea audio originală (#4012 contract). Dacă toate apelurile eșuează și se dovedește că ținta are `supportsAudio === false`, părțile devin
-   `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract). Pentru o țintă necunoscută (`null`), un rezultat în care toate apelurile eșuează rămâne neschimbat. O țintă demonstrat limitată la text, fără acreditări STT utilizabile, primește același substituent explicit fără emiterea unui apel de rețea.
+1. Rezolvă `supportsAudio` prin `getResolvedModelCapabilities()`. Metadatele explicite din registrul de furnizori au prioritate, apoi metadatele statice ale modelului, apoi `modalities_input` sincronizat. O listă de intrări declarată fără `audio` înseamnă `false`; lipsa dovezilor de capabilitate rămâne `null`. Atât `false`, cât și `null` activează puntea conservatoare, în timp ce `true` o ocolește.
+2. Rezolvă setările `modalityBridgeAudio*` și extrage părțile audio de nivel superior care pot fi decupate din fiecare mesaj prin detectorul partajat `detectMediaParts()`. Formele de transmisie acceptate sunt OpenAI `input_audio`, `audio_url` și `source.media_type: "audio/*"`. Conținutul audio imbricat este detectat pentru rutare, dar nu este eliminat de calea de decupare. Volumul de lucru este limitat de `modalityBridgeAudioMaxClips`; părțile ulterioare rămân neatinses.
+3. Respectă un `provider/model` configurat sau lasă `selectAudioBridgeModel()` să parcurgă `AUDIO_TRANSCRIPTION_PROVIDERS` în ordinea stabilă a catalogului și să selecteze primul model cu o credențială de furnizor activă utilizabilă.
+4. `callAudioTranscription()` convertește audio base64/data-URI într-un `file` multipart sau descarcă un `audio_url` la distanță prin gardianul de ieșire limitat la destinații publice, cu fixare DNS și o limită de 25 MB. Apoi trimite prin POST fișierul și modelul selectat către bucla locală `/v1/audio/transcriptions`, autentificat cu `resolveSelfLoopBearer()`. Ruta de transcriere existentă efectuează căutarea normală a credențialelor, gestionarea cooldown-ului și a limitării de rată, precum și redirecționarea către furnizor.
+5. Apelurile reușite își înlocuiesc părțile cu `[Audio N]: <transcript>`. Apelurile rulează cu `Promise.allSettled`: un eșec individual păstrează partea audio originală respectivă (contractul #4012). Dacă toate apelurile eșuează și ținta este dovedită `supportsAudio === false`, părțile devin `[Audio N]: (unavailable — no STT provider connected)` (contractul #8430). Pentru o țintă necunoscută (`null`), un rezultat cu eșec total rămâne neatins. O țintă dovedită doar-text, fără o credențială STT utilizabilă, primește același stub explicit fără a emite un apel de rețea.
 
-Transcrierile reușite folosesc memoria cache LRU/TTL a Modality Bridge, disponibilă la nivelul întregului proces. Cheia combină referința audio, eticheta stabilă a operației
-`audio-transcription` și modelul STT selectat; eșecurile nu sunt niciodată memorate în cache. Încercările audio actualizează contoarele partajate `bridged`, `cacheHits`, `failures` și `lastUsedAt`.
-Răspunsurile transformate includ
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; solicitările neatinse nu primesc un segment Audio Bridge.
+Transcrierile reușite folosesc cache-ul LRU/TTL Modality Bridge la nivel de proces. Cheia combină referința audio, eticheta stabilă de operație `audio-transcription` și modelul STT selectat; eșecurile nu sunt niciodată puse în cache. Încercările audio actualizează contoarele partajate `bridged`, `cacheHits`, `failures` și `lastUsedAt`. Răspunsurile transformate poartă `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; cererile neatinses nu primesc un segment Audio Bridge.
 
-Setările de rulare sunt stocate în DB și validate cu Zod:
+Setările de rulare sunt susținute de baza de date și validate cu Zod:
 
 | Cheie                         | Implicit | Interval        |
 | ----------------------------- | -------- | --------------- |
@@ -301,9 +229,7 @@ Setările de rulare sunt stocate în DB și validate cu Zod:
 | `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000     |
 | `modalityBridgeAudioMaxClips` | `3`      | 1–10            |
 
-Memoria cache partajată rămâne controlată de
-`modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` și `modalityBridgeCacheMaxEntries`.
+Cache-ul partajat rămâne controlat de `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` și `modalityBridgeCacheMaxEntries`.
 
 ### Punte video (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -502,157 +428,100 @@ Răspunsurile convertite adaugă
 `video->text;model=<visionModel>;parts=<videos>` la antetul central
 `x-omniroute-modality-bridge`, fără a elimina segmentele Vision sau Audio.
 
-### Mascatorul PII (`piiMasker.ts`)
+### PII Masker (`piiMasker.ts`)
 
-Rulează în **ambele** etape.
+Merge mai departe **ambele** etape.
 
-- **`preCall`** clonează payload-ul, parcurge `system`, `messages`, `input` și
-  `prompt` (inclusiv elementele simple de tip șir de caractere) și aplică
-  `processPII()` (din `@/shared/utils/inputSanitizer`) câmpurilor `content`/`text`
-  de tip șir de caractere. Când `PII_REDACTION_ENABLED=true`, PII detectate sunt
-  redactate în payload-ul transmis. Acest lucru este independent de
-  `INPUT_SANITIZER_MODE` (care controlează doar politica împotriva injecției de
-  prompturi). Când redactarea este dezactivată, apelul înregistrează numărul de
-  detectări fără a rescrie conținutul.
-- **`postCall`** clonează profund răspunsul, rulează `sanitizePIIResponse()` plus
-  mascatorul pentru forma Responses API (`maskResponsesOutput` — acoperă
-  `output_text` și `output[].content[].text`). Dacă are loc orice redactare,
-  răspunsul modificat îl înlocuiește pe cel original.
+- **`preCall`** clonează sarcina utilă, parcurge `system`, `messages`, `input` și `prompt` (inclusiv elemente de șir simplu) și aplică `processPII()` (din `@/shared/utils/inputSanitizer`) la câmpurile șir `content`/`text`. Când `PII_REDACTION_ENABLED=true`, PII detectat este redactat în încărcarea utilă de ieșire. Acesta este independent de `INPUT_SANITIZER_MODE` (care controlează doar politica de injectare promptă). Când redactarea este dezactivată, apelul înregistrează contorizarea fără a rescrie conținutul.
+- **`postCall`** clonează în profunzime răspunsul, rulează `sanitizePIIResponse()` plus mascarea Responses-API-shape (`maskResponsesOutput` — acoperă `output_text` și `output[].content[].text`). Dacă apare vreo redactare, răspunsul modificat îl înlocuiește pe original.
 
-Guardrail-ul nu blochează niciodată; doar adnotează (`meta.detections`,
-`meta.redacted`) sau rescrie.
+Parapetul nu se blochează niciodată; doar adnotează (`meta.detections`, `meta.redacted`) sau rescrie.
 
-#### Selectarea pe tipuri, modele personalizate și contoare de detectare
+#### Selecție pe tip, modele personalizate și contoare de detectare
 
-**Dashboard → Settings → Security → PII masking** alege _ce_ este mascat. Nu
-activează mascarea: aceasta este în continuare controlată de
-`PII_REDACTION_ENABLED` (cerere) și `PII_RESPONSE_SANITIZATION` (răspuns + SSE),
-ambele fiind dezactivate implicit.
+**Tabloul de bord Setări → → Securitate → Mascare PII** alege _ce_ este mascat. Nu pornește mascarea: adică încă `PII_REDACTION_ENABLED` (cerere) și `PII_RESPONSE_SANITIZATION` (răspuns + SSE), ambele dezactivate implicit.
 
-- **Selectarea pe tipuri** — id-urile încorporate sunt listate în
-  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nesetarea înseamnă
-  toate tipurile (comportamentul de dinaintea existenței acestei setări).
-  Modelul `ssn_us` al motorului pentru cereri se mapează la `ssn`. Șabloanele
-  (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) completează
-  doar casetele de selectare din interfață.
-- **Identificatori GDPR și POPIA** — douăsprezece id-uri încorporate care acoperă
-  identificatori personali din UE și Africa de Sud (tabelul de mai jos).
-  Expresiile regex, validatorii și etichetele jurisdicționale se află într-un
-  singur tabel, `src/shared/utils/piiPatterns.ts`, utilizat atât de
-  sanitizerul răspunsurilor (`src/lib/piiSanitizer.ts`), cât și de mascatorul
-  cererilor (`src/shared/utils/inputSanitizer.ts`). O potrivire este redactată
-  numai atunci când validatorul o acceptă; o simplă succesiune de cifre nu este
-  niciodată suficientă. Un operator care a salvat o selecție restrânsă înainte ca
-  aceste id-uri să existe păstrează comportamentul avut până când noile id-uri
-  sunt bifate.
-- **Modele personalizate** — până la 20 de modele regex sau wildcard (`*` =
-  până la 64 de caractere care nu sunt spații albe, `?` = unul). Potrivirile devin
-  `[CUSTOM_REDACTED]`. Fiecare model trece prin `compilePiiCustomPattern()`
-  (`src/shared/utils/piiCustomPatterns.ts`): cel mult 500 de caractere, flaguri
-  limitate la `g i m s u`, trebuie să poată fi compilat, să treacă de
-  `safe-regex` (împotriva revenirii catastrofale) și să nu se potrivească unui
-  șir gol sau unui substituent de redactare. Un model care eșuează este refuzat
-  la salvare și la testare, iar un rând stocat care eșuează este omis la runtime
-  în loc să fie compilat. Modelele personalizate rulează numai cât timp mascarea
-  este activată.
-- **Contoare de detectare** — numărători pe tipuri (niciodată valorile potrivite),
-  păstrate în memorie și resetate la repornire
-  (`src/lib/pii/piiDetectionStats.ts`). Ele cresc numai cât timp mascarea este
-  activată.
+- **Selectare pe tip** — ID-urile încorporate sunt listate în `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset înseamnă fiecare tip (comportamentul înainte de a exista această setare). Modelul `ssn_us` al motorului de solicitări se mapează la `ssn`. Șabloanele (Minimal, Standard, Financiar, Brazilian, USA, GDPR, POPIA, Complet) completează doar casetele de selectare din UI.
+- **Identificatori GDPR și POPIA** — douăsprezece ID-uri încorporate care acoperă EU și identificatorii personali din Africa de Sud (tabelul de mai jos). Exemplele lor regexe, validatorii și etichetele de jurisdicție trăiesc într-un singur tabel, `src/shared/utils/piiPatterns.ts`, pe care îl consumă atât dezinfectantul de răspuns (`src/lib/piiSanitizer.ts`), cât și mascatorul de solicitare (`src/shared/utils/inputSanitizer.ts`). O potrivire este redactată numai atunci când validatorul său o acceptă; o serie de cifre nu este niciodată suficientă. Un operator care a salvat o selecție restrânsă înainte de a exista aceste id-uri păstrează comportamentul pe care l-a avut până când noile id-uri sunt bifate.
+- **Modele personalizate** — până la 20 de modele regex sau wildcard (`*` = până la 64 de caractere fără spații albe, `?` = unul). Meciurile devin `[CUSTOM_REDACTED]`. Fiecare model trece prin `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): cel mult 500 de caractere, steagurile limitate la `g i m s u`, trebuie să fie compilate, trebuie să treacă `safe-regex` (backtracking catastrofal) și nu trebuie să se potrivească cu un șir gol sau cu un substituent de redactare. Un model care eșuează este refuzat când este salvat și când este testat, iar un rând stocat care eșuează este omis în timpul execuției în loc să fie compilat. Modelele personalizate rulează numai când mascarea este activată.
+- **Contoare de detectare** Numărări — per tip (valori nu s-au potrivit niciodată), păstrate în memorie și resetate la repornire (`src/lib/pii/piiDetectionStats.ts`). Ele cresc doar când mascarea este activată.
 
-Setările se află în tabelul `key_value` (namespace-ul `pii_settings`,
-`src/lib/db/piiSettings.ts`) și sunt citite printr-un cache de 1 s. API:
+Setările se află în tabelul `key_value` (spațiul de nume `pii_settings`, `src/lib/db/piiSettings.ts`) și sunt citite printr-un cache de 1 s. API:
 
-| Metodă | Cale                     | Scop                                                                            |
-| ------ | ------------------------ | ------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Starea indicatorului, `enabledTypes`, `customPatterns`, contoare de detectare   |
-| `PUT`  | `/api/settings/pii`      | Înlocuiește `enabledTypes` (`null` = toate) și/sau `customPatterns`             |
-| `POST` | `/api/settings/pii/test` | Testează o singură regulă pe un eșantion de cel mult 8 KB; nimic nu este stocat |
+| Metodă | Cale                     | Scop                                                                                     |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Starea flagurilor, `enabledTypes`, `customPatterns`, contoare de detecție                |
+| `PUT`  | `/api/settings/pii`      | Înlocuiește `enabledTypes` (`null` = toate) și/sau `customPatterns`                      |
+| `POST` | `/api/settings/pii/test` | Rulează un model în regim dry-run pe un eșantion de cel mult 8 KB; nimic nu se stochează |
 
-Toate cele trei necesită autentificare de administrare și validează corpul
-cu Zod (`src/shared/validation/schemas/piiSettings.ts`). Cu autentificarea
-dezactivată (`requireLogin=false`), `GET` și endpointul de test sunt deschise,
-dar `PUT` necesită o sesiune de dashboard, o cheie API cu domeniul de aplicare
-`manage`, un token de acces `oma_` cu domeniul de scriere sau superior, ori
-tokenul CLI sau tokenul de serviciu intern trimis de la loopback.
+Toate trei necesită autorizare de management și validează corpul cu Zod (`src/shared/validation/schemas/piiSettings.ts`). Cu conectarea dezactivată (`requireLogin=false`), `GET` și punctul final de testare sunt deschise, dar `PUT` are nevoie în continuare de o sesiune de tablou de bord, o cheie `manage` -scope API, un jeton de acces `oma_` cu domeniu de scriere sau mai mare sau jetonul CLI sau jetonul de serviciu intern trimis din loopback.
 
-#### Identificatori GDPR (UE) și POPIA (Africa de Sud)
+#### Identificatori GDPR (EU) și POPIA (Africa de Sud).
 
-| Id                  | Identificator                     | Validare                                                                                       |
-| ------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                              | Țară cunoscută, lungimea exactă pentru țara respectivă, ISO 13616 MOD-97-10                    |
-| `eu_vat`            | Număr de TVA UE                   | Prefix al unui stat membru cunoscut și formatul numeric al acelui stat (fără căutare VIES)     |
-| `es_dni_nie`        | DNI / NIE spaniol                 | Literă de control (valoare modulo 23); NIE este `X/Y/Z` + 7 cifre                              |
-| `it_codice_fiscale` | Codice Fiscale italian            | Literă de control calculată din tabelele pozițiilor pare/impare                                |
-| `pl_pesel`          | PESEL polonez                     | Sumă de control ponderată și o dată de naștere codificată care există                          |
-| `nl_bsn`            | BSN olandez                       | Regula 11 (ponderi 9..2, -1)                                                                   |
-| `de_steuer_id`      | Steuer-ID german                  | ISO 7064 Mod 11,10 plus regulile structurii cifrelor (fără 0 la început)                       |
-| `se_personnummer`   | personnummer suedez               | Luhn pentru ultimele zece cifre și o dată de naștere plauzibilă (10 sau 12 cifre)              |
-| `za_id`             | Număr de identificare sud-african | Luhn pentru toate cele 13 cifre, lună/zi de naștere valide, cifra cetățeniei 0 sau 1           |
-| `za_phone`          | Telefon sud-african               | Prefix `+27` / `27` sau forma națională `0..` scrisă cu un spațiu sau o cratimă                |
-| `za_vat`            | Număr de TVA sud-african          | 10 cifre care încep cu `4` **și** "VAT" / "BTW" în cele 48 de caractere precedente             |
-| `za_tax_ref`        | Referință fiscală sud-africană    | 10 cifre care încep cu `0`-`3`, Luhn, **și** "tax" / "SARS" în cele 48 de caractere precedente |
+| ID                  | Identificator                   | Validare                                                                                      |
+| ------------------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                            | Țară cunoscută, lungime exactă pentru țara respectivă, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | Număr TVA din UE                | Prefix cunoscut al statului membru și formatul numărului din acel stat (fără interogare VIES) |
+| `es_dni_nie`        | DNI / NIE spaniol               | Literă de control (valoare mod 23); NIE este `X/Y/Z` + 7 cifre                                |
+| `it_codice_fiscale` | Codice Fiscale italian          | Literă de control din tabelele pentru poziții impare/pare                                     |
+| `pl_pesel`          | PESEL polonez                   | Sumă de control ponderată și intervale plauzibile ale lunii/zilei de naștere codificate       |
+| `nl_bsn`            | BSN neerlandez                  | Verificare 11 (ponderi 9..2, -1)                                                              |
+| `de_steuer_id`      | Steuer-ID german                | ISO 7064 Mod 11,10 plus regulile structurii cifrelor (fără 0 inițial)                         |
+| `se_personnummer`   | Personnummer suedez             | Luhn pe ultimele zece cifre și dată de naștere plauzibilă (10 sau 12 cifre)                   |
+| `za_id`             | Număr de identitate sud-african | Luhn pe toate cele 13 cifre, lună/zi de naștere validă, cifră de cetățenie 0 sau 1            |
+| `za_phone`          | Telefon sud-african             | Prefix `+27` / `27` sau forma națională `0..` scrisă cu spațiu sau cratimă                    |
+| `za_vat`            | Număr TVA sud-african           | 10 cifre începând cu `4` **și** „VAT” / „BTW” în cele 48 de caractere anterioare              |
+| `za_tax_ref`        | Referință fiscală sud-africană  | 10 cifre începând cu `0`-`3`, Luhn **și** „tax” / „SARS” în cele 48 de caractere anterioare   |
 
-Deoarece formatele alcătuite doar din cifre intră în conflict cu numerele de
-comandă, numerele de build și marcajele temporale, cele mai puțin fiabile
-(`za_vat`, `za_tax_ref`) necesită indiciul reprezentat de cuvântul-cheie, iar
-un număr simplu de zece cifre care începe cu `0..` nu este tratat ca număr de
-telefon sud-african. IBAN-urile cu spații (`GB29 NWBK ...`) nu sunt potrivite.
-Pe calea de streaming, indiciul este căutat doar în fragmentul curent.
-Identificatorii sunt plasați înaintea tiparelor generice de telefon, astfel
-încât un identificator validat își păstrează propriul substituent
-(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Șabloanele `gdpr` și `popia`
-selectează identificatorii UE și, respectiv, sud-africani. Mascarea rămâne
-activată opțional (Hard Rule #20): nimic de aici nu modifică valoarea implicită
-a unui indicator de funcționalitate.
+Deoarece formatele numai cu cifre se ciocnesc cu numerele de comandă, cu numerele de construcție și cu marcajele de timp, cele mai slabe (`za_vat`, `za_tax_ref`) au nevoie de cuvântul cheie, iar un număr `0..` de zece cifre nu este tratat ca un număr de telefon din Africa de Sud. IBANs spațiate (`GB29 NWBK ...`) nu sunt potrivite. Pe calea de streaming, tacul este căutat numai în interiorul fragmentului curent. Id-urile stau înaintea modelelor de telefon generice, astfel încât un identificator validat își păstrează propriul substituent (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Șabloanele `gdpr` și `popia` selectează ID-urile EU și, respectiv, din Africa de Sud. Mascarea în sine rămâne opt-in (Hard Rule #20): nimic aici nu schimbă o caracteristică implicită.
 
-### Injecția de prompt (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Detectează structuri adversariale în conținutul furnizat de utilizator și
-impune politica configurată. Comportamentul este determinat de variabilele de
-mediu și de opțiunile constructorului:
+Detectează structuri adverse în conținutul furnizat de utilizator și aplică
+politica configurată. Comportamentul este controlat de variabilele de mediu și
+de opțiunile constructorului:
 
-| Setare          | Variabilă de mediu                                                                                      | Implicit | Efect                                                                                                                                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Activat         | `INPUT_SANITIZER_ENABLED`                                                                               | `true`   | Când este `false`, mecanismul de protecție se oprește imediat.                                                                                                                                                               |
-| Mod             | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                         | `warn`   | Politica pentru injecții: `block`, `warn` sau `log`. (`redact` este acceptat pentru compatibilitate retroactivă, dar **nu** elimină textul injecției; rescrierea PII din cerere este controlată de `PII_REDACTION_ENABLED`.) |
-| Prag de blocare | opțiunea `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Severitatea minimă necesară pentru blocare. La valoarea implicită, severitatea medie este doar observată.                                                                                                                    |
+| Setare          | Variabilă de mediu                                                                                      | Implicit | Efect                                                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Activat         | `INPUT_SANITIZER_ENABLED`                                                                               | `true`   | Când este `false`, guardrail-ul se scurtcircuitează.                                                                                                                                                                       |
+| Mod             | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                         | `warn`   | Politica de injecție: `block`, `warn` sau `log`. (`redact` este acceptat pentru compatibilitate retroactivă, dar **nu** elimină textul de injecție; rescrierea PII din cereri este controlată de `PII_REDACTION_ENABLED`.) |
+| Prag de blocare | opțiunea `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Severitatea minimă necesară pentru blocare. La valoarea implicită, Medium este doar pentru observare.                                                                                                                      |
 
-**Prioritatea modurilor** (`getMode`): `options.mode` al apelantului →
-`INJECTION_GUARD_MODE` **suprascrierea indicatorului de funcționalitate din DB**
-(Dashboard → Settings → Feature Flags) → variabila de mediu
-`INJECTION_GUARD_MODE` → variabila de mediu `INPUT_SANITIZER_MODE` →
-`warn`. Prin urmare, o suprascriere din dashboard are prioritate față de
-variabilele de mediu, astfel încât interfața Feature Flags controlează
-mecanismul de protecție activ în timp real (fără repornire). Citirea din DB
-este sigură în caz de eroare: dacă eșuează, mecanismul de protecție revine la
-comportamentul bazat pe mediu, iar când nu este setată nicio suprascriere,
-comportamentul este identic cu rezolvarea bazată exclusiv pe mediu.
+**Precedența modurilor** (`getMode`): `options.mode` al apelantului →
+**suprascriere prin feature-flag din DB** pentru `INJECTION_GUARD_MODE`
+(Dashboard → Setări → Feature Flags) → `INJECTION_GUARD_MODE` din mediu →
+`INPUT_SANITIZER_MODE` din mediu → `warn`. Prin urmare, o suprascriere din
+dashboard are prioritate față de variabilele de mediu, astfel încât interfața
+Feature Flags controlează live guardrail-ul activ (fără repornire). Citirea
+din DB este fail-safe: dacă generează eroare, guardrail-ul revine la
+comportamentul bazat pe variabilele de mediu, iar când nu este setată nicio
+suprascriere, comportamentul este identic cu rezoluția bazată exclusiv pe
+mediu.
 
-Surse de detectare:
+Surse de detecție:
 
-1. `sanitizeRequest()` din `@/shared/utils/inputSanitizer` (setul de detectoare
-   partajat utilizat în alte puncte ale pipeline-ului).
-2. `DEFAULT_GUARD_PATTERNS` încorporate (în prezent `system_override_inline` și
-   `markdown_system_block`, ambele cu severitatea `high`).
-3. `customPatterns` opționale transmise prin opțiunile constructorului (șiruri,
-   expresii regex sau înregistrări de forma `{ name, pattern, severity }`).
+1. `sanitizeRequest()` din `@/shared/utils/inputSanitizer` (setul de
+   detectoare partajat, folosit în alte părți ale pipeline-ului).
+2. `DEFAULT_GUARD_PATTERNS` încorporate (în prezent `system_override_inline`
+   și `markdown_system_block`, ambele cu severitate `high`).
+3. `customPatterns` opționale, transmise prin opțiunile constructorului
+   (șiruri, regex sau înregistrări `{ name, pattern, severity }`).
 
-Când `mode === "block"` **și** cel puțin o detectare atinge pragul de severitate,
-`preCall` returnează `{ block: true, message: "Request rejected:
-suspicious content detected" }`. În modurile `warn`/`log`, mecanismul de
-protecție înregistrează evenimentul, dar permite apelul. Helperul partajat
-`evaluatePromptInjection()` este, de asemenea, exportat pentru apelanții care
-au nevoie să evalueze prompturi fără să treacă prin registru.
+Când `mode === "block"` **și** cel puțin o detecție atinge pragul de
+severitate, `preCall` returnează `{ block: true, message: "Request rejected:
+suspicious content detected" }`. În modurile `warn`/`log`, guardrail-ul
+jurnalizează, dar permite apelul. Helper-ul partajat `evaluatePromptInjection()`
+este, de asemenea, exportat pentru apelanții care trebuie să evalueze prompturi
+fără a trece prin registru.
 
-**Limită de scanare (v3.8.20):** detectorul inspectează doar **primii 16 KB** din
-textul concatenat al promptului — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 de
-octeți) în `src/shared/utils/inputSanitizer.ts`. Atât `detectInjection()`, cât și
-`evaluatePromptInjection()` apelează `slice(0, MAX_INJECTION_SCAN_BYTES)` înainte
-de a parcurge bucla de tipare. Directivele de injectare se află de obicei în
-partea de sus a unui input, astfel încât această limită restrânge consumul de CPU/GC
-pentru payload-uri de câteva sute de KB fără a slăbi detectarea (cf.
-#3932, #4041).
+**Limită de scanare (v3.8.20):** detectorul inspectează doar **primii 16 KB**
+din textul combinat al promptului — `MAX_INJECTION_SCAN_BYTES = 16 * 1024`
+(16 384 octeți) în `src/shared/utils/inputSanitizer.ts`. Atât `detectInjection()`,
+cât și `evaluatePromptInjection()` aplică `slice(0, MAX_INJECTION_SCAN_BYTES)`
+înainte de a rula bucla de tipare. Directivele de injecție se află aproape de
+începutul unei intrări, astfel că acest lucru limitează consumul de CPU/GC al
+expresiilor regulate pe payload-uri de câteva sute de KB, fără a slăbi detecția
+(cf. #3932, #4041).
 
 ### Mascherul de credențiale (`credentialMasker.ts`)
 

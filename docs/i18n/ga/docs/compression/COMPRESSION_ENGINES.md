@@ -306,16 +306,16 @@ O(n) de réir líon na línte agus cuireann sé aga folaigh dhiomaibhseach leis.
 
 ---
 
-## Teaglamaí Comhbhrúite
+## Comhbhrúiteanna Comhbhrú
 
-Is próifílí comhbhrúite ainmnithe iad teaglamaí comhbhrúite is féidir a shannadh do theaglamaí ródúcháin:
+Ainmnítear teaglama comhbhrúite mar phróifílí comhbhrú ar féidir iad a shannadh do combos ródaithe:
 
-- `compression_combos`: stórálann sé mód, píblíne, cumraíocht RTK, cumraíocht teanga agus marcóir réamhshocraithe
-- `compression_combo_assignments`: mapálann sé teaglama comhbhrúite chuig teaglama ródúcháin
-- réitíonn comhtháthú ag am rite teaglama comhbhrúite sannta roimh sháruithe cineálacha teaglama
-- áirítear `compression_combo_id` agus `engine` san anailísíocht
+- `compression_combos`: modh stórais, píblíne, cumraíocht RTK, cumraíocht teanga, agus marcóir réamhshocraithe
+- `compression_combo_assignments`: mapálann teaglama comhbhrú go teaglama ródaithe
+- réitíonn comhtháthú ama rite teaglama comhbhrú sannta sula sáraítear teaglama cineálach
+- áirítear leis an anailísíocht `compression_combo_id` agus `engine`
 
-Dromchla an deais: `Deais -> Comhthéacs & Taisce -> Teaglamaí Comhbhrúite`.
+Dromchla an phainéil: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Réamhriachtanais / treoir oibreora (CCR & session-dedup)
 
@@ -404,7 +404,7 @@ Tugtar `omniroute_ccr_retrieve` ar an uirlis aisghabhála faoi láthair (tá an 
 
 ### Saolré an tseisiúin
 
-Seisiúin insruthaithe-HTTP díomhaoin agus sroicheann an freastalaí iad; tá an fhuinneog díomhaoin socraithe ag `OMNIROUTE_MCP_SESSION_IDLE_MS` (5 nóiméad réamhshocraithe; tagairt de réir ainm, ní luach códaithe crua, mar sin ní sruthóidh an leathanach seo nuair a athraíonn sé). Is é an comhartha a bhaineann le seisiún díomhaoin ná HTTP 404 le `Unknown Mcp-Session-Id` — is é an leigheas ná an seisiún a athcheangal nó a atosú,** nach bhfuil** chun eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú.
+Seisiúin insruthaithe-HTTP díomhaoin agus sroicheann an freastalaí iad; Tá an fhuinneog díomhaoin cumraithe ag `OMNIROUTE_MCP_SESSION_IDLE_MS`, ag titim ar ais go `DEFAULT_MCP_SESSION_IDLE_MS` i `open-sse/mcp-server/httpTransport.ts`. Is é an comhartha a bhaineann le seisiún díomhaoin ná HTTP 404 le `Unknown Mcp-Session-Id` — is é an leigheas ná an seisiún a athcheangal nó a atosú,**nach bhfuil** chun eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú.
 
 ## Dromchla API
 

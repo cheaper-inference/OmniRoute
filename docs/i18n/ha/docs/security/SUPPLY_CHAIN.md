@@ -25,29 +25,32 @@ ba tare da toshewa ba; matakin _CRITICAL gate_ (`severity: CRITICAL`, `ignore-un
 `exit-code: 1`) yana kasa sakin akan CRITICAL CVE **tare da gyara da ake samu**. `ignore-unfixed`
 yana hana toshe sakin don CVE na asali ba tare da facin sama ba.
 
-## ⚠️ Bambancin CVE (toshewar ƙofofin osv/Trivy)
+## ⚠️ Bambancin CVE (ƙofofin osv/Trivy masu toshewa)
 
-osv da Trivy suna kwatanta deps da bayanan CVE waɗanda **ke ci gaba da girma**. PR
-wanda **bai taɓa dogaro ba** na iya zama ja ba zato ba tsammani saboda an bayyana sabon CVE
-a cikin dep da ke akwai (osv: an auna `vulnCount` > tushe; Trivy: sabon
-CRITICAL mai gyarawa a cikin hoton). **Wannan shine halin aiki da ake tsammani na toshewar
-ƙofar CVE, ba koma baya na samfur ba.**
+osv da Trivy suna kwatanta dependencies da ma'ajin bayanan CVE waɗanda suke **ci gaba da ƙaruwa**. Wani PR
+wanda **bai taɓa kowace dependency ba** zai iya sauyawa zuwa ja ba zato ba tsammani saboda an
+bayyana sabon CVE a cikin dependency da ake da ita (osv: `vulnCount` da aka auna > baseline; Trivy: sabon
+CRITICAL mai gyaruwa a cikin image). **Wannan halayyar aiki ce da AKE SA RAN TA daga
+ƙofar CVE mai toshewa, ba koma-bayan samfur ba.**
 
-Lokacin da osv ko Trivy suka zama ja saboda sabon CVE da aka bayyana, maganin shine:
+Lokacin da osv ko Trivy suka koma ja saboda sabon CVE da aka bayyana, mafita ita ce:
 
-1. **Haɓaka dep da abin ya shafa** (an fi so) — haɓaka zuwa sigar da aka gyara ta hanyar `package.json`
-   `overrides` (transitive deps) ko sake gina hoton akan tushe da aka gyara.
-2. **Idan babu gyara na sama:**
-   - **osv:** sake daidaita `metrics.vulnCount` a cikin `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` baya rufe ƙofofin da aka keɓe — gyara darajar da
-     hannu, `direction:down`) tare da bayanin hujja + batun bin diddigi.
-   - **Trivy:** ƙara shigarwa a cikin `.trivyignore` (CVE-ID a kowane layi) tare da bayanin
-     hujja + batun bin diddigi. `ignore-unfixed: true` ya riga ya rufe CVEs ba tare da
-     facin kai tsaye ba.
+1. **Ɗaga sigar dependency da abin ya shafa** (an fi so) — haɓaka zuwa sigar da aka gyara ta hanyar `package.json`
+   `overrides` (dependencies na kaikaice) ko sake gina image ɗin bisa patched base.
+2. **Idan babu gyara:** riƙe binciken da aka auna kuma bi diddigin dogaro ko hoto da abin ya shafa. Kar a ɗaga tushen rashin lahani don sa ɗan takara ya gaza wucewa. Trivy's `ignore-unfixed: true` ya riga ya keɓance raunin hoto ba tare da facin sama ba. Duk wani banda yana buƙatar sake dubawa ID rauni, ainihin hanyar kunshin, ƙarewa da batun bin diddigi a cikin manufofin; ba sakamakon binciken da ya gaza ba ne ta atomatik.
 
-Duk ƙofofin **suna tsallakewa da kyau** (fita 0) lokacin da kayan aikin ba su nan ko kuma ma'aunin
-ya gaza (osv-scanner ba a cikin PATH, osv.dev/network ba za a iya isa ba, JSON mara inganci) —
-gazawar **ma'auni** ba ta taɓa toshewa ba, kawai koma baya **da aka auna** ke toshewa.
+Aiwatarwar OSV da ake buƙata (`check:vuln-ratchet -- --ratchet`) tana gazawa a rufe tare da
+`INCOMPLETE` da exit 2 lokacin da ba za a iya tabbatar da ingancin scanner, report ko baseline ba.
+Koma-bayan da aka auna yana bayar da exit 1. Aiwatarwar shawara har yanzu tana iya bayar da rahoton `SKIP` tare da
+exit 0, wanda ba ya tabbatar da cewa dependencies sun wuce scan ɗin. Matakin Trivy
+mai toshewa kuma yana buƙatar auna sakamako cikin nasara: tools da ba su samuwa, jobs da suka gaza
+da rashin shaidar image ba za su iya tabbatar da cewa image ɗin ba shi da matsala ba.
+
+## Manufar duba hoto
+
+`.trivyignore.yaml` na yanzu ba ya ƙunshi keɓanta rashin lahani. `npm run check:trivy-ignore-policy` yana tabbatar da ƙayyadaddun manufofin a cikin bayanan sikanin gida, CI da inganci. IDs da ba a sani ba, manyan hanyoyi, shigarwar kwafi da keɓantattun abubuwan da suka ƙare an ƙi; `.trivyignore` da aka gada ba ta shiga cikin binciken da aka yi hijira ba.
+
+Docker yana duba kayan aikin manufofin daga `github.workflow_sha` da manufar tushen hoto tare da mai zaɓin tushe iri ɗaya kamar ginin. Mai zaɓin manufofin ya ƙi iyawar da ba ta dace ba kuma yana shirya fayil ɗaya don duka binciken Trivy. Tushen tarihi ba tare da tsari mai tsari ba yana karɓar keɓantacce. Dukansu suna duban Trivy `v0.70.0`. Tabbatar da manufofin yana tabbatar da daidaiton tsari; hoton har yanzu yana buƙatar dubawa mai nasara.
 
 ## Hadarin dogaro mai ritaya
 

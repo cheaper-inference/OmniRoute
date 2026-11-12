@@ -393,7 +393,7 @@ Ní hamháin go seolann OmniRoute trácht trí sheachfhreastalaí — cuireann s
 
 ### Meaitseáil Méarloirg CLI
 
-Déanann an **Scorán Méarloirg CLI** (`Socruithe → Slándáil`) ceanntásca HTTP agus réimsí i gcorp JSON a athordú chun síniú beacht dénártha dúchasacha CLI (Claude Code, Codex, srl.) a mheaitseáil. Oibríonn sé seo **anuas ar** an seachfhreastalaí:
+Déanann an **Scorán Méarloirg CLI** (`Settings → Security`) ceanntásca HTTP agus réimsí i gcorp JSON a athordú chun síniú beacht dénártha dúchasacha CLI (Claude Code, Codex, srl.) a mheaitseáil. Oibríonn sé seo **anuas ar** an seachfhreastalaí:
 
 ```
 Do IP (blocáilte) → IP an tSeachfhreastalaí (SAM) → API an tSoláthraí

@@ -192,6 +192,45 @@ Diese bleiben bestehen, bis sich die Anmeldedaten ändern oder ein Operator sie 
 Regressionstests: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Bank-Resets automatisch anwenden
+
+**Umfang:** Codex und Claude -Abonnementverbindungen (OAuth).**Opt-in** : Die `bankedResetAutoApply` Einstellung ist deaktiviert und befindet sich standardmäßig im `dry-run` Modus (Einstellungen → AI → Bank-Resets automatisch anwenden).
+
+**Zweck:** Sie können Guthabenrücksetzungen selbst durchführen, wenn ein Konto an eine Nutzungsgrenze stößt, anstatt darauf zu warten, dass ein Betreiber auf der Seite „Anbieterlimits“ auf „Einlösen“ klickt.
+
+| Kreditart (`creditTypes`) | Was wird eingelöst                                          | Wo es läuft                                                             |
+| ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `codexCredits`            | Codex Reset-Credits                                         | Hintergrundjob, alle 60 s                                               |
+| `claudeCredits`           | Claude -Bankzuschüsse (`GRANT` Credits)                     | Hintergrundjob, alle 60 s                                               |
+| `claudeSessionReset`      | Claude wöchentliches Zurücksetzen des Sitzungslimits (oben) | Anforderungspfad über dieselbe Richtlinie wie die Umschaltung pro Konto |
+
+**Durchführung:**
+
+- Reine Entscheidung (ein Regelsatz für beide Pfade): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Hintergrundjob: `src/lib/services/bankedResetAutoApply.ts` (gestartet in `src/instrumentation-node.ts`)
+- Claude Anforderungspfad-Gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registriert über `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- Geschichte, Obergrenzen und Webhook: `src/lib/usage/bankedResetAudit.ts`
+- Geschichte API: `GET /api/settings/banked-reset-auto/history?limit=50` (Management-Authentifizierung)
+
+**Entscheidungsreihenfolge** (Die erste fehlerhafte Regel ist der aufgezeichnete Grund):
+
+1. Funktion deaktiviert, Kreditart deaktiviert oder Konto außerhalb des Gültigkeitsbereichs (`accountScope` `all` / `selected` plus die `connections` -Karte pro Konto).
+2. Außerhalb des optionalen UTC Zeitplans (`startHourUtc` > `endHourUtc` überschreitet Mitternacht).
+3. Obergrenzen in den letzten 24 Stunden: `maxPerAccountPerDay` (1), `maxPerDay` (3) und `minSpacingMinutes` (30) zwischen zwei beliebigen Einlösungen.
+4. Auslöser: ein ummauertes `session` oder `weekly` Fenster (gelesen aus `getQuotaWindowStatus().reachedThreshold`, nicht `isAccountQuotaExhausted()`, das nur ein Konto mit jedem ausgegebenen Fenster meldet) oder ein Guthaben, das innerhalb von `expiringCreditHours` (24) auf einem Konto abläuft, das mindestens `expiringCreditMinUsedPercent` (50) verwendet hat.
+5. Schutz vor natürlichem Zurücksetzen: Überspringen, wenn das ummauerte 5-Stunden-Fenster innerhalb von `sessionResetGuardMinutes` (90) oder das ummauerte wöchentliche Fenster innerhalb von `weeklyResetGuardHours` (12) zurückgesetzt wird.
+6. Wöchentlicher Mindestwert: Überspringen Sie ein 5-Stunden-Reset, wenn die wöchentlich verbleibende Restmenge unter `weeklyFloorPercent` (10) liegt.
+7. `last-resort` Modus: Überspringen, während ein anderes im Geltungsbereich befindliches Konto desselben Anbieters in beiden Fenstern mindestens noch `poolHeadroomPercent` (10) übrig hat. Auslöser für ablaufendes Guthaben umgehen dies.
+8. `dry-run` zeichnet eine Reihe auf und löst nichts ein; `last-resort` und `eager` einlösen.
+
+Fehlende Kontingentdaten entsperren nie eine Einlösung: eine unbekannte Rücksetzzeit oder wöchentliche Nutzungsausfälle.
+
+**Zurücksetzen Claude Sitzung:** Wenn die Funktion deaktiviert ist oder `claudeSessionReset` deaktiviert ist, entscheidet der `autoLimitReset` Schalter pro Konto genau wie zuvor. Wenn beide aktiviert sind, ersetzt die Funktion das Umschalten pro Konto: Ein in den Geltungsbereich fallendes Konto kann nur dann Anspruch erheben, wenn die Richtlinie dies zulässt, und im `dry-run` Modus wird kein Anspruch geltend gemacht.
+
+**Sicherheit:** Der Job löst höchstens ein Guthaben pro Tick ein, entscheidet vor der Auflistung von Guthaben (ein übersprungenes Konto wird nie aufgeführt), verwendet Idempotenzschlüssel `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` und sperrt ein Konto für 1 Stunde nach einer fehlgeschlagenen Auflistung oder Einlösung. Jede Rücknahme-, Fehlschlags- und Probelaufentscheidung wird an `audit_log` geschrieben (`action: "bankedReset.redeem"`, keine Token oder Kredit-IDs); Die Obergrenzen werden ab diesen Reihen gezählt, sodass sie Neustarts überstehen. Erfolgreiche Einlösungen lösen auch den `provider.reset_redeemed` Webhook aus.
+
+Regressionswächter: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sitzungsaffinität (#7274)
 
 **Geltungsbereich:** eine Clientsitzung (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-Header), die an eine Verbindung gebunden wird, für **jeden** Anbieter.
@@ -337,26 +376,17 @@ _Sperrzustand_ ist flüchtig.
 
 ---
 
-## 4. Quota-Share-Konkurrenzsteuerung (v3.8.36)
+## 4. Quota-Share-Parallelitätskontrolle (v3.8.36)
 
-Abonnementkonten (GLM, MiniMax usw.) akzeptieren häufig nur etwa 1–3 gleichzeitige
-Anfragen. Wird dieser Wert überschritten, führt dies zu 429-Fehlern und
-Abkühlzeiten. Dies ist bei **Quota-Share**-Kombinationen (`qtSd/…`) besonders
-kritisch, da mehrere API-Schlüssel dasselbe Upstream-Konto gemeinsam verwenden.
-Drei Ebenen verhindern, dass ein gemeinsames Konto überflutet wird.
+Abonnementkonten (GLM, MiniMax usw.) akzeptieren oft nur ~ 1–3 gleichzeitige Anfragen; Wird dieser Wert überschritten, werden 429 Sekunden und Abklingzeiten ausgelöst. Das ist akut unter **Quotenanteil** (`qtSd/…`)-Kombinationen, bei denen sich mehrere API Schlüssel ein Upstream-Konto teilen. Drei Schichten verhindern, dass ein gemeinsames Konto überflutet wird.
 
-### Begrenzung der Parallelität pro Verbindung (`max_concurrent`)
+### Parallelitätsobergrenze pro Verbindung (`max_concurrent`)
 
-Jede Provider-Verbindung kann eine Obergrenze für `max_concurrent` deklarieren
-(`provider_connections.max_concurrent`, festgelegt im Verbindungsdialog, über die API
-oder in der Datenbank). Lassen Sie das Feld leer, wenn keine Begrenzung gelten soll.
-Dies ist der einzige Regler, der die nachfolgende Serialisierungsebene steuert —
-setzen Sie ihn auf die tatsächliche Parallelität des Kontos (z. B. GLM ~1, MiniMax ~2).
+Jede Anbieterverbindung kann eine `max_concurrent` Obergrenze (`provider_connections.max_concurrent`, eingestellt im Verbindungsmodal / API / DB) deklarieren. Lassen Sie es leer, damit es keine Begrenzung gibt. Dies ist der einzelne Knopf, der die Serialisierungsschicht unterhalb — steuert und ihn auf die tatsächliche Parallelität des Kontos einstellt (z. B. GLM ~ 1, MiniMax ~ 2).
 
-### Begrenzungen der Parallelität pro Modell (`modelConcurrency`)
+### Parallelitätsobergrenzen pro Modell (`modelConcurrency`)
 
-Eine Verbindung kann zusätzlich exakte Obergrenzen für die Parallelität pro Modell
-in ihrer `rateLimitOverrides`-Map deklarieren:
+Eine Verbindung kann zusätzlich in ihrer `rateLimitOverrides` -Karte genaue Obergrenzen für die Parallelität pro Modell angeben:
 
 ```json
 {
@@ -367,91 +397,32 @@ in ihrer `rateLimitOverrides`-Map deklarieren:
 }
 ```
 
-Legen Sie dies im Verbindungsdialog fest (**Rate-Limit-Überschreibungen →
-Parallelitätsbegrenzungen pro Modell**, eine Zeile `model=cap` pro Eintrag) oder über
-`PATCH /api/providers/[id]` mit derselben JSON-Struktur. Bedeutung der Schlüssel:
+Stellen Sie es im Verbindungsmodal ein (**Die Ratenbegrenzung setzt → Parallelitätsobergrenzen pro Modell außer Kraft** , ein `model=cap` pro Zeile) oder über `PATCH /api/providers/[id]` mit der gleichen JSON Form. Schlüsselsemantik:
 
-- **Verbindungsweit gegenüber modellspezifisch:** `maxConcurrent` bleibt die
-  verbindungsweite gemeinsame Obergrenze. Wenn beide gelten, werden beide
-  Schranken atomar im selben zusammengesetzten Gate erworben
-  (`global → provider → account → model`); maßgeblich ist die jeweils strengere
-  anwendbare Begrenzung.
-- **Exakte Übereinstimmung des Modellschlüssels:** Der Schlüssel entspricht der
-  Modellzeichenfolge, die nach der Routing-Auflösung an den Executor übergeben wird —
-  normalerweise der einfache Upstream-Modellbezeichner (`glm-5`), nicht ein
-  clientseitiger `provider/model`-Alias (`zai/glm-5` stimmt nicht mit `glm-5` überein).
-  Die Werte sind positive Ganzzahlen und geben die Obergrenze für gleichzeitige
-  Anfragen an.
-- **Lokales Einreihen, keine Ermittlung:** Überschüssige Anfragen werden lokal mit
-  der bestehenden Queue-/Timeout-Semantik eingereiht (typisierte
-  Zulassungsfehler `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute
-  ermittelt oder erschließt keine Upstream-Richtlinien — es setzt exakt die vom
-  Betreiber konfigurierten Obergrenzen durch. Ein ausgelastetes Modell-Gate
-  deaktiviert den Provider niemals und erzeugt niemals eine dauerhafte Sperre des
-  Modells; das Verhalten bei Upstream-429-/Cooldown-/Fallback-Situationen bleibt
-  die Fehlerabsicherung.
-- **Geltungsbereich pro Verbindung und Prozess:** Die Begrenzungen gelten pro
-  Datenbankverbindung und werden im Speicher gehalten. Daher koordinieren sich zwei
-  Verbindungen, die denselben Upstream-API-Schlüssel wiederverwenden, nicht
-  miteinander.
-- **Nicht konfiguriert bedeutet unverändert:** Wird die Map weggelassen (oder das
-  Dashboard-Feld leer gelassen), wird kein Modell-Gate hinzugefügt. Beispielkonfiguration
-  ohne die Behauptung einer universellen Provider-Begrenzung:
+- **Verbindungsweit vs. modellspezifisch:** `maxConcurrent` bleibt die gemeinsame verbindungsweite Obergrenze. Wenn beides zutrifft, werden beide Gatter atomar im selben zusammengesetzten Gatter (`global → provider → account → model`) erfasst; das effektive Verhalten ist der strengere anwendbare Grenzwert.
+- **Exakte Modell-Schlüssel-Übereinstimmung:** Der Schlüssel ist die Modellzeichenfolge, die nach der Routing-Auflösung an den Executor übergeben wird — ist normalerweise die bloße Upstream-Modell-ID (`glm-5`), kein clientseitiger `provider/model` Alias (`zai/glm-5` stimmt nicht mit `glm-5` überein). Bei den Werten handelt es sich um positive, ganzzahlige Obergrenzen für gleichzeitige Anforderungen.
+- **Lokale Warteschlange, keine Erkennung:** Überschüssige Anfragen werden lokal mit der vorhandenen queue/timeout Semantik in die Warteschlange gestellt (typisierte `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` Zulassungsfehler). OmniRoute erkennt oder leitet keine Upstream-Richtlinie — ab, sondern erzwingt die genauen Obergrenzen, die der Betreiber konfiguriert hat. Ein gesättigtes Modelltor deaktiviert niemals den Anbieter und führt niemals zu einer dauerhaften Modellsperre. Das Upstream- 429/cooldown/fallback -Verhalten bleibt die Fehler-Rücklaufsperre.
+- **Umfang pro Verbindung, pro Prozess:** Die Obergrenzen gelten pro Datenbankverbindung und werden im Speicher gehalten, sodass zwei Verbindungen, die denselben Upstream API Schlüssel wiederverwenden, nicht miteinander koordiniert werden.
+- **Unkonfiguriert bedeutet unverändert:** Wenn Sie die Karte weglassen (oder das Dashboard-Feld leer lassen), wird kein Modell-Gate hinzugefügt. Beispielkonfiguration ohne Durchsetzung eines Universal-Provider-Limits:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialisierung von Quota-Share-Anfragen
+### Serialisierung von Kontingentanteil-Anfragen
 
-Wenn eine Quota-Share-Weiterleitung eine Verbindung mit einem positiven
-`max_concurrent` ansteuert, werden gleichzeitige Anfragen an dieses **Konto** über
-ein verbindungsspezifisches Semaphore (Schlüssel `qsconn:<connectionId>`) serialisiert:
-Überschüssige Anfragen **warten in der Warteschlange**, statt das Konto zu überfluten.
-Dies ist **fail-open** — bei voller Warteschlange oder einem Timeout wird ohne Slot
-fortgefahren, anstatt eine weiterleitbare Anfrage jemals abzulehnen. Aktivieren oder
-deaktivieren Sie dies unter **Einstellungen → Resilienz → Parallelität pro
-Quota-Share-Verbindung** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`,
-standardmäßig aktiviert). Ohne eine `max_concurrent`-Begrenzung bleibt das Verhalten
-unverändert.
+Wenn ein Quota-Share-Versand auf eine Verbindung abzielt, die eine positive `max_concurrent` deklariert, werden gleichzeitige Anfragen an diese gesendet **Konto** werden über ein verbindungsspezifisches Semaphor (Schlüssel `qsconn:<connectionId>`) serialisiert: überschüssige Anfragen **in der Warteschlange warten** anstatt das Konto zu überschwemmen. Es ist **Fail-Open** Bei einer gesättigten Warteschlange oder einer Zeitüberschreitung wird — ohne einen Slot fortgesetzt, anstatt jemals eine zuteilbare Anfrage abzulehnen. Einschalten **Einstellungen → -Resilienz → Kontingentanteil pro Verbindung Parallelität** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standardmäßig aktiviert). Ohne `max_concurrent` Obergrenze bleibt das Verhalten unverändert.
 
-> Das Quota-Share-Routing-Gate (`selectQuotaShareTarget`, DRR + P2C) ist selbst
-> fail-open und **setzt eine Verbindung am Limit lediglich zurück** — bei einem
-> Pool mit nur einer Verbindung kann es keine harte Begrenzung durchsetzen. Daher
-> ist dieses Semaphore die Komponente, die die Überflutung tatsächlich eindämmt.
+> Das Quota-Share-Routing-Gate (`selectQuotaShareTarget`, DRR + P2C) ist selbst ausfallsicher und _depriorisiert_ nur eine At-Cap-Verbindung — mit einem Einzelverbindungspool, den es nicht hart begrenzen kann, sodass dieses Semaphor tatsächlich die Flut enthält.
 
-### Combo-Cooldown-bewusster Wiederholungsversuch
+### Kombinierter, abklingzeitabhängiger Wiederholungsversuch
 
-Für jede Combo-Strategie (sofern aktiviert) wartet eine Anfrage, die andernfalls einen
-429-Fehler für einen KURZEN temporären Cooldown auslösen würde, den Cooldown ab und
-wird erneut weitergeleitet, statt den 429 zurückzugeben — dies deckt
-TPM-/RPM-Fenster der Gemini-Klasse (Retry-After etwa 60 Sekunden) bei
-Multi-Modell-Kombinationen ab, z. B. wenn beide Ziele einer 2-Modell-Kombination ein
-Rate-Limit pro Modell erreichen. Begrenzt wird dies durch `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) unter **Einstellungen →
-Resilienz**. Bei `quota_exhausted` (bis Mitternacht gesperrt) oder bei
-Authentifizierungs-/Nicht-gefunden-Gründen wird niemals gewartet.
+Für jede Combo-Strategie (sofern aktiviert) wartet eine Anfrage, die einen 429 für eine vorübergehende SHORT Abklingzeit kristallisieren würde, ab und sendet sie erneut, anstatt den 429 — zurückzugeben. Dies deckt TPM/RPM Fenster der Gemini-Klasse (~ 60 Sekunden Wiederholung nach) bei Multi-Modell-Combos ab, z. B. wenn beide Ziele einer 2-Modell-Combo ein Ratenlimit pro Modell erreichen. Begrenzt durch `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) in **Einstellungen → Resilienz** . Es wird nie auf `quota_exhausted` (bis Mitternacht gesperrt) oder auth/not-found Gründe gewartet. Wenn `comboTimeoutMs` festgelegt ist, beginnt eine Wartezeit, die nicht vor Ablauf dieser Frist beendet werden kann, nicht (#18998): Die Combo antwortet sofort mit ihrer Terminalantwort anstelle eines `COMBO_TIMEOUT` 504.
 
-Eine Combo kann sich mit `config.comboCooldownWaitEnabled: false` davon ausnehmen.
-Nur der literale Wert `false` deaktiviert diese gemeinsamen Combo-Wartevorgänge
-(Cooldown nach der Weiterleitung sowie Wartevorgänge bei vor der Weiterleitung
-geöffnetem Circuit/gesperrtem Modell) und deren Erweiterung des unteren Grenzwerts
-für das Wartebudget. Fehlt der Wert oder ist er `true`, bleibt die globale Richtlinie
-erhalten; `true` kann global deaktiviertes Warten nicht aktivieren. Ein explizites
-`targetTimeoutMs` hat weiterhin Vorrang. Diese Ausnahme ändert nichts am separaten
-Wartevorgang vor der Weiterleitung für die native-Codex-Turn-Pinning-Funktion.
+Eine Combo kann sich mit `config.comboCooldownWaitEnabled: false` abmelden. Nur das wörtliche `false` deaktiviert diese gemeinsamen Combo-Wartezeiten (Abklingzeit nach dem Versand und circuit-open/model-lock -Wartezeiten vor dem Versand) und ihre Verlängerung des Wartebudget-Timeouts. Fehlt oder `true` bleibt die globale Richtlinie erhalten; `true` kann das global deaktivierte Warten nicht aktivieren. Ein expliziter `targetTimeoutMs` gewinnt immer noch. Durch diese Abmeldung ändert sich nichts an der separaten Wartezeit vor dem Versand des Native-Codex-Turn-Pins.
 
-Dasselbe Gate deckt den Fall vor der Weiterleitung ab (#16319): Wenn jedes Ziel einer
-Combo übersprungen wird, bevor ein Versuch unternommen wurde, weil sein Modell sich
-in einer kurzen temporären Sperre befindet, wartet der Pfad mit null Versuchen die
-Sperre unter denselben Obergrenzen ab und leitet erneut weiter, statt eine
-hinweislose Antwort `503 ALL_TARGETS_SKIPPED` zurückzugeben. Wenn kein Warten
-zulässig ist (Obergrenze, Versuchszahl oder Budget erschöpft oder Funktion
-deaktiviert), wird die abschließende Antwort zu `429 rate_limit_error` hochgestuft
-und enthält `retry_after` / `reset_at` aus dem frühesten Ablauf der temporären
-Modellsperre; Quota-, Authentifizierungs- und Nicht-gefunden-Sperren behalten den
-hinweislosen 503-Fehler bei.
+Das gleiche Gate deckt den Pre-Dispatch-Fall (#16319) ab: Wenn jedes Ziel einer Combo übersprungen wird, bevor irgendein Versuch unternommen wird, weil sich das Modell in einer kurzen vorübergehenden Sperre befindet, wartet der Null-Versuchs-Pfad die Sperre unter denselben Obergrenzen ab und sendet erneut, anstatt auf einen `503 ALL_TARGETS_SKIPPED` ohne Hinweis zu antworten. Wenn keine Wartezeit zulässig ist (Obergrenze, Versuch oder Budget ausgeschöpft oder die Funktion deaktiviert), wird die Terminalantwort ab dem frühesten Ablauf der vorübergehenden Sperre auf `429 rate_limit_error` aktualisiert und `retry_after` / `reset_at` übertragen. Kontingent-, Authentifizierungs- und nicht gefundene Sperren behalten den Hinweis-losen 503 bei.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

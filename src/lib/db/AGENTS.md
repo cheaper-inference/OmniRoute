@@ -2,15 +2,15 @@
 
 **Purpose**: Domain-driven SQLite persistence. Each module owns a specific table set. Schema migrations are versioned and idempotent. No raw SQL in routes — all ops go through `src/lib/db/` modules.
 
-Live count: `ls src/lib/db/*.ts | wc -l` (currently 158). Migrations: `ls src/lib/db/migrations/*.sql | wc -l` (currently 220).
+Measure current totals from the repository root: modules — `ls src/lib/db/*.ts | wc -l`; migrations — `ls src/lib/db/migrations/*.sql | wc -l`.
 
 ---
 
 ## Core Infrastructure
 
-- **`core.ts`** — `getDbInstance()` returns singleton `better-sqlite3` with WAL journaling. Exports `rowToCamel()` (snake_case → camelCase), `encryptConnectionFields()` for provider credentials at rest. `SCHEMA_SQL` defines **19 base tables** (verify: `grep -c "CREATE TABLE" src/lib/db/core.ts` minus 1 for `_omniroute_migrations`). Native-load / missing-driver classification lives in `sqliteLoadError.ts` and is re-exported from here.
+- **`core.ts`** — `getDbInstance()` returns singleton `better-sqlite3` with WAL journaling. Exports `rowToCamel()` (snake_case → camelCase), `encryptConnectionFields()` for provider credentials at rest. `SCHEMA_SQL` defines the base tables; inspect that schema and the versioned migrations for the current table definitions. Native-load / missing-driver classification lives in `sqliteLoadError.ts` and is re-exported from here.
 - **`migrationRunner.ts`** — Applies versioned SQL files from `db/migrations/` inside transactions. Tracks applied migrations in `_omniroute_migrations`. Each migration is idempotent.
-- **`db/migrations/`** — 220 SQL files (`001_initial_schema.sql` → `223_call_logs_queue_wait_ms.sql`; numbering has intentional gaps). Each runs in a transaction, never fails partially.
+- **`db/migrations/`** — Versioned SQL files; numbering has intentional gaps. Each runs in a transaction, never fails partially.
 - The old `localDb.ts` barrel has been removed — consumers must import from the owning named module below.
 
 ## Key Domain Modules
@@ -44,7 +44,7 @@ Live count: `ls src/lib/db/*.ts | wc -l` (currently 158). Migrations: `ls src/li
 | `healthCheck.ts`       | health ops                | DB health monitoring                                |
 | `databaseSettings.ts`  | database settings         | DB-level configuration                              |
 
-Full list: `ls src/lib/db/*.ts | wc -l` (158 files). Drift detection: `npm run check:docs-counts`.
+List the current modules with `ls src/lib/db/*.ts`. Measure the files again whenever reporting a numeric total.
 
 ## Encryption & Security
 

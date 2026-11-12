@@ -6,36 +6,33 @@
 
 ## סקירה כללית
 
-Redis הוא **תלות רכה ואופציונלית** ב-OmniRoute — כאשר Redis אינו זמין, היישום ממשיך לפעול באופן תקין באמצעות
-חלופות בזיכרון. בסביבת ייצור, כוונון Redis מפחית את זמן ההשהיה עבור ארבעה עומסי עבודה
-נפרדים:
+Redis הוא **תלות אופציונלית, רכה** ב- OmniRoute — האפליקציה מתדרדרת בחן (נפילות בזיכרון) כאשר Redis אינו זמין. בייצור, כוונון Redis מפחית את זמן ההשהיה עבור ארבעה עומסי עבודה שונים:
 
-| עומס עבודה       | רכיב מפעיל                    | מפעל לקוחות                                           | תבנית מפתח                                                 |
-| ---------------- | ----------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
-| הגבלת קצב        | `rateLimiter.ts`              | מופע יחיד עצל של `ioredis` באמצעות `getRedisClient()` | חלונות הגבלת קצב אטומיים באמצעות Lua בתבנית `<prefix>rl:*` |
-| מטמון אימות      | `apiKeys.ts`                  | משתמש מחדש בלקוח של `rateLimiter`                     | `<prefix>auth:api_key:<sha256>` עם TTL                     |
-| מאגר מכסות       | `redisQuotaStore.ts`          | מופע יחיד נפרד של `getRedisClient(url)`               | `<prefix>quota:*` הניתן להגדרה לכל מופע                    |
-| מפסק מעגל לחימום | `redisCircuitBreakerStore.ts` | לקוח נפרד ב-`circuitBreakerFactory.ts`                | `<prefix>warmup:cb:<connectionId>`                         |
+| עומס עבודה  | נֶהָג                         | מפעל לקוח                                 | דפוס מפתח                                 |
+| ----------- | ----------------------------- | ----------------------------------------- | ----------------------------------------- |
+| הגבלת שיעור | `rateLimiter.ts`              | `getRedisClient()` — עצלן `ioredis` סינגל | חלונות מגבלת קצב אטומי `<prefix>rl:*` Lua |
+| מטמון אישור | `apiKeys.ts`                  | עושה שימוש חוזר בלקוח של `rateLimiter`    | `<prefix>auth:api_key:<sha256>` עם TTL    |
+| חנות מכסות  | `redisQuotaStore.ts`          | נפרד `getRedisClient(url)` singleton      | `<prefix>quota:*` ניתן להגדרה לכל מופע    |
+| מפסק חימום  | `redisCircuitBreakerStore.ts` | לקוח נפרד ב- `circuitBreakerFactory.ts`   | `<prefix>warmup:cb:<connectionId>`        |
 
-כל ארבעת עומסי העבודה חולקים קידומת מרחב שמות אחת, כדי ש-OmniRoute יוכל להתקיים לצד יישומים אחרים
-במופע Redis יחיד (למשל `127.0.0.1:6379`). ראו [מרחוב שמות למפתחות](#key-namespacing).
+כל ארבעת עומסי העבודה חולקים קידומת מרחב שמות אחת כך ש- OmniRoute יכול להתקיים במקביל עם אפליקציות אחרות במופע Redis יחיד (למשל `127.0.0.1:6379`). ראה [ריווח שמות מפתח](#key-namespacing).
 
 ---
 
-## תצורה נוכחית (ברירות המחדל בקוד)
+## תצורה נוכחית (ברירות מחדל של קוד)
 
-| הגדרה                                | ערך                                                      | מיקום                                                                                 |
-| ------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| משתנה הסביבה `REDIS_URL`             | `redis://redis:6379` (ב-compose), אופציונלי              | `rateLimiter.ts:5`, `.env.example`                                                    |
-| משתנה הסביבה `REDIS_KEY_PREFIX`      | `omniroute:` (ברירת המחדל)                               | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| משתנה הסביבה `QUOTA_STORE_REDIS_URL` | נפרד, יכול להיות שונה מ-`REDIS_URL`                      | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                 | `"sqlite"` (ברירת המחדל), `"redis"` אופציונלי            | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` של ioredis    | `3`                                                      | יצירת הלקוח ב-`rateLimiter.ts`                                                        |
-| `enableReadyCheck`                   | לא מוגדר (ברירת המחדל של ioredis: `true`)                | —                                                                                     |
-| `lazyConnect`                        | לא מוגדר (ברירת המחדל של ioredis: `false`)               | —                                                                                     |
-| `retryStrategy`                      | לא מוגדר (ברירת המחדל של ioredis: בסיס של 200ms, מעריכי) | —                                                                                     |
-| TLS / סיסמה / אינדקס DB              | **לא מוגדרים**                                           | —                                                                                     |
-| Sentinel / Cluster                   | **לא מוגדרים** — תמיכה בצומת עצמאי יחיד בלבד             | —                                                                                     |
+| סְבִיבָה                        | עֵרֶך                                                          | אֵיפֹה                                                                                |
+| ------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (כתיבה), אופציונלי                        | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (ברירת מחדל)                                      | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | נפרד, יכול להיות שונה מ- `REDIS_URL`                           | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (ברירת מחדל), `"redis"` אופציונלי                   | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                            | יצירת לקוח `rateLimiter.ts`                                                           |
+| `enableReadyCheck`              | לא מוגדר (ברירת המחדל של ioredis: `true`)                      | —                                                                                     |
+| `lazyConnect`                   | לא מוגדר (ברירת המחדל של ioredis: `false`)                     | —                                                                                     |
+| `retryStrategy`                 | לא מוגדר (ברירת המחדל של ioredis: בסיס של 200ms, אקספוננציאלי) | —                                                                                     |
+| TLS / סיסמה / אינדקס DB         | **לא מוגדר**                                                   | —                                                                                     |
+| זקיף / אשכול                    | **לא מוגדר** — עצמאי צומת יחיד בלבד                            | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## כוונון מומלץ לסביבת ייצור
+## כוונון הפקה מומלץ
 
-### 1. מאגר חיבורים / אפשרויות לקוח (הבנאי `Redis` של ioredis)
+### 1. מאגר חיבורים / אפשרויות לקוח (בנאי `Redis` ioredis)
 
-הקוד הנוכחי יוצר מופע יחיד של `new Redis(url)` ללא אפשרויות מותאמות אישית. עבור פריסות ייצור
-מרובות רפליקות, העבירו פונקציית יצירת לקוח בקוד או עטפו את `getRedisClient()`:
+הקוד הנוכחי יוצר `new Redis(url)` יחיד ללא אפשרויות מותאמות אישית. לפריסות מרובות-עותק ייצור, העבר מפעל לקוח בקוד או עטוף `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // ללא מגבלת ניסיונות חוזרים; יש לאפשר ל-retryStrategy להחליט
-  enableReadyCheck: true, // יש לוודא שהשרת מוכן לפני קבלת קריאות
-  lazyConnect: true, // אין להתחבר בעת יצירת המופע; יש להמתין לקריאה הראשונה
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // ויתור לאחר 10 ניסיונות חוזרים → התחברות מחדש מאוחר יותר
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, תקרה של 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // איחוד פקודות מקביליות לכתיבת TCP אחת
-  keepAlive: 10000, // TCP keep-alive בכל 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**פשרות עיקריות:**
+**פשרות מרכזיות:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — האפשרות המועדפת לייצור, כדי שהפעלות מחדש
-  זמניות של Redis לא יגרמו לכשל מיידי של כל בקשה. מנגנון הגיבוי בזיכרון של
-  `checkRateLimit()` מטפל בנתיב הכשל.
-- `lazyConnect: true` — מונע תלות בעת האתחול בכך ש-Redis יהיה פעיל לפני שהשרת
-  מתחיל לקבל חיבורים.
-- `enableAutoPipelining: true` — מצמצם הלוך ושוב ברשת עבור בדיקות מקבילות של הגבלת קצב;
-  מועיל בקצב של יותר מ-50 RPS בחיבור יחיד.
+- `maxRetriesPerRequest: null` + `retryStrategy` — מועדף לייצור כך שהתחלות מחדש Redis חולפות לא ייכשלו מיד בכל בקשה. הנפילה בזיכרון ב- `checkRateLimit()` סופגת את נתיב הכישלון.
+- `lazyConnect: true` — נמנע מתלות הפעלה בכך ש- Redis פועל לפני שהשרת מתחיל לקבל חיבורים.
+- `enableAutoPipelining: true` — מפחית נסיעות הלוך ושוב עבור בדיקות מגבלת תעריף במקביל; מועיל ב- > 50 RPS בחיבור יחיד.
 
 ### 2. תצורת שרת Redis (`redis.conf`)
 
 ```
-# זיכרון
-maxmemory 80%                        # השארת מקום למטמון הדפים של מערכת ההפעלה
-maxmemory-policy allkeys-lru         # פינוי רשומות מיושנות ממטמון האימות תחת עומס זיכרון
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# התמדה (אופציונלית — OmniRoute עמיד בפני קריסות גם בלעדיה)
-save 300 1                           # יצירת תמונת מצב לפחות בכל 5 דקות אם השתנה מפתח אחד לפחות
-appendonly no                        # אין צורך ב-AOF; ניתן ליצור מחדש את הנתונים
-appendfsync no                       # ללא תקורת fsync (‏RDB מספיק)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# רשת
-timeout 0                            # ללא ניתוק עקב חוסר פעילות
-tcp-keepalive 300                    # keep-alive של 5 דקות
-tcp-backlog 511                      # תור חיבורים לעומס מתפרץ
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# ביצועים
-hz 10                                # ברירת המחדל; 100 עבור יישומים רגישים להשהיה
-activedefrag yes                     # איחוי אוטומטי כאשר הקיטוע גדול מ-10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**הפשרה עבור `maxmemory-policy allkeys-lru`:** רשומות במטמון האימות עשויות להתפנות תחת
-לחץ זיכרון. הדבר בטוח — `setCachedApiKey` תמיד מאכלס מחדש במקרה של החטאה, ומנגנון
-הגיבוי של SQLite הוא מקור המידע המוסמך. סקריפט ה-Lua של מגביל הקצב יוצר מפתחות קטנים
-שהם קצרי־חיים מעצם תכנונם.
+**פשרה עבור `maxmemory-policy allkeys-lru`:** רשומות מטמון אימות עלולות להתפנות תחת לחץ זיכרון. זה בטוח — `setCachedApiKey` תמיד מתאכלס מחדש בעת החמצה, וה- SQLite החזרה היא סמכותית. סקריפט מגביל הקצב Lua יוצר מפתחות קטנים בעלי אורך חיים קצר בתכנון.
 
 ### 3. הגדרות Docker Compose
 
-קובץ ה-compose לייצור (`docker-compose.prod.yml`) משתמש ב-`redis:8.6.2-alpine`. הוסיפו:
+ה-prod compose (`docker-compose.prod.yml`) משתמש ב- `redis:8.6.2-alpine`. לְהוֹסִיף:
 
 ```yaml
 redis:
@@ -150,34 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. שיקולים לריבוי מופעים / הרחבת קיבולת
+### 4. שיקולי ריבוי מופעים / קנה מידה
 
-**Redis יחיד לכל הרפליקות** — סקריפט ה-Lua של מגביל הקצב תלוי במרחב מפתחות מוסמך
-יחיד. מופעי Redis מרובים מאחורי רפליקות יגרמו לאובדן האטומיות ולהכפלת המכסה. השתמשו
-ב-Redis יחיד (או באשכול Redis Sentinel עם מעבר בעת כשל) עבור כל רפליקות היישום.
+**Redis יחיד עבור כל ההעתקים** — התסריט מגביל הקצב Lua תלוי במרחב מפתח סמכותי יחיד. מופעי Redis מרובים מאחורי העתקים יאבדו את האטומיות ויכפילו את התקציב. השתמש ב- Redis יחיד (או באשכול Redis Sentinel עם כשל) עבור כל העתקים של האפליקציות.
 
-**מספר החיבורים:** כל רפליקת יישום פותחת **2 חיבורי TCP** אל Redis
-(לקוח מגביל קצב + לקוח אחסון מכסות). ב-10 רפליקות → 20 חיבורים, הרבה
-מתחת לתקרה של 10,000 חיבורים במופע Redis המוגדר כברירת מחדל.
+**ספירת חיבורים:** כל עותק של יישום נפתח **2 חיבורי TCP** ל- Redis (לקוח מגביל תעריפים + לקוח חנות מכסה). ב-10 העתקים של חיבורי → 20, הרבה בתוך תקרת החיבור של 10k ברירת המחדל של מופע Redis.
 
 ### 5. ניטור
 
-חשפו באמצעות נקודת קצה לבדיקת תקינות:
+חשיפה באמצעות נקודת קצה של בדיקת בריאות:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts כבר קורא לפונקציות של rateLimiter
-// הוסיפו בדיקות ייעודיות ל-Redis:
-//   1. השהיית PING באמצעות ioredis .ping()
-//   2. שימוש בזיכרון באמצעות INFO memory
-//   3. מספר חיבורים באמצעות INFO clients
-//   4. שיעור פגיעות עבור maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-מדדים מרכזיים למעקב:
+מדדי מפתח שכדאי לצפות בהם:
 
-- **מפתחות שפונו / שנייה** — אם הערך אינו אפס באופן מתמשך, הגדילו את `maxmemory`
-- **לקוחות חסומים** — ערך שאינו אפס מצביע על סקריפטי Lua איטיים או תחרות גבוהה על משאבים
-- **חיבורים שנדחו** — הגעתם למגבלת החיבורים; נדיר ב-20 חיבורים
+- **מפתחות שפונו / שניה** — אם מתמשך אינו אפס, הגדל `maxmemory`
+- **לקוחות חסומים** — לא אפס מציע סקריפטים איטיים של Lua או מחלוקת גבוהה
+- **חיבורים שנדחו** פגיעת מגבלת חיבור — ; נדיר ב-20 חיבורים
+
+### 6. שרתים תואמי Redis
+
+כל שרת המשמש כאן חייב להפעיל סקריפטים של Lua: מגביל הקצב הוא `EVAL` אחד. בשרת ללא Lua, `checkRateLimit()` רושם `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` וסופר לכל תהליך, כך שכל העתקה אוכפת את המגבלה בפני עצמה. חנות הזיקה המשותפת להפעלה (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) גם קוראת ומעדכנת סיכות עם `EVAL`; בלי Lua הוא רושם `[SESSION_AFFINITY] Redis error; falling back to SQLite.` וכל העתק שומר על הפינים שלו. עומסי העבודה האחרים משתמשים בפקודות פשוטות (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes ו-sets), וה- Redis backend של המטמון הסמנטי לא שולח פקודות `FT.*`.
+
+נבדק עם OmniRoute 3.8.52: KiviDB 1.2.0 עם תמונת Lua שלו (`kividb/kividb:v1.2.0-lua`). מגביל הקצב (כולל תהליך שני לשיתוף המונים), מטמון אישור, חנות מכסה, מפסק חימום, חנות מטמון סמנטי ובקשת `/v1/chat/completions` דרך מטפל הצ'אט עברו 18 מתוך 19 הבדיקות שעוברות על Redis 8.10.3. זה ששונה: `INCRBYFLOAT` מאחסן `0.1 + 0.2` כ- `0.30000000000000004` שבו Redis מאחסן `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). חנות המכסות מנתחת את שניהם עם `parseFloat`, אבל שני המספרים נבדלים זה מזה בספרות האחרונות, כך שהשוואה שנופלת בדיוק על גבול המכסה יכולה לצאת אחרת. חנות הזיקה להפעלה לא הייתה חלק מהריצה הזו. ( [הגדרה](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [תוצאות](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -198,15 +189,15 @@ flowchart LR
 
 ---
 
-## מקורות
+## הפניות
 
-| קובץ                               | מטרה                                                     |
-| ---------------------------------- | -------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | לקוח Redis ראשי, סקריפט Lua להגבלת קצב, חלופה בזיכרון    |
-| `src/lib/db/apiKeys.ts`            | מטמון אימות — חלופה מ־Redis ל־SQLite                     |
-| `src/lib/quota/redisQuotaStore.ts` | לקוח Redis נפרד עבור מאגר מכסות אופציונלי                |
-| `src/lib/quota/storeFactory.ts`    | מעבר בין מנהלי ההתקן `sqlite` ו־`redis` למכסות           |
-| `docker-compose.prod.yml`          | קונטיינר Redis לסביבת ייצור (תמונה `redis:8.6.2-alpine`) |
-| `.env.example`                     | תיעוד משתני הסביבה של Redis                              |
-| `src/app/api/local/redis/`         | נתיבי API לתזמור קונטיינר בסביבת פיתוח                   |
-| `bin/cli/commands/redis.mjs`       | פקודות CLI לתזמור קונטיינר בסביבת פיתוח                  |
+| קוֹבֶץ                             | מַטָרָה                                             |
+| ---------------------------------- | --------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | לקוח Redis ראשי, סקריפט מגבלת קצב Lua, חזרה בזיכרון |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite fallback                  |
+| `src/lib/quota/redisQuotaStore.ts` | לקוח Redis נפרד לחנות מכסה אופציונלית               |
+| `src/lib/quota/storeFactory.ts`    | מעבר בין נהגי מכסות `sqlite` ו- `redis`             |
+| `docker-compose.prod.yml`          | מיכל יצרן Redis (תמונה `redis:8.6.2-alpine`)        |
+| `.env.example`                     | תיעוד Redis env vars                                |
+| `src/app/api/local/redis/`         | מסלולי API לתזמור קונטיינר ל-dev                    |
+| `bin/cli/commands/redis.mjs`       | פקודות CLI לתזמור קונטיינר לפיתוח                   |

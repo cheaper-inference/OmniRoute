@@ -843,28 +843,48 @@ Web/search leverandørabstraksjon (Tavily, Brave, Exa, Serper, etc.).
 
 **Automatisk valg:** uten `provider` kjører den billigste leverandøren med en konfigurert tilkobling først, og den nest billigste er failover. Gratis siste utvei-leverandører (`duckduckgo-free`) brukes bare når ingenting annet er konfigurert. En selvvertsbasert SearXNG teller som konfigurert når tilkoblingen lagrer en ekte `baseUrl` (ikke standard katalogens `http://localhost:8888/search`): den rangerer da som en $0-leverandør foran nøkkelleverandører, med den billigste nøkkelleverandøren som failover, inkludert når SearXNG svarer 400, 401, 403 eller 404. A `baseUrl` eller som ikke er `http(s)` poeng URL sky-metadata-adressen teller ikke. En SearXNG tilkobling som lagrer et token rangerer bare på denne måten over `https://` eller loopback `http://`. Over ekstern plain `http://` er det aldri en failover og forblir en siste utvei, brukes bare når ingen annen leverandør er konfigurert eller når det blir bedt om ved navn, så det sender tokenet i klartekst i disse to tilfellene.
 
-### Exa og Tavily `provider_options`
+### `provider_options` for Exa og Tavily
 
-Exa og Tavily leser leverandørspesifikke felt fra en pose med navneavstand: `provider_options.exa` (eller `provider_options["exa-search"]`) og `provider_options.tavily` (eller `provider_options["tavily-search"]`). Kun nøklene nedenfor videresendes. Hver enkelt kontrolleres mot sitt eget Zod skjema i `open-sse/handlers/search/providerOptionsPassthrough.ts`, og en nøkkel med feil type blir droppet. Enhver annen nøkkel ignoreres, inkludert auth, base URL, `stream` og `outputSchema`. De flate tastene som brukes av andre leverandører (`cx`, `depth`, ...) fungerer som før.
+Exa og Tavily leser leverandørspesifikke felt fra en navngitt beholder:
+`provider_options.exa` (eller `provider_options["exa-search"]`) og `provider_options.tavily`
+(eller `provider_options["tavily-search"]`). Bare nøklene nedenfor videresendes. Hver nøkkel
+kontrolleres mot sitt eget Zod-skjema i `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+og en nøkkel med feil type forkastes. Alle andre nøkler ignoreres, inkludert autentisering, base-URL,
+`stream` og `outputSchema`. De flate nøklene som brukes av andre leverandører (`cx`, `depth`, ...)
+fungerer som før.
 
-| Leverandør | Felter på øverste nivå                                                                                                                                                                                                                                                                                                                                                    | Nestet                                                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flate primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` fusjonerte over standard `{ text: true, highlights: true }` |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                         |
+| Leverandør | Felter på toppnivå                                                                                                                                                                                                                                                                                                                                                        | Nøstet                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flate primitive verdier), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` slått sammen over standardverdien `{ text: true, highlights: true }` |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
-De generiske feltene vinner alltid: `query`, `max_results`, `filters` (domener), `country` og emnet avledet fra `search_type`. På Exa beholder `search_type: "news"` `category: "news"`. Tavily aksepterer også `search_type: "finance"` (`topic: "finance"`).
+De generiske feltene vinner alltid: `query`, `max_results`, `filters` (domener), `country` og
+emnet som utledes fra `search_type`. For Exa beholder `search_type: "news"` `category: "news"`.
+Tavily godtar også `search_type: "finance"` (`topic: "finance"`).
 
-Firecrawl-søkekostnad er registrert per startet blokk med 10 returnerte resultater, til $0,002 (2 studiepoeng) per blokk og minst én blokkering per samtale ( [Firecrawl-fakturering](https://docs.firecrawl.dev/billing) ): 11 resultater koster $0,004.
+Kostnaden for Firecrawl-søk registreres per påbegynte blokk med 10 returnerte resultater, til $0.002
+(2 kreditter) per blokk og minst én blokk per kall
+([Firecrawl-fakturering](https://docs.firecrawl.dev/billing)): 11 resultater koster $0.004.
 
-Den generiske `time_range` når nå begge leverandørene: Exa får `startPublishedDate` (ISO timestamp) og Tavily får `start_date` (`YYYY-MM-DD`). En eksplisitt dato i `provider_options` overstyrer den tilordnede.
+Den generiske `time_range` når nå begge leverandørene: Exa får `startPublishedDate` (ISO-tidsstempel)
+og Tavily får `start_date` (`YYYY-MM-DD`). En eksplisitt dato i `provider_options`
+overstyrer den tilordnede datoen.
 
-Exa-resultater beholder `id`, `highlights` (hvert høydepunkt, ikke bare det første som brukes som `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i `provider_raw`. Tavily resultater beholder `images` og `favicon`.
+Exa-resultater beholder `id`, `highlights` (hvert høydepunkt, ikke bare det første som brukes som
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i
+`provider_raw`. Tavily-resultater beholder `images` og `favicon`.
 
-Koblingssøkekostnad er registrert til $ 0,005 for `depth` `fast` og `standard` og $ 0,05 for `deep` ( [Linkup-prising](https://docs.linkup.so/pages/documentation/development/pricing) ), enten `depth` kommer fra `provider_options` eller tilkoblingens innstillinger.
+Kostnaden for Linkup-søk registreres som $0.005 for `depth` `fast` og `standard`, og $0.05 for
+`deep` ([Linkup-priser](https://docs.linkup.so/pages/documentation/development/pricing)),
+uavhengig av om `depth` kommer fra `provider_options` eller tilkoblingens innstillinger.
 
-Exa `type: "lite"` (Exa 3.0) godtar et mindre sett med felt og avviser hele forespørselen når et hvilket som helst annet felt er satt. For lite blir `additionalQueries`, `systemPrompt` og hver `contents` -tast unntatt `text` og `highlights` droppet før samtalen. De utdaterte `subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes ikke lenger.
+Exa `type: "lite"` (Exa 3.0) godtar et mindre sett med felter og avviser hele forespørselen
+når et annet felt er satt. For lite fjernes `additionalQueries`, `systemPrompt` og alle
+`contents`-nøkler unntatt `text` og `highlights` før kallet. De foreldede
+`subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes
+ikke lenger.
 
-Kostnadsregnskap er det flate registeret `costPerQuery`, bortsett fra Exa, som følger Exas egen prissetting: $0,007 per samtale for `auto` (og den eldre `fast`) eller $0,004 for `lite` (og den eldre `instant`), som dekker 10 resultater; $0,001 for hvert ytterligere resultat; og $0,001 per returnert resultat når `contents.summary` er satt. Tavily er registrert med 1 kreditt ($0,008) for `search_depth` `basic`, `fast` og `ultra-fast`, og 2 kreditter ($0,016) for `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). En samtale med `auto_parameters: true` som Tavily oppgraderer til avansert blir fortsatt registrert med 1 kreditt.
+Exa: $0,007 per samtale for `auto` (og den eldre `fast`) eller $0,004 for `lite` (og den eldre `instant`), som dekker 10 resultater; $0,001 for hvert ytterligere resultat; og $0,001 per returnert resultat når `contents.summary` er satt. Tavily er registrert med 1 kreditt ($0,008) for `search_depth` `basic`, `fast` og `ultra-fast`, og 2 kreditter ($0,016) for `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). En samtale med `auto_parameters: true` som Tavily oppgraderer til avansert blir fortsatt registrert med 1 kreditt.
 
 ---
 
@@ -961,14 +981,14 @@ fullføringen.
 
 ---
 
-## Kvoter og rapportering av problemer
+## Rapportering av kvoter og problemer
 
-| Metode | Bane                | Beskrivelse                                                                                    |
-| ------ | ------------------- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Forhåndsvalider kvote for en `provider` + `accountId` før en registrert nøkkel utstedes        |
-| POST   | `/v1/issues/report` | Rapporter en feil ved kvote-/nøkkelutstedelse til GitHub (krever `GITHUB_ISSUES_REPO` + token) |
+| Metode | Sti                 | Beskrivelse                                                                                 |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Forhåndsvalider kvoten for en `provider` + `accountId` før du utsteder en registrert nøkkel |
+| POST   | `/v1/issues/report` | Rapporter en quota/key -utstedelsesfeil til GitHub (krever `GITHUB_ISSUES_REPO` + token)    |
 
-**Autentisering:** Bearer API-nøkkel (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` tar en bærer API nøkkel (`isAuthenticated`). `/v1/issues/report` er kun for administrasjon (`requireManagementAuth`), som `/api/v1/registered-keys`: en dashbordøkt, det lokale CLI tokenet eller en API nøkkel med `manage`/`admin` omfang; API -nøkler som bare inferens får `403`.
 
 ### Gjenoppretting av kvoteøkter (valgfritt)
 
@@ -995,7 +1015,7 @@ for API-nøkkelen som opprettet dem. En avspilling der utfallet er usikkert, avs
 
 ## Selvbetjent bruk (`/api/usage/om-usage`)
 
-Enhver API -nøkkel kan lese** sin egen** bruk og kvoter — no management auth. Dette er endepunktet en klient (CLI, OmniCopilot panelet) bruker for å vise en nøkkelinnehaver forbruket sitt.
+Enhver API -nøkkel kan lese **sin egen** bruk og kvoter — ingen administrasjonsgodkjenning. Dette er endepunktet en klient (CLI, OmniCopilot panelet) bruker for å vise en nøkkelinnehaver forbruket sitt.
 
 ```bash
 # Text form (the historical contract — plain text for a terminal)
@@ -1007,7 +1027,7 @@ curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Nøkkelen må ha**`allowUsageCommand`** aktivert (av som standard — dashbordets API-nøkkelbehandling veksler per nøkkel). Uten det svarer endepunktet `403`.
+Nøkkelen må ha **`allowUsageCommand`** aktivert (av som standard — dashbordets API-nøkkelbehandling veksler per nøkkel). Uten det svarer endepunktet `403`.
 
 `?format=json` returnerer en diskriminert form slik at en innringer aldri leser et datafelt av et avslag. Om suksess:
 
@@ -1033,49 +1053,60 @@ Nøkkelen må ha**`allowUsageCommand`** aktivert (av som standard — dashbordet
 }
 ```
 
-Ved avslag (`401` dårlig nøkkel / `403` ikke tillatt) returnerer den samme ruten `{ "allowed": false, "error": { "message": "…" } }` — en present-men-tom `personal`/`provider` (nøkkel tillatt, ingenting lært ennå) er en annen tilstand enn et avslag, og bare JSON formen skiller dem.
+Ved avslag (`401` dårlig nøkkel / `403` ikke tillatt) returnerer den samme ruten `{ "allowed": false, "error": { "message": "…" } }` — en nåværende-men-tom `personal`/`provider` (nøkkel tillatt, ingenting lært ennå) er en annen tilstand enn et avslag, og bare JSON skjemaet skiller dem.
 
-**Auth:** innringerens egen bærer API nøkkel, validert med `isValidApiKey` — dette er _ikke_ administrasjonsflaten (`/api/keys/…`), som forblir bak `requireManagementAuth`.
+**Auth:** innringerens egen Bærer API nøkkel, validert med `isValidApiKey` — dette er _ikke_ administrasjonsflaten (`/api/keys/…`), som forblir bak `requireManagementAuth`.
 
-### Rå vs. Cutoff-justerte kvoteprosent
+### Rå kontra avbruddsjusterte kvoteprosenter
 
-Når du bruker `/api/usage/om-usage`, bør innringere merke seg forskjellen mellom prosentene som presenteres av** ren tekstutgang** og det strukturerte**JSON utgang** :
+Ved bruk av `/api/usage/om-usage` bør avsendere merke seg forskjellen mellom
+prosentene som presenteres av **ren tekst-utdata** og strukturert **JSON-utdata**:
 
-| Aspekt               | Vanlig tekstformat (`/api/usage/om-usage` / `@@om-usage`)                                     | JSON -format (`?format=json`)                                            |
-| :------------------- | :-------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- |
-| **Utdatafelt**       | `NN% left` (f.eks. `20% left`)                                                                | `provider.quotas` / `providers[].quotas`                                 |
-| **Mål**              | **Avskjæringsjustert bruksgodtgjørelse** : gjenværende kapasitet over grenseverdien           | **Rå oppstrømskvote** : ujustert leverandørmåling                        |
-| **Cutoff-skalering** | Skalert via `effectiveRemainingPercent()` slik at den beskyttede reserven leses som `0% left` | Ingen (rå øyeblikksbildeverdier rapportert av leverandøren)              |
-| **Terskeldata**      | Innlemmet i den viste prosentandelen                                                          | Lagret i `quotaWindowThresholds` per tilkobling (eller serverstandarder) |
-| **Primærforbruker**  | Interaktiv CLIs, terminalmeldinger, menneskelige operatører                                   | Programmatiske integrasjoner, dashbord, analyser, faktureringssporere    |
+| Aspekt                | Ren tekst-format (`/api/usage/om-usage` / `@@om-usage`)                                       | JSON-format (`?format=json`)                                             |
+| :-------------------- | :-------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| **Utdatafelt**        | `NN% left` (f.eks. `20% left`)                                                                | `provider.quotas` / `providers[].quotas`                                 |
+| **Måling**            | **Avbruddsjustert tilgjengelig kvote**: gjenværende kapasitet over avbruddsgrensen            | **Rå oppstrømskvote**: ujustert leverandørmåling                         |
+| **Avbruddsskalering** | Skalert via `effectiveRemainingPercent()` slik at den beskyttede reserven vises som `0% left` | Ingen (rå øyeblikksbildeverdier slik de rapporteres av leverandøren)     |
+| **Grensedata**        | Inkludert i den viste prosentandelen                                                          | Lagret i `quotaWindowThresholds` per tilkobling (eller serverstandarder) |
+| **Primærbruker**      | Interaktive CLI-er, terminalmeldinger, menneskelige operatører                                | Programmatisk integrasjon, dashbord, analyse, fakturasporing             |
 
-#### Cutoff-justeringsformelen
+#### Formelen for avbruddsjustering
 
-OmniRoute støtter proaktive kvoteavskjæringer for å forhindre oppstrøms utmatting (konfigurert via tilkobling `quotaWindowThresholds`, leverandørstandarder eller globale motstandsinnstillinger). Når en grenseverdi (f.eks. `cutoff = 25%`) er aktiv i et kvotevindu, beregner tekstgjengivelsen gjenværende kvote som:
+OmniRoute støtter proaktive kvoteavbrudd for å forhindre at oppstrømskvoten tømmes (konfigurert via tilkoblingens
+`quotaWindowThresholds`, leverandørstandarder eller globale innstillinger for robusthet). Når en avbruddsgrense
+(f.eks. `cutoff = 25%`) er aktiv i et kvotevindu, beregner tekstgjengiveren gjenværende tilgjengelig kvote slik:
 
-- If `remaining <= cutoff`: returnerer `0%`.
-- If `remaining > cutoff`: returnerer `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Hvis `remaining <= cutoff`: returnerer `0%`.
+- Hvis `remaining > cutoff`: returnerer `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Den formaterte tekstutgangen avrunder dette til nærmeste heltall (`Math.round(...)`).
+Den formaterte tekstutdataen avrunder dette til nærmeste heltall (`Math.round(...)`).
 
 #### Illustrerende eksempel
 
-Vurder et leverandørvindu med** 60 % råbruk** (derav** 40 % rå gjenværende kvote** ) og en konfigurert** 25 % gjenværende kvoteavskjæring** terskel:
+Vurder et leverandørvindu med **60 % råbruk** (dermed **40 % råkvote igjen**) og en konfigurert
+terskel på **25 % gjenstående kvote**:
 
-| Representasjon               | Beregning                                          | Gjenværende |              Underforstått brukt              |
-| :--------------------------- | :------------------------------------------------- | :---------: | :-------------------------------------------: |
-| **Rå JSON (`?format=json`)** | Oppstrøms øyeblikksbilde (`quotas[window]`)        |   **40%**   |                    **60%**                    |
-| **Tekstformat (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |   **20%**   | **80 %** (hvis du beregner `100 - remaining`) |
+| Representasjon               | Beregning                                          | Gjenstående |                Implisitt brukt                 |
+| :--------------------------- | :------------------------------------------------- | :---------: | :--------------------------------------------: |
+| **Rå JSON (`?format=json`)** | Oppstrømsøyeblikksbilde (`quotas[window]`)         |  **40 %**   |                    **60 %**                    |
+| **Tekstformat (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20 %**   | **80 %** (hvis beregnet som `100 - remaining`) |
 
-- **Hvorfor tekst viser 20 % igjen:** Av de 40 % fysiske kvotene som er igjen på kontoen, er 25 % reservert av avskjæringspolitikken. Den som ringer har bare 15 % av 75 % brukbar takhøyde igjen før ruteren slutter å rute til denne forbindelsen. Skalering sikrer at tilkoblingen signaliserer utmattelse (`0% left`) nøyaktig når ruting vil opphøre.
-- **Hvorfor JSON bevarer råverdier:** JSON nyttelasten returnerer det nøyaktige øyeblikksbildet fra leverandøren (`UsageSnapshot`) slik at eksterne verktøy har tilgang til sannhet oppstrøms utnyttelse og `quotaWindowThresholds` på tilkoblingsnivå uten tapsskalering på serversiden.
+- **Hvorfor teksten viser 20 % igjen:** Av de 40 % av den fysiske kvoten som er igjen på kontoen, er 25 % reservert av
+  avskjæringspolicyen. Den som kaller tjenesten, har bare 15 % av 75 % brukbart spillerom igjen før ruteren slutter å rute
+  til denne tilkoblingen. Skaleringen sørger for at tilkoblingen signaliserer at den er tom (`0% left`) nøyaktig når
+  rutingen opphører.
+- **Hvorfor JSON bevarer råverdier:** JSON-nyttelasten returnerer det nøyaktige leverandørøyeblikksbildet (`UsageSnapshot`)
+  slik at eksterne verktøy får tilgang til fasitverdier for oppstrømsbruk og tilkoblingsnivåets
+  `quotaWindowThresholds` uten tapsbringende skalering på serversiden.
 
-#### Veiledning for forbrukermigrering
+#### Veiledning for migrering av forbrukere
 
-Hvis en ekstern integrasjon (som en editor-plugin eller agentutvidelse) tidligere har skrapet tekstendepunktet (`NN% left`) og beregnet brukt prosentandel som `100 - NN`, betyr migrering til `?format=json` :
+Hvis en ekstern integrasjon (for eksempel et programtillegg for en redigerer eller en agentutvidelse) tidligere hentet data fra tekstendepunktet
+(`NN% left`) og beregnet brukt prosent som `100 - NN`, betyr migrering til `?format=json` at:
 
-- Lesing av rå JSON -verdier vil reflektere** faktisk oppstrømsforbruk** (60 % brukt i eksemplet ovenfor).
-- Hvis integrasjonen ønsker å bevare tekstendepunktets semantikk for brukbare tillatelser, kan den evaluere den effektive gjenværende formelen på klientsiden ved å bruke `quotaWindowThresholds` for overstyringer på tilkoblingsnivå.
+- Lesing av rå JSON-verdier vil gjenspeile **faktisk forbruk oppstrøms** (60 % brukt i eksempelet ovenfor).
+- Hvis integrasjonen ønsker å bevare tekstendepunktets semantikk for tilgjengelig bruk, kan den beregne
+  formelen for effektivt gjenstående klientbasert ved hjelp av `quotaWindowThresholds` for overstyringer på tilkoblingsnivå.
 
 ---
 
@@ -1140,6 +1171,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Kompatibilitet med CLIProxyAPI-administrasjon
 
 OmniRoute svarer på de tre [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)-administrasjonsendepunktene som bruksdashbord bruker til å lese abonnementsgrensene for Claude og Codex (for eksempel T3 Codes `cliproxy`-kilde for bruksgrenser). Angi klientens basis-URL til OmniRoute, og bruk en API-nøkkel med området `manage` som administrasjonsnøkkel. Rutene leveres på `/v0/management/*` og `/api/v0/management/*`.
@@ -1150,48 +1183,66 @@ OmniRoute svarer på de tre [CLIProxyAPI](https://github.com/router-for-me/CLIPr
 | POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sender én tillatt forespørsel med kontoens token og returnerer `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Fjerner tilkoblingens nedkjøling, modellblokkeringer og Codex-nedkjøling per område for én konto                    |
 
-- `auth_index` er OmniRoute-tilkoblingens ID. `provider` er `claude` eller `codex` (kun OAuth-tilkoblinger; `anthropic`-leverandøren med API-nøkkel vises ikke). For Codex er `id_token.chatgpt_account_id` den lagrede arbeidsområde-ID-en, og `plan_type` det lagrede abonnementet.
-- `api-call` er ikke en generell proxy. Den godtar bare Claude `GET https://api.anthropic.com/api/oauth/usage` og Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` og `POST .../wham/rate-limit-reset-credits/consume`, og hvert kall må gjøres for en konto med samsvarende leverandør. Alt annet returnerer `403` uten å kontakte oppstrøms. Den som foretar kallets `Authorization`-hode (inkludert plassholderen `$TOKEN$`) ignoreres: OmniRoute setter inn tilkoblingens tilgangstoken, oppdaterer det først når det nærmer seg utløp, og videresender bare tillatte hoder (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Hvis `Chatgpt-Account-Id` mangler, brukes den lagrede arbeidsområde-ID-en som standard. Forespørsler får tidsavbrudd etter 15 sekunder og bruker tilkoblingens proxy.
-- `reset-quota` lar terminaltilstander (`banned`, `expired`, `credits_exhausted`) være urørt. En ukjent `auth_index` returnerer `404`.
+- `auth_index` er OmniRoute-tilkoblingens ID. `provider` er `claude` eller `codex` (bare OAuth-tilkoblinger; API-nøkkelleverandøren `anthropic` er ikke oppført). For Codex er `id_token.chatgpt_account_id` den lagrede arbeidsområde-ID-en og `plan_type` det lagrede abonnementet.
+- `api-call` er ikke en generell proxy. Den godtar bare Claude `GET
+https://api.anthropic.com/api/oauth/usage` og Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` og `POST .../wham/rate-limit-reset-credits/consume`, hver bare for en konto hos tilsvarende leverandør. Alt annet returnerer `403` uten å kontakte oppstrømstjenesten. Kallerens `Authorization`-header (inkludert plassholderen `$TOKEN$`) ignoreres: OmniRoute setter inn tilkoblingens tilgangstoken, fornyer det først når det nærmer seg utløp, og videresender bare headere fra tillatelseslisten (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Manglende `Chatgpt-Account-Id` får den lagrede arbeidsområde-ID-en som standard. Hvis det første oppstrømssvaret er `401`, fornyer den én gang og prøver bare på nytt når tilgangstokenet endres. Hvert oppstrømsforsøk får tidsavbrudd etter 15 sekunder og bruker tilkoblingens proxy.
+- `reset-quota` lar terminale tilstander (banned, expired, credits_exhausted) være uendret. En ukjent `auth_index` returnerer `404`.
 
 **Autentisering:** dashbordøkt eller en API-nøkkel med området `manage`, som kreves selv når innlogging er deaktivert (banene finnes i `ALWAYS_PROTECTED_API_PATHS`). Nøkler som bare brukes til inferens, får `403`. Kilde: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 
-## Dashboard og administrasjon
+## Instrumentbord og administrasjon
 
-Forvaltningsruter (`/api/*` unntatt offentlig auth/login) er** ikke** autorisert av vanlige inferens API -nøkler. Eksempler på legitimasjonsfamilier, omfang og krøller: [Administrasjonsautentisering](../guides/MANAGEMENT-AUTH.md).
+Administrasjonsruter (`/api/*` bortsett fra offentlig auth/login) er **ikke** autorisert av
+vanlige inferens-API-nøkler. Legitimasjonsfamilier, omfang og curl-eksempler:
+[Administrasjonsautentisering](../guides/MANAGEMENT-AUTH.md).
 
 ### Autentisering
 
-| Endepunkt                     | Metode   | Beskrivelse                                                                                                                                                                                                                                                                             |
-| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Logg inn                                                                                                                                                                                                                                                                                |
-| `/api/auth/logout`            | POST     | Logg ut                                                                                                                                                                                                                                                                                 |
-| `/api/settings/require-login` | GET/POST | Påloggingsstatus (GET, offentlig). POST setter passordet / veksler pålogging: kun for operatør når et passord eksisterer (dashbordøkt, lokal CLI eller pålogging deaktivert — API nøkler og `oma_` -tokens får `403`); en dashbordøkt sender `currentPassword` for å erstatte passordet |
+| Endepunkt                     | Metode   | Beskrivelse                                                                                                                                                                                                                                                                                             |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Innlogging                                                                                                                                                                                                                                                                                              |
+| `/api/auth/logout`            | POST     | Utlogging                                                                                                                                                                                                                                                                                               |
+| `/api/settings/require-login` | GET/POST | Innloggingsstatus (GET, offentlig). POST angir passordet / slår innlogging av eller på: kun operatører når et passord finnes (instrumentbordøkt, lokal CLI eller innlogging deaktivert — API-nøkler og `oma_`-tokens får `403`); en instrumentbordøkt sender `currentPassword` for å erstatte passordet |
 
 ### Leverandøradministrasjon
 
-| Endepunkt                               | Metode                    | Beskrivelse                                                                                                                                                   |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | List opp/opprett leverandører                                                                                                                                 |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Administrer en leverandør                                                                                                                                     |
-| `/api/providers/[id]/test`              | POST                      | Test leverandørtilkobling                                                                                                                                     |
-| `/api/providers/[id]/models`            | GET                       | List leverandørmodeller                                                                                                                                       |
-| `/api/providers/validate`               | POST                      | Valider leverandørkonfig                                                                                                                                      |
-| `/api/providers/bulk`                   | POST                      | Bulk-legg til API nøkler for ONE leverandør                                                                                                                   |
-| `/api/providers/import`                 | POST                      | Importer en heterogen leverandør LIST fra en analysert CSV/JSON fil (#6836); resultater per rad delvise feil                                                  |
-| `/api/provider-nodes*`                  | Diverse                   | Administrasjon av leverandørnode                                                                                                                              |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Egendefinerte modeller og overstyringer per modell (legg til, oppdater, hide/show, slett)                                                                     |
-| `/api/provider-models/validate-and-add` | POST                      | Administrasjonsautentisert, opt-in streng tilkoblingsvalidering og atomisk tilpasset modellregistrering; se [Modellvalidering](../guides/MODEL-VALIDATION.md) |
+| Endepunkt                               | Metode                    | Beskrivelse                                                                                                                                                                                           |
+| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | List opp / opprett leverandører                                                                                                                                                                       |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Administrer en leverandør                                                                                                                                                                             |
+| `/api/providers/[id]/test`              | POST                      | Test leverandørtilkoblingen                                                                                                                                                                           |
+| `/api/providers/[id]/models`            | GET                       | List opp leverandørmodeller                                                                                                                                                                           |
+| `/api/providers/validate`               | POST                      | Valider leverandørkonfigurasjon                                                                                                                                                                       |
+| `/api/providers/bulk`                   | POST                      | Legg til API-nøkler i bulk for ÉN leverandør                                                                                                                                                          |
+| `/api/providers/import`                 | POST                      | Importer en heterogen leverandørliste fra en analysert CSV/JSON-fil (#6836); resultater med delvis feil per rad                                                                                       |
+| `/api/provider-nodes*`                  | Various                   | Administrasjon av leverandørnoder                                                                                                                                                                     |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Egendefinerte modeller og overstyringer per modell (legg til, oppdater, skjul/vis, slett)                                                                                                             |
+| `/api/provider-models/validate-and-add` | POST                      | Streng tilkoblingsvalidering som krever administrasjonsautentisering og er valgfritt aktivert, samt atomisk registrering av egendefinert modell; se [Modellvalidering](../guides/MODEL-VALIDATION.md) |
 
-For synced/imported modeller aksepterer `PUT /api/provider-models` `provider`, `modelId` og `maxOutputTokenOverride`: et positivt heltall setter den manuelle utdata-token-hetten, og `null` sletter den for å gjenopprette standarden. `GET /api/provider-models?provider=<provider>` returnerer disse verdiene i `modelOutputOverrides`, inkludert modeller uten en egendefinert modellrad. Overstyringen bruker runtime `max_output_tokens` funksjonen og overlever en modellresynkronisering. Den OpenAI-kompatible leverandørsiden tilbyr de samme edit/clear kontrollene og merker modeller med eksplisitt synsstøtte.
+For synkroniserte/importerte modeller godtar `PUT /api/provider-models` `provider`, `modelId` og
+`maxOutputTokenOverride`: et positivt heltall angir den manuelle grensen for antall output-tokens, og
+`null` fjerner den for å gjenopprette standardverdien. `GET /api/provider-models?provider=<provider>` returnerer disse verdiene i `modelOutputOverrides`, inkludert modeller uten en rad for egendefinert modell. Overstyringen bruker kjøretidens `max_output_tokens`-funksjonalitet og overlever en ny synkronisering av modellen. Siden for OpenAI-kompatible
+leverandører tilbyr de samme kontrollene for redigering/fjerning og markerer modeller med eksplisitt visningsstøtte.
 
-På en kompatibel leverandørnode lagrer skrivebanene (`POST`, `PUT`, `PATCH`, `DELETE` og `/api/provider-models/validate-and-add`) modell-ID-en som bare oppstrøms-ID: en id som er limt inn fra en prefiksliste har en hvilken som helst ledende stabel av nodens eget prefiks kollapset, og svarene gjengir den lagrede ID-en. Kanoniske leverandørers kuttede IDer (f.eks. `nvidia/nemotron-…`) lagres ordrett. `/v1/models` sender aldri ut en stablet `<prefix>/<prefix>/<model>` ID.
+På en kompatibel leverandørnode lagrer skriveoperasjonene (`POST`, `PUT`, `PATCH`, `DELETE` og
+`/api/provider-models/validate-and-add`) modell-ID-en som den rå upstream-ID-en: en ID
+som limes inn fra en prefikset liste, får alle innledende forekomster av nodens eget prefiks slått sammen, og
+svar gjengir den lagrede ID-en. Kanoniske leverandørers ID-er med skråstrek (f.eks. `nvidia/nemotron-…`) lagres
+ordrett. `/v1/models` sender aldri ut en stablet `<prefix>/<prefix>/<model>`-ID.
 
-Custom Chat Completions-noder tilpasser eksplisitte resonnementvalg til oppstrøms backend. En vellykket tilkoblingstest velger automatisk chat-malkontroller for hver eksakte modell ID hvis `/models` oppføring beviser en anerkjent `owned_by` verdi: `vllm`, `sglang` eller `llamacpp`. Gjennomsiktige OpenAI-kompatible innpakninger kan beholde den opprinnelige modelloppføringen inne i et nestet `openai` objekt; deteksjon følger opptil tre slike konvolutter. Modeller med manglende, ukjent eller motstridende eierskap beholder vanlig OpenAI adferd. Deteksjon gjenbruker den eksisterende katalogforespørselen, genererer ingen fullføringstokener og blir ugyldig når tilkoblingsendepunktet endres.
+Custom Chat Completions-noder tilpasser eksplisitte fravalg av resonnering til backend-systemet. En
+vellykket tilkoblingstest velger automatisk kontroller for chat-maler for hver eksakte modell-ID
+der oppføringen i `/models` bekrefter en gjenkjent `owned_by`-verdi: `vllm`, `sglang` eller `llamacpp`.
+Transparente OpenAI-kompatible omslag kan bevare den opprinnelige modelloppføringen i et nestet
+`openai`-objekt; deteksjonen følger opptil tre slike omslag. Modeller med manglende, ukjent eller
+motstridende eierskap beholder vanlig OpenAI-atferd. Deteksjonen bruker den eksisterende
+katalogforespørselen på nytt, genererer ingen completion-tokens og ugyldiggjøres når
+tilkoblingsendepunktet endres.
 
-For å feste atferden for en backend som ikke eksponerer de metadataene, bruk den eksisterende delvise leverandøroppdateringen API:
+For å låse atferden for en backend som ikke eksponerer disse metadataene, bruker du det eksisterende API-et for delvise leverandøroppdateringer:
 
 ```json
 {
@@ -1201,91 +1252,111 @@ For å feste atferden for en backend som ikke eksponerer de metadataene, bruk de
 }
 ```
 
-Send den kroppen med `PUT /api/providers/<connection-id>`. På den forbindelsen sendes en eksplisitt resonnementforsøk av `none` som `chat_template_kwargs.thinking=false` og `chat_template_kwargs.enable_thinking=false`. Eksplisitte opprinnelige malverdier forblir autoritative med mindre en resonneringsregel på serversiden fremtvinger en innsats. Innstillingen gjelder bare når en egendefinert OpenAI-kompatibel tilkobling sender en chatfullføringstekst; Svarforespørsler og vanlige leverandører beholder sin opprinnelige forespørselsform. Sett `reasoningControl` til `openai` for å tvinge vanlig OpenAI `reasoning_effort` -gjennomgang, eller slipp it/set den til `null` for å bruke automatisk deteksjon.
+Send denne body-en med `PUT /api/providers/<connection-id>`. På denne tilkoblingen sendes en eksplisitt
+resonneringsinnsats på `none` som `chat_template_kwargs.thinking=false` og
+`chat_template_kwargs.enable_thinking=false`. Eksplisitte opprinnelige malverdier forblir
+autoritative, med mindre en regel på serversiden tvinger frem en innsats. Innstillingen gjelder bare
+når en egendefinert OpenAI-kompatibel tilkobling sender en Chat Completions-body; Responses-forespørsler
+og vanlige leverandører beholder sin opprinnelige forespørselsform. Angi `reasoningControl` til
+`openai` for å tvinge gjennom vanlig OpenAI-passthrough av `reasoning_effort`, eller utelat den/sett
+den til `null` for å bruke automatisk deteksjon.
 
-Claude Code auto-modus klassifisering ber om standard innfødt tenkning til deaktivert når de ikke inneholder eksplisitte resonneringskontroller. Deteksjon bruker klassifisererens systemmarkør i Claude-formatforespørsler, ikke modellnavn eller fullføringsgrenser. Eksplisitte kroppskontroller, støttede effort/thinking overskrifter, rutingsregler og løst modellarbeid beholder sin eksisterende prioritet. Begge klassifiseringstrinn beholder sine meldinger, fullføringsgrenser, stoppsekvenser og ekte oppstrøms tillatelsesdommer; det andre trinnet kan fortsatt produsere sin forespurte synlige resonnement som vanlig tekst.
+Claude Code-forespørsler for klassifisering i automatisk modus bruker som standard opprinnelig
+tenking deaktivert når de ikke inneholder eksplisitte resonneringskontroller. Deteksjonen bruker
+klassifikatorens systemmarkør i forespørsler i Claude-format, ikke modellnavn eller
+completion-begrensninger. Eksplisitte body-kontroller, støttede headere for innsats/tenking,
+rutingsregler og løst modellnivå for innsats beholder sin eksisterende prioritet. Begge
+klassifikatorstadiene beholder promptene, completion-begrensningene og stoppsekvensene sine, samt
+de faktiske tillatelsesavgjørelsene fra upstream; det andre stadiet kan fortsatt produsere den
+forespurte synlige resonneringen som vanlig tekst.
 
-### OAuth flyter
+### OAuth-flyter
 
 | Endepunkt                        | Metode  | Beskrivelse               |
 | -------------------------------- | ------- | ------------------------- |
-| `/api/oauth/[provider]/[action]` | Diverse | Leverandørspesifikk OAuth |
+| `/api/oauth/[provider]/[action]` | Various | Leverandørspesifikk OAuth |
 
-### Ruting og konfig
+### Ruting og konfigurasjon
 
 | Endepunkt             | Metode   | Beskrivelse                           |
 | --------------------- | -------- | ------------------------------------- |
-| `/api/models`         | GET/PUT  | Modellliste / aliasoppdatering        |
+| `/api/models`         | GET/PUT  | Modelliste / aliasoppdatering         |
 | `/api/models/alias`   | GET/POST | Modellaliaser                         |
 | `/api/models/catalog` | GET      | Alle modeller etter leverandør + type |
-| `/api/combos*`        | Diverse  | Combo ledelse                         |
-| `/api/keys*`          | Diverse  | API nøkkelstyring                     |
-| `/api/pricing`        | GET      | Modellprising                         |
+| `/api/combos*`        | Various  | Administrasjon av kombinasjoner       |
+| `/api/keys*`          | Various  | Administrasjon av API-nøkler          |
+| `/api/pricing`        | GET      | Modellpriser                          |
 
-#### Modellgrense herkomst
+#### Opphav for modellbegrensninger
 
-`GET /api/models?withLimits=1` (også `true`; `0`/`false` eller utelate det holder standard nyttelasten uendret) legger til `contextWindow`, `maxInputTokens`, `maxOutputTokens` og et `capsSource` objekt til hver modellrad. `capsSource` navngir regelen som ga hver grense, så en overraskende grense (for eksempel 128k på en 1M-modell) kan spores til opprinnelsen. De løste verdiene er de samme som ruting bruker; flagget legger bare til felt og endrer aldri en verdi. Enhver annen `withLimits` verdi avvises med `400`.
+`GET /api/models?withLimits=1` (også `true`; `0`/`false`, eller hvis den utelates, beholdes
+standard-nyttelasten uendret) legger til `contextWindow`, `maxInputTokens`, `maxOutputTokens` og et
+`capsSource`-objekt i hver modellrad. `capsSource` navngir regelen som leverte hver begrensning, slik
+at en overraskende begrensning (for eksempel 128k på en 1M-modell) kan spores til opphavet sitt. De
+løste verdiene er de samme som rutingen bruker; flagget legger bare til felt og endrer aldri en verdi.
+Alle andre `withLimits`-verdier avvises med `400`.
 
-| `capsSource`                                 | Opprinnelse                                                              |
-| -------------------------------------------- | ------------------------------------------------------------------------ |
-| `override:context`                           | Vedvarende overstyring av kontekstvindu (`model_context_overrides`)      |
-| `override:max_input` / `override:max_output` | Vedvarende overstyring av `max_input_tokens` / `max_output_tokens` -evne |
-| `static-authoritative:<provider>/<model>`    | Statisk autoritativ kontekst-vindustabell                                |
-| `synced:<provider>/<model>`                  | models.dev synkronisert funksjonsrad                                     |
-| `registry:<provider>/<model>`                | Leverandørregisteroppføring                                              |
-| `spec:<model>`                               | Statisk modellspesifikasjon                                              |
-| `effort-base:` -prefiks                      | Rad lånt fra basismodellen til en variant med innsatssuffiks             |
-| `none`                                       | Ingen kilde erklærer grensen (verdien er `null`)                         |
+| `capsSource`-verdi                           | Opphav                                                                  |
+| -------------------------------------------- | ----------------------------------------------------------------------- |
+| `override:context`                           | Lagret overstyring av kontekstvindu (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | Lagret overstyring av `max_input_tokens` / `max_output_tokens`-egenskap |
+| `static-authoritative:<provider>/<model>`    | Statisk autoritativ tabell for kontekstvindu                            |
+| `synced:<provider>/<model>`                  | Synkronisert egenskapsrad fra models.dev                                |
+| `registry:<provider>/<model>`                | Oppføring i leverandørregisteret                                        |
+| `spec:<model>`                               | Statisk modellspesifikasjon                                             |
+| `effort-base:`-prefiks                       | Rad lånt fra basismodellen til en variant med suffiks for innsats       |
+| `none`                                       | Ingen kilde angir begrensningen (verdien er `null`)                     |
 
-Implementering: `getResolvedModelCapabilitiesWithLimitSources()` i `src/lib/modelCapabilities.ts` og prioritetskjedene i `src/lib/modelCapabilityLimits.ts`.
+Implementasjon: `getResolvedModelCapabilitiesWithLimitSources()` i `src/lib/modelCapabilities.ts`
+og presedenskjedene i `src/lib/modelCapabilityLimits.ts`.
 
 ### Bruk og analyse
 
-| Endepunkt                        | Metode          | Beskrivelse                                                                                                                                                                                                                                                                                                              |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/usage/history`             | GET             | Brukshistorikk                                                                                                                                                                                                                                                                                                           |
-| `/api/usage/logs`                | GET             | Brukslogger                                                                                                                                                                                                                                                                                                              |
-| `/api/usage/request-logs`        | GET             | Logger på forespørselsnivå                                                                                                                                                                                                                                                                                               |
-| `/api/usage/[connectionId]`      | GET             | Bruk per tilkobling                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Per-API-nøkkel token-grense budsjetter                                                                                                                                                                                                                                                                                   |
-| `/api/usage/model-latency-stats` | GET             | Rullende per-provider/model -latensaggregat (avg/p50/p95/p99, suksessrate); filtre: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                      |
-| `/api/usage/cache-health`        | GET             | Helseoppsummering for prompt-cache over `call_logs` — write/read -forhold, p50/p90/p99 -skrivestørrelsesfordeling, heavy-write-konsentrasjon, splitt per modell og en `healthy`/`degraded`/`thrash`/`no-data` -dom; spørringsparametere `range` (`1h`\| `24h`\| `7d`\| `30d`, standard `24h`) og valgfri `model` (#8827) |
+| Endepunkt                        | Metode          | Beskrivelse                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Brukshistorikk                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/usage/logs`                | GET             | Brukslogger                                                                                                                                                                                                                                                                                                                                                               |
+| `/api/usage/request-logs`        | GET             | Logger på forespørselsnivå                                                                                                                                                                                                                                                                                                                                                |
+| `/api/usage/[connectionId]`      | GET             | Bruk per tilkobling                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Token-grensebudsjetter per API-nøkkel                                                                                                                                                                                                                                                                                                                                     |
+| `/api/usage/model-latency-stats` | GET             | Rullerende aggregat for forsinkelse per leverandør/modell (gjennomsnitt/p50/p95/p99, suksessrate); filtre: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                |
+| `/api/usage/cache-health`        | GET             | Sammendrag av hurtigbufferstatus for ledetekster over `call_logs` — forholdet mellom skriving og lesing, p50/p90/p99-fordeling av skrivestørrelser, konsentrasjon av omfattende skriving, fordeling per modell og en `healthy`/`degraded`/`thrash`/`no-data`-vurdering; spørringsparametere `range` (`1h`\|`24h`\|`7d`\|`30d`, standard `24h`) og valgfri `model` (#8827) |
 
-### API nøkkel tillatelser
+### API -nøkkeltillatelser
 
 `PATCH /api/keys/{id}` oppdaterer en eksisterende nøkkels tillatelser. Som alle `/api/keys*` -ruter trenger den administrasjonsautorisasjon (se [Management Authentication](../guides/MANAGEMENT-AUTH.md) ), ikke en slutningsnøkkel. Send kun feltene du vil endre; en forespørsel med ingen av dem blir avvist med `No valid fields to update`. De aksepterte feltene er definert av `updateKeyPermissionsSchema` i `src/shared/validation/schemas/keys.ts`.
 
-| Felt                                        | Type                                                                 | Notater                                                                                                                                                                                                                                                                |
-| ------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | streng, 1-200 tegn                                                   |                                                                                                                                                                                                                                                                        |
-| `isActive`                                  | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `isBanned`                                  | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `expiresAt`                                 | ISO 8601 datetime eller `null`                                       | `null` fjerner utløpet                                                                                                                                                                                                                                                 |
-| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` må være tom når modusen er `all`                                                                                                                                                                                                                       |
-| `allowedModels`, `blockedModels`            | rekke strenger, opptil 1000                                          |                                                                                                                                                                                                                                                                        |
-| `allowedCombos`                             | rekke strenger, opptil 500                                           | Porter som kombinerer nøkkelen kan ringe; direkte modeller styres av `modelAccessMode` / `allowedModels`                                                                                                                                                               |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` må være ikke-tom når `restricted` og tom når `all`                                                                                                                                                                                                |
-| `allowedConnections`                        | rekke UUIDs, opptil 100                                              |                                                                                                                                                                                                                                                                        |
-| `allowAutoCombos`                           | boolsk                                                               | `false` avviser forespørsler om `auto/*` modeller med denne nøkkelen; nøkler som aldri angir det er tillatt                                                                                                                                                            |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                        | Hva `GET /v1/models` viser for denne nøkkelen (kun kombinasjoner, bare modeller eller begge deler); det endrer ikke hva nøkkelen kan kalle                                                                                                                             |
-| `forcedModel`                               | streng opp til 300 tegn, eller `null`                                | Sender chatforespørsler til denne model/combo, over `X-Route-Model` og `body.model`; nøkkelens grenser gjelder fortsatt                                                                                                                                                |
-| `noLog`, `autoResolve`                      | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `throttleDelayMs`                           | heltall, 0-300 000                                                   |                                                                                                                                                                                                                                                                        |
-| `maxSessions`                               | heltall, 0-10000                                                     |                                                                                                                                                                                                                                                                        |
-| `rateLimits`                                | rekke `{ limit, window }` (positive heltall, opptil 50) eller `null` | `null` klarerer grensene                                                                                                                                                                                                                                               |
-| `accessSchedule`                            | tidsplanobjekt eller `null`                                          | `null` sletter timeplanen                                                                                                                                                                                                                                              |
-| `scopes`                                    | rekke strenger, opptil 32                                            |                                                                                                                                                                                                                                                                        |
-| `allowedEndpoints`                          | rekke strenger, opptil 20                                            |                                                                                                                                                                                                                                                                        |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                                                                                                                                                        |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | Se [Per-tast cache bypass](#per-key-cache-bypass)                                                                                                                                                                                                                      |
-| `compressionEnabled`                        | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `codexServiceMode`                          | en av Codex -tjenestemodusene                                        |                                                                                                                                                                                                                                                                        |
-| `disableNonPublicModels`                    | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `allowUsageCommand`                         | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `usageLimitEnabled`                         | boolsk                                                               |                                                                                                                                                                                                                                                                        |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nummer >= 0 eller `null`                                             |                                                                                                                                                                                                                                                                        |
-| `fiveHourUsageLimitUsd`                     | nummer >= 0 eller `null`                                             | Rullende 5-timers USD budsjett, håndhevet som de daglige og ukentlige grensene (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` er når den eldste brukeren i vinduet eldes ut, noe som kan la en nøkkel langt over grensen fortsatt være blokkert. |
-| `chaosModeEnabled`                          | boolsk                                                               |                                                                                                                                                                                                                                                                        |
+| Felt                                        | Type                                                                       | Merknader                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 tegn                                                         |                                                                                                                                                                                                                                                                        |
+| `isActive`                                  | boolsk                                                                     |                                                                                                                                                                                                                                                                        |
+| `isBanned`                                  | boolsk                                                                     |                                                                                                                                                                                                                                                                        |
+| `expiresAt`                                 | ISO 8601-dato og -klokkeslett eller `null`                                 | `null` fjerner utløpstiden                                                                                                                                                                                                                                             |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | `allowedModels` må være tom når modusen er `all`                                                                                                                                                                                                                       |
+| `allowedModels`, `blockedModels`            | rekke strenger, opptil 1000                                                |                                                                                                                                                                                                                                                                        |
+| `allowedCombos`                             | matrise med strenger, opptil 500                                           | Styrer hvilke kombinasjoner nøkkelen kan kalle; direkte modeller styres av `modelAccessMode` / `allowedModels`                                                                                                                                                         |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` må være ikke-tom når modusen er `restricted`, og tom når modusen er `all`                                                                                                                                                                         |
+| `allowedConnections`                        | matrise med UUID-er, opptil 100                                            |                                                                                                                                                                                                                                                                        |
+| `allowAutoCombos`                           | boolsk                                                                     | `false` avviser forespørsler etter `auto/*`-modeller med denne nøkkelen; nøkler som aldri angir dette, tillates                                                                                                                                                        |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Hva `GET /v1/models` viser for denne nøkkelen (bare kombinasjoner, bare modeller eller begge); det endrer ikke hva nøkkelen kan kalle                                                                                                                                  |
+| `forcedModel`                               | streng på opptil 300 tegn eller `null`                                     | Ruter chatforespørsler til denne modellen/kombinasjonen, foran `X-Route-Model` og `body.model`; nøkkelens begrensninger gjelder fortsatt                                                                                                                               |
+| `noLog`, `autoResolve`                      | boolsk                                                                     |                                                                                                                                                                                                                                                                        |
+| `throttleDelayMs`                           | heltall, 0-300000                                                          |                                                                                                                                                                                                                                                                        |
+| `maxSessions`                               | heltall, 0-10000                                                           |                                                                                                                                                                                                                                                                        |
+| `rateLimits`                                | matrise med `{ limit, window }` (positive heltall, opptil 50) eller `null` | `null` fjerner begrensningene                                                                                                                                                                                                                                          |
+| `accessSchedule`                            | tidsplanobjekt eller `null`                                                | `null` fjerner tidsplanen                                                                                                                                                                                                                                              |
+| `scopes`                                    | matrise med strenger, opptil 32                                            |                                                                                                                                                                                                                                                                        |
+| `allowedEndpoints`                          | matrise med strenger, opptil 20                                            |                                                                                                                                                                                                                                                                        |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                                                                                                        |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Se [Omgåelse av hurtigbuffer per nøkkel](#per-key-cache-bypass)                                                                                                                                                                                                        |
+| `compressionEnabled`                        | boolsk                                                                     |                                                                                                                                                                                                                                                                        |
+| `codexServiceMode`                          | én av Codex-tjenestemodusene                                               |                                                                                                                                                                                                                                                                        |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                                                                                                        |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                                                                                                        |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                                                                                                        |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nummer >= 0 eller `null`                                                   |                                                                                                                                                                                                                                                                        |
+| `fiveHourUsageLimitUsd`                     | nummer >= 0 eller `null`                                                   | Rullende 5-timers USD budsjett, håndhevet som de daglige og ukentlige grensene (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` er når den eldste brukeren i vinduet eldes ut, noe som kan la en nøkkel langt over grensen fortsatt være blokkert. |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                                                                                                        |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1296,45 +1367,45 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Innstillinger
 
-| Endepunkt                             | Metode        | Beskrivelse                                                                                                                                                                                                                                                                         |
-| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Generelle innstillinger. Sikkerhetspolicynøkler (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) trenger `currentPassword` og en operatørlegitimasjon — API nøkler og `oma_` tokens får `403`; hver mutasjon trenger `admin` -tilgangstoken-omfanget |
-| `/api/settings/proxy`                 | GET/PUT       | Nettverks proxy-konfigurasjon                                                                                                                                                                                                                                                       |
-| `/api/settings/proxy/test`            | POST          | Test proxy-tilkobling                                                                                                                                                                                                                                                               |
-| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                              |
-| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** forespørsel** omskrivingsmodus (passthrough / auto-strip / egendefinert / adaptiv). Uavhengig av kompresjon. Se [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                            |
-| `/api/settings/system-prompt`         | GET/PUT       | Global systemmelding                                                                                                                                                                                                                                                                |
-| `/api/settings/compression`           | GET/PUT       | Global komprimeringskonfigurasjon                                                                                                                                                                                                                                                   |
-| `/api/settings/purge-request-history` | POST          | Slett rader for forespørselslogg og lokale anropslogg-artefakter                                                                                                                                                                                                                    |
+| Endpoint                              | Method        | Description                                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Generelle innstillinger. Sikkerhetspolicy-nøkler (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) krever `currentPassword` og en operatørlegitimasjon — API-nøkler og `oma_`-tokens får `403`; alle endringer krever `admin`-omfanget for tilgangstokenet |
+| `/api/settings/proxy`                 | GET/PUT       | Konfigurasjon av nettverksproxy                                                                                                                                                                                                                                                          |
+| `/api/settings/proxy/test`            | POST          | Test proxytilkoblingen                                                                                                                                                                                                                                                                   |
+| `/api/settings/ip-filter`             | GET/PUT       | Tillatelses-/blokkeringsliste for IP-adresser                                                                                                                                                                                                                                            |
+| `/api/settings/thinking-budget`       | GET/PUT       | Modus for omskriving av **forespørsler** om tenking/resonnering (passthrough / auto-strip / custom / adaptive). Uavhengig av komprimering. Se [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                        |
+| `/api/settings/system-prompt`         | GET/PUT       | Global systeminstruksjon                                                                                                                                                                                                                                                                 |
+| `/api/settings/compression`           | GET/PUT       | Global komprimeringskonfigurasjon                                                                                                                                                                                                                                                        |
+| `/api/settings/purge-request-history` | POST          | Tøm rader i forespørselsloggen og lokale artefakter fra samtaleloggen                                                                                                                                                                                                                    |
 
 ### Kontekst og komprimering
 
-| Endepunkt                              | Metode         | Beskrivelse                                                                          |
+| Endpoint                               | Method         | Description                                                                          |
 | -------------------------------------- | -------------- | ------------------------------------------------------------------------------------ |
-| `/api/compression/preview`             | POST           | Forhåndsvis off/lite/standard/aggressive/ultra/RTK/stacked -komprimering             |
-| `/api/compression/language-packs`      | GET            | Liste tilgjengelige Caveman-språkpakker                                              |
-| `/api/compression/rules`               | GET            | Vis hulemann-regelmetadata                                                           |
-| `/api/context/caveman/config`          | GET/PUT        | Hulemannspesifikke innstillingeralias                                                |
-| `/api/context/rtk/config`              | GET/PUT        | RTK-spesifikke innstillinger, inkludert tilpassede filtre og oppbevaring av råutdata |
-| `/api/context/rtk/filters`             | GET            | RTK filterkatalog og tilpasset filterdiagnostikk                                     |
-| `/api/context/rtk/test`                | POST           | Kjør RTK preview/test mot en tekstnyttelast                                          |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Les beholdt redigert rå utgang av peker-ID                                           |
-| `/api/context/combos`                  | GET/POST       | Kompresjonskombinasjon list/create                                                   |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Kompresjonskombinasjon detail/update/delete                                          |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Tilordne kompresjonskombinasjoner til rutingkombinasjoner                            |
+| `/api/compression/preview`             | POST           | Forhåndsvis komprimering med off/lite/standard/aggressive/ultra/RTK/stacked          |
+| `/api/compression/language-packs`      | GET            | Vis tilgjengelige Caveman-språkpakker                                                |
+| `/api/compression/rules`               | GET            | Vis metadata for Caveman-regler                                                      |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman-spesifikt innstillingsalias                                                  |
+| `/api/context/rtk/config`              | GET/PUT        | RTK-spesifikke innstillinger, inkludert egendefinerte filtre og bevaring av råutdata |
+| `/api/context/rtk/filters`             | GET            | RTK-filterkatalog og diagnostikk for egendefinerte filtre                            |
+| `/api/context/rtk/test`                | POST           | Kjør RTK-forhåndsvisning/test mot en tekstnyttelast                                  |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Les beholdte redigerte råutdata etter peker-ID                                       |
+| `/api/context/combos`                  | GET/POST       | Liste/oppretting av komprimeringskombinasjoner                                       |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Visning/oppdatering/sletting av komprimeringskombinasjon                             |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Tilordne komprimeringskombinasjoner til rutingskombinasjoner                         |
 | `/api/context/analytics`               | GET            | Alias for komprimeringsanalyse                                                       |
 
 ### Overvåking
 
-| Endepunkt                            | Metode     | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Aktiv øktsporing                                                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/rate-limits`                   | GET        | Satsgrenser per konto                                                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/monitoring/health`             | GET        | Helsesjekk + -leverandørsammendrag (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Administrasjonsvisning inkluderer `credentialHealth`: probe-cache-skalarer, `failedConnections` når `failed>0` og `staleDbNonOkCount` (SQLite klebrig `test_status`, ikke måleren). Se [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Bufferstatistikk / slett                                                                                                                                                                                                                                                                                                                                                                              |
-| `/api/modality-bridge/stats`         | GET        | `attempts` i minnet , suksesser/`bridged`, feil, hurtigbuffertreff, `totalLatencyMs`, `latencySamples`, sample-denominert `averageLatencyMs` og siste brukstid (tilbakestilling ved omstart; administrasjonsaut.)                                                                                                                                                                                     |
-| `/api/modality-bridge/video/runtime` | GET        | Streng sjekk av pålitelig tilbakekobling før administrasjon auth/probe; renset FFmpeg/ffprobe tilgjengelighet og versjoner (ikke-butikk)                                                                                                                                                                                                                                                              |
-| `/api/modality-bridge/video/extract` | POST       | Intern autentisert betrodd loopback-bytemegler; 50 MiB inngang, begrenset queue/32 MiB utgang, `503` kapasitet, `499` frakobling, `504` frist; ikke en offentlig opplasting API                                                                                                                                                                                                                       |
+| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Sporing av aktive økter                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/rate-limits`                   | GET        | Hastighetsgrenser per konto                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/monitoring/health`             | GET        | Helsesjekk + leverandøroversikt (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Administrasjonsvisningen inkluderer `credentialHealth`: skalarverdier fra probe-hurtigbufferet, `failedConnections` når `failed>0`, og `staleDbNonOkCount` (fastlåst SQLite `test_status`, ikke måleverdien). Se [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Hurtigbufferstatistikk / tøm hurtigbuffer                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/modality-bridge/stats`         | GET        | Innebygde `attempts`, vellykkede forespørsler/`bridged`, feil, treff i hurtigbufferet, `totalLatencyMs`, `latencySamples`, utvalgsbasert `averageLatencyMs` og tidspunkt for siste bruk (tilbakestilles ved omstart; administrasjonsautentisering)                                                                                                                                                                           |
+| `/api/modality-bridge/video/runtime` | GET        | Streng kontroll av klarert loopback før administrasjonsautentisering/probing; renset tilgjengelighet og versjoner for FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                              |
+| `/api/modality-bridge/video/extract` | POST       | Intern autentisert byte-megler for klarert loopback; inndata på 50 MiB, begrenset kø/32 MiB-utdata, `503` ved kapasitetsmangel, `499` ved frakobling, `504` ved tidsfrist; ikke et offentlig API for opplasting                                                                                                                                                                                                              |
 
 ### Drill-down videoramme
 
@@ -1344,99 +1415,104 @@ GET -spørring: nødvendig `handle`; valgfri `variant` (`preview`, `standard`, `
 
 `DELETE /api/v1/video-bridge/drilldown?handle=...` returnerer `{ "removed": 0|1 }`. Ukjent, utløpt og kryssnøkkel GETs er umulige å skille 404-svar; cross-key DELETE kan ikke fjerne eierens oppføring. Deaktivert tilgang returnerer 403, missing/invalid autentisering 401, ugyldige spørringer 400, kansellering 499 og midlertidige feil 503. Håndtakene er prosesslokale, utløper etter ti minutter og overlever ikke en omstart. Nye håndtak bruker `v1.` pluss et 32-byte tilfeldig Base64URL token; bare token-hasher beholdes. Legacy 64-hex tokens forblir syntaktisk lesbare for kompatibilitet. Se [Video Bridge-rekkverk](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) for detaljer om samtykke, kvoter og variantavledning.
 
-### Sikkerhetskopiering og Export/Import
+### Sikkerhetskopiering og eksport/import
 
-| Endepunkt                   | Metode | Beskrivelse                                                                     |
-| --------------------------- | ------ | ------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Liste over tilgjengelige sikkerhetskopier                                       |
-| `/api/db-backups`           | PUT    | Lag en manuell sikkerhetskopi                                                   |
-| `/api/db-backups`           | POST   | Gjenopprett fra en bestemt sikkerhetskopi                                       |
-| `/api/db-backups`           | PATCH  | Lagre innstillinger for sikkerhetskopiering (bare operatør)                     |
-| `/api/db-backups`           | DELETE | Beskjær lagrede sikkerhetskopier til oppbevaringsinnstillingene (bare operatør) |
-| `/api/db-backups/export`    | GET    | Last ned databasen som .sqlite-fil                                              |
-| `/api/db-backups/import`    | POST   | Last opp .sqlite-fil for å erstatte databasen (`?dryRun=true` validerer bare)   |
-| `/api/db-backups/exportAll` | GET    | Last ned full sikkerhetskopi som .tar.gz-arkiv                                  |
+| Endepunkt                   | Metode | Beskrivelse                                                                                |
+| --------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| `/api/db-backups`           | GET    | Vis tilgjengelige sikkerhetskopier                                                         |
+| `/api/db-backups`           | PUT    | Opprett en manuell sikkerhetskopi                                                          |
+| `/api/db-backups`           | POST   | Gjenopprett fra en spesifikk sikkerhetskopi                                                |
+| `/api/db-backups`           | PATCH  | Lagre innstillinger for oppbevaring av sikkerhetskopier (kun operatør)                     |
+| `/api/db-backups`           | DELETE | Rydd bort lagrede sikkerhetskopier i henhold til oppbevaringsinnstillingene (kun operatør) |
+| `/api/db-backups/export`    | GET    | Last ned databasen som en .sqlite-fil                                                      |
+| `/api/db-backups/import`    | POST   | Last opp .sqlite-fil for å erstatte databasen (`?dryRun=true` validerer bare)              |
+| `/api/db-backups/exportAll` | GET    | Last ned full sikkerhetskopi som et .tar.gz-arkiv                                          |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` og `/api/settings/export-json` deler ut hver lagrede legitimasjon, så de krever dashbordøkten eller den lokale CLI (eller pålogging deaktivert). API -nøkler av ethvert omfang og `oma_` tilgangstokener får `403`. Gjenopprettingene har samme grense: `POST /api/db-backups/import` (inkludert `dryRun=true` ), `POST /api/db-backups` (gjenoppretting etter id) og `POST /api/settings/import-json` erstatter den levende databasen eller innstillingene, så en maskinlegitimasjon får `403` der også; `omniroute sync import` sender den lokale CLI legitimasjonen. Det samme gjør `DELETE /api/db-backups` (beskjære lagrede sikkerhetskopier) og `PATCH /api/db-backups` (oppbevaringsinnstillinger: de vedvarende verdiene driver den automatiske beskjæringen etter hver sikkerhetskopi). Oppføring (`GET`) og oppretting av en manuell sikkerhetskopi (`PUT`) beholder ordinær administrasjonsautoritet.
+`/api/db-backups/export`, `/api/db-backups/exportAll` og `/api/settings/export-json` utleverer
+alle lagrede legitimasjonsopplysninger, så de krever dashbordøkten eller den lokale CLI-en (eller at
+innlogging er deaktivert). API-nøkler med hvilket som helst omfang og `oma_`-tilgangstokener får
+`403`. Gjenopprettinger har samme grense: `POST /api/db-backups/import` (`dryRun=true` inkludert), `POST /api/db-backups` (gjenoppretting etter id) og `POST /api/settings/import-json` erstatter den aktive databasen eller innstillingene, så en maskinlegitimasjon får også `403` der; `omniroute sync import` sender legitimasjonen til den lokale CLI-en. Det samme gjelder `DELETE /api/db-backups` (rydd bort lagrede sikkerhetskopier) og `PATCH /api/db-backups` (oppbevaringsinnstillinger:
+de lagrede verdiene styrer den automatiske oppryddingen etter hver sikkerhetskopi). Visning (`GET`) og oppretting
+av en manuell sikkerhetskopi (`PUT`) beholder vanlig administrasjonsautentisering.
 
-### Cloud Sync
+### Skysynkronisering
 
 | Endepunkt              | Metode  | Beskrivelse                   |
 | ---------------------- | ------- | ----------------------------- |
-| `/api/sync/cloud`      | Diverse | Skysynkroniseringsoperasjoner |
+| `/api/sync/cloud`      | Various | Skysynkroniseringsoperasjoner |
 | `/api/sync/initialize` | POST    | Initialiser synkronisering    |
-| `/api/cloud/*`         | Diverse | Skyadministrasjon             |
+| `/api/cloud/*`         | Various | Skyadministrasjon             |
 
 ### Tunneler
 
-| Endepunkt                  | Metode | Beskrivelse                                                               |
-| -------------------------- | ------ | ------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | Les Cloudflare Quick Tunnel install/runtime -status for dashbordet        |
-| `/api/tunnels/cloudflared` | POST   | Aktiver eller deaktiver Cloudflare Quick Tunnel (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET    | Les ngrok Tunnel kjøretidsstatus for dashbordet                           |
-| `/api/tunnels/ngrok`       | POST   | Aktiver eller deaktiver ngrok tunnelen (`action=enable/disable`)          |
+| Endepunkt                  | Metode | Beskrivelse                                                                      |
+| -------------------------- | ------ | -------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | Les installasjons- og kjøretidsstatus for Cloudflare Quick Tunnel for dashbordet |
+| `/api/tunnels/cloudflared` | POST   | Aktiver eller deaktiver Cloudflare Quick Tunnel (`action=enable/disable`)        |
+| `/api/tunnels/ngrok`       | GET    | Les kjøretidsstatus for ngrok Tunnel for dashbordet                              |
+| `/api/tunnels/ngrok`       | POST   | Aktiver eller deaktiver ngrok Tunnel (`action=enable/disable`)                   |
 
-### CLI verktøy
+### CLI-verktøy
 
 | Endepunkt                          | Metode | Beskrivelse           |
 | ---------------------------------- | ------ | --------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Claude CLI -status    |
-| `/api/cli-tools/codex-settings`    | GET    | Codex CLI -status     |
-| `/api/cli-tools/droid-settings`    | GET    | Droid CLI -status     |
-| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI -status  |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Generisk CLI kjøretid |
+| `/api/cli-tools/claude-settings`   | GET    | Claude CLI-status     |
+| `/api/cli-tools/codex-settings`    | GET    | Codex CLI-status      |
+| `/api/cli-tools/droid-settings`    | GET    | Droid CLI-status      |
+| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI-status   |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Generell CLI-kjøretid |
 
-CLI -svarene inkluderer: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI-svar inkluderer: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### ACP agenter
+### ACP-agenter
 
-| Endepunkt         | Metode | Beskrivelse                                                 |
-| ----------------- | ------ | ----------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Liste alle oppdagede agenter (innebygd + custom) med status |
-| `/api/acp/agents` | POST   | Legg til tilpasset agent eller oppdater deteksjonsbuffer    |
-| `/api/acp/agents` | DELETE | Fjern en tilpasset agent ved hjelp av `id` query param      |
+| Endepunkt         | Metode | Beskrivelse                                                                 |
+| ----------------- | ------ | --------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Vis alle oppdagede agenter (innebygde + egendefinerte) med status           |
+| `/api/acp/agents` | POST   | Legg til en egendefinert agent eller oppdater hurtigbufferen for oppdagelse |
+| `/api/acp/agents` | DELETE | Fjern en egendefinert agent med spørringsparameteren `id`                   |
 
-GET -svaret inkluderer `agents[]` (id, navn, binær, versjon, installert, protokoll, isCustom) og `summary` (totalt, installert, notFound, builtIn, tilpasset).
+GET-svaret inkluderer `agents[]` (id, name, binary, version, installed, protocol, isCustom) og `summary` (total, installed, notFound, builtIn, custom).
 
-### Resiliens og rategrenser
+### Robusthet og hastighetsbegrensninger
 
-| Endepunkt                         | Metode    | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Get/update -forespørselskø, tilkoblingsavkjøling, leverandøravbrudd og venteinnstillinger                                                                                                                                                                                                                                                                                                                     |
-| `/api/resilience/reset`           | POST      | Tilbakestill leverandørens strømbrytere                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/resilience/model-cooldowns` | GET       | Liste aktive per-(leverandør, tilkobling, modell) lockouter, sortert etter gjenværende tid                                                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/model-cooldowns` | DELETE    | Fjern en modellsperre — body `{provider, model}` eller `{all: true}` for å tørke av alt                                                                                                                                                                                                                                                                                                                       |
-| `/api/rate-limits`                | GET/POST  | Takstgrensestatus per konto (GET) eller veksle mellom rategrensebeskyttelse for en tilkobling (POST `{connectionId, enabled}`). Støttet skrivebane for `rateLimitProtection` (aldri endret via `PUT /api/providers/[id]`). Merk: `enabled: false` deaktiverer eksplisitt beskyttelse, men velger ikke en aktiv API-nøkkelforbindelse fra det globale autoaktiveringsnettverket (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Global rategrensekonfigurasjon (avviklet; alias til `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                       |
+| Endpoint                          | Metode    | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Hent/oppdater innstillinger for forespørselskø, tilkoblingsnedkjøling, leverandørbryter og venting                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/resilience/reset`           | POST      | Tilbakestill kretsbrytere for leverandører                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/resilience/model-cooldowns` | GET       | List aktive låsinger per (leverandør, tilkobling, modell), sortert etter gjenværende tid                                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/resilience/model-cooldowns` | DELETE    | Fjern en modellås — body `{provider, model}` eller `{all: true}` for å fjerne alle                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/rate-limits`                | GET/POST  | Status for hastighetsbegrensning per konto (GET) eller slå beskyttelse mot hastighetsbegrensning av/på for en tilkobling (POST `{connectionId, enabled}`). Støttet skrivebane for `rateLimitProtection` (endres aldri via `PUT /api/providers/[id]`). Merk: `enabled: false` deaktiverer eksplisitt beskyttelse, men gjør ikke at en aktiv API-nøkkeltilkobling velger bort det globale sikkerhetsnettet for automatisk aktivering (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Global konfigurasjon for hastighetsbegrensning (avviklet; alias til `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                           |
 
-> Alle fire `/api/resilience/*` -rutene krever** ledelsesaut** (`requireManagementAuth`). Se [Resilience (utvidet)](#resilience-extended) for en fullstendig oversikt over leverandørbryter vs tilkoblingsavkjøling vs modellsperre.
+> Alle fire `/api/resilience/*`-rutene krever **administrasjonsautentisering** (`requireManagementAuth`). Se [Resilience (utvidet)](#resilience-extended) for en fullstendig gjennomgang av leverandørbryter kontra tilkoblingsnedkjøling kontra modellås.
 
-### Evals
+### Evalueringer
 
-| Endepunkt    | Metode   | Beskrivelse                        |
-| ------------ | -------- | ---------------------------------- |
-| `/api/evals` | GET/POST | List eval suiter / kjør evaluering |
+| Endepunkt    | Metode   | Beskrivelse                            |
+| ------------ | -------- | -------------------------------------- |
+| `/api/evals` | GET/POST | List evalueringssett / kjør evaluering |
 
 ### Retningslinjer
 
-| Endepunkt       | Metode          | Beskrivelse                |
-| --------------- | --------------- | -------------------------- |
-| `/api/policies` | GET/POST/DELETE | Administrer rutingpolicyer |
+| Endepunkt       | Metode          | Beskrivelse                       |
+| --------------- | --------------- | --------------------------------- |
+| `/api/policies` | GET/POST/DELETE | Administrer rutingsretningslinjer |
 
-### Overholdelse
+### Samsvar
 
-| Endepunkt                   | Metode | Beskrivelse                          |
-| --------------------------- | ------ | ------------------------------------ |
-| `/api/compliance/audit-log` | GET    | Overholdelsesrevisjonslogg (siste N) |
+| Endepunkt                   | Metode | Beskrivelse                     |
+| --------------------------- | ------ | ------------------------------- |
+| `/api/compliance/audit-log` | GET    | Samsvarsrevisjonslogg (siste N) |
 
 ### v1beta (Gemini-kompatibel)
 
-| Endepunkt                  | Metode | Beskrivelse                         |
-| -------------------------- | ------ | ----------------------------------- |
-| `/v1beta/models`           | GET    | Liste over modeller i Gemini format |
-| `/v1beta/models/{...path}` | POST   | Gemini `generateContent` endepunkt  |
+| Endepunkt                  | Metode | Beskrivelse                        |
+| -------------------------- | ------ | ---------------------------------- |
+| `/v1beta/models`           | GET    | List modeller i Gemini-format      |
+| `/v1beta/models/{...path}` | POST   | Gemini-`generateContent`-endepunkt |
 
-Disse endepunktene gjenspeiler GeminiAPI format for klienter som forventer opprinnelig Gemini SDK kompatibilitet.
+Disse endepunktene speiler Geminis API-format for klienter som forventer innebygd kompatibilitet med Gemini SDK.
 
 ### Intern / System APIs
 
@@ -1452,7 +1528,7 @@ Disse endepunktene gjenspeiler GeminiAPI format for klienter som forventer oppri
 
 > **Note:** Disse endepunktene brukes internt av systemet eller for Ollama klientkompatibilitet. De kalles vanligvis ikke opp av sluttbrukere.
 
-### OAuth miljøreparasjon _(v3.6.1 +)_
+### Reparasjon av OAuth-miljø _(v3.6.1+)_
 
 ```bash
 POST /api/system/env/repair
@@ -1463,7 +1539,7 @@ Content-Type: application/json
 }
 ```
 
-Reparerer manglende eller ødelagte OAuth -miljøvariabler for en spesifikk leverandør. Returnerer:
+Reparerer manglende eller ødelagte OAuth-miljøvariabler for en bestemt leverandør. Returnerer:
 
 ```json
 {
@@ -1479,7 +1555,7 @@ Reparerer manglende eller ødelagte OAuth -miljøvariabler for en spesifikk leve
 GET /api/system/version
 ```
 
-Loopback-bare administrasjonsrute (admin auth). Returnerer den kjørende versjonen, den siste publiserte versjonen og statusen for automatisk oppdatering. `releaseChannel` og `channels` er additive felt (skinne 3.8.54); `channel` beholder sin betydning — distribusjonsmodusen dashboardoppdateringen bruker (`npm`, `source` eller `docker-compose`).
+Administrasjonsrute som kun er tilgjengelig via loopback (admin-autentisering). Returnerer den kjørende versjonen, den nyeste publiserte versjonen og statusen for automatisk oppdatering. `releaseChannel` og `channels` er additive felter (rail 3.8.54); `channel` beholder betydningen sin — distribusjonsmodusen som oppdateringsfunksjonen i dashbordet bruker (`npm`, `source` eller `docker-compose`).
 
 ```json
 {
@@ -1495,10 +1571,10 @@ Loopback-bare administrasjonsrute (admin auth). Returnerer den kjørende versjon
 }
 ```
 
-- `releaseChannel` — npm-kanal for den kjørende builden: `nightly` for `-nightly.*` -versjoner, `next` for andre forhåndsutgivelser (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` for en stabil versjon av en eldre dur enn `channels.latest`, ellers `latest`. Samme regler som `scripts/release/dist-tag.mjs`, som velger npm dist-taggen på publiseringstidspunktet.
-- `channels` — publiserte hodet for hver dist-tag, fra `npm view omniroute dist-tags` (register HTTP fallback), bufret med samme 10-minutters TTL som `latest`. `latest` er alltid tilstede (faller tilbake til `latest` feltet, deretter `"unavailable"`); `next`, `nightly` og `lts` vises bare når den dist-taggen eksisterer. En `Cache-Control: no-cache` -forespørsel oppdaterer begge oppslagene.
+- `releaseChannel` — npm-kanalen til det kjørende bygget: `nightly` for versjoner med `-nightly.*`, `next` for andre forhåndsutgivelser (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` for en stabil versjon av en eldre hovedversjon enn `channels.latest`, ellers `latest`. Samme regler som i `scripts/release/dist-tag.mjs`, som velger npm-distribusjonstaggen ved publisering.
+- `channels` — publisert hode for hver distribusjonstag, fra `npm view omniroute dist-tags` (HTTP-reservebane til registeret), bufret med samme TTL på 10 minutter som `latest`. `latest` finnes alltid (faller tilbake til `latest`-feltet, deretter `"unavailable"`); `next`, `nightly` og `lts` vises bare når den aktuelle distribusjonstaggen finnes. En forespørsel med `Cache-Control: no-cache` oppdaterer begge oppslagene.
 
-Kanalmodellen (`latest` = v3 til 4.0 GA, `next` = rc, `nightly` = `develop` builds, `lts` = v3 patchene etter 4.0 GA) er beskrevet i `docs/ops/RELEASE_STRATEGY.md`.
+Kanalmodellen (`latest` = v3 frem til 4.0 GA, `next` = rc, `nightly` = `develop`-bygg, `lts` = v3-oppdateringer etter 4.0 GA) er beskrevet i `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1722,17 +1798,21 @@ Utgående webhook-abonnementer for OmniRoute-hendelser (fullføring av forespør
 
 ## Registrerte nøkler (automatisk administrasjon)
 
-Brukes av subsystemet for automatisk nøkkeladministrasjon til å utstede og rotere API-nøkler mot en underliggende leverandør/konto, med daglige/timelange kvoter.
+Brukes av undersystemet for automatisk nøkkeladministrasjon til å utstede og rotere API nøkler mot en støttende provider/account, med daily/hourly kvoter.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                 |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | List registrerte nøkler (kun maskert prefiks)                                                                                                                                                                               |
-| POST   | `/api/v1/registered-keys`             | Utsted en ny registrert nøkkel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer den rå nøkkelen **én gang**. Returnerer `429` ved avvisning på grunn av kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hent metadata for en registrert nøkkel (ingen rått nøkkelmateriale)                                                                                                                                                         |
-| DELETE | `/api/v1/registered-keys/[id]`        | Tilbakekall en registrert nøkkel                                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplisitt endepunkt for tilbakekalling (samme effekt som DELETE)                                                                                                                                                           |
+| Metode | Sti                                   | Beskrivelse                                                                                                                                                                                             |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Liste registrerte nøkler (bare maskert prefiks)                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys`             | Utsted en ny registrert nøkkel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer rånøkkelen **en gang** . Returnerer `429` ved kvoteavslag. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hent en registrert nøkkels metadata (ingen råmateriale)                                                                                                                                                 |
+| DELETE | `/api/v1/registered-keys/[id]`        | Tilbakekall en registrert nøkkel                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplisitt tilbakekallende endepunkt (samme effekt som DELETE)                                                                                                                                          |
+| GET    | `/api/v1/providers/[provider]/limits` | Les leverandørens utstedelsestak                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Angi leverandørens utstedelsestak — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                       |
+| GET    | `/api/v1/accounts/[id]/limits`        | Les kontoens utstedelsestak                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Angi kontoens utstedelsestak — samme kropp som leverandørruten                                                                                                                                          |
 
-**Autentisering:** administrasjonsøkt/API-nøkkel (`requireManagementAuth`) — samme tilgangskontroll som `/api/keys`: en dashboardøkt, det lokale CLI-tokenet eller en API-nøkkel med `manage`/`admin`-omfang; API-nøkler som kun brukes til inferens får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
+**Auth:** management session/API nøkkel (`requireManagementAuth`) — samme vakt som `/api/keys`: en dashbordøkt, det lokale CLI tokenet eller en API nøkkel med `manage`/`admin` omfang; API -nøkler som bare inferens får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
 
 ---
 
@@ -1858,17 +1938,17 @@ Vedvarende samtale-/faktaminne, avgrenset per API-nøkkel / økt.
 
 OmniRoute leveres med en innebygd Model Context Protocol-server med tre transportmekanismer (stdio, SSE, streamable-http) og tilgangsavgrensede verktøy. Endepunktene for dashbordet nedenfor leser status-/revisjonsdata og videresender HTTP-transportmekanismene.
 
-| Metode | Bane | Beskrivelse |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Pulsslag, transportmekanisme, tilkoblet status, siste kall, mest brukte verktøy, suksessrate siste 24 timer |
-| GET | `/api/mcp/tools` | Liste over MCP-verktøy med `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Åpne SSE-strøm for SSE-transporten (returnerer `503` hvis MCP er deaktivert eller transportmekanismen ikke samsvarer) |
-| POST | `/api/mcp/sse` | Send JSON-RPC-ramme på SSE-transporten |
-| GET | `/api/mcp/stream` | Åpne SSE-siden av Streamable HTTP-transporten (serverinitierte meldinger) |
-| POST | `/api/mcp/stream` | Send JSON-RPC-ramme på Streamable HTTP-transporten |
-| DELETE | `/api/mcp/stream` | Avslutt en Streamable HTTP-økt |
-| GET | `/api/mcp/audit` | Spør i revisjonsloggen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Samlet revisjonsstatistikk (totaler, suksessrate, gjennomsnittlig varighet, mest brukte verktøy) |
+| Metode | Bane                   | Beskrivelse                                                                                                                     |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Pulsslag, transportmekanisme, tilkoblet status, siste kall, mest brukte verktøy, suksessrate siste 24 timer                     |
+| GET    | `/api/mcp/tools`       | Liste over MCP-verktøy med `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                            |
+| GET    | `/api/mcp/sse`         | Åpne SSE-strøm for SSE-transporten (returnerer `503` hvis MCP er deaktivert eller transportmekanismen ikke samsvarer)           |
+| POST   | `/api/mcp/sse`         | Send JSON-RPC-ramme på SSE-transporten                                                                                          |
+| GET    | `/api/mcp/stream`      | Åpne SSE-siden av Streamable HTTP-transporten (serverinitierte meldinger)                                                       |
+| POST   | `/api/mcp/stream`      | Send JSON-RPC-ramme på Streamable HTTP-transporten                                                                              |
+| DELETE | `/api/mcp/stream`      | Avslutt en Streamable HTTP-økt                                                                                                  |
+| GET    | `/api/mcp/audit`       | Spør i revisjonsloggen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Samlet revisjonsstatistikk (totaler, suksessrate, gjennomsnittlig varighet, mest brukte verktøy)                                |
 
 **Autentisering:** `sse`-/`stream`-transportmekanismene bruker den MCP-spesifikke autentiseringsflaten (Bearer API-nøkkel med `mcp`-omfang); `status`-/`tools`-/`audit*`-rutene kan leses fra dashbordet (ingen ekstra autentisering kreves utover tilgang til dashbordverten).
 

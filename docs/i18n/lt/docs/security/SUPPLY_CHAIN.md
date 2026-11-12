@@ -25,29 +25,32 @@ neblokuodamas; _CRITICAL vartų_ žingsnis (`severity: CRITICAL`, `ignore-unfixe
 `exit-code: 1`) nutraukia išleidimą, jei aptinkamas CRITICAL CVE **su galimu pataisymu**. `ignore-unfixed`
 neleidžia blokuoti išleidimo dėl bazinio atvaizdo CVE be aukštesniojo lygio pataisymo.
 
-## ⚠️ CVE Variacija (blokuojantys osv/Trivy vartai)
+## ⚠️ CVE kintamumas (blokuojančios osv/Trivy patikros)
 
 osv ir Trivy lygina priklausomybes su CVE duomenų bazėmis, kurios **nuolat auga**. PR,
-kuris **neliečia jokių priklausomybių**, gali staiga tapti raudonas, nes naujas CVE buvo
-atskleistas esamoje priklausomybėje (osv: išmatuotas `vulnCount` > bazinė vertė; Trivy: naujas
-pataisomas CRITICAL atvaizde). **Tai yra TIKĖTINAS blokuojančių CVE vartų veikimo elgesys,
-o ne produkto regresija.**
+kuris **nekeičia jokių priklausomybių**, gali staiga tapti raudonas, nes buvo
+paskelbta nauja esamos priklausomybės CVE (osv: išmatuotas `vulnCount` > bazinė reikšmė; Trivy: atvaizde aptikta nauja
+ištaisoma CRITICAL spraga). **Tai yra TIKĖTINA blokuojančios
+CVE patikros veikimo elgsena, o ne produkto regresija.**
 
-Kai osv arba Trivy tampa raudoni dėl naujai atskleisto CVE, sprendimas yra:
+Kai osv arba Trivy patikra tampa raudona dėl naujai paskelbtos CVE, reikia:
 
-1.  **Atnaujinti paveiktą priklausomybę** (pageidautina) – atnaujinti į pataisytą versiją per `package.json`
-    `overrides` (tranzityvinės priklausomybės) arba perkurti atvaizdą ant pataisytos bazės.
-2.  **Jei nėra aukštesniojo lygio pataisymo:**
-    - **osv:** iš naujo nustatyti `metrics.vulnCount` bazinę vertę `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` neapima specialių vartų – redaguokite reikšmę
-      rankiniu būdu, `direction:down`) su pagrindimu ir sekimo problema.
-    - **Trivy:** pridėti įrašą į `.trivyignore` (CVE-ID eilutėje) su pagrindimo
-      komentaru ir sekimo problema. `ignore-unfixed: true` jau automatiškai apima CVE be
-      pataisymų.
+1. **Atnaujinti paveiktą priklausomybę** (pageidautina) — atnaujinti iki pataisytos versijos naudojant `package.json`
+   `overrides` (tranzityviosioms priklausomybėms) arba iš naujo sukurti atvaizdą naudojant pataisytą bazinį atvaizdą.
+2. **Jei ištaisymas nepasiekiamas:** išsaugoti išmatuotą radinį ir stebėti paveiktą priklausomybę arba vaizdą. Nedidinkite pažeidžiamumo pradinio lygio, kad nesėkmingas kandidatas būtų išlaikytas. „Trivy“ `ignore-unfixed: true` jau pašalina vaizdo pažeidžiamumą be ankstesnio pataiso. Bet kuriai išimčiai reikia peržiūrėti pažeidžiamumo ID, tikslaus paketo kelio, galiojimo pabaigos ir stebėjimo problemos politikoje; tai nėra automatinė nesėkmingo nuskaitymo pasekmė.
 
-Abu vartai **gracingai PRALEIDŽIA** (išeina 0), kai įrankio nėra arba matavimas
-nepavyksta (osv-scanner nėra PATH, osv.dev/tinklas nepasiekiamas, neteisingas JSON) –
-**matavimo** gedimas niekada neblokuoja, blokuoja tik **išmatuota** regresija.
+Privalomi OSV vykdymai (`check:vuln-ratchet -- --ratchet`) baigiami nesėkmingai su
+`INCOMPLETE` ir išėjimo kodu 2, kai nepavyksta patikrinti skaitytuvo, ataskaitos arba bazinės reikšmės.
+Išmatuotos regresijos atveju grąžinamas išėjimo kodas 1. Patariamasis vykdymas vis tiek gali pateikti `SKIP` su
+išėjimo kodu 0, tačiau tai nepatvirtina, kad priklausomybės sėkmingai praėjo nuskaitymą. Blokuojančiam
+Trivy veiksmui taip pat būtinas sėkmingas matavimas: nepasiekiami įrankiai, nepavykusios užduotys
+ir trūkstami atvaizdo patikros duomenys negali patvirtinti, kad atvaizdas yra švarus.
+
+## Vaizdo nuskaitymo politika
+
+Dabartinėje `.trivyignore.yaml` pažeidžiamumo išimčių nėra. `npm run check:trivy-ignore-policy` patvirtina struktūrinę politiką vietiniuose nuskaitymo profiliuose, CI ir kokybės. Nežinomas IDs, platesni keliai, pasikartojantys įrašai ir pasibaigusios išimtys atmetami; senas `.trivyignore` nėra įvestis į perkeltus nuskaitymus.
+
+Docker tikrina politikos įrankius iš `github.workflow_sha` ir vaizdo šaltinio politiką naudodamas tą patį šaltinio parinkiklį kaip ir kūrimas. Politikos parinkiklis atmeta nesuderinamas sritis ir paruošia vieną failą abiem Trivy nuskaitymams. Istorinis šaltinis be struktūrinės politikos negauna jokių išimčių. Abu nuskaitymai prisega Trivy `v0.70.0`. Politikos patvirtinimas įrodo konfigūracijos nuoseklumą; vaizdą vis tiek reikia sėkmingai nuskaityti.
 
 ## Išėjus į pensiją priklausomybės rizika
 

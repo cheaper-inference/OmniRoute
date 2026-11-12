@@ -12,7 +12,7 @@ const { default: ErrorPageScaffold } = await import("@/shared/components/ErrorPa
 afterEach(() => cleanup());
 
 // #18068: the two CTAs were hand-styled links (`px-6 py-3 rounded-lg bg-primary …`); they are
-// kit buttons now, rendered as links through `buttonVariants`.
+// kit buttons now, rendered as links through the Button client component.
 describe("ErrorPageScaffold CTAs", () => {
   it("renders the primary and secondary actions as kit button links", () => {
     const { getByRole } = render(

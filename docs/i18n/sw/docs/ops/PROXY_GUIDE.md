@@ -395,7 +395,7 @@ Hutumia `wreq-js` kutengeneza alama za utambulisho za TLS zinazofanana na za kiv
 
 ### Ulinganishaji wa Alama ya Utambulisho ya CLI
 
-**Kibadilishaji cha Alama ya Utambulisho ya CLI** (`Mipangilio → Usalama`) hupanga upya vichwa vya HTTP na sehemu za mwili wa JSON ili zilingane na saini kamili ya faili asilia za kutekelezwa za CLI (Claude Code, Codex, n.k.). Hii hufanya kazi **juu ya** proksi:
+**Kibadilishaji cha Alama ya Utambulisho ya CLI** (`Settings → Security`) hupanga upya vichwa vya HTTP na sehemu za mwili wa JSON ili zilingane na saini kamili ya faili asilia za kutekelezwa za CLI (Claude Code, Codex, n.k.). Hii hufanya kazi **juu ya** proksi:
 
 ```
 IP yako (imezuiwa) → IP ya proksi (Marekani) → API ya mtoa huduma

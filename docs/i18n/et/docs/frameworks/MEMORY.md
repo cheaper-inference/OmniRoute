@@ -723,11 +723,11 @@ Moodul `extraction.ts` (`src/lib/memory/extraction.ts`) kasutab vestlussõnumite
 
 ### Vaikimisi mustrikategooriad
 
-| Kategooria          | Näidismuster                                                     | Jäädvustab                       |
-| ------------------- | ---------------------------------------------------------------- | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Ma eelistan <X>"`, `"Mulle meeldib <X>"`, `"Ma vihkan <X>"`    | Kasutaja eelistused              |
-| DECISION_PATTERNS   | `"Ma kasutan <X>"`, `"Otsustasin <X>"`, `"Valisin <X>"`          | Kasutaja otsused (episoodilised) |
-| PATTERN_PATTERNS    | `"Ma tavaliselt <X>"`, `"Ma alati <X>"`, `"Ma mitte kunagi <X>"` | Püsivad käitumismustrid          |
+| Kategooria          | Näidismuster                                                | Jäädvustab                       |
+| ------------------- | ----------------------------------------------------------- | -------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Kasutaja eelistused              |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Kasutaja otsused (episoodilised) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Püsivad käitumismustrid          |
 
 ### Näidismustrid (lihtsustatud)
 
@@ -763,8 +763,9 @@ Kui kasutaja ütleb:
 
 Kontrollimatu eraldamise vältimiseks kehtivad järgmised piirangud:
 
-| Sisu minimaalne pikkus | 3 märki |
-| Sisu maksimaalne pikkus| 500 märki |
+| Sisu minimaalne pikkus  | 3 märki   |
+| ----------------------- | --------- |
+| Sisu maksimaalne pikkus | 500 märki |
 
 ### Millal eraldamine keelata
 

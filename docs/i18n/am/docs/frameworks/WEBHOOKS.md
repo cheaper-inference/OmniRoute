@@ -4,57 +4,52 @@
 
 ---
 
-> **የእውነት ምንጭ:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **መጨረሻ የተዘመነው:** 2026-06-28 — v3.8.40
+> **የእውነት ምንጭ፡-** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**መጨረሻ የዘመነው፡-** 2026-06-28 — v3.8.40
 
-OmniRoute በመድረክ ክስተቶች ጊዜ HTTP webhooks ሊያስነሳ ይችላል። ከ
-Slack፣ PagerDuty፣ Datadog፣ ውስጣዊ የማንቂያ አገልግሎቶች ወይም ከማንኛውም HTTP ተቀባይ ጋር ለማዋሃድ ይጠቀሙባቸው።
+OmniRoute HTTP ዌብ መንጠቆዎችን በመድረክ ዝግጅቶች ላይ ማቃጠል ይችላል። ከ Slack፣ PagerDuty፣ Datadog፣ የውስጥ ማንቂያ አገልግሎቶች፣ ወይም ከማንኛውም HTTP ተቀባይ ጋር ለማዋሃድ ይጠቀሙባቸው።
 
-አሰራጩ እያንዳንዱን ርክክብ በHMAC-SHA256 ይፈርማል፣ ጊዜያዊ
-ውድቀቶች ሲከሰቱ እንደገና ይሞክራል፣ ለእያንዳንዱ webhook የርክክብ ጤንነትን ይከታተላል፣ እና በተደጋጋሚ
-የሚወድቁ endpointsን በራስ-ሰር ያሰናክላል።
+ላኪው እያንዳንዱን መላኪያ በ HMAC-SHA256 ይፈርማል፣ ጊዜያዊ ውድቀቶችን እንደገና ይሞክራል፣ የመላኪያ ጤናን በዌብ መንጠቆ ይከታተላል፣ እና አለመሳካታቸውን የሚቀጥሉ የመጨረሻ ነጥቦችን በራስሰር ያሰናክላል።
 
 ## የሚደገፉ ክስተቶች
 
-የ`WebhookEvent` ዓይነት (`src/lib/webhooks/eventDescriptions.ts`፣ በ`src/lib/webhookDispatcher.ts` ጥቅም ላይ የሚውል) በአሁኑ ጊዜ በትክክል አራት ክስተቶችን ይወክላል፦
+የ `WebhookEvent` አይነት (`src/lib/webhooks/eventDescriptions.ts`፣ በ `src/lib/webhookDispatcher.ts` የሚበላ) በአሁኑ ጊዜ ሰባት ክስተቶችን ሞዴል አድርጓል፡-
 
-| ክስተት                | የሚነሳበት ጊዜ                                         |
-| ------------------- | ------------------------------------------------- |
-| `request.completed` | በproxy የተላለፈ ጥያቄ በተሳካ ሁኔታ ሲጠናቀቅ                   |
-| `request.failed`    | በproxy የተላለፈ ጥያቄ ከሁሉም ድጋሚ ሙከራዎች/fallback በኋላ ሲወድቅ |
-| `quota.exceeded`    | አንድ API key የበጀት/quota ገደብን ሲያልፍ                  |
-| `test.ping`         | በሙከራ endpoint ጥቅም ላይ የሚውል ሰው ሰራሽ ክስተት             |
+| ክስተት                      | ሲቃጠል                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `request.completed`       | የተኪ ጥያቄ በተሳካ ሁኔታ ይጠናቀቃል                                                             |
+| `request.failed`          | ከሁሉም retries/fallback በኋላ የተኪ ጥያቄ አልተሳካም።                                           |
+| `quota.exceeded`          | የ API ቁልፍ የ budget/quota ገደብ ያልፋል                                                   |
+| `proxy.set_aside`         | የፕሮክሲ ገንዳ አባል ከተደጋጋሚ እምቢታ በኋላ ወደ ጎን ተቀምጧል (ሽግግር ብቻ)                                 |
+| `proxy.pool.exhausted`    | እያንዳንዱ የፕሮክሲ ገንዳ ወሰን አባል ወደ ጎን ተቀምጧል                                                |
+| `provider.reset_redeemed` | በራስ-የተተገበሩ የባንክ ዳግም ማስጀመሪያዎች ዳግም ማስጀመሪያ ክሬዲት ወይም የ Claude ሳምንታዊ ክፍለ ጊዜ ዳግም አስጀምረዋል። |
+| `test.ping`               | በሙከራ መጨረሻ ነጥብ ጥቅም ላይ የዋለ ሰው ሠራሽ ክስተት                                                |
 
-ምዝገባዎች እያንዳንዱን ክስተት ለመቀበል ቀጥተኛውን `"*"` ይቀበላሉ። በ
-`events` ውስጥ ያሉ ያልታወቁ የክስተት ስሞች በስርጭት ጊዜ ችላ ይባላሉ።
+የደንበኝነት ምዝገባዎች እያንዳንዱን ክስተት ለመቀበል ቀጥተኛውን `"*"` ይቀበላሉ። በ `events` ውስጥ ያልታወቁ የክስተት ስሞች በመላክ ጊዜ ችላ ይባላሉ።
 
-> ማስታወሻ፦ የአሰራጩ API ተገናኝቷል፣ ነገር ግን ለአንዳንድ
-> `test.ping` ያልሆኑ ክስተቶች የምርት ጥሪ ቦታዎች አሁንም በመጨመር ላይ ናቸው። በርስዎ ልቀት ውስጥ
-> የትኞቹ መንገዶች አሰራጩን እንደሚጠሩ ለማየት `grep dispatchEvent`ን ይፈትሹ።
+> ማስታወሻ፡ ላኪው API ባለገመድ ነው፣ ነገር ግን ለአንዳንድ `test.ping` ያልሆኑ ክስተቶች የምርት ጥሪ ጣቢያዎች አሁንም እያረፉ ነው። በአሁኑ ጊዜ ልቀትህ ውስጥ ላኪውን የሚጠራው የትኛው ዱካ እንደሆነ ለማየት `grep dispatchEvent` ፈትሽ።
 
 ## አርክቴክቸር
 
 ```
-ጠሪ (handler፣ service፣ monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> በwebhook.events አጣራ
-    -> ለእያንዳንዱ ተዛማጅ (በትይዩ):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         payloadን ገንባ { event, timestamp, data }
-         bodyን በHMAC-SHA256 ፈርም (secret ካለ)
-         በ10s timeout POST አድርግ
-         በ5xx / network error ላይ እስከ 3 ጊዜ ድጋሚ ሞክር
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-ስርጭቱ ለጠሪው አስነስቶ-የሚረሳ ነው፦ `Promise.allSettled`
-በእያንዳንዱ webhook ላይ የሚከሰቱ ስህተቶችን ስለሚያልፍ፣ አንድ መጥፎ ተቀባይ ሌሎቹን ማገድ አይችልም።
+መላክ ለጠሪው እሳቱ እና ይረሳል፡- `Promise.allSettled` በየድር መንጠቆ ስህተቶችን ስለሚውጥ አንድ መጥፎ ተቀባይ ሌሎቹን ማገድ አይችልም።
 
-## HMAC ፊርማ
+## HMAC መፈረም
 
-አንድ webhook `secret` ሲኖረው፣ OmniRoute የJSON bodyውን ፈርሞ የሚከተለውን ይልካል፦
+የድር መንጠቆ `secret` ሲኖረው፣ OmniRoute የ JSON አካልን ይፈርማል እና ይልካል፡-
 
 ```
 Content-Type: application/json
@@ -64,11 +59,9 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> የheader ስሞች የ`X-Webhook-*` ቅድመ ቅጥያን ይጠቀማሉ (`X-OmniRoute-*` አይደለም)። የፊርማው
-> እሴት `sha256=<hex>` ነው — ሙሉውን ቅድመ ቅጥያ ያረጋግጡ።
+> የራስጌ ስሞች የ `X-Webhook-*` ቅድመ ቅጥያ ( `X-OmniRoute-*` ሳይሆን) ይጠቀማሉ። የፊርማው ዋጋ `sha256=<hex>` — ነው ሙሉውን ቅድመ ቅጥያ ያረጋግጡ።
 
-`createWebhook` ያለ secret ከተጠራ፣ የDB ሞጁሉ አንድ ያመነጫል
-(`whsec_<48 hex>`)፣ ስለዚህ ሁሉም webhooks በነባሪነት የተፈረሙ ናቸው።
+`createWebhook` ያለ ምስጢር ከተጠራ የ DB ሞጁል አንድ (`whsec_<48 hex>`) ያመነጫል ስለዚህ ሁሉም የድር መንጠቆዎች በነባሪነት ይፈርማሉ።
 
 ### በተቀባዩ ላይ ማረጋገጥ
 
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-ማንኛውም የJSON ትንተና ከመደረጉ በፊት ሁልጊዜ **ጥሬውን** የጥያቄ body በመጠቀም ያረጋግጡ።
+ሁልጊዜ በ ላይ ያረጋግጡ **ጥሬው** የጥያቄ አካል፣ ከማንኛውም JSON ትንተና በፊት።
 
-## የድጋሚ ሙከራ እና የውድቀት ፖሊሲ
+## ድጋሚ ሞክር እና ውድቀት ፖሊሲ
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- ለእያንዳንዱ ሙከራ የ10 ሰከንድ የጊዜ ገደብ (`AbortController`)።
+- በአንድ ሙከራ 10 ሰከንድ ጊዜ አልቋል (`AbortController`)።
 - HTTP 2xx እንደ ስኬት ይቆጠራል።
-- HTTP 3xx/4xx ዳግም ሊሞከር የማይችል የመጨረሻ ሁኔታ ሆኖ ይቆጠራል — እንደተላከ ይመዘገባል፣
-  `success = res.ok` ይሆናል።
-- HTTP 5xx እና የአውታረ መረብ ስህተቶች በጨምሮ በሚሄድ የመጠበቂያ ጊዜ ዳግም ይሞከራሉ፦
-  `2^attempt * 1000 ms` (1s, 2s, 4s)።
-- ከ`maxRetries` በኋላ ማድረሱ እንደወደቀ ይመዘገባል።
-- እያንዳንዱ ማድረስ `last_triggered_at`ን፣ `last_status`ን ያዘምናል፤ እንዲሁም
-  `failure_count`ን ዳግም ወደ ዜሮ ይመልሳል ወይም ይጨምራል።
-- አሰራጩ ከእያንዳንዱ ሰፊ ስርጭት በኋላ `disableWebhooksWithHighFailures(10)`ን ይጠራል፤
-  ስለዚህ `failure_count >= 10` ያለው ማንኛውም webhook በራስ-ሰር ይሰናከላል።
+- HTTP 3xx/4xx ከ `success = res.ok` ጋር እንደደረሰ የተመዘገበ እንደ የማይሞከር የመጨረሻ ደረጃ ይቆጠራል —
+- HTTP 5xx እና የአውታረ መረብ ስህተቶች ከአርቢ ጀርባ `2^attempt * 1000 ms` (1s፣ 2s፣ 4s) ጋር እንደገና ይሞከራሉ።
+- ከ `maxRetries` በኋላ፣ መላኪያው ያልተሳካ ሆኖ ተመዝግቧል።
+- እያንዳንዱ ማቅረቢያ `last_triggered_at`፣ `last_status` ያዘምናል እና ወይ ዳግም ያስጀምራል ወይም `failure_count` ይጨምራል።
+- ላኪው ከእያንዳንዱ አድናቂ-ውጭ በኋላ ወደ `disableWebhooksWithHighFailures(10)` ይደውላል፣ ስለዚህ ማንኛውም ዌብ መንጠቆ ከ `failure_count >= 10` ጋር በራስ-ሰር ይሰናከላል።
 
 ## የውሂብ ጎታ
 
-ሰንጠረዥ `webhooks` (ማዛወሪያ `011_webhooks.sql`)፦
+ሰንጠረዥ `webhooks` (ስደት `011_webhooks.sql`):
 
-| ዓምድ                 | ዓይነት    | ማስታወሻዎች                            |
+| አምድ                 | ዓይነት    | ማስታወሻዎች                            |
 | ------------------- | ------- | ---------------------------------- |
 | `id`                | TEXT PK | UUID                               |
-| `url`               | TEXT    | የመድረሻ URL                          |
-| `events`            | TEXT    | JSON ድርድር፤ ነባሪው `["*"]`            |
-| `secret`            | TEXT    | HMAC ሚስጥር (ካልተሰጠ በራስ-ሰር የሚፈጠር)     |
-| `enabled`           | INT     | 0/1፤ ነባሪው 1                        |
-| `description`       | TEXT    | አማራጭ በሰው የሚነበብ መለያ                 |
+| `url`               | TEXT    | መድረሻ URL                           |
+| `events`            | TEXT    | JSON ድርድር; ነባሪ `["*"]`             |
+| `secret`            | TEXT    | HMAC ሚስጥር (ካልተሰጠ በራስ-ሰር የተፈጠረ)     |
+| `enabled`           | INT     | 0/1; ነባሪዎች ወደ 1                    |
+| `description`       | TEXT    | አማራጭ የሰው መለያ                       |
 | `created_at`        | TEXT    | `datetime('now')`                  |
-| `last_triggered_at` | TEXT    | በእያንዳንዱ የማድረስ ሙከራ ላይ ይዘምናል         |
+| `last_triggered_at` | TEXT    | በእያንዳንዱ የማድረስ ሙከራ ተዘምኗል            |
 | `last_status`       | INT     | የመጨረሻው ሙከራ HTTP ሁኔታ (0 = አውታረ መረብ) |
-| `failure_count`     | INT     | ሲሳካ ወደ 0 ይመለሳል፣ ሲወድቅ +1 ይጨምራል      |
+| `failure_count`     | INT     | በስኬት ወደ 0፣ + 1 በመክሸፍ ላይ            |
 
-የማድረስ ታሪክ በተለየው `webhook_deliveries` ሰንጠረዥ ውስጥ ይቀመጣል
-(ማዛወሪያ `069_webhook_deliveries.sql`፣ በእያንዳንዱ ሙከራ
-`src/lib/db/webhookDeliveries.ts::insertDelivery` በኩል የሚጻፍ)፤ ይህም
-በ`webhooks` ረድፍ ላይ ካሉት ድምር ቆጣሪዎች በተጨማሪ ነው። የዓይነት ሜታዳታ (Slack / Discord /
-Telegram / ብጁ የpayload ቀያሪዎች) በ`070_webhooks_kind_metadata.sql` ታክሏል።
+የማስረከቢያ ታሪክ በተወሰነው `webhook_deliveries` ሠንጠረዥ ውስጥ ጸንቷል (ስደት `069_webhook_deliveries.sql`፣ በእያንዳንዱ ሙከራ በ `src/lib/db/webhookDeliveries.ts::insertDelivery` የተጻፈ)፣ በ `webhooks` ረድፍ ላይ ካሉ ድምር ቆጣሪዎች በተጨማሪ። ዓይነት ሜታዳታ (Slack / Discord / Telegram /ብጁ የሚጫኑ ትራንስፎርመሮች) በ `070_webhooks_kind_metadata.sql` ታክለዋል።
 
 ## REST API
 
-ሁሉም endpoints የአስተዳደር ማረጋገጫ (`requireManagementAuth`) ይፈልጋሉ።
+ሁሉም የመጨረሻ ነጥቦች የአስተዳደር ማረጋገጫ (`requireManagementAuth`) ያስፈልጋቸዋል።
 
-| Endpoint                        | ዘዴ     | መግለጫ                             |
-| ------------------------------- | ------ | -------------------------------- |
-| `/api/webhooks`                 | GET    | webhooksን ዘርዝር (ሚስጥሮች የተሸፈኑ)     |
-| `/api/webhooks`                 | POST   | webhook ፍጠር                      |
-| `/api/webhooks/[id]`            | GET    | የwebhook ዝርዝር መረጃ (ሙሉ ሚስጥር)      |
-| `/api/webhooks/[id]`            | PUT    | መስኮችን አዘምን                       |
-| `/api/webhooks/[id]`            | DELETE | አስወግድ                            |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping`ን ላክ (ያለ ድጋሚ ሙከራዎች)   |
-| `/api/webhooks/[id]/deliveries` | GET    | ለአንድ webhook የቅርብ ጊዜ የማድረስ ሙከራዎች |
-| `/api/webhooks/validate-url`    | POST   | ቅድመ-በረራ URL ማረጋገጫ (የSSRF መከላከያ)  |
+| የመጨረሻ ነጥብ                       | ዘዴ     | መግለጫ                              |
+| ------------------------------- | ------ | --------------------------------- |
+| `/api/webhooks`                 | GET    | የድር መንጠቆዎችን ይዘርዝሩ (ምስጢሮች ጭንብል)    |
+| `/api/webhooks`                 | POST   | የድር መንጠቆን ይፍጠሩ                    |
+| `/api/webhooks/[id]`            | GET    | Webhook ዝርዝር (ሙሉ ሚስጥር)            |
+| `/api/webhooks/[id]`            | PUT    | መስኮችን አዘምን                        |
+| `/api/webhooks/[id]`            | DELETE | አስወግድ                             |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping` ማቃጠል (ዳግም ሙከራዎች የሉም)  |
+| `/api/webhooks/[id]/deliveries` | GET    | ለአንድ የድር መንጠቆ የቅርብ ጊዜ የማድረስ ሙከራዎች |
+| `/api/webhooks/validate-url`    | POST   | የቅድመ በረራ URL ማረጋገጫ (SSRF ጠባቂ)     |
 
-`GET /api/webhooks` በዝርዝር ገጾች ላይ ሚስጥሩ እንዳይጋለጥ ወደ `<የመጀመሪያዎቹ 10 ቁምፊዎች>...` ይሸፍነዋል።
-ሚስጥሩን በእርግጥ ሲያስፈልግዎ የ`[id]` GETን ይጠቀሙ።
+`GET /api/webhooks` በዝርዝሮች ገፆች ላይ እንዳይፈስ የ `<first 10 chars>...` ሚስጥር ይደብቃል። ምስጢሩን በትክክል በሚፈልጉበት ጊዜ `[id]` GET ይጠቀሙ።
 
-### webhook መፍጠር
+### የድር መንጠቆን ይፍጠሩ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,31 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` ከተተወ፣ አገልጋዩ `whsec_<hex>` ሚስጥር ያመነጫል እና በምላሹ
-ውስጥ ይመልሰዋል።
+`secret` ከተተወ አገልጋዩ የ `whsec_<hex>` ሚስጥር ያመነጫል እና በምላሹ ይመልሳል።
 
-### webhookን መሞከር
+### የድር መንጠቆን ይሞክሩ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }`ን ይመልሳል። ምንም ድጋሚ ሙከራዎች አይደረጉም — ተቀባዩ payloadን እና ፊርማውን መቀበሉን
-በፍጥነት ለማረጋገጥ ጠቃሚ ነው።
+`{ delivered, status, error }` ይመልሳል። ምንም ሙከራዎች አልተሞከሩም — ተቀባዩ ክፍያውን እና ፊርማውን መቀበሉን በፍጥነት ለማረጋገጥ ይጠቅማል።
 
 ## ዳሽቦርድ
 
-በ `/dashboard/webhooks` የሚገኘው የዳሽቦርድ ገጽ (`src/app/(dashboard)/dashboard/webhooks/page.tsx` ይመልከቱ) የሚከተሉትን ያቀርባል፦
+በ `/dashboard/webhooks` ላይ ያለው ዳሽቦርድ ገጽ ( `src/app/(dashboard)/dashboard/webhooks/page.tsx` ይመልከቱ) ያቀርባል፡-
 
-- የክስተት መራጭ በመጠቀም webhooks መፍጠር/ማርትዕ
-- በ `enabled`፣ `failure_count` እና `last_status` ላይ የተመሠረተ የሁኔታ አመልካች (ንቁ / ንቁ ያልሆነ / ስህተት ያጋጠመው)
-- በአንድ ጠቅታ የሙከራ ማድረስ
-- በእጅ የማንቃት/የማሰናከል መቀያየሪያ
+- Create/edit የድር መንጠቆዎች ከክስተት መራጭ ጋር
+- በ `enabled`፣ `failure_count` እና `last_status` ላይ የተመሰረተ የሁኔታ አመልካች (ገባሪ/የቦዘነ/የተሳሳተ)
+- አንድ-ጠቅ ሙከራ ማድረስ
+- በእጅ enable/disable መቀያየር
 
-## የPayload ምሳሌዎች
+## የመጫኛ ምሳሌዎች
 
-### request.completed
+### ጥያቄ. ተጠናቅቋል
 
 ```json
 {
@@ -199,7 +181,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-### test.ping
+### መፈተሽ.ፒንግ
 
 ```json
 {
@@ -212,19 +194,19 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-ከ `test.ping` ውጪ ላሉ ክስተቶች የመስኮች ቅርጽ እነሱን በሚልኩ የጥሪ ቦታዎች ይወሰናል፤ የ `data` ኦብጀክትን ከወደፊት ለሚመጡ ለውጦች ተኳሃኝ አድርገው ይያዙት (መስኮችን ይጨምሩ፣ በአለመኖራቸው ላይ ጥገኛ አይሁኑ)።
+`test.ping` ላልሆኑ ክስተቶች የመስክ ቅርጾች የሚገለጹት በሚለቁት የጥሪ ጣቢያዎች ነው; የ `data` ነገርን ወደፊት የሚስማማ አድርገው ይያዙት (መስኮችን ያክሉ፣ በሌለበት ላይ የተመኩ አይደሉም)።
 
 ## ምርጥ ልምዶች
 
-- **በእያንዳንዱ ማድረስ ላይ ፊርማውን ያረጋግጡ** ከጥሬው body ጋር በማነጻጸር — ይህ የwebhook URLዎን ከሚገምት ማንኛውም ሰው የሚላኩ የተጭበረበሩ POSTsን ይከላከላል።
-- **በ~5 ሰከንዶች ውስጥ 2xx ምላሽ ይስጡ** — አሰራጩ በ10 s ጊዜው ያልቃል። ዘገምተኛ ተቀባዮች ድጋሚ ሙከራዎችን ይጨርሳሉ እና `failure_count`ን ያሳድጋሉ።
-- **Handlersን idempotent ያድርጉ** — ድጋሚ ሙከራዎች እና ቢያንስ-አንድ-ጊዜ የማድረስ ባህሪ የተባዙ መልዕክቶች ሊኖሩ እንደሚችሉ ያመለክታሉ።
-- **በትንሹ ይመዝገቡ** — በትክክል የሚጠቀሙባቸውን ክስተቶች ብቻ ይዘርዝሩ፤ `"*"` እርስዎ በማይቆጣጠሯቸው ተቀባዮች ላይ ወጪ ይጨምራል።
-- **`failure_count`ን ይከታተሉ** — endpoints 10 ተከታታይ ውድቀቶች ሲያጋጥሙ በራስ-ሰር ይሰናከላሉ፤ ተቀባዩን ካስተካከሉ በኋላ `PUT /api/webhooks/[id]`ን ከ `enabled: true` ጋር በመጥራት ዳግም ያስጀምሩት።
-- **ሚስጥሮችን በየጊዜው ይቀይሩ** — አዲስ `secret` በ `PUT` ይላኩ፣ አዲሱን እሴት ወደ ተቀባዩ ያሰማሩ እና በሙከራ endpoint በኩል ያረጋግጡ።
+- **በእያንዳንዱ ማቅረቢያ ላይ ፊርማውን ያረጋግጡ** በጥሬው አካል ላይ — የእርስዎን ዌብ መንጠቆ URL ከሚገምት ማንኛውም ሰው የተፈጨ POSTs ይከላከላል።
+- **በ ~ 5 ሰከንድ ውስጥ 2xx ምላሽ ይስጡ** — የላኪው ጊዜ በ10 ሴ. ቀርፋፋ ተቀባዮች ሬሲዎችን ይበላሉ እና `failure_count` ያሳድጋሉ።
+- **ተቆጣጣሪዎችን ጠንካራ ያድርጉ** — እንደገና ይሞክራል እና ቢያንስ አንድ ጊዜ የማድረስ ትርጉም ማለት የተባዙ ሊሆኑ ይችላሉ።
+- **በትንሹ ለደንበኝነት ይመዝገቡ** — እርስዎ በትክክል የሚጠቀሙባቸውን ክስተቶች ብቻ ይዘርዝሩ። `"*"` እርስዎ በማይቆጣጠሩት ሪሲቨሮች ላይ ወጪን ይጨምራል።
+- **`failure_count` ይመልከቱ** — የመጨረሻ ነጥቦች በ 10 ተከታታይ ውድቀቶች በራስ-ሰር ተሰናክለዋል; መቀበያውን ካስተካከለ በኋላ ወደ `PUT /api/webhooks/[id]` በመደወል ዳግም ያስጀምሩ `enabled: true`
+- **ሚስጥሮችን በየጊዜው ያሽከርክሩ** — `PUT` አዲስ `secret`፣ አዲሱን እሴት ወደ ተቀባዩ ያሰማሩ እና በሙከራ መጨረሻ ነጥብ ያረጋግጡ።
 
-## በተጨማሪ ይመልከቱ
+## በተጨማሪም ተመልከት
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — ሙሉ የአስተዳደር API ወሰን
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — በ `request.failed` በኩል ከሚታዩ የአቅራቢ ውድቀቶች ጀርባ ያሉ የcircuit breaker / cooldown ባህሪያት
-- ምንጭ፦ `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — ሙሉ አስተዳደር API ወለል
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — የወረዳ የሚላተም / ከአቅራቢው ውድቀቶች በስተጀርባ የቀዘቀዘ ትርጉም በ `request.failed` በኩል ብቅ አለ
+- ምንጭ `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

@@ -4,28 +4,26 @@
 
 ---
 
-# 🌐 Vodič za OmniRoute Proxy
+> **Zaobiđite geografske blokove, zaštitite svoj identitet i usmjerite AI promet kroz bilo koji proxy — sa nultom složenošću konfiguracije.**
 
-> **Zaobiđite geografske blokade, zaštitite svoj identitet i usmjerite AI saobraćaj kroz bilo koji proxy — bez složenosti konfiguracije.**
-
-OmniRoute uključuje sistem za upravljanje proxy-jima sa svim funkcijama koji vam omogućava da usmjerite saobraćaj ka AI provajderima kroz HTTP, HTTPS ili SOCKS5 proxy-je. Bez obzira da li se nalazite u blokiranoj regiji, trebate rotaciju IP adresa ili želite prikriveno "fingerprinting" (otisak uređaja) — ovaj vodič pokriva sve.
+OmniRoute uključuje potpuno opremljen sistem upravljanja proxyjem koji vam omogućava da usmjerite uzvodni promet AI provajdera kroz HTTP, HTTPS ili SOCKS5 proksije. Bez obzira da li se nalazite u blokiranoj regiji, trebate IP rotaciju ili želite prikriveno uzimanje otisaka prstiju — ovaj vodič pokriva sve.
 
 ---
 
 ## Sadržaj
 
-- [Zašto koristiti proxy-je?](#zašto-koristiti-proxy-je)
-- [Pregled arhitekture](#pregled-arhitekture)
-- [Proxy sistem na 4 nivoa](#proxy-sistem-na-4-nivoa)
-- [Proxy registar (CRUD)](#proxy-registar-crud)
-- [1proxy besplatna tržnica](#1proxy-besplatna-tržnica)
-- [Rotacija proxy-ja](#rotacija-proxy-ja)
-- [Anti-detekcija i prikrivanje](#anti-detekcija-i-prikrivanje)
-- [Režimi uzvodnog (upstream) proxy-ja](#režimi-uzvodnog-upstream-proxy-ja)
+- [Zašto koristiti proksije?](#why-use-proxies)
+- [Pregled arhitekture](#architecture-overview)
+- [Proxy sistem na 4 nivoa](#4-level-proxy-system)
+- [Proxy registar (CRUD)](#proxy-registry-crud)
+- [1proxy Free Marketplace](#1proxy-free-proxy-marketplace)
+- [Proxy Rotation](#proxy-rotation)
+- [Anti-Detection & Stealth](#anti-detection--stealth)
+- [Upstream Proxy Modes](#upstream-proxy-modes)
 - [Dashboard UI](#dashboard-ui)
-- [API referenca](#api-referenca)
-- [Environment varijable](#environment-varijable)
-- [Rješavanje problema](#rješavanje-problema)
+- [API Reference](#api-reference)
+- [Varijable okruženja](#environment-variables)
+- [Rješavanje problema](#troubleshooting)
 
 ---
 
@@ -543,11 +541,11 @@ Provjerite je li proxy konfigurisan **prije** pokretanja OAuth toka. OmniRoute u
 
 ### Proxy se ne koristi
 
-Provjerite redoslijed razrješenja:
+Provjerite redoslijed rješavanja:
 
-1. Provjerite sa `GET /api/settings/proxy?resolve=your-connection-id`
-2. Provjerite je li status proxyja `active` (ne `inactive`)
-3. Osigurajte da se opseg dodjele proxyja podudara s vašom vezom
+1. Potvrdite sa `GET /api/settings/proxy?resolve=your-connection-id`
+2. Provjerite je li proxy `status` `active` (ne `inactive`)
+3. Uvjerite se da opseg dodjele proxyja odgovara vašoj vezi
 
 ### 1proxy sinhronizacija neuspješna
 

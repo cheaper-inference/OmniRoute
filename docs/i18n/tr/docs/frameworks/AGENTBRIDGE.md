@@ -20,7 +20,7 @@ Bir IDE aracısı (örneğin, GitHub Copilot, Cursor, Claude Code) bir API çağ
 
 Bu, şunları yapabileceğiniz anlamına gelir:
 
-- **Herhangi bir temsilciyi herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 381 sağlayıcılarından herhangi birine yönlendirin.
+- **Herhangi bir temsilciyi herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 388 sağlayıcılarından herhangi birine yönlendirin.
 - **Model eşlemelerini uygulama** : `gemini-3-flash` → `claude-sonnet-4.7` işleyici düzeyinde şeffaf bir şekilde.
 - **Tüm temsilci trafiğini gözlemleyin** : ele geçirilen her istek [Trafik Müfettişine](./TRAFFIC_INSPECTOR.md) yayınlanır.
 - **OmniRoute esnekliğini uygulayın** : birleşik yönlendirme, devre kesiciler, geri dönüşler ve maliyet takibi IDE aracı trafiği için de çalışır.
@@ -538,7 +538,7 @@ Trae nispeten yeni bir yapay zekâ kodlama asistanıdır. Bir işleyici uygulama
 3. Kimlik doğrulama mekanizmasını belirleyin
 4. Kullanım Koşulları ve API'nin keşfedilebilirliğine göre devam etme/devam etmeme değerlendirmesi yapın
 
-Araştırma tamamlanana kadar kontrol panelindeki Trae kartında, "Uygulanabilirliği bildir" bağlantısıyla birlikte "Araştırılıyor" rozeti gösterilir. `src/mitm/handlers/trae.ts` konumundaki işleyici taslağı, yapılandırılmış bir `Henüz uygulanmadı` hatası oluşturur.
+Araştırma tamamlanana kadar kontrol panelindeki Trae kartında, "Uygulanabilirliği bildir" bağlantısıyla birlikte "Araştırılıyor" rozeti gösterilir. `src/mitm/handlers/trae.ts` konumundaki işleyici taslağı, yapılandırılmış bir `Not yet implemented` hatası oluşturur.
 
 ### Birikmiş aracılar (MITM gereklidir — özel temel URL desteği yoktur)
 

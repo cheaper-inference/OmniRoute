@@ -393,7 +393,7 @@ OmniRoute anaghị naanị ebufe okporo data site na proxy — ọ na-emekwa ka 
 
 ### Ndakọrịta Mkpịsịaka CLI
 
-**Mgbanwe Mkpịsịaka CLI** (`Ntọala → Nche`) na-ahazigharị nkụnyeisi HTTP na mpaghara ahụ JSON ka ha dakọọ kpọmkwem na akara nke faịlụ CLI binary izizi (Claude Code, Codex, wdg.). Nke a na-arụ ọrụ **n'elu** proxy ahụ:
+**Mgbanwe Mkpịsịaka CLI** (`Settings → Security`) na-ahazigharị nkụnyeisi HTTP na mpaghara ahụ JSON ka ha dakọọ kpọmkwem na akara nke faịlụ CLI binary izizi (Claude Code, Codex, wdg.). Nke a na-arụ ọrụ **n'elu** proxy ahụ:
 
 ```
 IP gị (egbochiri) → IP Proxy (US) → API nke Onye Na-enye Ọrụ

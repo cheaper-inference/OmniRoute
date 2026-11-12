@@ -154,18 +154,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Mevcut Beceriler
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ile bağlantılı 6 A2A becerisini ortaya koyuyor. Her beceri modülü `src/lib/a2a/skills/` bulunur.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` bağlı 6 A2A becerisini ortaya koyuyor. Her beceri modülü `src/lib/a2a/skills/` bulunur.
 
-| Yetenek             | ID                   | Tanım                                                                                                                                                      | Etiketler                 | Örnekler                                        |
-| :------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :---------------------------------------------- |
-| Akıllı Yönlendirme  | `smart-routing`      | OmniRoute kombo motoru + puanlamasını kullanarak bir istemi en uygun provider/combo yönlendirir                                                            | yönlendirme, sağlayıcılar | "Bu istemi en iyi model aracılığıyla yönlendir" |
-| Kota Yönetimi       | `quota-management`   | Sağlayıcı başına kota durumu raporları, arayanların ne zaman throttle/switch yapacaklarına karar vermelerine yardımcı olur                                 | kota, sağlayıcılar        | "Antropik kotayı kontrol edin"                  |
-| Sağlayıcı Keşfi     | `provider-discovery` | Yetenekleri, ücretsiz katman işaretlerini ve OAuth durumunu içeren yüklü sağlayıcıları listeler                                                            | sağlayıcılar, keşif       | "Hangi sağlayıcılar mevcut?"                    |
-| Maliyet Analizi     | `cost-analysis`      | Katalog + son kullanımına göre bir request/conversation maliyetini tahmin eder                                                                             | maliyet, kullanım         | "Bu görüşmenin maliyetini tahmin edin"          |
-| Sağlık Raporu       | `health-report`      | Sağlayıcı başına devre kesiciyi, bekleme süresini ve kilitleme durumunu toplar                                                                             | sağlık, dayanıklılık      | "Tüm sağlayıcıların sağlık durumunu göster"     |
-| Yetenekleri Listele | `list-capabilities`  | 45 girişli tam Ajan Becerileri kataloğunu (23 API + 21 CLI + 1 config), bağlam ekleme için ham SKILL.md URLs içeren bir işaretleme tablosu olarak döndürür | katalog, keşif, beceriler | "Tüm OmniRoute yeteneklerini listele"           |
+| Yetenek             | ID                   | Tanım                                                                                                                                                                   | Etiketler                 | Örnekler                                        |
+| :------------------ | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :---------------------------------------------- |
+| Akıllı Yönlendirme  | `smart-routing`      | OmniRoute kombo motoru + puanlamasını kullanarak bir istemi optimum provider/combo yönlendirir                                                                          | yönlendirme, sağlayıcılar | "Bu istemi en iyi model aracılığıyla yönlendir" |
+| Kota Yönetimi       | `quota-management`   | Sağlayıcı başına kota durumu raporları, arayanların ne zaman throttle/switch başvuracaklarına karar vermelerine yardımcı olur                                           | kota, sağlayıcılar        | "Antropik kotayı kontrol edin"                  |
+| Sağlayıcı Keşfi     | `provider-discovery` | Yeteneklere, ücretsiz katman işaretlerine ve OAuth durumuna sahip yüklü sağlayıcıları listeler                                                                          | sağlayıcılar, keşif       | "Hangi sağlayıcılar mevcut?"                    |
+| Maliyet Analizi     | `cost-analysis`      | Katalog + son kullanımına göre request/conversation maliyetini tahmin eder                                                                                              | maliyet, kullanım         | "Bu görüşmenin maliyetini tahmin edin"          |
+| Sağlık Raporu       | `health-report`      | Sağlayıcı başına devre kesiciyi, bekleme süresini ve kilitleme durumunu toplar                                                                                          | sağlık, dayanıklılık      | "Tüm sağlayıcıların sağlık durumunu göster"     |
+| Yetenekleri Listele | `list-capabilities`  | 45 girişli tam Ajan Becerileri kataloğunu (23 API + 21 CLI + 1 yapılandırması), bağlam enjeksiyonu için ham SKILL.md URLs içeren bir işaretleme tablosu olarak döndürür | katalog, keşif, beceriler | "Tüm OmniRoute yeteneklerini listele"           |
 
-> Temsilci Kartı, canlı 381 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
+> Temsilci Kartı, canlı 388 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
 
 ### `list-capabilities` Beceri Detayı
 

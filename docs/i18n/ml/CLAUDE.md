@@ -13,7 +13,7 @@ Claude Code-ന് മാത്രം ബാധകമാണ് — `AGENTS.md`-�
 
 ## Worktree ഐസൊലേഷൻ — Claude Code-ന് പ്രത്യേകമായ കാര്യങ്ങൾ
 
-പൂർണ്ണമായ നിർബന്ധിത worktree പ്രോട്ടോക്കോൾ (ബേസ്-ബ്രാഞ്ച് സ്ഥിരീകരണം, `.claude/worktrees/` ക്യാനോണിക്കൽ പാത, `cp -al` node_modules, ടിയർഡൗൺ നിയമങ്ങൾ) [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-ൽ ആണ് (`AGENTS.md` → Git വർക്ക്ഫ്ലോ → "Worktree ഐസൊലേഷൻ" എന്നതിൽ സംഗ്രഹിച്ചിരിക്കുന്നു). Claude Code-ന് പ്രത്യേകമായ കാര്യങ്ങൾ:
+പൂർണ്ണമായ നിർബന്ധിത worktree പ്രോട്ടോക്കോൾ (ബേസ്-ബ്രാഞ്ച് സ്ഥിരീകരണം, `.claude/worktrees/` ക്യാനോണിക്കൽ പാത, `cp -al` node_modules, ടിയർഡൗൺ നിയമങ്ങൾ) [`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)-ൽ ആണ് (`AGENTS.md` → Git വർക്ക്ഫ്ലോ → "Worktree ഐസൊലേഷൻ" എന്നതിൽ സംഗ്രഹിച്ചിരിക്കുന്നു). Claude Code-ന് പ്രത്യേകമായ കാര്യങ്ങൾ:
 
 - ഓപ്പറേറ്റർ ഇതിനകം നിങ്ങളോട് പറഞ്ഞിട്ടില്ലെങ്കിൽ, `AskUserQuestion` വഴി (Hard Rule #19) ഓപ്പറേറ്ററോട് ബേസ് ബ്രാഞ്ച് സ്ഥിരീകരിക്കുക.
 - നേറ്റീവ് `EnterWorktree` ടൂൾ തന്നെ തിരഞ്ഞെടുക്കുക — അത് ഇതിനകം `.claude/worktrees/`-ലാണ് (ക്യാനോണിക്കൽ പാത) worktree-കൾ സൃഷ്ടിക്കുന്നത്. ഡോക്യുമെന്റ് ചെയ്തിരിക്കുന്ന `git worktree add` കമാൻഡ് ഉപയോഗിച്ച് worktree സൃഷ്ടിച്ച ശേഷം, അതിന്റെ `path` ഉപയോഗിച്ച് `EnterWorktree` വിളിക്കുക.

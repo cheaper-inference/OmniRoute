@@ -372,7 +372,7 @@ MCPツールのテキスト結果は、 `mcpAccessibility.maxTextChars` (デフ�
 
 ### セッションのライフサイクル
 
-Streamable-HTTP セッションはアイドル状態になり、サーバーがそれを回収します。アイドル ウィンドウは`OMNIROUTE_MCP_SESSION_IDLE_MS`によって設定されます (デフォルトは 5 分。ハードコードされた値ではなく名前で参照されるため、ページが変更されてもドリフトしません)。アイドルリープセッションの症状は、 `Unknown Mcp-Session-Id` —を伴うHTTP 404 です。解決策は、セッションを再接続するか再起動することです。**ない**キーを回転したり、スコープを変更したり、ツールの名前を変更したりできます。
+Streamable-HTTP セッションはアイドル状態になり、サーバーがそれを回収します。アイドル ウィンドウは`OMNIROUTE_MCP_SESSION_IDLE_MS`によって構成され、 `open-sse/mcp-server/httpTransport.ts`の`DEFAULT_MCP_SESSION_IDLE_MS`にフォールバックします。アイドルリープセッションの症状は、 `Unknown Mcp-Session-Id` —を伴うHTTP 404 です。解決策は、セッションを再接続するか再起動することです。**ない**キーを回転したり、スコープを変更したり、ツールの名前を変更したりできます。
 
 ## API サーフェス
 

@@ -4,99 +4,105 @@
 
 ---
 
-> **Source de vérité :** espace de travail `electron/`** Dernière mise à jour :** 2026-06-28 — v3.8.40
+> **Source de vérité :** espace de travail `electron/`
+> **Dernière mise à jour :** 2026-06-28 — v3.8.40
 
-OmniRoute propose une application de bureau multiplateforme (Windows / macOS / Linux) basée sur**Electron 41** +** constructeur d'électrons 26.10** . L'application de bureau génère le serveur autonome Next.js en tant que processus enfant, pointe un `BrowserWindow` dessus et ajoute une barre d'état système, un programme de mise à jour automatique, un pont IPC et un bootstrap secret sans configuration.
+OmniRoute fournit une application de bureau multiplateforme (Windows / macOS / Linux) basée sur
+**Electron 41** + **electron-builder 26.10**. L’application de bureau lance le serveur autonome
+Next.js en tant que processus enfant, y connecte une `BrowserWindow`, et ajoute une
+icône dans la zone de notification, un système de mise à jour automatique, un pont IPC et une initialisation sans configuration des secrets.
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
-│ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
-└──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
-┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
-│   window.electronAPI.* (contextIsolation)     │
-└──────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│ Processus principal Electron (electron/main.js)        │
+│ ├─ Verrou d’instance unique                            │
+│ ├─ Processus enfant : serveur autonome Next.js         │
+│ │   (lancé avec l’environnement Node d’Electron)       │
+│ ├─ BrowserWindow → http://localhost:PORT               │
+│ ├─ Zone de notification + menu contextuel              │
+│ ├─ Mise à jour automatique via electron-updater        │
+│ ├─ Content Security Policy (en-têtes de session)       │
+│ └─ Initialisation des secrets (JWT / API_KEY_SECRET)   │
+└────────────────────────────────────────────────────────┘
+            ↕ Pont IPC (electron/preload.js)
+┌────────────────────────────────────────────────────────┐
+│ Moteur de rendu (tableau de bord Next.js)              │
+│   window.electronAPI.* (contextIsolation)              │
+└────────────────────────────────────────────────────────┘
 ```
 
 ## Versions
 
-Confirmé par `electron/package.json`:
+Confirmées à partir de `electron/package.json` :
 
-| Emballer                     | Version                                                                |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `electron`                   | `^43.4.1`                                                              |
-| `electron-builder`           | `^26.15.3`                                                             |
-| `electron-updater`           | `^6.8.9`                                                               |
-| `better-sqlite3`             | root `^13.0.2` (Node-API préconstruit — sans reconstruction Electron ) |
-| Version de l'application     | `3.8.0`                                                                |
-| Identifiant de l'application | `online.omniroute.desktop`                                             |
-| Nom du produit               | `OmniRoute`                                                            |
+| Paquet                       | Version                                                                     |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `electron`                   | `^43.4.1`                                                                   |
+| `electron-builder`           | `^26.15.3`                                                                  |
+| `electron-updater`           | `^6.8.9`                                                                    |
+| `better-sqlite3`             | racine `^13.0.2` (précompilations Node-API — aucune recompilation Electron) |
+| Version de l’application     | `3.8.0`                                                                     |
+| Identifiant de l’application | `online.omniroute.desktop`                                                  |
+| Nom du produit               | `OmniRoute`                                                                 |
 
-## Scripts (racine `package.json`)
+## Scripts (`package.json` racine)
 
-| Scénario                          | But                                                                     |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| `npm run electron:dev`            | Démarre `npm run dev` + attend `localhost:20128` + lance Electron       |
-| `npm run electron:build`          | Construit Next.js puis exécute `electron-builder` pour le OS actuel     |
-| `npm run electron:build:win`      | Construit le programme d'installation de Windows NSIS + portable (x64)  |
-| `npm run electron:build:mac`      | Construit macOS DMG (Intel + Apple Silicon)                             |
-| `npm run electron:build:linux`    | Construit Linux AppImage + DEB (x64 + arm64)                            |
-| `npm run electron:smoke:packaged` | Lance le binaire packagé et sonde `/login` pour HTTP 200, puis s'arrête |
+| Script                            | Objectif                                                                               |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Démarre `npm run dev` + attend `localhost:20128` + lance Electron                      |
+| `npm run electron:build`          | Compile Next.js, puis exécute `electron-builder` pour le système d’exploitation actuel |
+| `npm run electron:build:win`      | Génère l’installateur Windows NSIS + la version portable (x64)                         |
+| `npm run electron:build:mac`      | Génère le DMG macOS (Intel + Apple Silicon)                                            |
+| `npm run electron:build:linux`    | Génère les paquets Linux AppImage + DEB (x64 + arm64)                                  |
+| `npm run electron:smoke:packaged` | Lance le binaire empaqueté et vérifie que `/login` renvoie HTTP 200, puis l’arrête     |
 
-L'espace de travail `electron/` expose également :
+L’espace de travail `electron/` expose également :
 
 - `npm run prepare:bundle` — exécute `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — builds macOS à arche unique
-- `npm run pack` — construction uniquement dans le répertoire pour les tests locaux (pas d'installateur)
+- `npm run build:mac-x64` / `build:mac-arm64` — compilations macOS pour une seule architecture
+- `npm run pack` — compilation sous forme de répertoire uniquement pour les tests locaux (sans installateur)
 
-## Packs d'exécution en option
+## Packs de runtime facultatifs
 
-Les versions de bureau peuvent publier des archives d'exécution facultatives avec leurs programmes d'installation. La charge utile du serveur installé contient `optional-packs.index.json` (sous `resources/app` sur Windows et Linux). Pour l'entrée `browser-runtime`, lisez `packs[].tarball` et téléchargez** ce nom de fichier exact de la même version** . Les noms d'archives incluent un résumé SHA-256 ; différentes versions peuvent nécessiter différentes archives. Gardez le nom du fichier téléchargé inchangé.
+Les compilations de bureau peuvent publier des archives de runtime facultatives à côté de leurs installateurs. Le contenu serveur installé comprend `optional-packs.index.json` (sous `resources/app` sur Windows et Linux). Pour l'entrée `browser-runtime`, lisez `packs[].tarball` et téléchargez **ce nom de fichier exact dans la même version publiée**. Les noms d'archives contiennent une empreinte SHA-256 ; différentes compilations peuvent nécessiter des archives différentes. Conservez le nom du fichier téléchargé sans le modifier.
 
-Copiez l'index de l'application installée et l'archive sélectionnée dans un seul répertoire, puis utilisez le CLI de la même version :
+Copiez l'index de l'application installée et l'archive sélectionnée dans un même répertoire, puis utilisez la CLI de la même version publiée :
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` affiche l'état d'installation et de vérification, pas le nom du fichier d'archive. L'index groupé sélectionne l'archive. L'installation vérifie la somme de contrôle de son archive avant l'extraction et celle de son package avant de remplacer un pack installé. Il lit les fichiers locaux ; il ne télécharge pas les archives manquantes. Redémarrez l'application après l'installation. Si la version n'a pas de ressource correspondante, le pack facultatif n'est pas disponible via les ressources de cette version.
+`packs list` affiche l'état d'installation et de vérification, pas le nom de l'archive. L'index fourni sélectionne l'archive. L'installation vérifie la somme de contrôle de l'archive avant son extraction et celles de ses paquets avant de remplacer un pack installé. Elle lit des fichiers locaux ; elle ne télécharge pas les archives manquantes. Redémarrez l'application après l'installation. Si la version publiée ne comporte aucun fichier correspondant, le pack facultatif n'est pas disponible parmi les fichiers de cette version.
 
-## Disposition du répertoire
+## Organisation des répertoires
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # Dépendances Electron + configuration electron-builder
+├── main.js                   # Processus principal (24 Ko — voir les annotations ci-dessous)
+├── preload.js                # Pont IPC contextBridge
+├── types.d.ts                # Types AppInfo / ServerStatus / ElectronAPI
+├── README.md                 # Notes internes à l’espace de travail
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # Sortie electron-builder (ignorée par Git)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # Prépare le bundle .next/electron-standalone
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # Test de vérification après la compilation
 ```
 
-`main.js` et `preload.js` sont tous deux** fichiers CommonJS `.js`** , pas TypeScript. Les typages côté moteur de rendu résident dans `electron/types.d.ts`.
+`main.js` et `preload.js` sont tous deux des **fichiers CommonJS `.js`**, et non des fichiers TypeScript. Les
+déclarations de types côté moteur de rendu se trouvent dans `electron/types.d.ts`.
 
 ## Pont IPC (`preload.js`)
 
-Le préchargement expose un API sur liste blanche sur `window.electronAPI` en utilisant `contextBridge` avec `contextIsolation: true` et `nodeIntegration: false`.
+Le script de préchargement expose une API sur liste blanche dans `window.electronAPI` à l’aide de `contextBridge`,
+avec `contextIsolation: true` et `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,132 +121,150 @@ const VALID_CHANNELS = {
 };
 ```
 
-Méthodes exposées :
+Méthodes exposées :
 
-| Appel du moteur de rendu                                          | Taper                          |
-| ----------------------------------------------------------------- | ------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoquer                       |
-| `openExternal(url)`                                               | invoquer                       |
-| `getDataDir()`                                                    | invoquer                       |
-| `restartServer()`                                                 | invoquer                       |
-| `getAppVersion()`                                                 | invoquer                       |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoquer                       |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | envoyer                        |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | recevoir (retourne le broyeur) |
+| Appel du moteur de rendu                                          | Type                                        |
+| ----------------------------------------------------------------- | ------------------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                      |
+| `openExternal(url)`                                               | invoke                                      |
+| `getDataDir()`                                                    | invoke                                      |
+| `restartServer()`                                                 | invoke                                      |
+| `getAppVersion()`                                                 | invoke                                      |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                      |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                        |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (renvoie une fonction de nettoyage) |
 
-Les aides à la réception renvoient un** fonction broyeur** plutôt que de compter sur `removeAllListeners` — cela empêche l'accumulation d'écouteurs lors du remontage des composants React.
+Les fonctions auxiliaires de réception renvoient une **fonction de nettoyage** au lieu de s’appuyer sur
+`removeAllListeners` — cela évite l’accumulation d’écouteurs lorsque les composants React
+sont remontés.
 
 ## Cycle de vie du serveur
 
-`main.js` génère le bundle autonome Next.js directement avec le runtime Electron Node pour éviter une incompatibilité ABI du module natif avec le nœud système :
+`main.js` lance directement le bundle autonome Next.js avec l’environnement d’exécution Node
+d’Electron afin d’éviter une incompatibilité d’ABI des modules natifs avec la version système de Node :
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
-Points forts:
+Points clés :
 
-- `waitForServer()` interroge le URL jusqu'à 30 s avant d'afficher la fenêtre (pas d'écran vide au démarrage à froid).
-- `stdio: "pipe"` capture stdout/stderr; les phrases prêtes (`Ready` / `listening`) émettent `server-status: running` sur IPC.
-- `before-quit` attend jusqu'à 5 s pour SIGTERM gracieux (point de contrôle WAL ) puis envoie SIGKILL.
-- Le commutateur de port dans le bac (`20128`, `3000`, `8080`) arrête et redémarre le serveur, puis recharge le BrowserWindow.
+- `waitForServer()` interroge l’URL pendant un maximum de 30 s avant d’afficher la fenêtre (aucun écran vide lors d’un démarrage à froid).
+- `stdio: "pipe"` capture stdout/stderr ; les expressions indiquant que le serveur est prêt (`Ready` / `listening`) émettent `server-status: running` via IPC.
+- `before-quit` attend jusqu’à 5 s la fin d’un SIGTERM propre (point de contrôle WAL), puis envoie SIGKILL.
+- Le sélecteur de port dans la zone de notification (`20128`, `3000`, `8080`) arrête et redémarre le serveur, puis recharge la BrowserWindow.
 
-## Bootstrap secret sans configuration
+## Amorçage des secrets sans configuration
 
-Au premier lancement, le processus principal génère automatiquement et conserve les secrets manquants :
+Au premier lancement, le processus principal génère automatiquement les secrets manquants et les conserve :
 
-| Secrète                  | Source                                                                                 |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                               |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (refuse si des crédits cryptés existent déjà) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                               |
+| Secret                   | Source                                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                     |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (refuse si des identifiants chiffrés existent déjà) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                     |
 
-J'ai persisté à `<DATA_DIR>/server.env`. `DATA_DIR` résout :
+Ils sont enregistrés dans `<DATA_DIR>/server.env`. `DATA_DIR` est résolu comme suit :
 
-- Windows: `%APPDATA%\omniroute`
-- Linux: `$XDG_CONFIG_HOME/omniroute` ou `~/.omniroute`
-- macOS: `~/.omniroute`
+- Windows : `%APPDATA%\omniroute`
+- Linux : `$XDG_CONFIG_HOME/omniroute` ou `~/.omniroute`
+- macOS : `~/.omniroute`
 
-## Recherche de fichier d'environnement
+## Recherche du fichier d’environnement
 
-Avant de générer le serveur, le processus principal (`getPreferredEnvFilePath()` dans `electron/main.js`) sélectionne** un** fichier `.env` : le premier d’entre eux qui existe.
+Avant de lancer le serveur, le processus principal (`getPreferredEnvFilePath()` dans
+`electron/main.js`) sélectionne **un seul** fichier `.env` : le premier fichier existant parmi les suivants.
 
-1. `$DATA_DIR/.env`, lorsque `DATA_DIR` est défini dans l'environnement avec lequel l'application a été lancée.
-2. `<resolved DATA_DIR>/.env`, en utilisant les mêmes valeurs par défaut que ci-dessus : `%APPDATA%\omniroute\.env` sur Windows, `$XDG_CONFIG_HOME/omniroute/.env` ou `~/.omniroute/.env` sur Linux et macOS.
-3. `.env` dans le répertoire de travail du processus.
+1. `$DATA_DIR/.env`, lorsque `DATA_DIR` est défini dans l’environnement depuis lequel l’application a été lancée.
+2. `<resolved DATA_DIR>/.env`, en utilisant les mêmes valeurs par défaut que ci-dessus : `%APPDATA%\omniroute\.env` sous
+   Windows, `$XDG_CONFIG_HOME/omniroute/.env` ou `~/.omniroute/.env` sous Linux et macOS.
+3. Le fichier `.env` dans le répertoire de travail du processus.
 
-Le processus principal lit uniquement ce fichier ; les candidats ultérieurs ne sont pas fusionnés. L'environnement serveur est ensuite construit avec cette priorité (la plus élevée en premier) :
+Le processus principal lit uniquement ce fichier ; les candidats suivants ne sont pas fusionnés. L’environnement
+du serveur est ensuite construit selon l’ordre de priorité suivant (du plus élevé au plus faible) :
 
-1. L'environnement de processus Electron (variables héritées du lancement de l'application).
+1. L’environnement du processus Electron (variables héritées de ce qui a lancé l’application).
 2. Le fichier `.env` sélectionné.
-3. `<DATA_DIR>/server.env` (les secrets d'amorçage ci-dessus).
+3. `<DATA_DIR>/server.env` (les secrets d’amorçage ci-dessus).
 
-L'environnement de processus est capturé lorsque l'application démarre, de sorte qu'une variable d'environnement système ou utilisateur définie pendant l'exécution de l'application (y compris lorsqu'elle se trouve dans la barre d'état après la fermeture de sa fenêtre) n'atteint pas le serveur tant que l'application n'est pas complètement fermée et relancée. Pour les boutons d'exécution tels que `CONTEXT_LENGTH_<PROVIDER>` (voir [Variables d'environnement : longueur de contexte par fournisseur](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), préférez le fichier `.env`, puis quittez complètement (bac,** Quitter** ) et relancez.
+L’environnement du processus est capturé au démarrage de l’application ; par conséquent, une variable d’environnement
+système ou utilisateur définie pendant que l’application est en cours d’exécution (y compris lorsqu’elle reste dans la zone de notification après la fermeture de sa fenêtre)
+n’est pas transmise au serveur tant que l’application n’a pas été complètement quittée puis relancée. Pour les paramètres d’exécution
+tels que `CONTEXT_LENGTH_<PROVIDER>` (voir
+[Variables d’environnement : longueur de contexte par fournisseur](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+privilégiez le fichier `.env`, puis quittez complètement l’application (zone de notification, **Quitter**) et relancez-la.
 
-## Fenêtre et plateau
+## Fenêtre et zone de notification
 
-- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, feu tricolore à `{ x: 16, y: 16 }`.
-- Windows/Linux: barre de titre native.
-- Le bouton de fermeture minimise le bac ; le menu de la barre d'état a** Ouvrir OmniRoute** ,** Ouvrir le tableau de bord** (navigateur externe),** Port du serveur** sous-menu,** Vérifier les mises à jour** ,** Quitter** .
+- `BrowserWindow` : 1400×900 (minimum 1024×700), `backgroundColor: "#0a0a0a"`.
+- macOS : `titleBarStyle: "hiddenInset"`, boutons de fenêtre à `{ x: 16, y: 16 }`.
+- Windows/Linux : barre de titre native.
+- Le bouton de fermeture réduit l’application dans la zone de notification ; le menu de la zone de notification contient **Ouvrir OmniRoute**, **Ouvrir le tableau de bord** (navigateur externe), le sous-menu **Port du serveur**, **Rechercher les mises à jour**, **Quitter**.
 
 ## Politique de sécurité du contenu
 
-Réglé via `session.defaultSession.webRequest.onHeadersReceived`. Directives notables :
+Définie via `session.defaultSession.webRequest.onHeadersReceived`. Directives importantes :
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Le mode Dev ajoute `'unsafe-eval'` à `script-src` uniquement
+- Le mode développement ajoute `'unsafe-eval'` à `script-src` uniquement
 
 ## Mise à jour automatique
 
 Utilise `electron-updater` avec le fournisseur GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Événements transmis au moteur de rendu via `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (avec `percent`), `downloaded`, `error`
-- `installUpdate()` tue le serveur puis appelle `autoUpdater.quitAndInstall()`
-- Ignoré en mode développement (`!app.isPackaged`)
+- Événements transmis au processus de rendu via l’IPC `update-status` :
+  `checking`, `available`, `not-available`, `downloading` (avec `percent`), `downloaded`, `error`
+- `installUpdate()` arrête le serveur, puis appelle `autoUpdater.quitAndInstall()`
+- Ignorée en mode développement (`!app.isPackaged`)
 
-## Construire un pipeline
+## Pipeline de build
 
-1. `npm run build` → Next.js autonome dans `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → se réinstalle dans `.next/electron-standalone` et réécrit les chemins absolus à l'intérieur `server.js` + `required-server-files.json` afin que le bundle puisse être déplacé.
-3. `electron-builder` packages `main.js`, `preload.js`, `node_modules` et `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → version autonome de Next.js dans `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → réorganise les fichiers dans `.next/electron-standalone` et réécrit les chemins absolus dans `server.js` + `required-server-files.json` afin que le bundle soit déplaçable.
+3. `electron-builder` empaquette `main.js`, `preload.js`, `node_modules` et `extraResources: { ../.next/electron-standalone → app }`.
 
-### Construire des cibles
+### Cibles de build
 
-| OS      | Cibles                                             |
-| ------- | -------------------------------------------------- |
-| Windows | programme d'installation de NSIS + portable (x64)  |
-| macOS   | DMG (Intel + arm64, glisser vers les applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                       |
+| OS      | Cibles                                                 |
+| ------- | ------------------------------------------------------ |
+| Windows | Programme d’installation NSIS + version portable (x64) |
+| macOS   | DMG (Intel + arm64, glisser-déposer vers Applications) |
+| Linux   | AppImage + DEB (x64 + arm64)                           |
 
-Paramètres NSIS : `oneClick: false`, permet à l'utilisateur de choisir le répertoire d'installation, crée des raccourcis sur le bureau et le menu Démarrer.
+Paramètres NSIS : `oneClick: false`, permet à l’utilisateur de choisir le répertoire d’installation et crée des raccourcis sur le Bureau et dans le menu Démarrer.
 
-## Version packagée pour les tests de fumée
+## Test rapide du build empaqueté
 
 ```bash
 npm run electron:smoke:packaged
 ```
 
-`scripts/dev/smoke-electron-packaged.mjs`:
+`scripts/dev/smoke-electron-packaged.mjs` :
 
-- Détecte automatiquement le binaire packagé dans `electron/dist-electron/` pour la plate-forme actuelle.
-- Se lance avec des répertoires `HOME`/`APPDATA`/`XDG_*` isolés afin de ne pas toucher aux données du développeur.
-- Sonde `http://127.0.0.1:20128/login` pour HTTP 200 dans les 45 s.
-- Surveille stderr/stdout pour les modèles fatals (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, etc.).
-- Attend 2 s de temps d'exécution stable après la préparation, puis émet SIGTERM et attend que le port se libère.
-- Dans CI, passe automatiquement `--no-sandbox --disable-gpu` (et `--disable-dev-shm-usage` sur Linux).
+- Détecte automatiquement le binaire empaqueté dans `electron/dist-electron/` pour la plateforme actuelle.
+- Le lance avec des répertoires `HOME`/`APPDATA`/`XDG_*` isolés afin de ne pas toucher aux données du développeur.
+- Interroge régulièrement `http://127.0.0.1:20128/login` jusqu’à obtenir une réponse HTTP 200 dans un délai de 45 s.
+- Surveille stderr/stdout afin de détecter les motifs d’erreur fatale (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, etc.).
+- Attend 2 s d’exécution stable après que l’application est prête, puis envoie SIGTERM et attend que le port soit libéré.
+- Dans la CI, transmet automatiquement `--no-sandbox --disable-gpu` (ainsi que `--disable-dev-shm-usage` sous Linux).
 
-Remplacements d'environnement : `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Variables d’environnement de remplacement : `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## Signature de code
+## Signature du code
 
-`electron/package.json` fait** pas** câbler les informations de signature directement. Transmettez-les via env vars à `electron-builder`:
+`electron/package.json` ne configure **pas** directement les identifiants de signature. Transmettez-les à `electron-builder` au moyen de variables d’environnement :
 
 ### macOS
 
@@ -263,32 +287,32 @@ npm run electron:build:win
 
 ### Linux
 
-La signature AppImage est facultative. — définit `LINUX_GPG_KEY` en cas de signature.
+La signature d’AppImage est facultative — définissez `LINUX_GPG_KEY` pour signer.
 
 ## Distribution
 
-Terrain d'artefacts à `electron/dist-electron/`:
+Les artefacts sont générés dans `electron/dist-electron/` :
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Les versions sont publiées dans GitHub Releases (`diegosouzapw/OmniRoute`), où `electron-updater` vérifie également les nouvelles versions.
+Les versions sont publiées dans GitHub Releases (`diegosouzapw/OmniRoute`), où `electron-updater` vérifie également la disponibilité de nouvelles versions.
 
 ## Dépannage
 
-| Symptôme                                                           | Réparer                                                                                                                                                                         |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` après Electron bosse majeure | better-sqlite3 v13 livre les pré-constructions Node-API — réexécute `npm install` à la racine et `prepare:bundle` (il vérifie la pré-construction pour la plate-forme actuelle) |
-| `ERR_DLOPEN_FAILED` pour le module natif                           | Réexécutez `prepare:bundle` — il échoue rapidement lorsque la pré-construction Node-API pour la plate-forme actuelle est manquante                                              |
-| La fenêtre apparaît vide sur Linux                                 | Confirmez que le serveur Next.js est réellement lié à PORT (vérifiez les journaux `[Server]` )                                                                                  |
-| stands de notarisation macOS                                       | Assurez-vous que les variables `APPLE_*` sont exportées, pas seulement dans `.env`                                                                                              |
-| Windows SmartScreen avertissement                                  | Signez avec le certificat EV ou les utilisateurs cliquent avec le bouton droit sur → "Exécuter quand même"                                                                      |
-| Le test de fumée échoue avec le port utilisé                       | Arrêtez tout serveur de développement local sur 20128 avant d'exécuter `electron:smoke:packaged`                                                                                |
+| Symptôme                                                                         | Solution                                                                                                                                                                            |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` après une mise à niveau majeure d’Electron | better-sqlite3 v13 fournit des builds précompilés Node-API — réexécutez `npm install` à la racine et `prepare:bundle` (qui vérifie le build précompilé pour la plateforme actuelle) |
+| `ERR_DLOPEN_FAILED` pour un module natif                                         | Réexécutez `prepare:bundle` — la commande échoue immédiatement lorsque le build précompilé Node-API pour la plateforme actuelle est absent                                          |
+| La fenêtre apparaît vide sous Linux                                              | Vérifiez que le serveur Next.js s’est bien lié à PORT (consultez les journaux `[Server]`)                                                                                           |
+| La notarisation macOS reste bloquée                                              | Assurez-vous que les variables `APPLE_*` sont exportées et qu’elles ne sont pas uniquement définies dans `.env`                                                                     |
+| Avertissement Windows SmartScreen                                                | Signez avec un certificat EV, ou les utilisateurs peuvent effectuer un clic droit → « Exécuter quand même »                                                                         |
+| Le test rapide échoue, car le port est déjà utilisé                              | Arrêtez tout serveur de développement local utilisant le port 20128 avant d’exécuter `electron:smoke:packaged`                                                                      |
 
 ## Voir aussi
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Source : `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Aides : `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Utilitaires : `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

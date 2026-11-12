@@ -17,7 +17,7 @@
 //
 // Advisory by default (exit 0). With --ratchet, reads metrics.<name>.value from
 // config/quality/quality-baseline.json and exits 1 when either count is HIGHER than its
-// baseline (direction: down).
+// baseline (direction: down). Incomplete source or baseline inputs exit 2.
 //
 //   node scripts/check/check-type-scale-ratchet.mjs
 //   node scripts/check/check-type-scale-ratchet.mjs --list     # show the worst files
@@ -51,12 +51,7 @@ export function countViolations(source) {
 }
 
 function* walk(dir) {
-  let entries;
-  try {
-    entries = fs.readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (SKIP.has(entry.name)) continue;
     const full = path.join(dir, entry.name);
@@ -104,7 +99,14 @@ export function compare(totals, baselineMetrics) {
 
 function main(argv) {
   const quiet = argv.includes("--quiet");
-  const { totals, perFile } = measure();
+  let measurement;
+  try {
+    measurement = measure();
+  } catch {
+    console.error("typeScale=INCOMPLETE reason=source-unreadable");
+    return 2;
+  }
+  const { totals, perFile } = measurement;
   for (const name of METRICS) console.log(`${name}=${totals[name]}`);
 
   if (argv.includes("--list")) {
@@ -121,13 +123,18 @@ function main(argv) {
   let metrics;
   try {
     metrics = JSON.parse(fs.readFileSync(BASELINE_PATH, "utf-8"))?.metrics;
-  } catch (err) {
-    // A measurement failure must not block, only a measured regression.
-    if (!quiet) console.log(`typeScale=SKIP reason=baseline-unreadable (${err.message})`);
-    return 0;
+  } catch {
+    console.error("typeScale=INCOMPLETE reason=baseline-unreadable");
+    return 2;
   }
-  const { regressions, skipped } = compare(totals, metrics);
-  for (const name of skipped) if (!quiet) console.log(`${name}=SKIP reason=baseline-absent`);
+  for (const name of METRICS) {
+    const metric = metrics?.[name];
+    if (!Number.isSafeInteger(metric?.value) || metric.value < 0 || metric.direction !== "down") {
+      console.error(`typeScale=INCOMPLETE reason=baseline-invalid metric=${name}`);
+      return 2;
+    }
+  }
+  const { regressions } = compare(totals, metrics);
   if (regressions.length > 0) {
     for (const { name, measured, ceiling } of regressions) {
       console.error(`Type scale ratchet: ${name}=${measured}, baseline ${ceiling}.`);

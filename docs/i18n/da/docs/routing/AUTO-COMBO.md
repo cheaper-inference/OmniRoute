@@ -188,36 +188,38 @@ To almindelige faldgruber:
 
 Se [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) og [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) for den oprindelige forvirring, som dette dokumenterer.
 
-## Sådan fungerer det (lagrede Auto-Combos)
+## Sådan fungerer det (vedvarende autokombinationer)
 
-Auto-Combo-motoren vælger dynamisk den bedste udbyder/model til hver anmodning ved hjælp af en **scoringsfunktion med 16 faktorer** (defineret i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Standardvægtene summerer til `1.0`; brugerdefinerede vægte normaliseres igen af `normalizeScoringWeights()`. To af de seksten — `cacheAffinity` og `resetWindowAffinity` — har en standardvægt på `0`; `reliability` har `0` i `DEFAULT_WEIGHTS`, men `0.03` i generiske pakker og `0.04` i `reliability-first`, og `quality` har `0.02` i pakker (`0.03` i `quality-first`): De beregnes stadig for hver kandidat, og `cacheAffinity` styrer deduplikering af promptcachen uden for scoren, så faktorerne med standardværdien nul har som udgangspunkt ingen indflydelse, mens de har det i pakkerne.
+Auto-Combo Engine vælger dynamisk den bedste provider/model for hver anmodning ved hjælp af en **16-faktor scoring funktion** (defineret i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Standardvægtene summer til `1.0`; brugerdefinerede vægte renormaliseres af `normalizeScoringWeights()`. To af de seksten — `cacheAffinity` og `resetWindowAffinity` — har en standardvægt på `0`; `reliability` bærer `0` i `DEFAULT_WEIGHTS` men `0.03` i generiske pakker og `0.04` i `reliability-first`, og `quality` bærer `0.02` i pakker (`0.03` i `quality-first`): de beregnes stadig for hver kandidat, og `cacheAffinity` porter prompt-cache-deduplikering uden for scoren, så nul-standardafstemningsfaktorerne gør det ganske enkelt ikke som standard.
 
-![Auto-Combo-scoring med 16 faktorer](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Kilde: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (generér igen via `npm run docs:render-diagrams`). Filnavnet er historisk; kilden og det renderede diagram viser alle 16 faktorer, der er erklæret i `DEFAULT_WEIGHTS`.
+> Kilde: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerer via `npm run docs:render-diagrams`). Filnavnet er historisk; kilden og det gengivne diagram viser alle 16 faktorer, der er deklareret i `DEFAULT_WEIGHTS`.
 
 | Faktor                | Standardvægt | Beskrivelse                                                                                                                                                                                                                |
 | :-------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429       | Resterende kvote / råderum inden for hastighedsgrænsen [0..1]                                                                                                                                                              |
-| `health`              | 0.1605       | Tilstandsscore fra circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                   |
-| `costInv`             | 0.1429       | Omvendt **kombineret** omkostning (60 % input- + 40 % outputtokenpris, normaliseret) — billigere = højere score                                                                                                            |
-| `latencyInv`          | 0.1143       | Omvendt p95-latenstid normaliseret i forhold til puljen — hurtigere = højere score                                                                                                                                         |
-| `taskFit`             | 0.0762       | Egnethed til opgavetypen (kodning, gennemgang, planlægning, analyse, fejlfinding, dokumentation)                                                                                                                           |
-| `stability`           | 0.0476       | Variansbaseret stabilitet ud fra latenstidens standardafvigelse — en kandidat med meget svingende svartider scorer lavere                                                                                                  |
-| `tierPriority`        | 0.0476       | Kontoniveauets prioritet — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                    |
-| `tierAffinity`        | 0.0476       | Overensstemmelse mellem kandidatens niveau og det niveau, som manifestet anbefaler                                                                                                                                         |
-| `specificityMatch`    | 0.0476       | Overensstemmelse mellem anmodningens specificitet (tip fra manifestet) og modelniveauet                                                                                                                                    |
-| `contextAffinity`     | 0.0476       | Overensstemmelse mellem anmodningens behov for kontekstvindue og modellens kontekstvindue                                                                                                                                  |
-| `sessionAvailability` | 0.0476       | Tilgængelighed af OAuth-sessionen for kandidatforbindelsen i denne session (`getOAuthSessionAvailability()`; forbindelser uden OAuth scorer 1.0)                                                                           |
-| `connectionDensity`   | 0.0476       | Fordeler belastningen på tværs af forbindelser fra samme udbyder (modvirker koncentration)                                                                                                                                 |
+| `quota`               | 0.1429       | Resterende kvote / satsgrænse frihøjde [0..1]                                                                                                                                                                              |
+| `health`              | 0.1605       | Sundhedsscore fra strømafbryder (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                   |
+| `costInv`             | 0.1429       | Omvendt **blandet** pris (60 % input + 40 % output token pris, normaliseret) — billigere = højere score                                                                                                                    |
+| `latencyInv`          | 0.1143       | Invers p95-latens normaliseres for at samle — hurtigere = højere score                                                                                                                                                     |
+| `taskFit`             | 0.0762       | Opgavetype fitness (kodning, gennemgang, planlægning, analyse, fejlretning, dokumenter)                                                                                                                                    |
+| `stability`           | 0.0476       | Variansbaseret stabilitet fra latency standardafvigelse — en kandidat, hvis responstid svinger scorer lavere                                                                                                               |
+| `tierPriority`        | 0.0476       | Kontoniveauprioritet — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Gratis = 0.0                                                                                                                                              |
+| `tierAffinity`        | 0.0476       | Affinitet mellem kandidatens niveau og det manifest-anbefalede niveau                                                                                                                                                      |
+| `specificityMatch`    | 0.0476       | Match mellem anmodningsspecificitet (manifest tip) og modelniveau                                                                                                                                                          |
+| `contextAffinity`     | 0.0476       | Affinitet mellem anmodningens kontekstvinduebehov og modellens kontekstvindue                                                                                                                                              |
+| `sessionAvailability` | 0.0476       | OAuth session tilgængelighed af kandidatforbindelsen til denne session (`getOAuthSessionAvailability()`; ikke-OAuth-forbindelser score 1,0)                                                                                |
+| `connectionDensity`   | 0.0476       | Fordeler belastningen på tværs af forbindelser fra samme udbyder (anti-koncentration)                                                                                                                                      |
 | `cacheAffinity`       | 0.00         | Rendezvous-hash-tilknytning til den forbindelse, der med størst sandsynlighed allerede indeholder denne anmodnings promptcachepræfiks (`open-sse/services/combo/promptCacheAffinity.ts`); deaktiveret som standard (#8008) |
-| `resetWindowAffinity` | 0.00         | Prioritering af forbindelser, hvis vindue for kvotenulstilling er fordelagtigt (deaktiveret som standard)                                                                                                                  |
-| `quality`             | 0.03         | Feedbackbaseret signal for outputkvalitet fra routinghændelsernes kvalitetssporing; kandidater uden observationer får den neutrale værdi 0.5                                                                               |
-| `reliability`         | 0.00         | Observeret succesandel, `1 - failureRate`, fra 24 timers brugshistorik med et minimum på ti stikprøver (ellers målinger i realtid); kandidater uden observationer aflæses som 1.0. Deaktiveret som standard                |
+| `resetWindowAffinity` | 0.00         | Bias mod forbindelser, hvis kvote nulstillingsvindue er gunstigt (deaktiveret som standard)                                                                                                                                |
+| `quality`             | 0.03         | Feedback-drevet output-kvalitetssignal fra routing-hændelseskvalitetsmåleren; kandidater uden observationer får en neutral 0,5                                                                                             |
+| `reliability`         | 0.00         | Observeret succesandel, `1 - failureRate`, fra 24 timers brugshistorie bag et gulv med ti prøver (ellers realtidsmålinger); kandidater uden observationer læses som 1,0. Deaktiveret som standard                          |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+`quality` trackeren (`open-sse/services/routing/quality.ts`) i hukommelsen er tom efter en kold genstart, så hver kandidat scorer en neutral `0.5` indtil de første observationer lander.
 
-**Sum:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` som erklæret i `DEFAULT_WEIGHTS`; brugerkonfigurerede vægte normaliseres igen til en fordeling af `normalizeScoringWeights()` før beregningen af scoren.
+> **Ulæselig kvote (#15347).** Når en udbyder har en kvotehenter, men den returnerer intet læsbart (mislykket hentning, manglende legitimationsoplysninger, brug af kun besked eller et forkert udformet øjebliksbillede uden parsebar `windows` og ingen finite `percentUsed`, inklusive `percentUsed: null`), scorer kandidaten `0` på `quota` aksen, og dens samme endelige score multipliceres med `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR`, `autoStrategy.ts`(0,5QG), soft. som forbindelsesstatusstraffen. En mislykket brugslæsning er bevis på telemetrien, ikke udbyderen, så den rangerer strengt under enhver reel aflæsning, inklusive en bekræftet 100 %-used, men den bliver aldrig hårdt blokeret eller smidt ud. En udbyder uden loft rapporterer `unlimited: true` og scorer som fuld kvote; en udbyder uden registreret kvotehenter har ingen telemetrikilde overhovedet og beholder standarden `100`.
+
+**Sum:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` som erklæret i `DEFAULT_WEIGHTS`; brugerkonfigurerede vægte renormaliseres til en fordeling af `normalizeScoringWeights()` før scoring.
 
 ## Tilstandspakker
 
@@ -284,7 +286,7 @@ omsatte værdier føres ind i motorens eksisterende `config.modePack`- / `config
 
 ## Alle routingstrategier
 
-OmniRoute's combo motor understøtter** 20 routingstrategier** (erklæret i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Selve Auto Combo-motoren er afsløret under `auto` strategien; de andre er tilgængelige for vedvarende kombinationer.
+OmniRoute's combo-motor understøtter **20 routingstrategier** (erklæret i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Selve Auto Combo-motoren er eksponeret under `auto` strategien; de andre er tilgængelige for vedvarende kombinationer.
 
 | Strategi            | Beskrivelse                                                                                                                                                                                         |
 | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -302,7 +304,7 @@ OmniRoute's combo motor understøtter** 20 routingstrategier** (erklæret i `src
 | `headroom`          | Vælg målet med den mest resterende kvotefrihed                                                                                                                                                      |
 | `quota-weighted`    | Spring over opbrugte konti, og vælg derefter blandt resten i forhold til resterende kvote divideret med last under flyvningen; eksisterende samtaler forbliver fastgjort                            |
 | `strict-random`     | Tilfældig uden deduplikering af gentagelser                                                                                                                                                         |
-| `auto`              | Brug Auto Combo scoring (16-faktor) —** anbefales**                                                                                                                                                 |
+| `auto`              | Brug Auto Combo scoring (16-faktor) —**anbefales**                                                                                                                                                  |
 | `lkgp`              | Sidst kendte-gode sti (stifter til den sidste succesrige udbyder og falder derefter tilbage til reglerne)                                                                                           |
 | `context-optimized` | Vælg mål, der passer bedst til den aktuelle kontekststørrelse                                                                                                                                       |
 | `cache-optimized`   | Omarranger mål efter prompt-cache-affinitet — den forbindelse, der sandsynligvis allerede har denne anmodnings cachepræfiks, prøves først (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
@@ -313,22 +315,36 @@ OmniRoute's combo motor understøtter** 20 routingstrategier** (erklæret i `src
 
 ### `weighted` semantik
 
-`weighted` er en** proportional tilfældig trækning pr. anmodning** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ikke en equalizer:
+`weighted` er en **proportional tilfældig trækning pr. anmodning** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ikke en equalizer:
 
-- Hver anmodning trækker** en** trin med sandsynlighed `weight / totalWeight`; de resterende trin er sorteret efter faldende vægt som reservekæden for den pågældende anmodning.
-- Et trin, hvis vægt er `0` (eller mangler) er** aldrig tegnet** mens ethvert andet trin har en vægt > 0 — kan det kun tjene som et tilbagefald, efter at det tegnede trin mislykkes. Kun hvornår** alle** vægte er 0 bliver valget ensartet.
-- Trin, hvis mål alle er utilgængelige — udbyderens strømafbryder `OPEN`, forbindelsesafkøling, model lockout — fjernes fra lodtrækningen, før det sker (`open-sse/services/combo/targetResolution.ts`), så et enkelt sundt trin kan midlertidigt vinde hver anmodning.
-- `stickyWeightedLimit` (combo config, standard `1` = off) fastgør det tegnede trin for så mange på hinanden følgende succeser, før du tegner igen.
+- Hver anmodning trækker **en** trin med sandsynlighed `weight / totalWeight`; de resterende trin er sorteret efter faldende vægt som reservekæden for den pågældende anmodning.
+- Et trin, hvis vægt er `0` (eller mangler).**aldrig tegnet** mens ethvert andet trin har en vægt > 0 — kan det kun tjene som et tilbagefald, efter at det tegnede trin mislykkes. Kun hvornår **alle** vægte er 0 bliver valget ensartet.
+- Trin, hvis mål alle er utilgængelige — udbyderkredsløbsafbryder `OPEN`, forbindelsesnedkøling, model lockout — fjernes fra lodtrækningen, før det sker (`open-sse/services/combo/targetResolution.ts`), så et enkelt sundt trin kan midlertidigt vinde hver anmodning.
+- `stickyWeightedLimit` (combo config, standard `1` = deaktiveret) fastgør det tegnede trin for så mange på hinanden følgende succeser før gentegning.
 
-For streng rotation brug `round-robin`; lige vægt på `weighted` giver statistisk — ikke streng — balance.
+For streng rotation brug `round-robin`; lige vægte på `weighted` giver statistisk — ikke streng — balance.
 
 ### Agentisk pipeline-tilstand
 
 En `pipeline` -kombination med mindst to modeller kan vælge planner/executor -routing med `config.agenticOrchestration.enabled`. Det første mål ejer planlægning og endelige svar; det andet mål udsender klient-native værktøjskald. OmniRoute registrerer værktøjsresultatfortsættelser fra anmodningsprotokollen, spørger planlæggeren, om der er behov for endnu en værktøjsrunde, og gør dynamisk enten udføreren eller planlæggeren til det klientvendte sidste trin.
 
-På værktøjsresultatfortsættelser stopper OmniRoute også udførelsen, når to på hinanden følgende afsluttede runder gentager de samme værktøjskald med uændrede resultater, eller når hvert eksplicit markeret resultat i to på hinanden følgende runder mislykkedes. Ændrede resultater tillader gentagne opkald (f.eks. polling). Vagten nulstiller på en ny brugeranmodning, grupperer parallelle opkald i én runde og understøtter Anthropic, Chat-afslutninger, Svar og Gemini -historier. Planlæggeren modtager årsagen og ejer det endelige svar, selvom den anmoder om endnu en værktøjsrunde.
+Valgfri `config.agenticOrchestration.contextCompaction` anvender et separat nyttelastbudget før hver planlægger- eller eksekveringsudsendelse. Aktiver det eksplicit:
 
-Yderligere modeller efter det andet mål er bestilte executor backups. Et mislykket HTTP svar eller transportundtagelse går videre til den næste eksekvere, der bærer den samme planlæggerbeslutning og native værktøjer, men den pågældende eksekutørs egen trinprompt og løste forbindelse. Det første vellykkede svar returneres uændret, inklusive SSE -streaming; fejl efter en vellykket stream starter kan ikke prøves igen her. Hvis alle udførere fejler, returneres den sidste fejl. Klient afbryder stop afsendelse.
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Disse er serialiserede JSON tegnbudgetter valgt af operatøren, ikke token-kontekstvinduer eller garanterede opstrømsgrænser. Den nøjagtige model IDs tilsidesætter standarden. Over tærsklen fjerner komprimering identiske værktøjsdefinitioner, trimmer overdimensionerede værktøjsbeviser med en sammenfatning og fjerner gamle komplette historiegrupper mod målforholdet. Den bevarer system/developer -instruktioner, den seneste brugeranmodning, den sidste værktøjsrunde inklusive parallel calls/results og Gemini's førende routing-instruktion. Instruktioner og værktøjsindstillinger på øverste niveau er bevaret. En udeladelsesmarkør registrerer fjernet historie; dette er deterministisk trimning, ikke en semantisk opsummering. Hvis den fastgjorte kontekst stadig overstiger budgettet, returnerer anmodningen 413, før modellen kontaktes. Med komprimering deaktiveret eller under tærsklen passerer anmodningen uændret.
+
+Ved fortsættelse af værktøjsresultater stopper OmniRoute også udførelsen, når to på hinanden følgende afsluttede runder gentager de samme værktøjskald med uændrede resultater, eller når hvert eksplicit markeret resultat i to på hinanden følgende runder mislykkedes. Ændrede resultater tillader gentagne opkald (f.eks. polling). Vagten nulstiller på en ny brugeranmodning, grupperer parallelle opkald i én runde og understøtter Anthropic, Chat-afslutninger, Svar og Gemini -historier. Planlæggeren modtager årsagen og ejer det endelige svar, selvom den anmoder om endnu en værktøjsrunde.
+
+Yderligere modeller efter det andet mål er bestilte executor backups. Et mislykket HTTP svar eller transportundtagelse går videre til den næste eksekutør, der bærer den samme planlæggerbeslutning og native værktøjer, men denne eksekutørs egen trinprompt og løste forbindelse. Det første vellykkede svar returneres uændret, inklusive SSE -streaming; fejl efter en vellykket stream starter kan ikke prøves igen her. Hvis alle udførere fejler, returneres den sidste fejl. Klient afbryder stop afsendelse.
 
 ```json
 {
@@ -346,46 +362,25 @@ Eksekveren kan udsende flere uafhængige opkald i ét svar. Afhængige opkald h�
 
 Round-robin er batchet, ikke én anmodning pr. trin:
 
-- `stickyRoundRobinLimit` (combo config, derefter `comboStickyRoundRobinLimit`, derefter `settings.stickyRoundRobinLimit`, standard** 3** ) holder det samme mål for så mange på hinanden følgende succeser, før de roterer. Indstil combo-tilsidesættelsen til `1` for én-anmodningsrotation. Kombinationseditoren viser den effektive værdi og hvilket lag den kom fra.
-- `connectionAwareExpansion` (combo config, derefter indstillinger, standard** falsk** ) udvider hvert trin på udbyderniveau til mål pr. konto før rotation. Gruppe-B-strategier (prioritet, vægtet, round-robin, tilfældig, p2c, mindst brugt, omkostningsoptimeret, lkgp, fill-first, strict-random, kontekstoptimeret, cacheoptimeret, kontekst-relæ, fusion, pipeline) bevarer en visning på udbyderniveau, indtil dette er aktiveret. Kombinationseditoren afslører arv / til / fra; inherit bruger den globale standard (fra).
-- Prompt-cache lokalitetsrouting (`promptCacheAffinityEnabled`, standard** ægte** ) omarrangerer fastgjorte forbindelser, så matchende cache-nøgler forbliver på én konto. Det har forrang over round-robin og vægtet rotation på tværs af fastgjorte trin pr. konto. Slå det fra under Indstillinger → Combo standarder, hvis du har brug for streng rotation. Der er ingen per-kombination tilsidesættelse.
+- `stickyRoundRobinLimit` (combo config, derefter `comboStickyRoundRobinLimit`, derefter `settings.stickyRoundRobinLimit`, standard **3** ) holder det samme mål for så mange på hinanden følgende succeser, før de roterer. Indstil combo-tilsidesættelsen til `1` for rotation med én anmodning. Kombinationseditoren viser den effektive værdi og hvilket lag den kom fra.
+- `connectionAwareExpansion` (combo config, derefter indstillinger, standard **falsk** ) udvider hvert trin på udbyderniveau til mål pr. konto før rotation. Gruppe-B-strategier (prioritet, vægtet, round-robin, tilfældig, p2c, mindst brugt, omkostningsoptimeret, lkgp, fill-first, strict-random, kontekstoptimeret, cacheoptimeret, kontekst-relæ, fusion, pipeline) bevarer en visning på udbyderniveau, indtil dette er aktiveret. Kombinationseditoren afslører arv / til / fra; inherit bruger den globale standard (fra).
+- Prompt-cache lokalitet routing (`promptCacheAffinityEnabled`, standard **ægte** ) omarrangerer fastgjorte forbindelser, så matchende cache-nøgler forbliver på én konto. Det har forrang over round-robin og vægtet rotation på tværs af fastgjorte trin pr. konto. Slå det fra under Indstillinger → Combo standarder, hvis du har brug for streng rotation. Der er ingen per-kombination tilsidesættelse.
 
-For multi-konto rotation på én model, foretrækkes** ét dynamisk kontotrin** (tom `connectionId`, hel pool) med sticky limit `1`, ikke tre fastgjorte `connectionId` s. Fastgjorte trin plus affinitet kollapser på den samme konto, selv mens RR tælleren går videre.
+For multi-konto rotation på én model, foretrækkes **ét dynamisk kontotrin** (tom `connectionId`, hel pool) med sticky limit `1`, ikke tre fastgjorte `connectionId`. Fastgjorte trin plus affinitet kollapser på den samme konto, selv mens RR tælleren rykker frem.
 
 ## Fusionsstrategi
 
-`fusion` er den eneste strategi, der **ikke** vælger et enkelt mål. Den sender prompten
-ud til **alle panelmodeller parallelt**, hvorefter en konfigurerbar **dommermodel** sammenfatter
-ét endeligt svar ud fra alle panelsvar. Porteret fra upstream-projektet `decolua/9router`
-(OpenRouters Fusion-design); implementeret i `open-sse/services/fusion.ts`.
+`fusion` er den ene strategi, der gør **ikke** vælge et enkelt mål. Det fans prompten ud til **hver panelmodel parallelt** , derefter en konfigurerbar **dommermodel** syntetiserer et enkelt endeligt svar fra alle panelsvar. Overført fra opstrøms `decolua/9router` (OpenRouter's Fusion-design); implementering i `open-sse/services/fusion.ts`.
 
 Sådan fungerer det:
 
-0. **Omgåelse ved brug af værktøjer** — en anmodning, der indeholder et ikke-tomt `tools`-array,
-   hvor `tool_choice` ikke udtrykkeligt er `"none"`, springer panelet helt over: Den dirigeres direkte
-   til en enkelt model (den konfigurerede dommer eller `panel[0]`), mens `tools`/`tool_choice`
-   videresendes uændret. Panelmedlemmer har ikke adgang til værktøjer, og dommerens
-   sammenfatningsinstruks fraråder generering af værktøjskald, så agentbaserede klienter og klienter,
-   der bruger værktøjskald, får en reel beslutning om værktøjskald i stedet for sammenfattet prosa (#6771).
-1. **Udsendelse** (kun anmodninger uden værktøjer) — prompten sendes til alle panelmodeller
-   på én gang, tvunget til ikke-streaming og uden værktøjer (dommeren skal bruge komplet
-   prosa for at kunne sammenfatte).
-2. **Indsamling med kvorum og henstandsperiode** — så snart `minPanel` svar er modtaget, starter
-   en kort henstandsperiode for de resterende modeller, hvorefter fusionen fortsætter med det,
-   der er blevet indsamlet. Dette begrænser den langsomste models påvirkning af den samlede
-   svartid inden for rammerne af en fast timeout.
-3. **Dommerens sammenfatning** — panelsvar anonymiseres (`Kilde 1`, `Kilde 2`, … — så
-   dommeren vurderer indholdet, ikke modellens mærke) og overdrages til dommeren, som analyserer
-   konsensus/modsigelser/delvis dækning/unikke indsigter/blinde vinkler og derefter
-   skriver **ét** autoritativt svar. Dommerkaldet beholder klientens oprindelige
-   `stream`-flag samt værktøjer, så streaming og efterfølgende brug af værktøjer stadig fungerer.
-4. **Kontrolleret degradering** — 0 panelsvar → `503`; præcis 1 overlevende → det pågældende svar
-   returneres direkte (der er intet at fusionere); et panel med én model svarer direkte.
+0. **Værktøjsbærende bypass** — en anmodning, der bærer et ikke-tomt `tools` -array med `tool_choice`, ikke eksplicit `"none"` springer panelet helt over: det dirigerer direkte til en enkelt model (den konfigurerede dommer eller `panel[0]`) med `tools`/`tool_choice` passeret uændret. Panelmedlemmer har ingen værktøjsadgang, og dommerens syntesedirektiv fraråder emission af værktøjsopkald, så agentic/tool-calling klienter får en ægte værktøjsopkaldsbeslutning i stedet for syntetiseret prosa (#6771).
+1. **Fan-out** (kun ikke-værktøjsbærende anmodninger) — prompten sendes til hver panelmodel på én gang, tvungen ikke-streaming med værktøjer strippet (dommeren har brug for komplet prosa for at syntetisere).
+2. **Quorum-nåde samling** — så snart `minPanel` svarene ankommer, starter en kort grace-timer for de efterladte, hvorefter fusionen fortsætter med det, der blev indsamlet. Dette begrænser den langsomste models straf på wall time, afgrænset af en hård timeout.
+3. **Dommersyntese** — panelets svar anonymiseres (`Source 1`, `Source 2`, … — så dommeren vejer substans, ikke modelmærke) og afleveres til dommeren, som analyserer konsensus / modsigelser / delvis dækning / unikke indsigter / blinde vinkler, skriver derefter **en** autoritativt svar. Dommerkaldet beholder klientens originale `stream` flag + værktøjer, så streaming og downstream-brug af værktøj fungerer stadig.
+4. **Yndefuld nedbrydning** — 0 panel svarer → `503`; nøjagtigt 1 overlevende → det svar returneres direkte (intet at fusionere); et panel med en enkelt model svarer direkte.
 
-Et panelmedlem kan også være et `combo-ref`-trin (`{kind: "combo-ref", comboName: "..."}`), der refererer
-til en anden kombination — det behandles som **én selvstændig panelstemme** (en fuldstændig rekursiv videresendelse
-til den refererede kombination, ikke en udsendelse til denne kombinations egne mål) med den samme dybde-/cyklusbeskyttelse,
-som alle andre strategier, der anvender combo-ref, allerede bruger (#6764).
+Et panelmedlem kan også være et `combo-ref` trin (`{kind: "combo-ref", comboName: "..."}`), der refererer til en anden kombinations —, det løser som **én sort-boks-panelstemme** (en fuld rekursiv afsendelse til den refererede combo, ikke en fan-out af den combos egne mål), med den samme depth/cycle beskyttelse, som hver anden combo-ref-forbrugende strategi allerede bruger (#6764).
 
 ### Konfiguration
 

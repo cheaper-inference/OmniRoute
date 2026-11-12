@@ -718,11 +718,11 @@ Modul `extraction.ts` (`src/lib/memory/extraction.ts`) používa **porovnávanie
 
 ### Predvolené kategórie vzorov
 
-| Kategória           | Príklad vzoru                                                 | Zachytáva                            |
-| ------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| PREFERENCE_PATTERNS | `"Preferujem <X>"`, `"Mám rád <X>"`, `"Neznášam <X>"`         | Preferencie používateľa              |
-| DECISION_PATTERNS   | `"Použijem <X>"`, `"Rozhodol som sa <X>"`, `"Vybral som <X>"` | Rozhodnutia používateľa (epizodické) |
-| PATTERN_PATTERNS    | `"Zvyčajne <X>"`, `"Vždy <X>"`, `"Nikdy <X>"`                 | Trvalé vzorce správania              |
+| Kategória           | Príklad vzoru                                               | Zachytáva                            |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferencie používateľa              |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Rozhodnutia používateľa (epizodické) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Trvalé vzorce správania              |
 
 ### Príklady vzorov (zjednodušené)
 
@@ -758,7 +758,8 @@ Keď používateľ povie:
 
 Aby sa zabránilo nekontrolovanej extrakcii, platia nasledujúce limity:
 
-| Minimálna dĺžka obsahu | 3 znaky |
+| Minimálna dĺžka obsahu | 3 znaky    |
+| ---------------------- | ---------- |
 | Maximálna dĺžka obsahu | 500 znakov |
 
 ### Kedy vypnúť extrakciu

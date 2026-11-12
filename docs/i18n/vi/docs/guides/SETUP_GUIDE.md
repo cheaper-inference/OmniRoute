@@ -20,14 +20,16 @@
 
 ## Phương thức cài đặt
 
-### npm (khuyến nghị)
+### npm (được khuyến nghị)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Bảng điều khiển sẽ mở tại `http://localhost:20128` và URL cơ sở của API là `http://localhost:20128/v1`.
+Bảng điều khiển mở tại `http://localhost:20128` và API cơ sở URL là `http://localhost:20128/v1`.
+
+> **người dùng npm:** Nếu npm cảnh báo rằng các tập lệnh cài đặt đã bị chặn (ví dụ: `omniroute`, `better-sqlite3`), hãy xem [Khắc phục sự cố — npm install-scripts bị chặn](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

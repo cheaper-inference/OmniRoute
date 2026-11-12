@@ -66,3 +66,23 @@ test("#17028 disabling free-only still imports the untouched fetched list", () =
   const list = [paid];
   assert.equal(selectModelsForImport("baidu", list, false).models, list);
 });
+
+test("each legacy badge hint still yields to a paid request fee in both badge modes", () => {
+  const hints = [
+    { id: "fixture", name: "Free promotional model" },
+    { id: "fixture", free: "yes" },
+    { id: "fixture", isFree: true },
+    { id: "fixture:free" },
+  ];
+  for (const provider of ["openrouter", "openai-compatible-fixture", "siliconflow"]) {
+    for (const hint of hints) {
+      const model = { ...hint, pricing: { prompt: 0, completion: 0, request: "0.01" } };
+      assert.equal(isModelFreeBadge(provider, model), false, `${provider}/${hint.id}`);
+      assert.equal(
+        isModelFreeBadge(provider, model, { strict: true }),
+        false,
+        `${provider}/${hint.id}:strict`
+      );
+    }
+  }
+});

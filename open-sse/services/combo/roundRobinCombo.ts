@@ -1108,9 +1108,11 @@ export async function handleRoundRobinCombo({
                 retryAfter = errorBody?.retryAfter || null;
               }
             } catch {
+              // no-effect: status/text still classify the error; optional prose hints may follow.
               logRetryHintUnreadable(log, "COMBO-RR", modelStr, result.status, "unparseable body");
             }
           } catch {
+            // no-effect: keep the original failure when optional clone metadata is unavailable.
             logRetryHintUnreadable(log, "COMBO-RR", modelStr, result.status, "clone failed");
           }
           // Process-wide shedding is terminal, not a target failure. Preserve the

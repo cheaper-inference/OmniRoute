@@ -4,47 +4,77 @@
 
 ---
 
-> オプトイン、デフォルトではオフ (`modelVisibilityAllowlist`/`modelVisibilityDenylist`両方とも空の場合、 `/v1/models`カタログANDすべての`auto/*`候補プールのバイト同一のままになります)。コストとは関係のない理由で厳選されたモデル リストが必要なオペレーター向けの`hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) の兄弟です。
+> オプトインで、デフォルトでは無効です（`modelVisibilityAllowlist`/`modelVisibilityDenylist` が両方とも空の場合、
+> `/v1/models` カタログとすべての `auto/*` 候補プールはバイト単位で同一のままです）。コストとは
+> 無関係の理由で厳選されたモデル一覧を提供したい運用者向けの、
+> `hidePaidModels`/`hideAutoCombos`（`src/lib/db/settings.ts`）の姉妹設定です。
 
-## なぜこれが存在するのか
+## この機能が存在する理由
 
-`hidePaidModels` 「このモデルは無料ですか?」という質問に答えます。そして、 `hideAutoCombos` 「 `auto/*`仮想 ID はそもそもアドバタイズされるべきですか?」と答えます。 —では、オペレーターがモデルの任意のサブセットをキュレートすることもできません (たとえば、価格に関係なく、特定のClaudeコード/ OpenCodeクライアントが参照すべきモデルを正確に提示すること)。 #11481 は、これを 2 つの独立したオプトイン文字列配列設定として追加します。
+`hidePaidModels` は「このモデルは無料か？」に答え、`hideAutoCombos` は「`auto/*`
+仮想 ID をそもそも公開すべきか？」に答えます。しかし、どちらも運用者が任意のモデルの
+サブセットを選別することはできません（たとえば、料金とは無関係に、特定の Claude Code /
+OpenCode クライアントに表示すべきモデルだけを提示する場合）。#11481 では、そのための独立した
+2 つのオプトイン文字列配列設定を追加します。
 
 ## 設定
 
-| 鍵                         | タイプ     | デフォルト | 意味                                                                            |
-| -------------------------- | ---------- | ---------- | ------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`       | 候補に一致するエントリは、その候補をcatalog/candidateプールから非表示にします。 |
-| `modelVisibilityAllowlist` | `string[]` | `[]`       | 空でない場合、候補に一致するONLYエントリは公開されたままになります。            |
+| キー                       | 型         | デフォルト | 意味                                                             |
+| -------------------------- | ---------- | ---------- | ---------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`       | 候補に一致するエントリをカタログ／候補プールから非表示にします。 |
+| `modelVisibilityAllowlist` | `string[]` | `[]`       | 空でない場合、候補に一致するエントリのみを公開したままにします。 |
 
-どちらも、それぞれ最大 200 文字のエントリを最大 500 件受け入れます ( `src/shared/validation/settingsSchemas.ts`で Zod 検証済み)。エントリは次のいずれかです。
+どちらも、それぞれ最大 200 文字のエントリを最大 500 件まで受け付けます
+（`src/shared/validation/settingsSchemas.ts` で Zod により検証されます）。エントリは次のいずれかです。
 
-- 正確なカタログ ID — `"gpt-4o"` (ベア モデル ID) または`"openai/gpt-4o"` (プロバイダー プレフィックス付き)、または
-- `*`/`?` — (例: `"openai/gpt-4*"`または`"anthropic/*"` ) を使用するグロブ パターン。 `ModelRoutingSection`のモデルごとのコンボ マッピングと`freeModels.ts::matchesOnlyPaidModels`ですでに使用されている同じ共有`globToRegex()` matcher (`src/shared/utils/globPattern.ts`) を介して解決される— 。
+- 正確なカタログ ID — `"gpt-4o"`（モデル ID のみ）または `"openai/gpt-4o"`（プロバイダー接頭辞付き）、または
+- `*`/`?` を使用する glob パターン — 例: `"openai/gpt-4*"` や `"anthropic/*"` —
+  `ModelRoutingSection` のモデル単位のコンボマッピングと
+  `freeModels.ts::matchesOnlyPaidModels` ですでに使用されている、同じ共有
+  `globToRegex()` マッチャー（`src/shared/utils/globPattern.ts`）で解決されます。
 
-優先順位: 拒否リストが最初にチェックされます (拒否されたエントリは、許可リストにも一致する場合でも常に非表示になります)。ホワイトリストが空ではない場合、一致するエントリのみが生き残ります。
+優先順位: denylist が最初にチェックされます（拒否されたエントリは、allowlist にも
+一致していても常に非表示になります）。allowlist が空でない場合、それに一致する
+エントリのみが残ります。
 
-## チョークポイントは 1 つではなく 2 つ
+## 1 つではなく 2 つのチョークポイント
 
-#6512 からの教訓 (コンボ候補プールが独立して構築されているため、 `hidePaidModels` -onlyカタログ フィルターにより`auto/*`有料モデルにルーティングされる) がここでも同様に当てはまります。一致する述語`isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) はBOTHから呼び出されます。
+#6512 から得られた教訓（`hidePaidModels` のみでカタログをフィルタリングしても、コンボ候補
+プールが独立して構築されていたため、`auto/*` が有料モデルにルーティングできてしまった）は、
+ここでも同様に当てはまります。マッチング述語 `isModelExposureAllowed()`
+（`src/shared/utils/modelExposureList.ts`）は、以下の両方から呼び出されます。
 
-- `src/app/api/v1/models/catalog.ts` — `/v1/models`リスト自体。同じソースごとの 5 つのチョークポイントで、 `shouldHidePaid()`すでにゲートしています (静的`PROVIDER_MODELS`、同期されたプロバイダー行、カスタム行、エイリアスバック行、マネージドフォールバック行)。
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — 、同等の`filterPaidOnlyCandidates()`呼び出しの直後に`virtualFactory.ts::buildPreparedPool`から呼び出されるため、拒否されたモデルを`auto/*`候補プールに選択することもできません。
+- `src/app/api/v1/models/catalog.ts` — `/v1/models` の一覧そのもの。既存の
+  `shouldHidePaid()` が制御しているものと同じ、ソースごとの 5 つのチョークポイント
+  （静的な `PROVIDER_MODELS`、同期されたプロバイダー行、カスタム行、エイリアスに基づく行、
+  管理対象フォールバック行）で呼び出されます。
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` —
+  `virtualFactory.ts::buildPreparedPool` から、対応する `filterPaidOnlyCandidates()` の呼び出し直後に
+  呼び出されます。これにより、拒否されたモデルが `auto/*` 候補プールに選択されることもありません。
 
-## NOTフィルターとは何ですか
+## フィルタリングされないもの
 
-`hideAutoCombos`の既存の動作をミラーリングします: モデル ID が送信されます**明示的に**( `auto/*`経由ではなく、カタログ リストを通じて検出されません) ディスパッチ時にブロックされることはありません—のみadvertisement/candidate-poolメンバーシップがフィルターされます。これは`hidePaidModels`とは独立しています。オペレーターは、コストとは関係のない理由で厳選されたセットを必要とする場合があるため、両方の設定は、 `catalog.ts`の既存のマルチフラグ構成と同様に、独立した AND フィルターとして構成されます。
+`hideAutoCombos` の既存の挙動を踏襲します。明示的に送信されたモデル ID（`auto/*` 経由ではなく、
+カタログ一覧を通じて検出されたものでもない）は、ディスパッチ時には決してブロックされません。
+フィルタリングされるのは、公開対象／候補プールのメンバーシップのみです。これは
+`hidePaidModels` とは独立しています。運用者はコストとは無関係の理由で厳選されたセットを
+必要とする場合があるため、両設定は、`catalog.ts` に既存の複数フラグの組み合わせと同様に、
+独立した AND 条件のフィルターとして組み合わされます。
 
-設定エクスポート (`GET /api/settings/export-json`) には、他の設定フィールド—と同様に、両方の配列がそのまま含まれています。 `hidePaidModels`のコンボステップ エクスポート フィルターとは異なり、ここでは再ハイドレーションのリスクはありません。エクスポートされたコンボ ステップに埋め込まれた拒否された ID は、オペレーター自身の明示的なルーティングの選択であり、エクスポート境界で削除する必要があるものではありません。
+設定のエクスポート（`GET /api/settings/export-json`）には、他の設定フィールドと同様に、
+両方の配列がそのまま含まれます。`hidePaidModels` のコンボステップ用エクスポートフィルターとは
+異なり、ここでは再ハイドレーションのリスクはありません。エクスポートされたコンボステップに
+埋め込まれた拒否対象 ID は、運用者自身が明示的に選択したルーティングであり、エクスポート境界で
+取り除く必要があるものではありません。
 
-## コンボのみのリスト (`exposeCombosOnly`)
+## コンボのみの一覧表示（`exposeCombosOnly`）
 
-コンボがパブリック モデル サーフェスであり、プロバイダーがバックエンドのみであるデプロイメントの場合は、別のブール値。これもデフォルトでオプトインおよび`false` 。 `true`の場合、パブリック リスト (`GET /v1/models`、 `GET /v1`、および`getUnifiedModelsResponse()`上に構築された他の`/v1`検出ルート) は、 `owned_by: "combo"`: ユーザー コンボと組み込みの`auto/*`コンボを含む行のみを保持します ( `hideAutoCombos`非表示にしない限り)。キーごとの`catalogScope: "combos"`と同じ行テストを使用し、キー独自のallow/deny/scopeフィルターが引き続き適用されます。
+コンボを公開モデルの窓口とし、プロバイダーをバックエンドとしてだけ使用する構成向けの、独立した真偽値設定です。これも明示的な有効化が必要で、既定値は `false` です。`true` にすると、公開一覧（`GET /v1/models`、`GET /v1`、および `getUnifiedModelsResponse()` に基づくその他の `/v1` 検出ルート）には `owned_by: "combo"` の行だけが残ります。対象はユーザーコンボと組み込みの `auto/*` コンボです（`hideAutoCombos` によって非表示にされている場合を除きます）。キー別の `catalogScope: "combos"` と同じ行判定を使い、その上に各キー自身の許可・拒否・スコープのフィルターが引き続き適用されます。
 
-切り替えてください**設定→ルーティング→モデルAPIリスト**、または`PATCH /api/settings {"exposeCombosOnly": true}`を使用します。
+**設定 → ルーティング → Models API の一覧表示**、または `PATCH /api/settings {"exposeCombosOnly": true}` で切り替えます。
 
-上記のリストと同様に、広告のみが変更されます。
+上記の一覧設定と同じく、変わるのは公開される一覧だけです。
 
-- 明示的な`provider/model` ID は引き続きディスパッチされ、 `GET /v1/models/{id}`引き続きそれを解決します。
-- ダッシュボード カタログ (`GET /api/models/catalog`、モデル ピッカーによって使用される) は絞り込まれません。
-- `auto/*`候補プールにはミラーリングされないため、 `auto/*`コンボは完全なプールを保持します。
+- `provider/model` の ID を明示した場合のディスパッチは引き続き行われ、`GET /v1/models/{id}` でも解決できます。
+- ダッシュボードのカタログ（モデル選択 UI で使う `GET /api/models/catalog`）は絞り込まれません。
+- この設定は `auto/*` の候補プールには反映されないため、`auto/*` コンボはプール全体を維持します。

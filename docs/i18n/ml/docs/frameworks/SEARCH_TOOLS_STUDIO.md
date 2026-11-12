@@ -54,7 +54,7 @@ Search Tools Studio, `/dashboard/search-tools`-നെ ഒരു അടിസ്�
 - ഇൻപുട്ട്: URL + പൂർണ്ണ-പേജ് ടോഗിൾ + ഫോർമാറ്റ് സെലക്ടർ (markdown / text / HTML).
 - സമർപ്പിക്കുക → ഫെച്ച് ചെയ്യുക → `ScrapeResult.tsx` റെൻഡർ ചെയ്യുക.
 - `ScrapeResult` മാർക്ക്ഡൗൺ പ്രിവ്യൂ + റോ ടോഗിൾ റെൻഡർ ചെയ്യുന്നു.
-- പരിധി: റെസ്പോൺസ് ബോഡി **256 KB**-ൽ കൂടുതലാണെങ്കിൽ, UI `(വെട്ടിച്ചുരുക്കിയിരിക്കുന്നു, റോ കാണുക)` എന്ന് കാണിക്കുകയും റോ ഉള്ളടക്കം ഒരു Monaco മോഡലിൽ തുറക്കുകയും ചെയ്യുന്നു (D21).
+- പരിധി: റെസ്പോൺസ് ബോഡി **256 KB**-ൽ കൂടുതലാണെങ്കിൽ, UI `View full raw content` എന്ന് കാണിക്കുകയും റോ ഉള്ളടക്കം ഒരു മോഡലിൽ തുറക്കുകയും ചെയ്യുന്നു (D21).
 - മെറ്റാഡാറ്റ പാനൽ: പ്രൊവൈഡർ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ലേറ്റൻസി, ചെലവ്, റെസ്പോൺസ് വലുപ്പം, ലിങ്കുകളുടെ എണ്ണം.
 - `useScrapeFetch.ts` ഹുക്ക് ഉപയോഗിക്കുന്നു.
 
@@ -103,9 +103,11 @@ Search Tools Studio, `/dashboard/search-tools`-നെ ഒരു അടിസ്�
 `ProviderCatalog.tsx`, `GET /api/search/providers`-ൽ നിന്നുള്ള ദാതാക്കളുടെ പൂർണ്ണ പട്ടിക ലഭ്യമാക്കുന്നു
 (fetch ദാതാക്കളെ ഉൾപ്പെടുത്തുന്നതിനായി F4-ൽ വിപുലീകരിച്ചത്):
 
-| `kind` | `"search"` (20 ദാതാക്കൾ) അല്ലെങ്കിൽ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ദാതാക്കൾ) അല്ലെങ്കിൽ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 ക്രെഡൻഷ്യലുകൾ നിലവിലുണ്ടോ എന്നും എല്ലാ കീകളും നിലവിൽ കൂൾഡൗണിലാണോ എന്നും പരിശോധിച്ച്, **അഭ്യർത്ഥന നടത്തുന്ന സമയത്താണ് സ്റ്റാറ്റസ് നിർണ്ണയിക്കുന്നത്**.
+
+`codex-search` (Codex Web Search): ബന്ധിപ്പിച്ച Codex (ChatGPT) അക്കൗണ്ടുകൾ ഉപയോഗിക്കുന്നു; പ്രത്യേക കീ ആവശ്യമില്ല. ഓരോ തിരയലും ChatGPT സബ്‌സ്‌ക്രിപ്‌ഷൻ ക്വോട്ട ഉപയോഗിക്കുകയും ഏകദേശം 10–40 സെക്കൻഡ് എടുക്കുകയും ചെയ്യുന്നു. അഭ്യർത്ഥനയിൽ പേര് വ്യക്തമാക്കിയാൽ പ്രവർത്തിക്കും; സ്വയമേവ തിരഞ്ഞെടുക്കാൻ സ്വതവേ ഓഫായിരിക്കുന്ന `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ഓണാക്കണം.
 
 ---
 

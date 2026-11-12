@@ -391,7 +391,7 @@ Gjenopprettingsverktøyet heter for øyeblikket `omniroute_ccr_retrieve` ( `omni
 
 ### Øktens livssyklus
 
-Streambare HTTP-økter går på tomgang og serveren høster dem; det inaktive vinduet er satt av `OMNIROUTE_MCP_SESSION_IDLE_MS` (standard 5 minutter; referert til ved navn, ikke en hardkodet verdi, så denne siden driver ikke når den endres). Symptomet på en inaktiv økt er en HTTP 404 med `Unknown Mcp-Session-Id` — løsningen er å koble til på nytt eller starte økten på nytt,** ikke** for å rotere en nøkkel, endre et omfang eller gi nytt navn til et verktøy.
+Streambare HTTP-økter går på tomgang og serveren høster dem; tomgangsvinduet er konfigurert av `OMNIROUTE_MCP_SESSION_IDLE_MS`, og faller tilbake til `DEFAULT_MCP_SESSION_IDLE_MS` i `open-sse/mcp-server/httpTransport.ts`. Symptomet på en inaktiv økt er en HTTP 404 med `Unknown Mcp-Session-Id` — løsningen er å koble til på nytt eller starte økten på nytt,**ikke** for å rotere en nøkkel, endre et omfang eller gi nytt navn til et verktøy.
 
 ## API-grensesnitt
 

@@ -392,7 +392,7 @@ Gebruikt `wreq-js` om browserachtige TLS-fingerprints te genereren en zo botdete
 
 ### CLI-fingerprintmatching
 
-De **CLI-fingerprintschakelaar** (`Instellingen → Beveiliging`) wijzigt de volgorde van HTTP-headers en velden in de JSON-body zodat deze overeenkomt met de exacte signatuur van native CLI-binaries (Claude Code, Codex, enz.). Dit werkt **boven op** de proxy:
+De **CLI-fingerprintschakelaar** (`Settings → Security`) wijzigt de volgorde van HTTP-headers en velden in de JSON-body zodat deze overeenkomt met de exacte signatuur van native CLI-binaries (Claude Code, Codex, enz.). Dit werkt **boven op** de proxy:
 
 ```
 Uw IP (geblokkeerd) → Proxy-IP (VS) → Provider-API

@@ -54,7 +54,7 @@ Tab ġdid għall-estrazzjoni tal-kontenut minn URL permezz ta’ `POST /v1/web/f
 - Input: URL + swiċċ għall-paġna sħiħa + selettur tal-format (markdown / test / HTML).
 - Issottometti → ġib → irrendi `ScrapeResult.tsx`.
 - `ScrapeResult` jirrendi previżjoni tal-markdown + swiċċ għall-verżjoni mhux ipproċessata.
-- Limitu: jekk il-korp tar-rispons ikun akbar minn **256 KB**, l-UI turi `(maqtugħ, ara l-verżjoni mhux ipproċessata)` u tiftaħ il-verżjoni mhux ipproċessata f’modal ta’ Monaco (D21).
+- Limitu: jekk il-korp tar-rispons ikun akbar minn **256 KB**, l-UI turi `View full raw content` u tiftaħ il-verżjoni mhux ipproċessata f’modal (D21).
 - Pannell tal-metadata: fornitur (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenza, spiża, daqs tar-rispons, għadd ta’ links.
 - Juża l-hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Iħaddem l-istess mistoqsija/URL fuq sa **4 fornituri b’mod parallel** (D22):
 `ProviderCatalog.tsx` jesponi l-lista sħiħa tal-fornituri minn `GET /api/search/providers`
 (estiża f'F4 biex tinkludi l-fornituri tal-fetch):
 
-| `kind` | `"search"` (20 fornitur) jew `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 fornitur) jew `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 L-istatus jiġi **derivat fil-ħin tat-talba** billi jiġi ċċekkjat jekk jeżistux kredenzjali u jekk
 iċ-ċwievet kollha humiex attwalment fil-perjodu ta' cooldown.
+
+`codex-search` (Codex Web Search): Juża l-kontijiet Codex (ChatGPT) konnessi tiegħek, mingħajr ċavetta separata. Kull tfittxija tikkonsma kwota tal-abbonament u tieħu madwar 10–40 s. Jaħdem meta t-talba ssemmih; l-għażla awtomatika teħtieġ il-bandiera `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, diżattivata b’mod awtomatiku.
 
 ---
 

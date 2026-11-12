@@ -392,7 +392,7 @@ OmniRoute 不只是透過代理路由流量，還能讓流量看起來合法：
 
 ### CLI 指紋比對
 
-**CLI 指紋切換開關**（`設定 → 安全性`）會重新排列 HTTP 標頭與 JSON 主體欄位，以符合原生 CLI 二進位檔（Claude Code、Codex 等）的確切特徵。此功能會在代理之上運作：
+**CLI 指紋切換開關**（`Settings → Security`）會重新排列 HTTP 標頭與 JSON 主體欄位，以符合原生 CLI 二進位檔（Claude Code、Codex 等）的確切特徵。此功能會在代理之上運作：
 
 ```
 您的 IP（遭封鎖）→ 代理 IP（美國）→ 提供者 API

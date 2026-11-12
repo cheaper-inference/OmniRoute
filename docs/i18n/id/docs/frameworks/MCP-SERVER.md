@@ -264,7 +264,7 @@ guardrail **sebelum** mencapai lapisan penegakan cakupan MCP.
 
 ---
 
-## Endpoint REST API
+## Titik Akhir REST API
 
 | Endpoint               | Metode                | Deskripsi                                                                                           | Autentikasi            |
 | :--------------------- | :-------------------- | :-------------------------------------------------------------------------------------------------- | :--------------------- |
@@ -277,17 +277,9 @@ guardrail **sebelum** mencapai lapisan penegakan cakupan MCP.
 
 File sumber: `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
 
-Transport SSE dan HTTP yang dapat dialirkan sama-sama diblokir hingga server MCP diaktifkan di Pengaturan (`mcpEnabled`) dan `mcpTransport` yang sesuai dipilih. Jika transport yang dikonfigurasi salah, rute akan mengembalikan HTTP 400 dengan petunjuk untuk mengganti pengaturan.
+Transport SSE dan Streamable HTTP diblokir hingga server MCP diaktifkan di Pengaturan (`mcpEnabled`) dan `mcpTransport` yang sesuai dipilih. Jika transportasi yang salah dikonfigurasi, rute akan mengembalikan HTTP 400 dengan petunjuk untuk mengganti pengaturan.
 
 ---
-
-# Autentikasi & Cakupan
-
-Panggilan alat MCP membaca string cakupan dari pemanggil. Pemeriksaan itu adalah
-satu dari tiga namespace yang independen. Kelulusan dari satu pemeriksa bukan
-berarti kelulusan dari pemeriksa lainnya.
-Aturannya ada di [Tiga namespace cakupan](#three-scope-namespaces).
-Katalog alatnya ada di [Cakupan alat MCP](#mcp-tool-scopes).
 
 ## Otentikasi & Cakupan
 

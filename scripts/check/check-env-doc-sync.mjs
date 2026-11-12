@@ -16,6 +16,7 @@
  *  - vars in code but missing from .env.example
  *  - vars in .env.example but missing from ENVIRONMENT.md
  *  - vars in ENVIRONMENT.md but missing from .env.example
+ *  - repeated tabular definitions within the same documentation section
  *
  * Programmatic API:
  *  Other Node tests can `import { runEnvDocSync } from "./check-env-doc-sync.mjs"`
@@ -31,12 +32,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
 // ─── Allowlists ────────────────────────────────────────────────────────────
+// Host-provided home-directory context, not application .env settings. Docs
+// may mention these names when explaining a configuration-path fallback.
+const OS_HOME_CONTEXT_VARS = new Set(["HOME", "USERPROFILE"]);
+
 // Env vars referenced in code that should NOT trigger documentation drift.
 // These are usually system/process vars or harness-only knobs.
 const IGNORE_FROM_CODE = new Set([
+  ...OS_HOME_CONTEXT_VARS,
   "NODE_ENV",
   "PATH",
-  "HOME",
   "USER",
   "LOGNAME",
   "XDG_CURRENT_DESKTOP",
@@ -49,6 +54,18 @@ const IGNORE_FROM_CODE = new Set([
   "LC_MESSAGES",
   "CI",
   "GITHUB_ACTIONS",
+  // Desktop release uploader context supplied by electron-release.yml (#18165).
+  // GITHUB_REPOSITORY is runner-owned; VERSION is the validated release tag.
+  // Neither is OmniRoute application configuration or belongs in a user's .env.
+  "GITHUB_REPOSITORY",
+  "VERSION",
+  // #17267: immutable GitHub event context consumed by the CHANGELOG comparison
+  // helper in quality.yml. These are CI inputs, never server/user configuration.
+  "CHANGELOG_EVENT_NAME",
+  "CHANGELOG_CANDIDATE_SHA",
+  "CHANGELOG_PR_BASE_SHA",
+  "CHANGELOG_MERGE_GROUP_BASE_SHA",
+  "CHANGELOG_PUSH_BEFORE_SHA",
   "RUNNER_OS",
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",
@@ -57,6 +74,8 @@ const IGNORE_FROM_CODE = new Set([
   // scripts/ci/docker-image-complete.mjs (#18749). Lets tests set 0; a CI-script tuning knob
   // with a built-in default, never OmniRoute runtime config.
   "DOCKER_IMAGE_COMPLETE_RETRY_DELAY_MS",
+  // #18345: CI build-provenance guard; never a server/user configuration option.
+  "OMNIROUTE_REQUIRE_PREBUILT_NEXT",
   // Agent environment / system execution paths.
   "PROJECT_ROOT",
   "ARTIFACTS_DIR",
@@ -79,7 +98,6 @@ const IGNORE_FROM_CODE = new Set([
   // XDG Base Directory cache root — read (never defined by OmniRoute) so the
   // Android/Termux serve path can honor an operator-set cache location (#8519).
   "XDG_CACHE_HOME",
-  "USERPROFILE",
   "PREFIX",
   // X11 display server — set by the OS/session manager, not OmniRoute config.
   "DISPLAY",
@@ -123,6 +141,9 @@ const IGNORE_FROM_CODE = new Set([
   "GITHUB_RUN_ATTEMPT",
   "GITHUB_RUN_ID",
   "GITHUB_SHA",
+  // #18345: Actions runner-owned workflow-file commit identity used by
+  // build-provenance/admission checks; never an application .env setting.
+  "GITHUB_WORKFLOW_SHA",
   "NEEDS_JSON",
   // Set by the Actions runner; the ts7 ratchet appends its job summary there
   // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — never OmniRoute runtime config (#9985).
@@ -438,11 +459,58 @@ function diff(set, against) {
 
 // ─── Programmatic entry point ──────────────────────────────────────────────
 
+/** Find repeated tabular variable declarations within one Markdown section. */
+export function findDuplicateEnvDocDefinitions(text) {
+  const declarations = new Map();
+  let section = 0;
+  let title = "(document)";
+  let fence = null;
+
+  for (const [index, line] of String(text ?? "")
+    .split("\n")
+    .entries()) {
+    const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (marker) {
+      if (!fence) {
+        fence = { character: marker[1][0], length: marker[1].length };
+      } else if (
+        marker[1][0] === fence.character &&
+        marker[1].length >= fence.length &&
+        !marker[2].trim()
+      ) {
+        fence = null;
+      }
+      continue;
+    }
+    if (fence) continue;
+
+    const heading = line.match(/^ {0,3}#{1,6}[ \t]+(.+?)\s*$/);
+    if (heading) {
+      section++;
+      title = heading[1].replace(/[ \t]+#+[ \t]*$/, "");
+      continue;
+    }
+
+    const declaration = line.match(/^ {0,3}(?:\|[ \t]*)?`([A-Z][A-Z0-9_]{2,})`[ \t]*\|/);
+    if (!declaration) continue;
+    const variable = declaration[1];
+    const key = `${section}:${variable}`;
+    let entry = declarations.get(key);
+    if (!entry) {
+      entry = { variable, section: title, lines: [] };
+      declarations.set(key, entry);
+    }
+    entry.lines.push(index + 1);
+  }
+
+  return [...declarations.values()].filter((entry) => entry.lines.length > 1);
+}
+
 /**
  * Run the contract checker. All inputs are overridable for tests.
  *
  * Returns `{ ok: boolean, summary, problems: { codeMissingEnv, envMissingDoc,
- *   docMissingEnv } }`.
+ *   docMissingEnv, duplicateDocDefinitions } }`.
  */
 export function runEnvDocSync(options = {}) {
   const ignore = options.ignore ?? IGNORE_FROM_CODE;
@@ -469,10 +537,16 @@ export function runEnvDocSync(options = {}) {
 
   const codeMissingEnv = diff(codeVars, envVars);
   const envMissingDoc = diff(envVars, docVars).filter((v) => !envOnly.has(v));
-  const docMissingEnv = diff(docVars, envVars).filter((v) => !docOnly.has(v));
+  const docMissingEnv = diff(docVars, envVars).filter(
+    (v) => !docOnly.has(v) && !OS_HOME_CONTEXT_VARS.has(v)
+  );
 
+  const duplicateDocDefinitions = findDuplicateEnvDocDefinitions(envDocText);
   const ok =
-    codeMissingEnv.length === 0 && envMissingDoc.length === 0 && docMissingEnv.length === 0;
+    codeMissingEnv.length === 0 &&
+    envMissingDoc.length === 0 &&
+    docMissingEnv.length === 0 &&
+    duplicateDocDefinitions.length === 0;
 
   return {
     ok,
@@ -485,6 +559,7 @@ export function runEnvDocSync(options = {}) {
       codeMissingEnv,
       envMissingDoc,
       docMissingEnv,
+      duplicateDocDefinitions,
     },
   };
 }
@@ -515,6 +590,12 @@ function main() {
   printList("In code but missing from .env.example", result.problems.codeMissingEnv);
   printList("In .env.example but missing from ENVIRONMENT.md", result.problems.envMissingDoc);
   printList("In ENVIRONMENT.md but missing from .env.example", result.problems.docMissingEnv);
+  printList(
+    "Repeated definitions in the same documentation section",
+    result.problems.duplicateDocDefinitions.map(
+      ({ variable, section, lines }) => `${variable} (${section}; lines ${lines.join(", ")})`
+    )
+  );
 
   if (result.ok) {
     console.log("\n✓ Env / docs contract is in sync.");

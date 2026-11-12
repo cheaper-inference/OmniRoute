@@ -20,7 +20,7 @@ Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) g
 
 Ciallaíonn sé seo gur féidir leat:
 
-- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 381 soláthraí OmniRoute.
+- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 388 soláthraí OmniRoute.
 - **Cuir mapálacha samhlacha i bhfeidhm** : `gemini-3-flash` → `claude-sonnet-4.7` trédhearcach ag leibhéal an láimhseála.
 - **Breathnaigh ar gach trácht gníomhaire** : foilsítear gach iarratas idircheapadh don [Chigire Tráchta](./TRAFFIC_INSPECTOR.md).
 - **Cuir athléimneacht OmniRoute i bhfeidhm** : ródú teaglama, scoradáin chiorcaid, fallbacks, agus obair rianaithe costais do thrácht gníomhaire IDE freisin.
@@ -554,7 +554,7 @@ Is cúntóir códaithe AI measartha nua é Trae. Sula gcuirtear láimhseálaí i
 3. Aimsigh an mheicníocht fíordheimhnithe
 4. Déan cinneadh dul ar aghaidh/gan dul ar aghaidh bunaithe ar na TOS agus ar in-aimsitheacht an API
 
-Go dtí go mbeidh an t-imscrúdú críochnaithe, taispeánfaidh cárta Trae sa deais suaitheantas "Á Imscrúdú" mar aon le nasc "Tuairiscigh inmharthanacht". Caitheann creatlach an láimhseálaí ag `src/mitm/handlers/trae.ts` earráid struchtúrtha `Níl sé curtha i bhfeidhm fós`.
+Go dtí go mbeidh an t-imscrúdú críochnaithe, taispeánfaidh cárta Trae sa deais suaitheantas "Á Imscrúdú" mar aon le nasc "Tuairiscigh inmharthanacht". Caitheann creatlach an láimhseálaí ag `src/mitm/handlers/trae.ts` earráid struchtúrtha `Not yet implemented`.
 
 ### Gníomhairí sa riaráiste (MITM riachtanach — gan aon tacaíocht do bhun-URL saincheaptha)
 

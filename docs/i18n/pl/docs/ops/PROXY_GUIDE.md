@@ -394,7 +394,7 @@ Wykorzystuje `wreq-js` do generowania odcisków TLS przypominających te używan
 
 ### Dopasowywanie odcisku CLI
 
-**Przełącznik odcisku CLI** (`Ustawienia → Bezpieczeństwo`) zmienia kolejność nagłówków HTTP i pól treści JSON, aby dokładnie odpowiadały sygnaturze natywnych plików binarnych CLI (Claude Code, Codex itp.). Działa to **niezależnie od** serwera proxy:
+**Przełącznik odcisku CLI** (`Settings → Security`) zmienia kolejność nagłówków HTTP i pól treści JSON, aby dokładnie odpowiadały sygnaturze natywnych plików binarnych CLI (Claude Code, Codex itp.). Działa to **niezależnie od** serwera proxy:
 
 ```
 Twój adres IP (zablokowany) → Adres IP proxy (USA) → API dostawcy

@@ -38,7 +38,7 @@ Flag boolean huwa kkunsidrat **attivat** meta l-valur effettiv tiegħu jkun `"tr
 
 ## Katalgu tal-Bandiera
 
-120 bandiera f'6 kategoriji.** Default** hija d-definizzjoni default — il-valur użat meta la DB override u lanqas varjabbli ambjentali ma jkunu preżenti.
+121 bandiera f'6 kategoriji.** Default** hija d-definizzjoni default — il-valur użat meta la DB override u lanqas varjabbli ambjentali ma jkunu preżenti.
 
 ### Sigurtà (11)
 
@@ -109,7 +109,7 @@ Flag boolean huwa kkunsidrat **attivat** meta l-valur effettiv tiegħu jkun `"tr
 
 Meta `UNPRICED_USAGE_BUDGET_POLICY` jiġi kkonfigurat b'mod espliċitu (DB override qabel l-ambjent), jieħu preċedenza fuq `USAGE_LIMIT_IGNORE_UNPRICED`. Bla ebda valur enum espliċitu, l-opt-out boolean upstream jagħżel `count_as_zero`; inkella l-inadempjenza hija `fail_closed`. Valuri ta' enum invalidi u ħażna ta' karatteristika-bandiera li ma tinqarax ifallu magħluqa. La l-opt-out ma ttaffi l-infiq bi prezz jew ħarsa falluta tal-ipprezzar. L-infurzar u r-rapport tal-amministratur isolvu l-istess politika effettiva.
 
-### Runtime (57)
+### Runtime (58)
 
 | Ewlenin                                        | Tip     | Default | Ibda mill-ġdid | Deskrizzjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -172,6 +172,7 @@ Meta `UNPRICED_USAGE_BUDGET_POLICY` jiġi kkonfigurat b'mod espliċitu (DB overr
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                | Tieqaf toffri u tibgħat l-isforz tar-raġunament `max` għal Cursor Grok 4.7 (#17386): Cursor's docs lista biss low/medium/high/xhigh, sabiex l-alias ta' riżerva `grok-4.7-max` tisparixxi mill-katalgu u tintbagħat talba ta 'sforz `max` mingħajr parametru ta' sforz. Mitfi b'mod awtomatiku: `max` jibqa' offrut u mibgħut, peress li sonda AgentService/Run ħaj aċċettatha.                                                                                                                                                                                                                                                                                                                              |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                | Send Responses keepalives bħala linja vojta minflok avveniment response.in_progress, għalhekk snapshot sintetiku qatt ma jista' jissostitwixxi r-rispons reali SDK uffiċjali. Linja vojta ma tibgħat l-ebda avveniment SSE, għalhekk klieb tal-għassies tal-klijent li reset biss fuq avvenimenti ma jiġix reset matul fażi twila siekta. Mitfi b'mod awtomatiku: it-tajmers jibagħtu l-avveniment spec-valid response.in_progress.                                                                                                                                                                                                                                                                          |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                | Fl-istatistiċi tal-cache tal-kompressjoni, għodd talba kkompressata lil fornitur tal-prefiss awtomatiku tal-caching (OpenAI, Codex, Azure, jew konnessjoni tad-dwana li tiddikjara caching fil-pront bi tqaxxir tal-marker) bħala hit cache stmata anki mingħajr markaturi `cache_control` (#17114). L-istima hija sinjal ta' eliġibbiltà tal-cache, mhux hit osservata, għalhekk ir-rata ta' hit irrappurtata għal dawk il-fornituri tvarja lejn 100%. Mitfija awtomatikament: talba biss li ġġorr markaturi `cache_control` lil fornitur tal-caching tgħodd bħala hit stmata, għalhekk il-fornituri tal-prefiss awtomatiku jibqgħu jirrappurtaw 0.                                                         |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                | Jippermetti tfittxija awtomatika fuq il-web mingħajr `provider` espliċitu tuża kont Codex (ChatGPT) konness permezz ta’ `codex-search`: bħala l-aħħar għażla qabel il-fornituri mingħajr ċavetta meta l-ebda fornitur bi kredenzjali ma jkun jista’ jintuża, u bħala alternattiva f’każ ta’ ħsara (#17933). Kull tfittxija tikkonsma kwota tal-abbonament u tieħu madwar 10–40 s. Diżattivat b’mod awtomatiku: `codex-search` jaħdem biss meta t-talba ssemmih espliċitament.                                                                                                                                                                                                                                |
 
 ### CLI (5)
 
@@ -242,10 +243,10 @@ Jirritorna kull bandiera bil-valur effettiv tagħha, is-sors, u sommarju.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -25,9 +25,9 @@ hooks များသည် route တိုင်း သို့မဟုတ်
 လုံခြုံရေးထိန်းချုပ်မှုအဖြစ် အားကိုးအသုံးမပြုမီ [လွှမ်းခြုံမှုနှင့် ကန့်သတ်ချက်များ](#coverage-and-limits) ကို
 ဖတ်ပါ။
 
-## Built-in Guardrails
+## ထည့်သွင်းပါရှိသော Guardrails
 
-တင်သွင်းချိန်တွင် registry သည် ဦးစားပေးအဆင့်အလိုက် guardrail ခြောက်ခုကို အလိုအလျောက် load လုပ်သည်
+Registry သည် import လုပ်ချိန်တွင် priority အစဉ်အတိုင်း guardrails ခြောက်ခုကို အလိုအလျောက် load လုပ်သည်\
 (`registry.ts` → `registerDefaultGuardrails()` ကိုကြည့်ပါ)။
 
 | Priority | Name                | Stage(s)       | File                  |
@@ -39,116 +39,111 @@ hooks များသည် route တိုင်း သို့မဟုတ်
 | `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-ဦးစားပေးနံပါတ် နိမ့်သည့် guardrail များသည် **အရင်** လုပ်ဆောင်သည်။
+Priority နံပါတ် နိမ့်သည့်အရာများသည် **အရင်** လုပ်ဆောင်သည်။
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-GLM 5.3 base model နှင့် `glm-5.3-{low,high,max}` တို့တွင် `supportsVision:false` registry/spec metadata ကို
-တိတိကျကျ သတ်မှတ်ထားသည်။ GLM 5.3 Flash မူကွဲများသည် native-vision model များအဖြစ် ဆက်လက်ရှိနေသည်။ Claude Code ၏ `/v1/messages` route သည် Claude-to-OpenAI ဘာသာပြန်ခြင်း မပြုလုပ်မီ
-shared `handleChat` pre-call guardrail chain ထဲသို့ ဝင်ရောက်သည်။ ထို့ကြောင့် nested
-`Read` tool-result image များကို OpenAI `image_url` content အဖြစ် မြှင့်တင်မပေးမီ ဖော်ပြပေးရမည် သို့မဟုတ်
-ကိုင်တွယ်ပေးရမည် (#17069)။
+GLM 5.3 base model နှင့် `glm-5.3-{low,high,max}` တို့တွင် `supportsVision:false` registry/spec metadata ကို အတိအလင်း သတ်မှတ်ထားသည်။ GLM 5.3 Flash variants များမှာ native-vision models အဖြစ် ဆက်လက်ရှိနေသည်။ Claude Code ၏ `/v1/messages` route သည် Claude-to-OpenAI ဘာသာပြန်ခြင်း မပြုမီ shared `handleChat` pre-call guardrail chain ထဲသို့ ဝင်ရောက်သည်။ ထို့ကြောင့် nested `Read` tool-result images များကို OpenAI `image_url` content အဖြစ် မြှင့်တင်မပြမီ ဖော်ပြပေးရန် သို့မဟုတ် ကိုင်တွယ်ပေးရန် လိုအပ်သည် (#17069)။
 
-image ပါဝင်သော request များသည် **vision မပံ့ပိုးသည့် model** များထံ ရည်ရွယ်ထားပါက ကြားဝင်ပြီး၊ request တစ်ခုလုံးကို vision စွမ်းရည်ရှိသော model ထံ ပြန်လည်လမ်းကြောင်းပြောင်းပေးခြင်း သို့မဟုတ် upstream call မပြုလုပ်မီ configurable vision model က ထုတ်လုပ်ပေးသည့် စာသားဖော်ပြချက်များဖြင့် image အစိတ်အပိုင်းများကို အစားထိုးပေးခြင်းတို့ထဲမှ တစ်ခုကို လုပ်ဆောင်သည်။ ထိုသို့ဖြင့် text-only provider များသည် multimodal payload များကို ပွင့်လင်းမြင်သာစွာ ကိုင်တွယ်နိုင်သည်။
+**vision မထောက်ပံ့သော models** များထံ ပို့မည့် image ပါဝင်သော requests များကို ကြားဖြတ်ယူပြီး request တစ်ခုလုံးကို vision-capable model သို့ ပြန်လည်လမ်းကြောင်းပို့ခြင်း သို့မဟုတ် upstream call မပြုမီ configurable vision model မှ ထုတ်လုပ်သည့် စာသားဖော်ပြချက်များဖြင့် image parts များကို အစားထိုးခြင်းတို့ကို ပြုလုပ်သည်။ ထိုသို့ဖြင့် text-only providers များသည် multimodal payloads များကို ပွင့်လင်းမြင်သာစွာ ကိုင်တွယ်နိုင်သည်။
 
-လုပ်ဆောင်စီးဆင်းမှု:
+လုပ်ဆောင်စီးဆင်းပုံ:
 
-1. target model က vision ကို ပံ့ပိုးပြီးသားဖြစ်ပါက ကျော်သွားသည် (`isVisionBridgeForcedModel` forced-bridge list ထဲတွင် ပါဝင်နေပါက ချွင်းချက်ဖြစ်သည်)။
-2. `extractImageParts(messages)` (`visionBridgeHelpers.ts`) ကို အသုံးပြု၍ image အစိတ်အပိုင်းများကို ထုတ်ယူသည်။ ၎င်းသည် combo compatibility filter နှင့် မျှဝေအသုံးပြုသည့် တစ်ခုတည်းသော အမှန်တရားရင်းမြစ်ဖြစ်သော **unified media detector** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` သို့ တာဝန်လွှဲပေးသည်။ ထုတ်ယူခြင်းသည် `replaceImageParts` က ပြန်လည်ထည့်သွင်းနိုင်သည့် ပုံစံများကိုသာ allowlist လုပ်ထားသည် (extract↔replace contract)။ ၎င်းတို့မှာ OpenAI `image_url`၊ Anthropic base64 `source.type:"base64"`၊ Anthropic URL `source.type:"url"` နှင့် Responses API `input_image` တို့ဖြစ်သည်။ Claude Code `tool_result.content` နှင့် Responses tool outputs အတွင်း အဆင့်ဆင့်ထည့်သွင်းထားသော ကိုက်ညီသည့် image များကိုလည်း မူလလမ်းကြောင်းများအတိုင်း ထုတ်ယူပြီး ပြန်လည်အစားထိုးသည်။ indicator-only ပုံစံများသည် combo-filter material ဖြစ်သောကြောင့် ထုတ်ယူခြင်းမပြုပါ။
-   မည်သည့် image မျှ မတွေ့ပါက ကျော်သွားသည်။
-3. `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) မှတစ်ဆင့် runtime config ကို ဖြေရှင်းသည်။ `modalityBridge*` settings key အသစ်များသည် ဦးစားပေးရရှိပြီး၊ အဟောင်း `visionBridge*` key များသည် **one-cycle fallback** (rollback window) အဖြစ် ဆက်လက်ရှိနေသည်။ bridge ကို ပိတ်ထားပါက media traversal တစ်စုံတစ်ရာ မပြုလုပ်မီ ကျော်သွားသည်။
-4. Mode selector (`modalityBridgeVisionMode`, အောက်ပါဇယားကိုကြည့်ပါ) က reroute နှင့် describe ထဲမှ မည်သည့်နည်းလမ်းကို အသုံးပြုမည်ကို ဆုံးဖြတ်သည်။ Reroute သည် `model` တစ်ခုတည်းကိုသာ လဲလှယ်ထားသော `modifiedPayload` နှင့်အတူ `{ rerouted, fromModel, toModel, imagesKept }` meta ကို ပြန်ပေးသည်။
-5. Describe လမ်းကြောင်းတွင် image များကို `maxImages` ဖြင့် ကန့်သတ်ပြီး task-aware prompt ကို ဖွဲ့စည်းသည်၊ describe cache ကို စစ်ဆေးသည်၊ ထို့နောက် vision model ကို **အပြိုင်** (`Promise.allSettled`) ခေါ်ကာ ၎င်းတို့၏နေရာတွင် `[Image N]: <description>` စာသားအစိတ်အပိုင်းများကို ထည့်သွင်းသည်။ Describe မအောင်မြင်ပါက `null` ရရှိမည်ဖြစ်ပြီး raw image ကို မသိရသေးသော/vision-capable target များအတွက် ထိန်းသိမ်းထားသည် (#4012)။ သို့သော် **အတည်ပြုထားသော text-only direct target** သို့မဟုတ် zero-vision combo အတွက် describe မလုပ်နိုင်သည့် image တိုင်းကို `(unavailable — no vision-capable provider connected)` ဟူသော တိကျသည့် စာသား stub ဖြင့် ထည့်သွင်းသည်။ ၎င်းတွင် partial failure များနှင့် describe-call cap ကျော်လွန်သည့် image များလည်း ပါဝင်သည် (#17069)။ အားလုံးမအောင်မြင်သည့် combo describe fallback အဟောင်းကိုလည်း ဆက်လက်ထားရှိသည် (#8430)။
-6. `modifiedPayload` နှင့် meta (`imagesProcessed`, `descriptions`,
-   `processingTimeMs`, `visionModel`) ကို ပြန်ပေးသည်။
+1. ပစ်မှတ် model သည် vision ကို ထောက်ပံ့ပြီးသားဖြစ်ပါက ကျော်သွားသည် (`isVisionBridgeForcedModel` forced-bridge list ထဲတွင် ပါဝင်နေပါက ချွင်းချက်ဖြစ်သည်)။
+2. `extractImageParts(messages)` (`visionBridgeHelpers.ts`) မှ image parts များကို ထုတ်ယူသည်။ ၎င်းသည် combo compatibility filter နှင့် မျှဝေသုံးသည့် တစ်ခုတည်းသော အမှန်တရားရင်းမြစ်ဖြစ်သော **unified media detector** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` ကို delegate လုပ်သည်။ Extraction သည် `replaceImageParts` က ပြန်လည် splice လုပ်နိုင်သည့် shapes များကိုသာ ခွင့်ပြုထားသော allowlist အဖြစ် သတ်မှတ်ထားသည် (extract↔replace contract)။ ထို shapes များမှာ OpenAI `image_url`၊ Anthropic base64 `source.type:"base64"`၊ Anthropic URL `source.type:"url"` နှင့် Responses API `input_image` တို့ဖြစ်သည်။ Claude Code `tool_result.content` နှင့် Responses tool outputs အတွင်းတွင် nested ဖြစ်နေသော ကိုက်ညီသည့် images များကိုလည်း မူလ paths များတွင် ထုတ်ယူပြီး အစားထိုးသည်။ indicator-only shapes များမှာ combo-filter material ဖြစ်သောကြောင့် ထုတ်ယူခြင်းမပြုပါ။ မည်သည့် image မျှ မတွေ့ပါက ကျော်သွားသည်။
+3. `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) မှ runtime config ကို ဖြေရှင်းသည်။ အသစ်ဖြစ်သော `modalityBridge*` settings keys များသည် ဦးစားပေးရရှိပြီး၊ legacy `visionBridge*` keys များသည် **one-cycle fallback** (rollback window) အဖြစ် ဆက်လက်ရှိနေသည်။ Bridge ကို ပိတ်ထားပါက media traversal တစ်စုံတစ်ရာ မပြုလုပ်မီ ကျော်သွားသည်။
+4. Mode selector (`modalityBridgeVisionMode`၊ အောက်ပါဇယားကိုကြည့်ပါ) သည် reroute သို့မဟုတ် describe ကို ဆုံးဖြတ်သည်။ Reroute သည် `model` တစ်ခုတည်းကိုသာ ပြောင်းထားသည့် `modifiedPayload` နှင့် `{ rerouted, fromModel, toModel, imagesKept }` meta ကို ပြန်ပေးသည်။
+5. Describe path တွင် images များကို `maxImages` အထိ ကန့်သတ်၍ task-aware prompt ကို ဖွဲ့စည်းသည်၊ describe cache ကို အသုံးပြုသည်၊ vision model ကို **အပြိုင်** (`Promise.allSettled`) ခေါ်ဆိုပြီး ၎င်းတို့၏နေရာတွင် `[Image N]: <description>` text parts များကို ထည့်သွင်းသည်။ Describe မအောင်မြင်ပါက `null` ရရှိသည်။ ထိုအခါ raw image ကို မသိရသေးသော/vision-capable targets များအတွက် ထိန်းသိမ်းထားသည် (#4012)။ သို့သော် **အတည်ပြုထားသော text-only direct target** သို့မဟုတ် zero-vision combo ဖြစ်ပါက မဖော်ပြနိုင်သည့် image တိုင်းအတွက် `(unavailable — no vision-capable provider connected)` ဟူသော text stub ကို ထည့်သွင်းသည်။ ၎င်းတွင် partial failures နှင့် describe-call cap ထက် ကျော်လွန်နေသော images များလည်း ပါဝင်သည် (#17069)။ အားလုံးမအောင်မြင်သော combo describe fallback အဟောင်းကိုလည်း ဆက်လက်အသုံးပြုနေသည် (#8430)။
+6. `modifiedPayload` နှင့် meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`) ကို ပြန်ပေးသည်။
 
 #### Mode selector (`modalityBridgeVisionMode`)
 
-| Mode       | Default | Behavior                                                                                                                                                                                                                                                                                                                                                  |
-| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔       | မပြောင်းလဲထားသော legacy heuristic (#6640/#7204) အတိုင်း လုပ်ဆောင်သည်။ combo မဟုတ်သော/`auto/` model များကို အကောင်းဆုံး vision model သို့ reroute လုပ်သည်။ သို့သော် မူလ model တွင် အသုံးပြုနိုင်သည့် credential ရှိပြီးသားဖြစ်ပါက describe လုပ်သည်။ combo target များတွင်မူ အမြဲ describe လုပ်သည်။                                                         |
-| `describe` |         | အမြဲ describe လုပ်သည် — reroute block ကို လုံးဝ ကျော်သွားပြီး အသုံးပြုသူရွေးချယ်ထားသော model ကသာ အဖြေပေးသည်။                                                                                                                                                                                                                                              |
-| `reroute`  |         | reroute ကို အတင်းအကျပ်လုပ်ဆောင်သည် — credential ရှိပြီးသား model ကို ထိန်းသိမ်းသည့် guard ကို ကျော်သွားသည်။ reroute-**target** credential guard ကမူ ဆက်လက်သက်ရောက်သည်။ အသုံးပြုနိုင်သော vision target မရှိပါက bridge သည် ရှင်းလင်းသော error ဖြင့် ရပ်တန့်ပြီး describe လုပ်ခြင်း သို့မဟုတ် raw image များကို text-only target ထံ ပေးပို့ခြင်း မပြုလုပ်ပါ။ |
+| Mode       | Default | Behavior                                                                                                                                                                                                                                                                                                                           |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔       | Legacy heuristic ကို မပြောင်းလဲဘဲ အသုံးပြုသည် (#6640/#7204)။ non-combo/`auto/` models များသည် မူလ model တွင် အသုံးပြုနိုင်သော credentials ရှိပြီးသားဖြစ်ပါက describe လုပ်ပြီး၊ မရှိပါက အကောင်းဆုံး vision model သို့ reroute လုပ်သည်။ combo targets များသည် အမြဲ describe လုပ်သည်။                                                 |
+| `describe` |         | အမြဲ describe လုပ်သည် — reroute block ကို လုံးဝကျော်သွားပြီး အသုံးပြုသူရွေးချယ်ထားသော model ကသာ အဖြေပေးသည်။                                                                                                                                                                                                                        |
+| `reroute`  |         | Reroute ကို အတင်းအကျပ်လုပ်သည် — keep-credentialed-model guard ကို ကျော်သွားသည်။ Reroute-**target** credential guard ကိုမူ ဆက်လက်အသုံးပြုသည်။ အသုံးပြုနိုင်သော vision target မရှိပါက bridge သည် ရှင်းလင်းသော error ဖြင့် block လုပ်ပြီး describe လုပ်ခြင်း သို့မဟုတ် raw images များကို text-only target သို့ ပို့ခြင်း မပြုလုပ်ပါ။ |
 
-Forced mode များသည် auto heuristic မလုပ်ဆောင်မီ တိုက်ရိုက်အကျိုးသက်ရောက်သည်။ `auto` အပြုအမူသည် PR-1 မတိုင်မီ guardrail နှင့် byte-identical ဖြစ်သည်။
+Forced modes များသည် auto heuristic မလုပ်ဆောင်မီ တိုက်ရိုက်အကျိုးသက်ရောက်သည်။ `auto` behavior သည် PR-1 မတိုင်မီ guardrail နှင့် byte-identical ဖြစ်သည်။
 
 #### API-key scope (`visionBridgeKeyScope.ts`)
 
 ခေါ်ဆိုသူ၏ API key က `allowedConnections`၊ quota pool များ
-(`allowedQuotas`) သို့မဟုတ် model များ (`allowedModels` / `blockedModels` /
+(`allowedQuotas`) သို့မဟုတ် မော်ဒယ်များ (`allowedModels` / `blockedModels` /
 `modelAccessMode: "restricted"` / `disableNonPublicModels`) ကို ကန့်သတ်ထားပါက bridge သည်
-key အသုံးပြုခွင့်ရှိသည့် connection များပေါ်တွင် key အသုံးပြုခွင့်ရှိသည့် reroute နှင့်
-describe model များကိုသာ ရွေးချယ်သည်။ ထို့နောက် describe call သည်
-`x-omniroute-self-loop-key-id` header ပါဝင်သော OmniRoute self-loop မှတစ်ဆင့်သာ
-အမြဲဖြတ်သန်းသွားသောကြောင့် လက်ခံသည့် chat request က ထို key ၏ connection နှင့်
-model policy ကို ထပ်မံအတည်ပြုသည်။ `enforceApiKeyPolicy()` သည် ထို header ကို
-self-loop bearer နှင့်အတူရှိမှသာ လက်ခံသောကြောင့် access ကို ပိုမိုကန့်သတ်နိုင်ရုံသာရှိပြီး၊
-resolve မဖြစ်သည့် id ကို ငြင်းပယ်သည်။
+ထို key အသုံးပြုခွင့်ရှိသော connection များပေါ်တွင် ထို key အသုံးပြုခွင့်ရှိသည့်
+reroute နှင့် describe မော်ဒယ်များကိုသာ ရွေးချယ်သည်။ ထို့နောက် describe ခေါ်ဆိုမှုသည်
+`x-omniroute-self-loop-key-id` header ပါဝင်သော OmniRoute self-loop မှတစ်ဆင့် အမြဲသွားပြီး
+လက်ခံသည့် chat request က ထို key ၏ connection နှင့် model policy ကို ထပ်မံအတည်ပြုသည်။
+`enforceApiKeyPolicy()` သည် ထို header ကို self-loop bearer နှင့်အတူရှိမှသာ လက်ခံသဖြင့်
+ဝင်ရောက်ခွင့်ကို ပိုမိုကျဉ်းမြောင်းစေနိုင်သော်လည်း ချဲ့ထွင်မပေးနိုင်ပါ။ ထို့အပြင် ဖြေရှင်း၍
+မရသော id ကိုလည်း ပယ်ချသည်။
 
-key အတွက် vision model တစ်ခုမျှ ခွင့်ပြုထားခြင်းမရှိပါက **အတည်ပြုပြီးသော text-only
-target** သည် image request ကို မစွမ်းဆောင်နိုင်သော upstream ထံ image bytes
-ပို့မည့်အစား ရှင်းလင်းသော HTTP 400 ဖြင့် locally ငြင်းပယ်သည် (#17069)။ မသေချာသေးသော
-သို့မဟုတ် native vision capability ရှိသည့် target များအတွက် describe path သည်
-ယခင် fail-open အပြုအမူကို ဆက်လက်ထိန်းသိမ်းထားသည်
+key အတွက် vision model တစ်ခုမျှ ခွင့်ပြုထားခြင်းမရှိပါက **အတည်ပြုပြီးသား
+text-only target** သည် image request ကို လုပ်ဆောင်နိုင်စွမ်းမရှိသော upstream သို့
+image bytes များ မပို့ဘဲ ရှင်းလင်းသော HTTP 400 ဖြင့် locally ပယ်ချသည် (#17069)။
+vision စွမ်းရည် မသိရှိရသေးသော သို့မဟုတ် native vision စွမ်းရည်ရှိသော target များအတွက်
+describe လမ်းကြောင်းသည် ယခင် fail-open အပြုအမူကို ဆက်လက်ထိန်းသိမ်းထားသည်
 (meta `{ skipped: true, reason: "no_permitted_vision_model" }`)။
 key မပါသော request များနှင့် ဤကန့်သတ်ချက်များမရှိသော key များသည် ယခင်အတိုင်း
 အတိအကျ လုပ်ဆောင်သည်။
 
-#### Task-aware describe prompt (`modalityBridgeVisionTaskAware`)
+#### လုပ်ငန်းတာဝန်နှင့် ကိုက်ညီသော describe prompt (`modalityBridgeVisionTaskAware`)
 
 ပုံမှန်တန်ဖိုးမှာ **true** ဖြစ်သည်။ `composeVisionPrompt()` (`visionBridgeHelpers.ts`) သည်
-**နောက်ဆုံး user message** ၏ စာသား (စာလုံး 500 အထိ ဖြတ်တောက်ထားသည်) ကို အခြေခံ
-describe prompt ၏နောက်တွင် ထည့်သွင်းပြီး၊ အသုံးပြုသူ အမှန်တကယ် မေးမြန်းထားသည့်အရာအပေါ်
-အခြေခံ၍ ဖော်ပြချက်ကို ဦးတည်စေသည် (codex-vision-proxy pattern)။ ထို့အပြင်
-vision model ကို မြင်ရသောစာသားများကို စာသားအဖြစ် ပြန်လည်ရေးသားရန် တောင်းဆိုသည်။
-flag ကို ပိတ်ထားပါက — သို့မဟုတ် user text မရှိပါက — အခြေခံ prompt ကို မပြောင်းလဲဘဲ
+အခြေခံ describe prompt ၏နောက်တွင် **နောက်ဆုံး user message** ၏ စာသားကို
+(အက္ခရာ 500 အထိ ဖြတ်တောက်ပြီး) ထည့်ပေးသည်။ ထိုသို့ဖြင့် အသုံးပြုသူက အမှန်တကယ်
+တောင်းဆိုထားသည့်အရာအပေါ် အခြေခံကာ ဖော်ပြချက်ပေးရန် လမ်းညွှန်ပြီး မြင်ရသောစာသားကို
+စာလုံးဖော်ရန် vision model ကို တောင်းဆိုသည် (codex-vision-proxy pattern)။ flag ကို
+ပိတ်ထားပါက — သို့မဟုတ် user text မရှိပါက — အခြေခံ prompt ကို မပြောင်းလဲဘဲ
 အသုံးပြုသည်။
 
-describe self-loop ၏ ကိုယ်ပိုင် OpenAI-compatible request
-(`visionBridgeHelpers.ts` ရှိ `callVisionModelSingle()`) သည် caller/provider
-တိုင်းအတွက် `image_url.detail: "high"` ကို အမြဲတောင်းဆိုသည် — client signal
-တစ်ခုခုအပေါ် အခြေခံ၍ ကန့်သတ်ထားခြင်းမရှိပါ။ Low-detail sampling သည် ဤ prompt က
-တောင်းဆိုထားသည့် text-transcription task အတွက် အထူးလိုအပ်သော OCR တိကျမှုကို
-လျော့ကျစေသောကြောင့် မူလ inbound request က အသုံးပြုခဲ့သည့် detail level မည်သို့ပင်
+Describe self-loop ၏ ကိုယ်ပိုင် OpenAI-compatible request
+(`visionBridgeHelpers.ts` ထဲရှိ `callVisionModelSingle()`) သည်
+`image_url.detail: "high"` ကို အမြဲတမ်း တောင်းဆိုသည် — client signal တစ်စုံတစ်ရာပေါ်
+မူတည်ခြင်းမရှိဘဲ caller/provider တိုင်းအတွက် သတ်မှတ်ထားသည်။ Low-detail sampling သည်
+ဤ prompt က တောင်းဆိုထားသည့် စာသားဖော်ထုတ်ခြင်းလုပ်ငန်းအတွက် OCR တိကျမှုကို
+လျော့ကျစေသောကြောင့် မူလဝင်လာသော request တွင် အသုံးပြုထားသည့် detail level မည်သို့ပင်
 ဖြစ်စေ describe call ကိုယ်တိုင်က high detail ကို အမြဲတောင်းဆိုသည်။ ၎င်းသည် အတွင်းပိုင်း
-describe request body ကိုသာ သက်ရောက်ပြီး၊ မူလ request တွင် caller ၏ ကိုယ်ပိုင်
-`image_url.detail` ကို OmniRoute က မည်သို့ forward လုပ်သည်ကို မပြောင်းလဲပါ —
-ထို default ကို သီးခြားသတ်မှတ်ထားပြီး၊ `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`)
-တွင် တွေ့ရှိထားသော OpenCode client များအတွက်သာ အသုံးပြုသည်။ Describe self-loop ၏
-Anthropic wire-format branch တွင် `detail` field မရှိသောကြောင့် default နှစ်မျိုးစလုံး၏
-သက်ရောက်မှုမရှိပါ။
+describe request body ကိုသာ သက်ရောက်ပြီး primary request တွင် OmniRoute က caller ၏
+ကိုယ်ပိုင် `image_url.detail` ကို forward လုပ်ပုံကို မပြောင်းလဲပါ — ထို default ကို
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) တွင် သီးခြား
+အသုံးချပြီး detected OpenCode clients များအတွက်သာ ဖြစ်သည်။ Describe self-loop ၏
+Anthropic wire-format branch တွင် `detail` field မရှိသဖြင့် default နှစ်မျိုးစလုံး၏
+သက်ရောက်မှု မရှိပါ။
 
-#### Describe output cap (`modalityBridgeVisionMaxChars`)
+#### Describe output အကန့်အသတ် (`modalityBridgeVisionMaxChars`)
 
 | Key                            | Default | Range            |
 | ------------------------------ | ------- | ---------------- |
 | `modalityBridgeVisionMaxChars` | `0`     | `0` or 100–50000 |
 
-`0` (ပုံမှန်တန်ဖိုး) သည် **ကန့်သတ်ချက်မရှိခြင်း** ကို ဆိုလိုသည် — `callVisionModel()` က
-ပြန်ပေးသည့် description ကို မပြင်ဆင်ဘဲ တိုက်ရိုက်ပေးပို့သောကြောင့် ရှိပြီးသား
-အပြုအမူကို ထိန်းသိမ်းထားသည်။ 100–50000 အတွင်းရှိ မည်သည့်တန်ဖိုးမဆို description ကို
+`0` (ပုံမှန်တန်ဖိုး) သည် **အကန့်အသတ်မရှိခြင်း** ကို ဆိုလိုသည် — `callVisionModel()` က
+ပြန်ပေးသော description ကို မပြုပြင်ဘဲ တိုက်ရိုက်ပေးပို့သဖြင့် ရှိပြီးသားအပြုအမူကို
+ထိန်းသိမ်းထားသည်။ 100–50000 အတွင်းရှိ မည်သည့်တန်ဖိုးမဆို description ကို
 `…` suffix ဖြင့် ဖြတ်တောက်ပြီး `[Image N]: <description>` အဖြစ် ပြန်လည်ထည့်သွင်းသည်
-(`src/lib/guardrails/visionBridge.ts` ရှိ `VisionBridgeGuardrail.preCall()`)။
-အောက်ခံ model က transcription အပြည့်အစုံ လိုအပ်သည့် အသေးစိတ် OCR task များအတွက်
-ဤတန်ဖိုးကို မြှင့်ပါ။ စကားများသော vision model များတွင် token အသုံးပြုမှုကို
+(`src/lib/guardrails/visionBridge.ts` ထဲရှိ `VisionBridgeGuardrail.preCall()` တွင်)။
+နောက်ဆက်တွဲ model က စာသားအပြည့်အစုံ လိုအပ်သော အသေးစိတ်များပြားသည့် OCR လုပ်ငန်းများ
+အတွက် ဤတန်ဖိုးကို မြှင့်ပါ။ စကားများသော vision model များတွင် token အသုံးပြုမှုကို
 ကန့်သတ်ရန် လျှော့ချပါ။
 
-Dashboard field သည် Vision tab ၏ Advanced panel တွင် ရှိသည်
-(`ModalityBridgeVisionTab.tsx` ရှိ `modality-bridge-max-chars`)။ ၎င်းသည် 1 နှင့် 99
-အတွင်းရှိ မည်သည့်တန်ဖိုးကိုမဆို 100 အထိ မြှင့်တင်ပေးပြီး explicit `0` ကိုမူ မပြောင်းလဲဘဲ
-ထားသည် — `0` သည် ၎င်း၏ကိုယ်ပိုင် valid Zod value ဖြစ်သည်
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`)၊ "unset" default
-သက်သက်မဟုတ်ပါ။
+Dashboard field သည် Vision tab ၏ Advanced panel ထဲတွင် ရှိသည်
+(`ModalityBridgeVisionTab.tsx` ထဲရှိ `modality-bridge-max-chars`)။ 1 မှ 99 အတွင်းရှိ
+မည်သည့်တန်ဖိုးကိုမဆို 100 အနိမ့်ဆုံးအထိ မြှင့်တင်ပေးသော်လည်း explicit `0` ကိုမူ
+မပြောင်းလဲဘဲ ထားသည် — `0` သည် သီးခြား Zod value အဖြစ် တရားဝင်ပြီး
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`) “မသတ်မှတ်ထားသော”
+ပုံမှန်တန်ဖိုးမျှသာ မဟုတ်ပါ။
 
 #### Describe cache (`modalityBridge/bridgeCache.ts`)
 
-Describe output များအတွက် process တစ်ခုလုံးအတွင်း မျှဝေသုံးစွဲသည့် in-memory LRU + TTL
-cache ဖြစ်သည်။ Key = `sha256(imageRef + composedPrompt + configuredBridgeModel)` ဖြစ်ပြီး
-length-prefix framing ကို အသုံးပြုထားသောကြောင့် field boundary collision မဖြစ်ပေါ်ပါ။
-Model component သည် အမှန်တကယ် အဖြေပေးခဲ့သည့် model မဟုတ်ဘဲ **configure ပြုလုပ်ထားသော**
-bridge model ဖြစ်သည် — `callVisionModel` သည် အတွင်းပိုင်းတွင် fallback ပြောင်းသုံးနိုင်သောကြောင့်
-attempt တစ်ခုချင်းစီအလိုက် key ခွဲခြားထားပါက cache အပိုင်းအစများ ပြန့်ကျဲသွားမည်ဖြစ်သည်။
-မအောင်မြင်သော describe များကို မည်သည့်အခါမျှ cache မလုပ်ပါ။ Settings များမှာ —
+Describe output များအတွက် process တစ်ခုလုံးအနှံ့ မျှဝေသုံးစွဲသော memory အတွင်းရှိ
+LRU + TTL cache ဖြစ်သည်။ Key = `sha256(imageRef + composedPrompt + configuredBridgeModel)`
+ဖြစ်ပြီး length-prefix framing ကို အသုံးပြုသဖြင့် field boundary များ ထပ်တိုက်မှု
+မဖြစ်ပါ။ model component သည် အမှန်တကယ် အဖြေပေးခဲ့သည့် model မဟုတ်ဘဲ
+**သတ်မှတ်ထားသော** bridge model ဖြစ်သည် — `callVisionModel` သည် အတွင်းပိုင်းတွင်
+fallback ပြုလုပ်နိုင်သောကြောင့် attempt တစ်ခုချင်းစီအလိုက် key ပြုလုပ်ပါက cache
+အပိုင်းစိတ်များစွာ ကွဲထွက်သွားမည်ဖြစ်သည်။ မအောင်မြင်သော describe များကို မည်သည့်အခါမျှ
+cache မလုပ်ပါ။ ဆက်တင်များမှာ —
 
 | Key                             | Default | Range   |
 | ------------------------------- | ------- | ------- |
@@ -158,131 +153,131 @@ attempt တစ်ခုချင်းစီအလိုက် key ခွဲခ�
 
 #### Remote image normalization (self-loop describe/base64 fetch)
 
-bridge က **remote** image ကို ကိုယ်တိုင် fetch လုပ်သောအခါ — Anthropic describe
+Bridge က **remote** image တစ်ခုကို ကိုယ်တိုင် fetch လုပ်သည့်အခါ — Anthropic describe
 self-call နှင့် claude-wire-format base64 conversion
-(`ensureBase64ImagesForClaudeWire`) နှစ်ခုစလုံးသည် `visionBridgeHelpers.ts` ရှိ
-`fetchRemoteImageAsDataUri()` မှတစ်ဆင့် လုပ်ဆောင်သည် — ရရှိလာသော data URI ကို
-vision-model request ထဲ မထည့်သွင်းမီ `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) ဖြင့် ဖြတ်သန်းစေသည်။ အရွယ်အစားလွန်သော image များကို
-**2048px long edge** အထိ downscale ပြုလုပ်သည် (OpenAI/Anthropic က server-side တွင်
-အသုံးပြုပြီးသား resize cap နှင့် ကိုက်ညီသည်)။ ထိုသို့ပြုလုပ်ခြင်းဖြင့် vision model မြင်ရသည့်
-အရာကို မပြောင်းလဲဘဲ upload bytes နှင့် latency ကို လျှော့ချနိုင်သည်။
+(`ensureBase64ImagesForClaudeWire`) နှစ်မျိုးလုံးသည်
+`visionBridgeHelpers.ts` ထဲရှိ `fetchRemoteImageAsDataUri()` ကို အသုံးပြုကြပြီး —
+ရရှိလာသော data URI ကို vision-model request ထဲ မထည့်သွင်းမီ
+`normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) မှတစ်ဆင့် ပေးပို့သည်။
+အရွယ်အစားလွန်ကဲသော image များကို **2048px long edge** အထိ အရွယ်လျှော့ချသည်
+(OpenAI/Anthropic က server-side တွင် အသုံးပြုထားပြီးသား resize cap နှင့် ကိုက်ညီသည်)။
+ထိုသို့ပြုလုပ်ခြင်းဖြင့် vision model မြင်ရသည့်အရာကို မပြောင်းလဲဘဲ upload bytes နှင့်
+latency ကို လျှော့ချပေးသည်။
 
-Resize ပြုလုပ်ရာတွင် `sharp` ကို dynamic import ဖြင့် load လုပ်သည်။ Native binary ကို
-load လုပ်ရာတွင် platform တစ်ခုခု၌ အမှားဖြစ်ပါက `normalizeDataUri()` သည်
-**မည်သည့်အခါမျှ throw မလုပ်ပါ** — မူရင်း bytes ကို passthrough ပြုလုပ်သည့် fallback
-သို့ ပြောင်းသွားသောကြောင့် describe/base64-conversion path သည် အမြဲအလုပ်လုပ်နေမည်ဖြစ်သည်။
-Non-image bytes (fetch ပြုလုပ်ရာတွင် decodable image ပြန်မရခဲ့ခြင်း) များကိုလည်း
-မပြောင်းလဲဘဲ passthrough လုပ်သည်။ ဤ normalization သည် bridge က ၎င်း၏ကိုယ်ပိုင်
-self-call အတွက် fetch လုပ်သည့် image များတွင်သာ သက်ရောက်ပြီး caller ၏ raw passthrough
-payload တွင် မည်သည့်အခါမျှ အသုံးမပြုပါ။ ၎င်းသည် opt-in-only mutation principle
-(Hard Rule #20) နှင့် ကိုက်ညီသည်။
+Resize ပြုလုပ်ရန် `sharp` ကို dynamic import မှတစ်ဆင့် load လုပ်သည်။ Native binary
+load မအောင်မြင်သော platform တစ်ခုတွင် `normalizeDataUri()` သည် **မည်သည့်အခါမျှ
+throw မလုပ်ပါ** — မူလ bytes များကို passthrough ပြုလုပ်ခြင်းသို့ fallback လုပ်သဖြင့်
+describe/base64-conversion လမ်းကြောင်းသည် အမြဲအလုပ်လုပ်နေမည်ဖြစ်သည်။ Non-image bytes
+(fetch ပြုလုပ်ထားသော်လည်း decode လုပ်၍ရသော image မဟုတ်သည့်အရာများ) ကိုလည်း
+မပြောင်းလဲဘဲ passthrough ပြုလုပ်သည်။ ဤ normalization သည် bridge က ကိုယ်ပိုင်
+self-call အတွက် fetch ပြုလုပ်သော image များတွင်သာ သက်ရောက်ပြီး caller ၏ raw
+passthrough payload တွင် မည်သည့်အခါမျှ အသုံးမချပါ။ ၎င်းသည် opt-in-only mutation
+principle (Hard Rule #20) နှင့် ကိုက်ညီသည်။
 
 #### Settings schema + migration
 
-`modalityBridge*` သော့များကို `updateSettingsSchema`
-(`src/shared/validation/settingsSchemas.ts`) တွင် Zod ဖြင့် အတည်ပြုထားသည် —
+`modalityBridge*` ကီးအသစ်များကို `updateSettingsSchema`
+(`src/shared/validation/settingsSchemas.ts`) တွင် Zod ဖြင့် အတည်ပြုထားသည်။
 `modalityBridgeVisionEnabled`,
 `modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
 `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
 `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, `modalityBridgeCache*` သုံးခုနှင့် Audio
-Bridge က အသုံးပြုသည့် `modalityBridgeAudio*` အုပ်စုတို့ ဖြစ်သည်။
+`modalityBridgeVisionMaxChars`၊ `modalityBridgeCache*` သုံးမျိုးနှင့်
+Audio Bridge က အသုံးပြုသည့် `modalityBridgeAudio*` အုပ်စုတို့ ပါဝင်သည်။
 Migration `141_modality_bridge_settings.sql` သည် ရှိပြီးသား
-`visionBridge*` တန်ဖိုးများကို ကိုက်ညီသည့် သော့အသစ်များသို့ ကူးယူပေးသည်
+`visionBridge*` တန်ဖိုးများကို ကိုက်ညီသည့် ကီးအသစ်များသို့ ကူးယူပေးသည်
 (idempotent ဖြစ်ပြီး operator က သတ်မှတ်ထားသော `modalityBridge*` တန်ဖိုးကို
-မည်သည့်အခါမျှ အစားမထိုးပါ)။ legacy သော့များကို release cycle တစ်ကြိမ်အတွက်
+မည်သည့်အခါမျှ ထပ်ရေးမည်မဟုတ်ပါ)။ Legacy ကီးများကို release cycle တစ်ကြိမ်အတွက်
 read fallback အဖြစ် ဆက်လက်လက်ခံထားသည်။
 
-#### ပွင့်လင်းမြင်သာမှု header + စာရင်းအင်းများ
+#### ပွင့်လင်းမြင်သာမှု ခေါင်းစီး + စာရင်းအင်းများ
 
 Describe-transformed တုံ့ပြန်မှုများတွင်
 `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
 (`modalityBridge/bridgeStats.ts` ရှိ `buildModalityBridgeHeader()` က
 တည်ဆောက်ပြီး `src/sse/handlers/chatHelpers.ts` ရှိ
 `withModalityBridgeHeader()` က ထည့်သွင်းပေးသည်) ပါဝင်သည်။
-Reroute ပြုလုပ်ထားသော request များတွင် header **မပါဝင်ပါ** — payload ကို
-မပြောင်းလဲထားသည့်အပြင် model swap ကို response body ၏ `model` field တွင်
-မြင်နိုင်ပြီးသား ဖြစ်သည်။
+Rerouted တောင်းဆိုမှုများတွင် ခေါင်းစီးမပါပါ — payload ကို မပြောင်းလဲထားသည့်အပြင်
+model ပြောင်းလဲမှုကို တုံ့ပြန်မှု body ရှိ `model` field တွင် မြင်နိုင်ပြီးဖြစ်သည်။
 
 `GET /api/modality-bridge/stats` (management auth၊
-`GET /api/settings` နှင့် တူညီသော tier) သည် `vision`, `audio` နှင့် `video`
-အတွက် memory အတွင်းရှိ modality တစ်ခုချင်းစီ၏ counter များကို
+`GET /api/settings` နှင့် တူညီသော tier) သည် `vision`၊ `audio` နှင့် `video`
+တို့အတွက် memory အတွင်းရှိ modality တစ်ခုချင်းစီ၏ ကောင်တာများကို
 `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` အဖြစ် ပြန်ပေးသည်။
-`averageLatencyMs` သည် denominator အဖြစ် attempts အားလုံးကို မသုံးဘဲ
-`latencySamples` ကို အသုံးပြုသည်။ timing မရှိသော operation အတွက်
-သုညမီလီစက္ကန့် sample ကို အတုအယောင် မဖန်တီးပါ။ `bridged` သည် အောင်မြင်သော
-conversion များအတွက် backward-compatible alias အဖြစ် ဆက်လက်ရှိနေပြီး၊
-မအောင်မြင်သော attempt များက ၎င်းကို တိုးမပေးပါ။
-Counter များသည် process restart ဖြစ်သောအခါ ရည်ရွယ်ချက်ရှိရှိ reset ဖြစ်သည်
+latencySamples, averageLatencyMs, lastUsedAt }` ပုံစံဖြင့် ပြန်ပေးသည်။
+`averageLatencyMs` သည် denominator အဖြစ် ကြိုးစားမှုအားလုံးကို မသုံးဘဲ
+`latencySamples` ကို အသုံးပြုသည်။ အချိန်တိုင်းတာမှုမရှိသော operation အတွက်
+သုညမီလီစက္ကန့် sample ကို အတုဖန်တီးမည်မဟုတ်ပါ။
+`bridged` သည် အောင်မြင်သော conversion များအတွက် backward-compatible alias
+အဖြစ် ဆက်ရှိနေသည်။ မအောင်မြင်သော ကြိုးစားမှုများသည် ၎င်းကို တိုးမပေးပါ။
+ဒီဇိုင်းအရ process ပြန်စသည့်အခါ ကောင်တာများကို reset လုပ်သည်
 (စာရင်းအင်းစောင့်ကြည့်မှုသာဖြစ်ပြီး accounting မဟုတ်ပါ)။
 
 #### Dashboard configuration
 
-သီးသန့် dashboard စာမျက်နှာမှာ
-`/dashboard/settings/modality-bridge` ဖြစ်သည်။ URL ဖြင့် သတ်မှတ်နိုင်သော
-`Vision`, `Audio` နှင့် `Video` tab များသည် `tab` တန်ဖိုးကို ပြောင်းလဲစဉ်
-query parameter များကို ထိန်းသိမ်းထားသည်။ Vision tab တွင် enablement၊ mode၊
+သီးခြား dashboard စာမျက်နှာသည်
+`/dashboard/settings/modality-bridge` ဖြစ်သည်။ URL ဖြင့် ရည်ညွှန်းနိုင်သော
+`Vision`၊ `Audio` နှင့် `Video` tabs များသည် `tab` တန်ဖိုးကို ပြောင်းလဲစဉ်
+query parameters များကို ထိန်းသိမ်းထားသည်။ Vision tab တွင် enablement၊ mode၊
 model ရွေးချယ်မှု (အလိုအလျောက် default အပါအဝင်)၊ task-aware prompting၊
-အဆင့်မြင့် timeout/image/description-length/cache ကန့်သတ်ချက်များ၊ runtime
-counter များနှင့် အကာအကွယ်ပါသော sample request တို့ကို ဖော်ပြပေးသည်။
-Audio tab သည်လည်း အသုံးပြုနိုင်ပြီဖြစ်ပြီး enablement၊ Auto ပါဝင်သော
-STT-only model picker၊ timeout/max-clip ကန့်သတ်ချက်များ၊ audio counter များနှင့်
-`input_audio` sample test တို့ကို ဖော်ပြပေးသည်။ Video tab သည်လည်း
-အပြည့်အဝလုပ်ဆောင်နိုင်ပြီး FFmpeg/ffprobe runtime အခြေအနေကို — UI အခြေအနေ
-လေးမျိုးထဲမှ တစ်ခုအဖြစ် — ဖော်ပြပေးသည် (`unknown` သည် probe လုပ်နေဆဲ
-သို့မဟုတ် ပြီးမြောက်အောင် မလုပ်ဆောင်နိုင်သေးချိန်၊ `restricted` သည်
-loopback မဟုတ်သော dashboard host တွင် client-side probe ကို ကျော်သွားချိန်၊
-`unavailable` သည် probe ပြီးနောက် မရှိကြောင်း အတည်ပြုချိန်၊ သို့မဟုတ်
-FFmpeg/ffprobe version များနှင့်အတူ `available`)။ ထို့အပြင်
-enable/model/frame/video/timeout ကန့်သတ်ချက်များကို သိမ်းဆည်းပေးသည်၊
-model picker ကို vision-capable model များအတွက်သာ စစ်ထုတ်ပေးသည်၊
-video counter များကို ဖော်ပြပေးသည်။
+အဆင့်မြင့် timeout/image/description-length/cache limits၊ runtime
+ကောင်တာများနှင့် ကာကွယ်ထားသော sample request တို့ကို ဖော်ပြပေးသည်။ Audio tab
+သည်လည်း live ဖြစ်ပြီး enablement၊ Auto ပါဝင်သော STT-only model picker၊
+timeout/max-clip limits၊ audio ကောင်တာများနှင့် `input_audio` sample test တို့ကို
+ဖော်ပြပေးသည်။ Video tab သည် လုပ်ဆောင်နိုင်သောအခြေအနေရှိပြီး FFmpeg/ffprobe
+runtime အခြေအနေကို အစီရင်ခံသည် — တိကျစွာ သတ်မှတ်ထားသော UI အခြေအနေ လေးမျိုးထဲမှ
+တစ်မျိုးဖြစ်သည် (`unknown` သည် probe လုပ်ဆောင်နေဆဲ သို့မဟုတ် ပြီးဆုံးအောင်
+မလုပ်နိုင်သေးချိန်၊ `restricted` သည် loopback မဟုတ်သော dashboard host တွင်
+client-side probe ကို ကျော်သွားချိန်၊ `unavailable` သည် probe လုပ်ပြီး
+မရှိကြောင်း အတည်ပြုပြီးချိန်၊ `available` သည် FFmpeg/ffprobe versions များနှင့်
+အတူ ရရှိနိုင်ချိန်)။ ထို့အပြင် video အတွက် enable/model/frame/video/timeout
+limits များကို သိမ်းဆည်းပေးသည်၊ model picker ကို vision-capable models များဖြင့်
+စစ်ထုတ်ပေးသည်၊ video ကောင်တာများကိုလည်း ဖော်ပြပေးသည်။
 
 AI settings အောက်ရှိ ယခင် Vision Bridge card သည် စာမျက်နှာအသစ်သို့
-compatibility link တစ်ခုသာဖြစ်ပြီး form ၏ ဒုတိယမိတ္တူကို မပိုင်ဆိုင်တော့ပါ။
-Media Providers သည် Image-to-Text နှင့် Speech-to-Text workflow များကို
-သက်ဆိုင်ရာ Modality Bridge tab များသို့လည်း ချိတ်ဆက်ပေးသော်လည်း ရှိပြီးသား
-Speech-to-Text playground ကို မဖယ်ရှားပါ။
+compatibility link တစ်ခုဖြစ်ပြီး form ၏ ဒုတိယမိတ္တူကို မပိုင်ဆိုင်တော့ပါ။
+Media Providers သည် Image-to-Text နှင့် Speech-to-Text workflows များကို
+သက်ဆိုင်ရာ Modality Bridge tabs များသို့လည်း လင့်ခ်ချိတ်ပေးသည်။ သို့သော်
+ရှိပြီးသား Speech-to-Text playground ကို မဖယ်ရှားပါ။
 
-**Self-loop admission bypass:** describe call သည် OmniRoute ၏ ကိုယ်ပိုင်
-`/v1` self-loop (စံမဟုတ်သော provider model) မှတစ်ဆင့် route လုပ်သောအခါ
+**Self-loop ဝင်ခွင့်စစ်ဆေးမှု ကျော်လွှားခြင်း:** describe call သည် OmniRoute ၏
+ကိုယ်ပိုင် `/v1` self-loop (စံမဟုတ်သော provider model) မှတစ်ဆင့် route လုပ်သည့်အခါ
 sub-request သည် `x-omniroute-admission-bypass: internal` ကို ပို့ပြီး
 ဖြေရှင်းထားသော self-loop credential ဖြင့် authenticate လုပ်သည် — local mode
-တွင် local `sk_omniroute` sentinel ကို အသုံးပြုသည်၊ သို့မဟုတ်
-operator က သတ်မှတ်ထားသော `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key
-(#1350) ကို အသုံးပြုသည်။ ထို့ကြောင့် `REQUIRE_API_KEY=true` deployment များတွင်
-လည်း describe call ကို ဆက်လက်လုပ်ဆောင်နိုင်သည်။ bypass ကို ထိုတိကျသော
-credential များအတွက်သာ လက်ခံသဖြင့် external client များသည် admission ကို
-ကျော်ရန် header ကို အသုံးပြုနိုင်မည်မဟုတ်ပါ။
+တွင် local `sk_omniroute` sentinel သို့မဟုတ် operator က သတ်မှတ်ထားသော
+`OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key (#1350) ကို အသုံးပြုသည်။ ထို့ကြောင့်
+`REQUIRE_API_KEY=true` deployments များတွင်လည်း describe call ကို ဆက်လက်
+လုပ်ဆောင်နိုင်သည်။ ထို bypass ကို အတိအကျ သတ်မှတ်ထားသော credential များအတွက်သာ
+လက်ခံသဖြင့် external clients များသည် admission ကို ကျော်ရန် header ကို
+အသုံးပြု၍ မရပါ။
 
-Legacy default များသည် `src/shared/constants/visionBridgeDefaults.ts` တွင်
-ရှိပြီး mode/task-aware/cache default အသစ်များနှင့် settings resolver သည်
-`src/shared/constants/modalityBridgeDefaults.ts` တွင် ရှိသည်။ Guardrail တွင်
-`deps` constructor option ကို ဖော်ပြပေးထားသဖြင့် test များသည် fake
-`getSettings` နှင့် `callVisionModel` implementation များကို ထည့်သွင်းနိုင်သည်။
+Legacy defaults များသည် `src/shared/constants/visionBridgeDefaults.ts` တွင်
+ရှိပြီး mode/task-aware/cache defaults အသစ်များနှင့် settings resolver သည်
+`src/shared/constants/modalityBridgeDefaults.ts` တွင် ရှိသည်။ Guardrail သည်
+tests များက fake `getSettings` နှင့် `callVisionModel` implementations များကို
+ထည့်သွင်းနိုင်ရန် `deps` constructor option ကို ဖော်ပြပေးသည်။
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Audio ပါဝင်သော chat request များကို audio input လက်ခံနိုင်ကြောင်း
-မသေချာသော target သို့ မရောက်မီ ကြားဖြတ်လုပ်ဆောင်သည်။ Chat request ကို
-reroute မလုပ်ဘဲ audio part များကို ရှိပြီးသား OpenAI-compatible multipart
-endpoint မှတစ်ဆင့် စာသားအဖြစ် ပြောင်းလဲပြီး ရွေးချယ်ထားသော chat model သည်
-စာသား transcript များဖြင့် ဆက်လက်လုပ်ဆောင်သည်။
+Audio ပါဝင်သော chat requests များကို audio input လက်ခံနိုင်ကြောင်း မသေချာသော
+target တစ်ခုသို့ မရောက်မီ ကြားဖြတ်ယူသည်။ ၎င်းသည် chat request ကို reroute
+မလုပ်ဘဲ audio parts များကို ရှိပြီးသား OpenAI-compatible multipart endpoint
+မှတစ်ဆင့် စာသားအဖြစ် ပြောင်းလဲပြီး ရွေးချယ်ထားသော chat model သည် text
+transcripts များဖြင့် ဆက်လက်လုပ်ဆောင်သည်။
 
 Flow:
 
-1. `getResolvedModelCapabilities()` မှတစ်ဆင့် `supportsAudio` ကို ဖြေရှင်းပါ။ တိကျစွာ သတ်မှတ်ထားသော provider-registry metadata သည် ဦးစားပေးအမြင့်ဆုံးဖြစ်ပြီး၊ ထို့နောက် static model metadata နှင့် synced `modalities_input` တို့ကို အသုံးပြုပါ။ သတ်မှတ်ထားသော input list တွင် `audio` မပါလျှင် `false` ဖြစ်ပြီး၊ capability အထောက်အထား မကျန်ရှိလျှင် `null` ဖြစ်သည်။ `false` နှင့် `null` နှစ်မျိုးစလုံးသည် conservative bridge ကို အသက်သွင်းပြီး `true` သည် ၎င်းကို ကျော်သွားသည်။
-2. `modalityBridgeAudio*` ဆက်တင်များကို ဖြေရှင်းပြီး shared `detectMediaParts()` detector မှတစ်ဆင့် message တိုင်းထဲမှ splice ပြုလုပ်နိုင်သော top-level audio parts များကို ထုတ်ယူပါ။ ပံ့ပိုးထားသော wire ပုံစံများမှာ OpenAI `input_audio`၊ `audio_url` နှင့် `source.media_type: "audio/*"` တို့ဖြစ်သည်။ Routing အတွက် nested audio ကို ရှာဖွေသိရှိနိုင်သော်လည်း splice လမ်းကြောင်းမှ ဖယ်ရှားမည်မဟုတ်ပါ။ လုပ်ဆောင်မှုကို `modalityBridgeAudioMaxClips` ဖြင့် ကန့်သတ်ထားပြီး နောက်ပိုင်း parts များကို မပြောင်းလဲဘဲ ထားရှိပါ။
-3. သတ်မှတ်ထားသော `provider/model` ကို လိုက်နာပါ၊ သို့မဟုတ် `selectAudioBridgeModel()` က `AUDIO_TRANSCRIPTION_PROVIDERS` ကို တည်ငြိမ်သော catalog အစီအစဉ်အတိုင်း လှည့်လည်ပြီး အသုံးပြုနိုင်သော active provider credential ရှိသည့် ပထမဆုံး model ကို ရွေးချယ်စေပါ။
-4. `callAudioTranscription()` သည် base64/data-URI audio ကို multipart `file` အဖြစ် ပြောင်းလဲပေးသည်၊ သို့မဟုတ် remote `audio_url` ကို DNS pinning နှင့် 25 MB ကန့်သတ်ချက်ပါသော public-only outbound guard မှတစ်ဆင့် download ပြုလုပ်သည်။ ထို့နောက် file နှင့် ရွေးချယ်ထားသော model ကို local `/v1/audio/transcriptions` self-loop သို့ POST ပြုလုပ်ပြီး `resolveSelfLoopBearer()` ဖြင့် authentication ပြုလုပ်သည်။ ရှိပြီးသား transcription route သည် ပုံမှန် credential ရှာဖွေမှု၊ cooldown/rate-limit ကိုင်တွယ်မှုနှင့် provider dispatch တို့ကို လုပ်ဆောင်သည်။
-5. အောင်မြင်သော call များသည် ၎င်းတို့၏ parts များကို `[Audio N]: <transcript>` ဖြင့် အစားထိုးသည်။ Call များကို `Promise.allSettled` ဖြင့် လုပ်ဆောင်သောကြောင့် တစ်ခုချင်းစီ မအောင်မြင်ပါက မူရင်း audio part ကို ထိန်းသိမ်းထားသည် (#4012 contract)။ Call အားလုံး မအောင်မြင်ဘဲ target ၏ `supportsAudio === false` ဖြစ်ကြောင်း သက်သေပြနိုင်လျှင် parts များသည်
-   `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract) အဖြစ် ပြောင်းလဲသွားသည်။ မသေချာသော target (`null`) အတွက် call အားလုံး မအောင်မြင်သည့် ရလဒ်တွင် မူရင်းအတိုင်း မပြောင်းလဲဘဲ ထားရှိသည်။ သက်သေပြနိုင်သော text-only target တွင် အသုံးပြုနိုင်သည့် STT credential မရှိပါက network call မပြုလုပ်ဘဲ အလားတူ explicit stub ကို ရရှိသည်။
+1. `supportsAudio` ကို `getResolvedModelCapabilities()` မှတစ်ဆင့် ဖြေရှင်းပါ။ သတ်မှတ်ထားသော provider-registry metadata ကို ဦးစားပေးပြီး၊ ထို့နောက် static model metadata၊ ထို့နောက် synced `modalities_input` ကို အသုံးပြုပါ။ သတ်မှတ်ထားသော input list တွင် `audio` မပါဝင်ပါက `false` ဖြစ်ပြီး၊ capability အထောက်အထား မရှိတော့ပါက `null` ဖြစ်သည်။ `false` နှင့် `null` နှစ်မျိုးစလုံးသည် conservative bridge ကို အသုံးပြုစေပြီး `true` ဖြစ်ပါက ၎င်းကို ကျော်သွားသည်။
+2. `modalityBridgeAudio*` ဆက်တင်များကို ဖြေရှင်းပြီး shared `detectMediaParts()` detector မှတစ်ဆင့် message တိုင်းမှ splice ပြုလုပ်နိုင်သော top-level audio parts များကို ထုတ်ယူပါ။ ထောက်ပံ့ထားသော wire shape များမှာ OpenAI `input_audio`၊ `audio_url` နှင့် `source.media_type: "audio/*"` တို့ဖြစ်သည်။ Nested audio ကို routing အတွက် ရှာဖွေတွေ့ရှိသော်လည်း splice လမ်းကြောင်းမှ ဖယ်ရှားမည်မဟုတ်ပါ။ လုပ်ဆောင်မှုကို `modalityBridgeAudioMaxClips` ဖြင့် ကန့်သတ်ထားပြီး နောက်ပိုင်း parts များကို မပြောင်းလဲဘဲ ထားရှိသည်။
+3. သတ်မှတ်ထားသော `provider/model` ကို အသုံးပြုပါ၊ သို့မဟုတ် `selectAudioBridgeModel()` က `AUDIO_TRANSCRIPTION_PROVIDERS` ကို တည်ငြိမ်သော catalog အစီအစဉ်အတိုင်း လှည့်လည်ပြီး အသုံးပြုနိုင်သော active provider credential ရှိသည့် ပထမဆုံး model ကို ရွေးချယ်ပါ။
+4. `callAudioTranscription()` သည် base64/data-URI audio ကို multipart `file` အဖြစ် ပြောင်းလဲပေးသည်၊ သို့မဟုတ် remote `audio_url` ကို DNS pinning နှင့် 25 MB ကန့်သတ်ချက်ပါသော public-only outbound guard မှတစ်ဆင့် ဒေါင်းလုဒ်လုပ်သည်။ ထို့နောက် file နှင့် ရွေးချယ်ထားသော model ကို `resolveSelfLoopBearer()` ဖြင့် authentication ပြုလုပ်ထားသော local `/v1/audio/transcriptions` self-loop သို့ POST လုပ်သည်။ ရှိပြီးသား transcription route သည် ပုံမှန် credential lookup၊ cooldown/rate-limit ကိုင်တွယ်မှုနှင့် provider dispatch ကို လုပ်ဆောင်သည်။
+5. အောင်မြင်သော calls များသည် ၎င်းတို့၏ parts များကို `[Audio N]: <transcript>` ဖြင့် အစားထိုးသည်။ Calls များကို `Promise.allSettled` ဖြင့် လုပ်ဆောင်သောကြောင့် တစ်ခုချင်းစီ မအောင်မြင်ပါက မူရင်း audio part ကို ထိန်းသိမ်းထားသည် (#4012 contract)။ Calls အားလုံး မအောင်မြင်ဘဲ target ၏ `supportsAudio === false` ဖြစ်ကြောင်း အတည်ပြုနိုင်ပါက parts များကို\
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract)\
+   အဖြစ် ပြောင်းလဲသည်။ မသေချာသော target (`null`) အတွက် calls အားလုံး မအောင်မြင်သည့် ရလဒ်တွင် မူရင်းအတိုင်း ထားရှိသည်။ အတည်ပြုထားသော text-only target တွင် အသုံးပြုနိုင်သော STT credential မရှိပါက network call မပြုလုပ်ဘဲ အလားတူ explicit stub ကို ထည့်ပေးသည်။
 
-အောင်မြင်သော transcript များသည် process-wide Modality Bridge LRU/TTL cache ကို အသုံးပြုသည်။ Key တွင် audio reference၊ တည်ငြိမ်သော `audio-transcription` operation label နှင့် ရွေးချယ်ထားသော STT model တို့ ပါဝင်သည်။ မအောင်မြင်မှုများကို မည်သည့်အခါမျှ cache မလုပ်ပါ။ Audio ကြိုးပမ်းမှုများသည် shared `bridged`၊ `cacheHits`၊ `failures` နှင့် `lastUsedAt` counters များကို update ပြုလုပ်သည်။ ပြောင်းလဲထားသော response များတွင် `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` ပါဝင်ပြီး၊ မပြောင်းလဲသော request များတွင် Audio Bridge segment မပါဝင်ပါ။
+အောင်မြင်သော transcripts များသည် process တစ်ခုလုံးအတွက် အသုံးပြုသည့် Modality Bridge LRU/TTL cache ကို အသုံးပြုသည်။ Key တွင် audio reference၊ တည်ငြိမ်သော `audio-transcription` operation label နှင့် ရွေးချယ်ထားသော STT model တို့ ပါဝင်သည်။ မအောင်မြင်မှုများကို cache ထဲတွင် မသိမ်းဆည်းပါ။ Audio attempts များသည် shared `bridged`၊ `cacheHits`၊ `failures` နှင့် `lastUsedAt` counters များကို update လုပ်သည်။ ပြောင်းလဲထားသော responses များတွင် `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` ပါဝင်ပြီး၊ မပြောင်းလဲသော requests များတွင် Audio Bridge segment မပါဝင်ပါ။
 
-Runtime ဆက်တင်များကို DB-backed ဖြစ်စေပြီး Zod ဖြင့် validate ပြုလုပ်ထားသည်-
+Runtime settings များကို DB တွင် သိမ်းဆည်းပြီး Zod ဖြင့် validate လုပ်ထားသည်-
 
 | Key                           | Default | Range          |
 | ----------------------------- | ------- | -------------- |
@@ -291,7 +286,8 @@ Runtime ဆက်တင်များကို DB-backed ဖြစ်စေပ�
 | `modalityBridgeAudioTimeout`  | `60000` | 1000–300000    |
 | `modalityBridgeAudioMaxClips` | `3`     | 1–10           |
 
-Shared cache ကို `modalityBridgeCacheEnabled`၊ `modalityBridgeCacheTtlMinutes` နှင့် `modalityBridgeCacheMaxEntries` တို့ဖြင့် ဆက်လက်ထိန်းချုပ်ထားသည်။
+Shared cache ကို `modalityBridgeCacheEnabled`၊
+`modalityBridgeCacheTtlMinutes` နှင့် `modalityBridgeCacheMaxEntries` တို့က ဆက်လက်ထိန်းချုပ်သည်။
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -477,186 +473,130 @@ Vision သို့မဟုတ် Audio segment များကို မဖယ
 
 ### PII Masker (`piiMasker.ts`)
 
-Stage နှစ်ခုလုံးတွင် လုပ်ဆောင်သည်။
+လည်ပတ်နေသည်။**နှစ်ခုလုံး** အဆင့်များ။
 
-- **`preCall`** သည် payload ကို clone လုပ်ပြီး `system`၊ `messages`၊ `input` နှင့်
-  `prompt` (ရိုးရိုး string item များအပါအဝင်) ကို လှည့်လည်စစ်ဆေးကာ
-  `@/shared/utils/inputSanitizer` မှ `processPII()` ကို string `content`/`text`
-  field များပေါ်တွင် အသုံးပြုသည်။ `PII_REDACTION_ENABLED=true` ဖြစ်ပါက
-  တွေ့ရှိထားသော PII ကို outbound payload ထဲတွင် ဖုံးကွယ်သည်။ ၎င်းသည်
-  `INPUT_SANITIZER_MODE` နှင့် သီးခြားဖြစ်သည် (`INPUT_SANITIZER_MODE` သည်
-  prompt-injection policy ကိုသာ ထိန်းချုပ်သည်)။ Redaction ပိတ်ထားပါက content
-  ကို ပြန်လည်ရေးသားခြင်းမပြုဘဲ detection count များကိုသာ မှတ်တမ်းတင်သည်။
-- **`postCall`** သည် response ကို deep-clone လုပ်ပြီး `sanitizePIIResponse()`
-  နှင့် Responses-API-shape masker (`maskResponsesOutput` — `output_text` နှင့်
-  `output[].content[].text` ကို ဖုံးလွှမ်းသည်) ကို လုပ်ဆောင်သည်။ Redaction
-  တစ်ခုခု ဖြစ်ပေါ်ပါက ပြင်ဆင်ထားသော response သည် မူရင်းနေရာတွင် အစားထိုးသည်။
+- **`preCall`** ဝန်ဆောင်ခကို ပုံတူပွားခြင်း၊ `system`၊ `messages`၊ `input` နှင့် `prompt` (ရိုးရိုးကြိုးတန်းအရာများ အပါအဝင်) နှင့် `processPII()` ( `@/shared/utils/inputSanitizer` မှ) ကို `content`/`text` အကွက်များသို့ လျှောက်သွားပါသည်။ `PII_REDACTION_ENABLED=true` တွင် တွေ့ရှိသောအခါ PII outbound payload တွင် ပြန်လည်ပြင်ဆင်သည်။ ၎င်းသည် `INPUT_SANITIZER_MODE` မှ သီးခြားဖြစ်သည် (အချက်ပြထိုးသွင်းခြင်းမူဝါဒကို ထိန်းချုပ်သည့်သာ)။ ပြန်လည်ပြင်ဆင်ခြင်းကို ပိတ်ထားသောအခါ၊ ခေါ်ဆိုမှုမှတ်တမ်းသည် အကြောင်းအရာကို ပြန်လည်ရေးသားခြင်းမပြုဘဲ ထောက်လှမ်းမှုရေတွက်သည်။
+- **`postCall`** တုံ့ပြန်မှုကို နက်ရှိုင်းစွာ ပေါင်းစပ်ဖန်တီးပြီး `sanitizePIIResponse()` နှင့် တုံ့ပြန်မှု-API-ပုံသဏ္ဍာန်မျက်နှာဖုံးကို လုပ်ဆောင်သည် (`maskResponsesOutput` — `output_text` နှင့် `output[].content[].text` အကျုံးဝင်သည် )။ တုံ့ပြန်မှု တစ်စုံတစ်ရာ ဖြစ်ပေါ်ပါက၊ ပြုပြင်ထားသော တုံ့ပြန်မှုသည် မူရင်းကို အစားထိုးသည်။
 
-Guardrail သည် မည်သည့်အခါမျှ block မလုပ်ပါ။ ၎င်းသည်
-(`meta.detections`, `meta.redacted`) ဖြင့်သာ မှတ်ချက်ထည့်ခြင်း သို့မဟုတ်
-ပြန်လည်ရေးသားခြင်း ပြုလုပ်သည်။
+အကာအရံသည် ဘယ်သောအခါမှ မပိတ်ဆို့၊ ၎င်းသည် (`meta.detections`၊ `meta.redacted`) ကိုသာ မှတ်စုများ သို့မဟုတ် ပြန်ရေးသည်။
 
-#### အမျိုးအစားအလိုက် ရွေးချယ်မှု၊ custom pattern များနှင့် detection counter များ
+#### အမျိုးအစားအလိုက် ရွေးချယ်မှု၊ စိတ်ကြိုက်ပုံစံများနှင့် ထောက်လှမ်းမှုကောင်တာများ
 
-**Dashboard → Settings → Security → PII masking** သည် မည်သည့်အရာများကို
-ဖုံးကွယ်မည်ကို ရွေးချယ်သည်။ ၎င်းသည် masking ကို ဖွင့်/ပိတ်ခြင်း မပြုပါ။
-Masking ကို ဖွင့်/ပိတ်ခြင်းမှာ request အတွက် `PII_REDACTION_ENABLED` နှင့်
-response + SSE အတွက် `PII_RESPONSE_SANITIZATION` ဖြစ်ပြီး နှစ်ခုစလုံးသည်
-မူလအတိုင်း ပိတ်ထားသည်။
+**ဒက်ရှ်ဘုတ် → ဆက်တင်များ → လုံခြုံရေး → PII မျက်နှာဖုံးစွပ်ခြင်း။** _what_ masked ကို ရွေးသည်။ ၎င်းသည် မျက်နှာဖုံးစွပ်ခြင်းကို ဖွင့်မထားပါ- ၎င်းသည် `PII_REDACTION_ENABLED` (တောင်းဆိုချက်) နှင့် `PII_RESPONSE_SANITIZATION` (တုံ့ပြန်မှု + SSE) နှစ်ခုလုံးကို မူရင်းအတိုင်း ပိတ်ထားသည်။
 
-- **Per-type selection** — built-in id များကို
-  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) တွင် စာရင်းပြုထားသည်။
-  သတ်မှတ်မထားပါက အမျိုးအစားအားလုံးကို အသုံးပြုသည် (ဤ setting မတည်ရှိမီက
-  အပြုအမူ)။ Request engine ၏ `ssn_us` pattern သည် `ssn` နှင့် map ဖြစ်သည်။
-  Template များ (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)
-  သည် UI ရှိ checkbox များကိုသာ ဖြည့်ပေးသည်။
-- **GDPR နှင့် POPIA identifiers** — EU နှင့် တောင်အာဖရိက ကိုယ်ရေးအချက်အလက်
-  identifier များကို လွှမ်းခြုံသော built-in id ဆယ့်နှစ်ခု (အောက်ပါ table)။
-  ၎င်းတို့၏ regex၊ validator နှင့် jurisdiction tag များသည်
-  `src/shared/utils/piiPatterns.ts` ရှိ table တစ်ခုတည်းတွင် တည်ရှိပြီး
-  response sanitizer (`src/lib/piiSanitizer.ts`) နှင့် request masker
-  (`src/shared/utils/inputSanitizer.ts`) နှစ်ခုစလုံးက အသုံးပြုသည်။ Validator
-  က လက်ခံမှသာ match ကို redacted လုပ်သည်။ ဂဏန်းများကို သီးသန့် ဆက်တိုက်
-  ရေးထားခြင်းသည် မည်သည့်အခါမျှ မလုံလောက်ပါ။ ဤ id များ မတည်ရှိမီ narrowed
-  selection ကို သိမ်းထားခဲ့သော operator သည် id အသစ်များကို ရွေးချယ်သည့်အထိ
-  ရှိပြီးသားအပြုအမူအတိုင်း ဆက်လက်အသုံးပြုမည်။
-- **Custom patterns** — regex သို့မဟုတ် wildcard pattern အများဆုံး 20 ခု
-  (`*` = whitespace မဟုတ်သော အက္ခရာ 64 ခုအထိ၊ `?` = တစ်ခု)။ Match များသည်
-  `[CUSTOM_REDACTED]` ဖြစ်လာသည်။ Pattern တိုင်းသည်
-  `src/shared/utils/piiCustomPatterns.ts` ရှိ
-  `compilePiiCustomPattern()` ကို ဖြတ်သန်းရသည်။ အများဆုံး အက္ခရာ 500 ခုသာ
-  ခွင့်ပြုသည်၊ flags များသည် `g i m s u` သာ ဖြစ်ရမည်၊ compile လုပ်နိုင်ရမည်၊
-  `safe-regex` (catastrophic backtracking) စစ်ဆေးမှုကို ဖြတ်ရမည်၊ ထို့အပြင်
-  empty string သို့မဟုတ် redaction placeholder ကို match မလုပ်ရ။ မအောင်မြင်သော
-  pattern ကို save လုပ်ချိန်နှင့် test လုပ်ချိန်တွင် ငြင်းပယ်သည်။ သိမ်းဆည်းထားသော
-  row တစ်ခု မအောင်မြင်ပါက runtime တွင် compile မလုပ်ဘဲ ကျော်သွားသည်။ Custom
-  pattern များသည် masking ဖွင့်ထားချိန်တွင်သာ လုပ်ဆောင်သည်။
-- **Detection counters** — အမျိုးအစားအလိုက် count များ (match ဖြစ်သောတန်ဖိုးများကို
-  မည်သည့်အခါမျှ မသိမ်း) ကို memory ထဲတွင် ထိန်းသိမ်းထားပြီး restart ပြုလုပ်ပါက
-  reset ဖြစ်သည် (`src/lib/pii/piiDetectionStats.ts`)။ Masking ဖွင့်ထားချိန်တွင်သာ
-  တိုးပွားသည်။
+- **အမျိုးအစားအလိုက် ရွေးချယ်မှု** — ၏ built-in အိုင်ဒီများကို `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) တွင် ဖော်ပြထားပါသည်။ Unset ဆိုသည်မှာ အမျိုးအစားတိုင်း (ဤဆက်တင်မတိုင်မီရှိခဲ့သည့် အပြုအမူ) ကို ဆိုလိုသည်။ တောင်းဆိုချက်အင်ဂျင်၏ `ssn_us` ပုံစံသည် `ssn` သို့ မြေပုံများဖြစ်သည်။ နမူနာပုံစံများ (အနည်းဆုံး၊ စံနှုန်း၊ ငွေကြေး၊ ဘရာဇီး၊ USA၊ GDPR၊ POPIA၊ အပြည့်အစုံ) သည် UI တွင် အမှန်ခြစ်ကွက်များကိုသာ ဖြည့်ပါ။
+- **GDPR နှင့် POPIA ခွဲခြားသတ်မှတ်မှုများ** — EU နှင့် တောင်အာဖရိက ကိုယ်ရေးကိုယ်တာ အထောက်အထားများကို ဖုံးအုပ်ထားသော built-in ID ၁၂ ခု (အောက်ပါဇယား)။ ၎င်းတို့၏ regexes၊ validators နှင့် jurisdiction tags များသည် response sanitizer (`src/lib/piiSanitizer.ts`) နှင့် request masker (`src/shared/utils/inputSanitizer.ts`) နှစ်မျိုးလုံးစားသုံးသည့် `src/shared/utils/piiPatterns.ts` ဇယားတစ်ခုတွင်နေထိုင်ပါသည်။ ၎င်း၏တရားဝင်သူမှ လက်ခံသည့်အခါမှသာ ကိုက်ညီမှုရှိ၊ ကိန်းဂဏာန်းတွေ ပြေးတာက ဘယ်တော့မှ မလုံလောက်ဘူး။ အိုင်ဒီများ မတည်ရှိမီ ကျဉ်းမြောင်းသော ရွေးချယ်မှုတစ်ခုကို သိမ်းဆည်းထားသည့် အော်ပရေတာတစ်ခုသည် အိုင်ဒီအသစ်များကို အမှန်ခြစ်မခံရမီအထိ ၎င်းတွင်ရှိသည့် အပြုအမူကို သိမ်းဆည်းထားသည်။
+- **စိတ်ကြိုက်ပုံစံများ** — regex သို့မဟုတ် wildcard ပုံစံ 20 အထိ (`*` = အထိ အဖြူရောင်မဟုတ်သော စာလုံး 64 လုံး၊ `?` = တစ်ခု)။ ပွဲစဉ်များသည် `[CUSTOM_REDACTED]` ဖြစ်လာသည်။ ပုံစံတိုင်းသည် `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) မှတဆင့် ဖြတ်သန်းသွားသည် : စာလုံးရေ 500 အများဆုံး၊ `g i m s u` တွင် ကန့်သတ်ထားသော အလံများ၊ စုစည်းရမည်ဖြစ်ပြီး၊ `safe-regex` (ဘေးဥပဒ်ဖြစ်စေသော နောက်ကြောင်းပြန်လှည့်ခြင်း) ကို ကျော်သွားရမည်၊ နှင့် ဗလာစာကြောင်း သို့မဟုတ် အစားထိုးခြင်းနေရာယူထားသည့်နေရာနှင့် မကိုက်ညီရပါ။ သိမ်းဆည်းပြီး စမ်းသပ်သည့်အခါတွင် ပျက်ကွက်သည့်ပုံစံကို ငြင်းဆိုလိုက်ပြီး မအောင်မြင်သည့် အတန်းကို စုစည်းထားမည့်အစား runtime တွင် ကျော်သွားပါသည်။ မျက်နှာဖုံးစွပ်ခြင်းကို ဖွင့်ထားချိန်တွင် စိတ်ကြိုက်ပုံစံများသာ လုပ်ဆောင်သည်။
+- **ထောက်လှမ်းကောင်တာများ** — အမျိုးအစားအလိုက် ရေတွက်ခြင်း (ဘယ်တော့မှ မတူညီသောတန်ဖိုးများ)၊ မှတ်ဉာဏ်တွင် သိမ်းဆည်းထားပြီး ပြန်လည်စတင်ချိန်တွင် ပြန်လည်သတ်မှတ်ပါ (`src/lib/pii/piiDetectionStats.ts`)။ ၎င်းတို့သည် မျက်နှာဖုံးများကို ဖွင့်ထားစဉ်တွင်သာ တိုးများလာသည်။
 
-Settings များသည် `key_value` table (namespace `pii_settings`,
-`src/lib/db/piiSettings.ts`) တွင် ရှိပြီး 1 s cache မှတစ်ဆင့် ဖတ်ယူသည်။ API:
+ဆက်တင်များကို `key_value` ဇယား (namespace `pii_settings`၊ `src/lib/db/piiSettings.ts`) တွင်နေထိုင်ပြီး 1 s ကက်ရှ်တစ်ခုမှတဆင့်ဖတ်သည်။ API
 
-| Method | Path                     | Purpose                                                                                                        |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Flag အခြေအနေ၊ `enabledTypes`၊ `customPatterns`၊ ရှာဖွေတွေ့ရှိမှု ကောင်တာများ                                   |
-| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = အားလုံး) နှင့်/သို့မဟုတ် `customPatterns` ကို အစားထိုးခြင်း                           |
-| `POST` | `/api/settings/pii/test` | အများဆုံး 8 KB ရှိသော နမူနာတစ်ခုအပေါ် pattern တစ်ခုကို dry-run ပြုလုပ်ခြင်း၊ မည်သည့်အရာမျှ သိမ်းဆည်းမည်မဟုတ်ပါ |
+| နည်းလမ်း | လမ်းကြောင်း              | ရည်ရွယ်ချက်                                                                                             |
+| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/settings/pii`      | Flag အခြေအနေ၊ `enabledTypes`၊ `customPatterns`၊ detection counter များ                                  |
+| `PUT`    | `/api/settings/pii`      | `enabledTypes` (`null` = အားလုံး) နှင့်/သို့မဟုတ် `customPatterns` ကို အစားထိုးခြင်း                    |
+| `POST`   | `/api/settings/pii/test` | နမူနာစာသား အများဆုံး ၈ KB အပေါ် pattern တစ်ခုကို dry-run စမ်းသပ်ခြင်း၊ မည်သည့်အရာမျှ သိမ်းဆည်းမထားခြင်း |
 
-သုံးခုစလုံးသည် management auth လိုအပ်ပြီး body ကို Zod ဖြင့် အတည်ပြုသည်
-(`src/shared/validation/schemas/piiSettings.ts`)။ Login ပိတ်ထားသောအခါ
-(`requireLogin=false`) `GET` နှင့် test endpoint ကို လွတ်လပ်စွာ အသုံးပြုနိုင်သော်လည်း
-`PUT` အတွက် dashboard session၊ `manage`-scope API key၊ write scope သို့မဟုတ်
-၎င်းထက်မြင့်သော scope ရှိ `oma_` access token၊ သို့မဟုတ် loopback မှ ပေးပို့သော
-CLI token သို့မဟုတ် internal-service token လိုအပ်သည်။
+သုံးခုစလုံးသည် စီမံခန့်ခွဲမှုစစ်မှန်ကြောင်း လိုအပ်ပြီး Zod (`src/shared/validation/schemas/piiSettings.ts`) ဖြင့် ခန္ဓာကိုယ်ကို မှန်ကန်ကြောင်း အတည်ပြုသည်။ အကောင့်ဝင်ခြင်းကိုပိတ်ထားသဖြင့် (`requireLogin=false`) `GET` နှင့် စမ်းသပ်မှုအဆုံးမှတ်ကို ဖွင့်ထားသော်လည်း `PUT` ဒက်ရှ်ဘုတ်စက်ရှင်တစ်ခု၊ `manage` -scope API သော့၊ စာရေးစကေးနှင့်အထက်ရှိသော `oma_` ဝင်ရောက်နိုင်သော တိုကင်တစ်ခု သို့မဟုတ် CLI တိုကင် သို့မဟုတ် စက်တွင်း-ဝန်ဆောင်မှု တိုကင်ကို လှည့်ပတ်မှ ပေးပို့လိုက်ပါသည်။
 
-#### GDPR (EU) နှင့် POPIA (တောင်အာဖရိက) identifiers
+#### GDPR (EU) နှင့် POPIA (တောင်အာဖရိက) ခွဲခြားသတ်မှတ်မှုများ
 
-| Id                  | Identifier               | Validation                                                                                                |
-| ------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                     | သိရှိထားသော နိုင်ငံ၊ ထိုနိုင်ငံအတွက် တိကျသော အရှည်၊ ISO 13616 MOD-97-10                                   |
-| `eu_vat`            | EU VAT number            | သိရှိထားသော အဖွဲ့ဝင်နိုင်ငံ prefix နှင့် ထိုနိုင်ငံ၏ number format (VIES lookup မပါဝင်)                   |
-| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23)၊ NIE သည် `X/Y/Z` + ဂဏန်း 7 လုံး                                             |
-| `it_codice_fiscale` | Italian Codice Fiscale   | odd/even position tables မှ control letter                                                                |
-| `pl_pesel`          | Polish PESEL             | Weighted checksum နှင့် အမှန်တကယ်ရှိသော encoded birth date                                                |
-| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                                               |
-| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 နှင့် digit-structure rules (ရှေ့ဆုံး 0 မဖြစ်ရ)                                        |
-| `se_personnummer`   | Swedish personnummer     | နောက်ဆုံးဂဏန်း 10 လုံးအပေါ် Luhn နှင့် ဖြစ်နိုင်ဖွယ်ရှိသော birth date (ဂဏန်း 10 သို့မဟုတ် 12 လုံး)        |
-| `za_id`             | South African ID number  | ဂဏန်း 13 လုံးစလုံးအပေါ် Luhn၊ မှန်ကန်သော မွေးလနှင့် မွေးရက်၊ citizenship digit 0 သို့မဟုတ် 1              |
-| `za_phone`          | South African phone      | `+27` / `27` prefix သို့မဟုတ် space သို့မဟုတ် hyphen ဖြင့် ရေးထားသော national `0..` ပုံစံ                 |
-| `za_vat`            | South African VAT number | `4` ဖြင့်စသော ဂဏန်း 10 လုံး **နှင့်** ရှေ့ရှိ character 48 လုံးအတွင်း "VAT" / "BTW" ပါဝင်ရမည်             |
-| `za_tax_ref`        | South African tax ref.   | `0`-`3` ဖြင့်စသော ဂဏန်း 10 လုံး၊ Luhn၊ **နှင့်** ရှေ့ရှိ character 48 လုံးအတွင်း "tax" / "SARS" ပါဝင်ရမည် |
+| Id                  | Identifier               | Validation                                                                                                 |
+| ------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                     | သိရှိထားသော နိုင်ငံ၊ ထိုနိုင်ငံအတွက် အတိအကျကိုက်ညီသော အရှည်၊ ISO 13616 MOD-97-10                           |
+| `eu_vat`            | EU VAT number            | သိရှိထားသော member-state prefix နှင့် ထိုပြည်နယ်၏ number format (VIES lookup မပါဝင်)                       |
+| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (တန်ဖိုး mod 23)၊ NIE သည် `X/Y/Z` + ဂဏန်း ၇ လုံး                                            |
+| `it_codice_fiscale` | Italian Codice Fiscale   | odd/even position table များမှ control letter                                                              |
+| `pl_pesel`          | ပိုလန် PESEL             | အလေးပေး checksum နှင့် encoded လုပ်ထားသော မွေးလ/ရက်၏ ယုတ္တိရှိသောအပိုင်းအခြားများ                          |
+| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                                                |
+| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 နှင့် digit-structure rule များ (ရှေ့ဆုံး 0 မဖြစ်ရ)                                     |
+| `se_personnummer`   | Swedish personnummer     | နောက်ဆုံး ဂဏန်း ၁၀ လုံးအပေါ် Luhn နှင့် ဖြစ်နိုင်ဖွယ်ရှိသော မွေးသက္ကရာဇ် (ဂဏန်း ၁၀ လုံး သို့မဟုတ် ၁၂ လုံး) |
+| `za_id`             | South African ID number  | ဂဏန်း ၁၃ လုံးအားလုံးအပေါ် Luhn၊ မှန်ကန်သော မွေးလနှင့် မွေးရက်၊ citizenship digit 0 သို့မဟုတ် 1             |
+| `za_phone`          | South African phone      | `+27` / `27` prefix သို့မဟုတ် space သို့မဟုတ် hyphen ဖြင့် ရေးထားသော national `0..` ပုံစံ                  |
+| `za_vat`            | South African VAT number | `4` ဖြင့်စသော ဂဏန်း ၁၀ လုံး **နှင့်** ရှေ့ရှိ အက္ခရာ ၄၈ လုံးအတွင်း "VAT" / "BTW" ပါဝင်ခြင်း                |
+| `za_tax_ref`        | South African tax ref.   | `0`-`3` ဖြင့်စသော ဂဏန်း ၁၀ လုံး၊ Luhn၊ **နှင့်** ရှေ့ရှိ အက္ခရာ ၄၈ လုံးအတွင်း "tax" / "SARS" ပါဝင်ခြင်း    |
 
-ဂဏန်းများသာပါဝင်သော format များသည် order number များ၊ build number များနှင့်
-timestamp များနှင့် ထပ်တူကျနိုင်သောကြောင့် အားနည်းဆုံးဖြစ်သော (`za_vat`,
-`za_tax_ref`) များတွင် keyword cue လိုအပ်ပြီး၊ ဂဏန်း 10 လုံးပါသော သီးခြား `0..`
-နံပါတ်ကို တောင်အာဖရိက ဖုန်းနံပါတ်အဖြစ် မသတ်မှတ်ပါ။ Space ခြားထားသော IBAN များ
-(`GB29 NWBK ...`) ကို match မပြုလုပ်ပါ။ Streaming path တွင် cue ကို လက်ရှိ
-chunk အတွင်း၌သာ ရှာဖွေသည်။ ids များသည် generic phone patterns များထက်
-ဦးစားပေးအဆင့်မြင့်သောကြောင့် အတည်ပြုပြီးသော identifier သည် ၎င်း၏ကိုယ်ပိုင်
-placeholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...) ကို ဆက်လက်အသုံးပြုသည်။
-`gdpr` နှင့် `popia` templates များသည် EU နှင့် တောင်အာဖရိက ids များကို
-သက်ဆိုင်ရာရွေးချယ်ပေးသည်။ Masking ကိုယ်တိုင်မှာ opt-in အဖြစ် ဆက်လက်ရှိနေသည်
-(Hard Rule #20)၊ ဤနေရာရှိအရာများက feature-flag default ကို မပြောင်းလဲပါ။
+ဂဏန်းသီးသန့်ဖော်မတ်များသည် အမှာစာနံပါတ်များ၊ တည်ဆောက်သည့်နံပါတ်များနှင့် အချိန်တံဆိပ်တုံးများနှင့် တိုက်မိသောကြောင့်၊ အညံ့ဆုံးများ (`za_vat`၊ `za_tax_ref`) သည် အဓိကစကားလုံး cue လိုအပ်ပြီး ဂဏန်းဆယ်လုံးပါ `0..` နံပါတ်ကို တောင်အာဖရိကဖုန်းနံပါတ်အဖြစ် သဘောထားမည်မဟုတ်ပါ။ ခွဲထားသော IBANs (`GB29 NWBK ...`) သည် မကိုက်ညီပါ။ တိုက်ရိုက်ထုတ်လွှင့်သည့်လမ်းကြောင်းတွင် လက်ရှိအပိုင်းအတွင်း၌သာ ကွင်းဆက်ကို ကြည့်ရှုသည်။ ids များသည် ယေဘူယျဖုန်းပုံစံများထက် ရှေ့တွင်ရှိနေသောကြောင့် တရားဝင်သတ်မှတ်ထားသော identifier သည် ၎င်း၏ကိုယ်ပိုင်နေရာယူထားသည် (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ... ) ကို သိမ်းဆည်းထားသည်။ `gdpr` နှင့် `popia` နမူနာများသည် EU နှင့် တောင်အာဖရိက အိုင်ဒီများကို အသီးသီး ရွေးချယ်သည်။ မျက်နှာဖုံးစွပ်ခြင်းတွင် ကိုယ်တိုင်ပါဝင်ခွင့်ရှိမည် (Hard Rule #20) : ဤနေရာတွင် အင်္ဂါရပ်အလံပုံသေကို မည်သည့်အရာမှ မပြောင်းလဲပါ။
 
 ### Prompt Injection (`promptInjection.ts`)
 
-အသုံးပြုသူပေးသော content အတွင်းရှိ adversarial structure များကို ရှာဖွေပြီး
-သတ်မှတ်ထားသော policy ကို အကောင်အထည်ဖော်သည်။ အပြုအမူကို environment variables
-နှင့် constructor options များက ထိန်းချုပ်သည်။
+အသုံးပြုသူပေးပို့သော အကြောင်းအရာအတွင်းရှိ တိုက်ခိုက်မှုဆန်သော ဖွဲ့စည်းပုံများကို
+ရှာဖွေပြီး သတ်မှတ်ထားသော policy ကို အကောင်အထည်ဖော်သည်။ လုပ်ဆောင်ပုံကို
+environment variable များနှင့် constructor options များက ထိန်းချုပ်သည်-
 
-| Setting         | Env var                                                                                               | Default | Effect                                                                                                                                                                                                |
-| --------------- | ----------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Enabled         | `INPUT_SANITIZER_ENABLED`                                                                             | `true`  | `false` ဖြစ်သောအခါ guardrail သည် ချက်ချင်းရပ်တန့်သည်။                                                                                                                                                 |
-| Mode            | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`  | Injection policy: `block`၊ `warn` သို့မဟုတ် `log`။ (`redact` ကို back-compat အတွက် လက်ခံသော်လည်း injection text ကို **မဖယ်ရှားပါ**၊ request PII rewrite ကို `PII_REDACTION_ENABLED` က ထိန်းချုပ်သည်။) |
-| Block threshold | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | Block ပြုလုပ်ရန် လိုအပ်သော အနည်းဆုံး severity။ Default အခြေအနေတွင် Medium သည် observe-only ဖြစ်သည်။                                                                                                   |
+| သတ်မှတ်ချက်     | Env var                                                                                               | မူလတန်ဖိုး | အကျိုးသက်ရောက်မှု                                                                                                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ဖွင့်ထားခြင်း   | `INPUT_SANITIZER_ENABLED`                                                                             | `true`     | `false` ဖြစ်ပါက guardrail သည် ချက်ချင်းရပ်တန့်သည်။                                                                                                                                                     |
+| Mode            | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`     | Injection policy: `block`, `warn`, သို့မဟုတ် `log`။ (`redact` ကို back-compat အတွက် လက်ခံသော်လည်း injection စာသားကို **မဖယ်ရှားပါ**။ request PII rewrite ကို `PII_REDACTION_ENABLED` က ထိန်းချုပ်သည်။) |
+| Block threshold | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | block လုပ်ရန် လိုအပ်သော အနည်းဆုံး severity။ မူလသတ်မှတ်ချက်တွင် Medium ကို စောင့်ကြည့်ရုံသာ လုပ်သည်။                                                                                                    |
 
-**Mode precedence** (`getMode`) - caller `options.mode` →
+**Mode precedence** (`getMode`) မှာ caller `options.mode` →
 `INJECTION_GUARD_MODE` **DB feature-flag override** (Dashboard → Settings →
 Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
 `warn` ဖြစ်သည်။ ထို့ကြောင့် dashboard override သည် env vars များထက် ဦးစားပေးပြီး
-Feature Flags UI က လည်ပတ်နေသော guard ကို live ထိန်းချုပ်နိုင်သည် (restart
-မလိုအပ်ပါ)။ DB read သည် fail-safe ဖြစ်သည်။ အမှားဖြစ်ပါက guard သည် env-based
-အပြုအမူသို့ ပြန်လည်ကျဆင်းပြီး၊ override မသတ်မှတ်ထားသောအခါ အပြုအမူသည် env-only
-resolution နှင့် တူညီသည်။
+Feature Flags UI က လုပ်ဆောင်နေသော guard ကို restart မလုပ်ဘဲ တိုက်ရိုက်ထိန်းချုပ်နိုင်သည်။
+DB ဖတ်ရှုမှုသည် fail-safe ဖြစ်သည်- အမှားဖြစ်ပါက guard သည် env-based လုပ်ဆောင်ပုံသို့
+ပြန်လည်ကျဆင်းမည်ဖြစ်ပြီး override သတ်မှတ်မထားပါက env-only resolution နှင့်
+လုပ်ဆောင်ပုံတူညီသည်။
 
-ရှာဖွေမှု ရင်းမြစ်များ -
+ရှာဖွေသည့် အရင်းအမြစ်များ-
 
-1. `sanitizeRequest()` from `@/shared/utils/inputSanitizer` (pipeline အတွင်း
-   အခြားနေရာများတွင် အသုံးပြုသည့် shared detector set)။
+1. `@/shared/utils/inputSanitizer` မှ `sanitizeRequest()` (pipeline အတွင်း အခြားနေရာများတွင် အသုံးပြုသည့် shared detector set)။
 2. Built-in `DEFAULT_GUARD_PATTERNS` (`system_override_inline` နှင့်
-   `markdown_system_block` တို့ဖြစ်ပြီး နှစ်ခုစလုံး `high` severity ဖြစ်သည်)။
-3. Constructor options မှတစ်ဆင့် ပေးပို့နိုင်သည့် optional `customPatterns` (strings၊ regex
-   သို့မဟုတ် `{ name, pattern, severity }` records)။
+   `markdown_system_block` တို့ဖြစ်ပြီး နှစ်ခုစလုံးသည် `high` severity ဖြစ်သည်)။
+3. Constructor options မှတစ်ဆင့် ပေးပို့နိုင်သော optional `customPatterns`
+   (strings၊ regex၊ သို့မဟုတ် `{ name, pattern, severity }` records)။
 
-`mode === "block"` ဖြစ်ပြီး detection အနည်းဆုံးတစ်ခုသည် severity
-threshold ကို ပြည့်မီသောအခါ `preCall` သည် `{ block: true, message: "Request rejected:
-suspicious content detected" }` ကို ပြန်ပေးသည်။ `warn`/`log` modes များတွင် guardrail သည်
-log မှတ်တမ်းတင်သော်လည်း call ကို ခွင့်ပြုသည်။ Registry ကိုဖြတ်သန်းခြင်းမရှိဘဲ prompts များကို
-စစ်ဆေးလိုသော callers များအတွက် shared helper `evaluatePromptInjection()` ကိုလည်း export
-ပြုလုပ်ထားသည်။
+`mode === "block"` ဖြစ်ပြီး severity threshold ကို ဖြည့်မီသော detection အနည်းဆုံး
+တစ်ခုရှိပါက `preCall` သည် `{ block: true, message: "Request rejected:
+suspicious content detected" }` ကို ပြန်ပေးသည်။ `warn`/`log` modes များတွင်
+guardrail သည် log မှတ်တမ်းတင်သော်လည်း call ကို ခွင့်ပြုသည်။ Shared helper
+`evaluatePromptInjection()` ကို registry မှတစ်ဆင့် မဖြတ်သန်းဘဲ prompt များကို
+အကဲဖြတ်လိုသော caller များအတွက်လည်း export လုပ်ထားသည်။
 
-**Scan bound (v3.8.20):** detector သည် ချိတ်ဆက်ထားသော prompt text ၏ **ပထမ 16 KB** ကိုသာ
-စစ်ဆေးသည် — `src/shared/utils/inputSanitizer.ts` အတွင်းရှိ
-`MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) ဖြစ်သည်။ `detectInjection()` နှင့်
-`evaluatePromptInjection()` နှစ်ခုစလုံးသည် pattern loop မလုပ်ဆောင်မီ
-`slice(0, MAX_INJECTION_SCAN_BYTES)` ကို အသုံးပြုသည်။ Injection directives များသည် input ၏
-အပေါ်ပိုင်းအနီးတွင် ရှိသောကြောင့်၊ ဤကန့်သတ်ချက်သည် detection ကို မလျော့နည်းစေဘဲ
-KB ရာနှင့်ချီသော payload များပေါ်ရှိ regex CPU/GC အသုံးပြုမှုကို ကန့်သတ်ပေးသည်
-(cf. #3932, #4041)။
+**Scan bound (v3.8.20):** detector သည် ပေါင်းစည်းထားသော prompt စာသား၏
+**ပထမ 16 KB** ကိုသာ စစ်ဆေးသည် — `MAX_INJECTION_SCAN_BYTES = 16 * 1024`
+(16 384 bytes) ကို `src/shared/utils/inputSanitizer.ts` တွင် သတ်မှတ်ထားသည်။
+`detectInjection()` နှင့် `evaluatePromptInjection()` နှစ်ခုစလုံးသည် pattern loop
+မလုပ်ဆောင်မီ `slice(0, MAX_INJECTION_SCAN_BYTES)` ကို အသုံးပြုသည်။ Injection
+ညွှန်ကြားချက်များသည် input ၏ အပေါ်ပိုင်းအနီးတွင် ရှိသောကြောင့် multi-hundred-KB
+payload များတွင် regex CPU/GC အသုံးပြုမှုကို ကန့်သတ်ပေးပြီး detection ကို
+အားနည်းစေခြင်းမရှိပါ (#3932, #4041 ကိုကြည့်ပါ)။
 
 ### Credential Masker (`credentialMasker.ts`)
 
-Default chain ၏ နောက်ဆုံးအဆင့် (priority `95`) အဖြစ် **အဆင့်နှစ်ခုစလုံး** တွင် လုပ်ဆောင်သည်။
-Outbound payload (message content၊ tool-call arguments၊ tool results) **နှင့်** provider
-response ထဲမှ လူသိများသော API-key / secret-token patterns များကို ဖျောက်ပေးသဖြင့် prompt
-ထဲသို့ credential တစ်ခု ကူးထည့်ထားခြင်း (သို့မဟုတ် tool result တစ်ခုက ပြန်လည်ထည့်သွင်းပေးခြင်း)
-သည် upstream provider ထံသို့ဖြစ်စေ client ထံသို့ဖြစ်စေ မပေါက်ကြားစေပါ။
+အဆင့်နှစ်ခုစလုံးတွင် လုပ်ဆောင်ပြီး default chain ၏ နောက်ဆုံးနေရာ (priority `95`) တွင်
+ရှိသည်။ အပြင်သို့ပို့မည့် payload (message content၊ tool-call arguments၊ tool
+results) **နှင့်** provider response ထဲရှိ လူသိများသော API-key / secret-token pattern
+များကို redact လုပ်ပေးသောကြောင့် prompt ထဲသို့ ထည့်သွင်းထားသော credential တစ်ခု
+(သို့မဟုတ် tool result က ပြန်လည်ထည့်သွင်းပေးသော credential တစ်ခု) သည် upstream
+provider ထံသို့ဖြစ်စေ client ထံသို့ဖြစ်စေ ပေါက်ကြားမည်မဟုတ်ပါ။
 
-- **Opt-in only** ဖြစ်ပြီး PII redaction နှင့် တူညီသော convention (Hard Rule #20-adjacent) ကို
-  အသုံးပြုသည် — `settings.credentialRedactionEnabled === true` **သို့မဟုတ်**
-  `CREDENTIAL_REDACTION_ENABLED=true` ဖြစ်မှသာ ဖွင့်ထားသည်။ ပိတ်ထားပါက guardrail သည်
-  no-op ဖြစ်ပြီး — ဘယ်သောအခါမျှ block မလုပ်သကဲ့သို့ rewrite လည်း မလုပ်ပါ။
-- `redactCredentials()` သည် payload/response tree တစ်ခုလုံးကို (`walkValue()`၊
-  prototype-pollution-safe၊ `WeakSet` မှတစ်ဆင့် cycle-safe) လှည့်လည်စစ်ဆေးပြီး matches များကို
-  `[REDACTED:<type>]` placeholder ဖြင့် အစားထိုးသည်။ အမှန်တကယ် ပြောင်းလဲသွားသော branches
-  များကိုသာ clone ပြုလုပ်သည်။
-- `CREDENTIAL_PATTERNS` တွင် LLM provider keys (OpenAI၊ OpenAI-proj၊ Anthropic၊ Google၊
-  Hugging Face၊ Replicate)၊ VCS/SaaS tokens (GitHub၊ Slack၊ Linear၊ Notion၊ npm၊ Postman၊
-  Discord)၊ payment keys (Stripe၊ Square)၊ cloud keys (AWS access key၊ Twilio၊ SendGrid၊
-  Mailgun)၊ private keys / JWTs၊ credential ပါဝင်သော connection strings
-  (`mongodb://user:pass@...` စသည်) နှင့် generic
-  `Authorization`/`x-api-key`/`api-key`/`apikey` header-value pattern တို့ ပါဝင်သည်။
-  Header ပုံစံ keys (`authorization`၊ `x-api-key`၊ `api-key`၊ `apikey`) များကို generic text
-  regex ဖြင့်မဟုတ်ဘဲ structure အရ (value ကိုသာ၊ `Bearer `/`Basic ` ကဲ့သို့ scheme prefix ကို
-  ထိန်းသိမ်း၍) redact ပြုလုပ်သည်။
-- Guardrail သည် ဘယ်သောအခါမျှ block မလုပ်ပါ။ ၎င်းသည် rewrite (`modifiedPayload` /
-  `modifiedResponse`) နှင့် annotation (`meta.credentialsRedacted`၊ `meta.count`) ကိုသာ
-  ပြုလုပ်သည်။
+- **Opt-in သာဖြစ်သည်**၊ PII redaction နှင့် တူညီသော convention ဖြစ်သည်
+  (Hard Rule #20-adjacent)- `settings.credentialRedactionEnabled === true`
+  **သို့မဟုတ်** `CREDENTIAL_REDACTION_ENABLED=true` ဖြစ်မှသာ ဖွင့်သည်။ ၎င်းကို
+  ပိတ်ထားပါက guardrail သည် no-op ဖြစ်ပြီး မည်သည့်အခါမျှ block မလုပ်သကဲ့သို့
+  rewrite လည်း မလုပ်ပါ။
+- `redactCredentials()` သည် payload/response tree တစ်ခုလုံးကို
+  (`walkValue()`၊ prototype-pollution-safe၊ `WeakSet` မှတစ်ဆင့် cycle-safe)
+  လှည့်လည်စစ်ဆေးပြီး ကိုက်ညီမှုများကို `[REDACTED:<type>]` placeholder ဖြင့်
+  အစားထိုးသည်။ အမှန်တကယ်ပြောင်းလဲသွားသော branch များကိုသာ clone လုပ်သည်။
+- `CREDENTIAL_PATTERNS` တွင် LLM provider key များ (OpenAI၊ OpenAI-proj၊
+  Anthropic၊ Google၊ Hugging Face၊ Replicate)၊ VCS/SaaS token များ (GitHub၊
+  Slack၊ Linear၊ Notion၊ npm၊ Postman၊ Discord)၊ payment key များ (Stripe၊
+  Square)၊ cloud key များ (AWS access key၊ Twilio၊ SendGrid၊ Mailgun)၊ private
+  key / JWT များ၊ credential ပါဝင်သော connection string များ
+  (`mongodb://user:pass@...` စသည်) နှင့် ယေဘုယျ
+  `Authorization`/`x-api-key`/`api-key`/`apikey` header-value pattern တို့
+  ပါဝင်သည်။ Header ပုံစံ key များ (`authorization`, `x-api-key`, `api-key`,
+  `apikey`) ကို ယေဘုယျ text regex ဖြင့်မဟုတ်ဘဲ ဖွဲ့စည်းပုံအရ (value ကိုသာ)
+  redact လုပ်သည်။ ထိုသို့လုပ်ရာတွင် `Bearer `/`Basic ` ကဲ့သို့ scheme prefix ကို
+  ထိန်းသိမ်းထားသည်။
+- Guardrail သည် မည်သည့်အခါမျှ block မလုပ်ပါ။ ၎င်းသည် rewrite
+  (`modifiedPayload` / `modifiedResponse`) လုပ်ပြီး annotation
+  (`meta.credentialsRedacted`, `meta.count`) များကိုသာ ထည့်သွင်းသည်။
 
-Regression guard: `tests/unit/credential-masker-guardrail.test.ts`။
+ပြန်လည်ပျက်ယွင်းမှု ကာကွယ်ရေး: `tests/unit/credential-masker-guardrail.test.ts`
 
 ## အခြေခံစာချုပ် (`base.ts`)
 

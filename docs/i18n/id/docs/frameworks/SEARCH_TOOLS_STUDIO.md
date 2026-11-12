@@ -54,7 +54,7 @@ Tab baru untuk mengekstrak konten dari URL melalui `POST /v1/web/fetch` (dibuat 
 - Input: URL + tombol aktif/nonaktif halaman penuh + pemilih format (markdown / teks / HTML).
 - Kirim → ambil → render `ScrapeResult.tsx`.
 - `ScrapeResult` merender pratinjau markdown + tombol aktif/nonaktif konten mentah.
-- Batas: jika isi respons > **256 KB**, UI menampilkan `(dipotong, lihat versi mentah)` dan membuka konten mentah dalam modal Monaco (D21).
+- Batas: jika isi respons > **256 KB**, UI menampilkan `View full raw content` dan membuka konten mentah dalam modal (D21).
 - Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latensi, biaya, ukuran respons, jumlah tautan.
 - Menggunakan hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Menjalankan kueri/URL yang sama pada hingga **4 penyedia secara paralel** (D22):
 `ProviderCatalog.tsx` menampilkan daftar lengkap penyedia dari `GET /api/search/providers`
 (diperluas dalam F4 untuk menyertakan penyedia fetch):
 
-| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status **ditentukan pada saat permintaan** dengan memeriksa apakah kredensial tersedia dan apakah
 semua kunci saat ini sedang dalam masa cooldown.
+
+`codex-search` (Codex Web Search): Menggunakan akun Codex (ChatGPT) Anda yang terhubung, tanpa kunci terpisah. Setiap pencarian memakai kuota langganan dan memerlukan sekitar 10–40 s. Berjalan saat permintaan menyebutkannya; pemilihan otomatis memerlukan flag `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, yang nonaktif secara default.
 
 ---
 

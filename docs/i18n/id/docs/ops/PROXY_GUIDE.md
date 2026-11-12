@@ -393,7 +393,7 @@ Menggunakan `wreq-js` untuk menghasilkan sidik jari TLS yang menyerupai browser,
 
 ### Pencocokan Sidik Jari CLI
 
-**Tombol Sidik Jari CLI** (`Pengaturan → Keamanan`) mengurutkan ulang header HTTP dan bidang isi JSON agar cocok dengan karakteristik persis biner CLI native (Claude Code, Codex, dll.). Fitur ini bekerja **di atas** proksi:
+**Tombol Sidik Jari CLI** (`Settings → Security`) mengurutkan ulang header HTTP dan bidang isi JSON agar cocok dengan karakteristik persis biner CLI native (Claude Code, Codex, dll.). Fitur ini bekerja **di atas** proksi:
 
 ```
 IP Anda (diblokir) → IP Proksi (AS) → API Penyedia

@@ -4,27 +4,33 @@
 
 ---
 
-> **狀態：**儀表板建構於 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) 之上，並以工作區
-> `packages/ui-kit` (`@omniroute/ui-kit`) 的形式納入版本控制（上游快照固定於
-> `packages/ui-kit/UPSTREAM.md`，並由 `npm run check:ui-kit-snapshot` 檢查）。淺色是標準
-> 主題；預設偏好設定為 `system`。預設調色盤採用套件的 **Editions** 外觀
-> （暖色紙張中性色與銅色強調色 `#e5ac82`，`packages/ui-kit/src/ci-editions.css`）；設定 →
-> 外觀 → 調色盤提供**經典**選項，使用套件的基礎權杖與萊姆色強調色。Switzer 是
-> UI、展示與程式碼文字共用的唯一字型家族（`--ci-font-ui`；`--ci-font-display` 與
-> `--ci-font-mono` 均解析為此字型），並由套件本身自行託管（`packages/ui-kit/src/ci-fonts.css`，
-> 由 `ci-tokens.css` 匯入）。Switzer 缺少的文字系統會逐字形回退（`src/app/globals.css`）：
-> 西里爾字母、希臘字母與越南文使用 Inter，而阿拉伯文字僅在 `html[dir="rtl"]` 下使用 Vazirmatn。
-> 每個圖示皆為 Lucide 字形。
+> **地位：**儀表板是建立在**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)，作為工作區`packages/ui-kit`包含在此儲存庫中（`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中並由`npm run check:ui-kit-snapshot`保護）。光是典型的主題；預設首選項是`system`。預設調色板是套件的**Editions**外觀（暖色紙質和銅色`#e5ac82`、 `packages/ui-kit/src/ci-editions.css`）；設定→外觀→調色板提供**Classic** ，該套件的帶有石灰口音的基本標記。 Switzer是UI和顯示文字的主要係列（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析為它），由套件本身自託管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`導入）。每個圖示都是一個Lucide字形。
+>
+> Inter是Switzer中缺少字形的後備； `--font-mono`對應到系統等寬堆疊`--ci-font-code`。
+>
+> 當`Switzer`缺少字形時，`src/app/globals.css`為每個字形選擇後備字體： `Inter`用於西里爾文、希臘文和越南文， `Vazirmatn`僅在`html[dir="rtl"]`下用於阿拉伯文腳本。
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. 事物存在的地方
 
-- **成套工具。** `packages/ui-kit/src`是`packages/ui-kit/UPSTREAM.md`中固定的提交處上游`src/`的逐字節副本（也記錄許可證授權）； `PATCHES.md`列出本地補丁（無）。它作為源使用，無需構建： `next.config.mjs`對其進行轉譯， `tsconfig.json`映射`@omniroute/ui-kit` → `packages/ui-kit/src`和`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` （`vitest.config.ts`和`vitest.mcp.config.ts`具有相同的別名）。透過其子路徑（`@omniroute/ui-kit/table`、 `@omniroute/ui-kit/page-header`...）導入套件元件，而不是透過`@omniroute/ui-kit`桶：桶將每個元件（包括日期選擇器）拉入每個導入器。套件樣式表透過`src/app/globals.css` （`@import "../../packages/ui-kit/src/ci-styles.css"`，完整的表：核心`ci-ui.css`加上每個模式系列）進入。
-- **代幣。** `packages/ui-kit/src/ci-tokens.css`聲明`--ci-*`代幣； `src/app/globals.css`將它們橋接到舊的OmniRoute名稱（`--color-*`、 `--radius-*`、 `--font-sans`/`--font-mono`、 `--table-*`、 `--orch-status-*`、 `--color-fd-*`），因此現有的`var(--color-*)`讀取和Tailwind實用程式繼續工作。新程式碼使用Tailwind實用程式（`bg-surface`、 `text-text-muted`、 `border-border`、 `text-success`、 `bg-success-bg`、 `bg-chart-1`…）或套件類別—從不使用十六進位值（`tests/unit/design-kit-bridge.test.ts`強制橋接）。 `text-primary`透過`--text-color-primary`解析為`--color-primary-ink` ，因此主要文字保持可讀，而`bg-primary`/`border-primary`保留重音表面：在版本下，它是套件的`--ci-color-accent-active` （淺色深銅`#99562f` ，深色銅重音）；在經典下， lime-800在淺色下，石灰口音在深色下。圖表系列使用`--color-chart-1`... `--color-chart-8`，每個都有一個文字安全的`--color-chart-N-ink`和一個不透明的`--color-chart-N-subtle`晶片色調，按套件系列順序（`ciChartSeriesOrder`）分配。
+- **成套工具。** `packages/ui-kit/src`是`packages/ui-kit/UPSTREAM.md`中固定的提交處上游`src/`的逐字節副本（也記錄許可證授權）； `PATCHES.md`列出本地補丁。它作為源使用，無需構建： `next.config.mjs`對其進行轉譯， `tsconfig.json`映射`@omniroute/ui-kit` → `packages/ui-kit/src`和`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` （`vitest.config.ts`和`vitest.mcp.config.ts`具有相同的別名）。透過其子路徑（`@omniroute/ui-kit/table`、 `@omniroute/ui-kit/page-header`...）導入套件元件，而不是透過`@omniroute/ui-kit`桶：桶將每個元件（包括日期選擇器）拉入每個導入器。套件樣式表透過`src/app/globals.css` （`@import "../../packages/ui-kit/src/ci-styles.css"`，完整的表：核心`ci-ui.css`加上每個模式系列）進入。
+- **代幣。** `packages/ui-kit/src/ci-tokens.css`聲明`--ci-*`代幣； `src/app/globals.css`將它們橋接到舊的OmniRoute名稱（`--color-*`、 `--radius-*`、 `--font-sans`/`--font-mono`、 `--table-*`、 `--orch-status-*`、 `--color-fd-*`），因此現有的`var(--color-*)`讀取和Tailwind實用程式繼續工作。新程式碼使用Tailwind實用程式（`bg-surface`、 `text-text-muted`、 `border-border`、 `text-success`、 `bg-success-bg`、 `bg-chart-1`…）或套件類別—從不使用十六進位值（`tests/unit/design-kit-bridge.test.ts`強制橋接）。 `text-primary`透過`--text-color-primary`解析為`--color-primary-ink` ，因此主要文本保持可讀，而`bg-primary`/`border-primary`保留重音表面：在Editions下，它是套件的`--ci-color-accent-active` （淺色深銅`#99562f` ，深色銅重音）；在Classic下， lime-800在亮處，石灰口音在暗處。圖表系列使用`--color-chart-1` … `--color-chart-8`，每個都有一個文字安全的`--color-chart-N-ink`和一個不透明的`--color-chart-N-subtle`晶片色調，按套件系列順序分配（`ciChartSeriesOrder`）。
 - **主題。** `<html className="ci-theme">` (`src/app/layout.tsx`) 將文件選擇為套件主題。優選的是`light`、 `dark`或`system` （`THEME_CONFIG.defaultTheme = "system"`位於`src/shared/constants/appConfig.ts`中； `system`跟隨`prefers-color-scheme`）。 `src/store/themeStore.ts`中的`applyTheme()` （由`THEME_BOOT_SCRIPT`鏡像，內聯在`src/app/layout.tsx`中，在水合之前運行）設定`data-theme="dark"|"light"`並一起切換`<html>`上的`.dark`類別。此套件的暗令牌集以`data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) 為密鑰； OmniRoute自己的暗覆蓋（ `globals.css`中的`.dark`塊）和`.dark`類別上的舊Tailwind `dark:`實用程式鍵。沒有強調色預設：強調色始終來自套件，並且在商店加載時會刪除舊版本中保留的預設。
-- **調色板。**兩個，均來自套件 (`src/shared/constants/appearancePalette.ts`)：預設值`editions`和`classic`。 Editions 是`<html>`上套件的`data-ci-appearance="editions"`屬性， `ci-editions.css` （由`ci-ui.css`導入）與`data-theme`組合；經典就是該屬性的缺失。根佈局伺服器渲染屬性，因此沒有儲存任何內容（或沒有JS）的訪客在每個表面—儀表板、登入、 `/status`、錯誤頁面、 `/docs`和PWA上獲得版本。該選擇將保留在同一個`theme`存儲中的主題旁邊（`palette`、 `setPalette()`、 `src/store/themeStore.ts`中的`applyPalette()` ），並在`THEME_BOOT_SCRIPT`繪製之前應用（`src/shared/utils/themeBootScript.ts`，內聯在佈局的`<head>`中），僅當存儲的調色板為`"classic"`時才會刪除該屬性； `src/app/global-error.tsx`位於同一佈局它時才會刪除該屬性；不要將`data-ci-appearance`放在任何其他元素上：該套件將其與`html:root:has([data-ci-appearance="editions"])`匹配，因此一個後代將切換整個文件。 Editions `data-ci-editions-variant="landing"`變體適用於行銷頁面，而不是儀表板。瀏覽器 chrome：伺服器在`viewport.themeColor`中呈現預設版本（每個`prefers-color-scheme`一個標籤），並在`src/shared/constants/pwaThemeColors.ts`中呈現 Web 清單— `PWA_THEME_COLORS` ，這是版本`--ci-color-background` (`#f3f1e9` / `#11120f`) 的一個鏡像，由`tests/unit/pwa-theme-colors.test.ts`固定到`ci-editions.css` 。然後，即時`<meta name="theme-color">`遵循儲存的調色板和模式： `THEME_BOOT_SCRIPT`在繪製之前重寫標籤，主題商店的操作在每次變更時執行此操作（ `src/shared/utils/themeColorMeta.ts`中的`resolveThemeColor()` / `applyThemeColor()` ，其中`CLASSIC_PAGE_BACKGROUND`從套件的`ciTokens`讀取）。明確的light/dark主題將每個標籤設定為該模式； `system`為每個方案保留一種顏色。清單保留版本：每次安裝都會取得一次，沒有首選項。摩納哥從探針（`monacoKitTheme.ts`）讀取顏色；在版本下，探針讀取會翻轉一次同步傳遞的根`data-theme` ，因為該套件從根解析版本light/dark 。
-- **組件（適配器）。** `src/shared/components/index.tsx`保留OmniRoute元件API （相同的名稱、預設導出和 props），其背後的原語是套件上的適配器`InfoTooltip`表單（`Button`、 `Input`、 `Textarea`、 `Checkbox`、 `Select`、 `Toggle`、 `Badge`、 `Card`）、覆蓋和`Loading` `Modal` `ConfirmModal`結構（`Collapsible`、 `NotificationToast`、 `CollapsibleSection`、 `SegmentedControl`、 `Breadcrumbs` `Avatar`和表（`DataTable`、 `FilterBar`、 `ColumnToggle` `EmptyState` `FilterPills`、 `PresetSlider`） `Tooltip`適配器透過`warning`路徑導入 kit 元件，並將舊版 props 映射到它—上，例如`Button variant="primary"`是 kit `default`按鈕（`--ci-button-primary-*`：亮色下的反面，暗色下帶有`--ci-color-accent-foreground`墨水的重音）， `danger` ， `destructive`是 kit `warning` 。 `Badge`狀態變體是套件音調，帶有`<option>`子項的`Select`呈現套件`NativeSelect`。 `tests/unit/ui/adapters/*.test.tsx`固定每個轉接器。
+- **調色板。**兩個，均來自套件 (`src/shared/constants/appearancePalette.ts`)：預設值`editions`和`classic`。 Editions是`<html>`上套件的`data-ci-appearance="editions"`屬性， `ci-editions.css` （由`ci-ui.css`導入）與`data-theme`組合； Classic是該屬性的缺失。根佈局伺服器渲染屬性，因此沒有儲存任何內容（或沒有JS）的訪客在每個表面—儀表板、登入、 `/status`、錯誤頁面、 `/docs`和PWA上取得Editions 。該選擇將保留在同一個`theme`存儲中的主題旁邊（ `src/store/themeStore.ts`中的`palette`、 `setPalette()`、 `applyPalette()` ），並在`THEME_BOOT_SCRIPT`繪製之前應用（`src/shared/utils/themeBootScript.ts`，內聯在佈局的`<head>`中`src/app/global-error.tsx`，僅當存儲的調色板為`"classic"`不要將`data-ci-appearance`放在任何其他元素上：該套件將其與`html:root:has([data-ci-appearance="editions"])`相匹配，因此一個後代將切換整個文件。 Editions `data-ci-editions-variant="landing"`變體適用於行銷頁面，而不是儀表板。瀏覽器 chrome：伺服器在`viewport.themeColor`中渲染預設值Editions（每個`prefers-color-scheme`一個標籤），並在`src/shared/constants/pwaThemeColors.ts`中渲染 Web 清單— `PWA_THEME_COLORS` ， Editions `--ci-color-background` (`#f3f1e9` / `#11120f`) 的一個鏡像，透過`tests/unit/pwa-theme-colors.test.ts`固定到`ci-editions.css` 。然後，即時`<meta name="theme-color">`遵循儲存的調色板和模式： `THEME_BOOT_SCRIPT`在繪製之前重寫標籤，主題商店的操作在每次變更時執行此操作（ `src/shared/utils/themeColorMeta.ts`中的`resolveThemeColor()` / `applyThemeColor()` ，其中`CLASSIC_PAGE_BACKGROUND`從套件的`ciTokens`讀取）。明確的light/dark主題將每個標籤設定為該模式； `system`為每個方案保留一種顏色。清單仍然是Editions：每次安裝都會取得一次，沒有首選項。摩納哥從探針（`monacoKitTheme.ts`）讀取顏色；在Editions下，探針讀取會翻轉根`data-theme`進行一次同步傳遞，因為該套件從根解析Editions light/dark 。
+- **組件（適配器）。** `src/shared/components/index.tsx`保留OmniRoute元件API （相同的名稱、預設導出和 props），其背後的原語是套件上的適配器`InfoTooltip`表單（`Button`、 `Input`、 `Textarea`、 `Checkbox`、 `Select`、 `Toggle`、 `Badge`、 `Card`）、覆蓋和`DataTable`（`Modal` `ConfirmModal`），結構（`Collapsible`、 `NotificationToast`、 `CollapsibleSection`、 `SegmentedControl`、 `Loading` `Avatar`和表（ `Breadcrumbs`、 `FilterBar`、 `ColumnToggle` `EmptyState` `FilterPills`、 `PresetSlider`） `Tooltip`適配器透過`warning`路徑導入 kit 元件，並將舊版 props 映射到它—上，例如`Button variant="primary"`是 kit `default`按鈕（`--ci-button-primary-*`：亮色下的反面，暗色下帶有`--ci-color-accent-foreground`墨水的重音）， `danger` ， `destructive`是 kit `warning` 。 `Badge`狀態變體是套件音調，帶有`<option>`子項的`Select`呈現套件`NativeSelect`。 `tests/unit/ui/adapters/*.test.tsx`固定每個轉接器。
 - **殼。** `src/app/(dashboard)/layout.tsx`呈現`DashboardLayout`，後者呈現`src/shared/components/layouts/DashboardShell.tsx`：套件`SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)， OmniRoute的導航邏輯位於`src/shared/components/Sidebar.tsx`。指向`#main-content` 「跳到內容」連結是第一個可聚焦元素。 `src/shared/components/Header.tsx`包含`SidebarTrigger`套件（shell 唯一的側邊欄切換開關）、Keak `ProductSwitcher`和命令面板開啟器；它僅在`#main-content`內沒有安裝套件`PageHeader` (`.ci-page-header`) 時顯示路由標題，因此具有自己的`PageHeader`頁面有一個`h1`。 `src/shared/components/CommandPalette.tsx`是`Dialog`一個套件。
-- **圖示.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) 透過`ICON_MAP` (`src/shared/constants/iconMap.ts`) 將名稱（螢幕使用的材質符號詞彙表）解析為 Lucide 字形。材質符號字體和套件消失了：地圖中缺少的名稱會呈現中性佔位符字形 (`data-icon-missing="true"`) 並在生產之外記錄控制台警告。 `npm run gen:icon-map`列印地圖中缺少的正在使用的名稱（`tests/unit/icon-map-coverage.test.ts`在沒有 Lucide 圖示的任何名稱上失敗； `tests/unit/icon-map-object-values.test.ts`涵蓋儲存在尋找物件中的名稱）； `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`將文字`<span className="material-symbols-outlined">` spans 重寫為`<Icon>`。
+- **圖示.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) 通过`ICON_MAP` (`src/shared/constants/iconMap.ts`) 将名称（屏幕使用的材质符号词汇表）解析为Lucide字形。材质符号字体和包消失了：地图中缺少的名称会呈现中性占位符字形 (`data-icon-missing="true"`) 并在生产之外记录控制台警告。 `npm run gen:icon-map`列印地圖中缺少的正在使用的名稱（`tests/unit/icon-map-coverage.test.ts`在沒有Lucide圖示的任何名稱上失敗； `tests/unit/icon-map-object-values.test.ts`涵蓋儲存在尋找物件中的名稱）； `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`將文字`<span className="material-symbols-outlined">` span 重寫為`<Icon>`。
 - **品牌。** `src/shared/components/OmniRouteLogo.tsx`包裝套件：預設導出`OmniRouteLogo`呈現`ProductIcon product="omniroute" variant="glyph"` （內聯SVG、 `basePath` -safe）， `OmniRouteLockup`呈現`ProductLockup product="omniroute"` （可訪問名稱“Keak OmniRoute”），或者，對於白標籤運營商，他們自己的`name`/`logoSrc`。產品切換器目標位於`src/shared/constants/keakProducts.ts` （`KEAK_PRODUCT_LINKS`、 `KEAK_ACTIVE_PRODUCT`）。獨立螢幕— `src/app/login/page.tsx`、 `src/app/status/page.tsx`、 `src/app/maintenance/page.tsx`、 `src/app/offline/page.tsx`、 `src/app/not-found.tsx`和`src/shared/components/ErrorPageScaffold.tsx` —顯示鎖定； `tests/unit/brand-pages-static.test.ts`守護著它。
 
 ## 2. 規則
@@ -63,7 +69,7 @@
 3. 針對 kit 缺口的變通做法應放在轉接器中（若修正屬於樣式，則放在 `globals.css` 的 `@layer components`），絕不放在 `packages/ui-kit/src`。
 4. 新增或更新 `tests/unit/ui/adapters/<name>.test.tsx`。對於有許多呼叫方的轉接器，請比較變更前後渲染出的標記——內距或包裝層的變動會擴散到每個畫面。
 
-## 5. 更新套件
+## 5. 更新 kit
 
 `npm run check:ui-kit-upstream`將`packages/ui-kit/UPSTREAM.md`中固定的版本與上游儲存庫的最新`v*`標籤進行比較，並在發佈時列印同步命令。
 
@@ -73,10 +79,10 @@
 
 這個工作流程使用兩個秘密：
 
-- `secrets.UI_KIT_READ_TOKEN`：私有上游儲存庫的唯讀令牌。當工作流程無法讀取上游（沒有令牌、令牌停止工作或GitHub無法存取）時，運行將保持綠色，但會寫入一條警告並保持一個單獨的問題處於開啟狀態，一旦稍後的運行可以再次讀取上游，該問題就會自行關閉。
-- `secrets.UI_KIT_SYNC_PR_TOKEN`：此儲存庫上的細粒度令牌，具有內容和拉取請求寫入權限。預設的`GITHUB_TOKEN`不能在這裡建立PRs ，而且它開啟的PR不會觸發CI。如果沒有此令牌，工作流程只會推送分支。
+- `secrets.UI_KIT_READ_TOKEN`：私有上游儲存庫的唯讀令牌。當上游檢查無法讀取資料（沒有令牌、令牌停止工作或GitHub無法存取）時，它會報告`unknown`並以代碼`0`退出。工作流程會寫入警告並嘗試保持一個單獨的追蹤問題處於開啟狀態；稍後成功運行會在訪問返回後將其關閉。 GitHub問題失敗API使作業失敗。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`：此儲存庫上的細粒度令牌，具有內容和拉取請求寫入權限。此工作流程僅在配置專用令牌時開啟或更新同步PRs ；如果沒有它，工作流程會推送分支並報告沒有開啟PR 。
 
-`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`將該提交處的上游`src/` （`latest` =最新的`v*`標記）複製到`packages/ui-kit/src`中，應用單一允許的轉換（它從相對導入中刪除`.js`後綴），並將`packages/ui-kit/package.json`和`package-lock.json`中的工作區版本設定為上游版本。然後：檢視`git diff packages/ui-kit`，對兩個主題中的提供者、設定、組合、用法和端點進行視覺化傳遞，運行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，並使用上游變更日誌開啟PR 。
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`將該提交處的上游`src/` （`latest` =最新的`v*`標記）複製到`packages/ui-kit/src`中，應用單一允許的轉換（它從相對導入中刪除`.js`後綴），並將`packages/ui-kit/package.json`和`package-lock.json`中的工作區版本設定為上游版本。然後：檢視`git diff packages/ui-kit`，對兩個主題中的提供者、設定、組合、用量和端點進行介面檢查，運行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，並使用上游變更日誌開啟PR 。
 
 ## 6. README 圖表
 
@@ -86,9 +92,10 @@
   淺色值位於 `:root`，深色值則在檔案內的 `prefers-color-scheme: dark` 後方，因此每張影像都會在 GitHub 上跟隨檢視者的配置。
 - **字型。** GitHub Markdown 不包含 CSS，而 camo Proxy 會封鎖所有外部擷取，因此套件字型必須包含在檔案內。`scripts/docs/readme-outline.mjs` 是每個產生器的最後一個步驟，會使用 HarfBuzz 塑造 Switzer 角色，並將它們繪製為向量輪廓（`<defs>` 路徑和 `<use>`）；Switzer 缺少的箭頭與幾何符號則會依其自身的度量繪製。請使用輪廓，絕不可嵌入字型：Switzer 的授權條款（`packages/ui-kit/src/fonts/FFL.txt`）禁止在未取得書面同意的情況下進行子集化與格式轉換，但允許向量繪圖，因此請勿重新引入 Switzer `@font-face` 或 `data:` URI。檔案中唯一保留的字型，是用於仍維持為實際程式碼文字之內容的 OFL IBM Plex Mono 子集（`scripts/docs/readme-fonts.mjs`），並由這些字元建置；任何無法嵌入的字符都會擲回錯誤。
 - **重新產生。** `npm run docs:readme-diagrams` 會依照 README 中的順序重寫全部十二個檔案，並為每個檔案輸出一行及其大小。單一產生器也可獨立執行（`node scripts/docs/gen-readme-<name>.mjs`；`free-tier-budget` 需要使用 `node --import tsx/esm`，因為其數值來自 `open-sse/config/freeModelCatalog.ts` 中的即時目錄載入器；目錄變更所造成的 CI 影響記載於 `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`）。請一併提交產生器與 SVG。
-- **驗證。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` 會按照 GitHub 提供檔案的方式呈現檔案（`<img>` 標籤、camo 的 `Content-Security-Policy`、`image/svg+xml`），擷取淺色與深色畫面，並回報頁面發出的外部字型請求數量（必須為 0）。
+- **證據。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` 在本機探測中渲染檔案（`<img>` 標籤、具限制性的 `Content-Security-Policy` 和 `image/svg+xml` 回應），擷取亮色與暗色畫面，並回報頁面發出的外部字型請求，數量必須為 0。
+
 - **大小限制。** 每個檔案須低於 200 KB（每個過時狀態測試都會判定）；500 KB 是任何 README 影像的硬性上限（SVG Studio 驗證器的規則）。
-- **文案維持不變，數值取自閘門。** 品牌重塑僅變更字型與調色盤，而不變更文字：每個產生器都會將其圖表的文案保存在 `*_COPY` 常數中（或從即時目錄建置），該常數既是繪製的文字，也是輪廓化步驟的輸入。標準數值會保留在 `<text>` 節點中（輪廓化後不可見，`fill-opacity:0`），由 `check:docs-counts`（`scripts/check/check-docs-counts-sync.mjs`）讀取；閘門所讀取圖表的過時狀態測試，也會在產生的檔案上執行其驗證器，因此若數值與程式碼不一致，測試便會失敗——請修正閘門所讀取的來源，絕不要修改產生器中的數字。
+- **共用文案，計數來自 gate。** 每個生成器在`*_COPY`常數中攜帶其圖表的副本（或從實時目錄構建它），該常數既是繪製的文本也是大綱步驟的輸入。規範圖形保留在`<text>`節點中（輪廓一旦勾勒就不可見， `fill-opacity:0`），由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 讀取；門讀取的圖表的陳舊性測試也在生成的文件上運行其驗證器，因此與代碼漂移的數字無法通過測試—修復門讀取的源，而不是生成器中的數字。
 
 ## 7. 參考索引
 

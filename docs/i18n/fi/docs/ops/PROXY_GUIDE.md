@@ -393,7 +393,7 @@ Luo `wreq-js`-paketin avulla selaimen kaltaisia TLS-sormenjälkiä ja ohittaa bo
 
 ### CLI-sormenjäljen täsmäytys
 
-**CLI-sormenjäljen valitsin** (`Asetukset → Suojaus`) järjestää HTTP-otsakkeet ja JSON-rungon kentät uudelleen vastaamaan natiivien CLI-binääritiedostojen (Claude Code, Codex jne.) tarkkaa allekirjoitusta. Tämä toimii **välityspalvelimen lisäksi**:
+**CLI-sormenjäljen valitsin** (`Settings → Security`) järjestää HTTP-otsakkeet ja JSON-rungon kentät uudelleen vastaamaan natiivien CLI-binääritiedostojen (Claude Code, Codex jne.) tarkkaa allekirjoitusta. Tämä toimii **välityspalvelimen lisäksi**:
 
 ```
 IP-osoitteesi (estetty) → Välityspalvelimen IP (Yhdysvallat) → Palveluntarjoajan API

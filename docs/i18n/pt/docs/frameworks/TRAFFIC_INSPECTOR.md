@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mecanismo:** Utiliza APIs do SO para redirecionar todo o tráfego HTTP/HTTPS através do listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` e as definições de anfitrião/porta HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Abrangência:** Todas as aplicações na máquina que respeitem as definições de proxy do sistema
   **Nota:** `source` = `"system-proxy"`
 
 **Mecanismos de segurança:**
 
-- Temporizador de desativação automática (predefinição de 30 min, configurável através de `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- O estado anterior do proxy do sistema é guardado na BD e restaurado ao reverter
-- O painel apresenta o aviso "A reverter o proxy do sistema" se o utilizador sair da página enquanto este estiver ativo
-- A IU apresenta o distintivo `⚠ Avançado` + uma caixa de confirmação explícita
+- Aplicar o proxy agenda um temporizador de reposição de melhor esforço, local ao processo (30 min por predefinição, configurável por `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). O temporizador não sobrevive ao encerramento do processo do servidor.
+- O estado anterior do proxy fica na memória do processo; este armazenamento do estado de captura não o persiste numa base de dados. A reposição restaura as definições guardadas do macOS/GNOME; no Windows, repõe o proxy WinHTTP em vez de restaurar a configuração anterior.
+- Enquanto o proxy é indicado como aplicado, ao sair da página (unload) o navegador envia um pedido de reposição com keepalive, de melhor esforço, e solicita uma confirmação nativa cujo texto é controlado pelo navegador. Desmontar o inspetor durante a navegação SPA também tenta a reposição, sem esse aviso do navegador.
+- A barra de captura apresenta o controlo `System-wide` traduzido, com um ícone de aviso. Clicar nele atualmente apenas altera o estado local da interface; não apresenta uma caixa de confirmação nem aplica ou repõe o proxy do sistema.
 
 ### Modo 5 — Desencriptação transparente TPROXY (Linux, root, opcional)
 
@@ -113,13 +113,13 @@ Este é um subsistema substancial com o seu próprio guia dedicado para operador
 
 ### Comparação dos modos de captura
 
-| Modo                     | Configuração                    |             Sudo?             | Abrangência                          | Notas                                                                                                                                        |
-| ------------------------ | ------------------------------- | :---------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge           | Automática                      |  Uma vez (certificado+hosts)  | 9 agentes de IDE                     | Ativado por predefinição                                                                                                                     |
-| 2. Hosts personalizados  | Introdução por host             |     Sim (ficheiro hosts)      | Qualquer aplicação que use esse host | Persistido na BD                                                                                                                             |
-| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`        |              Não              | Aplicações que respeitem o ambiente  | Porta 8080; HTTPS é encaminhado por túnel CONNECT (apenas metadados, nunca desencriptado)                                                    |
-| 4. Em todo o sistema     | Alternar + confirmar            |              Sim              | Todas as aplicações na máquina       | Desativação automática após 30 min.                                                                                                          |
-| 5. Desencriptação TPROXY | Alternar (Linux + addon nativo) | Sim (root + instalação da AC) | Qualquer host na porta de destino    | Desencripta hosts arbitrários; desativado por predefinição — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) |
+| Modo                     | Configuração                                                   |             Sudo?             | Abrangência                          | Notas                                                                                                                                        |
+| ------------------------ | -------------------------------------------------------------- | :---------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge           | Automática                                                     |  Uma vez (certificado+hosts)  | 9 agentes de IDE                     | Ativado por predefinição                                                                                                                     |
+| 2. Hosts personalizados  | Introdução por host                                            |     Sim (ficheiro hosts)      | Qualquer aplicação que use esse host | Persistido na BD                                                                                                                             |
+| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`                                       |              Não              | Aplicações que respeitem o ambiente  | Porta 8080; HTTPS é encaminhado por túnel CONNECT (apenas metadados, nunca desencriptado)                                                    |
+| 4. Em todo o sistema     | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Sim              | Todas as aplicações na máquina       | Temporizador de reposição de melhor esforço (30 min por predefinição)                                                                        |
+| 5. Desencriptação TPROXY | Alternar (Linux + addon nativo)                                | Sim (root + instalação da AC) | Qualquer host na porta de destino    | Desencripta hosts arbitrários; desativado por predefinição — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ será adicionado posteriormente).
 ### 5.1 Gravar uma sessão
 
 1. Clique em **"● Gravar sessão"** na barra de ferramentas → introduza um nome (opcional)
-2. O acompanhamento em tempo real continua normalmente; um indicador vermelho intermitente mostra `◉ GRAV · <nome> · 00:42 · 23 pedidos`
+2. O acompanhamento em tempo real continua normalmente; a barra de gravação mostra um ponto vermelho intermitente, o tempo decorrido, o nome da sessão quando disponível e um controlo Parar traduzido.
 3. Clique em **"⏹ Parar"** → o instantâneo da sessão é guardado em `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Ver uma sessão gravada
@@ -322,7 +322,7 @@ será adicionado posteriormente).
 O menu pendente **Sessões** na barra de ferramentas apresenta as sessões guardadas. Ao selecionar uma:
 
 - É carregado o instantâneo da sessão (estado imutável)
-- Uma faixa apresenta: `A ver a sessão gravada "<nome>" — [Voltar ao modo em direto]`
+- Uma faixa mostra um rótulo traduzido de sessão gravada e o nome da sessão (ou a alternativa traduzida para uma sessão sem título), ao lado de um botão Voltar à transmissão em direto traduzido.
 - O separador Estatísticas fica disponível com agregações do Recharts
 
 ### 5.3 Formatos de exportação
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-O painel também apresentará a opção "Reverter proxy do sistema" no carregamento seguinte se detetar que o estado da BD indica que o proxy estava ativo.
+O estado guardado do proxy existe apenas no processo do servidor. Após uma falha ou um reinício, o armazenamento atual do estado de captura não consegue restaurar esse instantâneo a partir de uma base de dados; utilize os comandos de recuperação da plataforma acima quando for necessária uma recuperação manual.
 
 ### Buffer cheio
 

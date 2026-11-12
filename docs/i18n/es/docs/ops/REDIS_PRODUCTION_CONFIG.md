@@ -6,36 +6,33 @@
 
 ## Descripción general
 
-Redis es una **dependencia opcional y no crítica** en OmniRoute: la aplicación reduce sus funcionalidades de forma controlada (usando
-alternativas en memoria) cuando Redis no está disponible. En producción, ajustar Redis reduce la latencia de cuatro cargas de
-trabajo distintas:
+Redis es un **dependencia suave opcional** en OmniRoute — la aplicación se degrada suavemente (respaldos en memoria) cuando Redis no está disponible. En producción, el ajuste Redis reduce la latencia para cuatro cargas de trabajo distintas:
 
-| Carga de trabajo           | Controlador                   | Fábrica de clientes                                         | Patrón de claves                                                              |
-| -------------------------- | ----------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Limitación de frecuencia   | `rateLimiter.ts`              | Singleton diferido de `ioredis` mediante `getRedisClient()` | Ventanas de limitación de frecuencia atómicas mediante Lua con `<prefix>rl:*` |
-| Caché de autenticación     | `apiKeys.ts`                  | Reutiliza el cliente de `rateLimiter`                       | `<prefix>auth:api_key:<sha256>` con TTL                                       |
-| Almacén de cuotas          | `redisQuotaStore.ts`          | Singleton independiente mediante `getRedisClient(url)`      | `<prefix>quota:*` configurable por instancia                                  |
-| Disyuntor de calentamiento | `redisCircuitBreakerStore.ts` | Cliente independiente en `circuitBreakerFactory.ts`         | `<prefix>warmup:cb:<connectionId>`                                            |
+| Carga de trabajo           | Conductor                     | Fábrica de clientes                               | Patrón clave                                               |
+| -------------------------- | ----------------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
+| Limitación de velocidad    | `rateLimiter.ts`              | `getRedisClient()` — singleton perezoso `ioredis` | Ventanas de límite de velocidad atómica `<prefix>rl:*` Lua |
+| caché de autenticación     | `apiKeys.ts`                  | Reutiliza el cliente de `rateLimiter`             | `<prefix>auth:api_key:<sha256>` con TTL                    |
+| tienda de cuotas           | `redisQuotaStore.ts`          | Singleton `getRedisClient(url)` separado          | `<prefix>quota:*` configurable por instancia               |
+| Disyuntor de calentamiento | `redisCircuitBreakerStore.ts` | Cliente separado en `circuitBreakerFactory.ts`    | `<prefix>warmup:cb:<connectionId>`                         |
 
-Las cuatro cargas de trabajo comparten un único prefijo de espacio de nombres para que OmniRoute pueda coexistir con otras aplicaciones en una
-sola instancia de Redis (p. ej., `127.0.0.1:6379`). Consulte [Espacios de nombres de claves](#key-namespacing).
+Las cuatro cargas de trabajo comparten un prefijo de espacio de nombres para que OmniRoute pueda coexistir con otras aplicaciones en una única instancia Redis (por ejemplo, `127.0.0.1:6379`). Consulte [Espacio de nombres clave](#key-namespacing).
 
 ---
 
-## Configuración actual (valores predeterminados del código)
+## Configuración actual (código predeterminado)
 
-| Configuración                               | Valor                                                                         | Ubicación                                                                             |
-| ------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Variable de entorno `REDIS_URL`             | `redis://redis:6379` (compose), opcional                                      | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Variable de entorno `REDIS_KEY_PREFIX`      | `omniroute:` (predeterminado)                                                 | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Variable de entorno `QUOTA_STORE_REDIS_URL` | independiente, puede diferir de `REDIS_URL`                                   | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                        | `"sqlite"` (predeterminado), `"redis"` opcional                               | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` de ioredis           | `3`                                                                           | creación del cliente en `rateLimiter.ts`                                              |
-| `enableReadyCheck`                          | no establecido (valor predeterminado de ioredis: `true`)                      | —                                                                                     |
-| `lazyConnect`                               | no establecido (valor predeterminado de ioredis: `false`)                     | —                                                                                     |
-| `retryStrategy`                             | no establecido (valor predeterminado de ioredis: base de 200 ms, exponencial) | —                                                                                     |
-| TLS / contraseña / índice de base de datos  | **no configurados**                                                           | —                                                                                     |
-| Sentinel / Cluster                          | **no configurados** — solo nodo único independiente                           | —                                                                                     |
+| Configuración                           | Valor                                                                         | Dónde                                                                                 |
+| --------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Var. de entorno `REDIS_URL`             | `redis://redis:6379` (componer), opcional                                     | `rateLimiter.ts:5`, `.env.example`                                                    |
+| Var. de entorno `REDIS_KEY_PREFIX`      | `omniroute:` (predeterminado)                                                 | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| Var. de entorno `QUOTA_STORE_REDIS_URL` | separado, puede diferir de `REDIS_URL`                                        | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`                    | `"sqlite"` (predeterminado), `"redis"` opcional                               | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`          | `3`                                                                           | Creación de cliente `rateLimiter.ts`                                                  |
+| `enableReadyCheck`                      | no configurado (valor predeterminado de ioredis: `true`)                      | —                                                                                     |
+| `lazyConnect`                           | no configurado (valor predeterminado de ioredis: `false`)                     | —                                                                                     |
+| `retryStrategy`                         | no configurado (valor predeterminado de ioredis: base de 200 ms, exponencial) | —                                                                                     |
+| TLS / contraseña / índice DB            | **no configurado**                                                            | —                                                                                     |
+| Centinela / Clúster                     | **no configurado** Solo nodo único independiente —                            | —                                                                                     |
 
 ---
 
@@ -65,59 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Ajustes recomendados para producción
+## Ajuste de producción recomendado
 
-### 1. Opciones del pool de conexiones / cliente (constructor `Redis` de ioredis)
+### 1. Grupo de conexiones/Opciones de cliente (constructor ioredis `Redis` )
 
-El código actual crea una única instancia `new Redis(url)` sin opciones personalizadas. Para despliegues de producción con múltiples réplicas, pase una fábrica de clientes en el código o encapsule `getRedisClient()`:
+El código actual crea un único `new Redis(url)` sin opciones personalizadas. Para implementaciones de producción de múltiples réplicas, pase una fábrica de clientes en el código o ajuste `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // sin límite de reintentos; dejar que retryStrategy decida
-  enableReadyCheck: true, // verificar que el servidor esté listo antes de aceptar llamadas
-  lazyConnect: true, // no conectarse durante la construcción; esperar a la primera llamada
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // abandonar después de 10 reintentos → reconectarse más tarde
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, límite de 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // agrupar comandos simultáneos en una sola escritura TCP
-  keepAlive: 10000, // keep-alive TCP cada 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Principales ventajas y desventajas:**
+**Compensaciones clave:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — opción recomendada para producción, de modo que los reinicios transitorios de Redis no hagan que todas las solicitudes fallen inmediatamente. El mecanismo alternativo en memoria de `checkRateLimit()` absorbe la ruta de fallo.
-- `lazyConnect: true` — evita que el arranque dependa de que Redis esté disponible antes de que el servidor comience a aceptar conexiones.
-- `enableAutoPipelining: true` — reduce los viajes de ida y vuelta para las comprobaciones simultáneas de límites de frecuencia; resulta beneficioso con >50 RPS en una sola conexión.
+- `maxRetriesPerRequest: null` + `retryStrategy` Se prefiere — para producción, de modo que los reinicios transitorios Redis no fallen inmediatamente en todas las solicitudes. El respaldo en memoria en `checkRateLimit()` absorbe la ruta de falla.
+- `lazyConnect: true` — evita que el inicio dependa de Redis antes de que el servidor comience a aceptar conexiones.
+- `enableAutoPipelining: true` — reduce los viajes de ida y vuelta para verificaciones simultáneas de límites de tarifas; beneficioso en > 50 RPS en una sola conexión.
 
 ### 2. Configuración del servidor Redis (`redis.conf`)
 
 ```
-# Memoria
-maxmemory 80%                        # dejar espacio para la caché de páginas del SO
-maxmemory-policy allkeys-lru         # expulsar entradas obsoletas de la caché de autenticación bajo presión
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistencia (opcional — OmniRoute es seguro ante fallos sin ella)
-save 300 1                           # crear una instantánea al menos cada 5 min si cambió ≥1 clave
-appendonly no                        # AOF no es necesario; los datos se pueden regenerar
-appendfsync no                       # sin sobrecarga de fsync (RDB es suficiente)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Red
-timeout 0                            # no desconectar por inactividad
-tcp-keepalive 300                    # keep-alive de 5 min
-tcp-backlog 511                      # cola de conexiones para cargas con ráfagas
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Rendimiento
-hz 10                                # valor predeterminado; 100 para cargas sensibles a la latencia
-activedefrag yes                     # desfragmentar automáticamente cuando la fragmentación sea >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Implicaciones de `maxmemory-policy allkeys-lru`:** Las entradas de la caché de autenticación pueden expulsarse cuando haya presión de memoria. Esto es seguro: `setCachedApiKey` siempre vuelve a rellenar la caché cuando no encuentra una entrada, y el mecanismo alternativo de SQLite es la fuente autoritativa. El script Lua del limitador de frecuencia crea claves pequeñas y de corta duración por diseño.
+**Compensación para `maxmemory-policy allkeys-lru`:** Las entradas de la caché de autenticación pueden ser expulsadas bajo presión de la memoria. Esta es — segura. `setCachedApiKey` siempre se vuelve a completar en caso de error y el respaldo SQLite tiene autoridad. El script Lua limitador de velocidad crea pequeñas claves que, por diseño, son de corta duración.
 
-### 3. Configuración de Docker Compose
+### 3. Configuración de redacción Docker
 
-La configuración de producción (`docker-compose.prod.yml`) utiliza `redis:8.6.2-alpine`. Añada:
+La composición de producción (`docker-compose.prod.yml`) utiliza `redis:8.6.2-alpine`. Agregar:
 
 ```yaml
 redis:
@@ -142,30 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Consideraciones sobre múltiples instancias / escalado
+### 4. Consideraciones de escalamiento/multiinstancia
 
-**Un único Redis para todas las réplicas** — el script Lua del limitador de frecuencia depende de un único espacio de claves autoritativo. El uso de múltiples instancias de Redis detrás de las réplicas haría que se perdiera la atomicidad y duplicaría el presupuesto. Utilice un único Redis (o un clúster de Redis Sentinel con conmutación por error) para todas las réplicas de la aplicación.
+**Redis único para todas las réplicas** — el script Lua limitador de velocidad, depende de un único espacio de clave autorizado. Varias instancias Redis detrás de réplicas perderían atomicidad y duplicarían el presupuesto. Utilice un único Redis (o clúster Redis Sentinel con conmutación por error) para todas las réplicas de aplicaciones.
 
-**Número de conexiones:** Cada réplica de la aplicación abre **2 conexiones TCP** a Redis (cliente del limitador de frecuencia + cliente del almacén de cuotas). Con 10 réplicas → 20 conexiones, muy por debajo del límite predeterminado de 10 000 conexiones de una instancia de Redis.
+**Recuento de conexiones:** Se abre cada réplica de la aplicación.**2 conexiones TCP** a Redis (cliente limitador de velocidad, cliente de tienda de cuotas + ). En 10 réplicas de conexiones → 20, dentro del límite máximo de conexiones de 10k de una instancia Redis predeterminada.
 
-### 5. Monitorización
+### 5. Monitoreo
 
-Exponga lo siguiente mediante el endpoint de comprobación de estado:
+Exponer a través del punto final de verificación de estado:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts ya llama a funciones de rateLimiter
-// Añadir comprobaciones específicas de Redis:
-//   1. Latencia de PING mediante .ping() de ioredis
-//   2. Uso de memoria mediante INFO memory
-//   3. Número de conexiones mediante INFO clients
-//   4. Tasa de aciertos de maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Métricas clave que deben vigilarse:
+Métricas clave a tener en cuenta:
 
-- **Claves expulsadas/s** — si el valor permanece distinto de cero, aumente `maxmemory`
-- **Clientes bloqueados** — un valor distinto de cero indica scripts Lua lentos o una contención elevada
-- **Conexiones rechazadas** — se ha alcanzado el límite de conexiones; poco probable con 20 conexiones
+- **Llaves desalojadas/seg** — si es persistentemente distinto de cero, aumentar `maxmemory`
+- **Clientes bloqueados** — distinto de cero sugiere scripts Lua lentos o alta contención
+- **Conexiones rechazadas** Límite de conexión — alcanzado; raro en 20 conexiones
+
+### 6. Servidores compatibles con Redis
+
+Cualquier servidor utilizado aquí debe ejecutar scripts Lua: el limitador de velocidad es un `EVAL`. En un servidor sin Lua, `checkRateLimit()` registra `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` y cuenta por proceso, por lo que cada réplica aplica el límite por sí sola. El almacén de afinidad de sesión compartida (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) también lee y actualiza los pines con `EVAL`; sin Lua, registra `[SESSION_AFFINITY] Redis error; falling back to SQLite.` y cada réplica mantiene sus propios pines. Las otras cargas de trabajo usan comandos simples (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes y conjuntos), y el backend Redis de la caché semántica no envía comandos `FT.*`.
+
+Probado con OmniRoute 3.8.52: KiviDB 1.2.0 con su imagen Lua (`kividb/kividb:v1.2.0-lua`). El limitador de velocidad (incluido un segundo proceso que comparte los contadores), la caché de autenticación, el almacén de cuotas, el disyuntor de calentamiento, el almacén de caché semántica y una solicitud `/v1/chat/completions` a través del controlador de chat pasaron 18 de las 19 comprobaciones que pasan en Redis 8.10.3. El que difiere: `INCRBYFLOAT` almacena `0.1 + 0.2` como `0.30000000000000004` donde Redis almacena `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). El almacén de cuotas analiza ambos con `parseFloat`, pero los dos números difieren en los últimos dígitos, por lo que una comparación que cae exactamente en un límite de cuota puede resultar diferente. El almacén de afinidad de sesiones no formó parte de esa ejecución. ( [configuración](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [resultados](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -188,13 +191,13 @@ flowchart LR
 
 ## Referencias
 
-| Archivo                            | Propósito                                                                                    |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Cliente principal de Redis, script Lua de limitación de solicitudes y alternativa en memoria |
-| `src/lib/db/apiKeys.ts`            | Caché de autenticación — Redis→SQLite como alternativa                                       |
-| `src/lib/quota/redisQuotaStore.ts` | Cliente de Redis independiente para el almacén de cuotas opcional                            |
-| `src/lib/quota/storeFactory.ts`    | Alterna entre los controladores de cuotas `sqlite` y `redis`                                 |
-| `docker-compose.prod.yml`          | Contenedor de Redis de producción (imagen `redis:8.6.2-alpine`)                              |
-| `.env.example`                     | Documentación de las variables de entorno de Redis                                           |
-| `src/app/api/local/redis/`         | Rutas de API para la orquestación de contenedores de desarrollo                              |
-| `bin/cli/commands/redis.mjs`       | Comandos de CLI para la orquestación de contenedores de desarrollo                           |
+| Archivo                            | Objetivo                                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Cliente Redis principal, script de límite de velocidad Lua, respaldo en memoria |
+| `src/lib/db/apiKeys.ts`            | Caché de autenticación — Redis→SQLite reserva                                   |
+| `src/lib/quota/redisQuotaStore.ts` | Cliente Redis independiente para almacenamiento de cuotas opcional              |
+| `src/lib/quota/storeFactory.ts`    | Cambia entre controladores de cuota `sqlite` y `redis`                          |
+| `docker-compose.prod.yml`          | Contenedor Prod Redis (imagen `redis:8.6.2-alpine`)                             |
+| `.env.example`                     | Documentación de variables ambientales Redis                                    |
+| `src/app/api/local/redis/`         | Rutas API para la orquestación de contenedores de desarrollo                    |
+| `bin/cli/commands/redis.mjs`       | Comandos CLI para la orquestación de contenedores de desarrollo                 |

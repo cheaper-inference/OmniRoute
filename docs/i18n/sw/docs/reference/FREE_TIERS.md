@@ -126,8 +126,8 @@ makusudi.
 Idadi nyingi za "tokeni zisizolipishwa kwa mwezi" katika eneo hili ni jumla ya viwango vilivyoainishwa kwa kila modeli. Yetu si hivyo, kwa makusudi:
 
 - **Kila hifadhi ya pamoja huhesabiwa mara moja.** Mpango usiolipishwa wa Mistral una mgao mmoja wa 1B/mwezi kwa kila shirika; kuuorodhesha chini ya modeli tano hakufanyi uwe 5B. Ikijumlishwa kwa kila modeli, katalogi yetu wenyewe ingeonyesha **~7.4B** (imekokotolewa upya tarehe 2026-09-03; idadi hii hailindwi na CI — ipime upya kila katalogi inapobadilika) — kichwa kikuu kinasema **~1.47B** kwa sababu hicho ndicho ambacho akaunti moja ya kila mtoa huduma inaweza kutumia.
-- **Vikomo vya kila siku hubadilishwa, viwango havibadilishwi.** Kikomo kilichoandikwa cha tokeni/siku huwa `× 30`; kikomo kilichoandikwa cha maombi/siku huwa `RPD × ~800 tokeni × 30`; mtoa huduma anayechapisha tu maombi kwa dakika hana idadi ya kila mwezi na huorodheshwa kama _isiyo na kikomo_, bila kujumuishwa kamwe. Kuzidisha kikomo cha kiwango kwa 24/7 ndilo ongezeko bandia tunalokataa.
-- **Mgao unaohitaji uthibitishaji wa utambulisho wa kikanda huonyeshwa kando** (`+~6M baada ya uthibitishaji wa utambulisho wa kikanda`), kwa sababu wasomaji wengi hawawezi kuutumia.
+- **Vikomo vya kila siku hubadilishwa, viwango havibadilishwi.** Kikomo kilichoandikwa cha tokeni/siku huwa `× 30`; kikomo kilichoandikwa cha maombi/siku huwa `RPD × ~800 tokens × 30`; mtoa huduma anayechapisha tu maombi kwa dakika hana idadi ya kila mwezi na huorodheshwa kama _isiyo na kikomo_, bila kujumuishwa kamwe. Kuzidisha kikomo cha kiwango kwa 24/7 ndilo ongezeko bandia tunalokataa.
+- **Mgao unaohitaji uthibitishaji wa utambulisho wa kikanda huonyeshwa kando** (`+~6M behind regional identity verification`), kwa sababu wasomaji wengi hawawezi kuutumia.
 - **Salio la kujisajili ni la mwezi wa kwanza pekee** na huripotiwa kama idadi ya pili, bila kuchanganywa kamwe na idadi ya kudumu.
 - **Idadi hiyo hutekelezwa na CI.** `npm run check:docs-counts` hukokotoa upya jumla kutoka kwenye katalogi na husababisha build ishindwe wakati faili hii, README au kadi ya bajeti zinapotofautiana na jumla hizo.
 

@@ -18,18 +18,32 @@ Foilsíonn OmniRoute airteagail npm + Docker. Soláthraíonn na geataí seo bun�
 
 Úsáideann an ratchet CVE íomhá **dhá chéim** i `docker-publish.yml`: coinníonn an chéim SARIF (`HIGH,CRITICAL`, `exit-code: 0`) ARD+CRITICIÚIL le feiceáil sa chluaisín Slándála gan bac a chur air; teipeann ar an gcéim _geata CRITICIÚIL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) an scaoileadh ar CVE CRITICIÚIL **le réiteach ar fáil**. Cuireann `ignore-unfixed` cosc ar bhac a chur ar an scaoileadh le haghaidh CVE buníomhá gan paiste uas-srutha.
 
-## ⚠️ Éagsúlacht CVE (geataí osv/Trivy ag cur bac)
+## ⚠️ Athraitheacht CVE (geataí blocála osv/Trivy)
 
-Déanann osv agus Trivy comparáid idir spleáchais agus bunachair shonraí CVE a **fhásann go leanúnach**. Is féidir le PR nach **dteagmhaíonn le spleáchais ar bith** éirí dearg go tobann toisc gur nochtadh CVE nua i spleáchas atá ann cheana (osv: `vulnCount` tomhaiste > bunlíne; Trivy: CRITICIÚIL nua inréitigh san íomhá). **Is iompar oibríochtúil IONCHASACH é seo de gheata CVE atá ag cur bac, ní cúlchéimniú táirge.**
+Cuireann osv agus Trivy spleáchais i gcomparáid le bunachair sonraí CVE a fhásann **go leanúnach**. Is féidir le PR
+nach **mbaineann le haon spleáchas** éirí dearg go tobann toisc gur nochtadh CVE nua
+i spleáchas atá ann cheana (osv: `vulnCount` tomhaiste > bunlíne; Trivy: CVE CRITICAL nua
+inshocraithe san íomhá). **Is é seo an t-iompar oibríochtúil a bhfuiltear ag súil leis ó gheata blocála
+CVE, ní cúlchéimniú táirge.**
 
-Nuair a éiríonn osv nó Trivy dearg mar gheall ar CVE nua-nochta, is é an leigheas:
+Nuair a éiríonn osv nó Trivy dearg de bharr CVE nuanochtaithe, seo a leanas an réiteach:
 
-1.  **Méadaigh an spleáchas atá buailte** (is fearr) — uasghrádaigh go dtí an leagan paistithe trí `overrides` `package.json` (spleáchais trasdultacha) nó atóg an íomhá ar bhunús paistithe.
-2.  **Mura bhfuil réiteach uas-srutha ann:**
-    - **osv:** athbhunlíneáil `metrics.vulnCount` i `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ní chlúdaíonn sé geataí tiomnaithe — cuir an luach in eagar de láimh, `direction:down`) le nóta údarúcháin + saincheist rianaithe.
-    - **Trivy:** cuir isteach iontráil i `.trivyignore` (CVE-ID in aghaidh na líne) le trácht údarúcháin + saincheist rianaithe. Clúdaíonn `ignore-unfixed: true` CVEanna gan paistí go huathoibríoch cheana féin.
+1. **Nuashonraigh an spleáchas lena mbaineann** (an rogha is fearr) — uasghrádaigh go dtí an leagan paisteáilte trí `package.json`
+   `overrides` (spleáchais indíreacha) nó atóg an íomhá ar bhonn paisteáilte.
+2. **Mura bhfuil leasúchán ar fáil:** an toradh tomhaiste a choinneáil agus an spleáchas nó an íomhá lena mbaineann a rianú. Ná ardaigh an bonnlíne leochaileachta chun pas iarrthóra a dteipeann air a dhéanamh. Eisiatar cheana féin le `ignore-unfixed: true` Trivy leochaileachtaí íomhá gan paiste in aghaidh an tsrutha. Éilíonn aon eisceacht ID leochaileachta athbhreithnithe, cosán pacáiste beacht, dul in éag agus saincheist rianaithe sa pholasaí; ní iarmhairt uathoibríoch é ar scanadh ar theip air.
 
-Déanann an dá gheata SCIORADH go galánta (exit 0) nuair a bhíonn an uirlis in easnamh nó nuair a theipeann ar an tomhas (osv-scanner nach bhfuil i PATH, osv.dev/network do-rochtain, JSON neamhbhailí) — ní chuireann teip **tomhais** bac riamh, ní chuireann ach cúlchéimniú **tomhaiste** bac.
+Teipeann dúnta ar rití riachtanacha OSV (`check:vuln-ratchet -- --ratchet`) le
+`INCOMPLETE` agus cód scortha 2 nuair nach féidir an scanóir, an tuarascáil ná an bhunlíne a bhailíochtú.
+Tugann cúlchéimniú tomhaiste cód scortha 1. Is féidir le rith comhairleach `SKIP` a thuairisciú fós le
+cód scortha 0, ach ní chruthaíonn sé sin gur éirigh leis na spleáchais sa scanadh. Éilíonn céim bhlocála
+Trivy tomhas rathúil freisin: ní féidir le huirlisí nach bhfuil ar fáil, jabanna ar theip orthu
+ná fianaise íomhá atá in easnamh a dheimhniú go bhfuil íomhá glan.
+
+## Polasaí scanadh íomhánna
+
+Níl aon eisceachtaí leochaileachta sa `.trivyignore.yaml` reatha. Déanann `npm run check:trivy-ignore-policy` an beartas struchtúrtha i bpróifílí scanta áitiúla, CI agus Cáilíocht a bhailíochtú. IDs anaithnid, diúltaítear cosáin níos leithne, iontrálacha dúblacha agus eisceachtaí atá imithe in éag; ní ionchur é an oidhreacht `.trivyignore` sna scananna imirce.
+
+Seiceálann Docker uirlisí beartais ó `github.workflow_sha` agus an beartas foinse íomhá leis an roghnóir foinse céanna leis an bhfoinse. Diúltaíonn an roghnóir beartais scóip neamh-chomhoiriúnacha agus ullmhaíonn sé comhad amháin don dá scanadh Trivy. Ní fhaigheann foinse stairiúil gan polasaí struchtúrtha aon eisceacht. Bioráin an dá scanadh Trivy `v0.70.0`. Cruthaíonn bailíochtú beartais comhsheasmhacht cumraíochta; tá scanadh rathúil fós ag teastáil ón íomhá.
 
 ## Riosca spleáchais scortha
 

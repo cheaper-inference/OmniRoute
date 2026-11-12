@@ -6,34 +6,34 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Dasibodu OmniRoute" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Ẹnu-ọ̀nà AI Ọ̀fẹ́
+# 🚀 OmniRoute — The Free AI Gateway
 
-**Ẹ̀dá [Diego Souza](https://github.com/diegosouzapw)**
+**Ṣẹda nipasẹ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Má ṣe dá kóòdù dúró láéláé. Gbogbo irinṣẹ́ AI → àwọn olùpèsè 388 — 150+ ọ̀fẹ́ — nípasẹ̀ endpoint kan. Claude Code, Codex, Cursor, Cline, Copilot àti Antigravity sí Claude / GPT / Gemini Ọ̀fẹ́ pẹ̀lú àyípadà aládàáṣiṣẹ́. Ìfipamọ́ tó 15–95% àwọn token (~89% ní àpapọ̀) pẹ̀lú ìfọ́kànsí RTK + Caveman — má ṣe dé ààlà láéláé. Àwọn olùpèsè AI 388 · àwọn ipele ọ̀fẹ́ 150+ · ~1.62B àwọn token ọ̀fẹ́/bí oṣù · àwọn ọgbọ́n ìdarí 20 · $0 láti bẹ̀rẹ̀."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 388 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 388 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
 <div align="center">
 
-## 💰 ~1.62B Àwọn Token / Oṣù Kọọkan Kọjá Àwọn Free Tier Ẹni-kẹta
+## Awọn ami-ami 💰 ~ 1.62B / Oṣooṣu Kọja Awọn ipele Ọfẹ Ẹkẹta
 
 </div>
 
-> **Mú àkáǹtì olupèsè tirẹ wá.** Èyí jẹ́ ìṣírò àpapọ̀ tí a fojú díwọ̀n láàárín àwọn free tier ẹni-kẹta tí ó yẹ lọ́tọ̀ọ̀tọ̀, kì í ṣe ẹ̀bùn token láti ọ̀dọ̀ OmniRoute. Forúkọsílẹ̀, gba àwọn ìwé-ẹ̀rí àṣẹ níbi tí ó bá ṣe pàtàkì, kí o sì so àwọn olupèsè tí o lè lò pọ̀; olupèsè kọ̀ọ̀kan ló ń ṣàkóso àwọn ààlà, ìwàláàyè, àti àwọn òfin rẹ̀.
+> **Mu awọn akọọlẹ olupese ti ara rẹ wa.** Eyi jẹ apapọ ifoju kọja awọn ipele ọfẹ ti ẹnikẹta ti o yẹ lọtọ, kii ṣe ẹbun ami lati OmniRoute. Forukọsilẹ, gba awọn iwe-ẹri nibiti o nilo, ati so awọn olupese ti o le lo; Olupese kọọkan n ṣakoso awọn opin rẹ, wiwa, ati awọn ofin.
 >
-> Kíkó àwọn free tier jọ pẹ̀lú ọwọ́ máa ń dùn ún — ọ̀pọ̀ SDK, ọ̀pọ̀ ààlà oṣuwọn, àti àìmọ̀ iye tí o ní gan-an. OmniRoute ṣe àkójọpọ̀ **àkọsílẹ̀ free-tier 465 káàkiri àwọn bọ́ọ̀lù adágún tí ń tún ara wọn ṣe 34** ó sì ń ṣírò àkótán token láti inú **àwọn adágún 17 tí ó ní ìṣúná oṣù rere tí a tẹ̀jáde, pẹ̀lú ààlà Groq márùn-ún fún model kọ̀ọ̀kan**, tí a sì yọ àtúnsọ̀rọ̀ kúrò nípasẹ̀ adágún tí wọ́n jọ pín. Àwọn quota tí ó máa ń ṣí lẹ́yìn ìwádìí ìdánimọ̀ agbègbè kan (lónìí: ModelScope) ni a fi hàn lọ́tọ̀, +~6M lẹ́yìn ìmúdájú ìdánimọ̀ agbègbè, a kò sì kà wọ́n sínú àkótán náà láéláé. Àbájáde náà máa ń hàn lórí dashboard (`/dashboard/free-tiers`).
+> Iṣakojọpọ awọn ipele ọfẹ nipasẹ ọwọ jẹ irora — dosinni ti SDKs, dosinni ti awọn opin oṣuwọn, ati pe ko mọ iye ti o ni gangan. OmniRoute awọn katalogi **Awọn titẹ sii ipele-ọfẹ 466 kọja awọn bọtini adagun-odo 34 loorekoore** ati ki o oniṣiro awọn akọle àmi lati awọn **Awọn adagun-omi 17 pẹlu isuna-isuna oṣooṣu rere ti a tẹjade pẹlu awọn bọtini Groq marun-kan fun awoṣe** , deduplicated nipa pín pool. Awọn ipin ti o ṣii nikan lẹhin ayẹwo idanimọ agbegbe (loni: ModelScope) ti han lọtọ, +~ 6M lẹhin ijẹrisi idanimọ agbegbe, ati pe ko ṣe akopọ sinu akọle. Abajade naa duro han lori dasibodu (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Káàdì ìṣúná free-tier OmniRoute: ~1.62B free token fún oṣù kọọkan ní ìdúróṣinṣin, tó lè dé ~2.22B ní oṣù àkọ́kọ́ pẹ̀lú àwọn kírẹ́dì ìforúkọsílẹ̀, láti inú àwọn bọ́ọ̀lù adágún tí ń tún ara wọn ṣe 34 tí a ṣàkọsílẹ̀, tí wọ́n bo àkọsílẹ̀ free-tier 465 lẹ́yìn endpoint kan. Ìṣírò adágún tí a yọ àtúnsọ̀rọ̀ kúrò pátápátá — a ka adágún tí a pín lẹ́ẹ̀kan ṣoṣo, pẹ̀lú àwọn adágún tí ń tún ara wọn ṣe 17 tí ó ní ìṣúná token oṣù rere tí a tẹ̀jáde, àti ààlà Groq márùn-ún fún model kọ̀ọ̀kan; àwọn olupèsè 12 ni a samisi pé kí a yẹra fún wọn nínú àkójọpọ̀ ewu àwọn òfin, nítorí náà ìwọ ló ń pinnu. Pẹpẹ ìṣúná náà ní Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ààlà márùn-ún fún model kọ̀ọ̀kan) àti àwọn adágún kéékèèké míì, pẹ̀lú àwọn kírẹ́dì ìforúkọsílẹ̀ oṣù àkọ́kọ́ àti àwọn olupèsè tí ó jẹ́ ọ̀fẹ́ títí láé tí kò ní ààlà token, tí a fi hàn lọ́tọ̀ kí wọ́n má bà a ṣe àkótán náà pọ̀ sí i. Iye tí a lò àti èyí tó ṣẹ́kù lórí /dashboard/free-tiers ní àkókò gidi."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card: ~1.62B free tokens per month steady, up to ~2.22B in the first month with signup credits, from 34 documented recurring pool keys covering 466 cataloged free-tier entries behind one endpoint. Honest pool-deduped math — each shared pool counted once, including 17 recurring pools with a published positive monthly token budget plus five per-model Groq caps; 12 providers are marked avoid in the terms-risk catalog so you decide. Budget bar includes Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (five per-model caps) and smaller pools, plus first-month signup credits and permanently-free no-token-cap providers surfaced separately so they never inflate the headline. Live used/remaining on /dashboard/free-tiers."/>
 
-> Àkótán alágbèéká ti ojú-ìwé `/dashboard/free-tiers` tó ń ṣiṣẹ́ ní àkókò gidi. Ọ̀nà àṣàyẹ̀wò kíkún (yíyọ àtúnsọ̀rọ̀ adágún, àwọn ipele kírẹ́dì, àwọn òfin olupèsè): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Akopọ ere idaraya ti oju-iwe `/dashboard/free-tiers` laaye. Ilana ni kikun (dedupe adagun-odo, awọn ipele kirẹditi, awọn ofin olupese):**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)** .
 >
-> <sub>A tún ń ṣàyẹ̀wò àwọn nọ́mbà wọ̀nyí ní gbogbo ọ̀sẹ̀ méjì lòdì sí àkójọpọ̀ tó ń ṣiṣẹ́, wọ́n sì **le lọ sókè tàbí sọ̀kalẹ̀** — tí olupèsè bá dá free tier dúró, nọ́mbà náà a dín kù; tí tuntun bá dé, yóò pọ̀ sí i. A ń tẹ̀jáde ohun tí àkójọpọ̀ náà ṣe ìṣírò gan-an, a kì í ṣe àfikún nọ́mbà síi láti ṣe àfihàn ìṣàǹfààní tó dára jù.</sub>
+> <sub>Awọn wọnyi ni isiro ti wa ni tun-audited gbogbo ọsẹ meji lodi si awọn ifiwe katalogi ati **gbe awọn ọna mejeeji** — olupese kan pari ipele ọfẹ ati nọmba naa ṣubu; titun kan ilẹ ati awọn ti o gun. A ṣe atẹjade ohun ti katalogi ṣe iṣiro gangan, kii ṣe ọran ti o dara julọ ti yika.</sub>
 
 <br/>
 
@@ -41,179 +41,169 @@
 
 <h3>
 
-⭐ Fún repo ní ìràwọ̀ bí OMNIROUTE bá ràn ọ́ lọ́wọ́ láti fi owó pamọ́ àti láti mú iṣẹ́ rẹ rọrùn.
+⭐ Star repo ti OMNIROUTE ṣe iranlọwọ fun ọ lati ṣafipamọ owo ati jẹ ki iṣẹ rẹ rọrun.
 
 </h3>
 
-[![Àwọn ìràwọ̀](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social) ](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Ipò Àkọsílẹ̀ Ìtàn Ìràwọ̀](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
-[![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
+[![Ipo Itan Irawọ](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Darapọ̀ mọ́ àwùjọ
+### 💬 Darapọ mọ agbegbe
 
-**👋 Tẹ̀lé ẹni tó ń bójú tó iṣẹ́ náà — gba àwọn olupèsè tuntun, àwọn ìtújáde àti àwọn ìmọ̀ràn kíákíá:**
+**👋 Tẹle olutọju — gba awọn olupese titun, awọn idasilẹ & awọn imọran ni akọkọ:**
 
-[![Tẹ̀lé Diego lórí LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Tẹ̀lé @diegosouzapw lórí GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Tẹle Diego lori LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Tẹle @diegosouzapw lori GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Agbègbè Gbogbo](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Ojú-òpó](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![ Aaye ayelujara](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Àwọn ìbéèrè, ìmọ̀ràn nípa olupèsè, ètò ọ̀nà iwájú àti ìrànlọ́wọ́ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Agbègbè Gbogbo](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Awọn ibeere, awọn imọran olupese, maapu ọna & atilẹyin → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Agbaye](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [ikanni Ibùṣe 📢](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 Ẹnubodè náà ń tẹ̀síwájú láti dàgbà
+## 📈 The Gateway ntọju dagba
 
 <div align="center">
 
-|                                       |        v3.8.50         | **v3.8.51** |       `v3.8.54+`       |
-| ------------------------------------- | :--------------------: | :---------: | :--------------------: |
-| 🌐 Àwọn olupèsè                       |          352           |   **358**   |          388           |
-| 🧠 Àwọn ID modèle ìjíròrò aláìlékànsí |          1320          |  **1374**   |          1491          |
-| 🖼️ Afárá ìbáṣepọ̀                      | 🆕 ìran + ohun + fídíò |      ✓      |           ✓            |
-| 📡 Katalogi ọ̀fẹ́ Radar                 | 🆕 ìforúkọsílẹ̀ àṣàyàn  |      ✓      |           ✓            |
-| ⚖️ Ìṣètò ìpín tó mọ̀ nípa quota        |     🆕 Quota-Share     |      ✓      |           ✓            |
-| 📊 Telemetry quota                    |     🆕 gidi-akoko      |      ✓      |           ✓            |
-| 🧰 Ipo aláìní-ojú                     |           —            |      —      | 🆕 `serve --headless`  |
-| 🛤️ Amayederun ọ̀nà LTS                 |           —            |      —      | 🆕 àwọn ikanni ìtúsílẹ̀ |
-| 🔎 API ìwádìí modèle                  |           —            |      —      | 🆕 `/v1/models/query`  |
+|                           |        v3.8.50        | **v3.8.51** |       `v3.8.54+`       |
+| ------------------------- | :-------------------: | :---------: | :--------------------: |
+| Awọn olupese 🌐           |          352          |   **358**   |          388           |
+| 🧠 Oto iwiregbe awoṣe IDs |         1320          |  **1374**   |          1535          |
+| 🖼️ Modality Bridge        | 🆕 iran + iwe + fidio |      ✓      |           ✓            |
+| 📡 Reda free katalogi     |    Ijade-iwọle 🆕     |      ✓      |           ✓            |
+| ⚖️ Quota-mọ siseto        |     🆕 Quota-Pin      |      ✓      |           ✓            |
+| 📊 Quota telemetry        |        🆕 gbe         |      ✓      |           ✓            |
+| 🧰 Headless mode          |           —           |      —      | 🆕 `serve --headless`  |
+| 🛤️ LTS iṣinipopada infura |           —           |      —      | Awọn ikanni idasilẹ 🆕 |
+| Awari awoṣe 🔎 API        |           —           |      —      | 🆕 `/v1/models/query`  |
 
-**→ [Àtòjọ ọ̀nà ìdàgbàsókè](ROADMAP.md) — tí ń gun ọ̀nà lọ sí `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — gigun iṣinipopada si `v3.9.0 LTS`**
 
 </div>
 
 <br/>
 
-## 🧩 Ó wà
+## 🧩 Wa
 
-[![Ẹ̀yà npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Oṣooṣù](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Àṣẹ: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Àwọn ìfà Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Àwọn ìgbàgbà Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Aṣẹ: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Bẹ̀rẹ̀</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Ibẹrẹ Kíákíá</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Fí sori ẹrọ</a></td>
-    <td align="center"><a href="#first-run">🆓 So olùpèsè pọ̀</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Kọ́ ẹ̀kọ́</b></td>
-    <td align="center"><a href="#-the-promise">💥 Ìlérí náà</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Kí ló dé tí OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ohun tí ó yà á sọ́tọ̀</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Àwọn Ẹya</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Àwọn Combo</a></td>
-    <td align="center"><a href="#-388-ai-providers--153-catalog-marked-free">🌐 Àwọn olùpèsè</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-388-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Ìdínkù</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Ibi tí ó ti ń ṣiṣẹ́</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Àdáni</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Wò ó</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Ní iṣẹ́</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kí ló ṣẹ̀ṣẹ̀ tuntun</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Àwọn CLI tó bá mu</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Àtìlẹ́yìn</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Àtìlẹ́yìn / Ṣètìrẹ́</a></td>
-    <td align="center"><a href="#-community--help">💬 Àwùjọ</a></td>
-    <td align="center"><a href="#-sponsors">💖 Àwọn alátìlẹ́yìn</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Iṣẹ́ náà</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Àkójọpọ̀ ìmọ̀ ẹ̀rọ</a></td>
-    <td align="center"><a href="#-documentation">📖 Àwọn ìwé ìtọ́sọ́nà</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Àwọn olùkópa</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
 </div>
 
 <div align="center">
-  <b>🌐 Ní àwọn èdè 67</b>
+  <b>🌐 Ni awọn ede 67</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Gẹ̀ẹ́sì (en)" title="Gẹ̀ẹ́sì (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Pọ́túgà — Brazil (pt-BR)" title="Pọ́túgà — Brazil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Pọ́túgà (pt)" title="Pọ́túgà (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Sípáníìṣì (es)" title="Sípáníìṣì (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Faransé (fr)" title="Faransé (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Itálì (it)" title="Itálì (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Jámánì (de)" title="Jámánì (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Dùtṣì (nl)" title="Dùtṣì (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Rọ́ṣíà (ru)" title="Rọ́ṣíà (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukurénì (uk-UA)" title="Ukurénì (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Pólándì (pl)" title="Pólándì (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Èdè Czech (cs)" title="Èdè Czech (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slofákì (sk)" title="Slofákì (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Rómáníà (ro)" title="Rómáníà (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Húngárì (hu)" title="Húngárì (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bọ́lgáríà (bg)" title="Bọ́lgáríà (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dáníṣì (da)" title="Dáníṣì (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Fínlándì (fi)" title="Fínlándì (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Nọ́wégíà (no)" title="Nọ́wégíà (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Súédíṣì (sv)" title="Súédíṣì (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Ṣáínà — Rọrùn (zh-CN)" title="Ṣáínà — Rọrùn (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Ṣáínà — Àtẹ̀yìnwá (zh-TW)" title="Ṣáínà — Àtẹ̀yìnwá (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Jàpáànì (ja)" title="Jàpáànì (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Kòríà (ko)" title="Kòríà (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Táilándì (th)" title="Táilándì (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Víẹtnàmì (vi)" title="Víẹtnàmì (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Èdè Indonesia (id)" title="Èdè Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Èdè Malay (ms)" title="Èdè Malay (ms)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
   <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindí (hi)" title="Hindí (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gújarátì (gu)" title="Gújarátì (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Maráthì (mr)" title="Maráthì (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamilì (ta)" title="Tamilì (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugù (te)" title="Telugù (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bẹ́ńgálì (bn)" title="Bẹ́ńgálì (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Pẹ́ṣíà (fa)" title="Pẹ́ṣíà (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Lárúbáwá (ar)" title="Lárúbáwá (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Hébúrù (he)" title="Hébúrù (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Tọ́kì (tr)" title="Tọ́kì (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Àṣẹ́bájání (az)" title="Àṣẹ́bájání (az)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
   <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Gíríìkì (el)" title="Gíríìkì (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Króátíà (hr)" title="Króátíà (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Sérbíà (sr)" title="Sérbíà (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lítúáníà (lt)" title="Lítúáníà (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Ésítóníà (et)" title="Ésítóníà (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Látfíà (lv)" title="Látfíà (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slofeníà (sl)" title="Slofeníà (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Málítì (mt)" title="Málítì (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Èdè Irish (ga)" title="Èdè Irish (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kannada (kn)" title="Kannada (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malayalam (ml)" title="Malayalam (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Òdíà (or)" title="Òdíà (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Punjabi (pa)" title="Punjabi (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nẹ́pálì (ne)" title="Nẹ́pálì (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Sinhala (si)" title="Sinhala (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Búrmà (my)" title="Búrmà (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmẹ̀r (km)" title="Khmẹ̀r (km)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
   <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
   <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Ìgbò (ig)" title="Ìgbò (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Àmáríìkì (am)" title="Àmáríìkì (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Úsíbẹ̀kì (uz)" title="Úsíbẹ̀kì (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Jọ́jíà (ka)" title="Jọ́jíà (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Àméníà (hy)" title="Àméníà (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bósníà (bs)" title="Bósníà (bs)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -223,48 +213,48 @@
 
 <a id="first-run"></a>
 
-## 🆓 Fi sori ẹrọ, so olupese kan pọ̀, lẹ́yìn náà darí nipasẹ endpoint kan
+## Fi sori ẹrọ 🆓, so olupese kan pọ, lẹhinna ipa ọna nipasẹ aaye ipari kan
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Ìgbésẹ̀ mẹ́ta: fi OmniRoute sori ẹrọ kí o sì bẹ̀rẹ̀ rẹ̀, so olupese tó yẹ pọ̀ pẹ̀lú àkọọ́lẹ̀ tirẹ̀ tàbí kọ́kọ́rọ́ API rẹ, lẹ́yìn náà tọ́ka irinṣẹ́ rẹ sí localhost:20128/v1 ní lílo kọ́kọ́rọ́ OmniRoute API àti model auto. Ìdarí dá lórí àwọn ìsopọ̀ tó yẹ tó wà àti àwọn ààlà olupese."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Three steps: install and start OmniRoute, connect an eligible provider with your own account or API key, then point your tool at localhost:20128/v1 using an OmniRoute API key and model auto. Routing depends on available eligible connections and provider limits."/>
 
 ```bash
-# Lẹ́yìn tí o bá so olupese kan pọ̀, da kọ́kọ́rọ́ OmniRoute rẹ̀ kọ́ láti Dashboard → Endpoints:
+# After connecting a provider, copy your OmniRoute key from Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` nílò ọ̀nà tó yẹ. Fifi sori ẹrọ tuntun lè má ní àwọn ibi-afẹ́fẹ́ keyless tó yẹ, àti pé olupese keyless lè kọ́ àwọn oníbàárà ẹni-kẹta. Àwọn olupese tí a samì sí `tos: avoid`, pẹ̀lú Kiro, ni a yọ kúrò nínú ìdarí aládàáṣiṣẹ́ ní àìpẹ̀yà; so àkọọ́lẹ̀ pọ̀ kò lè yí ìṣètò yẹn padà. Wo [Àkọsílẹ̀ Àwọn Ìpele Ọ̀fẹ́](docs/getting-started/FREE-TIERS-GUIDE.md) kí o tó yan olupese kan.</sub>
+<sub>`auto` nilo ipa ọna ti o yẹ. Fifi sori tuntun ko le ni awọn ibi-afẹde aisi bọtini ti o yẹ, ati pe olupese ti ko ni bọtini le kọ awọn alabara ẹnikẹta. Awọn olupese ti samisi `tos: avoid`, pẹlu Kiro, ti wa ni rara lati laifọwọyi afisona nipa aiyipada; sisopọ akọọlẹ kan ko ni yiyipada eto yẹn. Wo [Itọsọna Awọn ipele Ọfẹ](docs/getting-started/FREE-TIERS-GUIDE.md) ṣaaju yiyan olupese kan.</sub>
 
-<sub>📦 Àwọn script quickstart tí o lè da síbi kí o sì ṣiṣẹ́ fún **Python, Node.js, PHP, àti cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Daakọ-lẹẹmọ awọn iwe afọwọkọ iyara fun **Python, Node.js, PHP, ati cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
 <div align="center">
 
-# 💥 Àdéhùn náà
+# 💥 Ileri naa
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Àdéhùn náà — Endpoint kan àti àwọn olupese 388. Fallback aládàáṣiṣẹ́ máa ń jẹ́ kí ìdarí tẹ̀síwájú nígbà tí ibi-afẹ́fẹ́ mìíràn tó ní ìlera bá wà. Àwọn òpó mẹ́fà: fallback tó lágbára kọjá àwọn olupese 388 · ìfipamọ́ token tó tó 95% lórí àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ìpele ọ̀fẹ́ 150+ àti àwọn olupese ọ̀fẹ́ títí láé 52 tí ń tún ara wọn ṣe/tí kò nílò kọ́kọ́rọ́ · àwọn ìṣọ̀kan CLI/agent 39 nípasẹ̀ ìṣètò kan · ìbámu OpenAI, Claude, Gemini àti Responses API ní /v1 · àwọn ìṣàkóso production pẹ̀lú circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals àti àwọn ìkéde ìdánwò static 56,000+ káàkiri àwọn fáìlì ìdánwò 7,800+ tí a ń tọ́pin."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 388 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 388 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
 
 <div align="center">
 
-# 🤔 Kí ló dé OmniRoute?
+# 🤔 Kí nìdí OmniRoute?
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kí ló dé OmniRoute — dáwọ́ dúró láti máa ṣàkóso dashboards 10, àwọn kọ́kọ́rọ́ API tó ti kú àti àwọn owó àìròtẹ́lẹ̀. Àwọn ìṣòro ojoojúmọ́ mẹ́wàá àti àwọn àtúnṣe wọn: quota ń parí láìlo → mú àwọn subscription pọ̀ sí i; rate limits ní àárín coding → 4-tier auto-fallback (Subscription → API → Cheap → Free); àwọn àbájáde irinṣẹ́ ń jó tokens → RTK + Caveman compression (15–95%); APIs tó gbówó → ìdarí tí a ṣe àgbékalẹ̀ fún iye owó; gbogbo irinṣẹ́ ní setup tirẹ̀ → endpoint kan, dashboard kan; AI ti dènà → 3-level proxy + TLS stealth; àwọn kọ́kọ́rọ́ tó ti kú → resilience 3-layer (circuit breakers, key cooldown, model lockout); ẹgbẹ́ kan ń pín subscription kan → key pools pẹ̀lú quotas fair-share; prompts ń kọjá lórí cloud ẹlòmíràn → local-first pẹ̀lú àwọn kọ́kọ́rọ́ AES-256-GCM tí a ti encrypt; kò sí ìmòye lórí ìnáwó → analytics alààyè (usage, quota, savings, p95 latency)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains vs fixes: quota expiring unused → maximize subscriptions; rate limits mid-coding → 4-tier auto-fallback (Subscription → API → Cheap → Free); tool outputs burning tokens → RTK + Caveman compression (15–95%); expensive APIs → cost-optimized routing; every tool its own setup → one endpoint, one dashboard; AI blocked → 3-level proxy + TLS stealth; dead keys → 3-layer resilience (circuit breakers, key cooldown, model lockout); team sharing one subscription → key pools with fair-share quotas; prompts through someone's cloud → local-first with AES-256-GCM encrypted keys; no spend visibility → live analytics (usage, quota, savings, p95 latency)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Ìṣàn ìbéèrè OmniRoute: IDE tàbí CLI rẹ (Claude Code, Cursor, Cline…) ń pe endpoint agbegbe kan (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman compression, àwọn ọgbọ́n routing 20, circuit breakers, TLS stealth, MCP, A2A, guardrails) lè ṣe fallback kọjá àwọn tier olupese 4 nígbà tí ibi-afẹ́fẹ́ tó yẹ tó sì ní ìlera bá wà — Tier 1 Subscription, Tier 2 API Key, Tier 3 Cheap àti Tier 4 Free."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute request flow: your IDE or CLI (Claude Code, Cursor, Cline…) calls one local endpoint (http://localhost:20128/v1); the OmniRoute Smart Router (RTK + Caveman compression, 20 routing strategies, circuit breakers, TLS stealth, MCP, A2A, guardrails) can fall back across 4 provider tiers while an eligible healthy target remains — Tier 1 Subscription, Tier 2 API Key, Tier 3 Cheap and Tier 4 Free."/>
 
 </div>
 
@@ -505,11 +495,11 @@ Gbogbo ọgbọ́n **20** náà — parapọ̀ wọn bí o ṣe fẹ́ fún ìgb
 
 <div align="center">
 
-## 🏆 Ohun Tó Yà OmniRoute Sótọ̀
+## 🏆 Ohun Tí Ó Yà OmniRoute Kúrò
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ohun tó yà OmniRoute sọ́tọ̀ — àkótán àwọn ẹ̀yà ọjọ́ kan tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM káàkiri àwọn agbára 13. OmniRoute: àwọn olùpèsè 388, àwọn ipele ọ̀fẹ́ tí ó ju 150 lọ tí a ti ṣètò sínú rẹ̀, àwọn ọgbọ́n ìtọ́jú ipa 20, ìfipamọ́ token pẹ̀lú ẹ́ńjìnì 12, olupin MCP tí a ti ṣètò sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí títẹpẹlẹ, àwọn ìdènà ààbò, àwọn aṣojú awọ̀n ಮೋ, ìfipamọ́ ìtọ́ka TLS, Desktop/Termux/PWA àti àwọn èdè UI i18n 67. OmniRoute ní ìwé-aṣẹ MIT, ó sì lè jẹ́ ẹni tí a gbàlejò fúnra wa. Àwọn agbára àti iye àwọn olùjà lè yí padà; wo ìlànà tí a so mọ́ ọ."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ohun tí ó yà OmniRoute kúrò — àkótán àwọn ẹ̀yà tó ní ọjọ́ sílẹ̀ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM ní gbogbo agbára 13. OmniRoute: àwọn olupèsè 388, àwọn ìpele ọ̀fẹ́ 150+ tí a ti kọ́ sínú rẹ̀, àwọn ọgbọ́n ìtọ́sọ́nà 20, ìfúnpọ̀ token pẹ̀lú ẹ́ńjìnì 12, olupèsè MCP tí a ti kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí aláìgbéyìn, àwọn ìdènà ààbò, àwọn aṣojú awọ̀n, ìfarapamọ́ àpẹẹrẹ TLS, Desktop/Termux/PWA àti àwọn locale UI i18n 67. OmniRoute ní ìwé-aṣẹ MIT, ó sì lè gbàlejò fúnra rẹ. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ìlànà tí a so mọ́."/>
 
 <sub>📊 Ìlànà kíkún àti àlàyé ẹ̀yà kọ̀ọ̀kan ní ìfiwéra pẹ̀lú 9router, OpenRouter, CLIProxyAPI àti LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -584,39 +574,39 @@ tẹlifíṣọ̀nù lílò, tàbí ipò ìkọ̀sílẹ̀ ìkéde abẹ́lẹ̀
 
 <div align="center">
 
-## ✨ Kí ni Tuntun
+## ✨ Kini Tuntun
 
 </div>
 
-> Àwọn àkótán tuntun láti **v3.8.20 → v3.8.54**. Wo gbogbo ìtàn nínú [`CHANGELOG.md`](CHANGELOG.md).
+> Recent ifojusi lati **v3.8.20 → v3.8.54** . Ekunrere itan ni [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ Ìtọ́jú `quota-weighted`** — ìlànà combo ogún máa ń fo àwọn àkántì tí quota wọn ti tán, lẹ́yìn náà ó yan láàárín àwọn tó kù ní ìbámu pẹ̀lú leftover quota ÷ in-flight load, nípa bẹ́ẹ̀ àwọn ìjíròrò tó wà tẹ́lẹ̀ á dúró mọ́ ibi wọn. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Ipo Headless** — `omniroute serve --headless` (tàbí `OMNIROUTE_HEADLESS=1`) máa ń ṣiṣẹ́ engine aṣojú `/v1/*` nìkan, pẹ̀lú dashboard àti àwọn subsystems tó jẹ́ ti dashboard nìkan tí a pa. → [Ipo Headless](docs/guides/HEADLESS.md)
-- **🔎 Ìwádìí model** — `/v1/models` máa ń ṣe àlẹ̀mọ́ nípa agbára, context, irú àti ọ̀rọ̀, àti `POST /v1/models/query` máa ń dá shortlist kúkúrú tó ní ìpinnu kan náà padà, pẹ̀lú ìríran per-key kan náà. → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md)
-- **🔑 Ìṣàkóso routing fún kọ́kọ́rọ́ kọ̀ọ̀kan** — so API key kan mọ́ model kan tàbí combo kan pẹ̀lú `forcedModel`, kí o sì fi models àti combos kọ́kọ́rọ́ kan kún un tàbí yọ wọ́n kúrò ní ẹ̀ẹ̀kan (`/api/keys/{id}/access`). → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Àwọn ìṣàkóso PII tó túbọ̀ rọrùn** — yíyan nípa irú, títí dé àwọn àpẹẹrẹ masking àṣà 20 tí a fìdí rẹ̀ múlẹ̀, àti àwọn counter ìṣàwárí fún irú kọ̀ọ̀kan; masking fúnra rẹ̀ ṣì jẹ́ ohun tí a gbọ́dọ̀ yàn. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 Àwọn èdè 67** — dashboard, àwọn àfihàn docs àti CLI, pẹ̀lú `npm run i18n:add-locale` tó ń fi èdè kan kún gbogbo ibi ní àṣẹ kan ṣoṣo. → [Ìtọ́sọ́nà i18n](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — A2A delegation tó ń wọlé sí fleet agent rẹ, àwọn ọgbọ́n Conductor lórí Agent Card, àti panel dashboard kan pẹ̀lú Faro push-to-talk voice chat. → [Olùpèsè A2A](docs/frameworks/A2A-SERVER.md)
-- **🛂 Gbigba wọlé tó bá ara mu àti ìdènà overload** — àwọn ìbéèrè chat tó wuwo máa ń dúró ní queue dípò kí wọ́n máa dá 503 padà, pẹ̀lú àwọn atomic RPM rolling leases fún connection kọ̀ọ̀kan. → [Ìtọ́sọ́nà Resilience](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Ìtòlẹ́sẹẹsẹ `/v1/models` tó jẹ́ canonical** — block kan ṣoṣo tó tẹ̀lé ara rẹ̀ fún provider kọ̀ọ̀kan (àwọn combos pinned ní àkọ́kọ́), tó dúró ṣinṣin káàkiri gbogbo catalog source. → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md)
-- **🗜️ Ìmúgbòrò compression** — inflation guard tó wà nípasẹ̀ àìpẹ̀yà, Caveman packs fún DE / FR / JA àti Chinese (wényán), àti RTK filters fún Gradle & .NET. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Iye flat-rate tó jẹ́ òtítọ́** — àwọn provider subscription / coding-plan máa ń kà sí **$0** nínú ìtúpalẹ̀ iye owó; budget, quota àti routing ṣì ń ṣe ìṣírò. → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md)
-- **⚖️ Ìtọ́jú Quota-Share** — pín quota account tí a pín fún àwọn pooled keys ní òdodo, ó sì ń lo gbogbo agbára tó wà nípa yíyan àwọn slices tí kò ṣiṣẹ́ fún àwọn míì. → [Ìtọ́sọ́nà Resilience](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Ìṣètò CLI/agent pẹ̀lú àṣẹ kan** — àwọn àṣẹ `setup-*` 15 tí a forúkọsílẹ̀; `omniroute run` ń bẹ̀rẹ̀ CLI 7 (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` ń ṣe àtìlẹ́yìn fún targets 11 pẹ̀lú yíyan provider+model ìbánisọ̀rọ̀ àti àwọn favorites fún context kọ̀ọ̀kan. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Ipo Remote** — ṣàkóso OmniRoute remote kan pẹ̀lú àwọn token tó ní ààlà (`connect` / `contexts` / `tokens`) + olùrànlọ́wọ́ OAuth `antigravity` fún àwọn ìfìsí VPS. → [Ipo Remote](docs/guides/REMOTE-MODE.md)
-- **🧭 Auto-routing tó lóye jù** — `auto/<category>:<tier>` combos, **Fusion** (model panel + judge), routing tó mọ iṣẹ́, àti àwọn override model / mode / USD-budget fún ìbéèrè kọ̀ọ̀kan. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Compression tí a lè fi engine kún** — engines 12 tó lè darapọ̀ + Compression Studios: LLMLingua-2, Ultra tier méjì, omniglyph, per-step fidelity gate, GCF v3.2, àti drag-reorder editor. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ MITM decrypt (TPROXY) tó hàn gbangba** — capture CLIs tí ń fo àwọn proxy env vars, pẹ̀lú CA fún SNI kọ̀ọ̀kan + installer trust-store. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Àwọn ìwífún iye owó ní gbogbo ibi** — àwọn headers iye owó/lílò `X-OmniRoute-*` lórí endpoint kọ̀ọ̀kan, header savings fún cache-HIT, àti àwọn quota ìná USD fún key kọ̀ọ̀kan. → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md)
-- **🧠 Memory tí ìwọ ń ṣàkóso** — ó wà ni pipa ní ìbẹ̀rẹ̀, opt-in int8 vector quantization + typed decay, àti `x-omniroute-no-memory` fún ìbéèrè kọ̀ọ̀kan. → [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ Ààbò** — prompt-injection guard lórí gbogbo LLM route (red-team suite), credential-masking guardrail tí a lè yàn (ó ń bo àwọn API key/secret tí ó bá jo ní àwọn ìtọ́sọ́nà méjèèjì), ìwádìí wẹẹbù DuckDuckGo ọ̀fẹ́ fún ìgbà ìkẹyìn, àti OIDC login gate àṣàyàn fún dashboard (password login máa ń wà ní gbogbo ìgbà). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ Àwọn endpoint tuntun** — `/v1/ocr` (Mistral OCR) àti `/v1/audio/translations` (irú Whisper) ń mú àgbègbè media pé. → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md)
-- **🎨 Ṣíṣẹ̀dá image / video / audio** — API kan fún media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, àti àwọn provider speech bí ElevenLabs. → [Ìtọ́kasí API](docs/reference/API_REFERENCE.md)
-- **🌍 Deployment àti ops** — reverse-proxy `basePath`, ìṣàwárí browser-language aládàáṣe, device tracking fún key kọ̀ọ̀kan, MITM trust tí kò nílò root, àti ìtumọ̀ zh-TW. → [Ayíká](docs/reference/ENVIRONMENT.md)
-- **🤝 Àwọn provider àti agent míì** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) pẹ̀lú browser + OAuth login, kaadi Ollama tó ní àtìlẹ́yìn kíkún, Claude Opus 5 & Sonnet 5, ìfọwọ́sowọ́pọ̀ Kimi tó jẹ́ official (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… àti **catalog provider 388** tí a tún ṣe. → [Àwọn Provider](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Ìhàn gbangba routing** — gbogbo ìdáhùn ní header `X-OmniRoute-Decision` tó ń sọ strategy/provider/latency tó pèsè rẹ̀, combo strategy `cache-optimized` tuntun + factor `cacheAffinity` Auto-Combo máa ń darí àwọn ìbéèrè tí a tún ṣe padà sí connection tó ń di prefix tí a cache mọ́, àti endpoint `/v1/auto-combo/{channel}/candidates` tí a kà nìkan ń ṣí pool candidate gidi ti channel `auto/*` hàn. → [Auto-Combo](docs/routing/AUTO-COMBO.md).
-- **⚡ Ìṣiṣẹ́ agbègbè tó yára & amáyédẹrùn** — Redis agbègbè pẹ̀lú títẹ bọtìnì kan, àwọn olùgbékalẹ̀ relay Cloudflare Workers / Deno Deploy, àti Bifrost & Mux gẹ́gẹ́ bí àwọn iṣẹ́ tí a fi sínú tí a ń bójú tó. → [Àwọn Iṣẹ́ Tí A Fi Sínú](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Àwọn míì nínú àpótí** — ìlànà plugin + ọjà, àwọn ìlànà ọgbọ́n Omni/Agent/GitHub, ìṣọ̀kan Obsidian vault (àwọn irinṣẹ́ MCP 22), àwọn API Batch & Files tó bá OpenAI mu, kásì ìdáhùn ọgbọ́n, ìṣeré pẹ̀lú àwọn tábìlì aṣáájú, ìwádìí aṣojú ACP (àwọn aṣojú tí a ṣe sínú 15), ìtajà log tí a ṣètò sí BigQuery, `auto/chaos` ìfìtẹ́lẹ̀ ọ̀pọ̀ àwòṣe ní ìfarawé, afárá bot Telegram, olùṣàkóso ẹ̀dà nínú ìṣàfilọ́lẹ̀ àti àwọn ìṣàyẹ̀wò àwọn olùpèsè ọ̀fẹ́ LMArena-ELO. → [Àkọsílẹ̀](docs/README.md)
+- **⚖️ `quota-weighted` afisona** — ilana igbimọ konbo 20 fo awọn akọọlẹ ti o rẹwẹsi, lẹhinna fa laarin awọn iyokù ni iwọn si ipin aloku ÷ ninu ọkọ ofurufu, fifi awọn ibaraẹnisọrọ to wa tẹlẹ pinni. → [Aifọwọyi-Konbo](docs/routing/AUTO-COMBO.md)
+- **🧰 Headless mode** — `omniroute serve --headless` (tabi `OMNIROUTE_HEADLESS=1`) nṣiṣẹ nikan `/v1/*` aṣoju engine, pẹlu awọn Dasibodu ati Dasibodu-nikan subsystems ni pipa. → [Headless Ipo](docs/guides/HEADLESS.md)
+- **Awari awoṣe 🔎** — `/v1/models` ṣe asẹ nipasẹ agbara, ọrọ-ọrọ, iru ati ọrọ, ati `POST /v1/models/query` da pada atokọ kukuru ipinnu kukuru pẹlu hihan-bọtini kanna. → [API Itọkasi](docs/reference/API_REFERENCE.md)
+- **🔑 Per-bọtini idari ipa ọna** — pin bọtini API kan si awoṣe kan tabi konbo pẹlu `forcedModel`, ati ṣafikun tabi yọkuro awọn awoṣe bọtini kan ati awọn akojọpọ atomiki (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Finer PII idari** Aṣayan iru-iru —, to awọn ilana boju-boju aṣa ti a fọwọsi si 20 ati awọn iṣiro wiwa iru-iru; masking ara duro ijade-ni. → [Guardrails](docs/security/GUARDRAILS.md)
+- **🌍 67 ede** Dasibodu —, awọn digi docs ati CLI, pẹlu `npm run i18n:add-locale` fifi ede kan kun nibi gbogbo ni aṣẹ kan. → [i18n Itọsọna](docs/guides/I18N.md)
+- **🎛️ OmniConductor** Aṣoju — inbound A2A si ọkọ oju-omi kekere aṣoju rẹ, awọn ọgbọn adari lori Kaadi Aṣoju, ati igbimọ dasibodu kan pẹlu Faro titari-si-sọrọ ohun iwiregbe. → [A2A olupin](docs/frameworks/A2A-SERVER.md)
+- **Gbigbawọle Adaptive 🛂 & Idaabobo apọju** — heavyweight iwiregbe awọn ibeere isinyi dipo 503ing, pẹlu atomiki RPM yiyi yalo fun asopọ. → [Resilience Itọsọna](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Canonical `/v1/models` ibere** — ọkan contiguous olupese-ẹgbẹ Àkọsílẹ fun olupese (combos pinned akọkọ), idurosinsin kọja gbogbo orisun katalogi. → [API Itọkasi](docs/reference/API_REFERENCE.md)
+- **Lile funmorawon 🗜️** — aiyipada-lori afikun oluso, Caveman akopọ fun DE / FR / JA + Chinese (wényán), RTK Ajọ fun Gradle & .NET. → [funmorawon](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Otitọ idiyele alapin-oṣuwọn** Ṣiṣe alabapin — / awọn olupese eto ifaminsi ka **$0** ni awọn atupale iye owo; isuna, ipin & afisona pa ifoju. → [API Reference](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share afisona** — pin ipin ipin iroyin ti o pin ni aitọ kọja awọn bọtini ti a ṣajọpọ, titọju iṣẹ-ṣiṣe ki awọn ege laiṣiṣẹ ni a ya jade. → [Resilience Itọsọna](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Ọkan-aṣẹ CLI/agent setup** — 15 ti a forukọsilẹ awọn aṣẹ `setup-*` ; `omniroute run` ṣe ifilọlẹ 7 CLIs (koodu Claude, Codex, Aider, Goose, OpenCode, koodu Qwen, Gemini CLI); `omniroute configure` ṣe atilẹyin awọn ibi-afẹde 11 pẹlu olupese ibaraenisepo olupilẹṣẹ awoṣe + ati awọn ayanfẹ ọrọ-ọrọ. → [CLI Integration](docs/guides/CLI-INTEGRATIONS.md)
+- **Ipo Latọna 🛰️** — wakọ OmniRoute latọna jijin pẹlu awọn ami ti o ni iwọn (`connect` / `contexts` / `tokens`) + oluranlọwọ `antigravity` OAuth fun awọn fifi sori ẹrọ VPS. [Ipo Latọna](docs/guides/REMOTE-MODE.md) →
+- **🧭 ijafafa auto-afisona** Awọn akojọpọ — `auto/<category>:<tier>`,**Iparapọ** (onidajọ + awoṣe awoṣe), afisona-ṣiṣe-ṣiṣe, fun-ibeere awoṣe / mode / USD-isuna danu. → [Aifọwọyi-Konbo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Pluggable funmorawon** — 12 enjini composable + Situdio funmorawon: LLMLingua-2, meji-ipele Ultra, omniglyph, fun-igbese iṣootọ ẹnu-ọna, GCF v3.2, fa-atunbere olootu. → [funmorawon](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Transparent MITM decrypt (TPROXY)** — gba CLIs ti o foju parẹ proxy env vars, pẹlu olupilẹṣẹ ile-itaja igbẹkẹle-SNI CA + kan. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Iye owo telemetry nibi gbogbo** Awọn akọle — `X-OmniRoute-*` cost/usage lori gbogbo aaye ipari, kaṣe-HIT ifowopamọ akọsori, fun-bọtini USD inawo awọn ipin. → [API Itọkasi](docs/reference/API_REFERENCE.md)
+- **🧠 Memory o šakoso** — ni pipa nipa aiyipada, ijade int8 vector quantization + ti tẹ ibajẹ, fun ibeere `x-omniroute-no-memory`. → [Iranti](docs/frameworks/MEMORY.md)
+- **🛡️** Ẹṣọ abẹrẹ — ni kiakia lori gbogbo ọna LLM (suite-ẹgbẹ-pupa), ijade ni ẹṣọ-masking guardrail (awọn atunṣe ti jo API keys/secrets ni awọn itọnisọna mejeeji), wiwa wẹẹbu ibi-igbẹhin DuckDuckGo ọfẹ, ati ẹnu-ọna iwọle OIDC yiyan fun dasibodu (iwọle nigbagbogbo wa). → [Guardrails](docs/security/GUARDRAILS.md)
+- **🖼️ New endpoints** — `/v1/ocr` (Mistral OCR) ati `/v1/audio/translations` (Whisper-ara) yika awọn media dada. → [API itọkasi](docs/reference/API_REFERENCE.md)
+- **Aworan 🎨 / fidio / iran ohun** — ọkan API fun media: xAI Grok Fojuinu & Novita AI fidio, ComfyUI, Magnific, Adobe Firefly, Segmind, ati awọn olupese ọrọ gẹgẹbi ElevenLabs. → [API Itọkasi](docs/reference/API_REFERENCE.md)
+- **🌍 imuṣiṣẹ & ops** — aṣoju-aṣoju `basePath`, wiwa aifọwọyi-ede aṣawakiri, ipasẹ ẹrọ-bọtini, igbẹkẹle MITM ti ko ni gbongbo, agbegbe zh-TW. → [Ayika](docs/reference/ENVIRONMENT.md)
+- **🤝 Awọn olupese diẹ sii & awọn aṣoju** Awọn aṣoju awọsanma — (Codex Cloud, Cursor, Devin, Jules), Grok Kọ (xAI) pẹlu iwọle + OAuth ẹrọ aṣawakiri, kaadi Ollama akọkọ-kilasi, Claude Opus 5 & Sonnet 5, Kimi ajọṣepọ osise (Code/Web/Moonshot), Zed, Ibeere, SenseNova, Agfrey AI, Ag Yuannes **388-olupese katalogi** . [Awọn olupese](docs/reference/PROVIDER_REFERENCE.md) →
+- **📡 afisona akoyawo** — gbogbo idahun n gbe akọsori `X-OmniRoute-Decision` kan ti o n sọ orukọ strategy/provider/latency ti o ṣe iranṣẹ rẹ, ilana tuntun `cache-optimized` konbo + Auto-Combo `cacheAffinity` ifosiwewe ipa tun awọn ibeere pada si asopọ ti o ni imuduro iṣaaju ti a fi pamọ, ati ipari ipari `/v1/auto-combo/{channel}/candidates` kika-nikan ṣafihan adagun-idije ifiwe laaye ikanni `auto/*` kan. → [Aifọwọyi-Konbo](docs/routing/AUTO-COMBO.md)
+- **⚡ Agbegbe išẹ & infra** — ọkan-tẹ agbegbe Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux bi abojuto awọn iṣẹ ifibọ. [Awọn iṣẹ ifibọ](docs/frameworks/EMBEDDED-SERVICES.md) →
+- **🧩 Tun ninu apoti** — itanna ilana + ọjà, Omni/Agent/GitHub ogbon nílẹ, Obsidian ifinkan Integration (22 MCP irinṣẹ), OpenAI-ibaramu Batch & Faili APIs, atunmọ idahun kaṣe, gamification pẹlu leaderboards, ACP oluranlowo Awari (15-itumọ ti ni òjíṣẹ 15), eto okeere log to BigQuery, `auto/chaos` -apapọ-pupọ-bot app, afara-pupọ Telegram ni app. oluṣakoso ẹya ati LMArena-ELO awọn ipo olupese ọfẹ. [Awọn iwe aṣẹ](docs/README.md) →
 
 <br/>
 
@@ -697,15 +687,15 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 <div align="center">
 
-## 🌐 Àwọn Olùpèsè AI 388 — 153 Ti A Samisi Nínú Kátálógù Gẹ́gẹ́ Bí Ọ̀fẹ́
+## 🌐 388 AI Olupese — 156 Katalogi-Sami Ọfẹ
 
 </div>
 
-> **Àwọn olùpèsè 388 tí a forúkọsílẹ̀** káàkiri àwọn àkójọpọ̀ chat, media, search, local, cloud-agent àti system tó jẹ́ àkọ́kọ́, pẹ̀lú **153 tí ó ní metadata ìwádìí `hasFree: true`**. Àkọsílẹ̀ àwọn chat model bo **àwọn olùpèsè 239 / àwọn ìbáṣepọ̀ provider-model ọ̀tọ̀ọ̀tọ̀ 3,059 / àwọn ID model aise 1,475**; kátálógù ìná ọ̀fẹ́ tó yàtọ̀ ní **àwọn ìlà fún model 471**, **àwọn adágún tó ń tún ara wọn ṣe 34** àti **àwọn olùpèsè ọ̀fẹ́ títí láé 52 tí ó ń tún ara wọn ṣe/tí kò nílò kọ́kọ́rọ́**. Àwọn iye ìpín wọ̀nyí yàtọ̀ ní ìmọ̀lára; àwọn ìtumọ̀ àti ìṣirò tí a ti yọ ìdàpọ̀ adágún kúrò wà nínú [Ìtọ́kasí Olùpèsè](docs/reference/PROVIDER_REFERENCE.md) àti [Àwọn Ìpele Ọ̀fẹ́](docs/reference/FREE_TIERS.md).
+> **388 awọn olupese ti o forukọsilẹ** kọja iwiregbe canonical, media, wiwa, agbegbe, aṣoju-awọsanma ati awọn akojọpọ eto, pẹlu **156 ti n gbe metadata iwari `hasFree: true`** . Iforukọsilẹ awoṣe iwiregbe ni wiwa **Awọn olupese 245 / 3,172 awọn orisii olupese-awoṣe pato / 1,535 awoṣe aise IDs** ; awọn lọtọ free-isuna katalogi ni o ni **466 fun-awoṣe kana** ,**34 loorekoore adagun** ati **52 recurring/keyless awọn olupese ọfẹ-lailai** . Awọn wọnyi ni o yatọ si iyeida nipa oniru; awọn asọye ati awọn iṣiro ti a yọkuro adagun n gbe ni [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) ati [Awọn ipele Ọfẹ](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Gbogbo yàrá ńlá — nípasẹ̀ endpoint kan
+### 🏢 Gbogbo pataki lab — nipasẹ ọkan endpoint
 
 <table>
   <tr>
@@ -734,15 +724,15 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
   </tr>
 </table>
 
-<sub>…àti àwọn míì tó ju 350 lọ — gbogbo àmì àwòrán máa ń ṣí láìsí ìṣòro láti inú kátálógù olùpèsè dashboard. 📖 [Ìtọ́kasí Olùpèsè](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>ati 350 + diẹ sii — gbogbo aami ṣe ipinnu laaye lati inu iwe akọọlẹ olupese ti dasibodu. [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
-### 🆓 Ọ̀fẹ́ Títí Láé — $0, kò sí káàdì mootummaa
+### 🆓 Ọ̀fẹ́ Títí Láé — $0, kò nílò káàdì
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Kò sí ààlà token</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Ko sí ààlà token</sub></td>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Olùdarí aládàáṣiṣẹ́, Tencent Hy3<br/>Ọ̀fẹ́ títí láé</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Ọ̀fẹ́ títí láé</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Ìpele ọ̀fẹ́</sub></td>
@@ -750,96 +740,108 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Ọ̀fẹ́ títí láé</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Ọ̀FẸ́ láìlópin</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Ọ̀fẹ́ láìsí ààlà</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Kò nílò kọ́kọ́rọ́</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Àwọn àwòṣe 50+<br/>Neurons 10K/ọjọ́</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>RPM ọ̀fẹ́ ~40</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Kirẹ́ẹ̀dítì $5 lẹ́ẹ̀kan; káàdì jẹ́ dandan</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free models<br/>+$10 → RPM tó ga jù</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Àwọn àwòṣe 50+<br/>Neuroni 10K/ọjọ́ kan</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>RPM ọ̀fẹ́ tó tó ~40</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Kirẹditi $5 lẹ́ẹ̀kan; káàdì jẹ́ dandan</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Àwọn àwòṣe :free<br/>+$10 → RPM tó ga jù</sub></td>
   </tr>
 </table>
 
-📖 Kátálógì kíkún tí ẹ̀rọ lè kà → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 Kátálọ́ọ̀gù ẹ̀rọ kíkà ní kíkún → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
 
 <div align="center">
 
-## 🖥️ Ibi OmniRoute nṣiṣẹ - nibikibi
+## 🖥️ Ibi tí OmniRoute Ti Ń Ṣiṣẹ́ — Níbikíbi
 
 </div>
 
-> Ohun elo kanna, ẹrọ rẹ, awọn ofin rẹ. Lati fi sori ẹrọ npm agbaye si** foonu rẹ** nipasẹ Termux.
+> Ètò kan náà, ẹ̀rọ rẹ, àwọn òfin rẹ. Láti ìfìsórí npm àgbáyé títí dé **fóònù rẹ** nípasẹ̀ Termux.
 
 <table>
-  <tr><th align="left"> Platform </th><th align="left"> Fi sori ẹrọ </th><th align="left"> Awọn ifojusi </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (agbaye)</b></td><td align="left" nowrap><code> npm fi sori ẹrọ -g omniroute </code></td><td align="left"> Aṣẹ kan, eyikeyi OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (agbaye)</b></td><td align="left" nowrap><code> bun fi -g omniroute </code></td><td align="left"> Tarball iforukọsilẹ kanna, fifi sori ẹrọ ni kiakia </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Olona-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm ṣiṣe elekitironi:</code></td><td align="left"> Native window + eto atẹ — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Akojọ aṣyn-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> pọnti fi sori ẹrọ --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Abojuto &amp; adaṣe imudojuiwọn olupin — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> abinibi <code> arm64 </code></td><td align="left"> Rasipibẹri Pi, ARM olupin, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg fi sori ẹrọ nodejs && npx -y omniroute </code></td><td align="left"> Ṣiṣe <b> lori foonu rẹ </b>, 24/7, ko si root </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Fikun-un si Iboju ile"</td><td align="left"> Iboju ni kikun, offline, fifi sori ẹrọ lati aṣawakiri </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode itanna </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode zqn isọpọ </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Wiregbe </b></td><td align="left" nowrap> fi sori ẹrọ <b>OmniCopilot</b> itẹsiwaju </td><td align="left"> Gbogbo OmniRoute awoṣe ni abinibi Copilot Awo picker — idurosinsin &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Lati orisun </b></td><td align="left" nowrap><code> npm fi sori ẹrọ && npm ṣiṣe dev </code></td><td align="left"> gige lori rẹ, ṣe alabapin </td></tr>
+  <tr><th align="left">Pẹpẹ</th><th align="left">Ìfìsórí</th><th align="left">Àwọn Ànfàní Pàtàkì</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (àgbáyé)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Àṣẹ kan, OS èyíkéyìí</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (àgbáyé)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Ìbámu ní ìwọ̀n agbára tó dára jù láìsí ìdánilójú àtìlẹ́yìn; Node.js ni runtime tí a ṣe àtìlẹ́yìn fún.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Ọ̀pọ̀ àkitektọ̀ <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Fèrèsé abínibí + àpótí ètò — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Àkójọ-àṣàyàn (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Ń ṣàkóso &amp; ń ṣe ìmúdójúìwọ̀n olupin fúnra rẹ̀ — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>abínibí <code>arm64</code></td><td align="left">Raspberry Pi, àwọn olupin ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Ń ṣiṣẹ́ <b>lórí fóònù rẹ</b>, 24/7, láìsí root</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ṣàfikún sí Ojú Ìbẹ̀rẹ̀"</td><td align="left">Ojú-kíkún, láìsí ayélujára, ó ṣeé fi sórí láti inú aṣàwákiri</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Àfikún OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Ìṣọ̀kan OpenCode abínibí</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>fi àfikún <b>OmniCopilot</b> sórí</td><td align="left">Gbogbo àwòṣe OmniRoute nínú aṣàyàn Copilot Chat abínibí — stable &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Láti kóòdù orísun</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Ṣàtúnṣe rẹ̀, kópa nínú rẹ̀</td></tr>
 </table>
 
-<sub>📖 [Docker Itọsọna](docs/guides/DOCKER_GUIDE.md) · [Ojú-iṣẹ](electron/README.md) · [Akojọ atẹ-bar atẹ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Ìtọ́sọ́nà Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Àpótí àkójọ-àṣàyàn](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Tuntun: OmniRoute inu VS Code ká abinibi Copilot Wiregbe
+### 🧩 Tuntun: OmniRoute nínú Copilot Chat abínibí ti VS Code
 
 </div>
 
-> Ko si titun legbe, ko si titun iwiregbe UI - gbogbo awoṣe OmniRoute sìn fihan soke ọtun ninu awọn**Copilot Chat awoṣe picker ti o ti lo tẹlẹ** . Lati koodu VS 1.122, awọn awoṣe olupese n ṣiṣẹ laisi iwọle GitHub tabi ṣiṣe alabapin Copilot — ipo aṣoju, pipe irinṣẹ ati iran, fun ọfẹ.
+> Kò sí pẹpẹ-ẹ̀gbẹ́ tuntun, kò sí ojú ìbánisọ̀rọ̀ tuntun — gbogbo àwòṣe tí OmniRoute ń pèsè yóò hàn ní tààràtà nínú
+> **aṣàyàn àwòṣe Copilot Chat tí o ti ń lò**. Láti VS Code 1.122, àwọn àwòṣe olùpèsè ń ṣiṣẹ́
+> láìsí wíwọlé GitHub tàbí ìforúkọsílẹ̀ Copilot — ipò aṣojú, pípè irinṣẹ́ àti ìríran, lọ́fẹ̀ẹ́.
 
-Fi sori ẹrọ naa** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** itẹsiwaju, tọka si olupin OmniRoute rẹ (aiyipada si `localhost:20128`), lẹhinna ṣii Copilot Chat → awoṣe picker →** Ṣakoso Awọn awoṣe…** →**OmniRoute** .
+Fi àfikún **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** sórí, darí rẹ̀
+sí olupin OmniRoute rẹ (àtìlẹ́yìn àkọ́kọ́ ni `localhost:20128`), lẹ́yìn náà ṣí Copilot Chat → aṣàyàn àwòṣe
+→ **Ṣàkóso Àwọn Àwòṣe…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Itaja </th><th align="left"> Ọna asopọ </th><th align="left"> Ṣiṣẹ pẹlu </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Ibi ọja </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Fi sori ẹrọ →</a ></td >< td mö ="osi">VS Code — idurosinsin &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> iforukọsilẹ VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Fi sori ẹrọ →</a ></td >< td align ="osi">Cursor, Windsurf, VSCodium, Theia, koodu-server, Gitpod, Antigravity, Kiro...</td></tr>
+  <tr><th align="left">Ilé Ìtajà</th><th align="left">Ọ̀nà Àsopọ̀</th><th align="left">Ń ṣiṣẹ́ pẹ̀lú</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Fi sórí →</a></td><td align="left">VS Code — stable &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Fi sórí →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Lati inu olootu: ṣii** Awọn amugbooro** wo, àwárí** "OmniRoute"** , tẹ** Fi sori ẹrọ** - ṣiṣẹ ni ọna kanna lori awọn ile itaja mejeeji. Orisun, awọn ọran ati iwe ṣiṣe titẹjade n gbe ni [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Láti inú olóòtú: ṣí ojú **Àwọn Àfikún**, wá **"OmniRoute"**, tẹ **Fi sórí**
+— ó ń ṣiṣẹ́ lọ́nà kan náà lórí ilé ìtajà méjèèjì. Kóòdù orísun, àwọn ìṣòro àti ìwé ìtọ́sọ́nà ìtẹ̀jáde wà ní
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Koodu Copilot Itọsọna Wiregbe](docs/guides/VSCODE-COPILOT.md) - iṣeto, kini oluyan fihan, dasibodu-in-a-tab, laasigbotitusita </sub>
+<sub>📖 [Ìtọ́sọ́nà VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — ìṣètò, ohun tí aṣàyàn náà ń fi hàn, àtẹ ìṣàkóso nínú taabu, yíyanjú ìṣòro</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Tuntun: OmniRouteTray — ẹnu-ọna ẹnu-ọna rẹ, ti ngbe inu ọpa akojọ aṣayan
+### 🎩 Tuntun: OmniRouteTray — ẹnubodè rẹ, tí ń gbé inú ọ̀pá àkójọ-àṣàyàn
 
 </div>
 
-> `omniroute serve` ni idunnu julọ nigbati o ba wa nigbagbogbo.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** yi iyẹn pada si eto-ati-gbagbe mẹnu-bar app fun macOS: o bẹrẹ olupin naa, jẹ ki o wa laaye kọja awọn atunbere, ṣe imudojuiwọn rẹ ni aaye, ati fi eto-inawo tokini laaye laaye ni titẹ kan kuro -** ko si ferese ebute oko ti o wa ni sisi, ko si `npm install -g omniroute` si ibi omo.**
+> `omniroute serve` máa ń dára jù lọ nígbà tí ó bá ń ṣiṣẹ́ ní gbogbo ìgbà. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> ń yí èyí padà sí ètò ọ̀pá àkójọ-àṣàyàn fún macOS tí o lè ṣètò kí o sì gbàgbé rẹ̀: ó ń bẹ̀rẹ̀ olupin, ó ń jẹ́ kí ó máa ṣiṣẹ́
+> lẹ́yìn àwọn àtún-bẹ̀rẹ̀, ó ń ṣe ìmúdójúìwọ̀n rẹ̀ níbi kan náà, ó sì ń jẹ́ kí ìwọ̀n token rẹ ní àkókò gidi wà ní ìtẹ̀ kan — **kò sí
+> fèrèsé terminal tí a fi sílẹ̀ ní ṣíṣí, kò sí `npm install -g omniroute` tí o ní láti máa tọ́jú.**
 
-Ti a ṣe pẹlu [Tauri v2](https://v2.tauri.app/) (ikọkọ Rust kan ti o jẹ iwọn aṣiṣe iyipo), o firanṣẹ akoko asiko Node 24 ti o fowo si ati ṣakoso fifi sori OmniRoute ti ohun elo kan, nitorinaa ko ja `node`/`bun` agbaye rẹ rara. O** pin atunto `~/.omniroute/` ti o wa tẹlẹ ati data data** - nitorina o jẹ OmniRoute kanna ti o ti ṣiṣe tẹlẹ, o kan pẹlu ijanilaya lori. 🎩
+A kọ́ ọ pẹ̀lú [Tauri v2](https://v2.tauri.app/) (ìpìlẹ̀ Rust tí ó kéré gan-an), ó mú
+runtime Node 24 tirẹ̀ tí a fọwọ́sí wá, ó sì ń ṣàkóso ìfìsórí OmniRoute tí ètò náà ní, nítorí náà kò ní bá
+`node`/`bun` àgbáyé rẹ figagbága. Ó **ń pín àtòpọ̀ àti ibi ìpamọ́ dátà `~/.omniroute/` rẹ tí ó ti wà tẹ́lẹ̀** — nítorí náà,
+OmniRoute kan náà tí o ti ń ṣiṣẹ́ ni, ó kàn wọ fìlà ni. 🎩
 
 <table>
-  <tr><th align="left"> Ohun ti o ṣe </th><th align="left"> Bawo ni </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Abojuto olupin </b></td><td align="left"> Spawns <code> omniroute serve </code>, gba apẹẹrẹ ti nṣiṣẹ tẹlẹ dipo ṣiṣe ẹda </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Lilo Live ni iwo kan </b></td><td align="left"> Awọn ifi ipin ipin Olupese, awọn opin Claude session/weekly pẹlu awọn kika atunto, didenukole idiyele ọjọ 30 </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Awọn imudojuiwọn aifọwọyi ni aye </b></td><td align="left"> Ti ṣeto fifi sori ẹrọ, atomiki swap, yiyi pada lori ikuna - nigbagbogbo lori itusilẹ tuntun </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Bẹrẹ ni iwọle </b></td><td align="left"> Ifilọlẹ iyan ni wiwọle; atẹ-nikan, ko si aami ibi iduro </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Dókítà &amp; àkọọlẹ </b></td><td align="left"> Awọn ayẹwo-ọkan-ọkan ati wiwọle wiwọle olupin </td></tr>
+  <tr><th align="left">Ohun tí ó ń ṣe</th><th align="left">Bí ó ṣe ń ṣe é</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Ó ń ṣàkóso olupin</b></td><td align="left">Ó ń ṣe ìpilẹ̀ṣẹ̀ <code>omniroute serve</code>, ó ń gba instance tí ó ti ń ṣiṣẹ́ dípò ṣíṣe ẹ̀dà rẹ̀ méjì</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Ìlò ní àkókò gidi ní ojú kan</b></td><td align="left">Àwọn ọ̀pá ìpín olùpèsè, ààlà session/ọ̀sẹ̀ Claude pẹ̀lú ìṣírò àkókò tó kù sí àtúntò, ìpín iye owó ọjọ́ 30</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Ó ń ṣe ìmúdójúìwọ̀n fúnra rẹ̀ níbi kan náà</b></td><td align="left">Ìfìsórí ní ìpele, ìpàrọ̀ atomic, ìpadà sí ẹ̀yà àtijọ́ nígbà ìkùnà — ó máa ń wà lórí ìtẹ̀jáde tuntun jù lọ ní gbogbo ìgbà</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Bẹ̀rẹ̀ nígbà wíwọlé</b></td><td align="left">Ìpilẹ̀ṣẹ̀ àṣàyàn nígbà wíwọlé; àpótí nìkan, kò sí àmì dock</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Àyẹ̀wò &amp; àwọn àkọsílẹ̀</b></td><td align="left">Àyẹ̀wò ìṣòro pẹ̀lú ìtẹ̀ kan àti ìráyè sí àkọsílẹ̀ olupin</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> o fẹ igbasilẹ kan? Ja gba tuntun <code>.dmg </code> lati
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Tu </a> silẹ. Orisun, awọn oran ati kọ
-docs gbe ni <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Ise agbese agbegbe kan nipasẹ <a href="https://github.com/zoispag">@zoispag </a> - kii ṣe idasilẹ OmniRoute osise kan.</sub>
+<sub>Ṣé o fẹ́ràn ìgbàsílẹ̀? Gba <code>.dmg</code> tuntun láti
+<a href="https://github.com/zoispag/omniroute-tray/releases">Àwọn Ẹ̀yà Tí A Ti Tu Sílẹ̀</a>. Kóòdù orísun, àwọn ìṣòro àti àwọn àkọsílẹ̀ ìkọ́lé
+wà ní <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Iṣẹ́ àkànṣe àwùjọ láti ọwọ́ <a href="https://github.com/zoispag">@zoispag</a> — kì í ṣe ẹ̀yà OmniRoute tí a tú sílẹ̀ ní ọ̀nà ìjọba.</sub>
 
 <br/>
 
@@ -920,15 +922,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ Fipamọ 15–95% Àmi — Lọ́wọ́ọ̀wọ́
+## 🗜️ Fipamọ́ 15–95% Àwọn Token — Lọ́nà Aífòwọ́yí
 
 </div>
 
-### 📖 Bí ó ṣe ń ṣiṣẹ́ — pipeline, ìṣètò àti ìṣirò ìfipamọ́
+### 📖 Bí ó ṣe ń ṣiṣẹ́ — pipeline, ìkọ́-ètò àti ìṣirò ìfipamọ́
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Pipeline ìfúnkù OmniRoute: ìbéèrè oníbàárà àpẹẹrẹ kan tó ní àmi 10,000 ń kọjá nínú àwọn engine 12 tí a lè ṣàkópọ̀ — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra àti OmniGlyph — ó sì lè dé ọ̀dọ̀ olùpèsè pẹ̀lú àami tó tó 1,080 nínú àpẹẹrẹ tí a ṣàkọsílẹ̀. Àkóónú tó ní ìṣètò ni àwọn olùṣọ́ ìpamọ́ àti àwọn ẹnu-ọ̀nà ìdúróṣinṣin fún ìgbésẹ̀ kọ̀ọ̀kan ń dáàbò bò; àwọn mode tí ó ń fa àìdánù tàbí mode ìdánwò ní kedere lè yí àkóónú tó yẹ padà."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Pipeline ìdínkù token ti OmniRoute: ìbéèrè oníbàrà 10,000-token tó wà fún àfihàn ń kọjá nínú àwọn engine méjìlá tí a lè ṣàpéjọ — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra àti OmniGlyph — ó sì lè dé ọ̀dọ̀ olùpèsè ní ẹ̀sùn token 1,080 nínú àpèjúwe stacked tí a kọ sílẹ̀. Àwọn olùṣọ́ ìtọju àti àwọn ẹnu-ọ̀nà ìdánimọ̀-òtítọ́ lójú ìgbésẹ̀ kọ̀ọ̀kan ń dáàbò bo àkóónú tó ní ìṣètò; àwọn ìpo lossy tàbí ìdánwò tó kedere lè yí àkóónú tó peye padà."/>
 
-Àkópọ̀ àiyípadà àìpẹ̀yà máa ń ṣiṣẹ́ `RTK → Caveman`. Nígbà tí àwọn méjèèjì bá ṣiṣẹ́ lórí payload irinṣẹ́/àyíká kan náà, ìfipamọ́ máa ń kóra jọ:
+Ìsopọ̀ stacked àtìbòwá ń ṣe `RTK → Caveman`. Nígbà tí ẹ̀yìn méjèèjì bá ṣiṣẹ́ lórí payload irinṣẹ́/context kannáà, ìfipamọ́ máa ń papọ̀ mọ́ ara wọn:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -936,74 +938,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-Àwọn àkọsílẹ̀ kóòdù, URLs, JSON àti dátà tó ní ìṣètò jẹ́ **ìdáàbòbò ní gbogbo ìgbà** pẹ̀lú engine ìpamọ́.
+Àwọn ìbulọọkì kóòdù, URLs, JSON àti dátà tó ní ìṣètò ni engine ìtọju **ń dáàbò bo ní gbogbo ìgbà**.
 
-> **Kí ló dé tí a fi máa lo àmi púpọ̀ nígbà tí díẹ̀ bá tó?** Gbogbo ìbéèrè máa ń kọjá nínú pipeline ìfúnkù OmniRoute **láìfarahàn** — kò sí ìyípadà oníbàárà. Ó ti di **àkójọpọ̀ àwọn engine 12 tí a lè ṣàkópọ̀** tí wọ́n ń ṣiṣẹ́ létòlétò, tí a sì lè dàpọ̀ àti yàn gẹ́gẹ́ bí àkópọ̀ ìtọ́sọ́nà kọ̀ọ̀kan — tí wọ́n sì ń gbé lórí àwọn èrò láti [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua), àti [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
+> **Kí ló dé tí a fi ń lo ọ̀pọ̀ token nígbà tí díẹ̀ token ṣe é?** Gbogbo ìbéèrè ń kọjá nínú pipeline ìdínkù token ti OmniRoute **láìfarahàn** — kò sí àyípadà oníbàrà kankan. Ó ti di **àwọ̀sí àwọn engine méjìlá tí a lè ṣàpéjọ** tí ó ń ṣiṣẹ́ lẹ́sẹ̀sẹ̀lẹ, tó sì ń darapọ̀ àti bámu fún combo ìtọ́sọ́nà kọ̀ọ̀kan — ó ń gbé lórí àwọn èròjà láti ọ̀dọ̀ [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua), àti [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
 
-### 🧱 Àkójọpọ̀ engine 12
+### 🧱 Àwọ̀sí àwọn engine méjìlá
 
-Àwọn engine ń ṣiṣẹ́ létòlétò pipeline; a lè tan tàbí pa ọkọ̀ọ̀kan, a sì lè ṣètò ọkọ̀ọ̀kan fún àkópọ̀:
+Àwọn engine ń ṣiṣẹ́ lẹ́sẹ̀sẹ̀lẹ pipeline; a lè tan tàbí pa kọ̀ọ̀kan lódukọ̀, a sì lè ṣètò rẹ̀ fún combo kọ̀ọ̀kan:
 
 <table>
   <tr><th align="center">#</th><th align="left">Engine</th><th align="left">Ohun tí ó ń ṣe</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Ó ń yọ àkóónú tí ó tún ń farahàn kọjá àwọn ìyípadà (tí àkóónú ń tọ́ka sí, kọjá ìyípadà)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Ó ń fi àwọn bulọ́ọ̀kì ńlá pamọ́ lẹ́yìn àwọn àmì ìmúpadàbọ̀, tí a ń gbà nígbà tí ó bá nílò</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Ó ń gé ààyè òfo + URL àwòrán (ìpele ìpilẹ̀ tí kò wuwo fún ìdádúró)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Àlẹ̀mọ́ àbájáde irinṣẹ́ ọlọ́gbọ́n, dedup àti gé kúrò (ó mọ̀ àṣẹ)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">JSON tí kò ní àdánù ní àkọ́kọ́ + ìfúnkù àyẹ̀wò tó ní ààlà fún àwọn àbájáde shell/patch/search/build (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">Ìkópọ̀ tabular JSON arrays tí kò ní àdánù (~30%) nípasẹ̀ codec <b>GCF</b> tí a kó sínú iṣẹ́</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Àyọkà gbolohun tí a yan gẹ́gẹ́ bí ìdíwọ̀n lòdì sí ìbéèrè oníbàárà tó kẹ́yìn</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Ìfúnkù ọ̀rọ̀-àlàyé tó dá lórí àwọn òfin (~65–75% lórí àbájáde)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Ṣókí + dídára síi ní kẹ̀rẹ̀kẹrẹ̀ fún àwọn ìyípadà àtijọ́</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">Pípa semantic pruning pẹ̀lú ML nípasẹ̀ MobileBERT ONNX — ó bójú tó kóòdù, async</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Pípa àmi kúrò nípasẹ̀ heuristic pẹ̀lú ipele small-model (SLM) àṣàyàn</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Ìṣèkóòdù àyíká-ọ̀rọ̀-gẹ́gẹ́-bí-àwòrán fún Claude Fable 5 tí a dánwò lórí okun Anthropic tààrà; GPT 5.6 transformers ṣì wà ní fail-closed títí a ó fi rí ẹ̀rí olùpèsè. Àwọn profaili ìfúnkù mẹ́rin (àiyípadà líle jùlọ ní àìpẹ̀yà, balanced, coding-safe, passthrough) (líle jùlọ; opt-in)</td></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Ó ń yọ àkóónú tí a tún lò lẹ́ẹ̀kejì kúrò ní kálẹ̀ àwọn ìyí ọ̀rọ̀ (content-addressed, kálẹ̀-ìyí)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Ó ń fi àwọn ìbulọọkì ńlá pamọ́ sẹ́yìn àwọn àmì retrieve, tí a máa ń mú wá nígbà tí a béèrè fún wọn</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Ìgẹ́ whitespace + image-URL kúrò (ìpilẹ̀sẹ̀ tó fẹ́rẹ̀ ní latency)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Ìṣẹ̀yọ̀ èsì irinṣẹ́ lọ́gbọ́n, yíyọ àfikún kúrò àti gégun (ó mọ̀ọ́mọ̀ àṣẹ)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">JSON lossless-jọ́kọ́ọ́ + ìdínkù ìwádìí tó ní ààlà fún àwọn èsì shell/patch/search/build (Responses API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">Ìtíjú tábìlì JSON arrays láìsí ìpadánù (~30%) nípasẹ̀ codec <b>GCF</b> tí a fi sínú</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Ìṣirò àwọn gbolóhùn yíyọ-jáde lódì sí ìbéèrè olùlò tó gbẹ̀yìn</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Ìdínkù prose tó dá lórí òfin (~65–75% lórí èsì)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Àkótán ọ̀rọ̀ + aging àwọn ìyí ọ̀rọ̀ àtijọ́ lọ́nà díẹ̀díẹ̀</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">Ìyíyọ ìtumọ̀ kúrò nípasẹ̀ ML MobileBERT ONNX — ààbò-kóòdù, async</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Ìyíyọ token kúrò nípasẹ̀ heuristic pẹ̀lú ìpele awoṣe kékeré (SLM) tí kò ṣe dandan</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Ìkọ̀dẹ̀ context-gẹ́gẹ́-bí-àwòrán ìdánwò fún Claude Fable 5 tí a wọn lórí okùn Anthropic tààrà; àwọn transformers GPT 5.6 ṣì wà ní fail-closed títí àwọn ìrìsí olùpèsè yóò fi dé. Àwọn pròfáìlì ìdínkù mẹ́rìn (aggressive àtìbòwá, balanced, coding-safe, passthrough) (tó buru jùlọ; opt-in)</td></tr>
 </table>
 
-Àwọn àkọsílẹ̀ kóòdù, URLs àti dátà tó ní ìṣètò jẹ́ **ìpamọ́ pátápátá ní gbogbo ìgbà**. **Àwọn àkọ́kọ́ṣàṣàyàn tẹ̀ kan** ń ṣàkópọ̀ àwọn engine:
+Àwọn ìbulọọkì kóòdù, URLs àti dátà tó ní ìṣètò ni a **máa ń tọju ní gbogbo ìgbà** byte-perfect. **Àwọn preset tẹ́-lẹ́ẹ̀kan** ń ṣàpéjọ àwọn engine:
 
 <table>
-  <tr><th align="left">Mode</th><th align="left">Ìfipamọ́</th><th align="left">Ó dára jù fún</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Àṣàyàn àìyípadà tó ní ààbò, tí ó máa ń ṣiṣẹ́ ní gbogbo ìgbà</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Kóòdù ojoojúmọ́</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">Àwọn ìpàdé gígùn tí irinṣẹ́ pọ̀ sí</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">Ìfipamọ́ tó pọ̀ jù</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Àbájáde shell/test/build/git</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Àwọn ìbéèrè adalu + àwọn àkọsílẹ̀ irinṣẹ́</td></tr>
+  <tr><th align="left">Ìpo</th><th align="left">Ìfipamọ́</th><th align="left">Ó dára jùlọ fún</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Àtìbòwá ààbò tó ń ṣiṣẹ́ ní gbogbo ìgbà</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Ìkọ́ kóòdù ojoojúmọ́</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">Àwọn ìjoko gígùn tó kún fún irinṣẹ́</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">Ìfipamọ́ tó pọ̀ jùlọ</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Èsì shell/test/build/git</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Àwọn prompt àpèjọ + àkọsílẹ̀ irinṣẹ́</td></tr>
 </table>
 
-**Àpẹẹrẹ gidi — mode Standard:**
+**Àpèjúwe gidi — Ìpo Standard:**
 
-> **Ṣáájú (àmi 69):** _"Ìdí tí React component rẹ fi ń ṣe re-render ṣeé ṣe kó jẹ́ pé o ń dá object reference tuntun sílẹ̀ ní gbogbo ìyípadà render. Nígbà tí o bá fi object inline ránṣẹ́ gẹ́gẹ́ bí prop, ìfihàn shallow ti React máa rí i gẹ́gẹ́ bí object mìíràn ní gbogbo ìgbà, èyí sì ń fa re-render. Mo máa ṣàbẹ̀wò pé kí o lo useMemo láti memoize object náà."_
+> **Ṣáájú (69 tokens):** _"Ìdí tí component React rẹ fi ń render lẹ́ẹ̀kejì lè jẹ́ pé o ń dá àtọ́ka ohun-èlò tuntun sílẹ̀ ní gbogbo ìyí render. Nígbà tí o bá rán ohun-èlò inline lọ gẹ́gẹ́ bí prop, ìfiwéra eékèlé React máa ń rí i bí ohun-èlò mìíràn ní gbogbo ìgbà, èyí sì ń mú kí ó render lẹ́ẹ̀kejì. Èmi yóò ṣe ìmọ̀ràn pé kí o lo useMemo láti fi ohun-èlò náà pamọ́."_
 >
-> **Lẹ́yìn (àmi 19):** _"New object ref each render. Inline object prop = new ref = re-render. Wrap in useMemo."_
+> **Lẹ́yìn (19 tokens):** _"Àtọ́ka ohun-èlò tuntun ní render kọ̀ọ̀kan. Prop ohun-èlò inline = àtọ́ka tuntun = render lẹ́ẹ̀kejì. Kó o nínú useMemo."_
 >
-> **Ìdáhùn kan náà. Àmi kéré sí 72%. Kò sí àdánù ìpéye.** ✅
+> **Ìdáhùn kannáà. 72% díẹ̀ token. Kò sí ìpadánù ì péye rárá.** ✅
 
-**Àpẹẹrẹ PT-BR — mode [Troglodita](https://github.com/leninejunior/troglodita):**
+**Àpèjúwe PT-BR — ìpo [Troglodita](https://github.com/leninejunior/troglodita):**
 
-> **Ṣáájú (àmi 42):** _"Ìṣòro náà ni pé ẹ̀ka náà ń ṣe àtúnṣe-rírọ̀nìkànsí nítorí pé ìtọ́kasí ohun tuntun kan ń ṣẹ̀dá ní gbogbo yíyí ìṣàfihàn. Èmi yóò ṣàgbékalẹ̀ lílo useMemo."_
+> **Ṣáájú (42 token):** _"Ìṣòro ni pé ẹyaarọ náà ń túnṣe àwòrán nítorí pé a ń dá ìtọ́ka ohun tuntun sílẹ̀ lórí àgbélébùú àwòrán kọ̀ọ̀kan. Mo máa ṣàǹfàní láti lò `useMemo`."_
 >
-> **Lẹ́yìn (àmi 12):** _"Àtúnṣe-rírọ̀nìkànsí: ìtọ́kasí tuntun ní gbogbo yíyí (ohun inline tún ṣẹ̀dá). Lo `useMemo`."_
+> **Lẹ́yìn (12 token):** _"Túnṣe àwòrán: ref tuntun lórí àgbélébùú kọ̀ọ̀kan (ohun inline tí a dá tuntun). Lò `useMemo`."_
 >
-> **Ìdáhùn kan náà. Àwọn àmi kéré ní ìwọ̀n 70%. Ìpéye ọ̀nà ìmọ̀ kò yí padà.** ✅
+> **Ìdáhùn kan náà.** ~70% díẹ̀ sí i nínú àwọn token. **Ìṣọ́kan ìmọ̀-ẹ̀rọ kò yàgàn.** ✅
 
 <br/>
 
-### 🎚️ Kọjá àwọn ẹ́ńjìnì — àwọn àṣàyàn àbájáde, àyípadà ìmúdọ́gba àti ìṣàkóso fún ìbéèrè kọ̀ọ̀kan
+### 🎚️ Ni ikọja awọn enjini — awọn aza ti o wu jade, kiakia adaṣe & iṣakoso ibeere-kọọkan
 
-Àwọn ẹ́ńjìnì 12 tó wà lókè dín ohun tó ń **wọlé** kù. Àwọn ìpele mẹ́ta míì ló ń dá **bí**, **ìgbà wo**, àti ohun tó ń **jáde** sílẹ̀:
+Awọn ẹrọ 12 ti o wa loke dinku ohun ti n lọ **ninu** . Awọn ipele fẹlẹfẹlẹ mẹta diẹ sii **Bawo** ,**Nigbawo** , ati ohun ti mbọ **jade** :
 
-- **🪄 Àwọn Àṣà Àbájáde** _(ìdarí lórí àbájáde)_ — wọ́n ń fi àwọn ìtọ́ni tó ṣeé pinnu, tó sì bójú mu fún kásì, ṣe àkópọ̀ ìrísí ìdáhùn; wọ́n lè darapọ̀, ọ̀kọ̀ọ̀kan sì wà ní agbára `lite` / `full` / `ultra`. Fífi àṣà kan kún un jẹ́ ìforúkọsílẹ̀ laini kan:
-  - **Ọ̀rọ̀ ṣókí** — yọ ọ̀rọ̀ àfikún / àwọn àpilẹ̀kọ / ìṣiyèméjì kúrò; pa ohun pàtàkì ìmọ̀ ẹ̀rọ mọ́ ní pípé.
-  - **Kóòdù díẹ̀** — YAGNI “olùgbékalẹ̀ agba tó ń ṣe ọ̀lẹ”: àyípadà kékeré tó ń ṣiṣẹ́, láìsí ètò àfikún tí a kò béèrè fún.
-  - **Ìrù ẹṣin (olùgbékalẹ̀ agba tó ń ṣe ọ̀lẹ)** — gòkè àkàbà YAGNI, ṣàtúnṣe ohun tó fa ìṣòro náà, kí ìyípadà tó ń ṣiṣẹ́ jẹ́ kékeré jù.
-  - **Mo ní ADHD (ìṣe-akọ́kọ́)** — ìṣe tó kàn ń bọ̀ ló máa kọ́kọ́ wá, àwọn ìgbésẹ̀ ní nọ́mbà, ìgbésẹ̀ kan pàtó tó kàn, láìsí ọ̀rọ̀ ìṣáájú.
-  - **CJK ṣókí (文言)** — àṣà Ṣáínà ayé àtijọ́ tó kéré gan-an (a máa ṣàkóso rẹ̀ gẹ́gẹ́ bí èdè sí `zh`).
-- **🎯 Bọ́jétì àyíká ọ̀rọ̀ ìmúdọ́gba** _(àyípadà)_ — dípò ààlà àmi kan tó máa ń wà tàbí kò sí, ó máa ń gbé àwọn ẹ́ńjìnì tó ná kéré jù, tó sì ń pàdánù díẹ̀ jù lọ, sókè díẹ̀díẹ̀ títí tí ohun tó nílò fi **wọ inú fèrèsé àyíká ọ̀rọ̀ àwòṣe**. Ìlànà: `reserve-output` (àìkùnà, ó mọ àwòṣe) · `percentage` · `absolute`. Àyè: `floor` (ṣe ìdánilójú pé ó bá a mu) · `replace-autotrigger` (àṣàyàn rẹ ní àṣẹ) · `off` (ààlà àtijọ́).
-- **🎛️ Ibi tí a ti ń pinnu ìfúnpọ̀** _(àṣẹ, gíga → kékeré)_ — àkọsílẹ̀ `x-omniroute-compression` fún ìbéèrè kọ̀ọ̀kan › àyípadà routing-combo › profaili tí a dárúkọ tó ń ṣiṣẹ́ › adaptive / auto-trigger › àṣàyàn paneli àìpẹ̀yà › off. Ètò tí a lò máa ń padà nínú àkọsílẹ̀ ìdáhùn `X-OmniRoute-Compression: <mode>; source=<source>`.
+- **🪄 wu Styles** _(Itọsọna-itọjade-jade) _ — itọsi ipinnu ipinnu, kaṣe-ailewu idahun-didara awọn ilana; apapọ, kọọkan ni `lite` / `full` / `ultra` kikankikan. Ṣafikun ara kan jẹ titẹsi iforukọsilẹ laini kan:
+  - **Ọrọ aṣiwadi** — ju kikun / awọn nkan / hedging; pa imọ nkan na gangan.
+  - **Kekere koodu** — "ọlẹ oga dev" YAGNI: iyipada iṣẹ ti o kere julọ, ko si scaffolding ti ko beere.
+  - **Ponytail (ọlẹ agba dev)** — ngun akaba YAGNI, ṣatunṣe idi ti gbongbo, iyatọ iṣẹ ti o kere julọ.
+  - **Mo ni ADHD (igbese-akọkọ)** — tókàn igbese nyorisi, awọn igbesẹ ti nomba, ọkan nja nigbamii ti igbese, ko si Preamble.
+  - **Terse CJK (文言)** — kilasika-Chinese ultra-terse ara (agbegbe-gated si `zh`).
+- **🎯 Adaptive àrà-isuna** _(kiakia naa) _ — dipo iloro ami ami on/off kan, ṣe alekun ti o kere julọ, awọn ẹrọ ti ko ni ipadanu pupọ julọ bi o ti nilo lati **ipele ti awọn awoṣe ká o tọ window** . Ilana: `reserve-output` (aiyipada, awoṣe-mọ) · `percentage` · `absolute`. Ipo: `floor` (aṣepe idaniloju) · `replace-autotrigger` (aṣayan rẹ ti o han gbangba bori) · `off` (ala-ilẹ-gan).
+- **🎛️ Nibo ni ipinnu funmorawon** _(iṣaaju, giga → kekere)_ — fun ibeere `x-omniroute-compression` akọsori › afisona-konbo idojuk › profaili ti n ṣiṣẹ lọwọ › adaptive / auto-trigger › aiyipada nronu › pipa. Eto ti a fiwe si tun pada sẹhin ni akọsori esi `X-OmniRoute-Compression: <mode>; source=<source>`.
 
-Ṣètò auto-trigger pẹ̀lú ààlà àmi, yí àyípadà ìmúdọ́gba sílẹ̀, so profaili tí a dárúkọ mọ́ ọn, ṣètò rẹ̀ lẹ́ẹ̀kan fún ìbéèrè kan, tàbí yan pipeline fún routing combo kọ̀ọ̀kan — èyíkéyìí tó bá iṣẹ́ náà mu. **eval harness** offline tí a yan láti fẹ́ràn (`npm run eval:compression`) máa ń díwọ̀n ìdúróṣinṣin sí àwọn àǹfààní ìfipamọ́ lórí àkójọpọ̀ tí a dì mọ́, kí o tó gbé àyípadà kan lárugẹ.
+Ti nfa aifọwọyi nipasẹ ẹnu-ọna ami, yi pada lori kiakia adaṣe, PIN profaili ti a npè ni, ṣeto ọkan-pipa fun ibeere, tabi fi opo gigun ti epo fun konbo ọna — eyikeyi ti o baamu fifuye iṣẹ naa. Ijade-ni aisinipo **eval ijanu** (`npm run eval:compression`) awọn ikun ifaramọ la awọn ifowopamọ lori pinned koposi ṣaaju ki o to ṣe igbelaruge iyipada kan.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1011,44 +1013,39 @@ range    = 78.4 – 94.6%
 
 <div align="center">
 
-# ⚡ Ìbẹ̀rẹ̀ Kíákíá
+# ⚡ Quick Bẹrẹ
 
 </div>
 
-**1) Fi sori ẹrọ kí o sì ṣiṣẹ́**
+**1) Fi sori ẹrọ & ṣiṣẹ**
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-> 💡 Ṣé o rí `npm warn ERESOLVE` tàbí ìkìlọ̀ peer-dep? [Wọ́n kò léwu](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Ṣé o ń lo npm 11 tàbí tuntun jù bẹ́ẹ̀ lọ?** npm lè dí àwọn script ìgbésí-ayé package dúró bí a kò bá fún wọn ní àṣẹ. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) ṣe pàtàkì láti pèsè àwọn fáìlì runtime abinibi rẹ̀. Fún àwọn package tí a dárúkọ nínú ìkìlọ̀ npm ní àṣẹ nígbà tí o bá ń fi OmniRoute sílẹ̀ ní gbogbogbòò. Fún àkójọpọ̀ package tí OmniRoute 3.8.54 ròyìn:
+> 💡 Wo `npm warn ERESOLVE` tabi awọn ikilọ-ijinle ẹlẹgbẹ? [Wọn ko lewu](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).**Lilo npm 11 tabi nigbamii?** npm le dènà awọn iwe afọwọkọ igbesi aye package ayafi ti wọn ba gba laaye. OmniRoute's `postinstall` (`node scripts/build/postinstall.mjs`) ni a nilo lati mura awọn faili asiko asiko abinibi rẹ. Gba awọn idii ti a darukọ ni ikilọ npm nigba fifi sori ẹrọ ni agbaye. Fun package ṣeto ti o royin nipasẹ OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
 > ```
 >
-> Láti tún allowlist yìí lò fún àwọn ìfìsílẹ̀ gbogbogbòò ọjọ́ iwájú, ṣètò rẹ̀ lẹ́ẹ̀kan, lẹ́yìn náà fi sílẹ̀ lọ́nà àṣà:
+> Lati tun lo atokọ gbigba fun awọn fifi sori agbaye ni ọjọ iwaju, tunto rẹ lẹẹkan, lẹhinna fi sii ni deede:
 >
 > ```bash
 > npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 > npm install -g omniroute
 > ```
 >
-> Àtòjọ dependencies lè yí padà láàárín àwọn ìtújáde; bí npm bá ròyìn àtòjọ míì, lo àwọn orúkọ package tó wà nínú ìkìlọ̀ náà. Fífún package ní àṣẹ máa ń jẹ́ kí àwọn script ìfìsílẹ̀ rẹ̀ ṣiṣẹ́.
-> **Ṣé o ń lo Gemini Web tàbí olùpèsè cookie wẹẹbù míì?** Package npm ní
-> Playwright nínú, ṣùgbọ́n kò ní binary Chromium rẹ̀. Wo
-> [ìṣètò Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
-> kí o tó ṣe ìbéèrè olùpèsè wẹẹbù àkọ́kọ́.
+> Akojọ ti o gbẹkẹle le yipada laarin awọn idasilẹ; ti npm ba ṣe ijabọ atokọ ti o yatọ, lo awọn orukọ package lati ikilọ yẹn. Gbigba package laaye lati fi sori ẹrọ awọn iwe afọwọkọ lati ṣiṣẹ.**Lilo Gemini Web tabi olupese kuki wẹẹbu miiran?** Apo npm pẹlu Playwright ṣugbọn kii ṣe alakomeji Chromium rẹ. Wo akọsilẹ [iṣeto Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) ṣaaju ṣiṣe ibeere olupese wẹẹbu akọkọ.
 
-Dashboard wà ní `http://localhost:20128` · API wà ní `http://localhost:20128/v1`.
+Dasibodu ni `http://localhost:20128` · API ni `http://localhost:20128/v1`.
 
-**2) So olùpèsè tó yẹ pọ̀ pẹ̀lú àkáǹtì tirẹ**
+**2) So olupese ti o yẹ ni lilo akọọlẹ tirẹ**
 
-Dashboard → **Providers** → yan olùpèsè tí àwọn òfin àti quota rẹ̀ lọ́wọ́lọ́wọ́ bá ohun tí o fẹ́ ṣe mu → fi API key rẹ̀ kún un tàbí parí ìṣàn àkáǹtì rẹ̀. Àwọn free tiers lè béèrè ìforúkọsílẹ̀, ìfọwọ́sí, tàbí ọ̀nà ìsanwó kan. Ṣàyẹ̀wò [Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md); kò sí ìdánilójú pé ààyè láìsí key wà, àwọn olùpèsè tí a samisi `tos: avoid` sì wà láìsí nínú `auto` ní àkọ́kọ́.
+Dasibodu →**Awọn olupese** → yan olupese ti awọn ofin lọwọlọwọ ati ipin ti o baamu ọran lilo rẹ → ṣafikun bọtini API rẹ tabi pari sisan akọọlẹ rẹ. Awọn ipele ọfẹ le nilo iforukọsilẹ, ifọwọsi, tabi ọna isanwo. Ṣe atunyẹwo [Itọsọna Tiers Ọfẹ](docs/getting-started/FREE-TIERS-GUIDE.md) ; wiwa keyless kii ṣe iṣeduro, ati awọn olupese ti o samisi `tos: avoid` ti yọkuro lati `auto` nipasẹ aiyipada.
 
-**3) Tọ́ka ohun èlò kóòdù rẹ**
+**3) Tọkasi ọpa ifaminsi rẹ**
 
 ```txt
 Base URL: http://localhost:20128/v1
@@ -1056,15 +1053,15 @@ API Key:  [copy from Dashboard → Endpoints]
 Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4) Ṣàyẹ̀wò pé ó ń ṣiṣẹ́**
+**4) Rii daju pe o ṣiṣẹ**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-O yẹ kí o rí àwọn àwòṣe tí o so pọ̀ tí a ṣe àtòjọ. 🎉 Ìyẹn ni gbogbo rẹ̀ — bẹ̀rẹ̀ sí í kọ́ kóòdù, OmniRoute yóò sì yan ọ̀nà àti padà sí aṣàyàn míì fún ọ láìsí ìsapá.
+O yẹ ki o wo awọn awoṣe ti a ti sopọ ti a ṣe akojọ. 🎉 Iyẹn ni — bẹrẹ ifaminsi, ati awọn ọna-ọna OmniRoute & ṣubu pada fun ọ.
 
-Bí client rẹ kò bá lè rán àwọn akọsílẹ̀ àṣà, OmniRoute tún ń pèsè àwọn aliases ìbámu tó ní token:
+Ti alabara rẹ ko ba le firanṣẹ awọn akọle aṣa, OmniRoute tun ṣafihan awọn inagijẹ ibaramu tokenized:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1075,11 +1072,11 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-Lo àwọn wọ̀nyí nìkan fún àwọn client tí kò lè so `Authorization: Bearer ...` mọ́. Àṣẹ akọsílẹ̀ ṣì ni ọ̀nà tí a fẹ́ràn jù.
+Lo iwọnyi nikan fun awọn alabara ti ko le so `Authorization: Bearer ...`. Akọsori auth si maa wa awọn afihan mode.
 
 <br/>
 
-## 📦 Àwọn ọ̀nà ìfisílẹ̀ míì — Docker, source, pnpm, Arch
+## 📦 Àwọn ọ̀nà ìfi sori ẹrọ míì — Docker, source, pnpm, Arch
 
 **🐳 Docker**
 
@@ -1088,13 +1085,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` ń tẹ̀lé ẹ̀yà SemVer tó dúró ṣinṣin tó ga jù lọ tí a ti **tẹ̀ jáde**. Kò tẹ̀lé git `main`. Lo `:X.Y.Z` pàtó fún GitOps. Wo [Àwọn Ikanni Ìtújáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels).Àwòrán náà ṣètò **`OMNIROUTE_MEMORY_MB=1024`** gẹ́gẹ́ bí iye pàtó. Ìyẹn tó fún dashboard àti ìfọ̀rọ̀wérọ̀ kékeré. **Àwọn aṣojú coding** (`POST /v1/responses` láti Claude Code, Codex, Grok, …) nílò V8 heap tó tóbi púpọ̀ sí i, bí bẹ́ẹ̀ kọ́ process náà yóò ṣe `FATAL ERROR` ní nǹkan bí 12 GiB lábẹ́ àwọn context gígùn méjì tó bẹ̀rẹ̀ sí í lé ara wọn lórí. Ṣètò container náà kí ó tóbi ju heap lọ (àwọn native buffer wà ní òde V8):
+`:latest` ń tẹ̀lé ẹ̀yà SemVer dúróṣinṣin tó ga jù lọ tí a ti **ṣe àtẹ̀jáde**. Kò tẹ̀lé git `main`. Lo `:X.Y.Z` kan pàtó fún GitOps. Wo [Àwọn Ikànnì Àtẹ̀jáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Image náà ṣètò **`OMNIROUTE_MEMORY_MB=1024`** sí iye pàtó. Ìyẹn tó fún dashboard àti ìjíròrò kékeré. **Àwọn aṣojú kóòdù** (`POST /v1/responses` láti Claude Code, Codex, Grok, …) nílò heap V8 tó tóbi púpọ̀ sí i, bí bẹ́ẹ̀ kọ́ process náà yóò ṣe `FATAL ERROR` ní nǹkan bí ~12 GiB lábẹ́ àwọn context gígùn méjì tó bo ara wọn. Ṣètò ìwọ̀n container náà ju heap lọ (àwọn buffer abinibi wà níta V8):
 
-| Irú iṣẹ́                               | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
-| ------------------------------------- | ------------------------------- | ---------------------- |
-| Dashboard / ìfọ̀rọ̀wérọ̀ kékeré          | `1024` (ìpìlẹ̀ àwòrán)           | ≥2 g                   |
-| Aṣojú coding kan                      | `8192`                          | ≥10 g                  |
-| `/v1/responses` gígùn méjì lẹ́ẹ̀kan náà | `10240`–`12288`                 | ≥12–16 g               |
+| Ẹrù iṣẹ́                                    | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
+| ------------------------------------------ | ------------------------------- | ---------------------- |
+| Dashboard / ìjíròrò kékeré                 | `1024` (ìwọ̀n àiyípadà image)    | ≥2 g                   |
+| Aṣojú kóòdù kan                            | `8192`                          | ≥10 g                  |
+| Àwọn `/v1/responses` gígùn méjì lẹ́ẹ̀kan náà | `10240`–`12288`                 | ≥12–16 g               |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1102,24 +1099,24 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-Tábìlì kíkún: [Ìtọ́sọ́nà Docker — RAM àsìkò ìṣiṣẹ́](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
+Tábìlì kíkún: [Ìtọ́sọ́nà Docker — RAM àkókò ìṣiṣẹ́](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
-> **Ikanni Docker ṣáájú ìtújáde:** `diegosouzapw/omniroute:next` àti
-> `diegosouzapw/omniroute:next-web` ń tẹ̀lé ẹ̀ka `release/v*` tó jẹ́ àìyẹsẹ̀ lọ́wọ́lọ́wọ́.
-> Àwọn tag tí ó lè yí padà wọ̀nyí wà fún dídán àwọn àtúnṣe tí a kò tíì tú jáde wò nìkan, wọn kò sì
-> **ní àtìlẹ́yìn fún production**. Wo
-> [Àwọn Ikanni Ìtújáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
+> **Ikànnì Docker àkọ́sọ-àtẹ̀jáde:** `diegosouzapw/omniroute:next` àti
+> `diegosouzapw/omniroute:next-web` ń tẹ̀lé ẹ̀ka `release/v*` àiyípadà lọ́wọ́lọ́wọ́.
+> Àwọn tag tó ṣeé yí padà wọ̀nyí jẹ́ fún dídán àwọn àtúnṣe tí a kò tíì ṣe àtẹ̀jáde wò nìkan,
+> a kò sì **ṣe àtìlẹ́yìn wọn fún production**. Wo
+> [Àwọn Ikànnì Àtẹ̀jáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
-A ṣàtìlẹ́yìn fún `bun install` àtijọ́ àti ìfisílẹ̀ kárí-ayé (`bun install -g omniroute`) nípasẹ̀ ìṣàwárí runtime Bun:
+A ṣe àtìlẹ́yìn fún `bun install` boṣewa àti ìfi sori ẹrọ àgbáyé (`bun install -g omniroute`) nípasẹ̀ ìṣàwárí runtime Bun:
 
-- **`bun:sqlite` tí a kọ sínú rẹ̀**: OmniRoute máa ń lo driver `bun:sqlite` tí a kọ sínú Bun nígbà tó bá ń ṣiṣẹ́ lábẹ́ Bun, yóò sì yí padà sí `better-sqlite3` lórí Node.js tàbí `sql.js`.
-- **Yíyan bundler Webpack láìfọwọ́ṣe ní dev**: Development (`bun run dev`) máa ń ṣàwárí Bun láìfọwọ́ṣe, yóò sì pa Turbopack láti lo Webpack dípò rẹ̀ láti dènà àìbáramu native V8 binding. Àwọn build production (`bun run build`) ń tẹ̀lé `OMNIROUTE_USE_TURBOPACK` gan-an bíi ti Node: Turbopack gẹ́gẹ́ bí àìyẹsẹ̀, `OMNIROUTE_USE_TURBOPACK=0` láti build pẹ̀lú Webpack (`Dockerfile.bun` ń mú un wà gẹ́gẹ́ bí `--build-arg`).
-- **Dockerfile Bun àkànṣe**: `Dockerfile.bun` alápele-púpọ̀ fún àwọn deployment production Bun native (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **`bun:sqlite` tí a kọ sínú rẹ̀:** OmniRoute máa ń lo driver `bun:sqlite` tí a kọ sínú Bun nígbà tó bá ń ṣiṣẹ́ lábẹ́ Bun, yóò sì padà lo `better-sqlite3` lórí Node.js tàbí `sql.js`.
+- **Yíyan bundler Webpack láìfọwọ́yí ní dev:** Development (`bun run dev`) máa ń ṣàwárí Bun láìfọwọ́yí, yóò sì pa Turbopack kí ó lè lo Webpack dípò rẹ̀ láti dènà àìbáramu binding V8 abinibi. Àwọn build production (`bun run build`) ń tẹ̀lé `OMNIROUTE_USE_TURBOPACK` gan-an bíi ti Node: Turbopack ní àìyípadà, `OMNIROUTE_USE_TURBOPACK=0` láti build pẹ̀lú Webpack (`Dockerfile.bun` mú un wà gẹ́gẹ́ bí `--build-arg`).
+- **Dockerfile Bun àkànṣe:** `Dockerfile.bun` ọlọ́pọ̀-ìpele fún àwọn deployment production Bun abinibi (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
-# Fi sílẹ̀ kí o sì ṣiṣẹ́ pẹ̀lú Bun
+# Fi sori ẹrọ kí o sì ṣiṣẹ́ pẹ̀lú Bun
 bun install
 bun run dev
 ```
@@ -1159,46 +1156,48 @@ devbox run npm run dev
 **🦭 Podman**
 
 ```bash
-# 1. Pèsè àkọsílẹ̀ data tí a so mọ́ nípasẹ̀ bind
+# 1. Pèsè àpótí data tí a fi bind mount sílẹ̀
 mkdir -p data
 
-# 2. Linux + Podman rootless ti agbègbè nìkan (kì í ṣe client Podman Machine jíjìn rárá):
+# 2. Linux + Podman rootless agbègbè nìkan (má ṣe lò ó pẹ̀lú client Podman Machine tó jìnnà láé):
 podman unshare chown 1000:1000 ./data
 
-# 3. Ṣètò ìtọ́kasí runtime, build àwòrán Compose agbègbè, kí o sì bẹ̀rẹ̀
+# 3. Ṣètò ìtọ́kasí runtime, build image Compose agbègbè, kí o sì bẹ̀rẹ̀
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-Lórí macOS tàbí Windows, Podman máa ń lo Podman Machine jíjìn: má ṣe lo `podman unshare`, kí o sì
-tẹ̀lé [ìtọ́sọ́nà àkọsílẹ̀ data tó dá lórí topology](contrib/podman/README.md#data-directory-permissions-by-topology).
+Lórí macOS tàbí Windows, Podman máa ń lo Podman Machine tó jìnnà: fo `podman unshare` kí o sì
+tẹ̀lé [ìtọ́sọ́nà àpótí data tó bá topology mu](contrib/podman/README.md#data-directory-permissions-by-topology).
 
 📖 [Ìtọ́sọ́nà Podman](contrib/podman/README.md) — Àwọn build Compose, Podman Machine, àti
 ìṣètò Quadlet Linux/systemd.
 
-**⚡ Ìfisílẹ̀ tó yára / fẹ́ẹrẹ̀ sí i (fo native build)**
+**⚡ Ìfi sori ẹrọ tó yára / tó fẹẹrẹ̀ sí i (fo build abinibi)**
 
-Ẹ̀rọ SQLite native (`better-sqlite3`) jẹ́ dependency **àṣàyàn**, nítorí náà ìfisílẹ̀
-kárí-ayé kì í dúró de compilation láti source: ó máa ń lo binary tí a ti kọ́ tẹ́lẹ̀ nígbà tí èyí tó bá
-platform/Node rẹ mu bá wà, bí bẹ́ẹ̀ kọ́ yóò yí padà láìsí ìdíwọ́ sí ẹ̀rọ pure-JS
-(`node:sqlite` lórí Node 22+, tàbí WASM `sql.js` tí a kó pọ̀ mọ́ ọn) — kò nílò àwọn irinṣẹ́ build.
+Ẹ́ńjìnnì SQLite abinibi (`better-sqlite3`) jẹ́ dependency **àṣàyàn**, nítorí náà ìfi sori ẹrọ
+àgbáyé kì í dúró de compilation láti source: ó máa ń lo binary tí a ti build tẹ́lẹ̀ nígbà tí ọ̀kan bá
+bá platform/Node rẹ mu, bí bẹ́ẹ̀ kọ́, yóò padà lo ẹ́ńjìnnì pure-JS láìsí ìṣòro
+(`node:sqlite` lórí Node 22+, bí bẹ́ẹ̀ kọ́ WASM `sql.js` tí a kó sínú rẹ̀) — kò nílò irinṣẹ́ build.
 
-Láti fo ìmúrúgbóná native lẹ́yìn ìfisílẹ̀ pátápátá (CI, headless, tàbí àwọn ẹ̀rọ tó lọ́ra):
+Láti fo **native warm-up** lẹ́yìn ìfi sori ẹrọ pátápátá (CI, headless, tàbí àwọn ẹ̀rọ tó lọ́ra).
+Àkíyèsí: èyí fo ìgbésẹ̀ native warm-up SQLite (`scripts/postinstall.mjs`) nìkan; hook
+binary-copy/repair (`scripts/build/postinstall.mjs`) ṣì máa ń ṣiṣẹ́ gẹ́gẹ́ bí ó ti yẹ:
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 náà máa ń fò ó
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 náà tún máa ń fò ó
 ```
 
-Fún ìfisílẹ̀ tó yára jù lọ, yan **pnpm** (ibi ìpamọ́ tó dá lórí àkóónú + àwọn hard link — wo òkè).
-Fún runtime headless tí kò ní dashboard, lo profile `base` Docker (lókè) tàbí
-[ìtọ́sọ́nà Termux](docs/guides/TERMUX_GUIDE.md). Process kan náà ló ń pèsè CLI àti dashboard wẹ́ẹ̀bù lórí
-port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
+Fún ìfi sori ẹrọ tó yára jù lọ, yan **pnpm** (ibi ìpamọ́ tó dá lórí àkóónú + àwọn hard link — wo òkè).
+Fún runtime headless tí kò ní dashboard, lo profile Docker `base` (lókè) tàbí
+[ìtọ́sọ́nà Termux](docs/guides/TERMUX_GUIDE.md). Process kan náà ló ń pèsè CLI àti dashboard wẹ́ẹ̀bù
+lórí port kan, nítorí náà kò sí package CLI-nìkan lọ́wọ́lọ́wọ́.
 
 <br/>
 
 <div align="center">
 
-# 🎬 OmniRoute Níbi Iṣẹ́
+# 🎬 OmniRoute ní Iṣẹ́
 
 </div>
 
@@ -1206,7 +1205,7 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 <div align="center">
 
-<sub>Àwòrán ìgbà kan ti pánẹ́ẹ̀lì ní 2026-10-18 · Àkójọ àìṣàtúnṣe: YT 1.352 | TT 334 | IG 290 · Bí ó ṣe jẹ́ tuntun (ọjọ́): YT 5 | TT 48 | IG 49</sub>
+<sub>Àwòrán ìgbà-díẹ̀ ti pánẹ́ẹ̀lì ní 2026-10-18 · Àkójọ aláìṣe àtúnṣe: YT 1.352 | TT 334 | IG 290 · Ìgbàtuntun (ọjọ́): YT 5 | TT 48 | IG 49</sub>
 
 <table>
   <tr>
@@ -1215,42 +1214,42 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram Reel — nick_saraev" width="300"/>
       </a><br/>
       <b>🎬 #1 — Instagram</b><br/>
-      <sub>nick_saraev — àwọn ìwòran 3,042,474</sub>
+      <sub>nick_saraev — ìwòran 3,042,474</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.instagram.com/reel/Dbp7wv_CIO0/">
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram Reel — nnapier7" width="300"/>
       </a><br/>
       <b>🎬 #2 — Instagram</b><br/>
-      <sub>nnapier7 — àwọn ìwòran 1,454,535</sub>
+      <sub>nnapier7 — ìwòran 1,454,535</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY">
         <img src="https://img.youtube.com/vi/NJ0TQ-pyMDY/maxresdefault.jpg" alt="YouTube — Amidia AI & Tech" width="300"/>
       </a><br/>
       <b>🎬 #3 — YouTube</b><br/>
-      <sub>Amidia AI & Tech — àwọn ìwòran 794,974</sub>
+      <sub>Amidia AI & Tech — ìwòran 794,974</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.instagram.com/reel/DaSs65mMrHk/">
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram Reel — theopenstack" width="300"/>
       </a><br/>
       <b>🎬 #4 — Instagram</b><br/>
-      <sub>theopenstack — àwọn ìwòran 692,419</sub>
+      <sub>theopenstack — ìwòran 692,419</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358">
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="300"/>
       </a><br/>
       <b>🎬 #5 — TikTok</b><br/>
-      <sub>migue.baena — àwọn ìwòran 685,788</sub>
+      <sub>migue.baena — ìwòran 685,788</sub>
     </td>
   </tr>
 </table>
 
 </div>
 
-**Àtòjọ ipò kíkún (àwọn URL àṣẹ tí a ti yọ àdáwòkọ wọn kúrò, `v > 0`, ìwọ̀n àṣeyọrí tó ga jù):**
+**Ìpele kíkún (àwọn URL àṣẹwọlé tí a ti yọ àdàkọ kúrò, `v > 0`, ìwọ́le tó ga jù):**
 
 | #1                                                                                     | #2                                                                                  | #3                                                                                      | #4                                                                                    | #5                                                                                                  |
 | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -1260,9 +1259,9 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [nikothetech — TikTok](https://www.tiktok.com/@nikothetech/video/7671890769665477918) — **610,803** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **509,281** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** | [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** |
 
-Àwọn ìwọ̀n àṣẹ ní 2026-10-18: **àwọn fídíò aláìlẹ́ẹ̀kejì 1.976** · **àwọn ìwòran tí a mọ̀ 20.220.289** (`v > 0`) · **àwọn ikanni/prófáìlì 1.210 ní ìbámu pẹ̀lú nẹ́tíwọ́ọ̀kì**. Pánẹ́ẹ̀lì àìṣàtúnṣe ní àwọn ìlà 1.976 (YouTube 1.352 = àwọn fídíò gígùn 740 + Shorts 612 · TikTok 334 · Instagram 290); kò sí àdáwòkọ kankan tó ṣẹ́ kù lẹ́yìn ìṣètò sí ìwọ̀n kan nípasẹ̀ URL àṣẹ, èyí tó ń pa iye tó ga jù mọ́ fún fídíò kọ̀ọ̀kan. A ti dá ìkórè dátà YouTube dúró sí 2026-10-13 (ìpín API ti tán láti 14 sí 18/10), àti ti TikTok/Instagram láti 2026-09-02 (kò sí kirẹ́díìtì ìkórè dátà); àwọn fídíò 76 kò tíì ní iye ìwòran.
+Àwọn òṣùwọ̀n àṣẹwọlé ní 2026-10-18: **fídíò aláìlẹ́gbẹ́ 1.976** · **ìwòran tí a mọ̀ 20.220.289** (`v > 0`) · **ikanni/prófáìlì 1.210 fún nẹ́tíwọ́ọ̀kì kọ̀ọ̀kan**. Pánẹ́ẹ̀lì aláìṣe àtúnṣe ní ìlà 1.976 (YouTube 1.352 = gígùn 740 + Shorts 612 · TikTok 334 · Instagram 290); kò sí àdàkọ kankan tó ṣẹ́ kù lẹ́yìn ìṣọ̀kan nípasẹ̀ URL àṣẹwọlé, èyí tó pa iye ìwòran tó ga jù mọ́ fún fídíò kọ̀ọ̀kan. A ti dá ìkójọ YouTube dúró ní 2026-10-13 (ààlà API ti tán láti 14 sí 18/10), àti ti TikTok/Instagram láti 2026-09-02 (kò sí kirẹ́díìtì ìkójọ); fídíò 76 kò tíì ní iye ìwòran.
 
-> 🎬 **Ṣé o ṣe fídíò kan nípa OmniRoute?** Ṣí [ọ̀ràn](https://github.com/diegosouzapw/OmniRoute/issues/new) tàbí [ìjíròrò](https://github.com/diegosouzapw/OmniRoute/discussions) pẹ̀lú líńkì náà — a ó gbé e hàn níbí.
+> 🎬 **Ṣé o ṣe fídíò kan nípa OmniRoute?** Ṣí [ọ̀ràn](https://github.com/diegosouzapw/OmniRoute/issues/new) tàbí [ìjíròrò](https://github.com/diegosouzapw/OmniRoute/discussions) pẹ̀lú ìjápọ̀ náà — a ó fi hàn níbí.
 
 <br/>
 
@@ -1270,22 +1269,22 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 # 📧 Àwùjọ & Ìrànlọ́wọ́
 
-> Gbogbo nǹkan ní ibi kan — tẹ̀lé olùtọ́jú náà, bá àwùjọ sọ̀rọ̀, tàbí ṣí ọ̀ràn kan.
+> Ohun gbogbo ní ibi kan — tẹ̀lé olùtọ́jú náà, bá àwùjọ sọ̀rọ̀, tàbí ṣí ọ̀ràn kan.
 
-| Ikànnì                                        | Ibi / bí a ṣe lè lò ó                                                                                                 |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 💼 **LinkedIn** — tẹ̀lé olùtọ́jú náà            | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                             |
-| 🐙 **GitHub** — tẹ̀lé fún àwọn ìtújáde àti àbá | [@diegosouzapw](https://github.com/diegosouzapw)                                                                      |
-| 💬 **Discord**                                | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                |
-| ✈️ **Telegram**                               | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                |
-| 🟢 **WhatsApp — 🌍 Àgbáyé**                   | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                 |
-| 🟢 **WhatsApp — 🇧🇷 Brazil**                   | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                 |
-| 🌍 **Ààyè ayélujára**                         | [omniroute.online](https://omniroute.online)                                                                          |
-| 🌍 **🌍Àwùjọ StHub OmniRoute (ọ̀fẹ́)**          | [ojú-ọ̀nà StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                |
-| 📦 **Kóòdù orísun**                           | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                        |
-| 🐛 **Jábọ̀ àṣìṣe kan**                         | [ṣí ìṣòro kan](https://github.com/diegosouzapw/OmniRoute/issues) — so àbájáde `npm run system-info` mọ́ ọn             |
-| 🤝 **Ṣe àfikún**                              | [CONTRIBUTING.md](CONTRIBUTING.md) · [Àwoṣe Ẹ̀ka àti Ìtújáde](docs/ops/BRANCHING_MODEL.md) · yan `ìṣòro àkọ́kọ́ tó dára` |
-| 💚 **Ṣe àtìlẹ́yìn fún iṣẹ́ náà**                | [Àwọn ọ̀nà láti ṣe àtìlẹ́yìn ↑](#-support-omniroute) · [Àwọn Olùgbọ́wọ́ GitHub](https://github.com/sponsors/diegosouzapw) |
+| Ikànnì                                           | Ibi / bí o ṣe lè                                                                                                   |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| 💼 **LinkedIn** — tẹ̀lé olùtọ́jú                   | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                          |
+| 🐙 **GitHub** — tẹ̀lé fún àwọn ìtújáde àti ìmọ̀ràn | [@diegosouzapw](https://github.com/diegosouzapw)                                                                   |
+| 💬 **Discord**                                   | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                             |
+| ✈️ **Telegram**                                  | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                             |
+| 🟢 **WhatsApp — 🌍 Àgbáyé**                      | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                              |
+| 🟢 **WhatsApp — 🇧🇷 Brazil**                      | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                              |
+| 🌍 **Wẹ́ẹ̀bù**                                     | [omniroute.online](https://omniroute.online)                                                                       |
+| 🌍 **🌍Àwùjọ StHub OmniRoute (ọ̀fẹ́)**             | [ojú-ọ̀nà StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)             |
+| 📦 **Kóòdù orísun**                              | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                     |
+| 🐛 **Jábọ̀ àṣìṣe kan**                            | [ṣí ìṣòro kan](https://github.com/diegosouzapw/OmniRoute/issues) — so àbájáde `npm run system-info` mọ́ ọn          |
+| 🤝 **Ṣe àfikún**                                 | [CONTRIBUTING.md](CONTRIBUTING.md) · [Àwoṣe Ẹ̀ka àti Ìtújáde](docs/ops/BRANCHING_MODEL.md) · yan `good first issue` |
+| 💚 **Ṣe àtìlẹ́yìn fún iṣẹ́ náà**                   | [Àwọn ọ̀nà láti ṣe àtìlẹ́yìn ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)   |
 
 </div>
 
@@ -1294,28 +1293,28 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 <br/>
 <div align="center">
 
-## 🛠️ Àkójọpọ̀ Ìmọ̀ Ẹ̀rọ
+## 🛠️ Àkójọpọ̀ Ìmọ̀-ẹ̀rọ
 
 </div>
 
 <table>
-  <tr><th align="left">Àkànṣe</th><th align="left">Ìmọ̀ ẹ̀rọ</th></tr>
-  <tr><td nowrap><b>Ìpẹ̀yà</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (<code>any</code> kò sí nínú kókó láti v2.0)</td></tr>
-  <tr><td nowrap><b>Àgbékalẹ̀</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìwé-àkọsílẹ̀ WAL) + LowDB (JSON àtijọ́) — àwọn modúlù àgbègbè 147, àwọn ìṣíkiri 234</td></tr>
-  <tr><td nowrap><b>Ìrántí</b></td><td>Ìwádìí ọ̀rọ̀-kíkún SQLite FTS5 + àwọn ìfarahàn fákítọ̀ tí a ṣe quantize sí int8, ìparẹ́ tí a tẹ̀wé</td></tr>
-  <tr><td nowrap><b>Àwọn ètò àkàwé</b></td><td>Zod 4 — ìfọwọ́sí ìwọlé/jíjáde irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
-  <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Ìfiránṣẹ́ níṣóńṣó</b></td><td>Server-Sent Events (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Ìpọ̀n</b></td><td>Ìlà ẹ́ńjìnnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM nígbà tí ó wà ní ibi ìpamọ́ · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ìfarapamọ́</b></td><td>wreq-js — àfarawé àtẹ̀jáde TLS JA3 / JA4, aṣojú onípò 3</td></tr>
-  <tr><td nowrap><b>Ìfaradà</b></td><td>Alákóso àyípo, ìpadà sẹ́yìn oníìdásílẹ̀, ìdènà thundering-herd, ìmúnisẹ̀dá ara ẹni auto-combo</td></tr>
-  <tr><td nowrap><b>Àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tí a ṣètò pẹ̀lú àyíká ìbéèrè</td></tr>
-  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣàkóso ìdánwò Node.js + Vitest — <b>àwọn ìkéde ìdánwò aláìlásọ̀tẹ́lẹ̀ tó ju 60,000 lọ</b> káàkiri àwọn fáìlì ìdánwò tó lé ní 8,400 (unit, integration, E2E, ààbò, ecosystem)</td></tr>
-  <tr><td nowrap><b>Àwọn pẹpẹ̀</b></td><td>Kọ̀ǹpútà (Electron) · Android (Termux) · PWA (àṣàwákiri èyíkéyìí)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + Docker Hub nígbà ìtújáde</td></tr>
+  <tr><th align="left">Àpá</th><th align="left">Ìmọ̀-ẹ̀rọ</th></tr>
+  <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ní gbogbo <code>src/</code> àti <code>open-sse/</code> (àìsí <code>any</code> nínú mojú-kókó láti v2.0)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ data</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún àtijọ́) — àwọn modulu àgbègbè 147, àwọn ìṣípadà 234</td></tr>
+  <tr><td nowrap><b>Ìrántí</b></td><td>Ìṣàwárí ọ̀rọ̀-kíkún SQLite FTS5 + àwọn ìṣàpẹẹrẹ fekito tí a ṣe quantization sí int8, ìdínkù tí a tẹ̀</td></tr>
+  <tr><td nowrap><b>Àwọn àwòṣe</b></td><td>Zod 4 — ìmúdájú I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
+  <tr><td nowrap><b>Àwọn ìlànà ibánisọ̀rọ̀</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>Ṣíṣàn data</b></td><td>Àwọn ìṣẹ̀lẹ̀ tí a rán láti olupin (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Dídínkù data</b></td><td>Pipeline ẹ́ńjìnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ìfàṣẹsí MCP tó ní ààlà · AES-256-GCM nígbà tí data wà ní ìsinmi · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ìfarapamọ́</b></td><td>wreq-js — àfarawé ìka TLS JA3 / JA4, aṣojú ipele 3</td></tr>
+  <tr><td nowrap><b>Ìfaradà</b></td><td>Aláfọ̀wọ́kù àyíká, ìdádúró tí ń pọ̀ sí i, ìdènà ọ̀pọ̀ ìbéèrè lẹ́ẹ̀kan náà, ìmúláradá ara ẹni auto-combo</td></tr>
+  <tr><td nowrap><b>Ìkọ̀wé àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tó ní àgbékalẹ̀ pẹ̀lú àyíká ìbéèrè</td></tr>
+  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣiṣẹ́ ìdánwò Node.js + Vitest — <b>ó ju àwọn ìkéde ìdánwò aimi 60,000 lọ</b> káàkiri àwọn fáìlì ìdánwò tí a tọpinpin tí ó ju 8,400 lọ (ẹyọkan, ìṣọ̀kan, E2E, ààbò, àyíká-ẹ̀rọ)</td></tr>
+  <tr><td nowrap><b>Àwọn pèpéle</b></td><td>Kọ̀ǹpútà (Electron) · Android (Termux) · PWA (àṣàwákiri èyíkéyìí)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + Docker Hub nígbà ìtúsílẹ̀</td></tr>
   <tr><td nowrap><b>Àwọn ìjápọ̀</b></td><td><a href="https://omniroute.online">Ojúlé wẹ́ẹ̀bù</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1323,7 +1322,7 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 <br/>
 
-## 📖 Ìwé Àkọsílẹ̀
+## 📖 Ìwé Ìtọ́kasí
 
 </div>
 
@@ -1331,83 +1330,83 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 <table>
   <tr><th align="left">Ìwé</th><th align="left">Àlàyé</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Ìtọ́sọ́nà Olùmúlò</a></b></td><td>Àwọn pèsè, combos, ìṣọ̀kan CLI, ìgbékalẹ̀</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Ìtọ́sọ́nà Ìṣètò</a></b></td><td>Àwọn ọ̀nà fifi sori ẹrọ kíkún, àwọn àtòpọ̀ irinṣẹ́ CLI, ìṣètò protocol, àtúnṣe àkókò ìdúró</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Ìtọ́sọ́nà Àwọn Irinṣẹ́ CLI</a></b></td><td>Ìṣètò fún irinṣẹ́ kọ̀ọ̀kan fún Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Ìpo Latọ̀na</a></b></td><td>Ṣàkóso OmniRoute latọ̀na (VPS) láti inú CLI kọ̀ǹpútà alágbèéká rẹ pẹ̀lú àwọn àmi ìráyè tí a fi ààlà sí</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Àtòpọ̀ Claude Code</a></b></td><td>Darí Claude Code sí OmniRoute (agbegbe/latọ̀na) pẹ̀lú <code>launch</code> + àwọn profaili fún model kọ̀ọ̀kan</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Bíbẹ̀rẹ̀ Kíákíá</a></b></td><td>ìgbésẹ̀ 3: fifi sori ẹrọ → sopọ̀ → ṣàtúnṣe</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Ìtọ́sọ́nà Olùlò</a></b></td><td>Àwọn olùpèsè, combos, ìsọdọ̀kan CLI, imuṣiṣẹ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Ìtọ́sọ́nà Ìṣètò</a></b></td><td>Àwọn ọ̀nà fifi sori ẹrọ ní kíkún, àwọn ìṣètò irinṣẹ́ CLI, ìṣètò ìlànà, ìtúnṣe àkókò ìdúró</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Ìtọ́sọ́nà Àwọn Irinṣẹ́ CLI</a></b></td><td>Ìṣètò fún ọ̀kọ̀ọ̀kan irinṣẹ́ fún Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Ìwọ̀n Latọna Jijìn</a></b></td><td>Ṣàkóso OmniRoute latọna jijìn (VPS) láti inú CLI kọ̀ǹpútà alágbèéká rẹ pẹ̀lú àwọn àmì ààyè tí a fi ààlà sí</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Ìṣètò Claude Code</a></b></td><td>Darí Claude Code sí OmniRoute (agbègbè/latọna jijìn) pẹ̀lú <code>launch</code> àti àwọn profaili fún ọ̀kọ̀ọ̀kan model</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Bíbẹ̀rẹ̀ Kíákíá</a></b></td><td>Fifi sori ẹrọ ní ìgbésẹ̀ 3 → so pọ̀ → ṣètò</td></tr>
 </table>
 
-### 🔧 Àwọn Ìṣẹ́ àti Ìgbékalẹ̀
+### 🔧 Ìṣiṣẹ́ àti Imuṣiṣẹ
 
 <table>
   <tr><th align="left">Ìwé</th><th align="left">Àlàyé</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Ìtọ́sọ́nà Docker</a></b></td><td>Ṣíṣiṣẹ́ Docker, àwọn profaili Compose, Caddy HTTPS, àwọn tunnels, àwọn àmì image</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Ìtọ́sọ́nà Podman</a></b></td><td>Ìṣọ̀kan Quadlet systemd, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Ìgbékalẹ̀ VM</a></b></td><td>Ìtọ́sọ́nà kíkún: ìṣètò VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Ìgbékalẹ̀ Fly.io</a></b></td><td>Gbéró sí Fly.io pẹ̀lú ibi ìpamọ́ títẹ̀síwájú</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Ìtọ́sọ́nà Docker</a></b></td><td>Ṣíṣiṣẹ́ Docker, àwọn profaili Compose, Caddy HTTPS, àwọn ọ̀nà àjà, àwọn àmì àwòrán</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Ìtọ́sọ́nà Podman</a></b></td><td>Ìsọdọ̀kan Quadlet systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Imuṣiṣẹ VM</a></b></td><td>Ìtọ́sọ́nà kíkún: ìṣètò VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Imuṣiṣẹ Fly.io</a></b></td><td>Ṣe imuṣiṣẹ sí Fly.io pẹ̀lú ibi ìpamọ́ títí ayérayé</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Ìtọ́sọ́nà Termux</a></b></td><td>Ṣíṣiṣẹ́ OmniRoute lórí Android nípasẹ̀ Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Ìtọ́sọ́nà PWA</a></b></td><td>Fifi Progressive Web App sori ẹrọ, caching, àti ìṣètò ayaworan</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Ìtọ́sọ́nà Yíyọ̀ Sórí Ẹ̀rọ</a></b></td><td>Yíyọ̀ kíkún fún gbogbo àwọn ọ̀nà fifi sori ẹrọ</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Àtòpọ̀ Ayíká</a></b></td><td>Àwọn onírúurú <code>.env</code> àti àwọn ìtọ́kasí wọn ní kíkún</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Ìtọ́sọ́nà PWA</a></b></td><td>Fifi Progressive Web App sílẹ̀, ìpamọ́, ìṣètò ẹ̀rọ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Ìtọ́sọ́nà Yíyọ̀ Sílẹ̀</a></b></td><td>Yíyọ̀ mọ́́tò fún gbogbo àwọn ọ̀nà fifi sori ẹrọ</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Ìṣètò Ayíká</a></b></td><td>Gbogbo àwọn oníbàárà <code>.env</code> àti àwọn ìtọ́kasí wọn</td></tr>
 </table>
 
-### 🧠 Àwọn Ẹ̀yà àti Ìṣètò Ayaworan
+### 🧠 Àwọn Ẹ̀yà àti Ìṣètò Ẹ̀rọ
 
 <table>
   <tr><th align="left">Ìwé</th><th align="left">Àlàyé</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Ìṣètò Ayaworan</a></b></td><td>Ìṣètò ayaworan ètò, ìṣàn dátà, àti àwọn ohun inú rẹ̀</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Ìtọ́sọ́nà Fífúnpọ̀</a></b></td><td>Pipeline aṣàyàn 7: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Fífúnpọ̀ RTK</a></b></td><td>Fífúnpọ̀ àbájáde àṣẹ, àwọn filters, ìgbẹ́kẹ̀lé, ìmúdájú, àti ìgbàpadà àbájáde aise</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Àwọn Ẹ́ńjìnì Fífúnpọ̀</a></b></td><td>Caveman, RTK, àwọn pipeline stacked, àwọn ojúewé dashboard/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Ọ̀nà Ìṣètò Àwọn Òfin Fífúnpọ̀</a></b></td><td>Àwọn schema JSON rule-pack fún Caveman àti àwọn filters RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Àwọn Pàkì Èdè Fífúnpọ̀</a></b></td><td>Ìwádìí èdè àti kíkọ rule-pack Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ìtọ́sọ́nà Ìfaradà</a></b></td><td>Àwọn circuit breaker, cooldowns, queue, ìdènà ìkójọpọ̀ àìtọ́jọ́, TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Ẹ́ńjìnì Auto-Combo</a></b></td><td>Ìṣírò àwọn kókó-ọ̀nà 16, àwọn mode packs, ìmúláradá ara ẹni</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ìtọ́sọ́nà Proxy</a></b></td><td>Ètò proxy ìpele 3, ọjà 1proxy, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Àwọn Ìpele Ọ̀fẹ́</a></b></td><td>Àkójọpọ̀ àtòjọ: àwọn pool tí a ṣàkọsílẹ̀ 34 / àwọn àkọsílẹ̀ free-tier 465 tí a kà sílẹ̀</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Àwòrán Àwọn Ẹ̀yà</a></b></td><td>Ìrìn-àjò dashboard ojú-ìwòye pẹ̀lú àwọn fọ́tò ojú-ìwòye</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Ìwé Àkọsílẹ̀ Codebase</a></b></td><td>Ìrìn-àjò codebase tí ó rọrùn fún olùbẹ̀rẹ̀</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Ìṣètò Ẹ̀rọ</a></b></td><td>Ìṣètò ẹ̀rọ ètò, ìṣàn dátà, àti àwọn ohun inú rẹ̀</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Ìtọ́sọ́nà Ìdínkù</a></b></td><td>Pipeline aṣàyàn 7: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Ìdínkù RTK</a></b></td><td>Ìdínkù àbájáde àṣẹ, àwọn àlẹ̀mọ́, ìgbẹ́kẹ̀lé, ìmúdájú, àti ìmúpadàbọ̀ àbájáde aise</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Àwọn Ẹ̀rọ Ìdínkù</a></b></td><td>Caveman, RTK, àwọn pipeline stacked, ojú dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Ọ̀nà Àgbékalẹ̀ Àwọn Ofin Ìdínkù</a></b></td><td>Àwọn schema àkójọpọ̀ òfin JSON fún Caveman àti àwọn àlẹ̀mọ́ RTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Àwọn Àkójọpọ̀ Èdè Ìdínkù</a></b></td><td>Ìṣàwárí èdè àti kíkọ àkójọpọ̀ òfin Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ìtọ́sọ́nà Ìfaradà</a></b></td><td>Àwọn breaker àyíká, àwọn àkókò itutu, ìlà ìdúró, ìdènà ọ̀pọ̀ ìbéèrè lẹ́ẹ̀kan, TLS spoofing</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Ẹ̀rọ Auto-Combo</a></b></td><td>Ìṣírò àwọn kókó 16, àwọn akójọpọ̀ mode, ìmúláradá ara ẹni</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ìtọ́sọ́nà Proxy</a></b></td><td>Ètò proxy ipele 3, ọjà 1proxy, CRUD registry</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Àwọn Ìpele Ọ̀fẹ́</a></b></td><td>Àkójọpọ̀ àtòjọ: àwọn adágún tí ń tún ara wọn ṣe 34 tí a ṣàkọsílẹ̀ / àwọn àkọsílẹ̀ ìpele ọ̀fẹ́ 466 tí a kà sí àkójọ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Àfihàn Àwọn Ẹ̀yà</a></b></td><td>Ìrìn àjò dashboard ojú-ìran pẹ̀lú àwọn àwòrán iboju</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Ìwé Ìtọ́kasí Codebase</a></b></td><td>Ìrìn àjò codebase tí ó rọrùn fún olùbẹ̀rẹ̀</td></tr>
 </table>
 
-### 🤖 Protocol àti APIs
+### 🤖 Àwọn Ìlànà àti APIs
 
 <table>
   <tr><th align="left">Ìwé</th><th align="left">Àlàyé</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Ìtọ́kasí API</a></b></td><td>Gbogbo endpoints pẹ̀lú àpẹẹrẹ</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">Ìlànà OpenAPI</a></b></td><td>Ìlànà OpenAPI 3.0</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Olùpèsè MCP</a></b></td><td>Àwọn irinṣẹ́ MCP 110, àwọn àtòpọ̀ IDE, àwọn oníbàárà Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Ìtọ́sọ́nà Olùpèsè MCP</a></b></td><td>Fifi MCP sori ẹrọ, àwọn transports, àti ìtọ́kasí irinṣẹ́</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Olùpèsè A2A</a></b></td><td>Protocol JSON-RPC 2.0, àwọn ọgbọ́n, streaming, ìṣàkóso iṣẹ́</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Ìtọ́sọ́nà Olùpèsè A2A</a></b></td><td>Káàdì aṣojú A2A, àwọn iṣẹ́, àwọn ọgbọ́n, àti streaming</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Ìtọ́kasí API</a></b></td><td>Gbogbo àwọn endpoint pẹ̀lú àpẹẹrẹ</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">Ìtọ́kasí OpenAPI</a></b></td><td>Àlàyé OpenAPI 3.0</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Olùpèsè MCP</a></b></td><td>Àwọn irinṣẹ́ MCP 110, àwọn ìṣètò IDE, àwọn oníbàárà Python/TS/Go</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Ìtọ́sọ́nà Olùpèsè MCP</a></b></td><td>Fifi MCP sílẹ̀, àwọn ọ̀nà ìrìnàjò, àti ìtọ́kasí irinṣẹ́</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Olùpèsè A2A</a></b></td><td>Ìlànà JSON-RPC 2.0, àwọn ọgbọ́n, ṣiṣàn, ìṣàkóso iṣẹ́</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Ìtọ́sọ́nà Olùpèsè A2A</a></b></td><td>Kaadi aṣojú A2A, àwọn iṣẹ́, àwọn ọgbọ́n, àti ṣiṣàn</td></tr>
 </table>
 
-### 📋 Ètò àti Didara-Ọ̀rọ̀
+### 📋 Iṣẹ́ Àkànṣe àti Didára
 
 <table>
-  <tr><th align="left">Ìwé</th><th align="left">Àlàyé</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Ilowosi</a></b></td><td>Eto ìdàgbàsókè àti àwọn ìlànà</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Àwòṣe Ẹ̀ka àti Ìtúsílẹ̀</a></b></td><td>Ibi tí PRs ti ń tọ́ka sí (<code>release/*</code>), àti ohun tí <code>main</code> àti àwọn àmì túmọ̀ sí</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Àkọsílẹ̀ Àwọn Àyípadà</a></b></td><td>Ìtàn kíkún ti ìtúsílẹ̀ fún ẹ̀dà kọ̀ọ̀kan</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Ìlànà Ààbò</a></b></td><td>Rírọ̀ àwọn àìlera àti àwọn ìṣe ààbò</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">Ìtọ́sọ́nà i18n</a></b></td><td>Àtìlẹ́yìn fún èdè 67, ìṣàn iṣẹ́ ìtumọ̀, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Àtòjọ Ìmúdájú Ìtúsílẹ̀</a></b></td><td>Àwọn ìgbésẹ̀ ìmúdájú ṣáájú ìtúsílẹ̀</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Ètò Ibora</a></b></td><td>Ọgbọ́n ibora ìdánwò fún àwọn ìkéde ìdánwò aimi tó ju 60,000 lọ káàkiri àwọn fáìlì ìdánwò tó lé ní 8,400 tí a ń tọ́pa</td></tr>
+  <tr><th align="left">Ìwé</th><th align="left">Àpèjúwe</th></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Bí a ṣe lè kópa</a></b></td><td>Ìṣètò ìdàgbàsókè àti àwọn ìlànà</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Àwòṣe Ẹ̀ka àti Ìtusílẹ̀</a></b></td><td>Ibi tí PRs ń lọ sí (<code>release/*</code>), àti ohun tí <code>main</code> àti àwọn àmì túmọ̀ sí</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Àkọsílẹ̀ Àwọn Ìyípadà</a></b></td><td>Ìtàn ìtusílẹ̀ kíkún fún ẹ̀yà kọ̀ọ̀kan</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Ìlànà Ààbò</a></b></td><td>Ríròyìn àìlera àti àwọn ìṣe ààbò</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">Ìtọ́sọ́nà i18n</a></b></td><td>Àtìlẹ́yìn fún àwọn èdè 67, ìlànà ìtumọ̀, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Àtòjọ Àyẹ̀wò Ìtusílẹ̀</a></b></td><td>Àwọn ìgbésẹ̀ ìmúdájú ṣáájú ìtusílẹ̀</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Ètò Àgbègbè Ìdánwò</a></b></td><td>Ìlànà àgbègbè ìdánwò fún àwọn ìkéde ìdánwò aláìyípadà tó ju 60,000 lọ káàkiri àwọn fáìlì ìdánwò 8,400+ tí a ń tọpinpin</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Àwọn Olùkópa Àgbà
+# ⭐ Àwọn Olùkópa Pàtàkì Jùlọ
 
-> Àwùjọ orísun-ìmọ̀ tó ní ìfẹ́ ńlá ló ń ṣe àkóso OmniRoute. Àwọn ẹni wọ̀nyí ti ṣe àwọn àfikún àrà ọ̀tọ̀ tí ó kan dídára, ìdúróṣinṣin, àti ìtànkálẹ̀ iṣẹ́ náà ní tààrà. **Ẹ ṣé.**
+> Àwùjọ orísun-ìmọ̀ tó ní ìfẹ́ líle ló ń ṣe àwòṣe OmniRoute. Àwọn ènìyàn wọ̀nyí ti ṣe àwọn àfikún àrà ọ̀tọ̀ tí ó ní ipa tààrà lórí dídára, ìdúróṣinṣin, àti ìtànkálẹ̀ iṣẹ́ náà. **Ẹ ṣé.**
 
-### Àwọn olùkópa òde nípasẹ̀ àwọn pull request tí a ti dapọ̀
+### Àwọn olùkópa láti òde nípasẹ̀ àwọn pull request tí a ṣàpapọ̀
 
 <table>
-  <tr><th align="center">Ipò</th><th align="left">Olùkópa</th><th align="center">PRs tí a ti dapọ̀</th><th align="right">~Àwọn ìlà tí a yí padà</th></tr>
+  <tr><th align="center">Ipò</th><th align="left">Olùkópa</th><th align="center">Àwọn PR tí a ṣàpapọ̀</th><th align="right">~Àwọn ìlà tí a yí padà</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1430,9 +1429,9 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>A ṣe ìkànìyàn ní 2026-11-03 03:01:19 UTC pẹ̀lú ìpẹ̀yà ìgbàlódé <code>release/v3.8.53</code> <code>05bc048d6c</code>. Ìkànìyàn GitHub GraphQL tí a pín sí ojúewé ní àwọn PRs 9,947 tí a ti dapọ̀: 4,130 láti ọ̀dọ̀ olùní iṣẹ́ ibi ìpamọ́ náà, 240 láti ọ̀dọ̀ Dependabot, 6 láti ọ̀dọ̀ àwọn bot/app mìíràn, àti <b>5,571 PRs òde láti ọ̀dọ̀ àwọn olùkópa 883 ọ̀tọ̀ọ̀tọ̀</b>. “Àwọn ìlà tí a yí padà” jẹ́ àfikún + ìkópadà GitHub, ó sì ní àwọn fáìlì tí a ṣe jáde, lockfiles, àwọn kàtàlógì, àwọn ìtumọ̀ àti ìwé ìmúlò nínú; ó jẹ́ ìyípadà iṣẹ́, kì í ṣe LOC tí a kọ. Àwọn PRs 53 ròyìn àwọn ìyàtọ̀ GitHub tó ju 500,000 ìlà lọ (fún àpẹẹrẹ #13399, àfikún olùpèsè kan ṣoṣo, ṣe àkójọ àwọn fáìlì 2,347 tí a yí padà), èyí tó ń gbé ọ̀pọ̀ àpapọ̀ tó wà lókè ga. A pín àwọn tó dọ́gba sí ipò kan náà.</sub>
+<sub>Ìkànìyàn náà wáyé ní 2026-11-03 03:01:19 UTC pẹ̀lú ìpẹ̀yà <code>release/v3.8.53</code> gidi <code>05bc048d6c</code>. Ìkànìyàn GitHub GraphQL tí a pín sí ojú-ewé ní àwọn PR tí a ṣàpapọ̀ 9,947: 4,130 láti ọ̀dọ̀ olówó ibi ìpamọ́ náà, 240 láti ọ̀dọ̀ Dependabot, 6 láti ọ̀dọ̀ àwọn bot/app mìíràn, àti <b>àwọn PR òde 5,571 láti ọ̀dọ̀ àwọn olùkópa ọ̀tọ̀ọ̀tọ̀ 883</b>. “Àwọn ìlà tí a yí padà” jẹ́ àwọn àfikún GitHub + àwọn ìyọkúrò, ó sì ní àwọn fáìlì tí a ṣe lọ́wọ́ ara wọn, lockfile, kàtàlógì, àwọn ìtumọ̀ àti ìwé àlàyé nínú; ó jẹ́ ìyípadà iṣẹ́, kì í ṣe LOC tí òǹkọ̀wé kọ. Àwọn PR 53 ròyìn àwọn ìyàtọ̀ GitHub tó ju ìlà 500,000 lọ (fún àpẹẹrẹ #13399, àfikún olùpèsè kan ṣoṣo, ní àwọn fáìlì 2,347 tí a yí padà), èyí sì ń fa kí àwọn àpapọ̀ kan lókè pọ̀ sí i. A ka àwọn tí ipò wọn dọ́gba pọ̀.</sub>
 
-### Àwọn commit tí GitHub so mọ́ àwọn olùkópa
+### Àwọn commit tí GitHub yàn sí olùkópa náà
 
 <table>
   <tr>
@@ -1441,42 +1440,42 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 Àwọn commit tí GitHub fi sílẹ̀: 418</sub>
+      <sub>🥇 418 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 Àwọn commit tí GitHub fi sílẹ̀: 294</sub>
+      <sub>🥈 294 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 Àwọn commit tí GitHub fi sílẹ̀: 229</sub>
+      <sub>🥉 229 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 222</sub>
+      <sub>🏅 222 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 202</sub>
+      <sub>🏅 202 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 134</sub>
+      <sub>🏅 134 commit tí GitHub yàn sí</sub>
     </td>
   </tr>
   <tr>
@@ -1485,49 +1484,49 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 126</sub>
+      <sub>🏅 126 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 115</sub>
+      <sub>🏅 115 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 108</sub>
+      <sub>🏅 108 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 70</sub>
+      <sub>🏅 70 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 68</sub>
+      <sub>🏅 68 commit tí GitHub yàn sí</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 Àwọn commit tí GitHub fi sílẹ̀: 68</sub>
+      <sub>🏅 68 commit tí GitHub yàn sí</sub>
     </td>
   </tr>
 </table>
 
-<sub>A tún ṣàyẹ̀wò rẹ̀ ní 2026-11-03 02:09:16 UTC: Àwọn commit tí GitHub fi sílẹ̀ tí API Contributors ti ibi ìpamọ́ náà ròyìn fún ẹ̀ka àìyípadà <code>release/v3.8.53</code>. API náà dá àwọn ìdánimọ̀ 903 padà (àwọn olumulo 429, àwọn bot 2, àti àwọn aláìlórúkọ 472); tábìlì yìí kò kà olùtọ́jú, àwọn bot àti àwọn ìdánimọ̀ aláìlórúkọ sí, ó sì tún pa àwọn ìdíje tí iye wọn dọ́gba mọ́. Ó yàtọ̀ sí mejeeji ìpín àwọn PR tí a ti ṣàpapọ̀ lókè àti ìkànìyàn metadata Git tó wà nísàlẹ̀.</sub>
+<sub>A tún ṣàyẹ̀wò rẹ̀ ní 2026-11-03 02:09:16 UTC: àwọn commit tí GitHub yàn sí, gẹ́gẹ́ bí Contributors API ti ibi ipamọ ṣe ròyìn fún ẹ̀ka àìyípadà <code>release/v3.8.53</code>. API náà dá àwọn ìdánimọ̀ 903 padà (olùlò 429, bot 2, aláìlórúkọ 472); tábìlì yìí kò kà olùtọ́jú, àwọn bot àti àwọn ìdánimọ̀ aláìlórúkọ sí, ó sì pa àwọn ìdípọ̀ ipo mọ́. Ó yàtọ̀ sí méjèèjì ìṣètò merged-PR tó wà lókè àti ìkànìyàn Git-metadata tó wà nísàlẹ̀.</sub>
 
-> 🙏 Àwọn àfikún àwọn olùkópa wọ̀nyí, àwọn àtúnṣe aṣìṣe, àti àwọn ìmúgbòrò amáyédẹrùn jẹ́ **apá pàtàkì** nínú ohun tí ń jẹ́ kí OmniRoute jẹ́ alágbẹ̀kẹ̀lé tí ó sì ní ọ̀pọ̀ àfidámọ̀. Gbogbo ìbéèrè ìfàṣẹ́pọ̀, gbogbo àpẹẹrẹ ìdánwò, àti gbogbo fáìlì ìtumọ̀ i18n ṣe pàtàkì. Àwọn ènìyàn bíi wọ́n ni ó ń kọ́ orísun-ìmọ̀.
+> 🙏 Àwọn àfikún àwọn olùkópa wọ̀nyí, àwọn àtúnṣe àṣìṣe, àti àwọn ìmúgbòòrò amáyédẹrùn jẹ́ **apá pàtàkì** nínú ohun tó ń jẹ́ kí OmniRoute jẹ́ alágbára àti ní àwọn àfidámọ̀ púpọ̀. Gbogbo pull request, gbogbo àyẹ̀wò, àti gbogbo fáìlì ìtumọ̀ i18n ṣe pàtàkì. Àwọn ènìyàn bíi tiwọn ni ń kọ́ orísun-ìmọ̀.
 
 </div>
 
@@ -1806,17 +1805,17 @@ OmniRoute dúró lórí àyà àwọn òmìrán. Ó bẹ̀rẹ̀ gẹ́gẹ́ b�
   <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Ó ṣe ìdámọ̀ oju quota Grok Build; OmniRoute sì ṣàyẹ̀wò ó, ó sì ṣe àtúnṣe wire format alààyè ní òmìnira.</td></tr>
 </table>
 
-## 📄 Ìwé-aṣẹ
+## Iwe-aṣẹ 📄
 
-Ìwé-aṣẹ MIT - wo [LICENSE](LICENSE) fún àwọn àlàyé.
+Iwe-aṣẹ MIT - wo [LICENSE](LICENSE) fun awọn alaye.
 
 ---
 
 <div align="center">
 
-**[⬆ Padà sí òkè](#-omniroute)** · A fi ❤️ kọ́ ọ́ fún àwùjọ AI orísun-ìmọ̀.
+**[⬆ Pada si oke](#-omniroute)** · Itumọ ti pẹlu ❤️ fun awọn ìmọ-orisun AI awujo.
 
-<sub>Ẹni tó dá a sílẹ̀ ni <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Ìwé-aṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ti ṣẹda nipasẹ <a href="https://github.com/diegosouzapw">Diego Souza</a> OmniRoute v3.8.54 · Node ≥ 22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions ti ṣiṣẹ́ fún Ìbéèrè àti Ìdáhùn àwùjọ -->
+<!-- GitHub Discussions enabled for community Q&A -->

@@ -44,7 +44,7 @@ Un indicateur booléen est considéré comme **activé** lorsque sa valeur effec
 
 ## Catalogue de drapeaux
 
-120 drapeaux répartis en 6 catégories.** Défaut** est la définition par défaut — la valeur utilisée lorsque ni un remplacement DB ni une variable d'environnement ne sont présents.
+121 drapeaux répartis en 6 catégories.** Défaut** est la définition par défaut — la valeur utilisée lorsque ni un remplacement DB ni une variable d'environnement ne sont présents.
 
 ### Sécurité (11)
 
@@ -115,7 +115,7 @@ Un indicateur booléen est considéré comme **activé** lorsque sa valeur effec
 
 Lorsque `UNPRICED_USAGE_BUDGET_POLICY` est explicitement configuré (DB override avant l'environnement), il est prioritaire sur `USAGE_LIMIT_IGNORE_UNPRICED`. Sans valeur d'énumération explicite, la désinscription booléenne en amont sélectionne `count_as_zero`; sinon, la valeur par défaut est `fail_closed`. Les valeurs d'énumération non valides et le stockage des indicateurs de fonctionnalités illisibles échouent. Ni la désinscription n'assouplit les dépenses tarifaires ni l'échec de la recherche de prix. L'application et le rapport de l'administrateur résolvent la même politique efficace.
 
-### Durée d'exécution (57)
+### Durée d'exécution (58)
 
 | Clé                                            | Taper       | Défaut  | Redémarrage | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------- | ----------- | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Lorsque `UNPRICED_USAGE_BUDGET_POLICY` est explicitement configuré (DB override
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | booléen     | `false` |             | Arrêtez de proposer et de transmettre l'effort de raisonnement `max` pour Cursor Grok 4.7 (#17386) : la documentation de Cursor répertorie uniquement low/medium/high/xhigh, donc l'alias de secours `grok-4.7-max` disparaît du catalogue et une demande d'effort `max` est envoyée sans paramètre d'effort. Désactivé par défaut : `max` reste proposé et transmis, car une sonde AgentService/Run en direct l'a accepté.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | booléen     | `false` |             | Envoyez les réponses keepalives sous la forme d'une ligne vide au lieu d'un événement Response.in_progress, de sorte qu'un instantané synthétique ne puisse jamais remplacer la vraie réponse dans le SDK officiel. Une ligne vide ne distribue aucun événement SSE, donc un chien de garde client qui se réinitialise uniquement sur les événements ne sera pas réinitialisé pendant une longue phase silencieuse. Désactivé par défaut : les minuteries envoient l'événement Response.in_progress valide selon les spécifications.                                                                                                                                                                                                                                                                                                                                          |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booléen     | `false` |             | Dans les statistiques du cache de compression, comptez une requête compressée adressée à un fournisseur de mise en cache de préfixes automatique (OpenAI, Codex, Azure ou une connexion personnalisée qui déclare la mise en cache rapide avec suppression des marqueurs) comme une estimation du cache, même sans marqueurs `cache_control` (#17114). L'estimation est un signal d'éligibilité au cache, et non un succès observé, de sorte que le taux de succès signalé pour ces fournisseurs tend vers 100 %. Désactivé par défaut : seule une requête transportant des marqueurs `cache_control` vers un fournisseur de mise en cache compte comme une estimation du succès, donc les fournisseurs de préfixes automatiques continuent de signaler 0.                                                                                                                    |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | booléen     | `false` |             | Permet à une recherche web automatique sans `provider` explicite d’utiliser un compte Codex (ChatGPT) connecté via `codex-search` : en dernier recours avant les fournisseurs sans clé lorsqu’aucun fournisseur avec identifiants n’est utilisable, et comme solution de repli en cas d’échec (#17933). Chaque recherche consomme le quota de l’abonnement et prend environ 10–40 s. Désactivé par défaut : `codex-search` ne s’exécute que si la requête le désigne explicitement.                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Renvoie chaque indicateur avec sa valeur effective, sa source et un résumé.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

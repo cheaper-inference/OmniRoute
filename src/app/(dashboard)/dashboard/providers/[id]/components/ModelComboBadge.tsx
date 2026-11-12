@@ -40,7 +40,7 @@ export default function ModelComboBadge({ combos, t }: ModelComboBadgeProps) {
             combo: name,
           })}
         >
-          <Icon name="layers" size={10} />
+          <Icon name="layers" size={10} className="leading-none" />
           {name}
         </Link>
       ))}

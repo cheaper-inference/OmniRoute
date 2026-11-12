@@ -6,33 +6,33 @@
 
 ## Apžvalga
 
-Redis yra **pasirenkama, nebūtina priklausomybė** sistemoje „OmniRoute“ — kai Redis nepasiekiamas, programa toliau veikia naudodama atsarginius sprendimus atmintyje. Produkcinėje aplinkoje Redis optimizavimas sumažina keturių skirtingų darbo krūvių delsą:
+Redis yra **neprivaloma, švelni priklausomybė** OmniRoute — programa grakščiai pablogėja (atminties atsargos), kai Redis nepasiekiamas. Gamyboje derinant Redis sumažėja keturių skirtingų darbo krūvių delsa:
 
-| Darbo krūvis                                   | Tvarkyklė                     | Kliento kūrimo funkcija                                                       | Rakto šablonas                                                       |
-| ---------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Užklausų dažnio ribojimas                      | `rateLimiter.ts`              | `getRedisClient()` — tingiai inicijuojamas vienetinis `ioredis` egzempliorius | `<prefix>rl:*` Lua atomiškai valdomi užklausų dažnio ribojimo langai |
-| Autentifikavimo podėlis                        | `apiKeys.ts`                  | Pakartotinai naudoja `rateLimiter` klientą                                    | `<prefix>auth:api_key:<sha256>` su TTL                               |
-| Kvotų saugykla                                 | `redisQuotaStore.ts`          | Atskiras vienetinis `getRedisClient(url)` egzempliorius                       | `<prefix>quota:*`, konfigūruojamas kiekvienam egzemplioriui          |
-| Parengiamojo paleidimo grandinės pertraukiklis | `redisCircuitBreakerStore.ts` | Atskiras klientas faile `circuitBreakerFactory.ts`                            | `<prefix>warmup:cb:<connectionId>`                                   |
+| Darbo krūvis                     | Vairuotojas                   | Klientų gamykla                                  | Raktų raštas                                               |
+| -------------------------------- | ----------------------------- | ------------------------------------------------ | ---------------------------------------------------------- |
+| Normos ribojimas                 | `rateLimiter.ts`              | `getRedisClient()` — tingus `ioredis` vienvietis | `<prefix>rl:*` Lua-atominis greičio apribojimo langai      |
+| Auth cache                       | `apiKeys.ts`                  | Pakartotinai naudoja `rateLimiter` klientą       | `<prefix>auth:api_key:<sha256>` su TTL                     |
+| Kvotos parduotuvė                | `redisQuotaStore.ts`          | Atskiras `getRedisClient(url)` vienvietis        | `<prefix>quota:*` konfigūruojamas kiekvienam egzemplioriui |
+| Apšilimo grandinės pertraukiklis | `redisCircuitBreakerStore.ts` | Atskiras klientas `circuitBreakerFactory.ts`     | `<prefix>warmup:cb:<connectionId>`                         |
 
-Visiems keturiems darbo krūviams naudojamas vienas vardų srities priešdėlis, todėl „OmniRoute“ gali veikti kartu su kitomis programomis viename Redis egzemplioriuje (pvz., `127.0.0.1:6379`). Žr. [Raktų vardų sričių naudojimas](#key-namespacing).
+Visi keturi darbo krūviai turi vieną vardų srities priešdėlį, todėl OmniRoute gali egzistuoti kartu su kitomis programomis viename Redis egzemplioriuje (pvz., `127.0.0.1:6379`). Žr. [Tarpai tarp raktų](#key-namespacing).
 
 ---
 
-## Dabartinė konfigūracija (numatytosios kodo reikšmės)
+## Dabartinė konfigūracija (numatytieji kodo nustatymai)
 
-| Nustatymas                                  | Reikšmė                                                                               | Vieta                                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL` aplinkos kintamasis             | `redis://redis:6379` („compose“), pasirenkamas                                        | `rateLimiter.ts:5`, `.env.example`                                                    |
-| `REDIS_KEY_PREFIX` aplinkos kintamasis      | `omniroute:` (numatytoji reikšmė)                                                     | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL` aplinkos kintamasis | atskiras, gali skirtis nuo `REDIS_URL`                                                | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                        | `"sqlite"` (numatytoji reikšmė), `"redis"` pasirenkama                                | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`              | `3`                                                                                   | `rateLimiter.ts` kliento kūrimas                                                      |
-| `enableReadyCheck`                          | nenustatyta (numatytoji ioredis reikšmė: `true`)                                      | —                                                                                     |
-| `lazyConnect`                               | nenustatyta (numatytoji ioredis reikšmė: `false`)                                     | —                                                                                     |
-| `retryStrategy`                             | nenustatyta (numatytoji ioredis reikšmė: 200ms bazinė delsa, eksponentinis didėjimas) | —                                                                                     |
-| TLS / slaptažodis / DB indeksas             | **nesukonfigūruota**                                                                  | —                                                                                     |
-| Sentinel / Cluster                          | **nesukonfigūruota** — palaikomas tik atskiras vieno mazgo egzempliorius              | —                                                                                     |
+| Nustatymas                      | Vertė                                                           | Kur                                                                                   |
+| ------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (sudaryti), pasirinktinai                  | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (numatytasis)                                      | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | atskiras, gali skirtis nuo `REDIS_URL`                          | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (numatytasis), `"redis"` neprivalomas                | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                             | `rateLimiter.ts` kliento kūrimas                                                      |
+| `enableReadyCheck`              | nenustatyta (numatytoji funkcija: `true`)                       | —                                                                                     |
+| `lazyConnect`                   | nenustatyta (numatytoji funkcija: `false`)                      | —                                                                                     |
+| `retryStrategy`                 | nenustatyta (numatytasis „ioredis“: 200 ms bazė, eksponentinis) | —                                                                                     |
+| TLS / slaptažodis / DB indeksas | **nesukonfigūruotas**                                           | —                                                                                     |
+| Sentinel / klasteris            | **nesukonfigūruotas** Tik — atskiras vienas mazgas              | —                                                                                     |
 
 ---
 
@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Rekomenduojamas produkcinės aplinkos optimizavimas
+## Rekomenduojamas gamybos derinimas
 
-### 1. Ryšių telkinio / kliento parinktys (ioredis `Redis` konstruktorius)
+### 1. Ryšio telkinys / kliento parinktys (ioredis `Redis` konstruktorius)
 
-Dabartinis kodas sukuria vieną `new Redis(url)` be pasirinktinių parinkčių. Produkcinėse
-kelių replikų diegimo aplinkose kode perduokite kliento kūrimo funkciją arba apgaubkite `getRedisClient()`:
+Dabartinis kodas sukuria vieną `new Redis(url)` be jokių pasirinktinių parinkčių. Jei norite diegti gamybinę kelių kopijų versiją, nurodykite kliento gamyklą į kodą arba apvyniokite `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // nėra pakartojimų limito; sprendimą palikti retryStrategy
-  enableReadyCheck: true, // prieš priimant užklausas patikrinti, ar serveris paruoštas
-  lazyConnect: true, // neprisijungti konstravimo metu; laukti pirmosios užklausos
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // atsisakyti po 10 bandymų → vėliau prisijungti iš naujo
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, daugiausia 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // sujungti lygiagrečias komandas į vieną TCP įrašymą
-  keepAlive: 10000, // TCP ryšio palaikymas kas 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Pagrindiniai kompromisai:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — rekomenduojama produkcinėje aplinkoje, kad laikini
-  Redis paleidimai iš naujo iš karto nesužlugdytų visų užklausų. Atmintyje veikiantis atsarginis mechanizmas
-  funkcijoje `checkRateLimit()` perima nesėkmės scenarijų.
-- `lazyConnect: true` — panaikina paleidimo priklausomybę nuo Redis pasiekiamumo prieš serveriui
-  pradedant priimti ryšius.
-- `enableAutoPipelining: true` — sumažina užklausų ir atsakymų ciklų skaičių, kai vienu metu atliekamos spartos ribojimo patikros;
-  naudinga esant >50 RPS viename ryšyje.
+- `maxRetriesPerRequest: null` + `retryStrategy` — pirmenybė teikiama gamybai, todėl trumpalaikiai Redis paleidimai iš naujo neįvykdo kiekvieno užklausos iš karto. Atmintyje esantis atsarginis `checkRateLimit()` sugeria gedimo kelią.
+- `lazyConnect: true` — išvengia paleisties priklausomybės nuo Redis, kol serveris pradeda priimti ryšius.
+- `enableAutoPipelining: true` — sumažina kelionių pirmyn ir atgal tuo pačiu metu atliekamų normos ribos patikrų skaičių; naudinga > 50 RPS naudojant vieną jungtį.
 
 ### 2. Redis serverio konfigūracija (`redis.conf`)
 
 ```
-# Atmintis
-maxmemory 80%                        # palikti vietos OS puslapių podėliui
-maxmemory-policy allkeys-lru         # esant apkrovai pašalinti pasenusius autentifikavimo podėlio įrašus
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Duomenų išsaugojimas (neprivaloma — OmniRoute saugi gedimo atveju ir be jo)
-save 300 1                           # kurti momentinę kopiją bent kas 5 min., jei pasikeitė ≥1 raktas
-appendonly no                        # AOF nereikalingas; duomenis galima atkurti
-appendfsync no                       # nėra fsync pridėtinių sąnaudų (RDB pakanka)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Tinklas
-timeout 0                            # neatjungti neaktyvaus ryšio
-tcp-keepalive 300                    # palaikyti ryšį kas 5 min.
-tcp-backlog 511                      # ryšių eilė staigiai išaugusiai apkrovai
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Našumas
-hz 10                                # numatytoji reikšmė; 100 vėlinimui jautrioms sistemoms
-activedefrag yes                     # automatiškai defragmentuoti, kai fragmentacija >10 %
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` kompromisas:** autentifikavimo podėlio įrašai gali būti pašalinti
-esant atminties trūkumui. Tai saugu — `setCachedApiKey` visada iš naujo užpildo podėlį, kai įrašo nėra, o
-SQLite atsarginis šaltinis yra autoritetingas. Spartos ribotuvo Lua scenarijus kuria mažus raktus, kurie pagal
-sumanymą yra trumpalaikiai.
+**`maxmemory-policy allkeys-lru` kompromisas:** Auth talpyklos įrašai gali būti iškeldinti esant atminties spaudimui. Tai saugu. — `setCachedApiKey` visada iš naujo užpildomas praleidus, o SQLite atsarginis variantas yra autoritetingas. Greitį ribojantis Lua scenarijus sukuria mažus raktus, kurių dizainas yra trumpalaikis.
 
-### 3. Docker Compose nuostatos
+### 3. Docker Compose Settings
 
-Produkcinė compose konfigūracija (`docker-compose.prod.yml`) naudoja `redis:8.6.2-alpine`. Pridėkite:
+Gamybos kūrimas (`docker-compose.prod.yml`) naudoja `redis:8.6.2-alpine`. Pridėti:
 
 ```yaml
 redis:
@@ -139,34 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Kelių egzempliorių / mastelio didinimo aspektai
+### 4. Kelių egzempliorių / mastelio svarstymai
 
-**Vienas Redis visoms replikoms** — spartos ribotuvo Lua scenarijus priklauso nuo vienos
-autoritetingos raktų erdvės. Naudojant kelis Redis egzempliorius skirtingoms replikoms būtų prarastas operacijų atomiškumas
-ir biudžetas padvigubėtų. Visoms programos replikoms naudokite vieną Redis (arba Redis Sentinel klasterį su automatiniu perjungimu).
+**Viena Redis visoms kopijoms** — greičio ribotuvo Lua scenarijus priklauso nuo vienos autoritetingos rakto erdvės. Keli Redis egzemplioriai už kopijų prarastų atomiškumą ir padvigubintų biudžetą. Visoms programų kopijoms naudokite vieną Redis (arba Redis Sentinel klasterį su perkėlimu).
 
-**Ryšių skaičius:** kiekviena programos replika atidaro **2 TCP ryšius** su Redis
-(spartos ribotuvo klientas + kvotų saugyklos klientas). Naudojant 10 replikų → 20 ryšių, o tai gerokai
-mažiau nei numatytasis Redis egzemplioriaus 10 tūkst. ryšių limitas.
+**Ryšių skaičius:** Atsidaro kiekviena programos kopija **2 TCP jungtys** į Redis (kainos ribotuvo klientas + kvotos parduotuvės klientas). Esant 10 → 20 jungčių kopijų, gerai neviršijant numatytosios Redis egzemplioriaus 10 000 ryšio ribos.
 
-### 5. Stebėsena
+### 5. Stebėjimas
 
-Pateikite per būsenos patikros galinį tašką:
+Atskleisti per sveikatos patikrinimo galutinį tašką:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts jau iškviečia rateLimiter funkcijas
-// Pridėkite Redis skirtas patikras:
-//   1. PING delsą naudojant ioredis .ping()
-//   2. Atminties naudojimą naudojant INFO memory
-//   3. Ryšių skaičių naudojant INFO clients
-//   4. maxmemory-policy pataikymų rodiklį (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Svarbiausi stebėtini rodikliai:
+Pagrindinės metrikos, kurias reikia žiūrėti:
 
-- **Pašalinti raktai / sek.** — jei reikšmė nuolat nenulinė, padidinkite `maxmemory`
-- **Užblokuoti klientai** — nenulinė reikšmė rodo lėtus Lua scenarijus arba didelę konkurenciją dėl išteklių
-- **Atmesti ryšiai** — pasiektas ryšių limitas; esant 20 ryšių tai mažai tikėtina
+- **Iškeldinti raktai / sek** Jei — nuolat nesiskiria nuo nulio, padidinkite `maxmemory`
+- **Užblokuoti klientai** — ne nulis siūlo lėtus Lua scenarijus arba didelį konkurenciją
+- **Atmesti ryšiai** Nukentėjo — ryšio riba; retas 20 jungčių
+
+### 6. Redis suderinami serveriai
+
+Bet kuris čia naudojamas serveris turi paleisti Lua scenarijus: greičio ribotuvas yra vienas `EVAL`. Serveryje be Lua `checkRateLimit()` registruoja `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ir skaičiuoja kiekvieną procesą, todėl kiekviena replika taiko apribojimą atskirai. Pasirenkama bendrinamo seanso giminingumo saugykla (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) taip pat nuskaito ir atnaujina kaiščius su `EVAL`; be Lua ji registruoja `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ir kiekviena kopija turi savo kaiščius. Kitose darbo apkrovose naudojamos paprastos komandos (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, maišos ir rinkiniai), o semantinės talpyklos Redis užpakalinė programa nesiunčia `FT.*` komandų.
+
+Išbandyta naudojant OmniRoute 3.8.52: KiviDB 1.2.0 su Lua vaizdu (`kividb/kividb:v1.2.0-lua`). Greičio ribotuvas (įskaitant antrąjį procesą, dalijantį skaitiklius), autentifikavimo talpykla, kvotų saugykla, pašildymo grandinės pertraukiklis, semantinės talpyklos saugykla ir `/v1/chat/completions` užklausa per pokalbių tvarkyklę išlaikė 18 iš 19 patikrų, atitinkančių Redis 8.10.3. Tas, kuris skiriasi: `INCRBYFLOAT` saugo `0.1 + 0.2` kaip `0.30000000000000004`, kur Redis saugo `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvotų saugykla analizuoja abu su `parseFloat`, tačiau du skaičiai skiriasi paskutiniais skaitmenimis, todėl palyginimas, kuris tiksliai patenka į kvotos ribą, gali pasirodyti kitaip. Seanso bendrų interesų parduotuvė nebuvo to vykdymo dalis. ( [sąranka](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [rezultatai](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -189,13 +183,13 @@ flowchart LR
 
 ## Nuorodos
 
-| Failas                             | Paskirtis                                                                                            |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Pagrindinis Redis klientas, Lua užklausų dažnio ribojimo scenarijus, atsarginis saugojimas atmintyje |
-| `src/lib/db/apiKeys.ts`            | Autentifikavimo podėlis — Redis→SQLite atsarginis variantas                                          |
-| `src/lib/quota/redisQuotaStore.ts` | Atskiras Redis klientas pasirinktinei kvotų saugyklai                                                |
-| `src/lib/quota/storeFactory.ts`    | Perjungia tarp `sqlite` ir `redis` kvotų tvarkyklių                                                  |
-| `docker-compose.prod.yml`          | Produkcinės aplinkos Redis konteineris (atvaizdas `redis:8.6.2-alpine`)                              |
-| `.env.example`                     | Redis aplinkos kintamųjų dokumentacija                                                               |
-| `src/app/api/local/redis/`         | API maršrutai kūrimo aplinkos konteinerio orkestravimui                                              |
-| `bin/cli/commands/redis.mjs`       | CLI komandos kūrimo aplinkos konteinerio orkestravimui                                               |
+| Failas                             | Tikslas                                                                      |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Pirminis Redis klientas, Lua greičio ribojimo scenarijus, atsarginė atmintis |
+| `src/lib/db/apiKeys.ts`            | Auth talpyklos — Redis→SQLite atsarginė                                      |
+| `src/lib/quota/redisQuotaStore.ts` | Atskiras Redis klientas pasirenkamai kvotų saugyklai                         |
+| `src/lib/quota/storeFactory.ts`    | Perjungiama tarp `sqlite` ir `redis` kvotų tvarkyklių                        |
+| `docker-compose.prod.yml`          | Prod Redis konteineris (vaizdas `redis:8.6.2-alpine`)                        |
+| `.env.example`                     | Redis env vars dokumentacija                                                 |
+| `src/app/api/local/redis/`         | API maršrutai, skirti dev konteinerių orkestravimui                          |
+| `bin/cli/commands/redis.mjs`       | CLI komandos, skirtos dev konteinerių orkestravimui                          |

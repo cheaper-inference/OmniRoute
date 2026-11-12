@@ -393,7 +393,7 @@ Brauzerga oʻxshash TLS raqamli izlarini yaratish uchun `wreq-js`dan foydalanadi
 
 ### CLI raqamli iziga moslash
 
-**CLI raqamli izi almashtirgichi** (`Sozlamalar → Xavfsizlik`) HTTP sarlavhalari va JSON tanasi maydonlarini mahalliy CLI ikkilik fayllarining (Claude Code, Codex va boshqalar) aniq signaturasiga mos ravishda qayta tartiblaydi. Bu proksi bilan **birgalikda** ishlaydi:
+**CLI raqamli izi almashtirgichi** (`Settings → Security`) HTTP sarlavhalari va JSON tanasi maydonlarini mahalliy CLI ikkilik fayllarining (Claude Code, Codex va boshqalar) aniq signaturasiga mos ravishda qayta tartiblaydi. Bu proksi bilan **birgalikda** ishlaydi:
 
 ```
 Sizning IP manzilingiz (bloklangan) → Proksi IP manzili (AQSH) → Provayder API

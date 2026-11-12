@@ -25,67 +25,159 @@ run sa halip na laktawan ito.
 
 ## Mga Built-in na Guardrail
 
-Awtomatikong nilo-load ng registry ang anim na guardrail sa priority order sa pag-import (tingnan `registry.ts` → `registerDefaultGuardrails()`):
+Awtomatikong naglo-load ang registry ng anim na guardrail ayon sa pagkakasunud-sunod ng priority sa pag-import
+(tingnan ang `registry.ts` → `registerDefaultGuardrails()`):
 
-| Priyoridad | Pangalan            | (mga) yugto    | file                  |
-| ---------- | ------------------- | -------------- | --------------------- |
-| `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`        | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`       | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Priority | Pangalan            | (Mga) Stage    | File                  |
+| -------- | ------------------- | -------------- | --------------------- |
+| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
+| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
+| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
+| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
+| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
+| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Ang mga numero ng mas mababang priyoridad ay tumatakbo** una** .
+Ang mas mababang mga numero ng priority ay tumatakbo nang **una**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Ang GLM 5.3 base model at `glm-5.3-{low,high,max}` ay may tahasang `supportsVision:false` registry/spec metadata. Ang mga variant GLM 5.3 Flash ay nananatiling mga modelo ng native-vision. `/v1/messages` na ruta ng Claude Code ay pumapasok sa nakabahaging `handleChat` pre-call guardrail chain** dati** Pagsasalin ng Claude-to-OpenAI; Ang mga nested `Read` tool-result na larawan ay dapat ilarawan o pangasiwaan bago ang pagsasalin na iyon ay iangat ang mga ito sa OpenAI `image_url` na nilalaman (#17069).
+Ang GLM 5.3 base model at `glm-5.3-{low,high,max}` ay may tahasang
+`supportsVision:false` na registry/spec metadata. Ang mga GLM 5.3 Flash variant
+ay nananatiling mga native-vision model. Ang `/v1/messages` route ng Claude Code
+ay pumapasok sa shared `handleChat` pre-call guardrail chain **bago** ang
+Claude-to-OpenAI translation; ang mga naka-nest na `Read` tool-result image ay
+dapat ma-describe o ma-handle bago iangat ng translation na iyon ang mga ito sa
+OpenAI `image_url` content (#17069).
 
-Hinaharang ang mga kahilingang nagdadala ng imahe na nilalayon** mga modelong hindi nakikita** at maaaring i-rerouting ang buong kahilingan sa isang modelong may kakayahang pangitain o palitan ang mga bahagi ng larawan ng mga paglalarawan ng teksto na ginawa ng isang na-configure na modelo ng paningin bago ang upstream na tawag. Nagbibigay-daan ito sa mga text-only na provider na malinaw na pangasiwaan ang mga multimodal na payload.
+Hinaharang nito ang mga request na may dalang imahe na patungo sa mga **non-vision
+model** at maaaring i-reroute ang buong request sa isang vision-capable na model,
+o palitan ang mga image part ng mga text description na ginawa ng isang
+nako-configure na vision model bago ang upstream call. Pinapayagan nito ang mga
+text-only provider na transparent na mag-handle ng mga multimodal payload.
 
 Daloy:
 
-1. Laktawan kung sinusuportahan na ng target na modelo ang paningin (maliban kung ito ay lalabas sa forced-bridge list `isVisionBridgeForcedModel`).
-2. I-extract ang mga bahagi ng larawan sa pamamagitan ng `extractImageParts(messages)` (`visionBridgeHelpers.ts`), na nagde-delegate sa** pinag-isang media detector** `detectMediaParts()` sa `open-sse/utils/mediaParts.ts` — ang nag-iisang pinagmulan ng katotohanan na ibinahagi sa combo compatibility filter. Ang pagkuha ay pinahihintulutan sa mga hugis na maaaring i-splice ng `replaceImageParts` pabalik (ang extract ↔ replace contract): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, at Mga Tugon API `input_image`. Ang mga tumutugmang larawan na naka-nest sa loob ng Claude Code `tool_result.content` at mga output ng tool ng Mga Tugon ay kinukuha at pinapalitan din sa kanilang mga orihinal na landas; Ang mga hugis na indicator lang ay combo-filter na materyal at hindi kinukuha. Laktawan kung walang nahanap.
-3. Resolve runtime config sa pamamagitan ng `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): panalo ang mga bagong `modalityBridge*` settings keys; Ang mga legacy `visionBridge*` key ay nananatiling a** one-cycle fallback** (rollback window). Laktawan bago ang anumang media traversal kapag ang tulay ay hindi pinagana.
-4. Ang tagapili ng mode (`modalityBridgeVisionMode`, tingnan ang talahanayan sa ibaba) ay nagpapasya sa pag-reroute kumpara sa paglalarawan. Ang reroute ay nagbabalik `modifiedPayload` na may lamang `model` na napalitan, kasama ang meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Ilarawan ang landas: i-cap ang mga larawan sa `maxImages`, buuin ang task-aware prompt, kumonsulta sa paglalarawan ng cache, tawagan ang vision model** sa parallel** (`Promise.allSettled`), at mag-inject ng `[Image N]: <description>` na mga bahagi ng teksto sa kanilang lugar. Ang isang nabigong paglalarawan ay nagbubunga ng `null`: ang raw na imahe ay pinapanatili para sa mga unknown/vision-capable na target (#4012), ngunit isang** nakumpirma na text-only na direktang target** o zero-vision combo ay nakakakuha ng tahasang `(unavailable — no vision-capable provider connected)` text stub para sa bawat hindi inilarawang larawan, kabilang ang mga bahagyang pagkabigo at mga larawang lampas sa paglalarawan-tawag na cap (#17069). Ang umiiral na all-failed combo na naglalarawan ng fallback ay nananatili sa lugar (#8430).
-6. Ibalik `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Laktawan kung ang target model ay sumusuporta na sa vision (maliban kung
+   lumalabas ito sa forced-bridge list na `isVisionBridgeForcedModel`).
+2. I-extract ang mga image part sa pamamagitan ng `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), na nagde-delegate sa **unified media
+   detector** na `detectMediaParts()` sa `open-sse/utils/mediaParts.ts` — ang
+   iisang batayan ng katotohanan na ibinahagi sa combo compatibility filter.
+   Ang extraction ay naka-allowlist sa mga shape na kayang i-splice pabalik ng
+   `replaceImageParts` (ang extract↔replace contract): OpenAI `image_url`,
+   Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, at
+   Responses API `input_image`. Ang mga tumutugmang imaheng naka-nest sa loob ng
+   `tool_result.content` ng Claude Code at ng mga tool output ng Responses ay
+   ini-extract din at pinapalitan sa kanilang mga orihinal na path; ang mga
+   indicator-only na shape ay materyal ng combo filter at hindi ini-extract.
+   Laktawan kung walang nahanap.
+3. I-resolve ang runtime config sa pamamagitan ng
+   `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): panalo ang mga bagong
+   `modalityBridge*` settings key; ang mga legacy `visionBridge*` key ay
+   nananatiling **one-cycle fallback** (rollback window). Laktawan bago ang
+   anumang media traversal kapag naka-disable ang bridge.
+4. Ang tagapili ng mode (`modalityBridgeVisionMode`, tingnan ang talahanayan sa
+   ibaba) ang nagpapasya kung reroute o describe. Ang reroute ay nagbabalik ng
+   `modifiedPayload` na may `model` lamang na pinalitan, kasama ang meta na
+   `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Ang describe path: limitahan ang mga imahe sa `maxImages`, buuin ang
+   task-aware na prompt, tiningnan ang describe cache, tawagan ang vision model
+   **nang parallel** (`Promise.allSettled`), at mag-inject ng mga text part na
+   `[Image N]: <description>` bilang kapalit ng mga ito. Ang nabigong describe ay
+   nagbubunga ng `null`: pinapanatili ang raw na imahe para sa mga hindi kilala
+   o vision-capable na target (#4012), ngunit ang isang **nakumpirmahang
+   text-only na direktang target** o isang combo na walang vision ay tumatanggap
+   ng tahasang text stub na
+   `(unavailable — no vision-capable provider connected)` para sa bawat imaheng
+   hindi na-describe, kabilang ang mga bahagyang pagkabigo at mga imaheng lampas
+   sa limit ng describe call (#17069). Ang umiiral na all-failed combo describe
+   fallback ay nananatili sa lugar nito (#8430).
+6. Ibalik ang `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
 #### Tagapili ng mode (`modalityBridgeVisionMode`)
 
-| Mode       | Default | Pag-uugali                                                                                                                                                                                                                                                                                                   |
-| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto`     | ✔       | Legacy heuristic, untouched (#6640/#7204): non-combo/`auto/` models reroute to the best vision model maliban kung ang orihinal na modelo ay mayroon nang magagamit na mga kredensyal (pagkatapos ay ilarawan); Ang mga combo target ay palaging naglalarawan.                                                |
-| `describe` |         | Palaging ilarawan — ang reroute block ay ganap na nilaktawan; palaging sumasagot ang napiling modelo ng user.                                                                                                                                                                                                |
-| `reroute`  |         | Force reroute: ang keep-credentialed-model guard ay na-bypass. Ang reroute-** target** Inilalapat pa rin ng credential guard — kapag walang magagamit na vision target, hinaharangan ng tulay ang isang malinaw na error sa halip na ilarawan o ipadala ang mga raw na larawan sa isang text-only na target. |
+| Mode       | Default | Pag-uugali                                                                                                                                                                                                                                                                                                         |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`     | ✔       | Legacy na heuristic, hindi ginalaw (#6640/#7204): ang mga non-combo/`auto/` model ay nagre-reroute sa pinakamahusay na vision model maliban kung ang orihinal na model ay may magagamit nang credentials (pagkatapos ay describe); ang mga combo target ay laging nagde-describe.                                  |
+| `describe` |         | Laging describe — ang reroute block ay lubos na nilalaktawan; ang piniling model ng user ang laging sasagot.                                                                                                                                                                                                       |
+| `reroute`  |         | Pilit na reroute: binabypass ang keep-credentialed-model na guard. Ang reroute-**target** credential guard ay nananatiling umaandar — kapag walang magagamit na vision target, hinaharang ng bridge na may malinaw na error sa halip na mag-describe o magpadala ng mga raw na imahe sa isang text-only na target. |
 
-Mga sapilitang mode short-circuit** dati** ang auto heuristic ay tumatakbo; Ang gawi `auto` ay byte-pareho sa pre-PR-1 guardrail.
+Ang mga forced mode ay nag-short-circuit **bago** tumakbo ang auto heuristic; ang `auto` na pag-uugali
+ay byte-identical sa pre-PR-1 guardrail.
 
-#### Saklaw ng API-key (`visionBridgeKeyScope.ts`)
+#### Saklaw ng API key (`visionBridgeKeyScope.ts`)
 
-Kapag pinaghihigpitan ng API key ng tumatawag `allowedConnections`, mga quota pool (`allowedQuotas`) o mga modelo (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), pipili lang ang tulay na i-reroute at ilarawan ang mga modelong maaaring gamitin ng susi, sa mga koneksyon na maaaring gamitin ng susi. Ang naglalarawan na tawag pagkatapos ay palaging dumadaan sa OmniRoute self-loop gamit ang `x-omniroute-self-loop-key-id` header, kaya ipinapatupad muli ng pagtanggap ng kahilingan sa chat ang koneksyon at patakaran ng modelo ng key na iyon. Pinarangalan lang `enforceApiKeyPolicy()` ang header na iyon kasama ng self-loop bearer, kaya maaari lamang itong paliitin ang pag-access, at ang isang id na hindi nalulutas ay tinatanggihan.
+Kapag ang API key ng tumatawag ay naghihigpit sa `allowedConnections`, mga quota pool
+(`allowedQuotas`) o mga model (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), ang bridge ay pumipili lamang
+ng mga reroute at describe na model na maaaring gamitin ng key, sa mga koneksyon na maaaring
+gamitin ng key. Ang describe call ay laging dadaan sa OmniRoute self-loop kasama ang
+`x-omniroute-self-loop-key-id` header, kaya ang tumatanggap na chat request
+ay muling nagpapatupad ng connection at model policy ng key na iyon. Ang `enforceApiKeyPolicy()`
+ay iginagalang lamang ang header na iyon kasama ang self-loop bearer, kaya maaari lamang
+nitong higpitan ang access, at ang isang id na hindi ma-resolve ay tinatanggihan.
 
-Kung walang vision model ang pinahihintulutan para sa susi, a** nakumpirmang text-only na target** tinatanggihan ang kahilingan ng imahe nang lokal na may malinaw na HTTP 400 sa halip na ipasa ang mga byte ng imahe sa isang hindi kayang upstream (#17069). Para sa mga target na may hindi alam o katutubong kakayahan sa paningin, ang naglalarawan na landas ay nagpapanatili ng dati nitong hindi nakabukas na gawi (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Ang mga kahilingan na walang susi, at mga susi na walang mga paghihigpit na ito, ay gumagana nang eksakto tulad ng dati.
+Kung walang vision model na pinapayagan para sa key, ang isang **nakumpirmang text-only
+na target** ay tumatanggi sa image request nang lokal na may malinaw na HTTP 400 sa halip na
+i-forward ang mga byte ng imahe sa isang hindi kayang upstream (#17069). Para sa mga target na
+may hindi alam o katutubong vision capability, ang describe path ay nagpapanatili ng dating
+fail-open na pag-uugali (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Ang mga request na walang key, at mga key na walang mga paghihigpit na ito, ay kumikilos nang
+eksaktong tulad ng dati.
 
-#### prompt ng paglalarawan ng task-aware (`modalityBridgeVisionTaskAware`)
+#### Describe prompt na may kamalayan sa gawain (`modalityBridgeVisionTaskAware`)
 
-Default** totoo** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) idinaragdag ang teksto ng** huling mensahe ng user** (pinutol sa 500 char) sa base na naglalarawan ng prompt, na nagtutulak sa paglalarawan patungo sa kung ano talaga ang itinanong ng user (codex-vision-proxy pattern) at humihiling sa vision model na i-transcribe ang nakikitang text. Gamit ang flag off — o walang user text — ang base prompt ay ginagamit nang hindi nagbabago.
+Default na **true**. Idinaragdag ng `composeVisionPrompt()` (`visionBridgeHelpers.ts`) ang
+teksto ng **huling mensahe ng user** (pinutol sa 500 karakter) sa base
+describe prompt, na nag-aakay ng paglalarawan tungo sa kung ano talaga ang itinanong ng
+user (codex-vision-proxy pattern) at hinihiling sa vision model na i-transcribe ang nakikitang
+teksto. Kapag naka-off ang flag — o walang teksto ang user — ang base prompt ay
+gagamitin nang hindi binabago.
 
-Ang naglalarawan ng sariling OpenAI-compatible na kahilingan ng self-loop (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) ay palaging humihiling `image_url.detail: "high"` — nang walang kondisyon, para sa bawat caller/provider, hindi naka-gate sa anumang signal ng kliyente. Ang mababang-detalye na sampling ay nagpapababa sa katumpakan OCR para sa eksaktong gawain ng text-transcription na hinihiling ng prompt na ito, kaya ang mismong paglalarawan ng tawag ay palaging humihingi ng mataas na detalye anuman ang antas ng detalye na ginamit ng orihinal na papasok na kahilingan. Naaapektuhan lang nito ang panloob na paglalarawan ng kahilingan sa katawan; hindi nito binabago kung paano ipinapasa ng OmniRoute ang sariling `image_url.detail` ng tumatawag sa pangunahing kahilingan — na ang default ay inilapat nang hiwalay, at para lamang sa mga natukoy OpenCode na kliyente, sa `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Ang Anthropic wire-format na sangay ng paglalarawan ng self-loop ay walang `detail` na field at hindi naaapektuhan ng alinman sa default.
+Ang sariling OpenAI-compatible na request ng describe self-loop (`callVisionModelSingle()`
+sa `visionBridgeHelpers.ts`) ay laging humihiling ng `image_url.detail: "high"` —
+walang kondisyon, para sa bawat tumatawag/provider, hindi nakadepende sa anumang signal ng kliyente.
+Ang low-detail na sampling ay nagpapababa ng katumpakan ng OCR para mismo sa gawain ng pag-transcribe
+ng teksto na hinihiling ng prompt na ito, kaya ang describe call mismo ay laging humihiling ng mataas na
+detalye anuman ang antas ng detalye na ginamit ng orihinal na papasok na request.
+Naaapektuhan lamang nito ang panloob na describe request body; hindi nito binabago kung paano
+ipinapasa ng OmniRoute ang sariling `image_url.detail` ng tumatawag sa pangunahing request —
+ang default na iyon ay inilalapat nang hiwalay, at para lamang sa mga natukoy na OpenCode na kliyente, sa
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Ang
+Anthropic wire-format na branch ng describe self-loop ay walang `detail` na field
+at hindi apektado ng alinmang default.
 
-#### Ilarawan ang output cap (`modalityBridgeVisionMaxChars`)
+#### Hangganan ng output ng describe (`modalityBridgeVisionMaxChars`)
 
 | Susi                           | Default | Saklaw          |
 | ------------------------------ | ------- | --------------- |
 | `modalityBridgeVisionMaxChars` | `0`     | `0` o 100–50000 |
 
-ibig sabihin ng `0` (default).** walang takip** — ang paglalarawan na ibinalik ng `callVisionModel()` ay ipinapasa sa hindi binago, na pinapanatili ang umiiral na pag-uugali. Ang anumang halaga sa hanay na 100–50000 ay pinuputol ang paglalarawan gamit ang isang `…` suffix bago ito i-splice pabalik bilang `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` sa `src/lib/guardrails/visionBridge.ts`). Itaas ito para sa mga detalyadong gawaing OCR kung saan kailangan ng downstream na modelo ang buong transkripsyon; ibaba ito sa bound na paggamit ng token sa mga chatty vision models. Nakatira ang field ng dashboard sa Advanced na panel ng tab na Vision (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) at ikinakapit ang anumang value sa pagitan ng 1 at 99 hanggang sa 100 palapag habang nag-iiwan ng tahasang `0` na hindi nagalaw — `0` ay isang wastong halaga Zod sa sarili nitong karapatan (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), hindi lamang ang "unset" na default.
+Ang `0` (default) ay nangangahulugang **walang hangganan** — ang paglalarawan na ibinalik ng
+`callVisionModel()` ay ipinapasa nang hindi binabago, na nagpapanatili ng umiiral na
+pag-uugali. Ang anumang halaga sa saklaw na 100–50000 ay nagpuputol ng paglalarawan na may
+`…` na suffix bago ito isingit pabalik bilang `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` sa `src/lib/guardrails/visionBridge.ts`).
+Itaas ito para sa mga gawain ng OCR na mabigat sa detalye kung saan kailangan ng downstream
+model ang buong transcription; ibaba ito upang hangganan ang paggamit ng token sa mga
+madaldal na vision model.
+Ang field ng dashboard ay matatagpuan sa Advanced panel ng Vision tab
+(`modality-bridge-max-chars` sa `ModalityBridgeVisionTab.tsx`) at inaayos ang anumang
+halaga sa pagitan ng 1 at 99 papunta sa 100 na floor habang hindi ginagalaw ang tahasang `0`
+— ang `0` ay isang wastong Zod na halaga sa sarili nitong karapatan
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), hindi lamang
+ang "unset" na default.
 
-#### Ilarawan ang cache (`modalityBridge/bridgeCache.ts`)
+#### Cache ng describe (`modalityBridge/bridgeCache.ts`)
 
-In-memory LRU + TTL cache para sa paglalarawan ng mga output, ibinahagi sa buong proseso. Key = `sha256(imageRef + composedPrompt + configuredBridgeModel)` na may length-prefix framing (walang banggaan sa field-boundary). Ang bahagi ng modelo ay ang** naka-configure** modelo ng tulay, hindi ang modelo na aktwal na sumagot — `callVisionModel` ay maaaring bumalik sa loob, at ang pag-key sa bawat pagtatangka ay maghahati sa cache. Ang mga nabigong paglalarawan ay hindi kailanman na-cache. Mga Setting:
+In-memory na LRU + TTL cache para sa mga output ng describe, na ibinabahagi sa buong proseso.
+Susi = `sha256(imageRef + composedPrompt + configuredBridgeModel)` na may
+length-prefix framing (walang mga pagbanggaan ng hangganan ng field). Ang bahagi ng model ay
+ang **na-configure** na bridge model, hindi ang model na aktuwal na sumagot —
+maaaring mag-fall back ang `callVisionModel` nang panloob, at ang pag-key bawat pagtatangka ay
+magkakahiwa-hiwalay ng cache. Ang mga nabigong describe ay hindi kailanman naka-cache. Mga setting:
 
 | Susi                            | Default | Saklaw  |
 | ------------------------------- | ------- | ------- |
@@ -93,45 +185,163 @@ In-memory LRU + TTL cache para sa paglalarawan ng mga output, ibinahagi sa buong
 | `modalityBridgeCacheTtlMinutes` | `60`    | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`   | 10–5000 |
 
-#### Remote na pag-normalize ng imahe (self-loop describe/base64 fetch)
+#### Normalisasyon ng remote na imahe (self-loop describe/base64 fetch)
 
-Kapag ang tulay ay kumukuha ng a** remote** mismong larawan — ang Anthropic ay naglalarawan sa self-call at ang claude-wire-format base64 conversion (`ensureBase64ImagesForClaudeWire`), parehong sa pamamagitan `fetchRemoteImageAsDataUri()` sa `visionBridgeHelpers.ts` — ang nagreresultang data URI ay ipinapasa sa `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) bago i-embed sa kahilingan ng vision-model. Ang malalaking larawan ay ibinababa sa a** 2048px mahabang gilid** (ang tumutugma sa resize cap OpenAI/Anthropic ay nalalapat na sa server-side), na nagbabawas ng pag-upload ng bytes/latency nang hindi binabago ang nakikita ng modelo ng paningin. Gumagamit ang pagbabago ng laki `sharp`, na na-load sa pamamagitan ng dynamic na pag-import: sa isang platform kung saan nabigong mag-load ang native binary nito, `normalizeDataUri()`** hindi kailanman nagtatapon** — ito ay bumabalik sa isang passthrough ng orihinal na byte, kaya ang describe/base64-conversion path ay palaging gumagana. Ang mga byte na hindi larawan (isang pagkuha na hindi nagbalik ng isang decodable na larawan) ay dinadaan din nang hindi nagalaw. Ang normalization na ito ay saklaw sa mga larawang kinukuha ng tulay para sa sarili nitong self-call — na hindi kailanman inilalapat sa raw passthrough payload ng tumatawag, na naaayon sa opt-in-only na mutation na prinsipyo (Hard Rule #20).
+Kapag ang bridge mismo ang kumukuha ng **remote** na imahe — ang Anthropic
+describe self-call at ang claude-wire-format na base64 conversion
+(`ensureBase64ImagesForClaudeWire`), parehong dumadaan sa
+`fetchRemoteImageAsDataUri()` sa `visionBridgeHelpers.ts` — ang resultang data
+URI ay ipinapasa sa `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) bago i-embed sa request ng vision model.
+Ang mga sobrang laking imahe ay dinadaan sa downscale hanggang **2048px na long edge**
+(tumutugma sa resize cap na inilalapat na ng OpenAI/Anthropic sa server-side), na
+nagpapababa ng upload bytes/latency nang hindi binabago ang nakikita ng vision
+model. Ang resizing ay gumagamit ng `sharp`, na nilo-load gamit ang dynamic
+import: sa platform kung saan hindi naglo-load ang native binary nito, ang
+`normalizeDataUri()` ay **hindi kailanman nagta-throw** — bumabalik ito sa
+passthrough ng orihinal na bytes, kaya palaging gumagana ang
+describe/base64-conversion path. Ang mga hindi-imaheng bytes (isang fetch na
+hindi nagbalik ng ma-de-decode na imahe) ay ipinapasa ring hindi
+hinahawakan. Ang normalisasyong ito ay nakatakda lamang sa mga imaheng
+kinukuha ng bridge para sa sarili nitong self-call — hindi ito kailanman
+inilalapat sa raw passthrough payload ng caller, naaayon sa
+opt-in-only na prinsipyo ng mutasyon (Hard Rule #20).
 
-#### Mga setting ng schema + migration
+#### Settings schema + migration
 
-Ang mga bagong `modalityBridge*` key ay Zod-validated sa `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, ang `modalityBridgeCache*` trio, at ang `modalityBridgeAudio*` group na ginagamit ng Audio Bridge. Kinokopya ng migration `141_modality_bridge_settings.sql` ang mga umiiral nang legacy na halaga `visionBridge*` sa mga tumutugmang bagong key (idempotent, hindi kailanman na-overwrite ang isang `modalityBridge*` value na itinakda ng operator); mananatiling tinatanggap ang mga legacy key bilang read fallback para sa isang ikot ng paglabas.
+Ang mga bagong `modalityBridge*` key ay Zod-validated sa `updateSettingsSchema`
+(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
+`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
+`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
+`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
+`modalityBridgeVisionMaxChars`, ang tatlong `modalityBridgeCache*`, at ang
+`modalityBridgeAudio*` na grupo na ginagamit ng Audio Bridge. Kinokopya ng
+migration na `141_modality_bridge_settings.sql` ang mga umiiral na legacy na
+`visionBridge*` na halaga papunta sa mga katumbas na bagong key (idempotent,
+hindi kailanman nag-o-overwrite ng halagang itinakda ng operator sa
+`modalityBridge*`); ang mga legacy key ay nananatiling tinatanggap bilang
+read fallback sa loob ng isang release cycle.
 
 #### Transparency header + stats
 
-Ang mga describe-transformed na tugon ay nagdadala ng `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (binuo ng `buildModalityBridgeHeader()` sa `modalityBridge/bridgeStats.ts`, naselyohang `withModalityBridgeHeader()` sa `src/sse/handlers/chatHelpers.ts`). Nakukuha ang mga na-rerouting na kahilingan** hindi** header — ang payload ay hindi nagalaw at ang model swap ay nakikita na sa `model` field ng response body.
+Ang mga response na dumaan sa describe-transform ay may dalang
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+(binuo ng `buildModalityBridgeHeader()` sa `modalityBridge/bridgeStats.ts`,
+ini-stamp ng `withModalityBridgeHeader()` sa `src/sse/handlers/chatHelpers.ts`).
+Ang mga rerouted na request ay **walang** header — ang payload ay hindi
+hinawakan at ang model swap ay nakikita na sa `model` field ng response body.
 
-ibinabalik ng `GET /api/modality-bridge/stats` (management auth, parehong tier bilang `GET /api/settings`) ang mga in-memory per-modality counter `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` para sa `vision`, `audio`, at `video`. `averageLatencyMs` ay gumagamit ng `latencySamples`, hindi lahat ng pagtatangka, bilang denominator nito; ang isang operasyon na walang timing ay hindi gumagawa ng zero-millisecond sample. `bridged` ay nananatiling backward-compatible na alias para sa matagumpay na mga conversion; Ang mga nabigong pagtatangka ay hindi nadaragdagan ito. Nagre-reset ang mga counter sa proseso ng pag-restart ayon sa disenyo (telemetry, hindi accounting).
+Ang `GET /api/modality-bridge/stats` (management auth, kaparehong tier ng
+`GET /api/settings`) ay nagbabalik ng in-memory na per-modality na mga counter
+`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }` para sa `vision`, `audio`, at
+`video`. Ang `averageLatencyMs` ay gumagamit ng `latencySamples`, hindi lahat
+ng attempts, bilang denominator nito; ang operasyong walang timing ay hindi
+nag-imbento ng zero-millisecond na sample. Ang `bridged` ay nananatiling
+backward-compatible na alias para sa mga matagumpay na conversion; ang mga
+nabigong attempt ay hindi nag-i-increment nito.
+Ang mga counter ay nire-reset sa process restart alinsunod sa disenyo
+(telemetry, hindi accounting).
 
-#### Pag-configure ng dashboard
+#### Konfigurasyon ng dashboard
 
-The dedicated dashboard page is `/dashboard/settings/modality-bridge`. Its URL-addressable `Vision`, `Audio`, and `Video` tabs preserve query parameters while switching the `tab` value. The Vision tab exposes enablement, mode, model selection (including the automatic default), task-aware prompting, advanced timeout/image/description-length/cache limits, runtime counters, and a guarded sample request. The Audio tab is also live: it exposes enablement, an STT-only model picker with Auto, timeout/max-clip limits, audio counters, and an `input_audio` sample test. The Video tab is functional: it reports the FFmpeg/ffprobe runtime state — one of four explicit UI states (`unknown` while the probe is in flight or could not complete, `restricted` on a non-loopback dashboard host where the probe is skipped client-side, `unavailable` once probed and confirmed missing, or `available` with the FFmpeg/ffprobe versions) — persists enable/model/frame/video/timeout limits, filters the model picker to vision-capable models, and exposes video counters.
+Ang dedikadong dashboard page ay
+`/dashboard/settings/modality-bridge`. Ang mga URL-addressable na tab nitong
+`Vision`, `Audio`, at `Video` ay nagpapanatili ng mga query parameter habang
+pinalitan ang `tab` na halaga. Ang Vision tab ay naglalantad ng enablement,
+mode, model selection (kasama ang automatic na default), task-aware prompting,
+mga advanced na limitasyon sa timeout/image/description-length/cache, mga
+runtime counter, at isang guarded na sample na request. Ang Audio tab ay live
+rin: naglalantad ito ng enablement, isang STT-only na model picker na may
+Auto, mga limitasyon sa timeout/max-clip, mga audio counter, at isang
+`input_audio` na sample test. Ang Video tab ay functional: iniulat nito ang
+FFmpeg/ffprobe runtime state — isa sa apat na explicit na UI state (`unknown`
+habang nasa paglipad pa ang probe o hindi ito nakumpleto, `restricted` sa isang
+non-loopback na dashboard host kung saan nilalaktawan ang probe sa client-side,
+`unavailable` kapag na-probe na at nakumpirmang wala, o `available` kasama ang
+mga bersyon ng FFmpeg/ffprobe) — pinananatili ang mga limitasyon sa
+enable/model/frame/video/timeout, fini-filter ang model picker sa mga
+vision-capable na model, at naglalantad ng mga video counter.
 
-Ang dating Vision Bridge card sa ilalim ng AI settings ay isang compatibility link sa bagong page; hindi na ito nagmamay-ari ng pangalawang kopya ng form. Iniuugnay din ng Mga Media Provider ang mga workflow ng Image-to-Text at Speech-to-Text sa kaukulang mga tab ng Modality Bridge nang hindi inaalis ang umiiral na Speech-to-Text na palaruan.
+Ang dating Vision Bridge card sa ilalim ng AI settings ay isang compatibility
+link patungo sa bagong page; hindi na ito nagmamay-ari ng pangalawang kopya ng
+form. Ang Media Providers ay nagli-link din ng mga Image-to-Text at
+Speech-to-Text workflow sa mga katumbas na Modality Bridge tab nang hindi
+inaalis ang umiiral na Speech-to-Text playground.
 
-**Self-loop admission bypass:** kapag naglalarawan ng mga ruta ng tawag sa pamamagitan ng sariling `/v1` self-loop ng OmniRoute(hindi karaniwang modelo ng provider), ang sub-request ay nagpapadala ng `x-omniroute-admission-bypass: internal` at na-authenticate gamit ang naresolbang self-loop na kredensyal — ang lokal `sk_omniroute` sentinel sa lokal na mode, o ang `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key na na-configure ng operator (#1350) kaya magagawa pa rin `REQUIRE_API_KEY=true` ang mga pag-deploy ng tawag. Ang bypass ay pinarangalan lamang para sa mga eksaktong kredensyal na iyon, kaya hindi magagamit ng mga panlabas na kliyente ang header upang laktawan ang pagpasok.
+**Self-loop admission bypass:** kapag ang describe call ay dumaan sa sariling
+`/v1` self-loop ng OmniRoute (non-standard na provider model), ang sub-request
+ay nagpapadala ng `x-omniroute-admission-bypass: internal` at
+naa-authenticate gamit ang na-resolve na self-loop credential — ang lokal na
+`sk_omniroute` sentinel sa local mode, o ang operator-configured na
+`OMNIROUTE_API_KEY` / `ROUTER_API_KEY` na env key (#1350) upang ang mga
+deployment na may `REQUIRE_API_KEY=true` ay makapagpatakbo pa rin ng describe
+call. Ang bypass ay pinapansin lamang para sa mismong mga credential na iyon,
+kaya ang mga external client ay hindi makakagamit ng header para laktawan ang
+admission.
 
-Ang mga legacy default ay live sa `src/shared/constants/visionBridgeDefaults.ts`; ang bagong mode/task-aware/cache default at ang settings resolver ay nakatira sa `src/shared/constants/modalityBridgeDefaults.ts`. Ang guardrail ay naglalantad ng isang `deps` constructor na opsyon upang ang mga pagsubok ay makapag-inject ng pekeng `getSettings` at `callVisionModel` na pagpapatupad.
+Ang mga legacy default ay nasa `src/shared/constants/visionBridgeDefaults.ts`;
+ang mga bagong mode/task-aware/cache na default at ang settings resolver ay
+nasa `src/shared/constants/modalityBridgeDefaults.ts`. Ang guardrail ay
+naglalantad ng `deps` constructor option upang ang mga test ay makapag-inject
+ng mga pekeng `getSettings` at `callVisionModel` na implementation.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Hinaharang ang mga kahilingan sa chat na may audio-bearing bago nila maabot ang isang target na hindi kilalang tumatanggap ng audio input. Hinding-hindi nito inuulit ang kahilingan sa chat: ang mga bahagi ng audio ay na-transcribe sa pamamagitan ng umiiral nang OpenAI-compatible na multipart endpoint at ang napiling modelo ng chat ay nagpapatuloy sa mga text transcript.
+Hinaharang ang mga chat request na may kalakip na audio bago ito umabot sa
+target na hindi kilalang tumatanggap ng audio input. Hindi nito kailanman
+nire-reroute ang chat request: ang mga audio part ay tinatranscribe sa pamamagitan
+ng umiiral na OpenAI-compatible na multipart endpoint at ang napiling chat
+model ay nagpapatuloy gamit ang mga text transcript.
 
 Daloy:
 
-1. Lutasin `supportsAudio` sa pamamagitan ng `getResolvedModelCapabilities()`. Panalo ang tahasang metadata ng provider-registry, pagkatapos ay metadata ng static na modelo, pagkatapos ay naka-sync ang `modalities_input`. Ang ipinahayag na listahan ng input na walang `audio` ay `false`; walang katibayan ng kakayahan ang nananatiling `null`. Parehong pinagana `false` at `null` ang konserbatibong tulay, habang nilalampasan ito `true`.
-2. Lutasin ang mga setting `modalityBridgeAudio*` at i-extract ang mga spliceable na top-level na bahagi ng audio mula sa bawat mensahe sa pamamagitan ng nakabahaging `detectMediaParts()` detector. Ang mga sinusuportahang hugis wire ay OpenAI `input_audio`, `audio_url`, at `source.media_type: "audio/*"`. Natukoy ang nested audio para sa pagruruta ngunit hindi inalis ng splice path. Ang trabaho ay nililimitahan ng `modalityBridgeAudioMaxClips`; ang mga huling bahagi ay mananatiling hindi nagalaw.
-3. Parangalan ang isang naka-configure na `provider/model`, o hayaan ang `selectAudioBridgeModel()` na maglakad `AUDIO_TRANSCRIPTION_PROVIDERS` sa stable na pagkakasunud-sunod ng catalog at piliin ang unang modelo na may magagamit na aktibong kredensyal ng provider.
-4. Kino-convert `callAudioTranscription()` base64/data-URI audio sa isang multipart `file`, o nagda-download ng remote `audio_url` sa pamamagitan ng public-only outbound guard na may DNS pinning at 25 MB bound. Pagkatapos ay POSTs nito ang file at napiling modelo sa lokal na `/v1/audio/transcriptions` self-loop, na napatotohanan gamit ang `resolveSelfLoopBearer()`. Ang kasalukuyang ruta ng transkripsyon ay nagsasagawa ng normal na paghahanap ng kredensyal, paghawak ng cooldown/rate-limit, at pagpapadala ng provider.
-5. Pinapalitan ng mga matagumpay na tawag ang kanilang mga bahagi ng `[Audio N]: <transcript>`. Tumatakbo ang mga tawag gamit ang `Promise.allSettled`: pinapanatili ng isang indibidwal na kabiguan ang orihinal na bahagi ng audio na iyon ( kontrata #4012 ). Kung ang bawat tawag ay nabigo at ang target ay napatunayang `supportsAudio === false`, ang mga bahagi ay magiging `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract). Para sa hindi kilalang target (`null`), mananatiling hindi nagagalaw ang isang resulta ng lahat ng pagkabigo. Ang isang napatunayang text-only na target na walang magagamit na kredensyal STT ay tumatanggap ng parehong tahasang stub nang hindi nagbibigay ng isang tawag sa network.
+1. I-resolve ang `supportsAudio` sa pamamagitan ng `getResolvedModelCapabilities()`. Ang explicit
+   na metadata ng provider-registry ang mananaig, kasunod ang static na metadata ng
+   modelo, tapos ang naka-sync na `modalities_input`. Ang isang dineklarang input list
+   na walang `audio` ay `false`; kapag walang ebidensya ng kakayahan, nananatiling
+   `null`. Parehong nag-a-activate ang `false` at `null` ng conservative na bridge,
+   habang nilalampasan ito ng `true`.
+2. I-resolve ang mga setting ng `modalityBridgeAudio*` at i-extract ang mga nasa-splice
+   na top-level na audio part mula sa bawat mensahe sa pamamagitan ng shared na
+   `detectMediaParts()` detector. Ang mga sinusuportahang wire shape ay OpenAI
+   `input_audio`, `audio_url`, at `source.media_type: "audio/*"`. Ang nested na audio
+   ay natutukoy para sa routing ngunit hindi inaalis ng splice path. Ang trabaho ay
+   may limitasyong `modalityBridgeAudioMaxClips`; ang mga sumunod na part ay
+   nananatiling hindi nagagalaw.
+3. Sundin ang naka-configure na `provider/model`, o hayaang dumaan ang
+   `selectAudioBridgeModel()` sa `AUDIO_TRANSCRIPTION_PROVIDERS` sa stable na
+   pagkakasunud-sunod ng katalogo at piliin ang unang modelo na may magagamit na
+   aktibong kredensyal ng provider.
+4. Kinokonvert ng `callAudioTranscription()` ang base64/data-URI na audio sa isang
+   multipart na `file`, o dinidownload ang isang remote na `audio_url` sa pamamagitan
+   ng public-only na outbound guard na may DNS pinning at 25 MB na hangganan.
+   Pagkatapos nito, ipo-POST ang file at ang napiling modelo sa lokal na
+   `/v1/audio/transcriptions` self-loop, na may authentication gamit ang
+   `resolveSelfLoopBearer()`. Ang umiiral na transcription route ay nagsasagawa ng
+   normal na paghahanap ng kredensyal, paghawak ng cooldown/rate-limit, at dispatch
+   sa provider.
+5. Ang mga matagumpay na tawag ay pinapalitan ang kanilang mga part ng
+   `[Audio N]: <transcript>`. Tumatakbo ang mga tawag gamit ang `Promise.allSettled`:
+   ang indibidwal na kabiguan ay nagpapanatili ng orihinal na audio part na iyon
+   (kontrata ng #4012). Kung bumagsak ang bawat tawag at napatunayan na ang target ay
+   `supportsAudio === false`, ang mga part ay magiging
+   `[Audio N]: (unavailable — no STT provider connected)` (kontrata ng #8430). Para sa
+   isang hindi kilalang target (`null`), ang resultang lahat-nabigo ay nananatiling
+   hindi nagagalaw. Ang isang napatunayang text-only na target na walang magagamit na
+   STT na kredensyal ay tumatanggap ng parehong explicit na stub nang hindi naglalabas
+   ng network call.
 
-Ginagamit ng mga matagumpay na transcript ang buong proseso ng Modality Bridge LRU/TTL cache. Pinagsasama ng key ang audio reference, ang stable `audio-transcription` operation label, at ang napiling STT model; ang mga kabiguan ay hindi kailanman naka-cache. I-update ng mga pagsubok sa audio ang mga nakabahaging `bridged`, `cacheHits`, `failures`, at `lastUsedAt` counter. Ang mga binagong tugon ay nagdadala ng `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; Ang mga hindi nagalaw na kahilingan ay hindi nakakatanggap ng segment ng Audio Bridge.
+Ang mga matagumpay na transcript ay gumagamit ng process-wide na Modality Bridge
+LRU/TTL cache. Pinagsasama ng key ang audio reference, ang stable na
+`audio-transcription` na label ng operasyon, at ang napiling STT na modelo; ang mga
+kabiguan ay hindi kailanman naka-cache. Ang mga audio attempt ay nag-a-update ng mga
+shared na counter na `bridged`, `cacheHits`, `failures`, at `lastUsedAt`. Ang mga
+na-transform na response ay nagdadala ng
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; ang mga hindi
+nagalaw na request ay hindi tumatanggap ng Audio Bridge segment.
 
-Ang mga setting ng runtime ay DB-backed at Zod-validated:
+Ang mga runtime setting ay nakabatay sa DB at na-validate ng Zod:
 
 | Susi                          | Default | Saklaw        |
 | ----------------------------- | ------- | ------------- |
@@ -140,7 +350,8 @@ Ang mga setting ng runtime ay DB-backed at Zod-validated:
 | `modalityBridgeAudioTimeout`  | `60000` | 1000–300000   |
 | `modalityBridgeAudioMaxClips` | `3`     | 1–10          |
 
-Ang nakabahaging cache ay nananatiling kontrolado ng `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, at `modalityBridgeCacheMaxEntries`.
+Ang shared na cache ay nananatiling kontrolado ng `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes`, at `modalityBridgeCacheMaxEntries`.
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -218,83 +429,129 @@ Ang mga value ng timeout ng Legacy na lumampas sa 120 segundo ay naka-clamp sa d
 
 ### PII Masker (`piiMasker.ts`)
 
-Tumatakbo sa** pareho** mga yugto.
+Tumatakbo sa **pareho** mga yugto.
 
-- **`preCall`** kino-clone ang payload, nilalakad `system`, `messages`, `input`, at `prompt` (kabilang ang mga plain string item), at inilalapat ang `processPII()` (mula sa `@/shared/utils/inputSanitizer`) sa mga string na `content`/`text` na field. Kapag `PII_REDACTION_ENABLED=true`, ang natukoy na PII ay na-redact sa papalabas na payload. Ito ay independiyente sa `INPUT_SANITIZER_MODE` (na kumokontrol lamang sa prompt-injection policy). Kapag naka-off ang redaction, binibilang ang pagtuklas ng mga talaan ng tawag nang hindi muling isinusulat ang nilalaman.
-- **`postCall`** deep-clone ang tugon, nagpapatakbo ng `sanitizePIIResponse()` kasama ang Responses-API-shape masker (`maskResponsesOutput` — sumasaklaw sa `output_text` at `output[].content[].text`). Kung may nangyaring redaction, papalitan ng binagong tugon ang orihinal.
+- **`preCall`** kino-clone ang payload, nilalakad `system`, `messages`, `input`, at `prompt` (kabilang ang mga plain string na item), at inilalapat `processPII()` (mula sa `@/shared/utils/inputSanitizer`) sa mga string ng `content`/`text` na field. Kapag `PII_REDACTION_ENABLED=true`, ang nakitang PII ay na-redact sa papalabas na payload. Ito ay independiyente sa `INPUT_SANITIZER_MODE` (na kumokontrol lamang sa patakarang prompt-injection). Kapag naka-off ang redaction, binibilang ang pagtuklas ng mga talaan ng tawag nang hindi muling isinusulat ang nilalaman.
+- **`postCall`** deep-clone ang tugon, nagpapatakbo ng `sanitizePIIResponse()` kasama ang Responses-API-shape masker (`maskResponsesOutput` — ay sumasaklaw sa `output_text` at `output[].content[].text`). Kung may nangyaring redaction, papalitan ng binagong tugon ang orihinal.
 
 Ang guardrail ay hindi kailanman nakaharang; ito ay nag-annotate lamang (`meta.detections`, `meta.redacted`) o muling nagsusulat.
 
 #### Per-type na seleksyon, custom na pattern at detection counter
 
-**Dashboard → Mga Setting → Seguridad → PII masking** pinipili ang _ano_ ang nakamaskara. Hindi nito inililipat ang masking sa: iyon ay `PII_REDACTION_ENABLED` pa rin (kahilingan) at `PII_RESPONSE_SANITIZATION` (tugon + SSE), parehong naka-off bilang default.
+**Dashboard Mga Setting ng → → Security → PII masking** pinipili ang _ano_ ang nakamaskara. Hindi nito binubuksan ang masking: iyon pa rin ang `PII_REDACTION_ENABLED` (kahilingan) at `PII_RESPONSE_SANITIZATION` (tugon + SSE), parehong naka-off bilang default.
 
-- **Pagpili sa bawat uri** — ang mga built-in na id ay nakalista sa `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ang ibig sabihin ng unset ay bawat uri (ang gawi bago umiral ang setting na ito). Ang `ssn_us` pattern ng request engine ay nagmamapa sa `ssn`. Ang mga template (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) ay punan lamang ang mga checkbox sa UI.
-- **mga identifier GDPR at POPIA** — labindalawang built-in na id na sumasaklaw sa EU at mga personal na identifier ng South Africa (talahanayan sa ibaba). Ang kanilang mga regexe, validator, at jurisdiction tag ay nakatira sa isang table, `src/shared/utils/piiPatterns.ts`, na parehong ginagamit ng response sanitizer (`src/lib/piiSanitizer.ts`) at ang request masker (`src/shared/utils/inputSanitizer.ts`) . Ang isang tugma ay na-redact lamang kapag tinanggap ito ng validator nito; hindi sapat ang isang hubad na bilang ng mga numero. Ang isang operator na nag-save ng isang pinaliit na seleksyon bago umiral ang mga id na ito ay nagpapanatili ng pag-uugali na mayroon ito hanggang sa mamarkahan ang mga bagong id.
-- **Mga custom na pattern** — hanggang 20 regex o wildcard pattern (`*` = hanggang 64 na hindi whitespace na character, `?` = isa). Ang mga tugma ay nagiging `[CUSTOM_REDACTED]`. Ang bawat pattern ay dumadaan sa `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): hindi hihigit sa 500 character, ang mga flag ay limitado sa `g i m s u`, dapat mag-compile, dapat pumasa sa `safe-regex` (catastrophic backtracking), at hindi dapat tumugma sa isang walang laman na string o isang redaction placeholder. Ang isang pattern na nabigo ay tinatanggihan kapag nai-save at kapag sinubukan, at ang isang naka-imbak na row na nabigo ay nilaktawan sa runtime sa halip na i-compile. Gumagana lang ang mga custom na pattern habang naka-on ang masking.
+- **Pagpili sa bawat uri** — ang mga built-in na id ay nakalista sa `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ang ibig sabihin ng unset ay bawat uri (ang gawi bago umiral ang setting na ito). Ang `ssn_us` pattern ng request engine ay nagmamapa sa `ssn`. Ang mga template (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) ay pinupunan lamang ang mga checkbox sa UI.
+- **Mga identifier ng GDPR at POPIA** — labindalawang built-in na id na sumasaklaw sa EU at South African personal identifier (talahanayan sa ibaba). Ang kanilang mga regexe, validator at jurisdiction tag ay nakatira sa isang talahanayan, `src/shared/utils/piiPatterns.ts`, na parehong ginagamit ng response sanitizer (`src/lib/piiSanitizer.ts`) at request masker (`src/shared/utils/inputSanitizer.ts`). Ang isang tugma ay na-redact lamang kapag tinanggap ito ng validator nito; hindi sapat ang isang hubad na bilang ng mga numero. Ang isang operator na nag-save ng isang pinaliit na seleksyon bago umiral ang mga id na ito ay nagpapanatili ng pag-uugali na mayroon ito hanggang sa mamarkahan ang mga bagong id.
+- **Mga custom na pattern** — hanggang 20 regex o wildcard pattern (`*` = hanggang 64 na hindi whitespace na character, `?` = isa). Ang mga laban ay nagiging `[CUSTOM_REDACTED]`. Ang bawat pattern ay dumadaan sa `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): hindi hihigit sa 500 character, ang mga flag ay limitado sa `g i m s u`, dapat mag-compile, dapat pumasa sa `safe-regex` (catastrophic backtracking), at hindi dapat tumugma sa isang walang laman na string o isang redaction na placeholder. Ang isang pattern na nabigo ay tinatanggihan kapag nai-save at kapag sinubukan, at ang isang naka-imbak na row na nabigo ay nilaktawan sa runtime sa halip na i-compile. Gumagana lang ang mga custom na pattern habang naka-on ang masking.
 - **Mga counter ng pagtuklas** — per-type na bilang (hindi kailanman tumugma sa mga halaga), hawak sa memorya at i-reset sa pag-restart (`src/lib/pii/piiDetectionStats.ts`). Dumarami lamang sila habang naka-mask.
 
-Nakatira ang mga setting sa `key_value` table (namespace `pii_settings`, `src/lib/db/piiSettings.ts`) at binabasa sa pamamagitan ng 1 s cache. API:
+Ang mga setting ay nakatira sa `key_value` table (namespace `pii_settings`, `src/lib/db/piiSettings.ts`) at binabasa sa pamamagitan ng 1 s cache. API:
 
-| Pamamaraan | Daan                     | Layunin                                                                                    |
-| ---------- | ------------------------ | ------------------------------------------------------------------------------------------ |
-| `GET`      | `/api/settings/pii`      | Flag state, `enabledTypes`, `customPatterns`, detection counters                           |
-| `PUT`      | `/api/settings/pii`      | Palitan ang `enabledTypes` (`null` = lahat) and/or `customPatterns`                        |
-| `POST`     | `/api/settings/pii/test` | Dry-run ang isang pattern laban sa isang sample na hindi hihigit sa 8 KB; walang nakaimbak |
+| Method | Path                     | Layunin                                                                       |
+| ------ | ------------------------ | ----------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Estado ng mga flag, `enabledTypes`, `customPatterns`, mga detection counter   |
+| `PUT`  | `/api/settings/pii`      | Palitan ang `enabledTypes` (`null` = lahat) at/o `customPatterns`             |
+| `POST` | `/api/settings/pii/test` | I-dry-run ang isang pattern laban sa sample na hanggang 8 KB; walang iniimbak |
 
-Lahat ng tatlo ay nangangailangan ng pagpapatunay ng pamamahala at patunayan ang katawan gamit ang Zod (`src/shared/validation/schemas/piiSettings.ts`). Kung hindi pinagana ang pag-log in (`requireLogin=false`) `GET` at bukas ang endpoint ng pagsubok, ngunit kailangan pa rin ng `PUT` ang isang session ng dashboard, isang `manage` -scope API key, isang `oma_` access token na may write scope o mas mataas, o ang CLI token o internal-service token na ipinadala mula sa loopback.
+Lahat ng tatlo ay nangangailangan ng pagpapatunay ng pamamahala at pagpapatunay ng katawan gamit ang Zod (`src/shared/validation/schemas/piiSettings.ts`). Kung hindi pinagana ang pag-login (`requireLogin=false`) `GET` at bukas ang endpoint ng pagsubok, ngunit kailangan pa rin ng `PUT` ng session ng dashboard, isang `manage` -scope API key, isang `oma_` access token na may write scope o mas mataas, o ang CLI token o internal-service token na ipinadala mula sa loopback.
 
-#### mga identifier ng GDPR (EU) at POPIA (South Africa).
+#### Mga identifier ng GDPR (EU) at POPIA (South Africa).
 
-| Id                  | Identifier                     | Pagpapatunay                                                                                   |
-| ------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                           | Kilalang bansa, eksaktong haba para sa bansang iyon, ISO 13616 MOD-97-10                       |
-| `eu_vat`            | EU VAT na numero               | Kilalang prefix ng member-state at ang format ng numero ng estado na iyon (walang VIES lookup) |
-| `es_dni_nie`        | Espanyol DNI / NIE             | Control letter (value mod 23); NIE ay `X/Y/Z` + 7 digit                                        |
-| `it_codice_fiscale` | Italian Codece Fiscale         | Control letter mula sa mga talahanayan ng posisyon odd/even                                    |
-| `pl_pesel`          | Polish PESEL                   | Weighted checksum at isang naka-encode na petsa ng kapanganakan na umiiral                     |
-| `nl_bsn`            | Dutch BSN                      | 11-proof (weights 9..2, -1)                                                                    |
-| `de_steuer_id`      | German Steuer-ID               | ISO 7064 Mod 11,10 kasama ang mga panuntunan sa digit-structure (walang nangungunang 0)        |
-| `se_personnummer`   | Swedish personnummer           | Luhn sa huling sampung digit at isang posibleng petsa ng kapanganakan (10 o 12 digit)          |
-| `za_id`             | ID number sa Timog Aprika      | Luhn sa lahat ng 13 digit, valid birth month/day, citizenship digit 0 o 1                      |
-| `za_phone`          | Telepono sa Timog Aprika       | `+27` / `27` prefix, o ang pambansang `0..` form na nakasulat na may puwang o gitling          |
-| `za_vat`            | VAT number sa Timog Aprika     | 10 digit na nagsisimula sa `4`** at** "VAT" / "BTW" sa 48 characters dati                      |
-| `za_tax_ref`        | Ref. ng buwis sa Timog Aprika. | 10 digit simula `0`-`3`, Luhn,** at** "tax" / "SARS" sa 48 na character bago                   |
+| Id                  | Identifier                  | Pag-validate                                                                              |
+| ------------------- | --------------------------- | ----------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                        | Kilalang bansa, eksaktong haba para sa bansang iyon, ISO 13616 MOD-97-10                  |
+| `eu_vat`            | EU VAT number               | Kilalang prefix ng kasaping bansa at number format nito (walang VIES lookup)              |
+| `es_dni_nie`        | Spanish DNI / NIE           | Control letter (halaga mod 23); ang NIE ay `X/Y/Z` + 7 digit                              |
+| `it_codice_fiscale` | Italian Codice Fiscale      | Control letter mula sa mga talahanayan ng odd/even na posisyon                            |
+| `pl_pesel`          | Polish PESEL                | Weighted checksum at makatwirang saklaw ng naka-encode na buwan/araw ng kapanganakan      |
+| `nl_bsn`            | Dutch BSN                   | Pagsubok na 11 (mga timbang na 9..2, -1)                                                  |
+| `de_steuer_id`      | German Steuer-ID            | ISO 7064 Mod 11,10 at mga tuntunin sa digit structure (walang 0 sa simula)                |
+| `se_personnummer`   | Swedish personnummer        | Luhn sa huling sampung digit at makatwirang petsa ng kapanganakan (10 o 12 digit)         |
+| `za_id`             | South African ID number     | Luhn sa lahat ng 13 digit, wastong buwan/araw ng kapanganakan, citizenship digit na 0 o 1 |
+| `za_phone`          | Telepono sa South Africa    | Prefix na `+27` / `27`, o pambansang anyong `0..` na isinulat na may espasyo o gitling    |
+| `za_vat`            | South African VAT number    | 10 digit na nagsisimula sa `4` **at** "VAT" / "BTW" sa 48 character bago nito             |
+| `za_tax_ref`        | South African tax reference | 10 digit na nagsisimula sa `0`-`3`, Luhn, **at** "tax" / "SARS" sa 48 character bago nito |
 
-Dahil ang mga digit-only na format ay sumasalungat sa mga numero ng order, bumuo ng mga numero at timestamp, ang pinakamahina (`za_vat`, `za_tax_ref`) ay nangangailangan ng keyword cue, at ang isang walang laman na sampung digit `0..` na numero ay hindi itinuturing bilang isang South African na numero ng telepono. Ang spaced IBANs (`GB29 NWBK ...`) ay hindi tugma. Sa streaming path ang cue ay tinitingnan sa loob ng kasalukuyang tipak lamang. Nauuna ang mga id sa mga generic na pattern ng telepono, kaya pinapanatili ng isang validated identifier ang sarili nitong placeholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Ang `gdpr` at `popia` template ay pipili ng EU at South African id ayon sa pagkakabanggit. Ang pag-mask mismo ay nananatiling opt-in (Hard Rule #20): wala dito ang nagbabago sa default na feature-flag.
+Dahil ang mga digit-only na format ay sumasalungat sa mga numero ng order, bumuo ng mga numero at timestamp, ang pinakamahina (`za_vat`, `za_tax_ref`) ay nangangailangan ng keyword cue, at ang isang walang laman na sampung digit `0..` na numero ay hindi itinuturing bilang isang South African na numero ng telepono. Ang spaced IBANs (`GB29 NWBK ...`) ay hindi tugma. Sa streaming path ang cue ay tinitingnan sa loob ng kasalukuyang tipak lamang. Nauuna ang mga id sa mga generic na pattern ng telepono, kaya pinapanatili ng validated identifier ang sarili nitong placeholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Ang `gdpr` at `popia` na mga template ay pipili ng EU at South African id ayon sa pagkakabanggit. Ang pag-mask mismo ay nananatiling opt-in (Hard Rule #20): wala dito ang nagbabago sa default na feature-flag.
 
 ### Prompt Injection (`promptInjection.ts`)
 
-Nakikita ang mga istrukturang kalaban sa content na ibinigay ng user at ipinapatupad ang naka-configure na patakaran. Ang pag-uugali ay hinihimok ng mga variable ng kapaligiran at mga pagpipilian sa constructor:
+Nag-detect ng mga adversarial na istruktura sa content na ibinigay ng user at
+ipinapatupad ang naka-configure na policy. Ang pag-uugali ay hinihimok ng mga
+environment variable at constructor option:
 
-| Setting               | Env var                                                                                               | Default | Epekto                                                                                                                                                                                                                        |
-| --------------------- | ----------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pinagana              | `INPUT_SANITIZER_ENABLED`                                                                             | `true`  | Kapag `false`, guardrail short-circuits.                                                                                                                                                                                      |
-| Mode                  | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`  | Patakaran sa pag-injection: `block`, `warn`, o `log`. (`redact` ay tinatanggap para sa back-compat ngunit ginagawa** hindi** strip ng iniksyon na teksto; Ang request PII rewrite ay kinokontrol ng `PII_REDACTION_ENABLED`.) |
-| I-block ang threshold | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | Minimum na kalubhaan na kinakailangan upang harangan. Ang medium ay observe-only sa default.                                                                                                                                  |
+| Setting                | Env var                                                                                               | Default | Epekto                                                                                                                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pinagana               | `INPUT_SANITIZER_ENABLED`                                                                             | `true`  | Kapag `false`, nag-short-circuit ang guardrail.                                                                                                                                                                   |
+| Mode                   | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`  | Injection policy: `block`, `warn`, o `log`. (Tinatanggap ang `redact` para sa back-compat ngunit **hindi** nito inaalis ang injection text; ang PII rewrite ng request ay kontrolado ng `PII_REDACTION_ENABLED`.) |
+| Threshold ng pag-block | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | Minimum severity na kailangan para mag-block. Observe-only ang Medium sa default.                                                                                                                                 |
 
-**Pangunahin sa mode** (`getMode`): tumatawag `options.mode` → `INJECTION_GUARD_MODE`**DB feature-flag override** (Dashboard → Settings → Feature Flag) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Ang isang dashboard override samakatuwid ay nanalo sa mga env vars, kaya kinokontrol ng Feature Flags UI ang tumatakbong bantay nang live (walang restart). Ang DB read ay fail-safe: kung ito ay mali, ang bantay ay bumabalik sa env-based na gawi, at kapag walang override ang nakatakdang gawi ay kapareho ng env-only na resolution.
+**Precedence ng mode** (`getMode`): `options.mode` ng caller →
+`INJECTION_GUARD_MODE` **override ng feature flag sa DB** (Dashboard →
+Settings → Feature Flags) → env na `INJECTION_GUARD_MODE` → env na
+`INPUT_SANITIZER_MODE` → `warn`. Kaya nananaig ang dashboard override sa mga
+env var, at ang UI ng Feature Flags ang kumokontrol sa tumatakbong guard nang
+live (walang restart). Fail-safe ang pagbasa sa DB: kung magka-error ito,
+babalik ang guard sa env-based na pag-uugali, at kapag walang naka-set na
+override, magkakapareho ang pag-uugali sa env-only resolution.
 
-Mga mapagkukunan ng pagtuklas:
+Mga source ng detection:
 
-1. `sanitizeRequest()` mula sa `@/shared/utils/inputSanitizer` (nakabahaging set ng detector na ginagamit sa ibang lugar sa pipeline).
-2. Built-in na `DEFAULT_GUARD_PATTERNS` (kasalukuyang `system_override_inline` at `markdown_system_block`, parehong `high` severity).
-3. Ang opsyonal `customPatterns` ay ipinasa sa pamamagitan ng mga opsyon sa constructor (mga string, regex, o `{ name, pattern, severity }` na tala).
+1. `sanitizeRequest()` mula sa `@/shared/utils/inputSanitizer` (shared na
+   detector set na ginagamit din sa ibang bahagi ng pipeline).
+2. Mga built-in na `DEFAULT_GUARD_PATTERNS` (kasalukuyang
+   `system_override_inline` at `markdown_system_block`, parehong may `high`
+   severity).
+3. Opsyonal na `customPatterns` na ipinapasa sa pamamagitan ng mga constructor
+   option (mga string, regex, o mga record na `{ name, pattern, severity }`).
 
-Kapag `mode === "block"`** at** hindi bababa sa isang pagtuklas ang nakakatugon sa threshold ng kalubhaan, ibinabalik ng `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }`. Sa `warn`/`log` mode, ang guardrail ay nag-log ngunit pinapayagan ang tawag. Ang nakabahaging helper `evaluatePromptInjection()` ay na-export din para sa mga tumatawag na kailangang suriin ang mga prompt nang hindi dumadaan sa registry.
+Kapag `mode === "block"` **at** may kahit isang detection na umabot sa severity
+threshold, ang `preCall` ay nagbabalik ng `{ block: true, message: "Request rejected:
+suspicious content detected" }`. Sa mga mode na `warn`/`log` nagla-log ang guardrail
+pero pinapayagan ang tawag. Ang shared helper na `evaluatePromptInjection()` ay
+naka-export din para sa mga caller na kailangang mag-evaluate ng mga prompt nang
+hindi dumadaan sa registry.
 
-**Scan bound (v3.8.20):** ang detector ay nag-iinspeksyon lamang sa** unang 16 KB** ng sinalihang prompt text — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) sa `src/shared/utils/inputSanitizer.ts`. Parehong `detectInjection()` at `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` bago patakbuhin ang pattern loop. Ang mga direktiba sa pag-injection ay matatagpuan malapit sa tuktok ng isang input, kaya nililimitahan nito ang regex CPU/GC sa mga multi-hundred-KB na payload nang hindi humihina ang detection (cf. #3932, #4041).
+**Hangganan ng scan (v3.8.20):** sinusuri lamang ng detector ang **unang 16 KB**
+ng pinagsamang teksto ng prompt — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) sa
+`src/shared/utils/inputSanitizer.ts`. Parehong nag-`slice(0, MAX_INJECTION_SCAN_BYTES)`
+ang `detectInjection()` at `evaluatePromptInjection()` bago patakbuhin ang
+pattern loop. Ang mga injection directive ay nasa malapit sa itaas ng isang input,
+kaya nililimitahan nito ang regex CPU/GC sa mga payload na may daan-daang KB nang
+hindi hinihina ang detection (cf. #3932, #4041).
 
-### Credential Masker (`credentialMasker.ts`)
+### Pantakip ng mga Kredensyal (`credentialMasker.ts`)
 
-Tumatakbo sa** pareho** yugto, huling sa default na chain (priority `95`). Nag-redact ng mga kilalang API-key / secret-token pattern mula sa papalabas na payload (nilalaman ng mensahe, mga argumento ng tool-call, mga resulta ng tool)** at** ang tugon ng provider, kaya ang isang kredensyal na na-paste sa isang prompt (o na-echo pabalik ng isang resulta ng tool) ay hindi na-leak sa upstream provider o pabalik sa kliyente.
+Tumatakbo sa **parehong** stage, pinakahuli sa default na chain (priority `95`).
+Nire-redact nito ang mga kilalang pattern ng API-key / secret-token mula sa
+papalabas na payload (nilalaman ng mensahe, mga argumento ng tool-call, mga
+resulta ng tool) **at** sa tugon ng provider, upang ang kredensyal na naipaste sa
+isang prompt (o ibinalik ng isang resulta ng tool) ay hindi mailabas sa upstream
+provider o pabalik sa kliyente.
 
-- **Mag-opt-in lang** , parehong convention bilang PII redaction (Hard Rule #20-adjacent): hindi pinagana maliban kung `settings.credentialRedactionEnabled === true`** o** `CREDENTIAL_REDACTION_ENABLED=true`. Kapag naka-off ito, ang guardrail ay isang no-op — na hinding-hindi nito naba-block at hindi na muling nagsusulat.
-- Nilalakad `redactCredentials()` ang buong puno payload/response (`walkValue()`, prototype-pollution-safe, cycle-safe sa pamamagitan ng `WeakSet`) at pinapalitan ang mga tugma ng isang `[REDACTED:<type>]` placeholder, na nag-clone lang ng mga sanga na aktwal na nagbago.
-- `CREDENTIAL_PATTERNS` covers LLM provider keys (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), payment keys (Stripe, Square), cloud keys (AWS access key, Twilio, SendGrid, Mailgun), private keys / JWTs, credential-bearing connection strings (`mongodb://user:pass@...`, etc.), and a generic `Authorization`/`x-api-key`/`api-key`/`apikey` header-value pattern. Header-shaped keys (`authorization`, `x-api-key`, `api-key`, `apikey`) are redacted structurally (value only, scheme prefix like `Bearer `/`Basic ` preserved) rather than via the generic text regex.
-- Ang guardrail ay hindi kailanman nakaharang; nagre-rewrite lang ito (`modifiedPayload` / `modifiedResponse`) at nag-annotate (`meta.credentialsRedacted`, `meta.count`).
+- **Opt-in lamang**, parehong kombensiyon sa PII redaction (katabi ng Hard Rule
+  #20): naka-disable maliban kung `settings.credentialRedactionEnabled === true`
+  **o** `CREDENTIAL_REDACTION_ENABLED=true`. Kapag naka-off ito, ang guardrail ay
+  isang no-op — hindi ito kailanman nagba-block at hindi kailanman nagre-rewrite.
+- Tinatahak ng `redactCredentials()` ang buong tree ng payload/response
+  (`walkValue()`, ligtas sa prototype pollution, ligtas sa cycle sa pamamagitan ng
+  `WeakSet`) at pinapalitan ang mga tugma ng placeholder na `[REDACTED:<type>]`,
+  na kino-clone lamang ang mga sanga na talagang nagbago.
+- Sinasaklaw ng `CREDENTIAL_PATTERNS` ang mga key ng LLM provider (OpenAI,
+  OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), mga VCS/SaaS token
+  (GitHub, Slack, Linear, Notion, npm, Postman, Discord), mga payment key
+  (Stripe, Square), mga cloud key (AWS access key, Twilio, SendGrid, Mailgun),
+  mga private key / JWT, mga connection string na nagdadala ng kredensyal
+  (`mongodb://user:pass@...`, atbp.), at isang generic na pattern ng header-value
+  na `Authorization`/`x-api-key`/`api-key`/`apikey`. Ang mga key na may hugis-header
+  (`authorization`, `x-api-key`, `api-key`, `apikey`) ay nire-redact nang
+  structural (ang value lamang, pinananatili ang scheme prefix tulad ng
+  `Bearer `/`Basic `) sa halip na gamitin ang generic na text regex.
+- Hindi kailanman nagba-block ang guardrail; nagre-rewrite lamang ito
+  (`modifiedPayload` / `modifiedResponse`) at nag-a-annotate
+  (`meta.credentialsRedacted`, `meta.count`).
 
-Regression guard: `tests/unit/credential-masker-guardrail.test.ts`.
+Pananggalang sa regression: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Batayang Kontrata (`base.ts`)
 

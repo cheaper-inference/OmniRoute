@@ -814,28 +814,50 @@ Web/search 공급자 추상화(Tavily, Brave, Exa, Serper 등).
 
 **자동 선택:** `provider` 없으면 연결이 구성된 가장 저렴한 공급자가 먼저 실행되고 다음으로 가장 저렴한 공급자가 장애 조치입니다. 무료 최후의 수단 공급자(`duckduckgo-free`)는 아무것도 구성되지 않은 경우에만 사용됩니다. 자체 호스팅 SearXNG 연결이 실제 `baseUrl` (카탈로그 기본값 `http://localhost:8888/search` 아님)를 저장하면 구성된 것으로 계산됩니다. 그런 다음 SearXNG 400, 401, 403 또는 404로 응답하는 경우를 포함하여 가장 저렴한 키 공급자를 장애 조치로 사용하여 키 공급자보다 $0 공급자로 순위를 매깁니다. 유효한 `http(s)` URL 아니거나 클라우드 메타데이터 주소를 가리키는 `baseUrl` 는 계산되지 않습니다. 토큰을 저장하는 SearXNG 연결은 `https://` 또는 루프백 `http://` 에 대해서만 이러한 방식으로 순위를 매깁니다. 원격 일반 `http://` 에서는 결코 장애 조치가 아니며 최후의 수단으로 유지되며 다른 공급자가 구성되지 않거나 이름으로 요청될 때만 사용되므로 이 두 경우에 일반 텍스트로 토큰을 보냅니다.
 
-### 엑사와 타빌리 `provider_options`
+### Exa 및 Tavily `provider_options`
 
-Exa와 Tavily는 네임스페이스 백( `provider_options.exa` (또는 `provider_options["exa-search"]`) 및 `provider_options.tavily` (또는 `provider_options["tavily-search"]`))에서 공급자별 필드를 읽습니다. 아래 키만 전달됩니다. 각각은 `open-sse/handlers/search/providerOptionsPassthrough.ts` 의 자체 Zod 스키마와 비교하여 검사되며 잘못된 유형의 키는 삭제됩니다. auth, base URL, `stream` 및 `outputSchema` 를 포함한 다른 모든 키는 무시됩니다. 다른 공급자(`cx`, `depth`, ...)에서 사용하는 일반 키는 이전과 같이 작동합니다.
+Exa와 Tavily는 네임스페이스가 지정된 백에서 제공업체별 필드를 읽습니다:
+`provider_options.exa`(또는 `provider_options["exa-search"]`) 및 `provider_options.tavily`
+(또는 `provider_options["tavily-search"]`). 아래의 키만 전달됩니다. 각 키는
+`open-sse/handlers/search/providerOptionsPassthrough.ts`의 자체 Zod 스키마에 대해
+검사되며, 타입이 잘못된 키는 삭제됩니다. 인증, 기본 URL, `stream`, `outputSchema`를
+포함한 그 외 모든 키는 무시됩니다. 다른 제공업체에서 사용하는 평면 키(`cx`, `depth` ...)
+는 이전과 동일하게 작동합니다.
 
-| 공급자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩됨                                                                                                                                     |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 엑사   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (플랫 프리미티브), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` 기본 `{ text: true, highlights: true }` 위에 병합되었습니다. |
-| 타빌리 | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`가 기본값 `{ text: true, highlights: true }` 위에 병합됨 |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-일반 필드는 항상 승리합니다: `query`, `max_results`, `filters` (도메인), `country` 및 `search_type` 에서 파생된 주제. Exa에서 `search_type: "news"` `category: "news"` 유지합니다. Tavily는 `search_type: "finance"` (`topic: "finance"`)도 허용합니다.
+일반 필드는 항상 우선합니다: `query`, `max_results`, `filters`(도메인), `country`, 그리고
+`search_type`에서 파생된 주제가 해당합니다. Exa에서는 `search_type: "news"`일 때
+`category: "news"`가 유지됩니다. Tavily는 `search_type: "finance"`도 허용하며
+(`topic: "finance"`), 이 경우 주제는 `"finance"`입니다.
 
-Firecrawl 검색 비용은 반환된 결과 10개의 시작 블록당 $0.002(2크레딧), 호출당 최소 하나의 블록( [Firecrawl 청구](https://docs.firecrawl.dev/billing) )으로 기록됩니다. 11개 결과 비용은 $0.004입니다.
+Firecrawl 검색 비용은 반환된 결과 10개 단위로 시작된 블록마다 $0.002(2 크레딧)로
+기록되며, 호출당 최소 한 블록이 적용됩니다
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 결과 11개는 $0.004의 비용이 듭니다.
 
-일반 `time_range` 이제 두 공급자 모두에 도달합니다. Exa는 `startPublishedDate` (ISO 타임스탬프)를 가져오고 Tavily는 `start_date` (`YYYY-MM-DD`)를 가져옵니다. `provider_options` 의 명시적인 날짜는 매핑된 날짜보다 우선합니다.
+일반 `time_range`는 이제 두 제공업체 모두에 전달됩니다. Exa에는 `startPublishedDate`
+(ISO 타임스탬프)로, Tavily에는 `start_date`(`YYYY-MM-DD`)로 전달됩니다.
+`provider_options`에 날짜가 명시되어 있으면 매핑된 날짜보다 우선합니다.
 
-Exa 결과는 `id`, `highlights` ( `snippet` 로 사용된 첫 번째 하이라이트뿐만 아니라 모든 하이라이트), `highlight_scores`, `summary`, `subpages`, `entities` 및 `extras` `provider_raw` 에 유지합니다. Tavily 결과는 `images` 및 `favicon` 유지합니다.
+Exa 결과는 `id`, `highlights`(`snippet`에 사용된 첫 번째 항목뿐 아니라 모든
+하이라이트), `highlight_scores`, `summary`, `subpages`, `entities`, `extras`를
+`provider_raw`에 유지합니다. Tavily 결과는 `images` 및 `favicon`을 유지합니다.
 
-링크업 검색 비용은 `depth` `provider_options` 또는 연결 설정에서 제공되는지 여부에 관계없이 `depth` `fast` 및 `standard` 의 경우 $0.005, `deep` 의 경우 $0.05로 기록됩니다( [링크업 가격 책정](https://docs.linkup.so/pages/documentation/development/pricing) ).
+Linkup 검색 비용은 `depth`가 `fast` 및 `standard`일 때 $0.005, `deep`일 때 $0.05로
+기록됩니다([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)).
+`depth`가 `provider_options`에서 제공되었는지 연결 설정에서 제공되었는지와 관계없이
+동일합니다.
 
-Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
+Exa `type: "lite"`(Exa 3.0)는 더 적은 수의 필드를 허용하며, 다른 필드가 하나라도
+설정되면 전체 요청을 거부합니다. lite의 경우 호출 전에 `additionalQueries`,
+`systemPrompt`, 그리고 `contents`의 `text` 및 `highlights`를 제외한 모든 키가
+삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`,
+`highlights.numSentences`, `highlights.highlightsPerUrl`은 더 이상 전달되지 않습니다.
 
-비용 계산은 평면 레지스트리 `costPerQuery` 입니다. 단, Exa의 자체 가격을 따르는 Exa는 다음과 같습니다. `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
+Exa: `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
 
 ---
 
@@ -914,14 +936,14 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하고, OmniRou
 
 ---
 
-## 할당량 및 이슈 보고
+## 할당량 및 문제 보고
 
-| Method | Path                | Description                                                             |
-| ------ | ------------------- | ----------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | 등록된 키를 발급하기 전에 `provider` + `accountId`의 할당량을 사전 검증 |
-| POST   | `/v1/issues/report` | 할당량/키 발급 실패를 GitHub에 보고 (`GITHUB_ISSUES_REPO` + 토큰 필요)  |
+| 방법 | 길                  | 설명                                                                                 |
+| ---- | ------------------- | ------------------------------------------------------------------------------------ |
+| GET  | `/v1/quotas/check`  | 등록된 키를 발급하기 전에 `provider` + `accountId` 에 대한 할당량을 사전 검증합니다. |
+| POST | `/v1/issues/report` | quota/key 발급 실패를 GitHub 에 보고합니다( `GITHUB_ISSUES_REPO` + 토큰 필요)        |
 
-**인증:** Bearer API 키 (`isAuthenticated`).
+**인증:** `/v1/quotas/check` Bearer API 키(`isAuthenticated`)를 사용합니다. `/v1/issues/report` 는 `/api/v1/registered-keys` 와 같이 관리 전용(`requireManagementAuth`)입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 범위가 있는 API 키입니다. 추론 전용 API 키는 `403` 얻습니다.
 
 ### 할당량 세션 복구 (선택 사항)
 
@@ -946,9 +968,9 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하고, OmniRou
 
 ---
 
-## 셀프 서비스 사용량(`/api/usage/om-usage`)
+## 셀프 서비스 사용(`/api/usage/om-usage`)
 
-모든 API 키는 읽을 수 있습니다.** 그 자체의** 사용량 및 할당량 — 관리 인증 없음. 이는 클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 지출 내역을 표시하는 데 사용하는 엔드포인트입니다.
+모든 API 키는 읽을 수 있습니다.**그 자체의** 사용량 및 할당량 — 관리 인증 없음. 이는 클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 지출 내역을 보여주기 위해 사용하는 엔드포인트입니다.
 
 ```bash
 # Text form (the historical contract — plain text for a terminal)
@@ -960,9 +982,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-키에는 다음이 있어야 합니다.**`allowUsageCommand`** 활성화됩니다(기본적으로 꺼짐 — 대시보드의 API 키 관리자는 키별로 토글합니다). 이것이 없으면 엔드포인트는 `403` 응답합니다.
+키에는 다음이 있어야 합니다.**`allowUsageCommand`** 활성화됩니다(기본적으로 꺼져 있는 — 대시보드의 API 키 관리자가 키별로 토글합니다). 이것이 없으면 엔드포인트는 `403` 응답합니다.
 
-`?format=json` 구별된 모양을 반환하므로 호출자는 거부 시 데이터 필드를 읽지 않습니다. 성공 시:
+`?format=json` 식별된 모양을 반환하므로 발신자는 거부 시 데이터 필드를 읽지 않습니다. 성공 시:
 
 ```jsonc
 {
@@ -986,49 +1008,61 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-거부 시(`401` 잘못된 키 / `403` 허용되지 않음) 동일한 경로는 `{ "allowed": false, "error": { "message": "…" } }` — 를 반환하지만 현재는 비어 있지만 `personal`/`provider` (키는 허용되지만 아직 학습된 것은 없음)는 거부와 다른 상태이며 JSON 형식만이 이를 구별합니다.
+거부 시(`401` 잘못된 키/ `403` 허용되지 않음) 동일한 경로는 `{ "allowed": false, "error": { "message": "…" } }` — 반환하지만 존재하지만 비어 있는 `personal`/`provider` (키 허용됨, 아직 학습된 항목 없음)는 거부와 다른 상태이며 JSON 형식만 이를 구별합니다.
 
 **인증:** `isValidApiKey` — 로 검증된 호출자 자신의 Bearer API 키는 `requireManagementAuth` 뒤에 있는 관리 표면(`/api/keys/…`)이 _아닙니다_.
 
-### 원시 대 컷오프 조정 할당량 비율
+### 원시 할당량 백분율과 기준선 조정 할당량 백분율
 
-`/api/usage/om-usage` 사용할 때 호출자는 다음에 의해 표시되는 백분율 간의 차이에 유의해야 합니다.** 일반 텍스트 출력** 그리고 구조화된**JSON 출력** :
+`/api/usage/om-usage`를 사용할 때 호출자는 **일반 텍스트 출력**과 구조화된
+**JSON 출력**에 표시되는 백분율의 차이를 확인해야 합니다.
 
-| 측면                | 일반 텍스트 형식(`/api/usage/om-usage` / `@@om-usage`)                          | JSON 형식(`?format=json`)                                  |
-| :------------------ | :------------------------------------------------------------------------------ | :--------------------------------------------------------- |
-| **출력 필드**       | `NN% left` (예: `20% left`)                                                     | `provider.quotas` / `providers[].quotas`                   |
-| **측정**            | **컷오프 조정된 사용 가능 허용량** : 컷오프 임계값을 초과하는 남은 용량         | **원시 업스트림 할당량** : 조정되지 않은 공급자 측정       |
-| **컷오프 스케일링** | 보호된 예비가 `0% left` 로 읽혀지도록 `effectiveRemainingPercent()` 통해 확장됨 | 없음(공급자가 보고한 원시 스냅샷 값)                       |
-| **임계값 데이터**   | 표시된 백분율에 포함됩니다.                                                     | 연결당 `quotaWindowThresholds` 에 저장됨(또는 서버 기본값) |
-| **1차 소비자**      | 대화형 CLIs, 터미널 프롬프트, 인간 운영자                                       | 프로그래밍 방식 통합, 대시보드, 분석, 청구 추적기          |
+| Aspect            | 일반 텍스트 형식 (`/api/usage/om-usage` / `@@om-usage`)                               | JSON 형식 (`?format=json`)                                |
+| :---------------- | :------------------------------------------------------------------------------------ | :-------------------------------------------------------- |
+| **출력 필드**     | `NN% left` (예: `20% left`)                                                           | `provider.quotas` / `providers[].quotas`                  |
+| **측정값**        | **기준선 조정 사용 가능 허용량**: 기준선 임계값을 초과하여 남은 용량                  | **원시 업스트림 할당량**: 조정되지 않은 제공자 측정값     |
+| **기준선 조정**   | `effectiveRemainingPercent()`를 통해 조정되므로 보호된 예약 용량은 `0% left`로 표시됨 | 없음 (제공자가 보고한 원시 스냅샷 값)                     |
+| **임계값 데이터** | 표시되는 백분율에 반영됨                                                              | 연결별 `quotaWindowThresholds`(또는 서버 기본값)에 저장됨 |
+| **주요 소비자**   | 대화형 CLI, 터미널 프롬프트, 운영자                                                   | 프로그래밍 방식 통합, 대시보드, 분석, 결제 추적기         |
 
-#### 컷오프 조정 공식
+#### 기준선 조정 공식
 
-OmniRoute 업스트림 고갈을 방지하기 위해 사전 할당량 차단을 지원합니다( `quotaWindowThresholds` 연결, 공급자 기본값 또는 전역 복원력 설정을 통해 구성됨). 할당량 창에서 컷오프 임계값(예: `cutoff = 25%`)이 활성화되면 텍스트 렌더러는 남은 허용량을 다음과 같이 계산합니다.
+OmniRoute는 업스트림 소진을 방지하기 위한 사전 예방적 할당량 기준선을 지원합니다(연결의
+`quotaWindowThresholds`, 제공자 기본값 또는 전역 복원력 설정으로 구성). 할당량 윈도우에
+기준선 임계값(예: `cutoff = 25%`)이 활성화되면 텍스트 렌더러는 다음과 같이 남은 허용량을
+계산합니다.
 
-- `remaining <= cutoff` 인 경우: `0%` 반환합니다.
-- `remaining > cutoff` 인 경우: `((remaining - cutoff) / (100 - cutoff)) * 100` 반환합니다.
+- `remaining <= cutoff`인 경우: `0%`를 반환합니다.
+- `remaining > cutoff`인 경우: `((remaining - cutoff) / (100 - cutoff)) * 100`을 반환합니다.
 
-형식화된 텍스트 출력은 이를 가장 가까운 정수(`Math.round(...)`)로 반올림합니다.
+형식이 지정된 텍스트 출력은 이를 가장 가까운 정수로 반올림합니다(`Math.round(...)`).
 
-#### 예시적인 예
+#### 예시
 
-공급자 창을 고려하십시오.** 60% 원시 사용량** (따라서** 원시 남은 할당량 40%** ) 및 구성된** 25% 남은 할당량 컷오프** 한계점:
+제공업체 윈도우의 **원시 사용량이 60%**(따라서 **원시 잔여 할당량은 40%**)이고, 구성된
+**잔여 할당량 컷오프** 임계값이 **25%**라고 가정합니다:
 
-| 대표                           | 계산                                               |  남은   |             묵시적으로 사용됨              |
-| :----------------------------- | :------------------------------------------------- | :-----: | :----------------------------------------: |
-| **원시 JSON (`?format=json`)** | 업스트림 스냅샷(`quotas[window]`)                  | **40%** |                  **60%**                   |
-| **텍스트 형식(`NN% left`)**    | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** ( `100 - remaining` 계산하는 경우) |
+| 표현                           | 계산                                               | 잔여량  |            암시된 사용량            |
+| :----------------------------- | :------------------------------------------------- | :-----: | :---------------------------------: |
+| **원시 JSON (`?format=json`)** | 업스트림 스냅샷 (`quotas[window]`)                 | **40%** |               **60%**               |
+| **텍스트 형식 (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (계산 시 `100 - remaining`) |
 
-- **텍스트에 20% 남음이 표시되는 이유:** 계정에 남아 있는 물리적 할당량 40% 중 25%는 컷오프 정책에 따라 예약되어 있습니다. 라우터가 이 연결에 대한 라우팅을 중지하기 전에 호출자에게는 사용 가능한 헤드룸 75% 중 15%만 남아 있습니다. 스케일링은 라우팅이 중단될 때 정확하게 연결 신호 소진(`0% left`)을 보장합니다.
-- **JSON 원시 값을 유지하는 이유:** JSON 페이로드는 정확한 공급자 스냅샷(`UsageSnapshot`)을 반환하므로 외부 도구는 서버 측 손실 확장 없이 실제 업스트림 활용도와 연결 수준 `quotaWindowThresholds` 에 액세스할 수 있습니다.
+- **텍스트에 20%가 남은 것으로 표시되는 이유:** 계정에 물리적으로 남아 있는 할당량 40% 중 25%는
+  컷오프 정책에 의해 예약됩니다. 라우터가 이 연결로의 라우팅을 중지하기 전까지 호출자가 사용할 수 있는
+  여유 공간은 75% 중 15%뿐입니다. 이 스케일링을 적용하면 라우팅이 중단되는 시점에 연결이 정확히
+  소진 상태(`0% left`)를 표시합니다.
+- **JSON이 원시 값을 유지하는 이유:** JSON 페이로드는 정확한 제공업체 스냅샷(`UsageSnapshot`)을
+  반환하므로, 외부 도구는 서버 측의 손실 스케일링 없이 실제 업스트림 사용량과 연결 수준의
+  `quotaWindowThresholds`에 액세스할 수 있습니다.
 
 #### 소비자 마이그레이션 지침
 
-외부 통합(예: 편집기 플러그인 또는 에이전트 확장)이 이전에 텍스트 엔드포인트(`NN% left`)를 스크랩하고 사용된 비율을 `100 - NN` 로 계산한 경우 `?format=json` 로 마이그레이션하는 것은 다음을 의미합니다.
+외부 통합(예: 편집기 플러그인 또는 에이전트 확장)이 이전에 텍스트 엔드포인트
+(`NN% left`)를 스크랩하고 사용률을 `100 - NN`으로 계산했다면, `?format=json`으로 마이그레이션할 때:
 
-- 원시 JSON 값을 읽으면 반영됩니다.** 실제 업스트림 소비** (위 예에서는 60%가 사용됨)
-- 통합이 텍스트 끝점의 사용 가능 허용 의미를 보존하려는 경우 연결 수준 재정의를 위해 `quotaWindowThresholds` 사용하여 클라이언트 측에서 유효한 나머지 수식을 평가할 수 있습니다.
+- 원시 JSON 값을 읽으면 **실제 업스트림 사용량**(위 예시에서는 사용량 60%)이 반영됩니다.
+- 통합에서 텍스트 엔드포인트의 사용 가능한 허용량 의미 체계를 유지하려는 경우, 연결 수준 오버라이드에
+  `quotaWindowThresholds`를 사용하여 유효 잔여량 공식을 클라이언트 측에서 계산할 수 있습니다.
 
 ---
 
@@ -1093,6 +1127,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI 관리 호환성
 
 OmniRoute는 사용량 대시보드가 Claude 및 Codex 구독 한도를 읽기 위해 호출하는 세 가지 [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) 관리 엔드포인트에 응답합니다(예: T3 Code의 `cliproxy` 사용량 제한 소스). 클라이언트의 기본 URL을 OmniRoute로 지정하고 `manage` 범위가 있는 API 키를 관리 키로 사용합니다. 경로는 `/v0/management/*` 및 `/api/v0/management/*`에서 제공됩니다.
@@ -1103,14 +1139,11 @@ OmniRoute는 사용량 대시보드가 Claude 및 Codex 구독 한도를 읽기 
 | POST   | `/v0/management/api-call`    | 본문 `{ auth_index, method, url, header?, data? }`. 계정의 토큰으로 허용 목록에 있는 요청 하나를 보내고 `{ status_code, body }`를 반환합니다 |
 | POST   | `/v0/management/reset-quota` | 본문 `{ auth_index }`. 한 계정의 연결 쿨다운, 모델 잠금 및 Codex 범위별 쿨다운을 지웁니다                                                    |
 
-- `auth_index`는 OmniRoute 연결 ID입니다. `provider`는 `claude` 또는 `codex`입니다(OAuth 연결만 해당하며 `anthropic` API 키 제공자는 나열되지 않습니다). Codex의 경우 `id_token.chatgpt_account_id`는 저장된 워크스페이스 ID이고 `plan_type`은 저장된 요금제입니다.
-- `api-call`은 일반 프록시가 아닙니다. Claude `GET
+- `auth_index`는 OmniRoute 연결 ID입니다. `provider`는 `claude` 또는 `codex`입니다(OAuth 연결만 포함하며, API 키 제공자 `anthropic`는 나열하지 않음). Codex에서 `id_token.chatgpt_account_id`는 저장된 워크스페이스 ID이며 `plan_type`는 저장된 요금제입니다.
+- `api-call`는 범용 프록시가 아닙니다. Claude `GET
 https://api.anthropic.com/api/oauth/usage`와 Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` 및
-  `POST .../wham/rate-limit-reset-credits/consume`만 허용하며, 각각 일치하는 제공자의 계정에 대해서만 허용합니다. 그 외의 요청은 업스트림에 연결하지 않고 `403`을 반환합니다. 호출자의
-  `Authorization` 헤더(`$TOKEN$` 자리 표시자 포함)는 무시됩니다. OmniRoute는 연결의 액세스 토큰을 주입하고, 토큰이 곧 만료될 경우 먼저 갱신하며, 허용 목록에 있는 헤더(`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)만 전달합니다. `Chatgpt-Account-Id`가 없으면 저장된 워크스페이스 ID를 기본값으로 사용합니다. 요청 시간 제한은 15초이며 연결의 프록시를 사용합니다.
-- `reset-quota`는 최종 상태(banned, expired, credits_exhausted)를 그대로 유지합니다. 알 수 없는
-  `auth_index`는 `404`를 반환합니다.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume`만 허용하며 각각 해당 제공자의 계정에서만 사용할 수 있습니다. 그 외에는 업스트림에 연결하지 않고 `403`를 반환합니다. 호출자의 `Authorization` 헤더(`$TOKEN$` 자리표시자 포함)는 무시됩니다. OmniRoute는 연결의 액세스 토큰을 삽입하며, 만료가 가까우면 먼저 갱신합니다. 전달하는 헤더는 허용 목록에 있는 것뿐입니다(`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id`가 없으면 저장된 워크스페이스 ID를 기본값으로 사용합니다. 첫 업스트림 응답이 `401`이면 한 번 갱신한 뒤 액세스 토큰이 바뀐 경우에만 다시 시도합니다. 업스트림의 각 시도는 15초 후 시간 초과되며 연결의 프록시를 사용합니다.
+- `reset-quota`는 최종 상태(banned, expired, credits_exhausted)를 그대로 둡니다. 알 수 없는 `auth_index`는 `404`를 반환합니다.
 
 **인증:** 로그인 세션 또는 `manage` 범위의 API 키가 필요하며, 로그인 기능이 비활성화된 경우에도 필수입니다(경로가 `ALWAYS_PROTECTED_API_PATHS`에 포함되어 있습니다). 추론 전용 키는 `403`을 반환합니다. 소스:
 `src/lib/cliproxyCompat/managementApi.ts`.
@@ -1119,38 +1152,45 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 
 ## 대시보드 및 관리
 
-관리 경로(공용 auth/login 제외한 `/api/*` )는 다음과 같습니다.** ~ 아니다** 일반 추론 API 키로 승인됩니다. 자격 증명 계열, 범위 및 컬 예: [관리 인증](../guides/MANAGEMENT-AUTH.md)
+관리 라우트(공개 인증/로그인을 제외한 `/api/*`)는 **일반 추론 API 키로 인증되지 않습니다**. 자격 증명 제품군, 스코프 및 curl 예시는 다음을 참조하세요:
+[관리 인증](../guides/MANAGEMENT-AUTH.md).
 
-### 입증
+### 인증
 
-| 엔드포인트                    | 방법     | 설명                                                                                                                                                                                                                                                                            |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | 로그인                                                                                                                                                                                                                                                                          |
-| `/api/auth/logout`            | POST     | 로그아웃                                                                                                                                                                                                                                                                        |
-| `/api/settings/require-login` | GET/POST | 로그인 상태(GET, 공개). POST 비밀번호를 설정하고 로그인을 전환합니다. 비밀번호가 존재하는 경우 운영자만 가능합니다(대시보드 세션, 로컬 CLI 또는 로그인이 비활성화됨 — API 키 및 `oma_` 토큰이 `403` 얻음). 대시보드 세션은 비밀번호를 대체하기 위해 `currentPassword` 보냅니다. |
+| 엔드포인트                    | 메서드   | 설명                                                                                                                                                                                                                                                                           |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/login`             | POST     | 로그인                                                                                                                                                                                                                                                                         |
+| `/api/auth/logout`            | POST     | 로그아웃                                                                                                                                                                                                                                                                       |
+| `/api/settings/require-login` | GET/POST | 로그인 상태(GET은 공개). POST는 비밀번호를 설정하거나 로그인을 전환합니다. 비밀번호가 존재하면 운영자 전용입니다(대시보드 세션, 로컬 CLI 또는 로그인 비활성화 상태 — API 키와 `oma_` 토큰은 `403`을 받음). 대시보드 세션은 비밀번호를 변경할 때 `currentPassword`를 전송합니다 |
 
 ### 공급자 관리
 
-| 엔드포인트                              | 방법                      | 설명                                                                                                                        |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | 공급자 나열/생성                                                                                                            |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | 공급자 관리                                                                                                                 |
-| `/api/providers/[id]/test`              | POST                      | 테스트 공급자 연결                                                                                                          |
-| `/api/providers/[id]/models`            | GET                       | 공급자 모델 나열                                                                                                            |
-| `/api/providers/validate`               | POST                      | 공급자 구성 확인                                                                                                            |
-| `/api/providers/bulk`                   | POST                      | ONE 공급자를 위한 API 키 대량 추가                                                                                          |
-| `/api/providers/import`                 | POST                      | 구문 분석된 CSV/JSON 파일(#6836)에서 이종 공급자 LIST 가져옵니다. 행별 부분 실패 결과                                       |
-| `/api/provider-nodes*`                  | 다양한                    | 공급자 노드 관리                                                                                                            |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | 사용자 정의 모델 및 모델별 재정의(추가, 업데이트, hide/show, 삭제)                                                          |
-| `/api/provider-models/validate-and-add` | POST                      | 관리 인증, 옵트인 엄격한 연결 검증 및 원자적 사용자 정의 모델 등록 [모델 검증을](../guides/MODEL-VALIDATION.md) 참조하세요. |
+| 엔드포인트                              | 메서드                    | 설명                                                                                                                                       |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/providers`                        | GET/POST                  | 공급자 목록 조회 / 생성                                                                                                                    |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | 공급자 관리                                                                                                                                |
+| `/api/providers/[id]/test`              | POST                      | 공급자 연결 테스트                                                                                                                         |
+| `/api/providers/[id]/models`            | GET                       | 공급자 모델 목록 조회                                                                                                                      |
+| `/api/providers/validate`               | POST                      | 공급자 구성 검증                                                                                                                           |
+| `/api/providers/bulk`                   | POST                      | 하나의 공급자에 대한 API 키 일괄 추가                                                                                                      |
+| `/api/providers/import`                 | POST                      | 구문 분석된 CSV/JSON 파일에서 서로 다른 공급자 목록 가져오기(#6836); 행별 부분 실패 결과 제공                                              |
+| `/api/provider-nodes*`                  | 다양함                    | 공급자 노드 관리                                                                                                                           |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | 사용자 지정 모델 및 모델별 재정의(추가, 업데이트, 숨기기/표시, 삭제)                                                                       |
+| `/api/provider-models/validate-and-add` | POST                      | 관리 인증을 기반으로 선택적으로 수행하는 엄격한 연결 검증 및 원자적 사용자 지정 모델 등록. [모델 검증](../guides/MODEL-VALIDATION.md) 참조 |
 
-synced/imported 모델의 경우 `PUT /api/provider-models` `provider`, `modelId` 및 `maxOutputTokenOverride` 허용합니다. 양의 정수는 수동 출력 토큰 한도를 설정하고 `null` 이를 지워 기본값을 복원합니다. `GET /api/provider-models?provider=<provider>` 사용자 정의 모델 행이 없는 모델을 포함하여 `modelOutputOverrides` 에서 이러한 값을 반환합니다. 재정의는 런타임 `max_output_tokens` 기능을 사용하고 모델 재동기화 후에도 유지됩니다. OpenAI 호환 공급자 페이지는 동일한 edit/clear 컨트롤을 제공하고 명시적인 비전 지원이 포함된 모델을 표시합니다.
+동기화되거나 가져온 모델의 경우 `PUT /api/provider-models`는 `provider`, `modelId` 및
+`maxOutputTokenOverride`를 허용합니다. 양의 정수는 수동 출력 토큰 상한을 설정하고, `null`은
+기본값으로 복원하도록 상한을 해제합니다. `GET /api/provider-models?provider=<provider>`는 사용자 지정 모델 행이 없는 모델을 포함하여 이러한 값을 `modelOutputOverrides`로 반환합니다. 이 재정의는 런타임 `max_output_tokens` 기능을 사용하며 모델을 다시 동기화한 후에도 유지됩니다. OpenAI 호환
+공급자 페이지에서도 동일한 편집/해제 컨트롤을 제공하며, 명시적인 비전 지원이 있는 모델을 표시합니다.
 
-호환되는 공급자 노드에서 쓰기 경로(`POST`, `PUT`, `PATCH`, `DELETE` 및 `/api/provider-models/validate-and-add`)는 모델 ID를 기본 업스트림 ID로 저장합니다. 접두사가 붙은 목록에서 붙여넣은 ID에는 축소된 노드 자체 접두사의 선행 스택이 있으며 응답은 저장된 ID를 반영합니다. 정식 공급자의 슬래시 ID(예: `nvidia/nemotron-…`)는 그대로 저장됩니다. `/v1/models` 누적된 `<prefix>/<prefix>/<model>` ID를 결코 방출하지 않습니다.
+호환 가능한 공급자 노드에서 쓰기 경로(`POST`, `PUT`, `PATCH`, `DELETE` 및
+`/api/provider-models/validate-and-add`)는 모델 ID를 기본 업스트림 ID로 저장합니다. 접두사가 붙은 목록에서 붙여넣은 ID의 경우 노드 자체 접두사의 앞쪽 연속 부분이 하나로 축약되며,
+응답에는 저장된 ID가 그대로 반환됩니다. 정식 공급자의 슬래시가 포함된 ID(예: `nvidia/nemotron-…`)는
+있는 그대로 저장됩니다. `/v1/models`는 중복된 `<prefix>/<prefix>/<model>` ID를 출력하지 않습니다.
 
-사용자 정의 채팅 완료 노드는 명시적 추론 거부를 업스트림 백엔드에 적용합니다. 성공적인 연결 테스트는 `/models` 항목이 인식된 `owned_by` 값( `vllm`, `sglang` 또는 `llamacpp` 을 증명하는 각 정확한 모델 ID 에 대한 채팅 템플릿 컨트롤을 자동으로 선택합니다. 투명한 OpenAI 호환 래퍼는 중첩된 `openai` 객체 내부에 원래 모델 항목을 보존할 수 있습니다. 감지는 이러한 봉투를 최대 3개까지 따릅니다. 소유권이 누락되었거나 알 수 없거나 충돌하는 모델은 일반적인 OpenAI 동작을 유지합니다. 감지는 기존 카탈로그 요청을 재사용하고, 완료 토큰을 생성하지 않으며, 연결 끝점이 변경되면 무효화됩니다.
+사용자 지정 Chat Completions 노드는 명시적인 추론 옵트아웃을 업스트림 백엔드에 맞게 조정합니다. 성공적인 연결 테스트는 `/models` 항목에서 인식된 `owned_by` 값인 `vllm`, `sglang` 또는 `llamacpp` 중 하나를 확인한 각 정확한 모델 ID에 대해 채팅 템플릿 제어를 자동으로 선택합니다. 투명한 OpenAI 호환 래퍼는 중첩된 `openai` 객체 내부에 원래 모델 항목을 보존할 수 있으며, 감지는 이러한 봉투를 최대 3개까지 따릅니다. 소유 정보가 없거나, 알 수 없거나, 서로 충돌하는 모델은 일반적인 OpenAI 동작을 유지합니다. 감지는 기존 카탈로그 요청을 재사용하고 완료 토큰을 생성하지 않으며, 연결 엔드포인트가 변경되면 무효화됩니다.
 
-해당 메타데이터를 노출하지 않는 백엔드의 동작을 고정하려면 기존 부분 공급자 업데이트 API 사용하세요.
+해당 메타데이터를 노출하지 않는 백엔드에 동작을 고정하려면 기존 부분 제공자 업데이트 API를 사용합니다:
 
 ```json
 {
@@ -1160,91 +1200,91 @@ synced/imported 모델의 경우 `PUT /api/provider-models` `provider`, `modelId
 }
 ```
 
-해당 본문을 `PUT /api/providers/<connection-id>` 로 보내세요. 해당 연결에서 `none` 의 명시적인 추론 노력은 `chat_template_kwargs.thinking=false` 및 `chat_template_kwargs.enable_thinking=false` 로 전송됩니다. 명시적 기본 템플릿 값은 서버측 추론 규칙이 강제로 노력하지 않는 한 신뢰할 수 있는 상태로 유지됩니다. 이 설정은 사용자 정의 OpenAI 호환 연결이 채팅 완료 본문을 전달하는 경우에만 적용됩니다. 응답 요청과 일반 공급자는 기본 요청 형태를 유지합니다. 일반 OpenAI `reasoning_effort` 통과를 강제하려면 `reasoningControl` `openai` 로 설정하고, 자동 감지를 사용하려면 it/set 를 `null` 로 생략하세요.
+해당 본문을 `PUT /api/providers/<connection-id>`와 함께 전송합니다. 해당 연결에서는 명시적인 추론 수준 `none`이 `chat_template_kwargs.thinking=false` 및 `chat_template_kwargs.enable_thinking=false`로 전송됩니다. 명시적인 네이티브 템플릿 값은 서버 측 추론 규칙이 추론 수준을 강제하지 않는 한 계속 우선합니다. 이 설정은 사용자 지정 OpenAI 호환 연결이 Chat Completions 본문을 디스패치하는 경우에만 적용되며, Responses 요청과 일반 제공자는 네이티브 요청 형식을 유지합니다. 일반적인 OpenAI `reasoning_effort` 패스스루를 강제하려면 `reasoningControl`을 `openai`로 설정하고, 자동 감지를 사용하려면 생략하거나 `null`로 설정합니다.
 
-Claude 코드 자동 모드 분류자는 명시적 추론 제어가 포함되지 않은 경우 기본 기본 사고를 비활성화하도록 요청합니다. 감지에서는 모델 이름이나 완료 제한이 아닌 클로드 형식 요청의 분류기 시스템 마커를 사용합니다. 명시적 본문 제어, 지원되는 effort/thinking 헤더, 라우팅 규칙 및 해결된 모델 노력은 기존 우선순위를 유지합니다. 두 분류자 단계 모두 프롬프트, 완료 제한, 중지 시퀀스 및 실제 업스트림 권한 판정을 유지합니다. 두 번째 단계에서는 여전히 요청된 가시적 추론을 일반 텍스트로 생성할 수 있습니다.
+Claude Code 자동 모드 분류기 요청은 명시적인 추론 제어가 포함되지 않은 경우 기본적으로 네이티브 사고 기능을 비활성화합니다. 감지는 모델 이름이나 완료 제한이 아니라 Claude 형식 요청의 분류기 시스템 마커를 사용합니다. 명시적인 본문 제어, 지원되는 effort/thinking 헤더, 라우팅 규칙 및 확인된 모델 effort는 기존 우선순위를 유지합니다. 두 분류기 단계 모두 프롬프트, 완료 제한, 중지 시퀀스 및 실제 업스트림 권한 판정을 유지하며, 두 번째 단계는 요청된 표시 추론을 일반 텍스트로 계속 생성할 수 있습니다.
 
 ### OAuth 흐름
 
-| 엔드포인트                       | 방법   | 설명           |
+| Endpoint                         | Method | Description    |
 | -------------------------------- | ------ | -------------- |
-| `/api/oauth/[provider]/[action]` | 다양한 | 공급자별 OAuth |
+| `/api/oauth/[provider]/[action]` | 다양함 | 제공자별 OAuth |
 
 ### 라우팅 및 구성
 
-| 엔드포인트            | 방법     | 설명                      |
+| Endpoint              | Method   | Description               |
 | --------------------- | -------- | ------------------------- |
-| `/api/models`         | GET/PUT  | 모델 목록/별명 업데이트   |
+| `/api/models`         | GET/PUT  | 모델 목록 / 별칭 업데이트 |
 | `/api/models/alias`   | GET/POST | 모델 별칭                 |
-| `/api/models/catalog` | GET      | 공급자 + 유형별 모든 모델 |
-| `/api/combos*`        | 다양한   | 콤보 관리                 |
-| `/api/keys*`          | 다양한   | API 키 관리               |
+| `/api/models/catalog` | GET      | 제공자 + 유형별 모든 모델 |
+| `/api/combos*`        | 다양함   | 콤보 관리                 |
+| `/api/keys*`          | 다양함   | API 키 관리               |
 | `/api/pricing`        | GET      | 모델 가격                 |
 
 #### 모델 제한 출처
 
-`GET /api/models?withLimits=1` (또한 `true`; `0`/`false` 또는 생략하면 기본 페이로드가 변경되지 않은 상태로 유지됨)는 모든 모델 행에 `contextWindow`, `maxInputTokens`, `maxOutputTokens` 및 `capsSource` 객체를 추가합니다. `capsSource` 각 제한을 제공하는 규칙의 이름을 지정하므로 놀라운 제한(예: 1M 모델의 128k)을 그 출처로 추적할 수 있습니다. 확인된 값은 라우팅에서 사용하는 값과 동일합니다. 플래그는 필드만 추가하고 값은 변경하지 않습니다. 다른 `withLimits` 값은 `400` 로 거부됩니다.
+`GET /api/models?withLimits=1` (또한 `true`; `0`/`false` 또는 생략하면 기본 페이로드가 변경되지 않음)은 모든 모델 행에 `contextWindow`, `maxInputTokens`, `maxOutputTokens` 및 `capsSource` 객체를 추가합니다. `capsSource`는 각 제한을 제공한 규칙을 나타내므로, 예상치 못한 제한(예: 1M 모델에 적용된 128k)을 그 출처까지 추적할 수 있습니다. 확인된 값은 라우팅에서 사용하는 값과 동일하며, 이 플래그는 필드만 추가하고 값을 변경하지 않습니다. 그 외의 `withLimits` 값은 `400`으로 거부됩니다.
 
-| `capsSource` 값                              | 기원                                                          |
-| -------------------------------------------- | ------------------------------------------------------------- |
-| `override:context`                           | 지속적인 컨텍스트 창 재정의(`model_context_overrides`)        |
-| `override:max_input` / `override:max_output` | 지속적인 `max_input_tokens` / `max_output_tokens` 기능 재정의 |
-| `static-authoritative:<provider>/<model>`    | 정적 권한 컨텍스트 창 테이블                                  |
-| `synced:<provider>/<model>`                  | models.dev 동기화 기능 행                                     |
-| `registry:<provider>/<model>`                | 공급자 레지스트리 항목                                        |
-| `spec:<model>`                               | 정적 모델 사양                                                |
-| `effort-base:` 접두사                        | 노력 접미사 변형의 기본 모델에서 빌린 행                      |
-| `none`                                       | 어떤 소스도 한계를 선언하지 않습니다(값은 `null`).            |
+| `capsSource` value                           | Origin                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| `override:context`                           | 영구 저장된 컨텍스트 윈도우 재정의 (`model_context_overrides`)   |
+| `override:max_input` / `override:max_output` | 영구 저장된 `max_input_tokens` / `max_output_tokens` 기능 재정의 |
+| `static-authoritative:<provider>/<model>`    | 정적 권위 컨텍스트 윈도우 테이블                                 |
+| `synced:<provider>/<model>`                  | models.dev에서 동기화된 기능 행                                  |
+| `registry:<provider>/<model>`                | 제공자 레지스트리 항목                                           |
+| `spec:<model>`                               | 정적 모델 사양                                                   |
+| `effort-base:` prefix                        | effort 접미사가 붙은 변형 모델의 기본 모델에서 차용한 행         |
+| `none`                                       | 어떤 출처도 제한을 선언하지 않음 (값은 `null`)                   |
 
-구현: `src/lib/modelCapabilities.ts` 의 `getResolvedModelCapabilitiesWithLimitSources()` 및 `src/lib/modelCapabilityLimits.ts` 의 우선순위 체인.
+구현: `src/lib/modelCapabilities.ts`의 `getResolvedModelCapabilitiesWithLimitSources()` 및 `src/lib/modelCapabilityLimits.ts`의 우선순위 체인.
 
-### 사용 및 분석
+### 사용량 및 분석
 
-| 엔드포인트                       | 방법            | 설명                                                                                                                                                                                                                                                               |
+| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                        |
 | -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/usage/history`             | GET             | 이용내역                                                                                                                                                                                                                                                           |
-| `/api/usage/logs`                | GET             | 사용 로그                                                                                                                                                                                                                                                          |
+| `/api/usage/history`             | GET             | 사용량 기록                                                                                                                                                                                                                                                        |
+| `/api/usage/logs`                | GET             | 사용량 로그                                                                                                                                                                                                                                                        |
 | `/api/usage/request-logs`        | GET             | 요청 수준 로그                                                                                                                                                                                                                                                     |
-| `/api/usage/[connectionId]`      | GET             | 연결당 사용량                                                                                                                                                                                                                                                      |
-| `/api/usage/token-limits`        | GET/POST/DELETE | API 키당 토큰 제한 예산                                                                                                                                                                                                                                            |
-| `/api/usage/model-latency-stats` | GET             | 롤링 per-provider/model 지연 시간 집계(avg/p50/p95/p99, 성공률) 필터: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                              |
-| `/api/usage/cache-health`        | GET             | `call_logs` — write/read 비율, p50/p90/p99 쓰기 크기 분포, 대량 쓰기 집중, 모델별 분할 및 `healthy`/`degraded`/`thrash`/`no-data` 결과에 대한 프롬프트 캐시 상태 요약. 쿼리 매개변수 `range` (`1h`\| `24h`\| `7d`\| `30d`, 기본값 `24h`) 및 선택적 `model` (#8827) |
+| `/api/usage/[connectionId]`      | GET             | 연결별 사용량                                                                                                                                                                                                                                                      |
+| `/api/usage/token-limits`        | GET/POST/DELETE | API 키별 토큰 한도 예산                                                                                                                                                                                                                                            |
+| `/api/usage/model-latency-stats` | GET             | 제공업체/모델별 지연 시간 집계의 이동 통계(평균/p50/p95/p99, 성공률); 필터: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                        |
+| `/api/usage/cache-health`        | GET             | `call_logs`에 대한 프롬프트 캐시 상태 요약 — 쓰기/읽기 비율, p50/p90/p99 쓰기 크기 분포, 과도한 쓰기 집중도, 모델별 분할 및 `healthy`/`degraded`/`thrash`/`no-data` 판정; 쿼리 매개변수 `range` (`1h`\|`24h`\|`7d`\|`30d`, 기본값 `24h`) 및 선택적 `model` (#8827) |
 
 ### API 키 권한
 
 `PATCH /api/keys/{id}` 기존 키의 권한을 업데이트합니다. 모든 `/api/keys*` 경로와 마찬가지로 추론 키가 아닌 관리 인증( [관리 인증](../guides/MANAGEMENT-AUTH.md) 참조)이 필요합니다. 변경하려는 필드만 보냅니다. 그 중 아무것도 없는 요청은 `No valid fields to update` 로 거부됩니다. 허용되는 필드는 `src/shared/validation/schemas/keys.ts` 의 `updateKeyPermissionsSchema` 에 의해 정의됩니다.
 
-| 필드                                        | 유형                                                      | 메모                                                                                                                                                                                                                            |
-| ------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | 문자열, 1-200자                                           |                                                                                                                                                                                                                                 |
-| `isActive`                                  | 부울                                                      |                                                                                                                                                                                                                                 |
-| `isBanned`                                  | 부울                                                      |                                                                                                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                            | `null` 만료일을 지웁니다                                                                                                                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                     | 모드가 `all` 인 경우 `allowedModels` 비어 있어야 합니다.                                                                                                                                                                        |
-| `allowedModels`, `blockedModels`            | 문자열 배열(최대 1000개)                                  |                                                                                                                                                                                                                                 |
-| `allowedCombos`                             | 문자열 배열, 최대 500개                                   | 키를 조합하여 호출할 수 있는 게이트; 직접 모델은 `modelAccessMode` / `allowedModels` 에 의해 관리됩니다.                                                                                                                        |
-| `connectionAccessMode`                      | `all` \| `restricted`                                     | `allowedConnections` `restricted` 인 경우 비어 있지 않아야 하고 `all` 인 경우 비어 있어야 합니다.                                                                                                                               |
-| `allowedConnections`                        | UUIDs 배열, 최대 100개                                    |                                                                                                                                                                                                                                 |
-| `allowAutoCombos`                           | 부울                                                      | `false` 이 키가 있는 `auto/*` 모델에 대한 요청을 거부합니다. 설정하지 않은 키는 허용됩니다.                                                                                                                                     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                             | 이 키에 대해 `GET /v1/models` 나열하는 것(콤보만, 모델만 또는 둘 다) 키가 호출할 수 있는 내용은 변경되지 않습니다.                                                                                                              |
-| `forcedModel`                               | 최대 300자 문자열 또는 `null`                             | `X-Route-Model` 및 `body.model` 통해 채팅 요청을 이 model/combo 로 라우팅합니다. 키 제한은 여전히 적용됩니다.                                                                                                                   |
-| `noLog`, `autoResolve`                      | 부울                                                      |                                                                                                                                                                                                                                 |
-| `throttleDelayMs`                           | 정수, 0-300000                                            |                                                                                                                                                                                                                                 |
-| `maxSessions`                               | 정수, 0-10000                                             |                                                                                                                                                                                                                                 |
-| `rateLimits`                                | `{ limit, window }` (양의 정수, 최대 50) 또는 `null` 배열 | `null` 한계를 뛰어넘는다                                                                                                                                                                                                        |
-| `accessSchedule`                            | 일정 개체 또는 `null`                                     | `null` 일정을 지웠어                                                                                                                                                                                                            |
-| `scopes`                                    | 문자열 배열, 최대 32개                                    |                                                                                                                                                                                                                                 |
-| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                    |                                                                                                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                        |                                                                                                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                      | [키별 캐시 우회를](#per-key-cache-bypass) 참조하세요.                                                                                                                                                                           |
-| `compressionEnabled`                        | 부울                                                      |                                                                                                                                                                                                                                 |
-| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                 |                                                                                                                                                                                                                                 |
-| `disableNonPublicModels`                    | 부울                                                      |                                                                                                                                                                                                                                 |
-| `allowUsageCommand`                         | 부울                                                      |                                                                                                                                                                                                                                 |
-| `usageLimitEnabled`                         | 부울                                                      |                                                                                                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 숫자 >= 0 또는 `null`                                     |                                                                                                                                                                                                                                 |
-| `fiveHourUsageLimitUsd`                     | 숫자 >= 0 또는 `null`                                     | 5시간 롤링 USD 예산은 일일 및 주간 한도(`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`)처럼 적용됩니다. `retry-after` 는 창에서 가장 오래된 지출이 만료되는 경우이며, 한도를 훨씬 초과하는 키는 여전히 차단될 수 있습니다. |
-| `chaosModeEnabled`                          | 부울                                                      |                                                                                                                                                                                                                                 |
+| Field                                       | Type                                                       | Notes                                                                                                                                                                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | 문자열, 1~200자                                            |                                                                                                                                                                                                                                         |
+| `isActive`                                  | boolean                                                    |                                                                                                                                                                                                                                         |
+| `isBanned`                                  | boolean                                                    |                                                                                                                                                                                                                                         |
+| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                             | `null`은 만료를 해제합니다                                                                                                                                                                                                              |
+| `modelAccessMode`                           | `all` \| `restricted`                                      | 모드가 `all`인 경우 `allowedModels`는 비어 있어야 합니다                                                                                                                                                                                |
+| `allowedModels`, `blockedModels`            | 문자열 배열(최대 1000개)                                   |                                                                                                                                                                                                                                         |
+| `allowedCombos`                             | 문자열 배열, 최대 500개                                    | 이 키가 호출할 수 있는 콤보를 제한합니다. 직접 모델은 `modelAccessMode` / `allowedModels`에 의해 관리됩니다                                                                                                                             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                      | `restricted`인 경우 `allowedConnections`는 비어 있지 않아야 하며, `all`인 경우 비어 있어야 합니다                                                                                                                                       |
+| `allowedConnections`                        | UUID 배열, 최대 100개                                      |                                                                                                                                                                                                                                         |
+| `allowAutoCombos`                           | boolean                                                    | `false`는 이 키를 사용한 `auto/*` 모델 요청을 거부합니다. 한 번도 설정하지 않은 키는 허용됩니다                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                              | 이 키에 대해 `GET /v1/models`에 표시할 항목(콤보만, 모델만 또는 둘 다)을 지정합니다. 키가 호출할 수 있는 항목은 변경하지 않습니다                                                                                                       |
+| `forcedModel`                               | 최대 300자의 문자열 또는 `null`                            | `X-Route-Model` 및 `body.model`보다 우선하여 채팅 요청을 이 모델/콤보로 라우팅합니다. 키의 제한은 계속 적용됩니다                                                                                                                       |
+| `noLog`, `autoResolve`                      | 부울                                                       |                                                                                                                                                                                                                                         |
+| `throttleDelayMs`                           | 정수, 0~300000                                             |                                                                                                                                                                                                                                         |
+| `maxSessions`                               | 정수, 0~10000                                              |                                                                                                                                                                                                                                         |
+| `rateLimits`                                | `{ limit, window }` 배열(양의 정수, 최대 50개) 또는 `null` | `null`은 제한을 해제합니다                                                                                                                                                                                                              |
+| `accessSchedule`                            | 스케줄 객체 또는 `null`                                    | `null`은 스케줄을 해제합니다                                                                                                                                                                                                            |
+| `scopes`                                    | 문자열 배열, 최대 32개                                     |                                                                                                                                                                                                                                         |
+| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                     |                                                                                                                                                                                                                                         |
+| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                                                                                                                         |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | [키별 캐시 우회](#per-key-cache-bypass) 참조                                                                                                                                                                                            |
+| `compressionEnabled`                        | boolean                                                    |                                                                                                                                                                                                                                         |
+| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                  |                                                                                                                                                                                                                                         |
+| `disableNonPublicModels`                    | boolean                                                    |                                                                                                                                                                                                                                         |
+| `allowUsageCommand`                         | boolean                                                    |                                                                                                                                                                                                                                         |
+| `usageLimitEnabled`                         | boolean                                                    |                                                                                                                                                                                                                                         |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 번호 >= 0 또는 `null`                                      |                                                                                                                                                                                                                                         |
+| `fiveHourUsageLimitUsd`                     | 번호 >= 0 또는 `null`                                      | 5시간 롤링 USD 예산은 일일 및 주간 한도(`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`)처럼 시행됩니다. `retry-after` 는 기간 중 가장 오래된 지출이 만료되어 한도를 훨씬 초과한 키가 여전히 차단된 상태로 남을 수 있는 경우입니다. |
+| `chaosModeEnabled`                          | boolean                                                    |                                                                                                                                                                                                                                         |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1255,45 +1295,45 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### 설정
 
-| 엔드포인트                            | 방법          | 설명                                                                                                                                                                                                                                                    |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | 일반 설정. 보안 정책 키(`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`)에는 `currentPassword` 필요하고 운영자 자격 증명 — API 키와 `oma_` 토큰은 `403` 얻습니다. 모든 돌연변이에는 `admin` 액세스 토큰 범위가 필요합니다 |
-| `/api/settings/proxy`                 | GET/PUT       | 네트워크 프록시 구성                                                                                                                                                                                                                                    |
-| `/api/settings/proxy/test`            | POST          | 프록시 연결 테스트                                                                                                                                                                                                                                      |
-| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                  |
-| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** 요구** 다시 쓰기 모드(통과/자동 제거/사용자 정의/적응). 압축과 무관합니다. [THINKING_BUDGET.md 를](../guides/THINKING_BUDGET.md) 참조하세요.                                                                                       |
-| `/api/settings/system-prompt`         | GET/PUT       | 글로벌 시스템 프롬프트                                                                                                                                                                                                                                  |
-| `/api/settings/compression`           | GET/PUT       | 전역 압축 구성                                                                                                                                                                                                                                          |
-| `/api/settings/purge-request-history` | POST          | 요청 로그 행 및 로컬 통화 로그 아티팩트 지우기                                                                                                                                                                                                          |
+| 엔드포인트                            | 메서드        | 설명                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | 일반 설정. 보안 정책 키(`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`)에는 `currentPassword`와 운영자 자격 증명이 필요합니다 — API 키와 `oma_` 토큰은 `403`을 반환하며, 모든 변경에는 `admin` 액세스 토큰 범위가 필요합니다 |
+| `/api/settings/proxy`                 | GET/PUT       | 네트워크 프록시 구성                                                                                                                                                                                                                                        |
+| `/api/settings/proxy/test`            | POST          | 프록시 연결 테스트                                                                                                                                                                                                                                          |
+| `/api/settings/ip-filter`             | GET/PUT       | IP 허용 목록/차단 목록                                                                                                                                                                                                                                      |
+| `/api/settings/thinking-budget`       | GET/PUT       | 사고/추론 **요청** 재작성 모드(pass-through / auto-strip / custom / adaptive). 압축과는 독립적입니다. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)를 참조하세요.                                                                                      |
+| `/api/settings/system-prompt`         | GET/PUT       | 전역 시스템 프롬프트                                                                                                                                                                                                                                        |
+| `/api/settings/compression`           | GET/PUT       | 전역 압축 구성                                                                                                                                                                                                                                              |
+| `/api/settings/purge-request-history` | POST          | 요청 로그 행과 로컬 호출 로그 아티팩트 삭제                                                                                                                                                                                                                 |
 
 ### 컨텍스트 및 압축
 
-| 엔드포인트                             | 방법           | 설명                                                         |
-| -------------------------------------- | -------------- | ------------------------------------------------------------ |
-| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked 압축 미리보기 |
-| `/api/compression/language-packs`      | GET            | 사용 가능한 Caveman 언어 팩 목록                             |
-| `/api/compression/rules`               | GET            | Caveman 규칙 메타데이터 나열                                 |
-| `/api/context/caveman/config`          | GET/PUT        | 원시인 관련 설정 별칭                                        |
-| `/api/context/rtk/config`              | GET/PUT        | 사용자 정의 필터 및 원시 출력 보존을 포함한 RTK 관련 설정    |
-| `/api/context/rtk/filters`             | GET            | RTK 필터 카탈로그 및 맞춤형 필터 진단                        |
-| `/api/context/rtk/test`                | POST           | 텍스트 페이로드에 대해 RTK preview/test 실행                 |
-| `/api/context/rtk/raw-output/[id]`     | GET            | 포인터 ID로 보관된 수정된 원시 출력 읽기                     |
-| `/api/context/combos`                  | GET/POST       | 압축 콤보 list/create                                        |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | 압축 콤보 detail/update/delete                               |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | 라우팅 콤보에 압축 콤보 할당                                 |
-| `/api/context/analytics`               | GET            | 압축 분석 별칭                                               |
+| Endpoint                               | Method         | Description                                                   |
+| -------------------------------------- | -------------- | ------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked 압축 미리 보기 |
+| `/api/compression/language-packs`      | GET            | 사용 가능한 Caveman 언어 팩 목록                              |
+| `/api/compression/rules`               | GET            | Caveman 규칙 메타데이터 목록                                  |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman 전용 설정 별칭                                        |
+| `/api/context/rtk/config`              | GET/PUT        | 사용자 지정 필터 및 원시 출력 보존을 포함한 RTK 전용 설정     |
+| `/api/context/rtk/filters`             | GET            | RTK 필터 카탈로그 및 사용자 지정 필터 진단                    |
+| `/api/context/rtk/test`                | POST           | 텍스트 페이로드에 대해 RTK 미리 보기/테스트 실행              |
+| `/api/context/rtk/raw-output/[id]`     | GET            | 포인터 ID로 보존된 비식별화 원시 출력 읽기                    |
+| `/api/context/combos`                  | GET/POST       | 압축 콤보 목록/생성                                           |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | 압축 콤보 세부 정보/업데이트/삭제                             |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | 라우팅 콤보에 압축 콤보 할당                                  |
+| `/api/context/analytics`               | GET            | 압축 분석 별칭                                                |
 
 ### 모니터링
 
-| 엔드포인트                           | 방법       | 설명                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | 활성 세션 추적                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/rate-limits`                   | GET        | 계정당 요율 한도                                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/monitoring/health`             | GET        | 상태 확인 + 공급자 요약(`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). 관리 뷰에는 `credentialHealth`: 프로브 캐시 스칼라, `failed>0` 일 때 `failedConnections` 및 `staleDbNonOkCount` ( 게이지가 아닌 SQLite 고정 `test_status`)가 포함됩니다. [MONITORING_GUIDE.md 를](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) 참조하세요. |
-| `/api/cache/stats`                   | GET/DELETE | 캐시 통계 / 지우기                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/modality-bridge/stats`         | GET        | 인 메모리 `attempts`, 성공/`bridged`, 실패, 캐시 적중, `totalLatencyMs`, `latencySamples`, 샘플 지정 `averageLatencyMs` 및 마지막 사용 시간(재시작 시 재설정, 관리 인증)                                                                                                                                                                                                                  |
-| `/api/modality-bridge/video/runtime` | GET        | 관리 전 엄격한 신뢰 루프백 검사 auth/probe; 정리된 FFmpeg/ffprobe 가용성 및 버전(스토어 없음)                                                                                                                                                                                                                                                                                             |
-| `/api/modality-bridge/video/extract` | POST       | 내부 인증된 신뢰할 수 있는 루프백 바이트 브로커. 50 MiB 입력, 제한된 queue/32 MiB 출력, `503` 용량, `499` 연결 해제, `504` 마감일; 공개 업로드가 아님 API                                                                                                                                                                                                                                 |
+| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | 활성 세션 추적                                                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/rate-limits`                   | GET        | 계정별 속도 제한                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/monitoring/health`             | GET        | 상태 확인 + 공급자 요약 (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). 관리 보기에는 `credentialHealth`가 포함되며, 프로브 캐시 스칼라, `failed>0`일 때의 `failedConnections`, `staleDbNonOkCount`(게이지가 아닌 SQLite의 고정된 `test_status`)를 제공합니다. [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)를 참조하세요. |
+| `/api/cache/stats`                   | GET/DELETE | 캐시 통계 / 지우기                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/modality-bridge/stats`         | GET        | 메모리 내 `attempts`, 성공/`bridged`, 실패, 캐시 적중, `totalLatencyMs`, `latencySamples`, 샘플 기준 `averageLatencyMs`, 마지막 사용 시간(재시작 시 초기화; 관리 인증 필요)                                                                                                                                                                                                                             |
+| `/api/modality-bridge/video/runtime` | GET        | 관리 인증/프로브 전에 수행되는 엄격한 신뢰된 루프백 확인, 삭제된 FFmpeg/ffprobe 사용 가능 여부 및 버전(no-store)                                                                                                                                                                                                                                                                                        |
+| `/api/modality-bridge/video/extract` | POST       | 내부 인증 신뢰된 루프백 바이트 브로커; 입력 50MiB, 제한된 대기열/출력 32MiB, 용량 초과 시 `503`, 연결 해제 시 `499`, 기한 초과 시 `504`; 공개 업로드 API가 아님                                                                                                                                                                                                                                         |
 
 ### 비디오 프레임 드릴다운
 
@@ -1303,99 +1343,99 @@ GET 쿼리: 필수 `handle`; 선택적 `variant` (`preview`, `standard`, `detail
 
 `DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` 반환합니다. 알 수 없음, 만료됨 및 크로스 키 GETs 는 구별할 수 없는 404 응답입니다. 크로스 키 DELETE 소유자 항목을 제거할 수 없습니다. 비활성화된 액세스는 403, missing/invalid 인증 401, 잘못된 쿼리 400, 취소 499 및 임시 오류 503을 반환합니다. 핸들은 프로세스 로컬이며 10분 후에 만료되며 다시 시작해도 유지되지 않습니다. 새로운 핸들은 `v1.` 와 32바이트 임의 Base64URL 토큰을 사용합니다. 토큰 해시만 유지됩니다. 레거시 64-16진수 토큰은 호환성을 위해 구문적으로 읽을 수 있는 상태로 유지됩니다. 동의, 할당량 및 변형 파생 세부 정보는 [Video Bridge 가드레일을](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) 참조하세요.
 
-### 백업 및 Export/Import
+### 백업 및 내보내기/가져오기
 
-| 엔드포인트                  | 방법   | 설명                                                                         |
-| --------------------------- | ------ | ---------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | 사용 가능한 백업 나열                                                        |
-| `/api/db-backups`           | PUT    | 수동 백업 만들기                                                             |
-| `/api/db-backups`           | POST   | 특정 백업에서 복원                                                           |
-| `/api/db-backups`           | PATCH  | 백업 보존 설정 저장(운영자 전용)                                             |
-| `/api/db-backups`           | DELETE | 저장된 백업을 보존 설정으로 정리(운영자 전용)                                |
-| `/api/db-backups/export`    | GET    | 데이터베이스를 .sqlite 파일로 다운로드                                       |
-| `/api/db-backups/import`    | POST   | 데이터베이스를 교체할 .sqlite 파일 업로드(`?dryRun=true` 유효성 검사만 해당) |
-| `/api/db-backups/exportAll` | GET    | 전체 백업을 .tar.gz 아카이브로 다운로드                                      |
+| Endpoint                    | Method | Description                                                              |
+| --------------------------- | ------ | ------------------------------------------------------------------------ |
+| `/api/db-backups`           | GET    | 사용 가능한 백업 목록 조회                                               |
+| `/api/db-backups`           | PUT    | 수동 백업 생성                                                           |
+| `/api/db-backups`           | POST   | 특정 백업에서 복원                                                       |
+| `/api/db-backups`           | PATCH  | 백업 보존 설정 저장 (운영자 전용)                                        |
+| `/api/db-backups`           | DELETE | 보존 설정에 따라 저장된 백업 정리 (운영자 전용)                          |
+| `/api/db-backups/export`    | GET    | 데이터베이스를 .sqlite 파일로 다운로드                                   |
+| `/api/db-backups/import`    | POST   | 데이터베이스를 대체할 .sqlite 파일 업로드 (`?dryRun=true`는 검증만 수행) |
+| `/api/db-backups/exportAll` | GET    | 전체 백업을 .tar.gz 아카이브로 다운로드                                  |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` 및 `/api/settings/export-json` 저장된 모든 자격 증명을 전달하므로 대시보드 세션이나 로컬 CLI (또는 로그인 비활성화)가 필요합니다. 모든 범위의 API 키와 `oma_` 액세스 토큰은 `403` 얻습니다. 복원은 동일한 경계를 유지합니다. `POST /api/db-backups/import` (`dryRun=true` 포함), `POST /api/db-backups` (ID별 복원) 및 `POST /api/settings/import-json` 라이브 데이터베이스 또는 설정을 대체하므로 머신 자격 증명도 거기에서 `403` 가져옵니다. `omniroute sync import` 로컬 CLI 자격 증명을 보냅니다. `DELETE /api/db-backups` (저장된 백업 정리) 및 `PATCH /api/db-backups` (보존 설정: 지속된 값은 모든 백업 후 자동 정리를 구동함)도 마찬가지입니다. 나열(`GET`) 및 수동 백업 생성(`PUT`)은 일반 관리 인증을 유지합니다.
+`/api/db-backups/export`, `/api/db-backups/exportAll` 및 `/api/settings/export-json`은 저장된 모든 자격 증명을 제공하므로 대시보드 세션 또는 로컬 CLI가 필요합니다(또는 로그인이 비활성화되어 있어야 합니다). 모든 범위의 API 키와 `oma_` 액세스 토큰은 `403`을 반환합니다. 복원에도 동일한 경계가 적용됩니다. `POST /api/db-backups/import` (`dryRun=true` 포함), `POST /api/db-backups` (id로 복원) 및 `POST /api/settings/import-json`은 운영 데이터베이스 또는 설정을 대체하므로 시스템 자격 증명도 여기서 `403`을 반환합니다. `omniroute sync import`는 로컬 CLI 자격 증명을 전송합니다. 따라서 `DELETE /api/db-backups` (저장된 백업 정리)와 `PATCH /api/db-backups` (보존 설정: 저장된 값에 따라 모든 백업 후 자동 정리가 수행됨)도 마찬가지입니다. 목록 조회(`GET`)와 수동 백업 생성(`PUT`)에는 일반 관리 인증이 적용됩니다.
 
 ### 클라우드 동기화
 
-| 엔드포인트             | 방법   | 설명                 |
-| ---------------------- | ------ | -------------------- |
-| `/api/sync/cloud`      | 다양한 | 클라우드 동기화 작업 |
-| `/api/sync/initialize` | POST   | 동기화 초기화        |
-| `/api/cloud/*`         | 다양한 | 클라우드 관리        |
+| Endpoint               | Method  | Description          |
+| ---------------------- | ------- | -------------------- |
+| `/api/sync/cloud`      | Various | 클라우드 동기화 작업 |
+| `/api/sync/initialize` | POST    | 동기화 초기화        |
+| `/api/cloud/*`         | Various | 클라우드 관리        |
 
 ### 터널
 
-| 엔드포인트                 | 방법 | 설명                                                               |
-| -------------------------- | ---- | ------------------------------------------------------------------ |
-| `/api/tunnels/cloudflared` | GET  | 대시보드에 대한 Cloudflare Quick Tunnel install/runtime 상태 읽기  |
-| `/api/tunnels/cloudflared` | POST | Cloudflare 빠른 터널(`action=enable/disable`) 활성화 또는 비활성화 |
-| `/api/tunnels/ngrok`       | GET  | 대시보드에 대한 ngrok Tunnel 런타임 상태 읽기                      |
-| `/api/tunnels/ngrok`       | POST | ngrok 터널(`action=enable/disable`) 활성화 또는 비활성화           |
+| Endpoint                   | Method | Description                                                            |
+| -------------------------- | ------ | ---------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | 대시보드에 표시할 Cloudflare Quick Tunnel 설치/런타임 상태 조회        |
+| `/api/tunnels/cloudflared` | POST   | Cloudflare Quick Tunnel 활성화 또는 비활성화 (`action=enable/disable`) |
+| `/api/tunnels/ngrok`       | GET    | 대시보드에 표시할 ngrok Tunnel 런타임 상태 조회                        |
+| `/api/tunnels/ngrok`       | POST   | ngrok Tunnel 활성화 또는 비활성화 (`action=enable/disable`)            |
 
 ### CLI 도구
 
-| 엔드포인트                         | 방법 | 설명              |
-| ---------------------------------- | ---- | ----------------- |
-| `/api/cli-tools/claude-settings`   | GET  | Claude CLI 상태   |
-| `/api/cli-tools/codex-settings`    | GET  | Codex CLI 상태    |
-| `/api/cli-tools/droid-settings`    | GET  | 드로이드 CLI 상태 |
-| `/api/cli-tools/openclaw-settings` | GET  | OpenClaw CLI 상태 |
-| `/api/cli-tools/runtime/[toolId]`  | GET  | 일반 CLI 런타임   |
+| Endpoint                           | Method | Description       |
+| ---------------------------------- | ------ | ----------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Claude CLI 상태   |
+| `/api/cli-tools/codex-settings`    | GET    | Codex CLI 상태    |
+| `/api/cli-tools/droid-settings`    | GET    | Droid CLI 상태    |
+| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI 상태 |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | 일반 CLI 런타임   |
 
-CLI 응답에는 `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason` 포함됩니다.
+CLI 응답에는 다음이 포함됩니다: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### ACP 에이전트
 
-| 엔드포인트        | 방법   | 설명                                                                    |
-| ----------------- | ------ | ----------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | 감지된 모든 에이전트(기본 제공 + 사용자 정의)를 상태와 함께 나열합니다. |
-| `/api/acp/agents` | POST   | 사용자 정의 에이전트 추가 또는 새로 고침 감지 캐시                      |
-| `/api/acp/agents` | DELETE | `id` 쿼리 매개변수로 사용자 정의 에이전트 제거                          |
+| Endpoint          | Method | Description                                                    |
+| ----------------- | ------ | -------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | 상태와 함께 감지된 모든 에이전트(내장 + 사용자 지정) 목록 조회 |
+| `/api/acp/agents` | POST   | 사용자 지정 에이전트 추가 또는 감지 캐시 새로 고침             |
+| `/api/acp/agents` | DELETE | 쿼리 매개변수 `id`로 사용자 지정 에이전트 제거                 |
 
-GET 응답에는 `agents[]` (id, 이름, 바이너리, 버전, 설치됨, 프로토콜, isCustom) 및 `summary` (전체, 설치됨, notFound, builtIn, 사용자 정의)가 포함됩니다.
+GET 응답에는 `agents[]`(id, name, binary, version, installed, protocol, isCustom) 및 `summary`(total, installed, notFound, builtIn, custom)가 포함됩니다.
 
 ### 복원력 및 속도 제한
 
-| 엔드포인트                        | 방법      | 설명                                                                                                                                                                                                                                                                                                                                                         |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/resilience`                 | GET/PATCH | Get/update 요청 대기열, 연결 휴지, 공급자 차단기 및 대기 설정                                                                                                                                                                                                                                                                                                |
-| `/api/resilience/reset`           | POST      | 공급자 회로 차단기 재설정                                                                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/model-cooldowns` | GET       | 활성(공급자, 연결, 모델)별 잠금을 남은 시간별로 정렬하여 나열합니다.                                                                                                                                                                                                                                                                                         |
-| `/api/resilience/model-cooldowns` | DELETE    | 모든 것을 지우려면 모델 잠금 — body `{provider, model}` 또는 `{all: true}` 지우십시오.                                                                                                                                                                                                                                                                       |
-| `/api/rate-limits`                | GET/POST  | 계정별 비율 제한 상태(GET) 또는 연결에 대한 비율 제한 보호를 전환합니다(POST `{connectionId, enabled}`). `rateLimitProtection` 에 대해 지원되는 쓰기 경로( `PUT /api/providers/[id]` 통해 수정되지 않음). 참고: `enabled: false` 명시적 보호를 비활성화하지만 전역 자동 활성화 안전망(`autoEnableApiKeyProviders`)에서 활성 API 키 연결을 선택하지 않습니다. |
-| `/api/rate-limit`                 | GET       | 전역 속도 제한 구성(더 이상 사용되지 않음, 별칭은 `/api/rate-limits`)                                                                                                                                                                                                                                                                                        |
+| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/resilience`                 | GET/PATCH | 요청 큐, 연결 쿨다운, 제공자 차단기 및 대기 설정 조회/업데이트                                                                                                                                                                                                                                                                                                                             |
+| `/api/resilience/reset`           | POST      | 제공자 회로 차단기 재설정                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/resilience/model-cooldowns` | GET       | 활성 상태인 제공자별 연결별 모델별 잠금 목록을 남은 시간순으로 정렬하여 표시                                                                                                                                                                                                                                                                                                               |
+| `/api/resilience/model-cooldowns` | DELETE    | 모델 잠금 해제 — 본문 `{provider, model}` 또는 모든 항목을 삭제하려면 `{all: true}`                                                                                                                                                                                                                                                                                                        |
+| `/api/rate-limits`                | GET/POST  | 계정별 속도 제한 상태(GET) 또는 연결에 대한 속도 제한 보호 활성화/비활성화(POST `{connectionId, enabled}`). `rateLimitProtection`에 대해 지원되는 쓰기 경로입니다(`PUT /api/providers/[id]`를 통해서는 절대 수정되지 않음). 참고: `enabled: false`는 명시적 보호를 비활성화하지만, 활성 API 키 연결이 전역 자동 활성화 안전망(`autoEnableApiKeyProviders`)에서 제외되도록 하지는 않습니다. |
+| `/api/rate-limit`                 | GET       | 전역 속도 제한 구성(사용 중단 예정; `/api/rate-limits`의 별칭)                                                                                                                                                                                                                                                                                                                             |
 
-> 4개의 `/api/resilience/*` 경로 모두 필요** 관리 인증** (`requireManagementAuth`). 공급자 차단기, 연결 휴지통, 모델 잠금에 대한 전체 분석은 [탄력성(확장)을](#resilience-extended) 참조하세요.
+> `/api/resilience/*`의 네 가지 라우트 모두 **관리 인증**(`requireManagementAuth`)이 필요합니다. 제공자 차단기, 연결 쿨다운 및 모델 잠금에 대한 전체 설명은 [Resilience (extended)](#resilience-extended)를 참조하세요.
 
 ### 평가
 
-| 엔드포인트   | 방법     | 설명                       |
-| ------------ | -------- | -------------------------- |
-| `/api/evals` | GET/POST | 평가 제품군 나열/평가 실행 |
+| Endpoint     | Method   | Description                     |
+| ------------ | -------- | ------------------------------- |
+| `/api/evals` | GET/POST | 평가 모음 목록 조회 / 평가 실행 |
 
 ### 정책
 
-| 엔드포인트      | 방법            | 설명             |
+| Endpoint        | Method          | Description      |
 | --------------- | --------------- | ---------------- |
 | `/api/policies` | GET/POST/DELETE | 라우팅 정책 관리 |
 
 ### 규정 준수
 
-| 엔드포인트                  | 방법 | 설명                          |
-| --------------------------- | ---- | ----------------------------- |
-| `/api/compliance/audit-log` | GET  | 규정 준수 감사 로그(마지막 N) |
+| Endpoint                    | Method | Description                   |
+| --------------------------- | ------ | ----------------------------- |
+| `/api/compliance/audit-log` | GET    | 규정 준수 감사 로그(최근 N개) |
 
-### v1beta(Gemini 호환)
+### v1beta (Gemini 호환)
 
-| 엔드포인트                 | 방법 | 설명                                |
-| -------------------------- | ---- | ----------------------------------- |
-| `/v1beta/models`           | GET  | Gemini 형식으로 모델 나열           |
-| `/v1beta/models/{...path}` | POST | Gemini `generateContent` 엔드포인트 |
+| Endpoint                   | Method | Description                         |
+| -------------------------- | ------ | ----------------------------------- |
+| `/v1beta/models`           | GET    | Gemini 형식으로 모델 목록 조회      |
+| `/v1beta/models/{...path}` | POST   | Gemini `generateContent` 엔드포인트 |
 
-이러한 엔드포인트는 기본 Gemini SDK 호환성을 기대하는 클라이언트를 위해 Gemini 의 API 형식을 미러링합니다.
+이러한 엔드포인트는 기본 Gemini SDK 호환성을 요구하는 클라이언트를 위해 Gemini의 API 형식을 그대로 따릅니다.
 
 ### 내부/시스템 APIs
 
@@ -1411,7 +1451,7 @@ GET 응답에는 `agents[]` (id, 이름, 바이너리, 버전, 설치됨, 프로
 
 > **메모:** 이러한 엔드포인트는 시스템 내부적으로 또는 Ollama 클라이언트 호환성을 위해 사용됩니다. 일반적으로 최종 사용자는 호출하지 않습니다.
 
-### OAuth 환경 복구 _(v3.6.1 +)_
+### OAuth 환경 복구 _(v3.6.1+)_
 
 ```bash
 POST /api/system/env/repair
@@ -1422,7 +1462,7 @@ Content-Type: application/json
 }
 ```
 
-특정 공급자에 대한 누락되거나 손상된 OAuth 환경 변수를 복구합니다. 보고:
+특정 제공자의 누락되었거나 손상된 OAuth 환경 변수를 복구합니다. 다음을 반환합니다:
 
 ```json
 {
@@ -1438,7 +1478,10 @@ Content-Type: application/json
 GET /api/system/version
 ```
 
-루프백 전용 관리 경로(관리자 인증). 실행 중인 버전, 최신 게시 버전 및 자동 업데이트 상태를 반환합니다. `releaseChannel` 및 `channels` 는 추가 필드입니다(레일 3.8.54). `channel` 대시보드 업데이터가 사용하는 배포 모드(`npm`, `source` 또는 `docker-compose`)를 — 의미로 유지합니다.
+루프백 전용 관리 라우트(admin auth)입니다. 실행 중인 버전, 최신
+게시 버전 및 자동 업데이트 상태를 반환합니다. `releaseChannel` 및 `channels`는 추가된
+필드(rail 3.8.54)이며, `channel`은 대시보드 업데이터가 사용하는 배포 모드
+(`npm`, `source` 또는 `docker-compose`)라는 기존 의미를 유지합니다.
 
 ```json
 {
@@ -1454,10 +1497,18 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — 실행 중인 빌드의 npm 채널: `-nightly.*` 버전의 경우 `nightly`, 기타 사전 릴리스(`-rc.*`, `-beta.*`, `-alpha.*`)의 경우 `next`, `channels.latest` 보다 오래된 주요 안정 버전의 경우 `lts`, 그렇지 않은 경우 `latest`. 게시 시 npm dist-tag를 선택하는 `scripts/release/dist-tag.mjs` 과 동일한 규칙입니다.
-- `channels` — 는 `npm view omniroute dist-tags` (레지스트리 HTTP 폴백)에서 각 dist-tag의 헤드를 게시했으며 `latest` 와 동일한 10분 TTL 로 캐시되었습니다. `latest` 는 항상 존재합니다( `latest` 필드로 되돌아간 다음 `"unavailable"` 대체). `next`, `nightly` 및 `lts` 해당 dist-tag가 존재할 때만 나타납니다. `Cache-Control: no-cache` 요청은 두 조회를 모두 새로 고칩니다.
+- `releaseChannel` — 실행 중인 빌드의 npm 채널입니다. `-nightly.*` 버전에는 `nightly`를,
+  기타 프리릴리스(`-rc.*`, `-beta.*`, `-alpha.*`)에는 `next`를, `channels.latest`보다
+  이전 메이저 버전의 안정 버전에는 `lts`를 사용하며, 그 외에는 `latest`를 사용합니다.
+  게시 시 npm dist-tag를 선택하는 `scripts/release/dist-tag.mjs`와 동일한 규칙입니다.
+- `channels` — `npm view omniroute dist-tags`(레지스트리 HTTP 폴백)의 각 dist-tag에
+  게시된 최신 버전입니다. `latest`와 동일한 10분 TTL로 캐시됩니다. `latest`는 항상
+  존재하며(`latest` 필드로 폴백한 후 `"unavailable"`로 폴백), `next`, `nightly` 및
+  `lts`는 해당 dist-tag가 존재할 때만 표시됩니다. `Cache-Control: no-cache` 요청은 두
+  조회를 모두 새로 고칩니다.
 
-채널 모델(4.0 GA 이전의 `latest` = v3, `next` = rc, `nightly` = `develop` 빌드, 4.0 GA 이후의 `lts` = v3 패치)은 `docs/ops/RELEASE_STRATEGY.md` 에 설명되어 있습니다.
+채널 모델(`latest` = 4.0 GA 전까지의 v3, `next` = rc, `nightly` = `develop` 빌드,
+`lts` = 4.0 GA 이후의 v3 패치)은 `docs/ops/RELEASE_STRATEGY.md`에 설명되어 있습니다.
 
 ---
 
@@ -1584,10 +1635,10 @@ GET /api/telemetry/summary
 ## 예산
 
 ```bash
-# Get budget status for all API keys
+# 모든 API 키의 예산 상태 가져오기
 GET /api/usage/budget
 
-# Set or update a budget
+# 예산 설정 또는 업데이트
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1601,7 +1652,7 @@ Content-Type: application/json
 }
 ```
 
-> **스키마 메모** (`setBudgetSchema`): `apiKeyId` 필요합니다. `dailyLimitUsd`, `weeklyLimitUsd` 또는 `monthlyLimitUsd` 중 적어도 하나는 0보다 커야 합니다. 선택 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 레거시 `{keyId, limit, period}` 형태는 `400 Bad Request` 반환합니다.
+> **스키마 참고** (`setBudgetSchema`): `apiKeyId`는 필수이며, `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd` 중 하나 이상이 0보다 커야 합니다. 선택적 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 기존 `{keyId, limit, period}` 형식은 `400 Bad Request`를 반환합니다.
 
 ## 토큰 제한
 
@@ -1682,17 +1733,21 @@ OmniRoute 이벤트(요청 완료, 할당량 소진, 키 순환 등)에 대한 �
 
 ## 등록된 키(자동 관리)
 
-자동 키 관리 하위 시스템에서 백업 제공자/계정에 대한 API 키를 발급하고 순환하는 데 사용하며, 일일/시간별 할당량을 적용합니다.
+자동 키 관리 하위 시스템에서 daily/hourly 할당량을 사용하여 지원 provider/account 에 대해 API 키를 발급하고 순환하는 데 사용됩니다.
 
-| Method | Path                                  | Description                                                                                                                                                                             |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | 등록된 키 목록 조회 (마스킹된 접두사만 표시)                                                                                                                                            |
-| POST   | `/api/v1/registered-keys`             | 새 등록 키 발급 — 본문: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. 원본 키는 **한 번만** 반환됩니다. 할당량 거부 시 `429`를 반환합니다. |
-| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 조회 (원본 키 자료 없음)                                                                                                                                         |
-| DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 폐기                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적 폐기 엔드포인트 (DELETE와 동일한 효과)                                                                                                                                           |
+| 방법   | 길                                    | 설명                                                                                                                                                                                              |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 등록된 키 나열(마스킹된 접두사만)                                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys`             | 새로 등록된 키 — 본문: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}` 발급합니다. 원시 키를 반환합니다.**한 번** . 할당량이 거부되면 `429` 반환합니다. |
+| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 검색(원본 없음)                                                                                                                                                            |
+| DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 취소                                                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적인 취소 끝점( DELETE 와 동일한 효과)                                                                                                                                                        |
+| GET    | `/api/v1/providers/[provider]/limits` | 공급자의 발행 한도 읽기                                                                                                                                                                           |
+| PUT    | `/api/v1/providers/[provider]/limits` | 공급자의 발행 한도 설정 — 본문: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                           |
+| GET    | `/api/v1/accounts/[id]/limits`        | 계정의 발행 한도 읽기                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | 계정의 발행 한도를 — 공급자 경로와 동일하게 설정합니다.                                                                                                                                           |
 
-**인증:** 관리 세션/API 키(`requireManagementAuth`) — `/api/keys`와 동일한 가드입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 스코프가 있는 API 키를 사용할 수 있으며, 추론 전용 API 키는 `403`을 반환합니다. `/v1/quotas/check` 및 `/v1/issues/report`도 참조하세요.
+**인증:** 관리 session/API 키(`requireManagementAuth`) — `/api/keys` 와 동일한 가드입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 범위가 있는 API 키입니다. 추론 전용 API 키는 `403` 얻습니다. `/v1/quotas/check` 및 `/v1/issues/report` 도 참조하세요.
 
 ---
 
@@ -1818,17 +1873,17 @@ API 키 / 세션 범위로 지정된 대화형/사실 기반 영구 메모리 �
 
 OmniRoute는 3개의 전송 방식(stdio, SSE, streamable-http)과 범위가 지정된 도구를 지원하는 내장 Model Context Protocol 서버를 제공합니다. 아래 대시보드 엔드포인트는 상태/감사 데이터를 읽고 HTTP 전송을 프록시합니다.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | 하트비트, 전송 방식, 온라인 상태, 마지막 호출, 주요 도구, 24시간 성공률 |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`를 포함하는 MCP 도구 목록 |
-| GET | `/api/mcp/sse` | SSE 전송을 위한 SSE 스트림 열기(MCP가 비활성화되었거나 전송 방식이 일치하지 않으면 `503` 반환) |
-| POST | `/api/mcp/sse` | SSE 전송에서 JSON-RPC 프레임 전송 |
-| GET | `/api/mcp/stream` | Streamable HTTP 전송의 SSE 측면 열기(서버가 시작한 메시지) |
-| POST | `/api/mcp/stream` | Streamable HTTP 전송에서 JSON-RPC 프레임 전송 |
-| DELETE | `/api/mcp/stream` | Streamable HTTP 세션 종료 |
-| GET | `/api/mcp/audit` | 감사 로그 쿼리 — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | 집계된 감사 통계(총계, 성공률, 평균 기간, 주요 도구) |
+| Method | Path                   | Description                                                                                                             |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | 하트비트, 전송 방식, 온라인 상태, 마지막 호출, 주요 도구, 24시간 성공률                                                 |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`를 포함하는 MCP 도구 목록                      |
+| GET    | `/api/mcp/sse`         | SSE 전송을 위한 SSE 스트림 열기(MCP가 비활성화되었거나 전송 방식이 일치하지 않으면 `503` 반환)                          |
+| POST   | `/api/mcp/sse`         | SSE 전송에서 JSON-RPC 프레임 전송                                                                                       |
+| GET    | `/api/mcp/stream`      | Streamable HTTP 전송의 SSE 측면 열기(서버가 시작한 메시지)                                                              |
+| POST   | `/api/mcp/stream`      | Streamable HTTP 전송에서 JSON-RPC 프레임 전송                                                                           |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP 세션 종료                                                                                               |
+| GET    | `/api/mcp/audit`       | 감사 로그 쿼리 — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | 집계된 감사 통계(총계, 성공률, 평균 기간, 주요 도구)                                                                    |
 
 **인증:** `sse`/`stream` 전송은 MCP 전용 인증 영역(`mcp` 범위가 포함된 Bearer API 키)을 따릅니다. `status`/`tools`/`audit*` 경로는 대시보드에서 읽을 수 있습니다(대시보드 호스트에 접근하는 것 외에 추가 인증 필요 없음).
 

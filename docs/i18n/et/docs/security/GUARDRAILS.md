@@ -25,9 +25,10 @@ Hook'id **ei** käivitu igal marsruudil ega iga vastuse puhul. Enne
 guardrail'ile turvamehhanismina toetumist loe jaotist
 [Katvus ja piirangud](#coverage-and-limits).
 
-## Sisseehitatud kaitsepiirded
+## Sisseehitatud guardrail'id
 
-Register laadib importimisel automaatselt kuus kaitsepiiret prioriteetses järjekorras (vt `registry.ts` → `registerDefaultGuardrails()`):
+Register laadib importimisel automaatselt kuus guardrail'i
+prioriteedijärjekorras (vt `registry.ts` → `registerDefaultGuardrails()`):
 
 | Prioriteet | Nimi                | Etapp(id)      | Fail                  |
 | ---------- | ------------------- | -------------- | --------------------- |
@@ -38,7 +39,7 @@ Register laadib importimisel automaatselt kuus kaitsepiiret prioriteetses järje
 | `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Jooksevad madalama prioriteediga numbrid** esiteks** .
+Madalamad prioriteedinumbrid käivituvad **esimesena**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
@@ -121,28 +122,32 @@ Pärandvaikeväärtused elavad `src/shared/constants/visionBridgeDefaults.ts` ke
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Peatab heli kandvad vestlustaotlused, enne kui need jõuavad sihtmärgini, mis teadaolevalt ei aktsepteeri helisisendit. See ei suuna vestlustaotlust kunagi ümber: heliosad transkribeeritakse olemasoleva OpenAI-ga ühilduva mitmeosalise lõpp-punkti kaudu ja valitud vestlusmudel jätkub teksti transkriptsioonidega.
+Peab kinni helisisendit sisaldavad vestluspäringud enne, kui need jõuavad
+sihtmärgini, mille kohta pole teada, et see helisisendit aktsepteerib. See ei
+suuna vestluspäringut kunagi ümber: heliosad transkribeeritakse olemasoleva
+OpenAI-ühilduva multipart-lõpp-punkti kaudu ja valitud vestlusmudel jätkab
+teksti-transkriptsioonidega.
 
 Voog:
 
-1. Lahendage `supportsAudio` `getResolvedModelCapabilities()` kaudu. Võidab selgesõnalised pakkuja-registri metaandmed, seejärel staatilise mudeli metaandmed ja seejärel sünkroonitud `modalities_input`. Deklareeritud sisendloend ilma `audio` on `false`; `null` ei jää võimekuse tõenditeks. Nii `false` kui ka `null` aktiveerivad konservatiivse silla, samas kui `true` möödub sellest.
-2. Lahendage `modalityBridgeAudio*` sätted ja eraldage jagatud `detectMediaParts()` detektori kaudu igast sõnumist ühendatavad tipptasemel heliosad. Toetatud traadikujud on OpenAI `input_audio`, `audio_url` ja `source.media_type: "audio/*"`. Pesastatud heli tuvastatakse marsruutimisel, kuid seda ei eemaldata splaissimise teel. Tööd piirab `modalityBridgeAudioMaxClips`; hilisemad osad jäävad puutumata.
-3. Austage konfigureeritud `provider/model` või laske `selectAudioBridgeModel()` kõndida `AUDIO_TRANSCRIPTION_PROVIDERS` stabiilses kataloogijärjekorras ja valige esimene mudel, millel on kasutatavad aktiivsed pakkuja mandaadid.
-4. `callAudioTranscription()` teisendab base64/data-URI heli mitmeosaliseks `file` või laadib DNS kinnitusega ja 25 MB seotusega avaliku väljamineva valve kaudu alla kaug- `audio_url`. Seejärel POSTs fail ja valitud mudel kohalikku `/v1/audio/transcriptions` iseloopi, mille autentimine on `resolveSelfLoopBearer()`. Olemasolev transkriptsioonimarsruut teostab tavapärast mandaadiotsingut, cooldown/rate-limit käsitlust ja pakkujate väljasaatmist.
-5. Edukad kõned asendavad nende osad `[Audio N]: <transcript>`. Kõned käitatakse `Promise.allSettled`: individuaalne rike säilitab selle algse heliosa (#4012 -leping). Kui iga kõne nurjub ja sihtmärk on tõestatud `supportsAudio === false`, muutuvad osad `[Audio N]: (unavailable — no STT provider connected)` (#8430 -leping). Tundmatu sihtmärgi (`null`) korral jääb kõigi ebaõnnestumiste tulemus puutumata. Tõestatud tekstipõhine sihtmärk, millel pole kasutatavat STT mandaadi, saab sama selgesõnalise tünga ilma võrgukõnet tegemata.
+1. Tuvastage `supportsAudio` funktsiooni `getResolvedModelCapabilities()` kaudu. Esmajärjekorras kasutatakse teenusepakkujate registri otseseid metaandmeid, seejärel mudeli staatilisi metaandmeid ja lõpuks sünkroonitud välja `modalities_input`. Deklareeritud sisendiloendi väärtus ilma elemendita `audio` on `false`; kui võimekuse kohta puuduvad tõendid, jääb väärtuseks `null`. Nii `false` kui ka `null` aktiveerivad konservatiivse silla, samas kui `true` jätab selle vahele.
+2. Tuvastage `modalityBridgeAudio*` sätted ja eraldage kõigist sõnumitest ühise detektori `detectMediaParts()` abil asendatavad tipptaseme heliosad. Toetatud edastusvormingud on OpenAI `input_audio`, `audio_url` ja `source.media_type: "audio/*"`. Pesastatud heli tuvastatakse marsruutimiseks, kuid asendustee seda ei eemalda. Tööd piirab `modalityBridgeAudioMaxClips`; hilisemad osad jäävad puutumata.
+3. Kasutage seadistatud väärtust `provider/model` või laske funktsioonil `selectAudioBridgeModel()` läbida `AUDIO_TRANSCRIPTION_PROVIDERS` kataloogi stabiilses järjekorras ja valida esimene mudel, mille jaoks on olemas kasutatav aktiivne teenusepakkuja autentimistunnus.
+4. `callAudioTranscription()` teisendab base64-/andme-URI-vormingus heli mitmeosalise vormingu väljaks `file` või laadib kaugviite `audio_url` kaudu alla, kasutades ainult avalikke aadresse lubavat väljaminevate ühenduste kaitset koos DNS-i sidumise ja 25 MB piiranguga. Seejärel saadab see faili ja valitud mudeli POST-päringuga kohalikku iseringluse lõpp-punkti `/v1/audio/transcriptions`, autentides päringu funktsiooniga `resolveSelfLoopBearer()`. Olemasolev transkriptsioonimarsruut teeb tavapärase autentimistunnuste otsingu, haldab ooteaegu ja kiirusepiiranguid ning suunab päringu teenusepakkujale.
+5. Edukate kutsete korral asendatakse vastavad osad tekstiga `[Audio N]: <transcript>`. Kutsed käivitatakse meetodiga `Promise.allSettled`: üksiku kutse nurjumisel säilitatakse algne heliosa (lepingu #4012 nõue). Kui kõik kutsed nurjuvad ja sihtmudeli puhul on tõendatud `supportsAudio === false`, asendatakse osad tekstiga `[Audio N]: (unavailable — no STT provider connected)` (lepingu #8430 nõue). Tundmatu sihtmudeli (`null`) puhul jääb tulemus kõigi kutsete nurjumisel puutumata. Tõendatult ainult teksti toetav sihtmudel, mille jaoks pole kasutatavat STT-autentimistunnust, saab sama selgesõnalise asendusteksti ilma võrgukutset tegemata.
 
-Edukad ärakirjad kasutavad kogu protsessi hõlmavat Modality Bridge LRU/TTL vahemälu. Klahv ühendab heliviite, stabiilse `audio-transcription` -toimingu sildi ja valitud STT -mudeli; tõrkeid ei salvestata kunagi vahemällu. Helikatsed värskendavad jagatud `bridged`, `cacheHits`, `failures` ja `lastUsedAt` loendureid. Teisendatud vastused kannavad `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; puutumata päringud ei saa Audio Bridge'i segmenti.
+Edukate transkriptsioonide jaoks kasutatakse protsessiülest modaliteedisilla LRU-/TTL-vahemälu. Võti ühendab heliviite, stabiilse toimingusildi `audio-transcription` ja valitud STT-mudeli; nurjumisi ei salvestata kunagi vahemällu. Helitöötluskatsed värskendavad ühiseid loendureid `bridged`, `cacheHits`, `failures` ja `lastUsedAt`. Teisendatud vastused sisaldavad päist `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; puutumata päringutele audiosilla segmenti ei lisata.
 
-Käitusaja sätted on DB-ga tagatud ja Zod-valideeritud:
+Käituskeskkonna sätted talletatakse andmebaasis ja valideeritakse Zodiga:
 
-| Võti                          | Vaikimisi | Vahemik         |
-| ----------------------------- | --------- | --------------- |
-| `modalityBridgeAudioEnabled`  | `true`    | —               |
-| `modalityBridgeAudioModel`    | `""`      | Auto või STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`   | 1000–300000     |
-| `modalityBridgeAudioMaxClips` | `3`       | 1–10            |
+| Võti                          | Vaikeväärtus | Vahemik               |
+| ----------------------------- | ------------ | --------------------- |
+| `modalityBridgeAudioEnabled`  | `true`       | —                     |
+| `modalityBridgeAudioModel`    | `""`         | Automaatne või STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`      | 1000–300000           |
+| `modalityBridgeAudioMaxClips` | `3`          | 1–10                  |
 
-Jagatud vahemälu jäävad `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` ja `modalityBridgeCacheMaxEntries` kontrolli alla.
+Ühist vahemälu juhivad endiselt `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` ja `modalityBridgeCacheMaxEntries`.
 
 ### Videosild (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -220,83 +225,83 @@ Pärand püsinud video ajalõpu väärtused, mis on suuremad kui 120 sekundit, o
 
 ### PII masker (`piiMasker.ts`)
 
-Jookseb edasi** mõlemad** etapid.
+Jookseb edasi **mõlemad** etapid.
 
-- **`preCall`** kloonib kasuliku koormuse, kõnnib `system`, `messages`, `input` ja `prompt` (kaasa arvatud tavalised stringid) ning rakendab `processPII()` (alates `@/shared/utils/inputSanitizer`) stringi `content`/`text` väljadele. Kui `PII_REDACTION_ENABLED=true`, redigeeritakse tuvastatud PII väljuvas kasulikus koormuses. See ei sõltu `INPUT_SANITIZER_MODE` (mis juhib ainult viipe sisestamise poliitikat). Kui redigeerimine on välja lülitatud, salvestab kõne tuvastusloendeid sisu ümber kirjutamata.
+- **`preCall`** kloonib kasuliku koormuse, kõnnib `system`, `messages`, `input` ja `prompt` (kaasa arvatud tavalised stringiüksused) ning rakendab `processPII()` (alates `@/shared/utils/inputSanitizer`) stringi `content`/`text` väljadele. Kui `PII_REDACTION_ENABLED=true`, redigeeritakse tuvastatud PII väljaminevas kasulikus koormuses. See ei sõltu `INPUT_SANITIZER_MODE` (mis kontrollib ainult kiire süstimise poliitikat). Kui redigeerimine on välja lülitatud, salvestab kõne tuvastusloendeid sisu ümber kirjutamata.
 - **`postCall`** sügavalt kloonib vastuse, käivitab `sanitizePIIResponse()` pluss Responses-API-kuju maskeerija (`maskResponsesOutput` — hõlmab `output_text` ja `output[].content[].text`). Redigeerimise korral asendab muudetud vastus originaali.
 
 Kaitsepiire ei blokeeri kunagi; see ainult märgib (`meta.detections`, `meta.redacted`) või kirjutab ümber.
 
 #### Tüübi valik, kohandatud mustrid ja tuvastusloendurid
 
-**Armatuurlaud → Seaded → Turvalisus → PII maskeerimine** valib _mis_ on maskeeritud. See ei lülita maskeerimist sisse: see on endiselt `PII_REDACTION_ENABLED` (taotlus) ja `PII_RESPONSE_SANITIZATION` (vastus + SSE), mõlemad on vaikimisi välja lülitatud.
+**Armatuurlaud → sätted → turvalisus → PII maskeerimine** valib _mis_ on maskeeritud. See ei lülita maskeerimist sisse: see on endiselt `PII_REDACTION_ENABLED` (taotlus) ja `PII_RESPONSE_SANITIZATION` (vastus + SSE), mõlemad vaikimisi välja lülitatud.
 
-- **Valik tüübi järgi** — sisseehitatud ID-d on loetletud `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määramata tähendab igat tüüpi (käitumine enne selle sätte olemasolu). Päringumootori `ssn_us` muster kaardistab `ssn`. Mallid (minimaalne, standardne, finants, brasiilia, USA, GDPR, POPIA, täis) täidavad ainult UI märkeruudud.
-- **GDPR ja POPIA identifikaatorid** — kaksteist sisseehitatud ID-d, mis hõlmavad EU ja Lõuna-Aafrika isikutunnuseid (tabel allpool). Nende regexid, valideerijad ja jurisdiktsioonisildid asuvad ühes tabelis `src/shared/utils/piiPatterns.ts`, mida tarbivad nii vastuse puhastaja (`src/lib/piiSanitizer.ts`) kui ka päringu maskeerija (`src/shared/utils/inputSanitizer.ts`). Vaste redigeeritakse ainult siis, kui selle valija selle vastu võtab; tühjast numbrite jooksust ei piisa kunagi. Operaator, kes salvestas kitsendatud valiku enne nende ID-de olemasolu, säilitab oma käitumise seni, kuni uued ID-d on märgitud.
-- **Kohandatud mustrid** — kuni 20 regex- või metamärgimustrit (`*` = kuni 64 mitte-tühimärki, `?` = üks). Tikud muutuvad `[CUSTOM_REDACTED]`. Iga muster läbib `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): maksimaalselt 500 tähemärki, lipud piirduvad `g i m s u`, peavad kompileerima, läbima `safe-regex` (katastroofiline taganemine) ega tohi ühtida tühja stringi või redigeerimiskohahoidjaga. Ebaõnnestunud muster lükatakse salvestamisel ja testimisel tagasi ning ebaõnnestunud salvestatud rida jäetakse kompileerimise asemel käitusajal vahele. Kohandatud mustrid töötavad ainult siis, kui maskeerimine on sisse lülitatud.
+- **Valik tüübi järgi** — sisseehitatud ID-d on loetletud `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määramata tähendab igat tüüpi (käitumine enne selle sätte olemasolu). Päringumootori `ssn_us` muster kaardistab `ssn` ga. Mallid (minimaalne, standardne, finants, brasiilia, USA, GDPR, POPIA, täismall) täidavad ainult UI märkeruudud.
+- **GDPR ja POPIA identifikaatorid** — kaksteist sisseehitatud ID-d, mis katavad EU ja Lõuna-Aafrika isikuidentifikaatorid (tabel allpool). Nende regexid, valideerijad ja jurisdiktsioonimärgendid asuvad ühes tabelis `src/shared/utils/piiPatterns.ts`, mida tarbivad nii vastuse puhastaja (`src/lib/piiSanitizer.ts`) kui ka päringu maskeerija (`src/shared/utils/inputSanitizer.ts`). Vaste redigeeritakse ainult siis, kui selle valija selle vastu võtab; tühjast numbrite jooksust ei piisa kunagi. Operaator, kes salvestas kitsendatud valiku enne nende ID-de olemasolu, säilitab oma käitumise seni, kuni uued ID-d on märgitud.
+- **Kohandatud mustrid** — kuni 20 regex- või metamärgimustrit (`*` = kuni 64 mitte-tühimärki, `?` = üks). Mängudest saab `[CUSTOM_REDACTED]`. Iga muster läbib `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): maksimaalselt 500 tähemärki, lipud piirduvad `g i m s u`, peavad kompileerima, peavad läbima `safe-regex` (katastroofiline taganemine) ega tohi ühtida tühja stringi või redigeerimiskohahoidjaga. Ebaõnnestunud muster lükatakse salvestamisel ja testimisel tagasi ning ebaõnnestunud salvestatud rida jäetakse kompileerimise asemel käitusajal vahele. Kohandatud mustrid töötavad ainult siis, kui maskeerimine on sisse lülitatud.
 - **Tuvastamisloendurid** — loendab tüübi kohta (väärtused pole kunagi ühtinud), hoitakse mälus ja lähtestatakse taaskäivitamisel (`src/lib/pii/piiDetectionStats.ts`). Need suurenevad ainult maskeerimise ajal.
 
-Seadistused asuvad tabelis `key_value` (nimeruum `pii_settings`, `src/lib/db/piiSettings.ts`) ja neid loetakse 1 s vahemälu kaudu. API:
+Sätted asuvad `key_value` tabelis (nimeruum `pii_settings`, `src/lib/db/piiSettings.ts`) ja neid loetakse 1 s vahemälu kaudu. API:
 
-| meetod | Tee                      | Eesmärk                                                                         |
-| ------ | ------------------------ | ------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Lipu olek, `enabledTypes`, `customPatterns`, tuvastusloendurid                  |
-| `PUT`  | `/api/settings/pii`      | Asenda `enabledTypes` (`null` = all) and/or `customPatterns`                    |
-| `POST` | `/api/settings/pii/test` | Kuivkäivitage üks muster maksimaalselt 8 KB proovi suhtes; midagi ei salvestata |
+| Meetod | Tee                      | Otstarve                                                              |
+| ------ | ------------------------ | --------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Lippude olek, `enabledTypes`, `customPatterns`, tuvastuste loendurid  |
+| `PUT`  | `/api/settings/pii`      | Asendab `enabledTypes` (`null` = kõik) ja/või `customPatterns`        |
+| `POST` | `/api/settings/pii/test` | Proovib ühte mustrit kuni 8 KB suurusel valimil; midagi ei salvestata |
 
-Kõik kolm nõuavad haldamise autentimist ja kinnitavad keha Zod ga (`src/shared/validation/schemas/piiSettings.ts`). Kui sisselogimine on keelatud (`requireLogin=false`), on `GET` ja test lõpp-punkt avatud, kuid `PUT` vajab siiski armatuurlaua seanssi, `manage` -scope API võtit, `oma_` pääsuluba, millel on kirjutusulatus või suurem, või tagasisilmuse kaudu saadetud CLI -luba või siseteenuse luba.
+Kõik kolm nõuavad haldamise autentimist ja kinnitavad keha Zod ga (`src/shared/validation/schemas/piiSettings.ts`). Kui sisselogimine on keelatud (`requireLogin=false`), on `GET` ja testi lõpp-punkt avatud, kuid `PUT` vajab siiski armatuurlaua seanssi, `manage` -scope API -võtit, kirjutusulatusega või kõrgema `oma_` pääsuluba või tagasisilmuse kaudu saadetud CLI -luba või siseteenuse luba.
 
 #### GDPR (EU) ja POPIA (Lõuna-Aafrika) identifikaatorid
 
-| Id                  | Identifikaator           | Valideerimine                                                                              |
-| ------------------- | ------------------------ | ------------------------------------------------------------------------------------------ |
-| `iban`              | IBAN                     | Tuntud riik, selle riigi täpne pikkus, ISO 13616 MOD-97-10                                 |
-| `eu_vat`            | EU VAT number            | Tuntud liikmesriigi eesliide ja selle osariigi numbrivorming (ilma VIES otsinguta)         |
-| `es_dni_nie`        | hispaania DNI / NIE      | Kontrolltäht (väärtus mod 23); NIE on `X/Y/Z` + 7 numbrit                                  |
-| `it_codice_fiscale` | Itaalia Codice Fiscale   | Juhttäht odd/even positsioonitabelitest                                                    |
-| `pl_pesel`          | Poola PESEL              | Kaalutud kontrollsumma ja kodeeritud sünnikuupäev, mis on olemas                           |
-| `nl_bsn`            | Hollandi BSN             | 11-kindel (kaalud 9..2, -1)                                                                |
-| `de_steuer_id`      | Saksa Steuer-ID          | ISO 7064 Mod 11,10 pluss numbrite struktuuri reeglid (ei ole algust 0)                     |
-| `se_personnummer`   | Rootsi personalinumber   | Luhn üle viimase kümne numbri ja usutava sünnikuupäeva (10 või 12 numbrit)                 |
-| `za_id`             | Lõuna-Aafrika ID number  | Luhn üle kõik 13 numbrit, kehtiv sünninumber month/day, kodakondsuse number 0 või 1        |
-| `za_phone`          | Lõuna-Aafrika telefon    | `+27` / `27` eesliide või rahvuslik `0..` vorm, mis on kirjutatud tühiku või sidekriipsuga |
-| `za_vat`            | Lõuna-Aafrika VAT number | 10 numbrit, mis algavad tähega `4`** ja** "VAT" / "BTW" eelnevas 48 tähemärgis             |
-| `za_tax_ref`        | Lõuna-Aafrika maksuref.  | 10 numbrit, mis algavad `0`-`3`, Luhn,** ja** "tax" / "SARS" eelnevas 48 tähemärgis        |
+| ID                  | Identifikaator                 | Valideerimine                                                                 |
+| ------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | Tuntud riik, selle riigi täpne pikkus, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | EL-i käibemaksunumber          | Tuntud liikmesriigi prefiks ja selle riigi numbrivorming (VIES-päringuta)     |
+| `es_dni_nie`        | Hispaania DNI / NIE            | Kontrolltäht (väärtus mod 23); NIE on `X/Y/Z` + 7 numbrit                     |
+| `it_codice_fiscale` | Itaalia Codice Fiscale         | Kontrolltäht paaritute/paaris positsioonide tabelitest                        |
+| `pl_pesel`          | Poola PESEL                    | Kaalutud kontrollsumma ning kodeeritud sünnikuu/-päeva usutavad vahemikud     |
+| `nl_bsn`            | Hollandi BSN                   | 11-kontroll (kaalud 9..2, -1)                                                 |
+| `de_steuer_id`      | Saksamaa Steuer-ID             | ISO 7064 Mod 11,10 koos numbristruktuuri reeglitega (alguses pole 0)          |
+| `se_personnummer`   | Rootsi personnummer            | Luhn viimase kümne numbri üle ja usutav sünnikuupäev (10 või 12 numbrit)      |
+| `za_id`             | Lõuna-Aafrika isikukood        | Luhn kõigi 13 numbri üle, kehtiv sünnikuu/-päev, kodakondsusnumber 0 või 1    |
+| `za_phone`          | Lõuna-Aafrika telefon          | Prefiks `+27` / `27` või riigisisene kuju `0..` tühiku või sidekriipsuga      |
+| `za_vat`            | Lõuna-Aafrika käibemaksunumber | 10 numbrit algusega `4` **ja** "VAT" / "BTW" eelneva 48 märgi seas            |
+| `za_tax_ref`        | Lõuna-Aafrika maksuviide       | 10 numbrit algusega `0`-`3`, Luhn **ja** "tax" / "SARS" eelneva 48 märgi seas |
 
-Kuna ainult numbrilised vormingud põrkuvad järjekorranumbrite, järgunumbrite ja ajatemplitega, vajavad nõrgemad vormingud (`za_vat`, `za_tax_ref`) märksõna näpunäidet ja tühja kümnekohalist `0..` numbrit ei käsitleta Lõuna-Aafrika telefoninumbrina. Tühikutega IBANs (`GB29 NWBK ...`) ei sobita. Voogesitusteel vaadatakse vihjet ainult praeguse tüki seest. ID-d asuvad üldiste telefonimustrite ees, seega säilitab kinnitatud identifikaator oma kohahoidja (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallid `gdpr` ja `popia` valivad vastavalt EU ja Lõuna-Aafrika ID-d. Maskeerimine jääb valikuliseks (Hard Rule #20): siin ei muuda miski funktsioonilipu vaikeseadet.
+Kuna ainult numbrilised vormingud põrkuvad tellimusnumbrite, järgunumbrite ja ajatemplitega, vajavad nõrgimad (`za_vat`, `za_tax_ref`) märksõna näpunäidet ja tühja kümnekohalist `0..` numbrit ei käsitleta Lõuna-Aafrika telefoninumbrina. Tühikutega IBANs (`GB29 NWBK ...`) ei sobi. Voogesitusteel vaadatakse vihjet ainult praeguse tüki seest. ID-d asuvad üldiste telefonimustrite ees, seega säilitab kinnitatud identifikaator oma kohahoidja (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallid `gdpr` ja `popia` valivad vastavalt EU ja Lõuna-Aafrika ID-d. Maskeerimine jääb valikuliseks (Hard Rule #20): siin ei muuda miski funktsiooni lipu vaikeseadet.
 
-### Kiire süstimine (`promptInjection.ts`)
+### Prompt-injektsioon (`promptInjection.ts`)
 
-Tuvastab kasutaja pakutavas sisus võistlevaid struktuure ja jõustab konfigureeritud poliitika. Käitumist juhivad keskkonnamuutujad ja konstruktori valikud:
+Tuvastab kasutaja sisendis vaenulikke struktuure ja jõustab konfigureeritud poliitika. Käitumist juhivad keskkonnamuutujad ja konstruktori valikud:
 
-| Seadistamine    | Env var                                                                                               | Vaikimisi | Mõju                                                                                                                                                                                                  |
-| --------------- | ----------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lubatud         | `INPUT_SANITIZER_ENABLED`                                                                             | `true`    | Kui `false`, kaitsepiirde lühis.                                                                                                                                                                      |
-| Režiim          | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`    | Süstimisreeglid: `block`, `warn` või `log`. (`redact` on back-compat jaoks aktsepteeritud, kuid sobib** mitte** riba sissepritse tekst; PII ümberkirjutamise taotlust juhib `PII_REDACTION_ENABLED`.) |
-| Blokeerimislävi | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`    | Blokeerimiseks vajalik minimaalne raskusaste. Meedium on vaikimisi ainult jälgitav.                                                                                                                   |
+| Seade             | Keskkonnamuutuja                                                                                     | Vaikimisi | Mõju                                                                                                                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubatud           | `INPUT_SANITIZER_ENABLED`                                                                            | `true`    | Väärtusel `false` lühistub kaitseraud (kontroll jäetakse vahele).                                                                                                                                              |
+| Režiim            | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                      | `warn`    | Injektsiooni poliitika: `block`, `warn` või `log`. (`redact` aktsepteeritakse tagasiühilduvuse tõttu, kuid see **ei** eemalda injektsiooniteksti; päringu PII ümberkirjutamist juhib `PII_REDACTION_ENABLED`.) |
+| Blokeerimise lävi | `blockThreshold` valik / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`    | Blokeerimiseks vajalik minimaalne tõsidusaste. Vaikeseadel on keskmine tõsidusaste ainult jälgitav.                                                                                                            |
 
-**Režiimi eelistus** (`getMode`): helistaja `options.mode` → `INJECTION_GUARD_MODE`**DB funktsiooni-lipu alistamine** (Armatuurlaua → seaded → Funktsioonide lipud) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Armatuurlaua alistamine võidab seega env varie, nii et funktsioonide lipud UI juhivad jooksvat valvurit otse (taaskäivitamist ei toimu). DB lugemine on tõrkekindel: vigade korral lülitub valvur tagasi env-põhisele käitumisele ja kui alistamist pole määratud, on käitumine identne ainult env-resolutsiooniga.
+**Režiimi prioriteet** (`getMode`): väljakutsuja `options.mode` → `INJECTION_GUARD_MODE` **andmebaasi feature-flag'i ülekirjutus** (Armatuurlaud → Seaded → Feature Flags) → `INJECTION_GUARD_MODE` keskkonnamuutuja → `INPUT_SANITIZER_MODE` keskkonnamuutuja → `warn`. Armatuurlaua ülekirjutus võidab seega keskkonnamuutujaid, nii et Feature Flags'i kasutajaliides juhib töötavat kaitserauda reaalajas (ilma taaskäivituseta). Andmebaasi lugemine on tõrkekindel: kui see ebaõnnestub, naaseb kaitseraud keskkonnapõhise käitumise juurde, ja kui ülekirjutust pole määratud, on käitumine identne ainult keskkonnamuutujatepõhise lahendusega.
 
-Tuvastamisallikad:
+Tuvastusallikad:
 
-1. `sanitizeRequest()` `@/shared/utils/inputSanitizer` st (mujal torujuhtmes kasutatav jagatud detektorikomplekt).
-2. Sisseehitatud `DEFAULT_GUARD_PATTERNS` (praegu `system_override_inline` ja `markdown_system_block`, mõlema raskusastmega `high` ).
-3. Valikuline `customPatterns` edastatakse konstruktori valikute kaudu (stringid, regex või `{ name, pattern, severity }` -kirjed).
+1. `sanitizeRequest()` moodulist `@/shared/utils/inputSanitizer` (ühine detektorite kogum, mida kasutatakse ka mujal torustikus).
+2. Sisseehitatud `DEFAULT_GUARD_PATTERNS` (praegu `system_override_inline` ja `markdown_system_block`, mõlemad tõsidusastmega `high`).
+3. Valikulised `customPatterns`, mis antakse konstruktori valikute kaudu (stringid, regulaaravaldised või `{ name, pattern, severity }` kirjed).
 
-Kui `mode === "block"`** ja** vähemalt üks tuvastamine vastab raskuslävele, `preCall` tagastab `{ block: true, message: "Request rejected: suspicious content detected" }`. Režiimides `warn`/`log` kaitsepiire logib, kuid lubab kõne. Jagatud abimees `evaluatePromptInjection()` eksporditakse ka helistajatele, kes peavad hindama viipasid ilma registrit läbimata.
+Kui `mode === "block"` **ja** vähemalt üks tuvastus ületab tõsidusastme läve, tagastab `preCall` väärtuse `{ block: true, message: "Request rejected: suspicious content detected" }`. Režiimides `warn`/`log` kaitsemehhanism logib, kuid lubab kõne. Jagatud abifunktsioon `evaluatePromptInjection()` on samuti eksporditud neile, kes soovivad prompte hinnata ilma registriga tegelemata.
 
-**Skannimine seotud (v3.8.20):** detektor kontrollib ainult** esimesed 16 KB** ühendatud viipa tekstist — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 baiti) `src/shared/utils/inputSanitizer.ts`. Nii `detectInjection()` kui ka `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` enne mustritsükli käivitamist. Sisestusjuhised asuvad sisendi ülaosas, nii et see piirab mitmesaja KB suuruste kasulike koormuste korral regex CPU/GC ilma tuvastamist nõrgendamata (vrd #3932, #4041).
+**Skannimispiir (v3.8.20):** detektor kontrollib ühendatud prompt-teksti ainult **esimesi 16 KB** — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 baiti) failis `src/shared/utils/inputSanitizer.ts`. Nii `detectInjection()` kui ka `evaluatePromptInjection()` teevad `slice(0, MAX_INJECTION_SCAN_BYTES)` enne mustritsükli käivitamist. Injektsioonidirektiivid asuvad sisendi alguses, seega piirab see regulaaravaldise CPU/GC koormuse mitmesaja-KB-suuruste andmekoormate puhul ilma tuvastust nõrgendamata (vrdl. #3932, #4041).
 
-### Credential Masker (`credentialMasker.ts`)
+### Mandaatide maskeerija (`credentialMasker.ts`)
 
-Jookseb edasi** mõlemad** etapid, vaikeahela viimane (prioriteet `95`). Eemaldab väljaminevast kasulikust koormusest tuntud API-võtme / salajase märgi mustrid (sõnumi sisu, tööriista kutsumise argumendid, tööriista tulemused)** ja** teenusepakkuja vastus, nii et viipasse kleebitud (või tööriista tulemusega kajatud) mandaati ei lekitata ülesvoolu pakkujale ega tagasi kliendile.
+Töötab **mõlemal** etapil, vaikimisi ahelas viimasena (prioriteet `95`). Maskeerib tuntud API-võtme / salajase tokeni mustreid väljuvast andmekoormast (sõnumi sisu, tööriistakutse argumendid, tööriista tulemused) **ja** pakkuja vastusest, nii et prompti kleebitud (või tööriista tulemuse kaudu tagasi kajastatud) mandaat ei leki ülavoo pakkujale ega tagasi kliendile.
 
-- **Ainult lubamine** , sama konventsioon mis PII redigeerimisega (Hard Rule #20-adjacent): keelatud, välja arvatud juhul, kui `settings.credentialRedactionEnabled === true`** või** `CREDENTIAL_REDACTION_ENABLED=true`. Kui see on välja lülitatud, on kaitsepiire mittetoimiv — see ei blokeeri ega kirjuta kunagi ümber.
-- `redactCredentials()` kõnnib kogu payload/response puu (`walkValue()`, prototype-pollution-safe, cycle-safe via `WeakSet`) ja asendab vasted `[REDACTED:<type>]` kohahoidjaga, kloonides ainult tegelikult muutunud oksad.
-- `CREDENTIAL_PATTERNS` hõlmab LLM pakkuja võtmeid (OpenAI, OpenAI-proj, Anthropic, Google, Kallistav nägu, Replicate ), VCS/SaaS märke (GitHub, Slack, Lineaarne, Notion, npm, Postimees, Discord), maksevõtmeid (AWS võti (Strki võti , SendGrid, Mailgun), privaatvõtmed / JWTs, mandaadi kandvad ühendusstringid (`mongodb://user:pass@...` jne) ja üldine `Authorization`/`x-api-key`/`api-key`/`apikey` päiseväärtuste muster. Päisekujulisi klahve (`authorization`, `x-api-key`, `api-key`, `apikey`) redigeeritakse pigem struktuuriliselt (ainult väärtus, skeemi eesliide nagu `Bearer `/`Basic ` säilinud), mitte üldise teksti regexi kaudu.
-- Kaitsepiire ei blokeeri kunagi; see ainult kirjutab ümber (`modifiedPayload` / `modifiedResponse`) ja märgib (`meta.credentialsRedacted`, `meta.count`).
+- **Ainult sisselülitatav**, sama konventsioon nagu PII maskeerimisel (Hard Rule #20-le külgnev): keelatud, välja arvatud juhul, kui `settings.credentialRedactionEnabled === true` **või** `CREDENTIAL_REDACTION_ENABLED=true`. Väljalülitatuna on kaitsemehhanism tegevuseta (no-op) — see ei blokeeri ega kirjuta kunagi ümber.
+- `redactCredentials()` läbib kogu andmekoorma/vastuse puu (`walkValue()`, prototüübisaastmise-kindel, `WeakSet`i kaudu tsüklikindel) ja asendab vasted kohatäitega `[REDACTED:<type>]`, kloonides ainult need harud, mis tegelikult muutusid.
+- `CREDENTIAL_PATTERNS` hõlmab LLM-i pakkujate võtmeid (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS-i tokeneid (GitHub, Slack, Linear, Notion, npm, Postman, Discord), maksevõtmeid (Stripe, Square), pilvevõtmeid (AWS access key, Twilio, SendGrid, Mailgun), privaatvõtmeid / JWT-sid, mandaate sisaldavaid ühendusstringe (`mongodb://user:pass@...` jne) ning üldist `Authorization`/`x-api-key`/`api-key`/`apikey` päise väärtuse mustrit. Päisekujulised võtmed (`authorization`, `x-api-key`, `api-key`, `apikey`) maskeeritakse struktuurselt (ainult väärtus, skeemi eesliide nagu `Bearer `/`Basic ` säilitatakse), mitte üldise teksti-regulaaravaldise kaudu.
+- Kaitsemehhanism ei blokeeri kunagi; see ainult kirjutab ümber (`modifiedPayload` / `modifiedResponse`) ja annoteerib (`meta.credentialsRedacted`, `meta.count`).
 
-Regressioonikaitsja: `tests/unit/credential-masker-guardrail.test.ts`.
+Regressioonikaitse: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Põhileping (`base.ts`)
 

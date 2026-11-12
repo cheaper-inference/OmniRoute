@@ -143,7 +143,7 @@ RTK koondab dubleerivad read kahel sõltumatul kihil:
    `collapsePatterns`. Skeem: `deduplicate: z.boolean().default(false)` failis
    `open-sse/services/compression/engines/rtk/filterSchema.ts`.
 2. **Kogu mootorit hõlmav `deduplicateThreshold` (vaikimisi `3`).** Pärast kõigi filtrite käivitamist koondab mootor
-   kogu tulemuses kõik vähemalt `deduplicateThreshold` identsest järjestikusest reast koosnevad jadad
+   kogu tulemuses kõik vähemalt `>= deduplicateThreshold` identsest järjestikusest reast koosnevad jadad
    (`deduplicateRepeatedLines`, rakendatakse failis `engines/rtk/index.ts`). Normaliseerimisel piiratakse väärtus
    vahemikku 2–100.
 

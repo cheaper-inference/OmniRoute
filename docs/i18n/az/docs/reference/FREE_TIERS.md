@@ -126,8 +126,8 @@ qəsdən saxlanılır.
 Bu sahədəki əksər "aylıq pulsuz token" göstəriciləri model üzrə etiketlərin cəmidir. Bizimki qəsdən belə deyil:
 
 - **Hər ortaq hovuz yalnız bir dəfə hesablanır.** Mistral-ın pulsuz planı hər təşkilat üçün aylıq vahid 1B limitdir; onu beş model altında göstərmək bu limiti 5B etmir. Model üzrə toplandıqda öz kataloqumuz **~7.4B** göstərərdi (2026-09-03 tarixində yenidən hesablanıb; bu göstərici CI tərəfindən yoxlanılmır — kataloq hər dəfə dəyişəndə onu yenidən ölçün) — başlıqda **~1.47B** göstərilir, çünki hər provayderdə bir hesabın faktiki xərcləyə biləcəyi məbləğ budur.
-- **Gündəlik limitlər çevrilir, sürət limitləri isə yox.** Sənədləşdirilmiş token/gün limiti `× 30` olur; sənədləşdirilmiş sorğu/gün limiti `RPD × ~800 token × 30` olur; yalnız dəqiqədə sorğu sayını dərc edən provayder üçün aylıq göstərici **yoxdur** və o, _limitsiz_ kimi göstərilir, heç vaxt cəmə daxil edilmir. Sürət limitini 24/7 müddətinə vurmaq bizim qəbul etmədiyimiz şişirtmədir.
-- **Regional şəxsiyyət yoxlaması tələb edən kvotalar ayrıca göstərilir** (`+~6M regional şəxsiyyət təsdiqindən sonra`), çünki oxucuların əksəriyyəti onlardan istifadə edə bilmir.
+- **Gündəlik limitlər çevrilir, sürət limitləri isə yox.** Sənədləşdirilmiş token/gün limiti `× 30` olur; sənədləşdirilmiş sorğu/gün limiti `RPD × ~800 tokens × 30` olur; yalnız dəqiqədə sorğu sayını dərc edən provayder üçün aylıq göstərici **yoxdur** və o, _limitsiz_ kimi göstərilir, heç vaxt cəmə daxil edilmir. Sürət limitini 24/7 müddətinə vurmaq bizim qəbul etmədiyimiz şişirtmədir.
+- **Regional şəxsiyyət yoxlaması tələb edən kvotalar ayrıca göstərilir** (`+~6M behind regional identity verification`), çünki oxucuların əksəriyyəti onlardan istifadə edə bilmir.
 - **Qeydiyyat kreditləri yalnız ilk ay üçündür** və sabit göstəriciyə heç vaxt qarışdırılmadan ikinci rəqəm kimi təqdim edilir.
 - **Göstərici CI tərəfindən yoxlanılır.** `npm run check:docs-counts` kataloq əsasında yekunları yenidən hesablayır və bu fayldakı, README-dəki və ya büdcə kartındakı rəqəmlər onlardan fərqləndikdə yığmanı uğursuz edir.
 

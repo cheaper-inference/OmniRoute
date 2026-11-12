@@ -1,65 +1,66 @@
-# REASONING_REPLAY (فارسی)
+# Reasoning Replay Cache (فارسی)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../routing/REASONING_REPLAY.md) · 🇪🇹 [am](../../../am/docs/routing/REASONING_REPLAY.md) · 🇸🇦 [ar](../../../ar/docs/routing/REASONING_REPLAY.md) · 🇦🇿 [az](../../../az/docs/routing/REASONING_REPLAY.md) · 🇧🇬 [bg](../../../bg/docs/routing/REASONING_REPLAY.md) · 🇧🇩 [bn](../../../bn/docs/routing/REASONING_REPLAY.md) · 🇧🇦 [bs](../../../bs/docs/routing/REASONING_REPLAY.md) · 🇨🇿 [cs](../../../cs/docs/routing/REASONING_REPLAY.md) · 🇩🇰 [da](../../../da/docs/routing/REASONING_REPLAY.md) · 🇩🇪 [de](../../../de/docs/routing/REASONING_REPLAY.md) · 🇬🇷 [el](../../../el/docs/routing/REASONING_REPLAY.md) · 🇪🇸 [es](../../../es/docs/routing/REASONING_REPLAY.md) · 🇪🇪 [et](../../../et/docs/routing/REASONING_REPLAY.md) · 🇫🇮 [fi](../../../fi/docs/routing/REASONING_REPLAY.md) · 🇫🇷 [fr](../../../fr/docs/routing/REASONING_REPLAY.md) · 🇮🇪 [ga](../../../ga/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [gu](../../../gu/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ha](../../../ha/docs/routing/REASONING_REPLAY.md) · 🇮🇱 [he](../../../he/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [hi](../../../hi/docs/routing/REASONING_REPLAY.md) · 🇭🇷 [hr](../../../hr/docs/routing/REASONING_REPLAY.md) · 🇭🇺 [hu](../../../hu/docs/routing/REASONING_REPLAY.md) · 🇦🇲 [hy](../../../hy/docs/routing/REASONING_REPLAY.md) · 🇮🇩 [id](../../../id/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ig](../../../ig/docs/routing/REASONING_REPLAY.md) · 🇮🇹 [it](../../../it/docs/routing/REASONING_REPLAY.md) · 🇯🇵 [ja](../../../ja/docs/routing/REASONING_REPLAY.md) · 🇬🇪 [ka](../../../ka/docs/routing/REASONING_REPLAY.md) · 🇰🇭 [km](../../../km/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [kn](../../../kn/docs/routing/REASONING_REPLAY.md) · 🇰🇷 [ko](../../../ko/docs/routing/REASONING_REPLAY.md) · 🇱🇹 [lt](../../../lt/docs/routing/REASONING_REPLAY.md) · 🇱🇻 [lv](../../../lv/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ml](../../../ml/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [mr](../../../mr/docs/routing/REASONING_REPLAY.md) · 🇲🇾 [ms](../../../ms/docs/routing/REASONING_REPLAY.md) · 🇲🇹 [mt](../../../mt/docs/routing/REASONING_REPLAY.md) · 🇲🇲 [my](../../../my/docs/routing/REASONING_REPLAY.md) · 🇳🇵 [ne](../../../ne/docs/routing/REASONING_REPLAY.md) · 🇳🇱 [nl](../../../nl/docs/routing/REASONING_REPLAY.md) · 🇳🇴 [no](../../../no/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [or](../../../or/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [pa](../../../pa/docs/routing/REASONING_REPLAY.md) · 🇵🇭 [phi](../../../phi/docs/routing/REASONING_REPLAY.md) · 🇵🇱 [pl](../../../pl/docs/routing/REASONING_REPLAY.md) · 🇵🇹 [pt](../../../pt/docs/routing/REASONING_REPLAY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/REASONING_REPLAY.md) · 🇷🇴 [ro](../../../ro/docs/routing/REASONING_REPLAY.md) · 🇷🇺 [ru](../../../ru/docs/routing/REASONING_REPLAY.md) · 🇱🇰 [si](../../../si/docs/routing/REASONING_REPLAY.md) · 🇸🇰 [sk](../../../sk/docs/routing/REASONING_REPLAY.md) · 🇸🇮 [sl](../../../sl/docs/routing/REASONING_REPLAY.md) · 🇷🇸 [sr](../../../sr/docs/routing/REASONING_REPLAY.md) · 🇸🇪 [sv](../../../sv/docs/routing/REASONING_REPLAY.md) · 🇰🇪 [sw](../../../sw/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ta](../../../ta/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [te](../../../te/docs/routing/REASONING_REPLAY.md) · 🇹🇭 [th](../../../th/docs/routing/REASONING_REPLAY.md) · 🇹🇷 [tr](../../../tr/docs/routing/REASONING_REPLAY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/REASONING_REPLAY.md) · 🇵🇰 [ur](../../../ur/docs/routing/REASONING_REPLAY.md) · 🇺🇿 [uz](../../../uz/docs/routing/REASONING_REPLAY.md) · 🇻🇳 [vi](../../../vi/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [yo](../../../yo/docs/routing/REASONING_REPLAY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/REASONING_REPLAY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/REASONING_REPLAY.md)
 
 ---
 
-> **منبع حقیقت:** `src/lib/db/reasoningCache.ts`، `open-sse/services/reasoningCache.ts`** آخرین به روز رسانی:** 2026-06-28 — v3.8.40
+> **منبع حقیقت:** `src/lib/db/reasoningCache.ts`، `open-sse/services/reasoningCache.ts`
+> **آخرین بهروزرسانی:** 2026-06-28 — v3.8.40
 
-OmniRoute دستیار `reasoning_content` تولید شده توسط مدلهای حالت تفکر را ضبط میکند و هنگامی که ارائهدهنده بالادستی به آن نیاز دارد، در درخواستهای چند چرخشی آن را به طور شفاف پخش میکند. این خطاهای HTTP 400 را که ارائهدهندگان سختگیرانه زمانی که تاریخچه مکالمه مشتری استدلال نوبت قبلی را از دست داده است، ایجاد میکنند، حذف میکند.
+OmniRoute مقدار `reasoning_content` تولیدشده توسط مدلهای حالت تفکر را ثبت میکند و در درخواستهای چندمرحلهای، زمانی که ارائهدهنده بالادستی به آن نیاز دارد، بهصورت شفاف بازپخش میکند. این کار خطاهای HTTP 400 را که ارائهدهندگان سختگیر در صورت نبود استدلال مرحله قبلی در تاریخچه مکالمه کلاینت ایجاد میکنند، برطرف میسازد.
 
-## چرا این وجود دارد
+## دلیل وجود این قابلیت
 
-چندین ارائهدهنده حالت تفکر، نوبت بعدی را رد میکنند، مگر اینکه** پیام دستیار قبلی شامل `reasoning_content` اصلی است** . بالادست 400 را با پیام هایی مانند:
+چندین ارائهدهنده حالت تفکر، مرحله بعدی را رد میکنند مگر اینکه **پیام قبلی دستیار شامل `reasoning_content` اصلی باشد**. سرویس بالادستی خطای 400 را با پیامهایی مانند زیر برمیگرداند:
 
 ```
-Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
+پارامتر نادرست است: reasoning_content در حالت تفکر باید دوباره به API ارسال شود.
 ```
 
-اما مشتریان معمولی (Cursor، Cline، رو کد، OpenAI SDK) `reasoning_content` از تاریخچه ای که دوباره پخش می کنند، حذف می کنند. OmniRoute آن را از یک کش سمت سرور بازیابی می کند تا درخواستی که بالادست می بیند سازگار باشد. شماره #1628 پایداری ترکیبی memory/SQLite را معرفی کرد تا حافظه پنهان از راهاندازی مجدد فرآیند زنده بماند.
+اما کلاینتهای رایج (Cursor، Cline، Roo Code، OpenAI SDK) هنگام بازپخش تاریخچه، `reasoning_content` را حذف میکنند. OmniRoute آن را از یک کش سمت سرور بازیابی میکند تا درخواستی که سرویس بالادستی مشاهده میکند سازگار باشد. Issue #1628 قابلیت ماندگاری ترکیبی حافظه/SQLite را معرفی کرد تا کش پس از راهاندازی مجدد فرایند نیز حفظ شود.
 
 ## معماری
 
 ```
-Turn N (assistant generates):
-  → response contains reasoning_content + tool_calls
-  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
-  → forward response to client (which may or may not retain reasoning)
+نوبت N (دستیار تولید میکند):
+  → پاسخ شامل reasoning_content + tool_calls است
+  → اگر requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
+      مینویسد (حافظه + پایگاه داده)، با کلیدی مبتنی بر هر tool_call.id
+  → پاسخ را به کلاینت ارسال میکند (که ممکن است reasoning را نگه دارد یا ندارد)
 
-Turn N+1 (client sends follow-up):
-  → translator detects: requiresReasoningReplay(provider, model) === true
-  → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
-      hit  → msg.reasoning_content = cached; recordReplay()
-      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
-  → upstream sees consistent history → no 400
+نوبت N+1 (کلاینت پیام پیگیری را ارسال میکند):
+  → مترجم تشخیص میدهد: requiresReasoningReplay(provider, model) === true
+  → برای هر پیام دستیار که دارای tool_calls و فاقد reasoning_content است:
+      lookupReasoning(toolCalls[0].id) → حافظه → پایگاه داده
+      یافت شد  → msg.reasoning_content = cached; recordReplay()
+      یافت نشد → msg.reasoning_content = "" (راهکار بازگشت قدیمی برای نسخههای قدیمیتر DeepSeek)
+  → سرویس بالادستی تاریخچهای سازگار میبیند → بدون خطای 400
 ```
 
-ضبط در `open-sse/handlers/chatCore.ts` (دو سایت، در دو سایت تماس `cacheReasoningFromAssistantMessage` ) اتفاق می افتد. پخش مجدد در `open-sse/translator/index.ts` بعد از اجبار طرحواره اما قبل از ارسال اتفاق می افتد.
+ثبت در `open-sse/handlers/chatCore.ts` انجام میشود (در دو محل، یعنی دو محل فراخوانی `cacheReasoningFromAssistantMessage`). بازپخش در `open-sse/translator/index.ts`، پس از اجبار به انطباق با طرحواره اما پیش از ارسال، انجام میشود.
 
-نوبتهای دستیار ساده (غیر ابزاری) به طور متفاوت کلید میخورد: `buildAssistantMessageCacheKey()` محدوده جلسه را به اضافه رونوشت با فرمت OpenAI نرمال شده تا آن نوبت هضم میکند، زیرا DeepSeek نیاز به استدلال _every_ قبل از حضور `tools` دارد. برای اهداف Responses-API (به عنوان مثال `opencode-go/deepseek-v4-flash`، مسیریابی به `/responses`) بدنه بالادست `input` حمل می کند، نه `messages`، بنابراین `translateRequest()` (`open-sse/translator/index.ts`) رونوشت محوری را که از طریق یک گزینه برگشت هضم شده گزارش می کند و سایت های ضبط همان رونوشت را هضم می کنند. پاس بازپخش Responses در محور OpenAI برای هر فرمت منبع اجرا میشود، بنابراین مشتریان پیامهای Anthropic (پاسخهای Claude → OpenAI → ) نیز دوباره پخش میشوند.
+نوبتهای معمولی دستیار (بدون فراخوانی ابزار) بهشکل متفاوتی کلیدگذاری میشوند: `buildAssistantMessageCacheKey()` از محدودهٔ نشست بههمراه رونوشت نرمالشده با قالب OpenAI تا آن نوبت، چکیدهای تولید میکند، زیرا DeepSeek پس از وجود `tools` به reasoning مربوط به _تمام_ نوبتهای قبلی نیاز دارد. برای مقصدهای Responses-API (برای مثال `opencode-go/deepseek-v4-flash` که به `/responses` هدایت میشود)، بدنهٔ ارسالی به سرویس بالادستی بهجای `messages` دارای `input` است؛ بنابراین `translateRequest()` (`open-sse/translator/index.ts`) رونوشت محوریای را که چکیده کرده است از طریق یک گزینهٔ callback گزارش میدهد و محلهای ثبت نیز از همان رونوشت چکیده تولید میکنند. مرحلهٔ بازپخش Responses برای تمام قالبهای مبدأ روی محور OpenAI اجرا میشود؛ بنابراین بازپخش برای کلاینتهای Anthropic Messages (Claude → OpenAI → Responses) نیز انجام میشود.
 
-## ذخیره سازی — Hybrid Memory + SQLite
+## ذخیرهسازی — ترکیب حافظه + SQLite
 
-مسیر داغ از یک `Map` در حافظه (LRU-by-creation) استفاده می کند که توسط یک جدول SQLite برای بازیابی خرابی و دید داشبورد پشتیبانی می شود.
+مسیر پرتکرار از یک `Map` درونحافظهای (LRU بر اساس زمان ایجاد) استفاده میکند که یک جدول SQLite برای بازیابی پس از خرابی و نمایش در داشبورد، پشتیبان آن است.
 
-| لایه  | پیاده سازی                                     | هدف                                                     |
-| ----- | ---------------------------------------------- | ------------------------------------------------------- |
-| حافظه | `Map` در `open-sse/services/reasoningCache.ts` | جستجوی سریع، اخراج قدیمی ترین ها با 200 سال             |
-| DB    | جدول `reasoning_cache` (`src/lib/db/`)         | در طول راه اندازی مجدد ادامه دارد، آمار را درایو می کند |
+| لایه  | پیادهسازی                                      | هدف                                        |
+| ----- | ---------------------------------------------- | ------------------------------------------ |
+| حافظه | `Map` در `open-sse/services/reasoningCache.ts` | جستوجوی سریع؛ حذف قدیمیترین مورد در 200    |
+| DB    | جدول `reasoning_cache` (`src/lib/db/`)         | ماندگاری پس از راهاندازی مجدد و تأمین آمار |
 
-نوشته ها به هر دو می رود. ابتدا حافظه را می خواند، سپس به DB برمی گردد ( بازدیدهای DB دوباره به حافظه ارتقا می یابند). خرابی های DB غیر کشنده هستند — حافظه نهان به خدمت مسیر داغ ادامه می دهد.
+نوشتن در هر دو انجام میشود. عملیات خواندن ابتدا حافظه را بررسی میکند و سپس بهعنوان راهکار جایگزین به DB مراجعه میکند (موارد یافتشده در DB دوباره به حافظه ارتقا داده میشوند). خطاهای DB بحرانی نیستند — کش درونحافظهای همچنان به مسیر پرتکرار سرویس میدهد.
 
-**پیش فرض ها:**
+**مقادیر پیشفرض:**
 
 - TTL: `2h` (`TTL_MS = 2 * 60 * 60 * 1000`)
-- حداکثر ورودی حافظه: `200` (`MAX_MEMORY_ENTRIES`)
-- اخراج: قدیمی ترین `createdAt` اول
+- حداکثر ورودیهای حافظه: `200` (`MAX_MEMORY_ENTRIES`)
+- حذف: ابتدا قدیمیترین `createdAt`
 
 ## طرحواره پایگاه داده
 
-هجرت: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+مهاجرت: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (
@@ -73,13 +74,13 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-شاخص ها: `expires_at`، `provider`، `model`، `created_at`. `expires_at` به عنوان ثانیه های دوره یونیکس ذخیره می شود. لایه SELECT مقادیر متن قدیمی را از طریق `EXPIRES_AT_EPOCH_SQL` عادی می کند.
+ایندکسها: `expires_at`، `provider`، `model`، `created_at`. مقدار `expires_at` بهصورت ثانیههای Unix epoch ذخیره میشود؛ لایه SELECT مقادیر متنی قدیمی را از طریق `EXPIRES_AT_EPOCH_SQL` نرمالسازی میکند.
 
-## ارائه دهنده / تشخیص مدل
+## تشخیص ارائهدهنده / مدل
 
-هنگامی که `requiresReasoningReplay(provider, model)` `true` را برگرداند، پخش مجدد فعال می شود. این تابع دو لیست را در `open-sse/services/reasoningCache.ts` بررسی می کند.
+بازپخش زمانی فعال میشود که `requiresReasoningReplay(provider, model)` مقدار `true` را برگرداند. این تابع دو فهرست را در `open-sse/services/reasoningCache.ts` بررسی میکند.
 
-**ارائه دهنده IDs (تطابق دقیق، بدون حساس به حروف کوچک و بزرگ):**
+**شناسههای ارائهدهنده (تطبیق دقیق، بدون حساسیت به بزرگی و کوچکی حروف):**
 
 - `deepseek`
 - `opencode-go`
@@ -93,12 +94,12 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - `kimi-coding-apikey`
 - `xiaomi-mimo`
 
-**الگوهای regex مدل (بدون حساسیت):**
+**الگوهای عبارت منظم مدل (بدون حساسیت به بزرگی و کوچکی حروف):**
 
 - `/deepseek-r1/i`
 - `/deepseek-reasoner/i`
 - `/deepseek-chat/i`
-- `/deepseek[-/]?v4[-.]flash/i` و `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro، پسوند اختیاری `-free` )
+- `/deepseek[-/]?v4[-.]flash/i` و `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro، با پسوند اختیاری `-free`)
 - `/(deepseek|zen\/deepseek)-v4/i`
 - `/kimi[-/]k\d/i`
 - `/qwq/i`
@@ -106,21 +107,21 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - `/glm.*think/i`
 - `/^mimo[-.]?v\d/i`
 
-افزودن یک provider/model سخت جدید به معنای ضمیمه شدن به یکی از این لیست ها و نوشتن یک آزمون واحد برای تأیید تزریق مجدد است. توضیحات PR باید دقیقاً رشته 400 بالادستی را ذکر کند که انگیزه این تغییر است.
+افزودن یک ارائهدهنده/مدل سختگیرانه جدید بهمعنای افزودن آن به یکی از این فهرستها و نوشتن یک آزمون واحد برای تأیید تزریق بازپخش است. توضیحات PR باید دقیقاً رشته خطای 400 بالادستی را که باعث این تغییر شده است، ذکر کند.
 
 ## REST API
 
-کش دو نقطه پایانی را در زیر `src/app/api/cache/reasoning/route.ts` نشان می دهد. هر دو نیاز به احراز هویت مدیریت دارند (`isAuthenticated` از `@/shared/utils/apiAuth`).
+کش دو نقطه پایانی را در `src/app/api/cache/reasoning/route.ts` ارائه میکند. هر دو به احراز هویت مدیریتی نیاز دارند (`isAuthenticated` از `@/shared/utils/apiAuth`).
 
-| روش    | نقطه پایانی                                               | توضیحات                                                            |
-| ------ | --------------------------------------------------------- | ------------------------------------------------------------------ |
-| GET    | `/api/cache/reasoning`                                    | آمار + ورودی های صفحه بندی شده                                     |
-| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | فهرست فیلتر شده (`limit` به `[1, 200]` متصل شد )                   |
-| DELETE | `/api/cache/reasoning`                                    | همه چیز را پاک کنید (حافظه + DB) و تعداد hit/miss را بازنشانی کنید |
-| DELETE | `/api/cache/reasoning?provider=deepseek`                  | فقط ورودی های یک ارائه دهنده را پاک کنید                           |
-| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | حذف یک ورودی                                                       |
+| متد    | نقطه پایانی                                               | توضیحات                                                    |
+| ------ | --------------------------------------------------------- | ---------------------------------------------------------- |
+| GET    | `/api/cache/reasoning`                                    | آمار + ورودیهای صفحهبندیشده                                |
+| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | فهرست فیلترشده (`limit` به بازه `[1, 200]` محدود میشود)    |
+| DELETE | `/api/cache/reasoning`                                    | پاککردن همهچیز (حافظه + DB) و بازنشانی شمارندههای hit/miss |
+| DELETE | `/api/cache/reasoning?provider=deepseek`                  | پاککردن فقط ورودیهای یک ارائهدهنده                         |
+| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | حذف یک ورودی منفرد                                         |
 
-**شکل پاسخ GET :**
+**ساختار پاسخ GET:**
 
 ```json
 {
@@ -152,35 +153,35 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 }
 ```
 
-## یادداشت های عملیاتی
+## نکات عملیاتی
 
-- **پاکسازی:** `cleanupReasoningCache()` ورودی های حافظه منقضی شده را پاک می کند و `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')` را اجرا می کند. کارکنان چک به صورت دوره ای با این تماس می گیرند.
-- **بازیابی تصادف:** پس از راه اندازی مجدد، حافظه خالی است اما DB همچنان ورودی های منقضی نشده را نگه می دارد. اولین جستجو برای `tool_call_id` داده شده یک ضربه DB است. جستجوهای بعدی بازدیدهای حافظه هستند.
-- **بدون استدلال، بدون حافظه پنهان:** `cacheReasoningFromAssistantMessage` زمانی `0` را برمیگرداند که پیام دستیار فیلد `reasoning_content` / `reasoning` نداشته باشد، بنابراین پاسخهای غیرمتفکر هزینهای ندارند.
-- **نوشتن نیز دردار است:** هر دو سایت تماس در `chatCore.ts` (غیر استریم و استریم) فقط زمانی `cacheReasoningFromAssistantMessage()` را فراخوانی میکنند که `requiresReasoningReplay(provider, model)` `true` — باشد همان محمول بررسیهای جانبی خوانده شده. نصبهایی که هرگز ارائهدهنده پخش مجدد را لمس نمیکنند، هزینه نوشتن، بهروزرسانی ایندکس و try/catch را در هر پاسخ مبتنی بر استدلال متوقف میکنند.
-- **ارائه دهندگان غیر دقیق:** وقتی `requiresReasoningReplay` `false` است و قالب هدف OpenAI است، مترجم** نوارها** هر فیلد `reasoning_content` از پیام های خروجی — OpenAI Chat Completions آن را نمی پذیرد.
+- **پاکسازی:** `cleanupReasoningCache()` ورودیهای منقضیشده حافظه را حذف میکند و `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')` را اجرا میکند. پردازشگرهای بررسی سلامت، این تابع را بهصورت دورهای فراخوانی میکنند.
+- **بازیابی پس از خرابی:** پس از راهاندازی مجدد، حافظه خالی است، اما DB همچنان ورودیهای منقضینشده را نگه میدارد. نخستین جستوجو برای یک `tool_call_id` مشخص، یک hit در DB است؛ جستوجوهای بعدی hit در حافظه هستند.
+- **بدون استدلال، بدون کش:** وقتی پیام دستیار فیلد `reasoning_content` / `reasoning` نداشته باشد، `cacheReasoningFromAssistantMessage` مقدار `0` را برمیگرداند؛ بنابراین پاسخهای بدون تفکر هیچ هزینهای ندارند.
+- **نوشتن نیز مشروط است:** هر دو محل فراخوانی در `chatCore.ts` (حالت غیرجریانی و جریانی) فقط زمانی `cacheReasoningFromAssistantMessage()` را فراخوانی میکنند که `requiresReasoningReplay(provider, model)` برابر با `true` باشد — همان گزارهای که سمت خواندن بررسی میکند. نصبهایی که هرگز از ارائهدهندهای نیازمند بازپخش استفاده نمیکنند، دیگر هزینه نوشتن، بهروزرسانی ایندکس و try/catch در هر پاسخ دارای استدلال را متحمل نمیشوند.
+- **ارائهدهندگان غیرسختگیرانه:** وقتی `requiresReasoningReplay` برابر با `false` و قالب مقصد OpenAI باشد، مترجم هرگونه فیلد `reasoning_content` را از پیامهای خروجی **حذف میکند** — OpenAI Chat Completions آن را نمیپذیرد.
 
-## مالکیت با استدلال غیرشفاف
+## مالکیت استدلال مات Muse
 
-Muse (`muse-code`) استدلال غیرشفاف فراگیرنده (`encrypted_content`) را برمیگرداند. پخش مجدد آن تحت یک حساب کاربری دیگر یا اعتبارنامه یادآوری شده در بالادست انجام نمیشود، بنابراین درخواستهای OAuth بومی از مالکیت در سطح جلسه به جای چرخش هر درخواست استفاده میکنند (`src/sse/services/museSessionOwnership.ts`، در `src/sse/handlers/chat.ts` اعمال میشود). اتصالات کلید API و پیکربندیهای فقط کلید API مسیریابی موجود خود را بدون این حالت مالکیت حفظ میکنند.
+Muse (`muse-code`) استدلال مات وابسته به فراخواننده (`encrypted_content`) برمی‌گرداند. بازپخش آن با حساب دیگر یا اعتبارنامهٔ دوباره‌صادرشده در بالادست شکست می‌خورد؛ بنابراین درخواست‌های بومی OAuth از مالکیت در سطح نشست به‌جای چرخش در هر درخواست استفاده می‌کنند (`src/sse/services/museSessionOwnership.ts`، با اعمال در `src/sse/handlers/chat.ts`). اتصال‌های کلید API که صریحاً انتخاب شده‌اند و پیکربندی‌های فقط کلید API، مسیریابی موجود را بدون این حالت مالکیت حفظ می‌کنند.
 
-- یک جلسه ثابت ID در هر نوبت ارائه دهید: `x-omniroute-session-id`، `x-omniroute-session`، `x-session-id`، یا `x-codex-session-id`. به طور متناوب `prompt_cache_key`، `session_id`، `conversation_id` یا `metadata.session_id` در بدنه (به ترتیب اولویت) استفاده کنید. هنگامی که دو یا چند حساب OAuth بومی فعال هستند، IDs 400 وجود ندارد یا خالی است. با یک حساب OAuth تنها چیزی برای چرخش وجود ندارد، بنابراین چنین درخواستی مسیریابی را بدون پین نگه می دارد. دامنه شامل OmniRoute کلید API تماسگیرنده ID.
-- جلسات مستقل تازه در میان حسابهای بومی فعال OAuth که توسط خطمشی اتصال کلید API مجاز است، مرتبسازی شده توسط اتصال ID انجام میشود. Round-robin حسابها را در خنککردن اتصال، با وضعیت ترمینال (`banned`، `expired`، `credits_exhausted`)، یا قفلشده مدل برای مدل درخواستی، رد میکند. خرابیهای بالادستی Muse مانند سایر ارائهدهندگان، حالت خنکدان و شکن را ثبت میکنند. یک اتصال صراحتاً اجباری برای یک جلسه جدید از دور روبین عبور می کند اما نمی تواند مالک موجود را لغو کند.
-- تا زمانی که مالک یک پاسخ موفقیت آمیز ارائه دهد، جلسه ای که مالک آن در دسترس نیست مجدداً در یک حساب سالم ادعا می شود. پس از اولین پاسخ موفقیتآمیز، جلسه به آن مالک پین میشود تا زمانی که به مدت 30 روز بیکار باشد (`MUSE_SESSION_IDLE_TTL_MS`).
-- هر نوبت ادامه و نتیجه ابزار به مالک جلسه پین میشود: اتصال، هویت حساب، و تولید اعتبار استنتاج، دوباره قبل از تلاشهای بالادستی، از جمله تلاشهای مجدد برای بازخوانی اعتبارنامه، بررسی میشود. پاسخها ارجاعات IDs/item را فراخوانی میکنند و ابزار تکمیل چت-تماس IDs باید برای آن جلسه و نسل ضبط شده باشد.
-- رکوردهای SQLite `key_value` در فضای نام `muse_session_ownership` (`src/lib/db/museSessionOwnership.ts`) همچنان مالکیت خود را حفظ می کنند و مکان نما چرخش در سراسر راه اندازی مجدد. هر ادعا و پاسخ ارائه شده، مهر فعالیت جلسه را تازه می کند. یک جلسه بیکار طولانی تر از `MUSE_SESSION_IDLE_TTL_MS` هرس می شود (پین صاحب، پرچم ارائه شده و هش opaque/reference ضبط شده)، حداکثر هر 10 دقیقه یک بار و در دسته های محدود، بنابراین پخش بعدی تاریخچه آن به عنوان مالک ناشناس بسته نمی شود. سوابق حاوی IDs اتصال و هش هویت حساب، اطلاعات کاربری، محتوای غیر شفاف و مراجع ادامه هستند، نه اسرار یا سابقه مکالمه. مشتریان باید تاریخچه کامل و استدلال مبهم خود را حفظ و ارسال کنند.
-- استدلال غیرشفاف ناشناخته یا خارجی، مالک گمشده، حساب مالک غیرقابل دسترس، یا تغییر نسل با سابقه ثبت شده با شکست صریح 4xx/503 — هرگز بیصدا بین حسابها بسته نمیشود و استدلال هرگز حذف نمیشود.
-- یک کلید همان حساب یادآوری شده تنها زمانی پذیرفته می شود که جلسه هیچ سابقه قابل پخش مجددی را ثبت نکرده باشد. جلسات ضبط شده تا زمانی که تازه شروع شوند، بسته نمی شوند.
-- یک پاسخ خالی بالادستی (`upstream_empty_response` / `empty_response`، چیزی به تماسگیرنده ارسال نمیشود) حداکثر دو بار روی یک مالک، پس از 0.5 ثانیه و سپس 1.5 ثانیه (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`) دوباره امتحان میشود. اگر تمام تلاشها خالی باشد، 502 اصلی بدون علامتگذاری خنکدان یا شکن بازگردانده میشود، بنابراین یک پاسخ ورقهای هرگز صاحب را قفل نمیکند.
-- همه درخواستهای `muse-code` از خواندن و نوشتن حافظه پنهان معنایی، از جمله نوشتن جریان، دور میزنند، بنابراین خروجی غیرشفاف ذخیرهسازی شده نمیتواند صاحب جلسه دیگری را به دست آورد.
+- در هر نوبت شناسهٔ نشست پایدار بدهید: `x-omniroute-session-id`، `x-omniroute-session`، `x-session-id` یا `x-codex-session-id`؛ یا در بدنه از `prompt_cache_key`، `session_id`، `conversation_id` یا `metadata.session_id` استفاده کنید (به همین ترتیب اولویت). شناسهٔ غایب یا خالی وقتی دو یا چند حساب بومی OAuth فعال باشند 400 می‌دهد؛ با یک حساب OAuth مقصد دیگری برای چرخش نیست، پس چنین درخواستی مسیریابی بدون تثبیت را حفظ می‌کند. دامنه شامل شناسهٔ کلید OmniRoute API فراخواننده است.
+- نشست‌های مستقل تازه به‌ترتیب شناسهٔ اتصال میان حساب‌های بومی OAuth فعال و مجاز طبق سیاست اتصال کلید API به‌صورت دورگردان تقسیم می‌شوند. دورگردان حساب‌های در استراحت اتصال، دارای وضعیت نهایی (`banned`، `expired`، `credits_exhausted`) یا قفل‌شده برای مدل درخواستی را رد می‌کند؛ خطاهای بالادست Muse مانند سایر ارائه‌دهندگان وضعیت استراحت و مدارشکن را ثبت می‌کنند. اتصال تحمیلی صریح در نشست تازه دورگردان را کنار می‌گذارد، اما نمی‌تواند مالکی را که پاسخ موفق داده است جایگزین کند.
+- تا پیش از پاسخ موفق مالک، نشستی که مالکش از دسترس خارج شده دوباره به حساب سالم تخصیص می‌یابد. پس از اولین پاسخ موفق، نشست تا 30 روز بیکاری به همان مالک تثبیت می‌ماند (`MUSE_SESSION_IDLE_TTL_MS`).
+- هر ادامه و نوبت نتیجهٔ ابزار به مالک نشست تثبیت می‌ماند: اتصال، هویت حساب و نسل اعتبارنامهٔ استنتاج، که پیش از تلاش‌های بالادست، از جمله تلاش مجدد پس از نوسازی اعتبارنامه، دوباره بررسی می‌شوند. شناسه‌های فراخوانی/ارجاع آیتم Responses و شناسه‌های فراخوانی ابزار Chat Completions باید برای همان نشست و نسل ثبت شده باشند.
+- رکوردهای SQLite `key_value` در فضای نام `muse_session_ownership` (`src/lib/db/museSessionOwnership.ts`)، مالکیت و نشانگر چرخش را پس از راه‌اندازی مجدد حفظ می‌کنند. هر ادعا و پاسخ ارائه‌شده زمان فعالیت نشست را تازه می‌کند؛ نشست بیکار بیش از `MUSE_SESSION_IDLE_TTL_MS` پاک‌سازی می‌شود (تثبیت مالک، پرچم ارائهٔ پاسخ و هش‌های مات/ارجاع ثبت‌شده)، حداکثر یک بار در هر 10 دقیقه و در دسته‌های محدود، تا بازپخش بعدی تاریخچه به‌عنوان مالک ناشناخته به‌صورت امن رد شود. رکوردها شامل شناسهٔ اتصال و هش هویت حساب، اعتبارنامه، محتوای مات و ارجاعات ادامه‌اند، نه اسرار یا تاریخچهٔ گفتگو. مشتریان باید کل تاریخچه و استدلال مات خود را نگه دارند و ارسال کنند.
+- استدلال مات ناشناخته یا بیگانه، مالک غایب، حساب مالکِ خارج از دسترس، یا تغییر نسل با تاریخچهٔ ثبت‌شده با 4xx/503 صریح به‌صورت امن رد می‌شود؛ هرگز جابه‌جایی خاموش میان حساب‌ها یا حذف استدلال رخ نمی‌دهد.
+- کلید دوباره‌صادرشدهٔ همان حساب فقط وقتی پذیرفته می‌شود که نشست تاریخچهٔ قابل بازپخش ثبت نکرده باشد؛ نشست‌های ثبت‌شده تا شروع تازه همچنان به‌صورت امن رد می‌شوند.
+- پاسخ خالی بالادست (`upstream_empty_response` / `empty_response`، بدون ارسال چیزی به فراخواننده) حداکثر دو بار با همان مالک، پس از 0.5 s و سپس 1.5 s، تکرار می‌شود (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). اگر همهٔ تلاش‌ها خالی باشند، 502 اصلی بدون علامت‌گذاری استراحت یا مدارشکن برگردانده می‌شود، پس پاسخ ناپایدار مالک را قفل نمی‌کند.
+- تمام درخواست‌های `muse-code` خواندن و نوشتن کش معنایی، از جمله نوشتن جریانی، را کنار می‌گذارند تا خروجی ماتِ کش‌شده مالک نشست دیگری نگیرد.
 
-گاردهای رگرسیون: `tests/unit/muse-session-ownership.test.ts`، `tests/unit/muse-session-ownership-retention.test.ts`، `tests/unit/muse-empty-response-retry.test.ts` و `tests/unit/chatcore-semantic-cache.test.ts`.
+محافظ‌های پس‌رفت: `tests/unit/muse-session-ownership.test.ts`، `tests/unit/muse-session-ownership-retention.test.ts`، `tests/unit/muse-empty-response-retry.test.ts` و `tests/unit/chatcore-semantic-cache.test.ts`.
 
 ## همچنین ببینید
 
-- قطع کننده های مدار [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ، خنک کننده، قفل مدل
-- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — در حال تشخیص بالادست 400s
-- منبع: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
-- هجرت: `src/lib/db/migrations/033_create_reasoning_cache.sql`
-- مسیر API : `src/app/api/cache/reasoning/route.ts`
-- شماره اصلی: #1628
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — قطعکنندههای مدار، دورههای انتظار، قفلشدن مدل
+- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — تشخیص خطاهای 400 سرویس بالادستی
+- منبع: `src/lib/db/reasoningCache.ts`، `open-sse/services/reasoningCache.ts`، `open-sse/translator/index.ts`
+- مهاجرت: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+- مسیر API: `src/app/api/cache/reasoning/route.ts`
+- مسئله اصلی: #1628

@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mexanizm:** Bütün HTTP/HTTPS trafikini HTTP_PROXY dinləyicisi vasitəsilə yönləndirmək üçün əməliyyat sistemi API-lərindən istifadə edir:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` və HTTP/HTTPS host/port parametrləri
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Əhatə dairəsi:** Kompüterdə sistem proksi parametrlərini nəzərə alan hər bir tətbiq
   **Qeyd:** `source` = `"system-proxy"`
 
 **Təhlükəsizlik mexanizmləri:**
 
-- Avtomatik deaktivləşdirmə taymeri (standart olaraq 30 dəqiqə, `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` vasitəsilə konfiqurasiya edilə bilər)
-- Əvvəlki sistem proksi vəziyyəti verilənlər bazasında saxlanılır və geri qaytarılarkən bərpa edilir
-- İstifadəçi aktiv olduğu müddətdə səhifədən ayrılarsa, idarə paneli "Sistem proksisi geri qaytarılır" bildirişini göstərir
-- UI `⚠ Qabaqcıl` nişanı və ayrıca təsdiq xanası göstərir
+- Proksinin tətbiqi proses daxilində işləyən, uğuruna zəmanət verilməyən geri qaytarma taymeri planlaşdırır (standart 30 dəq, `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` ilə tənzimlənir). Server prosesi bitdikdə taymer qalmır.
+- Proksinin əvvəlki vəziyyəti proses yaddaşında saxlanılır; bu tutma vəziyyəti anbarı onu verilənlər bazasında daimi saxlamır. Geri qaytarma saxlanmış macOS/GNOME parametrlərini bərpa edir; Windows-da əvvəlki konfiqurasiyanı bərpa etmək əvəzinə WinHTTP proksisini sıfırlayır.
+- Proksi tətbiq edilmiş kimi bildirildiyi müddətdə səhifənin boşaldılması zəmanətsiz keepalive geri qaytarma sorğusu göndərir və mətnini brauzerin müəyyən etdiyi daxili təsdiq pəncərəsini tələb edir. SPA naviqasiyası zamanı inspektorun sökülməsi də həmin brauzer pəncərəsi olmadan geri qaytarmağa çalışır.
+- Tutma alətlər paneli lokallaşdırılmış `System-wide` idarəetməsini xəbərdarlıq işarəsi ilə göstərir. Hazırda klik yalnız interfeysin yerli vəziyyətini dəyişir; təsdiq xanası göstərmir və sistem proksisini tətbiq etmir və ya geri qaytarmır.
 
 ### Rejim 5 — TPROXY şəffaf şifrəaçması (Linux, root, könüllü aktivləşdirmə)
 
@@ -113,13 +113,13 @@ Bu, özünəməxsus xüsusi operator təlimatına malik geniş bir alt sistemdir
 
 ### Tutma rejimlərinin müqayisəsi
 
-| Rejim                | Quraşdırma                         |              Sudo?              | Əhatə dairəsi                                | Qeydlər                                                                                                                                                       |
-| -------------------- | ---------------------------------- | :-----------------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge       | Avtomatik                          |   Bir dəfə (sertifikat+hosts)   | 9 IDE agenti                                 | Defolt olaraq aktivdir                                                                                                                                        |
-| 2. Fərdi hostlar     | Hər host üçün daxiletmə            |       Bəli (hosts faylı)        | Həmin hostdan istifadə edən istənilən tətbiq | DB-də saxlanılır                                                                                                                                              |
-| 3. HTTP_PROXY        | `export HTTPS_PROXY=...`           |              Xeyr               | Mühit dəyişənlərinə riayət edən tətbiqlər    | Port 8080; HTTPS CONNECT tuneli ilə ötürülür (yalnız metadata, heç vaxt deşifrə edilmir)                                                                      |
-| 4. Sistem miqyasında | Dəyişdirici + təsdiq               |              Bəli               | Kompüterdəki bütün tətbiqlər                 | 30 dəqiqədən sonra avtomatik deaktiv edilir                                                                                                                   |
-| 5. TPROXY deşifrəsi  | Dəyişdirici (Linux + native addon) | Bəli (root + CA quraşdırılması) | Hədəf portdakı istənilən host                | İxtiyari hostları deşifrə edir; defolt olaraq deaktivdir — `docs/security/MITM-TPROXY-DECRYPT.md` faylına baxın (git; `/docs` daxilində kompilyasiya edilmir) |
+| Rejim                | Quraşdırma                                                     |              Sudo?              | Əhatə dairəsi                                | Qeydlər                                                                                                                                                       |
+| -------------------- | -------------------------------------------------------------- | :-----------------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge       | Avtomatik                                                      |   Bir dəfə (sertifikat+hosts)   | 9 IDE agenti                                 | Defolt olaraq aktivdir                                                                                                                                        |
+| 2. Fərdi hostlar     | Hər host üçün daxiletmə                                        |       Bəli (hosts faylı)        | Həmin hostdan istifadə edən istənilən tətbiq | DB-də saxlanılır                                                                                                                                              |
+| 3. HTTP_PROXY        | `export HTTPS_PROXY=...`                                       |              Xeyr               | Mühit dəyişənlərinə riayət edən tətbiqlər    | Port 8080; HTTPS CONNECT tuneli ilə ötürülür (yalnız metadata, heç vaxt deşifrə edilmir)                                                                      |
+| 4. Sistem miqyasında | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Bəli               | Kompüterdəki bütün tətbiqlər                 | Uğuruna zəmanət verilməyən geri qaytarma taymeri (standart 30 dəq)                                                                                            |
+| 5. TPROXY deşifrəsi  | Dəyişdirici (Linux + native addon)                             | Bəli (root + CA quraşdırılması) | Hədəf portdakı istənilən host                | İxtiyari hostları deşifrə edir; defolt olaraq deaktivdir — `docs/security/MITM-TPROXY-DECRYPT.md` faylına baxın (git; `/docs` daxilində kompilyasiya edilmir) |
 
 ---
 
@@ -316,7 +316,7 @@ efemer portunu PID + adla aşağıdakı qaydada uyğunlaşdırır:
 ### 5.1 Sessiyanın qeydə alınması
 
 1. Alətlər panelində **"● Sessiyanı qeydə al"** düyməsinə klikləyin → ad daxil edin (istəyə bağlıdır)
-2. Canlı axın normal şəkildə davam edir; qırmızı yanıb-sönən göstərici `◉ REC · <ad> · 00:42 · 23 sorğu` göstərir
+2. Canlı izləmə normal davam edir; qeyd paneli yanıb-sönən qırmızı nöqtəni, keçən vaxtı, varsa sessiyanın adını və lokallaşdırılmış Dayandır idarəetməsini göstərir.
 3. **"⏹ Dayandır"** düyməsinə klikləyin → sessiyanın ani görüntüsü `inspector_sessions` + `inspector_session_requests` daxilində saxlanılır
 
 ### 5.2 Qeydə alınmış sessiyaya baxış
@@ -324,7 +324,7 @@ efemer portunu PID + adla aşağıdakı qaydada uyğunlaşdırır:
 Alətlər panelindəki **Sessiyalar** açılan siyahısı saxlanılmış sessiyaları göstərir. Onlardan biri seçildikdə:
 
 - Sessiyanın ani görüntüsü yüklənir (dondurulmuş vəziyyət)
-- Banner göstərilir: `Qeydə alınmış "<ad>" sessiyasına baxılır — [Canlı rejimə qayıt]`
+- Banner qeydə alınmış sessiyanın lokallaşdırılmış etiketini və sessiya adını (və ya adsız sessiya üçün lokallaşdırılmış əvəzedici mətni), lokallaşdırılmış canlı görünüşə qayıt düyməsinin yanında göstərir.
 - Recharts aqreqatları ilə Statistika tabı əlçatan olur
 
 ### 5.3 İxrac formatları
@@ -348,7 +348,7 @@ Traffic Inspector avtorizasiya başlıqları və sorğu gövdələri daxil olmaq
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                      | Bütün marşrutlar və WebSocket son nöqtəsi yalnız loopback üçün əlçatandır (autentifikasiyadan əvvəl `routeGuard.ts` daxilində məcburi şəkildə tətbiq edilir)                                      |
 | **Məxfi məlumatların maskalanması** | Xətti `maskSecret()` skaneri RFC 6750 Bearer giriş məlumatlarını, provayder prefiksli açarları və uzun qeyri-şəffaf tokenləri `TrafficBuffer.push()` çağırışından əvvəl gizlədir                  |
-| **Gövdə ölçüsü limiti**             | `INSPECTOR_MAX_BODY_KB` dəyərindən böyük gövdələr (standart olaraq 1024 KB) `"(performans üçün qısaldılıb)"` bildirişi ilə qısaldılır                                                             |
+| **Gövdə ölçüsü limiti**             | `INSPECTOR_MAX_BODY_KB` dəyərindən böyük gövdələr (standart olaraq 1024 KB) `"(truncated for performance)"` bildirişi ilə qısaldılır                                                              |
 | **Başlıqların sanitizasiyası**      | Adlar kiçik hərflərə çevrilir; freyminq/hop-by-hop və proksi autentifikasiya başlıqları silinir; kukilər tamamilə gizlədilir; giriş məlumatlarının dəyərləri `maskSecret()` funksiyasına ötürülür |
 | **CSP**                             | Daxil edilmiş cavab gövdələri vasitəsilə XSS hücumlarının qarşısını almaq üçün Traffic Inspector səhifələrində ciddi Content Security Policy tətbiq edilir                                        |
 | **Standart olaraq saxlanmır**       | `TrafficBuffer` yaddaşdaxilidir və server yenidən başladıldıqda itir. Sessiyalar yalnız açıq şəkildə qeydə alındıqda saxlanılır                                                                   |
@@ -416,7 +416,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-İdarəetmə paneli növbəti dəfə yüklənərkən DB vəziyyətinin proksinin aktiv olduğunu göstərdiyini aşkarlayarsa, "Sistem proksisini əvvəlki vəziyyətinə qaytar" seçimini də təklif edəcək.
+Saxlanmış proksi vəziyyəti yalnız server prosesində mövcuddur. Çökmə və ya yenidən başlatmadan sonra cari tutma vəziyyəti anbarı həmin görüntünü verilənlər bazasından bərpa edə bilmir; əl ilə bərpa lazım olduqda yuxarıdakı platforma bərpa əmrlərindən istifadə edin.
 
 ### Bufer doludur
 

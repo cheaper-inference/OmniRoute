@@ -187,6 +187,45 @@ Estes persistem até as credenciais serem alteradas ou um operador os repor. Nã
 Proteções de regressão: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Aplicação automática de redefinições acumuladas
+
+**Escopo:** conexões de assinatura Codex e Claude (OAuth). **Ativação opcional:** a configuração `bankedResetAutoApply` vem desativada e no modo `dry-run` por padrão (Configurações → AI → Aplicação automática de redefinições acumuladas).
+
+**Objetivo:** usar créditos de redefinição acumulados quando uma conta atinge um limite de uso, sem esperar que um operador pressione "Resgatar" na página Limites do Provedor.
+
+| Tipo de crédito (`creditTypes`) | O que é resgatado                                         | Onde é executado                                                           |
+| ------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `codexCredits`                  | Créditos de redefinição do Codex                          | tarefa em segundo plano, a cada 60 s                                       |
+| `claudeCredits`                 | Créditos acumulados do Claude (créditos `GRANT`)          | tarefa em segundo plano, a cada 60 s                                       |
+| `claudeSessionReset`            | Redefinição semanal do limite de sessão do Claude (acima) | caminho da requisição, pela mesma política usada na configuração por conta |
+
+**Implementação:**
+
+- Decisão pura (um conjunto de regras para os dois caminhos): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Tarefa em segundo plano: `src/lib/services/bankedResetAutoApply.ts` (iniciada em `src/instrumentation-node.ts`)
+- Verificação no caminho da requisição do Claude: `src/lib/usage/claudeSessionResetPolicy.ts`, registrada por `setClaudeLimitResetPolicy()` em `open-sse/services/claudeLimitReset.ts`
+- Histórico, limites e webhook: `src/lib/usage/bankedResetAudit.ts`
+- API do histórico: `GET /api/settings/banked-reset-auto/history?limit=50` (autenticação de gerenciamento)
+
+**Ordem de decisão** (a primeira regra que impedir a operação define o motivo registrado):
+
+1. Recurso desativado, tipo de crédito desativado ou conta fora do escopo (`accountScope` `all` / `selected`, junto com o mapa `connections` por conta).
+2. Fora do horário opcional em UTC (`startHourUtc` > `endHourUtc` indica um intervalo que atravessa a meia-noite).
+3. Limites nas últimas 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3) e `minSpacingMinutes` (30) entre quaisquer dois resgates.
+4. Gatilho: uma janela `session` ou `weekly` que atingiu o limite (obtida de `getQuotaWindowStatus().reachedThreshold`, e não de `isAccountQuotaExhausted()`, que só indica uma conta com todas as janelas esgotadas), ou um crédito que expira em até `expiringCreditHours` (24), em uma conta que já usou pelo menos `expiringCreditMinUsedPercent` (50).
+5. Proteção para a redefinição natural: não resgatar quando a janela de 5 horas que atingiu o limite será redefinida em até `sessionResetGuardMinutes` (90), ou quando a janela semanal que atingiu o limite será redefinida em até `weeklyResetGuardHours` (12).
+6. Mínimo semanal: não resgatar uma redefinição de 5 horas quando o saldo semanal restante estiver abaixo de `weeklyFloorPercent` (10).
+7. Modo `last-resort`: não resgatar enquanto outra conta do mesmo provedor, dentro do escopo, ainda tiver pelo menos `poolHeadroomPercent` (10) disponível nas duas janelas. O gatilho de crédito prestes a expirar não passa por essa restrição.
+8. `dry-run` registra uma linha sem resgatar nada; `last-resort` e `eager` efetuam o resgate.
+
+Dados de cota ausentes nunca autorizam um resgate: se o horário de redefinição ou o uso semanal necessário à decisão for desconhecido, a conta é ignorada.
+
+**Redefinição de sessão do Claude:** com o recurso desativado, ou com `claudeSessionReset` desativado, a configuração `autoLimitReset` por conta continua decidindo como antes. Com ambos ativados, o recurso substitui as configurações por conta: uma conta dentro do escopo só pode solicitar a redefinição quando a política permitir; no modo `dry-run`, nenhuma solicitação é feita.
+
+**Segurança:** a tarefa resgata no máximo um crédito por execução, decide antes de listar os créditos (os créditos de uma conta ignorada nunca são listados), usa chaves de idempotência `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` e suspende novas tentativas nessa conta por 1 h após uma falha de listagem ou resgate. Cada resgate, falha e decisão de simulação é gravado em `audit_log` (`action: "bankedReset.redeem"`, sem tokens nem IDs de créditos). Os limites são calculados a partir desses registros e, por isso, persistem após reinicializações. Resgates bem-sucedidos também disparam o webhook `provider.reset_redeemed`.
+
+Testes de regressão: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinidade da sessão (#7274)
 
 **Âmbito:** uma sessão de cliente (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`
@@ -369,26 +408,17 @@ dos bloqueios é efémero.
 
 ---
 
-## 4. Controlo de concorrência de quota-share (v3.8.36)
+## 4. Controlo de simultaneidade de quota-partilha (v3.8.36)
 
-As contas de subscrição (GLM, MiniMax, etc.) aceitam frequentemente apenas ~1–3
-pedidos concorrentes; exceder esse limite desencadeia 429 e períodos de
-arrefecimento. Isto é particularmente problemático em combinações de
-**quota-share** (`qtSd/…`), nas quais várias chaves de API partilham a mesma
-conta upstream. Três camadas impedem que uma conta partilhada seja inundada.
+As contas de subscrição (GLM, MiniMax, etc.) geralmente só aceitam pedidos simultâneos ~ 1–3; exceder isso aciona 429s e cooldowns. Isto é agudo sob **quota-partilha** (`qtSd/…`), em que várias chaves API partilham uma conta upstream. Três camadas evitam que uma conta partilhada seja inundada.
 
-### Limite de concorrência por ligação (`max_concurrent`)
+### Limite de simultaneidade por ligação (`max_concurrent`)
 
-Cada ligação de fornecedor pode declarar um limite `max_concurrent`
-(`provider_connections.max_concurrent`, definido no modal de ligação / API / DB).
-Deixe-o vazio para não impor qualquer limite. Este é o único parâmetro que
-controla a camada de serialização abaixo — defina-o de acordo com a concorrência
-real da conta (por exemplo, GLM ~1, MiniMax ~2).
+Cada ligação do fornecedor pode declarar um tecto `max_concurrent` (`provider_connections.max_concurrent`, definido no modal de ligação / API / DB). Deixe-o vazio sem limite. Este é o botão único que orienta a camada de serialização abaixo do —, configurando-a para a simultaneidade real da conta (por exemplo GLM ~ 1, MiniMax ~ 2).
 
-### Limites de concorrência por modelo (`modelConcurrency`)
+### Limites de simultaneidade por modelo (`modelConcurrency`)
 
-Uma ligação pode também declarar limites exactos de concorrência por modelo
-dentro do seu mapa `rateLimitOverrides`:
+Além disso, uma ligação pode declarar limites exatos de simultaneidade por modelo dentro do seu mapa `rateLimitOverrides` :
 
 ```json
 {
@@ -399,71 +429,32 @@ dentro do seu mapa `rateLimitOverrides`:
 }
 ```
 
-Defina-o no modal de ligação (**Substituições do limite de taxa → Limites de
-concorrência por modelo**, um `model=cap` por linha) ou através de
-`PATCH /api/providers/[id]` com a mesma estrutura JSON. Semântica das chaves:
+Defina-o no modal de ligação (**O limite de taxa substitui os limites de simultaneidade → por modelo** , um `model=cap` por linha) ou via `PATCH /api/providers/[id]` com o mesmo formato JSON. Semântica chave:
 
-- **Limite para toda a ligação vs. específico do modelo:** `maxConcurrent` continua a ser o limite partilhado para toda a ligação. Quando ambos se aplicam, ambos os limites são adquiridos atomicamente no mesmo mecanismo composto
-  (`global → provider → account → model`); o comportamento efectivo é determinado pelo limite aplicável mais restritivo.
-- **Correspondência exacta da chave do modelo:** a chave é a cadeia do modelo passada ao executor após a resolução do encaminhamento — normalmente o ID simples do modelo upstream (`glm-5`), e não um alias `provider/model` do lado do cliente (`zai/glm-5` não corresponde a `glm-5`). Os valores são limites positivos inteiros de pedidos concorrentes.
-- **Colocação local em fila, sem descoberta:** os pedidos excedentes são colocados localmente em fila, com a semântica existente de fila/tempo limite (erros de admissão tipados `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). O OmniRoute não descobre nem infere a política upstream — aplica os limites exactos configurados pelo operador. Um mecanismo de limitação de modelo saturado nunca desactiva o fornecedor nem cria um bloqueio permanente do modelo; o comportamento de erro de 429/arrefecimento/fallback upstream continua a servir de salvaguarda.
-- **Âmbito por ligação e por processo:** os limites aplicam-se por ligação à base de dados e são mantidos em memória, pelo que duas ligações que reutilizem a mesma chave de API upstream não coordenam entre si.
-- **Não configurado significa inalterado:** omitir o mapa (ou deixar o campo do painel vazio) não adiciona qualquer limite de modelo. Exemplo de configuração sem afirmar qualquer limite universal do fornecedor:
+- **Em toda a ligação versus específico do modelo:** `maxConcurrent` continua a ser o teto partilhado para toda a ligação. Quando ambos se aplicam, ambas as portas são adquiridas atomicamente na mesma porta composta (`global → provider → account → model`); o comportamento efetivo é o limite aplicável mais rigoroso.
+- **Correspondência exata da chave do modelo:** a chave é a string do modelo passada ao executor após a resolução de encaminhamento — normalmente o ID do modelo upstream simples (`glm-5`), e não um alias `provider/model` do lado do cliente (`zai/glm-5` não corresponde `glm-5`). Os valores são limites máximos de pedidos simultâneos de número inteiro positivo.
+- **Enfileiramento local, sem descoberta:** os pedidos em excesso são enfileirados localmente com a semântica queue/timeout existente (erros de admissão `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` digitados). OmniRoute não descobre nem infere a política upstream — impõe os limites exatos que o operador configurou. Um modelo saturado nunca desativa o fornecedor e nunca cria um bloqueio permanente do modelo; o comportamento upstream 429/cooldown/fallback continua a ser o backstop de erro.
+- **Âmbito por ligação e por processo:** os caps são por ligação à base de dados e mantidos em memória, pelo que duas ligações que reutilizam a mesma chave API upstream não estão coordenadas entre si.
+- **Não configurado significa inalterado:** omitir o mapa (ou deixar o campo do painel em branco) não acrescenta nenhuma porta de modelo. Exemplo de configuração sem declarar qualquer limite de fornecedor universal:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialização de pedidos quota-share
+### Serialização de pedido de quota partilhada
 
-Quando um despacho quota-share tem como destino uma ligação que declara um
-`max_concurrent` positivo, os pedidos concorrentes para essa **conta** são
-serializados através de um semáforo por ligação (chave `qsconn:<connectionId>`):
-os pedidos excedentes **aguardam na fila**, em vez de inundarem a conta. É
-**fail-open** — uma fila saturada ou um tempo limite prossegue sem obter um
-slot, em vez de rejeitar um pedido que possa ser despachado. Activar em
-**Definições → Resiliência → Concorrência quota-share por ligação**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, activado por
-predefinição). Sem um limite `max_concurrent`, o comportamento mantém-se
-inalterado.
+Quando um despacho de quota partilhada tem como alvo uma ligação que declara um `max_concurrent` positivo, os pedidos simultâneos para esse **conta** são serializados através de um semáforo por ligação (chave `qsconn:<connectionId>`): excesso de pedidos **espere na fila** em vez de inundar a conta. Isso é **falha aberta** — uma fila saturada ou tempo limite prossegue sem um slot, em vez de rejeitar um pedido despachável. Ativar **Configurações Resiliência → Simultaneidade de quota partilhada por ligação →** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, padrão activado). Sem um limiar `max_concurrent` o comportamento permanece inalterado.
 
-> O mecanismo de encaminhamento quota-share (`selectQuotaShareTarget`, DRR + P2C) também é
-> fail-open e apenas _reduz a prioridade_ de uma ligação que atingiu o limite — com um
-> conjunto de ligações de uma só ligação não pode impor um limite rígido, pelo que este
-> semáforo é o que efectivamente contém a inundação.
+> A porta de encaminhamento de quota-partilha (`selectQuotaShareTarget`, DRR + P2C) é aberta em caso de falha e apenas _desprioriza_ uma ligação — at-cap com um pool de ligação única que não pode ser limitado, pelo que este semáforo é o que realmente contém a inundação.
 
-### Nova tentativa sensível ao período de arrefecimento de combinações
+### Nova tentativa com reconhecimento de arrefecimento combinado
 
-Para todas as estratégias de combinação (quando activadas), um pedido que
-provocaria um 429 durante um período de arrefecimento transitório CURTO aguarda
-que este termine e é novamente despachado, em vez de devolver o 429 — isto
-abrange janelas TPM/RPM da classe Gemini (~60 s de retry-after) em combinações
-com vários modelos, por exemplo quando ambos os destinos de uma combinação de
-2 modelos atingem um limite de taxa por modelo. Limitado por
-`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) em
-**Definições → Resiliência**. Nunca aguarda em `quota_exhausted` (bloqueado até
-à meia-noite) nem por motivos de autenticação/modelo não encontrado.
+Para cada estratégia de combinação (quando ativada), um pedido que cristalizaria um 429 para um arrefecimento transitório SHORT espera e reenvia em vez de devolver o 429 — Isto cobre janelas TPM/RPM da classe Gemini (repetição após ~ 60s) em combos de vários modelos, por exemplo, ambos os alvos de um combo de 2 modelos a atingir um limite de taxa por modelo. Delimitado por `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) em **Configurações Resiliência →** . Nunca espera por motivos `quota_exhausted` (bloqueado até à meia-noite) ou auth/not-found. Com `comboTimeoutMs` definido, não é iniciada uma espera que não possa terminar antes desse prazo (#18998): o combo responde imediatamente com a sua resposta terminal em vez de um `COMBO_TIMEOUT` 504.
 
-Uma combinação pode optar por não participar com
-`config.comboCooldownWaitEnabled: false`. Apenas `false` literal desactiva estas
-esperas partilhadas de combinações (arrefecimento pós-despacho e esperas
-pré-despacho de circuito aberto/bloqueio do modelo) e a extensão do limite
-inferior do tempo limite do orçamento de espera. A ausência do valor ou `true`
-preserva a política global; `true` não pode activar globalmente uma espera
-desactivada. Um `targetTimeoutMs` explícito continua a prevalecer. Esta opção
-não altera a espera pré-despacho separada de fixação de turno do Codex nativo.
+Um combo pode ser cancelado com `config.comboCooldownWaitEnabled: false`. Apenas `false` literal desativa estas esperas combinadas partilhadas (arrefecimento pós-despacho e esperas circuit-open/model-lock pré-despacho) e a sua extensão de tempo limite de orçamento de espera. Ausente ou `true` preserva a política global; `true` não pode ativar a espera desativada globalmente. Um `targetTimeoutMs` explícito ainda ganha. Esta desativação não altera a espera de pré-despacho separada do código nativo do Codex.
 
-O mesmo mecanismo abrange o caso pré-despacho (#16319): quando todos os destinos
-de uma combinação são ignorados antes de qualquer tentativa, porque o respectivo
-modelo se encontra num bloqueio transitório curto, o caminho sem tentativas
-aguarda que o bloqueio termine dentro dos mesmos limites e efectua um novo
-despacho, em vez de responder com um `503 ALL_TARGETS_SKIPPED` sem indicação.
-Quando não é permitida qualquer espera (limite, tentativa ou orçamento
-esgotado, ou funcionalidade desactivada), a resposta terminal é actualizada
-para `429 rate_limit_error`, incluindo `retry_after` / `reset_at` provenientes
-da expiração do bloqueio transitório mais próximo; os bloqueios de quota,
-autenticação e modelo não encontrado mantêm o 503 sem indicação.
+A mesma porta cobre o caso de pré-despacho (#16319): quando cada alvo de um combo é ignorado antes de qualquer tentativa ser feita porque o seu modelo fica num bloqueio transitório curto, o caminho de tentativa zero aguarda o bloqueio sob os mesmos limites e reenvia, em vez de responder a um `503 ALL_TARGETS_SKIPPED` sem dicas. Quando não é permitida qualquer espera (teto, tentativa ou orçamento esgotados, ou recurso desativado), a resposta do terminal é atualizada para `429 rate_limit_error` transportando `retry_after` / `reset_at` a partir da primeira expiração transitória do bloqueio; Os bloqueios de quota, autenticação e não encontrado mantêm o 503 sem dicas.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

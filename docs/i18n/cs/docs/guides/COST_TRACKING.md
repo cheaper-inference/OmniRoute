@@ -40,16 +40,16 @@ Protože jde o odhad:
 
 ### Zdroj ceny
 
-Náklady pocházejí ze sloučené cenové tabulky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) v tomto pořadí priority (** nejvyšší první** ):
+Náklady pocházejí ze sloučené cenové tabulky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) v tomto pořadí priority (**nejvyšší první** ):
 
-1. **Uživatelské přepisy** ceny — nastavené na řídicím panelu nebo prostřednictvím `PATCH /api/pricing` (jmenný prostor `pricing` ).
-2. **synchronizace modelů.dev** — ceny načtené z `https://models.dev/api.json` (jmenný prostor `models_dev_pricing` ).
-3. **synchronizace LiteLLM** ceny — získané z veřejného `model_prices_and_context_window.json` LiteLLM(jmenný prostor `pricing_synced` ).
-4. **Pevně zakódované výchozí hodnoty** sazby — dodávané v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Uživatelské přepisy** Ceny — nastavené na řídicím panelu nebo prostřednictvím `PATCH /api/pricing` (jmenný prostor `pricing` ).
+2. **synchronizace modelů.dev** Ceny — načtené ze `https://models.dev/api.json` (jmenný prostor `models_dev_pricing` ).
+3. **LiteLLM synchronizace** Ceny — získané z veřejného `model_prices_and_context_window.json` LiteLLM(jmenný prostor `pricing_synced` ).
+4. **Pevně zakódované výchozí hodnoty** Sazby — zasílány v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Pro stejné provider/model hodnoty z vrstev s vyšší prioritou přepisují odpovídající pole v nižších vrstvách; pole nepřítomná v horní vrstvě mohou stále pocházet z nižší vrstvy. Pořadí je pevné, i když jsou obě nezávislé synchronizační úlohy spuštěny současně. `GET /api/pricing?includeSources=1` vrátí `pricing` a `sourceMap`, jejichž popisky pro model (`user`, `modelsDev`, `litellm`, `default`) označují vrstvu s nejvyšší prioritou obsahující daný model.
+U stejného provider/model hodnoty z vrstev s vyšší prioritou přepisují odpovídající pole v nižších vrstvách; pole nepřítomná v horní vrstvě mohou stále pocházet z nižší vrstvy. Pořadí je pevné, i když jsou obě nezávislé synchronizační úlohy spuštěny současně. `GET /api/pricing?includeSources=1` vrací `pricing` a `sourceMap`, jejichž popisky podle modelu (`user`, `modelsDev`, `litellm`, `default`) označují vrstvu s nejvyšší prioritou obsahující daný model.
 
-**synchronizace LiteLLM** je přihlášení, ve výchozím nastavení zakázáno. Jeho proměnné prostředí (viz [`.env.example`](../../.env.example) ) jsou:
+**LiteLLM synchronizace** je přihlášení, ve výchozím nastavení zakázáno. Jeho proměnné prostředí (viz [`.env.example`](../../.env.example) ) jsou:
 
 | Env var                 | Výchozí   | Účel                                                                                |
 | ----------------------- | --------- | ----------------------------------------------------------------------------------- |
@@ -64,33 +64,55 @@ Pro stejné provider/model hodnoty z vrstev s vyšší prioritou přepisují odp
 | `MODELS_DEV_SYNC_ENABLED`  | _(nenastaveno)_ | Unset následuje přepínač Nastavení; `1/true/on/yes` vynutí zapnutí a `0/false/off/no` vypnutí (i když to Nastavení povolí). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Výchozí interval synchronizace models.dev v sekundách (denně).                                                              |
 
-`PRICING_SYNC_SOURCES` dělá** ne** povolit modely.dev; ovládá pouze synchronizaci LiteLLM. Odstraněním uživatelského přepsání se nevymaže ani synchronizovaný jmenný prostor; začne platit další dostupná cenová vrstva. U cenově dostupného modelu před přidáním ručního přepsání zkontrolujte nastavení synchronizace i `sourceMap`.
+`PRICING_SYNC_SOURCES` ano **ne** povolit modely.dev; ovládá pouze synchronizaci LiteLLM. Odstraněním uživatelského přepsání se nevymaže ani synchronizovaný jmenný prostor; začne platit další dostupná cenová vrstva. U cenově dostupného modelu zkontrolujte před přidáním ručního přepisu nastavení synchronizace i `sourceMap`.
 
 ### Nákladový vzorec
 
 Cena se počítá na žádost z počtu tokenů a sazeb za milion tokenů v [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Vstupní tokeny** (mínus čtení z mezipaměti a tokeny pro vytvoření mezipaměti) rychlost × `input`.
-- **Tokeny čtení z mezipaměti** × `cached` rychlost (spadne zpět na vstupní rychlost).
-- **Tokeny pro vytváření mezipaměti** × `cache_creation` rychlost (spadne zpět na vstupní rychlost).
-- **Výstupní tokeny** sazba × `output`.
-- **Tokeny zdůvodnění** × `reasoning` rychlost (spadne zpět na výstupní rychlost).
+- **Vstupní tokeny** (minus čtení z mezipaměti a tokeny pro vytvoření mezipaměti) Rychlost × `input`.
+- **Tokeny čtení z mezipaměti** × Sazba `cached` (spadne zpět na vstupní rychlost).
+- **Tokeny pro vytváření mezipaměti** × Sazba `cache_creation` (spadne zpět na vstupní rychlost).
+- **Výstupní tokeny** Sazba × `output`.
+- **Tokeny zdůvodnění** × Sazba `reasoning` (spadne zpět na výstupní rychlost).
 
-Všechny sazby jsou interpretovány jako USD za 1 000 000 tokenů. Úroveň služeb Codex „rychlá“/„priorita“ nebo „flex“ aplikuje multiplikátor nákladů (`getCodexFastCostMultiplier`) — např. flex je účtován s 50% slevou na tokenu, která se objeví jako** flex spoření** v palubní desce.
+Všechny sazby jsou interpretovány jako USD na 1 000 000 tokenů. Úroveň služeb Codex „rychlá“/„priorita“ nebo „flex“ používá multiplikátor nákladů (`getCodexFastCostMultiplier`) — např. flex je účtován s 50% slevou na tokenu, která se objeví jako **flex spoření** v palubní desce.
 
 Názvy modelů jsou nejprve normalizovány (předpony cesty poskytovatele jako `openai/` nebo `accounts/fireworks/models/` jsou odstraněny), takže historické řádky stále odpovídají ceně.
 
 ### Jak se zaznamenává útrata
 
-- Cena za požadavek je vypočítána po odpovědi a zaznamenána, takže nikdy nepřidává klientovi latenci. Spotřeba sdílené kvóty je naplánována na další zaškrtnutí smyčky událostí prostřednictvím [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Utrácení klíče API je ukládáno do vyrovnávací paměti a vyprázdněno v dávkách pomocí [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (výchozí interval vyprázdnění 60 s, vyrovnávací paměť 1 000 záznamů). Laditelné přes:
+- Cena za požadavek se vypočítá při dokončení požadavku. Spotřeba sdílené kvóty je naplánována na další zaškrtnutí smyčky událostí prostřednictvím [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Výdaje na klíč API jsou ukládány do vyrovnávací paměti a vyprázdněny v dávkách pomocí [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (výchozí interval vyprázdnění 60 s, vyrovnávací paměť 1 000 záznamů). Laditelné přes:
 
   | Env var                             | Výchozí | Účel                                                             |
   | ----------------------------------- | ------- | ---------------------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval splachování v milisekundách.                            |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maximální počet záznamů ve vyrovnávací paměti před vyprázdněním. |
 
-Údaje o nákladech na palubní desce jsou** ne** číst z uložené částky — v dolarech za řádek jsou přepočítávány za chodu z počtů tokenů a aktuální cenové tabulky pokaždé, když se spustí analytický koncový bod. To znamená, že oprava nesprávné ceny (a re-synchronizace) aktualizuje historické odhady nákladů zpětně.
+Náklady upřednostňují přesný poplatek nahlášený poskytovatelem (`provider_cost_usd`), poté snímek požadavku s cenou podle katalogu (`calculated_cost_usd`) a poté cenu tokenu z aktuálního katalogu. Uložené náklady se znovu neúčtují prostřednictvím jejich počtu tokenů. Starší řádky pouze s tokeny se stále mění, když se změní jejich katalogová cena.
+
+### OCR a vložení
+
+- Úspěšné požadavky `/v1/ocr` používají upstream `usage_info.pages_processed`, nikoli požadovaný rozsah stránek nebo počet vrácených objektů stránky. Odhad je na stránkách × `ocr_cost_per_page` (absolutní USD/page,**ne** USD/million).
+- Požadavky s anotací dokumentu nebo ohraničovacího rámečku vyžadují samostatný tarif `ocr_cost_per_annotated_page`. Bez toho zůstávají náklady neznámé; běžný tarif OCR není tiše nahrazen.
+- Synchronizace LiteLLM mapuje své pole `annotation_cost_per_page` před vstupem do `ocr_cost_per_annotated_page`, přičemž zachovává absolutní hodnotu USD/page a záznamy pouze pro anotaci, včetně explicitní nuly. Dodané kanonické pole má přednost; neplatné hodnoty aliasů jsou ignorovány. Přepisy uživatelských cen si zachovávají svou běžnou prioritu. Viz [cenové klíče LiteLLM společnosti OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Použití OCR ukládá počet stránek, jednotkovou cenu, vypočítané náklady USD, klíč API a vybrané připojení. Stránky nejsou nikdy reprezentovány jako tokeny. Protokoly hovorů obsahují fakturační metadata, nikoli dokument URLs, bajty PDF nebo extrahovaný text.
+- Úspěšné požadavky `/v1/embeddings` zaznamenají jeden řádek využití na fyzickou dávku, včetně samostatných dávek dokončených za stejnou milisekundu. Poplatky nahlášené poskytovatelem mají přednost před tokenovými odhady; kombinované obaly neúčtují žádný poplatek.
+- Tyto poplatky zahrnují historii používání, analýzu nákladů, okna provider/account, limity výdajů na klíč API, účetní kniha nákladů na požadavky a denní souhrny využití. Klíče bez protokolu zachovávají číselné účtování bez zachování zdrojového textu.
+- Chybí využití nebo tarify **neznámý** , není zdarma: hlavička nákladů na odezvu je vynechána a stávající zásada používání bez ceny platí pro omezené klíče API. Explicitně nakonfigurované nulové sazby zůstávají v platnosti s nulovými náklady.
+
+Toto je pouze dopředné účetnictví. Stará volání OCR/embedding, která nikdy nezapsala historii použití, nelze z této migrace rekonstruovat. Katalogové odhady jsou odhady USD, nikoli faktura, a nezahrnují převod měny, daně ani slevy.
+
+### Řeč a obrazy
+
+- Úspěšné pokusy `/v1/audio/transcriptions`, `/v1/audio/speech` a generování obrázků sdílejí numerické účetnictví. Přímé a kombinované hovory nesou klíč API volajícího a zvolené spojení; kombinovaný obal nikdy nepřidá druhý debet.
+- Poskytovatelem hlášená USD vítězí nad katalogovým odhadem, včetně explicitního nulového poplatku. OpenRouterJSON `usage.cost` je normalizováno na `cost_usd`. Jinak měřené tokeny používají ceny tokenů, sekundy přepisu používají ceny za sekundu, hlasový vstup používá počet znaků Unicode a obrázky s pevnou cenou používají skutečně vrácené číslo, nikoli požadované `n`.
+- Binární OpenRouter TTS nemá žádné tělo použití JSON. Po dokončení zvuku nebo zrušení volajícího se OmniRoute zeptá na svou generaci ID na **stejný** nakonfigurovaný původ OpenRouter. Požadavek EU se nikdy nevrací ke globálnímu původu. Toto je omezené vyhledávání pouze pro čtení; syntéza není znovu zkoušena pro účetnictví. Fakturační záznamy se mohou objevit po dokončení zvuku: opakování vyhledávání běží na pozadí po dobu až 52 sekund, včetně síťových uzávěrek.
+- Během tohoto vyhledávání má zvuková odpověď `X-OmniRoute-Cost-Status: pending` a žádnou hlavičku nákladů na odezvu. Jeho konečný poplatek se po odsouhlasení objeví v historii používání, analýze a hlavní knize. Pokud metadata nejsou k dispozici, použije se konfigurovaný snímek tarifu; jinak cena zůstává neznámá.
+- Počty sekund, znaků a obrázků mají samostatná pole fakturačních jednotek, nikdy ne falešné počty tokenů. Účetnictví zachovává pouze numerické použití, nikoli text řeči, přepisy nebo bajty obrázků. Stávající výjimky týkající se neplacených obrázků se nemění: skutečně chybějící tarif pro obrázky nově nezamyká omezený klíč a odpověď vynechává hlavičku ceny, místo aby hovor prohlásil za bezplatný. Selhání obchodu s cenami stále uchovává důkazy o použití pro vynucení, které bylo ukončeno selháním.
+
+Žádný historický poplatek speech/image není vynalezen ani zasypán. Účtování poskytovatele zůstává referenční pro faktury a pro hovory, jejichž cena nebyla hlášena.
 
 ---
 
@@ -141,50 +163,54 @@ Oblast Náklady také obsahuje následující stránky (všechny pod `/dashboard
 
 ---
 
-## API koncové body
+## Koncové body API
 
-Všechny tyto vyžadují oprávnění pro správu (loopback/JWT, via `requireManagementAuth`), pokud není uvedeno jinak.
+Všechny vyžadují autentizaci pro správu (loopback/JWT prostřednictvím
+`requireManagementAuth`), není-li uvedeno jinak.
 
-### Analýza využití a nákladů
+### Analytika využití a nákladů
 
-| Metoda | Koncový bod              | Účel                                                                                                                                                       |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Úplná analýza cost/usage : souhrn, denní trend, podle provider/model/API key/account/tier. Dotaz: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Využití kvót na poskytovatele v průběhu času. Dotaz: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                          |
-| `GET`  | `/api/usage/history`     | Nezpracované řádky historie využití.                                                                                                                       |
-| `GET`  | `/api/usage/call-logs`   | Protokoly hovorů podle požadavku (model, tokeny, cena, latence, stav).                                                                                     |
-| `GET`  | `/api/usage/quota`       | Stav kvóty poskytovatele.                                                                                                                                  |
-| `GET`  | `/api/usage/proxy-logs`  | Protokoly požadavků proxy.                                                                                                                                 |
+| Metoda | Koncový bod              | Účel                                                                                                                                                                                     |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Kompletní analytika nákladů a využití: souhrn, denní vývoj, podle poskytovatele/modelu/API klíče/účtu/úrovně. Parametry dotazu: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Využití kvóty jednotlivých poskytovatelů v čase. Parametry dotazu: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                          |
+| `GET`  | `/api/usage/history`     | Nezpracované řádky historie využití.                                                                                                                                                     |
+| `GET`  | `/api/usage/call-logs`   | Protokoly jednotlivých požadavků (model, tokeny, náklady, latence, stav).                                                                                                                |
+| `GET`  | `/api/usage/quota`       | Stav kvóty poskytovatele.                                                                                                                                                                |
+| `GET`  | `/api/usage/proxy-logs`  | Protokoly požadavků proxy.                                                                                                                                                               |
 
 ### Rozpočty
 
-| Metoda | Koncový bod              | Účel                                                                                           |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Souhrn nákladů + kontrola rozpočtu pro jeden klíč API (vyžadován parametr dotazu `apiKeyId` ). |
-| `POST` | `/api/usage/budget`      | Nastavit limity daily/weekly/monthly USD prahové hodnoty varování + pro klíč API.              |
-| `GET`  | `/api/usage/budget/bulk` | Hromadné souhrny rozpočtu napříč klíči API.                                                    |
+| Metoda | Koncový bod              | Účel                                                                                             |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `GET`  | `/api/usage/budget`      | Souhrn nákladů a kontrola rozpočtu pro jeden API klíč (je vyžadován parametr dotazu `apiKeyId`). |
+| `POST` | `/api/usage/budget`      | Nastavení denních/týdenních/měsíčních limitů v USD a prahu upozornění pro API klíč.              |
+| `GET`  | `/api/usage/budget/bulk` | Hromadné souhrny rozpočtů napříč API klíči.                                                      |
 
-> Rozpočet API je vymezen na**API klíč** (`apiKeyId`). Limity vrácené `GET /api/usage/budget` zahrnují `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` a průběžné součty (`totalCostToday`, `totalCostMonth`, …).
+> Rozpočtové API je vymezeno pro jednotlivé **API klíče** (`apiKeyId`). Limity vrácené
+> prostřednictvím `GET /api/usage/budget` zahrnují `dailyLimitUsd`, `weeklyLimitUsd`,
+> `monthlyLimitUsd`, hodnotu `warningThreshold` a průběžné součty (`totalCostToday`,
+> `totalCostMonth`, …).
 
 ### Ceny
 
-| Metoda   | Koncový bod             | Účel                                                                                                                                                              |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Sloučené čtyřvrstvé ceny (uživatel, models.dev, LiteLLM, výchozí nastavení). `?includeSources=1` vrátí `pricing` + `sourceMap`.                                   |
-| `PATCH`  | `/api/pricing`          | Přepsat cenu pro `{ provider: { model: { input, output, cached, … } } }`.                                                                                         |
-| `DELETE` | `/api/pricing`          | Odebrat přepsání uživatelských cen (volitelně s rozsahem podle `?provider=&model=`); synchronizované sazby nebo vestavěné výchozí hodnoty zůstávají jako záložní. |
-| `GET`    | `/api/pricing/defaults` | Zobrazit výchozí per-1M záložní sazby.                                                                                                                            |
-| `GET`    | `/api/pricing/models`   | Cena stanovena podle modelu.                                                                                                                                      |
-| `POST`   | `/api/pricing/sync`     | Spusťte ruční synchronizaci z externích zdrojů (LiteLLM).                                                                                                         |
-| `GET`    | `/api/pricing/sync`     | Aktuální stav synchronizace.                                                                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Jasné pouze ceny synchronizované LiteLLM (`pricing_synced`); data models.dev jsou oddělená.                                                                       |
+| Metoda   | Koncový bod             | Účel                                                                                                                                                       |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Sloučené ceny ze čtyř vrstev (uživatel, models.dev, LiteLLM, výchozí hodnoty). `?includeSources=1` vrací `pricing` + `sourceMap`.                          |
+| `PATCH`  | `/api/pricing`          | Přepsání cen pro `{ provider: { model: { input, output, cached, … } } }`.                                                                                  |
+| `DELETE` | `/api/pricing`          | Odstraní uživatelská přepsání cen (volitelně omezená pomocí `?provider=&model=`); synchronizované sazby a vestavěné výchozí hodnoty zůstávají jako záloha. |
+| `GET`    | `/api/pricing/defaults` | Zobrazení výchozích záložních sazeb za 1 milion jednotek.                                                                                                  |
+| `GET`    | `/api/pricing/models`   | Ceny indexované podle modelu.                                                                                                                              |
+| `POST`   | `/api/pricing/sync`     | Spuštění ruční synchronizace z externích zdrojů (LiteLLM).                                                                                                 |
+| `GET`    | `/api/pricing/sync`     | Aktuální stav synchronizace.                                                                                                                               |
+| `DELETE` | `/api/pricing/sync`     | Vymaže pouze ceny synchronizované z LiteLLM (`pricing_synced`); data models.dev jsou oddělená.                                                             |
 
-### Další nákladově relevantní koncové body
+### Další koncové body související s náklady
 
-| Metoda | Koncový bod                   | Účel                                                                           |
-| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
-| `GET`  | `/api/free-tier/summary`      | Celkové součty tokenů zdarma, použité tento měsíc a zbývající volné povolenky. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Použití pro fond sdílených kvót.                                               |
+| Metoda | Koncový bod                   | Účel                                                                                         |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Celkový počet tokenů bezplatného modelu, využití za tento měsíc a zbývající bezplatný limit. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Využití fondu sdílené kvóty.                                                                 |
 
 ---
 

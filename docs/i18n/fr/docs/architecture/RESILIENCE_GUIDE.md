@@ -202,6 +202,45 @@ un `429` en rafale sans en-têtes unifiés suit le chemin normal de refroidissem
 Protections contre les régressions : `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Appliquer automatiquement les réinitialisations bancaires
+
+**Portée:** Connexions d'abonnement Codex et Claude (OAuth).**S'inscrire** : le paramètre `bankedResetAutoApply` est désactivé et en mode `dry-run` par défaut (Paramètres → AI → Appliquer automatiquement les réinitialisations bancaires).
+
+**But:** dépenser eux-mêmes les réinitialisations en banque lorsqu'un compte atteint un mur d'utilisation, au lieu d'attendre qu'un opérateur appuie sur « Échanger » sur la page Limites du fournisseur.
+
+| Type de crédit (`creditTypes`) | Ce qui est racheté                                                       | Où ça court                                                        |
+| ------------------------------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `codexCredits`                 | Crédits de réinitialisation Codex                                        | travail en arrière-plan, toutes les 60 s                           |
+| `claudeCredits`                | Subventions en banque Claude (crédits `GRANT` )                          | travail en arrière-plan, toutes les 60 s                           |
+| `claudeSessionReset`           | Réinitialisation hebdomadaire de la limite de session Claude (ci-dessus) | chemin de demande, via la même politique que la bascule par compte |
+
+**Mise en œuvre:**
+
+- Décision pure (un ensemble de règles pour les deux chemins) : `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Travail en arrière-plan : `src/lib/services/bankedResetAutoApply.ts` (démarré dans `src/instrumentation-node.ts`)
+- Porte de chemin de requête Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, enregistrée via `setClaudeLimitResetPolicy()` dans `open-sse/services/claudeLimitReset.ts`
+- Historique, majuscules et webhook : `src/lib/usage/bankedResetAudit.ts`
+- Historique API: `GET /api/settings/banked-reset-auto/history?limit=50` (autorisation de gestion)
+
+**Ordonnance de décision** (la première règle défaillante est la raison enregistrée) :
+
+1. Fonctionnalité désactivée, type de crédit désactivé ou compte hors de portée (`accountScope` `all` / `selected` plus la carte `connections` par compte).
+2. En dehors de l'horaire optionnel UTC (`startHourUtc` > `endHourUtc` passe minuit).
+3. Caps sur les dernières 24 heures : `maxPerAccountPerDay` (1), `maxPerDay` (3) et `minSpacingMinutes` (30) entre deux rachats quelconques.
+4. Déclencheur : une fenêtre `session` ou `weekly` murée (lue depuis `getQuotaWindowStatus().reachedThreshold`, pas `isAccountQuotaExhausted()`, qui ne signale qu'un compte avec chaque fenêtre dépensée), ou un crédit expirant dans `expiringCreditHours` (24) sur un compte qui a utilisé au moins `expiringCreditMinUsedPercent` (50).
+5. Garde à réinitialisation naturelle : ignorez lorsque la fenêtre murée de 5 heures se réinitialise dans `sessionResetGuardMinutes` (90) ou la fenêtre hebdomadaire murée dans `weeklyResetGuardHours` (12).
+6. Plancher hebdomadaire : ignorez une réinitialisation de 5 heures lorsque le temps restant hebdomadaire est inférieur à `weeklyFloorPercent` (10).
+7. Mode `last-resort` : ignorer pendant qu'un autre compte concerné du même fournisseur a au moins `poolHeadroomPercent` (10) dans les deux fenêtres. Les déclencheurs de crédit expirant contournent cela.
+8. `dry-run` enregistre une ligne et ne rachète rien ; `last-resort` et `eager` échangent.
+
+Les données de quota manquantes ne débloquent jamais un échange : une heure de réinitialisation inconnue ou des sauts d'utilisation hebdomadaire.
+
+**Réinitialisation de la session Claude :** avec la fonctionnalité désactivée ou `claudeSessionReset` désactivé, la bascule `autoLimitReset` par compte décide exactement comme avant. Lorsque les deux sont activés, la fonctionnalité remplace les bascules par compte : un compte concerné ne peut réclamer que lorsque la politique le permet, et en mode `dry-run`, aucune réclamation n'est effectuée.
+
+**Sécurité:** le travail rachète au plus un crédit par tick, décide avant de lister les crédits (un compte ignoré n'est jamais répertorié), utilise les clés d'idempotence `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` et sauvegarde un compte pendant 1 h après un échec de listage ou de rachat. Chaque décision de rachat, d'échec et de simulation est écrite dans `audit_log` (`action: "bankedReset.redeem"`, pas de jetons ni d'identifiants de crédit) ; les majuscules sont comptées à partir de ces lignes, elles survivent donc aux redémarrages. Les rachats réussis déclenchent également le webhook `provider.reset_redeemed`.
+
+Gardes de régression : `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Affinité de session (#7274)
 
 **Portée :** une session client (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header)
@@ -386,26 +425,17 @@ la base de données — ils sont perdus au redémarrage. Les _paramètres_ sont 
 
 ---
 
-## 4. Contrôle de la concurrence par partage de quota (v3.8.36)
+## 4. Contrôle de la concurrence par partage de quotas (v3.8.36)
 
-Les comptes d’abonnement (GLM, MiniMax, etc.) n’acceptent souvent que ~1–3
-requêtes simultanées ; dépasser cette limite déclenche des 429 et des périodes de
-refroidissement. Le problème est particulièrement aigu avec les combinaisons de
-**partage de quota** (`qtSd/…`), où plusieurs clés API partagent un même compte
-en amont. Trois couches empêchent qu’un compte partagé soit submergé.
+Les comptes d'abonnement (GLM, MiniMax, etc.) n'acceptent souvent que les demandes simultanées ~ 1 à 3 ; le dépassement déclenche des 429 et des temps de recharge. Ceci est aigu sous **quote-part** (`qtSd/…`), où plusieurs clés API partagent un compte en amont. Trois couches empêchent un compte partagé d'être inondé.
 
 ### Plafond de concurrence par connexion (`max_concurrent`)
 
-Chaque connexion de fournisseur peut déclarer un plafond `max_concurrent`
-(`provider_connections.max_concurrent`, défini dans la fenêtre de connexion / l’API / la base de données).
-Laissez ce champ vide pour n’appliquer aucune limite. Il s’agit du paramètre
-unique qui pilote la couche de sérialisation ci-dessous — définissez-le sur la
-concurrence réelle du compte (par exemple, GLM ~1, MiniMax ~2).
+Chaque connexion du fournisseur peut déclarer un plafond `max_concurrent` (`provider_connections.max_concurrent`, défini dans la connexion modale / API / DB). Laissez-le vide sans limite. Il s'agit du seul bouton qui pilote la couche de sérialisation sous —, réglez-la sur la concurrence réelle du compte (par exemple GLM ~ 1, MiniMax ~ 2).
 
 ### Plafonds de concurrence par modèle (`modelConcurrency`)
 
-Une connexion peut également déclarer des plafonds exacts de concurrence par
-modèle dans sa map `rateLimitOverrides` :
+Une connexion peut en outre déclarer des plafonds de concurrence exacts par modèle dans sa carte `rateLimitOverrides` :
 
 ```json
 {
@@ -416,94 +446,32 @@ modèle dans sa map `rateLimitOverrides` :
 }
 ```
 
-Définissez cette valeur dans la fenêtre de connexion (**Remplacements de limite
-de débit → Plafonds de concurrence par modèle**, un `model=cap` par ligne) ou via
-`PATCH /api/providers/[id]` avec la même structure JSON. Sémantique des clés :
+Définissez-le dans le modal de connexion (**La limite de débit remplace les plafonds de concurrence → par modèle** , un `model=cap` par ligne) ou via `PATCH /api/providers/[id]` avec la même forme JSON. Sémantique clé :
 
-- **À l’échelle de la connexion ou spécifique au modèle :** `maxConcurrent` reste
-  le plafond partagé à l’échelle de la connexion. Lorsque les deux s’appliquent,
-  les deux verrous sont acquis atomiquement dans le même verrou composite
-  (`global → provider → account → model`) ; le comportement effectif est celui
-  de la limite applicable la plus stricte.
-- **Correspondance exacte de la clé de modèle :** la clé est la chaîne du modèle
-  transmise à l’exécuteur après la résolution du routage — normalement l’identifiant
-  de modèle brut du fournisseur en amont (`glm-5`), et non un alias
-  `provider/model` côté client (`zai/glm-5` ne correspond pas à `glm-5`). Les
-  valeurs sont des plafonds positifs de requêtes simultanées exprimés en entiers.
-- **Mise en file locale, sans découverte :** les requêtes excédentaires sont mises
-  en file localement selon les sémantiques existantes de file d’attente et de délai
-  d’expiration (erreurs d’admission typées `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL`). OmniRoute ne découvre ni n’infère la politique du
-  fournisseur en amont — il applique les plafonds exacts configurés par
-  l’opérateur. Un verrou de modèle saturé ne désactive jamais le fournisseur et
-  ne crée jamais de blocage permanent du modèle ; le comportement de secours face
-  aux 429, aux périodes de refroidissement et aux basculements en amont reste le
-  mécanisme de repli en cas d’erreur.
-- **Portée par connexion et par processus :** les plafonds s’appliquent à chaque
-  connexion de base de données et sont conservés en mémoire ; deux connexions
-  réutilisant la même clé API en amont ne se coordonnent donc pas entre elles.
-- **Non configuré signifie inchangé :** omettre la map (ou laisser le champ du
-  tableau de bord vide) n’ajoute aucun verrou de modèle. Exemple de configuration
-  sans imposer de limite universelle au fournisseur :
+- **À l’échelle de la connexion ou spécifique au modèle :** `maxConcurrent` reste le plafond partagé à l’échelle de la connexion. Lorsque les deux s'appliquent, les deux portes sont acquises atomiquement dans la même porte composite (`global → provider → account → model`) ; le comportement effectif est la limite applicable la plus stricte.
+- **Correspondance exacte modèle-clé :** la clé est la chaîne de modèle transmise à l'exécuteur après la résolution du routage — normalement l'identifiant de modèle en amont (`glm-5`), et non un alias `provider/model` côté client (`zai/glm-5` ne correspond pas `glm-5`). Les valeurs sont des plafonds de demandes simultanées positives.
+- **File d'attente locale, pas de découverte :** les requêtes excédentaires sont mises en file d'attente localement avec la sémantique queue/timeout existante (erreurs d'admission typées `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute ne découvre ni ne déduit la politique en amont — il applique les plafonds exacts configurés par l'opérateur. Une porte de modèle saturée ne désactive jamais le fournisseur et ne crée jamais de verrouillage permanent du modèle ; Le comportement 429/cooldown/fallback en amont reste le filet de sécurité contre les erreurs.
+- **Portée par connexion et par processus :** les majuscules sont par connexion à la base de données et conservées en mémoire, de sorte que deux connexions réutilisant la même clé API en amont ne se coordonnent pas.
+- **Non configuré signifie inchangé :** omettre la carte (ou laisser le champ du tableau de bord vide) n'ajoute aucune porte de modèle. Exemple de configuration sans affirmer de limite de fournisseur universel :
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Sérialisation des requêtes avec partage de quota
+### Sérialisation des demandes de partage de quota
 
-Lorsqu’une répartition avec partage de quota cible une connexion qui déclare un
-`max_concurrent` positif, les requêtes simultanées vers ce **compte** sont
-sérialisées via un sémaphore par connexion (clé `qsconn:<connectionId>`) : les
-requêtes excédentaires **attendent dans la file** au lieu de submerger le compte.
-Ce mécanisme est **non bloquant en cas d’échec** — une file saturée ou un délai
-d’expiration s’écoule sans emplacement disponible, mais une requête pouvant être
-répartie n’est jamais rejetée. Activez ou désactivez cette fonction dans
-**Paramètres → Résilience → Concurrence par connexion pour le partage de quota**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, activé par défaut).
-Sans plafond `max_concurrent`, le comportement reste inchangé.
+Lorsqu'une répartition en partage de quota cible une connexion qui déclare un `max_concurrent` positif, les requêtes simultanées adressées à ce dernier **compte** sont sérialisés via un sémaphore par connexion (clé `qsconn:<connectionId>`) : requêtes excédentaires **attendre dans la file d'attente** au lieu d'inonder le compte. C'est **échec d'ouverture** — une file d'attente saturée ou un délai d'attente se déroule sans créneau plutôt que de jamais rejeter une demande distribuable. Activer **Paramètres Résilience → Concurrence de partage de quota → par connexion** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, activé par défaut). Sans plafond `max_concurrent` le comportement est inchangé.
 
-> Le verrou de routage du partage de quota (`selectQuotaShareTarget`, DRR + P2C)
-> est lui-même non bloquant en cas d’échec et se contente de _déprioriser_ une
-> connexion ayant atteint son plafond — avec un pool à connexion unique, il ne
-> peut pas imposer de limite stricte ; ce sémaphore est donc ce qui contient
-> réellement l’afflux.
+> La porte de routage de partage de quotas (`selectQuotaShareTarget`, DRR + P2C) est elle-même ouverte en cas d'échec et ne _dépriorise_ qu'une connexion au plafond — avec un pool de connexion unique qu'elle ne peut pas limiter de manière stricte, donc ce sémaphore est ce qui contient réellement l'inondation.
 
-### Nouvelle tentative tenant compte du refroidissement des combinaisons
+### Nouvelle tentative prenant en compte le temps de recharge du combo
 
-Pour chaque stratégie de combinaison (lorsqu’elle est activée), une requête qui
-provoquerait un 429 pour un bref refroidissement transitoire attend la fin de
-celui-ci et est redistribuée au lieu de renvoyer le 429 — cela couvre les fenêtres
-TPM/RPM de type Gemini (~60 s de `retry-after`) sur les combinaisons multimodèles,
-par exemple lorsque les deux cibles d’une combinaison à 2 modèles atteignent une
-limite de débit par modèle. Le comportement est limité par `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) dans **Paramètres →
-Résilience**. Il n’attend jamais en cas de `quota_exhausted` (verrouillé jusqu’à
-minuit), ni pour des raisons d’authentification ou de ressource introuvable.
+Pour chaque stratégie de combo (lorsqu'elle est activée), une demande qui cristalliserait un 429 pour un temps de recharge transitoire SHORT l'attend et le réexpédie au lieu de renvoyer le 429 — Cela couvre les fenêtres TPM/RPM de classe Gemini (réessais après ~ 60) sur les combos multi-modèles, par exemple les deux cibles d'un combo à 2 modèles atteignant une limite de débit par modèle. Délimité par `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) dans **Paramètres Résilience →** . Il n'attend jamais des raisons `quota_exhausted` (verrouillé jusqu'à minuit) ou auth/not-found. Avec `comboTimeoutMs` défini, une attente qui ne peut pas se terminer avant cette date limite ne commence pas (#18998) : le combo répond immédiatement avec sa réponse terminale au lieu d'un `COMBO_TIMEOUT` 504.
 
-Une combinaison peut désactiver ce comportement avec
-`config.comboCooldownWaitEnabled: false`. Seule la valeur littérale `false`
-désactive ces attentes partagées des combinaisons (attente de refroidissement
-après répartition et attentes préalables à la répartition liées à l’ouverture du
-circuit ou au verrouillage du modèle), ainsi que l’extension de la limite
-inférieure du délai d’expiration par le budget d’attente. Une valeur absente ou
-`true` conserve la politique globale ; `true` ne peut pas activer une attente
-désactivée globalement. Un `targetTimeoutMs` explicite reste prioritaire. Cette
-désactivation ne modifie pas l’attente préalable à la répartition, distincte, du
-verrouillage de tour natif de Codex.
+Un combo peut se désinscrire avec `config.comboCooldownWaitEnabled: false`. Seul `false` littéral désactive ces attentes combinées partagées (temps de recharge après expédition et attentes circuit-open/model-lock avant expédition) et leur extension de délai d'expiration du budget d'attente. Manquant ou `true` préserve la politique globale ; `true` ne peut pas activer l'attente globalement désactivée. Un `targetTimeoutMs` explicite gagne toujours. Cette désinscription ne modifie pas l’attente préalable à l’expédition des broches Codex natives.
 
-Le même verrou couvre le cas préalable à la répartition (#16319) : lorsque toutes
-les cibles d’une combinaison sont ignorées avant toute tentative parce que leur
-modèle se trouve dans un bref verrouillage transitoire, le chemin sans tentative
-attend la fin du verrouillage selon les mêmes plafonds, puis redistribue la
-requête, au lieu de répondre par un `503 ALL_TARGETS_SKIPPED` sans indication.
-Lorsqu’aucune attente n’est autorisée (plafond, nombre de tentatives ou budget
-épuisé, ou fonctionnalité désactivée), la réponse finale devient
-`429 rate_limit_error` et contient `retry_after` / `reset_at` issus de
-l’expiration du verrou transitoire la plus proche ; les verrouillages liés au
-quota, à l’authentification et aux ressources introuvables conservent le 503
-sans indication.
+La même porte couvre le cas de pré-envoi (#16319) : lorsque chaque cible d'un combo est ignorée avant qu'une tentative ne soit effectuée parce que son modèle se trouve dans un court verrouillage transitoire, le chemin de tentative zéro attend le verrouillage sous les mêmes plafonds et ré-envoie, au lieu de répondre à un `503 ALL_TARGETS_SKIPPED` sans indice. Lorsqu'aucune attente n'est autorisée (plafond, tentative ou budget épuisé, ou fonctionnalité désactivée), la réponse du terminal passe à `429 rate_limit_error` portant `retry_after` / `reset_at` à partir de la première expiration du verrouillage transitoire ; les verrous de quota, d'authentification et non trouvés conservent le 503 sans indice.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

@@ -4,38 +4,35 @@
 
 ---
 
-## Bayani Gabaɗaya
+## Dubawa
 
-Redis wani **zaɓi ne, kuma dogaro ne mai sassauci** a cikin OmniRoute — manhajar tana ci gaba da aiki yadda ya kamata (ta amfani da
-madadin ajiyar cikin ƙwaƙwalwa) idan Redis ba ya samuwa. A yanayin samarwa, daidaita Redis yana rage jinkiri ga nau'ikan
-ayyuka huɗu:
+Redis da **na zaɓi, dogaro mai laushi** a cikin OmniRoute — aikace-aikacen yana ƙasƙantar da ni'ima (a cikin ƙwaƙwalwar ajiya) lokacin da babu Redis. A cikin samarwa, kunna Redis yana rage jinkiri don nau'ikan ayyuka guda huɗu:
 
-| Nau'in aiki                | Mai tafiyarwa                 | Masana'antar Kliyanta                                           | Tsarin Maɓalli                                                               |
-| -------------------------- | ----------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Iyakance ƙimar buƙatu      | `rateLimiter.ts`              | `getRedisClient()` — singleton na `ioredis` mai jinkirin farawa | `<prefix>rl:*` tagogin iyakance ƙima na Lua masu aiki a matsayin raka'a ɗaya |
-| Ma'ajiyar tantancewa       | `apiKeys.ts`                  | Yana sake amfani da kliyantar `rateLimiter`                     | `<prefix>auth:api_key:<sha256>` tare da TTL                                  |
-| Ma'ajiyar ƙayyadadden kaso | `redisQuotaStore.ts`          | Singleton na `getRedisClient(url)` na daban                     | `<prefix>quota:*` mai iya daidaitawa ga kowane instance                      |
-| Circuit breaker na warmup  | `redisCircuitBreakerStore.ts` | Kliyanta na daban a cikin `circuitBreakerFactory.ts`            | `<prefix>warmup:cb:<connectionId>`                                           |
+| Nauyin aiki            | Direba                        | Kamfanin Abokin ciniki                                   | Tsarin Maɓalli                                 |
+| ---------------------- | ----------------------------- | -------------------------------------------------------- | ---------------------------------------------- |
+| Ƙayyadadden ƙima       | `rateLimiter.ts`              | `getRedisClient()` — lazy `ioredis` singleton            | `<prefix>rl:*` Lua-atomic rate iyaka windows   |
+| Amintaccen cache       | `apiKeys.ts`                  | Yana sake amfani da abokin ciniki na `rateLimiter`       | `<prefix>auth:api_key:<sha256>` tare da TTL    |
+| kantin sayar da ƙima   | `redisQuotaStore.ts`          | Rarrabe `getRedisClient(url)` singleton                  | `<prefix>quota:*` daidaitacce ta kowane misali |
+| Warmup circuit breaker | `redisCircuitBreakerStore.ts` | Rarrabe abokin ciniki a cikin `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>`             |
 
-Dukkan nau'ikan ayyukan huɗu suna amfani da prefix na namespace guda ɗaya domin OmniRoute ya iya kasancewa tare da sauran manhajoji a kan
-instance ɗin Redis guda ɗaya (misali, `127.0.0.1:6379`). Duba [Rarraba Sunayen Maɓalli](#key-namespacing).
+Duk nau'ikan ayyuka guda huɗu suna raba prefix na sarari ɗaya don haka OmniRoute zata iya kasancewa tare da wasu ƙa'idodi akan misalin Redis ɗaya (misali `127.0.0.1:6379`). Duba [Maɓallin Sunaye](#key-namespacing).
 
 ---
 
-## Tsarin Yanzu (Ƙimar Tsoho ta Lamba)
+## Kanfigareshan Yanzu (Tsaffin Lambobi)
 
-| Saiti                              | Ƙima                                                                              | Wuri                                                                                  |
-| ---------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| env var na `REDIS_URL`             | `redis://redis:6379` (compose), na zaɓi                                           | `rateLimiter.ts:5`, `.env.example`                                                    |
-| env var na `REDIS_KEY_PREFIX`      | `omniroute:` (tsoho)                                                              | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| env var na `QUOTA_STORE_REDIS_URL` | na daban, zai iya bambanta da `REDIS_URL`                                         | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`               | `"sqlite"` (tsoho), `"redis"` na zaɓi                                             | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` na ioredis  | `3`                                                                               | ƙirƙirar kliyanta a `rateLimiter.ts`                                                  |
-| `enableReadyCheck`                 | ba a saita ba (tsohon saitin ioredis: `true`)                                     | —                                                                                     |
-| `lazyConnect`                      | ba a saita ba (tsohon saitin ioredis: `false`)                                    | —                                                                                     |
-| `retryStrategy`                    | ba a saita ba (tsohon saitin ioredis: tushe na 200ms, yana ƙaruwa ta exponential) | —                                                                                     |
-| TLS / kalmar sirri / fihirisar DB  | **ba a saita ba**                                                                 | —                                                                                     |
-| Sentinel / Cluster                 | **ba a saita ba** — standalone mai node guda ɗaya kawai                           | —                                                                                     |
+| Saita                           | Daraja                                                | Ina                                                                                   |
+| ------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (hada), na zaɓi                  | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (tsoho)                                  | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | daban, na iya bambanta da `REDIS_URL`                 | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (tsoho), `"redis"` na zaɓi                 | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                   | Ƙirƙirar abokin ciniki `rateLimiter.ts`                                               |
+| `enableReadyCheck`              | ba a saita ba (tsoho ioredis: `true`)                 | —                                                                                     |
+| `lazyConnect`                   | ba a saita ba (tsoho ioredis: `false`)                | —                                                                                     |
+| `retryStrategy`                 | ba a saita ba (tsoho ioredis: 200ms tushe, maɗaukaki) | —                                                                                     |
+| TLS / kalmar sirri / DB index   | **ba a saita ba**                                     | —                                                                                     |
+| Sentinel / Kungiya              | **ba a saita ba** — tsayayye guda-ƙulli kawai         | —                                                                                     |
 
 ---
 
@@ -65,59 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Shawarwarin Daidaitawa don Yanayin Samarwa
+## Gyaran Samar da Nasiha
 
-### 1. Zaɓuɓɓukan Connection Pool / Client (mai-gina `Redis` na ioredis)
+### 1. Pool Connection / Abokin Ciniki Zaɓuɓɓuka (ioredis `Redis` constructor)
 
-Lambar yanzu tana ƙirƙirar `new Redis(url)` guda ɗaya ba tare da zaɓuɓɓuka na musamman ba. Don turawa zuwa yanayin samarwa mai kwafi da yawa, shigar da client factory a cikin lambar ko kuma naɗe `getRedisClient()`:
+Lambar yanzu tana ƙirƙirar `new Redis(url)` guda ɗaya ba tare da zaɓuɓɓukan al'ada ba. Don samar da kayan aiki iri-iri, wuce masana'antar abokin ciniki a cikin lambar ko kunsa `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // babu iyakar sake gwadawa; bari retryStrategy ya yanke shawara
-  enableReadyCheck: true, // tabbatar uwar garken ta shirya kafin karɓar kira
-  lazyConnect: true, // kada a haɗa yayin ginawa; jira kiran farko
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // daina bayan sake gwadawa sau 10 → sake haɗawa daga baya
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, iyakar 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // haɗa umarnin lokaci guda cikin rubutawar TCP guda ɗaya
-  keepAlive: 10000, // TCP keep-alive kowane 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Muhimman abubuwan da ake yin rangwame a kansu:**
+**Mabuɗin ciniki:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — an fi son wannan a yanayin samarwa domin sake farawa na Redis na ɗan lokaci kada ya sa kowace buƙata ta gaza nan take. Madadin da ke cikin ƙwaƙwalwa a cikin `checkRateLimit()` yana ɗaukar hanyar gazawar.
-- `lazyConnect: true` — yana hana farawa dogaro da cewa Redis yana aiki kafin uwar garken ta fara karɓar haɗe-haɗe.
-- `enableAutoPipelining: true` — yana rage tafiye-tafiyen sadarwa don binciken iyakar buƙata na lokaci guda; yana da amfani idan an haura 50 RPS a kan haɗi guda ɗaya.
+- `maxRetriesPerRequest: null` + `retryStrategy` — ya fi so don samarwa don haka sake kunnawa Redis na wucin gadi kada nan da nan ya gaza kowane buƙatu. Faɗuwar cikin ƙwaƙwalwar ajiya a cikin `checkRateLimit()` tana ɗaukar hanyar gazawar.
+- `lazyConnect: true` — yana guje wa dogaron farawa akan Redis kasancewa sama kafin sabar ta fara karɓar haɗin gwiwa.
+- `enableAutoPipelining: true` — yana rage tafiye-tafiye-tafiye-tafiye don dubawa-iyakan adadin lokaci-lokaci; mai amfani a > 50 RPS akan haɗin guda ɗaya.
 
-### 2. Tsarin Uwar Garken Redis (`redis.conf`)
+### 2. Kanfigareshan Sabar Redis (`redis.conf`)
 
 ```
-# Ƙwaƙwalwa
-maxmemory 80%                        # bar sarari ga ma'ajiyar shafukan OS
-maxmemory-policy allkeys-lru         # cire tsofaffin bayanan auth cache idan ƙwaƙwalwa ta yi ƙasa
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Adana bayanai (na zaɓi — OmniRoute yana da kariya daga rushewa ba tare da shi ba)
-save 300 1                           # ɗauki snapshot aƙalla kowane minti 5 idan maɓalli ≥1 ya canza
-appendonly no                        # ba a buƙatar AOF; ana iya sake samar da bayanan
-appendfsync no                       # babu nauyin fsync (RDB ya isa)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Hanyar sadarwa
-timeout 0                            # babu katsewar haɗin da ba ya aiki
-tcp-keepalive 300                    # keep-alive na minti 5
-tcp-backlog 511                      # jerin jiran haɗi don cunkoson aiki na bazata
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Aiki
-hz 10                                # tsohon ƙima; 100 don tsarin da ke kula da ƙarancin jinkiri
-activedefrag yes                     # warware gutsuttsura ta atomatik idan fragmentation >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Rangwamen da ke tattare da `maxmemory-policy allkeys-lru`:** Ana iya cire bayanan auth cache idan ƙwaƙwalwa ta yi ƙasa. Wannan ba shi da haɗari — `setCachedApiKey` koyaushe yana sake cike bayanan idan ba a same su ba, kuma madadin SQLite shi ne tushe na hukuma. Rubutun Lua na rate-limiter yana ƙirƙirar ƙananan maɓallai waɗanda aka tsara su su kasance na ɗan gajeren lokaci.
+**Kasuwanci don `maxmemory-policy allkeys-lru`:** Ana iya fitar da shigarwar bayanan cache a ƙarƙashin matsin ƙwaƙwalwar ajiya. Wannan amintaccen — `setCachedApiKey` koyaushe yana sake cikawa akan kuskure, kuma faɗuwar SQLite tana da iko. Rubutun Lua mai iyaka-ƙididdigar ƙirƙira ƙananan maɓalli waɗanda ba su daɗe da ƙira.
 
-### 3. Saitunan Docker Compose
+### 3. Docker Shirya Saituna
 
-Compose na yanayin samarwa (`docker-compose.prod.yml`) yana amfani da `redis:8.6.2-alpine`. Ƙara:
+Samfurin tsara (`docker-compose.prod.yml`) yana amfani da `redis:8.6.2-alpine`. Ƙara:
 
 ```yaml
 redis:
@@ -142,30 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Abubuwan Lura don Multi‑Instance / Faɗaɗawa
+### 4. La'akari da Matsaloli da yawa / Sikeli
 
-**Redis guda ɗaya ga dukkan kwafi** — rubutun Lua na rate-limiter yana dogaro da sararin maɓallai guda ɗaya mai iko. Amfani da Redis instances da yawa a bayan kwafi zai kawar da atomicity kuma ya ninka kasafin. Yi amfani da Redis guda ɗaya (ko Redis Sentinel cluster mai failover) ga dukkan kwafin manhajar.
+**Redis guda ɗaya don duk kwafi** — rubutun Lua mai ƙayyadaddun ƙima ya dogara da sarari maɓalli ɗaya mai iko. Misalin Redis da yawa a bayan kwafi zai rasa atomity kuma ya ninka kasafin kuɗi. Yi amfani da Redis guda ɗaya (ko Redis Sentinel cluster tare da gazawa) don duk kwafin aikace-aikacen.
 
-**Adadin haɗe-haɗe:** Kowane kwafin manhaja yana buɗe **haɗe-haɗen TCP guda 2** zuwa Redis (client na rate limiter + client na quota store). Idan akwai kwafi 10 → haɗe-haɗe 20, wanda yake ƙasa sosai da iyakar haɗe-haɗe 10k ta asali ta Redis instance.
+**Ƙididdigar haɗin kai:** Kowane kwafin aikace-aikacen yana buɗewa **2 Haɗin TCP** zuwa Redis (masu iyakance ƙimar abokin ciniki + keɓaɓɓen kantin sayar da abokin ciniki). A 10 kwafi na haɗin → 20, da kyau a cikin tsohuwar silin haɗin haɗin 10k na Redis.
 
-### 5. Sa Ido
+### 5. Kulawa
 
-Bayyana ta endpoint na health-check:
+Bayyana ta hanyar ƙarshen duba lafiya:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts ya riga ya kira ayyukan rateLimiter
-// Ƙara bincike na musamman ga Redis:
-//   1. Jinkirin PING ta hanyar ioredis .ping()
-//   2. Amfani da ƙwaƙwalwa ta hanyar INFO memory
-//   3. Adadin haɗe-haɗe ta hanyar INFO clients
-//   4. Adadin nasara na maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Muhimman ma'aunan da za a sa ido a kansu:
+Mabuɗin ma'auni don kallo:
 
-- **Maɓallan da aka cire / daƙiƙa** — idan yana ci gaba da zama ba sifili ba, ƙara `maxmemory`
-- **Clients da aka toshe** — ƙima da ba sifili ba tana nuna jinkirin rubutun Lua ko yawan gogayya
-- **Haɗe-haɗen da aka ƙi** — an kai iyakar haɗe-haɗe; wannan ba kasafai yake faruwa ba a haɗe-haɗe 20
+- **Maɓallai da aka fitar / s** — idan nacire ba sifili ba, ƙara `maxmemory`
+- **Abokan ciniki da aka toshe** — mara sifili yana nuna jinkirin rubutun Lua ko babban hatsaniya
+- **An ƙi haɗin haɗin gwiwa** Iyakar haɗin — ya buga; rare a 20 haɗi
+
+### 6. Sabis masu dacewa da Redis
+
+Duk wani uwar garken da aka yi amfani da shi anan dole ne ya gudanar da rubutun Lua: madaidaicin ƙimar `EVAL` ɗaya ne. A kan uwar garken ba tare da Lua ba, `checkRateLimit()` yana yin rajistar `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` kuma yana ƙididdige kowane tsari, don haka kowane kwafi yana tilasta iyaka da kansa. The ficewa a raba zaman-abokin ciniki (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) yana karantawa da sabunta fil tare da `EVAL`; ba tare da Lua ba yana shigar da `[SESSION_AFFINITY] Redis error; falling back to SQLite.` kuma kowane kwafi yana riƙe da nasa fil. Sauran kayan aikin suna amfani da umarni a sarari (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes da saiti ), kuma bayanan baya na Redis na ma'anar cache baya aika ba umarnin `FT.*`.
+
+An gwada shi da OmniRoute 3.8.52: KiviDB 1.2.0 tare da hoton Lua (`kividb/kividb:v1.2.0-lua`). Ƙididdigar ƙima (ciki har da tsari na biyu na raba ƙididdiga), cache na auth, kantin keɓaɓɓu, mai kashe wutar lantarki, kantin ma'auni, da buƙatun `/v1/chat/completions` ta hanyar mai kula da taɗi ya wuce 18 daga cikin cak 19 waɗanda suka wuce Redis 8.10.3. Wanda ya bambanta: `INCRBYFLOAT` yana adana `0.1 + 0.2` a matsayin `0.30000000000000004` inda Redis ke adana `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kantin sayar da keɓaɓɓun yana rarraba duka biyu tare da `parseFloat`, amma lambobi biyu sun bambanta a cikin lambobi na ƙarshe, don haka kwatancen da ya faɗi daidai a kan iyakar keɓe zai iya fitowa daban. Kantin sayar da zaman-dangin ba ya cikin wannan gudu. ( [saitin](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [sakamako](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -186,15 +189,15 @@ flowchart LR
 
 ---
 
-## Manazarta
+## Magana
 
-| Fayil                              | Manufa                                                                            |
-| ---------------------------------- | --------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Babban client na Redis, skriptin iyakance ƙima na Lua, da madadin cikin ƙwaƙwalwa |
-| `src/lib/db/apiKeys.ts`            | Ma'ajiyar wucin gadi ta tantancewa — madadin Redis→SQLite                         |
-| `src/lib/quota/redisQuotaStore.ts` | Client na Redis daban don ma'ajiyar quota ta zaɓi                                 |
-| `src/lib/quota/storeFactory.ts`    | Yana sauyawa tsakanin direbobin quota na `sqlite` da `redis`                      |
-| `docker-compose.prod.yml`          | Kwantenan Redis na prod (image `redis:8.6.2-alpine`)                              |
-| `.env.example`                     | Takardun bayanin env vars na Redis                                                |
-| `src/app/api/local/redis/`         | Hanyoyin API don tsara tafiyar kwantenan dev                                      |
-| `bin/cli/commands/redis.mjs`       | Umarnin CLI don tsara tafiyar kwantenan dev                                       |
+| Fayil                              | Manufar                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Abokin ciniki na farko Redis, Rubutun iyaka-ƙididdigar ƙimar Lua, koma baya cikin ƙwaƙwalwar ajiya |
+| `src/lib/db/apiKeys.ts`            | Amintaccen cache — Redis→SQLite koma baya                                                          |
+| `src/lib/quota/redisQuotaStore.ts` | Ware abokin ciniki Redis don kantin keɓaɓɓen zaɓi                                                  |
+| `src/lib/quota/storeFactory.ts`    | Yana canzawa tsakanin direbobin keɓaɓɓun `sqlite` da `redis`                                       |
+| `docker-compose.prod.yml`          | Prod Redis ganga (hoton `redis:8.6.2-alpine`)                                                      |
+| `.env.example`                     | Redis env vars takardun shaida                                                                     |
+| `src/app/api/local/redis/`         | Hanyoyin API don kade-kaden kwantena                                                               |
+| `bin/cli/commands/redis.mjs`       | CLI yana ba da umarni don ƙungiyar kayan aikin dev                                                 |

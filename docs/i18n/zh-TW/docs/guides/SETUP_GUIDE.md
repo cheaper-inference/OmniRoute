@@ -20,14 +20,16 @@
 
 ## 安裝方式
 
-### npm（建議）
+### npm（推薦）
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-儀表板會在 `http://localhost:20128` 開啟，API 基礎 URL 為 `http://localhost:20128/v1`。
+儀表板在`http://localhost:20128`和API上打開，基礎URL是`http://localhost:20128/v1`。
+
+> **npm 用戶：**如果 npm 警告安裝腳本被封鎖（例如， `omniroute`、 `better-sqlite3`），請參閱[— npm install-scripts 阻止故障排除](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)。
 
 ### pnpm
 
@@ -281,11 +283,11 @@ curl -X POST http://localhost:20128/a2a \
 
 系統會維持向後相容性：現有的 `FETCH_TIMEOUT_MS`、`API_BRIDGE_PROXY_TIMEOUT_MS` 及其他各層級的逾時變數仍然有效，並會覆寫共用基準值。
 
-### 提供者特定注意事項
+### 提供者特定註釋
 
-對於與 Claude Code 相容的上游（`anthropic-compatible-cc-*`），OmniRoute 會根據解析後的擷取逾時推導出站的 `X-Stainless-Timeout` 標頭，讓提供者端的讀取逾時與您的環境設定保持一致。
+對於Claude程式碼相容的上游 (`anthropic-compatible-cc-*`)， OmniRoute從已解析的獲取逾時中派生出站`X-Stainless-Timeout`標頭，以便提供者端讀取逾時與您的環境配置保持一致。
 
-對於第三方、與 Claude Code 相容的反向代理，OmniRoute 會維持較保守的預設 `anthropic-beta` 設定；當「用戶端快取控制」保留為「自動」時，只會轉送用戶端提供的 `cache_control` 標記。僅當上游明確要求經過遮蔽的 Claude 思考串流時，才啟用每個連線的「啟用 redact-thinking beta」切換選項。
+對於第三方Claude代碼相容的反向代理， OmniRoute保留預設的`anthropic-beta`設定保守，並且當`Client Cache Control`保留在`Auto`上時，僅轉發客戶端提供的`cache_control`標記。只有當上游特別需要編輯Claude思考流時，才啟用每個連線的「啟用編輯思考測試版」切換。
 
 ### 進階逾時覆寫
 

@@ -392,7 +392,7 @@ Izgūšanas rīks pašlaik ir nosaukts `omniroute_ccr_retrieve` ( `omniroute_` p
 
 ### Sesijas dzīves cikls
 
-Straumējamās HTTP sesijas ir dīkstāves, un serveris tās iegūst; dīkstāves logs ir iestatīts ar `OMNIROUTE_MCP_SESSION_IDLE_MS` (noklusējuma 5 minūtes; atsauce uz nosaukumu, nevis cietā koda vērtība, tāpēc šī lapa nepārvietojas, kad tā mainās). Dīkstāves sesijas simptoms ir HTTP 404 ar `Unknown Mcp-Session-Id` — kā novērst sesijas atkārtotu pievienošanu vai restartēšanu,** nē** lai pagrieztu atslēgu, mainītu darbības jomu vai pārdēvētu rīku.
+Straumējamās HTTP sesijas ir dīkstāves, un serveris tās iegūst; dīkstāves logu konfigurē `OMNIROUTE_MCP_SESSION_IDLE_MS`, atgriežoties uz `DEFAULT_MCP_SESSION_IDLE_MS` `open-sse/mcp-server/httpTransport.ts`. Dīkstāves sesijas simptoms ir HTTP 404 ar `Unknown Mcp-Session-Id` — lai novērstu sesijas atkārtotu savienojumu vai restartēšanu,**nē** lai pagrieztu atslēgu, mainītu darbības jomu vai pārdēvētu rīku.
 
 ## API saskarne
 

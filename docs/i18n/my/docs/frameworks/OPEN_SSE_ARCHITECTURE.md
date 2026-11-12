@@ -484,11 +484,11 @@ createResponsesApiTransformStream(): TransformStream
 
 ## ဖွဲ့စည်းမှု
 
-`open-sse/config/` configuration layer ကို ကိုင်ထားသည်။
+`open-sse/config/` configuration layer ကို ကိုင်ထားသည်-
 
 | ဖို                                   | ရည်ရွယ်ချက်                                                 |
 | ------------------------------------- | ----------------------------------------------------------- |
-| `providerRegistry.ts`                 | 381-ပံ့ပိုးပေးသူ ကတ်တလောက်အတွက် ချတ်မော်ဒယ် မှတ်ပုံတင်ခြင်း |
+| `providerRegistry.ts`                 | 388-ပံ့ပိုးပေးသူ ကတ်တလောက်အတွက် ချတ်မော်ဒယ် မှတ်ပုံတင်ခြင်း |
 | `providerModels.ts`                   | မော်ဒယ်အမည်တူများ၊ ဖော်မတ်မြေပုံဆွဲခြင်း။                   |
 | `constants.ts`                        | အချိန်ကုန်ခြင်း၊ ကန့်သတ်ချက်များ၊ အခြေအနေကုဒ်များ           |
 | `defaultThinkingSignature.ts`         | မူရင်း Claude တွေးခေါ်မှု လက်မှတ်                           |

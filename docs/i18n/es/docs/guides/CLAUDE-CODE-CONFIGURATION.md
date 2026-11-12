@@ -24,27 +24,74 @@ omniroute launch --profile glm52  # Claude Code usando glm/glm-5.2 mediante Omni
 
 ---
 
-## Cómo se conecta Claude Code a una puerta de enlace
+## Cómo se conecta Claude Code a un gateway
 
-El Código Claude habla del**Anthropic Mensajes API** y apunta a un punto final personalizado con variables de entorno (no tiene indicador `--base-url` ):
+Claude Code se comunica con la **API de mensajes de Anthropic** y se dirige a un endpoint personalizado mediante variables de entorno (no tiene una opción `--base-url`):
 
-| Variable                                     | Objetivo                                                                                     |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Raíz de puerta de enlace URL (el código Claude agrega `/v1/messages`).** Sin sufijo `/v1`.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | Enviado como `Authorization: Bearer …` — use su token de acceso OmniRoute / clave API        |
-| `ANTHROPIC_API_KEY`                          | Alternativa: enviado como `x-api-key`. Si ambos establecen, `ANTHROPIC_AUTH_TOKEN` gana      |
-| `ANTHROPIC_MODEL`                            | Forzar un modelo específico (anula el valor predeterminado del selector `/model` )           |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → el selector nativo `/model` enumera los modelos `claude*`/`anthropic*` de `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limitar los tokens de salida por respuesta (p. ej., `65536`)                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Umbral de token para autocompactación                                                        |
+| Variable                                     | Propósito                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | URL raíz del gateway (Claude Code añade `/v1/messages`). **Sin el sufijo `/v1`.**                      |
+| `ANTHROPIC_AUTH_TOKEN`                       | Se envía como `Authorization: Bearer …`; usa tu token de acceso o clave de API de OmniRoute            |
+| `ANTHROPIC_API_KEY`                          | Alternativa: se envía como `x-api-key`. Si se establecen ambas, `ANTHROPIC_AUTH_TOKEN` tiene prioridad |
+| `ANTHROPIC_MODEL`                            | Fuerza un modelo específico (sobrescribe el valor predeterminado del selector `/model`)                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → el selector nativo `/model` muestra los modelos `claude*`/`anthropic*` de `/v1/models`           |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limita los tokens de salida por respuesta (p. ej., `65536`)                                            |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Umbral de tokens para la compactación automática                                                       |
 
-> Se leen las variables ambientales** una vez al inicio** — reinicia el código Claude después de cambiarlos.
+> Las variables de entorno se leen **una sola vez al iniciar**; reinicia Claude Code después de cambiarlas.
 
-Para una credencial que gira en lugar de una cadena fija, configure `apiKeyHelper` en `~/.claude/settings.json` como un comando que imprima la credencial actual en la salida estándar. Claude Code almacena en caché su salida durante cinco minutos de forma predeterminada (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` lo anula) y envía el valor tanto en `Authorization: Bearer` como `x-api-key`. El script debe imprimir la credencial y nada más — un banner junto a él falla el asistente en v2.1.227 +.
+Para usar una credencial que rota en lugar de una cadena fija, configura `apiKeyHelper` en `~/.claude/settings.json` con un comando que imprima la credencial actual en stdout. Claude Code almacena su salida en caché durante cinco minutos de forma predeterminada (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` cambia ese plazo) y envía el valor tanto en `Authorization: Bearer` como en `x-api-key`. El script debe imprimir únicamente la credencial; añadir un mensaje de presentación hace fallar al asistente en v2.1.227+.
 
-Así es como funciona Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` imprime un token de acceso de Entra de corta duración que OmniRoute verifica en lugar de una clave API. Ver [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Así funciona Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` imprime un token de acceso de Entra de corta duración que OmniRoute verifica en lugar de una clave API. Consulta [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` configura todo esto por usted: resuelve el token URL + base desde el contexto activo (por lo que `omniroute connect <vps>` entonces `omniroute launch` simplemente funciona), verifica el estado del servidor y ejecuta `claude`.
+`omniroute launch` configura todo esto por ti: resuelve la URL base y el token a partir del contexto activo (por lo que ejecutar `omniroute connect <vps>` y después `omniroute launch` funciona directamente), comprueba el estado del servidor y ejecuta `claude`.
+
+---
+
+## Atribución de uso: sesiones y proyectos.
+
+OmniRoute agrupa las solicitudes de cada clave API en **sesiones de agente** y registros que **proyecto** se trabajó en cada sesión (tabla `agent_sessions` ), por lo que el uso y el costo se pueden informar por miembro del equipo, por proyecto y por sesión.
+
+Qué se graba sin ninguna configuración de cliente:
+
+| Campo    | Fuente                                                                                                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesión   | Encabezado `x-claude-code-session-id` (mismo valor que `metadata.user_id.session_id`), estable por sesión                                                                                |
+| Proyecto | La línea `Primary working directory:` Código Claude envía su mensaje de entorno; Las carpetas del árbol de trabajo bajo `.claude/worktrees/` se resuelven con el nombre del repositorio. |
+| Rama     | `Current branch:` desde el código Claude de git status se envía con el primer mensaje                                                                                                    |
+| Cliente  | `user-agent` (`claude-cli/<version>`)                                                                                                                                                    |
+
+Codex (`<environment_context><cwd>`) y OpenCode (`x-opencode-session`) se reconocen de la misma manera. llaves con **sin registro** habilitado conserva solo la identificación de la sesión y los campos del proyecto proporcionados en el encabezado; no se almacena nada leído desde el mensaje (ruta, rama).
+
+### Nombrar el proyecto explícitamente (recomendado)
+
+El directorio de trabajo difiere entre máquinas, por lo que el mismo repositorio puede aparecer en diferentes rutas. En su lugar, envíe el proyecto explícitamente: el código Claude agrega los encabezados enumerados en `ANTHROPIC_CUSTOM_HEADERS` a cada solicitud de modelo, y OmniRoute lee dos de ellos:
+
+| Encabezamiento             | Valor                                                                       |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nombre del proyecto, p. ej. `omniroute`                                     |
+| `x-omniroute-project-repo` | Control remoto normalizado, por ejemplo `github.com/diegosouzapw/OmniRoute` |
+
+Ambos sólo se leen para atribución; nunca se reenvían al proveedor ascendente.
+
+`ANTHROPIC_CUSTOM_HEADERS` se lee una vez al inicio y los archivos de configuración almacenan valores literales, así que calculelo cuando se inicie Claude Code. Agregue esto a `~/.zshrc` o `~/.bashrc` y siga iniciando `claude` desde la carpeta del proyecto:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+La expresión `sed` elimina cualquier credencial incrustada en el URL remoto. Las extensiones IDE inician el código Claude sin su shell, por lo que sus sesiones vuelven al directorio de trabajo.
 
 ---
 

@@ -1,15 +1,8 @@
-# Traffic Inspector (Polski)
+# Inspektor ruchu (Polski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/TRAFFIC_INSPECTOR.md) · 🇪🇹 [am](../../../am/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇦🇿 [az](../../../az/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇩🇰 [da](../../../da/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇩🇪 [de](../../../de/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇬🇷 [el](../../../el/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇪🇸 [es](../../../es/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇪🇪 [et](../../../et/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇱 [he](../../../he/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇩 [id](../../../id/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇹 [it](../../../it/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇰🇭 [km](../../../km/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇲🇲 [my](../../../my/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇳🇴 [no](../../../no/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [or](../../../or/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇱🇰 [si](../../../si/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇮🇳 [te](../../../te/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇹🇭 [th](../../../th/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/TRAFFIC_INSPECTOR.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/TRAFFIC_INSPECTOR.md)
 
 ---
-
-title: "Inspektor ruchu"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# Inspektor ruchu
 
 Traffic Inspector to wbudowany debugger ruchu HTTPS w OmniRoute — narzędzie w stylu Charles Proxy / mitmweb / HTTP Toolkit, które jest **świadome LLM** (**LLM-aware**) i **świadome agentów** (**agent-aware**). Znajduje się pod `/dashboard/tools/traffic-inspector` i odbiera ruch na żywo z maksymalnie 5 jednoczesnych źródeł przechwytywania.
 
@@ -95,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mechanizm:** Używa interfejsów API systemu operacyjnego do przekierowywania całego ruchu HTTP/HTTPS przez odbiornik HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` oraz ustawienia hosta/portu HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Zasięg:** Każda aplikacja na komputerze, która respektuje systemowe ustawienia serwera proxy
   **Uwaga:** `source` = `"system-proxy"`
 
 **Mechanizmy bezpieczeństwa:**
 
-- Zegar automatycznego wyłączenia (domyślnie 30 min, konfigurowalny za pomocą `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Poprzedni stan systemowego serwera proxy jest zapisywany w bazie danych i przywracany podczas wycofywania zmian
-- Jeśli użytkownik spróbuje opuścić stronę przy aktywnym ustawieniu, pulpit nawigacyjny wyświetla komunikat „Przywracanie systemowego serwera proxy”
-- Interfejs użytkownika wyświetla etykietę `⚠ Zaawansowane` oraz pole wyboru wymagające wyraźnego potwierdzenia
+- Zastosowanie proxy uruchamia lokalny dla procesu licznik, który próbuje cofnąć zmianę bez gwarancji powodzenia (domyślnie 30 min, konfigurowane przez `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Licznik nie przetrwa zakończenia procesu serwera.
+- Poprzedni stan proxy pozostaje w pamięci procesu; ten magazyn stanu przechwytywania nie zapisuje go trwale w bazie danych. Cofnięcie przywraca zapisane ustawienia macOS/GNOME; w Windows resetuje proxy WinHTTP zamiast przywracać poprzednią konfigurację.
+- Dopóki proxy jest zgłaszane jako zastosowane, zwolnienie strony wysyła żądanie keepalive próbujące cofnąć zmianę i żąda natywnego potwierdzenia, którego treść ustala przeglądarka. Odmontowanie inspektora podczas nawigacji SPA również próbuje cofnąć zmianę, bez tego monitu przeglądarki.
+- Pasek przechwytywania pokazuje przetłumaczony element `System-wide` z ikoną ostrzeżenia. Kliknięcie zmienia obecnie tylko lokalny stan interfejsu; nie wyświetla pola potwierdzenia ani nie stosuje lub cofa systemowego proxy.
 
 ### Tryb 5 — Przezroczyste odszyfrowywanie TPROXY (Linux, root, opcjonalne)
 
@@ -120,13 +113,13 @@ Jest to rozbudowany podsystem mający własny, dedykowany podręcznik operatora 
 
 ### Porównanie trybów przechwytywania
 
-| Tryb                      | Konfiguracja                          |           Sudo?            | Zasięg                                      | Uwagi                                                                                                                                  |
-| ------------------------- | ------------------------------------- | :------------------------: | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge            | Automatyczna                          |   Raz (certyfikat+hosts)   | 9 agentów IDE                               | Domyślnie włączony                                                                                                                     |
-| 2. Własne hosty           | Dane dla każdego hosta                |      Tak (plik hosts)      | Każda aplikacja używająca tego hosta        | Utrwalone w bazie danych                                                                                                               |
-| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`              |            Nie             | Aplikacje respektujące zmienne środowiskowe | Port 8080; HTTPS jest tunelowany przez CONNECT (tylko metadane, nigdy nie jest odszyfrowywany)                                         |
-| 4. Ogólnosystemowy        | Przełącznik + potwierdzenie           |            Tak             | Wszystkie aplikacje na komputerze           | Automatyczne wyłączenie po 30 min                                                                                                      |
-| 5. Odszyfrowywanie TPROXY | Przełącznik (Linux + natywny dodatek) | Tak (root + instalacja CA) | Dowolny host na porcie docelowym            | Odszyfrowuje dowolne hosty; domyślnie wyłączone — zobacz `docs/security/MITM-TPROXY-DECRYPT.md` (git; nie jest kompilowany do `/docs`) |
+| Tryb                      | Konfiguracja                                                   |           Sudo?            | Zasięg                                      | Uwagi                                                                                                                                  |
+| ------------------------- | -------------------------------------------------------------- | :------------------------: | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge            | Automatyczna                                                   |   Raz (certyfikat+hosts)   | 9 agentów IDE                               | Domyślnie włączony                                                                                                                     |
+| 2. Własne hosty           | Dane dla każdego hosta                                         |      Tak (plik hosts)      | Każda aplikacja używająca tego hosta        | Utrwalone w bazie danych                                                                                                               |
+| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`                                       |            Nie             | Aplikacje respektujące zmienne środowiskowe | Port 8080; HTTPS jest tunelowany przez CONNECT (tylko metadane, nigdy nie jest odszyfrowywany)                                         |
+| 4. Ogólnosystemowy        | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Tak             | Wszystkie aplikacje na komputerze           | Licznik próbujący cofnąć zmianę bez gwarancji (domyślnie 30 min)                                                                       |
+| 5. Odszyfrowywanie TPROXY | Przełącznik (Linux + natywny dodatek)                          | Tak (root + instalacja CA) | Dowolny host na porcie docelowym            | Odszyfrowuje dowolne hosty; domyślnie wyłączone — zobacz `docs/security/MITM-TPROXY-DECRYPT.md` (git; nie jest kompilowany do `/docs`) |
 
 ---
 
@@ -314,7 +307,7 @@ to follow-up).
 ### 5.1 Nagrywanie sesji
 
 1. Kliknij **„● Record session”** na toolbarze → podaj nazwę (opcjonalnie)
-2. Live tail działa normalnie; czerwony pulsujący wskaźnik pokazuje `◉ REC · <name> · 00:42 · 23 reqs`
+2. Podgląd na żywo działa normalnie; pasek nagrywania pokazuje pulsującą czerwoną kropkę, czas, który upłynął, nazwę sesji, jeśli jest dostępna, oraz przetłumaczony element zatrzymania.
 3. Kliknij **„⏹ Stop”** → snapshot sesji trafia do `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Podgląd nagranej sesji
@@ -322,7 +315,7 @@ to follow-up).
 Dropdown **Sessions** na toolbarze listuje zapisane sesje. Wybór jednej:
 
 - Ładuje snapshot sesji (zamrożony stan)
-- Banner pokazuje: `Viewing recorded session "<name>" — [Back to live]`
+- Baner pokazuje przetłumaczoną etykietę nagranej sesji i nazwę sesji (lub przetłumaczony tekst zastępczy dla sesji bez tytułu), obok przetłumaczonego przycisku powrotu do podglądu na żywo.
 - Zakładka Stats staje się dostępna z agregatami Recharts
 
 ### 5.3 Formaty eksportu
@@ -346,7 +339,7 @@ Traffic Inspector pokazuje **cały przechwycony ruch HTTPS**, w tym nagłówki a
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**               | Wszystkie trasy i punkt końcowy WebSocket są dostępne wyłącznie przez interfejs pętli zwrotnej (wymuszane w `routeGuard.ts` przed uwierzytelnieniem)                                                                                        |
 | **Maskowanie sekretów**      | Liniowy skaner `maskSecret()` usuwa dane uwierzytelniające Bearer zgodne z RFC 6750, klucze z prefiksami dostawców oraz długie, nieprzezroczyste tokeny przed `TrafficBuffer.push()`                                                        |
-| **Limit rozmiaru treści**    | Treści większe niż `INSPECTOR_MAX_BODY_KB` (domyślnie 1024 KB) są obcinane i oznaczane komunikatem `"(obcięto ze względów wydajnościowych)"`                                                                                                |
+| **Limit rozmiaru treści**    | Treści większe niż `INSPECTOR_MAX_BODY_KB` (domyślnie 1024 KB) są obcinane i oznaczane komunikatem `"(truncated for performance)"`                                                                                                          |
 | **Sanityzacja nagłówków**    | Nazwy są zapisywane małymi literami; nagłówki związane z ramkowaniem, typu hop-by-hop oraz uwierzytelnianiem proxy są odrzucane; ciasteczka są całkowicie redagowane; wartości danych uwierzytelniających są przekazywane do `maskSecret()` |
 | **CSP**                      | Rygorystyczna polityka Content Security Policy na stronach Traffic Inspector zapobiega atakom XSS za pośrednictwem wstrzykniętych treści odpowiedzi                                                                                         |
 | **Domyślnie bez utrwalania** | `TrafficBuffer` jest przechowywany w pamięci i tracony po ponownym uruchomieniu serwera. Sesje są utrwalane tylko wtedy, gdy ich rejestrowanie zostanie jawnie włączone                                                                     |
@@ -414,7 +407,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Dashboard przy następnym załadowaniu zaproponuje też „Revert system proxy”, jeśli wykryje w stanie DB, że proxy było aktywne.
+Zapisany stan proxy istnieje tylko w procesie serwera. Po awarii lub ponownym uruchomieniu obecny magazyn stanu przechwytywania nie może odtworzyć tej migawki z bazy danych; gdy potrzebne jest ręczne odzyskanie, użyj powyższych poleceń dla danej platformy.
 
 ### Pełny bufor
 

@@ -55,7 +55,7 @@ Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetc
 - Intrare: URL + comutator pentru pagina completă + selector de format (markdown / text / HTML).
 - Trimitere → preluare → afișare în `ScrapeResult.tsx`.
 - `ScrapeResult` afișează previzualizarea markdown + un comutator pentru conținutul brut.
-- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizează conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
+- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `View full raw content` și deschide conținutul brut într-o fereastră modală (D21).
 - Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
 - Utilizează hook-ul `useScrapeFetch.ts`.
 
@@ -104,10 +104,12 @@ Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel
 `ProviderCatalog.tsx` expune lista completă de furnizori din `GET /api/search/providers`
 (extinsă în F4 pentru a include furnizorii de preluare):
 
-| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Starea este **determinată în momentul solicitării**, verificând dacă există credențiale și dacă
 toate cheile se află în prezent în perioada de așteptare.
+
+`codex-search` (Codex Web Search): Folosește conturile Codex (ChatGPT) conectate, fără o cheie separată. Fiecare căutare consumă cota abonamentului și durează aproximativ 10–40 s. Se execută când cererea îl indică; selectarea automată necesită indicatorul `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, dezactivat implicit.
 
 ---
 

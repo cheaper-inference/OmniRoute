@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Meicníocht:** Úsáideann sé APIanna an chórais oibriúcháin chun gach trácht HTTP/HTTPS a atreorú tríd an éisteoir HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` agus na socruithe óstaigh/poirt HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Raon:** Gach feidhmchlár ar an meaisín a urramaíonn socruithe seachfhreastalaí an chórais
   **Nóta:** `source` = `"system-proxy"`
 
 **Meicníochtaí sábháilteachta:**
 
-- Uaineadóir uathdhíchumasaithe (30 nóiméad de réir réamhshocraithe, inchumraithe trí `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Sábháiltear staid roimhe seo sheachfhreastalaí an chórais sa DB agus athchóirítear í nuair a dhéantar an t-athrú a chealú
-- Taispeánann an deais an leid "Seachfhreastalaí an chórais á thabhairt ar ais" má fhágann an t-úsáideoir an leathanach agus é gníomhach
-- Taispeánann an comhéadan úsáideora suaitheantas `⚠ Ardleibhéal` + ticbhosca deimhnithe sainráite
+- Nuair a chuirtear an seachfhreastalaí i bhfeidhm, sceidealaítear amadóir a dhéanann iarracht é a aisiompú, gan ráthaíocht, laistigh den phróiseas (30 nóiméad de réir réamhshocraithe, inchumraithe le `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Ní mhaireann an t-amadóir tar éis do phróiseas an fhreastalaí críochnú.
+- Coinnítear staid roimhe seo an tseachfhreastalaí i gcuimhne an phróisis; ní stórálann an stór staid ghabhála seo í go buan i mbunachar sonraí. Athchóiríonn an aisiompú socruithe sábháilte macOS/GNOME; ar Windows athshocraíonn sé seachfhreastalaí WinHTTP in ionad an chumraíocht roimhe seo a athchóiriú.
+- Fad a thuairiscítear an seachfhreastalaí mar churtha i bhfeidhm, seolann díluchtú an leathanaigh iarratas aisiompaithe keepalive gan ráthaíocht agus iarrann sé deimhniú dúchasach a rialaíonn an brabhsálaí a fhoclaíocht. Déanann dífheistiú an chigire le linn nascleanúint SPA iarracht aisiompaithe freisin, gan an leid bhrabhsálaí sin.
+- Taispeánann an barra gabhála an rialtán logánaithe `System-wide` le deilbhín rabhaidh. Faoi láthair ní athraíonn cliceáil air ach staid áitiúil an chomhéadain; ní thaispeánann sé ticbhosca deimhnithe ná ní chuireann sé seachfhreastalaí an chórais i bhfeidhm ná á aisiompú.
 
 ### Mód 5 — Díchriptiú trédhearcach TPROXY (Linux, root, roghnach)
 
@@ -113,13 +113,13 @@ Is fochóras suntasach é seo a bhfuil a threoir oibreora thiomnaithe féin aige
 
 ### Comparáid idir na móid ghabhála
 
-| Mód                      | Socrú                                |          Sudo?           | Raon feidhme                          | Nótaí                                                                                                                                                               |
-| ------------------------ | ------------------------------------ | :----------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge           | Uathoibríoch                         | Uair amháin (cert+hosts) | 9 ngníomhaire IDE                     | Cumasaithe de réir réamhshocraithe                                                                                                                                  |
-| 2. Óstaigh Shaincheaptha | Ionchur de réir óstaigh              |    Sea (comhad hosts)    | Aon aip a úsáideann an t-óstach sin   | Marthanach sa DB                                                                                                                                                    |
-| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`             |           Níl            | Aipeanna a urramaíonn an timpeallacht | Port 8080; cuirtear HTTPS trí thollán CONNECT (meiteashonraí amháin, ní dhíchriptítear riamh é)                                                                     |
-| 4. Ar fud an chórais     | Scoránú + deimhniú                   |           Sea            | Gach aip ar an meaisín                | Díchumasú uathoibríoch tar éis 30 nóiméad                                                                                                                           |
-| 5. Díchriptiú TPROXY     | Scoránú (Linux + breiseán dúchasach) | Sea (root + suiteáil CA) | Aon óstach ar an spriocphort          | Díchriptíonn sé óstaigh threallacha; díchumasaithe de réir réamhshocraithe — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; gan é a thiomsú isteach in `/docs`) |
+| Mód                      | Socrú                                                          |          Sudo?           | Raon feidhme                          | Nótaí                                                                                                                                                               |
+| ------------------------ | -------------------------------------------------------------- | :----------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge           | Uathoibríoch                                                   | Uair amháin (cert+hosts) | 9 ngníomhaire IDE                     | Cumasaithe de réir réamhshocraithe                                                                                                                                  |
+| 2. Óstaigh Shaincheaptha | Ionchur de réir óstaigh                                        |    Sea (comhad hosts)    | Aon aip a úsáideann an t-óstach sin   | Marthanach sa DB                                                                                                                                                    |
+| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`                                       |           Níl            | Aipeanna a urramaíonn an timpeallacht | Port 8080; cuirtear HTTPS trí thollán CONNECT (meiteashonraí amháin, ní dhíchriptítear riamh é)                                                                     |
+| 4. Ar fud an chórais     | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |           Sea            | Gach aip ar an meaisín                | Amadóir aisiompaithe gan ráthaíocht (30 nóiméad de réir réamhshocraithe)                                                                                            |
+| 5. Díchriptiú TPROXY     | Scoránú (Linux + breiseán dúchasach)                           | Sea (root + suiteáil CA) | Aon óstach ar an spriocphort          | Díchriptíonn sé óstaigh threallacha; díchumasaithe de réir réamhshocraithe — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; gan é a thiomsú isteach in `/docs`) |
 
 ---
 
@@ -316,7 +316,7 @@ macOS/Windows tugann an fheidhm `null` ar ais (stob; is obair leantach í tacaí
 ### 5.1 Seisiún a thaifeadadh
 
 1. Cliceáil **"● Taifead seisiún"** sa bharra uirlisí → cuir ainm isteach (roghnach)
-2. Leanann an t-eireaball beo ar aghaidh mar is gnách; taispeánann táscaire dearg bíogach `◉ TAIFEAD · <ainm> · 00:42 · 23 iarratas`
+2. Leanann an t-amharc beo ar aghaidh mar is gnách; taispeánann an barra taifeadta ponc dearg bíogach, an t-am atá caite, ainm an tseisiúin nuair atá sé ar fáil, agus rialtán Stop logánaithe.
 3. Cliceáil **"⏹ Stop"** → sábháiltear seat den seisiún in `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Seisiún taifeadta a fheiceáil
@@ -324,7 +324,7 @@ macOS/Windows tugann an fheidhm `null` ar ais (stob; is obair leantach í tacaí
 Liostaítear seisiúin shábháilte sa roghchlár anuas **Seisiúin** sa bharra uirlisí. Nuair a roghnaítear ceann:
 
 - Lódáiltear seat an tseisiúin (staid reoite)
-- Taispeántar meirge: `Ag féachaint ar an seisiún taifeadta "<ainm>" — [Ar ais go beo]`
+- Taispeánann meirge lipéad logánaithe do sheisiún taifeadta agus ainm an tseisiúin (nó téacs cúltaca logánaithe do sheisiún gan teideal), taobh le cnaipe logánaithe chun filleadh ar an amharc beo.
 - Cuirtear an cluaisín Staitisticí ar fáil le comhiomláin Recharts
 
 ### 5.3 Formáidí easpórtála
@@ -348,7 +348,7 @@ Taispeánann an Cigire Tráchta **an trácht HTTPS idircheaptha go léir**, lena
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                              | Tá gach bealach agus críochphointe WebSocket teoranta don lúb siar amháin (forfheidhmítear é in `routeGuard.ts` roimh fhíordheimhniú)                                                                                             |
 | **Mascadh rún**                             | Folaíonn scanóir líneach `maskSecret()` dintiúir Bearer RFC 6750, eochracha le réimír soláthraí agus comharthaí fada doiléire sula nglaoitear `TrafficBuffer.push()` orthu                                                        |
-| **Teorainn ar mhéid an choirp**             | Ciorraítear coirp > `INSPECTOR_MAX_BODY_KB` (1024 KB de réir réamhshocraithe) agus cuirtear an fógra `"(ciorraithe ar mhaithe le feidhmíocht)"` leo                                                                               |
+| **Teorainn ar mhéid an choirp**             | Ciorraítear coirp > `INSPECTOR_MAX_BODY_KB` (1024 KB de réir réamhshocraithe) agus cuirtear an fógra `"(truncated for performance)"` leo                                                                                          |
 | **Sláintiú ceanntásca**                     | Tiontaítear ainmneacha go cás íochtair; fágtar ceanntásca frámaithe/hop-by-hop agus ceanntásca fíordheimhnithe seachfhreastalaí ar lár; folaithear fianáin go hiomlán; cuirtear luachanna dintiúr ar aghaidh chuig `maskSecret()` |
 | **CSP**                                     | Beartas Slándála Ábhair docht ar leathanaigh an Chigire Tráchta chun XSS trí choirp freagartha insteallta a chosc                                                                                                                 |
 | **Gan marthanacht de réir réamhshocraithe** | Tá an `TrafficBuffer` sa chuimhne agus cailltear é nuair a atosaítear an freastalaí. Ní bhuanaítear seisiúin ach amháin nuair a thaifeadtar iad go sainráite                                                                      |
@@ -416,7 +416,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Tairgfidh an deais "Cuir seachfhreastalaí an chórais ar ais" ar an gcéad lódáil eile freisin má bhraitheann sí go léiríonn staid an bhunachair sonraí go raibh an seachfhreastalaí gníomhach.
+Ní choinnítear staid shábháilte an tseachfhreastalaí ach i bpróiseas an fhreastalaí. Tar éis tuairteála nó atosaithe, ní féidir leis an stór staid ghabhála reatha an léargas sin a athchóiriú ó bhunachar sonraí; úsáid orduithe athshlánaithe an ardáin thuas nuair is gá athshlánú de láimh.
 
 ### Maolán lán
 

@@ -156,14 +156,14 @@ OmniRoute odhaľuje 6 zručností A2A zapojených v `src/lib/a2a/taskExecution.t
 
 | Zručnosť                | ID                   | Popis                                                                                                                                                          | Tagy                       | Príklady                                          |
 | :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------ |
-| Inteligentné smerovanie | `smart-routing`      | Smeruje výzvu cez optimálne provider/combo pomocou OmniRoute's combo engine + skóre                                                                            | smerovanie, poskytovatelia | "Nasmerovať túto výzvu cez najlepší model"        |
+| Inteligentné smerovanie | `smart-routing`      | Smeruje výzvu cez optimálne provider/combo pomocou kombinovaného enginu + OmniRoute                                                                            | smerovanie, poskytovatelia | "Nasmerovať túto výzvu cez najlepší model"        |
 | Správa kvót             | `quota-management`   | Hlási stav kvóty podľa poskytovateľa, pomáha volajúcim rozhodnúť sa, kedy throttle/switch                                                                      | kvóta, poskytovatelia      | "Skontrolujte kvótu pre antropické"               |
 | Objav poskytovateľa     | `provider-discovery` | Uvádza zoznam nainštalovaných poskytovateľov so schopnosťami, príznakmi voľnej úrovne, stavom OAuth                                                            | poskytovatelia, objav      | "Ktorí poskytovatelia sú k dispozícii?"           |
-| Analýza nákladov        | `cost-analysis`      | Odhaduje náklady na request/conversation vzhľadom na nedávne použitie katalógu +                                                                               | náklady, použitie          | "Odhad nákladov na túto konverzáciu"              |
+| Analýza nákladov        | `cost-analysis`      | Odhaduje náklady na request/conversation vzhľadom na nedávne používanie katalógu +                                                                             | náklady, použitie          | "Odhad nákladov na túto konverzáciu"              |
 | Správa o zdraví         | `health-report`      | Súhrnný istič, chladenie, stav blokovania podľa poskytovateľa                                                                                                  | zdravie, odolnosť          | "Zobraziť zdravotný stav všetkých poskytovateľov" |
-| Zoznam schopností       | `list-capabilities`  | Vráti úplný katalóg zručností agenta so 45 položkami (konfigurácia 23 API + 21 CLI + 1) ako tabuľka značiek s nespracovaným SKILL.md URLs na vloženie kontextu | katalóg, objav, zručnosti  | "Vypísať všetky schopnosti OmniRoute "            |
+| Zoznam schopností       | `list-capabilities`  | Vráti úplný katalóg zručností agenta so 45 položkami (konfigurácia 23 API + 21 CLI + 1) ako tabuľka značiek s nespracovaným SKILL.md URLs na vloženie kontextu | katalóg, objav, zručnosti  | "Uveďte všetky možnosti OmniRoute "               |
 
-> Karta agenta by mala byť zarovnaná s aktuálnym katalógom poskytovateľov 381; počty poskytovateľov a metaúdaje free/no-auth sa získavajú z registra runtime.
+> Karta agenta by mala byť zarovnaná s aktuálnym katalógom poskytovateľa 388; počty poskytovateľov a metadáta free/no-auth sa získavajú z registra runtime.
 
 ### `list-capabilities` Detail zručnosti
 

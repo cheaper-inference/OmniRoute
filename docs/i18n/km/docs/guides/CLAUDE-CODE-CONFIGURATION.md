@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # Claude Code ប្រើ glm/glm-5.2 តា�
 
 ---
 
-## របៀបដែលកូដ Claude ភ្ជាប់ទៅច្រកផ្លូវ
+## របៀបដែល Claude Code ភ្ជាប់ទៅ gateway
 
-Claude កូដនិយាយអំពី**Anthropic សារ API** ហើយត្រូវបានចង្អុលនៅចំណុចបញ្ចប់ផ្ទាល់ខ្លួនជាមួយនឹងអថេរបរិស្ថាន (វាគ្មានទង់ `--base-url` )៖
+Claude Code ទាក់ទងតាម **Anthropic Messages API** ហើយត្រូវបានតម្រង់ទៅកាន់ endpoint ផ្ទាល់ខ្លួន
+ដោយប្រើ environment variables (វាមិនមាន flag `--base-url` ទេ)៖
 
-| អថេរ                                         | គោលបំណង                                                                               |
-| -------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude Code បន្ថែម `/v1/messages`) ។** គ្មានបច្ច័យ `/v1` ។**        |
-| `ANTHROPIC_AUTH_TOKEN`                       | បានផ្ញើជា `Authorization: Bearer …` — ប្រើ OmniRoute access token / API key របស់អ្នក។ |
-| `ANTHROPIC_API_KEY`                          | ជម្មើសជំនួស៖ ផ្ញើជា `x-api-key`។ ប្រសិនបើទាំងពីរកំណត់ `ANTHROPIC_AUTH_TOKEN` ឈ្នះ     |
-| `ANTHROPIC_MODEL`                            | បង្ខំគំរូជាក់លាក់មួយ (បដិសេធលំនាំដើមអ្នកជ្រើសរើស `/model` )                           |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → អ្នកជ្រើសរើស `/model` ដើមរាយបញ្ជីម៉ូដែល `claude*`/`anthropic*` ពី `/v1/models`  |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cap output tokens ក្នុងមួយការឆ្លើយតប (ឧ. `65536`)                                     |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | កម្រិតសញ្ញាសម្ងាត់សម្រាប់ការបង្រួមដោយស្វ័យប្រវត្តិ                                    |
+| អថេរ                                         | គោលបំណង                                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL ឫសរបស់ gateway (Claude Code បន្ថែម `/v1/messages`)។ **មិនត្រូវមានបច្ច័យ `/v1` ទេ។** |
+| `ANTHROPIC_AUTH_TOKEN`                       | ផ្ញើជា `Authorization: Bearer …` — ប្រើ access token / API key របស់ OmniRoute           |
+| `ANTHROPIC_API_KEY`                          | ជម្រើសជំនួស៖ ផ្ញើជា `x-api-key`។ ប្រសិនបើកំណត់ទាំងពីរ `ANTHROPIC_AUTH_TOKEN` មានអាទិភាព |
+| `ANTHROPIC_MODEL`                            | បង្ខំឱ្យប្រើម៉ូដែលជាក់លាក់មួយ (ជំនួសតម្លៃលំនាំដើមរបស់ឧបករណ៍ជ្រើស `/model`)              |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ឧបករណ៍ជ្រើស `/model` ដើម រាយម៉ូដែល `claude*`/`anthropic*` ពី `/v1/models`         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | កំណត់ចំនួន output tokens អតិបរមាសម្រាប់ការឆ្លើយតបនីមួយៗ (ឧ. `65536`)                    |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | កម្រិត token សម្រាប់ការបង្រួមដោយស្វ័យប្រវត្តិ                                           |
 
-> Env vars ត្រូវបានអាន** ម្តងនៅពេលចាប់ផ្តើម** — ចាប់ផ្តើមកូដ Claude ឡើងវិញបន្ទាប់ពីផ្លាស់ប្តូរពួកវា។
+> Env vars ត្រូវបានអាន **តែមួយដងនៅពេលចាប់ផ្ដើម** — ចាប់ផ្ដើម Claude Code ឡើងវិញបន្ទាប់ពីផ្លាស់ប្ដូរពួកវា។
 
-សម្រាប់ព័ត៌មានសម្ងាត់ដែលបង្វិលជំនួសឱ្យខ្សែអក្សរថេរ កំណត់ `apiKeyHelper` ក្នុង `~/.claude/settings.json` ទៅជាពាក្យបញ្ជាដែលបោះពុម្ពលិខិតសម្គាល់បច្ចុប្បន្នទៅ stdout ។ Claude Code ទុកទិន្នន័យចេញរបស់វារយៈពេលប្រាំនាទីតាមលំនាំដើម (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` បដិសេធវា) ហើយផ្ញើតម្លៃទាំង `Authorization: Bearer` និង `x-api-key`។ ស្គ្រីបត្រូវតែបោះពុម្ពលិខិតសម្គាល់ ហើយគ្មានអ្វីផ្សេងទៀត — ផ្ទាំងបដាអមជាមួយវាបរាជ័យ ជំនួយការនៅលើ v2.1.227 +។
+ដើម្បីប្រើព័ត៌មានផ្ទៀងផ្ទាត់ដែលផ្លាស់ប្តូរជាប្រចាំជំនួសឱ្យខ្សែអក្សរថេរ សូមកំណត់ `apiKeyHelper` ក្នុង `~/.claude/settings.json` ជាពាក្យបញ្ជាដែលបោះពុម្ពព័ត៌មានផ្ទៀងផ្ទាត់បច្ចុប្បន្នទៅ stdout។ តាមលំនាំដើម Claude Code រក្សាទុកលទ្ធផលរបស់វាក្នុងឃ្លាំងសម្ងាត់រយៈពេលប្រាំនាទី (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` អាចប្តូររយៈពេលនេះ) ហើយផ្ញើតម្លៃនៅក្នុងទាំង `Authorization: Bearer` និង `x-api-key`។ ស្គ្រីបត្រូវបោះពុម្ពតែព័ត៌មានផ្ទៀងផ្ទាត់ប៉ុណ្ណោះ៖ ការបោះពុម្ពបដាបន្ថែមជាមួយវាធ្វើឱ្យ helper បរាជ័យនៅក្នុង v2.1.227+។
 
-នេះជារបៀបដែល Entra ID SSO ដំណើរការ៖ `scripts/cli/omniroute-sso.mjs token` បោះពុម្ពសញ្ញាសម្ងាត់ចូលប្រើរយៈពេលខ្លីដែល OmniRoute ផ្ទៀងផ្ទាត់ជំនួសឱ្យគ្រាប់ចុច API ។ សូមមើល [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ។
+Entra ID SSO ដំណើរការតាមរបៀបនេះ៖ `scripts/cli/omniroute-sso.mjs token` បោះពុម្ពថូខឹនចូលប្រើ Entra ដែលមានសុពលភាពខ្លី ហើយ OmniRoute ផ្ទៀងផ្ទាត់ថូខឹននោះជំនួសឱ្យកូនសោ API។ សូមមើល [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)។
 
-`omniroute launch` កំណត់ទាំងអស់នេះសម្រាប់អ្នក៖ វាដោះស្រាយកូដ URL + មូលដ្ឋានពីបរិបទសកម្ម (ដូច្នេះ `omniroute connect <vps>` បន្ទាប់មក `omniroute launch` គ្រាន់តែដំណើរការ) ពិនិត្យសុខភាពម៉ាស៊ីនមេ និង execs `claude`។
+`omniroute launch` កំណត់អថេរទាំងអស់នេះជូនអ្នក៖ វាកំណត់ base URL + token
+ពី context ដែលកំពុងសកម្ម (ដូច្នេះ `omniroute connect <vps>` រួច `omniroute launch`
+នឹងដំណើរការភ្លាមៗ) ពិនិត្យស្ថានភាព server ហើយប្រតិបត្តិ `claude`។
+
+---
+
+## គុណលក្ខណៈការប្រើប្រាស់៖ វគ្គ និងគម្រោង
+
+OmniRoute ដាក់សំណើរបស់កូនសោ API នីមួយៗទៅក្នុង **វគ្គភ្នាក់ងារ** និងកត់ត្រាទុក **គម្រោង** វគ្គនីមួយៗដំណើរការលើ (តារាង `agent_sessions` ) ដូច្នេះការប្រើប្រាស់ និងការចំណាយអាចត្រូវបានរាយការណ៍ក្នុងមួយសមាជិកក្រុម គម្រោង និងក្នុងមួយវគ្គ។
+
+អ្វីដែលត្រូវបានកត់ត្រាដោយគ្មានការដំឡើងម៉ាស៊ីនភ្ញៀវណាមួយ:
+
+| វាល     | ប្រភព                                                                                                                                           |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| វគ្គ    | បឋមកថា`x-claude-code-session-id` (តម្លៃដូចគ្នានឹង `metadata.user_id.session_id`) មានស្ថេរភាពក្នុងមួយវគ្គ                                        |
+| គម្រោង  | បន្ទាត់ `Primary working directory:` កូដ Claude ផ្ញើនៅក្នុងសារបរិស្ថានរបស់វា; ថតឯកសារ worktree ក្រោម `.claude/worktrees/` ដោះស្រាយទៅឈ្មោះឃ្លាំង |
+| សាខា    | `Current branch:` ពីស្ថានភាព git Claude Code ផ្ញើជាមួយសារដំបូង                                                                                  |
+| អតិថិជន | `user-agent` (`claude-cli/<version>`)                                                                                                           |
+
+Codex (`<environment_context><cwd>`) និង OpenCode (`x-opencode-session`) ត្រូវបានទទួលស្គាល់តាមរបៀបដូចគ្នា។ សោជាមួយ **គ្មានកំណត់ហេតុ** បានបើកដំណើរការទុកតែលេខសម្គាល់សម័យ និងវាលគម្រោងដែលផ្តល់ដោយបឋមកថា។ គ្មានអ្វីដែលបានអានពីប្រអប់បញ្ចូល (ផ្លូវ, សាខា) ត្រូវបានរក្សាទុក។
+
+### ដាក់ឈ្មោះគម្រោងឱ្យច្បាស់លាស់ (បានណែនាំ)
+
+ថតការងារខុសគ្នារវាងម៉ាស៊ីន ដូច្នេះឃ្លាំងដូចគ្នាអាចបង្ហាញនៅក្រោមផ្លូវផ្សេងគ្នា។ ផ្ញើគម្រោងយ៉ាងច្បាស់លាស់ជំនួសវិញ៖ កូដ Claude បន្ថែមបឋមកថាដែលបានរាយក្នុង `ANTHROPIC_CUSTOM_HEADERS` ទៅនឹងរាល់សំណើគំរូ ហើយ OmniRoute អានពីរក្នុងចំណោមពួកគេ៖
+
+| បឋមកថា                     | តម្លៃ                                                      |
+| -------------------------- | ---------------------------------------------------------- |
+| `x-omniroute-project`      | ឈ្មោះគម្រោង ឧទាហរណ៍ `omniroute`                            |
+| `x-omniroute-project-repo` | ពីចម្ងាយធម្មតា ឧទាហរណ៍ `github.com/diegosouzapw/OmniRoute` |
+
+ទាំងពីរត្រូវបានអានសម្រាប់តែគុណលក្ខណៈ; ពួកគេមិនត្រូវបានបញ្ជូនបន្តទៅអ្នកផ្តល់ចរន្តទឹកឡើយ។
+
+`ANTHROPIC_CUSTOM_HEADERS` ត្រូវបានអានម្តងនៅពេលចាប់ផ្តើម ហើយឯកសារការកំណត់រក្សាទុកតម្លៃព្យញ្ជនៈ ដូច្នេះគណនាវានៅពេលដែលកូដ Claude ចាប់ផ្តើម។ បន្ថែមវាទៅ `~/.zshrc` ឬ `~/.bashrc` ហើយបន្តចាប់ផ្តើម `claude` ពីថតគម្រោង៖
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+កន្សោម `sed` ដកព័ត៌មានសម្ងាត់ណាមួយដែលបានបង្កប់នៅក្នុង URL ពីចម្ងាយ។ កម្មវិធីបន្ថែម IDE បើកដំណើរការកូដ Claude ដោយគ្មានសែលរបស់អ្នក ដូច្នេះវគ្គរបស់ពួកគេត្រលប់ទៅថតការងារវិញ។
 
 ---
 

@@ -54,7 +54,7 @@ Táàbù tuntun fún yíyọ àkóónú jáde láti URL kan nípasẹ̀ `POST /v
 - Ìṣàfilọ́lẹ̀: URL + yíyan ojú-ìwé-kíkún + aṣàyàn format (markdown / text / HTML).
 - Firanṣẹ́ → mú wá → ṣàfihàn `ScrapeResult.tsx`.
 - `ScrapeResult` ń ṣàfihàn àkọ́kọ́ markdown + yíyan raw.
-- Ààlà: bí body ìdáhùn bá ju **256 KB**, UI yóò fi `(a ti gé kúrú, wo raw)` hàn, yóò sì ṣí raw nínú Monaco modal kan (D21).
+- Ààlà: bí body ìdáhùn bá ju **256 KB**, UI yóò fi `View full raw content` hàn, yóò sì ṣí raw nínú modal kan (D21).
 - Páànù metadata: olùpèsè (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), àkókò ìdádúró, ìnáwó, ìwọ̀n ìdáhùn, iye àwọn link.
 - Lo hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Táàbù tuntun fún yíyọ àkóónú jáde láti URL kan nípasẹ̀ `POST /v
 `ProviderCatalog.tsx` ń ṣàfihàn àtòjọ àwọn olùpèsè ní ẹ̀kúnrẹ́rẹ́ láti inú `GET /api/search/providers`
 (tí a mú gbòòrò sí i nínú F4 láti fi àwọn olùpèsè ìgbàwálẹ̀ kún un):
 
-| `kind` | `"search"` (olùpèsè 20) tàbí `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (olùpèsè 23) tàbí `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 A máa ń **ṣírò ipò náà ní àkókò ìbéèrè** nípa ṣíṣàyẹ̀wò bóyá àwọn ẹ̀rí ìdánimọ̀ wà àti bóyá
 gbogbo àwọn kọ́kọ́rọ́ wà nínú àkókò ìdádúró lọ́wọ́lọ́wọ́.
+
+`codex-search` (Codex Web Search): Ó ń lo àwọn àkọọ́lẹ̀ Codex (ChatGPT) tí a ti so pọ̀; kò nílò kọ́kọ́rọ́ mìíràn. Ìwádìí kọ̀ọ̀kan ń lo ìpín àlábápín ChatGPT , ó sì máa ń gba nǹkan bí ìṣẹ́jú-àáyá 10–40. Ó ń ṣiṣẹ́ nígbà tí ìbéèrè bá dárúkọ rẹ̀; yíyan aládàáṣiṣẹ́ nílò kí a tan `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, èyí tí a pa ní ìbẹ̀rẹ̀.
 
 ---
 

@@ -8,78 +8,79 @@
 
 _Ìgbà ìkẹyìn tí a ṣe àfikún: 2026-06-28_
 
-## Isọniṣoki ti Alaṣẹ
+## Àkótán Gbogbogbò
 
-OmniRoute jẹ ẹnu-ọna afisona AI agbegbe ati dasibodu ti a ṣe lori Next.js. O pese aaye ipari-ibaramu OpenAI kan ṣoṣo (`/v1/*`) ati awọn ọna ipa-ọna kọja ọpọlọpọ awọn olupese oke pẹlu itumọ, ipadabọ, isọdọtun ami, ati ipasẹ lilo.
+OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìṣàkóso tí a kọ́ lórí Next.js.
+Ó pèsè ojú-ọ̀nà kan ṣoṣo tó bá OpenAI mu (`/v1/*`), ó sì ń darí ìrìn-àjò kọjá ọ̀pọ̀ àwọn olupèsè òkè pẹ̀lú ìtumọ̀, ìyípadà sí àṣàyàn ìrànwọ́, ìsọdọ̀tun token, àti ìtọ́pinpin lílò.
 
-Awọn agbara koko:
+Àwọn agbára pàtàkì:
 
-- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 381, awọn modulu alaṣẹ 159)
-- Request/response itumọ kọja awọn ọna kika olupese
-- Awoṣe konbo fallback (ọkọọkan awoṣe pupọ)
-- Awọn igbesẹ konbo ti a ṣeto (`provider + model + connection`) pẹlu pipaṣẹ akoko ṣiṣe nipasẹ `compositeTiers`
-- Ipadabọ ipele akọọlẹ (iroyin-ọpọlọpọ fun olupese)
-- Quota preflight ati kiota-mọ P2C iroyin yiyan ni ọna iwiregbe akọkọ
-- OAuth + API-bọtini iṣakoso asopọ olupese (awọn modulu olupese OAuth 27)
-- Iṣabọ iran nipasẹ `/v1/embeddings` (awọn olupese 18)
-- Iran aworan nipasẹ `/v1/images/generations` (awọn olupese 10 +, awọn awoṣe 20 + )
-- Igbasilẹ ohun nipasẹ `/v1/audio/transcriptions` (awọn olupese 18)
-- Ọrọ-si-ọrọ nipasẹ `/v1/audio/speech` (awọn olupese ti a ṣe sinu 24)
-- Awọn iran fidio nipasẹ `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Iran orin nipasẹ `/v1/music/generations` (ComfyUI)
-- Wiwa wẹẹbu nipasẹ `/v1/search` (awọn olupese 20)
-- Awọn iwọntunwọnsi nipasẹ `/v1/moderations`
-- Atunṣe nipasẹ `/v1/rerank`
-- Ronu tag parsing (`<think>...</think>`) fun ero awọn awoṣe
-- Idahun imototo fun ibamu OpenAI SDK ti o muna
-- Iṣe deede ipa (eto → olupilẹṣẹ, olumulo → eto) fun ibaramu olupese
-- Iyipada igbejade ti a ṣeto (json_schema → Gemini responseSchema)
-- Iduroṣinṣin agbegbe fun awọn olupese, awọn bọtini, awọn inagijẹ, awọn akojọpọ, awọn eto, idiyele (awọn modulu DB 122)
-- Usage/cost titele ati ìbéèrè gedu
-- Imuṣiṣẹpọ awọsanma iyan fun ìsiṣẹpọ multi-device/state
-- IP allowlist/blocklist fun iṣakoso wiwọle API
-- Isakoso isuna ero (passthrough/auto/custom/adaptive)
-- Agbaye eto abẹrẹ kiakia
-- Ipasẹ igba ati itẹka
-- Idiwọn oṣuwọn imudara iwe-iroyin pẹlu awọn profaili kan pato ti olupese
-- Awoṣe fifọ Circuit fun resilience olupese
-- Idaabobo agbo egboogi-ãra pẹlu titiipa mutex
-- Kaṣe yiyọkuro ibeere ti o da lori Ibuwọlu
-- Layer ase: awọn ofin iye owo, eto imupadabọ, eto imulo titiipa
-- Yiyi ọrọ-ọrọ: awọn akopọ imudani igba fun lilọsiwaju yiyi akọọlẹ
-- Itẹramọṣẹ ipinlẹ agbegbe (SQLite kikọ-nipasẹ kaṣe fun awọn ipadasẹhin, awọn inawo, awọn titiipa, awọn fifọ iyika)
-- Ẹrọ eto imulo fun igbelewọn ibeere aarin (lockout → budget → fallback)
-- Beere telemetry pẹlu akopọ lairi p50/p95/p99
-- Telemetry ibi-afẹde Konbo ati ilera ibi-afẹde itan-akọọlẹ nipasẹ `combo_execution_key` / `combo_step_id`
-- Ibaṣepọ ID (X-Ibeere-Id) fun wiwa kakiri opin-si-opin
-- Ṣiṣayẹwo iṣayẹwo ibamu pẹlu ijade kuro fun bọtini API
-- Ilana Eval fun idaniloju didara LLM
-- Dasibodu ilera pẹlu ipo fifọ iyika olupese akoko gidi
-- olupin MCP (awọn irinṣẹ 110) pẹlu awọn gbigbe 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) pẹlu awọn ọgbọn ati igbesi aye iṣẹ-ṣiṣe
-- Eto iranti (isediwon, abẹrẹ, igbapada, akopọ)
-- Eto ogbon (iforukọsilẹ, alaṣẹ, apoti iyanrin, awọn ọgbọn ti a ṣe sinu)
-- MITM aṣoju pẹlu iṣakoso ijẹrisi ati mimu DNS
-- Tọ abẹrẹ oluso middleware
-- Opopona funmorawon kiakia pẹlu Caveman, RTK, awọn opo gigun ti tolera, awọn akojọpọ funmorawon, awọn idii ede, ati awọn atupale
-- ACP (Agent Communication Protocol) iforukọsilẹ
-- Awọn olupese OAuth apọjuwọn (awọn modulu kọọkan 22 labẹ `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall awọn iwe afọwọkọ
-- OAuth ayika titunṣe igbese
-- afara WebSocket fun OpenAI-ibaramu WS ibara (`/v1/ws`)
-- Ìṣàkóso àmi ìsiṣẹpọ (issue/revoke, ETag-versioned konfigi edidi gbigba lati ayelujara)
-- GLM Thinking (`glmt`) tito olupese olupese kilasi akọkọ
-- Kika àmi arabara (olupese-ẹgbẹ `/messages/count_tokens` pẹlu ifẹhinti ifoju)
-- Awoṣe inagijẹ inagijẹ aladaaṣe (30 + awọn dialect-aṣoju agbekọja awọn aṣaaju ni ibẹrẹ)
-- Ailewu ti njade lode pẹlu ẹṣọ SSRF, ìdènà URL ikọkọ, ati atunto atunto
-- Cooldown-mọ iwiregbe tun gbiyanju pẹlu atunto `requestRetry` ati `maxRetryIntervalSec`
-- Ifọwọsi agbegbe asiko asiko pẹlu Zod ni ibẹrẹ
-- Ayẹwo ifaramọ v2 pẹlu pagination, awọn iṣẹlẹ CRUD olupese, ati SSRF dina mọ iwe afọwọsi
+- Ojú API tó bá OpenAI mu fún CLI/irinṣẹ́ (àwọn olupèsè 388, àwọn mójúùlù olùmúṣẹ 159)
+- Ìtumọ̀ ìbéèrè/ìdáhùn láàárín àwọn fọ́ọ̀mù olupèsè
+- Ìyípadà àṣàyàn àkójọpọ̀ model (ọ̀wọ̀ọ̀wọ́ ọ̀pọ̀ model)
+- Àwọn ìgbésẹ̀ àkójọpọ̀ tí a ṣètò (`provider + model + connection`) pẹ̀lú ìṣètò ní àkókò ìṣiṣẹ́ nípasẹ̀ `compositeTiers`
+- Ìyípadà àṣàyàn ní ìpele àkọọ́lẹ̀ (ọ̀pọ̀ àkọọ́lẹ̀ fún olupèsè kọ̀ọ̀kan)
+- Àyẹ̀wò quota ṣáájú àti yíyan àkọọ́lẹ̀ P2C tó mọ quota nínú ipa ọ̀nà ìbánisọ̀rọ̀ àkọ́kọ́
+- Ìṣàkóso ìsopọ̀ olupèsè OAuth + API-key (àwọn mójúùlù olupèsè OAuth 27)
+- Ṣíṣẹ̀dá embedding nípasẹ̀ `/v1/embeddings` (àwọn olupèsè 18)
+- Ṣíṣẹ̀dá àwòrán nípasẹ̀ `/v1/images/generations` (àwọn olupèsè 10+, àwọn model 20+)
+- Ìkọ̀wé-ohùn sí ọ̀rọ̀ nípasẹ̀ `/v1/audio/transcriptions` (àwọn olupèsè 18)
+- Ọ̀rọ̀-sí-ohùn nípasẹ̀ `/v1/audio/speech` (àwọn olupèsè inú ètò 24)
+- Ṣíṣẹ̀dá fídíò nípasẹ̀ `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Ṣíṣẹ̀dá orin nípasẹ̀ `/v1/music/generations` (ComfyUI)
+- Ìṣàwárí wẹ́ẹ̀bù nípasẹ̀ `/v1/search` (àwọn olupèsè 20)
+- Ìwọ̀ntúnwọ̀nsì nípasẹ̀ `/v1/moderations`
+- Àtúntò ipò nípasẹ̀ `/v1/rerank`
+- Ìtúpalẹ̀ àmì Think (`<think>...</think>`) fún àwọn model ìrònú
+- Ìwẹ̀nùmọ́ ìdáhùn fún ìbámu tó muna pẹ̀lú OpenAI SDK
+- Ṣíṣe àwọn ipa di ìwọ̀n kan náà (developer→system, system→user) fún ìbámu láàárín àwọn olupèsè
+- Ìyípadà àbájáde tí a ṣètò (json_schema → Gemini responseSchema)
+- Ìfipamọ́ abẹ́lẹ̀ fún àwọn olupèsè, kọ́kọ́rọ́, alias, àkójọpọ̀, ètò, àti iye owó (àwọn mójúùlù DB 122)
+- Ìtọ́pinpin lílò/ìnáwó àti ìforúkọsílẹ̀ ìbéèrè
+- Ìmúdọ́gba cloud àṣàyàn fún ìmúdọ́gba ọ̀pọ̀ ẹ̀rọ/ipò
+- Àkójọ IP tí a fàyè gbà/àkójọ tí a dí fún ìṣàkóso ààyè sí API
+- Ìṣàkóso ààlà ìrònú (fífi kọjá/àdáṣe/àṣà/adaptive)
+- Ìfi prompt system àgbáyé sínú
+- Ìtọ́pinpin session àti fífi àmì ìdánimọ̀ sí i
+- Ìdínwọ́ oṣùwọ̀n tó ti ní ìlọsíwájú fún àkọọ́lẹ̀ kọ̀ọ̀kan pẹ̀lú àwọn profaili pàtó sí olupèsè
+- Àpẹẹrẹ circuit breaker fún ìfaradà àwọn olupèsè
+- Ààbò lòdì sí anti-thundering herd pẹ̀lú mutex locking
+- Cache ìmúkúrò àwọn ìbéèrè àdáwòkọ tó dá lórí signature
+- Ìpele domain: àwọn òfin ìnáwó, ìlànà ìyípadà àṣàyàn, ìlànà lockout
+- Context Relay: àwọn àkótán fífi session lé omiì lọ fún ìtẹ̀síwájú nígbà yíyí àkọọ́lẹ̀
+- Ìfipamọ́ ipò domain (cache SQLite write-through fún àwọn ìyípadà àṣàyàn, ààlà, lockout, àti circuit breaker)
+- Ẹ̀rọ ìlànà fún àyẹ̀wò ìbéèrè láti ibi àárín (lockout → ààlà → ìyípadà àṣàyàn)
+- Telemetry ìbéèrè pẹ̀lú àkójọpọ̀ àkókò ìdádúró p50/p95/p99
+- Telemetry ibi-àfojúsùn àkójọpọ̀ àti ìlera ibi-àfojúsùn àkójọpọ̀ látijọ́ nípasẹ̀ `combo_execution_key` / `combo_step_id`
+- ID ìbáṣepọ̀ (X-Request-Id) fún ìtọ́pinpin láti ìbẹ̀rẹ̀ dé òpin
+- Ìforúkọsílẹ̀ àyẹ̀wò ìbámu pẹ̀lú àṣàyàn láti jáde fún API key kọ̀ọ̀kan
+- Ètò eval fún ìdánilójú dídára LLM
+- Pátákó ìlera pẹ̀lú ipò circuit breaker olupèsè ní àkókò gidi
+- MCP Server (irinṣẹ́ 110) pẹ̀lú ọ̀nà ìgbéga mẹ́ta (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) pẹ̀lú àwọn ọgbọ́n àti ìyípo ayé iṣẹ́
+- Ètò memory (yíyọ, fífi sínú, ìgbàpadà, ṣíṣe àkótán)
+- Ètò skills (registry, executor, sandbox, àwọn ọgbọ́n inú ètò)
+- Aṣojú MITM pẹ̀lú ìṣàkóso certificate àti ìtọ́jú DNS
+- Middleware ààbò lòdì sí prompt injection
+- Pipeline ìfúnpọ̀ prompt pẹ̀lú Caveman, RTK, àwọn pipeline tí a tò jọ, àwọn àkójọpọ̀ ìfúnpọ̀, àwọn àkójọpọ̀ èdè, àti ìtúpalẹ̀
+- Registry ACP (Agent Communication Protocol)
+- Àwọn olupèsè OAuth alámójúùlù (mójúùlù ọ̀tọ̀ọ̀tọ̀ 22 lábẹ́ `src/lib/oauth/providers/`)
+- Àwọn script uninstall/full-uninstall
+- Ìgbésẹ̀ àtúnṣe àyíká OAuth
+- Afárá WebSocket fún àwọn client WS tó bá OpenAI mu (`/v1/ws`)
+- Ìṣàkóso token ìmúdọ́gba (ìfúnni/fífagilé, gbígbà bundle ètò tó ní version ETag)
+- Ètò olupèsè GLM Thinking (`glmt`) gẹ́gẹ́ bí àṣàyàn ìpele-àkọ́kọ́
+- Kíkà token alápọpọ̀ (ní ẹ̀gbẹ́ olupèsè `/messages/count_tokens` pẹ̀lú àṣàyàn ìṣírò ìfojú dípò rẹ̀)
+- Ìfúnrúgbìn alias model láìfọwọ́ṣe (àwọn ìṣedéédé dialect aṣojú kọjá 30+ ní ìbẹ̀rẹ̀)
+- Fetch jáde tó ní ààbò pẹ̀lú ààbò SSRF, dídí URL àdáni, àti àtúndánwò tí a lè ṣètò
+- Àwọn àtúndánwò ìbánisọ̀rọ̀ tó mọ cooldown pẹ̀lú `requestRetry` àti `maxRetryIntervalSec` tí a lè ṣètò
+- Ìfọwọ́sí àyíká runtime pẹ̀lú Zod ní ìbẹ̀rẹ̀
+- Àyẹ̀wò ìbámu v2 pẹ̀lú pagination, àwọn ìṣẹ̀lẹ̀ CRUD olupèsè, àti ìforúkọsílẹ̀ ìfọwọ́sí tí SSRF dí
 
-Awoṣe asiko asiko akọkọ:
+Àpẹẹrẹ runtime àkọ́kọ́:
 
-- awọn ipa ọna app Next.js labẹ `src/app/api/*` ṣe imuse mejeeji dashboard APIs ati APIs ibamu
-- Kokoro SSE/routing ti o pin ni `src/sse/*` + `open-sse/*` n ṣe itọju ipaniyan olupese, itumọ, ṣiṣanwọle, ipadabọ, ati lilo
+- Àwọn ipa ọ̀nà app Next.js lábẹ́ `src/app/api/*` ń ṣe àwọn API pátákó ìṣàkóso àti àwọn API ìbámu
+- Kókó SSE/ìdarí tí a pín ní `src/sse/*` + `open-sse/*` ń bójú tó ìmúṣẹ olupèsè, ìtumọ̀, streaming, ìyípadà àṣàyàn, àti lílò
 
 ## Àwọn Àwòrán Ìtọ́kasí
 
@@ -856,41 +857,47 @@ flowchart LR
 - `src/lib/db/*`: ṣàgbéwọlé àwọn módù pàtó ní tààrà — kò sí barrel (a ti yọ ipele àtúnṣàgbéjáde `localDb.ts` àtijọ́ kúrò)
 - `src/lib/usageDb.ts`: ojú-ọ̀nà sí ìtàn lílò/àwọn àkọsílẹ̀ ìpè lórí àwọn tábìlì SQLite
 
-## Ìbòrí Executor Olùpèsè (Àpẹẹrẹ Strategy)
+## Ibori Olupese Olupese (Àpẹẹrẹ Ilana)
 
-Olùpèsè kọ̀ọ̀kan ní executor àkànṣe kan tí ó jogún láti inú `BaseExecutor` (nínú `open-sse/executors/base.ts`), èyí tí ó pèsè ṣíṣe URL, ìkọ́ àwọn header, àtúnṣe ìgbìyànjú pẹ̀lú ìdádúró tí ń pọ̀ sí i lọ́nà exponential, àwọn hook fún ìtúnṣe credential, àti method ìṣètò `execute()`.
+Olupese kọọkan ni olupilẹṣẹ amọja kan ti o gbooro `BaseExecutor` (ni `open-sse/executors/base.ts`), eyiti o pese ile URL, ikole akọsori, tun gbiyanju pẹlu ifẹhinti ti o pọju, awọn iwo isọdọtun ijẹrisi, ati ọna orchestration `execute()`.
 
-| Olùṣe                     | Olùpèsè                                                                                                                                                            | Ìṣàkóso Pàtàkì                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, àti bẹ́ẹ̀ lọ. | Àtúnṣe URL/header aláyípadà fún olùpèsè kọ̀ọ̀kan                        |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                 | Àwọn ID project/session àkànṣe, ṣíṣàyẹ̀wò Retry-After, ìfipamọ́ 429     |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                       | Ìdarí tó dá lórí deployment, fífi òfin query api-version múlẹ̀         |
-| `BlackboxWebExecutor`     | Blackbox AI (ipò wẹ́ẹ̀bù)                                                                                                                                            | Ìyípadà session wẹ́ẹ̀bù pẹ̀lú àfarawé fingerprint TLS                    |
-| `ClaudeIdentityExecutor`  | Claude.ai (ọ̀nà CCH)                                                                                                                                                | Àwọn pipeline constraint + tool-remap, ṣíṣe àtúnṣe fingerprint        |
-| `CliProxyApiExecutor`     | Àwọn olùpèsè tó bá CLIProxyAPI mu                                                                                                                                  | Ìṣàkóso auth àti protocol àkànṣe                                      |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                              | Ìfikún Account ID, ìtọ́pa lílò tó dá lórí Neurons                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                       | Ó ń fi àwọn ìtọ́nisọ́nà system kún un, ó sì ń fipá mú ìsapá reasoning   |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                                | Afárá Responses API session browser pẹ̀lú fífi thread/turn dúró        |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                       | OAuth + yíyí header padà fún session kọ̀ọ̀kan                           |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                         | Protocol ConnectRPC, encoding Protobuf, fífi checksum fọwọ́ sí request |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                          | Sísopọ̀ ìgbésí-ayé task Devin nípasẹ̀ module agent cloud                |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                     | Ìsọdọ̀tun token Copilot, àwọn header tó ń fara wé VSCode               |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                         | GitLab OAuth + ìdarí tó ní ààlà project                               |
-| `GlmExecutor`             | Z.AI GLM (pẹ̀lú preset `glmt`)                                                                                                                                      | Ó mọ thinking-budget, àwọn constant preset GLMT                       |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                       | Ìyípadà session wẹ́ẹ̀bù, yíyan ipò (ìrònú/boṣewa)                       |
-| `KieExecutor`             | KIE                                                                                                                                                                | Ìfúnni token àkànṣe pẹ̀lú àwọn anchor session tó ń yí padà             |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                             | Ọ̀nà kika binary AWS EventStream → ìyípadà SSE                         |
-| `MuseSparkWebExecutor`    | Muse Spark (wẹ́ẹ̀bù)                                                                                                                                                 | Ìyípadà session wẹ́ẹ̀bù pẹ̀lú afárá ifiranṣẹ-àwòrán                      |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                          | Ìrísí body request tó jẹ́ ti olùpèsè pàtó                              |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                           | Ìṣètò olùpèsè tó bá AI SDK mu                                         |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                                     | Ìyípadà session wẹ́ẹ̀bù fún ìtẹ̀síwájú ìfọ̀rọ̀wérọ̀                         |
-| `PetalsExecutor`          | Ìṣírò inference alápín Petals                                                                                                                                      | Ìdarí swarm aláìlákóso-àárín                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                    | Kò nílò API key, àwọn request tó ní ààlà oṣùwọ̀n                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                           | Àtìlẹ́yìn PAT àti OAuth, ipele ọ̀fẹ́ onírúurú model                      |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                                   | Auth service account, àwọn endpoint tó dá lórí region                 |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                      | API key tí a ṣàgbéwọlé + streaming chat Connect-protobuf              |
+| Apaniyan                  | Olupese (awọn)                                                                                                                                                  | Pataki mimu                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Idamu, Together, Fireworks, Cerebras, Cohere, NVIDIA, ati be be lo. | Ìmúdàgba URL/header atunto fun olupese                                   |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                              | Aṣa project/session IDs, Tun gbiyanju-Lẹhin sisọ, 429 obfuscation        |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                    | Itọnisọna ti o da lori imuṣiṣẹ, imuṣẹ ibeere ti ẹya api                  |
+| `BlackboxWebExecutor`     | Blackbox AI (ipo wẹẹbu)                                                                                                                                         | Yiyipada igba oju-iwe ayelujara pẹlu apẹẹrẹ ika ika TLS                  |
+| `ClaudeIdentityExecutor`  | Claude.ai (ọna CCH )                                                                                                                                            | Ihamọ + ọpa-pipe pipelines, tito itẹka                                   |
+| `CliProxyApiExecutor`     | CLIProxyAPI-ibaramu olupese                                                                                                                                     | Aṣa auth ati ilana mimu                                                  |
+| `CloudflareAiExecutor`    | Cloudflare Osise AI                                                                                                                                             | Abẹrẹ ID akọọlẹ, ipasẹ lilo orisun Neurons                               |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                    | Injects awọn ilana eto, ipa ero ero                                      |
+| `ChatGptWebCodexExecutor` | Aaye ayelujara ChatGPT (Codex)                                                                                                                                  | Browser-igba Awọn idahun Afara API pẹlu pinni thread/turn                |
+| `CommandCodeExecutor`     | Òfin koodu                                                                                                                                                      | OAuth + iyipo akọsori igba-kọọkan                                        |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                      | Ilana ConnectRPC, fifi koodu Protobuf, beere iforukọsilẹ nipasẹ checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                       | Nsopọ igbesi aye iṣẹ-ṣiṣe Devin nipasẹ module oluranlowo awọsanma        |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                  | Itupalẹ ami Copilot, awọn akọsori afarawe VSCode                         |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                      | GitLab OAuth + ise agbese-dopin afisona                                  |
+| `GlmExecutor`             | Z.AI GLM (pẹlu tito tẹlẹ `glmt` )                                                                                                                               | Iṣiro-isuna mọ, GLMT tito awọn ibakan                                    |
+| `GrokWebExecutor`         | Aaye ayelujara xAI Grok                                                                                                                                         | Yiyipada igba-ayelujara, aṣayan ipo (think/standard)                     |
+| `KieExecutor`             | KIE                                                                                                                                                             | Ipinfunni àmi aṣa pẹlu awọn ìdákọró igba yiyipo                          |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                          | AWS EventStream alakomeji kika → SSE iyipada                             |
+| `MuseSparkWebExecutor`    | Muse Spark (ayelujara)                                                                                                                                          | Ikoni oju opo wẹẹbu yiyipada pẹlu asopọ-ifiranṣẹ aworan                  |
+| `NlpCloudExecutor`        | Awọsanma NLP                                                                                                                                                    | Apẹrẹ ara ti olupese ni pato                                             |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                        | Eto olupese olupese AI SDK                                               |
+| `PerplexityWebExecutor`   | Wẹẹbu idamu                                                                                                                                                     | Oju opo wẹẹbu yiyipada fun lilọsiwaju iwiregbe                           |
+| `PetalsExecutor`          | Petals pin inference                                                                                                                                            | Atopin swarm afisona                                                     |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                 | Ko si bọtini API ti o beere, awọn ibeere ti o ni opin oṣuwọn             |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                        | Atilẹyin PAT ati OAuth, ipele ọfẹ-ọfẹ awoṣe                              |
+| `VertexExecutor`          | Google fatesi AI                                                                                                                                                | Ijeri iwe ipamọ iṣẹ, awọn aaye ipari ti agbegbe                          |
+| `DevinDesktopExecutor`    | Ojú-iṣẹ Devin                                                                                                                                                   | Ti ko wọle API bọtini + Sopọ-protobuf iwiregbe iwiregbe                  |
 
-Gbogbo àwọn olupèsè yòókù (pẹ̀lú àwọn node àdáni tó bá ara wọn mu) ń lo `DefaultExecutor`.
+Gbogbo awọn olupese miiran (pẹlu awọn apa ibaramu aṣa) lo `DefaultExecutor`.
+
+### Awọn iwadii adaṣe adaṣe ati awọn akọọlẹ igba wẹẹbu
+
+Awọn idanwo awoṣe, Gbogbo Idanwo, awọn idanwo konbo ati awọn igbelewọn firanṣẹ awọn ibeere iwiregbe gidi. Olupese aaye ayelujara n ṣiṣẹ bi olumulo ti o wọle, nitorinaa ọkọọkan awọn ibeere wọnyẹn yoo wa ni fipamọ bi ibaraẹnisọrọ lori akọọlẹ yẹn; Awọn iwadii adaṣe adaṣe ti o fi iru awọn ibaraẹnisọrọ silẹ ni akọọlẹ kan ti daduro (#14780). Opopona iwiregbe ko kọ gbogbo ibi-afẹde kan iwadii adaṣe ti de ọdọ ẹniti olupese gba iwe-ẹri igba-ayelujara, ni kete ti olupese ti ibi-afẹde ti yanju ati ṣaaju yiyan iwe-ẹri (`src/lib/providers/chatProbePolicy.ts`). Awọn kþ ni `422` pẹlu `error.code` `chat_probe_not_isolated`, ati awọn asare ibere jabo o bi a foo, ko kan ikuna.
+
+Oluṣeto ti o nṣiṣẹ gbogbo iwiregbe ni ipo ti kii ṣe itan-akọọlẹ olupese ti sọ pẹlu `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); Awọn iwadii si olupese yẹn lẹhinna gba laaye. ChatGPT Web sọ `temporary-chat`. Pin ikede kan si ẹrọ rẹ pẹlu idanwo kan, nitorinaa ẹtọ naa ko le kọja koodu ti o jẹ ki o jẹ otitọ.
 
 ## Mátríìsì Ìbámu Olùpèsè
 
@@ -1054,11 +1061,11 @@ A pa olùkọ̀sílẹ̀ ìbéèrè onífáìlì ti àtijọ́ (`open-sse/utils/
 - àwọn ìṣílọ schema SQLite àti àwọn hook ìmúdójúìwọ̀n aládàáṣiṣẹ́ nígbà ìbẹ̀rẹ̀
 - ipa ọ̀nà ìbámu ìṣílọ JSON àtijọ́ → SQLite
 
-## 6) Ààbò SSRF / URL Tí Ń Jáde
+## 6) SSRF / Ààbò URL Tí ń Jáde
 
-- `src/shared/network/outboundUrlGuard.ts` ń dí gbogbo URL ibi-àfojúsùn private/loopback/link-local kí wọ́n tó dé ọ̀dọ̀ àwọn olùṣe olùpèsè
-- Àwọn ipa ọ̀nà ìṣàwárí àti ìfìdímúlẹ̀ awoṣe olùpèsè ń lo `src/shared/network/safeOutboundFetch.ts`, èyí tí ń lo ààbò náà ṣáájú gbogbo ìbéèrè tó ń jáde
-- Àwọn àṣìṣe ààbò máa ń farahàn gẹ́gẹ́ bí `URL_GUARD_BLOCKED` pẹ̀lú HTTP 422, a sì máa ń kọ wọ́n sínú àkọsílẹ̀ àyẹ̀wò ìbámu nípasẹ̀ `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ń lo `src/shared/network/outboundUrlGuard.ts` sí àwọn ìbéèrè ìfọ̀rọ̀wérọ̀ tí a fi ránṣẹ́ nípasẹ̀ `BaseExecutor.execute()`. Ní ipò ti gbogbo ènìyàn nìkan (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` pẹ̀lú àsìá àdáni tí a pa), ó ń dí àwọn olùgbàlejò àdáni àti loopback, àti 169.254.0.0/16; ní gbogbo ipò mìíràn, ó ń dí àwọn olùgbàlejò metadata àwọsánmà. Ó ń ṣàyẹ̀wò orúkọ olùgbàlejò tàbí IP gẹ́gẹ́ bí a ṣe kọ ọ́, ṣáájú ìṣàwárí DNS èyíkéyìí. Àwọn olupèsè agbègbè tí a fi sínú ètò máa ń foju kọ ọ́.
+- Ìṣàwárí àti àwọn ipa-ọ̀nà ìfàṣẹsí àwòṣe olupèsè ń lo `src/shared/network/safeOutboundFetch.ts`, èyí tí ń lo ààbò náà ṣáájú gbogbo ìbéèrè tí ń jáde
+- Àwọn àṣìṣe ààbò máa ń hàn gẹ́gẹ́ bí `URL_GUARD_BLOCKED` pẹ̀lú HTTP 503 (`getSafeOutboundFetchErrorStatus`; ipa-ọ̀nà ìṣàwárí àwòṣe máa ń dá 400 padà), a sì máa ń ṣe àkọsílẹ̀ àwọn ìdènà SSRF gidi nígbà ìfàṣẹsí sínú àkọsílẹ̀ àyẹ̀wò gẹ́gẹ́ bí àwọn ìṣẹ̀lẹ̀ `provider.validation.ssrf_blocked`
 
 ## Àkíyèsí àti Àwọn Àmì Ìṣiṣẹ́
 
@@ -1109,7 +1116,7 @@ A pa olùkọ̀sílẹ̀ ìbéèrè onífáìlì ti àtijọ́ (`open-sse/utils/
 4. Ìhùwàsí awọsánmà gbára lé `NEXT_PUBLIC_BASE_URL` tó péye àti bí a ṣe lè dé endpoint awọsánmà.
 5. A tẹ ìtọ́kasí `open-sse/` jáde gẹ́gẹ́ bí **npm workspace package** `@omniroute/open-sse`. Kóòdù orísun ń ṣàgbéwọlé rẹ̀ nípasẹ̀ `@omniroute/open-sse/...` (tí Next.js `transpilePackages` ń yanjú). Àwọn ipa ọ̀nà fáìlì nínú ìwé yìí ṣì ń lo orúkọ ìtọ́kasí `open-sse/` fún ìṣọ̀kan.
 6. Àwọn àwòrán ìṣirò nínú dashboard ń lo **Recharts** (tó dá lórí SVG) fún àfihàn ìtúpalẹ̀ dátà tó ṣeé ráyè lò, tí ó sì ń dáhùn sí ìbáṣepọ̀ (àwọn àwòrán ọ̀pá lílo model, àwọn tábìlì pípín olùpèsè pẹ̀lú ìwọ̀n àṣeyọrí).
-7. Àwọn ìdánwò E2E ń lo **Playwright** (`tests/e2e/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:e2e`. Àwọn ìdánwò unit ń lo **Node.js test runner** (`tests/unit/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:unit`. Kóòdù orísun lábẹ́ `src/` jẹ́ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ṣì jẹ́ JavaScript (`.js`).
+7. Àwọn ìdánwò E2E ń lo **Playwright** (`tests/e2e/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:e2e`. Àwọn ìdánwò unit ń lo **Node.js test runner** (`tests/unit/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:unit`. Kóòdù orísun lábẹ́ `src/` jẹ́ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ṣì jẹ́ TypeScript (`.ts`).
 8. A ṣètò ojú-ewé àtúnṣe sí tabù 7: Gbogbogbò, Ìrísí, AI, Ààbò, Ìtọ́sọ́nà, Ìfaradà, Onípele-gíga. Ojú-ewé Ìfaradà ń ṣètò ìlà ìdúró ìbéèrè, àsìkò ìtutù àsopọ̀, olùdánudúró olùpèsè, àti ìhùwàsí dídúró-de-ìtutù nìkan; ipò àkókò-ìṣiṣẹ́ olùdánudúró lọ́wọ́lọ́wọ́ ni a fihàn lójú-ewé Ìlera.
 9. A pín ọgbọ́n **Context Relay** (`context-relay`) sí ìpele méjì: `combo.ts` ń pinnu bóyá ó yẹ kí a ṣẹ̀dá ìfìránṣẹ́ ìgbàlódé, `chat.ts` sì ń fi ìfìránṣẹ́ náà sínú rẹ̀ lẹ́yìn yíyan àkọọ́lẹ̀. Dátà ìfìránṣẹ́ náà wà nínú tábìlì SQLite `context_handoffs`. Ìpín yìí jẹ́ àfọ̀mọ́ nítorí pé `chat.ts` nìkan ló mọ̀ bóyá àkọọ́lẹ̀ gangan ti yí padà.
 10. **Ìfipámúlò proxy** ti pé ní gbogbo ọ̀nà báyìí: `tokenHealthCheck.ts` ń yanjú proxy fún àsopọ̀ kọ̀ọ̀kan, `/api/providers/validate` ń lo `runWithProxyContext`, `proxyFetch.ts` sì ń lo `undici.fetch()` láti pa ìbámu dispatcher mọ́ lórí Node 22.

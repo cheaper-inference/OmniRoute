@@ -44,7 +44,7 @@ Booleovský príznak sa považuje za **povolený**, keď je jeho efektívna hodn
 
 ## Katalóg príznakov
 
-120 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená definícia — hodnota
+121 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená definícia — hodnota
 použitá, keď nie je prítomné ani prepísanie v databáze, ani premenná prostredia.
 
 ### Zabezpečenie (11)
@@ -122,7 +122,7 @@ príznakov funkcií vedú k bezpečnému odmietnutiu. Ani jedna možnosť deakti
 výdavky za spoplatnené použitie ani nezlyhané vyhľadanie ceny. Vynucovanie a hlásenie pre
 administrátora vyriešia rovnakú efektívnu politiku.
 
-### Runtime (57)
+### Runtime (58)
 
 | Kľúč                                           | Typ     | Predvolené | Reštart | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -185,6 +185,7 @@ administrátora vyriešia rovnakú efektívnu politiku.
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`    |         | Prestať ponúkať a odosielať úroveň úsilia odôvodňovania `max` pre Cursor Grok 4.7 (#17386): dokumentácia Cursoru uvádza iba low/medium/high/xhigh, takže alternatívny alias `grok-4.7-max` zmizne z katalógu a požiadavka s úrovňou úsilia `max` sa odošle bez parametra úsilia. Predvolene vypnuté: `max` zostáva ponúkané a odosielané, keďže ho prijala živá sonda AgentService/Run.                                                                                                                                                                                                                                                                                                                                                                                               |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false`    |         | Odosielať keepalive správy Responses ako prázdny riadok namiesto udalosti response.in_progress, aby syntetická snímka nikdy nenahradila skutočnú odpoveď v oficiálnom SDK. Prázdny riadok nespúšťa žiadnu udalosť SSE, takže watchdog klienta, ktorý sa resetuje iba pri udalostiach, by sa počas dlhej tichej fázy neresetoval. Predvolene vypnuté: časovače odosielajú udalosť response.in_progress platnú podľa špecifikácie.                                                                                                                                                                                                                                                                                                                                                      |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`    |         | V štatistikách kompresnej vyrovnávacej pamäte započítať komprimovanú požiadavku poskytovateľovi s automatickým ukladaním prefixu do vyrovnávacej pamäte (OpenAI, Codex, Azure alebo vlastné pripojenie, ktoré deklaruje ukladanie promptov do vyrovnávacej pamäte s odstraňovaním markerov) ako odhadovaný zásah do vyrovnávacej pamäte aj bez markerov `cache_control` (#17114). Odhad je signál oprávnenosti na uloženie do vyrovnávacej pamäte, nie pozorovaný zásah, takže vykazovaná miera zásahov pre týchto poskytovateľov smeruje k 100 %. Predvolene vypnuté: za odhadovaný zásah sa počíta iba požiadavka s markermi `cache_control` odoslaná poskytovateľovi s podporou ukladania do vyrovnávacej pamäte, takže poskytovatelia s automatickým prefixom naďalej vykazujú 0. |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false`    |         | Umožňuje automatickému webovému vyhľadávaniu bez výslovného `provider` použiť pripojený účet Codex (ChatGPT) cez `codex-search`: ako poslednú možnosť pred poskytovateľmi bez kľúča, ak nie je použiteľný žiadny poskytovateľ s prihlasovacími údajmi, a ako zálohu pri zlyhaní (#17933). Každé vyhľadávanie čerpá kvótu predplatného a trvá približne 10–40 s. Predvolene vypnuté: `codex-search` sa spustí iba vtedy, keď ho požiadavka výslovne uvedie.                                                                                                                                                                                                                                                                                                                            |
 
 ### CLI (5)
 
@@ -276,10 +277,10 @@ Vráti každý príznak s jeho efektívnou hodnotou, zdrojom a súhrnom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všetkých 119 príznakov
+    // ... všetkých 121 príznakov
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

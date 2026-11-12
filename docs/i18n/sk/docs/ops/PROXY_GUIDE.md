@@ -393,7 +393,7 @@ Používa `wreq-js` na generovanie odtlačkov TLS podobných prehliadačom, čí
 
 ### Zhoda s odtlačkom CLI
 
-**Prepínač odtlačku CLI** (`Nastavenia → Zabezpečenie`) mení poradie hlavičiek HTTP a polí tela JSON tak, aby zodpovedali presnej signatúre natívnych binárnych súborov CLI (Claude Code, Codex atď.). Funguje to **nad rámec** proxy:
+**Prepínač odtlačku CLI** (`Settings → Security`) mení poradie hlavičiek HTTP a polí tela JSON tak, aby zodpovedali presnej signatúre natívnych binárnych súborov CLI (Claude Code, Codex atď.). Funguje to **nad rámec** proxy:
 
 ```
 Vaša IP (blokovaná) → IP proxy (USA) → API poskytovateľa

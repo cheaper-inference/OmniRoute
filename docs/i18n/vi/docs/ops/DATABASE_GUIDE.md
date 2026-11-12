@@ -403,52 +403,53 @@ Lệnh này sử dụng API sao lưu trực tuyến của SQLite — có thể c
 
 ---
 
-## Tinh chỉnh hiệu năng
+## Điều chỉnh hiệu suất
 
 ### Chế độ WAL
 
-WAL được bật theo mặc định. Đối với khối lượng công việc có nhiều thao tác ghi, hãy cân nhắc:
+WAL được bật theo mặc định. Đối với khối lượng công việc ghi cao, hãy cân nhắc:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Tạo checkpoint sau mỗi 1000 trang
-PRAGMA journal_size_limit = 67108864;  -- Giới hạn WAL ở mức 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute không đặt `journal_size_limit`. Điểm kiểm tra di chuyển các khung WAL vào tệp chính, nhưng tệp WAL vẫn giữ kích thước được phân bổ lớn nhất. Người bảo vệ `OMNIROUTE_WAL_GUARD_MAX_MB` chỉ cảnh báo và chạy `wal_checkpoint(RESTART)`; nó không phải là giới hạn kích thước đĩa.
 
 ### Chỉ mục
 
-Các chỉ mục quan trọng đối với hiệu năng (được migration tự động tạo):
+Các chỉ mục chính cho hiệu suất (được tạo tự động bằng cách di chuyển):
 
-- `idx_models_provider` — tra cứu mô hình theo nhà cung cấp
-- `idx_combo_targets_combo_id` — mở rộng mục tiêu combo
-- `idx_usage_history_api_key_timestamp` — phân tích mức sử dụng
-- `idx_quota_snapshots_api_key_window` — theo dõi hạn ngạch
-- `idx_call_logs_timestamp` — truy vấn nhật ký cuộc gọi
+- Tra cứu mô hình `idx_models_provider` — theo nhà cung cấp
+- Mở rộng mục tiêu kết hợp `idx_combo_targets_combo_id` —
+- Phân tích sử dụng `idx_usage_history_api_key_timestamp` —
+- Theo dõi hạn ngạch `idx_quota_snapshots_api_key_window` —
+- Truy vấn nhật ký cuộc gọi `idx_call_logs_timestamp` —
 
-Để thêm một chỉ mục mới, hãy tạo một migration:
+Để thêm chỉ mục mới, hãy tạo di chuyển:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O ánh xạ bộ nhớ
+### I/O được ánh xạ bộ nhớ
 
-Đối với cơ sở dữ liệu rất lớn (>10GB), có thể điều chỉnh ánh xạ bộ nhớ thông qua pragma của SQLite:
+Đối với cơ sở dữ liệu rất lớn (> 10GB), ánh xạ bộ nhớ có thể được điều chỉnh thông qua SQLite pragma:
 
 ```sql
--- Thiết lập thông qua pragma của SQLite (điều chỉnh trong core.ts hoặc khi chạy)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Thu gọn
+### nén chặt
 
-Các phiên bản OmniRoute chạy lâu dài sẽ được hưởng lợi từ việc thỉnh thoảng chạy `VACUUM`:
+Các phiên bản OmniRoute chạy dài được hưởng lợi từ `VACUUM` không thường xuyên:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Chạy hằng tháng trong các khoảng thời gian có lưu lượng thấp. (Chế độ WAL làm giảm nhu cầu này nhưng không loại bỏ hoàn toàn.)
+Chạy hàng tháng trong thời gian có lưu lượng truy cập thấp. (Chế độ WAL làm giảm nhu cầu nhưng không loại bỏ nó.)
 
 ---
 

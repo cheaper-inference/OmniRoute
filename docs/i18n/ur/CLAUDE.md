@@ -15,7 +15,7 @@ Claude Code پر ہوتا ہے — یہ `AGENTS.md` میں پہلے سے بیا�
 
 مکمل لازمی ورک ٹری پروٹوکول (بیس برانچ کی تصدیق، `.claude/worktrees/` معیاری
 راستہ، `cp -al` node_modules، خاتمے کے اصول)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) میں موجود ہے (جس کا خلاصہ `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) میں موجود ہے (جس کا خلاصہ `AGENTS.md` →
 Git ورک فلو → "ورک ٹری علیحدگی" میں ہے)۔ Claude-Code سے متعلق نکات:
 
 - آپریٹر سے `AskUserQuestion` کے ذریعے بیس برانچ کی تصدیق کریں (سخت اصول #19)، سوائے اس صورت کے کہ وہ

@@ -6,36 +6,33 @@
 
 ## ภาพรวม
 
-Redis เป็น **dependency แบบไม่บังคับและไม่ตายตัว** ใน OmniRoute — แอปพลิเคชันจะลดระดับการทำงานอย่างราบรื่น (fallback
-ไปใช้หน่วยความจำภายใน) เมื่อ Redis ไม่พร้อมใช้งาน ในระบบ production การปรับแต่ง Redis ช่วยลด latency สำหรับ workload
-ที่แตกต่างกันสี่ประเภท:
+Redis คือ **เป็นทางเลือก การพึ่งพาที่นุ่มนวล** ใน OmniRoute — แอปพลิเคชันจะลดลงอย่างสวยงาม (ทางเลือกในหน่วยความจำ) เมื่อ Redis ไม่พร้อมใช้งาน ในการผลิต การปรับแต่ง Redis จะช่วยลดเวลาแฝงสำหรับเวิร์กโหลดที่แตกต่างกันสี่รายการ:
 
-| Workload                      | ตัวขับเคลื่อน                 | Client Factory                                       | รูปแบบคีย์                                       |
-| ----------------------------- | ----------------------------- | ---------------------------------------------------- | ------------------------------------------------ |
-| การจำกัดอัตรา                 | `rateLimiter.ts`              | singleton `ioredis` แบบ lazy ผ่าน `getRedisClient()` | หน้าต่างจำกัดอัตราแบบ Lua‑atomic `<prefix>rl:*`  |
-| แคชการยืนยันตัวตน             | `apiKeys.ts`                  | ใช้ client ของ `rateLimiter` ซ้ำ                     | `<prefix>auth:api_key:<sha256>` พร้อม TTL        |
-| ที่เก็บโควตา                  | `redisQuotaStore.ts`          | singleton `getRedisClient(url)` แยกต่างหาก           | `<prefix>quota:*` ที่กำหนดค่าแยกต่อ instance ได้ |
-| circuit breaker สำหรับ warmup | `redisCircuitBreakerStore.ts` | client แยกต่างหากใน `circuitBreakerFactory.ts`       | `<prefix>warmup:cb:<connectionId>`               |
+| ภาระงาน                      | คนขับรถ                       | โรงงานลูกค้า                                       | รูปแบบที่สำคัญ                               |
+| ---------------------------- | ----------------------------- | -------------------------------------------------- | -------------------------------------------- |
+| การจำกัดอัตรา                | `rateLimiter.ts`              | `getRedisClient()` — ขี้เกียจ `ioredis` ซิงเกิลตัน | หน้าต่างจำกัดอัตรา `<prefix>rl:*` Lua‑atomic |
+| แคชรับรองความถูกต้อง         | `apiKeys.ts`                  | ใช้ไคลเอ็นต์ของ `rateLimiter` ซ้ำ                  | `<prefix>auth:api_key:<sha256>` กับ TTL      |
+| ร้านค้าโควต้า                | `redisQuotaStore.ts`          | แยก `getRedisClient(url)` ซิงเกิลตัน               | `<prefix>quota:*` ที่กำหนดค่าได้ต่ออินสแตนซ์ |
+| เซอร์กิตเบรกเกอร์อุ่นเครื่อง | `redisCircuitBreakerStore.ts` | แยกไคลเอนต์ใน `circuitBreakerFactory.ts`           | `<prefix>warmup:cb:<connectionId>`           |
 
-workload ทั้งสี่ประเภทใช้ prefix ของ namespace เดียวกัน เพื่อให้ OmniRoute สามารถทำงานร่วมกับแอปอื่นบน
-Redis instance เดียวกันได้ (เช่น `127.0.0.1:6379`) ดู [การกำหนด Namespace ให้คีย์](#การกำหนด-namespace-ให้คีย์)
+ปริมาณงานทั้งสี่ใช้คำนำหน้าเนมสเปซเดียว ดังนั้น OmniRoute จึงสามารถอยู่ร่วมกับแอปอื่นๆ บนอินสแตนซ์ Redis เดียว (เช่น `127.0.0.1:6379`) ดู [การเว้นวรรคคีย์](#key-namespacing)
 
 ---
 
-## การกำหนดค่าปัจจุบัน (ค่าเริ่มต้นในโค้ด)
+## การกำหนดค่าปัจจุบัน (ค่าเริ่มต้นของรหัส)
 
-| การตั้งค่า                         | ค่า                                                                     | ตำแหน่ง                                                                               |
-| ---------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| ตัวแปร env `REDIS_URL`             | `redis://redis:6379` (compose), ไม่บังคับ                               | `rateLimiter.ts:5`, `.env.example`                                                    |
-| ตัวแปร env `REDIS_KEY_PREFIX`      | `omniroute:` (ค่าเริ่มต้น)                                              | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| ตัวแปร env `QUOTA_STORE_REDIS_URL` | แยกต่างหากและอาจแตกต่างจาก `REDIS_URL`                                  | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`               | `"sqlite"` (ค่าเริ่มต้น), `"redis"` เป็นตัวเลือก                        | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` ของ ioredis | `3`                                                                     | การสร้าง client ใน `rateLimiter.ts`                                                   |
-| `enableReadyCheck`                 | ไม่ได้ตั้งค่า (ค่าเริ่มต้นของ ioredis: `true`)                          | —                                                                                     |
-| `lazyConnect`                      | ไม่ได้ตั้งค่า (ค่าเริ่มต้นของ ioredis: `false`)                         | —                                                                                     |
-| `retryStrategy`                    | ไม่ได้ตั้งค่า (ค่าเริ่มต้นของ ioredis: ฐาน 200ms, เพิ่มแบบ exponential) | —                                                                                     |
-| TLS / รหัสผ่าน / ดัชนี DB          | **ไม่ได้กำหนดค่า**                                                      | —                                                                                     |
-| Sentinel / Cluster                 | **ไม่ได้กำหนดค่า** — รองรับเฉพาะ standalone แบบ single-node             | —                                                                                     |
+| การตั้งค่า                          | ค่า                                                                 | ที่ไหน                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| สภาพแวดล้อม `REDIS_URL`             | `redis://redis:6379` (เขียน) เป็นทางเลือก                           | `rateLimiter.ts:5`, `.env.example`                                                    |
+| สภาพแวดล้อม `REDIS_KEY_PREFIX`      | `omniroute:` (ค่าเริ่มต้น)                                          | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| สภาพแวดล้อม `QUOTA_STORE_REDIS_URL` | แยกจากกันอาจแตกต่างจาก `REDIS_URL`                                  | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`                | `"sqlite"` (ค่าเริ่มต้น) เป็นตัวเลือก `"redis"`                     | `quota/storeFactory.ts`                                                               |
+| ออเรดิส `maxRetriesPerRequest`      | `3`                                                                 | การสร้างไคลเอ็นต์`rateLimiter.ts`                                                     |
+| `enableReadyCheck`                  | ไม่ได้ตั้งค่า (ค่าเริ่มต้น ioredis: `true`)                         | —                                                                                     |
+| `lazyConnect`                       | ไม่ได้ตั้งค่า (ค่าเริ่มต้น ioredis: `false`)                        | —                                                                                     |
+| `retryStrategy`                     | ไม่ได้ตั้งค่า (ค่าเริ่มต้นของ ioredis: ฐาน 200ms, เอ็กซ์โปเนนเชียล) | —                                                                                     |
+| TLS / รหัสผ่าน / ดัชนี DB           | **ไม่ได้กำหนดค่า**                                                  | —                                                                                     |
+| เซนทิเนล/คลัสเตอร์                  | **ไม่ได้กำหนดค่า** — โหนดเดียวแบบสแตนด์อโลนเท่านั้น                 | —                                                                                     |
 
 ---
 
@@ -65,59 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## การปรับแต่งที่แนะนำสำหรับระบบ Production
+## การปรับแต่งการผลิตที่แนะนำ
 
-### 1. ตัวเลือก Connection Pool / Client (คอนสตรักเตอร์ `Redis` ของ ioredis)
+### 1. ตัวเลือกพูลการเชื่อมต่อ / ไคลเอนต์ (ตัวสร้าง `Redis` ioredis)
 
-โค้ดปัจจุบันสร้าง `new Redis(url)` เพียงอินสแตนซ์เดียวโดยไม่มีตัวเลือกแบบกำหนดเอง สำหรับการปรับใช้แบบหลาย replica ในระบบ Production ให้ส่ง client factory เข้าไปในโค้ด หรือครอบ `getRedisClient()`:
+รหัสปัจจุบันสร้าง `new Redis(url)` เดียวโดยไม่มีตัวเลือกที่กำหนดเอง สำหรับการปรับใช้หลายการจำลองการผลิต ให้ส่งโรงงานลูกค้าในโค้ดหรือตัด `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // ไม่จำกัดจำนวนครั้งที่ลองใหม่ ให้ retryStrategy เป็นตัวตัดสินใจ
-  enableReadyCheck: true, // ตรวจสอบว่าเซิร์ฟเวอร์พร้อมก่อนรับคำสั่ง
-  lazyConnect: true, // ไม่เชื่อมต่อขณะสร้าง ให้รอจนมีการเรียกครั้งแรก
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // ยกเลิกหลังลองใหม่ 10 ครั้ง → เชื่อมต่อใหม่ภายหลัง
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, สูงสุด 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // รวมคำสั่งที่ทำงานพร้อมกันไว้ในการเขียน TCP ครั้งเดียว
-  keepAlive: 10000, // ส่ง TCP keep-alive ทุก 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**ข้อแลกเปลี่ยนที่สำคัญ:**
+**ข้อเสียเปรียบที่สำคัญ:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — แนะนำสำหรับระบบ Production เพื่อให้การรีสตาร์ต Redis ชั่วคราวไม่ทำให้ทุกคำขอล้มเหลวทันที กลไกสำรองในหน่วยความจำของ `checkRateLimit()` จะรองรับเส้นทางเมื่อเกิดความล้มเหลว
-- `lazyConnect: true` — หลีกเลี่ยงไม่ให้การเริ่มต้นระบบต้องพึ่งพาว่า Redis พร้อมใช้งานก่อนที่เซิร์ฟเวอร์จะเริ่มรับการเชื่อมต่อ
-- `enableAutoPipelining: true` — ลดจำนวนรอบการสื่อสารสำหรับการตรวจสอบขีดจำกัดอัตราที่เกิดขึ้นพร้อมกัน ซึ่งมีประโยชน์เมื่อมีอัตรามากกว่า 50 RPS บนการเชื่อมต่อเดียว
+- `maxRetriesPerRequest: null` + `retryStrategy` — ต้องการสำหรับการผลิต ดังนั้นการรีสตาร์ท Redis ชั่วคราวจะไม่ล้มเหลวทุกคำขอในทันที ทางเลือกในหน่วยความจำใน `checkRateLimit()` จะดูดซับเส้นทางความล้มเหลว
+- `lazyConnect: true` — หลีกเลี่ยงการพึ่งพาการเริ่มต้นระบบบน Redis ก่อนที่เซิร์ฟเวอร์จะเริ่มยอมรับการเชื่อมต่อ
+- `enableAutoPipelining: true` — ลดการไป-กลับสำหรับการตรวจสอบขีดจำกัดอัตราพร้อมกัน มีประโยชน์ที่ > 50 RPS ในการเชื่อมต่อเดียว
 
 ### 2. การกำหนดค่าเซิร์ฟเวอร์ Redis (`redis.conf`)
 
 ```
-# หน่วยความจำ
-maxmemory 80%                        # เว้นพื้นที่สำหรับแคชเพจของ OS
-maxmemory-policy allkeys-lru         # ขับรายการแคชการยืนยันตัวตนที่เก่าออกเมื่อหน่วยความจำตึงตัว
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# การเก็บข้อมูลถาวร (ไม่บังคับ — OmniRoute ปลอดภัยจากการขัดข้องแม้ไม่มีส่วนนี้)
-save 300 1                           # สร้างสแนปช็อตอย่างน้อยทุก 5 นาที หากมีคีย์เปลี่ยนแปลง ≥1 คีย์
-appendonly no                        # ไม่จำเป็นต้องใช้ AOF เพราะสามารถสร้างข้อมูลขึ้นใหม่ได้
-appendfsync no                       # ไม่มีโอเวอร์เฮดจาก fsync (RDB เพียงพอแล้ว)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# เครือข่าย
-timeout 0                            # ไม่ตัดการเชื่อมต่อที่ไม่มีการใช้งาน
-tcp-keepalive 300                    # ส่ง keep-alive ทุก 5 นาที
-tcp-backlog 511                      # คิวรอการเชื่อมต่อสำหรับโหลดที่พุ่งสูงเป็นช่วงๆ
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# ประสิทธิภาพ
-hz 10                                # ค่าเริ่มต้น ใช้ 100 สำหรับงานที่อ่อนไหวต่อเวลาแฝง
-activedefrag yes                     # จัดเรียงหน่วยความจำอัตโนมัติเมื่อการกระจัดกระจาย >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**ข้อแลกเปลี่ยนของ `maxmemory-policy allkeys-lru`:** รายการแคชการยืนยันตัวตนอาจถูกขับออกเมื่อหน่วยความจำตึงตัว ซึ่งปลอดภัย เนื่องจาก `setCachedApiKey` จะเติมข้อมูลกลับเสมอเมื่อไม่พบในแคช และ SQLite fallback เป็นแหล่งข้อมูลที่มีอำนาจตัดสิน กลไก rate limiter ที่เป็นสคริปต์ Lua จะสร้างคีย์ขนาดเล็กซึ่งได้รับการออกแบบมาให้มีอายุสั้น
+**การแลกเปลี่ยนสำหรับ `maxmemory-policy allkeys-lru`:** รายการแคชการรับรองความถูกต้องอาจถูกไล่ออกภายใต้แรงกดดันของหน่วยความจำ นี่เป็นวิธีที่ปลอดภัย — `setCachedApiKey` จะเติมข้อมูลซ้ำเสมอหากพลาด และ SQLite สำรองนั้นเชื่อถือได้ สคริปต์ Lua ที่จำกัดอัตราจะสร้างคีย์ขนาดเล็กซึ่งมีอายุการใช้งานสั้นตามการออกแบบ
 
-### 3. การตั้งค่า Docker Compose
+### 3. การตั้งค่าการเขียน Docker
 
-ไฟล์ compose สำหรับระบบ Production (`docker-compose.prod.yml`) ใช้ `redis:8.6.2-alpine` ให้เพิ่ม:
+prod compose (`docker-compose.prod.yml`) ใช้ `redis:8.6.2-alpine` เพิ่ม:
 
 ```yaml
 redis:
@@ -142,30 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. ข้อควรพิจารณาสำหรับหลายอินสแตนซ์ / การปรับขนาด
+### 4. ข้อควรพิจารณาหลายอินสแตนซ์/การปรับขนาด
 
-**ใช้ Redis เดียวสำหรับทุก replica** — สคริปต์ Lua ของ rate limiter ต้องพึ่งพาพื้นที่คีย์ที่มีอำนาจตัดสินเพียงแห่งเดียว การใช้ Redis หลายอินสแตนซ์แยกกันตาม replica จะทำให้สูญเสีย atomicity และทำให้งบประมาณเพิ่มเป็นสองเท่า ให้ใช้ Redis อินสแตนซ์เดียว (หรือคลัสเตอร์ Redis Sentinel ที่รองรับ failover) สำหรับ replica ทั้งหมดของแอปพลิเคชัน
+**Redis เดี่ยวสำหรับการจำลองทั้งหมด** — สคริปต์ Lua ที่จำกัดอัตราขึ้นอยู่กับพื้นที่คีย์ที่เชื่อถือได้เพียงพื้นที่เดียว อินสแตนซ์ Redis หลายรายการที่อยู่ด้านหลังแบบจำลองจะสูญเสียอะตอมมิกซิตีและเพิ่มงบประมาณเป็นสองเท่า ใช้ Redis เดียว (หรือคลัสเตอร์ Redis Sentinel ที่มีข้อผิดพลาด) สำหรับการจำลองแอปพลิเคชันทั้งหมด
 
-**จำนวนการเชื่อมต่อ:** replica ของแอปพลิเคชันแต่ละตัวจะเปิด **การเชื่อมต่อ TCP 2 รายการ** ไปยัง Redis (ไคลเอนต์ rate limiter + ไคลเอนต์ quota store) เมื่อมี 10 replica → 20 การเชื่อมต่อ ซึ่งยังต่ำกว่าขีดจำกัดเริ่มต้นของ Redis ที่ 10k การเชื่อมต่ออย่างมาก
+**จำนวนการเชื่อมต่อ:** แต่ละแอปพลิเคชันจำลองจะเปิดขึ้น **2 การเชื่อม TCP** ถึง Redis (ไคลเอนต์ตัวจำกัดอัตรา ไคลเอนต์ร้านค้าโควต้า + ) ที่การเชื่อมต่อ → 20 จำลอง 10 รายการ ซึ่งอยู่ภายในเพดานการเชื่อมต่อ 10,000 ของอินสแตนซ์ Redis เริ่มต้น
 
-### 5. การมอนิเตอร์
+### 5. การติดตามผล
 
-เปิดเผยข้อมูลผ่าน endpoint สำหรับ health check:
+เปิดเผยผ่านจุดสิ้นสุดการตรวจสุขภาพ:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts เรียกใช้ฟังก์ชันของ rateLimiter อยู่แล้ว
-// เพิ่มการตรวจสอบเฉพาะสำหรับ Redis:
-//   1. เวลาแฝงของ PING ผ่าน ioredis .ping()
-//   2. การใช้หน่วยความจำผ่าน INFO memory
-//   3. จำนวนการเชื่อมต่อผ่าน INFO clients
-//   4. อัตราการพบข้อมูลสำหรับ maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-เมตริกสำคัญที่ควรเฝ้าดู:
+ตัวชี้วัดหลักที่น่าจับตามอง:
 
-- **คีย์ที่ถูกขับออก / วินาที** — หากมีค่ามากกว่าศูนย์อย่างต่อเนื่อง ให้เพิ่ม `maxmemory`
-- **ไคลเอนต์ที่ถูกบล็อก** — ค่าที่ไม่เป็นศูนย์บ่งชี้ว่าสคริปต์ Lua ทำงานช้า หรือมีการแย่งใช้ทรัพยากรสูง
-- **การเชื่อมต่อที่ถูกปฏิเสธ** — ถึงขีดจำกัดการเชื่อมต่อ ซึ่งเกิดขึ้นได้ยากเมื่อมีเพียง 20 การเชื่อมต่อ
+- **ถอดกุญแจ / วินาที** — หากค่าไม่เป็นศูนย์อย่างต่อเนื่อง ให้เพิ่ม `maxmemory`
+- **ลูกค้าที่ถูกบล็อก** — ที่ไม่ใช่ศูนย์หมายถึงสคริปต์ Lua ที่ช้าหรือมีความขัดแย้งสูง
+- **การเชื่อมต่อที่ถูกปฏิเสธ** ขีดจำกัดการเชื่อมต่อ — ถึงขีดจำกัด; หายากที่ 20 การเชื่อมต่อ
+
+### 6. เซิร์ฟเวอร์ที่รองรับ Redis
+
+เซิร์ฟเวอร์ใดๆ ที่ใช้ที่นี่จะต้องเรียกใช้สคริปต์ Lua: ตัวจำกัดอัตราคือ `EVAL` หนึ่งตัว บนเซิร์ฟเวอร์ที่ไม่มี Lua นั้น `checkRateLimit()` จะบันทึก `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` และนับต่อกระบวนการ ดังนั้นแต่ละเรพลิกาจึงบังคับใช้ขีดจำกัดในตัวมันเอง ร้านค้าความสัมพันธ์เซสชันที่ใช้ร่วมกันที่เลือกใช้ (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ยังอ่านและอัปเดตพินด้วย `EVAL`; หากไม่มี Lua มันจะบันทึก `[SESSION_AFFINITY] Redis error; falling back to SQLite.` และแต่ละแบบจำลองจะเก็บพินของตัวเองไว้ ปริมาณงานอื่นๆ ใช้คำสั่งธรรมดา (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, แฮชและชุด) และแบ็กเอนด์ Redis ของแคชความหมายจะไม่ส่งคำสั่ง `FT.*`
+
+ทดสอบกับ OmniRoute 3.8.52: KiviDB 1.2.0 ด้วยอิมเมจ Lua (`kividb/kividb:v1.2.0-lua`) ตัวจำกัดอัตรา (รวมถึงกระบวนการที่สองที่แชร์ตัวนับ), แคชการรับรองความถูกต้อง, ที่เก็บโควต้า, เซอร์กิตเบรกเกอร์อุ่นเครื่อง, ที่เก็บแคชความหมาย และคำขอ `/v1/chat/completions` ผ่านตัวจัดการแชท ผ่านการตรวจสอบ 18 รายการจาก 19 รายการที่ส่งผ่าน Redis 8.10.3 สิ่งที่แตกต่าง: `INCRBYFLOAT` เก็บ `0.1 + 0.2` เป็น `0.30000000000000004` โดยที่ Redis เก็บ `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ) ที่เก็บโควต้าจะแยกวิเคราะห์ทั้งคู่ด้วย `parseFloat` แต่ตัวเลขทั้งสองต่างกันในหลักสุดท้าย ดังนั้นการเปรียบเทียบที่ตรงกับขอบเขตโควต้าทั้งหมดอาจแตกต่างกันได้ ที่เก็บเซสชันที่สัมพันธ์กันไม่ได้เป็นส่วนหนึ่งของการรันนั้น ( [การตั้งค่า](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md) [ผลลัพธ์](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -186,15 +189,15 @@ flowchart LR
 
 ---
 
-## เอกสารอ้างอิง
+## อ้างอิง
 
-| ไฟล์                               | วัตถุประสงค์                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | ไคลเอ็นต์ Redis หลัก, สคริปต์ Lua สำหรับจำกัดอัตรา, ระบบสำรองในหน่วยความจำ |
-| `src/lib/db/apiKeys.ts`            | แคชการยืนยันตัวตน — สำรองจาก Redis ไปยัง SQLite                            |
-| `src/lib/quota/redisQuotaStore.ts` | ไคลเอ็นต์ Redis แยกต่างหากสำหรับที่เก็บโควตาเสริม                          |
-| `src/lib/quota/storeFactory.ts`    | สลับไดรเวอร์โควตาระหว่าง `sqlite` และ `redis`                              |
-| `docker-compose.prod.yml`          | คอนเทนเนอร์ Redis สำหรับระบบใช้งานจริง (อิมเมจ `redis:8.6.2-alpine`)       |
-| `.env.example`                     | เอกสารตัวแปรสภาพแวดล้อมของ Redis                                           |
-| `src/app/api/local/redis/`         | เส้นทาง API สำหรับการควบคุมคอนเทนเนอร์ในสภาพแวดล้อมการพัฒนา                |
-| `bin/cli/commands/redis.mjs`       | คำสั่ง CLI สำหรับการควบคุมคอนเทนเนอร์ในสภาพแวดล้อมการพัฒนา                 |
+| ไฟล์                               | วัตถุประสงค์                                                            |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | ไคลเอ็นต์ Redis หลัก, สคริปต์จำกัดอัตรา Lua, ทางเลือกสำรองในหน่วยความจำ |
+| `src/lib/db/apiKeys.ts`            | แคชรับรองความถูกต้อง — Redis→SQLite ทางเลือก                            |
+| `src/lib/quota/redisQuotaStore.ts` | แยกไคลเอนต์ Redis สำหรับการจัดเก็บโควต้าเสริม                           |
+| `src/lib/quota/storeFactory.ts`    | สลับระหว่างไดรเวอร์โควต้า `sqlite` และ `redis`                          |
+| `docker-compose.prod.yml`          | คอนเทนเนอร์ผลิตภัณฑ์ Redis (รูปภาพ `redis:8.6.2-alpine`)                |
+| `.env.example`                     | เอกสาร Redis env vars                                                   |
+| `src/app/api/local/redis/`         | เส้นทาง API สำหรับการจัดการคอนเทนเนอร์ dev                              |
+| `bin/cli/commands/redis.mjs`       | คำสั่ง CLI สำหรับการประสานคอนเทนเนอร์ dev                               |

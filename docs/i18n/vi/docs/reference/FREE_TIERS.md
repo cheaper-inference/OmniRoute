@@ -115,7 +115,7 @@ Hầu hết các số liệu về "token miễn phí mỗi tháng" trong lĩnh v
 
 - **Mỗi quỹ dùng chung chỉ được tính một lần.** Gói miễn phí của Mistral có một hạn mức 1B/tháng cho mỗi tổ chức; việc liệt kê hạn mức này dưới năm mô hình không biến nó thành 5B. Nếu cộng theo từng mô hình, danh mục của chính chúng tôi sẽ là **~7.4B** (được tính lại vào 2026-09-03; số liệu này không được CI kiểm soát — hãy đo lại mỗi khi danh mục thay đổi) — tiêu đề ghi **~1.47B** vì đó là lượng mà một tài khoản của mỗi nhà cung cấp thực sự có thể sử dụng.
 - **Giới hạn hằng ngày được quy đổi, giới hạn tốc độ thì không.** Giới hạn tokens/ngày được công bố sẽ trở thành `× 30`; giới hạn requests/ngày được công bố sẽ trở thành `RPD × ~800 tokens × 30`; nhà cung cấp chỉ công bố số requests mỗi phút sẽ **không** có số liệu hằng tháng và được liệt kê là _không giới hạn_, tuyệt đối không được cộng vào tổng. Nhân giới hạn tốc độ với mức sử dụng 24/7 là kiểu thổi phồng mà chúng tôi không chấp nhận.
-- **Các hạn mức yêu cầu xác minh danh tính theo khu vực được hiển thị riêng** (`+~6M sau khi xác minh danh tính theo khu vực`), vì phần lớn người đọc không thể sử dụng chúng.
+- **Các hạn mức yêu cầu xác minh danh tính theo khu vực được hiển thị riêng** (`+~6M behind regional identity verification`), vì phần lớn người đọc không thể sử dụng chúng.
 - **Tín dụng đăng ký chỉ áp dụng cho tháng đầu tiên** và được báo cáo dưới dạng một con số thứ hai, không bao giờ được gộp vào con số ổn định.
 - **Con số này được CI thực thi.** `npm run check:docs-counts` tính lại tổng từ danh mục và làm cho bản dựng thất bại khi tệp này, README hoặc thẻ ngân sách không còn khớp với chúng.
 

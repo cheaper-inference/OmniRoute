@@ -19,20 +19,32 @@ OmniRoute n tẹjade àwọn ohun èlò npm + Docker. Àwọn ẹnu-ọ̀nà w�
 
 Ìmú-lọ-sí-ìsàlẹ̀ CVE àwòrán n lo **ìgbésẹ̀ méjì** nínú `docker-publish.yml`: ìgbésẹ̀ SARIF (`HIGH,CRITICAL`, `exit-code: 0`) n jẹ́ kí HIGH+CRITICAL hàn kedere nínú abala Aabo láìsí ìdènà; ìgbésẹ̀ _ẹnu-ọ̀nà CRITICAL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) n mú ìtúsílẹ̀ kùnà lórí CRITICAL CVE **pẹ̀lú àtúnṣe tí ó wà**. `ignore-unfixed` n dènà ìdènà ìtúsílẹ̀ fún CVE àwòrán ìpilẹ̀ṣẹ̀ láìsí àtúnṣe láti orísun.
 
-## ⚠️ Ìyàtọ̀ CVE (n dènà àwọn ẹnu-ọ̀nà osv/Trivy)
+## ⚠️ Ìyàtọ̀ CVE (tí ń dá àwọn ẹnu-ọ̀nà osv/Trivy dúró)
 
-osv àti Trivy n fi àwọn ìgbẹ́kẹ̀lé wé àwọn ibi ìpamọ́ data CVE tí **n gbòòrò sí i nígbà gbogbo**. PR kan tí **kò fọwọ́ kan àwọn ìgbẹ́kẹ̀lé kankan** lè yí padà sí pupa lójijì nítorí pé a ṣí CVE tuntun kan sílẹ̀ nínú ìgbẹ́kẹ̀lé tí ó wà tẹ́lẹ̀ (osv: `vulnCount` tí a wọ̀n > ìpilẹ̀ṣẹ̀; Trivy: CRITICAL tuntun tí ó ṣeé túnṣe nínú àwòrán). **Èyí jẹ́ ìhùwàsí ìṣiṣẹ́ tí a retí fún ẹnu-ọ̀nà CVE tí n dènà, kì í ṣe ìpadàsẹ́yìn ọjà.**
+osv àti Trivy máa ń fi àwọn ìgbẹ́kẹ̀lé wé àwọn ibi ìpamọ́ dátà CVE tí **ń pọ̀ sí i nígbà gbogbo**. PR kan
+tí **kò yí ìgbẹ́kẹ̀lé kankan padà** lè ṣàdédé di pupa nítorí pé a ṣàfihàn CVE tuntun kan
+nínú ìgbẹ́kẹ̀lé tó ti wà tẹ́lẹ̀ (osv: `vulnCount` tí a wọ̀n > ìwọ̀n ìpilẹ̀; Trivy: CRITICAL tuntun
+tí ó ṣeé túnṣe nínú image náà). **Èyí ni ìhùwàsí ìṣiṣẹ́ tí a RETÍ láti ọ̀dọ̀ ẹnu-ọ̀nà CVE
+tí ń dá iṣẹ́ dúró, kì í ṣe ìfàsẹ́yìn ọjà.**
 
-Nígbà tí osv tàbí Trivy bá di pupa nítorí CVE tuntun tí a ṣí sílẹ̀, ojútùú ni:
+Nígbà tí osv tàbí Trivy bá di pupa nítorí CVE tí a ṣẹ̀ṣẹ̀ ṣàfihàn, ojútùú ni:
 
-1.  **Ṣe ìgbéga ìgbẹ́kẹ̀lé tí ó kan** (èyí tí a fẹ́ràn jù) — ṣe ìgbéga sí àtúnṣe tí a ti túnṣe nípasẹ̀ `package.json`
-    `overrides` (àwọn ìgbẹ́kẹ̀lé àtìgbà-dégbà) tàbí tún ṣe àwòrán náà lórí ìpilẹ̀ṣẹ̀ tí a ti túnṣe.
-2.  **Bí kò bá sí àtúnṣe láti orísun:**
-    - **osv:** tún ṣe ìpilẹ̀ṣẹ̀ `metrics.vulnCount` nínú `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` kò bo àwọn ẹnu-ọ̀nà ìyàsọ́tọ̀ — ṣatunṣe ìwọ̀n náà pẹ̀lú ọwọ́, `direction:down`) pẹ̀lú àlàyé ìdáláre + ọ̀rọ̀ ìtọ́pinpin.
-    - **Trivy:** fi ìwọlé kan kún `.trivyignore` (CVE-ID fún ìlà kọ̀ọ̀kan) pẹ̀lú àlàyé ìdáláre + ọ̀rọ̀ ìtọ́pinpin. `ignore-unfixed: true` ti bo àwọn CVE tí kò ní àtúnṣe tẹ́lẹ̀ láìfọwọ́sí.
+1. **Ṣe bump ìgbẹ́kẹ̀lé tí ọ̀ràn náà kàn** (èyí ló dára jù) — ṣe ìgbésókè sí ẹ̀yà tí a ti patch nípasẹ̀ `package.json`
+   `overrides` (àwọn ìgbẹ́kẹ̀lé transitive) tàbí tún image náà kọ́ lórí base tí a ti patch.
+2. **Ti atunṣe ko ba si:** idaduro wiwa tiwọn ki o tọpa igbẹkẹle ti o kan tabi aworan. Maṣe gbe ipilẹ ailagbara soke lati jẹ ki oludije ti o kuna kọja. Trivy's `ignore-unfixed: true` tẹlẹ yọkuro awọn ailagbara aworan laisi alemo oke kan. Iyatọ eyikeyi nilo ailagbara atunwo ID, ọna package gangan, ipari ati ọran ipasẹ ninu eto imulo; kii ṣe abajade aifọwọyi ti ọlọjẹ ti o kuna.
 
-Àwọn ẹnu-ọ̀nà méjèèjì **n fàyè gbà láti fò** (jáde 0) nígbà tí ohun èlò kò bá sí tàbí tí ìwọ̀n bá kùnà (osv-scanner kò sí nínú PATH, osv.dev/network kò ṣeé dé, JSON tí kò tọ́) — ìkùnà **ìwọ̀n** kì í dènà láé, kìkì ìpadàsẹ́yìn **tí a wọ̀n** ni ó n dènà.
+Àwọn ìṣiṣẹ́ OSV tí a béèrè fún (`check:vuln-ratchet -- --ratchet`) máa ń kùnà ní ọ̀nà tí ó pa ẹnu-ọ̀nà mọ́ pẹ̀lú
+`INCOMPLETE` àti exit 2 nígbà tí a kò bá lè fìdí scanner, ìjábọ̀ tàbí ìwọ̀n ìpilẹ̀ múlẹ̀.
+Ìfàsẹ́yìn tí a wọ̀n máa ń jáde pẹ̀lú exit 1. Ìṣiṣẹ́ ìmọ̀ràn ṣì lè jabo `SKIP` pẹ̀lú
+exit 0, èyí tí kò fi hàn pé àwọn ìgbẹ́kẹ̀lé kọjá àyẹ̀wò náà. Ìgbésẹ̀ Trivy
+tí ń dá iṣẹ́ dúró náà tún nílò ìwọ̀n tó ṣàṣeyọrí: àwọn irinṣẹ́ tí kò sí lárọwọ́tó, àwọn iṣẹ́ tó kùnà,
+àti àìsí ẹ̀rí image kò lè jẹ́rìí pé image kan mọ́.
+
+## Ilana ọlọjẹ aworan
+
+`.trivyignore.yaml` lọwọlọwọ ko ni awọn imukuro ailagbara. `npm run check:trivy-ignore-policy` fọwọsi eto imulo ti iṣeto ni awọn profaili ọlọjẹ agbegbe, CI ati Didara. IDs ti a ko mọ, awọn ọna ti o gbooro, awọn titẹ sii ẹda-iwe ati awọn imukuro ti pari ni a kọ; `.trivyignore` julọ kii ṣe titẹ sii si awọn iwoye ti a ṣikiri.
+
+Docker ṣayẹwo irinṣẹ irinṣẹ eto imulo lati `github.workflow_sha` ati eto imulo orisun aworan pẹlu yiyan orisun kanna bi kikọ. Aṣayan eto imulo kọ awọn aaye ti ko ni ibamu ati ṣeto faili kan fun awọn iwoye Trivy mejeeji. Orisun itan laisi eto imulo ti a ṣeto ko gba awọn imukuro. Awọn ọlọjẹ mejeeji pin Trivy `v0.70.0`. Afọwọsi eto imulo jẹri aitasera iṣeto ni; aworan naa tun nilo ọlọjẹ aṣeyọri.
 
 ## Ewu igbẹkẹle ti fẹyìntì
 

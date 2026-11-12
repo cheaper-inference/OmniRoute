@@ -145,18 +145,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Mövcud Bacarıqlar
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` də simli 6 A2A bacarığını ifşa edir. Hər bir bacarıq modulu `src/lib/a2a/skills/`-də yaşayır.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` də simli 6 A2A bacarığını ifşa edir. Hər bir bacarıq modulu `src/lib/a2a/skills/` də yaşayır.
 
-| Bacarıq                | ID                   | Təsvir                                                                                                                                                     | Teqlər                        | Nümunələr                                             |
-| :--------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :---------------------------------------------------- |
-| Ağıllı marşrutlaşdırma | `smart-routing`      | OmniRoute-nin kombin mühərriki + hesabından istifadə edərək, optimal provider/combo vasitəsilə sorğu yönləndirir                                           | marşrutlaşdırma, provayderlər | "Bu əmri ən yaxşı model vasitəsilə yönləndirin"       |
-| Kvota İdarəetmə        | `quota-management`   | Provayderə görə kvota vəziyyəti haqqında hesabat verir, zəng edənlərə nə vaxt throttle/switch qərarına gəlməyə kömək edir                                  | kvota, provayderlər           | "Antropik üçün kvotanı yoxlayın"                      |
-| Provayder kəşfi        | `provider-discovery` | İmkanları, sərbəst səviyyəli bayraqları, OAuth statusu olan quraşdırılmış provayderləri siyahıya alır                                                      | təminatçılar, kəşf            | "Hansı provayderlər mövcuddur?"                       |
-| Xərclərin təhlili      | `cost-analysis`      | Kataloq + son istifadəni nəzərə alaraq request/conversation nın qiymətini təxmin edir                                                                      | xərc, istifadə                | "Bu söhbətin təxmini dəyəri"                          |
-| Sağlamlıq Hesabatı     | `health-report`      | Bir provayder üçün dövrə açarı, soyuducu, kilidləmə vəziyyəti                                                                                              | sağlamlıq, dözümlülük         | "Bütün provayderlərin sağlamlıq vəziyyətini göstərin" |
-| Bacarıqların siyahısı  | `list-capabilities`  | Tam 45 girişli Agent Bacarıqları kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) kontekst inyeksiyası üçün xam SKILL.md URLs ilə qeyd cədvəli kimi qaytarır | kataloq, kəşf, bacarıqlar     | "Bütün OmniRoute imkanlarını sadalayın"               |
+| Bacarıq                | ID                   | Təsvir                                                                                                                                                       | Teqlər                        | Nümunələr                                             |
+| :--------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :---------------------------------------------------- |
+| Ağıllı marşrutlaşdırma | `smart-routing`      | OmniRoute-nin kombo mühərriki + hesabından istifadə edərək optimal provider/combo vasitəsilə sorğu yönləndirir                                               | marşrutlaşdırma, provayderlər | "Bu əmri ən yaxşı model vasitəsilə yönləndirin"       |
+| Kvota İdarəetmə        | `quota-management`   | Provayderə görə kvota vəziyyəti haqqında hesabat verir, zəng edənlərə throttle/switch ya nə vaxt qərar verməsinə kömək edir                                  | kvota, provayderlər           | "Antropik üçün kvotanı yoxlayın"                      |
+| Provayder kəşfi        | `provider-discovery` | İmkanları, sərbəst səviyyəli bayraqları, OAuth statusu olan quraşdırılmış provayderləri siyahıya alır                                                        | təminatçılar, kəşf            | "Hansı provayderlər mövcuddur?"                       |
+| Xərclərin təhlili      | `cost-analysis`      | Kataloq + son istifadəsini nəzərə alaraq request/conversation nın qiymətini təxmin edir                                                                      | xərc, istifadə                | "Bu söhbətin təxmini dəyəri"                          |
+| Sağlamlıq Hesabatı     | `health-report`      | Bir provayder üçün dövrə açarı, soyuducu, kilidləmə vəziyyəti                                                                                                | sağlamlıq, dözümlülük         | "Bütün provayderlərin sağlamlıq vəziyyətini göstərin" |
+| Bacarıqların siyahısı  | `list-capabilities`  | Tam 45 girişli Agent Bacarıqları kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) kontekst yeridilməsi üçün xam SKILL.md URLs ilə qiymət cədvəli kimi qaytarır | kataloq, kəşf, bacarıqlar     | "Bütün OmniRoute imkanlarını sadalayın"               |
 
-> Agent Kartı canlı 381 provayder kataloqu ilə uyğunlaşdırılmalıdır; provayder sayları və free/no-auth metadata icra vaxtı reyestrindən əldə edilir.
+> Agent Kartı canlı 388 provayder kataloqu ilə uyğunlaşdırılmalıdır; provayder sayları və free/no-auth metaməlumatları icra vaxtı reyestrindən əldə edilir.
 
 ### `list-capabilities` Bacarıq Təfərrüatı
 

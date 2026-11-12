@@ -1,99 +1,41 @@
-# Release-Green: keeping the queue and release branch green (Português (Portugal))
+# Release-Green: candidate validation and evidence (Português (Portugal))
 
 🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇦🇿 [az](../../../az/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇯🇵 [ja](../../../ja/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇲🇲 [my](../../../my/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [or](../../../or/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇱 [pl](../../../pl/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ta](../../../ta/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
 
 ---
 
-## O problema que isto resolve
+O Release-Green observa um commit específico e reporta os seus resultados de validação. A [referência Quality Gates](../architecture/QUALITY_GATES.md) define os perfis CI atuais, as verificações necessárias e a política de aceitação. A política de admissão versionada no `config/quality/admission-policy.json` é o contrato exequível para `Gate / CI` e `Gate / Quality`.
 
-O **gate completo** (`.github/workflows/ci.yml` — shards de testes unitários, vitest, ratchets,
-`package-artifact`, SonarQube, E2E) é executado **apenas no PR de release** (PR → `main`). Os PRs direcionados
-para `release/**` recebem os **fast-gates** (`quality.yml`: testes afetados por TIA + verificação de tipos + lint)
-e, no caso de alterações de código, uma compilação de produção **consultiva**. Consequência: as falhas exclusivas
-da release podem continuar a acumular-se silenciosamente no ramo de release e **explodir em camadas de ~40 min**
-aquando da release, uma de cada vez.
+## CI e âmbito do observador
 
-A «família release-green» existe para **antecipar** essas falhas — validar o equivalente ao gate completo
-**localmente / fora da release**, a qualquer momento, para que o PR de release esteja
-verde logo na sua primeira execução de CI.
+`ci.yml` e `quality.yml` cobrem pull requests nas ramificações principal e de lançamento. O perfil selecionado determina quais as vagas que serão aplicadas. CI completo também inclui pistas que um pull request comum não executa. Um resultado rápido do observador não pode substituir estes trabalhos, e um invólucro de fluxo de trabalho concluído não pode substituir as suas receções.
 
-> **Princípio não negociável:** nada disto bloqueia o contribuidor. Não adicionamos uma verificação obrigatória
-> que faça o respetivo PR falhar. O **desvio** (ratchets) cabe ao responsável de manutenção recalibrar aquando da release —
-> nunca é uma preocupação do contribuidor. Nenhuma parte **fecha** um PR (roubo de crédito), nem
-> **enfraquece** um teste para que passe.
+A construção de produção pertence à CI. Não existe uma compilação de aconselhamento duplicada no `quality.yml`. Artefactos em falta, trabalho cancelado e medições incompletas não estabelecem uma verificação obrigatória bem-sucedida. Confirme a base atual, o candidato principal e o candidato combinado antes de aceitar os resultados.
 
-## A família (4 componentes) — e como cada um é executado de forma independente
+## Validação local
 
-| Componente                                                                | O que é                                                                        | Quando executar                                                                         | Âmbito                               |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------ |
-| **`/green-prs`** (Solução A)                                              | Análise a pedido pelo responsável de manutenção da **fila de PRs abertos**     | **De forma independente e periódica** — e sobretudo **antes** de um `/generate-release` | Fila completa de PRs → `release/**`  |
-| **`/validate-release-green`** (Solução C — `npm run check:release-green`) | Motor de validação: reproduz o gate completo num ramo OU num candidato a merge | De forma independente, a qualquer momento                                               | Um ramo específico ou um PR de merge |
-| **`/babysit <PR#>`**                                                      | Conduz o **CI em tempo real** de **um** PR até ficar verde                     | De forma independente, por PR                                                           | Um único PR                          |
-| **`nightly-release-green.yml`** (Solução D)                               | Workflow noturno automatizado; abre um issue em caso de falha HARD             | Automaticamente (cron)                                                                  | O ramo de release ativo              |
-
-**Resposta curta à pergunta «isto destina-se apenas a releases?»:** **não.** `/green-prs` foi concebido para
-ser executado **periodicamente, entre releases**. A execução independente é a utilização normal — a release é apenas
-o momento em que executá-lo proporciona mais valor.
-
-## Compilação consultiva entre PR e lançamento
-
-`quality.yml` inclui agora `Build (advisory)` para PRs de código que não estejam em rascunho e branches da fila do Mergify.
-Replica o procedimento de compilação de produção de `ci.yml`: Node 24, `npm-ci-retry`,
-`check:node-runtime` e `npm run build` com `OMNIROUTE_USE_TURBOPACK=1`. Intencionalmente,
-não carrega um artefacto de compilação, porque nenhum job de qualidade subsequente o utiliza neste workflow.
-Remova `continue-on-error` após uma semana de execuções estáveis de PRs de lançamento, para que o sinal se torne num
-bloqueio entre o PR e o lançamento.
-
-## Solução C — `npm run check:release-green` (o motor)
-
-Reproduz uma validação equivalente à de lançamento na árvore de trabalho atual e classifica cada falha:
-
-- **HARD** (verificação de tipos, erros de lint, unitários, vitest, db-rules, public-creds,
-  `package-artifact` opcional) → **defeito real**; `exit 1`. Corrigido na branch de origem (TDD, Regra n.º 18).
-- **DRIFT** (**avisos** do eslint, complexidade cognitiva, tamanho de ficheiros) → desvio do limite progressivo acumulado no
-  ciclo, **não é culpa do colaborador**; é apenas comunicado e **é recalibrado pelo responsável pela manutenção no
-  lançamento**. O desvio **nunca** altera o código de saída — por isso, nunca bloqueia ninguém.
+Execute o observador numa árvore de trabalho própria depois de preparar as suas dependências. Siga a árvore de trabalho e o protocolo de recursos no `docs/ops/WORKTREE_ISOLATION.md` antes da validação pesada.
 
 ```bash
-npm run check:release-green                 # branch atual (árvore de trabalho)
-node scripts/quality/validate-release-green.mjs --json   # saída estruturada
-node scripts/quality/validate-release-green.mjs --quick  # ignora unitários+vitest (apenas desvio+verificação de tipos+lint)
-node scripts/quality/validate-release-green.mjs --with-build  # inclui package-artifact (lento)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-Apenas diagnostica e **comunica** (sem correções automáticas). A orquestração da correção até ficar verde encontra-se em
-`/green-prs` e `/review-prs`.
+O perfil rápido é parcial. O perfil completo verifica os seus requisitos modelados e preserva as receções de comando; não certifica a implementação nem substitui as verificações alojadas aplicáveis. O relatório distingue a falha de execução do desvio da métrica. As torniquetes necessárias permanecem a bloquear de acordo com a política selecionada. Não aumente uma linha de base apenas para obter um resultado aprovado.
 
-## Solução A — `/green-prs` (a análise da fila)
+## Varrimentos noturnos e manuais
 
-Procedimento (resumo — consulte a skill `green-prs` para obter detalhes):
+Os resolvedores de lançamento noturno e de compatibilidade selecionam um branch de lançamento canónico. Esta seleção deve corresponder à ramificação que acionou o fluxo de trabalho e as suites utilizam o SHA imutável do evento. Para execução manual, selecione o release pretendido no `release_branch` e despache nessa mesma referência:
 
-1. **Inventariar** a fila de PRs abertos em relação à branch de lançamento ativa.
-2. **Fazer a triagem** de cada PR (viável / deve ser rejeitado / requer intervenção do autor) — os que devem ser rejeitados ou requerem intervenção do autor são
-   **comunicados, não fechados** (o autor decide).
-3. Para cada PR viável, numa **árvore de trabalho isolada** (Regra n.º 19), atualizar o PR para a ponta da branch de lançamento e executar
-   `npm run check:release-green`:
-   - **HARD** → corrigir **na branch do colaborador** através de coautoria (preserva o estado "Merged" do autor),
-     voltar a executar até todos os problemas HARD estarem resolvidos.
-   - **DRIFT** → deixá-lo como está; será recalibrado no lançamento.
-4. **Apresentar** uma tabela PR × (veredicto, falhas HARD, corrigido?, DRIFT, release-green agora?).
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-Pode **preparar** a fila sem efetuar merges; só efetua merges quando explicitamente solicitado — e nunca fecha um PR.
+O despacho entre filiais é rejeitado antes da execução do código selecionado. As suites principais alojadas verificam `main` e verificam se o seu SHA ainda corresponde ao destino resolvido antes da instalação. Se o main se mover durante a resolução, execute novamente a verificação incompleta no novo commit. Não combine recibos de suites de candidatos diferentes.
 
-## Cadência recomendada
+## Triagem e recuperação de falhas
 
-- Execute **`/green-prs` periodicamente** (por exemplo, semanalmente) e **sempre antes de um
-  `/generate-release`**.
-- Mantenha **`nightly-release-green.yml`** (Solução D) como um sinal contínuo: quando abrir uma
-  issue de falha HARD, é altura de efetuar uma análise.
-- Utilize **`/validate-release-green`** pontualmente para verificar uma branch ou um candidato específico a merge.
-- Utilize **`/babysit <PR#>`** quando for necessário acompanhar um PR específico até ficar verde no CI em execução.
+Utilize o incidente como índice de diagnóstico e, em seguida, inspecione a execução exata, a tentativa, a etapa com falha e o artefacto. Compare as provas de base e de candidato equivalentes antes de atribuir uma falha a um contribuidor. Erros de infraestrutura, defeitos herdados, regressões de candidatos e aprovações pendentes exigem soluções diferentes.
 
-## Relação com o lançamento
-
-- `/generate-release` chama a validação na **Fase 0 (pré-verificação)**: recalibra o DRIFT e corrige
-  os problemas HARD antes de abrir o PR de lançamento.
-- `/review-prs` utiliza a verificação release-green na etapa de decisão do merge (verde antes do merge).
-
-O objetivo de todas as partes é o mesmo: **um PR de lançamento verde na primeira execução de CI**, em vez de lidar com
-falhas em camadas de 40 minutos no dia do lançamento.
+As competências `/green-prs`, `/sweep-reds`, `/validate-release-green` e `/babysit` recolhem provas e preparam correções sob o seu âmbito documentado. Mantenha o crédito do contribuidor, utilize filiais de reparação isoladas e verifique todas as verificações necessárias antes de uma fusão autorizada. Nenhuma linha de base automática ou fecho de incidente substitui um candidato atual aprovado.

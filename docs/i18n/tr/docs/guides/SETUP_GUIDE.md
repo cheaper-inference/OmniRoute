@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Kontrol paneli `http://localhost:20128` adresinde açılır ve API temel URL'si `http://localhost:20128/v1` olur.
+Kontrol paneli `http://localhost:20128` açılır ve API tabanı URL `http://localhost:20128/v1`.
+
+> **npm kullanıcıları:** Npm, yükleme komut dosyalarının engellendiğine dair uyarıda bulunursa (örneğin, `omniroute`, `better-sqlite3`), bkz. [— Sorunlarını Giderme npm yükleme komut dosyaları engellendi](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

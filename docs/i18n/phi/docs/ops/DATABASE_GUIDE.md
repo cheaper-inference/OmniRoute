@@ -403,26 +403,27 @@ Ginagamit nito ang online backup API ng SQLite — ligtas itong patakbuhin haban
 
 ---
 
-## Pag-tune ng Performance
+## Pag-tune ng Pagganap
 
 ### WAL Mode
 
-Naka-enable ang WAL bilang default. Para sa mga workload na maraming pagsusulat, isaalang-alang ang:
+WAL ay pinagana bilang default. Para sa mga high-write workload, isaalang-alang ang:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Mag-checkpoint bawat 1000 page
-PRAGMA journal_size_limit = 67108864;  -- 64MB na limitasyon ng WAL
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### Mga Index
+Hindi itinatakda OmniRoute `journal_size_limit`. Ang isang checkpoint ay naglilipat ng mga WAL frame sa pangunahing file, ngunit pinapanatili ng WAL file ang pinakamalaking inilaan na laki nito. Ang `OMNIROUTE_WAL_GUARD_MAX_MB` guard ay nagbabala lamang at nagpapatakbo `wal_checkpoint(RESTART)`; hindi ito isang takip sa laki ng disk.
 
-Mahahalagang index para sa performance (awtomatikong ginagawa ng mga migration):
+### Mga index
 
-- `idx_models_provider` — paghahanap ng modelo ayon sa provider
-- `idx_combo_targets_combo_id` — pagpapalawak ng combo target
-- `idx_usage_history_api_key_timestamp` — analytics ng paggamit
-- `idx_quota_snapshots_api_key_window` — pagsubaybay sa quota
-- `idx_call_logs_timestamp` — mga query sa call log
+Mga pangunahing index para sa pagganap (awtomatikong ginawa ng mga paglilipat):
+
+- Mga paghahanap ng modelo `idx_models_provider` — ayon sa provider
+- `idx_combo_targets_combo_id` — combo target expansion
+- `idx_usage_history_api_key_timestamp` — paggamit analytics
+- `idx_quota_snapshots_api_key_window` — quota tracking
+- `idx_call_logs_timestamp` — na mga query sa log ng tawag
 
 Para magdagdag ng bagong index, gumawa ng migration:
 
@@ -433,22 +434,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### Memory-Mapped I/O
 
-Para sa napakalalaking database (>10GB), maaaring isaayos ang memory mapping sa pamamagitan ng SQLite pragma:
+Para sa napakalaking database (> 10GB), ang memory mapping ay maaaring isaayos sa pamamagitan ng SQLite pragma:
 
 ```sql
--- Itakda sa pamamagitan ng SQLite pragma (isaayos sa core.ts o runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Compaction
 
-Nakikinabang ang matagal nang tumatakbong mga instance ng OmniRoute sa paminsan-minsang `VACUUM`:
+Nakikinabang ang mga matagal nang OmniRoute instances mula sa paminsan-minsang `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Patakbuhin buwan-buwan sa mga panahong mababa ang traffic. (Binabawasan ng WAL mode ang pangangailangan, ngunit hindi nito ganap na inaalis iyon.)
+Patakbuhin buwan-buwan sa mga window na mababa ang trapiko. ( Binabawasan WAL mode ang pangangailangan, ngunit hindi ito inaalis.)
 
 ---
 

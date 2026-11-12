@@ -403,52 +403,53 @@ Nke a na-eji API ndabere SQLite nke ịntanetị — ọ dị nchebe ịrụ ya 
 
 ---
 
-## Ndozi Arụmọrụ
+## Ntugharị arụmọrụ
 
-### Ọnọdụ WAL
+### Ụdị WAL
 
-A na-agbanye WAL na ndabara. Maka ibu ọrụ nwere ọtụtụ ndebanye, tụlee:
+Agbanyere WAL na ndabara. Maka ibu ọrụ ederede dị elu, tụlee:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Mee checkpoint kwa ibe 1000
-PRAGMA journal_size_limit = 67108864;  -- Oke WAL nke 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### Indeks
+OmniRoute anaghị edobe `journal_size_limit`. Ebe nlele na-ebugharị okpokolo agba WAL n'ime faịlụ bụ isi, mana faịlụ WAL na-edobe nha ya kacha ukwuu. Onye nche `OMNIROUTE_WAL_GUARD_MAX_MB` na-adọ aka ná ntị ma na-agba ọsọ `wal_checkpoint(RESTART)`; ọ bụghị okpu nke nha disk.
 
-Indeks ndị dị mkpa maka arụmọrụ (migrations na-emepụta ha na-akpaghị aka):
+### Index
 
-- `idx_models_provider` — ọchụchọ model site na provider
-- `idx_combo_targets_combo_id` — mgbasawanye combo target
-- `idx_usage_history_api_key_timestamp` — nyocha ojiji
-- `idx_quota_snapshots_api_key_window` — nlekota quota
-- `idx_call_logs_timestamp` — ajụjụ ndekọ oku
+Ndekọ mkpịsị ugodi maka arụmọrụ (nke mbugharị mebere na akpaghị aka):
 
-Iji tinye indeks ọhụrụ, mepụta migration:
+- Nlebanya ụdị `idx_models_provider` — site n'aka ndị na-eweta ya
+- Mgbasa mkpokọta ebumnuche `idx_combo_targets_combo_id` —
+- Ntụle ojiji `idx_usage_history_api_key_timestamp` —
+- `idx_quota_snapshots_api_key_window` — nsochi oke
+- Ajụjụ ndekọ oku `idx_call_logs_timestamp` —
+
+Ka ịgbakwunye ndeksi ọhụrụ, mepụta mbugharị:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O E Jiri Maapụ Ebe Nchekwa
+### Ebe nchekwa I/O
 
-Maka database ndị buru nnọọ ibu (>10GB), enwere ike ịhazi memory mapping site na SQLite pragma:
+Maka nnukwu ọdụ data (> 10GB), enwere ike gbanwee maapụ ebe nchekwa site na SQLite pragma:
 
 ```sql
--- Tọọ site na SQLite pragma (gbanwee na core.ts ma ọ bụ runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Mkpakọ
+### Mgbakọ
 
-Instance OmniRoute ndị na-arụ ọrụ ogologo oge na-erite uru site n’iji `VACUUM` mgbe ụfọdụ:
+Ihe omume OmniRoute na-eme ogologo oge na-erite uru site na `VACUUM` mgbe ụfọdụ:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Na-agba ya otu ugboro n’ọnwa n’oge okporo ụzọ dị ala. (Ọnọdụ WAL na-ebelata mkpa ya, mana ọ naghị ewepụ ya kpamkpam.)
+Na-agba ọsọ kwa ọnwa n'oge windo ndị nwere obere okporo ụzọ. (Ụdị WAL na-ebelata mkpa ahụ, mana ọ dịghị ewepụ ya.)
 
 ---
 

@@ -278,9 +278,9 @@ Kümeyi kullanım kolaylığına göre değil, şekle göre seçin. Tek bir rota
 
 ## Kapsamlar
 
-Üç ad alanı. Her denetleyici yalnızca kendi dizelerini okur. Yan yana karşılaştırma, `manage`'in `read:compression` için `scopeMatches`'i neden başarısız kıldığını ve bir `read` erişim belirtecinin neden `/api/keys/{id}` adresine `PATCH` yapamadığını içeren detaylar [Üç kapsam ad alanı](../frameworks/MCP-SERVER.md#three-scope-namespaces) bölümündedir.
+Üç ad alanı. Her denetleyici yalnızca kendi dizelerini okur. `manage` neden `read:compression` için `scopeMatches` başarısız olduğu ve bir `read` erişim belirtecinin neden `PATCH /api/keys/{id}` yapamadığı da dahil olmak üzere yan yana [üç kapsam ad alanı](../frameworks/MCP-SERVER.md#three-scope-namespaces) bulunur.
 
-API anahtarları bir `scopes` dizisi taşır (`api_keys.scopes` içinde JSON olarak saklanır, bkz. `src/lib/db/apiKeys.ts`).
+API anahtarları bir `scopes` dizisi taşır ( `api_keys.scopes` JSON olarak saklanır, bkz. `src/lib/db/apiKeys.ts`).
 
 ### Yönetim kapsamı
 

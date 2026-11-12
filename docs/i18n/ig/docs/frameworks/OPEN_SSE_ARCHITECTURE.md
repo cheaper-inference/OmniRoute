@@ -488,7 +488,7 @@ Nke a na-ahụ maka:
 
 | Faịlụ                         | Ebumnuche                                                  |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Ndekọ nkata ihe nlere anya karịa katalọgụ ndị na-eweta 381 |
+| `providerRegistry.ts`         | Ndekọ nkata ihe nlere anya karịa katalọgụ ndị na-eweta 388 |
 | `providerModels.ts`           | Utu aha ụdị, eserese usoro                                 |
 | `constants.ts`                | Ọpụpụ, oke, koodu ọkwa                                     |
 | `defaultThinkingSignature.ts` | mbinye aka echiche Claude dapụtara                         |

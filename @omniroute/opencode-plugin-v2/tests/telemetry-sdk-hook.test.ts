@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import plugin from "../src/index.js";
+import { withBootstrapNetwork } from "./helpers/network-fixtures.js";
 
 /**
  * Strict fallback (re-anchored): no `includeUsage` marking is proven anywhere
@@ -72,7 +73,9 @@ async function setupQuiet(ctx: Record<string, unknown>): Promise<void> {
   console.warn = () => {};
   console.log = () => {};
   try {
-    await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
+    await withBootstrapNetwork(() =>
+      (plugin as unknown as { setup: (c: unknown) => Promise<() => void> }).setup(ctx)
+    );
   } finally {
     console.warn = warn;
     console.log = log;

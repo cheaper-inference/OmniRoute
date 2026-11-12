@@ -4,208 +4,119 @@
 
 ---
 
-OmniRoute määrab ühe tsentraliseeritud lubatud loendi abil, millised **brauseri päritolud** võivad lugeda päritoluüleste päringute vastuseid. Mudel on **vaikimisi suletud**:
-ühtegi päritolu ei lubata enne, kui te selle selgesõnaliselt lubate. Sellel lehel kirjeldatakse, kuidas lubatud loend
-lahendatakse, mida `CORS_ALLOW_ALL=true` tegelikult avalikustab (ja mis veelgi olulisem, mida see
-**ei avalikusta**), kuidas arendus- ja tootmiskeskkonda turvaliselt seadistada ning käitusaegset hoiatust,
-mida juhtpaneel kuvab, kui metamärk on aktiivne.
+OmniRoute kontrollib, millised **brauseri päritolu** võib lugeda päritoluüleseid vastuseid ühest tsentraliseeritud lubade loendist. Mudel on **vaikimisi tõrkesuletud** : ükski päritolu pole lubatud enne, kui olete selle lubanud. Sellel lehel kirjeldatakse, kuidas lubade loend lahendatakse, mida `CORS_ALLOW_ALL=true` tegelikult paljastab (ja mis kõige tähtsam, mida see teeb **mitte** ), kuidas dev vs tootmine ohutult konfigureerida, ja armatuurlaua käitusaja hoiatus näitab, kui metamärk on aktiivne.
 
-**Tõeallikas:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Lubatud loendit rakendatakse üks kord
-vahevaras (`src/server/authz/pipeline.ts`) — marsruudipõhised töötlejad ei määra
-`Access-Control-Allow-Origin` päist ise.
+**Tõe allikas:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Lubatud loendit rakendatakse üks kord, vahevaras (`src/server/authz/pipeline.ts`) — -i marsruudihaldurid ei määra ise `Access-Control-Allow-Origin`.
 
 ## Kuidas päritolu lahendatakse
 
-Iga päringu puhul arvutab vahevara `Access-Control-Allow-Origin` väärtuse
-järgmises järjekorras:
+Vahevara arvutab iga päringu jaoks `Access-Control-Allow-Origin` väärtuse järgmises järjekorras:
 
-1. **`CORS_ALLOW_ALL=true`** (või pärandseadistus `CORS_ORIGIN=*`) → tagastab kutsuja
-   `Origin` väärtuse (või `*`, kui `Origin` päis puudub) koos päisega `Vary: Origin`,
-   et vahemälud töötaksid korrektselt. Sama `applyCorsHeaders()` kitsaskoht lisab
-   `Vary: Accept-Encoding` ka igale kehaga 2xx-vastusele loapõhise autentimisega
-   `/v1*`/`/v1beta*` pinnal (`relaxForTokenAuth`, RFC 9110 §12.5.5, probleem #6737), et
-   allavoolu- ja jagatud vahemälud saaksid tihendatud ning tihendamata
-   variante korrektselt eristada.
-2. Vastasel juhul päringu `Origin` normaliseeritakse (teisendatakse väiketähtedeks ja
-   eemaldatakse lõpus olev kaldkriips) ning võrreldakse **ühendatud lubatud loendiga**:
-   - keskkonnamuutuja **`CORS_ALLOWED_ORIGINS`** — komadega eraldatud loend ja
-   - käitusaegne seadistus **`corsOrigins`** (Juhtpaneel → Turvalisus → _CORS-i lubatud
-     päritolud_), mis sisestatakse funktsiooni `setRuntimeAllowedOrigins()` kaudu failist
-     `src/lib/config/runtimeSettings.ts`.
-3. Vaste puudub → **`Access-Control-Allow-Origin` päist ei väljastata**. Brauser
-   blokeerib päritoluülese lugemise. See on ettenähtud vaikimisi suletud käitumine.
+1. **`CORS_ALLOW_ALL=true`** (või pärand `CORS_ORIGIN=*`) → kordab helistaja `Origin` tagasi (või `*`, kui `Origin` päist pole), koos `Vary: Origin`, nii et vahemälud jäävad õigeks. Sama `applyCorsHeaders()` chokepoint lisab `Vary: Accept-Encoding` ka igale 2xx-kehaga vastusele märgiga autentitud `/v1*`/`/v1beta*` pinnal (`relaxForTokenAuth`, RFC 9110 §12.5.5, väljaanne #6737), nii et downstream/shared vahemälud suudavad tihendatud ja tihendamata variante õigesti eristada.
+2. Vastasel juhul normaliseeritakse taotlus `Origin` (väikesed tähed, lõpu kaldkriips eemaldatakse) ja sobitatakse **ühendatud lubatud loend** :
+   - env **`CORS_ALLOWED_ORIGINS`** — komadega eraldatud loend ja
+   - käitusaeg **`corsOrigins`** seade (Armatuurlaud → Turvalisus → _CORS Allowed Origins_), sisestatud `setRuntimeAllowedOrigins()` kaudu `src/lib/config/runtimeSettings.ts`-st.
+3. → le ei vasta **`Access-Control-Allow-Origin` päist ei väljastata** . Brauser blokeerib ristpäritolu lugemise. See on kavandatud tõrkesulgemise vaikeseade.
 
-| Keskkonnamuutuja       | Tähendus                                                                                      |
-| ---------------------- | --------------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | Lubatavate täpsete päritolude CSV-loend (soovitatav).                                         |
-| `CORS_ALLOW_ALL`       | `true`/`1` → tagastab mis tahes päritolu (metamärk). Ainult arenduseks.                       |
-| `CORS_ORIGIN`          | Pärandseadistus. `*` käitub nagu `CORS_ALLOW_ALL`; üksik väärtus lisatakse lubatud loendisse. |
+| Env var                | Tähendus                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | Lubamiseks täpse päritoluga CSV (soovitatav).                                      |
+| `CORS_ALLOW_ALL`       | `true`/`1` → kajastab mis tahes päritolu (metamärk). Ainult arendaja.              |
+| `CORS_ORIGIN`          | Pärand. `*` käitub nagu `CORS_ALLOW_ALL`; lubatud loendisse lisatakse üks väärtus. |
 
-## Ohumudel — mida `CORS_ALLOW_ALL=true` tegelikult avalikustab
+## Ohu mudel — mida `CORS_ALLOW_ALL=true` tegelikult paljastab
 
-Üldist OWASP-i hoiatust („metamärgiga CORS = iga sait saab teie API-t kutsuda”) tasub
-tõsiselt võtta, kuid OmniRoute'i kokkupuutepind on **üldisest olukorrast kitsam**,
-sest rakendusel on üks konkreetne omadus:
+Üldist OWASP hoiatust ("metamärk CORS = mida iga sait võib teie API nimetada") tasub tõsiselt võtta, kuid OmniRoute kokkupuude on **kitsam kui üldjuhtum** , ühe konkreetse rakendamise fakti tõttu:
 
-> **Keskne `applyCorsHeaders()` ei väljasta kunagi päist
-> `Access-Control-Allow-Credentials`.** Brauser ei tee _autenditud_
-> (küpsist sisaldavat) päritoluülest vastust loetavaks, kui server ei saada päist
-> `Access-Control-Allow-Credentials: true`. OmniRoute'i ühine CORS-i tee ei tee
-> seda kunagi.
+> **Keskne `applyCorsHeaders()` ei kiirga kunagi `Access-Control-Allow-Credentials`.** Brauser ei avalda _credentialed_ (küpsiseid kandvat) ristpäritolu vastust, välja arvatud juhul, kui server saadab `Access-Control-Allow-Credentials: true`. OmniRoute jagatud CORS tee ei tee seda kunagi.
 
-See tähendab iga pinna kohta järgmist, isegi kui `CORS_ALLOW_ALL=true`:
+Mida see tähendab pinna kohta, isegi `CORS_ALLOW_ALL=true` puhul:
 
-| Pind                                       | Autentimismehhanism        | Metamärgiga CORS-i mõju                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Juhtpaneel / HALDUS `/api/*`               | Küpsiseseanss              | Päritolu tagastatakse, kuid **ilma päiseta `Allow-Credentials`** brauser **blokeerib** autenditud vastuse lugemise. Pahatahtlik päritoluülene sait **ei saa lugeda** teie autenditud juhtpaneeli vastuseid ning seansiküpsist ei avalikustata.                                                                                                              |
-| Kliendi API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key` päis | Juba **olemuslikult** lubav (`relaxForTokenAuth`): brauserid ei lisa päiseid `Authorization`/`x-api-key` kunagi automaatselt, seega ei saa ründaja leht teie võtit edastada. Peegeldamine kehtib ainult siis, kui esitatud võti on valideeritud; anonüümsed vastused (`REQUIRE_API_KEY=false`) säilitavad lubatud loendi. `CORS_ALLOW_ALL` ei laienda seda. |
-| Avalik kirjutuskaitstud (`/api/health`, …) | Puudub                     | Pole tundlik; metamärk on kahjutu.                                                                                                                                                                                                                                                                                                                          |
+| Pind                                       | Auth mehhanism            | Metamärgi CORS mõju                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Armatuurlaud / MANAGEMENT `/api/*`         | Küpsiseanss               | Päritolu on vastukaja, kuid **ilma `Allow-Credentials`** brauser **plokid** volikiri lugeda. Pahatahtlik mitme päritoluga sait **ei oska lugeda** teie autenditud armatuurlaua vastused ja seansiküpsist ei avaldata.                                                                                                                                                                                                                                                                                               |
+| Klient API `/v1/*`, `/v1beta/*`            | Kandja / `x-api-key` päis | Juba lubav **disaini järgi** (`relaxForTokenAuth`): brauserid ei ühenda kunagi `Authorization`/`x-api-key` automaatselt, seega ei saa ründaja leht teie võtit edastada. Lõdvestunud kaja nõuab autentitud subjekti (valideeritud API -võti või armatuurlaua seanss), mitte ainult mandaadi päist ja see ei sisalda kunagi `Access-Control-Allow-Credentials`. Anonüümsed vastused (`REQUIRE_API_KEY=false`) kasutavad konfigureeritud päritolu lubade loendit, sealhulgas selgesõnalist `CORS_ALLOW_ALL=true` luba. |
+| Avalik kirjutuskaitstud (`/api/health`, …) | Mitte ühtegi              | Mittetundlik; metamärk on kahjutu.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
-Seega piirdub `CORS_ALLOW_ALL=true` **jääkkokkupuude** järgmisega: (a)
-juba autentimist mittevajavate andmete autentimata päritoluülesed **lugemised** ja (b)
-CORS-i **eelkontrolli läbimise** võimaldamine haldusmarsruutidel — need nõuavad endiselt autentimist,
-mida päritoluülene leht ei saa pakkuda. See **ei ole** ühisel CORS-i teel seansi kaaperdamise ega
-mandaatide varastamise vektor.
+Nii et **jääk** `CORS_ALLOW_ALL=true` kokkupuude on piiratud: (a) mittevolitatud ristpäritoluga **loeb** juba autentimata andmetest ja (b) lubades CORS**lennueelne pass** haldusmarsruutidel —, mis nõuavad endiselt autentimist, mida ristpäritolu leht pakkuda ei suuda. On küll **mitte** seansi kaaperdamise või mandaadi varguse vektor jagatud CORS teel.
 
-### Üks tegelik erand — `/api/v1/agents/`
+### Üks tõeline erand — `/api/v1/agents/`
 
-Cloud-Agenti marsruudid (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) määravad
-oma **CORS-i päised**
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ning **väljastavad**
-`Access-Control-Allow-Origin: <origin>|*` koos päisega
-`Access-Control-Allow-Credentials: true`. See on ainus pind, kus
-päritolu tagastamine ja mandaadid esinevad koos, ning see on **sõltumatu seadistusest
-`CORS_ALLOW_ALL`**. Need marsruudid kasutavad haldusautentimist
-(`requireManagementAuth`); operaatorid, kes teevad juhtpaneeli kohalikust hostist väljaspool kättesaadavaks, peaksid
-teadma, et see on ainus koht, kus vastuse päised lubavad päritoluülest autenditud lugemist.
-Selle piiramine selgesõnalise lubatud loendiga on jälgimisel
-sellest CORS-i juhendist eraldi.
+Pilveagendi marsruudid (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) määravad oma **oma** CORS päised (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ja **teha** kiirgavad `Access-Control-Allow-Origin: <origin>|*` koos `Access-Control-Allow-Credentials: true`. See on üksainus pind, kus päritolu-kaja ja mandaadid eksisteerivad, ja see on nii **sõltumatu `CORS_ALLOW_ALL`** . Need marsruudid on haldusautenditud (`requireManagementAuth`); operaatorid, kes avaldavad armatuurlaua väljaspool hosti, peaksid teadma, et see on koht, kus vastuse päised lubavad ristpäise mandaadi lugemist. Selle pingutamist selgesõnaliseks lubatud loendiks jälgitakse sellest CORS juhendist eraldi.
 
-## Tootmiskeskkonna kontrollnimekiri
+## Tootmise kontrollnimekiri
 
-- **Ärge kunagi määrake tootmiskeskkonnas väärtust `CORS_ALLOW_ALL=true`.** Jätke see määramata.
-- Määrake **selgesõnaline** päritoluallikate loend — kas keskkonnamuutuja või vahekaardi Turvalisus välja kaudu:
+- **Ärge kunagi määrake `CORS_ALLOW_ALL=true` d tootmises.** Jätke määramata.
+- Määra an **selgesõnaline** päritoluloend — kas env var või vahekaart Turvalisus:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Kui OmniRoute töötab pöördproksi / tunneli (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale) taga, **ei ole** CORS teie ainus kaitsemeede — loopback-marsruudi
-  kaitse turvab endiselt protsesside käivitamist võimaldavaid marsruute (vt
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Ärge võltsige päist
-  `X-Forwarded-For: 127.0.0.1`, et 403 viga „parandada“; see avab uuesti RCE-klassi
-  turvaaugu, mille marsruudikaitse sulgeb.
-- Kontrollige käitusaegset olekut: juhtpaneel kuvab **püsivat merevaigukollast riba**
-  asukohas Juhtpaneel → Turvalisus → Autoriseerimise inventuur alati, kui
-  `CORS_ALLOW_ALL=true` on aktiivne, ning `/api/settings/authz-inventory` tagastab
-  struktuuri `cors: { allowAll, allowedOrigins }`, mida seiretööriistad saavad pärida.
+- Kui OmniRoute jookseb vastupidise puhverserveri/tunneli taga (nginx, Caddy, Cloudflare tunnel, Tailscale), on CORS**mitte** sinu ainus juht — tagasisilmustee valvur kaitseb endiselt kudemisvõimelisi marsruute (vt [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Ärge sepistage `X-Forwarded-For: 127.0.0.1` d 403 "parandamiseks"; mis avab uuesti RCE klassi, suletakse marsruudivalvur.
+- Kinnitage käitusaja olek: armatuurlaual kuvatakse a **püsiv merevaiguvärvi bänner** Armatuurlaua all → turve → autoriseerimisloend alati, kui `CORS_ALLOW_ALL=true` on aktiivne, ja `/api/settings/authz-inventory` tagastab `cors: { allowAll, allowedOrigins }` ümbriku jälgimise tööriistad, mida saab küsitleda.
 
-## Arenduse mugavus — konkreetsete kohalike päritoluallikate lubamine
+## Arendusmugavus — võimaldab konkreetset kohalikku päritolu
 
-Isegi arenduskeskkonnas vajate metamärki harva. Lubage ainult kasutatavad arendusserverid:
+Metamärki vajate harva isegi arenduses. Lubage ainult teie kasutatavad arendusserverid:
 
 ```bash
-# Vite'i (5173) + Next.js-i (3000) arendusserverid, mis kutsuvad kohalikku OmniRoute'i
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Päritoluallikaid võrreldakse tõstutundetult ja lõpus olevat kaldkriipsu eiratakse, seega
-`http://localhost:3000` ja `http://localhost:3000/` on samaväärsed. Sama CSV-loendi
-saab määrata käitusajal asukohas **Juhtpaneel → Turvalisus → CORS-i lubatud päritoluallikad** ilma
-taaskäivitamiseta.
+Lähtekohad sobitatakse tõstutundlikult ja lõpu kaldkriipsu eiratakse, seega on `http://localhost:3000` ja `http://localhost:3000/` samaväärsed. Sama CSV saab seadistada tööajal **Armatuurlaud → Turvalisus → CORS Lubatud päritolu** ilma taaskäivituseta.
 
-## API-võtmed võrreldes küpsiseseanssidega
+## API võtmed vs küpsiseansid
 
-- **Bearer / `x-api-key` (`/v1/*` järeldusliides):** brauserid ei lisa
-  neid kunagi automaatselt. CORS ei ole siin sisuline tõke — tõkkeks on API-võti —
-  mistõttu on see liides teadlikult liberaalne, et brauseri- ja
-  Electroni kliendid saaksid lugeda vastuseid, millele neil on juba õigus.
-  Leevendatud peegeldamine järgib valideeritud võtit, mitte pelgalt päise olemasolu: kui
-  `REQUIRE_API_KEY=false` teenindab päringut anonüümselt, säilitab selle edukas vastus
-  fail-closed lubatud loendi. Autentimise tagasilükkamised (401) jäävad loetavaks, et
-  kliendid saaksid kuvada tühistatud või valesti sisestatud võtme (#5242): konveieri enda
-  401 säilitab peegeldamise ning marsruut, mis lükkab võtme ise tagasi pärast seda, kui
-  konveier teenindas päringut anonüümsena (`/v1/models` ja `/v1beta/models`
-  seadistatud haldusautentimisega, omanikupõhised `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` ja auto-combo kandidaatmarsruudid), lisab
-  peegeldamise sellele 401-le funktsiooni `credentialRejectionHeaders()` kaudu.
-  Peegeldamine sõltub sellest, kas päring kannab mandaadipäist (`Authorization`,
-  `x-api-key`, `x-goog-api-key` või küpsis `auth_token`), mitte sellest, millist neist
-  marsruut kontrollis, ning seda ei seota kunagi päisega
-  `Access-Control-Allow-Credentials`; keha on fikseeritud veaümbrik. Haldusmarsruudid
-  `/api/v1/` all, mida kaitseb `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`), peegeldamist ei lisa: `REQUIRE_API_KEY=false` korral ei
-  ole nende 401/403 päritoluüleselt loetav.
-- **Küpsiseseanss (juhtpaneel):** seda kaitseb vaikimisi ligipääsu keelav seadistus **ja**
-  päise `Access-Control-Allow-Credentials` puudumine ühisel teel. Ärge lisage
-  haldusliidese ega juhtpaneeli päritoluallikaid ühelegi liberaalsele seadistusele; nende puhul peab
-  vaikimisi ligipääs olema alati rangelt keelatud.
+- **Kandja / `x-api-key` ( `/v1/*` järelduspind):** brauserid ei lisa neid kunagi automaatselt. CORS ei ole siin tähendusrikas takistus. — API -võti on — takistus, mistõttu on see pind tahtlikult lubatav, nii et brauseri ja Electron kliendid saavad lugeda vastuseid, millele neil on juba õigus. Lõdvestunud kaja nõuab autentitud subjekti (valideeritud API -võti või armatuurlaua seanss), mitte ainult mandaadi päist ja see ei sisalda kunagi `Access-Control-Allow-Credentials`. Anonüümsed vastused (`REQUIRE_API_KEY=false`) kasutavad konfigureeritud päritolu lubade loendit, sealhulgas selgesõnalist `CORS_ALLOW_ALL=true` lubamist. Auth-keeldumised (401) jäävad loetavaks, et kliendid saaksid esile tõsta tühistatud või valesti sisestatud võtme (#5242): konveieri enda 401 hoiab kaja ja marsruut, mis keeldub võtmest ise pärast seda, kui konveier on seda anonüümseks pakkunud (`/v1/models` ja `/v1beta/models` koos konfigureeritud haldusautendiga, omaniku ulatusega `/v1/files` ja ZQ- `/v1/batches`, `/v1/session-leases` `/v1/media`, kandidaatmarsruudid) lisab sellele 401-le kaja `credentialRejectionHeaders()` kaudu. Kaja sisestatakse päringule, mis kannab mandaadi päist (`Authorization`, `x-api-key`, `x-goog-api-key` või `auth_token` küpsis), mitte seda, millisel neist marsruuti kontrolliti, ja seda ei seostata kunagi `Access-Control-Allow-Credentials` iga; keha on fikseeritud veaümbris. `/api/v1/` all olevad haldusmarsruudid, mida valvab `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), ei kasuta seda mandaadi tagasilükkamise erandit: `REQUIRE_API_KEY=false` puhul järgivad nende 401/403 vastused konfigureeritud CORS päritolupoliitikat.
+- **Küpsiste seanss (juhtpaneel):** kaitstud tõrkesulgemise vaikeseadega **ja** `Access-Control-Allow-Credentials` puudumise tõttu jagatud teel. Hoidke management/dashboard lähtepunktid eemal igasugusest lubavast konfiguratsioonist; need peavad jääma täpselt suletuks.
 
-## WebSocketi kätlused (`/v1/responses`, `/v1/ws`)
+## WebSocket käepigistused (`/v1/responses`, `/v1/ws`)
 
-Brauserid ei rakenda WebSocketile CORS-i, seega kontrollivad järeldusväljundit
-tagastavad WebSocketi transpordid kätluse `Origin` väärtust ise
-(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) ja, kui
-OmniRoute töötab käsuga `npm start` / `npm run dev`, sild `/v1/ws` ja
-`/api/v1/ws`, mis voogedastab `/v1/chat/completions`, `/v1/messages` ja
-`/v1/responses` kaadritena. Sild küsib otsust aadressilt `/api/v1/ws?handshake=1` ja
-keeldub ühendust uuendamast, kui see marsruut kontrolli ei teinud. Kätlus võetakse
-vastu, kui:
+Brauserid ei rakenda CORS d WebSocket, seega kontrollivad WebSocket transpordid, mis tagastavad järeldusväljundi, ise käepigistuse `Origin` (`src/server/origin/wsOrigin.ts`): vastuseid WebSocket (`/v1/responses`) ja kui OmniRoute läbib `npm start` / `npm run dev`, siis `/v1/ws` ja `/api/v1/ws` silda, mis voogesitab `/v1/chat/completions`- `/v1/messages` ja `/v1/responses`. Sild küsib `/api/v1/ws?handshake=1` otsust ja keeldub versiooniuuendusest, kui see marsruut ei kontrolli. Autentimisnõuded kehtivad endiselt eraldi. Päritolukontroll läbib, kui:
 
-- sellel puudub `Origin` päis (Codex CLI, SDK-d ja muud mitte-brauseri kliendid);
-- `Origin` on lubatud ülaltoodud lubatud loendiga (`CORS_ALLOWED_ORIGINS`, seadistus
-  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` on üks OmniRoute'i enda avalikest päritoludest (seadistatud avalik baas-URL,
-  usaldusväärse puhverserveri edastatud päritolu või otsene loopback-/LAN-host, mis on
-  antud IP-literaalina või kujul `localhost` — samad kandidaadid, mida kasutab
-  juhtpaneeli muudatuste kontroll); või
-- see kannab kehtivat API-võtit, nagu HTTP `/v1/*` liideses.
+- sellel pole `Origin` päist (Codex CLI, SDKs ja muud brauserivälised kliendid);
+- `Origin` on lubatud ülaltoodud lubade loendis (`CORS_ALLOWED_ORIGINS`, `corsOrigins` seadistus, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` on üks OmniRoute enda avalikest algallikatest (konfigureeritud avalik baas URL, usaldusväärse puhverserveri edastatud lähtekoht või otsene loopback/LAN host, mis on antud IP literaalina või `localhost` — samad kandidaadid, mida armatuurlaua mutatsioonikontroll kasutab); või
+- sellel on kehtiv API võti, nagu HTTP `/v1/*` pinnal.
 
-Kõik muu saab vastuseks `403 ws_origin_forbidden`. Juhtpaneeli seansiküpsis ei vabasta
-võõrast `Origin` väärtust, sest brauser lisab selle iga lehe soklile. `localhost`
-teisel pordil ei loeta samaks päritoluks; lisage sellised arenduspäritolud loendisse
-`CORS_ALLOWED_ORIGINS`.
+Kõik muu saab `403 ws_origin_forbidden`. Armatuurlaua seansiküpsis ei vabasta välismaist `Origin`, sest brauser lisab selle mis tahes lehe pesasse. `localhost` teises pordis ei käsitleta sama päritoluna; lisage sellised arendusallikad `CORS_ALLOWED_ORIGINS`.
 
-## Näide: pöördproksi OmniRoute'i ees
+## Näide: vastupidine puhverserver OmniRoute ees
 
-CORS-i jõustab OmniRoute ise, seega ei tohiks proksi üldjuhul `Access-Control-*`
-päiseid lisada ega ümber kirjutada (topeltpäised põhjustavad brauserites tõrkeid). Lõpeta TLS
-ja edasta päring edasi — lase OmniRoute'il eelpäringule vastata:
+CORS jõustab OmniRoute ise, seega peaks puhverserver üldiselt seda tegema **mitte** lisada või ümber kirjutada `Access-Control-*` päised (topeltpäised rikuvad brausereid). Lõpetage TLS ja edastage — laske OmniRoute il vastata eelkatsele:
 
 ```nginx
-# nginx — edasta OmniRoute'ile; ÄRA sisesta siia Access-Control-* päiseid
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Säilita edastuspäised: samas hostis asuv proksi loob ühenduse tagasisideaadressilt ja just
-    # need annavad OmniRoute'ile teada, et helistaja ei ole kohalik operaator. Proksi, mis ei lisa neist ühtegi,
-    # jätab mulje, et iga kaughelistaja on kohalik. Ära määra ka X-Forwarded-For väärtuseks 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Määra brauseri lubatud päritolud OmniRoute'is (`CORS_ALLOWED_ORIGINS` või
-vahekaardil Security), mitte proksis.
+Määrake lubatud brauseri lähtekohad OmniRoute (`CORS_ALLOWED_ORIGINS` või vahekaart Turvalisus), mitte puhverserveris.
 
 ## Lähtefailid
 
-| Valdkond                                          | Fail                                                                 |
-| ------------------------------------------------- | -------------------------------------------------------------------- |
-| Lubatud loendi lahendamine + `getCorsStatus()`    | `src/server/cors/origins.ts`                                         |
-| Vahevara rakendamine (ainus tõeallikas)           | `src/server/authz/pipeline.ts`                                       |
-| Seaded → käitusaegne päritoluallikate sisestamine | `src/lib/config/runtimeSettings.ts`                                  |
-| Käitusaegne olek juhtpaneeli jaoks                | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Juhtpaneeli hoiatusriba                           | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| CORS-i lubatud päritoluallikate väli              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| Cloud-Agenti marsruudipõhine CORS (erand)         | `src/lib/cloudAgent/api.ts`                                          |
-| WebSocketi kätluse `Origin` kontroll              | `src/server/origin/wsOrigin.ts`                                      |
+| Mure                                           | Fail                                                                 |
+| ---------------------------------------------- | -------------------------------------------------------------------- |
+| Lubamisloendi eraldusvõime + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
+| Vahevara rakendus (üks tõeallikas)             | `src/server/authz/pipeline.ts`                                       |
+| Seaded → käitusaja päritolu süstimine          | `src/lib/config/runtimeSettings.ts`                                  |
+| Juhtpaneeli käitusaegne olek                   | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Armatuurlaua hoiatusbänner                     | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS lubatud päritolu väli                     | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent marsruudi kohta CORS (erand)       | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket käepigistus `Origin` kontroll        | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Vaata ka
 
-- [Marsruudivalvurite tasemed](./ROUTE_GUARD_TIERS.md) — tagasisideaadressi kasutamise jõustamine
-  protsesse käivitada võimaldavate marsruutide puhul (eraldi täiendav kontrollimeede).
-- [Autoriseerimisjuhend](../architecture/AUTHZ_GUIDE.md) — täielik autentimis- ja autoriseerimiskonveier.
+- [Route Guard Tiers](./ROUTE_GUARD_TIERS.md) — loopback jõustamine kudemisvõimeliste marsruutide jaoks (eraldi täiendav juhtseade).
+- [Autoriseerimisjuhend](../architecture/AUTHZ_GUIDE.md) — täielik autentimiskonveier.

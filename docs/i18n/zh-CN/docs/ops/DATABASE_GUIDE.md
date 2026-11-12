@@ -405,24 +405,25 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ## 性能调优
 
-### WAL 模式
+### WAL模式
 
-默认启用 WAL。对于高写入负载，请考虑：
+默认情况下启用WAL 。对于高写入工作负载，请考虑：
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- 每 1000 页执行一次检查点操作
-PRAGMA journal_size_limit = 67108864;  -- WAL 上限为 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute不设置`journal_size_limit`。检查点将WAL帧移动到主文件中，但WAL文件保持其最大分配大小。 `OMNIROUTE_WAL_GUARD_MAX_MB`守卫仅警告并运行`wal_checkpoint(RESTART)`；它不是磁盘大小上限。
 
 ### 索引
 
-用于提升性能的关键索引（由迁移自动创建）：
+性能关键指标（由迁移自动创建）：
 
-- `idx_models_provider` — 按提供者查找模型
-- `idx_combo_targets_combo_id` — 展开组合目标
-- `idx_usage_history_api_key_timestamp` — 使用情况分析
-- `idx_quota_snapshots_api_key_window` — 配额跟踪
-- `idx_call_logs_timestamp` — 调用日志查询
+- 按提供者查找`idx_models_provider` —模型
+- `idx_combo_targets_combo_id` —组合目标扩展
+- `idx_usage_history_api_key_timestamp` —使用情况分析
+- `idx_quota_snapshots_api_key_window` —配额跟踪
+- `idx_call_logs_timestamp` —通话记录查询
 
 要添加新索引，请创建迁移：
 
@@ -431,24 +432,24 @@ PRAGMA journal_size_limit = 67108864;  -- WAL 上限为 64MB
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### 内存映射 I/O
+### 内存映射I/O
 
-对于非常大的数据库（>10GB），可以通过 SQLite pragma 调整内存映射：
+对于非常大的数据库（> 10GB），可以通过SQLite pragma 调整内存映射：
 
 ```sql
--- 通过 SQLite pragma 设置（在 core.ts 或运行时中调整）
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### 压缩
+### 压实
 
-长期运行的 OmniRoute 实例可受益于偶尔执行 `VACUUM`：
+长期运行的OmniRoute实例受益于偶尔的`VACUUM`：
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-每月在低流量时段运行一次。（WAL 模式可减少此操作的必要性，但无法完全消除。）
+在低流量时段每月运行一次。 （WAL模式减少了这种需求，但并没有消除它。）
 
 ---
 

@@ -53,7 +53,7 @@ Search Tools Studio သည် `/dashboard/search-tools` ကို အခြေ�
 - ထည့်သွင်းမှု- URL + စာမျက်နှာအပြည့် ခလုတ် + ဖော်မတ်ရွေးချယ်ကိရိယာ (markdown / စာသား / HTML)။
 - တင်သွင်းခြင်း → ရယူခြင်း → `ScrapeResult.tsx` ကို ဖော်ပြခြင်း။
 - `ScrapeResult` သည် markdown အစမ်းကြည့်ရှုမှု + မူရင်းဒေတာ ခလုတ်ကို ဖော်ပြသည်။
-- ကန့်သတ်ချက်- တုံ့ပြန်မှု body သည် **256 KB** ထက် ကြီးပါက UI တွင် `(ဖြတ်တောက်ထားသည်၊ မူရင်းဒေတာကို ကြည့်ရန်)` ဟု ပြသပြီး မူရင်းဒေတာကို Monaco modal (D21) ဖြင့် ဖွင့်ပေးသည်။
+- ကန့်သတ်ချက်- တုံ့ပြန်မှု body သည် **256 KB** ထက် ကြီးပါက UI တွင် `View full raw content` ဟု ပြသပြီး မူရင်းဒေတာကို modal (D21) ဖြင့် ဖွင့်ပေးသည်။
 - မက်တာဒေတာအကန့်- ပံ့ပိုးသူ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)၊ ကြာချိန်၊ ကုန်ကျစရိတ်၊ တုံ့ပြန်မှုအရွယ်အစား၊ လင့်ခ်အရေအတွက်။
 - `useScrapeFetch.ts` hook ကို အသုံးပြုသည်။
 
@@ -102,9 +102,11 @@ Search Tools Studio သည် `/dashboard/search-tools` ကို အခြေ�
 `ProviderCatalog.tsx` သည် `GET /api/search/providers` မှ provider စာရင်းအပြည့်အစုံကို ဖော်ပြပေးသည်
 (fetch provider များ ပါဝင်လာစေရန် F4 တွင် တိုးချဲ့ထားသည်)-
 
-| `kind` | `"search"` (provider 20 ခု) သို့မဟုတ် `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (provider 23 ခု) သို့မဟုတ် `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 အထောက်အထားများ ရှိ၊ မရှိနှင့် key အားလုံးသည် လက်ရှိတွင် cooldown အခြေအနေ၌ ရှိ၊ မရှိကို စစ်ဆေးခြင်းဖြင့် တောင်းဆိုမှုပြုလုပ်သည့်အချိန်တွင် status ကို **တွက်ချက်သတ်မှတ်သည်**။
+
+`codex-search` (Codex Web Search): ချိတ်ဆက်ထားသော Codex (ChatGPT) အကောင့်များကို အသုံးပြုသည်။ သီးခြားကီး မလိုအပ်ပါ။ ရှာဖွေမှုတိုင်းသည် ChatGPT စာရင်းသွင်းမှု ခွဲတမ်း ကို သုံးစွဲပြီး 10–40 စက္ကန့်ခန့် ကြာသည်။ တောင်းဆိုချက်တွင် ၎င်း၏အမည်ကို ဖော်ပြပါက လုပ်ဆောင်သည်။ အလိုအလျောက်ရွေးချယ်ရန် မူလက ပိတ်ထားသော `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ကို ဖွင့်ရန်လိုသည်။
 
 ---
 

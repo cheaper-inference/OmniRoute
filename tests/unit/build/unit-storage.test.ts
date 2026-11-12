@@ -9,6 +9,7 @@ type Step = {
   uses?: string;
   if?: string;
   run?: string;
+  env?: Record<string, string>;
   with?: Record<string, unknown>;
 };
 type Workflow = { jobs: Record<string, { steps: Step[] }> };
@@ -45,22 +46,33 @@ test(
 );
 
 test(
-  "storage preparation preserves raw coverage and failure propagation",
+  "storage preparation preserves lossless coverage and failure propagation",
   { timeout: 1000 },
   () => {
     const steps = workflow.jobs["test-unit"].steps;
     const collect = steps.find((step) => step.name?.endsWith("with V8 coverage"))!;
-    assert.match(collect.run!, /npx c8 --merge-async/);
-    assert.match(collect.run!, /--temp-directory=coverage-shard/);
+    assert.equal(collect.env?.NODE_V8_COVERAGE, "${{ github.workspace }}/coverage-shard");
     assert.match(collect.run!, /npm run test:unit:ci:shard/);
+    assert.doesNotMatch(collect.run!, /npx c8|--merge-async/);
     assert.doesNotMatch(collect.run!, /\|\| true|exit 0|--exclude=src/);
-    const upload = steps.find((step) => step.name === "Upload raw shard coverage")!;
-    assert.equal(upload.if, "always()");
-    assert.equal(upload.with?.path, "coverage-shard/*.json");
+    const compactIndex = steps.findIndex(
+      (step) => step.name === "Compact successful shard coverage"
+    );
+    assert.ok(compactIndex > steps.indexOf(collect));
+    assert.equal(steps[compactIndex].if, undefined);
+    assert.match(
+      steps[compactIndex].run!,
+      /compact-v8-coverage\.mjs compact coverage-shard coverage-shard-compact "\$TEST_SHARD" "\$GITHUB_SHA"/
+    );
+    const upload = steps.find((step) => step.name === "Upload complete shard coverage")!;
+    assert.ok(steps.indexOf(upload) > compactIndex);
+    assert.equal(upload.if, undefined);
+    assert.equal(upload.with?.path, "coverage-shard-compact/");
     assert.equal(upload.with?.["if-no-files-found"], "error");
     const source = read(".github/workflows/ci.yml");
-    assert.match(source, /shard: \[1, 2, 3, 4, 5, 6, 7, 8\]/);
+    assert.match(source, /shard: \[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\]/);
     assert.match(source, /--check-coverage/);
     assert.match(collect.run!, /trap .*EXIT/);
+    assert.match(collect.run!, /status=\$\?.*exit "\$status"/);
   }
 );

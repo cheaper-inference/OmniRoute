@@ -18,18 +18,34 @@ OmniRoute objavlja artefakte npm + Docker. Ti prehodi zagotavljajo izvor (proven
 
 Prilagoditev CVE za sliko uporablja **dva koraka** v `docker-publish.yml`: korak SARIF (`HIGH,CRITICAL`, `exit-code: 0`) ohranja VISOKE+KRITIČNE ranljivosti vidne v zavihku Varnost, ne da bi blokiral; korak _KRITIČNI prehod_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) povzroči neuspeh izdaje ob KRITIČNI CVE **z razpoložljivim popravkom**. `ignore-unfixed` preprečuje blokiranje izdaje za CVE osnovne slike brez popravka od zgoraj.
 
-## ⚠️ Varianca CVE (blokiranje osv/Trivy prehodov)
+## ⚠️ Odstopanje CVE (blokiranje preverjanj osv/Trivy)
 
-osv in Trivy primerjata odvisnosti z bazami podatkov CVE, ki **nenehno rastejo**. Zahteva za združitev (PR), ki **se ne dotika nobenih odvisnosti**, lahko nenadoma postane rdeča, ker je bila razkrita nova CVE v obstoječi odvisnosti (osv: izmerjeno `vulnCount` > osnovna vrednost; Trivy: nova popravljiva KRITIČNA ranljivost v sliki). **To je PRIČAKOVANO operativno vedenje blokirnega prehoda CVE, ne pa regresija izdelka.**
+osv in Trivy primerjata odvisnosti s podatkovnimi zbirkami CVE, ki **se nenehno povečujejo**. PR,
+ki **ne spreminja nobenih odvisnosti**, lahko nenadoma postane rdeč, ker je bila za
+obstoječo odvisnost razkrita nova ranljivost CVE (osv: izmerjeni `vulnCount` > osnovna vrednost;
+Trivy: nova odpravljiva ranljivost stopnje CRITICAL v sliki). **To je PRIČAKOVANO operativno
+vedenje blokirnega preverjanja CVE in ne regresija izdelka.**
 
-Ko osv ali Trivy postaneta rdeča zaradi novo razkrite CVE, je rešitev:
+Ko osv ali Trivy postane rdeč zaradi na novo razkrite ranljivosti CVE, je rešitev:
 
-1.  **Posodobite prizadeto odvisnost** (prednostno) — nadgradite na popravljeno različico preko `package.json` `overrides` (prehodne odvisnosti) ali ponovno zgradite sliko na popravljeni osnovi.
-2.  **Če ni popravka od zgoraj:**
-    - **osv:** ponovno določite osnovno vrednost `metrics.vulnCount` v `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ne zajema namenskih prehodov — vrednost uredite ročno, `direction:down`) z opombo o utemeljitvi + sledilno nalogo.
-    - **Trivy:** dodajte vnos v `.trivyignore` (CVE-ID na vrstico) z opombo o utemeljitvi + sledilno nalogo. `ignore-unfixed: true` že samodejno pokriva CVE-je brez popravkov.
+1. **Posodobite prizadeto odvisnost** (prednostno) — nadgradite na popravljeno različico prek
+   `overrides` v `package.json` (prehodne odvisnosti) ali znova zgradite sliko na popravljeni
+   osnovni sliki.
+2. **Če popravek ni na voljo:** obdržite izmerjeno ugotovitev in sledite prizadeti odvisnosti ali podobi. Ne zvišajte izhodiščne vrednosti ranljivosti, da bi neuspešni kandidat opravil. Trivyjev `ignore-unfixed: true` že izključuje ranljivosti slike brez zgornjega popravka. Vsaka izjema zahteva pregledano ranljivost ID, natančno pot paketa, potek veljavnosti in težavo s sledenjem v pravilniku; ni samodejna posledica neuspešnega skeniranja.
 
-Oba prehoda se **elegantno PRESKOČITA** (izhod 0), če orodje ni prisotno ali meritev ne uspe (osv-scanner ni v PATH, osv.dev/omrežje nedosegljivo, neveljaven JSON) — napaka **meritve** nikoli ne blokira, blokira le **izmerjena** regresija.
+Zahtevana izvajanja OSV (`check:vuln-ratchet -- --ratchet`) se varno prekinejo z
+`INCOMPLETE` in izhodno kodo 2, kadar pregledovalnika, poročila ali osnovne vrednosti
+ni mogoče potrditi. Izmerjena regresija se konča z izhodno kodo 1. Svetovalno izvajanje
+lahko še vedno sporoči `SKIP` z izhodno kodo 0, kar ne potrjuje, da so odvisnosti uspešno
+prestale pregled. Tudi blokirni korak Trivy zahteva uspešno meritev: nerazpoložljiva
+orodja, neuspešna opravila in manjkajoči dokazi o sliki ne morejo potrditi, da je slika
+brez ranljivosti.
+
+## Politika skeniranja slik
+
+Trenutni `.trivyignore.yaml` ne vsebuje izjem glede ranljivosti. `npm run check:trivy-ignore-policy` potrdi strukturirano politiko v lokalnih profilih skeniranja, CI in kakovosti. Neznan IDs, širše poti, podvojeni vnosi in potekle izjeme so zavrnjeni; stari `.trivyignore` ni vhod v preseljena skeniranja.
+
+Docker preveri orodje pravilnika iz `github.workflow_sha` in pravilnik vira slike z istim izbirnikom vira kot graditev. Izbirnik pravilnika zavrne nezdružljive obsege in pripravi eno datoteko za oba pregleda Trivy. Zgodovinski vir brez strukturirane politike ni deležen izjem. Oba skeniranja pripnejo Trivy `v0.70.0`. Validacija pravilnika dokazuje skladnost konfiguracije; slika še vedno potrebuje uspešno skeniranje.
 
 ## Tveganje odvisnosti upokojencev
 

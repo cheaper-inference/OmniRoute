@@ -24,11 +24,12 @@ Hook-ovi se **ne** izvršavaju na svakoj ruti niti na svakom odgovoru. Pročitaj
 [Pokrivenost i ograničenja](#coverage-and-limits) pre nego što se oslonite na
 guardrail kao bezbednosnu kontrolu.
 
-## Уграђене заштитне ограде
+## Ugrađeni guardrail-i
 
-Регистар аутоматски учитава шест заштитних ограда у приоритетном редоследу при увозу (погледајте `registry.ts` → `registerDefaultGuardrails()`):
+Registar automatski učitava šest guardrail-a po prioritetnom redosledu pri import-u
+(vidi `registry.ts` → `registerDefaultGuardrails()`):
 
-| Приоритет | Име                 | Фаза(е)        | Филе                  |
+| Prioritet | Naziv               | Faza(e)        | Fajl                  |
 | --------- | ------------------- | -------------- | --------------------- |
 | `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -37,111 +38,230 @@ guardrail kao bezbednosnu kontrolu.
 | `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Покрећу се бројеви нижег приоритета** прво** .
+Manji brojevi prioriteta izvršavaju se **prvi**.
 
-### Висион Бридге (`visionBridge.ts`) — Мост модалитета PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Основни модел GLM 5.3 и `glm-5.3-{low,high,max}` имају експлицитне `supportsVision:false` registry/spec метаподатке. GLM 5.3 Фласх варијанте остају изворни модели. Claude рута `/v1/messages` кода улази у заједнички `handleChat` ланац заштитних ограда пре позива** пре** Превод Цлауде-то-ОпенАИ; угнежђене слике резултата алата `Read` морају бити описане или обрађене пре него што их превод подиже у садржај OpenAI `image_url` (#17069).
+Osnovni model GLM 5.3 i `glm-5.3-{low,high,max}` imaju eksplicitne
+`supportsVision:false` metapodatke u registru/specifikaciji. GLM 5.3 Flash varijante
+ostaju modeli sa nativnom podrškom za vid. Ruta `/v1/messages` u Claude Code ulazi u
+zajednički `handleChat` pre-call lanac guardrail-a **pre** Claude-to-OpenAI
+translacije; ugnježdene slike iz `Read` tool-result-a moraju biti opisane ili
+obrađene pre nego što ta translacija prebaci njih u OpenAI `image_url` sadržaj
+(#17069).
 
-Пресреће захтеве који садрже слике** не-визијски модели** и или преусмерава цео захтев на модел способан за визију или замењује делове слике текстуалним описима које производи конфигурабилни модел визије пре упстреам позива. Ово омогућава провајдерима који користе само текст транспарентно руковање мултимодалним корисним оптерећењем.
+Presreće zahteve koji nose slike, usmerene ka **modelima bez podrške za vid**, i ili
+preusmerava ceo zahtev na model sa podrškom za vid ili zamenjuje delove sa slikama
+tekstualnim opisima koje proizvodi podesivi vision model pre upstream poziva. Ovo
+omogućava provajderima koji podržavaju samo tekst da transparentno obrađuju
+multimodalne payload-e.
 
-ток:
+Tok:
 
-1. Прескочи ако циљни модел већ подржава визију (осим ако се не појављује на листи присилних премошћавања `isVisionBridgeForcedModel`).
-2. Извуците делове слике преко `extractImageParts(messages)` (`visionBridgeHelpers.ts`), који делегира на** унифицирани детектор медија** `detectMediaParts()` у `open-sse/utils/mediaParts.ts` — једини извор истине који се дели са комбинованим филтером компатибилности. Екстракција је на листи дозвољених облика које `replaceImageParts` може спојити (уговор замене екстракта ↔): OpenAI `image_url`, Anthropic басе64 `source.type:"base64"`, Anthropic URL `source.type:"url"` и Одговори API `input_image`. Одговарајуће слике угнежђене унутар Claude Цоде `tool_result.content` и излаза алата Респонсес се такође издвајају и замењују на њиховим оригиналним путањама; облици само индикатори су комбиновани филтер материјал и не екстрахују се. Прескочи ако ниједан није пронађен.
-3. Решите конфигурацију времена извршавања преко `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): нови `modalityBridge*` кључеви подешавања побеђују; застарели `visionBridge*` кључеви остају а** резервни циклус у једном циклусу** (прозор враћања назад). Прескочите пре било каквог преласка медија када је мост онемогућен.
-4. Селектор режима (`modalityBridgeVisionMode`, види табелу испод) одлучује о преусмеравању у односу на опис. Преусмеравање враћа `modifiedPayload` са само `model` замењеним, плус мета `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Опишите путању: затворите слике на `maxImages`, саставите промпт који свесни задатака, консултујте кеш за опис, позовите модел визије** паралелно** (`Promise.allSettled`) и убаците делове текста `[Image N]: <description>` на њихово место. Неуспели опис даје `null`: необрађена слика је сачувана за unknown/vision-capable циљеве (#4012), али** потврђена директна мета само за текст** или комбинација нулте видљивости добија експлицитни `(unavailable — no vision-capable provider connected)` текстуални стуб за сваку неописану слику, укључујући делимичне грешке и слике изван ограничења описа (#17069). Постојећа потпуно неуспела комбинација која описује резервни део остаје на месту (#8430).
-6. Врати `modifiedPayload` + мета (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Preskoči ako ciljni model već podržava vid (osim ako se pojavljuje u listi
+   prisilnog mosta `isVisionBridgeForcedModel`).
+2. Izdvoji delove sa slikama pomoću `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), koji delegira **unificiranom detektoru medija**
+   `detectMediaParts()` u `open-sse/utils/mediaParts.ts` — jedinom izvoru istine
+   deljenom sa combo filterom kompatibilnosti. Ekstrakcija je ograničena
+   allowlist-om na oblike koje `replaceImageParts` može da vrati nazad (ugovor
+   extract↔replace): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`,
+   Anthropic URL `source.type:"url"` i Responses API `input_image`. Podudarajuće
+   slike ugnježdene unutar Claude Code `tool_result.content` i Responses tool izlaza
+   takođe se izdvajaju i zamenjuju na svojim originalnim putanjama; oblici koji su
+   samo indikatori predviđeni su za combo filter i ne izdvajaju se. Preskoči ako
+   nijedna nije pronađena.
+3. Razreši runtime konfiguraciju pomoću `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): novi `modalityBridge*`
+   ključevi podešavanja imaju prednost; zastareli `visionBridge*` ključevi ostaju
+   **fallback za jedan ciklus** (prozor za povratak). Preskoči pre bilo kakvog
+   prolaska kroz medije kada je most onemogućen.
+4. Selektor režima (`modalityBridgeVisionMode`, vidi tabelu ispod) odlučuje između
+   preusmeravanja i opisivanja. Preusmeravanje vraća `modifiedPayload` samo sa
+   zamenjenim `model`, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Putanja opisivanja: ograniči slike na `maxImages`, sastavi prompt prilagođen
+   zadatku, konsultuj keš opisa, pozovi vision model **paralelno**
+   (`Promise.allSettled`) i ubaci `[Image N]: <description>` tekstualne delove na
+   njihovo mesto. Neuspelo opisivanje daje `null`: sirova slika se čuva za
+   nepoznate ciljeve ili ciljeve sa podrškom za vid (#4012), ali **potvrđen
+   direktan cilj koji podržava samo tekst** ili combo bez ijednog vision modela
+   dobija eksplicitni tekstualni stub
+   `(unavailable — no vision-capable provider connected)` za svaku neopisanu sliku,
+   uključujući delimične neuspehe i slike preko ograničenja describe poziva
+   (#17069). Postojeći fallback za combo opisivanje kada svi neuspu ostaje na snazi
+   (#8430).
+6. Vrati `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
-#### Бирач режима (`modalityBridgeVisionMode`)
+#### Selektor režima (`modalityBridgeVisionMode`)
 
-| Моде       | Подразумевано | Понашање                                                                                                                                                                                                                                                                                |
-| ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔             | Наслеђени хеуристички, нетакнути (#6640/#7204): не-комбо/`auto/` модели се преусмеравају на најбољи модел визије осим ако оригинални модел већ има употребљиве акредитиве (онда опишите); комбиновани циљеви увек описују.                                                              |
-| `describe` |               | Увек опишите — блок преусмеравања је у потпуности прескочен; модел који је корисник изабрао увек одговара.                                                                                                                                                                              |
-| `reroute`  |               | Присилно преусмеравање: заштита модела са акредитивима за чување је заобиђена. Преусмеравање-** циљ** Заштита акредитива и даље примењује — када не постоји употребљиви циљ визије, мост се блокира са јасном грешком уместо да описује или шаље необрађене слике на циљ само за текст. |
+| Режим      | Подразумевано | Понашање                                                                                                                                                                                                                                                                                           |
+| ---------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔             | Наслеђена хеуристика, непромењена (#6640/#7204): модели који нису combo/`auto/` се преусмеравају на најбољи vision модел осим ако оригинални модел већ има употребљиве креденцијале (тада describe); combo циљеви увек извршавају describe.                                                        |
+| `describe` |               | Увек describe — блок за преусмеравање се у потпуности прескаче; модел који је корисник изабрао увек одговара.                                                                                                                                                                                      |
+| `reroute`  |               | Принудно преусмеравање: заштита задржавања модела са креденцијалима се заобилази. Заштита креденцијала **циља** преусмеравања и даље важи — када не постоји употребљив vision циљ, мост блокира са јасном грешком уместо да изврши describe или пошаље сирове слике циљу који подржава само текст. |
 
-Принудни режими кратког споја** пре** аутохеуристички се изводи; `auto` понашање је идентично бајтовима као и pre-PR-1 заштитна ограда.
+Принудни режими прекидају извршавање **пре** него што се auto хеуристика покрене; понашање режима `auto` бајт-по-бајт је идентично guardrail-у пре PR-1.
 
-#### Обим АПИ-кључа (`visionBridgeKeyScope.ts`)
+#### Опсег API кључа (`visionBridgeKeyScope.ts`)
 
-Када API тастер позиваоца ограничава `allowedConnections`, скупове квота (`allowedQuotas`) или моделе (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), мост бира само преусмеравање и описује моделе које кључ може да користи, на конекцијама које кључ може да користи. Позив описа тада увек пролази кроз OmniRoute селф-петљу са `x-omniroute-self-loop-key-id` заглављем, тако да пријемни захтев за ћаскање поново намеће везу тог кључа и политику модела. `enforceApiKeyPolicy()` поштује то заглавље само заједно са носиоцем селф-петље, тако да може само да сузи приступ, а ид који се не решава се одбија.
+Када API кључ позиваоца ограничава `allowedConnections`, базене квота
+(`allowedQuotas`) или моделе (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), мост бира само
+reroute и describe моделе које кључ сме да користи, на конекцијама које кључ
+сме да користи. Describe позив затим увек пролази кроз OmniRoute self-loop са
+заглављем `x-omniroute-self-loop-key-id`, тако да примљени chat захтев поново
+спроводи политику конекција и модела тог кључа. `enforceApiKeyPolicy()`
+поштује то заглавље само заједно са self-loop bearer-ом, тако да може само да
+сузи приступ, а id који се не разрешава се одбија.
 
-Ако за кључ није дозвољен модел визије, а** потврђена само текстуална мета** одбацује захтев за слику локално са јасним HTTP 400 уместо да прослеђује бајтове слике неспособном узводном (#17069). За циљеве са непознатом или изворном способношћу вида, путања за опис задржава своје претходно понашање при отварању (мета `{ skipped: true, reason: "no_permitted_vision_model" }`). Захтеви без кључа, и кључеви без ових ограничења, понашају се као и раније.
+Ако ниједан vision модел није дозвољен за кључ, **потврђен циљ који подржава
+само текст** одбија захтев са сликом локално са јасним HTTP 400 уместо да
+прослеђује бајтове слике ка upstream-у који није способан (#17069). За циљеве
+са непознатом или нативном vision способношћу, describe путања задржава своје
+претходно fail-open понашање (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Захтеви без кључа, и кључеви без ових ограничења, понашају се потпуно исто као
+и пре.
 
-#### Промпт за опис задатка (`modalityBridgeVisionTaskAware`)
+#### Describe промпт свестан задатка (`modalityBridgeVisionTaskAware`)
 
-Подразумевано** истина** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) додаје текст** последња порука корисника** (скраћено на 500 знакова) до основног описа, усмеравајући опис према ономе што је корисник заправо тражио (цодек-висион-проки паттерн) и тражећи од модела визије да транскрибује видљиви текст. Са искљученом заставицом — или без корисничког текста — основни промпт се користи непромењен.
+Подразумевано **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) додаје
+текст **последње корисничке поруке** (одсечен на 500 карактера) на основни
+describe промпт, усмеравајући опис ка ономе што је корисник заиста питао
+(codex-vision-proxy образац) и тражећи од vision модела да транскрибује
+видљиви текст. Када је заставица искључена — или нема корисничког текста —
+основни промпт се користи непромењен.
 
-Описани сопствени захтев компатибилан са ОпенАИ-ом (`callVisionModelSingle()` у `visionBridgeHelpers.ts`) увек захтева `image_url.detail: "high"` — безусловно, за сваки caller/provider, није затворен ни на једном клијентском сигналу. Узорковање са ниским бројем детаља деградира OCR тачност за тачно задатак транскрипције текста који овај упит тражи, тако да сам позив за опис увек тражи висок ниво детаља без обзира на то који ниво детаља је користио оригинални улазни захтев. Ово утиче само на унутрашње тело захтева за опис; не мења начин на који OmniRoute прослеђује сопствени `image_url.detail` позиваоца на примарни захтев — који се подразумевано примењује засебно, и то само за откривене OpenCode клијенте, у `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Грана Anthropic жичног формата описане селф-петље нема `detail` поље и на њу не утиче ни једно ни друго подразумевано.
+Сопствени OpenAI-компатибилни захтев describe self-loop-а (`callVisionModelSingle()`
+у `visionBridgeHelpers.ts`) увек захтева `image_url.detail: "high"` —
+безусловно, за сваког позиваоца/провајдера, без условљавања било каквим
+клијентским сигналом. Узорковање са ниским нивоом детаља погоршава OCR тачност
+управо за задатак транскрипције текста који овај промпт тражи, тако да сам
+describe позив увек тражи висок ниво детаља без обзира на то који ниво детаља
+је оригинални долазни захтев користио. Ово утиче само на тело интерног
+describe захтева; не мења начин на који OmniRoute прослеђује сопствени
+`image_url.detail` позиваоца на примарном захтеву — та подразумевана вредност
+се примењује одвојено, и само за детектоване OpenCode клијенте, у
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Anthropic
+wire-format грана describe self-loop-а нема поље `detail` и није под утицајем
+ниједне од подразумеваних вредности.
 
-#### Опишите излазну капу (`modalityBridgeVisionMaxChars`)
+#### Ограничење describe излаза (`modalityBridgeVisionMaxChars`)
 
-| Кључ                           | Подразумевано | Ранге             |
+| Кључ                           | Подразумевано | Опсег             |
 | ------------------------------ | ------------- | ----------------- |
 | `modalityBridgeVisionMaxChars` | `0`           | `0` или 100–50000 |
 
-`0` (подразумевано) значи** без капе** — опис који враћа `callVisionModel()` пролази кроз неизмењено, чувајући постојеће понашање. Било која вредност у опсегу 100–50000 скраћује опис са суфиксом `…` пре него што се поново споји као `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` у `src/lib/guardrails/visionBridge.ts`). Подигните ово за OCR задатке са великим детаљима где је низводном моделу потребна потпуна транскрипција; смањите га на коришћење везаног токена на брбљивим моделима визије. Поље контролне табле налази се на напредном панелу картице Висион (`modality-bridge-max-chars` ин `ModalityBridgeVisionTab.tsx`) и спаја било коју вредност између 1 и 99 до 100 спрата, док оставља експлицитни `0` нетакнутим — `0` је сама по себи важећа Zod вредност (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), а не само „унсет“ подразумевана.
+`0` (подразумевано) значи **без ограничења** — опис који враћа
+`callVisionModel()` се прослеђује неизмењен, чувајући постојеће понашање.
+Било која вредност у опсегу 100–50000 скраћује опис са суфиксом `…` пре него
+што се уметне назад као `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` у `src/lib/guardrails/visionBridge.ts`).
+Повећајте ово за OCR задатке богате детаљима где downstream моделу треба пуна
+транскрипција; смањите га да бисте ограничили потрошњу токена код причљивих
+vision модела. Поље на контролној табли се налази на Advanced панелу Vision
+картице (`modality-bridge-max-chars` у `ModalityBridgeVisionTab.tsx`) и сваку
+вредност између 1 и 99 подиже до доње границе од 100, док експлицитну `0`
+оставља нетакнутом — `0` је важећа Zod вредност сама по себи
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), а не само
+„неподешена" подразумевана вредност.
 
-#### Опишите кеш (`modalityBridge/bridgeCache.ts`)
+#### Describe кеш (`modalityBridge/bridgeCache.ts`)
 
-У меморији LRU + TTL кеш меморија за опис излаза, дељени у целом процесу. Кључ = `sha256(imageRef + composedPrompt + configuredBridgeModel)` са оквиром дужине префикса (без судара на границама поља). Компонента модела је** конфигурисан** модел моста, а не модел који је заправо одговорио — `callVisionModel` може интерно да се врати, а укуцавање по покушају би фрагментирало кеш меморију. Неуспели описи се никада не кешују. Подешавања:
+LRU + TTL кеш у меморији за describe излазе, дељен у оквиру целог процеса.
+Кључ = `sha256(imageRef + composedPrompt + configuredBridgeModel)` са
+length-prefix framing-ом (без колизија на границама поља). Компонента модела
+је **конфигурисани** модел моста, а не модел који је заиста одговорио —
+`callVisionModel` може интерно да пређе на резервни модел, а кључевање по
+покушају би фрагментисало кеш. Неуспешни describe позиви се никада не
+кеширају. Подешавања:
 
-| Кључ                            | Подразумевано | Ранге   |
+| Кључ                            | Подразумевано | Опсег   |
 | ------------------------------- | ------------- | ------- |
 | `modalityBridgeCacheEnabled`    | `true`        | —       |
 | `modalityBridgeCacheTtlMinutes` | `60`          | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`         | 10–5000 |
 
-#### Даљинска нормализација слике (само-петља describe/base64 преузимање)
+#### Normalizacija udaljenih slika (self-loop describe/base64 preuzimanje)
 
-Када мост донесе а** даљински** сама слика — Anthropic описују самопозив и конверзију басе64 формата цлауде-вире (`ensureBase64ImagesForClaudeWire`), оба преко `fetchRemoteImageAsDataUri()` у `visionBridgeHelpers.ts` — резултујући подаци URI се прослеђују кроз `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) пре него што буду уграђени у захтев за модел визије. Превелике слике се смањују на а** Дуга ивица од 2048 пиксела** (која одговара ограничењу величине OpenAI/Anthropic већ се примењује на страни сервера), што смањује отпремање bytes/latency без промене онога што модел визије види. Промена величине користи `sharp`, учитан путем динамичког увоза: на платформи на којој се његов изворни бинарни фајл не учитава, `normalizeDataUri()`** никад не баца** — се враћа на пролаз оригиналних бајтова, тако да describe/base64-conversion путања увек ради. Бајтови који нису слике (дохваћање које није вратило слику која се може декодирати) се такође пролазе нетакнути. Ова нормализација је обухваћена сликама које мост преузима за сопствени самопозив — и никада се не примењује на сирови пролазни терет позиваоца, у складу са принципом мутације само за избор (тврдо правило #20).
+Kada most sam preuzme **udaljenu** sliku — Anthropic describe samopoziv i konverzija u claude-wire-format base64 (`ensureBase64ImagesForClaudeWire`), obe preko `fetchRemoteImageAsDataUri()` u `visionBridgeHelpers.ts` — rezultujući data URI se prosleđuje kroz `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) pre ugrađivanja u zahtev vision modela. Prevelike slike se smanjuju na **dužu ivicu od 2048px** (što odgovara ograničenju promene veličine koje OpenAI/Anthropic već primenjuju na serverskoj strani), što smanjuje bajtove/latenciju otpremanja bez promene onoga što vision model vidi. Promena veličine koristi `sharp`, učitan dinamičkim importom: na platformi gde se njegov nativni binarni fajl ne učita, `normalizeDataUri()` **nikada ne baca izuzetak** — vraća se na passthrough originalnih bajtova, tako da putanja describe/base64-konverzije uvek nastavlja da radi. Bajtovi koji nisu slika (preuzimanje koje nije vratilo dekodirajuću sliku) takođe prolaze netaknuti. Ova normalizacija je ograničena na slike koje most preuzima za sopstveni samopoziv — nikada se ne primenjuje na sirovi passthrough payload pozivaoca, u skladu sa principom izmena isključivo po pristanku (opt-in-only) (Strogo pravilo #20).
 
-#### Шема подешавања + миграција
+#### Šema podešavanja + migracija
 
-Нови `modalityBridge*` кључеви су Зод валидирани у `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` трио и `modalityBridgeAudio*` група коју користи Аудио Бридге. Миграција `141_modality_bridge_settings.sql` копира постојеће старе `visionBridge*` вредности у одговарајуће нове кључеве (идемпотентан, никада не преписује `modalityBridge*` вредност постављену оператором); застарели кључеви остају прихваћени као резервни за читање за један циклус издавања.
+Novi `modalityBridge*` ključevi se validiraju Zod-om u `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, trio `modalityBridgeCache*` i grupa `modalityBridgeAudio*` koju koristi Audio Bridge. Migracija `141_modality_bridge_settings.sql` kopira postojeće zastarele (legacy) `visionBridge*` vrednosti u odgovarajuće nove ključeve (idempotentno, nikada ne prepisuje vrednost `modalityBridge*` koju je postavio operator); zastareli ključevi ostaju prihvaćeni kao rezervna opcija pri čitanju (read fallback) tokom jednog ciklusa izdanja.
 
-#### Транспарентност заглавља + статистика
+#### Zaglavlje transparentnosti + statistika
 
-Опишите-трансформисани одговори носе `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (саграђен од `buildModalityBridgeHeader()` у `modalityBridge/bridgeStats.ts`, печат `withModalityBridgeHeader()` у `src/sse/handlers/chatHelpers.ts`). Преусмерени захтеви добијају** бр** заглавље — корисни терет је био нетакнут и замена модела је већ видљива у `model` пољу тела одговора.
+Odgovori transformisani describe-om nose `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (gradi ga `buildModalityBridgeHeader()` u `modalityBridge/bridgeStats.ts`, utiskuje `withModalityBridgeHeader()` u `src/sse/handlers/chatHelpers.ts`). Preusmereni zahtevi **nemaju** zaglavlje — payload je netaknut, a zamena modela je već vidljiva u polju `model` tela odgovora.
 
-`GET /api/modality-bridge/stats` (управљање аутх, исти ниво као `GET /api/settings`) враћа бројаче у меморији по модалитетима `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` за `vision`, `audio` и `video`. `averageLatencyMs` користи `latencySamples`, не све покушаје, као именилац; операција без мерења времена не производи узорак од нула милисекунди. `bridged` остаје псеудоним за успешне конверзије компатибилан уназад; неуспели покушаји га не повећавају. Бројачи се ресетују при поновном покретању процеса по дизајну (телеметрија, а не рачуноводство).
+`GET /api/modality-bridge/stats` (management autentifikacija, isti nivo kao `GET /api/settings`) vraća brojače po modalitetu u memoriji `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` za `vision`, `audio` i `video`. `averageLatencyMs` koristi `latencySamples`, a ne sve pokušaje, kao imenilac; operacija bez merenja vremena ne fabrikuje uzorak od nula milisekundi. `bridged` ostaje unazad kompatibilan pseudonim za uspešne konverzije; neuspešni pokušaji ga ne uvećavaju. Brojači se po dizajnu resetuju pri restartovanju procesa (telemetrija, a ne knjigovodstvo).
 
-#### Конфигурација контролне табле
+#### Konfiguracija kontrolne table
 
-Наменска страница контролне табле је `/dashboard/settings/modality-bridge`. Његове картице `Vision`, `Audio` и `Video` које се могу адресирати на УРЛ чувају параметре упита док мењају вредност `tab`. Картица Висион излаже омогућавање, режим, избор модела (укључујући аутоматски подразумевани), упите свесни задатака, напредна timeout/image/description-length/cache ограничења, бројаче времена извршавања и заштићени захтев за узорком. Картица Аудио је такође активна: открива омогућавање, бирач модела само за СТТ са Ауто, timeout/max-clip ограничења, аудио бројаче и `input_audio` тест узорка. Картица Видео је функционална: пријављује стање FFmpeg/ffprobe рунтиме — једно од четири експлицитна стања UI (`unknown` док је сонда у лету или није могла да се заврши, `restricted` на хосту контролне табле без повратне петље где је сонда прескочена на страни клијента, `unavailable` када се једном испита и потврди да недостаје, или `available` са зкп филтером по верзијама, — ограничава enable/model/frame/video/timeout филтер по верзијама FFmpeg/ffprobe ) моделе са могућношћу вида и излаже видео бројаче.
+Namenska stranica kontrolne table je `/dashboard/settings/modality-bridge`. Njeni URL-adresabilni tabovi `Vision`, `Audio` i `Video` čuvaju upitne (query) parametre pri promeni vrednosti `tab`. Tab Vision izlaže omogućavanje, režim, izbor modela (uključujući automatski podrazumevani), task-aware promptovanje, napredna ograničenja za timeout/broj slika/dužinu opisa/keš, runtime brojače i zaštićen probni zahtev. Tab Audio je takođe aktivan: izlaže omogućavanje, birač modela samo za STT sa opcijom Auto, ograničenja za timeout/maksimalnu dužinu klipa, audio brojače i probni test `input_audio`. Tab Video je funkcionalan: prijavljuje runtime stanje FFmpeg/ffprobe — jedno od četiri eksplicitna UI stanja (`unknown` dok je provera u toku ili nije mogla da se završi, `restricted` na hostu kontrolne table koji nije loopback, gde se provera preskače na klijentskoj strani, `unavailable` kada je provereno i potvrđeno da nedostaje, ili `available` sa verzijama FFmpeg/ffprobe) — trajno čuva ograničenja za uključivanje/model/broj frejmova/video/timeout, filtrira birač modela na modele sposobne za vizuelni ulaz i izlaže video brojače.
 
-Претходна Висион Бридге картица под AI поставкама је веза за компатибилност до нове странице; више не поседује другу копију обрасца. Провајдери медија такође повезују радне токове слике у текст и говор у текст са одговарајућим картицама Модалити Бридге без уклањања постојећег игралишта говора у текст.
+Bivša kartica Vision Bridge u AI podešavanjima je kompatibilnosni link ka novoj stranici; više ne poseduje drugu kopiju obrasca. Media Providers takođe povezuje Image-to-Text i Speech-to-Text tokove rada sa odgovarajućim tabovima Modality Bridge bez uklanjanja postojećeg Speech-to-Text playground-a.
 
-**Само-петља заобилазница за пријем:** када опис рута позива кроз OmniRoute ову сопствену `/v1` селф-петљу (нестандардни модел добављача), под-захтев шаље `x-omniroute-admission-bypass: internal` и аутентификује се са решеним акредитивом самопетље — локалним `sk_omniroute` стражаром у локалном режиму или оператером конфигурисаним `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` енв кључем, тако да позив још увек може (#1350 `REQUIRE_API_KEY=true` рун. Заобилазница се поштује само за те тачне акредитиве, тако да спољни клијенти не могу да користе заглавље да би прескочили пријем.
+**Zaobilaženje kontrole pristupa za self-loop:** kada se describe poziv usmerava kroz OmniRoute-ovu sopstvenu `/v1` self-loop petlju (model nestandardnog provajdera), podzahtev šalje `x-omniroute-admission-bypass: internal` i autentifikuje se razrešenim self-loop kredencijalom — lokalnim `sk_omniroute` sentinelom u lokalnom režimu, ili env ključem `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` koji je konfigurisao operator (#1350), tako da deployment-i sa `REQUIRE_API_KEY=true` i dalje mogu da izvrše describe poziv. Zaobilaženje se poštuje samo za te tačne kredencijale, tako da spoljni klijenti ne mogu da koriste zaglavlje da preskoče kontrolu pristupa.
 
-Наслеђене подразумеване вредности живе у `src/shared/constants/visionBridgeDefaults.ts`; нове mode/task-aware/cache подразумеване вредности и резолвер подешавања живе у `src/shared/constants/modalityBridgeDefaults.ts`. Заштитна ограда открива опцију `deps` конструктора тако да тестови могу убацити лажне `getSettings` и `callVisionModel` имплементације.
+Zastarele podrazumevane vrednosti nalaze se u `src/shared/constants/visionBridgeDefaults.ts`; nove podrazumevane vrednosti za režim/task-aware/keš i resolver podešavanja nalaze se u `src/shared/constants/modalityBridgeDefaults.ts`. Guardrail izlaže opciju konstruktora `deps` kako testovi mogu da ubace lažne (fake) implementacije `getSettings` i `callVisionModel`.
 
-### Аудио Бридге (`audioBridge.ts`) — Модалити Бридге PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Пресреће захтеве за ћаскање са аудио преносом пре него што стигну до циља за који се не зна да прихвата аудио улаз. Никада не преусмерава захтев за ћаскање: аудио делови се транскрибују кроз постојећу вишеделну крајњу тачку компатибилну са ОпенАИ, а изабрани модел ћаскања наставља са транскриптима текста.
+Presreće chat zahteve koji nose audio pre nego što stignu do odredišta za koje nije poznato da prihvata audio ulaz. Nikada ne preusmerava chat zahtev: audio delovi se transkribuju kroz postojeći OpenAI-kompatibilni multipart endpoint, a izabrani chat model nastavlja sa tekstualnim transkriptima.
 
-ток:
+Tok:
 
-1. Реши `supportsAudio` кроз `getResolvedModelCapabilities()`. Експлицитни метаподаци регистра добављача побеђују, затим метаподаци статичног модела, а затим синхронизовани `modalities_input`. Декларисана улазна листа без `audio` је `false`; нема доказа о способности `null`. И `false` и `null` активирају конзервативни мост, док га `true` заобилази.
-2. Решите `modalityBridgeAudio*` подешавања и издвојите аудио делове највишег нивоа који се могу спојити из сваке поруке преко заједничког `detectMediaParts()` детектора. Подржани облици жица су OpenAI `input_audio`, `audio_url` и `source.media_type: "audio/*"`. Угнежђени звук је откривен за рутирање, али га путања спајања не уклања. Рад је ограничен са `modalityBridgeAudioMaxClips`; каснији делови остају нетакнути.
-3. Поштујте конфигурисану `provider/model`, или пустите `selectAudioBridgeModel()` да хода по `AUDIO_TRANSCRIPTION_PROVIDERS` у стабилном каталошком редоследу и изаберите први модел са употребљивим активним акредитивима добављача.
-4. `callAudioTranscription()` конвертује base64/data-URI аудио у вишеделни `file`, или преузима удаљени `audio_url` кроз само јавни излазни чувар са DNS качењем и 25 MB везом. Затим POSTs датотеку и изабрани модел у локалну `/v1/audio/transcriptions` селф-петљу, аутентификован са `resolveSelfLoopBearer()`. Постојећа рута за транскрипцију обавља нормално тражење акредитива, руковање cooldown/rate-limit и слање добављача.
-5. Успешни позиви замењују своје делове са `[Audio N]: <transcript>`. Позиви се покрећу са `Promise.allSettled`: појединачна грешка чува тај оригинални аудио део (#4012 уговор). Ако сваки позив не успе и циљ се докаже `supportsAudio === false`, делови постају `[Audio N]: (unavailable — no STT provider connected)` (#8430 уговор). За непознату мету (`null`), резултат свих неуспеха остаје нетакнут. Проверени циљ само за текст без употребљивих STT акредитива прима исти експлицитни стуб без издавања мрежног позива.
+1. Razrešite `supportsAudio` kroz `getResolvedModelCapabilities()`. Eksplicitni
+   metapodaci registra provajdera imaju prednost, zatim statički metapodaci
+   modela, a zatim sinhronizovani `modalities_input`. Deklarisana lista ulaza bez
+   `audio` daje `false`; bez dokaza o mogućnostima ostaje `null`. I `false` i
+   `null` aktiviraju konzervativni most, dok ga `true` zaobilazi.
+2. Razrešite `modalityBridgeAudio*` podešavanja i izdvojite audio delove
+   najvišeg nivoa koji se mogu odseći iz svake poruke kroz zajednički
+   `detectMediaParts()` detektor. Podržani formati na vezi su OpenAI
+   `input_audio`, `audio_url` i `source.media_type: "audio/*"`. Ugnježdeni audio
+   se detektuje radi rutiranja, ali ga putanja odsecanja ne uklanja. Rad je
+   ograničen sa `modalityBridgeAudioMaxClips`; kasniji delovi ostaju nedirnuti.
+3. Poštujte konfigurisani `provider/model`, ili dozvolite da
+   `selectAudioBridgeModel()` prođe kroz `AUDIO_TRANSCRIPTION_PROVIDERS` u
+   stabilnom redosledu kataloga i izabere prvi model sa upotrebljivim aktivnim
+   akreditivom provajdera.
+4. `callAudioTranscription()` pretvara base64/data-URI audio u multipart
+   `file`, ili preuzima udaljeni `audio_url` kroz izlaznu zaštitu ograničenu
+   samo na javne adrese, sa DNS pinning-om i granicom od 25 MB. Zatim šalje POST
+   zahtev sa fajlom i izabranim modelom ka lokalnoj `/v1/audio/transcriptions`
+   self-loop petlji, autentifikovan pomoću `resolveSelfLoopBearer()`. Postojeća
+   ruta transkripcije obavlja uobičajeno pretraživanje akreditiva, rukovanje
+   cooldown periodom/ograničavanjem brzine i prosleđivanje provajderu.
+5. Uspešni pozivi zamenjuju svoje delove sa `[Audio N]: <transcript>`. Pozivi
+   se izvršavaju sa `Promise.allSettled`: pojedinačni neuspeh čuva taj
+   originalni audio deo (ugovor #4012). Ako svi pozivi ne uspeju i za cilj je
+   dokazano `supportsAudio === false`, delovi postaju
+   `[Audio N]: (unavailable — no STT provider connected)` (ugovor #8430). Za
+   nepoznat cilj (`null`), rezultat u kome su svi pozivi neuspešni ostaje
+   nedirnut. Cilj za koji je dokazano da podržava samo tekst, bez upotrebljivog
+   STT akreditiva, dobija isti eksplicitni stub bez upućivanja mrežnog poziva.
 
-Успешни транскрипти користе LRU/TTL кеш Модалити Бридге за читав процес. Тастер комбинује аудио референцу, ознаку стабилне `audio-transcription` операције и изабрани STT модел; грешке се никада не кеширају. Аудио покушаји ажурирања дељених бројача `bridged`, `cacheHits`, `failures` и `lastUsedAt`. Трансформисани одговори носе `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; нетакнути захтеви не добијају Аудио Бридге сегмент.
+Uspešne transkripcije koriste LRU/TTL keš Modality Bridge-a na nivou procesa.
+Ključ kombinuje referencu na audio, stabilnu oznaku operacije
+`audio-transcription` i izabrani STT model; neuspesi se nikad ne keširaju.
+Audio pokušaji ažuriraju zajedničke brojače `bridged`, `cacheHits`, `failures`
+i `lastUsedAt`. Transformisani odgovori nose
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; nedirnuti
+zahtevi ne dobijaju segment Audio Bridge-a.
 
-Подешавања времена извршавања су подржана од стране ДБ-а и Зод валидирана:
+Podešavanja izvršnog okruženja čuvaju se u bazi podataka i validiraju Zod-om:
 
-| Кључ                          | Подразумевано | Ранге           |
-| ----------------------------- | ------------- | --------------- |
-| `modalityBridgeAudioEnabled`  | `true`        | —               |
-| `modalityBridgeAudioModel`    | `""`          | Ауто или STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`       | 1000–300000     |
-| `modalityBridgeAudioMaxClips` | `3`           | 1–10            |
+| Ključ                         | Podrazumevano | Opseg                 |
+| ----------------------------- | ------------- | --------------------- |
+| `modalityBridgeAudioEnabled`  | `true`        | —                     |
+| `modalityBridgeAudioModel`    | `""`          | Automatski ili STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`       | 1000–300000           |
+| `modalityBridgeAudioMaxClips` | `3`           | 1–10                  |
 
-Заједнички кеш и даље контролишу `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` и `modalityBridgeCacheMaxEntries`.
+Zajedničkim kešom i dalje upravljaju `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` i `modalityBridgeCacheMaxEntries`.
 
 ### Видео Бридге (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -219,83 +339,128 @@ guardrail kao bezbednosnu kontrolu.
 
 ### PII маскер (`piiMasker.ts`)
 
-Ради даље** обоје** етапе.
+Ради даље **обоје** етапе.
 
-- **`preCall`** клонира корисни терет, шета `system`, `messages`, `input` и `prompt` (укључујући обичне стрингове) и примењује `processPII()` (од `@/shared/utils/inputSanitizer`) на низ `content`/`text` поља. Када `PII_REDACTION_ENABLED=true`, откривени PII се редигује у излазном корисном учитавању. Ово је независно од `INPUT_SANITIZER_MODE` (који контролише само политику брзе ињекције). Када је редиговање искључено, откривање записа позива се рачуна без поновног писања садржаја.
+- **`preCall`** клонира корисни терет, шета `system`, `messages`, `input` и `prompt` (укључујући обичне стрингове) и примењује `processPII()` (од `@/shared/utils/inputSanitizer`) на низ `content`/`text` поља. Када `PII_REDACTION_ENABLED=true`, откривени PII се редигује у одлазном терету. Ово је независно од `INPUT_SANITIZER_MODE` (који контролише само политику брзог убризгавања). Када је редиговање искључено, откривање записа позива се рачуна без поновног писања садржаја.
 - **`postCall`** дубоко клонира одговор, покреће `sanitizePIIResponse()` плус маскер облика Респонсес-АПИ (`maskResponsesOutput` — покрива `output_text` и `output[].content[].text`). Ако дође до било какве редакције, измењени одговор замењује оригинал.
 
-Заштитна ограда никада не блокира; само коментарише (`meta.detections`, `meta.redacted`) или преписује.
+Заштитна ограда никада не блокира; само бележи (`meta.detections`, `meta.redacted`) или преписује.
 
 #### Избор по типу, прилагођени обрасци и бројачи детекције
 
-**Дасхбоард → Сеттингс → Сецурити → PII маскинг** бира _шта_ је маскирано. Не укључује маскирање: то је и даље `PII_REDACTION_ENABLED` (захтев) и `PII_RESPONSE_SANITIZATION` (одговор + SSE), оба су подразумевано искључена.
+**Контролна табла → подешавања → безбедност → PII маскирање** бира _шта_ је маскирано. Не укључује маскирање: то је и даље `PII_REDACTION_ENABLED` (захтев) и `PII_RESPONSE_SANITIZATION` (одговор + SSE), оба су подразумевано искључена.
 
-- **Избор по типу** — уграђени ИД-ови су наведени у `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Унсет означава сваки тип (понашање пре него што је ова поставка постојала). `ssn_us` образац мотора захтева пресликава се у `ssn`. Шаблони (минимални, стандардни, финансијски, бразилски, USA, GDPR, POPIA, пуни) попуњавају само поља за потврду у UI.
+- **Избор по типу** — уграђени ИД-ови су наведени у `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Унсет означава сваки тип (понашање пре него што је ова поставка постојала). `ssn_us` образац мотора захтева мапира се у `ssn`. Шаблони (минимални, стандардни, финансијски, бразилски, USA, GDPR, POPIA, пуни) попуњавају само поља за потврду у UI.
 - **GDPR и POPIA идентификатори** — дванаест уграђених ИД-ова који покривају EU и јужноафричке личне идентификаторе (табела испод). Њихови регуларни изрази, валидатори и ознаке надлежности живе у једној табели, `src/shared/utils/piiPatterns.ts`, коју користе и дезинфикатор одговора (`src/lib/piiSanitizer.ts`) и маскер захтева (`src/shared/utils/inputSanitizer.ts`). Подударање се редигује само када га валидатор прихвати; голи низ цифара никада није довољан. Оператор који је сачувао сужени избор пре него што су ови ИД-ови постојали задржава понашање које је имао док се нови ИД-ови не обележе.
-- **Прилагођени обрасци** — до 20 шаблона регуларних израза или џокер знакова (`*` = до 64 знака без размака, `?` = један). Утакмице постају `[CUSTOM_REDACTED]`. Сваки образац пролази кроз `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): највише 500 знакова, заставице ограничене на `g i m s u`, морају се компајлирати, морају проћи `safe-regex` (катастрофално враћање уназад) и не смеју се подударати са празним стрингом или чуваром места за редиговање. Образац који не успе се одбија када се сачува и када се тестира, а ускладиштени ред који не успе се прескаче у току извршавања уместо да се компајлира. Прилагођени обрасци се покрећу само док је маскирање укључено.
+- **Прилагођени обрасци** — до 20 шаблона регуларног израза или џокер знакова (`*` = до 64 знака без размака, `?` = један). Утакмице постају `[CUSTOM_REDACTED]`. Сваки образац пролази кроз `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): највише 500 знакова, заставице ограничене на `g i m s u`, морају се компајлирати, морају проћи `safe-regex` (катастрофално враћање уназад) и не смеју се подударати са празним стрингом или чуваром места за редиговање. Образац који не успе се одбија када се сачува и када се тестира, а ускладиштени ред који не успе се прескаче у току извршавања уместо да се компајлира. Прилагођени обрасци се покрећу само док је маскирање укључено.
 - **Бројачи детекције** — броји по типу (никада усклађене вредности), чувају се у меморији и ресетују при поновном покретању (`src/lib/pii/piiDetectionStats.ts`). Они се само повећавају док је маскирање укључено.
 
-Подешавања живе у табели `key_value` (простор имена `pii_settings`, `src/lib/db/piiSettings.ts`) и читају се кроз кеш меморију од 1 с. API:
+Подешавања живе у `key_value` табели (именски простор `pii_settings`, `src/lib/db/piiSettings.ts`) и читају се кроз кеш меморију од 1 с. API:
 
-| Метод  | Пут                      | Сврха                                                                         |
-| ------ | ------------------------ | ----------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Стање заставе, `enabledTypes`, `customPatterns`, бројачи детекције            |
-| `PUT`  | `/api/settings/pii`      | Замените `enabledTypes` (`null` = све) and/or `customPatterns`                |
-| `POST` | `/api/settings/pii/test` | Извођење једног узорка на суво према узорку од највише 8 KB; ништа се не чува |
+| Metoda | Putanja                  | Svrha                                                                        |
+| ------ | ------------------------ | ---------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Stanje zastavica, `enabledTypes`, `customPatterns`, brojači detekcije        |
+| `PUT`  | `/api/settings/pii`      | Zamena `enabledTypes` (`null` = svi) i/ili `customPatterns`                  |
+| `POST` | `/api/settings/pii/test` | Probno pokretanje jednog obrasca na uzorku od najviše 8 KB; ništa se ne čuva |
 
-Сва три захтевају ауторизацију управљања и потврђују тело помоћу Zod (`src/shared/validation/schemas/piiSettings.ts`). Када је пријава онемогућена (`requireLogin=false`) `GET` и тестна крајња тачка су отворени, али `PUT` и даље треба сесију контролне табле, `manage` -scope API кључ, `oma_` приступни токен са опсегом писања или вишим, или CLI токен или токен интерне услуге послат из повратне петље.
+Сва три захтевају ауторизацију управљања и валидирају тело помоћу Zod (`src/shared/validation/schemas/piiSettings.ts`). Када је пријава онемогућена (`requireLogin=false`) `GET` и крајња тачка теста су отворени, али `PUT` и даље треба сесију контролне табле, `manage` -scope API кључ, `oma_` приступни токен са опсегом писања или вишим, или CLI токен или токен интерне услуге послат из повратне петље.
 
 #### GDPR (EU) и POPIA (Јужна Африка) идентификатори
 
-| Ид                  | Идентификатор              | Валидација                                                                     |
-| ------------------- | -------------------------- | ------------------------------------------------------------------------------ |
-| `iban`              | IBAN                       | Позната држава, тачна дужина за ту земљу, ISO 13616 MOD-97-10                  |
-| `eu_vat`            | EU VAT број                | Познати префикс државе чланице и формат броја те државе (без тражења VIES )    |
-| `es_dni_nie`        | шпански DNI / NIE          | Контролно писмо (вредност мод 23); NIE је `X/Y/Z` + 7 цифара                   |
-| `it_codice_fiscale` | Италијански кодекс Фисцале | Контролно писмо из табела позиција odd/even                                    |
-| `pl_pesel`          | Пољски PESEL               | Пондерисани контролни збир и кодирани датум рођења који постоји                |
-| `nl_bsn`            | холандски BSN              | 11-прооф (тежине 9..2, -1)                                                     |
-| `de_steuer_id`      | немачки Стеуер-ИД          | ISO 7064 Мод 11,10 плус правила о структури цифара (без водећих 0)             |
-| `se_personnummer`   | Сведисх персоннуммер       | Лухн преко последњих десет цифара и вероватан датум рођења (10 или 12 цифара)  |
-| `za_id`             | Јужноафрички ID број       | Лухн преко свих 13 цифара, важеће рођење month/day, цифра држављанства 0 или 1 |
-| `za_phone`          | Јужноафрички телефон       | `+27` / `27` префикс, или национални `0..` облик написан размаком или цртицом  |
-| `za_vat`            | Јужноафрички VAT број      | 10 цифара које почињу са `4`** и** "VAT" / "BTW" у претходних 48 знакова       |
-| `za_tax_ref`        | Јужноафричка пореска реф.  | 10 цифара које почињу `0`-`3`, Лухн,** и** "порез" / "SARS" у 48 знакова пре   |
+| ID                  | Идентификатор                     | Провера                                                                          |
+| ------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| `iban`              | IBAN                              | Позната држава, тачна дужина за ту државу, ISO 13616 MOD-97-10                   |
+| `eu_vat`            | ПДВ број EU-а                     | Познати префикс државе чланице и формат броја те државе (без упита VIES)         |
+| `es_dni_nie`        | Шпански DNI / NIE                 | Контролно слово (вредност mod 23); NIE је `X/Y/Z` + 7 цифри                      |
+| `it_codice_fiscale` | Италијански Codice Fiscale        | Контролно слово из табела непарних/парних положаја                               |
+| `pl_pesel`          | Пољски PESEL                      | Пондерисани контролни збир и прихватљиви распони кодираног месеца/дана рођења    |
+| `nl_bsn`            | Холандски BSN                     | Провера 11 (тежине 9..2, -1)                                                     |
+| `de_steuer_id`      | Немачки Steuer-ID                 | ISO 7064 Mod 11,10 и правила структуре цифри (без почетне 0)                     |
+| `se_personnummer`   | Шведски personnummer              | Luhn над последњих десет цифри и веродостојан датум рођења (10 или 12 цифри)     |
+| `za_id`             | Јужноафрички идентификациони број | Luhn над свих 13 цифри, ваљан месец/дан рођења, цифра држављанства 0 или 1       |
+| `za_phone`          | Јужноафрички телефон              | Префикс `+27` / `27` или национални облик `0..` написан с размаком или спојницом |
+| `za_vat`            | Јужноафрички ПДВ број             | 10 цифри с почетном `4` **и** "VAT" / "BTW" у претходних 48 знакова              |
+| `za_tax_ref`        | Јужноафричка пореска референца    | 10 цифри с почетном `0`-`3`, Luhn **и** "tax" / "SARS" у претходних 48 знакова   |
 
-Пошто се формати само цифара сукобљавају са бројевима наруџбине, бројевима израде и временским ознакама, најслабијим (`za_vat`, `za_tax_ref`) је потребна кључна реч, а голи десетоцифрени `0..` број се не третира као јужноафрички телефонски број. Размак IBANs (`GB29 NWBK ...`) се не подудара. На путањи за стриминг, знак се тражи само унутар тренутног дела. ИД-ови се налазе испред генеричких образаца телефона, тако да валидирани идентификатор задржава сопствени чувар места (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Шаблони `gdpr` и `popia` бирају EU и јужноафричке ИД-ове. Само маскирање остаје укључено (тврдо правило #20): ништа овде не мења подразумевану заставицу функције.
+Пошто се формати само цифара сукобљавају са бројевима наруџбине, бројевима израде и временским ознакама, најслабијима (`za_vat`, `za_tax_ref`) је потребна кључна реч, а голи десетоцифрени `0..` број се не третира као јужноафрички телефонски број. Размак IBANs (`GB29 NWBK ...`) се не подудара. На путањи за стриминг, знак се тражи само унутар тренутног дела. ИД-ови се налазе испред генеричких образаца телефона, тако да валидирани идентификатор задржава сопствени чувар места (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` и `popia` шаблони бирају EU и јужноафричке ИД-ове. Само маскирање остаје укључено (тврдо правило #20): ништа овде не мења подразумевану заставицу функције.
 
-### Промпт Ињецтион (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Открива супротстављене структуре у садржају који достављају корисници и спроводи конфигурисану политику. Понашање је вођено променљивим окружења и опцијама конструктора:
+Detektuje zlonamerne strukture u sadržaju koji dostavlja korisnik i primenjuje
+konfigurisanu politiku. Ponašanjem upravljaju promenljive okruženja i opcije
+konstruktora:
 
-| Подешавање | Енв вар                                                                                               | Подразумевано | Ефекат                                                                                                                                                                                                 |
-| ---------- | ----------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Омогућено  | `INPUT_SANITIZER_ENABLED`                                                                             | `true`        | Када `false`, заштитна ограда има кратки спој.                                                                                                                                                         |
-| Моде       | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`        | Политика убризгавања: `block`, `warn` или `log`. (`redact` је прихваћен за бацк-цомпат, али прихвата** не** текст за убризгавање траке; Захтев за преписивање PII контролише `PII_REDACTION_ENABLED`.) |
-| Праг блока | `blockThreshold` опција / `INPUT_SANITIZER_BLOCK_THRESHOLD` (алиас `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`        | Минимална озбиљност потребна за блокирање. Медиум је подразумевано само за посматрање.                                                                                                                 |
+| Podešavanje     | Promenljiva okruženja                                                                                 | Podrazumevano | Efekat                                                                                                                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Uključeno       | `INPUT_SANITIZER_ENABLED`                                                                             | `true`        | Kada je `false`, guardrail se odmah preskače.                                                                                                                                                           |
+| Režim           | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`        | Politika za injection: `block`, `warn` ili `log`. (`redact` se prihvata radi kompatibilnosti unazad, ali **ne** uklanja injection tekst; prepisivanjem PII u zahtevu upravlja `PII_REDACTION_ENABLED`.) |
+| Prag blokiranja | opcija `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`        | Minimalna ozbiljnost potrebna za blokiranje. Srednja je podrazumevano samo za posmatranje.                                                                                                              |
 
-**Приоритет режима** (`getMode`): позивалац `options.mode` → `INJECTION_GUARD_MODE`**DB функција-заставица надјачавање** (Контролна табла → Сеттингс → Феатуре Флагс) → `INJECTION_GUARD_MODE` енв → `INPUT_SANITIZER_MODE` енв → `warn`. Према томе, надјачавање контролне табле побеђује над енв варс-има, тако да заставице функција UI контролишу радну заштиту уживо (без поновног покретања). Читање DB је безбедно: ако дође до грешке, заштита се враћа на понашање засновано на енв-у, а када није постављено заобилажење, понашање је идентично резолуцији само за енв.
+**Prioritet režima** (`getMode`): `options.mode` pozivaoca →
+**zamena `INJECTION_GUARD_MODE` kroz DB feature-flag** (Kontrolna tabla →
+Podešavanja → Feature Flags) → env `INJECTION_GUARD_MODE` → env
+`INPUT_SANITIZER_MODE` → `warn`. Zamena sa kontrolne table zato ima prednost
+nad promenljivama okruženja, pa UI za Feature Flags uživo kontroliše aktivni
+guard (bez ponovnog pokretanja). Čitanje iz baze podataka je otporno na greške
+(fail-safe): ako dođe do greške, guard se vraća na ponašanje zasnovano na
+okruženju, a kada zamena nije podešena, ponašanje je identično razrešavanju
+isključivo preko okruženja.
 
-Извори откривања:
+Izvori detekcije:
 
-1. `sanitizeRequest()` из `@/shared/utils/inputSanitizer` (дељени скуп детектора који се користи негде другде у цевоводу).
-2. Уграђени `DEFAULT_GUARD_PATTERNS` (тренутно `system_override_inline` и `markdown_system_block`, оба `high` озбиљност).
-3. Опциони `customPatterns` прослеђен преко опција конструктора (стрингови, регуларни изрази или `{ name, pattern, severity }` записи).
+1. `sanitizeRequest()` iz `@/shared/utils/inputSanitizer` (zajednički skup
+   detektora koji se koristi i na drugim mestima u pipeline-u).
+2. Ugrađeni `DEFAULT_GUARD_PATTERNS` (trenutno `system_override_inline` i
+   `markdown_system_block`, oba ozbiljnosti `high`).
+3. Opcioni `customPatterns` prosleđeni kroz opcije konstruktora (stringovi,
+   regex ili zapisi `{ name, pattern, severity }`).
 
-Када `mode === "block"`** и** најмање једна детекција достиже праг озбиљности, `preCall` враћа `{ block: true, message: "Request rejected: suspicious content detected" }`. У `warn`/`log` режимима, заштитна ограда се евидентира, али дозвољава позив. Заједнички помоћник `evaluatePromptInjection()` се такође извози за позиваоце који треба да процене упите без проласка кроз регистар.
+Kada je `mode === "block"` **i** bar jedna detekcija ispunjava prag
+ozbiljnosti, `preCall` vraća `{ block: true, message: "Request rejected:
+suspicious content detected" }`. U režimima `warn`/`log` guardrail beleži,
+ali dozvoljava poziv. Deljeni pomoćnik `evaluatePromptInjection()` je takođe
+izvezen za pozivaoce kojima je potrebno da procene promptove bez prolaska kroz
+registar.
 
-**Веза за скенирање (в3.8.20):** детектор само прегледа** првих 16 KB** спојеног текста промпта — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 бајтова) у `src/shared/utils/inputSanitizer.ts`. И `detectInjection()` и `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` пре покретања петље шаблона. Директиве за убризгавање се налазе близу врха улаза, тако да ово ограничава регек CPU/GC на више стотина КБ корисних оптерећења без слабљења детекције (уп. #3932, #4041).
+**Granica skeniranja (v3.8.20):** detektor ispituje samo **prvih 16 KB**
+spojenog teksta prompta — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bajta)
+u `src/shared/utils/inputSanitizer.ts`. I `detectInjection()` i
+`evaluatePromptInjection()` primenjuju `slice(0, MAX_INJECTION_SCAN_BYTES)` pre
+pokretanja petlje obrazaca. Direktive za ubacivanje nalaze se blizu vrha ulaza,
+pa ovo ograničava CPU/GC potrošnju regex-a na payload-ovima od nekoliko stotina
+KB bez slabljenja detekcije (v. #3932, #4041).
 
-### Маскара акредитива (`credentialMasker.ts`)
+### Maskiranje kredencijala (`credentialMasker.ts`)
 
-Ради даље** обоје** фазе, последње у подразумеваном ланцу (приоритет `95`). Редигује добро познате обрасце АПИ-кључа/тајних токена из одлазног корисног оптерећења (садржај поруке, аргументи позивања алата, резултати алата)** и** одговор провајдера, тако да акредитив уметнут у промпт (или одјекнут резултатом алата) не процури до упстреам провајдера или назад до клијента.
+Izvršava se u **obe** faze, poslednji u podrazumevanom lancu (prioritet `95`).
+Maskira dobro poznate obrasce API ključeva / tajnih tokena u odlaznom payload-u
+(sadržaj poruka, argumenti poziva alata, rezultati alata) **i** u odgovoru
+provajdera, tako da kredencijal nalepljen u prompt (ili vraćen kroz rezultat
+alata) ne procure do upstream provajdera niti nazad ka klijentu.
 
-- **Само се укључите** , иста конвенција као PII редакција (тврдо правило #20-адјацент): онемогућено осим ако `settings.credentialRedactionEnabled === true`** или** `CREDENTIAL_REDACTION_ENABLED=true`. Када је искључена, заштитна ограда је неопходна — коју никада не блокира и никада не преписује.
-- `redactCredentials()` хода по целом payload/response стаблу (`walkValue()`, прототип-безбедно од загађења, безбедно за циклус преко `WeakSet`) и замењује подударања са `[REDACTED:<type>]` чуваром места, клонирајући само гране које су се заиста промениле.
-- `CREDENTIAL_PATTERNS` покрива кључеве LLM провајдера (OpenAI, ОпенАИ-прој, Anthropic, Google, Хуггинг Фаце, Реплицате), VCS/SaaS токене (GitHub, Slack, Линеар, Notion, нпм, Постман, Discord), кључеве плаћања (Стрипе, Скуаре), кључеве за приступ AWS (зкли, SendGrid) приватни кључеви / JWTs, низови везе који носе акредитиве (`mongodb://user:pass@...`, итд.) и генерички образац `Authorization`/`x-api-key`/`api-key`/`apikey` заглавља-вредности. Кључеви у облику заглавља (`authorization`, `x-api-key`, `api-key`, `apikey`) се редигују структурно (само вредност, префикс шеме као што је `Bearer `/`Basic ` је сачуван), а не путем генеричког редовног израза текста.
-- Заштитна ограда никада не блокира; само преписује (`modifiedPayload` / `modifiedResponse`) и коментарише (`meta.credentialsRedacted`, `meta.count`).
+- **Samo opt-in**, ista konvencija kao za maskiranje PII podataka (srodno sa
+  Hard Rule #20): onemogućeno je osim ako `settings.credentialRedactionEnabled
+=== true` **ili** `CREDENTIAL_REDACTION_ENABLED=true`. Kada je isključeno,
+  guardrail je no-op — nikada ne blokira i nikada ne prepisuje.
+- `redactCredentials()` prolazi kroz celo stablo payload-a/odgovora
+  (`walkValue()`, otporno na zagađenje prototipa, bezbedno od ciklusa putem
+  `WeakSet`) i zamenjuje poklapanja placeholder-om `[REDACTED:<type>]`,
+  klonirajući samo grane koje su se stvarno promenile.
+- `CREDENTIAL_PATTERNS` pokriva ključeve LLM provajdera (OpenAI, OpenAI-proj,
+  Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokene (GitHub, Slack,
+  Linear, Notion, npm, Postman, Discord), ključeve za plaćanja (Stripe,
+  Square), cloud ključeve (AWS pristupni ključ, Twilio, SendGrid, Mailgun),
+  privatne ključeve / JWT-ove, stringove za konekciju koji nose kredencijale
+  (`mongodb://user:pass@...`, itd.) i generički obrazac vrednosti zaglavlja
+  `Authorization`/`x-api-key`/`api-key`/`apikey`. Ključevi u obliku zaglavlja
+  (`authorization`, `x-api-key`, `api-key`, `apikey`) maskiraju se strukturalno
+  (samo vrednost, uz očuvan prefiks šeme poput `Bearer `/`Basic `), a ne putem
+  generičkog tekstualnog regex-a.
+- Guardrail nikada ne blokira; samo prepisuje (`modifiedPayload` /
+  `modifiedResponse`) i dodaje anotacije (`meta.credentialsRedacted`,
+  `meta.count`).
 
-Регресиони чувар: `tests/unit/credential-masker-guardrail.test.ts`.
+Regresiona zaštita: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Osnovni ugovor (`base.ts`)
 

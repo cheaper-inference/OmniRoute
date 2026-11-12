@@ -44,7 +44,7 @@ Un flag boolean este considerat **activat** atunci când valoarea sa efectivă e
 
 ## Catalog Flag
 
-120 de steaguri din 6 categorii.** Implicit** este definiția implicită — valoarea utilizată atunci când nu este prezentă nici o modificare DB, nici o variabilă de mediu.
+121 de steaguri din 6 categorii.** Implicit** este definiția implicită — valoarea utilizată atunci când nu este prezentă nici o modificare DB, nici o variabilă de mediu.
 
 ### Securitate (11)
 
@@ -115,7 +115,7 @@ Un flag boolean este considerat **activat** atunci când valoarea sa efectivă e
 
 Când `UNPRICED_USAGE_BUDGET_POLICY` este configurat în mod explicit (DB suprascrie înainte de mediu), are prioritate față de `USAGE_LIMIT_IGNORE_UNPRICED`. Fără o valoare de enumerare explicită, renunțarea booleană din amonte selectează `count_as_zero`; în caz contrar, valoarea implicită este `fail_closed`. Valorile de enumerare nevalide și stocarea de semnalizare a caracteristicilor care nu poate fi citită nu s-au închis. Nici renunțarea nu relaxează cheltuielile cu prețuri sau o căutare eșuată a prețurilor. Aplicarea și raportul administratorului rezolvă aceeași politică eficientă.
 
-### Timp de rulare (57)
+### Timp de rulare (58)
 
 | Cheie                                          | Tip       | Implicit | Repornire | Descriere                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------- | --------- | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Când `UNPRICED_USAGE_BUDGET_POLICY` este configurat în mod explicit (DB supras
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean   | `false`  |           | Nu mai oferiți și redirecționați efortul de raționament `max` pentru Cursor Grok 4.7 (#17386): lista de documente a lui Cursor numai low/medium/high/xhigh, astfel încât alias-ul de rezervă `grok-4.7-max` dispare din catalog și o solicitare de efort `max` este trimisă fără un parametru de efort. Dezactivat în mod implicit: `max` rămâne oferit și redirecționat, deoarece o sondă AgentService/Run live l-a acceptat.                                                                                                                                                                                                                                                                                                                                   |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean   | `false`  |           | Trimiteți răspunsuri păstrează ca o linie goală în loc de un eveniment response.in_progress, astfel încât un instantaneu sintetic nu poate înlocui niciodată răspunsul real în SDK oficial. O linie goală nu trimite niciun eveniment SSE, astfel încât un watchdog client care se resetează numai pe evenimente nu ar fi resetat în timpul unei faze lungi de silențioasă. Dezactivat în mod implicit: temporizatoarele trimit evenimentul response.in_progress valid-spec.                                                                                                                                                                                                                                                                                     |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean   | `false`  |           | În statisticile cache-ului de compresie, numărați o solicitare comprimată către un furnizor de stocare în cache automată a prefixelor (OpenAI, Codex, Azure sau o conexiune personalizată care declară memorarea promptă în cache cu eliminarea marcatorilor) ca o atingere estimată a cache-ului chiar și fără marcatori `cache_control` (#17114). Estimarea este un semnal de eligibilitate pentru cache, nu o lovitură observată, astfel încât rata de accesare raportată pentru acei furnizori este de 100%. Dezactivat în mod prestabilit: doar o solicitare care transportă marcatori `cache_control` către un furnizor de stocare în cache este considerată o atingere estimată, astfel încât furnizorii de prefix automat raportează în continuare 0.    |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean   | `false`  |           | Permite unei căutări web automate fără un `provider` explicit să folosească un cont Codex (ChatGPT) conectat prin `codex-search`: ca ultimă opțiune înaintea furnizorilor fără cheie când niciun furnizor cu acreditări nu poate fi utilizat și ca alternativă în caz de eroare (#17933). Fiecare căutare consumă cota abonamentului și durează aproximativ 10–40 s. Dezactivat implicit: `codex-search` se execută doar când cererea îl indică explicit.                                                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Returnează fiecare semnalizare cu valoarea efectivă, sursa și un rezumat.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

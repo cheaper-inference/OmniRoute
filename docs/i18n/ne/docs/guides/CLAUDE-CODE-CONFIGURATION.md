@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # OmniRoute मार्फत glm/glm-5.2 प
 
 ---
 
-## Claude कोड गेटवेमा कसरी जडान हुन्छ
+## Claude Code गेटवेसँग कसरी जडान हुन्छ
 
-Claude कोडले कुरा गर्छ**Anthropic सन्देशहरू API** र वातावरण चरको साथ अनुकूलन अन्त्य बिन्दुमा देखाइएको छ (यसमा कुनै `--base-url` झण्डा छैन):
+Claude Code ले **Anthropic Messages API** सँग सञ्चार गर्छ र वातावरणीय चलहरूद्वारा
+अनुकूलन गरिएको एन्डपोइन्टतर्फ निर्देशित हुन्छ (यसमा `--base-url` फ्ल्याग छैन):
 
-| चर                                           | उद्देश्य                                                                                               |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | गेटवे रूट URL (Claude कोड `/v1/messages` जोडिन्छ)।** कुनै `/v1` प्रत्यय छैन।**                         |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — को रूपमा पठाइयो तपाईंको OmniRoute पहुँच टोकन / API कुञ्जी प्रयोग गर्नुहोस् |
-| `ANTHROPIC_API_KEY`                          | वैकल्पिक: `x-api-key` को रूपमा पठाइयो। दुवै सेट भएमा, `ANTHROPIC_AUTH_TOKEN` ले जित्छ                  |
-| `ANTHROPIC_MODEL`                            | एक विशेष मोडेल बल ( `/model` पिकर पूर्वनिर्धारित ओभरराइड)                                              |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → नेटिभ `/model` पिकरले `/v1/models` बाट `claude*`/`anthropic*` मोडेलहरू सूचीबद्ध गर्दछ            |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | प्रति प्रतिक्रिया क्याप आउटपुट टोकनहरू (जस्तै `65536`)                                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | स्वत: संकुचनको लागि टोकन थ्रेसहोल्ड                                                                    |
+| चल                                           | उद्देश्य                                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | गेटवेको मूल URL (Claude Code ले `/v1/messages` थप्छ)। **`/v1` प्रत्यय नराख्नुहोस्।**                  |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` का रूपमा पठाइन्छ — आफ्नो OmniRoute पहुँच टोकन / API कुञ्जी प्रयोग गर्नुहोस् |
+| `ANTHROPIC_API_KEY`                          | वैकल्पिक: `x-api-key` का रूपमा पठाइन्छ। दुवै सेट भएमा `ANTHROPIC_AUTH_TOKEN` ले प्राथमिकता पाउँछ      |
+| `ANTHROPIC_MODEL`                            | कुनै निश्चित मोडेल प्रयोग गर्न बाध्य पार्छ (`/model` चयनकर्ताको पूर्वनिर्धारित मानलाई ओभरराइड गर्छ)   |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → मूल `/model` चयनकर्ताले `/v1/models` बाट `claude*`/`anthropic*` मोडेलहरू सूचीबद्ध गर्छ          |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | प्रत्येक प्रतिक्रियाका आउटपुट टोकन सीमित गर्छ (जस्तै `65536`)                                         |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | स्वतः-सङ्कुचनका लागि टोकन सीमा                                                                        |
 
-> Env vars पढिन्छ** एक पटक स्टार्टअपमा** — तिनीहरूलाई परिवर्तन गरेपछि Claude कोड पुन: सुरु गर्नुहोस्।
+> वातावरणीय चलहरू **सुरु हुँदा एक पटक मात्र** पढिन्छन् — तिनलाई परिवर्तन गरेपछि Claude Code पुनः सुरु गर्नुहोस्।
 
-निश्चित स्ट्रिङको सट्टा घुम्ने प्रमाणका लागि, `~/.claude/settings.json` मा `apiKeyHelper` कमाण्डमा सेट गर्नुहोस् जसले हालको प्रमाणलाई stdout मा छाप्छ। Claude कोडले पूर्वनिर्धारित रूपमा पाँच मिनेटको लागि यसको आउटपुट क्यास गर्छ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ले ओभरराइड गर्छ) र `Authorization: Bearer` र `x-api-key` दुवैमा मान पठाउँछ। स्क्रिप्टले प्रमाण छाप्नु पर्छ र यसको साथमा — ब्यानरले v2.1.227 + मा सहायकलाई असफल पार्छ।
+स्थिर string को सट्टा नियमित फेरिने credential प्रयोग गर्न, `~/.claude/settings.json` मा `apiKeyHelper` लाई हालको credential stdout मा छाप्ने command मा सेट गर्नुहोस्। Claude Code ले पूर्वनिर्धारित रूपमा यसको output पाँच मिनेट cache मा राख्छ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ले त्यो अवधि बदल्छ) र मानलाई `Authorization: Bearer` तथा `x-api-key` दुवैमा पठाउँछ। Script ले credential मात्र छाप्नुपर्छ: सँगै banner छाप्दा v2.1.227+ मा helper विफल हुन्छ।
 
-Entra ID SSO यसरी काम गर्छ: `scripts/cli/omniroute-sso.mjs token` छोटो अवधिको Entra पहुँच टोकन छाप्छ जुन API कुञ्जीको सट्टा OmniRoute प्रमाणित गर्छ। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) हेर्नुहोस्।
+Entra ID SSO यसरी काम गर्छ: `scripts/cli/omniroute-sso.mjs token` ले छोटो समय मान्य हुने Entra access token छाप्छ, जसलाई OmniRoute ले API key को सट्टा प्रमाणित गर्छ। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) हेर्नुहोस्।
 
-`omniroute launch` यी सबै तपाइँको लागि सेट गर्दछ: यसले सक्रिय सन्दर्भबाट आधार URL + टोकन समाधान गर्दछ (त्यसैले `omniroute connect <vps>` त्यसपछि `omniroute launch` मात्र काम गर्दछ), सर्भरको स्वास्थ्य जाँच गर्दछ, र `claude` कार्यान्वयन गर्दछ।
+`omniroute launch` ले यी सबै तपाईंका लागि सेट गर्छ: यसले सक्रिय सन्दर्भबाट आधार URL + टोकन
+निर्धारण गर्छ (त्यसैले `omniroute connect <vps>` पछि `omniroute launch`
+सीधै काम गर्छ), सर्भरको स्वास्थ्य जाँच गर्छ, र `claude` कार्यान्वयन गर्छ।
+
+---
+
+## उपयोग विशेषता: सत्र र परियोजनाहरू
+
+OmniRoute प्रत्येक API कुञ्जीका अनुरोधहरूलाई समूहबद्ध गर्दछ **एजेन्ट सत्रहरू** र रेकर्ड गर्दछ जुन **परियोजना** प्रत्येक सत्र (`agent_sessions` तालिका) मा काम गरियो, त्यसैले उपयोग र लागत प्रति टोली सदस्य, प्रति परियोजना र प्रति सत्र रिपोर्ट गर्न सकिन्छ।
+
+कुनै ग्राहक सेटअप बिना के रेकर्ड गरिएको छ:
+
+| क्षेत्र  | स्रोत                                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| सत्र     | `x-claude-code-session-id` हेडर ( `metadata.user_id.session_id` को समान मान), प्रति सत्र स्थिर                                                          |
+| परियोजना | `Primary working directory:` लाइन Claude कोड आफ्नो वातावरण सन्देश पठाउँछ; `.claude/worktrees/` अन्तर्गत worktree फोल्डरहरूले भण्डारको नाममा समाधान गर्छ |
+| शाखा     | Git स्थितिबाट `Current branch:` Claude कोडले पहिलो सन्देश पठाउँछ                                                                                        |
+| ग्राहक   | `user-agent` (`claude-cli/<version>`)                                                                                                                   |
+
+Codex (`<environment_context><cwd>`) र OpenCode (`x-opencode-session`) लाई उस्तै तरिकाले मान्यता दिइन्छ। साथ कुञ्जीहरू**कुनै लग** सत्र आईडी र हेडर-सप्लाई गरिएको परियोजना क्षेत्रहरू मात्र राख्न सक्षम गर्नुहोस्; प्रम्प्ट (मार्ग, शाखा) बाट पढिएको केहि पनि भण्डार गरिएको छैन।
+
+### परियोजनाको स्पष्ट नामकरण (सिफारिस गरिएको)
+
+काम गर्ने डाइरेक्टरी मेशिनहरू बीच फरक हुन्छ, त्यसैले एउटै रिपोजिटरी फरक मार्गहरू अन्तर्गत देखिन सक्छ। यसको सट्टामा स्पष्ट रूपमा परियोजना पठाउनुहोस्: Claude कोडले `ANTHROPIC_CUSTOM_HEADERS` मा सूचीबद्ध कुनै पनि हेडरहरू प्रत्येक मोडेल अनुरोधमा थप्छ, र OmniRoute ती मध्ये दुई पढ्छ:
+
+| हेडर                       | मूल्य                                                        |
+| -------------------------- | ------------------------------------------------------------ |
+| `x-omniroute-project`      | परियोजनाको नाम, जस्तै `omniroute`                            |
+| `x-omniroute-project-repo` | सामान्यीकृत रिमोट, जस्तै `github.com/diegosouzapw/OmniRoute` |
+
+दुबै एट्रिब्युसनको लागि मात्र पढिन्छ; तिनीहरू कहिल्यै अपस्ट्रीम प्रदायकलाई फर्वार्ड गर्दैनन्।
+
+`ANTHROPIC_CUSTOM_HEADERS` स्टार्टअपमा एक पटक पढिन्छ, र सेटिङ फाइलहरूले शाब्दिक मानहरू भण्डारण गर्दछ, त्यसैले Claude कोड सुरु हुँदा यसलाई गणना गर्नुहोस्। यसलाई `~/.zshrc` वा `~/.bashrc` मा थप्नुहोस् र परियोजना फोल्डरबाट `claude` सुरु गरिरहनुहोस्:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` अभिव्यक्तिले टाढाको URL मा इम्बेड गरिएका कुनै पनि प्रमाणहरू स्ट्रिप गर्दछ। IDE एक्सटेन्सनहरूले Claude कोड तपाईंको शेल बिना सुरु गर्दछ, त्यसैले तिनीहरूको सत्रहरू काम गर्ने डाइरेक्टरीमा फर्किन्छन्।
 
 ---
 

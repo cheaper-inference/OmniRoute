@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo, useRef, useState } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Customized, DefaultTooltipContent, Line, LineChart as RechartsLineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Customized, DefaultTooltipContent, Line, LineChart as RechartsLineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, usePlotArea } from "recharts";
 import type { ComponentProps, CSSProperties, MutableRefObject, ReactNode } from "react";
 import { chartTheme } from "./chart-theme";
 import { cn } from "./lib/utils";
@@ -51,7 +51,6 @@ const seriesColor = (series: ChartSeries, index: number) => series.color ?? pale
 const tooltipStyle = chartTheme.tooltip.contentStyle;
 
 interface ChartPointZonesProps {
-  offset?: { top: number; left: number; width: number; height: number };
   points: readonly StackedBarDatum[];
   ariaLabel: string;
   rovingId?: string | null;
@@ -65,8 +64,10 @@ interface ChartPointZonesProps {
   onFocused: (id: string | null) => void;
   onTooltip: (point: { index: number; x: number; y: number } | null) => void;
 }
-function ChartPointZones({ offset, points, ariaLabel, rovingId, selectedId, keyboardIndex, tooltipId, zones, selectable, describe, onPointSelect, onFocused, onTooltip }: ChartPointZonesProps) {
-  if (!offset) return null;
+function ChartPointZones({ points, ariaLabel, rovingId, selectedId, keyboardIndex, tooltipId, zones, selectable, describe, onPointSelect, onFocused, onTooltip }: ChartPointZonesProps) {
+  const plotArea = usePlotArea();
+  if (!plotArea) return null;
+  const offset = { top: plotArea.y, left: plotArea.x, width: plotArea.width, height: plotArea.height };
   const slot = offset.width / points.length;
   return <g role="group" aria-label={`${ariaLabel} data points`}>{points.map((datum, index) => <rect key={datum.id} ref={node => { zones.current[index] = node; }}
     className="ci-stacked-chart__zone" data-selected={selectedId === datum.id || undefined}

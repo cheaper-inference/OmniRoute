@@ -3,27 +3,27 @@
 // Catraca de vulnerabilidades de dependências via osv-scanner (Task 7.2 — Fase 7).
 //
 // Saída (stdout):
-//   vulnCount=N         — total de vulnerabilidades encontradas (todos os severities)
+//   vulnCount=N         — applicable findings after exact, reviewed dispositions
+//   rawVulnCount=N      — original scanner count; never hidden
+//   notAffectedCount=N — exact non-applicable artifacts (version + integrity + expiry)
 //   vulnCount=SKIP reason=binary-absent   — osv-scanner não está no PATH
 //
-// Por default é ADVISORY (sai 0 sempre). Passe --ratchet para tornar BLOQUEANTE:
-// lê metrics.vulnCount.value de config/quality/quality-baseline.json, compara a
-// contagem MEDIDA e SAI 1 SE — E SOMENTE SE — a medida for MAIOR que o baseline
-// (regressão real, direction:down). Qualquer SKIP gracioso (binário ausente,
-// osv.dev/rede inacessível, erro de parse) SAI 0 mesmo com --ratchet — uma falha
-// de MEDIÇÃO nunca bloqueia, só uma regressão medida bloqueia.
+// Advisory mode reports findings without blocking. With --ratchet, exit 1 means
+// a measured regression and exit 2 means INCOMPLETE (tool/report/baseline missing).
+// An unavailable measurement never establishes zero vulnerabilities.
 //
 // NB (variância de CVE): osv mede contra um banco de CVEs que cresce de forma
 // contínua. Um PR que NÃO toca dependências pode subitamente medir vulnCount >
 // baseline porque um novo CVE foi divulgado nas deps existentes — isso é o
 // comportamento ESPERADO de um gate de CVE bloqueante, não uma regressão de
 // produto. O remédio é (a) bumpar a dep afetada (preferível) ou, se não houver
-// fix, (b) re-baseline metrics.vulnCount com justificativa + issue de tracking.
+// fix, preserve the blocker. A proven absent vulnerable mechanism can be recorded
+// in vulnerability-dispositions.json with exact artifact identity and a tracking issue.
 // Ver docs/security/SUPPLY_CHAIN.md → "Variância de CVE".
 //
 // Uso:
 //   node scripts/check/check-vuln-ratchet.mjs
-//   node scripts/check/check-vuln-ratchet.mjs --json    # imprime JSON bruto do osv-scanner
+//   node scripts/check/check-vuln-ratchet.mjs --json    # OSV JSON plus explicit disposition assessment
 //   node scripts/check/check-vuln-ratchet.mjs --quiet   # suprime logs de diagnóstico
 //   node scripts/check/check-vuln-ratchet.mjs --ratchet  # falha (exit 1) numa regressão
 
@@ -85,9 +85,10 @@ export function parseOsvJson(osvJson) {
       if (!Array.isArray(pkg.vulnerabilities)) continue;
 
       // Use groups for deduplication when available (same vuln in multiple paths)
-      const pkgCount = Array.isArray(pkg.groups) && pkg.groups.length > 0
-        ? pkg.groups.length
-        : pkg.vulnerabilities.length;
+      const pkgCount =
+        Array.isArray(pkg.groups) && pkg.groups.length > 0
+          ? pkg.groups.length
+          : pkg.vulnerabilities.length;
 
       vulnCount += pkgCount;
 
@@ -100,6 +101,118 @@ export function parseOsvJson(osvJson) {
   }
 
   return { vulnCount, bySeverity };
+}
+
+// Reviewed non-applicability is narrower than ignoring an advisory or a package.
+// Every match is bound to advisory, ecosystem, exact version, lock integrity and expiry.
+export function applyVulnerabilityDispositions(osvJson, policy, lock, now = new Date()) {
+  if (policy?.schemaVersion !== 1 || !Array.isArray(policy.dispositions)) {
+    throw new Error("Invalid vulnerability disposition policy");
+  }
+  const today = now.toISOString().slice(0, 10);
+  const rules = policy.dispositions.map((entry) => {
+    if (
+      entry?.status !== "not_affected" ||
+      entry.justification !== "vulnerable_code_not_present" ||
+      !/^GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}$/.test(entry.advisory || "") ||
+      entry.ecosystem !== "npm" ||
+      !/^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/.test(entry.name || "") ||
+      !/^\d+\.\d+\.\d+$/.test(entry.version || "") ||
+      !/^sha512-[A-Za-z0-9+/]{86}==$/.test(entry.integrity || "") ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(entry.expiresOn || "") ||
+      new Date(`${entry.expiresOn}T00:00:00Z`).toISOString().slice(0, 10) !== entry.expiresOn ||
+      !/^https:\/\/github\.com\/cheaper-inference\/OmniRoute\/issues\/\d+$/.test(
+        entry.trackingIssue || ""
+      ) ||
+      typeof entry.reason !== "string" ||
+      entry.reason.trim().length < 40 ||
+      !Array.isArray(entry.references) ||
+      entry.references.length < 2 ||
+      !entry.references.every((url) => typeof url === "string" && url.startsWith("https://"))
+    ) {
+      throw new Error("Unbounded or undocumented vulnerability disposition");
+    }
+    if (!lock || !lock.packages || typeof lock.packages !== "object") {
+      throw new Error("Lock identity is required for vulnerability dispositions");
+    }
+    const suffix = `node_modules/${entry.name}`;
+    const matches = Object.entries(lock.packages).filter(([location, pkg]) => {
+      const matchesPath = location === suffix || location.endsWith(`/${suffix}`);
+      const matchesName = pkg.name === entry.name || (matchesPath && !pkg.name);
+      return matchesName && pkg.version === entry.version;
+    });
+    return {
+      ...entry,
+      applicable:
+        entry.expiresOn > today &&
+        matches.length > 0 &&
+        matches.every(([, pkg]) => pkg.integrity === entry.integrity),
+    };
+  });
+
+  const rawVulnCount = parseOsvJson(osvJson).vulnCount;
+  const applied = [];
+  const report = {
+    ...osvJson,
+    results: osvJson.results.map((result) => ({
+      ...result,
+      packages: result.packages.map((pkg) => {
+        const removedIds = new Set();
+        const vulnerabilities = pkg.vulnerabilities.filter((vuln) => {
+          const rule = rules.find(
+            (entry) =>
+              entry.applicable &&
+              pkg.package?.ecosystem === entry.ecosystem &&
+              pkg.package.name === entry.name &&
+              pkg.package.version === entry.version &&
+              vuln.id === entry.advisory
+          );
+          if (!rule) return true;
+          for (const id of [vuln.id, ...(vuln.aliases || [])]) removedIds.add(id);
+          applied.push({
+            advisory: rule.advisory,
+            name: rule.name,
+            version: rule.version,
+            trackingIssue: rule.trackingIssue,
+            expiresOn: rule.expiresOn,
+          });
+          return false;
+        });
+        if (!removedIds.size) return pkg;
+        const keptIds = new Set(
+          vulnerabilities.flatMap((vuln) => [vuln.id, ...(vuln.aliases || [])])
+        );
+        const groups = pkg.groups?.filter((group) => {
+          if (!Array.isArray(group.ids) || group.ids.length === 0) {
+            throw new Error("Unknown vulnerability group cannot be adjudicated");
+          }
+          // An unknown ID or a finding still present in a shared group remains blocking.
+          return group.ids.some((id) => keptIds.has(id) || !removedIds.has(id));
+        });
+        return { ...pkg, vulnerabilities, ...(groups ? { groups } : {}) };
+      }),
+    })),
+  };
+  const applicableVulnCount = parseOsvJson(report).vulnCount;
+  if (applicableVulnCount > rawVulnCount) {
+    throw new Error("Inconsistent vulnerability groups cannot be adjudicated");
+  }
+  return { report, rawVulnCount, notAffectedCount: rawVulnCount - applicableVulnCount, applied };
+}
+
+function readVulnerabilityDispositions(osvJson) {
+  const policyPath = path.join(ROOT, "config/quality/vulnerability-dispositions.json");
+  if (!fs.existsSync(policyPath)) {
+    return {
+      report: osvJson,
+      rawVulnCount: parseOsvJson(osvJson).vulnCount,
+      notAffectedCount: 0,
+      applied: [],
+    };
+  }
+  const policy = JSON.parse(fs.readFileSync(policyPath, "utf8"));
+  const lock = JSON.parse(fs.readFileSync(path.join(ROOT, "package-lock.json"), "utf8"));
+  return applyVulnerabilityDispositions(osvJson, policy, lock);
 }
 
 /**
@@ -151,7 +264,7 @@ export function evaluateVulnRatchet(current, baseline) {
 /**
  * Lê metrics.vulnCount.value do quality-baseline.json.
  * Retorna null se o arquivo ou a métrica estiverem ausentes (sem baseline não há
- * ratchet possível — o caller trata como SKIP gracioso, exit 0).
+ * ratchet possível — o caller trata como INCOMPLETE no modo obrigatório).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -165,7 +278,7 @@ export function readBaselineVulnValue(baselinePath = BASELINE_PATH) {
     return null;
   }
   const metric = baselineJson?.metrics?.vulnCount;
-  if (!metric || typeof metric.value !== "number") return null;
+  if (!metric || !Number.isSafeInteger(metric.value) || metric.value < 0) return null;
   return metric.value;
 }
 
@@ -215,19 +328,15 @@ export function findOsvScanner() {
  * Executa o osv-scanner sobre o lockfile/diretório.
  * Usa execFileSync sem shell interpolation (Hard Rule #13).
  *
- * Em uma falha de MEDIÇÃO (osv-scanner não produziu JSON — rede/osv.dev
- * inacessível, timeout, JSON inválido) retorna { skip: true, reason } em vez de
- * abortar o processo: o caller traduz isso num SKIP gracioso (exit 0 mesmo com
- * --ratchet). Uma falha de medição NUNCA bloqueia; só uma regressão MEDIDA bloqueia.
+ * Falhas de execução ou formato retornam { skip: true, reason }; o modo obrigatório
+ * as reporta como INCOMPLETE. Exit 1 do scanner é um resultado com findings;
+ * 127/128 e sinais não são medições. Ver https://google.github.io/osv-scanner/output/.
  *
  * @param {string} osvBin - Caminho para o binário osv-scanner
  * @returns {{ json: object } | { skip: true, reason: string }}
  */
 function runOsvScanner(osvBin) {
-  const args = [
-    "--format", "json",
-    "--lockfile", path.join(ROOT, "package-lock.json"),
-  ];
+  const args = ["--format", "json", "--lockfile", path.join(ROOT, "package-lock.json")];
 
   if (!QUIET) {
     process.stderr.write("[vuln-ratchet] Rodando osv-scanner --format json ...\n");
@@ -245,16 +354,33 @@ function runOsvScanner(osvBin) {
     // osv-scanner sai com código != 0 quando encontra vulnerabilidades;
     // o JSON ainda vai no stdout.
     stdout = err.stdout ? String(err.stdout) : "";
-    if (!stdout.trim()) {
+    if (err.status !== 1 || err.signal || err.killed || !stdout.trim()) {
       process.stderr.write(`[vuln-ratchet] ERRO ao executar osv-scanner: ${err.message}\n`);
       return { skip: true, reason: "osv-error" };
     }
   }
 
   try {
-    return { json: JSON.parse(stdout) };
+    const json = JSON.parse(stdout);
+    if (
+      !Array.isArray(json?.results) ||
+      json.results.some(
+        (result) =>
+          !Array.isArray(result?.packages) ||
+          result.packages.some(
+            (pkg) =>
+              !Array.isArray(pkg?.vulnerabilities) ||
+              pkg.vulnerabilities.some((vuln) => !vuln || typeof vuln.id !== "string" || !vuln.id)
+          )
+      )
+    ) {
+      return { skip: true, reason: "invalid-report" };
+    }
+    return { json };
   } catch (parseErr) {
-    process.stderr.write(`[vuln-ratchet] ERRO ao parsear JSON do osv-scanner: ${parseErr.message}\n`);
+    process.stderr.write(
+      `[vuln-ratchet] ERRO ao parsear JSON do osv-scanner: ${parseErr.message}\n`
+    );
     process.stderr.write(`[vuln-ratchet] stdout (primeiros 500 chars): ${stdout.slice(0, 500)}\n`);
     return { skip: true, reason: "parse-error" };
   }
@@ -264,56 +390,60 @@ function runOsvScanner(osvBin) {
 // Main
 // ---------------------------------------------------------------------------
 
+function incomplete(reason) {
+  console.log(`vulnCount=${RATCHET ? "INCOMPLETE" : "SKIP"} reason=${reason}`);
+  process.exitCode = RATCHET ? 2 : 0;
+}
+
 function main() {
   const osvBin = findOsvScanner();
 
   if (!osvBin) {
-    // Skip gracioso: binário ausente — esperado em ambientes sem osv-scanner instalado.
-    // SKIP sai 0 MESMO com --ratchet (binário ausente nunca bloqueia).
-    console.log("vulnCount=SKIP reason=binary-absent");
-    if (!QUIET) {
-      process.stderr.write(
-        "[vuln-ratchet] SKIP — osv-scanner não encontrado no PATH.\n" +
-        "[vuln-ratchet] Instale via: https://google.github.io/osv-scanner/\n" +
-        "[vuln-ratchet] SKIP gracioso — sai 0 mesmo com --ratchet (binário ausente nunca bloqueia).\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete("binary-absent");
+    if (!QUIET)
+      process.stderr.write("[vuln-ratchet] Install osv-scanner to complete this measurement.\n");
     return;
   }
 
   const osvResult = runOsvScanner(osvBin);
-
-  // Falha de MEDIÇÃO (rede/osv.dev inacessível, timeout, JSON inválido) → SKIP
-  // gracioso, sai 0 mesmo com --ratchet (uma falha de medição nunca bloqueia).
   if (osvResult.skip) {
-    console.log(`vulnCount=SKIP reason=${osvResult.reason}`);
-    if (!QUIET) {
-      process.stderr.write(
-        `[vuln-ratchet] SKIP — osv-scanner não produziu uma medição (${osvResult.reason}).\n` +
-        "[vuln-ratchet] SKIP gracioso — sai 0 mesmo com --ratchet (falha de medição nunca bloqueia).\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete(osvResult.reason);
     return;
   }
 
   const osvJson = osvResult.json;
-
-  if (PRINT_JSON) {
-    process.stdout.write(JSON.stringify(osvJson, null, 2) + "\n");
+  let assessment;
+  try {
+    assessment = readVulnerabilityDispositions(osvJson);
+  } catch {
+    incomplete("disposition-unresolved");
     return;
   }
-
-  const { vulnCount, bySeverity } = parseOsvJson(osvJson);
+  const { vulnCount, bySeverity } = parseOsvJson(assessment.report);
+  const dispositionMetadata = {
+    rawVulnCount: assessment.rawVulnCount,
+    notAffectedCount: assessment.notAffectedCount,
+    applicableVulnCount: vulnCount,
+    dispositions: assessment.applied,
+  };
+  if (PRINT_JSON) {
+    process.stdout.write(
+      JSON.stringify({ ...osvJson, omnirouteAssessment: dispositionMetadata }, null, 2) + "\n"
+    );
+    applyRatchet(vulnCount);
+    return;
+  }
+  console.log(`rawVulnCount=${assessment.rawVulnCount}`);
+  console.log(`notAffectedCount=${assessment.notAffectedCount}`);
 
   // Emitir em formato KEY=VALUE para o coletor de métricas (collect-metrics.mjs)
   console.log(`vulnCount=${vulnCount}`);
 
   if (!QUIET) {
-    const severitySummary = Object.entries(bySeverity)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(", ") || "nenhuma";
+    const severitySummary =
+      Object.entries(bySeverity)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(", ") || "nenhuma";
     process.stderr.write(
       `[vuln-ratchet] Total de vulnerabilidades: ${vulnCount} (${severitySummary})\n`
     );
@@ -326,7 +456,7 @@ function main() {
 /**
  * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
  * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → SKIP gracioso (exit 0).
+ * (medida > baseline). Baseline ausente → INCOMPLETE (exit 2).
  *
  * @param {number} vulnCount - Contagem MEDIDA (medição bem-sucedida).
  */
@@ -343,12 +473,7 @@ function applyRatchet(vulnCount) {
 
   const baselineValue = readBaselineVulnValue(BASELINE_PATH);
   if (baselineValue === null) {
-    if (!QUIET) {
-      process.stderr.write(
-        "[vuln-ratchet] baseline ausente (metrics.vulnCount) — SKIP gracioso, sai 0.\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete("baseline-unresolved");
     return;
   }
 
@@ -356,9 +481,9 @@ function applyRatchet(vulnCount) {
   if (regressed) {
     process.stderr.write(
       `[vuln-ratchet] REGRESSÃO — ${vulnCount} vulnerabilidades > baseline ${baselineValue}\n` +
-        "  → Bumpe a(s) dep(s) afetada(s) (preferível). Se não houver fix, re-baseline\n" +
-        "    metrics.vulnCount em config/quality/quality-baseline.json com justificativa\n" +
-        "    + issue de tracking. Ver docs/security/SUPPLY_CHAIN.md → 'Variância de CVE'.\n"
+        "  → Atualize as dependências afetadas e preserve o bloqueio enquanto faltarem correções.\n" +
+        "    Uma não aplicabilidade comprovada exige identidade exata, evidência e expiração\n" +
+        "    em config/quality/vulnerability-dispositions.json; não eleve o baseline.\n"
     );
     process.exitCode = 1;
     return;

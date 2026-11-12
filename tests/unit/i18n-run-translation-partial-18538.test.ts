@@ -25,6 +25,17 @@ const runner = await import("../../scripts/i18n/run-translation.mjs");
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const LOCALES = ["de", "fr", "ja"];
+const driftReport = () => ({
+  ok: true,
+  checkedSources: 3,
+  checkedTargets: 9,
+  driftedSources: [],
+  missingTargets: [],
+  driftedTargets: [],
+  staleTargets: [],
+  inconsistentSectionCaches: [],
+});
+
 const sha = (text: string) => crypto.createHash("sha256").update(text).digest("hex");
 
 const OLD_A = "# Alpha\n\nIntro.\n\n## Setup\n\nOld setup text.\n";
@@ -213,6 +224,7 @@ test("blockingDrift excuses only the failed units and never an unreadable report
   ];
   const translated = [{ rel: "docs/A.md", locale: "de" }];
   const report = {
+    ...driftReport(),
     ok: false,
     driftedSources: [{ rel: "docs/A.md" }, { rel: "docs/B.md" }, { rel: "docs/C.md" }],
     missingTargets: [{ rel: "docs/B.md", locale: "de" }],
@@ -232,13 +244,7 @@ test("blockingDrift excuses only the failed units and never an unreadable report
     "driftedSources docs/C.md",
     "driftedTargets docs/A.md ja",
   ]);
-  assert.deepEqual(
-    runner.blockingDrift(
-      { ok: true, driftedSources: [], missingTargets: [], driftedTargets: [] },
-      []
-    ),
-    []
-  );
+  assert.deepEqual(runner.blockingDrift(driftReport(), []), []);
   assert.equal(runner.blockingDrift({ ok: false, reason: "missing-state" }, failures).length, 1);
 });
 
@@ -343,6 +349,7 @@ test("blockingDrift: a locale that was never tried still blocks even when its so
     { rel: "docs/B.md", locale: "fr" },
   ];
   const report = {
+    ...driftReport(),
     ok: false,
     driftedSources: [{ rel: "docs/B.md" }],
     missingTargets: [
@@ -360,4 +367,114 @@ test("blockingDrift: a locale that was never tried still blocks even when its so
       `${x.kind} ${x.rel} ${x.locale ?? ""}`.trim()
     );
   assert.deepEqual(left, ["missingTargets docs/B.md ja", "driftedTargets docs/B.md ko"]);
+});
+
+for (const kind of ["staleTargets", "inconsistentSectionCaches"]) {
+  test(`partial refresh: ${kind} is excused only for the exact failed unit`, () => {
+    const failed = { rel: "docs/A.md", locale: "fr" };
+    const untouched = { rel: "docs/A.md", locale: "ja" };
+    const report = { ...driftReport(), ok: false, [kind]: [failed, untouched] };
+    assert.deepEqual(runner.blockingDrift(report, [failed]), [{ ...untouched, kind }]);
+    assert.equal(runner.blockingDrift(report, []).length, 2);
+  });
+}
+
+test("partial refresh refuses incomplete, contradictory and unknown checker schemas", () => {
+  const missing = { ...driftReport() } as Record<string, unknown>;
+  delete missing.staleTargets;
+  for (const report of [
+    missing,
+    { ...driftReport(), checkedSources: 0 },
+    { ...driftReport(), checkedTargets: -1 },
+    { ...driftReport(), ok: false },
+    { ...driftReport(), futureBucket: [] },
+    { ...driftReport(), staleTargets: [{ rel: "../outside.md", locale: "fr" }] },
+    { ...driftReport(), inconsistentSectionCaches: [{ rel: "docs/A.md" }] },
+  ]) {
+    assert.equal(runner.blockingDrift(report, []).length, 1);
+  }
+});
+
+test("partial refresh refuses duplicated, overlapping or unsafe failed units", () => {
+  const failed = { rel: "docs/A.md", locale: "fr" };
+  for (const failures of [
+    [failed, failed],
+    [{ rel: "../outside.md", locale: "fr" }],
+    [{ rel: "docs/A.md", locale: "../fr" }],
+  ]) {
+    assert.equal(runner.blockingDrift(driftReport(), failures).length, 1);
+  }
+  assert.equal(runner.blockingDrift(driftReport(), [failed], [failed]).length, 1);
+});
+
+function partialSummary() {
+  return {
+    considered: 3,
+    translated: 1,
+    skipped: 1,
+    failed: 1,
+    failures: [{ rel: "docs/A.md", locale: "fr", error: "fixture failure" }],
+    translatedUnits: [{ rel: "docs/A.md", locale: "de" }],
+  };
+}
+
+test("partial summary counts, membership and failure records must agree", () => {
+  const summary = partialSummary();
+  assert.deepEqual(runner.readTranslationSummary(summary), summary);
+  for (const invalid of [
+    { ...summary, considered: 4 },
+    { ...summary, failed: 0 },
+    { ...summary, translated: -1 },
+    { ...summary, translatedUnits: [{ rel: "docs/A.md", locale: "fr" }] },
+    { ...summary, failures: [{ rel: "docs/A.md", locale: "fr" }] },
+    { ...summary, extraField: true },
+  ]) {
+    assert.throws(() => runner.readTranslationSummary(invalid));
+  }
+});
+
+test("failed units retain complete locale records and bytes before and after hooks", () => {
+  const failures = partialSummary().failures;
+  const record = { source_hash: "a".repeat(64), target_hash: "b".repeat(64), updated_at: "old" };
+  const before = { sources: { "docs/A.md": { source_hash: "old", locales: { fr: record } } } };
+  const after = structuredClone(before);
+  // Success in another locale may advance the shared source hash; the failed locale remains old.
+  after.sources["docs/A.md"].source_hash = "new";
+  const target = {
+    rel: "docs/A.md",
+    locale: "fr",
+    beforeHash: "b".repeat(64),
+    afterHash: "b".repeat(64),
+  };
+  assert.doesNotThrow(() => runner.assertFailedUnitsUnchanged(failures, before, after, [target]));
+  assert.throws(() =>
+    runner.assertFailedUnitsUnchanged(failures, before, after, [
+      { ...target, afterHash: "c".repeat(64) },
+    ])
+  );
+  const mutatedRecord = structuredClone(after);
+  mutatedRecord.sources["docs/A.md"].locales.fr.updated_at = "new";
+  assert.throws(() => runner.assertFailedUnitsUnchanged(failures, before, mutatedRecord, [target]));
+  assert.throws(() => runner.assertFailedUnitsUnchanged(failures, before, after, []));
+  assert.throws(() => runner.assertFailedUnitsUnchanged(failures, before, after, [target, target]));
+  assert.throws(() =>
+    runner.assertFailedUnitsUnchanged(failures, before, after, [{ ...target, locale: "de" }])
+  );
+});
+
+test("missing failed targets stay missing; creation or deletion after a failure is rejected", () => {
+  const failures = partialSummary().failures;
+  const state = { sources: {} };
+  const target = { rel: "docs/A.md", locale: "fr", beforeHash: null, afterHash: null };
+  assert.doesNotThrow(() => runner.assertFailedUnitsUnchanged(failures, state, state, [target]));
+  assert.throws(() =>
+    runner.assertFailedUnitsUnchanged(failures, state, state, [
+      { ...target, afterHash: "b".repeat(64) },
+    ])
+  );
+  assert.throws(() =>
+    runner.assertFailedUnitsUnchanged(failures, state, state, [
+      { ...target, beforeHash: "b".repeat(64) },
+    ])
+  );
 });

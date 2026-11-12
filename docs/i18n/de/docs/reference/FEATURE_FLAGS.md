@@ -45,7 +45,7 @@ Ein boolesches Flag gilt als **aktiviert**, wenn sein effektiver Wert `"true"`,
 
 ## Flaggenkatalog
 
-120 Flaggen in 6 Kategorien.** Standard** ist der Definitionsstandard — der Wert, der verwendet wird, wenn weder eine DB Überschreibung noch eine Umgebungsvariable vorhanden ist.
+121 Flaggen in 6 Kategorien.** Standard** ist der Definitionsstandard — der Wert, der verwendet wird, wenn weder eine DB Überschreibung noch eine Umgebungsvariable vorhanden ist.
 
 ### Sicherheit (11)
 
@@ -116,7 +116,7 @@ Ein boolesches Flag gilt als **aktiviert**, wenn sein effektiver Wert `"true"`,
 
 Wenn `UNPRICED_USAGE_BUDGET_POLICY` explizit konfiguriert ist (DB Überschreibung vor Umgebung), hat es Vorrang vor `USAGE_LIMIT_IGNORE_UNPRICED`. Ohne expliziten Enum-Wert wählt das boolesche Upstream-Opt-out `count_as_zero` aus; andernfalls ist der Standardwert `fail_closed`. Ungültige Enum-Werte und nicht lesbarer Feature-Flag-Speicher können nicht geschlossen werden. Weder das Opt-out führt zu einer Lockerung der Preisausgaben noch zu einer fehlgeschlagenen Preissuche. Die Durchsetzung und der Administratorbericht lösen dieselbe wirksame Richtlinie auf.
 
-### Laufzeit (57)
+### Laufzeit (58)
 
 | Schlüssel                                      | Typ             | Standard | Neustart | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------------------------------------------- | --------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -179,6 +179,7 @@ Wenn `UNPRICED_USAGE_BUDGET_POLICY` explizit konfiguriert ist (DB Überschreibun
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | Boolescher Wert | `false`  |          | Hören Sie auf, den `max` -Begründungsaufwand für Cursor Grok 4.7 (#17386) anzubieten und weiterzuleiten: Die Dokumente von Cursor enthalten nur low/medium/high/xhigh, sodass der `grok-4.7-max` Fallback-Alias aus dem Katalog verschwindet und eine `max` Aufwandsanforderung ohne Aufwandsparameter gesendet wird. Standardmäßig deaktiviert: `max` bleibt angeboten und weitergeleitet, da es von einer Live- AgentService/Run Probe akzeptiert wurde.                                                                                                                                                                                                                                                                                                                                                                 |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | Boolescher Wert | `false`  |          | Senden Sie Antwort-Keepalives als Leerzeile statt als Response.in_progress-Ereignis, sodass ein synthetischer Snapshot niemals die echte Antwort im offiziellen SDK ersetzen kann. Eine leere Zeile löst kein SSE Ereignis aus, sodass ein Client-Watchdog, der nur bei Ereignissen zurückgesetzt wird, während einer langen Ruhephase nicht zurückgesetzt wird. Standardmäßig deaktiviert: Timer senden das spec-valid-Ereignis „response.in_progress“.                                                                                                                                                                                                                                                                                                                                                                   |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | Boolescher Wert | `false`  |          | Zählen Sie in den Komprimierungs-Cache-Statistiken eine komprimierte Anfrage an einen Anbieter für automatisches Präfix-Caching (OpenAI, Codex, Azure oder eine benutzerdefinierte Verbindung, die Prompt-Caching mit Markierungsentfernung deklariert) als geschätzten Cache-Treffer, auch ohne `cache_control` -Markierungen (#17114). Bei der Schätzung handelt es sich um ein Cache-Eignungssignal und nicht um einen beobachteten Treffer, sodass die gemeldete Trefferquote für diese Anbieter tendenziell bei 100 % liegt. Standardmäßig deaktiviert: Nur eine Anfrage mit `cache_control` -Markern an einen Caching-Anbieter zählt als geschätzter Treffer, daher melden Anbieter mit automatischen Präfixen weiterhin 0.                                                                                          |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | Boolescher Wert | `false`  |          | Erlaubt einer automatischen Websuche ohne ausdrücklich angegebenen `provider`, ein verbundenes Codex-Konto (ChatGPT) über `codex-search` zu nutzen: als letzte Option vor Anbietern ohne Schlüssel, wenn kein Anbieter mit Zugangsdaten nutzbar ist, und als Alternative bei einem Ausfall (#17933). Jede Suche verbraucht Abonnementkontingent und dauert etwa 10–40 s. Standardmäßig deaktiviert: `codex-search` wird nur ausgeführt, wenn eine Anfrage den Anbieter ausdrücklich nennt.                                                                                                                                                                                                                                                                                                                                 |
 
 ### CLI (5)
 
@@ -249,10 +250,10 @@ Gibt jedes Flag mit seinem effektiven Wert, seiner Quelle und einer Zusammenfass
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -119,15 +119,15 @@ korunmaktadır.
 - **Uygunluk koşuluna bağlı kotalar** (`eligibilityGate: "regional-identity"`): yalnızca bölgeye bağlı bir kimlik kontrolünden sonra açılan gerçek, yinelenen bir kota (bugün için Çin ana karasında gerçek ad doğrulaması). Aynı havuz tekilleştirme kuralıyla ayrı bir rakama (`gatedRecurringTokens`) dahil edilir; istikrarlı ana toplama hiçbir zaman dahil edilmez. Rejim (`freeType`) değişmez, dolayısıyla yönlendirme de değişmez.
 - **Kanıt sınıfları.** Kural şudur: katalogdaki bir sayı, kaynağını girdinin yanında yer alan bir `// evidence:` yorumunda belirtir — `public-page` (herkesin okuyabileceği bir sağlayıcı sayfası), `api-public` (sağlayıcının kimlik doğrulaması gerektirmeyen bir uç noktası; örneğin router.bynara.id adresindeki NaraRouter genel planlar uç noktası) veya `console-verified <date> por <who>` (rakam yalnızca bir hesap konsolunda görünür; yorum, rakamı kimin ve ne zaman gördüğünü ve kotanın mevcut olduğunu belirten genel sayfayı kaydeder). Bugünkü durum: **2026-09-02** tarihinde yeniden denetlenen beş blok bu bilgiyi taşır (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); **2026-09-02** tarihli yeniden denetimden önceki girdiler, üzerlerinde değişiklik yapılana kadar önceki araştırmayı devralır; `evidence` yorumu olmayan **yeni veya değiştirilmiş** herhangi bir sayı bir hatadır. Bugün yalnızca `mistral` konsol doğrulamasından geçmiştir.
 
-## Sayımız neden diğer toplayıcılarınkinden daha küçük?
+## Sayımız neden diğer toplayıcıların sayısından daha az?
 
-Bu alandaki çoğu "aylık ücretsiz token" rakamı, model başına etiketlerin toplamıdır. Bizimki kasıtlı olarak böyle değildir:
+Bu alandaki "aylık ücretsiz token" rakamlarının çoğu, model başına etiketlerin toplamıdır. Bizimki bilerek değil:
 
-- **Her paylaşılan havuz bir kez sayılır.** Mistral'ın ücretsiz planı, kuruluş başına aylık tek bir 1B kotadır; bunu beş model altında listelemek kotayı 5B yapmaz. Model başına toplandığında kendi kataloğumuz **~7.4B** olarak görünürdü (2026-09-03 tarihinde yeniden hesaplandı; bu rakam CI tarafından denetlenmez — katalog her değiştiğinde yeniden ölçün) — başlıkta **~1.47B** yazmasının nedeni, her sağlayıcıdaki tek bir hesabın gerçekte harcayabileceği miktarın bu olmasıdır.
-- **Günlük üst sınırlar dönüştürülür, hız limitleri dönüştürülmez.** Belgelenmiş bir token/gün üst sınırı `× 30` olarak hesaplanır; belgelenmiş bir istek/gün üst sınırı `RPD × ~800 token × 30` olarak hesaplanır; yalnızca dakika başına istek sayısı yayımlayan bir sağlayıcının aylık rakamı **yoktur** ve her zaman _sınırsız_ olarak listelenir, toplama hiçbir zaman dahil edilmez. Bir hız limitini 24/7 ile çarpmak, reddettiğimiz türden bir şişirmedir.
-- **Bölgesel kimlik kontrolünün arkasındaki kotalar ayrı gösterilir** (`+~6M behind regional identity verification`), çünkü çoğu okuyucu bunları kullanamaz.
-- **Kayıt kredileri yalnızca ilk ay içindir** ve düzenli rakama hiçbir zaman karıştırılmadan ikinci bir rakam olarak bildirilir.
-- **Rakam CI tarafından doğrulanır.** `npm run check:docs-counts`, toplamları katalogdan yeniden hesaplar ve bu dosya, README veya bütçe kartı bunlardan saptığında derlemeyi başarısız kılar.
+- **Her paylaşılan havuz bir kez sayılır.** Mistral ücretsiz planı, kuruluş başına bir 1B/month ödeneğidir; Beş model altında listelenmesi onu 5B yapmaz. Model başına toplandığında kendi kataloğumuz şunu okur:**~ 7.4B** (03.09.2026 tarihinde yeniden hesaplanmıştır; bu rakam CI kapılı değildir — katalog değiştiğinde yeniden ölçün) Başlıkta — yazıyor **~ 1.47B** çünkü bu, her sağlayıcının bir hesabının gerçekte harcayabileceği miktardır.
+- **Günlük limitler dönüştürülür, oranlar dönüştürülmez.** Belgelenen bir tokens/day üst sınırı `× 30` olur; belgelenmiş bir requests/day sınırı `RPD × ~800 tokens × 30` olur; yalnızca dakika başına istek yayınlayan bir sağlayıcı **HAYIR** aylık rakamdır ve _uncapped_ olarak listelenir, hiçbir zaman toplanmaz. Bir oran limitinin 24/7 ile çarpılması, reddettiğimiz enflasyondur.
+- **Bölgesel kimlik kontrolünün ardındaki kotalar ayrı ayrı gösteriliyor** (`+~6M behind regional identity verification`), çünkü çoğu okuyucu bunları kullanamaz.
+- **Kayıt kredileri yalnızca ilk ay içindir** ve ikinci bir rakam olarak rapor edildi, hiçbir zaman sabit sayıya karışmadı.
+- **Bu rakam CI tarafından uygulanmaktadır.** `npm run check:docs-counts` katalogdaki toplamları yeniden hesaplar ve bu dosya, README veya bütçe kartı bunlardan saptığında derlemede başarısız olur.
 
 ---
 
@@ -387,12 +387,12 @@ Bu alandaki çoğu "aylık ücretsiz token" rakamı, model başına etiketlerin 
 
 ## Sözlük
 
-| Terim                    | Anlam                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**      | Dakika / gün / saat başına istek                                                |
-| **TPM / TPD**            | Dakika / gün başına token                                                       |
-| **Belgelenmiş tahsisat** | Sağlayıcının açıkça yayımladığı günlük/aylık token sınırı (savunulabilir bütçe) |
-| **Teorik üst sınır**     | `hız sınırı × 7/24 × 30 gün` — tahsis edilmiş bir bütçe değil, maksimum değer   |
-| **Nöron**                | Cloudflare işlem birimi (~1 çıktı tokeni)                                       |
+| Terim                | Anlam                                                                          |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **RPM / RPD / RPH**  | Dakika / gün / saat başına istekler                                            |
+| **TPM / TPD**        | Dakika / gün başına jetonlar                                                   |
+| **Belgelenmiş hibe** | Sağlayıcı açık bir daily/monthly token limiti yayınlıyor (savunulabilir bütçe) |
+| **Teorik tavan**     | `rate-limit × 24/7 × 30d` — maksimum, verilen bir bütçe değil                  |
+| **Nöron**            | Cloudflare hesaplama ünitesi (~ 1 çıkış jetonu)                                |
 
-> Sağlayıcı bazında 2026-06-05 tarihinde yapılan araştırmadan oluşturulmuştur. Yenilemek için araştırma iş akışını (bkz. `_tasks/features-v3.8.12`) yeniden çalıştırın.
+> 2026-06-05 tarihinde sağlayıcı başına yapılan araştırmadan oluşturulmuştur. Yenilemek için araştırma iş akışını yeniden çalıştırın (bkz. `_tasks/features-v3.8.12`).

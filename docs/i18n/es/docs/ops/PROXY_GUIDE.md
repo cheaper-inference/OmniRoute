@@ -393,7 +393,7 @@ Utiliza `wreq-js` para generar huellas digitales TLS similares a las de los nave
 
 ### Coincidencia de huellas digitales de CLI
 
-El **selector de huella digital de CLI** (`Configuración → Seguridad`) reordena los encabezados HTTP y los campos del cuerpo JSON para que coincidan con la firma exacta de los binarios de CLI nativos (Claude Code, Codex, etc.). Esto funciona **además del** proxy:
+El **selector de huella digital de CLI** (`Settings → Security`) reordena los encabezados HTTP y los campos del cuerpo JSON para que coincidan con la firma exacta de los binarios de CLI nativos (Claude Code, Codex, etc.). Esto funciona **además del** proxy:
 
 ```
 Tu IP (bloqueada) → IP del proxy (EE. UU.) → API del proveedor

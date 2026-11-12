@@ -381,7 +381,7 @@ Ohun elo imupada jẹ orukọ lọwọlọwọ `omniroute_ccr_retrieve` (iṣaaj
 
 ### Igbesi aye igba
 
-Awọn akoko ṣiṣan-HTTP laišišẹ ati olupin n ṣajọ wọn; ferese ti ko ṣiṣẹ ti ṣeto nipasẹ `OMNIROUTE_MCP_SESSION_IDLE_MS` (aiyipada iṣẹju 5; ti a tọka nipasẹ orukọ, kii ṣe iye koodu lile, nitorinaa oju-iwe yii ko lọ nigbati o yipada). Awọn aami aisan ti igba ikore laišišẹ jẹ HTTP 404 pẹlu `Unknown Mcp-Session-Id` — atunṣe ni lati tun sopọ tabi tun bẹrẹ igba naa,** kii ṣe** lati yi bọtini kan pada, yi aaye kan pada, tabi tunrukọ ohun elo kan.
+Awọn akoko ṣiṣan-HTTP laišišẹ ati olupin n ṣajọ wọn; ferese ti ko ṣiṣẹ jẹ tunto nipasẹ `OMNIROUTE_MCP_SESSION_IDLE_MS`, ti o ṣubu pada si `DEFAULT_MCP_SESSION_IDLE_MS` ni `open-sse/mcp-server/httpTransport.ts`. Awọn aami aisan ti igba ikore laišišẹ jẹ HTTP 404 pẹlu `Unknown Mcp-Session-Id` — atunṣe ni lati tun sopọ tabi tun bẹrẹ igba naa,**kii ṣe** lati yi bọtini kan pada, yi aaye kan pada, tabi tunrukọ ohun elo kan.
 
 ## Ojú API
 

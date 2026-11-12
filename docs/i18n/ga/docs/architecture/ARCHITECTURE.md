@@ -8,78 +8,79 @@
 
 _Nuashonraithe an uair dheireanach: 2026-06-28_
 
-## Achoimre Fheidhmeach
+## Achoimre Feidhmiúcháin
 
-Is geata ródaithe áitiúil AI agus painéal é OmniRoute tógtha ar Next.js. Soláthraíonn sé críochphointe singil OpenAI-comhoiriúnach (`/v1/*`) agus stiúrann sé trácht ar sholáthróirí iolracha in aghaidh an tsrutha le haistriúchán, cúltaca, athnuachan comharthaí agus rianú úsáide.
+Is geata ródaithe AI áitiúil agus painéal é OmniRoute atá tógtha ar Next.js.
+Soláthraíonn sé críochphointe aonair atá comhoiriúnach le OpenAI (`/v1/*`) agus ródaíonn sé trácht thar iliomad soláthraithe réamhtheachtacha le haistriúchán, cúltaca, athnuachan comharthaí agus rianú úsáide.
 
-Cumais lárnacha:
+Príomhchumais:
 
-- Dromchla API -comhoiriúnach le OpenAI do CLI/tools (381 soláthraí, 159 modúl seiceadóir)
-- Request/response aistriúchán thar formáidí soláthraí
-- Cúltaca teaglama samhail (seicheamh ilmhúnlaí)
-- Céimeanna teaglama struchtúrtha (`provider + model + connection`) le hordú ama rite ag `compositeTiers`
-- aisíocaíocht ar leibhéal cuntais (ilchuntas in aghaidh an tsoláthraí)
-- Réamheitilt cuóta agus roghnú cuntais P2C atá feasach ar chuóta sa phríomhchonair chomhrá
-- OAuth + Bainistíocht nasc soláthraí API-eochair (27 modúl soláthraí OAuth )
-- Giniúint leabú trí `/v1/embeddings` (18 soláthraí)
-- Giniúint íomhá trí `/v1/images/generations` (10 soláthraí +, 20 samhail + )
-- Trascríobh fuaime trí `/v1/audio/transcriptions` (18 soláthraí)
+- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (388 soláthraí, 159 modúl rite)
+- Aistriú iarrataí/freagraí idir formáidí soláthraithe
+- Cúltaca teaglama samhlacha (seicheamh il-samhail)
+- Céimeanna struchtúrtha teaglama (`provider + model + connection`) le hordú ag am rite de réir `compositeTiers`
+- Cúltaca ar leibhéal cuntais (ilchuntais in aghaidh an tsoláthraí)
+- Réamheiceáil cuóta agus roghnú cuntais P2C atá feasach ar chuóta sa phríomhchonair comhrá
+- Bainistíocht nasc soláthraithe trí OAuth + eochracha API (27 modúl soláthraí OAuth)
+- Giniúint leabuithe trí `/v1/embeddings` (18 soláthraí)
+- Giniúint íomhánna trí `/v1/images/generations` (10+ soláthraí, 20+ samhail)
+- Tras-scríobh fuaime trí `/v1/audio/transcriptions` (18 soláthraí)
 - Téacs-go-hurlabhra trí `/v1/audio/speech` (24 soláthraí ionsuite)
-- Giniúint físeáin trí `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Giniúint físe trí `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Giniúint ceoil trí `/v1/music/generations` (ComfyUI)
-- Cuardach Gréasáin trí `/v1/search` (20 soláthraí)
-- Modhnuithe trí `/v1/moderations`
+- Cuardach gréasáin trí `/v1/search` (20 soláthraí)
+- Modhnóireachtaí trí `/v1/moderations`
 - Athrangú trí `/v1/rerank`
-- Smaoinigh ar pharsáil chlib (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
-- Sanitization freagartha le haghaidh comhoiriúnacht dhian OpenAI SDK
-- Normalú róil (córas → forbróir, úsáideoir córas →) le haghaidh comhoiriúnacht tras-soláthraí
-- Comhshó aschuir struchtúrtha ( json_schema → Gemini responseSchema)
-- Marthanacht áitiúil do sholáthraithe, eochracha, ailiasanna, combos, socruithe, praghsáil (modúil 122 DB )
-- Usage/cost rianú agus logáil iarratais
-- Sioncronú scamall roghnach le haghaidh multi-device/state sync
-- IP allowlist/blocklist le haghaidh rialú rochtana API
-- Bainistiú buiséid smaointeoireachta (passthrough/auto/custom/adaptive)
-- Córas domhanda instealladh pras
-- Rianú seisiúin agus méarlorgaireacht
-- Teorainniú ráta feabhsaithe in aghaidh an chuntais le próifílí a bhaineann go sonrach le soláthraí
-- Patrún scoradáin chiorcaid le haghaidh athléimneacht an tsoláthraí
-- Cosaint tréada frith-thundering le glasáil mutex
-- Taisce dídhublála iarratais bunaithe ar shíniú
-- Ciseal an fhearainn: rialacha costais, beartas cúltaca, beartas frithdhúnadh
-- Leaschraolacháin Comhthéacs: achoimrí aistrithe seisiúin le haghaidh leanúnachas uainíochta cuntas
-- Seasmhacht staid an fhearainn ( taisce scríobh-trí SQLite le haghaidh aisíocaíochtaí, buiséid, frithdhúnadh, scoradáin chiorcaid)
-- Inneall beartais le haghaidh meastóireachta ar iarratais láraithe (frithdhúnadh frithdhúnadh → budget → )
-- Iarr teiliméadracht le comhiomlánú latency p50/p95/p99
-- Teiliméadracht sprice teaglama agus spriocshláinte teaglama stairiúil via `combo_execution_key` / `combo_step_id`
-- Comhghaol ID (X-Iarratas-Id) le haghaidh rianú ceann go ceann
-- Logánú iniúchta comhlíonta le díliostáil de réir eochair API
-- Creatlach eval le haghaidh dearbhú cáilíochta LLM
-- Painéal na nIonstraimí sláinte le stádas scoradáin chiorcaid soláthraí fíor-ama
-- Freastalaí MCP (110 uirlis) le 3 iompar (stdio/SSE/Streamable HTTP)
+- Parsáil clibeanna smaointeoireachta (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
+- Sláintiú freagraí ar mhaithe le dian-chomhoiriúnacht le OpenAI SDK
+- Normalú ról (developer→system, system→user) ar mhaithe le comhoiriúnacht idir soláthraithe
+- Tiontú aschuir struchtúrtha (json_schema → Gemini responseSchema)
+- Stóráil mharthanach áitiúil do sholáthraithe, eochracha, ailiasanna, teaglamaí, socruithe agus praghsáil (122 modúl DB)
+- Rianú úsáide/costais agus logáil iarrataí
+- Sioncronú néil roghnach le haghaidh sioncronú ilghléasanna/stáit
+- Liosta ceada/liosta coiscthe IP le haghaidh rialú rochtana API
+- Bainistíocht buiséid smaointeoireachta (pas-tríd/uathoibríoch/saincheaptha/oiriúnaitheach)
+- Instealladh leid chórais dhomhanda
+- Rianú seisiún agus méarlorgaireacht
+- Teorannú ráta feabhsaithe in aghaidh an chuntais le próifílí a bhaineann go sonrach le soláthraithe
+- Patrún scoradáin chiorcaid le haghaidh athléimneacht soláthraithe
+- Cosaint i gcoinne borradh comhuaineach iarrataí le glasáil mutex
+- Taisce dí-dhúblála iarrataí bunaithe ar shíniú
+- Sraith fearainn: rialacha costais, beartas cúltaca, beartas frithdhúnadh
+- Sealaíocht Chomhthéacs: achoimrí aistrithe seisiúin chun leanúnachas a choinneáil le linn rothlú cuntas
+- Stóráil mharthanach staid fearainn (taisce SQLite le scríobh tríd le haghaidh cúltacaí, buiséad, frithdhúnadh agus scoradán ciorcaid)
+- Inneall beartais le haghaidh meastóireacht láraithe iarrataí (frithdhúnadh → buiséad → cúltaca)
+- Teiliméadracht iarrataí le comhiomlánú aga folaigh p50/p95/p99
+- Teiliméadracht sprice teaglama agus sláinte stairiúil spriocanna teaglama trí `combo_execution_key` / `combo_step_id`
+- Aitheantas comhghaolmhaireachta (X-Request-Id) le haghaidh rianú ó cheann ceann
+- Logáil iniúchta comhlíontachta le rogha díliostála in aghaidh na heochrach API
+- Creat meastóireachta le haghaidh dearbhú cáilíochta LLM
+- Painéal sláinte le stádas fíor-ama scoradán ciorcaid soláthraithe
+- Freastalaí MCP (110 uirlis) le 3 mhodh iompair (stdio/SSE/Streamable HTTP)
 - Freastalaí A2A (JSON-RPC 2.0 + SSE) le scileanna agus saolré tascanna
 - Córas cuimhne (eastóscadh, instealladh, aisghabháil, achoimriú)
-- Córas scileanna (clárlann, seiceadóir, bosca gainimh, scileanna ionsuite)
-- MITM seachfhreastalaí le bainistíocht deimhnithe agus láimhseáil DNS
-- Meán-earraí garda instealladh pras
-- Píblíne pras comhbhrú le Caveman, RTK, píblínte cruachta, teaglama comhbhrú, pacáistí teanga, agus anailísíocht
-- ACP (Prótacal Cumarsáide Gníomhaire) clárlann
-- Soláthróirí modúlach OAuth (22 modúl aonair faoi `src/lib/oauth/providers/`)
-- scripteanna Uninstall/full-uninstall
-- gníomh deisiúcháin timpeallacht OAuth
-- droichead WebSocket do chliaint WS atá comhoiriúnach le OpenAI (`/v1/ws`)
-- Bainistíocht comhartha sioncronaithe (issue/revoke, íoslódáil bundle cumraíochta le leagan ETag)
-- GLM Smaointeoireacht (`glmt`) soláthraí den chéad scoth réamhshocraithe
-- Comhaireamh dearbhán hibrideach ( `/messages/count_tokens` taobh an tsoláthraí le haisíoc meastacháin)
-- Uathshíolú ailias samhail (30 + normalú canúint tras-seachfhreastalaí ag am tosaithe)
-- Gabh amach sábháilte le garda SSRF, blocáil príobháideach URL, agus atriail inchumraithe
-- Iarrann comhrá ar an eolas faoi fhuarú arís le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
-- Bailíochtú timpeallacht ama rite le Zod ag am tosaithe
-- Iniúchadh comhlíonta v2 le huimhrigh, imeachtaí an tsoláthraí CRUD, agus logáil bailíochtaithe bactha ag SSRF
+- Córas scileanna (clárlann, riteoir, bosca gainimh, scileanna ionsuite)
+- Seachfhreastalaí MITM le bainistíocht teastas agus láimhseáil DNS
+- Meánearra cosanta ar instealladh leid
+- Píblíne comhbhrúite leid le Caveman, RTK, píblínte cruachta, teaglamaí comhbhrúite, pacáistí teanga agus anailísíocht
+- Clárlann ACP (Agent Communication Protocol)
+- Soláthraithe modúlacha OAuth (22 modúl aonair faoi `src/lib/oauth/providers/`)
+- Scripteanna díshuiteála/díshuiteála iomláine
+- Gníomh deisithe timpeallachta OAuth
+- Droichead WebSocket le haghaidh cliaint WS atá comhoiriúnach le OpenAI (`/v1/ws`)
+- Bainistíocht comharthaí sioncronaithe (eisiúint/cúlghairm, íoslódáil beart cumraíochta le leaganacha ETag)
+- Smaointeoireacht GLM (`glmt`) mar réamhshocrú soláthraí den chéad scoth
+- Comhaireamh hibrideach comharthaí (`/messages/count_tokens` ar thaobh an tsoláthraí le meastachán mar chúltaca)
+- Réamhshíolú uathoibríoch ailiasanna samhlacha (30+ normalú traschanúintí seachfhreastalaí ag am tosaithe)
+- Gabháil amach sábháilte le cosaint SSRF, bac ar URLanna príobháideacha agus atriail inchumraithe
+- Atrialacha comhrá atá feasach ar thréimhse mharbhánta le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
+- Bailíochtú timpeallachta rite le Zod ag am tosaithe
+- Iniúchadh comhlíontachta v2 le huimhriú leathanach, teagmhais CRUD soláthraithe agus logáil bailíochtaithe nuair a chuireann SSRF bac ar iarratas
 
-Múnla príomhama rite:
+Príomhshamhail rite:
 
-- Cuireann bealaí app Next.js faoi `src/app/api/*` an dá painéal APIs agus comhoiriúnacht APIs i bhfeidhm
-- Láimhseálann croí SSE/routing roinnte i `src/sse/*` + `open-sse/*` feidhmiú, aistriúchán, sruthú, cúl-ais agus úsáid soláthraí
+- Cuireann bealaí feidhmchláir Next.js faoi `src/app/api/*` APIanna painéil agus APIanna comhoiriúnachta araon i bhfeidhm
+- Láimhseálann croílár comhroinnte SSE/ródaithe in `src/sse/*` + `open-sse/*` rith soláthraithe, aistriúchán, sruthú, cúltaca agus úsáid
 
 ## Léaráidí Tagartha
 
@@ -857,41 +858,47 @@ flowchart LR
 - `src/lib/db/*`: iompórtáil modúil shonracha go díreach — gan aon bharaille (baineadh an tseanchiseal athonnmhairithe `localDb.ts`)
 - `src/lib/usageDb.ts`: comhéadain le stair úsáide/logaí glaonna anuas ar tháblaí SQLite
 
-## Clúdach Fheidhmitheoirí na Soláthraithe (Patrún Straitéise)
+## Clúdach Seiceadóir Soláthraí (Patrún Straitéise)
 
-Tá feidhmitheoir speisialaithe ag gach soláthraí a shíneann `BaseExecutor` (in `open-sse/executors/base.ts`), lena soláthraítear tógáil URLanna, cumadh ceanntásca, atriail le cúlú easpónantúil, crúcaí athnuachana dintiúr, agus an modh comhordaithe `execute()`.
+Tá seiceadóir speisialaithe ag gach soláthraí a shíneann `BaseExecutor` (i `open-sse/executors/base.ts`), a sholáthraíonn foirgneamh URL, tógáil ceanntásca, athiarracht le cúlú easpónantúil, crúcaí athnuachana creidiúnacha, agus modh ceolfhoirne `execute()`.
 
-| Forghníomhaitheoir        | Soláthraí                                                                                                                                                   | Láimhseáil Speisialta                                                                  |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, etc. | Cumraíocht dhinimiciúil URL/ceanntáisc de réir soláthraí                               |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | Aitheantais saincheaptha tionscadail/seisiúin, parsáil Retry-After, doiléiriú 429      |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Ródú bunaithe ar imscaradh, forfheidhmiú iarratas api-version                          |
-| `BlackboxWebExecutor`     | Blackbox AI (mód gréasáin)                                                                                                                                  | Cúl-innealtóireacht seisiúin gréasáin le haithris méarloirg TLS                        |
-| `ClaudeIdentityExecutor`  | Claude.ai (cosán CCH)                                                                                                                                       | Píblínte srianta + athmhapála uirlisí, múnlú méarloirg                                 |
-| `CliProxyApiExecutor`     | Soláthraithe atá comhoiriúnach le CLIProxyAPI                                                                                                               | Láimhseáil saincheaptha fíordheimhnithe agus prótacail                                 |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | Instealladh aitheantais cuntais, rianú úsáide bunaithe ar Neurons                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Insteallann sé treoracha córais, cuireann sé leibhéal iarrachta réasúnaithe i bhfeidhm |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Droichead Responses API seisiúin brabhsálaí le snáithe/cas a fheannadh                 |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + rothlú ceanntásca de réir seisiúin                                             |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Prótacal ConnectRPC, ionchódú Protobuf, síniú iarratais trí shuim sheiceála            |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Droicheadú shaolré thasc Devin trí mhodúl néalghníomhaire                              |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Athnuachan chomhartha Copilot, ceanntásca a dhéanann aithris ar VSCode                 |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + ródú ar scóip tionscadail                                               |
-| `GlmExecutor`             | Z.AI GLM (réamhshocrú `glmt` san áireamh)                                                                                                                   | Feasach ar bhuiséad smaointeoireachta, tairisigh réamhshocraithe GLMT                  |
-| `GrokWebExecutor`         | Gréasán xAI Grok                                                                                                                                            | Cúl-innealtóireacht seisiúin gréasáin, roghnú móid (smaoineamh/caighdeánach)           |
-| `KieExecutor`             | KIE                                                                                                                                                         | Eisiúint saincheaptha comharthaí le hancairí rothlacha seisiúin                        |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Formáid dhénártha AWS EventStream → tiontú SSE                                         |
-| `MuseSparkWebExecutor`    | Muse Spark (gréasán)                                                                                                                                        | Cúl-innealtóireacht seisiúin gréasáin le droicheadú teachtaireachtaí íomhá             |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Cruth choirp iarratais a bhaineann go sonrach leis an soláthraí                        |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Socrú soláthraí atá comhoiriúnach le AI SDK                                            |
-| `PerplexityWebExecutor`   | Gréasán Perplexity                                                                                                                                          | Cúl-innealtóireacht seisiúin gréasáin chun comhrá a leanúint                           |
-| `PetalsExecutor`          | Tátal dáilte Petals                                                                                                                                         | Ródú díláraithe saithí                                                                 |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | Níl eochair API de dhíth, iarratais faoi theorainn ráta                                |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Tacaíocht PAT agus OAuth, sraith saor in aisce ilmhúnla                                |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Fíordheimhniú cuntais seirbhíse, críochphointí bunaithe ar réigiúin                    |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Eochair API iompórtáilte + sruthú comhrá Connect-protobuf                              |
+| seiceadóir                | Soláthraí                                                                                                                                                   | Láimhseáil Speisialta                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, etc. | Cumraíocht dinimiciúil URL/header in aghaidh an tsoláthraí                |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | Saincheaptha project/session IDs, Retry-Tar éis parsáil, 429 obfuscation  |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Ródú bunaithe ar imscaradh, forfheidhmiú fiosrúcháin api-leagan           |
+| `BlackboxWebExecutor`     | Blackbox AI (mód gréasáin)                                                                                                                                  | Seisiún Gréasáin droim ar ais le aithris méarloirg TLS                    |
+| `ClaudeIdentityExecutor`  | Claude.ai ( conair CCH )                                                                                                                                    | Srianadh píblínte uirlis-remapála +, múnlú méarloirg                      |
+| `CliProxyApiExecutor`     | Soláthraithe atá comhoiriúnach le CLIProxyAPI                                                                                                               | Údar saincheaptha agus láimhseáil prótacail                               |
+| `CloudflareAiExecutor`    | Oibrithe Cloudflare AI                                                                                                                                      | Cuntas instealladh ID, rianú úsáide bunaithe ar néaróin                   |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Instealladh treoracha córais, fórsaí iarracht réasúnaíocht                |
+| `ChatGptWebCodexExecutor` | Gréasán ChatGPT (Codex)                                                                                                                                     | Freagraí seisiúin bhrabhsálaí Droichead API le feannadh thread/turn       |
+| `CommandCodeExecutor`     | Cód Ordú                                                                                                                                                    | OAuth + rothlú ceanntásc in aghaidh an tseisiúin                          |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Prótacal ConnectRPC, ionchódú Protobuf, iarr síniú trí sheic              |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Idirlinne saolré tasc Devin trí mhodúl gníomhaire néil                    |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Athnuachan comharthaí Copilot, ceanntásca a dhéanann aithris ar Chóid VSC |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth Ródú scóip tionscadail +                                     |
+| `GlmExecutor`             | Z.AI GLM (réamhshocraithe `glmt` san áireamh)                                                                                                               | Smaoineamh-buiséad feasach, tairisigh réamhshocraithe GLMT                |
+| `GrokWebExecutor`         | xAI Grok gréasáin                                                                                                                                           | Seisiún Gréasáin droim ar ais, roghnú mód (think/standard)                |
+| `KieExecutor`             | KIE                                                                                                                                                         | Eisiúint sainchomhartha saincheaptha le ancairí seisiúin rothlacha        |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Formáid dhénártha AWS EventStream → SSE chomhshó                          |
+| `MuseSparkWebExecutor`    | Muse Spark (gréasáin)                                                                                                                                       | Seisiún Gréasáin droim ar ais le idirlinne íomhá-teachtaireacht           |
+| `NlpCloudExecutor`        | Scamall NLP                                                                                                                                                 | Cruth comhlacht iarratais a bhaineann go sonrach le soláthraí             |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Socrú soláthraí comhoiriúnach AI SDK                                      |
+| `PerplexityWebExecutor`   | Gréasáin perplexity                                                                                                                                         | Seisiún Gréasáin droim ar ais chun leanúint leis an gcomhrá               |
+| `PetalsExecutor`          | Peitil dáilte tátal                                                                                                                                         | Ródú swarm díláraithe                                                     |
+| `PollinationsExecutor`    | Pailniú AI                                                                                                                                                  | Níl eochair API ag teastáil, iarratais a bhfuil teorainn an ráta leo      |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Tacaíocht PAT agus OAuth, sraith il-mhúnla saor in aisce                  |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Údar cuntais seirbhíse, críochphointí bunaithe ar an réigiún              |
+| `DevinDesktopExecutor`    | Deasc Devin                                                                                                                                                 | Iompórtáil eochair API + Connect-protobuf sruthú comhrá                   |
 
-Úsáideann gach soláthraí eile (lena n-áirítear nóid chomhoiriúnacha saincheaptha) an `DefaultExecutor`.
+Úsáideann gach soláthraí eile (lena n-áirítear nóid shainoiriúnaithe) an `DefaultExecutor`.
+
+### Taiscéalaithe uathoibrithe agus cuntais seisiúin ghréasáin
+
+Seolann tástálacha múnla, Test All, tástálacha teaglama agus measúnuithe fíor-iarratais chomhrá. Feidhmíonn soláthraí seisiúin ghréasáin mar an t-úsáideoir sínithe isteach, agus mar sin bheadh gach ceann de na hiarratais sin sábháilte mar chomhrá ar an gcuntas sin; cuireadh cuntas ar fionraí (#14780) maidir le taiscéalaithe uathoibrithe a d'fhág comhráite den sórt sin. Mar sin, diúltaíonn an píblíne comhrá gach sprioc a shroicheann taiscéalaí uathoibrithe a ndéanann a soláthraí dintiúr don seisiún gréasáin, a luaithe a bhíonn soláthraí an sprice réitithe agus sula roghnaítear dintiúir (`src/lib/providers/chatProbePolicy.ts`). Is é `422` le `error.code` `chat_probe_not_isolated` an diúltú, agus tuairiscíonn na reathaithe taiscéalaithe é mar scipeáil, ní teip.
+
+Dearbhaíonn seiceadóir a ritheann gach comhrá i mód gan stair an tsoláthraí féin é le `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); ceadaítear tóireadóirí don soláthraí sin ansin. Dearbhaíonn ChatGPT Web `temporary-chat`. Pinn dearbhú ar a mheicníocht le tástáil, mar sin ní féidir leis an éileamh a bheith níos faide ná an cód a fhágann go bhfuil sé fíor.
 
 ## Maitrís Comhoiriúnachta Soláthraithe
 
@@ -1055,11 +1062,11 @@ comhoiriúnacht leagáide amháin. Úsáideann an conradh reatha ama rite:
 - ascnaimh scéimre SQLite agus crúcaí uathuasghrádaithe ag an am tosaithe
 - conair chomhoiriúnachta ascnaimh ó JSON leagáide → SQLite
 
-## 6) Garda SSRF / URL Amach
+## 6) SSRF / Cosaint URLanna Amach
 
-- cuireann `src/shared/network/outboundUrlGuard.ts` bac ar gach sprioc-URL príobháideach/aischasta/nasc-áitiúil sula sroicheann siad seiceadóirí soláthraí
-- úsáideann bealaí aimsithe agus bailíochtaithe samhlacha soláthraí `src/shared/network/safeOutboundFetch.ts`, a chuireann an garda i bhfeidhm roimh gach iarratas amach
-- taispeántar earráidí garda mar `URL_GUARD_BLOCKED` le HTTP 422 agus logáiltear iad sa rian iniúchta comhlíontachta trí `providerAudit.ts`
+- Cuireann `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `src/shared/network/outboundUrlGuard.ts` i bhfeidhm ar iarratais chomhrá a sheoltar trí `BaseExecutor.execute()`. Sa mhód poiblí amháin (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` agus an bhratach phríobháideach múchta), blocálann sé óstaigh phríobháideacha agus aisfhillteacha, chomh maith le 169.254.0.0/16; i ngach mód eile, blocálann sé óstaigh mheiteashonraí néil. Seiceálann sé an t-óstainm nó an seoladh IP litriúil mar atá scríofa, roimh aon chuardach DNS. Scipeálann soláthraithe áitiúla ionsuite é.
+- Úsáideann bealaí aimsithe agus bailíochtaithe samhlacha soláthraithe `src/shared/network/safeOutboundFetch.ts`, a chuireann an chosaint i bhfeidhm roimh gach iarratas amach
+- Taispeántar earráidí cosanta mar `URL_GUARD_BLOCKED` le HTTP 503 (`getSafeOutboundFetchErrorStatus`; filleann an bealach aimsithe samhlacha 400), agus logáiltear fíorbhlocálacha SSRF le linn bailíochtaithe sa rian iniúchta mar theagmhais `provider.validation.ssrf_blocked`
 
 ## Inbhraiteacht agus Comharthaí Oibríochtúla
 
@@ -1110,7 +1117,7 @@ Athróga timpeallachta a úsáideann an cód go gníomhach:
 4. Braitheann iompar néil ar `NEXT_PUBLIC_BASE_URL` ceart agus ar inrochtaineacht chríochphointe an néil.
 5. Foilsítear an chomhadlann `open-sse/` mar **phacáiste spáis oibre npm** `@omniroute/open-sse`. Iompórtálann an cód foinse í trí `@omniroute/open-sse/...` (arna réiteach ag `transpilePackages` Next.js). Úsáideann conairí comhaid sa doiciméad seo ainm na comhadlainne `open-sse/` fós ar mhaithe le comhsheasmhacht.
 6. Úsáideann cairteacha sa deais **Recharts** (bunaithe ar SVG) le haghaidh léirshamhluithe anailísíochta inrochtana, idirghníomhacha (barrachairteacha úsáide samhlacha, táblaí miondealaithe soláthraithe le rátaí ratha).
-7. Úsáideann tástálacha E2E **Playwright** (`tests/e2e/`), agus ritear iad trí `npm run test:e2e`. Úsáideann tástálacha aonaid **reathaí tástála Node.js** (`tests/unit/`), agus ritear iad trí `npm run test:unit`. Is **TypeScript** (`.ts`/`.tsx`) é an cód foinse faoi `src/`; fanann spás oibre `open-sse/` mar JavaScript (`.js`).
+7. Úsáideann tástálacha E2E **Playwright** (`tests/e2e/`), agus ritear iad trí `npm run test:e2e`. Úsáideann tástálacha aonaid **reathaí tástála Node.js** (`tests/unit/`), agus ritear iad trí `npm run test:unit`. Is **TypeScript** (`.ts`/`.tsx`) é an cód foinse faoi `src/`; fanann spás oibre `open-sse/` mar TypeScript (`.ts`).
 8. Tá leathanach na socruithe eagraithe ina 7 gcluaisín: Ginearálta, Cuma, IS, Slándáil, Ródú, Athléimneacht, Ardroghanna. Ní chumraíonn an leathanach Athléimneachta ach scuaine na n-iarratas, tréimhse shuaimhnithe na gceangal, scoradán an tsoláthraí, agus iompar feithimh don tréimhse shuaimhnithe; taispeántar staid bheo am rite an scoradáin ar an leathanach Sláinte.
 9. Tá straitéis **Athsheachadadh Comhthéacs** (`context-relay`) roinnte thar dhá shraith: cinneann `combo.ts` ar cheart aistriú a ghiniúint, agus insteallann `chat.ts` an t-aistriú tar éis réiteach an chuntais. Tá sonraí aistrithe i dtábla SQLite `context_handoffs`. Tá an deighilt seo d'aon ghnó mar ní bhíonn a fhios ach ag `chat.ts` ar athraigh an cuntas iarbhír.
 10. Tá **forfheidhmiú seachfhreastalaí** cuimsitheach anois: réitíonn `tokenHealthCheck.ts` an seachfhreastalaí do gach ceangal, úsáideann `/api/providers/validate` `runWithProxyContext`, agus úsáideann `proxyFetch.ts` `undici.fetch()` chun comhoiriúnacht seoltóra a choinneáil ar Node 22.

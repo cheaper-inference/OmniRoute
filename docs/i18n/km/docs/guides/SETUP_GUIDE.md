@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ផ្ទាំងគ្រប់គ្រងបើកនៅ `http://localhost:20128` ហើយ URL មូលដ្ឋានរបស់ API គឺ `http://localhost:20128/v1`។
+ផ្ទាំងគ្រប់គ្រងបើកនៅ `http://localhost:20128` ហើយ API មូលដ្ឋាន URL គឺ `http://localhost:20128/v1`។
+
+> **អ្នកប្រើប្រាស់ npm៖** ប្រសិនបើ npm ព្រមានថាការដំឡើងស្គ្រីបត្រូវបានរារាំង (ឧទាហរណ៍ `omniroute`, `better-sqlite3`) សូមមើល [ការដោះស្រាយបញ្ហា — npm install-scripts ត្រូវបានរារាំង](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ។
 
 ### pnpm
 

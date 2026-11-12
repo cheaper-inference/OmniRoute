@@ -53,7 +53,7 @@ Search Tools Studio මඟින් `/dashboard/search-tools`, මූලික �
 - ආදානය: URL + සම්පූර්ණ පිටු ටොගලය + ආකෘති තේරීම (markdown / පෙළ / HTML).
 - ඉදිරිපත් කිරීම → ලබාගැනීම → `ScrapeResult.tsx` විදැහුම් කිරීම.
 - `ScrapeResult` මගින් markdown පෙරදසුනක් + අමු දත්ත ටොගලයක් විදැහුම් කරයි.
-- සීමාව: ප්රතිචාර බඳ > **256 KB** නම්, UI එක `(කප්පාදු කරන ලදී, අමු දත්ත බලන්න)` පෙන්වා අමු දත්ත Monaco මෝඩලයක විවෘත කරයි (D21).
+- සීමාව: ප්රතිචාර බඳ > **256 KB** නම්, UI එක `View full raw content` පෙන්වා අමු දත්ත මෝඩලයක විවෘත කරයි (D21).
 - පාරදත්ත පැනලය: සැපයුම්කරු (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ප්රමාදය, පිරිවැය, ප්රතිචාර ප්රමාණය, සබැඳි ගණන.
 - `useScrapeFetch.ts` හුක් එක භාවිත කරයි.
 
@@ -102,9 +102,11 @@ Search Tools Studio මඟින් `/dashboard/search-tools`, මූලික �
 `ProviderCatalog.tsx` මඟින් `GET /api/search/providers` වෙතින් සම්පූර්ණ සැපයුම්කරු ලැයිස්තුව නිරාවරණය කරයි
 (fetch සැපයුම්කරුවන් ඇතුළත් කිරීමට F4 හිදී පුළුල් කරන ලදී):
 
-| `kind` | `"search"` (සැපයුම්කරුවන් 20ක්) හෝ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (සැපයුම්කරුවන් 23ක්) හෝ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 අක්තපත්ර පවතින්නේද සහ සියලුම යතුරු දැනට cooldown තත්ත්වයේ පවතින්නේද යන්න පරීක්ෂා කිරීමෙන්, ඉල්ලීම සිදු කරන අවස්ථාවේදී තත්ත්වය **ව්යුත්පන්න කෙරේ**.
+
+`codex-search` (Codex Web Search): සම්බන්ධ කළ Codex (ChatGPT) ගිණුම් භාවිත කරයි; වෙනම යතුරක් අවශ්‍ය නැත. සෑම සෙවුමක්ම ChatGPT දායකත්ව කෝටාව වැය කරන අතර තත්පර 10–40 ක් පමණ ගත වේ. ඉල්ලීමේ එහි නම සඳහන් කළ විට ක්‍රියා කරයි; ස්වයංක්‍රීය තේරීම සඳහා පෙරනිමියෙන් අක්‍රිය `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` සක්‍රිය කළ යුතුය.
 
 ---
 

@@ -306,12 +306,25 @@ function keepsForkCodeOffSelfHosted(runsOn) {
 }
 
 for (const profile of ["ci", "quality"]) {
-  test(`${profile}: workflow jobs and dependencies match the versioned admission policy`, () => {
+  test(`${profile}: workflow concurrency, jobs and dependencies match the admission policy`, () => {
     const workflow = loadYaml(
       readFileSync(new URL(`../../.github/workflows/${profile}.yml`, import.meta.url), "utf8")
     );
     const verdict = workflow.jobs["admission-verdict"];
     const ids = Object.keys(policy.profiles[profile].jobs).sort();
+    assert.ok(workflow.concurrency.group.startsWith("${{ github.workflow }}-${{ github.ref }}"));
+    assert.match(workflow.concurrency.group, /github\.event\.changes\.base/);
+    assert.match(workflow.concurrency.group, /github\.run_id/);
+    assert.equal(
+      workflow.concurrency["cancel-in-progress"],
+      false,
+      `${profile}: the running candidate must reach a terminal admission verdict`
+    );
+    assert.equal(
+      workflow.concurrency.queue ?? "single",
+      "single",
+      `${profile}: only the latest pending candidate should wait behind the running candidate`
+    );
     assert.deepEqual([...verdict.needs].sort(), ids);
     assert.deepEqual(
       Object.keys(workflow.jobs)
@@ -319,17 +332,12 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    // The exact check name, except on a Mergify queue-draft edit run (ci-mergify-candidate.test.mjs).
+    // Event/identity behavior is covered by both admission regression files.
+    // Retain #19343's distinct ordinary-draft name alongside metadata isolation.
     const checkName = policy.profiles[profile].checkName;
-    assert.ok(
-      verdict.name.endsWith(`&& '${checkName} (queue-draft edit)' || '${checkName}' }}`),
-      verdict.name
-    );
-    // always(), except a description edit on a Mergify queue draft (ci-mergify-candidate.test.mjs).
-    assert.match(
-      verdict.if,
-      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
-    );
+    const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
+    assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
+    assert.match(verdict.if, /always\(\)/);
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its
     // PR and Release-Green validates the merged combination on release/** (the per-push

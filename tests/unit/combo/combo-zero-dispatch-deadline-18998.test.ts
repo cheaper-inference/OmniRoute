@@ -7,7 +7,7 @@
  * A wait that cannot finish before the deadline must not start, so the combo
  * answers at once with its normal terminal response and Retry-After.
  */
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -36,9 +36,12 @@ const MODELS = ["openai/alpha", "claude/beta"];
 
 type LogLine = { level: "info" | "warn"; message: string };
 
-function capturingLog(lines: LogLine[] = []) {
+function capturingLog(lines: LogLine[] = [], onCooldownWait?: () => void) {
   return {
-    info: (_tag: string, message: string) => lines.push({ level: "info", message }),
+    info: (_tag: string, message: string) => {
+      lines.push({ level: "info", message });
+      if (message.includes("model-lock wait: waiting ")) onCooldownWait?.();
+    },
     warn: (_tag: string, message: string) => lines.push({ level: "warn", message }),
     error() {},
     debug() {},
@@ -80,6 +83,7 @@ async function dispatchSkippedPool(opts: {
   compatRejectedTargets?: ResolvedComboTarget[];
   handleSingleModel?: AttemptLoopDeps["handleSingleModelWithTimeout"];
   logLines?: LogLine[];
+  onCooldownWait?: () => void;
 }) {
   const state: AttemptLoopState = {
     orderedTargets: MODELS.map(modelTarget),
@@ -109,7 +113,7 @@ async function dispatchSkippedPool(opts: {
     strategy: "priority",
     combo: { name: "zero-dispatch", models: [] },
     config: {},
-    log: capturingLog(opts.logLines),
+    log: capturingLog(opts.logLines, opts.onCooldownWait),
     settings: null,
     resilienceSettings: {
       providerCooldown: { enabled: false },
@@ -160,6 +164,23 @@ async function dispatchSkippedPool(opts: {
   return { response, gateCalls };
 }
 
+/** Advance only after the real loop has scheduled its model-lock wait. */
+async function dispatchWithControlledWait(
+  context: TestContext,
+  opts: Parameters<typeof dispatchSkippedPool>[0],
+  elapsedMs: number
+) {
+  let notifyWait = () => {};
+  const scheduled = new Promise<void>((resolve) => {
+    notifyWait = resolve;
+  });
+  const pending = dispatchSkippedPool({ ...opts, onCooldownWait: notifyWait });
+  const waited = await Promise.race([scheduled.then(() => true), pending.then(() => false)]);
+  assert.ok(waited, "the real attempt loop must schedule the expected model-lock wait");
+  context.mock.timers.tick(elapsedMs);
+  return pending;
+}
+
 async function errorOf(response: Response) {
   const body = (await response.json()) as {
     error?: { code?: string; type?: string; retry_after?: number; message?: string };
@@ -182,17 +203,22 @@ test.after(() => {
   } catch {}
 });
 
-test("a pool that stays walled answers ALL_TARGETS_SKIPPED, not the 0-attempted 504", async () => {
+test("a pool that stays walled answers ALL_TARGETS_SKIPPED, not the 0-attempted 504", async (context) => {
+  context.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
   // Concurrent traffic keeps every lock fresh, so each wait ends on the same wall.
   const lines: LogLine[] = [];
-  const { response, gateCalls } = await dispatchSkippedPool({
-    comboTimeoutMs: 1000,
-    logLines: lines,
-    onGate: (modelStr) => {
-      lockModel(modelStr, 600);
-      return null;
+  const { response, gateCalls } = await dispatchWithControlledWait(
+    context,
+    {
+      comboTimeoutMs: 1000,
+      logLines: lines,
+      onGate: (modelStr) => {
+        lockModel(modelStr, 600);
+        return null;
+      },
     },
-  });
+    650
+  );
 
   const error = await errorOf(response);
   assert.equal(response.status, 429, `got ${response.status} ${error.message}`);
@@ -220,23 +246,28 @@ test("a lock longer than the time left fails fast instead of sleeping past the d
   assert.deepEqual(gateCalls, MODELS, "no wait means no second pass over the targets");
 });
 
-test("a short lock that fits the deadline is still waited out (#16319)", async () => {
+test("a short lock that fits the deadline is still waited out (#16319)", async (context) => {
+  context.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
   for (const modelStr of MODELS) lockModel(modelStr, 150);
   let pass = 0;
 
-  const { response, gateCalls } = await dispatchSkippedPool({
-    comboTimeoutMs: 10_000,
-    onGate: () => {
-      pass += 1;
-      if (pass <= MODELS.length) return null;
-      return {
-        kind: "proceed",
-        targetForAttempt: modelTarget(MODELS[0]),
-        profile: null,
-        protectedPriorityTarget: false,
-      };
+  const { response, gateCalls } = await dispatchWithControlledWait(
+    context,
+    {
+      comboTimeoutMs: 10_000,
+      onGate: () => {
+        pass += 1;
+        if (pass <= MODELS.length) return null;
+        return {
+          kind: "proceed",
+          targetForAttempt: modelTarget(MODELS[0]),
+          profile: null,
+          protectedPriorityTarget: false,
+        };
+      },
     },
-  });
+    200
+  );
 
   assert.equal(response.status, 200);
   assert.equal(gateCalls.length, MODELS.length + 1);

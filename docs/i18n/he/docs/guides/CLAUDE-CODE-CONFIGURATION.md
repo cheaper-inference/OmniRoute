@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # Claude Code באמצעות glm/glm-5.2 דר�
 
 ---
 
-## איך Claude Code מתחבר לשער
+## כיצד Claude Code מתחבר לשער
 
-קוד Claude מדבר על**Anthropic הודעות API** והוא מצביע על נקודת קצה מותאמת אישית עם משתני סביבה (אין לו דגל `--base-url` ):
+Claude Code מתקשר באמצעות **Anthropic Messages API** ומופנה אל נקודת קצה
+מותאמת אישית באמצעות משתני סביבה (אין לו דגל `--base-url`):
 
-| מִשְׁתַנֶה                                   | מַטָרָה                                                                         |
-| -------------------------------------------- | ------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | שורש השער URL (קוד Claude מוסיף `/v1/messages`).** אין סיומת `/v1`.**           |
-| `ANTHROPIC_AUTH_TOKEN`                       | נשלח כ- `Authorization: Bearer …` — השתמש ב- OmniRoute קוד הגישה / מפתח API     |
-| `ANTHROPIC_API_KEY`                          | חלופה: נשלח כ- `x-api-key`. אם שניהם מוגדרים, `ANTHROPIC_AUTH_TOKEN` מנצח       |
-| `ANTHROPIC_MODEL`                            | לכפות דגם ספציפי (עוקף את ברירת המחדל של בורר `/model` )                        |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → הבורר המקורי של `/model` מפרט דגמי `claude*`/`anthropic*` מ- `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | קביעת אסימוני פלט לכל תגובה (למשל `65536`)                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | סף אסימון לדחיסה אוטומטית                                                       |
+| משתנה                                        | מטרה                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | כתובת ה־URL הבסיסית של השער (Claude Code מוסיף `/v1/messages`). **ללא הסיומת `/v1`.** |
+| `ANTHROPIC_AUTH_TOKEN`                       | נשלח בתור `Authorization: Bearer …` — השתמשו באסימון הגישה / מפתח ה־API של OmniRoute  |
+| `ANTHROPIC_API_KEY`                          | חלופה: נשלח בתור `x-api-key`. אם שניהם מוגדרים, `ANTHROPIC_AUTH_TOKEN` מקבל עדיפות    |
+| `ANTHROPIC_MODEL`                            | כפיית מודל מסוים (דורס את ברירת המחדל של בורר `/model`)                               |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` ← הבורר המובנה `/model` מציג מודלים מסוג `claude*`/`anthropic*` מתוך `/v1/models` |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | הגבלת מספר אסימוני הפלט לכל תגובה (למשל `65536`)                                      |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | סף אסימונים לדחיסה אוטומטית                                                           |
 
-> Env vars נקראים** פעם אחת בהפעלה** — הפעל מחדש את קוד Claude לאחר שינוים.
+> משתני הסביבה נקראים **פעם אחת בעת ההפעלה** — הפעילו מחדש את Claude Code לאחר שינויים בהם.
 
-עבור אישור שמסתובב במקום מחרוזת קבועה, הגדר `apiKeyHelper` ב- `~/.claude/settings.json` לפקודה שמדפיסה את האישור הנוכחי ל-stdout. Claude Code מאחסן את הפלט שלו במשך חמש דקות כברירת מחדל (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` עוקף את זה) ושולח את הערך גם ב- `Authorization: Bearer` וגם `x-api-key`. הסקריפט חייב להדפיס את האישורים ושום דבר אחר לא — בבאנר לצדו ב-helper ב-v2.1.227 +.
+כדי להשתמש בפרטי הזדהות מתחלפים במקום במחרוזת קבועה, הגדירו את `apiKeyHelper` בתוך `~/.claude/settings.json` כפקודה שמדפיסה את פרטי ההזדהות הנוכחיים ל-stdout. ‏Claude Code שומר את הפלט במטמון לחמש דקות כברירת מחדל (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` משנה את משך הזמן הזה), ושולח את הערך גם ב-`Authorization: Bearer` וגם ב-`x-api-key`. הסקריפט חייב להדפיס רק את פרטי ההזדהות; הודעת פתיחה נוספת לצדם גורמת לכשל של כלי העזר ב-v2.1.227+.
 
-כך פועלת Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` מדפיסה אסימון גישה ל-Entra קצר מועד ש- OmniRoute מאמת במקום מפתח API. ראה [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+כך פועל Entra ID SSO: ‏`scripts/cli/omniroute-sso.mjs token` מדפיס אסימון גישה קצר מועד של Entra, ש-OmniRoute מאמת במקום מפתח API. ראו [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` מגדיר את כל אלה עבורך: הוא פותר את אסימון URL + הבסיסי מההקשר הפעיל (אז `omniroute connect <vps>` ואז `omniroute launch` פשוט עובד), בודק בריאות את השרת ומנהל את `claude`.
+`omniroute launch` מגדיר את כולם עבורכם: הוא מאתר את כתובת ה־URL הבסיסית ואת האסימון
+מתוך ההקשר הפעיל (כך שלאחר `omniroute connect <vps>`, הפעלת `omniroute launch`
+פשוט עובדת), מבצע בדיקת תקינות לשרת ומריץ את `claude`.
+
+---
+
+## ייחוס שימוש: הפעלות ופרויקטים
+
+OmniRoute מקבץ את הבקשות של כל מפתח API לתוך **מפגשי סוכנים** ומתעד אילו **פּרוֹיֶקט** כל מפגש שעבד עליו (טבלת `agent_sessions` ), כך שניתן לדווח על שימוש ועלות לכל חבר צוות, לפרויקט ולכל מפגש.
+
+מה מוקלט ללא כל הגדרת לקוח:
+
+| שָׂדֶה    | מָקוֹר                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| מוֹשָׁב   | כותרת `x-claude-code-session-id` (ערך זהה לזה של `metadata.user_id.session_id`), יציבה לכל הפעלה                                |
+| פּרוֹיֶקט | שורת `Primary working directory:` Claude Code שולחת בסביבה שלו הודעה; תיקיות worktree תחת `.claude/worktrees/` נפתרות לשם המאגר |
+| עָנָף     | `Current branch:` מהסטטוס git Claude Code שולח עם ההודעה הראשונה                                                                |
+| לָקוּחַ   | `user-agent` (`claude-cli/<version>`)                                                                                           |
+
+Codex (`<environment_context><cwd>`) ו- OpenCode (`x-opencode-session`) מוכרים באותו אופן. מפתחות עם **ללא יומן** מופעל לשמור רק את מזהה ההפעלה ואת שדות הפרויקט שסופקו בכותרת; שום דבר שנקרא מההנחיה (נתיב, ענף) לא מאוחסן.
+
+### מתן שם מפורש לפרויקט (מומלץ)
+
+ספריית העבודה שונה בין מחשבים, כך שאותו מאגר יכול להופיע תחת נתיבים שונים. שלח את הפרויקט במפורש במקום זאת: קוד Claude מוסיף את כל הכותרות הרשומות ב- `ANTHROPIC_CUSTOM_HEADERS` לכל בקשת דגם, ו- OmniRoute קורא שתיים מהן:
+
+| כּוֹתֶרֶת                  | עֵרֶך                                                |
+| -------------------------- | ---------------------------------------------------- |
+| `x-omniroute-project`      | שם הפרויקט, למשל `omniroute`                         |
+| `x-omniroute-project-repo` | שלט מנורמל, למשל `github.com/diegosouzapw/OmniRoute` |
+
+שניהם נקראים רק לצורך ייחוס; הם לעולם לא מועברים לספק במעלה הזרם.
+
+`ANTHROPIC_CUSTOM_HEADERS` נקרא פעם אחת באתחול, וקובצי ההגדרות מאחסנים ערכים מילוליים, אז חשב אותו כאשר קוד Claude מופעל. הוסף את זה ל- `~/.zshrc` או `~/.bashrc` והמשיך להפעיל `claude` מתיקיית הפרויקט:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+הביטוי `sed` מסיר את כל האישורים המוטמעים ב- URL המרוחק. הרחבות IDE משיקות קוד Claude ללא המעטפת שלך, כך שההפעלות שלהן נופלות חזרה לספריית העבודה.
 
 ---
 

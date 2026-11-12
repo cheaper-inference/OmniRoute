@@ -130,7 +130,7 @@ A maioria dos valores de «tokens gratuitos por mês» neste espaço resulta da 
 
 - **Cada conjunto partilhado é contado uma única vez.** O plano gratuito da Mistral consiste num limite de 1B/mês por organização; apresentá-lo em cinco modelos não o transforma em 5B. Somado por modelo, o nosso próprio catálogo indicaria **~7,4B** (recalculado em 2026-09-03; este valor não é controlado pela CI — volte a medi-lo sempre que o catálogo mudar) — o valor em destaque indica **~1,47B**, porque é isso que uma conta de cada fornecedor pode realmente gastar.
 - **Os limites diários são convertidos, as taxas não.** Um limite documentado de tokens/dia torna-se `× 30`; um limite documentado de pedidos/dia torna-se `RPD × ~800 tokens × 30`; um fornecedor que apenas publique pedidos por minuto **não** tem um valor mensal e é apresentado como _sem limite_, nunca sendo incluído na soma. Multiplicar um limite de taxa por 24/7 é o tipo de inflação que recusamos.
-- **As quotas sujeitas a uma verificação de identidade regional são apresentadas separadamente** (`+~6M mediante verificação de identidade regional`), porque a maioria dos leitores não pode utilizá-las.
+- **As quotas sujeitas a uma verificação de identidade regional são apresentadas separadamente** (`+~6M behind regional identity verification`), porque a maioria dos leitores não pode utilizá-las.
 - **Os créditos de registo aplicam-se apenas ao primeiro mês** e são indicados como um segundo valor, nunca combinados com o valor recorrente.
 - **O valor é imposto pela CI.** `npm run check:docs-counts` recalcula os totais a partir do catálogo e faz com que a compilação falhe quando este ficheiro, o README ou o cartão de orçamento deixam de corresponder aos mesmos.
 

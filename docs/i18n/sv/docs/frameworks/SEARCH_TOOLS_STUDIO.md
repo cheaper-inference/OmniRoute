@@ -54,7 +54,7 @@ Ny flik för att extrahera innehåll från en URL via `POST /v1/web/fetch` (skap
 - Inmatning: URL + växling för hela sidan + formatväljare (markdown/text/HTML).
 - Skicka → hämta → rendera `ScrapeResult.tsx`.
 - `ScrapeResult` renderar en förhandsvisning av markdown + växling till rådata.
-- Gräns: om svarskroppen är större än **256 kB** visar gränssnittet `(truncated, view raw)` och öppnar rådata i en Monaco-modal (D21).
+- Gräns: om svarskroppen är större än **256 kB** visar gränssnittet `View full raw content` och öppnar rådata i en modal (D21).
 - Metadatapanel: leverantör (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latens, kostnad, svarsstorlek, antal länkar.
 - Använder hooken `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Kör samma fråga/URL parallellt hos upp till **4 leverantörer** (D22):
 `ProviderCatalog.tsx` visar hela leverantörslistan från `GET /api/search/providers`
 (utökad i F4 för att inkludera hämtningsleverantörer):
 
-| `kind` | `"search"` (20 leverantörer) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 leverantörer) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Statusen **fastställs vid tidpunkten för begäran** genom att kontrollera om autentiseringsuppgifter finns och om
 alla nycklar för närvarande har en nedkylningsperiod.
+
+`codex-search` (Codex Web Search): Använder dina anslutna Codex-konton (ChatGPT) utan en separat nyckel. Varje sökning förbrukar prenumerationskvot och tar cirka 10–40 s. Körs när en begäran anger den; automatiskt val kräver flaggan `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, som är avstängd som standard.
 
 ---
 

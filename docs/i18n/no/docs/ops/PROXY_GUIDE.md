@@ -393,7 +393,7 @@ Bruker `wreq-js` til å generere nettleserlignende TLS-fingeravtrykk og omgår d
 
 ### Samsvar med CLI-fingeravtrykk
 
-**Bryteren for CLI-fingeravtrykk** (`Innstillinger → Sikkerhet`) endrer rekkefølgen på HTTP-hoder og felt i JSON-innholdet slik at de samsvarer med den nøyaktige signaturen til opprinnelige CLI-binærfiler (Claude Code, Codex osv.). Dette fungerer **i tillegg til** proxyen:
+**Bryteren for CLI-fingeravtrykk** (`Settings → Security`) endrer rekkefølgen på HTTP-hoder og felt i JSON-innholdet slik at de samsvarer med den nøyaktige signaturen til opprinnelige CLI-binærfiler (Claude Code, Codex osv.). Dette fungerer **i tillegg til** proxyen:
 
 ```
 Din IP (blokkert) → Proxy-IP (USA) → Leverandør-API

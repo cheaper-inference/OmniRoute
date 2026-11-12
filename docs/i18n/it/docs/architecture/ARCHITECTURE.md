@@ -8,78 +8,79 @@
 
 _Ultimo aggiornamento: 2026-06-28_
 
-## Sintesi
+## Riepilogo esecutivo
 
-OmniRoute è un gateway di routing AI locale e un dashboard basato su Next.js. Fornisce un singolo endpoint compatibile con OpenAI (`/v1/*`) e instrada il traffico attraverso più provider upstream con traduzione, fallback, aggiornamento dei token e monitoraggio dell'utilizzo.
+OmniRoute è un gateway locale per l'instradamento dell'IA e una dashboard basata su Next.js.
+Fornisce un singolo endpoint compatibile con OpenAI (`/v1/*`) e instrada il traffico tra più provider upstream, offrendo traduzione, fallback, rinnovo dei token e monitoraggio dell'utilizzo.
 
 Funzionalità principali:
 
-- Superficie API compatibile con OpenAI per CLI/tools (381 provider, 159 moduli esecutori)
-- Traduzione Request/response tra i formati dei fornitori
-- Fallback combinato di modelli (sequenza multi-modello)
-- Passaggi combinati strutturati (`provider + model + connection`) con ordinamento di runtime tramite `compositeTiers`
-- Fallback a livello di account (più account per fornitore)
-- Preflight delle quote e selezione dell'account P2C compatibile con le quote nel percorso della chat principale
-- gestione della connessione del provider di chiavi API OAuth + (27 moduli del provider OAuth )
-- Incorporamento della generazione tramite `/v1/embeddings` (18 fornitori)
-- Generazione di immagini tramite `/v1/images/generations` (10 fornitori +, 20 modelli + )
-- Trascrizione audio tramite `/v1/audio/transcriptions` (18 fornitori)
+- Superficie API compatibile con OpenAI per CLI/strumenti (388 provider, 159 moduli executor)
+- Traduzione di richieste/risposte tra i formati dei provider
+- Fallback tramite combinazioni di modelli (sequenza multi-modello)
+- Passaggi di combinazione strutturati (`provider + model + connection`) con ordinamento in fase di esecuzione tramite `compositeTiers`
+- Fallback a livello di account (più account per provider)
+- Controllo preliminare della quota e selezione degli account P2C basata sulla quota nel flusso principale della chat
+- Gestione delle connessioni ai provider tramite OAuth e chiavi API (27 moduli provider OAuth)
+- Generazione di embedding tramite `/v1/embeddings` (18 provider)
+- Generazione di immagini tramite `/v1/images/generations` (oltre 10 provider, oltre 20 modelli)
+- Trascrizione audio tramite `/v1/audio/transcriptions` (18 provider)
 - Sintesi vocale tramite `/v1/audio/speech` (24 provider integrati)
-- Generazione video tramite `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generazione di video tramite `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Generazione di musica tramite `/v1/music/generations` (ComfyUI)
-- Ricerca web tramite `/v1/search` (20 fornitori)
-- Moderazioni tramite `/v1/moderations`
-- Riclassificazione tramite `/v1/rerank`
-- Pensa all'analisi dei tag (`<think>...</think>`) per i modelli di ragionamento
-- Sanificazione della risposta per una rigorosa compatibilità OpenAI SDK
-- Normalizzazione dei ruoli (sistema → dello sviluppatore, utente del sistema →) per la compatibilità tra provider
+- Ricerca web tramite `/v1/search` (20 provider)
+- Moderazione tramite `/v1/moderations`
+- Riordinamento tramite `/v1/rerank`
+- Analisi dei tag Think (`<think>...</think>`) per i modelli di ragionamento
+- Sanitizzazione delle risposte per una rigorosa compatibilità con l'SDK OpenAI
+- Normalizzazione dei ruoli (developer→system, system→user) per la compatibilità tra provider
 - Conversione dell'output strutturato (json_schema → Gemini responseSchema)
-- Persistenza locale per provider, chiavi, alias, combo, impostazioni, prezzi (122 moduli DB )
-- monitoraggio Usage/cost e registrazione delle richieste
-- Sincronizzazione cloud opzionale per la sincronizzazione multi-device/state
-- IP allowlist/blocklist per il controllo degli accessi API
-- Pensare alla gestione del budget (passthrough/auto/custom/adaptive)
-- Iniezione rapida del sistema globale
-- Monitoraggio della sessione e rilevamento delle impronte digitali
-- Limitazione tariffaria avanzata per account con profili specifici del fornitore
-- Modello di interruttore automatico per la resilienza del fornitore
-- Protezione gregge antituono con bloccaggio mutex
-- Cache di deduplicazione delle richieste basata su firma
-- Livello del dominio: regole di costo, politica di fallback, politica di blocco
-- Inoltro contesto: riepiloghi di trasferimento delle sessioni per la continuità della rotazione degli account
-- Persistenza dello stato del dominio (cache write-through SQLite per fallback, budget, blocchi, interruttori automatici)
+- Persistenza locale di provider, chiavi, alias, combinazioni, impostazioni e prezzi (122 moduli DB)
+- Monitoraggio dell'utilizzo e dei costi e registrazione delle richieste
+- Sincronizzazione cloud facoltativa per la sincronizzazione dello stato tra più dispositivi
+- Lista di indirizzi IP consentiti/bloccati per il controllo dell'accesso alle API
+- Gestione del budget di ragionamento (passthrough/auto/custom/adaptive)
+- Inserimento di un prompt di sistema globale
+- Monitoraggio e fingerprinting delle sessioni
+- Limitazione avanzata della frequenza per account, con profili specifici per provider
+- Pattern circuit breaker per la resilienza dei provider
+- Protezione anti-thundering herd con blocco mutex
+- Cache di deduplicazione delle richieste basata sulla firma
+- Livello di dominio: regole dei costi, criteri di fallback, criteri di blocco
+- Context Relay: riepiloghi di passaggio delle sessioni per garantire la continuità durante la rotazione degli account
+- Persistenza dello stato del dominio (cache write-through SQLite per fallback, budget, blocchi e circuit breaker)
 - Motore di policy per la valutazione centralizzata delle richieste (blocco → budget → fallback)
-- Richiedi telemetria con aggregazione della latenza p50/p95/p99
-- Telemetria del target combinato e salute storica del target combinato tramite `combo_execution_key` / `combo_step_id`
-- Correlazione ID (X-Request-Id) per la traccia end-to-end
-- Registrazione del controllo di conformità con rinuncia per chiave API
-- Quadro di valutazione per la garanzia della qualità LLM
-- Dashboard di integrità con stato dell'interruttore automatico del fornitore in tempo reale
-- MCP Server (110 strumenti) con 3 trasporti (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) con competenze e ciclo di vita delle attività
-- Sistema di memoria (estrazione, iniezione, recupero, riepilogo)
-- Sistema di competenze (registro, esecutore, sandbox, competenze integrate)
-- proxy MITM con gestione dei certificati e gestione DNS
-- Middleware di protezione dell'iniezione rapida
-- Pipeline di compressione rapida con Caveman, RTK, pipeline impilate, combinazioni di compressione, pacchetti linguistici e analisi
-- Registro di sistema ACP (Agent Communication Protocol).
-- Fornitori OAuth modulari (22 moduli individuali sotto `src/lib/oauth/providers/`)
-- script Uninstall/full-uninstall
-- azione di riparazione dell'ambiente OAuth
-- bridge WebSocket per client WS compatibili con OpenAI (`/v1/ws`)
-- Sincronizzazione della gestione dei token (issue/revoke, download del bundle di configurazione con versione ETag)
-- GLM Thinking (`glmt`) preimpostazione fornitore di prima classe
-- Conteggio dei token ibridi ( `/messages/count_tokens` lato provider con fallback di stima)
-- Seeding automatico degli alias del modello (normalizzazioni di dialetti cross-proxy di 30 + all'avvio)
-- Recupero in uscita sicuro con protezione SSRF, blocco URL privato e tentativi configurabili
-- Tentativi di chat sensibili al cooldown con `requestRetry` e `maxRetryIntervalSec` configurabili
-- Convalida dell'ambiente runtime con Zod all'avvio
-- Controllo di conformità v2 con impaginazione, eventi CRUD del provider e registrazione di convalida bloccata da SSRF
+- Telemetria delle richieste con aggregazione della latenza p50/p95/p99
+- Telemetria dei target delle combinazioni e cronologia dello stato dei target tramite `combo_execution_key` / `combo_step_id`
+- ID di correlazione (X-Request-Id) per il tracciamento end-to-end
+- Registrazione degli audit di conformità con possibilità di disattivazione per ogni chiave API
+- Framework di valutazione per il controllo qualità degli LLM
+- Dashboard di integrità con stato in tempo reale dei circuit breaker dei provider
+- Server MCP (110 strumenti) con 3 trasporti (stdio/SSE/Streamable HTTP)
+- Server A2A (JSON-RPC 2.0 + SSE) con competenze e ciclo di vita delle attività
+- Sistema di memoria (estrazione, inserimento, recupero, riepilogo)
+- Sistema di competenze (registro, executor, sandbox, competenze integrate)
+- Proxy MITM con gestione dei certificati e del DNS
+- Middleware di protezione contro l'iniezione di prompt
+- Pipeline di compressione dei prompt con Caveman, RTK, pipeline sovrapposte, combinazioni di compressione, pacchetti linguistici e analisi
+- Registro ACP (Agent Communication Protocol)
+- Provider OAuth modulari (22 moduli individuali in `src/lib/oauth/providers/`)
+- Script di disinstallazione/disinstallazione completa
+- Azione di ripristino dell'ambiente OAuth
+- Bridge WebSocket per client WS compatibili con OpenAI (`/v1/ws`)
+- Gestione dei token di sincronizzazione (emissione/revoca, download di bundle di configurazione con versionamento ETag)
+- Preset provider GLM Thinking (`glmt`) di prima classe
+- Conteggio ibrido dei token (`/messages/count_tokens` lato provider con fallback alla stima)
+- Inizializzazione automatica degli alias dei modelli (oltre 30 normalizzazioni dei dialetti tra proxy all'avvio)
+- Recupero in uscita sicuro con protezione SSRF, blocco degli URL privati e nuovi tentativi configurabili
+- Nuovi tentativi della chat sensibili al periodo di attesa, con `requestRetry` e `maxRetryIntervalSec` configurabili
+- Convalida dell'ambiente di runtime con Zod all'avvio
+- Audit di conformità v2 con paginazione, eventi CRUD dei provider e registrazione delle convalide bloccate da SSRF
 
-Modello runtime primario:
+Modello di runtime principale:
 
-- I percorsi dell'app Next.js sotto `src/app/api/*` implementano sia la dashboard APIs che la compatibilità APIs
-- Un core SSE/routing condiviso in `src/sse/*` + `open-sse/*` gestisce l'esecuzione, la traduzione, lo streaming, il fallback e l'utilizzo del provider
+- Le route dell'app Next.js in `src/app/api/*` implementano sia le API della dashboard sia le API di compatibilità
+- Un nucleo SSE/di instradamento condiviso in `src/sse/*` + `open-sse/*` gestisce l'esecuzione dei provider, la traduzione, lo streaming, il fallback e l'utilizzo
 
 ## Diagrammi di riferimento
 
@@ -344,7 +345,7 @@ Livelli dell'architettura:
   streaming in tempo reale dei log, gestione delle chiavi API e, per 9Router, UI nativa integrata tramite
   un reverse proxy interno.
 - **API** (`/api/services/{name}/*`) — 11 endpoint per 9Router, 10 per CLIProxyAPI, 8 ciascuno per Bifrost / Mux / Dario,
-  tutti classificati come **LOCAL_ONLY** (regola rigida n. 17). Un endpoint SSE condiviso `GET /api/services/[name]/logs`
+  tutti classificati come **LOCAL_ONLY** (regola rigida n. #17). Un endpoint SSE condiviso `GET /api/services/[name]/logs`
   serve entrambi i servizi.
 - **Supervisore** (`src/lib/services/`) — la classe generica `ServiceSupervisor` esegue il wrapping di
   `child_process.spawn`, mantiene un buffer circolare da 5 MB per lo streaming SSE dei log, un ciclo
@@ -858,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: importa direttamente i moduli specifici — nessun barrel (il precedente livello di riesportazione `localDb.ts` è stato rimosso)
 - `src/lib/usageDb.ts`: facade della cronologia di utilizzo/dei log delle chiamate basata sulle tabelle SQLite
 
-## Copertura degli executor dei provider (pattern Strategy)
+## Copertura dell'esecutore del provider (modello strategico)
 
-Ogni provider dispone di un executor specializzato che estende `BaseExecutor` (in `open-sse/executors/base.ts`), il quale fornisce la costruzione degli URL, la creazione degli header, i tentativi ripetuti con backoff esponenziale, gli hook per l'aggiornamento delle credenziali e il metodo di orchestrazione `execute()`.
+Ogni provider dispone di un esecutore specializzato che estende `BaseExecutor` (in `open-sse/executors/base.ts`), che fornisce la creazione URL, la costruzione dell'intestazione, i nuovi tentativi con backoff esponenziale, gli hook di aggiornamento delle credenziali e il metodo di orchestrazione `execute()`.
 
-| Executor                  | Provider                                                                                                                                                    | Gestione speciale                                                                        |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, ecc. | Configurazione dinamica di URL/header per ciascun provider                               |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID di progetto/sessione personalizzati, analisi di Retry-After, offuscamento 429         |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Instradamento basato sul deployment, applicazione della query api-version                |
-| `BlackboxWebExecutor`     | Blackbox AI (modalità web)                                                                                                                                  | Reverse engineering della sessione web con emulazione del fingerprint TLS                |
-| `ClaudeIdentityExecutor`  | Claude.ai (percorso CCH)                                                                                                                                    | Pipeline di vincoli e rimappatura degli strumenti, modellazione del fingerprint          |
-| `CliProxyApiExecutor`     | Provider compatibili con CLIProxyAPI                                                                                                                        | Autenticazione e gestione del protocollo personalizzate                                  |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | Inserimento dell'ID account, monitoraggio dell'utilizzo basato su Neurons                |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Inserisce istruzioni di sistema, impone il livello di ragionamento                       |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Bridge dell'API Responses tramite sessione browser con associazione thread/turno         |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth e rotazione degli header per sessione                                              |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Protocollo ConnectRPC, codifica Protobuf, firma delle richieste tramite checksum         |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Bridge del ciclo di vita delle attività Devin tramite il modulo agente cloud             |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Aggiornamento del token Copilot, header che emulano VSCode                               |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | OAuth GitLab e instradamento limitato al progetto                                        |
-| `GlmExecutor`             | Z.AI GLM (incluso il preset `glmt`)                                                                                                                         | Gestione del budget di ragionamento, costanti del preset GLMT                            |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | Reverse engineering della sessione web, selezione della modalità (ragionamento/standard) |
-| `KieExecutor`             | KIE                                                                                                                                                         | Emissione di token personalizzati con riferimenti di sessione a rotazione                |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Conversione del formato binario AWS EventStream → SSE                                    |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                            | Reverse engineering della sessione web con bridge per messaggi immagine                  |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Struttura del corpo della richiesta specifica del provider                               |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Configurazione del provider compatibile con AI SDK                                       |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                              | Reverse engineering della sessione web per la continuazione della chat                   |
-| `PetalsExecutor`          | Inferenza distribuita Petals                                                                                                                                | Instradamento decentralizzato nello swarm                                                |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | Nessuna chiave API richiesta, richieste soggette a limitazione di frequenza              |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Supporto PAT e OAuth, piano gratuito multimodello                                        |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Autenticazione con account di servizio, endpoint basati sulla regione                    |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Chiave API importata e streaming della chat tramite Connect-protobuf                     |
+| Esecutore                 | Fornitore/i                                                                                                                                                  | Movimentazione speciale                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplessità, Together, Fireworks, Cerebras, Cohere, NVIDIA, ecc. | Configurazione URL/header dinamica per fornitore                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | project/session IDs personalizzato, analisi Riprova dopo, offuscamento 429       |
+| `AzureOpenAIExecutor`     | OpenAI azzurro                                                                                                                                               | Routing basato sulla distribuzione, applicazione delle query sulla versione API  |
+| `BlackboxWebExecutor`     | Blackbox AI (modalità web)                                                                                                                                   | Inversione della sessione Web con emulazione dell'impronta digitale TLS          |
+| `ClaudeIdentityExecutor`  | Claude.ai (percorso CCH )                                                                                                                                    | Vincolo + tool-remap pipeline, modellatura delle impronte digitali               |
+| `CliProxyApiExecutor`     | Provider compatibili con CLIProxyAPI                                                                                                                         | Gestione dell'autenticazione e del protocollo personalizzati                     |
+| `CloudflareAiExecutor`    | Cloudflare Lavoratori AI                                                                                                                                     | Iniezione ID dell'account, monitoraggio dell'utilizzo basato sui neuroni         |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | Inserisce istruzioni di sistema, forza lo sforzo di ragionamento                 |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | Risposte della sessione del browser Bridge API con blocco thread/turn            |
+| `CommandCodeExecutor`     | Codice di comando                                                                                                                                            | OAuth + Rotazione dell'intestazione per sessione                                 |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | Protocollo ConnectRPC, codifica Protobuf, firma della richiesta tramite checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Bridge del ciclo di vita delle attività Devin tramite il modulo agente cloud     |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Aggiornamento del token Copilot, intestazioni che imitano VSCode                 |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth + Routing nell'ambito del progetto                                  |
+| `GlmExecutor`             | Z.AI GLM (incl. preimpostazione `glmt` )                                                                                                                     | Consapevole del budget, costanti preimpostate GLMT                               |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                 | Inversione della sessione Web, selezione della modalità (think/standard)         |
+| `KieExecutor`             | KIE                                                                                                                                                          | Emissione di token personalizzati con ancoraggi di sessione rotanti              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | AWS EventStream conversione formato binario → SSE                                |
+| `MuseSparkWebExecutor`    | Musa Spark (web)                                                                                                                                             | Inversione della sessione Web con collegamento di messaggi immagine              |
+| `NlpCloudExecutor`        | NLP Nuvola                                                                                                                                                   | Forma del corpo richiesta specifica del provider                                 |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | Configurazione del provider compatibile AI SDK                                   |
+| `PerplexityWebExecutor`   | Rete di perplessità                                                                                                                                          | Inversione della sessione Web per la continuazione della chat                    |
+| `PetalsExecutor`          | Inferenza distribuita sui petali                                                                                                                             | Instradamento dello sciame decentralizzato                                       |
+| `PollinationsExecutor`    | Impollinazioni AI                                                                                                                                            | Nessuna chiave API richiesta, richieste a velocità limitata                      |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                     | Supporto PAT e OAuth, livello gratuito multi-modello                             |
+| `VertexExecutor`          | Google Vertice AI                                                                                                                                            | Autenticazione dell'account di servizio, endpoint basati sulla regione           |
+| `DevinDesktopExecutor`    | Desktop Devin                                                                                                                                                | Chiave API importata Streaming chat del protocollo + Connect                     |
 
-Tutti gli altri provider (inclusi i nodi compatibili personalizzati) utilizzano il `DefaultExecutor`.
+Tutti gli altri provider (inclusi i nodi compatibili personalizzati) utilizzano `DefaultExecutor`.
+
+### Sonde automatizzate e account di sessioni web
+
+Test sui modelli, Test All, test combinati e valutazioni inviano richieste di chat reali. Un fornitore di sessioni web funge da utente che ha effettuato l'accesso, quindi ciascuna di queste richieste verrà salvata come conversazione su quell'account; le indagini automatizzate che hanno lasciato tali conversazioni hanno ottenuto la sospensione dell'account (#14780). La pipeline della chat rifiuta quindi ogni target raggiunto da una sonda automatizzata il cui provider accetta una credenziale di sessione Web, una volta risolto il provider del target e prima che venga scelta una credenziale (`src/lib/providers/chatProbePolicy.ts`). Il rifiuto è `422` con `error.code` `chat_probe_not_isolated` e i sondaggi lo segnalano come un salto, non come un fallimento.
+
+Un esecutore che esegue ogni chat nella modalità senza cronologia propria del provider la dichiara con `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); le sonde a quel fornitore sono quindi consentite. ChatGPT Web dichiara `temporary-chat`. Fissa una dichiarazione al suo meccanismo con un test, in modo che l'affermazione non possa sopravvivere al codice che la rende vera.
 
 ## Matrice di compatibilità dei provider
 
@@ -1058,9 +1065,9 @@ compatibilità con i sistemi legacy. L'attuale contratto di runtime utilizza:
 
 ## 6) Protezione SSRF / URL in uscita
 
-- `src/shared/network/outboundUrlGuard.ts` blocca tutti gli URL di destinazione privati/loopback/link-local prima che raggiungano gli esecutori dei provider
-- le route di rilevamento e convalida dei modelli dei provider utilizzano `src/shared/network/safeOutboundFetch.ts`, che applica la protezione prima di ogni richiesta in uscita
-- gli errori della protezione vengono esposti come `URL_GUARD_BLOCKED` con HTTP 422 e registrati nel percorso di audit della conformità tramite `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) applica `src/shared/network/outboundUrlGuard.ts` alle richieste di chat inoltrate tramite `BaseExecutor.execute()`. In modalità solo pubblica (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` con il flag privato disattivato), blocca gli host privati e di loopback e 169.254.0.0/16; in tutte le altre modalità blocca gli host dei metadati cloud. Controlla il nome host o il valore letterale dell'indirizzo IP così come è scritto, prima di qualsiasi ricerca DNS. I provider locali integrati non sono soggetti a questo controllo.
+- Le route di individuazione e convalida dei modelli dei provider utilizzano `src/shared/network/safeOutboundFetch.ts`, che applica la protezione prima di ogni richiesta in uscita
+- Gli errori della protezione vengono esposti come `URL_GUARD_BLOCKED` con HTTP 503 (`getSafeOutboundFetchErrorStatus`; la route di individuazione dei modelli restituisce 400) e i blocchi SSRF effettivi durante la convalida vengono registrati nel log di audit come eventi `provider.validation.ssrf_blocked`
 
 ## Osservabilità e segnali operativi
 
@@ -1111,7 +1118,7 @@ Variabili di ambiente utilizzate attivamente dal codice:
 4. Il comportamento cloud dipende dalla corretta configurazione di `NEXT_PUBLIC_BASE_URL` e dalla raggiungibilità dell'endpoint cloud.
 5. La directory `open-sse/` viene pubblicata come **pacchetto workspace npm** `@omniroute/open-sse`. Il codice sorgente la importa tramite `@omniroute/open-sse/...` (risolto da `transpilePackages` di Next.js). Per coerenza, i percorsi dei file in questo documento continuano a utilizzare il nome della directory `open-sse/`.
 6. I grafici nella dashboard utilizzano **Recharts** (basato su SVG) per visualizzazioni analitiche accessibili e interattive (grafici a barre sull'utilizzo dei modelli, tabelle di dettaglio dei provider con tassi di successo).
-7. I test E2E utilizzano **Playwright** (`tests/e2e/`) e vengono eseguiti tramite `npm run test:e2e`. I test unitari utilizzano il **test runner di Node.js** (`tests/unit/`) e vengono eseguiti tramite `npm run test:unit`. Il codice sorgente in `src/` è **TypeScript** (`.ts`/`.tsx`); il workspace `open-sse/` rimane in JavaScript (`.js`).
+7. I test E2E utilizzano **Playwright** (`tests/e2e/`) e vengono eseguiti tramite `npm run test:e2e`. I test unitari utilizzano il **test runner di Node.js** (`tests/unit/`) e vengono eseguiti tramite `npm run test:unit`. Il codice sorgente in `src/` è **TypeScript** (`.ts`/`.tsx`); il workspace `open-sse/` rimane in TypeScript (`.ts`).
 8. La pagina delle impostazioni è organizzata in 7 schede: Generali, Aspetto, IA, Sicurezza, Routing, Resilienza, Avanzate. La pagina Resilienza configura solo la coda delle richieste, il tempo di recupero della connessione, il circuit breaker del provider e il comportamento di attesa del tempo di recupero; lo stato di runtime in tempo reale del circuit breaker viene mostrato nella pagina Stato.
 9. La strategia **Context Relay** (`context-relay`) è suddivisa in due livelli: `combo.ts` decide se debba essere generato un handoff, mentre `chat.ts` inserisce l'handoff dopo la risoluzione dell'account. I dati degli handoff risiedono nella tabella SQLite `context_handoffs`. Questa suddivisione è intenzionale, perché solo `chat.ts` sa se l'account effettivo è cambiato.
 10. L'**applicazione del proxy** è ora completa: `tokenHealthCheck.ts` risolve il proxy per ogni connessione, `/api/providers/validate` utilizza `runWithProxyContext` e `proxyFetch.ts` utilizza `undici.fetch()` per mantenere la compatibilità con il dispatcher su Node 22.

@@ -20,7 +20,7 @@ Ketika agen IDE (misalnya, GitHub Copilot, Cursor, Claude Code) membuat panggila
 
 Ini berarti Anda dapat:
 
-- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 381 penyedia OmniRoute.
+- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 388 penyedia OmniRoute.
 - **Terapkan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara transparan di tingkat handler.
 - **Amati semua lalu lintas agen** : setiap permintaan yang disadap dipublikasikan ke [Inspektur Lalu Lintas](./TRAFFIC_INSPECTOR.md).
 - **Terapkan ketahanan OmniRoute** : perutean kombo, pemutus sirkuit, fallback, dan pelacakan biaya juga berfungsi untuk lalu lintas agen IDE.
@@ -556,7 +556,7 @@ Trae adalah asisten pengodean AI yang relatif baru. Sebelum mengimplementasikan 
 3. Tentukan mekanisme autentikasi
 4. Nilai lanjut/tidak lanjut berdasarkan TOS dan kemudahan penemuan API
 
-Hingga investigasi selesai, kartu Trae di dasbor menampilkan lencana "Sedang Diinvestigasi" dengan tautan "Laporkan kelayakan". Stub handler di `src/mitm/handlers/trae.ts` memunculkan error terstruktur `Belum diimplementasikan`.
+Hingga investigasi selesai, kartu Trae di dasbor menampilkan lencana "Sedang Diinvestigasi" dengan tautan "Laporkan kelayakan". Stub handler di `src/mitm/handlers/trae.ts` memunculkan error terstruktur `Not yet implemented`.
 
 ### Agen backlog (MITM diperlukan — tidak mendukung URL dasar kustom)
 

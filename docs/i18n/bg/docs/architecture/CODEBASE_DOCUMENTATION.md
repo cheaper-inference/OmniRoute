@@ -444,104 +444,143 @@ server/
 
 ---
 
-## 4. `open-sse/` — Работно пространство на стрийминг машина
+## 4. `open-sse/` — Работно пространство на стрийминг системата
 
-Отделно работно пространство npm, публикувано като `@omniroute/open-sse`. Притежава обработка на заявки, изпълнители, преводачи, услуги, трансформатор и MCP сървър.
+Отделно npm работно пространство, публикувано като `@omniroute/open-sse`. Отговаря за обработката на заявки, изпълнителите, транслаторите, услугите, трансформатора и MCP сървъра.
 
 ```
 open-sse/
-├── index.ts                Public exports
-├── package.json            Workspace manifest
+├── index.ts                Публично експортирани елементи
+├── package.json            Манифест на работното пространство
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries, header profiles, identity, …
-├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
-├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               80+ service modules (combos, fallback, quotas, identity, …)
-├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
+├── config/                 Регистри на доставчици, профили на заглавки, идентичност, …
+├── handlers/               Обработчици на заявки (чат, вграждания, аудио, изображения, …)
+├── executors/              159 модула за изпълнители на доставчици (класове изпълнители + помощни модули за отделните доставчици)
+├── translator/             Преобразуване на формати (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Трансформатор на поток от Responses API към Chat Completions
+├── services/               Над 80 модула за услуги (комбинации, резервни варианти, квоти, идентичност, …)
+├── utils/                  Помощни инструменти за стрийминг, TLS клиент, AWS SigV4, извличане чрез прокси, …
+└── mcp-server/             MCP сървър (3 транспорта, 33 обхвата, 110 инструмента)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Манипулатор             | Цел                                                                                                       |
-| ----------------------- | --------------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Основен канал за чат (кеш, ограничение на скоростта, комбинирано маршрутизиране, изпращане на изпълнител) |
-| `responsesHandler.ts`   | OpenAI Отговори API входна точка                                                                          |
-| `embeddings.ts`         | Вграждания                                                                                                |
-| `imageGeneration.ts`    | Генериране на изображения                                                                                 |
-| `audioSpeech.ts`        | Преобразуване на текст в реч                                                                              |
-| `audioTranscription.ts` | Преобразуване на реч в текст                                                                              |
-| `videoGeneration.ts`    | Видео генериране                                                                                          |
-| `musicGeneration.ts`    | Музикално поколение                                                                                       |
-| `rerank.ts`             | Прекласиране                                                                                              |
-| `moderations.ts`        | Умереност                                                                                                 |
-| `search.ts`             | Търсене в мрежата                                                                                         |
-| `sseParser.ts`          | анализатор на събития SSE                                                                                 |
-| `usageExtractor.ts`     | Изтеглете броя на жетоните от потоци нагоре по веригата                                                   |
-| `responseSanitizer.ts`  | Отстраняване на шума, специфичен за доставчика                                                            |
-| `responseTranslator.ts` | Лепило между отговора на доставчика и слоя преводач                                                       |
+| Обработчик              | Предназначение                                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Основен конвейер за чат (кеш, ограничаване на честотата, маршрутизиране на комбинации, разпределяне към изпълнители) |
+| `responsesHandler.ts`   | Входна точка на OpenAI Responses API                                                                                 |
+| `embeddings.ts`         | Векторни представяния                                                                                                |
+| `imageGeneration.ts`    | Генериране на изображения                                                                                            |
+| `audioSpeech.ts`        | Преобразуване на текст в реч                                                                                         |
+| `audioTranscription.ts` | Преобразуване на реч в текст                                                                                         |
+| `videoGeneration.ts`    | Генериране на видео                                                                                                  |
+| `musicGeneration.ts`    | Генериране на музика                                                                                                 |
+| `rerank.ts`             | Повторно класиране                                                                                                   |
+| `moderations.ts`        | Модериране                                                                                                           |
+| `search.ts`             | Търсене в мрежата                                                                                                    |
+| `sseParser.ts`          | Парсър на SSE събития                                                                                                |
+| `usageExtractor.ts`     | Извличане на броя токени от потоците на доставчика                                                                   |
+| `responseSanitizer.ts`  | Премахване на специфичен за доставчика шум                                                                           |
+| `responseTranslator.ts` | Свързващ слой между отговора на доставчика и слоя за преобразуване                                                   |
 
 ### 4.2 `open-sse/executors/`
 
-159 изпълнителни модула от най-високо ниво (`*.ts` минус `base.ts`, `index.ts` и тестове — броят измерва `npm run check:docs-counts` ). Всеки изпълнителен клас разширява `BaseExecutor` (`base.ts`), директно или чрез `DefaultExecutor` или друг изпълнител; останалите модули са помощници за всеки доставчик (схеми на инструменти, fetch/TTS адаптери, манипулатори на quirk). Изпълнителите включват:
+159 модула за изпълнители от най-високо ниво (`*.ts` без `base.ts`, `index.ts` и тестовете — броят, измерван от `npm run check:docs-counts`). Всеки клас изпълнител наследява `BaseExecutor` (`base.ts`), директно или чрез `DefaultExecutor` или друг изпълнител; останалите модули са помощни модули за отделните доставчици (схеми на инструменти, адаптери за извличане/TTS, обработчици на особености). Изпълнителите включват:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, плюс `claudeIdentity.ts` (помощник за споделена самоличност) и `index.ts` (регистър).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
+`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
+`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, както и `claudeIdentity.ts`
+(споделен помощен модул за идентичност) и `index.ts` (регистър).
 
-> Забележка: доставчиците, които не са изброени тук, се обслужват от `default.ts` използвайки генеричния OpenAI-съвместим изпълнител. Пълният каталог на доставчиците (381 доставчици) се намира в `src/shared/constants/providers.ts`.
+> Забележка: доставчиците, които не са изброени тук, се обслужват от `default.ts` чрез универсалния
+> OpenAI-съвместим изпълнител. Пълният каталог на доставчиците (388 доставчици) се намира в
+> `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Превод Hub-and-Spoke (OpenAI е центърът).
+Преобразуване по модел „център и лъчи“ (OpenAI е центърът).
 
-- **9 заявки за преводачи** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 преводачи на отговор** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **9 помощници** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, плюс помощни тестове.
-- **Помощници за изображения** (`translator/image/sizeMapper.ts`).
-- Най-високо ниво: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- **9 транслатора на заявки** (`translator/request/`):
+  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
+  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 транслатора на отговори** (`translator/response/`):
+  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
+- **9 помощни модула** (`translator/helpers/`):
+  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, както и
+  тестове на помощните модули.
+- **Помощни модули за изображения** (`translator/image/sizeMapper.ts`).
+- На най-високо ниво: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Отговори API ↔ Преобразувател на завършвания на чат (използван от маршрута `responses/` catch-all).
+- `responsesTransformer.ts` — базиран на `TransformStream` конвертор между Responses API и Chat
+  Completions (използван от универсалния маршрут `responses/`).
 
 ### 4.5 `open-sse/services/`
 
-Акценти (пълният списък под `open-sse/services/`):
+Основни модули (пълният списък е в `open-sse/services/`):
 
-| Загриженост                      | файлове                                                                                                                                                                                                                                                  |
+| Област                           | Файлове                                                                                                                                                                                                                                                  |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Комбинирано маршрутизиране       | `combo.ts` (20 стратегии), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
-| Auto Combo двигател              | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Устойчивост                      | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
+| Автоматичен комбиниран механизъм | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Устойчивост                      | `accountFallback.ts` (период на изчакване + блокиране), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                            |
 | Квоти                            | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Кеширане                         | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Интелигентност за маршрутизиране | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Обработка на модела              | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Компресия                        | `compression/` — окабеляване на двигателя с пълна компресия                                                                                                                                                                                              |
-| Токен + сесия                    | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Интелигентно маршрутизиране      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Обработка на модели              | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Компресиране                     | `compression/` — цялостно свързване на механизма за компресиране                                                                                                                                                                                         |
+| Токени + сесии                   | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Ниво / манифест                  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / мрежа                       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Партиди                          | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Пакетна обработка                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Използване                       | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 уникални инструмента** свързани в `server.ts` (45 канонични в `schemas/tools.ts` + памет, умения, GitHub-умения, пул, геймификация, плъгин, Notion, Obsidian, локален корпус и модули за компресия — съюз, преброени от `countUniqueMcpTools`).
-- **3 транспорта** : stdio, HTTP Streamable, SSE.
-- **33 обхвата** наложен по време на изпълнение — базов списък в `src/shared/constants/mcpScopes.ts`, пълният набор е обединението на обхватите, декларирани от всеки инструментален модул.
-- Таблица за одит: `mcp_tool_audit` (попълнена от `audit.ts`).
-- Файлове: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, плюс тестове под `__tests__/`.
+- **110 уникални инструмента**, свързани в `server.ts` (45 канонични в `schemas/tools.ts` +
+  модули за памет, умения, GitHub умения, пул, геймификация, приставки, Notion, Obsidian,
+  локален корпус и компресиране — обединението се преброява от `countUniqueMcpTools`).
+- **3 транспорта**: stdio, HTTP Streamable, SSE.
+- **33 обхвата**, налагани по време на изпълнение — основният списък е в `src/shared/constants/mcpScopes.ts`, а пълният набор е обединението от обхватите, декларирани от всеки модул с инструменти.
+- Таблица за одит: `mcp_tool_audit` (попълва се от `audit.ts`).
+- Файлове: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
+  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
+  плюс тестове в `__tests__/`.
 - Вижте [MCP-SERVER.md](../frameworks/MCP-SERVER.md) за пълния каталог с инструменти.
 
 ### 4.7 `open-sse/config/`
 
-Регистри на доставчици (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), регистри на модел на формат (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), помощници за самоличност (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), помощници за идентификационни данни (`credentialLoader.ts`, `codexClient.ts`) и облачни адаптери (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `maritalk.ts` `glmProvider.ts` `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Регистри на доставчици (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), регистри на модели по формат (`audioRegistry.ts`,
+`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
+`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
+помощни компоненти за идентичност (`codexIdentity.ts`, `codexInstructions.ts`,
+`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
+`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
+помощни компоненти за идентификационни данни (`credentialLoader.ts`, `codexClient.ts`) и облачни
+адаптери (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
+`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Примитиви за поточно предаване и помощници на доставчика: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+Примитиви за поточно предаване и помощни модули за доставчици: `stream.ts`, `streamHandler.ts`,
+`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
+`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
+`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
+`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
+`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
+`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
+`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
+`ollamaTransform.ts`.
 
 ---
 
@@ -739,7 +778,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Задайте подходящия обхват или обхвати в `src/shared/constants/mcpScopes.ts`.
 3. Регистрирайте инструмента в `open-sse/mcp-server/server.ts`.
-4. Добавете тестове в `open-sse/mcp-server/__tests__/`.
+4. Добавете тестове в `tests/unit/`.
 5. Актуализирайте [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Добавяне на ново A2A умение
@@ -757,7 +796,7 @@ bin/
 - **Именуване**: файлове в `camelCase` или `kebab-case`, компоненти в `PascalCase`,
   константи в `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` навсякъде;
-  `no-explicit-any` = `warn` в `open-sse/` и `tests/`, а другаде е грешка.
+  `no-explicit-any` = `error` в `open-sse/**/*.ts` и `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (наследен подход). Предпочитайте явни типове пред
   извеждане на типове при границите между модулите.
 - **База данни**: никога не пишете необработен SQL в маршрути или обработчици — винаги използвайте
@@ -787,8 +826,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Клонове**: префикси `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Никога не правете комити директно в `main`.
-- **Husky**: преди комит се изпълняват `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; преди изпращане се изпълняват `check:any-budget:t11` + `check:tracked-artifacts` (бързи проверки; изключва `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

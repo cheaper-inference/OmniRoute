@@ -1,14 +1,25 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
+import { writeReleaseGreenEslintFixture } from "../../_helpers/writeReleaseGreenEslintFixture.mjs";
 
 const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
 const sha = "1".repeat(40);
+const baseSha = "2".repeat(40);
 
 function verify(check: Record<string, unknown>) {
   const dir = mkdtempSync(join(tmpdir(), "omni-green-evidence-"));
@@ -74,13 +85,47 @@ function observe({
   mkdirSync(artifacts, { recursive: true });
   const dir = mkdtempSync(join(artifacts, "workflow-evidence-test-"));
   try {
-    writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}\n');
-    for (const path of ["scripts/quality", "config/quality", ".github/workflows", "bin"]) {
+    writeFileSync(
+      join(dir, "package.json"),
+      JSON.stringify({
+        type: "commonjs",
+        scripts: { "check:workflows": "node scripts/check/check-workflows.mjs" },
+      })
+    );
+    for (const path of [
+      "scripts/quality",
+      "scripts/dev",
+      "scripts/ci",
+      "scripts/i18n",
+      "scripts/check",
+      "config/quality",
+      ".github/workflows",
+      "bin",
+    ]) {
       mkdirSync(join(dir, path), { recursive: true });
     }
-    for (const name of ["validate-release-green.mjs", "gate-process.mjs"]) {
-      cpSync(new URL(`scripts/quality/${name}`, root), join(dir, "scripts/quality", name));
-    }
+    copyReleaseGreenModuleFixture(fileURLToPath(root), dir);
+    writeFileSync(
+      join(dir, "config/quality/release-green-static-profile.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        sourceJobs: ["lint"],
+        exclusions: [],
+        gates: [
+          {
+            id: "check:workflows",
+            job: "lint",
+            args: ["run", "check:workflows", "--", "--ratchet"],
+            kind: "drift",
+            command: "node scripts/check/check-workflows.mjs",
+          },
+        ],
+      })
+    );
+    writeFileSync(
+      join(dir, ".github/workflows/quality.yml"),
+      "on: push\njobs:\n  fast:\n    steps:\n      - run: |\n          gates=(\n            workflows\n          )\n          ratchet_gates=(\n            workflows\n          )\n"
+    );
     writeFileSync(
       join(dir, "config/quality/quality-baseline.json"),
       JSON.stringify({
@@ -121,25 +166,62 @@ function observe({
         `if (process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");\n`,
       { mode: 0o755 }
     );
-    writeFileSync(join(bin, "npx"), `#!${process.execPath}\nconsole.log("[]");\n`, {
-      mode: 0o755,
-    });
-    writeFileSync(join(bin, "git"), `#!${process.execPath}\nconsole.log("${sha}");\n`, {
-      mode: 0o755,
-    });
+    writeReleaseGreenEslintFixture(bin);
+    writeFileSync(
+      join(bin, "git"),
+      `#!${process.execPath}\nconsole.log(process.argv.at(-1) === "${baseSha}^{commit}" ? "${baseSha}" : "${sha}");\n`,
+      {
+        mode: 0o755,
+      }
+    );
     const result = spawnSync(
       process.execPath,
       [join(dir, "scripts/quality/validate-release-green.mjs"), "--quick", "--full-ci", "--json"],
       {
         cwd: dir,
-        env: { ...process.env, PATH: bin, GITHUB_OUTPUT: "" },
+        env: {
+          ...process.env,
+          PATH: bin,
+          GITHUB_OUTPUT: "",
+          // Pin a valid synthetic comparison; ambient Actions events are unrelated to this fixture.
+          I18N_BASE_SHA: baseSha,
+          I18N_BASE_TIP_SHA: baseSha,
+          I18N_CANDIDATE_SHA: sha,
+          I18N_COMPARISON_SOURCE: "fixture:workflow-evidence",
+          I18N_COMPARISON_SCOPE: "candidate",
+        },
         encoding: "utf8",
         timeout: 20_000,
       }
     );
     assert.equal(result.error, undefined);
     assert.notEqual(result.stdout.trim(), "", result.stderr);
-    return { status: result.status, report: JSON.parse(result.stdout) };
+    // Capture only structured receipts from this owned fixture before cleanup.
+    // Raw command logs and process environment are never opened here.
+    const diagnostics: Record<string, unknown>[] = [];
+    const commandDirectory = join(dir, "_artifacts/release-green/commands");
+    try {
+      for (const file of readdirSync(commandDirectory)) {
+        if (!/^[0-9a-f-]+\.log\.json$/i.test(file)) continue;
+        try {
+          const receipt = JSON.parse(readFileSync(join(commandDirectory, file), "utf8"));
+          if (["PASS", "FAIL"].includes(receipt.outcome)) continue;
+          diagnostics.push({
+            outcome: receipt.outcome,
+            exitCode: receipt.exitCode,
+            signal: receipt.signal,
+            spawnError: receipt.spawnError,
+            cleanupError: receipt.cleanupError,
+            processGroupObservation: receipt.processGroupObservation ?? null,
+          });
+        } catch {
+          diagnostics.push({ captureCode: "COMMAND_RECEIPT_UNREADABLE" });
+        }
+      }
+    } catch {
+      diagnostics.push({ captureCode: "COMMAND_RECEIPT_DIRECTORY_UNREADABLE" });
+    }
+    return { status: result.status, report: JSON.parse(result.stdout), diagnostics };
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -184,7 +266,11 @@ test(
       [1, 0, false],
     ] as const) {
       const result = observe({ scanners: "valid", findings, baseline });
-      assert.equal(result.status, 0);
+      assert.equal(
+        result.status,
+        0,
+        `Owned process diagnostics: ${JSON.stringify(result.diagnostics)}`
+      );
       assert.equal(result.report.releaseGreen, true);
       assert.deepEqual(result.report.hardFailures, []);
       for (const id of ["workflow-lint", "check:workflows"]) {

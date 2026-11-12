@@ -4,38 +4,35 @@
 
 ---
 
-## ସାରାଂଶ
+## ସମୀକ୍ଷା
 
-Redis ହେଉଛି OmniRouteରେ ଏକ **ଇଚ୍ଛାଧୀନ, ଅନାବଶ୍ୟକ ନିର୍ଭରଶୀଳତା** — Redis ଉପଲବ୍ଧ ନଥିବାବେଳେ ଆପ୍ଲିକେସନ୍ ସୁଚାରୁ ଭାବେ କ୍ଷମତା ହ୍ରାସ କରେ (ଇନ୍-ମେମୋରି
-ଫଲ୍ବ୍ୟାକ୍)। ପ୍ରଡକ୍ସନ୍ରେ Redisକୁ ଟ୍ୟୁନ୍ କରିବା ଦ୍ୱାରା ଚାରୋଟି ସ୍ୱତନ୍ତ୍ର
-କାର୍ଯ୍ୟଭାର ପାଇଁ ବିଳମ୍ବତା ହ୍ରାସ ପାଏ:
+Redis ହେଉଛି ଏକ।**ବ al କଳ୍ପିକ, ନରମ ନିର୍ଭରଶୀଳତା।** OmniRoute — ରେ ଯେତେବେଳେ ଅନୁପ୍ରୟୋଗ ଅନୁଗ୍ରହରେ (ଇନ-ମେମୋରୀ ଫଲବ୍ୟାକ୍) ଖରାପ ହୋଇଯାଏ ଯେତେବେଳେ Redis ଉପଲବ୍ଧ ନଥାଏ। ଉତ୍ପାଦନରେ, Redis ଟ୍ୟୁନିଂ ଚାରୋଟି ଭିନ୍ନ କାର୍ଯ୍ୟଭାର ପାଇଁ ବିଳମ୍ବତାକୁ ହ୍ରାସ କରେ:
 
-| କାର୍ଯ୍ୟଭାର               | ଡ୍ରାଇଭର୍                      | କ୍ଲାଏଣ୍ଟ ଫ୍ୟାକ୍ଟରୀ                            | କି ପ୍ୟାଟର୍ନ                                          |
-| ------------------------ | ----------------------------- | --------------------------------------------- | ---------------------------------------------------- |
-| ରେଟ୍ ସୀମିତକରଣ            | `rateLimiter.ts`              | `getRedisClient()` — ଲେଜି `ioredis` ସିଙ୍ଗଲଟନ୍ | `<prefix>rl:*` Lua‑ଆଟମିକ୍ ରେଟ୍ ସୀମା ୱିଣ୍ଡୋ           |
-| ପ୍ରମାଣୀକରଣ କ୍ୟାଶ୍        | `apiKeys.ts`                  | `rateLimiter`ର କ୍ଲାଏଣ୍ଟକୁ ପୁନଃବ୍ୟବହାର କରେ     | TTL ସହିତ `<prefix>auth:api_key:<sha256>`             |
-| କୋଟା ଷ୍ଟୋର୍              | `redisQuotaStore.ts`          | ପୃଥକ `getRedisClient(url)` ସିଙ୍ଗଲଟନ୍          | ପ୍ରତି ଇନ୍ଷ୍ଟାନ୍ସ ପାଇଁ ବିନ୍ୟାସଯୋଗ୍ୟ `<prefix>quota:*` |
-| ୱାର୍ମଅପ୍ ସର୍କିଟ୍ ବ୍ରେକର୍ | `redisCircuitBreakerStore.ts` | `circuitBreakerFactory.ts`ରେ ପୃଥକ କ୍ଲାଏଣ୍ଟ    | `<prefix>warmup:cb:<connectionId>`                   |
+| କାର୍ଯ୍ୟଭାର               | ଡ୍ରାଇଭର।                      | କ୍ଲାଏଣ୍ଟ କାରଖାନା।                                | କି ନମୁନା                                         |
+| ------------------------ | ----------------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| ହାର ସୀମିତ                | `rateLimiter.ts`              | `getRedisClient()` — ଅଳସୁଆ `ioredis` ସିଙ୍ଗଲେଟନ୍। | `<prefix>rl:*` Lua - ପରମାଣୁ ହାର ସୀମା ୱିଣ୍ଡୋ।     |
+| Auth କ୍ୟାଚ୍              | `apiKeys.ts`                  | `rateLimiter` ର କ୍ଲାଏଣ୍ଟକୁ ପୁନ uses ବ୍ୟବହାର କରେ। | TTL ସହିତ `<prefix>auth:api_key:<sha256>`         |
+| କୋଟା ଷ୍ଟୋର୍।             | `redisQuotaStore.ts`          | ଅଲଗା `getRedisClient(url)` ସିଙ୍ଗଲେଟନ୍।           | ପ୍ରତି ପରିସ୍ଥିତିରେ`<prefix>quota:*` ବିନ୍ୟାସଯୋଗ୍ୟ। |
+| ୱାର୍ମଅପ୍ ସର୍କିଟ ବ୍ରେକର୍। | `redisCircuitBreakerStore.ts` | `circuitBreakerFactory.ts` ରେ ପୃଥକ କ୍ଲାଏଣ୍ଟ।     | `<prefix>warmup:cb:<connectionId>`               |
 
-ସମସ୍ତ ଚାରୋଟି କାର୍ଯ୍ୟଭାର ଗୋଟିଏ ନେମସ୍ପେସ୍ ପ୍ରିଫିକ୍ସ ସହଭାଗ କରନ୍ତି, ଯାହାଦ୍ୱାରା OmniRoute ଗୋଟିଏ
-Redis ଇନ୍ଷ୍ଟାନ୍ସରେ ଅନ୍ୟ ଆପ୍ଗୁଡ଼ିକ ସହିତ ସହାବସ୍ଥାନ କରିପାରିବ (ଯଥା `127.0.0.1:6379`)। [କି ନେମସ୍ପେସିଂ](#key-namespacing) ଦେଖନ୍ତୁ।
+ସମସ୍ତ ଚାରୋଟି କାର୍ଯ୍ୟଭାର ଗୋଟିଏ ନାମପେସ୍ ଉପସର୍ଗ ଅଂଶୀଦାର କରେ ତେଣୁ OmniRoute ଗୋଟିଏ Redis ଉଦାହରଣରେ (ଯେପରିକି `127.0.0.1:6379`) ଅନ୍ୟ ଆପ୍ ସହିତ ସହ-ବିଦ୍ୟମାନ ହୋଇପାରେ। [କି ନେମସ୍ପେସ୍](#key-namespacing) ଦେଖନ୍ତୁ।
 
 ---
 
-## ବର୍ତ୍ତମାନର ବିନ୍ୟାସ (କୋଡ୍ ଡିଫଲ୍ଟ)
+## ସାମ୍ପ୍ରତିକ ବିନ୍ୟାସ (କୋଡ୍ ଡିଫଲ୍ଟ)
 
-| ସେଟିଂ                                   | ମୂଲ୍ୟ                                                          | ସ୍ଥାନ                                                                                 |
-| --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL` ପରିବେଶ ଭେରିଏବଲ୍             | `redis://redis:6379` (compose), ଇଚ୍ଛାଧୀନ                       | `rateLimiter.ts:5`, `.env.example`                                                    |
-| `REDIS_KEY_PREFIX` ପରିବେଶ ଭେରିଏବଲ୍      | `omniroute:` (ଡିଫଲ୍ଟ)                                          | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL` ପରିବେଶ ଭେରିଏବଲ୍ | ପୃଥକ, `REDIS_URL`ଠାରୁ ଭିନ୍ନ ହୋଇପାରେ                            | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                    | `"sqlite"` (ଡିଫଲ୍ଟ), `"redis"` ଇଚ୍ଛାଧୀନ                        | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`          | `3`                                                            | `rateLimiter.ts` କ୍ଲାଏଣ୍ଟ ସୃଷ୍ଟି                                                      |
-| `enableReadyCheck`                      | ସେଟ୍ କରାଯାଇନାହିଁ (ioredis ଡିଫଲ୍ଟ: `true`)                      | —                                                                                     |
-| `lazyConnect`                           | ସେଟ୍ କରାଯାଇନାହିଁ (ioredis ଡିଫଲ୍ଟ: `false`)                     | —                                                                                     |
-| `retryStrategy`                         | ସେଟ୍ କରାଯାଇନାହିଁ (ioredis ଡିଫଲ୍ଟ: 200ms ଆଧାର, ଏକ୍ସପୋନେନ୍ସିଆଲ୍) | —                                                                                     |
-| TLS / ପାସ୍ୱାର୍ଡ / DB ଇଣ୍ଡେକ୍ସ           | **ବିନ୍ୟାସ କରାଯାଇନାହିଁ**                                        | —                                                                                     |
-| Sentinel / Cluster                      | **ବିନ୍ୟାସ କରାଯାଇନାହିଁ** — କେବଳ ସ୍ୱତନ୍ତ୍ର ସିଙ୍ଗଲ୍-ନୋଡ୍          | —                                                                                     |
+| ସେଟିଂ                           | ମୂଲ୍ୟ                                                    | କେଉଁଠାରେ                                                                              |
+| ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (ରଚନା), ବ al କଳ୍ପିକ।                | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (ଡିଫଲ୍ଟ)                                    | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | ଅଲଗା, `REDIS_URL` ଠାରୁ ଭିନ୍ନ ହୋଇପାରେ।                    | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (ଡିଫଲ୍ଟ), `"redis"` ବ al କଳ୍ପିକ।              | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                      | `rateLimiter.ts` କ୍ଲାଏଣ୍ଟ ସୃଷ୍ଟି।                                                     |
+| `enableReadyCheck`              | ସେଟ୍ ହୋଇନାହିଁ (ioredis ଡିଫଲ୍ଟ: `true`)                   | —                                                                                     |
+| `lazyConnect`                   | ସେଟ୍ ହୋଇନାହିଁ (ioredis ଡିଫଲ୍ଟ: `false`)                  | —                                                                                     |
+| `retryStrategy`                 | ସେଟ୍ ହୋଇନାହିଁ (ioredis default: 200ms base, exponential) | —                                                                                     |
+| TLS / ପାସୱାର୍ଡ / DB ସୂଚକାଙ୍କ।   | **ବିନ୍ୟାସିତ ନୁହେଁ।**                                     | —                                                                                     |
+| ସେଣ୍ଟିନେଲ / କ୍ଲଷ୍ଟର।            | **ବିନ୍ୟାସିତ ନୁହେଁ।** — କେବଳ ଏକକ-ନୋଡ୍।                    | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## ପ୍ରଡକ୍ସନ୍ ପାଇଁ ସୁପାରିସକୃତ ଟ୍ୟୁନିଂ
+## ସୁପାରିଶ କରାଯାଇଥିବା ଉତ୍ପାଦନ ଟ୍ୟୁନିଂ।
 
-### 1. କନେକ୍ସନ୍ ପୁଲ୍ / କ୍ଲାଏଣ୍ଟ ବିକଳ୍ପଗୁଡ଼ିକ (ioredis `Redis` କନ୍ଷ୍ଟ୍ରକ୍ଟର୍)
+### 1। ସଂଯୋଗ ପୁଲ୍ / କ୍ଲାଏଣ୍ଟ ବିକଳ୍ପସମୂହ (ioredis `Redis` କନଷ୍ଟ୍ରକ୍ଟର)
 
-ବର୍ତ୍ତମାନର କୋଡ୍ କୌଣସି କଷ୍ଟମ୍ ବିକଳ୍ପ ବିନା ଗୋଟିଏ `new Redis(url)` ସୃଷ୍ଟି କରେ। ପ୍ରଡକ୍ସନ୍
-ମଲ୍ଟି-ରେପ୍ଲିକା ଡିପ୍ଲୟମେଣ୍ଟ ପାଇଁ, କୋଡ୍ରେ ଏକ କ୍ଲାଏଣ୍ଟ ଫ୍ୟାକ୍ଟରୀ ପାସ୍ କରନ୍ତୁ କିମ୍ବା `getRedisClient()`କୁ ରାପ୍ କରନ୍ତୁ:
+ସାମ୍ପ୍ରତିକ କୋଡ୍ କ custom ଣସି କଷ୍ଟମ୍ ବିକଳ୍ପ ସହିତ ଗୋଟିଏ `new Redis(url)` ସୃଷ୍ଟି କରେ। ଉତ୍ପାଦନ ମଲ୍ଟି - ପ୍ରତିକୃତି ନିୟୋଜନ ପାଇଁ, ଏକ କ୍ଲାଏଣ୍ଟ କାରଖାନାକୁ କୋଡ୍ ରେ ପାସ୍ କର କିମ୍ବା `getRedisClient()` ଗୁଡ଼ାଇ ରଖ:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // କୌଣସି ପୁନଃଚେଷ୍ଟା ସୀମା ନାହିଁ; retryStrategyକୁ ନିଷ୍ପତ୍ତି ନେବାକୁ ଦିଅନ୍ତୁ
-  enableReadyCheck: true, // କଲ୍ ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ ସର୍ଭର୍ ପ୍ରସ୍ତୁତ ଥିବା ଯାଞ୍ଚ କରନ୍ତୁ
-  lazyConnect: true, // ନିର୍ମାଣ ସମୟରେ ସଂଯୋଗ କରନ୍ତୁ ନାହିଁ; ପ୍ରଥମ କଲ୍ ପର୍ଯ୍ୟନ୍ତ ଅପେକ୍ଷା କରନ୍ତୁ
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10ଟି ପୁନଃଚେଷ୍ଟା ପରେ ଛାଡ଼ିଦିଅନ୍ତୁ → ପରେ ପୁନଃସଂଯୋଗ କରନ୍ତୁ
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, ସର୍ବାଧିକ 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // ସମକାଳୀନ କମାଣ୍ଡଗୁଡ଼ିକୁ ଗୋଟିଏ TCP ରାଇଟ୍ରେ ଏକତ୍ର କରନ୍ତୁ
-  keepAlive: 10000, // ପ୍ରତି 10sରେ TCP କିପ୍-ଆଲାଇଭ୍
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**ମୁଖ୍ୟ ସମନ୍ୱୟଗୁଡ଼ିକ:**
+**ପ୍ରମୁଖ ବାଣିଜ୍ୟ ବନ୍ଦ:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — ପ୍ରଡକ୍ସନ୍ ପାଇଁ ପସନ୍ଦଯୋଗ୍ୟ, ଯାହାଦ୍ୱାରା ଅସ୍ଥାୟୀ
-  Redis ପୁନଃପ୍ରାରମ୍ଭ ପ୍ରତ୍ୟେକ ଅନୁରୋଧକୁ ତୁରନ୍ତ ବିଫଳ କରିବ ନାହିଁ। `checkRateLimit()`ରେ ଥିବା ଇନ୍-ମେମୋରି ଫଲ୍ବ୍ୟାକ୍
-  ବିଫଳତା ପଥକୁ ସମ୍ଭାଳେ।
-- `lazyConnect: true` — ସର୍ଭର୍ ସଂଯୋଗ ଗ୍ରହଣ କରିବା ଆରମ୍ଭ କରିବା ପୂର୍ବରୁ Redis ଚାଲୁ ରହିବା ଉପରେ
-  ଷ୍ଟାର୍ଟଅପ୍ ନିର୍ଭରଶୀଳତାକୁ ଏଡ଼ାଏ।
-- `enableAutoPipelining: true` — ସମକାଳୀନ ରେଟ୍-ଲିମିଟ୍ ଯାଞ୍ଚ ପାଇଁ ରାଉଣ୍ଡ-ଟ୍ରିପ୍ ହ୍ରାସ କରେ;
-  ଗୋଟିଏ ସଂଯୋଗରେ >50 RPS ହେଲେ ଲାଭଦାୟକ।
+- `maxRetriesPerRequest: null` + `retryStrategy` — ଉତ୍ପାଦନ ପାଇଁ ପସନ୍ଦ କରେ ତେଣୁ କ୍ଷଣସ୍ଥାୟୀ Redis ପୁନ art ଆରମ୍ଭ ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ତୁରନ୍ତ ବିଫଳ ହୁଏ ନାହିଁ। `checkRateLimit()` ରେ ଥିବା ମେମୋରୀ ଫଲବ୍ୟାକ୍ ବିଫଳତା ପଥକୁ ଅବଶୋଷଣ କରେ।
+- `lazyConnect: true` — ସର୍ଭର ସଂଯୋଗ ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ Redis ଉପରେ ଥିବା ଏକ ଷ୍ଟାର୍ଟଅପ୍ ନିର୍ଭରଶୀଳତାକୁ ଏଡାଇଥାଏ।
+- `enableAutoPipelining: true` — ଏକକାଳୀନ ହାର-ସୀମା ଯାଞ୍ଚ ପାଇଁ ରାଉଣ୍ଡ-ଟ୍ରିପ୍ ହ୍ରାସ କରେ। ଗୋଟିଏ ସଂଯୋଗରେ > 50 RPS ରେ ଲାଭଦାୟକ।
 
-### 2. Redis ସର୍ଭର୍ କନଫିଗରେସନ୍ (`redis.conf`)
+### 2। Redis ସର୍ଭର ବିନ୍ୟାସକରଣ (`redis.conf`)
 
 ```
-# ମେମୋରି
-maxmemory 80%                        # OS ପେଜ୍ କ୍ୟାଶ୍ ପାଇଁ ସ୍ଥାନ ଛାଡ଼ନ୍ତୁ
-maxmemory-policy allkeys-lru         # ଚାପ ସମୟରେ ପୁରୁଣା auth କ୍ୟାଶ୍ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକୁ ବହିଷ୍କାର କରନ୍ତୁ
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# ସ୍ଥାୟିତ୍ୱ (ଇଚ୍ଛାଧୀନ — ଏହା ବିନା ମଧ୍ୟ OmniRoute କ୍ରାଶ୍-ସୁରକ୍ଷିତ)
-save 300 1                           # ≥1ଟି କୀ ପରିବର୍ତ୍ତିତ ହୋଇଥିଲେ ଅତି କମରେ ପ୍ରତି 5 minରେ ସ୍ନାପ୍ଶଟ୍ ନିଅନ୍ତୁ
-appendonly no                        # AOF ଆବଶ୍ୟକ ନୁହେଁ; ଡାଟା ପୁନଃସୃଷ୍ଟି କରାଯାଇପାରେ
-appendfsync no                       # କୌଣସି fsync ଓଭରହେଡ୍ ନାହିଁ (RDB ଯଥେଷ୍ଟ)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# ନେଟୱର୍କିଂ
-timeout 0                            # ନିଷ୍କ୍ରିୟ ସଂଯୋଗ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ ନାହିଁ
-tcp-keepalive 300                    # 5 min କିପ୍-ଆଲାଇଭ୍
-tcp-backlog 511                      # ହଠାତ୍ ବଢ଼ୁଥିବା ଲୋଡ୍ ପାଇଁ ସଂଯୋଗ ବ୍ୟାକ୍ଲଗ୍
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# କାର୍ଯ୍ୟଦକ୍ଷତା
-hz 10                                # ଡିଫଲ୍ଟ; ବିଳମ୍ବତା-ସମ୍ବେଦନଶୀଳ ବ୍ୟବହାର ପାଇଁ 100
-activedefrag yes                     # ଫ୍ରାଗ୍ମେଣ୍ଟେସନ୍ >10% ହେଲେ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଡିଫ୍ରାଗ୍ମେଣ୍ଟ କରନ୍ତୁ
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` ପାଇଁ ସମନ୍ୱୟ:** ମେମୋରି ଚାପ ସମୟରେ Auth କ୍ୟାଶ୍ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ
-ବହିଷ୍କୃତ ହୋଇପାରେ। ଏହା ସୁରକ୍ଷିତ — ମିସ୍ ହେଲେ `setCachedApiKey` ସର୍ବଦା ପୁନଃପୂରଣ କରେ, ଏବଂ
-SQLite ଫଲ୍ବ୍ୟାକ୍ ହେଉଛି ପ୍ରାମାଣିକ ଉତ୍ସ। ରେଟ୍-ଲିମିଟର୍ Lua ସ୍କ୍ରିପ୍ଟ ଡିଜାଇନ୍ ଅନୁଯାୟୀ
-ସ୍ୱଳ୍ପକାଳୀନ ଛୋଟ କୀଗୁଡ଼ିକ ସୃଷ୍ଟି କରେ।
+**`maxmemory-policy allkeys-lru` ପାଇଁ ବାଣିଜ୍ୟ ବନ୍ଦ:** ସ୍ମୃତି ଚାପରେ Auth କ୍ୟାଚ୍ ଏଣ୍ଟ୍ରିଗୁଡିକ ବାହାର କରାଯାଇପାରେ। ଏହା ନିରାପଦ — `setCachedApiKey` ସର୍ବଦା ମିସରେ ପୁନ pop ଜନସଂଖ୍ୟା କରେ, ଏବଂ SQLite ଫଲବ୍ୟାକ୍ ପ୍ରାଧିକୃତ ଅଟେ। ରେଟ୍-ସୀମାବଦ୍ଧ ଲୁଆ ସ୍କ୍ରିପ୍ଟ ଛୋଟ ଚାବି ସୃଷ୍ଟି କରେ ଯାହା ଡିଜାଇନ୍ ଦ୍ୱାରା ସ୍ୱଳ୍ପ ସମୟର ଅଟେ।
 
-### 3. Docker Compose ସେଟିଂସ୍
+### 3। Docker ସେଟିଂସମୂହ ରଚନା କରନ୍ତୁ।
 
-ପ୍ରଡକ୍ସନ୍ compose (`docker-compose.prod.yml`) `redis:8.6.2-alpine` ବ୍ୟବହାର କରେ। ଏହା ଯୋଡ଼ନ୍ତୁ:
+ପ୍ରୋଡ୍ ରଚନା (`docker-compose.prod.yml`) `redis:8.6.2-alpine` ବ୍ୟବହାର କରେ। ଯୋଡନ୍ତୁ:
 
 ```yaml
 redis:
@@ -150,35 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. ମଲ୍ଟି-ଇନ୍ଷ୍ଟାନ୍ସ / ସ୍କେଲିଂ ବିଚାରଗୁଡ଼ିକ
+### 4। ମଲ୍ଟି - ଇନଷ୍ଟାନ୍ସ / ସ୍କେଲିଂ ବିଚାର।
 
-**ସମସ୍ତ ରେପ୍ଲିକା ପାଇଁ ଗୋଟିଏ Redis** — ରେଟ୍-ଲିମିଟର୍ Lua ସ୍କ୍ରିପ୍ଟ ଗୋଟିଏ
-ପ୍ରାମାଣିକ କୀ ସ୍ପେସ୍ ଉପରେ ନିର୍ଭର କରେ। ରେପ୍ଲିକାଗୁଡ଼ିକ ପଛରେ ଏକାଧିକ Redis ଇନ୍ଷ୍ଟାନ୍ସ ବ୍ୟବହାର କଲେ ପରମାଣବିକତା
-ହରାଇବ ଏବଂ ବଜେଟ୍ ଦ୍ୱିଗୁଣିତ ହେବ। ସମସ୍ତ ଆପ୍ଲିକେସନ୍ ରେପ୍ଲିକା ପାଇଁ ଗୋଟିଏ Redis (କିମ୍ବା ଫେଲ୍ଓଭର୍ ସହିତ Redis Sentinel କ୍ଲଷ୍ଟର୍)
-ବ୍ୟବହାର କରନ୍ତୁ।
+**ସମସ୍ତ ପ୍ରତିକୃତି ପାଇଁ ଏକକ Redis** — ରେଟ୍-ସୀମାବଦ୍ଧ ଲୁଆ ସ୍କ୍ରିପ୍ଟ ଏକକ ପ୍ରାଧିକୃତ କି ସ୍ଥାନ ଉପରେ ନିର୍ଭର କରେ। ପ୍ରତିକୃତି ପଛରେ ଏକାଧିକ Redis ଉଦାହରଣ ପରମାଣୁ ହରାଇବ ଏବଂ ବଜେଟକୁ ଦ୍ୱିଗୁଣିତ କରିବ। ସମସ୍ତ ପ୍ରୟୋଗ ପ୍ରତିକୃତି ପାଇଁ ଗୋଟିଏ Redis (କିମ୍ବା ବିଫଳତା ସହିତ Redis ସେଣ୍ଟିନେଲ କ୍ଲଷ୍ଟର) ବ୍ୟବହାର କରନ୍ତୁ।
 
-**ସଂଯୋଗ ସଂଖ୍ୟା:** ପ୍ରତ୍ୟେକ ଆପ୍ଲିକେସନ୍ ରେପ୍ଲିକା Redis ସହିତ **2ଟି TCP ସଂଯୋଗ** ଖୋଲେ
-(ରେଟ୍ ଲିମିଟର୍ କ୍ଲାଏଣ୍ଟ + କ୍ୱୋଟା ଷ୍ଟୋର୍ କ୍ଲାଏଣ୍ଟ)। 10ଟି ରେପ୍ଲିକାରେ → 20ଟି ସଂଯୋଗ, ଯାହା
-ଏକ ଡିଫଲ୍ଟ Redis ଇନ୍ଷ୍ଟାନ୍ସର 10k ସଂଯୋଗ ସୀମା ମଧ୍ୟରେ ସହଜରେ ରହେ।
+**ସଂଯୋଗ ଗଣନା:** ପ୍ରତ୍ୟେକ ପ୍ରୟୋଗର ପ୍ରତିକୃତି ଖୋଲିବ।**2 TCP ସଂଯୋଗଗୁଡ଼ିକ।** Redis କୁ (ରେଟ୍ ସୀମିତ କ୍ଲାଏଣ୍ଟ + କୋଟା ଷ୍ଟୋର କ୍ଲାଏଣ୍ଟ)। 10 ପ୍ରତିକୃତି → 20 ସଂଯୋଗରେ, ଏକ ଡିଫଲ୍ଟ Redis ଉଦାହରଣର 10k ସଂଯୋଗ ଛାତ ମଧ୍ୟରେ।
 
-### 5. ମନିଟରିଂ
+### ମନିଟରିଂ
 
-ହେଲ୍ଥ-ଚେକ୍ ଏଣ୍ଡପଏଣ୍ଟ ମାଧ୍ୟମରେ ପ୍ରକାଶ କରନ୍ତୁ:
+ସ୍ୱାସ୍ଥ୍ୟ-ଯାଞ୍ଚ ଶେଷ ପଏଣ୍ଟ ମାଧ୍ୟମରେ ପ୍ରକାଶ କରନ୍ତୁ:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts ପୂର୍ବରୁ rateLimiter ଫଙ୍କସନ୍ଗୁଡ଼ିକୁ କଲ୍ କରେ
-// Redis-ନିର୍ଦ୍ଦିଷ୍ଟ ଯାଞ୍ଚଗୁଡ଼ିକ ଯୋଡ଼ନ୍ତୁ:
-//   1. ioredis .ping() ମାଧ୍ୟମରେ PING ବିଳମ୍ବତା
-//   2. INFO memory ମାଧ୍ୟମରେ ମେମୋରି ବ୍ୟବହାର
-//   3. INFO clients ମାଧ୍ୟମରେ ସଂଯୋଗ ସଂଖ୍ୟା
-//   4. maxmemory-policy ପାଇଁ ହିଟ୍ ରେଟ୍ (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-ନଜର ରଖିବାକୁ ମୁଖ୍ୟ ମେଟ୍ରିକ୍ସ:
+ଦେଖିବା ପାଇଁ ମୁଖ୍ୟ ମେଟ୍ରିକ୍:
 
-- **ପ୍ରତି ସେକେଣ୍ଡରେ ବହିଷ୍କୃତ କୀଗୁଡ଼ିକ** — ଯଦି ଲଗାତାର ଶୂନ୍ୟ ନୁହେଁ, `maxmemory` ବଢ଼ାନ୍ତୁ
-- **ବ୍ଲକ୍ ହୋଇଥିବା କ୍ଲାଏଣ୍ଟଗୁଡ଼ିକ** — ଶୂନ୍ୟ ନ ହେବା ଧୀର Lua ସ୍କ୍ରିପ୍ଟ କିମ୍ବା ଉଚ୍ଚ ପ୍ରତିଦ୍ୱନ୍ଦ୍ୱିତାକୁ ସୂଚାଏ
-- **ପ୍ରତ୍ୟାଖ୍ୟାନ ହୋଇଥିବା ସଂଯୋଗଗୁଡ଼ିକ** — ସଂଯୋଗ ସୀମା ପୂରଣ ହୋଇଛି; 20ଟି ସଂଯୋଗରେ ଏହା ବିରଳ
+- **ବହିଷ୍କୃତ କି / ସେକେଣ୍ଡ** — ଯଦି କ୍ରମାଗତ ଭାବରେ ଶୂନ୍ୟ ନୁହେଁ, `maxmemory` ବୃଦ୍ଧି କରନ୍ତୁ।
+- **ଅବରୋଧିତ ଗ୍ରାହକ।** — ଅଣ-ଶୂନ୍ୟ ଧୀର ଲୁଆ ସ୍କ୍ରିପ୍ଟ କିମ୍ବା ଉଚ୍ଚ ବିବାଦକୁ ସୂଚିତ କରେ।
+- **ପ୍ରତ୍ୟାଖ୍ୟାନ ସଂଯୋଗଗୁଡ଼ିକ।** — ସଂଯୋଗ ସୀମା ହିଟ୍; 20 ସଂଯୋଗରେ ବିରଳ।
+
+### 6। ରେଡିସ୍-ସୁସଙ୍ଗତ ସର୍ଭରଗୁଡ଼ିକ।
+
+ଏଠାରେ ବ୍ୟବହୃତ ଯେକ Any ଣସି ସର୍ଭର ନିଶ୍ଚିତ ଭାବରେ ଲୁଆ ସ୍କ୍ରିପ୍ଟଗୁଡିକ ଚଳାଇବ: ରେଟ୍ ସୀମା ହେଉଛି ଗୋଟିଏ `EVAL`। ଲୁଆ ବିନା ଏକ ସର୍ଭରରେ, `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ଲଗ୍ କରେ ଏବଂ ପ୍ରତି ପ୍ରକ୍ରିୟାରେ ଗଣନା କରେ, ତେଣୁ ପ୍ରତ୍ୟେକ ପ୍ରତିକୃତି ନିଜେ ସୀମାକୁ କାର୍ଯ୍ୟକାରୀ କରେ। ଅପ୍ଟ-ଇନ୍ ଅଂଶୀଦାରୀ ଅଧିବେଶନ-ଆଫିନିଟି ଷ୍ଟୋର୍ (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ମଧ୍ୟ `EVAL` ସହିତ ପିନଗୁଡିକ ପ read ଼ି ଅପଡେଟ୍ କରେ। ଲୁଆ ବିନା ଏହା `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ଲଗ୍ କରେ ଏବଂ ପ୍ରତ୍ୟେକ ପ୍ରତିକୃତି ନିଜସ୍ୱ ପିନ ରଖେ। ଅନ୍ୟ କାର୍ଯ୍ୟଭାରଗୁଡ଼ିକ ସାଧା କମାଣ୍ଡ ବ୍ୟବହାର କରନ୍ତି (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, ହ୍ୟାସ୍ ଏବଂ ସେଟ୍), ଏବଂ ଅର୍ଥଗତ କ୍ୟାଶେର Redis ବ୍ୟାକେଣ୍ଡ୍ କ `FT.*` ନିର୍ଦ୍ଦେଶ ପଠାଏ ନାହିଁ।
+
+OmniRoute 3.8.52 ସହିତ ପରୀକ୍ଷା କରାଯାଇଛି: KiviDB 1.2.0 ଏହାର Lua ପ୍ରତିଛବି (`kividb/kividb:v1.2.0-lua`) ସହିତ। ରେଟ୍ ସୀମାବଦ୍ଧ (କାଉଣ୍ଟରଗୁଡିକ ଅଂଶୀଦାର କରୁଥିବା ଦ୍ୱିତୀୟ ପ୍ରକ୍ରିୟା ଅନ୍ତର୍ଭୂକ୍ତ କରି), ଅଥ୍ କ୍ୟାଚ୍, କୋଟା ଷ୍ଟୋର୍, ୱାର୍ମଅପ୍ ସର୍କିଟ ବ୍ରେକର୍, ସେମାଣ୍ଟିକ୍ କ୍ୟାଚ୍ ଷ୍ଟୋର୍, ଏବଂ ଚାଟ୍ ହ୍ୟାଣ୍ଡେଲର୍ ମାଧ୍ୟମରେ `/v1/chat/completions` ଅନୁରୋଧ Redis 8.10.3 ରେ ପାସ୍ ହୋଇଥିବା 19 ଟି ଚେକ୍ ମଧ୍ୟରୁ 18 ଟି ପାସ୍ କରିଛି। ଯାହା ଭିନ୍ନ: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` ଭାବରେ ଗଚ୍ଛିତ କରେ ଯେଉଁଠାରେ Redis `0.3` ( [kividbio/kividb# 387](https://github.com/kividbio/kividb/issues/387) ) ଗଚ୍ଛିତ କରେ। କୋଟା ଷ୍ଟୋର ଉଭୟ `parseFloat` ସହିତ ପାର୍ସ କରେ, କିନ୍ତୁ ଶେଷ ସଂଖ୍ୟାରେ ଦୁଇଟି ସଂଖ୍ୟା ଭିନ୍ନ, ତେଣୁ କୋଟା ସୀମା ଉପରେ ପଡିଥିବା ଏକ ତୁଳନା ଭିନ୍ନ ଭାବରେ ବାହାରକୁ ଆସିପାରେ। ଅଧିବେଶନ-ଆଫିନିଟି ଷ୍ଟୋର ସେହି ଚାଲିବାର ଅଂଶ ନୁହେଁ। ( [ସେଟଅପ୍](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [ଫଳାଫଳ](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -199,15 +189,15 @@ flowchart LR
 
 ---
 
-## ସନ୍ଦର୍ଭଗୁଡ଼ିକ
+## ସନ୍ଦର୍ଭ
 
-| ଫାଇଲ୍                              | ଉଦ୍ଦେଶ୍ୟ                                                                   |
-| ---------------------------------- | -------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | ପ୍ରାଥମିକ Redis କ୍ଲାଏଣ୍ଟ୍, Lua ରେଟ୍-ଲିମିଟ୍ ସ୍କ୍ରିପ୍ଟ୍, ଇନ୍-ମେମୋରି ଫଲ୍ବ୍ୟାକ୍ |
-| `src/lib/db/apiKeys.ts`            | ପ୍ରମାଣୀକରଣ କ୍ୟାଶ୍ — Redis→SQLite ଫଲ୍ବ୍ୟାକ୍                                 |
-| `src/lib/quota/redisQuotaStore.ts` | ଇଚ୍ଛାଧୀନ କୋଟା ଷ୍ଟୋର୍ ପାଇଁ ପୃଥକ Redis କ୍ଲାଏଣ୍ଟ୍                             |
-| `src/lib/quota/storeFactory.ts`    | `sqlite` ଏବଂ `redis` କୋଟା ଡ୍ରାଇଭର୍ଗୁଡ଼ିକ ମଧ୍ୟରେ ସୁଇଚ୍ କରେ                  |
-| `docker-compose.prod.yml`          | ପ୍ରଡକ୍ସନ୍ Redis କଣ୍ଟେନର୍ (ଇମେଜ୍ `redis:8.6.2-alpine`)                      |
-| `.env.example`                     | Redis ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକର ଡକ୍ୟୁମେଣ୍ଟେସନ୍                                |
-| `src/app/api/local/redis/`         | ଡେଭଲପମେଣ୍ଟ କଣ୍ଟେନର୍ ଅର୍କେଷ୍ଟ୍ରେସନ୍ ପାଇଁ API ରୁଟ୍ଗୁଡ଼ିକ                     |
-| `bin/cli/commands/redis.mjs`       | ଡେଭଲପମେଣ୍ଟ କଣ୍ଟେନର୍ ଅର୍କେଷ୍ଟ୍ରେସନ୍ ପାଇଁ CLI କମାଣ୍ଡ୍ଗୁଡ଼ିକ                  |
+| ଫାଇଲ୍।                             | ଉଦ୍ଦେଶ୍ୟ                                                           |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `src/shared/utils/rateLimiter.ts`  | ପ୍ରାଥମିକ Redis କ୍ଲାଏଣ୍ଟ, ଲୁଆ ରେଟ୍-ସୀମା ସ୍କ୍ରିପ୍ଟ, ମେମୋରୀ ଫଲବ୍ୟାକ୍। |
+| `src/lib/db/apiKeys.ts`            | Auth କ୍ୟାଚ୍ — Redis→SQLite ଫଲବ୍ୟାକ୍।                               |
+| `src/lib/quota/redisQuotaStore.ts` | ଇଚ୍ଛାଧୀନ କୋଟା ଷ୍ଟୋର୍ ପାଇଁ Redis କ୍ଲାଏଣ୍ଟକୁ ପୃଥକ କରନ୍ତୁ।            |
+| `src/lib/quota/storeFactory.ts`    | `sqlite` ଏବଂ `redis` କୋଟା ଡ୍ରାଇଭରଗୁଡ଼ିକ ମଧ୍ୟରେ ସୁଇଚ୍।              |
+| `docker-compose.prod.yml`          | ଉତ୍ପାଦ Redis ପାତ୍ର (ପ୍ରତିଛବି `redis:8.6.2-alpine`)                 |
+| `.env.example`                     | Redis env vars ଡକ୍ୟୁମେଣ୍ଟେସନ୍।                                     |
+| `src/app/api/local/redis/`         | Dev କଣ୍ଟେନର ଅର୍କେଷ୍ଟ୍ରେସନ୍ ପାଇଁAPI ମାର୍ଗ।                          |
+| `bin/cli/commands/redis.mjs`       | Dev କଣ୍ଟେନର ଅର୍କେଷ୍ଟ୍ରେସନ୍ ପାଇଁCLI ନିର୍ଦ୍ଦେଶ।                      |

@@ -54,7 +54,7 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 - קלט: URL + מתג לעמוד מלא + בורר פורמט (Markdown / טקסט / HTML).
 - שליחה ← אחזור ← עיבוד `ScrapeResult.tsx`.
 - `ScrapeResult` מציג תצוגה מקדימה של Markdown + מתג להצגת התוכן הגולמי.
-- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `(קוצר, הצגת תוכן גולמי)` ופותח את התוכן הגולמי בחלון Monaco מודאלי (D21).
+- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `View full raw content` ופותח את התוכן הגולמי בחלון מודאלי (D21).
 - חלונית מטא-נתונים: ספק (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), זמן השהיה, עלות, גודל תגובה, מספר קישורים.
 - שימוש ב-hook‏ `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 `ProviderCatalog.tsx` חושף את רשימת הספקים המלאה מ־`GET /api/search/providers`
 (שהורחבה ב־F4 כדי לכלול ספקי אחזור):
 
-| `kind` | `"search"` (20 ספקים) או `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ספקים) או `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 הסטטוס **נגזר בזמן הבקשה** באמצעות בדיקה אם קיימים פרטי גישה ואם
 כל המפתחות נמצאים כעת בתקופת צינון.
+
+`codex-search` (Codex Web Search): משתמש בחשבונות Codex (ChatGPT) המחוברים שלך, ללא מפתח נפרד. כל חיפוש צורך ממכסת המינוי ונמשך כ־10–40 s. מופעל כשהבקשה מציינת אותו; בחירה אוטומטית דורשת את הדגל `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, שמושבת כברירת מחדל.
 
 ---
 

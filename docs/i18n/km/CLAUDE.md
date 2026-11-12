@@ -15,7 +15,7 @@
 
 ពិធីការ worktree ដោយឡែកដែលតម្រូវជាចាំបាច់ទាំងស្រុង (ការបញ្ជាក់ base branch, ផ្លូវ canonical
 `.claude/worktrees/`, `cp -al` node_modules, ច្បាប់ teardown) មាននៅក្នុង
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (សង្ខេបក្នុង `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (សង្ខេបក្នុង `AGENTS.md` →
 ដំណើរការ Git → "ការញែក worktree ដោយឡែក")។ ចំណុចពិសេសសម្រាប់ Claude Code:
 
 - បញ្ជាក់ base branch ជាមួយអ្នកប្រតិបត្តិការតាមរយៈ `AskUserQuestion` (ច្បាប់រឹង #19) លុះត្រាតែ

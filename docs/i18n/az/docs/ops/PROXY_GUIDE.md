@@ -393,7 +393,7 @@ Brauzerə bənzər TLS barmaq izləri yaratmaq üçün `wreq-js` istifadə edir 
 
 ### CLI Barmaq İzinin Uyğunlaşdırılması
 
-**CLI Barmaq İzi Dəyişdiricisi** (`Parametrlər → Təhlükəsizlik`) HTTP başlıqlarını və JSON gövdəsindəki sahələri yerli CLI binar fayllarının (Claude Code, Codex və s.) dəqiq imzasına uyğunlaşdırmaq üçün yenidən sıralayır. Bu, proksi ilə **birlikdə** işləyir:
+**CLI Barmaq İzi Dəyişdiricisi** (`Settings → Security`) HTTP başlıqlarını və JSON gövdəsindəki sahələri yerli CLI binar fayllarının (Claude Code, Codex və s.) dəqiq imzasına uyğunlaşdırmaq üçün yenidən sıralayır. Bu, proksi ilə **birlikdə** işləyir:
 
 ```
 IP ünvanınız (bloklanıb) → Proksi IP-si (ABŞ) → Provayder API-si

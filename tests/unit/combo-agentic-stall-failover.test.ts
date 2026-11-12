@@ -19,6 +19,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-agentic-stall-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -166,8 +167,9 @@ afterEach(() => {
   if (previousFlag === undefined) delete process.env[FLAG];
   else process.env[FLAG] = previousFlag;
 });
-test.after(() => {
+test.after(async () => {
   clearAllModelLockouts();
+  await closeSharedLoggerResource();
   try {
     core.resetDbInstance();
     fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });

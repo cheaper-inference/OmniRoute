@@ -6,36 +6,33 @@
 
 ## Nchịkọta
 
-Redis bụ **dependency dị nro, nke a na-eji ma ọ bụrụ na achọrọ** na OmniRoute — ngwa ahụ na-aga n'ihu ịrụ ọrụ nke ọma site n'iji usoro ndị nọ na ebe nchekwa
-dị ka ndabere mgbe Redis adịghị. Na production, ịhazi Redis nke ọma na-ebelata latency maka ụdị ọrụ anọ
-dị iche iche:
+Redis bụ otu **nhọrọ, ịdabere nro** na OmniRoute — ngwa a na-eweda n'amara (ndaghachi azụ na ebe nchekwa) mgbe Redis adịghị. Na mmepụta, n'iji ya gee ntị Redis na-ebelata latency maka ọrụ anọ dị iche iche:
 
-| Ụdị ọrụ                | Driver                        | Client Factory                                                               | Usoro Key                                               |
-| ---------------------- | ----------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Ịkpa oke ọnụego        | `rateLimiter.ts`              | `getRedisClient()` — singleton `ioredis` nke a na-ebido naanị mgbe achọrọ ya | `<prefix>rl:*` windo oke ọnụego Lua‑atomic              |
-| Cache auth             | `apiKeys.ts`                  | Na-eji client nke `rateLimiter` ọzọ                                          | `<prefix>auth:api_key:<sha256>` nwere TTL               |
-| Ebe nchekwa quota      | `redisQuotaStore.ts`          | Singleton `getRedisClient(url)` dị iche                                      | `<prefix>quota:*` nke a pụrụ ịhazi maka instance ọ bụla |
-| Circuit breaker warmup | `redisCircuitBreakerStore.ts` | Client dị iche na `circuitBreakerFactory.ts`                                 | `<prefix>warmup:cb:<connectionId>`                      |
+| Ibu ọrụ                      | Onye ọkwọ ụgbọ ala            | Ụlọ ọrụ ndị ahịa                                 | Usoro igodo                               |
+| ---------------------------- | ----------------------------- | ------------------------------------------------ | ----------------------------------------- |
+| Mmachi ọnụego                | `rateLimiter.ts`              | `getRedisClient()` — umengwụ `ioredis` singleton | `<prefix>rl:*` Lua-atomic mpio oke oke    |
+| cache nyocha                 | `apiKeys.ts`                  | Na-ejizi onye ahịa `rateLimiter`                 | `<prefix>auth:api_key:<sha256>` na TTL    |
+| Ụlọ ahịa oke                 | `redisQuotaStore.ts`          | `getRedisClient(url)` singleton dị iche          | `<prefix>quota:*` nwere ike ịhazi kwa oge |
+| Ihe mgbaji sekit na-ekpo ọkụ | `redisCircuitBreakerStore.ts` | Ndị ahịa dị iche na `circuitBreakerFactory.ts`   | `<prefix>warmup:cb:<connectionId>`        |
 
-Ụdị ọrụ anọ ahụ niile na-ekekọrịta otu prefix namespace ka OmniRoute nwee ike ibikọ na ngwa ndị ọzọ n'otu
-instance Redis (dịka `127.0.0.1:6379`). Lee [Nhazi Namespace nke Key](#key-namespacing).
+Ibu ọrụ anọ niile na-ekekọrịta otu prefix oghere aha ka OmniRoute wee nwee ike ịnọkọ na ngwa ndị ọzọ n'otu ihe atụ Redis (dịka `127.0.0.1:6379`). Hụ [igodo nbanye aha](#key-namespacing).
 
 ---
 
-## Nhazi Dị Ugbu a (Ụkpụrụ Ndabara nke Code)
+## Nhazi ugbu a (Nhazi koodu)
 
-| Ntọala                             | Uru                                                           | Ebe                                                                                   |
-| ---------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| env var `REDIS_URL`                | `redis://redis:6379` (compose), ọ bụghị iwu na a ga-etinye ya | `rateLimiter.ts:5`, `.env.example`                                                    |
-| env var `REDIS_KEY_PREFIX`         | `omniroute:` (ndabara)                                        | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| env var `QUOTA_STORE_REDIS_URL`    | dị iche, nwere ike ịdị iche na `REDIS_URL`                    | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`               | `"sqlite"` (ndabara), `"redis"` ma ọ bụrụ na achọrọ           | `quota/storeFactory.ts`                                                               |
-| `maxRetriesPerRequest` nke ioredis | `3`                                                           | imepụta client na `rateLimiter.ts`                                                    |
-| `enableReadyCheck`                 | edoghị ya (ndabara ioredis: `true`)                           | —                                                                                     |
-| `lazyConnect`                      | edoghị ya (ndabara ioredis: `false`)                          | —                                                                                     |
-| `retryStrategy`                    | edoghị ya (ndabara ioredis: ntọala 200ms, exponential)        | —                                                                                     |
-| TLS / password / index DB          | **ahazibeghị**                                                | —                                                                                     |
-| Sentinel / Cluster                 | **ahazibeghị** — naanị standalone single-node                 | —                                                                                     |
+| Ịtọ ntọala                                 | Uru                                                 | Ebee                                                                                  |
+| ------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` dị iche iche                   | `redis://redis:6379` (nke mejupụtara), nhọrọ        | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` dị iche iche            | `omniroute:` (nke ndabara)                          | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` dị iche iche       | iche, nwere ike ịdị iche na `REDIS_URL`             | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`                       | `"sqlite"` (ndabere), nhọrọ `"redis"`               | `quota/storeFactory.ts`                                                               |
+| Ọnụ ego nke ioredis `maxRetriesPerRequest` | `3`                                                 | `rateLimiter.ts` okike okike                                                          |
+| `enableReadyCheck`                         | edobeghi (ndabara ioredis: `true`)                  | —                                                                                     |
+| `lazyConnect`                              | edobeghi (ndabara ioredis: `false`)                 | —                                                                                     |
+| `retryStrategy`                            | edobeghi (ndabere ioredis: 200ms base, exponential) | —                                                                                     |
+| TLS / paswọọdụ / DB index                  | **ahazibeghị**                                      | —                                                                                     |
+| Sentinel / ụyọkọ                           | **ahazibeghị** — kwụụrụ naanị otu ọnụ ọnụ           | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Nhazi Mmepụta A Kwadoro
+## Ntụgharị mmepụta ihe akwadoro
 
-### 1. Nhọrọ Connection Pool / Client (ioredis `Redis` constructor)
+### 1. Njikọ ọdọ mmiri / Nhọrọ ndị ahịa (ioredis `Redis` constructor)
 
-Koodu dị ugbu a na-emepụta otu `new Redis(url)` na-enweghị nhọrọ ahaziri iche. Maka
-mgbasa mmepụta nwere ọtụtụ replica, nyefee client factory n'ime koodu ahụ ma ọ bụ kechie `getRedisClient()`:
+Koodu dị ugbu a na-emepụta otu `new Redis(url)` na-enweghị nhọrọ omenala. Maka nrụpụta multi-replica deployments, nyefee ụlọ ọrụ ndị ahịa na koodu ma ọ bụ kechie `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // enweghị oke retry; hapụ retryStrategy ka ọ kpebie
-  enableReadyCheck: true, // chọpụta na server adịla njikere tupu ọ nabata oku
-  lazyConnect: true, // ejikọtala mgbe a na-emepụta ya; chere ruo oku mbụ
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // kwụsị mgbe retry 10 gachara → jikọọ ọzọ ma emechaa
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, oke 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // jikọta command ndị na-eme n'otu oge n'ime otu TCP write
-  keepAlive: 10000, // TCP keep‑alive kwa 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Ihe ndị bụ isi a ga-atụle:**
+**Isi azụmaahịa:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — ka mma maka mmepụta ka Redis
-  restart na-adịru nwa oge ghara ime ka request niile daa ozugbo. In-memory fallback dị na
-  `checkRateLimit()` na-ejikwa ụzọ ọdịda ahụ.
-- `lazyConnect: true` — na-egbochi mmalite server ịdabere na Redis ịdị njikere tupu server
-  amalite ịnabata connection.
-- `enableAutoPipelining: true` — na-ebelata round-trip maka nyocha rate-limit na-eme n'otu oge;
-  ọ bara uru mgbe RPS karịrị 50 n'otu connection.
+- `maxRetriesPerRequest: null` + `retryStrategy` — kacha amasị maka mmepụta ya mere ịmalitegharị Redis na-adịru nwa oge anaghị ada ngwa ngwa ọ bụla arịrịọ. Ndaghachi azụ nke ebe nchekwa dị na `checkRateLimit()` na-amịkọrọ ụzọ ọdịda.
+- `lazyConnect: true` — na-ezere ndabere mmalite na Redis ịdị elu tupu ihe nkesa amalite ịnakwere njikọ.
+- `enableAutoPipelining: true` — na-ebelata njem nlegharị anya maka nlele oke ọnụ ahịa n'otu oge; bara uru na > 50 RPS n'otu njikọ.
 
-### 2. Nhazi Redis Server (`redis.conf`)
+### 2. Nhazi nke sava Redis (`redis.conf`)
 
 ```
-# Ebe nchekwa
-maxmemory 80%                        # hapụ ohere maka OS page cache
-maxmemory-policy allkeys-lru         # wepụ auth cache entry ochie mgbe nrụgide dị
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Nchekwa na-adịgide adịgide (nhọrọ — OmniRoute na-anọgide na nchekwa mgbe crash mere na-enweghị ya)
-save 300 1                           # mee snapshot opekata mpe kwa nkeji 5 ma ọ bụrụ na ≥1 key gbanwere
-appendonly no                        # AOF adịghị mkpa; enwere ike imepụta data ọzọ
-appendfsync no                       # enweghị ibu fsync (RDB zuru oke)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Netwọkụ
-timeout 0                            # akwụsịla connection n'ihi na ọ naghị arụ ọrụ
-tcp-keepalive 300                    # keep‑alive nke nkeji 5
-tcp-backlog 511                      # backlog connection maka ibu na-abịa na mberede
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Arụmọrụ
-hz 10                                # nke ndabara; 100 maka ọrụ chọrọ latency dị ala
-activedefrag yes                     # mee defragment na-akpaghị aka mgbe fragmentation >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Ihe a ga-atụle maka `maxmemory-policy allkeys-lru`:** Enwere ike iwepụ auth cache entry mgbe
-nrụgide ebe nchekwa dị. Nke a adịghị emerụ ahụ — `setCachedApiKey` na-etinye data ọzọ mgbe niile ma ọ bụrụ na ọ hụghị ya, ebe
-SQLite fallback bụ isi mmalite e ji ekpebi eziokwu. Lua script nke rate-limiter na-emepụta obere key ndị
-e mere ka ha dịrị naanị obere oge.
+**Mgbanwe nke `maxmemory-policy allkeys-lru`:** Enwere ike ịchụpụ ndenye cache a n'okpuru nrụgide ebe nchekwa. Nke a dị mma — `setCachedApiKey` na-ebigharị mgbe niile na efu, na ndaghachi azụ SQLite bụ ikike. Ederede Lua na-amachi ọnụego na-emepụta obere igodo ndị na-adịte aka site na imewe.
 
-### 3. Ntọala Docker Compose
+### 3. Docker dere Ntọala
 
-Prod compose (`docker-compose.prod.yml`) na-eji `redis:8.6.2-alpine`. Tinye:
+Ihe mejupụtara (`docker-compose.prod.yml`) na-eji `redis:8.6.2-alpine`. Tinye:
 
 ```yaml
 redis:
@@ -150,35 +139,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Ihe A Ga-atụle Maka Ọtụtụ Instance / Scaling
+### 4. Ọtụtụ ihe atụ / nlebara anya
 
-**Otu Redis maka replica niile** — Lua script nke rate-limiter na-adabere n'otu
-key space nwere ikike ikpeazụ. Iji ọtụtụ Redis instance n'azụ replica ga-eme ka atomicity
-fuo ma mee ka budget okpukpu abụọ. Jiri otu Redis (ma ọ bụ Redis Sentinel cluster nwere failover) maka
-replica ngwa niile.
+**Otu Redis maka oyiri niile** — ederede Lua na-amachi ọnụego dabere na otu oghere igodo ikike. Ọtụtụ ihe atụ Redis n'azụ replicas ga-atụfu atomity na mmefu ego okpukpu abụọ. Jiri otu Redis (ma ọ bụ ụyọkọ Redis Sentinel nwere ọdịda) maka oyiri ngwa niile.
 
-**Ọnụọgụ connection:** Replica ngwa ọ bụla na-emepe **connection TCP 2** na Redis
-(rate limiter client + quota store client). Na replica 10 → connection 20, nke ka dị
-nnọọ n'okpuru oke connection 10k nke Redis instance ndabara.
+**Ọnụọgụ njikọ:** Ngwa oyiri ọ bụla ga-emepe **2 njikọ TCP** na Redis (ọnụahịa limiter ahịa + onye ahịa ahịa oke). Na njikọ → 20 nke 10, nke ọma n'ime ụlọ njikọ 10k nke Redis ndabara.
 
-### 5. Nlekota
+### 5. Nleba anya
 
-Mee ka ihe ndị a pụta site na health-check endpoint:
+Gosipụta site na njedebe nyocha ahụike:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts akpọọlarị function nke rateLimiter
-// Tinye nyocha ndị metụtara Redis:
-//   1. Latency PING site na ioredis .ping()
-//   2. Ojiji ebe nchekwa site na INFO memory
-//   3. Ọnụọgụ connection site na INFO clients
-//   4. Hit rate maka maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Metric ndị bụ isi a ga-elebara anya:
+Merik isi ihe ị ga-elele:
 
-- **Key ewepụrụ / sec** — ọ bụrụ na ọ na-adịgide n'elu efu, bulie `maxmemory`
-- **Client egbochiri** — uru na-abụghị efu na-egosi Lua script dị nwayọ ma ọ bụ contention dị elu
-- **Connection a jụrụ** — eruola oke connection; ọ naghị adịkarị na connection 20
+- **Igodo achụpụrụ / sk** — ma ọ bụrụ na ọ nọgidere na-abụghị efu, mụbaa `maxmemory`
+- **Ndị ahịa egbochiri** — na-abụghị efu na-atụ aro edemede Lua nwayọ ma ọ bụ esemokwu dị elu
+- **Njikọ ndị jụrụ** njedebe njikọ — kụrụ; obere na njikọ 20
+
+### 6. Redis-Dakọtara Sava
+
+Ihe nkesa ọ bụla a na-eji ebe a ga-emerịrị edemede Lua: njedebe ọnụego bụ otu `EVAL`. Na sava na-enweghị Lua, `checkRateLimit()` na-edekọ `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` wee gụọ usoro ọ bụla, yabụ oyiri ọ bụla na-amanye oke n'onwe ya. Ụlọ ahịa Nwepu-na-ekekọrịta nnọkọ-mmekọrịta (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) na-agụkwa ma na-emelite atụdo na `EVAL`; na-enweghị Lua ọ na-edekọ `[SESSION_AFFINITY] Redis error; falling back to SQLite.` na oyiri ọ bụla na-edobe ntụtụ nke ya. Ọrụ ndị ọzọ na-eji iwu dị larịị (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes na setịpụ), na azụ azụ Redis cache nke semantic anaghị eziga iwu `FT.*`.
+
+A nwalere ya na OmniRoute 3.8.52: KiviDB 1.2.0 na foto Lua ya (`kividb/kividb:v1.2.0-lua`). Ihe njedebe ọnụego (gụnyere usoro nke abụọ na-ekerịta ọnụ ọgụgụ), cache auth, ụlọ ahịa oke, igwe na-ekpo ọkụ ọkụ, ụlọ ahịa cache semantic, na arịrịọ `/v1/chat/completions` site na onye na-ahụ maka nkata gafere 18 n'ime nlele 19 na-agafe na Redis 8.10.3. Nke dị iche: `INCRBYFLOAT` na-echekwa `0.1 + 0.2` dị ka `0.30000000000000004` ebe Redis na-echekwa `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Ụlọ ahịa ego na-atụgharị ma na `parseFloat`, ma ọnụọgụ abụọ ahụ dị iche na ọnụọgụ ikpeazụ, ya mere ntụnyere nke dabara kpọmkwem na oke oke nwere ike ịpụta dị iche iche. Ụlọ ahịa mmekọ ọnụ abụghị akụkụ nke ọsọ ahụ. ( [ntọlite](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [nsonaazụ](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -201,13 +191,13 @@ flowchart LR
 
 ## Ntụaka
 
-| Faịlụ                              | Ebumnuche                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------ |
-| `src/shared/utils/rateLimiter.ts`  | Client Redis bụ isi, script Lua maka rate-limit, na fallback dị na ebe nchekwa |
-| `src/lib/db/apiKeys.ts`            | Cache nyocha njirimara — fallback Redis→SQLite                                 |
-| `src/lib/quota/redisQuotaStore.ts` | Client Redis dị iche maka ụlọ nchekwa quota nke bụ nhọrọ                       |
-| `src/lib/quota/storeFactory.ts`    | Na-agbanwe n'etiti driver quota `sqlite` na `redis`                            |
-| `docker-compose.prod.yml`          | Container Redis maka mmepụta (image `redis:8.6.2-alpine`)                      |
-| `.env.example`                     | Akwụkwọ nkọwa env vars Redis                                                   |
-| `src/app/api/local/redis/`         | Route API maka nhazi container mmepe                                           |
-| `bin/cli/commands/redis.mjs`       | Iwu CLI maka nhazi container mmepe                                             |
+| Faịlụ                              | Ebumnuche                                                               |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Onye ahịa Redis nke mbụ, script oke ọnụego Lua, ọdịda n'ime ebe nchekwa |
+| `src/lib/db/apiKeys.ts`            | Ihe nchekwa nchekwa — Redis→SQLite ọdịda azụ                            |
+| `src/lib/quota/redisQuotaStore.ts` | Kewapụ onye ahịa Redis maka ụlọ ahịa oke nhọrọ                          |
+| `src/lib/quota/storeFactory.ts`    | Ngbanwe n'etiti ndị ọkwọ ụgbọ ala oke `sqlite` na `redis`               |
+| `docker-compose.prod.yml`          | Akpa Redis Prod (onyinyo `redis:8.6.2-alpine`)                          |
+| `.env.example`                     | Redis env vars akwụkwọ                                                  |
+| `src/app/api/local/redis/`         | Ụzọ API maka nhazi ihe egwu dev                                         |
+| `bin/cli/commands/redis.mjs`       | CLI nyere iwu maka nhazi ihe eji eme ihe                                |

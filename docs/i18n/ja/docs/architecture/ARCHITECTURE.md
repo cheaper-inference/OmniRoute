@@ -8,78 +8,79 @@
 
 _最終更新日: 2026-06-28_
 
-## エグゼクティブサマリー
+## 概要
 
-OmniRouteは、ローカルAIルーティング ゲートウェイおよびNext.js上に構築されたダッシュボードです。単一の OpenAI 互換エンドポイント (`/v1/*`) を提供し、変換、フォールバック、トークン更新、使用状況追跡を使用して複数の上流プロバイダー間でトラフィックをルーティングします。
+OmniRoute は、Next.js を基盤とするローカル AI ルーティングゲートウェイおよびダッシュボードです。
+単一の OpenAI 互換エンドポイント（`/v1/*`）を提供し、形式変換、フォールバック、トークン更新、使用量追跡を行いながら、複数の上流プロバイダーにトラフィックをルーティングします。
 
-コア機能:
+主な機能：
 
-- OpenAI 互換のAPI surface for CLI/tools (381 プロバイダー、159 エクゼキューター モジュール)
-- プロバイダ形式間のRequest/response変換
-- モデル コンボ フォールバック (マルチモデル シーケンス)
-- `compositeTiers`によるランタイム順序付けを備えた構造化コンボ ステップ (`provider + model + connection`)
-- アカウントレベルのフォールバック (プロバイダーごとにマルチアカウント)
-- メイン チャット パスでのクォータ プリフライトとクォータ対応P2Cアカウントの選択
-- OAuth + API キープロバイダー接続管理 (27 OAuthプロバイダーモジュール)
-- `/v1/embeddings`による埋め込み生成 (18 プロバイダー)
-- `/v1/images/generations`によるイメージ生成 (10 の+プロバイダー、20 の+モデル)
-- `/v1/audio/transcriptions`経由の音声文字起こし (18 プロバイダー)
-- `/v1/audio/speech`経由のテキスト読み上げ (24 の組み込みプロバイダー)
-- `/v1/videos/generations`によるビデオ生成 (ComfyUI + SD WebUI)
-- `/v1/music/generations` (ComfyUI) による音楽生成
-- `/v1/search`経由の Web 検索 (20 プロバイダー)
-- `/v1/moderations`によるモデレーション
-- `/v1/rerank`による再ランキング
-- 推論モデルのためのタグ解析 (`<think>...</think>`) を考える
-- 厳密なOpenAI SDK互換性のための応答のサニタイズ
-- プロバイダ間の互換性のための役割の正規化 (開発者→システム、システム→ユーザー)
-- 構造化出力変換 (json_schema → Gemini responseSchema)
-- プロバイダー、キー、エイリアス、コンボ、設定、価格設定のローカル永続化 (122 DBモジュール)
-- Usage/cost追跡とリクエストのロギング
-- multi-device/state同期用のオプションのクラウド同期
-- APIアクセス制御の場合はIP allowlist/blocklist
-- 考える予算管理 (passthrough/auto/custom/adaptive)
-- グローバル システム プロンプト インジェクション
+- CLI／ツール向けの OpenAI 互換 API サーフェス（388 プロバイダー、159 エグゼキューターモジュール）
+- プロバイダー形式間でのリクエスト／レスポンス変換
+- モデルコンボのフォールバック（複数モデルのシーケンス）
+- 構造化されたコンボステップ（`provider + model + connection`）と、`compositeTiers` によるランタイム順序付け
+- アカウント単位のフォールバック（プロバイダーごとの複数アカウント）
+- メインチャット処理におけるクォータの事前チェックと、クォータを考慮した P2C アカウント選択
+- OAuth および API キーによるプロバイダー接続管理（27 の OAuth プロバイダーモジュール）
+- `/v1/embeddings` による埋め込み生成（18 プロバイダー）
+- `/v1/images/generations` による画像生成（10 以上のプロバイダー、20 以上のモデル）
+- `/v1/audio/transcriptions` による音声文字起こし（18 プロバイダー）
+- `/v1/audio/speech` によるテキスト読み上げ（24 の組み込みプロバイダー）
+- `/v1/videos/generations` による動画生成（ComfyUI + SD WebUI）
+- `/v1/music/generations` による音楽生成（ComfyUI）
+- `/v1/search` による Web 検索（20 プロバイダー）
+- `/v1/moderations` によるモデレーション
+- `/v1/rerank` によるリランキング
+- 推論モデル向けの Think タグ解析（`<think>...</think>`）
+- 厳密な OpenAI SDK 互換性のためのレスポンスサニタイズ
+- プロバイダー間の互換性を確保するためのロール正規化（developer→system、system→user）
+- 構造化出力の変換（json_schema → Gemini responseSchema）
+- プロバイダー、キー、エイリアス、コンボ、設定、料金情報のローカル永続化（122 の DB モジュール）
+- 使用量／コストの追跡とリクエストログ記録
+- 複数デバイス間／状態同期のためのオプションのクラウド同期
+- API アクセス制御用の IP 許可リスト／ブロックリスト
+- 思考バジェット管理（パススルー／自動／カスタム／適応型）
+- グローバルシステムプロンプトの注入
 - セッション追跡とフィンガープリンティング
-- プロバイダー固有のプロファイルによるアカウントごとの強化されたレート制限
-- プロバイダーの回復力を高めるサーキット ブレーカー パターン
-- ミューテックスロックによるアンチサンダーリングハード保護
-- 署名ベースのリクエスト重複排除キャッシュ
-- ドメイン層: コスト ルール、フォールバック ポリシー、ロックアウト ポリシー
-- コンテキスト リレー: アカウント ローテーションの継続性のためのセッション ハンドオフの概要
-- ドメイン状態の永続性 (フォールバック、バジェット、ロックアウト、サーキット ブレーカー用のSQLiteライトスルー キャッシュ)
-- 一元化されたリクエスト評価のためのポリシー エンジン (ロックアウト→バジェット→フォールバック)
-- p50/p95/p99レイテンシ集約を使用したテレメトリのリクエスト
-- `combo_execution_key` / `combo_step_id`を介したコンボ ターゲット テレメトリと履歴コンボ ターゲット ヘルス
-- エンドツーエンド トレース用の相関ID (X-Request-Id)
-- APIキーごとのオプトアウトによるコンプライアンス監査ログ
-- LLM品質保証の評価フレームワーク
-- リアルタイムのプロバイダーのサーキット ブレーカー ステータスを表示するヘルス ダッシュボード
-- 3 つのトランスポート (stdio/SSE/Streamable HTTP) を備えたMCPサーバー (110 ツール)
-- スキルとタスクのライフサイクルを備えたA2Aサーバー (JSON-RPC 2.0 + SSE)
-- 記憶システム（抽出、挿入、検索、要約）
-- スキル システム (レジストリ、エグゼキューター、サンドボックス、組み込みスキル)
-- 証明書管理とDNS処理を備えたMITMプロキシ
-- プロンプトインジェクションガードミドルウェア
-- Caveman、 RTK、スタックされたパイプライン、圧縮コンボ、言語パック、分析を使用したプロンプト圧縮パイプライン
-- ACP (エージェント通信プロトコル) レジストリ
-- モジュラーOAuthプロバイダー ( `src/lib/oauth/providers/`の下に 22 個の個別モジュール)
-- Uninstall/full-uninstallスクリプト
-- OAuth環境修復アクション
-- OpenAI 互換のWSクライアント用のWebSocketブリッジ (`/v1/ws`)
-- 同期トークン管理 (issue/revoke、ETag バージョンの構成バンドルのダウンロード)
-- GLM Thinking (`glmt`) ファーストクラスプロバイダーのプリセット
-- ハイブリッド トークン カウンティング (推定フォールバックを備えたプロバイダー側の`/messages/count_tokens` )
-- モデルエイリアスの自動シード (起動時に 30 の+クロスプロキシ方言正規化)
-- SSRFガード、プライベートURLブロッキング、構成可能な再試行による安全なアウトバウンドフェッチ
-- 構成可能な`requestRetry`および`maxRetryIntervalSec`によるクールダウンを意識したチャットの再試行
-- 起動時にZodを使用したランタイム環境の検証
-- ページネーション、プロバイダーCRUDイベント、SSRF ブロックされた検証ログを備えたコンプライアンス監査 v2
+- プロバイダー固有のプロファイルを使用した、アカウント単位の強化されたレート制限
+- プロバイダーの耐障害性を高めるサーキットブレーカーパターン
+- ミューテックスロックによるサンダリングハード対策
+- シグネチャベースのリクエスト重複排除キャッシュ
+- ドメインレイヤー：コストルール、フォールバックポリシー、ロックアウトポリシー
+- Context Relay：アカウントローテーション時の継続性を確保するセッション引き継ぎサマリー
+- ドメイン状態の永続化（フォールバック、バジェット、ロックアウト、サーキットブレーカー向け SQLite ライトスルーキャッシュ）
+- 一元的なリクエスト評価を行うポリシーエンジン（ロックアウト → バジェット → フォールバック）
+- p50／p95／p99 レイテンシ集計を備えたリクエストテレメトリ
+- `combo_execution_key`／`combo_step_id` によるコンボターゲットのテレメトリと、過去のコンボターゲットの健全性
+- エンドツーエンドのトレーシングに使用する相関 ID（X-Request-Id）
+- API キーごとのオプトアウトに対応したコンプライアンス監査ログ
+- LLM の品質保証向け評価フレームワーク
+- プロバイダーのサーキットブレーカー状態をリアルタイム表示するヘルスダッシュボード
+- 3 種類のトランスポート（stdio／SSE／Streamable HTTP）を備えた MCP Server（110 ツール）
+- スキルとタスクライフサイクルを備えた A2A Server（JSON-RPC 2.0 + SSE）
+- メモリシステム（抽出、注入、取得、要約）
+- スキルシステム（レジストリ、エグゼキューター、サンドボックス、組み込みスキル）
+- 証明書管理と DNS 処理を備えた MITM プロキシ
+- プロンプトインジェクション防止ミドルウェア
+- Caveman、RTK、スタック型パイプライン、圧縮コンボ、言語パック、分析機能を備えたプロンプト圧縮パイプライン
+- ACP（Agent Communication Protocol）レジストリ
+- モジュール式 OAuth プロバイダー（`src/lib/oauth/providers/` 配下の 22 個の個別モジュール）
+- アンインストール／完全アンインストールスクリプト
+- OAuth 環境修復アクション
+- OpenAI 互換 WS クライアント向け WebSocket ブリッジ（`/v1/ws`）
+- 同期トークン管理（発行／失効、ETag でバージョン管理された設定バンドルのダウンロード）
+- GLM Thinking（`glmt`）をファーストクラスのプロバイダープリセットとしてサポート
+- ハイブリッドトークンカウント（プロバイダー側の `/messages/count_tokens` と推定フォールバック）
+- モデルエイリアスの自動シード（起動時に 30 以上のクロスプロキシ方言を正規化）
+- SSRF ガード、プライベート URL のブロック、設定可能な再試行機能を備えた安全なアウトバウンドフェッチ
+- 設定可能な `requestRetry` と `maxRetryIntervalSec` を使用する、クールダウンを考慮したチャット再試行
+- 起動時の Zod によるランタイム環境検証
+- ページネーション、プロバイダー CRUD イベント、SSRF ブロック検証ログを備えたコンプライアンス監査 v2
 
-プライマリ ランタイム モデル:
+主要なランタイムモデル：
 
-- `src/app/api/*`の下のNext.jsアプリ ルートは、ダッシュボードAPIsと互換性APIs両方を実装します。
-- `src/sse/*` + `open-sse/*`の共有SSE/routingコアは、プロバイダーの実行、変換、ストリーミング、フォールバック、および使用を処理します。
+- `src/app/api/*` 配下の Next.js アプリルートが、ダッシュボード API と互換 API の両方を実装
+- `src/sse/*` + `open-sse/*` の共有 SSE／ルーティングコアが、プロバイダーの実行、変換、ストリーミング、フォールバック、使用量処理を担当
 
 ## 参照図
 
@@ -849,41 +850,47 @@ flowchart LR
 - `src/lib/db/*`: 特定のモジュールを直接インポート — バレルは使用しない（旧`localDb.ts`再エクスポートレイヤーは削除済み）
 - `src/lib/usageDb.ts`: SQLiteテーブル上に構築された使用履歴／呼び出しログのファサード
 
-## プロバイダーエグゼキューターのカバレッジ（Strategy パターン）
+## プロバイダーエグゼキューターのカバレッジ (戦略パターン)
 
-各プロバイダーには、`BaseExecutor`（`open-sse/executors/base.ts` 内）を拡張した専用のエグゼキューターがあります。これは、URL の構築、ヘッダーの構築、指数バックオフによる再試行、認証情報の更新フック、および `execute()` オーケストレーションメソッドを提供します。
+各プロバイダーには、 `BaseExecutor` ( `open-sse/executors/base.ts`内) を拡張する特殊なエグゼキューターがあり、 URL構築、ヘッダーの構築、指数バックオフによる再試行、資格情報の更新フック、および`execute()`オーケストレーション メソッドを提供します。
 
-| エグゼキューター          | プロバイダー                                                                                                                                               | 特別な処理                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI、Claude、Gemini、Qwen、OpenRouter、GLM、Kimi、MiniMax、DeepSeek、Groq、xAI、Mistral、Perplexity、Together、Fireworks、Cerebras、Cohere、NVIDIA など | プロバイダーごとの動的な URL／ヘッダー設定                                         |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | カスタムプロジェクト／セッション ID、Retry-After の解析、429 の難読化              |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | デプロイメントベースのルーティング、api-version クエリの適用                       |
-| `BlackboxWebExecutor`     | Blackbox AI（Web モード）                                                                                                                                  | TLS フィンガープリントのエミュレーションを伴う Web セッションのリバース処理        |
-| `ClaudeIdentityExecutor`  | Claude.ai（CCH パス）                                                                                                                                      | 制約およびツール再マッピングのパイプライン、フィンガープリント調整                 |
-| `CliProxyApiExecutor`     | CLIProxyAPI 互換プロバイダー                                                                                                                               | カスタム認証およびプロトコル処理                                                   |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | アカウント ID の注入、Neurons ベースの使用量追跡                                   |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | システム指示を注入し、推論エフォートを強制                                         |
-| `ChatGptWebCodexExecutor` | ChatGPT Web（Codex）                                                                                                                                       | スレッド／ターン固定を備えたブラウザセッション用 Responses API ブリッジ            |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth およびセッションごとのヘッダーローテーション                                 |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC プロトコル、Protobuf エンコーディング、チェックサムによるリクエスト署名 |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | クラウドエージェントモジュールを介した Devin タスクライフサイクルのブリッジ        |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot トークンの更新、VSCode を模したヘッダー                                    |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth およびプロジェクトスコープのルーティング                              |
-| `GlmExecutor`             | Z.AI GLM（`glmt` プリセットを含む）                                                                                                                        | 思考バジェット対応、GLMT プリセット定数                                            |
-| `GrokWebExecutor`         | xAI Grok Web                                                                                                                                               | Web セッションのリバース処理、モード選択（think／standard）                        |
-| `KieExecutor`             | KIE                                                                                                                                                        | ローテーションするセッションアンカーを使用したカスタムトークン発行                 |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream バイナリ形式から SSE への変換                                      |
-| `MuseSparkWebExecutor`    | Muse Spark（Web）                                                                                                                                          | 画像メッセージのブリッジを伴う Web セッションのリバース処理                        |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | プロバイダー固有のリクエストボディ形式                                             |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK 互換のプロバイダー設定                                                      |
-| `PerplexityWebExecutor`   | Perplexity Web                                                                                                                                             | チャット継続のための Web セッションのリバース処理                                  |
-| `PetalsExecutor`          | Petals 分散推論                                                                                                                                            | 分散型スウォームルーティング                                                       |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | API キー不要、レート制限付きリクエスト                                             |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT および OAuth のサポート、複数モデル対応の無料枠                                |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | サービスアカウント認証、リージョンベースのエンドポイント                           |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | インポートされた API キーおよび Connect-Protobuf によるチャットストリーミング      |
+| 執行者                    | プロバイダー                                                                                                                                                                       | 特別な取り扱い                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI、 Claude、 Gemini、 Qwen、 OpenRouter、 GLM、 Kimi、 MiniMax、 DeepSeek、 Groq、 xAI、 Mistral、 パープレキシティ、 Together、 Fireworks、 Cerebras、 Cohere、 NVIDIAなど。 | プロバイダーごとの動的URL/header構成                                              |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                                 | カスタムproject/session IDs、解析後の再試行、429 難読化                           |
+| `AzureOpenAIExecutor`     | アズールOpenAI                                                                                                                                                                     | デプロイメントベースのルーティング、API バージョンのクエリ強制                    |
+| `BlackboxWebExecutor`     | ブラックボックスAI (Web モード)                                                                                                                                                    | TLS指紋エミュレーションを使用した Web セッション リバース                         |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCHパス)                                                                                                                                                                | 制約+ツール - パイプラインの再マッピング、フィンガープリントの整形                |
+| `CliProxyApiExecutor`     | CLIProxyAPI 互換プロバイダー                                                                                                                                                       | カスタム認証とプロトコル処理                                                      |
+| `CloudflareAiExecutor`    | CloudflareワーカーAI                                                                                                                                                               | アカウントIDインジェクション、ニューロンベースの使用状況追跡                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                                       | システム命令を注入し、推論努力を強制する                                          |
+| `ChatGptWebCodexExecutor` | ChatGPTウェブ (Codex)                                                                                                                                                              | ブラウザセッションの応答thread/turnピニングを使用したAPIブリッジ                  |
+| `CommandCodeExecutor`     | コマンドコード                                                                                                                                                                     | OAuth +セッションごとのヘッダーのローテーション                                   |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                                         | ConnectRPCプロトコル、Protobuf エンコーディング、チェックサムによるリクエスト署名 |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                                          | クラウド エージェント モジュールを介したDevinタスク ライフサイクル ブリッジング   |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                                     | Copilotトークンのリフレッシュ、VSCode を模倣したヘッダー                          |
+| `GitlabExecutor`          | GitLabデュオ                                                                                                                                                                       | GitLab OAuth +プロジェクト スコープのルーティング                                 |
+| `GlmExecutor`             | Z.AI GLM ( `glmt`プリセットを含む)                                                                                                                                                 | 予算を考慮したGLMTプリセット定数                                                  |
+| `GrokWebExecutor`         | xAI Grokウェブ                                                                                                                                                                     | Web セッションのリバース、モード選択 (think/standard)                             |
+| `KieExecutor`             | KIE                                                                                                                                                                                | ローテーションセッションアンカーを使用したカスタムトークンの発行                  |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                                             | AWS EventStreamバイナリ形式→ SSE変換                                              |
+| `MuseSparkWebExecutor`    | ミューズスパーク（ウェブ）                                                                                                                                                         | イメージメッセージブリッジングを使用した Web セッションリバース                   |
+| `NlpCloudExecutor`        | NLPクラウド                                                                                                                                                                        | プロバイダー固有のリクエストボディの形状                                          |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                                           | AI SDK互換プロバイダーのセットアップ                                              |
+| `PerplexityWebExecutor`   | パープレキシティウェブ                                                                                                                                                             | チャットを継続するための Web セッションのリバース                                 |
+| `PetalsExecutor`          | 花びら分散推論                                                                                                                                                                     | 分散型スウォーム ルーティング                                                     |
+| `PollinationsExecutor`    | 受粉AI                                                                                                                                                                             | APIキーは不要、レート制限されたリクエスト                                         |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                                           | PATおよびOAuthサポート、マルチモデルの無料枠                                      |
+| `VertexExecutor`          | Google頂点AI                                                                                                                                                                       | サービスアカウント認証、リージョンベースのエンドポイント                          |
+| `DevinDesktopExecutor`    | Devinデスクトップ                                                                                                                                                                  | インポートされたAPIキー+ Connect-protobuf チャット ストリーミング                 |
 
-その他のすべてのプロバイダー（カスタム互換ノードを含む）は、`DefaultExecutor` を使用します。
+他のすべてのプロバイダー (カスタム互換ノードを含む) は`DefaultExecutor`を使用します。
+
+### 自動化されたプローブと Web セッション アカウント
+
+モデル テスト、すべてテスト、コンボ テストおよび評価では、実際のチャット リクエストが送信されます。 Web セッション プロバイダーはサインイン ユーザーとして機能するため、これらの各要求はそのアカウントの会話として保存されます。このような会話を残した自動プローブはアカウントを停止されました (#14780)。したがって、チャット パイプラインは、ターゲットのプロバイダーが解決されてから資格情報が選択される (`src/lib/providers/chatProbePolicy.ts`) 前に、プロバイダーが Web セッション資格情報を取得する自動プローブが到達するすべてのターゲットを拒否します。拒否は`422`と`error.code` `chat_probe_not_isolated`であり、プローブ ランナーはそれを失敗ではなくスキップとして報告します。
+
+プロバイダー独自の履歴なしモードですべてのチャットを実行するエグゼキューターは、それを`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) で宣言します。その後、そのプロバイダーへのプローブが許可されます。 ChatGPT Web は`temporary-chat`を宣言します。テストを使用して宣言をそのメカニズムに固定するため、クレームがそれを true にするコードよりも長く存続することはありません。
 
 ## プロバイダー互換性マトリックス
 
@@ -1046,11 +1053,11 @@ flowchart LR
 - 起動時の SQLite スキーママイグレーションおよび自動アップグレードフック
 - レガシー JSON → SQLite マイグレーションの互換パス
 
-## 6) SSRF／送信先 URL ガード
+## 6) SSRF / 外向き URL ガード
 
-- `src/shared/network/outboundUrlGuard.ts` は、プロバイダーエグゼキューターに到達する前に、すべてのプライベート／ループバック／リンクローカルのターゲット URL をブロックします
-- プロバイダーモデルの検出および検証ルートでは、すべての送信リクエストの前にガードを適用する `src/shared/network/safeOutboundFetch.ts` を使用します
-- ガードエラーは HTTP 422 の `URL_GUARD_BLOCKED` として通知され、`providerAudit.ts` を介してコンプライアンス監査証跡に記録されます
+- `BaseExecutor.assertOutboundUrlAllowed`（`open-sse/executors/base.ts`）は、`BaseExecutor.execute()` を通じて送信されるチャットリクエストに `src/shared/network/outboundUrlGuard.ts` を適用します。公開 URL のみを許可するモード（`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` かつプライベートフラグがオフ）では、プライベートホスト、ループバックホスト、および 169.254.0.0/16 をブロックします。それ以外のすべてのモードでは、クラウドメタデータホストをブロックします。DNS ルックアップを実行する前に、記述されたとおりのホスト名または IP リテラルを確認します。組み込みのローカルプロバイダーでは、このチェックはスキップされます。
+- プロバイダーモデルの検出および検証ルートでは、すべての外向きリクエストの前にガードを適用する `src/shared/network/safeOutboundFetch.ts` を使用します
+- ガードエラーは、HTTP 503（`getSafeOutboundFetchErrorStatus`。モデル検出ルートは 400 を返します）とともに `URL_GUARD_BLOCKED` として表面化し、検証中に実際に発生した SSRF ブロックは、`provider.validation.ssrf_blocked` イベントとして監査証跡に記録されます
 
 ## オブザーバビリティと運用シグナル
 
@@ -1101,7 +1108,7 @@ flowchart LR
 4. クラウドの動作は、正しい `NEXT_PUBLIC_BASE_URL` とクラウドエンドポイントへの到達可能性に依存する。
 5. `open-sse/` ディレクトリは、`@omniroute/open-sse` **npm ワークスペースパッケージ**として公開される。ソースコードでは `@omniroute/open-sse/...` を介してインポートされる（Next.js の `transpilePackages` によって解決される）。一貫性を保つため、このドキュメント内のファイルパスでは引き続きディレクトリ名 `open-sse/` を使用する。
 6. ダッシュボードのチャートでは、アクセシブルでインタラクティブな分析可視化（モデル使用量の棒グラフ、成功率を含むプロバイダー内訳表）のために、**Recharts**（SVG ベース）を使用する。
-7. E2E テストでは **Playwright**（`tests/e2e/`）を使用し、`npm run test:e2e` で実行する。ユニットテストでは **Node.js test runner**（`tests/unit/`）を使用し、`npm run test:unit` で実行する。`src/` 配下のソースコードは **TypeScript**（`.ts`／`.tsx`）であり、`open-sse/` ワークスペースは引き続き JavaScript（`.js`）を使用する。
+7. E2E テストでは **Playwright**（`tests/e2e/`）を使用し、`npm run test:e2e` で実行する。ユニットテストでは **Node.js test runner**（`tests/unit/`）を使用し、`npm run test:unit` で実行する。`src/` 配下のソースコードは **TypeScript**（`.ts`／`.tsx`）であり、`open-sse/` ワークスペースは引き続き TypeScript（`.ts`）を使用する。
 8. 設定ページは、General、Appearance、AI、Security、Routing、Resilience、Advanced の 7 つのタブで構成される。Resilience ページでは、リクエストキュー、接続クールダウン、プロバイダーブレーカー、およびクールダウン待機動作のみを設定する。ブレーカーの実行時状態は Health ページに表示される。
 9. **Context Relay** ストラテジー（`context-relay`）は 2 つのレイヤーに分割されている。`combo.ts` はハンドオフを生成すべきかどうかを決定し、`chat.ts` はアカウント解決後にハンドオフを挿入する。ハンドオフデータは SQLite の `context_handoffs` テーブルに格納される。この分割は、実際のアカウントが変更されたかどうかを把握できるのが `chat.ts` だけであるため、意図的に行われている。
 10. **プロキシの適用**は現在包括的に行われる。`tokenHealthCheck.ts` は接続ごとにプロキシを解決し、`/api/providers/validate` は `runWithProxyContext` を使用し、`proxyFetch.ts` は Node 22 でディスパッチャーの互換性を維持するために `undici.fetch()` を使用する。

@@ -394,7 +394,7 @@ Menggunakan `wreq-js` untuk menjana cap jari TLS seperti pelayar, sekali gus mem
 
 ### Pemadanan Cap Jari CLI
 
-**Togol Cap Jari CLI** (`Tetapan → Keselamatan`) menyusun semula pengepala HTTP dan medan badan JSON agar sepadan dengan tandatangan tepat binari CLI natif (Claude Code, Codex, dan sebagainya). Ini berfungsi **di samping** proksi:
+**Togol Cap Jari CLI** (`Settings → Security`) menyusun semula pengepala HTTP dan medan badan JSON agar sepadan dengan tandatangan tepat binari CLI natif (Claude Code, Codex, dan sebagainya). Ini berfungsi **di samping** proksi:
 
 ```
 IP Anda (disekat) → IP Proksi (AS) → API Penyedia

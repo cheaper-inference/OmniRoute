@@ -137,41 +137,63 @@ Ugyanezen csomag kapcsolódó moduljai:
 
 ---
 
-## Antigravity lopakodó mód
+## Antigravity Stealth
 
-Az Antigravity-kérések bájtról bájtra megőrzik a hívó szövegét. Az OmniRoute nem szúr zéró szélességű karaktereket a promptokba, és nem nevez át vagy injektál eszközöket egy IDE-kliens utánzásához.
+Antigravity kérések byte-onként megőrzik a hívó szövegét. OmniRoute nem szúr be nulla szélességű karaktereket a promptokba vagy rename/inject eszközökbe, hogy utánozzon egy IDE klienst.
 
 ### `antigravityHeaderScrub.ts`
 
-Továbbítás előtt eltávolítja a Stainless SDK jelölőit (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Lehúzza a rozsdamentes SDK markereket (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) a továbbítás előtt.
 
-### ⚠️ Kockázat: `ANTIGRAVITY_CREDITS=always` (fióktiltási gócpont)
+### ⚠️ kockázat: `ANTIGRAVITY_CREDITS=always` (számlatiltás hot spot)
 
-Az `ANTIGRAVITY_CREDITS=always` (amelyet az `open-sse/executors/antigravity.ts` használ fel) **minden** kérést az Antigravity AI Credit Overages szolgáltatáson (fizetős Google-krediteken) keresztül irányít, ahelyett, hogy a Google ingyenes csomagjának kvótája korlátozná a használatot. Ez funkcióként van dokumentálva, de **ez az általunk látott szolgáltatásifeltétel-sértési jelentések messze leggyakoribb oka** — több Google Ultra-fiókot is letiltottak `403 / "service disabled for ToS violation" / insufficient_quota` hibával, miután néhány órán át `=always` beállítással futottak.
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` által fogyasztott) útvonalak **minden** kérjen Antigravity AI Credit Overages (fizetett Google kreditek) révén, ahelyett, hogy Google szabadszintű kvótakapuját engedélyezné. Ez jellemzőként van dokumentálva, de így van **az egyetlen leggyakoribb Általános Szerződési Feltételek megsértéséről szóló jelentés, amelyet látunk** — több Google Ultra fiókot letiltottak `403 / "service disabled for ToS violation" / insufficient_quota` használatával, miután néhány órán át futottak `=always` vel.
 
-A felsőbb rétegbeli szabályérvényesítés **a Google oldalán** történik, ezt az OmniRoute nem tudja megakadályozni. A környezeti változó neve és a meglévő dokumentáció azt a benyomást kelti, hogy biztonságosan bekapcsolható; ez nem így van.
+Az upstream végrehajtás be van kapcsolva **Google oldala** , semmi sem akadályozhatja meg OmniRoute. Az env var név és a meglévő dokumentumok úgy hangzik, mint egy biztonságos gomb, amellyel meg lehet fordítani; nem az.
 
-**Miért vált ez ki agresszívebb visszaélés-észlelést, mint a kizárólag ingyenes csomagra korlátozott használat:**
+**Miért vezeti fel ez agresszívebben a visszaélések felderítését, mint a csak szabadszintű használat:**
 
-- Az egyetlen Google-fiókon keresztüli tartós, automatizált költést másként jelölik meg, mint amikor az ingyenes csomag eléri a kvótát, majd leáll.
-- A kredittúllépéseknek nincs sebességkorlátjuk, ezért egy hibásan konfigurált kliens percek alatt több száz USD-t költhet el, és API-kulcs-viszonteladásnak vagy botforgalomnak tűnhet.
-- Ha több OmniRoute-felhasználó párhuzamosan, ugyanarról a külső IP-címről használ túllépési krediteket, az tovább erősíti a jelzést.
+- Az egyetlen Google -fiókra fordított tartós automatizált költés másképp jelölődik, mint a szabadszintű találati kvóta és leállás.
+- A hiteltúllépéseknek nincs kamatplafonja, így a rosszul konfigurált kliens percek alatt több száz USD égethet el, és API-kulcsos viszonteladásnak vagy botforgalomnak tűnhet.
+- Több OmniRoute felhasználó, akik párhuzamosan ütik el a túllépési kreditet ugyanabból a külső IP ből, összeadják a jelet.
 
-**Javasolt eljárás:**
+**Javasolt testtartás:**
 
-1. Tartsa meg az alapértelmezett `ANTIGRAVITY_CREDITS=off` beállítást, kivéve, ha az üzemeltető kifejezetten elfogadja a fizetős kreditekkel és a fiókkal szembeni intézkedésekkel járó kockázatot. A `retry` először elküldi a normál kérést, és egy megfelelő, kvótához kapcsolódó 429-es válasz után legfeljebb egyszer injektál krediteket; az `always` már az első kérésbe injektálja a krediteket.
-2. **Ossza el a terhelést a szolgáltatók között az Auto-Combo segítségével** (`model: "auto"` vagy `kr/glm/etc`-combo), ahelyett, hogy egyetlen Antigravity-fiókot terhelne túl.
-3. **Állítson be kapcsolatonkénti RPM-korlátokat** az Antigravity szolgáltató szerkesztési oldalán (Dashboard → Providers → Antigravity → kapcsolat → sebességkorlát). Tartós használat esetén a 30–60 RPM védhető felső határ.
-4. **Használjon stabil, az üzemeltető által felügyelt felsőbb rétegbeli hálózatot**, és kerülje egyetlen fiók megosztását egymástól független felhasználók vagy munkaterhelések között.
-5. **Letiltás esetén**: nyújtson be fellebbezést a `support.google.com` → „Restore Workspace/Account access” oldalon, és mellékelje a Google által küldött pontos `quota_exceeded` / `service disabled` választörzset. A helyreállítás nem garantált.
+1. Tartsa meg az alapértelmezett `ANTIGRAVITY_CREDITS=off` kivéve, ha az üzemeltető kifejezetten vállalja a kifizetett hitelek és a számlavégrehajtás kockázatát. `retry` először a normál kérést küldi el, és legfeljebb egyszer ad be jóváírást a 429-es jogosult kvóta után; `always` az első kérésre beszúrja a krediteket.
+2. **Terhelés megosztása a szolgáltatók között az Auto-Combo segítségével** (`model: "auto"` vagy `kr/glm/etc` -combo), ahelyett, hogy egyetlen Antigravity fiókot telítenének.
+3. **Állítsa be a csatlakozásonkénti RPM korlátokat** a Antigravity szolgáltató szerkesztő oldalán (Dashboard → Providers → Antigravity → connect → rate limit). A 30–60 RPM egy védhető felső határ a tartós használathoz.
+4. **Használjon stabil, kezelő által vezérelt upstream hálózatot** és ne ossza meg egy fiókot független felhasználókkal vagy munkaterhelésekkel.
+5. **Ha betiltják** : fellebbezés `support.google.com` → " Workspace/Account hozzáférés visszaállítása" útján a pontos `quota_exceeded` / `service disabled` választörzs Google elküldésével. A helyreállítás nem garantált.
 
-A környezeti változók referenciadokumentációja ismerteti az egyes kreditmódok fiókra és költségekre gyakorolt hatásait.
+A környezeti hivatkozás dokumentálja az egyes jóváírási módok számla- és kiadási vonatkozásait.
 
-Érintett helyek:
+#### Nem csak `=always`: Antigravity OAuth útválasztás általában
 
-- `open-sse/executors/antigravity.ts` — beolvassa a `process.env.ANTIGRAVITY_CREDITS` értékét
-- `src/lib/oauth/providers/antigravity.ts` — hitelesítő adatok továbbítása
-- Eredeti incidensjelentés: [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183) beszélgetés
+A felfüggesztések nem korlátozódnak a hiteltúllépésekre. A 2026. novemberi jelentések (#19223, #19266) több olyan Google -fiókot írnak le, amelyeket felfüggesztettek a `antigravity` és `agy` (Antigravity CLI) szolgáltatókon keresztül történő átirányítás során, és a következők:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Mindkét szolgáltató a Antigravity termék OAuth munkamenetével hitelesít, erre az irányítópult kockázati figyelmeztetése („Ez a szolgáltató az Ön hivatalos session/OAuth termékét használja, amely nem engedélyezett proxy/router használatához”) figyelmeztet a kapcsolat hozzáadása előtt. A fenti ajánlások egyike sem teszi lehetővé ezt a felhasználást; csak azt csökkentik, hogy egy fiók mekkora forgalmat hordoz.
+
+**Engedélyezett API interfészek Gemini modellekhez.** Google programozott hozzáférést biztosít Gemini hez APIs keresztül, amelyet OmniRoute normál API-kulcs-szolgáltatóként támogat:
+
+| Szolgáltató azonosítója | Irányítópult neve         | Hitelesítési adat                                                                     |
+| ----------------------- | ------------------------- | ------------------------------------------------------------------------------------- |
+| `gemini`                | Gemini (Google AI Studio) | Gemini API kulcs a Google AI Studio-tól (ingyenes szint elérhető)                     |
+| `vertex`                | Vertex AI                 | Szolgáltatásfiók JSON, OAuth hozzáférési token vagy Vertex Express API kulcs (Gemini) |
+
+Ezek a szolgáltatók hitelesítő adatok Google problémákat használnak API hozzáféréshez, ellentétben a Antigravity termékmunkamenettel. Nem tesznek minden használatot megfelelővé, és nem szüntetik meg a végrehajtás kockázatát: mindegyikre a saját feltételei vonatkoznak, amelyeket az üzemeltetőnek ellenőriznie kell a telepítéshez. Például a [Gemini API Kiegészítő Szolgáltatási Feltételei](https://ai.google.dev/gemini-api/terms) csak akkor engedélyezik a Fizetős szolgáltatásokat, ha API klienseket az Európai Gazdasági Térségben, Svájcban vagy az Egyesült Királyságban lévő felhasználók rendelkezésére bocsátják, és a nem fizetett szolgáltatásoknak küldött tartalmat Google termékeinek fejlesztésére lehet felhasználni. A Vertex AI helyett a Google Cloud feltételei vonatkoznak ( [Szolgáltatásspecifikus feltételek](https://cloud.google.com/terms/service-terms) ). Az árak és a kvóták inkább a API feltételeket követik, nem pedig a Antigravity előfizetést.
+
+Azoknak az üzemeltetőknek, akik el akarják kerülni a fent leírt Antigravity felfüggesztéseket, Gemini forgalmat ezen szolgáltatók egyikén kell átirányítaniuk `antigravity` / `agy` helyett, miután ellenőrizték, hogy használatuk megfelel-e a szolgáltató feltételeinek.
+
+Érintési pontok:
+
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` olvassa
+- `src/lib/oauth/providers/antigravity.ts` — hitelesítő vízvezeték
+- Eredeti eseményjelentés: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -240,7 +262,7 @@ Minden MITM-végpont kezelési hitelesítést igényel (`requireCliToolsAuth`). 
 
 ---
 
-## A felhasználói ügynök felülbírálja — env vars-t (`.env.example`, 12. szakasz)
+## User-Agent felülbírálások — környezeti változók (`.env.example` 12. szakasz)
 
 | Változó             | Alapértelmezett                               |
 | ------------------- | --------------------------------------------- |
@@ -251,7 +273,7 @@ Minden MITM-végpont kezelési hitelesítést igényel (`requireCliToolsAuth`). 
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-`open-sse/executors/base.ts::buildHeaders()` dinamikus keresésen keresztül fogyasztja.** Ha a szolgáltatók új CLI verziókat adnak ki, nyomd meg ezeket** — elavult UA karakterláncait elavult kliensként kezdik elutasítani.
+Az `open-sse/executors/base.ts::buildHeaders()` használja dinamikus kereséssel. **Frissítse ezeket, amikor a szolgáltatók új CLI-verziókat adnak ki** — az elavult UA-karakterláncokat a rendszer elavult kliensekként kezdi elutasítani.
 
 ## CLI-kompatibilitási mód kapcsolói (`.env.example` 13. szakasz)
 

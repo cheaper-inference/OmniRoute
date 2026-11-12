@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # Claude Code koristi glm/glm-5.2 preko OmniRo
 
 ---
 
-## Како Claude код повезује са мрежним пролазом
+## Kako se Claude Code povezuje sa mrežnim prolazom
 
-Claude Цоде говори о**Anthropic Поруке API** и усмерен је на прилагођену крајњу тачку са варијаблама окружења (нема `--base-url` заставицу):
+Claude Code koristi **Anthropic Messages API** i usmerava se ka prilagođenoj
+krajnjoj tački pomoću promenljivih okruženja (nema opciju `--base-url`):
 
-| Променљива                                   | Сврха                                                                                        |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Роот мрежног пролаза URL (Claude код додаје `/v1/messages`).** Нема `/v1` суфикса.**         |
-| `ANTHROPIC_AUTH_TOKEN`                       | Послато као `Authorization: Bearer …` — користите свој OmniRoute приступни токен / API кључ  |
-| `ANTHROPIC_API_KEY`                          | Алтернатива: послато као `x-api-key`. Ако су оба постављена, `ANTHROPIC_AUTH_TOKEN` побеђује |
-| `ANTHROPIC_MODEL`                            | Присилите одређени модел (замењује подразумевани бирач `/model` )                            |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → изворни `/model` наводи `claude*`/`anthropic*` моделе из `/v1/models`                  |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ограничите излазне токене по одговору (нпр. `65536`)                                         |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Праг токена за аутоматско збијање                                                            |
+| Promenljiva                                  | Namena                                                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Korenski URL mrežnog prolaza (Claude Code dodaje `/v1/messages`). **Bez sufiksa `/v1`.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | Šalje se kao `Authorization: Bearer …` — koristite svoj OmniRoute pristupni token / API ključ      |
+| `ANTHROPIC_API_KEY`                          | Alternativa: šalje se kao `x-api-key`. Ako su obe postavljene, `ANTHROPIC_AUTH_TOKEN` ima prednost |
+| `ANTHROPIC_MODEL`                            | Prisilno korišćenje određenog modela (zamenjuje podrazumevani izbor u biraču `/model`)             |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni birač `/model` prikazuje `claude*`/`anthropic*` modele iz `/v1/models`               |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ograničava broj izlaznih tokena po odgovoru (npr. `65536`)                                         |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag broja tokena za automatsko sažimanje                                                          |
 
-> Енв варс се читају** једном приликом покретања** — поново покрените Claude код након што их промените.
+> Promenljive okruženja se čitaju **samo jednom pri pokretanju** — ponovo pokrenite Claude Code nakon što ih promenite.
 
-За акредитив који се ротира уместо фиксног стринга, поставите `apiKeyHelper` у `~/.claude/settings.json` на команду која штампа тренутни акредитив на стдоут. Claude код подразумевано кешира свој излаз пет минута (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` то замењује) и шаље вредност у `Authorization: Bearer` и `x-api-key`. Скрипта мора да одштампа акредитиве и ништа друго — банер поред њега не успева помоћник на в2.1.227 +.
+За акредитив који се ротира уместо фиксног низа, подесите `apiKeyHelper` у `~/.claude/settings.json` на команду која исписује тренутни акредитив на stdout. Claude Code подразумевано кешира излаз пет минута (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` мења тај рок) и шаље вредност и у `Authorization: Bearer` и у `x-api-key`. Скрипта мора да испише искључиво акредитив — додатна уводна порука изазива отказ помоћног програма у v2.1.227+.
 
-Овако функционише Ентра ID SSO : `scripts/cli/omniroute-sso.mjs token` штампа краткотрајни Ентра приступни токен који OmniRoute верификује уместо API кључа. Види [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Тако функционише Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` исписује краткотрајни Entra приступни токен који OmniRoute проверава уместо API кључа. Погледајте [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` поставља све ово за вас: решава основни URL + токен из активног контекста (тако да `omniroute connect <vps>` онда `omniroute launch` само ради), проверава здравље сервера и извршава `claude`.
+`omniroute launch` podešava sve ovo umesto vas: razrešava osnovni URL i token
+iz aktivnog konteksta (tako da `omniroute connect <vps>`, a zatim `omniroute launch`
+jednostavno radi), proverava stanje servera i izvršava `claude`.
+
+---
+
+## Атрибуција употребе: сесије и пројекти
+
+OmniRoute групише захтеве сваког API кључа у **агент сесије** и евиденције које **пројекат** свака сесија на којој се ради (`agent_sessions` табела), тако да се употреба и трошкови могу извести по члану тима, по пројекту и по сесији.
+
+Шта се снима без икаквог подешавања клијента:
+
+| Поље     | Извор                                                                                                                                                |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Сессион  | `x-claude-code-session-id` заглавље (иста вредност као `metadata.user_id.session_id`), стабилно по сесији                                            |
+| Пројекат | `Primary working directory:` линија Claude код шаље у свом окружењу поруку; фасцикле радног стабла под `.claude/worktrees/` решавају у име спремишта |
+| Филијала | `Current branch:` из гит статуса Claude код шаље са првом поруком                                                                                    |
+| Клијент  | `user-agent` (`claude-cli/<version>`)                                                                                                                |
+
+Codex (`<environment_context><cwd>`) и OpenCode (`x-opencode-session`) се препознају на исти начин. Кључеви са **но-лог** омогућено да задржи само ИД сесије и поља пројекта која су достављена у заглављу; ништа прочитано из промпта (путања, грана) се не чува.
+
+### Експлицитно именовање пројекта (препоручено)
+
+Радни директоријум се разликује између машина, тако да се исто спремиште може појавити на различитим путањама. Уместо тога, експлицитно пошаљите пројекат: Claude Цоде додаје сва заглавља наведена у `ANTHROPIC_CUSTOM_HEADERS` сваком захтеву модела, а OmniRoute чита два од њих:
+
+| Хеадер                     | Валуе                                                            |
+| -------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-project`      | Назив пројекта, нпр. `omniroute`                                 |
+| `x-omniroute-project-repo` | Нормализовани даљински, нпр. `github.com/diegosouzapw/OmniRoute` |
+
+Оба се читају само за приписивање; никада се не прослеђују упстреам провајдеру.
+
+`ANTHROPIC_CUSTOM_HEADERS` се чита једном приликом покретања, а датотеке подешавања чувају литералне вредности, па га израчунајте када се Claude Цоде покрене. Додајте ово у `~/.zshrc` или `~/.bashrc` и наставите да покрећете `claude` из фасцикле пројекта:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` израз уклања све акредитиве уграђене у удаљени URL. IDE екстензије покрећу Claude код без ваше шкољке, тако да се њихове сесије враћају у радни директоријум.
 
 ---
 

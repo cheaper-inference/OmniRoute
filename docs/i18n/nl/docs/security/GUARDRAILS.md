@@ -25,9 +25,10 @@ De hooks worden **niet** op elke route of elk antwoord uitgevoerd. Lees
 [Dekking en beperkingen](#coverage-and-limits) voordat je op een guardrail
 vertrouwt als beveiligingscontrole.
 
-## Ingebouwde leuningen
+## Ingebouwde guardrails
 
-Het register laadt bij het importeren automatisch zes vangrails in prioriteitsvolgorde (zie `registry.ts` → `registerDefaultGuardrails()`):
+Het register laadt bij import automatisch zes guardrails in prioriteitsvolgorde
+(zie `registry.ts` → `registerDefaultGuardrails()`):
 
 | Prioriteit | Naam                | Fase(n)        | Bestand               |
 | ---------- | ------------------- | -------------- | --------------------- |
@@ -38,56 +39,154 @@ Het register laadt bij het importeren automatisch zes vangrails in prioriteitsvo
 | `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Nummers met een lagere prioriteit worden uitgevoerd** Eerst** .
+Lagere prioriteitsnummers worden **eerst** uitgevoerd.
 
-### Visiebrug (`visionBridge.ts`) — Modaliteitsbrug PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Het GLM 5.3-basismodel en `glm-5.3-{low,high,max}` hebben expliciete `supportsVision:false` registry/spec metagegevens. De GLM 5.3 Flash-varianten blijven native vision-modellen. `/v1/messages` route van Claude Code komt binnen in de gedeelde `handleChat` pre-call vangrailketen** voor** Claude-naar-OpenAI-vertaling; geneste `Read` -toolresultaatafbeeldingen moeten worden beschreven of verwerkt voordat de vertaling ze naar OpenAI `image_url` inhoud (#17069) tilt.
+Het GLM 5.3-basismodel en `glm-5.3-{low,high,max}` hebben expliciete
+`supportsVision:false`-metadata in het register/de spec. De GLM 5.3 Flash-varianten
+blijven native-vision-modellen. De `/v1/messages`-route van Claude Code komt de
+gedeelde `handleChat` pre-call-guardrailketen binnen **vóór** de
+Claude-naar-OpenAI-vertaling; geneste afbeeldingen in `Read`-toolresultaten moeten
+worden beschreven of afgehandeld voordat die vertaling ze overhevelt naar OpenAI
+`image_url`-content (#17069).
 
-Onderschept beelddragende verzoeken gericht op** niet-visiemodellen** en stuurt het hele verzoek om naar een model dat geschikt is voor visie, of vervangt de afbeeldingsdelen door tekstbeschrijvingen die zijn geproduceerd door een configureerbaar visiemodel vóór de stroomopwaartse oproep. Hierdoor kunnen aanbieders van alleen tekst op transparante wijze omgaan met multimodale payloads.
+Onderschept requests met afbeeldingen die gericht zijn aan **niet-vision-modellen**
+en stuurt óf de hele request om naar een vision-geschikt model, óf vervangt de
+afbeeldingsdelen door tekstbeschrijvingen die vóór de upstream-aanroep door een
+configureerbaar vision-model zijn gegenereerd. Hierdoor kunnen providers die
+alleen tekst ondersteunen transparant multimodale payloads verwerken.
 
-Stroom:
+Verloop:
 
-1. Sla dit over als het doelmodel al visie ondersteunt (tenzij het voorkomt in de lijst met geforceerde bruggen `isVisionBridgeForcedModel`).
-2. Extraheer afbeeldingsdelen via `extractImageParts(messages)` (`visionBridgeHelpers.ts`), dat delegeert naar de** uniforme mediadetector** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — de enige bron van waarheid gedeeld met het combo-compatibiliteitsfilter. Extractie staat op de toelatingslijst voor de vormen `replaceImageParts` kan terugsplitsen (het extract ↔ vervangt contract): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` en Responses API `input_image`. Overeenkomende afbeeldingen die zijn genest in Claude Code `tool_result.content` en Responses-tooluitvoer worden ook geëxtraheerd en vervangen op hun oorspronkelijke paden; Vormen met alleen indicatoren zijn combofiltermateriaal en worden niet geëxtraheerd. Overslaan als er niets gevonden wordt.
-3. Los runtime-configuratie op via `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): nieuwe `modalityBridge*` -instellingensleutels winnen; oudere `visionBridge*` sleutels blijven een** terugval van één cyclus** (terugdraaivenster). Overslaan voordat er media worden gepasseerd als de bridge is uitgeschakeld.
-4. Moduskiezer (`modalityBridgeVisionMode`, zie onderstaande tabel) beslist over herrouteren versus beschrijven. Reroute retourneert `modifiedPayload` waarbij alleen `model` is verwisseld, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Beschrijf pad: sluit afbeeldingen af op `maxImages`, stel de taakbewuste prompt samen, raadpleeg de beschrijven cache, roep het visiemodel aan** parallel** (`Promise.allSettled`), en injecteer `[Image N]: <description>` -tekstdelen op hun plaats. Een mislukte beschrijving levert `null` op: het onbewerkte beeld wordt bewaard voor unknown/vision-capable doelen (#4012), maar a** bevestigde directe target met alleen tekst** of zero-vision combo krijgt een expliciete `(unavailable — no vision-capable provider connected)` tekststub voor elke onbeschreven afbeelding, inclusief gedeeltelijke fouten en afbeeldingen buiten de write-call cap (#17069). De bestaande, volledig mislukte combo die fallback beschrijft, blijft op zijn plaats (#8430).
-6. Retourneert `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Sla over als het doelmodel al vision ondersteunt (tenzij het voorkomt in de
+   lijst met geforceerde bridges `isVisionBridgeForcedModel`).
+2. Extraheer afbeeldingsdelen via `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), die delegeert naar de **geünificeerde
+   mediadetector** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — de
+   enige bron van waarheid die wordt gedeeld met de combo-compatibiliteitsfilter.
+   De extractie is via een allowlist beperkt tot de vormen die `replaceImageParts`
+   terug kan invoegen (het extract↔replace-contract): OpenAI `image_url`,
+   Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, en
+   Responses API `input_image`. Overeenkomende afbeeldingen die genest zijn in
+   Claude Code `tool_result.content` en Responses tool-outputs worden eveneens
+   geëxtraheerd en op hun oorspronkelijke paden vervangen; vormen die alleen als
+   indicator dienen, zijn materiaal voor de combo-filter en worden niet
+   geëxtraheerd. Sla over als er geen gevonden zijn.
+3. Los de runtime-configuratie op via `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): nieuwe
+   `modalityBridge*`-instelsleutels gaan voor; legacy `visionBridge*`-sleutels
+   blijven een **fallback van één cyclus** (rollback-venster). Sla vóór elke
+   media-doorloping over wanneer de bridge is uitgeschakeld.
+4. De modusselector (`modalityBridgeVisionMode`, zie tabel hieronder) beslist
+   tussen omleiden en beschrijven. Omleiden retourneert `modifiedPayload` met
+   alleen `model` verwisseld, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Beschrijvingspad: beperk het aantal afbeeldingen tot `maxImages`, stel de
+   taakbewuste prompt samen, raadpleeg de beschrijfcache, roep het vision-model
+   **parallel** aan (`Promise.allSettled`) en injecteer
+   `[Image N]: <description>`-tekstdelen op hun plaats. Een mislukte beschrijving
+   levert `null` op: de ruwe afbeelding blijft behouden voor onbekende of
+   vision-geschikte doelen (#4012), maar een **bevestigd tekst-only direct doel**
+   of een combo zonder vision krijgt een expliciete
+   `(unavailable — no vision-capable provider connected)`-tekststub voor elke
+   onbeschreven afbeelding, inclusief gedeeltelijke mislukkingen en afbeeldingen
+   boven de limiet voor beschrijvingsaanroepen (#17069). De bestaande fallback
+   voor combo-beschrijvingen waarbij alle aanroepen mislukken, blijft van kracht
+   (#8430).
+6. Retourneer `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
-#### Moduskiezer (`modalityBridgeVisionMode`)
+#### Modusselector (`modalityBridgeVisionMode`)
 
-| Modus      | Standaard | Gedrag                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto`     | ✔         | Legacy-heuristisch, onaangeroerd (#6640/#7204): niet-combo/`auto/` modellen worden omgeleid naar het beste visiemodel, tenzij het originele model al bruikbare referenties heeft (beschrijf vervolgens); combo-doelen beschrijven altijd.                                                                                      |
-| `describe` |           | Beschrijf altijd — het omleidingsblok wordt volledig overgeslagen; het door de gebruiker gekozen model antwoordt altijd.                                                                                                                                                                                                       |
-| `reroute`  |           | Omleiding forceren: de bewaker van het model met legitimatie wordt omzeild. De omleiding-** doel** Credential Guard past nog steeds — toe als er geen bruikbaar zichtdoel bestaat, de brug blokkeert met een duidelijke fout in plaats van onbewerkte afbeeldingen te beschrijven of naar een doel met alleen tekst te sturen. |
+| Modus      | Standaard | Gedrag                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔         | Verouderde heuristiek, ongemoeid gelaten (#6640/#7204): niet-combo-/`auto/`-modellen worden omgeleid naar het beste vision-model, tenzij het oorspronkelijke model al bruikbare inloggegevens heeft (dan wordt beschreven); combo-doelen beschrijven altijd.                                                                                                           |
+| `describe` |           | Altijd beschrijven — het omleidingsblok wordt volledig overgeslagen; het door de gebruiker gekozen model geeft altijd antwoord.                                                                                                                                                                                                                                        |
+| `reroute`  |           | Omleiding forceren: de beveiliging die het model met inloggegevens behoudt, wordt omzeild. De beveiliging van de inloggegevens van het omleidings-**doel** blijft van kracht — wanneer er geen bruikbaar vision-doel bestaat, blokkeert de brug met een duidelijke foutmelding in plaats van te beschrijven of ruwe afbeeldingen naar een alleen-tekst-doel te sturen. |
 
-Geforceerde modi kortsluiting** voor** de automatische heuristische runs; `auto` gedrag is byte-identiek aan de pre-PR-1 vangrail.
+Geforceerde modi komen **vóórdat** de automatische heuristiek wordt uitgevoerd
+al in werking; het gedrag van `auto` is byte-identiek aan de guardrail van vóór PR-1.
 
-#### API-sleutelbereik (`visionBridgeKeyScope.ts`)
+#### Scope van de API-sleutel (`visionBridgeKeyScope.ts`)
 
-Wanneer de API sleutel van de beller `allowedConnections`, quotapools (`allowedQuotas`) of modellen (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`) beperkt, kiest de bridge alleen reroute en beschrijft modellen die de sleutel mag gebruiken, op verbindingen die de sleutel mag gebruiken. De write-aanroep gaat dan altijd door de OmniRoute self-loop met de `x-omniroute-self-loop-key-id` header, dus het ontvangende chatverzoek dwingt het verbindings- en modelbeleid van die sleutel opnieuw af. `enforceApiKeyPolicy()` respecteert die header alleen samen met de self-loop-drager, dus het kan de toegang alleen beperken, en een id die niet wordt opgelost, wordt afgewezen.
+Wanneer de API-sleutel van de aanroeper `allowedConnections`, quotapools
+(`allowedQuotas`) of modellen (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`) beperkt, kiest de
+brug alleen omleidings- en beschrijfmodellen die de sleutel mag gebruiken, op
+verbindingen die de sleutel mag gebruiken. De beschrijfaanroep verloopt dan
+altijd via de OmniRoute-self-loop met de header
+`x-omniroute-self-loop-key-id`, zodat het ontvangende chatverzoek het
+verbindings- en modelbeleid van die sleutel opnieuw afdwingt.
+`enforceApiKeyPolicy()` honoreert die header alleen in combinatie met de
+self-loop-bearer, waardoor de toegang alleen vernauwd kan worden, en een id
+die niet kan worden herleid, wordt afgewezen.
 
-Indien voor de sleutel geen zichtmodel is toegestaan, a** bevestigd doel met alleen tekst** wijst het beeldverzoek lokaal af met een duidelijke HTTP 400 in plaats van beeldbytes door te sturen naar een incapabele stroomopwaartse (#17069). Voor doelen met onbekend of eigen zichtvermogen behoudt het beschrijvingspad zijn eerdere fail-open-gedrag (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Verzoeken zonder sleutel, en sleutels zonder deze beperkingen, gedragen zich precies zoals voorheen.
+Als er voor de sleutel geen vision-model is toegestaan, weigert een
+**bevestigd alleen-tekst-doel** het afbeeldingsverzoek lokaal met een
+duidelijke HTTP 400 in plaats van afbeeldingsbytes door te sturen naar een
+upstream die deze niet kan verwerken (#17069). Voor doelen met een onbekende
+of native vision-mogelijkheid behoudt het beschrijfpad zijn eerdere
+fail-open-gedrag (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Verzoeken zonder sleutel, en sleutels zonder deze beperkingen, gedragen zich
+exact zoals daarvoor.
 
-#### Taakbewuste beschrijvingsprompt (`modalityBridgeVisionTaskAware`)
+#### Taakbewuste beschrijfprompt (`modalityBridgeVisionTaskAware`)
 
-Standaard** WAAR** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) voegt de tekst van de toe** laatste gebruikersbericht** (afgekapt tot 500 tekens) naar de basisbeschrijvingsprompt, waarbij de beschrijving wordt gestuurd naar wat de gebruiker feitelijk heeft gevraagd (codex-vision-proxy-patroon) en het visiemodel wordt gevraagd zichtbare tekst te transcriberen. Met de vlag uit — of zonder gebruikerstekst — wordt de basisprompt onveranderd gebruikt.
+Standaard **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) voegt
+de tekst van het **laatste gebruikersbericht** (afgekapt tot 500 tekens) toe
+aan de basis-beschrijfprompt, waarmee de beschrijving wordt gestuurd op wat
+de gebruiker daadwerkelijk vroeg (codex-vision-proxy-patroon) en het
+vision-model wordt gevraagd zichtbare tekst te transcriberen. Met de vlag
+uitgeschakeld — of zonder gebruikerstekst — wordt de basisprompt ongewijzigd
+gebruikt.
 
-Het eigen OpenAI-compatibele verzoek van de self-loop (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) vraagt altijd onvoorwaardelijk naar `image_url.detail: "high"` —, voor elke caller/provider, niet gepoort op een clientsignaal. Bemonstering met weinig details verslechtert OCR nauwkeurigheid voor precies de teksttranscriptietaak waar deze prompt om vraagt, dus de aanroep van de beschrijving zelf vraagt altijd om hoge details, ongeacht welk detailniveau de oorspronkelijke inkomende aanvraag gebruikte. Dit heeft alleen invloed op de interne beschrijvingsaanvraag; het verandert niets aan de manier waarop OmniRoute de eigen `image_url.detail` van de beller doorstuurt op het primaire verzoek — Deze standaard wordt afzonderlijk toegepast, en alleen voor gedetecteerde OpenCode clients, in `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). De Anthropic -draadformaattak van de beschrijvende zelflus heeft geen `detail` veld en wordt door geen van beide standaarden beïnvloed.
+Het eigen OpenAI-compatibele verzoek van de beschrijf-self-loop
+(`callVisionModelSingle()` in `visionBridgeHelpers.ts`) vraagt altijd
+`image_url.detail: "high"` aan — onvoorwaardelijk, voor elke
+aanroeper/provider, niet afhankelijk van enig clientsignaal. Sampling met
+een lage detailgraad verslechtert de OCR-nauwkeurigheid voor precies de
+teksttranscriptietaak waarvoor deze prompt vraagt, dus vraagt de
+beschrijfaanroep zelf altijd om een hoge detailgraad, ongeacht welke
+detailgraad het oorspronkelijke inkomende verzoek gebruikte. Dit heeft
+alleen invloed op de interne request body van de beschrijfaanroep; het
+verandert niet hoe OmniRoute de eigen `image_url.detail` van de aanroeper
+bij het primaire verzoek doorstuurt — die standaardwaarde wordt apart
+toegepast, en alleen voor gedetecteerde OpenCode-clients, in
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). De
+Anthropic-wire-format-tak van de beschrijf-self-loop heeft geen
+`detail`-veld en wordt door geen van beide standaardwaarden beïnvloed.
 
-#### Beschrijf output cap (`modalityBridgeVisionMaxChars`)
+#### Outputlimiet voor beschrijvingen (`modalityBridgeVisionMaxChars`)
 
-| Sleutel                        | Standaard | Bereik            |
-| ------------------------------ | --------- | ----------------- |
-| `modalityBridgeVisionMaxChars` | `0`       | `0` of 100-50.000 |
+| Sleutel                        | Standaard | Bereik           |
+| ------------------------------ | --------- | ---------------- |
+| `modalityBridgeVisionMaxChars` | `0`       | `0` of 100–50000 |
 
-`0` (standaard) betekent** geen dop** — De door `callVisionModel()` geretourneerde beschrijving wordt ongewijzigd doorgegeven, waarbij het bestaande gedrag behouden blijft. Elke waarde in het bereik van 100–50000 kapt de beschrijving af met een `…` achtervoegsel voordat deze wordt teruggesplitst als `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` in `src/lib/guardrails/visionBridge.ts`). Verhoog dit voor OCR -taken met veel details waarbij het stroomafwaartse model de volledige transcriptie nodig heeft; verlaag het tot gebonden tokengebruik op spraakmakende visiemodellen. Het dashboardveld bevindt zich in het paneel Geavanceerd van het tabblad Vision (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) en klemt elke waarde tussen 1 en 99 vast tot op de 100 verdieping, terwijl een expliciete `0` onaangeroerd blijft. — `0` is op zichzelf een geldige Zod waarde (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), en niet slechts de "niet-ingestelde" standaard.
+`0` (standaard) betekent **geen limiet** — de beschrijving die door
+`callVisionModel()` wordt geretourneerd, wordt ongewijzigd doorgegeven,
+waardoor het bestaande gedrag behouden blijft. Elke waarde in het bereik
+100–50000 kapt de beschrijving af met een `…`-achtervoegsel voordat deze
+weer wordt ingevoegd als `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` in `src/lib/guardrails/visionBridge.ts`).
+Verhoog deze waarde voor detailrijke OCR-taken waarbij het downstream-model
+de volledige transcriptie nodig heeft; verlaag deze om het tokengebruik van
+spraakzame vision-modellen te begrenzen. Het dashboardveld bevindt zich op
+het paneel Geavanceerd van het tabblad Vision (`modality-bridge-max-chars`
+in `ModalityBridgeVisionTab.tsx`) en klampt elke waarde tussen 1 en 99
+omhoog naar de ondergrens van 100, terwijl een expliciete `0` ongemoeid
+wordt gelaten — `0` is op zichzelf een geldige Zod-waarde
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), niet
+slechts de "niet-ingestelde" standaardwaarde.
 
-#### Beschrijf cache (`modalityBridge/bridgeCache.ts`)
+#### Beschrijfcache (`modalityBridge/bridgeCache.ts`)
 
-In-memory LRU + TTL cache voor het beschrijven van uitvoer, gedeeld in het hele proces. Sleutel = `sha256(imageRef + composedPrompt + configuredBridgeModel)` met lengtevoorvoegselframing (geen veldgrensbotsingen). De modelcomponent is de** geconfigureerd** bridge-model, niet het model dat daadwerkelijk — heeft beantwoord. `callVisionModel` kan intern terugvallen, en het sleutelen per poging zou de cache fragmenteren. Mislukte beschrijvingen worden nooit in de cache opgeslagen. Instellingen:
+In-memory LRU + TTL-cache voor beschrijfoutputs, gedeeld binnen het hele
+proces. Sleutel = `sha256(imageRef + composedPrompt + configuredBridgeModel)`
+met lengteprefix-framing (geen botsingen op veldgrenzen). De modelcomponent
+is het **geconfigureerde** brugmodel, niet het model dat daadwerkelijk
+antwoordde — `callVisionModel` kan intern terugvallen op een ander model, en
+sleutelen per poging zou de cache fragmenteren. Mislukte beschrijvingen
+worden nooit gecachet. Instellingen:
 
 | Sleutel                         | Standaard | Bereik  |
 | ------------------------------- | --------- | ------- |
@@ -95,54 +194,89 @@ In-memory LRU + TTL cache voor het beschrijven van uitvoer, gedeeld in het hele 
 | `modalityBridgeCacheTtlMinutes` | `60`      | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`     | 10–5000 |
 
-#### Beeldnormalisatie op afstand (self-loop describe/base64 fetch)
+#### Normalisatie van remote afbeeldingen (self-loop describe/base64-fetch)
 
-Wanneer de brug een** op afstand** afbeelding zelf — de Anthropic beschrijft zelfoproep en de claude-wire-format base64-conversie (`ensureBase64ImagesForClaudeWire`), beide via `fetchRemoteImageAsDataUri()` in `visionBridgeHelpers.ts` — De resulterende gegevens URI worden doorgegeven door `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) voordat ze worden ingebed in het visiemodelverzoek. Extra grote afbeeldingen worden verkleind naar a** 2048px lange zijde** (overeenkomend met de resize cap OpenAI/Anthropic is al van toepassing op de server), waardoor het uploaden bytes/latency wordt verminderd zonder te veranderen wat het visiemodel ziet. Het formaat wijzigen maakt gebruik van `sharp`, geladen via dynamische import: op een platform waar het oorspronkelijke binaire bestand niet kan worden geladen, `normalizeDataUri()`** gooit nooit** — het valt terug op een passthrough van de originele bytes, dus het describe/base64-conversion pad blijft altijd werken. Niet-afbeeldingsbytes (een ophaalactie die geen decodeerbare afbeelding opleverde) worden ook onaangeroerd doorgegeven. Deze normalisatie is gericht op afbeeldingen die de bridge ophaalt voor zijn eigen zelfoproepende — Deze wordt nooit toegepast op de onbewerkte passthrough-payload van de beller, in overeenstemming met het alleen-opt-in-mutatieprincipe (Hard Rule #20).
+Wanneer de bridge zelf een **remote** afbeelding ophaalt — de Anthropic describe-self-call en de base64-conversie naar claude-wire-format (`ensureBase64ImagesForClaudeWire`), beide via `fetchRemoteImageAsDataUri()` in `visionBridgeHelpers.ts` — wordt de resulterende data-URI door `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) gehaald voordat deze in het vision-model-verzoek wordt ingebed. Te grote afbeeldingen worden verkleind naar een **lange zijde van 2048px** (gelijk aan de resize-limiet die OpenAI/Anthropic al server-side toepassen), wat upload-bytes/latentie vermindert zonder te veranderen wat het vision-model ziet. Het verkleinen gebruikt `sharp`, geladen via dynamic import: op een platform waar het native binary niet laadt, gooit `normalizeDataUri()` **nooit een fout** — het valt terug op een passthrough van de originele bytes, zodat het describe/base64-conversiepad altijd blijft werken. Niet-afbeeldingsbytes (een fetch die geen decodeerbare afbeelding opleverde) worden ook ongemoeid doorgelaten. Deze normalisatie is beperkt tot afbeeldingen die de bridge voor zijn eigen self-call ophaalt — hij wordt nooit toegepast op de ruwe passthrough-payload van de aanroeper, in overeenstemming met het opt-in-only mutatieprincipe (Harde Regel #20).
 
 #### Instellingenschema + migratie
 
-De nieuwe `modalityBridge*` sleutels zijn Zod-gevalideerd in `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, het `modalityBridgeCache*` trio en de `modalityBridgeAudio*` groep die door de Audio Bridge wordt gebruikt. Migratie `141_modality_bridge_settings.sql` kopieert bestaande oude `visionBridge*` -waarden naar de overeenkomende nieuwe sleutels (idempotent, overschrijft nooit een door de operator ingestelde `modalityBridge*` waarde); de verouderde sleutels blijven geaccepteerd als leesterugval voor één releasecyclus.
+De nieuwe `modalityBridge*`-sleutels worden Zod-gevalideerd in `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, het `modalityBridgeCache*`-trio en de `modalityBridgeAudio*`-groep die door de Audio Bridge wordt gebruikt. Migratie `141_modality_bridge_settings.sql` kopieert bestaande legacy-`visionBridge*`-waarden naar de overeenkomstige nieuwe sleutels (idempotent, overschrijft nooit een door een operator ingestelde `modalityBridge*`-waarde); de legacy-sleutels blijven één releasecyclus geaccepteerd als lees-fallback.
 
-#### Transparantie header + statistieken
+#### Transparantie-header + statistieken
 
-Beschrijf-getransformeerde reacties dragen `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (gebouwd door `buildModalityBridgeHeader()` in `modalityBridge/bridgeStats.ts`, gestempeld door `withModalityBridgeHeader()` in `src/sse/handlers/chatHelpers.ts`). Omgeleide verzoeken krijgen** Nee** header — de payload bleef onaangeroerd en de modelwissel is al zichtbaar in het `model` veld van de antwoordtekst.
+Describe-getransformeerde responses dragen `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (gebouwd door `buildModalityBridgeHeader()` in `modalityBridge/bridgeStats.ts`, aangebracht door `withModalityBridgeHeader()` in `src/sse/handlers/chatHelpers.ts`). Omgeleide verzoeken krijgen **geen** header — de payload was onaangeroerd en de modelwissel is al zichtbaar in het `model`-veld van de response-body.
 
-`GET /api/modality-bridge/stats` (management auth, dezelfde laag als `GET /api/settings`) retourneert de in-memory per-modaliteitstellers `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` voor `vision`, `audio` en `video`. `averageLatencyMs` gebruikt `latencySamples`, niet alle pogingen, als noemer; een operatie zonder timing levert geen monster van nul milliseconden op. `bridged` blijft de achterwaarts compatibele alias voor succesvolle conversies; mislukte pogingen verhogen het niet. Tellers worden door het ontwerp opnieuw ingesteld bij het opnieuw starten van het proces (telemetrie, niet boekhouding).
+`GET /api/modality-bridge/stats` (management-auth, hetzelfde niveau als `GET /api/settings`) geeft de in-memory per-modaliteit-tellers terug `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` voor `vision`, `audio` en `video`. `averageLatencyMs` gebruikt `latencySamples`, niet alle pogingen, als noemer; een operatie zonder timing fabriceert geen nul-milliseconde-sample. `bridged` blijft de achterwaarts-compatibele alias voor succesvolle conversies; mislukte pogingen verhogen hem niet. Tellers worden bij procesherstart gereset, by design (telemetrie, geen boekhouding).
 
-#### Dashboardconfiguratie
+#### Dashboard-configuratie
 
-De speciale dashboardpagina is `/dashboard/settings/modality-bridge`. De URL-adresseerbare `Vision`, `Audio` en `Video` tabbladen behouden de queryparameters terwijl de `tab` waarde wordt gewijzigd. Op het tabblad Visie vindt u de inschakeling, modus, modelselectie (inclusief de automatische standaard), taakbewuste aanwijzingen, geavanceerde timeout/image/description-length/cache limieten, runtime-tellers en een bewaakt voorbeeldverzoek. Het tabblad Audio is ook live: het toont inschakeling, een STT-only modelkiezer met Auto, timeout/max-clip limieten, audiotellers en een `input_audio` voorbeeldtest. Het tabblad Video is functioneel: het rapporteert de FFmpeg/ffprobe runtimestatus — een van de vier expliciete UI enable/model/frame/video/timeout — `unknown` terwijl de probe actief is of niet kon worden voltooid, `restricted` op een niet-loopback dashboardhost waar de probe aan de clientzijde wordt overgeslagen, `unavailable` eenmaal onderzocht en als vermist is bevestigd, of `available` met de FFmpeg/ffprobe versies).
+De toegewijde dashboardpagina is `/dashboard/settings/modality-bridge`. De URL-adresseerbare `Vision`-, `Audio`- en `Video`-tabbladen behouden query-parameters bij het wisselen van de `tab`-waarde. Het Vision-tabblad biedt inschakeling, modus, modelselectie (inclusief de automatische standaard), task-aware prompting, geavanceerde limieten voor timeout/aantal afbeeldingen/beschrijvingslengte/cache, runtime-tellers en een beveiligd voorbeeldverzoek. Het Audio-tabblad is ook live: het biedt inschakeling, een STT-only modelkiezer met Auto, limieten voor timeout/maximale clipduur, audio-tellers en een `input_audio`-voorbeeldtest. Het Video-tabblad is functioneel: het rapporteert de FFmpeg/ffprobe-runtime-status — een van vier expliciete UI-statussen (`unknown` terwijl de probe onderweg is of niet kon worden voltooid, `restricted` op een niet-loopback dashboardhost waar de probe client-side wordt overgeslagen, `unavailable` zodra geprobeerd en bevestigd afwezig, of `available` met de FFmpeg/ffprobe-versies) — bewaart limieten voor inschakeling/model/frames/video/timeout, filtert de modelkiezer naar vision-capable modellen en toont video-tellers.
 
-De voormalige Vision Bridge-kaart onder AI instellingen is een compatibiliteitslink naar de nieuwe pagina; zij bezit niet langer een tweede exemplaar van het formulier. Mediaproviders koppelen ook de workflows Beeld-naar-Tekst en Spraak-naar-Tekst aan de overeenkomstige Modality Bridge-tabbladen zonder de bestaande Spraak-naar-Tekst-speeltuin te verwijderen.
+De voormalige Vision Bridge-kaart onder AI-instellingen is een compatibiliteitslink naar de nieuwe pagina; hij bevat geen tweede kopie van het formulier meer. Media Providers linkt ook Image-to-Text- en Speech-to-Text-workflows naar de overeenkomstige Modality Bridge-tabbladen zonder de bestaande Speech-to-Text-playground te verwijderen.
 
-**Bypass voor toelating tot zelflus:** wanneer de write-oproep door OmniRoute's eigen `/v1` self-loop (niet-standaard providermodel) gaat, verzendt het subverzoek `x-omniroute-admission-bypass: internal` en wordt geauthenticeerd met de opgeloste self-loop-referentie — de lokale `sk_omniroute` schildwacht in lokale modus, of de door de operator geconfigureerde `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env-sleutel (#1350), zodat `REQUIRE_API_KEY=true` implementaties nog steeds de beschrijven-oproep kunnen uitvoeren. De bypass wordt alleen gehonoreerd voor die exacte inloggegevens, dus externe clients kunnen de header niet gebruiken om de toegang over te slaan.
+**Self-loop admission-bypass:** wanneer de describe-call via OmniRoutes eigen `/v1`-self-loop wordt gerouteerd (niet-standaard providermodel), stuurt het sub-verzoek `x-omniroute-admission-bypass: internal` en wordt het geauthenticeerd met de opgeloste self-loop-credential — de lokale `sk_omniroute`-sentinel in lokale modus, of de door de operator geconfigureerde `OMNIROUTE_API_KEY` / `ROUTER_API_KEY`-env-sleutel (#1350), zodat deployments met `REQUIRE_API_KEY=true` de describe-call nog steeds kunnen uitvoeren. De bypass wordt alleen gehonoreerd voor die exacte credentials, zodat externe clients de header niet kunnen gebruiken om admission over te slaan.
 
-Oude wanbetalingen leven in `src/shared/constants/visionBridgeDefaults.ts`; de nieuwe mode/task-aware/cache standaardwaarden en de instellingenresolver zijn live in `src/shared/constants/modalityBridgeDefaults.ts`. De vangrail stelt een `deps` constructoroptie bloot, zodat tests nep- `getSettings` en `callVisionModel` implementaties kunnen injecteren.
+Legacy-standaardwaarden staan in `src/shared/constants/visionBridgeDefaults.ts`; de nieuwe standaardwaarden voor modus/task-aware/cache en de settings-resolver staan in `src/shared/constants/modalityBridgeDefaults.ts`. De guardrail stelt een `deps`-constructoroptie beschikbaar zodat tests nep-`getSettings`- en `callVisionModel`-implementaties kunnen injecteren.
 
-### Audiobrug (`audioBridge.ts`) — Modaliteitsbrug PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Onderschept chatverzoeken met audio voordat deze een doel bereiken waarvan niet bekend is dat het audio-invoer accepteert. Het chatverzoek wordt nooit omgeleid: audiodelen worden getranscribeerd via het bestaande OpenAI-compatibele meerdelige eindpunt en het gekozen chatmodel gaat verder met teksttranscripties.
+Onderschept chatverzoeken met audio voordat ze een doel bereiken waarvan niet bekend is dat het audio-invoer accepteert. Hij leidt het chatverzoek nooit om: audio-parts worden getranscribeerd via het bestaande OpenAI-compatibele multipart-endpoint en het gekozen chatmodel gaat verder met teksttranscripten.
 
-Stroom:
+Verloop:
 
-1. Los `supportsAudio` op via `getResolvedModelCapabilities()`. Expliciete metadata van het providerregister wint, daarna de metadata van het statische model en vervolgens de gesynchroniseerde `modalities_input`. Een gedeclareerde invoerlijst zonder `audio` is `false`; er blijft geen bekwaamheidsbewijs `null`. Zowel `false` als `null` activeren de conservatieve brug, terwijl `true` deze omzeilt.
-2. Los `modalityBridgeAudio*` instellingen op en extraheer koppelbare audiodelen op het hoogste niveau uit elk bericht via de gedeelde `detectMediaParts()` detector. Ondersteunde draadvormen zijn OpenAI `input_audio`, `audio_url` en `source.media_type: "audio/*"`. Geneste audio wordt gedetecteerd voor routering, maar wordt niet verwijderd door het splitsingspad. Werk wordt beperkt door `modalityBridgeAudioMaxClips`; latere delen blijven onaangeroerd.
-3. Eer een geconfigureerde `provider/model`, of laat `selectAudioBridgeModel()` `AUDIO_TRANSCRIPTION_PROVIDERS` in een stabiele catalogusvolgorde lopen en selecteer het eerste model met een bruikbare actieve providerreferentie.
-4. `callAudioTranscription()` converteert base64/data-URI audio naar een `file` met meerdere delen, of downloadt een `audio_url` op afstand via de publieke uitgaande bewaker met DNS pinning en een 25 MB grens. Vervolgens POSTs het bestand en het geselecteerde model naar de lokale `/v1/audio/transcriptions` self-loop, geauthenticeerd met `resolveSelfLoopBearer()`. De bestaande transcriptieroute voert het normale opzoeken van referenties, cooldown/rate-limit afhandeling en providerverzending uit.
-5. Succesvolle oproepen vervangen hun onderdelen door `[Audio N]: <transcript>`. Gesprekken worden uitgevoerd met `Promise.allSettled`: een individuele fout behoudt het originele audiogedeelte (#4012 contract). Als elke oproep mislukt en het doel `supportsAudio === false` is bewezen, worden de delen `[Audio N]: (unavailable — no STT provider connected)` (#8430 -contract). Voor een onbekend doel (`null`) blijft een volledig mislukt resultaat onaangetast. Een bewezen alleen-tekstdoel zonder bruikbare STT referentie ontvangt hetzelfde expliciete stub zonder een netwerkoproep uit te voeren.
+1. Los `supportsAudio` op via `getResolvedModelCapabilities()`. Expliciete
+   provider-registry-metadata gaat voor, daarna statische modelmetadata, daarna
+   gesynchroniseerde `modalities_input`. Een gedeclareerde invoerlijst zonder
+   `audio` is `false`; bij geen bewijs van de capability blijft de waarde `null`.
+   Zowel `false` als `null` activeert de conservatieve bridge, terwijl `true` de
+   bridge omzeilt.
+2. Los de `modalityBridgeAudio*`-instellingen op en extraheer invoegbare
+   audioparts op het topniveau uit elk bericht via de gedeelde
+   `detectMediaParts()`-detector. Ondersteunde wire-vormen zijn OpenAI
+   `input_audio`, `audio_url` en `source.media_type: "audio/*"`. Geneste audio
+   wordt gedetecteerd voor routing, maar niet verwijderd door het splice-pad. De
+   hoeveelheid werk wordt begrensd door `modalityBridgeAudioMaxClips`; latere
+   parts blijven onaangeroerd.
+3. Respecteer een geconfigureerde `provider/model`, of laat
+   `selectAudioBridgeModel()` `AUDIO_TRANSCRIPTION_PROVIDERS` in stabiele
+   catalogusvolgorde doorlopen en het eerste model selecteren met een bruikbare
+   actieve provider-credential.
+4. `callAudioTranscription()` converteert base64/data-URI-audio naar een
+   multipart-`file`, of downloadt een externe `audio_url` via de public-only
+   outbound-guard met DNS-pinning en een grens van 25 MB. Vervolgens POST't het
+   het bestand en het geselecteerde model naar de lokale
+   `/v1/audio/transcriptions`-self-loop, geauthenticeerd met
+   `resolveSelfLoopBearer()`. De bestaande transcription-route voert de normale
+   credential-opzoeking, cooldown-/rate-limit-afhandeling en provider-dispatch
+   uit.
+5. Geslaagde aanroepen vervangen hun parts door `[Audio N]: <transcript>`.
+   Aanroepen lopen met `Promise.allSettled`: een individuele mislukking bewaart
+   het oorspronkelijke audiopart (#4012-contract). Als elke aanroep mislukt en
+   het doel bewezen `supportsAudio === false` heeft, worden de parts
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430-contract). Voor
+   een onbekend doel (`null`) blijft een volledig mislukt resultaat onaangeroerd.
+   Een bewezen tekst-only-doel zonder bruikbare STT-credential ontvangt dezelfde
+   expliciete stub zonder een netwerkaanroep te doen.
 
-Succesvolle transcripties gebruiken de procesbrede LRU/TTL cache van Modality Bridge. De sleutel combineert de audioreferentie, het stabiele `audio-transcription` bedieningslabel en het geselecteerde STT model; fouten worden nooit in de cache opgeslagen. Audiopogingen werken de gedeelde `bridged`, `cacheHits`, `failures` en `lastUsedAt` tellers bij. Getransformeerde reacties dragen `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; onaangeroerde verzoeken ontvangen geen Audio Bridge-segment.
+Geslaagde transcripts gebruiken de procesbrede Modality Bridge LRU/TTL-cache.
+De sleutel combineert de audioreferentie, het stabiele
+`audio-transcription`-bewerkingslabel en het geselecteerde STT-model; mislukkingen
+worden nooit gecachet. Audiogpogingen werken de gedeelde tellers `bridged`,
+`cacheHits`, `failures` en `lastUsedAt` bij. Getransformeerde responses dragen
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; onaangeroerde
+requests ontvangen geen Audio Bridge-segment.
 
-Runtime-instellingen worden ondersteund door DB en Zod-gevalideerd:
+Runtime-instellingen worden ondersteund door de database en gevalideerd met Zod:
 
-| Sleutel                       | Standaard | Bereik         |
-| ----------------------------- | --------- | -------------- |
-| `modalityBridgeAudioEnabled`  | `true`    | —              |
-| `modalityBridgeAudioModel`    | `""`      | Auto of STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`   | 1000–300000    |
-| `modalityBridgeAudioMaxClips` | `3`       | 1–10           |
+| Key                           | Default | Range          |
+| ----------------------------- | ------- | -------------- |
+| `modalityBridgeAudioEnabled`  | `true`  | —              |
+| `modalityBridgeAudioModel`    | `""`    | Auto or STT ID |
+| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000    |
+| `modalityBridgeAudioMaxClips` | `3`     | 1–10           |
 
-De gedeelde cache blijft beheerd door `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` en `modalityBridgeCacheMaxEntries`.
+De gedeelde cache blijft beheerd door `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` en `modalityBridgeCacheMaxEntries`.
 
 ### Videobrug (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
@@ -218,12 +352,12 @@ Runtime-instellingen worden ondersteund door DB en Zod-gevalideerd:
 
 Verouderde waarden blijven bestaan Videotime-outwaarden van meer dan 120 seconden worden beperkt tot de deadline van de broker; nieuwe instellingen die boven die limiet schrijven, worden afgewezen. `GET /api/modality-bridge/video/runtime` vereist een vertrouwde, gestempelde loopback-locatie vóór authenticatie of runtime-onderzoek, en vereist vervolgens beheerverificatie. Het retourneert alleen `available`, opgeschoonde FFmpeg/ffprobe versies en een vaste reden waarom de runtime niet beschikbaar is. Het interne extractie-eindpunt is geen openbare upload API: wachtrijverzadiging retourneert `503` plus `Retry-After`, een aanroeper die de verbinding verbreekt retourneert `499`, en de vaste brokerdeadline retourneert `504`. Geconverteerde antwoorden voegen `video->text;model=<visionModel>;parts=<videos>` toe aan de centrale `x-omniroute-modality-bridge` header zonder Vision- of Audio-segmenten te verwijderen.
 
-### PII Masker (`piiMasker.ts`)
+### PII masker (`piiMasker.ts`)
 
-Loopt door** beide** stadia.
+Loopt door **beide** stadia.
 
-- **`preCall`** kloont de payload, loopt door `system`, `messages`, `input` en `prompt` (inclusief gewone stringitems) en past `processPII()` (van `@/shared/utils/inputSanitizer`) toe op string `content`/`text` -velden. Wanneer `PII_REDACTION_ENABLED=true` wordt gedetecteerd, wordt PII geredigeerd in de uitgaande payload. Dit is onafhankelijk van `INPUT_SANITIZER_MODE` (dat alleen het prompt-injectiebeleid regelt). Wanneer redactie is uitgeschakeld, telt de detectie van gespreksrecords zonder dat de inhoud wordt herschreven.
-- **`postCall`** kloont het antwoord diep, voert `sanitizePIIResponse()` uit plus het Responses-API-vormmasker (`maskResponsesOutput` — omvat `output_text` en `output[].content[].text`). Als er sprake is van redactie, vervangt het gewijzigde antwoord het origineel.
+- **`preCall`** kloont de payload, loopt door `system`, `messages`, `input` en `prompt` (inclusief gewone stringitems) en past `processPII()` (van `@/shared/utils/inputSanitizer`) toe op string `content`/`text` velden. Wanneer `PII_REDACTION_ENABLED=true` wordt gedetecteerd, wordt PII geredigeerd in de uitgaande payload. Dit staat los van `INPUT_SANITIZER_MODE` (dat alleen het prompt-injectiebeleid controleert). Wanneer redactie is uitgeschakeld, telt de detectie van gespreksrecords zonder dat de inhoud wordt herschreven.
+- **`postCall`** kloneert het antwoord diep, voert `sanitizePIIResponse()` uit plus het Responses-API-vormmasker (`maskResponsesOutput` — omvat `output_text` en `output[].content[].text`). Als er sprake is van redactie, vervangt het gewijzigde antwoord het origineel.
 
 De vangrail blokkeert nooit; het annoteert alleen (`meta.detections`, `meta.redacted`) of herschrijft.
 
@@ -231,72 +365,85 @@ De vangrail blokkeert nooit; het annoteert alleen (`meta.detections`, `meta.reda
 
 **Dashboard → Instellingen → Beveiliging → PII maskering** kiest _wat_ wordt gemaskeerd. Het schakelt de maskering niet in: dat is nog steeds `PII_REDACTION_ENABLED` (verzoek) en `PII_RESPONSE_SANITIZATION` (antwoord + SSE), beide standaard uitgeschakeld.
 
-- **Selectie per type** — de ingebouwde id's worden vermeld in `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Niet ingesteld betekent elk type (het gedrag voordat deze instelling bestond). Het `ssn_us` patroon van de verzoekengine wordt toegewezen aan `ssn`. Sjablonen (Minimaal, Standaard, Financieel, Braziliaans, USA, GDPR, POPIA, Volledig) vullen alleen de selectievakjes in de UI.
-- **GDPR en POPIA identificatoren** — twaalf ingebouwde ID's voor EU en Zuid-Afrikaanse persoonlijke identificatiegegevens (tabel hieronder). Hun regexes, validators en jurisdictietags bevinden zich in één tabel, `src/shared/utils/piiPatterns.ts`, die zowel de response sanitizer (`src/lib/piiSanitizer.ts`) als de request mask (`src/shared/utils/inputSanitizer.ts`) gebruiken. Een match wordt alleen geredigeerd als de validator deze accepteert; een enkele reeks cijfers is nooit genoeg. Een operator die een beperkte selectie heeft opgeslagen voordat deze ID's bestonden, behoudt het gedrag dat hij had totdat de nieuwe ID's zijn aangevinkt.
-- **Aangepaste patronen** — maximaal 20 regex- of jokertekenpatronen (`*` = maximaal 64 niet-witruimtetekens, `?` = één). Overeenkomsten worden `[CUSTOM_REDACTED]`. Elk patroon doorloopt `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): maximaal 500 tekens, vlaggen beperkt tot `g i m s u`, moeten compileren, moeten `safe-regex` passeren (catastrofale backtracking) en mogen niet overeenkomen met een lege tekenreeks of een tijdelijke aanduiding voor redactie. Een patroon dat faalt, wordt geweigerd wanneer het wordt opgeslagen en getest, en een opgeslagen rij die faalt, wordt tijdens runtime overgeslagen in plaats van te worden gecompileerd. Aangepaste patronen worden alleen uitgevoerd als maskering is ingeschakeld.
-- **Detectie tellers** — tellingen per type (nooit overeenkomende waarden), in het geheugen bewaard en opnieuw ingesteld bij opnieuw opstarten (`src/lib/pii/piiDetectionStats.ts`). Ze nemen alleen maar toe als de maskering is ingeschakeld.
+- **Selectie per type** — De ingebouwde ID's worden vermeld in `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Niet ingesteld betekent elk type (het gedrag voordat deze instelling bestond). Het `ssn_us` -patroon van de aanvraagengine wordt toegewezen aan `ssn`. Sjablonen (Minimaal, Standaard, Financieel, Braziliaans, USA, GDPR, POPIA, Volledig) vullen alleen de selectievakjes in de UI in.
+- **GDPR en POPIA ID's** — twaalf ingebouwde ID's voor EU en Zuid-Afrikaanse persoonlijke identificatiegegevens (tabel hieronder). Hun regexes, validators en jurisdictietags bevinden zich in één tabel, `src/shared/utils/piiPatterns.ts`, die zowel de response sanitizer (`src/lib/piiSanitizer.ts`) als de request mask (`src/shared/utils/inputSanitizer.ts`) gebruiken. Een match wordt alleen geredigeerd als de validator deze accepteert; een enkele reeks cijfers is nooit genoeg. Een operator die een beperkte selectie heeft opgeslagen voordat deze ID's bestonden, behoudt het gedrag dat hij had totdat de nieuwe ID's zijn aangevinkt.
+- **Aangepaste patronen** — maximaal 20 regex- of jokertekenpatronen (`*` = maximaal 64 niet-witruimtetekens, `?` = één). Wedstrijden worden `[CUSTOM_REDACTED]`. Elk patroon gaat door `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): maximaal 500 tekens, vlaggen beperkt tot `g i m s u`, moeten compileren, moeten `safe-regex` passeren (catastrofale backtracking) en mogen niet overeenkomen met een lege tekenreeks of een tijdelijke aanduiding voor redactie. Een patroon dat faalt, wordt geweigerd wanneer het wordt opgeslagen en getest, en een opgeslagen rij die faalt, wordt tijdens runtime overgeslagen in plaats van te worden gecompileerd. Aangepaste patronen worden alleen uitgevoerd als maskering is ingeschakeld.
+- **Detectie tellers** — telt per type (nooit overeenkomende waarden), vastgehouden in het geheugen en gereset bij opnieuw opstarten (`src/lib/pii/piiDetectionStats.ts`). Ze nemen alleen maar toe als de maskering is ingeschakeld.
 
 De instellingen bevinden zich in de `key_value` tabel (naamruimte `pii_settings`, `src/lib/db/piiSettings.ts`) en worden gelezen via een cache van 1 seconde. API:
 
-| Methode | Pad                      | Doel                                                                                    |
-| ------- | ------------------------ | --------------------------------------------------------------------------------------- |
-| `GET`   | `/api/settings/pii`      | Vlagstaat, `enabledTypes`, `customPatterns`, detectietellers                            |
-| `PUT`   | `/api/settings/pii`      | Vervang `enabledTypes` (`null` = alles) and/or `customPatterns`                         |
-| `POST`  | `/api/settings/pii/test` | Eén patroon droogdraaien tegen een monster van maximaal 8 KB; er wordt niets opgeslagen |
+| Methode | Pad                      | Doel                                                                               |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| `GET`   | `/api/settings/pii`      | Status van de vlag, `enabledTypes`, `customPatterns`, detectietellers              |
+| `PUT`   | `/api/settings/pii`      | Vervang `enabledTypes` (`null` = alles) en/of `customPatterns`                     |
+| `POST`  | `/api/settings/pii/test` | Dry-run van één patroon op een sample van maximaal 8 KB; er wordt niets opgeslagen |
 
-Alle drie vereisen beheerauthenticatie en valideren de hoofdtekst met Zod (`src/shared/validation/schemas/piiSettings.ts`). Met inloggen uitgeschakeld (`requireLogin=false`) zijn `GET` en het testeindpunt open, maar `PUT` heeft nog steeds een dashboardsessie nodig, een `manage` -scope API sleutel, een `oma_` toegangstoken met schrijfbereik of hoger, of het CLI token of het interne servicetoken verzonden vanuit loopback.
+Alle drie vereisen managementauthenticatie en valideren de instantie met Zod (`src/shared/validation/schemas/piiSettings.ts`). Met inloggen uitgeschakeld (`requireLogin=false`) zijn `GET` en het testeindpunt open, maar `PUT` heeft nog steeds een dashboardsessie nodig, een `manage` -scope API -sleutel, een `oma_` toegangstoken met schrijfbereik of hoger, of het CLI -token of interne servicetoken verzonden vanuit loopback.
 
 #### GDPR (EU) en POPIA (Zuid-Afrika) identificatiegegevens
 
-| Identiteitskaart    | Identificatie                 | Geldigmaking                                                                                        |
-| ------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------- |
-| `iban`              | IBAN                          | Bekend land, exacte lengte voor dat land, ISO 13616 MOD-97-10                                       |
-| `eu_vat`            | EU VAT nummer                 | Bekend voorvoegsel van de lidstaat en de getalnotatie van die staat (geen VIES zoekopdracht)        |
-| `es_dni_nie`        | Spaanse DNI / NIE             | Controleletter (waarde mod. 23); NIE is `X/Y/Z` + 7 cijfers                                         |
-| `it_codice_fiscale` | Italiaanse Codice Fiscale     | Controlebrief uit de odd/even positietabellen                                                       |
-| `pl_pesel`          | Poolse PESEL                  | Gewogen controlesom en een gecodeerde geboortedatum die bestaat                                     |
-| `nl_bsn`            | Nederlandse BSN               | 11-proof (gewichten 9..2, -1)                                                                       |
-| `de_steuer_id`      | Duitse Steuer-ID              | ISO 7064 Mod 11,10 plus de regels voor de cijferstructuur (geen leidende 0)                         |
-| `se_personnummer`   | Zweeds persoonsnummer         | Luhn over de laatste tien cijfers en een plausibele geboortedatum (10 of 12 cijfers)                |
-| `za_id`             | Zuid-Afrikaans ID nummer      | Luhn over alle 13 cijfers, geldige geboorte month/day, staatsburgerschapcijfer 0 of 1               |
-| `za_phone`          | Zuid-Afrikaanse telefoon      | `+27` / `27` voorvoegsel, of het nationale `0..` formulier geschreven met een spatie of koppelteken |
-| `za_vat`            | Zuid-Afrikaans VAT nummer     | 10 cijfers beginnend met `4`** En** "VAT" / "BTW" in de 48 tekens ervoor                            |
-| `za_tax_ref`        | Zuid-Afrikaanse belastingref. | 10 cijfers beginnend met `0`-`3`, Luhn,** En** "tax" / "SARS" in de 48 tekens ervoor                |
+| ID                  | Identificator                    | Validatie                                                                                     |
+| ------------------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                             | Bekend land, exacte lengte voor dat land, ISO 13616 MOD-97-10                                 |
+| `eu_vat`            | EU-btw-nummer                    | Bekend lidstaatvoorvoegsel en het nummerformaat van die staat (geen VIES-opzoeking)           |
+| `es_dni_nie`        | Spaanse DNI / NIE                | Controleletter (waarde modulo 23); NIE is `X/Y/Z` + 7 cijfers                                 |
+| `it_codice_fiscale` | Italiaanse Codice Fiscale        | Controleletter uit de tabellen voor oneven/even posities                                      |
+| `pl_pesel`          | Poolse PESEL                     | Gewogen controlesom en plausibele bereiken voor de gecodeerde geboortemaand/-dag              |
+| `nl_bsn`            | Nederlands BSN                   | 11-proef (gewichten 9..2, -1)                                                                 |
+| `de_steuer_id`      | Duitse Steuer-ID                 | ISO 7064 Mod 11,10 plus de regels voor de cijferstructuur (geen eerste 0)                     |
+| `se_personnummer`   | Zweeds personnummer              | Luhn over de laatste tien cijfers en een aannemelijke geboortedatum (10 of 12 cijfers)        |
+| `za_id`             | Zuid-Afrikaans identiteitsnummer | Luhn over alle 13 cijfers, geldige geboortemaand/-dag, staatsburgerschapscijfer 0 of 1        |
+| `za_phone`          | Zuid-Afrikaans telefoonnummer    | Voorvoegsel `+27` / `27`, of de nationale vorm `0..` geschreven met een spatie of koppelteken |
+| `za_vat`            | Zuid-Afrikaans btw-nummer        | 10 cijfers beginnend met `4` **en** "VAT" / "BTW" in de 48 voorafgaande tekens                |
+| `za_tax_ref`        | Zuid-Afrikaans belastingnummer   | 10 cijfers beginnend met `0`-`3`, Luhn, **en** "tax" / "SARS" in de 48 voorafgaande tekens    |
 
-Omdat de alleen-cijferige notaties botsen met bestelnummers, bouwnummers en tijdstempels, hebben de zwakste (`za_vat`, `za_tax_ref`) de trefwoordcue nodig, en een `0..` -nummer van tien cijfers wordt niet behandeld als een Zuid-Afrikaans telefoonnummer. Gespreide IBANs (`GB29 NWBK ...`) komen niet overeen. Op het streamingpad wordt de cue alleen binnen het huidige segment opgezocht. De id's liggen vóór de generieke telefoonpatronen, dus een gevalideerde identificatie behoudt zijn eigen tijdelijke aanduiding (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). De `gdpr` en `popia` sjablonen selecteren respectievelijk de EU en Zuid-Afrikaanse ID's. Het maskeren zelf blijft opt-in (Hard Rule #20): niets verandert hier een feature-flag-standaard.
+Omdat de formaten die alleen uit cijfers bestaan, botsen met bestelnummers, bouwnummers en tijdstempels, hebben de zwakste (`za_vat`, `za_tax_ref`) de trefwoordcue nodig, en een `0..` nummer van tien cijfers wordt niet behandeld als een Zuid-Afrikaans telefoonnummer. Gespreide IBANs (`GB29 NWBK ...`) komen niet overeen. Op het streamingpad wordt de cue alleen binnen het huidige segment opgezocht. De ID's liggen vóór de generieke telefoonpatronen, dus een gevalideerde ID behoudt zijn eigen tijdelijke aanduiding (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). De `gdpr` en `popia` sjablonen selecteren respectievelijk de EU en Zuid-Afrikaanse ID's. Het maskeren zelf blijft opt-in (Hard Rule #20): niets verandert hier de standaardfunctievlag.
 
-### Snelle injectie (`promptInjection.ts`)
+### Prompt-injectie (`promptInjection.ts`)
 
-Detecteert vijandige structuren in door gebruikers aangeleverde inhoud en handhaaft het geconfigureerde beleid. Gedrag wordt bepaald door omgevingsvariabelen en constructoropties:
+Detecteert kwaadwillende structuren in door de gebruiker aangeleverde inhoud en
+handhaaft het geconfigureerde beleid. Het gedrag wordt gestuurd door
+omgevingsvariabelen en constructor-opties:
 
-| Instelling        | Env var                                                                                              | Standaard | Effect                                                                                                                                                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ingeschakeld      | `INPUT_SANITIZER_ENABLED`                                                                            | `true`    | Wanneer `false`, kortsluiting van de vangrail.                                                                                                                                                                            |
-| Modus             | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                      | `warn`    | Injectiebeleid: `block`, `warn` of `log`. (`redact` wordt geaccepteerd voor back-compatibiliteit, maar doet dat wel** niet** strip injectie tekst; verzoek PII herschrijven wordt bestuurd door `PII_REDACTION_ENABLED`.) |
-| Drempel blokkeren | `blockThreshold` optie / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`    | Minimale ernst vereist om te blokkeren. Medium is standaard alleen observeren.                                                                                                                                            |
+| Instelling      | Env-var                                                                                              | Standaard | Effect                                                                                                                                                                                                                                |
+| --------------- | ---------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ingeschakeld    | `INPUT_SANITIZER_ENABLED`                                                                            | `true`    | Bij `false` wordt de guardrail overgeslagen.                                                                                                                                                                                          |
+| Modus           | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                      | `warn`    | Injectiebeleid: `block`, `warn` of `log`. (`redact` wordt geaccepteerd voor achterwaartse compatibiliteit, maar verwijdert injectietekst **niet**; het herschrijven van PII in requests wordt gestuurd door `PII_REDACTION_ENABLED`.) |
+| Blokkeerdrempel | `blockThreshold`-optie / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`    | Minimale ernst die nodig is om te blokkeren. Medium is bij de standaardwaarde alleen observeren.                                                                                                                                      |
 
-**Modusprioriteit** (`getMode`): beller `options.mode` → `INJECTION_GUARD_MODE`**DB -functievlag overschrijven** (Dashboard → -instellingen → Functievlaggen) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Een dashboard-override wint daarom de env-vars, dus de Feature Flags UI bestuurt de running guard live (geen herstart). De DB lezing is fail-safe: als er een fout optreedt, valt de bewaker terug naar het env-gebaseerde gedrag, en als er geen override is ingesteld, is het gedrag identiek aan de oplossing voor alleen env.
+**Modusprioriteit** (`getMode`): `options.mode` van de aanroeper →
+`INJECTION_GUARD_MODE`-**DB-feature-flag-override** (Dashboard → Instellingen →
+Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
+`warn`. Een dashboard-override wint dus van de env-vars, zodat de Feature
+Flags-UI de actieve guard live stuurt (geen herstart nodig). De DB-lezing is
+fail-safe: als die mislukt, valt de guard terug op het env-gebaseerde gedrag,
+en wanneer er geen override is ingesteld, is het gedrag identiek aan resolutie
+op basis van alleen env.
 
 Detectiebronnen:
 
-1. `sanitizeRequest()` van `@/shared/utils/inputSanitizer` (gedeelde detectorset die elders in de pijplijn wordt gebruikt).
-2. Ingebouwde `DEFAULT_GUARD_PATTERNS` (momenteel `system_override_inline` en `markdown_system_block`, beide `high` ernst).
-3. Optionele `customPatterns` doorgegeven via constructoropties (strings, regex of `{ name, pattern, severity }` records).
+1. `sanitizeRequest()` uit `@/shared/utils/inputSanitizer` (gedeelde
+   detectorset die ook elders in de pipeline wordt gebruikt).
+2. Ingebouwde `DEFAULT_GUARD_PATTERNS` (momenteel `system_override_inline` en
+   `markdown_system_block`, beide met ernst `high`).
+3. Optionele `customPatterns` die via constructor-opties worden doorgegeven
+   (strings, regexes of `{ name, pattern, severity }`-records).
 
-Wanneer `mode === "block"`** En** ten minste één detectie voldoet aan de ernstdrempel, `preCall` retourneert `{ block: true, message: "Request rejected: suspicious content detected" }`. In `warn`/`log` modi logt de vangrail, maar staat de oproep toe. De gedeelde helper `evaluatePromptInjection()` wordt ook geëxporteerd voor bellers die aanwijzingen moeten evalueren zonder het register te doorlopen.
+Wanneer `mode === "block"` **en** ten minste één detectie de ernstdrempel bereikt, retourneert `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }`. In de modi `warn`/`log` logt de guardrail wel, maar laat hij de aanroep door. De gedeelde helper `evaluatePromptInjection()` wordt ook geëxporteerd voor aanroepers die prompts moeten evalueren zonder via het register te gaan.
 
-**Scangebonden (v3.8.20):** de detector inspecteert alleen de** eerste 16 KB** van samengevoegde prompttekst — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16.384 bytes) in `src/shared/utils/inputSanitizer.ts`. Zowel `detectInjection()` als `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` voordat de patroonlus wordt uitgevoerd. Injectierichtlijnen zitten bovenaan een invoer, dus dit beperkt regex CPU/GC op payloads van meerdere honderden KB's zonder de detectie te verzwakken (vgl. #3932, #4041).
+**Scangrens (v3.8.20):** de detector inspecteert alleen de **eerste 16 KB** van de samengevoegde prompttekst — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) in `src/shared/utils/inputSanitizer.ts`. Zowel `detectInjection()` als `evaluatePromptInjection()` voeren `slice(0, MAX_INJECTION_SCAN_BYTES)` uit voordat de patroonlus wordt gestart. Injectie-instructies bevinden zich doorgaans bovenaan een invoer, dus dit begrenst het regex-CPU-/GC-verbruik bij payloads van honderden kilobytes zonder de detectie te verzwakken (vgl. #3932, #4041).
 
 ### Credential Masker (`credentialMasker.ts`)
 
-Loopt door** beide** fasen, laatste in de standaardketen (prioriteit `95`). Redigeert bekende API-sleutel-/geheime-tokenpatronen uit de uitgaande payload (berichtinhoud, tool-aanroepargumenten, toolresultaten)** En** het antwoord van de provider, zodat een inloggegevens die in een prompt worden geplakt (of worden teruggestuurd door een toolresultaat) niet naar de upstream-provider of terug naar de client worden gelekt.
+Wordt uitgevoerd in **beide** fasen, als laatste in de standaardketen (prioriteit `95`). Maskeert bekende API-sleutel-/geheime-tokenpatronen uit de uitgaande payload (berichtinhoud, argumenten van tool-aanroepen, tool-resultaten) **én** het providerantwoord, zodat een in een prompt geplakte credential (of teruggekaatst door een tool-resultaat) niet uitlekt naar de upstreamprovider of terug naar de client.
 
-- **Alleen aanmelden** , dezelfde conventie als PII -redactie (harde regel #20-aangrenzend): uitgeschakeld tenzij `settings.credentialRedactionEnabled === true`** of** `CREDENTIAL_REDACTION_ENABLED=true`. Als deze is uitgeschakeld, is de vangrail een no-op- — die hij nooit blokkeert en nooit herschrijft.
-- `redactCredentials()` doorloopt de volledige payload/response boom (`walkValue()`, prototype-pollution-safe, cycle-safe via `WeakSet`) en vervangt overeenkomsten door een `[REDACTED:<type>]` placeholder, waarbij alleen de takken worden gekloond die daadwerkelijk zijn veranderd.
-- `CREDENTIAL_PATTERNS` omvat LLM -providersleutels (OpenAI, OpenAI-proj, Anthropic, Google, Knuffelgezicht, Repliceren), VCS/SaaS tokens (GitHub, Slack, Lineair, Notion, npm, Postman, Discord), betalingssleutels (Stripe, Square), cloudsleutels (AWS toegangssleutel, Twilio, SendGrid, Mailgun), privésleutels / JWTs, verbinding met inloggegevens strings (`mongodb://user:pass@...`, etc.), en een generiek `Authorization`/`x-api-key`/`api-key`/`apikey` header-waardepatroon. Kopvormige sleutels (`authorization`, `x-api-key`, `api-key`, `apikey`) worden structureel geredigeerd (alleen waarde, schemavoorvoegsel zoals `Bearer `/`Basic ` behouden) in plaats van via de generieke tekstregex.
-- De vangrail blokkeert nooit; het herschrijft alleen (`modifiedPayload` / `modifiedResponse`) en annoteert (`meta.credentialsRedacted`, `meta.count`).
+- **Alleen opt-in**, dezelfde conventie als PII-maskering (vergelijkbaar met Hard Rule #20): uitgeschakeld tenzij `settings.credentialRedactionEnabled === true` **of**
+  `CREDENTIAL_REDACTION_ENABLED=true`. Wanneer uitgeschakeld is de guardrail een no-op — hij blokkeert nooit en herschrijft nooit.
+- `redactCredentials()` doorloopt de volledige payload-/antwoordboom (`walkValue()`, beschermd tegen prototype pollution, cyclusveilig via `WeakSet`) en vervangt overeenkomsten door een `[REDACTED:<type>]`-placeholder, waarbij alleen de takken worden gekloond die daadwerkelijk zijn gewijzigd.
+- `CREDENTIAL_PATTERNS` dekt LLM-providersleutels (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS-/SaaS-tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), betaalsleutels (Stripe, Square), cloudsleutels (AWS-toegangssleutel, Twilio, SendGrid, Mailgun), privésleutels / JWT's, connectiestrings met credentials (`mongodb://user:pass@...`, enz.) en een generiek patroon voor `Authorization`/`x-api-key`/`api-key`/`apikey`-headerwaarden. Sleutels in headervorm (`authorization`, `x-api-key`, `api-key`, `apikey`) worden structureel gemaskeerd (alleen de waarde; schemaprefixen zoals `Bearer `/`Basic ` blijven behouden) in plaats van via de generieke tekst-regex.
+- De guardrail blokkeert nooit; hij herschrijft alleen (`modifiedPayload` / `modifiedResponse`) en annoteert (`meta.credentialsRedacted`, `meta.count`).
 
-Regressiewacht: `tests/unit/credential-masker-guardrail.test.ts`.
+Regressiebewaking: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Basiscontract (`base.ts`)
 

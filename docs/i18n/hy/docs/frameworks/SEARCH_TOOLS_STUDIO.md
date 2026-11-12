@@ -54,7 +54,7 @@ Search Tools Studio-ն `/dashboard/search-tools`-ը որոնման պարզ փո
 - Մուտքագրում՝ URL + ամբողջ էջի փոխարկիչ + ձևաչափի ընտրիչ (markdown / տեքստ / HTML)։
 - Ուղարկել → ստանալ → ցուցադրել `ScrapeResult.tsx`-ը։
 - `ScrapeResult`-ը ցուցադրում է markdown-ի նախադիտումը և չմշակված տեսքի փոխարկիչը։
-- Սահմանաչափ․ եթե պատասխանի մարմինը գերազանցում է **256 ԿԲ**-ը, UI-ը ցուցադրում է `(կրճատված է, դիտել չմշակվածը)` և չմշակված բովանդակությունը բացում Monaco մոդալ պատուհանում (D21)։
+- Սահմանաչափ․ եթե պատասխանի մարմինը գերազանցում է **256 ԿԲ**-ը, UI-ը ցուցադրում է `View full raw content` և չմշակված բովանդակությունը բացում մոդալ պատուհանում (D21)։
 - Մետատվյալների վահանակ՝ մատակարար (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ուշացում, արժեք, պատասխանի չափ, հղումների քանակ։
 - Օգտագործում է `useScrapeFetch.ts` հուքը։
 
@@ -103,10 +103,12 @@ Search Tools Studio-ն `/dashboard/search-tools`-ը որոնման պարզ փո
 `ProviderCatalog.tsx`-ը ցուցադրում է պրովայդերների ամբողջական ցանկը՝ ստացված `GET /api/search/providers`-ից
 (F4-ում ընդլայնված՝ ներառելով տվյալներ ստացող պրովայդերները)․
 
-| `kind` | `"search"` (20 պրովայդեր) կամ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 պրովայդեր) կամ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Կարգավիճակը **որոշվում է հարցման պահին**՝ ստուգելով՝ արդյոք մուտքային տվյալները առկա են, և արդյոք
 բոլոր բանալիները տվյալ պահին սպասման ժամանակահատվածում են։
+
+`codex-search` (Codex Web Search): Օգտագործում է միացված Codex (ChatGPT) հաշիվները․ առանձին բանալի պետք չէ։ Յուրաքանչյուր որոնում ծախսում է ChatGPT բաժանորդագրության քվոտան և տևում մոտ 10–40 վայրկյան։ Աշխատում է, երբ հարցումը նշում է դրա անունը․ ավտոմատ ընտրության համար պետք է միացնել `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`-ը, որը լռելյայն անջատված է։
 
 ---
 

@@ -53,7 +53,7 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 - 입력: URL + 전체 페이지 토글 + 형식 선택기(markdown / text / HTML).
 - 제출 → 가져오기 → `ScrapeResult.tsx` 렌더링.
 - `ScrapeResult`는 마크다운 미리보기 + 원본 토글을 렌더링합니다.
-- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `(잘림, 원본 보기)`가 표시되고 Monaco 모달에서 원본이 열립니다(D21).
+- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `View full raw content`가 표시되고 모달에서 원본이 열립니다(D21).
 - 메타데이터 패널: 제공자(firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), 지연 시간, 비용, 응답 크기, 링크 수.
 - `useScrapeFetch.ts` 훅을 사용합니다.
 
@@ -102,9 +102,11 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 `ProviderCatalog.tsx`는 `GET /api/search/providers`에서 전체 제공자 목록을 노출합니다
 (F4에서 fetch 제공자를 포함하도록 확장됨):
 
-| `kind` | `"search"`(20개 제공자) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"`(23개 제공자) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 상태는 자격 증명의 존재 여부와 모든 키가 현재 쿨다운 상태인지 확인하여 **요청 시점에 파생**됩니다.
+
+`codex-search` (Codex Web Search): 별도의 키 없이 연결된 Codex (ChatGPT) 계정을 사용합니다. 각 검색은 구독 할당량을 사용하며, 약 10–40 s가 걸립니다. 요청에서 지정하면 실행됩니다. 자동 선택에는 기본적으로 꺼져 있는 `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` 플래그가 필요합니다.
 
 ---
 

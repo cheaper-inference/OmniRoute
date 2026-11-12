@@ -4,57 +4,52 @@
 
 ---
 
-> **Sors awtorevoli:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Aġġornat l-aħħar:** 2026-06-28 — v3.8.40
+> **Sors tal-verità:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Aġġornata l-aħħar:** 2026-06-28 — v3.8.40
 
-OmniRoute jista’ jattiva webhooks HTTP meta jseħħu avvenimenti tal-pjattaforma. Użahom biex tintegra ma’
-Slack, PagerDuty, Datadog, servizzi interni ta’ twissijiet, jew kwalunkwe riċevitur HTTP.
+OmniRoute jista' jispara webhooks HTTP fuq avvenimenti tal-pjattaforma. Użahom biex tintegra ma' Slack, PagerDuty, Datadog, servizzi interni ta' twissija, jew kwalunkwe riċevitur HTTP.
 
-Id-dispatcher jiffirma kull konsenja b’HMAC-SHA256, jerġa’ jipprova f’każ ta’
-fallimenti temporanji, isegwi l-istat tal-konsenji għal kull webhook, u jiddiżattiva awtomatikament endpoints li
-jibqgħu jfallu.
+Id-dispaċċ jiffirma kull konsenja HMAC-SHA256, jerġa' jipprova fuq fallimenti temporanji, isegwi s-saħħa tal-kunsinna għal kull webhook, u jiddiżattiva awtomatikament l-endpoints li jibqgħu jonqsu.
 
 ## Avvenimenti Appoġġjati
 
-It-tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, użat minn `src/lib/webhookDispatcher.ts`) bħalissa jimmudella eżattament erba’ avvenimenti:
+It-tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ikkunsmat minn `src/lib/webhookDispatcher.ts`) bħalissa jimmudella seba' avvenimenti:
 
-| Avveniment          | Jiġi attivat meta                                                               |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `request.completed` | Talba mibgħuta permezz ta’ proxy titlesta b’suċċess                             |
-| `request.failed`    | Talba mibgħuta permezz ta’ proxy tfalli wara l-provi mill-ġdid/fallbacks kollha |
-| `quota.exceeded`    | Ċavetta API taqbeż limitu ta’ baġit/kwota                                       |
-| `test.ping`         | Avveniment sintetiku użat mill-endpoint tat-test                                |
+| Avveniment                | Nirien meta                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Talba b'prokura titlesta b'suċċess                                                                                      |
+| `request.failed`          | Talba bi prokura tonqos wara retries/fallback kollha                                                                    |
+| `quota.exceeded`          | Ċavetta API taqsam limitu budget/quota                                                                                  |
+| `proxy.set_aside`         | Membru tal-grupp ta' prokura jitwarrab wara rifjuti ripetuti (tranżizzjoni biss)                                        |
+| `proxy.pool.exhausted`    | Kull membru ta' ambitu ta' pool ta' prokura jitwarrab                                                                   |
+| `provider.reset_redeemed` | Ir-resets bankarji tal-applikazzjoni awtomatika fdew kreditu ta' reset jew ir-reset tas-sessjoni ta' kull ġimgħa Claude |
+| `test.ping`               | Avveniment sintetiku użat mill-endpoint tat-test                                                                        |
 
-L-abbonamenti jaċċettaw il-valur litterali `"*"` biex jirċievu kull avveniment. Ismijiet ta’
-avvenimenti mhux magħrufa f’`events` jiġu injorati waqt id-dispaċċ.
+L-abbonamenti jaċċettaw l- `"*"` letterali biex jirċievu kull avveniment. Ismijiet ta' avvenimenti mhux magħrufa `events` jiġu injorati fil-ħin tad-dispaċċ.
 
-> Nota: l-API tad-dispatcher hija mqabbda, iżda s-siti tas-sejħiet tal-produzzjoni għal uħud mill-
-> avvenimenti li mhumiex `test.ping` għadhom qed jiġu implimentati. Iċċekkja `grep dispatchEvent` biex tara
-> liema mogħdijiet bħalissa jsejħu lid-dispatcher fir-rilaxx tiegħek.
+> Nota: id-dispatcher API huwa bil-fili, iżda s-siti ta 'sejħiet ta' produzzjoni għal xi wħud mill-avvenimenti mhux `test.ping` għadhom qed jinżlu. Iċċekkja `grep dispatchEvent` biex tara liema mogħdijiet bħalissa jinvokaw lid-dispaċċ fir-rilaxx tiegħek.
 
 ## Arkitettura
 
 ```
-Min isejjaħ (handler, servizz, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> iffiltra skont webhook.events
-    -> għal kull qbil (b’mod parallel):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         ibni l-payload { event, timestamp, data }
-         iffirma l-body b’HMAC-SHA256 (jekk hemm secret)
-         POST b’timeout ta’ 10s
-         erġa’ pprova sa 3 darbiet għal 5xx / żball tan-network
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Id-dispaċċ jaħdem mingħajr ma min isejjaħ joqgħod jistenna r-riżultat: `Promise.allSettled` jassorbi
-l-iżbalji ta’ kull webhook sabiex riċevitur wieħed difettuż ma jkunx jista’ jimblokka lill-oħrajn.
+Id-dispaċċ huwa nar u tinsa għal min iċempel: `Promise.allSettled` jibla 'żbalji għal kull webhook sabiex riċevitur ħażin wieħed ma jistax jimblokka lill-oħrajn.
 
 ## Iffirmar HMAC
 
-Meta webhook ikollu `secret`, OmniRoute jiffirma l-body JSON u jibgħat:
+Meta webhook ikollu `secret`, OmniRoute jiffirma l-korp JSON u jibgħat:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> L-ismijiet tal-headers jużaw il-prefiss `X-Webhook-*` (mhux `X-OmniRoute-*`). Il-valur tal-firma
-> huwa `sha256=<hex>` — ivverifika l-prefiss sħiħ.
+> L-ismijiet tal-header jużaw il-prefiss `X-Webhook-*` (mhux `X-OmniRoute-*`). Il-valur tal-firma huwa `sha256=<hex>` — jivverifika l-prefiss sħiħ.
 
-Jekk `createWebhook` jissejjaħ mingħajr secret, il-modulu DB jiġġenera wieħed
-(`whsec_<48 hex>`) sabiex il-webhooks kollha jkunu ffirmati awtomatikament.
+Jekk `createWebhook` jissejjaħ mingħajr sigriet, il-modulu DB jiġġenera wieħed (`whsec_<48 hex>`) sabiex il-webhooks kollha jiġu ffirmati b'mod awtomatiku.
 
-### Verifika min-naħa tar-riċevitur
+### Verifika fuq ir-riċevitur
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,64 +76,55 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Dejjem ivverifika billi tuża l-body **mhux ipproċessat** tat-talba, qabel kwalunkwe parsing ta’ JSON.
+Dejjem ivverifika kontra l-**nej** korp talba, qabel kwalunkwe parsing JSON.
 
-## Politika ta’ Tentattivi Mill-Ġdid u Ħsarat
+## Ipprova mill-ġdid u Politika ta' Falliment
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Limitu ta’ żmien ta’ 10 sekondi għal kull tentattiv (`AbortController`).
-- Status HTTP 2xx jitqies bħala suċċess.
-- Status HTTP 3xx/4xx jitqies bħala status finali li ma jistax jerġa’ jiġi ppruvat — jiġi rreġistrat bħala mwassal
-  b’`success = res.ok`.
-- Żbalji HTTP 5xx u żbalji tan-network jerġgħu jiġu ppruvati b’dewmien esponenzjali:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Wara `maxRetries`, it-twassil jiġi rreġistrat bħala fallut.
-- Kull twassil jaġġorna `last_triggered_at`, `last_status`, u jew jirrisettja
-  jew iżid `failure_count`.
-- Id-dispaċċatur isejjaħ `disableWebhooksWithHighFailures(10)` wara kull fan-out,
-  għalhekk kwalunkwe webhook b’`failure_count >= 10` jiġi diżattivat awtomatikament.
+- 10 sekondi timeout għal kull tentattiv (`AbortController`).
+- HTTP 2xx jgħodd bħala suċċess.
+- HTTP 3xx/4xx jgħodd bħala status finali — li ma jistax jerġa' jiġi pprovat irreġistrat bħala kkonsenjat ma' `success = res.ok`.
+- HTTP 5xx u żbalji tan-netwerk jerġgħu jiġu ppruvati b'backoff esponenzjali: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Wara `maxRetries`, il-kunsinna tiġi rreġistrata bħala falluta.
+- Kull konsenja taġġorna `last_triggered_at`, `last_status`, u jew reset jew inkrementi `failure_count`.
+- Id-dispatcher isejjaħ lil `disableWebhooksWithHighFailures(10)` wara kull fan-out, għalhekk kwalunkwe webhook `failure_count >= 10` huwa awtomatikament diżattivat.
 
-## Bażi tad-Data
+## Database
 
 Tabella `webhooks` (migrazzjoni `011_webhooks.sql`):
 
-| Kolonna             | Tip     | Noti                                                      |
-| ------------------- | ------- | --------------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                      |
-| `url`               | TEXT    | URL tad-destinazzjoni                                     |
-| `events`            | TEXT    | Array JSON; valur default `["*"]`                         |
-| `secret`            | TEXT    | Sigriet HMAC (iġġenerat awtomatikament jekk ma jingħatax) |
-| `enabled`           | INT     | 0/1; valur default 1                                      |
-| `description`       | TEXT    | Tikketta umana fakultattiva                               |
-| `created_at`        | TEXT    | `datetime('now')`                                         |
-| `last_triggered_at` | TEXT    | Aġġornat ma’ kull tentattiv ta’ twassil                   |
-| `last_status`       | INT     | Status HTTP tal-aħħar tentattiv (0 = network)             |
-| `failure_count`     | INT     | Jirrisettja għal 0 mas-suċċess, +1 mal-falliment          |
+| Kolonna             | Tip     | Noti                                                    |
+| ------------------- | ------- | ------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                    |
+| `url`               | TEXT    | Destinazzjoni URL                                       |
+| `events`            | TEXT    | Array JSON ; default `["*"]`                            |
+| `secret`            | TEXT    | Sigriet HMAC (ġenerat awtomatikament jekk ma jingħatax) |
+| `enabled`           | INT     | 0/1; default għal 1                                     |
+| `description`       | TEXT    | Tikketta umana mhux obbligatorja                        |
+| `created_at`        | TEXT    | `datetime('now')`                                       |
+| `last_triggered_at` | TEXT    | Aġġornat fuq kull tentattiv ta' kunsinna                |
+| `last_status`       | INT     | Status HTTP tal-aħħar tentattiv (0 netwerk = )          |
+| `failure_count`     | INT     | Resets għal 0 fuq suċċess, + 1 fuq falliment            |
 
-L-istorja tat-twassil tinħażen fit-tabella ddedikata `webhook_deliveries`
-(migrazzjoni `069_webhook_deliveries.sql`, miktuba permezz ta’
-`src/lib/db/webhookDeliveries.ts::insertDelivery` ma’ kull tentattiv), flimkien
-mal-counters aggregati fir-ringiela `webhooks`. Il-metadata tat-tip (Slack / Discord /
-Telegram / trasformaturi personalizzati tal-payload) ġiet miżjuda minn `070_webhooks_kind_metadata.sql`.
+L-istorja tal-kunsinna hija ppersistita fit-tabella `webhook_deliveries` ddedikata (migrazzjoni `069_webhook_deliveries.sql`, miktuba permezz ta ' `src/lib/db/webhookDeliveries.ts::insertDelivery` fuq kull tentattiv), minbarra l-counters aggregati fuq ir-ringiela `webhooks`. Metadata tip (Slack / Discord / Telegram / transformers tat-tagħbija personalizzata) ġiet miżjuda minn `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
-L-endpoints kollha jeħtieġu awtentikazzjoni tal-ġestjoni (`requireManagementAuth`).
+L-endpoints kollha jeħtieġu awtorizzazzjoni tal-ġestjoni (`requireManagementAuth`).
 
 | Endpoint                        | Metodu | Deskrizzjoni                                        |
 | ------------------------------- | ------ | --------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Elenka l-webhooks (sigrieti moħbija)                |
+| `/api/webhooks`                 | GET    | Lista webhooks (sigrieti mgħottija)                 |
 | `/api/webhooks`                 | POST   | Oħloq webhook                                       |
-| `/api/webhooks/[id]`            | GET    | Dettalji tal-webhook (sigriet sħiħ)                 |
+| `/api/webhooks/[id]`            | GET    | Dettall tal-Webhook (sigriet sħiħ)                  |
 | `/api/webhooks/[id]`            | PUT    | Aġġorna l-oqsma                                     |
 | `/api/webhooks/[id]`            | DELETE | Neħħi                                               |
-| `/api/webhooks/[id]/test`       | POST   | Skatta `test.ping` (mingħajr tentattivi mill-ġdid)  |
-| `/api/webhooks/[id]/deliveries` | GET    | Tentattivi riċenti ta’ twassil għal webhook wieħed  |
-| `/api/webhooks/validate-url`    | POST   | Validazzjoni preliminari tal-URL (protezzjoni SSRF) |
+| `/api/webhooks/[id]/test`       | POST   | Fire a `test.ping` (l-ebda prova mill-ġdid)         |
+| `/api/webhooks/[id]/deliveries` | GET    | Tentattivi riċenti ta' kunsinna għal webhook wieħed |
+| `/api/webhooks/validate-url`    | POST   | Validazzjoni URL qabel it-titjira (gwardja SSRF )   |
 
-`GET /api/webhooks` jaħbi s-sigriet bħala `<first 10 chars>...` sabiex jevita li
-jiġi żvelat fil-paġni tal-listi. Uża l-GET ta’ `[id]` meta fil-fatt ikollok bżonn is-sigriet.
+`GET /api/webhooks` jaħbi s-sigriet għal `<first 10 chars>...` biex tevita li tnixxi fuq il-paġni tal-elenkar. Uża l- `[id]` GET meta fil-fatt għandek bżonn is-sigriet.
 
 ### Oħloq webhook
 
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Jekk `secret` jitħalla barra, is-server jiġġenera sigriet `whsec_<hex>` u jirritornah
-fir-rispons.
+Jekk `secret` titħalla barra, is-server jiġġenera sigriet `whsec_<hex>` u jirritornah fir-rispons.
 
-### Ittestja l-webhook
+### Test webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Jirritorna `{ delivered, status, error }`. Ma jsir l-ebda tentattiv mill-ġdid — utli biex
-tivvalida malajr li r-riċevitur jaċċetta l-payload u l-firma.
+Ritorn `{ delivered, status, error }`. Ebda tentattivi mill-ġdid huma attentati — utli għall-validazzjoni malajr li r-riċevitur jaċċetta t-tagħbija u l-firma.
 
 ## Dashboard
 
-Il-paġna tad-dashboard f’`/dashboard/webhooks` (ara
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) tipprovdi:
+Il-paġna tad-dashboard `/dashboard/webhooks` (ara `src/app/(dashboard)/dashboard/webhooks/page.tsx`) tipprovdi:
 
-- Il-ħolqien/editjar ta’ webhooks b’selettur tal-avvenimenti
-- Indikatur tal-istatus (attiv / inattiv / bi żball) ibbażat fuq `enabled`,
-  `failure_count`, u `last_status`
-- Twassil tat-test bi klikk waħda
-- Swiċċ manwali għall-attivazzjoni/diżattivazzjoni
+- Webhooks Create/edit b'picker tal-avveniment
+- Indikatur tal-istatus (attiv / inattiv / bi żball) ibbażat fuq `enabled`, `failure_count`, u `last_status`
+- Konsenja tat-test b'klikk waħda
+- Toggle manwali enable/disable
 
-## Eżempji ta’ Payloads
+## Eżempji ta' Tagħbija
 
-### request.completed
+### talba.lest
 
 ```json
 {
@@ -208,25 +188,25 @@ Il-paġna tad-dashboard f’`/dashboard/webhooks` (ara
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Twassil ta’ webhook tat-test minn OmniRoute",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-L-istrutturi tal-kampijiet għal avvenimenti li mhumiex `test.ping` huma definiti mis-siti tas-sejħiet li jemettuhom; ittratta l-oġġett `data` bħala kompatibbli ma’ verżjonijiet futuri (żid kampijiet, tiddependix fuq in-nuqqas tagħhom).
+Il-forom tal-kamp għal avvenimenti mhux `test.ping` huma definiti mis-siti tas-sejħiet li jarmuhom; ittratta l-oġġett `data` bħala kompatibbli bil-quddiem (żid oqsma, ma jiddependux fuq l-assenza).
 
 ## L-Aħjar Prattiki
 
-- **Ivverifika l-firma ma’ kull twassil** billi tqabbilha mal-korp mhux ipproċessat — dan jipprevjeni POSTs iffalsifikati minn kull min jaqta’ l-URL tal-webhook tiegħek.
-- **Irrispondi b’2xx fi żmien ~5 sekondi** — id-distributur jiskadi wara 10 s. Riċevituri bil-mod jikkunsmaw it-tentattivi mill-ġdid u jżidu `failure_count`.
-- **Agħmel il-handlers idempotenti** — it-tentattivi mill-ġdid u s-semantika ta’ twassil mill-inqas darba jfissru li huma possibbli duplikati.
-- **Abbona biss għal dak li teħtieġ** — elenka biss l-avvenimenti li fil-fatt tuża; `"*"` iżid l-ispiża għar-riċevituri li ma tikkontrollax.
-- **Immonitorja `failure_count`** — l-endpoints jiġu diżattivati awtomatikament wara 10 fallimenti konsekuttivi; issettjah mill-ġdid billi ssejjaħ `PUT /api/webhooks/[id]` b’`enabled: true` wara li tirranġa r-riċevitur.
-- **Ibdel is-sigrieti perjodikament** — ibgħat `PUT` b’`secret` ġdid, iddistribwixxi l-valur il-ġdid lir-riċevitur, u kkonferma permezz tal-endpoint tat-test.
+- **Ivverifika l-firma fuq kull kunsinna** kontra l-korp mhux maħdum — jipprevjeni POSTs spoofed minn kull min guess webhook tiegħek URL.
+- **Irrispondi 2xx fi żmien ~ 5 sekondi** — id-dispatcher jispiċċa f'10 s. Riċevituri bil-mod se jieklu mill-ġdid u jintefħu `failure_count`.
+- **Agħmel il-handlers idempotenti** Jippruvaw mill-ġdid — u semantika tal-kunsinna tal-inqas darba jfissru duplikati huma possibbli.
+- **Abbona minimament** — telenka biss avvenimenti li attwalment tikkonsma; `"*"` se jżid l-ispiża fuq riċevituri li ma tikkontrollax.
+- **Watch `failure_count`** L-endpoints — huma awto-diżattivati f'10 fallimenti konsekuttivi; reset billi ċċempel lil `PUT /api/webhooks/[id]` ma ' `enabled: true` wara li tiffissa r-riċevitur.
+- **Dawwar is-sigrieti perjodikament** — `PUT` a `secret` ġdid, skjerament il-valur il-ġdid lir-riċevitur, u kkonferma permezz tal-endpoint tat-test.
 
 ## Ara Wkoll
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — is-superfiċje sħiħa tal-API tal-ġestjoni
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — is-semantika taċ-circuit breaker / cooldown wara l-fallimenti tal-fornitur esposti permezz ta’ `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — ġestjoni sħiħa API wiċċ
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — circuit breaker / semantika ta' cooldown wara fallimenti tal-fornitur ħarġu permezz ta `request.failed`
 - Sors: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

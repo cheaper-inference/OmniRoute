@@ -102,14 +102,14 @@ Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_x_search`            | `execute:search`      | Hae X:stä xAI/SuperGrokin kautta tai valitse `xquik-search` Xquik API -tuloksia varten. Vaatii tunnistetiedot valitulle taustaohjelmalle. |
 | `omniroute_web_fetch`           | `execute:search`      | Hae verkkosisältöä määritettyjen hakupalveluntarjoajien kautta                                                                            |
 
-## Edistyneet työkalut (11) — Vaihe 2
+## Lisätyökalut (11) — -vaihe 2
 
 | Työkalu                            | Laajuudet                            | Kuvaus                                                                                                                            |
 | :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute_simulate_route`         | `read:health`, `read:combos`         | Kuiva-ajo reitityssimulaatio varapuun kanssa                                                                                      |
 | `omniroute_set_budget_guard`       | `write:budget`                       | Istunnon budjetti heikennys-/esto-/hälytystoiminnolla                                                                             |
 | `omniroute_set_routing_strategy`   | `write:combos`                       | Päivitä yhdistelmästrategia ajon aikana (prioriteetti/painotettu/auto/jne.)                                                       |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Käytä `aggressiivista` / `tasapainoista` / `konservatiivista` joustavuuden esiasetusta                                            |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Käytä `aggressive` / `balanced` / `conservative` joustavuuden esiasetusta                                                         |
 | `omniroute_test_combo`             | `execute:completions`, `read:combos` | Jokaisen palveluntarjoajan reaaliaikainen testaus yhdistelmässä käyttäen todellista ylävirran kutsua                              |
 | `omniroute_get_provider_metrics`   | `read:health`                        | Palveluntarjoajakohtaiset mittarit p50/p95/p99 viiveellä ja katkaisijan tilalla                                                   |
 | `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Suosittele yhdistelmää tehtävätyypin mukaan budjetti-/viiverajoituksilla                                                          |
@@ -496,7 +496,7 @@ Käytä kojelautaa tai `/api/mcp/audit` ja `/api/mcp/audit/stats` REST-päätepi
 | `open-sse/mcp-server/audit.ts`                                           | Työkalukutsujen auditointiloki (`mcp_tool_audit`)                              |
 | `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio-sykkeen kirjoittaja (`mcp-heartbeat.json`)                               |
 | `open-sse/mcp-server/descriptionCompressor.ts`                           | Kuvausten pakkaus työkalu- / kehotus- / resurssirekistereille                  |
-| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod-skeemat + työkalurekisteri (MCP_TOOLS, 45 merkintää)                       |
+| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod -skeemat + -työkalurekisteri (`MCP_TOOLS`, 45 merkintää)                   |
 | `open-sse/mcp-server/tools/advancedTools.ts`                             | Vaiheen 2 + välimuistin + 1proxy-työkalujen käsittelijät                       |
 | `open-sse/mcp-server/tools/compressionTools.ts`                          | Pakkaustyökalujen käsittelijät                                                 |
 | `open-sse/mcp-server/tools/memoryTools.ts`                               | Muistityökalujen määrittelyt (3 työkalua)                                      |

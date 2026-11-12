@@ -357,8 +357,8 @@ import { ArrowBigUpDash, Blend } from "lucide-react";
  * Navigation uses one ink (no per-item accent) — SIDEBAR_ICON_ACCENTS was retired (spec §3.5).
  */
 export const ICON_MAP: Record<string, LucideIcon> = {
-  // ── shell + primitives ──
   anchor: Anchor,
+  // ── shell + primitives ──
   home: House,
   settings: Settings,
   search: Search,

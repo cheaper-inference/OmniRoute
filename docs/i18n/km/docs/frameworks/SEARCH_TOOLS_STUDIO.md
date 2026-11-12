@@ -54,7 +54,7 @@ Search Tools Studio បម្លែង `/dashboard/search-tools` ពីកន្
 - ទិន្នន័យបញ្ចូល៖ URL + ប៊ូតុងបិទបើកសម្រាប់ទំព័រពេញ + ឧបករណ៍ជ្រើសរើសទម្រង់ (markdown / អត្ថបទ / HTML)។
 - ដាក់ស្នើ → ទាញយក → បង្ហាញ `ScrapeResult.tsx`។
 - `ScrapeResult` បង្ហាញការមើលជាមុននៃ markdown + ប៊ូតុងបិទបើកសម្រាប់មើលទិន្នន័យដើម។
-- ដែនកំណត់៖ ប្រសិនបើតួការឆ្លើយតប > **256 KB** នោះ UI បង្ហាញ `(បានកាត់ខ្លី, មើលទិន្នន័យដើម)` ហើយបើកទិន្នន័យដើមក្នុងម៉ូឌែល Monaco (D21)។
+- ដែនកំណត់៖ ប្រសិនបើតួការឆ្លើយតប > **256 KB** នោះ UI បង្ហាញ `View full raw content` ហើយបើកទិន្នន័យដើមក្នុងម៉ូឌែល (D21)។
 - ផ្ទាំងមេតាទិន្នន័យ៖ អ្នកផ្តល់សេវា (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), រយៈពេលឆ្លើយតប, តម្លៃ, ទំហំការឆ្លើយតប, ចំនួនតំណ។
 - ប្រើ hook `useScrapeFetch.ts`។
 
@@ -103,10 +103,12 @@ Search Tools Studio បម្លែង `/dashboard/search-tools` ពីកន្
 `ProviderCatalog.tsx` បង្ហាញបញ្ជីអ្នកផ្តល់សេវាពេញលេញពី `GET /api/search/providers`
 (បានពង្រីកនៅក្នុង F4 ដើម្បីរួមបញ្ចូលអ្នកផ្តល់សេវាទាញយក):
 
-| `kind` | `"search"` (អ្នកផ្តល់សេវា 20) ឬ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (អ្នកផ្តល់សេវា 23) ឬ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 ស្ថានភាពត្រូវបាន **កំណត់នៅពេលស្នើសុំ** ដោយពិនិត្យថាតើព័ត៌មានសម្ងាត់មានឬអត់ និងថាតើ
 សោទាំងអស់កំពុងស្ថិតក្នុងរយៈពេលរង់ចាំមុនប្រើឡើងវិញឬអត់។
+
+`codex-search` (Codex Web Search): ប្រើគណនី Codex (ChatGPT) ដែលបានភ្ជាប់ ដោយមិនត្រូវការសោដាច់ដោយឡែក។ ការស្វែងរកនីមួយៗប្រើកូតានៃការជាវ ChatGPT ហើយចំណាយពេលប្រហែល 10–40 វិនាទី។ វាដំណើរការនៅពេលសំណើបញ្ជាក់ឈ្មោះវា។ ការជ្រើសរើសស្វ័យប្រវត្តិត្រូវការបើក `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ដែលត្រូវបានបិទតាមលំនាំដើម។
 
 ---
 

@@ -186,8 +186,9 @@ describe("translated /docs pages (#18699)", () => {
     vi.spyOn(process, "cwd").mockReturnValue(tmpRoot);
   }, 180_000);
 
-  afterAll(() => {
+  afterAll(async () => {
     vi.restoreAllMocks();
+    await (await import("../../src/shared/utils/loggerResource.ts")).closeSharedLoggerResource();
     fs.rmSync(tmpRoot, { recursive: true, force: true });
   });
 

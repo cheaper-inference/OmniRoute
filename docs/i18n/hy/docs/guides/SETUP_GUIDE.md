@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Կառավարման վահանակը բացվում է `http://localhost:20128` հասցեով, իսկ API-ի բազային URL-ն է՝ `http://localhost:20128/v1`։
+Գործակալության վահանակը բացվում է `http://localhost:20128` ում, իսկ API բազայում URL `http://localhost:20128/v1` է:
+
+> **npm օգտվողներ.** Եթե npm-ը զգուշացնում է, որ տեղադրման սկրիպտներն արգելափակված են (օրինակ՝ `omniroute`, `better-sqlite3`), տես [— npm install-scripts blocked Troubleshooting](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

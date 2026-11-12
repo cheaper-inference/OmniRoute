@@ -54,7 +54,7 @@
 - الإدخال: URL + مفتاح تبديل للصفحة الكاملة + محدد التنسيق (markdown / نص / HTML).
 - إرسال ← جلب ← عرض `ScrapeResult.tsx`.
 - يعرض `ScrapeResult` معاينة markdown + مفتاح تبديل للعرض الخام.
-- الحد الأقصى: إذا كان نص الاستجابة أكبر من **256 كيلوبايت**، تعرض واجهة المستخدم `(مقتطع، عرض الخام)` وتفتح المحتوى الخام في نافذة Monaco مشروطة (D21).
+- الحد الأقصى: إذا كان نص الاستجابة أكبر من **256 كيلوبايت**، تعرض واجهة المستخدم `View full raw content` وتفتح المحتوى الخام في نافذة مشروطة (D21).
 - لوحة البيانات الوصفية: الموفّر (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)، وزمن الاستجابة، والتكلفة، وحجم الاستجابة، وعدد الروابط.
 - تستخدم الخطاف `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@
 يعرض `ProviderCatalog.tsx` القائمة الكاملة للمزوّدين من `GET /api/search/providers`
 (تم توسيعها في F4 لتشمل مزوّدي الجلب):
 
-| `kind` | `"search"` (20 مزوّدًا) أو `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search، parallel-search) |
+| `kind` | `"search"` (23 مزوّدًا) أو `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search، parallel-search) |
 
 تُشتق الحالة **وقت الطلب** عبر التحقق مما إذا كانت بيانات الاعتماد موجودة، وما إذا كانت
 جميع المفاتيح حاليًا في فترة انتظار.
+
+`codex-search` (Codex Web Search): يستخدم حسابات Codex (ChatGPT) المتصلة، دون مفتاح منفصل. يستهلك كل بحث حصة من الاشتراك ويستغرق نحو 10–40 s. يعمل عندما يحدده الطلب؛ ويتطلب الاختيار التلقائي العلم `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`، المعطل افتراضيًا.
 
 ---
 

@@ -295,16 +295,16 @@ O filtro é aplicado apenas a payloads de resultados de ferramentas cujo `type` 
 
 ---
 
-## Combinações de compressão
+## Combos de compressão
 
-As combinações de compressão são perfis de compressão com nome que podem ser atribuídos a combinações de encaminhamento:
+Os combos de compressão são designados por perfis de compressão que podem ser atribuídos aos combos de encaminhamento:
 
-- `compression_combos`: armazena o modo, o pipeline, a configuração RTK, a configuração de idioma e o marcador predefinido
-- `compression_combo_assignments`: associa uma combinação de compressão a uma combinação de encaminhamento
-- a integração em tempo de execução resolve uma combinação de compressão atribuída antes das substituições genéricas de combinações
-- as análises incluem `compression_combo_id` e `engine`
+- `compression_combos`: armazena o modo, pipeline, configuração RTK, configuração de idioma e marcador padrão
+- `compression_combo_assignments`: mapeia um combo de compressão para um combo de encaminhamento
+- a integração em tempo de execução resolve um combo de compressão atribuído antes das substituições de combos genéricos
+- análises incluem `compression_combo_id` e `engine`
 
-Localização no painel: `Painel -> Contexto e cache -> Combinações de compressão`.
+Superfície do painel: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Pré-requisitos/guia do operador (CCR e session-dedup)
 
@@ -393,7 +393,7 @@ A ferramenta de recuperação é atualmente chamada `omniroute_ccr_retrieve` (o 
 
 ### Ciclo de vida da sessão
 
-As sessões Streamable-HTTP ficam inativas e o servidor recolhe-as; a janela inativa é definida por `OMNIROUTE_MCP_SESSION_IDLE_MS` (padrão 5 minutos; referenciada pelo nome, e não por um valor codificado, pelo que esta página não oscila quando muda). O sintoma de uma sessão em idle é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é voltar a ligar ou reiniciar a sessão,** não** para rodar uma chave, alterar um âmbito ou renomear uma ferramenta.
+As sessões Streamable-HTTP ficam inativas e o servidor recolhe-as; a janela inativa é configurada pelo `OMNIROUTE_MCP_SESSION_IDLE_MS`, voltando ao `DEFAULT_MCP_SESSION_IDLE_MS` no `open-sse/mcp-server/httpTransport.ts`. O sintoma de uma sessão em idle é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é voltar a ligar ou reiniciar a sessão,**não** para rodar uma chave, alterar um âmbito ou renomear uma ferramenta.
 
 ## Superfície da API
 

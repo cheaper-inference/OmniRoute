@@ -304,16 +304,16 @@ keerukus on ridade arvu suhtes O(n) ja see lisab tühise latentsuse.
 
 ---
 
-## Tihenduskombod
+## Kompressioonikombinatsioonid
 
-Tihenduskombod on nimelised tihendusprofiilid, mida saab määrata marsruutimiskombodele:
+Tihenduskombod nimetatakse tihendusprofiilideks, mida saab määrata marsruutimiskombodele:
 
-- `compression_combos`: talletab režiimi, konveieri, RTK konfiguratsiooni, keelekonfiguratsiooni ja vaikemarkerit
-- `compression_combo_assignments`: seob tihenduskombinatsiooni marsruutimiskomboga
-- käitusaegne integratsioon lahendab määratud tihenduskombinatsiooni enne üldisi kombo ülekirjutusi
-- analüütika sisaldab välju `compression_combo_id` ja `engine`
+- `compression_combos`: salvestab režiimi, torujuhtme, RTK konfiguratsiooni, keele konfiguratsiooni ja vaikemarkeri
+- `compression_combo_assignments`: vastendab tihenduskombo marsruutimise kombinatsiooniks
+- käitusaegne integratsioon lahendab määratud tihenduskombo enne üldise kombinatsiooni alistamist
+- analüütika hõlmab `compression_combo_id` ja `engine`
 
-Töölaua asukoht: `Töölaud -> Kontekst ja vahemälu -> Tihenduskombod`.
+Armatuurlaua pind: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Eeltingimused / operaatori juhend (CCR & session-dedup)
 
@@ -402,7 +402,7 @@ Tootmistööriist kannab praegu nime `omniroute_ccr_retrieve` (eesliide `omnirou
 
 ### Seansi elutsükkel
 
-Voogesitatavad HTTP-seansid on tühikäigul ja server võtab need ära; jõudeoleku aken on seatud `OMNIROUTE_MCP_SESSION_IDLE_MS` (vaikimisi 5 minutit; viidatud nime järgi, mitte kodeeritud väärtus, nii et see leht ei triivi, kui see muutub). Tühiseansi sümptomiks on HTTP 404 koos `Unknown Mcp-Session-Id` — Abinõu on seansi taasühendamine või taaskäivitamine,** mitte** klahvi pööramiseks, ulatuse muutmiseks või tööriista ümbernimetamiseks.
+Voogesitatavad HTTP-seansid on tühikäigul ja server võtab need ära; jõudeoleku akna konfigureerib `OMNIROUTE_MCP_SESSION_IDLE_MS`, langedes tagasi `DEFAULT_MCP_SESSION_IDLE_MS` le `open-sse/mcp-server/httpTransport.ts`. Tühiseansi sümptomiks on HTTP 404 koos `Unknown Mcp-Session-Id` — abinõu on seansi uuesti ühendamine või taaskäivitamine,**mitte** klahvi pööramiseks, ulatuse muutmiseks või tööriista ümbernimetamiseks.
 
 ## API-liides
 

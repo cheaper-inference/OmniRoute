@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Osclaítear an painéal ag `http://localhost:20128` agus is é `http://localhost:20128/v1` bun-URL an API.
+Osclaíonn an painéal ag `http://localhost:20128` agus bonn API Is é URL `http://localhost:20128/v1`.
+
+> **úsáideoirí npm:** Má thugann npm rabhadh gur cuireadh bac ar scripteanna suiteála (m.sh., `omniroute`, `better-sqlite3`), féach [Fabhtcheartú — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

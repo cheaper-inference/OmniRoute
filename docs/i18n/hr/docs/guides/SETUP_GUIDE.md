@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Nadzorna ploča otvara se na adresi `http://localhost:20128`, a osnovni URL API-ja je `http://localhost:20128/v1`.
+Nadzorna ploča otvara se na `http://localhost:20128` i API baza URL je `http://localhost:20128/v1`.
+
+> **npm korisnici:** Ako npm upozorava da su instalacijske skripte blokirane (npr. `omniroute`, `better-sqlite3`), pogledajte [Rješavanje problema — npm instalacijske skripte blokirane](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

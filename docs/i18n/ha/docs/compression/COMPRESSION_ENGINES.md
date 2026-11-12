@@ -9,16 +9,16 @@ Matsewar OmniRoute an gina ta ne bisa kwangilolin injuna. Wani yanayi na iya taf
 
 ## Hanyoyi
 
-| Hanyar       | Hanyar injin                                                                                                                                | Shigarwa da aka yi niyya                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `off`        | babu                                                                                                                                        | Kiyaye umarni daidai                                        |
-| `lite`       | Caveman lite helpers                                                                                                                        | Tsaftacewa mai ƙarancin haɗari koyaushe                     |
-| `standard`   | Caveman                                                                                                                                     | Takaita umarni na harshe na halitta                         |
-| `aggressive` | Caveman + history/tool summarizers                                                                                                          | Zaman tattaunawa mai tsawo                                  |
-| `ultra`      | Caveman + pruning helpers                                                                                                                   | Maido da iyakokin mahallin                                  |
-| `rtk`        | RTK                                                                                                                                         | Terminal, shell, gini, gwaji, da fitarwa na git             |
-| `omniglyph`  | OmniGlyph                                                                                                                                   | Mahalli a matsayin hoto akan wayar mai ba da sabis na asali |
-| `stacked`    | Pipeline. Tsohon buƙata shine `session-dedup -> lite`. `rtk -> caveman` zaɓi ne. Haɗaɗɗen rajistan kayan aiki da rubutu, mafi girman tanadi |
+| Hanyar       | Hanyar injin                                                                        | Shigarwa da aka yi niyya                                    |
+| ------------ | ----------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `off`        | babu                                                                                | Kiyaye umarni daidai                                        |
+| `lite`       | Caveman lite helpers                                                                | Tsaftacewa mai ƙarancin haɗari koyaushe                     |
+| `standard`   | Caveman                                                                             | Takaita umarni na harshe na halitta                         |
+| `aggressive` | Caveman + history/tool taƙaitaccen bayani                                           | Dogon tattaunawa                                            |
+| `ultra`      | Caveman + pruning helpers                                                           | Maido da iyakokin mahallin                                  |
+| `rtk`        | RTK                                                                                 | Terminal, shell, gini, gwaji, da fitarwa na git             |
+| `omniglyph`  | OmniGlyph                                                                           | Mahalli a matsayin hoto akan wayar mai ba da sabis na asali |
+| `stacked`    | Bututu. Tsoffin buƙatun shine `session-dedup -> lite`. `rtk -> caveman` yana shiga. | Mixed kayan aiki rajistan ayyukan da prose, max tanadi      |
 
 ### Fasalin matsewa na OmniGlyph
 
@@ -391,7 +391,7 @@ A halin yanzu ana kiran kayan aikin maido da `omniroute_ccr_retrieve` (prefix ɗ
 
 ### Zagayowar rayuwa
 
-Streamable-HTTP zaman mara amfani da uwar garken girbe su; an saita taga mara aiki ta hanyar `OMNIROUTE_MCP_SESSION_IDLE_MS` (tsohon mintuna 5; ana magana da suna, ba ƙima mai lamba ba, don haka wannan shafin baya yin shuɗi lokacin da ya canza). Alamar zaman girbi mara aiki shine HTTP 404 tare da `Unknown Mcp-Session-Id` — maganin shine sake haɗawa ko sake farawa zaman,** ba** don juya maɓalli, canza iyaka, ko sake suna kayan aiki.
+Streamable-HTTP zaman mara amfani da uwar garken girbe su; `OMNIROUTE_MCP_SESSION_IDLE_MS` ne ya daidaita taga mara aiki , yana komawa `DEFAULT_MCP_SESSION_IDLE_MS` a cikin `open-sse/mcp-server/httpTransport.ts`. Alamar zaman girbi mara aiki shine HTTP 404 tare da `Unknown Mcp-Session-Id` — maganin shine sake haɗawa ko sake farawa zaman,**ba** don juya maɓalli, canza iyaka, ko sake suna kayan aiki.
 
 ## Fuskar API
 

@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26-এ রুটের বাইরে সরানো হয়েছে (বিশৃঙ্খলা কমাতে):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, এবং তৈরি হওয়া `quality-metrics.json` (gitignored)। দেখুন [`## config/`](#config--static-configs--quality-gate-state)।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, এবং তৈরি হওয়া `quality-metrics.json` (gitignored)। দেখুন [`## config/`](#config--স্ট্যাটিক-কনফিগ--কোয়ালিটি-গেট-স্টেট)।
 
 ---
 
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ড্যাশবোর্ড কম্পোনেন্ট API: অ্যাডাপ্টার ওভার `packages/ui-kit` — দেখুন `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: স্ক্রীন দ্বারা ব্যবহৃত আইকনের নাম → Lucide উপাদান (`<Icon>`)                                   |
-| `constants/providers.ts`         | **381 প্রদানকারী** Zod বৈধতা সহ (সত্যের উত্স)                                                              |
+| `constants/providers.ts`         | **388 প্রদানকারী** Zod বৈধতা সহ (সত্যের উত্স)                                                              |
 | `constants/cliTools.ts`          | বাহ্যিক CLI টুল রেজিস্ট্রি                                                                                 |
 | `constants/routingStrategies.ts` | **20টি রাউটিং কৌশল** অগ্রাধিকার সহ                                                                         |
 | `constants/publicApiRoutes.ts`   | যে রুটের জন্য Bearer (বনাম ম্যানেজমেন্ট) auth প্রয়োজন                                                     |
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — পাবলিক ডকুমেন্টেশন (7 রুট ফাইল + 17 subdirs)
+## `docs/` — সর্বজনীন ডকুমেন্টেশন (৭টি রুট ফাইল + ১৭টি সাবডিরেক্টরি)
 
 ### শীর্ষ-স্তরের গাইড
 
@@ -412,59 +412,59 @@ open-sse/
 | `CLI-TOOLS.md`              | বাহ্যিক CLI ইন্টিগ্রেশন + অভ্যন্তরীণ OmniRoute CLI                                           |
 | `I18N.md`                   | i18n আর্কিটেকচার, একটি ভাষা যোগ করা, 67টি লোকেল                                              |
 | `UNINSTALL.md`              | আনইনস্টল পদক্ষেপগুলি পরিষ্কার করুন                                                           |
-| `PROVIDER_REFERENCE.md`     | **স্বয়ংক্রিয়ভাবে তৈরি** 381 প্রদানকারীর ক্যাটালগ (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **স্বয়ংক্রিয়ভাবে তৈরি** 388 প্রদানকারীর ক্যাটালগ (regen: `npm run gen:provider-reference`) |
 
-### সাবসিস্টেম গভীর-ডাইভ
+### সাবসিস্টেম গভীর বিশ্লেষণ
 
-| ডক                                               | উদ্দেশ্য                                                                  |
-| ------------------------------------------------ | ------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                  | MCP সার্ভার: 110টি টুল, 3টি পরিবহন, 33টি স্কোপ, REST শেষ পয়েন্ট          |
-| `A2A-SERVER.md`                                  | A2A v0.3: JSON-RPC, 6 দক্ষতা, REST সাহায্যকারী, এজেন্ট কার্ড              |
-| `AGENT_PROTOCOLS_GUIDE.md`                       | ইউনিফাইড গাইড: A2A বনাম ACP বনাম ক্লাউড এজেন্ট                            |
-| `CLOUD_AGENT.md`                                 | Codex Cloud / Devin / Jules অর্কেস্ট্রেশন                                 |
-| `SKILLS.md`                                      | দক্ষতা ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH + স্যান্ডবক্স)    |
-| `RADAR.md`                                       | রাডার ফ্রি-মডেল ক্যাটালগ ওভারলে (`RADAR_ENABLED`, ডিফল্টরূপে বন্ধ)        |
-| `MEMORY.md`                                      | মেমরি সিস্টেম (SQLite FTS5 + Qdrant)                                      |
-| `EVALS.md`                                       | ইভাল ফ্রেমওয়ার্ক (স্যুট, রান, রুব্রিক্স)                                 |
-| `GUARDRAILS.md`                                  | PII masker, প্রম্পট ইনজেকশন, দৃষ্টি সেতু                                  |
-| `COMPLIANCE.md`                                  | অডিট লগ, ধরে রাখা, noLog অপ্ট-আউট                                         |
-| `WEBHOOKS.md`                                    | HMAC- স্বাক্ষরিত ওয়েবহুক বিতরণ                                           |
-| `REASONING_REPLAY.md`                            | `reasoning_content` এর জন্য হাইব্রিড memory/SQLite ক্যাশে                 |
-| `AUTHZ_GUIDE.md`                                 | অনুমোদন পাইপলাইন (`classify` → `policies` → `enforce`)                    |
-| `RESILIENCE_GUIDE.md`                            | সার্কিট ব্রেকার + কুলডাউন + মডেল লকআউট                                    |
-| `docs/security/STEALTH_GUIDE.md` (শুধুমাত্র git) | TLS ফিঙ্গারপ্রিন্টিং (JA3/JA4), Claude কোড CCH, MITM শংসাপত্র             |
-| `AUTO-COMBO.md`                                  | অটো কম্বো ইঞ্জিন (16-ফ্যাক্টর স্কোরিং, 6 মোড প্যাক, ভার্চুয়াল ফ্যাক্টরি) |
+| ডক                                          | উদ্দেশ্য                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP সার্ভার: ১১০টি টুল, ৩টি ট্রান্সপোর্ট, ৩৩টি স্কোপ, REST এন্ডপয়েন্ট       |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, ৬টি স্কিল, REST হেল্পার, এজেন্ট কার্ড                    |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | ইউনিফাইড গাইড: A2A বনাম ACP বনাম Cloud Agents                                |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules অর্কেস্ট্রেশন                                    |
+| `SKILLS.md`                                 | স্কিল ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH + স্যান্ডবক্স)        |
+| `RADAR.md`                                  | Radar ফ্রি-মডেল ক্যাটালগ ওভারলে (`RADAR_ENABLED`, ডিফল্টভাবে বন্ধ)           |
+| `MEMORY.md`                                 | মেমরি সিস্টেম (SQLite FTS5 + Qdrant)                                         |
+| `EVALS.md`                                  | ইভ্যাল ফ্রেমওয়ার্ক (স্যুট, রান, রুব্রিক)                                    |
+| `GUARDRAILS.md`                             | PII মাস্কার, প্রম্পট ইনজেকশন, ভিশন ব্রিজ                                     |
+| `COMPLIANCE.md`                             | অডিট লগ, রিটেনশন, noLog অপ্ট-আউট                                             |
+| `WEBHOOKS.md`                               | HMAC-স্বাক্ষরিত ওয়েবহুক ডেলিভারি                                            |
+| `REASONING_REPLAY.md`                       | `reasoning_content`-এর জন্য হাইব্রিড মেমরি/SQLite ক্যাশ                      |
+| `AUTHZ_GUIDE.md`                            | অথরাইজেশন পাইপলাইন (`classify` → `policies` → `enforce`)                     |
+| `RESILIENCE_GUIDE.md`                       | সার্কিট ব্রেকার + কুলডাউন + মডেল লকআউট                                       |
+| `docs/security/STEALTH_GUIDE.md` (শুধু git) | TLS ফিঙ্গারপ্রিন্টিং (JA3/JA4), Claude Code CCH, MITM সার্টিফিকেট            |
+| `AUTO-COMBO.md`                             | Auto Combo ইঞ্জিন (১৬-ফ্যাক্টর স্কোরিং, ৬টি মোড প্যাক, ভার্চুয়াল ফ্যাক্টরি) |
 
 ### কম্প্রেশন
 
-| ডক                              | উদ্দেশ্য                                 |
-| ------------------------------- | ---------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | কম্প্রেশন মোড + রোডম্যাপের ওভারভিউ       |
-| `COMPRESSION_ENGINES.md`        | গুহামানব + RTK ইঞ্জিন, রেজিস্ট্রি চুক্তি |
-| `COMPRESSION_RULES_FORMAT.md`   | কেভম্যান রুল প্যাক JSON স্কিমা           |
-| `COMPRESSION_LANGUAGE_PACKS.md` | প্রতি-ভাষা নিয়ম প্যাক ইনভেন্টরি         |
-| `RTK_COMPRESSION.md`            | RTK ঘোষণামূলক পাইপলাইন (56 ফিল্টার)      |
+| ডক                              | উদ্দেশ্য                                    |
+| ------------------------------- | ------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | কম্প্রেশন মোডের ওভারভিউ + রোডম্যাপ          |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK ইঞ্জিন, রেজিস্ট্রি কন্ট্রাক্ট |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman রুল প্যাক JSON স্কিমা               |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ভাষা-ভিত্তিক রুল প্যাক ইনভেন্টরি            |
+| `RTK_COMPRESSION.md`            | RTK ডিক্লারেটিভ পাইপলাইন (৫৬টি ফিল্টার)     |
 
-### স্থাপনা
+### ডিপ্লয়মেন্ট
 
 | ডক                           | উদ্দেশ্য                                                          |
 | ---------------------------- | ----------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Docker বিল্ড, প্রোফাইল (base/cli/host/cliproxyapi), Redis সাইডকার |
-| `VM_DEPLOYMENT_GUIDE.md`     | জেনেরিক VM/VPS স্থাপনা (Ubuntu/Debian + nginx + systemd)          |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io স্থাপনা (বর্তমানে শুধুমাত্র চাইনিজ)                        |
-| `TERMUX_GUIDE.md`            | Termux এর মাধ্যমে Android হেডলেস                                  |
-| `PWA_GUIDE.md`               | প্রগতিশীল ওয়েব অ্যাপ ইনস্টল + পরিষেবা কর্মী                      |
+| `VM_DEPLOYMENT_GUIDE.md`     | জেনেরিক VM/VPS ডিপ্লয়মেন্ট (Ubuntu/Debian + nginx + systemd)     |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ডিপ্লয়মেন্ট (বর্তমানে শুধুমাত্র চীনা ভাষায়)              |
+| `TERMUX_GUIDE.md`            | Termux-এর মাধ্যমে Android হেডলেস                                  |
+| `PWA_GUIDE.md`               | Progressive Web App ইনস্টল + সার্ভিস ওয়ার্কার                    |
 | `ELECTRON_GUIDE.md`          | ডেস্কটপ অ্যাপ বিল্ড + সাইন + বিতরণ                                |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale ফানেল                             |
-| `PROXY_GUIDE.md`             | 4-স্তরের আউটবাউন্ড প্রক্সি + 1proxy মার্কেটপ্লেস                  |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
+| `PROXY_GUIDE.md`             | ৪-স্তরের আউটবাউন্ড প্রক্সি + 1proxy মার্কেটপ্লেস                  |
 
 ### সাবডিরেক্টরি
 
-| সাবদির                | উদ্দেশ্য                                                                                                                                                                                        |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | স্থানীয়কৃত ডক অনুবাদ (41 স্থানীয়)                                                                                                                                                             |
-| `docs/screenshots/`   | গাইড জন্য ইমেজ সম্পদ                                                                                                                                                                            |
-| `_tasks/superpowers/` | সুপার পাওয়ার থেকেPlans/specs (`writing-plans`/`brainstorming`) + গবেষণা — বিচ্ছিন্ন, আলাদা-সংস্করণযুক্ত রেপো, প্রধান গাছ দ্বারা উপেক্ষা করা। CLAUDE.md → "পরিকল্পনা ও গবেষণা শিল্পকর্ম" দেখুন। |
+| সাবডিরেক্টরি          | উদ্দেশ্য                                                                                                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | লোকালাইজড ডক অনুবাদ (৬৬টি লোকেল)                                                                                                                                                                            |
+| `docs/screenshots/`   | গাইডগুলির জন্য ইমেজ অ্যাসেট                                                                                                                                                                                 |
+| `_tasks/superpowers/` | superpowers থেকে প্ল্যান/স্পেসিফিকেশন (`writing-plans`/`brainstorming`) + গবেষণা — বিচ্ছিন্ন, আলাদাভাবে সংস্করণিত রেপো, মূল ট্রি কর্তৃক gitignore-কৃত। CLAUDE.md দেখুন → "পরিকল্পনা ও গবেষণা আর্টিফ্যাক্ট"। |
 
 ---
 

@@ -122,15 +122,15 @@ apzināti.
 
 ---
 
-## Kāpēc mūsu skaitlis ir mazāks nekā citiem apkopotājiem
+## Kāpēc mūsu skaits ir mazāks nekā citiem apkopotājiem
 
-Vairums šajā jomā minēto „bezmaksas žetonu mēnesī” skaitļu ir katram modelim norādīto apjomu summas. Mūsu skaitlis ar nolūku tāds nav:
+Lielākā daļa skaitļu "bezmaksas marķieri mēnesī" šajā vietā ir katra modeļa etiķešu summas. Mūsējais ar nolūku nav:
 
-- **Katrs koplietojamais kopums tiek uzskaitīts vienreiz.** Mistral bezmaksas plānā katrai organizācijai ir viens 1B/mēnesī apjoms; tā norādīšana pieciem modeļiem nepadara to par 5B. Saskaitot pa modeļiem, mūsu pašu katalogā būtu norādīti **~7.4B** (pārrēķināts 2026-09-03; šo skaitli nekontrolē CI — pārmēriet to ikreiz, kad mainās katalogs), taču virsrakstā norādīti **~1.47B**, jo tieši tik faktiski var iztērēt viens katra pakalpojumu sniedzēja konts.
-- **Dienas ierobežojumi tiek pārrēķināti, ātruma ierobežojumi — ne.** Dokumentēts žetonu/dienā ierobežojums kļūst par `× 30`; dokumentēts pieprasījumu/dienā ierobežojums kļūst par `RPD × ~800 žetonu × 30`; pakalpojumu sniedzējam, kas publicē tikai pieprasījumu minūtē skaitu, mēneša skaitļa **nav**, un tas tiek norādīts kā _neierobežots_, nekad netiekot pieskaitīts. Ātruma ierobežojuma reizināšana ar 24/7 ir skaitļa mākslīga palielināšana, ko mēs nepieļaujam.
-- **Kvotas, kam nepieciešama reģionāla identitātes pārbaude, tiek norādītas atsevišķi** (`+~6M aiz reģionālās identitātes pārbaudes`), jo vairums lasītāju tās nevar izmantot.
-- **Reģistrācijas kredīti attiecas tikai uz pirmo mēnesi** un tiek norādīti kā otrs skaitlis, nekad tos neiekļaujot pastāvīgajā apjomā.
-- **Skaitli kontrolē CI.** `npm run check:docs-counts` pārrēķina kopsummas no kataloga un aptur būvējumu, ja šis fails, README vai budžeta kartīte vairs tām neatbilst.
+- **Katrs koplietošanas baseins tiek ieskaitīts vienu reizi.** Mistral bezmaksas plāns ir viens 1B/month pabalsts katrai organizācijai; Ja to uzskaita piecos modeļos, tas nav 5B. Summējot pēc modeļa, varētu lasīt mūsu pašu katalogu **~ 7.4B** (pārrēķināts 2026-09-03; šis skaitlis nav saistīts ar CI. — mēriet to atkārtoti ikreiz, kad mainās katalogs) — virsrakstā teikts **~ 1.47B** jo tieši to var tērēt viens katra pakalpojumu sniedzēja konts.
+- **Dienas limiti tiek konvertēti, likmes netiek konvertētas.** Dokumentēta tokens/day vāciņš kļūst `× 30`; dokumentēta requests/day vāciņš kļūst `RPD × ~800 tokens × 30`; pakalpojumu sniedzējs, kas publicē tikai pieprasījumus minūtē **nē** mēneša skaitlis, un tas ir norādīts kā _bez ierobežojuma_, nekad nav summēts. Likmes limita reizināšana ar 24/7 ir inflācija, kuru mēs atsakāmies.
+- **Kvotas aiz reģionālās identitātes pārbaudes ir parādītas atsevišķi** (`+~6M behind regional identity verification`), jo lielākā daļa lasītāju tos nevar izmantot.
+- **Reģistrācijas kredīti ir tikai pirmajā mēnesī** un uzrādīts kā otrs skaitlis, kas nekad nav sajaukts ar nemainīgu skaitli.
+- **Šo skaitli nodrošina CI.** `npm run check:docs-counts` pārrēķina kopsummas no kataloga un neizdodas veidot, kad šis fails, README vai budžeta karte novirzās no tiem.
 
 ---
 
@@ -390,12 +390,12 @@ Vairums šajā jomā minēto „bezmaksas žetonu mēnesī” skaitļu ir katram
 
 ## Glosārijs
 
-| Termins                  | Nozīme                                                                                        |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**      | Pieprasījumi minūtē / dienā / stundā                                                          |
-| **TPM / TPD**            | Tokeni minūtē / dienā                                                                         |
-| **Dokumentētais limits** | Pakalpojuma sniedzējs publicē skaidri noteiktu dienas/mēneša tokenu limitu (pamatots budžets) |
-| **Teorētiskie griesti**  | `ātruma ierobežojums × 24/7 × 30 d.` — maksimums, nevis piešķirts budžets                     |
-| **Neirons**              | Cloudflare skaitļošanas vienība (~1 izvades tokens)                                           |
+| Termiņš                  | Nozīme                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| **RPM / RPD / RPH**      | Pieprasījumi minūtē / dienā / stundā                                                             |
+| **TPM / TPD**            | Žetoni minūtē / dienā                                                                            |
+| **Dokumentēta dotācija** | Pakalpojumu sniedzējs publicē skaidru daily/monthly marķiera ierobežojumu (aizsargājams budžets) |
+| **Teorētiskie griesti**  | `rate-limit × 24/7 × 30d` — maksimālais, nevis piešķirtais budžets                               |
+| **Neirons**              | Cloudflare skaitļošanas vienība (~ 1 izvades marķieris)                                          |
 
-> Ģenerēts, pamatojoties uz katra pakalpojuma sniedzēja izpēti 2026-06-05. Lai atjauninātu informāciju, atkārtoti palaidiet izpētes darbplūsmu (skatiet `_tasks/features-v3.8.12`).
+> Ģenerēts no katra pakalpojumu sniedzēja pētījuma 2026. gada 6. jūnijā. Atkārtoti palaidiet izpētes darbplūsmu (skatiet `_tasks/features-v3.8.12`), lai atsvaidzinātu.

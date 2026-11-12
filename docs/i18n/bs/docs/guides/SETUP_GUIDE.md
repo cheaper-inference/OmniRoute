@@ -4,9 +4,7 @@
 
 ---
 
-# 📖 Vodič za podešavanje — OmniRoute
-
-> Kompletna referenca za podešavanje OmniRoute-a. Za brzu verziju, pogledajte [Brzi početak u README](../README.md#-quick-start).
+> Kompletna referenca za podešavanje za OmniRoute. Za brzu verziju pogledajte [Brzi početak u README](../README.md#-quick-start).
 
 ## Sadržaj
 
@@ -29,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Kontrolna tabla se otvara na `http://localhost:20128`, a osnovni API URL je `http://localhost:20128/v1`.
+Kontrolna tabla se otvara na `http://localhost:20128`, a API baza URL je `http://localhost:20128/v1`.
+
+> **npm korisnici:** Ako npm upozori da su instalacijske skripte blokirane (npr. `omniroute`, `better-sqlite3`), pogledajte [Rješavanje problema — blokirane npm install-skripte](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

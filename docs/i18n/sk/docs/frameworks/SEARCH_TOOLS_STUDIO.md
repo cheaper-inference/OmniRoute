@@ -54,7 +54,7 @@ Nová karta na extrakciu obsahu z URL prostredníctvom `POST /v1/web/fetch` (vyt
 - Vstup: URL + prepínač celej stránky + výber formátu (markdown / text / HTML).
 - Odoslanie → načítanie → vykreslenie `ScrapeResult.tsx`.
 - `ScrapeResult` vykresľuje náhľad markdownu + prepínač surového obsahu.
-- Limit: ak telo odpovede presiahne **256 KB**, používateľské rozhranie zobrazí `(skrátené, zobraziť surový obsah)` a otvorí surový obsah v modálnom okne Monaco (D21).
+- Limit: ak telo odpovede presiahne **256 KB**, používateľské rozhranie zobrazí `View full raw content` a otvorí surový obsah v modálnom okne (D21).
 - Panel metadát: poskytovateľ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencia, náklady, veľkosť odpovede, počet odkazov.
 - Používa hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Spúšťa rovnaký dopyt/URL paralelne až u **4 poskytovateľov** (D22):
 `ProviderCatalog.tsx` zobrazuje úplný zoznam poskytovateľov z `GET /api/search/providers`
 (rozšírený v F4 o poskytovateľov načítavania):
 
-| `kind` | `"search"` (20 poskytovateľov) alebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 poskytovateľov) alebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Stav je **odvodený v čase požiadavky** kontrolou, či existujú prihlasovacie údaje a či
 sú všetky kľúče momentálne v období čakania.
+
+`codex-search` (Codex Web Search): Používa vaše pripojené účty Codex (ChatGPT), bez samostatného kľúča. Každé vyhľadávanie čerpá kvótu predplatného a trvá približne 10–40 s. Spustí sa, keď ho požiadavka uvedie; automatický výber vyžaduje príznak `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, ktorý je predvolene vypnutý.
 
 ---
 

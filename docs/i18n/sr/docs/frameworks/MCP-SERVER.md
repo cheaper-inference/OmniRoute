@@ -103,14 +103,14 @@ Cursor, Cline i kompatibilno podešavanje MCP klijenta.
 | `omniroute_x_search`            | `execute:search`      | Pretraga X-a putem xAI/SuperGrok-a, ili odaberite `xquik-search` za rezultate Xquik API-ja. Zahteva akreditive za odabrani bek-end. |
 | `omniroute_web_fetch`           | `execute:search`      | Preuzimanje veb sadržaja putem konfigurisanih provajdera preuzimanja                                                                |
 
-## Napredni alati (11) — Faza 2
+## Напредни алати (11) — фаза 2
 
 | Alat                               | Opsezi                               | Opis                                                                                                                                          |
 | :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute_simulate_route`         | `read:health`, `read:combos`         | Simulacija rutiranja u probnom režimu sa rezervnim stablom                                                                                    |
 | `omniroute_set_budget_guard`       | `write:budget`                       | Budžet sesije sa akcijama degradacije/blokiranja/upozorenja                                                                                   |
 | `omniroute_set_routing_strategy`   | `write:combos`                       | Ažuriranje strategije kombinacije u toku izvršavanja (prioritetna/ponderisana/automatska/itd.)                                                |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Primena `agresivnog` / `balansiranog` / `konzervativnog` profila otpornosti                                                                   |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Примените унапред подешену отпорност `aggressive` / `balanced` / `conservative`                                                               |
 | `omniroute_test_combo`             | `execute:completions`, `read:combos` | Testiranje uživo svakog provajdera u kombinaciji korišćenjem stvarnog uzvodnog poziva                                                         |
 | `omniroute_get_provider_metrics`   | `read:health`                        | Metrike po provajderu sa p50/p95/p99 kašnjenjem i stanjem prekidača kola                                                                      |
 | `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Preporučite kombinaciju po tipu zadatka sa ograničenjima budžeta/kašnjenja                                                                    |

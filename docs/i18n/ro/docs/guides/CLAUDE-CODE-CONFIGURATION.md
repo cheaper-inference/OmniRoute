@@ -27,25 +27,75 @@ omniroute launch --profile glm52  # Claude Code folosind glm/glm-5.2 prin OmniRo
 
 ## Cum se conectează Claude Code la un gateway
 
-Codul Claude vorbește despre**Anthropic Mesaje API** și este îndreptat către un punct final personalizat cu variabile de mediu (nu are semnal `--base-url` ):
+Claude Code comunică prin **Anthropic Messages API** și este direcționat către un endpoint
+personalizat prin variabile de mediu (nu are opțiunea `--base-url`):
 
-| Variabilă                                    | Scop                                                                                        |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Codul Claude adaugă `/v1/messages`).** Fără sufix `/v1`.**                |
-| `ANTHROPIC_AUTH_TOKEN`                       | Trimis ca `Authorization: Bearer …` — folosește jetonul de acces OmniRoute /cheia API       |
-| `ANTHROPIC_API_KEY`                          | Alternativă: trimis ca `x-api-key`. Dacă ambele sunt setate, `ANTHROPIC_AUTH_TOKEN` câștigă |
-| `ANTHROPIC_MODEL`                            | Forțați un anumit model (înlocuiește selectorul `/model` implicit)                          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → selectorul nativ `/model` listează modelele `claude*`/`anthropic*` de la `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limitați jetoanele de ieșire pe răspuns (de ex. `65536`)                                    |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Pragul indicativ pentru compactare automată                                                 |
+| Variabilă                                    | Scop                                                                                               |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL-ul rădăcină al gateway-ului (Claude Code adaugă `/v1/messages`). **Fără sufixul `/v1`.**       |
+| `ANTHROPIC_AUTH_TOKEN`                       | Trimis ca `Authorization: Bearer …` — utilizați tokenul de acces / cheia API OmniRoute             |
+| `ANTHROPIC_API_KEY`                          | Alternativă: trimis ca `x-api-key`. Dacă sunt setate ambele, `ANTHROPIC_AUTH_TOKEN` are prioritate |
+| `ANTHROPIC_MODEL`                            | Impune un anumit model (suprascrie valoarea implicită a selectorului `/model`)                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → selectorul nativ `/model` listează modelele `claude*`/`anthropic*` din `/v1/models`          |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limitează numărul de tokenuri de ieșire pentru fiecare răspuns (de ex. `65536`)                    |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Pragul de tokenuri pentru compactarea automată                                                     |
 
-> Se citesc vars. Env** o dată la pornire** — reporniți codul Claude după ce le-ați schimbat.
+> Variabilele de mediu sunt citite **o singură dată la pornire** — reporniți Claude Code după modificarea lor.
 
-Pentru o acreditare care se rotește în loc de un șir fix, setați `apiKeyHelper` în `~/.claude/settings.json` la o comandă care imprimă acreditările curente în stdout. Codul Claude își păstrează în cache ieșirea timp de cinci minute în mod implicit (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` îl înlocuiește) și trimite valoarea atât în `Authorization: Bearer` cât și `x-api-key`. Scriptul trebuie să imprime acreditările și nimic altceva — un banner alături de acesta eșuează ajutorul pe v2.1.227 +.
+Pentru o credențială care se rotește în locul unui șir fix, setați `apiKeyHelper` în `~/.claude/settings.json` la o comandă care afișează credențiala curentă pe stdout. Claude Code memorează implicit rezultatul în cache timp de cinci minute (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` modifică acest interval) și trimite valoarea atât în `Authorization: Bearer`, cât și în `x-api-key`. Scriptul trebuie să afișeze numai credențiala — un mesaj introductiv suplimentar provoacă eșecul mecanismului auxiliar în v2.1.227+.
 
-Iată cum funcționează Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` tipărește un token de acces Entra de scurtă durată pe care OmniRoute îl verifică în loc de o cheie API. Vezi [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Așa funcționează Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` afișează un token de acces Entra de scurtă durată, pe care OmniRoute îl verifică în locul unei chei API. Consultați [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` setează toate acestea pentru tine: rezolvă simbolul URL + de bază din contextul activ (deci `omniroute connect <vps>` apoi `omniroute launch` funcționează), verifică starea serverului și execs `claude`.
+`omniroute launch` le setează pe toate pentru dvs.: determină URL-ul de bază + tokenul
+din contextul activ (astfel încât `omniroute connect <vps>`, urmat de `omniroute launch`,
+să funcționeze direct), verifică starea serverului și execută `claude`.
+
+---
+
+## Atribuire utilizare: sesiuni și proiecte
+
+OmniRoute grupează cererile fiecărei chei API în **sesiuni de agent** şi înregistrează care **proiect** fiecare sesiune a lucrat (tabel `agent_sessions` ), astfel încât utilizarea și costul pot fi raportate pe membru al echipei, pe proiect și pe sesiune.
+
+Ce se înregistrează fără nicio configurare client:
+
+| Domeniu | Sursă                                                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sesiune | Antet `x-claude-code-session-id` (aceeași valoare ca și `metadata.user_id.session_id`), stabil pe sesiune                                                    |
+| Proiect | Codul Claude de linie `Primary working directory:` trimite în mediul său mesaj; folderele worktree din `.claude/worktrees/` se rezolvă la numele depozitului |
+| Ramura  | `Current branch:` din statusul git Codul Claude se trimite cu primul mesaj                                                                                   |
+| Client  | `user-agent` (`claude-cli/<version>`)                                                                                                                        |
+
+Codex (`<environment_context><cwd>`) și OpenCode (`x-opencode-session`) sunt recunoscute în același mod. Chei cu **fără jurnal** activat păstrează numai ID-ul sesiunii și câmpurile de proiect furnizate de antet; nimic citit din prompt (cale, ramură) nu este stocat.
+
+### Denumirea explicită a proiectului (recomandat)
+
+Directorul de lucru diferă între mașini, astfel încât același depozit poate apărea pe căi diferite. Trimiteți proiectul în mod explicit: Codul Claude adaugă toate anteturile listate în `ANTHROPIC_CUSTOM_HEADERS` la fiecare cerere de model, iar OmniRoute citește două dintre ele:
+
+| Antet                      | Valoare                                                                 |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `x-omniroute-project`      | Numele proiectului, de exemplu `omniroute`                              |
+| `x-omniroute-project-repo` | Telecomanda normalizată, de exemplu `github.com/diegosouzapw/OmniRoute` |
+
+Ambele sunt citite doar pentru atribuire; nu sunt niciodată redirecționate către furnizorul din amonte.
+
+`ANTHROPIC_CUSTOM_HEADERS` este citit o dată la pornire, iar fișierele de setări stochează valori literale, așa că calculați-l când se lansează codul Claude. Adăugați acest lucru la `~/.zshrc` sau `~/.bashrc` și continuați să porniți `claude` din folderul proiectului:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Expresia `sed` elimină orice acreditări încorporate în URL la distanță. Extensiile IDE lansează codul Claude fără shell-ul dvs., astfel încât sesiunile lor revin în directorul de lucru.
 
 ---
 

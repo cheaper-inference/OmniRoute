@@ -25,6 +25,8 @@ export interface OpenapiPath {
   description?: string;
   /** OpenAPI tags */
   tags: string[];
+  /** Explicit JSON request example, when the canonical operation supplies one. */
+  requestBodyExample?: unknown;
 }
 
 export interface ParsedOpenapi {
@@ -146,6 +148,7 @@ function extractOperations(pathsObj: Record<string, any>): OpenapiPath[] {
         summary: String(operation.summary ?? ""),
         description: operation.description ? String(operation.description) : undefined,
         tags: Array.isArray(operation.tags) ? operation.tags.map(String) : [],
+        requestBodyExample: operation.requestBody?.content?.["application/json"]?.example,
       });
     }
   }

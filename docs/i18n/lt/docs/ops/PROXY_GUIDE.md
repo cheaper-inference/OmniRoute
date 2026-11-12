@@ -394,7 +394,7 @@ Naudoja `wreq-js`, kad sugeneruotų naršyklėms būdingus TLS kontrolinius atsp
 
 ### CLI kontrolinio atspaudo atitikimas
 
-**CLI kontrolinio atspaudo jungiklis** (`Nustatymai → Saugumas`) pertvarko HTTP antraštes ir JSON turinio laukus, kad jie tiksliai atitiktų vietinių CLI vykdomųjų failų (Claude Code, Codex ir kt.) parašą. Tai veikia **kartu su** tarpiniu serveriu:
+**CLI kontrolinio atspaudo jungiklis** (`Settings → Security`) pertvarko HTTP antraštes ir JSON turinio laukus, kad jie tiksliai atitiktų vietinių CLI vykdomųjų failų (Claude Code, Codex ir kt.) parašą. Tai veikia **kartu su** tarpiniu serveriu:
 
 ```
 Jūsų IP (užblokuotas) → Tarpinio serverio IP (JAV) → Teikėjo API

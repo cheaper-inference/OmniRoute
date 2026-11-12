@@ -54,7 +54,7 @@ Nov zavihek za pridobivanje vsebine iz URL-ja prek `POST /v1/web/fetch` (ustvarj
 - Vnos: URL + stikalo za celotno stran + izbirnik oblike (markdown / besedilo / HTML).
 - Pošlji → pridobi → upodobi `ScrapeResult.tsx`.
 - `ScrapeResult` upodobi predogled markdowna + stikalo za neobdelano vsebino.
-- Omejitev: če je telo odziva večje od **256 KB**, uporabniški vmesnik prikaže `(skrajšano, prikaži neobdelano)` in odpre neobdelano vsebino v modalnem oknu Monaco (D21).
+- Omejitev: če je telo odziva večje od **256 KB**, uporabniški vmesnik prikaže `View full raw content` in odpre neobdelano vsebino v modalnem oknu (D21).
 - Podokno z metapodatki: ponudnik (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), zakasnitev, stroški, velikost odziva, število povezav.
 - Uporablja kavelj `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Izvede isto poizvedbo/URL pri največ **4 ponudnikih vzporedno** (D22):
 `ProviderCatalog.tsx` prikazuje celoten seznam ponudnikov iz `GET /api/search/providers`
 (v F4 razširjen tako, da vključuje ponudnike za pridobivanje vsebine):
 
-| `kind` | `"search"` (20 ponudnikov) ali `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ponudnikov) ali `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Stanje se **določi ob času zahteve** s preverjanjem, ali poverilnice obstajajo in ali so
 vsi ključi trenutno v obdobju začasne blokade.
+
+`codex-search` (Codex Web Search): Uporablja vaše povezane račune Codex (ChatGPT) brez ločenega ključa. Vsako iskanje porabi naročniško kvoto in traja približno 10–40 s. Zažene se, ko ga zahteva navede; samodejna izbira zahteva zastavico `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, ki je privzeto izklopljena.
 
 ---
 

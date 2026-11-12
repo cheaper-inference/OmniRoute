@@ -24,29 +24,22 @@ _KRİTİK geçit_ adımı (`severity: CRITICAL`, `ignore-unfixed: true`,
 `exit-code: 1`), **düzeltmesi mevcut olan** KRİTİK bir CVE'de yayını başarısız kılar. `ignore-unfixed`
 yukarı akış yaması olmayan bir temel imaj CVE'si için yayının engellenmesini önler.
 
-## ⚠️ CVE Varyansı (osv/Trivy geçitlerini engelleme)
+## ⚠️ CVE Değişkenliği (osv/Trivy kapılarını engeller)
 
-osv ve Trivy, bağımlılıkları **sürekli büyüyen** CVE veritabanlarına karşı karşılaştırır.
-**Hiçbir bağımlılığa dokunmayan** bir PR, mevcut bir bağımlılıkta yeni bir CVE
-açıklandığı için aniden kırmızıya dönebilir (osv: ölçülen `vulnCount` > temel çizgi; Trivy:
-imajda yeni düzeltilebilir bir KRİTİK). **Bu, engelleme yapan bir CVE geçidinin BEKLENEN
-operasyonel davranışıdır, bir ürün gerilemesi değildir.**
+osv ve Trivy, bağımlılıkları **sürekli büyüyen** CVE veritabanlarıyla karşılaştırır. **Hiçbir bağımlılığa dokunmayan** bir PR, mevcut bir bağımlılıkta yeni bir CVE açıklandığı için aniden başarısız olabilir (osv: ölçülen `vulnCount` > temel değer; Trivy: imajda düzeltilebilir yeni bir CRITICAL). **Bu, ürün regresyonu değil, engelleyici bir CVE kapısının BEKLENEN operasyonel davranışıdır.**
 
-Yeni açıklanan bir CVE nedeniyle osv veya Trivy kırmızıya döndüğünde, çözüm şudur:
+osv veya Trivy yeni açıklanan bir CVE nedeniyle başarısız olduğunda çözüm şudur:
 
-1. **Etkilenen bağımlılığı yükseltin** (tercih edilen) — `package.json`
-   `overrides` (geçişli bağımlılıklar) aracılığıyla yamalı sürüme yükseltin veya yamalı bir temel üzerinde imajı yeniden oluşturun.
-2. **Yukarı akışta bir düzeltme yoksa:**
-   - **osv:** `config/quality/quality-baseline.json` içindeki `metrics.vulnCount` değerini yeniden temel alın
-     (`npm run quality:ratchet -- --update` özel geçitleri kapsamaz — değeri elle düzenleyin,
-     `direction:down`) bir gerekçe notu + takip sorunu ile.
-   - **Trivy:** `.trivyignore` dosyasına (her satırda CVE-ID) bir gerekçe
-     yorum + takip sorunu ile bir giriş ekleyin. `ignore-unfixed: true` zaten
-     yaması olmayan CVE'leri otomatik olarak kapsar.
+1. **Etkilenen bağımlılığın sürümünü yükseltin** (tercih edilen) — `package.json` içindeki `overrides` aracılığıyla yamalı sürüme yükseltin (geçişli bağımlılıklar için) veya imajı yamalı bir temel üzerinde yeniden oluşturun.
+2. **Bir düzeltme mevcut değilse:** Ölçülen bulguyu koruyun ve etkilenen bağımlılığı veya görüntüyü izleyin. Başarısız bir adayın geçmesini sağlamak için güvenlik açığı temel çizgisini yükseltmeyin. Trivy'nin `ignore-unfixed: true` zaten bir yukarı akış yaması olmadan görüntüdeki güvenlik açıklarını hariç tutuyor. Herhangi bir istisna, incelenmiş bir güvenlik açığı ID, tam paket yolunu, politikadaki son kullanma tarihini ve izleme sorununu gerektirir; başarısız bir taramanın otomatik sonucu değildir.
 
-Her iki geçit de araç yoksa veya ölçüm başarısız olursa (osv-scanner PATH'de yok,
-osv.dev/ağ erişilemez, geçersiz JSON) **zarifçe ATLAR** (çıkış 0) — bir
-**ölçüm** hatası asla engellemez, yalnızca **ölçülen** bir gerileme engeller.
+Zorunlu OSV yürütmeleri (`check:vuln-ratchet -- --ratchet`), tarayıcı, rapor veya temel değer doğrulanamadığında güvenli biçimde başarısız olur; `INCOMPLETE` ile çıkış kodu 2 döndürür. Ölçülen bir regresyon, çıkış kodu 1 döndürür. Tavsiye niteliğindeki yürütme yine de `SKIP` bildirip çıkış kodu 0 döndürebilir; bu, bağımlılıkların taramayı geçtiğini kanıtlamaz. Engelleyici Trivy adımı da başarılı bir ölçüm gerektirir: kullanılamayan araçlar, başarısız işler ve eksik imaj kanıtları, bir imajın temiz olduğunu doğrulayamaz.
+
+## Görüntü tarama politikası
+
+Mevcut `.trivyignore.yaml` hiçbir güvenlik açığı istisnası içermiyor. `npm run check:trivy-ignore-policy` yerel tarama profillerindeki, CI ve Kalitedeki yapılandırılmış politikayı doğrular. Bilinmeyen IDs, daha geniş yollar, yinelenen girişler ve süresi dolmuş istisnalar reddedilir; eski `.trivyignore` taşınan taramalara bir girdi değildir.
+
+Docker `github.workflow_sha` politika araçlarını ve görüntü kaynağı politikasını yapıyla aynı kaynak seçiciyle kontrol eder. Politika seçici, uyumsuz kapsamları reddeder ve her iki Trivy taraması için bir dosya hazırlar. Yapılandırılmış bir politikası olmayan tarihi bir kaynak hiçbir istisna kabul etmez. Her iki tarama da Trivy `v0.70.0` pinliyor. İlke doğrulaması yapılandırma tutarlılığını kanıtlar; görüntünün hâlâ başarılı bir taramaya ihtiyacı var.
 
 ## Emekli bağımlılık riski
 

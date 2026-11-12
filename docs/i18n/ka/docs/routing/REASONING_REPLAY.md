@@ -1,61 +1,62 @@
-# REASONING_REPLAY (ქართული)
+# Reasoning Replay Cache (ქართული)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../routing/REASONING_REPLAY.md) · 🇪🇹 [am](../../../am/docs/routing/REASONING_REPLAY.md) · 🇸🇦 [ar](../../../ar/docs/routing/REASONING_REPLAY.md) · 🇦🇿 [az](../../../az/docs/routing/REASONING_REPLAY.md) · 🇧🇬 [bg](../../../bg/docs/routing/REASONING_REPLAY.md) · 🇧🇩 [bn](../../../bn/docs/routing/REASONING_REPLAY.md) · 🇧🇦 [bs](../../../bs/docs/routing/REASONING_REPLAY.md) · 🇨🇿 [cs](../../../cs/docs/routing/REASONING_REPLAY.md) · 🇩🇰 [da](../../../da/docs/routing/REASONING_REPLAY.md) · 🇩🇪 [de](../../../de/docs/routing/REASONING_REPLAY.md) · 🇬🇷 [el](../../../el/docs/routing/REASONING_REPLAY.md) · 🇪🇸 [es](../../../es/docs/routing/REASONING_REPLAY.md) · 🇪🇪 [et](../../../et/docs/routing/REASONING_REPLAY.md) · 🇮🇷 [fa](../../../fa/docs/routing/REASONING_REPLAY.md) · 🇫🇮 [fi](../../../fi/docs/routing/REASONING_REPLAY.md) · 🇫🇷 [fr](../../../fr/docs/routing/REASONING_REPLAY.md) · 🇮🇪 [ga](../../../ga/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [gu](../../../gu/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ha](../../../ha/docs/routing/REASONING_REPLAY.md) · 🇮🇱 [he](../../../he/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [hi](../../../hi/docs/routing/REASONING_REPLAY.md) · 🇭🇷 [hr](../../../hr/docs/routing/REASONING_REPLAY.md) · 🇭🇺 [hu](../../../hu/docs/routing/REASONING_REPLAY.md) · 🇦🇲 [hy](../../../hy/docs/routing/REASONING_REPLAY.md) · 🇮🇩 [id](../../../id/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ig](../../../ig/docs/routing/REASONING_REPLAY.md) · 🇮🇹 [it](../../../it/docs/routing/REASONING_REPLAY.md) · 🇯🇵 [ja](../../../ja/docs/routing/REASONING_REPLAY.md) · 🇰🇭 [km](../../../km/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [kn](../../../kn/docs/routing/REASONING_REPLAY.md) · 🇰🇷 [ko](../../../ko/docs/routing/REASONING_REPLAY.md) · 🇱🇹 [lt](../../../lt/docs/routing/REASONING_REPLAY.md) · 🇱🇻 [lv](../../../lv/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ml](../../../ml/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [mr](../../../mr/docs/routing/REASONING_REPLAY.md) · 🇲🇾 [ms](../../../ms/docs/routing/REASONING_REPLAY.md) · 🇲🇹 [mt](../../../mt/docs/routing/REASONING_REPLAY.md) · 🇲🇲 [my](../../../my/docs/routing/REASONING_REPLAY.md) · 🇳🇵 [ne](../../../ne/docs/routing/REASONING_REPLAY.md) · 🇳🇱 [nl](../../../nl/docs/routing/REASONING_REPLAY.md) · 🇳🇴 [no](../../../no/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [or](../../../or/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [pa](../../../pa/docs/routing/REASONING_REPLAY.md) · 🇵🇭 [phi](../../../phi/docs/routing/REASONING_REPLAY.md) · 🇵🇱 [pl](../../../pl/docs/routing/REASONING_REPLAY.md) · 🇵🇹 [pt](../../../pt/docs/routing/REASONING_REPLAY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/REASONING_REPLAY.md) · 🇷🇴 [ro](../../../ro/docs/routing/REASONING_REPLAY.md) · 🇷🇺 [ru](../../../ru/docs/routing/REASONING_REPLAY.md) · 🇱🇰 [si](../../../si/docs/routing/REASONING_REPLAY.md) · 🇸🇰 [sk](../../../sk/docs/routing/REASONING_REPLAY.md) · 🇸🇮 [sl](../../../sl/docs/routing/REASONING_REPLAY.md) · 🇷🇸 [sr](../../../sr/docs/routing/REASONING_REPLAY.md) · 🇸🇪 [sv](../../../sv/docs/routing/REASONING_REPLAY.md) · 🇰🇪 [sw](../../../sw/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ta](../../../ta/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [te](../../../te/docs/routing/REASONING_REPLAY.md) · 🇹🇭 [th](../../../th/docs/routing/REASONING_REPLAY.md) · 🇹🇷 [tr](../../../tr/docs/routing/REASONING_REPLAY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/REASONING_REPLAY.md) · 🇵🇰 [ur](../../../ur/docs/routing/REASONING_REPLAY.md) · 🇺🇿 [uz](../../../uz/docs/routing/REASONING_REPLAY.md) · 🇻🇳 [vi](../../../vi/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [yo](../../../yo/docs/routing/REASONING_REPLAY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/REASONING_REPLAY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/REASONING_REPLAY.md)
 
 ---
 
-> **სიმართლის წყარო:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** ბოლო განახლება:** 2026-06-28 — v3.8.40
+> **ჭეშმარიტების წყარო:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
+> **ბოლოს განახლდა:** 2026-06-28 — v3.8.40
 
-OmniRoute იჭერს ასისტენტი `reasoning_content` რომელიც წარმოებულია აზროვნების რეჟიმის მოდელებით და გამჭვირვალედ იმეორებს მას მრავალ შემობრუნების მოთხოვნაზე, როდესაც ამას მოითხოვს ზედა დინებაში პროვაიდერი. ეს აღმოფხვრის HTTP 400 შეცდომებს, რომლებსაც მკაცრი პროვაიდერები უშვებენ, როდესაც კლიენტის საუბრის ისტორიას აკლია წინა რიგის მსჯელობა.
+OmniRoute იღებს აზროვნების რეჟიმის მოდელების მიერ გენერირებულ ასისტენტის `reasoning_content`-ს და გამჭვირვალედ ხელახლა გადასცემს მას მრავალსვლიან მოთხოვნებში, როდესაც ამას ზედა დონის პროვაიდერი მოითხოვს. ეს გამორიცხავს HTTP 400 შეცდომებს, რომლებსაც მკაცრი პროვაიდერები აბრუნებენ, როდესაც კლიენტის საუბრის ისტორიაში წინა სვლის მსჯელობა არ არის.
 
 ## რატომ არსებობს ეს
 
-აზროვნების რეჟიმის რამდენიმე პროვაიდერი უარყოფს შემდგომ რიგს, გარდა იმ შემთხვევისა** წინა ასისტენტის შეტყობინება შეიცავს ორიგინალ `reasoning_content`** . ზემოთ ნაკადი აბრუნებს 400 შეტყობინებებით, როგორიცაა:
+აზროვნების რეჟიმის რამდენიმე პროვაიდერი უარყოფს მომდევნო სვლას, თუ **ასისტენტის წინა შეტყობინება თავდაპირველ `reasoning_content`-ს არ შეიცავს**. ზედა დონის სერვისი აბრუნებს 400 შეცდომას მსგავსი შეტყობინებებით:
 
 ```
-Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
+არასწორი პარამეტრი: აზროვნების რეჟიმში reasoning_content ხელახლა უნდა გადაეცეს API-ს.
 ```
 
-მაგრამ ტიპიური კლიენტები (Cursor, Cline, Roo Code, OpenAI SDK) აშორებენ `reasoning_content` იმ ისტორიიდან, რომელსაც ისინი იმეორებენ. OmniRoute აღადგენს მას სერვერის ქეშიდან, ასე რომ მოთხოვნა, რომელსაც ხედავს ზემოთ, თანმიმდევრულია. გამოცემა #1628-მა შემოიტანა ჰიბრიდული memory/SQLite მდგრადობა, რათა ქეში გადარჩეს პროცესის გადატვირთვას.
+თუმცა ტიპური კლიენტები (Cursor, Cline, Roo Code, OpenAI SDK) ხელახლა გადაცემული ისტორიიდან `reasoning_content`-ს შლიან. OmniRoute აღადგენს მას სერვერის მხარეს არსებული კეშიდან, რათა ზედა დონის სერვისის მიერ მიღებული მოთხოვნა თანმიმდევრული იყოს. საკითხმა #1628 დანერგა მეხსიერებისა და SQLite-ის ჰიბრიდული პერმანენტული შენახვა, რათა კეში პროცესის ხელახლა გაშვების შემდეგაც შენარჩუნდეს.
 
 ## არქიტექტურა
 
 ```
-Turn N (assistant generates):
-  → response contains reasoning_content + tool_calls
-  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
-  → forward response to client (which may or may not retain reasoning)
+რაუნდი N (ასისტენტი აგენერირებს):
+  → პასუხი შეიცავს reasoning_content-ს + tool_calls-ს
+  → თუ requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
+      ინახავს (მეხსიერებაში + DB-ში), გასაღებად ყოველი tool_call.id-ის გამოყენებით
+  → პასუხს გადასცემს კლიენტს (რომელმაც reasoning შეიძლება შეინარჩუნოს ან არ შეინარჩუნოს)
 
-Turn N+1 (client sends follow-up):
-  → translator detects: requiresReasoningReplay(provider, model) === true
-  → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
-      hit  → msg.reasoning_content = cached; recordReplay()
-      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
-  → upstream sees consistent history → no 400
+რაუნდი N+1 (კლიენტი აგზავნის შემდგომ მოთხოვნას):
+  → მთარგმნელი ამოიცნობს: requiresReasoningReplay(provider, model) === true
+  → თითოეული ასისტენტის შეტყობინებისთვის, რომელსაც აქვს tool_calls და არ აქვს reasoning_content:
+      lookupReasoning(toolCalls[0].id) → მეხსიერება → DB
+      დამთხვევა  → msg.reasoning_content = cached; recordReplay()
+      აცდენა → msg.reasoning_content = "" (ძველი DeepSeek-ისთვის მემკვიდრეობითი სათადარიგო ვარიანტი)
+  → ზედა დონის სერვერი ხედავს თანმიმდევრულ ისტორიას → 400 არ წარმოიქმნება
 ```
 
-გადაღება ხდება `open-sse/handlers/chatCore.ts` ში (ორი საიტი, `cacheReasoningFromAssistantMessage` ზარის ორ საიტზე). გამეორება ხდება `open-sse/translator/index.ts` ში სქემის იძულების შემდეგ, მაგრამ გაგზავნამდე.
+ჩაწერა ხდება `open-sse/handlers/chatCore.ts`-ში (ორ ადგილას, `cacheReasoningFromAssistantMessage`-ის გამოძახების ორ წერტილში). ხელახალი ჩასმა ხდება `open-sse/translator/index.ts`-ში, სქემის იძულებითი გარდაქმნის შემდეგ, მაგრამ გადაგზავნამდე.
 
-ასისტენტის უბრალო (არაინსტრუმენტული გამოძახების) მონაცვლეობები განსხვავებულად იწერება: `buildAssistantMessageCacheKey()` ანაწილებს სესიის ფარგლებს, პლუს ნორმალიზებული OpenAI ფორმატის ტრანსკრიპტს ამ მომენტამდე, რადგან DeepSeek მოითხოვს _ყოველი_ წინა შემობრუნების მსჯელობას, როდესაც `tools` იქნება. Responses-API სამიზნეებისთვის (მაგალითად, `opencode-go/deepseek-v4-flash`, გადაყვანილია `/responses` მდე) ზედა ნაკადის სხეული ატარებს `input` და არა `messages`, ამიტომ `translateRequest()` (`open-sse/translator/index.ts`) აცნობებს კრებსით ტრანსკრიპტს, რომელიც დაიჯესტია გამოძახების ვარიანტის მეშვეობით და დაჭერის საიტები იჭრება იმავე ტრანსკრიპტს. Responses replay pass გადის OpenAI pivot-ზე ყველა წყაროს ფორმატისთვის, ამიტომ Anthropic Messages კლიენტებიც (Claude → OpenAI → Responses) ხელახლა ითამაშებენ.
+ასისტენტის ჩვეულებრივი (tool-call-ის არმქონე) რაუნდებისთვის გასაღები სხვაგვარად იქმნება: `buildAssistantMessageCacheKey()` ქმნის სესიის ფარგლებისა და ამ რაუნდამდე ნორმალიზებული OpenAI-ფორმატის ტრანსკრიპტის დაიჯესტს, რადგან `tools`-ის არსებობისას DeepSeek-ს _ყოველი_ წინა რაუნდის reasoning სჭირდება. Responses-API-ის სამიზნეებისთვის (მაგალითად, `opencode-go/deepseek-v4-flash`, რომელიც მარშრუტიზდება `/responses`-ზე) ზედა დონის მოთხოვნის სხეული შეიცავს `input`-ს და არა `messages`-ს, ამიტომ `translateRequest()` (`open-sse/translator/index.ts`) callback-პარამეტრის მეშვეობით ატყობინებს მის მიერ დამუშავებულ შუალედურ ტრანსკრიპტს, ხოლო ჩაწერის წერტილები იმავე ტრანსკრიპტის დაიჯესტს ქმნიან. Responses-ის ხელახალი ჩასმის ეტაპი ყველა საწყისი ფორმატისთვის OpenAI-ის შუალედურ წარმოდგენაზე სრულდება, ამიტომ Anthropic Messages-ის კლიენტებისთვისაც (Claude → OpenAI → Responses) ხდება ხელახალი ჩასმა.
 
-## შენახვა — ჰიბრიდული მეხსიერება + SQLite
+## საცავი — მეხსიერებისა და SQLite-ის ჰიბრიდი
 
-ცხელი ბილიკი იყენებს მეხსიერებაში `Map` (LRU-შექმნით), რომელსაც მხარს უჭერს SQLite ცხრილი ავარიის აღდგენისა და დაფის ხილვადობისთვის.
+სწრაფი გზა იყენებს მეხსიერებაში არსებულ `Map`-ს (LRU შექმნის დროის მიხედვით), რომელსაც ავარიული აღდგენისა და მართვის პანელში ხილვადობისთვის SQLite-ის ცხრილი უდევს საფუძვლად.
 
-| ფენა       | განხორციელება                                  | მიზანი                                             |
-| ---------- | ---------------------------------------------- | -------------------------------------------------- |
-| მეხსიერება | `Map` in `open-sse/services/reasoningCache.ts` | სწრაფად ეძებს, ასახლებს უხუცესს 200 წლის ასაკში    |
-| DB         | `reasoning_cache` მაგიდა (`src/lib/db/`)       | გრძელდება გადატვირთვის დროს, აწარმოებს სტატისტიკას |
+| ფენა       | იმპლემენტაცია                                      | დანიშნულება                                               |
+| ---------- | -------------------------------------------------- | --------------------------------------------------------- |
+| მეხსიერება | `Map` ფაილში `open-sse/services/reasoningCache.ts` | სწრაფი ძიება, 200 ჩანაწერისას შლის ყველაზე ძველს          |
+| DB         | `reasoning_cache` ცხრილი (`src/lib/db/`)           | ინახება ხელახლა გაშვებებს შორის, უზრუნველყოფს სტატისტიკას |
 
-წერები მიდის ორივეზე. ჯერ კითხულობს მეხსიერების კონსულტაციას, შემდეგ ისევ DB ზე (DB ჰიტები დაბრუნდება მეხსიერებაში). DB წარუმატებლობა არ არის ფატალური — მეხსიერების ქეში აგრძელებს ცხელ გზას.
+ჩაწერა ორივეგან ხდება. წაკითხვა ჯერ მეხსიერებას ამოწმებს, შემდეგ კი DB-ს მიმართავს (DB-ში ნაპოვნი ჩანაწერები კვლავ მეხსიერებაში გადადის). DB-ის შეცდომები ფატალური არ არის — მეხსიერებაში არსებული კეში სწრაფი გზის მომსახურებას განაგრძობს.
 
-**ნაგულისხმევი:**
+**ნაგულისხმევი მნიშვნელობები:**
 
 - TTL: `2h` (`TTL_MS = 2 * 60 * 60 * 1000`)
-- მეხსიერების მაქსიმალური ჩანაწერები: `200` (`MAX_MEMORY_ENTRIES`)
-- გამოსახლება: ჯერ უძველესი `createdAt`
+- მეხსიერების ჩანაწერების მაქსიმალური რაოდენობა: `200` (`MAX_MEMORY_ENTRIES`)
+- ჩანაწერების წაშლა: ჯერ ყველაზე ძველი `createdAt`
 
 ## მონაცემთა ბაზის სქემა
 
@@ -73,13 +74,13 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-ინდექსები: `expires_at`, `provider`, `model`, `created_at`. `expires_at` ინახება როგორც Unix ეპოქის წამი; SELECT ფენა ახდენს ძველი ტექსტის მნიშვნელობების ნორმალიზებას `EXPIRES_AT_EPOCH_SQL` საშუალებით.
+ინდექსები: `expires_at`, `provider`, `model`, `created_at`. `expires_at` ინახება Unix ეპოქის წამების სახით; SELECT ფენა მემკვიდრეობით ტექსტურ მნიშვნელობებს `EXPIRES_AT_EPOCH_SQL`-ის მეშვეობით ახდენს ნორმალიზებას.
 
-## პროვაიდერი / მოდელის გამოვლენა
+## პროვაიდერის / მოდელის გამოვლენა
 
-გამეორება ჩართულია, როდესაც `requiresReasoningReplay(provider, model)` დააბრუნებს `true`. ფუნქცია ამოწმებს ორ სიას `open-sse/services/reasoningCache.ts` ში.
+ხელახალი დაკვრა ჩართულია, როდესაც `requiresReasoningReplay(provider, model)` აბრუნებს `true`-ს. ფუნქცია ამოწმებს ორ სიას ფაილში `open-sse/services/reasoningCache.ts`.
 
-**პროვაიდერი IDs (ზუსტი შესატყვისი, ქეისისადმი მგრძნობიარე):**
+**პროვაიდერის ID-ები (ზუსტი დამთხვევა, რეგისტრის გაუთვალისწინებლად):**
 
 - `deepseek`
 - `opencode-go`
@@ -93,12 +94,12 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - `kimi-coding-apikey`
 - `xiaomi-mimo`
 
-**რეგექსის შაბლონების მოდელი (საქმისადმი მგრძნობიარე):**
+**მოდელის რეგულარული გამოსახულების შაბლონები (რეგისტრის გაუთვალისწინებლად):**
 
 - `/deepseek-r1/i`
 - `/deepseek-reasoner/i`
 - `/deepseek-chat/i`
-- `/deepseek[-/]?v4[-.]flash/i` და `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, სურვილისამებრ `-free` სუფიქსი)
+- `/deepseek[-/]?v4[-.]flash/i` და `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, არასავალდებულო `-free` სუფიქსით)
 - `/(deepseek|zen\/deepseek)-v4/i`
 - `/kimi[-/]k\d/i`
 - `/qwq/i`
@@ -106,21 +107,21 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - `/glm.*think/i`
 - `/^mimo[-.]?v\d/i`
 
-ახალი მკაცრი provider/model დამატება ნიშნავს ერთ-ერთ ჩამონათვალში დამატებას და ერთეულის ტესტის დაწერას განმეორებითი ინექციის მტკიცებით. PR აღწერილობაში მოყვანილი უნდა იყოს ზუსტი ზემოთ 400 სტრიქონი, რამაც გამოიწვია ცვლილება.
+ახალი მკაცრი პროვაიდერის/მოდელის დასამატებლად საჭიროა მისი ერთ-ერთ ამ სიაში ჩამატება და ერთეულოვანი ტესტის დაწერა, რომელიც ხელახალი დაკვრის ჩასმას ადასტურებს. PR-ის აღწერაში მითითებული უნდა იყოს ზუსტი ზედა დონის 400 შეცდომის ტექსტი, რომელმაც ცვლილება განაპირობა.
 
 ## REST API
 
-ქეში ასახავს ორ ბოლო წერტილს `src/app/api/cache/reasoning/route.ts` ქვეშ. ორივე მოითხოვს მენეჯმენტის ავთენტიფიკაციას (`isAuthenticated` `@/shared/utils/apiAuth` დან).
+ქეში ხელმისაწვდომს ხდის ორ საბოლოო წერტილს `src/app/api/cache/reasoning/route.ts`-ის ქვეშ. ორივე მოითხოვს მართვის ავტორიზაციას (`isAuthenticated` მოდულიდან `@/shared/utils/apiAuth`).
 
-| მეთოდი | ბოლო წერტილი                                              | აღწერა                                                              |
-| ------ | --------------------------------------------------------- | ------------------------------------------------------------------- |
-| GET    | `/api/cache/reasoning`                                    | სტატისტიკა + ფაგირირებული ჩანაწერები                                |
-| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | გაფილტრული ჩამონათვალი (`limit` დამაგრებულია `[1, 200]` ზე)         |
-| DELETE | `/api/cache/reasoning`                                    | გაასუფთავე ყველაფერი (მეხსიერება + DB) და გადააყენე hit/miss თვლები |
-| DELETE | `/api/cache/reasoning?provider=deepseek`                  | წაშალეთ მხოლოდ ერთი პროვაიდერის ჩანაწერები                          |
-| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | წაშალეთ ერთი ჩანაწერი                                               |
+| მეთოდი | საბოლოო წერტილი                                           | აღწერა                                                                    |
+| ------ | --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| GET    | `/api/cache/reasoning`                                    | სტატისტიკა + გვერდებად დაყოფილი ჩანაწერები                                |
+| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | გაფილტრული სია (`limit` შეზღუდულია `[1, 200]` დიაპაზონით)                 |
+| DELETE | `/api/cache/reasoning`                                    | ყველაფრის გასუფთავება (მეხსიერება + DB) და hit/miss მრიცხველების განულება |
+| DELETE | `/api/cache/reasoning?provider=deepseek`                  | მხოლოდ ერთი პროვაიდერის ჩანაწერების გასუფთავება                           |
+| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | ერთი ჩანაწერის წაშლა                                                      |
 
-**GET პასუხის ფორმა:**
+**GET პასუხის სტრუქტურა:**
 
 ```json
 {
@@ -152,35 +153,35 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 }
 ```
 
-## ოპერატიული შენიშვნები
+## საოპერაციო შენიშვნები
 
-- **გასუფთავება:** `cleanupReasoningCache()` ასუფთავებს ვადაგასული მეხსიერების ჩანაწერებს და აწარმოებს `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')`. ამას პერიოდულად ეძახიან ჯანდაცვის მუშაკები.
-- **ავარიის აღდგენა:** გადატვირთვის შემდეგ მეხსიერება ცარიელია, მაგრამ DB მაინც ინახავს ვადაგასული ჩანაწერებს. პირველი ძიება მოცემულ `tool_call_id` სთვის არის DB დარტყმა; შემდგომი ძიება არის მეხსიერების ჰიტები.
-- **მსჯელობის გარეშე, ქეშის გარეშე:** `cacheReasoningFromAssistantMessage` აბრუნებს `0` როდესაც ასისტენტის შეტყობინებას არ აქვს `reasoning_content` / `reasoning` ველი, ასე რომ, დაუფიქრებელი პასუხები არ ღირს.
-- **წერაც დახურულია:** ორივე ზარის საიტი `chatCore.ts` ში (არასტრიმინგზე და სტრიმინგში) იძახებს `cacheReasoningFromAssistantMessage()` მხოლოდ მაშინ, როდესაც `requiresReasoningReplay(provider, model)` არის `true` — იგივე პრედიკატი წაკითხული გვერდითი ამოწმებს. ინსტალაციები, რომლებიც არასოდეს ეხება გამეორების პროვაიდერს, წყვეტს გადახდას ჩაწერისთვის, ინდექსის განახლებისთვის და try/catch ისთვის ყოველი დასაბუთებული პასუხის შემთხვევაში.
-- **არა მკაცრი პროვაიდერები:** როდესაც `requiresReasoningReplay` არის `false` და სამიზნე ფორმატი არის OpenAI, მთარგმნელი** ზოლები** ნებისმიერი `reasoning_content` ველი გამავალი შეტყობინებებიდან — OpenAI ჩატის დასრულებები არ იღებს მას.
+- **გასუფთავება:** `cleanupReasoningCache()` შლის მეხსიერებიდან ვადაგასულ ჩანაწერებს და ასრულებს `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')` მოთხოვნას. მდგომარეობის შემოწმების მუშაკები ამას პერიოდულად იძახებენ.
+- **ავარიული შეწყვეტის შემდეგ აღდგენა:** ხელახლა გაშვების შემდეგ მეხსიერება ცარიელია, მაგრამ DB-ში ვადაგაუსვლელი ჩანაწერები კვლავ რჩება. მოცემული `tool_call_id`-ისთვის პირველი მოძიება DB-ში მოხვედრაა; მომდევნო მოძიებები კი მეხსიერებაში მოხვედრებია.
+- **მსჯელობის გარეშე ქეშიც არ არის:** `cacheReasoningFromAssistantMessage` აბრუნებს `0`-ს, როდესაც ასისტენტის შეტყობინებას არ აქვს `reasoning_content` / `reasoning` ველი, ამიტომ მსჯელობის არმქონე პასუხები არაფერს ხარჯავს.
+- **ჩაწერაც პირობითია:** `chatCore.ts`-ში ორივე გამოძახების ადგილი (ნაკადური და არანაკადური) `cacheReasoningFromAssistantMessage()`-ს მხოლოდ მაშინ იძახებს, როდესაც `requiresReasoningReplay(provider, model)` არის `true` — ეს იგივე პრედიკატია, რომელსაც წაკითხვის მხარე ამოწმებს. ინსტალაციები, რომლებიც ხელახალი დაკვრის პროვაიდერს არასდროს იყენებენ, აღარ იხდიან ჩაწერის, ინდექსის განახლებისა და ყველა მსჯელობის შემცველ პასუხზე try/catch-ის შესრულების საფასურს.
+- **არამკაცრი პროვაიდერები:** როდესაც `requiresReasoningReplay` არის `false` და სამიზნე ფორმატია OpenAI, მთარგმნელი გამავალ შეტყობინებებს `reasoning_content` ველს **აცილებს** — OpenAI Chat Completions მას არ იღებს.
 
-## მუზა გაუმჭვირვალე-მსჯელობის საკუთრება
+## Muse-ის გაუმჭვირვალე მსჯელობის მფლობელობა
 
-Muse (`muse-code`) აბრუნებს აბონენტთან დაკავშირებულ გაუმჭვირვალე მსჯელობას (`encrypted_content`). მისი ხელახლა დაკვრა სხვა ანგარიშით ან შეხსენებული რწმუნებათა სიგელის ქვეშ ვერ ხერხდება, ამიტომ მშობლიური OAuth მოთხოვნები იყენებს სესიის დონის მფლობელობას თითო მოთხოვნის როტაციის ნაცვლად (`src/sse/services/museSessionOwnership.ts`, იძულებითი `src/sse/handlers/chat.ts` ში). აშკარად შერჩეული API გასაღების კავშირები და მხოლოდ API გასაღების კონფიგურაციები ინარჩუნებენ არსებულ მარშრუტიზაციას ამ მფლობელობის რეჟიმის გარეშე.
+Muse (`muse-code`) აბრუნებს გამომძახებელზე მიბმულ გაუმჭვირვალე მსჯელობას (`encrypted_content`). სხვა ანგარიშით ან ხელახლა გაცემული ავტორიზაციის მონაცემებით მისი გამეორება upstream-ზე მარცხდება, ამიტომ მშობლიური OAuth მოთხოვნები თითო მოთხოვნის როტაციის ნაცვლად სესიის დონის მფლობელობას იყენებს (`src/sse/services/museSessionOwnership.ts`, აღსრულდება `src/sse/handlers/chat.ts`-ში). აშკარად შერჩეული API გასაღების კავშირები და მხოლოდ API გასაღებიანი კონფიგურაციები არსებულ მარშრუტიზაციას ამ მფლობელობის რეჟიმის გარეშე ინარჩუნებს.
 
-- მიაწოდეთ სტაბილური სესიის ID ყოველ ჯერზე: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id`, ან `x-codex-session-id`; ალტერნატიულად გამოიყენეთ `prompt_cache_key`, `session_id`, `conversation_id` ან `metadata.session_id` სხეულში (ამ პრიორიტეტული თანმიმდევრობით). გამოტოვებული ან ცარიელი IDs აბრუნებს 400, როდესაც ორი ან მეტი მშობლიური OAuth ანგარიში აქტიურია; ერთი OAuth ანგარიშით არაფერია დასატრიალებელი, ამიტომ ასეთი მოთხოვნა აგრძელებს ჩამაგრებულ მარშრუტიზაციას. ფარგლები მოიცავს აბონენტის OmniRoute API კლავიშს ID.
-- ახალი დამოუკიდებელი სესიები შემოიფარგლება აქტიურ მშობლიურ OAuth ანგარიშებზე, რომლებიც ნებადართულია API-გასაღების კავშირის პოლიტიკით, შეკვეთილი კავშირის მიხედვით ID. მრგვალი რეჟიმი გამოტოვებს ანგარიშებს კავშირის გაგრილებისას, ტერმინალის სტატუსით (`banned`, `expired`, `credits_exhausted`), ან მოდელით დაბლოკილია მოთხოვნილი მოდელისთვის; Muse-ის ზემო დინებაში ჩავარდნები აღრიცხავს გაგრილებას და ამომრთველს, როგორც სხვა პროვაიდერები. აშკარად იძულებითი კავშირი გვერდს უვლის ახალ სესიას, მაგრამ არ შეუძლია არსებული მფლობელის უგულებელყოფა.
-- სანამ მფლობელი წარმატებულ პასუხს არ მოახდენს, სესია, რომლის მფლობელიც მიუწვდომელი გახდა, ხელახლა განიხილება ჯანსაღ ანგარიშზე. პირველი წარმატებული პასუხის შემდეგ, სესია მიმაგრებული რჩება ამ მფლობელთან, სანამ ის უმოქმედო იქნება 30 დღის განმავლობაში (`MUSE_SESSION_IDLE_TTL_MS`).
-- გაგრძელებისა და ხელსაწყოების შედეგის ყოველი ტრიალი მიმაგრებული რჩება სესიის მფლობელზე: კავშირი, ანგარიშის იდენტიფიკაცია და დასკვნის სერთიფიკატების გენერირება, ხელახლა შემოწმდება ზემოთ მცდელობამდე, მათ შორის სერთიფიკატების ხელახალი განახლების მცდელობები. პასუხები მოუწოდებს IDs/item მითითებებს და ჩატის დასრულებების ხელსაწყო-ზარის IDs უნდა იყოს ჩაწერილი ამ სესიისა და თაობისთვის.
-- SQLite `key_value` ჩანაწერები `muse_session_ownership` სახელთა სივრცეში (`src/lib/db/museSessionOwnership.ts`) რჩება მფლობელობაში და როტაციის კურსორი გადატვირთვისას. თითოეული პრეტენზია და მოწოდებული პასუხი განაახლებს სესიის აქტივობის შტამპს; `MUSE_SESSION_IDLE_TTL_MS` ზე ხანგრძლივად უმოქმედო სესიის ამოჭრა (მფლობელის პინი, სერვისული დროშა და ჩაწერილი opaque/reference ჰეშები), მაქსიმუმ 10 წუთში ერთხელ და შეზღუდულ პარტიებში, ასე რომ, მისი ისტორიის მოგვიანებით გამეორება ვერ დაიხურება, როგორც უცნობი მფლობელი. ჩანაწერები შეიცავს IDs კავშირს და ანგარიშის იდენტიფიკაციის ჰეშებს, რწმუნებათა სიგელებს, გაუმჭვირვალე შინაარსს და გაგრძელების მითითებებს და არა საიდუმლოებებს ან საუბრის ისტორიას. კლიენტებმა უნდა შეინარჩუნონ და გაგზავნონ თავიანთი სრული ისტორია და გაუმჭვირვალე მსჯელობა.
-- უცნობი ან უცხო გაუმჭვირვალე მსჯელობა, დაკარგული მფლობელი, მიუწვდომელი მფლობელის ანგარიში ან თაობის ცვლილება ჩაწერილი ისტორიით ვერ დაიხურება აშკარა 4xx/503 — არასოდეს ჩუმად ჯვარედინი ანგარიშების გაუქმებით და არასოდეს გაუქმებული მსჯელობა.
-- შეხსენებული იგივე ანგარიშის გასაღები მიიღება მხოლოდ მაშინ, როდესაც სესიაზე არ არის ჩაწერილი ხელახლა დაკვრა ისტორია; ჩაწერილი სესიები არ იხურება, სანამ არ დაიწყება ახალი.
-- ცარიელი ზედა დინების პასუხი (`upstream_empty_response` / `empty_response`, აბონენტს არაფერი ეგზავნება) ხელახლა განმეორდება ერთსა და იმავე მფლობელზე მაქსიმუმ ორჯერ, 0,5 წამის შემდეგ, შემდეგ 1,5 წამის შემდეგ (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). თუ ყველა მცდელობა ცარიელია, ორიგინალი 502 ბრუნდება გაგრილების ან ამომრთველის მარკირების გარეშე, ასე რომ, ცალმხრივი პასუხი არასოდეს დაბლოკავს მფლობელს.
-- ყველა `muse-code` მოთხოვნა გვერდის ავლით კითხულობს და წერს სემანტიკური ქეში, სტრიმინგის ჩაწერის ჩათვლით, ასე რომ, ქეშირებული გაუმჭვირვალე გამომავალი ვერ მიიღებს სესიის სხვა მფლობელს.
+- ყოველ turn-ზე მიაწოდეთ სტაბილური სესიის ID: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id` ან `x-codex-session-id`; ალტერნატიულად სხეულში გამოიყენეთ `prompt_cache_key`, `session_id`, `conversation_id` ან `metadata.session_id` (პრიორიტეტის ამ რიგით). გამოტოვებული ან ცარიელი ID-ები აბრუნებს 400-ს, როცა ორი ან მეტი მშობლიური OAuth ანგარიში აქტიურია; ერთი OAuth ანგარიშისას როტაციის სხვა სამიზნე არ არსებობს, ამიტომ ასეთი მოთხოვნა მიუმაგრებელ მარშრუტიზაციას ინარჩუნებს. scope მოიცავს გამომძახებლის OmniRoute API გასაღების ID-ს.
+- ახალი დამოუკიდებელი სესიები round-robin-ით ნაწილდება აქტიურ მშობლიურ OAuth ანგარიშებზე, რომლებსაც API გასაღების კავშირის პოლიტიკა უშვებს, კავშირის ID-ით დალაგებულად. round-robin გამოტოვებს კავშირის მოცდის პერიოდში მყოფ, ტერმინალურ სტატუსიან (`banned`, `expired`, `credits_exhausted`) ან მოთხოვნილი მოდელისთვის დაბლოკილ ანგარიშებს; Muse-ის upstream ჩავარდნები სხვა პროვაიდერების მსგავსად აღრიცხავს მოცდის პერიოდსა და breaker-ის მდგომარეობას. აშკარად იძულებითი კავშირი ახალი სესიისთვის round-robin-ს გვერდს უვლის, მაგრამ მფლობელს ვეღარ შეცვლის მას შემდეგ, რაც მან წარმატებული პასუხი გასცა.
+- სანამ მფლობელი წარმატებულ პასუხს გასცემს, სესია, რომლის მფლობელი მიუწვდომელი გახდა, გამართულ ანგარიშს ხელახლა მიეკუთვნება. პირველი წარმატებული პასუხის შემდეგ სესია ამ მფლობელზე მიბმული რჩება, სანამ 30 დღე უმოქმედო არ იქნება (`MUSE_SESSION_IDLE_TTL_MS`).
+- ყოველი გაგრძელება და ხელსაწყოს შედეგის turn სესიის მფლობელზე რჩება მიბმული: კავშირი, ანგარიშის იდენტობა და inference-ის ავტორიზაციის მონაცემების თაობა ხელახლა მოწმდება upstream მცდელობებამდე, მათ შორის ავტორიზაციის განახლების შემდეგ გამეორებამდე. Responses-ის call ID-ები/item მითითებები და Chat Completions-ის tool-call ID-ები ამ სესიისა და თაობისთვის უკვე აღრიცხული უნდა იყოს.
+- SQLite-ის `key_value` ჩანაწერები `muse_session_ownership` სახელთა სივრცეში (`src/lib/db/museSessionOwnership.ts`) მფლობელობასა და როტაციის კურსორს გადატვირთვებს შორის ინარჩუნებს. ყოველი claim და გაცემული პასუხი აახლებს სესიის აქტივობის ნიშნულს; სესია, რომელიც `MUSE_SESSION_IDLE_TTL_MS`-ზე მეტხანს უმოქმედოა, იწმინდება (მფლობელის მიმაგრება, პასუხის გაცემის flag და აღრიცხული გაუმჭვირვალე შიგთავსის/მითითებების ჰეშები), არა უმეტეს ერთხელ ყოველ 10 წუთში და შეზღუდულ პაკეტებად, ამიტომ მისი ისტორიის მოგვიანებით გამეორება უცნობი მფლობელის გამო უსაფრთხოების მიზნით იბლოკება. ჩანაწერები შეიცავს კავშირის ID-ებსა და ანგარიშის იდენტობის, ავტორიზაციის მონაცემების, გაუმჭვირვალე შიგთავსისა და გაგრძელების მითითებების ჰეშებს და არა საიდუმლოებებს ან საუბრის ისტორიას. კლიენტებმა სრული ისტორია და გაუმჭვირვალე მსჯელობა უნდა შეინახოს და გამოაგზავნოს.
+- უცნობი ან უცხო გაუმჭვირვალე მსჯელობა, დაკარგული მფლობელი, მფლობელის მიუწვდომელი ანგარიში ან თაობის ცვლილება აღრიცხული ისტორიის არსებობისას იწვევს უსაფრთხოების მიზნით ბლოკირებას აშკარა 4xx/503-ით; არასოდეს ხდება ჩუმი გადართვა სხვა ანგარიშზე ან მსჯელობის გადაგდება.
+- იმავე ანგარიშისთვის ხელახლა გაცემული გასაღები მიიღება მხოლოდ მაშინ, როცა სესიას გასამეორებელი ისტორია არ აღურიცხავს; ისტორიის მქონე სესიები უსაფრთხოების მიზნით ბლოკირებული რჩება ახლიდან დაწყებამდე.
+- upstream-ის ცარიელი პასუხი (`upstream_empty_response` / `empty_response`, გამომძახებელს არაფერი მიუღია) იმავე მფლობელზე მაქსიმუმ ორჯერ მეორდება, ჯერ 0.5 s-ის, შემდეგ 1.5 s-ის შემდეგ (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). თუ ყველა მცდელობა ცარიელია, ბრუნდება საწყისი 502 მოცდის პერიოდის ან breaker-ის მონიშვნის გარეშე, ამიტომ არასტაბილური პასუხი მფლობელს არასოდეს ბლოკავს.
+- ყველა `muse-code` მოთხოვნა გვერდს უვლის სემანტიკური ქეშის წაკითხვებსა და ჩაწერებს, მათ შორის სტრიმულ ჩაწერებს, რათა ქეშირებულმა გაუმჭვირვალე შედეგმა სხვა სესიის მფლობელი ვერ მიიღოს.
 
-რეგრესიის მცველები: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts` და `tests/unit/chatcore-semantic-cache.test.ts`.
+რეგრესიის დამცავი შემოწმებები: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts` და `tests/unit/chatcore-semantic-cache.test.ts`.
 
-## აგრეთვე
+## აგრეთვე იხილეთ
 
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ამომრთველები, გაგრილება, მოდელის ჩაკეტვა
-- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — დიაგნოსტიკა 400-იანების ზემოთ
-- წყარო: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ამომრთველები, შეყოვნების პერიოდები, მოდელის ბლოკირებები
+- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — ზემდგომი სერვისიდან მიღებული 400 შეცდომების დიაგნოსტიკა
+- საწყისი კოდი: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - მიგრაცია: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 - API მარშრუტი: `src/app/api/cache/reasoning/route.ts`
-- ორიგინალური ნომერი: #1628
+- თავდაპირველი საკითხი: #1628

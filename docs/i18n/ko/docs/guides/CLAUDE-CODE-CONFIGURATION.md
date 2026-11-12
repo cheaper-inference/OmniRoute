@@ -24,27 +24,74 @@ omniroute launch --profile glm52  # OmniRoute를 통해 glm/glm-5.2를 사용하
 
 ---
 
-## Claude Code가 게이트웨이에 연결하는 방법
+## Claude Code가 게이트웨이에 연결되는 방식
 
-Claude 코드는**Anthropic 메시지 API** 환경 변수가 있는 사용자 정의 엔드포인트를 가리킵니다( `--base-url` 플래그가 없음).
+Claude Code는 **Anthropic Messages API**를 사용하며 환경 변수를 통해 사용자 지정 엔드포인트를 가리킵니다(`--base-url` 플래그는 지원하지 않음).
 
-| 변하기 쉬운                                  | 목적                                                                                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | 게이트웨이 루트 URL (Claude 코드에 `/v1/messages` 추가).** `/v1` 접미사가 없습니다.**  |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — 로 전송됨 OmniRoute 액세스 토큰/ API 키를 사용하세요.      |
-| `ANTHROPIC_API_KEY`                          | 대안: `x-api-key` 로 전송됩니다. 둘 다 설정되면 `ANTHROPIC_AUTH_TOKEN` 승리합니다.     |
-| `ANTHROPIC_MODEL`                            | 특정 모델 강제 적용( `/model` 선택기 기본값 재정의)                                    |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → 기본 `/model` 선택기는 `/v1/models` 의 `claude*`/`anthropic*` 모델을 나열합니다. |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 응답당 출력 토큰 제한(예: `65536`)                                                     |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 자동 압축을 위한 토큰 임계값                                                           |
+| 변수                                         | 용도                                                                                          |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | 게이트웨이 루트 URL(Claude Code가 `/v1/messages`를 추가). **`/v1` 접미사를 포함하지 마세요.** |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …`로 전송 — OmniRoute 액세스 토큰/API 키를 사용                        |
+| `ANTHROPIC_API_KEY`                          | 대안: `x-api-key`로 전송. 둘 다 설정된 경우 `ANTHROPIC_AUTH_TOKEN`이 우선                     |
+| `ANTHROPIC_MODEL`                            | 특정 모델 강제 지정(`/model` 선택기의 기본값 재정의)                                          |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → 기본 `/model` 선택기에 `/v1/models`의 `claude*`/`anthropic*` 모델 표시                  |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 응답당 출력 토큰 수 제한(예: `65536`)                                                         |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 자동 압축을 위한 토큰 임계값                                                                  |
 
-> 환경 변수를 읽습니다.** 시작 시 한 번** — Claude 코드를 변경한 후 다시 시작합니다.
+> 환경 변수는 **시작 시 한 번만** 읽힙니다. 변경한 후 Claude Code를 다시 시작하세요.
 
-고정 문자열 대신 회전하는 자격 증명의 경우 `~/.claude/settings.json` 의 `apiKeyHelper` 현재 자격 증명을 stdout에 인쇄하는 명령으로 설정합니다. Claude 코드는 기본적으로 5분 동안 출력을 캐시하고(`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` 이를 재정의함) 값을 `Authorization: Bearer` 및 `x-api-key` 모두로 보냅니다. 스크립트는 자격 증명을 인쇄해야 하며 — 와 함께 배너를 인쇄하면 v2.1.227 + 의 도우미가 실패합니다.
+고정 문자열 대신 주기적으로 교체되는 자격 증명을 사용하려면 `~/.claude/settings.json`의 `apiKeyHelper`를 현재 자격 증명을 stdout으로 출력하는 명령으로 설정하세요. Claude Code는 기본적으로 출력을 오 분 동안 캐시하고(`CLAUDE_CODE_API_KEY_HELPER_TTL_MS`로 변경 가능), 값을 `Authorization: Bearer`와 `x-api-key` 양쪽에 보냅니다. 스크립트는 자격 증명만 출력해야 합니다. 배너를 함께 출력하면 v2.1.227+에서 도우미가 실패합니다.
 
-이것이 Entra ID SSO 작동하는 방식입니다. `scripts/cli/omniroute-sso.mjs token` API 키 대신 OmniRoute 확인하는 단기 Entra 액세스 토큰을 인쇄합니다. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) 참조하세요.
+Entra ID SSO는 이 방식으로 작동합니다. `scripts/cli/omniroute-sso.mjs token`이 수명이 짧은 Entra 액세스 토큰을 출력하면 OmniRoute가 API 키 대신 이 토큰을 검증합니다. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)를 참고하세요.
 
-`omniroute launch` 이 모든 것을 설정합니다. 활성 컨텍스트에서 기본 URL + 토큰을 확인하고(따라서 `omniroute connect <vps>` 다음 `omniroute launch` 작동함) 서버 상태를 확인하고 `claude` 실행합니다.
+`omniroute launch`는 이러한 변수를 모두 자동으로 설정합니다. 활성 컨텍스트에서 기본 URL과 토큰을 확인하므로 `omniroute connect <vps>` 후 `omniroute launch`를 실행하면 바로 작동하며, 서버 상태를 확인한 다음 `claude`를 실행합니다.
+
+---
+
+## 사용 기여: 세션 및 프로젝트
+
+OmniRoute 각 API 키의 요청을 다음과 같이 그룹화합니다.**에이전트 세션** 그리고 기록하는 것은 **프로젝트** 각 세션에서 작업했기 때문에(`agent_sessions` 테이블) 팀 구성원별, 프로젝트별, 세션별로 사용량과 비용을 보고할 수 있습니다.
+
+클라이언트 설정 없이 녹음되는 내용:
+
+| 필드     | 원천                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 세션     | `x-claude-code-session-id` 헤더( `metadata.user_id.session_id` 와 동일한 값), 세션당 안정적                                                      |
+| 프로젝트 | `Primary working directory:` 라인 Claude 코드는 환경 메시지를 보냅니다. `.claude/worktrees/` 아래의 작업 트리 폴더는 저장소 이름으로 확인됩니다. |
+| 나뭇가지 | git status Claude 코드의 `Current branch:` 첫 번째 메시지와 함께 보냅니다.                                                                       |
+| 고객     | `user-agent` (`claude-cli/<version>`)                                                                                                            |
+
+Codex (`<environment_context><cwd>`) 및 OpenCode (`x-opencode-session`)는 동일한 방식으로 인식됩니다. 다음이 포함된 키 **로그 없음** 활성화하면 세션 ID와 헤더 제공 프로젝트 필드만 유지됩니다. 프롬프트(경로, 분기)에서 읽은 내용은 저장되지 않습니다.
+
+### 프로젝트 이름을 명시적으로 지정(권장)
+
+작업 디렉터리는 컴퓨터마다 다르므로 동일한 저장소가 다른 경로에 표시될 수 있습니다. 대신 명시적으로 프로젝트를 보냅니다. Claude 코드는 모든 모델 요청에 `ANTHROPIC_CUSTOM_HEADERS` 에 나열된 헤더를 추가하고 OmniRoute 그 중 두 개를 읽습니다.
+
+| 헤더                       | 값                                                    |
+| -------------------------- | ----------------------------------------------------- |
+| `x-omniroute-project`      | 프로젝트 이름(예: `omniroute`                         |
+| `x-omniroute-project-repo` | 정규화된 원격(예: `github.com/diegosouzapw/OmniRoute` |
+
+둘 다 귀속을 위해서만 읽혀집니다. 업스트림 공급자에게 전달되지 않습니다.
+
+`ANTHROPIC_CUSTOM_HEADERS` 는 시작 시 한 번 읽히고 설정 파일은 리터럴 값을 저장하므로 Claude 코드가 시작될 때 이를 계산합니다. 이것을 `~/.zshrc` 또는 `~/.bashrc` 에 추가하고 프로젝트 폴더에서 `claude` 계속 시작하십시오.
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` 표현식은 원격 URL 에 포함된 모든 자격 증명을 제거합니다. IDE 확장은 셸 없이 Claude 코드를 실행하므로 해당 세션이 작업 디렉터리로 돌아갑니다.
 
 ---
 

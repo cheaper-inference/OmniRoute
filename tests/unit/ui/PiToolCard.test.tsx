@@ -9,6 +9,7 @@ const translate = (key: string) => key;
 
 vi.mock("next-intl", () => ({ useTranslations: () => translate }));
 vi.mock("next/image", () => ({ default: () => null }));
+vi.mock("@/shared/hooks", () => ({ DEFAULT_DISPLAY_BASE_URL: "http://localhost:20128" }));
 vi.mock("@/app/(dashboard)/dashboard/cli-code/components/CliStatusBadge", () => ({
   default: () => null,
 }));
@@ -158,6 +159,9 @@ describe("PiToolCard", () => {
 
     const endpoint = container.querySelector<HTMLInputElement>("#pi-omniroute-endpoint");
     expect(endpoint?.value).toBe("http://10.0.0.2:20128/v1");
+    expect(endpoint?.className).toContain("ci-input");
+    expect(container.querySelector('svg[data-icon="check_circle"]')).not.toBeNull();
+    expect(container.querySelector('input[aria-label="model"]')).not.toBeNull();
     const modelInput = container.querySelector<HTMLInputElement>('input[type="text"]');
     expect(modelInput?.value).toBe("auto/best-coding");
 

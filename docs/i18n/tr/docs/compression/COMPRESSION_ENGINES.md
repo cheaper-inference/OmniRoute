@@ -251,14 +251,14 @@ Sayfa karmaşıklığına bağlı olarak tarayıcı anlık görüntüsü araç s
 
 ## Sıkıştırma Kombinasyonları
 
-Sıkıştırma kombinasyonları, yönlendirme kombinasyonlarına atanabilen adlandırılmış sıkıştırma profilleridir:
+Sıkıştırma kombinasyonları, yönlendirme kombinasyonlarına atanabilen sıkıştırma profilleri olarak adlandırılır:
 
-- `compression_combos`: modu, işlem hattını, RTK yapılandırmasını, dil yapılandırmasını ve varsayılan işaretini depolar
-- `compression_combo_assignments`: bir sıkıştırma kombinasyonunu bir yönlendirme kombinasyonuyla eşler
-- çalışma zamanı entegrasyonu, genel kombinasyon geçersiz kılmalarından önce atanmış bir sıkıştırma kombinasyonunu çözümler
-- analizler `compression_combo_id` ve `engine` alanlarını içerir
+- `compression_combos`: modu, boru hattını, RTK yapılandırmasını, dil yapılandırmasını ve varsayılan işaretçiyi depolar
+- `compression_combo_assignments`: bir sıkıştırma kombinasyonunu bir yönlendirme kombinasyonuna eşler
+- çalışma zamanı entegrasyonu, genel birleşik geçersiz kılmadan önce atanmış bir sıkıştırma birleşimini çözer
+- analizler `compression_combo_id` ve `engine` içerir
 
-Pano konumu: `Pano -> Bağlam ve Önbellek -> Sıkıştırma Kombinasyonları`.
+Kontrol paneli yüzeyi: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Önkoşullar / operatör kılavuzu (CCR ve oturum tekilleştirme)
 
@@ -347,7 +347,7 @@ Geri alma aracı şu anda `omniroute_ccr_retrieve` olarak adlandırılıyor ( `o
 
 ### Oturum yaşam döngüsü
 
-Yayınlanabilir HTTP oturumları boşta kalır ve sunucu bunları toplar; boşta kalma penceresi `OMNIROUTE_MCP_SESSION_IDLE_MS` tarafından ayarlanır (varsayılan 5 dakika; sabit kodlanmış bir değer değil, isimle başvurulur, bu nedenle bu sayfa değiştiğinde kaymaz). Boşta toplanan bir oturumun belirtisi, `Unknown Mcp-Session-Id` — bir HTTP 404'tür, bunun çaresi oturumu yeniden bağlamak veya yeniden başlatmaktır,** Olumsuz** Bir anahtarı döndürmek, kapsamı değiştirmek veya bir aracı yeniden adlandırmak için.
+Yayınlanabilir HTTP oturumları boşta kalır ve sunucu bunları toplar; boş pencere `OMNIROUTE_MCP_SESSION_IDLE_MS` tarafından yapılandırılır ve `open-sse/mcp-server/httpTransport.ts` `DEFAULT_MCP_SESSION_IDLE_MS` geri döner. Boşta toplanan bir oturumun belirtisi, `Unknown Mcp-Session-Id` — bir HTTP 404'tür, çaresi oturumu yeniden bağlamak veya yeniden başlatmaktır,**Olumsuz** Bir anahtarı döndürmek, kapsamı değiştirmek veya bir aracı yeniden adlandırmak için.
 
 ## API Yüzeyi
 

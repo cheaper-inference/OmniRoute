@@ -152,18 +152,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Ujuzi Uliopo
 
-OmniRoute inafichua ujuzi wa A2A 6 unaotumia waya katika `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kila moduli ya ujuzi inaishi `src/lib/a2a/skills/`.
+OmniRoute inafichua ujuzi 6 A2A unaotumia waya katika `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kila moduli ya ujuzi inaishi katika `src/lib/a2a/skills/`.
 
-| Ujuzi                   | ID                   | Maelezo                                                                                                                                                               | Lebo                      | Mifano                                           |
-| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :----------------------------------------------- |
-| Smart Routing           | `smart-routing`      | Hupitisha onyesho kupitia provider/combo mojawapo kwa kutumia injini ya mchanganyiko ya OmniRoute+ kufunga                                                            | uelekezaji, watoa huduma  | "Elekeza onyesho hili kupitia mtindo bora zaidi" |
-| Usimamizi wa Kiwango    | `quota-management`   | Ripoti hali ya upendeleo kwa kila mtoaji huduma, huwasaidia wapigaji kuamua wakati wa throttle/switch                                                                 | upendeleo, watoa huduma   | "Angalia mgawo wa anthropic"                     |
-| Ugunduzi wa Mtoa Huduma | `provider-discovery` | Inaorodhesha watoa huduma waliosakinishwa wenye uwezo, bendera za daraja la bure, hali ya OAuth                                                                       | watoa huduma, ugunduzi    | "Ni watoa huduma gani wanapatikana?"             |
-| Uchambuzi wa Gharama    | `cost-analysis`      | Makadirio ya gharama ya request/conversation kutokana na katalogi + matumizi ya hivi majuzi                                                                           | gharama, matumizi         | "Kadiria gharama ya mazungumzo haya"             |
-| Ripoti ya Afya          | `health-report`      | Hukusanya kikatiza mzunguko, hali tulivu, hali ya kufunga kwa kila mtoa huduma                                                                                        | afya, uvumilivu           | "Onyesha hali ya afya ya watoa huduma wote"      |
-| Orodha ya Uwezo         | `list-capabilities`  | Hurejesha katalogi kamili ya Ujuzi wa Wakala yenye viingilio 45 (23 API + 21 CLI + 1 usanidi) kama jedwali la alama iliyo na SKILL.md URLs ghafi ya kudunga muktadha. | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote OmniRoute "                |
+| Ujuzi                   | ID                   | Maelezo                                                                                                                                                            | Lebo                      | Mifano                                           |
+| :---------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :----------------------------------------------- |
+| Smart Routing           | `smart-routing`      | Hupitisha haraka kupitia provider/combo mojawapo kwa kutumia injini ya mseto ya OmniRoute ya + kufunga bao                                                         | uelekezaji, watoa huduma  | "Elekeza onyesho hili kupitia mtindo bora zaidi" |
+| Usimamizi wa Kiwango    | `quota-management`   | Ripoti zinasema kiwango cha upendeleo kwa kila mtoaji, huwasaidia wapigaji kuamua lini wafanye throttle/switch                                                     | upendeleo, watoa huduma   | "Angalia mgawo wa anthropic"                     |
+| Ugunduzi wa Mtoa Huduma | `provider-discovery` | Inaorodhesha watoa huduma waliosakinishwa wenye uwezo, bendera za daraja la bure, hali ya OAuth                                                                    | watoa huduma, ugunduzi    | "Ni watoa huduma gani wanapatikana?"             |
+| Uchambuzi wa Gharama    | `cost-analysis`      | Makadirio ya gharama ya request/conversation kutokana na orodha ya matumizi ya hivi majuzi +                                                                       | gharama, matumizi         | "Kadiria gharama ya mazungumzo haya"             |
+| Ripoti ya Afya          | `health-report`      | Hukusanya kikatiza mzunguko, hali tulivu, hali ya kufunga kwa kila mtoa huduma                                                                                     | afya, uvumilivu           | "Onyesha hali ya afya ya watoa huduma wote"      |
+| Orodha ya Uwezo         | `list-capabilities`  | Hurejesha katalogi kamili ya Ujuzi wa Wakala yenye ingizo 45 (23 API + 21 CLI + 1 usanidi) kama jedwali la alama iliyo na SKILL.md URLs ghafi ya kudunga muktadha. | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote OmniRoute "                |
 
-> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 381; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
+> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 388; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
 
 ### `list-capabilities` Maelezo ya Ujuzi
 

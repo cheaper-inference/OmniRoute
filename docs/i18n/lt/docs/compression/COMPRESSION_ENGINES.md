@@ -388,7 +388,7 @@ Naudokite `mode:"lines"` su `start`/`end`, jei norite nueiti ilgą puslapių blo
 
 ### Sesijos gyvavimo ciklas
 
-Streamable-HTTP sesijos neveikia ir serveris jas naudoja; tuščiosios eigos langas nustatytas `OMNIROUTE_MCP_SESSION_IDLE_MS` (numatytasis 5 minutės; nurodomas pavadinimu, o ne užkoduota reikšmė, todėl šis puslapis nejuda, kai jis keičiasi). Nenaudojamo seanso požymis yra HTTP 404 su `Unknown Mcp-Session-Id` — Ištaisyti galima iš naujo prisijungti arba paleisti seansą iš naujo,** ne** norėdami pasukti raktą, pakeisti taikymo sritį arba pervardyti įrankį.
+Streamable-HTTP sesijos neveikia ir serveris jas naudoja; tuščiosios eigos langą sukonfigūruoja `OMNIROUTE_MCP_SESSION_IDLE_MS`, kuris grįžta į `DEFAULT_MCP_SESSION_IDLE_MS` `open-sse/mcp-server/httpTransport.ts`. Nenaudojamo seanso simptomas yra HTTP 404 su `Unknown Mcp-Session-Id` — Ištaisyti galima iš naujo prisijungti arba paleisti seansą iš naujo,**ne** norėdami pasukti raktą, pakeisti taikymo sritį arba pervardyti įrankį.
 
 ## API sąsaja
 

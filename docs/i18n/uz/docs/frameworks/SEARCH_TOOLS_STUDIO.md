@@ -53,7 +53,7 @@ Mavjud `SearchForm` + `ResultsPanel` + `RerankPanel` komponentlarini tabga aylan
 - Kiritish: URL + toʻliq sahifa almashtirgichi + format selektori (markdown / matn / HTML).
 - Yuborish → olish → `ScrapeResult.tsx`ni render qilish.
 - `ScrapeResult` markdown oldindan koʻrish oynasi + xom format almashtirgichini render qiladi.
-- Cheklov: agar javob tanasi **256 KB**dan katta boʻlsa, UI `(qisqartirilgan, xom holatda ko‘rish)` yozuvini koʻrsatadi va xom kontentni Monaco modal oynasida ochadi (D21).
+- Cheklov: agar javob tanasi **256 KB**dan katta boʻlsa, UI `View full raw content` yozuvini koʻrsatadi va xom kontentni modal oynasida ochadi (D21).
 - Metamaʼlumotlar paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), kechikish, narx, javob hajmi, havolalar soni.
 - `useScrapeFetch.ts` hukidan foydalanadi.
 
@@ -102,10 +102,12 @@ Bir xil soʻrov/URLni **4 tagacha provayderda parallel ravishda** ishga tushirad
 `ProviderCatalog.tsx` `GET /api/search/providers` dan olingan provayderlarning toʻliq roʻyxatini taqdim etadi
 (F4 da fetch provayderlarini ham qamrab olish uchun kengaytirilgan):
 
-| `kind` | `"search"` (20 ta provayder) yoki `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ta provayder) yoki `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Holat soʻrov vaqtida hisob maʼlumotlari mavjudligi va barcha kalitlar hozirda cooldown holatida ekanligini
 tekshirish orqali **aniqlanadi**.
+
+`codex-search` (Codex Web Search): Ulangan Codex (ChatGPT) hisoblaridan foydalanadi; alohida kalit talab qilinmaydi. Har bir qidiruv ChatGPT obunasi kvotasini sarflaydi va taxminan 10–40 soniya davom etadi. So‘rovda uning nomi ko‘rsatilganda ishlaydi; avtomatik tanlash uchun odatda o‘chiq bo‘lgan `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` yoqilishi kerak.
 
 ---
 

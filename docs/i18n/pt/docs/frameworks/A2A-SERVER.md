@@ -152,18 +152,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Competências disponíveis
 
-OmniRoute expõe 6 competências A2A ligadas em `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Cada módulo de habilidade reside em `src/lib/a2a/skills/`.
+OmniRoute expõe 6 competências A2A ligadas ao `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Cada módulo de habilidade reside no `src/lib/a2a/skills/`.
 
 | Competência              | ID                   | Descrição                                                                                                                                                                                 | Etiquetas                          | Exemplos                                            |
 | :----------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------- | :-------------------------------------------------- |
-| Roteamento Inteligente   | `smart-routing`      | Encaminha um prompt através do provider/combo ideal utilizando o mecanismo de combinação + do OmniRoute                                                                                   | encaminhamento, provedores         | "Roteie este prompt através do melhor modelo"       |
+| Roteamento Inteligente   | `smart-routing`      | Encaminha um prompt através do provider/combo ideal utilizando o mecanismo combinado de pontuação + do OmniRoute                                                                          | encaminhamento, provedores         | "Roteie este prompt através do melhor modelo"       |
 | Gestão de cotas          | `quota-management`   | Informa o estado da quota por fornecedor e ajuda os chamadores a decidir quando fazer throttle/switch                                                                                     | quota, fornecedores                | “Verificar cota para antrópicos”                    |
-| Descoberta de fornecedor | `provider-discovery` | Lista fornecedores instalados com recursos, sinalizadores de nível gratuito, estado OAuth                                                                                                 | fornecedores, descoberta           | "Quais os fornecedores disponíveis?"                |
-| Análise de custos        | `cost-analysis`      | Estima o custo de um request/conversation considerando a utilização recente do catálogo +                                                                                                 | custo, utilização                  | "Estimar o custo desta conversa"                    |
+| Descoberta de fornecedor | `provider-discovery` | Lista os fornecedores instalados com recursos, sinalizadores de nível gratuito, estado OAuth                                                                                              | fornecedores, descoberta           | "Quais os fornecedores disponíveis?"                |
+| Análise de custos        | `cost-analysis`      | Estima o custo de um request/conversation de acordo com a utilização recente do catálogo +                                                                                                | custo, utilização                  | "Estimar o custo desta conversa"                    |
 | Relatório de saúde       | `health-report`      | Agrega disjuntor, arrefecimento e estado de bloqueio por fornecedor                                                                                                                       | saúde, resiliência                 | "Mostrar o estado de saúde de todos os prestadores" |
 | Listar recursos          | `list-capabilities`  | Retorna o catálogo completo de competências do agente com 45 entradas (configuração 23 API + 21 CLI + 1) como uma tabela de descontos com SKILL.md URLs em bruto para injeção de contexto | catálogo, descoberta, competências | "Listar todos os recursos OmniRoute "               |
 
-> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 381 prestadores; as contagens de fornecedores e os metadados free/no-auth são provenientes do registo de tempo de execução.
+> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 388 prestadores; as contagens de fornecedores e os metadados free/no-auth são provenientes do registo de tempo de execução.
 
 ### Detalhe da habilidade `list-capabilities`
 

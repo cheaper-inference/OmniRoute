@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-仪表板将在 `http://localhost:20128` 打开，API 基础 URL 为 `http://localhost:20128/v1`。
+仪表板在`http://localhost:20128`和API上打开，基础URL是`http://localhost:20128/v1`。
+
+> **npm 用户：**如果 npm 警告安装脚本被阻止（例如， `omniroute`、 `better-sqlite3`），请参阅[— npm install-scripts 阻止故障排除](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)。
 
 ### pnpm
 

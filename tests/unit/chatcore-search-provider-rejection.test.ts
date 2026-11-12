@@ -8,6 +8,11 @@ const { resolveChatExecutor } =
   await import("../../open-sse/handlers/chatCore/searchProviderRejection.ts");
 const { SearchProviderChatError } = await import("../../open-sse/utils/searchProviderChatError.ts");
 const { getExecutor } = await import("../../open-sse/executors/index.ts");
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 test("passes the resolved executor through untouched", async () => {
   const executor = { name: "native" };

@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-டாஷ்போர்டு `http://localhost:20128` இல் திறக்கும்; API அடிப்படை URL `http://localhost:20128/v1` ஆகும்.
+டாஷ்போர்டு `http://localhost:20128` இல் திறக்கிறது மற்றும் API அடிப்படை URL `http://localhost:20128/v1` ஆகும்.
+
+> **npm பயனர்கள்:** நிறுவல் ஸ்கிரிப்ட்கள் தடுக்கப்பட்டதாக npm எச்சரித்தால் (எ.கா., `omniroute`, `better-sqlite3`), [— npm இன்ஸ்டால்-ஸ்கிரிப்ட்கள் தடுக்கப்பட்ட பிழையறிந்து](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) பார்க்கவும்.
 
 ### pnpm
 

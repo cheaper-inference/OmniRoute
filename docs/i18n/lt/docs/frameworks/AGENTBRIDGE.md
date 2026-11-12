@@ -20,7 +20,7 @@ Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude kodas) atlieka API skambut
 
 Tai reiškia, kad galite:
 
-- **Peradresuokite bet kurį agentą bet kuriam teikėjui** : Copilot kalbi su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš OmniRoute 381 teikėjų.
+- **Peradresuokite bet kurį agentą bet kuriam teikėjui** : Copilot kalbi su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš OmniRoute 388 teikėjų.
 - **Taikykite modelių atvaizdus** : `gemini-3-flash` → `claude-sonnet-4.7` skaidriai prižiūrėtojo lygyje.
 - **Stebėkite visą agento srautą** : kiekvienas perimtas prašymas paskelbiamas [eismo inspektoriui](./TRAFFIC_INSPECTOR.md).
 - **Taikykite OmniRoute atsparumą** : kombinuotas maršruto parinkimas, grandinės pertraukikliai, atsarginės dalys ir išlaidų stebėjimo darbai, skirti IDE agentų srautui.
@@ -554,7 +554,7 @@ Trae yra palyginti naujas DI programavimo asistentas. Prieš įgyvendinant apdor
 3. Nustatyti autentifikavimo mechanizmą
 4. Įvertinti, ar tęsti, atsižvelgiant į naudojimo sąlygas ir API aptinkamumą
 
-Kol tyrimas nebaigtas, Trae kortelėje valdymo skydelyje rodoma žyma „Tiriama“ su nuoroda „Pranešti apie perspektyvumą“. Apdorojimo modulio ruošinys faile `src/mitm/handlers/trae.ts` pateikia struktūrizuotą klaidą `Dar neįgyvendinta`.
+Kol tyrimas nebaigtas, Trae kortelėje valdymo skydelyje rodoma žyma „Tiriama“ su nuoroda „Pranešti apie perspektyvumą“. Apdorojimo modulio ruošinys faile `src/mitm/handlers/trae.ts` pateikia struktūrizuotą klaidą `Not yet implemented`.
 
 ### Laukiantys agentai (būtinas MITM — nėra tinkinto bazinio URL palaikymo)
 

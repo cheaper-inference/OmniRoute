@@ -44,7 +44,7 @@ Un flag booleano è considerato **abilitato** quando il suo valore effettivo è 
 
 ## Catalogo delle bandiere
 
-120 bandiere in 6 categorie.** Predefinito** è la definizione predefinita — il valore utilizzato quando non è presente né un override DB né una variabile di ambiente.
+121 bandiere in 6 categorie.** Predefinito** è la definizione predefinita — il valore utilizzato quando non è presente né un override DB né una variabile di ambiente.
 
 ### Sicurezza (11)
 
@@ -115,7 +115,7 @@ Un flag booleano è considerato **abilitato** quando il suo valore effettivo è 
 
 Quando `UNPRICED_USAGE_BUDGET_POLICY` è configurato in modo esplicito (DB esegue l'override prima dell'ambiente), ha la precedenza su `USAGE_LIMIT_IGNORE_UNPRICED`. Senza un valore enum esplicito, l'opt-out booleano upstream seleziona `count_as_zero`; otherwise the default is `fail_closed`. I valori enumerativi non validi e l'archiviazione di flag di funzionalità illeggibile non riescono a chiudersi. Né la rinuncia allenta la spesa determinata o la mancata ricerca dei prezzi. L'applicazione e la segnalazione dell'amministratore risolvono la stessa politica efficace.
 
-### Durata (57)
+### Durata (58)
 
 | Chiave                                         | Tipo     | Predefinito | Ricomincia | Descrizione                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------- | -------- | ----------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Quando `UNPRICED_USAGE_BUDGET_POLICY` è configurato in modo esplicito (DB esegu
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | booleano | `false`     |            | Interrompere l'offerta e l'inoltro dello sforzo di ragionamento `max` per Cursor Grok 4.7 (#17386): i documenti di Cursor elencano solo low/medium/high/xhigh, quindi l'alias di fallback `grok-4.7-max` scompare dal catalogo e una richiesta di sforzo `max` viene inviata senza un parametro di sforzo. Disattivato per impostazione predefinita: `max` rimane offerto e inoltrato, poiché una sonda AgentService/Run live lo ha accettato.                                                                                                                                                                                                                                                                                                                                                           |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | booleano | `false`     |            | Invia risposte keepalive come una riga vuota invece di un evento Response.in_progress, quindi uno snapshot sintetico non potrà mai sostituire la risposta reale nello SDK ufficiale. Una riga vuota non invia alcun evento SSE, quindi un watchdog client che si reimposta solo su eventi non verrebbe reimpostato durante una lunga fase silenziosa. Disattivato per impostazione predefinita: i timer inviano l'evento risposta.in_progress con validità specifica.                                                                                                                                                                                                                                                                                                                                    |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booleano | `false`     |            | Nelle statistiche della cache di compressione, contare una richiesta compressa a un provider di memorizzazione nella cache con prefisso automatico (OpenAI, Codex, Azure o una connessione personalizzata che dichiara la memorizzazione nella cache dei prompt con eliminazione dei marcatori) come un riscontro stimato della cache anche senza marcatori `cache_control` (#17114). La stima è un segnale di idoneità della cache, non un riscontro osservato, pertanto la percentuale di riscontro segnalata per tali fornitori tende verso il 100%. Disattivato per impostazione predefinita: solo una richiesta che trasporta marcatori `cache_control` a un provider di caching conta come un successo stimato, quindi i provider con prefisso automatico continuano a segnalare 0.                |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | booleano | `false`     |            | Consente a una ricerca web automatica senza `provider` esplicito di usare un account Codex (ChatGPT) collegato tramite `codex-search`: come ultima risorsa prima dei provider senza chiave quando nessun provider con credenziali è utilizzabile, e come alternativa in caso di errore (#17933). Ogni ricerca consuma la quota dell’abbonamento e richiede circa 10–40 s. Disattivato per impostazione predefinita: `codex-search` viene eseguito solo quando la richiesta lo indica esplicitamente.                                                                                                                                                                                                                                                                                                     |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Restituisce ogni flag con il valore effettivo, l'origine e un riepilogo.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

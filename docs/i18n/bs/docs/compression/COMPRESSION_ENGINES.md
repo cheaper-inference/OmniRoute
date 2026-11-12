@@ -4,9 +4,7 @@
 
 ---
 
-# Mehanizmi kompresije
-
-OmniRoute kompresija je izgrađena oko ugovora o mehanizmima. Režim može pokrenuti jedan mehanizam direktno (`caveman` ili `rtk`) ili deterministički složeni cjevovod koji izvršava više mehanizama redom.
+OmniRoute kompresija je izgrađena oko ugovora motora. Režim može direktno pokrenuti jedan motor (`caveman` ili `rtk`) ili deterministički naslagani cjevovod koji izvršava više motora po redu.
 
 ## Načini rada
 
@@ -326,7 +324,7 @@ Alat za dohvaćanje se trenutno zove `omniroute_ccr_retrieve` (prefiks `omnirout
 
 ### Životni ciklus sesije
 
-Streamable-HTTP sesije ne rade i server ih koristi; prozor mirovanja je postavljen pomoću `OMNIROUTE_MCP_SESSION_IDLE_MS` (podrazumevano 5 minuta; referencirano po imenu, a ne čvrsto kodiranom vrednošću, tako da se ova stranica ne pomera kada se promeni). Simptom neaktivne sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — a lijek je ponovno povezivanje ili ponovno pokretanje sesije,** ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
+Streamable-HTTP sesije ne rade i server ih koristi; prozor mirovanja konfiguriše `OMNIROUTE_MCP_SESSION_IDLE_MS`, vraćajući se na `DEFAULT_MCP_SESSION_IDLE_MS` u `open-sse/mcp-server/httpTransport.ts`. Simptom neaktivne sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — a lijek je ponovno povezivanje ili ponovno pokretanje sesije,**ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
 
 ## API površina
 

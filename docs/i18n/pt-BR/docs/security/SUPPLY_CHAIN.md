@@ -18,18 +18,22 @@ OmniRoute publica artefatos npm + Docker. Esses portões fornecem proveniência,
 
 O ajuste de CVE da imagem usa **duas etapas** em `docker-publish.yml`: a etapa SARIF (`HIGH,CRITICAL`, `exit-code: 0`) mantém ALTO+CRÍTICO visível na aba de Segurança sem bloquear; a etapa _CRITICAL gate_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) falha o lançamento em um CVE CRÍTICO **com uma correção disponível**. `ignore-unfixed` impede o bloqueio do lançamento para um CVE de imagem base sem um patch upstream.
 
-## ⚠️ Variação de CVE (portões osv/Trivy bloqueantes)
+## ⚠️ Variação de CVEs (bloqueando os gates do osv/Trivy)
 
-osv e Trivy comparam dependências com bancos de dados de CVE que **crescem continuamente**. Um PR que **não toca em dependências** pode de repente ficar vermelho porque um novo CVE foi divulgado em uma dependência existente (osv: `vulnCount` medido > linha de base; Trivy: um novo CRÍTICO corrigível na imagem). **Este é o comportamento operacional ESPERADO de um portão de CVE bloqueante, não uma regressão do produto.**
+O osv e o Trivy comparam as dependências com bancos de dados de CVEs que **crescem continuamente**. Um PR que **não altera nenhuma dependência** pode repentinamente ficar vermelho porque uma nova CVE foi divulgada em uma dependência existente (osv: `vulnCount` medido > baseline; Trivy: uma nova vulnerabilidade CRITICAL corrigível na imagem). **Esse é o comportamento operacional ESPERADO de um gate de CVEs bloqueante, não uma regressão do produto.**
 
-Quando osv ou Trivy ficam vermelhos devido a um CVE recém-divulgado, o remédio é:
+Quando o osv ou o Trivy ficarem vermelhos devido a uma CVE recém-divulgada, a solução será:
 
-1.  **Atualizar a dependência afetada** (preferencial) — fazer upgrade para a versão corrigida via `overrides` do `package.json` (dependências transitivas) ou reconstruir a imagem em uma base corrigida.
-2.  **Se não houver correção upstream:**
-    - **osv:** redefinir a linha de base de `metrics.vulnCount` em `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` não cobre portões dedicados — edite o valor manualmente, `direction:down`) com uma nota de justificativa + issue de acompanhamento.
-    - **Trivy:** adicionar uma entrada em `.trivyignore` (CVE-ID por linha) com um comentário de justificativa + issue de acompanhamento. `ignore-unfixed: true` já cobre CVEs sem patches automaticamente.
+1. **Atualizar a dependência afetada** (preferencial) — atualize para a versão corrigida por meio de `package.json` e `overrides` (dependências transitivas) ou reconstrua a imagem usando uma base corrigida.
+2. **Se uma correção não estiver disponível:** mantenha o resultado medido e acompanhe a dependência ou imagem afetada. Não aumente o baseline de vulnerabilidades para aprovar uma candidata com falhas. A opção `ignore-unfixed: true` do Trivy já exclui vulnerabilidades de imagem sem uma correção upstream. Qualquer exceção na política exige revisão do ID da vulnerabilidade, do caminho exato do pacote, do prazo de validade e da issue de acompanhamento; ela não decorre automaticamente de um scan com falha.
 
-Ambos os portões **IGNORAM graciosamente** (exit 0) quando a ferramenta está ausente ou a medição falha (osv-scanner não está no PATH, osv.dev/rede inalcançável, JSON inválido) — uma falha de **medição** nunca bloqueia, apenas uma regressão **medida** bloqueia.
+As execuções obrigatórias do OSV (`check:vuln-ratchet -- --ratchet`) falham de forma restritiva com `INCOMPLETE` e código de saída 2 quando o scanner, o relatório ou o baseline não podem ser validados. Uma regressão medida resulta no código de saída 1. Uma execução consultiva ainda pode relatar `SKIP` com código de saída 0, o que não comprova que as dependências passaram pela verificação. A etapa bloqueante do Trivy também exige uma medição bem-sucedida: ferramentas indisponíveis, jobs com falha e ausência de evidências da imagem não podem certificar uma imagem como limpa.
+
+## Política de scan de imagens
+
+O arquivo `.trivyignore.yaml` atual não contém exceções de vulnerabilidade. O comando `npm run check:trivy-ignore-policy` valida a política estruturada nos perfis locais, na CI e no workflow Quality. IDs desconhecidos, caminhos mais abrangentes, entradas duplicadas e exceções vencidas são rejeitados; os scans migrados não usam o arquivo legado `.trivyignore`.
+
+O workflow Docker obtém as ferramentas da política de `github.workflow_sha` e o arquivo de política da imagem com o mesmo seletor de origem usado no build. O seletor de política rejeita escopos incompatíveis e prepara um único arquivo para os dois scans Trivy. Uma versão histórica sem política estruturada não recebe exceções. Ambos os scans fixam a versão `v0.70.0` do Trivy. A validação da política comprova a consistência da configuração; a imagem ainda precisa passar por um scan bem-sucedido.
 
 ## Risco de dependência de aposentados
 

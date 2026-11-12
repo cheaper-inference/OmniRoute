@@ -27,7 +27,10 @@ export type AppliedProxySink = {
    * pool has nothing else to offer — the executor keeps its behavior then.
    */
   reselectPoolMember?: () => Promise<unknown>;
-  /** First upstream dispatch time; retries keep the original timestamp. */
+  /**
+   * Time immediately before the first executor invocation; retries keep the original timestamp.
+   * Transport setup and network timing are outside this measurement.
+   */
   upstreamDispatchedAt?: number | null;
 };
 const APPLIED_PROXY_CONTEXT_KEY = Symbol.for("omniroute.proxyFetch.applied-context");
@@ -134,6 +137,7 @@ export function readUpstreamDispatchedAt(): number | null {
   }
 }
 
+/** Time until the first executor invocation, not the first byte on the network. */
 export function queueWaitMsFromDispatch(
   upstreamDispatchedAt: number | null,
   startTime: number

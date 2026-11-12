@@ -117,38 +117,60 @@ Mga kaugnay na module sa parehong bundle:
 
 ## Antigravity Stealth
 
-Pinapanatili ng mga Antigravity request ang text ng tumatawag nang eksaktong byte-for-byte. Hindi naglalagay ang OmniRoute ng mga zero-width character sa mga prompt o nagpapalit/nag-i-inject ng mga tool upang gayahin ang isang IDE client.
+Ang mga kahilingan Antigravity ay nagpapanatili ng text ng tumatawag na byte-for-byte. OmniRoute ay hindi naglalagay ng mga zero-width na character sa mga prompt o mga tool rename/inject upang gayahin ang isang IDE client.
 
 ### `antigravityHeaderScrub.ts`
 
-Inaalis ang mga marker ng Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) bago i-forward.
+Mga strip ng Stainless SDK marker (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) bago ipasa.
 
-### ⚠️ Panganib: `ANTIGRAVITY_CREDITS=always` (pangunahing sanhi ng pag-ban ng account)
+### Panganib ⚠️ : `ANTIGRAVITY_CREDITS=always` (hot spot sa pagbabawal ng account)
 
-Ang `ANTIGRAVITY_CREDITS=always` (ginagamit ng `open-sse/executors/antigravity.ts`) ay nagruruta sa **bawat** request sa Antigravity AI Credit Overages (mga bayad na Google credit) sa halip na hayaang limitahan ng free-tier quota ng Google ang paggamit. Nakadokumento ito bilang isang feature, ngunit ito ang **nag-iisang pinakakaraniwang ulat ng paglabag sa ToS na nakikita namin** — maraming Google Ultra account ang na-ban nang may `403 / "service disabled for ToS violation" / insufficient_quota` matapos tumakbo nang ilang oras gamit ang `=always`.
+Mga ruta `ANTIGRAVITY_CREDITS=always` (ginagamit ng `open-sse/executors/antigravity.ts`).**bawat** humiling sa pamamagitan ng Antigravity AI Credit Overages (bayad na Google credits) sa halip na hayaan Google's free-tier quota gate na mga bagay. Ito ay dokumentado bilang isang tampok, ngunit ito ay **ang nag-iisang pinakakaraniwang ulat ng paglabag sa ToS na nakikita namin** — maraming Google Ultra account ay pinagbawalan sa `403 / "service disabled for ToS violation" / insufficient_quota` pagkatapos tumakbo ng ilang oras sa `=always`.
 
-Ang pagpapatupad ng mga patakaran sa upstream ay nasa **panig ng Google**, at hindi ito mapipigilan ng OmniRoute. Dahil sa pangalan ng env var at sa umiiral na dokumentasyon, tila isa itong ligtas na opsyong i-enable; ngunit hindi.
+Naka-on ang upstream na pagpapatupad **Ang panig ng Google** , walang anumang mapipigilan OmniRoute. Ang pangalan ng env var at ang mga umiiral na doc ay ginagawa itong parang isang ligtas na knob upang i-flip; ito ay hindi.
 
-**Bakit mas agresibo nitong natitrigger ang pagtukoy ng pang-aabuso kaysa sa paggamit lamang ng free tier:**
+**Bakit mas agresibo ang pag-detect ng pang-aabuso nito kaysa sa libreng-tier-only na paggamit:**
 
-- Naiiba ang pag-flag sa tuloy-tuloy na automated na paggastos sa iisang Google account kumpara sa free-tier na umaabot sa quota at pagkatapos ay humihinto.
-- Walang limitasyon sa rate ang mga credit overage, kaya maaaring makaubos ang isang maling na-configure na client ng ilang daang USD sa loob ng ilang minuto at magmukhang muling pagbebenta ng API key o trapiko ng bot.
-- Kapag maraming user ng OmniRoute ang sabay-sabay na gumagamit ng mga overage credit mula sa parehong external IP, lalo nitong pinalalakas ang signal.
+- Ang patuloy na awtomatikong paggastos sa iisang Google account ay nagba-flag nang iba kaysa sa free-tier na hit-quota-and-stop.
+- Ang mga credit overage ay walang rate ceiling, kaya ang isang maling na-configure na kliyente ay maaaring sumunog sa ilang daang USD sa ilang minuto at magmukhang API-key na muling pagbebenta o bot traffic.
+- Maraming user OmniRoute na nakakakuha ng overage na mga kredito nang magkatulad mula sa parehong panlabas IP ay nagsasama ng signal.
 
-**Inirerekomendang pamamaraan:**
+**Inirerekomendang postura:**
 
-1. Panatilihin ang default na `ANTIGRAVITY_CREDITS=off` maliban kung tahasang tinatanggap ng operator ang panganib ng paggamit ng bayad na credit at pagpapatupad ng parusa sa account. Ipinapadala muna ng `retry` ang normal na request at nag-i-inject ng mga credit nang hindi hihigit sa isang beses pagkatapos ng kwalipikadong quota 429; nag-i-inject naman ang `always` ng mga credit sa unang request.
-2. **Ipamahagi ang load sa iba't ibang provider sa pamamagitan ng Auto-Combo** (`model: "auto"` o `kr/glm/etc`-combo) sa halip na sagarin ang iisang Antigravity account.
-3. **Magtakda ng mga RPM limit sa bawat koneksyon** sa edit page ng Antigravity provider (Dashboard → Providers → Antigravity → connection → rate limit). Ang 30–60 RPM ay isang makatuwirang upper bound para sa tuloy-tuloy na paggamit.
-4. **Gumamit ng stable at kontrolado ng operator na upstream networking** at iwasang ibahagi ang isang account sa mga user o workload na walang kaugnayan sa isa't isa.
-5. **Kung na-ban**: magsumite ng apela sa pamamagitan ng `support.google.com` → "Restore Workspace/Account access" gamit ang eksaktong `quota_exceeded` / `service disabled` response body na ipinadala ng Google. Walang garantiya na maibabalik ang access.
+1. Panatilihin ang default `ANTIGRAVITY_CREDITS=off` maliban kung tahasang tumatanggap ang operator ng panganib sa bayad na kredito at pagpapatupad ng account. `retry` ay nagpapadala muna ng normal na kahilingan at nag-iniksyon ng mga credit nang hindi hihigit sa isang beses pagkatapos ng isang karapat-dapat na quota 429; `always` ay nag-inject ng mga credit sa unang kahilingan.
+2. **Ikalat ang load sa mga provider sa pamamagitan ng Auto-Combo** (`model: "auto"` o `kr/glm/etc` -combo) sa halip na i-saturate ang isang Antigravity account.
+3. **Magtakda ng mga limitasyon RPM sa bawat koneksyon** sa pahina ng pag-edit ng provider ng Antigravity (Dashboard → Provider → Antigravity → na limitasyon sa rate ng → na koneksyon). Ang 30–60 RPM ay isang mapagtatanggol na upper bound para sa matagal na paggamit.
+4. **Gumamit ng matatag, kontrolado ng operator na upstream networking** at iwasang magbahagi ng isang account sa mga hindi nauugnay na user o workload.
+5. **Kung pinagbawalan** : apela sa pamamagitan ng `support.google.com` → "Ibalik Workspace/Account access" na may eksaktong `quota_exceeded` / `service disabled` response body na ipinadala Google. Ang pagpapanumbalik ay hindi ginagarantiyahan.
 
-Nakadokumento sa environment reference ang mga epekto ng bawat credits mode sa account at paggastos.
+Ang sangguniang kapaligiran ay nagdodokumento ng account at mga implikasyon sa paggastos ng bawat credits mode.
+
+#### Hindi lamang `=always`: Antigravity OAuth routing sa pangkalahatan
+
+Ang mga pagsususpinde ay hindi limitado sa mga labis na kredito. Inilalarawan ng mga ulat noong Nobyembre 2026 (#19223, #19266) ang ilang Google account na nasuspinde habang nagruruta sa mga provider ng `antigravity` at `agy` (Antigravity CLI), na may:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Parehong nagpapatotoo ang mga provider gamit ang Antigravity product OAuth session, na kung saan ang kaso ng paunawa sa panganib ng dashboard ("Ginagamit ng provider na ito ang iyong opisyal na produkto session/OAuth, na hindi awtorisado para sa paggamit proxy/router ") ay nagbabala tungkol sa bago idagdag ang isang koneksyon. Wala sa mga rekomendasyon sa itaas ang nagpapahintulot sa paggamit na iyon; binabawasan lang nila kung gaano karaming trapiko ang dala ng isang account.
+
+**Mga awtorisadong interface API para sa mga modelong Gemini.** Nag-aalok Google ng programmatic na access sa Gemini sa pamamagitan ng APIs nito, na sinusuportahan OmniRoute bilang mga ordinaryong API-key provider:
+
+| Provider id | Pangalan ng dashboard     | kredensyal                                                                 |
+| ----------- | ------------------------- | -------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | Gemini API key mula sa Google AI Studio (libreng tier available)           |
+| `vertex`    | Vertex AI                 | Service Account JSON, OAuth access token o Vertex Express API key (Gemini) |
+
+Gumagamit ang mga provider na ito ng mga kredensyal na isyu Google para sa API access, hindi katulad ng session ng produkto Antigravity. Hindi nila ginagawang sumusunod ang bawat paggamit o inaalis ang panganib ng pagpapatupad: ang bawat isa ay pinamamahalaan ng sarili nitong mga tuntunin, na kailangang suriin ng operator para sa kanilang deployment. Halimbawa, pinapayagan lamang ng [Mga Karagdagang Tuntunin ng Serbisyo Gemini API](https://ai.google.dev/gemini-api/terms) ang Mga Bayad na Serbisyo kapag ang mga kliyente API ay ginawang available sa mga user sa European Economic Area, Switzerland o United Kingdom, at ang nilalamang ipinadala sa Mga Hindi Nabayarang Serbisyo ay maaaring gamitin upang mapabuti ang mga produkto ng Google. Ang Vertex AI ay nasa ilalim ng mga tuntunin ng Google Cloud sa halip ( [Mga Tuntunin ng Mga Tukoy sa Serbisyo](https://cloud.google.com/terms/service-terms) ). Ang pagpepresyo at mga quota ay sumusunod sa mga tuntuning iyon API sa halip na isang subscription Antigravity.
+
+Ang mga operator na gustong umiwas sa mga pagsususpinde Antigravity na inilarawan sa itaas ay dapat na iruta ang trapiko Gemini sa isa sa mga provider na ito sa halip na `antigravity` / `agy`, pagkatapos suriin na ang paggamit ng mga ito ay umaangkop sa mga tuntunin ng provider.
 
 Mga touch point:
 
-- `open-sse/executors/antigravity.ts` — binabasa ang `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — pamamahala ng credential
+- Binabasa ng `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
+- Pagtutubero ng kredensyal `src/lib/oauth/providers/antigravity.ts` —
 - Orihinal na ulat ng insidente: Talakayan [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
@@ -218,7 +240,7 @@ Nangangailangan ang lahat ng MITM endpoint ng management auth (`requireCliToolsA
 
 ---
 
-## Ino-override ng User-Agent — env vars (`.env.example` seksyon 12)
+## Mga Override ng User-Agent — mga env var (`.env.example` seksyon 12)
 
 | Variable            | Default                                       |
 | ------------------- | --------------------------------------------- |
@@ -229,7 +251,7 @@ Nangangailangan ang lahat ng MITM endpoint ng management auth (`requireCliToolsA
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Naubos ng `open-sse/executors/base.ts::buildHeaders()` sa pamamagitan ng dynamic na paghahanap.** Bump ito kapag naglabas ang mga provider ng mga bagong bersyon CLI** — stale UA string ay nagsisimula nang tanggihan bilang mga hindi napapanahong kliyente.
+Ginagamit ng `open-sse/executors/base.ts::buildHeaders()` sa pamamagitan ng dinamikong lookup. **I-update ang mga ito kapag naglalabas ang mga provider ng mga bagong bersyon ng CLI** — ang mga lumang UA string ay nagsisimulang tanggihan bilang mga lipas na client.
 
 ## Mga Toggle ng CLI Compatibility Mode (`.env.example` seksyon 13)
 

@@ -221,10 +221,7 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 
 ## ឧបករណ៍កាតាឡុកជំនាញភ្នាក់ងារ (3)
 
-បានកំណត់នៅក្នុង `open-sse/mcp-server/tools/agentSkillTools.ts`។ គាំទ្រដោយ `src/lib/agentSkills/catalog`។ ឧបករណ៍ទាំងនេះបង្ហាញកាតាឡុកឯកសារជំនាញភ្នាក់ងារ 45 ធាតុទៅកាន់ម៉ាស៊ីនភ្ញៀវ MCP និងភ្នាក់ងារខាងក្រៅ។ វិសាលភាព៖ `read:catalog`។
-
-| ឧបករណ៍ | វិសាលភាព | ការពិពណ៌នា  
-The following table lists the tools available in the MCP tool catalog.
+កំណត់ក្នុង `open-sse/mcp-server/tools/agentSkillTools.ts`។ គាំទ្រដោយ `src/lib/agentSkills/catalog`។ ឧបករណ៍ទាំងនេះបង្ហាញកាតាឡុកឯកសារ Agent Skills 45-entry ទៅឱ្យអតិថិជន MCP និងភ្នាក់ងារខាងក្រៅ។ វិសាលភាព៖ `read:catalog`។
 
 | Tool                              | Scopes         | Description                                                                                                                  |
 | :-------------------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------- |

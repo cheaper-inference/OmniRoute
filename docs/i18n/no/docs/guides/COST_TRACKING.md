@@ -40,16 +40,16 @@ Fordi tallet er et estimat:
 
 ### Priskilden
 
-Kostnadene kommer fra den sammenslåtte pristabellen i [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), i denne rekkefølgen (** høyest først** ):
+Kostnadene kommer fra den sammenslåtte pristabellen i [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), i denne rekkefølgen (**høyest først** ):
 
-1. **Bruker overstyrer** — priser satt i dashbordet eller via `PATCH /api/pricing` (navneområdet `pricing` ).
-2. **models.dev synkronisering** — -priser hentet fra `https://models.dev/api.json` (navneområdet `models_dev_pricing` ).
-3. **LiteLLM synkronisering** — priser hentet fra LiteLLM offentlige `model_prices_and_context_window.json` (navneområdet `pricing_synced` ).
+1. **Bruker overstyrer** — priser satt i dashbordet eller via `PATCH /api/pricing` ( `pricing` navneområdet).
+2. **models.dev synkronisering** — priser hentet fra `https://models.dev/api.json` ( `models_dev_pricing` navneområdet).
+3. **LiteLLM -synkronisering** — priser hentet fra LiteLLM offentlige `model_prices_and_context_window.json` (navneområdet `pricing_synced` ).
 4. **Hardkodede standarder** — priser sendes i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-For samme provider/model overskriver verdier fra høyere prioriterte lag samsvarende felt i lavere lag; felt fraværende fra et øvre lag kan fortsatt komme fra et nedre lag. Rekkefølgen er fast selv når begge uavhengige synkroniseringsjobber kjører samtidig. `GET /api/pricing?includeSources=1` returnerer `pricing` og `sourceMap`, hvis etiketter per modell (`user`, `modelsDev`, `litellm`, `default`) identifiserer det høyest prioriterte laget som inneholder den modellen.
+For den samme provider/model overskriver verdier fra høyere prioriterte lag samsvarende felt i lavere lag; felt fraværende fra et øvre lag kan fortsatt komme fra et nedre lag. Rekkefølgen er fast selv når begge uavhengige synkroniseringsjobber kjører samtidig. `GET /api/pricing?includeSources=1` returnerer `pricing` og `sourceMap`, hvis etiketter per modell (`user`, `modelsDev`, `litellm`, `default`) identifiserer det høyest prioriterte laget som inneholder den modellen.
 
-**LiteLLM synkronisering** er opt-in, deaktivert som standard. Dens miljøvariabler (se [`.env.example`](../../.env.example) ) er:
+**LiteLLM -synkronisering** er opt-in, deaktivert som standard. Dens miljøvariabler (se [`.env.example`](../../.env.example) ) er:
 
 | Env var                 | Misligholde | Hensikt                                                                         |
 | ----------------------- | ----------- | ------------------------------------------------------------------------------- |
@@ -64,33 +64,55 @@ For samme provider/model overskriver verdier fra høyere prioriterte lag samsvar
 | `MODELS_DEV_SYNC_ENABLED`  | _(uaktivert)_ | Unset følger innstillingsbryteren; `1/true/on/yes` tvinger på og `0/false/off/no` tvinger av (selv om Innstillinger aktiverer det). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Standard models.dev synkroniseringsintervall i sekunder (daglig).                                                                   |
 
-`PRICING_SYNC_SOURCES` gjør det** ikke** aktivere models.dev; den kontrollerer bare LiteLLM synkroniseringen. Sletting av en brukeroverstyring sletter ikke noen av de synkroniserte navneområdene. neste tilgjengelige prislag trer i kraft. For en upriset modell, sjekk både synkroniseringsinnstillinger og `sourceMap` før du legger til en manuell overstyring.
+Det gjør `PRICING_SYNC_SOURCES`**ikke** aktivere models.dev; den kontrollerer bare LiteLLM synkroniseringen. Sletting av en brukeroverstyring sletter ikke noen av de synkroniserte navneområdene. neste tilgjengelige prislag trer i kraft. For en upriset modell, sjekk både synkroniseringsinnstillinger og `sourceMap` før du legger til en manuell overstyring.
 
 ### Kostnadsformelen
 
-Kostnaden beregnes per forespørsel fra tokenantall og per million tokenpriser i [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+Kostnaden beregnes per forespørsel fra token-antall og per million-token-priser i [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Skriv inn tokens** (minus cache lesing og cache-oppretting tokens) × `input` rate.
+- **Skriv inn tokens** (minus cache-lesing og cache-opprettingstokens) × `input` rate.
 - **Bufferleste tokens** × `cached` rate (faller tilbake til inngangshastigheten).
 - **Tokener for å lage cache** × `cache_creation` rate (faller tilbake til inngangshastigheten).
 - **Output tokens** × `output` rate.
-- **Resonneringstegn** × `reasoning` rate (faller tilbake til utgangshastigheten).
+- **Resonneringstegn** × `reasoning` rate (faller tilbake til output rate).
 
-Alle priser tolkes som USD per 1 000 000 tokens. En Codex "rask"/"prioritet" eller "flex" tjenestenivå bruker en kostnadsmultiplikator (`getCodexFastCostMultiplier`) —, f.eks. flex faktureres med en 50 % symbolrabatt, dukket opp som** flex besparelser** i dashbordet.
+Alle priser tolkes som USD per 1 000 000 tokens. En Codex "rask"/"prioritet" eller "flex" tjenestenivå bruker en kostnadsmultiplikator (`getCodexFastCostMultiplier`) —, f.eks. flex faktureres med en 50 % symbolrabatt, dukket opp som **flex besparelser** i dashbordet.
 
 Modellnavn normaliseres først (leverandørbaneprefikser som `openai/` eller `accounts/fireworks/models/` fjernes) slik at historiske rader fortsatt samsvarer med en pris.
 
 ### Hvordan forbruk registreres
 
-- Kostnaden per forespørsel beregnes etter responsen og registreres brann-og-glem, slik at den aldri legger ventetid til klienten. Forbruk av delt kvote er planlagt på neste event-loop-merke via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API-nøkkelforbruk bufres og tømmes i batcher av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-talls skylleintervall, 1000 inngangsbuffer). Kan justeres via:
+- Kostnaden per forespørsel beregnes ved fullføring av forespørselen. Forbruk av delt kvote er planlagt på neste event-loop-merke via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API-nøkkelforbruk bufres og tømmes i batcher av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-talls flush-intervall, 1000-entry buffer). Kan justeres via:
 
   | Env var                             | Misligholde | Hensikt                             |
   | ----------------------------------- | ----------- | ----------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Skylleintervall i millisekunder.    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maks bufrede oppføringer før flush. |
 
-Dashbordets kostnadstall er** ikke** leses fra et lagret per rad dollarbeløp — de beregnes på nytt fra tokenantall og gjeldende pristabell hver gang analyseendepunktet kjører. Det betyr at korrigering av en feil pris (og re-synkronisering) oppdaterer historiske kostnadsestimater med tilbakevirkende kraft.
+Kostnader foretrekker en eksakt leverandørrapportert belastning (`provider_cost_usd`), deretter et øyeblikksbilde av forespørselen til katalogpriset (`calculated_cost_usd`), deretter token-reprising fra gjeldende katalog. Lagrede kostnader belastes ikke igjen gjennom token-tellingene. Eldre token-rader endres fortsatt når katalogprisen deres endres.
+
+### OCR og embeddings
+
+- Vellykkede `/v1/ocr` forespørsler bruker oppstrøms `usage_info.pages_processed`, ikke det forespurte sideområdet eller antallet returnerte sideobjekter. Anslaget er sider × `ocr_cost_per_page` (absolutt USD/page,**ikke** USD/million).
+- Forespørsler med dokument- eller avgrensningsmerknader krever en egen `ocr_cost_per_annotated_page` tariff. Uten det forblir kostnaden ukjent; den ordinære OCR tariffen erstattes ikke stille.
+- LiteLLM synkronisering kartlegger oppstrøms `annotation_cost_per_page` feltet til `ocr_cost_per_annotated_page`, og beholder den absolutte USD/page verdien og oppføringer som kun er for merknader, inkludert eksplisitt null. Et levert kanonisk felt har forrang; ugyldige aliasverdier ignoreres. Overstyring av brukerpriser beholder sin normale prioritet. Se [LiteLLMOCR prisnøkler](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -bruk lagrer sideantall, enhetspris, beregnet USD kostnad, API -nøkkel og valgt tilkobling. Sider er aldri representert som tokens. Anropslogger inneholder faktureringsmetadata, ikke dokument URLs, PDF byte eller ekstrahert tekst.
+- Vellykkede `/v1/embeddings` forespørsler registrerer én bruksrad per fysisk batch, inkludert separate batcher fullført i samme millisekund. Leverandørrapporterte belastninger har forrang over tokenestimater; combo wrappers legger ikke til en kostnad.
+- Brukshistorikk, kostnadsanalyse, provider/account vinduer, API-nøkkelforbruksgrenser, forespørselskostnadsbok og daglig brukssammendrag inkluderer disse kostnadene. No-log-nøkler beholder numerisk regnskap uten å beholde kildetekst.
+- Manglende bruk eller tariffer er **ukjent** , ikke gratis: svarkostnadsoverskriften er utelatt, og den eksisterende policyen for upriset bruk gjelder begrensede API nøkler. Eksplisitt konfigurerte nullsatser forblir gyldig nullkostnadsbruk.
+
+Dette er kun foreløpig regnskap. Gamle OCR/embedding anrop som aldri skrev brukshistorikk kan ikke rekonstrueres fra denne migreringen. Kataloganslag er USD -anslag, ikke en faktura, og inkluderer ikke valutaomregning, skatt eller rabatter.
+
+### Tale og bilder
+
+- Vellykkede `/v1/audio/transcriptions`, `/v1/audio/speech` og bildegenereringsforsøk deler numerisk regnskap. Direkte og kombinasjonsanrop har anroperens API nøkkel og den valgte forbindelsen; en combo wrapper legger aldri til en ekstra debet.
+- Leverandørrapportert USD vinner over et katalogestimat, inkludert en eksplisitt nullavgift. OpenRouterJSON `usage.cost` er normalisert til `cost_usd`. Ellers bruker målte tokens tokenpriser, transkripsjonssekunder bruker priser per sekund, taleinndata bruker Unicode-tegnteller, og flatprisbilder bruker tallet som faktisk returneres, ikke den forespurte `n`.
+- Binær OpenRouter TTS har ingen JSON -brukskropp. Etter at lyden er fullført eller innringeren kansellerer, spør OmniRoute sin generasjon ID på **samme** konfigurert OpenRouter opprinnelse. En EU forespørsel faller aldri tilbake til den globale opprinnelsen. Dette er et avgrenset, skrivebeskyttet oppslag; syntese prøves ikke på nytt for regnskap. Faktureringsposter kan vises etter at lyden er ferdig: oppslagsforsøk kjører i bakgrunnen i opptil 52 sekunder, inkludert nettverksfrister.
+- Under det oppslaget har lydresponsen `X-OmniRoute-Cost-Status: pending` og ingen responskostnadsoverskrift. Den endelige belastningen vises i brukshistorikk, analyser og hovedboken etter avstemming. Hvis metadata ikke er tilgjengelig, brukes et konfigurert tarifføyeblikksbilde; ellers forblir kostnaden ukjent.
+- Sekunder, tegn og bildeantall har separate faktureringsenhetsfelt, aldri falske tokentellinger. Regnskap beholder kun numerisk bruk, ikke taletekst, transkripsjoner eller bildebytes. Eksisterende fritak for uprisede bilder er uendret: en virkelig manglende bildetariff låser ikke nylig en begrenset nøkkel, og svaret utelater kostnadsoverskriften i stedet for å erklære samtalen gratis. En svikt i prissettingsbutikken beholder fortsatt bruksbevis for feillukket håndhevelse.
+
+Ingen historisk speech/image avgift er oppfunnet eller gjenfylt. Leverandørfakturering forblir referansen for fakturaer og for samtaler hvis kostnad ikke ble rapportert.
 
 ---
 
@@ -140,50 +162,53 @@ Kostnader-området inneholder også (alle under `/dashboard/costs/`):
 
 ---
 
-## API -endepunkter
+## API-endepunkter
 
-Alle disse krever administrasjonsgodkjenning (loopback/JWT, via `requireManagementAuth`) med mindre det er angitt.
+Alle disse krever administrasjonsautentisering (loopback/JWT, via `requireManagementAuth`) med mindre
+annet er angitt.
 
 ### Bruks- og kostnadsanalyse
 
-| Metode | Endepunkt                | Hensikt                                                                                                                                                           |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Full cost/usage -analyse: sammendrag, daglig trend, etter provider/model/API key/account/tier. Spørring: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Per-leverandør kvoteutnyttelse over tid. Spørring: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                   |
-| `GET`  | `/api/usage/history`     | Rå brukshistorikk rader.                                                                                                                                          |
-| `GET`  | `/api/usage/call-logs`   | Anropslogger per forespørsel (modell, tokens, kostnad, ventetid, status).                                                                                         |
-| `GET`  | `/api/usage/quota`       | Leverandørkvotestatus.                                                                                                                                            |
-| `GET`  | `/api/usage/proxy-logs`  | Logger for proxy-forespørsel.                                                                                                                                     |
+| Metode | Endepunkt                | Formål                                                                                                                                                                          |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Fullstendig kostnads-/bruksanalyse: sammendrag, daglig trend, etter leverandør/modell/API-nøkkel/konto/nivå. Spørring: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Kvotebruk over tid per leverandør. Spørring: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                       |
+| `GET`  | `/api/usage/history`     | Rådata for brukshistorikk.                                                                                                                                                      |
+| `GET`  | `/api/usage/call-logs`   | Kallogger per forespørsel (modell, tokener, kostnad, ventetid, status).                                                                                                         |
+| `GET`  | `/api/usage/quota`       | Status for leverandørkvoter.                                                                                                                                                    |
+| `GET`  | `/api/usage/proxy-logs`  | Logger for proxy-forespørsler.                                                                                                                                                  |
 
 ### Budsjetter
 
-| Metode | Endepunkt                | Hensikt                                                                                        |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Kostnadssammendrag + -budsjettsjekk for én API nøkkel (`apiKeyId` -spørringsparameter kreves). |
-| `POST` | `/api/usage/budget`      | Angi daily/weekly/monthly USD grenser + advarselsterskel for en API nøkkel.                    |
-| `GET`  | `/api/usage/budget/bulk` | Massebudsjettsammendrag på tvers av API nøkler.                                                |
+| Metode | Endepunkt                | Formål                                                                                              |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Kostnadssammendrag + budsjettkontroll for én API-nøkkel (`apiKeyId`-spørringsparameter er påkrevd). |
+| `POST` | `/api/usage/budget`      | Angi daglige/ukentlige/månedlige USD-grenser + varselterskel for en API-nøkkel.                     |
+| `GET`  | `/api/usage/budget/bulk` | Samlede budsjettsammendrag på tvers av API-nøkler.                                                  |
 
-> Budsjettet API er scoped pr**API nøkkel** (`apiKeyId`). Grenser returnert av `GET /api/usage/budget` inkluderer `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, og de løpende summene (`totalCostToday`, `totalCostMonth`, ...).
+> Budsjett-API-et er avgrenset per **API-nøkkel** (`apiKeyId`). Grenser som returneres av
+> `GET /api/usage/budget`, inkluderer `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> en `warningThreshold` og løpende totaler (`totalCostToday`, `totalCostMonth`, …).
 
 ### Prissetting
 
-| Metode   | Endepunkt               | Hensikt                                                                                                                                       |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Sammenslått firelagsprising (bruker, models.dev, LiteLLM, standardinnstillinger). `?includeSources=1` returnerer `pricing` + `sourceMap`.     |
-| `PATCH`  | `/api/pricing`          | Overstyr priser for `{ provider: { model: { input, output, cached, … } } }`.                                                                  |
-| `DELETE` | `/api/pricing`          | Fjern brukerprisoverstyringer (valgfritt med `?provider=&model=`); synkroniserte priser eller innebygde standardverdier forblir som reserver. |
-| `GET`    | `/api/pricing/defaults` | Vis standard reservefrekvenser per-1M.                                                                                                        |
-| `GET`    | `/api/pricing/models`   | Pris tastet etter modell.                                                                                                                     |
-| `POST`   | `/api/pricing/sync`     | Utløs en manuell synkronisering fra eksterne kilder (LiteLLM).                                                                                |
-| `GET`    | `/api/pricing/sync`     | Gjeldende synkroniseringsstatus.                                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Slett bare LiteLLM-synkroniserte priser (`pricing_synced`); models.dev-data er separate.                                                      |
+| Metode   | Endepunkt               | Formål                                                                                                                                                     |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Sammenslåtte priser fra fire lag (bruker, models.dev, LiteLLM, standardverdier). `?includeSources=1` returnerer `pricing` + `sourceMap`.                   |
+| `PATCH`  | `/api/pricing`          | Overstyr priser for `{ provider: { model: { input, output, cached, … } } }`.                                                                               |
+| `DELETE` | `/api/pricing`          | Fjern brukerens prisoverstyringer, eventuelt avgrenset med `?provider=&model=`; synkroniserte satser eller innebygde standardverdier beholdes som reserve. |
+| `GET`    | `/api/pricing/defaults` | Vis standard reservesatser per 1M.                                                                                                                         |
+| `GET`    | `/api/pricing/models`   | Priser indeksert etter modell.                                                                                                                             |
+| `POST`   | `/api/pricing/sync`     | Utløs en manuell synkronisering fra eksterne kilder (LiteLLM).                                                                                             |
+| `GET`    | `/api/pricing/sync`     | Gjeldende synkroniseringsstatus.                                                                                                                           |
+| `DELETE` | `/api/pricing/sync`     | Tøm bare priser synkronisert fra LiteLLM (`pricing_synced`); data fra models.dev er atskilt.                                                               |
 
 ### Andre kostnadsrelevante endepunkter
 
-| Metode | Endepunkt                     | Hensikt                                                                           |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Token-totaler for gratismodeller, brukt denne måneden og gjenværende gratiskvote. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Bruk for en delt kvotepool.                                                       |
+| Metode | Endepunkt                     | Formål                                                                          |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Tokenantall for gratismodeller, brukt denne måneden og gjenværende gratiskvote. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Bruk for en delt kvotepulje.                                                    |
 
 ---
 

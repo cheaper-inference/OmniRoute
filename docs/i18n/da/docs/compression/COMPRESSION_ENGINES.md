@@ -97,64 +97,47 @@ den ikke kan nå. Idempotens håndhæves ved at scanne meddelelseshistorikken ef
 før indsættelse, så requests med flere ture (som afspiller tidligere meddelelser igen) ikke ophober
 noten én gang pr. tur.
 
-## Caveman
+## Hulemand
 
-Caveman-tilstand fokuserer på semantisk kondensering af almindelig prosa:
+Caveman-tilstand fokuserer på semantisk kondensering af normal prosa:
 
-- bevarer kodeblokke, URL'er, JSON, stier og strukturerede data
-- fjerner fyldord, forbehold, gentagen kontekst og omstændelige forbindelsesformuleringer
-- understøtter sprogspecifikke filregelsæt i `open-sse/services/compression/rules/`
-- er fortsat tilgængelig via de ældre tilstande `standard`, `aggressive` og `ultra`
+- bevarer kodeblokke, URLs, JSON, stier og strukturerede data
+- fjerner fyldstof, afdækning, gentagen kontekst og verbose bindende frasering
+- understøtter sprogbevidste filregelpakker i `open-sse/services/compression/rules/`
+- forbliver tilgængelig gennem de gamle `standard`, `aggressive` og `ultra` -tilstande
 
-Dashboardplaceringen er `Dashboard -> Kontekst og cache -> Caveman`.
+Instrumentbrættets overflade er `Dashboard -> Context & Cache -> Caveman`.
 
-Caveman-projektet rapporterer `~75%` færre outputtokens, `65%` gennemsnitlig outputbesparelse i benchmarks
-med et interval på `22-87%` samt et værktøj til inputkomprimering på `~46%`. OmniRoute bruger Cavemans tal for
-inputkomprimering ved dokumentation af kombinerede prompt-/kontekstbesparelser; Cavemans outputtilstand er fortsat
-en separat funktion til styring af svaradfærd.
+Caveman upstream rapporterer `~75%` færre output-tokens, `65%` gennemsnitlige outputbesparelser i benchmarks med et `22-87%` område og et `~46%` input-komprimeringsværktøj. OmniRoute bruger Caveman input-side-nummeret, når de dokumenterer stablede prompt/context besparelser; Caveman-outputtilstand forbliver en separat respons-adfærdsfunktion.
 
 ## RTK
 
-RTK-tilstand fokuserer på output fra kommandoer og værktøjer:
+RTK tilstand fokuserer på kommando- og værktøjsoutput:
 
-- registrerer outputklasser såsom `git status`, `git branch`, `git diff`, Vitest/Jest/Pytest,
-  Cargo-/Go-tests, TypeScript-/Vite-/Webpack-builds, ESLint, npm-audits/-installationer, Docker-logfiler,
-  shell-kommandoerne `find`/`grep`, stack traces og generiske logfiler
-- anvender 49 JSON-filtre fra `open-sse/services/compression/engines/rtk/filters/`
-- understøtter den deklarative pipeline i RTK-stil: fjernelse af ANSI, erstatning, tidlig afslutning ved outputmatch,
-  fjernelse/bevarelse af linjer, afkortning pr. linje, afkortning efter start/slutning/maksimalt antal linjer samt fallback ved tomt output
-- understøtter tillidsbegrænsede projektfiltre i `.rtk/filters.json` og globale filtre i
-  `DATA_DIR/rtk/filters.json`
-- fjerner ANSI-sekvenser, fremskridtsstøj, gentagne linjer og unødvendig standardtekst
-- bevarer handlingsrelevante fejl, advarsler, oversigter, ændrede filer og afsluttende kontekst
-- kan valgfrit bevare redigeret råoutput til gendannelse/fejlfinding via godkendte administrationsruter
+- registrerer outputklasser såsom `git status`, `git branch`, `git diff`, Vitest/Jest/Pytest, Cargo/Go tests, TypeScript/Vite/Webpack builds, ESLint, npm audit/installs, Docker logfiler, shell `find`/`grep`, stack traces og generiske logfiler
+- anvender 49 JSON -filtre fra `open-sse/services/compression/engines/rtk/filters/`
+- understøtter den deklarative pipeline i RTK-stil: ANSI stripping, replace, match-output kortslutning, strip/keep linjer, per-line trunkering, head/tail/max-line trunkering og on-empty fallback
+- understøtter tillidsbaserede projektfiltre i `.rtk/filters.json` og globale filtre i `DATA_DIR/rtk/filters.json`
+- stripper ANSI sekvenser, fremskridtsstøj, gentagne linjer og uhensigtsmæssig kedelplade
+- bevarer handlingsbare fejl, advarsler, oversigter, ændrede filer og halekontekst
+- kan eventuelt beholde redigeret rå output til recovery/debugging gennem autentificerede administrationsruter
 
-Dashboardplaceringen er `Dashboard -> Kontekst og cache -> RTK`.
+Instrumentbrættets overflade er `Dashboard -> Context & Cache -> RTK`.
 
-Driftsoplysninger om brugerdefinerede filtre, tillid, verificering og gendannelse af råoutput findes i
-[`RTK_COMPRESSION.md`](./RTK_COMPRESSION.md).
+Driftsdetaljer for tilpassede filtre, tillid, verifikation og gendannelse af rå-output live i [`RTK_COMPRESSION.md`](./RTK_COMPRESSION.md).
 
-RTK-projektet rapporterer besparelser på `60-90%` ved komprimering af kommandooutput. Eksemplet i projektets README viser en
-30-minutters Claude Code-session, der reduceres fra `~118,000` tokens til `~23,900`, svarende til en besparelse på `79.7%`.
+RTK upstream rapporterer `60-90%` besparelser for kommando-output-komprimering. Dens README eksempel viser en 30-minutters Claude -kodesession, der går fra `~118,000` tokens til `~23,900`, eller `79.7%` gemt.
 
-## LLMLingua-2 (semantisk beskæring)
+## LLMLingua-2 (Semantisk beskæring)
 
-LLMLingua-2-tilstand udfører **semantisk tokenbeskæring** af prosa ved hjælp af en lille ONNX-tokenklassifikator
-som supplement til de regelbaserede Caveman- og RTK-motorer:
+LLMLingua-2 tilstand udføres **semantisk token beskæring** på prosa ved hjælp af en lille ONNX tokenklassificering, der komplementerer de regelbaserede Caveman- og RTK motorer:
 
-- komprimerer kun prosa i ikke-systemmeddelelser; indhegnede kodeblokke og andre bevarede
-  konstruktioner ændres aldrig
-- kører `@atjsh/llmlingua-2`-backenddelen (ONNX via `@huggingface/transformers`) i en
-  worker-tråd, så modelinferens aldrig blokerer anmodningens event loop
-- kan **kombineres** (`stackPriority` 35): I en kombineret pipeline kører den efter de
-  strukturelle motorer (CCR, session-dedup, headroom, Caveman), men før `ultra`, da
-  semantisk beskæring er mest effektiv på tekst, der allerede er strukturelt komprimeret — f.eks.
-  `rtk -> caveman -> llmlingua`
-- **fortsætter uden fejl ved enhver fejl** (manglende valgfrie afhængigheder, start af worker, modelindlæsning, inferens
-  eller timeout) → den oprindelige tekst returneres uændret, aldrig en fejl
+- komprimerer kun prosa i ikke-systemmeddelelser; indhegnede kodeblokke og andre bevarede konstruktioner ændres aldrig
+- kører `@atjsh/llmlingua-2` backend (ONNX via `@huggingface/transformers`) i en arbejdstråd, så modelinferens blokerer aldrig anmodningshændelsesløkken
+- er **stabelbar** (`stackPriority` 35): i en stablet pipeline kører den efter de strukturelle motorer (CCR, session-dedup, headroom, Caveman) men før `ultra`, da semantisk beskæring er mest effektiv på allerede strukturelt komprimeret tekst — f.eks. `rtk -> caveman -> llmlingua`
+- **fejl-åbner ved enhver fejl** (mangler valgfri deps, worker spawn, model load, inferens eller timeout) → den originale tekst returneres uændret, aldrig en fejl
 
-Motorplacering: `open-sse/services/compression/engines/llmlingua/`. Dashboardplaceringen
-er `Dashboard -> Kontekst og cache -> LLMLingua`.
+Motorplacering: `open-sse/services/compression/engines/llmlingua/`. Instrumentbrættets overflade er `Dashboard -> Context & Cache -> LLMLingua`.
 
 ### Modeller
 
@@ -293,16 +276,16 @@ Filteret anvendes kun på nyttelaster med værktøjsresultater, hvis `type` er `
 
 ---
 
-## Komprimeringskombinationer
+## Kompressionskombinationer
 
-Komprimeringskombinationer er navngivne komprimeringsprofiler, der kan tildeles routingkombinationer:
+Kompressionskombinationer er navngivne kompressionsprofiler, der kan tildeles til routingkombinationer:
 
-- `compression_combos`: gemmer tilstand, pipeline, RTK-konfiguration, sprogkonfiguration og standardmarkør
-- `compression_combo_assignments`: knytter en komprimeringskombination til en routingkombination
-- runtime-integrationen finder en tildelt komprimeringskombination før generiske kombinationstilsidesættelser
-- analyser inkluderer `compression_combo_id` og `engine`
+- `compression_combos`: gemmer tilstand, pipeline, RTK -konfiguration, sprogkonfiguration og standardmarkør
+- `compression_combo_assignments`: kortlægger en kompressionskombination til en routingkombination
+- Runtime-integration løser en tildelt kompressionskombination før generisk kombination tilsidesætter
+- analyser omfatter `compression_combo_id` og `engine`
 
-Placering i dashboardet: `Dashboard -> Kontekst og cache -> Komprimeringskombinationer`.
+Dashboard overflade: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Forudsætninger / operatørvejledning (CCR & session-dedup)
 
@@ -391,7 +374,7 @@ Hentningsværktøjet hedder i øjeblikket `omniroute_ccr_retrieve` ( `omniroute_
 
 ### Sessions livscyklus
 
-Streambare-HTTP-sessioner går i tomgang, og serveren høster dem; det inaktive vindue er indstillet af `OMNIROUTE_MCP_SESSION_IDLE_MS` (standard 5 minutter; refereret ved navn, ikke en hårdkodet værdi, så denne side driver ikke, når den ændres). Symptomet på en inaktiv session er en HTTP 404 med `Unknown Mcp-Session-Id` — midlet er at genoprette forbindelsen eller genstarte sessionen,** ikke** for at rotere en nøgle, ændre et omfang eller omdøbe et værktøj.
+Streambare-HTTP-sessioner går i tomgang, og serveren høster dem; det ledige vindue er konfigureret af `OMNIROUTE_MCP_SESSION_IDLE_MS`, der falder tilbage til `DEFAULT_MCP_SESSION_IDLE_MS` i `open-sse/mcp-server/httpTransport.ts`. Symptomet på en session med tomgang er en HTTP 404 med `Unknown Mcp-Session-Id` — midlet er at genoprette forbindelsen eller genstarte sessionen,**ikke** for at rotere en nøgle, ændre et omfang eller omdøbe et værktøj.
 
 ## API-grænseflade
 

@@ -44,7 +44,7 @@ Et boolsk flagg anses som **aktivert** når dets effektive verdi er `"true"`,
 
 ## Flaggkatalog
 
-120 flagg fordelt på 6 kategorier.** Misligholde** er definisjonen standard — verdien som brukes når verken en DB overstyring eller en miljøvariabel er tilstede.
+121 flagg fordelt på 6 kategorier.** Misligholde** er definisjonen standard — verdien som brukes når verken en DB overstyring eller en miljøvariabel er tilstede.
 
 ### Sikkerhet (11)
 
@@ -115,7 +115,7 @@ Et boolsk flagg anses som **aktivert** når dets effektive verdi er `"true"`,
 
 Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplisitt konfigurert (DB overstyring før miljø), har det forrang over `USAGE_LIMIT_IGNORE_UNPRICED`. Uten noen eksplisitt enum-verdi, velger oppstrøms boolsk opt-out `count_as_zero`; ellers er standard `fail_closed`. Ugyldige enum-verdier og uleselig funksjonsflagg-lagringsfeil ble lukket. Verken oppt-out reduserer prisutgifter eller et mislykket prisoppslag. Håndhevelse og administratorrapport løser den samme effektive policyen.
 
-### Kjøretid (57)
+### Kjøretid (58)
 
 | Nøkkel                                         | Type    | Misligholde | Start på nytt | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------- | ------- | ----------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplisitt konfigurert (DB overstyring f�
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolsk  | `false`     |               | Slutt å tilby og videresende `max` -resonneringsinnsatsen for Cursor Grok 4.7 (#17386): Cursor dokumentliste kun low/medium/high/xhigh, så `grok-4.7-max` fallback-aliaset forsvinner fra katalogen og en `max` innsatsforespørsel sendes uten en innsatsparameter. Av som standard: `max` forblir tilbudt og videresendt, ettersom en live AgentService/Run sonde godtok det.                                                                                                                                                                                                                                                                                                                           |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolsk  | `false`     |               | Send Responses keepalives som en tom linje i stedet for en response.in_progress-hendelse, så et syntetisk øyeblikksbilde kan aldri erstatte det virkelige svaret i den offisielle SDK. En tom linje sender ingen SSE -hendelse, så en klientvakthund som tilbakestiller kun på hendelser, vil ikke bli tilbakestilt under en lang stille fase. Av som standard: tidtakere sender den spec-valide response.in_progress-hendelsen.                                                                                                                                                                                                                                                                         |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolsk  | `false`     |               | I komprimeringsbufferstatistikken teller du en komprimert forespørsel til en leverandør av automatisk prefiksbufring (OpenAI, Codex, Azure eller en tilpasset tilkobling som erklærer hurtigbufring med markørstripping) som et estimert cachetreff selv uten `cache_control` markører (#17114). Anslaget er et cache-kvalifiseringssignal, ikke et observert treff, så den rapporterte trefffrekvensen for disse leverandørene går mot 100 %. Av som standard: bare en forespørsel som bærer `cache_control` -markører til en hurtigbufferleverandør teller som et estimert treff, så leverandører av automatiske prefikser fortsetter å rapportere 0.                                                  |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolsk  | `false`     |               | Lar et automatisk nettsøk uten en uttrykkelig `provider` bruke en tilkoblet Codex-konto (ChatGPT) via `codex-search`: som siste mulighet før leverandører uten nøkkel når ingen leverandør med påloggingsinformasjon kan brukes, og som reserve ved feil (#17933). Hvert søk bruker abonnementskvote og tar omtrent 10–40 s. Slått av som standard: `codex-search` kjører bare når en forespørsel angir den uttrykkelig.                                                                                                                                                                                                                                                                                 |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Returnerer hvert flagg med dens effektive verdi, kilde og et sammendrag.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

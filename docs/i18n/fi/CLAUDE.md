@@ -16,7 +16,7 @@ määriteltyjen sääntöjen toiminnallisista tarkennuksista.
 
 Pakollinen worktree-protokolla kokonaisuudessaan (kantahaaran vahvistus, kanoninen
 `.claude/worktrees/`-polku, `cp -al` node_modules, purkusäännöt) on tiedostossa
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (yhteenveto `AGENTS.md`-tiedostossa →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (yhteenveto `AGENTS.md`-tiedostossa →
 Git-työnkulku → "Worktree-eristys"). Claude Code -kohtaiset huomiot:
 
 - Vahvista kantahaara operaattorin kanssa `AskUserQuestion`-työkalulla (Ehdoton sääntö #19), ellei hän

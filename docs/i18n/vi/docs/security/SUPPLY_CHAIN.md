@@ -18,18 +18,32 @@ OmniRoute xuất bản các artifact npm + Docker. Các cổng này cung cấp b
 
 Cơ chế điều chỉnh CVE của image sử dụng **hai bước** trong `docker-publish.yml`: bước SARIF (`HIGH,CRITICAL`, `exit-code: 0`) giữ cho các CVE mức HIGH+CRITICAL hiển thị trong tab Security mà không chặn; bước _cổng CRITICAL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) sẽ làm thất bại quá trình phát hành nếu có CVE mức CRITICAL **có bản vá khả dụng**. `ignore-unfixed` ngăn chặn việc chặn phát hành đối với CVE của image cơ sở mà không có bản vá từ nhà cung cấp.
 
-## ⚠️ Sự biến động của CVE (các cổng osv/Trivy chặn)
+## ⚠️ Biến động CVE (các cổng osv/Trivy có tính chặn)
 
-osv và Trivy so sánh các phụ thuộc (deps) với các cơ sở dữ liệu CVE **liên tục phát triển**. Một PR **không chạm vào bất kỳ phụ thuộc nào** vẫn có thể đột ngột chuyển sang màu đỏ vì một CVE mới được tiết lộ trong một phụ thuộc hiện có (osv: `vulnCount` đo được > baseline; Trivy: một CRITICAL mới có thể sửa được trong image). **Đây là hành vi hoạt động ĐƯỢC MONG ĐỢI của một cổng CVE chặn, không phải là một lỗi sản phẩm.**
+osv và Trivy đối chiếu các dependency với cơ sở dữ liệu CVE vốn **liên tục phát triển**. Một PR
+**không thay đổi dependency nào** vẫn có thể đột ngột chuyển sang trạng thái đỏ vì một CVE mới
+được công bố trong một dependency hiện có (osv: `vulnCount` đo được > mức cơ sở; Trivy: một
+lỗ hổng CRITICAL mới có thể khắc phục trong image). **Đây là hành vi vận hành DỰ KIẾN của một
+cổng CVE có tính chặn, không phải lỗi hồi quy của sản phẩm.**
 
-Khi osv hoặc Trivy chuyển sang màu đỏ do một CVE mới được tiết lộ, biện pháp khắc phục là:
+Khi osv hoặc Trivy chuyển sang trạng thái đỏ do một CVE mới được công bố, cách khắc phục là:
 
-1.  **Nâng cấp phụ thuộc bị ảnh hưởng** (ưu tiên) — nâng cấp lên phiên bản đã được vá thông qua `overrides` trong `package.json` (đối với các phụ thuộc bắc cầu) hoặc xây dựng lại image trên một nền tảng đã được vá.
-2.  **Nếu không có bản vá từ nhà cung cấp:**
-    - **osv:** đặt lại baseline cho `metrics.vulnCount` trong `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` không bao gồm các cổng chuyên dụng — hãy chỉnh sửa giá trị thủ công, `direction:down`) kèm theo ghi chú giải thích + vấn đề theo dõi.
-    - **Trivy:** thêm một mục vào `.trivyignore` (mỗi dòng một CVE-ID) kèm theo bình luận giải thích + vấn đề theo dõi. `ignore-unfixed: true` đã tự động xử lý các CVE không có bản vá.
+1. **Nâng phiên bản dependency bị ảnh hưởng** (ưu tiên) — nâng cấp lên phiên bản đã vá thông qua `package.json`
+   `overrides` (dependency bắc cầu) hoặc xây dựng lại image trên một image nền đã được vá.
+2. **Nếu không có biện pháp khắc phục:** giữ lại kết quả đo được và theo dõi sự phụ thuộc hoặc hình ảnh bị ảnh hưởng. Không nâng mức cơ bản về lỗ hổng để giúp một ứng viên thất bại vượt qua. `ignore-unfixed: true` của Trivy đã loại trừ các lỗ hổng hình ảnh mà không cần bản vá ngược dòng. Bất kỳ ngoại lệ nào đều yêu cầu lỗ hổng ID được xem xét, đường dẫn gói chính xác, vấn đề hết hạn và theo dõi trong chính sách; nó không phải là hậu quả tự động của việc quét thất bại.
 
-Cả hai cổng đều **bỏ qua một cách nhẹ nhàng** (exit 0) khi công cụ không có mặt hoặc phép đo thất bại (osv-scanner không có trong PATH, osv.dev/network không thể truy cập, JSON không hợp lệ) — một lỗi **phép đo** không bao giờ chặn, chỉ một sự thoái lui **được đo lường** mới chặn.
+Các lần thực thi OSV bắt buộc (`check:vuln-ratchet -- --ratchet`) sẽ thất bại theo cơ chế đóng an toàn với
+`INCOMPLETE` và mã thoát 2 khi không thể xác thực trình quét, báo cáo hoặc mức cơ sở.
+Một mức hồi quy được đo lường sẽ trả về mã thoát 1. Việc thực thi mang tính tư vấn vẫn có thể báo cáo `SKIP` với
+mã thoát 0, nhưng điều này không xác nhận rằng các dependency đã vượt qua quá trình quét. Bước Trivy có tính
+chặn cũng yêu cầu phép đo thành công: công cụ không khả dụng, job thất bại
+và thiếu bằng chứng về image không thể chứng nhận một image là sạch.
+
+## Chính sách quét hình ảnh
+
+`.trivyignore.yaml` hiện tại không có ngoại lệ về lỗ hổng bảo mật. `npm run check:trivy-ignore-policy` xác thực chính sách có cấu trúc trong cấu hình quét cục bộ, CI và Chất lượng. IDs không xác định, đường dẫn rộng hơn, mục nhập trùng lặp và ngoại lệ đã hết hạn đều bị từ chối; `.trivyignore` kế thừa không phải là đầu vào cho các lần quét được di chuyển.
+
+Docker kiểm tra công cụ chính sách từ `github.workflow_sha` và chính sách nguồn hình ảnh bằng cùng bộ chọn nguồn như bản dựng. Bộ chọn chính sách từ chối các phạm vi không tương thích và chuẩn bị một tệp cho cả hai lần quét Trivy. Nguồn lịch sử không có chính sách có cấu trúc sẽ không nhận được ngoại lệ. Cả hai đều quét pin Trivy `v0.70.0`. Xác thực chính sách chứng minh tính nhất quán của cấu hình; hình ảnh vẫn cần quét thành công.
 
 ## Rủi ro phụ thuộc khi nghỉ hưu
 

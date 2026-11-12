@@ -54,7 +54,7 @@ Naujas skirtukas, skirtas turiniui iš URL išgauti per `POST /v1/web/fetch` (su
 - Įvestis: URL + viso puslapio perjungiklis + formato parinkiklis (markdown / tekstas / HTML).
 - Pateikti → gauti → atvaizduoti `ScrapeResult.tsx`.
 - `ScrapeResult` atvaizduoja markdown peržiūrą ir neapdoroto turinio perjungiklį.
-- Riba: jei atsakymo turinys > **256 KB**, naudotojo sąsajoje rodoma `(sutrumpinta, peržiūrėti neapdorotą turinį)`, o neapdorotas turinys atidaromas Monaco modaliniame lange (D21).
+- Riba: jei atsakymo turinys > **256 KB**, naudotojo sąsajoje rodoma `View full raw content`, o neapdorotas turinys atidaromas modaliniame lange (D21).
 - Metaduomenų skydelis: teikėjas (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), delsa, kaina, atsakymo dydis, nuorodų skaičius.
 - Naudoja `useScrapeFetch.ts` kablį.
 
@@ -103,10 +103,12 @@ Vykdo tą pačią užklausą / URL lygiagrečiai naudojant iki **4 teikėjų** (
 `ProviderCatalog.tsx` pateikia visą teikėjų sąrašą iš `GET /api/search/providers`
 (F4 išplėstas įtraukiant turinio gavimo teikėjus):
 
-| `kind` | `"search"` (20 teikėjų) arba `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 teikėjų) arba `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Būsena **nustatoma užklausos metu**, patikrinant, ar yra prisijungimo duomenų ir ar
 visiems raktams šiuo metu taikomas atvėsimo laikotarpis.
+
+`codex-search` (Codex Web Search): Naudoja jūsų prijungtas Codex (ChatGPT) paskyras be atskiro rakto. Kiekviena paieška naudoja prenumeratos kvotą ir trunka maždaug 10–40 s. Vykdoma, kai užklausa jį nurodo; automatiniam pasirinkimui reikia vėliavėlės `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, kuri pagal numatytuosius nustatymus išjungta.
 
 ---
 

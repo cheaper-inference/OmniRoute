@@ -2,10 +2,8 @@
  * Ensure Cursor catalog listings always expose OmniRoute's public auto-router
  * ids (`auto` + Cost/Balance/Intelligence variants). Live AvailableModels /
  * cursor-agent often return wire id `default` only.
+ * Imported by dashboard components: keep flag and database readers on the server.
  */
-
-import { GROK_47_EFFORTS } from "@omniroute/open-sse/config/providers/registry/cursor/grok47.ts";
-import { isCursorGrok47MaxEffortDropped } from "@omniroute/open-sse/utils/cursorAgentProtobuf/grok47MaxEffort.ts";
 
 export type CursorAutoCatalogEntry = {
   id: string;
@@ -29,9 +27,6 @@ const CURSOR_AUTO_ROUTER_VARIANT_NAMES: Record<
 };
 
 const CURSOR_ONE_MILLION_CONTEXT = 1_000_000;
-// Verified with grok-4.7 through AgentService/Run: each tier returned HTTP 200. Cursor's docs list
-// only GROK_47_EFFORTS, so "max" is dropped only under CURSOR_GROK_47_DROP_MAX_EFFORT (#17386).
-const GROK_47_FALLBACK_EFFORT_TIERS = [...GROK_47_EFFORTS, "max"] as const;
 const CURSOR_CONTEXT_EFFORT = "(?:low|medium|high|xhigh|max)";
 const CURSOR_ONE_MILLION_MODEL_PATTERNS = [
   new RegExp(`^claude-fable-5-1-thinking-${CURSOR_CONTEXT_EFFORT}$`),
@@ -60,34 +55,6 @@ function supportsCursorOneMillionContext(id: string): boolean {
 function oneMillionDisplayName(name: string): string {
   const family = CURSOR_CONTEXT_FAMILY_NAMES.find((candidate) => name.startsWith(candidate));
   return family ? `${family} 1M${name.slice(family.length)}` : `${name} 1M`;
-}
-
-/** Expose selectable names only when Grok 4.7 itself is available upstream. */
-export function ensureCursorGrokEffortAliases<
-  T extends CursorAutoCatalogEntry & { supportedThinkingEfforts?: string[] },
->(models: T[]): T[] {
-  const base = models.find((model) => model.id === "grok-4.7");
-  if (!base) return models;
-  const tiers: readonly string[] = isCursorGrok47MaxEffortDropped()
-    ? GROK_47_EFFORTS
-    : GROK_47_FALLBACK_EFFORT_TIERS;
-  const allowed =
-    base.supportedThinkingEfforts === undefined
-      ? tiers
-      : tiers.filter((tier) => base.supportedThinkingEfforts?.includes(tier));
-  const existing = new Set(models.map((model) => model.id));
-  const out: T[] = [];
-  for (const model of models) {
-    out.push(model);
-    if (model.id !== base.id) continue;
-    for (const tier of allowed) {
-      const id = `${base.id}-${tier}`;
-      if (existing.has(id)) continue;
-      existing.add(id);
-      out.push({ ...base, id, name: `${base.name} ${tier.toUpperCase()}` });
-    }
-  }
-  return out;
 }
 
 /** Cursor auto-router: catalog id `auto`, wire id `default`. Always keep `auto` visible. */

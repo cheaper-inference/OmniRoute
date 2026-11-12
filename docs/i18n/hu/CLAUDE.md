@@ -12,7 +12,7 @@
 
 A teljes, kötelező worktree-protokoll (a base branch megerősítése, a `.claude/worktrees/`
 kanonikus útvonal, a `cp -al` node_modules, a lebontási szabályok) a
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) fájlban található (összefoglalva az `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) fájlban található (összefoglalva az `AGENTS.md` →
 Git-munkafolyamat → „Worktree-izoláció” részben). Claude Code-specifikus tudnivalók:
 
 - Erősítsd meg a base branchet az operátorral az `AskUserQuestion` segítségével (Hard Rule #19),

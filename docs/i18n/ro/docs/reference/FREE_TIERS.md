@@ -111,15 +111,15 @@ importul pe server din alta, previzualizarea nu ar corespunde cu ceea ce se
 
 ---
 
-## De ce cifra noastră este mai mică decât cea a altor agregatoare
+## De ce numărul nostru este mai mic decât al altor agregatori
 
-Majoritatea cifrelor privind „tokenurile gratuite pe lună” din acest domeniu reprezintă sume ale limitelor per model. A noastră nu este, în mod intenționat:
+Majoritatea cifrelor „jetoane gratuite pe lună” din acest spațiu sunt sume de etichete per model. Al nostru nu este, intenționat:
 
-- **Fiecare fond comun este numărat o singură dată.** Planul gratuit Mistral oferă o singură alocație de 1B/lună per organizație; enumerarea acesteia pentru cinci modele nu o transformă în 5B. Însumat per model, propriul nostru catalog ar indica **~7.4B** (recalculat la 2026-09-03; această cifră nu este verificată de CI — măsurați-o din nou ori de câte ori se modifică catalogul) — titlul indică **~1.47B**, deoarece aceasta este cantitatea pe care un cont de la fiecare furnizor o poate consuma efectiv.
-- **Plafoanele zilnice sunt convertite, ratele nu.** Un plafon documentat de tokenuri/zi devine `× 30`; un plafon documentat de cereri/zi devine `RPD × ~800 tokenuri × 30`; un furnizor care publică doar cereri pe minut **nu** are o cifră lunară și este prezentat ca _fără plafon_, fără a fi inclus vreodată în sumă. Înmulțirea unei limite de rată cu 24/7 este inflația pe care refuzăm să o practicăm.
-- **Cotele condiționate de o verificare regională a identității sunt prezentate separat** (`+~6M în urma verificării regionale a identității`), deoarece majoritatea cititorilor nu le pot utiliza.
-- **Creditele de înscriere sunt valabile doar în prima lună** și sunt raportate ca o a doua cifră, fără a fi incluse vreodată în cifra recurentă.
-- **Cifra este impusă prin CI.** `npm run check:docs-counts` recalculează totalurile din catalog și determină eșuarea compilării atunci când acest fișier, README-ul sau cardul de buget nu mai corespund acestora.
+- **Fiecare piscină comună este numărată o dată.** Planul gratuit al Mistral este o alocație 1B/month per organizație; enumerarea lui sub cinci modele nu îl face 5B. Însumat pe model, propriul nostru catalog ar citi **~ 7.4B** (recalculată pe 2026-09-03; această cifră nu este CI-gated — re-măsoară-o ori de câte ori catalogul se schimbă) — titlul spune **~ 1,47B** pentru că asta este ceea ce poate cheltui de fapt un cont al fiecărui furnizor.
+- **Limitele zilnice sunt convertite, ratele nu.** Un plafon tokens/day documentat devine `× 30`; un plafon requests/day documentat devine `RPD × ~800 tokens × 30`; un furnizor care publică doar solicitări-pe-minut are **nu** cifră lunară și este listată ca _necapped_, niciodată însumată. Înmulțirea unei limite de rată cu 24/7 este inflația pe care o refuzăm.
+- **Cotele din spatele verificării identității regionale sunt afișate separat** (`+~6M behind regional identity verification`), deoarece majoritatea cititorilor nu le pot folosi.
+- **Creditele de înscriere sunt doar pentru prima lună** și raportată ca o a doua cifră, niciodată amestecată în numărul constant.
+- **Cifra este aplicată de CI.** `npm run check:docs-counts` recalculează totalurile din catalog și nu reușește construcția atunci când acest fișier, README sau cardul de buget ies din ele.
 
 ---
 
@@ -379,12 +379,12 @@ Majoritatea cifrelor privind „tokenurile gratuite pe lună” din acest domeni
 
 ## Glosar
 
-| Termen                  | Semnificație                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**     | Solicitări pe minut / zi / oră                                                        |
-| **TPM / TPD**           | Tokenuri pe minut / zi                                                                |
-| **Alocare documentată** | Furnizorul publică o limită explicită lunară/zilnică de tokenuri (buget justificabil) |
-| **Plafon teoretic**     | `limită-de-rată × 24/7 × 30d` — un maxim, nu un buget alocat                          |
-| **Neuron**              | Unitate de calcul Cloudflare (~1 token de ieșire)                                     |
+| Termen               | Sens                                                                           |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **RPM / RPD / RPH**  | Cereri pe minut/zi/ora                                                         |
+| **TPM / TPD**        | Jetoane pe minut/zi                                                            |
+| **Grant documentat** | Furnizorul publică un plafon de simbol daily/monthly explicit (buget susținut) |
+| **Plafon teoretic**  | `rate-limit × 24/7 × 30d` — un maximum, nu un buget acordat                    |
+| **Neuron**           | Unitate de calcul Cloudflare (token de ieșire ~ 1)                             |
 
-> Generat pe baza cercetării pentru fiecare furnizor la 2026-06-05. Rulați din nou fluxul de lucru pentru cercetare (consultați `_tasks/features-v3.8.12`) pentru actualizare.
+> Generat din cercetarea per furnizor pe 2026-06-05. Reluați fluxul de lucru de cercetare (consultați `_tasks/features-v3.8.12`) pentru a reîmprospăta.

@@ -43,7 +43,7 @@ Een boolean-vlag wordt als **ingeschakeld** beschouwd wanneer de effectieve waar
 
 ## Vlagcatalogus
 
-120 vlaggen in 6 categorieën.** Standaard** is de standaarddefinitie — de waarde die wordt gebruikt wanneer noch een DB overschrijving noch een omgevingsvariabele aanwezig is.
+121 vlaggen in 6 categorieën.** Standaard** is de standaarddefinitie — de waarde die wordt gebruikt wanneer noch een DB overschrijving noch een omgevingsvariabele aanwezig is.
 
 ### Beveiliging (11)
 
@@ -114,7 +114,7 @@ Een boolean-vlag wordt als **ingeschakeld** beschouwd wanneer de effectieve waar
 
 Wanneer `UNPRICED_USAGE_BUDGET_POLICY` expliciet is geconfigureerd (DB overschrijft vóór omgeving), heeft het voorrang op `USAGE_LIMIT_IGNORE_UNPRICED`. Zonder expliciete enum-waarde selecteert de upstream booleaanse opt-out `count_as_zero`; anders is de standaard `fail_closed`. Ongeldige opsommingswaarden en onleesbare feature-flag-opslag mislukt gesloten. Geen van beide opt-outs versoepelt de prijsuitgaven of een mislukte prijsopzoeking. Handhaving en het beheerdersrapport lossen hetzelfde effectieve beleid op.
 
-### Looptijd (57)
+### Looptijd (58)
 
 | Sleutel                                        | Type      | Standaard | Opnieuw opstarten | Beschrijving                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------------- | --------- | --------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -177,6 +177,7 @@ Wanneer `UNPRICED_USAGE_BUDGET_POLICY` expliciet is geconfigureerd (DB overschri
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | Booleaans | `false`   |                   | Stop met het aanbieden en doorsturen van de `max` -redeneringsinspanning voor Cursor Grok 4.7 (#17386): Cursor's documenten vermelden alleen low/medium/high/xhigh, dus de `grok-4.7-max` fallback-alias verdwijnt uit de catalogus en een `max` inspanningsverzoek wordt verzonden zonder een inspanningsparameter. Standaard uitgeschakeld: `max` blijft aangeboden en doorgestuurd, omdat een live AgentService/Run sonde het heeft geaccepteerd.                                                                                                                                                                                                                                                                                                                                  |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | Booleaans | `false`   |                   | Stuur Responses keepalives als een lege regel in plaats van een response.in_progress-gebeurtenis, zodat een synthetische momentopname nooit het echte antwoord in de officiële SDK kan vervangen. Een lege regel verzendt geen SSE -gebeurtenis, dus een client-watchdog die alleen wordt gereset bij gebeurtenissen, wordt niet gereset tijdens een lange stille fase. Standaard uitgeschakeld: timers verzenden de spec-valide response.in_progress-gebeurtenis.                                                                                                                                                                                                                                                                                                                    |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | Booleaans | `false`   |                   | In de compressiecachestatistieken telt u een gecomprimeerde aanvraag aan een automatische prefix-cachingprovider (OpenAI, Codex, Azure of een aangepaste verbinding die promptcaching declareert met markeringsstripping) als een geschatte cachetreffer, zelfs zonder `cache_control` markeringen (#17114). De schatting is een signaal om in aanmerking te komen voor de cache, en niet een waargenomen hit. Het gerapporteerde hitpercentage voor deze providers neigt dus naar 100%. Standaard uitgeschakeld: alleen een verzoek met `cache_control` -markeringen naar een cachingprovider telt als een geschatte treffer, dus aanbieders van automatische voorvoegsels blijven 0 rapporteren.                                                                                    |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | Booleaans | `false`   |                   | Laat een automatische webzoekopdracht zonder expliciete `provider` een gekoppeld Codex-account (ChatGPT) gebruiken via `codex-search`: als laatste optie vóór aanbieders zonder sleutel wanneer geen aanbieder met inloggegevens bruikbaar is, en als reserve bij een storing (#17933). Elke zoekopdracht verbruikt abonnementsquotum en duurt ongeveer 10–40 s. Standaard uitgeschakeld: `codex-search` wordt alleen uitgevoerd als het verzoek deze aanbieder expliciet noemt.                                                                                                                                                                                                                                                                                                      |
 
 ### CLI (5)
 
@@ -247,10 +248,10 @@ Retourneert elke vlag met zijn effectieve waarde, bron en een samenvatting.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

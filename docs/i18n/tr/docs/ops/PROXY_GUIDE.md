@@ -394,7 +394,7 @@ Tarayıcı benzeri TLS parmak izleri oluşturmak için `wreq-js` kullanarak tara
 
 ### CLI Parmak İzi Eşleştirme
 
-**CLI Parmak İzi Anahtarı** (`Ayarlar → Güvenlik`), HTTP başlıklarını ve JSON gövde alanlarını yerel CLI ikili dosyalarının (Claude Code, Codex vb.) imzasıyla tam olarak eşleşecek şekilde yeniden sıralar. Bu özellik, proxy'nin **üzerine ek olarak** çalışır:
+**CLI Parmak İzi Anahtarı** (`Settings → Security`), HTTP başlıklarını ve JSON gövde alanlarını yerel CLI ikili dosyalarının (Claude Code, Codex vb.) imzasıyla tam olarak eşleşecek şekilde yeniden sıralar. Bu özellik, proxy'nin **üzerine ek olarak** çalışır:
 
 ```
 IP adresiniz (engellenmiş) → Proxy IP'si (ABD) → Sağlayıcı API'si

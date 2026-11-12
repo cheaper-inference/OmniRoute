@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Papan pemuka dibuka di `http://localhost:20128` dan URL asas API ialah `http://localhost:20128/v1`.
+Papan pemuka dibuka pada `http://localhost:20128` dan API asas URL ialah `http://localhost:20128/v1`.
+
+> **pengguna npm:** Jika npm memberi amaran bahawa skrip pemasangan telah disekat (cth, `omniroute`, `better-sqlite3`), lihat [Penyelesaian masalah — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

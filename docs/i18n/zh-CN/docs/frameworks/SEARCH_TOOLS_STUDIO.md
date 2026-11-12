@@ -53,7 +53,7 @@ Search Tools Studio 将 `/dashboard/search-tools` 从基础搜索试验场升级
 - 输入：URL + 整页切换开关 + 格式选择器（markdown / 文本 / HTML）。
 - 提交 → 获取 → 渲染 `ScrapeResult.tsx`。
 - `ScrapeResult` 渲染 markdown 预览，并提供原始内容切换开关。
-- 上限：如果响应正文超过 **256 KB**，UI 将显示`（已截断，查看原始内容）`，并在 Monaco 模态窗口中打开原始内容（D21）。
+- 上限：如果响应正文超过 **256 KB**，UI 将显示`View full raw content`，并在模态窗口中打开原始内容（D21）。
 - 元数据面板：提供者（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search）、延迟、成本、响应大小、链接数量。
 - 使用 `useScrapeFetch.ts` hook。
 
@@ -102,9 +102,11 @@ Search Tools Studio 将 `/dashboard/search-tools` 从基础搜索试验场升级
 `ProviderCatalog.tsx` 会展示来自 `GET /api/search/providers` 的完整提供者列表
 （在 F4 中扩展为包含抓取提供者）：
 
-| `kind` | `"search"`（20 个提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
+| `kind` | `"search"`（23 个提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
 
 状态通过检查凭据是否存在以及所有密钥当前是否均处于冷却状态，**在请求时动态确定**。
+
+`codex-search` (Codex Web Search): 使用已连接的 Codex (ChatGPT) 账号，无需单独的密钥。 每次搜索都会消耗订阅配额，耗时约 10–40 s。 请求指定该提供商时才会运行；自动选择需要启用默认关闭的 `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` 功能标志。
 
 ---
 

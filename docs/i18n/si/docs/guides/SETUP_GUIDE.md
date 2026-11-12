@@ -20,14 +20,16 @@
 
 ## ස්ථාපන ක්රම
 
-### npm (නිර්දේශිතයි)
+### npm (නිර්දේශිත)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-උපකරණ පුවරුව `http://localhost:20128` හි විවෘත වන අතර API මූලික URL එක `http://localhost:20128/v1` වේ.
+උපකරණ පුවරුව `http://localhost:20128` හි විවෘත වන අතර API පදනම URL `http://localhost:20128/v1` වේ.
+
+> **npm භාවිතා කරන්නන්:** ස්ථාපන ස්ක්‍රිප්ට් අවහිර කර ඇති බවට npm අනතුරු අඟවන්නේ නම් (උදා, `omniroute`, `better-sqlite3`), [— npm install-scripts blocked දෝශ නිරාකරණය](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) බලන්න.
 
 ### pnpm
 

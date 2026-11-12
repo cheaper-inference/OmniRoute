@@ -215,6 +215,45 @@ limit", GLM `并发数过高`)가 포함된 `429`는 계정이 정상 상태이�
 회귀 방지 테스트: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### 은행 재설정 자동 적용
+
+**범위:** Codex 및 Claude 구독(OAuth) 연결.**선택** : `bankedResetAutoApply` 설정은 꺼져 있고 기본적으로 `dry-run` 모드입니다(설정 → AI → 자동 적용 뱅크 재설정).
+
+**목적:** 운영자가 공급자 한도 페이지에서 "사용"을 누를 때까지 기다리지 않고 계정이 사용 한계에 도달할 때 자체적으로 은행 재설정을 소비합니다.
+
+| 신용 유형(`creditTypes`) | 무엇이 구속되었는가                | 실행되는 곳                                |
+| ------------------------ | ---------------------------------- | ------------------------------------------ |
+| `codexCredits`           | Codex 재설정 크레딧                | 백그라운드 작업, 60초마다                  |
+| `claudeCredits`          | Claude 은행 보조금(`GRANT` 크레딧) | 백그라운드 작업, 60초마다                  |
+| `claudeSessionReset`     | Claude 주간 세션 제한 재설정(위)   | 계정별 토글과 동일한 정책을 통해 요청 경로 |
+
+**구현:**
+
+- 순수 결정(두 경로 모두에 대해 하나의 규칙 세트): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- 백그라운드 작업: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` 에서 시작됨)
+- Claude 요청 경로 게이트: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` 에서 `setClaudeLimitResetPolicy()` 통해 등록됨
+- 역사, 캡, 웹훅: `src/lib/usage/bankedResetAudit.ts`
+- 연혁 API: `GET /api/settings/banked-reset-auto/history?limit=50` (관리인증)
+
+**결정 순서** (첫 번째 실패한 규칙은 기록된 이유입니다):
+
+1. 기능 해제, 신용 유형 해제 또는 범위를 벗어난 계정(`accountScope` `all` / `selected` 및 계정별 `connections` 맵)
+2. 선택적 UTC 일정 외부(`startHourUtc` > `endHourUtc` 자정을 넘음).
+3. 지난 24시간 동안의 한도: 두 상환 사이의 `maxPerAccountPerDay` (1), `maxPerDay` (3) 및 `minSpacingMinutes` (30).
+4. 트리거: 벽으로 둘러싸인 `session` 또는 `weekly` 창( `isAccountQuotaExhausted()` 아닌 `getQuotaWindowStatus().reachedThreshold` 에서 읽음) 또는 최소 `expiringCreditMinUsedPercent` (50)를 사용한 계정의 `expiringCreditHours` (24) 내에서 만료되는 크레딧.
+5. 자연 재설정 가드: `sessionResetGuardMinutes` (90) 내에서 벽으로 둘러싸인 5시간 창이 재설정되거나 `weeklyResetGuardHours` (12) 내에서 벽으로 둘러싸인 주간 창이 재설정되면 건너뜁니다.
+6. 주간 하한: 주간 남은 금액이 `weeklyFloorPercent` (10) 미만인 경우 5시간 재설정을 건너뜁니다.
+7. `last-resort` 모드: 동일한 공급자의 다른 범위 내 계정에 두 창 모두에 최소 `poolHeadroomPercent` (10)가 남아 있는 동안 건너뜁니다. 만료되는 크레딧 트리거는 이를 우회합니다.
+8. `dry-run` 행을 기록하고 아무것도 상환하지 않습니다. `last-resort` 및 `eager` 사용됩니다.
+
+할당량 데이터가 누락되어도 상환이 잠금 해제되지 않습니다. 재설정 시간을 알 수 없거나 주간 사용량이 건너뛰기 때문입니다.
+
+**Claude 세션 재설정:** 기능을 끄거나 `claudeSessionReset` 끄면 계정별 `autoLimitReset` 토글이 이전과 똑같이 결정됩니다. 두 가지 기능을 모두 활성화하면 이 기능은 계정별 토글을 대체합니다. 범위 내 계정은 정책에서 허용하는 경우에만 청구할 수 있으며 `dry-run` 모드에서는 청구가 이루어지지 않습니다.
+
+**안전:** 작업은 틱당 최대 1개의 크레딧을 상환하고, 크레딧을 나열하기 전에 결정하고(건너뛴 계정은 나열되지 않음), 멱등성 키 `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` 사용하고, 나열 또는 상환 실패 후 1시간 동안 계정을 백업합니다. 모든 상환, 실패 및 시험 실행 결정은 `audit_log` (`action: "bankedReset.redeem"`, 토큰 또는 신용 ID 없음)에 기록됩니다. 한도는 해당 행에서 계산되므로 다시 시작해도 유지됩니다. 성공적인 상환은 `provider.reset_redeemed` 웹훅도 실행합니다.
+
+회귀 가드: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### 세션 고정 (#7274)
 
 **범위:** 하나의 클라이언트 세션(`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 헤더)을
@@ -366,26 +405,17 @@ _나열_함) — 새 카드는 매개변수를 _구성_합니다. 기본값은
 
 ---
 
-## 4. 쿼터 공유 동시성 제어 (v3.8.36)
+## 4. 할당량-공유 동시성 제어(v3.8.36)
 
-구독 계정(GLM, MiniMax 등)은 대개 동시 요청을 약 1~3개만
-허용하며, 이를 초과하면 429와 쿨다운이 발생합니다. 여러 API 키가 하나의
-업스트림 계정을 공유하는 **쿼터 공유**(`qtSd/…`) 조합에서는 이 문제가 특히
-심각합니다. 공유 계정이 과도한 요청으로 넘쳐나지 않도록 세 가지 계층이
-사용됩니다.
+구독 계정(GLM, MiniMax 등)은 종종 ~ 1-3 동시 요청만 허용합니다. 이를 초과하면 429초와 재사용 대기시간이 발생합니다. 이것은 아래에서 심각하다 **할당량 공유** (`qtSd/…`) 콤보. 여러 API 키가 하나의 업스트림 계정을 공유합니다. 세 가지 계층으로 공유 계정이 침수되는 것을 방지합니다.
 
-### 연결별 동시성 상한 (`max_concurrent`)
+### 연결당 동시성 한도(`max_concurrent`)
 
-각 공급자 연결은 `max_concurrent` 상한을 선언할 수 있습니다
-(`provider_connections.max_concurrent`, 연결 모달 / API / DB에서 설정).
-제한을 적용하지 않으려면 비워 두십시오. 이 값은 아래 직렬화 계층을
-구동하는 단일 설정입니다. 계정의 실제 동시성에 맞게 설정하십시오
-(예: GLM은 약 1, MiniMax는 약 2).
+각 공급자 연결은 `max_concurrent` 한도(`provider_connections.max_concurrent`, 연결 모달 / API / DB 에 설정)를 선언할 수 있습니다. 제한 없이 비워 두세요. 이는 — 아래의 직렬화 계층을 구동하여 계정의 실제 동시성(예: GLM ~ 1, MiniMax ~ 2)으로 설정하는 단일 손잡이입니다.
 
-### 모델별 동시성 상한 (`modelConcurrency`)
+### 모델별 동시성 한도(`modelConcurrency`)
 
-연결의 `rateLimitOverrides` 맵에 모델별 정확한 동시성 상한을 추가로
-선언할 수 있습니다.
+연결은 `rateLimitOverrides` 맵 내에서 정확한 모델별 동시성 한도를 추가로 선언할 수 있습니다.
 
 ```json
 {
@@ -396,84 +426,32 @@ _나열_함) — 새 카드는 매개변수를 _구성_합니다. 기본값은
 }
 ```
 
-연결 모달(**Rate limit overrides → Per-model
-concurrency caps**, 한 줄에 `model=cap` 하나) 또는 동일한 JSON 구조를
-사용하는
-`PATCH /api/providers/[id]`를 통해 설정할 수 있습니다. 주요 의미는 다음과
-같습니다.
+연결 모달(**속도 제한은 → 모델별 동시성 한도보다 우선 적용됩니다.** , 라인당 하나의 `model=cap` ) 또는 동일한 JSON 모양의 `PATCH /api/providers/[id]` 통해. 주요 의미:
 
-- **연결 전체 및 모델별:** `maxConcurrent`는 연결 전체에 공유되는 상한으로
-  유지됩니다. 두 제한이 모두 적용되는 경우 동일한 복합 게이트
-  (`global → provider → account → model`)에서 두 게이트를 원자적으로
-  획득합니다. 실제 동작은 적용 가능한 제한 중 더 엄격한 쪽을 따릅니다.
-- **모델 키 정확히 일치:** 키는 라우팅 확인 후 실행기에 전달되는 모델 문자열입니다. 일반적으로
-  클라이언트 측 `provider/model` 별칭(`zai/glm-5`는 `glm-5`와 일치하지 않음)이
-  아닌, 업스트림의 원래 모델 ID(`glm-5`)입니다. 값은 동시 요청 수를 나타내는
-  양의 정수 상한이어야 합니다.
-- **로컬 대기열, 검색 없음:** 초과 요청은 기존 대기열/시간 제한 의미 체계에 따라
-  로컬에서 대기합니다(형식화된 `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` 승인 오류). OmniRoute는 업스트림 정책을 검색하거나
-  추론하지 않으며, 운영자가 구성한 정확한 상한을 적용합니다. 포화된 모델
-  게이트는 공급자를 비활성화하지 않으며 영구적인 모델 차단도 생성하지
-  않습니다. 업스트림 429/쿨다운/폴백 동작은 계속해서 오류에 대한 최후의
-  안전장치로 작동합니다.
-- **연결별, 프로세스별 범위:** 상한은 DB 연결별로 적용되며 메모리에
-  유지됩니다. 따라서 동일한 업스트림 API 키를 재사용하는 두 연결은
-  서로 조정하지 않습니다.
-- **구성하지 않으면 변경 없음:** 맵을 생략하거나 대시보드 필드를 비워 두면
-  모델 게이트가 추가되지 않습니다. 공급자 전체에 보편적인 제한을
-  적용한다고 가정하지 않는 구성 예시는 다음과 같습니다.
+- **연결 전체 및 모델별:** `maxConcurrent` 공유 연결 전체 한도를 유지합니다. 둘 다 적용하면 두 게이트 모두 동일한 복합 게이트(`global → provider → account → model`)에서 원자적으로 획득됩니다. 효과적인 동작은 적용 가능한 한도가 더 엄격하다는 것입니다.
+- **정확한 모델 키 일치:** 키는 라우팅 확인 — 후 실행기에 전달된 모델 문자열입니다. 일반적으로 클라이언트 측 `provider/model` 별칭(`zai/glm-5` `glm-5` 일치하지 않음)이 아닌 순수 업스트림 모델 ID(`glm-5`)입니다. 값은 양의 정수 동시 요청 한도입니다.
+- **로컬 대기열, 검색 없음:** 초과 요청은 기존 queue/timeout 의미 체계를 사용하여 로컬로 대기열에 추가됩니다( `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` 승인 오류 입력). OmniRoute 업스트림 정책 — 발견하거나 추론하지 않으며 운영자가 구성한 정확한 한도를 시행합니다. 포화된 모델 게이트는 공급자를 비활성화하지 않으며 영구적인 모델 잠금을 생성하지 않습니다. 업스트림 429/cooldown/fallback 동작은 오류 백스톱으로 남아 있습니다.
+- **연결별, 프로세스별 범위:** 대문자는 데이터베이스 연결당이며 메모리에 보관되므로 동일한 업스트림 API 키를 재사용하는 두 연결은 서로 조정되지 않습니다.
+- **구성되지 않음은 변경되지 않았음을 의미합니다.** 맵을 생략하거나 대시보드 필드를 비워두면 모델 게이트가 추가되지 않습니다. 범용 공급자 제한을 주장하지 않는 구성 예:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### 쿼터 공유 요청 직렬화
+### 할당량 공유 요청 직렬화
 
-쿼터 공유 디스패치가 양수 `max_concurrent`를 선언한 연결을 대상으로 할 때,
-해당 **계정**에 대한 동시 요청은 연결별 세마포어(키
-`qsconn:<connectionId>`)를 통해 직렬화됩니다. 초과 요청은 계정을
-과부하시키는 대신 **대기열에서 대기**합니다. 이는 **fail-open** 방식입니다.
-즉, 포화된 대기열이나 시간 초과가 발생해도 슬롯 없이 계속 진행하며,
-디스패치 가능한 요청을 거부하지는 않습니다. **Settings → Resilience →
-Quota-share per-connection
-concurrency**에서 전환할 수 있습니다
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, 기본값 on).
-`max_concurrent` 상한이 없으면 동작은 변경되지 않습니다.
+할당량 공유 디스패치가 긍정적인 `max_concurrent` 선언하는 연결을 대상으로 하는 경우 해당 연결에 대한 동시 요청 **계정** 연결별 세마포어(키 `qsconn:<connectionId>`)를 통해 직렬화됩니다. 초과 요청 **대기열에서 기다리다** 계정이 넘쳐나는 대신. 그것은 **페일오픈** — 포화된 대기열 또는 시간 초과가 디스패치 가능한 요청을 거부하는 대신 슬롯 없이 진행됩니다. 전환 **설정 → 복원력 → 할당량 공유 연결별 동시성** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, 기본값은 켜짐). `max_concurrent` 캡이 없으면 동작이 변경되지 않습니다.
 
-> 쿼터 공유 라우팅 게이트(`selectQuotaShareTarget`, DRR + P2C) 자체도
-> fail-open이며, 상한에 도달한 연결의 우선순위만 **낮춥니다**. 연결이 하나뿐인
-> 풀에서는 이를 강제로 제한할 수 없으므로, 실제로 과도한 요청을 억제하는
-> 것은 이 세마포어입니다.
+> 할당량 공유 라우팅 게이트(`selectQuotaShareTarget`, DRR + P2C)는 그 자체로 페일오픈이며 단일 연결 풀이 있는 최대 연결 — 만 _우선순위화_하여 하드 제한할 수 없으므로 이 세마포어가 실제로 플러드를 포함하는 것입니다.
 
-### 조합 쿨다운 인식 재시도
+### 콤보 쿨다운 인식 재시도
 
-모든 조합 전략에서(활성화된 경우), 요청이 SHORT 일시적 쿨다운에 대한 429를
-확정적으로 발생시킬 상황이면 429를 반환하는 대신 해당 쿨다운이 끝날 때까지
-대기한 후 다시 디스패치합니다. 이는 다중 모델 조합에서 Gemini 계열의 TPM/RPM
-윈도우(약 60초의 retry-after)를 처리합니다. 예를 들어 2개 모델 조합의 두
-대상이 모두 모델별 속도 제한에 걸린 경우가 이에 해당합니다.
-대기는 **Settings → Resilience**의 `comboCooldownWait`(`enabled`,
-`maxWaitMs`, `maxAttempts`, `budgetMs`)로 제한됩니다. `quota_exhausted`
-(자정까지 잠김) 또는 인증/찾을 수 없음 사유에 대해서는 대기하지 않습니다.
+모든 콤보 전략(활성화된 경우)에 대해 SHORT 일시적 쿨다운을 위해 429를 결정화하는 요청은 429 — 를 반환하는 대신 기다렸다가 다시 디스패치합니다. 이는 다중 모델 콤보의 Gemini급 TPM/RPM 창(~ 60초 재시도 후)을 포함합니다. 예를 들어 모델별 속도 제한에 도달하는 2모델 콤보의 두 대상 모두입니다. `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`)에 의해 제한됨 **설정 → 탄력성** . `quota_exhausted` (자정까지 잠김) 또는 auth/not-found 이유로 기다리지 않습니다. `comboTimeoutMs` 설정된 경우 해당 기한 전에 완료할 수 없는 대기는 시작되지 않습니다(#18998). 콤보는 `COMBO_TIMEOUT` 504 대신 터미널 응답으로 즉시 응답합니다.
 
-조합은 `config.comboCooldownWaitEnabled: false`로 이 기능을 사용하지 않도록
-설정할 수 있습니다. 리터럴 `false`만 이러한 공유 조합 대기(디스패치 후
-쿨다운 대기 및 디스패치 전 회로 열림/모델 잠금 대기)와 대기 예산의 시간 제한
-하한 확장을 비활성화합니다. 값이 없거나 `true`이면 전역 정책을 유지하며,
-`true`로 전역적으로 비활성화된 대기를 활성화할 수는 없습니다. 명시적인
-`targetTimeoutMs`가 있으면 항상 이를 우선합니다. 이 비활성화 설정은 별도의
-네이티브 Codex 턴 고정 디스패치 전 대기에는 영향을 주지 않습니다.
+콤보는 `config.comboCooldownWaitEnabled: false` 사용하여 옵트아웃할 수 있습니다. 리터럴 `false` 만이 이러한 공유 콤보 대기(디스패치 후 쿨다운 및 디스패치 전 circuit-open/model-lock 대기)와 대기 예산 제한 시간 연장을 비활성화합니다. 누락 또는 `true` 글로벌 정책을 유지합니다. `true` 전역적으로 비활성화된 대기를 활성화할 수 없습니다. 명시적인 `targetTimeoutMs` 여전히 승리합니다. 이 거부는 별도의 기본 Codex 턴핀 사전 디스패치 대기를 변경하지 않습니다.
 
-동일한 게이트는 디스패치 전 상황(#16319)에도 적용됩니다. 조합의 모든 대상이
-시도되기 전에 해당 모델이 짧은 일시적 잠금 상태이므로 건너뛰어지는 경우,
-시도가 0회인 경로는 동일한 상한 아래에서 잠금이 풀릴 때까지 대기한 후 다시
-디스패치합니다. 그 결과 힌트가 없는 `503 ALL_TARGETS_SKIPPED`로 응답하지
-않습니다. 대기가 허용되지 않는 경우(상한, 시도 횟수 또는 예산 소진, 혹은
-기능 비활성화) 최종 응답은 가장 이른 일시적 잠금 만료 시점의
-`retry_after` / `reset_at`을 포함하는 `429 rate_limit_error`로
-상향됩니다. 쿼터, 인증 및 찾을 수 없음 잠금은 힌트 없는 503을 유지합니다.
+동일한 게이트가 디스패치 전 사례(#16319)를 다룹니다. 모델이 짧은 일시적 잠금 상태에 있기 때문에 시도가 이루어지기 전에 콤보의 모든 대상을 건너뛰는 경우 제로 시도 경로는 힌트가 없는 `503 ALL_TARGETS_SKIPPED` 응답하는 대신 동일한 한도 하에서 잠금을 기다리고 다시 디스패치를 기다립니다. 대기가 허용되지 않으면(한도, 시도 또는 예산이 소진되거나 기능이 꺼짐) 터미널 응답은 가장 빠른 임시 잠금 만료부터 `retry_after` / `reset_at` 전달하는 `429 rate_limit_error` 로 업그레이드됩니다. 할당량, 인증 및 찾을 수 없는 잠금은 힌트 없는 503을 유지합니다.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

@@ -19,18 +19,32 @@ OmniRoute objavljuje npm + Docker artefakte. Ovi gejtovi obezbeđuju poreklo, in
 
 CVE podešavanje slike koristi **dva koraka** u `docker-publish.yml`: SARIF korak (`HIGH,CRITICAL`, `exit-code: 0`) održava VISOKE+KRITIČNE vidljivim u kartici Bezbednost bez blokiranja; korak _KRITIČNOG gejta_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) ne uspeva izdavanje za KRITIČNI CVE **sa dostupnom popravkom**. `ignore-unfixed` sprečava blokiranje izdavanja za CVE osnovne slike bez uzvodne zakrpe.
 
-## ⚠️ Varijansa CVE-a (blokirajući osv/Trivy gejtovi)
+## ⚠️ Varijabilnost CVE-ova (blokira osv/Trivy kontrole)
 
-osv i Trivy upoređuju zavisnosti sa CVE bazama podataka koje **kontinuirano rastu**. PR koji **ne dira zavisnosti** može iznenada postati crven jer je novi CVE otkriven u postojećoj zavisnosti (osv: izmereni `vulnCount` > osnovna vrednost; Trivy: novi popravljivi KRITIČNI u slici). **Ovo je OČEKIVANO operativno ponašanje blokirajućeg CVE gejta, a ne regresija proizvoda.**
+osv i Trivy porede zavisnosti sa bazama CVE-ova koje **neprekidno rastu**. PR
+koji **ne menja nijednu zavisnost** može iznenada postati crven jer je novi CVE
+objavljen za postojeću zavisnost (osv: izmereni `vulnCount` > osnovna vrednost; Trivy: novi
+CRITICAL propust u slici koji je moguće ispraviti). **Ovo je OČEKIVANO operativno ponašanje blokirajuće
+CVE kontrole, a ne regresija proizvoda.**
 
 Kada osv ili Trivy postanu crveni zbog novootkrivenog CVE-a, rešenje je:
 
-1.  **Ažurirajte pogođenu zavisnost** (poželjno) — nadogradite na zakrpljenu verziju putem `package.json` `overrides` (tranzitivne zavisnosti) ili ponovo izgradite sliku na zakrpljenoj osnovi.
-2.  **Ako nema uzvodne popravke:**
-    - **osv:** ponovo postavite osnovnu vrednost `metrics.vulnCount` u `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ne pokriva namenske gejtove — ručno uredite vrednost, `direction:down`) sa beleškom o opravdanju + pratećim problemom.
-    - **Trivy:** dodajte unos u `.trivyignore` (CVE-ID po liniji) sa komentarom o opravdanju + pratećim problemom. `ignore-unfixed: true` već automatski pokriva CVE-ove bez zakrpa.
+1. **Ažurirajte pogođenu zavisnost** (preporučeno) — nadogradite je na zakrpljenu verziju putem `package.json`
+   `overrides` (tranzitivne zavisnosti) ili ponovo izgradite sliku na zakrpljenoj osnovnoj slici.
+2. **Ако санација није доступна:** задржати измерени налаз и пратити зависност или слику на коју утиче. Не повећавајте основну линију рањивости да би кандидат који није успео прошао. Триви-јев `ignore-unfixed: true` већ искључује рањивости слика без упстреам закрпе. Сваки изузетак захтева ревидирану рањивост ID, тачну путању пакета, истек и проблем праћења у политици; није аутоматска последица неуспелог скенирања.
 
-Oba gejta **graciozno PRESKAČU** (izlaz 0) kada alat nedostaje ili merenje ne uspe (osv-scanner nije u PATH-u, osv.dev/mreža nedostupna, nevažeći JSON) — neuspeh **merenja** nikada ne blokira, samo **izmerena** regresija blokira.
+Obavezna izvršavanja OSV-a (`check:vuln-ratchet -- --ratchet`) bezbedno se prekidaju sa
+`INCOMPLETE` i izlaznim kodom 2 kada skener, izveštaj ili osnovna vrednost ne mogu biti potvrđeni.
+Izmerena regresija završava se izlaznim kodom 1. Savetodavno izvršavanje i dalje može prijaviti `SKIP` sa
+izlaznim kodom 0, što ne potvrđuje da su zavisnosti uspešno prošle skeniranje. Blokirajući
+Trivy korak takođe zahteva uspešno merenje: nedostupne alatke, neuspešni poslovi
+i nedostajući dokazi o slici ne mogu potvrditi da je slika čista.
+
+## Политика скенирања слика
+
+Тренутни `.trivyignore.yaml` не садржи изузетке рањивости. `npm run check:trivy-ignore-policy` потврђује структурисану политику у локалним профилима скенирања, CI и квалитету. Непознати IDs, шире путање, дупли уноси и истекли изузеци се одбијају; застарели `.trivyignore` није улаз за мигрирана скенирања.
+
+Docker провјерава алате за политике из `github.workflow_sha` а и политику извора слике са истим селектором извора као и буилд. Бирач смерница одбија некомпатибилне опсеге и припрема једну датотеку за оба Триви скенирања. Историјски извор без структуриране политике не добија изузетке. Оба скенирања пин Триви `v0.70.0`. Валидација политике доказује конзистентност конфигурације; слика и даље треба успешно скенирање.
 
 ## Ризик зависности од пензије
 

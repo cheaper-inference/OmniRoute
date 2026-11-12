@@ -3,9 +3,9 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { load } from "js-yaml";
 
-for (const [file, job] of [
-  ["ci.yml", "quality-extended"],
-  ["quality.yml", "fast-gates"],
+for (const [file, job, installer] of [
+  ["ci.yml", "quality-extended", "install-quality-scanners.sh"],
+  ["quality.yml", "fast-gates", "install-workflow-scanners.sh"],
 ]) {
   test(`${file} requires the shared pinned scanner installer before auditing`, () => {
     const source = readFileSync(
@@ -14,14 +14,22 @@ for (const [file, job] of [
     );
     const workflow = load(source);
     const steps = workflow.jobs[job].steps;
-    const setup = steps.findIndex(
-      (step) => step.run === "bash scripts/ci/install-workflow-scanners.sh"
-    );
+    const setup = steps.findIndex((step) => step.run === `bash scripts/ci/${installer}`);
     assert.ok(setup >= 0);
     assert.notEqual(steps[setup]["continue-on-error"], true);
     assert.equal(steps[setup].env.GH_TOKEN, "${{ github.token }}");
     assert.ok(steps.slice(setup + 1).some((step) => /\bworkflows\b/.test(step.run || "")));
     assert.doesNotMatch(source, /download-actionlint\.bash|pipx install "zizmor/);
+    if (installer === "install-quality-scanners.sh") {
+      const wrapper = readFileSync(
+        new URL("../../scripts/ci/install-quality-scanners.sh", import.meta.url),
+        "utf8"
+      );
+      assert.match(wrapper, /set -euo pipefail/);
+      const delegation = wrapper.indexOf('bash "$script_dir/install-workflow-scanners.sh"');
+      assert.ok(delegation >= 0 && delegation < wrapper.indexOf("GITLEAKS_VERSION="));
+      assert.doesNotMatch(wrapper, /\|\| true|set \+e/);
+    }
   });
 }
 

@@ -476,14 +476,14 @@ Südamelöögi hetktõmmis sisaldab:
 
 ## Auditi logimine
 
-Iga tööriistakõne logitakse SQLite `mcp_tool_audit` tabelisse faili `open-sse/mcp-server/audit.ts` poolt:
+`open-sse/mcp-server/audit.ts` logib iga tööriistakutse SQLite `mcp_tool_audit` tabelisse:
 
-- Tööriista nimi, argumendid (räsitud/kärbitud vastavalt tööriistapõhisele `auditLevel`-ile), tulemus
-- Kestus millisekundites, õnnestumise/ebaõnnestumise lipp, veateade (kui asjakohane)
-- API võtme räsi, ajatempel
-- Ulatuse keeldumised logitakse kujul `scope_denied:<põhjus>` koos puuduvate ulatuste loendiga
+- Tööriista nimi, argumendid (hashed/truncated tööriista `auditLevel` kohta ), tulemus
+- Kestus ms, success/failure lipp, veateade (kui see on kohaldatav)
+- API võtmeräsi, ajatempel
+- Ulatuse keelamised logitakse puuduva ulatuse loendiga `scope_denied:<reason>` na
 
-Kasuta töölauda või `/api/mcp/audit` ja `/api/mcp/audit/stats` REST lõpp-punkte, et vaadata viimaseid kõnesid.
+Kasutage viimaste kõnede kontrollimiseks armatuurlauda või `/api/mcp/audit` ja `/api/mcp/audit/stats` REST lõpp-punkte.
 
 ---
 

@@ -4,196 +4,119 @@
 
 ---
 
-OmniRoute qaysi **brauzer originlari** yagona, markazlashtirilgan ruxsat roʻyxati orqali boshqa origindagi javoblarni oʻqishi mumkinligini boshqaradi. Model **standart holatda yopiq**:
-siz originni ruxsat roʻyxatiga kiritmaguningizcha hech bir originga ruxsat berilmaydi. Ushbu sahifada ruxsat roʻyxati qanday aniqlanishi, `CORS_ALLOW_ALL=true` aslida nimalarni ochishi (va, muhimi, nimalarni **ochmasligi**), ishlab chiqish va production muhitlarini qanday xavfsiz sozlash hamda wildcard faol boʻlganda boshqaruv paneli koʻrsatadigan bajarilish vaqtidagi ogohlantirish bayon etiladi.
+OmniRoute qaysi birini nazorat qiladi **brauzerning kelib chiqishi** yagona, markazlashtirilgan ruxsat etilgan roʻyxatdagi oʻzaro kelib chiqish javoblarini oʻqishi mumkin. Modeli **sukut bo'yicha muvaffaqiyatsiz yopilgan** : tanlanmaguningizcha hech qanday manbaga ruxsat berilmaydi. Bu sahifa ruxsat etilgan roʻyxat qanday hal qilinishini, `CORS_ALLOW_ALL=true` aslida nimani koʻrsatishini (va, eng muhimi, u nima qilishini) hujjatlashtiradi.**emas** ), dev va ishlab chiqarishni qanday qilib xavfsiz tarzda sozlash va asboblar panelidagi ish vaqti haqida ogohlantirish joker belgi jonli ekanligini ko'rsatadi.
 
-**Asosiy manba:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Ruxsat roʻyxati middleware ichida bir marta qoʻllanadi (`src/server/authz/pipeline.ts`) — alohida marshrut ishlov beruvchilari
-`Access-Control-Allow-Origin` sarlavhasini oʻzlari oʻrnatmaydi.
+**Haqiqat manbai:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Ruxsat etilgan ro'yxat bir marta qo'llaniladi, o'rta dasturda (`src/server/authz/pipeline.ts`) — har bir marshrut ishlovchilari `Access-Control-Allow-Origin` o'zlari o'rnatmaydilar.
 
-## Origin qanday aniqlanadi
+## Kelib chiqishi qanday hal qilinadi
 
-Har bir soʻrov uchun middleware `Access-Control-Allow-Origin` qiymatini quyidagi tartibda hisoblaydi:
+Har bir so'rov uchun vositachi dastur `Access-Control-Allow-Origin` qiymatini quyidagi tartibda hisoblab chiqadi:
 
-1. **`CORS_ALLOW_ALL=true`** (yoki eski `CORS_ORIGIN=*`) → chaqiruvchining
-   `Origin` qiymatini qaytaradi (yoki `Origin` sarlavhasi boʻlmasa `*`), keshlar toʻgʻri ishlashi uchun `Vary: Origin`
-   bilan birga. Xuddi shu `applyCorsHeaders()` nazorat nuqtasi token orqali autentifikatsiya qilinadigan
-   `/v1*`/`/v1beta*` yuzasidagi tanaga ega har bir 2xx javobga
-   `Vary: Accept-Encoding` sarlavhasini ham qoʻshadi (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737), shunda
-   quyi oqimdagi/umumiy keshlar siqilgan va siqilmagan variantlarni toʻgʻri farqlay oladi.
-2. Aks holda, soʻrovning `Origin` qiymati normallashtiriladi (kichik harflarga oʻtkaziladi, oxiridagi qiya chiziq olib tashlanadi) va **birlashtirilgan ruxsat roʻyxati** bilan solishtiriladi:
-   - env **`CORS_ALLOWED_ORIGINS`** — vergul bilan ajratilgan roʻyxat va
-   - bajarilish vaqtidagi **`corsOrigins`** sozlamasi (Boshqaruv paneli → Xavfsizlik → _CORS ruxsat etilgan originlari_), `src/lib/config/runtimeSettings.ts` faylidagi
-     `setRuntimeAllowedOrigins()` orqali kiritiladi.
-3. Moslik topilmasa → **`Access-Control-Allow-Origin` sarlavhasi chiqarilmaydi**. Brauzer boshqa origindagi javobni oʻqishni bloklaydi. Bu standart holatda yopiq ishlashning koʻzlangan xatti-harakatidir.
+1. **`CORS_ALLOW_ALL=true`** (yoki eski `CORS_ORIGIN=*`) → qo'ng'iroq qiluvchining `Origin` (yoki `Origin` sarlavhasi bo'lmaganda `*` ) aks-sado qiladi, `Vary: Origin` bilan keshlar to'g'ri qoladi. Xuddi shu `applyCorsHeaders()` chok nuqtasi, shuningdek, token bilan tasdiqlangan `/v1*`/`/v1beta*` yuzasida (`relaxForTokenAuth`, RFC 9110 §12.5.5, #6737 nashri) har bir 2xx tana javobiga `Vary: Accept-Encoding` qo'shadi, shuning uchun downstream/shared keshlari siqilgan va siqilmagan variantlarni to'g'ri ajrata oladi.
+2. Aks holda, `Origin` so'rovi normallashtiriladi (kichik harflar, so'nggi chiziqli chiziq olib tashlanadi) va so'rov bilan mos keladi.**merged allowlist** :
+   - env **`CORS_ALLOWED_ORIGINS`** — vergul bilan ajratilgan ro'yxat va
+   - the runtime **`corsOrigins`** sozlash (Dashboard → Security → _CORS Allowed Origins_), `src/lib/config/runtimeSettings.ts` dan `setRuntimeAllowedOrigins()` orqali kiritilgan.
+3. No match →**no `Access-Control-Allow-Origin` header is emitted** . Brauzer o'zaro o'qishni bloklaydi. Bu mo'ljallangan muvaffaqiyatsiz yopiq sukut.
 
-| Env oʻzgaruvchisi      | Maʼnosi                                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------------------ |
-| `CORS_ALLOWED_ORIGINS` | Ruxsat beriladigan aniq originlarning CSV roʻyxati (tavsiya etiladi).                      |
-| `CORS_ALLOW_ALL`       | `true`/`1` → istalgan originni qaytarish (wildcard). Faqat ishlab chiqish uchun.           |
-| `CORS_ORIGIN`          | Eski. `*` xuddi `CORS_ALLOW_ALL` kabi ishlaydi; bitta qiymat ruxsat roʻyxatiga qoʻshiladi. |
+| Env var                | Ma'nosi                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | Ruxsat berish uchun aniq kelib chiqishi CSV (tavsiya etiladi).                               |
+| `CORS_ALLOW_ALL`       | `true`/`1` → har qanday kelib chiqishini aks ettiradi (joker belgilar). Dev only.            |
+| `CORS_ORIGIN`          | Legacy. `*` behaves like `CORS_ALLOW_ALL`; ruxsat etilgan ro'yxatga bitta qiymat qo'shiladi. |
 
-## Tahdid modeli — `CORS_ALLOW_ALL=true` aslida nimalarni ochadi
+## `CORS_ALLOW_ALL=true` haqiqatda fosh qiladigan tahdid modeli —
 
-OWASPning umumiy ogohlantirishini ("wildcard CORS = istalgan sayt API'ingizga murojaat qilishi mumkin") jiddiy qabul qilish kerak, ammo OmniRoute ochadigan imkoniyat **umumiy holatga qaraganda torroq**, chunki amalga oshirishga oid bitta aniq fakt mavjud:
+Umumiy OWASP ogohlantirishi (“ CORS = har qanday sayt sizning API qo'ng'iroq qilishi mumkin”) jiddiy qabul qilishga arziydi, ammo OmniRoute ta'siri **narrower than the generic case** , because of one concrete implementation fact:
 
-> **Markaziy `applyCorsHeaders()` hech qachon
-> `Access-Control-Allow-Credentials` sarlavhasini chiqarmaydi.** Server
-> `Access-Control-Allow-Credentials: true` sarlavhasini yubormasa, brauzer _hisob maʼlumotlari bilan yuborilgan_
-> (cookie mavjud) boshqa origindagi javobni ochmaydi. OmniRoute'ning umumiy CORS yoʻli buni hech qachon
-> qilmaydi.
+> **The central `applyCorsHeaders()` never emits `Access-Control-Allow-Credentials`.** Agar server `Access-Control-Allow-Credentials: true` yubormasa, brauzer _credentialed_ (cookie-bearing) oʻzaro kelib chiqish javobini koʻrsatmaydi. OmniRoute's shared CORS path never does.
 
-Bu `CORS_ALLOW_ALL=true` boʻlganda ham har bir yuza uchun quyidagilarni anglatadi:
+Bu har bir yuza uchun nimani anglatadi, hatto `CORS_ALLOW_ALL=true` bilan ham:
 
-| Yuza                                    | Autentifikatsiya mexanizmi      | Wildcard CORS taʼsiri                                                                                                                                                                                                                                                                                                                                                                                                     |
-| --------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Boshqaruv paneli / MANAGEMENT `/api/*`  | Cookie seansi                   | Origin qaytariladi, ammo **`Allow-Credentials` boʻlmagani uchun** brauzer hisob maʼlumotlari bilan yuborilgan javobni oʻqishni **bloklaydi**. Zararli boshqa origin sayti autentifikatsiya qilingan boshqaruv paneli javoblaringizni **oʻqiy olmaydi** va seans cookie'si oshkor qilinmaydi.                                                                                                                              |
-| Mijoz API'si `/v1/*`, `/v1beta/*`       | Bearer / `x-api-key` sarlavhasi | Allaqachon **ataylab** ruxsatchan (`relaxForTokenAuth`): brauzerlar `Authorization`/`x-api-key` qiymatlarini hech qachon avtomatik biriktirmaydi, shuning uchun hujumchining sahifasi sizning kalitingizni taqdim eta olmaydi. Origin faqat taqdim etilgan kalit tasdiqlanganda qaytariladi; anonim javoblar (`REQUIRE_API_KEY=false`) ruxsat roʻyxatiga amal qilishda davom etadi. `CORS_ALLOW_ALL` buni kengaytirmaydi. |
-| Ommaviy faqat oʻqish (`/api/health`, …) | Yoʻq                            | Maxfiy emas; wildcard zararsiz.                                                                                                                                                                                                                                                                                                                                                                                           |
+| Yuzaki                                              | Auth mechanism                     | CORS joker belgisining ta'siri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Boshqaruv paneli / MANAGEMENT `/api/*`              | Cookie seansi                      | Kelib chiqishi aks-sado beradi, lekin **without `Allow-Credentials`** brauzer **bloklar** tasdiqlangan o'qish. A malicious cross-origin site **o'qiy olmaydi** autentifikatsiya qilingan asboblar panelidagi javoblaringiz va seans cookie fayli oshkor etilmaydi.                                                                                                                                                                                                                                                                                                                                        |
+| Mijoz API `/v1/*`, `/v1beta/*`                      | Tashuvchi / `x-api-key` sarlavhasi | Already permissive **by design** (`relaxForTokenAuth`): brauzerlar hech qachon `Authorization`/`x-api-key` ni avtomatik biriktirmaydi, shuning uchun tajovuzkorning sahifasi kalitingizni taqdim eta olmaydi. Bo'shashgan aks-sado faqat hisob ma'lumotlari sarlavhasini emas, balki autentifikatsiya qilingan mavzuni (tasdiqlangan API kaliti yoki asboblar paneli seansi) talab qiladi va hech qachon `Access-Control-Allow-Credentials` o'z ichiga olmaydi. Anonim javoblar (`REQUIRE_API_KEY=false`) sozlangan manbalar roʻyxatidan, jumladan, aniq `CORS_ALLOW_ALL=true` -ga kirishdan foydalanadi. |
+| Faqat o'qish uchun mo'ljallangan (`/api/health`, …) | Yo'q                               | Sezuvchan bo'lmagan; joker belgisi zararsizdir.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
-Shunday qilib, `CORS_ALLOW_ALL=true` ning **qoldiq** taʼsiri quyidagilar bilan cheklangan: (a)
-allaqachon autentifikatsiya talab qilmaydigan maʼlumotlarni hisob maʼlumotlarisiz boshqa origindan **oʻqish** va (b)
-boshqaruv marshrutlarida CORS **preflight tekshiruvining oʻtishiga** ruxsat berish — ammo ular baribir boshqa origin sahifasi taqdim eta olmaydigan autentifikatsiyani talab qiladi. Umumiy CORS yoʻlida bu seansni oʻgʻirlash yoki hisob maʼlumotlarini oʻgʻirlash vektori **emas**.
+Shunday qilib **qoldiq** `CORS_ALLOW_ALL=true` ta'siri quyidagilar bilan cheklanadi: (a) hisob ma'lumotlari bo'lmagan o'zaro kelib chiqish **o'qiydi** autentifikatsiya qilinmagan ma'lumotlar va (b) CORS ruxsat berish **parvozdan oldingi talon** Hali ham oʻzaro kelib chiqish sahifasi taqdim eta olmaydigan autentifikatsiyani talab qiladigan — boshqaruv yoʻnalishlarida. Bu **emas** umumiy CORS yo'lidagi sessiyani o'g'irlash yoki hisob ma'lumotlarini o'g'irlash vektori.
 
 ### Bitta haqiqiy istisno — `/api/v1/agents/`
 
-Cloud-Agent marshrutlari (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) oʻzlarining **alohida** CORS sarlavhalarini oʻrnatadi
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) va
-`Access-Control-Allow-Origin: <origin>|*` bilan birga
-`Access-Control-Allow-Credentials: true` sarlavhasini ham **chiqaradi**. Bu originni qaytarish va hisob maʼlumotlari birga mavjud boʻlgan yagona yuza boʻlib,
-`CORS_ALLOW_ALL` dan **mustaqil**. Ushbu marshrutlar boshqaruv autentifikatsiyasidan oʻtkaziladi
-(`requireManagementAuth`); boshqaruv panelini hostdan tashqariga ochadigan operatorlar aynan shu joyda javob sarlavhalari boshqa origindan hisob maʼlumotlari bilan yuborilgan javobni oʻqishga ruxsat berishini bilishlari kerak. Uni aniq ruxsat roʻyxati bilan cheklash ushbu CORS koʻrsatmalaridan alohida ravishda kuzatib boriladi.
+Cloud-Agent marshrutlari (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) o'zlarining **o'z** CORS sarlavhalari (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) va **qil** `Access-Control-Allow-Credentials: true` bilan birga `Access-Control-Allow-Origin: <origin>|*` chiqaradi. Bu kelib chiqish-echo va hisobga olish ma'lumotlari birga mavjud bo'lgan yagona sirt va shunday **`CORS_ALLOW_ALL` dan mustaqil** . Bu marshrutlar boshqaruv tomonidan autentifikatsiya qilingan (`requireManagementAuth`); Boshqaruv panelini xostdan tashqarida ochadigan operatorlar shuni bilishlari kerakki, bu javob sarlavhalari tomonidan o'zaro kelib chiqish ma'lumotlarini o'qishga ruxsat beriladi. Uni aniq ruxsat etilgan ro'yxatga olish ushbu CORS yo'riqnomasidan alohida kuzatiladi.
 
-## Ishlab chiqarish muhiti uchun tekshiruv roʻyxati
+## Ishlab chiqarish nazorat ro'yxati
 
-- **Ishlab chiqarish muhitida hech qachon `CORS_ALLOW_ALL=true` qilib belgilamang.** Uni belgilanmagan holda qoldiring.
-- Kelib chiqish manzillarining **aniq** roʻyxatini belgilang — muhit oʻzgaruvchisi yoki Security sahifasidagi maydon orqali:
+- **Hech qachon ishlab chiqarishda `CORS_ALLOW_ALL=true` o'rnatmang.** Sozlanmagan holda qoldiring.
+- o'rnating **aniq** kelib chiqish ro'yxati — yoki env var yoki Security-tab maydoni:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Agar OmniRoute teskari proksi / tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale) ortida ishlasa, CORS sizning yagona nazorat mexanizmingiz
-  **emas** — loopback marshrut himoyasi jarayon ishga tushira oladigan marshrutlarni
-  hamon himoya qiladi ([ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ga qarang).
-  403 xatosini “tuzatish” uchun `X-Forwarded-For: 127.0.0.1` ni soxtalashtirmang;
-  bu marshrut himoyasi yopadigan RCE turidagi zaiflikni qayta ochadi.
-- Ish vaqtidagi holatni tasdiqlang: `CORS_ALLOW_ALL=true` faol boʻlganda boshqaruv
-  panelida Dashboard → Security → Authorization Inventory ostida **doimiy
-  qahrabo rangli banner** koʻrsatiladi va `/api/settings/authz-inventory`
-  monitoring vositalari muntazam soʻrashi mumkin boʻlgan
-  `cors: { allowAll, allowedOrigins }` qobigʻini qaytaradi.
+- Agar OmniRoute teskari proksi/tunnel (nginx, Caddy, Cloudflare Tunnel, Tailscale) ortida ishlasa, CORS**emas** Sizning yagona boshqaruvingiz — orqaga qaytish marshruti qo'riqchisi hali ham paydo bo'ladigan marshrutlarni himoya qiladi ( [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ga qarang). 403-ni "tuzatish" uchun `X-Forwarded-For: 127.0.0.1` soxtalashtirmang; marshrut qo'riqchisi yopadigan RCE sinfini qayta ochadi.
+- Ish vaqti holatini tasdiqlang: asboblar panelida a ko'rsatilgan **doimiy amber banner** Dashboard → Security → avtorizatsiya inventarizatsiyasi ostida `CORS_ALLOW_ALL=true` har doim jonli bo'lganda va `/api/settings/authz-inventory` `cors: { allowAll, allowedOrigins }` konvertini kuzatish vositalarini so'rashi mumkin.
 
-## Ishlab chiqishdagi qulaylik — muayyan mahalliy manbalarga ruxsat berish
+## Rivojlanish qulayligi — muayyan mahalliy kelib chiqishiga imkon beradi
 
-Hatto ishlab chiqish muhitida ham universal belgidan foydalanish kamdan-kam zarur
-boʻladi. Faqat foydalanadigan ishlab chiqish serverlaringizga ruxsat bering:
+Hatto dev-da ham joker belgilar kamdan-kam hollarda kerak bo'ladi. Faqat siz foydalanadigan ishlab chiqaruvchi serverlarga ruxsat bering:
 
 ```bash
-# Mahalliy OmniRouteʼga murojaat qiluvchi Vite (5173) + Next.js (3000) ishlab chiqish serverlari
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Manbalar registrga bogʻliq boʻlmagan holda solishtiriladi va oxiridagi qiya chiziq
-eʼtiborga olinmaydi, shuning uchun `http://localhost:3000` va
-`http://localhost:3000/` teng hisoblanadi. Xuddi shu CSV qiymatini ish vaqtida
-**Dashboard → Security → CORS Allowed Origins** orqali qayta ishga tushirmasdan
-belgilash mumkin.
+Kelib chiqishi katta-kichik-kichik harflar bilan moslashtiriladi, orqadagi qiyshiq chiziq hisobga olinmaydi, shuning uchun `http://localhost:3000` va `http://localhost:3000/` ekvivalentdir. Xuddi shu CSV ish vaqtida o'rnatilishi mumkin **Boshqaruv paneli → Xavfsizlik → CORS ruxsat berilgan kelib chiqishi** qayta ishga tushirmasdan.
 
 ## API kalitlari va cookie seanslari
 
-- **Bearer / `x-api-key` (`/v1/*` inferensiya interfeysi):** brauzerlar ularni hech
-  qachon avtomatik ravishda biriktirmaydi. Bu yerda CORS mazmunli toʻsiq emas —
-  toʻsiq API kalitidir — shu sababli brauzer va Electron mijozlari oʻzlari allaqachon
-  foydalanish huquqiga ega boʻlgan javoblarni oʻqiy olishi uchun ushbu interfeys
-  ataylab erkin qilingan.
-  Erkin origin qaytarish faqat sarlavha mavjudligiga emas, balki tasdiqlangan kalitga
-  bogʻliq: `REQUIRE_API_KEY=false` soʻrovni anonim tarzda xizmat qilganda, uning
-  muvaffaqiyatli javobi xavfsiz tarzda rad etuvchi ruxsat roʻyxatini saqlab qoladi.
-  Autentifikatsiya rad javoblari (401) oʻqiladigan boʻlib qoladi, shunda mijozlar bekor
-  qilingan yoki xato yozilgan kalitni koʻrsata oladi (#5242): pipeline'ning oʻz 401 javobi
-  origin qaytarishni saqlaydi, pipeline soʻrovni anonim sifatida xizmat qilgandan keyin
-  kalitni oʻzi rad etadigan marshrut esa (boshqaruv autentifikatsiyasi sozlangan
-  `/v1/models` va `/v1beta/models`, egasiga bogʻlangan `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` hamda auto-combo nomzod marshrutlari) shu 401 javobiga
-  `credentialRejectionHeaders()` orqali origin qaytarishni qoʻshadi. Qaytarish
-  soʻrovda hisob maʼlumotlari sarlavhasi (`Authorization`, `x-api-key`, `x-goog-api-key`
-  yoki `auth_token` cookie) borligiga bogʻliq, marshrut ulardan qaysi birini
-  tekshirganiga emas, va u hech qachon `Access-Control-Allow-Credentials` bilan birga
-  kelmaydi; javob tanasi qatʼiy xato konverti hisoblanadi. `/api/v1/` ostidagi
-  `requireManagementAuth()` bilan himoyalangan boshqaruv marshrutlari
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) origin qaytarishni qoʻshmaydi:
-  `REQUIRE_API_KEY=false` boʻlganda ularning 401/403 javoblarini boshqa origindan oʻqib
-  boʻlmaydi.
-- **Cookie seansi (boshqaruv paneli):** xavfsiz tarzda rad etuvchi standart sozlama
-  **hamda** umumiy yoʻlda `Access-Control-Allow-Credentials` mavjud emasligi bilan
-  himoyalangan. Boshqaruv/boshqaruv paneli manbalarini ruxsat beruvchi hech qanday
-  konfiguratsiyaga kiritmang; ular aynan xavfsiz tarzda rad etuvchi holatda qolishi
-  kerak.
+- **Tashuvchi / `x-api-key` ( `/v1/*` xulosasi yuzasi):** brauzerlar ularni hech qachon avtomatik ravishda biriktirmaydi. Bu erda CORS mazmunli to'siq emas — API kaliti — to'sig'idir, shuning uchun bu sirt qasddan ruxsat etilgan, shuning uchun brauzer va Electron mijozlari o'zlari olish huquqiga ega bo'lgan javoblarni o'qishlari mumkin. Bo'shashgan aks-sado nafaqat hisob ma'lumotlari sarlavhasini emas, balki autentifikatsiya qilingan mavzuni (tasdiqlangan API kaliti yoki asboblar paneli seansi) talab qiladi va hech qachon `Access-Control-Allow-Credentials` o'z ichiga olmaydi. Anonim javoblar (`REQUIRE_API_KEY=false`) sozlangan manbalar roʻyxatidan, jumladan, aniq `CORS_ALLOW_ALL=true` -ga kirishdan foydalanadi. Mijozlar bekor qilingan yoki notoʻgʻri kiritilgan kalitni (#5242) koʻrsatishi uchun autentifikatsiyani rad etishlar (401) oʻqilishi mumkin boʻlib qoladi: quvur liniyasining 401-raqami aks-sadoni saqlaydi va quvur liniyasi anonim sifatida xizmat qilgandan soʻng kalitni rad etuvchi marshrut (`/v1/models` va `/v1beta/models`, boshqaruv autentifikatsiyasi sozlangan, egasi tomonidan `/v1/files`, `/v1/batches` `/v1/media`, `/v1/session-leases` ) mavjud. nomzod marshrutlari) `credentialRejectionHeaders()` orqali o'sha 401 ga aks-sado qo'shadi. Echo qayd maʼlumotlari sarlavhasi (`Authorization`, `x-api-key`, `x-goog-api-key` yoki `auth_token` cookie-fayllari) boʻlgan soʻrovga kiritiladi, ularning qaysi birida marshrut tekshirilmaydi va hech qachon `Access-Control-Allow-Credentials` bilan bogʻlanmaydi; tanasi qattiq xato konvertidir. `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) tomonidan qoʻriqlanadigan `/api/v1/` ostida boshqaruv marshrutlari ushbu hisobga olish maʼlumotlarini rad etish istisnosidan foydalanmaydi: `REQUIRE_API_KEY=false` bilan ularning 401/403 javoblari konfiguratsiya qilingan CORS manba siyosatiga amal qiladi.
+- **Cookie seansi (boshqaruv paneli):** muvaffaqiyatsiz yopilgan sukut bilan himoyalangan **va** umumiy yo'lda `Access-Control-Allow-Credentials` yo'qligi bilan. management/dashboard manbalarini har qanday ruxsat beruvchi konfiguratsiyadan uzoqroq tuting; ular to'liq yopiq qolishi kerak.
 
-## WebSocket qoʻl siqishuvlari (`/v1/responses`, `/v1/ws`)
+## WebSocket qoʻl siqish (`/v1/responses`, `/v1/ws`)
 
-Brauzerlar WebSocket'ga CORS qoʻllamaydi, shuning uchun inferensiya natijasini
-qaytaruvchi WebSocket transportlari qoʻl siqishuvdagi `Origin` qiymatini oʻzlari
-tekshiradi (`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`)
-va OmniRoute `npm start` / `npm run dev` orqali ishga tushirilganda `/v1/ws` hamda
-`/api/v1/ws` koʻprigi, u `/v1/chat/completions`, `/v1/messages` va `/v1/responses`
-javoblarini freymlar sifatida oqim bilan uzatadi. Koʻprik qarorni
-`/api/v1/ws?handshake=1` dan soʻraydi va oʻsha marshrut tekshiruvni bajarmagan
-boʻlsa, ulanishni yangilashni rad etadi. Qoʻl siqishuv quyidagi hollarda qabul qilinadi:
+Brauzerlar CORS WebSocket ga qo‘llamaydi, shuning uchun xulosa chiqarishni qaytaruvchi WebSocket transportlari qo‘l siqish `Origin` o‘zlari tekshiradi (`src/server/origin/wsOrigin.ts`): Javoblar WebSocket (`/v1/responses`) va OmniRoute `npm start` / `npm run dev` dan o‘tganda `/v1/chat/completions`, `/v1/messages` va `/v1/responses` ni oqimlaydigan `/v1/ws` va `/api/v1/ws` ko‘prigi. Ko'prik `/api/v1/ws?handshake=1` hukmni so'raydi va agar bu yo'nalish tekshiruvdan o'tmasa, yangilanishni rad etadi. Autentifikatsiya talablari hali ham alohida qo'llaniladi. Kelib chiqishi tekshiruvi quyidagi hollarda o'tadi:
 
-- unda `Origin` sarlavhasi yoʻq (Codex CLI, SDK'lar va brauzer boʻlmagan boshqa mijozlar);
-- `Origin` yuqoridagi ruxsat roʻyxati tomonidan qabul qilingan (`CORS_ALLOWED_ORIGINS`,
-  `corsOrigins` sozlamasi, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` OmniRoute'ning oʻz ommaviy originlaridan biri (sozlangan ommaviy asosiy URL,
-  ishonchli proksi tomonidan uzatilgan origin yoki IP literal yoxud `localhost`
-  sifatida berilgan bevosita loopback/LAN xosti — boshqaruv paneli oʻzgartirish
-  tekshiruvi foydalanadigan nomzodlarning aynan oʻzi); yoki
-- unda HTTP `/v1/*` interfeysidagi kabi yaroqli API kaliti mavjud.
+- unda `Origin` sarlavhasi yo'q (Codex CLI, SDKs va boshqa brauzer bo'lmagan mijozlar);
+- `Origin` yuqoridagi ruxsat etilgan ro'yxat tomonidan qabul qilinadi (`CORS_ALLOWED_ORIGINS`, `corsOrigins` sozlamalari, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` OmniRoute ning umumiy manbalaridan biridir (konfiguratsiya qilingan umumiy URL bazasi, ishonchli proksi-serverning yuborilgan kelib chiqishi yoki IP literal yoki `localhost` — sifatida berilgan bevosita loopback/LAN xosti, asboblar paneli mutatsiyasini tekshirishda foydalanadigan nomzodlar); yoki
+- u HTTP `/v1/*` yuzasida bo'lgani kabi joriy API kalitiga ega.
 
-Qolgan barcha holatlar `403 ws_origin_forbidden` oladi. Boshqaruv panelining seans
-cookie fayli begona `Origin` qiymatini istisno qilmaydi, chunki brauzer uni istalgan
-sahifaning socket'iga biriktiradi. Boshqa portdagi `localhost` bir xil origin deb
-hisoblanmaydi; bunday ishlab chiqish originlarini `CORS_ALLOWED_ORIGINS` ga qoʻshing.
+Boshqa har qanday narsa `403 ws_origin_forbidden` oladi. Boshqaruv paneli seansi cookie-fayllari xorijiy `Origin` ozod qilmaydi, chunki brauzer uni istalgan sahifaning rozetkasiga ulaydi. Boshqa portdagi `localhost` bir xil kelib chiqish deb hisoblanmaydi; `CORS_ALLOWED_ORIGINS` ga bunday dev kelib chiqishini qo'shing.
 
-## Misol: OmniRoute oldidagi teskari proksi
+## Misol: OmniRoute oldida teskari proksi
 
-CORS OmniRoute tomonidan qoʻllanadi, shuning uchun proksi odatda `Access-Control-*`
-sarlavhalarini **qoʻshmasligi** yoki qayta yozmasligi kerak (takroriy sarlavhalar brauzerlar ishlashini buzadi). TLS ulanishini
-yakunlang va soʻrovni yoʻnaltiring — dastlabki soʻrovga OmniRoute javob bersin:
+CORS OmniRoute tomonidan amalga oshiriladi, shuning uchun proksi odatda kerak **emas** `Access-Control-*` sarlavhalarini qo'shing yoki qayta yozing (ikkita sarlavhalar brauzerlarni buzadi). TLS tugating va — yo'naltiring, OmniRoute oldindan parvozga javob bering:
 
 ```nginx
-# nginx — OmniRouteʼga yoʻnaltiring; bu yerda Access-Control-* sarlavhalarini kiritmang
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Yoʻnaltirish sarlavhalarini saqlang: ayni xostdagi proksi loopback orqali ulanadi va aynan ular
-    # OmniRouteʼga murojaat qiluvchi mahalliy operator emasligini bildiradi. Ulardan hech birini qoʻshmaydigan proksi
-    # barcha masofaviy murojaat qiluvchilarni mahalliy sifatida koʻrsatadi. X-Forwarded-Forʼni ham hech qachon 127.0.0.1 qilib belgilamang.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Brauzer uchun ruxsat etilgan manbalarni proksida emas, OmniRouteʼda (`CORS_ALLOWED_ORIGINS` yoki
-Security ichki oynasida) belgilang.
+Ruxsat etilgan brauzer manbalarini proksi-serverda emas, OmniRoute (`CORS_ALLOWED_ORIGINS` yoki Xavfsizlik yorlig'i) da o'rnating.
 
-## Manba fayllari
+## Manba fayllar
 
-| Vazifa                                                      | Fayl                                                                 |
-| ----------------------------------------------------------- | -------------------------------------------------------------------- |
-| Ruxsat etilgan roʻyxatni aniqlash + `getCorsStatus()`       | `src/server/cors/origins.ts`                                         |
-| Oraliq dastur qoʻllanilishi (yagona haqiqat manbai)         | `src/server/authz/pipeline.ts`                                       |
-| Settings → ish vaqtidagi manbani kiritish                   | `src/lib/config/runtimeSettings.ts`                                  |
-| Boshqaruv paneli uchun ish vaqti holati                     | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Boshqaruv panelidagi ogohlantirish banneri                  | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| CORS Allowed Origins maydoni                                | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| Har bir marshrut uchun Cloud-Agent CORS sozlamasi (istisno) | `src/lib/cloudAgent/api.ts`                                          |
-| WebSocket qoʻl siqishuvida `Origin` tekshiruvi              | `src/server/origin/wsOrigin.ts`                                      |
+| Xavotir                                           | Fayl                                                                 |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| Ruxsat berilganlar roʻyxati + `getCorsStatus()`   | `src/server/cors/origins.ts`                                         |
+| O'rta dastur dasturi (haqiqatning yagona manbai)  | `src/server/authz/pipeline.ts`                                       |
+| Sozlamalar → ish vaqti kelib chiqish injection    | `src/lib/config/runtimeSettings.ts`                                  |
+| Boshqaruv paneli uchun ish vaqti holati           | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Boshqaruv panelidagi ogohlantirish banneri        | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS ruxsat berilgan manbalar maydoni             | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Har bir marshrut uchun Cloud-Agent CORS (istisno) | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket qo'l siqish `Origin` tekshiruvi         | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Shuningdek qarang
 
-- [Marshrut himoyasi darajalari](./ROUTE_GUARD_TIERS.md) — jarayon ishga tushira oladigan marshrutlar uchun loopback cheklovi (alohida, bir-birini toʻldiruvchi nazorat).
-- [Avtorizatsiya boʻyicha qoʻllanma](../architecture/AUTHZ_GUIDE.md) — toʻliq autentifikatsiya jarayoni.
+- [Route Guard Tiers](./ROUTE_GUARD_TIERS.md) — qo'llab-quvvatlanadigan marshrutlarni qayta tiklash (alohida, qo'shimcha nazorat).
+- [Avtorizatsiya bo'yicha qo'llanma](../architecture/AUTHZ_GUIDE.md) — to'liq avtorizatsiya quvuri.

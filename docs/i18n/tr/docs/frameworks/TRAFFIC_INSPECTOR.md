@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanizma:** Tüm HTTP/HTTPS trafiğini HTTP_PROXY dinleyicisi üzerinden yönlendirmek için işletim sistemi API'lerini kullanır:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` ve HTTP/HTTPS ana makine/port ayarları
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Kapsam:** Makinede sistem proxy ayarlarına uyan tüm uygulamalar
   **Not:** `source` = `"system-proxy"`
 
 **Güvenlik mekanizmaları:**
 
-- Otomatik devre dışı bırakma zamanlayıcısı (varsayılan 30 dk.; `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` aracılığıyla yapılandırılabilir)
-- Önceki sistem proxy durumu veritabanına kaydedilir ve geri alma sırasında geri yüklenir
-- Sistem proxy'si etkinken kullanıcı sayfadan ayrılırsa pano, "Sistem proxy'si geri alınıyor" istemini gösterir
-- Kullanıcı arayüzü, `⚠ İleri Düzey` rozeti ve açık bir onay kutusu gösterir
+- Proxy’yi uygulamak, işlem içinde çalışan ve başarı garantisi olmayan bir geri alma zamanlayıcısı planlar (varsayılan 30 dk; `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` ile ayarlanabilir). Zamanlayıcı sunucu işlemi sonlandığında varlığını sürdüremez.
+- Proxy’nin önceki durumu işlem belleğinde tutulur; bu yakalama durumu deposu onu veritabanında kalıcı olarak saklamaz. Geri alma, kaydedilmiş macOS/GNOME ayarlarını geri yükler; Windows’ta önceki yapılandırmayı geri yüklemek yerine WinHTTP proxy’sini sıfırlar.
+- Proxy uygulanmış olarak bildirildiği sürece sayfanın kaldırılması, başarı garantisi olmayan bir keepalive geri alma isteği gönderir ve metnini tarayıcının belirlediği yerel bir onay istemini talep eder. SPA gezinmesi sırasında denetleyicinin kaldırılması da bu tarayıcı istemi olmadan geri almayı dener.
+- Yakalama araç çubuğu, yerelleştirilmiş `System-wide` denetimini bir uyarı simgesiyle gösterir. Tıklamak şu anda yalnızca yerel arayüz durumunu değiştirir; onay kutusu göstermez ve sistem proxy’sini uygulamaz ya da geri almaz.
 
 ### Mod 5 — TPROXY şeffaf şifre çözme (Linux, root, isteğe bağlı)
 
@@ -113,13 +113,13 @@ Bu, kendine ait özel bir operatör kılavuzu bulunan kapsamlı bir alt sistemdi
 
 ### Yakalama modu karşılaştırması
 
-| Mod                   | Kurulum                          |           Sudo?           | Erişim                                | Notlar                                                                                                                                      |
-| --------------------- | -------------------------------- | :-----------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge        | Otomatik                         |   Bir kez (cert+hosts)    | 9 IDE aracısı                         | Varsayılan olarak açık                                                                                                                      |
-| 2. Özel Hostlar       | Host başına giriş                |   Evet (hosts dosyası)    | Bu hostu kullanan tüm uygulamalar     | Veritabanında kalıcı olarak saklanır                                                                                                        |
-| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`         |           Hayır           | Ortam değişkenlerine uyan uygulamalar | Port 8080; HTTPS, CONNECT üzerinden tünellenir (yalnızca meta veriler, asla şifresi çözülmez)                                               |
-| 4. Sistem geneli      | Aç/kapat + onay                  |           Evet            | Makinedeki tüm uygulamalar            | 30 dakika içinde otomatik olarak devre dışı bırakılır                                                                                       |
-| 5. TPROXY şifre çözme | Aç/kapat (Linux + yerel eklenti) | Evet (root + CA kurulumu) | Hedef porttaki tüm hostlar            | İstenen hostların şifresini çözer; varsayılan olarak kapalıdır — bkz. `docs/security/MITM-TPROXY-DECRYPT.md` (git; `/docs` içine derlenmez) |
+| Mod                   | Kurulum                                                        |           Sudo?           | Erişim                                | Notlar                                                                                                                                      |
+| --------------------- | -------------------------------------------------------------- | :-----------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge        | Otomatik                                                       |   Bir kez (cert+hosts)    | 9 IDE aracısı                         | Varsayılan olarak açık                                                                                                                      |
+| 2. Özel Hostlar       | Host başına giriş                                              |   Evet (hosts dosyası)    | Bu hostu kullanan tüm uygulamalar     | Veritabanında kalıcı olarak saklanır                                                                                                        |
+| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`                                       |           Hayır           | Ortam değişkenlerine uyan uygulamalar | Port 8080; HTTPS, CONNECT üzerinden tünellenir (yalnızca meta veriler, asla şifresi çözülmez)                                               |
+| 4. Sistem geneli      | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |           Evet            | Makinedeki tüm uygulamalar            | Başarı garantisi olmayan geri alma zamanlayıcısı (varsayılan 30 dk)                                                                         |
+| 5. TPROXY şifre çözme | Aç/kapat (Linux + yerel eklenti)                               | Evet (root + CA kurulumu) | Hedef porttaki tüm hostlar            | İstenen hostların şifresini çözer; varsayılan olarak kapalıdır — bkz. `docs/security/MITM-TPROXY-DECRYPT.md` (git; `/docs` içine derlenmez) |
 
 ---
 
@@ -316,7 +316,7 @@ desteği daha sonra eklenecektir).
 ### 5.1 Oturum kaydetme
 
 1. Araç çubuğunda **"● Oturumu kaydet"** seçeneğine tıklayın → bir ad girin (isteğe bağlı)
-2. Canlı akış normal şekilde devam eder; kırmızı, yanıp sönen bir gösterge `◉ KAYIT · <ad> · 00:42 · 23 istek` bilgisini gösterir
+2. Canlı izleme normal şekilde devam eder; kayıt çubuğu yanıp sönen kırmızı bir nokta, geçen süre, varsa oturum adı ve yerelleştirilmiş bir Durdur denetimi gösterir.
 3. **"⏹ Durdur"** seçeneğine tıklayın → oturum anlık görüntüsü `inspector_sessions` + `inspector_session_requests` konumuna kaydedilir
 
 ### 5.2 Kaydedilmiş bir oturumu görüntüleme
@@ -324,7 +324,7 @@ desteği daha sonra eklenecektir).
 Araç çubuğundaki **Oturumlar** açılır menüsü, kaydedilmiş oturumları listeler. Bir oturum seçildiğinde:
 
 - Oturumun anlık görüntüsü yüklenir (dondurulmuş durum)
-- Bir başlık şu bilgiyi gösterir: `Kaydedilmiş "<ad>" oturumu görüntüleniyor — [Canlı görünüme dön]`
+- Bir başlık alanı, yerelleştirilmiş kayıtlı oturum etiketini ve oturum adını (veya adsız oturum için yerelleştirilmiş yedek metni), yerelleştirilmiş Canlıya dön düğmesinin yanında gösterir.
 - Recharts toplamlarını içeren İstatistikler sekmesi kullanılabilir hâle gelir
 
 ### 5.3 Dışa aktarma biçimleri
@@ -348,7 +348,7 @@ Traffic Inspector, yetkilendirme başlıkları ve istek gövdeleri dahil olmak �
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                         | Tüm rotalar ve WebSocket uç noktası yalnızca loopback üzerinden erişilebilir (`routeGuard.ts` içinde kimlik doğrulamadan önce zorunlu kılınır)                                                 |
 | **Gizli bilgi maskeleme**              | Doğrusal `maskSecret()` tarayıcısı, `TrafficBuffer.push()` öncesinde RFC 6750 Bearer kimlik bilgilerini, sağlayıcı önekli anahtarları ve uzun opak token'ları gizler                           |
-| **Gövde boyutu sınırı**                | `INSPECTOR_MAX_BODY_KB` değerini (varsayılan 1024 KB) aşan gövdeler, `"(performans için kısaltıldı)"` bildirimiyle kısaltılır                                                                  |
+| **Gövde boyutu sınırı**                | `INSPECTOR_MAX_BODY_KB` değerini (varsayılan 1024 KB) aşan gövdeler, `"(truncated for performance)"` bildirimiyle kısaltılır                                                                   |
 | **Başlık temizleme**                   | Adlar küçük harfe dönüştürülür; çerçeveleme/hop-by-hop ve proxy kimlik doğrulama başlıkları kaldırılır; çerezler tamamen gizlenir; kimlik bilgisi değerleri `maskSecret()` işlevine devredilir |
 | **CSP**                                | Eklenen yanıt gövdeleri üzerinden XSS'yi önlemek için Traffic Inspector sayfalarında katı Content Security Policy uygulanır                                                                    |
 | **Varsayılan olarak kalıcılık yoktur** | `TrafficBuffer` bellekte tutulur ve sunucu yeniden başlatıldığında kaybolur. Oturumlar yalnızca açıkça kaydedildiğinde kalıcı hâle getirilir                                                   |
@@ -416,7 +416,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Kontrol paneli, veritabanı durumunun proxy'nin etkin olduğunu belirttiğini algılarsa bir sonraki yüklemede "Sistem proxy'sini geri al" seçeneğini de sunar.
+Kaydedilen proxy durumu yalnızca sunucu işleminde bulunur. Çökme veya yeniden başlatmadan sonra mevcut yakalama durumu deposu bu anlık görüntüyü veritabanından geri yükleyemez; elle kurtarma gerektiğinde yukarıdaki platform kurtarma komutlarını kullanın.
 
 ### Arabellek dolu
 

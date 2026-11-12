@@ -4,8 +4,6 @@
 
 ---
 
-# Vodič kroz šemu baze podataka i operacije
-
 > **TL;DR**: OmniRoute koristi **SQLite sa WAL žurnaliranjem** kao primarnu pohranu, uz **AES-256-GCM** enkripciju u stanju mirovanja za osjetljiva polja. Ovaj vodič pokriva šemu, migracije, sigurnosne kopije/oporavak i operativne priručnike.
 
 **Izvori:**
@@ -403,50 +401,51 @@ Ovo koristi SQLite-ov API za online sigurnosne kopije — sigurno za pokretanje 
 
 ## Podešavanje performansi
 
-### WAL režim
+### WAL Mode
 
-WAL je omogućen po podrazumevanoj vrednosti. Za radna opterećenja sa velikim brojem upisa, razmotrite:
+WAL je podrazumevano omogućen. Za radna opterećenja visokog pisanja, razmotrite:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint na svakih 1000 stranica
-PRAGMA journal_size_limit = 67108864;  -- Ograničenje WAL-a od 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ne postavlja `journal_size_limit`. Kontrolna tačka pomera WAL okvire u glavnu datoteku, ali WAL datoteka zadržava svoju najveću dodeljenu veličinu. `OMNIROUTE_WAL_GUARD_MAX_MB` čuvar samo upozorava i pokreće `wal_checkpoint(RESTART)`; nije ograničenje veličine diska.
 
 ### Indeksi
 
 Ključni indeksi za performanse (automatski kreirani migracijama):
 
-- `idx_models_provider` — pretraga modela po provajderu
-- `idx_combo_targets_combo_id` — proširenje combo ciljeva
-- `idx_usage_history_api_key_timestamp` — analitika korišćenja
+- `idx_models_provider` — traženja modela po provajderu
+- `idx_combo_targets_combo_id` — kombinovano proširenje cilja
+- `idx_usage_history_api_key_timestamp` — analiza upotrebe
 - `idx_quota_snapshots_api_key_window` — praćenje kvota
-- `idx_call_logs_timestamp` — upiti dnevnika poziva
+- `idx_call_logs_timestamp` — upiti za evidenciju poziva
 
-Da biste dodali novi indeks, kreirajte migraciju:
+Da dodate novi indeks, kreirajte migraciju:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Memory-Mapped I/O
+### I/O mapirana memorijom
 
-Za veoma velike baze podataka (>10GB), memorijsko mapiranje se može podesiti putem SQLite pragma:
+Za vrlo velike baze podataka (> 10GB), mapiranje memorije se može podesiti putem SQLite pragma:
 
 ```sql
--- Podesite putem SQLite pragma (prilagodite u core.ts ili tokom izvršavanja)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Kompakcija
+### Zbijanje
 
-OmniRoute instance koje dugo rade imaju koristi od povremenog `VACUUM`:
+Dugotrajne OmniRoute instance imaju koristi od povremenih `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Pokrenite mesečno tokom perioda slabog saobraćaja. (WAL režim smanjuje potrebu, ali je ne eliminiše.)
+Pokreni mjesečno tokom perioda sa malim prometom. (WAL način rada smanjuje potrebu, ali je ne eliminira.)
 
 ---
 

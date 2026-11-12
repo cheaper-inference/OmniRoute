@@ -56,7 +56,7 @@ jobs:
     if: (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && needs.detect.outputs.exists == 'true'
     # Same dynamic-runner rule as npm-publish.yml: a full `next build` outgrew the
     # 16 GB hosted runner during v3.8.49. Never runs on pull_request.
-    runs-on: ${{ vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    runs-on: ${{ vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build","omni-build-60gb"]') || 'ubuntu-latest' }}
     permissions:
       contents: read
     outputs:

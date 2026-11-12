@@ -128,41 +128,63 @@ Shu toʻplamdagi yordamchi modullar:
 
 ---
 
-## Antigravity yashirinligi
+## Antigravity Stealth
 
-Antigravity soʻrovlari chaqiruvchi matnini baytma-bayt saqlaydi. OmniRoute IDE mijoziga taqlid qilish uchun promptlarga nol kenglikdagi belgilarni kiritmaydi yoki vositalarni qayta nomlamaydi/kiritmaydi.
+Antigravity so'rovlari qo'ng'iroq qiluvchining matnini bayt-bayt saqlaydi. OmniRoute IDE mijoziga taqlid qilish uchun takliflar yoki rename/inject vositalariga nol kenglikdagi belgilarni kiritmaydi.
 
 ### `antigravityHeaderScrub.ts`
 
-Yoʻnaltirishdan oldin Stainless SDK belgilarini (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) olib tashlaydi.
+Yo'naltirishdan oldin zanglamaydigan SDK markerlarini (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) chiziqlar.
 
-### ⚠️ Xavf: `ANTIGRAVITY_CREDITS=always` (hisob bloklanishi uchun eng xavfli nuqta)
+### ⚠️ xavfi: `ANTIGRAVITY_CREDITS=always` (hisobni taqiqlash nuqtasi)
 
-`ANTIGRAVITY_CREDITS=always` (`open-sse/executors/antigravity.ts` tomonidan ishlatiladi) Google’ning bepul tarif kvotasi soʻrovlarni cheklashiga yoʻl qoʻyish oʻrniga **har bir** soʻrovni Antigravity AI Credit Overages (Google’ning pulli kreditlari) orqali yoʻnaltiradi. Bu imkoniyat sifatida hujjatlashtirilgan, ammo u **biz koʻradigan Xizmat koʻrsatish shartlari buzilishi haqidagi xabarlarning eng keng tarqalgan yagona sababidir** — bir nechta Google Ultra hisobi `=always` bilan bir necha soat ishlaganidan soʻng `403 / "service disabled for ToS violation" / insufficient_quota` xatosi bilan bloklangan.
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` tomonidan iste'mol qilinadi) marshrutlari **har** Google ning bepul darajali kvotaga kirishiga ruxsat berish o'rniga, Antigravity AI Credit Overages (to'langan Google kreditlari) orqali so'rov yuboring. Bu xususiyat sifatida hujjatlashtirilgan, lekin shunday **Biz ko'rib turgan eng keng tarqalgan ToS qoidalarini buzish hisoboti** `=always` bilan bir necha soat davomida ishlagandan so'ng — bilan bir nechta Google Ultra hisoblari `403 / "service disabled for ToS violation" / insufficient_quota` bilan taqiqlangan.
 
-Yuqori oqimdagi nazorat **Google tomonida** amalga oshiriladi va OmniRoute buning oldini ola olmaydi. Muhit oʻzgaruvchisining nomi va mavjud hujjatlar uni yoqish xavfsizdek koʻrsatadi; aslida esa bunday emas.
+Yuqori oqimni qo'llash yoqilgan **Google tomoni** , OmniRoute hech narsa oldini olmaydi. env var nomi va mavjud hujjatlar uni burish uchun xavfsiz tugma kabi ko'rsatadi; unday emas.
 
-**Nega bu faqat bepul tarifdan foydalanishga qaraganda suiisteʼmolni aniqlash tizimlarini faolroq ishga tushiradi:**
+**Nima uchun bu suiiste'molni aniqlashni faqat bepul foydalanishdan ko'ra tajovuzkorroq qiladi:**
 
-- Bitta Google hisobidan davomli avtomatlashtirilgan xarajat bepul tarifning kvotaga yetib, toʻxtab qolishidan boshqacha belgilanishiga sabab boʻladi.
-- Ortiqcha kreditlar uchun tezlik chegarasi yoʻq, shu sababli notoʻgʻri sozlangan mijoz bir necha daqiqada bir necha yuz USD sarflashi va API kalitlarini qayta sotish yoki bot trafigiga oʻxshab koʻrinishi mumkin.
-- Bir xil tashqi IP manzildan parallel ravishda ortiqcha kreditlardan foydalanayotgan bir nechta OmniRoute foydalanuvchisi signalni kuchaytiradi.
+- Bitta Google hisobiga doimiy avtomatlashtirilgan sarf-xarajatlar bepul darajali hits-kvota-va-stoplardan farq qiladi.
+- Kreditni oshirib yuborishda stavkaning chegarasi yo'q, shuning uchun noto'g'ri sozlangan mijoz bir necha daqiqada bir necha yuz USD yoqib yuborishi va API kalitlarini qayta sotish yoki bot trafigiga o'xshab ko'rinishi mumkin.
+- Bir xil tashqi IP dan oshib ketgan kreditlarni parallel ravishda urgan bir nechta OmniRoute foydalanuvchilari signalni birlashtiradi.
 
-**Tavsiya etiladigan yondashuv:**
+**Tavsiya etilgan holat:**
 
-1. Operator pulli kreditlar va hisobga nisbatan choralar koʻrilishi xavfini aniq qabul qilmasa, standart `ANTIGRAVITY_CREDITS=off` holatini saqlang. `retry` avval odatiy soʻrovni yuboradi va mos keluvchi kvota 429 xatosidan keyin kreditlarni koʻpi bilan bir marta kiritadi; `always` esa kreditlarni birinchi soʻrovdayoq kiritadi.
-2. Bitta Antigravity hisobini haddan tashqari yuklash oʻrniga **Auto-Combo orqali yukni provayderlar boʻylab taqsimlang** (`model: "auto"` yoki `kr/glm/etc`-combo).
-3. Antigravity provayderining tahrirlash sahifasida **har bir ulanish uchun RPM chegaralarini belgilang** (Dashboard → Providers → Antigravity → ulanish → tezlik chegarasi). Uzoq muddatli foydalanish uchun 30–60 RPM asosli yuqori chegara hisoblanadi.
-4. **Barqaror, operator nazoratidagi yuqori oqim tarmogʻidan foydalaning** va bitta hisobni bir-biriga aloqasiz foydalanuvchilar yoki ish yuklari oʻrtasida ulashishdan saqlaning.
-5. **Agar bloklansa**: Google yuborgan aniq `quota_exceeded` / `service disabled` javob tanasi bilan `support.google.com` → “Restore Workspace/Account access” orqali apellyatsiya yuboring. Hisobning tiklanishi kafolatlanmaydi.
+1. Operator to'langan kredit va hisobni amalga oshirish xavfini aniq qabul qilmasa, standart `ANTIGRAVITY_CREDITS=off` saqlang. `retry` birinchi navbatda oddiy so'rovni yuboradi va 429 mos kvotadan keyin kreditlarni ko'pi bilan bir marta kiritadi; `always` birinchi so'rov bo'yicha kreditlarni kiritadi.
+2. **Auto-Combo orqali yukni provayderlar bo'ylab tarqating** (`model: "auto"` yoki `kr/glm/etc` -combo) bitta Antigravity hisobini to'ldirish o'rniga.
+3. **Har bir ulanish uchun RPM chegaralarini o'rnating** Antigravity provayderining tahrirlash sahifasida (Dashboard → Providers → Antigravity → ulanish → tezligi chegarasi). 30-60 RPM barqaror foydalanish uchun himoyalangan yuqori chegaradir.
+4. **Barqaror, operator tomonidan boshqariladigan yuqori oqim tarmog'idan foydalaning** va bir-biriga bog'liq bo'lmagan foydalanuvchilar yoki ish yuklari orasida bitta hisobni almashishdan saqlaning.
+5. **Agar taqiqlangan bo'lsa** : `support.google.com` → orqali murojaat " Workspace/Account kirishni tiklash" aniq `quota_exceeded` / `service disabled` javob tanasi Google yuborilgan. Qayta tiklash kafolatlanmaydi.
 
-Muhit maʼlumotnomasida har bir kredit rejimining hisob va xarajatga taʼsiri hujjatlashtirilgan.
+Atrof-muhit ma'lumotnomasi har bir kredit rejimining hisob va sarf-xarajat oqibatlarini hujjatlashtiradi.
+
+#### Faqat `=always` emas: umuman Antigravity OAuth marshrutlash
+
+To'xtatib turish faqat kreditni oshirib yuborish bilan cheklanmaydi. 2026 yil noyabr oyidagi hisobotlarda (#19223, #19266) `antigravity` va `agy` (Antigravity CLI) provayderlari orqali marshrutlashda toʻxtatilgan bir nechta Google hisoblari tasvirlangan:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Ikkala provayder ham Antigravity mahsuloti OAuth seansi bilan autentifikatsiya qiladi, bunda asboblar panelidagi xavf haqida ogohlantirish ("Ushbu provayder proxy/router foydalanishga ruxsat berilmagan session/OAuth rasmiy mahsulotingizdan foydalanadi") ulanish qo'shilishidan oldin ogohlantiriladi. Yuqoridagi tavsiyalarning hech biri foydalanishga ruxsat bermaydi; ular faqat bitta hisob qancha trafikni kamaytiradi.
+
+**Gemini modellari uchun vakolatli API interfeyslari.** Google o'zining APIs orqali Gemini ga dasturiy kirishni taklif qiladi, OmniRoute uni oddiy API-kalit provayderlari sifatida qo'llab-quvvatlaydi:
+
+| Provayder identifikatori | Boshqaruv paneli nomi     | Hisob ma'lumotlari                                                              |
+| ------------------------ | ------------------------- | ------------------------------------------------------------------------------- |
+| `gemini`                 | Gemini (Google AI Studio) | Google AI Studio'dan Gemini API kaliti (bepul daraja mavjud)                    |
+| `vertex`                 | Vertex AI                 | Xizmat hisobi JSON, OAuth kirish tokeni yoki Vertex Express API kaliti (Gemini) |
+
+Ushbu provayderlar Antigravity mahsulot seansidan farqli o'laroq, API kirish uchun Google hisob ma'lumotlaridan foydalanadilar. Ular har qanday foydalanishni talablarga moslashtirmaydi yoki qo'llash xavfini yo'qotmaydi: ularning har biri o'z shartlari bilan boshqariladi, operator ularning joylashishini tekshirishi kerak. Masalan, [Gemini API qo‘shimcha xizmat ko‘rsatish shartlari](https://ai.google.dev/gemini-api/terms) API mijozlari Yevropa Iqtisodiy hududi, Shveytsariya yoki Buyuk Britaniyadagi foydalanuvchilar uchun ochiq bo‘lganda va To‘lanmagan xizmatlarga yuborilgan kontent Google mahsulotlarini yaxshilash uchun ishlatilishi mumkin bo‘lsa, faqat Pulli xizmatlarga ruxsat beradi. Vertex AI o'rniga Google Cloud shartlariga to'g'ri keladi ( [Xizmatga xos shartlar](https://cloud.google.com/terms/service-terms) ). Narxlar va kvotalar Antigravity obunasiga emas, balki API shartlariga amal qiladi.
+
+Yuqorida tavsiflangan Antigravity toʻxtatib qoʻyishdan qochmoqchi boʻlgan operatorlar, ulardan foydalanish provayder shartlariga mos kelishini tekshirgandan soʻng, Gemini trafigini `antigravity` / `agy` oʻrniga ushbu provayderlardan biri orqali yoʻnaltirishlari kerak.
 
 Tegishli nuqtalar:
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ni oʻqiydi
-- `src/lib/oauth/providers/antigravity.ts` — hisob maʼlumotlarini ulash
-- Dastlabki hodisa hisoboti: Muhokama [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ni o'qiydi
+- `src/lib/oauth/providers/antigravity.ts` — hisob ma'lumotlari sanitariya-tesisat
+- Voqealarning asl hisoboti: [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183) muhokamasi
 
 ---
 
@@ -231,9 +253,9 @@ Barcha MITM endpointlari boshqaruv autentifikatsiyasini (`requireCliToolsAuth`) 
 
 ---
 
-## Foydalanuvchi agenti — env varslarini bekor qiladi (`.env.example` 12-bo'lim)
+## User-Agent qiymatlarini qayta belgilash — muhit o‘zgaruvchilari (`.env.example` 12-bo‘lim)
 
-| O'zgaruvchan        | Standart                                      |
+| O‘zgaruvchi         | Standart qiymat                               |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -242,7 +264,7 @@ Barcha MITM endpointlari boshqaruv autentifikatsiyasini (`requireCliToolsAuth`) 
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dinamik qidiruv orqali `open-sse/executors/base.ts::buildHeaders()` tomonidan iste'mol qilinadi.** Provayderlar yangi CLI versiyalarini chiqarganda, bularni buzing** — eskirgan UA satrlari eskirgan mijozlar sifatida rad etila boshlaydi.
+`open-sse/executors/base.ts::buildHeaders()` tomonidan dinamik qidiruv orqali ishlatiladi. **Provayderlar yangi CLI versiyalarini chiqarganda bu qiymatlarni yangilang** — eskirgan UA satrlari eski mijozlarga tegishli deb rad etila boshlaydi.
 
 ## CLI moslik rejimi almashtirgichlari (`.env.example` 13-boʻlim)
 

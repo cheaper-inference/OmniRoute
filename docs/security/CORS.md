@@ -57,11 +57,11 @@ because of one concrete implementation fact:
 
 What that means per surface, even with `CORS_ALLOW_ALL=true`:
 
-| Surface                             | Auth mechanism              | Effect of wildcard CORS                                                                                                                                                                                                                                                                                                       |
-| ----------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin is echoed, but **without `Allow-Credentials`** the browser **blocks** the credentialed read. A malicious cross-origin site **cannot read** your authenticated dashboard responses, and the session cookie is not exposed.                                                                                              |
-| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | Already permissive **by design** (`relaxForTokenAuth`): browsers never auto-attach `Authorization`/`x-api-key`, so an attacker's page cannot supply your key. The echo applies only when the presented key validated; anonymous responses (`REQUIRE_API_KEY=false`) keep the allowlist. `CORS_ALLOW_ALL` does not widen this. |
-| Public read-only (`/api/health`, …) | None                        | Non-sensitive; wildcard is harmless.                                                                                                                                                                                                                                                                                          |
+| Surface                             | Auth mechanism              | Effect of wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin is echoed, but **without `Allow-Credentials`** the browser **blocks** the credentialed read. A malicious cross-origin site **cannot read** your authenticated dashboard responses, and the session cookie is not exposed.                                                                                                                                                                                                                                                         |
+| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | Already permissive **by design** (`relaxForTokenAuth`): browsers never auto-attach `Authorization`/`x-api-key`, so an attacker's page cannot supply your key. The relaxed echo requires an authenticated subject (a validated API key or dashboard session), not just a credential header, and never includes `Access-Control-Allow-Credentials`. Anonymous responses (`REQUIRE_API_KEY=false`) use the configured origin allowlist, including an explicit `CORS_ALLOW_ALL=true` opt-in. |
+| Public read-only (`/api/health`, …) | None                        | Non-sensitive; wildcard is harmless.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 So the **residual** exposure of `CORS_ALLOW_ALL=true` is limited to: (a)
 non-credentialed cross-origin **reads** of already-unauthenticated data, and (b)
@@ -122,10 +122,7 @@ restart.
 - **Bearer / `x-api-key` (the `/v1/*` inference surface):** browsers never attach
   these automatically. CORS is not a meaningful barrier here — the API key is the
   barrier — which is why that surface is intentionally permissive so browser and
-  Electron clients can read responses they are already entitled to. The relaxed
-  echo follows the validated key, not the mere presence of the header: when
-  `REQUIRE_API_KEY=false` serves a request anonymously, its successful response
-  keeps the fail-closed allowlist. Auth rejections (401) stay readable so clients
+  Electron clients can read responses they are already entitled to. The relaxed echo requires an authenticated subject (a validated API key or dashboard session), not just a credential header, and never includes `Access-Control-Allow-Credentials`. Anonymous responses (`REQUIRE_API_KEY=false`) use the configured origin allowlist, including an explicit `CORS_ALLOW_ALL=true` opt-in. Auth rejections (401) stay readable so clients
   can surface a revoked or mistyped key (#5242): the pipeline's own 401 keeps the
   echo, and a route that refuses the key itself after the pipeline served it as
   anonymous (`/v1/models` and `/v1beta/models` with management auth configured,
@@ -139,8 +136,7 @@ restart.
   `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`,
   `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`,
   `/api/v1/issues/report`)
-  do not add the echo: with `REQUIRE_API_KEY=false` their 401/403 is not
-  readable cross-origin.
+  do not use this credential-rejection exception: with `REQUIRE_API_KEY=false`, their 401/403 responses follow the configured CORS origin policy.
 - **Cookie session (the dashboard):** protected by the fail-closed default **and**
   by the absence of `Access-Control-Allow-Credentials` on the shared path. Keep
   management/dashboard origins out of any permissive config; they must stay exactly
@@ -154,8 +150,7 @@ inference output check the handshake `Origin` themselves
 when OmniRoute runs through `npm start` / `npm run dev`, the `/v1/ws` and
 `/api/v1/ws` bridge, which streams `/v1/chat/completions`, `/v1/messages` and
 `/v1/responses` as frames. The bridge asks `/api/v1/ws?handshake=1` for the
-verdict and refuses to upgrade unless that route ran the check. A handshake is
-accepted when:
+verdict and refuses to upgrade unless that route ran the check. Authentication requirements still apply separately. The origin check passes when:
 
 - it has no `Origin` header (Codex CLI, SDKs and other non-browser clients);
 - the `Origin` is admitted by the allowlist above (`CORS_ALLOWED_ORIGINS`, the

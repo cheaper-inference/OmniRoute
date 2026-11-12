@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Таблото се отваря на `http://localhost:20128`, а базовият URL адрес на API е `http://localhost:20128/v1`.
+Таблото се отваря при `http://localhost:20128` и API база URL е `http://localhost:20128/v1`.
+
+> **потребители на npm:** Ако npm предупреждава, че инсталационните скриптове са блокирани (напр. `omniroute`, `better-sqlite3`), вижте [Отстраняване на неизправности — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

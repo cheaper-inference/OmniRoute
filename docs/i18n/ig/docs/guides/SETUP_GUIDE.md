@@ -20,14 +20,16 @@
 
 ## Ụzọ Nwụnye
 
-### npm (a tụrụ aro)
+### npm (atụ aro)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboard ga-emeghe na `http://localhost:20128`, ebe URL ntọala API bụ `http://localhost:20128/v1`.
+Dashboard mepere na `http://localhost:20128` na API base URL bụ `http://localhost:20128/v1`.
+
+> **ndị ọrụ npm:** Ọ bụrụ npm dọrọ aka ná ntị na egbochiri scripts arụnyere (dịka, `omniroute`, `better-sqlite3`), lee [Nchọpụta nsogbu — npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

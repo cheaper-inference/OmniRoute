@@ -18,18 +18,22 @@ OmniRoute npm + Docker artefaktlarini nashr etadi. Bu darvozalar kelib chiqishin
 
 Tasvir CVE ratcheti `docker-publish.yml` da **ikki bosqichdan** foydalanadi: SARIF bosqichi (`HIGH,CRITICAL`, `exit-code: 0`) HIGH+CRITICAL ni Xavfsizlik yorlig'ida bloklamasdan ko'rinadigan qilib turadi; _CRITICAL darvozasi_ bosqichi (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) **mavjud tuzatishga ega bo'lgan** CRITICAL CVE da chiqarishni muvaffaqiyatsiz qiladi. `ignore-unfixed` yuqori oqim yamoqchisiz asosiy tasvir CVE uchun chiqarishni bloklashning oldini oladi.
 
-## ⚠️ CVE farqi (osv/Trivy darvozalarini bloklash)
+## ⚠️ CVE o‘zgaruvchanligi (osv/Trivy tekshiruvlarini bloklaydi)
 
-osv va Trivy bog'liqliklarni **doimiy ravishda o'sib boruvchi** CVE ma'lumotlar bazalari bilan solishtiradi. **Hech qanday bog'liqliklarga tegmaydigan** PR to'satdan qizil rangga aylanishi mumkin, chunki mavjud bog'liqlikda yangi CVE oshkor qilingan (osv: o'lchangan `vulnCount` > bazaviy ko'rsatkich; Trivy: tasvirda yangi tuzatiladigan CRITICAL). **Bu bloklovchi CVE darvozasining KUTILGAN operatsion xatti-harakati, mahsulot regressiyasi emas.**
+osv va Trivy bog‘liqliklarni **doimiy ravishda kengayib boradigan** CVE ma’lumotlar bazalari bilan solishtiradi. **Hech qanday bog‘liqlikka tegmagan** PR ham mavjud bog‘liqlikda yangi CVE oshkor etilgani sababli to‘satdan qizil holatga o‘tishi mumkin (osv: o‘lchangan `vulnCount` > bazaviy qiymat; Trivy: tasvirda tuzatish mumkin bo‘lgan yangi CRITICAL zaiflik). **Bu mahsulot regressiyasi emas, balki bloklovchi CVE tekshiruvining KUTILGAN operatsion xatti-harakatidir.**
 
-osv yoki Trivy yangi oshkor qilingan CVE tufayli qizil rangga aylanganda, yechim quyidagicha:
+Yangi oshkor etilgan CVE sababli osv yoki Trivy qizil holatga o‘tganda, quyidagilarni bajaring:
 
-1.  **Ta'sirlangan bog'liqlikni yangilash** (afzalroq) — `package.json` `overrides` (tranzitiv bog'liqliklar) orqali yamoqlangan versiyaga yangilash yoki yamoqlangan asosda tasvirni qayta qurish.
-2.  **Agar yuqori oqim tuzatmasi bo'lmasa:**
-    - **osv:** `config/quality/quality-baseline.json` dagi `metrics.vulnCount` ni qayta bazaviy holatga keltirish (`npm run quality:ratchet -- --update` maxsus darvozalarni qamrab olmaydi — qiymatni qo'lda tahrirlash, `direction:down`) asoslash eslatmasi + kuzatuv masalasi bilan.
-    - **Trivy:** `.trivyignore` ga (har bir qatorda CVE-ID) asoslash izohi + kuzatuv masalasi bilan yozuv qo'shish. `ignore-unfixed: true` allaqachon yamoqlarsiz CVE larni avtomatik ravishda qamrab oladi.
+1. **Ta’sirlangan bog‘liqlik versiyasini oshiring** (afzal) — `package.json` faylidagi `overrides` orqali tuzatilgan versiyaga yangilang (tranzitiv bog‘liqliklar uchun) yoki tasvirni tuzatilgan bazaviy tasvir asosida qayta yarating.
+2. **Agar tuzatish mavjud bo'lmasa:** o'lchangan topilmani saqlang va ta'sirlangan bog'liqlik yoki tasvirni kuzatib boring. Muvaffaqiyatsiz nomzodni o'tish uchun zaiflik asosini ko'tarmang. Trivy's `ignore-unfixed: true` allaqachon yuqori oqim patchisiz tasvir zaifliklarini istisno qiladi. Har qanday istisnolar ko'rib chiqilgan zaiflikni talab qiladi ID, paketning aniq yo'li, amal qilish muddati va siyosatdagi kuzatuv muammosi; bu muvaffaqiyatsiz skanerlashning avtomatik natijasi emas.
 
-Ikkala darvoza ham vosita mavjud bo'lmaganda yoki o'lchov muvaffaqiyatsiz bo'lganda (osv-scanner PATH da emas, osv.dev/tarmoqqa ulanib bo'lmaydi, noto'g'ri JSON) **muloyimlik bilan O'TKAZIB YUBORADI** (exit 0) — **o'lchov** muvaffaqiyatsizligi hech qachon bloklamaydi, faqat **o'lchangan** regressiya bloklaydi.
+Majburiy OSV ishga tushirishlari (`check:vuln-ratchet -- --ratchet`) skaner, hisobot yoki bazaviy qiymatni tekshirish imkoni bo‘lmaganda `INCOMPLETE` holati va 2 chiqish kodi bilan xavfsiz tarzda muvaffaqiyatsiz yakunlanadi. O‘lchangan regressiya 1 chiqish kodi bilan yakunlanadi. Tavsiyaviy ishga tushirish hali ham 0 chiqish kodi bilan `SKIP` holatini bildirishi mumkin, ammo bu bog‘liqliklar skanerlashdan muvaffaqiyatli o‘tganini tasdiqlamaydi. Bloklovchi Trivy bosqichi ham muvaffaqiyatli o‘lchovni talab qiladi: mavjud bo‘lmagan vositalar, muvaffaqiyatsiz topshiriqlar va yetishmayotgan tasvir dalillari tasvirning zaifliklardan xoli ekanini tasdiqlay olmaydi.
+
+## Rasmni skanerlash siyosati
+
+Joriy `.trivyignore.yaml` hech qanday zaiflik istisnolarini o'z ichiga olmaydi. `npm run check:trivy-ignore-policy` mahalliy skanerlash profillarida, CI va Sifatda tuzilgan siyosatni tasdiqlaydi. Noma'lum IDs, kengroq yo'llar, takroriy yozuvlar va muddati o'tgan istisnolar rad etiladi; eski `.trivyignore` ko'chirilgan skanerlash uchun kirish emas.
+
+Docker `github.workflow_sha` siyosat vositalarini va tasvir manbasi siyosatini tuzilish bilan bir xil manba selektori bilan tekshiradi. Siyosat selektori mos kelmaydigan doiralarni rad etadi va ikkala Trivy skanerlash uchun bitta fayl tayyorlaydi. Tarkibiy siyosatga ega bo'lmagan tarixiy manba hech qanday istisnolarga ega emas. Ikkala skanerlash Trivy `v0.70.0` ni o'rnatadi. Siyosatni tekshirish konfiguratsiyaning muvofiqligini tasdiqlaydi; tasvir hali ham muvaffaqiyatli skanerdan o'tishi kerak.
 
 ## Nafaqaga chiqqan qaramlik xavfi
 

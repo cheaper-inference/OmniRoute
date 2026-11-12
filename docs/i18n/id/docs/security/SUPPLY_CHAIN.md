@@ -18,18 +18,32 @@ OmniRoute memublikasikan artefak npm + Docker. Gerbang-gerbang ini menyediakan p
 
 Penyetelan CVE gambar menggunakan **dua langkah** di `docker-publish.yml`: langkah SARIF (`HIGH,CRITICAL`, `exit-code: 0`) menjaga HIGH+CRITICAL tetap terlihat di tab Keamanan tanpa memblokir; langkah _gerbang KRITIS_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) menggagalkan rilis pada CVE KRITIS **dengan perbaikan yang tersedia**. `ignore-unfixed` mencegah pemblokiran rilis untuk CVE gambar dasar tanpa patch hulu.
 
-## ⚠️ Variansi CVE (gerbang osv/Trivy yang memblokir)
+## ⚠️ Variansi CVE (gate osv/Trivy yang memblokir)
 
-osv dan Trivy membandingkan dependensi dengan basis data CVE yang **terus bertambah**. Sebuah PR yang **tidak menyentuh dependensi apa pun** dapat tiba-tiba menjadi merah karena CVE baru diungkapkan dalam dependensi yang sudah ada (osv: `vulnCount` terukur > baseline; Trivy: KRITIS baru yang dapat diperbaiki dalam gambar). **Ini adalah perilaku operasional yang DIHARAPKAN dari gerbang CVE yang memblokir, bukan regresi produk.**
+osv dan Trivy membandingkan dependensi dengan basis data CVE yang **terus bertambah**. Sebuah PR
+yang **tidak mengubah dependensi apa pun** dapat tiba-tiba menjadi merah karena CVE baru
+diungkapkan pada dependensi yang sudah ada (osv: `vulnCount` terukur > baseline; Trivy: CRITICAL
+baru yang dapat diperbaiki pada image). **Ini adalah perilaku operasional yang DIHARAPKAN dari gate
+CVE yang memblokir, bukan regresi produk.**
 
-Ketika osv atau Trivy menjadi merah karena CVE yang baru diungkapkan, solusinya adalah:
+Ketika osv atau Trivy menjadi merah akibat CVE yang baru diungkapkan, solusinya adalah:
 
-1.  **Tingkatkan dependensi yang terpengaruh** (disarankan) — tingkatkan ke versi yang telah di-patch melalui `overrides` di `package.json` (dependensi transien) atau bangun ulang gambar pada basis yang telah di-patch.
-2.  **Jika tidak ada perbaikan hulu:**
-    - **osv:** menetapkan ulang baseline `metrics.vulnCount` di `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` tidak mencakup gerbang khusus — edit nilai secara manual, `direction:down`) dengan catatan justifikasi + masalah pelacakan.
-    - **Trivy:** tambahkan entri di `.trivyignore` (CVE-ID per baris) dengan komentar justifikasi + masalah pelacakan. `ignore-unfixed: true` sudah secara otomatis mencakup CVE tanpa patch.
+1. **Naikkan versi dependensi yang terdampak** (lebih disarankan) — lakukan upgrade ke versi yang telah ditambal melalui `package.json`
+   `overrides` (dependensi transitif) atau build ulang image menggunakan base yang telah ditambal.
+2. **Jika remediasi tidak tersedia:** menyimpan temuan terukur dan melacak ketergantungan atau gambar yang terpengaruh. Jangan menaikkan garis dasar kerentanan untuk membuat kandidat yang gagal lolos. `ignore-unfixed: true` Trivy sudah mengecualikan kerentanan gambar tanpa patch upstream. Pengecualian apa pun memerlukan peninjauan kerentanan ID, jalur paket yang tepat, masa berlaku dan masalah pelacakan dalam kebijakan; ini bukan akibat otomatis dari pemindaian yang gagal.
 
-Kedua gerbang **melewati dengan anggun** (exit 0) ketika alat tidak ada atau pengukuran gagal (osv-scanner tidak ada di PATH, osv.dev/network tidak dapat dijangkau, JSON tidak valid) — kegagalan **pengukuran** tidak pernah memblokir, hanya regresi yang **terukur** yang memblokir.
+Eksekusi OSV yang diwajibkan (`check:vuln-ratchet -- --ratchet`) akan gagal secara tertutup dengan
+`INCOMPLETE` dan kode keluar 2 ketika pemindai, laporan, atau baseline tidak dapat divalidasi.
+Regresi yang terukur menghasilkan kode keluar 1. Eksekusi advisori masih dapat melaporkan `SKIP` dengan
+kode keluar 0, yang tidak membuktikan bahwa dependensi telah lolos pemindaian. Langkah Trivy yang
+memblokir juga memerlukan pengukuran yang berhasil: alat yang tidak tersedia, pekerjaan yang gagal,
+dan bukti image yang tidak ada tidak dapat menyatakan bahwa image tersebut bersih.
+
+## Kebijakan pemindaian gambar
+
+`.trivyignore.yaml` saat ini tidak mengandung pengecualian kerentanan. `npm run check:trivy-ignore-policy` memvalidasi kebijakan terstruktur dalam profil pemindaian lokal, CI, dan Kualitas. IDs yang tidak diketahui, jalur yang lebih luas, entri duplikat, dan pengecualian yang kedaluwarsa ditolak; `.trivyignore` lama bukan merupakan masukan untuk pemindaian yang dimigrasi.
+
+Docker memeriksa perkakas kebijakan dari `github.workflow_sha` dan kebijakan sumber gambar dengan pemilih sumber yang sama dengan build. Pemilih kebijakan menolak cakupan yang tidak kompatibel dan menyiapkan satu file untuk kedua pemindaian Trivy. Sumber sejarah tanpa kebijakan terstruktur tidak terkecuali. Kedua pemindaian menyematkan Trivy `v0.70.0`. Validasi kebijakan membuktikan konsistensi konfigurasi; gambar masih memerlukan pemindaian yang berhasil.
 
 ## Risiko ketergantungan pensiunan
 

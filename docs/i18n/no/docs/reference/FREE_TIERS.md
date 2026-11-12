@@ -115,7 +115,7 @@ De fleste tall for «gratis tokens per måned» på dette området er summer av 
 
 - **Hver delte kvote telles én gang.** Mistrals gratisabonnement har én kvote på 1B/måned per organisasjon; å føre den opp under fem modeller gjør den ikke til 5B. Summert per modell ville vår egen katalog vist **~7.4B** (beregnet på nytt 2026-09-03; dette tallet kontrolleres ikke av CI — mål det på nytt hver gang katalogen endres) — overskriften sier **~1.47B** fordi det er dette én konto hos hver leverandør faktisk kan bruke.
 - **Daglige grenser konverteres, rater gjør det ikke.** En dokumentert grense for tokens/dag blir `× 30`; en dokumentert grense for forespørsler/dag blir `RPD × ~800 tokens × 30`; en leverandør som bare publiserer forespørsler per minutt, har **ikke noe** månedlig tall og oppføres som _uten grense_, aldri summert. Å multiplisere en rategrense med 24/7 er den oppblåsingen vi nekter å gjøre.
-- **Kvoter bak en regional identitetskontroll vises separat** (`+~6M bak regional identitetsverifisering`), fordi de fleste lesere ikke kan bruke dem.
+- **Kvoter bak en regional identitetskontroll vises separat** (`+~6M behind regional identity verification`), fordi de fleste lesere ikke kan bruke dem.
 - **Registreringskreditter gjelder bare den første måneden** og rapporteres som et eget tall, aldri blandet inn i det løpende tallet.
 - **Tallet håndheves av CI.** `npm run check:docs-counts` beregner totalsummene på nytt fra katalogen og lar byggingen feile når denne filen, README-filen eller budsjettkortet avviker fra dem.
 

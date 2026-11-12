@@ -4,57 +4,52 @@
 
 ---
 
-> **Isi mmalite eziokwu:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
+> **Isi mmalite nke eziokwu:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
 
-OmniRoute nwere ike izipu HTTP webhooks mgbe ihe omume dị n'elu ikpo okwu mere. Jiri ha jikọta ya na
-Slack, PagerDuty, Datadog, ọrụ ịdọ aka ná ntị dị n'ime, ma ọ bụ ihe nnata HTTP ọ bụla.
+OmniRoute nwere ike gbaa HTTP webhooks na mmemme ikpo okwu. Jiri ha jikọọ na Slack, PagerDuty, Datadog , esịtidem alerting ọrụ, ma ọ bụ ihe ọ bụla HTTP nnata.
 
-Dispatcher ahụ na-eji HMAC-SHA256 abịanye aka na nnyefe ọ bụla, na-anwale ọzọ mgbe
-ọdịda nwa oge mere, na-enyocha ọnọdụ nnyefe nke webhook ọ bụla, ma na-agbanyụ endpoints
-na-akụ afọ n'ala ugboro ugboro na-akpaghị aka.
+Onye na-ezipụ na-edebanye aha nnyefe ọ bụla na HMAC-SHA256, na-emegharị na ọdịda na-adịru nwa oge, na-akwado ahụike nnyefe kwa webhook, na-ewepụkwa njedebe njedebe nke na-aga n'ihu.
 
-## Ihe Omume A Na-akwado
+## Ihe omume akwadoro
 
-Ụdị `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, nke `src/lib/webhookDispatcher.ts` na-eji) na-anọchi anya kpọmkwem ihe omume anọ ugbu a:
+Ụdị `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, nke `src/lib/webhookDispatcher.ts` na-eri) na-emepụta ihe omume asaa ugbu a:
 
-| Ihe omume           | Mgbe ọ na-eme                                                                 |
-| ------------------- | ----------------------------------------------------------------------------- |
-| `request.completed` | Mgbe arịrịọ e bufere site na proxy mezuru nke ọma                             |
-| `request.failed`    | Mgbe arịrịọ e bufere site na proxy dara mgbe nnwale ọzọ/fallback niile gasịrị |
-| `quota.exceeded`    | Mgbe API key gafere oke mmefu/quota                                           |
-| `test.ping`         | Ihe omume arụrụ aka nke endpoint nnwale na-eji                                |
+| Ihe omume                 | Ọkụ mgbe                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Arịrịọ proxied mezuru nke ọma                                                                           |
+| `request.failed`          | Arịrịọ proxied ada ada ma retries/fallback niile gachara                                                |
+| `quota.exceeded`          | Otu igodo API na-agafe ụzọ budget/quota                                                                 |
+| `proxy.set_aside`         | A na-ewepụta onye otu ọdọ mmiri proxy ka ọ jụrụ ugboro ugboro (naanị mgbanwe)                           |
+| `proxy.pool.exhausted`    | A na-ewepụta onye ọ bụla so na mpaghara proxy ọdọ mmiri                                                 |
+| `provider.reset_redeemed` | Ntọgharị ụlọ akụ etinyere na-akpaghị aka gbapụtara kredit nrụpụta ma ọ bụ ntọgharị nnọkọ Claude kwa izu |
+| `test.ping`               | Ihe omume sịntetik nke ebe njedebe ule ji                                                               |
 
-Ndebanye aha na-anabata literal `"*"` iji nata ihe omume niile. A na-eleghara aha
-ihe omume ndị a na-amaghị dị na `events` anya n'oge dispatch.
+Ndebanye aha na-anabata `"*"` nkịtị iji nata mmemme ọ bụla. A na-eleghara aha mmemme amabeghị na `events` anya n'oge izipu.
 
-> Rịba ama: ejikọtala API nke dispatcher ahụ, mana ebe ụfọdụ dị na production na-akpọ
-> ihe omume ndị na-abụghị `test.ping` ka na-abata. Lelee `grep dispatchEvent` ka ị hụ
-> paths ndị na-akpọ dispatcher ugbu a na release gị.
+> Cheta na: API onye na-ezipụ ozi bụ wired, mana saịtị ịkpọ oku maka ụfọdụ mmemme na-abụghị nke `test.ping` ka na-agbadata. Lelee `grep dispatchEvent` ka ịhụ ụzọ ndị na-akpọku onye na-ezipụ ozi ugbu a na ntọhapụ gị.
 
-## Nhazi Sistemụ
+## Nhazi
 
 ```
-Onye na-akpọ (handler, service, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> yọchaa site na webhook.events
-    -> maka nke ọ bụla dabara (n'otu oge):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         wuo payload { event, timestamp, data }
-         jiri HMAC-SHA256 bịanye aka na body (ọ bụrụ na secret dị)
-         POST nwere timeout nke 10s
-         nwaa ọzọ ruo ugboro 3 mgbe njehie 5xx / netwọkụ mere
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Dispatch bụ fire-and-forget nye onye na-akpọ ya: `Promise.allSettled` na-amịkọrọ
-njehie nke webhook ọ bụla ka otu receiver ọjọọ ghara igbochi ndị ọzọ.
+Nzipu bụ ọkụ-na-echefu maka onye na-akpọ oku: `Promise.allSettled` na-eloda njehie kwa webhook ka otu onye nnata ọjọọ enweghị ike igbochi ndị ọzọ.
 
-## Ịbịanye Aka na HMAC
+## Ịbanye HMAC
 
-Mgbe webhook nwere `secret`, OmniRoute na-abịanye aka na JSON body ma zipụ:
+Mgbe webhook nwere `secret`, OmniRoute bịanyere aka na ahụ JSON wee zipu:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Aha header na-eji prefix `X-Webhook-*` (ọ bụghị `X-OmniRoute-*`). Uru signature
-> bụ `sha256=<hex>` — nyochaa prefix ahụ n'uju.
+> Aha nkụnye eji isi mee na-eji prefix `X-Webhook-*` (ọ bụghị `X-OmniRoute-*`). Uru mbinye aka bụ `sha256=<hex>` — nyochaa prefix zuru ezu.
 
-Ọ bụrụ na a kpọọ `createWebhook` na-enweghị secret, modul DB ahụ na-emepụta otu
-(`whsec_<48 hex>`) ka e wee bịanye aka na webhooks niile na ndabara.
+Ọ bụrụ na a na-akpọ `createWebhook` na-enweghị ihe nzuzo, modul DB na-emepụta otu (`whsec_<48 hex>`) ya mere a na-edebanye aha webhooks niile na ndabara.
 
-### Inyocha ya n'akụkụ receiver
+### Na-enyocha na nnata
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Na-enyocha mgbe niile site na iji **raw** request body, tupu parsing JSON ọ bụla.
+Na-enyocha mgbe niile megide ya **raw** Rịọ ahụ, tupu nyocha JSON ọ bụla.
 
-## Iwu Mgbalị Ọzọ & Ọdịda
+## Nwaagharịa & Iwu ọdịda
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Oge njedebe nke sekọnd 10 maka mgbalị ọ bụla (`AbortController`).
-- HTTP 2xx ka a na-ewere dị ka ihe ịga nke ọma.
-- HTTP 3xx/4xx ka a na-ewere dị ka ọnọdụ ikpeazụ a na-agaghị anwale ọzọ — a na-edekọ ya dị ka ezigara
-  yana `success = res.ok`.
-- A na-anwale HTTP 5xx na njehie netwọkụ ọzọ site na iji oge nchere na-abawanye okpukpu abụọ:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Mgbe `maxRetries` gasịrị, a na-edekọ nnyefe ahụ dị ka nke dara.
-- Nnyefe ọ bụla na-emelite `last_triggered_at`, `last_status`, ma tọgharịa
-  ma ọ bụ bawanye `failure_count`.
-- Onye nkesa ahụ na-akpọ `disableWebhooksWithHighFailures(10)` mgbe nkesa ọ bụla gasịrị,
-  ya mere a na-agbanyụ webhook ọ bụla nwere `failure_count >= 10` na-akpaghị aka.
+- Oge 10 nke abụọ kwa mgbalị (`AbortController`).
+- HTTP 2xx gụrụ dị ka ihe ịga nke ọma.
+- HTTP 3xx/4xx na-agụ dị ka ọkwa ikpeazụ a na-apụghị ịnwale ya — dekọrọ ka ewepụtara ya na `success = res.ok`.
+- A na-anwalegharị HTTP 5xx na mperi netwọk site na nkwụghachi azụ: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Mgbe `maxRetries`, a na-edekọ nnyefe ka ọ dara.
+- Nbufe ọ bụla na-emelite `last_triggered_at`, `last_status`, ma megharịa ma ọ bụ nwekwuo `failure_count`.
+- Onye na-ezipụ ozi ahụ na-akpọ `disableWebhooksWithHighFailures(10)` ka onye ọ bụla na-apụ apụ, yabụ na-enwe nkwarụ webụ ọ bụla nwere `failure_count >= 10` na-akpaghị aka.
 
-## Ebe Nchekwa Data
+## Ebe nchekwa data
 
-Tebụl `webhooks` (mbugharị `011_webhooks.sql`):
+Okpokoro `webhooks` (Mbugharị `011_webhooks.sql`):
 
-| Kọlụm               | Ụdị     | Nkọwa                                                                   |
-| ------------------- | ------- | ----------------------------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                                    |
-| `url`               | TEXT    | URL ebe a na-eziga                                                      |
-| `events`            | TEXT    | Ndepụta JSON; ndabara `["*"]`                                           |
-| `secret`            | TEXT    | Ihe nzuzo HMAC (a na-emepụta ya na-akpaghị aka ma ọ bụrụ na enyeghị ya) |
-| `enabled`           | INT     | 0/1; ndabara ya bụ 1                                                    |
-| `description`       | TEXT    | Aha mmadụ nwere ike ịgbakwunye                                          |
-| `created_at`        | TEXT    | `datetime('now')`                                                       |
-| `last_triggered_at` | TEXT    | A na-emelite ya na mgbalị nnyefe ọ bụla                                 |
-| `last_status`       | INT     | Ọnọdụ HTTP nke mgbalị ikpeazụ (0 = netwọkụ)                             |
-| `failure_count`     | INT     | Na-alaghachi na 0 mgbe ihe gara nke ọma, +1 mgbe ọ dara                 |
+| Ogidi               | Ụdị     | Ihe ndetu                                                    |
+| ------------------- | ------- | ------------------------------------------------------------ |
+| `id`                | TEXT PK | UUID                                                         |
+| `url`               | TEXT    | Ebe URL                                                      |
+| `events`            | TEXT    | JSON n'usoro; `["*"]` ndabara                                |
+| `secret`            | TEXT    | HMAC nzuzo (mepụtara na-akpaghị aka ma ọ bụrụ na enyeghị ya) |
+| `enabled`           | INT     | 0/1; ndabara na 1                                            |
+| `description`       | TEXT    | akara mmadụ nhọrọ                                            |
+| `created_at`        | TEXT    | `datetime('now')`                                            |
+| `last_triggered_at` | TEXT    | Emelitere na mbọ mbufe ọ bụla                                |
+| `last_status`       | INT     | Ọkwa HTTP nke mbọ ikpeazụ (0 = netwọk)                       |
+| `failure_count`     | INT     | Tụgharịa na 0 na ịga nke ọma, + 1 na ọdịda                   |
 
-A na-echekwa akụkọ nnyefe na tebụl `webhook_deliveries` e mere kpọmkwem maka ya
-(mbugharị `069_webhook_deliveries.sql`, nke a na-ede site na
-`src/lib/db/webhookDeliveries.ts::insertDelivery` na mgbalị ọ bụla), tinyere
-ọnụọgụ nchịkọta ndị dị n'ahịrị `webhooks`. Mbugharị `070_webhooks_kind_metadata.sql`
-gbakwunyere metadata ụdị (Slack / Discord / Telegram / ndị na-agbanwe payload omenala).
+A na-aga n'ihu na akụkọ nnyefe na tebụl `webhook_deliveries` raara onwe ya nye (mbugharị `069_webhook_deliveries.sql`, nke e dere site na `src/lib/db/webhookDeliveries.ts::insertDelivery` na mgbalị ọ bụla), na mgbakwunye na nchịkọta nchịkọta na ahịrị `webhooks`. `070_webhooks_kind_metadata.sql` gbakwunyere metadata ụdị (Slack / Discord / Telegram / ihe ntụgharị ụgwọ akwụ ụgwọ omenala).
 
 ## REST API
 
-Endpoint niile chọrọ nkwenye njikwa (`requireManagementAuth`).
+Ebe njedebe niile chọrọ nyocha njikwa (`requireManagementAuth`).
 
-| Endpoint                        | Usoro  | Nkọwa                                               |
-| ------------------------------- | ------ | --------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Depụta webhook (ezoro ihe nzuzo)                    |
-| `/api/webhooks`                 | POST   | Mepụta webhook                                      |
-| `/api/webhooks/[id]`            | GET    | Nkọwa webhook (ihe nzuzo zuru ezu)                  |
-| `/api/webhooks/[id]`            | PUT    | Melite oghere                                       |
-| `/api/webhooks/[id]`            | DELETE | Wepụ                                                |
-| `/api/webhooks/[id]/test`       | POST   | Zipu `test.ping` (enweghị mgbalị ọzọ)               |
-| `/api/webhooks/[id]/deliveries` | GET    | Mgbalị nnyefe ndị na-adịbeghị anya maka otu webhook |
-| `/api/webhooks/validate-url`    | POST   | Nkwado URL tupu izipu (ihe nche SSRF)               |
+| Ebe njedebe                     | Usoro  | Nkọwa                                      |
+| ------------------------------- | ------ | ------------------------------------------ |
+| `/api/webhooks`                 | GET    | Ndepụta webhooks (ihe nzuzo kpuchie)       |
+| `/api/webhooks`                 | POST   | Mepụta nko weebụ                           |
+| `/api/webhooks/[id]`            | GET    | Nkọwa Webhook (nzuzo zuru oke)             |
+| `/api/webhooks/[id]`            | PUT    | Melite mpaghara                            |
+| `/api/webhooks/[id]`            | DELETE | Wepu                                       |
+| `/api/webhooks/[id]/test`       | POST   | Gbanyụọ `test.ping` (anaghị emegharị ọzọ)  |
+| `/api/webhooks/[id]/deliveries` | GET    | Mgbalị mbufe na nso nso a maka otu webhook |
+| `/api/webhooks/validate-url`    | POST   | Nkwado URL tupu ụgbọ elu (onye nche SSRF ) |
 
-`GET /api/webhooks` na-ezo ihe nzuzo ahụ ka ọ bụrụ `<mkpụrụedemede 10 mbụ>...` iji gbochie
-ikpughe ya na peeji ndepụta. Jiri `[id]` GET mgbe ịchọrọ ihe nzuzo ahụ n'ezie.
+`GET /api/webhooks` na-ekpuchi ihe nzuzo dị na `<first 10 chars>...` ka ịzenarị na ibe ndepụta. Jiri `[id]` GET mgbe ịchọrọ nzuzo.
 
-### Mepụta webhook
+### Mepụta nko weebụ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,37 +136,33 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Ọkwa Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Ọ bụrụ na ewepụ `secret`, sava ahụ na-emepụta ihe nzuzo `whsec_<hex>` ma weghachite
-ya na nzaghachi ahụ.
+Ọ bụrụ na ewepụrụ `secret`, ihe nkesa na-ewepụta ihe nzuzo `whsec_<hex>` wee weghachi ya na nzaghachi.
 
-### Nwalee webhook
+### Nwalee nko webụ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Na-eweghachite `{ delivered, status, error }`. A naghị anwale ya ọzọ — nke a bara uru maka
-ịchọpụta ngwa ngwa na onye nnata na-anabata payload na mbinye aka ahụ.
+Na-eweghachite `{ delivered, status, error }`. Ọ nweghị nnwale ọzọ a nwara — bara uru maka ịkwado ngwa ngwa na onye nnata na-anabata ibu na mbinye aka.
 
 ## Dashboard
 
-Ihu dashboard dị na `/dashboard/webhooks` (lee
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) na-enye:
+Ibe dashboard dị na `/dashboard/webhooks` (lee `src/app/(dashboard)/dashboard/webhooks/page.tsx`) na-enye:
 
-- Ịmepụta/idezi webhooks site na onye nhọpụta mmemme
-- Ihe ngosi ọnọdụ (na-arụ ọrụ / anaghị arụ ọrụ / nwere njehie) dabere na `enabled`,
-  `failure_count`, na `last_status`
-- Nnyefe nnwale site n’otu ọpịpị
-- Mgbanwe aka iji mee ka ọ rụọ ọrụ/kwụsị ịrụ ọrụ
+- Create/edit webụ nko na onye na-ahọrọ mmemme
+- Ngosipụta ọnọdụ (adịghị arụ ọrụ / adịghị arụ ọrụ / ezighi ezi) dabere na `enabled`, `failure_count`, na `last_status`
+- Otu-pịa nnyefe ule
+- Ntụgharị enable/disable akwụkwọ ntuziaka
 
-## Ọmụmaatụ Payload
+## Ọmụmaatụ ịkwụ ụgwọ
 
-### request.completed
+### arịrịọ.mechara
 
 ```json
 {
@@ -201,7 +181,7 @@ Ihu dashboard dị na `/dashboard/webhooks` (lee
 }
 ```
 
-### test.ping
+### nwale.ping
 
 ```json
 {
@@ -214,29 +194,19 @@ Ihu dashboard dị na `/dashboard/webhooks` (lee
 }
 ```
 
-Ebe ndị na-akpọ ọrụ ma na-ezipụ mmemme ndị na-abụghị `test.ping` nọ ka a na-akọwa
-ọdịdị mpaghara ha; were object `data` dịka nke dakọtara na mgbanwe n’ọdịnihu (tinye mpaghara, adaberekwala na
-enweghị ha).
+A na-akọwapụta ụdị mpaghara maka mmemme na-abụghị nke `test.ping` site na saịtị oku na-ebupụta ha; na-emeso ihe `data` dị ka ihe na-aga n'ihu (tinye ubi, adaberela na enweghị).
 
-## Omume Kachasị Mma
+## Omume kacha mma
 
-- **Nyochaa mbinye aka na nnyefe ọ bụla** megide raw body — nke a na-egbochi
-  POSTs adịgboroja sitere n’aka onye ọ bụla chọpụtara URL webhook gị.
-- **Zaghachi 2xx n’ime ihe dịka sekọnd 5** — dispatcher na-akwụsị ichere mgbe 10 s gachara. Ndị nnata
-  dị nwayọ ga-emefusị retries ma bulie `failure_count`.
-- **Mee ka handlers bụrụ idempotent** — retries na usoro nnyefe at-least-once
-  pụtara na duplicates nwere ike ịdị.
-- **Debanye aha naanị n’ihe ndị dị mkpa** — depụta naanị mmemme ndị ị na-eji n’ezie; `"*"` ga-
-  agbakwunye ụgwọ n’ebe ndị nnata ị na-adịghị achị nọ.
-- **Lezie `failure_count` anya** — a na-akwụsị endpoints na-akpaghị aka mgbe ọdịda 10 mere n’usoro;
-  tọgharịa ya site n’ịkpọ `PUT /api/webhooks/[id]` na `enabled: true`
-  mgbe ị mezichara onye nnata.
-- **Na-agbanwe secrets kwa oge** — jiri `PUT` tinye `secret` ọhụrụ, deploy uru ọhụrụ ahụ
-  n’ebe onye nnata nọ, wee jiri test endpoint kwenye na ọ na-arụ ọrụ.
+- **Nyochaa mbinye aka na nnyefe ọ bụla** megide ahụ raw — na-egbochi POSTs spoofed site na onye ọ bụla na-eche gị webhook URL.
+- **Zaa 2xx n'ime nkeji ~ 5** — oge izipu ga-apụta na 10s. Ndị na-anata ngwa ngwa ga-erigharị ma fesaa `failure_count`.
+- **Mee ka ndị na-elekọta ya nwee ike** Nnwale — na ntụgharị akwụkwọ ozi opekata mpe-opekata mpe, ọ ga-ekwe omume.
+- **Debanye aha obere** — depụta naanị ihe omume ị na-eri; `"*"` ga-agbakwunye ego na ndị nnata ị naghị ejikwa.
+- **Lelee `failure_count`** A na-agbanyụ ngwụcha ngwụcha — na ọdịda 10 n'usoro; Tọgharia site na ịkpọ `PUT /api/webhooks/[id]` na `enabled: true` mgbe edozichara onye nnata.
+- **Na-atụgharị ihe nzuzo kwa oge** — `PUT` ọhụrụ `secret`, tinye uru ọhụrụ na onye nnata, ma kwadoro site na njedebe ule.
 
 ## Hụkwa
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — API njikwa zuru ezu
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — usoro circuit breaker / cooldown
-  dị n’azụ ọdịda provider ndị a na-egosi site na `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — zuru njikwa API elu
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — sekit breaker / cooldown semantics n'azụ ọdịda ndị na-eweta ọdịda pụtara site na `request.failed`
 - Isi mmalite: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

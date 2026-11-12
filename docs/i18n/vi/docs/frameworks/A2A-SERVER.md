@@ -154,16 +154,16 @@ curl -X POST http://localhost:20128/a2a \
 
 OmniRoute bộc lộ 6 kỹ năng A2A có trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi mô-đun kỹ năng tồn tại trong `src/lib/a2a/skills/`.
 
-| Kỹ năng               | ID                   | Sự miêu tả                                                                                                                                   | Thẻ                         | Ví dụ                                                      |
-| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------- |
-| Định tuyến thông minh | `smart-routing`      | Định tuyến lời nhắc thông qua provider/combo tối ưu bằng cách sử dụng tính năng ghi điểm + của công cụ kết hợp OmniRoute                     | định tuyến, nhà cung cấp    | "Định tuyến lời nhắc này thông qua mô hình tốt nhất"       |
-| Quản lý hạn ngạch     | `quota-management`   | Báo cáo trạng thái hạn ngạch của mỗi nhà cung cấp, giúp người gọi quyết định thời điểm throttle/switch                                       | hạn ngạch, nhà cung cấp     | "Kiểm tra hạn ngạch cho nhân loại"                         |
-| Khám phá nhà cung cấp | `provider-discovery` | Liệt kê các nhà cung cấp đã cài đặt với các khả năng, cờ cấp miễn phí, trạng thái OAuth                                                      | nhà cung cấp, khám phá      | "Có những nhà cung cấp nào?"                               |
-| Phân tích chi phí     | `cost-analysis`      | Ước tính chi phí của một request/conversation dựa trên danh mục + sử dụng gần đây                                                            | chi phí, cách sử dụng       | "Ước tính chi phí cho cuộc trò chuyện này"                 |
-| Báo cáo sức khỏe      | `health-report`      | Tổng hợp bộ ngắt mạch, thời gian hồi chiêu, trạng thái khóa cho mỗi nhà cung cấp                                                             | sức khỏe, khả năng phục hồi | "Hiển thị tình trạng sức khỏe của tất cả các nhà cung cấp" |
-| Liệt kê khả năng      | `list-capabilities`  | Trả về danh mục Kỹ năng đặc vụ gồm 45 mục đầy đủ (23 API + 21 CLI + 1 config) dưới dạng bảng đánh dấu với SKILL.md URLs thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng | "Liệt kê tất cả các khả năng OmniRoute "                   |
+| Kỹ năng               | ID                   | Sự miêu tả                                                                                                                                     | Thẻ                         | Ví dụ                                                      |
+| :-------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------- |
+| Định tuyến thông minh | `smart-routing`      | Định tuyến lời nhắc thông qua provider/combo tối ưu bằng cách sử dụng tính năng ghi điểm + của công cụ kết hợp OmniRoute                       | định tuyến, nhà cung cấp    | "Định tuyến lời nhắc này thông qua mô hình tốt nhất"       |
+| Quản lý hạn ngạch     | `quota-management`   | Báo cáo trạng thái hạn ngạch của mỗi nhà cung cấp, giúp người gọi quyết định thời điểm throttle/switch                                         | hạn ngạch, nhà cung cấp     | "Kiểm tra hạn ngạch cho nhân loại"                         |
+| Khám phá nhà cung cấp | `provider-discovery` | Liệt kê các nhà cung cấp đã cài đặt với các khả năng, cờ cấp miễn phí, trạng thái OAuth                                                        | nhà cung cấp, khám phá      | "Có những nhà cung cấp nào?"                               |
+| Phân tích chi phí     | `cost-analysis`      | Ước tính chi phí của request/conversation dựa trên danh mục + sử dụng gần đây                                                                  | chi phí, cách sử dụng       | "Ước tính chi phí cho cuộc trò chuyện này"                 |
+| Báo cáo sức khỏe      | `health-report`      | Tổng hợp bộ ngắt mạch, thời gian hồi chiêu, trạng thái khóa cho mỗi nhà cung cấp                                                               | sức khỏe, khả năng phục hồi | "Hiển thị tình trạng sức khỏe của tất cả các nhà cung cấp" |
+| Liệt kê khả năng      | `list-capabilities`  | Trả về danh mục Kỹ năng đặc vụ gồm 45 mục đầy đủ (cấu hình 23 API + 21 CLI + 1) dưới dạng bảng đánh dấu với SKILL.md URLs thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng | "Liệt kê tất cả các khả năng OmniRoute "                   |
 
-> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp 381 trực tiếp; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
+> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp 388 trực tiếp; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ cơ quan đăng ký thời gian chạy.
 
 ### Chi tiết kỹ năng `list-capabilities`
 

@@ -159,7 +159,37 @@ test("stream with real content never trips the content watchdog", async () => {
   });
   const text = await readStreamText(stream);
   assert.equal(onErrorCalled, false);
+  assert.match(text, /"delta":"Hello"/);
   assert.doesNotMatch(text, /content stall/i);
+});
+
+test("concatenated data payloads without an SSE boundary are not real content", async () => {
+  const source = new ReadableStream({
+    start(controller) {
+      controller.enqueue(
+        encoder.encode(
+          'data: {"type":"response.in_progress","response":{}}' +
+            'data: {"type":"response.output_text.delta","delta":"Hello"}\n\n'
+        )
+      );
+      controller.close();
+    },
+  });
+  let onErrorEvent: { message: string } | null = null;
+  const streamController = createStreamController({
+    onError(event) {
+      onErrorEvent = event;
+      return true;
+    },
+  });
+  await readStreamText(
+    pipeWithDisconnect(new Response(source), new TransformStream(), streamController, {
+      stallTimeoutMs: 5000,
+      contentStallTimeoutMs: 200,
+    })
+  );
+  assert.ok(onErrorEvent, "malformed data must not count as model output");
+  assert.match(onErrorEvent.message, /empty content/i);
 });
 
 test("hasOpenReasoning parity on the watchdog tail buffer shape", () => {

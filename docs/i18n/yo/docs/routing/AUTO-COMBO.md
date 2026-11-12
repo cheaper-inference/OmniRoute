@@ -207,36 +207,38 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Wo [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) àti [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) fún ìdàrúdàpọ̀ àkọ́kọ́ tí àkọsílẹ̀ yìí ń ṣàlàyé.
 
-## Bí Ó Ṣe Ń Ṣiṣẹ́ (Àwọn Auto-Combo Tí A Fi Pamọ́)
+## Bii O Ṣe Nṣiṣẹ (Awọn Combos Aifọwọyi ti o tẹsiwaju)
 
-Auto-Combo Engine ń yan olùpèsè/àwòṣe tó dára jù lọ fún ìbéèrè kọ̀ọ̀kan ní ìmúdàgba nípa lílo **iṣẹ́ ìṣírò oní-okùnfà 16** (tí a ṣàlàyé nínú `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Àpapọ̀ àwọn ìwọ̀n àìyípadà jẹ́ `1.0`; `normalizeScoringWeights()` tún àwọn ìwọ̀n àdáni ṣe sí ìwọ̀n tó péye. Méjì nínú mẹ́rìndínlógún náà — `cacheAffinity` àti `resetWindowAffinity` — ní ìwọ̀n àìyípadà `0`; `reliability` ní `0` nínú `DEFAULT_WEIGHTS`, ṣùgbọ́n ó ní `0.03` nínú àwọn àkójọpọ̀ gbogbogbò àti `0.04` nínú `reliability-first`, `quality` sì ní `0.02` nínú àwọn àkójọpọ̀ (`0.03` nínú `quality-first`): a ṣì ń ṣírò wọn fún olùdíje kọ̀ọ̀kan, `cacheAffinity` sì ń ṣàkóso ìyọkúrò àwọn àdákọ prompt-cache lẹ́yìn ààlà ìṣírò náà, nítorí náà àwọn okùnfà tí iye àìyípadà wọn jẹ́ òdo kì í dìbò nípasẹ̀ àìyípadà, nígbà tí àwọn àkójọpọ̀ ń ṣe bẹ́ẹ̀.
+Enjini Konbo Aifọwọyi yan provider/model ti o dara julọ fun ibeere kọọkan nipa lilo a **16-ifosiwewe iṣẹ igbelewọn** (telẹ ninu `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Awọn iwọn aiyipada apao si `1.0`; Awọn iwọn aṣa jẹ atunṣe nipasẹ `normalizeScoringWeights()`. Meji ninu awọn — `cacheAffinity` mẹrindilogun ati `resetWindowAffinity` — gbe iwuwo aiyipada ti `0`; `reliability` gbe `0` ni `DEFAULT_WEIGHTS` ṣugbọn `0.03` ni jeneriki awọn akopọ ati `0.04` ni `reliability-first`, ati `quality` gbejade `0.02` ni awọn akopọ (`0.03` ni `quality-first`): ti won ti wa ni ṣi iṣiro fun gbogbo oludije, ati `cacheAffinity` ibode tọ-cache deduplication ni ita awọn Dimegilio, ki awọn odo-aiyipada ifosiwewe nìkan ma ṣe dibo nipa aiyipada nigba ti akopọ.
 
-![Ìṣírò oní-okùnfà 16 ti Auto-Combo](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Orísun: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (tún un ṣe nípasẹ̀ `npm run docs:render-diagrams`). Orúkọ fáìlì náà jẹ́ ti ìtàn; orísun àti àwòrán tí a ṣe jáde fi gbogbo àwọn okùnfà 16 tí a kéde nínú `DEFAULT_WEIGHTS` hàn.
+> Orisun: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (atunṣe nipasẹ `npm run docs:render-diagrams`). Orukọ faili jẹ itan; orisun ati aworan ti a ṣe afihan gbogbo awọn ifosiwewe 16 ti a sọ ni `DEFAULT_WEIGHTS`.
 
-| Okùnfà                | Ìwọ̀n Àìyípadà | Àpèjúwe                                                                                                                                                                                                             |
-| :-------------------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `quota`               | 0.1429        | Ìpín tí ó ṣẹ́kù / ààyè àfikún ààlà ìwọ̀n-lílo [0..1]                                                                                                                                                                  |
-| `health`              | 0.1605        | Ìṣírò ìlera láti ọ̀dọ̀ circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                          |
-| `costInv`             | 0.1429        | Òdìkejì iye owó **àpapọ̀** (60% iye owó token àbáwọlé + 40% iye owó token àbájáde, tí a mú bá òṣùwọ̀n mu) — èyí tó din owó kù = ìṣírò tó ga jù                                                                        |
-| `latencyInv`          | 0.1143        | Òdìkejì ìdádúró p95 tí a mú bá àkójọpọ̀ mu — èyí tó yára jù = ìṣírò tó ga jù                                                                                                                                         |
-| `taskFit`             | 0.0762        | Ìbámu pẹ̀lú irú iṣẹ́ (kíkọ kóòdù, àyẹ̀wò, ètò, ìtúpalẹ̀, ṣíṣe àtúnṣe àṣìṣe, ìwé àkọsílẹ̀)                                                                                                                                |
-| `stability`           | 0.0476        | Ìdúróṣinṣin tó dá lórí ìyàtọ̀ láti inú standard deviation ìdádúró — olùdíje tí àkókò ìdáhùn rẹ̀ ń yí padà gan-an máa ń ní ìṣírò kékeré                                                                                |
-| `tierPriority`        | 0.0476        | Ipò àkọ́kọ́ ipele àkọọ́lẹ̀ — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                               |
-| `tierAffinity`        | 0.0476        | Ìbámu láàárín ipele olùdíje àti ipele tí manifest dábàá                                                                                                                                                             |
-| `specificityMatch`    | 0.0476        | Ìbámu láàárín bí ìbéèrè ṣe ṣe pàtó tó (ìtọ́kasí manifest) àti ipele àwòṣe                                                                                                                                            |
-| `contextAffinity`     | 0.0476        | Ìbámu láàárín àìní context-window ìbéèrè àti context window àwòṣe                                                                                                                                                   |
-| `sessionAvailability` | 0.0476        | Wíwà igba OAuth ti ìsopọ̀ olùdíje fún igba yìí (`getOAuthSessionAvailability()`; àwọn ìsopọ̀ tí kì í ṣe OAuth ní ìṣírò 1.0)                                                                                           |
-| `connectionDensity`   | 0.0476        | Pín ẹrù káàkiri àwọn ìsopọ̀ olùpèsè kan náà (láti dènà ìkójọpọ̀ sí ibi kan)                                                                                                                                           |
-| `cacheAffinity`       | 0.00          | Ìbámu rendezvous-hash sí ìsopọ̀ tó ṣeé ṣe jù lọ láti ti ní ìpele ìbẹ̀rẹ̀ prompt-cache ti ìbéèrè yìí (`open-sse/services/combo/promptCacheAffinity.ts`); a ti pa á nípasẹ̀ àìyípadà (#8008)                              |
-| `resetWindowAffinity` | 0.00          | Ìtẹ̀sí sí àwọn ìsopọ̀ tí fèrèsé ìtúntò quota wọn rọrùn (a ti pa á nípasẹ̀ àìyípadà)                                                                                                                                    |
-| `quality`             | 0.03          | Àmì dídára àbájáde tó dá lórí èsì láti ọ̀dọ̀ olùtọpa dídára routing-event; àwọn olùdíje tí kò ní àkíyèsí gba iye àárín gbùngbùn 0.5                                                                                   |
-| `reliability`         | 0.00          | Ìpín àṣeyọrí tí a ṣàkíyèsí, `1 - failureRate`, láti inú ìtàn lílo wákàtí 24 lẹ́yìn ààlà ìsàlẹ̀ àpẹẹrẹ mẹ́wàá (àwọn ìwọ̀n àkókò-gidi bí bẹ́ẹ̀ kọ́); àwọn olùdíje tí kò ní àkíyèsí ni a kà sí 1.0. A ti pa á nípasẹ̀ àìyípadà |
+| Okùnfà                | Ìwọ̀n Àìyípadà | Àpèjúwe                                                                                                                                                                                               |
+| :-------------------- | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429        | Iye ti o ku / yara-iwọn-ipari ori [0..1]                                                                                                                                                              |
+| `health`              | 0.1605        | Idiyele ilera lati ọdọ fifọ Circuit (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                          |
+| `costInv`             | 0.1429        | Yiyipada **idapọmọra** iye owo (60% titẹ sii + 40% idiyele amijade, deede) — din owo = ti o ga julọ                                                                                                   |
+| `latencyInv`          | 0.1143        | Inverse p95 lairi deede to pool — yiyara = ti o ga Dimegilio                                                                                                                                          |
+| `taskFit`             | 0.0762        | Amọdaju iru iṣẹ-ṣiṣe (iforukọsilẹ, atunyẹwo, igbero, itupalẹ, ṣiṣatunṣe, awọn iwe aṣẹ)                                                                                                                |
+| `stability`           | 0.0476        | Iduroṣinṣin ti o da lori iyatọ lati iyapa boṣewa lairi — oludije ti akoko idahun rẹ yi awọn ikun kekere                                                                                               |
+| `tierPriority`        | 0.0476        | Iṣiro-ipele pataki — Ultra = 1.0, Pro = 0.67,= Standard 0.33,= 0.0 Ọfẹ                                                                                                                                |
+| `tierAffinity`        | 0.0476        | Ibaṣepọ laarin ipele oludije ati ipele ti a ṣe iṣeduro ifihan                                                                                                                                         |
+| `specificityMatch`    | 0.0476        | Baramu laarin ibeere pato (itanna ti o han) ati ipele awoṣe                                                                                                                                           |
+| `contextAffinity`     | 0.0476        | Ibaṣepọ laarin iwulo ọrọ-ọrọ-ibere ti ibeere ati ferese ọrọ ọrọ awoṣe                                                                                                                                 |
+| `sessionAvailability` | 0.0476        | Wiwa igba OAuth ti asopọ oludije fun igba yii (`getOAuthSessionAvailability()`; awọn asopọ ti kii ṣe OAuth Dimegilio 1.0)                                                                             |
+| `connectionDensity`   | 0.0476        | Ntan ẹru kọja awọn asopọ ti olupese kanna (egboogi-ifojusi)                                                                                                                                           |
+| `cacheAffinity`       | 0.00          | Ìbámu rendezvous-hash sí ìsopọ̀ tó ṣeé ṣe jù lọ láti ti ní ìpele ìbẹ̀rẹ̀ prompt-cache ti ìbéèrè yìí (`open-sse/services/combo/promptCacheAffinity.ts`); a ti pa á nípasẹ̀ àìyípadà (#8008)                |
+| `resetWindowAffinity` | 0.00          | Iyatọ si awọn asopọ ti ferese atunto ipin jẹ ọjo (alaabo nipasẹ aiyipada)                                                                                                                             |
+| `quality`             | 0.03          | Ifiranṣẹ-iwakọ-ifihan ifihan agbara-didara lati olutọpa didara iṣẹlẹ; awọn oludije laisi awọn akiyesi gba didoju 0.5                                                                                  |
+| `reliability`         | 0.00          | Ipin aṣeyọri ti a ṣe akiyesi, `1 - failureRate`, lati 24h ti itan lilo lẹhin ilẹ-apẹẹrẹ mẹwa (awọn metiriki akoko gidi bibẹẹkọ); awọn oludije ti ko ni awọn akiyesi ka bi 1.0. Alaabo nipasẹ aiyipada |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Olutọpa `quality` inu-iranti (`open-sse/services/routing/quality.ts`) jẹ ofo lẹhin atunbere tutu, nitorinaa gbogbo oludije ṣe iṣiro `0.5` didoju titi ti awọn akiyesi akọkọ yoo de ilẹ.
 
-**Àpapọ̀:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` gẹ́gẹ́ bí a ṣe kéde rẹ̀ nínú `DEFAULT_WEIGHTS`; `normalizeScoringWeights()` máa ń tún àwọn ìwọ̀n tí aṣàmúlò ṣètò ṣe sí ìpínkiri tó péye kí ìṣírò tó bẹ̀rẹ̀.
+> **Iwọn ti a ko le ka (#15347).** Nigbati olupese kan ba ni olutọpa ipin ṣugbọn ko pada ohunkohun ti a le ka (buku kuna, awọn iwe-ẹri ti o padanu, lilo ifiranṣẹ-nikan, tabi aworan aiṣedeede ti ko si `windows` ti o ṣapejuwe ati pe ko si `percentUsed` ti o ni opin, `autoStrategy.ts` `percentUsed: null`), oludije ṣe Dimegilio `0` lori ipo `quota` ati ipari ipari rẹ jẹ isodipupo nipasẹ `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` -0.5 apẹrẹ kanna. ijiya ipo asopọ. Kika lilo ti kuna jẹ ẹri nipa telemetry, kii ṣe olupese, nitorinaa o wa ni muna ni isalẹ eyikeyi kika gidi, pẹlu timo 100%-used ọkan, ṣugbọn kii ṣe dina lile tabi yọ kuro. Olupese ti ko ni fila ṣe ijabọ `unlimited: true` ati awọn ikun bi ipin kikun; Olupese ti ko ni iwe-ipin ti a forukọsilẹ ko ni orisun telemetry rara ati pe o tọju aiyipada ti `100`.
+
+**Apapọ:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` bi a ti kede ni `DEFAULT_WEIGHTS`; òṣuwọn atunto olumulo ti wa ni tunto sinu kan pinpin nipa `normalizeScoringWeights()` ṣaaju ki o to igbelewọn.
 
 ## Àkójọpọ̀ Módù
 
@@ -302,51 +304,65 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 ## Gbogbo afisona ogbon
 
-OmniRoute's konbo engine atilẹyin** 20 afisona ogbon** (ti a kede ni `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Awọn Auto Combo engine ara ti wa ni fara labẹ `auto` nwon.Mirza; awọn miiran wa fun awọn combos ti o tẹsiwaju.
+OmniRoute's konbo engine atilẹyin **20 afisona ogbon** (ti a kede ni `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Awọn Auto Konbo engine ara ti wa ni fara labẹ awọn `auto` nwon.Mirza; awọn miiran wa fun awọn combos ti o tẹsiwaju.
 
-| Ilana               | Apejuwe                                                                                                                                                                                       |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Àtòkọ paṣẹ ibi-afẹde akọkọ pẹlu pataki ti o fojuhan                                                                                                                                           |
-| `weighted`          | Iwọn laileto nipasẹ iwuwo ibi-afẹde                                                                                                                                                           |
-| `round-robin`       | Yiyi lọ nipasẹ awọn ibi-afẹde ni tito-to (batched; wo isalẹ)                                                                                                                                  |
-| `context-relay`     | Pa ọrọ-ọrọ kuro lori awọn ibi-afẹde (awọn ibaraẹnisọrọ gigun)                                                                                                                                 |
-| `fill-first`        | Kun kọọkan afojusun ká ipin ṣaaju ki o to gbigbe si tókàn                                                                                                                                     |
-| `p2c`               | Power-of-2-choices fifuye iwontunwosi                                                                                                                                                         |
-| `random`            | Aṣọ ID aṣayan                                                                                                                                                                                 |
-| `least-used`        | Mu ibi-afẹde pẹlu ẹru lọwọlọwọ ti o kere julọ                                                                                                                                                 |
-| `cost-optimized`    | Din $ fun ibeere ti a fun ni idiyele katalogi                                                                                                                                                 |
-| `reset-aware` ⭐    | Ṣe iṣaaju nipasẹ akoko atunto akoko — kukuru atunto awọn window ni ipo ti o ga julọ                                                                                                           |
-| `reset-window`      | Ṣe ayanfẹ awọn ibi-afẹde ti ferese ipin wọn tunto laipẹ                                                                                                                                       |
-| `headroom`          | Yan ibi-afẹde pẹlu yara ori ipin ipin to ku julọ                                                                                                                                              |
-| `quota-weighted`    | Rekọja awọn akọọlẹ ti o rẹwẹsi, lẹhinna yan laarin awọn iyokù ni ibamu si ipin ti o ṣẹku ti a pin nipasẹ ẹru ọkọ ofurufu; awọn ibaraẹnisọrọ to wa tẹlẹ duro pinni                             |
-| `strict-random`     | ID lai deduplication ti ntun                                                                                                                                                                  |
-| `auto`              | Lo idojukọ Konbo igbelewọn (16-ifosiwewe) —** niyanju**                                                                                                                                       |
-| `lkgp`              | Ọna Ti o dara-kẹhin mọ (awọn pinni si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin)                                                                                             |
-| `context-optimized` | Mu ibi-afẹde pẹlu ibamu ti o dara julọ fun iwọn ọrọ-ọrọ lọwọlọwọ                                                                                                                              |
-| `cache-optimized`   | Ṣe atunto awọn ibi-afẹde nipasẹ isunmọ kaṣe-kiakia — asopọ o ṣeeṣe julọ lati mu ami-iṣaaju ipamọ ti ibeere yii ti gbiyanju ni akọkọ (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Ṣe afẹfẹ jade si igbimọ ti awọn awoṣe ni afiwe, lẹhinna ṣajọpọ idahun kan nipasẹ adajọ kan (wo isalẹ)                                                                                         |
-| `pipeline`          | Ṣiṣe awọn ibi-afẹde leralera, titọka abajade igbesẹ kọọkan sinu igbewọle igbesẹ ti nbọ; Idahun ikẹhin nikan ni a da pada (#6396)                                                              |
+| Ilana               | Apejuwe                                                                                                                                                                                          |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Àtòkọ paṣẹ ibi-afẹde akọkọ pẹlu pataki ti o fojuhan                                                                                                                                              |
+| `weighted`          | Iwọn laileto nipasẹ iwuwo ibi-afẹde                                                                                                                                                              |
+| `round-robin`       | Yiyi lọ nipasẹ awọn ibi-afẹde ni tito-to (batched; wo isalẹ)                                                                                                                                     |
+| `context-relay`     | Pa ọrọ-ọrọ kuro lori awọn ibi-afẹde (awọn ibaraẹnisọrọ gigun)                                                                                                                                    |
+| `fill-first`        | Kun kọọkan afojusun ká ipin ṣaaju ki o to gbigbe si tókàn                                                                                                                                        |
+| `p2c`               | Iwontunwosi fifuye ID Power-of-2-choices                                                                                                                                                         |
+| `random`            | Aṣọ ID aṣayan                                                                                                                                                                                    |
+| `least-used`        | Mu ibi-afẹde pẹlu ẹru lọwọlọwọ ti o kere julọ                                                                                                                                                    |
+| `cost-optimized`    | Din $ fun ibeere ti a fun ni idiyele katalogi                                                                                                                                                    |
+| `reset-aware` ⭐    | Ṣe iṣaaju nipasẹ akoko atunto ipin — awọn window kukuru ti o wa ni ipo ti o ga julọ                                                                                                              |
+| `reset-window`      | Ṣe ayanfẹ awọn ibi-afẹde ti ferese ipin wọn tunto laipẹ                                                                                                                                          |
+| `headroom`          | Yan ibi-afẹde pẹlu yara ori ipin ipin to ku julọ                                                                                                                                                 |
+| `quota-weighted`    | Rekọja awọn akọọlẹ ti o rẹwẹsi, lẹhinna yan laarin awọn iyokù ni ibamu si ipin ti o ṣẹku ti a pin nipasẹ ẹru ọkọ ofurufu; awọn ibaraẹnisọrọ to wa tẹlẹ duro pinni                                |
+| `strict-random`     | ID lai deduplication ti ntun                                                                                                                                                                     |
+| `auto`              | Lo idojukọ Konbo igbelewọn (16-ifosiwewe) —**niyanju**                                                                                                                                           |
+| `lkgp`              | Ọna Ti o dara-kẹhin mọ (awọn pinni si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin)                                                                                                |
+| `context-optimized` | Mu ibi-afẹde pẹlu ibamu ti o dara julọ fun iwọn ọrọ-ọrọ lọwọlọwọ                                                                                                                                 |
+| `cache-optimized`   | Ṣe atunto awọn ibi-afẹde nipasẹ isunmọ kaṣe-kiakia — asopọ ti o ṣeeṣe julọ lati mu ami-iṣaaju ipamọ ti ibeere yii ti gbiyanju ni akọkọ (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Ṣe afẹfẹ jade si igbimọ ti awọn awoṣe ni afiwe, lẹhinna ṣajọpọ idahun kan nipasẹ adajọ kan (wo isalẹ)                                                                                            |
+| `pipeline`          | Ṣiṣe awọn ibi-afẹde leralera, titọka abajade igbesẹ kọọkan sinu igbewọle igbesẹ ti nbọ; Idahun ikẹhin nikan ni a da pada (#6396)                                                                 |
 
 ⭐ = Tuntun ni v3.8.0 · 🧬 = Tuntun ni v3.8.36
 
-### `weighted`
+### Awọn itumọ `weighted`
 
-`weighted` ni a** iwon ID iyaworan fun ìbéèrè** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), kii ṣe oluṣatunṣe:
+`weighted` jẹ a **iwon ID iyaworan fun ìbéèrè** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), kii ṣe oluṣeto:
 
-- Kọọkan ìbéèrè fa** ọkan** igbese pẹlu iṣeeṣe `weight / totalWeight`; Awọn igbesẹ ti o ku ni a paṣẹ nipasẹ iwuwo ti o sọkalẹ bi ẹwọn fallback fun ibeere yẹn.
-- Igbesẹ ti iwuwo rẹ jẹ `0` (tabi sonu) jẹ** ko kale** nigba ti eyikeyi igbese miiran ni o ni iwuwo > 0 — o le ṣiṣẹ nikan bi ipadabọ lẹhin igbesẹ iyaworan kuna. Nikan nigbati** gbogbo** òṣuwọn ni 0 ṣe yiyan di aṣọ.
-- Awọn igbesẹ ti awọn ibi-afẹde ni gbogbo ko si — olupese Circuit breaker `OPEN`, asopọ cooldown, model lockout — ti wa ni kuro lati iyaworan ṣaaju ki o to ṣẹlẹ (`open-sse/services/combo/targetResolution.ts`), ki kan nikan ni ilera igbese le fun igba die win gbogbo ìbéèrè.
+- Kọọkan ìbéèrè fa **ọkan** igbese pẹlu iṣeeṣe `weight / totalWeight`; Awọn igbesẹ ti o ku ni a paṣẹ nipasẹ iwuwo ti o sọkalẹ bi ẹwọn fallback fun ibeere yẹn.
+- Igbesẹ ti iwuwo rẹ jẹ `0` (tabi sonu) jẹ **ko kale** nigba ti eyikeyi miiran igbese ni o ni a àdánù > 0 — o le nikan sin bi a fallback lẹhin ti awọn kale igbese kuna. Nikan nigbati **gbogbo** òṣuwọn ni 0 ṣe yiyan di aṣọ.
+- Awọn igbesẹ ti awọn ibi-afẹde wọn ko si — olupese Circuit fifọ `OPEN`, asopọ cooldown, model lockout — ti wa ni kuro lati iyaworan ṣaaju ki o to ṣẹlẹ (`open-sse/services/combo/targetResolution.ts`), ki a nikan ni ilera igbese le igba die win gbogbo ìbéèrè.
 - `stickyWeightedLimit` (konfigi konbo, aiyipada `1` = pipa) pin igbesẹ ti o fa fun ọpọlọpọ awọn aṣeyọri itẹlera ṣaaju ki o to tun yiya.
 
-Fun yiyi to muna lo `round-robin`; òṣuwọn dogba lori `weighted` fun — iṣiro kii ṣe iwọntunwọnsi — ti o muna.
+Fun yiyi to muna lo `round-robin`; dogba òṣuwọn on `weighted` fun iṣiro — ko muna — iwontunwonsi.
 
 ### Ipo opo gigun ti epo
 
-Akopọ `pipeline` pẹlu o kere ju awọn awoṣe meji le jade si ọna ọna planner/executor pẹlu `config.agenticOrchestration.enabled`. Ibi-afẹde akọkọ ni eto ati awọn idahun ikẹhin; ibi-afẹde keji njade awọn ipe irinṣẹ abinibi-onibara. OmniRoute ṣe awari awọn itesiwaju esi-irinṣẹ lati ilana ibeere, beere lọwọ oluṣeto boya o nilo iyipo irinṣẹ miiran, ati ni agbara mu boya alaṣẹ tabi oluṣeto ni ipele ikẹhin ti nkọju si alabara.
+Konbo `pipeline` kan pẹlu o kere ju awọn awoṣe meji le jade si ipa ọna planner/executor pẹlu `config.agenticOrchestration.enabled`. Ibi-afẹde akọkọ ni eto ati awọn idahun ikẹhin; ibi-afẹde keji njade awọn ipe irinṣẹ abinibi-onibara. OmniRoute ṣe awari awọn ilọsiwaju abajade-irinṣẹ lati ilana ibeere, beere lọwọ oluṣeto boya o nilo iyipo irinṣẹ miiran, ati ni agbara mu boya alaṣẹ tabi oluṣeto ni ipele ikẹhin ti nkọju si alabara.
 
-Lori awọn ilọsiwaju esi-irinṣẹ, OmniRoute tun da ipaniyan duro nigbati awọn iyipo meji ti o pari ni itẹlera tun awọn ipe irinṣẹ kanna ṣe pẹlu awọn abajade ti ko yipada, tabi nigbati gbogbo abajade ti o samisi ni gbangba ni awọn iyipo itẹlera meji kuna. Awọn abajade iyipada gba awọn ipe leralera laaye (fun apẹẹrẹ, idibo). Ẹṣọ tunto lori ibeere olumulo titun, awọn ẹgbẹ ti o jọra awọn ipe sinu iyipo kan, ati atilẹyin Anthropic, Iwiregbe Ipari, Awọn idahun ati awọn itan-akọọlẹ Gemini. Alakoso gba idi naa ati pe o ni idahun ikẹhin paapaa ti o ba beere ọpa miiran yika.
+`config.agenticOrchestration.contextCompaction` iyan kan lo isuna isanwo isanwo lọtọ ṣaaju ki oluṣeto kọọkan tabi fifiranṣẹ alaṣẹ. Muu ṣiṣẹ ni gbangba:
 
-Awọn awoṣe afikun lẹhin ibi-afẹde keji ti paṣẹ awọn afẹyinti alaṣẹ. Idahun HTTP ti o kuna tabi awọn ilọsiwaju imukuro gbigbe si olupilẹṣẹ atẹle, ti n gbe ipinnu olupilẹṣẹ kanna ati awọn irinṣẹ abinibi ṣugbọn igbesẹ ti alaṣẹ ti ararẹ ati asopọ ipinnu. Idahun aṣeyọri akọkọ jẹ pada ko yipada, pẹlu ṣiṣan SSE ; awọn ikuna lẹhin ṣiṣan aṣeyọri ti bẹrẹ ko le tun gbiyanju nibi. Ti gbogbo awọn alaṣẹ ba kuna, ikuna ti o kẹhin yoo pada. Onibara aborts da fifiranṣẹ.
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Iwọnyi jẹ awọn eto isuna ohun kikọ JSON ti a ṣe lẹsẹsẹ ti a yan nipasẹ oniṣẹ, kii ṣe awọn window ti o tọ tabi iṣeduro awọn opin oke. Gangan awoṣe IDs idojuk awọn aiyipada. Loke iloro, iwapọ n yọ awọn asọye irinṣẹ kanna kuro, ge ẹri ọpa ti o tobijulo pẹlu ijẹẹmu, ati yọkuro awọn ẹgbẹ itan pipe atijọ si ipin ibi-afẹde. O da awọn ilana system/developer duro, ibeere olumulo tuntun, iyipo irinṣẹ to kẹhin pẹlu calls/results ti o jọra, ati itọsọna itọsọna itọsọna Gemini. Awọn itọnisọna ipele-oke ati awọn eto irinṣẹ ti wa ni ipamọ. Awọn igbasilẹ asami aisi kuro ni itan-akọọlẹ; eyi jẹ gige ipinnu ipinnu, kii ṣe akopọ atunmọ kan. Ti o ba ti pinni o tọ si tun koja isuna, awọn ìbéèrè pada 413 ṣaaju ki o to kan si awọn awoṣe. Pẹlu iwapọ alaabo tabi ni isalẹ iloro ibeere naa kọja nipasẹ ko yipada.
+
+Lori awọn ilọsiwaju esi-irinṣẹ, OmniRoute tun da ipaniyan duro nigbati awọn iyipo meji ti o pari ni itẹlera tun awọn ipe irinṣẹ kanna ṣe pẹlu awọn abajade ti ko yipada, tabi nigbati gbogbo abajade ti o samisi ni gbangba ni awọn iyipo itẹlera meji kuna. Awọn abajade iyipada gba awọn ipe leralera laaye (fun apẹẹrẹ, idibo). Ẹṣọ tunto lori ibeere olumulo titun, awọn ẹgbẹ ti o jọra awọn ipe sinu iyipo kan, ati atilẹyin Anthropic, Awọn ipari Iwiregbe, Awọn idahun ati awọn itan-akọọlẹ Gemini. Alakoso gba idi naa ati pe o ni idahun ikẹhin paapaa ti o ba beere ọpa miiran yika.
+
+Awọn awoṣe afikun lẹhin ibi-afẹde keji ti paṣẹ awọn afẹyinti alaṣẹ. Idahun HTTP ti o kuna tabi awọn ilọsiwaju imukuro gbigbe si olupilẹṣẹ atẹle, gbigbe ipinnu oluṣeto kanna ati awọn irinṣẹ abinibi ṣugbọn igbesẹ ti alaṣẹ yẹn tọ ati ipinnu asopọ. Idahun aṣeyọri akọkọ ti pada ko yipada, pẹlu ṣiṣanwọle SSE ; awọn ikuna lẹhin ṣiṣan aṣeyọri ti bẹrẹ ko le tun gbiyanju nibi. Ti gbogbo awọn alaṣẹ ba kuna, ikuna ti o kẹhin yoo pada. Onibara aborts da fifiranṣẹ.
 
 ```json
 {
@@ -360,15 +376,15 @@ Awọn awoṣe afikun lẹhin ibi-afẹde keji ti paṣẹ awọn afẹyinti ala
 
 Oluṣeto le gbe awọn ipe ominira lọpọlọpọ jade ni esi kan. Awọn ipe ti o gbẹkẹle ni a mu ni awọn iyipada abajade irinṣẹ alabara nigbamii, pẹlu oluṣeto atunwo gbogbo abajade. `maxToolRounds` aiyipada si `8` ati gba `1`–`32`; ni kete ti o ba de ọdọ, oluṣeto gbọdọ gbejade idahun ikẹhin ti o dara julọ ti o wa. Awọn ipinnu oluṣeto inu inu jẹ ifipamọ, lakoko ti idahun ti nkọju si alabara ti o yan ṣe itọju ayanfẹ ṣiṣanwọle atilẹba.
 
-### `round-robin` alalepo ipele ati iroyin imugboroosi
+### Ipele alalepo `round-robin` ati imugboroosi akọọlẹ
 
 Yika-robin ti wa ni ipele, kii ṣe ibeere-ọkan-ni-igbesẹ:
 
-- `stickyRoundRobinLimit` (konfigi konbo, lẹhinna `comboStickyRoundRobinLimit`, lẹhinna `settings.stickyRoundRobinLimit`, aiyipada** 3** ) n tọju ibi-afẹde kanna fun ọpọlọpọ awọn aṣeyọri itẹlera ṣaaju yiyi. Ṣeto idojukokoro konbo si `1` fun yiyi-ibeere kan. Olootu konbo fihan iye ti o munadoko ati iru Layer ti o ti wa.
-- `connectionAwareExpansion` (konfigi konbo, lẹhinna awọn eto, aiyipada** eke** ) faagun igbesẹ ipele-olupese kọọkan sinu awọn ibi-apamọ-kọọkan ṣaaju yiyi. Ẹgbẹ-B ogbon ( ayo, iwon, yika-robin, ID, p2c, o kere-lo, iye owo-iṣapeye, lkgp, kun-akọkọ, muna-ID, context-iṣapeye, kaṣe-iṣapeye, context-relay, fusion, pipeline) tọju wiwo ipele olupese titi eyi yoo wa ni titan. Olootu konbo ṣafihan jogun / tan / pipa; jogun nlo aiyipada agbaye (pa).
-- Itọnisọna agbegbe kaṣe-kia (`promptCacheAffinityEnabled`, aiyipada** ooto** ) tun paṣẹ awọn isopọ pinni nitoribẹẹ awọn bọtini kaṣe ti o baamu duro lori akọọlẹ kan. O gba iṣaaju lori iyipo-robin ati yiyi iwuwo kọja awọn igbesẹ ti a pinni fun-iroyin. Pa a labẹ Eto → Konbo aiyipada ti o ba nilo yiyi to muna. Ko si idakokoro-konbo.
+- `stickyRoundRobinLimit` (konfigi konbo, lẹhinna `comboStickyRoundRobinLimit`, lẹhinna `settings.stickyRoundRobinLimit`, aiyipada **3** ) n tọju ibi-afẹde kanna fun ọpọlọpọ awọn aṣeyọri itẹlera ṣaaju yiyi. Ṣeto idojukokoro konbo si `1` fun yiyi-ibeere kan. Olootu konbo fihan iye ti o munadoko ati iru Layer ti o wa.
+- `connectionAwareExpansion` (konfigi konbo, lẹhinna awọn eto, aiyipada **eke** ) faagun igbesẹ ipele-olupese kọọkan sinu awọn ibi-apamọ-kọọkan ṣaaju yiyi. Ẹgbẹ-B ogbon ( ayo, iwon, yika-robin, ID, p2c, o kere-lo, iye owo-iṣapeye, lkgp, kun-akọkọ, muna-ID, context-iṣapeye, cache-iṣapeye, context-relay, fusion, pipeline) tọju wiwo ipele olupese titi eyi yoo wa ni titan. Olootu konbo ṣafihan jogun / tan / pipa; jogun nlo aiyipada agbaye (pa).
+- Itọnisọna kaṣe-kiakia agbegbe (`promptCacheAffinityEnabled`, aiyipada **ooto** ) tun paṣẹ awọn isopọ pinni nitoribẹẹ awọn bọtini kaṣe ti o baamu duro lori akọọlẹ kan. O gba iṣaaju lori iyipo-robin ati yiyi iwuwo kọja awọn igbesẹ ti a pinni fun-iroyin. Pa a labẹ Eto → Konbo aiyipada ti o ba nilo yiyi to muna. Ko si idakokoro-konbo.
 
-Fun yiyi-iroyin olona lori awoṣe kan, fẹ** ọkan ìmúdàgba-iroyin igbese** ( `connectionId` ofo, gbogbo adagun) pẹlu alalepo iye `1`, kii ṣe pinni `connectionId` s mẹta. Awọn igbesẹ ti a fi ṣopọ pẹlu ifaramọ ibalẹ sori akọọlẹ kanna paapaa lakoko ti kika RR n tẹsiwaju.
+Fun yiyi-iroyin olona lori awoṣe kan, fẹ **ọkan ìmúdàgba-iroyin igbese** ( `connectionId` ofo, gbogbo adagun) pẹlu alalepo opin `1`, kii ṣe `connectionId` s pinni mẹta. Awọn igbesẹ ti a fi ṣopọ pẹlu ifaramọ ibalẹ sori akọọlẹ kanna paapaa lakoko ti counter RR ti nlọsiwaju.
 
 ## Ìlànà Fusion
 

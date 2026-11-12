@@ -91,6 +91,8 @@ function runStep(
   const bodies = path.join(cwd, "gh-bodies.log");
   const summary = path.join(cwd, "summary.md");
   fs.writeFileSync(summary, "");
+  const startupMarker = path.join(cwd, "startup-marker");
+  fs.writeFileSync(path.join(cwd, ".bashrc"), 'printf fixture > "$HOME/startup-marker"\n');
   fs.writeFileSync(
     path.join(cwd, "ui-kit-upstream.json"),
     JSON.stringify({
@@ -112,10 +114,11 @@ function runStep(
       "fi",
     ].join("\n")
   );
-  const res = spawnSync("bash", ["-e", "-c", step.run], {
+  const res = spawnSync("bash", ["--noprofile", "--norc", "-e", "-c", step.run], {
     cwd,
     encoding: "utf8",
     env: {
+      HOME: cwd,
       PATH: `${bin}:${process.env.PATH}`,
       STATE: opts.state,
       GH_TOKEN: "stub",
@@ -125,6 +128,11 @@ function runStep(
       GITHUB_STEP_SUMMARY: summary,
     },
   });
+  assert.equal(
+    fs.existsSync(startupMarker),
+    false,
+    "the workflow shell must not load startup files"
+  );
   const read = (f: string) => (fs.existsSync(f) ? fs.readFileSync(f, "utf8") : "");
   return {
     status: res.status,

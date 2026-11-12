@@ -54,7 +54,7 @@ Nova kartica za izdvajanje sadržaja iz URL-a putem `POST /v1/web/fetch` (izrađ
 - Unos: URL + prekidač za cijelu stranicu + odabir formata (markdown / tekst / HTML).
 - Slanje → dohvaćanje → prikaz u `ScrapeResult.tsx`.
 - `ScrapeResult` prikazuje pretpregled markdowna + prekidač za neobrađeni prikaz.
-- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `(skraćeno, prikaži neobrađeno)` i otvara neobrađeni sadržaj u Monaco modalnom prozoru (D21).
+- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `View full raw content` i otvara neobrađeni sadržaj u modalnom prozoru (D21).
 - Ploča s metapodacima: pružatelj (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencija, trošak, veličina odgovora, broj poveznica.
 - Upotrebljava hook `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Pokreće isti upit/URL paralelno kod najviše **4 pružatelja** (D22):
 `ProviderCatalog.tsx` prikazuje potpuni popis pružatelja usluga iz `GET /api/search/providers`
 (proširen u F4 kako bi uključivao pružatelje dohvaćanja):
 
-| `kind` | `"search"` (20 pružatelja) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 pružatelja) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status se **izvodi u trenutku zahtjeva** provjerom postoje li vjerodajnice i jesu li
 svi ključevi trenutačno u razdoblju čekanja.
+
+`codex-search` (Codex Web Search): Koristi vaše povezane račune Codex (ChatGPT), bez zasebnog ključa. Svako pretraživanje troši kvotu pretplate i traje približno 10–40 s. Pokreće se kada ga zahtjev navede; automatski odabir zahtijeva zastavicu `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, koja je zadano isključena.
 
 ---
 

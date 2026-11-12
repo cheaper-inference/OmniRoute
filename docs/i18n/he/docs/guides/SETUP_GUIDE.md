@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-לוח הבקרה נפתח בכתובת `http://localhost:20128`, וכתובת הבסיס של ה-API היא `http://localhost:20128/v1`.
+לוח המחוונים נפתח ב- `http://localhost:20128` ובסיס API URL הוא `http://localhost:20128/v1`.
+
+> **משתמשי npm:** אם npm מזהירה שסקריפטים של התקנה נחסמו (למשל, `omniroute`, `better-sqlite3`), ראה [פתרון בעיות — npm install-scripts חסומים](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 

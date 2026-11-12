@@ -4,112 +4,34 @@
 
 ---
 
-> **Stádas:** tá an painéal tógtha ar **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), atá cuachta
-> mar an spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá an léargas réamhtheachtach feistithe in
-> `packages/ui-kit/UPSTREAM.md` agus cosanta ag `npm run check:ui-kit-snapshot`). Is é an téama geal an téama
-> canónach; is é `system` an rogha réamhshocraithe. Is é cuma **Editions** na foirne an pailéad réamhshocraithe
-> (neodracha teo páipéir agus an bhéim chopair `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Socruithe →
-> Cuma → Pailéad dathanna, tairgtear **Classic**, comharthaí bonn na foirne leis an mbéim líoma.
-> Is é Switzer an t-aon chlófhoireann amháin do théacs an chomhéadain, an taispeántais agus an chóid (`--ci-font-ui`; réitíonn `--ci-font-display` agus
-> `--ci-font-mono` chuige), agus tá sé féinóstáilte ag an bhfoireann féin (`packages/ui-kit/src/ci-fonts.css`,
-> arna iompórtáil ag `ci-tokens.css`). I gcás na gcóras scríbhneoireachta nach dtacaíonn Switzer leo, úsáidtear clófhoirne malartacha glife ar ghlife (`src/app/globals.css`):
-> Inter don Choireallach, don Ghréigis agus don Vítneaimis agus, faoi `html[dir="rtl"]` amháin, Vazirmatn don script Arabach.
-> Is glif Lucide é gach deilbhín.
+> **Stádas:** tá an deais tógtha ar an **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), san áireamh sa stór seo mar an spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá an pictiúr in aghaidh an tsrutha pinned in `packages/ui-kit/UPSTREAM.md` agus cosanta ag `npm run check:ui-kit-snapshot`). Is é solas an téama canónach; Is é `system` an rogha réamhshocraithe. Is é an pailéad réamhshocraithe an trealamh **Editions** cuma (neodraigh páipéar te agus an blas copair `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Socruithe → Dealramh Cuireann pailéad dathanna → ar fáil **Classic** , comharthaí bonn an trealamh leis an accent aoil. Is é Switzer an príomh-theaghlach le haghaidh UI agus téacs taispeána (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Is glyph Lucide é gach deilbhín.
+>
+> is cúl-tuilleamh é Inter do glyphs atá ar iarraidh ó Switzer; léarscáileanna `--font-mono` chuig an gcóras monaspáis stack `--ci-font-code`.
+>
+> roghnaíonn `src/app/globals.css` cló ar leithligh do gach cruth carachtair. Le haghaidh cruth carachtair nach bhfuil ann ó `Switzer`, úsáideann sé: `Inter` le haghaidh Coireallach, Gréigis agus Vítneaimis, agus `Vazirmatn` do script Araibis amháin faoi `html[dir="rtl"]`.
 
-## 1. Cá bhfuil rudaí suite
+`src/app/globals.css`:
 
-- **Trealamh.** Is cóip beart ar bheart é `packages/ui-kit/src` den `src/` réamhtheachtach ag an gcur i bhfeidhm atá pionnáilte in
-  `packages/ui-kit/UPSTREAM.md` (ina dtaifeadtar údarú an cheadúnais freisin); liostaíonn `PATCHES.md` paistí
-  áitiúla (níl aon cheann ann). Úsáidtear é mar chód foinseach, gan tógáil: déanann `next.config.mjs` é a thras‑tiomsú, agus
-  mapálann `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` agus `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (tá an ailias céanna in `vitest.config.ts` agus `vitest.mcp.config.ts`). Iompórtáil
-  comhpháirt trealaimh trína fochonair (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), agus ná déan
-  é riamh trí bhairille `@omniroute/ui-kit`: tarraingíonn an bairille gach comhpháirt (an roghnóir dáta san áireamh)
-  isteach i ngach iompórtálaí. Tagann stílbhileog an trealaimh isteach trí `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, an bhileog iomlán: an croí-`ci-ui.css` móide gach teaghlach patrún).
-- **Comharthaí.** Dearbhaíonn `packages/ui-kit/src/ci-tokens.css` na comharthaí `--ci-*`; déanann `src/app/globals.css`
-  droichead eatarthu agus seanainmneacha OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), ionas go leanfaidh na léamha `var(--color-*)` agus fóntais Tailwind
-  de bheith ag obair. Úsáideann cód nua fóntais Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) nó aicmí an trealaimh — ní úsáidtear luach heics riamh
-  (`tests/unit/design-kit-bridge.test.ts` a fhorfheidhmíonn an droichead). Réitíonn `text-primary` go
-  `--color-primary-ink` trí `--text-color-primary`, ionas go bhfanann téacs príomhúil soléite agus go gcoinníonn
-  `bg-primary`/`border-primary` an dromchla béime: faoi Editions is é `--ci-color-accent-active` an trealaimh é
-  (an copar domhain `#99562f` sa mhód geal, an bhéim chopair sa mhód dorcha); faoi Classic,
-  lime-800 sa mhód geal agus an bhéim aoil sa mhód dorcha. Úsáideann sraitheanna cairte
-  `--color-chart-1` … `--color-chart-8`, gach ceann acu le `--color-chart-N-ink` atá sábháilte do théacs agus imir shlise
-  theimhneach `--color-chart-N-subtle`, arna sannadh de réir ord sraithe an trealaimh (`ciChartSeriesOrder`).
-- **Téamaí.** Cuireann `<html className="ci-theme">` (`src/app/layout.tsx`) an cháipéis isteach i dtéama an trealaimh.
-  Is é `light`, `dark` nó `system` an rogha (`THEME_CONFIG.defaultTheme = "system"` in
-  `src/shared/constants/appConfig.ts`; leanann `system` `prefers-color-scheme`). Socraíonn `applyTheme()` in
-  `src/store/themeStore.ts` (agus `THEME_BOOT_SCRIPT` mar mhacasamhail de, ionsuite in `src/app/layout.tsx`, a ritheann
-  roimh hiodráitiú) `data-theme="dark"|"light"` agus scoránaíonn sé an aicme `.dark` ar `<html>` ag an am céanna.
-  Tá tacar comharthaí dorcha an trealaimh eochraithe ar `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  tá sáruithe dorcha OmniRoute féin (an bloc `.dark` in `globals.css`) agus seanfhóntais Tailwind `dark:`
-  eochraithe ar an aicme `.dark`. Níl aon réamhshocruithe dathanna béime ann: tagann an bhéim ón trealamh i gcónaí,
-  agus baintear réamhshocrú marthanach ó leagan níos sine nuair a lódálann an stór.
-- **Pailéid.** Tá dhá cheann ann, agus tagann an dá cheann ón trealamh (`src/shared/constants/appearancePalette.ts`): `editions`, an
-  réamhshocrú, agus `classic`. Is é Editions tréith `data-ci-appearance="editions"` an trealaimh ar `<html>`, a
-  chomhcheanglaíonn `ci-editions.css` (arna iompórtáil ag `ci-ui.css`) le `data-theme`; is é Classic easpa na tréithe.
-  Rindreálann leagan amach na fréimhe an tréith ar an bhfreastalaí, mar sin faigheann cuairteoir nach bhfuil aon rud stóráilte aige (nó nach bhfuil JS aige)
-  Editions ar gach dromchla — an deais, logáil isteach, `/status`, leathanaigh earráide, `/docs` agus an PWA. Déantar an rogha a
-  bhuanú in aice leis an téama sa stór `theme` céanna (`palette`, `setPalette()`, `applyPalette()` in
-  `src/store/themeStore.ts`) agus cuireann `THEME_BOOT_SCRIPT` i bhfeidhm í roimh phéinteáil
-  (`src/shared/utils/themeBootScript.ts`, ionsuite i `<head>` an leagain amach), rud nach mbaineann an tréith
-  ach amháin nuair is é `"classic"` an pailéad stóráilte; cuireann `src/app/global-error.tsx`, atá lasmuigh de leagan amach na fréimhe,
-  i bhfeidhm í ón stór céanna. Ná cuir `data-ci-appearance` ar aon eilimint eile: meaitseálann an trealamh é le
-  `html:root:has([data-ci-appearance="editions"])`, mar sin d’athródh sliocht amháin an cháipéis iomlán.
-  Tá malairt Editions `data-ci-editions-variant="landing"` ann do leathanaigh mhargaíochta, ní don deais.
-  Cróim an bhrabhsálaí: rindreálann an freastalaí an réamhshocrú, Editions, in `viewport.themeColor` (clib amháin do gach
-  `prefers-color-scheme`) agus sa mha manifest gréasáin — `PWA_THEME_COLORS` in
-  `src/shared/constants/pwaThemeColors.ts`, an t-aon mhacasamhail amháin de `--ci-color-background` Editions
-  (`#f3f1e9` / `#11120f`), pionnáilte le `ci-editions.css` ag `tests/unit/pwa-theme-colors.test.ts`. Leanann an
-  `<meta name="theme-color">` beo an pailéad agus an mód stóráilte ansin: athscríobhann `THEME_BOOT_SCRIPT` na
-  clibeanna roimh phéinteáil agus déanann gníomhartha an stórais téama é ar gach athrú (`resolveThemeColor()` /
-  `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, agus `CLASSIC_PAGE_BACKGROUND` léite ó
-  `ciTokens` an trealaimh). Socraíonn téama follasach geal/dorcha gach clib don mhód sin; coinníonn `system` dath amháin
-  do gach scéim. Fanann an mha manifest mar Editions: faightear uair amháin é le haghaidh gach suiteála, gan an
-  rogha. Léann Monaco a dhathanna ó thóireadóir (`monacoKitTheme.ts`);
-  faoi Editions, aisiompaíonn léamh an tóireadóra `data-theme` na fréimhe ar feadh pas sioncrónach amháin, toisc go
-  réitíonn an trealamh Editions geal/dorcha ón bhfréamh.
-- **Comhpháirteanna (cuibheoirí).** Coinníonn `src/shared/components/index.tsx` API comhpháirte OmniRoute (na
-  hainmneacha, na heaspórtálacha réamhshocraithe agus na hairíonna céanna), agus is cuibheoirí thar an trealamh iad na primitíbheanna taobh thiar de: foirmeacha
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), forleaganacha agus aiseolas
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  struchtúr (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) agus táblaí
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Iompórtálann cuibheoir comhpháirt an trealaimh
-  trí fhochonair agus mapálann sé na sean-airíonna uirthi — mar shampla, is é `Button variant="primary"` cnaipe
-  `default` an trealaimh (`--ci-button-primary-*`: an dromchla inbhéartach sa mhód geal, an bhéim lena
-  dhúch `--ci-color-accent-foreground` sa mhód dorcha), is é `destructive` atá i `danger`, agus is é `warning` cnaipe `warning`
-  an trealaimh. Is toin trealaimh iad malairtí stádais `Badge`, agus rindreálann `Select` le páistí `<option>` an
-  `NativeSelect` trealaimh.
-  Pionnálann `tests/unit/ui/adapters/*.test.tsx` gach cuibheoir.
-- **Blaosc.** Rindreálann `src/app/(dashboard)/layout.tsx` `DashboardLayout`, a rindreálann
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
-  `SidebarInset` an trealaimh (`packages/ui-kit/src/sidebar.tsx`), agus loighic nascleanúna OmniRoute in
-  `src/shared/components/Sidebar.tsx`. Is é nasc "scipeáil chuig an ábhar" chuig `#main-content` an chéad eilimint
-  infhócasaithe. Tá `SidebarTrigger` an trealaimh in `src/shared/components/Header.tsx` (an t-aon
-  lasc scoránaigh don bharra taoibh sa bhlaosc), mar aon le `ProductSwitcher` Keak agus oscailteoir an phailéid orduithe;
-  ní thaispeánann sé teideal an bhealaigh ach amháin nuair nach bhfuil `PageHeader` (`.ci-page-header`) de chuid an trealaimh
-  feistithe laistigh de `#main-content`, ionas go mbíonn aon `h1` amháin ag leathanach a bhfuil a
-  `PageHeader` féin aige. Is `Dialog` de chuid an trealaimh é `src/shared/components/CommandPalette.tsx`.
-- **Deilbhíní.** Réitíonn `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) an t-ainm (stór focal
-  Material Symbols a úsáideann na scáileáin) trí `ICON_MAP` (`src/shared/constants/iconMap.ts`) go glife
-  Lucide. Tá cló agus pacáiste Material Symbols imithe: má tá ainm ar iarraidh ón léarscáil, rindreáiltear
-  glife ionadchoinneála neodrach (`data-icon-missing="true"`) agus logáiltear rabhadh sa chonsól lasmuigh den táirgeadh.
-  Priontálann `npm run gen:icon-map` na hainmneacha atá in úsáid agus atá ar iarraidh ón léarscáil
-  (teipeann ar `tests/unit/icon-map-coverage.test.ts` i gcás aon ainm gan deilbhín Lucide;
-  cumhdaíonn `tests/unit/icon-map-object-values.test.ts` ainmneacha atá stóráilte in oibiachtaí cuardaigh);
-  athscríobhann `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` réisí litriúla
-  `<span className="material-symbols-outlined">` mar `<Icon>`.
-- **Branda.** Timfhilleann `src/shared/components/OmniRouteLogo.tsx` an trealamh: rindreálann an t-easpórtáil réamhshocraithe `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"` (SVG inlíne, sábháilte do `basePath`) agus
-  rindreálann `OmniRouteLockup` `ProductLockup product="omniroute"` (ainm inrochtana "Keak OmniRoute") nó, i gcás
-  oibreoirí lipéid bháin, a `name`/`logoSrc` féin. Tá cinn scríbe an lascaire táirgí in
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Taispeánann na scáileáin
-  neamhspleácha — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` agus `src/shared/components/ErrorPageScaffold.tsx`
-  — an glasáil branda; déanann `tests/unit/brand-pages-static.test.ts` í a chosaint.
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
+
+## 1. An áit a bhfuil cónaí ar rudaí
+
+- **Kit.** Is cóip beart-le-beart é `packages/ui-kit/src` den `src/` in aghaidh an tsrutha ag an gceangal atá pináilte i `packages/ui-kit/UPSTREAM.md` (a thaifeadann údarú an cheadúnais freisin); Liostaíonn `PATCHES.md` paistí áitiúla. Déantar é a chaitheamh mar fhoinse, gan aon tógáil: déanann `next.config.mjs` é a thras-charnadh, agus tá an ailias céanna ag léarscáileanna `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` agus `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` agus `vitest.mcp.config.ts` ). Iompórtáil comhpháirt feiste trína fhochonair (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ná tríd an mbairille `@omniroute/ui-kit` riamh: tarraingíonn an bairille gach comhpháirt (lena n-áirítear an roghnóir dáta) isteach i ngach allmhaireoir. Téann stílbhileog an trealaimh isteach trí `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, an bhileog iomlán: an croí `ci-ui.css` móide gach teaghlach patrún).
+- **Comharthaí.** Dearbhaíonn `packages/ui-kit/src/ci-tokens.css` na comharthaí `--ci-*` ; `src/app/globals.css` droichid iad leis an oidhreacht OmniRoute ainmneacha (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), mar sin léann an `var(--color-*)` atá ann cheana féin agus Tailwind fóntais a choinneáil ag obair. Úsáideann cód nua na fóntais Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`... ) nó ranganna trealamh — riamh luach heicsidheachúlach (`tests/unit/design-kit-bridge.test.ts` fhorfheidhmíonn an droichead ). Réitíonn `text-primary` `--color-primary-ink` trí `--text-color-primary`, mar sin fanann an buntéacs inléite agus coinníonn `bg-primary`/`border-primary` an dromchla blas: faoi Editions is é `--ci-color-accent-active` an trealamh (an `#99562f` copar domhain i bhfianaise, an blas copair sa dorchadas); faoi Classic, lime-800 sa solas agus an blas aoil sa dorchadas. Úsáideann sraith cairteacha `--color-chart-1` … `--color-chart-8`, gach ceann acu le `--color-chart-N-ink` atá sábháilte ó thaobh téacs agus tint sliseanna `--color-chart-N-subtle` teimhneach, sannta san ord sraith feiste (`ciChartSeriesOrder`).
+- **Téamaí.** Roghnaíonn `<html className="ci-theme">` (`src/app/layout.tsx`) an doiciméad isteach sa téama feiste. Is é an tosaíocht ná `light`, `dark` nó `system` (`THEME_CONFIG.defaultTheme = "system"` i `src/shared/constants/appConfig.ts`; leanann `system` `prefers-color-scheme`). Leagann `applyTheme()` i `src/store/themeStore.ts` (scáthánaithe ag `THEME_BOOT_SCRIPT`, líneáilte i `src/app/layout.tsx`, a ritheann roimh hiodráitiú) `data-theme="dark"|"light"` agus scoránaigh an rang `.dark` ar `<html>` le chéile. Tá tacair chomharthaí dorcha an feiste eochairaithe ar `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); Sáraíonn dorcha OmniRoute féin (an bloc `.dark` i `globals.css`) agus an eochair fóntais Tailwind `dark:` oidhreachta ar an rang `.dark`. Níl aon réamhshocruithe datha accent ann: tagann an accent i gcónaí ón trealamh, agus déantar réamhshocrú leanúnach ó thógáil níos sine nuair a bhíonn an stór ag luchtú.
+- **Pailéid.** Dhá cheann, an dá cheann as an trealamh (`src/shared/constants/appearancePalette.ts`): `editions`, an réamhshocraithe, agus `classic`. Is é Editions an tréith `data-ci-appearance="editions"` atá ag an trealamh ar `<html>`, a chomhcheanglaíonn `ci-editions.css` ( arna iompórtáil ag `ci-ui.css`) le `data-theme`; Is é Classic neamhláithreacht an tréith. Déanann an freastalaí leagan amach an fhréamh an tréith, mar sin faigheann cuairteoir nach bhfuil aon rud stóráilte aige (nó gan aon JS) Editions ar gach dromchla deais —, logáil isteach, `/status`, leathanaigh earráide, `/docs` agus an PWA. Leantar an rogha in aice leis an téama sa siopa `theme` céanna (`palette`, `setPalette()`, `applyPalette()` i `src/store/themeStore.ts`) agus cuirtear i bhfeidhm é roimh phéinteáil le `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, líneáilte i `<head>` an leagan amach ), rud a bhainfidh an tréith ach amháin nuair is `"classic"` an pailéad stóráilte; `src/app/global-error.tsx`, taobh amuigh den leagan amach fréimhe, cuireann sé as an siopa céanna. Ná cuir `data-ci-appearance` ar aon eilimint eile: meaitseálann an trealamh é le `html:root:has([data-ci-appearance="editions"])`, mar sin d’athródh sliocht amháin an doiciméad iomlán. Baineann an leagan Editions `data-ci-editions-variant="landing"` le leathanaigh mhargaíochta, ní le haghaidh an deais. Brabhsálaí chrome: déanann an freastalaí an réamhshocrú, Editions, i `viewport.themeColor` (clib amháin in aghaidh `prefers-color-scheme`) agus an léiriú gréasáin — `PWA_THEME_COLORS` i `src/shared/constants/pwaThemeColors.ts`, scáthán amháin den Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), pinnáilte chuig `ci-editions.css` le `tests/unit/pwa-theme-colors.test.ts`. Leanann an `<meta name="theme-color">` beo an pailéad agus an modh stóráilte ansin: athscríobhann `THEME_BOOT_SCRIPT` na clibeanna roimh phéinteáil agus déanann gníomhartha an tsiopa téama é ar gach athrú (`resolveThemeColor()` / `applyThemeColor()` i `src/shared/utils/themeColorMeta.ts`, le `CLASSIC_PAGE_BACKGROUND` léite ó `ciTokens` an trealamh). Socraíonn téama sainráite light/dark gach clib don mhodh sin; Coinníonn `system` dath amháin in aghaidh na scéime. Fanann an forléiriú Editions: faightear é uair amháin in aghaidh na suiteála, gan rogha. Léann Monacó a dathanna as taiscéalaí (`monacoKitTheme.ts`); faoi Editions smeachann an léamh probe an fhréamh `data-theme` le haghaidh pas sioncrónach amháin, toisc go réitíonn an trealamh Editions light/dark ón bhfréamh.
+- **Comhpháirteanna (adapters).** Coinníonn `src/shared/components/index.tsx` an chomhpháirt OmniRoute API (ainmneacha céanna, easpórtálacha réamhshocraithe agus props), agus is iad na primitives taobh thiar de na oiriúnaitheoirí thar an trealamh `InfoTooltip` foirmeacha (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), `Tooltip` agus aiseolas (`Modal`/`ConfirmModal`, `NotificationToast` `EmptyState`), struchtúr (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) agus táblaí (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills` `Loading` `PresetSlider`). Iompórtálann cuibheoir comhpháirt an fheiste trí fhobhealach agus mapálann sé na fearais oidhreachta air — mar shampla is é `Button variant="primary"` an trealamh `default` cnaipe (`--ci-button-primary-*`: an dromchla inbhéartach i solas, an blas lena dúch `--ci-color-accent-foreground` i dorcha), `danger` is `destructive`, agus `warning` an trealamh `warning` cnaipe. Is toin feiste iad leaganacha stádais `Badge`, agus déanann `Select` le leanaí `<option>` an trealamh `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` bioráin gach adapter.
+- **Bhlaosc.** Déanann `src/app/(dashboard)/layout.tsx` `DashboardLayout`, rud a fhágann `src/shared/components/layouts/DashboardShell.tsx`: an trealamh `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), le loighic loingseoireachta OmniRoute i `src/shared/components/Sidebar.tsx`. Is é nasc “scipeáil chuig ábhar” chuig `#main-content` an chéad eilimint ar féidir díriú air. Coinníonn `src/shared/components/Header.tsx` an trealamh `SidebarTrigger` (an t-aon scorán barra taoibh an bhlaosc), an Keak `ProductSwitcher` agus an t-oscailteoir ordaithe-phailéad; ní thaispeánann sé teideal an bhealaigh ach amháin cé nach bhfuil aon trealamh `PageHeader` (`.ci-page-header`) suite taobh istigh `#main-content`, mar sin tá `h1` amháin ag leathanach a bhfuil a `PageHeader` féin aige. Is trealamh `Dialog` `src/shared/components/CommandPalette.tsx`.
+- **Deilbhíní.** Réitíonn `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) an t-ainm (foclóir Siombailí Ábhar a úsáideann na scáileáin) trí `ICON_MAP` (`src/shared/constants/iconMap.ts`) go glyph Lucide. Tá cló agus pacáiste na Siombailí Ábhar imithe: fágann ainm atá ar iarraidh ón léarscáil glyph neodrach áite (`data-icon-missing="true"`) agus logálann sé rabhadh consól lasmuigh den táirgeadh. Priontálann `npm run gen:icon-map` na hainmneacha in úsáid atá in easnamh ón léarscáil (teipeann ar `tests/unit/icon-map-coverage.test.ts` ar aon ainm gan deilbhín Lucide ; clúdaíonn `tests/unit/icon-map-object-values.test.ts` ainmneacha atá stóráilte i réada cuardaigh); Athscríobhann `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` raonta litriúil `<span className="material-symbols-outlined">` go `<Icon>`.
+- **Branda.** Clúdaíonn `src/shared/components/OmniRouteLogo.tsx` an trealamh: cuireann an t-easpórtáil réamhshocraithe `OmniRouteLogo` le `ProductIcon product="omniroute" variant="glyph"` (inlíne SVG, `basePath` -safe) agus `OmniRouteLockup` rindreáil `ProductLockup product="omniroute"` (ainm inrochtana "Keak OmniRoute") nó, d'oibreoirí lipéad bán, a `name`/`logoSrc` féin . Cónaíonn cinn scríbe malartóra táirgí i `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Taispeánann na scáileáin neamhspleácha — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` agus `src/shared/components/ErrorPageScaffold.tsx` — an glasáil; `tests/unit/brand-pages-static.test.ts` gardaí é.
 
 ## 2. Rialacha
 
@@ -175,7 +97,7 @@
 4. Cuir `tests/unit/ui/adapters/<name>.test.tsx` leis nó nuashonraigh é. I gcás cuibheora a bhfuil go leor glaoiteoirí aige, déan
    comparáid idir an mharcáil rindreáilte roimh an athrú agus ina dhiaidh — scaipfidh athruithe ar an stuáil nó ar an bhfillteán chuig gach scáileán.
 
-## 5. An trealamh a nuashonrú
+## 5. An kit a nuashonrú
 
 Déanann `npm run check:ui-kit-upstream` comparáid idir an leagan atá pinned in `packages/ui-kit/UPSTREAM.md` leis an gclib `v*` is nuaí den repo in aghaidh an tsrutha agus priontaí an t-ordú sioncronaithe nuair a bhíonn scaoileadh amach.
 
@@ -185,8 +107,8 @@ Nuair nach féidir aon PR a oscailt (tá an scaoileadh sprice reoite, tá an PR 
 
 Úsáideann an sreabhadh oibre dhá rún:
 
-- `secrets.UI_KIT_READ_TOKEN`: comhartha inléite amháin don repo príobháideach réamhtheachtacha. Nuair nach féidir leis an sreabhadh oibre léamh in aghaidh an tsrutha (gan aon chomhartha, comhartha a stop ag obair, nó GitHub dosroichte) fanann an rith glas ach scríobhann sé rabhadh agus coinníonn sé saincheist ar leith amháin oscailte, a dhúnann é féin uair amháin sa rith níos déanaí is féidir léamh in aghaidh an tsrutha arís.
-- `secrets.UI_KIT_SYNC_PR_TOKEN`: comhartha mín ar an stór seo le hiarratais ar Ábhar agus Tarraingt rochtain scríofa. Ní féidir leis an `GITHUB_TOKEN` réamhshocraithe PRs a chruthú anseo, agus ní spreagfadh PR a d'oscail sé CI. Gan an comhartha seo ní bhrúnn an sreabhadh oibre ach an brainse.
+- `secrets.UI_KIT_READ_TOKEN`: comhartha inléite amháin don repo príobháideach réamhtheachtacha. Nuair nach féidir leis an tseiceáil in aghaidh an tsrutha sonraí a léamh (gan aon chomhartha, comhartha nár stad ag obair, nó GitHub dosroichte), tuairiscíonn sé `unknown` agus fágann sé le cód `0`. Scríobhann an sreabhadh oibre rabhadh agus déanann sé iarracht saincheist rianaithe ar leithligh amháin a choinneáil oscailte; dúnann rith rathúil níos déanaí é tar éis an rochtain a fháil ar ais. Theip ar an bpost mar gheall ar theip ar cheist GitHub API.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: comhartha mín ar an stór seo le hiarratais ar Ábhar agus Tarraingt rochtain scríofa. Ní osclaíonn nó nuashonraíonn an sreabhadh oibre seo PRs sioncrónaithe ach amháin nuair a bhíonn an comhartha tiomnaithe cumraithe; gan é, brúnn an sreabhadh oibre an brainse agus tuairiscíonn sé nár osclaíodh aon PR.
 
 Déanann `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` an `src/` in aghaidh an tsrutha a chóipeáil ag an ngealltanas sin (`latest` = an chlib `v*` is nua) go `packages/ui-kit/src`, cuireann sé an claochlú aonair ceadaithe i bhfeidhm (titeann sé an iarmhír `.js` ó allmhairí coibhneasta), agus socraíonn sé an leagan spáis oibre i `packages/ui-kit/package.json` agus `package-lock.json` chuig an gceann in aghaidh an tsrutha. Ansin: athbhreithniú `git diff packages/ui-kit`, déan pas amhairc ar sholáthraithe, socruithe, teaglama, úsáid agus críochphointe sa dá théama, reáchtáil `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus oscail an PR leis an changelog in aghaidh an tsrutha.
 
@@ -220,18 +142,12 @@ aschur a ghineadóra (jab `test-unit`).
   teastaíonn `node --import tsx/esm` ó `free-tier-budget` toisc go dtagann a fhigiúirí ón lódálaí catalóige beo in
   `open-sse/config/freeModelCatalog.ts`; tá iarmhairt CI a bhaineann le hathrú catalóige in
   `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Tiomnaigh an gineadóir agus an SVG le chéile.
-- **Cruthúnas.** Rindreálann `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` comhad ar an mbealach a bhfreastalaíonn GitHub
-  air (clib `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), gabhann sé fráma geal agus fráma dorcha
-  agus tuairiscíonn sé na hiarratais ar chlónna seachtracha a rinne an leathanach (ní mór dó a bheith 0).
+- **Cruthúnas.** Rindreálann `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` comhad sa triail áitiúil (clib `<img>`, `Content-Security-Policy` sriantach agus freagra `image/svg+xml`), gabhann sé íomhá gheal agus íomhá dhorcha agus tuairiscíonn sé iarratais sheachtracha na leathanach ar chlófhoirne; caithfidh 0 a bheith ann.
+
 - **Buiséad.** Faoi bhun 200 KB in aghaidh an chomhaid (dearbhaíonn gach tástáil seanaimsearthachta é); is é 500 KB an uasteorainn dhocht d'aon íomhá
   README (riail bhailíochtóir stiúideo SVG).
-- **Cóip gan athrú, comhairimh ón ngeata.** D'athraigh an t-athbhrandáil an cló agus an pailéad, ní na focail: tá cóip a léaráide
-  i dtairiseach `*_COPY` ag gach gineadóir (nó tógann sé í ón gcatalóg bheo), agus is í sin an téacs
-  tarraingthe agus ionchur na céime imlíne araon. Fanann figiúirí canónacha i nóid `<text>` (dofheicthe a luaithe a
-  dhéantar imlíne díobh, `fill-opacity:0`), agus léann `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) iad; ritheann tástálacha seanaimsearthachta na léaráidí a léann an geata sin
-  a bhailíochtóirí ar an gcomhad ginte freisin, mar sin má imíonn figiúr ón gcód teipeann ar an tástáil — ceartaigh an
-  fhoinse a léann an geata, agus ná ceartaigh an uimhir sa ghineadóir riamh.
+- **Téacs comhroinnte, uimhreacha ón gate.** tá cóip gach léaráide i ngineadóir i dtairiseach `*_COPY` (nó tógtar í ón gcatalóg bheo) atá ina téacs tarraingthe agus ina hionchur don chéim imlínithe araon. Fanann na figiúirí canónacha i nóid `<text>` (dofheicthe nuair a dhéantar imlíne díobh, `fill-opacity:0`), agus léann `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) iad; ritheann tástálacha seandachta na léaráidí a dhéanann léamh a gheata freisin a mbailíochtóirí ar an gcomhad ginte, mar sin teipeann ar an tástáil má imíonn figiúr ón gcód — ceartaigh an fhoinse a léann an geata, ná ceartaigh an uimhir sa ghineadóir riamh.
 
 ## 7. Innéacs tagartha
 

@@ -4,9 +4,13 @@
 
 ---
 
-> **Sürüm:** v3.8.44** Son güncelleme:** 2026-10-28** Kitle:** Gömülü hizmetleri (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) ekleyen, bakımını yapan veya hata ayıklayan mühendisler.
+> **Sürüm:** v3.8.44
+> **Son güncelleme:** 2026-10-28
+> **Hedef kitle:** Gömülü hizmetleri ekleyen, bakımını yapan veya hatalarını ayıklayan mühendisler (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Gömülü hizmetler, OmniRoute yüklediği, denetlediği ve birinci sınıf yönlendirme hedefleri olarak kullanıma sunduğu, yerel olarak yüklenen süreç yardımcı araçlarıdır. Harici sağlayıcıların (İnternet üzerinden API anahtarları aracılığıyla erişilen) aksine, yerleşik hizmetler OmniRoute ile aynı makinede çalışır ve geri döngü üzerinden iletişim kurar.
+Gömülü hizmetler, OmniRoute'un yüklediği, denetlediği ve birinci sınıf yönlendirme hedefleri olarak
+sunduğu, yerel olarak yüklenen yardımcı işlem araçlarıdır. API anahtarları aracılığıyla internet üzerinden
+erişilen harici sağlayıcıların aksine gömülü hizmetler, OmniRoute ile aynı makinede çalışır ve geri döngü üzerinden iletişim kurar.
 
 ---
 
@@ -27,36 +31,36 @@ Gömülü hizmetler, OmniRoute yüklediği, denetlediği ve birinci sınıf yön
 
 ### Neden gömülü hizmetler?
 
-Sekiz hizmet yerleşiktir:
+Sekiz hizmet gömülüdür:
 
-| Hizmet            | npm paketi                              | Varsayılan bağlantı noktası | Amaç                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------- | --------------------------------------- | :-------------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Yönlendirici** | `9router`                               |            20130            | OmniRoute alt sağlayıcı olarak kullanabileceği AI yönlendiricisi. `9router/{sub}/{model}` olarak sunulan modeller                                                                                                                                                                                                                                                         |
-| **CLIProxyAPI**   | GitHub sürüm ikili dosyası (`cliproxy`) |            8317             | Anthropic CLI kimlik doğrulama akışları için yerel proxy bağdaştırıcısı. OAuth belirteçlerinin süresi dolduğunda geri dönüş yönlendirmesi sağlar                                                                                                                                                                                                                          |
-| **Mux**           | `mux` (başsız `mux server`)             |            8322             | Yerel aracı düzenleme arka plan programı (coder/mux). Yalnızca yaşam döngüsü tarafından yönetilen — bir yönlendirme hedefi değil ( LLM proxy oluşturma yok).                                                                                                                                                                                                              |
-| **Bifrost**       | `@maximhq/bifrost`                      |            8080             | AI ağ geçidi geçiş arka ucuna gidin. Çalışırken, geçiş yolu (`/v1/relay/`) tarafından otomatik olarak seçilir                                                                                                                                                                                                                                                             |
-| **Dario**         | `@askalf/dario`                         |            3456             | Claude Kodu şeklindeki trafik için Claude aboneliği proxy'si — CLIProxyAPI alternative/failover ; enjekte edilen anahtar, `/admin/*` OAuth kontrol düzlemini kaplayan `DARIO_ADMIN_TOKEN` olur                                                                                                                                                                            |
-| **açık-wa**       | `@open-wa/wa-automate`                  |            8323             | WhatsApp Web otomasyonu (Puppeteer aracılığıyla başsız Chromium). Yalnızca yaşam döngüsü tarafından yönetilen — bir yönlendirme hedefi değildir.                                                                                                                                                                                                                          |
-| **LLMLingua**     | `@atjsh/llmlingua-2`                    |            20135            | İstemi sıkıştırmalı sepet — gerçek LLMLingua-2 ONNX modeli ( Microsoft algoritmasının JS/TS bağlantı noktası). `open-sse/services/compression/engines/llmlingua/index.ts` sepet kapalıyken süreç içi çalışan iş parçacığı arka ucuna geri dönerek HTTP üzerinden `/compress` ona gönderir. Yalnızca yaşam döngüsü tarafından yönetilen — bir yönlendirme hedefi değildir. |
-| **şarkı kutusu**  | GitHub sürüm ikili dosyası (`singbox`)  |            20140            | TPROXY sepeti, `applyTproxy()` şeffaf proxy müdahalesini (`src/mitm/tproxy/setup.ts`) destekler. Yükleyici sabitlenmiş, sağlama toplamı doğrulanmış sürümü indirir. Yalnızca yaşam döngüsü tarafından yönetilen — yönlendirme hedefi değil ( LLM proxy'si yok)                                                                                                            |
+| Hizmet          | npm paketi                                 | Varsayılan port | Amaç                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ------------------------------------------ | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **9Router**     | `9router`                                  |      20130      | OmniRoute'un alt sağlayıcı olarak kullanabileceği yapay zekâ yönlendiricisi. Modeller `9router/{sub}/{model}` biçiminde sunulur                                                                                                                                                                                                                                                            |
+| **CLIProxyAPI** | GitHub sürüm ikili dosyası (`cliproxy`)    |      8317       | Anthropic CLI kimlik doğrulama akışları için yerel proxy bağdaştırıcısı. OAuth belirteçlerinin süresi dolduğunda yedek yönlendirme sağlar                                                                                                                                                                                                                                                  |
+| **Mux**         | `mux` (başsız `mux server`)                |      8322       | Yerel aracı orkestrasyon daemon'u (coder/mux). Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir (LLM proxy'leme yoktur).                                                                                                                                                                                                                                                     |
+| **Bifrost**     | `@maximhq/bifrost`                         |      8080       | Go tabanlı yapay zekâ ağ geçidi aktarma arka ucu. Çalışırken aktarma rotası (`/v1/relay/`) tarafından otomatik olarak seçilir                                                                                                                                                                                                                                                              |
+| **Dario**       | `@askalf/dario`                            |      3456       | Claude abonelik proxy'si — Claude-Code biçimli trafik için CLIProxyAPI'ye alternatif/yedek; enjekte edilen anahtar, `/admin/*` OAuth kontrol düzlemine erişimi kısıtlayan `DARIO_ADMIN_TOKEN` hâline gelir                                                                                                                                                                                 |
+| **open-wa**     | `@open-wa/wa-automate`                     |      8323       | WhatsApp Web otomasyonu (Puppeteer üzerinden başsız Chromium). Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir.                                                                                                                                                                                                                                                             |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                       |      20135      | İstem sıkıştırma yardımcı hizmeti — gerçek LLMLingua-2 ONNX modeli (Microsoft'un algoritmasının JS/TS uyarlaması). `open-sse/services/compression/engines/llmlingua/index.ts`, `/compress` isteklerini HTTP üzerinden bu hizmete yönlendirir ve yardımcı hizmet çalışmıyorsa süreç içi iş parçacığı arka ucuna geri döner. Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir. |
+| **sing-box**    | GitHub sürümünün ikili dosyası (`singbox`) |      20140      | `applyTproxy()` işlevinin şeffaf proxy ile trafiği yakalamasını destekleyen TPROXY yardımcı süreci (`src/mitm/tproxy/setup.ts`). Yükleyici, sürümü sabitlenmiş ve sağlama toplamı doğrulanmış paketi indirir. Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir ve LLM proxy işlevi görmez.                                                                                   |
 
-Sekizinin tümü aynı denetim modelini takip ediyor:
+Sekizi de aynı süreç gözetimi modelini izler:
 
-- OmniRoute bunları `DATA_DIR/services/{name}/` altına kurar ( OmniRoute kendi `package.json` yalıtılmış olarak)
-- OmniRoute bunları alt süreçler olarak oluşturur ve izler
-- OmniRoute çocuğun ortamına geçici bir API anahtarı enjekte eder ve kesinti olmadan onu döndürür (varsa)
-- Tüm yönetim yolları (`/api/services/*`)**LOCAL_ONLY** — yalnızca geridöngüden erişilebilir (katı kural #17)
+- OmniRoute bunları `DATA_DIR/services/{name}/` altına kurar (OmniRoute'un kendi `package.json` dosyasından yalıtılmıştır)
+- OmniRoute bunları alt süreçler olarak başlatır ve izler
+- OmniRoute, geçici bir API anahtarını alt sürecin ortamına enjekte eder ve bunu kesinti olmadan yeniler (uygulanabildiği durumlarda)
+- Tüm yönetim rotaları (`/api/services/*`) **LOCAL_ONLY** kapsamındadır — yalnızca loopback üzerinden erişilebilir (kesin kural #17)
 
-### Önemli kararlar (tasarım planından)
+### Temel kararlar (tasarım planından)
 
-| Karar                                      | Değer                                                                                           |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| 9Router yerel UI kontrol panelinden erişim | `/dashboard/providers/services/9router/embed/*` ters proxy                                      |
-| Kurulum mekanizması                        | `execFile` aracılığıyla `npm install {package}` (kabuk enterpolasyonu yok)                      |
-| Tüketim modu                               | Sağlayıcı, yönlendirme motorunda `9router/{sub}/{model}` olarak kayıtlı                         |
-| API anahtar yönetimi                       | OmniRoute, hareketsiz durumdayken (AES-256-GCM) oluşturur, şifreler ve env yoluyla enjekte eder |
-| Kontrol paneli konumu                      | `/dashboard/providers/services` (üç sekme)                                                      |
-| Otomatik başlatma                          | Hizmet başına geçiş, varsayılan OFF                                                             |
+| Karar                                          | Değer                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 9Router yerel kullanıcı arayüzüne pano erişimi | `/dashboard/providers/services/9router/embed/*` adresinde ters proxy                                   |
+| Kurulum mekanizması                            | `execFile` aracılığıyla `npm install {package}` (kabuk interpolasyonu yoktur)                          |
+| Kullanım modu                                  | Sağlayıcı, yönlendirme motoruna `9router/{sub}/{model}` olarak kaydedilir                              |
+| API anahtarı yönetimi                          | OmniRoute oluşturur, beklemedeyken şifreler (AES-256-GCM) ve ortam değişkeni aracılığıyla enjekte eder |
+| Pano konumu                                    | `/dashboard/providers/services` (üç sekme)                                                             |
+| Otomatik başlatma                              | Hizmet başına açma/kapatma seçeneği, varsayılan olarak KAPALI                                          |
 
 ---
 
@@ -64,12 +68,12 @@ Sekizinin tümü aynı denetim modelini takip ediyor:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Layer 1 — UI                                                      │
-│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
-│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
+│  Katman 1 — Kullanıcı Arayüzü                                     │
+│  /dashboard/providers/services  (sekmeler: CLIProxyAPI | 9Router | Mux)│
+│  Canlı günlükler (SSE), Başlat/Durdur/Yeniden Başlat/Güncelle, Ayarlar, Kurulum│
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + tab routing by ?tab=         │
+│    ├── page.tsx               Kabuk + ?tab= ile sekme yönlendirmesi│
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -77,7 +81,7 @@ Sekizinin tümü aynı denetim modelini takip ediyor:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
+│  Katman 2 — API (LOCAL_ONLY — yalnızca geri döngü)                 │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -86,74 +90,75 @@ Sekizinin tümü aynı denetim modelini takip ediyor:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
+│    (ters HTTP + WebSocket proxy → 9Router üst sunucusu)            │
 │                                                                    │
-│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
-│        "/dashboard/providers/services/*/embed/"                    │
+│  Geçit: LOCAL_ONLY_API_PREFIXES, "/api/services/" ve               │
+│         "/dashboard/providers/services/*/embed/" içerir            │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ in-process calls
+                       │ işlem içi çağrılar
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
+│  Katman 3 — ServiceSupervisor (src/lib/services/)                  │
 │                                                                    │
-│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
-│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
-│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 for 9Router (configurable)                │
-│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
-│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
-│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
+│  ServiceSupervisor.ts   Genel gözetmen (child_process.spawn)       │
+│    ├── kurulum:    execFile('npm', ['install', pkg, '--prefix'])   │
+│    ├── başlatma:   spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY │
+│    ├── port:       9Router için 20130 (yapılandırılabilir)          │
+│    ├── günlükler:  stdio halka arabelleği 5 MB → SSE olayları      │
+│    ├── sağlık:     Her 2–5 sn.'de HTTP GET /health, tembel kurtarma│
+│    └── yaşam döngüsü: SIGTERM 15 sn. → SIGKILL                     │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
+│  bootstrap.ts       İşlem başlangıcında tüm SERVICES[] öğelerini başlatır│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Periodic GET /v1/models → service_models table │
-│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
-│  healthCheck.ts     Polling HTTP health probe                      │
+│  modelSync.ts       Düzenli GET /v1/models → service_models tablosu│
+│  ringBuffer.ts      Dairesel günlük arabelleği (hizmet başına 5 MB)│
+│  healthCheck.ts     Yoklamalı HTTP sağlık denetimi                 │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (installer adapters)                          │
+│                      (kurucu bağdaştırıcıları)                     │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-compatible HTTP (loopback)
+                       │ OpenAI uyumlu HTTP (geri döngü)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 4 — Provider / Routing                                      │
+│  Katman 4 — Sağlayıcı / Yönlendirme                                │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Re-looks up port and API key per-request (no caching).          │
-│    Strips "9router/" prefix from model id before proxying.         │
-│    Returns 503 service_not_running if supervisor not in "running". │
+│    Her istekte portu ve API anahtarını yeniden arar (önbellekleme yok).│
+│    Proxy'lemeden önce model kimliğindeki "9router/" önekini kaldırır.│
+│    Gözetmen "running" durumunda değilse 503 service_not_running döndürür.│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Entry for "9router": isEmbeddedService: true                    │
+│    "9router" girdisi: isEmbeddedService: true                      │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Models stored as "9router/{sub}/{model}" (prefixed).            │
-│    Synced every 5 min by modelSync.ts.                             │
+│    Modeller "9router/{sub}/{model}" biçiminde saklanır (önekli).   │
+│    modelSync.ts tarafından her 5 dakikada bir eşitlenir.           │
 │                                                                    │
-│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
-│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
-│  executor/provider entry and is never a routing target.            │
+│  Mux YALNIZCA yaşam döngüsü açısından yönetilir (Katman 1-3) — bir │
+│  LLM proxy'si değil, ajan orkestrasyon daemon'udur; bu nedenle     │
+│  Katman 4 yürütücü/sağlayıcı girdisi yoktur ve hiçbir zaman        │
+│  yönlendirme hedefi olmaz.                                        │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Anahtar kaynak dosyaları
+### Temel kaynak dosyaları
 
-| Dosya                                       | Rol                                                            |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Çekirdek sınıf: yaşam döngüsü, kilit, sağlık, halka arabelleği |
-| `src/lib/services/bootstrap.ts`             | Süreç düzeyinde kayıt ve otomatik başlatma                     |
-| `src/lib/services/registry.ts`              | Singleton haritası `tool → supervisor`                         |
-| `src/lib/services/apiKey.ts`                | Anahtar oluşturma, kullanımda olmayan AES-256-GCM şifrelemesi  |
-| `src/lib/services/modelSync.ts`             | Periyodik model senkronizasyonu (5 dk) isteğe bağlı +          |
-| `src/lib/services/ringBuffer.ts`            | SSE aboneliği ile 5 MB dairesel günlük arabelleği              |
-| `src/lib/services/healthCheck.ts`           | HTTP sistem durumu araştırması (yapılandırılabilir aralık)     |
-| `src/lib/services/installers/ninerouter.ts` | 9Router için npm install/update/uninstall                      |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI için npm install/update/uninstall                  |
-| `src/lib/services/installers/mux.ts`        | Mux için npm install/update/uninstall                          |
-| `src/lib/services/installers/openwa.ts`     | açık-wa için npm install/update/uninstall                      |
-| `src/lib/services/installers/llmlingua.ts`  | LLMLingua için npm install/update/uninstall                    |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` yardımcısı                             |
-| `src/app/api/services/[name]/logs/route.ts` | Paylaşılan SSE günlükleri uç noktası                           |
-| `open-sse/executors/ninerouter.ts`          | Sağlayıcı yürütücüsü (Katman 4)                                |
+| Dosya                                       | Rol                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Temel sınıf: yaşam döngüsü, kilit, sağlık, halka tampon          |
+| `src/lib/services/bootstrap.ts`             | İşlem düzeyinde kayıt ve otomatik başlatma                       |
+| `src/lib/services/registry.ts`              | Tekil örnek eşlemesi `araç → supervisor`                         |
+| `src/lib/services/apiKey.ts`                | Anahtar oluşturma, bekleyen veriler için AES-256-GCM şifrelemesi |
+| `src/lib/services/modelSync.ts`             | Periyodik model senkronizasyonu (5 dk.) + isteğe bağlı           |
+| `src/lib/services/ringBuffer.ts`            | SSE aboneliğine sahip 5 MB'lık dairesel günlük tamponu           |
+| `src/lib/services/healthCheck.ts`           | HTTP sağlık yoklaması (yapılandırılabilir aralık)                |
+| `src/lib/services/installers/ninerouter.ts` | 9Router için npm ile yükleme/güncelleme/kaldırma                 |
+| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI için npm ile yükleme/güncelleme/kaldırma             |
+| `src/lib/services/installers/mux.ts`        | Mux için npm ile yükleme/güncelleme/kaldırma                     |
+| `src/lib/services/installers/openwa.ts`     | open-wa için npm ile yükleme/güncelleme/kaldırma                 |
+| `src/lib/services/installers/llmlingua.ts`  | LLMLingua için npm ile yükleme/güncelleme/kaldırma               |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` yardımcı işlevi                          |
+| `src/app/api/services/[name]/logs/route.ts` | Paylaşılan SSE günlük uç noktası                                 |
+| `open-sse/executors/ninerouter.ts`          | Sağlayıcı yürütücüsü (Katman 4)                                  |
 
 ---
 
@@ -212,50 +217,54 @@ arayüzü düğmesinin aynı anda tetiklenmesi durumunda yarış koşullarını 
 
 ## 4. API referansı
 
-`/api/services/` kapsamındaki tüm rotalar**LOCAL_ONLY** (yalnızca geridöngü, zor kural #17). Geridöngü olmayan istekler, kimlik doğrulama belirteci ne olursa olsun `403 LOCAL_ONLY` alır.
+`/api/services/` altındaki tüm rotalar **LOCAL_ONLY**'dir (yalnızca geri döngü, kesin kural #17).
+Geri döngü dışı istekler, kimlik doğrulama belirtecinden bağımsız olarak `403 LOCAL_ONLY` yanıtı alır.
 
-### 4.1 9Yönlendirici uç noktaları (11 rota)
+### 4.1 9Router uç noktaları (11 rota)
 
 #### `POST /api/services/9router/install`
 
-9Router'ı npm'den yükleyin. Kendi `package.json` ve `node_modules/` ile `DATA_DIR/services/9router/` oluşturur. OmniRoute kendi depolarıyla çakışmaz.
+9Router'ı npm üzerinden yükler. Kendi `package.json` ve `node_modules/` öğelerini içeren
+`DATA_DIR/services/9router/` dizinini oluşturur. OmniRoute'un kendi bağımlılıklarıyla çakışmaz.
 
-**Talep gövdesi** (hepsi isteğe bağlı):
+**İstek gövdesi** (tüm alanlar isteğe bağlıdır):
 
 ```json
 { "version": "latest" }
 ```
 
-| Alan      | Tip      | Varsayılan | Tanım                                   |
-| --------- | -------- | ---------- | --------------------------------------- |
-| `version` | `string` | `"latest"` | npm sürüm etiketi veya kurulacak semver |
+| Alan      | Tür      | Varsayılan | Açıklama                                 |
+| --------- | -------- | ---------- | ---------------------------------------- |
+| `version` | `string` | `"latest"` | Yüklenecek npm sürüm etiketi veya semver |
 
 **Yanıtlar:**
 
-| Durum | Tanım                                                         |
-| ----- | ------------------------------------------------------------- |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`        |
-| `400` | Geçersiz istek gövdesi (Zod doğrulama hatası)                 |
-| `409` | Zaten kuruluyor (kilit basılı tutuluyor)                      |
-| `500` | npm kurulumu başarısız oldu — kolay hata için `message` bakın |
+| Durum | Açıklama                                                              |
+| ----- | --------------------------------------------------------------------- |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                |
+| `400` | Geçersiz istek gövdesi (Zod doğrulama hatası)                         |
+| `409` | Yükleme zaten devam ediyor (kilit tutuluyor)                          |
+| `500` | npm yüklemesi başarısız — anlaşılır hata için `message` alanına bakın |
 
-**Notlar:** `execFile('npm', [...])` — kullanır, kabuk yok, enterpolasyon yok (katı kural #13). EACCES hataları dostane mesajlar olarak ortaya çıkar.
+**Notlar:** `execFile('npm', [...])` kullanır — kabuk veya enterpolasyon yoktur (kesin kural #13).
+EACCES hataları anlaşılır mesajlar olarak sunulur.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-9Router'ı başlatın. Henüz kayıtlı değilse bir gözetmeni kaydeder ve ardından `supervisor.start()` çağırır. Zaten çalışırken Idempotent.
+9Router'ı başlatır. Henüz kaydedilmemişse bir denetleyici kaydeder, ardından
+`supervisor.start()` çağrısını yapar. Zaten çalışırken çağrıldığında idempotenttir.
 
-**Talep gövdesi:** hiçbiri
+**İstek gövdesi:** yok
 
 **Yanıtlar:**
 
-| Durum | Tanım                                                     |
-| ----- | --------------------------------------------------------- |
-| `200` | `ServiceStatus` nesnesi (aşağıdaki şemaya bakın)          |
-| `409` | 9Yönlendirici kurulu değil (`status: "not_installed"`)    |
-| `503` | Başlatma başarısız oldu (işlem hatası — bkz. `lastError`) |
+| Durum | Açıklama                                                      |
+| ----- | ------------------------------------------------------------- |
+| `200` | `ServiceStatus` nesnesi (aşağıdaki şemaya bakın)              |
+| `409` | 9Router yüklü değil (`status: "not_installed"`)               |
+| `503` | Başlatma başarısız (işlem hatası — `lastError` alanına bakın) |
 
 **ServiceStatus şeması:**
 
@@ -275,34 +284,37 @@ arayüzü düğmesinin aynı anda tetiklenmesi durumunda yarış koşullarını 
 
 #### `POST /api/services/9router/stop`
 
-9Router'ı zarif bir şekilde durdurun. SIGTERM gönderir, 15 saniye bekler, ardından SIGKILL hâlâ hayattaysa. Zaten durduğunda Idempotent.
+9Router'ı düzgün biçimde durdurur. SIGTERM gönderir, 15 sn bekler ve hâlâ çalışıyorsa
+SIGKILL gönderir. Zaten durdurulmuşken çağrıldığında idempotenttir.
 
-**Talep gövdesi:** hiçbiri
+**İstek gövdesi:** yok
 
 **Yanıtlar:**
 
-| Durum | Tanım                                       |
+| Durum | Açıklama                                    |
 | ----- | ------------------------------------------- |
-| `200` | `ServiceStatus` (durum: "durdu")            |
+| `200` | `ServiceStatus` (`state: "stopped"`)        |
 | `503` | Durdurma beklenmedik şekilde başarısız oldu |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-İşlem kilidi altındaki `stop()` ve `start()` eşdeğerdir.
+İşlem kilidi altında önce `stop()`, ardından `start()` çağrılmasına eşdeğerdir.
 
-**Talep gövdesi:** hiçbiri
+**İstek gövdesi:** yok
 
-**Yanıtlar:** `start` ile aynıdır (son `ServiceStatus` değerini döndürür).
+**Yanıtlar:** `start` ile aynıdır (nihai `ServiceStatus` değerini döndürür).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-9Router'ı daha yeni bir npm sürümüne günceller. Hizmet çalışıyorsa önce durdurulur, npm kurulumu çalıştırılır (daha yeni sürümün yerine yüklenmesi) ve ardından hizmet yeniden başlatılır.
+9Router'ı daha yeni bir npm sürümüne günceller. Hizmet çalışıyorsa önce durdurulur,
+npm install çalıştırılır (daha yeni sürüm mevcut kurulumun üzerine yüklenir) ve ardından
+hizmet yeniden başlatılır.
 
-**Talep gövdesi** (hepsi isteğe bağlı):
+**İstek gövdesi** (tüm alanlar isteğe bağlıdır):
 
 ```json
 { "version": "latest" }
@@ -310,41 +322,44 @@ arayüzü düğmesinin aynı anda tetiklenmesi durumunda yarış koşullarını 
 
 **Yanıtlar:**
 
-| Durum | Tanım                                                           |
+| Durum | Açıklama                                                        |
 | ----- | --------------------------------------------------------------- |
 | `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
 | `400` | Geçersiz gövde                                                  |
-| `500` | npm güncellemesi başarısız oldu                                 |
+| `500` | npm güncellemesi başarısız                                      |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-9Router için yeni bir API anahtarı oluşturur, onu kullanımda değilken şifreler ve hizmeti (çalışıyorsa) yeniden başlatarak yeni anahtarı ortamından alır. Eski anahtar hemen geçersiz kılınır.
+9Router için yeni bir API anahtarı oluşturur, bunu depolama sırasında şifreler ve
+hizmet çalışıyorsa yeni anahtarı ortamından alabilmesi için yeniden başlatır. Eski
+anahtar derhâl geçersiz kılınır.
 
-**Talep gövdesi:** hiçbiri
+**İstek gövdesi:** yok
 
 **Yanıtlar:**
 
-| Durum | Tanım                                      |
+| Durum | Açıklama                                   |
 | ----- | ------------------------------------------ |
 | `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | Döndürme başarısız oldu                    |
+| `500` | Anahtar yenileme başarısız                 |
 
-**Güvenlik:** Yanıtta yeni anahtar hiçbir zaman döndürülmez (kimlik bilgisi sızıntısı yoktur). `version_manager` tablosunda şifrelenmiş (AES-256-GCM) olarak saklanır.
+**Güvenlik:** Yeni anahtar yanıtta hiçbir zaman döndürülmez (kimlik bilgisi sızıntısı olmaz).
+`version_manager` tablosunda şifrelenmiş olarak (AES-256-GCM) saklanır.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Sürüm meta verileri ve API anahtarı önizlemesi dahil olmak üzere birleştirilmiş canlı + DB durumunu döndürür.
+Sürüm meta verileri ve API anahtarı önizlemesi dâhil olmak üzere birleşik canlı + DB durumunu döndürür.
 
 **Yanıtlar:**
 
-| Durum | Tanım                      |
-| ----- | -------------------------- |
-| `200` | Aşağıdaki şemaya bakın     |
-| `500` | Durum okuma başarısız oldu |
+| Durum | Açıklama                     |
+| ----- | ---------------------------- |
+| `200` | Aşağıdaki şemaya bakın       |
+| `500` | Durum okuma işlemi başarısız |
 
 **Yanıt şeması:**
 
@@ -370,9 +385,10 @@ Sürüm meta verileri ve API anahtarı önizlemesi dahil olmak üzere birleştir
 
 #### `POST /api/services/9router/auto-start`
 
-Otomatik başlatma bayrağını değiştirin. `enabled: true` olduğunda, OmniRoute bir sonraki açılışında hizmet otomatik olarak başlar (hizmet yüklüyse).
+Otomatik başlatma bayrağını açar veya kapatır. `enabled: true` olduğunda hizmet,
+OmniRoute'un bir sonraki başlatılışında otomatik olarak başlar (hizmet yüklüyse).
 
-**Talep gövdesi:**
+**İstek gövdesi:**
 
 ```json
 { "enabled": true }
@@ -380,7 +396,7 @@ Otomatik başlatma bayrağını değiştirin. `enabled: true` olduğunda, OmniRo
 
 **Yanıtlar:**
 
-| Durum | Tanım                 |
+| Durum | Açıklama              |
 | ----- | --------------------- |
 | `200` | `{ autoStart: true }` |
 | `400` | Geçersiz gövde        |
@@ -389,178 +405,231 @@ Otomatik başlatma bayrağını değiştirin. `enabled: true` olduğunda, OmniRo
 
 #### `GET /api/services/9router/logs`
 
-9Router'ın stdout/stderr halka arabelleğinden canlı günlüklerin SSE akışı.
+9Router'ın stdout/stderr halka arabelleğindeki canlı günlüklerin SSE akışı.
 
 **Sorgu parametreleri:**
 
-| Parametre | Tip       | Varsayılan | Tanım                                                                                       |
-| --------- | --------- | ---------- | ------------------------------------------------------------------------------------------- |
-| `tail`    | `integer` | 200        | İlk önce kaç geçmiş satır gönderilecek (maks. 1000)                                         |
-| `filter`  | `string`  | hiçbiri    | Büyük/küçük harfe duyarlı olmayan alt dize filtresi (regex — ReDoS açısından güvenli değil) |
+| Parametre | Tür       | Varsayılan | Açıklama                                                                                 |
+| --------- | --------- | ---------- | ---------------------------------------------------------------------------------------- |
+| `tail`    | `integer` | 200        | İlk olarak gönderilecek geçmiş satır sayısı (en fazla 1000)                              |
+| `filter`  | `string`  | yok        | Büyük/küçük harfe duyarsız alt dize filtresi (regex yoktur — ReDoS açısından güvenlidir) |
 
-**SSE etkinlikleri:**
+**SSE olayları:**
 
-| Etkinlik    | Veri        | Tanım                           |
-| ----------- | ----------- | ------------------------------- |
-| `snapshot`  | `LogLine[]` | İlk tarihsel kuyruk             |
-| `log`       | `LogLine`   | Canlı günlük hattı              |
-| `heartbeat` | `{}`        | Her 15 saniyede bir canlı tutma |
+| Olay        | Veri        | Açıklama                                |
+| ----------- | ----------- | --------------------------------------- |
+| `snapshot`  | `LogLine[]` | Başlangıçtaki geçmiş son satırlar       |
+| `log`       | `LogLine`   | Canlı günlük satırı                     |
+| `heartbeat` | `{}`        | Her 15 sn'de bir bağlantıyı canlı tutar |
 
 **LogLine şeması:**
 
 ```json
-{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
+{
+  "ts": 1716633600000,
+  "stream": "stdout",
+  "line": "[9router] Listening on :20130"
+}
 ```
 
 **Yanıtlar:**
 
-| Durum | Tanım                                          |
+| Durum | Açıklama                                       |
 | ----- | ---------------------------------------------- |
 | `200` | `text/event-stream`                            |
 | `400` | `filter` parametresi çok uzun (> 200 karakter) |
-| `404` | Hizmet bulunamadı (yönetici kayıtlı değil)     |
+| `404` | Hizmet bulunamadı (supervisor'a kaydedilmemiş) |
 
 ---
 
 ### 4.2 CLIProxyAPI uç noktaları (10 rota)
 
-CLIProxyAPI, 9Router eksi `rotate-key` artı `accounts`, `provider-expose` ve `auto-restart-adopted` ile aynı uç nokta şekline sahiptir. Artık ortaya çıkma sırasında enjekte edilen özel bir veri düzlemi API anahtarını alıyor ( `bootstrap.ts` içinde `needsApiKey: true`, model senkronizasyonu için kullanılır); `status` daha az alan içerir.
+CLIProxyAPI, `rotate-key` hariç 9Router ile aynı uç nokta yapısına sahiptir; buna ek olarak
+`accounts`, `provider-expose` ve `auto-restart-adopted` içerir. Artık başlatma sırasında
+atanmış özel bir veri düzlemi API anahtarı alır (`bootstrap.ts` içinde
+`needsApiKey: true`; model senkronizasyonu için kullanılır); `status` daha az alan içerir.
 
-| Yöntem | Yol                                 | Tanım                                   |
-| ------ | ----------------------------------- | --------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPI npm'den yükleyin            |
-| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI başlat                      |
-| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI durdur                      |
-| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI yeniden başlat              |
-| `POST` | `/api/services/cliproxy/update`     | Daha yeni sürüme güncelle               |
-| `GET`  | `/api/services/cliproxy/status`     | Canlı + DB durumu ( `apiKeyMasked` yok) |
-| `POST` | `/api/services/cliproxy/auto-start` | Otomatik başlatmayı aç/kapat            |
+| Yöntem | Yol                                 | Açıklama                               |
+| ------ | ----------------------------------- | -------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPI'yi npm'den yükle           |
+| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI'yi başlat                  |
+| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI'yi durdur                  |
+| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI'yi yeniden başlat          |
+| `POST` | `/api/services/cliproxy/update`     | Daha yeni sürüme güncelle              |
+| `GET`  | `/api/services/cliproxy/status`     | Canlı + DB durumu (`apiKeyMasked` yok) |
+| `POST` | `/api/services/cliproxy/auto-start` | Otomatik başlatmayı aç/kapat           |
 
-Paylaşılan `GET /api/services/{name}/logs` uç noktası (bkz. §4.1), `[name]` dinamik segmentini kullanan dört hizmetin tümü için çalışır.
+Paylaşılan `GET /api/services/{name}/logs` uç noktası (bkz. §4.1), `[name]`
+dinamik segmentini kullanarak dört hizmetin tümü için çalışır.
 
 ---
 
 ### 4.3 Mux uç noktaları (8 rota)
 
-Mux, API yüzeyinde `rotate-key` rotası olmayan CLIProxyAPI — ile aynı uç nokta şekline sahiptir (taşıyıcı jeton, `getOrCreateApiKey("mux")` aracılığıyla 9Router'ınkiyle aynı şekilde oluşturulur ve `MUX_SERVER_AUTH_TOKEN` env var aracılığıyla enjekte edilir, ancak henüz özel bir dönüş uç noktası yoktur). Mux yalnızca yaşam döngüsü tarafından yönetilir: 9Router'ın aksine, Katman 4 yürütücüsü yoktur ve hiçbir zaman bir yönlendirme sağlayıcısı olarak kayıtlı değildir.
+Mux, CLIProxyAPI ile aynı uç nokta yapısına sahiptir; API yüzeyinde `rotate-key`
+rotası yoktur (bearer token'ı, 9Router'dakiyle aynı şekilde `getOrCreateApiKey("mux")`
+aracılığıyla oluşturulur ve `MUX_SERVER_AUTH_TOKEN` ortam değişkeni üzerinden atanır;
+ancak henüz özel bir yenileme uç noktası yoktur). Mux yalnızca yaşam döngüsü kapsamında
+yönetilir: 9Router'ın aksine Katman 4 yürütücüsü yoktur ve hiçbir zaman yönlendirme
+sağlayıcısı olarak kaydedilmez.
 
-| Yöntem | Yol                            | Tanım                                |
-| ------ | ------------------------------ | ------------------------------------ |
-| `POST` | `/api/services/mux/install`    | Mux'u npm'den yükleyin (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Mux'u başlatın (`mux server`)        |
-| `POST` | `/api/services/mux/stop`       | Mux'u Durdur                         |
-| `POST` | `/api/services/mux/restart`    | Mux'u yeniden başlat                 |
-| `POST` | `/api/services/mux/update`     | Daha yeni npm sürümüne güncelleme    |
-| `GET`  | `/api/services/mux/status`     | Canlı + DB durumu                    |
-| `POST` | `/api/services/mux/auto-start` | Otomatik başlatmayı aç/kapat         |
+| Yöntem | Yol                            | Açıklama                          |
+| ------ | ------------------------------ | --------------------------------- |
+| `POST` | `/api/services/mux/install`    | Mux'ı npm'den yükle (`npm i mux`) |
+| `POST` | `/api/services/mux/start`      | Mux'ı başlat (`mux server`)       |
+| `POST` | `/api/services/mux/stop`       | Mux'ı durdur                      |
+| `POST` | `/api/services/mux/restart`    | Mux'ı yeniden başlat              |
+| `POST` | `/api/services/mux/update`     | Daha yeni npm sürümüne güncelle   |
+| `GET`  | `/api/services/mux/status`     | Canlı + DB durumu                 |
+| `POST` | `/api/services/mux/auto-start` | Otomatik başlatmayı aç/kapat      |
 
 ---
 
-### 4.4 Bifrost bitiş noktaları (8 rota)
+### 4.4 Bifrost uç noktaları (8 rota)
 
-Bifrost, bir Go AI ağ geçidi aktarma arka ucudur (`@maximhq/bifrost`). CLIProxyAPI ile aynı uç nokta şeklini kullanır ( `rotate-key` yok — Bifrost, `config.json` kendi sağlayıcı anahtarlarını `-app-dir` altında yönetir).
+Bifrost, Go tabanlı bir yapay zekâ ağ geçidi aktarma arka ucudur (`@maximhq/bifrost`).
+CLIProxyAPI ile aynı uç nokta yapısını kullanır (`rotate-key` yoktur; Bifrost,
+kendi sağlayıcı anahtarlarını `-app-dir` altındaki `config.json` dosyasında yönetir).
 
-| Yöntem | Yol                                | Tanım                                                                   |
-| ------ | ---------------------------------- | ----------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Bifrost'u npm'den yükleyin (`@maximhq/bifrost`)                         |
-| `POST` | `/api/services/bifrost/start`      | Bifrost'u 8080 numaralı bağlantı noktasından başlatın (varsayılan)      |
-| `POST` | `/api/services/bifrost/stop`       | Bifrost'u Durdur                                                        |
-| `POST` | `/api/services/bifrost/restart`    | Bifrost'u yeniden başlatın                                              |
-| `POST` | `/api/services/bifrost/update`     | Daha yeni sürüme güncelle                                               |
-| `GET`  | `/api/services/bifrost/status`     | Canlı + DB durumu                                                       |
-| `POST` | `/api/services/bifrost/auto-start` | Otomatik başlatmayı aç/kapat                                            |
-| `GET`  | `/api/services/bifrost/logs`       | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rota aracılığıyla) |
+| Yöntem | Yol                                | Açıklama                                                               |
+| ------ | ---------------------------------- | ---------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Bifrost'u npm'den yükle (`@maximhq/bifrost`)                           |
+| `POST` | `/api/services/bifrost/start`      | Bifrost'u 8080 numaralı bağlantı noktasında başlat (varsayılan)        |
+| `POST` | `/api/services/bifrost/stop`       | Bifrost'u durdur                                                       |
+| `POST` | `/api/services/bifrost/restart`    | Bifrost'u yeniden başlat                                               |
+| `POST` | `/api/services/bifrost/update`     | Daha yeni sürüme güncelle                                              |
+| `GET`  | `/api/services/bifrost/status`     | Canlı + DB durumu                                                      |
+| `POST` | `/api/services/bifrost/auto-start` | Otomatik başlatmayı aç/kapat                                           |
+| `GET`  | `/api/services/bifrost/logs`       | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rotası üzerinden) |
 
-**Yönlendirme kablolaması:** `BIFROST_BASE_URL` ayarlanmadığında ve denetlenen Bifrost örneği çalışırken, `getBifrostRoutingConfig()` ( `routingBackend.ts` içinde) otomatik olarak `http://127.0.0.1:{port}` URL aktarma tabanı olarak kullanır. Açık `BIFROST_BASE_URL` env her zaman önceliklidir.
+**Yönlendirme bağlantısı:** `BIFROST_BASE_URL` ayarlanmamışsa ve denetlenen Bifrost
+örneği çalışıyorsa, `getBifrostRoutingConfig()` (`routingBackend.ts` içinde) aktarma
+temel URL'si olarak otomatik biçimde `http://127.0.0.1:{port}` kullanır. Açıkça
+ayarlanmış `BIFROST_BASE_URL` ortam değişkeni her zaman önceliklidir.
 
 ---
 
 ### 4.5 Dario uç noktaları (12 rota)
 
-Diğer hizmetlerle aynı yaşam döngüsü şekli (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) artı `admin/` altında belirteç kapılı OAuth kontrol düzlemi : `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (hepsi `DARIO_ADMIN_TOKEN` arkasında).
+Diğer hizmetlerle aynı yaşam döngüsü yapısına (`install`, `start`, `stop`, `restart`,
+`update`, `status`, `auto-start`, `auto-restart-adopted`) ek olarak `admin/` altında
+token korumalı bir OAuth kontrol düzlemi içerir: `admin/accounts`,
+`admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete`
+(tümü `DARIO_ADMIN_TOKEN` ile korunur).
 
-### 4.6 açık wa uç noktaları (7 rota)
+### 4.6 open-wa uç noktaları (7 rota)
 
-open-wa (`@open-wa/wa-automate`), WhatsApp Web'i otomatikleştirmek için başsız bir Chromium örneğini (Puppeteer aracılığıyla) çalıştırır. Mux ile aynı uç nokta şeklini kullanır (henüz `rotate-key` yolu yoktur). Yalnızca yaşam döngüsü tarafından yönetilen — bir yönlendirme hedefi değildir, Katman 4 executor/provider girişi yoktur.
+open-wa (`@open-wa/wa-automate`), WhatsApp Web'i otomatikleştirmek için Puppeteer
+aracılığıyla başsız bir Chromium örneğini çalıştırır. Mux ile aynı uç nokta yapısını
+kullanır (henüz `rotate-key` rotası yoktur). Yalnızca yaşam döngüsü kapsamında
+yönetilir; bir yönlendirme hedefi değildir ve Katman 4 yürütücüsü/sağlayıcı girdisi
+yoktur.
 
-| Yöntem | Yol                               | Tanım                                                                   |
-| ------ | --------------------------------- | ----------------------------------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | Npm'den (`@open-wa/wa-automate`) open-wa'yı yükleyin                    |
-| `POST` | `/api/services/openwa/start`      | 8323 numaralı bağlantı noktasında open-wa'yı başlatın (varsayılan)      |
-| `POST` | `/api/services/openwa/stop`       | Açık-wa'yı durdur                                                       |
-| `POST` | `/api/services/openwa/restart`    | Open-wa'yı yeniden başlat                                               |
-| `POST` | `/api/services/openwa/update`     | Daha yeni sürüme güncelle                                               |
-| `GET`  | `/api/services/openwa/status`     | Canlı + DB durumu                                                       |
-| `POST` | `/api/services/openwa/auto-start` | Otomatik başlatmayı aç/kapat                                            |
-| `GET`  | `/api/services/openwa/logs`       | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rota aracılığıyla) |
+| Yöntem | Yol                               | Açıklama                                                               |
+| ------ | --------------------------------- | ---------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | open-wa'yı npm'den (`@open-wa/wa-automate`) yükler                     |
+| `POST` | `/api/services/openwa/start`      | open-wa'yı 8323 numaralı bağlantı noktasında (varsayılan) başlatır     |
+| `POST` | `/api/services/openwa/stop`       | open-wa'yı durdurur                                                    |
+| `POST` | `/api/services/openwa/restart`    | open-wa'yı yeniden başlatır                                            |
+| `POST` | `/api/services/openwa/update`     | Daha yeni sürüme günceller                                             |
+| `GET`  | `/api/services/openwa/status`     | Canlı + DB durumu                                                      |
+| `POST` | `/api/services/openwa/auto-start` | Otomatik başlatmayı açar/kapatır                                       |
+| `GET`  | `/api/services/openwa/logs`       | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rotası üzerinden) |
 
-**API anahtarı:** `WA_KEY` — open-wa'nın genel `WA_*` -prefixed env geçersiz kılma işlemi olarak enjekte edilir ve bunu `--key`/`-k` CLI seçeneğiyle eşleştirir (`dist/cli/setup.js::envArgs()`, kurulu 4.76.0 paketiyle doğrulanmıştır). `generateServiceApiKey()` tarafından oluşturulduğunda `ow_` öneki eklenir. open-wa anahtarı bir `key`/`api_key` HTTP başlığından geri okur ( `Authorization: Bearer` değil); `/api-docs*` açıkça denetimden muaf tutulmuştur ( `dist/cli/server.js` `setupAuthenticationLayer` ), dolayısıyla sistem durumu araştırmasının kimlik doğrulama başlığına ihtiyacı yoktur.
+**API anahtarı:** `WA_KEY` olarak enjekte edilir — open-wa'nın genel `WA_*` önekli
+ortam değişkeni geçersiz kılma mekanizması, bunu `--key`/`-k` CLI seçeneğine eşler
+(`dist/cli/setup.js::envArgs()`, yüklü 4.76.0 paketiyle doğrulanmıştır).
+`generateServiceApiKey()` tarafından oluşturulduğunda `ow_` öneki eklenir. open-wa,
+anahtarı bir `key`/`api_key` HTTP başlığından geri okur (`Authorization:
+Bearer` değil); `/api-docs*` denetimden açıkça muaf tutulur
+(`dist/cli/server.js` içindeki `setupAuthenticationLayer`), dolayısıyla sağlık
+yoklaması için kimlik doğrulama başlığı gerekmez.
 
-**Eşleştirme:** open-wa resmi değildir ve WhatsApp — ile bağlantısı yoktur, bağlı numara WhatsApp kendi otomasyon tespiti nedeniyle yasaklanma riski taşır. İlk başlangıçta, eşleştirme QR kodu stdout'a yazdırılır ve mevcut Logs panel/SSE akışı aracılığıyla ortaya çıkarılır — bu entegrasyonda henüz özel bir QR görüntüsü uç noktası yoktur.
-
----
-
-### 4,7 LLMLingua uç noktaları (8 rota)
-
-LLMLingua `@atjsh/llmlingua-2` saran hızlı sıkıştırmalı bir sepettir (gerçek ONNX token sınıflandırma modeli, ilk `/compress` çağrısında Hugging Face'ten indirilmiştir). Bifrost ile aynı uç nokta şeklini kullanır ( API anahtarı yoktur — `needsApiKey: false`, hiçbir zaman kimlik bilgilerini işlemez).
-
-| Yöntem | Yol                                            | Tanım                                                                                           |
-| ------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + eşleri, sepet sunucusu komut dosyasını yazın                 |
-| `POST` | `/api/services/llmlingua/start`                | Sepeti 20135 numaralı bağlantı noktasında başlatın (varsayılan)                                 |
-| `POST` | `/api/services/llmlingua/stop`                 | Sepeti durdur                                                                                   |
-| `POST` | `/api/services/llmlingua/restart`              | Sepeti yeniden başlat                                                                           |
-| `POST` | `/api/services/llmlingua/update`               | Daha yeni paket sürümüne güncelleme                                                             |
-| `GET`  | `/api/services/llmlingua/status`               | Canlı + DB durumu                                                                               |
-| `POST` | `/api/services/llmlingua/auto-start`           | Otomatik başlatmayı aç/kapat                                                                    |
-| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Kabul edilen (önceden var olan) bir örneğin otomatik olarak yeniden başlatılmasını açın/kapatın |
-| `GET`  | `/api/services/llmlingua/logs`                 | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rota aracılığıyla)                         |
-
-**Sepet sözleşmesi:** sunucu betiği `GET /health` (anlık — modelde beklemez) ve `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`) ortaya çıkarır. Model ilk `/compress` çağrısında yavaş yükleniyor.
-
-**Sıkıştırma kablolaması:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` `LLMLINGUA_BASE_URL` (varsayılan `http://127.0.0.1:20135`) çağırır ve sepetin yanıtını yalnızca girdiden kesinlikle daha kısa olduğunda kabul eder; herhangi bir hata (çalışmama, zaman aşımı, işlem dışı yanıt) işlem içi çalışan iş parçacığı arka ucuna (`./worker.ts`) düşer.
+**Eşleştirme:** open-wa resmî değildir ve WhatsApp ile bağlantılı değildir —
+bağlanan numara, WhatsApp'ın kendi otomasyon algılama sistemi nedeniyle
+yasaklanma riski taşır. İlk başlatmada eşleştirme QR kodu stdout'a yazdırılır ve
+mevcut Günlükler paneli/SSE akışı üzerinden gösterilir — bu entegrasyonda henüz
+özel bir QR görüntüsü uç noktası yoktur.
 
 ---
 
-### 4.8 şarkı kutusu uç noktaları (8 rota)
+### 4.7 LLMLingua uç noktaları (8 rota)
 
-sing-box, Mux — ile aynı uç nokta şekline sahiptir, `rotate-key` yolu yok, API anahtar enjeksiyonu yok (`needsApiKey: false` `bootstrap.ts`). Yalnızca yaşam döngüsü tarafından yönetilir: asla bir routing/LLM sağlayıcısı değildir. `install()` sabitlenmiş sürüm için resmi GitHub sürüm ikili dosyasını (`SagerNet/sing-box`) indirir ( `src/lib/services/installers/singbox.ts` `SINGBOX_PINNED_VERSION` ) ve SHA256 diske yazmadan önce aynı dosyaya yerleştirilen bir sağlama toplamına göre doğrular — istenen diğer sürümler reddedilir.
+LLMLingua, `@atjsh/llmlingua-2` paketini sarmalayan bir istem sıkıştırma yardımcı
+servisidir (gerçek ONNX belirteç sınıflandırma modeli, ilk `/compress` çağrısında
+Hugging Face'ten indirilir). Bifrost ile aynı uç nokta yapısını kullanır (API
+anahtarı yoktur — `needsApiKey: false`, kimlik bilgilerini hiçbir zaman işlemez).
 
-| Yöntem | Yol                                          | Tanım                                                                                   |
-| ------ | -------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `POST` | `/api/services/singbox/install`              | + indirin, sabitlenmiş şarkı kutusu sürümünü doğrulayın                                 |
-| `POST` | `/api/services/singbox/start`                | Şarkı kutusunu başlat (`sing-box run -c config.json`)                                   |
-| `POST` | `/api/services/singbox/stop`                 | Şarkı söyleme kutusunu durdur                                                           |
-| `POST` | `/api/services/singbox/restart`              | Şarkı kutusunu yeniden başlat                                                           |
-| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall sabitlenmiş sürüm                                                   |
-| `GET`  | `/api/services/singbox/status`               | Canlı + DB durumu                                                                       |
-| `POST` | `/api/services/singbox/auto-start`           | Otomatik başlatmayı aç/kapat                                                            |
-| `POST` | `/api/services/singbox/auto-restart-adopted` | Kabul edilen (önceden var olan) bir süreç için otomatik yeniden başlatmayı açın/kapatın |
-| `GET`  | `/api/services/singbox/logs`                 | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rota aracılığıyla)                 |
+| Yöntem | Yol                                            | Açıklama                                                                                |
+| ------ | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | `@atjsh/llmlingua-2` + eş paketlerini npm ile yükler, yardımcı servis betiğini yazar    |
+| `POST` | `/api/services/llmlingua/start`                | Yardımcı servisi 20135 numaralı bağlantı noktasında (varsayılan) başlatır               |
+| `POST` | `/api/services/llmlingua/stop`                 | Yardımcı servisi durdurur                                                               |
+| `POST` | `/api/services/llmlingua/restart`              | Yardımcı servisi yeniden başlatır                                                       |
+| `POST` | `/api/services/llmlingua/update`               | Daha yeni paket sürümüne günceller                                                      |
+| `GET`  | `/api/services/llmlingua/status`               | Canlı + DB durumu                                                                       |
+| `POST` | `/api/services/llmlingua/auto-start`           | Otomatik başlatmayı açar/kapatır                                                        |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Benimsenmiş (önceden var olan) bir örneğin otomatik yeniden başlatılmasını açar/kapatır |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE günlük kuyruğu (paylaşılan `[name]/logs` dinamik rotası üzerinden)                  |
 
-**TPROXY kablolama:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`), `config.json` yazar ve `applyTproxy()` TPROXY güvenlik duvarı kurallarını yüklemeden önce denetçiyi başlatır. Denetleyici eksikse veya `running` ulaşamazsa, artık hata seviyesinde kayıt yapar (arızayı sessizce yutmak yerine), böylece operatör, arkasında çalışan bir dinleyici olmadan TPROXY kurallarının uygulandığını anlayabilir.
+**Yardımcı servis sözleşmesi:** Sunucu betiği `GET /health` (anında yanıt verir —
+modeli beklemez) ve `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`) uç noktalarını sunar. Model, ilk
+`/compress` çağrısında tembel olarak yüklenir.
+
+**Sıkıştırma bağlantısı:** `open-sse/services/compression/engines/llmlingua/index.ts`
+içindeki `httpSidecarBackend`, `LLMLINGUA_BASE_URL` adresini (varsayılan:
+`http://127.0.0.1:20135`) çağırır ve yardımcı servisin yanıtını yalnızca girdiden
+kesin olarak daha kısa olduğunda kabul eder; herhangi bir hata durumunda
+(çalışmama, zaman aşımı, değişiklik yapmayan yanıt), süreç içi çalışan iş parçacığı
+arka ucuna (`./worker.ts`) geri döner.
 
 ---
 
-### 4.9 Ters proxy (9Router kontrol paneli yerleştirmesi)
+### 4.8 sing-box uç noktaları (8 rota)
 
-Kontrol paneli, 9Router web UI aşağıdaki adresteki dahili bir ters proxy aracılığıyla bir iframe'in içine yerleştirir:
+sing-box, Mux ile aynı uç nokta yapısına sahiptir — `rotate-key` rotası ve API anahtarı ekleme yoktur (`bootstrap.ts` içinde `needsApiKey: false`). Yalnızca yaşam döngüsü yönetilir; hiçbir zaman yönlendirme veya LLM sağlayıcısı değildir. `install()`, sabitlenmiş sürümün (`src/lib/services/installers/singbox.ts` içindeki `SINGBOX_PINNED_VERSION`) resmi GitHub ikili dosyasını (`SagerNet/sing-box`) indirir ve diske yazmadan önce SHA256 değerini aynı dosyaya gömülü sağlama toplamıyla doğrular. İstenen diğer tüm sürümler reddedilir.
+
+| Yöntem | Yol                                          | Açıklama                                                                                    |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Sabitlenmiş sing-box sürümünü indir ve doğrula                                              |
+| `POST` | `/api/services/singbox/start`                | sing-box başlat (`sing-box run -c config.json`)                                             |
+| `POST` | `/api/services/singbox/stop`                 | sing-box durdur                                                                             |
+| `POST` | `/api/services/singbox/restart`              | sing-box yeniden başlat                                                                     |
+| `POST` | `/api/services/singbox/update`               | Sabitlenmiş sürümü yeniden doğrula veya yükle                                               |
+| `GET`  | `/api/services/singbox/status`               | Anlık durum ve veritabanı durumu                                                            |
+| `POST` | `/api/services/singbox/auto-start`           | Otomatik başlatmayı aç veya kapat                                                           |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Yönetimi devralınmış, önceden var olan süreç için otomatik yeniden başlatmayı aç veya kapat |
+| `GET`  | `/api/services/singbox/logs`                 | SSE ile yeni günlük kayıtlarını izle (ortak dinamik `[name]/logs` rotası üzerinden)         |
+
+**TPROXY bağlantısı:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`), `applyTproxy()` TPROXY güvenlik duvarı kurallarını yüklemeden önce `config.json` dosyasını yazar ve süreç gözeticisini başlatır. Gözetici yoksa veya `running` durumuna ulaşamazsa, hata sessizce yutulmak yerine artık hata düzeyinde günlüğe yazılır. Böylece operatör, TPROXY kurallarının arkalarında çalışan bir dinleyici olmadan uygulandığını anlayabilir.
+
+---
+
+### 4.9 Ters proxy (9Router pano yerleştirmesi)
+
+Pano, 9Router web kullanıcı arayüzünü şu adresteki dahili bir ters proxy
+aracılığıyla bir iframe içine yerleştirir:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Bu vekil:
+Bu proxy:
 
-- İsteği `http://127.0.0.1:{port}/{path}` iletir (yalnızca geri döngü)
-- Gelen `cookie` ve `authorization` başlıklarını çıkarır ( OmniRoute oturumunda sızıntı olmaz)
+- İsteği `http://127.0.0.1:{port}/{path}` adresine iletir (yalnızca geri döngü)
+- Gelen `cookie` ve `authorization` başlıklarını kaldırır (OmniRoute oturumu sızdırılmaz)
 - 9Router kimlik doğrulaması için `Authorization: Bearer {apiKey}` enjekte eder
-- Yanıttan `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` çıkarılır
-- `<base href>` enjekte etmek ve mutlak yolları normalleştirmek için HTML yanıtlarını yeniden yazar (`/foo` → `/dashboard/.../embed/foo`)
+- Yanıttan `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` başlıklarını kaldırır
+- `<base href>` enjekte etmek ve mutlak yolları normalleştirmek (`/foo` → `/dashboard/.../embed/foo`) için HTML yanıtlarını yeniden yazar
 
-Gömülü kontrol paneli için WebSocket yükseltmeleri, özel bir bağlantı noktasındaki yardımcı bir sunucu tarafından gerçekleştirilir (bkz. `src/lib/services/embedWsProxy.ts`).
+Yerleştirilmiş pano için WebSocket yükseltmeleri, özel bir bağlantı noktasındaki
+eşlikçi sunucu tarafından işlenir (bkz. `src/lib/services/embedWsProxy.ts`).
 
-**Güvenlik:** Gömülü proxy yolları `LOCAL_ONLY_API_PREFIXES` altında sınıflandırılır ve yalnızca geridöngüden erişilebilir. Cloudflare/Ngrok tüneli aracılığıyla JWT elde eden bir saldırgan, yerleşik hizmetlere proxy olarak erişemez.
+**Güvenlik:** Yerleştirme proxy rotaları `LOCAL_ONLY_API_PREFIXES` altında
+sınıflandırılır ve yalnızca geri döngü üzerinden erişilebilir. Cloudflare/Ngrok
+tüneli üzerinden JWT elde eden bir saldırgan, yerleştirilmiş servislere proxy
+aracılığıyla erişemez.
 
 ---
 

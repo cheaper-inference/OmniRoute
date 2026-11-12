@@ -203,6 +203,45 @@ Kiro 的二進位 `reasoningContentEvent` 框架若具有非空簽章，會透�
 迴歸防護：`tests/unit/claude-low-priority-mode.test.ts`、
 `tests/unit/claude-limit-reset.test.ts`、`tests/unit/claude-low-priority-executor.test.ts`。
 
+### 自動應用儲存重置
+
+**範圍：** Codex和Claude訂閱 (OAuth) 連線。**選擇加入**： `bankedResetAutoApply`設定關閉並預設為`dry-run`模式（設定→ AI →自動套用分組重設）。
+
+**目的：**當帳戶達到使用限制時，銀行支出會自行重置，而不是等待操作員在提供者限制頁面上按「兌換」。
+
+| 信用類型（`creditTypes`） | 贖回的是什麼                   | 它運行在哪裡                           |
+| ------------------------- | ------------------------------ | -------------------------------------- |
+| `codexCredits`            | Codex重置積分                  | 後台作業，每 60 秒                     |
+| `claudeCredits`           | Claude銀行補助（`GRANT`學分）  | 後台作業，每 60 秒                     |
+| `claudeSessionReset`      | Claude每週會話限制重置（上圖） | 請求路徑，透過與每個帳戶切換相同的策略 |
+
+**執行：**
+
+- 純粹決策（一條規則集適用於兩條路徑）： `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- 後台作業： `src/lib/services/bankedResetAutoApply.ts` （從`src/instrumentation-node.ts`開始）
+- Claude請求路徑門： `src/lib/usage/claudeSessionResetPolicy.ts`，透過`setClaudeLimitResetPolicy()`在`open-sse/services/claudeLimitReset.ts`中註冊
+- 歷史、上限和 webhook： `src/lib/usage/bankedResetAudit.ts`
+- 歷史API： `GET /api/settings/banked-reset-auto/history?limit=50` （管理授權）
+
+**決策順序**（第一個失敗規則是記錄的原因）：
+
+1. 功能關閉、信用類型關閉或帳戶超出範圍（`accountScope` `all` / `selected`加上每個帳戶的`connections`地圖）。
+2. 在可選的UTC時間表之外（`startHourUtc` > `endHourUtc`穿過午夜）。
+3. 過去 24 小時內的上限：任兩次兌換之間的`maxPerAccountPerDay` (1)、 `maxPerDay` (3) 和`minSpacingMinutes` (30)。
+4. 觸發器：受圍牆的`session`或`weekly`視窗（從`getQuotaWindowStatus().reachedThreshold`讀取，而不是`isAccountQuotaExhausted()`，後者僅報告每個視窗花費的帳戶），或至少使用`expiringCreditMinUsedPercent` (50) 的帳戶在`expiringCreditHours` (24) 內到期的信用。
+5. 自然重置守衛：當`sessionResetGuardMinutes` （90）內的圍牆5小時窗口重置或`weeklyResetGuardHours` （12）內的圍牆每週窗口重置時跳過。
+6. 每週下限：每週剩餘時間低於`weeklyFloorPercent` (10) 時，跳過 5 小時重置。
+7. `last-resort`模式：當同一提供者的另一個範圍內帳戶在兩個視窗中至少剩餘`poolHeadroomPercent` (10) 時跳過。到期信用觸發器繞過了這個。
+8. `dry-run`記錄了一行並且沒有贖回任何東西； `last-resort`和`eager`兌換。
+
+遺失配額資料永遠無法解鎖兌換：未知的重置時間或每週使用量跳過。
+
+**Claude會話重置：**當該功能關閉或`claudeSessionReset`關閉時，每個帳戶的`autoLimitReset`切換會像以前一樣做出決定。啟用兩者後，此功能將取代每個帳戶的切換：範圍內的帳戶僅在策略允許時才可以提出索賠，而在`dry-run`模式下則不會提出索賠。
+
+**安全：**該作業每次蜱最多兌換一個積分，在列出積分之前決定（跳過的帳戶永遠不會列出），使用冪等性密鑰`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`，並在列出或兌換失敗後將帳戶退回 1 小時。每個兌換、失敗和試運行決策都會寫入`audit_log` （`action: "bankedReset.redeem"`，無代幣或信用 ID）；上限是從這些行中計算的，因此它們在重新啟動後仍然存在。成功兌換也會觸發`provider.reset_redeemed` webhook。
+
+回歸守衛： `tests/unit/banked-reset-policy.test.ts`、 `tests/unit/banked-reset-auto-apply.test.ts`、 `tests/unit/claude-limit-reset-policy-gate.test.ts`、 `tests/unit/banked-reset-history-route.test.ts`。
+
 ### 工作階段親和性 (#7274)
 
 **範圍：**將一個用戶端工作階段（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 標頭）固定至一個連線，適用於**任何**提供者。
@@ -335,20 +374,17 @@ DB — 重新啟動後即會遺失。_設定_會持久化；作用中的鎖定_�
 
 ---
 
-## 4. 配額共用並行控制 (v3.8.36)
+## 4. 配額共享並發控制 (v3.8.36)
 
-訂閱帳戶（GLM、MiniMax 等）通常僅接受約 1–3 個並行請求；超過此數量會觸發 429 和冷卻時間。在 **配額共用** (`qtSd/…`) 組合下，這個問題尤其嚴重，因為多個 API 金鑰會共用同一個上游帳戶。以下三個層級可避免共用帳戶遭到大量請求淹沒。
+訂閱帳戶（GLM、 MiniMax等）通常只接受~ 1-3個並發請求；超過會觸發 429 秒和冷卻時間。這是嚴重的**配額份額**(`qtSd/…`) 組合，其中多個API金鑰共用一個上游帳戶。三層保護共享帳戶不被淹沒。
 
-### 每個連線的並行上限 (`max_concurrent`)
+### 每個連接的並發上限（`max_concurrent`）
 
-每個提供者連線都可以宣告 `max_concurrent` 上限
-（`provider_connections.max_concurrent`，可在連線對話方塊 / API / DB 中設定）。
-留空表示不限制。這是驅動下方序列化層的單一控制項 — 將其設為帳戶的實際並行數
-（例如 GLM 約為 1、MiniMax 約為 2）。
+每個提供者連線都可以聲明一個`max_concurrent`上限（`provider_connections.max_concurrent`，在連線模態 / API / DB中設定）。將其留空，沒有限制。這是驅動—下面的序列化層的單一旋鈕，將其設定為帳戶的實際並發性（例如GLM ~ 1、 MiniMax ~ 2）。
 
-### 每個模型的並行上限 (`modelConcurrency`)
+### 每個模型的並發上限 (`modelConcurrency`)
 
-連線還可以在其 `rateLimitOverrides` map 中宣告精確的每個模型並行上限：
+連接還可以在其`rateLimitOverrides`映射中聲明精確的每個模型並發上限：
 
 ```json
 {
@@ -359,54 +395,32 @@ DB — 重新啟動後即會遺失。_設定_會持久化；作用中的鎖定_�
 }
 ```
 
-可在連線對話方塊中設定（**速率限制覆寫 → 每個模型的並行上限**，每行一個
-`model=cap`），或透過具有相同 JSON 結構的
-`PATCH /api/providers/[id]` 設定。主要語意如下：
+在連接模式中設定它（**速率限制覆蓋→每個模型的並發上限**，每行一個`model=cap` ）或通過具有相同JSON形狀的`PATCH /api/providers/[id]` 。關鍵語意：
 
-- **整個連線與特定模型：** `maxConcurrent` 仍是整個共用連線的上限。兩者同時適用時，兩個閘門會在同一個複合閘門中以原子方式取得
-  （`global → provider → account → model`）；實際行為採用適用限制中較嚴格者。
-- **精確的模型金鑰比對：** 金鑰是路由解析後傳給執行器的模型字串 — 通常是上游模型的裸 ID
-  (`glm-5`)，而不是用戶端的 `provider/model` 別名（`zai/glm-5` 不會比對到
-  `glm-5`）。值必須是正整數的並行請求上限。
-- **本機排隊，不進行探索：** 超出的請求會依現有的佇列 / 逾時語意在本機排隊（具類型的 `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` 准入錯誤）。OmniRoute 不會探索或推斷上游政策 — 它只會
-  強制執行操作員所設定的確切上限。已飽和的模型閘門絕不會停用提供者，也不會建立永久的模型鎖定；上游 429 / 冷卻 / 備援行為
-  仍是錯誤防線。
-- **每個連線、每個程序的範圍：** 上限以資料庫連線為單位，並保存在記憶體中，因此重複使用相同上游 API 金鑰的兩個連線彼此不會協調。
-- **未設定表示維持不變：** 省略 map（或將儀表板欄位留白）不會新增模型閘門。以下是未宣告任何通用提供者限制的範例設定：
+- **連接範圍與特定模型：** `maxConcurrent`仍然是共享連接範圍的上限。當兩者都適用時，兩個門都在同一個複合門（`global → provider → account → model`）中以原子方式獲取；有效行為是更嚴格的適用限制。
+- **精確的型號-密鑰匹配：**關鍵是路由解析—後傳遞給執行器的模型字串，通常是裸上游模型 id (`glm-5`)，而不是客戶端`provider/model`別名 (`zai/glm-5` `glm-5`不符)。值是正整數並發請求上限。
+- **本地排隊，沒有發現：**多餘的請求使用現有的queue/timeout語義在本地排隊（類型化`SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`准入錯誤）。 OmniRoute不會發現或推斷上游策略—它強制執行運營商配置的確切上限。飽和的模型門永遠不會禁用提供者，也永遠不會造成永久的模型鎖定；上游429/cooldown/fallback行為仍然是錯誤支持。
+- **每個連線、每個進程範圍：** caps 是每個資料庫連接並保存在記憶體中，因此重複使用相同上游API密鑰的兩個連接不會相互協調。
+- **未配置意味著未更改：**省略地圖（或將儀表板欄位留空）不會新增模型閘。不聲明任何通用提供者限制的範例配置：
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### 配額共用請求序列化
+### 配額共享請求序列化
 
-當配額共用分派的目標連線宣告了正值的
-`max_concurrent` 時，對該**帳戶**的並行請求會透過每個連線的 semaphore（索引鍵 `qsconn:<connectionId>`）進行序列化：超出的請求會**在佇列中等待**，而不是讓大量請求淹沒帳戶。這是**故障開放**（fail-open）設計 — 佇列已滿或逾時時，會不取得插槽便繼續，而不會拒絕任何原本可分派的請求。在**設定 → 復原能力 → 配額共用的每個連線並行控制**中切換
-（`resilienceSettings.quotaShareConcurrencyLimit.enabled`，預設開啟）。未設定
-`max_concurrent` 上限時，行為維持不變。
+當配額共享調度的目標連線聲明為正`max_concurrent`時，對該連線的並發請求**帳戶**透過每個連接信號量（關鍵`qsconn:<connectionId>`）進行序列化：多餘的請求**在隊列中等待**而不是淹沒帳戶。這是**故障開放**—飽和佇列或逾時在沒有時隙的情況下繼續進行，而不是拒絕可分派請求。切換進入**設定→彈性→配額共享每個連接並發數**（`resilienceSettings.quotaShareConcurrencyLimit.enabled`，預設開啟）。如果沒有`max_concurrent`上限，行為不會改變。
 
-> 配額共用路由閘門（`selectQuotaShareTarget`、DRR + P2C）本身也是
-> 故障開放，並且只會將已達上限的連線降低優先順序 — 在只有一個連線的
-> pool 中無法硬性限制，因此實際遏止大量請求的是這個 semaphore。
+> 配額共享路由門（`selectQuotaShareTarget`、 DRR + P2C）本身是故障開放的，並且僅_deprioritize_具有無法硬限制的單連接池的上限連接— ，因此該信號量實際上包含洪水。
 
 ### 組合冷卻感知重試
 
-對於每個組合策略（啟用時），如果某個請求會因短暫冷卻而確實觸發 429，
-則會等待冷卻結束後重新分派，而不是直接傳回 429 — 這涵蓋 Gemini 類型的 TPM/RPM
-時間窗（約 60 秒的 retry-after）在多模型組合中的情況，例如 2 個模型組合的兩個目標都觸發每個模型的速率限制。此行為受**設定 → 復原能力**中的
-`comboCooldownWait`（`enabled`、`maxWaitMs`、`maxAttempts`、
-`budgetMs`）限制。對 `quota_exhausted`（鎖定至午夜）或驗證 / 找不到原因，
-絕不會等待。
+對於每個組合策略（啟用時），會具體化 429 SHORT瞬態冷卻的請求會等待其結束並重新分派，而不是返回 429 —這涵蓋了多模型組合上的 Gemini 級TPM/RPM視窗（~ 60 秒後重試），例如 2 模型組合的兩個目標都達到了每個模型的速率限制。以`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) 為界**設定→彈性**。它從不等待`quota_exhausted` （鎖定到午夜）或auth/not-found原因。設定`comboTimeoutMs`後，無法在截止日期之前完成的等待不會開始 (#18998)：組合立即用其終端回應而不是`COMBO_TIMEOUT` 504 進行應答。
 
-組合可透過 `config.comboCooldownWaitEnabled: false` 選擇退出。只有字面值
-`false` 會停用這些共用組合等待（分派後冷卻，以及分派前的電路開啟 / 模型鎖定等待）及其等待預算逾時下限延伸。缺少此設定或設定為 `true` 會保留全域政策；`true` 無法在全域停用等待時啟用等待。明確設定的 `targetTimeoutMs` 仍具有優先權。此退出設定不會變更獨立的原生 Codex 回合釘選分派前等待。
+組合可以透過`config.comboCooldownWaitEnabled: false`選擇退出。只有文字`false`會停用這些共享組合等待（調度後冷卻和調度前circuit-open/model-lock等待）及其等待預算逾時下限擴展。缺失或`true`保留全域策略； `true`無法啟用全域停用等待。明確的`targetTimeoutMs`仍然獲勝。此選擇退出不會變更單獨的本機 Codex 轉針預調度等待。
 
-相同閘門也涵蓋分派前的情況（#16319）：當組合的每個目標都在尚未進行任何嘗試前，因其模型處於短暫暫時性鎖定而被略過時，零嘗試路徑會在相同上限下等待鎖定解除並重新分派，而不是回應不含提示的
-`503 ALL_TARGETS_SKIPPED`。當不允許等待時（已達上限、嘗試次數或預算耗盡，或功能已關閉），終端回應會升級為
-`429 rate_limit_error`，並從最早的暫時性鎖定到期時間攜帶
-`retry_after` / `reset_at`；配額、驗證及找不到原因的鎖定則維持不含提示的 503。
+相同的閘門涵蓋了預調度情況（#16319）：當組合的每個目標在進行任何嘗試之前都被跳過時，因為其模型處於短暫的瞬時鎖定狀態，零嘗試路徑會在相同的上限下等待鎖定並重新調度，而不是回答無提示的`503 ALL_TARGETS_SKIPPED`。當不允許等待時（上限、嘗試或預算耗盡、或功能關閉），終端回應從最早的瞬時鎖到期升級到攜帶`retry_after` / `reset_at`的`429 rate_limit_error` ；配額、身份驗證和未找到鎖定保留無提示 503。
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

@@ -258,14 +258,14 @@ Le filtre est appliqué uniquement aux charges utiles de résultats d’outils d
 
 ## Combinaisons de compression
 
-Les combinaisons de compression sont des profils de compression nommés qui peuvent être attribués à des combinaisons de routage :
+Les combos de compression sont appelés profils de compression qui peuvent être attribués aux combos de routage :
 
-- `compression_combos` : stocke le mode, le pipeline, la configuration RTK, la configuration linguistique et l’indicateur par défaut
-- `compression_combo_assignments` : associe une combinaison de compression à une combinaison de routage
-- l’intégration à l’exécution résout une combinaison de compression attribuée avant les substitutions génériques de combinaison
-- les données analytiques incluent `compression_combo_id` et `engine`
+- `compression_combos`: mode de stockage, pipeline, configuration RTK, configuration de langue et marqueur par défaut
+- `compression_combo_assignments`: mappe un combo de compression à un combo de routage
+- l'intégration à l'exécution résout une combinaison de compression attribuée avant les remplacements de combinaison générique
+- les analyses incluent `compression_combo_id` et `engine`
 
-Interface du tableau de bord : `Tableau de bord -> Contexte et cache -> Combinaisons de compression`.
+Surface du tableau de bord : `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Prérequis / guide de l'opérateur (CCR & session-dedup)
 
@@ -354,7 +354,7 @@ L'outil de récupération s'appelle actuellement `omniroute_ccr_retrieve` (le pr
 
 ### Cycle de vie des sessions
 
-Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre d'inactivité est définie par `OMNIROUTE_MCP_SESSION_IDLE_MS` (par défaut 5 minutes ; référencée par un nom, pas une valeur codée en dur, donc cette page ne dérive pas lorsqu'elle change). Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,** pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
+Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre inactive est configurée par `OMNIROUTE_MCP_SESSION_IDLE_MS`, retombant sur `DEFAULT_MCP_SESSION_IDLE_MS` dans `open-sse/mcp-server/httpTransport.ts`. Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,**pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
 
 ## Surface de l’API
 

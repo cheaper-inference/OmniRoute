@@ -18,18 +18,32 @@ OmniRoute udgiver npm + Docker-artefakter. Disse gates leverer proveniens, inven
 
 Image CVE-ratcheten bruger **to trin** i `docker-publish.yml`: SARIF-trinnet (`HIGH,CRITICAL`, `exit-code: 0`) holder HIGH+CRITICAL synlig i Sikkerhedsfanen uden at blokere; det _KRITISKE gate_-trin (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) får releasen til at fejle ved en KRITISK CVE **med en tilgængelig løsning**. `ignore-unfixed` forhindrer blokering af releasen for en base-image CVE uden en upstream-patch.
 
-## ⚠️ CVE-varians (blokerende osv/Trivy-gates)
+## ⚠️ CVE-variation (blokerende osv-/Trivy-kontroller)
 
-osv og Trivy sammenligner afhængigheder med CVE-databaser, der **kontinuerligt vokser**. En PR, der **ikke rører ved afhængigheder**, kan pludselig blive rød, fordi en ny CVE blev afsløret i en eksisterende afhængighed (osv: målt `vulnCount` > baseline; Trivy: en ny fikserbar KRITISK i imaget). **Dette er FORVENTET operationel adfærd for en blokerende CVE-gate, ikke en produktregression.**
+osv og Trivy sammenligner afhængigheder med CVE-databaser, der **vokser kontinuerligt**. En PR,
+der **ikke ændrer nogen afhængigheder**, kan pludselig blive rød, fordi en ny CVE er blevet
+offentliggjort i en eksisterende afhængighed (osv: målt `vulnCount` > baseline; Trivy: en ny
+CRITICAL-sårbarhed i imaget, som kan rettes). **Dette er FORVENTET driftsmæssig adfærd for en blokerende
+CVE-kontrol, ikke en produktregression.**
 
-Når osv eller Trivy bliver rød på grund af en nyopdaget CVE, er løsningen:
+Når osv eller Trivy bliver rød på grund af en nyligt offentliggjort CVE, er løsningen:
 
-1.  **Opdater den berørte afhængighed** (foretrukket) — opgrader til den patchede version via `package.json` `overrides` (transitive afhængigheder) eller genopbyg imaget på en patchet base.
-2.  **Hvis der ikke er en upstream-løsning:**
-    - **osv:** re-baseline `metrics.vulnCount` i `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` dækker ikke dedikerede gates — rediger værdien manuelt, `direction:down`) med en begrundelsesnote + sporingssag.
-    - **Trivy:** tilføj en post i `.trivyignore` (CVE-ID per linje) med en begrundelseskommentar + sporingssag. `ignore-unfixed: true` dækker allerede CVE'er uden patches automatisk.
+1. **Opgradér den berørte afhængighed** (foretrukket) — opgradér til den rettede version via `package.json`
+   `overrides` (transitive afhængigheder), eller genopbyg imaget på en rettet base.
+2. **Hvis en afhjælpning ikke er tilgængelig:** bevare det målte fund og spor den berørte afhængighed eller billede. Hæv ikke sårbarhedsbasislinjen for at få en mislykket kandidat bestået. Trivys `ignore-unfixed: true` udelukker allerede billedsårbarheder uden en upstream-patch. Enhver undtagelse kræver en gennemgået sårbarhed ID, nøjagtig pakkesti, udløb og sporingsproblem i politikken; det er ikke en automatisk konsekvens af en mislykket scanning.
 
-Begge gates **SKIPPER elegant** (exit 0), når værktøjet mangler, eller målingen mislykkes (osv-scanner ikke i PATH, osv.dev/netværk utilgængeligt, ugyldig JSON) — en **målingsfejl** blokerer aldrig, kun en **målt** regression blokerer.
+Påkrævede OSV-kørsler (`check:vuln-ratchet -- --ratchet`) fejler lukket med
+`INCOMPLETE` og afslutningskode 2, når scanneren, rapporten eller baselinen ikke kan valideres.
+En målt regression giver afslutningskode 1. En vejledende kørsel kan stadig rapportere `SKIP` med
+afslutningskode 0, hvilket ikke dokumenterer, at afhængighederne bestod scanningen. Det blokerende
+Trivy-trin kræver også en vellykket måling: utilgængelige værktøjer, mislykkede jobs
+og manglende image-evidens kan ikke certificere et image som rent.
+
+## Billedscanningspolitik
+
+Den nuværende `.trivyignore.yaml` indeholder ingen sårbarhedsundtagelser. `npm run check:trivy-ignore-policy` validerer den strukturerede politik i lokale scanningsprofiler, CI og Kvalitet. Ukendt IDs, bredere stier, duplikerede poster og udløbne undtagelser afvises; den gamle `.trivyignore` er ikke et input til de migrerede scanninger.
+
+Docker tjekker politikværktøjer fra `github.workflow_sha` og billedkildepolitikken med den samme kildevælger som buildet. Politikvælgeren afviser inkompatible omfang og forbereder én fil til begge Trivy-scanninger. En historisk kilde uden en struktureret politik modtager ingen undtagelser. Begge scanninger pin Trivy `v0.70.0`. Politikvalidering beviser konfigurationskonsistens; billedet har stadig brug for en vellykket scanning.
 
 ## Pensioneret afhængighedsrisiko
 

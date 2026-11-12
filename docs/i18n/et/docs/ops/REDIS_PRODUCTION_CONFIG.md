@@ -6,36 +6,33 @@
 
 ## Ülevaade
 
-Redis on OmniRoute'i **valikuline, nõrk sõltuvus** — rakendus jätkab Redise kättesaamatuse korral sujuvalt tööd (kasutades mälupõhiseid
-varulahendusi). Tootmiskeskkonnas vähendab Redise häälestamine latentsust nelja erineva
-töökoormuse puhul:
+Redis on **valikuline, pehme sõltuvus** OmniRoute — taandub rakendus graatsiliselt (mälus olevad varud), kui Redis pole saadaval. Tootmises vähendab Redis häälestamine latentsusaega nelja erineva töökoormuse jaoks:
 
-| Töökoormus                 | Draiver                       | Kliendi tehas                                                  | Võtmemuster                                                      |
-| -------------------------- | ----------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Päringusageduse piiramine  | `rateLimiter.ts`              | `getRedisClient()` — laisalt loodav `ioredis`-e üksikeksemplar | `<prefix>rl:*` Lua abil atomaarse päringusageduse piirangu aknad |
-| Autentimisvahemälu         | `apiKeys.ts`                  | Kasutab uuesti `rateLimiter`-i klienti                         | `<prefix>auth:api_key:<sha256>` koos TTL-iga                     |
-| Kvoodihoidla               | `redisQuotaStore.ts`          | Eraldi `getRedisClient(url)`-i üksikeksemplar                  | `<prefix>quota:*`, seadistatav eksemplaripõhiselt                |
-| Eelsoojenduse kaitselüliti | `redisCircuitBreakerStore.ts` | Eraldi klient failis `circuitBreakerFactory.ts`                | `<prefix>warmup:cb:<connectionId>`                               |
+| Töökoormus        | Juht                          | Kliendi tehas                                  | Võtme muster                                       |
+| ----------------- | ----------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| Kiiruse piiramine | `rateLimiter.ts`              | `getRedisClient()` — laisk `ioredis` singleton | `<prefix>rl:*` Lua-aatomi kiiruspiirangu aknad     |
+| Auth vahemälu     | `apiKeys.ts`                  | Taaskasutab `rateLimiter` klienti              | `<prefix>auth:api_key:<sha256>` koos TTL           |
+| Kvoodipood        | `redisQuotaStore.ts`          | Eraldi `getRedisClient(url)` üksiktoon         | `<prefix>quota:*` konfigureeritav eksemplari kohta |
+| Soojenduslüliti   | `redisCircuitBreakerStore.ts` | Eraldi klient `circuitBreakerFactory.ts` s     | `<prefix>warmup:cb:<connectionId>`                 |
 
-Kõik neli töökoormust jagavad üht nimeruumi prefiksit, et OmniRoute saaks ühes
-Redise eksemplaris teiste rakendustega koos eksisteerida (nt `127.0.0.1:6379`). Vaadake jaotist [Võtmete nimeruum](#key-namespacing).
+Kõik neli töökoormust jagavad ühte nimeruumi eesliidet, nii et OmniRoute saab eksisteerida koos teiste rakendustega ühes Redis eksemplaris (nt `127.0.0.1:6379`). Vt [Võtme nimevahed](#key-namespacing).
 
 ---
 
-## Praegune konfiguratsioon (koodi vaikeväärtused)
+## Praegune konfiguratsioon (koodi vaikeseaded)
 
-| Seadistus                                | Väärtus                                                                  | Asukoht                                                                               |
-| ---------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| Keskkonnamuutuja `REDIS_URL`             | `redis://redis:6379` (compose), valikuline                               | `rateLimiter.ts:5`, `.env.example`                                                    |
-| Keskkonnamuutuja `REDIS_KEY_PREFIX`      | `omniroute:` (vaikimisi)                                                 | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| Keskkonnamuutuja `QUOTA_STORE_REDIS_URL` | eraldiseisev, võib erineda muutujast `REDIS_URL`                         | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`                     | `"sqlite"` (vaikimisi), `"redis"` valikuline                             | `quota/storeFactory.ts`                                                               |
-| ioredis-e `maxRetriesPerRequest`         | `3`                                                                      | kliendi loomine failis `rateLimiter.ts`                                               |
-| `enableReadyCheck`                       | määramata (ioredis-e vaikeväärtus: `true`)                               | —                                                                                     |
-| `lazyConnect`                            | määramata (ioredis-e vaikeväärtus: `false`)                              | —                                                                                     |
-| `retryStrategy`                          | määramata (ioredis-e vaikeväärtus: 200 ms baasväärtus, eksponentsiaalne) | —                                                                                     |
-| TLS / parool / andmebaasi indeks         | **seadistamata**                                                         | —                                                                                     |
-| Sentinel / Cluster                       | **seadistamata** — toetatud on ainult autonoomne üksiksõlm               | —                                                                                     |
+| Seadistamine                    | Väärtus                                                           | Kus                                                                                   |
+| ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (koostamine), valikuline                     | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (vaikimisi)                                          | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | eraldi, võib erineda `REDIS_URL`                                  | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (vaikimisi), `"redis"` valikuline                      | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                               | `rateLimiter.ts` kliendi loomine                                                      |
+| `enableReadyCheck`              | pole määratud (ioredise vaikimisi: `true`)                        | —                                                                                     |
+| `lazyConnect`                   | pole määratud (ioredise vaikimisi: `false`)                       | —                                                                                     |
+| `retryStrategy`                 | pole määratud (ioredise vaikimisi: 200 ms baas, eksponentsiaalne) | —                                                                                     |
+| TLS / parool / DB indeks        | **pole konfigureeritud**                                          | —                                                                                     |
+| Sentinel / klaster              | **pole konfigureeritud** Ainult — eraldiseisev ühe sõlmega        | —                                                                                     |
 
 ---
 
@@ -65,67 +62,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Soovitatav tootmiskeskkonna häälestus
+## Soovitatav tootmise häälestamine
 
-### 1. Ühendusekogumi / kliendi valikud (ioredise `Redis`-konstruktor)
+### 1. Ühendusbassein / kliendi valikud (ioredis `Redis` konstruktor)
 
-Praegune kood loob ühe `new Redis(url)`-i ilma kohandatud valikuteta. Tootmiskeskkonna
-mitme replikatsiooniga juurutuste puhul edastage koodis klienditehas või mähkige `getRedisClient()`:
+Praegune kood loob ühe `new Redis(url)`, millel pole kohandatud valikuid. Mitme koopia tootmiseks juurutamiseks edastage kliendi tehas koodis või mähitage `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // korduskatsete piirang puudub; las retryStrategy otsustab
-  enableReadyCheck: true, // kontrolli enne päringute vastuvõtmist, kas server on valmis
-  lazyConnect: true, // ära loo ühendust konstrueerimisel; oota esimest päringut
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // loobu pärast 10 korduskatset → loo ühendus hiljem uuesti
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, ülempiir 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // koonda samaaegsed käsud üheks TCP-kirjutuseks
-  keepAlive: 10000, // TCP keep-alive iga 10 s järel
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Peamised kompromissid:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — tootmiskeskkonnas eelistatud, et ajutised
-  Redise taaskäivitused ei nurjaks kohe kõiki päringuid. Mälusisene varulahendus funktsioonis
-  `checkRateLimit()` võtab tõrketee üle.
-- `lazyConnect: true` — väldib käivitamisel sõltuvust sellest, et Redis peab töötama enne, kui server
-  hakkab ühendusi vastu võtma.
-- `enableAutoPipelining: true` — vähendab samaaegsete kiiruspiirangu kontrollide edasi-tagasi päringuid;
-  kasulik ühe ühenduse korral koormusel >50 RPS.
+- `maxRetriesPerRequest: null` + `retryStrategy` — eelistatakse tootmiseks, nii et mööduvad Redis taaskäivitused ei kukuks kohe iga taotluse läbi. `checkRateLimit()` -i mälusisene varu neelab tõrketee.
+- `lazyConnect: true` — väldib käivitamisel sõltuvust sellest, et Redis on üleval enne, kui server hakkab ühendusi vastu võtma.
+- `enableAutoPipelining: true` — vähendab edasi-tagasi lende samaaegsete piirmäärade kontrollide jaoks; kasulik > 50 RPS ühe ühenduse korral.
 
-### 2. Redise serveri konfiguratsioon (`redis.conf`)
+### 2. Redis serveri konfiguratsioon (`redis.conf`)
 
 ```
-# Mälu
-maxmemory 80%                        # jäta ruumi operatsioonisüsteemi leheküljevahemälule
-maxmemory-policy allkeys-lru         # eemalda koormuse all aegunud autentimisvahemälu kirjed
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Püsimälu (valikuline — OmniRoute on ka ilma selleta krahhikindel)
-save 300 1                           # loo tõmmis vähemalt iga 5 minuti järel, kui ≥1 võti muutus
-appendonly no                        # AOF pole vajalik; andmed on taastoodetavad
-appendfsync no                       # fsync-lisakulu puudub (RDB on piisav)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Võrk
-timeout 0                            # jõudeolevate ühenduste katkestamine puudub
-tcp-keepalive 300                    # 5 min keep-alive
-tcp-backlog 511                      # ühenduste järjekord hüppelise koormuse jaoks
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Jõudlus
-hz 10                                # vaikeväärtus; viiteaja suhtes tundlikul juhul 100
-activedefrag yes                     # defragmendi automaatselt, kui killustatus on >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Kompromiss valiku `maxmemory-policy allkeys-lru` puhul:** autentimisvahemälu kirjed võidakse
-mälusurve korral eemaldada. See on ohutu — `setCachedApiKey` asustab vahemälu puudumisel selle alati uuesti
-ning SQLite'i varulahendus on autoriteetne. Kiiruspiiraja Lua-skript loob väikseid võtmeid, mis on
-oma olemuselt lühiajalised.
+**Kompromiss `maxmemory-policy allkeys-lru` jaoks:** Vahemälu autentimiskirjed võidakse mälu surve all välja tõsta. See on turvaline. — `setCachedApiKey` täidetakse vahelejäämise korral alati uuesti ja SQLite varuvaru on autoriteetne. Kiirusepiiraja Lua skript loob väikesed võtmed, mis on disainilt lühiajalised.
 
-### 3. Docker Compose'i sätted
+### 3. Docker koostamisseaded
 
-Tootmiskeskkonna Compose (`docker-compose.prod.yml`) kasutab kujutist `redis:8.6.2-alpine`. Lisage:
+Prod-koostamine (`docker-compose.prod.yml`) kasutab `redis:8.6.2-alpine`. Lisa:
 
 ```yaml
 redis:
@@ -152,33 +141,34 @@ redis:
 
 ### 4. Mitme eksemplari / skaleerimise kaalutlused
 
-**Üks Redis kõigile replikatsioonidele** — kiiruspiiraja Lua-skript sõltub ühest
-autoriteetsest võtmeruumist. Replikatsioonide taga olevad mitu Redise eksemplari kaotaksid atomaarsuse
-ja kahekordistaksid limiidi. Kasutage kõigi rakenduse replikatsioonide jaoks üht Redist (või tõrkesiirdega
-Redis Sentineli klastrit).
+**Üks Redis kõigi koopiate jaoks** — kiiruspiiraja Lua skript sõltub ühest autoriteetsest võtmeruumist. Mitu Redis eksemplari koopiate taga kaotaks tuumasuse ja kahekordistaks eelarve. Kasutage kõigi rakenduste koopiate jaoks ühte Redis (või tõrkesiirdega Redis Sentineli klastrit).
 
-**Ühenduste arv:** iga rakenduse replikatsioon avab Redisega **2 TCP-ühendust**
-(kiiruspiiraja klient + kvoodihoidla klient). 10 replikatsiooni korral → 20 ühendust, mis jääb
-Redise vaikeeksemplari 10 000 ühenduse ülempiirist tublisti allapoole.
+**Ühenduste arv:** Avaneb iga rakenduse koopia **2 TCP ühendust** Redis (määra piiraja klient + kvoodipoe klient). 10 → 20 ühenduse koopia puhul, mis jääb Redis eksemplari vaikeeksemplari 10 000 ühenduse ülemmäära piiresse.
 
 ### 5. Seire
 
-Avaldage seisundikontrolli lõpp-punkti kaudu:
+Esitage tervisekontrolli lõpp-punkti kaudu:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts kutsub juba kiiruspiiraja funktsioone
-// Lisa Redise-põhised kontrollid:
-//   1. PING-i viiteaeg ioredise .ping() kaudu
-//   2. Mälukasutus INFO memory kaudu
-//   3. Ühenduste arv INFO clients kaudu
-//   4. maxmemory-policy tabamusmäär (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Peamised jälgitavad mõõdikud:
+Peamised mõõdikud, mida vaadata:
 
-- **Eemaldatud võtmeid sekundis** — kui väärtus püsib nullist suurem, suurendage `maxmemory`
-- **Blokeeritud kliendid** — nullist suurem väärtus viitab aeglastele Lua-skriptidele või suurele konkurentsile
-- **Tagasilükatud ühendused** — ühenduste piirang on saavutatud; 20 ühenduse puhul haruldane
+- **Välja tõstetud võtmed / sek** Kui — on püsivalt nullist erinev, suurendage `maxmemory`
+- **Blokeeritud kliendid** — mis ei ole null, viitab aeglastele Lua skriptidele või kõrgele konkurentsile
+- **Keelatud ühendused** — ühenduse limiit tabas; haruldane 20 ühenduse juures
+
+### 6. Redis-ühilduvad serverid
+
+Iga siin kasutatav server peab käivitama Lua skripte: kiiruse piiraja on üks `EVAL`. Lua-ta serveris logib `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ja loendab protsessi kohta, nii et iga koopia jõustab piirangu ise. Valitud jagatud seansi affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) loeb ja värskendab ka kontakte `EVAL` abil; ilma Luata logib see `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ja iga koopia säilitab oma tihvtid. Teised töökoormused kasutavad tavalisi käske (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, räsid ja komplektid) ning semantilise vahemälu Redis -i taustaprogramm ei saada `FT.*` käske.
+
+Testitud versiooniga OmniRoute 3.8.52: KiviDB 1.2.0 koos selle Lua kujutisega (`kividb/kividb:v1.2.0-lua`). Kiiruse piiraja (sealhulgas loendureid jagav teine protsess), autentimisvahemälu, kvoodisalv, soojenduskaitselüliti, semantiline vahemälu salvestamine ja vestluse töötleja kaudu edastatud `/v1/chat/completions` päring läbisid 18 19-st Redis 8.10.3 kontrollimisest. See, mis erineb: `INCRBYFLOAT` salvestab `0.1 + 0.2` kui `0.30000000000000004`, kus Redis salvestab `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvoodipood analüüsib mõlemat koodiga `parseFloat`, kuid need kaks numbrit erinevad viimaste numbrite poolest, nii et täpselt kvoodipiirile langev võrdlus võib välja tulla erinevalt. Seansi seotuse pood ei olnud selle käitamise osa. ( [seadistus](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [tulemused](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 
@@ -201,13 +191,13 @@ flowchart LR
 
 ## Viited
 
-| Fail                               | Otstarve                                                                            |
-| ---------------------------------- | ----------------------------------------------------------------------------------- |
-| `src/shared/utils/rateLimiter.ts`  | Peamine Redise klient, Lua päringusageduse piiramise skript, mälupõhine varuvariant |
-| `src/lib/db/apiKeys.ts`            | Autentimisvahemälu — Redis→SQLite varuvariant                                       |
-| `src/lib/quota/redisQuotaStore.ts` | Eraldi Redise klient valikulise kvoodihoidla jaoks                                  |
-| `src/lib/quota/storeFactory.ts`    | Vahetab kvoodidraivereid `sqlite` ja `redis`                                        |
-| `docker-compose.prod.yml`          | Tootmiskeskkonna Redise konteiner (tõmmis `redis:8.6.2-alpine`)                     |
-| `.env.example`                     | Redise keskkonnamuutujate dokumentatsioon                                           |
-| `src/app/api/local/redis/`         | API marsruudid arenduskeskkonna konteineri orkestreerimiseks                        |
-| `bin/cli/commands/redis.mjs`       | CLI käsud arenduskeskkonna konteineri orkestreerimiseks                             |
+| Fail                               | Eesmärk                                                         |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Esmane Redis klient, Lua kiiruspiirangu skript, mälusisene varu |
+| `src/lib/db/apiKeys.ts`            | Vahemälu autentimine — Redis→SQLite varundus                    |
+| `src/lib/quota/redisQuotaStore.ts` | Eraldi Redis klient valikulise kvoodipoe jaoks                  |
+| `src/lib/quota/storeFactory.ts`    | Lülitab `sqlite` ja `redis` kvoodidraiverite vahel              |
+| `docker-compose.prod.yml`          | Prod Redis konteiner (pilt `redis:8.6.2-alpine`)                |
+| `.env.example`                     | Redis env vars dokumentatsioon                                  |
+| `src/app/api/local/redis/`         | API marsruudid arendaja konteinerite orkestreerimiseks          |
+| `bin/cli/commands/redis.mjs`       | CLI käsud arendaja konteineri orkestreerimiseks                 |

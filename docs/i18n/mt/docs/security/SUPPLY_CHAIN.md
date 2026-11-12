@@ -18,18 +18,32 @@ OmniRoute tippubblika artifacts npm + Docker. Dawn il-gates jipprovdu provenjenz
 
 Ir-ratchet tal-CVE tal-immaġni juża **żewġ passi** f'`docker-publish.yml`: il-pass SARIF (`HIGH,CRITICAL`, `exit-code: 0`) iżomm HIGH+CRITICAL viżibbli fit-tab tas-Sigurtà mingħajr ma jimblokka; il-pass _CRITICAL gate_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) ifalli r-rilaxx fuq CVE KRITIKU **b'soluzzjoni disponibbli**. `ignore-unfixed` jipprevjeni l-imblukkar tar-rilaxx għal CVE ta' immaġni bażi mingħajr patch upstream.
 
-## ⚠️ Varjanza tal-CVE (gates ta' imblukkar osv/Trivy)
+## ⚠️ Varjanza fis-CVE (timblokka l-kontrolli ta’ osv/Trivy)
 
-osv u Trivy iqabblu d-deps kontra databases tal-CVE li **jikbru kontinwament**. PR li **ma jmiss l-ebda dipendenza** jista' f'daqqa waħda jsir aħmar minħabba li CVE ġdid ġie żvelat f'dep eżistenti (osv: `vulnCount` imkejjel > baseline; Trivy: CRITICAL ġdid li jista' jiġi rranġat fl-immaġni). **Dan huwa mġiba operattiva MISTENNIJA ta' gate tal-CVE li jimblokka, mhux rigressjoni tal-prodott.**
+osv u Trivy iqabblu d-dipendenzi ma’ bażijiet tad-data tas-CVE li **jikbru kontinwament**. PR
+li **ma jibdel l-ebda dipendenza** jista’ f’daqqa waħda jsir aħmar minħabba li CVE ġdid ikun
+ġie żvelat f’dipendenza eżistenti (osv: `vulnCount` imkejjel > il-linja bażi; Trivy: CRITICAL
+ġdid li jista’ jiġi rranġat fl-immaġni). **Din hija mġiba operazzjonali MISTENNIJA ta’ kontroll
+CVE li jimblokka, mhux rigressjoni tal-prodott.**
 
-Meta osv jew Trivy jsiru ħomor minħabba CVE żvelat ġdid, ir-rimedju huwa:
+Meta osv jew Trivy isiru ħomor minħabba CVE li jkun għadu kif ġie żvelat, ir-rimedju huwa:
 
-1.  **Aġġorna d-dep affettwat** (preferut) — aġġorna għall-verżjoni patched permezz ta' `package.json` `overrides` (deps tranżittivi) jew ibni mill-ġdid l-immaġni fuq bażi patched.
-2.  **Jekk ma hemm l-ebda soluzzjoni upstream:**
-    - **osv:** erġa' ssettja l-baseline `metrics.vulnCount` f'`config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ma jkoprix gates dedikati — edita l-valur manwalment, `direction:down`) b'nota ta' ġustifikazzjoni + issue ta' traċċar.
-    - **Trivy:** żid entrata f'`.trivyignore` (CVE-ID kull linja) b'kumment ta' ġustifikazzjoni + issue ta' traċċar. `ignore-unfixed: true` diġà jkopri CVEs mingħajr patches awtomatikament.
+1. **Aġġorna d-dipendenza affettwata** (preferut) — aġġorna għall-verżjoni kkoreġuta permezz ta’
+   `overrides` f’`package.json` (għad-dipendenzi tranżittivi) jew erġa’ ibni l-immaġni fuq bażi kkoreġuta.
+2. **Jekk rimedju ma jkunx disponibbli:** iżomm is-sejba mkejla u ssegwi d-dipendenza jew l-immaġni affettwata. Tgħollix il-linja bażi tal-vulnerabbiltà biex tgħaddi kandidat li jonqos. Trivy's `ignore-unfixed: true` diġà teskludi vulnerabbiltajiet immaġini mingħajr garża upstream. Kwalunkwe eċċezzjoni teħtieġ vulnerabbiltà riveduta ID, mogħdija eżatta tal-pakkett, skadenza u kwistjoni ta 'traċċar fil-politika; mhijiex konsegwenza awtomatika ta' skan fallut.
 
-Iż-żewġ gates **jaqbżu b'mod grazzjuż** (exit 0) meta l-għodda tkun assenti jew il-kejl ifalli (osv-scanner mhux fil-PATH, osv.dev/network ma jistax jintlaħaq, JSON invalidu) — falliment ta' **kejl** qatt ma jimblokka, biss rigressjoni **mkejla** timblokka.
+L-eżekuzzjonijiet OSV meħtieġa (`check:vuln-ratchet -- --ratchet`) ifallu b’mod magħluq bi
+`INCOMPLETE` u joħorġu b’2 meta l-iskaner, ir-rapport jew il-linja bażi ma jkunux jistgħu jiġu vvalidati.
+Rigressjoni mkejla toħroġ b’1. Eżekuzzjoni konsultattiva xorta tista’ tirrapporta `SKIP` bi
+ħruġ 0, iżda dan ma jistabbilixxix li d-dipendenzi għaddew mill-iskannjar. Il-pass Trivy
+li jimblokka jeħtieġ ukoll kejl li jirnexxi: għodod mhux disponibbli, kompiti li fallew
+u evidenza nieqsa tal-immaġni ma jistgħux jiċċertifikaw immaġni bħala nadifa.
+
+## Politika tal-iskannjar tal-immaġni
+
+`.trivyignore.yaml` attwali ma fih l-ebda eċċezzjoni ta' vulnerabbiltà. `npm run check:trivy-ignore-policy` jivvalida l-politika strutturata fil-profili tal-iskannjar lokali, CI u Kwalità. IDs mhux magħruf, mogħdijiet usa', entrati duplikati u eċċezzjonijiet skaduti huma miċħuda; il-legat `.trivyignore` mhuwiex input għall-iskans emigrati.
+
+Docker jiċċekkja l-għodda tal-politika minn `github.workflow_sha` u l-politika tas-sors tal-immaġni bl-istess selettur tas-sors bħall-bini. Is-selettur tal-politika jirrifjuta ambiti inkompatibbli u jipprepara fajl wieħed għaż-żewġ skanijiet Trivy. Sors storiku mingħajr politika strutturata ma jirċievi l-ebda eċċezzjoni. Iż-żewġ skans pin Trivy `v0.70.0`. Il-validazzjoni tal-politika tagħti prova tal-konsistenza tal-konfigurazzjoni; l-immaġni għadha teħtieġ skan ta 'suċċess.
 
 ## Riskju ta' dipendenza rtirati
 

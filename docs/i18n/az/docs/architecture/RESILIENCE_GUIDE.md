@@ -216,6 +216,45 @@ Bunlar etimadnamələr dəyişdirilənə və ya operator onları sıfırlayana q
 Reqressiya qoruyucuları: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Banklaşdırılmış sıfırlamaları avtomatik tətbiq edin
+
+**Əhatə dairəsi:** Codex və Claude abunə (OAuth) əlaqələri.**Daxil olun** : `bankedResetAutoApply` parametri defolt olaraq söndürülüb və `dry-run` rejimindədir (Parametrlər → AI → Banklaşdırılmış sıfırlamaları avtomatik tətbiq edin).
+
+**Məqsəd:** operatorun Provayder Limitləri səhifəsində "Geri Al" düyməsini basmasını gözləmək əvəzinə, hesab istifadə divarına dəyəndə banklaşdırılmış sıfırlamaları özbaşına xərcləyin.
+
+| Kredit növü (`creditTypes`) | Nə geri alınır                                            | Harada qaçır                                            |
+| --------------------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| `codexCredits`              | Codex kreditlərini sıfırladı                              | fon işi, hər 60 s                                       |
+| `claudeCredits`             | Claude bank qrantları (`GRANT` kreditləri)                | fon işi, hər 60 s                                       |
+| `claudeSessionReset`        | Claude həftəlik sessiya limitinin sıfırlanması (yuxarıda) | hər hesab keçidi ilə eyni siyasət vasitəsilə sorğu yolu |
+
+**İcra:**
+
+- Təmiz qərar (hər iki yol üçün müəyyən edilmiş bir qayda): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Əsas iş: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` də başlamışdır)
+- Claude sorğu yolu qapısı: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts`-də `setClaudeLimitResetPolicy()` vasitəsilə qeydiyyatdan keçmişdir
+- Tarix, qapaqlar və webhook: `src/lib/usage/bankedResetAudit.ts`
+- Tarix API: `GET /api/settings/banked-reset-auto/history?limit=50` (idarəetmə auth)
+
+**Qərar əmri** (birinci uğursuz qayda qeydə alınmış səbəbdir):
+
+1. Xüsusiyyət deaktivdir, kredit növü deaktivdir və ya hesab əhatə dairəsindən kənardır (`accountScope` `all` / `selected` və hər hesab üçün `connections` xəritəsi).
+2. Əlavə UTC cədvəlindən kənarda (`startHourUtc` > `endHourUtc` gecə yarısını keçir).
+3. Son 24 saat ərzində məhdudiyyətlər: `maxPerAccountPerDay` (1), `maxPerDay` (3) və `minSpacingMinutes` (30) istənilən iki ödəniş arasında.
+4. Tətik: divarlı `session` və ya `weekly` pəncərəsi ( `getQuotaWindowStatus().reachedThreshold` dən oxunur, `isAccountQuotaExhausted()` deyil, yalnız xərclənmiş hər pəncərə ilə hesab haqqında məlumat verir) və ya ən azı `expiringCreditMinUsedPercent` (50) istifadə etmiş hesabda `expiringCreditHours` (24) daxilində müddəti bitən kredit.
+5. Təbii sıfırlama qoruyucusu: divarlı 5 saatlıq pəncərə `sessionResetGuardMinutes` (90) daxilində və ya `weeklyResetGuardHours` daxilində divarlı həftəlik pəncərə (12) sıfırlandıqda keçin.
+6. Həftəlik mərtəbə: həftəlik qalan `weeklyFloorPercent` (10) aşağı olduqda 5 saatlıq sıfırlamağa keçin.
+7. `last-resort` rejimi: hər iki pəncərədə eyni provayderin digər əhatə dairəsi hesabında ən azı `poolHeadroomPercent` (10) qaldıqda keçin. Müddəti bitən kredit tətikləri bundan yan keçir.
+8. `dry-run` sıra qeyd edir və heç nə geri qaytarmır; `last-resort` və `eager` geri qaytarılır.
+
+Çatışmayan kvota datası heç vaxt geri ödəməni açmır: naməlum sıfırlama vaxtı və ya həftəlik istifadə atlanır.
+
+**Claude sessiyasının sıfırlanması:** xüsusiyyət söndürüldükdə və ya `claudeSessionReset` söndürüldükdə, hər hesab üçün `autoLimitReset` keçidi əvvəlki kimi qərar verir. Hər ikisi aktiv olduqda, funksiya hər hesab üçün keçidləri əvəz edir: əhatə dairəsi daxilində hesab yalnız siyasət buna icazə verdikdə iddia edə bilər və `dry-run` rejimində heç bir iddia irəli sürülmür.
+
+**Təhlükəsizlik:** iş hər bir işarə üçün ən çox bir kredit geri alır, kreditləri siyahıya salmazdan əvvəl qərar verir (keçilmiş hesab heç vaxt siyahıya alınmır), `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` identifikasiya açarlarından istifadə edir və uğursuz siyahıdan və ya ödənişdən sonra 1 saat ərzində hesabı söndürür. Hər bir geri alma, uğursuzluq və quru iş qərarı `audit_log` -yə yazılır (`action: "bankedReset.redeem"`, token və ya kredit idləri yoxdur); qapaqlar həmin cərgələrdən sayılır, ona görə də onlar yenidən işə salındıqda sağ qalırlar. Uğurlu ödənişlər `provider.reset_redeemed` webhook-u da işə salır.
+
+Reqressiya qoruyucuları: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sessiya bağlılığı (#7274)
 
 **Əhatə dairəsi:** istənilən provayder üçün bir klient sessiyası
@@ -366,26 +405,17 @@ saxlanılmır — yenidən başladıldıqda itirilir. _Parametrlər_ saxlanılı
 
 ---
 
-## 4. Kvota-paylaşımı üzrə paralellik nəzarəti (v3.8.36)
+## 4. Kvota-Paylaşma Paralelliyinə Nəzarət (v3.8.36)
 
-Abunə hesabları (GLM, MiniMax və s.) çox vaxt yalnız ~1–3 paralel
-sorğunu qəbul edir; limiti aşmaq 429 xətalarını və soyuma müddətlərini
-işə salır. Bu hal bir neçə API açarının eyni upstream hesabını paylaşdığı
-**kvota-paylaşımı** (`qtSd/…`) kombinasiyalarında xüsusilə kəskindir. Üç
-qat mexanizm paylaşılan hesabın həddən artıq sorğu ilə yüklənməsinin qarşısını alır.
+Abunə hesabları (GLM, MiniMax və s. ) çox vaxt yalnız ~ 1–3 paralel sorğuları qəbul edir; bunun aşılması 429 saniyə və soyuma müddətini tetikler. Bu altında kəskindir **kvota payı** (`qtSd/…`) kombinləri, burada bir neçə API açarı bir yuxarı hesab paylaşır. Üç qat paylaşılan hesabı su altında saxlamaqdan qoruyur.
 
-### Bağlantı üzrə paralellik limiti (`max_concurrent`)
+### Hər bağlantı üzrə paralellik həddi (`max_concurrent`)
 
-Hər provayder bağlantısı `max_concurrent` limiti elan edə bilər
-(`provider_connections.max_concurrent`, bağlantı modalında / API-də / DB-də
-təyin edilir). Limit istəmirsinizsə, sahəni boş saxlayın. Bu, aşağıda
-izah olunan seriallaşdırma qatını idarə edən əsas parametrdir — onu hesabın
-real paralellik səviyyəsinə uyğun təyin edin (məsələn, GLM ~1, MiniMax ~2).
+Hər bir provayder bağlantısı `max_concurrent` tavanını elan edə bilər (`provider_connections.max_concurrent`, əlaqə modal / API / DB). Heç bir məhdudiyyət olmadan boş buraxın. Bu, — altındakı seriallaşdırma qatını idarə edən tək düymədir, onu hesabın real paralelliyinə təyin edir (məsələn GLM ~ 1, MiniMax ~ 2).
 
-### Model üzrə paralellik limitləri (`modelConcurrency`)
+### Hər model üçün paralellik hədləri (`modelConcurrency`)
 
-Bağlantı əlavə olaraq `rateLimitOverrides` xəritəsində hər model üçün dəqiq
-paralellik limitləri elan edə bilər:
+Bağlantı əlavə olaraq `rateLimitOverrides` xəritəsində hər model üzrə dəqiq paralellik tavanlarını elan edə bilər:
 
 ```json
 {
@@ -396,89 +426,32 @@ paralellik limitləri elan edə bilər:
 }
 ```
 
-Bunu bağlantı modalında (**Rate limit overrides → Per-model
-concurrency caps**, hər sətirdə bir `model=cap`) və ya eyni JSON strukturu ilə
-`PATCH /api/providers/[id]` vasitəsilə təyin edin. Əsas semantika:
+Onu əlaqə modalında təyin edin (**Məzənnə limiti → Hər modelə uyğunluq hədlərini ləğv edir** , hər sətir üçün bir `model=cap` ) və ya eyni JSON formalı `PATCH /api/providers/[id]` vasitəsilə. Əsas semantika:
 
-- **Bağlantı üzrə və modelə xas:** `maxConcurrent` bütün bağlantı üçün ortaq
-  limit olaraq qalır. Hər ikisi tətbiq edildikdə, eyni kompozit kiliddə
-  (`global → provider → account → model`) hər iki kilid atomik şəkildə
-  əldə edilir; effektiv davranışı tətbiq olunan daha sərt limit müəyyən edir.
-- **Model açarının dəqiq uyğunluğu:** açar marşrutlaşdırma həll edildikdən sonra
-  icraçıya ötürülən model sətridir — adətən upstream model identifikatorunun
-  özüdür (`glm-5`), müştəri tərəfli `provider/model` alias-ı deyil
-  (`zai/glm-5`, `glm-5` ilə uyğun gəlmir). Dəyərlər müsbət tam ədədlə
-  ifadə olunan paralel sorğu limitləridir.
-- **Yerli növbəyə yerləşdirmə, aşkarlama yoxdur:** artıq sorğular mövcud
-  növbə/zaman aşımı semantikası ilə yerli növbəyə yerləşdirilir (tipli
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` qəbul xətaları). OmniRoute
-  upstream siyasətini aşkar etmir və ya çıxarmır — operatorun konfiqurasiya
-  etdiyi dəqiq limitləri tətbiq edir. Dolu model kilidi provayderi heç vaxt
-  deaktiv etmir və model üçün daimi bloklanma yaratmır; upstream 429/soyuma/
-  ehtiyat keçidi davranışı xəta zamanı ehtiyat mexanizm olaraq qalır.
-- **Bağlantı və proses üzrə əhatə dairəsi:** limitlər hər verilənlər bazası
-  bağlantısı üçün ayrıdır və yaddaşda saxlanılır; buna görə eyni upstream API
-  açarını yenidən istifadə edən iki bağlantı bir-biri ilə koordinasiya olunmur.
-- **Konfiqurasiya edilmədikdə dəyişiklik yoxdur:** xəritənin buraxılması (və ya
-  idarə panelindəki sahənin boş saxlanması) model kilidi əlavə etmir. Heç bir
-  universal provayder limiti təsdiqləməyən nümunə konfiqurasiya:
+- **Bağlantı miqyasında və modelə xas:** `maxConcurrent` ümumi əlaqə tavanı olaraq qalır. Hər ikisi tətbiq edildikdə, hər iki qapı eyni kompozit qapıda (`global → provider → account → model`) atomik şəkildə alınır; effektiv davranış daha sərt tətbiq olunan hədddir.
+- **Dəqiq model-açar uyğunluğu:** əsas — marşrutlaşdırma həllindən sonra icraçıya ötürülən model sətridir `glm-5` adətən müştəri tərəfi `provider/model` ləqəbi deyil (`glm-5` `zai/glm-5` uyğun gəlmir). Dəyərlər müsbət tamsaylı paralel sorğu tavanlarıdır.
+- **Yerli növbə, aşkarlama yoxdur:** artıq sorğular mövcud queue/timeout semantikası ilə yerli növbəyə (yazılmış `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` qəbul xətaları) malikdir. OmniRoute yuxarı istiqamət siyasətini kəşf etmir və ya nəticə çıxarmır — o, operatorun konfiqurasiya etdiyi dəqiq tavanları tətbiq edir. Doymuş model qapısı heç vaxt provayderi söndürmür və heç vaxt daimi model blokirovkası yaratmır; upstream 429/cooldown/fallback davranışı səhv backstop olaraq qalır.
+- **Hər bir əlaqə, hər bir proses əhatəsi:** qapaqlar verilənlər bazası bağlantısı üzrədir və yaddaşda saxlanılır, buna görə də eyni yuxarı axın API açarını təkrar istifadə edən iki əlaqə bir-biri ilə əlaqələndirilmir.
+- **Konfiqurasiya edilməmiş, dəyişməmiş deməkdir:** xəritəni buraxmaq (və ya tablosunun sahəsini boş qoymaq) heç bir model qapısı əlavə etmir. Hər hansı universal provayder məhdudiyyəti qoymadan konfiqurasiya nümunəsi:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Kvota-paylaşımı sorğularının seriallaşdırılması
+### Kvota-paylaşma sorğusunun seriallaşdırılması
 
-Kvota-paylaşımı dispetçerliyi müsbət `max_concurrent` elan edən bağlantını
-hədəflədikdə, həmin **hesaba** yönələn paralel sorğular bağlantı üzrə
-semafor vasitəsilə (`qsconn:<connectionId>` açarı) seriallaşdırılır: artıq
-sorğular hesabı həddən artıq yükləmək əvəzinə **növbədə gözləyir**. Bu
-mexanizm **fail-open** rejimində işləyir — dolu növbə və ya zaman aşımı
-slot əldə edilmədən davam edir və dispetç edilə bilən sorğunu heç vaxt
-rədd etmir. Parametri **Settings → Resilience → Quota-share per-connection
-concurrency** bölməsindən dəyişin
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standart olaraq
-aktivdir). `max_concurrent` limiti olmadıqda davranış dəyişmir.
+Kvota payı göndərişi müsbət `max_concurrent` elan edən əlaqəni hədəflədikdə, ona paralel sorğular **hesab** hər bir əlaqə semaforu (açar `qsconn:<connectionId>`) vasitəsilə seriallaşdırılır: artıq sorğular **növbədə gözləyin** hesabı doldurmaq əvəzinə. elədir **uğursuz-açıq** — doymuş növbə və ya vaxt aşımı göndərilə bilən sorğunu heç vaxt rədd etmək əvəzinə, boşluq olmadan davam edir. Daxil edin **Parametrlər → Dayanıqlılığı → Kvota-paylaşma hər bağlantı üzrə paralellik** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, defolt aktivdir). `max_concurrent` qapağı olmadan davranış dəyişməzdir.
 
-> Kvota-paylaşımı marşrutlaşdırma kilidi (`selectQuotaShareTarget`, DRR + P2C)
-> özü də **fail-open** rejimində işləyir və limitə çatmış bağlantının yalnız
-> _prioritetini azaldır_ — bir bağlantılı hovuzda sərt limit tətbiq edə bilməz;
-> buna görə yüklənməni faktiki olaraq məhdudlaşdıran məhz bu semafordur.
+> Kvota payı yönləndirmə qapısı (`selectQuotaShareTarget`, DRR + P2C) özü uğursuzdur və yalnız — tək qoşulma hovuzu ilə məhdudlaşdıra bilməz, ona görə də bu semafor əslində daşqını ehtiva edən şeydir.
 
-### Kombinasiya üzrə soyuma müddətini nəzərə alan yenidən cəhd
+### Kombo soyutma müddətindən xəbərdar olan yenidən cəhd edin
 
-Bütün kombinasiya strategiyaları üçün (aktiv olduqda), qısa müddətli
-müvəqqəti soyuma müddəti səbəbindən 429 ilə nəticələnəcək sorğu 429 qaytarmaq
-əvəzinə həmin müddətin bitməsini gözləyir və yenidən dispetç edilir — buna
-çoxmodeli kombinasiyalarda Gemini sinfi TPM/RPM pəncərələri (~60 saniyəlik
-retry-after) də daxildir; məsələn, 2 modeldən ibarət kombinasiyanın hər iki
-hədəfi model üzrə sürət limitinə çatdıqda. Bu davranış **Settings →
-Resilience** bölməsindəki `comboCooldownWait` (`enabled`, `maxWaitMs`,
-`maxAttempts`, `budgetMs`) ilə məhdudlaşdırılır. `quota_exhausted` səbəbinə
-görə (gecəyarısına qədər bloklanmış) və ya autentifikasiya/tapılmama
-səbəblərinə görə heç vaxt gözləmir.
+Hər bir kombinasiya strategiyası üçün (aktiv olduqda), SHORT müvəqqəti soyutma müddəti üçün 429-u kristallaşdıran sorğu onu gözləyir və 429 — ni qaytarmaq əvəzinə yenidən göndərilir, bu, çox modelli kombinasiyalarda Gemini sinif TPM/RPM pəncərələrini (~ 60-ların təkrar cəhdi) əhatə edir, məsələn, hər iki hədəf üçün hər iki hədəf üçün limit. `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) ilə məhdudlaşır **Parametrlər → Dayanıqlığı** . Heç vaxt `quota_exhausted` (gecə yarısına qədər kilidlənir) və ya auth/not-found səbəblərini gözləmir. `comboTimeoutMs` dəsti ilə, bu son tarixdən əvvəl başa çata bilməyən gözləmə başlamaz (#18998): kombo `COMBO_TIMEOUT` 504 əvəzinə terminal cavabı ilə dərhal cavab verir.
 
-Kombinasiya `config.comboCooldownWaitEnabled: false` ilə bu funksiyanı
-söndürə bilər. Yalnız literal `false` bu ortaq kombinasiya gözləmələrini
-(dispetçerlikdən sonrakı soyuma müddəti və dispetçerlikdən əvvəlki dövrə
-açıq/model kilidi gözləmələri) və gözləmə büdcəsi üçün zaman aşımı alt
-həddinin genişləndirilməsini deaktiv edir. Dəyərin olmaması və ya `true`
-qlobal siyasəti saxlayır; `true` qlobal olaraq deaktiv edilmiş gözləməni
-aktivləşdirə bilməz. Açıq şəkildə təyin edilmiş `targetTimeoutMs` yenə də
-üstün sayılır. Bu seçim ayrıca native-Codex növbə-pin dispetçerlikdən əvvəlki
-gözləməsini dəyişmir.
+Kombo `config.comboCooldownWaitEnabled: false` ilə imtina edə bilər. Yalnız hərfi `false` bu paylaşılan kombinasiya gözləmələrini (göndərmədən sonrakı soyuma və göndərilmədən əvvəl circuit-open/model-lock gözləmələri) və onların gözləmə-büdcə vaxt aşımı mərtəbəsinin uzadılmasını deaktiv edir. Eksik və ya `true` qlobal siyasəti qoruyur; `true` qlobal olaraq deaktiv edilmiş gözləməni aktivləşdirə bilməz. Açıq bir `targetTimeoutMs` hələ də qazanır. Bu imtina ayrı-ayrı yerli-Codex dönmə sancağı göndərilmə öncəsi gözləməsini dəyişmir.
 
-Eyni kilid dispetçerlikdən əvvəlki halı da əhatə edir (#16319): cəhd
-edilməzdən əvvəl kombinasiyanın bütün hədəfləri model qısa müddətli
-müvəqqəti bloklanmada olduğuna görə buraxıldıqda, sıfır cəhdli yol kilidin
-bitməsini eyni limitlər çərçivəsində gözləyir və işarəsiz
-`503 ALL_TARGETS_SKIPPED` cavabı vermək əvəzinə yenidən dispetç edir.
-Gözləməyə icazə verilmədikdə (limit, cəhd və ya büdcə tükəndikdə, yaxud
-funksiya söndürüldükdə) terminal cavab ən erkən müvəqqəti kilidin bitmə
-vaxtından `retry_after` / `reset_at` daşıyan
-`429 rate_limit_error` cavabına yüksəldilir; kvota, autentifikasiya və
-tapılmama kilidləri isə işarəsiz 503 olaraq qalır.
+Eyni darvaza göndərilmə qabağı qutunu (#16319) əhatə edir : hər hansı bir cəhd edilməzdən əvvəl kombonun hər hədəfi atlandıqda onun modeli qısa keçici blokada oturur, sıfır cəhd yolu eyni tavanlar altında kilidi gözləyir və işarəsiz `503 ALL_TARGETS_SKIPPED` cavab vermək əvəzinə yenidən göndərilir. Heç bir gözləməyə icazə verilmədikdə (tavan, cəhd və ya büdcə tükəndikdə və ya funksiya sönür), terminal cavabı ən erkən keçid kilidinin bitməsindən `retry_after` / `reset_at` daşıyan `429 rate_limit_error` yə təkmilləşdirir; kvota, auth və tapılmayan kilidlər işarəsiz 503-ü saxlayır.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

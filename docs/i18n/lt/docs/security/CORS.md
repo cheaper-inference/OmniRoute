@@ -4,209 +4,119 @@
 
 ---
 
-OmniRoute valdo, kuriems **naršyklės šaltiniams** leidžiama skaityti atsakymus iš kitų šaltinių,
-naudodama vieną centralizuotą leidžiamų šaltinių sąrašą. Pagal numatytąją nuostatą modelis
-**neleidžia prieigos**: joks šaltinis nėra leidžiamas, kol jo aiškiai neįtraukiate. Šiame puslapyje aprašoma, kaip
-nustatomas leidžiamas šaltinis, ką iš tikrųjų atveria `CORS_ALLOW_ALL=true` (ir, svarbiausia, ko
-jis **neatveria**), kaip saugiai konfigūruoti kūrimo ir gamybinę aplinkas bei vykdymo metu rodomas įspėjimas,
-kurį prietaisų skydelis pateikia, kai įjungtas pakaitos simbolis.
+OmniRoute kontroliuoja, kuris **naršyklės kilmė** gali skaityti įvairių šaltinių atsakymus iš vieno centralizuoto leidžiamųjų sąrašo. Modelis yra **pagal numatytuosius nustatymus nepavyko uždaryti** : jokia kilmė neleidžiama, kol nepasirinkote. Šiame puslapyje aprašoma, kaip išsprendžiamas leidžiamųjų sąrašas, ką iš tikrųjų atskleidžia `CORS_ALLOW_ALL=true` (ir, svarbiausia, ką jis daro **ne** ), kaip saugiai konfigūruoti dev vs production, o vykdymo laiko įspėjimas prietaisų skydelyje rodomas, kai veikia pakaitos simbolis.
 
-**Pirminis tiesos šaltinis:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Leidžiamų šaltinių sąrašas pritaikomas vieną kartą
-tarpinėje programinėje įrangoje (`src/server/authz/pipeline.ts`) — atskirų maršrutų apdorojimo funkcijos pačios nenustato
-`Access-Control-Allow-Origin`.
+**Tiesos šaltinis:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Leidžiamas sąrašas taikomas vieną kartą, tarpinėje programinėje įrangoje (`src/server/authz/pipeline.ts`) — maršruto tvarkytojai patys nenustato `Access-Control-Allow-Origin`.
 
-## Kaip nustatomas šaltinis
+## Kaip išsprendžiama kilmė
 
-Kiekvienai užklausai tarpinė programinė įranga apskaičiuoja `Access-Control-Allow-Origin` reikšmę
-tokia tvarka:
+Kiekvienai užklausai tarpinė programinė įranga apskaičiuoja `Access-Control-Allow-Origin` reikšmę tokia tvarka:
 
-1. **`CORS_ALLOW_ALL=true`** (arba senesnis `CORS_ORIGIN=*`) → grąžina užklausos siuntėjo
-   `Origin` reikšmę (arba `*`, kai nėra `Origin` antraštės), kartu su `Vary: Origin`,
-   kad podėliai veiktų tinkamai. Tas pats `applyCorsHeaders()` kontrolinis taškas taip pat prideda
-   `Vary: Accept-Encoding` prie kiekvieno 2xx atsakymo su turiniu prieigos raktu autentifikuojamoje
-   `/v1*`/`/v1beta*` sąsajoje (`relaxForTokenAuth`, RFC 9110 §12.5.5, problema #6737), kad
-   tolesni arba bendrinami podėliai galėtų tinkamai atskirti suglaudintus ir nesuglaudintus
-   variantus.
-2. Priešingu atveju užklausos `Origin` normalizuojamas (paverčiamas mažosiomis raidėmis,
-   pašalinamas galinis pasvirasis brūkšnys) ir palyginamas su **sujungtu leidžiamų šaltinių sąrašu**:
-   - aplinkos kintamasis **`CORS_ALLOWED_ORIGINS`** — kableliais atskirtas sąrašas, ir
-   - vykdymo metu taikomas **`corsOrigins`** nustatymas (prietaisų skydelis → Saugumas → _Leidžiami CORS
-     šaltiniai_), perduodamas per `setRuntimeAllowedOrigins()` iš
-     `src/lib/config/runtimeSettings.ts`.
-3. Atitikties nėra → **`Access-Control-Allow-Origin` antraštė neišsiunčiama**. Naršyklė
-   blokuoja skaitymą iš kito šaltinio. Tai yra numatytoji prieigą draudžianti elgsena.
+1. **`CORS_ALLOW_ALL=true`** (arba senasis `CORS_ORIGIN=*`) → atkartoja skambinančiojo `Origin` (arba `*`, kai nėra `Origin` antraštės) su `Vary: Origin`, todėl talpyklos išliks teisingos. Tas pats `applyCorsHeaders()` droselio taškas taip pat prideda `Vary: Accept-Encoding` prie kiekvieno 2xx-su kūnu atsako žetonu autentifikuotame `/v1*`/`/v1beta*` paviršiuje (`relaxForTokenAuth`, RFC 9110 §12.5.5, #6737 leidimas ), todėl downstream/shared talpyklos gali teisingai atskirti suglaudintus ir nesuglaudintus variantus.
+2. Kitu atveju užklausa `Origin` normalizuojama (mažosios raidės, galinis pasvirasis brūkšnys pašalinamas) ir suderinama su **sujungtas leidimų sąrašas** :
+   - env **`CORS_ALLOWED_ORIGINS`** — kableliais atskirtas sąrašas ir
+   - vykdymo laikas **`corsOrigins`** nustatymas (Dashboard → Security → _CORS Allowed Origins_), įpurškiamas per `setRuntimeAllowedOrigins()` iš `src/lib/config/runtimeSettings.ts`.
+3. Nėra atitikimo →**neskleidžiama `Access-Control-Allow-Origin` antraštė** . Naršyklė blokuoja kryžminės kilmės skaitymą. Tai numatytasis numatytasis nesėkmingo uždarymo režimas.
 
-| Aplinkos kintamasis    | Reikšmė                                                                                                        |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | Tikslių leidžiamų šaltinių CSV sąrašas (rekomenduojama).                                                       |
-| `CORS_ALLOW_ALL`       | `true`/`1` → grąžinti bet kurį šaltinį (pakaitos simbolis). Tik kūrimo aplinkai.                               |
-| `CORS_ORIGIN`          | Senesnis parametras. `*` veikia kaip `CORS_ALLOW_ALL`; viena reikšmė pridedama prie leidžiamų šaltinių sąrašo. |
+| Env var                | Reikšmė                                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | Tikslios kilmės CSV leisti (rekomenduojama).                                             |
+| `CORS_ALLOW_ALL`       | `true`/`1` → atkartoja bet kokią kilmę (pakaitalas). Tik kūrėjas.                        |
+| `CORS_ORIGIN`          | Palikimas. `*` elgiasi kaip `CORS_ALLOW_ALL`; į leidimų sąrašą įtraukiama viena reikšmė. |
 
-## Grėsmių modelis — ką iš tikrųjų atveria `CORS_ALLOW_ALL=true`
+## Grėsmės modelis —, ką `CORS_ALLOW_ALL=true` iš tikrųjų atskleidžia
 
-Į bendrąjį OWASP įspėjimą („CORS pakaitos simbolis = bet kuri svetainė gali iškviesti jūsų API“) verta
-žiūrėti rimtai, tačiau OmniRoute pažeidžiamumo sritis yra **siauresnė nei bendruoju atveju**
-dėl vieno konkretaus įgyvendinimo ypatumo:
+Į bendrąjį OWASP įspėjimą („pakeistinė raidė CORS = bet kuri svetainė gali vadinti jūsų API“) verta žiūrėti rimtai, tačiau OmniRoute parodymas **siauresnis nei bendrasis atvejis** , dėl vieno konkretaus įgyvendinimo fakto:
 
-> **Centrinė `applyCorsHeaders()` funkcija niekada neišsiunčia
-> `Access-Control-Allow-Credentials`.** Naršyklė nepateiks _su kredencialais_
-> (su slapuku) gauto atsakymo iš kito šaltinio, nebent serveris išsiųstų
-> `Access-Control-Allow-Credentials: true`. Bendrasis OmniRoute CORS kelias to niekada
-> nedaro.
+> **Centrinis `applyCorsHeaders()` niekada neskleidžia `Access-Control-Allow-Credentials`.** Naršyklė nepateiks _credentialed_ (slapukus turinčio) kryžminės kilmės atsakymo, nebent serveris atsiųs `Access-Control-Allow-Credentials: true`. OmniRoute bendras CORS kelias niekada neveikia.
 
-Ką tai reiškia kiekvienai sąsajai, net kai nustatyta `CORS_ALLOW_ALL=true`:
+Ką tai reiškia vienam paviršiui, net naudojant `CORS_ALLOW_ALL=true`:
 
-| Sąsaja                                   | Autentifikavimo mechanizmas   | CORS pakaitos simbolio poveikis                                                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Prietaisų skydelis / MANAGEMENT `/api/*` | Slapuku pagrįsta sesija       | Šaltinis grąžinamas, tačiau **be `Allow-Credentials`** naršyklė **blokuoja** skaitymą su kredencialais. Kenkėjiška kito šaltinio svetainė **negali perskaityti** autentifikuotų prietaisų skydelio atsakymų, o sesijos slapukas neatskleidžiamas.                                                                                                                                 |
-| Kliento API `/v1/*`, `/v1beta/*`         | Bearer / `x-api-key` antraštė | Jau yra liberalus **pagal projektą** (`relaxForTokenAuth`): naršyklės niekada automatiškai neprideda `Authorization`/`x-api-key`, todėl užpuoliko puslapis negali pateikti jūsų rakto. Atspindėjimas taikomas tik tada, kai pateiktas raktas patvirtintas; anoniminiai atsakymai (`REQUIRE_API_KEY=false`) išlaiko leidžiamųjų sąrašą. `CORS_ALLOW_ALL` šios prieigos neišplečia. |
-| Viešas tik skaitymui (`/api/health`, …)  | Nėra                          | Duomenys nėra jautrūs; pakaitos simbolis nepavojingas.                                                                                                                                                                                                                                                                                                                            |
+| Paviršius                                | Auth mechanizmas               | Pakaitos simbolio CORS poveikis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prietaisų skydelis / MANAGEMENT `/api/*` | Slapukų seansas                | Kilmė aidi, bet **be `Allow-Credentials`** naršyklę **blokai** perskaitė kredencialas. Kenkėjiška kelios kilmės svetainė **negali skaityti** autentifikuotų prietaisų skydelio atsakymų, o seanso slapukas neatskleidžiamas.                                                                                                                                                                                                                                                                                                              |
+| Klientas API `/v1/*`, `/v1beta/*`        | Nešyklė / `x-api-key` antraštė | Jau leistinas **pagal dizainą** (`relaxForTokenAuth`): naršyklės niekada automatiškai neprideda `Authorization`/`x-api-key`, todėl užpuoliko puslapis negali pateikti jūsų rakto. Atsipalaidavęs aidas reikalauja autentifikuoto subjekto (patvirtinto API rakto arba prietaisų skydelio seanso), o ne tik kredencialų antraštės ir niekada neapima `Access-Control-Allow-Credentials`. Anoniminiai atsakymai (`REQUIRE_API_KEY=false`) naudoja sukonfigūruotą kilmės leistinų sąrašą, įskaitant aiškų `CORS_ALLOW_ALL=true` pasirinkimą. |
+| Viešas tik skaitomas (`/api/health`,…)   | Nėra                           | Nejautri; pakaitos simbolis yra nekenksmingas.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
-Taigi **likusi** `CORS_ALLOW_ALL=true` keliama rizika apsiriboja: (a)
-skaitymu iš kitų šaltinių **be kredencialų**, kai skaitomi ir taip neautentifikuoti duomenys, ir (b)
-leidimu sėkmingai atlikti CORS **išankstinę užklausą** valdymo maršrutuose — kuriems vis tiek reikalingas autentifikavimas,
-o kito šaltinio puslapis jo suteikti negali. Bendrame CORS kelyje tai **nėra** sesijos užgrobimo ar
-kredencialų vagystės vektorius.
+Taigi,**likutinis** `CORS_ALLOW_ALL=true` poveikis apsiriboja: (a) neįrodyta kryžmine kilme **skaito** jau neautentifikuotų duomenų ir (b) leisti CORS**leidimas prieš skrydį** valdymo maršrutuose —, kuriems vis tiek reikalingas autentifikavimas, kurio negali pateikti įvairios kilmės puslapis. Tai yra **ne** seanso užgrobimo arba kredencialų vagystės vektorius bendrame CORS kelyje.
 
 ### Viena tikra išimtis — `/api/v1/agents/`
 
-Cloud-Agent maršrutai (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) nustato
-**savo** CORS antraštes
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ir **išsiunčia**
-`Access-Control-Allow-Origin: <origin>|*` kartu su
-`Access-Control-Allow-Credentials: true`. Tai vienintelė sąsaja, kurioje
-šaltinio grąžinimas ir kredencialai naudojami kartu, ir ji **nepriklauso nuo
-`CORS_ALLOW_ALL`**. Šiuose maršrutuose naudojamas valdymo autentifikavimas
-(`requireManagementAuth`); operatoriai, kurie prietaisų skydelį padaro pasiekiamą už pagrindinio kompiuterio ribų, turėtų
-žinoti, kad tai yra vienintelė vieta, kurioje atsakymo antraštės leidžia skaityti iš kito šaltinio
-naudojant kredencialus. Jo apribojimas iki aiškaus leidžiamų šaltinių sąrašo stebimas
-atskirai nuo šių CORS gairių.
+„Cloud-Agent“ maršrutai (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) nustato juos **savo** CORS antraštės (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ir **daryti** skleidžia `Access-Control-Allow-Origin: <origin>|*` kartu su `Access-Control-Allow-Credentials: true`. Tai yra vienintelis paviršius, kuriame kartu egzistuoja kilmė, aidas ir kredencialai, ir taip yra **nepriklausomas nuo `CORS_ALLOW_ALL`** . Šie maršrutai yra valdymo autentifikuoti (`requireManagementAuth`); operatoriai, kurie atskleidžia prietaisų skydelį ne priegloboje, turėtų žinoti, kad tai yra ta vieta, kurioje atsakymų antraštėse leidžiama skaityti kryžminės kilmės kredencialus. Priveržimas į aiškų leistinų sąrašą stebimas atskirai nuo šių CORS gairių.
 
-## Produkcinės aplinkos kontrolinis sąrašas
+## Gamybos kontrolinis sąrašas
 
-- **Produkcinėje aplinkoje niekada nenustatykite `CORS_ALLOW_ALL=true`.** Palikite šį parametrą nenustatytą.
-- Nustatykite **aiškų** leidžiamų šaltinių sąrašą — naudodami aplinkos kintamąjį arba skirtuko „Security“ lauką:
+- **Niekada nenustatykite `CORS_ALLOW_ALL=true` gamyboje.** Palikite nenustatytą.
+- Nustatyti an **aiškus** kilmės sąrašas — arba env var, arba skirtuko Sauga laukas:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Jei „OmniRoute“ veikia už atvirkštinio tarpinio serverio / tunelio („nginx“, „Caddy“, „Cloudflare“
-  Tunnel, „Tailscale“), CORS **nėra** vienintelė jūsų apsaugos priemonė — vietinio grįžtamojo ryšio maršrutų
-  apsauga vis tiek saugo maršrutus, galinčius paleisti procesus (žr.
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Neklastokite
-  `X-Forwarded-For: 127.0.0.1`, kad „ištaisytumėte“ 403 klaidą; taip vėl atveriama RCE klasės spraga,
-  kurią uždaro maršrutų apsauga.
-- Patikrinkite vykdymo būseną: valdymo skydelyje rodoma **nuolatinė gintaro spalvos reklamjuostė**
-  skiltyje Dashboard → Security → Authorization Inventory, kai
-  `CORS_ALLOW_ALL=true` yra aktyvus, o `/api/settings/authz-inventory` grąžina
-  `cors: { allowAll, allowedOrigins }` apvalkalą, kurį stebėjimo įrankiai gali periodiškai tikrinti.
+- Jei OmniRoute veikia už atvirkštinio tarpinio serverio / tunelio (nginx, Caddy, Cloudflare tunelis, Tailscale), CORS yra **ne** jūsų vienintelis valdiklis — atgalinio maršruto apsauga vis tiek apsaugo maršrutus, kuriuose gali atsirasti neršimas (žr. [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Neklastokite `X-Forwarded-For: 127.0.0.1`, kad „sutaisytų“ 403; kad vėl atidaroma RCE klasė, maršruto apsauga užsidaro.
+- Patvirtinkite vykdymo būseną: prietaisų skydelyje rodoma a **patvari gintaro vėliava** Prietaisų skydelyje → sauga → autorizacijos inventorius, kai `CORS_ALLOW_ALL=true` veikia, ir `/api/settings/authz-inventory` grąžina `cors: { allowAll, allowedOrigins }` voko stebėjimo priemones, kurias gali apklausti.
 
-## Patogumas kuriant — leiskite konkrečius vietinius šaltinius
+## Plėtros patogumas — leidžia konkrečią vietinę kilmę
 
-Net kūrimo aplinkoje pakaitos simbolio prireikia retai. Leiskite tik naudojamus kūrimo serverius:
+Pakaitos simbolio jums retai reikia net dev. Leisti tik jūsų naudojamiems kūrėjų serveriams:
 
 ```bash
-# „Vite“ (5173) ir „Next.js“ (3000) kūrimo serveriai, besikreipiantys į vietinį „OmniRoute“
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Šaltiniai lyginami neatsižvelgiant į didžiąsias ir mažąsias raides, o galinis pasvirasis brūkšnys ignoruojamas, todėl
-`http://localhost:3000` ir `http://localhost:3000/` yra lygiaverčiai. Tą patį CSV
-sąrašą galima nustatyti vykdymo metu skiltyje **Dashboard → Security → CORS Allowed Origins**,
-nepaleidžiant sistemos iš naujo.
+Ištakos derinamos neskiriant didžiųjų ir mažųjų raidžių, o pasvirasis brūkšnys ignoruojamas, todėl `http://localhost:3000` ir `http://localhost:3000/` yra lygiaverčiai. Tą patį CSV galima nustatyti vykdymo metu **Prietaisų skydelis → sauga → CORS Leidžiama kilmė** be pakartotinio paleidimo.
 
 ## API raktai ir slapukų seansai
 
-- **Bearer / `x-api-key` (`/v1/*` išvadų sąsaja):** naršyklės niekada jų neprideda
-  automatiškai. CORS čia nėra reikšmingas barjeras — barjeras yra API raktas —
-  todėl ši sąsaja sąmoningai yra mažiau ribojama, kad naršyklės ir
-  „Electron“ klientai galėtų skaityti atsakymus, kuriuos jie jau turi teisę gauti.
-  Sušvelnintas atspindėjimas priklauso nuo patvirtinto rakto, o ne vien nuo antraštės
-  buvimo: kai `REQUIRE_API_KEY=false` užklausą aptarnauja anonimiškai, sėkmingas jos
-  atsakymas išlaiko fail-closed leidžiamųjų sąrašą. Autentifikavimo atmetimai (401)
-  lieka skaitomi, kad klientai galėtų parodyti atšauktą ar klaidingai įvestą raktą
-  (#5242): paties konvejerio 401 išlaiko atspindėjimą, o maršrutas, kuris pats atmeta
-  raktą po to, kai konvejeris užklausą aptarnavo kaip anoniminę (`/v1/models` ir
-  `/v1beta/models`, kai sukonfigūruotas valdymo autentifikavimas, savininkui priskirti
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ir auto-combo
-  kandidatų maršrutai), prideda atspindėjimą prie to 401 per
-  `credentialRejectionHeaders()`. Atspindėjimas priklauso nuo to, ar užklausoje yra
-  kredencialų antraštė (`Authorization`, `x-api-key`, `x-goog-api-key` arba slapukas
-  `auth_token`), o ne nuo to, kurią iš jų patikrino maršrutas, ir niekada nederinamas su
-  `Access-Control-Allow-Credentials`; turinys yra fiksuotas klaidos vokas. Valdymo
-  maršrutai po `/api/v1/`, saugomi `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`), atspindėjimo neprideda: esant `REQUIRE_API_KEY=false`, jų
-  401/403 negalima perskaityti iš kito šaltinio.
-- **Slapukų seansas (valdymo skydelis):** apsaugotas numatytąja uždara nuostata **ir**
-  tuo, kad bendrame kelyje nėra `Access-Control-Allow-Credentials`. Neįtraukite
-  administravimo / valdymo skydelio šaltinių į jokią mažiau ribojančią konfigūraciją; jiems turi būti taikoma
-  būtent uždara numatytoji nuostata.
+- **Nešiklis / `x-api-key` ( `/v1/*` išvadinis paviršius):** naršyklės niekada jų neprideda automatiškai. CORS čia nėra prasminga kliūtis. — API raktas yra — kliūtis, todėl šis paviršius yra sąmoningai leistinas, todėl naršyklės ir Electron klientai gali skaityti atsakymus, į kuriuos jie jau turi teisę. Atsipalaidavęs aidas reikalauja autentifikuoto subjekto (patvirtinto API rakto arba prietaisų skydelio seanso), o ne tik kredencialų antraštės ir niekada neapima `Access-Control-Allow-Credentials`. Anoniminiuose atsakymuose (`REQUIRE_API_KEY=false`) naudojamas sukonfigūruotas kilmės leistinas sąrašas, įskaitant aiškų `CORS_ALLOW_ALL=true` pasirinkimą. Auth atmetimai (401) lieka nuskaitomi, kad klientai galėtų parodyti atšauktą arba klaidingai įvestą raktą (#5242): paties dujotiekio 401 išlaiko aidą ir maršrutą, kuris atsisako paties rakto po to, kai dujotiekis jį naudojo kaip anoniminį (`/v1/models` ir `/v1beta/models` su sukonfigūruota valdymo autentifikacija, savininko aprėptis `/v1/files`, `/v1/batches` `/v1/media`, `/v1/session-leases`, kandidatų maršrutai) prideda aidą prie to 401 per `credentialRejectionHeaders()`. Aidas įvedamas užklausoje, turinčioje kredencialų antraštę (`Authorization`, `x-api-key`, `x-goog-api-key` arba `auth_token` slapuką), o ne kuriame iš jų buvo patikrintas maršrutas, ir niekada nėra susietas su `Access-Control-Allow-Credentials`; korpusas yra fiksuotas klaidų apvalkalas. Valdymo maršrutuose pagal `/api/v1/` saugomus `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), ši kredencialų atmetimo išimtis nenaudojama: naudojant `REQUIRE_API_KEY=false`, jų 401/403 atsakymai atitinka sukonfigūruotą CORS kilmės politiką.
+- **Slapukų sesija (prietaisų skydelis):** apsaugotas pagal nutylėjimą **ir** nesant `Access-Control-Allow-Credentials` bendrame kelyje. Saugokite management/dashboard pradžią nuo bet kokios leidžiamos konfigūracijos; jie turi likti tiksliai uždaryti.
 
 ## WebSocket rankos paspaudimai (`/v1/responses`, `/v1/ws`)
 
-Naršyklės WebSocket ryšiams CORS netaiko, todėl WebSocket transportai, grąžinantys
-išvadų rezultatus, patys tikrina rankos paspaudimo `Origin`
-(`src/server/origin/wsOrigin.ts`): „Responses“ WebSocket (`/v1/responses`) ir, kai
-„OmniRoute“ paleidžiamas per `npm start` / `npm run dev`, `/v1/ws` ir
-`/api/v1/ws` tiltas, kuris srautu perduoda `/v1/chat/completions`, `/v1/messages` ir
-`/v1/responses` kaip kadrus. Tiltas sprendimo klausia `/api/v1/ws?handshake=1` ir
-atsisako atnaujinti ryšį, nebent tas maršrutas atliko patikrą. Rankos paspaudimas
-priimamas, kai:
+Naršyklės netaiko CORS į WebSocket, todėl WebSocket transportavimas, kuris grąžina išvados išvestį, tikrina pačius rankos paspaudimus `Origin` (`src/server/origin/wsOrigin.ts`): atsakus WebSocket (`/v1/responses`) ir, kai OmniRoute eina per `npm start` / `npm run dev`, `/v1/ws` ir `/api/v1/ws` tiltą, kuris perduoda `/v1/chat/completions` `/v1/messages` ir `/v1/responses`, kaip ZQs. Tiltas prašo `/api/v1/ws?handshake=1` nuosprendžio ir atsisako atnaujinti, nebent šis maršrutas būtų patikrintas. Autentifikavimo reikalavimai vis tiek taikomi atskirai. Kilmės patikrinimas praeina, kai:
 
-- jame nėra `Origin` antraštės (Codex CLI, SDK ir kiti ne naršyklės klientai);
-- `Origin` leidžia aukščiau aprašytas leidžiamųjų sąrašas (`CORS_ALLOWED_ORIGINS`,
-  nustatymas `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` yra vienas iš paties „OmniRoute“ viešųjų šaltinių (sukonfigūruotas viešasis
-  bazinis URL, patikimo tarpinio serverio persiųstas šaltinis arba tiesioginis
-  loopback / LAN pagrindinis kompiuteris, nurodytas kaip IP literalas arba `localhost` —
-  tie patys kandidatai, kuriuos naudoja valdymo skydelio pakeitimų patikra); arba
-- jame yra galiojantis API raktas, kaip HTTP `/v1/*` sąsajoje.
+- jis neturi `Origin` antraštės (Codex CLI, SDKs ir kiti ne naršyklės klientai);
+- `Origin` leidžiamas aukščiau pateiktame leidimų sąraše (`CORS_ALLOWED_ORIGINS`, `corsOrigins` nustatymas, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` yra viena iš OmniRoute viešųjų šaltinių (sukonfigūruota viešoji bazė URL, patikimo tarpinio serverio persiųsta kilmė arba tiesioginis loopback/LAN prieglobas, pateiktas kaip IP literal arba `localhost` — tie patys kandidatai, kuriuos naudoja prietaisų skydelio mutacijų patikra); arba
+- jis turi galiojantį API raktą, kaip ir ant HTTP `/v1/*` paviršiaus.
 
-Visa kita gauna `403 ws_origin_forbidden`. Valdymo skydelio sesijos slapukas
-neatleidžia svetimo `Origin`, nes naršyklė jį prideda prie bet kurio puslapio lizdo.
-`localhost` kitame prievade nelaikomas tuo pačiu šaltiniu; tokius kūrimo šaltinius
-pridėkite prie `CORS_ALLOWED_ORIGINS`.
+Visa kita gauna `403 ws_origin_forbidden`. Prietaisų skydelio seanso slapukas neatleidžia nuo svetimo `Origin`, nes naršyklė prideda jį prie bet kurio puslapio lizdo. `localhost` kitame prievade nėra traktuojamas kaip tos pačios kilmės; pridėkite tokias kūrėjo ištakas prie `CORS_ALLOWED_ORIGINS`.
 
 ## Pavyzdys: atvirkštinis tarpinis serveris prieš OmniRoute
 
-CORS užtikrina pati OmniRoute, todėl tarpinis serveris paprastai **neturėtų** pridėti ar
-perrašyti `Access-Control-*` antraščių (dvigubos antraštės sutrikdo naršyklių veikimą). Užbaikite TLS
-ryšį ir persiųskite užklausą — leiskite OmniRoute atsakyti į išankstinę užklausą:
+CORS vykdo pats OmniRoute, todėl tarpinis serveris paprastai turėtų **ne** pridėti arba perrašyti `Access-Control-*` antraštes (dvigubos antraštės pažeidžia naršykles). Nutraukite TLS ir persiųskite — leiskite OmniRoute atsakyti prieš patikrinimą:
 
 ```nginx
-# nginx — persiųsti į OmniRoute; čia NEĮTERPKITE Access-Control-*
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Išsaugokite persiuntimo antraštes: tame pačiame pagrindiniame kompiuteryje veikiantis tarpinis serveris jungiasi iš grįžtamojo ryšio adreso, o jos
-    # nurodo OmniRoute, kad užklausą pateikė ne vietinis operatorius. Jei tarpinis serveris neprideda nė vienos iš jų,
-    # visi nuotoliniai užklausų teikėjai atrodo kaip vietiniai. Taip pat niekada nenustatykite X-Forwarded-For reikšmės į 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Leidžiamas naršyklių kilmės vietas nustatykite OmniRoute (`CORS_ALLOWED_ORIGINS` arba
-skirtuke „Sauga“), o ne tarpiniame serveryje.
+Leidžiamas naršyklės kilmes nustatykite OmniRoute (`CORS_ALLOWED_ORIGINS` arba skirtuke Sauga), o ne tarpiniame serveryje.
 
 ## Šaltinio failai
 
-| Sritis                                                              | Failas                                                               |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Leidžiamųjų sąrašo nustatymas ir `getCorsStatus()`                  | `src/server/cors/origins.ts`                                         |
-| Tarpinės programinės įrangos taikymas (vienintelis tiesos šaltinis) | `src/server/authz/pipeline.ts`                                       |
-| Nustatymai → šaltinių įterpimas vykdymo metu                        | `src/lib/config/runtimeSettings.ts`                                  |
-| Vykdymo būsena valdymo skydeliui                                    | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Valdymo skydelio įspėjamoji reklamjuostė                            | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Leidžiamų CORS šaltinių laukas                                      | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| „Cloud-Agent“ kiekvieno maršruto CORS (išimtis)                     | `src/lib/cloudAgent/api.ts`                                          |
-| WebSocket rankos paspaudimo `Origin` patikra                        | `src/server/origin/wsOrigin.ts`                                      |
+| Susirūpinimas                                                  | Failas                                                               |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Leidžiamų sąrašo rezoliucija + `getCorsStatus()`               | `src/server/cors/origins.ts`                                         |
+| Tarpinės programinės įrangos programa (vienas tiesos šaltinis) | `src/server/authz/pipeline.ts`                                       |
+| Nustatymai → vykdymo laiko kilmės įterpimas                    | `src/lib/config/runtimeSettings.ts`                                  |
+| Informacijos suvestinės vykdymo būsena                         | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Prietaisų skydelio įspėjimo reklamjuostė                       | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS leistinos kilmės laukas                                   | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| „Cloud-Agent“ vienam maršrutui CORS (išimtis)                  | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket rankos paspaudimas `Origin` patikrinimas             | `src/server/origin/wsOrigin.ts`                                      |
 
-## Taip pat žr.
+## Taip pat žr
 
-- [Maršrutų apsaugos lygiai](./ROUTE_GUARD_TIERS.md) — vietinio grįžtamojo ryšio sąsajos reikalavimų užtikrinimas
-  maršrutams, galintiems kurti procesus (atskira, papildanti kontrolės priemonė).
-- [Autorizavimo vadovas](../architecture/AUTHZ_GUIDE.md) — visas autentifikavimo ir autorizavimo procesas.
+- [„Route Guard Tiers](./ROUTE_GUARD_TIERS.md) — loopback“ vykdymas maršrutams, kuriuose gali atsirasti neršimas (atskiras, papildomas valdymas).
+- [Autorizacijos vadovas](../architecture/AUTHZ_GUIDE.md) — visą autentifikavimo vamzdyną.

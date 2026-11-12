@@ -44,7 +44,7 @@ Omdat het bedrag een schatting is:
 
 ### De prijsbron
 
-De kosten komen uit de samengevoegde prijstabel in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), in deze volgorde van prioriteit (** hoogste eerst** ):
+Kosten komen uit de samengevoegde prijstabel in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), in deze volgorde van prioriteit (**hoogste eerst** ):
 
 1. **Gebruikersoverschrijvingen** — prijzen ingesteld in het dashboard of via `PATCH /api/pricing` (de `pricing` naamruimte).
 2. **models.dev-synchronisatie** — -prijzen opgehaald uit `https://models.dev/api.json` (de `models_dev_pricing` naamruimte).
@@ -63,30 +63,30 @@ Voor dezelfde provider/model overschrijven waarden uit lagen met een hogere prio
 
 **models.dev-synchronisatie** staat los van de LiteLLM synchronisatie en is ook standaard uitgeschakeld. Schakel het in via Instellingen (models.dev sync) of gebruik deze variabelen:
 
-| Env var                    | Standaard         | Doel                                                                                                                                                               |
-| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MODELS_DEV_SYNC_ENABLED`  | _(uitgeschakeld)_ | Uitschakelen volgt de schakelaar Instellingen; `1/true/on/yes` wordt ingeschakeld en `0/false/off/no` wordt uitgeschakeld (zelfs als Instellingen dit inschakelt). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standaard synchronisatie-interval van models.dev in seconden (dagelijks).                                                                                          |
+| Env var                    | Standaard         | Doel                                                                                                                                                                |
+| -------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(uitgeschakeld)_ | Uitschakelen volgt de schakelaar Instellingen; `1/true/on/yes` wordt ingeschakeld en `0/false/off/no` wordt uitgeschakeld (zelfs als Instellingen dit inschakelen). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Standaard synchronisatie-interval van models.dev in seconden (dagelijks).                                                                                           |
 
-`PRICING_SYNC_SOURCES` wel** niet** modellen.dev inschakelen; het bestuurt alleen de LiteLLM synchronisatie. Als u een gebruikersoverschrijving verwijdert, worden de gesynchroniseerde naamruimten niet gewist; de volgende beschikbare prijslaag wordt van kracht. Voor een ongeprijsd model controleert u zowel de synchronisatie-instellingen als de `sourceMap` voordat u een handmatige overschrijving toevoegt.
+`PRICING_SYNC_SOURCES` wel **niet** modellen.dev inschakelen; het bestuurt alleen de LiteLLM synchronisatie. Als u een gebruikersoverschrijving verwijdert, worden de gesynchroniseerde naamruimten niet gewist; de volgende beschikbare prijslaag wordt van kracht. Voor een ongeprijsd model controleert u zowel de synchronisatie-instellingen als de `sourceMap` voordat u een handmatige overschrijving toevoegt.
 
 ### De kostenformule
 
-De kosten worden per verzoek berekend op basis van het aantal tokens en de tarieven per miljoen tokens in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+De kosten worden per aanvraag berekend op basis van tokenaantallen en tokentarieven per miljoen in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Invoertokens** (minus cache-lezingen en tokens voor het maken van caches) × `input` snelheid.
+- **Invoertokens** (minus cache-leesbewerkingen en tokens voor het maken van caches) × `input` snelheid.
 - **In cache gelezen tokens** × `cached` -tarief (valt terug naar het invoertarief).
 - **Tokens voor het maken van caches** × `cache_creation` -tarief (valt terug naar het invoertarief).
 - **Uitvoertokens** × `output` tarief.
 - **Redeneringsfiches** × `reasoning` -snelheid (valt terug naar de uitvoersnelheid).
 
-Alle tarieven worden geïnterpreteerd als USD per 1.000.000 tokens. Een Codex "fast"/"priority" of "flex" servicelaag past een kostenvermenigvuldiger toe (`getCodexFastCostMultiplier`) — bijvoorbeeld flex wordt gefactureerd met een tokenkorting van 50%, weergegeven als** flex sparen** in het dashboard.
+Alle tarieven worden geïnterpreteerd als USD per 1.000.000 tokens. Een Codex -servicelaag "snel"/"prioriteit" of "flex" past een kostenvermenigvuldiger toe (`getCodexFastCostMultiplier`). — bijvoorbeeld, flex wordt gefactureerd met een tokenkorting van 50%, weergegeven als **flex sparen** in het dashboard.
 
 Modelnamen worden eerst genormaliseerd (providerpadvoorvoegsels zoals `openai/` of `accounts/fireworks/models/` worden verwijderd), zodat historische rijen nog steeds overeenkomen met een prijs.
 
 ### Hoe de uitgaven worden geregistreerd
 
-- De kosten per verzoek worden berekend na de respons en geregistreerde ‘fire-and-forget’-procedures, zodat er nooit latentie voor de client ontstaat. Het verbruik van gedeelde quota wordt gepland bij de volgende event-loop tick via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- De kosten per aanvraag worden berekend bij voltooiing van de aanvraag. Het verbruik van gedeelde quota wordt gepland bij de volgende event-loop tick via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - De uitgaven voor API-sleutels worden in batches gebufferd en leeggemaakt door de [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standaard spoelinterval van 60 seconden, buffer voor 1.000 invoer). Afstembaar via:
 
   | Env var                             | Standaard | Doel                                           |
@@ -94,7 +94,29 @@ Modelnamen worden eerst genormaliseerd (providerpadvoorvoegsels zoals `openai/` 
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Spoelinterval in milliseconden.                |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Max. gebufferde invoeren vóór het doorspoelen. |
 
-De kostencijfers van het dashboard zijn** niet** gelezen uit een opgeslagen dollarbedrag per rij — worden ze telkens opnieuw berekend op basis van tokenaantallen en de huidige prijstabel elke keer dat het analyse-eindpunt wordt uitgevoerd. Dat betekent dat het corrigeren van een verkeerde prijs (en het opnieuw synchroniseren) de historische kostenramingen met terugwerkende kracht bijwerkt.
+De kosten geven de voorkeur aan een exacte, door de provider gerapporteerde toeslag (`provider_cost_usd`), vervolgens aan een momentopname van een catalogusgeprijsde aanvraag (`calculated_cost_usd`), en vervolgens aan een tokenherziening van de huidige catalogus. Opgeslagen kosten worden niet opnieuw in rekening gebracht via hun tokentellingen. Verouderde rijen met alleen tokens veranderen nog steeds wanneer hun catalogusprijs verandert.
+
+### OCR en inbedding
+
+- Succesvolle `/v1/ocr` -aanvragen gebruiken upstream `usage_info.pages_processed`, niet het aangevraagde paginabereik of het aantal geretourneerde pagina-objecten. De schatting is pagina's × `ocr_cost_per_page` (absoluut USD/page,**niet** USD/million).
+- Voor aanvragen met document- of bounding box-annotaties geldt een apart `ocr_cost_per_annotated_page` tarief. Zonder dit blijven de kosten onbekend; het gewone OCR -tarief wordt niet stilzwijgend vervangen.
+- LiteLLM synchronisatie wijst het stroomopwaartse `annotation_cost_per_page` veld toe aan `ocr_cost_per_annotated_page`, waarbij de absolute USD/page waarde en alleen annotatie-items behouden blijven, inclusief expliciete nul. Een opgegeven canoniek veld heeft voorrang; ongeldige aliaswaarden worden genegeerd. Overschrijvingen van gebruikersprijzen behouden hun normale prioriteit. Zie [de OCR prijssleutels van LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -gebruik slaat het aantal pagina's, de eenheidsprijs, de berekende USD kosten, API sleutel en de geselecteerde verbinding op. Pagina's worden nooit weergegeven als tokens. Oproeplogboeken bevatten factureringsmetagegevens, geen document URLs, PDF bytes of geëxtraheerde tekst.
+- Succesvolle `/v1/embeddings` verzoeken registreren één gebruiksrij per fysieke batch, inclusief afzonderlijke batches die in dezelfde milliseconde worden voltooid. Door de aanbieder gerapporteerde kosten hebben voorrang op tokenschattingen; combo-wrappers brengen geen kosten met zich mee.
+- Gebruiksgeschiedenis, de kostenanalyse, provider/account -vensters, bestedingslimieten voor API-sleutels, het grootboek met aanvraagkosten en dagelijkse gebruiksoverzichten zijn inclusief deze kosten. Sleutels zonder logboek behouden de numerieke boekhouding zonder de brontekst te behouden.
+- Ontbrekend gebruik of tarieven zijn dat wel **onbekend** , niet gratis: de responskostenheader is weggelaten en het bestaande beleid voor ongeprijsd gebruik is van toepassing op beperkte API sleutels. Expliciet geconfigureerde nultarieven blijven geldig nulkostengebruik.
+
+Dit is alleen voorwaartse boekhouding. Oude OCR/embedding aanroepen die nooit gebruiksgeschiedenis hebben geschreven, kunnen niet worden gereconstrueerd op basis van deze migratie. Catalogusschattingen zijn USD -schattingen, geen factuur, en omvatten geen valutaomrekening, belastingen of kortingen.
+
+### Spraak en beelden
+
+- Succesvolle `/v1/audio/transcriptions`, `/v1/audio/speech` en beeldgeneratiepogingen delen numerieke boekhouding. Directe en combo-oproepen bevatten de API sleutel van de beller en de geselecteerde verbinding; een combo-wrapper voegt nooit een tweede afschrijving toe.
+- Door de provider gerapporteerde USD wint een catalogusschatting, inclusief een expliciet nultarief. OpenRouter's JSON `usage.cost` is genormaliseerd naar `cost_usd`. Anders gebruiken gemeten tokens tokenprijzen, gebruiken transcriptieseconden prijzen per seconde, gebruikt spraakinvoer Unicode-tekentellingen en gebruiken afbeeldingen met een vaste prijs het daadwerkelijk geretourneerde aantal, niet de gevraagde `n`.
+- Binaire OpenRouter TTS heeft geen JSON gebruikstekst. Nadat de audio is voltooid of de beller annuleert, vraagt OmniRoute de generatie ID op de **dezelfde** geconfigureerde OpenRouter oorsprong. Een EU verzoek valt nooit terug op de mondiale oorsprong. Dit is een begrensde, alleen-lezen zoekopdracht; De synthese wordt niet opnieuw geprobeerd voor de boekhouding. Factureringsgegevens kunnen verschijnen nadat de audio is afgelopen: nieuwe zoekpogingen worden maximaal ongeveer 52 seconden op de achtergrond uitgevoerd, inclusief netwerkdeadlines.
+- Tijdens dat opzoeken heeft het audioantwoord `X-OmniRoute-Cost-Status: pending` en geen header voor responskosten. De uiteindelijke kosten verschijnen na afstemming in de gebruiksgeschiedenis, analyses en het grootboek. Als metagegevens niet beschikbaar zijn, wordt een geconfigureerde tariefmomentopname gebruikt; anders blijven de kosten onbekend.
+- Het aantal seconden, tekens en afbeeldingen heeft afzonderlijke velden voor de factureringseenheden, en nooit valse tokens. De boekhouding behoudt alleen numeriek gebruik, geen spraaktekst, transcripties of afbeeldingsbytes. De bestaande vrijstellingen voor ongeprijsde afbeeldingen zijn ongewijzigd: een werkelijk ontbrekend afbeeldingstarief vergrendelt niet opnieuw een beperkte sleutel, en het antwoord laat de kostenkop weg in plaats van het gesprek gratis te verklaren. Bij een mislukte prijsopslag blijft er nog steeds gebruiksbewijs aanwezig voor het afdwingen van een mislukte sluiting.
+
+Er wordt geen historische speech/image heffing uitgevonden of aangevuld. De facturering aan de provider blijft de referentie voor facturen en voor oproepen waarvan de kosten niet zijn gerapporteerd.
 
 ---
 
@@ -140,50 +162,53 @@ Het gedeelte Kosten bevat ook (allemaal onder `/dashboard/costs/`):
 
 ---
 
-## API -eindpunten
+## API-endpoints
 
-Deze vereisen allemaal managementauthenticatie (loopback/JWT, via `requireManagementAuth`), tenzij anders aangegeven.
+Al deze endpoints vereisen beheerauthenticatie (loopback/JWT, via `requireManagementAuth`), tenzij
+anders vermeld.
 
 ### Gebruiks- en kostenanalyse
 
-| Methode | Eindpunt                 | Doel                                                                                                                                                                     |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`   | `/api/usage/analytics`   | Volledige cost/usage -analyse: samenvatting, dagelijkse trend, door provider/model/API key/account/tier. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`   | `/api/usage/utilization` | Quotagebruik per provider in de loop van de tijd. Zoekopdracht: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                             |
-| `GET`   | `/api/usage/history`     | Ruwe gebruiksgeschiedenisrijen.                                                                                                                                          |
-| `GET`   | `/api/usage/call-logs`   | Gesprekslogboeken per aanvraag (model, tokens, kosten, latentie, status).                                                                                                |
-| `GET`   | `/api/usage/quota`       | Quotumstatus van provider.                                                                                                                                               |
-| `GET`   | `/api/usage/proxy-logs`  | Logboeken van proxyverzoeken.                                                                                                                                            |
+| Methode | Endpoint                 | Doel                                                                                                                                                                              |
+| ------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/analytics`   | Volledige kosten-/gebruiksanalyse: samenvatting, dagelijkse trend, per provider/model/API-sleutel/account/niveau. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`   | `/api/usage/utilization` | Quotumgebruik per provider in de loop van de tijd. Query: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                            |
+| `GET`   | `/api/usage/history`     | Ruwe gebruikshistorieregels.                                                                                                                                                      |
+| `GET`   | `/api/usage/call-logs`   | Aanroeplogboeken per aanvraag (model, tokens, kosten, latentie, status).                                                                                                          |
+| `GET`   | `/api/usage/quota`       | Status van providerquotum.                                                                                                                                                        |
+| `GET`   | `/api/usage/proxy-logs`  | Logboeken van proxy-aanvragen.                                                                                                                                                    |
 
 ### Budgetten
 
-| Methode | Eindpunt                 | Doel                                                                                        |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------- |
-| `GET`   | `/api/usage/budget`      | Kostenoverzicht + budgetcontrole voor één API sleutel (`apiKeyId` -queryparameter vereist). |
-| `POST`  | `/api/usage/budget`      | Stel daily/weekly/monthly USD limieten + waarschuwingsdrempel in voor een API sleutel.      |
-| `GET`   | `/api/usage/budget/bulk` | Bulkbudgetsamenvattingen over API sleutels.                                                 |
+| Methode | Endpoint                 | Doel                                                                                                 |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/budget`      | Kostenoverzicht + budgetcontrole voor één API-sleutel (queryparameter `apiKeyId` vereist).           |
+| `POST`  | `/api/usage/budget`      | Stel dagelijkse/wekelijkse/maandelijkse USD-limieten + waarschuwingsdrempel voor een API-sleutel in. |
+| `GET`   | `/api/usage/budget/bulk` | Gecombineerde budgetoverzichten voor meerdere API-sleutels.                                          |
 
-> Het budget API heeft een scope per**API sleutel** (`apiKeyId`). Limieten die door `GET /api/usage/budget` worden geretourneerd, zijn onder meer `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` en de lopende totalen (`totalCostToday`, `totalCostMonth`, ...).
+> De budget-API heeft een bereik per **API-sleutel** (`apiKeyId`). Limieten die worden geretourneerd door
+> `GET /api/usage/budget` omvatten `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> een `warningThreshold` en de lopende totalen (`totalCostToday`, `totalCostMonth`, …).
 
 ### Prijzen
 
-| Methode  | Eindpunt                | Doel                                                                                                                                                                    |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Samengevoegde vierlaagse prijzen (gebruiker, models.dev, LiteLLM, standaardwaarden). `?includeSources=1` retourneert `pricing` + `sourceMap`.                           |
-| `PATCH`  | `/api/pricing`          | Prijzen voor `{ provider: { model: { input, output, cached, … } } }` overschrijven.                                                                                     |
-| `DELETE` | `/api/pricing`          | Verwijder gebruikersprijsoverschrijvingen (optioneel bepaald door `?provider=&model=`); gesynchroniseerde tarieven of ingebouwde standaardwaarden blijven als fallback. |
-| `GET`    | `/api/pricing/defaults` | Toon standaard per-1M -fallback-percentages.                                                                                                                            |
-| `GET`    | `/api/pricing/models`   | Prijzen aangepast per model.                                                                                                                                            |
-| `POST`   | `/api/pricing/sync`     | Activeer een handmatige synchronisatie vanaf externe bronnen (LiteLLM).                                                                                                 |
-| `GET`    | `/api/pricing/sync`     | Huidige synchronisatiestatus.                                                                                                                                           |
-| `DELETE` | `/api/pricing/sync`     | Alleen LiteLLM-gesynchroniseerde prijzen wissen (`pricing_synced`); models.dev-gegevens zijn gescheiden.                                                                |
+| Methode  | Endpoint                | Doel                                                                                                                                                                                       |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Samengevoegde prijzen uit vier lagen (gebruiker, models.dev, LiteLLM, standaardwaarden). `?includeSources=1` retourneert `pricing` + `sourceMap`.                                          |
+| `PATCH`  | `/api/pricing`          | Overschrijf prijzen voor `{ provider: { model: { input, output, cached, … } } }`.                                                                                                          |
+| `DELETE` | `/api/pricing`          | Gebruikersoverschrijvingen van prijzen verwijderen, eventueel beperkt met `?provider=&model=`; gesynchroniseerde tarieven of ingebouwde standaardwaarden blijven beschikbaar als terugval. |
+| `GET`    | `/api/pricing/defaults` | Toon standaard fallbacktarieven per 1 miljoen.                                                                                                                                             |
+| `GET`    | `/api/pricing/models`   | Prijzen geïndexeerd per model.                                                                                                                                                             |
+| `POST`   | `/api/pricing/sync`     | Start een handmatige synchronisatie vanuit externe bronnen (LiteLLM).                                                                                                                      |
+| `GET`    | `/api/pricing/sync`     | Huidige synchronisatiestatus.                                                                                                                                                              |
+| `DELETE` | `/api/pricing/sync`     | Alleen door LiteLLM gesynchroniseerde prijzen wissen (`pricing_synced`); gegevens van models.dev staan daar los van.                                                                       |
 
-### Andere kostenrelevante eindpunten
+### Andere kostenrelevante endpoints
 
-| Methode | Eindpunt                      | Doel                                                                                  |
-| ------- | ----------------------------- | ------------------------------------------------------------------------------------- |
-| `GET`   | `/api/free-tier/summary`      | Tokentotalen van gratis model, deze maand gebruikt, en resterende gratis hoeveelheid. |
-| `GET`   | `/api/quota/pools/[id]/usage` | Gebruik voor een pool met gedeelde quota.                                             |
+| Methode | Eindpunt                      | Doel                                                                                 |
+| ------- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| `GET`   | `/api/free-tier/summary`      | Tokenaantallen voor gratis modellen, deze maand gebruikt en resterend gratis tegoed. |
+| `GET`   | `/api/quota/pools/[id]/usage` | Gebruik voor een pool met een gedeeld quotum.                                        |
 
 ---
 

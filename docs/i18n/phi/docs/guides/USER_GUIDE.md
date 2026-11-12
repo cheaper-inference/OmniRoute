@@ -356,7 +356,7 @@ Modelo: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Deployment
+## 🚀 Pag-deploy
 
 ### Global npm install (Inirerekomenda)
 
@@ -385,34 +385,34 @@ Simulan ang OmniRoute sa system tray:
 omniroute serve --tray
 ```
 
-Ang utos ay bumalik pagkatapos na ang server at tray ay handa na.
+Babalik ang command kapag handa na ang server at tray.
 
-Nagpapatuloy ang server nang walang terminal.
+Magpapatuloy ang server nang wala ang terminal.
 
-Sinusuportahan ng tray mode macOS, Windows, at graphical Linux session. Hindi awtomatikong binubuksan ng tray mode ang dashboard.
+Sinusuportahan ng tray mode ang macOS, Windows, at mga graphical Linux session. Hindi awtomatikong binubuksan ng tray mode ang dashboard.
 
-Gamitin ang tray menu para sa mga pagkilos na ito:
+Gamitin ang tray menu para sa mga sumusunod na pagkilos:
 
 - Buksan ang dashboard.
 - Buksan ang `/dashboard/logs`.
-- Baguhin ang auto-start.
-- Tumigil ka OmniRoute.
+- Baguhin ang awtomatikong pagsisimula.
+- Ihinto ang OmniRoute.
 
-Huwag pagsamahin `--tray` sa mga opsyong ito:
+Huwag pagsamahin ang `--tray` sa mga sumusunod na opsyon:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Ang mga mode na ito ay nangangailangan ng iba't ibang proseso ng pagmamay-ari.
+Nangangailangan ang mga mode na ito ng magkakaibang pagmamay-ari ng proseso.
 
-Paganahin ang startup sa susunod na pag-login sa makina:
+Paganahin ang pagsisimula sa susunod na pag-login sa machine:
 
 ```bash
 omniroute autostart enable
 ```
 
-Gumagamit ang auto-start ng tray mode sa macOS, Windows, at graphical Linux session. Ang walang ulo na Linux ay gumagamit ng umiiral na serbisyo ng user ng systemd.
+Ginagamit ng awtomatikong pagsisimula ang tray mode sa macOS, Windows, at mga graphical Linux session. Ginagamit ng headless Linux ang umiiral na systemd user service.
 
 Huwag paganahin ang pagsisimula sa pag-login:
 
@@ -420,18 +420,18 @@ Huwag paganahin ang pagsisimula sa pag-login:
 omniroute autostart disable
 ```
 
-### Ina-uninstall
+### Pag-uninstall
 
-Kapag hindi mo na kailangan OmniRoute, nagbibigay kami ng dalawang mabilis na script para sa malinis na pag-aalis:
+Kapag hindi mo na kailangan ang OmniRoute, nagbibigay kami ng dalawang mabilis na script para sa malinis na pagtanggal:
 
-| Utos                     | Aksyon                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Inaalis ang system app ngunit** pinapanatili ang iyong DB at mga configuration** sa `~/.omniroute`. |
-| `npm run uninstall:full` | Permanenteng inaalis ang AND ng app** binubura ang lahat ng configuration, key, at database** .     |
+| Command                  | Pagkilos                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Tinatanggal ang system app ngunit **pinapanatili ang iyong DB at mga configuration** sa `~/.omniroute`. |
+| `npm run uninstall:full` | Tinatanggal ang app AT permanenteng **binubura ang lahat ng configuration, key, at database**.          |
 
-> Tandaan: Upang patakbuhin ang mga command na ito, mag-navigate sa OmniRoute project folder (kung na-clone mo ito) at patakbuhin ang mga ito. Bilang kahalili, kung naka-install sa buong mundo, maaari mo lang patakbuhin `npm uninstall -g omniroute`.
+> Paalala: Upang patakbuhin ang mga command na ito, pumunta sa folder ng proyektong OmniRoute (kung na-clone mo ito) at patakbuhin ang mga ito. Bilang alternatibo, kung pandaigdigang naka-install, maaari mo lamang patakbuhin ang `npm uninstall -g omniroute`.
 
-### VPS Deployment
+### Pag-deploy sa VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -447,25 +447,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Or: pm2 start npm --name omniroute -- start
+# O: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 Deployment (Mababang Memory)
+### Pag-deploy gamit ang PM2 (Mababang Memory)
 
-Para sa mga server na may limitadong RAM, gamitin ang opsyon sa limitasyon ng memorya:
+Para sa mga server na may limitadong RAM, gamitin ang opsyon para sa limitasyon ng memory:
 
 ```bash
-# With 512MB limit (default)
+# May limitasyong 512MB (default)
 pm2 start npm --name omniroute -- start
 
-# Or with custom memory limit
+# O may custom na limitasyon ng memory
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Or using ecosystem.config.js
+# O gamit ang ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Lumikha `ecosystem.config.js`:
+Gumawa ng `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -490,30 +490,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Build image (default = runner-cli with codex/claude/droid preinstalled)
+# Buuin ang image (default = runner-cli na may naka-preinstall na codex/claude/droid)
 docker build -t omniroute:cli .
 
-# Portable mode (recommended)
+# Portable mode (inirerekomenda)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Para sa host-integrated mode na may mga CLI binary, tingnan ang seksyong Docker sa mga pangunahing doc.
+Para sa host-integrated mode na may mga CLI binary, tingnan ang seksyong Docker sa pangunahing dokumentasyon.
 
-### Walang bisa Linux (xbps-src)
+### Void Linux (xbps-src)
 
-Ang mga gumagamit ng void Linux ay maaaring mag-package at mag-install ng OmniRoute nang katutubong gamit ang `xbps-src` cross-compilation framework. I-automate nito ang Node.js standalone na build kasama ang mga kinakailangang `better-sqlite3` native bindings.
+Maaaring i-package at i-install ng mga user ng Void Linux ang OmniRoute nang native gamit ang `xbps-src` cross-compilation framework. Ina-automate nito ang standalone build ng Node.js kasama ang mga kinakailangang native binding ng `better-sqlite3`.
 
 <details>
 <summary><b>Tingnan ang template ng xbps-src</b></summary>
 
 ```bash
-# Template file for 'omniroute'
+# Template file para sa 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Pangkalahatang AI gateway na may matalinong routing para sa maraming LLM provider"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -528,7 +528,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Determine target CPU arch for node-gyp
+	# Tukuyin ang target na CPU architecture para sa node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -537,29 +537,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Install all deps – skip scripts
+	# 1) I-install ang lahat ng dependency – laktawan ang mga script
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Build the Next.js standalone bundle
+	# 2) I-build ang standalone bundle ng Next.js
 	npm run build
 
-	# 3) Copy static assets into standalone
+	# 3) Kopyahin ang mga static asset sa standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compile better-sqlite3 native binding
+	# 4) I-compile ang native binding ng better-sqlite3
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Place the compiled binding into the standalone bundle
+	# 5) Ilagay ang na-compile na binding sa standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Remove arch-specific sharp bundles
+	# 6) Alisin ang mga bundle ng sharp na partikular sa architecture
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copy pino runtime deps omitted by Next.js static analysis:
+	# 7) Kopyahin ang mga runtime dependency ng pino na hindi isinama ng static analysis ng Next.js:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -573,7 +573,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Prevent removal of empty Next.js app router dirs by the post-install hook
+	# Pigilan ang post-install hook na alisin ang mga walang-lamang directory ng Next.js app router
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,32 +599,32 @@ post_install() {
 
 </details>
 
-### Mga variable ng kapaligiran
+### Mga Environment Variable
 
-| Variable                                | Default                  | Paglalarawan                                                                                                                                                 |
-| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | _(auto-generated)_       | JWT signing secret — awtomatikong nabuo sa unang pagtakbo at nagpatuloy sa `server.env`; itakda ito nang tahasan kapag ang direktoryo ng data ay panandalian |
-| `INITIAL_PASSWORD`                      | _(unset)_                | Unang password sa pag-login. Ang mga pag-install ng npm/source ay nagsisimula sa `CHANGEME`: palitan ito. Hindi nakatakda: onboarding wizard                 |
-| `DATA_DIR`                              | `~/.omniroute`           | Direktoryo ng data (db, paggamit, mga log)                                                                                                                   |
-| `PORT`                                  | default na framework     | Port ng serbisyo (`20128` sa mga halimbawa)                                                                                                                  |
-| `HOSTNAME`                              | default na framework     | Bind host (Docker defaults to `0.0.0.0`)                                                                                                                     |
-| `NODE_ENV`                              | default na runtime       | Itakda ang `production` para sa pag-deploy                                                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Ang pampublikong base URL ay lumabas sa dashboard at nakalantad sa server (pinapalitan ang legacy `BASE_URL`)                                                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (pinapalitan ang legacy `CLOUD_URL`)                                                                                            |
-| `API_KEY_SECRET`                        | _(auto-generated)_       | HMAC secret para sa mga nabuong API key na awtomatikong nabuo ang — sa unang pagtakbo at nagpatuloy sa `server.env`                                          |
-| `REQUIRE_API_KEY`                       | `false`                  | Ipatupad ang Bearer API key sa `/v1/*`                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Pahintulutan ang mga na-authenticate na user ng dashboard na ipakita ang buong nakaimbak na API key value on demand                                          |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side refresh cadence para sa naka-cache na data ng Mga Limitasyon ng Provider; Ang mga UI refresh button ay nagti-trigger pa rin ng manual sync       |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Huwag paganahin ang mga awtomatikong SQLite snapshot bago writes/import/restore; gumagana pa rin ang mga manual backup                                       |
-| `APP_LOG_TO_FILE`                       | `true`                   | Pinapagana ang application at audit log output sa disk                                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                  | Pilitin ang `Secure` auth cookie (sa likod ng HTTPS reverse proxy)                                                                                           |
-| `CLOUDFLARED_BIN`                       | hindi nakatakda          | Gumamit ng kasalukuyang `cloudflared` binary sa halip na pinamamahalaang pag-download                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport para sa pinamamahalaang Quick Tunnels (`http2`, `quic`, o `auto`)                                                                                  |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js heap na limitasyon sa MB                                                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Max prompt cache entry                                                                                                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Max semantic cache na mga entry                                                                                                                              |
+| Variable                                | Default                  | Paglalarawan                                                                                                                                                               |
+| --------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(awtomatikong binubuo)_ | Lihim sa pag-sign ng JWT — awtomatikong binubuo sa unang pagtakbo at permanenteng sine-save sa `server.env`; tahasang itakda ito kapag pansamantala ang direktoryo ng data |
+| `INITIAL_PASSWORD`                      | _(hindi nakatakda)_      | Password para sa unang pag-login. Nagsisimula sa `CHANGEME` ang mga pag-install mula sa npm/source: palitan ito. Hindi nakatakda: onboarding wizard                        |
+| `DATA_DIR`                              | `~/.omniroute`           | Direktoryo ng data (db, paggamit, mga log)                                                                                                                                 |
+| `PORT`                                  | default ng framework     | Port ng serbisyo (`20128` sa mga halimbawa)                                                                                                                                |
+| `HOSTNAME`                              | default ng framework     | Host na ibi-bind (default ng Docker ang `0.0.0.0`)                                                                                                                         |
+| `NODE_ENV`                              | default ng runtime       | Itakda sa `production` para sa deployment                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Pampublikong base URL na ipinapakita sa dashboard at inilalantad sa server (pumapalit sa lumang `BASE_URL`)                                                                |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Base URL ng endpoint para sa cloud sync (pumapalit sa lumang `CLOUD_URL`)                                                                                                  |
+| `API_KEY_SECRET`                        | _(awtomatikong binubuo)_ | Checksum secret para sa mga API key na nakatali sa makina — awtomatikong binubuo ito ng startup bootstrap kapag hindi nakatakda at sine-save sa nasusulatang `server.env`  |
+| `REQUIRE_API_KEY`                       | `false`                  | Ipatupad ang Bearer API key sa `/v1/*`                                                                                                                                     |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Payagan ang mga authenticated na user ng dashboard na ipakita ang buong nakaimbak na value ng API key kapag hiniling                                                       |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Dalas ng server-side refresh para sa naka-cache na data ng Provider Limits; nagpapasimula pa rin ng manual sync ang mga refresh button sa UI                               |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | I-disable ang mga awtomatikong SQLite snapshot bago ang write/import/restore; gumagana pa rin ang mga manual backup                                                        |
+| `APP_LOG_TO_FILE`                       | `true`                   | Pinapagana ang pag-output ng application at audit log sa disk                                                                                                              |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Piliting gamitin ang `Secure` auth cookie (sa likod ng HTTPS reverse proxy)                                                                                                |
+| `CLOUDFLARED_BIN`                       | hindi nakatakda          | Gumamit ng kasalukuyang `cloudflared` binary sa halip na managed download                                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport para sa mga managed na Quick Tunnel (`http2`, `quic`, o `auto`)                                                                                                  |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Limitasyon ng Node.js heap sa MB                                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Pinakamataas na bilang ng mga entry sa prompt cache                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Pinakamataas na bilang ng mga entry sa semantic cache                                                                                                                      |
 
-Para sa buong environment variable reference, tingnan ang [README](../README.md).
+Para sa kumpletong sanggunian ng mga environment variable, tingnan ang [README](../README.md).
 
 ---
 
@@ -687,58 +687,77 @@ Para sa buong environment variable reference, tingnan ang [README](../README.md)
 
 ---
 
-## 🧩 Advanced na Mga Tampok
+## 🧩 Mga Advanced na Feature
 
 ### Mga Custom na Modelo
 
-Magdagdag ng anumang modelong ID sa anumang provider nang hindi naghihintay ng update ng app:
+Magdagdag ng anumang model ID sa anumang provider nang hindi naghihintay ng update sa app:
 
 ```bash
-# Via API
+# Sa pamamagitan ng API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# List: curl http://localhost:20128/api/provider-models?provider=openai
-# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# Ilista: curl http://localhost:20128/api/provider-models?provider=openai
+# Alisin: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-O gamitin ang Dashboard:** Mga Provider → [Provider] → Mga Custom na Modelo** .
+O gamitin ang Dashboard: **Mga Provider → [Provider] → Mga Custom na Modelo**.
 
-Mga Tala:
+Mga tala:
 
-- Ang mga nagbibigay ng OpenRouter at OpenAI/Anthropic-compatible ay pinamamahalaan mula sa** Mga Magagamit na Modelo** lamang. Manu-manong pagdaragdag, pag-import, at pag-auto-sync ng lahat ng lupain sa parehong listahan ng available na modelo, kaya walang hiwalay na seksyon ng Mga Custom na Modelo para sa mga provider na iyon.
-- Ang** Mga Custom na Modelo** Ang seksyon ay inilaan para sa mga provider na hindi naglalantad ng mga pinamamahalaang pag-import ng mga available na modelo.
+- Ang OpenRouter at mga provider na compatible sa OpenAI/Anthropic ay pinamamahalaan lamang mula sa **Mga Available na Modelo**. Ang manu-manong pagdaragdag, pag-import, at awtomatikong pag-sync ay lahat napupunta sa iisang listahan ng mga available na modelo, kaya walang hiwalay na seksyong Mga Custom na Modelo para sa mga provider na iyon.
+- Ang seksyong **Mga Custom na Modelo** ay para sa mga provider na hindi nagbibigay ng mga pinamamahalaang pag-import ng mga available na modelo.
 
-### Custom na OpenAI-Compatible Provider
+### Mga Custom na Provider na Compatible sa OpenAI
 
-Anumang gateway na nagsasalita ng OpenAI API (isang self-hosted na proxy, vLLM, isang third-party aggregator) ay maaaring idagdag bilang sarili nitong provider node:
+Ang anumang gateway na gumagamit ng OpenAI API (isang self-hosted proxy, vLLM, o third-party aggregator)
+ay maaaring idagdag bilang sarili nitong provider node:
 
-1. **Mga provider → Magdagdag ng OpenAI Compatible** .
-2. **Pangalan** : isang display label para sa node.
-3. **Prefix** : ang pangalan ng pagruruta. Tinatawag ng mga kliyente ang mga modelo bilang `<prefix>/<model>`, kaya ang isang node na may prefix `mygw` ay nagsisilbi `mygw/gpt-4o-mini`. Kinakailangan; walang paghihigpit sa karakter.
-4. **API Uri** : ang endpoint na pamilya na pinaglilingkuran ng gateway (Mga Pagkumpleto ng Chat, Mga Tugon, Mga Pag-embed, audio, mga larawan).
-5. **Base URL** : ang API root, hanggang sa at kabilang `/v1` (halimbawa `https://gateway.example.com/v1`), hindi ang buong `/chat/completions` path. Ang mga gateway na may mga hindi karaniwang path ay itinatakda ang mga ito sa ilalim** Mga Advanced na Setting** (daanan ng chat, landas ng mga modelo).
-6. Ang**API Key (para sa Pagsusuri)** sinusubok lamang ng field ang koneksyon. Pagkatapos gawin ang node, buksan ito at gamitin** Magdagdag ng Koneksyon** upang iimbak ang susi na gagamitin ng mga kahilingan.
+1. **Mga Provider → Magdagdag ng OpenAI Compatible**.
+2. **Pangalan**: isang display label para sa node.
+3. **Prefix**: ang pangalan para sa routing. Tinatawag ng mga client ang mga modelo bilang `<prefix>/<model>`, kaya ang node na may
+   prefix na `mygw` ay naghahatid ng `mygw/gpt-4o-mini`. Kinakailangan ito; walang restriksiyon sa mga character.
+4. **Uri ng API**: ang pamilya ng endpoint na inihahatid ng gateway (Chat Completions, Responses,
+   Embeddings, audio, mga larawan).
+5. **Base URL**: ang API root, hanggang at kasama ang `/v1` (halimbawa,
+   `https://gateway.example.com/v1`), hindi ang buong path na `/chat/completions`. Itinatakda ng mga gateway na may
+   hindi karaniwang mga path ang mga ito sa ilalim ng **Mga Advanced na Setting** (chat path, models path).
+6. Ang field na **API Key (para sa Pagsusuri)** ay sumusubok lamang sa koneksyon. Pagkatapos gawin ang node,
+   buksan ito at gamitin ang **Magdagdag ng Koneksyon** upang iimbak ang key na gagamitin ng mga request.
 
-Ang node ay nakakakuha ng panloob na id ng form na `openai-compatible-<apiType>-<uuid>`; hindi mo na kailangang i-type ito, ang prefix ay ang pampublikong pangalan.
+Makakatanggap ang node ng internal id na may anyong `openai-compatible-<apiType>-<uuid>`; hindi mo kailanman
+kailangang i-type ito dahil ang prefix ang pampublikong pangalan.
 
-#### Mga nakalaan na prefix
+#### Mga nakareserbang prefix
 
-Ang prefix ay hindi maaaring ang id o alias ng isang built-in na provider (halimbawa `openai`, `cf`), o ang id ng isang retiradong provider. Sinusuri ng model resolver ang mga built-in na id at alias bago ang mga custom na node, kaya ang isang node na gumagamit ng isa sa mga prefix na iyon ay hindi makakatanggap ng trapiko: sa halip ay mapupunta `<prefix>/model` sa built-in na provider, o mabibigong sarado kung ang provider na iyon ay itinigil. Ang paggawa o pag-edit ng node na may tulad na prefix ay tinanggihan ng:
+Hindi maaaring maging id o alias ng built-in na provider ang isang prefix (halimbawa, `openai`, `cf`), o
+ang id ng isang retiradong provider. Sinusuri ng model resolver ang mga built-in na id at alias bago ang
+mga custom na node, kaya hindi kailanman makatatanggap ng traffic ang isang node na gumagamit ng isa sa mga prefix na iyon:
+ang `<prefix>/model` ay mapupunta sa built-in na provider, o tatanggihan kung retirado na ang provider na iyon.
+Ang paggawa o pag-edit ng node na may gayong prefix ay tatanggihan gamit ang:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: Ang "<prefix>" ay isang nakareserbang provider prefix — pumili ng ibang prefix (hindi maaaring gamitin ang mga nakareserbang id/alias para sa mga custom na node dahil ang mga request tulad ng <prefix>/model ay nira-route sa isang built-in na provider o tinatanggihan kapag retirado na)
 ```
 
-Pumili ng natatanging prefix (`mygw`, `acme-proxy`). Kung nabigo ang mga kahilingan sa isang custom na node na may error na nagpapangalan sa isang built-in na provider o sa mga kredensyal nito, tingnan kung ang prefix ng node ay nakalaan: ang mga node na na-save bago umiral ang panuntunang ito ay nakaimbak pa rin, ngunit ang kanilang mga ruta ng prefix sa built-in na provider. I-edit ang node at bigyan ito ng bagong prefix.
+Pumili ng natatanging prefix (`mygw`, `acme-proxy`). Kung pumalya ang mga request sa isang custom na node na may
+error na nagbabanggit ng built-in na provider o mga credential nito, suriin kung nakareserba ang prefix ng node:
+nakaimbak pa rin ang mga node na na-save bago umiral ang panuntunang ito, ngunit ang prefix ng mga ito ay nira-route sa
+built-in na provider. I-edit ang node at bigyan ito ng bagong prefix.
 
-#### Mga opsyon sa gateway sa bawat koneksyon
+#### Mga opsyon ng gateway kada koneksyon
 
-Ang mga key na ito ay napupunta sa `providerSpecificData` ng isang koneksyon (halimbawa sa pamamagitan ng `PUT /api/providers/{id}`):
+Ang mga key na ito ay inilalagay sa `providerSpecificData` ng isang koneksyon (halimbawa, sa pamamagitan ng
+`PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — para sa OpenAI chat-format compatible na koneksyon na ang gateway ay tinatanggihan ang mahabang pangalan ng tool. Ang mas mahahabang pangalan ay ipinapadala bilang maiikling alyas at ibinabalik sa tugon.
-- `quotaEndpoint` — ang quota/credits endpoint ng gateway, basahin para sa dashboard quota strip at quota-aware na pagruruta. Gumagana sa parehong OpenAI- at Anthropic-compatible na koneksyon; ang buong hugis ay nakadokumento sa `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (integer, 1–1024) — para sa mga koneksyong compatible sa OpenAI chat format na
+  ang gateway ay tumatanggi sa mahahabang pangalan ng tool. Ipinapadala ang mas mahahabang pangalan bilang maiikling alias at ibinabalik sa orihinal na anyo sa
+  tugon.
+- `quotaEndpoint` — ang endpoint ng quota/credits ng gateway, na binabasa para sa quota strip ng dashboard at
+  routing na isinasaalang-alang ang quota. Gumagana sa parehong mga koneksyong compatible sa OpenAI at Anthropic; nakadokumento ang kumpletong
+  anyo sa `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -753,11 +772,12 @@ Ang mga key na ito ay napupunta sa `providerSpecificData` ng isang koneksyon (ha
 }
 ```
 
-### Pagkakadena OmniRoute Mga Kapantay
+### Pagkakadena ng mga OmniRoute Peer
 
-Ang isa pang OmniRoute gateway ay maaaring idagdag bilang a** Custom na OpenAI-compatible** provider. Gamitin ang `/v1` base na URL ng peer at isang nakalaang, pinakakaunting pribilehiyong API key na ibinigay ng peer na iyon.
+Maaaring idagdag ang isa pang OmniRoute gateway bilang **Custom na provider na compatible sa OpenAI**. Gamitin ang
+`/v1` base URL ng peer at isang nakalaang API key na may pinakamababang pribilehiyo na inisyu ng peer na iyon.
 
-Para sa reciprocal o multi-hop chain, paganahin ang opt-in loop guard sa bawat gateway:
+Para sa mga reciprocal o multi-hop na chain, i-enable ang opt-in loop guard sa bawat gateway:
 
 ```bash
 # gateway-a
@@ -773,13 +793,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Ang mga kahilingan lang na ipinadala sa isang tahasang pinahihintulutang peer URL ang makakatanggap ng `X-OmniRoute-Peer-Trace` header. Tinatanggihan ng gateway ang paulit-ulit na instance ID o naubos na hop budget na may HTTP `508 Loop Detected`; Ang mga ordinaryong upstream provider ay hindi tumatanggap ng peer metadata.
+Tanging ang mga request na ipinadala sa tahasang pinahihintulutang peer URL ang makatatanggap ng
+`X-OmniRoute-Peer-Trace` header. Tinatanggihan ng gateway ang nauulit na instance ID o naubos na hop
+budget gamit ang HTTP `508 Loop Detected`; walang natatanggap na peer metadata ang mga karaniwang upstream provider.
 
-Ang peer chaining ay hindi pagtitiklop ng database o host failover. Ang bawat gateway ay nagpapanatili ng independiyenteng estado SQLite, mga cache, mga tagabilang ng rate, at mga session. Gumamit ng reverse proxy na sinusuri sa kalusugan o failover ng kliyente para sa availability active/passive o active/active, at huwag na huwag mag-mount ng isang database SQLite sa maraming mga tumatakbong OmniRoute instance.
+Ang peer chaining ay hindi database replication o host failover. Nagpapanatili ang bawat gateway ng hiwalay na
+SQLite state, mga cache, rate counter, at session. Gumamit ng health-checked reverse proxy o client
+failover para sa active/passive o active/active availability, at huwag kailanman mag-mount ng iisang SQLite database
+sa maraming tumatakbong OmniRoute instance.
 
-### Nakalaang Mga Ruta ng Provider
+### Mga Nakalaang Route ng Provider
 
-Direktang iruta ang mga kahilingan sa isang partikular na provider na may pagpapatunay ng modelo:
+Direktang i-route ang mga request sa isang partikular na provider na may validation ng modelo:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -787,137 +812,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Ang prefix ng provider ay awtomatikong idinaragdag kung nawawala. Ang mga hindi tugmang modelo ay nagbabalik `400`.
+Awtomatikong idinaragdag ang provider prefix kung wala ito. Ang mga hindi tugmang modelo ay nagbabalik ng `400`.
 
 ### Configuration ng Network Proxy
 
 ```bash
-# Set global proxy
+# Itakda ang global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Per-provider proxy
+# Proxy para sa bawat provider
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Test proxy
+# Subukan ang proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Pangunahin:** → na partikular sa key Combo na partikular → Partikular sa provider → Global → Environment.
+**Pagkakasunod ng prayoridad:** Partikular sa key → Partikular sa combo → Partikular sa provider → Global → Environment.
 
-### Katalogo ng Modelo API
+### API ng Catalog ng Modelo
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Ibinabalik ang mga modelong nakapangkat ayon sa provider na may mga uri (`chat`, `embedding`, `image`).
+Nagbabalik ng mga modelong nakapangkat ayon sa provider at may mga uri (`chat`, `embedding`, `image`).
 
 ### Cloud Sync
 
-- I-sync ang mga provider, combo, at setting sa mga device
-- Awtomatikong pag-sync sa background na may timeout + -fast
-- Mas gusto ang server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` sa produksyon
+- I-sync ang mga provider, combo, at setting sa iba't ibang device
+- Awtomatikong background sync na may timeout + fail-fast
+- Mas piliing gamitin ang server-side na `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` sa production
 
-### Cloudflare Mabilis na Tunnel
+### Mabilisang Tunnel ng Cloudflare
 
-- Available sa** Dashboard → Endpoints** para sa Docker at iba pang self-hosted deployment
-- Gumagawa ng pansamantalang `https://*.trycloudflare.com` URL na nagpapasa sa iyong kasalukuyang OpenAI-compatible `/v1` endpoint
-- Unang paganahin ang pag-install ng `cloudflared` lamang kapag kinakailangan; sa paglaon ay magsisimula muli ang paggamit ng parehong pinamamahalaang binary
-- Ang Mga Mabilisang Tunnel ay hindi awtomatikong nire-restore pagkatapos mag-restart ang isang OmniRoute o container; muling paganahin ang mga ito mula sa dashboard kung kinakailangan
-- Ang tunnel URLs ay ephemeral at nagbabago sa tuwing stop/start mo ang tunnel
-- Default ang Managed Quick Tunnels sa HTTP/2 transport para maiwasan ang maingay na QUIC UDP buffer na babala sa mga pinipigilang container
-- Itakda ang `CLOUDFLARED_PROTOCOL=quic` o `auto` kung gusto mong i-override ang pinamamahalaang pagpipilian sa transportasyon
-- Itakda ang `CLOUDFLARED_BIN` kung mas gusto mong gumamit ng paunang naka-install `cloudflared` binary sa halip na ang pinamamahalaang pag-download
-- Cloudflare Quick Tunnel, Tailscale Funnel, at ngrok Tunnel panel ay maaaring ipakita o itago sa** Mga Setting → Hitsura** . Ang pagtatago ng isang panel ay hindi humihinto sa isang tumatakbong lagusan.
+- Available sa **Dashboard → Mga Endpoint** para sa Docker at iba pang mga self-hosted na deployment
+- Gumagawa ng pansamantalang `https://*.trycloudflare.com` URL na nagpapasa sa iyong kasalukuyang OpenAI-compatible na `/v1` endpoint
+- Sa unang pag-enable, ini-install lamang ang `cloudflared` kapag kinakailangan; ginagamit muli ng mga susunod na pag-restart ang parehong pinamamahalaang binary
+- Hindi awtomatikong naibabalik ang mga Quick Tunnel pagkatapos ng pag-restart ng OmniRoute o container; i-enable muli ang mga ito mula sa dashboard kapag kinakailangan
+- Pansamantala ang mga Tunnel URL at nagbabago sa tuwing ihihinto/sisimulan mo ang tunnel
+- Gumagamit bilang default ang mga pinamamahalaang Quick Tunnel ng HTTP/2 transport upang maiwasan ang maiingay na babala tungkol sa QUIC UDP buffer sa mga container na limitado ang resource
+- Itakda ang `CLOUDFLARED_PROTOCOL=quic` o `auto` kung gusto mong i-override ang pinamamahalaang pagpili ng transport
+- Itakda ang `CLOUDFLARED_BIN` kung mas gusto mong gumamit ng naka-preinstall na `cloudflared` binary sa halip na pinamamahalaang pag-download
+- Maaaring ipakita o itago ang mga panel ng Cloudflare Quick Tunnel, Tailscale Funnel, at ngrok Tunnel sa **Mga Setting → Hitsura**. Hindi pinatitigil ng pagtatago ng panel ang tumatakbong tunnel.
 
-### LLM Gateway Intelligence (Phase 9)
+### Katalinuhan ng LLM Gateway (Yugto 9)
 
-- **Semantic Cache** — Auto-cache non-streaming, temperatura = 0 tugon (bypass na may `X-OmniRoute-No-Cache: true`)
-- **Humiling ng Idepotency** — Nagde-deduplicate ng mga kahilingan sa loob ng 5s sa pamamagitan ng `Idempotency-Key` o `X-Request-Id` header
-- **Pagsubaybay sa Pag-unlad** — Mag-opt-in sa SSE `event: progress` na mga kaganapan sa pamamagitan ng `X-OmniRoute-Progress: true` header
-
----
-
-### Palaruan ng Tagasalin
-
-I-access sa pamamagitan ng** Tagasalin ng Dashboard →** . I-debug at i-visualize kung paano isinasalin ng OmniRoute ang mga kahilingan API sa pagitan ng mga provider.
-
-| Mode                | Layunin                                                                                                     |
-| ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Palaruan**        | Pumili ng mga source/target format, i-paste ang isang kahilingan, at makita agad ang isinalin na output     |
-| **Chat Tester**     | Magpadala ng mga mensahe sa live chat sa pamamagitan ng proxy at siyasatin ang buong request/response cycle |
-| **Test Bench**      | Magpatakbo ng mga batch test sa maraming kumbinasyon ng format para i-verify ang kawastuhan ng pagsasalin   |
-| **Live na Monitor** | Manood ng mga real-time na pagsasalin habang dumadaloy ang mga kahilingan sa pamamagitan ng proxy           |
-
-**Mga kaso ng paggamit:**
-
-- I-debug kung bakit nabigo ang isang partikular na kumbinasyon client/provider
-- I-verify na ang mga tag ng pag-iisip, mga tawag sa tool, at mga prompt ng system ay naisalin nang tama
-- Ihambing ang mga pagkakaiba sa format sa pagitan ng OpenAI, Claude, Gemini, at Mga Tugon API na format
+- **Semantic Cache** — Awtomatikong kina-cache ang mga non-streaming na tugon na may temperature=0 (i-bypass gamit ang `X-OmniRoute-No-Cache: true`)
+- **Request Idempotency** — Tinatanggal ang mga dobleng request sa loob ng 5s sa pamamagitan ng `Idempotency-Key` o `X-Request-Id` header
+- **Pagsubaybay sa Progreso** — Mga opsyonal na SSE `event: progress` event sa pamamagitan ng `X-OmniRoute-Progress: true` header
 
 ---
 
-### Mga Istratehiya sa Pagruruta
+### Playground ng Translator
 
-I-configure sa pamamagitan ng** Dashboard → Mga Setting → Pagruruta** . Inilalantad ng dashboard ang anim na pinakaginagamit na estratehiya; Ang mga combo at ang auto-router ay panloob na sumusuporta sa isang mas malawak na hanay.
+I-access sa pamamagitan ng **Dashboard → Translator**. I-debug at isalarawan kung paano isinasalin ng OmniRoute ang mga API request sa pagitan ng mga provider.
 
-**Mga diskarte na nakikita sa dashboard (pagruruta sa antas ng account):**
+| Mode             | Layunin                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Playground**   | Pumili ng mga format ng source/target, mag-paste ng request, at makita agad ang isinaling output              |
+| **Chat Tester**  | Magpadala ng mga live chat message sa pamamagitan ng proxy at suriin ang buong cycle ng request/response      |
+| **Test Bench**   | Magpatakbo ng mga batch test sa maraming kombinasyon ng format upang beripikahin ang kawastuhan ng pagsasalin |
+| **Live Monitor** | Subaybayan ang mga real-time na pagsasalin habang dumadaloy ang mga request sa proxy                          |
 
-| Diskarte                       | Paglalarawan                                                                                                                                                   |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Punan muna**                 | Gumagamit ng mga account sa pagkakasunud-sunod ng priyoridad — pinangangasiwaan ng pangunahing account ang lahat ng mga kahilingan hanggang sa hindi magagamit |
-| **Round Robin**                | Umiikot sa lahat ng account na may na-configure na malagkit na limitasyon (default: 3 tawag sa bawat account)                                                  |
-| **P2C (Power of Two Choices)** | Pumili ng 2 random na account at ruta patungo sa mas malusog — binabalanse ang load nang may kaalaman sa kalusugan                                             |
-| **Random**                     | Random na pumipili ng account para sa bawat kahilingan gamit ang Fisher-Yates shuffle                                                                          |
-| **Hindi gaanong nagamit**      | Mga ruta patungo sa account na may pinakamatandang `lastUsedAt` timestamp, na namamahagi ng trapiko nang pantay-pantay                                         |
-| **Na-optimize ang Gastos**     | Mga ruta patungo sa account na may pinakamababang halaga ng priyoridad, na nag-o-optimize para sa mga provider na may pinakamababang halaga                    |
+**Mga gamit:**
 
-**Mga advanced na diskarte sa combo at auto** (nako-configure sa bawat combo o sa pamamagitan ng mga prefix `auto/*` — tingnan [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+- I-debug kung bakit pumapalya ang isang partikular na kombinasyon ng client/provider
+- Beripikahing tama ang pagsasalin sa mga thinking tag, tool call, at system prompt
+- Ihambing ang mga pagkakaiba ng format sa pagitan ng mga format ng OpenAI, Claude, Gemini, at Responses API
 
-- `priority` - mahigpit na pagkakasunud-sunod, hindi kailanman round-robins
-- `weighted` — proporsyonal na paghahati ng trapiko ayon sa mga timbang sa bawat modelo
-- `fill-first` - alisan ng tubig ang unang modelo hanggang sa maabot ang mga limitasyon
+---
+
+### Mga Estratehiya sa Routing
+
+I-configure sa pamamagitan ng **Dashboard → Mga Setting → Routing**. Ipinapakita ng dashboard ang anim na pinakamadalas gamiting estratehiya; sinusuportahan sa loob ng mga combo at auto-router ang mas malawak na hanay.
+
+**Mga estratehiyang nakikita sa dashboard (routing sa antas ng account):**
+
+| Estratehiya                             | Paglalarawan                                                                                                                                                      |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Punuin Muna**                         | Ginagamit ang mga account ayon sa pagkakasunod-sunod ng priyoridad — pinangangasiwaan ng pangunahing account ang lahat ng request hanggang hindi na ito available |
+| **Round Robin**                         | Umiikot sa lahat ng account na may nako-configure na sticky limit (default: 3 tawag bawat account)                                                                |
+| **P2C (Lakas ng Dalawang Pagpipilian)** | Pumipili ng 2 random na account at nagru-route sa mas malusog — binabalanse ang load habang isinasaalang-alang ang kalagayan                                      |
+| **Random**                              | Random na pumipili ng account para sa bawat request gamit ang Fisher-Yates shuffle                                                                                |
+| **Pinakakaunting Nagamit**              | Nagru-route sa account na may pinakalumang `lastUsedAt` timestamp, na pantay na namamahagi ng traffic                                                             |
+| **Na-optimize sa Gastos**               | Nagru-route sa account na may pinakamababang priority value, na nag-o-optimize para sa mga provider na may pinakamababang gastos                                  |
+
+**Mga advanced na estratehiya para sa combo at auto** (nako-configure sa bawat combo o sa pamamagitan ng mga `auto/*` prefix — tingnan ang [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+
+- `priority` — mahigpit na pagkakasunod-sunod, hindi kailanman gumagamit ng round-robin
+- `weighted` — proporsyonal na paghahati ng traffic ayon sa timbang ng bawat modelo
+- `fill-first` — inuubos muna ang kapasidad ng unang modelo hanggang maabot ang mga limitasyon
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (Lakas ng Dalawang Pagpipilian)
 - `least-used` at `cost-optimized`
-- `auto` — score-driven sa lahat ng kandidato
-- `lkgp` (Huling Kilalang Mabuting Provider) — mga pin sa huling matagumpay na provider, pagkatapos ay babalik sa mga panuntunan
-- `context-optimized` — pinipili ang modelo na may pinakamalaking libreng window ng konteksto
-- `context-relay` — nag-chain ng mga modelong pang-context para sa mga follow-up na pagliko
+- `auto` — nakabatay sa score sa lahat ng candidate
+- `lkgp` (Huling Kilalang Mahusay na Provider) — nananatili sa huling matagumpay na provider, pagkatapos ay bumabalik sa mga panuntunan
+- `context-optimized` — pinipili ang modelong may pinakamalaking libreng context window
+- `context-relay` — pinagkakadena ang mga long-context na modelo para sa mga kasunod na turn
 
-#### External Sticky Session Header
+#### External na Sticky Session Header
 
-Para sa external na session affinity (halimbawa, Claude Code/Codex agent sa likod ng mga reverse proxy), ipadala ang:
+Para sa external na session affinity (halimbawa, mga Claude Code/Codex agent sa likod ng mga reverse proxy), ipadala ang:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-Tumatanggap din OmniRoute `x_session_id` at ibinabalik ang epektibong session key sa `X-OmniRoute-Session-Id`.
+Tinatanggap din ng OmniRoute ang `x_session_id` at ibinabalik ang aktuwal na session key sa `X-OmniRoute-Session-Id`.
 
-Kung gumagamit ka ng Nginx at magpadala ng mga underscore-form na header, paganahin ang:
+Kung gumagamit ka ng Nginx at nagpapadala ng mga header na nasa underscore form, i-enable ang:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Mga Alyas ng Modelong Wildcard
+#### Mga Wildcard Model Alias
 
-Lumikha ng mga pattern ng wildcard para i-remap ang mga pangalan ng modelo:
+Gumawa ng mga wildcard pattern upang muling i-map ang mga pangalan ng modelo:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Sinusuportahan ng mga wildcard `*` (anumang character) at `?` (solong character).
+Sinusuportahan ng mga wildcard ang `*` (anumang mga character) at `?` (isang character).
 
-#### Fallback Chain
+#### Mga Fallback Chain
 
-Tukuyin ang mga pandaigdigang fallback chain na nalalapat sa lahat ng kahilingan:
+Magtakda ng mga global fallback chain na nalalapat sa lahat ng request:
 
 ```
 Chain: production-fallback
@@ -928,22 +953,22 @@ Chain: production-fallback
 
 ---
 
-### Mga Karaniwang Kumbinasyon ng Provider at Mga Pattern ng Pagruruta
+### Mga Karaniwang Kombinasyon ng Provider at Pattern ng Routing
 
-Narito ang mga halimbawang pattern para sa pagsasama-sama ng maraming provider at pagruruta sa pagitan nila sa OmniRoute:
+Narito ang mga halimbawang pattern para sa pagsasama-sama ng maraming provider at pagru-route sa pagitan ng mga ito sa OmniRoute:
 
-#### 1. Coding Agent Combo: High-End Reasoning na may Cost/Speed Fallback
+#### 1. Combo ng Coding Agent: High-End na Reasoning na may Fallback para sa Gastos/Bilis
 
-Tamang-tama para sa mga ahente ng coding (OpenCode, Claude Code, Cursor, Cline). Mga ruta sa una sa mga frontier na mga modelo ng pangangatwiran, bumabalik sa mabilis na mga modelo ng coding sa pagkaubos ng quota o mga error.
+Mainam para sa mga coding agent (OpenCode, Claude Code, Cursor, Cline). Sa simula, nagru-route sa mga frontier reasoning model at bumabalik sa mabibilis na coding model kapag naubos ang quota o nagkaroon ng mga error.
 
-- **Dashboard** : Combos → Bagong Combo → Pangalan: `agent-coding` → Diskarte: `Priority`
-- **Mga modelo** :
-  1. `claude/claude-sonnet-4-6` (Pangunahing ahente ng coding)
-  2. `openai/gpt-4o` (Pangalawang mataas na kapasidad na fallback)
-  3. `deepseek/deepseek-v4-flash` (High-efficiency, cost-effective na fallback)
+- **Dashboard**: Mga Combo → Bagong Combo → Pangalan: `agent-coding` → Estratehiya: `Priority`
+- **Mga Modelo**:
+  1. `claude/claude-sonnet-4-6` (Pangunahing coding agent)
+  2. `openai/gpt-4o` (Pangalawang high-capacity na fallback)
+  3. `deepseek/deepseek-v4-flash` (High-efficiency at cost-effective na fallback)
 
 ```bash
-# Example via API
+# Halimbawa gamit ang API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -958,174 +983,178 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Free-Tier Auto Failover Combo
+#### 2. Combo na Awtomatikong Nagfa-failover sa Libreng Antas
 
-Nagcha-chain ng maramihang free-tier at keyless provider para ma-maximize ang uptime nang walang API cost.
+Pinagdurugtong ang maraming provider na nasa libreng antas at hindi nangangailangan ng key upang mapataas ang uptime nang walang gastos sa API.
 
-- **Diskarte** : `Least Used` o `Round Robin` (namamahagi ng load sa mga quota)
-- **Mga modelo** :
+- **Diskarte**: `Least Used` o `Round Robin` (ipinamamahagi ang load sa iba't ibang quota)
+- **Mga Modelo**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Example via CLI
+# Halimbawa gamit ang CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Multimodal / Vision at Text Pipeline
+#### 3. Multimodal / Pipeline para sa Biswal at Teksto
 
-Pagpapares ng mga dalubhasang modelo ng paningin na may mataas na bilis ng pagbuo ng teksto para sa mga daloy ng trabaho na kinasasangkutan ng pag-unawa sa imahe at pagbuo ng code.
+Pinagsasama ang mga espesyalisadong vision model at mabilis na pagbuo ng teksto para sa mga workflow na kinabibilangan ng pag-unawa sa larawan at pagbuo ng code.
 
-- **Pattern** : Isang `Priority` combo na naglilista ng mga modelong may kakayahang pangitain muna at isang high-throughput text/code na modelo ang huli.
-- **Mga modelo** :
-  1. `gemini/gemini-2.5-pro` (Malakas na pang-unawa image/multimodal )
-  2. `openai/gpt-4o` (Balanseng paningin at paggamit ng tool)
-  3. `deepseek/deepseek-v4-flash` ( henerasyon Text/code )
-
----
-
-### Katatagan at Mga Circuit Breaker
-
-I-configure sa pamamagitan ng** Dashboard → Mga Setting → Katatagan** .
-
-Ipinapatupad ng OmniRoute ang katatagan sa antas ng provider na may limang bahagi:
-
-1. **Humiling ng Queue at Pacing** — Paghubog ng kahilingan sa antas ng system:
-   - **Mga Kahilingan Bawat Minuto (RPM)** — Pinakamataas na kahilingan kada minuto bawat account
-   - **Min na Oras sa Pagitan ng Mga Kahilingan** — Minimum na agwat sa millisecond sa pagitan ng mga kahilingan
-   - **Max Kasabay na Kahilingan** — Pinakamataas na sabay-sabay na mga kahilingan sa bawat account
-
-2. **Cooldown ng Koneksyon** — Per-auth-type na configuration para sa isang koneksyon pagkatapos ng mga muling pagsubok na pagkabigo:
-   - **Base Cooldown** — Default na cooldown window para sa muling pagsubok na upstream na mga pagkabigo
-   - **Gumamit ng Upstream Retry Hint** — Pinarangalan ang awtoritatibong `Retry-After` o i-reset ang mga pahiwatig kapag ibinigay
-   - **Max Backoff Steps** — Pinakamataas na exponential backoff level para sa mga paulit-ulit na pagkabigo
-
-3. **Tagapagbigay ng Circuit Breaker** — Sinusubaybayan ang mga end-to-end na pagkabigo ng provider, minarkahan ang isang provider na nasira sa naka-configure na threshold ng babala, at binubuksan ang breaker kapag naabot ang na-configure na threshold ng pagkabigo:
-   - **Degradation Threshold** — Magkasunod na pagkabigo ng provider bago pumasok sa `DEGRADED`
-   - **Threshold ng Pagkabigo** — Magkasunod na pagkabigo ng provider bago pumasok sa `OPEN`
-   - **I-reset ang Timeout** — Palugit ng oras bago muling masuri ang provider
-   - **CLOSED** (Healthy) — Normal na dumadaloy ang mga kahilingan
-   - **DEGRADED** — Dumadaloy pa rin ang mga kahilingan habang sinusubaybayan ang mga matataas na pagkabigo
-   - **OPEN** — Pansamantalang naharang ang provider pagkatapos ng paulit-ulit na pagkabigo
-   - **HALF_OPEN** — Pagsubok kung nakabawi na ang provider
-
-   Nananatili ang mga limitasyon sa rate ng `429` na saklaw ng koneksyon** Cooldown ng Koneksyon** at huwag ibilang sa tagapagbigay breaker.
-
-   Ang provider breaker runtime state ay ipinapakita sa** Dashboard → Health** lamang.
-
-4. **Hintayin ang Cooldown** — Kung lumalamig na ang bawat koneksyon ng kandidato, maaaring maghintay OmniRoute para sa pinakamaagang cooldown at awtomatikong subukan ang parehong kahilingan ng kliyente.
-
-5. **Awtomatikong Pagtukoy sa Limitasyon ng Rate** — Kapag ibinalik ng mga upstream provider ang tahasang mga window ng paghihintay, ang mga pahiwatig na iyon ay na-override ang cooldown ng lokal na koneksyon kapag pinagana ang setting.
-
-**Pro Tip:** Gamitin ang** Kalusugan** pahina upang siyasatin at i-reset ang mga live na breaker ng provider pagkatapos ng outage. Ang pahina ng Resilience ay nagbabago lamang ng configuration.
+- **Pattern**: Isang `Priority` combo na unang naglilista ng mga modelong may kakayahang umunawa ng larawan at naglalagay ng text/code model na may mataas na throughput sa hulihan.
+- **Mga Modelo**:
+  1. `gemini/gemini-2.5-pro` (Mahusay na pag-unawa sa larawan/multimodal na nilalaman)
+  2. `openai/gpt-4o` (Balanseng paggamit ng vision at mga tool)
+  3. `deepseek/deepseek-v4-flash` (Pagbuo ng teksto/code)
 
 ---
 
-### Database Export / Import
+### Katatagan at mga Circuit Breaker
 
-Pamahalaan ang mga backup ng database sa** Dashboard → Mga Setting → System at Storage** .
+I-configure sa pamamagitan ng **Dashboard → Settings → Resilience**.
 
-| Aksyon                       | Paglalarawan                                                                                                                                                     |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **I-export ang Database**    | Dina-download ang kasalukuyang SQLite database bilang isang `.sqlite` file                                                                                       |
-| **I-export Lahat (.tar.gz)** | Nagda-download ng buong backup na archive kabilang ang: database, mga setting, combo, mga koneksyon sa provider (walang mga kredensyal), API key metadata        |
-| **Mag-import ng Database**   | Mag-upload ng `.sqlite` file upang palitan ang kasalukuyang database. Awtomatikong nagagawa ang pre-import backup maliban kung `DISABLE_SQLITE_AUTO_BACKUP=true` |
+Ipinapatupad ng OmniRoute ang katatagan sa antas ng provider gamit ang limang bahagi:
+
+1. **Queue at Pacing ng mga Request** — Pagkontrol sa daloy ng mga request sa antas ng system:
+   - **Mga Request Kada Minuto (RPM)** — Pinakamaraming request kada minuto para sa bawat account
+   - **Pinakamaikling Oras sa Pagitan ng mga Request** — Pinakamaliit na pagitan sa millisecond sa pagitan ng mga request
+   - **Pinakamaraming Magkakasabay na Request** — Pinakamaraming sabay-sabay na request para sa bawat account
+
+2. **Cooldown ng Koneksyon** — Configuration ayon sa uri ng auth para sa isang koneksyon pagkatapos ng mga kabiguang maaaring subukang muli:
+   - **Pangunahing Cooldown** — Default na panahon ng cooldown para sa mga kabiguan sa upstream na maaaring subukang muli
+   - **Gamitin ang mga Pahiwatig sa Muling Pagsubok mula sa Upstream** — Sinusunod ang awtoritatibong `Retry-After` o mga pahiwatig sa pag-reset kapag ibinigay
+   - **Pinakamaraming Hakbang ng Backoff** — Pinakamataas na antas ng exponential backoff para sa mga paulit-ulit na kabiguan
+
+3. **Circuit Breaker ng Provider** — Sinusubaybayan ang mga end-to-end na kabiguan ng provider, minamarkahan ang provider bilang degraded kapag naabot ang naka-configure na threshold ng babala, at binubuksan ang breaker kapag naabot ang naka-configure na threshold ng kabiguan:
+   - **Threshold ng Degradation** — Bilang ng magkakasunod na kabiguan ng provider bago pumasok sa `DEGRADED`
+   - **Threshold ng Kabiguan** — Bilang ng magkakasunod na kabiguan ng provider bago pumasok sa `OPEN`
+   - **Timeout ng Pag-reset** — Panahon bago muling subukan ang provider
+   - **CLOSED** (Maayos) — Normal na dumadaloy ang mga request
+   - **DEGRADED** — Patuloy na dumadaloy ang mga request habang sinusubaybayan ang dumaraming kabiguan
+   - **OPEN** — Pansamantalang bina-block ang provider pagkatapos ng mga paulit-ulit na kabiguan
+   - **HALF_OPEN** — Sinusuri kung nakabawi na ang provider
+
+   Ang mga rate limit na `429` na nakatuon sa koneksyon ay nananatili sa **Cooldown ng Koneksyon** at hindi ibinibilang sa breaker ng provider.
+
+   Ang runtime state ng breaker ng provider ay ipinapakita lamang sa **Dashboard → Health**.
+
+4. **Hintayin ang Cooldown** — Kung nasa cooldown na ang bawat maaaring gamiting koneksyon, maaaring hintayin ng OmniRoute ang pinakamaagang matatapos na cooldown at awtomatikong subukang muli ang parehong request ng client.
+
+5. **Awtomatikong Pagtukoy ng Rate Limit** — Kapag nagbalik ang mga upstream provider ng tahasang panahon ng paghihintay, pinapalitan ng mga pahiwatig na iyon ang lokal na cooldown ng koneksyon kapag naka-enable ang setting.
+
+**Propesyonal na Tip:** Gamitin ang page na **Health** upang suriin at i-reset ang mga aktibong breaker ng provider pagkatapos ng outage. Binabago lamang ng page na Resilience ang configuration.
+
+---
+
+### Pag-export / Pag-import ng Database
+
+Pamahalaan ang mga backup ng database sa **Dashboard → Settings → System & Storage**.
+
+| Aksyon                       | Paglalarawan                                                                                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **I-export ang Database**    | Dina-download ang kasalukuyang SQLite database bilang `.sqlite` file                                                                                                       |
+| **I-export Lahat (.tar.gz)** | Dina-download ang kumpletong backup archive na kinabibilangan ng: database, mga setting, combo, mga koneksyon ng provider (walang credential), at metadata ng API key      |
+| **I-import ang Database**    | Nag-a-upload ng `.sqlite` file upang palitan ang kasalukuyang database. Awtomatikong gumagawa ng backup bago ang pag-import maliban kung `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Export database
+# API: I-export ang database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Export all (full archive)
+# API: I-export lahat (kumpletong archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Import database
+# API: I-import ang database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Pagpapatunay ng Import:** Ang na-import na file ay napatunayan para sa integridad (SQLite pragma check), kinakailangang mga talahanayan (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), at laki (max 100MB).
+**Pag-validate ng Import:** Vina-validate ang na-import na file para sa integridad (SQLite pragma check), mga kinakailangang table (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), at laki (maximum na 100MB).
 
-**Mga Kaso ng Paggamit:**
+**Mga Gamit:**
 
-- I-migrate OmniRoute sa pagitan ng mga makina
-- Gumawa ng mga panlabas na backup para sa pagbawi ng kalamidad
-- Magbahagi ng mga configuration sa pagitan ng mga miyembro ng team (i-export ang lahat → share archive)
-
----
-
-### Dashboard ng Mga Setting
-
-Ang pahina ng mga setting ay nakaayos sa** 7 tab** para sa madaling pag-navigate:
-
-| Tab           | Mga nilalaman                                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Heneral**   | Mga tool sa storage ng system, default na gawi, visibility ng Endpoint tunnel                                                                                          |
-| **Hitsura**   | Mga kontrol sa tema (light/dark/system), sidebar visibility, mga toggle ng panel para sa Cloudflare/Tailscale/ngrok tunnel card                                        |
-| **AI**        | Pag-iisip ng badyet (passthrough / auto-strip / custom / adaptive — tingnan ang [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), global system prompt, prompt cache stats |
-| **Seguridad** | Login/Password settings, IP Access Control, API auth para sa `/models`, Provider Blocking, prompt-injection guard                                                      |
-| **Pagruruta** | Pandaigdigang diskarte sa pagruruta (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), wildcard model alias, fallback chain, combo default       |
-| **Katatagan** | Humiling ng queue, cooldown ng koneksyon, config ng provider breaker, at wait-for-cooldown na gawi                                                                     |
-| **Advanced**  | Pangkalahatang configuration ng proxy (HTTP/SOCKS5), mga override ng proxy ng bawat provider                                                                           |
-
-Ang Pangkalahatan ay hindi na duplicate ng read-only na pag-log at cache ng mga tala. Ang mga setting ng pagpapanatili at pag-optimize ng database ay nananatili sa pamamagitan ng `/api/settings/database`; Ang manual cache clearing ay gumagamit ng `DELETE /api/cache`. Ang request at proxy log row caps ay kinokontrol ng `CALL_LOGS_TABLE_MAX_ROWS` at `PROXY_LOGS_TABLE_MAX_ROWS`.
+- Ilipat ang OmniRoute sa ibang machine
+- Gumawa ng mga external backup para sa disaster recovery
+- Magbahagi ng mga configuration sa mga miyembro ng team (i-export lahat → ibahagi ang archive)
 
 ---
 
-### Mga Gastos at Pamamahala ng Badyet
+### Dashboard ng mga Setting
 
-I-access sa pamamagitan ng** Mga Gastos sa Dashboard →** .
+Ang page ng mga setting ay isinaayos sa **7 tab** para sa madaling pag-navigate:
 
-| Tab             | Layunin                                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Badyet**      | Magtakda ng mga limitasyon sa paggastos sa bawat API key gamit ang mga badyet daily/weekly/monthly at real-time na pagsubaybay |
-| **Pagpepresyo** | Tingnan at i-edit ang mga entry sa pagpepresyo ng modelo — gastos sa bawat 1K input/output token bawat provider                |
+| Tab               | Mga Nilalaman                                                                                                                                                                                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pangkalahatan** | Mga tool sa storage ng system, default na gawi, visibility ng Endpoint tunnel                                                                                                                         |
+| **Hitsura**       | Mga kontrol sa tema (maliwanag/madilim/system), visibility ng sidebar, mga toggle ng panel para sa mga tunnel card ng Cloudflare/Tailscale/ngrok                                                      |
+| **AI**            | Badyet sa pag-iisip (passthrough / awtomatikong pag-aalis / custom / adaptive — tingnan ang [THINKING_BUDGET.md](./THINKING_BUDGET.md)), pandaigdigang system prompt, mga estadistika ng prompt cache |
+| **Seguridad**     | Mga setting ng Login/Password, IP Access Control, API auth para sa `/models`, Pag-block sa Provider, proteksyon laban sa prompt injection                                                             |
+| **Pagruruta**     | Pandaigdigang estratehiya sa pagruruta (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), mga wildcard model alias, mga fallback chain, mga default ng combo                    |
+| **Katatagan**     | Queue ng request, cooldown ng koneksyon, configuration ng provider breaker, at gawi sa paghihintay sa cooldown                                                                                        |
+| **Advanced**      | Pandaigdigang configuration ng proxy (HTTP/SOCKS5), mga override ng proxy para sa bawat provider                                                                                                      |
+
+Hindi na inuulit ng Pangkalahatan ang mga read-only na tala tungkol sa pag-log at cache. Ang mga setting sa retention at
+optimization ng database ay pinapanatili sa pamamagitan ng `/api/settings/database`; ginagamit ng manu-manong paglilinis ng cache ang
+`DELETE /api/cache`. Ang mga limitasyon sa dami ng row ng mga log ng request at proxy ay kinokontrol ng
+`CALL_LOGS_TABLE_MAX_ROWS` at `PROXY_LOGS_TABLE_MAX_ROWS`.
+
+---
+
+### Pamamahala ng Mga Gastos at Badyet
+
+I-access sa pamamagitan ng **Dashboard → Mga Gastos**.
+
+| Tab             | Layunin                                                                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Badyet**      | Magtakda ng mga limitasyon sa paggastos para sa bawat API key gamit ang pang-araw-araw/lingguhan/buwanang badyet at real-time na pagsubaybay |
+| **Pagpepresyo** | Tingnan at i-edit ang mga entry sa pagpepresyo ng model — gastos sa bawat 1K input/output token para sa bawat provider                       |
 
 ```bash
-# API: Set a budget
+# API: Magtakda ng badyet
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Get current budget status
+# API: Kunin ang kasalukuyang status ng badyet
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Pagsubaybay sa Gastos:** Ang bawat kahilingan ay nagla-log ng paggamit ng token at kinakalkula ang gastos gamit ang talahanayan ng pagpepresyo. Tingnan ang mga breakdown sa** Dashboard → Paggamit** ng provider, modelo, at API key.
+**Pagsubaybay sa Gastos:** Itinatala ng bawat request ang paggamit ng token at kinakalkula ang gastos gamit ang talahanayan ng pagpepresyo. Tingnan ang mga breakdown sa **Dashboard → Paggamit** ayon sa provider, model, at API key.
 
 ---
 
 ### Transkripsyon ng Audio
 
-Sinusuportahan OmniRoute ang audio transcription sa pamamagitan ng OpenAI-compatible na endpoint:
+Sinusuportahan ng OmniRoute ang transkripsyon ng audio sa pamamagitan ng endpoint na compatible sa OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Example with curl
+# Halimbawa gamit ang curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` ay ang katutubong ruta ng Deepgram at nangangailangan ng Deepgram API key. Kung OpenRouter lang ang naka-configure, gamitin `openrouter/deepgram/nova-3`.
+Ang `deepgram/nova-3` ang native na ruta ng Deepgram at nangangailangan ng Deepgram API key.
+Kung OpenRouter lamang ang naka-configure, gamitin ang `openrouter/deepgram/nova-3`.
 
-**Speech-to-Text (transkripsyon)** provider:
+Mga provider ng **Speech-to-Text (transkripsyon)**:
 
-- `openai/` (katugma sa bulong)
+- `openai/` (compatible sa whisper)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (pamilya ng Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (mga variant ng bulong)
+- `huggingface/` (mga variant ng whisper)
 - `qwen/`
 
-**Text-to-Speech (`POST /v1/audio/speech`)** provider:
+Mga provider ng **Text-to-Speech (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1142,45 +1171,56 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Mga sinusuportahang format ng audio para sa transkripsyon: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Ang mga format ng output TTS ay nakasalalay sa provider (mp3, wav, opus, pcm, mulaw).
+Mga sinusuportahang format ng audio para sa transkripsyon: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Nakadepende sa provider ang mga format ng output ng TTS (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Mga Istratehiya sa Pagbalanse ng Combo
+### Mga Estratehiya sa Pagbabalanse ng Combo
 
-I-configure ang per-combo balancing in** Dashboard → Combos → Create/Edit → Diskarte** .
+I-configure ang pagbabalanse para sa bawat combo sa **Dashboard → Mga Combo → Gumawa/Mag-edit → Estratehiya**.
 
-| Diskarte                   | Paglalarawan                                                                                             |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Round-Robin**            | Umiikot sa mga modelo nang sunud-sunod                                                                   |
-| **Priyoridad**             | Palaging sinusubukan ang unang modelo; bumabalik lamang sa pagkakamali                                   |
-| **Random**                 | Pumipili ng random na modelo mula sa combo para sa bawat kahilingan                                      |
-| **Natimbang**              | Mga rutang proporsyonal batay sa mga nakatalagang timbang sa bawat modelo                                |
-| **Hindi gaanong nagamit**  | Mga ruta patungo sa modelo na may pinakakaunting mga kamakailang kahilingan (gumagamit ng combo metrics) |
-| **Na-optimize ang Gastos** | Mga ruta patungo sa pinakamurang available na modelo (gumagamit ng talahanayan ng pagpepresyo)           |
+| Estratehiya        | Paglalarawan                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| **Round-Robin**    | Paikot na gumagamit ng mga model nang sunod-sunod                                                 |
+| **Prayoridad**     | Palaging sinusubukan muna ang unang model; gumagamit lamang ng fallback kapag may error           |
+| **Random**         | Pumipili ng random na model mula sa combo para sa bawat request                                   |
+| **Weighted**       | Nagru-route nang proporsyonal batay sa mga itinalagang timbang para sa bawat model                |
+| **Least-Used**     | Nagru-route sa model na may pinakakaunting kamakailang request (gumagamit ng mga metric ng combo) |
+| **Cost-Optimized** | Nagru-route sa pinakamurang available na model (gumagamit ng talahanayan ng pagpepresyo)          |
 
-Maaaring itakda ang mga default na global combo** Mga Setting ng Dashboard → → Pagruruta → Mga Default ng Combo** . Ang mga combo target na timeout ay namamana ng kasalukuyang timeout ng kahilingan bilang default. Gamitin** Target na timeout (segundo)** sa mga default na combo o isang indibidwal na combo lamang kapag ang isang mas maikling limitasyon sa bawat target ay dapat mag-trigger ng mas mabilis na fallback.
+Maaaring itakda ang mga pandaigdigang default ng combo sa **Dashboard → Mga Setting → Pagruruta → Mga Default ng Combo**.
+Bilang default, minamana ng mga timeout ng target ng combo ang kasalukuyang timeout ng request. Gamitin lamang ang **Timeout ng target
+(segundo)** sa mga default ng combo o sa isang partikular na combo kapag kailangang mag-trigger ang mas maikling limitasyon sa bawat target
+ng mas mabilis na fallback.
 
-Ang mga zero-latency combo optimization ay opt-in. umalis** Zero-latency optimizations** hindi pinagana upang pigilan ang mga feature na ito ng latency na makipagkarera sa mga fallback na target, paglaktaw sa mga target batay sa kasaysayan TTFT, o pag-compress ng mga fallback na kahilingan; ang pagpapagana nito ay nagbibigay-daan sa naka-configure na hedging, predictive TTFT skips, at proactive fallback compression na i-trade routing/request fidelity para sa mas mababang tail latency.
+Opsyonal ang mga zero-latency optimization ng combo. Panatilihing naka-disable ang **Mga zero-latency optimization** upang
+pigilan ang mga feature na ito sa latency na makipag-unahan sa mga fallback target, lumaktaw ng mga target batay sa kasaysayan ng TTFT,
+o i-compress ang mga fallback request; kapag in-enable ito, pinapayagan nito ang naka-configure na hedging, mga predictive na paglaktaw batay sa TTFT,
+at proactive na pag-compress ng fallback upang ipagpalit ang fidelity ng pagruruta/request para sa mas mababang tail
+latency.
 
-Huwag paganahin** Reasoning token buffer** kapag ang mga upstream provider ay nangangailangan ng mahigpit na mga limitasyon `max_tokens` / `maxOutputTokens`. Kapag naka-enable, ang combo routing ay nagdaragdag lamang ng reasoning-model headroom para sa mga modelong may kilalang output cap at iniiwan ang limitasyon ng token ng kliyente na hindi nagbabago kapag ang ligtas na buffered na halaga ay lalampas sa cap na iyon. Kung lampas na sa kilalang cap ang limitasyon ng kliyente, i-clamp ito ng OmniRoute sa cap na iyon bago ipadala ang upstream na kahilingan.
+I-disable ang **buffer ng token para sa pangangatwiran** kapag nangangailangan ang mga upstream provider ng mahihigpit na limitasyon sa
+`max_tokens` / `maxOutputTokens`. Kapag naka-enable, nagdaragdag lamang ang combo routing ng
+karagdagang puwang para sa reasoning model sa mga model na may kilalang limitasyon sa output at hindi nito binabago ang limitasyon ng token ng client kapag
+lalampas sa limitasyong iyon ang ligtas na value na may buffer. Kung ang limitasyon ng client ay mas mataas na sa isang kilalang limitasyon,
+ibinababa ito ng OmniRoute sa limitasyong iyon bago ipadala ang upstream request.
 
 ---
 
-### Dashboard ng Kalusugan
+### Dashboard ng Kalagayan
 
-I-access sa pamamagitan ng** Dashboard → Health** . Real-time na pangkalahatang-ideya ng kalusugan ng system na may 6 na card:
+I-access sa pamamagitan ng **Dashboard → Kalagayan**. Real-time na pangkalahatang-ideya ng kalagayan ng system na may 6 na card:
 
-| Card                       | Ang Pinapakita Nito                                                        |
-| -------------------------- | -------------------------------------------------------------------------- |
-| **Katayuan ng System**     | Uptime, bersyon, paggamit ng memorya, direktoryo ng data                   |
-| **Kalusugan ng Provider**  | Global provider circuit breaker runtime state                              |
-| **Mga Limitasyon sa Rate** | Mga cooldown ng aktibong koneksyon sa bawat account na may natitirang oras |
-| **Mga Aktibong Lockout**   | Mga aktibong lockout na saklaw ng modelo at pansamantalang pagbubukod      |
-| **Signature Cache**        | Deduplication cache stats (aktibong key, hit rate)                         |
-| **Latency Telemetry**      | p50/p95/p99 latency aggregation bawat provider                             |
+| Card                       | Ipinapakita Nito                                                               |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| **Status ng System**       | Uptime, bersyon, paggamit ng memory, direktoryo ng data                        |
+| **Kalagayan ng Provider**  | Runtime state ng circuit breaker ng global provider                            |
+| **Mga Limitasyon sa Rate** | Mga aktibong cooldown ng koneksyon sa bawat account kasama ang natitirang oras |
+| **Mga Aktibong Lockout**   | Mga aktibong lockout na nakatuon sa model at mga pansamantalang pagbubukod     |
+| **Cache ng Signature**     | Mga estadistika ng deduplication cache (mga aktibong key, hit rate)            |
+| **Telemetry ng Latency**   | Pagsasama-sama ng p50/p95/p99 latency sa bawat provider                        |
 
-**Pro Tip:** Ang pahina ng Kalusugan ay awtomatikong nagre-refresh bawat 10 segundo. Gamitin ang circuit breaker card upang matukoy kung aling mga provider ang nakakaranas ng mga isyu.
+**Pro Tip:** Awtomatikong nagre-refresh ang page ng Kalagayan bawat 10 segundo. Gamitin ang card ng circuit breaker upang matukoy kung aling mga provider ang nakararanas ng mga problema.
 
 ---
 

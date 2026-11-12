@@ -21,6 +21,7 @@ const noopLog = { warn: () => {}, info: () => {}, debug: () => {}, error: () => 
 test.after(async () => {
   await new Promise<void>((resolve) => setImmediate(resolve));
   coreDb.resetDbInstance();
+  await (await import("../../../src/shared/utils/loggerResource.ts")).closeSharedLoggerResource();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

@@ -394,7 +394,7 @@ A visszakereső eszköz neve jelenleg `omniroute_ccr_retrieve` (a `omniroute_` e
 
 ### A munkamenet életciklusa
 
-A streamelhető HTTP-munkamenetek tétlenül működnek, és a szerver lekéri őket; az üresjárati ablakot `OMNIROUTE_MCP_SESSION_IDLE_MS` állítja be (alapértelmezett 5 perc; névre hivatkozva, nem kódolt érték, így ez az oldal nem sodródik, ha változik). A tétlenül learatott munkamenet tünete egy HTTP 404 `Unknown Mcp-Session-Id` — -vel, a megoldás a munkamenet újracsatlakozása vagy újraindítása,** nem** kulcs forgatásához, hatókör módosításához vagy eszköz átnevezéséhez.
+A streamelhető HTTP-munkamenetek tétlenül működnek, és a szerver lekéri őket; az üresjárati ablakot `OMNIROUTE_MCP_SESSION_IDLE_MS` konfigurálja, és `open-sse/mcp-server/httpTransport.ts` ben `DEFAULT_MCP_SESSION_IDLE_MS` re esik vissza. A tétlenül learatott munkamenet tünete egy HTTP 404 `Unknown Mcp-Session-Id` — -el, a megoldás a munkamenet újracsatlakozása vagy újraindítása,**nem** kulcs forgatásához, hatókör módosításához vagy eszköz átnevezéséhez.
 
 ## API-felület
 

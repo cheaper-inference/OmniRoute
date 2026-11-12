@@ -722,11 +722,11 @@ Le module `extraction.ts` (`src/lib/memory/extraction.ts`) utilise une **corresp
 
 ### Catégories de modèles par défaut
 
-| Catégorie           | Exemple de modèle                                                 | Éléments capturés                        |
-| ------------------- | ----------------------------------------------------------------- | ---------------------------------------- |
-| PREFERENCE_PATTERNS | `"Je préfère <X>"`, `"J’aime <X>"`, `"Je déteste <X>"`            | Préférences de l’utilisateur             |
-| DECISION_PATTERNS   | `"J’utiliserai <X>"`, `"J’ai décidé de <X>"`, `"J’ai choisi <X>"` | Décisions de l’utilisateur (épisodiques) |
-| PATTERN_PATTERNS    | `"D’habitude, je <X>"`, `"Je <X> toujours"`, `"Je ne <X> jamais"` | Modèles comportementaux persistants      |
+| Catégorie           | Exemple de modèle                                           | Éléments capturés                        |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Préférences de l’utilisateur             |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Décisions de l’utilisateur (épisodiques) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Modèles comportementaux persistants      |
 
 ### Exemples de modèles (simplifiés)
 
@@ -762,7 +762,8 @@ Lorsqu’un utilisateur dit :
 
 Pour éviter une extraction incontrôlée, les limites suivantes s’appliquent :
 
-| Longueur minimale du contenu | 3 caractères |
+| Longueur minimale du contenu | 3 caractères   |
+| ---------------------------- | -------------- |
 | Longueur maximale du contenu | 500 caractères |
 
 ### Quand désactiver l’extraction

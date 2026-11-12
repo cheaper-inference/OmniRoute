@@ -22,7 +22,7 @@ describe("PR #4145 OpenCode Responses API sanitization", () => {
       assert.equal(body.max_tokens, undefined);
     });
 
-    it("strips prior reasoning items and encrypted_content fields", () => {
+    it("strips opaque-only prior reasoning items and encrypted_content fields", () => {
       const body: Record<string, unknown> = {
         input: [
           { type: "reasoning", encrypted_content: "secret" },
@@ -36,23 +36,52 @@ describe("PR #4145 OpenCode Responses API sanitization", () => {
       assert.equal(input[0].encrypted_content, undefined);
     });
 
-    it("keeps a reasoning item with readable text, without its encrypted payload", () => {
+    it("preserves plaintext reasoning required by DeepSeek continuation", () => {
+      const reasoning = {
+        type: "reasoning",
+        content: [{ type: "reasoning_text", text: "The earlier result explains this step." }],
+      };
+      const assistant = { type: "message", role: "assistant", content: "Done." };
+      const body: Record<string, unknown> = { input: [structuredClone(reasoning), assistant] };
+      sanitizeResponsesBody(body);
+      assert.deepEqual(body.input, [reasoning, assistant]);
+    });
+
+    it("projects mixed reasoning onto plaintext without carrying opaque state or display summaries", () => {
       const body: Record<string, unknown> = {
         input: [
-          { type: "reasoning", content: [{ type: "reasoning_text", text: "because" }] },
-          { type: "reasoning", summary: [], content: [], encrypted_content: "secret" },
           {
             type: "reasoning",
-            summary: [{ type: "summary_text", text: "short" }],
-            encrypted_content: "secret",
+            id: "rs_other_account",
+            encrypted_content: "opaque-fixture",
+            reasoning_encrypted_content: "legacy-opaque-fixture",
+            signature: "signature-fixture",
+            format: "provider-bound",
+            summary: [{ type: "summary_text", text: "Only for display." }],
+            content: [{ type: "reasoning_text", text: "Portable continuation." }],
           },
         ],
       };
       sanitizeResponsesBody(body);
       assert.deepEqual(body.input, [
-        { type: "reasoning", content: [{ type: "reasoning_text", text: "because" }] },
-        { type: "reasoning", summary: [{ type: "summary_text", text: "short" }] },
+        {
+          type: "reasoning",
+          content: [{ type: "reasoning_text", text: "Portable continuation." }],
+        },
       ]);
+    });
+
+    it("drops summary-only, empty and malformed reasoning instead of promoting it to continuation", () => {
+      const body: Record<string, unknown> = {
+        input: [
+          { type: "reasoning", summary: [{ type: "summary_text", text: "Display only." }] },
+          { type: "reasoning", content: [{ type: "reasoning_text", text: "  " }] },
+          { type: "reasoning", content: [{ type: "summary_text", text: "Not continuation." }] },
+          { type: "reasoning", content: "not-an-array" },
+        ],
+      };
+      sanitizeResponsesBody(body);
+      assert.deepEqual(body.input, []);
     });
 
     it("ensures empty parameters object has properties map", () => {

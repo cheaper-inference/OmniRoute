@@ -587,9 +587,8 @@ export async function fetchChatPlaygroundModels(): Promise<ChatPlaygroundModel[]
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 15_000);
-      let res: Response;
       try {
-        res = await fetch(CHATPLAYGROUND_MODELS_URL, {
+        const res = await fetch(CHATPLAYGROUND_MODELS_URL, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -598,19 +597,19 @@ export async function fetchChatPlaygroundModels(): Promise<ChatPlaygroundModel[]
           },
           signal: controller.signal,
         });
+        if (res.ok) {
+          const data: unknown = await res.json();
+          const seen = new Set<string>();
+          const models = extractRawModelList(data)
+            .map((item) => buildCatalogModel(item, seen))
+            .filter((m): m is ChatPlaygroundModel => m !== null);
+          if (models.length > 0) {
+            catalogCache = { models, fetchedAt: Date.now() };
+            return models;
+          }
+        }
       } finally {
         clearTimeout(timer);
-      }
-      if (res.ok) {
-        const data: unknown = await res.json();
-        const seen = new Set<string>();
-        const models = extractRawModelList(data)
-          .map((item) => buildCatalogModel(item, seen))
-          .filter((m): m is ChatPlaygroundModel => m !== null);
-        if (models.length > 0) {
-          catalogCache = { models, fetchedAt: Date.now() };
-          return models;
-        }
       }
     } catch {
       // discovery outage (network, timeout, malformed payload) — fall through

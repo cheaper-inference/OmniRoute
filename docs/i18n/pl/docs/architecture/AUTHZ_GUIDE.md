@@ -265,9 +265,9 @@ export async function POST(request: Request) {
 
 `hasManageScope(scopes)` zwraca true dla `"manage"` lub `"admin"`.
 
-### Wzorzec 3 — Dodanie do publicznej allowlisty
+### Wzór 3 — Dodanie do publicznej listy dozwolonych
 
-Dodaj prefiks do `PUBLIC_API_ROUTE_PREFIXES` (lub `PUBLIC_READONLY_API_ROUTE_PREFIXES` dla GET-only). Zaktualizuj testy jednostkowe w `tests/unit/public-api-routes.test.ts` i `tests/unit/authz/classify.test.ts`.
+Wybierz zestaw według kształtu, a nie wygody. Jedna trasa prowadzi w `PUBLIC_API_ROUTES_EXACT` (lub `PUBLIC_READONLY_CORS_API_ROUTES` tylko w przypadku GET); tylko prawdziwe poddrzewo trafia do `PUBLIC_API_ROUTE_PREFIXES` i to **musi kończyć się na `/`** . Umieszczenie pojedynczej trasy na liście prefiksów powoduje również publikację każdej sąsiedniej ścieżki, która ma wspólne znaki wiodące — w tym rodzeństwo segmentów dynamicznych dodane później (GHSA-74g9-q8f6-793h). Zaktualizuj testy jednostkowe w `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` i `tests/unit/authz/classify.test.ts`.
 
 ## Zakresy
 

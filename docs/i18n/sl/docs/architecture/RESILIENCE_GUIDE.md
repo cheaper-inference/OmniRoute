@@ -178,6 +178,45 @@ omogočeni obe funkciji):
 Regresijski varovali: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Samodejna uporaba bančnih ponastavitev
+
+**Področje uporabe:** Naročniške povezave Codex in Claude (OAuth).**Prijavite se** : nastavitev `bankedResetAutoApply` je privzeto izklopljena in v načinu `dry-run` (Nastavitve → AI → Auto-apply banked resets).
+
+**Namen:** sami porabijo bančne ponastavitve, ko račun naleti na zid uporabe, namesto da čakajo, da operater pritisne »Unovči« na strani z omejitvami ponudnika.
+
+| Vrsta kredita (`creditTypes`) | Kaj je odkupljeno                                    | Kjer teče                                                          |
+| ----------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| `codexCredits`                | Codex ponastavi kredite                              | delo v ozadju, vsakih 60 s                                         |
+| `claudeCredits`               | Bančna nepovratna sredstva Claude (krediti `GRANT` ) | delo v ozadju, vsakih 60 s                                         |
+| `claudeSessionReset`          | Ponastavitev tedenske omejitve sej Claude (zgoraj)   | pot zahteve, prek istega pravilnika kot preklop za posamezni račun |
+
+**Izvedba:**
+
+- Čista odločitev (eno pravilo za obe poti): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Posel v ozadju: `src/lib/services/bankedResetAutoApply.ts` (začetek v `src/instrumentation-node.ts`)
+- Vrata poti zahteve Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, registrirana prek `setClaudeLimitResetPolicy()` v `open-sse/services/claudeLimitReset.ts`
+- Zgodovina, zgornje meje in webhook: `src/lib/usage/bankedResetAudit.ts`
+- Zgodovina API: `GET /api/settings/banked-reset-auto/history?limit=50` (avtor upravljanja)
+
+**Vrstni red sklepa** (prvo neuspešno pravilo je zabeleženi razlog):
+
+1. Funkcija izklopljena, vrsta kredita izklopljena ali račun izven obsega (`accountScope` `all` / `selected` plus zemljevid `connections` za posamezen račun).
+2. Zunaj izbirnega urnika UTC (`startHourUtc` > `endHourUtc` prečka polnoč).
+3. Omejitve v zadnjih 24 urah: `maxPerAccountPerDay` (1), `maxPerDay` (3) in `minSpacingMinutes` (30) med katerima koli dvema odkupoma.
+4. Sprožilec: zaprto okno `session` ali `weekly` (brano iz `getQuotaWindowStatus().reachedThreshold`, ne `isAccountQuotaExhausted()`, ki poroča samo o računu z vsakim porabljenim oknom) ali kredit, ki poteče znotraj `expiringCreditHours` (24) na računu, ki je uporabil vsaj `expiringCreditMinUsedPercent` (50).
+5. Zaščita naravne ponastavitve: preskoči, ko se zazidano 5-urno okno ponastavi znotraj `sessionResetGuardMinutes` (90) ali zazidano tedensko okno znotraj `weeklyResetGuardHours` (12).
+6. Tedenska spodnja meja: preskočite 5-urno ponastavitev, ko je preostala tedenska vrednost pod `weeklyFloorPercent` (10).
+7. Način `last-resort` : preskoči, medtem ko ima drug v obsegu račun istega ponudnika v obeh oknih še vsaj `poolHeadroomPercent` (10). Sprožilci poteka kredita to obidejo.
+8. `dry-run` zabeleži vrstico in ne unovči ničesar; `last-resort` in `eager` odkup.
+
+Manjkajoči podatki o kvoti nikoli ne odklenejo unovčitve: neznani čas ponastavitve ali tedenski preskoki uporabe.
+
+**Ponastavitev seje Claude :** ko je funkcija izklopljena ali `claudeSessionReset` izklopljena, preklop `autoLimitReset` za posamezen račun odloča točno tako kot prej. Ko sta oba vklopljena, funkcija nadomesti preklope za posamezne račune: račun v obsegu lahko zahteva le, če pravilnik to dovoljuje, v načinu `dry-run` pa zahtevek ni vložen.
+
+**Varnost:** delo unovči največ en kredit na kljukico, odloči se pred uvrstitvijo kreditov (preskočeni račun ni nikoli naveden), uporablja ključe za idempotenco `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` in izklopi račun za 1 uro po neuspešnem kotiranju ali unovčenju. Vsaka odločitev o unovčenju, neuspehu in brezplačni uporabi se zapiše v `audit_log` (`action: "bankedReset.redeem"`, brez žetonov ali kreditnih ID-jev); zgornje meje se štejejo iz teh vrstic, tako da preživijo ponovne zagone. Uspešni odkupi sprožijo tudi spletni kavelj `provider.reset_redeemed`.
+
+Regresijska varovala: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afiniteta seje (#7274)
 
 **Obseg:** ena seja odjemalca (`X-Session-Id` / `x-codex-session-id` /
@@ -350,25 +389,17 @@ _stanje blokade_ je začasno.
 
 ---
 
-## 4. Nadzor sočasnosti z deljenjem kvote (v3.8.36)
+## 4. Nadzor sočasnosti deleža kvote (v3.8.36)
 
-Naročniški računi (GLM, MiniMax itd.) pogosto sprejmejo le ~1–3 sočasne
-zahteve; prekoračitev tega števila sproži napake 429 in ohlajanja. To je še
-posebej izrazito pri kombinacijah **quota-share** (`qtSd/…`), kjer več ključev API
-uporablja isti nadrejeni račun. Trije sloji preprečujejo preobremenitev
-skupnega računa.
+Naročniški računi (GLM, MiniMax itd.) pogosto sprejemajo le ~ 1–3 sočasne zahteve; prekoračitev tega sproži 429s in ohladitve. To je akutno pod **kvotni delež** (`qtSd/…`) kombinacije, kjer si več ključev API deli en navzgornji račun. Trije sloji preprečujejo poplavo skupnega računa.
 
 ### Omejitev sočasnosti na povezavo (`max_concurrent`)
 
-Vsaka povezava ponudnika lahko določi zgornjo mejo `max_concurrent`
-(`provider_connections.max_concurrent`, nastavljeno v pogovornem oknu povezave / API-ju / zbirki podatkov).
-Pustite prazno za neomejeno število. To je edini parameter, ki upravlja spodnji
-sloj serializacije — nastavite ga na dejansko sočasnost računa (npr. GLM ~1, MiniMax ~2).
+Vsaka povezava ponudnika lahko razglasi zgornjo mejo `max_concurrent` (`provider_connections.max_concurrent`, nastavljeno v načinu povezave / API / DB). Pustite prazno, če ni omejitev. To je edini gumb, ki poganja serializacijsko plast pod —, ki jo nastavi na dejansko sočasnost računa (npr. GLM ~ 1, MiniMax ~ 2).
 
 ### Omejitve sočasnosti na model (`modelConcurrency`)
 
-Povezava lahko dodatno določi natančne omejitve sočasnosti za posamezne modele
-znotraj svojega zemljevida `rateLimitOverrides`:
+Povezava lahko dodatno deklarira natančne zgornje meje sočasnosti na model znotraj svojega zemljevida `rateLimitOverrides` :
 
 ```json
 {
@@ -379,86 +410,32 @@ znotraj svojega zemljevida `rateLimitOverrides`:
 }
 ```
 
-Nastavite ga v pogovornem oknu povezave (**Preglasitve omejitve hitrosti →
-Omejitve sočasnosti na model**, ena vrstica `model=cap`) ali prek
-`PATCH /api/providers/[id]` z enako obliko JSON. Ključna semantika:
+Nastavite ga v načinu povezave (**Omejitev stopnje preglasi omejitve sočasnosti na model →** , en `model=cap` na vrstico) ali prek `PATCH /api/providers/[id]` z isto obliko JSON. Ključna semantika:
 
-- **Omejitev za celotno povezavo v primerjavi z omejitvijo za model:** `maxConcurrent` ostaja skupna
-  omejitev za celotno povezavo. Ko veljata obe, se obe zapornici pridobita
-  atomsko v isti sestavljeni zapornici
-  (`global → provider → account → model`); dejansko vedenje določa strožja
-  veljavna omejitev.
-- **Natančno ujemanje ključa modela:** ključ je niz modela, poslan izvajalniku po
-  razrešitvi usmerjanja — običajno goli ID nadrejenega modela
-  (`glm-5`), ne vzdevek `provider/model` na strani odjemalca (`zai/glm-5` se
-  ne ujema z `glm-5`). Vrednosti so pozitivne celoštevilske omejitve
-  sočasnih zahtev.
-- **Lokalno čakanje v vrsti, brez odkrivanja:** presežne zahteve čakajo lokalno v
-  vrsti z obstoječo semantiko vrste/časovne omejitve (tipizirane napake pri
-  sprejemu `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute ne odkriva
-  ali sklepa pravil nadrejenega sistema — uveljavlja natančne omejitve, ki jih
-  je konfiguriral upravljavec. Zasičena zapornica modela nikoli ne onemogoči
-  ponudnika in nikoli ne ustvari trajne blokade modela; vedenje nadrejenega
-  sistema pri napakah 429/ohlajanju/preklopu ostane varovalo za napake.
-- **Obseg na povezavo in proces:** omejitve veljajo za posamezno povezavo v
-  zbirki podatkov in se hranijo v pomnilniku, zato se dve povezavi, ki ponovno
-  uporabljata isti ključ API nadrejenega sistema, med seboj ne usklajujeta.
-- **Nekonfigurirano pomeni nespremenjeno vedenje:** če zemljevid izpustite (ali
-  pustite polje na nadzorni plošči prazno), se zapornica za model ne doda.
-  Primer konfiguracije brez določanja univerzalne omejitve ponudnika:
+- **Za celotno povezavo v primerjavi z modelom:** `maxConcurrent` ostaja skupna zgornja meja za celotno povezavo. Ko velja oboje, se oba vratca pridobijo atomsko v istih kompozitnih vratih (`global → provider → account → model`); učinkovito vedenje je strožja veljavna meja.
+- **Natančno ujemanje modela in ključa:** ključ je niz modela, ki se posreduje izvajalcu po razrešitvi usmerjanja — običajno goli ID modela navzgor (`glm-5`), ne vzdevek `provider/model` na strani odjemalca (`zai/glm-5` se ne ujema `glm-5`). Vrednosti so zgornje meje sočasnih zahtev pozitivnih celih števil.
+- **Lokalno čakanje v čakalni vrsti, brez odkritja:** presežne zahteve lokalno v čakalno vrsto z obstoječo semantiko queue/timeout (tipkane napake sprejema `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute ne odkrije ali sklepa navzgornjo politiko — uveljavlja natančne zgornje meje, ki jih je konfiguriral operater. Nasičena vrata modela nikoli ne onemogočijo ponudnika in nikoli ne ustvarijo trajne blokade modela; vedenje 429/cooldown/fallback navzgor ostaja povratni mehanizem napake.
+- **Obseg na povezavo, na proces:** caps so na povezavo baze podatkov in se hranijo v pomnilniku, tako da dve povezavi, ki ponovno uporabljata isti ključ API navzgor, nista usklajeni med seboj.
+- **Nekonfigurirano pomeni nespremenjeno:** izpustitev zemljevida (ali pustite polje nadzorne plošče prazno) ne doda vrat modela. Primer konfiguracije brez uveljavljanja univerzalne omejitve ponudnika:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serializacija zahtev z deljenjem kvote
+### Serializacija zahteve za delež kvote
 
-Ko usmerjanje z deljenjem kvote cilja na povezavo, ki določa pozitivno vrednost
-`max_concurrent`, se sočasne zahteve za ta **račun** serializirajo prek
-semaforja na posamezno povezavo (ključ `qsconn:<connectionId>`): presežne zahteve
-**čakajo v vrsti**, namesto da bi preobremenile račun. Delovanje je **odprto ob
-napaki** — zasičena vrsta ali časovna omejitev se nadaljuje brez dodeljenega
-mesta, namesto da bi bila zahteva, ki jo je mogoče odposlati, kadar koli
-zavrnjena. Preklop je v **Nastavitve → Odpornost → Sočasnost deljenja kvote na
-povezavo** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, privzeto
-vključeno). Brez omejitve `max_concurrent` se vedenje ne spremeni.
+Ko pošiljanje deleža kvote cilja na povezavo, ki izjavi pozitivno `max_concurrent`, sočasne zahteve za to **račun** so serializirane prek semaforja na povezavo (ključ `qsconn:<connectionId>`): presežne zahteve **čakati v čakalni vrsti** namesto da bi poplavil račun. Je **neuspešno odprt** — nasičena čakalna vrsta ali časovna omejitev se nadaljuje brez reže, namesto da bi kadar koli zavrnil zahtevo, ki jo je mogoče poslati. Vklopi **Nastavitve → Odpornost → Sočasnost deleža kvote na povezavo** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, privzeto vklopljeno). Brez pokrovčka `max_concurrent` je obnašanje nespremenjeno.
 
-> Zapornica za usmerjanje z deljenjem kvote (`selectQuotaShareTarget`, DRR + P2C)
-> je sama po sebi odprta ob napaki in povezavo, ki je dosegla omejitev, le
-> _postavi na nižje mesto_ — pri bazenu z eno samo povezavo ne more uveljaviti
-> trde omejitve, zato je ta semafor tisti, ki dejansko zadrži preobremenitev.
+> Usmerjevalna vrata s skupnim deležem kvote (`selectQuotaShareTarget`, DRR + P2C) so sama odprta ob napakah in samo _deprioritizira_ povezavo z zgornjo mejo — s skupino enojne povezave, ki je ni mogoče težko omejiti, zato je ta semafor tisto, kar dejansko vsebuje poplavo.
 
-### Ponovni poskus kombinacije, upoštevajoč ohlajanje
+### Kombinirani ponovni poskus z upoštevanjem ohlajanja
 
-Pri vsaki strategiji kombinacije (ko je omogočena) zahteva, ki bi povzročila
-napako 429 zaradi KRATKEGA prehodnega ohlajanja, počaka, da se to izteče, in se
-znova odpošlje, namesto da bi vrnila napako 429 — to pokriva okna TPM/RPM
-razreda Gemini (~60 s `retry-after`) pri kombinacijah z več modeli, na primer
-ko oba cilja kombinacije z 2 modeloma dosežeta omejitev hitrosti na model.
-Omejeno je z `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) v **Nastavitve → Odpornost**. Nikoli ne čaka pri
-`quota_exhausted` (zaklenjeno do polnoči) ali pri razlogih za preverjanje
-pristnosti/neobstoj.
+Za vsako kombinirano strategijo (ko je omogočena) zahteva, ki bi kristalizirala 429 za prehodno ohlajanje SHORT počaka in ponovno odpošlje, namesto da bi vrnila 429 — To zajema okna TPM/RPM razreda Gemini (~ 60-ih po ponovnem poskusu) pri kombinacijah z več modeli, npr. oba cilja kombinacije 2 modelov dosežeta stopnjo na model. omejitev. Omejeno z `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) v **Nastavitve → Odpornost** . Nikoli ne čaka na razloge `quota_exhausted` (zaklenjeno do polnoči) ali auth/not-found. Z nastavljenim `comboTimeoutMs` se čakanje, ki se ne more končati pred tem rokom, ne začne (#18998): kombinacija odgovori takoj s svojim odzivom terminala namesto z `COMBO_TIMEOUT` 504.
 
-Kombinacija se lahko izključi z `config.comboCooldownWaitEnabled: false`. Le
-dobesedna vrednost `false` onemogoči ta skupna čakanja kombinacij (ohlajanje po
-odpošiljanju in čakanje pred odpošiljanjem zaradi odprtega vezja/zaklenjenega
-modela) ter podaljšanje spodnje meje časovne omejitve zaradi proračuna čakanja.
-Manjkajoča vrednost ali `true` ohrani globalni pravilnik; `true` ne more
-globalno onemogočenega čakanja omogočiti. Izrecno določen `targetTimeoutMs` ima
-še vedno prednost. Ta izključitev ne spremeni ločenega izvornega čakanja
-`Codex` zaradi pripenjanja obrata pred odpošiljanjem.
+Kombinacija se lahko odjavi z `config.comboCooldownWaitEnabled: false`. Samo dobesedni `false` onemogoči ta skupna kombinirana čakanja (ohlajanje po odpremi in čakanja circuit-open/model-lock pred odpremo) in njihovo podaljšanje časovne omejitve proračuna čakanja-spodnjega praga. Manjka ali `true` ohranja globalno politiko; `true` ne more omogočiti globalno onemogočenega čakanja. Eksplicitni `targetTimeoutMs` še vedno zmaga. Ta zavrnitev ne spremeni ločenega čakanja pred odpremo native-Codex.
 
-Ista zapornica pokriva primer pred odpošiljanjem (#16319): ko je vsak cilj
-kombinacije preskočen, še preden je izveden kateri koli poskus, ker je njegov
-model v kratki prehodni blokadi, pot z nič poskusi počaka, da se blokada izteče,
-v okviru istih omejitev, in nato znova odpošlje zahtevo, namesto da bi vrnila
-odgovor brez namiga `503 ALL_TARGETS_SKIPPED`. Ko čakanje ni dovoljeno (dosežena
-omejitev, izčrpano število poskusov ali proračun oziroma izključena funkcija),
-se končni odgovor nadgradi v `429 rate_limit_error` ter vsebuje `retry_after` /
-`reset_at` iz najzgodnejšega izteka prehodne blokade; blokade zaradi kvote,
-preverjanja pristnosti in neobstoja še naprej vrnejo 503 brez namiga.
+Ista vrata pokrivajo primer pred odpošiljanjem (#16319): ko je vsak cilj kombinacije preskočen pred kakršnim koli poskusom, ker je njegov model v kratki prehodni blokadi, pot brez poskusa čaka na zaklepanje pod istimi zgornjimi mejami in ponovno odpošlje, namesto da odgovori na `503 ALL_TARGETS_SKIPPED` brez namigov. Ko čakanje ni dovoljeno (zgornja meja, poskus ali proračun je izčrpan ali je funkcija izklopljena), se odziv terminala nadgradi na `429 rate_limit_error`, ki prenaša `retry_after` / `reset_at` od najzgodnejšega poteka prehodnega zaklepanja; kvota, avtorizacija in zaklepanje ni najdeno ohranjajo 503 brez namigov.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

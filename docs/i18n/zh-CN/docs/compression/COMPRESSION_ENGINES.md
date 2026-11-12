@@ -277,14 +277,14 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 ## 压缩组合
 
-压缩组合是可分配给路由组合的命名压缩配置文件：
+压缩组合被命名为压缩配置文件，可以分配给路由组合：
 
-- `compression_combos`：存储模式、流水线、RTK 配置、语言配置和默认标记
+- `compression_combos`：存储模式、管道、 RTK配置、语言配置和默认标记
 - `compression_combo_assignments`：将压缩组合映射到路由组合
-- 运行时集成会先解析已分配的压缩组合，再处理通用组合覆盖配置
-- 分析数据包括 `compression_combo_id` 和 `engine`
+- 运行时集成在通用组合覆盖之前解析指定的压缩组合
+- 分析包括`compression_combo_id`和`engine`
 
-控制面板入口：`控制面板 -> 上下文与缓存 -> 压缩组合`。
+仪表板表面： `Dashboard -> Context & Cache -> Compression Combos`。
 
 ## 先决条件/操作员指南（CCR和会话重复数据删除）
 
@@ -373,7 +373,7 @@ MCP工具文本结果被裁剪在`mcpAccessibility.maxTextChars` （默认`50000
 
 ### 会话生命周期
 
-Streamable-HTTP 会话空闲，服务器获取它们；空闲窗口由`OMNIROUTE_MCP_SESSION_IDLE_MS`设置（默认 5 分钟；通过名称引用，而不是硬编码值，因此该页面在更改时不会漂移）。空闲会话的症状是HTTP 404 和`Unknown Mcp-Session-Id` —补救措施是重新连接或重新启动会话，**不是**旋转关键点、更改范围或重命名工具。
+Streamable-HTTP 会话空闲，服务器获取它们；空闲窗口由`OMNIROUTE_MCP_SESSION_IDLE_MS`配置，在`open-sse/mcp-server/httpTransport.ts`中回退到`DEFAULT_MCP_SESSION_IDLE_MS` 。空闲收获会话的症状是带有`Unknown Mcp-Session-Id` — HTTP 404，补救措施是重新连接或重新启动会话，**不是**旋转关键点、更改范围或重命名工具。
 
 ## API 接口
 

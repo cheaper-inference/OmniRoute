@@ -492,7 +492,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `index.ts` `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `muse-spark-web`, `devin-desktop`, Plus `claudeIdentity.ts`
 
-> ଟିପନ୍ତୁ: ଏଠାରେ ତାଲିକାଭୁକ୍ତ ପ୍ରଦାନକାରୀମାନେ ଜେନେରିକ୍ OpenAI- ସୁସଙ୍ଗତ ନିର୍ବାହକ ବ୍ୟବହାର କରି `default.ts` ଦ୍ୱାରା ପରିବେଷଣ କରାଯାଏ। ପୂର୍ଣ୍ଣ ପ୍ରଦାନକାରୀ ତାଲିକା (381 ପ୍ରଦାନକାରୀ) `src/shared/constants/providers.ts` ରେ ରୁହନ୍ତି।
+> ଟିପନ୍ତୁ: ଏଠାରେ ତାଲିକାଭୁକ୍ତ ପ୍ରଦାନକାରୀମାନେ ଜେନେରିକ୍ OpenAI- ସୁସଙ୍ଗତ ନିର୍ବାହକ ବ୍ୟବହାର କରି `default.ts` ଦ୍ୱାରା ପରିବେଷଣ କରାଯାଏ। ପୂର୍ଣ୍ଣ ପ୍ରଦାନକାରୀ ତାଲିକା (388 ପ୍ରଦାନକାରୀ) `src/shared/constants/providers.ts` ରେ ରୁହନ୍ତି।
 
 ### 4.3 `open-sse/translator/`
 
@@ -741,7 +741,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` କୁ ବିସ୍ତାର କରନ୍ତୁ)।
 2. `src/shared/constants/mcpScopes.ts` ରେ ଉପଯୁକ୍ତ ପରିସର(ଗୁଡ଼ିକୁ) ନିର୍ଦ୍ଧାରଣ କରନ୍ତୁ।
 3. `open-sse/mcp-server/server.ts` ରେ ଟୁଲ ପଞ୍ଜିକୃତ କରନ୍ତୁ।
-4. `open-sse/mcp-server/__tests__/` ଅଧୀନରେ ପରୀକ୍ଷା ଯୋଗ କରନ୍ତୁ।
+4. `tests/unit/` ଅଧୀନରେ ପରୀକ୍ଷା ଯୋଗ କରନ୍ତୁ।
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ଅଦ୍ୟତନ କରନ୍ତୁ।
 
 ### ଏକ ନୂତନ A2A ସ୍କିଲ୍ ଯୋଗ କରନ୍ତୁ
@@ -759,7 +759,7 @@ bin/
 - **ନାମକରଣ**: ଫାଇଲ `camelCase` ବା `kebab-case`, କମ୍ପୋନେଣ୍ଟ `PascalCase`,
   ଧାରାବାହିକ `UPPER_SNAKE`।
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = ସର୍ବତ୍ର `error`;
-  `no-explicit-any` = `open-sse/` ଏବଂ `tests/` ରେ `warn`, ଅନ୍ୟତ୍ର `error`।
+  `no-explicit-any` = `open-sse/**/*.ts` ଏବଂ `tests/**/*.ts` ରେ `error`।
 - **TypeScript**: `strict: false` (ପୁରୁଣା ସ୍ଥିତି)। କ୍ରସ-ମଡ୍ୟୁଲ ସୀମାରେ ଅନୁମାନ ଅପେକ୍ଷା ସ୍ପଷ୍ଟ ପ୍ରକାର
   ପସନ୍ଦ କରନ୍ତୁ।
 - **ଡାଟାବେସ୍**: ରୁଟ ବା ହ୍ୟାଣ୍ଡଲରରେ କେବେ ହେଲେ କଞ୍ଚା SQL ଲେଖନ୍ତୁ ନାହିଁ — ସର୍ବଦା
@@ -781,8 +781,7 @@ bin/
   `a2a`, `memory`, `skills`।
 - **ଶାଖା**: ଉପସର୍ଗ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`। ସିଧାସଳଖ `main` ରେ କେବେ ହେଲେ କମିଟ ନ କରନ୍ତୁ।
-- **Husky**: ପ୍ରି-କମିଟ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ଚଲାଏ; ପ୍ରି-ପୁଶ `check:any-budget:t11` + `check:tracked-artifacts` ଚଲାଏ (ଦ୍ରୁତ ଗେଟ୍; `test:unit` ବାଦ ଦିଏ)।
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

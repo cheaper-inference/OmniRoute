@@ -12,18 +12,18 @@ OmniRoute 包含一个功能完备的代理管理系统，可让您通过 HTTP�
 
 ## 目录
 
-- [为什么使用代理？](#为什么使用代理)
-- [架构概览](#架构概览)
-- [四级代理系统](#四级代理系统)
-- [代理注册表（CRUD）](#代理注册表crud)
-- [1proxy 免费代理市场](#1proxy-免费代理市场)
-- [代理轮换](#代理轮换)
-- [反检测与隐匿](#反检测与隐匿)
-- [上游代理模式](#上游代理模式)
-- [控制面板 UI](#控制面板-ui)
-- [API 参考](#api-参考)
-- [环境变量](#环境变量)
-- [故障排除](#故障排除)
+- [为什么使用代理？](#why-use-proxies)
+- [架构概述](#architecture-overview)
+- [四级代理系统](#4-level-proxy-system)
+- [代理注册处 (CRUD)](#proxy-registry-crud)
+- [1proxy 免费市场](#1proxy-free-proxy-marketplace)
+- [代理轮换](#proxy-rotation)
+- [反探测与隐身](#anti-detection--stealth)
+- [上游代理模式](#upstream-proxy-modes)
+- [仪表板UI](#dashboard-ui)
+- [API参考](#api-reference)
+- [环境变量](#environment-variables)
+- [故障排除](#troubleshooting)
 
 ---
 
@@ -390,17 +390,17 @@ OmniRoute 不只是通过代理路由流量，还会让流量看起来合法：
 
 使用 `wreq-js` 生成类似浏览器的 TLS 指纹，从而绕过会标记非浏览器 TLS 握手的机器人检测系统。
 
-### CLI 指纹匹配
+### CLI指纹比对
 
-**CLI 指纹开关**（`设置 → 安全`）会重新排列 HTTP 标头和 JSON 正文字段，以精确匹配原生 CLI 二进制文件（Claude Code、Codex 等）的特征。此功能在代理之上运行：
+这**CLI指纹开关**(`Settings → Security`) 重新排序HTTP标头和JSON主体字段，以匹配本机CLI二进制文件的确切签名（Claude Code、 Codex等）。这有效**在上面**代理：
 
 ```
-您的 IP（被阻止）→ 代理 IP（美国）→ 提供者 API
-                   + TLS 伪装
-                   + CLI 指纹
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-您可以同时获得 **IP 隐藏**和**请求真实性**。
+你两者都得到**IP掩蔽**和**要求真实性**同时地。
 
 ### 代理 IP 保留
 

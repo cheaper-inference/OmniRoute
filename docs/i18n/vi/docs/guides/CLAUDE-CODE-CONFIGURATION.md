@@ -25,27 +25,77 @@ omniroute launch --profile glm52  # Claude Code sử dụng glm/glm-5.2 thông q
 
 ---
 
-## Cách mã Claude kết nối với cổng
+## Cách Claude Code kết nối với gateway
 
-Mã Claude nói về**Anthropic Tin nhắn API** và được trỏ vào điểm cuối tùy chỉnh với các biến môi trường (nó không có cờ `--base-url` ):
+Claude Code giao tiếp với **Anthropic Messages API** và được trỏ đến một endpoint
+tùy chỉnh bằng các biến môi trường (không có cờ `--base-url`):
 
-| Biến                                         | Mục đích                                                                                                      |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Cổng gốc URL ( Mã Claude nối thêm `/v1/messages`).** Không có hậu tố `/v1`.**                                 |
-| `ANTHROPIC_AUTH_TOKEN`                       | Được gửi dưới dạng `Authorization: Bearer …` — hãy sử dụng mã thông báo truy cập OmniRoute / khóa API của bạn |
-| `ANTHROPIC_API_KEY`                          | Thay thế: gửi dưới dạng `x-api-key`. Nếu cả hai được đặt, `ANTHROPIC_AUTH_TOKEN` sẽ thắng                     |
-| `ANTHROPIC_MODEL`                            | Buộc một mô hình cụ thể (ghi đè mặc định của bộ chọn `/model` )                                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → bộ chọn `/model` gốc liệt kê các mô hình `claude*`/`anthropic*` từ `/v1/models`                         |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Giới hạn mã thông báo đầu ra cho mỗi phản hồi (ví dụ `65536`)                                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ngưỡng mã thông báo để tự động nén                                                                            |
+| Biến                                         | Mục đích                                                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL gốc của gateway (Claude Code nối thêm `/v1/messages`). **Không có hậu tố `/v1`.**                       |
+| `ANTHROPIC_AUTH_TOKEN`                       | Được gửi dưới dạng `Authorization: Bearer …` — sử dụng access token / API key OmniRoute của bạn             |
+| `ANTHROPIC_API_KEY`                          | Phương án thay thế: được gửi dưới dạng `x-api-key`. Nếu cả hai đều được đặt, `ANTHROPIC_AUTH_TOKEN` ưu tiên |
+| `ANTHROPIC_MODEL`                            | Buộc sử dụng một mô hình cụ thể (ghi đè lựa chọn mặc định của bộ chọn `/model`)                             |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → bộ chọn `/model` gốc liệt kê các mô hình `claude*`/`anthropic*` từ `/v1/models`                       |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Giới hạn số token đầu ra cho mỗi phản hồi (ví dụ: `65536`)                                                  |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ngưỡng token để tự động thu gọn                                                                             |
 
-> Các vars Env được đọc** một lần khi khởi động** — khởi động lại Mã Claude sau khi thay đổi chúng.
+> Các biến môi trường chỉ được đọc **một lần khi khởi động** — hãy khởi động lại Claude Code sau khi thay đổi chúng.
 
-Đối với thông tin xác thực xoay thay vì chuỗi cố định, hãy đặt `apiKeyHelper` trong `~/.claude/settings.json` thành lệnh in thông tin xác thực hiện tại thành thiết bị xuất chuẩn. Mã Claude lưu trữ đầu ra của nó trong năm phút theo mặc định (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ghi đè điều đó) và gửi giá trị trong cả `Authorization: Bearer` và `x-api-key`. Tập lệnh phải in thông tin xác thực và không có gì khác — một biểu ngữ cùng với nó không hỗ trợ trợ giúp trên v2.1.227 +.
+Đối với thông tin xác thực được luân phiên thay vì một chuỗi cố định, hãy đặt `apiKeyHelper` trong `~/.claude/settings.json` thành lệnh in thông tin xác thực hiện tại ra stdout. Claude Code mặc định lưu đầu ra vào bộ nhớ đệm trong năm phút (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ghi đè khoảng thời gian này) và gửi giá trị trong cả `Authorization: Bearer` lẫn `x-api-key`. Script phải chỉ in thông tin xác thực — thêm một dòng giới thiệu sẽ làm trình trợ giúp thất bại trên v2.1.227+.
 
-Đây là cách Entra ID SSO hoạt động: `scripts/cli/omniroute-sso.mjs token` in mã thông báo truy cập Entra tồn tại trong thời gian ngắn mà OmniRoute xác minh thay vì khóa API. Xem [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Entra ID SSO hoạt động theo cách này: `scripts/cli/omniroute-sso.mjs token` in token truy cập Entra có thời hạn ngắn để OmniRoute xác minh thay cho khóa API. Xem [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` đặt tất cả những thứ này cho bạn: nó phân giải mã thông báo URL + cơ sở từ ngữ cảnh hoạt động (vì vậy `omniroute connect <vps>` thì `omniroute launch` chỉ hoạt động), kiểm tra tình trạng máy chủ và thực thi `claude`.
+`omniroute launch` thiết lập tất cả các biến này cho bạn: lệnh này phân giải URL cơ sở + token
+từ ngữ cảnh đang hoạt động (vì vậy, sau khi chạy `omniroute connect <vps>` rồi `omniroute launch`,
+mọi thứ sẽ tự hoạt động), kiểm tra tình trạng máy chủ và thực thi `claude`.
+
+---
+
+## Phân bổ sử dụng: phiên và dự án
+
+OmniRoute nhóm các yêu cầu của mỗi khóa API vào **phiên đại lý** và ghi lại những gì **dự án** mỗi phiên hoạt động (bảng `agent_sessions` ), do đó, mức sử dụng và chi phí có thể được báo cáo cho mỗi thành viên trong nhóm, mỗi dự án và mỗi phiên.
+
+Những gì được ghi lại mà không cần bất kỳ thiết lập máy khách nào:
+
+| Cánh đồng  | Nguồn                                                                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phiên họp  | Tiêu đề `x-claude-code-session-id` (cùng giá trị với `metadata.user_id.session_id`), ổn định mỗi phiên                                                                  |
+| Dự án      | Mã Claude dòng `Primary working directory:` gửi trong thông báo môi trường của nó; các thư mục cây công việc trong `.claude/worktrees/` phân giải thành tên kho lưu trữ |
+| Chi nhánh  | `Current branch:` từ trạng thái git Mã Claude gửi cùng với tin nhắn đầu tiên                                                                                            |
+| Khách hàng | `user-agent` (`claude-cli/<version>`)                                                                                                                                   |
+
+Codex (`<environment_context><cwd>`) và OpenCode (`x-opencode-session`) được nhận dạng theo cùng một cách. Chìa khóa với **không đăng nhập** được bật chỉ giữ lại id phiên và các trường dự án do tiêu đề cung cấp; không có gì đọc được từ dấu nhắc (đường dẫn, nhánh) được lưu trữ.
+
+### Đặt tên dự án một cách rõ ràng (được khuyến nghị)
+
+Thư mục làm việc khác nhau giữa các máy, do đó, cùng một kho lưu trữ có thể hiển thị dưới các đường dẫn khác nhau. Thay vào đó hãy gửi dự án một cách rõ ràng: Mã Claude thêm bất kỳ tiêu đề nào được liệt kê trong `ANTHROPIC_CUSTOM_HEADERS` vào mọi yêu cầu mô hình và OmniRoute đọc hai trong số đó:
+
+| tiêu đề                    | Giá trị                                                                    |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Tên dự án, ví dụ `omniroute`                                               |
+| `x-omniroute-project-repo` | Điều khiển từ xa được chuẩn hóa, ví dụ `github.com/diegosouzapw/OmniRoute` |
+
+Cả hai đều chỉ được đọc để ghi công; chúng không bao giờ được chuyển tiếp đến nhà cung cấp ngược dòng.
+
+`ANTHROPIC_CUSTOM_HEADERS` được đọc một lần khi khởi động và các tệp cài đặt lưu trữ các giá trị bằng chữ, vì vậy hãy tính toán nó khi Mã Claude khởi chạy. Thêm phần này vào `~/.zshrc` hoặc `~/.bashrc` và tiếp tục khởi động `claude` từ thư mục dự án:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Biểu thức `sed` loại bỏ mọi thông tin xác thực được nhúng trong URL từ xa. Các tiện ích mở rộng IDE khởi chạy Mã Claude mà không cần shell của bạn, do đó các phiên của chúng sẽ quay trở lại thư mục làm việc.
 
 ---
 

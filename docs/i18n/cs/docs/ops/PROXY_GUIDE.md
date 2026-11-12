@@ -393,7 +393,7 @@ Používá `wreq-js` ke generování otisků TLS podobných prohlížečům, č�
 
 ### Napodobení otisku CLI
 
-**Přepínač otisku CLI** (`Nastavení → Zabezpečení`) mění pořadí hlaviček HTTP a polí v těle JSON tak, aby přesně odpovídalo signatuře nativních binárních souborů CLI (Claude Code, Codex atd.). Tato funkce pracuje **nad rámec** proxy:
+**Přepínač otisku CLI** (`Settings → Security`) mění pořadí hlaviček HTTP a polí v těle JSON tak, aby přesně odpovídalo signatuře nativních binárních souborů CLI (Claude Code, Codex atd.). Tato funkce pracuje **nad rámec** proxy:
 
 ```
 Vaše IP (blokovaná) → IP proxy (USA) → API poskytovatele

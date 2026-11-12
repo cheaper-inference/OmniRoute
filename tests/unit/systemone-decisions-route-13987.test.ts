@@ -15,6 +15,13 @@ import {
   TYPESAFE_SYSTEMONE_URL,
 } from "../../open-sse/config/systemOneRegistry.ts";
 import { handleSystemOneProxy } from "../../open-sse/handlers/systemOne.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await (await import("../../src/lib/usage/callLogs.ts")).closeCallLogSaves(5000);
+  (await import("../../src/lib/db/core.ts")).resetDbInstance();
+  await closeSharedLoggerResource();
+});
 
 // ─── resolveSystemOneTarget ────────────────────────────────────────────────
 

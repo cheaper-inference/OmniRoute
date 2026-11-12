@@ -54,7 +54,7 @@ Bagong tab para sa pagkuha ng content mula sa isang URL sa pamamagitan ng `POST 
 - Input: URL + toggle para sa buong page + tagapili ng format (markdown / text / HTML).
 - I-submit → kunin → i-render ang `ScrapeResult.tsx`.
 - Nagre-render ang `ScrapeResult` ng preview ng markdown + toggle para sa raw na content.
-- Limitasyon: kung ang response body ay > **256 KB**, ipinapakita ng UI ang `(pinaikli, tingnan ang raw)` at binubuksan ang raw na content sa isang Monaco modal (D21).
+- Limitasyon: kung ang response body ay > **256 KB**, ipinapakita ng UI ang `View full raw content` at binubuksan ang raw na content sa isang modal (D21).
 - Panel ng metadata: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, gastos, laki ng response, bilang ng mga link.
 - Ginagamit ang hook na `useScrapeFetch.ts`.
 
@@ -103,10 +103,12 @@ Pinapatakbo ang parehong query/URL sa hanggang **4 na provider nang sabay-sabay*
 Inilalantad ng `ProviderCatalog.tsx` ang kumpletong listahan ng provider mula sa `GET /api/search/providers`
 (pinalawak sa F4 upang isama ang mga fetch provider):
 
-| `kind` | `"search"` (20 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Ang status ay **tinutukoy sa oras ng request** sa pamamagitan ng pagsuri kung may mga credential at kung
 ang lahat ng key ay kasalukuyang nasa cooldown.
+
+`codex-search` (Codex Web Search): Ginagamit ang iyong nakakonektang mga Codex (ChatGPT) account, nang walang hiwalay na key. Bawat paghahanap ay gumagamit ng quota ng subscription at tumatagal nang humigit-kumulang 10–40 s. Tumatakbo kapag tinukoy ito ng request; kailangan ng awtomatikong pagpili ang flag na `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, na naka-off bilang default.
 
 ---
 

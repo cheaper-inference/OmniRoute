@@ -378,7 +378,7 @@ Hakutyökalun nimi on tällä hetkellä `omniroute_ccr_retrieve` ( `omniroute_` 
 
 ### Istunnon elinkaari
 
-Streamable-HTTP-istunnot ovat tyhjäkäynnillä ja palvelin kerää ne; tyhjäkäyntiikkuna on asetettu `OMNIROUTE_MCP_SESSION_IDLE_MS` (oletusarvo 5 minuuttia; viitataan nimellä, ei kovakoodattu arvo, joten tämä sivu ei ajaudu muuttuessaan). Käyttämättömän istunnon oire on HTTP 404 ja `Unknown Mcp-Session-Id` — Korjaustoimenpide on muodostaa yhteys uudelleen tai käynnistää istunto uudelleen,** ei** kiertää avainta, muuttaa laajuutta tai nimetä työkalu uudelleen.
+Streamable-HTTP-istunnot ovat tyhjäkäynnillä ja palvelin kerää ne; lepotila - ikkuna on `OMNIROUTE_MCP_SESSION_IDLE_MS` konfiguroinut , ja se on `DEFAULT_MCP_SESSION_IDLE_MS` : ssä `open-sse/mcp-server/httpTransport.ts`. Joutokäynnin oireena on HTTP 404, jossa on `Unknown Mcp-Session-Id` — Korjaustoimenpide on yhdistää uudelleen tai käynnistää istunto uudelleen,**ei** kiertää avainta, muuttaa laajuutta tai nimetä työkalu uudelleen.
 
 ## API-rajapinta
 

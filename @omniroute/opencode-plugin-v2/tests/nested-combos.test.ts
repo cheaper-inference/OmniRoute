@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { publishCatalog } from "../src/catalog.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 type BetaDraft = {
   provider: {
     list?: () => unknown[];
@@ -77,37 +78,40 @@ describe("catalog nested combo refs", () => {
   it("resolves a forward combo-ref: parent LCD follows the nested combo, not zero", async () => {
     const c = fakeDraft();
     try {
-      const res = await publishCatalog(c.draft, baseOpts, {
-        fetcher: async () => [
-          {
-            id: "a",
-            context_length: 100000,
-            max_output_tokens: 4000,
-            capabilities: { tool_calling: true, reasoning: true },
-          },
-          {
-            id: "b",
-            context_length: 50000,
-            max_output_tokens: 2000,
-            capabilities: { tool_calling: true, reasoning: true },
-          },
-        ],
-        combosFetcher: async () => [
-          {
-            id: "parent",
-            name: "Parent",
-            models: [
-              { kind: "combo-ref", comboName: "Child" } as never,
-              { kind: "model", model: "a" } as never,
-            ],
-          },
-          {
-            id: "child",
-            name: "Child",
-            models: [{ kind: "model", model: "b" } as never],
-          },
-        ],
-      });
+      const res = await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, baseOpts, {
+          enrichmentFetcher,
+          fetcher: async () => [
+            {
+              id: "a",
+              context_length: 100000,
+              max_output_tokens: 4000,
+              capabilities: { tool_calling: true, reasoning: true },
+            },
+            {
+              id: "b",
+              context_length: 50000,
+              max_output_tokens: 2000,
+              capabilities: { tool_calling: true, reasoning: true },
+            },
+          ],
+          combosFetcher: async () => [
+            {
+              id: "parent",
+              name: "Parent",
+              models: [
+                { kind: "combo-ref", comboName: "Child" } as never,
+                { kind: "model", model: "a" } as never,
+              ],
+            },
+            {
+              id: "child",
+              name: "Child",
+              models: [{ kind: "model", model: "b" } as never],
+            },
+          ],
+        })
+      );
       assert.deepEqual(res, { models: 2, combos: 2 });
       const parent = c.models.get("omniroute/Parent");
       assert.ok(parent);
@@ -122,16 +126,19 @@ describe("catalog nested combo refs", () => {
   it("drops an unresolvable combo-ref after the fixpoint instead of claiming empty LCD", async () => {
     const c = fakeDraft();
     try {
-      const res = await publishCatalog(c.draft, baseOpts, {
-        fetcher: async () => [{ id: "a" }],
-        combosFetcher: async () => [
-          {
-            id: "orphan",
-            name: "Orphan",
-            models: [{ kind: "combo-ref", comboName: "Missing" } as never],
-          },
-        ],
-      });
+      const res = await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, baseOpts, {
+          enrichmentFetcher,
+          fetcher: async () => [{ id: "a" }],
+          combosFetcher: async () => [
+            {
+              id: "orphan",
+              name: "Orphan",
+              models: [{ kind: "combo-ref", comboName: "Missing" } as never],
+            },
+          ],
+        })
+      );
       assert.deepEqual(res, { models: 1, combos: 0 });
       assert.ok(!c.models.has("omniroute/Orphan"));
       assert.ok(c.warns.some((w) => w.includes("could not resolve")));
@@ -143,33 +150,36 @@ describe("catalog nested combo refs", () => {
   it("resolves a two-level chain within the pass budget", async () => {
     const c = fakeDraft();
     try {
-      await publishCatalog(c.draft, baseOpts, {
-        fetcher: async () => [
-          {
-            id: "a",
-            context_length: 80000,
-            max_output_tokens: 3000,
-            capabilities: { tool_calling: true },
-          },
-        ],
-        combosFetcher: async () => [
-          {
-            id: "top",
-            name: "Top",
-            models: [{ kind: "combo-ref", comboName: "Mid" } as never],
-          },
-          {
-            id: "mid",
-            name: "Mid",
-            models: [{ kind: "combo-ref", comboName: "Leaf" } as never],
-          },
-          {
-            id: "leaf",
-            name: "Leaf",
-            models: [{ kind: "model", model: "a" } as never],
-          },
-        ],
-      });
+      await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, baseOpts, {
+          enrichmentFetcher,
+          fetcher: async () => [
+            {
+              id: "a",
+              context_length: 80000,
+              max_output_tokens: 3000,
+              capabilities: { tool_calling: true },
+            },
+          ],
+          combosFetcher: async () => [
+            {
+              id: "top",
+              name: "Top",
+              models: [{ kind: "combo-ref", comboName: "Mid" } as never],
+            },
+            {
+              id: "mid",
+              name: "Mid",
+              models: [{ kind: "combo-ref", comboName: "Leaf" } as never],
+            },
+            {
+              id: "leaf",
+              name: "Leaf",
+              models: [{ kind: "model", model: "a" } as never],
+            },
+          ],
+        })
+      );
       const top = c.models.get("omniroute/Top");
       assert.ok(top);
       assert.equal(top?.limit.context, 80000);
@@ -190,8 +200,12 @@ describe("catalog collision dedupe", () => {
           { id: "dupe", name: "Dupe Combo", models: [{ kind: "model", model: "dupe" } as never] },
         ],
       };
-      await publishCatalog(c.draft, { ...baseOpts, collisionWarned }, args);
-      await publishCatalog(c.draft, { ...baseOpts, collisionWarned }, args);
+      await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, { ...baseOpts, collisionWarned }, { ...args, enrichmentFetcher })
+      );
+      await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, { ...baseOpts, collisionWarned }, { ...args, enrichmentFetcher })
+      );
       const hits = c.warns.filter((w) => w.includes("collides with a model id"));
       // Name-based keying: the combo publishes as `omniroute/Dupe Combo` and
       // the raw model stays at `omniroute/dupe` — no collision, so no warn.
@@ -210,16 +224,19 @@ describe("catalog collision dedupe", () => {
       // v1 pattern: /v1/models pre-mirrors the combo under its friendly
       // NAME and the combo is keyed by that name, so the overwritten model
       // id equals the combo name exactly and the draft key collides.
-      const res = await publishCatalog(c.draft, baseOpts, {
-        fetcher: async () => [{ id: "omniroute/Mirror Combo" }],
-        combosFetcher: async () => [
-          {
-            id: "Mirror Combo",
-            name: "Mirror Combo",
-            models: [{ kind: "model", model: "omniroute/Mirror Combo" } as never],
-          },
-        ],
-      });
+      const res = await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, baseOpts, {
+          enrichmentFetcher,
+          fetcher: async () => [{ id: "omniroute/Mirror Combo" }],
+          combosFetcher: async () => [
+            {
+              id: "Mirror Combo",
+              name: "Mirror Combo",
+              models: [{ kind: "model", model: "omniroute/Mirror Combo" } as never],
+            },
+          ],
+        })
+      );
       assert.deepEqual(res, { models: 1, combos: 1 });
       assert.ok(!c.warns.some((w) => w.includes("collides")));
       assert.equal(c.models.get("omniroute/Mirror Combo")?.name, "combo - Mirror Combo");
@@ -242,8 +259,12 @@ describe("catalog collision dedupe", () => {
           },
         ],
       };
-      await publishCatalog(c.draft, { ...baseOpts, collisionWarned }, args);
-      await publishCatalog(c.draft, { ...baseOpts, collisionWarned }, args);
+      await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, { ...baseOpts, collisionWarned }, { ...args, enrichmentFetcher })
+      );
+      await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(c.draft, { ...baseOpts, collisionWarned }, { ...args, enrichmentFetcher })
+      );
       const hits = c.warns.filter((w) => w.includes("collides with a model id"));
       // Same shape as the test above: name-based keys mean the combo
       // (`omniroute/Other Combo`) never collides with the raw model
