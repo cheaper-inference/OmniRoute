@@ -201,6 +201,12 @@ test("redaction covers individual cookie values, JSON cookie exports and path cr
     jsonCookieKey
   );
   assert.ok(!echoed.includes("SSOVALUE") && !echoed.includes("rwTOKENVALUE"), echoed);
+  // The same export behind a `Cookie:` prefix (normalizeSessionCookieHeader strips it).
+  const prefixed = redactValidationText(
+    "forbidden for rwTOKENVALUE4242",
+    `Cookie: ${jsonCookieKey}`
+  );
+  assert.ok(!prefixed.includes("rwTOKENVALUE"), prefixed);
   // A credential in a custom base-URL path need not match the validated key.
   const record = buildValidationLogRecord({
     provider: "custom",

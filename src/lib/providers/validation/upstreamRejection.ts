@@ -21,7 +21,7 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 
-import { parseJsonCookiesToHeader } from "@/lib/providers/webCookieAuth";
+import { parseJsonCookiesToHeader, stripCookieInputPrefix } from "@/lib/providers/webCookieAuth";
 
 export type ValidationRejectionKind =
   "auth" | "access_denied" | "forbidden_ambiguous" | "rate_limited" | "unavailable" | "other";
@@ -222,12 +222,13 @@ const MIN_REDACTED_FRAGMENT_CHARS = 6;
 function credentialFragments(apiKey: string | null): string[] {
   if (!apiKey || apiKey.length < MIN_REDACTED_FRAGMENT_CHARS) return [];
   const fragments = new Set<string>([apiKey]);
-  // A JSON cookie export (`[{"name":"sso","value":"..."}]`, accepted by
-  // normalizeSessionCookieHeader) is split as the `name=value; ...` header it
-  // stands for — otherwise each value keeps its JSON quotes and never matches.
+  // A JSON cookie export (`[{"name":"sso","value":"..."}]`, optionally behind a
+  // `Bearer` / `Cookie:` prefix) is split as the `name=value; ...` header it
+  // stands for — the same normalization normalizeSessionCookieHeader applies —
+  // otherwise each value keeps its JSON quotes and never matches.
   let source = apiKey;
   try {
-    source = parseJsonCookiesToHeader(apiKey) ?? apiKey;
+    source = parseJsonCookiesToHeader(stripCookieInputPrefix(apiKey)) ?? apiKey;
   } catch {
     // Malformed cookie JSON — fall back to splitting the raw string.
   }
