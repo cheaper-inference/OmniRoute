@@ -148,6 +148,7 @@ import {
   normalizeAzureModelsResponse,
 } from "./discovery/normalizers";
 import { isNamedOpenAIStyleProvider } from "./discovery/providerSets";
+import { INFOMANIAK_HTTPS_REQUIRED_MESSAGE, isHttpsBaseUrl } from "@/shared/constants/infomaniak";
 import { buildStaleEncryptionKeyResponse } from "./staleEncryptionGuard";
 import {
   type ProviderModelsConfigEntry,
@@ -876,6 +877,11 @@ export async function GET(
           },
           { status: 400 }
         );
+      }
+
+      // The discovery request carries the connection's Bearer key; refuse plain http.
+      if (provider === "infomaniak" && !isHttpsBaseUrl(baseUrl)) {
+        return NextResponse.json({ error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE }, { status: 400 });
       }
 
       let base = baseUrl.replace(/\/$/, "");

@@ -14,6 +14,8 @@ import { MODAL_DEFAULT_VALIDATION_MODEL_ID } from "@/shared/constants/modal";
 import {
   INFOMANIAK_BASE_URL_EXAMPLE,
   INFOMANIAK_DEFAULT_VALIDATION_MODEL_ID,
+  INFOMANIAK_HTTPS_REQUIRED_MESSAGE,
+  isHttpsBaseUrl,
 } from "@/shared/constants/infomaniak";
 import { validateImageProviderApiKey } from "@/lib/providers/imageValidation";
 import { usesCcWireImage } from "@omniroute/open-sse/services/ccWireImageBuiltins.ts";
@@ -355,7 +357,7 @@ export async function validateProviderApiKey({
     },
     /**
      * Infomaniak AI Tools: the account's product id lives in the Base URL path, so a missing
-     * Base URL is rejected without a request; otherwise probes `<baseUrl>/models`.
+     * or non-https Base URL is rejected without a request; otherwise probes `<baseUrl>/models`.
      */
     infomaniak: ({ apiKey, providerSpecificData }: any) => {
       // The endpoint path carries the account's AI Tools product id; without a Base URL
@@ -366,6 +368,10 @@ export async function validateProviderApiKey({
           valid: false,
           error: `Infomaniak requires a Base URL with your AI Tools product id (e.g. ${INFOMANIAK_BASE_URL_EXAMPLE}).`,
         };
+      }
+      // The API key goes out as a Bearer token, so never probe over plain http.
+      if (!isHttpsBaseUrl(baseUrl)) {
+        return { valid: false, error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE };
       }
       return validateOpenAILikeProvider({
         provider: "infomaniak",

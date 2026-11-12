@@ -83,3 +83,35 @@ test("infomaniak validation probes <baseUrl>/models", async () => {
   assert.equal(result.valid, true);
   assert.equal(urls[0], `${BASE_URL}/models`);
 });
+
+const HTTP_BASE_URL = BASE_URL.replace("https://", "http://");
+
+test("infomaniak validation rejects an http Base URL and makes no request", async () => {
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    return new Response("{}", { status: 200 });
+  }) as typeof fetch;
+
+  const result = await validateProviderApiKey({
+    provider: "infomaniak",
+    apiKey: "k",
+    providerSpecificData: { baseUrl: HTTP_BASE_URL },
+  });
+
+  assert.equal(result.valid, false);
+  assert.match(String(result.error), /https/);
+  assert.equal(calls, 0);
+});
+
+test("infomaniak chat dispatch refuses an http Base URL", () => {
+  const executor = new DefaultExecutor("infomaniak");
+  assert.throws(
+    () =>
+      executor.buildUrl("google/gemma-4-31B-it", false, 0, {
+        apiKey: "k",
+        providerSpecificData: { baseUrl: HTTP_BASE_URL },
+      }),
+    /https/
+  );
+});
