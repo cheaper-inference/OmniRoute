@@ -190,12 +190,6 @@ export async function POST(request) {
         // never reads the request body a second time. See chatCompletionsRouteShapeSchema
         // for why this stays scoped to record-shaped bodies and deliberately permissive.
         if (isRecord(parsedBody)) {
-          if (
-            typeof parsedBody.model === "string" &&
-            ["gemini-decision-1", "gemini/gemini-decision-1"].includes(parsedBody.model.toLowerCase())
-          ) {
-            return finishAdmission(errorResponse(400, "Gemini Decision 1 requires POST /v1/decisions"));
-          }
           const shapeCheck = chatCompletionsRouteShapeSchema.safeParse(parsedBody);
           if (!shapeCheck.success) {
             const issue = shapeCheck.error.issues[0];
@@ -232,6 +226,15 @@ export async function POST(request) {
             if (selfHostedResponse) {
               return finishAdmission(selfHostedResponse);
             }
+          }
+
+          // Direct Google Decisions are not Gemini generateContent requests.
+          // Preserve a configured self-hosted model with the same local alias.
+          if (
+            typeof parsedBody.model === "string" &&
+            ["gemini-decision-1", "gemini/gemini-decision-1"].includes(parsedBody.model.trim().toLowerCase())
+          ) {
+            return finishAdmission(errorResponse(400, "Gemini Decision 1 requires POST /v1/decisions"));
           }
 
           try {
