@@ -32,7 +32,7 @@ export interface A2ARestAuth {
  * `instanceof NextResponse`, or the 401 silently falls through to the handler.
  */
 export async function authorizeA2ATaskRoute(request: Request): Promise<A2ARestAuth | Response> {
-  const apiKey = extractApiKey(request);
+  const apiKey = extractApiKey(request, { allowUrl: false });
 
   if (isRequireApiKeyEnabled()) {
     if (apiKey && (await isValidApiKey(apiKey))) return { owner: await resolveA2AOwner(request) };
