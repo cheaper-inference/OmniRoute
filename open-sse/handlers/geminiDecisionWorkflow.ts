@@ -148,9 +148,71 @@ async function markFailedCredential(
   }
 }
 
+type AttemptResult =
+  | { kind: "response"; response: Response }
+  | { kind: "continue" }
+  | { kind: "stop" };
+
+type AttemptContext = {
+  body: GeminiDecisionsBody;
+  selected: unknown;
+  state: FailureState;
+  tried: Set<string>;
+  exhaustedProjects: Set<string>;
+  signal: AbortSignal;
+  started: number;
+  remaining: number;
+};
+
+/** One selected connection is either dispatched once, skipped, or stopped. */
+async function attemptDecision(context: AttemptContext): Promise<AttemptResult> {
+  const { body, selected, state, tried, exhaustedProjects, signal, started, remaining } = context;
+  const unavailable = unusableCredentialsResponse(PROVIDER, selected);
+  if (unavailable) {
+    return {
+      kind: "response",
+      response: state.attempts === 0 ? unavailable : finalFailure(state),
+    };
+  }
+
+  const credentials = selected as Credential;
+  const connectionId = credentials.connectionId;
+  if (!connectionId || tried.has(connectionId) || !credentials.apiKey) return { kind: "stop" };
+  tried.add(connectionId);
+  const project = projectIdOf(credentials);
+  if (project && exhaustedProjects.has(project)) return { kind: "continue" };
+
+  state.attempts++;
+  const recoverySnapshot = {
+    testStatus: credentials.testStatus ?? null,
+    lastErrorAt: credentials.lastErrorAt ?? null,
+    rateLimitedUntil: credentials.rateLimitedUntil ?? null,
+  };
+  const response = await executeGeminiDecision({
+    model: body.model, input: body.input, questions: body.questions,
+  }, credentials.apiKey, {
+    signal,
+    timeoutMs: Math.min(20_000, remaining),
+  });
+  const error = response.transportError || geminiDecisionErrorText(response.body);
+  logAttempt(response, credentials, error);
+  if (response.status === 200 && response.body) {
+    await clearRecoveredProviderState(credentials, recoverySnapshot);
+    return { kind: "response", response: jsonSuccess(response.body, Date.now() - started, state.attempts) };
+  }
+  if (response.status === 499) {
+    return { kind: "response", response: errorResponse(499, "Client request cancelled") };
+  }
+
+  recordFailure(state, response, error);
+  if (!RETRYABLE_STATUS.has(response.status)) return { kind: "stop" };
+  await markFailedCredential(credentials, response, state.message, exhaustedProjects, tried);
+  return { kind: "continue" };
+}
+
 /**
- * Retrying a known exhausted project is pointless even if it has many API keys.
- * The caller-key allowlist is passed into every quota-preflight selection.
+ * Google quota is project-scoped: retrying sibling keys cannot recover
+ * capacity. Every selection uses the caller API key's allowed connection IDs.
  */
 export async function handleGeminiDecisionRequest(
   body: GeminiDecisionsBody, allowedConnections: AllowedConnections, signal: AbortSignal
@@ -175,39 +237,11 @@ export async function handleGeminiDecisionRequest(
       { excludeConnectionIds: Array.from(tried) }
     );
     if (!selected) break;
-    const unavailable = unusableCredentialsResponse(PROVIDER, selected);
-    if (unavailable) return state.attempts === 0 ? unavailable : finalFailure(state);
-
-    const credentials = selected as Credential;
-    const connectionId = credentials.connectionId;
-    if (!connectionId || tried.has(connectionId) || !credentials.apiKey) break;
-    tried.add(connectionId);
-    const project = projectIdOf(credentials);
-    if (project && exhaustedProjects.has(project)) continue;
-
-    state.attempts++;
-    const recoverySnapshot = {
-      testStatus: credentials.testStatus ?? null,
-      lastErrorAt: credentials.lastErrorAt ?? null,
-      rateLimitedUntil: credentials.rateLimitedUntil ?? null,
-    };
-    const response = await executeGeminiDecision({
-      model: body.model, input: body.input, questions: body.questions,
-    }, credentials.apiKey, {
-      signal,
-      timeoutMs: Math.min(20_000, remaining),
+    const outcome = await attemptDecision({
+      body, selected, state, tried, exhaustedProjects, signal, started, remaining,
     });
-    const error = response.transportError || geminiDecisionErrorText(response.body);
-    logAttempt(response, credentials, error);
-    if (response.status === 200 && response.body) {
-      await clearRecoveredProviderState(credentials, recoverySnapshot);
-      return jsonSuccess(response.body, Date.now() - started, state.attempts);
-    }
-    if (response.status === 499) return errorResponse(499, "Client request cancelled");
-
-    recordFailure(state, response, error);
-    if (!RETRYABLE_STATUS.has(response.status)) break;
-    await markFailedCredential(credentials, response, state.message, exhaustedProjects, tried);
+    if (outcome.kind === "response") return outcome.response;
+    if (outcome.kind === "stop") break;
   }
   return finalFailure(state);
 }
