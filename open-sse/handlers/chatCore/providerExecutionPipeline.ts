@@ -28,6 +28,11 @@ import {
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
+import {
+  bindCodexResponseCallbacks,
+  runWithCodexResponseFence,
+  isCodexResponseCurrent,
+} from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
 import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
@@ -366,7 +371,7 @@ function maxAttemptsFor(provider: string): number {
 export async function runProviderExecutionPipeline(
   input: ProviderExecutionPipelineInput
 ): Promise<ProviderExecutionOutcome> {
-  const { policy, target, connection, wire, state } = input;
+  const { policy, target, connection, wire, state: baseState } = input;
   const sendProviderAttempt = async (model: string, allowDedup: boolean) => {
     const rejection: HttpAttemptRejectionSlot = { selection: null };
     if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
@@ -410,6 +415,26 @@ export async function runProviderExecutionPipeline(
     }
   };
 
+  const tryAuthenticationRefresh = async (response: Response): Promise<boolean> => {
+    if (
+      authRefreshed ||
+      (response.status !== 401 && response.status !== 403) ||
+      typeof connection.refreshCredentials !== "function" ||
+      (await shouldSkipCredentialRefresh(target.provider, response))
+    )
+      return false;
+    if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
+    const refreshed = await runWithCodexResponseFence(response, () =>
+      connection.refreshCredentials!(connection.getCredentials())
+    );
+    if (!refreshed || (!refreshed.accessToken && !refreshed.copilotToken)) return false;
+    connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
+    await connection.onCredentialsRefreshed(refreshed);
+    authRefreshed = true;
+    authRefreshPending = true;
+    return true;
+  };
+
   while (
     attempts < maxAttempts ||
     antigravityByopRotationPending ||
@@ -424,6 +449,21 @@ export async function runProviderExecutionPipeline(
 
     const attempt = await sendProviderAttempt(wire.currentModel, attempts === 0);
     lastAttempt = attempt;
+    const state = bindCodexResponseCallbacks(attempt.response, baseState);
+    if (!isCodexResponseCurrent(attempt.response)) {
+      // A passive replica may reread a newer token for the same owner. The
+      // refresh adapter validates that adoption; the stale response still
+      // cannot run rate-limit, health or other mutation callbacks.
+      if (isPassiveCodex(target.provider) && (await tryAuthenticationRefresh(attempt.response))) {
+        continue;
+      }
+      return toOutcome(
+        attempt,
+        wire.currentModel,
+        currentConnectionId(connection),
+        target.provider
+      );
+    }
 
     const after = assertLease(policy, connection, wire.currentModel);
     if (after) return after;
@@ -519,22 +559,7 @@ export async function runProviderExecutionPipeline(
       }
     }
 
-    if (
-      !authRefreshed &&
-      (status === 401 || status === 403) &&
-      typeof connection.refreshCredentials === "function" &&
-      !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
-    ) {
-      if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
-      const refreshed = await connection.refreshCredentials(connection.getCredentials());
-      if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
-        connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
-        await connection.onCredentialsRefreshed(refreshed);
-        authRefreshed = true;
-        authRefreshPending = true;
-        continue;
-      }
-    }
+    if (await tryAuthenticationRefresh(attempt.response)) continue;
 
     {
       let signatureMessage = attempt.response.statusText || "upstream error";

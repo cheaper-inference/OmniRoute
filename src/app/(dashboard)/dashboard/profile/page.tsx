@@ -212,7 +212,7 @@ export default function ProfilePage() {
               {level}
             </div>
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-semibold">
                 {tg(`levelTitles.${getLevelTitle(level).toLowerCase()}`)}
               </h2>
               <div className="flex items-center gap-2 mt-1">
@@ -256,7 +256,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className="text-5xl">🔥</div>
             <div>
-              <p className="text-2xl font-bold">{tg("dayStreak", { count: streak })}</p>
+              <p className="text-2xl font-semibold">{tg("dayStreak", { count: streak })}</p>
               <p className="text-sm text-text-muted">{tg("maintainStreak")}</p>
             </div>
           </div>
