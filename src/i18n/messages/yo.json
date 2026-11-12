@@ -14990,6 +14990,10 @@
         "label": "Combo: Duro ni Idilọwọ Aṣa Iṣẹ-ṣiṣe",
         "description": "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Konbo: jamba-iji fifọ",
+        "description": "Rekọja awọn ibi-afẹde akojọpọ olupese ṣaaju fifiranṣẹ (idi crash_storm) ni kete ti ikuna ti ara ẹni kanna (aṣiṣe ipaniyan agbegbe tabi irufin adehun alaṣẹ, 5xx) tun ṣe lori inu window sisun: OMNIROUTE_CRASH_STORM_THRESHOLD (10) ati OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Ko kọ itutu tabi titiipa rara, ati pe ojulowo oke 5xx ko jẹ ifunni rẹ. Paa nipasẹ aiyipada: ko si ohun ti o gbasilẹ ko si si ibi-afẹde ti o fo."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Awọn idahun: keepalive lori gbigbe nikan",
         "description": "Firanṣẹ Awọn idahun olutọju bi laini òfo dipo iṣẹlẹ response.in_progress kan, nitorinaa aworan sintetiki ko le rọpo esi gidi rara ni SDK osise. Laini òfo ko firanṣẹ iṣẹlẹ SSE, nitorinaa oluṣọ alabara ti o tunto lori awọn iṣẹlẹ nikan kii yoo ṣe atunto lakoko ipele ipalọlọ gigun. Paa nipasẹ aiyipada: awọn aago fi iṣẹlẹ response.in_progress ti o wulo ni pato ranṣẹ."

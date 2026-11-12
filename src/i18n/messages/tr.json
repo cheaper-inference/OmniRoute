@@ -14990,6 +14990,10 @@
         "label": "Kombinasyon: İçerik Politikası Reddinde Dur",
         "description": "Bir kombinasyon hedefi tam bir içerik politikası reddiyle (kod veya tür cyber_policy / content_policy_violation) yanıt verdiğinde, kalan hedefler farklı modeller olsa bile kombinasyonu durdurur ve bu reddi döndürür, bir sonraki hedefe ilerlemek yerine. Varsayılan olarak kapalıdır: bu reddi, hesabı soğutmaz veya sağlayıcı sigortasını tetiklemez; kombinasyon tam olarak önceki gibi bir sonraki hedefine ilerler."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Çarpışma-Fırtına Kırıcı",
+        "description": "Kendi kendine oluşan aynı hata (yerel yürütme hatası veya uygulayıcı sözleşme ihlali, 5xx) kayan bir pencere içinde tekrarlandığında, göndermeden önce sağlayıcının birleşik hedeflerini atlayın (neden kaza_fırtınası): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ve OMNIROUTE_CRASH_STORM_WINDOW_MS (5 dk). Asla bir bekleme süresi veya kilitleme yazmaz ve gerçek bir yukarı akış 5xx onu asla beslemez. Varsayılan olarak kapalı: hiçbir şey kaydedilmez ve hiçbir hedef atlanmaz."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Yanıtlar: yalnızca aktarım sırasında canlı kalma",
         "description": "Yanıtları Gönder response.in_progress olayı yerine boş bir satır olarak canlı tutulur, böylece sentetik bir anlık görüntü hiçbir zaman resmi SDK gerçek yanıtın yerini alamaz. Boş bir satır hiçbir SSE olayı göndermez; dolayısıyla yalnızca olaylarda sıfırlanan bir istemci gözlemcisi, uzun bir sessiz aşama sırasında sıfırlanmaz. Varsayılan olarak kapalı: zamanlayıcılar spesifikasyona uygun response.in_progress olayını gönderir."

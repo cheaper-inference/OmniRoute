@@ -14990,6 +14990,10 @@
         "label": "Combo : arrêt sur refus de politique de contenu",
         "description": "Lorsqu'une cible de combo répond par un refus exact lié à la politique de contenu (code ou type cyber_policy / content_policy_violation), arrêter le combo et renvoyer ce refus même lorsque les cibles restantes sont des modèles différents, au lieu de passer à la cible suivante. Désactivé par défaut : le refus ne met jamais le compte en période de refroidissement et ne déclenche pas le disjoncteur du fournisseur, et le combo passe à sa cible suivante exactement comme avant."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo : Brise-tempête-crash",
+        "description": "Ignorez les cibles combinées d'un fournisseur avant l'envoi (raison crash_storm) une fois que le même échec auto-infligé (erreur d'exécution locale ou violation du contrat de l'exécuteur, 5xx) se répète dans une fenêtre glissante : OMNIROUTE_CRASH_STORM_THRESHOLD (10) et OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Il n'écrit jamais de temps de recharge ou de verrouillage, et un véritable 5xx en amont ne l'alimente jamais. Désactivé par défaut : rien n'est enregistré et aucune cible n'est ignorée."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Réponses : rester en vie pendant le transport uniquement",
         "description": "Envoyez les réponses keepalives sous la forme d'une ligne vierge au lieu d'un événement response.in_progress, de sorte qu'un instantané synthétique ne pourra jamais remplacer la vraie réponse dans le SDK officiel. Une ligne vide ne distribue aucun événement SSE, donc un chien de garde client qui se réinitialise uniquement sur les événements ne sera pas réinitialisé pendant une longue phase silencieuse. Désactivé par défaut : les minuteries envoient l'événement response.in_progress conforme aux spécifications."

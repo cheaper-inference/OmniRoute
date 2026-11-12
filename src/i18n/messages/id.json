@@ -14990,6 +14990,10 @@
         "label": "Combo: Berhenti saat Penolakan Kebijakan Konten",
         "description": "Ketika target combo merespons dengan penolakan kebijakan konten yang persis (kode atau jenis cyber_policy / content_policy_violation), hentikan combo dan kembalikan penolakan tersebut meskipun target yang tersisa adalah model yang berbeda, alih-alih beralih ke target berikutnya. Nonaktif secara default: penolakan tersebut tidak pernah menerapkan cooldown pada akun atau memicu breaker penyedia, dan combo beralih ke target berikutnya persis seperti sebelumnya."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Pemecah Badai",
+        "description": "Lewati target kombo penyedia sebelum pengiriman (alasan crash_storm) setelah kegagalan yang disebabkan oleh diri sendiri (kesalahan eksekusi lokal atau pelanggaran kontrak pelaksana, 5xx) terulang di dalam jendela geser: OMNIROUTE_CRASH_STORM_THRESHOLD (10) dan OMNIROUTE_CRASH_STORM_WINDOW_MS (5 menit). Itu tidak pernah menulis cooldown atau kunci, dan 5xx upstream asli tidak pernah memasukkannya. Nonaktif secara default: tidak ada yang direkam dan tidak ada target yang dilewati."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Tanggapan: tetap hidup melalui transportasi saja",
         "description": "Kirim Respons tetap hidup sebagai baris kosong, bukan peristiwa response.in_progress, jadi snapshot sintetis tidak akan pernah bisa menggantikan respons sebenarnya di SDK resmi. Baris kosong tidak mengirimkan peristiwa SSE, sehingga pengawas klien yang mengatur ulang hanya pada peristiwa tidak akan diatur ulang selama fase diam yang panjang. Nonaktif secara default: pengatur waktu mengirimkan peristiwa response.in_progress yang valid dengan spesifikasi."

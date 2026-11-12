@@ -14990,6 +14990,10 @@
         "label": "Kombo: Stopp ved innholdspolicyavvisning",
         "description": "Når et kombomål svarer med en eksakt innholdspolicyavvisning (kode eller type cyber_policy / content_policy_violation), stopp komboen og returner denne avvisningen selv om de gjenværende målene er andre modeller, i stedet for å gå videre til neste mål. Deaktivert som standard: avvisningen kjøler aldri ned kontoen eller utløser leverandørens kretsbryter, og komboen går videre til sitt neste mål akkurat som før."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Hopp over en leverandørs kombinasjonsmål før utsendelse (årsak til crash_storm) når den samme selvpåførte feilen (lokal utførelsesfeil eller brudd på eksekveringskontrakten, 5xx) gjentas på den i et skyvevindu: OMNIROUTE_CRASH_STORM_THRESHOLD (10) og OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Den skriver aldri en nedkjøling eller lås, og en ekte oppstrøms 5xx mater den aldri. Av som standard: ingenting registreres og ingen mål hoppes over."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Svar: hold liv kun over transporten",
         "description": "Send svar keepalives som en tom linje i stedet for en response.in_progress -hendelse, så et syntetisk øyeblikksbilde kan aldri erstatte det virkelige svaret i den offisielle SDK. En tom linje sender ingen SSE -hendelser, så en klientvakthund som tilbakestiller kun på hendelser, vil ikke bli tilbakestilt under en lang stille fase. Av som standard: tidtakere sender den spesifikasjonsgyldige response.in_progress hendelsen."

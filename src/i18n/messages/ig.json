@@ -14990,6 +14990,10 @@
         "label": "Combo: Kwụsị n'Ajụjụ Content-Policy",
         "description": "Mgbe ebumnuche combo zaghachiri site n'ajụjụ doro anya nke content-policy (koodu ma ọ bụ ụdị cyber_policy / content_policy_violation), kwụsị combo ahụ ma weghachi ajụjụ ahụ ọbụlagodi mgbe ebumnuche ndị fọdụrụ bụ ụdị dị iche iche, kama ịga n'ihu na ebumnuche na-esonụ. Agbanyụrụ na ndabara: ajụjụ ahụ anaghị eme ka akaụntụ dajụọ ma ọ bụ kpalite provider breaker, combo na-agakwa n'ihu na ebumnuche ya na-esonụ kpọmkwem dịka ọ dị na mbụ."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Ngwakọta: Ọkụkụ-oké Breaker",
+        "description": "Gbanye ihe mgbaru ọsọ nke onye na-eweta ya tupu izipu (ihe kpatara crash_storm) ozugbo otu ọdịda nke onwe ya (mmebi mmebi mpaghara ma ọ bụ nkwekọrịta mmegide, 5xx) na-emegharị ya n'ime windo na-amị amị: OMNIROUTE_CRASH_STORM_THRESHOLD (10) na OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Ọ dịghị mgbe ọ na-ede oyi ma ọ bụ mkpọchi, na ezigbo 5xx dị elu anaghị enye ya nri. Gbanyụọ na ndabara: ọ nweghị ihe edekọ ma ọ nweghị ebumnuche awụpụ."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Azịza: idobe ndụ naanị n'ụgbọ njem",
         "description": "Zipu nzaghachi na-echekwa ndụ dị ka ahịrị oghere kama ịme ihe omume response.in_progress, yabụ foto sịntetịt enweghị ike dochie ezigbo nzaghachi na SDK gọọmentị. Ahịrị oghere adịghị eziga mmemme SSE, yabụ na onye na-ahụ maka ndị ahịa na-emegharị naanị na mmemme agaghị emegharị ya n'oge ogologo oge ịgbachi nkịtị. Gbanyụọ na ndabara: ndị ngụ oge na-eziga mmemme response.in_progress kwesịrị ekwesị."

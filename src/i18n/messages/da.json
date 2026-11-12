@@ -14990,6 +14990,10 @@
         "label": "Combo: Stop ved afvisning på grund af indholdspolitik",
         "description": "Når et combo-mål svarer med en præcis afvisning på grund af indholdspolitik (kode eller type cyber_policy / content_policy_violation), skal comboen stoppe og returnere denne afvisning, selv når de resterende mål er andre modeller, i stedet for at gå videre til næste mål. Deaktiveret som standard: afvisningen afkøler aldrig kontoen eller udløser udbyderafbryderen, og comboen går videre til sit næste mål præcis som før."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Spring over en udbyders kombinationsmål før afsendelse (årsag til crash_storm), når den samme selvforskyldte fejl (lokal udførelsesfejl eller brud på eksekveringskontrakten, 5xx) gentages på den inden for et glidende vindue: OMNIROUTE_CRASH_STORM_THRESHOLD (10) og OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Den skriver aldrig en cooldown eller lås, og en ægte upstream 5xx fodrer den aldrig. Fra som standard: intet registreres, og intet mål springes over."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Svar: Hold kun i live over transporten",
         "description": "Send svar keepalives som en tom linje i stedet for en response.in_progress -begivenhed, så et syntetisk snapshot kan aldrig erstatte det rigtige svar i den officielle SDK. En tom linje sender ingen SSE begivenhed, så en klientovervågning, der kun nulstiller på hændelser, vil ikke blive nulstillet under en lang stille fase. Fra som standard: timere sender den spec-gyldige response.in_progress hændelse."

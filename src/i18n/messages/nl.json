@@ -14990,6 +14990,10 @@
         "label": "Combo: stoppen bij content-policy-weigering",
         "description": "Wanneer een combo-doel antwoordt met een exacte content-policy-weigering (code of type cyber_policy / content_policy_violation), stop dan de combo en retourneer die weigering zelfs wanneer de resterende doelen andere modellen zijn, in plaats van door te gaan naar het volgende doel. Standaard uitgeschakeld: de weigering plaatst het account nooit in een cooldown en activeert de provider-breaker niet, en de combo gaat precies zoals voorheen door naar het volgende doel."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combinatie: Crash-Storm Breaker",
+        "description": "Sla de combodoelen van een provider over voordat deze wordt verzonden (reden crash_storm) zodra dezelfde zelf veroorzaakte fout (lokale uitvoeringsfout of contractovertreding van de uitvoerder, 5xx) zich binnen een glijdend venster herhaalt: OMNIROUTE_CRASH_STORM_THRESHOLD (10) en OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Het schrijft nooit een cooldown of lock, en een echte upstream 5xx voedt het nooit. Standaard uitgeschakeld: er wordt niets opgenomen en er wordt geen doel overgeslagen."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Reacties: alleen over het transport blijven",
         "description": "Stuur reacties keepalives als een lege regel in plaats van een response.in_progress gebeurtenis, dus een synthetische momentopname kan nooit het echte antwoord in de officiële SDK vervangen. Een lege regel verzendt geen SSE -gebeurtenis, dus een client-watchdog die alleen reset bij gebeurtenissen, wordt niet gereset tijdens een lange stille fase. Standaard uitgeschakeld: timers verzenden de spec-geldige response.in_progress gebeurtenis."

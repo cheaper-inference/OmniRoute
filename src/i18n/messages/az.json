@@ -14990,6 +14990,10 @@
         "label": "Kombo: Məzmun Siyasətinə Görə İmtina Zamanı Dayandır",
         "description": "Kombo hədəfi dəqiq məzmun siyasəti imtinası ilə cavab verdikdə (kod və ya növü cyber_policy / content_policy_violation), növbəti hədəfə keçmək əvəzinə, komboyu dayandırın və qalan hədəflər fərqli modellər olsa belə, həmin imtina cavabını qaytarın. Defolt olaraq qeyri-aktivdir: rədd cavabı heç vaxt hesabı soyutmur və ya provayder kəsicisini işə salmır və kombo əvvəlki kimi növbəti hədəfinə keçir."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Qəza-Fırtına Qırıcı",
+        "description": "Sürüşmə pəncərəsində eyni öz-özünə yaranan nasazlıq (yerli icra xətası və ya icraçı müqaviləsinin pozulması, 5xx) təkrarlanandan sonra göndərilməzdən əvvəl provayderin kombinə edilmiş hədəflərini keçin (səbəb crash_storm): OMNIROUTE_CRASH_STORM_THRESHOLD (10) və OMNIROUTE_CRASH_STORM_WINDOW_MS (5 dəq). O, heç vaxt soyuma müddətini və ya kilidi yazmır və orijinal yuxarı axın 5xx heç vaxt onu qidalandırmır. Defolt olaraq söndürülür: heç nə qeydə alınmır və heç bir hədəf atılmır."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Cavablar: yalnız nəqliyyatda sağ olun",
         "description": "Cavabları response.in_progress hadisəsi əvəzinə boş sətir kimi göndərin, beləliklə, sintetik snapshot heç vaxt rəsmi SDK-də real cavabı əvəz edə bilməz. Boş sətir heç bir SSE hadisəsi göndərmir, buna görə də yalnız hadisələrdə sıfırlanan müştəri nəzarətçisi uzun səssiz faza zamanı sıfırlanmayacaq. Defolt olaraq söndürülür: taymerlər etibarlı response.in_progress hadisəsini göndərir."

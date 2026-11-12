@@ -14990,6 +14990,10 @@
         "label": "Combo: Zaustavljanje pri odbijanju zbog politike sadržaja",
         "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinacija: Crash-Storm Breaker",
+        "description": "Preskočite provajderove kombinovane ciljeve prije slanja (razlog crash_storm) nakon što se isti kvar koji je sam izazvao (lokalna greška u izvršenju ili kršenje ugovora izvršitelja, 5xx) ponovi na njemu unutar kliznog prozora: OMNIROUTE_CRASH_STORM_THRESHOLD (10) i OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikada ne upisuje hlađenje ili zaključavanje, a pravi uzvodni 5xx ga nikada ne hrani. Podrazumevano isključeno: ništa se ne snima i nijedan cilj nije preskočen."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Odgovori: samo preko transporta",
         "description": "Pošaljite odgovore kao praznu liniju umjesto response.in_progress događaja, tako da sintetički snimak nikada ne može zamijeniti pravi odgovor u službenom SDK. Prazan red ne šalje SSE događaj, tako da se klijent čuvar koji se resetuje samo na događaje ne bi resetovao tokom duge tihe faze. Isključeno prema zadanim postavkama: tajmeri šalju response.in_progress događaj koji vrijedi za specifikaciju."

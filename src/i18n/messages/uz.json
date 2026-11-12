@@ -14990,6 +14990,10 @@
         "label": "Kombinatsiya: Kontent Siyosati Rad Etishda To‘xtash",
         "description": "Kombinatsiya maqsadi aniq kontent siyosati rad etish bilan javob qaytarganda (kod yoki tur cyber_policy / content_policy_violation), kombinatsiyani to‘xtating va bu rad etishni qaytaring, garchi qolgan maqsadlar boshqa modellarda bo‘lsa ham, keyingi maqsadga o‘tmasdan. Standart holatda o‘chiq: bu rad etish hech qachon hisobni sovuq tushirmaydi yoki provayder circuit breaker’ini ishlamasdan qoldirmaydi, va kombinatsiya xuddi avvalgidec keyingi maqsadga o‘tadi."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Crash-Storm Breaker",
+        "description": "Bir xil oʻz-oʻzidan yuzaga kelgan nosozlik (mahalliy ijro xatosi yoki ijrochi shartnomasining buzilishi, 5xx) siljish oynasi ichida takrorlanganda, joʻnatishdan oldin provayderning kombinatsiyalangan maqsadlarini oʻtkazib yuboring: OMNIROUTE_CRASH_STORM_THRESHOLD (10) va OMNIROUTE_CRASH_STORM_WINDOW_MS (5 daqiqa). U hech qachon sovutish yoki qulflashni yozmaydi va haqiqiy yuqori oqim 5xx uni hech qachon oziqlantirmaydi. Sukut bo'yicha o'chirilgan: hech narsa yozilmaydi va hech qanday maqsad o'tkazib yuborilmaydi."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Javoblar: faqat transportda saqlanish",
         "description": "Javoblarni response.in_progress hodisasi oʻrniga boʻsh satr sifatida yuboring, shuning uchun sintetik oniy rasm hech qachon rasmiy SDK dagi haqiqiy javob oʻrnini bosa olmaydi. Bo'sh satr hech qanday SSE hodisasini jo'natmaydi, shuning uchun faqat voqealar bo'yicha qayta tiklanadigan mijoz kuzatuvi uzoq davom etadigan jim fazada tiklanmaydi. Sukut bo'yicha o'chirilgan: taymerlar aniq response.in_progress hodisasini yuboradi."

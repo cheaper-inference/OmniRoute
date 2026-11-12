@@ -14990,6 +14990,10 @@
         "label": "Combo: Tsaya Kan Ƙin Yarda na Manufar Abun Ciki",
         "description": "Lokacin da manufar combo ta ba da amsa tare da ainihin ƙin yarda na manufar abun ciki (lamba ko nau'in cyber_policy / content_policy_violation), tsayar da combo ɗin kuma mayar da wannan ƙin yardar ko da kuwa sauran manufofin samfura ne daban-daban, maimakon ci gaba zuwa manufa ta gaba. A kashe yake bisa asali: ƙin yardar ba ta taɓa kwantar da asusun ko kunna provider breaker ba, kuma combo yana ci gaba zuwa manufarsa ta gaba daidai kamar da."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Tsallake maƙasudin haɗin kai na mai bayarwa kafin aikawa (dalilin crash_storm) sau ɗaya gazawar kai ɗaya (kuskuren kisa na gida ko cin zarafin kwangilar zartarwa, 5xx) yana maimaituwa akan sa a cikin taga mai zamewa: OMNIROUTE_CRASH_STORM_THRESHOLD (10) da OMNIROUTE_CRASH_STORM_WINDOW_MS (minti 5). Ba ya taɓa rubuta sanyi ko kullewa, kuma ainihin 5xx na sama ba zai taɓa ciyar da shi ba. Kashe ta tsohuwa: babu abin da aka yi rikodin kuma ba a tsallake wani manufa ba."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Martani: kiyaye rayuwa akan jigilar kaya kawai",
         "description": "Aika Amsoshi masu kiyaye rai azaman layin mara komai maimakon taron response.in_progress, don haka hoton roba ba zai taɓa maye gurbin ainihin martani a cikin SDK na hukuma ba. Layin da ba komai a ciki ba ya aika da taron SSE, don haka mai sa ido na abokin ciniki wanda ke sake saiti akan abubuwan da suka faru kawai ba za a sake saita shi ba yayin dogon shuru. Kashe ta tsohuwa: masu ƙidayar lokaci suna aika takamammen tabbataccen taron response.in_progress."

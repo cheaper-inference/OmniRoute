@@ -14990,6 +14990,10 @@
         "label": "Combo: Oprire la refuzul politicii de conținut",
         "description": "Atunci când o țintă din combo răspunde cu un refuz exact legat de politica de conținut (cod sau tip cyber_policy / content_policy_violation), oprește combo-ul și returnează acel refuz chiar și atunci când țintele rămase sunt modele diferite, în loc să avansezi la următoarea țintă. Dezactivat în mod implicit: refuzul nu plasează niciodată contul în cooldown și nu declanșează disjunctorul furnizorului, iar combo-ul avansează la următoarea sa țintă exact ca înainte."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Omiteți țintele combinate ale unui furnizor înainte de expediere (motiv crash_storm) odată ce același eșec auto-provocat (eroare de execuție locală sau încălcare a contractului de executant, 5xx) se repetă pe el în interiorul unei ferestre glisante: OMNIROUTE_CRASH_STORM_THRESHOLD (10) și OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nu scrie niciodată un cooldown sau o blocare, iar un 5xx autentic din amonte nu îl alimentează niciodată. Dezactivat în mod implicit: nimic nu este înregistrat și nicio țintă nu este omisă."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Răspunsuri: menținerea în viață numai în timpul transportului",
         "description": "Trimiteți răspunsurile păstrează ca o linie goală în loc de un eveniment response.in_progress, astfel încât un instantaneu sintetic nu poate înlocui niciodată răspunsul real din SDK oficial. O linie goală nu trimite niciun eveniment SSE, astfel încât un watchdog client care se resetează numai pe evenimente nu ar fi resetat în timpul unei faze lungi de silențioasă. Dezactivat în mod implicit: temporizatoarele trimit evenimentul response.in_progress valabil pentru specificații."

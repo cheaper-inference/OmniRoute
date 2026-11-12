@@ -14990,6 +14990,10 @@
         "label": "Combo: arresto su rifiuto della content policy",
         "description": "Quando un target della combo risponde con un rifiuto esatto per la content policy (codice o tipo cyber_policy / content_policy_violation), arresta la combo e restituisci tale rifiuto anche se i target rimanenti sono modelli diversi, invece di passare al target successivo. Disattivato per impostazione predefinita: il rifiuto non mette mai l'account in cooldown né fa scattare il breaker del provider, e la combo passa al target successivo esattamente come prima."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Stormbreaker",
+        "description": "Salta gli obiettivi combo di un provider prima dell'invio (motivo crash_storm) una volta che lo stesso errore autoinflitto (errore di esecuzione locale o violazione del contratto dell'esecutore, 5xx) si ripete all'interno di una finestra scorrevole: OMNIROUTE_CRASH_STORM_THRESHOLD (10) e OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Non scrive mai un cooldown o un blocco e un vero 5xx upstream non lo alimenta mai. Disattivato per impostazione predefinita: non viene registrato nulla e nessun obiettivo viene saltato."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Risposte: keepalive solo durante il trasporto",
         "description": "Invia risposte keepalive come una riga vuota invece di un evento response.in_progress, quindi un'istantanea sintetica non potrà mai sostituire la risposta reale nello SDK ufficiale. Una riga vuota non invia alcun evento SSE, quindi un watchdog client che si reimposta solo su eventi non verrebbe reimpostato durante una lunga fase silenziosa. Disattivato per impostazione predefinita: i timer inviano l'evento response.in_progress valido per le specifiche."

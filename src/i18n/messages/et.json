@@ -14990,6 +14990,10 @@
         "label": "Kombo: peatu sisupoliitika keeldumisel",
         "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinatsioon: Crash-Storm Breaker",
+        "description": "Jätke teenusepakkuja kombineeritud sihtmärgid enne saatmist vahele (põhjus crash_storm), kui sellel kordub sama tõrge (kohalik täitmise viga või täitja lepingu rikkumine, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ja OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). See ei kirjuta kunagi jahtumist ega lukustumist ning tõeline ülesvoolu 5xx ei toida seda kunagi. Vaikimisi väljas: midagi ei salvestata ja ühtegi sihtmärki ei jäeta vahele."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Vastused: hoida elus ainult transpordi ajal",
         "description": "Saatke vastused ellujäämiseks tühja reana response.in_progress sündmuse asemel, nii et sünteetiline hetktõmmis ei saa kunagi asendada tegelikku vastust ametlikus SDK. Tühi rida ei edasta SSE sündmust, seega ei lähtestata kliendi valvekoera, mis lähtestab ainult sündmuste korral, pika vaikse faasi ajal. Vaikimisi väljas: taimerid saadavad spetsifikatsiooniga kehtiva response.in_progress sündmuse."

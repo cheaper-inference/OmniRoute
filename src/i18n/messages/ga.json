@@ -14990,6 +14990,10 @@
         "label": "Teaglaim: Stop ar Dhiúltú Pholasaí Ábhair",
         "description": "Nuair a fhreagraíonn sprioc theaglaime le diúltú beacht pholasaí ábhair (cód nó cineál cyber_policy / content_policy_violation), stop an teaglaim agus seol an diúltú sin ar ais fiú nuair is samhlacha difriúla iad na spriocanna atá fágtha, in ionad dul ar aghaidh go dtí an chéad sprioc eile. Múchta de réir réamhshocraithe: ní chuireann an diúltú fuarú ar an gcuntas riamh ná ní thuraisíonn sé scoradán an tsoláthraí, agus téann an teaglaim ar aghaidh go dtí an chéad sprioc eile díreach mar a bhí roimhe seo."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Teaglama: Crash-Storm Breaker",
+        "description": "Scipeáil spriocanna teaglama an tsoláthraí roimh seolta (cúis crash_storm) a luaithe a tharlaíonn an teip chéanna féin-tharla (earráid fhorghníomhaithe áitiúil nó sárú conartha seiceadóir, 5xx) taobh istigh d'fhuinneog sleamhnáin: OMNIROUTE_CRASH_STORM_THRESHOLD (10) agus OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Ní scríobhann sé fuarú ná glas riamh, agus ní chothaíonn 5xx fíor in aghaidh srutha é. As de réir réamhshocraithe: ní dhéantar aon rud a thaifeadadh agus ní dhéantar aon sprioc a scipeáil."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Freagraí: coimeád beo ar an iompar amháin",
         "description": "Seol Freagraí slán mar líne bhán in ionad imeacht response.in_progress, mar sin ní féidir le pictiúr sintéiseach choíche ionad an fhreagra iarbhír sa SDK oifigiúil . Ní sheolann líne bán aon imeacht SSE, mar sin ní athshocródh faire cliant a athshocraíonn ach ar imeachtaí le linn tréimhse fhada chiúin. Múchta de réir réamhshocraithe: seolann amadóirí an t-imeacht response.in_progress spec-valid."

@@ -14990,6 +14990,10 @@
         "label": "Kombo: Berhenti atas Penolakan Dasar Kandungan",
         "description": "Apabila sasaran kombo membalas dengan penolakan dasar kandungan yang tepat (kod atau jenis cyber_policy / content_policy_violation), hentikan kombo dan kembalikan penolakan tersebut walaupun sasaran yang selebihnya adalah model yang berbeza, bukannya mara ke sasaran seterusnya. Dimatikan secara lalai: penolakan tidak sekali-kali menyejukkan akaun atau mencetuskan pemutus litar penyedia, dan kombo mara ke sasaran seterusnya sama seperti sebelum ini."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Pemecah Ribut",
+        "description": "Langkau sasaran kombo penyedia sebelum penghantaran (sebab crash_storm) apabila kegagalan yang dilakukan sendiri (ralat pelaksanaan tempatan atau pelanggaran kontrak pelaksana, 5xx) berulang padanya di dalam tetingkap gelongsor: OMNIROUTE_CRASH_STORM_THRESHOLD (10) dan OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Ia tidak pernah menulis cooldown atau kunci, dan 5xx huluan tulen tidak pernah menyuapnya. Mati secara lalai: tiada apa-apa direkodkan dan tiada sasaran dilangkau."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Respons: keepalive over the transport sahaja",
         "description": "Hantar Respons tetap hidup sebagai baris kosong dan bukannya acara response.in_progress, jadi syot kilat sintetik tidak boleh menggantikan respons sebenar dalam SDK rasmi . Baris kosong tidak menghantar sebarang acara SSE, jadi pengawas pelanggan yang menetapkan semula hanya pada acara tidak akan ditetapkan semula semasa fasa senyap yang panjang. Mati secara lalai: pemasa menghantar acara response.in_progress yang sah dengan spesifikasi."

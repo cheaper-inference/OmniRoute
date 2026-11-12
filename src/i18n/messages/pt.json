@@ -14990,6 +14990,10 @@
         "label": "Combo: Parar em Caso de Recusa por Política de Conteúdo",
         "description": "Quando um destino do combo responder com uma recusa exata por política de conteúdo (código ou tipo cyber_policy / content_policy_violation), para o combo e devolve essa recusa, mesmo quando os restantes destinos forem modelos diferentes, em vez de avançar para o destino seguinte. Desativado por predefinição: a recusa nunca arrefece a conta nem aciona o disjuntor do fornecedor, e o combo avança para o destino seguinte exatamente como antes."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Quebra-Tempestades",
+        "description": "Ignore os alvos combinados de um fornecedor antes do envio (motivo crash_storm) quando a mesma falha autoinfligida (erro de execução local ou violação do contrato do executor, 5xx) se repete dentro de uma janela deslizante: OMNIROUTE_CRASH_STORM_THRESHOLD (10) e OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nunca grava um cooldown ou bloqueio, e um upstream 5xx genuíno nunca o alimenta. Desativado por predefinição: nada é gravado e nenhum alvo é ignorado."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Respostas: keepalive apenas no transporte",
         "description": "Envie as manutenções da atividade de respostas como uma linha em branco em vez de um evento response.in_progress, para que um instantâneo sintético nunca possa substituir a resposta real no SDK oficial. Uma linha em branco não despacha nenhum evento SSE, pelo que um watchdog do cliente que reinicializa apenas em eventos não seria reinicializado durante uma longa fase silenciosa. Desativado por defeito: os temporizadores enviam o evento response.in_progress com uma especificação válida."

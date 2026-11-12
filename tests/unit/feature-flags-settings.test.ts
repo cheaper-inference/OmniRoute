@@ -72,7 +72,8 @@ const {
 // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
 // FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) takes it to 120;
 // CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933, default off) takes it to 121.
-const EXPECTED_FEATURE_FLAG_COUNT = 121;
+// CRASH_STORM_BREAKER_ENABLED (#18448, default off) takes it to 122.
+const EXPECTED_FEATURE_FLAG_COUNT = 122;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED

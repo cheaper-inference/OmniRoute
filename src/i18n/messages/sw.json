@@ -14990,6 +14990,10 @@
         "label": "Mzingamano: Kumuisha kwa Kukataa kwa Sera ya Mwenendo",
         "description": "Tangu mzingamano wa awali wa kutoka amwajibu kukataa kwa sera ya mwenendo tu (mabao au aina cyber_policy / content_policy_violation), mzingamano anamwisha na kurejea kukataa kwa hata tangu awali wa mzingamano ni michoro tofauti, badala ya kwenda kwa mzingamano unaofuata. Imezimwa kwa chaguo-msingi: kukataa haina kufuruputa akaunti au kutosha mwingiliano, na mzingamano anakwenda kwa mzingamano unaofuata kama ya awali."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Mchanganyiko: Kivunja-Dhoruba ya Ajali",
+        "description": "Ruka malengo ya mseto ya mtoa huduma kabla ya kutuma (sababu ya crash_storm) mara tu hitilafu ile ile ya kujisababishia (hitilafu ya ndani ya kutekeleza au ukiukaji wa mkataba wa mtekelezaji, 5xx) inajirudia ndani ya dirisha la kuteleza: OMNIROUTE_CRASH_STORM_THRESHOLD (10) na OMNIROUTE_CRASH_STORM_WINDOW_MS (dakika 5). Haiandiki hali ya kupozea au kufuli, na 5xx halisi ya juu hailishi kamwe. Imezimwa kwa chaguo-msingi: hakuna kitu kinachorekodiwa na hakuna lengo linalorukwa."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Majibu: weka hai kwenye usafiri pekee",
         "description": "Tuma kumbukumbu za Majibu kama mstari tupu badala ya tukio response.in_progress, ili picha ya muhtasari ya syntetisk haiwezi kamwe kuchukua nafasi ya jibu halisi katika SDK rasmi. Laini tupu haitumi tukio la SSE, kwa hivyo shirika la ulinzi la mteja ambalo linaweka upya matukio pekee halitawekwa upya wakati wa awamu ya kimya ya muda mrefu. Imezimwa kwa chaguo-msingi: vipima muda hutuma tukio sahihi response.in_progress."

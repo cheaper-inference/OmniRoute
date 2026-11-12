@@ -14990,6 +14990,10 @@
         "label": "Kombinacija: Ustavi se pri zavrnitvi politike vsebine",
         "description": "Ko kombinacijski cilj odgovori s točno zavrnitvijo politike vsebine (koda ali tip cyber_policy / content_policy_violation), ustavi kombinacijo in vrni to zavrnitev, tudi če so preostali cilji različni modeli, namesto napredovanja na naslednji cilj. Privzeto je izklopljeno: zavrnitev nikoli ne ohladi računa ali sproži varnostnega prekinitva ponudnika, kombinacija pa napreduje na svoj naslednji cilj natanko kot prej."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinacija: Crash-Storm Breaker",
+        "description": "Preskoči kombinirane cilje ponudnika pred pošiljanjem (razlog crash_storm), ko se ista samopovzročena napaka (lokalna napaka pri izvajanju ali kršitev pogodbe izvajalca, 5xx) ponovi na njem znotraj drsnega okna: OMNIROUTE_CRASH_STORM_THRESHOLD (10) in OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikoli ne zapiše ohlajanja ali zaklepanja in pristen upstream 5xx ga nikoli ne napaja. Privzeto izklopljeno: nič se ne zabeleži in noben cilj ni preskočen."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Odgovori: Keepalive samo pri transportu",
         "description": "Pošljite keepalive Responses API kot prazno vrstico namesto dogodka response.in_progress, tako da sintetični posnetek nikoli ne more nadomestiti pravega odziva v uradnem SDK. Prazna vrstica ne odpošlje nobenega dogodka SSE, tako da nadzornik odjemalca, ki se ponastavi samo ob dogodkih, ne bi bil ponastavljen med dolgo tiho fazo. Privzeto izklopljeno: časovniki pošljejo specifikacijsko veljaven dogodek response.in_progress."

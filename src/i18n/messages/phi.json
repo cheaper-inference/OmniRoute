@@ -14990,6 +14990,10 @@
         "label": "Combo: Huminto sa Pagtanggi sa Content-Policy",
         "description": "Kapag sumagot ang isang target ng combo ng isang eksaktong pagtanggi sa content-policy (code o uri na cyber_policy / content_policy_violation), ihinto ang combo at ibalik ang pagtangging iyon kahit na magkakaibang modelo ang mga natitirang target, sa halip na magpatuloy sa susunod na target. Naka-off bilang default: hindi kailanman pinapalamig ng pagtanggi ang account o pinapagana ang provider breaker, at uusad ang combo sa susunod nitong target eksakto tulad ng dati."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Laktawan ang mga combo na target ng provider bago ipadala (dahilan ng crash_storm) kapag naulit dito ang parehong self-inflicted failure (local execution error o executor contract violation, 5xx) sa loob ng sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) at OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Hindi ito kailanman nagsusulat ng cooldown o lock, at hindi ito pinapakain ng isang tunay na upstream 5xx. Naka-off bilang default: walang naitala at walang target na nilaktawan."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Mga tugon: keepalive over the transport only",
         "description": "Magpadala ng Mga Tugon na keepalive bilang isang blangkong linya sa halip na isang response.in_progress na kaganapan, kaya hindi kailanman mapapalitan ng isang synthetic na snapshot ang tunay na tugon sa opisyal SDK. Ang isang blangkong linya ay hindi nagpapadala SSE na kaganapan, kaya ang isang client watchdog na nagre-reset lamang sa mga kaganapan ay hindi mare-reset sa mahabang yugto ng tahimik. Naka-off bilang default: ipinapadala ng mga timer ang spec-valid response.in_progress na kaganapan."

@@ -14990,6 +14990,10 @@
         "label": "Combo: Ieqaf fuq Rifjut tal-Politika tal-Kontenut",
         "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Aqbeż il-miri combo ta 'fornitur qabel id-dispaċċ (raġuni crash_storm) ladarba l-istess falliment awto-inflitt (żball ta' eżekuzzjoni lokali jew ksur tal-kuntratt tal-eżekutur, 5xx) jirrepeti fuqha ġewwa tieqa li tiżżerżaq: OMNIROUTE_CRASH_STORM_THRESHOLD (10) u OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Qatt ma jikteb cooldown jew lock, u upstream ġenwin 5xx qatt ma jitmah. Mitfi b'mod awtomatiku: xejn ma huwa rreġistrat u l-ebda mira ma tinqabeż."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Tweġibiet: keepalive fuq it-trasport biss",
         "description": "Ibgħat il-keepalives taż Responses API bħala linja vojta minflok avveniment response.in_progress, għalhekk snapshot sintetiku qatt ma jista 'jissostitwixxi r-rispons reali SDK uffiċjali. Linja vojta ma tibgħat l-ebda avveniment SSE, għalhekk watchdog tal-klijent li reset biss fuq avvenimenti ma jkunx reset matul fażi twila siekta. Mitfi b'mod awtomatiku: it-tajmers jibagħtu l-avveniment response.in_progress spec-valid."

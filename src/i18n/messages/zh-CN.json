@@ -14990,6 +14990,10 @@
         "label": "组合：遇内容策略拒绝即停",
         "description": "当组合目标返回精确的内容策略拒绝（code 或 type 为 cyber_policy / content_policy_violation）时，停止组合并返回该拒绝，即使剩余目标是不同模型，不再前进到下一目标。默认关闭：该拒绝不冷却账户也不触发提供者断路器，组合与之前一样前进到下一目标。"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "组合：风暴破坏者",
+        "description": "一旦相同的自造成故障（本地执行错误或执行者合约违规，5xx）在滑动窗口内重复出现，则在分派之前跳过提供者的组合目标（原因 crash_storm）： OMNIROUTE_CRASH_STORM_THRESHOLD （10）和OMNIROUTE_CRASH_STORM_WINDOW_MS （5 分钟）。它从不写入冷却时间或锁定，真正的上游 5xx 也从不提供它。默认关闭：不记录任何内容，也不跳过任何目标。"
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "响应：仅通过传输保持活动状态",
         "description": "将响应 keepalives 作为空行而不是response.in_progress事件发送，因此合成快照永远无法替代官方SDK中的真实响应。空行不会调度SSE事件，因此仅在事件发生时重置的客户端看门狗在长时间静默阶段不会重置。默认关闭：计时器发送规范有效的response.in_progress事件。"

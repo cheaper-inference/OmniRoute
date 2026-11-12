@@ -14990,6 +14990,10 @@
         "label": "Combo: Stop on Content-Policy Refusal",
         "description": "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Responses: Transport-Only Keepalive",
         "description": "Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."

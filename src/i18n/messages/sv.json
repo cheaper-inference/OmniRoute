@@ -14990,6 +14990,10 @@
         "label": "Combo: Stoppa vid innehållspolitiskt avslag",
         "description": "När en combo-måltavla svarar med ett exakt innehållspolitiskt avslag (kod eller typ cyber_policy / content_policy_violation), stoppa combo:n och returnera det avslaget även när återstående måltavlor är olika modeller, istället för att avancera till nästa måltavla. Avstängt som standard: avslaget svalkar aldrig kontot eller triggar leverantörens brytare, och combo:n avancera till sin nästa måltavla exakt som tidigare."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Hoppa över en leverantörs kombinationsmål före utskick (orsak till crash_storm) när samma självförvållade misslyckande (lokalt exekveringsfel eller brott mot exekutorkontraktet, 5xx) upprepas på det i ett glidande fönster: OMNIROUTE_CRASH_STORM_THRESHOLD (10) och OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Den skriver aldrig en nedkylning eller lås, och en äkta uppströms 5xx matar den aldrig. Av som standard: ingenting spelas in och inget mål hoppas över."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Svar: Keepalive endast över transporten",
         "description": "Skicka svar keepalives som en tom rad istället för en response.in_progress händelse, så en syntetisk ögonblicksbild kan aldrig ersätta det verkliga svaret i den officiella SDK. En tom rad skickar ingen SSE händelse, så en klientövervakning som endast återställer händelser skulle inte återställas under en lång tyst fas. Av som standard: timers skickar den spec-giltiga response.in_progress händelsen."

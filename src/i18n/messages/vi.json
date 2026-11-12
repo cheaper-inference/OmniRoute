@@ -14990,6 +14990,10 @@
         "label": "Combo: Dừng Khi Bị Từ Chối Do Chính Sách Nội Dung",
         "description": "Khi một đích của combo trả lời bằng một lệnh từ chối chính sách nội dung chính xác (mã hoặc loại cyber_policy / content_policy_violation), hãy dừng combo và trả về lệnh từ chối đó ngay cả khi các đích còn lại là các mô hình khác nhau, thay vì tiếp tục chuyển sang đích tiếp theo. Tắt theo mặc định: lệnh từ chối sẽ không bao giờ làm giảm hiệu lực tài khoản hoặc kích hoạt cơ chế ngắt mạch của nhà cung cấp, và combo sẽ tiếp tục chuyển sang đích tiếp theo như trước."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Bộ ngắt bão lỗi",
+        "description": "Bỏ qua các đích combo của một nhà cung cấp trước khi gửi đi (lý do crash_storm) khi cùng một lỗi do chính hệ thống gây ra (lỗi thực thi cục bộ hoặc vi phạm hợp đồng executor, mã 5xx) lặp lại trên nhà cung cấp đó trong một cửa sổ trượt: OMNIROUTE_CRASH_STORM_THRESHOLD (10) và OMNIROUTE_CRASH_STORM_WINDOW_MS (5 phút). Tính năng này không bao giờ ghi cooldown hoặc khóa, và lỗi 5xx thực sự từ upstream không được tính. Tắt theo mặc định: không ghi nhận gì và không bỏ qua đích nào."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Responses: Keepalive chỉ ở tầng truyền tải",
         "description": "Gửi keepalive của Responses dưới dạng dòng trống thay vì sự kiện response.in_progress, để ảnh chụp tổng hợp không bao giờ thay thế phản hồi thật trong SDK chính thức. Dòng trống không phát sinh sự kiện SSE, nên watchdog phía client chỉ đặt lại theo sự kiện sẽ không được đặt lại trong giai đoạn im lặng dài. Tắt theo mặc định: bộ hẹn giờ gửi sự kiện response.in_progress đúng chuẩn."

@@ -14990,6 +14990,10 @@
         "label": "Kombo: Zastavit při odmítnutí z důvodu zásad obsahu",
         "description": "Pokud cíl komba odpoví přesným odmítnutím z důvodu zásad obsahu (kód nebo typ cyber_policy / content_policy_violation), zastavit kombo a vrátit toto odmítnutí i v případě, že zbývající cíle jsou jiné modely, namísto přechodu na další cíl. Ve výchozím stavu vypnuto: odmítnutí nikdy neochladí účet ani nespustí jistič poskytovatele a kombo přejde na svůj další cíl přesně jako dříve."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinace: Crash-Storm Breaker",
+        "description": "Přeskočte kombinované cíle poskytovatele před odesláním (reason crash_storm), jakmile se stejné selhání, které si sami způsobili (chyba místního provádění nebo porušení smlouvy exekutora, 5xx), zopakuje v posuvném okně: OMNIROUTE_CRASH_STORM_THRESHOLD (10) a OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikdy nezapíše cooldown nebo zámek a originální upstream 5xx ho nikdy nenapáje. Ve výchozím nastavení vypnuto: nic se nezaznamená a žádný cíl se nepřeskočí."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Odpovědi: Udržujte naživu pouze přepravu",
         "description": "Odesílejte odpovědi udržovací jako prázdný řádek namísto události response.in_progress, takže syntetický snímek nikdy nemůže nahradit skutečnou odpověď v oficiálním SDK. Prázdný řádek neodesílá žádnou událost SSE, takže klientský hlídací pes, který se resetuje pouze při událostech, nebude resetován během dlouhé tiché fáze. Ve výchozím nastavení vypnuto: časovače odesílají událost response.in_progress s platnou specifikací."

@@ -14990,6 +14990,10 @@
         "label": "Combo: zatrzymanie przy odmowie z powodu zasad treści",
         "description": "Gdy cel combo odpowie dokładną odmową z powodu zasad dotyczących treści (kod lub typ cyber_policy / content_policy_violation), zatrzymaj combo i zwróć tę odmowę, nawet jeśli pozostałe cele to inne modele, zamiast przechodzić do następnego celu. Domyślnie wyłączone: odmowa nigdy nie nakłada na konto okresu karencji ani nie aktywuje wyłącznika awaryjnego dostawcy, a combo przechodzi do kolejnego celu dokładnie tak jak dotychczas."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinacja: Łamacz katastrofy i burzy",
+        "description": "Pomiń cele combo dostawcy przed wysyłką (przyczyna awarii_burzy), gdy ta sama awaria z własnej winy (błąd wykonania lokalnego lub naruszenie umowy wykonawcy, 5xx) powtórzy się w przesuwanym oknie: OMNIROUTE_CRASH_STORM_THRESHOLD (10) i OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nigdy nie zapisuje czasu odnowienia ani blokady, a prawdziwy upstream 5xx nigdy go nie zasila. Domyślnie wyłączone: nic nie jest rejestrowane i żaden cel nie jest pomijany."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Odpowiedzi: utrzymywanie kontaktu tylko w transporcie",
         "description": "Wysyłaj odpowiedzi podtrzymujące jako pustą linię zamiast zdarzenia response.in_progress, więc syntetyczny zrzut ekranu nigdy nie zastąpi prawdziwej odpowiedzi w oficjalnym SDK. Pusta linia nie wywołuje żadnego zdarzenia SSE, więc watchdog klienta, który resetuje się tylko w przypadku zdarzeń, nie zostanie zresetowany podczas długiej fazy cichej. Domyślnie wyłączone: liczniki czasu wysyłają zdarzenie response.in_progress o określonej specyfikacji."

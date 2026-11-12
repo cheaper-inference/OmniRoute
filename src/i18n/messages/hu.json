@@ -14990,6 +14990,10 @@
         "label": "Combo: Leállítás tartalom-irányelvi elutasításkor",
         "description": "Ha egy combo-célpont pontos tartalom-irányelvi elutasítással válaszol (cyber_policy / content_policy_violation kód vagy típus), állítsa le a combót, és küldje vissza ezt az elutasítást még akkor is, ha a fennmaradó célpontok más modellek, ahelyett, hogy továbblépne a következő célpontra. Alapértelmezés szerint kikapcsolva: az elutasítás soha nem helyezi nyugalmi állapotba a fiókot, nem oldja ki a provider breakert, és a combo pontosan úgy halad tovább a következő célpontra, mint korábban."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "A szolgáltató kombinált célpontjainak kihagyása a feladás előtt (ok: crash_storm), ha ugyanaz a saját maga okozta hiba (helyi végrehajtási hiba vagy végrehajtói szerződés megsértése, 5xx) megismétlődik rajta egy csúszó ablakon belül: OMNIROUTE_CRASH_STORM_THRESHOLD (10) és OMNIROUTE_CRASH_STORM_WINDOW_MS (5 perc). Soha nem ír le cooldownt vagy zárat, és egy eredeti upstream 5xx soha nem táplálja. Alapértelmezés szerint kikapcsolva: semmi nem kerül rögzítésre, és egyetlen cél sem kerül kihagyásra."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Válaszok: csak a szállítás során maradjon életben",
         "description": "A válaszok elküldése üres sorként a response.in_progress esemény helyett, így a szintetikus pillanatkép soha nem helyettesítheti a valódi választ a hivatalos SDK ben. Az üres sor nem küld SSE eseményt, így a csak eseményekre visszaállító kliensfigyelő nem indul vissza egy hosszú néma fázis alatt. Alapértelmezés szerint kikapcsolva: az időzítők elküldik a spec-valid response.in_progress eseményt."

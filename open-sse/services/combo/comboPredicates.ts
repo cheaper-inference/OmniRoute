@@ -379,6 +379,22 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   ...Object.fromEntries([...LOCAL_CONFIGURATION_ERROR_CODES].map((code) => [code, true])),
 };
 
+/**
+ * Failures only OUR side can have caused: a local host execution error (missing binary, broken
+ * pipe, child process exit) or our own executor-result contract violation. A genuine upstream 5xx
+ * is not one of them, so it stays with the provider breaker. Feeds the crash-storm breaker.
+ */
+export function isSelfInflictedComboFailure(
+  errorText: string,
+  error?: { code?: string | null; type?: string | null }
+): boolean {
+  return (
+    error?.code === EXECUTOR_CONTRACT_VIOLATION_CODE ||
+    isLocalExecutionError(errorText) ||
+    isLocalExecutionError(error)
+  );
+}
+
 /** Request/model-specific failures must not poison provider-wide resilience state. */
 export function classifyQualityFailure(quality: ResponseQualityResult): {
   status: number;

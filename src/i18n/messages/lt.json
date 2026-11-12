@@ -14990,6 +14990,10 @@
         "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
         "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Derinys: „Crash-Storm Breaker“.",
+        "description": "Prieš išsiuntimą praleiskite tiekėjo kombinuotus tikslus (priežastis „crash_storm“), kai slankiojančiame lange pasikartoja tokia pati savaime sukelta klaida (vietinė vykdymo klaida arba vykdytojo sutarties pažeidimas, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ir OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min.). Jis niekada neįrašo atšalimo ar užrakto, o tikras prieš srovę esantis 5xx niekada jo nepadeda. Išjungta pagal numatytuosius nustatymus: niekas neįrašoma ir joks tikslas nepraleidžiamas."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Atsakymai: išlikti gyvam tik transportuojant",
         "description": "Siųskite atsakymus kaip tuščią eilutę, o ne response.in_progress įvykį, todėl sintetinė momentinė nuotrauka niekada negali pakeisti tikrojo atsakymo oficialiame SDK. Tuščia eilutė nesiunčia jokio SSE įvykio, todėl kliento sargybinis, kuris iš naujo nustato tik įvykius, nebūtų iš naujo nustatytas per ilgą tyliąją fazę. Išjungta pagal numatytuosius nustatymus: laikmačiai siunčia galiojantį response.in_progress įvykį."

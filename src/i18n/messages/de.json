@@ -14990,6 +14990,10 @@
         "label": "Combo: Stopp bei Content-Policy-Verweigerung",
         "description": "Wenn ein Combo-Ziel mit einer exakten Content-Policy-Verweigerung antwortet (Code oder Typ cyber_policy / content_policy_violation), die Combo stoppen und diese Verweigerung zurückgeben, selbst wenn die verbleibenden Ziele andere Modelle sind, anstatt zum nächsten Ziel überzugehen. Standardmäßig deaktiviert: Die Verweigerung versetzt das Konto niemals in einen Cooldown oder löst den Provider-Breaker aus, und die Combo geht genau wie zuvor zum nächsten Ziel über."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Überspringen Sie die Combo-Ziele eines Anbieters vor dem Versand (Grund crash_storm), sobald sich derselbe selbstverschuldete Fehler (lokaler Ausführungsfehler oder Verstoß gegen den Executor-Vertrag, 5xx) innerhalb eines Schiebefensters wiederholt: OMNIROUTE_CRASH_STORM_THRESHOLD (10) und OMNIROUTE_CRASH_STORM_WINDOW_MS (5 Min.). Es schreibt nie eine Abklingzeit oder Sperre, und ein echter Upstream-5xx füttert es nie. Standardmäßig deaktiviert: Es wird nichts aufgezeichnet und kein Ziel wird übersprungen."
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "Antworten: Keepalive nur über den Transport",
         "description": "Senden Sie Antwort-Keepalives als Leerzeile statt als response.in_progress -Ereignis, sodass ein synthetischer Snapshot niemals die echte Antwort im offiziellen SDK ersetzen kann. Eine Leerzeile löst kein SSE Ereignis aus, sodass ein Client-Watchdog, der nur bei Ereignissen zurückgesetzt wird, während einer langen Ruhephase nicht zurückgesetzt wird. Standardmäßig deaktiviert: Timer senden das spezifikationsgültige response.in_progress Ereignis."

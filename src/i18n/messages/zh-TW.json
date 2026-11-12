@@ -14990,6 +14990,10 @@
         "label": "組合：遇內容策略拒絕即停",
         "description": "當組合目標返回精確的內容策略拒絕（code 或 type 為 cyber_policy / content_policy_violation）時，停止組合並返回該拒絕，即使剩餘目標是不同模型，不再前進到下一目標。預設關閉：該拒絕不冷卻帳戶也不觸發提供者斷路器，組合與之前一樣前進到下一目標。"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "組合：風暴破壞者",
+        "description": "一旦相同的自造成故障（本地執行錯誤或執行者合約違規，5xx）在滑動視窗內重複出現，則在分派之前跳過提供者的組合目標（原因 crash_storm）： OMNIROUTE_CRASH_STORM_THRESHOLD （10）和OMNIROUTE_CRASH_STORM_WINDOW_MS （5 分鐘）。它從不寫入冷卻時間或鎖定，真正的上游 5xx 也從不提供它。預設為關閉：不記錄任何內容，也不跳過任何目標。"
+      },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
         "label": "回應：僅透過傳輸保持活動狀態",
         "description": "將回應 keepalives 作為空行而不是response.in_progress事件發送，因此合成快照永遠無法取代官方SDK中的真實回應。空白行不會調度SSE事件，因此僅在事件發生時重置的客戶端看門狗在長時間靜默階段不會重置。預設為關閉：計時器發送規範有效的response.in_progress事件。"

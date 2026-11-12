@@ -1,7 +1,7 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
-
+import { CRASH_STORM_BREAKER_ENABLED_FLAG } from "./featureFlagDefinitionsCrashStorm";
 export type { FeatureFlagDefinition };
 
 export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
@@ -1398,6 +1398,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
+  CRASH_STORM_BREAKER_ENABLED_FLAG,
   {
     key: "PROXY_STRICT_POST_REPLAY_ENABLED",
     label: "Proxy Fetch: Strict POST Replay",
