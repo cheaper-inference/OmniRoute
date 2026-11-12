@@ -1,1 +1,1 @@
-Provider synchronization tests now verify spacing with a controlled clock, so unrelated work between requests cannot cause a timing failure. The checks still reject skipped waits, extra waits, and waits after the final batch.
+- Provider synchronization tests now verify spacing with a controlled clock, so unrelated work between requests cannot cause a timing failure. The checks still reject skipped waits, extra waits, and waits after the final batch.
