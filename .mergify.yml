@@ -64,6 +64,8 @@ queue_rules:
       - check-success=Merge integrity (changelog + generated skills)
       - check-success=Gate / CI
       - check-success=Gate / Quality
+      # This independent workflow is outside both aggregate verdicts.
+      - check-success=@github-actions/API Route Typecheck
     # NO batching: 'Merge Queue Batch' requires a paid Mergify tier (live finding
     # 2026-07-15 — the queue command fails with "Cannot use Merge Queue batch" on
     # the free plan; #7220). Serial queue (1 PR at a time) still automates the train.
@@ -107,6 +109,8 @@ queue_rules:
       - check-success=Merge integrity (changelog + generated skills)
       - check-success=Gate / CI
       - check-success=Gate / Quality
+      # This independent workflow is outside both aggregate verdicts.
+      - check-success=@github-actions/API Route Typecheck
     checks_timeout: 240 min
     # Preserve the reviewed original PR heads; rebasing or squash would lose them.
     update_method: merge
