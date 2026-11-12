@@ -6739,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Web sīkdatnes vietturis",
     "herokuBaseUrlHint": "Norāde par Heroku bāzes URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Slēpt e-pastu",
     "imageProviders": "Attēlu nodrošinātāji",
     "videoProviders": "Video generēšana",
