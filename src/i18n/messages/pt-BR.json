@@ -5679,6 +5679,7 @@
     "usageTracking": "Rastreamento de Uso",
     "securityDesc": "Defina uma senha para proteger seu painel, ou pule por enquanto.",
     "securityDescSkipWarning": "⚠️ Sem uma senha, você não poderá adicionar provedores durante a configuração. Você poderá adicioná-los depois pelo painel, após definir uma senha.",
+    "passwordAlreadySet": "Uma senha do painel já está definida. Você pode alterá-la depois em Configurações.",
     "providerDesc": "Conecte seu primeiro provedor de IA. Você pode adicionar mais depois.",
     "providerRequiresPassword": "Você precisa definir uma senha primeiro para adicionar provedores. Volte à etapa de segurança e defina uma senha, ou adicione provedores depois pelo painel.",
     "apiKeyRequired": "Chave de API (obrigatório)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "meu-gcp-project-id",
     "grokWebCookiePlaceholder": "Cole o valor do cookie sso do grok.com",
     "herokuBaseUrlHint": "Obrigatório: cole a URL base do Heroku Inference. O app adicionará /v1/chat/completions.",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ocultar e-mail",
     "imageProviders": "Geração de Imagem",
     "videoProviders": "Geração de Vídeo",
@@ -7236,7 +7238,8 @@
       "kiro": "Nível gratuito: 50 créditos/mês (~25K–100K tokens). ⚠️ Os Termos de Serviço do Kiro proíbem o uso de proxy/harness de terceiros.",
       "codex": "Conecte o OpenAI Codex com o fluxo OAuth existente.",
       "qwen": "Conecte o Qwen Code com o fluxo OAuth existente.",
-      "github-models": "Crie um PAT do GitHub com o escopo 'models: read' em github.com/settings/tokens"
+      "github-models": "Crie um PAT do GitHub com o escopo 'models: read' em github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} aceita IDs de modelo nativos do provedor. Importe de /models ou adicione IDs personalizados para roteamento.",
     "bedrockModelsDescription": "Os modelos Amazon Bedrock têm escopo definido por região da AWS. Importe de /models ou adicione IDs de modelo Bedrock habilitados na região selecionada.",
@@ -8806,6 +8809,8 @@
     "retentionUsageHistory": "Histórico de uso (dias)",
     "retentionMemoryEntries": "Entradas de memória (dias)",
     "retentionXpAuditLog": "Log de Auditoria de XP (dias)",
+    "mediaStoreMaxMb": "Limite de tamanho do armazenamento de mídia (MiB)",
+    "mediaStoreMaxMbHint": "Tamanho total da mídia gerada guardada. Os arquivos mais antigos saem primeiro. A variável de ambiente MEDIA_STORE_MAX_MB tem prioridade quando definida. Padrão 2048.",
     "saveRetentionSettings": "Salvar configurações de retenção",
     "storageAutoVacuumMode": "Modo de vácuo automático",
     "storageScheduledVacuum": "Vácuo programado",
@@ -10256,7 +10261,11 @@
     "mappingInvalidJson": "JSON inválido.",
     "mappingMustBeObject": "O mapeamento deve ser um objeto JSON, não um array ou valor primitivo.",
     "mappingValueMustBeString": "O valor da chave “{key}” deve ser uma string.",
-    "save": "Salvar"
+    "save": "Salvar",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Motor Caveman",
@@ -12868,6 +12877,8 @@
     },
     "attempts": "tentativas",
     "detail": {
+      "tabOverview": "Visão Geral",
+      "tabPayloads": "Payloads",
       "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
       "noHttpResponse": "Nenhuma resposta HTTP foi observada",
       "transportError": "Erro de transporte",

@@ -5679,6 +5679,7 @@
     "usageTracking": "გამოყენების აღრიცხვა",
     "securityDesc": "თქვენი დაფის დასაცავად დააყენეთ პაროლი ან ჯერ გამოტოვეთ ეს ნაბიჯი.",
     "securityDescSkipWarning": "⚠️ პაროლის გარეშე დაყენების პროცესში პროვაიდერების დამატებას ვერ შეძლებთ. პაროლის დაყენების შემდეგ მათ მოგვიანებით დაფიდან დაამატებთ.",
+    "passwordAlreadySet": "დაფის პაროლი უკვე დაყენებულია. მოგვიანებით შეგიძლიათ შეცვალოთ ის პარამეტრებში.",
     "providerDesc": "დააკავშირეთ თქვენი პირველი AI პროვაიდერი. მოგვიანებით მეტის დამატებას შეძლებთ.",
     "providerRequiresPassword": "პროვაიდერების დასამატებლად ჯერ პაროლი უნდა დააყენოთ. დაბრუნდით უსაფრთხოების ეტაპზე და დააყენეთ პაროლი, ან პროვაიდერები მოგვიანებით დაფიდან დაამატეთ.",
     "apiKeyRequired": "API გასაღები (სავალდებულო)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Web ქუქი-ფაილის ადგილმაჩვენებელი",
     "herokuBaseUrlHint": "Heroku-ს საბაზისო URL-ის მინიშნება",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ელფოსტის დამალვა",
     "imageProviders": "სურათების პროვაიდერები",
     "videoProviders": "ვიდეოს გენერირება",
@@ -7227,7 +7229,8 @@
       "kiro": "უფასო ტარიფი: 50 კრედიტი/თვე (~25K–100K ტოკენი). ⚠️ Kiro-ს მომსახურების პირობები კრძალავს მესამე მხარის პროქსის/ჰარნესის გამოყენებას.",
       "codex": "დააკავშირეთ OpenAI Codex არსებული OAuth პროცესით.",
       "qwen": "დააკავშირეთ Qwen Code არსებული OAuth პროცესით.",
-      "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens"
+      "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} იღებს პროვაიდერის ნატიურ მოდელის ID-ებს. შემოიტანეთ ისინი /models განყოფილებიდან ან მარშრუტიზაციისთვის დაამატეთ მორგებული ID-ები.",
     "bedrockModelsDescription": "Amazon Bedrock-ის მოდელები შეზღუდულია AWS-ის რეგიონის მიხედვით. შემოიტანეთ ისინი /models განყოფილებიდან ან დაამატეთ არჩეულ რეგიონში ჩართული Bedrock მოდელების ID-ები.",
@@ -8806,6 +8809,8 @@
     "retentionUsageHistory": "გამოყენების ისტორია (დღე)",
     "retentionMemoryEntries": "მეხსიერების ჩანაწერები (დღე)",
     "retentionXpAuditLog": "XP აუდიტის ჟურნალი (დღე)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "შენახვის ვადის პარამეტრების შენახვა",
     "storageAutoVacuumMode": "ავტომატური VACUUM-ის რეჟიმი",
     "storageScheduledVacuum": "დაგეგმილი VACUUM",
@@ -10256,7 +10261,11 @@
     "mappingInvalidJson": "არასწორი JSON.",
     "mappingMustBeObject": "შესაბამისობა უნდა იყოს JSON ობიექტი და არა მასივი ან პრიმიტიული მნიშვნელობა.",
     "mappingValueMustBeString": "„{key}“ გასაღების მნიშვნელობა სტრიქონი უნდა იყოს.",
-    "save": "შენახვა"
+    "save": "შენახვა",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12868,6 +12877,8 @@
     },
     "attempts": "მცდელობები",
     "detail": {
+      "tabOverview": "მიმოხილვა",
+      "tabPayloads": "მონაცემები",
       "omittedHttpAttempts": "{count} HTTP გაგზავნა არ შენახულა",
       "noHttpResponse": "HTTP პასუხი არ დაფიქსირებულა",
       "transportError": "გადაცემის შეცდომა",

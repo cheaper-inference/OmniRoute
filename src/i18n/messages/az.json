@@ -5679,6 +5679,7 @@
     "usageTracking": "İstifadənin izlənməsi",
     "securityDesc": "İdarəetmə panelinizi qorumaq üçün parol təyin edin və ya hələlik keçin.",
     "securityDescSkipWarning": "⚠️ Parol olmadan quraşdırma zamanı provayder əlavə edə bilməyəcəksiniz. Parol təyin etdikdən sonra onları idarəetmə panelindən əlavə edə bilərsiniz.",
+    "passwordAlreadySet": "İdarə paneli üçün parol artıq təyin edilib. Onu sonra Parametrlərdə dəyişə bilərsiniz.",
     "providerDesc": "İlk AI provayderinizə qoşulun. Daha sonra başqa provayderlər əlavə edə bilərsiniz.",
     "providerRequiresPassword": "Provayder əlavə etmək üçün əvvəlcə parol təyin etməlisiniz. Təhlükəsizlik mərhələsinə qayıdıb parol təyin edin və ya provayderləri daha sonra idarəetmə panelindən əlavə edin.",
     "apiKeyRequired": "API açarı (tələb olunur)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok veb kukisi üçün yer tutucu",
     "herokuBaseUrlHint": "Heroku əsas URL-i üçün ipucu",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "E-poçtu gizlət",
     "imageProviders": "Şəkil provayderləri",
     "videoProviders": "Video generasiyası",
@@ -7236,7 +7238,8 @@
       "kiro": "Pulsuz səviyyə: ayda 50 kredit (~25K–100K token). ⚠️ Kiro istifadə şərtləri üçüncü tərəf proksi və ya harness istifadəsini qadağan edir.",
       "codex": "OpenAI Codex-i mövcud OAuth axını ilə qoşun.",
       "qwen": "Qwen Code-u mövcud OAuth axını ilə qoşun.",
-      "github-models": "github.com/settings/tokens ünvanında 'models: read' əhatə dairəsi ilə GitHub PAT yaradın"
+      "github-models": "github.com/settings/tokens ünvanında 'models: read' əhatə dairəsi ilə GitHub PAT yaradın",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} provayderin yerli model identifikatorlarını qəbul edir. /modellərdən idxal edin və ya marşrutlaşdırma üçün fərdi identifikatorlar əlavə edin.",
     "bedrockModelsDescription": "Amazon Bedrock modelləri AWS bölgəsi tərəfindən əhatə olunur. /modellərdən idxal edin və ya seçilmiş regionda aktivləşdirilmiş Bedrock model ID-lərini əlavə edin.",
@@ -8806,6 +8809,8 @@
     "retentionUsageHistory": "İstifadə Tarixçəsi (günlər)",
     "retentionMemoryEntries": "Yaddaş Girişləri (günlər)",
     "retentionXpAuditLog": "XP audit jurnalı (gün)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Saxlama müddəti parametrlərini yadda saxlayın",
     "storageAutoVacuumMode": "Avtomatik vakuum rejimi",
     "storageScheduledVacuum": "Planlaşdırılmış vakuum",
@@ -10256,7 +10261,11 @@
     "mappingInvalidJson": "Yanlış JSON.",
     "mappingMustBeObject": "Uyğunlaşdırma massiv və ya primitiv dəyər deyil, JSON obyekti olmalıdır.",
     "mappingValueMustBeString": "“{key}” açarının dəyəri sətir olmalıdır.",
-    "save": "Saxla"
+    "save": "Saxla",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12868,6 +12877,8 @@
     },
     "attempts": "cəhdlər",
     "detail": {
+      "tabOverview": "Ümumi baxış",
+      "tabPayloads": "Faydalı yüklər",
       "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
       "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
       "transportError": "Nəqliyyat xətası",

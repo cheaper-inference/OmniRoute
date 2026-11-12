@@ -5679,6 +5679,7 @@
     "usageTracking": "Foydalanishni kuzatish",
     "securityDesc": "Boshqaruv panelingizni himoyalash uchun parol oʻrnating yoki hozircha oʻtkazib yuboring.",
     "securityDescSkipWarning": "⚠️ Parolsiz sozlash vaqtida provayderlarni qoʻsha olmaysiz. Parol oʻrnatganingizdan soʻng ularni boshqaruv panelidan qoʻshishingiz mumkin.",
+    "passwordAlreadySet": "Boshqaruv paneli paroli allaqachon o'rnatilgan. Uni keyinroq Sozlamalarda o'zgartirishingiz mumkin.",
     "providerDesc": "Birinchi AI provayderingizni ulang. Keyinroq yana qoʻshishingiz mumkin.",
     "providerRequiresPassword": "Provayderlarni qoʻshish uchun avval parol oʻrnatishingiz kerak. Xavfsizlik bosqichiga qaytib, parol oʻrnating yoki provayderlarni keyinroq boshqaruv panelidan qoʻshing.",
     "apiKeyRequired": "API kaliti (majburiy)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok veb-cookie fayli uchun to‘ldiruvchi matn",
     "herokuBaseUrlHint": "Heroku asosiy URL manzili bo‘yicha ko‘rsatma",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "E-pochta manzilini yashirish",
     "imageProviders": "Tasvir provayderlari",
     "videoProviders": "Video yaratish",
@@ -7227,7 +7229,8 @@
       "kiro": "Bepul tarif: oyiga 50 kredit (~25K–100K token). ⚠️ Kiro ToS uchinchi tomon proksi yoki harness vositalaridan foydalanishni taqiqlaydi.",
       "codex": "OpenAI Codexʼni mavjud OAuth jarayoni orqali ulang.",
       "qwen": "Qwen Codeʼni mavjud OAuth jarayoni orqali ulang.",
-      "github-models": "github.com/settings/tokens manzilida 'models: read' vakolat doirasiga ega GitHub PAT yarating"
+      "github-models": "github.com/settings/tokens manzilida 'models: read' vakolat doirasiga ega GitHub PAT yarating",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} provayderga xos model IDʼlarini qabul qiladi. /models orqali import qiling yoki marshrutlash uchun maxsus IDʼlarni qoʻshing.",
     "bedrockModelsDescription": "Amazon Bedrock modellari AWS mintaqasi boʻyicha cheklangan. /models orqali import qiling yoki tanlangan mintaqada yoqilgan Bedrock model IDʼlarini qoʻshing.",
@@ -8806,6 +8809,8 @@
     "retentionUsageHistory": "Foydalanish tarixi (kun)",
     "retentionMemoryEntries": "Xotira yozuvlari (kun)",
     "retentionXpAuditLog": "XP audit jurnali (kun)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Saqlash muddati sozlamalarini saqlash",
     "storageAutoVacuumMode": "Avtomatik vakuum rejimi",
     "storageScheduledVacuum": "Rejalashtirilgan vakuum",
@@ -10256,7 +10261,11 @@
     "mappingInvalidJson": "JSON notoʻgʻri.",
     "mappingMustBeObject": "Moslashtirish massiv yoki sodda qiymat emas, JSON obyekti boʻlishi kerak.",
     "mappingValueMustBeString": "“{key}” kalitining qiymati satr boʻlishi kerak.",
-    "save": "Saqlash"
+    "save": "Saqlash",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman mexanizmi",
@@ -12868,6 +12877,8 @@
     },
     "attempts": "urinishlar",
     "detail": {
+      "tabOverview": "Umumiy ko‘rinish",
+      "tabPayloads": "Yuklamalar",
       "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
       "noHttpResponse": "HTTP javobi kuzatilmadi",
       "transportError": "Uzatish xatosi",
