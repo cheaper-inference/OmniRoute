@@ -1,0 +1,5 @@
+- **feat(providers):** new per-connection opt-in `providerSpecificData.blockClientTierFields` removes client-supplied `service_tier`, `safety_identifier`, `inference_geo`, `speed` and `include_obfuscation` from upstream requests; off by default.
+- **feat(mcp):** Opt-in `OMNIROUTE_MCP_SCOPE_TOOLS_LIST=1` hides MCP tools a key's scopes cannot call from `tools/list`, so read-only keys stop being offered tools that would be refused.
+- **feat(payload-rules):** Payload rules accept an optional `when` list of conditions (`eq`, `neq`, `in`, `exists`, `missing` on a body path); the rule applies only when all hold, and rules without `when` are unchanged.
+- **feat(pii):** request-side card masking now checks the Luhn digit, so 16-digit ids and timestamps are no longer masked as card numbers (PII redaction stays opt-in).
+- **feat(chat):** Opt-in `OMNIROUTE_PROMPT_TEMPLATES=1` expands `template://<slug>` chat messages from the stored prompt templates, filling `{{var}}` slots from `template_params`; a missing slot answers 400.

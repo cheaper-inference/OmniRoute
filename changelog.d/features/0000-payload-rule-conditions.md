@@ -1,1 +1,0 @@
-- **feat(payload-rules):** Payload rules accept an optional `when` list of conditions (`eq`, `neq`, `in`, `exists`, `missing` on a body path); the rule applies only when all hold, and rules without `when` are unchanged.

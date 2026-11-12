@@ -1,1 +1,0 @@
-- **feat(chat):** Opt-in `OMNIROUTE_PROMPT_TEMPLATES=1` expands `template://<slug>` chat messages from the stored prompt templates, filling `{{var}}` slots from `template_params`; a missing slot answers 400.

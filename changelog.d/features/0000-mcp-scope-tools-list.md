@@ -1,1 +1,0 @@
-- **feat(mcp):** Opt-in `OMNIROUTE_MCP_SCOPE_TOOLS_LIST=1` hides MCP tools a key's scopes cannot call from `tools/list`, so read-only keys stop being offered tools that would be refused.

@@ -1,1 +1,0 @@
-- **feat(pii):** request-side card masking now checks the Luhn digit, so 16-digit ids and timestamps are no longer masked as card numbers (PII redaction stays opt-in).
