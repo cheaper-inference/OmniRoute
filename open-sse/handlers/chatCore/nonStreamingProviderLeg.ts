@@ -34,7 +34,10 @@ import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
-import { ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
+import {
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
+} from "../../config/constants.ts";
 import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
 import {
@@ -555,15 +558,25 @@ export async function runNonStreamingProviderLeg(
     // The old non-streaming path reduced every TimeoutError to a bare 504.
     // Preserve only the explicit Antigravity pre-response marker, not arbitrary
     // upstream 504s: the outer account router needs the original failure type.
+    const requestScopedTimeout =
+      failureStatus === 504 &&
+      !!error &&
+      typeof error === "object" &&
+      (error as { code?: unknown }).code === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
     const preResponseTimeout =
       provider === "antigravity" &&
       failureStatus === 504 &&
       !!error &&
       typeof error === "object" &&
       (error as { code?: unknown }).code === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+    const timeoutType = requestScopedTimeout
+      ? "request_timeout"
+      : preResponseTimeout
+        ? "upstream_timeout"
+        : undefined;
     const receipt = buildReceipt(input, {
       httpStatus: failureStatus,
-      errorType: preResponseTimeout ? "upstream_timeout" : null,
+      errorType: timeoutType ?? null,
       usage: null,
       termination: "provider_error",
       latencyMs: Date.now() - startMs,
@@ -577,8 +590,12 @@ export async function runNonStreamingProviderLeg(
       failureMessage,
       error,
       null,
-      preResponseTimeout ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE : undefined,
-      preResponseTimeout ? "upstream_timeout" : undefined
+      requestScopedTimeout
+        ? REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+        : preResponseTimeout
+          ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+          : undefined,
+      timeoutType
     );
     return {
       kind: "error",
@@ -874,8 +891,9 @@ export async function runNonStreamingProviderLeg(
   });
 
   if (parsed.kind === "invalid_sse") {
+    const sseStatus = parsed.status ?? 502;
     const receipt = buildReceipt(input, {
-      httpStatus: 502,
+      httpStatus: sseStatus,
       errorType: "invalid_sse_payload",
       usage: null,
       termination: "provider_error",
@@ -886,7 +904,7 @@ export async function runNonStreamingProviderLeg(
       model: currentModel,
     });
     const errorResult = legError(
-      502,
+      sseStatus,
       parsed.message,
       new Error(parsed.message),
       null,
@@ -1133,8 +1151,10 @@ export async function runNonStreamingProviderLeg(
                 ? "invalid_sse_payload"
                 : "invalid_json_payload";
             const parseMessage = fallbackParsed.message;
+            const parseStatus =
+              (fallbackParsed.kind === "invalid_sse" && fallbackParsed.status) || 502;
             const receipt = buildReceipt(input, {
-              httpStatus: 502,
+              httpStatus: parseStatus,
               errorType: parseCode,
               usage: null,
               termination: "provider_error",
@@ -1145,7 +1165,7 @@ export async function runNonStreamingProviderLeg(
               model: nextModel,
             });
             const errorResult = legError(
-              502,
+              parseStatus,
               parseMessage,
               new Error(parseMessage),
               null,

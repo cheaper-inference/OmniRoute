@@ -1,6 +1,6 @@
 <svg viewBox="0 0 1200 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
   <title id="t">Comparison table: OmniRoute versus 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities.</title>
-  <desc id="d">OmniRoute is the only one with the full set: 382 providers, 150+ free providers built-in, 20 routing strategies, 12-engine token compression, a built-in MCP server with 110 tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, 67 UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.</desc>
+  <desc id="d">OmniRoute is the only one with the full set: 389 providers, 150+ free providers built-in, 20 routing strategies, 12-engine token compression, a built-in MCP server with 110 tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, 67 UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.</desc>
   <style>
 :root{--bg:#f3f1e9;--surface:#faf9f4;--ink:#20211c;--body:#20211c;--muted:#626459;--border:rgba(32,33,28,0.22);--grid:rgba(32,33,28,0.06);--accent:#e5ac82;--accent-ink:#241b15;--ok:#3c735b;--ok-bg:#e4ece3;--warn:#8a591c;--warn-bg:#f3e6cf;--err:#ae4340;--err-bg:#f5e2dc;--info:#526b80;--info-bg:#e4e9ed;--surface-subtle:#eae8df;--surface-muted:#e3e1d7;--inverse-bg:#11120f;--inverse-text:#f2f0e8;--track:rgba(32,33,28,0.18);--accent-soft:rgba(229,172,130,0.18)}
 @media (prefers-color-scheme: dark){:root{--bg:#11120f;--surface:#191a16;--ink:#f2f0e8;--body:#f2f0e8;--muted:#a5a69b;--border:rgba(242,240,232,0.22);--grid:rgba(242,240,232,0.05);--accent:#e5ac82;--accent-ink:#241b15;--ok:#9ecbbb;--ok-bg:#1c3028;--warn:#e5c28c;--warn-bg:#352c1c;--err:#edaaa1;--err-bg:#382421;--info:#a6bfd0;--info-bg:#212e37;--surface-subtle:#22231d;--surface-muted:#292a23;--inverse-bg:#11120f;--inverse-text:#f2f0e8;--track:rgba(242,240,232,0.18);--accent-soft:rgba(229,172,130,0.18)}}
@@ -75,25 +75,25 @@
     <path id="g1j" d="M78 0v680h92v-680h-92zM312 248h-168v75h163q76 0 118 38 42 38 42 103 0 65-42 103-42 38-115 38h-166v75h167q77 0 134-26 56-26 87-74 30-48 30-115 0-103-68-160-68-57-182-57z"/>
     <path id="g1k" d="M525 466q0-41-17-72-17-31-53-51-36-20-92-30-57-11-136-11v75h30q44 0 71 8 27 8 42 22 15 13 20 28 5 16 5 30 0 40-27 63-27 24-77 24-53 0-82-27-29-26-37-72h-128q9 64 41 109 32 46 85 71 52 25 122 25 77 0 128-26 52-26 78-69 27-44 27-97zM543 184q0-55-29-100-28-45-84-72-56-27-139-27-73 0-128 26-55 25-90 72-34 47-43 111h130q8-47 40-75 31-28 90-28 60 0 91 26 32 26 32 72 0 18-6 35-7 16-23 29-16 14-45 21-29 8-75 8h-37v90q87 0 148-13 60-14 97-38 37-25 54-60 17-34 17-77z"/>
     <path id="g1l" d="M291-15q-75 0-131 25-57 24-88 68-31 44-31 104 0 58 32 99 31 41 88 63 56 22 130 22 76 0 131-23 56-24 88-65 31-41 31-95 0-61-31-105-31-45-87-69-56-24-132-24zM291 89q55 0 88 26 33 26 33 74 0 32-15 54-15 23-42 35-27 12-64 12-55 0-88-27-33-26-33-75 0-46 33-73 33-26 88-26zM291 658q69 0 120-23 52-22 80-64 29-42 29-99 0-53-29-92-29-38-80-60-51-21-120-21-68 0-119 21-52 21-80 60-29 38-29 92 0 56 29 98 28 41 80 65 51 23 119 23zM291 554q-47 0-75-23-28-23-28-65 0-42 28-66 28-24 75-24 47 0 75 24 28 24 28 66 0 43-28 65-28 23-75 23z"/>
-    <path id="g1m" d="M521 457q0-45-18-79-19-34-50-61-31-26-67-48-37-22-74-44-36-22-67-46-31-25-50-57-18-32-18-74l-126-16q0 62 19 106 18 45 48 77 31 33 67 57 36 24 73 43 36 20 66 40 31 20 49 44 19 24 19 57 0 45-26 71-25 25-73 25-52 0-79-27-28-26-35-72h-131q9 64 41 109 32 46 84 71 52 25 121 25 75 0 125-27 51-27 77-72 25-46 25-102zM51 0v32l101 66h371v-98h-472z"/>
-    <path id="g1n" d="M447 0h-90v524l-230-303h414v-70h-497v80l322 412h81v-643z"/>
-    <path id="g1o" d="M288-12q-119 0-185 88-66 88-66 245 0 161 67 248 66 86 184 86 119 0 185-88 65-88 65-246 0-161-66-247-67-86-184-86zM288 64q77 0 119 67 41 66 41 190 0 123-41 191-42 67-119 67-78 0-119-66-42-67-42-192 0-121 42-189 42-68 119-68z"/>
-    <path id="g1p" d="M93 283v70h389v-70h-389zM323 123h-70v389h70v-389z"/>
-    <path id="g1q" d="M148 536l-11 144h71l-10-144h-50zM165 512l-140 34 22 68 134-54-16-48zM193 521l-76-122-57 42 93 110 40-30zM181 512l-16 48 133 54 22-68-139-34zM153 521l40 30 93-110-57-42-76 122z"/>
-    <path id="g1r" d="M93 285v66q26 18 50 26 23 8 44 8 28 0 54-10 26-10 51-23 24-14 48-24 24-10 48-10 21 0 45 8 23 8 49 25v-66q-26-18-49-26-24-8-45-8-28 0-54 10-26 10-50 24-25 13-49 23-24 10-48 10-21 0-44-8-24-8-50-25z"/>
-    <path id="g1s" d="M536 214q0-66-27-117-27-51-80-80-53-29-132-29-72 0-124 23-52 23-83 66-31 43-40 104h88q9-54 48-85 39-32 110-32 76 0 114 40 38 39 38 109 0 28-7 56-8 27-25 49-18 22-47 35-29 13-73 13-38 0-65-9-28-10-46-25-19-16-31-34l-79 8 40 47q33 38 77 64 43 25 111 25 64 0 109-18 44-19 72-51 27-32 40-73 12-41 12-86zM95 643h411v-70h-341l-15-241-75-26 20 337z"/>
-    <path id="g1t" d="M353 0h-92v520q-5 0-12 0-8 0-19 0h-92v70h73q39 0 52 10 13 9 13 31v12h77v-643zM138 0v70h338v-70h-338z"/>
-    <path id="g1u" d="M78 0v680h92v-680h-92zM144 605v75h395v-75h-395zM144 297v75h358v-75h-358z"/>
-    <path id="g1v" d="M308 544q71 0 122-33 50-33 77-95 27-62 27-149 0-135-61-207-61-72-165-72-92 0-146 72-55 71-55 207 0 84 25 146 24 62 70 97 45 34 106 34zM302 468q-70 0-106-51-37-52-37-150 0-97 38-150 37-53 105-53 69 0 106 53 36 52 36 150 0 96-37 149-37 52-105 52zM159-220h-88v751h88v-751z"/>
-    <path id="g1w" d="M307 544q71 0 122-33 50-33 77-95 27-62 27-149 0-135-61-207-61-72-165-72-92 0-146 72-55 71-55 207 0 84 25 146 24 62 70 97 45 34 106 34zM301 468q-70 0-106-51-37-52-37-150 0-97 38-150 37-53 105-53 69 0 106 53 36 52 36 150 0 96-37 149-37 52-105 52zM158 0h-88v720h88v-720z"/>
-    <path id="g1x" d="M70 0v720h88v-720h-88z"/>
-    <path id="g1y" d="M68 235v75h266v-75h-266z"/>
-    <path id="g1z" d="M374 0h-135v488q-7 0-16 0-8 0-19 0h-85v96h56q51 0 68 12 18 12 18 38v9h113v-643zM119 0v98h375v-98h-375z"/>
-    <path id="g20" d="M543 215q0-65-28-117-28-52-83-83-55-30-135-30-73 0-127 25-55 24-88 69-33 46-42 108h128q8-44 40-70 32-26 88-26 59 0 89 33 30 32 30 90 0 25-6 47-7 23-21 41-15 18-37 28-23 10-57 10-29 0-51-8-22-7-37-20-16-13-26-29l-115 11 58 68q34 35 76 59 42 23 106 23 64 0 109-18 45-18 73-50 29-31 43-73 13-41 13-88zM85 643h425v-99h-321l-13-211-111-39 20 349z"/>
-    <path id="g21" d="M288-15q-122 0-190 89-67 89-67 247 0 161 68 249 68 88 189 88 122 0 189-89 68-89 68-248 0-161-68-248-69-88-189-88zM288 93q61 0 93 59 32 59 32 169 0 110-32 169-32 60-93 60-61 0-94-59-32-59-32-170 0-108 33-168 32-60 93-60z"/>
-    <path id="g22" d="M84 271v99h407v-99h-407zM341 117h-106v406h106v-406z"/>
-    <path id="g23" d="M78 0v680h92v-680h-92zM331 303h-187v57h175q68 0 106 34 37 33 37 89 0 56-37 89-38 33-104 33h-177v75h179q107 0 171-51 63-52 63-141 0-90-61-137-62-48-165-48zM493 0l-43 184q-10 42-26 64-16 22-42 30-27 7-68 7h-154v60h168q68 0 109-12 41-12 65-43 23-31 37-88l51-202h-97z"/>
-    <path id="g24" d="M151 358h-88q9 59 37 101 28 41 75 63 47 22 112 22 71 0 118-26 47-26 70-72 23-47 23-109v-209q0-46 5-76 4-30 14-52h-93q-10 20-12 50-2 30-2 59v226q0 64-31 99-32 34-100 34-57 0-88-29-32-30-40-81zM423 323v-66q-89 0-145-8-57-9-88-24-31-16-43-37-12-21-12-46 0-37 29-57 28-21 74-21 49 0 88 23 39 23 62 62 22 38 22 83h47q-4-65-25-111-22-47-55-76-34-29-72-43-38-14-76-14-55 0-96 17-42 17-65 51-23 34-23 84 0 55 30 94 29 38 88 58 56 19 117 25 61 6 143 6z"/>
+    <path id="g1m" d="M447 0h-90v524l-230-303h414v-70h-497v80l322 412h81v-643z"/>
+    <path id="g1n" d="M288-12q-119 0-185 88-66 88-66 245 0 161 67 248 66 86 184 86 119 0 185-88 65-88 65-246 0-161-66-247-67-86-184-86zM288 64q77 0 119 67 41 66 41 190 0 123-41 191-42 67-119 67-78 0-119-66-42-67-42-192 0-121 42-189 42-68 119-68z"/>
+    <path id="g1o" d="M93 283v70h389v-70h-389zM323 123h-70v389h70v-389z"/>
+    <path id="g1p" d="M148 536l-11 144h71l-10-144h-50zM165 512l-140 34 22 68 134-54-16-48zM193 521l-76-122-57 42 93 110 40-30zM181 512l-16 48 133 54 22-68-139-34zM153 521l40 30 93-110-57-42-76 122z"/>
+    <path id="g1q" d="M93 285v66q26 18 50 26 23 8 44 8 28 0 54-10 26-10 51-23 24-14 48-24 24-10 48-10 21 0 45 8 23 8 49 25v-66q-26-18-49-26-24-8-45-8-28 0-54 10-26 10-50 24-25 13-49 23-24 10-48 10-21 0-44-8-24-8-50-25z"/>
+    <path id="g1r" d="M536 214q0-66-27-117-27-51-80-80-53-29-132-29-72 0-124 23-52 23-83 66-31 43-40 104h88q9-54 48-85 39-32 110-32 76 0 114 40 38 39 38 109 0 28-7 56-8 27-25 49-18 22-47 35-29 13-73 13-38 0-65-9-28-10-46-25-19-16-31-34l-79 8 40 47q33 38 77 64 43 25 111 25 64 0 109-18 44-19 72-51 27-32 40-73 12-41 12-86zM95 643h411v-70h-341l-15-241-75-26 20 337z"/>
+    <path id="g1s" d="M353 0h-92v520q-5 0-12 0-8 0-19 0h-92v70h73q39 0 52 10 13 9 13 31v12h77v-643zM138 0v70h338v-70h-338z"/>
+    <path id="g1t" d="M78 0v680h92v-680h-92zM144 605v75h395v-75h-395zM144 297v75h358v-75h-358z"/>
+    <path id="g1u" d="M308 544q71 0 122-33 50-33 77-95 27-62 27-149 0-135-61-207-61-72-165-72-92 0-146 72-55 71-55 207 0 84 25 146 24 62 70 97 45 34 106 34zM302 468q-70 0-106-51-37-52-37-150 0-97 38-150 37-53 105-53 69 0 106 53 36 52 36 150 0 96-37 149-37 52-105 52zM159-220h-88v751h88v-751z"/>
+    <path id="g1v" d="M307 544q71 0 122-33 50-33 77-95 27-62 27-149 0-135-61-207-61-72-165-72-92 0-146 72-55 71-55 207 0 84 25 146 24 62 70 97 45 34 106 34zM301 468q-70 0-106-51-37-52-37-150 0-97 38-150 37-53 105-53 69 0 106 53 36 52 36 150 0 96-37 149-37 52-105 52zM158 0h-88v720h88v-720z"/>
+    <path id="g1w" d="M70 0v720h88v-720h-88z"/>
+    <path id="g1x" d="M68 235v75h266v-75h-266z"/>
+    <path id="g1y" d="M374 0h-135v488q-7 0-16 0-8 0-19 0h-85v96h56q51 0 68 12 18 12 18 38v9h113v-643zM119 0v98h375v-98h-375z"/>
+    <path id="g1z" d="M543 215q0-65-28-117-28-52-83-83-55-30-135-30-73 0-127 25-55 24-88 69-33 46-42 108h128q8-44 40-70 32-26 88-26 59 0 89 33 30 32 30 90 0 25-6 47-7 23-21 41-15 18-37 28-23 10-57 10-29 0-51-8-22-7-37-20-16-13-26-29l-115 11 58 68q34 35 76 59 42 23 106 23 64 0 109-18 45-18 73-50 29-31 43-73 13-41 13-88zM85 643h425v-99h-321l-13-211-111-39 20 349z"/>
+    <path id="g20" d="M288-15q-122 0-190 89-67 89-67 247 0 161 68 249 68 88 189 88 122 0 189-89 68-89 68-248 0-161-68-248-69-88-189-88zM288 93q61 0 93 59 32 59 32 169 0 110-32 169-32 60-93 60-61 0-94-59-32-59-32-170 0-108 33-168 32-60 93-60z"/>
+    <path id="g21" d="M84 271v99h407v-99h-407zM341 117h-106v406h106v-406z"/>
+    <path id="g22" d="M78 0v680h92v-680h-92zM331 303h-187v57h175q68 0 106 34 37 33 37 89 0 56-37 89-38 33-104 33h-177v75h179q107 0 171-51 63-52 63-141 0-90-61-137-62-48-165-48zM493 0l-43 184q-10 42-26 64-16 22-42 30-27 7-68 7h-154v60h168q68 0 109-12 41-12 65-43 23-31 37-88l51-202h-97z"/>
+    <path id="g23" d="M151 358h-88q9 59 37 101 28 41 75 63 47 22 112 22 71 0 118-26 47-26 70-72 23-47 23-109v-209q0-46 5-76 4-30 14-52h-93q-10 20-12 50-2 30-2 59v226q0 64-31 99-32 34-100 34-57 0-88-29-32-30-40-81zM423 323v-66q-89 0-145-8-57-9-88-24-31-16-43-37-12-21-12-46 0-37 29-57 28-21 74-21 49 0 88 23 39 23 62 62 22 38 22 83h47q-4-65-25-111-22-47-55-76-34-29-72-43-38-14-76-14-55 0-96 17-42 17-65 51-23 34-23 84 0 55 30 94 29 38 88 58 56 19 117 25 61 6 143 6z"/>
+    <path id="g24" d="M521 457q0-45-18-79-19-34-50-61-31-26-67-48-37-22-74-44-36-22-67-46-31-25-50-57-18-32-18-74l-126-16q0 62 19 106 18 45 48 77 31 33 67 57 36 24 73 43 36 20 66 40 31 20 49 44 19 24 19 57 0 45-26 71-25 25-73 25-52 0-79-27-28-26-35-72h-131q9 64 41 109 32 46 84 71 52 25 121 25 75 0 125-27 51-27 77-72 25-46 25-102zM51 0v32l101 66h371v-98h-472z"/>
     <path id="g25" d="M508 463q0-47-19-81-20-35-52-61-32-27-70-49-38-22-76-44-39-23-71-49-32-27-51-62-20-36-20-84l-87-9q0 62 20 107 19 44 51 76 31 32 69 56 38 24 76 45 38 20 70 42 31 21 51 48 19 27 19 64 0 55-31 86-32 31-92 31-66 0-100-32-34-32-43-87h-91q9 61 39 105 29 43 79 67 49 23 117 23 70 0 117-25 47-26 71-69 24-43 24-98zM62 0v24l69 46h384v-70h-453z"/>
     <path id="g26" d="M513 472q0-37-14-67-14-30-46-51-33-21-86-32-53-12-131-12v57h21q54 0 87 10 32 9 50 25 17 16 23 34 6 18 6 35 0 51-33 80-33 28-98 28-67 0-103-32-36-32-45-87h-89q9 61 39 105 30 43 80 67 50 23 119 23 73 0 122-24 48-24 73-65 25-41 25-94zM532 179q0-55-27-98-27-43-80-68-54-25-134-25-71 0-124 24-53 23-85 68-32 44-41 105h90q9-55 48-88 38-33 111-33 75 0 114 32 38 31 38 87 0 21-7 41-7 20-26 37-19 16-54 26-36 10-93 10h-26v67q86 0 143-14 57-14 91-39 33-25 48-58 14-34 14-74z"/>
     <path id="g27" d="M304 62l2-74q-77 0-135 35-59 35-91 109-33 74-33 189 0 161 69 248 68 86 189 86 90 0 151-50 61-50 84-143h-90q-18 58-56 88-38 29-92 29-84 0-128-66-45-67-45-192 0-92 18-149 18-57 57-83 39-27 100-27zM306-12q-61 0-107 27-47 26-73 75-27 49-27 114 0 68 28 117 28 49 77 75 48 26 108 26 69 0 121-25 51-26 80-74 29-48 29-116 0-68-30-117-31-50-84-76-54-26-122-26zM304 64q67 0 108 36 40 36 40 104 0 45-19 77-19 31-52 48-33 17-77 17-67 0-108-37-41-37-41-106 0-65 41-102 41-37 108-37z"/>
@@ -196,21 +196,21 @@
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.15s" fill="freeze"/>
       <g class="cell" transform="translate(44 196) scale(.013 -.013)"><use href="#g1j"/><use href="#gg" x="602"/><use href="#gi" x="965"/><use href="#ge" x="1527"/><use href="#gn" x="2041"/><use href="#gl" x="2269"/><use href="#gf" x="2845"/><use href="#gg" x="3417"/><use href="#gm" x="3790"/></g>
   <text x="44" y="196" class="ol">Providers</text>
-      <g class="h4" transform="translate(427.9 196) scale(.014 -.014)"><use href="#g1k"/><use href="#g1l" x="576"/><use href="#g1m" x="1152"/></g>
-  <text x="440" y="196" class="ol">382</text>
-      <g class="cell" style="fill:var(--muted)" transform="translate(592.77 196) scale(.013 -.013)"><use href="#g1n"/><use href="#g1o" x="576"/><use href="#g1p" x="1152"/></g>
+      <g class="h4" transform="translate(427.9 196) scale(.014 -.014)"><use href="#g1k"/><use href="#g1l" x="576"/><use href="#g1a" x="1152"/></g>
+  <text x="440" y="196" class="ol">389</text>
+      <g class="cell" style="fill:var(--muted)" transform="translate(592.77 196) scale(.013 -.013)"><use href="#g1m"/><use href="#g1n" x="576"/><use href="#g1o" x="1152"/></g>
   <text x="604" y="196" class="ol">40+</text>
-      <g class="cell" style="fill:var(--muted)" transform="translate(742.78 196) scale(.013 -.013)"><use href="#g1n"/><use href="#g1o" x="576"/><use href="#g1o" x="1152"/><use href="#g1p" x="1728"/><use href="#g1q" x="2304"/></g>
+      <g class="cell" style="fill:var(--muted)" transform="translate(742.78 196) scale(.013 -.013)"><use href="#g1m"/><use href="#g1n" x="576"/><use href="#g1n" x="1152"/><use href="#g1o" x="1728"/><use href="#g1p" x="2304"/></g>
   <text x="760" y="196" class="ol">400+*</text>
-      <g class="cell" style="fill:var(--muted)" transform="translate(908.51 196) scale(.013 -.013)"><use href="#g1r"/><use href="#g1s" x="576"/></g>
+      <g class="cell" style="fill:var(--muted)" transform="translate(908.51 196) scale(.013 -.013)"><use href="#g1q"/><use href="#g1r" x="576"/></g>
   <text x="916" y="196" class="ol">~5</text>
-      <g class="cell" style="fill:var(--muted)" transform="translate(1065.02 196) scale(.013 -.013)"><use href="#g1t"/><use href="#g1o" x="576"/><use href="#g1o" x="1152"/><use href="#g1p" x="1728"/></g>
+      <g class="cell" style="fill:var(--muted)" transform="translate(1065.02 196) scale(.013 -.013)"><use href="#g1s"/><use href="#g1n" x="576"/><use href="#g1n" x="1152"/><use href="#g1o" x="1728"/></g>
   <text x="1080" y="196" class="ol">100+</text>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.24s" fill="freeze"/>
-      <g class="cell" transform="translate(44 238) scale(.013 -.013)"><use href="#g1u"/><use href="#gg" x="559"/><use href="#gf" x="922"/><use href="#gf" x="1494"/><use href="#g1v" x="2266"/><use href="#gg" x="2843"/><use href="#gi" x="3206"/><use href="#ge" x="3768"/><use href="#gn" x="4282"/><use href="#gl" x="4510"/><use href="#gf" x="5086"/><use href="#gg" x="5658"/><use href="#gm" x="6031"/><use href="#g1w" x="6746"/><use href="#gj" x="7322"/><use href="#gn" x="7888"/><use href="#g1x" x="8116"/><use href="#gk" x="8344"/><use href="#g1y" x="8625"/><use href="#gn" x="9028"/><use href="#go" x="9256"/></g>
+      <g class="cell" transform="translate(44 238) scale(.013 -.013)"><use href="#g1t"/><use href="#gg" x="559"/><use href="#gf" x="922"/><use href="#gf" x="1494"/><use href="#g1u" x="2266"/><use href="#gg" x="2843"/><use href="#gi" x="3206"/><use href="#ge" x="3768"/><use href="#gn" x="4282"/><use href="#gl" x="4510"/><use href="#gf" x="5086"/><use href="#gg" x="5658"/><use href="#gm" x="6031"/><use href="#g1v" x="6746"/><use href="#gj" x="7322"/><use href="#gn" x="7888"/><use href="#g1w" x="8116"/><use href="#gk" x="8344"/><use href="#g1x" x="8625"/><use href="#gn" x="9028"/><use href="#go" x="9256"/></g>
   <text x="44" y="238" class="ol">Free providers built-in</text>
-      <g class="h4" transform="translate(423.87 238) scale(.014 -.014)"><use href="#g1z"/><use href="#g20" x="576"/><use href="#g21" x="1152"/><use href="#g22" x="1728"/></g>
+      <g class="h4" transform="translate(423.87 238) scale(.014 -.014)"><use href="#g1y"/><use href="#g1z" x="576"/><use href="#g20" x="1152"/><use href="#g21" x="1728"/></g>
   <text x="440" y="238" class="ol">150+</text>
       <use href="#cmp-yes" x="604" y="233"/>
       <use href="#cmp-mid" x="760" y="233"/>
@@ -218,9 +218,9 @@
       <use href="#cmp-no" x="1080" y="233"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.33s" fill="freeze"/>
-      <g class="cell" transform="translate(44 280) scale(.013 -.013)"><use href="#g23"/><use href="#gi" x="622"/><use href="#gj" x="1194"/><use href="#gk" x="1760"/><use href="#gn" x="2061"/><use href="#go" x="2289"/><use href="#gp" x="2861"/><use href="#gm" x="3638"/><use href="#gk" x="4153"/><use href="#gg" x="4454"/><use href="#g24" x="4817"/><use href="#gk" x="5389"/><use href="#gf" x="5690"/><use href="#gp" x="6262"/><use href="#gn" x="6839"/><use href="#gf" x="7067"/><use href="#gm" x="7639"/></g>
+      <g class="cell" transform="translate(44 280) scale(.013 -.013)"><use href="#g22"/><use href="#gi" x="622"/><use href="#gj" x="1194"/><use href="#gk" x="1760"/><use href="#gn" x="2061"/><use href="#go" x="2289"/><use href="#gp" x="2861"/><use href="#gm" x="3638"/><use href="#gk" x="4153"/><use href="#gg" x="4454"/><use href="#g23" x="4817"/><use href="#gk" x="5389"/><use href="#gf" x="5690"/><use href="#gp" x="6262"/><use href="#gn" x="6839"/><use href="#gf" x="7067"/><use href="#gm" x="7639"/></g>
   <text x="44" y="280" class="ol">Routing strategies</text>
-      <g class="h4" transform="translate(431.94 280) scale(.014 -.014)"><use href="#g1m"/><use href="#g21" x="576"/></g>
+      <g class="h4" transform="translate(431.94 280) scale(.014 -.014)"><use href="#g24"/><use href="#g20" x="576"/></g>
   <text x="440" y="280" class="ol">20</text>
       <g class="cell" style="fill:var(--muted)" transform="translate(600.26 280) scale(.013 -.013)"><use href="#g25"/></g>
   <text x="604" y="280" class="ol">2</text>
@@ -232,9 +232,9 @@
   <text x="1080" y="280" class="ol">6</text>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.42s" fill="freeze"/>
-      <g class="cell" transform="translate(44 322) scale(.013 -.013)"><use href="#g28"/><use href="#gi" x="530"/><use href="#g29" x="1102"/><use href="#gf" x="1581"/><use href="#go" x="2153"/><use href="#g2a" x="2925"/><use href="#gi" x="3477"/><use href="#g2b" x="4049"/><use href="#g1v" x="4917"/><use href="#gg" x="5494"/><use href="#gf" x="5857"/><use href="#gm" x="6429"/><use href="#gm" x="6944"/><use href="#gn" x="7459"/><use href="#gi" x="7687"/><use href="#go" x="8259"/></g>
+      <g class="cell" transform="translate(44 322) scale(.013 -.013)"><use href="#g28"/><use href="#gi" x="530"/><use href="#g29" x="1102"/><use href="#gf" x="1581"/><use href="#go" x="2153"/><use href="#g2a" x="2925"/><use href="#gi" x="3477"/><use href="#g2b" x="4049"/><use href="#g1u" x="4917"/><use href="#gg" x="5494"/><use href="#gf" x="5857"/><use href="#gm" x="6429"/><use href="#gm" x="6944"/><use href="#gn" x="7459"/><use href="#gi" x="7687"/><use href="#go" x="8259"/></g>
   <text x="44" y="322" class="ol">Token compression</text>
-      <g class="h4" transform="translate(418.31 322) scale(.014 -.014)"><use href="#g1z"/><use href="#g1m" x="576"/><use href="#gz" x="1344"/><use href="#gt" x="1925"/><use href="#g2c" x="2510"/></g>
+      <g class="h4" transform="translate(418.31 322) scale(.014 -.014)"><use href="#g1y"/><use href="#g24" x="576"/><use href="#gz" x="1344"/><use href="#gt" x="1925"/><use href="#g2c" x="2510"/></g>
   <text x="440" y="322" class="ol">12 eng</text>
       <use href="#cmp-yes" x="604" y="317"/>
       <use href="#cmp-mid" x="760" y="317"/>
@@ -242,9 +242,9 @@
       <use href="#cmp-no" x="1080" y="317"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.51s" fill="freeze"/>
-      <g class="cell" transform="translate(44 364) scale(.013 -.013)"><use href="#g2d"/><use href="#gj" x="627"/><use href="#gn" x="1193"/><use href="#g1x" x="1421"/><use href="#gk" x="1649"/><use href="#g1y" x="1930"/><use href="#gn" x="2333"/><use href="#go" x="2561"/><use href="#g2e" x="3333"/><use href="#g2f" x="4197"/><use href="#g1j" x="4878"/><use href="#gm" x="5680"/><use href="#gf" x="6195"/><use href="#gg" x="6767"/><use href="#ge" x="7140"/><use href="#gf" x="7654"/><use href="#gg" x="8226"/><use href="#g2g" x="8799"/><use href="#gi" x="9119"/><use href="#g2h" x="9681"/><use href="#go" x="10491"/><use href="#gk" x="11263"/><use href="#gi" x="11564"/><use href="#gi" x="12136"/><use href="#g1x" x="12708"/><use href="#gm" x="12936"/><use href="#g2i" x="13451"/></g>
+      <g class="cell" transform="translate(44 364) scale(.013 -.013)"><use href="#g2d"/><use href="#gj" x="627"/><use href="#gn" x="1193"/><use href="#g1w" x="1421"/><use href="#gk" x="1649"/><use href="#g1x" x="1930"/><use href="#gn" x="2333"/><use href="#go" x="2561"/><use href="#g2e" x="3333"/><use href="#g2f" x="4197"/><use href="#g1j" x="4878"/><use href="#gm" x="5680"/><use href="#gf" x="6195"/><use href="#gg" x="6767"/><use href="#ge" x="7140"/><use href="#gf" x="7654"/><use href="#gg" x="8226"/><use href="#g2g" x="8799"/><use href="#gi" x="9119"/><use href="#g2h" x="9681"/><use href="#go" x="10491"/><use href="#gk" x="11263"/><use href="#gi" x="11564"/><use href="#gi" x="12136"/><use href="#g1w" x="12708"/><use href="#gm" x="12936"/><use href="#g2i" x="13451"/></g>
   <text x="44" y="364" class="ol">Built-in MCP server (own tools)</text>
-      <g class="h4" transform="translate(427.9 364) scale(.014 -.014)"><use href="#g1z"/><use href="#g1z" x="576"/><use href="#g21" x="1152"/></g>
+      <g class="h4" transform="translate(427.9 364) scale(.014 -.014)"><use href="#g1y"/><use href="#g1y" x="576"/><use href="#g20" x="1152"/></g>
   <text x="440" y="364" class="ol">110</text>
       <use href="#cmp-no" x="604" y="359"/>
       <use href="#cmp-mid" x="760" y="359"/>
@@ -252,7 +252,7 @@
       <use href="#cmp-mid" x="1080" y="359"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.60s" fill="freeze"/>
-      <g class="cell" transform="translate(44 406) scale(.013 -.013)"><use href="#g2j"/><use href="#g25" x="681"/><use href="#g2j" x="1257"/><use href="#g24" x="2108"/><use href="#gp" x="2680"/><use href="#gf" x="3257"/><use href="#go" x="3829"/><use href="#gk" x="4401"/><use href="#g1v" x="4902"/><use href="#gg" x="5479"/><use href="#gi" x="5842"/><use href="#gk" x="6414"/><use href="#gi" x="6715"/><use href="#g2a" x="7287"/><use href="#gi" x="7839"/><use href="#g1x" x="8411"/></g>
+      <g class="cell" transform="translate(44 406) scale(.013 -.013)"><use href="#g2j"/><use href="#g25" x="681"/><use href="#g2j" x="1257"/><use href="#g23" x="2108"/><use href="#gp" x="2680"/><use href="#gf" x="3257"/><use href="#go" x="3829"/><use href="#gk" x="4401"/><use href="#g1u" x="4902"/><use href="#gg" x="5479"/><use href="#gi" x="5842"/><use href="#gk" x="6414"/><use href="#gi" x="6715"/><use href="#g2a" x="7287"/><use href="#gi" x="7839"/><use href="#g1w" x="8411"/></g>
   <text x="44" y="406" class="ol">A2A agent protocol</text>
       <use href="#cmp-yes" x="440" y="401"/>
       <use href="#cmp-no" x="604" y="401"/>
@@ -270,7 +270,7 @@
       <use href="#cmp-no" x="1080" y="443"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.78s" fill="freeze"/>
-      <g class="cell" transform="translate(44 490) scale(.013 -.013)"><use href="#g2k"/><use href="#gj" x="701"/><use href="#g24" x="1267"/><use href="#gg" x="1839"/><use href="#gl" x="2202"/><use href="#gg" x="2778"/><use href="#g24" x="3141"/><use href="#gn" x="3713"/><use href="#g1x" x="3941"/><use href="#gm" x="4169"/><use href="#g2g" x="4884"/><use href="#g1j" x="5204"/><use href="#g2l" x="5806"/><use href="#g2l" x="6054"/><use href="#g2m" x="6502"/><use href="#gn" x="7040"/><use href="#go" x="7268"/><use href="#g2n" x="7840"/><use href="#gf" x="8068"/><use href="#g2a" x="8640"/><use href="#gk" x="9192"/><use href="#gn" x="9493"/><use href="#gi" x="9721"/><use href="#go" x="10293"/><use href="#g2i" x="10865"/></g>
+      <g class="cell" transform="translate(44 490) scale(.013 -.013)"><use href="#g2k"/><use href="#gj" x="701"/><use href="#g23" x="1267"/><use href="#gg" x="1839"/><use href="#gl" x="2202"/><use href="#gg" x="2778"/><use href="#g23" x="3141"/><use href="#gn" x="3713"/><use href="#g1w" x="3941"/><use href="#gm" x="4169"/><use href="#g2g" x="4884"/><use href="#g1j" x="5204"/><use href="#g2l" x="5806"/><use href="#g2l" x="6054"/><use href="#g2m" x="6502"/><use href="#gn" x="7040"/><use href="#go" x="7268"/><use href="#g2n" x="7840"/><use href="#gf" x="8068"/><use href="#g2a" x="8640"/><use href="#gk" x="9192"/><use href="#gn" x="9493"/><use href="#gi" x="9721"/><use href="#go" x="10293"/><use href="#g2i" x="10865"/></g>
   <text x="44" y="490" class="ol">Guardrails (PII / injection)</text>
       <use href="#cmp-yes" x="440" y="485"/>
       <use href="#cmp-no" x="604" y="485"/>
@@ -279,7 +279,7 @@
       <use href="#cmp-yes" x="1080" y="485"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.87s" fill="freeze"/>
-      <g class="cell" transform="translate(44 532) scale(.013 -.013)"><use href="#g2f"/><use href="#g1x" x="681"/><use href="#gi" x="909"/><use href="#gj" x="1481"/><use href="#gl" x="2047"/><use href="#g24" x="2823"/><use href="#gp" x="3395"/><use href="#gf" x="3972"/><use href="#go" x="4544"/><use href="#gk" x="5116"/><use href="#gm" x="5417"/><use href="#g2g" x="6132"/><use href="#g2f" x="6452"/><use href="#gi" x="7133"/><use href="#gl" x="7705"/><use href="#gf" x="8281"/><use href="#g2o" x="8838"/><use href="#g2m" x="9361"/><use href="#g2p" x="9699"/><use href="#gf" x="10396"/><use href="#ge" x="10958"/><use href="#gn" x="11472"/><use href="#go" x="11700"/><use href="#g2m" x="12272"/><use href="#g2q" x="12530"/><use href="#gj" x="13059"/><use href="#g1x" x="13625"/><use href="#gf" x="13853"/><use href="#gm" x="14425"/><use href="#g2i" x="14940"/></g>
+      <g class="cell" transform="translate(44 532) scale(.013 -.013)"><use href="#g2f"/><use href="#g1w" x="681"/><use href="#gi" x="909"/><use href="#gj" x="1481"/><use href="#gl" x="2047"/><use href="#g23" x="2823"/><use href="#gp" x="3395"/><use href="#gf" x="3972"/><use href="#go" x="4544"/><use href="#gk" x="5116"/><use href="#gm" x="5417"/><use href="#g2g" x="6132"/><use href="#g2f" x="6452"/><use href="#gi" x="7133"/><use href="#gl" x="7705"/><use href="#gf" x="8281"/><use href="#g2o" x="8838"/><use href="#g2m" x="9361"/><use href="#g2p" x="9699"/><use href="#gf" x="10396"/><use href="#ge" x="10958"/><use href="#gn" x="11472"/><use href="#go" x="11700"/><use href="#g2m" x="12272"/><use href="#g2q" x="12530"/><use href="#gj" x="13059"/><use href="#g1w" x="13625"/><use href="#gf" x="13853"/><use href="#gm" x="14425"/><use href="#g2i" x="14940"/></g>
   <text x="44" y="532" class="ol">Cloud agents (Codex/Devin/Jules)</text>
       <use href="#cmp-yes" x="440" y="527"/>
       <use href="#cmp-no" x="604" y="527"/>
@@ -288,7 +288,7 @@
       <use href="#cmp-no" x="1080" y="527"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.96s" fill="freeze"/>
-      <g class="cell" transform="translate(44 574) scale(.013 -.013)"><use href="#g28"/><use href="#g2r" x="620"/><use href="#g2s" x="1164"/><use href="#g2t" x="1967"/><use href="#go" x="2467"/><use href="#gp" x="3039"/><use href="#gf" x="3616"/><use href="#gg" x="4188"/><use href="#g1v" x="4561"/><use href="#gg" x="5138"/><use href="#gn" x="5511"/><use href="#go" x="5739"/><use href="#gk" x="6311"/><use href="#gm" x="6812"/><use href="#gk" x="7327"/><use href="#gf" x="7628"/><use href="#g24" x="8200"/><use href="#g1x" x="8772"/><use href="#gk" x="9000"/><use href="#g2u" x="9301"/><use href="#g2g" x="10073"/><use href="#g2q" x="10353"/><use href="#g2j" x="10857"/><use href="#g26" x="11538"/><use href="#g2m" x="12114"/><use href="#g2q" x="12372"/><use href="#g2j" x="12876"/><use href="#g1n" x="13557"/><use href="#g2i" x="14133"/></g>
+      <g class="cell" transform="translate(44 574) scale(.013 -.013)"><use href="#g28"/><use href="#g2r" x="620"/><use href="#g2s" x="1164"/><use href="#g2t" x="1967"/><use href="#go" x="2467"/><use href="#gp" x="3039"/><use href="#gf" x="3616"/><use href="#gg" x="4188"/><use href="#g1u" x="4561"/><use href="#gg" x="5138"/><use href="#gn" x="5511"/><use href="#go" x="5739"/><use href="#gk" x="6311"/><use href="#gm" x="6812"/><use href="#gk" x="7327"/><use href="#gf" x="7628"/><use href="#g23" x="8200"/><use href="#g1w" x="8772"/><use href="#gk" x="9000"/><use href="#g2u" x="9301"/><use href="#g2g" x="10073"/><use href="#g2q" x="10353"/><use href="#g2j" x="10857"/><use href="#g26" x="11538"/><use href="#g2m" x="12114"/><use href="#g2q" x="12372"/><use href="#g2j" x="12876"/><use href="#g1m" x="13557"/><use href="#g2i" x="14133"/></g>
   <text x="44" y="574" class="ol">TLS fingerprint stealth (JA3/JA4)</text>
       <use href="#cmp-yes" x="440" y="569"/>
       <use href="#cmp-no" x="604" y="569"/>
@@ -297,7 +297,7 @@
       <use href="#cmp-no" x="1080" y="569"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="1.05s" fill="freeze"/>
-      <g class="cell" transform="translate(44 616) scale(.013 -.013)"><use href="#g2p"/><use href="#gf" x="697"/><use href="#gm" x="1269"/><use href="#g29" x="1784"/><use href="#gk" x="2308"/><use href="#gi" x="2609"/><use href="#g1v" x="3181"/><use href="#g2v" x="3958"/><use href="#g28" x="4710"/><use href="#gf" x="5240"/><use href="#gg" x="5812"/><use href="#g2b" x="6185"/><use href="#gj" x="7053"/><use href="#g2o" x="7619"/><use href="#g2v" x="8342"/><use href="#g1j" x="9114"/><use href="#g2w" x="9716"/><use href="#g2j" x="10671"/></g>
+      <g class="cell" transform="translate(44 616) scale(.013 -.013)"><use href="#g2p"/><use href="#gf" x="697"/><use href="#gm" x="1269"/><use href="#g29" x="1784"/><use href="#gk" x="2308"/><use href="#gi" x="2609"/><use href="#g1u" x="3181"/><use href="#g2v" x="3958"/><use href="#g28" x="4710"/><use href="#gf" x="5240"/><use href="#gg" x="5812"/><use href="#g2b" x="6185"/><use href="#gj" x="7053"/><use href="#g2o" x="7619"/><use href="#g2v" x="8342"/><use href="#g1j" x="9114"/><use href="#g2w" x="9716"/><use href="#g2j" x="10671"/></g>
   <text x="44" y="616" class="ol">Desktop · Termux · PWA</text>
       <use href="#cmp-yes" x="440" y="611"/>
       <use href="#cmp-mid" x="604" y="611"/>
@@ -306,7 +306,7 @@
       <use href="#cmp-mid" x="1080" y="611"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="1.14s" fill="freeze"/>
-      <g class="cell" transform="translate(44 658) scale(.013 -.013)"><use href="#gn"/><use href="#g1t" x="228"/><use href="#g2x" x="804"/><use href="#go" x="1380"/><use href="#g2y" x="2152"/><use href="#g2l" x="2835"/><use href="#g1x" x="3283"/><use href="#gi" x="3511"/><use href="#g2a" x="4083"/><use href="#g24" x="4635"/><use href="#g1x" x="5207"/><use href="#gf" x="5435"/><use href="#gm" x="6007"/></g>
+      <g class="cell" transform="translate(44 658) scale(.013 -.013)"><use href="#gn"/><use href="#g1s" x="228"/><use href="#g2x" x="804"/><use href="#go" x="1380"/><use href="#g2y" x="2152"/><use href="#g2l" x="2835"/><use href="#g1w" x="3283"/><use href="#gi" x="3511"/><use href="#g2a" x="4083"/><use href="#g23" x="4635"/><use href="#g1w" x="5207"/><use href="#gf" x="5435"/><use href="#gm" x="6007"/></g>
   <text x="44" y="658" class="ol">i18n UI locales</text>
       <g class="h4" transform="translate(431.94 658) scale(.014 -.014)"><use href="#g2z"/><use href="#g30" x="576"/></g>
   <text x="440" y="658" class="ol">67</text>
@@ -317,7 +317,7 @@
       <use href="#cmp-no" x="1080" y="653"/>
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="1.23s" fill="freeze"/>
-      <g class="cell" transform="translate(44 700) scale(.013 -.013)"><use href="#g2s"/><use href="#gf" x="603"/><use href="#g1x" x="1175"/><use href="#g31" x="1403"/><use href="#g1y" x="1675"/><use href="#g2u" x="2078"/><use href="#gi" x="2650"/><use href="#gm" x="3222"/><use href="#gk" x="3737"/><use href="#gf" x="4038"/><use href="#gl" x="4610"/><use href="#g2v" x="5386"/><use href="#g1t" x="6158"/><use href="#g1o" x="6734"/><use href="#g1o" x="7310"/><use href="#g32" x="7886"/><use href="#g2e" x="8868"/><use href="#g2l" x="9732"/><use href="#g28" x="9980"/></g>
+      <g class="cell" transform="translate(44 700) scale(.013 -.013)"><use href="#g2s"/><use href="#gf" x="603"/><use href="#g1w" x="1175"/><use href="#g31" x="1403"/><use href="#g1x" x="1675"/><use href="#g2u" x="2078"/><use href="#gi" x="2650"/><use href="#gm" x="3222"/><use href="#gk" x="3737"/><use href="#gf" x="4038"/><use href="#gl" x="4610"/><use href="#g2v" x="5386"/><use href="#g1s" x="6158"/><use href="#g1n" x="6734"/><use href="#g1n" x="7310"/><use href="#g32" x="7886"/><use href="#g2e" x="8868"/><use href="#g2l" x="9732"/><use href="#g28" x="9980"/></g>
   <text x="44" y="700" class="ol">Self-hosted · 100% MIT</text>
       <g class="h4" transform="translate(427.56 700) scale(.014 -.014)"><use href="#g1i"/><use href="#g1d" x="881"/><use href="#g33" x="1150"/></g>
   <text x="440" y="700" class="ol">MIT</text>
@@ -326,7 +326,7 @@
       <use href="#cmp-no" x="760" y="695"/>
       <g class="cell" style="fill:var(--muted)" transform="translate(904.74 700) scale(.013 -.013)"><use href="#g2e"/><use href="#g2l" x="864"/><use href="#g28" x="1112"/></g>
   <text x="916" y="700" class="ol">MIT</text>
-      <g class="cell" style="fill:var(--warn)" transform="translate(1049.09 700) scale(.013 -.013)"><use href="#gi"/><use href="#g1v" x="572"/><use href="#gf" x="1149"/><use href="#go" x="1721"/><use href="#g1y" x="2293"/><use href="#g2a" x="2696"/><use href="#gi" x="3248"/><use href="#gg" x="3820"/><use href="#gf" x="4183"/></g>
+      <g class="cell" style="fill:var(--warn)" transform="translate(1049.09 700) scale(.013 -.013)"><use href="#gi"/><use href="#g1u" x="572"/><use href="#gf" x="1149"/><use href="#go" x="1721"/><use href="#g1x" x="2293"/><use href="#g2a" x="2696"/><use href="#gi" x="3248"/><use href="#gg" x="3820"/><use href="#gf" x="4183"/></g>
   <text x="1080" y="700" class="ol">open-core</text>
     </g>
   </g>

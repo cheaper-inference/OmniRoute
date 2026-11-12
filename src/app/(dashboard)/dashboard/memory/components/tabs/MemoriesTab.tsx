@@ -385,7 +385,7 @@ export default function MemoriesTab() {
               <span className="text-xs text-text-muted">{t("totalEntries")}</span>
               <InfoTooltip text={t("tooltip.totalEntries")} />
             </div>
-            <div className="text-2xl font-bold">{stats.totalEntries}</div>
+            <div className="text-2xl font-semibold">{stats.totalEntries}</div>
           </div>
         </Card>
         <Card>
@@ -394,7 +394,7 @@ export default function MemoriesTab() {
               <span className="text-xs text-text-muted">{t("tokensUsed")}</span>
               <InfoTooltip text={t("tooltip.tokensUsed")} />
             </div>
-            <div className="text-2xl font-bold">{(stats.tokensUsed ?? 0).toLocaleString()}</div>
+            <div className="text-2xl font-semibold">{(stats.tokensUsed ?? 0).toLocaleString()}</div>
           </div>
         </Card>
         {showHitRate && (
@@ -404,7 +404,9 @@ export default function MemoriesTab() {
                 <span className="text-xs text-text-muted">{t("hitRate")}</span>
                 <InfoTooltip text={t("tooltip.hitRate")} />
               </div>
-              <div className="text-2xl font-bold">{((stats.hitRate ?? 0) * 100).toFixed(1)}%</div>
+              <div className="text-2xl font-semibold">
+                {((stats.hitRate ?? 0) * 100).toFixed(1)}%
+              </div>
             </div>
           </Card>
         )}

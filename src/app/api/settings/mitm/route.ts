@@ -34,6 +34,7 @@ type MitmStats = {
   activeConnections: number;
   lastRequestAt: string | null;
   lastInterceptAt: string | null;
+  ingestFailures: number;
 };
 
 type MitmConfig = {
@@ -139,6 +140,7 @@ async function readStats(): Promise<MitmStats> {
       activeConnections: Number(raw.activeConnections || 0),
       lastRequestAt: typeof raw.lastRequestAt === "string" ? raw.lastRequestAt : null,
       lastInterceptAt: typeof raw.lastInterceptAt === "string" ? raw.lastInterceptAt : null,
+      ingestFailures: Number(raw.ingestFailures || 0),
     };
   } catch {
     return {
@@ -148,6 +150,7 @@ async function readStats(): Promise<MitmStats> {
       activeConnections: 0,
       lastRequestAt: null,
       lastInterceptAt: null,
+      ingestFailures: 0,
     };
   }
 }

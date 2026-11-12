@@ -1,8 +1,10 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
 import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   getProviderConnectionById,
   getProviderConnections,
+  mergeConnectionProviderSpecificData,
   updateProviderConnection,
 } from "@/lib/db/providers";
 import { getSettings, resolveProxyForConnection, updateSettings } from "@/lib/db/settings";
@@ -992,6 +994,11 @@ export async function getSanitizedCachedProviderLimitsMap(): Promise<
   return sanitized;
 }
 
+async function apiKeyUnchangedSinceRead(connection: ProviderConnectionLike): Promise<boolean> {
+  const stored = (await getProviderConnectionById(connection.id)) as { apiKey?: string } | null;
+  return stored?.apiKey === (connection as { apiKey?: string }).apiKey;
+}
+
 export async function fetchLiveProviderLimits(connectionId: string): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
@@ -1033,7 +1040,10 @@ async function fetchLiveProviderLimitsWithOptions(
       )) as JsonRecord,
       await refreshLiveModelIds(connection.provider)
     );
-    if (isRecord(usage.quotas)) {
+    // A key edit during the fetch makes this reading the old key's: it must not refill the quota
+    // cache or write a snapshot for the new key. The write follows the check with no I/O between.
+    const keyUnchanged = await apiKeyUnchangedSinceRead(connection);
+    if (keyUnchanged && isRecord(usage.quotas)) {
       setQuotaCache(
         connectionId,
         connection.provider,
@@ -1098,6 +1108,16 @@ async function fetchLiveProviderLimitsWithOptions(
             await refreshLiveModelIds(conn.provider)
           );
         }
+      }
+
+      // Display-only workspace label (personal plan vs. Business seat), fetched once
+      // the token has just proven itself on the usage request.
+      if (conn.provider === "codex" && !usageData?.message) {
+        // Merged in one transaction onto the row as stored now, so fields another
+        // path wrote during the lookup are not overwritten by this snapshot.
+        conn = await syncCodexWorkspaceInfoIfNeeded(conn, {
+          persist: mergeConnectionProviderSpecificData,
+        });
       }
 
       // Only the dashboard's on-demand refresh lists credits; background polls keep
