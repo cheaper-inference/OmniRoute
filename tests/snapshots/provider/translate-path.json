@@ -3493,6 +3493,29 @@
       "stream": "https://chat.intern-ai.org.cn/api/v1/chat/completions"
     }
   },
+  "jembatanai": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://freeai.jembatanai.com/v1/chat/completions",
+      "stream": "https://freeai.jembatanai.com/v1/chat/completions"
+    }
+  },
   "kenari": {
     "format": "openai",
     "headers": {

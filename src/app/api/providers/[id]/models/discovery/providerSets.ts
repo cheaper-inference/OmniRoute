@@ -141,6 +141,9 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // ParalonCloud — GET https://paraloncloud.com/v1/models is key-gated; the registry
   // seed is only the offline fallback.
   "paraloncloud",
+  // JembatanAI serves a key-scoped /v1/models (each key lists the ids it may call);
+  // the registry seed stays as the offline fallback.
+  "jembatanai",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {
