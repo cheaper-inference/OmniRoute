@@ -5,3 +5,7 @@ export { enrichLocalEndpoints } from "./catalog.ts";
 export { collectConnectionCatalog } from "./omniroute/connectionCatalog.ts";
 export type { ConnectionPolicy } from "./omniroute/connectionCatalog.ts";
 export { transformModelsDev } from "./metadata/modelsDev.ts";
+export { subscriptionEligibility } from "./policy.ts";
+export { endpointHealthKey, nextRetryAt, shouldProbe } from "./health/cache.ts";
+export { consumeProbeBudget, utcDay } from "./health/probeBudget.ts";
+export { evaluateEndpoint, updateCacheFromProbe } from "./health/evaluate.ts";
