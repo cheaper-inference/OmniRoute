@@ -2,6 +2,7 @@
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { registerCodexRefreshPersistence } from "@omniroute/open-sse/services/codexAccount/refreshPersistence.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
@@ -252,6 +253,21 @@ function preserveNewerRefreshFailure(
     delete updates[key];
 }
 
+function applyRefreshedExpiry(updates: Record<string, any>, newCredentials: any) {
+  if (newCredentials.expiresIn) {
+    const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+    updates.expiresAt = expiresAt;
+    updates.tokenExpiresAt = expiresAt;
+    updates.expiresIn = newCredentials.expiresIn;
+  } else if (newCredentials.expiresAt) {
+    updates.expiresAt = newCredentials.expiresAt;
+    updates.tokenExpiresAt = newCredentials.expiresAt;
+  } else if (newCredentials.accessToken && newCredentials.expiresAt === null) {
+    updates.expiresAt = null;
+    updates.tokenExpiresAt = null;
+  }
+}
+
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(
   connectionId: string,
@@ -285,15 +301,7 @@ export async function updateProviderCredentials(
     if (newCredentials.refreshToken) {
       updates.refreshToken = newCredentials.refreshToken;
     }
-    if (newCredentials.expiresIn) {
-      const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
-      updates.expiresAt = expiresAt;
-      updates.tokenExpiresAt = expiresAt;
-      updates.expiresIn = newCredentials.expiresIn;
-    } else if (newCredentials.expiresAt) {
-      updates.expiresAt = newCredentials.expiresAt;
-      updates.tokenExpiresAt = newCredentials.expiresAt;
-    }
+    applyRefreshedExpiry(updates, newCredentials);
     if (newCredentials.providerSpecificData) {
       updates.providerSpecificData = newCredentials.providerSpecificData;
     }
@@ -336,6 +344,18 @@ export async function updateProviderCredentials(
     });
     return false;
   }
+}
+
+// A transient Muse remint failure says nothing about the credential: keep it, as a null refresh does.
+function keepsMuseCredentialsAfterRefreshError(provider: string, error: unknown) {
+  return provider === "muse-code" && isTransientRefreshError(error);
+}
+
+function resolveExpiryWithoutAbsolute(newCredentials: any, currentExpiresAt: unknown) {
+  if (newCredentials.expiresIn) {
+    return new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+  }
+  return newCredentials.expiresAt === null ? null : currentExpiresAt;
 }
 
 // Local-specific: Check and refresh token proactively
@@ -403,9 +423,7 @@ function mergeProactiveRefreshCredentials(
     refreshToken: refreshed.refreshToken || credentials.refreshToken,
     expiresAt: refreshed.expiresAt
       ? refreshed.expiresAt
-      : refreshed.expiresIn
-        ? new Date(Date.now() + refreshed.expiresIn * 1000).toISOString()
-        : credentials.expiresAt,
+      : resolveExpiryWithoutAbsolute(refreshed, credentials.expiresAt),
   };
 }
 
@@ -450,7 +468,13 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
         adoptCommittedRefresh
       );
 
-      const newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      let newCredentials;
+      try {
+        newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      } catch (error) {
+        if (!keepsMuseCredentialsAfterRefreshError(provider, error)) throw error;
+        return { ...credentials };
+      }
 
       if (newCredentials && newCredentials.accessToken) {
         const adoptedFence = adoptProactiveRefresh(

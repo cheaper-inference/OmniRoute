@@ -16,9 +16,7 @@ export {
   getCodexOperationFence,
   runWithCodexConnectionFence,
   bindCodexResponseFence,
-  inheritCodexResponseFence,
   runWithCodexResponseFence,
-  bindCodexResponseCallbacks,
   isCodexResponseCurrent,
 } from "@omniroute/open-sse/services/codexAccount/fences.ts";
 

@@ -362,6 +362,50 @@ export async function runValidateCommand(opts = {}) {
   }
 }
 
+// The quota cache hydrates from `quota_snapshots` on a cold start, so a rotated
+// key would inherit the old key's exhausted pause. Retire the latest row of every
+// window the same way src/domain/quotaSnapshotPersistence.ts does: append a
+// retirement record, keep the history. A CLI-only database has no such table.
+const RETIRED_QUOTA_WINDOW_RAW_DATA = JSON.stringify({ retired: true });
+
+function retireQuotaSnapshots(db, connectionId) {
+  try {
+    db.prepare(
+      `INSERT INTO quota_snapshots
+         (provider, connection_id, window_key, remaining_percentage, is_exhausted,
+          next_reset_at, window_duration_ms, raw_data, created_at)
+       SELECT provider, connection_id, window_key, NULL, 0, NULL, NULL, @raw, @now
+         FROM quota_snapshots
+        WHERE connection_id = @id
+          AND id IN (SELECT MAX(id) FROM quota_snapshots WHERE connection_id = @id GROUP BY window_key)
+          AND COALESCE(raw_data, '') != @raw`
+    ).run({
+      id: connectionId,
+      raw: RETIRED_QUOTA_WINDOW_RAW_DATA,
+      now: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (!/no such table/i.test(String(error?.message))) throw error;
+  }
+}
+
+// The key is already written when this runs, so a failure here (locked or read-only database)
+// is a warning: it must not turn a finished rotation into a failed command.
+async function retireQuotaSnapshotsAfterRotate(connectionId) {
+  try {
+    const { db } = await openOmniRouteDb();
+    try {
+      retireQuotaSnapshots(db, connectionId);
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    console.warn(
+      `Warning: the key was rotated, but the old quota snapshots were not cleared (${error?.message ?? error}).`
+    );
+  }
+}
+
 export async function runProvidersRotateCommand(selector, opts = {}) {
   if (!selector) {
     console.error("Provider connection id or name is required.");
@@ -479,6 +523,8 @@ export async function runProvidersRotateCommand(selector, opts = {}) {
       db2.close();
     }
   }
+
+  await retireQuotaSnapshotsAfterRotate(connection.id);
 
   console.log(
     t("providers.rotate.success", { name: connection.name, id: connection.id.slice(0, 8) })

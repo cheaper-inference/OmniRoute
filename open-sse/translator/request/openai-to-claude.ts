@@ -590,6 +590,28 @@ export function openaiToClaudeRequest(
     }
   }
 
+  // Anthropic answers 400 "must define tools" when the history holds tool_use blocks but the
+  // request declares no tools (an agent that loaded its tools late). Declare each called tool
+  // as a stub and forbid calling it. Names Anthropic would reject are skipped.
+  if (!result.tools?.length) {
+    const stubNames = new Set<string>();
+    for (const message of result.messages) {
+      for (const block of Array.isArray(message.content) ? message.content : []) {
+        if (block.type === "tool_use" && /^[a-zA-Z0-9_-]{1,128}$/.test(String(block.name))) {
+          stubNames.add(String(block.name));
+        }
+      }
+    }
+    if (stubNames.size > 0) {
+      result.tools = [...stubNames].map((name) => ({
+        name,
+        description: "Called earlier in this conversation; not available now.",
+        input_schema: { type: "object", properties: {} },
+      }));
+      result.tool_choice = { type: "none" };
+    }
+  }
+
   // response_format: inject JSON structured output instruction into system prompt.
   // Claude doesn't natively support response_format, so we insert a system-level instruction.
   // NOTE: systemParts are consumed later (after this block) — they're accumulated here.
@@ -786,7 +808,9 @@ function getContentBlocksFromMessage(
           // prepareClaudeRequest treats any non-empty signature on the latest assistant turn as
           // genuine and forwards the block verbatim, so the fake signature 400s upstream. This
           // mirrors the stricter "non-empty string" check already used in claudeHelper.ts.
-          if (part.type === "thinking" && !part.signature) {
+          // Kimi ignores signatures (prepareClaudeRequest strips the field), so its
+          // unsigned block keeps the reasoning text it must see on replay.
+          if (part.type === "thinking" && !part.signature && !isKimiCoding) {
             continue; // drop — no replayable signature (empty or absent)
           }
           if (part.type === "redacted_thinking" && part.data === "") {
@@ -907,8 +931,16 @@ function getContentBlocksFromMessage(
         hasThinkingBlock = true;
       }
     }
-    if (isKimiCoding && typeof msg.reasoning_content === "string" && !hasThinkingBlock) {
-      blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
+    if (isKimiCoding && typeof msg.reasoning_content === "string") {
+      if (!hasThinkingBlock) {
+        blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
+      } else if (msg.reasoning_content.trim()) {
+        // Only empty thinking blocks: they must not hide the reasoning the client sent.
+        const thinkingBlocks = blocks.filter((b) => b.type === "thinking");
+        const hasText = thinkingBlocks.some((b) => String(b.thinking ?? "").trim());
+        if (thinkingBlocks.length > 0 && !hasText)
+          thinkingBlocks[0].thinking = msg.reasoning_content;
+      }
     }
     // A store miss injects nothing: adaptive thinking has no precursor requirement, and
     // prepareClaudeRequest disables manual thinking when the final tool turn has no
