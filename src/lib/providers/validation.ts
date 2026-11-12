@@ -11,6 +11,12 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { MODAL_DEFAULT_VALIDATION_MODEL_ID } from "@/shared/constants/modal";
+import {
+  INFOMANIAK_BASE_URL_EXAMPLE,
+  INFOMANIAK_DEFAULT_VALIDATION_MODEL_ID,
+  INFOMANIAK_HTTPS_REQUIRED_MESSAGE,
+  isHttpsBaseUrl,
+} from "@/shared/constants/infomaniak";
 import { validateImageProviderApiKey } from "@/lib/providers/imageValidation";
 import { usesCcWireImage } from "@omniroute/open-sse/services/ccWireImageBuiltins.ts";
 import {
@@ -346,6 +352,41 @@ export async function validateProviderApiKey({
         providerSpecificData,
         baseUrl: normalizeBaseUrl(baseUrl),
         modelId: MODAL_DEFAULT_VALIDATION_MODEL_ID,
+        isLocal,
+      });
+    },
+    /**
+     * Infomaniak AI Tools: the account's product id lives in the Base URL path, so a missing
+     * or non-https Base URL is rejected without a request; otherwise probes `<baseUrl>/models`.
+     */
+    infomaniak: ({ apiKey, providerSpecificData }: any) => {
+      // The endpoint path carries the account's AI Tools product id; without a Base URL
+      // the probe would hit the registry placeholder.
+      const baseUrl = (providerSpecificData?.baseUrl || "").trim();
+      if (!baseUrl) {
+        return {
+          valid: false,
+          error: `Infomaniak requires a Base URL with your AI Tools product id (e.g. ${INFOMANIAK_BASE_URL_EXAMPLE}).`,
+        };
+      }
+      // The API key goes out as a Bearer token, so never probe over plain http.
+      if (!isHttpsBaseUrl(baseUrl)) {
+        return { valid: false, error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE };
+      }
+      // A models URL override replaces the probe endpoint verbatim, so it needs the same check.
+      const modelsUrl =
+        typeof providerSpecificData?.modelsUrl === "string"
+          ? providerSpecificData.modelsUrl.trim()
+          : "";
+      if (modelsUrl && !isHttpsBaseUrl(modelsUrl)) {
+        return { valid: false, error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE };
+      }
+      return validateOpenAILikeProvider({
+        provider: "infomaniak",
+        apiKey,
+        providerSpecificData,
+        baseUrl: normalizeBaseUrl(baseUrl),
+        modelId: INFOMANIAK_DEFAULT_VALIDATION_MODEL_ID,
         isLocal,
       });
     },

@@ -376,8 +376,13 @@ export class DefaultExecutor extends BaseExecutor {
         const baseUrl = this.resolveBaseUrl(credentials);
         return buildMaritalkChatUrl(baseUrl);
       }
-      case "siliconflow": {
+      case "siliconflow":
+      case "infomaniak": {
         const baseUrl = this.resolveBaseUrl(credentials);
+        // The Bearer key goes to this URL, so Infomaniak never runs over plain http.
+        if (this.provider === "infomaniak" && !/^https:\/\//i.test(baseUrl.trim())) {
+          throw new Error("Infomaniak requires an https:// Base URL");
+        }
         return normalizeOpenAIChatUrl(baseUrl);
       }
       case "ollama-local":

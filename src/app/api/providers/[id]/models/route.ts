@@ -148,6 +148,8 @@ import {
   normalizeAzureModelsResponse,
 } from "./discovery/normalizers";
 import { isNamedOpenAIStyleProvider } from "./discovery/providerSets";
+import { INFOMANIAK_HTTPS_REQUIRED_MESSAGE, isHttpsBaseUrl } from "@/shared/constants/infomaniak";
+import { resolveProviderId } from "@/shared/constants/providers";
 import { buildStaleEncryptionKeyResponse } from "./staleEncryptionGuard";
 import {
   type ProviderModelsConfigEntry,
@@ -234,7 +236,12 @@ export async function GET(
     const staleEncryptionResponse = buildStaleEncryptionKeyResponse(connection);
     if (staleEncryptionResponse) return staleEncryptionResponse;
 
-    const provider = connectionProvider;
+    // A connection imported under the Infomaniak alias (imk) keeps that id; discovery is keyed by
+    // the canonical one. Stored rows stay unchanged.
+    const provider =
+      connectionProvider && resolveProviderId(connectionProvider) === "infomaniak"
+        ? "infomaniak"
+        : connectionProvider;
     const codexFence = provider === "codex" ? captureCodexConnectionFence(connection, id) : null;
     if (!provider) {
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
@@ -874,6 +881,14 @@ export async function GET(
                 ? "No base URL configured for local provider"
                 : "No base URL configured for provider",
           },
+          { status: 400 }
+        );
+      }
+
+      // The discovery request carries the connection's Bearer key; refuse plain http.
+      if (provider === "infomaniak" && !isHttpsBaseUrl(baseUrl)) {
+        return NextResponse.json(
+          { error: sanitizeErrorMessage(INFOMANIAK_HTTPS_REQUIRED_MESSAGE) },
           { status: 400 }
         );
       }

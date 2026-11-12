@@ -158,6 +158,7 @@ import { duckduckgo_webProvider } from "./registry/duckduckgo-web/index.ts";
 import { xaiProvider, xai_oauthProvider } from "./registry/xai/index.ts";
 import { morphProvider } from "./registry/morph/index.ts";
 import { siliconflowProvider } from "./registry/siliconflow/index.ts";
+import { infomaniakProvider } from "./registry/infomaniak/index.ts";
 import { gitlab_duoProvider } from "./registry/gitlab-duo/index.ts";
 import { command_codeProvider } from "./registry/command-code/index.ts";
 import { novitaProvider } from "./registry/novita/index.ts";
@@ -461,6 +462,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "xai-oauth": xai_oauthProvider,
   morph: morphProvider,
   siliconflow: siliconflowProvider,
+  infomaniak: infomaniakProvider,
   "gitlab-duo": gitlab_duoProvider,
   "command-code": command_codeProvider,
   novita: novitaProvider,

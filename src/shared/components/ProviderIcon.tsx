@@ -252,6 +252,7 @@ const GENERIC_PROVIDER_IDS = new Set([
   "gitlab",
   "haiper",
   "ideogram",
+  "infomaniak",
   "inworld",
   "kilo-gateway",
   "kilocode",
