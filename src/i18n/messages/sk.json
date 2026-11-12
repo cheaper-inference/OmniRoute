@@ -4481,7 +4481,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Dnešné výdavky",
+    "spendToday": "Výdavky za 1 deň",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Podiel poskytovateľov",
@@ -5679,6 +5679,7 @@
     "usageTracking": "Sledovanie používania",
     "securityDesc": "Nastavte si heslo na ochranu svojho informačného panela alebo ho zatiaľ preskočte.",
     "securityDescSkipWarning": "⚠️ Bez hesla nebudete môcť počas nastavenia pridať poskytovateľov. Môžete ich pridať neskôr z ovládacieho panela po nastavení hesla.",
+    "passwordAlreadySet": "Heslo k ovládaciemu panelu je už nastavené. Neskôr ho môžete zmeniť v Nastaveniach.",
     "providerDesc": "Pripojte svojho prvého poskytovateľa AI. Neskôr môžete pridať ďalšie.",
     "providerRequiresPassword": "Ak chcete pridať poskytovateľov, musíte najprv nastaviť heslo. Vráťte sa ku kroku zabezpečenia a nastavte heslo alebo pridajte poskytovateľov neskôr z ovládacieho panela.",
     "apiKeyRequired": "API kľúč (povinné)",
@@ -6051,6 +6052,8 @@
     "importFromModels": "Importovať z /models",
     "modelsImported": "Počet importovaných modelov: {count}",
     "allModelsAlreadyImported": "Všetky modely sú už importované",
+    "providerPublishesNoModelList": "Tento poskytovateľ nezverejňuje zoznam modelov — jeho vstavaný katalóg je aktuálny",
+    "modelsNoLongerListed": "{count, plural, one {# model už poskytovateľ neuvádza} few {# modely už poskytovateľ neuvádza} other {# modelov už poskytovateľ neuvádza}}",
     "noNewModelsToImport": "Žiadne nové modely na import — všetky modely sú už v registri alebo v zozname vlastných modelov",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Objavenie modelu zlyhalo {time}",
@@ -7234,7 +7237,8 @@
       "kiro": "Bezplatná úroveň: 50 kreditov/mesiac (~25k – 100k tokenov). ⚠️ Podmienky používania (ToS) Kiro zakazujú používanie proxy/harness tretích strán.",
       "codex": "Pripojte OpenAI Codex pomocou existujúceho toku OAuth.",
       "qwen": "Pripojte Qwen Code pomocou existujúceho toku OAuth.",
-      "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens"
+      "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} akceptuje ID modelu natívneho poskytovateľa. Importujte z /models alebo pridajte vlastné ID pre smerovanie.",
     "bedrockModelsDescription": "Modely Amazon Bedrock sú vymedzené podľa regiónu AWS. Importovať z /models alebo pridať ID modelu Bedrock povolené vo vybranom regióne.",
@@ -8804,6 +8808,8 @@
     "retentionUsageHistory": "História používania (dni)",
     "retentionMemoryEntries": "Záznamy pamäte (dni)",
     "retentionXpAuditLog": "Auditný log XP (dni)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Uložiť nastavenia uchovávania",
     "storageAutoVacuumMode": "Režim automatického vysávania",
     "storageScheduledVacuum": "Plánované vysávanie",
@@ -10254,7 +10260,11 @@
     "mappingInvalidJson": "Neplatný formát JSON.",
     "mappingMustBeObject": "Mapovanie musí byť objekt JSON, nie pole alebo primitívna hodnota.",
     "mappingValueMustBeString": "Hodnota pre kľúč „{key}“ musí byť reťazec.",
-    "save": "Uložiť"
+    "save": "Uložiť",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Mechanizmus Caveman",
@@ -12866,6 +12876,8 @@
     },
     "attempts": "pokusy",
     "detail": {
+      "tabOverview": "Prehľad",
+      "tabPayloads": "Dáta požiadaviek",
       "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
       "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
       "transportError": "Chyba prenosu",
