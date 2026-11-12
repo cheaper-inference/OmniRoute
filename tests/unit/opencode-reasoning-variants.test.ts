@@ -137,4 +137,18 @@ describe("opencode config generator — reasoning variants from effort_tiers", (
     // No listed base id: nothing says the suffix is a variant of something else.
     assert.deepEqual(Object.keys(models["cu/gpt-5-high"].variants), tiers);
   });
+
+  it("writes no variants for a `-minimal` alias whose base id is listed", async () => {
+    const museTiers = ["minimal", "low", "medium", "high"];
+    stubCatalog([
+      { id: "mc/muse-ember-1.0", capabilities: { reasoning: true, effort_tiers: museTiers } },
+      {
+        id: "mc/muse-ember-1.0-minimal",
+        capabilities: { reasoning: true, effort_tiers: museTiers },
+      },
+    ]);
+    const models = (await generate()).provider.omniroute.models;
+    assert.deepEqual(Object.keys(models["mc/muse-ember-1.0"].variants), museTiers);
+    assert.equal("variants" in models["mc/muse-ember-1.0-minimal"], false);
+  });
 });

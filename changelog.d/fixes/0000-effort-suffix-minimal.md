@@ -1,0 +1,1 @@
+- **fix(api):** effort-suffixed aliases ending in `-minimal` (for example `mc/muse-ember-1.0-minimal`) are now recognised as aliases of their listed base id, so `/v1/models` no longer gives them a `supported_reasoning_levels` ladder and the OpenCode generator no longer writes `variants` for them.

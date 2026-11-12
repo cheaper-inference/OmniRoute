@@ -95,3 +95,23 @@ test("an effort-suffixed row of a listed base id emits no supported_reasoning_le
   assert.equal("supported_reasoning_levels" in rows.get("combo-base-low")!, false);
   assert.deepEqual(rows.get("orphan-high")!.supported_reasoning_levels, tiers);
 });
+
+test("a `-minimal` alias of a listed base id emits no supported_reasoning_levels", async () => {
+  const tiers = ["minimal", "low", "medium", "high", "xhigh", "max"];
+  const rows = await rowsFor([
+    {
+      id: "mc/muse-ember-1.0",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+    {
+      id: "mc/muse-ember-1.0-minimal",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+  ]);
+  assert.deepEqual(rows.get("mc/muse-ember-1.0")!.supported_reasoning_levels, tiers);
+  assert.equal("supported_reasoning_levels" in rows.get("mc/muse-ember-1.0-minimal")!, false);
+});
