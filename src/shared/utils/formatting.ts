@@ -102,8 +102,9 @@ export function formatApiKeyLabel(
  * @returns {string}
  */
 export function fmtCompact(n: number | null | undefined) {
-  if (n && n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n && n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  // Thresholds sit at the rounding edge so 999_950 shows "1.0M", not "1000.0K".
+  if (n && n >= 999_950_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n && n >= 999_950) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n && n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return new Intl.NumberFormat().format(n || 0);
 }
