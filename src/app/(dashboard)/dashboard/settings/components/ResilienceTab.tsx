@@ -1137,6 +1137,7 @@ const MAX_BANNED_KEYWORD_LENGTH = 200;
 export default function ResilienceTab() {
   const notify = useNotificationStore();
   const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const [data, setData] = useState<ResilienceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingSection, setSavingSection] = useState<string | null>(null);
@@ -1145,6 +1146,7 @@ export default function ResilienceTab() {
   const [bannedKeywordsLoading, setBannedKeywordsLoading] = useState(true);
   const [bannedKeywordsLoadFailed, setBannedKeywordsLoadFailed] = useState(false);
   const [savingBannedKeywords, setSavingBannedKeywords] = useState(false);
+  const [bannedKeywordsLoadToken, setBannedKeywordsLoadToken] = useState(0);
   // The ref is the single source of truth: it always holds the last list the
   // server confirmed. Rapid add/remove clicks therefore cannot build on a
   // stale closure value, and a failed PATCH never desyncs UI from server.
@@ -1167,13 +1169,26 @@ export default function ResilienceTab() {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
+      setBannedKeywordsLoading(true);
+      setBannedKeywordsLoadFailed(false);
       try {
         const res = await fetch("/api/settings");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const settings = await res.json();
         if (!mounted) return;
+        // The classifier lowercases the error body but NOT the signal itself, so
+        // uppercase values imported elsewhere would never match. Normalise on
+        // load (trim + lowercase + dedupe); keep long values rather than
+        // silently discarding server-side data — adding is guarded separately.
         const list: string[] = Array.isArray(settings?.customBannedSignals)
-          ? settings.customBannedSignals.filter((v: unknown) => typeof v === "string")
+          ? Array.from(
+              new Set(
+                settings.customBannedSignals
+                  .filter((v: unknown) => typeof v === "string")
+                  .map((v: string) => v.trim().toLowerCase())
+                  .filter(Boolean)
+              )
+            )
           : [];
         bannedKeywordsRef.current = list;
         setBannedKeywords(list);
@@ -1190,7 +1205,7 @@ export default function ResilienceTab() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [bannedKeywordsLoadToken]);
 
   // Commit only after the server accepts the write. The synchronous ref lock
   // serialises edits so two quick clicks cannot race on a stale array.
@@ -1331,16 +1346,23 @@ export default function ResilienceTab() {
             onClick={() => void addBannedKeyword()}
             disabled={bannedKeywordsBusy || !bannedKeywordInput.trim()}
           >
-            {tx("add", "Add")}
+            {tc("add")}
           </Button>
         </div>
         {bannedKeywordsLoadFailed ? (
-          <p className="text-xs text-error">
-            {tx(
-              "failedLoadResilience",
-              "Failed to load banned keywords. Refresh the page to retry."
-            )}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-error">
+              {tx("errorOccurred", "An error occurred")}
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="refresh"
+              onClick={() => setBannedKeywordsLoadToken((n) => n + 1)}
+            >
+              {tx("retry", "Retry")}
+            </Button>
+          </div>
         ) : bannedKeywordsLoading ? (
           <Spinner decorative size="sm" />
         ) : bannedKeywords.length > 0 ? (
@@ -1402,6 +1424,7 @@ export default function ResilienceTab() {
 
   return (
     <div className="space-y-6">
+      {bannedKeywordsCard}
       <AutoDisableCard />
       {data.preferredAccountFailover && (
         <PreferredAccountFailoverCard
@@ -1421,8 +1444,6 @@ export default function ResilienceTab() {
           }
         />
       )}
-
-      {bannedKeywordsCard}
 
       <RequestQueueCard
         value={data.requestQueue}

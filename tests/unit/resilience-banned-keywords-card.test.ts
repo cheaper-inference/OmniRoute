@@ -63,6 +63,18 @@ test("a failed settings load never renders the misleading empty state", () => {
     "bannedKeywordsLoadFailed ? (",
     '"noCustomBannedSignals",',
   ]);
+
+  // The failure notice must not reuse `failedLoadResilience`: that key exists
+  // in every locale, so tx() would render "Failed to load resilience status"
+  // instead of the intended fallback. Offer an in-place retry instead.
+  const failedBranch = source.slice(
+    source.indexOf("bannedKeywordsLoadFailed ? ("),
+    source.indexOf("bannedKeywordsLoading ? (")
+  );
+  assert.doesNotMatch(failedBranch, /failedLoadResilience/);
+  assert.match(failedBranch, /tx\("errorOccurred"/);
+  assert.match(failedBranch, /tx\("retry"/);
+  assert.match(failedBranch, /setBannedKeywordsLoadToken/);
 });
 
 test("rapid edits read the ref, and removal is keyed by value not index", () => {
@@ -74,6 +86,11 @@ test("rapid edits read the ref, and removal is keyed by value not index", () => 
   assert.match(source, /<Badge key=\{keyword\}/);
   assert.doesNotMatch(source, /removeBannedKeyword\(index/);
   assert.doesNotMatch(source, /<Badge key=\{index\}/);
+
+  // Imported uppercase values would never match the classifier's lowercased
+  // error body. Normalise + dedupe on load so values are stable React keys.
+  assert.match(source, /\.map\(\(v: string\) => v\.trim\(\)\.toLowerCase\(\)\)/);
+  assert.match(source, /Array\.from\(\s*new Set\(/);
 });
 
 test("banned keywords editor survives a failed resilience-data load", () => {
@@ -92,5 +109,15 @@ test("banned keywords editor survives a failed resilience-data load", () => {
   assert.ok(
     renders.length >= 3,
     "card must render on the loading, failed and loaded branches"
+  );
+
+  // Same position on all three branches, otherwise the card jumps down the
+  // page once /api/resilience resolves.
+  const firstChild =
+    source.match(/<div className="space-y-6">\s*\{bannedKeywordsCard\}/g) ?? [];
+  assert.equal(
+    firstChild.length,
+    3,
+    "card must be the first child on the loading, failed and loaded branches"
   );
 });
