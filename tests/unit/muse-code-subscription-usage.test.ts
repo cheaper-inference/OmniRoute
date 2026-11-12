@@ -167,9 +167,73 @@ test("an out-of-range frame or an oversized block never breaks the stream", asyn
   const second = tapMuseSubscriptionUsage(sseResponse(oversized, 64 * 1024), (u) => {
     readings.push(u);
   });
-  assert.equal((await second.text()).length, oversized.length);
+  assert.equal(await second.text(), oversized);
   assert.equal(readings.length, 1);
   assert.equal(readings[0].window?.usedPercent, 6);
+});
+
+test("an oversized block cannot turn its tail into a subscription reading", async () => {
+  const prefix = `data: ${"x".repeat(1024 * 1024 + 32)}`;
+  // These are two data fields in ONE oversized event, not a fresh usage event.
+  const forgedTail = `\ndata: ${JSON.stringify(frame)}\n\n`;
+  const bytes = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(bytes.encode(prefix));
+      controller.enqueue(bytes.encode(forgedTail));
+      controller.close();
+    },
+  });
+  const readings: unknown[] = [];
+  const response = new Response(body, { headers: { "content-type": "text/event-stream" } });
+  const output = await tapMuseSubscriptionUsage(
+    response,
+    (usage) => void readings.push(usage)
+  ).text();
+  assert.equal(output, prefix + forgedTail);
+  assert.deepEqual(readings, [], "a discarded block stays discarded through its terminator");
+});
+
+test("oversized blocks resynchronize at CRLF boundaries without recording their tails", async () => {
+  const encoder = new TextEncoder();
+  const prefix = `data: ${"x".repeat(1024 * 1024 + 32)}`;
+  const forgedTail = `\r\ndata: ${JSON.stringify(frame)}`;
+  const valid = museStream.replace(/\n/g, "\r\n");
+  for (const separator of [
+    ["\r", "\n", "\r", "\n"],
+    ["\r\n", "\r\n"],
+    ["\r\n\r", "\n"],
+  ]) {
+    const chunks = [prefix, forgedTail, ...separator, valid];
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of chunks) controller.enqueue(encoder.encode(chunk));
+        controller.close();
+      },
+    });
+    const readings: unknown[] = [];
+    const tapped = tapMuseSubscriptionUsage(
+      new Response(body, { headers: { "content-type": "text/event-stream" } }),
+      (usage) => void readings.push(usage)
+    );
+    assert.equal(await tapped.text(), chunks.join(""));
+    assert.equal(readings.length, 1, "only the next complete event contributes usage");
+  }
+});
+
+test("window duration overflow and invalid stored observation times are not quota evidence", () => {
+  assert.equal(
+    parseMuseSubscriptionUsageEvent({
+      type: MUSE_SUBSCRIPTION_USAGE_EVENT,
+      subscription: {
+        window: { used_percent: 5, resets_at: SESSION_RESET, window_duration_mins: 1e308 },
+      },
+    }),
+    null
+  );
+  const reading = parseMuseSubscriptionUsageEvent(frame);
+  assert.ok(reading);
+  assert.equal(readStoredMuseSubscriptionUsage({ ...reading, observedAt: "invalid" }), null);
 });
 
 test("a failing usage recorder never breaks the stream", async () => {

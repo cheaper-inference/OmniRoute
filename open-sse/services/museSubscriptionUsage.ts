@@ -54,7 +54,14 @@ function parseWindow(raw: unknown, fallbackSeconds: number | null): MuseUsageWin
   const minutes = finiteNumber(record.window_duration_mins);
   const windowSeconds = minutes !== null && minutes > 0 ? minutes * 60 : fallbackSeconds;
   if (usedPercent === null || usedPercent < 0 || usedPercent > 100) return null;
-  if (resetsAt === null || resetsAt <= 0 || windowSeconds === null) return null;
+  if (
+    resetsAt === null ||
+    resetsAt <= 0 ||
+    windowSeconds === null ||
+    !Number.isFinite(windowSeconds) ||
+    windowSeconds <= 0
+  )
+    return null;
   const resetDate = new Date(resetsAt * 1000);
   // Beyond the Date range (`resets_at` > 8.64e12 s) there is no instant to report.
   if (Number.isNaN(resetDate.getTime())) return null;
@@ -130,6 +137,9 @@ export function tapMuseSubscriptionUsage(
   // Per tap: the scan resumes from `lastIndex`, so each character is searched about once.
   const blockEnd = new RegExp(SSE_BLOCK_END_SOURCE, "g");
   let pending = "";
+  // A dropped block is still the same event until its blank line arrives. Keeping
+  // only the separator overlap bounds retained text without admitting its tail.
+  let droppingBlock = false;
   let latest: MuseSubscriptionUsage | null = null;
   const inspect = (block: string) => {
     if (!block.includes(MUSE_SUBSCRIPTION_USAGE_EVENT)) return;
@@ -144,16 +154,22 @@ export function tapMuseSubscriptionUsage(
       pending += decoder.decode(chunk, { stream: true });
       let separator = blockEnd.exec(pending);
       while (separator) {
-        inspect(pending.slice(0, separator.index));
+        if (!droppingBlock && separator.index <= MAX_PENDING_CHARS) {
+          inspect(pending.slice(0, separator.index));
+        }
+        droppingBlock = false;
         pending = pending.slice(separator.index + separator[0].length);
         blockEnd.lastIndex = 0;
         separator = blockEnd.exec(pending);
       }
-      if (pending.length > MAX_PENDING_CHARS) pending = "";
+      if (droppingBlock || pending.length > MAX_PENDING_CHARS) {
+        droppingBlock = true;
+        pending = pending.slice(-SEPARATOR_OVERLAP);
+      }
     },
     flush() {
       pending += decoder.decode();
-      if (pending.trim()) inspect(pending);
+      if (!droppingBlock && pending.length <= MAX_PENDING_CHARS && pending.trim()) inspect(pending);
       const usage = latest;
       if (!usage) return;
       try {
@@ -220,7 +236,12 @@ function readWindow(raw: unknown): MuseUsageWindow | null {
 /** A stored reading (`providerSpecificData.subscriptionUsage`), or null when absent or malformed. */
 export function readStoredMuseSubscriptionUsage(raw: unknown): MuseSubscriptionUsage | null {
   const record = asRecord(raw);
-  if (!record || typeof record.observedAt !== "string") return null;
+  if (
+    !record ||
+    typeof record.observedAt !== "string" ||
+    Number.isNaN(Date.parse(record.observedAt))
+  )
+    return null;
   const window = readWindow(record.window);
   const weekly = readWindow(record.weekly);
   if (!window && !weekly) return null;
