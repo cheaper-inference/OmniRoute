@@ -91,3 +91,18 @@ test("the secret key never appears in the signed headers", async () => {
   });
   assert.ok(!all.includes(SECRET));
 });
+
+test("IAM connections with the same secret but another key id do not share a cached client", () => {
+  const executor = new BedrockExecutor();
+  const first = executor.createClient(iam());
+  assert.strictEqual(executor.createClient(iam()), first);
+  const otherKeyId = {
+    ...iam(),
+    providerSpecificData: {
+      ...iam().providerSpecificData,
+      awsAccessKeyId: KEY_ID.slice(0, -1) + "Z",
+    },
+  };
+  assert.notStrictEqual(executor.createClient(otherKeyId), first);
+  assert.notStrictEqual(executor.createClient(iam({ awsSessionToken: SESSION })), first);
+});
