@@ -984,6 +984,20 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "NG",
     website: "https://nano-gpt.com",
   },
+  lunaroute: {
+    id: "lunaroute",
+    serviceKinds: ["llm"],
+    alias: "lr",
+    name: "LunaRoute",
+    icon: "hub",
+    color: "#7C3AED",
+    textIcon: "LR",
+    website: "https://lunaroute.com",
+    authHint:
+      "Create a LunaRoute API key in the dashboard, then paste the lr_ key here. OmniRoute sends it as a Bearer token.",
+    apiHint:
+      "LunaRoute serves /chat/completions, /completions, /responses (also root /responses), /messages, /messages/count_tokens, /embeddings, /rerank, /audio/transcriptions, /audio/preprocess, /audio/preprocess/capabilities, /systemone, /images/generations, /images/uploads, /images/edits, /images/{id}, and /images/{id}/content from https://gw.lunaroute.com. Live catalogs are available at /v1/models, /v1/embeddings/models, /v1/rerank/models, /v1/audio/transcriptions/models, and /v1/images/models.",
+  },
   // NaN.Builders (https://nan.builders) — OpenAI-compatible /v1 covering chat, vision,
   // embeddings, STT, TTS, images and rerank; per-model token quotas feed the limits panel.
   nan: {

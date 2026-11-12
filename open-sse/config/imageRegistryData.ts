@@ -702,6 +702,29 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1280", "1280x1024"],
   },
 
+  lunaroute: {
+    id: "lunaroute",
+    alias: "lr",
+    baseUrl: "https://gw.lunaroute.com/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      { id: "flux2-klein", name: "FLUX.2 Klein" },
+      { id: "qwen-image-2.1", name: "Qwen Image 2.1" },
+      { id: "qwen-image-2512", name: "Qwen Image 2512" },
+      {
+        id: "qwen-image-edit-2511",
+        name: "Qwen Image Edit 2511",
+        inputModalities: ["text", "image"],
+        imageRequired: true,
+      },
+    ],
+    // LunaRoute owns size validation and defaults; the dashboard does not
+    // publish a closed size allowlist for these live targets.
+    supportedSizes: [],
+  },
+
   // NaN.Builders (https://nan.builders) — OpenAI-compatible /v1/images/generations.
   nan: {
     id: "nan",

@@ -578,6 +578,19 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     ],
   },
 
+  lunaroute: {
+    id: "lunaroute",
+    baseUrl: "https://gw.lunaroute.com/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "emb-granite", name: "Granite Embedding Multilingual" },
+      { id: "emb-nomic-code", name: "Nomic Embed Code" },
+      { id: "emb-nomic-moe", name: "Nomic Embed Text v2 (MoE)" },
+      { id: "emb-qwen3", name: "Qwen3 Embedding" },
+    ],
+  },
+
   nan: {
     id: "nan",
     baseUrl: "https://api.nan.builders/v1/embeddings",
@@ -597,6 +610,7 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
 };
 
 const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
+  lr: "lunaroute",
   jina: "jina-ai",
   voyage: "voyage-ai",
   // The dashboard stores LM Studio connections under the hyphenated provider

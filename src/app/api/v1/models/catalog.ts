@@ -24,6 +24,7 @@ import { getAllAudioModels } from "@omniroute/open-sse/config/audioRegistry";
 import { getAllModerationModels } from "@omniroute/open-sse/config/moderationRegistry";
 import { getAllVideoModels } from "@omniroute/open-sse/config/videoRegistry";
 import { getAllMusicModels } from "@omniroute/open-sse/config/musicRegistry";
+import { getAllSystemOneModels } from "@omniroute/open-sse/config/systemOneRegistry";
 import {
   getRegistryModelThinkingEfforts,
   getRegistryThinkingEfforts,
@@ -1679,6 +1680,45 @@ async function buildUnifiedModelsResponseCore(
     // providers whose model IDs carry a sub-path (e.g. OpenRouter scoped models).
     const getSpecialtyModelRelativeId = (modelId: string, provider: string): string =>
       modelId.startsWith(`${provider}/`) ? modelId.slice(provider.length + 1) : modelId;
+
+    // Add System One typed-decision models. They deliberately do not live in
+    // the chat registry: the request/response wire shape is {state, questions}
+    // rather than messages. A live provider catalog can still return the same
+    // id, so correct that row's classification instead of publishing a duplicate.
+    for (const decisionModel of getAllSystemOneModels()) {
+      await maybeYieldCatalogBuild();
+      if (!isProviderActive(decisionModel.provider)) continue;
+      const rawModelId = getSpecialtyModelRelativeId(decisionModel.id, decisionModel.provider);
+      if (!providerSupportsModel(decisionModel.provider, rawModelId)) continue;
+      if (isModelHiddenBulk(decisionModel.provider, rawModelId, null, "decisions")) continue;
+
+      const fields = {
+        type: "decisions",
+        supported_endpoints: ["decisions"],
+        context_length: decisionModel.contextLength,
+        max_input_tokens: decisionModel.maxInputTokens,
+        max_output_tokens: decisionModel.maxOutputTokens,
+        input_modalities: decisionModel.supportsVision ? ["text", "image"] : ["text"],
+        output_modalities: ["text"],
+      };
+      const existing = models.find(
+        (model) =>
+          model?.id === decisionModel.id ||
+          (model?.owned_by === decisionModel.provider && model?.root === rawModelId)
+      );
+      if (existing) {
+        Object.assign(existing, fields);
+        continue;
+      }
+      models.push({
+        id: decisionModel.id,
+        object: "model",
+        created: timestamp,
+        owned_by: decisionModel.provider,
+        root: rawModelId,
+        ...fields,
+      });
+    }
 
     // Add embedding models (filtered by active providers)
     for (const embModel of getAllEmbeddingModels()) {

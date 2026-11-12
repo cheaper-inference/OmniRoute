@@ -22,7 +22,39 @@ export const OPENROUTER_DECISIONS_PROVIDER_ID = "openrouter";
 export const OPENROUTER_DECISIONS_BASE_URL = "https://openrouter.ai";
 export const OPENROUTER_DECISIONS_URL = `${OPENROUTER_DECISIONS_BASE_URL}/api/alpha/decisions`;
 
-export type SystemOneBackend = "typesafe" | "openrouter";
+export const LUNAROUTE_SYSTEM_ONE_PROVIDER_ID = "lunaroute";
+export const LUNAROUTE_SYSTEM_ONE_BASE_URL = "https://gw.lunaroute.com";
+export const LUNAROUTE_SYSTEM_ONE_URL = `${LUNAROUTE_SYSTEM_ONE_BASE_URL}/v1/systemone`;
+
+export const LUNAROUTE_SYSTEM_ONE_MODELS = [
+  {
+    id: "clef-flash",
+    name: "Clef Flash",
+    contextLength: 8_192,
+    maxInputTokens: 8_192,
+    maxOutputTokens: 2_048,
+    supportsVision: true,
+  },
+  {
+    id: "djev",
+    name: "djev",
+    contextLength: 32_768,
+    maxInputTokens: 32_768,
+    maxOutputTokens: 1_024,
+    supportsVision: true,
+  },
+] as const;
+
+/** Return every statically discoverable System One model for the unified catalog. */
+export function getAllSystemOneModels() {
+  return LUNAROUTE_SYSTEM_ONE_MODELS.map((model) => ({
+    ...model,
+    id: `${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/${model.id}`,
+    provider: LUNAROUTE_SYSTEM_ONE_PROVIDER_ID,
+  }));
+}
+
+export type SystemOneBackend = "typesafe" | "openrouter" | "lunaroute";
 
 export interface SystemOneTarget {
   backend: SystemOneBackend;
@@ -67,6 +99,16 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
       provider: OPENROUTER_DECISIONS_PROVIDER_ID,
       upstreamModel: trimmed.slice("openrouter/".length),
       upstreamUrl: OPENROUTER_DECISIONS_URL,
+    };
+  }
+  if (trimmed.startsWith(`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`)) {
+    const upstreamModel = trimmed.slice(`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`.length);
+    if (!LUNAROUTE_SYSTEM_ONE_MODELS.some((model) => model.id === upstreamModel)) return null;
+    return {
+      backend: "lunaroute",
+      provider: LUNAROUTE_SYSTEM_ONE_PROVIDER_ID,
+      upstreamModel,
+      upstreamUrl: LUNAROUTE_SYSTEM_ONE_URL,
     };
   }
   if (/^jev[-/]/i.test(trimmed)) {

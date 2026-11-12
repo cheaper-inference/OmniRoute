@@ -140,9 +140,21 @@ export const RERANK_PROVIDERS = {
     authHeader: "bearer",
     models: [{ id: "rerank", name: "NaN Rerank" }],
   },
+
+  // LunaRoute exposes a Cohere v2-compatible rerank surface. The model id is
+  // corroborated by LunaRoute's current Pi extension catalog fixtures; the
+  // dedicated /v1/rerank/models listing remains the runtime authority.
+  lunaroute: {
+    id: "lunaroute",
+    baseUrl: "https://gw.lunaroute.com/v1/rerank",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "bge-rr-v2-m3", name: "BGE Reranker v2 M3" }],
+  },
 };
 
 const RERANK_PROVIDER_ALIASES = {
+  lr: "lunaroute",
   jina: "jina-ai",
   voyage: "voyage-ai",
 };
