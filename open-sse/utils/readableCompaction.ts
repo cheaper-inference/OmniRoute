@@ -35,13 +35,32 @@ function decodeSummary(payload: string): string {
 
 export function restoreReadableCompactionItem(item: JsonRecord): JsonRecord | null {
   const type = typeof item.type === "string" ? item.type : "";
+  if (!COMPACTION_TYPES.has(type)) return null;
+
+  if (type === "compaction" || type === "compaction_summary") {
+    const role = typeof item.role === "string" && item.role.trim() ? item.role : "user";
+    if (
+      item.content !== undefined &&
+      item.content !== null &&
+      (!Array.isArray(item.content) || item.content.length > 0)
+    ) {
+      const content =
+        typeof item.content === "string"
+          ? [{ type: "input_text", text: item.content }]
+          : item.content;
+      return { type: "message", role, content };
+    }
+    if (typeof item.text === "string" && item.text.trim().length > 0) {
+      return {
+        type: "message",
+        role,
+        content: [{ type: "input_text", text: item.text }],
+      };
+    }
+  }
+
   const content = item.encrypted_content;
-  if (
-    !COMPACTION_TYPES.has(type) ||
-    typeof content !== "string" ||
-    !content.startsWith(BRIDGE_COMPACTION_PREFIX)
-  )
-    return null;
+  if (typeof content !== "string" || !content.startsWith(BRIDGE_COMPACTION_PREFIX)) return null;
   const summary = decodeSummary(content.slice(BRIDGE_COMPACTION_PREFIX.length));
   return {
     type: "message",
