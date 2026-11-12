@@ -928,6 +928,40 @@ async function materializeConnection(
   };
 }
 
+const PROVIDER_EXHAUSTED_DEDUPE_MS = 10 * 60 * 1000;
+const lastProviderExhaustedAt = new Map<string, number>();
+
+/** Webhook alert when every account of a provider cools down; one per provider per window. */
+function notifyProviderExhausted(provider: string, connectionsCount: number, retryAfter: string) {
+  const now = Date.now();
+  const last = lastProviderExhaustedAt.get(provider);
+  if (last !== undefined && now - last < PROVIDER_EXHAUSTED_DEDUPE_MS) return;
+  lastProviderExhaustedAt.set(provider, now);
+  void import("@/lib/webhookDispatcher")
+    .then(({ notifyWebhookEvent }) =>
+      notifyWebhookEvent("provider.exhausted", { provider, connectionsCount, retryAfter })
+    )
+    .catch(() => {
+      /* webhook delivery is best-effort */
+    });
+}
+
+/**
+ * True when every account of the pool is cooling down at connection level. An account that the
+ * selection filter never saw (a request-specific capability filter removed it) counts by its own
+ * cooldown, so a usable account hidden from this request keeps the provider "up".
+ */
+function isWholeProviderRateLimited(
+  pool: ProviderConnectionView[],
+  filterStatus: Map<string, string>
+): boolean {
+  return pool.every((c) =>
+    filterStatus.has(c.id)
+      ? filterStatus.get(c.id) === "rateLimited"
+      : isAccountUnavailable(c.rateLimitedUntil)
+  );
+}
+
 /**
  * True when the active Codex pool (narrowed by an API key's `allowedConnections`) is
  * non-empty and every account is plan-ineligible for the paid-only `requestedModel`.
@@ -1200,6 +1234,8 @@ export async function getProviderCredentials(
         connections = connections.filter((conn) => conn.id === forcedConnectionId);
       }
     }
+    // The provider's whole active pool, before a request-specific capability filter narrows it.
+    const providerPool = connections;
     if (resolvedId === "qoder" && options.requireToolCalling) {
       connections = connections.filter(qoderSupportsCallerTools);
     }
@@ -1591,6 +1627,22 @@ export async function getProviderCredentials(
           options,
           allBlockedByModelCooldown ? "MODEL_INELIGIBLE" : "HEALTH_OR_COOLDOWN"
         );
+        // Only the whole provider counts: a key policy, a pin, a capability filter or a
+        // model-only cooldown narrows the view without taking the provider down. Excluded
+        // accounts fail the check. The retry time is a connection cooldown, never a shorter
+        // model lock that only affects one model.
+        if (
+          !allBlockedByModelCooldown &&
+          !allowedConnections?.length &&
+          !forcedConnectionId &&
+          isWholeProviderRateLimited(providerPool, connectionFilterStatus)
+        ) {
+          notifyProviderExhausted(
+            provider,
+            providerPool.length,
+            getEarliestRateLimitedUntil(providerPool) ?? earliest
+          );
+        }
         return {
           allRateLimited: true,
           retryAfter: earliest,
