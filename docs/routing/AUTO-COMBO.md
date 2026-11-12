@@ -799,7 +799,11 @@ health and cost keep deciding which account.
 strings. `baseUrl` is only needed for a self-hosted Nadir (a trailing `/v1` is tolerated).
 Keyless calls land on Nadir's anonymous tier, which is rate-limited per IP. With a key
 ([create one](https://app.getnadir.com/dashboard/api-keys)), each decision is
-logged to your Nadir dashboard. Full setup and verification:
+logged to your Nadir dashboard and counts as a Nadir request: the first 50 a month are
+free, then each draws a per-request fee from a prepaid balance
+([current price](https://getnadir.com/pricing)). On an empty balance Nadir answers
+HTTP 402, the log line carries its `balance_empty` reason, and the combo routes with
+`rules` until you top up. Full setup and verification:
 [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
 What leaves the box: the last user message's text (first 16k characters), the candidate
@@ -810,7 +814,7 @@ Failure behavior is fail-open: a timeout (default 2000 ms), a non-2xx, an unreac
 host, a malformed response or a selection outside the pool resolves to the `rules`
 decision and the reason is prefixed `NadirStrategy: fallback (…)`. After a failed call the
 strategy skips the network for 30 s, so an outage costs one timeout per 30 s rather than
-one per request. Routing events report `strategy: "nadir"` only when Nadir actually made
+one per request; after a 401, 402 or 403 (bad key or empty balance) it waits 5 minutes. Routing events report `strategy: "nadir"` only when Nadir actually made
 the choice.
 
 **When to use**: mixed-difficulty traffic on a pool that spans model tiers (a small, a mid

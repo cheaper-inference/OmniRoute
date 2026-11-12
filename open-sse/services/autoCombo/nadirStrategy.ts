@@ -60,6 +60,46 @@ export const NADIR_DEFAULT_TIMEOUT_MS = 2000;
 export const NADIR_MAX_TIMEOUT_MS = 30_000;
 /** After a failed call, skip the network for this long (per base URL). */
 export const NADIR_FAILURE_COOLDOWN_MS = 30_000;
+/**
+ * A rejected key (401/403) or an empty prepaid balance (402) does not clear in
+ * seconds, so the strategy waits longer before asking again.
+ */
+export const NADIR_ACCOUNT_COOLDOWN_MS = 300_000;
+const ACCOUNT_ERROR_STATUSES = new Set([401, 402, 403]);
+const MAX_ERROR_DETAIL_CHARS = 300;
+
+class NadirHttpError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/**
+ * `HTTP <status>` plus Nadir's error code and message when the body carries
+ * them (`{"detail": {"error", "message"}}` or `{"error": ...}`), so the
+ * operator's log says why, e.g. `HTTP 402 balance_empty: ... Top up ...`.
+ */
+async function describeHttpError(response: Response): Promise<string> {
+  let detail = "";
+  try {
+    const body: unknown = await response.json();
+    const record = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+    const inner = record.detail ?? record.error ?? body;
+    const fields =
+      inner && typeof inner === "object" && !Array.isArray(inner)
+        ? (inner as Record<string, unknown>)
+        : {};
+    const code = readString(fields.error) ?? readString(inner);
+    detail = [code, readString(fields.message)].filter(Boolean).join(": ");
+  } catch {
+    // Non-JSON body: the status alone.
+  }
+  const head = `HTTP ${response.status}`;
+  return detail ? `${head} ${detail.slice(0, MAX_ERROR_DETAIL_CHARS)}` : head;
+}
 /** `BucketRequest.menu` accepts at most 100 ids. */
 const MAX_MENU_ITEMS = 100;
 /** The classifier reads the head of the prompt; a pasted log need not travel whole. */
@@ -195,10 +235,14 @@ export class NadirStrategyImpl implements RouterStrategy {
     try {
       data = await this.requestDecision(baseUrl, prompt, candidates, context);
     } catch (err) {
-      this.cooldownUntil.set(baseUrl, this.now() + NADIR_FAILURE_COOLDOWN_MS);
+      const cooldownMs =
+        err instanceof NadirHttpError && ACCOUNT_ERROR_STATUSES.has(err.status)
+          ? NADIR_ACCOUNT_COOLDOWN_MS
+          : NADIR_FAILURE_COOLDOWN_MS;
+      this.cooldownUntil.set(baseUrl, this.now() + cooldownMs);
       const message = err instanceof Error ? err.message : String(err);
       console.warn(
-        `[NadirStrategy] decision call failed (${message}); using '${this.fallback.name}' for the next ${NADIR_FAILURE_COOLDOWN_MS / 1000}s`
+        `[NadirStrategy] decision call failed (${message}); using '${this.fallback.name}' for the next ${cooldownMs / 1000}s`
       );
       return this.fallbackDecision(candidates, context, `call failed: ${message}`);
     }
@@ -227,7 +271,9 @@ export class NadirStrategyImpl implements RouterStrategy {
       }),
       timeoutMs: clampTimeout(context.nadir?.timeoutMs),
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      throw new NadirHttpError(response.status, await describeHttpError(response));
+    }
     const data: unknown = await response.json();
     if (!data || typeof data !== "object" || Array.isArray(data)) {
       throw new Error("malformed response");
