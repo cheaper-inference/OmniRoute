@@ -155,7 +155,7 @@ export function getPricingLookupModels(provider: string, model: string): string[
 }
 
 /** Pricing row for (provider, model), trying {@link getPricingLookupModels} in order. */
-async function resolvePricingRow(provider: string, model: string) {
+export async function resolvePricingRow(provider: string, model: string) {
   const { getPricingForModel } = await import("@/lib/db/settings");
   for (const key of getPricingLookupModels(provider, model)) {
     const pricing = await getPricingForModel(provider, key);
