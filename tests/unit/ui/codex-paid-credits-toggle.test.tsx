@@ -95,6 +95,13 @@ describe("Codex extra-credit account button", () => {
       ) : null;
     }
     await act(async () => root.render(<Harness />));
+    if (provider === "codex") {
+      const details = container.querySelector<HTMLButtonElement>(
+        'button[aria-expanded="false"][aria-controls]'
+      );
+      expect(details).not.toBeNull();
+      act(() => details?.click());
+    }
   }
 
   function button() {

@@ -1433,7 +1433,8 @@
       "stats",
       "teamCosts",
       "traeAuthModal",
-      "trafficInspector"
+      "trafficInspector",
+      "usage"
     ],
     "quota": [
       "agentSkills",

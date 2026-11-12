@@ -1,7 +1,14 @@
 "use client";
 
+import {
+  CollectionViewControls,
+  CollectionPagination,
+  OptionalCollectionLayout,
+  type CollectionView,
+  type CollectionPageSize,
+} from "./ProviderCollectionControls";
 import Icon from "@/shared/components/Icon";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { type ConnectionRowConnection } from "./ConnectionRow";
 import ConnectionRow from "./ConnectionRow";
@@ -12,9 +19,10 @@ import {
   DistributeProxiesButton,
   FilterPills,
   Input,
+  Select,
 } from "@/shared/components";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
-import { readBooleanToggle, providerCountText } from "../providerPageHelpers";
+import { readBooleanToggle, providerCountText, providerText } from "../providerPageHelpers";
 import { compareTr } from "@/shared/utils/turkishText";
 import type { CodexGlobalServiceMode } from "@/lib/providers/codexFastTier";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
@@ -128,6 +136,22 @@ function resolveConnProxyField(
   return connProxyMap[connId]?.proxy?.[field] || null;
 }
 
+/**
+ * First/last flags drive the priority move buttons; any other sort order has no
+ * neighbour to swap with inside the visible order, so every row is both ends.
+ */
+function groupedRowEdges(
+  sortOrder: string,
+  group: { index: number; count: number },
+  row: { index: number; count: number }
+): { isFirst: boolean; isLast: boolean } {
+  if (sortOrder !== "priority") return { isFirst: true, isLast: true };
+  return {
+    isFirst: group.index === 0 && row.index === 0,
+    isLast: group.index === group.count - 1 && row.index === row.count - 1,
+  };
+}
+
 export default function ConnectionsListPanel({
   connections,
   providerId,
@@ -197,7 +221,31 @@ export default function ConnectionsListPanel({
   t,
 }: ConnectionsListPanelProps) {
   const tc = useTranslations("common");
-  const sorted = [...connections].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+  const [viewMode, setViewMode] = useState<CollectionView>("list");
+  const [pageSize, setPageSize] = useState<CollectionPageSize>(PAGE_SIZE);
+  const [columns, setColumns] = useState(3);
+  const [sortOrder, setSortOrder] = useState("priority");
+  const effectivePageSize =
+    providerId === "codex"
+      ? pageSize === "all"
+        ? Math.max(1, connections.length)
+        : pageSize
+      : PAGE_SIZE;
+  const layoutProps = {
+    view: viewMode,
+    columns,
+    headers: [
+      providerText(t, "accountColumn", "Account"),
+      providerText(t, "statusColumn", "Status"),
+      providerText(t, "quota", "Quota"),
+      providerText(t, "itemActions", "Actions"),
+    ],
+  };
+  const sorted = [...connections].sort((a, b) =>
+    sortOrder === "name" && providerId === "codex"
+      ? String(a.name || a.email || a.id).localeCompare(String(b.name || b.email || b.id))
+      : (a.priority || 0) - (b.priority || 0)
+  );
   const quotaSupported = supportsProviderQuota(providerId);
   const hasAnyTag = sorted.some((c) => c.providerSpecificData?.tag as string | undefined);
   const allSelected = selectedIds.size === connections.length && connections.length > 0;
@@ -253,6 +301,15 @@ export default function ConnectionsListPanel({
     { value: "all", label: t("filterAll", "All") },
     { value: "active", label: t("filterActive", "Active") },
     { value: "error", label: t("filterError", "Error") },
+    ...(providerId === "codex"
+      ? [
+          { value: "inactive", label: providerText(t, "accountsInactive", "Inactive") },
+          {
+            value: "reset_credits",
+            label: providerText(t, "accountsWithResets", "With reset credits"),
+          },
+        ]
+      : []),
     { value: "banned", label: t("filterBanned", "Banned") },
     {
       value: "credits_exhausted",
@@ -269,25 +326,40 @@ export default function ConnectionsListPanel({
       : []),
   ];
   const healthFiltered =
-    healthFilter === "all" ? sorted : sorted.filter((c) => matchesHealthFilter(c, healthFilter));
+    healthFilter === "all"
+      ? sorted
+      : sorted.filter((c) => {
+          if (healthFilter === "inactive") return c.isActive === false;
+          if (healthFilter === "reset_credits")
+            return (quotaByConnectionId[c.id]?.bankedResetCredits ?? 0) > 0;
+          return matchesHealthFilter(c, healthFilter);
+        });
   // #7937 — substring search over id/tag/name/email, applied across the FULL
   // in-memory list (not just the current page).
   const filtered = filterConnectionsByQuery(accountSearch, healthFiltered);
 
-  const totalFilteredPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalFilteredPages = Math.max(1, Math.ceil(filtered.length / effectivePageSize));
   const clampedPage = Math.min(page, totalFilteredPages - 1);
-  const pageStart = clampedPage * PAGE_SIZE;
-  const pageEnd = pageStart + PAGE_SIZE;
+  const pageStart = clampedPage * effectivePageSize;
+  const pageEnd = pageStart + effectivePageSize;
 
   const accountSearchInput = (
     <Input
       type="text"
       value={accountSearch}
-      onChange={(e) => setAccountSearch(e.target.value)}
+      onChange={(e) => {
+        setAccountSearch(e.target.value);
+        setPage(0);
+        setSelectedIds(new Set());
+      }}
       placeholder={t("accountSearchPlaceholder", "Search accounts…")}
       aria-label={t("accountSearchPlaceholder", "Search accounts…")}
       icon="search"
-      className="w-full sm:w-auto sm:min-w-[160px] sm:max-w-[220px]"
+      className={
+        providerId === "codex"
+          ? "w-full min-w-0 flex-1"
+          : "w-full sm:w-auto sm:min-w-[160px] sm:max-w-[220px]"
+      }
       inputClassName="text-xs"
     />
   );
@@ -304,8 +376,58 @@ export default function ConnectionsListPanel({
     />
   );
 
+  const listControls = (
+    <CollectionViewControls
+      view={viewMode}
+      onChange={setViewMode}
+      columns={columns}
+      onColumnsChange={setColumns}
+    />
+  );
+  const sortControl = providerId === "codex" && (
+    <Select
+      compact
+      label={providerText(t, "accountSort", "Sort accounts")}
+      value={sortOrder}
+      onChange={(e) => {
+        setSortOrder(e.target.value);
+        setPage(0);
+      }}
+      options={[
+        { value: "priority", label: providerText(t, "sortPriority", "Priority") },
+        { value: "name", label: providerText(t, "sortName", "Name") },
+      ]}
+    />
+  );
+  const searchToolbar = providerId === "codex" && (
+    <div className="mb-3 grid grid-cols-1 items-center gap-3 rounded-xl border border-border bg-surface p-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+      {accountSearchInput}
+      <details className="relative rounded-lg border border-border px-3 py-2 text-sm">
+        <summary className="cursor-pointer font-medium">
+          {providerText(t, "collectionFilters", "Filters")}
+        </summary>
+        <div className="absolute right-0 top-full z-30 mt-2 flex w-72 max-w-[calc(100vw-3rem)] flex-wrap gap-2 rounded-xl border border-border bg-surface p-3 shadow-xl">
+          {filterPills}
+        </div>
+      </details>
+      {listControls}
+    </div>
+  );
+
   const paginationBar =
-    totalFilteredPages > 1 ? (
+    providerId === "codex" ? (
+      <CollectionPagination
+        total={filtered.length}
+        page={clampedPage}
+        pageSize={pageSize}
+        onPage={setPage}
+        onPageSize={(size) => {
+          setPageSize(size);
+          setPage(0);
+          setSelectedIds(new Set());
+        }}
+      />
+    ) : totalFilteredPages > 1 ? (
       <div className="flex items-center justify-between px-3 py-2 border-t border-border">
         <span className="text-xs text-text-muted">
           {pageStart + 1}–{Math.min(pageEnd, filtered.length)} / {filtered.length}
@@ -341,6 +463,7 @@ export default function ConnectionsListPanel({
     const someSelectedPage = pageConnections.some((c) => selectedIds.has(c.id));
     return (
       <>
+        {searchToolbar}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-3 py-2 bg-muted/50 rounded-t-lg border border-b-0 border-border">
           <div className="flex w-full items-center gap-2 flex-wrap sm:w-auto">
             <Checkbox
@@ -364,6 +487,11 @@ export default function ConnectionsListPanel({
               }}
               label={
                 <span className="text-sm font-medium text-text-muted">
+                  {providerId === "codex" && (
+                    <span className="mr-3">
+                      {providerText(t, "selectPageAccounts", "Select this page")}
+                    </span>
+                  )}
                   {selectedIds.size > 0
                     ? providerCountText(
                         t,
@@ -382,14 +510,28 @@ export default function ConnectionsListPanel({
                 </span>
               }
             />
-            {accountSearchInput}
-            {filterPills}
+            {providerId !== "codex" && (
+              <>
+                {accountSearchInput}
+                {filterPills}
+              </>
+            )}
           </div>
 
-          {bulkActions}
+          <div className="flex flex-wrap items-center gap-3">
+            {bulkActions}
+            {sortControl}
+          </div>
         </div>
         {paginationBar}
-        <div className="flex flex-col divide-y divide-border border border-t-0 border-border rounded-b-lg overflow-hidden">
+        <OptionalCollectionLayout
+          collection={
+            providerId === "codex"
+              ? { ...layoutProps, empty: pageConnections.length === 0 }
+              : undefined
+          }
+          className="flex flex-col divide-y divide-border border border-t-0 border-border rounded-b-lg overflow-hidden"
+        >
           {pageConnections.length === 0 ? (
             <div className="px-3 py-6 text-center text-sm text-text-muted">
               {t("noFilteredConnections", "No connections match the current filter.")}
@@ -399,11 +541,12 @@ export default function ConnectionsListPanel({
               <ConnectionRow
                 key={conn.id}
                 connection={conn}
+                codexViewMode={viewMode}
                 isOAuth={conn.authType === "oauth"}
                 isClaude={providerId === "claude"}
                 codexGlobalServiceMode={codexGlobalServiceMode}
-                isFirst={index === 0}
-                isLast={index === pageConnections.length - 1}
+                isFirst={sortOrder !== "priority" || index === 0}
+                isLast={sortOrder !== "priority" || index === pageConnections.length - 1}
                 isSelected={selectedIds.has(conn.id)}
                 onToggleSelect={() => handleToggleSelectOne(conn.id)}
                 onMoveUp={() => handleSwapPriority(conn, sorted[index - 1])}
@@ -495,8 +638,8 @@ export default function ConnectionsListPanel({
               />
             ))
           )}
-        </div>
-        {paginationBar}
+        </OptionalCollectionLayout>
+        {providerId !== "codex" && paginationBar}
       </>
     );
   }
@@ -528,15 +671,44 @@ export default function ConnectionsListPanel({
 
   return (
     <>
+      {searchToolbar}
       {selectedIds.size > 0 || connections.length > 0 ? (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-3 py-2 bg-muted/50 rounded-t-lg border border-b-0 border-border">
           <div className="flex w-full items-center gap-2 flex-wrap sm:w-auto">
             <Checkbox
-              checked={allSelected}
-              indeterminate={someSelected}
-              onChange={handleToggleSelectAll}
+              checked={
+                providerId === "codex"
+                  ? pageConnectionsTagged.length > 0 &&
+                    pageConnectionsTagged.every((c) => selectedIds.has(c.id))
+                  : allSelected
+              }
+              indeterminate={
+                providerId === "codex"
+                  ? pageConnectionsTagged.some((c) => selectedIds.has(c.id)) &&
+                    !pageConnectionsTagged.every((c) => selectedIds.has(c.id))
+                  : someSelected
+              }
+              onChange={
+                providerId === "codex"
+                  ? () =>
+                      setSelectedIds((prev) => {
+                        const next = new Set(prev);
+                        const remove = pageConnectionsTagged.every((c) => prev.has(c.id));
+                        for (const c of pageConnectionsTagged) {
+                          if (remove) next.delete(c.id);
+                          else next.add(c.id);
+                        }
+                        return next;
+                      })
+                  : handleToggleSelectAll
+              }
               label={
                 <span className="text-sm font-medium text-text-muted">
+                  {providerId === "codex" && (
+                    <span className="mr-3">
+                      {providerText(t, "selectPageAccounts", "Select this page")}
+                    </span>
+                  )}
                   {selectedIds.size > 0
                     ? providerCountText(
                         t,
@@ -555,8 +727,12 @@ export default function ConnectionsListPanel({
                 </span>
               }
             />
-            {accountSearchInput}
-            {filterPills}
+            {providerId !== "codex" && (
+              <>
+                {accountSearchInput}
+                {filterPills}
+              </>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -564,6 +740,7 @@ export default function ConnectionsListPanel({
                 removed the duplicate here that rendered simultaneously when nothing
                 was selected. Per-tag groups keep their own scoped button. */}
             {bulkActions}
+            {sortControl}
           </div>
         </div>
       ) : null}
@@ -594,16 +771,23 @@ export default function ConnectionsListPanel({
                   <span className="text-[10px] text-text-muted/40">{groupTotal}</span>
                 </div>
               )}
-              <div className="flex flex-col divide-y divide-border">
+              <OptionalCollectionLayout
+                collection={providerId === "codex" ? layoutProps : undefined}
+                className="flex flex-col divide-y divide-border"
+              >
                 {groupConns.map((conn, index) => (
                   <ConnectionRow
                     key={conn.id}
                     connection={conn}
+                    codexViewMode={viewMode}
                     isOAuth={conn.authType === "oauth"}
                     isClaude={providerId === "claude"}
                     codexGlobalServiceMode={codexGlobalServiceMode}
-                    isFirst={gi === 0 && index === 0}
-                    isLast={gi === visibleGroupKeys.length - 1 && index === groupConns.length - 1}
+                    {...groupedRowEdges(
+                      sortOrder,
+                      { index: gi, count: visibleGroupKeys.length },
+                      { index, count: groupConns.length }
+                    )}
                     isSelected={selectedIds.has(conn.id)}
                     onToggleSelect={() => handleToggleSelectOne(conn.id)}
                     onMoveUp={() => handleSwapPriority(conn, sorted[sorted.indexOf(conn) - 1])}
@@ -696,12 +880,12 @@ export default function ConnectionsListPanel({
                     onRefreshQuota={() => handleRefreshQuota(conn.id)}
                   />
                 ))}
-              </div>
+              </OptionalCollectionLayout>
             </div>
           );
         })}
       </div>
-      {paginationBar}
+      {providerId !== "codex" && paginationBar}
     </>
   );
 }

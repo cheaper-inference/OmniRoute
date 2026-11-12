@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  CollectionViewControls,
+  CollectionPagination,
+  OptionalCollectionLayout,
+  type CollectionView,
+  type CollectionPageSize,
+} from "./ProviderCollectionControls";
 import Icon from "@/shared/components/Icon";
 
 /**
@@ -194,8 +201,12 @@ export default function ProviderModelsSection({
   getUpstreamHeadersRecordForModel,
   t,
 }: ProviderModelsSectionProps) {
+  const [collectionView, setCollectionView] = useState<CollectionView>("list");
+  const [columns, setColumns] = useState(3);
+  const [pageSize, setPageSize] = useState<CollectionPageSize>(25);
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
+  const [modelPage, setModelPage] = useState({ key: "", page: 0 });
   // Catalog rows only: the compatible/passthrough branches mount their own copy of
   // the hook, so skip the duplicate fetch here. The key is the CANONICAL provider
   // id — the one the capability resolver reads model_context_overrides by and the
@@ -492,6 +503,26 @@ export default function ProviderModelsSection({
   const displayModels = sortFreeFirst
     ? sortModelsFreeFirst(filteredModels, { isFree: (m) => m.isFree, key: (m) => m.id })
     : filteredModels;
+  const operationalList = providerId === "codex";
+  const modelPageKey = JSON.stringify([
+    modelFilter,
+    visibilityFilter,
+    freeFilter,
+    sortFreeFirst,
+    pageSize,
+  ]);
+  const effectivePageSize = pageSize === "all" ? Math.max(1, displayModels.length) : pageSize;
+  const modelPageCount = Math.max(1, Math.ceil(displayModels.length / effectivePageSize));
+  const currentModelPage = Math.min(
+    modelPage.key === modelPageKey ? modelPage.page : 0,
+    modelPageCount - 1
+  );
+  const pagedModels = operationalList
+    ? displayModels.slice(
+        currentModelPage * effectivePageSize,
+        (currentModelPage + 1) * effectivePageSize
+      )
+    : displayModels;
   const activeCount = modelsWithVisibility.filter((m) => !m.isHidden).length;
   const hiddenFilteredCount = filteredModels.filter((m) => m.isHidden).length;
   const visibleFilteredCount = filteredModels.length - hiddenFilteredCount;
@@ -504,6 +535,16 @@ export default function ProviderModelsSection({
       {importButton}
       {modelsWithVisibility.length > 0 && (
         <ModelVisibilityToolbar
+          collectionControls={
+            operationalList ? (
+              <CollectionViewControls
+                view={collectionView}
+                onChange={setCollectionView}
+                columns={columns}
+                onColumnsChange={setColumns}
+              />
+            ) : undefined
+          }
           t={t}
           filterValue={modelFilter}
           onFilterChange={setModelFilter}
@@ -538,11 +579,40 @@ export default function ProviderModelsSection({
           onSortFreeFirstChange={setSortFreeFirst}
         />
       )}
-      <AutoGrid>
-        {displayModels.map((model) => {
+      {operationalList && (
+        <CollectionPagination
+          total={displayModels.length}
+          page={currentModelPage}
+          pageSize={pageSize}
+          onPage={(page) => setModelPage({ key: modelPageKey, page })}
+          onPageSize={setPageSize}
+        />
+      )}
+      <OptionalCollectionLayout
+        fallback={AutoGrid}
+        collection={
+          operationalList
+            ? {
+                view: collectionView,
+                columns,
+                headers: [
+                  providerText(t, "modelColumn", "Model"),
+                  providerText(t, "modelDetailsColumn", "Details & actions"),
+                  providerText(t, "endpointsColumn", "Endpoints"),
+                ],
+                empty: pagedModels.length === 0,
+              }
+            : undefined
+        }
+        className={
+          operationalList ? "divide-y divide-border rounded-lg border border-border" : undefined
+        }
+      >
+        {pagedModels.map((model) => {
           return (
             <ModelRow
               key={model.id}
+              collectionView={collectionView}
               model={model}
               endpointInfo={(() => {
                 const discovered = syncedAvailableModels.find((row) => row.id === model.id);
@@ -601,7 +671,7 @@ export default function ProviderModelsSection({
             })}
           </p>
         )}
-      </AutoGrid>
+      </OptionalCollectionLayout>
     </div>
   );
 }

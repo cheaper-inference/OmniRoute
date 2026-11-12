@@ -177,44 +177,56 @@ export default function ConnectionsHeaderToolbar({
           </div>
         )}
         {providerId === "codex" && (
-          <div
-            className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-subtle px-2 py-1 text-xs font-medium text-text-muted"
-            title={providerText(
-              t,
-              "providerDetailServiceModeTooltip",
-              "Set a global Codex service mode, or leave accounts on their individual service-tier setting."
-            )}
-          >
-            <span>{providerText(t, "providerDetailServiceModeLabel", "Global service mode:")}</span>
-            <Select
-              compact
-              value={codexGlobalServiceMode}
-              onChange={(event) =>
-                handleChangeCodexGlobalServiceMode(event.target.value as CodexGlobalServiceMode)
+          <details className="text-xs">
+            <summary className="cursor-pointer font-medium text-text-muted">
+              {providerText(t, "providerDetailServiceModeLabel", "Global service mode:")}{" "}
+              {
+                codexGlobalServiceModeOptions.find(
+                  (option) => option.value === codexGlobalServiceMode
+                )?.label
               }
-              disabled={savingCodexGlobalServiceMode || !codexSettingsLoaded}
-              aria-label={providerText(t, "globalCodexServiceMode", "Global Codex service mode")}
-              className="min-w-0 max-w-full"
-              selectClassName="text-xs"
+            </summary>
+            <div
+              className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-subtle px-2 py-1 text-xs font-medium text-text-muted"
+              title={providerText(
+                t,
+                "providerDetailServiceModeTooltip",
+                "Set a global Codex service mode, or leave accounts on their individual service-tier setting."
+              )}
             >
-              {codexGlobalServiceModeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-            {codexSettingsLoadError ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => void loadCodexSettings()}
-                className="h-6 min-h-0 px-2 text-[11px]"
-                title={codexSettingsLoadError}
+              <span>
+                {providerText(t, "providerDetailServiceModeLabel", "Global service mode:")}
+              </span>
+              <Select
+                compact
+                value={codexGlobalServiceMode}
+                onChange={(event) =>
+                  handleChangeCodexGlobalServiceMode(event.target.value as CodexGlobalServiceMode)
+                }
+                disabled={savingCodexGlobalServiceMode || !codexSettingsLoaded}
+                aria-label={providerText(t, "globalCodexServiceMode", "Global Codex service mode")}
+                className="min-w-0 max-w-full"
+                selectClassName="text-xs"
               >
-                {providerText(t, "retry", "Retry")}
-              </Button>
-            ) : null}
-          </div>
+                {codexGlobalServiceModeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+              {codexSettingsLoadError ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void loadCodexSettings()}
+                  className="h-6 min-h-0 px-2 text-[11px]"
+                  title={codexSettingsLoadError}
+                >
+                  {providerText(t, "retry", "Retry")}
+                </Button>
+              ) : null}
+            </div>
+          </details>
         )}
         {/* Provider-level proxy indicator/button */}
         <Button
