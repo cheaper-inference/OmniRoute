@@ -51,7 +51,7 @@ test("GET /api/providers/[id]/models returns normalized models with supportedEnd
           max_context_length: 8192,
         },
         {
-          id: "pixtral-large-latest",
+          id: "ministral-14b-latest",
           object: "model",
           capabilities: {
             completion_chat: true,
@@ -107,11 +107,11 @@ test("GET /api/providers/[id]/models returns normalized models with supportedEnd
   assert.equal(embedModel.supportsTools, false);
   assert.equal(embedModel.inputTokenLimit, 8192);
 
-  const pixtralModel = body.models.find((m) => m.id === "pixtral-large-latest");
-  assert.ok(pixtralModel, "pixtral-large-latest should be returned");
-  assert.equal(pixtralModel.supportsVision, true);
-  assert.equal(pixtralModel.supportsTools, true);
-  assert.equal(pixtralModel.inputTokenLimit, 131072);
+  const visionModel = body.models.find((m) => m.id === "ministral-14b-latest");
+  assert.ok(visionModel, "ministral-14b-latest should be returned");
+  assert.equal(visionModel.supportsVision, true);
+  assert.equal(visionModel.supportsTools, true);
+  assert.equal(visionModel.inputTokenLimit, 131072);
 
   const textModel = body.models.find((m) => m.id === "mistral-large-latest");
   assert.ok(textModel, "mistral-large-latest should be returned");

@@ -452,11 +452,14 @@ describe("useModelImportHandlers — import through the model sync", () => {
   });
 
   it("forwards supportsVision and max_output_tokens to provider-models API", async () => {
+    // The POST-to-provider-models path is the no-auth listing import: a provider
+    // WITH a connection writes through the sync route instead.
     const hook = renderHook(
       buildParams({
         providerId: "mistral",
         providerStorageAlias: "mistral",
-        connections: [conn("mistral-connection", true)],
+        isFreeNoAuth: true,
+        connections: [],
       })
     );
 
@@ -467,8 +470,8 @@ describe("useModelImportHandlers — import through the model sync", () => {
         json: async () => ({
           models: [
             {
-              id: "pixtral-large-latest",
-              name: "Pixtral Large",
+              id: "ministral-14b-latest",
+              name: "Ministral 3 14B",
               supportsVision: true,
               outputTokenLimit: 4096,
             },
@@ -488,7 +491,7 @@ describe("useModelImportHandlers — import through the model sync", () => {
     expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
       expect.objectContaining({
         provider: "mistral",
-        modelId: "pixtral-large-latest",
+        modelId: "ministral-14b-latest",
         supportsVision: true,
         max_output_tokens: 4096,
       })

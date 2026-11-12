@@ -6251,6 +6251,8 @@
     "openRouterModelPlaceholder": "anthropic/claude-3-opus",
     "customModels": "Custom Models",
     "customModelsHint": "Add model IDs not in the default list. These will be available for routing.",
+    "discoveredModel": "Discovered",
+    "discoveredModelHint": "Imported from the provider's model list, not typed by you",
     "normalizeToolCallIdLabel": "Normalize tool call IDs to 9 characters (e.g. Mistral)",
     "preserveDeveloperRoleLabel": "Keep OpenAI Responses developer role (do not map to system)",
     "compatAdjustmentsTitle": "Compatibility",

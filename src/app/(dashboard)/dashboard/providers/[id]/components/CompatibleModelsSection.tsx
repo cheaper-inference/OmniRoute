@@ -473,15 +473,19 @@ export default function CompatibleModelsSection({
                       const discovered = availableModels.find((row) => row.id === modelId);
                       const selected = customModelMap.get(modelId);
                       const catalog = fallbackModels.find((row) => row.id === modelId);
+                      // Endpoint list and provenance come from the SAME row: mixing
+                      // a discovered list with a registry row's absent provenance
+                      // rendered a declared card as "Assumed".
+                      const endpointSource = selected?.supportedEndpoints?.length
+                        ? selected
+                        : discovered?.supportedEndpoints?.length
+                          ? discovered
+                          : catalog?.supportedEndpoints?.length
+                            ? catalog
+                            : undefined;
                       return {
-                        supportedEndpoints:
-                          selected?.supportedEndpoints ??
-                          discovered?.supportedEndpoints ??
-                          catalog?.supportedEndpoints,
-                        endpointCapabilitySource:
-                          selected?.endpointCapabilitySource ??
-                          discovered?.endpointCapabilitySource ??
-                          catalog?.endpointCapabilitySource,
+                        supportedEndpoints: endpointSource?.supportedEndpoints,
+                        endpointCapabilitySource: endpointSource?.endpointCapabilitySource,
                         discoveredEndpoints: discovered?.supportedEndpoints,
                         resettable: Boolean(
                           discovered && selected?.endpointCapabilitySource === "operator"
