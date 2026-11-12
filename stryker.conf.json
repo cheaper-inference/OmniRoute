@@ -523,6 +523,7 @@
       "tests/unit/nvidia-quota-phase1.test.ts",
       "tests/unit/oauth-providers-config.test.ts",
       "tests/unit/oauth-redirect-uri-mismatch.test.ts",
+      "tests/unit/oauth-session-spread-priority.test.ts",
       "tests/unit/observability-fase04.test.ts",
       "tests/unit/observability-payloads.test.ts",
       "tests/unit/ollama-cloud-weekly-quota-cooldown-3709.test.ts",
