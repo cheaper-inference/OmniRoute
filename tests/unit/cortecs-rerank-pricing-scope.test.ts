@@ -83,7 +83,7 @@ test("durable SQL distinguishes the endpoint, reported zero and unrelated aliase
     ["cortecs", "/v1/rerank", 0, 0, 0],
     [null, null, null, 1, 0],
   ]) {
-    const sql = `WITH sample(provider,endpoint,provider_cost_usd) AS (VALUES (?,?,?))
+    const sql = `WITH sample(provider,endpoint,provider_cost_usd,calculated_cost_usd) AS (VALUES (?,?,?,NULL))
       SELECT CASE WHEN ${tokenPriceableUsageSql("sample")} THEN 1 ELSE 0 END as priceable,
       CASE WHEN ${unpricedCortecsRerankSql("sample")} THEN 1 ELSE 0 END as unpriced FROM sample`;
     assert.deepEqual(core.getDbInstance().prepare(sql).get(provider, endpoint, usd), {
@@ -92,6 +92,21 @@ test("durable SQL distinguishes the endpoint, reported zero and unrelated aliase
     });
   }
   assert.throws(() => tokenPriceableUsageSql("untrusted;alias"), /Invalid usage table alias/);
+});
+
+test("stored catalogue snapshots exclude tokens and never become unpriced reranks", () => {
+  for (const provider of ["cortecs", "mistral", "other"]) {
+    for (const cost of [0, 0.0123]) {
+      const sql = `WITH sample(provider,endpoint,provider_cost_usd,calculated_cost_usd)
+        AS (VALUES (?, '/v1/rerank', NULL, ?))
+        SELECT CASE WHEN ${tokenPriceableUsageSql("sample")} THEN 1 ELSE 0 END as priceable,
+        CASE WHEN ${unpricedCortecsRerankSql("sample")} THEN 1 ELSE 0 END as unpriced FROM sample`;
+      assert.deepEqual(core.getDbInstance().prepare(sql).get(provider, cost), {
+        priceable: 0,
+        unpriced: 0,
+      });
+    }
+  }
 });
 
 test("archived Cortecs values are snapshots, not retrospective token estimates", () => {

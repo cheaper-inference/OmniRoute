@@ -4,8 +4,9 @@
  * always move together and dedup no-ops never double count.
  */
 
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { AgentContext } from "@omniroute/open-sse/handlers/chatCore/agentContext.ts";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 
 import type { SqliteAdapter } from "./adapters/types";
 
@@ -49,10 +50,8 @@ function newSessionId(): string {
  * by client session id looks rows up by this id, so changing it hides existing sessions there.
  */
 function clientSessionRowId(apiKeyId: string | null, clientSessionId: string): string {
-  const digest = createHash("sha256")
-    .update(`${apiKeyId ?? ""}\x1f${clientSessionId}`)
-    .digest("hex");
-  return `as_${digest.slice(0, 32)}`;
+  // Same bytes as the historical sha256 hex prefix, so stored session ids keep matching.
+  return `as_${opaqueTokenFingerprint(`${apiKeyId ?? ""}\x1f${clientSessionId}`, { length: 32 })}`;
 }
 
 function findIdleWindowSession(db: SqliteAdapter, usage: AgentSessionUsage): string | null {

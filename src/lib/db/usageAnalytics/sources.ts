@@ -2,7 +2,7 @@
  * db/usageAnalytics/sources.ts — Pure SQL source-string builders for usage analytics.
  *
  * Builds the UNION subqueries that merge recent `usage_history` rows with older
- * `daily_usage_summary` aggregates. These functions are pure (no DB calls, no imports)
+ * `daily_usage_summary` aggregates. These functions are pure (no DB calls)
  * and are consumed by the query functions in the parent `usageAnalytics.ts` module.
  */
 
@@ -40,12 +40,12 @@ export interface UnifiedSourceResult {
 
 /**
  * Stored cost and priceable tokens of a raw usage_history row. A row carrying a
- * provider-reported exact cost (`provider_cost_usd` — credit-metered providers,
- * xAI) is billed by that cost; its tokens stay for display and are never priced
- * again. Rows without one are priced from their tokens as before.
+ * provider-reported cost or catalogue-priced snapshot uses that cost; tokens
+ * remain available for display, but are never priced again. Rows without a
+ * stored cost are priced from their tokens as before.
  */
 const RAW_COST_COLUMNS = `
-          COALESCE(provider_cost_usd, 0.0) as stored_cost,
+          COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost,
           CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_input ELSE 0 END as cost_tokens_input,
           CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_output ELSE 0 END as cost_tokens_output,
           CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,

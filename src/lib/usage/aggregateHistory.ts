@@ -276,8 +276,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
           COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
           COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
-          (provider_cost_usd IS NOT NULL) as hasStoredCost,
-          COALESCE(SUM(provider_cost_usd), 0) as storedCost
+          (COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL) as hasStoredCost,
+          COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost
         FROM usage_history
         WHERE timestamp < ?
           AND provider IS NOT NULL AND provider != ''
@@ -318,7 +318,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         // one cache-heavy request's clamped surplus cancel another request's
         // billable input.
         //
-        // A request with a provider-reported exact cost (`provider_cost_usd`) is
+        // A request with a provider-reported cost or catalogue snapshot is
         // archived at that cost; none of its tokens are priced.
         totalCost: row.hasStoredCost
           ? row.storedCost

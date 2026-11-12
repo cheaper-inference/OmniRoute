@@ -1,6 +1,6 @@
 import { getDbInstance } from "@/lib/db/core";
+import { getApiKeySpendRows } from "@/lib/db/apiKeySpend";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
-import { tokenPriceableUsageSql, unpricedCortecsRerankSql } from "@/lib/db/usageCostSql";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
 import { getOldestSearchLedgerSpendSince, sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
 import { calculateCostDetailed } from "./costCalculator";
@@ -95,21 +95,6 @@ export interface ApiKeyUsageLimitDeps {
   getProviderLimitsCache?: (connectionId: string) => ProviderLimitsCacheEntry | null;
   getAllProviderLimitsCache?: () => Record<string, ProviderLimitsCacheEntry>;
   getUnpricedUsagePolicy?: () => UnpricedUsageBudgetPolicy;
-}
-
-interface UsageCostRow {
-  unpricedRerankRequests?: number;
-  storedCost: number | null;
-  unmeteredRequests: number | null;
-  provider: string | null;
-  model: string | null;
-  serviceTier: string | null;
-  promptTokens: number | null;
-  completionTokens: number | null;
-  cacheReadTokens: number | null;
-  cacheCreationTokens: number | null;
-  reasoningTokens: number | null;
-  oldestTimestamp: string | null;
 }
 
 interface WeeklyResetCandidate {
@@ -518,7 +503,7 @@ const EMPTY_SPEND: ApiKeyUsdSpend = {
 };
 
 /** Oldest row across the groups the total counts; a group without provider/model is skipped. */
-function getOldestCountedUsageIso(rows: UsageCostRow[]): string | null {
+function getOldestCountedUsageIso(rows: ReturnType<typeof getApiKeySpendRows>): string | null {
   const oldestTimes = rows
     .filter((row) => row.provider && row.model)
     .map((row) => Date.parse(row.oldestTimestamp ?? ""))
@@ -528,31 +513,7 @@ function getOldestCountedUsageIso(rows: UsageCostRow[]): string | null {
 
 async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promise<ApiKeyUsdSpend> {
   if (!apiKeyId) return EMPTY_SPEND;
-  const db = getDbInstance();
-  const rows = db
-    .prepare(
-      `
-      SELECT
-        LOWER(provider) as provider,
-        LOWER(model) as model,
-        COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-        COALESCE(SUM(provider_cost_usd), 0) as storedCost,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN 1 ELSE 0 END), 0) as unmeteredRequests,
-        SUM(CASE WHEN ${unpricedCortecsRerankSql()} THEN 1 ELSE 0 END) as unpricedRerankRequests,
-        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_input ELSE 0 END), 0) as promptTokens,
-        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_output ELSE 0 END), 0) as completionTokens,
-        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
-        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
-        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens,
-        MIN(timestamp) as oldestTimestamp
-      FROM usage_history
-      WHERE api_key_id = @apiKeyId
-        AND timestamp >= @sinceIso
-        AND (success = 1 OR provider_cost_usd IS NOT NULL)
-      GROUP BY LOWER(provider), LOWER(model), serviceTier
-    `
-    )
-    .all({ apiKeyId, sinceIso }) as UsageCostRow[];
+  const rows = getApiKeySpendRows(apiKeyId, sinceIso);
 
   let total = 0;
   const unpriced = new Set<string>();
@@ -562,10 +523,11 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     const model = typeof row.model === "string" ? row.model : "";
     if (!provider || !model) continue;
 
-    // A provider-reported exact cost is the billed amount (credit-metered providers,
-    // xAI). Those rows' tokens are excluded above, and they never make the group
+    // Provider-reported costs and catalogue snapshots exclude their tokens
+    // above, avoiding a second charge. A known stored cost never makes the group
     // unpriced: only rows without a stored cost are priced from tokens.
     total += toNumber(row.storedCost);
+    if (toNumber(row.unpricedUnitRequests) > 0) unpriced.add(`${provider}/${model}`);
     if (toNumber(row.unmeteredRequests) === 0) continue;
     if (toNumber(row.unpricedRerankRequests) > 0) unpriced.add(`${provider}/${model}`);
 

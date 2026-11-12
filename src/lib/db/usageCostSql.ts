@@ -10,11 +10,12 @@ function prefix(alias: string): string {
 /** A missing rerank charge is not a token tariff, even when a pricing row exists. */
 export function unpricedCortecsRerankSql(alias = ""): string {
   const p = prefix(alias);
-  return `(${p}provider_cost_usd IS NULL AND LOWER(COALESCE(${p}provider, '')) = 'cortecs'
+  return `(COALESCE(${p}provider_cost_usd, ${p}calculated_cost_usd) IS NULL AND LOWER(COALESCE(${p}provider, '')) = 'cortecs'
     AND COALESCE(${p}endpoint, '') IN ('/v1/rerank', '/rerank'))`;
 }
 
-/** Exact USD rows and unpriced Cortecs reranks keep tokens for display only. */
+/** Stored USD snapshots and unpriced Cortecs reranks keep tokens for display only. */
 export function tokenPriceableUsageSql(alias = ""): string {
-  return `(${prefix(alias)}provider_cost_usd IS NULL AND NOT ${unpricedCortecsRerankSql(alias)})`;
+  const p = prefix(alias);
+  return `(COALESCE(${p}provider_cost_usd, ${p}calculated_cost_usd) IS NULL AND NOT ${unpricedCortecsRerankSql(alias)})`;
 }
