@@ -1,6 +1,6 @@
 # Family Alias Auto-Maintainer v2 Design
 
-**Status:** Approved 2026-11-11  
+**Status:** Approved 2026-11-11
 **Date:** 2026-11-11
 
 ## Decision
