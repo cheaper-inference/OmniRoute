@@ -53,7 +53,8 @@ async function connection(seconds = 3600) {
     name: "synthetic-refresh-gate",
     email: `${crypto.randomUUID()}@example.invalid`,
     accessToken: "synthetic-access",
-    refreshToken: "synthetic-refresh",
+    // Unique per connection: the refresh guard remembers a token the server rejected as dead.
+    refreshToken: `synthetic-refresh-${crypto.randomUUID()}`,
     idToken: "synthetic-id",
     expiresAt: new Date(Date.now() + seconds * 1000).toISOString(),
     isActive: true,

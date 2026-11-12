@@ -6,7 +6,7 @@ const END_STREAM_FLAG = 0x02;
  * big-endian length, then the JSON. The upstream rejects an unframed body, so
  * every streaming call has to build it the same way.
  */
-export function frameConnectJson(body: string): Uint8Array {
+export function frameConnectJson(body: string): Uint8Array<ArrayBuffer> {
   const json = new TextEncoder().encode(body);
   const out = new Uint8Array(HEADER + json.length);
   new DataView(out.buffer).setUint32(1, json.length, false);

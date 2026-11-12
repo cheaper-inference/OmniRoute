@@ -2,7 +2,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
-import { Button, Input, Modal, SegmentedControl, Textarea } from "@/shared/components";
+import {
+  Button,
+  Input,
+  Modal,
+  SegmentedControl,
+  SegmentedPanel,
+  SegmentedTabs,
+  Textarea,
+} from "@/shared/components";
 
 interface ImportGrokCliAuthModalProps {
   onClose: () => void;
@@ -134,19 +142,22 @@ export default function ImportGrokCliAuthModal({
         </p>
 
         {/* Tab toggle */}
-        <SegmentedControl
-          size="sm"
+        <SegmentedTabs
           value={tab}
           onChange={(next) => setTab(next as typeof tab)}
-          options={[
-            { value: "upload", label: t("grokUploadFile") },
-            { value: "paste", label: t("grokPasteJson") },
-          ]}
-        />
+          className="gap-4"
+        >
+          <SegmentedControl
+            semantics="tabs"
+            size="sm"
+            options={[
+              { value: "upload", label: t("grokUploadFile") },
+              { value: "paste", label: t("grokPasteJson") },
+            ]}
+          />
 
-        {/* Upload tab */}
-        {tab === "upload" && (
-          <div className="flex flex-col gap-3">
+          {/* Upload tab */}
+          <SegmentedPanel value="upload" className="flex flex-col gap-3">
             <Input
               type="file"
               accept=".json"
@@ -154,12 +165,10 @@ export default function ImportGrokCliAuthModal({
               onChange={handleFileChange}
               inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
             />
-          </div>
-        )}
+          </SegmentedPanel>
 
-        {/* Paste tab */}
-        {tab === "paste" && (
-          <div className="flex flex-col gap-3">
+          {/* Paste tab */}
+          <SegmentedPanel value="paste" className="flex flex-col gap-3">
             <Textarea
               className="h-32 resize-none font-mono text-sm"
               aria-label={t("grokPasteJson")}
@@ -167,8 +176,8 @@ export default function ImportGrokCliAuthModal({
               value={pasteText}
               onChange={(e) => handlePasteChange(e.target.value)}
             />
-          </div>
-        )}
+          </SegmentedPanel>
+        </SegmentedTabs>
 
         {/* Parse error */}
         {parseError && <p className="text-sm text-error">{parseError}</p>}

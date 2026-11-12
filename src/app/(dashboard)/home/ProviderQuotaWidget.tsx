@@ -77,7 +77,10 @@ function QuotaRow({ quota }: { quota: any }) {
     return (
       <div className="flex min-w-0 items-center justify-between gap-3 py-1.5">
         <span className="min-w-0 truncate text-xs font-medium text-text-main">{label}</span>
-        <span className="shrink-0 text-xs font-bold tabular-nums" style={{ color: colors.text }}>
+        <span
+          className="shrink-0 text-xs font-semibold tabular-nums"
+          style={{ color: colors.text }}
+        >
           {amount}
         </span>
       </div>
@@ -88,7 +91,10 @@ function QuotaRow({ quota }: { quota: any }) {
     <div className="flex min-w-0 flex-col gap-1 py-1.5" title={quota.modelKey || quota.name}>
       <div className="flex items-center justify-between gap-3">
         <span className="min-w-0 truncate text-xs font-medium text-text-main">{label}</span>
-        <span className="shrink-0 text-xs font-bold tabular-nums" style={{ color: colors.text }}>
+        <span
+          className="shrink-0 text-xs font-semibold tabular-nums"
+          style={{ color: colors.text }}
+        >
           {quota.unlimited
             ? "∞"
             : translateUsageOrFallback(t, "percentLeft", `${percentage}% left`, {

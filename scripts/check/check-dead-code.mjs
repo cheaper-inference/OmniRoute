@@ -178,6 +178,31 @@ export function resolveKnipBin(opts = {}) {
 }
 
 /**
+ * Parse knip's `--reporter json` stdout.
+ *
+ * knip >= 6.44 loads `next.config.*`, and ours calls fumadocs-mdx `createMDX()`,
+ * which prints "[MDX] generated files in …ms" to stdout before the report. The
+ * report is still intact, so read it from the first line that opens a JSON object.
+ * Output with no JSON report still throws a SyntaxError.
+ *
+ * Exported for unit testing.
+ *
+ * @param {string} stdout
+ * @returns {unknown} the parsed report
+ */
+export function parseKnipStdout(stdout) {
+  const text = String(stdout ?? "").trim();
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    const lines = text.split(/\r?\n/);
+    const start = lines.findIndex((line) => line.trimStart().startsWith("{"));
+    if (start <= 0) throw err;
+    return JSON.parse(lines.slice(start).join("\n"));
+  }
+}
+
+/**
  * Classify a knip invocation outcome.
  *
  * The subtlety this exists for: knip LEGITIMATELY exits non-zero when it finds
@@ -192,29 +217,6 @@ export function resolveKnipBin(opts = {}) {
  * @param {string} stdout - whatever knip wrote to stdout
  * @returns {{kind: "ok"|"infra"|"unparseable", exitCode: number, reason: string}}
  */
-/**
- * knip writes plugin warnings to stdout ahead of the report (`[MDX] generated ...`), and
- * that made JSON.parse throw on output that was actually fine. The report is the last
- * complete JSON object in the stream, so it is taken by its outermost braces.
- */
-export function extractKnipJson(text) {
-  const trimmed = typeof text === "string" ? text.trim() : "";
-  if (!trimmed) return null;
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    // fall through to the braced slice
-  }
-  const start = trimmed.indexOf("{");
-  const end = trimmed.lastIndexOf("}");
-  if (start === -1 || end <= start) return null;
-  try {
-    return JSON.parse(trimmed.slice(start, end + 1));
-  } catch {
-    return null;
-  }
-}
-
 export function classifyKnipFailure(execError, stdout) {
   const text = typeof stdout === "string" ? stdout.trim() : "";
 
@@ -227,8 +229,7 @@ export function classifyKnipFailure(execError, stdout) {
   // reporting findings. This is a successful measurement, not a failure.
   if (text) {
     try {
-      if (extractKnipJson(text) === null) throw new Error("no JSON object");
-
+      parseKnipStdout(text);
       return {
         kind: "ok",
         exitCode: DEAD_CODE_EXIT.OK,
@@ -340,8 +341,7 @@ function runKnip(cwd = ROOT) {
 
   let knipJson;
   try {
-    knipJson = extractKnipJson(String(stdout));
-    if (knipJson === null) throw new Error("no JSON object in knip output");
+    knipJson = parseKnipStdout(stdout);
   } catch (parseErr) {
     // Unreachable via classifyKnipFailure (it already JSON-parsed), kept as a
     // defensive guard so a future change cannot turn this into exit 2.

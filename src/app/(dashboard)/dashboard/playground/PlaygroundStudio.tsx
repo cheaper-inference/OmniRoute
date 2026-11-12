@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { StreamMetrics } from "@/shared/schemas/playground";
+import { SegmentedPanel, SegmentedTabs } from "@/shared/components/SegmentedControl";
 import StudioTopBar, { type StudioTab } from "./components/StudioTopBar";
 import StudioConfigPane, { type ConfigState } from "./components/StudioConfigPane";
 import { DEFAULT_PARAMS } from "./components/ParamSliders";
@@ -70,11 +71,13 @@ export function PlaygroundStudio() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+    <SegmentedTabs
+      value={effectiveTab}
+      onChange={(tab) => handleTabChange(tab as StudioTab)}
+      className="h-[calc(100vh-4rem)] gap-0 overflow-hidden"
+    >
       {/* Top bar with tabs + token/cost counter + export button */}
       <StudioTopBar
-        activeTab={effectiveTab}
-        onTabChange={handleTabChange}
         metrics={metrics}
         exportState={{
           endpoint: configState.endpoint,
@@ -92,18 +95,24 @@ export function PlaygroundStudio() {
       <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
         {/* Tab content */}
         <div className="min-h-40 flex-1 overflow-y-auto md:min-h-0 md:overflow-hidden">
-          {effectiveTab === "chat" && (
+          <SegmentedPanel value="chat" className="h-full">
             <ChatTab configState={configState} onMetricsUpdate={handleMetricsUpdate} />
-          )}
-          {effectiveTab === "compare" && <CompareTab configState={configState} />}
-          {effectiveTab === "api" && <ApiTab configState={configState} />}
-          {effectiveTab === "build" && <BuildTab configState={configState} />}
+          </SegmentedPanel>
+          <SegmentedPanel value="compare" className="h-full">
+            <CompareTab configState={configState} />
+          </SegmentedPanel>
+          <SegmentedPanel value="api" className="h-full">
+            <ApiTab configState={configState} />
+          </SegmentedPanel>
+          <SegmentedPanel value="build" className="h-full">
+            <BuildTab configState={configState} />
+          </SegmentedPanel>
         </div>
 
         {/* Config pane — always visible, collapsible */}
         {/* SLOT_PRESETS and SLOT_IMPROVE are inside StudioConfigPane */}
         <StudioConfigPane configState={configState} setConfigState={setConfigState} />
       </div>
-    </div>
+    </SegmentedTabs>
   );
 }

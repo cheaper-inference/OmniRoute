@@ -1,0 +1,1 @@
+- **fix(cli):** CLI command failures keep the concise error message by default and print the full stack trace only when `OMNIROUTE_DEBUG_STACK=1` is set ([#19590](https://github.com/cheaper-inference/OmniRoute/pull/19590)) — thanks @Bl0ck154

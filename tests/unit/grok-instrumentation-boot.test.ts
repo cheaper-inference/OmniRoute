@@ -79,7 +79,7 @@ function bootHarness({
     "@omniroute/open-sse/services/quotaTrackersBatch.ts": ["registerQuotaTrackersBatch"],
     "@/lib/providers/noAuthAutoRoutingReadiness": ["registerNoAuthAutoRoutingReadiness"],
     "@/lib/env/runtimeEnv": ["enforceWebRuntimeEnv"],
-    "@/lib/db/encryption": ["assertEncryptionKeyConfiguredForProduction"],
+    "@/lib/db/encryption": ["assertEncryptionKeyConfiguredForProduction", "probeStoredSecrets"],
     "@/lib/usage/migrations": [],
     "@/lib/consoleInterceptor": ["initConsoleInterceptor"],
     "@/lib/gracefulShutdown": ["initGracefulShutdown"],
@@ -141,6 +141,9 @@ function bootHarness({
       if (failDb) throw new Error("driver unavailable");
       events.push("db-ready");
     },
+    // The startup secret probe asks the same module for the handle once the DB
+    // is ready; an empty table scan keeps encryption off in the test.
+    getDbInstance: () => ({ prepare: () => ({ all: () => [] }) }),
   });
   add("@/lib/db/secrets", { getPersistedSecret: noop, persistSecret: noop });
   add("@/lib/db/providers", {

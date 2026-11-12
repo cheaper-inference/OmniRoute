@@ -7,7 +7,7 @@
  */
 
 import type { ComboRecord } from "@/domain/persistence/comboRepositories";
-import { backupDbFile } from "./backup";
+import { backupDbFile, backupDbFileAwaited } from "./backup";
 import { pruneDeletedComboConnectionRefs } from "./comboConnectionRefs";
 import { clearSessionModelHistoryForCombo } from "./contextHandoffs";
 import { getDbInstance } from "./core";
@@ -71,12 +71,16 @@ export async function reorderCombos(comboIds: string[]): Promise<ComboRecord[]> 
 }
 
 export async function deleteCombo(id: string): Promise<boolean> {
+  // Snapshot BEFORE the delete and wait for it: a snapshot taken after would not hold the
+  // combo. A failed routine snapshot is logged and must not block the delete.
+  await backupDbFileAwaited("pre-write").catch((error: unknown) => {
+    console.error("[DB] Pre-write backup failed:", error instanceof Error ? error.message : error);
+  });
   const deleted = await repository.deleteById(id);
   if (!deleted) return false;
 
   invalidateDbCache("combos");
   invalidateReasoningRoutingRuleCache();
-  backupDbFile("pre-write");
   return true;
 }
 

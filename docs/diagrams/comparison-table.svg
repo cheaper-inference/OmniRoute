@@ -196,8 +196,8 @@
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.15s" fill="freeze"/>
       <g class="cell" transform="translate(44 196) scale(.013 -.013)"><use href="#g1j"/><use href="#gg" x="602"/><use href="#gi" x="965"/><use href="#ge" x="1527"/><use href="#gn" x="2041"/><use href="#gl" x="2269"/><use href="#gf" x="2845"/><use href="#gg" x="3417"/><use href="#gm" x="3790"/></g>
   <text x="44" y="196" class="ol">Providers</text>
-      <g class="h4" transform="translate(427.9 196) scale(.014 -.014)"><use href="#g1k"/><use href="#g1l" x="576"/><use href="#g1l" x="1152"/></g>
-  <text x="440" y="196" class="ol">388</text>
+      <g class="h4" transform="translate(427.9 196) scale(.014 -.014)"><use href="#g1k"/><use href="#g1l" x="576"/><use href="#g1a" x="1152"/></g>
+  <text x="440" y="196" class="ol">389</text>
       <g class="cell" style="fill:var(--muted)" transform="translate(592.77 196) scale(.013 -.013)"><use href="#g1m"/><use href="#g1n" x="576"/><use href="#g1o" x="1152"/></g>
   <text x="604" y="196" class="ol">40+</text>
       <g class="cell" style="fill:var(--muted)" transform="translate(742.78 196) scale(.013 -.013)"><use href="#g1m"/><use href="#g1n" x="576"/><use href="#g1n" x="1152"/><use href="#g1o" x="1728"/><use href="#g1p" x="2304"/></g>

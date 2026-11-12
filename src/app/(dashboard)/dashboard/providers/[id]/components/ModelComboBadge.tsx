@@ -29,19 +29,20 @@ export default function ModelComboBadge({ combos, t }: ModelComboBadgeProps) {
   });
 
   return (
-    <span className="flex flex-wrap items-center gap-1" title={tooltip}>
+    <span className="flex min-w-0 max-w-full flex-wrap items-center gap-1" title={tooltip}>
       {combos.map((name) => (
         <Link
           key={name}
           href="/dashboard/combos"
           onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-0.5 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide leading-none text-primary hover:border-primary/60 hover:bg-primary/20 transition-colors"
+          className="inline-flex min-w-0 max-w-full items-center gap-0.5 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide leading-none text-primary hover:border-primary/60 hover:bg-primary/20 transition-colors"
           title={providerText(t, "openComboTooltip", "Open Combos — used by {combo}", {
             combo: name,
           })}
         >
           <Icon name="layers" size={10} />
-          {name}
+          {/* Combo names may be one unbreakable word (`_`/`.`), so truncate; the title has it. */}
+          <span className="min-w-0 truncate">{name}</span>
         </Link>
       ))}
     </span>

@@ -5,6 +5,9 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -359,12 +362,20 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // lookup behind the health endpoint, never connection selection or dispatch (class C).
     "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
+    // #18864: after a confirmed GLM reset-card redemption (whose caller already passed the
+    // auxiliary-lease gate) the row is re-read only to confirm the captured cooldown is
+    // unchanged before the compare-and-clear — a state read, never connection selection or
+    // dispatch, so class C (same shape as resetCreditCooldownRelease.ts).
+    "src/lib/usage/glmResetCardRecovery.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
     // ACTIVE exclusive lease defers redemption (409 exclusive_lease_active).
     "src/lib/usage/grokResetCredits.ts": 1,
-    "src/lib/usage/providerLimits.ts": 4,
+    // The fifth site re-reads the row after a live usage fetch only to compare the stored API key
+    // with the one the fetch used (an edit during the fetch retires the reading). It is a
+    // read-back guard, never selection or dispatch, so the class stays the same.
+    "src/lib/usage/providerLimits.ts": 5,
     // #4305 port: after a confirmed reset-credit redemption (whose caller already passed
     // the auxiliary-lease gate) the row is re-read only to check its terminal/codex-scope
     // state before lifting the local quota cooldown — a state read, never connection

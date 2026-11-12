@@ -120,6 +120,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "cpl",
   // Cloudflare Workers AI daily neurons vs the 10k/day free allocation (needs Analytics: Read)
   "cloudflare-ai",
+  // xKiro daily free-token quota (GET /v1/usage → free_tokens; wallet ignored)
+  "xkiro",
   // Zed Hosted Models USD credit (optional Orb billing portal link)
   "zed-hosted",
 ];

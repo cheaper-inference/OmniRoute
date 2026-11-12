@@ -595,8 +595,13 @@ export async function registerNodejs(): Promise<void> {
     import("@/lib/env/runtimeEnv").then(({ enforceWebRuntimeEnv }) => enforceWebRuntimeEnv()),
     // Warn loudly at boot if STORAGE_ENCRYPTION_KEY is missing in production.
     // Do not exit: an empty key is the documented encryption-disabled contract.
-    import("@/lib/db/encryption").then(({ assertEncryptionKeyConfiguredForProduction }) =>
-      assertEncryptionKeyConfiguredForProduction()
+    import("@/lib/db/encryption").then(
+      async ({ assertEncryptionKeyConfiguredForProduction, probeStoredSecrets }) => {
+        assertEncryptionKeyConfiguredForProduction();
+        // One decrypt of a stored secret: a wrong key logs once here, not once per provider.
+        const { getDbInstance } = await import("@/lib/db/core");
+        probeStoredSecrets(getDbInstance());
+      }
     ),
     import("@/lib/usage/migrations"),
     import("@/lib/consoleInterceptor").then(({ initConsoleInterceptor }) =>
