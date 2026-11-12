@@ -228,7 +228,10 @@ function assertKeptOwnerUsable(
   current: Connection | null | undefined,
   forcedId?: string | null
 ): void {
-  if (!current || current.unavailable) {
+  // Only a missing owner forces another account. A present owner that is cooling down
+  // (rate limit, per-model lockout) keeps the session: credential selection is pinned to
+  // it, so the caller gets the normal 429 with its reset instead of a cross-account error.
+  if (!current) {
     throw new MuseOwnershipError(
       "Muse session owner is unavailable; cross-account continuation is forbidden.",
       503

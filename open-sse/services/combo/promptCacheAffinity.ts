@@ -183,7 +183,8 @@ export function calculatePromptCacheAffinityScores(
  * original target as a fail-open fallback when no eligible account is known.
  */
 export async function expandPromptCacheAffinityTargets(
-  targets: ResolvedComboTarget[]
+  targets: ResolvedComboTarget[],
+  apiKeyAllowedConnectionIds: string[] | null = null
 ): Promise<ResolvedComboTarget[]> {
   const providers = Array.from(
     new Set(
@@ -210,14 +211,22 @@ export async function expandPromptCacheAffinityTargets(
       }
     })
   );
-  return expandPromptCacheAffinityTargetsFromConnections(targets, connectionsByProvider);
+  return expandPromptCacheAffinityTargetsFromConnections(
+    targets,
+    connectionsByProvider,
+    apiKeyAllowedConnectionIds
+  );
 }
 
 export function expandPromptCacheAffinityTargetsFromConnections(
   targets: ResolvedComboTarget[],
-  connectionsByProvider: Map<string, Array<Record<string, unknown>>>
+  connectionsByProvider: Map<string, Array<Record<string, unknown>>>,
+  apiKeyAllowedConnectionIds: string[] | null = null
 ): ResolvedComboTarget[] {
   const expandedTargets: ResolvedComboTarget[] = [];
+  // Cache affinity must never introduce account candidates outside the caller's key scope.
+  const apiKeyScope =
+    apiKeyAllowedConnectionIds === null ? null : new Set(apiKeyAllowedConnectionIds);
   for (const target of targets) {
     if (target.connectionId) {
       const provider =
@@ -249,9 +258,11 @@ export function expandPromptCacheAffinityTargetsFromConnections(
           )
         )
       : null;
-    const scopedConnectionIds = allowedConnectionIds
-      ? connectionIds.filter((connectionId) => allowedConnectionIds.has(connectionId))
-      : connectionIds;
+    const scopedConnectionIds = connectionIds.filter(
+      (connectionId) =>
+        (!allowedConnectionIds || allowedConnectionIds.has(connectionId)) &&
+        (!apiKeyScope || apiKeyScope.has(connectionId))
+    );
     if (scopedConnectionIds.length === 0) {
       expandedTargets.push(target);
       continue;

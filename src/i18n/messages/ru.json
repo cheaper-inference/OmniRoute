@@ -5679,6 +5679,7 @@
     "usageTracking": "Отслеживание использования",
     "securityDesc": "Установите пароль для защиты вашей панели управления или пропустите этот шаг.",
     "securityDescSkipWarning": "⚠️ Без пароля вы не сможете добавлять провайдеров во время настройки. Их можно добавить позже на панели управления после установки пароля.",
+    "passwordAlreadySet": "Пароль панели управления уже задан. Его можно изменить позже в настройках.",
     "providerDesc": "Подключите своего первого поставщика искусственного интеллекта. Вы можете добавить больше позже.",
     "providerRequiresPassword": "Чтобы добавлять провайдеров, сначала необходимо установить пароль. Вернитесь к этапу настройки безопасности и установите пароль либо добавьте провайдеров позже на панели управления.",
     "apiKeyRequired": "Ключ API (обязательно)",
@@ -7227,7 +7228,8 @@
       "kiro": "Бесплатный тариф: 50 кредитов/месяц (~25K–100K токенов). ⚠️ Условия использования Kiro запрещают использование сторонних прокси/оболочек.",
       "codex": "Подключите OpenAI Codex с помощью существующего процесса OAuth.",
       "qwen": "Подключите Qwen Code с помощью существующего процесса OAuth.",
-      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens"
+      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} принимает собственные идентификаторы моделей поставщика. Импортируйте из /models или добавляйте собственные идентификаторы для маршрутизации.",
     "bedrockModelsDescription": "Модели Amazon Bedrock охватываются регионом AWS. Импортируйте из /models или добавьте идентификаторы моделей Bedrock, включенные в выбранном регионе.",
@@ -10258,7 +10260,11 @@
     "mappingInvalidJson": "Некорректный JSON.",
     "mappingMustBeObject": "Сопоставление должно быть JSON-объектом, а не массивом или примитивным значением.",
     "mappingValueMustBeString": "Значение для ключа “{key}” должно быть строкой.",
-    "save": "Сохранить"
+    "save": "Сохранить",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12870,6 +12876,8 @@
     },
     "attempts": "попытки",
     "detail": {
+      "tabOverview": "Обзор",
+      "tabPayloads": "Данные запросов",
       "omittedHttpAttempts": "{count} отправок HTTP не сохранено",
       "noHttpResponse": "Ответ HTTP не наблюдался",
       "transportError": "Ошибка транспорта",

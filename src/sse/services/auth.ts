@@ -13,9 +13,14 @@ import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
+import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
-import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
+import {
+  isModelScopedFailure,
+  isQuotaExhaustedSignal,
+  isWorkspacePolicyBudget429,
+} from "./modelScopedQuotaFailure.ts"; // #13548, #19314
 import { isCIPayloadQuotaFailure } from "./ciPayloadQuotaFailure.ts";
 import {
   getCachedRawProviderConnections,
@@ -111,6 +116,7 @@ import {
   getRuntimeProviderProfile,
   recordModelLockoutFailure as recordModelLockoutFailureBase,
   retryHintBypassesMaxCooldownMs,
+  isAuthoritativeRetryHintSource,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
@@ -2066,10 +2072,13 @@ export async function getProviderCredentials(
     ) {
       const selectedPriority = connection.priority || 999;
       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
+      const isPriorityStrategy =
+        strategy === "fill-first" || strategy === "priority" || strategy === "cost-optimized";
+      const maxAllowedPriority = isPriorityStrategy ? selectedPriority : selectedPriority + 1;
       const moreAvailablePeer = [...orderedConnections]
         .filter(
           (candidate) =>
-            candidate.authType === "oauth" && (candidate.priority || 999) <= selectedPriority + 1
+            candidate.authType === "oauth" && (candidate.priority || 999) <= maxAllowedPriority
         )
         .sort(
           (a, b) =>
@@ -2532,6 +2541,9 @@ export async function markAccountUnavailable(
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
+  if (provider === "muse-code" && isMusePolicyRefusal(status, errorText)) {
+    return { shouldFallback: true, cooldownMs: 0 };
+  }
   // Preserve the transport's original 429; cooling Opus would hide the cause and
   // prevent healthy small requests from using the same connection afterward.
   if (isCIPayloadQuotaFailure(provider, status, options.structuredError?.code))
@@ -2948,6 +2960,7 @@ export async function markAccountUnavailable(
     if (
       status === 429 &&
       egressBucketed &&
+      !isWorkspacePolicyBudget429(errorText) &&
       (fallbackResult.reason === RateLimitReason.QUOTA_EXHAUSTED ||
         fallbackResult.reason === RateLimitReason.RATE_LIMIT_EXCEEDED) &&
       !fallbackResult.permanent &&
@@ -3339,6 +3352,16 @@ export async function markAccountUnavailable(
           exactCooldownMs:
             fallbackResult.usedUpstreamRetryHint === true ? fallbackResult.cooldownMs : null,
           maxCooldownMs: mlSettings.maxCooldownMs,
+          // A structured upstream reset (reset_at/retry_after JSON or header) is the
+          // provider's own clock: a new, shorter hint must shrink a stale longer
+          // lock, otherwise the model stays parked after the provider recovered.
+          // Only an ACTUALLY-APPLIED upstream hint qualifies — the same condition as
+          // exactCooldownMs above. A locally scaled cooldown (usedUpstreamRetryHint
+          // === false, e.g. hints disabled in the profile while the body still
+          // carries a structured hint) must never shorten a longer lock (#CO-402).
+          authoritativeBodyReset:
+            fallbackResult.usedUpstreamRetryHint === true &&
+            isAuthoritativeRetryHintSource(fallbackResult.retryHintSource),
         }
       );
       updateProviderConnection(connectionId, {

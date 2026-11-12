@@ -5,6 +5,9 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
