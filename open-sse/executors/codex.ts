@@ -518,9 +518,10 @@ export function codexDropNonstandardEvents(): boolean {
 // re-allocated per block/iteration before hoisting.
 const CODEX_SSE_EVENT_LINE_RE = /^event:\s*(.+)$/m;
 const CODEX_SSE_BLOCK_SEP_RE = /\r?\n\r?\n/;
-export function filterNonstandardCodexSse(response: Response): Response {
+export function filterNonstandardCodexSse(response: Response, assumeSse = false): Response {
   const contentType = response.headers.get("content-type") || "";
-  if (!response.body || !contentType.includes("text/event-stream")) {
+  const isSse = contentType.includes("text/event-stream") || (assumeSse && contentType === "");
+  if (!response.body || !isSse) {
     return response;
   }
   const decoder = new TextDecoder();
@@ -666,7 +667,8 @@ type CodexSseTransientErrorPeek =
  */
 export async function peekCodexSseTransientError(
   response: Response,
-  timeoutMs: number = FETCH_BODY_TIMEOUT_MS
+  timeoutMs: number = FETCH_BODY_TIMEOUT_MS,
+  assumeSse = false
 ): Promise<CodexSseTransientErrorPeek> {
   const contentType = response.headers.get("content-type") || "";
   // #7536: check content-type BEFORE touching `response.body`. On the wreq-js
@@ -676,8 +678,10 @@ export async function peekCodexSseTransientError(
   // upstream response has an empty content-type, so it must short-circuit here
   // WITHOUT reading `.body` — otherwise chatCore's readNonStreamingResponseBody
   // 502s. Only genuine SSE responses (which this peek intends to buffer) reach
-  // the `.body` access below.
-  if (!response.ok || !contentType.includes("text/event-stream") || !response.body) {
+  // the `.body` access below. When the request was explicitly streaming (assumeSse),
+  // an empty content-type from chatgpt.com is treated as SSE.
+  const isSse = contentType.includes("text/event-stream") || (assumeSse && contentType === "");
+  if (!response.ok || !isSse || !response.body) {
     return { matched: null, message: null, replacementBody: null };
   }
 
@@ -899,12 +903,15 @@ export class CodexExecutor extends BaseExecutor {
       if (codexDropNonstandardEvents()) {
         const resp = (httpResult as { response?: Response }).response;
         if (resp?.body) {
-          (httpResult as { response: Response }).response = filterNonstandardCodexSse(resp);
+          (httpResult as { response: Response }).response = filterNonstandardCodexSse(
+            resp,
+            input.stream === true
+          );
         }
       }
       const resp = (httpResult as { response?: Response }).response;
       if (resp) {
-        const peek = await peekCodexSseTransientError(resp);
+        const peek = await peekCodexSseTransientError(resp, undefined, input.stream === true);
         if (peek.modelUnavailable) {
           // Model + account scoped: a 400 lets isModelScoped400 lock the model on this
           // connection and advance the combo; a 503 would feed the provider breaker.
