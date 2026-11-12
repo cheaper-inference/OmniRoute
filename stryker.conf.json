@@ -37,6 +37,7 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/truthful-stream-review.test.ts",
       "tests/unit/chatgpt-account-routing.test.ts",
       "tests/unit/chatgpt-siwc-lifecycle-contract-15201.test.ts",
       "tests/unit/chatgpt-siwc.test.ts",
@@ -45,6 +46,7 @@
       "tests/unit/combo-multimodal-input-routing.test.ts",
       "tests/unit/claude-model-scoped-429-headroom-18296.test.ts",
       "tests/unit/combo/codex-paid-credits-routing.test.ts",
+      "tests/unit/direct-path-stream-terminated-no-cooldown.test.ts",
       "tests/unit/model-lockout-one-step-per-episode.test.ts",
       "tests/unit/qoder-model-scoped-throttle-real-path.test.ts",
       "tests/unit/qoder-model-scoped-throttle.test.ts",
@@ -605,6 +607,7 @@
       "tests/unit/router-strategies.test.ts",
       "tests/unit/routing-adaptive-e2e.test.ts",
       "tests/unit/rule12-error-sanitization-sweep.test.ts",
+      "tests/unit/search-borrowed-key-search-scoped-lock.test.ts",
       "tests/unit/semantic-cache-skip-tool-call-store.test.ts",
       "tests/unit/serial/combo-health-autopilot.test.ts",
       "tests/unit/serial/combo-quota-share-cooldown-wait-timing.test.ts",

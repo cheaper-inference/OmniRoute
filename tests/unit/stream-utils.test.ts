@@ -254,6 +254,7 @@ test("createSSEStream passthrough converts textual tool-call content into struct
       provider: "antigravity",
       model: "antigravity/gemini-3.7-flash-low",
       body: {
+        tools: [{ type: "function", function: { name: "terminal" } }],
         messages: [{ role: "user", content: "inspect db" }],
       },
       onComplete(payload) {
@@ -312,7 +313,10 @@ test("createSSEStream passthrough converts split textual tool-call content at co
       sourceFormat: FORMATS.OPENAI,
       provider: "antigravity",
       model: "antigravity/gemini-3.7-flash-low",
-      body: { messages: [{ role: "user", content: "inspect db" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect db" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -375,7 +379,10 @@ test("createSSEStream passthrough handles textual tool-call content split inside
       sourceFormat: FORMATS.OPENAI,
       provider: "antigravity",
       model: "antigravity/gemini-3.7-flash-low",
-      body: { messages: [{ role: "user", content: "inspect db" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect db" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -436,7 +443,10 @@ test("createSSEStream passthrough buffers fragmented textual tool-call JSON befo
       sourceFormat: FORMATS.OPENAI,
       provider: "omniroute",
       model: "MainAgent",
-      body: { messages: [{ role: "user", content: "inspect" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -487,7 +497,10 @@ test("createSSEStream passthrough suppresses trailing prose plus textual tool ca
       sourceFormat: FORMATS.OPENAI,
       provider: "omniroute",
       model: "MainAgent",
-      body: { messages: [{ role: "user", content: "inspect static files" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect static files" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -2677,7 +2690,10 @@ test("createSSEStream passthrough does not swallow false positive textual tool c
       sourceFormat: FORMATS.OPENAI,
       provider: "omniroute",
       model: "MainAgent",
-      body: { messages: [{ role: "user", content: "inspect status" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect status" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
