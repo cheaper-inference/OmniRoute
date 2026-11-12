@@ -14,6 +14,7 @@ import {
 import { handleGeminiDecisionRequest } from "@omniroute/open-sse/handlers/geminiDecisionWorkflow.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { recordUnpricedBudgetUsage } from "@/domain/costRules";
+import { saveRequestUsage } from "@/lib/usageDb";
 import { recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { recordTokenUsage } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 
@@ -90,7 +91,22 @@ export async function POST(request: Request): Promise<Response> {
   const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
   return handleGeminiDecisionRequest(
     parsed.data, scope.allowedConnections, request.signal,
-    (tokens, startedAt) => {
+    (tokens, startedAt, connectionId) => {
+      // This row is consumed by daily/weekly usage windows and per-key
+      // analytics. Call logs alone cannot satisfy those limits.
+      void saveRequestUsage({
+        provider: "gemini",
+        model: GEMINI_DECISION_PUBLIC_MODEL,
+        tokens: { input_tokens: tokens, output_tokens: 0, total_tokens: tokens },
+        status: "200",
+        success: true,
+        endpoint: "/v1/decisions",
+        connectionId,
+        apiKeyId,
+        latencyMs: Date.now() - startedAt,
+      }, { deduplicate: false }).catch(() => {
+        console.error("[Gemini Decisions] Failed to save request usage");
+      });
       if (!apiKeyId) return;
       recordKeyQuotaUsage(apiKeyId, tokens);
       recordTokenUsage(apiKeyId, "gemini", GEMINI_DECISION_PUBLIC_MODEL, tokens, startedAt);

@@ -30,7 +30,7 @@ const TOTAL_DEADLINE_MS = 45_000;
 const RETRYABLE_STATUS = new Set([401, 402, 403, 408, 429, 500, 502, 503, 504]);
 
 type AllowedConnections = Parameters<typeof getProviderCredentialsWithQuotaPreflight>[2];
-type RecordDecisionUsage = (tokens: number, startedAt: number) => void;
+type RecordDecisionUsage = (tokens: number, startedAt: number, connectionId: string) => void;
 type Credential = {
   apiKey?: string | null;
   connectionId?: string | null;
@@ -202,7 +202,7 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
     // A Decisions response is metered upstream, but we have no verified USD
     // price for this model. Fail closed for limited dollar budgets instead of
     // silently treating it as a free inference call.
-    recordUsage(geminiDecisionInputTokens(response.body), started);
+    recordUsage(geminiDecisionInputTokens(response.body), started, connectionId);
     try {
       await clearRecoveredProviderState(credentials, recoverySnapshot);
     } catch {
