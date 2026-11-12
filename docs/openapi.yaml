@@ -4776,6 +4776,530 @@ paths:
         "200":
           description: Historical usage data
 
+  /api/reports/summary:
+    get:
+      tags: [Usage]
+      summary: Team report of coding-agent usage
+      description: >
+        Totals plus breakdowns by member, project, client, provider, model, account, day, git
+        branch, error code, service tier and billing team, computed from requests attributed to
+        agent sessions. Cost is the stored cost for requests that have one (the provider-reported
+        cost, else the catalogue estimate of a non-token tariff such as OCR pages), and is priced
+        from token counts at read time for the others.
+        Filters combine with AND; a filter given several values matches any of them. A breakdown
+        row's key is the value of its filter ("" is an empty field, filtered with `__none__`), so
+        a row drills down by calling this route or /api/reports/sessions with that filter added.
+      parameters:
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: >
+            `totals` over all matching requests, with the time and latency KPIs
+            (ReportTimeKpis); `breakdowns` rows carry the totals without those KPIs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [totals, breakdowns]
+                properties:
+                  totals:
+                    allOf:
+                      - $ref: "#/components/schemas/ReportSessionTotals"
+                      - $ref: "#/components/schemas/ReportTimeKpis"
+                      - type: object
+                        required: [sessions, members, projects, lastSeenAt]
+                        properties:
+                          sessions: { type: integer }
+                          members: { type: integer }
+                          projects: { type: integer }
+                          lastSeenAt: { type: string, format: date-time, nullable: true }
+                  breakdowns:
+                    type: object
+                    description: >-
+                      Rows per dimension, most cost first (daily: oldest day first). errorCodes
+                      has a "" row for the requests without an error code (all successful
+                      requests and failures that stored none); add outcome=error for failures
+                      only. teams rows carry the team name as label.
+                    required:
+                      [
+                        members,
+                        projects,
+                        clients,
+                        providers,
+                        models,
+                        accounts,
+                        daily,
+                        branches,
+                        errorCodes,
+                        serviceTiers,
+                        teams,
+                      ]
+                    additionalProperties:
+                      type: array
+                      items: { $ref: "#/components/schemas/ReportBreakdownRow" }
+        "400":
+          description: Invalid query parameters
+
+  /api/reports/sessions:
+    get:
+      tags: [Usage]
+      summary: List agent sessions for the team report
+      description: >
+        Sessions with at least one request matching the filters. Each row carries the totals of
+        those matching requests only (inside from/to, through the provider, model or account
+        filtered on), priced at read time like /api/reports/summary, so the rows add up to the
+        summary totals. firstSeenAt and lastSeenAt are all-time; windowFirstSeenAt and
+        windowLastSeenAt bound the matching requests.
+      parameters:
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+        - $ref: "#/components/parameters/ReportSessionSort"
+        - $ref: "#/components/parameters/ReportSessionOrder"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        "200":
+          description: One page of sessions and the number of matching sessions.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessions, total]
+                properties:
+                  sessions:
+                    type: array
+                    items: { $ref: "#/components/schemas/ReportSessionRow" }
+                  total: { type: integer, description: Matching sessions across all pages. }
+        "400":
+          description: Invalid query parameters
+
+  /api/reports/sessions/{id}:
+    get:
+      tags: [Usage]
+      summary: Agent session detail with a page of its requests
+      description: >
+        `session` holds the stored session counters (cost priced at request time). `totals` holds
+        the session's all-time request totals priced at read time, the same way as the sessions
+        list rows and the summary, plus its time and latency KPIs. `recentRequests` is one page
+        of all the session's requests, newest first, each priced at read time.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+        - name: limit
+          in: query
+          description: Requests per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: "{ session, recentRequests, requestsTotal, totals, timeline }"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session, recentRequests, requestsTotal, totals, timeline]
+                properties:
+                  session: { type: object, description: Stored agent session record. }
+                  recentRequests:
+                    type: array
+                    description: One page (limit, offset) of the session's requests, newest first.
+                    items: { $ref: "#/components/schemas/ReportSessionRequest" }
+                  requestsTotal:
+                    type: integer
+                    description: All of the session's requests, across pages.
+                  totals: { $ref: "#/components/schemas/ReportSessionDetailTotals" }
+                  timeline: { $ref: "#/components/schemas/ReportSessionTimeline" }
+        "400":
+          description: Invalid query parameters
+        "404":
+          description: Session not found
+
+  /api/reports/facets:
+    get:
+      tags: [Usage]
+      summary: Filter values for the team report dropdowns
+      description: >
+        The values each filter can offer, with the number of matching requests, for the time window
+        and the other active filters. Each dimension ignores its own filter, so a dimension keeps
+        offering its other values once one is picked. Counts only; nothing is priced.
+      parameters:
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+      responses:
+        "200":
+          description: Entries per dimension, most requests first, then by label.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    members,
+                    projects,
+                    clients,
+                    providers,
+                    models,
+                    accounts,
+                    branches,
+                    serviceTiers,
+                    errorCodes,
+                    teams,
+                  ]
+                properties:
+                  members: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  projects: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  clients: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  providers: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  models: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  accounts: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  branches: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  serviceTiers: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  errorCodes: { $ref: "#/components/schemas/ReportFacetEntries" }
+                  teams: { $ref: "#/components/schemas/ReportFacetEntries" }
+        "400":
+          description: Invalid query parameters
+
+  /api/reports/export:
+    get:
+      tags: [Usage]
+      summary: Download a team report breakdown, the sessions, the matrix or a session's requests
+      description: >
+        A breakdown type (members ... teams) exports the rows of that summary breakdown;
+        `sessions` the sessions list rows in the sort and order given, capped at 10,000 rows;
+        `matrix` the /api/reports/matrix view of `rows` x `cols`; `sessionRequests` every request
+        of the session `sessionId`, newest first, capped at 10,000 rows. The report filters apply
+        to every type except `sessionRequests`, which, like the session detail, covers the whole
+        session. `format=json` returns the same row objects as the report API (ReportExport;
+        ReportMatrixExport for the matrix). In CSV, a cell whose text starts with =, +, -, @, tab
+        or CR is prefixed with `'` so spreadsheets do not evaluate it. The file is named
+        `omniroute-report-<type>-<YYYY-MM-DD>.<csv|json>` with the UTC date. sort and order only
+        apply to type=sessions; rows, cols and metric are rejected unless type=matrix, and
+        sessionId unless type=sessionRequests.
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              [
+                members,
+                projects,
+                clients,
+                providers,
+                models,
+                accounts,
+                daily,
+                branches,
+                errorCodes,
+                serviceTiers,
+                teams,
+                sessions,
+                matrix,
+                sessionRequests,
+              ]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [csv, json]
+            default: csv
+        - name: rows
+          in: query
+          description: type=matrix only. Dimension of the rows.
+          schema:
+            type: string
+            enum: [members, projects, clients, providers, models, branches, teams]
+            default: members
+        - name: cols
+          in: query
+          description: type=matrix only. Dimension of the columns; must differ from rows.
+          schema:
+            type: string
+            enum: [members, projects, clients, providers, models, branches, teams]
+            default: projects
+        - name: metric
+          in: query
+          description: >-
+            type=matrix only. The value in each CSV cell; the JSON export holds every metric.
+            activeMs cells are empty where an entry splits sessions (see ReportMatrixMetrics).
+          schema:
+            type: string
+            enum: [costUsd, tokens, requests, activeMs]
+            default: costUsd
+        - name: sessionId
+          in: query
+          description: Required for type=sessionRequests, rejected for the other types.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 512
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+        - $ref: "#/components/parameters/ReportSessionSort"
+        - $ref: "#/components/parameters/ReportSessionOrder"
+      responses:
+        "200":
+          description: >
+            The CSV or JSON file (Content-Disposition attachment). Breakdown CSV columns: key,
+            label, detail, sessions, members, projects, requests, errors, tokens_input,
+            tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+            tokens_total, cost_usd, unpriced_requests, last_seen_at. Sessions CSV columns:
+            session_id, api_key_id, api_key_name, client, project_name, project_repo,
+            project_path, git_branch, requests, errors, tokens_total, cost_usd, unpriced_requests,
+            window_first_seen_at, window_last_seen_at, first_seen_at, last_seen_at,
+            active_time_ms, model_time_ms, main_model, tokens_reasoning. Matrix CSV: a header
+            line (`<rows> \ <cols> (<metric>)`, key, one column per column header, total), one
+            line per row header (its name, its key, a cell per column, the row total) and a last
+            `Total` line with the column totals; headers are named by label, else key, `(none)`
+            for the empty value, and the other bucket `Other (N more)` (its row key is
+            `__other__`). sessionRequests CSV columns: request_id, timestamp, provider, model,
+            connection_id, service_tier, status, success, error_code, latency_ms, ttft_ms,
+            tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation,
+            tokens_reasoning, tokens_uncached_input, cost_usd, priced.
+          headers:
+            X-Report-Total:
+              description: >-
+                Rows matching before the cap: breakdown rows, matching sessions, the session's
+                requests, or for the matrix its distinct row values (rowCount).
+              schema: { type: integer, minimum: 0 }
+            X-Report-Truncated:
+              description: >-
+                true when the export was capped: sessions and sessionRequests past 10,000 rows,
+                the matrix when either axis was capped. Always false for a breakdown.
+              schema: { type: string, enum: ["true", "false"] }
+          content:
+            text/csv:
+              schema:
+                type: string
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ReportExport"
+                  - $ref: "#/components/schemas/ReportMatrixExport"
+        "400":
+          description: >-
+            Invalid query parameters, a param of another type (rows, cols, metric, sessionId),
+            type=sessionRequests without sessionId, or matrix rows equal to cols
+        "404":
+          description: type=sessionRequests and the session does not exist
+
+  /api/reports/matrix:
+    get:
+      tags: [Usage]
+      summary: Team report matrix crossing two dimensions
+      description: >
+        The matching requests crossed by two dimensions (default members by projects), priced
+        like /api/reports/summary. Rows keep the 25 values with the most cost and columns the 15
+        with the most cost (ties: tokens, requests, key); the rest of each axis is summed into
+        a last entry with `other: true` and key `__other__`, and `truncated` is true. A cell
+        drills down by calling /api/reports/summary or /api/reports/sessions with the row's and
+        the column's filters (the other bucket has no single filter). Built from the same cached
+        read of the window as the summary, so a page loading both reads the window once.
+      parameters:
+        - name: rows
+          in: query
+          description: Dimension of the rows.
+          schema:
+            type: string
+            enum: [members, projects, clients, providers, models, branches, teams]
+            default: members
+        - name: cols
+          in: query
+          description: Dimension of the columns; must differ from rows.
+          schema:
+            type: string
+            enum: [members, projects, clients, providers, models, branches, teams]
+            default: projects
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: Row and column headers, every cell, and the totals.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportMatrix" }
+        "400":
+          description: Invalid query parameters, or rows equal to cols
+
+  /api/reports/trends:
+    get:
+      tags: [Usage]
+      summary: Team report trend per local day, stacked by a dimension
+      description: >
+        One metric of the matching requests per local day (tzOffset), stacked by one dimension:
+        the 8 values with the largest metric over the window (ties: key), then a series with
+        `other: true` and key `__other__` summing the rest. The days run from `from` (else the
+        first day with usage) to `to` (else today), days without usage included as zeros. A
+        window longer than 366 days is summed per week (Monday to Sunday) and `bucket` is
+        `week`; a window longer than 366 weeks is rejected with 400. Built from the same cached
+        read of the window as the summary.
+      parameters:
+        - name: dimension
+          in: query
+          description: Dimension to stack by.
+          schema:
+            type: string
+            enum:
+              [
+                members,
+                projects,
+                clients,
+                providers,
+                models,
+                branches,
+                teams,
+                errorCodes,
+                serviceTiers,
+              ]
+            default: members
+        - name: metric
+          in: query
+          description: costUsd, tokens (input + output) or requests.
+          schema:
+            type: string
+            enum: [costUsd, tokens, requests]
+            default: costUsd
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: The days and one series per stacked value.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportTrends" }
+        "400":
+          description: Invalid query parameters, or a window longer than 366 weeks
+
+  /api/reports/heatmap:
+    get:
+      tags: [Usage]
+      summary: Team report requests and cost by local weekday and hour
+      description: >
+        The matching requests and their cost (priced like /api/reports/summary) in a 7 x 24
+        grid of local weekday and hour (tzOffset), with the largest cell of each grid for
+        scaling. No filter selects one weekday or hour, so a cell has no drill-down.
+      parameters:
+        - $ref: "#/components/parameters/ReportFrom"
+        - $ref: "#/components/parameters/ReportTo"
+        - $ref: "#/components/parameters/ReportApiKeyId"
+        - $ref: "#/components/parameters/ReportProjectName"
+        - $ref: "#/components/parameters/ReportClient"
+        - $ref: "#/components/parameters/ReportProvider"
+        - $ref: "#/components/parameters/ReportModel"
+        - $ref: "#/components/parameters/ReportConnectionId"
+        - $ref: "#/components/parameters/ReportGitBranch"
+        - $ref: "#/components/parameters/ReportServiceTier"
+        - $ref: "#/components/parameters/ReportErrorCode"
+        - $ref: "#/components/parameters/ReportBillingTeamId"
+        - $ref: "#/components/parameters/ReportOutcome"
+        - $ref: "#/components/parameters/ReportSearch"
+        - $ref: "#/components/parameters/ReportTzOffset"
+      responses:
+        "200":
+          description: The two grids and their largest cells.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportHeatmap" }
+        "400":
+          description: Invalid query parameters
+
   /api/usage/logs:
     get:
       tags: [Usage]
@@ -17206,6 +17730,159 @@ components:
       required: true
       schema:
         type: string
+    ReportFrom:
+      name: from
+      in: query
+      description: >
+        Only count requests at or after this ISO 8601 timestamp. A `from` later than `to` is
+        rejected with 400.
+      schema:
+        type: string
+        format: date-time
+    ReportTo:
+      name: to
+      in: query
+      description: >
+        Only count requests at or before this ISO 8601 timestamp. A `to` earlier than `from` is
+        rejected with 400.
+      schema:
+        type: string
+        format: date-time
+    ReportApiKeyId:
+      name: apiKeyId
+      in: query
+      description: >
+        Team member (API key id). Repeat the parameter for several values (`?apiKeyId=a&apiKeyId=b`,
+        matched with IN). `__none__` matches sessions without an API key and can be mixed with ids.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportProjectName:
+      name: projectName
+      in: query
+      description: >
+        Project name; repeat for several values (names may contain commas, so no comma lists).
+        `__none__` matches sessions without a project and can be mixed with names. Matches the
+        session's latest project name (each request that reports one overwrites it), not the
+        value each request had when it was made, so all of a session's requests match or none do.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportClient:
+      name: client
+      in: query
+      description: >
+        Coding agent, e.g. claude-code or codex; repeat for several values. `__none__` matches
+        sessions without one.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportProvider:
+      name: provider
+      in: query
+      description: Provider of the request; repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportModel:
+      name: model
+      in: query
+      description: Only count requests to this model; repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportConnectionId:
+      name: connectionId
+      in: query
+      description: Provider account (connection id); repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportGitBranch:
+      name: gitBranch
+      in: query
+      description: >
+        Git branch of the session; repeat for several values. `__none__` matches sessions without
+        a branch. Matches the session's latest branch (each request that reports one overwrites
+        it), not the branch each request was made on, so all of a session's requests match or
+        none do.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportServiceTier:
+      name: serviceTier
+      in: query
+      description: >
+        Service tier of the request (standard, priority or flex; requests without one count as
+        standard); repeat for several values.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportErrorCode:
+      name: errorCode
+      in: query
+      description: >
+        Error code of the request; repeat for several values. `__none__` matches requests without
+        an error code.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportBillingTeamId:
+      name: billingTeamId
+      in: query
+      description: >
+        Billing team recorded on the request (see /api/teams); repeat for several values.
+        `__none__` matches requests without a billing team.
+      style: form
+      explode: true
+      schema: { $ref: "#/components/schemas/ReportFilterValues" }
+    ReportOutcome:
+      name: outcome
+      in: query
+      description: Only count successful (`success`) or failed (`error`) requests.
+      schema:
+        type: string
+        enum: [success, error]
+    ReportSearch:
+      name: search
+      in: query
+      description: >
+        Case-insensitive substring of the session id, client session id, project name, project
+        path or git branch. `%`, `_` and `\` match literally. Project and branch are the
+        session's latest values (each request that reports one overwrites them), not each
+        request's value at the time.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+    ReportTzOffset:
+      name: tzOffset
+      in: query
+      description: >
+        Minutes to add to UTC to get local time (send `-new Date().getTimezoneOffset()`). The
+        daily breakdown and the trends group by local day and the heatmap by local weekday and
+        hour; absent or 0 uses UTC. from/to are not shifted.
+      schema:
+        type: integer
+        minimum: -840
+        maximum: 840
+    ReportSessionSort:
+      name: sort
+      in: query
+      description: >-
+        lastSeen and firstSeen sort by the window bounds of each session; activeTime sorts by
+        activeMs.
+      schema:
+        type: string
+        enum: [lastSeen, firstSeen, requests, tokens, cost, activeTime]
+        default: lastSeen
+    ReportSessionOrder:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
 
   responses:
     Unauthorized:
@@ -17348,6 +18025,378 @@ components:
         cacheCreation: { type: integer }
         output: { type: integer, description: Output tokens, reasoning included. }
         reasoning: { type: integer }
+    ReportFilterValues:
+      description: >-
+        One filter value, or several from a repeated query parameter (`?model=a&model=b`).
+        `__none__` matches an empty field (NULL or "") and can be mixed with
+        values. At most 50 values of 1 to 512 characters each.
+      oneOf:
+        - { type: string, minLength: 1, maxLength: 512 }
+        - type: array
+          minItems: 1
+          maxItems: 50
+          items: { type: string, minLength: 1, maxLength: 512 }
+    ReportFacetEntries:
+      type: array
+      items:
+        type: object
+        required: [value, label, requests]
+        properties:
+          value:
+            type: string
+            description: Value to send as the filter; "" is an empty field (filter with `__none__`).
+          label: { type: string, nullable: true, description: Display name, when one is known. }
+          requests: { type: integer }
+    ReportSessionTotals:
+      type: object
+      description: Request totals of one session, priced at read time.
+      required: [requests, errors, unpricedRequests, costUsd, tokens]
+      properties:
+        requests: { type: integer }
+        errors: { type: integer }
+        unpricedRequests:
+          type: integer
+          description: >
+            Requests with tokens and no stored cost, on a model without a pricing row
+            (not in costUsd).
+        costUsd: { type: number }
+        tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+    ReportSessionRow:
+      allOf:
+        - $ref: "#/components/schemas/ReportSessionTotals"
+        - type: object
+          required:
+            - id
+            - apiKeyId
+            - apiKeyName
+            - client
+            - clientSessionId
+            - projectName
+            - projectRepo
+            - projectPath
+            - projectSource
+            - gitBranch
+            - firstSeenAt
+            - lastSeenAt
+            - windowFirstSeenAt
+            - windowLastSeenAt
+            - activeMs
+            - modelMs
+            - mainModel
+          properties:
+            id: { type: string }
+            apiKeyId: { type: string, nullable: true }
+            apiKeyName: { type: string, nullable: true }
+            client: { type: string, nullable: true }
+            clientSessionId: { type: string, nullable: true }
+            projectName: { type: string, nullable: true }
+            projectRepo: { type: string, nullable: true }
+            projectPath: { type: string, nullable: true }
+            projectSource: { type: string, nullable: true, description: "header or path" }
+            gitBranch: { type: string, nullable: true }
+            firstSeenAt: { type: string, format: date-time, description: All-time first request. }
+            lastSeenAt: { type: string, format: date-time, description: All-time last request. }
+            windowFirstSeenAt:
+              type: string
+              format: date-time
+              description: First request matching the filters.
+            windowLastSeenAt:
+              type: string
+              format: date-time
+              description: Last request matching the filters.
+            activeMs:
+              type: integer
+              description: Same as ReportTimeKpis.activeMs, over the matching requests.
+            modelMs:
+              type: integer
+              description: Sum of latency_ms of the matching requests.
+            mainModel:
+              type: string
+              nullable: true
+              description: >-
+                Model with the most matching requests; ties go to the higher cost, then the
+                name. null when that is the requests without a model.
+    ReportBreakdownRow:
+      allOf:
+        - $ref: "#/components/schemas/ReportSessionTotals"
+        - type: object
+          required: [key, label, detail, sessions, members, projects, lastSeenAt]
+          properties:
+            key:
+              type: string
+              description: >-
+                The value to filter on; "" is an empty field (filter with `__none__`). daily
+                rows hold the local day.
+            label:
+              type: string
+              nullable: true
+              description: Display name when one is known (API key name, account label, team name).
+            detail:
+              type: string
+              nullable: true
+              description: Project repo for projects, the provider for accounts.
+            sessions: { type: integer }
+            members: { type: integer }
+            projects: { type: integer }
+            lastSeenAt: { type: string, format: date-time, nullable: true }
+    ReportMatrixMetrics:
+      type: object
+      required: [requests, tokens, costUsd, activeMs]
+      properties:
+        requests: { type: integer }
+        tokens: { type: integer, description: input + output, as tokens.total in the summary. }
+        costUsd: { type: number }
+        activeMs:
+          type: integer
+          nullable: true
+          description: >-
+            Active time (as ReportTimeKpis.activeMs) of the sessions the entry covers. Only
+            entries whose dimensions all belong to the session (members, projects, clients,
+            branches) cover whole sessions; entries of a request-level dimension (providers,
+            models, teams) split sessions and have null. The totals always have it.
+    ReportMatrixHeader:
+      allOf:
+        - $ref: "#/components/schemas/ReportMatrixMetrics"
+        - type: object
+          required: [key, label, other]
+          properties:
+            key:
+              type: string
+              description: >-
+                The value to filter on ("" is an empty field: filter with `__none__`);
+                `__other__` for the other bucket.
+            label: { type: string, nullable: true, description: API key name or team name. }
+            other: { type: boolean, description: true for the bucket summing the rest. }
+    ReportMatrix:
+      type: object
+      required:
+        [rowDimension, colDimension, rows, cols, cells, totals, truncated, rowCount, colCount]
+      properties:
+        rowDimension: { type: string }
+        colDimension: { type: string }
+        rows:
+          type: array
+          description: Up to 25 values by cost, then the other bucket when there are more.
+          items: { $ref: "#/components/schemas/ReportMatrixHeader" }
+        cols:
+          type: array
+          description: Up to 15 values by cost, then the other bucket when there are more.
+          items: { $ref: "#/components/schemas/ReportMatrixHeader" }
+        cells:
+          type: array
+          description: cells[i][j] holds rows[i] x cols[j]; every cell is present (zeros when empty).
+          items:
+            type: array
+            items: { $ref: "#/components/schemas/ReportMatrixMetrics" }
+        totals: { $ref: "#/components/schemas/ReportMatrixMetrics" }
+        truncated:
+          type: boolean
+          description: true when either axis had more values than its cap.
+        rowCount: { type: integer, description: Distinct row values before the cap. }
+        colCount: { type: integer, description: Distinct column values before the cap. }
+    ReportExportEnvelope:
+      type: object
+      required: [type, generatedAt, filters, total, truncated]
+      properties:
+        type: { type: string, description: The export type. }
+        generatedAt: { type: string, format: date-time }
+        filters:
+          type: object
+          additionalProperties: true
+          description: >-
+            The parsed report filters that selected the rows (from/to normalized to UTC, repeated
+            values as arrays); `{ sessionId }` for type=sessionRequests.
+        total:
+          type: integer
+          description: Same as the X-Report-Total header.
+        truncated:
+          type: boolean
+          description: Same as the X-Report-Truncated header.
+    ReportExport:
+      description: JSON export of a breakdown, the sessions or a session's requests.
+      allOf:
+        - $ref: "#/components/schemas/ReportExportEnvelope"
+        - type: object
+          required: [rows]
+          properties:
+            rows:
+              type: array
+              description: >-
+                ReportBreakdownRow for a breakdown type, ReportSessionRow for sessions (as
+                /api/reports/sessions), ReportSessionRequest for sessionRequests (as the session
+                detail's recentRequests).
+              items:
+                oneOf:
+                  - $ref: "#/components/schemas/ReportBreakdownRow"
+                  - $ref: "#/components/schemas/ReportSessionRow"
+                  - $ref: "#/components/schemas/ReportSessionRequest"
+    ReportMatrixExport:
+      description: >-
+        JSON export of the matrix: the envelope plus the /api/reports/matrix response. total is
+        rowCount; rows are the row headers.
+      allOf:
+        - $ref: "#/components/schemas/ReportExportEnvelope"
+        - $ref: "#/components/schemas/ReportMatrix"
+    ReportTrends:
+      type: object
+      required: [dimension, metric, bucket, days, series]
+      properties:
+        dimension: { type: string }
+        metric: { type: string, enum: [costUsd, tokens, requests] }
+        bucket:
+          type: string
+          enum: [day, week]
+          description: week when the window spans more than 366 local days.
+        days:
+          type: array
+          description: Local days (YYYY-MM-DD), oldest first; for weeks, the Monday each starts on.
+          items: { type: string, format: date }
+        series:
+          type: array
+          description: Up to 8 series by the metric's window total, then other.
+          items:
+            type: object
+            required: [key, label, other, values]
+            properties:
+              key:
+                type: string
+                description: >-
+                  The value to filter on ("" is an empty field: filter with `__none__`);
+                  `__other__` for the other series.
+              label: { type: string, nullable: true, description: API key name or team name. }
+              other: { type: boolean }
+              values:
+                type: array
+                description: One value per entry of days.
+                items: { type: number }
+    ReportHeatmap:
+      type: object
+      required: [requests, costUsd, maxRequests, maxCostUsd]
+      properties:
+        requests:
+          type: array
+          description: requests[weekday][hour], local weekday 0 = Sunday to 6 = Saturday, hour 0-23.
+          minItems: 7
+          maxItems: 7
+          items:
+            type: array
+            minItems: 24
+            maxItems: 24
+            items: { type: integer }
+        costUsd:
+          type: array
+          description: Cost in the same layout as requests.
+          minItems: 7
+          maxItems: 7
+          items:
+            type: array
+            minItems: 24
+            maxItems: 24
+            items: { type: number }
+        maxRequests: { type: integer, description: Largest requests cell; 0 without requests. }
+        maxCostUsd: { type: number, description: Largest costUsd cell. }
+    ReportTimeKpis:
+      type: object
+      description: >-
+        Time and latency over the same requests as the totals. Latency and TTFT averages use
+        only requests with a recorded value (> 0).
+      required:
+        [cacheHitRate, avgLatencyMs, p95LatencyMs, avgTtftMs, costPerSession, activeMs, modelMs]
+      properties:
+        cacheHitRate:
+          type: number
+          nullable: true
+          description: tokens.cacheRead / tokens.input; null when input is 0.
+        avgLatencyMs: { type: integer, nullable: true, description: Mean latency_ms. }
+        p95LatencyMs:
+          type: integer
+          nullable: true
+          description: Nearest-rank 95th percentile of latency_ms.
+        avgTtftMs:
+          type: integer
+          nullable: true
+          description: Mean time to first token; requests that reported none store their latency.
+        costPerSession:
+          type: number
+          nullable: true
+          description: costUsd / sessions; null without sessions.
+        activeMs:
+          type: integer
+          description: >-
+            Per session, the time from the first request's start to the last request's end,
+            with each idle gap between requests counted up to 15 minutes; summed over sessions.
+        modelMs: { type: integer, description: Sum of latency_ms. }
+    ReportSessionDetailTotals:
+      allOf:
+        - $ref: "#/components/schemas/ReportSessionTotals"
+        - $ref: "#/components/schemas/ReportTimeKpis"
+        - type: object
+          required: [wallMs]
+          properties:
+            wallMs:
+              type: integer
+              description: Last request time minus first request time.
+    ReportSessionRequest:
+      type: object
+      required:
+        - id
+        - timestamp
+        - provider
+        - model
+        - connectionId
+        - serviceTier
+        - status
+        - success
+        - errorCode
+        - latencyMs
+        - ttftMs
+        - tokens
+        - costUsd
+        - priced
+      properties:
+        id: { type: integer }
+        timestamp: { type: string, format: date-time }
+        provider: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        connectionId: { type: string, nullable: true }
+        serviceTier:
+          { type: string, description: The priced tier; "standard" when none was stored. }
+        status: { type: string, nullable: true }
+        success: { type: boolean }
+        errorCode: { type: string, nullable: true }
+        latencyMs: { type: integer }
+        ttftMs:
+          type: integer
+          description: Time to first token; full latency when none was reported, 0 when unrecorded.
+        tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+        costUsd:
+          type: number
+          description: >
+            The stored cost when the request has one (provider-reported, else a non-token
+            catalogue estimate), otherwise priced at read time.
+        priced:
+          type: boolean
+          description: >
+            false when the request has tokens, no stored cost and its model has no
+            pricing row.
+    ReportSessionTimeline:
+      type: object
+      required: [points, capped]
+      properties:
+        points:
+          type: array
+          description: The newest 2000 requests at most, oldest first.
+          items:
+            type: object
+            required: [timestamp, model, latencyMs, ok]
+            properties:
+              timestamp: { type: string, format: date-time }
+              model: { type: string, nullable: true }
+              latencyMs: { type: integer }
+              ok: { type: boolean, description: false when the request failed. }
+        capped:
+          type: boolean
+          description: true when the session has more requests than points; the oldest are left out.
     ImportedApiKey:
       type: object
       additionalProperties: false
