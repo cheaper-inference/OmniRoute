@@ -28,6 +28,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { validateProviderApiKey } from "@/lib/providers/validation";
 import { INFOMANIAK_HTTPS_REQUIRED_MESSAGE, isHttpsBaseUrl } from "@/shared/constants/infomaniak";
+import { resolveProviderId } from "@/shared/constants/providers";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { getProxyForLevel } from "@/lib/db/settings";
 import { resolveProxyForProvider } from "@/lib/db/proxies";
@@ -84,7 +85,8 @@ function isKnownImportProvider(provider: string): boolean {
 // Infomaniak has no fixed host (the product id lives in the Base URL path) and sends the key as a
 // Bearer token, so an import needs an https Base URL even when key validation is skipped.
 function infomaniakImportError(entry: ImportEntry, data: Record<string, unknown> | undefined) {
-  if (entry.provider !== "infomaniak") return null;
+  // The catalog also accepts the alias (imk); the connection keeps the id it was imported under.
+  if (resolveProviderId(entry.provider) !== "infomaniak") return null;
   const baseUrl = typeof data?.baseUrl === "string" ? data.baseUrl.trim() : "";
   return baseUrl && isHttpsBaseUrl(baseUrl) ? null : INFOMANIAK_HTTPS_REQUIRED_MESSAGE;
 }

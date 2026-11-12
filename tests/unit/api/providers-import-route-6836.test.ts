@@ -272,3 +272,24 @@ test("providers import route rejects infomaniak without an https Base URL, even 
   assert.deepEqual(body.errors.map((e) => e.index).sort(), [0, 1]);
   assert.match(body.errors[0]?.message ?? "", /https/);
 });
+
+test("providers import route applies the infomaniak https gate to its alias (imk)", async () => {
+  await resetStorage();
+  const response = await postImport({
+    validateKeys: false,
+    entries: [
+      { provider: "imk", name: "alias-no-url", apiKey: "sk-1" },
+      {
+        provider: "imk",
+        name: "alias-http",
+        apiKey: "sk-2",
+        baseUrl: "http://api.infomaniak.com/2/ai/12345/openai/v1",
+      },
+    ],
+  });
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as ImportRouteResponse;
+  assert.equal(body.success, 0);
+  assert.equal(body.failed, 2);
+  assert.equal(body.created.length, 0);
+});

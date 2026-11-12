@@ -133,3 +133,22 @@ test("infomaniak validation rejects an http models URL override and makes no req
   assert.match(String(result.error), /https/);
   assert.equal(calls, 0);
 });
+
+for (const modelsUrl of ["HTTP://example.org/models", "//example.org/models", "models"]) {
+  test(`infomaniak validation rejects a non-https models URL override (${modelsUrl})`, async () => {
+    let calls = 0;
+    globalThis.fetch = (async () => {
+      calls += 1;
+      return new Response("{}", { status: 200 });
+    }) as typeof fetch;
+
+    const result = await validateProviderApiKey({
+      provider: "infomaniak",
+      apiKey: "k",
+      providerSpecificData: { baseUrl: BASE_URL, modelsUrl },
+    });
+
+    assert.equal(result.valid, false);
+    assert.equal(calls, 0);
+  });
+}

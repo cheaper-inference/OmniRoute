@@ -149,6 +149,7 @@ import {
 } from "./discovery/normalizers";
 import { isNamedOpenAIStyleProvider } from "./discovery/providerSets";
 import { INFOMANIAK_HTTPS_REQUIRED_MESSAGE, isHttpsBaseUrl } from "@/shared/constants/infomaniak";
+import { resolveProviderId } from "@/shared/constants/providers";
 import { buildStaleEncryptionKeyResponse } from "./staleEncryptionGuard";
 import {
   type ProviderModelsConfigEntry,
@@ -880,8 +881,11 @@ export async function GET(
       }
 
       // The discovery request carries the connection's Bearer key; refuse plain http.
-      if (provider === "infomaniak" && !isHttpsBaseUrl(baseUrl)) {
-        return NextResponse.json({ error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE }, { status: 400 });
+      if (resolveProviderId(provider) === "infomaniak" && !isHttpsBaseUrl(baseUrl)) {
+        return NextResponse.json(
+          { error: sanitizeErrorMessage(INFOMANIAK_HTTPS_REQUIRED_MESSAGE) },
+          { status: 400 }
+        );
       }
 
       let base = baseUrl.replace(/\/$/, "");
