@@ -16,3 +16,6 @@ export { liveStateHash, planOmniRoute } from "./omniroute/plan.ts";
 export { applyOmniRoute } from "./omniroute/apply.ts";
 export { applyCpa } from "./cpa/apply.ts";
 export { CPA_MANAGED_PROVIDER, cpaStateHash, planCpa } from "./cpa/plan.ts";
+export { runCli } from "./cli.ts";
+export { createSavedPlan, makeRunReport, verifySavedPlan } from "./run.ts";
+export { reportHash } from "./report.ts";
