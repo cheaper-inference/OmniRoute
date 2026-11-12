@@ -14,6 +14,7 @@ import {
 } from "../../open-sse/services/claudeLimitReset.ts";
 // Namespace import: the memo API is exercised per test, so one missing export fails one test.
 import * as resetCreditMemo from "../../open-sse/services/claudeResetCreditCount.ts";
+import { _resetClaudeOauthUsageCooldown } from "../../open-sse/services/claudeUsageCooldown.ts";
 import * as resetCreditRedemption from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/useCodexResetCreditRedemption.ts";
 import { parseQuotaData } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/utils.tsx";
 import {
@@ -287,6 +288,7 @@ function deferredListFetch() {
 test.beforeEach(() => {
   resetCreditMemo._resetClaudeResetCreditCountCache();
   _resetClaudeLimitResetMemo();
+  _resetClaudeOauthUsageCooldown();
 });
 
 test("the regular usage poller never requests the reset-credit list and keeps the base headers", async () => {
@@ -446,11 +448,15 @@ test("throttled or failing lists keep the last count; other 4xx make it unknown"
     fetchImpl: seed.fetchImpl,
   });
   for (const status of [429, 503]) {
+    // A 429 starts the shared OAuth-usage cooldown (claude-usage-cooldown-reset-credits.test.ts);
+    // let it expire so the next upstream status is observed.
+    _resetClaudeOauthUsageCooldown();
     await resetCreditMemo.fetchAndSeedClaudeResetCreditUsage("conn-1", "tok", {
       fetchImpl: mockClaudeUpstream({ listStatus: status }).fetchImpl,
     });
     assert.equal(resetCreditMemo.peekClaudeResetCreditCount("conn-1"), 3, `kept after ${status}`);
   }
+  _resetClaudeOauthUsageCooldown();
   await resetCreditMemo.fetchAndSeedClaudeResetCreditUsage("conn-1", "tok", {
     fetchImpl: mockClaudeUpstream({ listStatus: 403 }).fetchImpl,
   });
