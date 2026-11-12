@@ -772,10 +772,38 @@ export async function cleanupExpiredLogs() {
   let trimmedProxyLogs = 0;
 
   try {
-    const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoff);
-    deletedUsage = r1.changes;
-  } catch {
-    /* table may not exist */
+    const { tableExists, deleteWholeDaysBefore } = await import("../db/cleanup/usagePurge");
+    if (tableExists("usage_history")) {
+      // This pass runs at boot, before the periodic retention job, and the rows it
+      // removes are the only source daily_usage_summary and daily_team_usage_summary
+      // are built from. Roll them up first, or that usage leaves the summaries with
+      // the rows. A rollup that fails or reports errors leaves the rows alone instead
+      // of dropping them uncounted; the next pass collects them once it can roll up.
+      // Rollup and delete share cleanupUsageHistory()'s whole-day boundary: a rollup
+      // replaces a day's totals, so deleting part of a day would let the next rollup
+      // rebuild that day from the remaining rows only.
+      const usageCutoffDate = usageCutoff.split("T")[0];
+      let rolledUp = false;
+      try {
+        const { rollupUsageHistoryBeforeDate } = await import("../usage/aggregateHistory");
+        const rollup = await rollupUsageHistoryBeforeDate(usageCutoffDate);
+        rolledUp = rollup.errors === 0;
+        if (!rolledUp) {
+          console.error("[compliance] usage rollup reported errors; usage_history rows are kept");
+        }
+      } catch (error) {
+        console.error("[compliance] usage rollup failed; usage_history rows are kept", error);
+      }
+      if (rolledUp) {
+        try {
+          deletedUsage = await deleteWholeDaysBefore("usage_history", "timestamp", usageCutoffDate);
+        } catch (error) {
+          console.error("[compliance] could not delete old usage_history rows", error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[compliance] could not reach usage_history", error);
   }
 
   try {

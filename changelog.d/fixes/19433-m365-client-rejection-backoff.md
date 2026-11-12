@@ -1,0 +1,1 @@
+- **fix(oauth):** A Microsoft 365 Copilot connection whose tenant rejects the client (`unauthorized_client`) now stops redeeming its refresh token after 3 consecutive rejections and waits 30 minutes before the next attempt, instead of calling the token endpoint on every chat request. ([#19433](https://github.com/cheaper-inference/OmniRoute/pull/19433))
