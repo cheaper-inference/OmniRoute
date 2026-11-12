@@ -71,10 +71,13 @@ function appendTextToFunctionResponse(
   textParts: string[]
 ): boolean {
   const response = part.functionResponse?.response;
-  if (!response || typeof response.result !== "string") return false;
+  // A failed tool_result carries its text in `error`, a successful one in `result`.
+  const key = typeof response?.result === "string" ? "result" : "error";
+  const current = response?.[key];
+  if (!response || typeof current !== "string") return false;
   const combinedText = textParts.join("\n");
   if (!combinedText) return false;
-  response.result = response.result ? `${response.result}\n${combinedText}` : combinedText;
+  response[key] = current ? `${current}\n${combinedText}` : combinedText;
   return true;
 }
 
@@ -127,6 +130,10 @@ function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
     for (const index of leadingIndexes.reverse()) content.parts.splice(index, 1);
   }
 }
+
+// Every turn re-sends all earlier tool_result images; keep only the newest few.
+const MAX_TOOL_RESULT_IMAGES = 5;
+const TOOL_RESULT_IMAGE_PLACEHOLDER = "[Earlier tool result image omitted to bound request size]";
 
 type ToolUseOccurrence = { name: string; signature: string | null };
 
@@ -188,6 +195,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       googleSearch?: Record<string, unknown>;
       googleSearchRetrieval?: Record<string, unknown>;
     }>;
+    toolConfig?: { functionCallingConfig: Record<string, unknown> };
     _toolNameMap?: Map<string, string>;
   } = {
     model: model,
@@ -276,6 +284,8 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     // matching tool_result becomes text instead of a Gemini-400'd functionResponse.
     const omittedToolCallIds = new Set<string>();
     const toolUseOccurrences = createToolUseOccurrenceQueue();
+    // Base64 tool_result image parts in request order, for the cap after the loop.
+    const toolResultInlineImages: Array<Record<string, unknown>> = [];
     for (const msg of body.messages) {
       const parts = [];
       // Images returned inside tool_result blocks go right after the last tool response,
@@ -339,9 +349,11 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 let hasImage = false;
                 for (const c of content) {
                   if (c.type === "image" && c.source?.type === "base64") {
-                    toolResultImageParts.push({
+                    const imagePart = {
                       inlineData: { mimeType: c.source.media_type, data: c.source.data },
-                    });
+                    };
+                    toolResultImageParts.push(imagePart);
+                    toolResultInlineImages.push(imagePart);
                     hasImage = true;
                   } else if (isUrlImageBlock(c)) {
                     toolResultImageParts.push(urlImagePart(c.source.url));
@@ -380,7 +392,10 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 functionResponse: {
                   ...(stripFunctionCallId ? {} : { id: toolUseId }),
                   name,
-                  response: { result: sanitizeFunctionResponseData(content) },
+                  response: {
+                    [block.is_error === true ? "error" : "result"]:
+                      sanitizeFunctionResponseData(content),
+                  },
                 },
               });
               afterLastToolResult = parts.length;
@@ -415,6 +430,17 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
         result.contents.push({ role: geminiRole, parts });
       }
     }
+    // Turn the oldest images into text in place, so part order stays valid.
+    const droppedImages = toolResultInlineImages.slice(0, -MAX_TOOL_RESULT_IMAGES);
+    for (const part of droppedImages) {
+      delete part.inlineData;
+      part.text = TOOL_RESULT_IMAGE_PLACEHOLDER;
+    }
+    if (droppedImages.length > 0) {
+      console.warn(
+        `TOOL_RESULT_IMAGE_CAP kept=${MAX_TOOL_RESULT_IMAGES} dropped=${droppedImages.length}`
+      );
+    }
   }
 
   // ── Convert tools ──────────────────────────────────────────────
@@ -435,6 +461,43 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   });
   if (geminiTools) {
     result.tools = geminiTools;
+  }
+
+  // ── Tool choice ────────────────────────────────────────────────
+  // Claude tool_choice -> Gemini toolConfig. "auto" is Gemini's default, so it sets nothing.
+  const declaredNames = (geminiTools ?? []).flatMap((tool) =>
+    (tool.functionDeclarations ?? []).map((declaration) => declaration.name as string)
+  );
+  const choice = body.tool_choice;
+  const choiceType = typeof choice === "string" ? choice : choice?.type;
+  // A forced Claude server web search tool was dropped above (or became googleSearch).
+  const forcesServerTool =
+    choiceType === "tool" &&
+    Array.isArray(body.tools) &&
+    body.tools.some((tool) => isClaudeServerWebSearchTool(tool) && tool.name === choice.name);
+  if (choiceType === "none") {
+    // No tool call is wanted, so a native search tool (googleSearch) goes too.
+    if (declaredNames.length > 0) {
+      result.toolConfig = { functionCallingConfig: { mode: "NONE" } };
+    } else {
+      delete result.tools;
+    }
+  } else if (
+    declaredNames.length > 0 &&
+    (choiceType === "any" || (choiceType === "tool" && !forcesServerTool))
+  ) {
+    const functionCallingConfig: Record<string, unknown> = { mode: "ANY" };
+    if (choiceType === "tool") {
+      const forcedName = typeof choice.name === "string" ? sanitizeToolName(choice.name) : "";
+      if (!declaredNames.includes(forcedName)) {
+        throw Object.assign(
+          new Error(`tool_choice names "${choice.name}", which is not in the tools list.`),
+          { statusCode: 400, errorType: "invalid_request_error" }
+        );
+      }
+      functionCallingConfig.allowedFunctionNames = [forcedName];
+    }
+    result.toolConfig = { functionCallingConfig };
   }
 
   // ── Thinking config ────────────────────────────────────────────
