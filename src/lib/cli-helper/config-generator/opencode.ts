@@ -496,10 +496,12 @@ export async function generateOpencodeConfig(options: GenerateOpencodeOptions): 
   const provider: Record<string, unknown> = {
     name: existingProvider?.name ?? "OmniRoute",
     npm: existingProvider?.npm ?? "@ai-sdk/openai-compatible",
+    // The router this run targets wins over a stale entry; the user's other options
+    // (headers, timeout, ...) are kept. An empty apiKey keeps the existing one.
     options: {
-      baseURL,
-      apiKey: options.apiKey,
       ...(existingProvider?.options ?? {}),
+      baseURL,
+      ...(options.apiKey ? { apiKey: options.apiKey } : {}),
     },
     models: mergedModels,
   };

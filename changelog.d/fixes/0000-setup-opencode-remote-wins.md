@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute setup-opencode --remote <url>` now writes the requested router address (and key) even when `opencode.json` already has an `omniroute` provider; before, the old `baseURL`/`apiKey` silently won. Other provider options the user set are kept.
