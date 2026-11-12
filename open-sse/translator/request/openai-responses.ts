@@ -707,6 +707,11 @@ export function openaiResponsesToOpenAIRequest(
       continue;
     }
 
+    if (itemType === "compaction_trigger") {
+      // Remote compaction v2 trigger marker: no chat completions equivalent, safe to omit.
+      continue;
+    }
+
     // Defense in depth for Responses/subagent fallback: agent_message is
     // Responses-only. Normalization should already have rewritten or dropped it;
     // never throw a 5xx-looking unsupported-feature error if a shape slips through.
