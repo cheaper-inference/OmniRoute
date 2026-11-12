@@ -7,6 +7,8 @@ const { isNoLogRequested, resolveNoLogEnabled } =
   await import("../../open-sse/handlers/chatCore/headers.ts");
 const { buildExecutorClientHeaders } =
   await import("../../open-sse/handlers/chatCore/executorClientHeaders.ts");
+const { resolveUsageAgentContext } =
+  await import("../../open-sse/handlers/chatCore/agentContext.ts");
 
 test("isNoLogRequested accepts truthy header values (plain object)", () => {
   for (const value of ["true", "1", "yes", "TRUE", "Yes", " true "]) {
@@ -70,4 +72,28 @@ test("x-omniroute-no-log is stripped before executor headers reach an upstream",
   assert.equal(fromHeaders?.["x-omniroute-no-log"], undefined);
   assert.equal(fromHeaders?.["x-omniroute-lease-owner"], undefined);
   assert.equal(fromHeaders?.["content-type"], "application/json");
+});
+
+test("effective no-log drops prompt-derived agent context but keeps header identifiers", () => {
+  const body = {
+    system: "Primary working directory: /Users/me/project",
+    messages: [{ role: "user", content: "Current branch: feature/x" }],
+  };
+  const headers = { "x-omniroute-project": "header-project" };
+
+  const logged = resolveUsageAgentContext(body, headers, { noLog: false });
+  assert.equal(logged.projectName, "header-project");
+  assert.equal(logged.projectPath, "/Users/me/project");
+  assert.equal(logged.gitBranch, "feature/x");
+
+  const noLog = resolveUsageAgentContext(body, headers, { noLog: true });
+  assert.equal(noLog.projectName, "header-project");
+  assert.equal(noLog.projectSource, "header");
+  assert.equal(noLog.projectPath, null);
+  assert.equal(noLog.gitBranch, null);
+
+  const noHeaderNoLog = resolveUsageAgentContext(body, null, { noLog: true });
+  assert.equal(noHeaderNoLog.projectName, null);
+  assert.equal(noHeaderNoLog.projectPath, null);
+  assert.equal(noHeaderNoLog.gitBranch, null);
 });

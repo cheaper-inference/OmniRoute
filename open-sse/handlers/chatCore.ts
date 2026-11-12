@@ -622,7 +622,13 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
+  // before agent-context extraction so a header-only no-log request also drops
+  // prompt-derived project/branch fields from usage attribution.
+  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, {
+    noLog: noLogEnabled,
+  });
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -947,10 +953,6 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. The
-  // header lets a client keep payloads out of the call log for one request
-  // without provisioning a dedicated no-log key.
-  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
   const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
