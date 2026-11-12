@@ -94,9 +94,7 @@ test.describe("Bailian Coding Plan Provider", () => {
     const nameInput = dialog.getByLabel(/name/i).or(dialog.locator("input").first());
     await nameInput.fill("Test Bailian Connection");
 
-    const apiKeyInput = dialog
-      .getByLabel(/api.*key/i)
-      .or(dialog.locator('input[type="password"]').first());
+    const apiKeyInput = dialog.getByLabel(/^api key$/i);
     await apiKeyInput.fill("test-api-key-12345");
 
     const saveButton = dialog
@@ -203,9 +201,7 @@ test.describe("Bailian Coding Plan Provider", () => {
     const nameInput = dialog.getByLabel(/name/i).or(dialog.locator("input").first());
     await nameInput.fill("Test Bailian CN Connection");
 
-    const apiKeyInput = dialog
-      .getByLabel(/api.*key/i)
-      .or(dialog.locator('input[type="password"]').first());
+    const apiKeyInput = dialog.getByLabel(/^api key$/i);
     await apiKeyInput.fill("test-api-key-12345");
 
     const saveButton = dialog

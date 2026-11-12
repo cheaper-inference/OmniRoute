@@ -1,0 +1,1 @@
+- Target the exact API Key label in provider management and Alibaba region E2E flows so the modal's labeled tabs cannot match the credential field.
