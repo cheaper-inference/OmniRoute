@@ -69,84 +69,91 @@ function isRestrictedAgeTier(tier: JsonRecord | null): boolean {
   return AGE_VERIFICATION_WORDING.test(msg);
 }
 
-function collectJsonCandidates(json: JsonRecord, out: unknown[]): void {
+function collectTierCandidates(json: JsonRecord, out: unknown[]): void {
   for (const tier of asArray(json.ineligibleTiers)) {
     const record = asRecord(tier);
-    if (record) {
-      out.push(record.validationUrl, record.validation_url, record.appeal_url);
-      if (isRestrictedAgeTier(record)) {
-        out.push(GOOGLE_AGE_VERIFICATION_URL);
-      }
-    }
+    if (!record) continue;
+    out.push(record.validationUrl, record.validation_url, record.appeal_url);
+    if (isRestrictedAgeTier(record)) out.push(GOOGLE_AGE_VERIFICATION_URL);
   }
   out.push(json.validationUrl, json.validation_url, json.appeal_url);
-  if (isRestrictedAgeTier(json)) {
-    out.push(GOOGLE_AGE_VERIFICATION_URL);
+  if (isRestrictedAgeTier(json)) out.push(GOOGLE_AGE_VERIFICATION_URL);
+}
+
+function collectDetailCandidates(details: JsonRecord[], out: unknown[]): void {
+  for (const detail of details) {
+    const meta = asRecord(detail.metadata);
+    if (meta) {
+      out.push(meta.validation_url, meta.validationUrl, meta.appeal_url, meta.appealUrl);
+      if (isRestrictedAgeTier(meta)) out.push(GOOGLE_AGE_VERIFICATION_URL);
+    }
+    if (detail.reason === "RESTRICTED_AGE") out.push(GOOGLE_AGE_VERIFICATION_URL);
   }
+}
+
+function collectHelpLinks(message: string, details: JsonRecord[], out: unknown[]): void {
+  const isVerification =
+    VERIFICATION_WORDING.test(message) ||
+    details.some((d) => typeof d.reason === "string" && VERIFICATION_WORDING.test(d.reason));
+
+  if (!isVerification) return;
+  for (const detail of details) {
+    for (const link of asArray(detail.links)) out.push(asRecord(link)?.url);
+  }
+}
+
+function collectJsonCandidates(json: JsonRecord, out: unknown[]): void {
+  collectTierCandidates(json, out);
 
   const err = asRecord(json.error) ?? json;
   const details = asArray(err.details)
     .map(asRecord)
     .filter((d): d is JsonRecord => d !== null);
-  for (const detail of details) {
-    const meta = asRecord(detail.metadata);
-    if (meta) {
-      out.push(meta.validation_url, meta.validationUrl, meta.appeal_url, meta.appealUrl);
-      if (isRestrictedAgeTier(meta)) {
-        out.push(GOOGLE_AGE_VERIFICATION_URL);
-      }
-    }
-    if (detail.reason === "RESTRICTED_AGE") {
-      out.push(GOOGLE_AGE_VERIFICATION_URL);
-    }
-  }
 
-  // Help links are generic (they also point at support pages), so only trust
-  // them when the error itself is a verification challenge.
+  collectDetailCandidates(details, out);
+
   const message = typeof err.message === "string" ? err.message : "";
-  const isVerificationError =
-    VERIFICATION_WORDING.test(message) ||
-    details.some((d) => typeof d.reason === "string" && VERIFICATION_WORDING.test(d.reason));
-
   if (AGE_VERIFICATION_WORDING.test(message)) {
     out.push(GOOGLE_AGE_VERIFICATION_URL);
   }
 
-  if (!isVerificationError) return;
-  for (const detail of details) {
-    for (const link of asArray(detail.links)) out.push(asRecord(link)?.url);
-  }
+  collectHelpLinks(message, details, out);
 }
 
 /**
  * Best-effort extraction of the Google account-verification URL from an upstream
  * payload (parsed JSON or raw text). Returns the normalized URL, or null.
  */
+function parsePayload(payload: unknown): { json: unknown; text: string } {
+  if (typeof payload === "string") {
+    try {
+      return { json: JSON.parse(payload), text: payload };
+    } catch {
+      return { json: null, text: payload };
+    }
+  }
+  return { json: payload, text: "" };
+}
+
+function collectTextCandidates(text: string, out: unknown[]): void {
+  if (!text || !VERIFICATION_WORDING.test(text)) return;
+  const match = text.match(FREE_TEXT_URL);
+  if (match) out.push(match[0]);
+  if (AGE_VERIFICATION_WORDING.test(text)) {
+    out.push(GOOGLE_AGE_VERIFICATION_URL);
+  }
+}
+
 export function extractVerificationUrl(payload: unknown): string | null {
   if (payload === null || payload === undefined) return null;
 
-  let json: unknown = payload;
-  let text = "";
-  if (typeof payload === "string") {
-    text = payload;
-    try {
-      json = JSON.parse(payload);
-    } catch {
-      json = null;
-    }
-  }
-
+  const { json, text } = parsePayload(payload);
   const candidates: unknown[] = [];
+
   const root = asRecord(Array.isArray(json) ? json[0] : json);
   if (root) collectJsonCandidates(root, candidates);
 
-  if (text && VERIFICATION_WORDING.test(text)) {
-    const match = text.match(FREE_TEXT_URL);
-    if (match) candidates.push(match[0]);
-    if (AGE_VERIFICATION_WORDING.test(text)) {
-      candidates.push(GOOGLE_AGE_VERIFICATION_URL);
-    }
-  }
+  collectTextCandidates(text, candidates);
 
   for (const candidate of candidates) {
     const normalized = typeof candidate === "string" ? candidate.replace(/\\\//g, "/") : candidate;

@@ -345,6 +345,55 @@ function isOnboardOnBackoff(key: string): boolean {
  * @param accessToken  The OAuth bearer token for the current connection.
  * @param fetchImpl    Injected fetch implementation (defaults to globalThis.fetch).
  */
+async function executeOnboardLock(
+  cacheKey: string,
+  accessToken: string,
+  fetchImpl: FetchLike,
+  clientProfile: AntigravityClientProfile,
+  tierId: string | undefined,
+  signal?: AbortSignal
+): Promise<void> {
+  let aborted = false;
+  let succeeded = false;
+  let requiresManual = false;
+  try {
+    const status = await tryOnboardUser(accessToken, fetchImpl, clientProfile, tierId, signal);
+    if (status === "requires_manual_project") {
+      markRequiresManualProject(cacheKey);
+      requiresManual = true;
+      return;
+    }
+    if (status === "onboarded") {
+      const retry = await tryLoadCodeAssist(accessToken, fetchImpl, clientProfile, signal);
+      if (retry.projectId) {
+        evictOldest(projectCache);
+        projectCache.set(cacheKey, retry.projectId);
+        succeeded = true;
+        return;
+      }
+    }
+  } catch (_e) {
+    aborted = signal?.aborted === true;
+    return;
+  } finally {
+    onboardLocks.delete(cacheKey);
+    if (!aborted && !requiresManual) {
+      if (succeeded) onboardFailureAt.delete(cacheKey);
+      else markOnboardFailure(cacheKey);
+    }
+  }
+}
+
+async function notifyVerificationUrl(
+  url: string | null | undefined,
+  handler?: (url: string) => void | Promise<void>
+): Promise<void> {
+  if (!url || !handler) return;
+  try {
+    await handler(url);
+  } catch {}
+}
+
 export async function ensureAntigravityProjectAssigned(
   accessToken: string,
   fetchImpl: FetchLike = fetch,
@@ -368,11 +417,7 @@ export async function ensureAntigravityProjectAssigned(
     signal
   );
 
-  if (verificationUrl && onVerification) {
-    try {
-      await onVerification(verificationUrl);
-    } catch {}
-  }
+  await notifyVerificationUrl(verificationUrl, onVerification);
 
   let projectId = initialProjectId;
 
@@ -391,43 +436,7 @@ export async function ensureAntigravityProjectAssigned(
     // Per-key lock: concurrent calls for the same token share one onboard attempt.
     let lock = onboardLocks.get(cacheKey);
     if (!lock) {
-      lock = (async () => {
-        let aborted = false;
-        let succeeded = false;
-        let requiresManual = false;
-        try {
-          const status = await tryOnboardUser(
-            accessToken,
-            fetchImpl,
-            clientProfile,
-            tierId,
-            signal
-          );
-          if (status === "requires_manual_project") {
-            markRequiresManualProject(cacheKey);
-            requiresManual = true;
-            return;
-          }
-          if (status === "onboarded") {
-            const retry = await tryLoadCodeAssist(accessToken, fetchImpl, clientProfile, signal);
-            if (retry.projectId) {
-              evictOldest(projectCache);
-              projectCache.set(cacheKey, retry.projectId);
-              succeeded = true;
-              return;
-            }
-          }
-        } catch (_e) {
-          aborted = signal?.aborted === true;
-          return;
-        } finally {
-          onboardLocks.delete(cacheKey);
-          if (!aborted && !requiresManual) {
-            if (succeeded) onboardFailureAt.delete(cacheKey);
-            else markOnboardFailure(cacheKey);
-          }
-        }
-      })();
+      lock = executeOnboardLock(cacheKey, accessToken, fetchImpl, clientProfile, tierId, signal);
       onboardLocks.set(cacheKey, lock);
     }
     await lock;
