@@ -87,6 +87,28 @@ export function detectVisionInput(record: JsonRecord): boolean {
   return false;
 }
 
+/**
+ * True when the model card says the vendor has retired this model.
+ *
+ * Mistral's `BaseModelCard` keeps deprecated models in `GET /v1/models` and marks
+ * them with `deprecation` (a date-time; a past value means already retired) and
+ * `deprecation_replacement_model`. `archived` is deliberately NOT consulted: it
+ * exists only on `FTModelCard`, where it means the operator archived their own
+ * fine-tuned model — a different statement entirely.
+ *
+ * A `deprecation` date in the future is a warning, not a retirement: the model is
+ * still callable, so it stays in the catalog and the lifecycle policy reports the
+ * upcoming shutdown.
+ */
+export function isDeprecatedModelCard(record: JsonRecord, asOf: number = Date.now()): boolean {
+  const raw = toNonEmptyString(record.deprecation);
+  if (!raw) return false;
+  const deprecatedAt = Date.parse(raw);
+  // An unparseable date is not evidence of retirement — keep the model.
+  if (!Number.isFinite(deprecatedAt)) return false;
+  return deprecatedAt <= asOf;
+}
+
 // #7694: nested `reasoning.supported_efforts` shape some OpenAI-compatible upstreams
 // expose (as opposed to the flat `supportedThinkingEfforts` field OmniRoute's own
 // import format already emits). Hard Rule #7 — validate the untrusted upstream
@@ -558,6 +580,12 @@ export function normalizeDiscoveredModels(
       toNonEmptyString(record.name) ||
       toNonEmptyString(record.model);
     if (!id) continue;
+    // Mistral keeps retired models in /v1/models and marks them on the model card
+    // itself: `deprecation` (a date-time, already passed for a retired model) plus
+    // `deprecation_replacement_model`. `archived` is NOT this signal — it only
+    // exists on FTModelCard (fine-tuned models), where it means the operator
+    // archived their own model, not that the vendor retired it.
+    if (isDeprecatedModelCard(record)) continue;
 
     const isCrofReasoningModel = providerId === "crof" && record.reasoning_effort === true;
     const isCommandCodeModel = providerId === "command-code";
@@ -605,7 +633,11 @@ export function normalizeDiscoveredModels(
     if (caps.ocr === true) declaredEndpointsFromCaps.push("ocr");
     if (caps.completion_chat === true) declaredEndpointsFromCaps.push("chat");
 
-    const hasNonChatCaps = declaredEndpointsFromCaps.some((e) => e !== "chat");
+    // Any capability the card declares is evidence, chat included. A chat-only card
+    // (Mistral's `capabilities.completion_chat: true`) used to be dropped here, which
+    // left the row with no endpoints AND no provenance — the dashboard then showed
+    // "Assumed" for a model the provider had explicitly declared.
+    const hasDeclaredCaps = declaredEndpointsFromCaps.length > 0;
 
     const supportedEndpoints = Array.isArray(record.supportedEndpoints)
       ? Array.from(
@@ -615,7 +647,7 @@ export function normalizeDiscoveredModels(
               .filter((endpoint): endpoint is string => Boolean(endpoint))
           )
         ).sort()
-      : hasNonChatCaps
+      : hasDeclaredCaps
         ? Array.from(new Set(declaredEndpointsFromCaps)).sort()
         : modality.isEmbedding
           ? ["embeddings"]
@@ -637,7 +669,7 @@ export function normalizeDiscoveredModels(
       record.endpointCapabilitySource === "declared" ||
       record.endpointCapabilitySource === "inferred"
         ? record.endpointCapabilitySource
-        : !Array.isArray(record.supportedEndpoints) && hasNonChatCaps
+        : !Array.isArray(record.supportedEndpoints) && hasDeclaredCaps
           ? "declared"
           : !Array.isArray(record.supportedEndpoints) &&
               (modality.isEmbedding || modality.isRerank || modality.isImage)

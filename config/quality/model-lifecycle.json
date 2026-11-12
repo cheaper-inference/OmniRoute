@@ -654,6 +654,18 @@
       "status": "retired",
       "retiredOn": "2025-06-16",
       "replacement": "codestral-2508"
+    },
+    "pixtral-large-latest": {
+      "vendor": "mistral",
+      "status": "retired",
+      "retiredOn": "2026-05-31",
+      "replacement": "mistral-large-latest"
+    },
+    "devstral-latest": {
+      "vendor": "mistral",
+      "status": "retired",
+      "retiredOn": "2026-07-31",
+      "replacement": "devstral-medium-latest"
     }
   }
 }

@@ -547,15 +547,21 @@ export default function ProviderModelsSection({
               endpointInfo={(() => {
                 const discovered = syncedAvailableModels.find((row) => row.id === model.id);
                 const operator = modelMeta.customModels.find((row) => row.id === model.id);
+                // Endpoint metadata and its provenance travel together: taking them
+                // from different rows reports a discovered list under a registry
+                // row's (absent) provenance, which is how a declared Mistral card
+                // still rendered as "Assumed". The operator row wins outright; then
+                // the discovered row; the registry row only when it declares a list.
+                const endpointSource = operator?.supportedEndpoints?.length
+                  ? operator
+                  : discovered?.supportedEndpoints?.length
+                    ? discovered
+                    : model.supportedEndpoints?.length
+                      ? model
+                      : undefined;
                 return {
-                  supportedEndpoints:
-                    operator?.supportedEndpoints ??
-                    model.supportedEndpoints ??
-                    discovered?.supportedEndpoints,
-                  endpointCapabilitySource:
-                    operator?.endpointCapabilitySource ??
-                    model.endpointCapabilitySource ??
-                    discovered?.endpointCapabilitySource,
+                  supportedEndpoints: endpointSource?.supportedEndpoints,
+                  endpointCapabilitySource: endpointSource?.endpointCapabilitySource,
                   discoveredEndpoints: discovered?.supportedEndpoints,
                   resettable: Boolean(
                     discovered && operator?.endpointCapabilitySource === "operator"
