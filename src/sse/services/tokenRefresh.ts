@@ -2,6 +2,7 @@
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
@@ -188,6 +189,21 @@ export const getAllAccessTokens = (userInfo: any) =>
       updateProviderCredentials(connectionId, result),
   });
 
+function applyRefreshedExpiry(updates: Record<string, any>, newCredentials: any) {
+  if (newCredentials.expiresIn) {
+    const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+    updates.expiresAt = expiresAt;
+    updates.tokenExpiresAt = expiresAt;
+    updates.expiresIn = newCredentials.expiresIn;
+  } else if (newCredentials.expiresAt) {
+    updates.expiresAt = newCredentials.expiresAt;
+    updates.tokenExpiresAt = newCredentials.expiresAt;
+  } else if (newCredentials.accessToken && newCredentials.expiresAt === null) {
+    updates.expiresAt = null;
+    updates.tokenExpiresAt = null;
+  }
+}
+
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(connectionId: string, newCredentials: any) {
   try {
@@ -217,15 +233,7 @@ export async function updateProviderCredentials(connectionId: string, newCredent
     if (newCredentials.refreshToken) {
       updates.refreshToken = newCredentials.refreshToken;
     }
-    if (newCredentials.expiresIn) {
-      const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
-      updates.expiresAt = expiresAt;
-      updates.tokenExpiresAt = expiresAt;
-      updates.expiresIn = newCredentials.expiresIn;
-    } else if (newCredentials.expiresAt) {
-      updates.expiresAt = newCredentials.expiresAt;
-      updates.tokenExpiresAt = newCredentials.expiresAt;
-    }
+    applyRefreshedExpiry(updates, newCredentials);
     if (newCredentials.providerSpecificData) {
       updates.providerSpecificData = newCredentials.providerSpecificData;
     }
@@ -269,6 +277,18 @@ export async function updateProviderCredentials(connectionId: string, newCredent
   }
 }
 
+// A transient Muse remint failure says nothing about the credential: keep it, as a null refresh does.
+function keepsMuseCredentialsAfterRefreshError(provider: string, error: unknown) {
+  return provider === "muse-code" && isTransientRefreshError(error);
+}
+
+function resolveExpiryWithoutAbsolute(newCredentials: any, currentExpiresAt: unknown) {
+  if (newCredentials.expiresIn) {
+    return new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+  }
+  return newCredentials.expiresAt === null ? null : currentExpiresAt;
+}
+
 // Local-specific: Check and refresh token proactively
 export async function checkAndRefreshToken(provider: string, credentials: any) {
   let updatedCredentials = { ...credentials };
@@ -304,7 +324,13 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
           }
         : undefined;
 
-      const newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      let newCredentials;
+      try {
+        newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      } catch (error) {
+        if (!keepsMuseCredentialsAfterRefreshError(provider, error)) throw error;
+        return { ...credentials };
+      }
 
       if (newCredentials && newCredentials.accessToken) {
         // For the no-connectionId path (no mutex, no onPersist), persist here as before.
@@ -319,9 +345,7 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
           refreshToken: newCredentials.refreshToken || updatedCredentials.refreshToken,
           expiresAt: newCredentials.expiresAt
             ? newCredentials.expiresAt
-            : newCredentials.expiresIn
-              ? new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString()
-              : updatedCredentials.expiresAt,
+            : resolveExpiryWithoutAbsolute(newCredentials, updatedCredentials.expiresAt),
         };
       }
     }

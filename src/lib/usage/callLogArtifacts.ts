@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { resolveWritableDataDir } from "../dataPaths.ts";
-import { getCallLogPipelineMaxSizeBytes, isChatDebugFileEnabled } from "../logEnv.ts";
+import {
+  getCallLogMinFreeDiskBytes,
+  getCallLogPipelineMaxSizeBytes,
+  isChatDebugFileEnabled,
+} from "../logEnv.ts";
 import {
   CALL_LOG_SIZE_LIMIT_REASON as SIZE_LIMIT_EXCEEDED_REASON,
   CALL_LOG_BODY_OMITTED_FOR_SIZE_LIMIT as OMITTED_FOR_SIZE_LIMIT,
@@ -314,6 +318,48 @@ function serializeArtifactForStorage(artifact: CallLogArtifact): string {
     reason: SIZE_LIMIT_EXCEEDED_REASON,
     error: preserveErrorForSizeLimit(artifact.error),
   });
+}
+
+let freeBytesProbe: ((dir: string) => number) | null = null;
+let lastLowDiskWarningAt = 0;
+
+/** Test hook: replace the free-space probe (null restores statfs). */
+export function setFreeBytesProbeForTest(probe: ((dir: string) => number) | null): void {
+  freeBytesProbe = probe;
+}
+
+function readFreeBytes(dir: string): number {
+  if (freeBytesProbe) return freeBytesProbe(dir);
+  const stats = fs.statfsSync(dir);
+  return stats.bavail * stats.bsize;
+}
+
+/**
+ * False when the volume that holds the call_logs directory (and, normally, storage.sqlite)
+ * has less free space than the floor. Artifacts must not take the last bytes that the usage
+ * ledger and call log row writes need. Fails open: a probe error never drops a log.
+ */
+export function hasRoomForCallLogArtifact(): boolean {
+  const floor = getCallLogMinFreeDiskBytes();
+  const logsDir = getCallLogsDir();
+  if (floor === 0 || !logsDir) return true;
+  try {
+    // call_logs is created on the first write: measure the nearest existing parent.
+    let dir = logsDir;
+    while (!fs.existsSync(dir) && path.dirname(dir) !== dir) dir = path.dirname(dir);
+    const free = readFreeBytes(dir);
+    if (free >= floor) return true;
+    const now = Date.now();
+    if (now - lastLowDiskWarningAt > 60_000) {
+      lastLowDiskWarningAt = now;
+      console.warn(
+        `[callLogs] Low disk space (${free} bytes free, floor ${floor}); call log details are skipped.`
+      );
+    }
+    return false;
+  } catch {
+    return true;
+  }
 }
 
 export function writeCallArtifact(

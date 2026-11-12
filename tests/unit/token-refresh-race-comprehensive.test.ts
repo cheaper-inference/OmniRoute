@@ -206,7 +206,10 @@ test("serialized refresh re-checks rotation inside the lane, not before waiting"
     /lookupRotation/,
     "lookupRotation before serializeRefresh is the race that burns a Claude refresh token"
   );
-  const body = src.slice(inner, inner + 2500);
+  // Read the whole function (up to the next top-level declaration), not a fixed window:
+  // guards added inside it must not push these calls out of view.
+  const next = src.slice(inner + 1).search(/\n(?:export )?(?:async )?function /);
+  const body = src.slice(inner, next >= 0 ? inner + 1 + next : undefined);
   assert.match(body, /lookupRotation\(/);
   assert.match(body, /recordRotation\(/);
   assert.match(body, /_getAccessTokenInternal\(/);

@@ -5,6 +5,9 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -351,7 +354,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
     // ACTIVE exclusive lease defers redemption (409 exclusive_lease_active).
     "src/lib/usage/grokResetCredits.ts": 1,
-    "src/lib/usage/providerLimits.ts": 4,
+    // The fifth site re-reads the row after a live usage fetch only to compare the stored API key
+    // with the one the fetch used (an edit during the fetch retires the reading). It is a
+    // read-back guard, never selection or dispatch, so the class stays the same.
+    "src/lib/usage/providerLimits.ts": 5,
     // #4305 port: after a confirmed reset-credit redemption (whose caller already passed
     // the auxiliary-lease gate) the row is re-read only to check its terminal/codex-scope
     // state before lifting the local quota cooldown — a state read, never connection
