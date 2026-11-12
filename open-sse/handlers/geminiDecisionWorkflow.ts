@@ -191,7 +191,9 @@ export async function handleGeminiDecisionRequest(
       lastErrorAt: credentials.lastErrorAt ?? null,
       rateLimitedUntil: credentials.rateLimitedUntil ?? null,
     };
-    const response = await executeGeminiDecision(body, credentials.apiKey, {
+    const response = await executeGeminiDecision({
+      model: body.model, input: body.input, questions: body.questions,
+    }, credentials.apiKey, {
       signal,
       timeoutMs: Math.min(20_000, remaining),
     });

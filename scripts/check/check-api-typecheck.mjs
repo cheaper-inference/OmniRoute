@@ -257,11 +257,6 @@ function main() {
   }
 
   if (regressions.length > 0) {
-    const regressed = stdout.split(String.fromCharCode(10)).filter((line) =>
-      regressions.some((regression) => line.includes(regression.file + "(") &&
-        line.includes("error " + regression.code + ":"))
-    );
-    if (regressed.length) process.stderr.write("[api-typecheck] Raw regressions: " + regressed.join(" | "));
     process.stderr.write(
       `[api-typecheck] FAIL — ${regressions.length} new/regressed TypeScript error(s) ` +
         `under src/app/api/ not covered by the frozen baseline:\n` +
