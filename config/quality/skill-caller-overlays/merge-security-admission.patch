@@ -1,0 +1,548 @@
+--- a/merge-waves/SKILL.md
++++ b/merge-waves/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: merge-waves
+-description: "Run one squash wave of open OmniRoute pull requests onto the active release branch, then stop. Use when the owner says /merge-waves, próxima onda, pode seguir, continue, or asks to merge the queue to close the version. Asks once per session whether owner feat PRs are in scope. Do not use for a pasted contributor list (/merge-batch), plan-file merges (/merge-prs), or for deferring feat titles."
++description: "Run one squash wave of open OmniRoute pull requests onto the active release branch, then stop. Use when the owner invokes /merge-waves or asks to merge the queue to close the version; continuation phrases resume this skill only when a merge wave is already active. Asks once per session whether owner feat PRs are in scope. Do not use for a pasted contributor list (/merge-batch), plan-file merges (/merge-prs), or for deferring feat titles."
+ allowed-tools: Bash, Read, Edit, Write, Grep, Glob, AskUserQuestion
+ ---
+ 
+@@ -30,7 +30,7 @@
+ 4. `references/06-conserto-branch.md` só se uma PR do lote precisar de correção na branch do autor.
+ 5. `references/historico.md` é memória. Nenhum número de lá é teto vigente nem autorização.
+ 
+-Em conflito com `/merge-batch`, valem os overrides abaixo. Em conflito com `AGENTS.md` ou com `_shared/protected-surfaces.md`, vale o mais restritivo.
++Os overrides abaixo organizam o lote. A admissão de cada merge segue `_shared/merge-gates.md`, `_shared/base-green.md`, `_shared/validation-gate.md` e `_shared/protected-surfaces.md`; esta skill não cria exceções a esses contratos. O board fornece diagnóstico da sua própria árvore. Cada squash precisa dos checks obrigatórios do candidato atual, com base, head, árvore combinada e política registrados.
+ 
+ ## Pergunta de feat, uma vez por sessão
+ 
+@@ -77,7 +77,7 @@
+ 2. Censo REST. Classifique. Não retitule feat. Quem retitula é a onda de defer.
+ 3. Pré-gate de `references/02-pregate.md`, inclusive casar worktree alheia com `headRefName`.
+ 4. Mostre a tabela de estrelas. Embarque só o lote que passou.
+-5. Board e validação única em `references/03-board-validacao.md`.
++5. Board e diagnóstico em `references/03-board-validacao.md`; admissão individual em `references/04-squash.md`.
+ 6. Squash em `references/04-squash.md`. Confira `headRefOid` de novo antes de cada merge. Prove `mergeCommit` ancestral da release.
+ 7. Teardown e relato em `references/05-teardown-relato.md`. Pare.
+ 
+--- a/merge-waves/references/01-censo.md
++++ b/merge-waves/references/01-censo.md
+@@ -20,7 +20,7 @@
+ 
+ Anote a branch do checkout. Termine nela. Não faça pull.
+ 
+-A issue cujo título é `🔴 Release branch not green: <release alvo>` é a base-red herdada. O título é a chave de dedupe: não abra outra e não feche esta. O número dela entra no squash como `⚠️ base-red inherited: #<N>`. Confirme o número na API desta execução. Não use o número de uma campanha antiga sem essa confirmação.
++A issue cujo título é `🔴 Release branch not green: <release alvo>` identifica um incidente para investigar. Confirme o número e o SHA observado na API desta execução. O título é a chave de dedupe: não abra outra nem feche a existente nesta onda. Registre `⚠️ base-red inherited: #<N>` somente quando a mesma falha tiver sido reproduzida na base exata em ambiente comparável. A issue e essa anotação não substituem os checks obrigatórios nem liberam merge com falha herdada.
+ 
+ Load alta já produziu HTTP 503 falso de catálogo. Não suba `CATALOG_BUILD_TIMEOUT_MS` do produto por causa do `uptime`.
+ 
+--- a/merge-waves/references/02-pregate.md
++++ b/merge-waves/references/02-pregate.md
+@@ -8,7 +8,7 @@
+ gh pr diff <N> --repo cheaper-inference/OmniRoute --name-only
+ ```
+ 
+-`mergeable: UNKNOWN` logo depois de um squash irmão: o GitHub está recalculando. Espere cerca de 5 s e leia de novo. Não crie worktree para forçar. `MERGEABLE` com checks `unstable` é a base vermelha. O `--admin` da onda ainda faz o squash. Não espere o CI da base ficar verde.
++`mergeable: UNKNOWN` logo depois de um squash irmão: o GitHub está recalculando. Espere e releia. `MERGEABLE` prova apenas ausência de conflito; `unstable` exige diagnóstico dos checks. Resolva base SHA, head SHA, candidato combinado e política atuais. Falha, ausência ou pendência de check obrigatório mantém HOLD até reparo e revalidação, inclusive quando a falha é comprovadamente herdada. Siga `_shared/merge-gates.md`; não use `--admin` para atravessar o gate.
+ 
+ Diff com mais de 300 arquivos faz `gh pr diff` falhar. Essa PR não entra num lote de 10. Fica no relato como grande demais para esta onda.
+ 
+@@ -28,13 +28,13 @@
+ - Pilha cujo título ou base cita vídeo de promoção, shadow-CI, ou base que não é a release alvo.
+ - `mergeStateStatus` = `DIRTY` / título de conflito / `mergeable` = `CONFLICTING`. Não rebaseie.
+ - PR de release (título `Release v…`, base `main`).
+-- Superfície protegida, salvo sim **desta PR nesta mensagem**. Aprovar o lote não aprova a superfície. Arquivos: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` em qualquer pasta, `.agents/`, `.claude/`, `llm.txt` e `docs/i18n/*/llm.txt`, `skills/**/SKILL.md`, `.github/copilot-instructions.md`, `.cursorrules`.
++- Superfície protegida, salvo sim **desta PR nesta mensagem**. Aprovar o lote não aprova a superfície. Arquivos: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` em qualquer pasta, `.agents/`, `.claude/`, `llm.txt` e `docs/i18n/*/llm.txt`, `skills/**/SKILL.md`, `.github/copilot-instructions.md`, `.cursorrules`, `config/quality/skill-templates/` e patches de instruções em `config/quality/skill-caller-overlays/`.
+ 
+ ```bash
+-gh pr diff <N> --name-only | grep -E '(^|/)(CLAUDE|AGENTS|GEMINI)\.md$|(^|/)\.agents/|(^|/)\.claude/|llm\.txt$|SKILL\.md$|copilot-instructions|\.cursorrules' || true
++gh pr diff <N> --name-only | grep -E '(^|/)(CLAUDE|AGENTS|GEMINI)\.md$|(^|/)\.agents/|(^|/)\.claude/|llm\.txt$|SKILL\.md$|copilot-instructions|\.cursorrules|^config/quality/skill-(templates|caller-overlays)/' || true
+ ```
+ 
+-Qualquer linha: HOLD. Mostre o hunk (`gh pr diff <N> -- <path>`) e siga com as outras PRs.
++Qualquer linha: HOLD. Mostre os hunks relevantes de `gh pr diff <N>` e siga com as outras PRs.
+ 
+ - Diff que altera `config/quality/file-size-baseline.json` aumentando teto. Aperto (número menor) pode seguir.
+ - Diff que muda o default de `PII_REDACTION_ENABLED` ou `PII_RESPONSE_SANITIZATION` em `src/shared/constants/featureFlagDefinitions.ts` para algo diferente de `"false"`.
+--- a/merge-waves/references/03-board-validacao.md
++++ b/merge-waves/references/03-board-validacao.md
+@@ -39,31 +39,24 @@
+ 
+ Conflito: `git merge --abort` e tire a PR do lote. Não rebaseie. Sobreposição aditiva que o pré-gate já aceitou pode ser resolvida neste board. Essa resolução só chega na release se for commit na branch da PR, com push fast-forward e `headRefOid` igual ao HEAD local, e a branch não estiver em worktree alheia. O commit de board em si não é pushado.
+ 
+-Ejetar no meio, somente nesta worktree:
++Se precisar ejetar uma PR depois de embarcá-la, preserve o board e os recibos anteriores e reconstrua um board próprio a partir do SHA de base registrado, somente com as PRs restantes. A nova composição exige nova validação.
+ 
+-```bash
+-git reset --hard "$ACTIVE"
+-# reembarcar só as que ficam
+-```
++Se o head remoto mudar durante o board, busque de novo o ref privado e invalide o recibo anterior. Mesmo diff aparente não preserva a identidade validada. Reconstrua e valide o novo candidato ou tire a PR desta onda. Mudança na base ou na política também invalida o recibo.
+ 
+-Proibido esse reset no checkout compartilhado.
++## Diagnosticar o board
+ 
+-Se o head remoto mudar durante o board, busque de novo o ref privado. Delta idêntico ao que você validou: siga. Delta diferente: tire a PR desta onda.
+-
+-## Validar uma vez
+-
+-No worktree da onda. Sem suíte completa neste devbox.
++Na worktree da onda, com recursos limitados. Os testes focados abaixo são evidência parcial: o board não certifica os squash intermediários. Cada merge precisa dos checks obrigatórios do candidato que será publicado, conforme `_shared/merge-gates.md` na raiz das skills.
+ 
+ ```bash
+ node scripts/check/check-file-size.mjs
+ CHANGELOG_BASE_REF="$ACTIVE" node scripts/check/check-changelog-integrity.mjs
+ env -u OMNIROUTE_API_KEY DATA_DIR="$(mktemp -d)" \
+-  node --import tsx/esm --test --test-force-exit <cada teste que o lote toca ou cria>
++  node --import tsx/esm --test <cada teste que o lote toca ou cria>
+ ```
+ 
+-`DATA_DIR` default (`~/.omniroute`) é o banco do dono. Todo teste e todo worker usam diretório novo. Não use `--test-isolation=process` com handle aberto de `better-sqlite3`: os testes passam e o processo fica pendurado. `--test-force-exit` é o caminho. Feche banco de teste com `resetDbInstance()` quando o teste abrir migration.
++`DATA_DIR` default (`~/.omniroute`) é o banco do dono. Todo teste e todo worker usam diretório novo. Feche bancos de teste com `resetDbInstance()`, timers e outros handles. Preserve o status e o término normal do runner; teste que não termina exige diagnóstico e não conta como PASS.
+ 
+-`typecheck:core` quando o diff mexe em tipo ou a PR já veio vermelha de api-typecheck. Não é obrigatório em lote pequeno já coberto por teste focado.
++Use `typecheck:core` para o diagnóstico de tipos quando aplicável. O tamanho do lote e os testes focados não dispensam nenhum check exigido pela política do candidato.
+ 
+ Arquivo com `@vitest-environment jsdom` ou `vi.mock` não roda sob `node:test`. Use `npx vitest run <arquivo>` só nesses. Lint como o CI: `npx eslint --suppressions-location config/quality/eslint-suppressions.json <arquivos>`. Não rode `next build` nesta onda.
+ 
+@@ -82,7 +75,7 @@
+ 
+ A interseção com o arquivo que o checker acusou é a candidata a ejetar. Confirme com `git diff "$ACTIVE"...refs/mw/<id>/$N --stat -- <arquivo>`. Ejetar é reset desta worktree e reboard das outras. Não edite o baseline para caber.
+ 
+-Estouro num arquivo que nenhuma PR do lote toca: herança da tip. Anote e siga. Não é defeito da onda.
++Estouro num arquivo fora do diff é uma hipótese de falha herdada. Reproduza a mesma assinatura na base exata com ambiente comparável e registre os recibos. Um gate obrigatório vermelho continua bloqueando o merge até reparo e revalidação.
+ 
+ Tetos de campanhas antigas estão em `_historico.md`. Remeça. Não copie o número antigo para o baseline.
+ 
+@@ -90,7 +83,7 @@
+ 
+ 1. Rode o arquivo sozinho, com `DATA_DIR` novo.
+ 2. Se falhar, rode o mesmo arquivo na tip pura, noutra worktree desta sessão.
+-3. Igual na tip: herança. Anote.
++3. Mesma assinatura no SHA exato da base, com runtime, instalação e ambiente comparáveis: herança comprovada. Registre ambos os recibos; se obrigatório, continua HOLD até reparo.
+ 4. Falha reproduzível e ausente na tip: corte o lote e ejete a PR. Não afrouxe asserção.
+ 
+ ### Catálogo 503
+@@ -101,10 +94,10 @@
+ 
+ ```bash
+ env -u OMNIROUTE_API_KEY DATA_DIR="$(mktemp -d)" CATALOG_BUILD_TIMEOUT_MS=300000 \
+-  node --import tsx/esm --test --test-force-exit <arquivo>
++  node --import tsx/esm --test <arquivo>
+ ```
+ 
+-Se o 503 some, o lote segue. No relato, diga que o combinado teve 503 e a rerodagem passou. Não diga que o combinado estava limpo.
++Aumentar o timeout serve apenas para investigar a hipótese de pressão de recursos. Preserve o RED original e registre a mudança de ambiente. O resultado desse diagnóstico não libera o lote: o candidato precisa passar nas condições exigidas pela política, após corrigir a causa.
+ 
+ `ECONNRESET` que se repete no isolado ejeta a PR. Não conte como verde.
+ 
+--- a/merge-waves/references/04-squash.md
++++ b/merge-waves/references/04-squash.md
+@@ -7,7 +7,7 @@
+ gh pr view <N> --repo cheaper-inference/OmniRoute --json state,mergeable,mergeStateStatus,headRefOid,baseRefName
+ ```
+ 
+-`headRefOid` tem de ser o SHA embarcado. Push de correção: o OID remoto tem de ser o HEAD local da correção. Push que falhou e merge em seguida publica conteúdo errado. Pare.
++Registre a base remota atual, `headRefOid`, SHA/árvore combinada e política. Exija todos os checks obrigatórios válidos para essa identidade, incluindo `Gate / CI` e `Gate / Quality` quando exigidos pela política. Revise freeze, superfícies protegidas e créditos pelo protocolo compartilhado. Check pendente, ausente ou vermelho mantém HOLD. `headRefOid` tem de ser o SHA embarcado. Push de correção: o OID remoto tem de ser o HEAD local da correção. Push que falhou e merge em seguida publica conteúdo errado. Pare.
+ 
+ Dono: a branch já está em `origin`. Não faça push, salvo correção obrigatória pela `06`, e só se nenhuma worktree alheia tiver a branch.
+ 
+@@ -26,9 +26,9 @@
+ ```markdown
+ <o que a PR faz, uma frase>
+ 
+-Evidence: focused tests <passados> (<arquivos>); file-size <OK ou herança nomeada>; changelog integrity OK against origin/<release>.
++Evidence: base <SHA>; head <SHA>; combined candidate <SHA/tree>; policy <version>; required checks <receipt links>; focused diagnostics <commands/results>; changelog integrity <receipt>.
+ 
+-⚠️ base-red inherited: #<issue confirmada no pré-voo>
++<optional historical base-red reference, with exact-base reproduction and repair receipts; never a gate waiver>
+ 
+ <linhas Fixes/Closes/Resolves copiadas exatamente do body, ou nenhuma>
+ ```
+@@ -45,13 +45,13 @@
+ ## Merge
+ 
+ ```bash
+-gh pr merge <N> --repo cheaper-inference/OmniRoute --squash --admin \
++gh pr merge <N> --repo cheaper-inference/OmniRoute --squash --match-head-commit <HEAD_SHA_VALIDADO> \
+   --body-file _artifacts/mw-<id>/bodies/<N>.md
+ ```
+ 
+-Sem `--delete-branch`. Sem `--admin` para esconder regressão, teste que não rodou ou autoria desconhecida. `--admin` aqui só atravessa o CI vermelho herdado da base, já registrado no corpo.
++Sem `--delete-branch` ou bypass administrativo. `--match-head-commit` protege somente o head; a base e a árvore combinada também precisam ser preservadas por required checks estritos/fila do servidor ou outro protocolo de identidade revisado. Se essa garantia estiver ausente, mantenha HOLD. Falha herdada não autoriza exceção.
+ 
+-Ordem: as que não compartilham arquivo. Se o squash irmão deixar a próxima `UNKNOWN`, espere 5 s e leia uma vez. Se voltar `CONFLICTING`, deixe aberta. Não rebaseie nesta onda. Siga com as que continuam `MERGEABLE`.
++Ordem: as que não compartilham arquivo. Se o squash irmão deixar a próxima `UNKNOWN`, espere 5 s e leia uma vez. Se voltar `CONFLICTING`, deixe aberta. Não rebaseie nesta onda. Uma nova tip invalida a evidência das próximas PRs. Revalide cada candidato antes de seguir; `MERGEABLE` sozinho não libera o próximo squash.
+ 
+ Não reverta squash de outra sessão que entrou na tip no meio. Grave `RELEASE_BEFORE=$(git rev-parse origin/<release>)` antes do primeiro squash. Depois:
+ 
+@@ -71,7 +71,7 @@
+ git log -1 --format=%B <mergeCommit>
+ ```
+ 
+-`state` tem de ser `MERGED`. O ancestral tem de ser verdadeiro. O body do commit não pode ter trailer de IA. As keywords do arquivo têm de aparecer iguais. CLI aceitar o comando não é prova.
++`state` tem de ser `MERGED`. O ancestral tem de ser verdadeiro. O body do commit não pode ter trailer de IA. As keywords do arquivo têm de aparecer iguais. CLI aceitar o comando não é prova. Confira também a árvore integrada, o crédito humano e os checks da base após o merge; registre qualquer divergência.
+ 
+ Issue fecha só se o commit tiver `Fixes` / `Closes` / `Resolves` e o número. Fechar ou reabrir PR não fecha issue neste repo. Não invente keyword para ajudar o fechamento. Não feche issue cuja PR de fix ainda está aberta. Não feche a issue de base-red, a de nightly-compat nem a de CI Build OOM: confirme os números no pré-voo pelo título, e deixe abertas. Não reabra issue que outra sessão fechou, salvo o dono pedir nesta sessão. Não feche issues em massa.
+ 
+--- a/merge-waves/references/06-conserto-branch.md
++++ b/merge-waves/references/06-conserto-branch.md
+@@ -16,4 +16,4 @@
+ 
+ Push fast-forward na fork, pelo URL de `04-squash.md`. Confira `gh pr view <N> --json headRefOid` = `git rev-parse HEAD` antes de voltar ao squash. Antes de aceitar worker: `git diff` completo, deleção com substituto, teste sem asserção removida. O relato do worker não substitui isso.
+ 
+-Se o autor moveu a branch e o delta contra a base é o mesmo que você validou, faça merge de verdade do head novo na correção. Nunca `git merge -s ours`. Delta diferente: revalide ou tire a PR da onda.
++Se o autor moveu a branch e o delta contra a base é o mesmo que você validou, faça merge de verdade do head novo na correção. Nunca `git merge -s ours`. Em ambos os casos, o novo SHA exige nova revisão e checks obrigatórios; revalide ou tire a PR da onda. O diff igual não reaproveita o recibo antigo.
+--- a/security-wave/SKILL.md
++++ b/security-wave/SKILL.md
+@@ -286,7 +286,7 @@
+    `node scripts/check/check-complexity-ratchets.mjs --base-ref $(git merge-base HEAD origin/$BASE)`
+    → `OK` nas duas métricas ("REGRESSÃO (código novo)" é do PR: extraia helpers);
+    `npm run -s check:file-size -- --base-ref $(git merge-base HEAD origin/$BASE)` (modo PR, #8522: só
+-   acusa arquivo que cresceu em relação à base — validado 2026-10-16; sem a flag, `✗` fora do seu diff é herdado);
++   acusa arquivo que cresceu em relação à base — validado 2026-10-16; sem a flag, `✗` fora do diff é hipótese a reproduzir na base exata);
+    `NODE_OPTIONS=--max-old-space-size=8192 npx eslint --suppressions-location config/quality/eslint-suppressions.json <tocados>`
+    (`bin/*.mjs` é ignorado pelo eslint → `node --check`); typecheck dos TS tocados pela receita de
+    `references/` quando o worker não provou.
+@@ -308,16 +308,9 @@
+   | grep -E '^\s*✖ |^\s*✗ |::error|gate\(s\) failed|\[cycles\] FAIL|i18n-check\] FAIL|TS[0-9]{4}|REGRESS' | grep -v printf
+ ```
+ 
+-**Herdado**: está no base-red (ou no último comentário dele); OU idêntico num PR "quase nulo" da
+-mesma base; OU o arquivo apontado não está no diff do PR (file-size, typecheck por baseline, ciclos
+-de import). **Do PR**: "REGRESSÃO (código novo)"; `✗ <arquivo do diff>`; teste novo falhando; teste
+-existente que passa no tip e falha no branch. Técnica: `✖`/`✗` de cada PR em `$ART/ci-disc/<N>.txt`
+-(`sort -u`) e `comm -23` contra o PR quase-nulo ou contra o tip.
+-
+-Runners saturados (checks `QUEUED` por horas): a política é esperar `Fast Quality Gates` e
+-`API Route Typecheck` do head final. Se for impossível, só mergeie com validação local completa
+-(ratchets, lint, testes, `merge-tree` limpo, nenhum arquivo em comum com outro PR da onda) **e diga
+-isso ao dono no relatório** — a decisão é dele.
++**Herdado comprovado**: a mesma assinatura foi reproduzida no SHA exato da base, com runtime, instalação e ambiente comparáveis. Registre comando, exit code, base/head, ambiente e os dois recibos. Issue de base-red, PR quase nulo, nome de job ou arquivo fora do diff orientam a investigação; não provam herança. Falhas novas e regressões também precisam de evidência causal, sem afrouxar asserções.
++
++Runners saturados ou checks `QUEUED`: aguarde todos os checks obrigatórios do candidato atual ou mantenha HOLD com o bloqueio identificado. Testes locais, `Fast Quality Gates`, `API Route Typecheck` ou `merge-tree` isolados não substituem o conjunto obrigatório. Falha herdada ou de infraestrutura continua bloqueando a admissão até reparo e revalidação. Siga `../_shared/merge-gates.md` e preserve o RED original.
+ 
+ ## Fase 6 — Relatório e autorização
+ 
+@@ -335,12 +328,12 @@
+ ## Fase 7 — Merge (só com autorização explícita; `merge-gates.md` manda)
+ 
+ Antes do lote: matriz de arquivos em comum entre os PRs autorizados (`gh pr diff --name-only` de
+-cada); independentes primeiro; re-fetch e `merge-tree` depois de **cada** merge.
++cada); independentes primeiro. Antes de **cada** merge, refaça a identidade base/head/candidato/política e confira todos os checks obrigatórios. Mudança na base ou no head invalida os recibos anteriores, mesmo que o diff pareça igual. Use a garantia de identidade do servidor descrita em `merge-gates.md`; sem ela, HOLD.
+ 
+ ```bash
+ gh issue list --repo $R --label release-freeze --state open                  # vazio
+ read st H b < <(gh pr view $N --repo $R --json state,headRefOid,headRefName --jq '[.state,.headRefOid,.headRefName]|@tsv')
+-[ "$st" = OPEN ] && [ "${H:0:10}" = "<head auditado>" ] || echo "HEAD MUDOU — re-auditar"
++[ "$st" = OPEN ] && [ "$H" = "<SHA completo auditado>" ] || { echo "HEAD MUDOU — re-auditar"; exit 1; }
+ gh pr diff $N --repo $R --name-only | grep -Ei '(^|/)(AGENTS\.md|CLAUDE\.md|GEMINI\.md|llm\.txt|SKILL\.md)$|^\.agents/|^\.claude/|^config/quality/skill-templates/'
+ git fetch -q origin $BASE $b && git merge-tree --write-tree origin/$BASE origin/$b >/dev/null 2>&1 && echo clean || echo CONFLICT
+ git worktree list | grep -iE "$N|<slug>"                                    # nenhuma alheia
+--- a/security-wave/references/recipes-and-pitfalls.md
++++ b/security-wave/references/recipes-and-pitfalls.md
+@@ -64,8 +64,10 @@
+       | grep -E '^\s*✖ |^\s*✗ |::error|gate\(s\) failed|\[cycles\] FAIL|TS[0-9]{4}' | grep -v printf \
+       | sed -E 's/^\s+//; s/ \([0-9.]+ms\)$//'; done | sort -u > $ART/ci-disc/$n.txt
+ done
+-comm -23 $ART/ci-disc/<PR>.txt $ART/ci-disc/<PR quase nulo ou tip>.txt   # o que só o PR tem
++comm -23 $ART/ci-disc/<PR>.txt $ART/ci-disc/<base-exata>.txt   # diferença textual para investigar
+ ```
++
++Comparar listas apenas agrupa sintomas. Herança exige execução da mesma assinatura na base exata em ambiente comparável; PR quase nulo, issue ou arquivo fora do diff não substituem essa prova. Falha obrigatória mantém HOLD até reparo e revalidação.
+ 
+ ### Esperar sem `sleep` encadeado
+ 
+@@ -146,10 +148,9 @@
+ - `skills/*/SKILL.md` gerados por `npm run check:agent-skills-sync` são superfície protegida
+   mesmo em mudança mecânica: OK do dono, mostrando o diff.
+ - `npm run check:file-size`, `check-complexity-ratchets` e `API Route Typecheck` operam por
+-  baseline: `✗` em arquivo fora do seu diff é herdado; "REGRESSÃO (código novo)" é seu.
++  baseline: `✗` fora do diff é uma hipótese de herança; reproduza na base exata antes de classificar.
+   `npm run -s check:file-size -- --base-ref <merge-base>` (modo PR, #8522) já faz essa discriminação
+-  sozinho: numa worktree sem crescimento ele imprime `OK` mesmo com os 4 overages herdados da base
+-  (validado 2026-10-16).
++  por crescimento; seu `OK` não atesta ausência de violações globais nem dispensa outros checks obrigatórios.
+ - Lote de PRs que tocam `docs/openapi.yaml` ou `docs/security/ROUTE_GUARD_TIERS.md` ao mesmo
+   tempo: `merge-tree` limpo em cada um não garante o último — re-checar depois de cada merge.
+ - Worker que cria `tsconfig.*-tmp.json` e esquece no disco: apague antes de aceitar; nunca
+--- a/omni-code-sec/SKILL.md
++++ b/omni-code-sec/SKILL.md
+@@ -113,6 +113,6 @@
+ - Running any red-team against a host that is not `localhost:20128`, or without `--live`.
+ - Installing a market skill inside the repo (`.claude/skills/<x>` real dir, `.agents/skills/<x>`)
+   instead of globally.
+-- Treating a deterministic gate failure as "inherited" without the Release-Green issue naming it.
++- Treating an issue mention as proof of inheritance: reproduce the same signature on the exact base in a comparable environment. Required failures remain HOLD until repaired and revalidated.
+ - Letting `scan-omniroute` be skipped because one tool is missing — the row is reported with the
+   missing tool named; the other rows still run.
+--- a/omni-code-sec/rubric.md
++++ b/omni-code-sec/rubric.md
+@@ -35,7 +35,8 @@
+ 
+ {{THREAT_MODEL}}
+ 
+-INHERITED BASE-REDS (NOT findings): {{INHERITED_REDS}}
++BASE-RED INVESTIGATION HINTS (unverified until reproduced on the exact base in a comparable environment): {{INHERITED_REDS}}
++Do not suppress or ACK a finding solely because it matches this list. Report its evidence; required gate failures continue to block admission even when inheritance is proven.
+ 
+ EVIDENCE RULE: quote the vulnerable lines AND state the concrete attack path (who sends what,
+ what happens). A finding without an attack path is confidence low. Read-only commands only.
+--- a/omni-code-review/rubric.md
++++ b/omni-code-review/rubric.md
+@@ -55,7 +55,8 @@
+ PROJECT RULES that outrank generic taste: read `{{RUN_DIR}}/AGENTS.md` sections "Key Conventions",
+ "Security" and "Hard Rules" before judging. A documented project rule wins over a generic smell.
+ 
+-INHERITED BASE-REDS (already red on the base — NOT findings): {{INHERITED_REDS}}
++BASE-RED INVESTIGATION HINTS (unverified until reproduced on the exact base in a comparable environment): {{INHERITED_REDS}}
++Do not suppress or ACK a finding solely because it matches this list. Report its evidence; required gate failures continue to block admission even when inheritance is proven.
+ 
+ EVIDENCE RULE: a finding needs quoted lines from the patch or an executed READ-ONLY command
+ (grep/node -e/test run with no writes) in `evidence`. No evidence → confidence low.
+--- a/_shared/omni-review-core.md
++++ b/_shared/omni-review-core.md
+@@ -147,8 +147,7 @@
+ [ -n "$BASE_RED" ] && gh issue view "$BASE_RED" --repo cheaper-inference/OmniRoute --json comments --jq '.comments[-1].body' | sed -n '/^HARD failures/,/^```/p' | grep '^[[:space:]]*❌' | grep -v 'NOT release-green' | sed 's/^[[:space:]]*//' > "$WORK/inherited-reds.txt"
+ ```
+ - `--areas` takes directory PREFIXES (`src/lib,open-sse/handlers`), not globs.
+-- Red base → `inherited-reds.txt` (one `❌ gate: detail` per line) is stamped into every reviewer
+-  prompt as inherited and any matching finding is `ACK`ed; empty file → "none".
++- `inherited-reds.txt` is a legacy filename for issue-derived investigation hints. Its entries are unverified until reproduced on the exact base in a comparable environment. Pass them as hints to reviewers; retain matching findings with evidence. Issue text does not automatically justify `ACK`, and required failures block admission until repaired and revalidated; empty file → "none".
+ 
+ ## Step 2 — Discover reviewers, confirm the roster (P2 only if needed)
+ 
+@@ -401,7 +400,7 @@
+ 
+ ## Step 9 — PR, owner validation (P4), merge
+ 
+-- Base-green check again (`BASE_RED`); red → `⚠️ base-red inherited: #<issue> — <gates>` in the body.
++- Refresh the base-green evidence (`BASE_RED`). Mention the incident in the body; use the inherited label only with exact-base reproduction and comparable environment receipts. It never waives a required check.
+ ```bash
+ source "$WORK/run.env"; cd "$FIX_WT"
+ git push -u origin "$FIX_BRANCH"
+@@ -412,10 +411,7 @@
+ ```
+ - **P4:** show the PR, wait for CI green AND the owner's explicit merge OK (the P3 OK authorized
+   fixing, not merging). No OK → outcome `held`; the PR stays open; stop here.
+-- Merge: `PR_BASE` is a `release/v*` → run the fused block of `../_shared/merge-gates.md` §1
+-  (freeze-gate with retarget to the ACTIVE release, §3 base-red discriminator, §4 `--admin`
+-  policy) — never a bare `gh pr merge`. `PR_BASE` is a feature branch → `gh pr merge <N> --squash`
+-  after P4 (the release freeze does not govern a feature branch). → outcome `merged`.
++- For every target, apply `../_shared/merge-gates.md`: current base/head/combined candidate/policy, successful required checks, protected-surface approval and contributor credit. Release targets also require the freeze check. Retargeting creates a new candidate. Use expected-head matching plus a server guarantee for the base/candidate; otherwise HOLD. Neither a feature-branch target nor proven inheritance permits administrative bypass. Read back merged SHA/tree and the post-merge base checks before reporting integrated and validated.
+ 
+ ## Step 10 — Teardown (P5) and Step 10-lite
+ 
+@@ -442,7 +438,7 @@
+ | Workflow interrupted (named workflow, e.g. `claude-security:scan`, `insecure-defaults:audit-pipeline`) | resume with `Workflow({ name, args, resumeFromRunId })` — resuming by `scriptPath` alone drops `args` and the pipeline exits with `no-args`/`missing-plugin-root` (measured 2026-09-21) |
+ | API 429/500/529 kills subagents mid-run | the journal keeps completed results; stop the task and resume from the run id; a worker that died with uncommitted edits is audited (`git status`/`git diff`) before anything is discarded |
+ | citation does not exist / does not match | `confidence: low` + `DISCUSS`; counted per reviewer under "invalid citations" |
+-| base red (Release-Green issue) | inherited HARD reds stamped in prompts; matching findings → `ACK` automatically |
++| base red (Release-Green issue) | investigation hints only; exact-base reproduction required; retain matching findings and HOLD on required failures |
+ | release freeze active | only matters at merge: `merge-gates.md` §1 retargets/holds → outcome `held` |
+ | empty diff / source is the base | outcome `empty` at Step 1, Step 10-lite |
+ | zero findings everywhere | outcome `clean`: report with the tally, run recorded, no fix branch |
+--- a/_shared/pr-rework-uplift.md
++++ b/_shared/pr-rework-uplift.md
+@@ -8,6 +8,8 @@
+ **Owner directive (2026-09-15, verbatim intent):** "corrija aproveitando a ideia mas fazendo
+ certo para dar 5 estrelas, crie os testes para validar; ajuste a ideia SEM mudar o processo
+ atual; não quebre nada; me dê um relatório das correções antes de mergear."
++
++Admission follows `merge-gates.md`, `base-green.md`, `validation-gate.md`, `protected-surfaces.md` and `credit-preservation.md`. Historical campaign results below confer no bypass or rebaseline authority.
+ 
+ ## 1. The uplift gate (where this plugs into the star classification)
+ 
+@@ -54,9 +56,7 @@
+    changed** (it normally does not). Never weaken an assertion to get green.
+ 5. **Keep the contributor's commits intact** — rework lands as NEW commits on top; the PR
+    is later squash-merged under the contributor's name. Never rewrite their history; the
+-   only exception is a branch contaminated with foreign commits (see §3 "contaminated"),
+-   rebuilt as tip + cherry-pick of the value commit with authorship preserved, then
+-   force-pushed to the contributor's branch after `maintainerCanModify` is confirmed.
++   contaminated branch needs a separately reviewed, credit-preserving repair candidate (see §3). `maintainerCanModify` does not authorize force-pushing over contributor history.
+ 6. **No AI attribution** in any commit (Hard Rule #16), no `--no-verify`, no `git stash`.
+ 
+ ## 3. Dispatching rework fronts (subagents)
+@@ -83,9 +83,7 @@
+ - the per-PR defect list from the review (file:line) and the owner's policy decisions;
+ - the gates to run and report with exit codes: eslint on changed files (with the
+   suppressions file; prune stale suppressions, never add), `typecheck:core` AND
+-  `check:open-sse-typecheck` (core does not cover `open-sse/`), `check-file-size` (bump
+-  inside `frozen` with a dated `_rebaseline_<date>_<N>_<slug>` annotation for legitimate
+-  growth; never squeeze code onto one line to dodge it), complexity + cognitive,
++  `check:open-sse-typecheck` (core does not cover `open-sse/`), `check-file-size` (repair growth or hold; no automatic ceiling increase or compressed-line workaround), complexity + cognitive,
+   `check:env-doc-sync` (every new env var goes to `.env.example` + `ENVIRONMENT.md`),
+   `check:docs-counts` when docs/migrations change, `check:dashboard-typecheck` for `.tsx`,
+   the PR's focused tests + the neighbouring test files of every touched module;
+@@ -130,30 +128,8 @@
+ 
+ ## 6. Merging the reworked set (composes with `/merge-batch` Step 3–6)
+ 
+-- **Combined board first**: one worktree from the tip, merge every `rework/<N>` (or
+-  `refs/prs/<N>` for the PRs that needed no rework) in stack order. Auto-resolve the
+-  mechanical conflicts with the helpers in `.agents/skills/uplift-prs/scripts/`:
+-  `resolve_baseline.py` (file-size baseline: union of annotations, max of numbers),
+-  `keepboth.py` (diff3 hunks where both sides only ADD — flag definitions, docs rows, env
+-  docs, i18n keys — concatenated ours+theirs; anything else is left for you), and
+-  `fix_flag_counts.py` (recomputes totals + per-category headings + the count assertion
+-  from the definitions). Two more for the gates that move under a long campaign:
+-  `fill_missing_i18n.py` (the tip gained locales after the branches forked → every new
+-  flag/i18n key is missing there; fills `__MISSING__:<en>` except vi, which needs a real
+-  translation) and `sync_llm_mirrors.py` (a PR touching `llm.txt` must regenerate all the
+-  `docs/i18n/*/llm.txt` mirrors — never `cp`, the mirrors keep a localized header and the
+-  `---` separator the docs-sync hook checks). Run the full static battery + every changed
+-  test file once here.
+-- **Then one PR at a time on the fresh tip**: merge the tip into the PR branch, re-run the
+-  helpers (baseline, keepboth, flag counts, then i18n fill and llm mirrors when the merge
+-  commit's hook rejects), run that PR's focused tests + eslint (typechecks were proven on
+-  the board; re-run them per PR only for `.tsx` or a conflict you resolved by hand), auto-
+-  rebaseline file-size growth on the PR's own files (a violation on a file the PR never
+-  touched is an inherited base-red — log it, do not block), re-run a red test file in
+-  isolation before calling it real (timing flakes at load 40+), push to the contributor's
+-  fork, verify `headRefOid` == local HEAD, `gh pr merge --squash --admin` with a body that
+-  names what it does, the maintainer rework (bullets), and the evidence. Flag counts move
+-  by one per merge — recompute every time, never hand-edit.
++- **Combined board for diagnosis**: build an owned worktree from the pinned base and record the ordered PR heads and final tree. Inspect conflict resolutions and run the applicable diagnostics. Additive merges must preserve sibling changes; helpers do not authorize baseline increases, placeholder translations or protected instruction changes. Use the explicit base/compare contract for i18n callers. A board PASS applies only to that exact composition, not to intermediate squash trees.
++- **One PR at a time on the current base**: after an authorized fast-forward update, resolve base SHA, head SHA, combined candidate SHA/tree and policy again. Run all applicable required checks and retain their receipts. Reproduce suspected inherited failures on the exact base in a comparable environment; required inherited failures still block. Review human credit and protected-surface approval. Merge only through the identity-preserving protocol in `merge-gates.md`, with expected-head matching and server enforcement for the base/candidate. No `--admin` or automatic rebaseline. Read back merged state/SHA/tree and the base's post-merge checks; recompute flag counts after each merge.
+ - Close the PRs that ended with nothing valid (e.g. the upper half of a pair that undid the
+   lower one) and the duplicates by other authors only AFTER their superseding PR merged,
+   each with a comment naming what covers it. Never before, never without owner OK.
+@@ -164,19 +140,15 @@
+   ESLint on changed files, nested-workspace tests. Run them.
+ - `pkill -f <script>` matches your own shell if the command line contains the name — kill by
+   PID.
+-- Under load (>30) timing tests flake; re-run isolated before calling a red real.
++- Load is a diagnostic lead, not proof of a flake. Preserve the RED and compare controlled alternating runs before classification; required checks still need a passing current candidate.
+ - A branch's own test can be red on its own head for a reason unrelated to the fix (the
+   #13153 route keepalive dropped a header) — root-cause before "fixing" the assertion.
+-- Prettier-unclean files on the tip make every touching PR grow lines at commit time — that
+-  is legitimate rebaseline growth, annotate it as such.
++- Formatting may increase line counts. Inspect that growth and repair or hold an exceeded gate; formatting is not automatic authorization to raise a baseline.
+ - The contributor may rebase mid-campaign: the push to their branch is then rejected
+   (non-fast-forward). Never force-push over it — fetch the new head, prove it is a pure
+   rebase (`git diff refs/prs/<N>-old refs/prs/<N>` over the value files is empty), then
+   rebuild `rework/<N>` as new head + cherry-pick of your rework commits (#13581).
+-- A killed lint-staged run leaves "lint-staged automatic backup" entries on the SHARED
+-  stash stack. They are not yours to `stash pop`; identify them by parent SHA
+-  (`git stash list --format='%gd %P'`) and drop only the ones whose parent is your own
+-  commit.
++- A killed lint-staged run may leave an automatic backup in shared Git state. Preserve it and report the interrupted hook; do not mutate the shared stash stack. Recover only owned files through an explicitly reviewed procedure.
+ - A merged PR can add a `t("…")` key without the catalog entry (`serve.ready_timeout`,
+   #13433): `tests/unit/cli-i18n-catalog.test.ts` / `check:cli-i18n` go red on the tip.
+   When a PR touches `bin/cli/commands/`, run that test in the battery.
+@@ -191,6 +163,5 @@
+   runs after every scripted resolution and again on every changed `.ts/.json` right before
+   the push; and any conflict resolved by script in a `.ts` file re-runs `typecheck:core` +
+   `check:open-sse-typecheck` for that PR (the combined-board proof does not cover a
+-  resolution made later) with a base-red discriminator (errors only in files the PR did not
+-  change are inherited and logged). Audit the tip after a campaign with
++  resolution made later). File paths alone do not prove inheritance: reproduce on the exact base in a comparable environment, and keep required failures blocking. Audit the tip after a campaign with
+   `dupaudit.py --md $(git diff --name-only <before>..<after>)`.
+--- a/security-wave/templates/worker-prompt.md
++++ b/security-wave/templates/worker-prompt.md
+@@ -147,7 +147,7 @@
+      big: split helpers out until OK.
+    - `npm run -s check:file-size -- --base-ref $(git merge-base HEAD origin/{{BASE}})` (PR mode, #8522: flags only
+      files that grew relative to the base) → must print `OK`; never grow a frozen file, never raise a baseline.
+-     Without the flag, a `✗` on a file outside your diff is inherited base-red.
++     Without the flag, a `✗` outside the diff is only a lead: reproduce the same signature on the exact base in a comparable environment before calling it inherited. Required failures remain blocking until repaired and revalidated.
+    - Typecheck of the TS files you touched — never the full project:
+      ```bash
+      cat > tsconfig.touched.tmp.json <<'EOF'
+--- a/uplift-prs/REWORK_RULES.md
++++ b/uplift-prs/REWORK_RULES.md
+@@ -1,6 +1,8 @@
+ # Rework rules — template handed to every rework front (fill BASE, PR list, defect lists)
+ 
+ Owner directive (2026-09-15, verbatim intent): "fix them, keeping the idea but doing it right, so they rate 4-5 stars, create tests to validate; adjust the idea WITHOUT changing the current process; don't break anything; report the corrections before merging."
++
++Required admission follows `_shared/merge-gates.md`, `_shared/base-green.md` and `_shared/validation-gate.md`. Preserve exact base/head/candidate/policy receipts; local focused diagnostics cannot waive required checks.
+ 
+ Placeholders: `$ROOT` = main checkout, `<base>` = active release branch (e.g. `<base>`).
+ 
+@@ -10,7 +12,7 @@
+ - NEVER push, NEVER run mutating `gh` commands (no comment/merge/close/edit/pr create). Local commits only.
+ - NEVER touch worktrees/branches you did not create; never touch `_tasks/`; never edit the main checkout.
+ - Worktrees ONLY under `.claude/worktrees/rw-<N>` (create: `git worktree add .claude/worktrees/rw-<N> -b rework/<N> refs/prs/<N>`, then `cp -al $ROOT/node_modules .claude/worktrees/rw-<N>/node_modules`, then `cd` there and run `npx husky` so the pre-commit hook runs). Never `ln -s` node_modules. Do NOT remove your worktrees at the end (the orchestrator audits them).
+-- First step in each worktree: `git merge origin/<base>` and resolve conflicts. `config/quality/file-size-baseline.json` conflicts are additive (keep both sides' entries; for the same numeric key keep the value the checker needs). If ESLint reports stale suppressions, prune with `npx eslint --suppressions-location config/quality/eslint-suppressions.json --prune-suppressions <files>` (never add suppressions for new violations).
++- First step in each worktree: `git merge origin/<base>` and resolve conflicts. `config/quality/file-size-baseline.json` conflicts are additive (keep both sides' entries; for a shared numeric key preserve the authorized ceiling; conflicting policy requires review, not a larger value). If ESLint reports stale suppressions, prune with `npx eslint --suppressions-location config/quality/eslint-suppressions.json --prune-suppressions <files>` (never add suppressions for new violations).
+ - Never use `--no-verify`. Commit messages: Conventional Commits, NO AI attribution/Co-Authored-By/"Generated with" footers.
+ - Any script that may open the DB (check:compression-budget, gen scripts, ad-hoc tsx) must run with `DATA_DIR=$(mktemp -d)`; tests run with `--import ./tests/_setup/isolateDataDir.ts`.
+ - Stacked PRs: rework the LOWER PR branch first; the upper PR branch then merges the reworked lower branch (`git merge rework/<lower>`) and adds only its own fixes.
+@@ -18,9 +20,9 @@
+ ## Engineering bar ("do it right, don't change the current process")
+ 1. Default runtime behavior on the release tip must stay the same, unless the PR fixes an unambiguous verified bug whose fix does not change policy (e.g. a crash, a data-loss write, a wrong computation). Anything that changes routing, retries, failover, cooldown/lockout policy, status codes, client-visible headers/bodies, billing/cost, or UI semantics MUST be opt-in: a feature flag in `src/shared/constants/featureFlagDefinitions.ts` with `defaultValue: "false"`, following the existing pattern exactly (definition, `docs/reference/FEATURE_FLAGS.md` row, the description i18n key the other flags use in `src/i18n/messages/en.json` — mirror to other locales only the way existing flags do, and update any flag-count assertions such as `tests/unit/feature-flags-settings.test.ts`). Read the flag at the decision point (fail closed = old behavior on any error). Other agents are adding flags in parallel; flag COUNT conflicts are expected and will be reconciled by the orchestrator — keep each flag addition in its own clearly named commit.
+ 2. Fix every concrete defect the review found (listed per PR in your task). Do not expand scope beyond the PR's idea.
+-3. Tests: exercise the REAL code path (no local re-implementation / source-grep tautologies unless that is the only possible guard and you say so). Relative imports must resolve from the test file directory. Prove each new behavioral test is meaningful: it must FAIL without the fix (check by running it against a pristine copy of the file from `origin/<base>`, e.g. a throwaway `git worktree add --detach .claude/worktrees/rw-<N>-tip origin/<base>` with node_modules hardlinked — remove that probe worktree afterwards), and when a flag gates the behavior, test BOTH flag off (old behavior unchanged) and flag on. Clean up DB handles (`resetDbInstance()` in `after`), timers, and cancel response bodies. `tests/unit/autoCombo/**` and `*.test.tsx` are vitest; everything else node:test. Beware importing heavy SSE modules that arm intervals (can hang node:test) — use `--test-force-exit` and clear timers.
++3. Tests: exercise the REAL code path (no local re-implementation / source-grep tautologies unless that is the only possible guard and you say so). Relative imports must resolve from the test file directory. Prove each new behavioral test is meaningful: it must FAIL without the fix (check by running it against a pristine copy of the file from `origin/<base>`, e.g. a throwaway `git worktree add --detach .claude/worktrees/rw-<N>-tip origin/<base>` with node_modules hardlinked — remove that probe worktree afterwards), and when a flag gates the behavior, test BOTH flag off (old behavior unchanged) and flag on. Clean up DB handles (`resetDbInstance()` in `after`), timers, and cancel response bodies. `tests/unit/autoCombo/**` and `*.test.tsx` are vitest; everything else node:test. Clean up intervals armed by imported modules and require normal runner completion; a hanging test needs diagnosis and does not count as PASS.
+ 4. Existing tests asserting OLD behavior: only change them if the default behavior legitimately changed (it normally should NOT under rule 1). Never weaken assertions to get green.
+-5. Gates to run per PR worktree and report (exit codes): `npx eslint --no-warn-ignored --suppressions-location config/quality/eslint-suppressions.json <changed ts/tsx/js/mjs files>`, `npm run -s typecheck:core`, `npm run -s check:open-sse-typecheck`, `node scripts/check/check-file-size.mjs` (legit growth: bump the value INSIDE the `frozen` object and add a dated `_rebaseline_2026_09_15_<N>_<slug>` annotation explaining it; `open-sse/utils/stream.ts` 3115>3098 is a pre-existing base-red — ignore), `node scripts/check/check-complexity.mjs`, `node scripts/check/check-cognitive-complexity.mjs`, `npm run -s check:env-doc-sync` (do not ADD drift; the base already has 5+6 pre-existing entries), `npm run -s check:docs-counts` if docs/migrations/flags changed, `npm run -s check:dashboard-typecheck` if .tsx changed, plus the PR's focused tests and neighbouring existing test files for the touched modules.
++5. Gates to run per PR worktree and report (exit codes): `npx eslint --no-warn-ignored --suppressions-location config/quality/eslint-suppressions.json <changed ts/tsx/js/mjs files>`, `npm run -s typecheck:core`, `npm run -s check:open-sse-typecheck`, `node scripts/check/check-file-size.mjs` (repair growth or report HOLD; never auto-raise ceilings, and remeasure historical violations against the exact current base), `node scripts/check/check-complexity.mjs`, `node scripts/check/check-cognitive-complexity.mjs`, `npm run -s check:env-doc-sync` (measure the current exact candidate; historical counts are not exemptions), `npm run -s check:docs-counts` if docs/migrations/flags changed, `npm run -s check:dashboard-typecheck` if .tsx changed, plus the PR's focused tests and neighbouring existing test files for the touched modules.
+ 6. Keep contributor authorship: add your changes as NEW commits on top (do not rewrite their commits).
+ 
+ ## Final report (your final message)
+--- a/review-prs/SKILL.md
++++ b/review-prs/SKILL.md
+@@ -182,9 +182,7 @@
+ 
+ **Base-red awareness (`../_shared/base-green.md`):** before dispatching, run the base-green
+ check against the active release branch. If a base-red issue is open, stamp its HARD-failure
+-list into every agent's prompt: agents must **NOT** classify a failure that appears on that
+-list as a defect of the PR under review — it is inherited from the base tip. Only reds outside
+-the list are the PR's own.
++list into every agent's prompt as investigation hints. A matching name does not prove inheritance, and absence from the list does not prove a PR regression. Reproduce the same signature on the exact base in a comparable environment, or record the cause as unproven. Required failures remain blocking until repaired and revalidated.
+ 
+ Each agent evaluates its PR across all six sections:
+ 
+@@ -382,13 +380,7 @@
+ the release branch, and the release branch accumulates all changes before the final merge to
+ `main`.
+ 
+-**Base-red handling (`../_shared/base-green.md`):** if `BASE_RED_ISSUE` is non-empty, the
+-retarget target itself is red — **retarget ANYWAY** (leaving PRs on `main` is worse: conflict
+-detection and the eventual merge would run against the wrong base). But record the inheritance:
+-note in the Step 4 report and in each PR's feedback comment (5a) that CI reds matching the
+-base-red issue's HARD-failure list are **inherited from the base tip, not introduced by the
+-PR** — cite `⚠️ base-red inherited: #$BASE_RED_ISSUE` so the author and `/merge-prs`/`/babysit`
+-don't chase ghosts.
++**Base-red handling (`../_shared/base-green.md`):** confirm the authorized target before retargeting. A retarget creates a new candidate: refresh base/head/combined tree/policy and checks, and read back the target. If the target has a base-red incident, record it as an investigation lead; label inheritance only with exact-base reproduction in a comparable environment. Keep required failures blocking and never retarget-and-merge using old receipts.
+ 
+ ## Step 6 — Handoff & teardown
+ 
+--- a/review-group-prs/SKILL.md
++++ b/review-group-prs/SKILL.md
+@@ -116,8 +116,7 @@
+ 
+ If the base-green check returns an issue, extract its HARD-failure list (protocol in
+ `../_shared/base-green.md`) and carry it through the whole run: stamp it into every swarm
+-agent's prompt (Step 3) and note it in the report — those reds are **inherited from the base
+-tip**, never a defect of any PR under analysis.
++agent's prompt (Step 3) as investigation hints. Neither the issue nor matching failure names establish cause. Reproduce the same signature on the exact base in a comparable environment before classifying inheritance; otherwise record it as unproven and keep required failures blocking.
+ 
+ This skill itself stays read-only in the repo — it reads PRs/diffs and writes only
+ `_tasks/` artifacts. Each swarm agent (Step 3) creates its own throwaway probe worktree
+@@ -165,9 +164,7 @@
+ groups to fit the actual queue). **Two clustering axes: by disposition and by
+ subject/contributor.** **Base-red is NOT a clustering axis:** CI reds shared by the whole
+ group (or the whole queue) that appear on the base-red issue's HARD-failure list (Step 0,
+-`../_shared/base-green.md`) are **inherited from the base tip** — do not cluster PRs around
+-them or read them as a common defect linking the PRs; cluster only on what each PR itself
+-changes. **Tie-break:** classify in group order — **G0 HOLD always wins**,
++`../_shared/base-green.md`) are investigation leads. Classify inheritance only after exact-base reproduction in a comparable environment; frequency is not causal proof. Cluster by each PR's changes, and retain unresolved required failures as admission blockers. **Tie-break:** classify in group order — **G0 HOLD always wins**,
+ then first match wins (a subsumed Dependabot bump is G2, not G1; a subsumed PR that's part
+ of a subsystem cluster is G2 if the exact fix already landed, else G6).
+ 
+@@ -217,10 +214,7 @@
+ · `needs-vps` · `defer` · `subsumed` · `close-recommended`.
+ 
+ ### §3-A Dependabot / CI bumps
+-The diff is pure workflow YAML → it **categorically cannot** cause a lint/unit/coverage
+-failure. If CI shows those red, they are base-reds on `main`, not introduced by the bump.
+-Verdict `merge-ready` with a note that these legitimately target `main` — record it so
+-`/merge-prs` doesn't spend time debugging the base-red.
++Workflow YAML can change the runtime, installation, commands, permissions and artifacts used by lint/tests/coverage. Review those effects and inspect the exact candidate's results. `merge-ready` requires the applicable admission evidence; a workflow-only diff does not establish inheritance or waive a failed/incomplete check. Record the explicitly authorized target and any unresolved cause.
+ 
+ ### §3-B Subsumed (VERIFY before recommending close)
+ Prove the fix already landed — **file-scope + direction, not just the issue number**:
