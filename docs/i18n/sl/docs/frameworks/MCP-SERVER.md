@@ -10,35 +10,30 @@
 
 ## Namestitev
 
-OmniRoute MCP je vgrajen. Zaženite ga z:
+OmniRoute MCP je vgrajen. Začnite z:
 
 ```bash
 omniroute --mcp
 ```
 
-Ali prek transporta open-sse:
+Ali preko odprtega prevoza:
 
 ```bash
-# Pretočni transport HTTP (vrata 20130)
-omniroute --dev  # MCP se samodejno zažene na končni točki /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Transporti HTTP (`sse` / `streamable-http`, ki jih znotraj procesa zagotavlja strežnik nadzorne plošče) so
-privzeto izklopljeni in jih je bilo prej mogoče preklapljati samo na strani `/dashboard/mcp`. Od različice v3.8.51
-CLI ponuja enake možnosti:
+Prenosi HTTP (`sse` / `streamable-http`, ki jih v procesu streže strežnik nadzorne plošče) so privzeto izklopljeni in jih je bilo prej mogoče preklapljati samo s strani `/dashboard/mcp`. Od v3.8.51 ima CLI pariteto:
 
 ```bash
-omniroute mcp status                                  # omogočeno/povezano, transport, število orodij
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # ponastavi aktivne seje sse/streamable-http
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` z metodo PATCH spremenita isto nastavitev `mcpEnabled` (in po želji `mcpTransport`),
-ki jo nadzorna plošča preklaplja prek `/api/settings`. `mcp restart` pokliče `POST /api/mcp/restart`: prekine
-aktivne seje `sse`/`streamable-http`, tako da se ob naslednji zahtevi znova pravilno inicializirajo, vrne
-`409`, če je MCP onemogočen, in `501` za transport `stdio` (odjemalci stdio upravljajo svoje
-podprocese — znotraj procesa ni ročice, ki bi jo bilo mogoče znova zagnati).
+`mcp enable`/`mcp disable` PATCH isti `mcpEnabled` (in neobvezno `mcpTransport`) nastavitev nadzorne plošče preklopi prek `/api/settings`. `mcp restart` pokliče `POST /api/mcp/restart`: prekine aktivne seje `sse`/`streamable-http` tako da se naslednja zahteva čisto znova inicializira, vrne `409` če je MCP onemogočen, in `501` za transport `stdio` (odjemalci stdio imajo lasten podproces — v procesu ni ročaja za ponovni zagon).
 
 ## Prenosi
 
@@ -132,52 +127,40 @@ Za nastavitev Claude Desktop, Cursor, Cline in združljivih odjemalcev MCP glejt
 
 ## Orodja za stiskanje (13)
 
-| Orodje                              | Obsegi              | Opis                                                                                                                                            |
+| Orodje                              | Območja             | Opis                                                                                                                                            |
 | :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Nastavitve stiskanja, povzetek analitike in statistika, ki upošteva predpomnilnik (vključuje metapodatke `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Konfiguracija načina stiskanja, praga, ciljnega razmerja, ohranjanja sistemskega poziva in preklopa stiskanja opisov MCP                        |
-| `omniroute_set_compression_engine`  | `write:compression` | Izbira dejavnega mehanizma (off/caveman/rtk/stacked) in intenzivnosti Caveman/RTK                                                               |
-| `omniroute_list_compression_combos` | `read:compression`  | Seznam poimenovanih kombinacij stiskanja in njihovih cevovodov mehanizmov                                                                       |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analitika, združena po kombinaciji stiskanja in mehanizmu                                                                                       |
-| `omniroute_ccr_store`               | `write:compression` | Shranjevanje vsebine, ločene glede na klicatelja, v omejeni pomnilniški shrambi CCR ter vračilo označevalnika in sklica `ccr://`                |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Pridobivanje celotne vsebine CCR ali z načini za začetek, konec, vrstice, grep in statistiko                                                    |
-| `omniroute_ccr_inspect`             | `read:compression`  | Pregled metapodatkov CCR v lasti klicatelja brez vračanja vsebine                                                                               |
-| `omniroute_ccr_list`                | `read:compression`  | Seznam metapodatkov s številčenjem strani za bloke CCR v lasti klicatelja                                                                       |
-| `omniroute_ccr_delete`              | `write:compression` | Brisanje bloka CCR v lasti klicatelja                                                                                                           |
-| `omniroute_ccr_stats`               | `read:compression`  | Poročilo o uporabi pomnilnika, števcitih življenjskega cikla in omejitvah shrambe glede na klicatelja                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Odkrivanje ponavljajočega se šuma v vzorcih izhodnih podatkov RTK, za katere je bila podana privolitev                                          |
-| `omniroute_rtk_learn`               | `read:compression`  | Ustvarjanje osnutka filtra RTK za pregled iz vzorcev, za katere je bila podana privolitev                                                       |
+| `omniroute_compression_status`      | `read:compression`  | Nastavitve stiskanja, povzetek analitike in statistični podatki o predpomnilniku (vključuje metapodatke `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurirajte način stiskanja, prag, ciljno razmerje, ohranjanje sistemskega poziva, preklop stiskanja opisa MCP                               |
+| `omniroute_set_compression_engine`  | `write:compression` | Izberite aktivni motor (off/caveman/rtk/stacked) in intenzivnost Caveman/RTK                                                                    |
+| `omniroute_list_compression_combos` | `read:compression`  | Seznam imenovanih kompresijskih kombinacij in njihovih cevovodov motorjev                                                                       |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analitika, združena glede na kompresijsko kombinacijo in mehanizem                                                                              |
+| `omniroute_ccr_store`               | `write:compression` | Shranite vsebino, izolirano od klicatelja, v omejeno shrambo CCR v pomnilniku in vrnite oznako plus referenco `ccr://`                          |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Pridobite vsebino CCR v celoti ali z načini glave, repa, vrstic, grep in statistike                                                             |
+| `omniroute_ccr_inspect`             | `read:compression`  | Preglejte metapodatke CCR v lasti kličočega brez vrnitve vsebine                                                                                |
+| `omniroute_ccr_list`                | `read:compression`  | Seznam paginiranih metapodatkov za bloke CCR v lasti klicatelja                                                                                 |
+| `omniroute_ccr_delete`              | `write:compression` | Izbrišite blok CCR v lasti klicatelja                                                                                                           |
+| `omniroute_ccr_stats`               | `read:compression`  | Poročilo o uporabi pomnilnika v obsegu klicatelja, števcih življenjskega cikla in omejitvah shranjevanja                                        |
+| `omniroute_rtk_discover`            | `read:compression`  | Odkrijte ponavljajoče se šume v izhodnih vzorcih opt-in RTK                                                                                     |
+| `omniroute_rtk_learn`               | `read:compression`  | Ustvarite osnutek filtra RTK ki ga je mogoče pregledati, iz vzorcev za prijavo                                                                  |
 
-Vnosi CCR so shranjeni samo v pomnilniku in ob ponovnem zagonu izginejo. Posamezen blok je omejen na 2 MiB, posamezna
-identiteta na 16 MiB, globalna shramba pa na 64 MiB. Privzeti čas veljavnosti vnosov je 24 ur (največ
-sedem dni). Celotno pridobivanje prek MCP je omejeno na 256 KiB; večji bloki ostanejo na voljo prek
-načinov z obsegi in grep. Shranjevanje, pridobivanje, izpisovanje, pregledovanje, brisanje in statistika so ločeni glede na
-overjeno identiteto ključa API. Revizijski zapisi vsebujejo zgoščene vrednosti in metapodatke o velikosti, nikoli pa vsebine.
+Vnosi CCR uporabljajo dvonivojsko shrambo: vročo raven v pomnilniku, ki jo v lokalnih izvajalnih časih brez oblaka podpira vzdržljiva raven SQLite (`ccr_blocks`, privzeto vklopljeno), tako da blok preživi izgon ali ponovni zagon, dokler se njegov TTL ne izprazni — razen blokov nad 512 KB in izvajalnimi časi v oblaku, ki ostanejo samo v pomnilniku. Vsak blok je omejen na 2 MiB, vsak glavnik na 16 MiB in globalna trgovina na 64 MiB. Vnosi so privzeto nastavljeni na 24-urni TTL (največ sedem dni). Polno iskanje MCP je omejeno na 256 KiB; večji bloki ostanejo na voljo v načinih ranged in grep. Shranjevanje, iskanje, seznam, pregledovanje, brisanje in statistika so izolirani s preverjenim glavnim ključem API. Revizijski zapisi vsebujejo zgoščene vrednosti in metapodatke o velikosti, nikoli vsebine. Podrobnosti za operaterja (obe označevalci, predpogoji odjemalca, `codemode:false`, obsegi na orodje, paginacija in diagnostična matrika) so v živo v [predpogojih za kompresijske motorje → / vodniku za operaterja](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` poroča o stiskanju opisov MCP ločeno pod
-`analytics.mcpDescriptionCompression`. Te vrednosti so ocene velikosti metapodatkov za opise MCP, ki jih je mogoče izpisati
-(`tools`, `prompts`, `resources` in `resourceTemplates`); niso potrdila o uporabi pri ponudniku
-in so označene z `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` poroča o stiskanju opisa MCP ločeno pod `analytics.mcpDescriptionCompression`. Te vrednosti so ocene velikosti metapodatkov za popisljive opise MCP (`tools`, `prompts`, `resources` in `resourceTemplates`); niso potrdila o uporabi ponudnika in so označeni z `source: "mcp_metadata_estimate"`.
 
-### Filter drevesa dostopnosti MCP (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-Neodvisno od zgornjih orodij za stiskanje OmniRoute vključuje filter po izvedbi, ki
-stisne **rezultate orodij** brskalniških orodij/orodij za dostopnost MCP, preden so vrnjeni
-agentu. Ta filter sam po sebi ni orodje — pregledno se izvede nad vsakim rezultatom orodja, ki vsebuje
-obsežno besedilo drevesa dostopnosti ali posnetka brskalnika (≥2000 znakov).
+Ločeno od zgornjih orodij za stiskanje OmniRoute vključuje filter po izvedbi, ki stisne** rezultate orodja** orodij MCP browser/accessibility preden se vrnejo agentu. Ta filter sam po sebi ni orodje — izvaja se pregledno na katerem koli rezultatu orodja, ki vsebuje podrobno besedilo drevesa dostopnosti ali posnetka brskalnika (≥ 2000 znakov).
 
-Ključne značilnosti:
+Ključna vedenja:
 
-- Strne ≥30 zaporednih ponovljenih vrstic sorodnih elementov v povzetek začetka + konca
-- Ohrani sidra `[ref=eXX]`, ki jih zahteva Playwright/uporaba računalnika
-- Strogo odreže predolgo besedilo (>50.000 znakov) z namigom za krmarjenje
-- Pričakovani prihranek: **60–80 %** pri koristnih vsebinah posnetkov brskalnika
+- Strni ≥ 30 zaporednih ponavljajočih sestrskih vrstic v glavo + rep povzetek
+- Ohranja sidra `[ref=eXX]`, ki jih zahteva Playwright/computer-use
+- Trdo skrajša preveliko besedilo (> 50.000 znakov) z namigom za krmarjenje
+- Pričakovani prihranki:** 60–80 %** na obremenitvah posnetkov brskalnika
 
-Konfiguracija: `compression.mcpAccessibility` v globalnih nastavitvah (migracija 056).
-Implementacija: `open-sse/services/compression/engines/mcpAccessibility/`.
-Celotna dokumentacija: [Mehanizmi stiskanja — filter drevesa dostopnosti MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguracija: `compression.mcpAccessibility` v globalnih nastavitvah (migracija 056). Izvedba: `open-sse/services/compression/engines/mcpAccessibility/`. Celotni dokumenti: [Motorji za stiskanje — MCP Drevesni filter dostopnosti](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Za model stiskanja med izvajanjem, na katerem temeljijo ta orodja, glejte [Mehanizmi stiskanja](../compression/COMPRESSION_ENGINES.md) in [Stiskanje RTK](../compression/RTK_COMPRESSION.md).
+Glejte [Compression Engines](../compression/COMPRESSION_ENGINES.md) in [RTK Compression](../compression/RTK_COMPRESSION.md) za model stiskanja izvajalnega časa za temi orodji.
 
 ## Orodja 1Proxy (3)
 

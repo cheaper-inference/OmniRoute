@@ -646,6 +646,31 @@ function isSchemaAlreadyApplied(
         hasColumn(db, "usage_history", "provider_credits") &&
         hasColumn(db, "usage_history", "provider_cost_usd")
       );
+    case "230":
+      // Cache-write tier columns (#17307, renumbered 213 -> 217 -> 226 -> 227 -> 228 -> 229 -> 230:
+      // the 213 slot went to 213_api_key_preferred_connections first, the 217 slot to
+      // 217_quota_recovery_tickets, the 226 slot to 226_request_cost_ledger_read_indexes, the
+      // 227 slot to 227_quota_recovery_due_cover, the 228 slot to
+      // 228_purge_orphaned_provider_catalogs and the 229 slot to 229_api_key_five_hour_limit,
+      // none of which has a guard here). Keyed by version
+      // only: a stale number would skip those migrations.
+      return [
+        "tokens_cache_creation_5m",
+        "tokens_cache_creation_1h",
+        "cache_creation_tier_status",
+        "cache_write_cost_usd",
+        "cache_write_priced_tokens",
+      ].every((column) => hasColumn(db, "call_logs", column));
+    case "236":
+      // Earlier builds applied this schema at 228, 231 or 233. Name-locked
+      // compatibility frees those slots; also handle a schema ahead of its ledger.
+      return (
+        migration.name === "usage_history_calculated_cost" &&
+        hasColumn(db, "usage_history", "calculated_cost_usd") &&
+        hasColumn(db, "usage_history", "billing_unit") &&
+        hasColumn(db, "usage_history", "billing_quantity") &&
+        hasColumn(db, "usage_history", "billing_unit_price_usd")
+      );
     default:
       return false;
   }

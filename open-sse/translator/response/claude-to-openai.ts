@@ -1,4 +1,5 @@
 import { register } from "../registry.ts";
+import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
 import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
@@ -11,6 +12,7 @@ type OpenAIUsage = {
   prompt_tokens_details?: {
     cached_tokens?: number;
     cache_creation_tokens?: number;
+    cache_creation?: unknown;
     // false: cache_creation_tokens is not included in prompt_tokens (#2215).
     cache_creation_in_prompt?: boolean;
   };
@@ -113,6 +115,7 @@ export function claudeToOpenAIResponse(chunk, state) {
         if (inputTokens > 0 || outputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
           const billableInputTokens = inputTokens + cacheRead;
           state.usage = {
+            ...cacheCreationFields(startUsage),
             prompt_tokens: billableInputTokens,
             completion_tokens: outputTokens,
             input_tokens: billableInputTokens,
@@ -297,6 +300,7 @@ export function claudeToOpenAIResponse(chunk, state) {
             ? inputTokens + cacheReadTokens
             : previousInputTokens;
         state.usage = {
+          ...mergeCacheCreationFields(previousUsage, chunk.usage),
           prompt_tokens: billableInputTokens,
           completion_tokens: outputTokens,
           input_tokens: billableInputTokens,
@@ -317,7 +321,10 @@ export function claudeToOpenAIResponse(chunk, state) {
         if (effectiveCacheReadTokens > 0) {
           state.usage.cache_read_input_tokens = effectiveCacheReadTokens;
         }
-        if (effectiveCacheCreationTokens > 0) {
+        if (
+          effectiveCacheCreationTokens > 0 &&
+          state.usage.cache_creation_input_tokens === undefined
+        ) {
           state.usage.cache_creation_input_tokens = effectiveCacheCreationTokens;
         }
       }
@@ -378,6 +385,7 @@ export function claudeToOpenAIResponse(chunk, state) {
           const totalTokens = promptTokens + completionTokens;
 
           finalChunk.usage = {
+            ...cacheCreationFields(state.usage),
             prompt_tokens: promptTokens,
             completion_tokens: completionTokens,
             total_tokens: totalTokens,
@@ -393,7 +401,7 @@ export function claudeToOpenAIResponse(chunk, state) {
 
           // Add prompt_tokens_details if cached tokens exist
           if (cachedTokens > 0 || cacheCreationTokens > 0) {
-            finalChunk.usage.prompt_tokens_details = {};
+            finalChunk.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
             if (cachedTokens > 0) {
               finalChunk.usage.prompt_tokens_details.cached_tokens = cachedTokens;
             }
@@ -421,6 +429,7 @@ export function claudeToOpenAIResponse(chunk, state) {
           state.usage && typeof state.usage === "object"
             ? {
                 usage: {
+                  ...cacheCreationFields(state.usage),
                   prompt_tokens: state.usage.input_tokens || 0,
                   completion_tokens: state.usage.output_tokens || 0,
                   total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
@@ -435,6 +444,7 @@ export function claudeToOpenAIResponse(chunk, state) {
                   ...(cachedTokens > 0 || cacheCreationTokens > 0
                     ? {
                         prompt_tokens_details: {
+                          ...cacheCreationFields(state.usage),
                           ...(cachedTokens > 0 ? { cached_tokens: cachedTokens } : {}),
                           ...(cacheCreationTokens > 0
                             ? {

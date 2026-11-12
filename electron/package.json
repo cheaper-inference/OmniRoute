@@ -28,8 +28,8 @@
     "electron-updater": "^6.8.11"
   },
   "devDependencies": {
-    "electron": "^45.2.0",
-    "electron-builder": "^26.15.3"
+    "electron": "^45.2.2",
+    "electron-builder": "^26.18.0"
   },
   "overrides": {
     "@xmldom/xmldom": "^0.9.12",

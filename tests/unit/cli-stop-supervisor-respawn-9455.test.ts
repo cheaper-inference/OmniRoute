@@ -26,6 +26,7 @@ type KillByPortDeps = {
   processKill?: (pid: number, signal: string | number) => boolean;
   isPidRunning?: (pid: number) => boolean;
   sleep?: (ms: number) => Promise<void>;
+  classifyPidIdentity?: (pid: number) => "ours" | "foreign" | "gone" | "unknown";
 };
 type KillByPortFn = (port: number, deps?: KillByPortDeps) => Promise<boolean>;
 
@@ -172,6 +173,8 @@ test("Defect 2: killByPort on win32 must actually kill the port listener via net
     },
     isPidRunning: (_p: number) => false, // pretend SIGTERM already killed it
     sleep: async (_ms: number) => {},
+    // The fake PID is not a process on this host: do not let the host's own answer decide.
+    classifyPidIdentity: () => "ours" as const,
   };
 
   const { killByPort } = await import("../../bin/cli/commands/stop.mjs");
@@ -219,6 +222,8 @@ test("netstat parsing: only LISTENING lines matching the exact port are selected
     },
     isPidRunning: (_p: number) => false,
     sleep: async (_ms: number) => {},
+    // PIDs 111 and 222 may exist on the host: do not let the host's own answer decide.
+    classifyPidIdentity: () => "ours" as const,
   };
 
   const { killByPort } = await import("../../bin/cli/commands/stop.mjs");
