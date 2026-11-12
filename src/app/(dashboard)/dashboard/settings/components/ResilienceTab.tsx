@@ -1,7 +1,7 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button, Card, Select } from "@/shared/components";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { Badge, Button, Card, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -1130,12 +1130,26 @@ function CredentialHealthCheckCard({
   );
 }
 
+// Mirrors `customBannedSignals: z.array(z.string().max(200))` in
+// src/shared/validation/settingsSchemas.ts — keep the two in sync.
+const MAX_BANNED_KEYWORD_LENGTH = 200;
+
 export default function ResilienceTab() {
   const notify = useNotificationStore();
   const t = useTranslations("settings");
   const [data, setData] = useState<ResilienceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingSection, setSavingSection] = useState<string | null>(null);
+  const [bannedKeywords, setBannedKeywords] = useState<string[]>([]);
+  const [bannedKeywordInput, setBannedKeywordInput] = useState("");
+  const [bannedKeywordsLoading, setBannedKeywordsLoading] = useState(true);
+  const [bannedKeywordsLoadFailed, setBannedKeywordsLoadFailed] = useState(false);
+  const [savingBannedKeywords, setSavingBannedKeywords] = useState(false);
+  // The ref is the single source of truth: it always holds the last list the
+  // server confirmed. Rapid add/remove clicks therefore cannot build on a
+  // stale closure value, and a failed PATCH never desyncs UI from server.
+  const bannedKeywordsRef = useRef<string[]>([]);
+  const bannedKeywordsSavingRef = useRef(false);
   const tx = useCallback(
     (key: string, fallback: string) => {
       if (typeof t.has === "function" && t.has(key as never)) {
@@ -1145,6 +1159,89 @@ export default function ResilienceTab() {
     },
     [t]
   );
+
+  // Custom banned keywords live in /api/settings, not in the resilience
+  // payload, so this card loads and saves them independently. It belongs on
+  // the Resilience page next to AutoDisableCard: it decides when an upstream
+  // error permanently bans and disables a connection.
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const settings = await res.json();
+        if (!mounted) return;
+        const list: string[] = Array.isArray(settings?.customBannedSignals)
+          ? settings.customBannedSignals.filter((v: unknown) => typeof v === "string")
+          : [];
+        bannedKeywordsRef.current = list;
+        setBannedKeywords(list);
+      } catch (error) {
+        console.error("Failed to load custom banned signals:", error);
+        // Never show the "no keywords" empty state when loading failed:
+        // editing from there would overwrite the real server-side list.
+        if (mounted) setBannedKeywordsLoadFailed(true);
+      } finally {
+        if (mounted) setBannedKeywordsLoading(false);
+      }
+    };
+    void load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Commit only after the server accepts the write. The synchronous ref lock
+  // serialises edits so two quick clicks cannot race on a stale array.
+  const saveBannedKeywords = async (next: string[]): Promise<boolean> => {
+    if (bannedKeywordsSavingRef.current) return false;
+    bannedKeywordsSavingRef.current = true;
+    setSavingBannedKeywords(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customBannedSignals: next }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      bannedKeywordsRef.current = next;
+      setBannedKeywords(next);
+      return true;
+    } catch (error) {
+      console.error("Failed to update custom banned signals:", error);
+      notify.error(tx("saveFailed", "Failed to save banned keywords"));
+      return false;
+    } finally {
+      bannedKeywordsSavingRef.current = false;
+      setSavingBannedKeywords(false);
+    }
+  };
+
+  const bannedKeywordsBusy =
+    bannedKeywordsLoading || bannedKeywordsLoadFailed || savingBannedKeywords;
+
+  const addBannedKeyword = async () => {
+    if (bannedKeywordsBusy || bannedKeywordsSavingRef.current) return;
+    const keyword = bannedKeywordInput.trim().toLowerCase();
+    if (!keyword || bannedKeywordsRef.current.includes(keyword)) return;
+    // Defence in depth for the Input's maxLength: the server rejects strings
+    // longer than 200 chars (settingsSchemas.ts), which would otherwise be a
+    // silent failure.
+    if (keyword.length > MAX_BANNED_KEYWORD_LENGTH) {
+      notify.error(tx("saveFailed", "Failed to save banned keywords"));
+      return;
+    }
+    const saved = await saveBannedKeywords([...bannedKeywordsRef.current, keyword]);
+    if (saved) setBannedKeywordInput("");
+  };
+
+  // Remove by value, not by index: with an async save an index can go stale
+  // between two quick clicks (and makes a stable React key).
+  const removeBannedKeyword = (keyword: string) => {
+    if (bannedKeywordsBusy || bannedKeywordsSavingRef.current) return;
+    void saveBannedKeywords(bannedKeywordsRef.current.filter((k) => k !== keyword));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -1241,6 +1338,80 @@ export default function ResilienceTab() {
           }
         />
       )}
+
+      {/* Custom banned keywords: a resilience concern (when a connection is
+          permanently banned and disabled), kept next to AutoDisableCard. */}
+      <Card
+        icon="report"
+        title={tx("customBannedSignals", "Banned Keywords")}
+        subtitle={tx(
+          "customBannedSignalsDesc",
+          "Additional keywords that trigger permanent account ban detection. Built-in keywords always apply."
+        )}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+            <Input
+              className="flex-1"
+              aria-label={tx("customBannedSignals", "Banned Keywords")}
+              placeholder={tx("customBannedSignalsPlaceholder", "e.g. api key revoked")}
+              value={bannedKeywordInput}
+              maxLength={MAX_BANNED_KEYWORD_LENGTH}
+              disabled={bannedKeywordsBusy}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setBannedKeywordInput(e.target.value)
+              }
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter") void addBannedKeyword();
+              }}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="add"
+              onClick={() => void addBannedKeyword()}
+              disabled={bannedKeywordsBusy || !bannedKeywordInput.trim()}
+            >
+              {tx("add", "Add")}
+            </Button>
+          </div>
+          {bannedKeywordsLoadFailed ? (
+            <p className="text-xs text-error">
+              {tx(
+                "failedLoadResilience",
+                "Failed to load banned keywords. Refresh the page to retry."
+              )}
+            </p>
+          ) : bannedKeywordsLoading ? (
+            <Spinner decorative size="sm" />
+          ) : bannedKeywords.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {bannedKeywords.map((keyword) => (
+                <Badge key={keyword} variant="error" className="gap-1 pr-1">
+                  {keyword}
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="size-5"
+                    disabled={savingBannedKeywords}
+                    onClick={() => removeBannedKeyword(keyword)}
+                    aria-label={`${tx("remove", "Remove")} ${keyword}`}
+                  >
+                    <Icon name="close" size={12} />
+                  </Button>
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-text-muted">
+              {tx(
+                "noCustomBannedSignals",
+                "No custom keywords. Only built-in keywords are active."
+              )}
+            </p>
+          )}
+        </div>
+      </Card>
 
       <RequestQueueCard
         value={data.requestQueue}
