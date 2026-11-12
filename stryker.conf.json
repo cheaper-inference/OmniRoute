@@ -807,7 +807,8 @@
       "tests/unit/combo-avoid-stalled-account.test.ts",
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
-      "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts"
+      "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",

@@ -120,6 +120,7 @@ import {
   retryHintBypassesMaxCooldownMs,
   isAuthoritativeRetryHintSource,
   isProviderModelUnsupported400,
+  isAccountSemaphoreFull,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
 import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
@@ -944,6 +945,21 @@ export async function isCodexPoolPlanIneligibleForModel(
     ? active.filter((connection) => allowedConnections.includes(connection.id))
     : active;
   return pool.length > 0 && filterCodexPlanEligible("codex", pool, requestedModel).length === 0;
+}
+
+/**
+ * Drop accounts that sit at their `max_concurrent` cap, so a pick never queues behind a full
+ * account while a sibling has room. Same cap source as the combo gate. When every account is
+ * full, or none has a cap, the list is returned unchanged.
+ */
+function skipFullAccounts<T extends { id: string; maxConcurrent?: number | null }>(
+  provider: string,
+  connections: T[]
+): T[] {
+  const open = connections.filter(
+    (c) => !(c.maxConcurrent && isAccountSemaphoreFull(provider, c.id, c.maxConcurrent))
+  );
+  return open.length > 0 ? open : connections;
 }
 
 /**
@@ -1839,7 +1855,7 @@ export async function getProviderCredentials(
         : null;
     }
 
-    const orderedConnections = [...leasePolicy.connections].sort((a, b) => {
+    const allOrderedConnections = [...leasePolicy.connections].sort((a, b) => {
       if (a.authType !== "oauth" || b.authType !== "oauth") return 0;
       const priorityDelta = (a.priority || 999) - (b.priority || 999);
       if (priorityDelta !== 0) return priorityDelta;
@@ -1861,18 +1877,22 @@ export async function getProviderCredentials(
     const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
     let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
     let connection = leasePolicy.activeLease
-      ? orderedConnections.find(
+      ? allOrderedConnections.find(
           (candidate) => candidate.id === leasePolicy.activeLease?.connectionId
         )
       : undefined;
     let selectedByApiKeyPreference = false;
     let preferredFallbackAvailable = false;
     if (!connection && options.preferredConnectionIds?.length) {
-      const preferred = pickPreferredConnection(orderedConnections, options.preferredConnectionIds);
+      const preferred = pickPreferredConnection(
+        allOrderedConnections,
+        options.preferredConnectionIds
+      );
       if (preferred) {
         connection = preferred;
         selectedByApiKeyPreference = true;
-        preferredFallbackAvailable = orderedConnections.some(
+        // Full list: a sibling at its concurrency cap is still a failover target.
+        preferredFallbackAvailable = allOrderedConnections.some(
           (candidate) => candidate.id !== preferred.id
         );
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
@@ -1885,7 +1905,7 @@ export async function getProviderCredentials(
         ? planSessionAffinityConnection(
             provider,
             options.sessionKey,
-            orderedConnections,
+            allOrderedConnections,
             sessionAffinityTtlMs,
             affinityRecord
           )
@@ -1897,7 +1917,7 @@ export async function getProviderCredentials(
         : await selectSessionAffinityConnection(
             provider,
             options.sessionKey,
-            orderedConnections,
+            allOrderedConnections,
             sessionAffinityTtlMs
           );
     if (affinityConnection) {
@@ -1916,6 +1936,10 @@ export async function getProviderCredentials(
         }
       );
     }
+
+    // A pin, lease or key preference above keeps its account whatever the load (prompt cache).
+    // Global routing below skips accounts already at their concurrency cap.
+    const orderedConnections = skipFullAccounts(provider, allOrderedConnections);
 
     if (connection) {
       // Active lease, API-key preference, or session affinity selected before global routing.
@@ -2117,7 +2141,7 @@ export async function getProviderCredentials(
 
     let exclusiveLease: ExclusiveConnectionLease | undefined;
     if (options.lease) {
-      const candidateIds = orderedConnections.map((candidate) => candidate.id);
+      const candidateIds = allOrderedConnections.map((candidate) => candidate.id);
       const selectNextLeaseCandidate = (excludedConnectionId: string) =>
         getProviderCredentials(provider, null, allowedConnections, requestedModel, {
           ...options,
