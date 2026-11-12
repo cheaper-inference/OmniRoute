@@ -9,3 +9,5 @@ export { subscriptionEligibility } from "./policy.ts";
 export { endpointHealthKey, nextRetryAt, shouldProbe } from "./health/cache.ts";
 export { consumeProbeBudget, utcDay } from "./health/probeBudget.ts";
 export { evaluateEndpoint, updateCacheFromProbe } from "./health/evaluate.ts";
+export { buildDesiredGraph } from "./graph.ts";
+export { OWNER, ownershipDescription, parseOwnership, stableHash } from "./ownership.ts";
