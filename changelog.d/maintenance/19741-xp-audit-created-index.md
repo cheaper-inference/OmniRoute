@@ -1,0 +1,1 @@
+- **perf(gamification):** Each keyed chat no longer scans every retained XP audit row for the hourly anti-cheat check. A new created_at-first covering index serves the hourly range. ([#19741](https://github.com/cheaper-inference/OmniRoute/pull/19741))
