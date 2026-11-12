@@ -74,14 +74,19 @@ describe("cgroup_high throttle proof", () => {
   it("reaches critical on a memory.events high increase across the window", () => {
     const tracker = createResourcePressureTracker(fastThresholds);
     const first = overHighWithoutProof();
+    // A high counter rise with a large cache and zero PSI is cheap reclaim,
+    // not a reason to shed requests. Use a non-cache-dominated working set
+    // here to exercise the genuine throttle-proofs-critical path.
     const proof = overHighWithoutProof();
     proof.cgroup = {
       ...proof.cgroup,
+      fileBytes: 1 * 1024 ** 3,
       events: { low: 0, high: 3, max: 0, oom: 0, oom_kill: 0 },
     };
     const proofMore = overHighWithoutProof();
     proofMore.cgroup = {
       ...proofMore.cgroup,
+      fileBytes: 1 * 1024 ** 3,
       events: { low: 0, high: 5, max: 0, oom: 0, oom_kill: 0 },
     };
     // H,H arms the informative high with a stable zero baseline. The proof is

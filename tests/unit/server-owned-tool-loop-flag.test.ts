@@ -77,8 +77,9 @@ describe("feature-flags-settings count update", () => {
     // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
-    // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 121);
+    // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st;
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd; ENFORCE_HIDDEN_MODELS the 123rd.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
