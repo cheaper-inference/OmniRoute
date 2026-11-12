@@ -1,1 +1,0 @@
-- **feat(radar):** when a signed Radar catalog feed has a bad shape, the sync result now lists up to 8 path-labelled reasons (for example `models[0].modelId: expected string`) next to `invalid_schema`.

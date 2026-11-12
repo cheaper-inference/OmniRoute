@@ -1,1 +1,0 @@
-- **feat(pricing):** the models.dev catalog sync now refuses an empty, malformed or over-16-MiB response instead of replacing stored pricing, and revalidates with an ETag so an unchanged catalog costs no download.
