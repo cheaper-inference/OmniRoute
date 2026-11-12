@@ -77,8 +77,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 96 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 96);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 98 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 98);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "usage_history_calculated_cost"
@@ -307,6 +307,20 @@ describe("migrationRunner/constants — large-table integrity", () => {
         fromName: "team_cost_centers",
         toVersion: "215",
         toName: "team_cost_centers",
+      }))
+    );
+  });
+
+  it("rehomes the earlier 236/237 pending-detail index heads to 239 (#19573)", () => {
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter(
+        (entry) => entry.fromName === "call_logs_pending_detail_index"
+      ),
+      ["236", "237"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "call_logs_pending_detail_index",
+        toVersion: "239",
+        toName: "call_logs_pending_detail_index",
       }))
     );
   });

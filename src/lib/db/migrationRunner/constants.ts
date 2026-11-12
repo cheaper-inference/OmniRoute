@@ -42,6 +42,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "usage_history_calculated_cost",
   },
   {
+    // Earlier #19573 heads used 236 and 237 before 236_key_templates and
+    // 237_usage_history_calculated_cost (and 238_codex_connection_fences, #18347)
+    // claimed those slots. Rehome only the exact pending-detail index row.
+    fromVersion: "236",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
+  {
+    fromVersion: "237",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
+  {
     fromVersion: "028",
     fromName: "provider_connection_max_concurrent",
     toVersion: "029",
