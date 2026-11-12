@@ -15,6 +15,7 @@ for (const [id, alias] of Object.entries(PROVIDER_ID_TO_ALIAS)) {
 // These live outside the registry because they represent multiple providers
 // or backward-compatible slug changes, not a single provider's display name.
 // opencode/ → opencode-zen (OpenCode Zen; opencode-go is a separate tier)
+ALIAS_TO_PROVIDER_ID["moonshot"] = "kimi";
 ALIAS_TO_PROVIDER_ID["opencode"] = "opencode-zen";
 // xiaomi/ is the user-visible prefix for MiMo models; register it so
 // parseModel("xiaomi/mimo-v2-flash") resolves provider = "xiaomi-mimo" instead

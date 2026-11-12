@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "../config/kimiProvider.ts";
 import type { TierAssignment, TierConfig, ProviderTier } from "./tierTypes";
 import { PROVIDER_TIER } from "./tierTypes";
 import { getModelPricing } from "./providerCostData";
@@ -152,8 +153,38 @@ export function setTierPricingSnapshot(
   }
 }
 
-function cacheKey(provider: string, model: string): string {
-  return `${provider}::${model}`;
+export type TierModelInputKind = "wire" | "local-qualified";
+
+function cacheKey(provider: string, model: string, kind: TierModelInputKind): string {
+  return JSON.stringify([provider, model, kind]);
+}
+function matchesTierProvider(ruleProvider: string, provider: string): boolean {
+  return (
+    canonicalKimiProvider(ruleProvider.toLowerCase()) ===
+    canonicalKimiProvider(provider.toLowerCase())
+  );
+}
+function isTierProviderFree(provider: string, config: TierConfig): boolean {
+  return (
+    isExplicitlyFree(provider, config) ||
+    (canonicalKimiProvider(provider.toLowerCase()) === "kimi" &&
+      (config.freeProviders.includes("kimi") || config.freeProviders.includes("moonshot")))
+  );
+}
+function matchesTierModel(
+  pattern: string,
+  provider: string,
+  model: string,
+  kind: TierModelInputKind
+): boolean {
+  if (matchGlob(pattern, model)) return true;
+  if (kind !== "local-qualified" || canonicalKimiProvider(provider.toLowerCase()) !== "kimi")
+    return false;
+  const slash = model.indexOf("/");
+  if (slash < 0 || canonicalKimiProvider(model.slice(0, slash).toLowerCase()) !== "kimi")
+    return false;
+  const suffix = model.slice(slash + 1);
+  return matchGlob(pattern, "kimi/" + suffix) || matchGlob(pattern, "moonshot/" + suffix);
 }
 
 function matchGlob(pattern: string, text: string): boolean {
@@ -161,14 +192,18 @@ function matchGlob(pattern: string, text: string): boolean {
   return new RegExp(`^${regexStr}$`, "i").test(text);
 }
 
-export function classifyTier(provider: string, model: string): TierAssignment {
-  const key = cacheKey(provider, model);
+export function classifyTier(
+  provider: string,
+  model: string,
+  kind: TierModelInputKind = "wire"
+): TierAssignment {
+  const key = cacheKey(provider, model, kind);
 
   if (tierCache.has(key)) {
     return tierCache.get(key)!;
   }
 
-  if (isExplicitlyFree(provider, currentConfig)) {
+  if (isTierProviderFree(provider, currentConfig)) {
     const assignment: TierAssignment = {
       provider,
       model,
@@ -182,8 +217,8 @@ export function classifyTier(provider: string, model: string): TierAssignment {
     return assignment;
   }
 
-  const providerOverride = currentConfig.providerOverrides.find(
-    (o) => o.provider.toLowerCase() === provider.toLowerCase()
+  const providerOverride = currentConfig.providerOverrides.find((o) =>
+    matchesTierProvider(o.provider, provider)
   );
   if (providerOverride) {
     const pricing = getModelPricing(provider, model);
@@ -202,7 +237,9 @@ export function classifyTier(provider: string, model: string): TierAssignment {
   }
 
   const modelOverride = currentConfig.modelOverrides.find(
-    (o) => o.provider.toLowerCase() === provider.toLowerCase() && matchGlob(o.modelPattern, model)
+    (o) =>
+      matchesTierProvider(o.provider, provider) &&
+      matchesTierModel(o.modelPattern, provider, model, kind)
   );
   if (modelOverride) {
     const pricing = getModelPricing(provider, model);
@@ -308,22 +345,26 @@ export function getTierStats(): Record<ProviderTier, number> {
 
 export let tierAsyncFallbackTotal = 0; // exported for testability
 
-export async function classifyTierAsync(provider: string, model: string): Promise<TierAssignment> {
+export async function classifyTierAsync(
+  provider: string,
+  model: string,
+  kind: TierModelInputKind = "wire"
+): Promise<TierAssignment> {
   // Explicit routing policy takes precedence over price-derived classification,
   // just as it does in classifyTier. Do not let a DB/catalog lookup overwrite
   // that policy in the shared cache and change a later synchronous estimate.
   if (
-    isExplicitlyFree(provider, currentConfig) ||
-    currentConfig.providerOverrides.some(
-      (override) => override.provider.toLowerCase() === provider.toLowerCase()
+    isTierProviderFree(provider, currentConfig) ||
+    currentConfig.providerOverrides.some((override) =>
+      matchesTierProvider(override.provider, provider)
     ) ||
     currentConfig.modelOverrides.some(
       (override) =>
-        override.provider.toLowerCase() === provider.toLowerCase() &&
-        matchGlob(override.modelPattern, model)
+        matchesTierProvider(override.provider, provider) &&
+        matchesTierModel(override.modelPattern, provider, model, kind)
     )
   ) {
-    return classifyTier(provider, model);
+    return classifyTier(provider, model, kind);
   }
   try {
     const { getPricingForModel } = await import("@/lib/db/settings");
@@ -349,12 +390,12 @@ export async function classifyTierAsync(provider: string, model: string): Promis
         hasFreeTier: input === 0,
         freeQuotaLimit: sync.freeQuotaLimit,
       };
-      tierCache.set(cacheKey(provider, model), assignment);
+      tierCache.set(cacheKey(provider, model, kind), assignment);
       return assignment;
     }
   } catch {
     // fall through to sync
   }
   tierAsyncFallbackTotal++;
-  return classifyTier(provider, model);
+  return classifyTier(provider, model, kind);
 }

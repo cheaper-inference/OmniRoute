@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { getDbInstance } from "../core";
 
 export const PROXY_ALIVE_PREDICATE =
@@ -43,7 +44,7 @@ export function hasBlockingProxyAssignment(
       .prepare("SELECT provider, proxy_enabled FROM provider_connections WHERE id = ?")
       .get(connectionId) as { provider?: string | null; proxy_enabled?: number } | undefined;
     if (conn && conn.proxy_enabled === 0) return false;
-    const provider = conn?.provider ?? providerId ?? null;
+    const provider = canonicalKimiProvider(conn?.provider ?? providerId ?? "") || null;
     // #13469: include combo scope — a fully dead combo-scoped pool must not
     // fall through to direct egress.
     const dead = db
@@ -68,6 +69,7 @@ export function hasBlockingProxyAssignment(
  * when a provider/global proxy assignment exists but all assigned proxies are known dead.
  */
 export function hasBlockingProxyAssignmentForProvider(providerId: string): boolean {
+  providerId = canonicalKimiProvider(providerId);
   try {
     const db = getDbInstance();
     if (!isGlobalProxyEnabled(db)) return false;

@@ -1,3 +1,4 @@
+import { readKimiBudgetHistory } from "../../src/lib/db/kimiBudgetHistory.ts";
 /**
  * Token Limit Counter — in-memory write-through accelerator.
  *
@@ -60,6 +61,16 @@ export function seedWindowUsageFromHistory(
   const upperClause = upperBound ? " AND timestamp < ?" : "";
   const bounds = upperBound ? [lowerBound, upperBound] : [lowerBound];
   const db = getDbInstance();
+
+  const kimiUsage = readKimiBudgetHistory(
+    db,
+    limit.apiKeyId,
+    limit.scopeType,
+    limit.scopeValue,
+    periodStartAt,
+    recordedBefore
+  );
+  if (kimiUsage !== null) return kimiUsage;
 
   // Canonical billable total = input + output (+ reasoning only when it exceeds output).
   // tokens_cache_read and tokens_cache_creation are a BREAKDOWN already inside tokens_input (see

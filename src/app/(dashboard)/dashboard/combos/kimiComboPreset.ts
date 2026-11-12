@@ -33,7 +33,7 @@ export const KIMI_CODING_PRESET: KimiComboPreset = {
   name: KIMI_CODING_PRESET_NAME,
   strategy: "priority",
   models: [
-    { provider: "moonshot", model: "kimi-k3", weight: 100 },
+    { provider: "kimi", model: "kimi-k3", weight: 100 },
     { provider: "kimi-coding", model: "k3", weight: 100 },
     { provider: "kimi-web", model: "k3", weight: 100 },
   ],

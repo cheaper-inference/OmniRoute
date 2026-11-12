@@ -92,6 +92,7 @@ function initAliases(): Record<string, string> {
 
 // Helper functions
 export function getProviderModels(aliasOrId: string): RegistryModel[] {
+  if (aliasOrId === "moonshot") aliasOrId = "kimi";
   // Accept either the public alias (the /v1/models prefix, e.g. "gh") or the raw
   // provider id (e.g. "github") and resolve id→alias before reading the namespace
   // map — so callers don't need to know which form they hold. We resolve here rather
@@ -103,7 +104,7 @@ export function getProviderModels(aliasOrId: string): RegistryModel[] {
 }
 
 export function getDefaultModel(aliasOrId: string): string | null {
-  const models = PROVIDER_MODELS[aliasOrId];
+  const models = PROVIDER_MODELS[aliasOrId === "moonshot" ? "kimi" : aliasOrId];
   return models?.[0]?.id || null;
 }
 
@@ -219,7 +220,7 @@ function scanRegistryScoresAs(modelId: string): string | undefined {
 }
 
 export function getProviderModel(aliasOrId: string, modelId: string): RegistryModel | undefined {
-  const models = PROVIDER_MODELS[aliasOrId];
+  const models = PROVIDER_MODELS[aliasOrId === "moonshot" ? "kimi" : aliasOrId];
   if (!models) return getGlobalModel(modelId);
   return models.find((model) => model.id === modelId) || getGlobalModel(modelId);
 }
@@ -230,13 +231,13 @@ export function isValidModel(
   passthroughProviders = new Set<string>()
 ): boolean {
   if (passthroughProviders.has(aliasOrId)) return true;
-  const models = PROVIDER_MODELS[aliasOrId];
+  const models = PROVIDER_MODELS[aliasOrId === "moonshot" ? "kimi" : aliasOrId];
   if (!models) return !!getGlobalModel(modelId);
   return models.some((m) => m.id === modelId) || !!getGlobalModel(modelId);
 }
 
 export function findModelName(aliasOrId: string, modelId: string): string {
-  const models = PROVIDER_MODELS[aliasOrId];
+  const models = PROVIDER_MODELS[aliasOrId === "moonshot" ? "kimi" : aliasOrId];
   if (!models) return getGlobalModel(modelId)?.name || modelId;
   const found = models.find((m) => m.id === modelId) || getGlobalModel(modelId);
   return found?.name || modelId;
@@ -387,7 +388,7 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   return null;
 }
 export function getModelStripTypes(aliasOrId: string, modelId: string): string[] {
-  const models = PROVIDER_MODELS[aliasOrId];
+  const models = PROVIDER_MODELS[aliasOrId === "moonshot" ? "kimi" : aliasOrId];
   if (!models)
     return Array.isArray(getGlobalModel(modelId)?.strip)
       ? [...getGlobalModel(modelId)!.strip!]

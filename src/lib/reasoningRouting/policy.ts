@@ -1,3 +1,4 @@
+import { canonicalKimiModel } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { getComboById } from "@/lib/db/combos";
 import {
   getReasoningRoutingRules,
@@ -240,6 +241,8 @@ export function extractReasoningIntent(
 }
 
 export function globMatches(pattern: string, value: string): boolean {
+  value = canonicalKimiModel(value.toLowerCase());
+  pattern = canonicalKimiModel(pattern.toLowerCase());
   const escaped = pattern
     .replace(/[.+^${}()|[\]\\]/g, "\\$&")
     .replace(/\*/g, ".*")
@@ -287,7 +290,7 @@ function isExactModelMatch(rule: ReasoningRoutingRule, model: string): boolean {
   return (
     !!rule.modelPattern &&
     !/[?*]/.test(rule.modelPattern) &&
-    rule.modelPattern.toLowerCase() === model.toLowerCase()
+    canonicalKimiModel(rule.modelPattern.toLowerCase()) === canonicalKimiModel(model.toLowerCase())
   );
 }
 

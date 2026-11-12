@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **fix(providers):** consolidate the Moonshot API under `kimi`, retain `moonshot/...` aliases, and migrate saved routing, access rules and budgets without changing connection IDs or endpoint overrides (#19072).
+
 ### ✨ New Features
 
 - **feat(dashboard):** adaptive context-budget dial on the compression settings panel — mode (`off` / `floor` / `replace-autotrigger`) and policy (`reserve-output` / `percentage` / `absolute`) persist via `PUT /api/settings/compression` `contextBudget`. Completes the dashboard half of #7005 (API + DB already shipped in #7183).

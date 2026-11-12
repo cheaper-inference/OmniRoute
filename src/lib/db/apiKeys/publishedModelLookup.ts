@@ -118,7 +118,12 @@ export async function isDeniedUnderCanonicalProvider(
   const canonicalProvider = provider ? await canonicalProviderForAlias(provider) : null;
   if (!canonicalProvider) return false;
   return Boolean(
-    checkKeyModelAccess(apiKeyId, modelTarget, canonicalProvider).deniedBy ||
-    checkKeyModelAccess(apiKeyId, `${canonicalProvider}/${modelTarget}`, canonicalProvider).deniedBy
+    checkKeyModelAccess(apiKeyId, modelTarget, canonicalProvider, "wire").deniedBy ||
+    checkKeyModelAccess(
+      apiKeyId,
+      `${canonicalProvider}/${modelTarget}`,
+      canonicalProvider,
+      "local-qualified"
+    ).deniedBy
   );
 }

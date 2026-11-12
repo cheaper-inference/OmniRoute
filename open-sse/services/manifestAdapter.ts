@@ -11,12 +11,7 @@ import type { RuleInput } from "./specificityTypes";
 import type { ResolvedComboTarget } from "./combo";
 
 export type StrategyModifier =
-  | "default"
-  | "prefer-free"
-  | "prefer-cheap"
-  | "require-premium"
-  | "cost-save"
-  | "quality-first";
+  "default" | "prefer-free" | "prefer-cheap" | "require-premium" | "cost-save" | "quality-first";
 
 export interface RoutingHint {
   tierAssignments: Map<string, TierAssignment>;
@@ -39,9 +34,12 @@ export async function generateRoutingHints(
     modelTargets.map(async (target) => {
       const key = `${target.provider}::${target.modelStr}`;
       try {
-        return [key, await classifyTierAsync(target.provider, target.modelStr)] as const;
+        return [
+          key,
+          await classifyTierAsync(target.provider, target.modelStr, "local-qualified"),
+        ] as const;
       } catch {
-        return [key, classifyTier(target.provider, target.modelStr)] as const;
+        return [key, classifyTier(target.provider, target.modelStr, "local-qualified")] as const;
       }
     })
   );
@@ -108,7 +106,7 @@ function determineStrategyModifier(
 }
 
 export function getTargetTier(target: ResolvedComboTarget): TierAssignment {
-  return classifyTier(target.provider, target.modelStr);
+  return classifyTier(target.provider, target.modelStr, "local-qualified");
 }
 
 export function estimateRequestCost(

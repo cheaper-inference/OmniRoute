@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { NextResponse } from "next/server";
 import { FalClient } from "@omniroute/open-sse/handlers/fal/client";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
@@ -204,7 +205,7 @@ export async function GET(
     const connection = await getCachedProviderConnectionById(id);
     const connectionProvider =
       typeof connection?.provider === "string" && connection.provider.trim().length > 0
-        ? connection.provider
+        ? canonicalKimiProvider(connection.provider)
         : null;
     const noAuthProviderId = resolveNoAuthProviderId(id, connectionProvider);
 
@@ -2495,7 +2496,7 @@ export async function GET(
     // handling above (#5899). addModelsSuffix() reuses the shared normalization:
     // it drops a trailing chat/responses/messages path, appends /models, and
     // leaves an already-/models URL untouched.
-    if (provider === "openrouter") {
+    if (provider === "openrouter" || provider === "kimi" || provider === "moonshot") {
       const customBaseUrl = getProviderBaseUrl(connection.providerSpecificData);
       if (customBaseUrl) {
         url = addModelsSuffix(customBaseUrl) || url;

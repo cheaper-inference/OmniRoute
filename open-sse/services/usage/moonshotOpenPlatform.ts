@@ -6,7 +6,6 @@
  * identified by baseUrl host, not by provider id (those ids are uuids).
  */
 
-import { moonshotProvider } from "../../config/providers/registry/moonshot/index.ts";
 import { kimiProvider } from "../../config/providers/registry/kimi/index.ts";
 
 export const MOONSHOT_OPEN_PLATFORM_HOSTS: ReadonlySet<string> = new Set([
@@ -45,8 +44,8 @@ export function moonshotBalanceUrl(origin: string): string {
 }
 
 function registryDefaultOrigin(provider: string | undefined): string | null {
-  if (provider === "moonshot") return parseMoonshotOrigin(moonshotProvider.baseUrl);
-  if (provider === "kimi") return parseMoonshotOrigin(kimiProvider.baseUrl);
+  if (provider === "moonshot" || provider === "kimi")
+    return parseMoonshotOrigin(kimiProvider.baseUrl);
   return null;
 }
 

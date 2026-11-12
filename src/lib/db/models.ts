@@ -580,7 +580,8 @@ export async function getActiveProvidersWithSyncedModel(modelId: string): Promis
        FROM provider_connections pc
        JOIN key_value kv
          ON kv.namespace = 'syncedAvailableModels'
-        AND kv.key = pc.provider || ':' || pc.id
+        AND (kv.key = pc.provider || ':' || pc.id
+          OR (pc.provider IN ('kimi','moonshot') AND kv.key IN ('kimi:' || pc.id,'moonshot:' || pc.id)))
        JOIN json_each(CASE WHEN json_valid(kv.value) THEN kv.value ELSE '[]' END) synced_model
        WHERE pc.is_active = 1
          AND COALESCE(
@@ -593,7 +594,7 @@ export async function getActiveProvidersWithSyncedModel(modelId: string): Promis
        FROM provider_connections pc
        JOIN key_value kv
          ON kv.namespace = 'customModels'
-        AND kv.key = pc.provider
+        AND (kv.key = pc.provider OR (pc.provider IN ('kimi','moonshot') AND kv.key IN ('kimi','moonshot')))
        JOIN json_each(CASE WHEN json_valid(kv.value) THEN kv.value ELSE '[]' END) custom_model
        WHERE pc.is_active = 1
          AND COALESCE(

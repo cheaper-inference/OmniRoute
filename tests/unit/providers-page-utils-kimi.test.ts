@@ -48,7 +48,7 @@ test("sortProviderEntriesFeaturedFirst pins Kimi providers first, alphabetical o
   // not merely that Kimi happens to sort first on its own.
   const entries = [
     entry("zulu-provider", "Zulu Provider"),
-    entry("moonshot", "Kimi"),
+    entry("kimi", "Kimi"),
     entry("acme", "Acme"),
     entry("kimi-web", "Kimi Web"),
     entry("anthropic-clone", "Anthropic Clone"),
@@ -62,16 +62,34 @@ test("sortProviderEntriesFeaturedFirst pins Kimi providers first, alphabetical o
   // one sorts first — so moonshot leads the featured group.
   assert.deepEqual(
     sorted.map((e) => e.providerId),
-    ["moonshot", "kimi-coding", "kimi-web", "acme", "anthropic-clone", "zulu-provider"],
+    ["kimi", "kimi-coding", "kimi-web", "acme", "anthropic-clone", "zulu-provider"],
     "featured (Kimi) entries come first, each group alphabetical among itself"
   );
 });
 
 test("filterConfiguredProviderEntries surfaces Kimi first within a mixed category (oauth section shape)", () => {
   const entries = [
-    { providerId: "claude", provider: { name: "Claude" }, stats: { total: 1 }, displayAuthType: "oauth", toggleAuthType: "oauth" },
-    { providerId: "kimi-coding", provider: { name: "Kimi Code CLI" }, stats: { total: 0 }, displayAuthType: "oauth", toggleAuthType: "oauth" },
-    { providerId: "amazon-q", provider: { name: "Amazon Q" }, stats: { total: 0 }, displayAuthType: "oauth", toggleAuthType: "oauth" },
+    {
+      providerId: "claude",
+      provider: { name: "Claude" },
+      stats: { total: 1 },
+      displayAuthType: "oauth",
+      toggleAuthType: "oauth",
+    },
+    {
+      providerId: "kimi-coding",
+      provider: { name: "Kimi Code CLI" },
+      stats: { total: 0 },
+      displayAuthType: "oauth",
+      toggleAuthType: "oauth",
+    },
+    {
+      providerId: "amazon-q",
+      provider: { name: "Amazon Q" },
+      stats: { total: 0 },
+      displayAuthType: "oauth",
+      toggleAuthType: "oauth",
+    },
   ];
 
   // No filters applied (showConfiguredOnly=false) — pure ordering behavior.
@@ -143,7 +161,7 @@ test("real Web Cookie section pins kimi-web first (page.tsx's webCookieProviderE
   );
 });
 
-test("real API Key -> LLM subsection pins moonshot first (page.tsx's llmProviderEntries shape)", () => {
+test("real API Key -> LLM subsection pins canonical kimi first (page.tsx's llmProviderEntries shape)", () => {
   const getProviderStats = () => ({ total: 0 });
   const apiKeyEntriesAll = providerPageUtils.buildStaticProviderEntries("apikey", getProviderStats);
   // Mirrors page.tsx's llmProviderEntriesAll filter exactly (moonshot is not an
@@ -161,17 +179,24 @@ test("real API Key -> LLM subsection pins moonshot first (page.tsx's llmProvider
   assert.ok(llmEntries.length > 5, "sanity: the real API Key -> LLM subsection has many providers");
   assert.equal(
     llmEntries[0].providerId,
-    "moonshot",
+    "kimi",
     "moonshot (displayed as 'Kimi', where kimi-k3 lives) must be the first card in the real API Key -> LLM subsection"
   );
 
   // kimi-coding-apikey and kimi (both hiddenFromDashboard) never surface as
   // their own card here or in any other section — see the dedicated test below.
-  assert.equal(llmEntries.some((e) => e.providerId === "kimi-coding-apikey"), false);
-  assert.equal(llmEntries.some((e) => e.providerId === "kimi"), false);
+  assert.equal(
+    llmEntries.some((e) => e.providerId === "kimi-coding-apikey"),
+    false
+  );
+  assert.equal(llmEntries.filter((e) => e.providerId === "kimi").length, 1);
+  assert.equal(
+    llmEntries.some((e) => e.providerId === "moonshot"),
+    false
+  );
 });
 
-test("kimi-coding-apikey and kimi never render as their own dashboard card in ANY section (hiddenFromDashboard)", () => {
+test("kimi-coding-apikey and legacy moonshot never render as their own dashboard card in ANY section (hiddenFromDashboard)", () => {
   const getProviderStats = () => ({ total: 0 });
   const categories = [
     "no-auth",
@@ -193,9 +218,9 @@ test("kimi-coding-apikey and kimi never render as their own dashboard card in AN
       `kimi-coding-apikey must not appear as its own card in the "${category}" category`
     );
     assert.equal(
-      entries.some((e) => e.providerId === "kimi"),
+      entries.some((e) => e.providerId === "moonshot"),
       false,
-      `kimi (legacy alias) must not appear as its own card in the "${category}" category`
+      `moonshot (legacy alias) must not appear as its own card in the "${category}" category`
     );
   }
 });

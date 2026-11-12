@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  canonicalKimiProvider,
+  isKimiApiProviderBlocked,
+} from "@omniroute/open-sse/config/kimiProvider.ts";
+import { computeNextBlockedProviders } from "@/shared/utils/noAuthProviders";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Card, Button, Input, Toggle, Modal, Badge } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
@@ -140,8 +145,14 @@ export default function SecurityTab() {
 
   const toggleBlockedProvider = (providerId: string) => {
     const current: string[] = settings.blockedProviders || [];
-    const updated = current.includes(providerId)
-      ? current.filter((p) => p !== providerId)
+    const api = canonicalKimiProvider(providerId) === "kimi";
+    const blocked = api
+      ? isKimiApiProviderBlocked(providerId, current)
+      : current.includes(providerId);
+    const updated = blocked
+      ? api
+        ? computeNextBlockedProviders(current, ["kimi", "moonshot"], true)
+        : current.filter((p) => p !== providerId)
       : [...current, providerId];
     updateSetting("blockedProviders", updated);
   };
@@ -368,7 +379,9 @@ export default function SecurityTab() {
             <CheckboxGroup label={t("blockedProviders")} description={t("blockedProvidersDesc")}>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {Object.values(AI_PROVIDERS).map((provider: any) => {
-                  const isBlocked = blockedProviders.includes(provider.id);
+                  const isBlocked =
+                    blockedProviders.includes(provider.id) ||
+                    isKimiApiProviderBlocked(provider.id, blockedProviders);
                   return (
                     <Checkbox
                       key={provider.id}

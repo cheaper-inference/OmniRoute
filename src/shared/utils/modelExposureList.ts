@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * #11481 — explicit model exposure allow/deny list for the `/v1/models` catalog.
  *
@@ -67,6 +68,9 @@ export function isModelExposureAllowed(
   if (denylist.length === 0 && allowlist.length === 0) return true;
 
   const candidates = [modelId, `${provider}/${modelId}`];
+  if (canonicalKimiProvider(provider) === "kimi") {
+    candidates.push("kimi/" + modelId, "moonshot/" + modelId);
+  }
   if (listMatchesAny(denylist, candidates)) return false;
   if (allowlist.length === 0) return true;
   return listMatchesAny(allowlist, candidates);
