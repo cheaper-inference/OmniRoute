@@ -3982,7 +3982,11 @@ paths:
     get:
       tags: [System]
       summary: List Ollama-compatible model tags
-      description: Returns models in Ollama /api/tags format for Ollama client compatibility
+      description: >-
+        Returns models in Ollama /api/tags format for Ollama client compatibility.
+        By default the list is a fixed two-model sample. With OMNIROUTE_OLLAMA_REAL_TAGS=1
+        it is the real model catalog (same builder and auth check as GET /v1/models);
+        size and digest are empty because the catalog has none.
       responses:
         "200":
           description: Ollama model tags
