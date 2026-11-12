@@ -15,6 +15,9 @@ import {
 } from "@/shared/validation/schemas/geminiDecisions";
 import { getProviderConnections } from "@/lib/db/providers";
 import { saveCallLog } from "@/lib/usageDb";
+import { recordUnpricedBudgetUsage } from "@/domain/costRules";
+import { recordKeyQuotaUsage } from "@/domain/keyQuota";
+import { recordTokenUsage } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
@@ -162,11 +165,12 @@ type AttemptContext = {
   signal: AbortSignal;
   started: number;
   remaining: number;
+  apiKeyId: string | null;
 };
 
 /** One selected connection is either dispatched once, skipped, or stopped. */
 async function attemptDecision(context: AttemptContext): Promise<AttemptResult> {
-  const { body, selected, state, tried, exhaustedProjects, signal, started, remaining } = context;
+  const { body, selected, state, tried, exhaustedProjects, signal, started, remaining, apiKeyId } = context;
   const unavailable = unusableCredentialsResponse(PROVIDER, selected);
   if (unavailable) {
     return {
@@ -197,7 +201,23 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
   const error = response.transportError || geminiDecisionErrorText(response.body);
   logAttempt(response, credentials, error);
   if (response.status === 200 && response.body) {
-    await clearRecoveredProviderState(credentials, recoverySnapshot);
+    // A Decisions response is metered upstream, but we have no verified USD
+    // price for this model. Fail closed for limited dollar budgets instead of
+    // silently treating it as a free inference call.
+    if (apiKeyId) {
+      const tokens = geminiDecisionInputTokens(response.body);
+      recordKeyQuotaUsage(apiKeyId, tokens);
+      recordTokenUsage(apiKeyId, PROVIDER, GEMINI_DECISION_PUBLIC_MODEL, tokens, started);
+      recordUnpricedBudgetUsage(apiKeyId, {
+        provider: PROVIDER,
+        model: GEMINI_DECISION_PUBLIC_MODEL,
+      });
+    }
+    try {
+      await clearRecoveredProviderState(credentials, recoverySnapshot);
+    } catch {
+      // A failed state cleanup must never hide the successful upstream answer.
+    }
     return { kind: "response", response: jsonSuccess(response.body, Date.now() - started, state.attempts) };
   }
   if (response.status === 499) {
@@ -215,7 +235,8 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
  * capacity. Every selection uses the caller API key's allowed connection IDs.
  */
 export async function handleGeminiDecisionRequest(
-  body: GeminiDecisionsBody, allowedConnections: AllowedConnections, signal: AbortSignal
+  body: GeminiDecisionsBody, allowedConnections: AllowedConnections, signal: AbortSignal,
+  apiKeyId: string | null = null
 ): Promise<Response> {
   const started = Date.now();
   const tried = new Set<string>();
@@ -238,7 +259,7 @@ export async function handleGeminiDecisionRequest(
     );
     if (!selected) break;
     const outcome = await attemptDecision({
-      body, selected, state, tried, exhaustedProjects, signal, started, remaining,
+      body, selected, state, tried, exhaustedProjects, signal, started, remaining, apiKeyId,
     });
     if (outcome.kind === "response") return outcome.response;
     if (outcome.kind === "stop") break;

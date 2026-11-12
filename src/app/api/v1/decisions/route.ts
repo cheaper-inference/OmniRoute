@@ -79,7 +79,12 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) {
     return errorResponse(400, parsed.error.issues[0]?.message || "Invalid Decisions request");
   }
-  const scope = await enforceApiKeyPolicyWithScope(request, parsed.data.model);
+  // Both accepted names dispatch to this exact Gemini provider/model.
+  // Authorize the canonical target so a bare alias cannot bypass a
+  // provider-qualified blockedModels rule (for example "gemini/*").
+  const scope = await enforceApiKeyPolicyWithScope(request, GEMINI_DECISION_PUBLIC_MODEL);
   if (scope.rejection) return scope.rejection;
-  return handleGeminiDecisionRequest(parsed.data, scope.allowedConnections, request.signal);
+  return handleGeminiDecisionRequest(
+    parsed.data, scope.allowedConnections, request.signal, scope.policy.apiKeyInfo?.id ?? null
+  );
 }

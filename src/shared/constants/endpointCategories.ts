@@ -81,8 +81,8 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
     id: "decisions",
     label: "Decisions",
-    description: "System One typed decisions (Jev)",
-    prefixes: ["/v1/systemone"],
+    description: "System One and Gemini typed decisions",
+    prefixes: ["/v1/systemone", "/v1/decisions"],
   },
   {
     id: "models",
