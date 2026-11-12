@@ -38,15 +38,16 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // Includes the release base NVIDIA Nemotron 3.5 identity rename.
     // 464 → 465 on the v3.8.54 base: #16315/#18579 add two sourced Token Harbor :free routes,
     // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
-    // 465 → 464: #19334 drops ollama-cloud/qwen3.5:397b when Ollama's free tier ended.
+    // 465 → 466: #18604 adds nvidia gpt-oss-20b (nvidia/openai/gpt-oss-20b, the sole delta).
+    // 466 → 465: #19334 drops ollama-cloud/qwen3.5:397b when Ollama's free tier ended.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 464);
+    assert.equal(new Set(identities).size, 465);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
-      "15140fd0798efc6d3fdba532f50cf6d7b356392f836b358e2a7eecf0b0a0f6c9"
+      "82a2df8ad0371647bd86e04ad4b67a9c579a47e469995ecc24f608f59d5d6382"
     );
-    assert.equal(totals.modelCount, 464);
+    assert.equal(totals.modelCount, 465);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });

@@ -320,6 +320,14 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // https://build.nvidia.com/search publishes request-rate limits, not a token/credit allowance; model pages advertise free endpoints. Requires an API key; trial-use restrictions apply (#18499).
   { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
   { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
+  // evidence: public-page https://github.com/mnfst/awesome-free-llm-apis (2026-10-30)
+  // lists GPT OSS 20B on NVIDIA NIM's free Developer Program tier (40 RPM / 10,000 RPD).
+  // NVIDIA's model page https://build.nvidia.com/openai/gpt-oss-20b identifies this as an
+  // API Trial governed by NVIDIA API Trial Terms. The allowance is request-based, not a
+  // published token budget; keep it uncapped here rather than inventing a token estimate.
+  // NVIDIA's trial notice says prompts are logged to improve products; do not send secrets
+  // or confidential code through this free endpoint.
+  { provider: "nvidia", modelId: "openai/gpt-oss-20b", displayName: "GPT OSS 20B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution", trainsOnPrompts: true },
   // evidence: https://ollama.com/pricing (2026-11-09) ended the free tier; all models moved to pay-as-you-go (#19334).
   // evidence: api-public https://onomeo.com/api/info (2026-10-25) — `freeModels` lists the models served free of
   // charge. Metering is 30 calls per 5 h per account inside a site-wide pool shared by all accounts (`rate`:
