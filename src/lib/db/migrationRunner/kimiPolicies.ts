@@ -186,7 +186,7 @@ function validTier(value: unknown): value is Row {
 
 function chaos(value: unknown, ids: Set<string>): unknown {
   if (!validChaos(value)) return value;
-  const rows = providerRows(value.providerOverrides, "providerId", "modelId", ids);
+  const rows = providerRows(value.providerOverrides, "providerId", undefined, ids);
   return { ...value, providerOverrides: rows };
 }
 
@@ -213,11 +213,16 @@ export function preflightKimiPolicies(db: SqliteAdapter): void {
     .prepare<Row>("SELECT id,provider,is_active FROM provider_connections")
     .all()
     .filter((v) => v.is_active !== 0);
-  const exact = (selector: Row, connection: Row) =>
-    [connection.id, connection.provider].some(
-      (v) => String(v).toLowerCase() === String(selector.providerId).toLowerCase()
+  const matchesSelector = (selector: Row, connection: Row) => {
+    const id = String(selector.providerId).toLowerCase();
+    if (ids.has(id) && canonicalKimiProvider(id) === "kimi")
+      return String(connection.id).toLowerCase() === id;
+    return (
+      String(connection.id).toLowerCase() === id ||
+      canonicalKimiProvider(id) === canonicalKimiProvider(String(connection.provider).toLowerCase())
     );
-  const identity = (v: Row) => JSON.stringify([v.providerId, v.modelId ?? null]);
+  };
+  const identity = (v: Row) => JSON.stringify([v.providerId]);
   const disabled = new Set(
     original
       .filter((v) => v.providerId === "kimi" && v.enabled === false && !ids.has("kimi"))
@@ -230,21 +235,11 @@ export function preflightKimiPolicies(db: SqliteAdapter): void {
       normalizedSelector("moonshot", ids) === "kimi" &&
       v.enabled !== false &&
       disabled.has(identity({ ...v, providerId: "kimi" })) &&
-      active.some((c) => exact(v, c))
+      active.some((c) => matchesSelector(v, c))
   );
   if (!lost) return;
   const matches = after.some(
-    (v) =>
-      v.enabled !== false &&
-      active.some((c) => {
-        const id = String(v.providerId).toLowerCase();
-        if (ids.has(id) && canonicalKimiProvider(id) === "kimi")
-          return String(c.id).toLowerCase() === id;
-        return (
-          String(c.id).toLowerCase() === id ||
-          canonicalKimiProvider(id) === canonicalKimiProvider(String(c.provider).toLowerCase())
-        );
-      })
+    (v) => v.enabled !== false && active.some((c) => matchesSelector(v, c))
   );
   if (!matches) throw new Error("Kimi chaos selector conflict would broaden the active selection");
 }

@@ -464,7 +464,7 @@ describe("modelsDevSync — mapProviderId", () => {
   });
 
   it("maps moonshot to the canonical provider plus Kimi aliases", () => {
-    assert.deepEqual(mapProviderId("moonshot"), ["moonshot", "kimi", "kimi-coding", "kmc", "kmca"]);
+    assert.deepEqual(mapProviderId("moonshot"), ["kimi", "kimi-coding", "kmc", "kmca"]);
   });
 
   it("maps current models.dev provider IDs used by OmniRoute-compatible providers", () => {

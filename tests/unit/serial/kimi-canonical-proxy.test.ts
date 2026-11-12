@@ -1,12 +1,12 @@
 import http from "node:http";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
+import { createChatPipelineHarness } from "../../integration/_chatPipelineHarness.ts";
 const h = await createChatPipelineHarness("kimi-proxy");
 process.env.PROXY_AUTO_SELECT_ENABLED = "false";
 delete process.env.PROXY_FAIL_OPEN;
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const settings = await import("../../src/lib/db/settings.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const settings = await import("../../../src/lib/db/settings.ts");
 let db: ReturnType<typeof h.core.getDbInstance>;
 function migrate() {
   return runMigrations(db);
@@ -20,8 +20,8 @@ test.beforeEach(async () => {
   settings.bumpProxyConfigGeneration();
 });
 test.after(() => h.cleanup());
-const proxies = await import("../../src/lib/db/proxies.ts");
-const { safeResolveProxy } = await import("../../src/sse/handlers/chatHelpers.ts");
+const proxies = await import("../../../src/lib/db/proxies.ts");
+const { safeResolveProxy } = await import("../../../src/sse/handlers/chatHelpers.ts");
 
 async function registryProxy(name: string, status = "active") {
   const proxy = await proxies.createProxy({
@@ -168,7 +168,7 @@ test("C10 later legacy provider inputs share canonical registry scopes without c
 });
 
 test("C10 subscription selectors remain canonical after actual refresh/rebind and a dead replacement blocks", async () => {
-  const subscriptions = await import("../../src/lib/proxySubscription/index.ts");
+  const subscriptions = await import("../../../src/lib/proxySubscription/index.ts");
   let host = "10.60.0.1";
   const server = http.createServer((_request, response) => {
     response.writeHead(200, { "content-type": "text/plain" });

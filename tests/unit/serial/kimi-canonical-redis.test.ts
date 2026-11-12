@@ -6,13 +6,13 @@ import path from "node:path";
 import test from "node:test";
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-redis-"));
 process.env.DATA_DIR = dataDir;
-const core = await import("../../src/lib/db/core.ts");
+const core = await import("../../../src/lib/db/core.ts");
 const { sqliteSessionAffinityStore: local } =
-  await import("../../src/lib/db/sessionAffinity/sqliteStore.ts");
+  await import("../../../src/lib/db/sessionAffinity/sqliteStore.ts");
 const { RedisSessionAffinityStore } =
-  await import("../../src/lib/db/sessionAffinity/redisStore.ts");
+  await import("../../../src/lib/db/sessionAffinity/redisStore.ts");
 const { sessionAffinityAccountIdentity } =
-  await import("../../src/lib/db/sessionAffinity/accountIdentity.ts");
+  await import("../../../src/lib/db/sessionAffinity/accountIdentity.ts");
 const NOW = Date.now(),
   TTL = 45000;
 const session = "legacy-session";
@@ -151,8 +151,8 @@ test("C2 missing expected digest and missing candidate cannot evict API account 
   redis.seed("kimi", "reused", "a".repeat(64));
   assert.equal(await store.evict(session, "kimi", "reused"), false);
   assert.equal(redis.rows.has(key("kimi")), true);
-  const factory = await import("../../src/lib/db/sessionAffinity/storeFactory.ts");
-  const eviction = await import("../../src/lib/db/sessionAffinity/requestEviction.ts");
+  const factory = await import("../../../src/lib/db/sessionAffinity/storeFactory.ts");
+  const eviction = await import("../../../src/lib/db/sessionAffinity/requestEviction.ts");
   process.env.OMNIROUTE_SESSION_AFFINITY_STORE = "redis";
   factory._setSessionAffinityRedisForTests({
     getClient: async () => redis,
@@ -196,7 +196,7 @@ test("C2 legacy account digest is accepted only after verifying the actual candi
     email: "fixture@example.test",
   };
   const expected = sessionAffinityAccountIdentity(candidate, "kimi");
-  const { resolveUsageAccountIdentity } = await import("../../src/lib/usage/accountIdentity.ts");
+  const { resolveUsageAccountIdentity } = await import("../../../src/lib/usage/accountIdentity.ts");
   const legacy = createHash("sha256")
     .update(resolveUsageAccountIdentity({ ...candidate, provider: "moonshot" }).accountKey)
     .digest("hex");

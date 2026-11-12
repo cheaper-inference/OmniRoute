@@ -4,6 +4,7 @@
  * models/; this file re-exports their public APIs for backward compatibility.
  */
 
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
 import { getDbInstance } from "./core";
@@ -469,9 +470,14 @@ export async function getSyncedAvailableModels(
   for (const row of rows) {
     const { key, value } = getKeyValue(row);
     if (!key || value === null) continue;
-    const models = normalizeSyncedAvailableModels(JSON.parse(value), providerId);
-    for (const m of models) {
-      if (m.id) map.set(m.id, m);
+    try {
+      const models = normalizeSyncedAvailableModels(JSON.parse(value), providerId);
+      for (const m of models) {
+        if (m.id) map.set(m.id, m);
+      }
+    } catch (error) {
+      // Native namespace merges must not let one account erase healthy metadata.
+      if (canonicalKimiProvider(providerId) !== "kimi") throw error;
     }
   }
   return Array.from(map.values());
@@ -509,9 +515,14 @@ export type SyncedAvailableModelsByConnection = Record<string, SyncedAvailableMo
  * A non-enumerable symbol marks malformed persisted rows so strict callers can
  * fail closed without changing the existing Record-shaped API.
  */
-export async function getSyncedAvailableModelsByConnection(
+export type RawSyncedAvailableModelsByConnection = Record<
+  string,
+  { value: unknown; malformed: boolean }
+> & { [SYNCED_AVAILABLE_MODELS_MALFORMED]?: true };
+
+export async function getRawSyncedAvailableModelsByConnection(
   providerId: string
-): Promise<SyncedAvailableModelsByConnection> {
+): Promise<RawSyncedAvailableModelsByConnection> {
   const db = getDbInstance();
   const prefix = `${providerId}:`;
   const rows = db
@@ -519,19 +530,43 @@ export async function getSyncedAvailableModelsByConnection(
       "SELECT key, value FROM key_value WHERE namespace = 'syncedAvailableModels' AND key LIKE ?"
     )
     .all(`${prefix}%`);
-  const result: SyncedAvailableModelsByConnection = {};
+  const result: RawSyncedAvailableModelsByConnection = {};
   for (const row of rows) {
     const { key, value } = getKeyValue(row);
     if (!key || value === null || !key.startsWith(prefix)) continue;
     try {
       const connectionId = key.slice(prefix.length);
-      result[connectionId] = normalizeSyncedAvailableModels(JSON.parse(value), providerId);
+      result[connectionId] = { value: JSON.parse(value), malformed: false };
     } catch {
+      result[key.slice(prefix.length)] = { value: undefined, malformed: true };
       Object.defineProperty(result, SYNCED_AVAILABLE_MODELS_MALFORMED, {
         value: true,
         enumerable: false,
       });
     }
+  }
+  return result;
+}
+
+export async function getSyncedAvailableModelsByConnection(
+  providerId: string
+): Promise<SyncedAvailableModelsByConnection> {
+  const raw = await getRawSyncedAvailableModelsByConnection(providerId);
+  const result: SyncedAvailableModelsByConnection = {};
+  let malformed = raw[SYNCED_AVAILABLE_MODELS_MALFORMED] === true;
+  for (const [connectionId, row] of Object.entries(raw)) {
+    if (row.malformed) continue;
+    try {
+      result[connectionId] = normalizeSyncedAvailableModels(row.value, providerId);
+    } catch {
+      malformed = true;
+    }
+  }
+  if (malformed) {
+    Object.defineProperty(result, SYNCED_AVAILABLE_MODELS_MALFORMED, {
+      value: true,
+      enumerable: false,
+    });
   }
   return result;
 }

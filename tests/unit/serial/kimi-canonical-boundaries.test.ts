@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
+import { createChatPipelineHarness } from "../../integration/_chatPipelineHarness.ts";
 
 const h = await createChatPipelineHarness("kimi-boundaries");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const limits = await import("../../src/lib/db/tokenLimits.ts");
-const counter = await import("../../open-sse/services/tokenLimitCounter.ts");
-const groups = await import("../../src/lib/db/apiKeyGroups.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const limits = await import("../../../src/lib/db/tokenLimits.ts");
+const counter = await import("../../../open-sse/services/tokenLimitCounter.ts");
+const groups = await import("../../../src/lib/db/apiKeyGroups.ts");
 const { isDeniedUnderCanonicalProvider } =
-  await import("../../src/lib/db/apiKeys/publishedModelLookup.ts");
-const models = await import("../../src/lib/db/models.ts");
-const search = await import("../../src/app/api/v1/search/route.ts");
-const { getUnifiedModelsResponse } = await import("../../src/app/api/v1/models/catalog.ts");
+  await import("../../../src/lib/db/apiKeys/publishedModelLookup.ts");
+const models = await import("../../../src/lib/db/models.ts");
+const search = await import("../../../src/app/api/v1/search/route.ts");
+const { getUnifiedModelsResponse } = await import("../../../src/app/api/v1/models/catalog.ts");
 const originalFetch = globalThis.fetch;
 test.after(async () => {
   globalThis.fetch = originalFetch;

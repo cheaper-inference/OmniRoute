@@ -8,14 +8,14 @@ import test, { mock } from "node:test";
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-migration-"));
 process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET = "kimi-migration-fixture-secret";
-const core = await import("../../src/lib/db/core.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const limits = await import("../../src/lib/db/tokenLimits.ts");
-const counter = await import("../../open-sse/services/tokenLimitCounter.ts");
-const quota = await import("../../src/lib/quota/providerQuotaState.ts");
-const affinity = await import("../../src/lib/db/sessionAffinity/sqliteStore.ts");
-const identity = await import("../../src/lib/db/sessionAffinity/accountIdentity.ts");
-const { resolveUsageAccountIdentity } = await import("../../src/lib/usage/accountIdentity.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const limits = await import("../../../src/lib/db/tokenLimits.ts");
+const counter = await import("../../../open-sse/services/tokenLimitCounter.ts");
+const quota = await import("../../../src/lib/quota/providerQuotaState.ts");
+const affinity = await import("../../../src/lib/db/sessionAffinity/sqliteStore.ts");
+const identity = await import("../../../src/lib/db/sessionAffinity/accountIdentity.ts");
+const { resolveUsageAccountIdentity } = await import("../../../src/lib/usage/accountIdentity.ts");
 
 const NOW = Date.UTC(2026, 10, 12, 12);
 const DAY = Date.UTC(2026, 10, 12);
@@ -496,7 +496,7 @@ test("legacy hashed pins verify the exact candidate digest; lifecycle never resu
     null
   );
   const { selectSessionAffinityConnection } =
-    await import("../../src/sse/services/sessionAffinityPin.ts");
+    await import("../../../src/sse/services/sessionAffinityPin.ts");
   const routed = await selectSessionAffinityConnection(
     "kimi",
     "session",
@@ -549,12 +549,14 @@ test("legacy hashed pins verify the exact candidate digest; lifecycle never resu
 });
 
 test("migrated templates enforce budgets and deterministic saved reasoning order on repeated applications", async () => {
-  const { createDefaultKeyTemplatePolicy } = await import("../../src/shared/types/keyTemplates.ts");
+  const { createDefaultKeyTemplatePolicy } =
+    await import("../../../src/shared/types/keyTemplates.ts");
   const { createApiKeyFromPolicy, isModelAllowedForKey } =
-    await import("../../src/lib/db/apiKeys.ts");
+    await import("../../../src/lib/db/apiKeys.ts");
   const { invalidateReasoningRoutingRuleCache } =
-    await import("../../src/lib/db/reasoningRoutingRules.ts");
-  const { resolveReasoningRoutingRule } = await import("../../src/lib/reasoningRouting/policy.ts");
+    await import("../../../src/lib/db/reasoningRoutingRules.ts");
+  const { resolveReasoningRoutingRule } =
+    await import("../../../src/lib/reasoningRouting/policy.ts");
   const policy = createDefaultKeyTemplatePolicy();
   policy.key.modelAccessMode = "restricted";
   policy.key.allowedModels = ["moonshot/*"];
@@ -636,8 +638,9 @@ test("migrated templates enforce budgets and deterministic saved reasoning order
 
 test("saved reasoning overlaps keep IDs, priority and stable tie order; later legacy rules still match", async () => {
   const { invalidateReasoningRoutingRuleCache } =
-    await import("../../src/lib/db/reasoningRoutingRules.ts");
-  const { resolveReasoningRoutingRule } = await import("../../src/lib/reasoningRouting/policy.ts");
+    await import("../../../src/lib/db/reasoningRoutingRules.ts");
+  const { resolveReasoningRoutingRule } =
+    await import("../../../src/lib/reasoningRouting/policy.ts");
   for (const [index, prefix] of ["moonshot", "kimi"].entries()) {
     insert("reasoning_routing_rules", {
       id: "rule-" + index,
@@ -697,7 +700,7 @@ test("single cold model policy remains unseeded until a read of exact wire plus 
 });
 
 test("remaining configuration tables and keyed namespaces merge without losing disjoint fields", async () => {
-  const apiKeys = await import("../../src/lib/db/apiKeys.ts");
+  const apiKeys = await import("../../../src/lib/db/apiKeys.ts");
   const key = await apiKeys.createApiKey("saved", "machine");
   db.prepare("UPDATE api_keys SET allowed_models=?,blocked_models=?,forced_model=? WHERE id=?").run(
     '["moonshot/*"]',

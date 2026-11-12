@@ -31,7 +31,7 @@ See **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for general setup instructi
 ## Kimi API compatibility
 
 The Moonshot Open Platform API uses the provider ID and model prefix `kimi`,
-for example `kimi/kimi-k3`. Existing `moonshot/...` requests still work.
+for example `kimi/k3`. Existing `moonshot/...` requests still work.
 Kimi Code, Kimi Code API-key and Kimi Web remain separate integrations.
 
 On upgrade, migration 239 preserves connection IDs, credentials and custom base

@@ -1,31 +1,31 @@
 import assert from "node:assert/strict";
 import test, { mock } from "node:test";
-import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
+import { createChatPipelineHarness } from "../../integration/_chatPipelineHarness.ts";
 const h = await createChatPipelineHarness("kimi-settings");
-const settings = await import("../../src/lib/db/settings.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
-const { resolveComboConfig } = await import("../../open-sse/services/comboConfig.ts");
-const errors = await import("../../open-sse/config/providerErrorRules.ts");
-const resilience = await import("../../src/lib/resilience/settings.ts");
-const preferred = await import("../../src/sse/services/preferredConnectionFailover.ts");
-const preflight = await import("../../src/sse/services/quotaPreflightPolicy.ts");
-const rate = await import("../../open-sse/services/providerDefaultRateLimit.ts");
-const tierDb = await import("../../src/lib/db/tierConfig.ts");
-const tiers = await import("../../open-sse/services/tierResolver.ts");
-const chaosConfig = await import("../../src/lib/chaos/chaosConfig.ts");
-const chaos = await import("../../src/lib/chaos/chaosExecutor.ts");
+const settings = await import("../../../src/lib/db/settings.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const { invalidateDbCache } = await import("../../../src/lib/db/readCache.ts");
+const { resolveComboConfig } = await import("../../../open-sse/services/comboConfig.ts");
+const errors = await import("../../../open-sse/config/providerErrorRules.ts");
+const resilience = await import("../../../src/lib/resilience/settings.ts");
+const preferred = await import("../../../src/sse/services/preferredConnectionFailover.ts");
+const preflight = await import("../../../src/sse/services/quotaPreflightPolicy.ts");
+const rate = await import("../../../open-sse/services/providerDefaultRateLimit.ts");
+const tierDb = await import("../../../src/lib/db/tierConfig.ts");
+const tiers = await import("../../../open-sse/services/tierResolver.ts");
+const chaosConfig = await import("../../../src/lib/chaos/chaosConfig.ts");
+const chaos = await import("../../../src/lib/chaos/chaosExecutor.ts");
 const quotaUi =
-  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/utils.tsx");
+  await import("../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/utils.tsx");
 const { PROVIDER_LABEL } =
-  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/constants.ts");
-const transforms = await import("../../open-sse/services/systemTransforms.ts");
-const exposure = await import("../../src/shared/utils/modelExposureList.ts");
-const autoExposure = await import("../../open-sse/services/autoCombo/modelExposureFilter.ts");
-const models = await import("../../src/lib/db/models.ts");
-const { getUnifiedModelsResponse } = await import("../../src/app/api/v1/models/catalog.ts");
-const manifest = await import("../../open-sse/services/manifestAdapter.ts");
-const { GET: getSearchProviders } = await import("../../src/app/api/v1/search/route.ts");
+  await import("../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/constants.ts");
+const transforms = await import("../../../open-sse/services/systemTransforms.ts");
+const exposure = await import("../../../src/shared/utils/modelExposureList.ts");
+const autoExposure = await import("../../../open-sse/services/autoCombo/modelExposureFilter.ts");
+const models = await import("../../../src/lib/db/models.ts");
+const { getUnifiedModelsResponse } = await import("../../../src/app/api/v1/models/catalog.ts");
+const manifest = await import("../../../open-sse/services/manifestAdapter.ts");
+const { GET: getSearchProviders } = await import("../../../src/app/api/v1/search/route.ts");
 let db: ReturnType<typeof h.core.getDbInstance>;
 function kv(key: string, value: unknown) {
   db.prepare("INSERT OR REPLACE INTO key_value(namespace,key,value) VALUES('settings',?,?)").run(
@@ -475,7 +475,7 @@ test("C14 auto exposure mirror preserves canonical and legacy candidates under s
     pool.slice(0, 2)
   );
 });
-test("C13 canonical disabled duplicate wins while connection IDs, distinct wire models and prompts remain exact", async () => {
+test("C13 canonical disabled provider wins regardless of legacy model while connection selectors stay exact", async () => {
   const connection = await h.seedConnection("openai", { apiKey: "chaos-connection" });
   const config = {
     ...chaosConfig.DEFAULT_CHAOS_CONFIG,
@@ -491,11 +491,7 @@ test("C13 canonical disabled duplicate wins while connection IDs, distinct wire 
   migrate();
   assert.deepEqual(raw("chaosModeConfig"), {
     ...config,
-    providerOverrides: [
-      config.providerOverrides[1],
-      config.providerOverrides[2],
-      { ...config.providerOverrides[3], providerId: "kimi" },
-    ],
+    providerOverrides: [config.providerOverrides[1], config.providerOverrides[2]],
   });
 });
 
@@ -636,8 +632,9 @@ for (const source of ["static", "synced"])
   }
 
 test("C11 API checkbox predicate and explicit unblock retain separate Search entry", async () => {
-  const { isKimiApiProviderBlocked } = await import("../../open-sse/config/kimiProvider.ts");
-  const { computeNextBlockedProviders } = await import("../../src/shared/utils/noAuthProviders.ts");
+  const { isKimiApiProviderBlocked } = await import("../../../open-sse/config/kimiProvider.ts");
+  const { computeNextBlockedProviders } =
+    await import("../../../src/shared/utils/noAuthProviders.ts");
   assert.equal(isKimiApiProviderBlocked("kimi", ["moonshot"]), true);
   assert.equal(isKimiApiProviderBlocked("moonshot", ["kimi"]), true);
   assert.equal(isKimiApiProviderBlocked("kimi-search", ["moonshot"]), false);
@@ -729,4 +726,99 @@ test("C14 alias deny takes precedence and empty exposure lists preserve the pool
   assert.equal(autoExposure.filterModelExposureCandidates(pool, {}), pool);
   const rules = { modelVisibilityAllowlist: ["moonshot/*"], modelVisibilityDenylist: ["kimi/*"] };
   assert.deepEqual(autoExposure.filterModelExposureCandidates(pool, rules), [pool[2]]);
+});
+
+for (const canonicalFirst of [false, true]) {
+  test(
+    "R6 Chaos canonical provider override wins differing models in order " + canonicalFirst,
+    async () => {
+      const account = await h.seedConnection("moonshot", { apiKey: "chaos-canonical" });
+      await h.seedConnection("openai", { apiKey: "chaos-foreign" });
+      const legacy = { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true };
+      const canonical = { providerId: "kimi", modelId: "moonshot/canonical-wire", enabled: true };
+      kv("chaosModeConfig", {
+        ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+        enabled: true,
+        providerOverrides: canonicalFirst ? [canonical, legacy] : [legacy, canonical],
+      });
+      migrate();
+      assert.deepEqual(raw("chaosModeConfig").providerOverrides, [canonical]);
+      const calls: string[] = [];
+      mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
+        calls.push((await request.json()).model);
+        return Response.json({ choices: [{ message: { content: "fixture" } }] });
+      });
+      const result = await chaos.executeChaosRun({ task: "canonical override" });
+      assert.equal(result.totalProviders, 1);
+      assert.equal(result.models[0].providerId, account.id);
+      assert.deepEqual(calls, ["moonshot/canonical-wire"]);
+    }
+  );
+}
+for (const connectionProvider of ["moonshot", "kimi"])
+  for (const unmatchedSurvivor of [false, true]) {
+    test(
+      "R6 Chaos differing disabled collision rolls back for " +
+        connectionProvider +
+        " with unmatched survivor " +
+        unmatchedSurvivor,
+      async () => {
+        await h.seedConnection(connectionProvider, { apiKey: "chaos-prior" });
+        await h.seedConnection("deepseek", { apiKey: "chaos-not-selected" });
+        kv("chaosModeConfig", {
+          ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+          enabled: true,
+          providerOverrides: [
+            { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true },
+            { providerId: "kimi", modelId: "moonshot/canonical-wire", enabled: false },
+            ...(unmatchedSurvivor ? [{ providerId: "missing-provider", enabled: true }] : []),
+          ],
+        });
+        const connections = db.prepare("SELECT * FROM provider_connections ORDER BY id").all();
+        const stored = db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all();
+        assert.throws(migrate, /chaos|conflict|selection/i);
+        assert.deepEqual(
+          db.prepare("SELECT * FROM provider_connections ORDER BY id").all(),
+          connections
+        );
+        assert.deepEqual(
+          db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(),
+          stored
+        );
+        assert.equal(
+          db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='239'").get(),
+          undefined
+        );
+      }
+    );
+  }
+test("R6 Chaos keeps a matching connection selector while canonical disable wins", async () => {
+  await h.seedConnection("moonshot", { apiKey: "chaos-prior" });
+  const survivor = await h.seedConnection("openai", { apiKey: "chaos-selected" });
+  const canonical = { providerId: "kimi", modelId: "moonshot/canonical-wire", enabled: false };
+  const connection = {
+    providerId: survivor.id,
+    modelId: "moonshot/connection-wire",
+    enabled: true,
+  };
+  kv("chaosModeConfig", {
+    ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+    enabled: true,
+    providerOverrides: [
+      { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true },
+      canonical,
+      connection,
+    ],
+  });
+  migrate();
+  assert.deepEqual(raw("chaosModeConfig").providerOverrides, [canonical, connection]);
+  const calls: string[] = [];
+  mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
+    calls.push((await request.json()).model);
+    return Response.json({ choices: [{ message: { content: "fixture" } }] });
+  });
+  const result = await chaos.executeChaosRun({ task: "connection selector" });
+  assert.equal(result.totalProviders, 1);
+  assert.equal(result.models[0].providerId, survivor.id);
+  assert.deepEqual(calls, ["moonshot/connection-wire"]);
 });

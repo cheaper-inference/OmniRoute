@@ -6,12 +6,12 @@ import test from "node:test";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-canonical-"));
 process.env.DATA_DIR = dataDir;
-const core = await import("../../src/lib/db/core.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const { REGISTRY, getRegistryEntry } = await import("../../open-sse/config/providerRegistry.ts");
-const { resolveProviderAlias } = await import("../../open-sse/services/providerAlias.ts");
-const { resolveProviderId } = await import("../../src/shared/constants/providers.ts");
-const { modelPatternMatches } = await import("../../src/domain/modelPermissions.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const { REGISTRY, getRegistryEntry } = await import("../../../open-sse/config/providerRegistry.ts");
+const { resolveProviderAlias } = await import("../../../open-sse/services/providerAlias.ts");
+const { resolveProviderId } = await import("../../../src/shared/constants/providers.ts");
+const { modelPatternMatches } = await import("../../../src/domain/modelPermissions.ts");
 
 test.after(() => {
   core.resetDbInstance();

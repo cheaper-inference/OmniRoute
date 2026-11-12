@@ -1,4 +1,4 @@
-import { getBudgetWindow, type BudgetResetInterval } from "@/domain/costRules";
+import { getBudgetWindow, type BudgetResetInterval } from "@/domain/budgetWindow";
 import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 import type { SqliteAdapter } from "../adapters/types";
 import { readKimiBudgetHistory } from "../kimiBudgetHistory";

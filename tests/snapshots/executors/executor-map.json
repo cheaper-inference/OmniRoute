@@ -462,8 +462,8 @@
     },
     "moonshot": {
       "className": "MoonshotExecutor",
-      "configSource": "moonshot",
-      "provider": "moonshot"
+      "configSource": "kimi",
+      "provider": "kimi"
     },
     "ms-web": {
       "className": "MuseSparkWebExecutor",

@@ -1,3 +1,8 @@
+import { canonicalKimiProvider } from "../../config/kimiProvider.ts";
+import {
+  getKimiAutoComboInputs,
+  getKimiAutoComboCandidates,
+} from "@/lib/db/models/kimiAutoComboInputs";
 import { getAutoRoutableEmulatedNoAuthProviders } from "./emulatedNoAuthAllowlist";
 import { AutoComboConfig } from "./engine";
 import { MODE_PACKS } from "./modePacks";
@@ -609,9 +614,10 @@ export async function prepareVirtualAutoComboInputs(
   const registry = getProviderRegistry();
   const connectionsByProvider = new Map<string, VirtualFactoryConn[]>();
   for (const conn of validConnections) {
-    const providerConnections = connectionsByProvider.get(conn.provider) ?? [];
+    const providerKey = canonicalKimiProvider(conn.provider);
+    const providerConnections = connectionsByProvider.get(providerKey) ?? [];
     providerConnections.push(conn);
-    connectionsByProvider.set(conn.provider, providerConnections);
+    connectionsByProvider.set(providerKey, providerConnections);
   }
 
   // Build one logical candidate per provider/model and keep account fallback as an
@@ -622,6 +628,35 @@ export async function prepareVirtualAutoComboInputs(
   const candidateBuildYield = createCooperativeYieldBudget();
   for (const [providerId, providerConnections] of connectionsByProvider) {
     const providerInfo = registry[providerId];
+    if (providerId === "kimi") {
+      try {
+        const inputs = await getKimiAutoComboInputs(new Set(providerConnections.map((c) => c.id)));
+        const models = (providerInfo?.models ?? []).flatMap((model) =>
+          typeof model?.id === "string" && model.id.trim()
+            ? [{ ...model, id: model.id.trim() }]
+            : []
+        );
+        for (const candidate of await getKimiAutoComboCandidates(
+          inputs,
+          providerConnections,
+          models,
+          () => candidateBuildYield.yieldIfDue()
+        )) {
+          await candidateBuildYield.yieldIfDue();
+          candidatePool.push({
+            provider: providerId,
+            connectionId: null,
+            allowedConnectionIds: candidate.allowedConnectionIds,
+            model: candidate.modelId,
+            modelStr: providerId + "/" + candidate.modelId,
+            costPer1MTokens: resolveVirtualCost(providerId, candidate.modelId),
+          });
+        }
+      } catch {
+        // An unreadable native inventory does not widen that group or suppress other providers.
+      }
+      continue;
+    }
     const registryModelIds = Array.isArray(providerInfo?.models)
       ? providerInfo.models
           .map((model) => (typeof model?.id === "string" ? model.id.trim() : ""))

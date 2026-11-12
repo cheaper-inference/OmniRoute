@@ -90,14 +90,14 @@ test("test 4: xai and xai-oauth both passthrough unknown model ids", () => {
   assert.equal(xai.passthroughModels, true);
 });
 
-test("test 6: CATALOG_SIBLING_IDS stays agy/antigravity and never keys the xai family", () => {
+test("test 6: CATALOG_SIBLING_IDS includes API compatibility siblings and never keys the xai family", () => {
   const src = readRepo("src/lib/db/models/activeSyncedCatalog.ts");
   const literal = extractNamedConstLiteral(src, "CATALOG_SIBLING_IDS");
   const uncommented = literal.replace(/\/\/.*$/gm, "");
   const keys = [...uncommented.matchAll(/^\s*(?:"([^"]+)"|([A-Za-z_][\w-]*))\s*:/gm)]
     .map((match) => match[1] ?? match[2])
     .sort();
-  assert.deepEqual(keys, ["agy", "antigravity"]);
+  assert.deepEqual(keys, ["agy", "antigravity", "kimi", "moonshot"]);
   assert.doesNotMatch(literal, /["']xai["']|["']xai-oauth["']|["']xao["']/);
 });
 

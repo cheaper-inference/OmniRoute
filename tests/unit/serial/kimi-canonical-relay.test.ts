@@ -4,23 +4,33 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+const originalEnv = {
+  DATA_DIR: process.env.DATA_DIR,
+  BIFROST_BASE_URL: process.env.BIFROST_BASE_URL,
+  OMNIROUTE_RELAY_BACKEND: process.env.OMNIROUTE_RELAY_BACKEND,
+  BIFROST_ENABLED: process.env.BIFROST_ENABLED,
+};
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-relay-"));
 process.env.DATA_DIR = dataDir;
 process.env.BIFROST_BASE_URL = "http://fixture-bifrost:8080";
 process.env.OMNIROUTE_RELAY_BACKEND = "bifrost";
 process.env.BIFROST_ENABLED = "1";
-const core = await import("../../src/lib/db/core.ts");
-const relay = await import("../../src/lib/db/relayProxies.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const relay = await import("../../../src/lib/db/relayProxies.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
 const routes = [
-  (await import("../../src/app/api/v1/relay/chat/completions/route.ts")).POST,
-  (await import("../../src/app/api/v1/relay/chat/completions/bifrost/route.ts")).POST,
+  (await import("../../../src/app/api/v1/relay/chat/completions/route.ts")).POST,
+  (await import("../../../src/app/api/v1/relay/chat/completions/bifrost/route.ts")).POST,
 ];
 const originalFetch = globalThis.fetch;
 test.after(() => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true });
+  for (const [key, value] of Object.entries(originalEnv)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
 });
 for (const [index, post] of routes.entries())
   for (const pattern of ["moonshot/kimi-k3", "moonshot/*"]) {

@@ -7,13 +7,14 @@ import test, { mock } from "node:test";
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-model-policy-"));
 process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET = "model-policy-fixture";
-const core = await import("../../src/lib/db/core.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const limits = await import("../../src/lib/db/tokenLimits.ts");
-const counter = await import("../../open-sse/services/tokenLimitCounter.ts");
-const templates = await import("../../src/lib/db/keyTemplates.ts");
-const apiKeys = await import("../../src/lib/db/apiKeys.ts");
-const { createDefaultKeyTemplatePolicy } = await import("../../src/shared/types/keyTemplates.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const limits = await import("../../../src/lib/db/tokenLimits.ts");
+const counter = await import("../../../open-sse/services/tokenLimitCounter.ts");
+const templates = await import("../../../src/lib/db/keyTemplates.ts");
+const apiKeys = await import("../../../src/lib/db/apiKeys.ts");
+const { createDefaultKeyTemplatePolicy } =
+  await import("../../../src/shared/types/keyTemplates.ts");
 const NOW = Date.UTC(2026, 10, 12, 12);
 let db: ReturnType<typeof core.getDbInstance>;
 test.beforeEach(() => {

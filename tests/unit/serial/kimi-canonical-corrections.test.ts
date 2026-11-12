@@ -9,14 +9,14 @@ process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET = "kimi-corrections-fixture";
 process.env.PROXY_AUTO_SELECT_ENABLED = "false";
 delete process.env.PROXY_FAIL_OPEN;
-const core = await import("../../src/lib/db/core.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const models = await import("../../src/lib/db/models.ts");
-const settings = await import("../../src/lib/db/settings.ts");
-const domain = await import("../../src/lib/db/domainState.ts");
-const groups = await import("../../src/lib/db/apiKeyGroups.ts");
-const { readKimiBudgetHistory } = await import("../../src/lib/db/kimiBudgetHistory.ts");
-const { resolveModelAliasFromMap } = await import("../../open-sse/services/model.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const models = await import("../../../src/lib/db/models.ts");
+const settings = await import("../../../src/lib/db/settings.ts");
+const domain = await import("../../../src/lib/db/domainState.ts");
+const groups = await import("../../../src/lib/db/apiKeyGroups.ts");
+const { readKimiBudgetHistory } = await import("../../../src/lib/db/kimiBudgetHistory.ts");
+const { resolveModelAliasFromMap } = await import("../../../open-sse/services/model.ts");
 let db: ReturnType<typeof core.getDbInstance>;
 function kv(namespace: string, key: string, value: unknown) {
   db.prepare("INSERT OR REPLACE INTO key_value(namespace,key,value) VALUES(?,?,?)").run(
@@ -87,7 +87,7 @@ test("C1 real fallback entries preserve canonical disabled/priority rather than 
   ]);
   domain.saveFallbackChain("kimi/correction", [{ provider: "kimi", priority: 9, enabled: false }]);
   migrate();
-  const fallback = await import("../../src/domain/fallbackPolicy.ts");
+  const fallback = await import("../../../src/domain/fallbackPolicy.ts");
   assert.deepEqual(fallback.resolveFallbackChain("kimi/correction"), [
     { provider: "openai", priority: 3, enabled: true },
   ]);
@@ -155,7 +155,7 @@ test("C4 model history retains exact wire matches and family suffix; provider pa
   assert.equal(readKimiBudgetHistory(db, "key", "provider", "kimi", start, end, "kimi"), 10);
 });
 test("C4 unrelated group wire pattern retains its original grant without broadening", async () => {
-  const apiKeys = await import("../../src/lib/db/apiKeys.ts");
+  const apiKeys = await import("../../../src/lib/db/apiKeys.ts");
   const key = await apiKeys.createApiKey("wire group", "fixture");
   const group = groups.createKeyGroup("vendor");
   assert.equal(groups.addKeyToGroup(key.id, group.id), true);
@@ -199,8 +199,8 @@ test("C7 ordinary alias syntax and managed provenance survive canonical-name col
 });
 
 test("C8 shared quota provider selection survives migration and later legacy settings", async () => {
-  const selfSettings = await import("../../src/lib/db/apiKeySelfServiceSettings.ts");
-  const accounts = await import("../../src/lib/usage/apiKeySelfServiceAccounts.ts");
+  const selfSettings = await import("../../../src/lib/db/apiKeySelfServiceSettings.ts");
+  const accounts = await import("../../../src/lib/usage/apiKeySelfServiceAccounts.ts");
   db.prepare(
     "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES('shared','moonshot',1,'old','old'),('other','openrouter',1,'old','old')"
   ).run();
@@ -242,7 +242,7 @@ test("C8 shared quota provider selection survives migration and later legacy set
     assert.equal(entries.length, 1);
     assert.equal(entries[0].connectionId, "shared");
   }
-  const providerDb = await import("../../src/lib/db/providers.ts");
+  const providerDb = await import("../../../src/lib/db/providers.ts");
   db.prepare(
     "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES('later-shared','moonshot',1,'old','old')"
   ).run();
@@ -267,12 +267,12 @@ test("C8 shared quota provider selection survives migration and later legacy set
 });
 
 test("C9 provider-scoped wire IDs remain distinct in overrides, mappings and discovery", async () => {
-  const context = await import("../../src/lib/db/modelContextOverrides.ts");
-  const capabilities = await import("../../src/lib/db/modelCapabilityOverrides.ts");
-  const discovery = await import("../../src/lib/db/discoveryResults.ts");
-  const proxy = await import("../../src/lib/db/upstreamProxy.ts");
+  const context = await import("../../../src/lib/db/modelContextOverrides.ts");
+  const capabilities = await import("../../../src/lib/db/modelCapabilityOverrides.ts");
+  const discovery = await import("../../../src/lib/db/discoveryResults.ts");
+  const proxy = await import("../../../src/lib/db/upstreamProxy.ts");
   const { applyCliproxyapiModelMapping } =
-    await import("../../open-sse/handlers/chatCore/cliproxyModelMapping.ts");
+    await import("../../../open-sse/handlers/chatCore/cliproxyModelMapping.ts");
   for (const [model, value] of [
     ["moonshot/custom", 8192],
     ["kimi/custom", 16384],

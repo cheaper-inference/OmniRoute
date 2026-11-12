@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
+import { createChatPipelineHarness } from "../../integration/_chatPipelineHarness.ts";
 
 const h = await createChatPipelineHarness("kimi-quota-owner");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const quota = await import("../../src/lib/quota/providerQuotaState.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const quota = await import("../../../src/lib/quota/providerQuotaState.ts");
 const originalFetch = globalThis.fetch;
 const originalQuotaFlag = process.env.OMNIROUTE_QUOTA_AWARE_ROUTING;
 test.after(async () => {

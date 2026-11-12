@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
+import { createChatPipelineHarness } from "../../integration/_chatPipelineHarness.ts";
 
 const h = await createChatPipelineHarness("kimi-canonical-runtime");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const groups = await import("../../src/lib/db/apiKeyGroups.ts");
-const { GET: discover } = await import("../../src/app/api/providers/[id]/models/route.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const groups = await import("../../../src/lib/db/apiKeyGroups.ts");
+const { GET: discover } = await import("../../../src/app/api/providers/[id]/models/route.ts");
 const originalFetch = globalThis.fetch;
 test.after(async () => {
   globalThis.fetch = originalFetch;
@@ -112,7 +112,7 @@ test("migrated connection runs both prefixes through the chat route, forced SSE 
   }
   for (const stored of ["kimi", "moonshot"]) {
     db.prepare("UPDATE provider_connections SET provider=? WHERE id=?").run(stored, conn.id);
-    const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
+    const { invalidateDbCache } = await import("../../../src/lib/db/readCache.ts");
     invalidateDbCache();
     let url = "";
     globalThis.fetch = (async (input) => {
@@ -126,8 +126,8 @@ test("migrated connection runs both prefixes through the chat route, forced SSE 
     assert.equal(response.status, 200, await response.clone().text());
     assert.equal(url, "https://api.moonshot.cn/v1/models");
   }
-  const { invalidateModelCatalogCache } = await import("../../src/lib/db/readCache.ts");
-  const { getUnifiedModelsResponse } = await import("../../src/app/api/v1/models/catalog.ts");
+  const { invalidateModelCatalogCache } = await import("../../../src/lib/db/readCache.ts");
+  const { getUnifiedModelsResponse } = await import("../../../src/app/api/v1/models/catalog.ts");
   invalidateModelCatalogCache();
   const catalogResponse = await getUnifiedModelsResponse(
     new Request("http://localhost/v1/models"),
@@ -235,7 +235,7 @@ test("C9 default wire model and explicit outer routing prefix preserve vendor mo
       ?.default_model,
     "moonshot/custom"
   );
-  const aliases = await import("../../src/lib/db/models.ts");
+  const aliases = await import("../../../src/lib/db/models.ts");
   await aliases.setModelAlias("default-wire", "kimi/auto");
   for (const [requested, model] of [
     ["default-wire", "moonshot/custom"],

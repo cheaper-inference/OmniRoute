@@ -6,10 +6,10 @@ import test from "node:test";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-fallback-"));
 process.env.DATA_DIR = dataDir;
-const core = await import("../../src/lib/db/core.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const domain = await import("../../src/lib/db/domainState.ts");
-const fallback = await import("../../src/domain/fallbackPolicy.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const domain = await import("../../../src/lib/db/domainState.ts");
+const fallback = await import("../../../src/domain/fallbackPolicy.ts");
 let db: ReturnType<typeof core.getDbInstance>;
 test.beforeEach(() => {
   core.resetDbInstance();

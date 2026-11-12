@@ -6,12 +6,12 @@ import test from "node:test";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-wildcard-"));
 process.env.DATA_DIR = dataDir;
-const core = await import("../../src/lib/db/core.ts");
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-const combos = await import("../../src/lib/db/combos.ts");
-const models = await import("../../src/lib/db/models.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
+const combos = await import("../../../src/lib/db/combos.ts");
+const models = await import("../../../src/lib/db/models.ts");
 const { expandProviderWildcardsInCombo } =
-  await import("../../open-sse/services/combo/providerWildcard.ts");
+  await import("../../../open-sse/services/combo/providerWildcard.ts");
 
 let db: ReturnType<typeof core.getDbInstance>;
 test.beforeEach(() => {

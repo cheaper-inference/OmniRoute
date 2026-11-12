@@ -498,7 +498,7 @@ function resolveProviderAliasOrId(providerOrAlias: string): string {
 
 function getComboModelProvider(modelEntry: unknown): string | null {
   const providerOrAlias = getComboEntryProvider(modelEntry);
-  return providerOrAlias ? resolveProviderAliasOrId(providerOrAlias) : null;
+  return providerOrAlias ? canonicalKimiProvider(resolveProviderAliasOrId(providerOrAlias)) : null;
 }
 
 function migrateProxyEntry(value: unknown): JsonRecord | null {
