@@ -80,6 +80,11 @@ function isRateLimited(gate: ModelGate): boolean {
   return true;
 }
 
+/** An idle gate may be dropped only when no cooldown is pending on it. */
+function isIdle(gate: ModelGate): boolean {
+  return gate.running === 0 && gate.queue.length === 0 && !isRateLimited(gate);
+}
+
 /**
  * Try to drain queued requests when slots become available
  * @param {string} modelStr
@@ -96,7 +101,8 @@ function drainQueue(modelStr: string): void {
     next.resolve(createReleaseFn(modelStr));
   }
 
-  if (gate.running === 0 && gate.queue.length === 0) {
+  // A cooling gate stays; the markRateLimited timer drains it again at expiry.
+  if (isIdle(gate)) {
     gates.delete(modelStr);
   }
 }
@@ -114,10 +120,6 @@ function createReleaseFn(modelStr: string): () => void {
     const gate = gates.get(modelStr);
     if (gate && gate.running > 0) {
       gate.running--;
-      if (gate.running === 0 && gate.queue.length === 0) {
-        gates.delete(modelStr);
-        return;
-      }
       drainQueue(modelStr);
     }
   };
@@ -156,7 +158,7 @@ export function acquire(
     };
     err.code = "SEMAPHORE_QUEUE_FULL";
     // Drop a freshly-created idle gate so we don't leak an empty entry.
-    if (gate.running === 0 && gate.queue.length === 0) gates.delete(modelStr);
+    if (isIdle(gate)) gates.delete(modelStr);
     return Promise.reject(err);
   }
 

@@ -13,7 +13,10 @@ import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import { CardSkeleton } from "@/shared/components/Loading";
 import Modal from "@/shared/components/Modal";
-import SegmentedControl from "@/shared/components/SegmentedControl";
+import SegmentedControl, {
+  SegmentedPanel,
+  SegmentedTabs,
+} from "@/shared/components/SegmentedControl";
 import { cn } from "@/shared/utils/cn";
 import Toggle from "@/shared/components/Toggle";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
@@ -1271,7 +1274,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const ngrokUrlNotice = translateOrFallback("ngrokUrlNotice", "Creates a public ngrok tunnel.");
 
   return (
-    <div className="flex flex-col gap-8">
+    <SegmentedTabs
+      value={activeEndpointTab}
+      onChange={(value) => setActiveEndpointTab(value as EndpointTab)}
+      className="gap-8"
+    >
       {/* Guided connection header (#11228): /v1 URL + test action lead; advanced protocols demoted */}
       <div className="flex flex-col gap-2">
         <PageHeader compact title={t("title")} description={t("subtitle")} />
@@ -1288,868 +1295,879 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         </div>
       </div>
       <SegmentedControl
+        semantics="tabs"
         options={ENDPOINT_TABS.map((tab) => ({ ...tab, label: t(tab.labelKey) }))}
-        value={activeEndpointTab}
-        onChange={(value) => setActiveEndpointTab(value as EndpointTab)}
         aria-label={t("endpointSections")}
         className="w-fit"
       />
 
-      {activeEndpointTab === "mcp" ? <McpDashboardPage /> : null}
-      {activeEndpointTab === "a2a" ? <A2ADashboardPage /> : null}
-      {activeEndpointTab === "context-sources" ? (
-        <div className="flex flex-col gap-4">
-          <NotionSourceCard />
-          <ObsidianSourceCard />
-        </div>
-      ) : null}
-
-      {/* Endpoint Card */}
-      <Card>
-        <h2 className="text-lg font-semibold mb-4">{t("title")}</h2>
-
-        {/* Cloud Status Toast */}
-        {cloudStatus && (
-          <Alert
-            variant={
-              cloudStatus.type === "success"
-                ? "success"
-                : cloudStatus.type === "warning"
-                  ? "warning"
-                  : "critical"
-            }
-            className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300"
-            icon={
-              <Icon
-                name={
-                  cloudStatus.type === "success"
-                    ? "check_circle"
-                    : cloudStatus.type === "warning"
-                      ? "warning"
-                      : "error"
-                }
-                size={18}
-              />
-            }
-            description={cloudStatus.message}
-            dismissLabel={tc("close")}
-            onDismiss={() => setCloudStatus(null)}
-          />
-        )}
-
-        {/* Active URLs bar */}
-        {activeUrls.length > 0 && (
-          <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
-            <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">
-              {t("activeEndpoints")}
-            </p>
-            <div className="flex flex-col gap-1.5">
-              {activeUrls.map(({ label, url, key }) => (
-                <div key={key} className="flex items-center gap-2 min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
-                  <span className="text-xs text-text-muted w-20 shrink-0">{label}</span>
-                  <code className="text-xs font-mono text-text-main flex-1 truncate min-w-0">
-                    {url}
-                  </code>
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => void copy(url, key)}
-                    className="shrink-0 text-text-muted"
-                    aria-label={`${tc("copy")} ${label}`}
-                    title={url}
-                    icon={copied === key ? "check" : "content_copy"}
-                  />
-                </div>
-              ))}
-            </div>
+      {/* The endpoint cards stay under every section, so one panel follows the selected tab. */}
+      <SegmentedPanel value={activeEndpointTab} className="flex flex-col gap-8">
+        {activeEndpointTab === "mcp" ? <McpDashboardPage /> : null}
+        {activeEndpointTab === "a2a" ? <A2ADashboardPage /> : null}
+        {activeEndpointTab === "context-sources" ? (
+          <div className="flex flex-col gap-4">
+            <NotionSourceCard />
+            <ObsidianSourceCard />
           </div>
-        )}
+        ) : null}
 
-        {/* Connection rows */}
-        <div className="flex flex-col">
-          {/* Local Server */}
-          <div className="flex items-center gap-3 py-3">
-            <Icon name="computer" size={18} className="text-success" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1 flex-wrap">
-                <span className="text-sm font-medium">{t("localServer")}</span>
-                {resolvedMachineId && (
-                  <span className="text-xs text-text-muted">· {resolvedMachineId.slice(0, 8)}</span>
-                )}
-                {lanUrls.map((url) => (
-                  <Button
-                    key={url}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void copy(url, `lan_${url}`)}
-                    title={t("copyUrlTitle", { url })}
-                    aria-label={t("copyUrlTitle", { url })}
-                    className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
-                  >
-                    <code className="font-mono">{url.replace(/^https?:\/\//, "")}</code>
-                    <Icon
-                      name={copied === `lan_${url}` ? "check" : "content_copy"}
-                      size={10}
-                      className="opacity-60"
+        {/* Endpoint Card */}
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">{t("title")}</h2>
+
+          {/* Cloud Status Toast */}
+          {cloudStatus && (
+            <Alert
+              variant={
+                cloudStatus.type === "success"
+                  ? "success"
+                  : cloudStatus.type === "warning"
+                    ? "warning"
+                    : "critical"
+              }
+              className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300"
+              icon={
+                <Icon
+                  name={
+                    cloudStatus.type === "success"
+                      ? "check_circle"
+                      : cloudStatus.type === "warning"
+                        ? "warning"
+                        : "error"
+                  }
+                  size={18}
+                />
+              }
+              description={cloudStatus.message}
+              dismissLabel={tc("close")}
+              onDismiss={() => setCloudStatus(null)}
+            />
+          )}
+
+          {/* Active URLs bar */}
+          {activeUrls.length > 0 && (
+            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">
+                {t("activeEndpoints")}
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {activeUrls.map(({ label, url, key }) => (
+                  <div key={key} className="flex items-center gap-2 min-w-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
+                    <span className="text-xs text-text-muted w-20 shrink-0">{label}</span>
+                    <code className="text-xs font-mono text-text-main flex-1 truncate min-w-0">
+                      {url}
+                    </code>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => void copy(url, key)}
+                      className="shrink-0 text-text-muted"
+                      aria-label={`${tc("copy")} ${label}`}
+                      title={url}
+                      icon={copied === key ? "check" : "content_copy"}
                     />
-                  </Button>
+                  </div>
                 ))}
               </div>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 border border-success/30 text-success shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-              {t("statusRunning")}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              icon={copied === "endpoint_url" ? "check" : "content_copy"}
-              onClick={() => void copy(localApiUrl, "endpoint_url")}
-              className="shrink-0 text-text-muted"
-            >
-              {copied === "endpoint_url" ? tc("copied") : tc("copy")}
-            </Button>
-          </div>
-
-          {/* Tunnels section header */}
-          <div className="flex items-center gap-2 pt-4 pb-1 border-t border-border/50">
-            <Icon name="network_node" size={14} className="text-text-muted" />
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-              {t("tunnels")}
-            </span>
-            <div className="flex-1 h-px bg-border/50" />
-            <span className="text-[10px] text-text-muted">
-              {t("activeTunnelCount", {
-                active: activeTunnelCount,
-                total: visibleTunnelCount,
-              })}
-            </span>
-          </div>
-
-          {/* Cloud OmniRoute — wraps below sm: the text block keeps a minimum width so the
-              status pill and the action move to the next line instead of squeezing it; only
-              the URL may break anywhere ("Cloud sync d|estination" at 390 px, F4). */}
-          <div className="flex flex-wrap items-center gap-3 py-3">
-            <Icon name="cloud" size={18} className="text-info" />
-            <div className="flex-1 min-w-[12rem]">
-              <span className="text-sm font-medium">{t("cloudOmniroute")}</span>
-              <p
-                className="text-xs text-text-muted break-words"
-                data-testid="cloud-sync-destination"
-              >
-                {translateOrFallback(
-                  "cloudUploadDestination",
-                  "Cloud sync destination (not local backups):"
-                )}{" "}
-                {/* break-all only for a URL: the "Not configured" fallback is words (review I-1). */}
-                <span className={cloudBaseUrl ? "break-all" : undefined}>
-                  {cloudBaseUrl || tc("notConfigured")}
-                </span>
-              </p>
-            </div>
-            <span
-              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border shrink-0 ${
-                cloudEnabled
-                  ? "bg-success/10 border-success/30 text-success"
-                  : "bg-surface border-border/70 text-text-muted"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${cloudEnabled ? "bg-success animate-pulse" : "bg-text-muted"}`}
-              />
-              {cloudEnabled ? tc("active") : tc("disabled")}
-            </span>
-            {cloudEnabled ? (
-              <Button
-                size="sm"
-                variant="secondary"
-                icon="cloud_off"
-                onClick={() => handleCloudToggle(false)}
-                disabled={cloudSyncing}
-                className="shrink-0 border-error/30 text-error hover:bg-error/10"
-              >
-                {t("disableCloud")}
-              </Button>
-            ) : cloudConfigured ? (
-              <Button
-                size="sm"
-                variant="primary"
-                icon="cloud_upload"
-                onClick={() => handleCloudToggle(true)}
-                disabled={cloudSyncing}
-                className="shrink-0"
-              >
-                {t("enableCloud")}
-              </Button>
-            ) : (
-              <span className="text-xs text-text-muted shrink-0 px-2 py-1 rounded border border-border/70 bg-surface">
-                {tc("notConfigured")}
-              </span>
-            )}
-          </div>
-
-          {/* Cloudflare Quick Tunnel */}
-          {showCloudflaredTunnel && (
-            <div className="border-t border-border/30">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
-                <Icon name="cloud_queue" size={18} className="text-warning" />
-                <div className="flex-1 min-w-[10rem]">
-                  <span className="text-sm font-medium">
-                    {translateOrFallback("cloudflaredTitle", "Cloudflare Quick Tunnel")}
-                  </span>
-                </div>
-                <Badge
-                  variant="outline"
-                  shape="pill"
-                  tone={cloudflaredPhaseMeta[cloudflaredPhase].tone}
-                  className="shrink-0"
-                >
-                  {cloudflaredPhaseMeta[cloudflaredPhase].label}
-                </Badge>
-                {cloudflaredStatus?.supported !== false && (
-                  <Button
-                    size="sm"
-                    variant={cloudflaredStatus?.running ? "outline" : "primary"}
-                    icon={cloudflaredStatus?.running ? "cloud_off" : "cloud_upload"}
-                    loading={cloudflaredBusy}
-                    onClick={() => {
-                      void handleCloudflaredAction(
-                        cloudflaredStatus?.running ? "disable" : "enable"
-                      );
-                    }}
-                    className="shrink-0"
-                  >
-                    {cloudflaredActionLabel}
-                  </Button>
-                )}
-              </div>
-              {cloudflaredNotice && (
-                <Alert
-                  variant={
-                    cloudflaredNotice.type === "success"
-                      ? "success"
-                      : cloudflaredNotice.type === "info"
-                        ? "info"
-                        : "critical"
-                  }
-                  className="mb-2 ml-7"
-                  icon={
-                    <Icon
-                      name={
-                        cloudflaredNotice.type === "success"
-                          ? "check_circle"
-                          : cloudflaredNotice.type === "info"
-                            ? "info"
-                            : "error"
-                      }
-                      size={18}
-                    />
-                  }
-                  description={cloudflaredNotice.message}
-                  dismissLabel={tc("close")}
-                  onDismiss={() => setCloudflaredNotice(null)}
-                />
-              )}
-              {cloudflaredStatus?.lastError && (
-                <p className="mb-2 ml-7 text-xs text-error">
-                  {translateOrFallback("cloudflaredLastError", "Last error: {error}", {
-                    error: cloudflaredStatus.lastError,
-                  })}
-                </p>
-              )}
-            </div>
           )}
 
-          {/* Tailscale Funnel */}
-          {showTailscaleFunnel && (
-            <div className={showCloudflaredTunnel ? "border-t border-border/30" : ""}>
-              {/* #18071: the row is no longer `role="button"` (axe nested-interactive — it
-                  wrapped the copy/action Buttons). The keyboard and screen-reader control is the
-                  title button; a click anywhere else on the row still toggles for the mouse. */}
-              <div
-                className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
-                onClick={() => toggleTunnelRow("ts")}
-              >
-                <div className="flex-1 min-w-[10rem]">
-                  <div className="flex items-baseline gap-1 flex-wrap">
+          {/* Connection rows */}
+          <div className="flex flex-col">
+            {/* Local Server */}
+            <div className="flex items-center gap-3 py-3">
+              <Icon name="computer" size={18} className="text-success" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-1 flex-wrap">
+                  <span className="text-sm font-medium">{t("localServer")}</span>
+                  {resolvedMachineId && (
+                    <span className="text-xs text-text-muted">
+                      · {resolvedMachineId.slice(0, 8)}
+                    </span>
+                  )}
+                  {lanUrls.map((url) => (
                     <Button
+                      key={url}
                       variant="ghost"
                       size="sm"
-                      aria-expanded={expandedTunnel === "ts"}
-                      aria-controls="endpoint-tunnel-ts-details"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleTunnelRow("ts");
-                      }}
-                      className={TUNNEL_ROW_TOGGLE_CLASS}
+                      onClick={() => void copy(url, `lan_${url}`)}
+                      title={t("copyUrlTitle", { url })}
+                      aria-label={t("copyUrlTitle", { url })}
+                      className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
                     >
-                      <Icon name="vpn_lock" size={18} className="text-chart-3" />
-                      <span className="text-sm font-medium">
-                        {translateOrFallback("tailscaleTitle", "Tailscale Funnel")}
-                      </span>
+                      <code className="font-mono">{url.replace(/^https?:\/\//, "")}</code>
+                      <Icon
+                        name={copied === `lan_${url}` ? "check" : "content_copy"}
+                        size={10}
+                        className="opacity-60"
+                      />
                     </Button>
-                    {tailscaleIpUrl && (
+                  ))}
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 border border-success/30 text-success shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                {t("statusRunning")}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={copied === "endpoint_url" ? "check" : "content_copy"}
+                onClick={() => void copy(localApiUrl, "endpoint_url")}
+                className="shrink-0 text-text-muted"
+              >
+                {copied === "endpoint_url" ? tc("copied") : tc("copy")}
+              </Button>
+            </div>
+
+            {/* Tunnels section header */}
+            <div className="flex items-center gap-2 pt-4 pb-1 border-t border-border/50">
+              <Icon name="network_node" size={14} className="text-text-muted" />
+              <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+                {t("tunnels")}
+              </span>
+              <div className="flex-1 h-px bg-border/50" />
+              <span className="text-[10px] text-text-muted">
+                {t("activeTunnelCount", {
+                  active: activeTunnelCount,
+                  total: visibleTunnelCount,
+                })}
+              </span>
+            </div>
+
+            {/* Cloud OmniRoute — wraps below sm: the text block keeps a minimum width so the
+              status pill and the action move to the next line instead of squeezing it; only
+              the URL may break anywhere ("Cloud sync d|estination" at 390 px, F4). */}
+            <div className="flex flex-wrap items-center gap-3 py-3">
+              <Icon name="cloud" size={18} className="text-info" />
+              <div className="flex-1 min-w-[12rem]">
+                <span className="text-sm font-medium">{t("cloudOmniroute")}</span>
+                <p
+                  className="text-xs text-text-muted break-words"
+                  data-testid="cloud-sync-destination"
+                >
+                  {translateOrFallback(
+                    "cloudUploadDestination",
+                    "Cloud sync destination (not local backups):"
+                  )}{" "}
+                  {/* break-all only for a URL: the "Not configured" fallback is words (review I-1). */}
+                  <span className={cloudBaseUrl ? "break-all" : undefined}>
+                    {cloudBaseUrl || tc("notConfigured")}
+                  </span>
+                </p>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border shrink-0 ${
+                  cloudEnabled
+                    ? "bg-success/10 border-success/30 text-success"
+                    : "bg-surface border-border/70 text-text-muted"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${cloudEnabled ? "bg-success animate-pulse" : "bg-text-muted"}`}
+                />
+                {cloudEnabled ? tc("active") : tc("disabled")}
+              </span>
+              {cloudEnabled ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  icon="cloud_off"
+                  onClick={() => handleCloudToggle(false)}
+                  disabled={cloudSyncing}
+                  className="shrink-0 border-error/30 text-error hover:bg-error/10"
+                >
+                  {t("disableCloud")}
+                </Button>
+              ) : cloudConfigured ? (
+                <Button
+                  size="sm"
+                  variant="primary"
+                  icon="cloud_upload"
+                  onClick={() => handleCloudToggle(true)}
+                  disabled={cloudSyncing}
+                  className="shrink-0"
+                >
+                  {t("enableCloud")}
+                </Button>
+              ) : (
+                <span className="text-xs text-text-muted shrink-0 px-2 py-1 rounded border border-border/70 bg-surface">
+                  {tc("notConfigured")}
+                </span>
+              )}
+            </div>
+
+            {/* Cloudflare Quick Tunnel */}
+            {showCloudflaredTunnel && (
+              <div className="border-t border-border/30">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
+                  <Icon name="cloud_queue" size={18} className="text-warning" />
+                  <div className="flex-1 min-w-[10rem]">
+                    <span className="text-sm font-medium">
+                      {translateOrFallback("cloudflaredTitle", "Cloudflare Quick Tunnel")}
+                    </span>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    shape="pill"
+                    tone={cloudflaredPhaseMeta[cloudflaredPhase].tone}
+                    className="shrink-0"
+                  >
+                    {cloudflaredPhaseMeta[cloudflaredPhase].label}
+                  </Badge>
+                  {cloudflaredStatus?.supported !== false && (
+                    <Button
+                      size="sm"
+                      variant={cloudflaredStatus?.running ? "outline" : "primary"}
+                      icon={cloudflaredStatus?.running ? "cloud_off" : "cloud_upload"}
+                      loading={cloudflaredBusy}
+                      onClick={() => {
+                        void handleCloudflaredAction(
+                          cloudflaredStatus?.running ? "disable" : "enable"
+                        );
+                      }}
+                      className="shrink-0"
+                    >
+                      {cloudflaredActionLabel}
+                    </Button>
+                  )}
+                </div>
+                {cloudflaredNotice && (
+                  <Alert
+                    variant={
+                      cloudflaredNotice.type === "success"
+                        ? "success"
+                        : cloudflaredNotice.type === "info"
+                          ? "info"
+                          : "critical"
+                    }
+                    className="mb-2 ml-7"
+                    icon={
+                      <Icon
+                        name={
+                          cloudflaredNotice.type === "success"
+                            ? "check_circle"
+                            : cloudflaredNotice.type === "info"
+                              ? "info"
+                              : "error"
+                        }
+                        size={18}
+                      />
+                    }
+                    description={cloudflaredNotice.message}
+                    dismissLabel={tc("close")}
+                    onDismiss={() => setCloudflaredNotice(null)}
+                  />
+                )}
+                {cloudflaredStatus?.lastError && (
+                  <p className="mb-2 ml-7 text-xs text-error">
+                    {translateOrFallback("cloudflaredLastError", "Last error: {error}", {
+                      error: cloudflaredStatus.lastError,
+                    })}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Tailscale Funnel */}
+            {showTailscaleFunnel && (
+              <div className={showCloudflaredTunnel ? "border-t border-border/30" : ""}>
+                {/* #18071: the row is no longer `role="button"` (axe nested-interactive — it
+                  wrapped the copy/action Buttons). The keyboard and screen-reader control is the
+                  title button; a click anywhere else on the row still toggles for the mouse. */}
+                <div
+                  className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
+                  onClick={() => toggleTunnelRow("ts")}
+                >
+                  <div className="flex-1 min-w-[10rem]">
+                    <div className="flex items-baseline gap-1 flex-wrap">
                       <Button
                         variant="ghost"
                         size="sm"
+                        aria-expanded={expandedTunnel === "ts"}
+                        aria-controls="endpoint-tunnel-ts-details"
                         onClick={(e) => {
                           e.stopPropagation();
-                          void copy(tailscaleIpUrl, "tailscale_ip_inline");
+                          toggleTunnelRow("ts");
                         }}
-                        title={`${tc("copy")} ${tailscaleIpUrl}`}
-                        aria-label={`${tc("copy")} ${tailscaleIpUrl}`}
-                        className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
+                        className={TUNNEL_ROW_TOGGLE_CLASS}
                       >
-                        <code className="font-mono">
-                          {tailscaleIpUrl.replace(/^https?:\/\//, "")}
-                        </code>
-                        <Icon
-                          name={copied === "tailscale_ip_inline" ? "check" : "content_copy"}
-                          size={10}
-                          className="opacity-60"
-                        />
+                        <Icon name="vpn_lock" size={18} className="text-chart-3" />
+                        <span className="text-sm font-medium">
+                          {translateOrFallback("tailscaleTitle", "Tailscale Funnel")}
+                        </span>
                       </Button>
+                      {tailscaleIpUrl && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void copy(tailscaleIpUrl, "tailscale_ip_inline");
+                          }}
+                          title={`${tc("copy")} ${tailscaleIpUrl}`}
+                          aria-label={`${tc("copy")} ${tailscaleIpUrl}`}
+                          className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
+                        >
+                          <code className="font-mono">
+                            {tailscaleIpUrl.replace(/^https?:\/\//, "")}
+                          </code>
+                          <Icon
+                            name={copied === "tailscale_ip_inline" ? "check" : "content_copy"}
+                            size={10}
+                            className="opacity-60"
+                          />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    shape="pill"
+                    tone={tailscalePhaseMeta[tailscalePhase].tone}
+                    className="shrink-0"
+                  >
+                    {tailscalePhaseMeta[tailscalePhase].label}
+                  </Badge>
+                  {tailscaleStatus?.supported !== false && (
+                    <Button
+                      size="sm"
+                      variant={tailscaleStatus?.running ? "outline" : "primary"}
+                      icon={tailscaleStatus?.running ? "vpn_key_off" : "vpn_lock"}
+                      loading={tailscaleBusy}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (tailscaleStatus?.running) {
+                          void handleTailscaleDisable();
+                        } else if (tailscaleStatus?.installed) {
+                          void handleTailscaleEnable();
+                        } else {
+                          setShowTailscaleInstallModal(true);
+                        }
+                      }}
+                      className="shrink-0"
+                    >
+                      {tailscaleActionLabel}
+                    </Button>
+                  )}
+                  <Icon
+                    name="expand_more"
+                    size={18}
+                    className={cn(
+                      "text-text-muted shrink-0 transition-transform duration-200",
+                      expandedTunnel === "ts" && "rotate-180"
+                    )}
+                  />
+                </div>
+                {expandedTunnel === "ts" && (
+                  <div
+                    id="endpoint-tunnel-ts-details"
+                    className="pb-3 pl-7 pr-1 flex flex-col gap-2"
+                  >
+                    {tailscaleNotice && (
+                      <Alert
+                        variant={
+                          tailscaleNotice.type === "success"
+                            ? "success"
+                            : tailscaleNotice.type === "info"
+                              ? "info"
+                              : "critical"
+                        }
+                        icon={
+                          <Icon
+                            name={
+                              tailscaleNotice.type === "success"
+                                ? "check_circle"
+                                : tailscaleNotice.type === "info"
+                                  ? "info"
+                                  : "error"
+                            }
+                            size={18}
+                          />
+                        }
+                        description={tailscaleNotice.message}
+                        dismissLabel={tc("close")}
+                        onDismiss={() => setTailscaleNotice(null)}
+                      />
+                    )}
+                    <p className="text-xs text-text-muted">{tailscaleUrlNotice}</p>
+                    {tailscaleStatus?.phase === "needs_login" && (
+                      <p className="text-xs text-info">
+                        {translateOrFallback(
+                          "tailscaleNeedsLoginHint",
+                          "Authenticate this machine with Tailscale, then enable Funnel."
+                        )}
+                      </p>
+                    )}
+                    {tailscaleStatus?.installed && tailscaleStatus?.platform !== "win32" && (
+                      <div className="flex flex-col gap-1">
+                        <Input
+                          label={translateOrFallback(
+                            "tailscaleSudoLabel",
+                            "Sudo Password (required on macOS/Linux)"
+                          )}
+                          type="password"
+                          value={tailscalePassword}
+                          onChange={(event) => setTailscalePassword(event.target.value)}
+                          placeholder={translateOrFallback(
+                            "tailscaleSudoPlaceholder",
+                            "Optional sudo password"
+                          )}
+                          disabled={tailscaleBusy}
+                          className="font-mono text-sm"
+                        />
+                      </div>
+                    )}
+                    {tailscaleStatus?.binaryPath && (
+                      <p className="text-xs text-text-muted">
+                        {translateOrFallback("tailscaleBinaryPath", "Binary: {path}", {
+                          path: tailscaleStatus.binaryPath,
+                        })}
+                      </p>
+                    )}
+                    {tailscaleStatus?.lastError && (
+                      <p className="text-xs text-error">
+                        {translateOrFallback("tailscaleLastError", "Last error: {error}", {
+                          error: tailscaleStatus.lastError,
+                        })}
+                      </p>
                     )}
                   </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  shape="pill"
-                  tone={tailscalePhaseMeta[tailscalePhase].tone}
-                  className="shrink-0"
-                >
-                  {tailscalePhaseMeta[tailscalePhase].label}
-                </Badge>
-                {tailscaleStatus?.supported !== false && (
-                  <Button
-                    size="sm"
-                    variant={tailscaleStatus?.running ? "outline" : "primary"}
-                    icon={tailscaleStatus?.running ? "vpn_key_off" : "vpn_lock"}
-                    loading={tailscaleBusy}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (tailscaleStatus?.running) {
-                        void handleTailscaleDisable();
-                      } else if (tailscaleStatus?.installed) {
-                        void handleTailscaleEnable();
-                      } else {
-                        setShowTailscaleInstallModal(true);
-                      }
-                    }}
-                    className="shrink-0"
-                  >
-                    {tailscaleActionLabel}
-                  </Button>
                 )}
-                <Icon
-                  name="expand_more"
-                  size={18}
-                  className={cn(
-                    "text-text-muted shrink-0 transition-transform duration-200",
-                    expandedTunnel === "ts" && "rotate-180"
-                  )}
-                />
               </div>
-              {expandedTunnel === "ts" && (
-                <div id="endpoint-tunnel-ts-details" className="pb-3 pl-7 pr-1 flex flex-col gap-2">
-                  {tailscaleNotice && (
-                    <Alert
-                      variant={
-                        tailscaleNotice.type === "success"
-                          ? "success"
-                          : tailscaleNotice.type === "info"
-                            ? "info"
-                            : "critical"
-                      }
-                      icon={
-                        <Icon
-                          name={
-                            tailscaleNotice.type === "success"
-                              ? "check_circle"
-                              : tailscaleNotice.type === "info"
-                                ? "info"
-                                : "error"
-                          }
-                          size={18}
-                        />
-                      }
-                      description={tailscaleNotice.message}
-                      dismissLabel={tc("close")}
-                      onDismiss={() => setTailscaleNotice(null)}
-                    />
-                  )}
-                  <p className="text-xs text-text-muted">{tailscaleUrlNotice}</p>
-                  {tailscaleStatus?.phase === "needs_login" && (
-                    <p className="text-xs text-info">
-                      {translateOrFallback(
-                        "tailscaleNeedsLoginHint",
-                        "Authenticate this machine with Tailscale, then enable Funnel."
-                      )}
-                    </p>
-                  )}
-                  {tailscaleStatus?.installed && tailscaleStatus?.platform !== "win32" && (
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label={translateOrFallback(
-                          "tailscaleSudoLabel",
-                          "Sudo Password (required on macOS/Linux)"
-                        )}
-                        type="password"
-                        value={tailscalePassword}
-                        onChange={(event) => setTailscalePassword(event.target.value)}
-                        placeholder={translateOrFallback(
-                          "tailscaleSudoPlaceholder",
-                          "Optional sudo password"
-                        )}
-                        disabled={tailscaleBusy}
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  )}
-                  {tailscaleStatus?.binaryPath && (
-                    <p className="text-xs text-text-muted">
-                      {translateOrFallback("tailscaleBinaryPath", "Binary: {path}", {
-                        path: tailscaleStatus.binaryPath,
-                      })}
-                    </p>
-                  )}
-                  {tailscaleStatus?.lastError && (
-                    <p className="text-xs text-error">
-                      {translateOrFallback("tailscaleLastError", "Last error: {error}", {
-                        error: tailscaleStatus.lastError,
-                      })}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ngrok Tunnel */}
-          {showNgrokTunnel && (
-            <div
-              className={
-                showCloudflaredTunnel || showTailscaleFunnel ? "border-t border-border/30" : ""
-              }
-            >
-              <div
-                className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
-                onClick={() => toggleTunnelRow("ngrok")}
-              >
-                <div className="flex-1 min-w-[10rem]">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-expanded={expandedTunnel === "ngrok"}
-                    aria-controls="endpoint-tunnel-ngrok-details"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleTunnelRow("ngrok");
-                    }}
-                    className={TUNNEL_ROW_TOGGLE_CLASS}
-                  >
-                    <Icon name="public" size={18} className="text-chart-3" />
-                    <span className="text-sm font-medium">
-                      {translateOrFallback("ngrokTitle", "ngrok Tunnel")}
-                    </span>
-                  </Button>
-                </div>
-                <Badge
-                  variant="outline"
-                  shape="pill"
-                  tone={ngrokPhaseMeta[ngrokPhase].tone}
-                  className="shrink-0"
-                >
-                  {ngrokPhaseMeta[ngrokPhase].label}
-                </Badge>
-                {ngrokStatus?.supported !== false && (
-                  <Button
-                    size="sm"
-                    variant={ngrokStatus?.running ? "outline" : "primary"}
-                    icon={ngrokStatus?.running ? "public_off" : "public"}
-                    loading={ngrokBusy}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void handleNgrokAction(ngrokStatus?.running ? "disable" : "enable");
-                    }}
-                    className="shrink-0"
-                  >
-                    {ngrokActionLabel}
-                  </Button>
-                )}
-                <Icon
-                  name="expand_more"
-                  size={18}
-                  className={cn(
-                    "text-text-muted shrink-0 transition-transform duration-200",
-                    expandedTunnel === "ngrok" && "rotate-180"
-                  )}
-                />
-              </div>
-              {expandedTunnel === "ngrok" && (
-                <div
-                  id="endpoint-tunnel-ngrok-details"
-                  className="pb-3 pl-7 pr-1 flex flex-col gap-2"
-                >
-                  {ngrokNotice && (
-                    <Alert
-                      variant={
-                        ngrokNotice.type === "success"
-                          ? "success"
-                          : ngrokNotice.type === "info"
-                            ? "info"
-                            : "critical"
-                      }
-                      icon={
-                        <Icon
-                          name={
-                            ngrokNotice.type === "success"
-                              ? "check_circle"
-                              : ngrokNotice.type === "info"
-                                ? "info"
-                                : "error"
-                          }
-                          size={18}
-                        />
-                      }
-                      description={ngrokNotice.message}
-                      dismissLabel={tc("close")}
-                      onDismiss={() => setNgrokNotice(null)}
-                    />
-                  )}
-                  <p className="text-xs text-text-muted">{ngrokUrlNotice}</p>
-                  {ngrokStatus?.phase === "needs_auth" && (
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label={translateOrFallback(
-                          "ngrokAuthTokenLabel",
-                          "Authtoken (Required if NGROK_AUTHTOKEN not set in environment)"
-                        )}
-                        type="password"
-                        value={ngrokToken}
-                        onChange={(event) => setNgrokToken(event.target.value)}
-                        placeholder={translateOrFallback(
-                          "ngrokAuthTokenPlaceholder",
-                          "Enter your ngrok authtoken"
-                        )}
-                        disabled={ngrokBusy}
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  )}
-                  {ngrokStatus?.lastError && (
-                    <p className="text-xs text-error">
-                      {translateOrFallback("ngrokLastError", "Last error: {error}", {
-                        error: ngrokStatus.lastError,
-                      })}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Custom System Prompt */}
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-border gap-4 flex-wrap">
-          <div className="min-w-0 flex-1">
-            <p className="font-medium text-sm">{t("customSystemPromptTitle")}</p>
-            <p className="text-sm text-text-muted">{t("customSystemPromptDescription")}</p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            {customSystemPromptEnabled && (
-              <Input
-                type="text"
-                value={customSystemPrompt}
-                onChange={(e) => handleCustomSystemPromptChange(e.target.value)}
-                placeholder={t("customSystemPromptPlaceholder")}
-                className="w-64 text-xs"
-              />
             )}
-            <Toggle
-              checked={customSystemPromptEnabled}
-              onChange={handleCustomSystemPromptEnabledChange}
-              ariaLabel={t("customSystemPromptTitle")}
-              size="sm"
-            />
-          </div>
-        </div>
-      </Card>
 
-      <Card>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-lg font-semibold">{t("available")}</h2>
-            <p className="text-sm text-text-muted">
-              {modelsLoading
-                ? translateOrFallback("loadingModels", "Loading available models...")
-                : t("modelsAcrossEndpoints", {
-                    models: totalEndpointModelCount,
-                    endpoints: availableEndpointCount,
-                  })}
-            </p>
+            {/* ngrok Tunnel */}
+            {showNgrokTunnel && (
+              <div
+                className={
+                  showCloudflaredTunnel || showTailscaleFunnel ? "border-t border-border/30" : ""
+                }
+              >
+                <div
+                  className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
+                  onClick={() => toggleTunnelRow("ngrok")}
+                >
+                  <div className="flex-1 min-w-[10rem]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-expanded={expandedTunnel === "ngrok"}
+                      aria-controls="endpoint-tunnel-ngrok-details"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTunnelRow("ngrok");
+                      }}
+                      className={TUNNEL_ROW_TOGGLE_CLASS}
+                    >
+                      <Icon name="public" size={18} className="text-chart-3" />
+                      <span className="text-sm font-medium">
+                        {translateOrFallback("ngrokTitle", "ngrok Tunnel")}
+                      </span>
+                    </Button>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    shape="pill"
+                    tone={ngrokPhaseMeta[ngrokPhase].tone}
+                    className="shrink-0"
+                  >
+                    {ngrokPhaseMeta[ngrokPhase].label}
+                  </Badge>
+                  {ngrokStatus?.supported !== false && (
+                    <Button
+                      size="sm"
+                      variant={ngrokStatus?.running ? "outline" : "primary"}
+                      icon={ngrokStatus?.running ? "public_off" : "public"}
+                      loading={ngrokBusy}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleNgrokAction(ngrokStatus?.running ? "disable" : "enable");
+                      }}
+                      className="shrink-0"
+                    >
+                      {ngrokActionLabel}
+                    </Button>
+                  )}
+                  <Icon
+                    name="expand_more"
+                    size={18}
+                    className={cn(
+                      "text-text-muted shrink-0 transition-transform duration-200",
+                      expandedTunnel === "ngrok" && "rotate-180"
+                    )}
+                  />
+                </div>
+                {expandedTunnel === "ngrok" && (
+                  <div
+                    id="endpoint-tunnel-ngrok-details"
+                    className="pb-3 pl-7 pr-1 flex flex-col gap-2"
+                  >
+                    {ngrokNotice && (
+                      <Alert
+                        variant={
+                          ngrokNotice.type === "success"
+                            ? "success"
+                            : ngrokNotice.type === "info"
+                              ? "info"
+                              : "critical"
+                        }
+                        icon={
+                          <Icon
+                            name={
+                              ngrokNotice.type === "success"
+                                ? "check_circle"
+                                : ngrokNotice.type === "info"
+                                  ? "info"
+                                  : "error"
+                            }
+                            size={18}
+                          />
+                        }
+                        description={ngrokNotice.message}
+                        dismissLabel={tc("close")}
+                        onDismiss={() => setNgrokNotice(null)}
+                      />
+                    )}
+                    <p className="text-xs text-text-muted">{ngrokUrlNotice}</p>
+                    {ngrokStatus?.phase === "needs_auth" && (
+                      <div className="flex flex-col gap-1">
+                        <Input
+                          label={translateOrFallback(
+                            "ngrokAuthTokenLabel",
+                            "Authtoken (Required if NGROK_AUTHTOKEN not set in environment)"
+                          )}
+                          type="password"
+                          value={ngrokToken}
+                          onChange={(event) => setNgrokToken(event.target.value)}
+                          placeholder={translateOrFallback(
+                            "ngrokAuthTokenPlaceholder",
+                            "Enter your ngrok authtoken"
+                          )}
+                          disabled={ngrokBusy}
+                          className="font-mono text-sm"
+                        />
+                      </div>
+                    )}
+                    {ngrokStatus?.lastError && (
+                      <p className="text-xs text-error">
+                        {translateOrFallback("ngrokLastError", "Last error: {error}", {
+                          error: ngrokStatus.lastError,
+                        })}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Core APIs */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Icon name="hub" className="text-sm text-primary" />
-            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              {t("categoryCore")}
-            </h3>
-            <div className="flex-1 h-px bg-border/50" />
+          {/* Custom System Prompt */}
+          <div className="flex items-center justify-between pt-4 mt-4 border-t border-border gap-4 flex-wrap">
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm">{t("customSystemPromptTitle")}</p>
+              <p className="text-sm text-text-muted">{t("customSystemPromptDescription")}</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {customSystemPromptEnabled && (
+                <Input
+                  type="text"
+                  value={customSystemPrompt}
+                  onChange={(e) => handleCustomSystemPromptChange(e.target.value)}
+                  placeholder={t("customSystemPromptPlaceholder")}
+                  className="w-64 text-xs"
+                />
+              )}
+              <Toggle
+                checked={customSystemPromptEnabled}
+                onChange={handleCustomSystemPromptEnabledChange}
+                ariaLabel={t("customSystemPromptTitle")}
+                size="sm"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-            <EndpointCard
-              icon="chat"
-              iconColor="text-info"
-              iconBg="bg-info/10"
-              title={t("chatCompletions")}
-              path="/v1/chat/completions"
-              models={endpointData.chat}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="code"
-              iconColor="text-chart-3"
-              iconBg="bg-chart-3/10"
-              title={t("responses")}
-              path="/v1/responses"
-              models={endpointData.chat}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="text_fields"
-              iconColor="text-warning"
-              iconBg="bg-warning/10"
-              title={t("completionsLegacy")}
-              path="/v1/completions"
-              models={endpointData.chat}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="psychology"
-              iconColor="text-chart-3"
-              iconBg="bg-chart-3/10"
-              title={t("messagesApi")}
-              path="/v1/messages"
-              models={null}
-              badge="Anthropic"
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-            />
-          </div>
-        </div>
+        </Card>
 
-        {/* Media & Multi-Modal */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Icon name="perm_media" className="text-sm text-chart-3" />
-            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              {t("categoryMedia")}
-            </h3>
-            <div className="flex-1 h-px bg-border/50" />
+        <Card>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-semibold">{t("available")}</h2>
+              <p className="text-sm text-text-muted">
+                {modelsLoading
+                  ? translateOrFallback("loadingModels", "Loading available models...")
+                  : t("modelsAcrossEndpoints", {
+                      models: totalEndpointModelCount,
+                      endpoints: availableEndpointCount,
+                    })}
+              </p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-            <EndpointCard
-              icon="data_array"
-              iconColor="text-success"
-              iconBg="bg-success/10"
-              title={t("embeddings")}
-              path="/v1/embeddings"
-              models={endpointData.embeddings}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="image"
-              iconColor="text-chart-3"
-              iconBg="bg-chart-3/10"
-              title={t("imageGeneration")}
-              path="/v1/images/generations"
-              models={endpointData.images}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="edit_square"
-              iconColor="text-chart-3"
-              iconBg="bg-chart-3/10"
-              title={t("imageEdits")}
-              path="/v1/images/edits"
-              models={endpointData.images}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="mic"
-              iconColor="text-error"
-              iconBg="bg-error/10"
-              title={t("audioTranscription")}
-              path="/v1/audio/transcriptions"
-              models={endpointData.audioTranscription}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="record_voice_over"
-              iconColor="text-info"
-              iconBg="bg-info/10"
-              title={t("textToSpeech")}
-              path="/v1/audio/speech"
-              models={endpointData.audioSpeech}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="music_note"
-              iconColor="text-chart-3"
-              iconBg="bg-chart-3/10"
-              title={t("musicGeneration")}
-              path="/v1/music/generations"
-              models={endpointData.music}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="videocam"
-              iconColor="text-error"
-              iconBg="bg-error/10"
-              title={t("videoGeneration")}
-              path="/v1/videos/generations"
-              models={endpointData.video}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-          </div>
-        </div>
 
-        {/* Search & Discovery */}
-        {searchProviders.length > 0 && (
+          {/* Core APIs */}
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
-              <Icon name="travel_explore" className="text-sm text-info" />
+              <Icon name="hub" className="text-sm text-primary" />
               <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("categorySearch")}
+                {t("categoryCore")}
               </h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
               <EndpointCard
-                icon="search"
+                icon="chat"
                 iconColor="text-info"
                 iconBg="bg-info/10"
-                title={t("webSearch")}
-                path="/v1/search"
-                models={searchProviders.map((p) => ({ id: p.id, owned_by: p.id, type: "search" }))}
+                title={t("chatCompletions")}
+                path="/v1/chat/completions"
+                models={endpointData.chat}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="code"
+                iconColor="text-chart-3"
+                iconBg="bg-chart-3/10"
+                title={t("responses")}
+                path="/v1/responses"
+                models={endpointData.chat}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="text_fields"
+                iconColor="text-warning"
+                iconBg="bg-warning/10"
+                title={t("completionsLegacy")}
+                path="/v1/completions"
+                models={endpointData.chat}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="psychology"
+                iconColor="text-chart-3"
+                iconBg="bg-chart-3/10"
+                title={t("messagesApi")}
+                path="/v1/messages"
+                models={null}
+                badge="Anthropic"
                 copy={copy}
                 copied={copied}
                 baseUrl={currentEndpoint}
               />
             </div>
           </div>
-        )}
 
-        {/* Utility & Management */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Icon name="build" className="text-sm text-warning" />
-            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              {t("categoryUtility")}
-            </h3>
-            <div className="flex-1 h-px bg-border/50" />
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-            <EndpointCard
-              icon="sort"
-              iconColor="text-warning"
-              iconBg="bg-warning/10"
-              title={t("rerank")}
-              path="/v1/rerank"
-              models={endpointData.rerank}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="shield"
-              iconColor="text-warning"
-              iconBg="bg-warning/10"
-              title={t("moderations")}
-              path="/v1/moderations"
-              models={endpointData.moderation}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-              modelsLoading={modelsLoading}
-            />
-            <EndpointCard
-              icon="view_list"
-              iconColor="text-chart-4"
-              iconBg="bg-chart-4/10"
-              title={t("batchApi")}
-              path="/v1/batches"
-              models={null}
-              badge="OpenAI"
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-            />
-            <EndpointCard
-              icon="folder"
-              iconColor="text-warning"
-              iconBg="bg-warning/10"
-              title={t("filesApi")}
-              path="/v1/files"
-              models={null}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-            />
-            <EndpointCard
-              icon="list"
-              iconColor="text-chart-4"
-              iconBg="bg-chart-4/10"
-              title={t("listModels")}
-              path="/v1/models"
-              models={allModels}
-              modelsLoading={modelsLoading}
-              copy={copy}
-              copied={copied}
-              baseUrl={currentEndpoint}
-            />
+          {/* Media & Multi-Modal */}
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Icon name="perm_media" className="text-sm text-chart-3" />
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                {t("categoryMedia")}
+              </h3>
+              <div className="flex-1 h-px bg-border/50" />
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              <EndpointCard
+                icon="data_array"
+                iconColor="text-success"
+                iconBg="bg-success/10"
+                title={t("embeddings")}
+                path="/v1/embeddings"
+                models={endpointData.embeddings}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="image"
+                iconColor="text-chart-3"
+                iconBg="bg-chart-3/10"
+                title={t("imageGeneration")}
+                path="/v1/images/generations"
+                models={endpointData.images}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="edit_square"
+                iconColor="text-chart-3"
+                iconBg="bg-chart-3/10"
+                title={t("imageEdits")}
+                path="/v1/images/edits"
+                models={endpointData.images}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="mic"
+                iconColor="text-error"
+                iconBg="bg-error/10"
+                title={t("audioTranscription")}
+                path="/v1/audio/transcriptions"
+                models={endpointData.audioTranscription}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="record_voice_over"
+                iconColor="text-info"
+                iconBg="bg-info/10"
+                title={t("textToSpeech")}
+                path="/v1/audio/speech"
+                models={endpointData.audioSpeech}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="music_note"
+                iconColor="text-chart-3"
+                iconBg="bg-chart-3/10"
+                title={t("musicGeneration")}
+                path="/v1/music/generations"
+                models={endpointData.music}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="videocam"
+                iconColor="text-error"
+                iconBg="bg-error/10"
+                title={t("videoGeneration")}
+                path="/v1/videos/generations"
+                models={endpointData.video}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+            </div>
           </div>
 
-          <VscodeTokenAliasCard className="mt-4" />
-        </div>
-      </Card>
+          {/* Search & Discovery */}
+          {searchProviders.length > 0 && (
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Icon name="travel_explore" className="text-sm text-info" />
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  {t("categorySearch")}
+                </h3>
+                <div className="flex-1 h-px bg-border/50" />
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                <EndpointCard
+                  icon="search"
+                  iconColor="text-info"
+                  iconBg="bg-info/10"
+                  title={t("webSearch")}
+                  path="/v1/search"
+                  models={searchProviders.map((p) => ({
+                    id: p.id,
+                    owned_by: p.id,
+                    type: "search",
+                  }))}
+                  copy={copy}
+                  copied={copied}
+                  baseUrl={currentEndpoint}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Utility & Management */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Icon name="build" className="text-sm text-warning" />
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                {t("categoryUtility")}
+              </h3>
+              <div className="flex-1 h-px bg-border/50" />
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              <EndpointCard
+                icon="sort"
+                iconColor="text-warning"
+                iconBg="bg-warning/10"
+                title={t("rerank")}
+                path="/v1/rerank"
+                models={endpointData.rerank}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="shield"
+                iconColor="text-warning"
+                iconBg="bg-warning/10"
+                title={t("moderations")}
+                path="/v1/moderations"
+                models={endpointData.moderation}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="view_list"
+                iconColor="text-chart-4"
+                iconBg="bg-chart-4/10"
+                title={t("batchApi")}
+                path="/v1/batches"
+                models={null}
+                badge="OpenAI"
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+              />
+              <EndpointCard
+                icon="folder"
+                iconColor="text-warning"
+                iconBg="bg-warning/10"
+                title={t("filesApi")}
+                path="/v1/files"
+                models={null}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+              />
+              <EndpointCard
+                icon="list"
+                iconColor="text-chart-4"
+                iconBg="bg-chart-4/10"
+                title={t("listModels")}
+                path="/v1/models"
+                models={allModels}
+                modelsLoading={modelsLoading}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+              />
+            </div>
+
+            <VscodeTokenAliasCard className="mt-4" />
+          </div>
+        </Card>
+      </SegmentedPanel>
 
       {/* Cloud Enable Modal */}
       <Modal
@@ -2392,7 +2410,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           onClose={() => setSelectedProvider(null)}
         />
       )}
-    </div>
+    </SegmentedTabs>
   );
 }
 

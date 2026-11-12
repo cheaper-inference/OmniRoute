@@ -26,8 +26,9 @@ vi.mock("next-intl", () => ({
   },
 }));
 
+const navigation = vi.hoisted(() => ({ pathname: "/dashboard/analytics" }));
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/dashboard/analytics",
+  usePathname: () => navigation.pathname,
 }));
 
 const cleanupCallbacks: Array<() => void> = [];
@@ -68,6 +69,7 @@ describe("Sidebar pinned items shortcut (#pinned-items)", () => {
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
     localStorage.clear();
+    navigation.pathname = "/dashboard/analytics";
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string) => {
@@ -252,5 +254,108 @@ describe("Sidebar pinned items shortcut (#pinned-items)", () => {
     const headerPinIcon = pinnedHeader?.querySelector("svg:not(:last-child)");
     expect(headerPinIcon).toBeNull();
     expect(pinnedHeader?.querySelectorAll("svg")).toHaveLength(1);
+  });
+
+  it.each([false, true])(
+    "keeps pinned Feature Flags reachable when hidden by a preset (collapsed: %s)",
+    async (collapsed) => {
+      navigation.pathname = "/dashboard/settings/feature-flags";
+      localStorage.setItem("sidebar-pinned-items", JSON.stringify(["settings-feature-flags"]));
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () =>
+          jsonResponse({
+            hiddenSidebarItems: ["settings-feature-flags"],
+          })
+        )
+      );
+      const Harness = await loadHarness();
+      const container = makeContainer();
+      root = createRoot(container);
+      await act(async () => {
+        root!.render(<Harness collapsed={collapsed} />);
+      });
+
+      const links = container.querySelectorAll('a[href="/dashboard/settings/feature-flags"]');
+      expect(links).toHaveLength(1);
+      expect(links[0].getAttribute("aria-current")).toBe("page");
+      if (collapsed) return;
+      expect(links[0].closest("[data-slot=sidebar-group]")?.textContent).toContain("Pinned");
+
+      // Removing the shortcut must not re-enable the entry hidden by the preset.
+      const unpin = links[0].parentElement!.querySelector<HTMLButtonElement>(
+        'button[title="Unpin item"]'
+      );
+      expect(unpin).not.toBeNull();
+      await act(async () => {
+        unpin!.click();
+      });
+      expect(
+        container.querySelectorAll('a[href="/dashboard/settings/feature-flags"]')
+      ).toHaveLength(0);
+      expect(JSON.parse(localStorage.getItem("sidebar-pinned-items") || "[]")).toEqual([]);
+    }
+  );
+
+  it("pins Feature Flags without navigating and keeps the shortcut after settings change", async () => {
+    const Harness = await loadHarness();
+    const container = makeContainer();
+    root = createRoot(container);
+    await act(async () => {
+      root!.render(<Harness />);
+    });
+    const settingsHeader = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button[aria-expanded]")
+    ).find((el) => el.textContent?.includes("Configuration"));
+    expect(settingsHeader).toBeDefined();
+    await act(async () => {
+      settingsHeader!.click();
+    });
+    const link = container.querySelector('a[href="/dashboard/settings/feature-flags"]');
+    expect(link).not.toBeNull();
+    const pin = link!.parentElement!.querySelector<HTMLButtonElement>('button[title="Pin item"]');
+    expect(pin).not.toBeNull();
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    await act(async () => {
+      pin!.dispatchEvent(click);
+    });
+    expect(click.defaultPrevented).toBe(true);
+    expect(JSON.parse(localStorage.getItem("sidebar-pinned-items") || "[]")).toEqual([
+      "settings-feature-flags",
+    ]);
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent("omniroute:settings-updated", {
+          detail: {
+            hiddenSidebarItems: ["settings-feature-flags"],
+          },
+        })
+      );
+    });
+    expect(container.querySelectorAll('a[href="/dashboard/settings/feature-flags"]')).toHaveLength(
+      1
+    );
+  });
+
+  it("does not restore gated or unavailable runtime links from stored pins", async () => {
+    localStorage.setItem(
+      "sidebar-pinned-items",
+      JSON.stringify(["radar", "radar-admin", "removed-item"])
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse({ radarEnabled: false }))
+    );
+    const Harness = await loadHarness();
+    const container = makeContainer();
+    root = createRoot(container);
+    await act(async () => {
+      root!.render(<Harness />);
+    });
+    expect(container.querySelector('a[href="/dashboard/radar"]')).toBeNull();
+    expect(
+      Array.from(container.querySelectorAll("span")).map((el) => el.textContent)
+    ).not.toContain("Pinned");
   });
 });

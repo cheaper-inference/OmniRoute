@@ -49,13 +49,28 @@ export function isDiscoveryImportedCustomSource(source: unknown): boolean {
  * static registry for dashboard / `/v1/models` / Test All listing. Static rows
  * remain offline fallback only when synced is empty.
  *
- * Cursor, Codex, and CodeBuddy CN inventories are account-specific.
+ * Cursor, Codex, CodeBuddy CN, and ChatGPT inventories are account-specific.
  * Partial-discovery providers retain coverage-style preservation (e.g.
  * command-code uncovered static ids).
  */
 export function providerUsesExclusiveSyncedListing(providerId: string): boolean {
   const id = providerId.trim().toLowerCase();
-  return id === "cursor" || id === "cu" || id === "codex" || id === "cx" || id === "codebuddy-cn";
+  return (
+    providerIsCursor(id) ||
+    id === "codex" ||
+    id === "cx" ||
+    id === "codebuddy-cn" ||
+    id === "chatgpt"
+  );
+}
+
+/**
+ * Cursor-specific listing behavior (`owned_by: "cursor"` + synthetic `auto*`
+ * router rows). Exclusive-listing providers other than Cursor must not inherit it.
+ */
+export function providerIsCursor(providerId: string): boolean {
+  const id = providerId.trim().toLowerCase();
+  return id === "cursor" || id === "cu";
 }
 
 /**
