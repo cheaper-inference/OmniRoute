@@ -7,6 +7,7 @@ import {
   invalidateProxyHealth,
   __setProxyHealthTcpCheckForTesting,
 } from "../../src/lib/proxyHealth.ts";
+import type { ProxyProbeVerdict } from "../../src/lib/proxyHealth.ts";
 import { runWithProxyContext, proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
 
 test("T14: isProxyReachable caches unreachable proxy result", async () => {
