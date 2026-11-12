@@ -15,7 +15,7 @@
 
 **உருவாக்கியவர் [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — குறியீடு எழுதுவதை ஒருபோதும் நிறுத்தாதீர்கள். ஒவ்வொரு AI கருவியும் → 388 வழங்குநர்கள் — 150+ இலவசம் — ஒரே endpoint வழியாக. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ஆகியவற்றை auto-fallback உடன் இலவச Claude / GPT / Gemini ஆக மாற்றுகிறது. RTK + Caveman அடுக்கப்பட்ட சுருக்கம் 15–95% டோக்கன்களை (~89% சராசரி) சேமிக்கிறது — வரம்புகளை ஒருபோதும் எட்டாதீர்கள். 388 AI வழங்குநர்கள் · 150+ இலவச அடுக்குகள் · மாதத்திற்கு ~1.62B இலவச டோக்கன்கள் · 20 routing உத்திகள் · தொடங்க $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — குறியீடு எழுதுவதை ஒருபோதும் நிறுத்தாதீர்கள். ஒவ்வொரு AI கருவியும் → 389 வழங்குநர்கள் — 150+ இலவசம் — ஒரே endpoint வழியாக. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ஆகியவற்றை auto-fallback உடன் இலவச Claude / GPT / Gemini ஆக மாற்றுகிறது. RTK + Caveman அடுக்கப்பட்ட சுருக்கம் 15–95% டோக்கன்களை (~89% சராசரி) சேமிக்கிறது — வரம்புகளை ஒருபோதும் எட்டாதீர்கள். 389 AI வழங்குநர்கள் · 150+ இலவச அடுக்குகள் · மாதத்திற்கு ~1.62B இலவச டோக்கன்கள் · 20 routing உத்திகள் · தொடங்க $0."/>
 
 </div>
 
@@ -73,7 +73,7 @@ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவ�
 
 |                                       |         v3.8.50          | **v3.8.51** |       `v3.8.54+`       |
 | ------------------------------------- | :----------------------: | :---------: | :--------------------: |
-| 🌐 வழங்குநர்கள்                       |           352            |   **358**   |          388           |
+| 🌐 வழங்குநர்கள்                       |           352            |   **358**   |          389           |
 | 🧠 தனித்துவமான உரையாடல் மாதிரி ID-கள் |           1320           |  **1374**   |          1491          |
 | 🖼️ பல்முறைமைப் பாலம்                  | 🆕 பார்வை + ஒலி + காணொளி |      ✓      |           ✓            |
 | 📡 ரேடார் இலவசப் பட்டியல்             |    🆕 விருப்பத்தேர்வு    |      ✓      |           ✓            |
@@ -114,7 +114,7 @@ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவ�
   <tr>
     <td align="right"><b>⚙️ அம்சங்கள்</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 சேர்க்கைகள்</a></td>
-    <td align="center"><a href="#-388-ai-providers--153-catalog-marked-free">🌐 வழங்குநர்கள்</a></td>
+    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 வழங்குநர்கள்</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="வாக்குறுதி — ஒரே endpoint மற்றும் 388 வழங்குநர்கள். மற்றொரு ஆரோக்கியமான இலக்கு கிடைக்கும் வரை தானியங்கி fallback வழிமாற்றத்தைத் தொடரச் செய்கிறது. ஆறு தூண்கள்: 388 வழங்குநர்கள் முழுவதும் நம்பகமான fallback · தகுதியான பணிச்சுமைகளில் token சேமிப்பு 95% வரை · 150+ இலவச tiers மற்றும் தொடர்ந்து கிடைக்கும் அல்லது keyless ஆக இலவசமாக இருக்கும் 52 வழங்குநர்களுடன் தொடங்க $0 · ஒரே config மூலம் 39 CLI/agent integrations · /v1-ல் OpenAI, Claude, Gemini மற்றும் Responses API compatibility · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals மற்றும் 7,800+ கண்காணிக்கப்படும் test files முழுவதும் 56,000+ static test declarations உள்ளிட்ட production controls."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="வாக்குறுதி — ஒரே endpoint மற்றும் 389 வழங்குநர்கள். மற்றொரு ஆரோக்கியமான இலக்கு கிடைக்கும் வரை தானியங்கி fallback வழிமாற்றத்தைத் தொடரச் செய்கிறது. ஆறு தூண்கள்: 389 வழங்குநர்கள் முழுவதும் நம்பகமான fallback · தகுதியான பணிச்சுமைகளில் token சேமிப்பு 95% வரை · 150+ இலவச tiers மற்றும் தொடர்ந்து கிடைக்கும் அல்லது keyless ஆக இலவசமாக இருக்கும் 52 வழங்குநர்களுடன் தொடங்க $0 · ஒரே config மூலம் 39 CLI/agent integrations · /v1-ல் OpenAI, Claude, Gemini மற்றும் Responses API compatibility · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals மற்றும் 7,800+ கண்காணிக்கப்படும் test files முழுவதும் 56,000+ static test declarations உள்ளிட்ட production controls."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ combo எதையும் உருவாக்கத் தேவையில
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-ஐ தனித்துவமாக்குவது என்ன — 13 திறன்களில் 9router, OpenRouter, CLIProxyAPI மற்றும் LiteLLM உடனான தேதியிடப்பட்ட அம்ச ஒப்பீடு. OmniRoute: 388 வழங்குநர்கள், உள்ளமைக்கப்பட்ட 150+ இலவச அடுக்குகள், 20 வழிமுறை உத்திகள், 12-எஞ்சின் டோக்கன் சுருக்கம், 110 கருவிகளுடன் உள்ளமைக்கப்பட்ட MCP சேவையகம், A2A முகவர் நெறிமுறை, நிலையான நினைவகம், பாதுகாப்புக் கட்டுப்பாடுகள், கிளவுட் முகவர்கள், TLS கைரேகை மறைவு, Desktop/Termux/PWA மற்றும் 67 i18n UI மொழி வட்டாரங்கள். OmniRoute MIT உரிமம் பெற்றது மற்றும் உங்கள் சொந்த சேவையகத்தில் ஹோஸ்ட் செய்யலாம். போட்டியாளர்களின் திறன்களும் எண்ணிக்கைகளும் மாறக்கூடும்; இணைக்கப்பட்ட முறையியலைப் பார்க்கவும்."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-ஐ தனித்துவமாக்குவது என்ன — 13 திறன்களில் 9router, OpenRouter, CLIProxyAPI மற்றும் LiteLLM உடனான தேதியிடப்பட்ட அம்ச ஒப்பீடு. OmniRoute: 389 வழங்குநர்கள், உள்ளமைக்கப்பட்ட 150+ இலவச அடுக்குகள், 20 வழிமுறை உத்திகள், 12-எஞ்சின் டோக்கன் சுருக்கம், 110 கருவிகளுடன் உள்ளமைக்கப்பட்ட MCP சேவையகம், A2A முகவர் நெறிமுறை, நிலையான நினைவகம், பாதுகாப்புக் கட்டுப்பாடுகள், கிளவுட் முகவர்கள், TLS கைரேகை மறைவு, Desktop/Termux/PWA மற்றும் 67 i18n UI மொழி வட்டாரங்கள். OmniRoute MIT உரிமம் பெற்றது மற்றும் உங்கள் சொந்த சேவையகத்தில் ஹோஸ்ட் செய்யலாம். போட்டியாளர்களின் திறன்களும் எண்ணிக்கைகளும் மாறக்கூடும்; இணைக்கப்பட்ட முறையியலைப் பார்க்கவும்."/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI மற்றும் LiteLLM உடனான முழு முறையியல் &amp; ஒவ்வொரு அம்சத்தின் விவரங்கள் → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -613,7 +613,7 @@ Radar-ஐப் பயன்படுத்தத் தனியாகச் �
 - **🖼️ புதிய endpoints** — `/v1/ocr` (Mistral OCR) மற்றும் `/v1/audio/translations` (Whisper-style) ஆகியவை media surface-ஐ நிறைவு செய்கின்றன. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio generation** — media-க்கான ஒரே API: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, மேலும் ElevenLabs போன்ற speech providers. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & ops** — reverse-proxy `basePath`, browser-language auto-detect, ஒவ்வொரு key-க்குமான device tracking, root-less MITM trust, zh-TW localization. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 மேலும் providers & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login உடன் Grok Build (xAI), first-class card கொண்ட Ollama, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… மேலும் புதுப்பிக்கப்பட்ட **388-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 மேலும் providers & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login உடன் Grok Build (xAI), first-class card கொண்ட Ollama, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… மேலும் புதுப்பிக்கப்பட்ட **389-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing transparency** — ஒவ்வொரு response-உம் அதை வழங்கிய strategy/provider/latency-ஐ குறிப்பிடும் `X-OmniRoute-Decision` header-ஐ கொண்டுள்ளது; புதிய `cache-optimized` combo strategy மற்றும் Auto-Combo `cacheAffinity` factor ஆகியவை repeat requests-ஐ cached prefix-ஐ வைத்திருக்கும் connection-க்கு மீண்டும் வழிமாற்றுகின்றன; மேலும் read-only `/v1/auto-combo/{channel}/candidates` endpoint, `auto/*` channel-ன் live candidate pool-ஐ வெளிப்படுத்துகிறது. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ உள்ளமை செயல்திறன் & உள்கட்டமைப்பு** — ஒரே கிளிக்கில் உள்ளமை Redis, Cloudflare Workers / Deno Deploy ரிலே டிப்ளாயர்கள், கண்காணிக்கப்படும் உட்பொதிக்கப்பட்ட சேவைகளாக Bifrost & Mux. → [உட்பொதிக்கப்பட்ட சேவைகள்](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 பெட்டியிலேயே கிடைப்பவை** — செருகுநிரல் கட்டமைப்பு + சந்தை, Omni/Agent/GitHub திறன்கள் கட்டமைப்புகள், Obsidian vault ஒருங்கிணைப்பு (22 MCP கருவிகள்), OpenAI-இணக்கமான Batch & Files API-கள், பொருள் சார்ந்த பதில் கேச், லீடர்போர்டுகளுடன் கூடிய கேமிஃபிகேஷன், ACP ஏஜென்ட் கண்டறிதல் (15 உள்ளமை ஏஜென்ட்கள்), BigQuery-க்கு திட்டமிடப்பட்ட பதிவு ஏற்றுமதி, `auto/chaos` இணை பல-மாதிரி fan-out, Telegram bot பாலம், பயன்பாட்டிலேயே உள்ள பதிப்பு மேலாளர் மற்றும் LMArena-ELO இலவச வழங்குநர் தரவரிசைகள். → [ஆவணங்கள்](docs/README.md)
@@ -696,11 +696,11 @@ omniroute configure codex          # இதுவும்: claude opencode qwen
 
 <div align="center">
 
-## 🌐 388 AI வழங்குநர்கள் — 153 பட்டியலில் இலவசமாகக் குறிக்கப்பட்டவை
+## 🌐 389 AI வழங்குநர்கள் — 153 பட்டியலில் இலவசமாகக் குறிக்கப்பட்டவை
 
 </div>
 
-> **388 பதிவு செய்யப்பட்ட வழங்குநர்கள்**, canonical chat, media, search, local, cloud-agent மற்றும் system தொகுப்புகள் முழுவதும் உள்ளனர்; இதில் **153 வழங்குநர்கள் `hasFree: true` கண்டறிதல் metadata-வை கொண்டுள்ளனர்**. Chat model registry-யில் **239 வழங்குநர்கள் / 3,059 தனித்துவமான provider-model ஜோடிகள் / 1,475 மூல model IDs** உள்ளன; தனி இலவச-பட்ஜெட் பட்டியலில் **471 ஒவ்வொரு-model வரிசைகள்**, **34 தொடர்ச்சியான pool-கள்** மற்றும் **52 தொடர்ச்சியான/keyless எப்போதும்-இலவச வழங்குநர்கள்** உள்ளனர். இவை வடிவமைப்பின் அடிப்படையில் வெவ்வேறு denominator-கள்; வரையறைகளும் pool-deduped கணக்கீடுகளும் [வழங்குநர் குறிப்பு](docs/reference/PROVIDER_REFERENCE.md) மற்றும் [இலவச அடுக்குகள்](docs/reference/FREE_TIERS.md) ஆகியவற்றில் உள்ளன.
+> **389 பதிவு செய்யப்பட்ட வழங்குநர்கள்**, canonical chat, media, search, local, cloud-agent மற்றும் system தொகுப்புகள் முழுவதும் உள்ளனர்; இதில் **153 வழங்குநர்கள் `hasFree: true` கண்டறிதல் metadata-வை கொண்டுள்ளனர்**. Chat model registry-யில் **239 வழங்குநர்கள் / 3,059 தனித்துவமான provider-model ஜோடிகள் / 1,475 மூல model IDs** உள்ளன; தனி இலவச-பட்ஜெட் பட்டியலில் **471 ஒவ்வொரு-model வரிசைகள்**, **34 தொடர்ச்சியான pool-கள்** மற்றும் **52 தொடர்ச்சியான/keyless எப்போதும்-இலவச வழங்குநர்கள்** உள்ளனர். இவை வடிவமைப்பின் அடிப்படையில் வெவ்வேறு denominator-கள்; வரையறைகளும் pool-deduped கணக்கீடுகளும் [வழங்குநர் குறிப்பு](docs/reference/PROVIDER_REFERENCE.md) மற்றும் [இலவச அடுக்குகள்](docs/reference/FREE_TIERS.md) ஆகியவற்றில் உள்ளன.
 
 <div align="center">
 
@@ -1302,7 +1302,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
   <tr><td nowrap><b>இயக்கநேரம்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் core-ல் பூஜ்ய <code>any</code>)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 233 migrations</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 234 migrations</td></tr>
   <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>ஸ்கீமாக்கள்</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

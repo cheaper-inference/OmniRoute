@@ -214,3 +214,82 @@ test("maxContextWindow rejecting every target returns a 404 context_requirements
   assert.equal(body.diagnostics?.terminalReason, "context_requirements_exhausted");
   assert.equal(body.diagnostics?.excluded?.length, 2);
 });
+
+test("single-account prompt-cache expansion remains account-bound even without a reorder", async () => {
+  const providersDb = await import("../../src/lib/db/providers.ts");
+  const account = await providersDb.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    name: "affinity-single-account",
+    email: "affinity-test@example.invalid",
+    apiKey: null,
+    accessToken: "test-access-token",
+    refreshToken: "test-refresh-token",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { workspacePlanType: "plus" },
+  });
+  const result = await resolveComboTargetPipeline(
+    deps({
+      combo: {
+        id: "affinity-one-eligible-account",
+        name: "affinity-one-eligible-account",
+        models: ["codex/gpt-5.5"],
+        config: {},
+      },
+      body: {
+        prompt_cache_key: "same-prefix-one-account",
+        messages: [{ role: "user", content: "test cache routing" }],
+      },
+      settings: { promptCacheAffinityEnabled: true },
+      apiKeyAllowedConnections: [account.id],
+    })
+  );
+  assert.ok(!("earlyResponse" in result));
+  if ("earlyResponse" in result) return;
+  assert.equal(result.orderedTargets.length, 1);
+  assert.equal(result.orderedTargets[0]?.connectionId, account.id);
+  assert.match(result.orderedTargets[0]?.executionKey ?? "", /@/);
+});
+
+test("weighted prompt-cache expansion maps an account-bound target to its sticky step", async () => {
+  const providersDb = await import("../../src/lib/db/providers.ts");
+  const account = await providersDb.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    name: "weighted-affinity-single-account",
+    email: "weighted-affinity@example.invalid",
+    apiKey: null,
+    accessToken: "test-weighted-access-token",
+    refreshToken: "test-weighted-refresh-token",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { workspacePlanType: "plus" },
+  });
+  const result = await resolveComboTargetPipeline(
+    deps({
+      strategy: "weighted",
+      combo: {
+        id: "weighted-affinity",
+        name: "weighted-affinity",
+        strategy: "weighted",
+        models: [{ model: "codex/gpt-5.5", weight: 1 }],
+        config: {},
+      },
+      body: {
+        prompt_cache_key: "weighted-affinity-prefix",
+        messages: [{ role: "user", content: "cache-bound weighted response" }],
+      },
+      settings: { promptCacheAffinityEnabled: true },
+      apiKeyAllowedConnections: [account.id],
+    })
+  );
+  assert.ok(!("earlyResponse" in result));
+  if ("earlyResponse" in result) return;
+  assert.equal(result.orderedTargets.length, 1);
+  const target = result.orderedTargets[0]!;
+  assert.equal(target.connectionId, account.id);
+  const mappedStep = result.getWeightedStepKeyForTarget(target);
+  assert.ok(mappedStep, "successful expanded target must map to its weighted sticky step");
+  assert.ok(target.executionKey.startsWith(mappedStep + "@"));
+});

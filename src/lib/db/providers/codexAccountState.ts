@@ -20,7 +20,7 @@ type CodexScopedQuotaPatch = {
   quotaState?: JsonRecord;
   exhaustedWindow?: "5h" | "7d" | null;
   rateLimitedUntil?: string | null;
-  rateLimitSource?: "fallback" | "quota_reset";
+  rateLimitSource?: "fallback" | "quota_reset" | "quota_preflight";
 };
 
 const CODEX_CHILD_COOLDOWN_KEYS = [
@@ -179,11 +179,14 @@ export async function updateCodexScopedQuotaState(
           typeof scopeCooldowns[scope] === "string"
             ? new Date(scopeCooldowns[scope] as string).getTime()
             : NaN;
+        // A local text quota preflight must not downgrade an existing upstream
+        // or legacy cooldown; only another preflight may replace a preflight.
         const existingIsAuthoritative =
-          sourceByScope[scope] === "quota_reset" &&
-          patch.rateLimitSource !== "quota_reset" &&
           Number.isFinite(existingCooldownMs) &&
-          existingCooldownMs > Date.now();
+          existingCooldownMs > Date.now() &&
+          ((sourceByScope[scope] === "quota_reset" && patch.rateLimitSource !== "quota_reset") ||
+            (patch.rateLimitSource === "quota_preflight" &&
+              sourceByScope[scope] !== "quota_preflight"));
         scopeCooldowns[scope] = existingIsAuthoritative
           ? scopeCooldowns[scope]
           : patch.rateLimitedUntil;
@@ -318,10 +321,11 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
 export async function updateCodexScopeCooldown(
   id: string,
   scope: "codex" | "spark",
-  rateLimitedUntil: string
+  rateLimitedUntil: string,
+  source: "fallback" | "quota_preflight" = "fallback"
 ): Promise<JsonRecord | null> {
   return updateCodexScopedQuotaState(id, scope, {
     rateLimitedUntil,
-    rateLimitSource: "fallback",
+    rateLimitSource: source,
   });
 }

@@ -129,6 +129,7 @@ import {
   isLocalOpenAIStyleProvider,
   mergeLocalCatalogModels,
   mergeSpecialtyCatalogIntoLiveModels,
+  enrichLiveModelsWithDiscoveredCapabilities,
   buildOptionalBearerHeaders,
   buildNamedOpenAiStyleHeaders,
   enrichOllamaLocalModels,
@@ -499,7 +500,13 @@ export async function GET(
         // OpenRouter's embeddingRegistry catalog) into the live-discovery
         // response; the live /v1/models endpoint only lists chat models, and
         // the specialty catalog otherwise only reached local_catalog fallback.
-        const mergedModels = mergeSpecialtyCatalogIntoLiveModels(models, provider);
+        // #19337 — keep the raw live cards (and every model the upstream listed)
+        // but carry the normalized capability fields so imports keep endpoints,
+        // provenance, vision and token limits.
+        const mergedModels = mergeSpecialtyCatalogIntoLiveModels(
+          enrichLiveModelsWithDiscoveredCapabilities(models, discoveredModels),
+          provider
+        );
         return buildResponse({
           provider,
           connectionId,

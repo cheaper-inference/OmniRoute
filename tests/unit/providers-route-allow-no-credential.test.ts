@@ -9,6 +9,9 @@ import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-providers-route-nocred-"));
 process.env.DATA_DIR = DATA_DIR;
