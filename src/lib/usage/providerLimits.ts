@@ -1010,6 +1010,11 @@ export async function getSanitizedCachedProviderLimitsMap(): Promise<
   return sanitized;
 }
 
+async function apiKeyUnchangedSinceRead(connection: ProviderConnectionLike): Promise<boolean> {
+  const stored = (await getProviderConnectionById(connection.id)) as { apiKey?: string } | null;
+  return stored?.apiKey === (connection as { apiKey?: string }).apiKey;
+}
+
 export async function fetchLiveProviderLimits(connectionId: string): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
@@ -1051,7 +1056,10 @@ async function fetchLiveProviderLimitsWithOptions(
       )) as JsonRecord,
       await refreshLiveModelIds(connection.provider)
     );
-    if (isRecord(usage.quotas)) {
+    // A key edit during the fetch makes this reading the old key's: it must not refill the quota
+    // cache or write a snapshot for the new key. The write follows the check with no I/O between.
+    const keyUnchanged = await apiKeyUnchangedSinceRead(connection);
+    if (keyUnchanged && isRecord(usage.quotas)) {
       setQuotaCache(
         connectionId,
         connection.provider,

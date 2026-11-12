@@ -9,6 +9,7 @@
  */
 
 import { getProviderConnections } from "@/lib/db/providers";
+import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as log from "../../utils/logger";
 import {
@@ -99,20 +100,24 @@ export async function claimMuseOwner(args: ClaimArgs): Promise<MuseOwner | Respo
   }
 }
 
-/** 503 when the credentials selected for this attempt are not the session owner's. */
+/**
+ * 503 when this attempt selected another account than the session owner. Selection is
+ * restricted to the owner, so "no usable credentials" (the owner is rate limited or expired)
+ * is not a cross-account attempt: it returns null and the caller answers it as usual (429 with
+ * the reset, or the expired-credentials error).
+ */
 export function museOwnerUnavailable(owner: MuseOwner, credentials: Creds): Response | null {
-  const usable =
+  const selectedAnother =
     !!credentials &&
-    !("allRateLimited" in credentials) &&
-    !("allExpired" in credentials) &&
     "connectionId" in credentials &&
-    credentials.connectionId === owner.connectionId;
-  return usable
-    ? null
-    : errorResponse(
+    typeof credentials.connectionId === "string" &&
+    credentials.connectionId !== owner.connectionId;
+  return selectedAnother
+    ? errorResponse(
         503,
         "Muse session owner is unavailable; cross-account continuation is forbidden."
-      );
+      )
+    : null;
 }
 
 const accountOf = (credentials: Cred) =>
@@ -188,7 +193,11 @@ export function museRetryDelay(
 export const museFailureMarksAccount = (result: {
   errorCode?: unknown;
   errorType?: unknown;
+  status?: number;
+  rawMessage?: unknown;
+  error?: unknown;
 }): boolean =>
+  !isMusePolicyRefusal(result.status, String(result.rawMessage ?? result.error ?? "")) &&
   result.errorCode !== "MUSE_OWNERSHIP_REJECTED" &&
   result.errorType !== "stream_timeout" &&
   result.errorType !== "stream_early_eof" &&

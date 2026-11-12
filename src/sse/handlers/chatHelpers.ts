@@ -625,6 +625,10 @@ export async function executeChatWithBreaker({
                 Number(failure?.status) === 499 ||
                 failure?.code === "client_disconnected" ||
                 failure?.type === "client_disconnected" ||
+                // A 200 stream cut without an upstream status is a transport event, not an
+                // account refusal: a real refusal carries its own status/code and keeps cooling.
+                (failure?.code === "stream_terminated" &&
+                  Number(failure?.status) === HTTP_STATUS.BAD_GATEWAY) ||
                 isRequestScopedUpstreamFailure(failure) ||
                 isLocalStreamLifecycleError(failure?.message ?? failure) // client abort, #4602
               ) {

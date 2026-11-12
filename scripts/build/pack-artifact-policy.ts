@@ -279,6 +279,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // GHSA-2pg2-xm9r-8544: private-by-default DATA_DIR / .env modes, called on every boot.
   "bin/cli/privateDataDir.mjs",
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
+  // `formatCliError` — the top-level CLI failure handler (OMNIROUTE_DEBUG_STACK opt-in).
+  "bin/cli/utils/formatCliError.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",
   // The allowlist of keys a working-directory .env may set; read on every CLI boot.

@@ -554,6 +554,8 @@ export default function AddApiKeyModal({
         )}
         {bulkSupported && (
           <SegmentedControl
+            semantics="radio"
+            aria-label={getAddCredentialModalTitle(t, providerDisplayName, webSessionCredential)}
             size="sm"
             value={mode}
             onChange={(next) => {
@@ -1143,6 +1145,7 @@ export default function AddApiKeyModal({
             {isGlm && (
               <div className="flex flex-col gap-3">
                 <Select
+                  native
                   label={t("apiRegionLabel")}
                   hint={t("apiRegionHint")}
                   value={formData.apiRegion}
