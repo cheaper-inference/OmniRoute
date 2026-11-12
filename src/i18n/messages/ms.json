@@ -133,6 +133,16 @@
     "saveError": "Tidak dapat menyimpan mod perkhidmatan. Sila cuba lagi."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "dilaporkan",
+      "estimated": "dianggarkan",
+      "unknown": "Tidak tersedia",
+      "unknownSource": "sumber tidak diketahui",
+      "containsEstimates": "Mengandungi anggaran penggunaan",
+      "historicalUnknown": "Asal sebahagian data penggunaan tidak diketahui",
+      "catalogueCost": "Anggaran kos katalog, bukan bil pembekal",
+      "loadError": "Log penggunaan tidak dapat dimuatkan. Cuba muat semula."
+    },
     "save": "Jimat",
     "cancel": "Batal",
     "delete": "Padam",

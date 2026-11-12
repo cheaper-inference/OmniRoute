@@ -133,6 +133,16 @@
     "saveError": "De servicemodus kon niet worden opgeslagen. Probeer het opnieuw."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "gerapporteerd",
+      "estimated": "geschat",
+      "unknown": "Niet beschikbaar",
+      "unknownSource": "bron onbekend",
+      "containsEstimates": "Bevat geschat gebruik",
+      "historicalUnknown": "De herkomst van sommige gebruiksgegevens is onbekend",
+      "catalogueCost": "Kostenraming volgens prijslijst, geen factuur van de aanbieder",
+      "loadError": "Gebruikslogboeken konden niet worden geladen. Probeer te vernieuwen."
+    },
     "save": "Opslaan",
     "cancel": "Annuleer",
     "delete": "Verwijderen",

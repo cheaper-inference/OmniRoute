@@ -133,6 +133,16 @@
     "saveError": "Nije moguće spremiti način usluge. Pokušajte ponovno."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "prijavljeno",
+      "estimated": "procijenjeno",
+      "unknown": "Nije dostupno",
+      "unknownSource": "nepoznat izvor",
+      "containsEstimates": "Sadrži procijenjenu potrošnju",
+      "historicalUnknown": "Podrijetlo dijela podataka o potrošnji nije poznato",
+      "catalogueCost": "Procjena prema cjeniku, nije obračun pružatelja usluge",
+      "loadError": "Nije moguće učitati zapise o potrošnji. Pokušajte osvježiti."
+    },
     "save": "Spremi",
     "cancel": "Odustani",
     "delete": "Izbriši",

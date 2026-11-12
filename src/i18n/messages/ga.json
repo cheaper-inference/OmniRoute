@@ -133,6 +133,16 @@
     "saveError": "Níorbh fhéidir an mód seirbhíse a shábháil. Bain triail eile as."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "tuairiscithe",
+      "estimated": "measta",
+      "unknown": "Níl ar fáil",
+      "unknownSource": "foinse anaithnid",
+      "containsEstimates": "Tá úsáid mheasta san áireamh",
+      "historicalUnknown": "Ní fios bunús cuid de na sonraí úsáide",
+      "catalogueCost": "Meastachán de réir an chatalóige, ní billeáil an tsoláthraí",
+      "loadError": "Ní féidir na logaí úsáide a lódáil. Bain triail as athnuachan."
+    },
     "save": "Sábháil",
     "cancel": "Cealaigh",
     "delete": "Scrios",

@@ -133,6 +133,16 @@
     "saveError": "Enweghị ike ichekwa ọnọdụ ọrụ ahụ. Biko nwaa ọzọ."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "a kọrọ",
+      "estimated": "a tụrụ atụmatụ",
+      "unknown": "enweghị ozi",
+      "unknownSource": "amaghị ebe o si bịa",
+      "containsEstimates": "Nwere atụmatụ ojiji",
+      "historicalUnknown": "Amaghị ebe ụfọdụ ozi ojiji si bịa",
+      "catalogueCost": "Atụmatụ ọnụ ahịa dabere na ndepụta ọnụ ahịa, ọ bụghị ụgwọ onye na-eweta ọrụ",
+      "loadError": "Enweghị ike ibunye ndekọ ojiji. Gbalịa ime ka ibe a dị ọhụrụ."
+    },
     "save": "Chekwa",
     "cancel": "Kagbuo",
     "delete": "Hichapụ",

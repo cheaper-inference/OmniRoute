@@ -133,6 +133,16 @@
     "saveError": "Impossible d’enregistrer le mode de service. Veuillez réessayer."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "déclaré",
+      "estimated": "estimé",
+      "unknown": "Non disponible",
+      "unknownSource": "source inconnue",
+      "containsEstimates": "Contient une utilisation estimée",
+      "historicalUnknown": "La provenance de certaines données d’utilisation est inconnue",
+      "catalogueCost": "Estimation selon le catalogue, pas une facturation du fournisseur",
+      "loadError": "Impossible de charger les journaux d’utilisation. Essayez d’actualiser."
+    },
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",

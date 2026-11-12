@@ -133,6 +133,16 @@
     "saveError": "Neizdevās saglabāt pakalpojuma režīmu. Lūdzu, mēģiniet vēlreiz."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "ziņots",
+      "estimated": "aplēsts",
+      "unknown": "Nav pieejams",
+      "unknownSource": "avots nav zināms",
+      "containsEstimates": "Ietver aplēstu lietojumu",
+      "historicalUnknown": "Dažu lietojuma datu izcelsme nav zināma",
+      "catalogueCost": "Izmaksu aplēse pēc cenrāža, nevis pakalpojumu sniedzēja rēķins",
+      "loadError": "Nevar ielādēt lietojuma žurnālus. Mēģiniet atsvaidzināt."
+    },
     "save": "Saglabāt",
     "cancel": "Atcelt",
     "delete": "Dzēst",

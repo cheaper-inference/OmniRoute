@@ -133,6 +133,16 @@
     "saveError": "无法保存服务模式。请重试。"
   },
   "common": {
+    "usageEvidence": {
+      "reported": "已报告",
+      "estimated": "估算",
+      "unknown": "暂无数据",
+      "unknownSource": "来源未知",
+      "containsEstimates": "包含估算用量",
+      "historicalUnknown": "部分用量数据的来源未知",
+      "catalogueCost": "根据价目表估算的费用，并非提供者的实际账单",
+      "loadError": "无法加载用量日志，请尝试刷新页面。"
+    },
     "save": "保存",
     "cancel": "取消",
     "delete": "删除",

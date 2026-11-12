@@ -8,13 +8,22 @@ import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
   getNoCacheTokens,
-  getPromptCacheCreationTokens,
-  getPromptCacheReadTokens,
+  getPromptCacheCreationTokensOrNull,
+  getPromptCacheReadTokensOrNull,
 } from "@/lib/usage/tokenAccounting";
 import { FORMATS } from "../translator/formats.ts";
 import { pickCacheCreationTokens } from "./pickCacheCreationTokens.ts";
 import { sharedSymbol } from "@/shared/utils/processSingleton";
 
+import {
+  carryUsageEvidence,
+  deriveUsageEvidence,
+  hasEstimatedUsageEvidence,
+  withoutInvalidCacheCounters,
+  type UsageEvidence,
+} from "@/lib/usage/usageEvidence";
+import { estimateInputTokens, estimateOutputTokens } from "./usageEstimation.ts";
+export { estimateInputTokens, estimateOutputTokens } from "./usageEstimation.ts";
 export { pickCacheCreationTokens };
 
 /** Nested `*_tokens_details` containers ({ cached_tokens, reasoning_tokens, … }). */
@@ -33,6 +42,7 @@ interface UsageTokenDetail {
  * everything else passes through untouched via the index signature.
  */
 export interface UsageLike {
+  usage_evidence?: UsageEvidence;
   estimated?: boolean;
   input_tokens?: number;
   output_tokens?: number;
@@ -316,6 +326,19 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
     }
   }
 
+  // Normalized Claude prompt totals include cache; native input counts exclude it.
+  if (
+    targetFormat === FORMATS.CLAUDE &&
+    usage.prompt_tokens !== undefined &&
+    usage.prompt_tokens_details?.cache_creation_in_prompt === true
+  ) {
+    convertedUsage.input_tokens = Math.max(
+      0,
+      usage.prompt_tokens -
+        (getPromptCacheReadTokensOrNull(usage) ?? 0) -
+        (getPromptCacheCreationTokensOrNull(usage) ?? 0)
+    );
+  }
   // Helper to pick only defined fields from usage
   const pickFields = (fields: string[]) => {
     const filtered: Record<string, unknown> = {};
@@ -405,7 +428,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
     else convertedUsage.cost = reportedCostUsd;
   }
 
-  return pickFields(fields);
+  return carryUsageEvidence(usage, pickFields([...fields, "usage_evidence"]));
 }
 
 // Provider usage is normally authoritative, but compatibility gateways can return
@@ -537,9 +560,9 @@ function getReportedInputTokens(usage: UsageLike, format: string): number {
 function clearCachedTokenDetail<T extends UsageTokenDetail | null | undefined>(value: T): T {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
   const result = { ...value };
-  if (result.cached_tokens !== undefined) result.cached_tokens = 0;
-  if (result.cache_creation_tokens !== undefined) result.cache_creation_tokens = 0;
-  if (result.cache_write_tokens !== undefined) result.cache_write_tokens = 0;
+  if (result.cached_tokens !== 0) delete result.cached_tokens;
+  if (result.cache_creation_tokens !== 0) delete result.cache_creation_tokens;
+  if (result.cache_write_tokens !== 0) delete result.cache_write_tokens;
   return result;
 }
 
@@ -554,14 +577,10 @@ export function sanitizeProviderUsageForRequest(
 ) {
   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return usage;
 
+  usage = withoutInvalidCacheCounters(usage);
   const format = resolveUsageFormat(usage, targetFormat);
   const reportedInput = getReportedInputTokens(usage, format);
-  // #10705: reportedInput === 0 was always accepted, on the theory this guard only
-  // needed to catch providers over-reporting huge counts. But a real, non-trivial
-  // request body can legitimately have its input tokens under-reported to exactly 0
-  // by a relay provider. Only treat 0 as plausible when the request body itself is
-  // trivial (no serialized body, or a body too small to plausibly need any tokens);
-  // otherwise fall through to the same local-estimate repair used for over-reports.
+  // A nontrivial request cannot justify a relay reporting zero input.
   const bodyBytesForZeroCheck = reportedInput === 0 ? getSerializedBodyBytes(body) : null;
   const zeroIsPlausible =
     reportedInput === 0 && (bodyBytesForZeroCheck === null || bodyBytesForZeroCheck === 0);
@@ -570,14 +589,31 @@ export function sanitizeProviderUsageForRequest(
   }
 
   const estimatedInput = Math.max(1, estimateInputTokens(body));
-  const result = { ...usage };
+  const result: UsageLike & { usage_evidence: UsageEvidence } = {
+    ...usage,
+    estimated: true,
+    usage_evidence: deriveUsageEvidence(usage),
+  };
+  result.usage_evidence.input = { source: "estimated", method: "request_body_heuristic" };
+  for (const key of [
+    "cached_tokens",
+    "cache_read_input_tokens",
+    "cache_creation_input_tokens",
+    "cache_write_tokens",
+    "cachedContentTokenCount",
+  ]) {
+    if (result[key] !== 0) delete result[key];
+  }
+  delete result.cache_creation;
+  delete result.cache_creation_tier_status;
+  result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
+  result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
+  const repairedCacheEvidence = deriveUsageEvidence({ ...result, usage_evidence: undefined });
+  result.usage_evidence.cacheRead = repairedCacheEvidence.cacheRead;
+  result.usage_evidence.cacheCreation = repairedCacheEvidence.cacheCreation;
 
   if (format === FORMATS.CLAUDE) {
     result.input_tokens = estimatedInput;
-    result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
-    result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
-    result.cache_read_input_tokens = 0;
-    result.cache_creation_input_tokens = 0;
     return result;
   }
 
@@ -585,7 +621,6 @@ export function sanitizeProviderUsageForRequest(
     const output =
       tokenNumber(result.candidatesTokenCount) + tokenNumber(result.thoughtsTokenCount);
     result.promptTokenCount = estimatedInput;
-    result.cachedContentTokenCount = 0;
     if (result.totalTokenCount !== undefined) {
       result.totalTokenCount = estimatedInput + output;
     }
@@ -594,10 +629,6 @@ export function sanitizeProviderUsageForRequest(
 
   if (format === FORMATS.OPENAI_RESPONSES) {
     result.input_tokens = estimatedInput;
-    result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
-    result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
-    result.cache_read_input_tokens = 0;
-    result.cache_creation_input_tokens = 0;
     if (result.total_tokens !== undefined) {
       result.total_tokens = estimatedInput + tokenNumber(result.output_tokens);
     }
@@ -605,9 +636,6 @@ export function sanitizeProviderUsageForRequest(
   }
 
   result.prompt_tokens = estimatedInput;
-  result.cached_tokens = 0;
-  result.cache_read_input_tokens = 0;
-  result.cache_creation_input_tokens = 0;
   result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
   if (result.total_tokens !== undefined) {
     result.total_tokens = estimatedInput + tokenNumber(result.completion_tokens);
@@ -678,7 +706,7 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   const assignNumber = (key: string, value: unknown) => {
     if (value === undefined || value === null) return;
     const numeric = Number(value);
-    if (Number.isFinite(numeric)) normalized[key] = numeric;
+    if (Number.isFinite(numeric) && numeric >= 0) normalized[key] = numeric;
   };
 
   assignNumber("prompt_tokens", usage?.prompt_tokens);
@@ -723,17 +751,14 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   if (reportedCostUsd !== undefined) normalized.cost_usd = reportedCostUsd;
 
   if (Object.keys(normalized).length === 0) return null;
-  return normalized;
+  return carryUsageEvidence(usage, normalized);
 }
 
-// Internal marker for usage that was estimated locally (a web/cookie executor with no
-// upstream metering). A NON-enumerable symbol: JSON.stringify, object spread and
-// filterUsageForFormat never copy it, so it cannot reach a client payload or change any
-// usage field, cost or budget — it only lets the call-log sink tell estimated usage apart
-// after extraction rebuilt the object without the provider's `estimated` flag.
+// Legacy marker retained beside serializable field evidence.
 const ESTIMATED_USAGE_MARKER = sharedSymbol("usage.estimated");
 
 export function carryEstimatedUsageMarker<T>(source: unknown, rebuilt: T): T {
+  carryUsageEvidence(source, rebuilt);
   const estimated =
     !!source && typeof source === "object" && (source as UsageLike).estimated === true;
   if (estimated && rebuilt && typeof rebuilt === "object") {
@@ -749,7 +774,7 @@ export function carryEstimatedUsageMarker<T>(source: unknown, rebuilt: T): T {
  */
 export function isEstimatedUsage(usage: unknown): boolean {
   if (!usage || typeof usage !== "object") return false;
-  if ((usage as UsageLike).estimated === true) return true;
+  if ((usage as UsageLike).estimated === true || hasEstimatedUsageEvidence(usage)) return true;
   return Reflect.get(usage, ESTIMATED_USAGE_MARKER) === true;
 }
 
@@ -787,7 +812,7 @@ export function hasValidUsage(usage: UsageLike | null | undefined) {
   ];
 
   for (const field of tokenFields) {
-    if (typeof usage[field] === "number" && usage[field] > 0) {
+    if (typeof usage[field] === "number" && Number.isFinite(usage[field]) && usage[field] > 0) {
       return true;
     }
   }
@@ -855,15 +880,18 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const cacheRead = u.cache_read_input_tokens || 0;
     const cacheCreation = readCacheWriteUsage(u).total ?? 0;
     if (inputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
-      return normalizeUsage({
-        ...cacheCreationFields(u),
-        prompt_tokens: inputTokens + cacheRead + cacheCreation,
-        completion_tokens: u.output_tokens || u.completion_tokens || 0,
-        input_tokens: inputTokens + cacheRead + cacheCreation,
-        output_tokens: u.output_tokens || u.completion_tokens || 0,
-        cache_read_input_tokens: u.cache_read_input_tokens,
-        cache_creation_input_tokens: u.cache_creation_input_tokens,
-      });
+      return carryUsageEvidence(
+        u,
+        normalizeUsage({
+          ...cacheCreationFields(u),
+          prompt_tokens: inputTokens + cacheRead + cacheCreation,
+          completion_tokens: u.output_tokens || u.completion_tokens || 0,
+          input_tokens: inputTokens + cacheRead + cacheCreation,
+          output_tokens: u.output_tokens || u.completion_tokens || 0,
+          cache_read_input_tokens: u.cache_read_input_tokens,
+          cache_creation_input_tokens: u.cache_creation_input_tokens,
+        })
+      );
     }
   }
 
@@ -872,16 +900,19 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const deltaInput = chunk.usage.input_tokens || 0;
     const deltaCacheRead = chunk.usage.cache_read_input_tokens || 0;
     const deltaCacheCreation = chunk.usage.cache_creation_input_tokens || 0;
-    return normalizeUsage({
-      ...cacheCreationFields(chunk.usage),
-      prompt_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
-      completion_tokens: chunk.usage.output_tokens || 0,
-      input_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
-      output_tokens: chunk.usage.output_tokens || 0,
-      cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
-      cache_creation_input_tokens: chunk.usage.cache_creation_input_tokens,
-      reasoning_tokens: chunk.usage.output_tokens_details?.thinking_tokens,
-    });
+    return carryUsageEvidence(
+      chunk.usage,
+      normalizeUsage({
+        ...cacheCreationFields(chunk.usage),
+        prompt_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
+        completion_tokens: chunk.usage.output_tokens || 0,
+        input_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
+        output_tokens: chunk.usage.output_tokens || 0,
+        cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
+        cache_creation_input_tokens: chunk.usage.cache_creation_input_tokens,
+        reasoning_tokens: chunk.usage.output_tokens_details?.thinking_tokens,
+      })
+    );
   }
 
   // OpenAI Responses API format (response.completed or response.done)
@@ -891,22 +922,25 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     typeof chunk.response.usage === "object"
   ) {
     const usage = chunk.response.usage;
-    return normalizeUsage({
-      ...cacheCreationFields(usage),
-      provider_credits: usage.provider_credits,
-      cost_in_usd_ticks: usage.cost_in_usd_ticks,
-      prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
-      completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
-      cached_tokens:
-        usage.input_tokens_details?.cached_tokens ??
-        usage.prompt_tokens_details?.cached_tokens ??
-        usage.cache_read_input_tokens,
-      cache_creation_input_tokens: pickCacheCreationTokens(usage),
-      reasoning_tokens:
-        usage.output_tokens_details?.reasoning_tokens ??
-        usage.completion_tokens_details?.reasoning_tokens ??
-        usage.reasoning_tokens,
-    });
+    return carryUsageEvidence(
+      usage,
+      normalizeUsage({
+        ...cacheCreationFields(usage),
+        provider_credits: usage.provider_credits,
+        cost_in_usd_ticks: usage.cost_in_usd_ticks,
+        prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
+        completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
+        cached_tokens:
+          usage.input_tokens_details?.cached_tokens ??
+          usage.prompt_tokens_details?.cached_tokens ??
+          usage.cache_read_input_tokens,
+        cache_creation_input_tokens: pickCacheCreationTokens(usage),
+        reasoning_tokens:
+          usage.output_tokens_details?.reasoning_tokens ??
+          usage.completion_tokens_details?.reasoning_tokens ??
+          usage.reasoning_tokens,
+      })
+    );
   }
 
   // OpenAI format
@@ -958,20 +992,23 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
       reportedCachedTokens <= promptTokens
         ? reportedCachedTokens
         : undefined;
-    return normalizeUsage({
-      prompt_tokens: promptTokens,
-      completion_tokens: (usageMeta.candidatesTokenCount || 0) + thoughts,
-      total_tokens: usageMeta.totalTokenCount,
-      ...(cachedTokens !== undefined ? { cached_tokens: cachedTokens } : {}),
-      cache_evidence: !Object.prototype.hasOwnProperty.call(usageMeta, "cachedContentTokenCount")
-        ? "unreported"
-        : cachedTokens === undefined
-          ? "invalid"
-          : cachedTokens > 0
-            ? "hit"
-            : "miss",
-      reasoning_tokens: thoughts,
-    });
+    return carryUsageEvidence(
+      usageMeta,
+      normalizeUsage({
+        prompt_tokens: promptTokens,
+        completion_tokens: (usageMeta.candidatesTokenCount || 0) + thoughts,
+        total_tokens: usageMeta.totalTokenCount,
+        ...(cachedTokens !== undefined ? { cached_tokens: cachedTokens } : {}),
+        cache_evidence: !Object.prototype.hasOwnProperty.call(usageMeta, "cachedContentTokenCount")
+          ? "unreported"
+          : cachedTokens === undefined
+            ? "invalid"
+            : cachedTokens > 0
+              ? "hit"
+              : "miss",
+        reasoning_tokens: thoughts,
+      })
+    );
   }
 
   // Ollama NDJSON format (raw from provider, before translation)
@@ -981,93 +1018,22 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const promptEvalCount = chunk.prompt_eval_count || 0;
     const evalCount = chunk.eval_count || 0;
     const cachedCount = chunk.prompt_eval_cached_count;
-    return normalizeUsage({
-      prompt_tokens: promptEvalCount,
-      completion_tokens: evalCount,
-      total_tokens: promptEvalCount + evalCount,
-      ...(typeof cachedCount === "number" ? { cached_tokens: cachedCount } : {}),
-    });
+    return carryUsageEvidence(
+      {
+        input_tokens: chunk.prompt_eval_count,
+        output_tokens: chunk.eval_count,
+        cached_tokens: chunk.prompt_eval_cached_count,
+      },
+      normalizeUsage({
+        prompt_tokens: promptEvalCount,
+        completion_tokens: evalCount,
+        total_tokens: promptEvalCount + evalCount,
+        ...(typeof cachedCount === "number" ? { cached_tokens: cachedCount } : {}),
+      })
+    );
   }
 
   return null;
-}
-
-// Heuristic token estimation constants
-const CHARS_PER_TOKEN_SCHEMA = 6; // ~6 chars/token for JSON schemas (more verbose per token)
-
-/**
- * Improved token estimation heuristic (no dependency).
- * Splits text on common token boundaries (whitespace, punctuation, camelCase)
- * and applies a sub-word correction factor. Better accuracy for:
- * - English text (~4 chars/token)
- * - CJK text (~1 char/token for ideographs)
- * - Code (~3.5 chars/token, more punctuation-heavy)
- *
- * @param {string} text - Text to estimate tokens for
- * @returns {number} Estimated token count
- */
-function estimateTokenCount(text: unknown) {
-  if (!text || typeof text !== "string") return 0;
-
-  // Count CJK ideographs separately — each is roughly 1 token
-  const cjkMatches = text.match(/[\u3000-\u9fff\uf900-\ufaff\u{20000}-\u{2fa1f}]/gu);
-  const cjkCount = cjkMatches ? cjkMatches.length : 0;
-
-  // Remove CJK chars for the remaining estimation
-  const nonCJK = text.replace(/[\u3000-\u9fff\uf900-\ufaff]/g, " ");
-
-  // Split on token boundaries: whitespace, punctuation, camelCase transitions
-  const tokens = nonCJK
-    .split(/(\s+|[^\w\s]|(?<=[a-z])(?=[A-Z]))/)
-    .filter((t) => t && t.trim().length > 0);
-
-  // Apply sub-word correction: BPE tokenizers often split long words
-  // into sub-word pieces, so raw token count underestimates slightly
-  const estimatedNonCJK = Math.ceil(tokens.length * 1.3);
-
-  return cjkCount + estimatedNonCJK;
-}
-
-/**
- * Estimate input tokens from request body.
- * Separates tool definitions (JSON schemas) from message content
- * for more accurate estimation since JSON schemas are more verbose but
- * compress into fewer tokens than plain text.
- */
-export function estimateInputTokens(body: unknown) {
-  if (!body || typeof body !== "object") return 0;
-  const record = body as Record<string, unknown>;
-
-  try {
-    let toolTokens = 0;
-    let messageTokens = 0;
-
-    // Separate tool definitions from the rest of the body
-    if (record.tools && Array.isArray(record.tools)) {
-      const toolStr = JSON.stringify(record.tools);
-      toolTokens = Math.ceil(toolStr.length / CHARS_PER_TOKEN_SCHEMA);
-      // Estimate messages without tools
-      const { tools, ...bodyWithoutTools } = record;
-      messageTokens = estimateTokenCount(JSON.stringify(bodyWithoutTools));
-    } else {
-      messageTokens = estimateTokenCount(JSON.stringify(record));
-    }
-
-    return messageTokens + toolTokens;
-  } catch {
-    // Fallback if stringify fails
-    return 0;
-  }
-}
-
-/**
- * Estimate output tokens from content length.
- * Uses improved heuristic when possible, falls back to length-based estimation.
- */
-export function estimateOutputTokens(contentLength: number | null | undefined) {
-  if (!contentLength || contentLength <= 0) return 0;
-  // When we only have a character count, use 4 chars/token with sub-word correction
-  return Math.max(1, Math.ceil(contentLength / 3.5));
 }
 
 /**
@@ -1083,6 +1049,12 @@ export function formatUsage(inputTokens: number, outputTokens: number, targetFor
       input_tokens: inputTokens,
       output_tokens: outputTokens,
       estimated: true,
+      usage_evidence: {
+        input: { source: "estimated", method: "request_body_heuristic" },
+        output: { source: "estimated", method: "observed_characters" },
+        cacheRead: { source: "unknown" },
+        cacheCreation: { source: "unknown" },
+      },
     });
   }
 
@@ -1092,6 +1064,12 @@ export function formatUsage(inputTokens: number, outputTokens: number, targetFor
     completion_tokens: outputTokens,
     total_tokens: inputTokens + outputTokens,
     estimated: true,
+    usage_evidence: {
+      input: { source: "estimated", method: "request_body_heuristic" },
+      output: { source: "estimated", method: "observed_characters" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 }
 
@@ -1126,6 +1104,7 @@ export function logUsage(
   // Support both formats:
   // - OpenAI: prompt_tokens, completion_tokens
   // - Claude: input_tokens, output_tokens
+  const evidence = deriveUsageEvidence(usage);
   const inTokens = getLoggedInputTokens(usage);
   const outTokens = getLoggedOutputTokens(usage);
   void apiKeyInfo;
@@ -1134,7 +1113,7 @@ export function logUsage(
     ? normalizedConnectionId.slice(0, 8) + "..."
     : "unknown";
 
-  let msg = `[${getTimeString()}] 📊 ${COLORS.green}[USAGE] ${p} | in=${inTokens} | out=${outTokens} | account=${accountPrefix}${COLORS.reset}`;
+  let msg = `[${getTimeString()}] 📊 ${COLORS.green}[USAGE] ${p} | in=${evidence.input.source === "estimated" ? "~" : ""}${inTokens} | out=${evidence.output.source === "estimated" ? "~" : ""}${outTokens} | account=${accountPrefix}${COLORS.reset}`;
 
   // Add estimated flag if present
   if (usage.estimated) {
@@ -1142,11 +1121,11 @@ export function logUsage(
   }
 
   // Add cache info if present (unified from different formats)
-  const cacheRead = getPromptCacheReadTokens(usage);
-  if (cacheRead) msg += ` | cache_read=${cacheRead}`;
+  const cacheRead = getPromptCacheReadTokensOrNull(usage);
+  msg += ` | cache_read=${cacheRead ?? "unknown"}`;
 
-  const cacheCreation = getPromptCacheCreationTokens(usage);
-  if (cacheCreation) msg += ` | cache_create=${cacheCreation}`;
+  const cacheCreation = getPromptCacheCreationTokensOrNull(usage);
+  msg += ` | cache_create=${cacheCreation ?? "unknown"}`;
 
   // Non-cached (fresh) input tokens — informational only, already included in
   // prompt_tokens (Command Code reports inputTokenDetails.noCacheTokens).
@@ -1159,12 +1138,13 @@ export function logUsage(
   console.log(msg);
 
   // Streaming requests persist usage once in chatCore's completion callback.
-  // Keep this helper side-effect free apart from console visibility.
+  // This diagnostic request-log append is separate from durable token accounting.
   const tokens = {
     input: inTokens,
     output: outTokens,
-    cacheRead: cacheRead || 0,
-    cacheCreation: cacheCreation || 0,
+    cacheRead,
+    cacheCreation,
+    usage_evidence: evidence,
     reasoning: reasoning || 0,
   };
   appendRequestLog({

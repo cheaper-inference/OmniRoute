@@ -133,6 +133,16 @@
     "saveError": "サービスモードを保存できませんでした。もう一度お試しください。"
   },
   "common": {
+    "usageEvidence": {
+      "reported": "報告値",
+      "estimated": "推定値",
+      "unknown": "データなし",
+      "unknownSource": "情報源不明",
+      "containsEstimates": "推定使用量が含まれています",
+      "historicalUnknown": "一部の使用量は情報源が不明です",
+      "catalogueCost": "料金表に基づく推定費用であり、プロバイダーの請求額ではありません",
+      "loadError": "使用量ログを読み込めませんでした。ページを再読み込みしてください。"
+    },
     "save": "保存",
     "cancel": "キャンセル",
     "delete": "削除",

@@ -133,6 +133,16 @@
     "saveError": "Could not save the service mode. Please try again."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "reported",
+      "estimated": "estimated",
+      "unknown": "N/A",
+      "unknownSource": "source unknown",
+      "containsEstimates": "Contains estimated usage",
+      "historicalUnknown": "Some usage has unknown provenance",
+      "catalogueCost": "Catalogue cost estimate, not provider billing",
+      "loadError": "Unable to load usage logs. Try refreshing."
+    },
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",

@@ -133,6 +133,16 @@
     "saveError": "無法儲存服務模式。請再試一次。"
   },
   "common": {
+    "usageEvidence": {
+      "reported": "已回報",
+      "estimated": "估算",
+      "unknown": "無資料",
+      "unknownSource": "來源不明",
+      "containsEstimates": "包含估算用量",
+      "historicalUnknown": "部分用量資料的來源不明",
+      "catalogueCost": "依價目表估算的費用，並非提供者的實際帳單",
+      "loadError": "無法載入用量記錄，請嘗試重新整理頁面。"
+    },
     "save": "儲存",
     "cancel": "取消",
     "delete": "刪除",

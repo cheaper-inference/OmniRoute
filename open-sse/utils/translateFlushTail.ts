@@ -1,3 +1,4 @@
+import { mergeUsageEvidence } from "@/lib/usage/usageEvidence";
 /**
  * Shared per-line drain for translate-mode flush.
  *
@@ -46,7 +47,11 @@ function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
   }
   const current = state.usage as Record<string, number>;
   const incoming = extracted as Record<string, number>;
-  Object.assign(current, mergeCacheCreationFields(current, extracted));
+  Object.assign(
+    current,
+    { usage_evidence: mergeUsageEvidence(current, extracted) },
+    mergeCacheCreationFields(current, extracted)
+  );
   if (incoming.prompt_tokens > 0) current.prompt_tokens = incoming.prompt_tokens;
   if (incoming.completion_tokens > 0) current.completion_tokens = incoming.completion_tokens;
   if (incoming.total_tokens > 0) current.total_tokens = incoming.total_tokens;

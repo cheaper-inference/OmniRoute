@@ -133,6 +133,16 @@
     "saveError": "Nem sikerült menteni a szolgáltatási módot. Kérjük, próbálja újra."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "jelentett",
+      "estimated": "becsült",
+      "unknown": "Nem érhető el",
+      "unknownSource": "ismeretlen forrás",
+      "containsEstimates": "Becsült használatot tartalmaz",
+      "historicalUnknown": "Egyes használati adatok eredete ismeretlen",
+      "catalogueCost": "Katalógusár alapján becsült költség, nem szolgáltatói számlázás",
+      "loadError": "A használati naplók nem tölthetők be. Próbálja meg frissíteni."
+    },
     "save": "Mentés",
     "cancel": "Mégsem",
     "delete": "Törölje",

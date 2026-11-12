@@ -133,6 +133,16 @@
     "saveError": "Nie udało się zapisać trybu usługi. Spróbuj ponownie."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "zgłoszone",
+      "estimated": "szacowane",
+      "unknown": "Brak danych",
+      "unknownSource": "nieznane źródło",
+      "containsEstimates": "Zawiera szacowane użycie",
+      "historicalUnknown": "Pochodzenie części danych o użyciu jest nieznane",
+      "catalogueCost": "Szacunek według cennika, nie rozliczenie dostawcy",
+      "loadError": "Nie można wczytać dzienników użycia. Spróbuj odświeżyć."
+    },
     "save": "Zapisz",
     "cancel": "Anuluj",
     "delete": "Usuń",

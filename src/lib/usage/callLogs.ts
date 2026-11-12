@@ -1,3 +1,4 @@
+import * as usageEvidence from "./storedUsageEvidence";
 import {
   parseUpstreamHttp,
   UPSTREAM_HTTP_ATTEMPT,
@@ -148,6 +149,7 @@ type CallLogSummaryRow = {
   resilience_actions?: string | null;
   has_content?: number | null;
   usage_provenance?: string | null;
+  usage_evidence?: string | null;
 };
 
 export const RESOLVED_ACCOUNT_SQL =
@@ -467,7 +469,7 @@ function mapSummaryRow(row: CallLogSummaryRow) {
     reasoningSource: row.reasoning_source ?? null,
     reasoningChars: row.reasoning_chars != null ? toNumber(row.reasoning_chars) : null,
     hasContent: row.has_content ?? null,
-    usageProvenance: row.usage_provenance ?? null,
+    ...usageEvidence.storedUsageEvidence(row),
     requestType: row.request_type,
     sourceFormat: row.source_format,
     targetFormat: row.target_format,
@@ -676,9 +678,6 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
   const errorType = toStoredErrorType(
     classifyCallLogError(entry.status, entry.error, entry.provider)
   );
-  // Rendered-content presence plus usage provenance: success-only, additive,
-  // nullable. A 2xx is a success even with token counts at zero, so the
-  // success bound is 200-299 (not <400).
   const numericStatus = Number(entry.status);
   const isSuccess = Number.isFinite(numericStatus) && numericStatus >= 200 && numericStatus < 300;
   const clientVisibleBody =
@@ -821,6 +820,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
 
   const insertParams = {
     ...logEntry,
+    usageEvidence: metadataOnly ? null : usageEvidence.serializeUsageEvidence(entry.tokens),
     errorSummary: toStoredErrorSummary(protectedError),
     detailState,
     detailPendingUntil,
@@ -873,7 +873,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         detail_pending_until, artifact_relpath, artifact_size_bytes, artifact_sha256,
         has_request_body, has_response_body, has_pipeline_details, request_summary,
         correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
-        video_content_removed, has_content, usage_provenance,
+        video_content_removed, has_content, usage_provenance, usage_evidence,
         added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
       )
       VALUES (
@@ -890,7 +890,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @detailPendingUntil, @artifactRelPath, @artifactSizeBytes, @artifactSha256,
         @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
         @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
-        @videoContentRemoved, @hasContent, @usageProvenance,
+        @videoContentRemoved, @hasContent, @usageProvenance, @usageEvidence,
         @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}
       )
     `
@@ -932,9 +932,9 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
 
 export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   // Usage is also needed by the live dashboard when disk history is disabled.
-  // Retain only counters, never the request/response bodies from this entry.
   if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
     updateRequestTokensById(entry.pendingRequestId ?? entry.id, {
+      ...usageEvidence.liveUsageEvidence(entry.tokens),
       in: getLoggedInputTokens(entry.tokens),
       out: getLoggedOutputTokens(entry.tokens),
       cacheRead: getPromptCacheReadTokensOrNull(entry.tokens),

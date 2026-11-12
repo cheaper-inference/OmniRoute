@@ -133,6 +133,16 @@
     "saveError": "Ba a iya ajiye yanayin sabis ba. Da fatan za a sake gwadawa."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "an ruwaito",
+      "estimated": "ƙiyastacce",
+      "unknown": "babu bayanai",
+      "unknownSource": "ba a san tushen ba",
+      "containsEstimates": "Ya ƙunshi ƙiyasin amfani",
+      "historicalUnknown": "Ba a san tushen wasu bayanan amfani ba",
+      "catalogueCost": "Ƙiyasin kuɗi bisa jerin farashi, ba lissafin kuɗin mai ba da sabis ba",
+      "loadError": "An kasa loda bayanan amfani. Gwada sabunta shafin."
+    },
     "save": "Ajiye",
     "cancel": "Soke",
     "delete": "Goge",

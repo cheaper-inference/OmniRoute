@@ -1,3 +1,4 @@
+import { rollupUsageEvidenceBeforeDate } from "../db/usageEvidenceAggregates";
 /**
  * Aggregation utility functions for usage data summarization.
  * Rolls up usage_history (and quota_snapshots) into daily summary tables.
@@ -55,6 +56,9 @@ export async function rollupDailyUsage(
         total_input_tokens = excluded.total_input_tokens,
         total_output_tokens = excluded.total_output_tokens,
         total_cache_read_tokens = NULL,
+        estimated_requests = NULL,
+        unknown_evidence_requests = NULL,
+        cached_input_unknown_requests = NULL,
         total_cost = excluded.total_cost
     `;
 
@@ -397,6 +401,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           ).changes,
         0
       );
+      rollupUsageEvidenceBeforeDate(beforeDate);
       // The Team upsert and raw-row processed marker are one transaction. If
       // either fails, neither becomes visible and a retry cannot double count.
       db.prepare(teamAggregateQuery).run(beforeDate, beforeDate);

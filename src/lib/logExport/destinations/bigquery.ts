@@ -139,6 +139,8 @@ export const BIGQUERY_TABLE_SCHEMA = {
     { name: "ttft_ms", type: "INT64", mode: "NULLABLE" },
     { name: "tokens_in", type: "INT64", mode: "NULLABLE" },
     { name: "tokens_out", type: "INT64", mode: "NULLABLE" },
+    { name: "usage_evidence", type: "STRING", mode: "NULLABLE" },
+    { name: "usage_estimated", type: "BOOL", mode: "NULLABLE" },
     { name: "tokens_cache_read", type: "INT64", mode: "NULLABLE" },
     { name: "tokens_cache_write", type: "INT64", mode: "NULLABLE" },
     { name: "tokens_reasoning", type: "INT64", mode: "NULLABLE" },
@@ -177,7 +179,12 @@ export const BIGQUERY_TABLE_SCHEMA = {
 } as const;
 
 /** Project a canonical export record onto the BigQuery column names. */
-export function toBigQueryRow(record: LogExportRecord, exportedAt: string, includeTtft = true) {
+export function toBigQueryRow(
+  record: LogExportRecord,
+  exportedAt: string,
+  includeTtft = true,
+  includeEvidence = true
+) {
   return {
     id: record.id,
     timestamp: record.timestamp,
@@ -194,6 +201,12 @@ export function toBigQueryRow(record: LogExportRecord, exportedAt: string, inclu
     ...(includeTtft ? { ttft_ms: record.ttftMs } : {}),
     tokens_in: record.tokensIn,
     tokens_out: record.tokensOut,
+    ...(includeEvidence
+      ? {
+          usage_evidence: record.usageEvidence ? JSON.stringify(record.usageEvidence) : null,
+          usage_estimated: record.estimated ?? null,
+        }
+      : {}),
     tokens_cache_read: record.tokensCacheRead,
     tokens_cache_write: record.tokensCacheWrite,
     tokens_reasoning: record.tokensReasoning,
@@ -257,6 +270,12 @@ interface BigQueryResponse {
   json: BigQueryResponseBody | null;
 }
 
+function hasEvidenceFields(body: BigQueryResponseBody | null): boolean {
+  return ["usage_evidence", "usage_estimated"].every((name) =>
+    body?.schema?.fields?.some((field) => field.name === name)
+  );
+}
+
 function hasTtftField(body: BigQueryResponseBody | null): boolean {
   return body?.schema?.fields?.some((field) => field.name === "ttft_ms") ?? false;
 }
@@ -273,6 +292,7 @@ class BigQueryClient implements LogExportClient {
   private createdTableThisRun = false;
   /** Only TTFT is optional for legacy tables; all other columns remain strictly checked. */
   private includeTtft = true;
+  private includeEvidence = true;
 
   constructor(
     private readonly config: BigQueryConfig,
@@ -342,6 +362,7 @@ class BigQueryClient implements LogExportClient {
     const table = await this.request("GET", this.tablePath);
     if (table.ok) {
       this.includeTtft = hasTtftField(table.json);
+      this.includeEvidence = hasEvidenceFields(table.json);
       return;
     }
     if (table.status !== 404) throw new Error(describeFailure(table.status, table.json));
@@ -395,6 +416,7 @@ class BigQueryClient implements LogExportClient {
       const existing = await this.request("GET", this.tablePath);
       if (!existing.ok) throw new Error(describeFailure(existing.status, existing.json));
       this.includeTtft = hasTtftField(existing.json);
+      this.includeEvidence = hasEvidenceFields(existing.json);
       return;
     }
     this.includeTtft = true;
@@ -402,6 +424,16 @@ class BigQueryClient implements LogExportClient {
   }
 
   async send(records: readonly LogExportRecord[]): Promise<void> {
+    // Existing tables need nullable usage_evidence STRING and usage_estimated BOOL.
+    // Fail before insertAll; the runner keeps its cursor and retries after schema repair.
+    if (
+      !this.includeEvidence &&
+      records.some((record) => record.usageEvidence || record.estimated)
+    ) {
+      throw new Error(
+        "BigQuery table needs nullable usage_evidence STRING and usage_estimated BOOL columns before exporting metering evidence"
+      );
+    }
     if (records.length === 0) return;
     const exportedAt = new Date().toISOString();
     // The caller's batch size is a cursor unit, not an HTTP limit. insertAll caps a
@@ -445,7 +477,7 @@ class BigQueryClient implements LogExportClient {
       ignoreUnknownValues: false,
       rows: records.map((record) => ({
         insertId: record.id,
-        json: toBigQueryRow(record, exportedAt, this.includeTtft),
+        json: toBigQueryRow(record, exportedAt, this.includeTtft, this.includeEvidence),
       })),
     };
 

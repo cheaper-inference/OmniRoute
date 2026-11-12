@@ -133,6 +133,16 @@
     "saveError": "Servicetilstanden kunne ikke gemmes. Prøv igen."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "rapporteret",
+      "estimated": "estimeret",
+      "unknown": "Ikke tilgængelig",
+      "unknownSource": "ukendt kilde",
+      "containsEstimates": "Indeholder estimeret forbrug",
+      "historicalUnknown": "Oprindelsen af nogle forbrugstal er ukendt",
+      "catalogueCost": "Prisoverslag fra prisliste, ikke udbyderens fakturering",
+      "loadError": "Forbrugsloggene kunne ikke indlæses. Prøv at opdatere."
+    },
     "save": "Gem",
     "cancel": "Annuller",
     "delete": "Slet",

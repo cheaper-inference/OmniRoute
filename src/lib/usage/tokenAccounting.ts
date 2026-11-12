@@ -1,3 +1,4 @@
+import { readUsageEvidence, usableTokenCounter } from "./usageEvidence";
 type JsonRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): JsonRecord {
@@ -217,7 +218,7 @@ export function getObservedReasoning(message: unknown): ObservedReasoning {
 // vs `0` when the provider explicitly reported zero.
 
 function hasAnyKey(record: JsonRecord, keys: string[]): boolean {
-  return keys.some((k) => record[k] !== undefined && record[k] !== null);
+  return keys.some((k) => usableTokenCounter(record[k]));
 }
 
 /**
@@ -225,6 +226,7 @@ function hasAnyKey(record: JsonRecord, keys: string[]): boolean {
  * report any cache-read field at all.
  */
 export function getPromptCacheReadTokensOrNull(tokens: unknown): number | null {
+  if (readUsageEvidence(tokens)?.cacheRead.source === "unknown") return null;
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
   if (
@@ -241,6 +243,7 @@ export function getPromptCacheReadTokensOrNull(tokens: unknown): number | null {
  * provider didn't report any cache-creation field at all.
  */
 export function getPromptCacheCreationTokensOrNull(tokens: unknown): number | null {
+  if (readUsageEvidence(tokens)?.cacheCreation.source === "unknown") return null;
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
   if (

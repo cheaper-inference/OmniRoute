@@ -16,13 +16,20 @@ export async function getCacheMetrics() {
         COUNT(*) as totalRequests,
         SUM(tokens_input) as totalInputTokens,
         SUM(tokens_cache_read) as totalCachedTokens,
-        SUM(tokens_cache_creation) as totalCacheCreationTokens
+        SUM(tokens_cache_creation) as totalCacheCreationTokens,
+        MAX(CASE WHEN usage_provenance = 'estimated' THEN 1 ELSE 0 END) as estimated,
+        COUNT(tokens_cache_read) = COUNT(*) as totalCachedTokensComplete,
+        COUNT(tokens_cache_creation) = COUNT(*) as totalCacheCreationTokensComplete,
+        SUM(CASE WHEN tokens_cache_read > 0 OR tokens_cache_creation > 0 THEN 1 ELSE 0 END) as cachedRequests
       FROM usage_history
-      WHERE tokens_cache_read > 0 OR tokens_cache_creation > 0
     `
       )
       .get() as
       | {
+          estimated: number;
+          cachedRequests: number;
+          totalCachedTokensComplete: number;
+          totalCacheCreationTokensComplete: number;
           totalRequests: number;
           totalInputTokens: number | null;
           totalCachedTokens: number | null;
@@ -50,11 +57,13 @@ export async function getCacheMetrics() {
         SUM(CASE WHEN tokens_cache_read > 0 OR tokens_cache_creation > 0 THEN 1 ELSE 0 END) as cachedRequests,
         SUM(CASE WHEN tokens_cache_read > 0 OR tokens_cache_creation > 0 THEN tokens_input ELSE 0 END) as inputTokens,
         SUM(tokens_cache_read) as cachedTokens,
-        SUM(tokens_cache_creation) as cacheCreationTokens
+        SUM(tokens_cache_creation) as cacheCreationTokens,
+        MAX(CASE WHEN usage_provenance = 'estimated' THEN 1 ELSE 0 END) as estimated,
+        COUNT(tokens_cache_read) = COUNT(*) as cachedTokensComplete,
+        COUNT(tokens_cache_creation) = COUNT(*) as cacheCreationTokensComplete
       FROM usage_history
       WHERE provider IS NOT NULL
       GROUP BY provider
-      HAVING cachedRequests > 0
     `
       )
       .all() as Array<{
@@ -63,7 +72,10 @@ export async function getCacheMetrics() {
       cachedRequests: number;
       inputTokens: number | null;
       cachedTokens: number | null;
+      estimated: number;
       cacheCreationTokens: number | null;
+      cachedTokensComplete: number;
+      cacheCreationTokensComplete: number;
     }>;
 
     // Aggregate by combo strategy (direct requests stored as 'direct')
@@ -75,9 +87,11 @@ export async function getCacheMetrics() {
         COUNT(*) as requests,
         SUM(tokens_input) as inputTokens,
         SUM(tokens_cache_read) as cachedTokens,
-        SUM(tokens_cache_creation) as cacheCreationTokens
+        SUM(tokens_cache_creation) as cacheCreationTokens,
+        MAX(CASE WHEN usage_provenance = 'estimated' THEN 1 ELSE 0 END) as estimated,
+        COUNT(tokens_cache_read) = COUNT(*) as cachedTokensComplete,
+        COUNT(tokens_cache_creation) = COUNT(*) as cacheCreationTokensComplete
       FROM usage_history
-      WHERE (tokens_cache_read > 0 OR tokens_cache_creation > 0)
       GROUP BY combo_strategy
     `
       )
@@ -86,16 +100,22 @@ export async function getCacheMetrics() {
       requests: number;
       inputTokens: number | null;
       cachedTokens: number | null;
+      estimated: number;
       cacheCreationTokens: number | null;
+      cachedTokensComplete: number;
+      cacheCreationTokensComplete: number;
     }>;
 
-    const tokensSaved = totalsRow?.totalCachedTokens || 0;
+    const tokensSaved = totalsRow?.totalCachedTokens ?? null;
 
     const AVG_INPUT_PRICE_PER_MILLION = 3;
     const CACHE_DISCOUNT = 0.9;
     const estimatedCostSaved =
-      Math.round((tokensSaved / 1_000_000) * AVG_INPUT_PRICE_PER_MILLION * CACHE_DISCOUNT * 100) /
-      100;
+      tokensSaved === null
+        ? null
+        : Math.round(
+            (tokensSaved / 1_000_000) * AVG_INPUT_PRICE_PER_MILLION * CACHE_DISCOUNT * 100
+          ) / 100;
 
     // Build byProvider object
     const byProvider: Record<
@@ -105,8 +125,11 @@ export async function getCacheMetrics() {
         totalRequests: number;
         cachedRequests: number;
         inputTokens: number;
-        cachedTokens: number;
-        cacheCreationTokens: number;
+        estimated: boolean;
+        cachedTokens: number | null;
+        cacheCreationTokens: number | null;
+        cachedTokensComplete: boolean;
+        cacheCreationTokensComplete: boolean;
       }
     > = {};
     for (const row of byProviderRows) {
@@ -115,8 +138,11 @@ export async function getCacheMetrics() {
         totalRequests: row.totalRequests,
         cachedRequests: row.cachedRequests,
         inputTokens: row.inputTokens || 0,
-        cachedTokens: row.cachedTokens || 0,
-        cacheCreationTokens: row.cacheCreationTokens || 0,
+        estimated: Boolean(row.estimated),
+        cachedTokens: row.cachedTokens,
+        cacheCreationTokens: row.cacheCreationTokens,
+        cachedTokensComplete: Boolean(row.cachedTokensComplete),
+        cacheCreationTokensComplete: Boolean(row.cacheCreationTokensComplete),
       };
     }
 
@@ -126,25 +152,35 @@ export async function getCacheMetrics() {
       {
         requests: number;
         inputTokens: number;
-        cachedTokens: number;
-        cacheCreationTokens: number;
+        estimated: boolean;
+        cachedTokens: number | null;
+        cacheCreationTokens: number | null;
+        cachedTokensComplete: boolean;
+        cacheCreationTokensComplete: boolean;
       }
     > = {};
     for (const row of byStrategyRows) {
       byStrategy[row.strategy] = {
         requests: row.requests,
         inputTokens: row.inputTokens || 0,
-        cachedTokens: row.cachedTokens || 0,
-        cacheCreationTokens: row.cacheCreationTokens || 0,
+        estimated: Boolean(row.estimated),
+        cachedTokens: row.cachedTokens,
+        cacheCreationTokens: row.cacheCreationTokens,
+        cachedTokensComplete: Boolean(row.cachedTokensComplete),
+        cacheCreationTokensComplete: Boolean(row.cacheCreationTokensComplete),
       };
     }
 
     return {
+      estimated: Boolean(totalsRow?.estimated),
       totalRequests: allRequestsRow?.totalRequests || totalsRow?.totalRequests || 0,
-      requestsWithCacheControl: totalsRow?.totalRequests || 0,
+      requestsWithCacheControl: totalsRow?.cachedRequests || 0,
       totalInputTokens: totalsRow?.totalInputTokens || 0,
-      totalCachedTokens: totalsRow?.totalCachedTokens || 0,
-      totalCacheCreationTokens: totalsRow?.totalCacheCreationTokens || 0,
+      totalCachedTokens: totalsRow?.totalCachedTokens ?? null,
+      totalCacheCreationTokens: totalsRow?.totalCacheCreationTokens ?? null,
+      totalCachedTokensComplete: Boolean(totalsRow?.totalCachedTokensComplete),
+      totalCacheCreationTokensComplete: Boolean(totalsRow?.totalCacheCreationTokensComplete),
+      savingsComplete: Boolean(totalsRow?.totalCachedTokensComplete),
       tokensSaved,
       estimatedCostSaved,
       byProvider,
@@ -154,13 +190,17 @@ export async function getCacheMetrics() {
   } catch (error) {
     console.error("Failed to fetch cache metrics from usage_history:", error);
     return {
+      estimated: false,
       totalRequests: 0,
       requestsWithCacheControl: 0,
       totalInputTokens: 0,
-      totalCachedTokens: 0,
-      totalCacheCreationTokens: 0,
-      tokensSaved: 0,
-      estimatedCostSaved: 0,
+      totalCachedTokens: null,
+      totalCacheCreationTokens: null,
+      totalCachedTokensComplete: false,
+      totalCacheCreationTokensComplete: false,
+      savingsComplete: false,
+      tokensSaved: null,
+      estimatedCostSaved: null,
       byProvider: {},
       byStrategy: {},
       lastUpdated: new Date().toISOString(),
@@ -175,12 +215,15 @@ export async function updateCacheMetrics(_metrics: Record<string, unknown>) {
 }
 
 export interface CacheTrendPoint {
+  estimated: boolean;
   timestamp: string;
   requests: number;
   cachedRequests: number;
   inputTokens: number;
-  cachedTokens: number;
-  cacheCreationTokens: number;
+  cachedTokens: number | null;
+  cacheCreationTokens: number | null;
+  cachedTokensComplete: boolean;
+  cacheCreationTokensComplete: boolean;
 }
 
 export async function getCacheTrend(hours = 24): Promise<CacheTrendPoint[]> {
@@ -196,7 +239,10 @@ export async function getCacheTrend(hours = 24): Promise<CacheTrendPoint[]> {
           SUM(CASE WHEN tokens_cache_read > 0 OR tokens_cache_creation > 0 THEN 1 ELSE 0 END) as cachedRequests,
           SUM(tokens_input) as inputTokens,
           SUM(tokens_cache_read) as cachedTokens,
-          SUM(tokens_cache_creation) as cacheCreationTokens
+          SUM(tokens_cache_creation) as cacheCreationTokens,
+        MAX(CASE WHEN usage_provenance = 'estimated' THEN 1 ELSE 0 END) as estimated,
+        COUNT(tokens_cache_read) = COUNT(*) as cachedTokensComplete,
+        COUNT(tokens_cache_creation) = COUNT(*) as cacheCreationTokensComplete
         FROM usage_history
         WHERE timestamp >= datetime('now', ?)
         GROUP BY hour
@@ -209,16 +255,22 @@ export async function getCacheTrend(hours = 24): Promise<CacheTrendPoint[]> {
       cachedRequests: number;
       inputTokens: number | null;
       cachedTokens: number | null;
+      estimated: number;
       cacheCreationTokens: number | null;
+      cachedTokensComplete: number;
+      cacheCreationTokensComplete: number;
     }>;
 
     return rows.map((r) => ({
+      estimated: Boolean(r.estimated),
       timestamp: r.hour,
       requests: r.requests,
       cachedRequests: r.cachedRequests,
       inputTokens: r.inputTokens || 0,
-      cachedTokens: r.cachedTokens || 0,
-      cacheCreationTokens: r.cacheCreationTokens || 0,
+      cachedTokens: r.cachedTokens,
+      cacheCreationTokens: r.cacheCreationTokens,
+      cachedTokensComplete: Boolean(r.cachedTokensComplete),
+      cacheCreationTokensComplete: Boolean(r.cacheCreationTokensComplete),
     }));
   } catch (error) {
     console.error("Failed to fetch cache trend:", error);

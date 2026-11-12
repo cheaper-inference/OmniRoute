@@ -133,6 +133,16 @@
     "saveError": "Não foi possível guardar o modo de serviço. Tente novamente."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "comunicado",
+      "estimated": "estimado",
+      "unknown": "Não disponível",
+      "unknownSource": "origem desconhecida",
+      "containsEstimates": "Inclui utilização estimada",
+      "historicalUnknown": "A origem de alguns dados de utilização é desconhecida",
+      "catalogueCost": "Estimativa pelo catálogo, não é faturação do fornecedor",
+      "loadError": "Não foi possível carregar os registos de utilização. Tente atualizar."
+    },
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",

@@ -1,3 +1,5 @@
+import { serializeUsageEvidence, storedUsageEvidence } from "../usage/storedUsageEvidence";
+import type { UsageEvidence } from "../usage/usageEvidence";
 import { logicalCallSql } from "./logicalCallSql";
 /**
  * db/costLedger.ts — Per-request cost ledger (RIC-741 / M3 D2).
@@ -22,6 +24,8 @@ import { toNumber } from "@/shared/utils/numeric";
 // ---------------------------------------------------------------------------
 
 export interface CostLedgerEntry {
+  usageEvidence?: UsageEvidence | null;
+  costEstimated?: boolean;
   apiKeyId: string;
   provider: string;
   model: string;
@@ -40,12 +44,16 @@ export interface CostLedgerEntry {
 }
 
 export interface LedgerAggregate {
+  estimated?: boolean;
+  costEstimated?: boolean;
   amountUsd: number;
   requestCount: number;
 }
 
 /** One priced call belonging to a run, as read by {@link getCostBySessionTag}. */
 export interface RunCostRow {
+  usageEvidence?: UsageEvidence | null;
+  costEstimated?: boolean;
   provider: string;
   model: string;
   tokensInput: number;
@@ -85,8 +93,8 @@ export function recordLedgerEntry(entry: CostLedgerEntry): void {
       api_key_id, provider, model,
       tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
       unit_price_input, unit_price_output, amount_usd,
-      service_tier, success, timestamp, request_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      service_tier, success, timestamp, request_id, usage_evidence
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
   ).run(
     entry.apiKeyId,
@@ -103,7 +111,8 @@ export function recordLedgerEntry(entry: CostLedgerEntry): void {
     entry.serviceTier || "standard",
     entry.success === false ? 0 : 1,
     entry.timestamp || new Date().toISOString(),
-    entry.requestId ?? null
+    entry.requestId ?? null,
+    serializeUsageEvidence(entry.usageEvidence)
   );
 }
 
@@ -131,8 +140,8 @@ export function recordLedgerEntries(entries: CostLedgerEntry[]): void {
       api_key_id, provider, model,
       tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
       unit_price_input, unit_price_output, amount_usd,
-      service_tier, success, timestamp, request_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      service_tier, success, timestamp, request_id, usage_evidence
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
   );
   const tx = db.transaction((rows: CostLedgerEntry[]) => {
@@ -153,7 +162,8 @@ export function recordLedgerEntries(entries: CostLedgerEntry[]): void {
         entry.serviceTier || "standard",
         entry.success === false ? 0 : 1,
         entry.timestamp || new Date().toISOString(),
-        entry.requestId ?? null
+        entry.requestId ?? null,
+        serializeUsageEvidence(entry.usageEvidence)
       );
     }
   });
@@ -167,6 +177,7 @@ export function recordLedgerEntries(entries: CostLedgerEntry[]): void {
 function getAggRow(row: unknown): LedgerAggregate {
   const r = asRecord(row);
   return {
+    ...(toNumber(r.estimated_count) > 0 ? { estimated: true, costEstimated: true } : {}),
     amountUsd: toNumber(r.amount_usd ?? r.totalUsd),
     requestCount: toNumber(r.request_count ?? r.cnt),
   };
@@ -189,7 +200,8 @@ export function aggregateLedger(
     .prepare(
       `SELECT
          COALESCE(SUM(amount_usd), 0) AS amount_usd,
-         COUNT(*) AS request_count
+         COUNT(*) AS request_count,
+         SUM(CASE WHEN usage_evidence LIKE '%"source":"estimated"%' THEN 1 ELSE 0 END) AS estimated_count
        FROM request_cost_ledger
        WHERE api_key_id = ? AND timestamp >= ?${successClause}`
     )
@@ -260,6 +272,7 @@ export function listLedgerEntries(
   return rows.map((r) => {
     const row = asRecord(r);
     return {
+      ...storedUsageEvidence(row),
       apiKeyId,
       provider: typeof row.provider === "string" ? row.provider : "",
       model: typeof row.model === "string" ? row.model : "",
@@ -311,7 +324,7 @@ export function getCostBySessionTag(sessionTag: string): RunCostRow[] {
     .prepare(
       `SELECT r.provider, r.model, r.tokens_input, r.tokens_output,
               r.tokens_cache_read, r.tokens_cache_creation, r.tokens_reasoning,
-              r.amount_usd, r.request_id, r.timestamp
+              r.amount_usd, r.request_id, r.timestamp, r.usage_evidence
        FROM call_logs c
        JOIN request_cost_ledger r ON r.request_id = c.correlation_id
        WHERE ${logicalCallSql("c")} AND c.session_tag = ?
@@ -322,6 +335,7 @@ export function getCostBySessionTag(sessionTag: string): RunCostRow[] {
   return rows.map((r) => {
     const row = asRecord(r);
     return {
+      ...storedUsageEvidence(row),
       provider: typeof row.provider === "string" ? row.provider : "",
       model: typeof row.model === "string" ? row.model : "",
       tokensInput: toNumber(row.tokens_input),

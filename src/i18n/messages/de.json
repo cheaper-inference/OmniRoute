@@ -133,6 +133,16 @@
     "saveError": "Der Service-Modus konnte nicht gespeichert werden. Bitte erneut versuchen."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "gemeldet",
+      "estimated": "geschätzt",
+      "unknown": "Nicht verfügbar",
+      "unknownSource": "Quelle unbekannt",
+      "containsEstimates": "Enthält geschätzte Nutzung",
+      "historicalUnknown": "Die Herkunft einiger Nutzungsdaten ist unbekannt",
+      "catalogueCost": "Schätzung nach Preisliste, keine Anbieterabrechnung",
+      "loadError": "Nutzungsprotokolle konnten nicht geladen werden. Bitte neu laden."
+    },
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",

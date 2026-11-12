@@ -133,6 +133,16 @@
     "saveError": "Režim služby sa nepodarilo uložiť. Skúste to znova."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "nahlásené",
+      "estimated": "odhadované",
+      "unknown": "Nedostupné",
+      "unknownSource": "neznámy zdroj",
+      "containsEstimates": "Obsahuje odhadované využitie",
+      "historicalUnknown": "Pôvod niektorých údajov o využití nie je známy",
+      "catalogueCost": "Odhad podľa cenníka, nie vyúčtovanie poskytovateľa",
+      "loadError": "Záznamy využitia sa nedajú načítať. Skúste obnoviť stránku."
+    },
     "save": "Uložiť",
     "cancel": "Zrušiť",
     "delete": "Odstrániť",

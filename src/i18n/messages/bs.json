@@ -133,6 +133,16 @@
     "saveError": "Nije moguće sačuvati režim usluge. Pokušajte ponovo."
   },
   "common": {
+    "usageEvidence": {
+      "reported": "prijavljeno",
+      "estimated": "procijenjeno",
+      "unknown": "Nije dostupno",
+      "unknownSource": "nepoznat izvor",
+      "containsEstimates": "Sadrži procijenjenu potrošnju",
+      "historicalUnknown": "Porijeklo dijela potrošnje nije poznato",
+      "catalogueCost": "Procjena prema cjenovniku, nije račun pružaoca usluge",
+      "loadError": "Nije moguće učitati evidenciju potrošnje. Pokušajte osvježiti."
+    },
     "save": "Sačuvaj",
     "cancel": "Otkaži",
     "delete": "Obriši",
