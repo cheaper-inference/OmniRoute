@@ -5679,6 +5679,7 @@
     "usageTracking": "Spremljanje porabe",
     "securityDesc": "Nastavite geslo, da zaščitite nadzorno ploščo, ali pa ta korak za zdaj preskočite.",
     "securityDescSkipWarning": "⚠️ Brez gesla med nastavitvijo ne boste mogli dodati ponudnikov. Dodate jih lahko pozneje na nadzorni plošči, ko nastavite geslo.",
+    "passwordAlreadySet": "Geslo za nadzorno ploščo je že nastavljeno. Pozneje ga lahko spremenite v Nastavitvah.",
     "providerDesc": "Povežite svojega prvega ponudnika umetne inteligence. Več jih lahko dodate pozneje.",
     "providerRequiresPassword": "Če želite dodati ponudnike, morate najprej nastaviti geslo. Vrnite se na korak za varnost in nastavite geslo ali pa ponudnike dodajte pozneje na nadzorni plošči.",
     "apiKeyRequired": "Ključ API-ja (obvezno)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Označba mesta za spletni piškotek Grok",
     "herokuBaseUrlHint": "Namig za osnovni URL storitve Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skrij e-poštni naslov",
     "imageProviders": "Ponudniki slik",
     "videoProviders": "Ustvarjanje videoposnetkov",
@@ -7236,7 +7238,8 @@
       "kiro": "Brezplačna raven: 50 dobroimetij/mesec (~25.000–100.000 žetonov). ⚠️ Pogoji uporabe storitve Kiro prepovedujejo uporabo posrednikov ali ogrodij tretjih oseb.",
       "codex": "Povežite OpenAI Codex z obstoječim postopkom OAuth.",
       "qwen": "Povežite Qwen Code z obstoječim postopkom OAuth.",
-      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens"
+      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} sprejema izvorne ID-je modelov ponudnika. Uvozite jih iz /models ali dodajte ID-je po meri za usmerjanje.",
     "bedrockModelsDescription": "Modeli Amazon Bedrock so omejeni na regijo AWS. Uvozite jih iz /models ali dodajte ID-je modelov Bedrock, omogočene v izbrani regiji.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "Neveljaven JSON.",
     "mappingMustBeObject": "Preslikava mora biti objekt JSON, ne polje ali primitivna vrednost.",
     "mappingValueMustBeString": "Vrednost ključa »{key}« mora biti niz.",
-    "save": "Shrani"
+    "save": "Shrani",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12870,6 +12877,8 @@
     },
     "attempts": "poskusi",
     "detail": {
+      "tabOverview": "Pregled",
+      "tabPayloads": "Koristne vsebine",
       "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
       "noHttpResponse": "Odgovor HTTP ni bil zaznan",
       "transportError": "Napaka prenosa",

@@ -342,6 +342,20 @@ export function resolveGatedCredential(
 }
 
 /**
+ * Credential headers for Zen's `/v1/responses` endpoint (#12633 / #19315). The gated public
+ * lane expects `x-api-key` only, while an OpenCode Console key also needs
+ * `Authorization: Bearer` (otherwise 401 "Missing API key."), so a keyed request sends both.
+ */
+export function applyZenResponsesAuth(
+  headers: Record<string, string>,
+  key: string,
+  gatedScope: boolean
+): void {
+  headers["x-api-key"] = key;
+  if (!gatedScope) headers["Authorization"] = `Bearer ${key}`;
+}
+
+/**
  * Base URL of the Bun relay (`scripts/ops/opencode-free-relay.ts`), from
  * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Throws when the
  * URL is plaintext `http://` on a non-loopback host. Read per call.

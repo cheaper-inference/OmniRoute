@@ -554,6 +554,8 @@ export default function AddApiKeyModal({
         )}
         {bulkSupported && (
           <SegmentedControl
+            semantics="radio"
+            aria-label={getAddCredentialModalTitle(t, providerDisplayName, webSessionCredential)}
             size="sm"
             value={mode}
             onChange={(next) => {

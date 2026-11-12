@@ -5679,6 +5679,7 @@
     "usageTracking": "उपयोग ट्रैकिंग",
     "securityDesc": "अपने डैशबोर्ड की सुरक्षा के लिए एक पासवर्ड सेट करें, या अभी के लिए छोड़ें।",
     "securityDescSkipWarning": "⚠️ पासवर्ड के बिना, आप सेटअप के दौरान प्रदाता नहीं जोड़ पाएँगे। पासवर्ड सेट करने के बाद आप उन्हें डैशबोर्ड से जोड़ सकते हैं।",
+    "passwordAlreadySet": "डैशबोर्ड पासवर्ड पहले से सेट है। आप इसे बाद में सेटिंग्स में बदल सकते हैं।",
     "providerDesc": "अपना पहला AI प्रदाता कनेक्ट करें. आप बाद में और भी जोड़ सकते हैं.",
     "providerRequiresPassword": "प्रदाता जोड़ने के लिए आपको पहले पासवर्ड सेट करना होगा। कृपया सुरक्षा चरण पर वापस जाकर पासवर्ड सेट करें, या बाद में डैशबोर्ड से प्रदाता जोड़ें।",
     "apiKeyRequired": "एपीआई कुंजी (आवश्यक)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "मेरी-जीसीपी-प्रोजेक्ट-आईडी",
     "grokWebCookiePlaceholder": "Grok वेब कुकी प्लेसहोल्डर",
     "herokuBaseUrlHint": "Heroku बेस URL संकेत",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ईमेल छिपाएँ",
     "imageProviders": "इमेज प्रदाता",
     "videoProviders": "वीडियो जनरेशन",
@@ -7227,7 +7229,8 @@
       "kiro": "फ्री टियर: 50 क्रेडिट/महीना (~25K–100K टोकन)। ⚠️ Kiro ToS तृतीय-पक्ष प्रॉक्सी/हार्नेस के उपयोग को प्रतिबंधित करता है।",
       "codex": "OpenAI Codex को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
       "qwen": "Qwen Code को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
-      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं"
+      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} प्रदाता-मूल मॉडल आईडी स्वीकार करता है। /मॉडल से आयात करें या रूटिंग के लिए कस्टम आईडी जोड़ें।",
     "bedrockModelsDescription": "अमेज़ॅन बेडरॉक मॉडल का दायरा AWS क्षेत्र द्वारा तय किया गया है। /मॉडल से आयात करें या चयनित क्षेत्र में सक्षम बेडरॉक मॉडल आईडी जोड़ें।",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "अमान्य JSON।",
     "mappingMustBeObject": "मैपिंग एक JSON ऑब्जेक्ट होना चाहिए, न कि कोई ऐरे या प्रिमिटिव मान।",
     "mappingValueMustBeString": "कुंजी “{key}” का मान एक स्ट्रिंग होना चाहिए।",
-    "save": "सहेजें"
+    "save": "सहेजें",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12870,6 +12877,8 @@
     },
     "attempts": "प्रयास",
     "detail": {
+      "tabOverview": "सिंहावलोकन",
+      "tabPayloads": "पेलोड",
       "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
       "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
       "transportError": "परिवहन त्रुटि",
