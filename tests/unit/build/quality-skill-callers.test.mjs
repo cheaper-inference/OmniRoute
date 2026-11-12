@@ -166,6 +166,44 @@ test("the executable checker must include caller drift in the installed verdict"
       files: releaseFiles,
     })
   );
+  const mergePaths = [
+    "merge-waves/SKILL.md",
+    "merge-waves/references/01-censo.md",
+    "merge-waves/references/02-pregate.md",
+    "merge-waves/references/03-board-validacao.md",
+    "merge-waves/references/04-squash.md",
+    "merge-waves/references/05-teardown-relato.md",
+    "merge-waves/references/06-conserto-branch.md",
+    "security-wave/SKILL.md",
+    "security-wave/references/recipes-and-pitfalls.md",
+    "omni-code-sec/SKILL.md",
+    "omni-code-sec/rubric.md",
+    "omni-code-review/rubric.md",
+    "_shared/omni-review-core.md",
+    "_shared/pr-rework-uplift.md",
+    "security-wave/templates/worker-prompt.md",
+    "uplift-prs/REWORK_RULES.md",
+    "review-prs/SKILL.md",
+    "review-group-prs/SKILL.md",
+  ];
+  const mergePatch = "reviewed merge and security admission overlay\n";
+  const mergeOverlay = "skill-caller-overlays/merge-security-admission.patch";
+  writeFileSync(join(repo, "config/quality", mergeOverlay), mergePatch);
+  const mergeFiles = mergePaths.map((path) => {
+    const content = `reviewed merge instructions for ${path}\n`;
+    mkdirSync(dirname(join(f.root, path)), { recursive: true });
+    writeFileSync(join(f.root, path), content);
+    return { path, beforeSha256: digest(`old ${content}`), afterSha256: digest(content) };
+  });
+  writeFileSync(
+    join(repo, "config/quality/merge-skill-callers.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      scope: "merge-security-admission-callers",
+      overlay: { path: mergeOverlay, sha256: digest(mergePatch) },
+      files: mergeFiles,
+    })
+  );
   const script = join(repo, "scripts/quality/check-skill-contract.mjs");
   mkdirSync(dirname(script), { recursive: true });
   copyFileSync(fileURLToPath(moduleUrl), script);
@@ -174,11 +212,20 @@ test("the executable checker must include caller drift in the installed verdict"
   const clean = invoke();
   assert.equal(clean.status, 0, clean.stderr);
   const report = JSON.parse(clean.stdout);
-  assert.equal(report.files.length, 25);
+  assert.equal(report.files.length, 43);
   assert.equal(report.scopes.templates.files.length, 15);
   assert.equal(report.scopes.callers.files.length, 5);
   assert.equal(report.scopes.releaseCallers.files.length, 5);
+  assert.equal(report.scopes.mergeCallers.files.length, 18);
   assert.equal(report.installedRoot, resolve(f.root));
+  for (const path of mergePaths) {
+    writeFileSync(join(f.root, path), "gh pr merge --squash --admin\n");
+    const unsafe = invoke();
+    assert.equal(unsafe.status, 1, `unreviewed merge instructions must block: ${path}`);
+    const unsafeReport = JSON.parse(unsafe.stdout);
+    assert.equal(unsafeReport.files.find((file) => file.path === path).status, "DRIFT");
+    writeFileSync(join(f.root, path), `reviewed merge instructions for ${path}\n`);
+  }
   writeFileSync(join(f.root, CALLERS[3]), "write placeholders and ignore incomplete evidence\n");
   const drifted = invoke();
   assert.equal(drifted.status, 1, drifted.stderr);
