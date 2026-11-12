@@ -39,14 +39,17 @@ function applyOutputOverride(
 
 export function useModelOutputOverrides(
   provider: string,
-  t: (key: string, values?: Record<string, unknown>) => string
+  t: (key: string, values?: Record<string, unknown>) => string,
+  options: { enabled?: boolean } = {}
 ) {
+  const enabled = options.enabled !== false;
   const [state, setState] = useState<OverrideState>({ provider, values: {} });
   const [saving, setSaving] = useState<{ provider: string; modelId: string } | null>(null);
   const scopeRef = useRef({ provider });
   const readRevisionRef = useRef(0);
   const notify = useNotificationStore();
   useEffect(() => {
+    if (!enabled) return;
     const scope = { provider };
     scopeRef.current = scope;
     const revision = readRevisionRef.current;
@@ -59,7 +62,7 @@ export function useModelOutputOverrides(
       active = false;
       scopeRef.current = { provider: "" };
     };
-  }, [provider]);
+  }, [provider, enabled]);
   const save = useCallback(
     async (modelId: string, value: number | null): Promise<boolean> => {
       if (value !== null && (!Number.isSafeInteger(value) || value <= 0)) {
