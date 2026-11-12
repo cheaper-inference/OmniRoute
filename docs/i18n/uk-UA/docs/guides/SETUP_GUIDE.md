@@ -191,9 +191,9 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Налаштування протоколів (MCP + A2A)
+## Налаштування протоколу (MCP + A2A)
 
-### Налаштування MCP (Model Context Protocol)
+### Налаштування MCP (протокол контексту моделі)
 
 Запустіть транспорт MCP у режимі stdio:
 
@@ -201,31 +201,31 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 omniroute --mcp
 ```
 
-Рекомендована послідовність перевірки:
+Рекомендований процес перевірки:
 
 ```bash
-# 1. Запустіть сервер MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Зі свого клієнта MCP викличте:
-omniroute_get_health        # Має повернути стан системи
-omniroute_list_combos       # Має повернути активні комбінації
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Або запустіть повний набір наскрізних тестів:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Налаштування клієнта MCP
+#### Конфігурація клієнта MCP
 
-**Claude Code:**
+**код Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Додайте до налаштувань MCP:
+Додайте до налаштувань MCP (stdio, з ключем, щоб абонент мав принципала):
 
 ```json
 {
@@ -233,15 +233,22 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Повна документація MCP:** [README сервера MCP](../../open-sse/mcp-server/README.md) — 110 інструментів, конфігурації IDE, клієнти Python/TS/Go.
+Або, коли `mcpTransport` дорівнює `streamable-http` (встановіть його на `/dashboard/mcp` або за допомогою `omniroute mcp enable --transport streamable-http`), вкажіть запис віддаленого сервера MCP клієнта на `http://localhost:20128/api/mcp/stream`.
 
-### Налаштування A2A (Agent-to-Agent Protocol)
+Ключ передається як `Authorization: Bearer <api-key>` (див. [MCP Server → Віддалений доступ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) для віддалених хостів; для віддаленого ключа потрібен `mcp:connect` плюс його області read/write ).
+
+**Повна документація MCP :** [Сервер MCP README](../../open-sse/mcp-server/README.md) — 110 інструменти, конфігурації IDE, клієнти Python/TS/Go. Довідник оператора для інструментів стиснення CCR/dedup (маркери, передумови, області дії для кожного інструменту, пошукові сторінки, діагностика): [механізми стиснення → Prerequisites / посібник оператора](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Налаштування A2A (протокол між агентами)
 
 Перевірте картку агента:
 
@@ -249,7 +256,7 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Надішліть завдання:
+Надіслати завдання:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Повна документація A2A:** [README сервера A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, навички, потокове передавання, життєвий цикл завдань.
+**Повна документація A2A :** [A2A сервер README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, навички, потокове передавання, життєвий цикл завдання.
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Шаблон Void Linux (xbps-src)
+## Шаблон Void Linux (xbps-src).
 
-Користувачі Void Linux можуть зібрати нативний пакет за допомогою `xbps-src`. Збережіть цей блок як `srcpkgs/omniroute/template`:
+Для користувачів Void Linux ви можете створити нативний пакет за допомогою `xbps-src`. Збережіть цей блок як `srcpkgs/omniroute/template`:
 
 ```bash
-# Файл шаблону для 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Повторно створюйте контрольну суму для кожного випуску за допомогою:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

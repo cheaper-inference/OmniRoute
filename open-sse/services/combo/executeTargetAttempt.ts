@@ -22,6 +22,7 @@ import {
 import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
+import { isMusePolicyRefusal } from "../musePolicyRefusal.ts";
 import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -71,6 +72,8 @@ import {
   isModelScoped400,
   isContextOverflowFailure,
   requestScopedReplayKey,
+  clampDeadlineFailureBudget,
+  isReadinessDeadlineFailure,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
@@ -410,7 +413,15 @@ export async function executeTargetAttempt(
         deps.clientRequestedStream,
         deps.log,
         deps.config.responseValidation as ResponseValidationConfig | null | undefined,
-        preContentTransportRecovery ? deps.signal : null,
+        targetSignal
+          ? preContentTransportRecovery
+            ? AbortSignal.any(
+                [deps.signal, targetSignal].filter((signal): signal is AbortSignal => !!signal)
+              )
+            : targetSignal
+          : preContentTransportRecovery
+            ? deps.signal
+            : null,
         await isTrustedEmptyTurn(provider, result, target.connectionId),
         preContentTransportRecovery
       );
@@ -419,6 +430,14 @@ export async function executeTargetAttempt(
         void quality.clonedResponse?.body?.cancel().catch(() => {});
         releaseRejectedQualityResponse(qualityClone, result);
         return { ok: false, response: errorResponse(499, "Client disconnected") };
+      }
+      // The per-target timers are gone once the first-output gate passed, so an abort here comes
+      // from the parent (a hedge sibling won, a fatal sibling, or the loop safety). The quality
+      // peek reports such an abort as valid; it is not a success of this target.
+      if (targetSignal?.aborted) {
+        void quality.clonedResponse?.body?.cancel().catch(() => {});
+        releaseRejectedQualityResponse(qualityClone, result);
+        return null;
       }
       if (!quality.valid) {
         releaseRejectedQualityResponse(qualityClone, result);
@@ -895,7 +914,9 @@ export async function executeTargetAttempt(
     // treated as local to that target and the combo continues to the next target.
     // Error classification is retained only for retry/cooldown pacing; it must
     // not decide whether fallback happens, including for generic 400 responses.
-    const scopedFailure = isScopedFailure(result, errorText, structuredError);
+    const scopedFailure =
+      (provider === "muse-code" && isMusePolicyRefusal(result.status, errorText)) ||
+      isScopedFailure(result, errorText, structuredError);
 
     // #8375: input-bound request-scoped failures (context_length_exceeded) are
     // deterministic for the same input — retrying on other accounts of the same
@@ -1295,6 +1316,27 @@ export async function executeTargetAttempt(
       code: structuredError?.code,
     });
     state.lastStatus = result.status;
+    // Opt-in sub-budget for readiness-deadline failures
+    // (OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES). A stalled upstream fails the
+    // readiness window (tens of seconds to minutes) on EVERY target, and each
+    // rotation re-dispatches the full body — a few of them multiply user
+    // latency and gateway memory while the global-attempts cap (calibrated
+    // for fast failures) still has plenty of headroom. With the budget set,
+    // exhausting it terminates the combo with a clean 504 instead of
+    // rotating further targets. Unset (default) = disabled, zero change.
+    // The exit itself happens below, AFTER the model-lockout and provider-
+    // cooldown recording, so the target that exhausts the budget is charged
+    // exactly like every earlier one.
+    let deadlineFailureBudgetExhausted = 0;
+    if (isReadinessDeadlineFailure(result.status, structuredError?.code)) {
+      state.deadlineFailures++;
+      const deadlineFailureBudget = clampDeadlineFailureBudget(
+        process.env.OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES
+      );
+      if (deadlineFailureBudget > 0 && state.deadlineFailures >= deadlineFailureBudget) {
+        deadlineFailureBudgetExhausted = deadlineFailureBudget;
+      }
+    }
     state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
@@ -1356,6 +1398,20 @@ export async function executeTargetAttempt(
         targetWithConnection.connectionId ?? undefined,
         deps.resilienceSettings
       );
+    }
+
+    if (deadlineFailureBudgetExhausted > 0) {
+      deps.log.warn(
+        "COMBO",
+        `Readiness-deadline failure budget (${deadlineFailureBudgetExhausted}) exhausted — terminating combo instead of rotating further targets`
+      );
+      return {
+        ok: false,
+        response: errorResponse(
+          504,
+          `Stream readiness deadline failed on ${state.deadlineFailures} targets — terminating to avoid amplifying a stalled upstream; retry shortly`
+        ),
+      };
     }
 
     const fallbackWaitMs =

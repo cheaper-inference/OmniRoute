@@ -214,6 +214,18 @@ export type DispatchWithCooldownRetryExtra = {
 };
 
 /**
+ * The cooldown budget a wait may use now. A wait that cannot end before the combo
+ * deadline only re-enters the target loop to find it expired, which turns a pool
+ * that dispatched nothing into a silent 504 (#18998). A timeout of 0 sets no deadline.
+ */
+function resolveCooldownWaitBudgetMs(extra: DispatchWithCooldownRetryExtra): number {
+  const budgetLeftMs = extra.comboCooldownBudgetLeftMs.current;
+  if (extra.comboTimeoutMs <= 0) return budgetLeftMs;
+  const timeLeftMs = extra.comboStartTime + extra.comboTimeoutMs - Date.now();
+  return Math.min(budgetLeftMs, Math.max(0, timeLeftMs));
+}
+
+/**
  * Dispatches ordered targets with bounded set and cooldown retries, returning the first
  * success or terminal response, or an aggregate failure when eligible targets are exhausted.
  */
@@ -274,6 +286,7 @@ export async function dispatchWithCooldownRetry(opts: {
       // too — it equals the index of the target that ends up serving, i.e. the
       // value exposed as `X-OmniRoute-Fallback-Attempts`.
       state.fallbackCount = 0;
+      state.deadlineFailures = 0;
       state.recordedAttempts = 0;
       state.comboErrors = [];
 
@@ -416,6 +429,18 @@ export async function dispatchWithCooldownRetry(opts: {
         const task = (async () => {
           try {
             const res = await executeTarget(i);
+            if (anySuccess) {
+              if (res?.ok && res.response) {
+                // A sibling may win while this target is in response-quality validation,
+                // after its timeout runner returned the streaming response. Abort already
+                // reached the upstream; cancel its original body too so the losing stream
+                // cannot continue generating or hold an unread tee branch.
+                void res.response.body
+                  ?.cancel(new Error(COMBO_HEDGE_CANCELLED_REASON))
+                  .catch(() => {});
+              }
+              return;
+            }
             if (res && !anySuccess) {
               if (res.ok) {
                 anySuccess = true;
@@ -494,7 +519,8 @@ export async function dispatchWithCooldownRetry(opts: {
           Date.now() - extra.comboStartTime >= extra.comboTimeoutMs
         ) {
           state.comboExpired = true;
-          deps.log.info(
+          // Zero attempts means the budget went to waits, not upstream calls.
+          deps.log[state.recordedAttempts === 0 ? "warn" : "info"](
             "COMBO",
             `Combo global timeout (${extra.comboTimeoutMs}ms) reached after ` +
               `${i + 1}/${state.orderedTargets.length} targets (${state.recordedAttempts} attempted) — stopping`
@@ -632,7 +658,7 @@ export async function dispatchWithCooldownRetry(opts: {
           skippedForCircuitOpen: state.skippedForCircuitOpen,
           retryAfterMs: state.earliestCircuitOpenRetryMs,
           attempt: extra.comboCooldownAttempt.current,
-          budgetLeftMs: extra.comboCooldownBudgetLeftMs.current,
+          budgetLeftMs: resolveCooldownWaitBudgetMs(extra),
           settings: deps.resilienceSettings.comboCooldownWait,
         });
         if (circuitOpenWait.wait) {
@@ -662,7 +688,7 @@ export async function dispatchWithCooldownRetry(opts: {
           targets: state.orderedTargets,
           earliestRetryAfter: null,
           attempt: extra.comboCooldownAttempt.current,
-          budgetLeftMs: extra.comboCooldownBudgetLeftMs.current,
+          budgetLeftMs: resolveCooldownWaitBudgetMs(extra),
           settings: deps.resilienceSettings.comboCooldownWait,
           lookupLock: (provider, connectionId, target) => {
             const rawModel = parseModel(target?.modelStr ?? "").model || "";
@@ -851,7 +877,7 @@ export async function dispatchWithCooldownRetry(opts: {
           targets: state.orderedTargets,
           earliestRetryAfter: state.earliestRetryAfter,
           attempt: extra.comboCooldownAttempt.current,
-          budgetLeftMs: extra.comboCooldownBudgetLeftMs.current,
+          budgetLeftMs: resolveCooldownWaitBudgetMs(extra),
           settings: deps.resilienceSettings.comboCooldownWait,
           // Key each lookup on the TARGET's own model: quota-share combos are
           // single-model/multi-account (so this is identical to the previous

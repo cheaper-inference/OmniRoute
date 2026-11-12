@@ -76,7 +76,10 @@ import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
 import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
 import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getVertexCredentialCopy } from "./vertexCredentialCopy";
-import QuotaScrapingFields, { EMPTY_QUOTA_SCRAPING_FIELDS } from "./QuotaScrapingFields";
+import QuotaScrapingFields, {
+  assignQuotaScrapingProviderData,
+  EMPTY_QUOTA_SCRAPING_FIELDS,
+} from "./QuotaScrapingFields";
 import { useGitHubCreditLimitDraft } from "./GitHubCreditLimitField";
 import ConnectionEmailCard from "./ConnectionEmailCard";
 import GlmTeamQuotaFields, { EMPTY_GLM_TEAM_QUOTA_FIELDS } from "./GlmTeamQuotaFields";
@@ -680,6 +683,10 @@ export default function EditConnectionModal({
           tags: parseRoutingTagsInput(formData.routingTags),
           excludedModels: parseExcludedModelsInput(formData.excludedModels),
         };
+        // zed-hosted is OAuth-only, so its optional billing portal link would
+        // otherwise never reach the API-key branch above. The helper guards per
+        // provider, so other OAuth providers are unaffected.
+        assignQuotaScrapingProviderData(provider, formData, updates.providerSpecificData);
         if (isClaude) {
           Object.assign(updates.providerSpecificData, claudeConnectionFieldPatch(formData));
         }
@@ -1460,6 +1467,7 @@ export default function EditConnectionModal({
         {isGlm && (
           <div className="flex flex-col gap-3">
             <Select
+              native
               label={t("apiRegionLabel")}
               hint={t("apiRegionHint")}
               value={formData.apiRegion}
@@ -1529,7 +1537,7 @@ export default function EditConnectionModal({
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-text-main">
                 {t("extraApiKeysLabel")}
-                <span className="ml-2 text-[11px] font-normal text-text-muted">
+                <span className="ml-2 text-xs font-normal text-text-muted">
                   ({t("extraApiKeysHint")})
                 </span>
               </p>
@@ -1642,9 +1650,9 @@ export default function EditConnectionModal({
                 {t("add")}
               </Button>
             </div>
-            <p className="text-[11px] text-text-muted">{t("bulkPasteHint")}</p>
+            <p className="text-xs text-text-muted">{t("bulkPasteHint")}</p>
             {extraApiKeys.length > 0 && (
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {t("totalKeysRotating", { count: extraApiKeys.length + 1 })}
               </p>
             )}

@@ -87,7 +87,7 @@ export default function AutoDisableCard() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Icon name="block" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("autoDisableBannedAccounts")}</h2>
+            <h2 className="text-lg font-semibold">{t("autoDisableBannedAccounts")}</h2>
           </div>
           {editMode ? (
             <div className="flex gap-2">
@@ -145,7 +145,7 @@ export default function AutoDisableCard() {
               />
             ) : (
               <>
-                <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
                   {t("autoDisableThreshold")}
                 </h3>
                 <span className={`text-sm font-mono ${data.enabled ? "" : "text-text-muted"}`}>
@@ -160,6 +160,7 @@ export default function AutoDisableCard() {
         <div className="mt-4 rounded-lg bg-bg-subtle p-4">
           <RadioGroup
             name="auto-disable-banned-scope"
+            columns={2}
             label={t("autoDisableBannedScope")}
             description={t("autoDisableBannedScopeDesc")}
             value={current.scope}
@@ -167,7 +168,6 @@ export default function AutoDisableCard() {
               setDraft((prev) => ({ ...prev, scope: next as (typeof scopes)[number] }))
             }
             disabled={!editMode || !current.enabled}
-            orientation="horizontal"
           >
             {scopes.map((scope) => (
               <RadioGroupItem

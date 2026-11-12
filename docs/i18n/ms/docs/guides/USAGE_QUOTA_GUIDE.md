@@ -42,25 +42,25 @@ Permintaan ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 Perkhidmatan `usage.ts` merekodkan **peristiwa penggunaan** bagi setiap permintaan:
 
-| Medan              | Jenis   | Sumber                                                      |
-| ------------------ | ------- | ----------------------------------------------------------- |
-| `id`               | string  | UUID yang dijana semasa merekodkan                          |
-| `apiKeyId`         | string  | Kunci API yang memulakan permintaan                         |
-| `provider`         | string  | ID penyedia (openai, anthropic dan sebagainya)              |
-| `model`            | string  | ID model (gpt-5, claude-opus-4-6 dan sebagainya)            |
-| `comboId`          | string? | ID kombo jika dihalakan melalui kombo                       |
-| `promptTokens`     | number  | Daripada respons huluan                                     |
-| `completionTokens` | number  | Daripada respons huluan                                     |
-| `cachedTokens`     | number  | Token padanan cache (cache gesaan Anthropic dan sebagainya) |
-| `totalTokens`      | number  | gesaan + pelengkapan                                        |
-| `costUsd`          | number  | Dikira daripada data harga                                  |
-| `latencyMs`        | number  | Tempoh permintaan dari hujung ke hujung                     |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`  |
-| `errorClass`       | string? | Kelas ralat jika status != success                          |
-| `timestamp`        | string  | ISO 8601 UTC                                                |
-| `metadata`         | object  | Data tersuai yang disuntik oleh pemalam                     |
+| Medan              | Jenis   | Sumber                                                          |
+| ------------------ | ------- | --------------------------------------------------------------- |
+| `id`               | string  | UUID yang dijana semasa perekodan                               |
+| `apiKeyId`         | string  | Kunci API yang memulakan permintaan                             |
+| `provider`         | string  | ID penyedia (openai, anthropic, dll.)                           |
+| `model`            | string  | ID model (gpt-5, claude-opus-4-6, dll.)                         |
+| `comboId`          | string? | ID kombo jika dihalakan melalui kombo                           |
+| `promptTokens`     | number  | Daripada respons huluan                                         |
+| `completionTokens` | number  | Daripada respons huluan                                         |
+| `cachedTokens`     | number  | Token yang ditemui dalam cache (caching prompt Anthropic, dll.) |
+| `totalTokens`      | number  | prompt + pelengkapan                                            |
+| `costUsd`          | number  | Dikira daripada data harga                                      |
+| `latencyMs`        | number  | Tempoh permintaan dari awal hingga akhir                        |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`      |
+| `errorClass`       | string? | Kelas ralat jika status != success                              |
+| `timestamp`        | string  | ISO 8601 UTC                                                    |
+| `metadata`         | object  | Data tersuai yang disuntik oleh pemalam                         |
 
-### Sumber Token
+### Asal Token
 
 Token diekstrak daripada respons penyedia huluan dalam **pengendali respons**:
 
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Bagi penyedia yang tidak mengembalikan penggunaan (sesetengah penyedia kuki web), OmniRoute **menganggarkan** token menggunakan heuristik `~4 aksara bagi setiap token` (lihat `open-sse/services/autoCombo/pipelineRouter.ts`).
+Bagi penyedia yang tidak mengembalikan maklumat penggunaan (sesetengah penyedia kuki web), OmniRoute **menganggarkan** token menggunakan heuristik `~4 chars per token` (lihat `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Token Dicache
+### Token yang Dicache
 
 OmniRoute menjejaki `cached_tokens` secara berasingan daripada `prompt_tokens` kerana:
 
-- Cache gesaan Anthropic mengenakan kadar yang lebih rendah untuk token dicache (10% daripada kadar biasa)
-- Sesetengah penyedia mengembalikan `cache_read_input_tokens` yang perlu ditetapkan harga secara berbeza
-- Analitik boleh menunjukkan **kadar padanan cache** = `cached_tokens / prompt_tokens`
+- Caching prompt Anthropic mengenakan kadar yang lebih rendah untuk token yang dicache (10% daripada kadar biasa)
+- Sesetengah penyedia mengembalikan `cache_read_input_tokens` yang sepatutnya dikenakan harga berbeza
+- Analitik boleh menunjukkan **kadar hit cache** = `cached_tokens / prompt_tokens`
+
+### Diagnostik peringkat penulisan cache
+
+Panel kesihatan cache prompt pada papan pemuka Analitik membezakan penulisan cache
+5 minit dan 1 jam yang dilaporkan oleh penyedia. Nilai
+`usage.cache_creation.ephemeral_5m_input_tokens` dan
+`usage.cache_creation.ephemeral_1h_input_tokens` Anthropic dikekalkan sepanjang penukaran
+maklumat penggunaan penstriman dan bukan penstriman serta disimpan bersama ringkasan log panggilan. Jumlah
+gabungan penulisan cache tidak ditambahkan pada kategori tersebut untuk kali kedua.
+
+Panggilan yang hanya mempunyai pembilang penulisan gabungan, termasuk rekod lama, mempunyai peringkat
+yang tidak diketahui. Pecahan separa mengekalkan baki yang belum diperuntukkan sebagai tidak diketahui; pembilang yang tidak sah atau
+bercanggah ditandai dan bukannya diberikan TTL secara senyap. Penanda
+TTL pada sisi permintaan bukan bukti peringkat yang dibilkan.
+
+Anggaran penulisan setara API pada panel hanya meliputi peringkat yang dilaporkan dan mempunyai harga, bukan
+keseluruhan permintaan. Bagi penetapan harga model Claude/Anthropic asli, anggaran ini menggunakan 1.25 kali
+kadar input untuk penulisan 5 minit dan dua kali kadar input untuk penulisan 1 jam. Harga yang tiada
+dianggap tidak tersedia, bukan sifar. Harga direkodkan apabila setiap panggilan baharu dilogkan;
+harga rekod terdahulu tidak dikira semula. Oleh itu, akaun langganan boleh mempunyai
+anggaran setara API tanpa jumlah tersebut dikenakan sebagai perbelanjaan tunai atau penggunaan kuota
+langganan. Pengiraan kuota, belanjawan dan kos tepat mengikut penyedia yang sedia ada tidak berubah.
+
+Diagnostik ini menggunakan ringkasan kesihatan cache terhad dan pengekalan log panggilan
+yang sedia ada. Diagnostik ini tidak mengubah tetapan lalai TTL permintaan, penghalaan atau pemilihan akaun.
+Perekodan TTL yang diminta oleh klien berbanding TTL keluar sebenar pada titik penghantaran
+kepada penyedia ditangguhkan; panel ini melaporkan peringkat pada resit, bukan TTL keluar sebenar.
+
+Pelaksanaan: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, dan `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -125,29 +155,29 @@ Bagi model tanpa data harga, OmniRoute akan **menganggarkan kos** menggunakan ka
 
 Modul `usageAnalytics.ts` mengira widget papan pemuka daripada data penggunaan mentah. Modul ini menyokong 7 julat masa:
 
-| Julat    | Tempoh                                     | Kes penggunaan                       |
-| -------- | ------------------------------------------ | ------------------------------------ |
-| `1d`     | 24 jam terakhir                            | Pengesanan lonjakan kos mengikut jam |
-| `7d`     | 7 hari terakhir                            | Semakan mingguan                     |
-| `30d`    | 30 hari terakhir                           | Pengebilan bulanan                   |
-| `90d`    | 90 hari terakhir                           | Analisis suku tahunan                |
-| `ytd`    | Sejak 1 Jan tahun semasa                   | Penjejakan belanjawan tahunan        |
-| `all`    | Sepanjang masa                             | Statistik sepanjang hayat            |
-| `custom` | Tarikh mula/tamat yang ditentukan pengguna | Audit, pertanyaan ad hoc             |
+| Julat    | Tempoh                         | Kes penggunaan                     |
+| -------- | ------------------------------ | ---------------------------------- |
+| `1d`     | 24 jam terakhir                | Pengesanan lonjakan kos setiap jam |
+| `7d`     | 7 hari terakhir                | Semakan mingguan                   |
+| `30d`    | 30 hari terakhir               | Pengebilan bulanan                 |
+| `90d`    | 90 hari terakhir               | Analisis suku tahunan              |
+| `ytd`    | Sejak 1 Jan tahun semasa       | Penjejakan belanjawan tahunan      |
+| `all`    | Sepanjang masa                 | Statistik sepanjang hayat          |
+| `custom` | Mula/tamat ditentukan pengguna | Audit, pertanyaan ad hoc           |
 
 ### Widget Papan Pemuka yang Dikira
 
-Bagi sebarang julat tarikh, lapisan analitik mengira:
+Untuk sebarang julat tarikh, lapisan analitik mengira:
 
-| Widget                 | Penerangan                                                               |
+| Widget                 | Perihalan                                                                |
 | ---------------------- | ------------------------------------------------------------------------ |
 | **Kad ringkasan**      | Jumlah permintaan, jumlah kos, jumlah token, kadar kejayaan              |
-| **Carta trend harian** | Kos + token setiap hari, ditindan mengikut model                         |
+| **Carta trend harian** | Kos + token sehari, disusun bertindan mengikut model                     |
 | **Peta haba aktiviti** | Grid jam dalam sehari × hari dalam seminggu, warna = bilangan permintaan |
 | **Pecahan model**      | Carta pai kos mengikut model                                             |
 | **Pecahan penyedia**   | Carta bar permintaan mengikut penyedia                                   |
 | **Kunci API teratas**  | Jadual 10 kunci teratas mengikut kos                                     |
-| **Analisis ralat**     | Kadar ralat dari semasa ke semasa, kelas ralat teratas                   |
+| **Analisis ralat**     | Kadar ralat mengikut masa, kelas ralat teratas                           |
 
 ### Akses Secara Pengaturcaraan
 
@@ -174,7 +204,7 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 Kuota bagi setiap kunci API dikuatkuasakan di dua tempat:
 
 1. **Had lembut** (`quotaWarnAt`): amaran papan pemuka apabila penggunaan melebihi ambang
-2. **Had keras** (`quotaLimit`): permintaan ditolak dengan HTTP 429 apabila had dilebihi
+2. **Had keras** (`quotaLimit`): permintaan ditolak dengan HTTP 429 apabila had dilepasi
 
 ### Konfigurasi
 
@@ -182,7 +212,7 @@ Kuota bagi setiap kunci API dikuatkuasakan di dua tempat:
 // Bagi setiap kunci API
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — paparkan amaran
-  quotaLimit: 10_00,    // $10.00 — hentian keras
+  quotaLimit: 10_00,    // $10.00 — hentian mutlak
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
@@ -191,29 +221,29 @@ await updateApiKey(keyId, {
 
 ```
 Permintaan ──▶ quotaCheck()
-                 │
-                 ├── Dalam had?  ──▶ benarkan
-                 │
-                 └── Melebihi had?  ──▶ 429 Too Many Requests
-                                          dengan pengepala Retry-After
+              │
+              ├── Dalam had?  ──▶ benarkan
+              │
+              └── Melebihi had?  ──▶ 429 Too Many Requests
+                                   dengan pengepala Retry-After
 ```
 
-### Syot Kilat Kuota
+### Petikan Keadaan Kuota
 
-Jadual `quotaSnapshots` menyimpan **keadaan kuota bersejarah** untuk analisis trend:
+Jadual `quotaSnapshots` menyimpan **keadaan kuota terdahulu** untuk analisis trend:
 
-| Medan | Penerangan |
+| Medan | Perihalan |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Kunci yang dijejaki |
 | `window` | "day" | "week" | "month" |
-| `used` | Kos yang digunakan dalam tetingkap ini (sen) |
+| `used` | Kos yang digunakan dalam tempoh ini (sen) |
 | `limit` | Had (sen) |
-| `resetAt` | Masa tetingkap ditetapkan semula |
-| `createdAt` | Masa syot kilat diambil |
+| `resetAt` | Masa tempoh ditetapkan semula |
+| `createdAt` | Masa petikan keadaan diambil |
 
-Syot kilat diambil **pada setiap permintaan** yang menggunakan kos > 0, dan digunakan untuk:
+Petikan keadaan diambil **pada setiap permintaan** yang menggunakan kos > 0, dan digunakan untuk:
 
-- Memaparkan bar kemajuan kuota dalam papan pemuka
+- Memaparkan bar kemajuan kuota pada papan pemuka
 - Menunjukkan carta trend kuota 30 hari
 - Mencetuskan amaran apabila penggunaan menghampiri had
 
@@ -272,12 +302,7 @@ Respons:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,7 +313,7 @@ Respons:
 
 ### Kueri Analitik Penggunaan
 
-Data penggunaan diakses melalui papan pemuka atau alatan MCP, bukan titik akhir eksport REST secara langsung. Analitik yang tersedia:
+Data penggunaan diakses melalui papan pemuka atau alat MCP, bukan melalui titik akhir eksport REST secara langsung. Analitik yang tersedia:
 
 - **`/api/usage/analytics`** — metrik penggunaan teragregat (dikumpulkan mengikut model, penyedia, kunci)
 - **`/api/usage/quota`** — status kuota semasa bagi setiap kunci API
@@ -296,16 +321,16 @@ Data penggunaan diakses melalui papan pemuka atau alatan MCP, bukan titik akhir 
 
 ---
 
-## Alatan MCP
+## Alat MCP
 
-Dua alatan MCP mendedahkan data penggunaan kepada ejen (lihat `open-sse/mcp-server/tools/`):
+Dua alat MCP menyediakan data penggunaan kepada ejen (lihat `open-sse/mcp-server/tools/`):
 
 | Alat                    | Penerangan                                                  |
 | ----------------------- | ----------------------------------------------------------- |
 | `omniroute_cost_report` | Menjana laporan kos bagi setiap kunci untuk tempoh tertentu |
 | `omniroute_check_quota` | Mengembalikan status kuota semasa untuk kunci API           |
 
-Contoh pemanggilan ejen:
+Contoh panggilan ejen:
 
 ```json
 {
@@ -331,7 +356,7 @@ Secara lalai, sejarah penggunaan dikekalkan selama **90 hari**.
 Rekod lama dibersihkan oleh `src/lib/db/cleanup.ts`:
 
 - Dicetuskan oleh proses cron latar belakang
-- Memadamkan rekod daripada `usage_history` yang lebih lama daripada tetapan pengekalan `usageHistory` yang dikonfigurasikan
+- Memadamkan rekod daripada `usage_history` yang lebih lama daripada tempoh pengekalan yang dikonfigurasikan dalam tetapan `usageHistory`
 
 ### Anggaran Storan
 
@@ -344,7 +369,7 @@ Rekod lama dibersihkan oleh `src/lib/db/cleanup.ts`:
 
 Untuk trafik yang sangat tinggi, pertimbangkan:
 
-- Mengurangkan tempoh pengekalan melalui Tetapan Pangkalan Data
+- Memendekkan tempoh pengekalan melalui Tetapan Pangkalan Data
 - Menggunakan `aggregated_metrics` dan bukannya rekod mentah (hanya untuk analitik)
 
 ---
@@ -354,19 +379,19 @@ Untuk trafik yang sangat tinggi, pertimbangkan:
 ### 1. Gunakan Model yang Sesuai
 
 ```bash
-# Jawapan pantas — gunakan yang murah + pantas
+# Jawapan ringkas — gunakan yang murah + pantas
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Tugasan kompleks — utamakan kualiti
+# Tugas kompleks — utamakan kualiti
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Dayakan Cache
 
-Cache gesaan Anthropic menjimatkan **90% pada konteks berulang**:
+Cache prom Anthropic menjimatkan **90% bagi konteks berulang**:
 
 ```ts
-// Cache adalah automatik — hanya sertakan gesaan sistem besar yang sama
+// Cache berfungsi secara automatik — hanya sertakan prom sistem panjang yang sama
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Akan dicache secara automatik
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. Gunakan Pemampatan
 
-Pemampatan RTK + Caveman menjimatkan **15-95% pada sesi yang banyak menggunakan alat**:
+Pemampatan RTK + Caveman menjimatkan **15-95% bagi sesi yang banyak menggunakan alat**:
 
 ```ts
 const config = {
@@ -389,7 +414,7 @@ const config = {
 
 ### 4. Tetapkan Kuota bagi Setiap Kunci
 
-Sentiasa tetapkan `quotaLimit` untuk mengelakkan kos tidak terkawal:
+Sentiasa tetapkan `quotaLimit` untuk mengelakkan kos yang tidak terkawal:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Had $10/bulan
@@ -410,20 +435,20 @@ GET /api/usage/analytics?groupBy=apiKey
 ### "Kos lebih tinggi daripada yang dijangkakan"
 
 1. Semak **`/api/usage/analytics?groupBy=model`** — cari model yang mahal
-2. Semak **`/api/usage/analytics?groupBy=apiKey`** — cari pengguna yang menggunakan paling banyak sumber
-3. Sahkan data harga adalah terkini: `POST /api/pricing/sync`
+2. Semak **`/api/usage/analytics?groupBy=apiKey`** — cari pengguna dengan penggunaan tinggi
+3. Pastikan data harga adalah terkini: `POST /api/pricing/sync`
 
 ### "Rekod tiada"
 
 - Semak tetapan pengekalan DB di bawah Papan Pemuka → Pangkalan Data → Pembersihan — rekod lama dipadamkan oleh tugas pembersihan berkala (`src/lib/db/cleanup.ts`)
 - Semak ralat dalam `src/lib/db/usage*.ts` — kegagalan penulisan DB dilog tetapi tidak dipaparkan
-- Sahkan permintaan benar-benar sampai ke `chatCore` — semak penghalaan kombo
+- Pastikan permintaan benar-benar sampai ke `chatCore` — semak penghalaan kombo
 
 ### "Kuota tidak dikuatkuasakan"
 
-- Semak tetapan `quotaLimit` bagi kunci tersebut
-- Sahkan `quotaWindow` ditetapkan dengan betul
-- Cari rekod `quotaSnapshots` — rekod tersebut sepatutnya dicipta pada setiap permintaan
+- Semak tetapan `quotaLimit` kunci tersebut
+- Pastikan `quotaWindow` ditetapkan dengan betul
+- Cari rekod `quotaSnapshots` — rekod ini sepatutnya dicipta pada setiap permintaan
 
 ---
 

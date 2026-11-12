@@ -424,6 +424,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:type-scale-ratchet",
+      "command": "node scripts/check/check-type-scale-ratchet.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:ui-icu",
       "command": "node scripts/i18n/check-ui-icu.mjs",
       "disposition": "separately-invoked"
@@ -706,6 +711,11 @@
     {
       "name": "typecheck:core",
       "command": "tsc --pretty false -p tsconfig.typecheck-core.json",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "typecheck:build",
+      "command": "tsc --pretty false -p tsconfig.build.json",
       "disposition": "separately-invoked"
     },
     {

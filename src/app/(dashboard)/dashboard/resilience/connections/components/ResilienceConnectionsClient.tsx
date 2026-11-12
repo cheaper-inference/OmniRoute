@@ -188,7 +188,7 @@ export default function ResilienceConnectionsClient() {
           })}
         />
       )}
-      <div className="text-[11px] text-text-muted">{t("pollingNote")}</div>
+      <div className="text-xs text-text-muted">{t("pollingNote")}</div>
       <ConnectionsTable
         connections={data.connections}
         receivedAt={data.receivedAt ?? 0}
