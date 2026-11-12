@@ -85,13 +85,13 @@ export function detectCodeComplexity(input: RuleInput): number {
   const langIndicators = [
     /function\s+\w+\s*\(/gi,
     /const\s+\w+\s*=/gi,
-    /import\s+.*from/gi,
+    /import\s+.{0,200}?from/gi,
     /class\s+\w+/gi,
     /interface\s+\w+/gi,
     /async\s+function/gi,
     /def\s+\w+\s*\(/gi,
-    /SELECT\s+.*FROM/gi,
-    /\$\{.*\}/g,
+    /SELECT\s+.{0,500}?FROM/gi,
+    /\$\{.{0,200}?\}/g,
   ];
   const langMatches = langIndicators.reduce((sum, re) => {
     const matches = allText.match(re);
@@ -133,7 +133,7 @@ export function detectReasoningDepth(input: RuleInput): number {
     /\b(let me think|let's reason|let's analyze|step by step|breaking this down)\b/gi,
     /\b(we need to|we must|we should|the approach is|the solution involves)\b/gi,
     /(?:\d+\.\s+)(?:\w+)/g,
-    /\b(if\s+.+\s+then\s+|assuming\s+|suppose\s+|consider\s+that)\b/gi,
+    /\b(if\s+.{0,200}?\s+then\s+|assuming\s+|suppose\s+|consider\s+that)\b/gi,
   ];
 
   const reasonMatches = reasoningIndicators.reduce((sum, re) => {
