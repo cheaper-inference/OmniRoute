@@ -67,6 +67,7 @@
       "tests/unit/codex-quota-window-identity-18330.test.ts",
       "tests/unit/muse-session-ownership.test.ts",
       "tests/unit/muse-empty-response-retry.test.ts",
+      "tests/unit/muse-owner-rate-limit-429.test.ts",
       "tests/unit/deepseek-api-flash-vision.test.ts",
       "tests/unit/geminiProjectBlockAuth.test.ts",
       "tests/unit/provider-limits-recovery.test.ts",
