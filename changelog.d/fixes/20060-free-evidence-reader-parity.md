@@ -1,0 +1,1 @@
+- **fix(providers):** OpenRouter listing, model discovery and free-only import now share the paid-evidence veto. A free suffix or flag cannot override a positive price or an explicit paid flag, so contradictory entries no longer survive the hide-paid listing.
