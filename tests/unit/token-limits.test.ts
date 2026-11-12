@@ -10,6 +10,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const tokenLimits = await import("../../src/lib/db/tokenLimits.ts");
 const counter = await import("../../open-sse/services/tokenLimitCounter.ts");
+const route = await import("../../src/app/api/usage/token-limits/route.ts");
 
 const flush = () => new Promise((r) => setImmediate(r));
 
@@ -21,6 +22,108 @@ const D2 = Date.UTC(2026, 0, 11, 12);
 const W1 = Date.UTC(2026, 0, 6, 12); // Tue
 const W2 = Date.UTC(2026, 0, 13, 12); // next Tue
 const M1 = Date.UTC(2026, 0, 8, 6); // same daily window as D1? no -> Jan 8; use for "same window" daily checks separately
+
+test("fixed credit never rolls over and survives a cache restart", () => {
+  const limit = tokenLimits.upsertTokenLimit({
+    apiKeyId: "fixed-credit",
+    scopeType: "global",
+    tokenLimit: 2000000,
+    resetInterval: "never",
+  });
+  assert.equal(limit.resetInterval, "never");
+  const january = tokenLimits.resetWindowIfElapsed(limit, NOW_JAN);
+  const february = tokenLimits.resetWindowIfElapsed(limit, NOW_FEB);
+  assert.equal(january.windowStart, february.windowStart);
+  assert.equal(february.nextResetAt, null);
+  tokenLimits.incrementWindowTokens(limit.id, january.windowStart, 2000000);
+  core.resetDbInstance();
+  counter.clearTokenLimitCache();
+  const breach = counter.checkTokenLimits("fixed-credit", "", "", NOW_FEB);
+  assert.equal(breach?.tokensUsed, 2000000);
+  assert.equal(breach?.nextResetAt, null);
+});
+
+test("GET reports historical usage even before a counter is created", async () => {
+  const limit = tokenLimits.upsertTokenLimit({
+    apiKeyId: "report-history",
+    scopeType: "global",
+    tokenLimit: 2000000,
+    resetInterval: "monthly",
+  });
+  insertUsage("report-history", "openai", "gpt-4o", 100, 20, new Date().toISOString(), {
+    reasoning: 5,
+    cacheRead: 30,
+  });
+  const response = await route.GET(
+    new Request("http://localhost/api/usage/token-limits?apiKeyId=report-history")
+  );
+  const { limits } = await response.json();
+  assert.equal(limits[0].tokensUsed, 125);
+  assert.equal(limits[0].remaining, 1999875);
+  assert.equal(counter.getCurrentWindowUsage(limit, Date.now(), true), limits[0].tokensUsed);
+});
+
+test("API accepts fixed credit and reports no next reset", async () => {
+  const response = await route.POST(
+    new Request("http://localhost/api/usage/token-limits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apiKeyId: "fixed-api",
+        scopeType: "global",
+        tokenLimit: 2000000,
+        resetInterval: "never",
+        enabled: true,
+      }),
+    })
+  );
+  assert.equal(response.status, 200);
+  const report = await route.GET(
+    new Request("http://localhost/api/usage/token-limits?apiKeyId=fixed-api")
+  );
+  const { limits } = await report.json();
+  assert.equal(limits[0].resetInterval, "never");
+  assert.equal(limits[0].nextResetAt, null);
+  assert.equal(limits[0].remaining, 2000000);
+});
+
+test("fixed credit and monthly quotas coexist; increasing credit preserves consumption", async () => {
+  const fixed = tokenLimits.upsertTokenLimit({
+    apiKeyId: "top-up",
+    scopeType: "global",
+    tokenLimit: 2000000,
+    resetInterval: "never",
+  });
+  tokenLimits.upsertTokenLimit({
+    apiKeyId: "top-up",
+    scopeType: "global",
+    tokenLimit: 5000000,
+    resetInterval: "monthly",
+  });
+  counter.recordTokenUsage("top-up", "openai", "gpt-4o", 2000000);
+  await flush();
+  assert.equal(counter.checkTokenLimits("top-up")?.limitId, fixed.id);
+  tokenLimits.upsertTokenLimit({ ...fixed, tokenLimit: 3000000 });
+  assert.equal(counter.checkTokenLimits("top-up"), null);
+  assert.equal(counter.getCurrentWindowUsage(fixed, Date.now(), true), 2000000);
+  assert.equal(tokenLimits.listTokenLimits("top-up").length, 2);
+});
+
+test("API rejects impossible reset times", async () => {
+  const response = await route.POST(
+    new Request("http://localhost/api/usage/token-limits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apiKeyId: "bad-time",
+        scopeType: "global",
+        tokenLimit: 10,
+        resetTime: "25:99",
+      }),
+    })
+  );
+  assert.equal(response.status, 400);
+});
 
 async function resetStorage() {
   core.resetDbInstance();

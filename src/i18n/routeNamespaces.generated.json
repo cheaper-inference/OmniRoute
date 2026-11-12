@@ -284,6 +284,7 @@
       "sidebar",
       "stats",
       "teamCosts",
+      "tokenLimits",
       "traeAuthModal",
       "trafficInspector",
       "usageLimits"

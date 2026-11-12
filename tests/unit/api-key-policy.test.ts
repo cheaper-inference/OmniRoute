@@ -566,6 +566,27 @@ test("enforceApiKeyPolicy returns the token-limit reset instant", async () => {
   assert.equal(result.rejection.headers.get("Retry-After"), String(body.error?.retry_after));
 });
 
+test("exhausted fixed token credit rejects requests without promising a retry time", async () => {
+  const key = await createKeyWithPolicy();
+  const limit = tokenLimitsDb.upsertTokenLimit({
+    apiKeyId: key.id,
+    scopeType: "global",
+    tokenLimit: 2000000,
+    resetInterval: "never",
+  });
+  const { windowStart } = tokenLimitsDb.resetWindowIfElapsed(limit);
+  tokenLimitsDb.incrementWindowTokens(limit.id, windowStart, 2000000);
+  const policy = await loadPolicy("fixed-token-credit");
+  const result = await policy.enforceApiKeyPolicy(makePolicyRequest(key.key), "openai/gpt-4.1");
+  assert.equal(result.rejection.status, 429);
+  const body = await readErrorBody(result.rejection);
+  assert.equal(body.error?.code, "token_limit_exceeded");
+  assert.match(String(body.error?.message), /does not renew automatically/);
+  assert.equal(body.error?.retry_after, undefined);
+  assert.equal(body.error?.reset_at, undefined);
+  assert.equal(result.rejection.headers.get("Retry-After"), null);
+});
+
 test("enforceApiKeyPolicy applies blockedModels in all-access mode", async () => {
   const key = await createKeyWithPolicy({
     modelAccessMode: "all",

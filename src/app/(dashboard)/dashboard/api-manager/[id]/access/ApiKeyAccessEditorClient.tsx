@@ -391,6 +391,7 @@ function AccessLimitsPanelPanelContent({ context }: { context: AccessFormContext
   const { form } = context;
   return (
     <LimitsTab
+      apiKeyId={context.apiKey.id}
       formState={form.formState}
       setMaxSessions={form.setMaxSessions}
       setThrottleDelayMs={form.setThrottleDelayMs}

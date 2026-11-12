@@ -190,7 +190,7 @@ export interface TokenLimitBreach {
   tokensUsed: number;
   remaining: number;
   windowStart: string;
-  nextResetAt: number;
+  nextResetAt: number | null;
 }
 
 /**
