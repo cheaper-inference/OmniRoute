@@ -6753,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Zástupný text súboru cookie Grok Web",
     "herokuBaseUrlHint": "Pomocný text pre základnú URL adresu Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skryť e-mail",
     "imageProviders": "Poskytovatelia obrázkov",
     "videoProviders": "Generovanie videa",

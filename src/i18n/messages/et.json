@@ -6753,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Webi küpsise kohatäitja",
     "herokuBaseUrlHint": "Heroku baas-URL-i vihje",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Peida e-posti aadress",
     "imageProviders": "Pildipakkujad",
     "videoProviders": "Video genereerimine",

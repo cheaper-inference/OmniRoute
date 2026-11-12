@@ -10,14 +10,14 @@ import { categoricalSlot, type CategoricalSlot } from "@/shared/utils/categorica
  * ROUTING_STRATEGY_VALUES (then the internal ones), and the token is the kit series order
  * `ciChartSeriesOrder[index % 8]`:
  *
- *   chart-1 priority · cost-optimized · lkgp
- *   chart-2 weighted · reset-aware · context-optimized
- *   chart-3 round-robin · reset-window · cache-optimized
- *   chart-4 context-relay · expiry-first · fusion
- *   chart-5 fill-first · headroom · pipeline
- *   chart-6 p2c · quota-weighted · quota-share
- *   chart-7 random · strict-random
- *   chart-8 least-used · auto
+ *   chart-4 priority · cost-optimized · lkgp
+ *   chart-3 weighted · reset-aware · context-optimized
+ *   chart-6 round-robin · reset-window · cache-optimized
+ *   chart-7 context-relay · expiry-first · fusion
+ *   chart-8 fill-first · headroom · pipeline
+ *   chart-2 p2c · quota-weighted · quota-share
+ *   chart-1 random · strict-random
+ *   chart-5 least-used · auto
  *
  * Twenty-two palette entries (twenty-one public strategies plus the internal quota-share) share
  * eight colours, so the colour is only a grouping cue: every badge and node prints the strategy
