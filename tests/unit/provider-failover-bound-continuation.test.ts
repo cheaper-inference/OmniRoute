@@ -148,8 +148,8 @@ test("a Muse owner-unavailable 503 is returned as is and never failed over", asy
     emptyOriginal: null,
   } as unknown as Parameters<typeof museOwnerUnavailable>[0];
   const { response, dispatched } = await dispatchBareModel(() => {
-    const failClose = museOwnerUnavailable(owner, { allRateLimited: true });
-    assert.ok(failClose, "a credential set without the owner must fail closed");
+    const failClose = museOwnerUnavailable(owner, { connectionId: "conn-another-account" });
+    assert.ok(failClose, "selecting a different account than the owner must fail closed");
     return failClose;
   });
   assert.equal(response.status, 503);
