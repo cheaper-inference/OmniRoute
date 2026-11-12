@@ -13,3 +13,4 @@ export { buildDesiredGraph } from "./graph.ts";
 export { OWNER, ownershipDescription, parseOwnership, stableHash } from "./ownership.ts";
 export { deletionOrder, validateDesiredDag } from "./omniroute/dag.ts";
 export { liveStateHash, planOmniRoute } from "./omniroute/plan.ts";
+export { applyOmniRoute } from "./omniroute/apply.ts";
