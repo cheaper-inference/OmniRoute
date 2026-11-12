@@ -277,7 +277,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #11698/#11720 retirement PRs' combined getProviderConnectionById
     // fallback in the three write-path functions): not introduced by this PR.
     // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
-    "src/lib/db/providers.ts": 4,
+    // #18347: after an owner-fenced Codex update, re-read the durable row instead of returning
+    // the pre-write snapshot. State lookup only; it does not select or dispatch (class C).
+    "src/lib/db/providers.ts": 5,
     "src/lib/db/readCache.ts": 2,
     // #16472: guarded session-affinity eviction resolves the failed connection's shared
     // account identity before a compare-and-delete on the optional Redis store. Read-only
@@ -374,8 +376,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
     // attempt still resolves credentials through the class-A path in chat.ts, pinned to that
-    // owner's connection id — so this is a state read (class C).
-    "src/sse/handlers/chat/museOwnership.ts": 1,
+    // owner's connection id — so this is a state read (class C). Two reads: the claim, and
+    // `museSessionIsOwned` deciding whether provider failover may change provider.
+    "src/sse/handlers/chat/museOwnership.ts": 2,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
   },

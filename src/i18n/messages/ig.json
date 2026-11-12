@@ -6730,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Ebe ndokwa kuki Weebụ Grok",
     "herokuBaseUrlHint": "Ntụziaka URL ntọala Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Zoo ozi-e",
     "imageProviders": "Ndị na-eweta onyonyo",
     "videoProviders": "Mmepụta vidiyo",
