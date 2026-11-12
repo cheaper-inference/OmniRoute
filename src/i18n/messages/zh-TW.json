@@ -4481,7 +4481,7 @@
     "spend7d": "7 天支出",
     "avgCostPerRequest": "平均每次請求成本",
     "noCostDataDescription": "發起請求後，成本資料會顯示在這裡。",
-    "spendToday": "今日支出",
+    "spendToday": "1 天支出",
     "overviewLoadFailed": "載入成本概覽失敗",
     "overviewDescription": "按提供者、模型和時間段彙總成本。",
     "providerShare": "提供者佔比",
@@ -5679,6 +5679,7 @@
     "usageTracking": "使用情況追蹤",
     "securityDesc": "設定密碼以保護您的儀表板，或暫時跳過。",
     "securityDescSkipWarning": "⚠️ 若未設定密碼，您將無法在設定期間新增提供者。您可以稍後在設定密碼後，從儀表板新增提供者。",
+    "passwordAlreadySet": "已設定儀表板密碼。你可以稍後在設定中變更。",
     "providerDesc": "連線你的第一個 AI 提供者。你之後還可以繼續新增。",
     "providerRequiresPassword": "您必須先設定密碼才能新增提供者。請返回安全性步驟並設定密碼，或稍後從儀表板新增提供者。",
     "apiKeyRequired": "API 金鑰（必填）",
@@ -6051,6 +6052,8 @@
     "importFromModels": "從 /models 匯入",
     "modelsImported": "已匯入 {count} 個模型",
     "allModelsAlreadyImported": "所有模型已匯入",
+    "providerPublishesNoModelList": "此提供者不發佈模型清單 — 其內建目錄已為最新",
+    "modelsNoLongerListed": "{count, plural, one {# 個模型已不再由提供者列出} other {# 個模型已不再由提供者列出}}",
     "noNewModelsToImport": "沒有新模型可匯入 — 所有模型已在登錄檔或自定義模型列表中",
     "localCatalogFallbackStatus": "無法取得提供者的模型清單——正在顯示內建目錄",
     "discoveryDegradedStatus": "模型探索失敗 {time}",
@@ -7225,7 +7228,8 @@
       "kiro": "免費方案：每月 50 額度（約 2.5 萬至 10 萬 tokens）。⚠️ Kiro 服務條款禁止第三方代理/轉接使用。",
       "codex": "使用現有的 OAuth 流程連線 OpenAI Codex。",
       "qwen": "使用現有的 OAuth 流程連線 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT"
+      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} 接受提供者本機模型 ID。從 /models 匯入或新增用於路由的自定義 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的範圍按 AWS 區域劃分。從 /models 匯入或新增在所選區域中啟用的基岩模型 ID。",
@@ -8804,6 +8808,8 @@
     "retentionUsageHistory": "使用歷史（天）",
     "retentionMemoryEntries": "記憶體條目（天）",
     "retentionXpAuditLog": "XP 稽核記錄（天數）",
+    "mediaStoreMaxMb": "媒體儲存大小上限（MiB）",
+    "mediaStoreMaxMbHint": "已儲存的生成媒體的總大小。先刪除最舊的檔案。設定環境變數 MEDIA_STORE_MAX_MB 時以它為準。預設 2048。",
     "saveRetentionSettings": "儲存保留設定",
     "storageAutoVacuumMode": "自動真空模式",
     "storageScheduledVacuum": "預定真空",
@@ -10254,7 +10260,11 @@
     "mappingInvalidJson": "無效的 JSON。",
     "mappingMustBeObject": "對應必須是 JSON 物件，而非陣列或基本型別值。",
     "mappingValueMustBeString": "金鑰「{key}」的值必須是字串。",
-    "save": "儲存"
+    "save": "儲存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman 引擎",
@@ -12866,6 +12876,8 @@
     },
     "attempts": "嘗試次數",
     "detail": {
+      "tabOverview": "概述",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
       "noHttpResponse": "未觀察到 HTTP 回應",
       "transportError": "傳輸錯誤",

@@ -891,8 +891,9 @@ export async function runNonStreamingProviderLeg(
   });
 
   if (parsed.kind === "invalid_sse") {
+    const sseStatus = parsed.status ?? 502;
     const receipt = buildReceipt(input, {
-      httpStatus: 502,
+      httpStatus: sseStatus,
       errorType: "invalid_sse_payload",
       usage: null,
       termination: "provider_error",
@@ -903,7 +904,7 @@ export async function runNonStreamingProviderLeg(
       model: currentModel,
     });
     const errorResult = legError(
-      502,
+      sseStatus,
       parsed.message,
       new Error(parsed.message),
       null,
@@ -1150,8 +1151,10 @@ export async function runNonStreamingProviderLeg(
                 ? "invalid_sse_payload"
                 : "invalid_json_payload";
             const parseMessage = fallbackParsed.message;
+            const parseStatus =
+              (fallbackParsed.kind === "invalid_sse" && fallbackParsed.status) || 502;
             const receipt = buildReceipt(input, {
-              httpStatus: 502,
+              httpStatus: parseStatus,
               errorType: parseCode,
               usage: null,
               termination: "provider_error",
@@ -1162,7 +1165,7 @@ export async function runNonStreamingProviderLeg(
               model: nextModel,
             });
             const errorResult = legError(
-              502,
+              parseStatus,
               parseMessage,
               new Error(parseMessage),
               null,

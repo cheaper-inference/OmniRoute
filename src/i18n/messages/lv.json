@@ -4481,7 +4481,7 @@
     "spend7d": "Izdevumi 7D",
     "avgCostPerRequest": "Vidējās izmaksas uz pieprasījumu",
     "noCostDataDescription": "Sāciet veikt pieprasījumus, lai šeit parādītos izmaksu dati. Izmaksas tiek automātiski uzskaitītas visiem nodrošinātājiem.",
-    "spendToday": "Izdevumi šodien",
+    "spendToday": "Izdevumi 1 dienā",
     "overviewLoadFailed": "Neizdevās ielādēt izmaksu pārskatu",
     "overviewDescription": "Reāllaika izdevumu sadalījums visiem pieslēgtajiem nodrošinātājiem un modeļiem",
     "providerShare": "Nodrošinātāju īpatsvars",
@@ -5679,6 +5679,7 @@
     "usageTracking": "Izmantošanas uzskaite",
     "securityDesc": "Iestatiet paroli, lai aizsargātu savu informācijas paneli, vai izlaidiet šo soli.",
     "securityDescSkipWarning": "⚠️ Ja parole nav iestatīta, iestatīšanas laikā nevarēsiet pievienot pakalpojumu sniedzējus. Varat tos pievienot vēlāk informācijas panelī pēc paroles iestatīšanas.",
+    "passwordAlreadySet": "Paneļa parole jau ir iestatīta. Vēlāk to varat mainīt iestatījumos.",
     "providerDesc": "Pievienojiet savu pirmo AI pakalpojumu sniedzēju. Vēlāk varēsiet pievienot vairāk.",
     "providerRequiresPassword": "Lai pievienotu pakalpojumu sniedzējus, vispirms jāiestata parole. Lūdzu, atgriezieties drošības solī un iestatiet paroli vai pievienojiet pakalpojumu sniedzējus vēlāk informācijas panelī.",
     "apiKeyRequired": "API atslēga (obligāta)",
@@ -6051,6 +6052,8 @@
     "importFromModels": "Importēt no /models",
     "modelsImported": "Importēti modeļi: {count}",
     "allModelsAlreadyImported": "Visi modeļi jau importēti",
+    "providerPublishesNoModelList": "Šis nodrošinātājs nepublicē modeļu sarakstu — tā iebūvētais katalogs ir aktuāls",
+    "modelsNoLongerListed": "{count, plural, one {# modelis vairs nav} other {# modeļi vairs nav}} norādīti nodrošinātāja sarakstā",
     "noNewModelsToImport": "Nav jaunu modeļu importēšanai — visi modeļi jau ir reģistrā vai pielāgoto modeļu sarakstā",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modeļa atklāšana neizdevās {time}",
@@ -7234,7 +7237,8 @@
       "kiro": "Bezmaksas plāns: 50 kredīti mēnesī (~25K–100K tokenu). ⚠️ Kiro pakalpojuma sniegšanas noteikumi aizliedz trešo pušu proxy/harness izmantošanu.",
       "codex": "Savienojiet OpenAI Codex, izmantojot esošo OAuth plūsmu.",
       "qwen": "Savienojiet Qwen Code, izmantojot esošo OAuth plūsmu.",
-      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens"
+      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} pieņem sniedzēja formāta modeļu ID. Importējiet tos no /models vai pievienojiet pielāgotus ID maršrutēšanai.",
     "bedrockModelsDescription": "Amazon Bedrock modeļi ir piesaistīti AWS reģionam. Importējiet tos no /models vai pievienojiet izvēlētajā reģionā iespējoto Bedrock modeļu ID.",
@@ -8804,6 +8808,8 @@
     "retentionUsageHistory": "Lietojuma vēsture (dienas)",
     "retentionMemoryEntries": "Atmiņas ieraksti (dienas)",
     "retentionXpAuditLog": "XP audita žurnāls (dienas)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Saglabāt glabāšanas iestatījumus",
     "storageAutoVacuumMode": "Automātiskais VACUUM režīms",
     "storageScheduledVacuum": "Plānotā VACUUM darbība",
@@ -10254,7 +10260,11 @@
     "mappingInvalidJson": "Nederīgs JSON.",
     "mappingMustBeObject": "Kartēšanai jābūt JSON objektam, nevis masīvam vai primitīvai vērtībai.",
     "mappingValueMustBeString": "Atslēgas “{key}” vērtībai jābūt virknei (string).",
-    "save": "Saglabāt"
+    "save": "Saglabāt",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman dzinējs",
@@ -12866,6 +12876,8 @@
     },
     "attempts": "mēģinājumi",
     "detail": {
+      "tabOverview": "Pārskats",
+      "tabPayloads": "Dati",
       "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
       "noHttpResponse": "HTTP atbilde nav novērota",
       "transportError": "Pārsūtīšanas kļūda",

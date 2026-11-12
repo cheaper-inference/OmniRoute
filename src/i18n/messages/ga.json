@@ -4481,7 +4481,7 @@
     "spend7d": "Caiteachas 7D",
     "avgCostPerRequest": "Meánchostas / Iarraidh",
     "noCostDataDescription": "Tosaigh ag déanamh iarratas chun sonraí costais a fheiceáil anseo. Rianaítear costais go huathoibríoch do gach soláthraí.",
-    "spendToday": "Caiteachas inniu",
+    "spendToday": "Caiteachas 1 lá",
     "overviewLoadFailed": "Theip ar fhorbhreathnú ar chostais a lódáil",
     "overviewDescription": "Miondealú caiteachais fíor-ama ar fud na soláthraithe agus na samhlacha nasctha go léir",
     "providerShare": "Sciar de réir Soláthraí",
@@ -5679,6 +5679,7 @@
     "usageTracking": "Rianú Úsáide",
     "securityDesc": "Socraigh pasfhocal chun do dheais a chosaint, nó fág ar lár é anois.",
     "securityDescSkipWarning": "⚠️ Gan pasfhocal, ní bheidh tú in ann soláthraithe a chur leis le linn an tsocraithe. Is féidir leat iad a chur leis níos déanaí ón ndeais tar éis pasfhocal a shocrú.",
+    "passwordAlreadySet": "Tá pasfhocal an phainéil socraithe cheana féin. Is féidir leat é a athrú níos déanaí sna Socruithe.",
     "providerDesc": "Ceangail do chéad sholáthraí AI. Is féidir leat níos mó a chur leis níos déanaí.",
     "providerRequiresPassword": "Caithfidh tú pasfhocal a shocrú ar dtús chun soláthraithe a chur leis. Téigh ar ais go dtí an chéim slándála agus socraigh pasfhocal, nó cuir soláthraithe leis níos déanaí ón ndeais.",
     "apiKeyRequired": "Eochair API (riachtanach)",
@@ -6051,6 +6052,8 @@
     "importFromModels": "Iompórtáil ó /models",
     "modelsImported": "Iompórtáladh {count} múnla",
     "allModelsAlreadyImported": "Tá na múnlaí go léir iompórtáilte cheana",
+    "providerPublishesNoModelList": "Ní fhoilsíonn an soláthraí seo aon liosta samhlacha — tá a chatalóg ionsuite cothrom le dáta",
+    "modelsNoLongerListed": "{count, plural, one {Níl # samhail liostaithe ag an soláthraí a thuilleadh} two {Níl # shamhail liostaithe ag an soláthraí a thuilleadh} few {Níl # shamhail liostaithe ag an soláthraí a thuilleadh} many {Níl # samhail liostaithe ag an soláthraí a thuilleadh} other {Níl # samhail liostaithe ag an soláthraí a thuilleadh}}",
     "noNewModelsToImport": "Níl aon mhúnla nua le hiompórtáil — tá na múnlaí go léir sa chlárlann nó ar liosta na múnlaí saincheaptha",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Theip ar fhionnachtain mionsamhail {time}",
@@ -7234,7 +7237,8 @@
       "kiro": "Sraith saor in aisce: 50 creidmheas/mí (~25K–100K comharthaí). ⚠️ Cuireann ToS Kiro cosc ar úsáid proxy/harness tríú páirtí.",
       "codex": "Ceangail OpenAI Codex leis an sreabhadh OAuth atá ann cheana.",
       "qwen": "Ceangail Qwen Code leis an sreabhadh OAuth atá ann cheana.",
-      "github-models": "Cruthaigh PAT GitHub le scóip 'models: read' ag github.com/settings/tokens"
+      "github-models": "Cruthaigh PAT GitHub le scóip 'models: read' ag github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "Glacann {provider} le haitheantais samhlacha atá dúchasach don soláthraí. Iompórtáil ó /models nó cuir aitheantais shaincheaptha leis le haghaidh ródaithe.",
     "bedrockModelsDescription": "Tá samhlacha Amazon Bedrock teoranta de réir réigiún AWS. Iompórtáil ó /models nó cuir aitheantais samhlacha Bedrock atá cumasaithe sa réigiún roghnaithe leis.",
@@ -8804,6 +8808,8 @@
     "retentionUsageHistory": "Stair Úsáide (laethanta)",
     "retentionMemoryEntries": "Iontrálacha Cuimhne (laethanta)",
     "retentionXpAuditLog": "Loga Iniúchta XP (laethanta)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Sábháil socruithe coinneála",
     "storageAutoVacuumMode": "Mód Uathfholúsaithe",
     "storageScheduledVacuum": "Folúsú Sceidealaithe",
@@ -10254,7 +10260,11 @@
     "mappingInvalidJson": "JSON neamhbhailí.",
     "mappingMustBeObject": "Ní mór don mhapáil a bheith ina hoibiacht JSON, ní ina heagar ná ina luach prímitíoch.",
     "mappingValueMustBeString": "Ní mór gur teaghrán é an luach don eochair “{key}”.",
-    "save": "Sábháil"
+    "save": "Sábháil",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Inneall Caveman",
@@ -12866,6 +12876,8 @@
     },
     "attempts": "iarrachtaí",
     "detail": {
+      "tabOverview": "Forbhreathnú",
+      "tabPayloads": "Pálastaí",
       "omittedHttpAttempts": "Níor coinníodh {count} seoladh HTTP",
       "noHttpResponse": "Níor breathnaíodh aon fhreagra HTTP",
       "transportError": "Earráid iompair",

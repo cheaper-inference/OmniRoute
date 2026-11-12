@@ -30,6 +30,15 @@ function toPlainRow<T>(row: T): T {
   return { ...(row as Record<string, unknown>) } as T;
 }
 
+// node:sqlite binds a string only up to its first NUL byte and drops the rest
+// without any error, so "a\0b" is stored as "a". Strip NULs from string params
+// (never from Buffers) so text is not silently cut. Also coerces undefined -> null
+// (see normalizeBindParams).
+function normalizeBindValue(value: unknown): unknown {
+  if (value === undefined) return null;
+  return typeof value === "string" ? value.replaceAll("\0", "") : value;
+}
+
 // better-sqlite3 (the production/CI driver) and sql.js both accept `undefined`
 // as a bound value and treat it as SQL NULL. node:sqlite is stricter and throws
 // "Provided value cannot be bound to SQLite parameter N" for undefined. Several
@@ -50,11 +59,11 @@ function normalizeBindParams(params: unknown[]): unknown[] {
     const source = first as Record<string, unknown>;
     const normalized: Record<string, unknown> = {};
     for (const key of Object.keys(source)) {
-      normalized[key] = source[key] === undefined ? null : source[key];
+      normalized[key] = normalizeBindValue(source[key]);
     }
     return [normalized];
   }
-  return params.map((value) => (value === undefined ? null : value));
+  return params.map(normalizeBindValue);
 }
 
 export function createNodeSqliteAdapterFromDatabase(
