@@ -60,6 +60,12 @@ const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeTyp
 // the shipped Hermes-4 rows had no evidence and were removed (#16781/#16791), so it has no
 // catalog rows either: live evidence per model, paid flags and prices still veto (#19562).
 const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow", "nous-research"] as const;
+
+/** Whether discovery must keep the per-model free evidence (no catalog rows to fall back on). */
+export function requiresLiveFreeEvidence(provider: string): boolean {
+  return (LIVE_EVIDENCE_ONLY_PROVIDERS as readonly string[]).includes(provider);
+}
+
 export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
   ...FREE_BUDGETS.map((m) => m.provider),
   ...LIVE_EVIDENCE_ONLY_PROVIDERS,

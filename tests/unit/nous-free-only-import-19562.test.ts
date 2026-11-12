@@ -52,6 +52,23 @@ test("#19562 (a) the four live :free Nous models are accepted by free-only impor
   }
 });
 
+test("#19562 discovery keeps free evidence on a Nous model without the :free suffix", () => {
+  // Without the suffix only the payload says the model is free, so discovery must keep it.
+  const unsuffixed = [
+    { id: "nous/free-by-flag", isFree: true },
+    { id: "nous/free-by-snake-flag", is_free: true },
+    { id: "nous/free-by-price", pricing: { prompt: "0", completion: "0" } },
+    { id: "nous/free-by-tag", tags: ["free"] },
+  ];
+  const fetched = discover([...unsuffixed, { id: "nous/no-evidence" }]);
+  const result = selectModelsForImport(PROVIDER, fetched, true);
+  assert.deepEqual(
+    result.models.map((m) => m.id),
+    unsuffixed.map((m) => m.id)
+  );
+  assert.equal(result.freeFilterEmpty, false);
+});
+
 test("#19562 (b) a paid flag or a positive price vetoes a :free id", () => {
   const id = liveFreeIds[0];
   const vetoed = [
