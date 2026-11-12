@@ -1700,7 +1700,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
               className="relative rounded-lg border border-border bg-bg-subtle p-2.5"
             >
               <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
                   {step.step}
                 </span>
                 <Icon name={step.icon} size={14} className="text-primary" />

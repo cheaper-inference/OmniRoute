@@ -1,0 +1,3 @@
+- **fix(discovery):** keep the raw upstream cards from `GET /api/providers/[id]/models` and add the normalized `supportedEndpoints`, `endpointCapabilitySource`, and capability metadata to them, ensuring model imports preserve discovered endpoints and capability provenance.
+- **fix(models):** forward `supportsVision` and `max_output_tokens` during model import in `useModelImportHandlers` so vision-capable and token-limited models retain their capabilities when imported into custom models.
+- **fix(dashboard):** wire `supportsVision`, `visionOverride`, `maxOutputTokenOverride`, and `contextWindowOverride` in `PassthroughModelsSection` so models in passthrough provider views display vision badges and allow editing vision and token limits.
