@@ -143,7 +143,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/cursorCliProxy.ts": 1,
     // GET /v1/systemone/models reads the active TypeSafe/OpenRouter connections to
     // know which catalogs to list: read-only, no credential selection, no dispatch.
-    "open-sse/handlers/systemOneModels.ts": 1,
+    "src/app/api/v1/_shared/systemOneModels.ts": 1,
     "open-sse/services/alibabaFreeTier.ts": 1,
     "open-sse/services/alibabaFreeTierQuotaFetcher.ts": 1,
     // Family cooldown persist looks the row up to write PSD, not dispatch.
@@ -389,7 +389,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
       [
         "open-sse/handlers/chatCore.ts",
         "open-sse/handlers/chatCore/streamingResponse.ts",
-        "open-sse/handlers/systemOneModels.ts",
+        "src/app/api/v1/_shared/systemOneModels.ts",
         "open-sse/services/alibabaFreeTier.ts",
         "open-sse/services/alibabaFreeTierQuotaFetcher.ts",
         "open-sse/services/combo/executeTargetGates.ts",
