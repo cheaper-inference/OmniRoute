@@ -1,0 +1,1 @@
+- **auto-combo**: Bound repeat patterns in `detectCodeComplexity` and `detectReasoningDepth` regexes (`import`, `SELECT`, `${...}`, `if...then`) to eliminate quadratic backtracking on long lines (#19881)
