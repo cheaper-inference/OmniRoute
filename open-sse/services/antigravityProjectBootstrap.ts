@@ -350,7 +350,7 @@ async function executeOnboardLock(
   accessToken: string,
   fetchImpl: FetchLike,
   clientProfile: AntigravityClientProfile,
-  tierId: string | undefined,
+  tierId: string,
   signal?: AbortSignal
 ): Promise<void> {
   let aborted = false;
