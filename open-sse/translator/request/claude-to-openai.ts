@@ -41,8 +41,39 @@ function normalizeToolSchema(schema: unknown): Record<string, unknown> {
 
 function normalizeOpenAIReasoningEffort(effort: unknown): string | undefined {
   if (typeof effort !== "string") return undefined;
-  const normalized = effort.toLowerCase();
+  const normalized = effort.trim().toLowerCase();
   return normalized || undefined;
+}
+
+// The turn's effort is the last role=system directive that carries one (Claude Code
+// mid-conversation directive); the top-level output_config is only the cached default.
+function lastSystemDirectiveEffort(messages: unknown): string | undefined {
+  if (!Array.isArray(messages)) return undefined;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message?.role !== "system") continue;
+    const effort = normalizeOpenAIReasoningEffort(message.output_config?.effort);
+    if (effort) return effort;
+  }
+  return undefined;
+}
+
+// The steps that run before this translator (thinking mode, forced reasoning rules, role
+// normalization) only see the top-level output_config.effort. Move the directive's effort
+// there first, so Auto strips it, a forced rule replaces it and a model without a system role
+// cannot lose it. The directives give up their copy, so it is not read a second time here.
+export function hoistSystemDirectiveEffort<T>(body: T): T {
+  const record = body as unknown as JsonRecord | null;
+  const effort = lastSystemDirectiveEffort(record?.messages);
+  if (!record || !effort) return body;
+  const messages = (record.messages as JsonRecord[]).map((message) => {
+    if (message?.role !== "system" || !message.output_config) return message;
+    const output_config = { ...(message.output_config as JsonRecord) };
+    delete output_config.effort;
+    return { ...message, output_config };
+  });
+  const output_config = { ...(record.output_config as JsonRecord | undefined), effort };
+  return { ...record, messages, output_config } as T;
 }
 
 function toStringArray(value: unknown): string[] {
@@ -345,7 +376,10 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
   // Priority: output_config.effort > enabled thinking budget > explicit opt-out fallback.
   // Budget buckets match the reverse mapping in thinkingBudget.ts::setCustomBudget.
-  const outputEffort = normalizeOpenAIReasoningEffort(body.output_config?.effort) || "";
+  const outputEffort =
+    lastSystemDirectiveEffort(body.messages) ||
+    normalizeOpenAIReasoningEffort(body.output_config?.effort) ||
+    "";
   if (outputEffort) {
     result.reasoning_effort = outputEffort;
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
