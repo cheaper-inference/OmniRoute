@@ -129,3 +129,31 @@ test("manual reference protects stale wrapper and its stale descendants", () => 
   assert.deepEqual(plan.deletes, []);
   assert.equal(plan.conflicts.length, 1);
 });
+
+test('owned wrapper update deletes superseded version leaf', () => {
+  const oldHash = 'b'.repeat(64);
+  const desired = graph();
+  const live = [
+    {
+      id: 'old-leaf',
+      name: 'claude/fable/5.1',
+      description: ownershipDescription(oldHash, 'version'),
+      strategy: 'priority',
+      allowedModelFamilies: ['claude'],
+      models: [],
+    },
+    {
+      id: 'wrapper',
+      name: 'claude/fable',
+      description: ownershipDescription(oldHash, 'family'),
+      strategy: 'priority',
+      allowedModelFamilies: ['claude'],
+      models: [{ id: 'old-ref', kind: 'combo-ref', comboName: 'claude/fable/5.1', weight: 0 }],
+    },
+  ];
+  const plan = planOmniRoute(desired, live);
+  assert.deepEqual(plan.creates.map((combo) => combo.name), ['claude/fable/5.2']);
+  assert.deepEqual(plan.updates.map((item) => item.desired.name), ['claude/fable']);
+  assert.deepEqual(plan.deletes.map((item) => item.name), ['claude/fable/5.1']);
+  assert.deepEqual(plan.conflicts, []);
+});

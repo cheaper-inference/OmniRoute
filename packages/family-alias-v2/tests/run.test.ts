@@ -63,12 +63,3 @@ test("tampered plan is refused before apply", async () => {
   );
   assert.equal(applies, 0);
 });
-
-test("partial target outcomes remain independent", () => {
-  const outcomes = {
-    omniroute: { status: "success", planHash: "a" },
-    cpa: { status: "failed", reason: "management API unavailable" },
-  };
-  assert.equal(outcomes.omniroute.status, "success");
-  assert.equal(outcomes.cpa.status, "failed");
-});

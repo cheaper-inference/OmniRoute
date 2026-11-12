@@ -110,18 +110,31 @@ export function planOmniRoute(desired: DesiredGraph, live: LiveCombo[]): TargetP
     }
   };
 
+  const desiredRefs = new Set(
+    desired.combos.flatMap((combo) =>
+      combo.models
+        .filter((step) => step.kind === "combo-ref")
+        .map((step) => step.comboName),
+    ),
+  );
   for (const combo of live) {
     if (staleNames.has(combo.name)) continue;
+    const marker = parseOwnership(combo.description);
+    const ownedAndUpdated = marker?.owner === OWNER && desiredByName.has(combo.name);
     for (const step of combo.models ?? []) {
       const record = step as { kind?: string; comboName?: string };
-      if (record.kind === "combo-ref" && record.comboName && staleNames.has(record.comboName)) {
-        conflicts.push({
-          name: record.comboName,
-          liveId: combo.id,
-          reason: `stale owned combo is referenced by ${combo.name}`,
-        });
-        protect(record.comboName);
+      if (!(record.kind === "combo-ref" && record.comboName && staleNames.has(record.comboName))) {
+        continue;
       }
+      // An owned wrapper being updated to drop the old reference is not a conflict.
+      // Only unmanaged referrers, or desired state that still names the combo, block deletion.
+      if (ownedAndUpdated && !desiredRefs.has(record.comboName)) continue;
+      conflicts.push({
+        name: record.comboName,
+        liveId: combo.id,
+        reason: `stale owned combo is referenced by ${combo.name}`,
+      });
+      protect(record.comboName);
     }
   }
   for (const name of protectedNames) staleNames.delete(name);
