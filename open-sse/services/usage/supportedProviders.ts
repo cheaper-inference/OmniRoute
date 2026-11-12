@@ -50,6 +50,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   // StepFun account balance (GET /v1/accounts; see usage/stepfun.ts — the
   // base-URL override selects China vs international platform)
   "stepfun",
+  // InfCode seat/shared-pool credits (Token Infinity user center; see usage/infcode.ts)
+  "inf-code",
   "moonshot",
   "kimi",
   "xiaomi-mimo",

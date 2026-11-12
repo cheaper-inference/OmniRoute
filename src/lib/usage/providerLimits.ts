@@ -31,6 +31,10 @@ import {
   isExplicitClaudeQuota429Text,
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { getMachineId } from "@/shared/utils/machine";
+import {
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+} from "@/shared/constants/providers";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
 import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
 import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
@@ -233,6 +237,18 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
   if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
   if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;
   return supportsProviderQuota(connection.provider, connection);
+}
+
+/** Why a connection cannot be polled for usage, naming the part the operator can change. */
+export function usageUnavailableMessage(connection: ProviderConnectionLike): string {
+  const { provider, authType } = connection;
+  if (supportsProviderQuota(provider, connection)) {
+    return `Usage for ${provider} is available, but ${authType} connections cannot be polled.`;
+  }
+  if (isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider)) {
+    return `Usage for ${provider} needs a quotaEndpoint in the connection settings.`;
+  }
+  return `${provider} has no usage/quota API registered.`;
 }
 
 function withStatus(error: Error, status: number): Error & { status: number } {
@@ -1025,7 +1041,7 @@ async function fetchLiveProviderLimitsWithOptions(
   }
 
   if (!isSupportedUsageConnection(connection)) {
-    throw withStatus(new Error("Usage not available for this connection"), 400);
+    throw withStatus(new Error(usageUnavailableMessage(connection)), 400);
   }
 
   if (connection.authType !== "oauth") {

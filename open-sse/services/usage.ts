@@ -70,6 +70,7 @@ export { parseQoderUserStatusUsage } from "./usage/qoder.ts";
 import { getOpencodeUsage } from "./usage/opencode.ts";
 import { getDeepseekUsage } from "./usage/deepseek.ts";
 import { getStepfunUsage } from "./usage/stepfun.ts";
+import { getInfCodeUsage } from "./usage/infcode.ts";
 import { getMoonshotOpenPlatformUsage } from "./moonshotQuotaFetcher.ts";
 import {
   isKimiCodingConnection,
@@ -233,6 +234,10 @@ export async function getUsageForProvider(
       // providerSpecificData selects the platform (api.stepfun.com China vs
       // api.stepfun.ai international) — the same override the chat path uses.
       return await getStepfunUsage(apiKey || "", providerSpecificData);
+    case "inf-code":
+      // Seat credit balance from the Token Infinity user center
+      // (GET /api/user_center/v1/dashboard/personal/quotas, bearer OAuth token).
+      return await getInfCodeUsage(accessToken, providerSpecificData);
     case "moonshot":
     case "kimi":
       return await getMoonshotOpenPlatformUsage(connection);

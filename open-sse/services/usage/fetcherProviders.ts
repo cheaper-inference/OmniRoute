@@ -114,6 +114,9 @@ export const USAGE_FETCHER_PROVIDERS = [
   // StepFun account balance (GET /v1/accounts; base URL override selects
   // China vs international platform, mirroring the chat path)
   "stepfun",
+  // InfCode (Token Infinity) seat credit balance
+  // (GET {userCenter}/api/user_center/v1/dashboard/personal/quotas, bearer OAuth token)
+  "inf-code",
   // MegaBrain plan session + weekly limits (GET /api/profile/limits)
   "megabrain",
   "mb",

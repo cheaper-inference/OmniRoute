@@ -41,6 +41,9 @@ export const ROTATION_LOCK_GROUP: Record<string, string> = {
   // Openference rotates one-time-use refresh tokens on its own endpoint; a
   // concurrent sibling refresh would burn the token, so it gets its own lane.
   openference: "openference",
+  // InfCode refreshes with rotate_refresh: true, so each refresh token is single-use
+  // and a concurrent refresh would present a token the first one already consumed.
+  "inf-code": "inf-code",
   // RenderHour rotates its refresh tokens (rhrt_*): each refresh returns a new pair
   // and the old token stops working at once, so siblings get their own lane.
   renderhour: "renderhour",

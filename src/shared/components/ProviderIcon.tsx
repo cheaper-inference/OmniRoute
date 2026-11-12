@@ -140,6 +140,7 @@ const KNOWN_SVGS = new Set([
   "hyperbolic",
   "ibm",
   "iflytek",
+  "inf-code",
   "inclusionai",
   "inference",
   "kenari",

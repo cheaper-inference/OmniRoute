@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <title>InfCode</title>
+  <!-- Official InfCode mark, geometry taken verbatim from the Token Infinity
+       infcode-logo-text.svg served by https://www.tokensinfinity.com, scaled from
+       its 67.4557 x 50 mark box into the 24 x 24 provider-icon viewBox. -->
+  <g transform="translate(0.23 3.27) scale(0.349)">
+    <path d="M43.3081 25L28.8668 50L0 0H28.8668L43.3081 25Z" fill="url(#infcode-g0)"/>
+    <path d="M53.0144 50H33.7278L48.1691 25H67.4557L53.0144 50Z" fill="url(#infcode-g1)"/>
+    <path d="M43.3081 25L28.8668 50H0L14.4413 25H43.3081Z" fill="#001FFC"/>
+    <path d="M43.3081 25H14.4413L28.8668 50L43.3081 25Z" fill="url(#infcode-g2)"/>
+  </g>
+  <defs>
+    <linearGradient id="infcode-g0" x1="27.3516" y1="22.601" x2="14.7885" y2="0.315656" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B7C0FF"/>
+      <stop offset="1" stop-color="#8897FF"/>
+    </linearGradient>
+    <linearGradient id="infcode-g1" x1="37.5788" y1="37.5" x2="65.4671" y2="37.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#001FFF"/>
+      <stop offset="1" stop-color="#F700FF"/>
+    </linearGradient>
+    <linearGradient id="infcode-g2" x1="22.38" y1="37.1686" x2="42.4716" y2="27.8251" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3980FF"/>
+      <stop offset="1" stop-color="#84A5FB"/>
+    </linearGradient>
+  </defs>
+</svg>

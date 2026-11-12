@@ -1,0 +1,1 @@
+- **feat(providers):** add InfCode (Token Infinity) as an OAuth provider with credit quota in Provider Limits and `INF_CODE_*` overrides for private instances ([#18820](https://github.com/cheaper-inference/OmniRoute/pull/18820)) — thanks @AlphaHinex

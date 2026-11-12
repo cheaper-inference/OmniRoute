@@ -144,6 +144,10 @@ export const ANTIGRAVITY_DEFAULT_SYSTEM =
   "**Proactiveness**";
 
 // OAuth endpoints
+const INF_CODE_AUTH_BASE = (
+  process.env.INF_CODE_OAUTH_BASE_URL || "https://www.tokensinfinity.com"
+).replace(/\/+$/, "");
+
 export const OAUTH_ENDPOINTS = {
   google: {
     token: "https://oauth2.googleapis.com/token",
@@ -170,6 +174,17 @@ export const OAUTH_ENDPOINTS = {
     token: "https://openference.com/oauth/token",
     auth: "https://openference.com/app/oauth/authorize",
     clientId: resolvePublicCred("openference_id"),
+  },
+  infcode: {
+    // InfCode (Token Infinity) — endpoints verified live 2026-11-02 from the
+    // Tokfinity.infcode v2.8.0 extension. Env-overridable for private instances.
+    // `token` is the refresh endpoint. INF_CODE_OAUTH_TOKEN_URL names the auth-code
+    // exchange (src/lib/oauth/constants/oauth.ts), so it must not be read here, and
+    // the base has to match the one login used or a private instance's refresh
+    // token would be posted to the public SaaS.
+    token: process.env.INF_CODE_OAUTH_REFRESH_URL || `${INF_CODE_AUTH_BASE}/acode/v1/refresh_token`,
+    auth: process.env.INF_CODE_OAUTH_AUTHORIZE_URL || `${INF_CODE_AUTH_BASE}/infcode/login`,
+    clientId: process.env.INF_CODE_OAUTH_CLIENT_ID || resolvePublicCred("infcode_id"),
   },
   renderhour: {
     token: "https://renderhour.com/api/oauth/token",
