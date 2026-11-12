@@ -100,20 +100,24 @@ export async function claimMuseOwner(args: ClaimArgs): Promise<MuseOwner | Respo
   }
 }
 
-/** 503 when the credentials selected for this attempt are not the session owner's. */
+/**
+ * 503 when this attempt selected another account than the session owner. Selection is
+ * restricted to the owner, so "no usable credentials" (the owner is rate limited or expired)
+ * is not a cross-account attempt: it returns null and the caller answers it as usual (429 with
+ * the reset, or the expired-credentials error).
+ */
 export function museOwnerUnavailable(owner: MuseOwner, credentials: Creds): Response | null {
-  const usable =
+  const selectedAnother =
     !!credentials &&
-    !("allRateLimited" in credentials) &&
-    !("allExpired" in credentials) &&
     "connectionId" in credentials &&
-    credentials.connectionId === owner.connectionId;
-  return usable
-    ? null
-    : errorResponse(
+    typeof credentials.connectionId === "string" &&
+    credentials.connectionId !== owner.connectionId;
+  return selectedAnother
+    ? errorResponse(
         503,
         "Muse session owner is unavailable; cross-account continuation is forbidden."
-      );
+      )
+    : null;
 }
 
 const accountOf = (credentials: Cred) =>

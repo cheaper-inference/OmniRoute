@@ -10,7 +10,10 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
-import SegmentedControl from "@/shared/components/SegmentedControl";
+import SegmentedControl, {
+  SegmentedPanel,
+  SegmentedTabs,
+} from "@/shared/components/SegmentedControl";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import { IMAGE_PROVIDERS } from "@omniroute/open-sse/config/imageRegistryData.ts";
@@ -697,12 +700,15 @@ export default function MediaPageClient() {
         : !prompt.trim());
 
   return (
-    <div className="space-y-6">
+    <SegmentedTabs
+      value={activeTab}
+      onChange={(next) => switchTab(next as Modality)}
+      className="gap-6"
+    >
       {/* Modality Tabs */}
       <SegmentedControl
+        semantics="tabs"
         aria-label={t("modalityTabsAria")}
-        value={activeTab}
-        onChange={(next) => switchTab(next as Modality)}
         options={(Object.keys(MODALITY_CONFIG) as Modality[]).map((key) => ({
           value: key,
           label: t(MODALITY_CONFIG[key].labelKey),
@@ -710,269 +716,272 @@ export default function MediaPageClient() {
         }))}
       />
 
-      {/* Generation Form */}
-      <Card className="space-y-4" padding="md">
-        {/* Provider + Model row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Select
-            label={t("provider")}
-            value={selectedProvider}
-            onChange={(e) => handleProviderChange(e.target.value)}
-            options={currentProviders.map((p) => ({ value: p.id, label: p.name }))}
-          />
-          <Select
-            label={t("model")}
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            options={currentModels.map((m) => ({ value: m.id, label: m.name }))}
-          />
-        </div>
+      {/* One form for every modality: the panel follows the selected tab. */}
+      <SegmentedPanel value={activeTab} className="flex flex-col gap-6">
+        {/* Generation Form */}
+        <Card className="space-y-4" padding="md">
+          {/* Provider + Model row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label={t("provider")}
+              value={selectedProvider}
+              onChange={(e) => handleProviderChange(e.target.value)}
+              options={currentProviders.map((p) => ({ value: p.id, label: p.name }))}
+            />
+            <Select
+              label={t("model")}
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              options={currentModels.map((m) => ({ value: m.id, label: m.name }))}
+            />
+          </div>
 
-        {/* Credential hint */}
-        {selectedProvider && !["sdwebui", "comfyui", "qwen"].includes(selectedProvider) && (
-          <p className="text-xs text-text-muted flex items-center gap-1.5">
-            <Icon name="info" size={14} className="text-warning" />
-            {t.rich("credentialsRequired", {
-              provider: () => <strong className="capitalize">{selectedProvider}</strong>,
-              providers: (chunks) => (
+          {/* Credential hint */}
+          {selectedProvider && !["sdwebui", "comfyui", "qwen"].includes(selectedProvider) && (
+            <p className="text-xs text-text-muted flex items-center gap-1.5">
+              <Icon name="info" size={14} className="text-warning" />
+              {t.rich("credentialsRequired", {
+                provider: () => <strong className="capitalize">{selectedProvider}</strong>,
+                providers: (chunks) => (
+                  <Link
+                    href="/dashboard/providers"
+                    className="text-primary underline underline-offset-2 hover:text-primary/80"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
+          )}
+
+          {/* Speech: voice + format */}
+          {activeTab === "speech" && (
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                label={t("voice")}
+                value={speechVoice}
+                onChange={(e) => setSpeechVoice(e.target.value)}
+                options={voiceList.map((v) => ({ value: v.id, label: v.label }))}
+              />
+              <Select
+                label={t("format")}
+                value={speechFormat}
+                onChange={(e) => setSpeechFormat(e.target.value)}
+                options={currentSpeechFormats.map((f) => ({ value: f, label: f }))}
+              />
+            </div>
+          )}
+
+          {/* Transcription: file upload */}
+          {activeTab === "transcription" ? (
+            <Input
+              type="file"
+              accept="audio/*,video/*"
+              label={t("audioVideoFile")}
+              error={fileSizeError || undefined}
+              hint={
+                <>
+                  {audioFile && !fileSizeError && (
+                    <span className="block">
+                      {audioFile.name} ({formatFileSize(audioFile.size)})
+                    </span>
+                  )}
+                  <span className="block">{t("audioVideoFileHint")}</span>
+                </>
+              }
+              inputClassName={FILE_INPUT_CLASS}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                setFileSizeError(null);
+                if (file && file.size > MAX_TRANSCRIPTION_FILE_SIZE) {
+                  setFileSizeError(
+                    t("fileTooLarge", { size: formatFileSize(file.size), max: "4 GB" })
+                  );
+                  setAudioFile(null);
+                  e.target.value = "";
+                  return;
+                }
+                setAudioFile(file);
+              }}
+            />
+          ) : (
+            <>
+              {activeTab === "image" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    label={t("sourceImage")}
+                    hint={
+                      <>
+                        {imageInputFile && (
+                          <span className="block">
+                            {imageInputFile.name} ({formatFileSize(imageInputFile.size)})
+                          </span>
+                        )}
+                        <span className="block">{t("sourceImageHint")}</span>
+                      </>
+                    }
+                    inputClassName={FILE_INPUT_CLASS}
+                    onChange={(e) => setImageInputFile(e.target.files?.[0] ?? null)}
+                  />
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    label={t("maskImage")}
+                    hint={
+                      <>
+                        {imageMaskFile && (
+                          <span className="block">
+                            {imageMaskFile.name} ({formatFileSize(imageMaskFile.size)})
+                          </span>
+                        )}
+                        <span className="block">{t("maskImageHint")}</span>
+                      </>
+                    }
+                    inputClassName={FILE_INPUT_CLASS}
+                    onChange={(e) => setImageMaskFile(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+              )}
+
+              {/* Prompt / Text */}
+              <Field
+                htmlFor={promptId}
+                label={
+                  activeTab === "speech"
+                    ? t("text")
+                    : activeTab === "image" && selectedProvider === "topaz"
+                      ? t("promptOptional")
+                      : t("prompt")
+                }
+              >
+                <Textarea
+                  id={promptId}
+                  rows={3}
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={
+                    activeTab === "image" && selectedProvider === "topaz"
+                      ? t("enhancementInstructionsPlaceholder")
+                      : config.placeholderKey
+                        ? t(config.placeholderKey)
+                        : undefined
+                  }
+                  className="resize-none"
+                />
+              </Field>
+            </>
+          )}
+
+          {/* Generate button */}
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={handleGenerate}
+            disabled={isGenerateDisabled}
+            loading={loading}
+            icon={
+              loading
+                ? undefined
+                : activeTab === "speech"
+                  ? "volume_up"
+                  : activeTab === "transcription"
+                    ? "mic"
+                    : "auto_awesome"
+            }
+          >
+            {loading
+              ? activeTab === "speech"
+                ? t("synthesizing")
+                : activeTab === "transcription"
+                  ? t("transcribing")
+                  : t("generating")
+              : activeTab === "speech"
+                ? t("synthesizeSpeech")
+                : activeTab === "transcription"
+                  ? t("transcribeAudio")
+                  : t("generateModality", { modality: t(config.labelKey) })}
+          </Button>
+        </Card>
+
+        {/* Error */}
+        {error && (
+          <Alert
+            variant={isCredentialsError ? "warning" : "critical"}
+            icon={<Icon name={isCredentialsError ? "key" : "error"} size={20} />}
+            title={isCredentialsError ? t("apiKeyRequired") : t("error")}
+            description={<span className="break-words">{error}</span>}
+            dismissLabel={tc("dismissNotification")}
+            onDismiss={() => setError(null)}
+            actions={
+              isCredentialsError ? (
                 <Link
                   href="/dashboard/providers"
-                  className="text-primary underline underline-offset-2 hover:text-primary/80"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                 >
-                  {chunks}
+                  <Icon name="open_in_new" size={13} />
+                  {t("configureApiKeys")} →
                 </Link>
-              ),
-            })}
-          </p>
-        )}
-
-        {/* Speech: voice + format */}
-        {activeTab === "speech" && (
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label={t("voice")}
-              value={speechVoice}
-              onChange={(e) => setSpeechVoice(e.target.value)}
-              options={voiceList.map((v) => ({ value: v.id, label: v.label }))}
-            />
-            <Select
-              label={t("format")}
-              value={speechFormat}
-              onChange={(e) => setSpeechFormat(e.target.value)}
-              options={currentSpeechFormats.map((f) => ({ value: f, label: f }))}
-            />
-          </div>
-        )}
-
-        {/* Transcription: file upload */}
-        {activeTab === "transcription" ? (
-          <Input
-            type="file"
-            accept="audio/*,video/*"
-            label={t("audioVideoFile")}
-            error={fileSizeError || undefined}
-            hint={
-              <>
-                {audioFile && !fileSizeError && (
-                  <span className="block">
-                    {audioFile.name} ({formatFileSize(audioFile.size)})
-                  </span>
-                )}
-                <span className="block">{t("audioVideoFileHint")}</span>
-              </>
+              ) : undefined
             }
-            inputClassName={FILE_INPUT_CLASS}
-            onChange={(e) => {
-              const file = e.target.files?.[0] ?? null;
-              setFileSizeError(null);
-              if (file && file.size > MAX_TRANSCRIPTION_FILE_SIZE) {
-                setFileSizeError(
-                  t("fileTooLarge", { size: formatFileSize(file.size), max: "4 GB" })
-                );
-                setAudioFile(null);
-                e.target.value = "";
-                return;
-              }
-              setAudioFile(file);
-            }}
           />
-        ) : (
-          <>
-            {activeTab === "image" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  label={t("sourceImage")}
-                  hint={
-                    <>
-                      {imageInputFile && (
-                        <span className="block">
-                          {imageInputFile.name} ({formatFileSize(imageInputFile.size)})
-                        </span>
-                      )}
-                      <span className="block">{t("sourceImageHint")}</span>
-                    </>
-                  }
-                  inputClassName={FILE_INPUT_CLASS}
-                  onChange={(e) => setImageInputFile(e.target.files?.[0] ?? null)}
-                />
-                <Input
-                  type="file"
-                  accept="image/*"
-                  label={t("maskImage")}
-                  hint={
-                    <>
-                      {imageMaskFile && (
-                        <span className="block">
-                          {imageMaskFile.name} ({formatFileSize(imageMaskFile.size)})
-                        </span>
-                      )}
-                      <span className="block">{t("maskImageHint")}</span>
-                    </>
-                  }
-                  inputClassName={FILE_INPUT_CLASS}
-                  onChange={(e) => setImageMaskFile(e.target.files?.[0] ?? null)}
-                />
-              </div>
-            )}
-
-            {/* Prompt / Text */}
-            <Field
-              htmlFor={promptId}
-              label={
-                activeTab === "speech"
-                  ? t("text")
-                  : activeTab === "image" && selectedProvider === "topaz"
-                    ? t("promptOptional")
-                    : t("prompt")
-              }
-            >
-              <Textarea
-                id={promptId}
-                rows={3}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder={
-                  activeTab === "image" && selectedProvider === "topaz"
-                    ? t("enhancementInstructionsPlaceholder")
-                    : config.placeholderKey
-                      ? t(config.placeholderKey)
-                      : undefined
-                }
-                className="resize-none"
-              />
-            </Field>
-          </>
         )}
 
-        {/* Generate button */}
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={handleGenerate}
-          disabled={isGenerateDisabled}
-          loading={loading}
-          icon={
-            loading
-              ? undefined
-              : activeTab === "speech"
-                ? "volume_up"
-                : activeTab === "transcription"
-                  ? "mic"
-                  : "auto_awesome"
-          }
-        >
-          {loading
-            ? activeTab === "speech"
-              ? t("synthesizing")
-              : activeTab === "transcription"
-                ? t("transcribing")
-                : t("generating")
-            : activeTab === "speech"
-              ? t("synthesizeSpeech")
-              : activeTab === "transcription"
-                ? t("transcribeAudio")
-                : t("generateModality", { modality: t(config.labelKey) })}
-        </Button>
-      </Card>
-
-      {/* Error */}
-      {error && (
-        <Alert
-          variant={isCredentialsError ? "warning" : "critical"}
-          icon={<Icon name={isCredentialsError ? "key" : "error"} size={20} />}
-          title={isCredentialsError ? t("apiKeyRequired") : t("error")}
-          description={<span className="break-words">{error}</span>}
-          dismissLabel={tc("dismissNotification")}
-          onDismiss={() => setError(null)}
-          actions={
-            isCredentialsError ? (
-              <Link
-                href="/dashboard/providers"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-              >
-                <Icon name="open_in_new" size={13} />
-                {t("configureApiKeys")} →
-              </Link>
-            ) : undefined
-          }
-        />
-      )}
-
-      {/* Result */}
-      {result && (
-        <Card padding="md">
-          <div className="flex items-center gap-2 mb-4">
-            <Icon name={config.icon} size={20} className="text-primary" />
-            <h3 className="text-sm font-medium text-text-main">{t("result")}</h3>
-            <span className="text-xs text-text-muted ml-auto">
-              {new Date(result.timestamp).toLocaleTimeString()}
-            </span>
-          </div>
-
-          {result.type === "speech" && result.audioUrl ? (
-            <div className="space-y-3">
-              <audio controls src={result.audioUrl} className="w-full rounded-lg" autoPlay />
-              <a
-                href={result.audioUrl}
-                download={`speech.${result.data?.format || "mp3"}`}
-                className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-              >
-                <Icon name="download" size={16} />
-                {t("downloadFormat", { format: result.data?.format?.toUpperCase() || "MP3" })}
-              </a>
+        {/* Result */}
+        {result && (
+          <Card padding="md">
+            <div className="flex items-center gap-2 mb-4">
+              <Icon name={config.icon} size={20} className="text-primary" />
+              <h3 className="text-sm font-medium text-text-main">{t("result")}</h3>
+              <span className="text-xs text-text-muted ml-auto">
+                {new Date(result.timestamp).toLocaleTimeString()}
+              </span>
             </div>
-          ) : result.type === "image" ? (
-            <ImageResults data={result.data} />
-          ) : result.type === "transcription" ? (
-            <div className="space-y-3">
-              <div className="bg-bg-subtle rounded-lg p-4 text-sm text-text-main leading-relaxed whitespace-pre-wrap">
-                {result.data?.text || (
-                  <span className="text-text-muted italic">{t("noTextReturned")}</span>
+
+            {result.type === "speech" && result.audioUrl ? (
+              <div className="space-y-3">
+                <audio controls src={result.audioUrl} className="w-full rounded-lg" autoPlay />
+                <a
+                  href={result.audioUrl}
+                  download={`speech.${result.data?.format || "mp3"}`}
+                  className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Icon name="download" size={16} />
+                  {t("downloadFormat", { format: result.data?.format?.toUpperCase() || "MP3" })}
+                </a>
+              </div>
+            ) : result.type === "image" ? (
+              <ImageResults data={result.data} />
+            ) : result.type === "transcription" ? (
+              <div className="space-y-3">
+                <div className="bg-bg-subtle rounded-lg p-4 text-sm text-text-main leading-relaxed whitespace-pre-wrap">
+                  {result.data?.text || (
+                    <span className="text-text-muted italic">{t("noTextReturned")}</span>
+                  )}
+                </div>
+                {result.data?.words && (
+                  <Disclosure className="mt-2">
+                    <DisclosureTrigger>
+                      {t("wordTimestamps", { count: result.data.words.length })}
+                    </DisclosureTrigger>
+                    <DisclosureContent keepMounted>
+                      <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48 custom-scrollbar">
+                        {JSON.stringify(result.data.words, null, 2)}
+                      </pre>
+                    </DisclosureContent>
+                  </Disclosure>
                 )}
               </div>
-              {result.data?.words && (
-                <Disclosure className="mt-2">
-                  <DisclosureTrigger>
-                    {t("wordTimestamps", { count: result.data.words.length })}
-                  </DisclosureTrigger>
-                  <DisclosureContent keepMounted>
-                    <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48 custom-scrollbar">
-                      {JSON.stringify(result.data.words, null, 2)}
-                    </pre>
-                  </DisclosureContent>
-                </Disclosure>
-              )}
-            </div>
-          ) : (
-            <pre className="bg-bg-subtle rounded-lg p-4 text-xs text-text-muted overflow-auto max-h-96 custom-scrollbar">
-              {JSON.stringify(result.data, null, 2)}
-            </pre>
-          )}
-        </Card>
-      )}
+            ) : (
+              <pre className="bg-bg-subtle rounded-lg p-4 text-xs text-text-muted overflow-auto max-h-96 custom-scrollbar">
+                {JSON.stringify(result.data, null, 2)}
+              </pre>
+            )}
+          </Card>
+        )}
+      </SegmentedPanel>
 
       {/* Info cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -997,6 +1006,6 @@ export default function MediaPageClient() {
           );
         })}
       </div>
-    </div>
+    </SegmentedTabs>
   );
 }

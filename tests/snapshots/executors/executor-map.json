@@ -95,6 +95,11 @@
       "configSource": "<custom-config>",
       "provider": "chatgpt-web-codex"
     },
+    "chatgpt": {
+      "className": "ChatGptExecutor",
+      "configSource": "chatgpt",
+      "provider": "chatgpt"
+    },
     "chatgpt-web": {
       "className": "ChatGptWebExecutor",
       "configSource": "<custom-config>",
@@ -505,6 +510,11 @@
       "configSource": "opencode-go",
       "provider": "opencode-go"
     },
+    "opencode-server": {
+      "className": "OpencodeServerExecutor",
+      "configSource": "opencode-server",
+      "provider": "opencode-server"
+    },
     "opencode-zen": {
       "className": "OpencodeExecutor",
       "configSource": "opencode-zen",
@@ -711,6 +721,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 142,
+  "keyCount": 144,
   "sharedInstances": []
 }
