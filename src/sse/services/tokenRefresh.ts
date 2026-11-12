@@ -427,6 +427,55 @@ function mergeProactiveRefreshCredentials(
   };
 }
 
+async function refreshExpiringCopilotToken(
+  provider: string,
+  credentials: {
+    connectionId: string;
+    accessToken: string;
+    copilotToken?: string;
+    providerSpecificData?: Record<string, unknown> & { copilotTokenExpiresAt?: number };
+  }
+): Promise<void> {
+  // GitHub and GHE share expiry semantics, but use their own token endpoint hosts.
+  if (
+    (provider === "github" || provider === "ghe-copilot") &&
+    credentials.providerSpecificData?.copilotTokenExpiresAt
+  ) {
+    const copilotExpiresAt = credentials.providerSpecificData.copilotTokenExpiresAt * 1000;
+    const now = Date.now();
+
+    if (copilotExpiresAt - now < TOKEN_EXPIRY_BUFFER_MS) {
+      log.info("TOKEN_REFRESH", "Copilot token expiring soon, refreshing proactively", {
+        provider,
+        expiresIn: Math.round((copilotExpiresAt - now) / 1000),
+      });
+
+      const copilotToken = await refreshCopilotToken(
+        credentials.accessToken,
+        credentials,
+        resolveCopilotTokenBaseUrl(provider, credentials)
+      );
+      if (copilotToken?.token) {
+        await updateProviderCredentials(credentials.connectionId, {
+          providerSpecificData: {
+            ...credentials.providerSpecificData,
+            copilotToken: copilotToken.token,
+            copilotTokenExpiresAt: copilotToken.expiresAt,
+          },
+        });
+
+        credentials.providerSpecificData = {
+          ...credentials.providerSpecificData,
+          copilotToken: copilotToken.token,
+          copilotTokenExpiresAt: copilotToken.expiresAt,
+        };
+        // Sync to top-level so buildHeaders() picks up the fresh token.
+        credentials.copilotToken = copilotToken.token;
+      }
+    }
+  }
+}
+
 async function checkAndRefreshTokenInner(provider: string, credentials: any) {
   let resultFence = getCodexOperationFence(String(credentials.connectionId || ""));
   const adoptCommittedRefresh = (result: object): boolean => {
@@ -499,49 +548,7 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
     }
   }
 
-  // Check GitHub/GHE Copilot token expiry. Both github.com Copilot and GHE
-  // Copilot (device-code flow against an enterprise host) issue a short-lived
-  // sub-token separate from the OAuth access token, stored the same way in
-  // providerSpecificData.copilotTokenExpiresAt — only the token endpoint host
-  // differs (resolveCopilotTokenBaseUrl picks it via providerSpecificData.gheUrl).
-  if (
-    (provider === "github" || provider === "ghe-copilot") &&
-    updatedCredentials.providerSpecificData?.copilotTokenExpiresAt
-  ) {
-    const copilotExpiresAt = updatedCredentials.providerSpecificData.copilotTokenExpiresAt * 1000;
-    const now = Date.now();
-
-    if (copilotExpiresAt - now < TOKEN_EXPIRY_BUFFER_MS) {
-      log.info("TOKEN_REFRESH", "Copilot token expiring soon, refreshing proactively", {
-        provider,
-        expiresIn: Math.round((copilotExpiresAt - now) / 1000),
-      });
-
-      const copilotToken = await refreshCopilotToken(
-        updatedCredentials.accessToken,
-        updatedCredentials,
-        resolveCopilotTokenBaseUrl(provider, updatedCredentials)
-      );
-      if (copilotToken?.token) {
-        await updateProviderCredentials(updatedCredentials.connectionId, {
-          providerSpecificData: {
-            ...updatedCredentials.providerSpecificData,
-            copilotToken: copilotToken.token,
-            copilotTokenExpiresAt: copilotToken.expiresAt,
-          },
-        });
-
-        updatedCredentials.providerSpecificData = {
-          ...updatedCredentials.providerSpecificData,
-          copilotToken: copilotToken.token,
-          copilotTokenExpiresAt: copilotToken.expiresAt,
-        };
-        // Sync to top-level so buildHeaders() picks up the fresh token
-        updatedCredentials.copilotToken = copilotToken.token;
-      }
-    }
-  }
-
+  await refreshExpiringCopilotToken(provider, updatedCredentials);
   validateRefreshedCodexFence(resultFence, updatedCredentials);
   return updatedCredentials;
 }
