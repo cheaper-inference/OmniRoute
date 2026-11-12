@@ -12,6 +12,7 @@ import {
   GEMINI_3_7_FLASH_PROMO_PRICING,
   GEMINI_3_8_FLASH_PROMO_PRICING,
   GEMINI_4_ARGON_PROMO_PRICING,
+  GEMINI_4_CARBON_PROMO_PRICING,
   GPT_5_3_CODEX_PRICING,
   GPT_5_5_PRICING,
   GPT_5_6_LUNA_PRICING,
@@ -48,6 +49,10 @@ const ANTIGRAVITY_PRICING = {
   "gemini-4-argon-low": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-4-argon-medium": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-4-argon-high": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-carbon": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-carbon-low": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-carbon-medium": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-carbon-high": GEMINI_4_CARBON_PROMO_PRICING,
   "gemini-3.5-flash-lite": {
     input: 0.3,
     output: 2.5,

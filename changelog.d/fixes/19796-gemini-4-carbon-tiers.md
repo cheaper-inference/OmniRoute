@@ -1,0 +1,1 @@
+- **fix(providers):** add Gemini 4 Carbon specs, bare id alias, 65k output cap, and pricing rows across Antigravity, Gemini, and Vertex catalogs ([#19796](https://github.com/cheaper-inference/OmniRoute/issues/19796)) — thanks @xiaoyaner0201
