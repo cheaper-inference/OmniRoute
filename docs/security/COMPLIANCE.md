@@ -162,9 +162,9 @@ out.
 
 ### Per-request opt-out (`x-omniroute-no-log`)
 
-A client can opt a single request out of payload persistence without creating a
-dedicated key. Send `x-omniroute-no-log: true` on the request (`1` and `yes` are
-also accepted, case-insensitive). The call-log row is still written with its
+A client can opt a single chat or Responses request out of payload persistence
+without creating a dedicated key. Send `x-omniroute-no-log: true` on the request
+(`1` and `yes` are also accepted, case-insensitive). The call-log row is still written with its
 timestamp, model, provider, status, duration and token counts, but
 `request_body`, `response_body`, request summaries and pipeline artifacts are
 omitted.
