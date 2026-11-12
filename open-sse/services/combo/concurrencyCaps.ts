@@ -20,6 +20,9 @@
  */
 
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import { buildAccountSemaphoreKey } from "../accountSemaphore.ts";
+import { resolveConnectionConcurrencyCap } from "../adaptiveConnectionConcurrency.ts";
+import { getProviderDefaultConnectionConcurrency } from "../providerDefaultRateLimit.ts";
 import { effectiveMaxConcurrency } from "./comboPredicates.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
@@ -28,7 +31,14 @@ export async function lookupPositiveCap(connectionId: string): Promise<number | 
   try {
     const conn = await getCachedProviderConnectionById(connectionId);
     const raw = (conn as { maxConcurrent?: number | null } | null)?.maxConcurrent;
-    return typeof raw === "number" && Number.isFinite(raw) && raw > 0 ? raw : null;
+    if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) return raw;
+    const provider = (conn as { provider?: string } | null)?.provider;
+    if (!provider) return null;
+    return resolveConnectionConcurrencyCap(
+      raw,
+      getProviderDefaultConnectionConcurrency(provider),
+      buildAccountSemaphoreKey({ provider, accountKey: connectionId })
+    );
   } catch {
     return null; // fail-open: never block routing on a lookup error
   }

@@ -557,7 +557,7 @@ export default function EditConnectionModal({
       let parsedMaxConcurrent: number | null = null;
       if (trimmedMaxConcurrent) {
         const numericMaxConcurrent = Number(trimmedMaxConcurrent);
-        if (!Number.isInteger(numericMaxConcurrent) || numericMaxConcurrent < 0) {
+        if (!Number.isInteger(numericMaxConcurrent) || numericMaxConcurrent < -1) {
           setSaveError(t("maxConcurrentWholeNumberError"));
           return;
         }
@@ -996,7 +996,7 @@ export default function EditConnectionModal({
           </div>
           <Input
             type="number"
-            min={0}
+            min={-1}
             step={1}
             aria-label={t("accountConcurrencyCapLabel")}
             value={formData.maxConcurrent}
@@ -1005,13 +1005,13 @@ export default function EditConnectionModal({
               setFormData({ ...formData, maxConcurrent: nextValue });
               if (saveError && nextValue.trim()) {
                 const numericValue = Number(nextValue);
-                if (Number.isInteger(numericValue) && numericValue >= 0) {
+                if (Number.isInteger(numericValue) && numericValue >= -1) {
                   setSaveError(null);
                 }
               }
             }}
             placeholder="0"
-            hint={t("accountConcurrencyCapHint")}
+            hint={t("adaptiveConnectionConcurrencyHint")}
           />
         </div>
         {saveError && (

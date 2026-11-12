@@ -234,6 +234,8 @@ export interface ProviderQuotaOverrideSettings {
   concurrency?: number;
   /** Shared concurrency cap across every connection for this provider. */
   providerConcurrency?: number;
+  /** Default per-connection cap when maxConcurrent is unset or zero. */
+  defaultConnectionConcurrency?: number;
   /**
    * Fixed connection cooldown (seconds) after a rate-limit error when the upstream sent no
    * retry hint. Replaces the scaled exponential backoff for this provider; a per-connection

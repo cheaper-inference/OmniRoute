@@ -497,6 +497,12 @@ function normalizeProviderQuotaOverrideEntry(raw: unknown): ProviderQuotaOverrid
   if (concurrency !== undefined) out.concurrency = concurrency;
   const providerConcurrency = pickTruncated(record.providerConcurrency, (n) => n >= 0);
   if (providerConcurrency !== undefined) out.providerConcurrency = providerConcurrency;
+  const defaultConnectionConcurrency = pickTruncated(
+    record.defaultConnectionConcurrency,
+    (n) => n >= 1 && n <= 10_000
+  );
+  if (defaultConnectionConcurrency !== undefined)
+    out.defaultConnectionConcurrency = defaultConnectionConcurrency;
   // Per-provider rate-limit retry delay: <=0/non-finite means "Auto" (dropped); capped at 6h.
   const cooldownSeconds = pickTruncated(record.rateLimitCooldownSeconds, (n) => n >= 1);
   if (cooldownSeconds !== undefined) {

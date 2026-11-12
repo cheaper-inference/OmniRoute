@@ -458,6 +458,11 @@ export default function ConnectionRow({
                 {t("autoPriority", { priority: connection.globalPriority })}
               </span>
             )}
+            {connection.maxConcurrent === -1 && (
+              <Badge variant="default" size="sm" icon={<Icon name="dynamic_feed" size={11} />}>
+                -1 (429 ↓ / 2xx ↑)
+              </Badge>
+            )}
             {connection.maxConcurrent != null && connection.maxConcurrent > 0 && (
               <Badge
                 variant="default"

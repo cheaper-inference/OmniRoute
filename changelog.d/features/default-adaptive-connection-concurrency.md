@@ -1,0 +1,1 @@
+- Add an opt-in provider default for per-connection concurrency, and `maxConcurrent = -1` for process-local adaptive account limits that respond to upstream 429s and successful requests. ([#19506](https://github.com/cheaper-inference/OmniRoute/issues/19506))
