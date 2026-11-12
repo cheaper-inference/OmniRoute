@@ -220,6 +220,26 @@ test("redaction covers individual cookie values, JSON cookie exports and path cr
   assert.equal(record.endpoint, "https://relay.provider.example");
 });
 
+test("an echoed JSON-cookie value never reaches the surfaced error or the log record", async () => {
+  const cookieValue = "eyJhbGciOiJIUzI1NiJ9ECHOEDCOOKIE";
+  const cookieKey = `Cookie: ${JSON.stringify([{ name: "sso", value: cookieValue }])}`;
+  const body = `Service is not available in your region (session ${cookieValue})`;
+  const { result } = await withFetch(
+    () => new Response(body, { status: 403 }),
+    () =>
+      validateProviderApiKey({ provider: "together", apiKey: cookieKey, providerSpecificData: {} })
+  );
+  assert.match(String(result.error), /access denied by provider \(HTTP 403: /i);
+  assert.ok(!String(result.error).includes(cookieValue), String(result.error));
+  const record = buildValidationLogRecord({
+    provider: "together",
+    apiKey: cookieKey,
+    outcome: "access_denied",
+    rejection: { endpoint: "https://api.provider.example/v1/models", status: 403, body },
+  });
+  assert.ok(!JSON.stringify(record).includes(cookieValue), JSON.stringify(record));
+});
+
 test("classifyValidationRejection buckets statuses", () => {
   assert.equal(classifyValidationRejection(401, "nope").kind, "auth");
   assert.equal(classifyValidationRejection(403, '{"error":"invalid api key"}').kind, "auth");
