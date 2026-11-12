@@ -193,7 +193,7 @@ family alias
        -> endpoint pinned to subscription connection B
 ```
 
-A base family alias never includes thinking/effort variants. Harness/request parameters control reasoning.
+The unsuffixed family alias is not an effort mix: it is the newest version with no effort suffix. Effort is a separate owned alias, {name}/{effort} and {name}/{version}/{effort}, emitted only when the first provider still has that exact suffixed model. flash, pro, mini, nano, turbo, lite, preview, lightning, fast, and thinking are product words, not effort.
 
 ## Reconciliation transaction
 

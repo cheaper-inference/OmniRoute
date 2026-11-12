@@ -27,8 +27,9 @@ test("orders exact family versions newest first and preserves endpoint identitie
   const family = graph.combos.find((combo) => combo.name === "claude/fable")!;
   assert.deepEqual(
     family.models.map((step) => (step.kind === "combo-ref" ? step.comboName : "")),
-    ["claude/fable/5.2", "claude/fable/5.1"],
+    ["claude/fable/5.2"],
   );
+  assert.ok(graph.combos.some((combo) => combo.name === "claude/fable/5.1"));
   const version = graph.combos.find((combo) => combo.name === "claude/fable/5.2")!;
   assert.deepEqual(
     version.models.map((step) =>

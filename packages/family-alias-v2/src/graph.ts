@@ -4,6 +4,7 @@ import { evaluateEndpoint } from "./health/evaluate.ts";
 import type { HealthCache } from "./health/cache.ts";
 import { endpointHealthKey } from "./health/cache.ts";
 import { OWNER, ownershipDescription, stableHash } from "./ownership.ts";
+import { EFFORT_TOKENS, effortId, orderEndpoints, type Effort } from "./routing.ts";
 import { compareVersionNewestFirst } from "./version.ts";
 import type { ClassifiedEndpoint } from "./types.ts";
 
@@ -94,7 +95,7 @@ export function buildDesiredGraph(opts: {
         .map(([display, endpoints]) => ({
           display,
           version: endpoints[0].version,
-          endpoints: [...endpoints].sort((a, b) => endpointKey(a).localeCompare(endpointKey(b))),
+          endpoints: orderEndpoints(alias.split("/")[0], endpoints),
         }))
         .sort((a, b) => compareVersionNewestFirst(a.version, b.version)),
     }));
@@ -136,14 +137,32 @@ export function buildDesiredGraph(opts: {
       description: ownershipDescription(graphHash, "family"),
       strategy: "priority",
       allowedModelFamilies: [family.alias.split("/")[0]],
-      models: versionNames.map((comboName, index) => ({
+      models: versionNames.slice(0, 1).map((comboName, index) => ({
         id: `fam-v2-ref-${stableHash(`${family.alias}:${comboName}:${index}`).slice(0, 16)}`,
-        kind: "combo-ref",
+        kind: "combo-ref" as const,
         comboName,
-        weight: 0,
+        weight: 0 as const,
       })),
     });
   }
+
+  const byModel = new Map(opts.enriched.map((item) => [item.endpoint.modelId, item]));
+  const extra: DesiredCombo[] = [];
+  for (const combo of combos) {
+    const first = combo.models.find((step) => step.kind === "model");
+    if (!first || first.kind !== "model") continue;
+    for (const effort of EFFORT_TOKENS) {
+      const wanted = effortId(first.model, effort as Effort);
+      const match = byModel.get(wanted);
+      if (!match || match.endpoint.providerId !== first.providerId) continue;
+      extra.push({
+        ...combo,
+        name: combo.name + "/" + effort,
+        models: [{ ...first, id: stepId({ endpoint: match.endpoint } as ClassifiedEndpoint), model: wanted }],
+      });
+    }
+  }
+  combos.push(...extra);
 
   return { owner: OWNER, graphHash, combos, omitted };
 }
