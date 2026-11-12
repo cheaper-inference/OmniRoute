@@ -22,7 +22,7 @@ export const HERO_COPY = {
   cmd: ["$ npm i -g omniroute"],
   foot: ["RTK + CAVEMAN · STACKED COMPRESSION · ONE ENDPOINT · /v1"],
   stats: [
-    "393",
+    "394",
     "AI PROVIDERS",
     "150+",
     "FREE TIERS",
