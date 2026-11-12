@@ -9,6 +9,7 @@
  */
 
 import { getProviderConnections } from "@/lib/db/providers";
+import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as log from "../../utils/logger";
 import {
@@ -192,7 +193,11 @@ export function museRetryDelay(
 export const museFailureMarksAccount = (result: {
   errorCode?: unknown;
   errorType?: unknown;
+  status?: number;
+  rawMessage?: unknown;
+  error?: unknown;
 }): boolean =>
+  !isMusePolicyRefusal(result.status, String(result.rawMessage ?? result.error ?? "")) &&
   result.errorCode !== "MUSE_OWNERSHIP_REJECTED" &&
   result.errorType !== "stream_timeout" &&
   result.errorType !== "stream_early_eof" &&
