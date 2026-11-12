@@ -1,0 +1,1 @@
+- **fix(providers):** Muse OAuth sessions can adopt plain tool history across an eligible account pool rather than rejecting a model switch with 409 whenever several accounts are configured. Initial owner rotation and pre-binding retries work without relaxing encrypted-reasoning, item-reference or established account ownership guards.
