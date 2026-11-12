@@ -14,3 +14,5 @@ export { OWNER, ownershipDescription, parseOwnership, stableHash } from "./owner
 export { deletionOrder, validateDesiredDag } from "./omniroute/dag.ts";
 export { liveStateHash, planOmniRoute } from "./omniroute/plan.ts";
 export { applyOmniRoute } from "./omniroute/apply.ts";
+export { applyCpa } from "./cpa/apply.ts";
+export { CPA_MANAGED_PROVIDER, cpaStateHash, planCpa } from "./cpa/plan.ts";
