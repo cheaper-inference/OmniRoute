@@ -53,6 +53,8 @@ function sanitizeFunctionName(name: string): string {
   return name.replace(FUNCTION_NAME_SANITIZE_RE, "_").slice(0, 128);
 }
 
+const ITEM_ID_SANITIZE_RE = /[^a-zA-Z0-9_-]/gu;
+
 function sanitizeInputItemId(record: JsonRecord): JsonRecord {
   if (record.id === undefined) return record;
   if (!isValidResponsesItemId(record.id)) {
@@ -61,17 +63,19 @@ function sanitizeInputItemId(record: JsonRecord): JsonRecord {
     return next;
   }
 
+  const id = record.id.replace(ITEM_ID_SANITIZE_RE, "_").slice(0, 64);
+  const next = id === record.id ? record : { ...record, id };
   const type = typeof record.type === "string" ? record.type : "";
   const expectedPrefix = SERVER_ITEM_ID_PREFIX_BY_TYPE[type];
   const hasExpectedPrefix = expectedPrefix
-    ? record.id.startsWith(expectedPrefix)
-    : SERVER_ITEM_ID_PATTERN.test(record.id);
+    ? id.startsWith(expectedPrefix)
+    : SERVER_ITEM_ID_PATTERN.test(id);
 
-  if (hasExpectedPrefix) return record;
+  if (hasExpectedPrefix) return next;
 
-  const next = { ...record };
-  delete next.id;
-  return next;
+  const withoutId = { ...next };
+  delete withoutId.id;
+  return withoutId;
 }
 
 function imageUrlToText(value: unknown): string {

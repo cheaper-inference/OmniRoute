@@ -5679,6 +5679,7 @@
     "usageTracking": "የአጠቃቀም ክትትል",
     "securityDesc": "ዳሽቦርድዎን ለመጠበቅ የይለፍ ቃል ያዘጋጁ፣ ወይም ለአሁን ይዝለሉ።",
     "securityDescSkipWarning": "⚠️ ያለ የይለፍ ቃል፣ በማዋቀር ጊዜ አቅራቢዎችን ማከል አይችሉም። የይለፍ ቃል ካዘጋጁ በኋላ ከዳሽቦርዱ ላይ ሊያክሏቸው ይችላሉ።",
+    "passwordAlreadySet": "የዳሽቦርድ የይለፍ ቃል አስቀድሞ ተቀናብሯል። በኋላ በቅንብሮች ውስጥ ሊቀይሩት ይችላሉ።",
     "providerDesc": "የመጀመሪያውን AI አቅራቢዎን ያገናኙ። በኋላ ተጨማሪ ማከል ይችላሉ።",
     "providerRequiresPassword": "አቅራቢዎችን ለማከል መጀመሪያ የይለፍ ቃል ማዘጋጀት ያስፈልግዎታል። እባክዎ ወደ ደህንነት ደረጃ ተመልሰው የይለፍ ቃል ያዘጋጁ፣ ወይም በኋላ ከዳሽቦርዱ ላይ አቅራቢዎችን ያክሉ።",
     "apiKeyRequired": "API ቁልፍ (አስፈላጊ)",
@@ -7228,7 +7229,8 @@
       "kiro": "ነፃ ደረጃ፦ በወር 50 ክሬዲቶች (~25K–100K ቶከኖች)። ⚠️ የKiro ToS በሦስተኛ ወገን ፕሮክሲ/ሃርነስ መጠቀምን ይከለክላል።",
       "codex": "OpenAI Codexን በነባሩ OAuth ፍሰት ያገናኙ።",
       "qwen": "Qwen Codeን በነባሩ OAuth ፍሰት ያገናኙ።",
-      "github-models": "በgithub.com/settings/tokens ላይ 'models: read' ወሰን ያለው GitHub PAT ይፍጠሩ"
+      "github-models": "በgithub.com/settings/tokens ላይ 'models: read' ወሰን ያለው GitHub PAT ይፍጠሩ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} የአቅራቢውን ቤተኛ የሞዴል መለያዎች ይቀበላል። ከ/models ያስመጡ ወይም ለማስተላለፍ ብጁ መለያዎችን ያክሉ።",
     "bedrockModelsDescription": "የAmazon Bedrock ሞዴሎች በAWS ክልል የተገደቡ ናቸው። ከ/models ያስመጡ ወይም በተመረጠው ክልል የነቁ የBedrock ሞዴል መለያዎችን ያክሉ።",
@@ -10259,7 +10261,11 @@
     "mappingInvalidJson": "ልክ ያልሆነ JSON።",
     "mappingMustBeObject": "ማዛመጃው የJSON ኦብጀክት መሆን አለበት፤ ድርድር ወይም መሠረታዊ እሴት መሆን የለበትም።",
     "mappingValueMustBeString": "የ“{key}” ቁልፍ እሴት ሕብረቁምፊ መሆን አለበት።",
-    "save": "አስቀምጥ"
+    "save": "አስቀምጥ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12871,6 +12877,8 @@
     },
     "attempts": "ሙከራዎች",
     "detail": {
+      "tabOverview": "አጠቃላይ እይታ",
+      "tabPayloads": "የውሂብ ጭነቶች",
       "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
       "noHttpResponse": "የHTTP ምላሽ አልታየም",
       "transportError": "የማጓጓዣ ስህተት",

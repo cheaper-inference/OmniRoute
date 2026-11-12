@@ -5679,6 +5679,7 @@
     "usageTracking": "Usage Tracking",
     "securityDesc": "Set a password to protect your dashboard, or skip for now.",
     "securityDescSkipWarning": "⚠️ Without a password, you won't be able to add providers during setup. You can add them later from the dashboard after setting a password.",
+    "passwordAlreadySet": "A dashboard password is already set. You can change it later in Settings.",
     "providerDesc": "Connect your first AI provider. You can add more later.",
     "providerRequiresPassword": "You need to set a password first to add providers. Please go back to the security step and set a password, or add providers later from the dashboard.",
     "apiKeyRequired": "API Key (required)",
@@ -7228,7 +7229,8 @@
       "kiro": "Free tier: 50 credits/month (~25K–100K tokens). ⚠️ Kiro ToS prohibits third-party proxy/harness use.",
       "codex": "Connect OpenAI Codex with the existing OAuth flow.",
       "qwen": "Connect Qwen Code with the existing OAuth flow.",
-      "github-models": "Create a GitHub PAT with 'models: read' scope at github.com/settings/tokens"
+      "github-models": "Create a GitHub PAT with 'models: read' scope at github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} accepts provider-native model IDs. Import from /models or add custom IDs for routing.",
     "bedrockModelsDescription": "Amazon Bedrock models are scoped by AWS region. Import from /models or add Bedrock model IDs enabled in the selected region.",
@@ -10259,7 +10261,11 @@
     "mappingInvalidJson": "Invalid JSON.",
     "mappingMustBeObject": "The mapping must be a JSON object, not an array or primitive value.",
     "mappingValueMustBeString": "The value for key “{key}” must be a string.",
-    "save": "Save"
+    "save": "Save",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12871,6 +12877,8 @@
     },
     "attempts": "attempts",
     "detail": {
+      "tabOverview": "Overview",
+      "tabPayloads": "Payloads",
       "omittedHttpAttempts": "{count} HTTP sends not retained",
       "noHttpResponse": "No HTTP response observed",
       "transportError": "Transport error",

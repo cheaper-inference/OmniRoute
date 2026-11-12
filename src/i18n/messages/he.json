@@ -5679,6 +5679,7 @@
     "usageTracking": "מעקב אחר שימוש",
     "securityDesc": "הגדר סיסמה כדי להגן על לוח המחוונים שלך, או דלג לעת עתה.",
     "securityDescSkipWarning": "⚠️ ללא סיסמה, לא תהיה לך אפשרות להוסיף ספקים במהלך ההגדרה. ניתן להוסיף אותם מאוחר יותר מלוח הבקרה לאחר הגדרת סיסמה.",
+    "passwordAlreadySet": "כבר הוגדרה סיסמה ללוח הבקרה. אפשר לשנות אותה מאוחר יותר בהגדרות.",
     "providerDesc": "חבר את ספק הבינה המלאכותית הראשון שלך. תוכל להוסיף עוד מאוחר יותר.",
     "providerRequiresPassword": "כדי להוסיף ספקים, תחילה יש להגדיר סיסמה. נא לחזור לשלב האבטחה ולהגדיר סיסמה, או להוסיף ספקים מאוחר יותר מלוח הבקרה.",
     "apiKeyRequired": "מפתח API (נדרש)",
@@ -7228,7 +7229,8 @@
       "kiro": "מסלול חינמי: 50 קרדיטים לחודש (~25K–100K טוקנים). ⚠️ תנאי השימוש של Kiro אוסרים על שימוש בפרוקסי/harness של צד שלישי.",
       "codex": "חבר את OpenAI Codex באמצעות תהליך ה-OAuth הקיים.",
       "qwen": "חבר את Qwen Code באמצעות תהליך ה-OAuth הקיים.",
-      "github-models": "צור GitHub PAT עם הרשאת 'models: read' ב-github.com/settings/tokens"
+      "github-models": "צור GitHub PAT עם הרשאת 'models: read' ב-github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} מקבל מזהי מודל מקוריים של ספק. ייבא מ /models או הוסף מזהים מותאמים אישית לניתוב.",
     "bedrockModelsDescription": "הדגמים של Amazon Bedrock נמצאים לפי אזור AWS. ייבא מ-/models או הוסף מזהי דגמי Bedrock המופעלים באזור הנבחר.",
@@ -10259,7 +10261,11 @@
     "mappingInvalidJson": "JSON לא תקין.",
     "mappingMustBeObject": "המיפוי חייב להיות אובייקט JSON, לא מערך או ערך פרימיטיבי.",
     "mappingValueMustBeString": "הערך עבור המפתח “{key}” חייב להיות מחרוזת.",
-    "save": "שמור"
+    "save": "שמור",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12871,6 +12877,8 @@
     },
     "attempts": "ניסיונות",
     "detail": {
+      "tabOverview": "סקירה כללית",
+      "tabPayloads": "מטענים",
       "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
       "noHttpResponse": "לא נצפתה תגובת HTTP",
       "transportError": "שגיאת תעבורה",
