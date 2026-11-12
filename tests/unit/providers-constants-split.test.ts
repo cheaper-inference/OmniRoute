@@ -66,7 +66,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // deAPI adds one apikey/specialty-media entry — 256.
 // EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
-const APIKEY_PROVIDER_COUNT = 258;
+// EVREN (#18365) adds one apikey/gateways entry — 259.
+const APIKEY_PROVIDER_COUNT = 259;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
