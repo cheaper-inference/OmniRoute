@@ -2,6 +2,7 @@
 
 import type { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
 import { getI18nOrFallback } from "./comboPageHelpers";
 
 type Translator = ReturnType<typeof useTranslations>;
@@ -56,13 +57,15 @@ export function ComboListToolbar({
         {summary}
       </p>
       {onSearchChange && (
-        <input
+        <Input
           type="search"
+          size="sm"
+          icon="search"
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={getI18nOrFallback(t, "searchCombos", "Search combos by name or model")}
           aria-label={getI18nOrFallback(t, "searchCombos", "Search combos by name or model")}
-          className="w-full rounded-lg border border-border bg-bg px-3 py-1.5 text-sm sm:max-w-xs"
+          className="w-full sm:max-w-xs"
           data-testid="combo-list-search"
         />
       )}
