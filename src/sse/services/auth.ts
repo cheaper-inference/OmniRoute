@@ -15,7 +15,11 @@ import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
-import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
+import {
+  isModelScopedFailure,
+  isQuotaExhaustedSignal,
+  isWorkspacePolicyBudget429,
+} from "./modelScopedQuotaFailure.ts"; // #13548, #19314
 import { isCIPayloadQuotaFailure } from "./ciPayloadQuotaFailure.ts";
 import {
   getCachedRawProviderConnections,
@@ -2952,6 +2956,7 @@ export async function markAccountUnavailable(
     if (
       status === 429 &&
       egressBucketed &&
+      !isWorkspacePolicyBudget429(errorText) &&
       (fallbackResult.reason === RateLimitReason.QUOTA_EXHAUSTED ||
         fallbackResult.reason === RateLimitReason.RATE_LIMIT_EXCEEDED) &&
       !fallbackResult.permanent &&
