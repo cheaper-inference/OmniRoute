@@ -8,7 +8,7 @@ import {
   type SystemContentBlock,
   type ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { BaseExecutor } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
@@ -774,17 +774,21 @@ interface BedrockClientOutput {
   stream?: AsyncIterable<unknown>;
 }
 
+const MAX_BEDROCK_CLIENTS = 32;
+
 interface BedrockClientLike {
   send: (
     command: ConverseCommand | ConverseStreamCommand,
     options?: { abortSignal?: AbortSignal }
   ) => Promise<BedrockClientOutput>;
+  destroy?: () => void;
 }
 
 export class BedrockExecutor extends BaseExecutor {
   // Tests inject a stub, so this names only the method the executor calls rather
   // than the SDK client class.
   private readonly clientFactory: ((credentials: unknown) => BedrockClientLike) | null;
+  private readonly clients = new Map<string, BedrockClientLike>();
 
   constructor(clientFactory: ((credentials: unknown) => BedrockClientLike) | null = null) {
     super("bedrock", PROVIDERS.bedrock || { format: "openai" });
@@ -807,16 +811,31 @@ export class BedrockExecutor extends BaseExecutor {
   }
 
   createClient(credentials): BedrockClientLike {
-    if (this.clientFactory) return this.clientFactory(credentials);
     const region = resolveBedrockRegion(credentials?.providerSpecificData);
     const customUserAgent = getCustomUserAgent(credentials?.providerSpecificData);
-    return new BedrockRuntimeClient({
-      region,
-      token: { token: credentials.apiKey },
-      authSchemePreference: ["httpBearerAuth"],
-      maxAttempts: 1,
-      ...(customUserAgent ? { customUserAgent } : {}),
-    });
+    const keyFingerprint = createHash("sha256").update(credentials.apiKey).digest("hex");
+    const cacheKey = JSON.stringify([region, customUserAgent, keyFingerprint]);
+    const cached = this.clients.get(cacheKey);
+    if (cached) return cached;
+
+    const client = this.clientFactory
+      ? this.clientFactory(credentials)
+      : new BedrockRuntimeClient({
+          region,
+          token: { token: credentials.apiKey },
+          authSchemePreference: ["httpBearerAuth"],
+          maxAttempts: 1,
+          ...(customUserAgent ? { customUserAgent } : {}),
+        });
+    if (this.clients.size >= MAX_BEDROCK_CLIENTS) {
+      const oldestKey = this.clients.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.clients.get(oldestKey)?.destroy?.();
+        this.clients.delete(oldestKey);
+      }
+    }
+    this.clients.set(cacheKey, client);
+    return client;
   }
 
   async execute({ model, body, stream, credentials, signal, log }) {
