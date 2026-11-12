@@ -12,7 +12,11 @@
  */
 import { parseSSELine } from "./streamHelpers.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
-import { extractUsage, sanitizeUsagePayloadForRequest } from "./usageTracking.ts";
+import {
+  extractUsage,
+  sanitizeUsagePayloadForRequest,
+  type RequestUsageBasis,
+} from "./usageTracking.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { markToolFinish } from "../services/sessionManager.ts";
 
@@ -23,6 +27,7 @@ export type TranslateFlushTailContext = {
   openaiFormat: string;
   openaiResponsesFormat: string;
   body: unknown;
+  usageBasis?: RequestUsageBasis;
   state: { usage?: unknown } & JsonRecord;
   sessionId: string | null;
   now: () => number;
@@ -87,7 +92,7 @@ function drainOneTailLine(
   if (context.emitFailureAndAbort(controller, parsed)) return true;
   if (isSkippedTailLine(parsed, context)) return false;
   context.pushProviderPayload(parsed);
-  sanitizeUsagePayloadForRequest(parsed, context.body, context.targetFormat);
+  sanitizeUsagePayloadForRequest(parsed, context.body, context.targetFormat, context.usageBasis);
   trackTailToolTiming(parsed as JsonRecord, context);
   mergeUsage(context.state, extractUsage(parsed));
   context.translateAndEmit(controller, parsed);

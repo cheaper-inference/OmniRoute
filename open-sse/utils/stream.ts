@@ -18,6 +18,7 @@ import {
   carryCacheCreationMarker,
   normalizeUsage as normalizeTokenUsage,
   sanitizeUsagePayloadForRequest,
+  createRequestUsageBasis,
   type UsageLike,
 } from "./usageTracking.ts";
 import {
@@ -872,6 +873,9 @@ export function createSSEStream(options: StreamOptions = {}) {
     performance.mark("omni-request-body-size", { detail: bodySize });
     performance.clearMarks("omni-request-body-size");
   }
+  // The usage guard's body size and input estimate depend only on the request, so they are
+  // computed at most once per stream instead of on every chunk that carries usage (#20086).
+  const requestUsageBasis = createRequestUsageBasis(body);
 
   // Canonical streaming timing (TTFT / ITL / interruption). One instance per
   // stream, marked from the transform below. ttft() = first-forwarded-SSE-chunk
@@ -1841,7 +1845,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type.startsWith("content_block") ||
                     parsed.type === "ping" ||
                     parsed.type === "error");
-                if (sanitizeUsagePayloadForRequest(parsed, body, clientResponseFormat)) {
+                if (
+                  sanitizeUsagePayloadForRequest(
+                    parsed,
+                    body,
+                    clientResponseFormat,
+                    requestUsageBasis
+                  )
+                ) {
                   output = `data: ${JSON.stringify(parsed)}\n\n`;
                   injectedUsage = true;
                 }
@@ -2695,7 +2706,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           if (parsed && parsed.done) {
             continue;
           }
-          sanitizeUsagePayloadForRequest(parsed, body, targetFormat);
+          sanitizeUsagePayloadForRequest(parsed, body, targetFormat, requestUsageBasis);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
           }
@@ -2979,7 +2990,12 @@ export function createSSEStream(options: StreamOptions = {}) {
               pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
               sanitizeUsagePayload: (payload: unknown) =>
-                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
+                sanitizeUsagePayloadForRequest(
+                  payload as UsageLike,
+                  body,
+                  clientResponseFormat,
+                  requestUsageBasis
+                ),
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
@@ -3072,7 +3088,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                     );
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 }
-                if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
+                if (
+                  sanitizeUsagePayloadForRequest(
+                    bufferedPayload,
+                    body,
+                    clientResponseFormat,
+                    requestUsageBasis
+                  )
+                )
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
@@ -3431,6 +3454,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               openaiFormat: FORMATS.OPENAI,
               openaiResponsesFormat: FORMATS.OPENAI_RESPONSES,
               body,
+              usageBasis: requestUsageBasis,
               state: state as TranslateState & Record<string, unknown>,
               sessionId,
               now: () => Date.now(),
