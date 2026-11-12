@@ -1009,6 +1009,14 @@ export class CodexExecutor extends BaseExecutor {
       }
     };
 
+    const cleanupWsListeners = () => {
+      if (ws) {
+        ws.onmessage = null;
+        ws.onerror = null;
+        ws.onclose = null;
+      }
+    };
+
     let abortHandler: (() => void) | null = null;
     const removeAbortListener = () => {
       if (!abortHandler) return;
@@ -1030,6 +1038,7 @@ export class CodexExecutor extends BaseExecutor {
       if (closed) return;
       closed = true;
       removeAbortListener();
+      cleanupWsListeners();
       if (closeSocket) closeUpstream(reason);
 
       const controller = streamController;
@@ -1129,6 +1138,7 @@ export class CodexExecutor extends BaseExecutor {
             // emit a terminal response.failed instead of ending the client stream as
             // if it completed normally (silent truncation).
             if (closed) return;
+            cleanupWsListeners();
             const closeDetail = event
               ? ` (code ${event.code ?? "unknown"}${event.reason ? `: ${event.reason}` : ""})`
               : "";
