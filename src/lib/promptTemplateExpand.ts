@@ -94,7 +94,7 @@ export function expandPromptTemplates<T extends Body>(
 export function expandChatPromptTemplates<T extends Body>(body: T): T | Response {
   if (!isPromptTemplatesEnabled()) return body;
   const result = expandPromptTemplates(body, (slug) => getActivePrompt(slug)?.content ?? null);
-  if (result.ok) return result.body;
+  if (result.ok === true) return result.body;
   return Response.json(
     { error: { message: result.message, type: "invalid_request_error", code: "invalid_template" } },
     { status: result.status }
