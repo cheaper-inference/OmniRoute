@@ -27,6 +27,7 @@ import {
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { validateProviderApiKey } from "@/lib/providers/validation";
+import { INFOMANIAK_HTTPS_REQUIRED_MESSAGE, isHttpsBaseUrl } from "@/shared/constants/infomaniak";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { getProxyForLevel } from "@/lib/db/settings";
 import { resolveProxyForProvider } from "@/lib/db/proxies";
@@ -80,6 +81,14 @@ function isKnownImportProvider(provider: string): boolean {
   );
 }
 
+// Infomaniak has no fixed host (the product id lives in the Base URL path) and sends the key as a
+// Bearer token, so an import needs an https Base URL even when key validation is skipped.
+function infomaniakImportError(entry: ImportEntry, data: Record<string, unknown> | undefined) {
+  if (entry.provider !== "infomaniak") return null;
+  const baseUrl = typeof data?.baseUrl === "string" ? data.baseUrl.trim() : "";
+  return baseUrl && isHttpsBaseUrl(baseUrl) ? null : INFOMANIAK_HTTPS_REQUIRED_MESSAGE;
+}
+
 async function importOneEntry(
   entry: ImportEntry,
   validateKeys: boolean,
@@ -91,6 +100,8 @@ async function importOneEntry(
   }
 
   const providerSpecificData = await resolveProviderSpecificData(entry);
+  const infomaniakError = infomaniakImportError(entry, providerSpecificData);
+  if (infomaniakError) return { error: infomaniakError };
   if (
     (isOpenAICompatibleProvider(entry.provider) || isAnthropicCompatibleProvider(entry.provider)) &&
     !providerSpecificData

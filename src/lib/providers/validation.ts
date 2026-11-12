@@ -373,6 +373,14 @@ export async function validateProviderApiKey({
       if (!isHttpsBaseUrl(baseUrl)) {
         return { valid: false, error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE };
       }
+      // An absolute models URL override replaces the probe endpoint, so it needs the same check.
+      const modelsUrl =
+        typeof providerSpecificData?.modelsUrl === "string"
+          ? providerSpecificData.modelsUrl.trim()
+          : "";
+      if (modelsUrl.startsWith("http") && !isHttpsBaseUrl(modelsUrl)) {
+        return { valid: false, error: INFOMANIAK_HTTPS_REQUIRED_MESSAGE };
+      }
       return validateOpenAILikeProvider({
         provider: "infomaniak",
         apiKey,

@@ -244,3 +244,31 @@ test("providers import route applies a per-entry baseUrl override for compatible
   assert.equal(body.success, 1);
   assert.equal(body.created[0].providerSpecificData?.baseUrl, "https://example.com");
 });
+
+test("providers import route rejects infomaniak without an https Base URL, even with validateKeys off", async () => {
+  await resetStorage();
+  const response = await postImport({
+    validateKeys: false,
+    entries: [
+      { provider: "infomaniak", name: "no-url", apiKey: "sk-1" },
+      {
+        provider: "infomaniak",
+        name: "http-url",
+        apiKey: "sk-2",
+        baseUrl: "http://api.infomaniak.com/2/ai/12345/openai/v1",
+      },
+      {
+        provider: "infomaniak",
+        name: "ok",
+        apiKey: "sk-3",
+        baseUrl: "https://api.infomaniak.com/2/ai/12345/openai/v1",
+      },
+    ],
+  });
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as ImportRouteResponse;
+  assert.equal(body.success, 1);
+  assert.equal(body.failed, 2);
+  assert.deepEqual(body.errors.map((e) => e.index).sort(), [0, 1]);
+  assert.match(body.errors[0]?.message ?? "", /https/);
+});

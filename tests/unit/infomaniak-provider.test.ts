@@ -115,3 +115,21 @@ test("infomaniak chat dispatch refuses an http Base URL", () => {
     /https/
   );
 });
+
+test("infomaniak validation rejects an http models URL override and makes no request", async () => {
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    return new Response("{}", { status: 200 });
+  }) as typeof fetch;
+
+  const result = await validateProviderApiKey({
+    provider: "infomaniak",
+    apiKey: "k",
+    providerSpecificData: { baseUrl: BASE_URL, modelsUrl: `${HTTP_BASE_URL}/models` },
+  });
+
+  assert.equal(result.valid, false);
+  assert.match(String(result.error), /https/);
+  assert.equal(calls, 0);
+});
