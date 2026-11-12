@@ -353,6 +353,10 @@ export async function validateProviderApiKey({
         isLocal,
       });
     },
+    /**
+     * Infomaniak AI Tools: the account's product id lives in the Base URL path, so a missing
+     * Base URL is rejected without a request; otherwise probes `<baseUrl>/models`.
+     */
     infomaniak: ({ apiKey, providerSpecificData }: any) => {
       // The endpoint path carries the account's AI Tools product id; without a Base URL
       // the probe would hit the registry placeholder.
