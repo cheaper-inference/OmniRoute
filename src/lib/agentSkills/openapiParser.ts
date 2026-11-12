@@ -58,18 +58,20 @@ const PATH_AREA_MAP: Array<[string, SkillArea]> = [
   ["/api/keys", "api-keys"],
   // Usage logs
   ["/api/usage", "usage-logs"],
+  ["/api/log-export", "usage-logs"],
   // Budget / rate limit
   ["/api/rate-limit", "budget"],
   ["/api/budget", "budget"],
+  // Proxies and compression settings (before the generic /api/settings)
+  ["/api/settings/proxy", "proxies"],
+  ["/api/settings/proxies", "proxies"],
+  ["/api/settings/compression", "compression"],
   // Settings
   ["/api/settings", "settings"],
   ["/api/tags", "settings"],
-  // Proxies
-  ["/api/settings/proxy", "proxies"],
   // Cache
   ["/api/cache", "cache"],
   // Compression / RTK
-  ["/api/settings/compression", "compression"],
   ["/api/compression", "compression"],
   ["/api/context/rtk", "context-rtk"],
   // Resilience
@@ -79,17 +81,20 @@ const PATH_AREA_MAP: Array<[string, SkillArea]> = [
   // CLI tools
   ["/api/cli-tools", "cli-tools"],
   // Tunnels
-  ["/api/tunnel", "tunnels"],
+  ["/api/tunnels", "tunnels"],
   // Sync / cloud
   ["/api/cloud", "sync-cloud"],
   ["/api/sync", "sync-cloud"],
   // DB backups
+  ["/api/db-backups", "db-backups"],
   ["/api/system", "db-backups"],
   ["/api/backup", "db-backups"],
   // Webhooks
   ["/api/webhooks", "webhooks"],
   // MCP
   ["/api/mcp", "mcp"],
+  // GitHub skills
+  ["/api/github-skills", "github-skills"],
   // A2A
   ["/a2a", "agents-a2a"],
   // Version manager

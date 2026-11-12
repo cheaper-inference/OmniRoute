@@ -25,7 +25,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — A2A Protocol
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 OmniRoute publishes an Agent Card at `/.well-known/agent.json` and accepts
 JSON-RPC 2.0 calls at `/a2a`.
@@ -47,6 +47,7 @@ Returns Agent Card with skills, endpoints, auth scheme.
 | `provider-discovery` | Lists providers matching capability filters (vision, JSON mode, tools, max-context) |
 | `cost-analysis`      | Estimates cost for a given request shape                                            |
 | `health-report`      | Returns system health (circuit states, latencies, errors)                           |
+| `list-capabilities`  | Returns the full catalog of OmniRoute agent skills                                  |
 
 ## Call example (JSON-RPC 2.0)
 
@@ -88,5 +89,5 @@ curl -X POST $OMNIROUTE_URL/a2a \
 
 ## Reference
 
-Full docs: https://github.com/diegosouzapw/OmniRoute/blob/main/docs/frameworks/A2A-SERVER.md
+Full docs: https://github.com/cheaper-inference/OmniRoute/blob/main/docs/frameworks/A2A-SERVER.md
 <!-- skill:custom-end -->

@@ -188,17 +188,16 @@ export OMNIROUTE_KEY="sk-..."                       # from Dashboard → API Key
 
 All requests: `${OMNIROUTE_URL}/v1/...` with `Authorization: Bearer ${OMNIROUTE_KEY}`.
 
-Verify: `curl $OMNIROUTE_URL/api/health` → `{"ok":true}`
+Verify: `curl $OMNIROUTE_URL/api/health` → `{"status":"ok","timestamp":"..."}`
 
 ## Discover models
 
 ```bash
 curl $OMNIROUTE_URL/v1/models                  # chat/LLM (default)
-curl $OMNIROUTE_URL/v1/models/image            # image-gen
-curl $OMNIROUTE_URL/v1/models/tts              # text-to-speech
-curl $OMNIROUTE_URL/v1/models/embedding        # embeddings
-curl $OMNIROUTE_URL/v1/models/web              # web search + fetch
-curl $OMNIROUTE_URL/v1/models/stt              # speech-to-text
+curl "$OMNIROUTE_URL/v1/models?kind=image"     # image-gen
+curl "$OMNIROUTE_URL/v1/models?kind=audio"     # text-to-speech + speech-to-text
+curl "$OMNIROUTE_URL/v1/models?kind=embedding" # embeddings
+curl $OMNIROUTE_URL/v1/search                  # web search providers
 ```
 
 Use `data[].id` as `model` field in requests. Combos appear with `owned_by:"combo"`.
@@ -207,40 +206,40 @@ Use `data[].id` as `model` field in requests. Combos appear with `owned_by:"comb
 
 | Capability             | Raw URL                                                                                           |
 | ---------------------- | ------------------------------------------------------------------------------------------------- |
-| Chat / code-gen        | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Image generation       | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Text-to-speech         | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Speech-to-text         | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Embeddings             | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Web search             | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Web fetch              | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| MCP server (110 tools) | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-mcp/SKILL.md            |
-| A2A protocol           | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-agents-a2a/SKILL.md     |
-| Routing & combos       | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-combos-routing/SKILL.md |
-| Token compression      | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-compression/SKILL.md    |
-| Monitoring & health    | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-resilience/SKILL.md     |
+| Chat / code-gen        | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Image generation       | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Text-to-speech         | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Speech-to-text         | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Embeddings             | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Web search             | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Web fetch              | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| MCP server (110 tools) | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-mcp/SKILL.md            |
+| A2A protocol           | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-agents-a2a/SKILL.md     |
+| Routing & combos       | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-combos-routing/SKILL.md |
+| Token compression      | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-compression/SKILL.md    |
+| Monitoring & health    | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-resilience/SKILL.md     |
 
 ## CLI skills (omniroute binary)
 
 | Capability                             | Raw URL                                                                                       |
 | -------------------------------------- | --------------------------------------------------------------------------------------------- |
-| CLI entry point                        | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md       |
-| CLI admin & lifecycle                  | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md       |
-| CLI providers & keys                   | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-providers/SKILL.md   |
-| CLI cloud agents (`omniroute cloud …`) | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-backup-sync/SKILL.md |
-| CLI evals & benchmarks                 | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-eval/SKILL.md        |
+| CLI entry point                        | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md       |
+| CLI admin & lifecycle                  | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md       |
+| CLI providers & keys                   | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-providers/SKILL.md   |
+| CLI cloud agents (`omniroute cloud …`) | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-backup-sync/SKILL.md |
+| CLI evals & benchmarks                 | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-eval/SKILL.md        |
 
 ## Errors
 
 - `401` → set/refresh `OMNIROUTE_KEY` (Dashboard → API Keys)
-- `400 Invalid model format` → check `model` exists in `/v1/models/<kind>`
-- `503 Provider circuit open` → upstream provider down; retry after `Retry-After` seconds
+- `400 Invalid model format` → check `model` exists in `/v1/models`
+- `503 provider_circuit_open` → upstream provider down; retry after `Retry-After` seconds
 - `429` → rate limited; honor `Retry-After`
 
 ## Differentiators vs OpenAI direct
 
 - **Auto-fallback** combos (19 strategies): never stop coding even if a provider rate-limits
-- **RTK token saver**: tool_result compressed via 47 specialized filters (git-diff, test-jest, terraform-plan, docker-logs…) — 20-40% token reduction
+- **RTK token saver**: tool_result compressed via 56 specialized filters (git-diff, test-jest, terraform-plan, docker-logs…) — 20-40% token reduction
 - **Caveman mode**: optional terse system prompt injection (LITE/FULL/ULTRA) — 15-25% completion reduction
 - **MCP + A2A** servers built-in (this is the only AI router that exposes both protocols)
 - **Memory** with FTS5 + Qdrant for persistent agent context

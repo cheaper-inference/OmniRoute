@@ -109,7 +109,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — MCP Server
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## Transports
 
@@ -160,8 +160,8 @@ The table below shows representative core tools; the server's discovery response
 | providers | `omniroute_get_provider_metrics`, `omniroute_check_quota`, `omniroute_route_request`               |
 | budget    | `omniroute_set_budget_guard`, `omniroute_set_routing_strategy`, `omniroute_set_resilience_profile` |
 | testing   | `omniroute_test_combo`                                                                             |
-| memory    | `memory_add`, `memory_search`, `memory_delete`                                                     |
-| skills    | `skill_invoke`, `skill_list`, `skill_describe`, `skill_register`                                   |
+| memory    | `omniroute_memory_search`, `omniroute_memory_add`, `omniroute_memory_clear`                        |
+| skills    | `omniroute_skills_list`, `omniroute_skills_enable`, `omniroute_skills_execute`                     |
 | cache     | `omniroute_cache_stats`, `omniroute_cache_flush`                                                   |
 | admin     | `omniroute_db_health_check`, `omniroute_sync_pricing`, `omniroute_get_session_snapshot`            |
 
@@ -170,9 +170,10 @@ Full list: `GET $OMNIROUTE_URL/api/mcp/tools`
 ## Scopes
 
 Tools are grouped into 33 scopes (chat-only, memory-readonly, full-admin, etc.).
-Pass scope name as `--scope` arg or via `X-Omniroute-Scope` header.
+Pass a scope with `omniroute mcp call --scope <s>`. Over HTTP the caller's API key sets the scopes;
+without one, the `OMNIROUTE_MCP_SCOPES` env var applies.
 
 ## Reference
 
-Full docs: https://github.com/diegosouzapw/OmniRoute/blob/main/docs/frameworks/MCP-SERVER.md
+Full docs: https://github.com/cheaper-inference/OmniRoute/blob/main/docs/frameworks/MCP-SERVER.md
 <!-- skill:custom-end -->

@@ -128,7 +128,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-cache",
     name: "Cache",
     description:
-      "Manage the LLM response cache. View cache statistics, clear entries, configure TTL policies, and control semantic-similarity caching thresholds.",
+      "Manage the LLM response cache. View cache statistics, list and clear entries, and inspect or clear the reasoning replay cache.",
     category: "api",
     area: "cache",
     icon: "cached",
@@ -194,7 +194,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-db-backups",
     name: "Database & Backups",
     description:
-      "Trigger system backups, restore from backup files, and manage the SQLite database lifecycle. Supports export, import, and incremental snapshot strategies.",
+      "List and export database backups. Also covers the system version, metrics and environment-repair routes.",
     category: "api",
     area: "db-backups",
     icon: "backup",

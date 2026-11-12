@@ -2403,7 +2403,7 @@ paths:
           description: Invalid `withLimits` value
 
   /api/models/alias:
-    post:
+    put:
       tags: [Models]
       summary: Create or update a model alias
       requestBody:
@@ -2668,7 +2668,7 @@ paths:
           description: A provider node with the resulting id already exists
 
   /api/provider-nodes/{id}:
-    patch:
+    put:
       tags: [Provider Nodes]
       summary: Update provider node
       parameters:
@@ -3950,7 +3950,7 @@ paths:
       responses:
         "200":
           description: Current proxy settings
-    patch:
+    put:
       tags: [Settings]
       summary: Update proxy settings
       responses:
@@ -7745,6 +7745,7 @@ paths:
         "200":
           description: Backup list
     post:
+      x-agent-skill-excluded: true
       tags: [System]
       summary: Restore a database backup by id
       description: >-
@@ -11681,6 +11682,7 @@ paths:
             and `oma_` access tokens get 403.
   /api/db-backups/import:
     post:
+      x-agent-skill-excluded: true
       tags:
         - Db backups
       summary: "POST db backups › import"
