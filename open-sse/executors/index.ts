@@ -69,6 +69,8 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   gitlab: () => import("./gitlab.ts").then((m) => new m.GitlabExecutor()),
   "gitlab-duo": () => import("./gitlab.ts").then((m) => new m.GitlabExecutor("gitlab-duo")),
   nlpcloud: () => import("./nlpcloud.ts").then((m) => new m.NlpCloudExecutor()),
+  replicate: () => import("./replicate.ts").then((m) => new m.ReplicateExecutor()),
+  cerebrium: () => import("./cerebrium.ts").then((m) => new m.CerebriumExecutor()),
   oneminai: () => import("./oneminai.ts").then((m) => new m.OneMinAiExecutor()),
   "1min": () => import("./oneminai.ts").then((m) => new m.OneMinAiExecutor()), // Alias
   pollinations: () => import("./pollinations.ts").then((m) => new m.PollinationsExecutor()),

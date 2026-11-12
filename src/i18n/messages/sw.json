@@ -6741,6 +6741,7 @@
     "antigravityProjectIdPlaceholder": "kitambulisho cha mradi-wangu-gcp",
     "grokWebCookiePlaceholder": "Kishikilia Nafasi cha Kidakuzi cha Wavuti cha Grok",
     "herokuBaseUrlHint": "Kidokezo cha URL ya msingi ya Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ficha Barua Pepe",
     "imageProviders": "Watoa Huduma za Picha",
     "videoProviders": "Kizazi cha Video",

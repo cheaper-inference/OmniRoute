@@ -6732,6 +6732,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok వెబ్ కుకీ ప్లేస్హోల్డర్",
     "herokuBaseUrlHint": "Heroku బేస్ URL సూచన",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ఇమెయిల్ను దాచు",
     "imageProviders": "చిత్ర ప్రొవైడర్లు",
     "videoProviders": "వీడియో జనరేషన్",

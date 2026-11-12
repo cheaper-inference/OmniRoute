@@ -1,0 +1,1 @@
+- **feat(providers):** add Replicate chat, Cerebrium, Hetzner Inference and Grokified providers, the MarkItDown MCP launcher, and desktop launchers with an Arabic setup guide ([#19206](https://github.com/cheaper-inference/OmniRoute/pull/19206)) — thanks @jowimila
