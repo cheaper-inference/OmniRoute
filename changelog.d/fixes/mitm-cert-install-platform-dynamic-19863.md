@@ -1,0 +1,1 @@
+- **mitm**: Replace module-load `process.platform` constants in cert installer with dynamic `os.platform()` checks, preventing bundler constant-folding from pruning Windows trust-store checks in Next.js builds (#19863)
