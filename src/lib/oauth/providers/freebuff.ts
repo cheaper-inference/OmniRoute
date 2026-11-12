@@ -5,7 +5,7 @@ import { FREEBUFF_CONFIG } from "../constants/oauth";
 /**
  * Freebuff (freebuff.com — Codebuff free tier) — custom fingerprint login flow.
  *
- *   1. POST codeUrl { fingerprintId } → { loginUrl, fingerprintHash, expiresAt }
+ *   1. POST codeUrl { fingerprintId } → { loginUrl, fingerprintHash, expiresAt (ISO or epoch ms) }
  *   2. Open loginUrl in the browser
  *   3. GET statusUrl?fingerprintId&fingerprintHash&expiresAt until { user.authToken }
  *      (401 = still pending)
@@ -77,8 +77,22 @@ export function decodeFreebuffLoginState(deviceCode: unknown): FreebuffLoginStat
   return null;
 }
 
+/**
+ * freebuff.com used to return `expiresAt` as an ISO date and now returns epoch milliseconds.
+ * Keep the original value (as a string) because the status poll sends it back verbatim.
+ */
+function normalizeExpiresAt(value: unknown): string | null {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return typeof value === "string" && value ? value : null;
+}
+
+/** Epoch ms for an ISO date or an epoch-ms value (numeric string); NaN if unparseable. */
+function expiresAtMs(expiresAt: string): number {
+  return /^\d+$/.test(expiresAt) ? Number(expiresAt) : Date.parse(expiresAt);
+}
+
 function secondsUntil(expiresAt: string, fallback: number): number {
-  const ms = Date.parse(expiresAt) - Date.now();
+  const ms = expiresAtMs(expiresAt) - Date.now();
   if (!Number.isFinite(ms)) return fallback;
   return Math.max(1, Math.floor(ms / 1000));
 }
@@ -109,13 +123,13 @@ export const freebuff = {
       fingerprintHash?: unknown;
       expiresAt?: unknown;
     };
+    const expiresAt = normalizeExpiresAt(data.expiresAt);
     if (
       typeof data.loginUrl !== "string" ||
       typeof data.fingerprintHash !== "string" ||
-      typeof data.expiresAt !== "string" ||
       !data.loginUrl ||
       !data.fingerprintHash ||
-      !data.expiresAt
+      !expiresAt
     ) {
       throw new Error("Freebuff login URL response is missing required fields");
     }
@@ -124,12 +138,12 @@ export const freebuff = {
       device_code: encodeFreebuffLoginState({
         fingerprintId,
         fingerprintHash: data.fingerprintHash,
-        expiresAt: data.expiresAt,
+        expiresAt,
       }),
       user_code: fingerprintId.replace(/^codebuff-cli-/, ""),
       verification_uri: data.loginUrl,
       verification_uri_complete: data.loginUrl,
-      expires_in: secondsUntil(data.expiresAt, config.loginTimeoutSec),
+      expires_in: secondsUntil(expiresAt, config.loginTimeoutSec),
       interval: Math.max(1, Math.floor(config.pollInterval / 1000)),
     };
   },
@@ -153,7 +167,7 @@ export const freebuff = {
       headers: { Accept: "application/json" },
     });
 
-    const expired = Date.parse(state.expiresAt) <= Date.now();
+    const expired = expiresAtMs(state.expiresAt) <= Date.now();
     if (!response.ok) {
       if (expired) return EXPIRED_RESULT;
       // 401 is the upstream "not approved yet" signal; the official CLI keeps
