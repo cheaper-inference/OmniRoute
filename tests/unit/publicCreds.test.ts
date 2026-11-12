@@ -143,3 +143,8 @@ test("decoded values are stable across calls (no internal state)", () => {
   assert.equal(b, c);
   assert.ok(a.length > 0);
 });
+
+test("resolvePublicCred('cursor_id') returns the public desktop OAuth client id shape", () => {
+  const value = resolvePublicCred("cursor_id");
+  assert.match(value, /^[A-Za-z0-9]{32}$/);
+});

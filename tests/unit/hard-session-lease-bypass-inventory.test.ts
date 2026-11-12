@@ -210,6 +210,18 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/oauth/kiro/social-exchange/route.ts": 1,
     "src/app/api/playground/simulate-route/route.ts": 1,
     "src/app/api/provider-nodes/[id]/route.ts": 1,
+    // Grok console reads the explicitly named account, then directly dispatches
+    // account RPCs/streams. These are class B, not credential-free state reads:
+    // each route rejects ACTIVE exclusive leases before token refresh/dispatch.
+    "src/app/api/providers/[id]/grok-bot/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/connector/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/computer-file/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/draft/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/permission/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/secret/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/send/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/transcript/route.ts": 1,
+    "src/app/api/providers/[id]/grok-bot/widget/route.ts": 1,
     "src/app/api/providers/[id]/chatgpt-web-codex-doctor/route.ts": 1,
     "src/app/api/providers/[id]/refresh-token/route.ts": 1,
     // #15130: the connection test re-reads the row uncached right before its write so an
@@ -255,7 +267,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
-    "src/instrumentation-node.ts": 1,
+    // Startup settings read plus Grok cleanup queue lookup. The cleanup belongs
+    // to an earlier request, not today's lease owner: its resolver throws on an
+    // ACTIVE lease, retaining the item without refresh/remote delete (class B).
+    "src/instrumentation-node.ts": 2,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
     "src/lib/chaos/chaosExecutor.ts": 1,
     // #17999: CLIProxyAPI management compat (/v0/management/api-call) re-resolves the
@@ -303,6 +318,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/monitoring/providerHealthMatrix.ts": 1,
     "src/lib/oauth/connectionPersistence.ts": 1,
     "src/lib/oauth/services/persistCursorConnection.ts": 1,
+    // Login persistence looks up the same account to update instead of duplicate.
+    // No credential selection or upstream dispatch: class C, like Cursor login.
+    "src/lib/oauth/services/persistGrokBotConnection.ts": 1,
     "src/lib/oauth/utils/agyAuthImport.ts": 1,
     "src/lib/oauth/utils/claudeAuthImport.ts": 1,
     "src/lib/oauth/utils/codexAuthImport.ts": 1,
@@ -416,6 +434,16 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "open-sse/services/alibabaFreeTierQuotaFetcher.ts",
         "open-sse/services/combo/executeTargetGates.ts",
         "open-sse/services/tokenRefresh.ts",
+        "src/app/api/providers/[id]/grok-bot/route.ts",
+        "src/app/api/providers/[id]/grok-bot/connector/route.ts",
+        "src/app/api/providers/[id]/grok-bot/computer-file/route.ts",
+        "src/app/api/providers/[id]/grok-bot/draft/route.ts",
+        "src/app/api/providers/[id]/grok-bot/permission/route.ts",
+        "src/app/api/providers/[id]/grok-bot/secret/route.ts",
+        "src/app/api/providers/[id]/grok-bot/send/route.ts",
+        "src/app/api/providers/[id]/grok-bot/transcript/route.ts",
+        "src/app/api/providers/[id]/grok-bot/widget/route.ts",
+        "src/instrumentation-node.ts",
         "src/app/api/translator/send/route.ts",
         "src/lib/cliproxyCompat/managementApi.ts",
         "src/lib/credentialHealth/scheduler.ts",
@@ -528,6 +556,20 @@ test("managed request surfaces are fenced centrally or rejected before independe
   );
   const internalKeys = fs.readFileSync(path.join(REPO_ROOT, "src/lib/db/apiKeys.ts"), "utf8");
   const auxiliaryIsolationSources = [
+    // Cached agent lookup is not counted by countCalls, but dispatch still needs
+    // the same fence; GET/POST/DELETE are exercised in behavioral tests.
+    "src/app/api/providers/[id]/grok-bot-agent/route.ts",
+    "src/instrumentation-node.ts",
+    "src/app/api/providers/[id]/grok-bot/route.ts",
+    "src/app/api/providers/[id]/grok-bot/connector/route.ts",
+    "src/app/api/providers/[id]/grok-bot/computer-file/route.ts",
+    "src/app/api/providers/[id]/grok-bot/draft/route.ts",
+    "src/app/api/providers/[id]/grok-bot/permission/route.ts",
+    "src/app/api/providers/[id]/grok-bot/secret/route.ts",
+    "src/app/api/providers/[id]/grok-bot/send/route.ts",
+    "src/app/api/providers/[id]/grok-bot/transcript/route.ts",
+    "src/app/api/providers/[id]/grok-bot/widget/route.ts",
+
     "src/app/api/providers/[id]/models/route.ts",
     "src/app/api/translator/send/route.ts",
     "src/app/api/translator/translate/route.ts",

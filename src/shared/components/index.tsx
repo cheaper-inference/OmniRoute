@@ -32,6 +32,7 @@ export { default as KiroAuthModal } from "./KiroAuthModal";
 export { default as KiroOAuthWrapper } from "./KiroOAuthWrapper";
 export { default as KiroSocialOAuthModal } from "./KiroSocialOAuthModal";
 export { default as CursorAuthModal } from "./CursorAuthModal";
+export { default as GrokBotAuthModal } from "./GrokBotAuthModal";
 export { default as TraeAuthModal } from "./TraeAuthModal";
 export { default as SegmentedControl, SegmentedPanel, SegmentedTabs } from "./SegmentedControl";
 export { default as FilterPills } from "./FilterPills";

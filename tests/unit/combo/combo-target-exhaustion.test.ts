@@ -1213,3 +1213,60 @@ test("OmniRoute's own local model_cooldown 429 never exhausts the provider (#173
   assert.equal(upstreamResult.providerExhausted, true);
   assert.ok(upstream.exhaustedProviders.has("test-dedup-provider"));
 });
+
+for (const connectionId of ["conn-1", null]) {
+  test(`auth exhaustion returns its durable scope with connectionId=${connectionId}`, () => {
+    const s = sets();
+    const result = applyComboTargetExhaustion(target({ connectionId }), {
+      ...baseOpts,
+      result: { status: 401 },
+      fallbackResult: {},
+      sets: s,
+    });
+    assert.deepEqual(
+      result.durableExhaustion,
+      connectionId
+        ? { scope: "connection", provider: "test-dedup-provider", connectionId }
+        : { scope: "provider", provider: "test-dedup-provider" }
+    );
+  });
+}
+
+test("provider-wide quota returns a provider durable mark even for a pinned target", () => {
+  const result = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 429 },
+    fallbackResult: { creditsExhausted: true },
+    sets: sets(),
+  });
+  assert.deepEqual(result.durableExhaustion, {
+    scope: "provider",
+    provider: "test-dedup-provider",
+  });
+});
+
+for (const errorText of ["incomplete_turn", "idle without explicit completion"]) {
+  test(`Grok unfinished turn stays transient: ${errorText}`, () => {
+    const s = sets();
+    const result = applyComboTargetExhaustion(
+      target({ provider: "grok-bot", modelStr: "grok-bot/grok-4" }),
+      { ...baseOpts, result: { status: 502 }, fallbackResult: {}, errorText, sets: s }
+    );
+    assert.equal(result.providerExhausted, false);
+    assert.equal(result.durableExhaustion, undefined);
+    assert.equal(s.exhaustedConnections.size, 0);
+    assert.equal(s.exhaustedProviders.size, 0);
+  });
+}
+
+test("connection transport failures stay transient across set retries", () => {
+  const s = sets();
+  const result = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 502 },
+    fallbackResult: {},
+    sets: s,
+  });
+  assert.equal(result.durableExhaustion, undefined);
+  assert.ok(s.exhaustedConnections.has("test-dedup-provider:conn-1"));
+});

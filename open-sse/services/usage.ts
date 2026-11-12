@@ -83,6 +83,7 @@ import { getXiaomiMimoUsage } from "./usage/xiaomi-mimo.ts";
 import { getXaiUsage } from "./usage/xai.ts";
 import { getXaiOauthUsage } from "./usage/xaiOauth.ts";
 import { getGrokCliUsage } from "./usage/grokCli.ts";
+import { getGrokBotUsage } from "./usage/grokBot.ts";
 import { getFirecrawlUsage } from "./usage/firecrawl.ts";
 import { getContext7Usage } from "./usage/context7.ts";
 import { getTavilyUsage } from "./usage/tavily.ts";
@@ -255,6 +256,8 @@ export async function getUsageForProvider(
       return await getXaiOauthUsage(id || "", accessToken, connection);
     case "grok-cli":
       return await getGrokCliUsage(accessToken);
+    case "grok-bot":
+      return await getGrokBotUsage(accessToken);
     case "codebuddy-cn":
       return await getCodeBuddyCnUsage(accessToken, apiKey, providerSpecificData);
     case "codebuddy-intl":

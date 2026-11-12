@@ -1369,6 +1369,19 @@ Anthropic-compatible provider instead.
 
 ---
 
+### Grok Bot bridge and diagnostics
+
+These optional settings are read by `open-sse/executors/grok-bot.ts` and
+`open-sse/services/grokBotBridgeRegistry.ts`. They do not change the Cursor CLI login.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `GROK_BOT_BRIDGE_MAX_REQUESTS` | `32` | Maximum accepted requests per bridge nonce. Handshake requests and tool calls share this budget. Non-positive or non-integer values fall back to the default. |
+| `GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS` | `300000` | Absolute bridge lifetime in milliseconds. Non-positive or non-integer values fall back to the default. |
+| `GROK_BOT_PUBLIC_BRIDGE_URL` | Unset | Optional operator-provided public bridge endpoint for tool-enabled turns. No endpoint override is applied when unset. Configure only an endpoint you trust. |
+| `GROK_BOT_REMOTE_MCP_SERVERS` | Unset | JSON object mapping server names to objects with a non-empty `url` and optional string-valued `headers`. Entries are forwarded upstream; use trusted endpoints and protect header credentials. Missing or invalid JSON adds no servers. |
+| `GROK_BOT_WATCH_TRACE` | Off | Set exactly `1` to log watch-state metadata, including agent IDs, activity flags and timing. Leave off for normal operation. |
+
 ## 21. Proxy Health
 
 | Variable                                          | Default                  | Source File                                                                             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
