@@ -257,13 +257,18 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
   // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
   // two more (444 -> 446).
+  // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
   // ZCode native accounts (#19307) register four tariff ids plus their four aliases
   // (zcode-start/zc-start, zcode-individual/zc-individual, zcode-cn-start/zc-cn-start,
-  // zcode-cn-individual/zc-cn-individual): +8 (446 -> 454). Measured on the merged tree.
-  assert.equal(RESERVED_PREFIX_COUNT, 454);
+  // zcode-cn-individual/zc-cn-individual): +8 (450 -> 458).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 458.
+  assert.equal(RESERVED_PREFIX_COUNT, 458);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("zcode-start"), true);
+  for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {
+    assert.equal(RESERVED_PROVIDER_PREFIXES.has(id), true);
+  }
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);

@@ -56,6 +56,10 @@ import { kimiProvider } from "./registry/kimi/index.ts";
 import { kimi_webProvider } from "./registry/kimi/web/index.ts";
 import { groqProvider } from "./registry/groq/index.ts";
 import { inference_netProvider } from "./registry/inference-net/index.ts";
+import { hetznerProvider } from "./registry/hetzner/index.ts";
+import { grokifiedProvider } from "./registry/grokified/index.ts";
+import { replicateProvider } from "./registry/replicate/index.ts";
+import { cerebriumProvider } from "./registry/cerebrium/index.ts";
 import { llm7Provider } from "./registry/llm7/index.ts";
 import { cerebrasProvider } from "./registry/cerebras/index.ts";
 import { charmHyperProvider } from "./registry/charm-hyper/index.ts";
@@ -360,6 +364,10 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "kimi-web": kimi_webProvider,
   groq: groqProvider,
   "inference-net": inference_netProvider,
+  hetzner: hetznerProvider,
+  grokified: grokifiedProvider,
+  replicate: replicateProvider,
+  cerebrium: cerebriumProvider,
   llm7: llm7Provider,
   cerebras: cerebrasProvider,
   "charm-hyper": charmHyperProvider,

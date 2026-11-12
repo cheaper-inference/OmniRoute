@@ -15,7 +15,11 @@ import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import { resolveRetryAfterInstant } from "./retryAfterInstant.ts";
 import { parseAntigravityRetryTime, parseProseRetryDelayMs } from "./proseRetryDelay.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
-import { NonStreamingResponseTooLargeError, readResponseTextWithinCap } from "./responseBodyCap.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  cancelNonStreamingReader,
+  getMaxNonStreamingResponseBytes,
+} from "./responseBodyCap.ts";
 
 import {
   isSafePublicErrorIdentifier,
@@ -473,6 +477,53 @@ export function logRetryHintUnreadable(
   else log.debug?.(tag, message, { status });
 }
 
+const ERROR_BODY_MAX_BYTES = 64 * 1024;
+const ERROR_BODY_READ_TIMEOUT_MS = 5_000;
+
+/**
+ * Read an upstream error body as text, at most 64 KiB and at most 5 s. A stalled body must not
+ * hold the request slot until the 600 s body timeout. On timeout the reader is cancelled and the
+ * text read so far is returned. Past the byte cap the body is cancelled and
+ * {@link NonStreamingResponseTooLargeError} is thrown.
+ */
+export async function readErrorBodyText(response: Response): Promise<string> {
+  const maxBytes = Math.min(ERROR_BODY_MAX_BYTES, getMaxNonStreamingResponseBytes());
+  const declared = Number.parseInt(response.headers.get("content-length") ?? "", 10);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    void response.body?.cancel().catch(() => {});
+    throw new NonStreamingResponseTooLargeError(declared, maxBytes);
+  }
+  if (!response.body || response.bodyUsed) return response.text();
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  let bytesSeen = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<"timeout">((resolve) => {
+    timer = setTimeout(() => resolve("timeout"), ERROR_BODY_READ_TIMEOUT_MS);
+  });
+  try {
+    while (true) {
+      const chunk = await Promise.race([reader.read(), timedOut]);
+      if (chunk === "timeout") {
+        cancelNonStreamingReader(reader, new Error("Upstream error body read timed out"));
+        break;
+      }
+      if (chunk.done) break;
+      bytesSeen += chunk.value.byteLength;
+      if (bytesSeen > maxBytes) throw new NonStreamingResponseTooLargeError(bytesSeen, maxBytes);
+      text += decoder.decode(chunk.value, { stream: true });
+    }
+  } catch (error) {
+    cancelNonStreamingReader(reader, error);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+  return text + decoder.decode();
+}
+
 /**
  * Parse upstream provider error response
  * @param {Response} response - Fetch response from provider
@@ -490,7 +541,7 @@ export async function parseUpstreamError(response: Response, provider: string | 
   let rawText = "";
 
   try {
-    const text = await readResponseTextWithinCap(response);
+    const text = await readErrorBodyText(response);
     rawText = text;
     responseBody = normalizePayloadForLog(text);
 
