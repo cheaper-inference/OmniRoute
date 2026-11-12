@@ -1,1 +1,0 @@
-- **feat(claude):** opt-in `OMNIROUTE_DEDUP_WEB_TOOLS=true` drops the built-in WebSearch and WebFetch tools from a Claude Code request that already carries an Exa or Tavily MCP search/fetch tool (exact names only), so the model sees fewer duplicate tool schemas. Off by default.

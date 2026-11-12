@@ -1,1 +1,0 @@
-- **feat(sse):** a 200 stream whose first frame is `{choices: [], error}` (a relay forwarding a dead downstream) now fails the turn before any content, so combo fallback runs, instead of returning an empty 200. Frames after real content are unchanged.

@@ -1,1 +1,0 @@
-- **feat(routing):** Opt-in `CLAUDE_CLIENT_ANTHROPIC_ENDPOINT` sends Claude-format clients to a provider's own Anthropic endpoint when it declares one, so the OpenAI hub no longer drops Claude-only fields.

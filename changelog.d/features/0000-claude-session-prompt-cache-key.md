@@ -1,1 +1,0 @@
-- **feat(routing):** Opt-in `OMNIROUTE_CLAUDE_SESSION_CACHE_KEY` reuses the Claude Code session id as `prompt_cache_key` on OpenAI Chat and Responses targets, so one session keeps one upstream prompt cache.
