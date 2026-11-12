@@ -52,11 +52,38 @@ function advanceInsideString(state: JsonScanState, ch: string): void {
 function advanceOutsideString(state: JsonScanState, ch: string): void {
   if (ch === '"') {
     state.inString = true;
-  } else if (ch === "{") {
+  } else if (ch === "{" || ch === "[") {
     state.depth += 1;
-  } else if (ch === "}") {
+  } else if (ch === "}" || ch === "]") {
     state.depth -= 1;
   }
+}
+
+/** Returns true if a comma `,` appears at depth 1 outside strings (indicating multiple root properties). */
+export function hasTopLevelComma(text: string): boolean {
+  const state: JsonScanState = { depth: 0, inString: false, escaped: false };
+
+  for (let index = 0; index < text.length; index += 1) {
+    const ch = text[index];
+    if (state.inString) {
+      advanceInsideString(state, ch);
+      continue;
+    }
+    if (ch === '"') {
+      state.inString = true;
+    } else if (ch === "{" || ch === "[") {
+      state.depth += 1;
+    } else if (ch === "}" || ch === "]") {
+      state.depth -= 1;
+      if (state.depth === 0) {
+        break;
+      }
+    } else if (ch === "," && state.depth === 1) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /** Index of the `}` closing the object that opens at `text[0]`, or -1 if it never closes. */
@@ -103,12 +130,19 @@ export function consumePlanningLeak(text: string, isFinal = false): BufferedPlan
     return { kind: "plain", visibleText: text };
   }
 
+  // If a top-level comma is already present, the root object has multiple
+  // properties (e.g. {"thought":"...","summary":"..."}), which is structured
+  // application output, not a leaked solitary planning artifact.
+  if (hasTopLevelComma(text)) {
+    return { kind: "plain", visibleText: text };
+  }
+
   const leading = splitLeadingJsonObject(text);
 
   if (!leading) {
     if (isFinal) {
       const trimmed = text.trim();
-      if (trimmed.includes('"thought"')) {
+      if (trimmed.includes('"thought"') && !hasTopLevelComma(text)) {
         return { kind: "leak", visibleText: "" };
       }
       return { kind: "plain", visibleText: text };
@@ -121,9 +155,22 @@ export function consumePlanningLeak(text: string, isFinal = false): BufferedPlan
     if (
       parsed &&
       typeof parsed === "object" &&
+      !Array.isArray(parsed) &&
       typeof (parsed as Record<string, unknown>).thought === "string"
     ) {
-      return { kind: "leak", visibleText: leading.rest };
+      const keys = Object.keys(parsed as Record<string, unknown>);
+      if (keys.length === 1) {
+        if (leading.rest.length > 0) {
+          return { kind: "leak", visibleText: leading.rest };
+        }
+        if (!isFinal) {
+          return { kind: "incomplete" };
+        }
+        // At final chunk, if no visible text follows a solitary thought object,
+        // stripping it would yield empty content (0 chars) and cause empty-stream
+        // failure loops (#19805). Preserve it as plain text.
+        return { kind: "plain", visibleText: text };
+      }
     }
   } catch {
     return { kind: "plain", visibleText: text };
