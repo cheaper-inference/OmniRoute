@@ -24,16 +24,13 @@ import type {
 import { bufferedResponsesFailure } from "./bufferedResponsesFailure.ts";
 import { translateNonStreamingClientResponse } from "./nonStreamingClientTranslate.ts";
 import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
-import {
-  NonStreamingResponseTooLargeError,
-  readResponseTextWithinCap,
-} from "./nonStreamingResponseBody.ts";
+import { NonStreamingResponseTooLargeError } from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
-import { createErrorResult, formatProviderError } from "../../utils/error.ts";
+import { createErrorResult, formatProviderError, readErrorBodyText } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
@@ -660,7 +657,7 @@ export async function runNonStreamingProviderLeg(
     let parsedErrorBody: Record<string, unknown> = {};
 
     try {
-      const errorBodyText = await readResponseTextWithinCap(providerResponse);
+      const errorBodyText = await readErrorBodyText(providerResponse);
       try {
         parsedErrorBody = JSON.parse(errorBodyText) as Record<string, unknown>;
       } catch {
