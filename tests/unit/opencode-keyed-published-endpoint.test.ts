@@ -206,7 +206,7 @@ test("flag on: a Responses-model request follows the published base and keeps x-
   assert.equal(resultUrl(result), `${PUBLISHED_BASE}/responses`);
   assert.equal(calls[0]?.url, `${PUBLISHED_BASE}/responses`);
   assert.equal(calls[0]?.headers["x-api-key"], "test-key");
-  assert.equal(calls[0]?.headers.Authorization, undefined);
+  assert.equal(calls[0]?.headers.Authorization, "Bearer test-key");
   // The registry config is untouched: usesZenApiKeyAuth() keeps comparing it to the Zen base.
   assert.equal(executor.config.baseUrl, ZEN_BASE);
 });
