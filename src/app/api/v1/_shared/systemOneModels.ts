@@ -1,5 +1,7 @@
 /**
- * System One model catalog (`GET /v1/systemone/models`).
+ * System One model catalog (`GET /v1/systemone/models`). Lives in the app layer:
+ * it reads connections, proxies and the outbound guard from src/, which the
+ * engine (open-sse/) must not import.
  *
  * POST /v1/systemone accepts `typesafe/<model>` (native TypeSafe API) and
  * `openrouter/<vendor>/<model>` (OpenRouter decisions endpoint). Each backend
@@ -10,22 +12,22 @@
  */
 
 import { z } from "zod";
-import { CORS_HEADERS } from "../utils/cors.ts";
-import { errorResponse } from "../utils/error.ts";
-import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
-import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
+import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
+import { hasUnsafeModelIdSyntax } from "@omniroute/open-sse/utils/modelIdSafety.ts";
 import * as log from "@/sse/utils/logger";
 import {
   OPENROUTER_DECISIONS_BASE_URL,
   OPENROUTER_DECISIONS_PROVIDER_ID,
   TYPESAFE_SYSTEMONE_BASE_URL,
   TYPESAFE_SYSTEMONE_PROVIDER_ID,
-} from "../config/systemOneRegistry.ts";
+} from "@omniroute/open-sse/config/systemOneRegistry.ts";
 import { getProviderConnections } from "@/lib/db/providers";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
-import { isAccountUnavailable } from "../services/accountFallback.ts";
+import { isAccountUnavailable } from "@omniroute/open-sse/services/accountFallback.ts";
 
 export const SYSTEMONE_MODELS_TIMEOUT_MS = 10_000;
 const TYPESAFE_MODELS_URL = `${TYPESAFE_SYSTEMONE_BASE_URL}/v1/models`;
@@ -188,6 +190,20 @@ async function fetchBackendCatalog(
     : openRouterModels(await fetchJson(OPENROUTER_DECISIONS_MODELS_URL, connection, false, signal));
 }
 
+/** Applies the key's model rules and the per-backend bound to one catalog. */
+async function admitModels(
+  models: SystemOneModel[],
+  options: SystemOneModelsOptions,
+  into: Map<string, SystemOneModel>
+): Promise<void> {
+  for (const model of models.slice(0, MAX_MODELS_PER_BACKEND)) {
+    if (into.has(model.id) || hasUnsafeModelIdSyntax(model.id)) continue;
+    if (!options.isModelAllowed || (await options.isModelAllowed(model.id))) {
+      into.set(model.id, model);
+    }
+  }
+}
+
 /** Reads one backend catalog through the first healthy connection that can answer. */
 async function collectBackend(
   backend: Backend,
@@ -202,12 +218,7 @@ async function collectBackend(
   for (const connection of backend === "openrouter" ? eligible.slice(0, 1) : eligible) {
     try {
       const models = await fetchBackendCatalog(backend, connection, options.signal);
-      for (const model of models.slice(0, MAX_MODELS_PER_BACKEND)) {
-        if (into.has(model.id) || hasUnsafeModelIdSyntax(model.id)) continue;
-        if (!options.isModelAllowed || (await options.isModelAllowed(model.id))) {
-          into.set(model.id, model);
-        }
-      }
+      await admitModels(models, options, into);
       return;
     } catch (error) {
       if (options.signal?.aborted) throw error;

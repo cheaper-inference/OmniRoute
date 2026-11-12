@@ -1,16 +1,12 @@
-import { handleSystemOneModels } from "@omniroute/open-sse/handlers/systemOneModels.ts";
+import { handleSystemOneModels } from "@/app/api/v1/_shared/systemOneModels";
 import { enforceApiKeyPolicy, validateApiKeyRoutingTarget } from "@/shared/utils/apiKeyPolicy";
+import { handleCorsOptions } from "@/shared/utils/cors";
 import { resolveKeyConnectionScope } from "@/sse/services/keyConnectionScope";
 
 export const dynamic = "force-dynamic";
 
 export async function OPTIONS() {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
-    },
-  });
+  return handleCorsOptions();
 }
 
 /**

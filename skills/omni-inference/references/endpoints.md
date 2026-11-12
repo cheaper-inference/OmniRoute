@@ -115,6 +115,7 @@
 - [`POST /api/v1/segment`](#post-apiv1segment)
 - [`GET /api/v1/systemone`](#get-apiv1systemone)
 - [`POST /api/v1/systemone`](#post-apiv1systemone)
+- [`GET /api/v1/systemone/models`](#get-apiv1systemonemodels)
 - [`GET /api/v1/video-bridge/drilldown`](#get-apiv1video-bridgedrilldown)
 - [`DELETE /api/v1/video-bridge/drilldown`](#delete-apiv1video-bridgedrilldown)
 - [`GET /api/v1/videos/generations`](#get-apiv1videosgenerations)
@@ -1383,6 +1384,17 @@ curl -X POST http://localhost:20128/api/v1/systemone \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/v1/systemone/models
+
+List live System One decisions models
+
+Live catalog of the decisions models `POST /api/v1/systemone` accepts, read from the configured connections on every call (never cached). `typesafe/<model>` entries come from the TypeSafe API (`GET /v1/models`, needs an active TypeSafe connection); `openrouter/<vendor>/<model>` entries come from OpenRouter's public catalog filtered by `output_modalities=decisions` (needs an active OpenRouter connection). Every returned `id` can be sent unchanged as the `model` of `POST /api/v1/systemone`. The API key's endpoint category, budget, connection scope and model allow/deny rules apply; a model the key may not use is not listed.
+
+```bash
+curl http://localhost:20128/api/v1/systemone/models \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ### GET /api/v1/video-bridge/drilldown

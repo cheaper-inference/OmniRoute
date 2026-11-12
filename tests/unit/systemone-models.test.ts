@@ -14,7 +14,7 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const costRules = await import("../../src/domain/costRules.ts");
 const rateLimiter = await import("../../src/shared/utils/rateLimiter.ts");
 const route = await import("../../src/app/api/v1/systemone/models/route.ts");
-const { handleSystemOneModels } = await import("../../open-sse/handlers/systemOneModels.ts");
+const { handleSystemOneModels } = await import("../../src/app/api/v1/_shared/systemOneModels.ts");
 const { resolveSystemOneTarget } = await import("../../open-sse/config/systemOneRegistry.ts");
 
 rateLimiter.setRateLimiterTestMode(true);
@@ -349,8 +349,12 @@ test("without an eligible connection no upstream is called and the list is empty
 
 test("CORS preflight allows GET", async () => {
   const response = await route.OPTIONS();
+  assert.equal(response.status, 204);
   assert.match(response.headers.get("Access-Control-Allow-Methods") ?? "", /GET/);
-  assert.equal(response.headers.get("Access-Control-Allow-Headers"), "*");
+  assert.match(response.headers.get("Access-Control-Allow-Methods") ?? "", /OPTIONS/);
+  assert.match(response.headers.get("Access-Control-Allow-Headers") ?? "", /Authorization/);
+  // The origin is owned by the middleware allowlist, never set by the route.
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
   stubBackends({ data: [decisionModel("liquid/d1")] });
   const ok = await route.GET(listRequest());
   assert.match(ok.headers.get("Access-Control-Allow-Methods") ?? "", /GET/);
