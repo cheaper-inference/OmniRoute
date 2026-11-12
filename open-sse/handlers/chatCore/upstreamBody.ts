@@ -20,6 +20,7 @@ import {
   type ConnectionCacheOverride,
 } from "../../utils/cacheControlPolicy.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import { resolveClaudeSessionCacheKey } from "./claudeSessionCacheKey.ts";
 import { stripInternalBodyFields } from "../../config/cliFingerprints.ts";
 import { readBodyReasoningEffort } from "../../executors/base/reasoningEffort.ts";
 import { sanitizeRequestForResolvedTarget } from "../../services/targetRequestSanitizer.ts";
@@ -45,6 +46,7 @@ import {
   foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
+import { dedupeBuiltinWebTools } from "./webToolDedup.ts";
 
 type LoggerLike =
   | { debug?: (...args: unknown[]) => void; warn?: (tag: string, message: string) => void }
@@ -324,8 +326,19 @@ async function injectPromptCacheKey(
   bodyToSend: Body,
   provider: string | null | undefined,
   targetFormat: string,
-  connectionCacheOverride: ConnectionCacheOverride | null
+  connectionCacheOverride: ConnectionCacheOverride | null,
+  clientHeaders?: unknown
 ): Promise<Body> {
+  const sessionKey =
+    providerSupportsCaching(
+      provider,
+      undefined,
+      connectionCacheOverride,
+      bodyToSend.model as string
+    ) && !providerRejectsPromptCacheKey(provider, connectionCacheOverride)
+      ? resolveClaudeSessionCacheKey(bodyToSend, provider, targetFormat, clientHeaders)
+      : null;
+  if (sessionKey) return { ...bodyToSend, prompt_cache_key: sessionKey };
   if (
     targetFormat === FORMATS.OPENAI &&
     providerSupportsCaching(
@@ -520,6 +533,7 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
   // After the sanitizers, which read `reasoning.effort`, and after payload rules can add it.
   bodyToSend = foldReasoningForOpenAIChat(bodyToSend, provider, targetFormat);
   bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
+  bodyToSend = dedupeBuiltinWebTools(bodyToSend, opts.clientRawRequest?.headers);
   // Relevance selection runs before the provider cap so the cap keeps the useful tools.
   const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
     rawBody: opts.rawBody,
@@ -547,7 +561,8 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
     bodyToSend,
     provider,
     targetFormat,
-    connectionCacheOverride
+    connectionCacheOverride,
+    opts.clientRawRequest?.headers
   );
 
   return bodyToSend;

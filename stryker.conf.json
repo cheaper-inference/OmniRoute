@@ -809,7 +809,14 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts",
+      "tests/unit/stream-readiness-empty-choices-error.test.ts",
+      "tests/unit/gemini-signature-store-lru.test.ts",
+      "tests/unit/claude-session-prompt-cache-key.test.ts",
+      "tests/unit/claude-client-anthropic-endpoint.test.ts",
+      "tests/unit/route-streaming-policy.test.ts",
+      "tests/unit/combo-tool-rejection-defer.test.ts",
+      "tests/unit/web-tool-dedup.test.ts"
     ],
     "nodeArgs": [
       "--import",

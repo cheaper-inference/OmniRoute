@@ -22,6 +22,8 @@ export function buildNonStreamingResponseHeaders(
     compressionResponseMeta?: string | null | undefined;
     comboStrategy?: string | null | undefined;
     fallbackAttempts?: number;
+    /** Resolved context window; emitted as response headers only when OMNIROUTE_CONTEXT_HEADERS is on. */
+    contextWindow?: number | null;
   },
   deps: { attachOmniRouteMetaHeaders: typeof defaultAttachMeta; now: () => number } = {
     attachOmniRouteMetaHeaders: defaultAttachMeta,
@@ -42,6 +44,9 @@ export function buildNonStreamingResponseHeaders(
     requestId: args.requestId,
     strategy: args.comboStrategy ?? "single",
     ...(args.fallbackAttempts !== undefined ? { fallbackAttempts: args.fallbackAttempts } : {}),
+    ...(/^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_CONTEXT_HEADERS?.trim() ?? "")
+      ? { contextWindow: args.contextWindow }
+      : {}),
   });
   if (args.compressionResponseMeta) {
     responseHeaders[OMNIROUTE_RESPONSE_HEADERS.compression] = args.compressionResponseMeta;

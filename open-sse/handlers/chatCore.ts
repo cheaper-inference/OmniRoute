@@ -102,7 +102,10 @@ import {
 import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
-import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
+import {
+  applyClientProtocolAlternate,
+  resolveChatCoreTargetFormat,
+} from "./chatCore/targetFormat.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
 import { usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeUpstreamRequestParams } from "./chatCore/upstreamRequestParams.ts";
@@ -320,6 +323,7 @@ import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
 import { resolveInterceptSearch, resolveInterceptFetch } from "@/lib/db/interceptionRules";
 import { resolveExplicitStreamAlias, resolveStreamFlag } from "../utils/aiSdkCompat.ts";
+import { applyStreamingPolicy } from "../utils/streamingPolicy.ts";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
@@ -837,6 +841,20 @@ async function handleChatCoreInner({
 
   // Wire target-format resolution extracted to chatCore/targetFormat.ts (#3501); `alias` is reused
   // downstream when stripping the alias/ prefix off the upstream model id.
+  // Opt-in: a Claude client uses the provider's Anthropic alternate; the executors read the same
+  // connection data, so body format, URL and auth header switch together.
+  if (credentials) {
+    const protocolPsd = applyClientProtocolAlternate({
+      provider,
+      resolvedModel,
+      sourceFormat,
+      customModelTargetFormat,
+      providerSpecificData: credentials.providerSpecificData,
+    });
+    if (protocolPsd !== credentials.providerSpecificData) {
+      credentials = { ...credentials, providerSpecificData: protocolPsd };
+    }
+  }
   const { alias, targetFormat } = resolveChatCoreTargetFormat({
     provider,
     resolvedModel,
@@ -1145,13 +1163,20 @@ async function handleChatCoreInner({
   // flag into resolveStreamFlag would force `stream=true` and skip that
   // conversion, yielding STREAM_EARLY_EOF for JSON callers. (#2081, #6126)
   const providerRequiresStreaming = REGISTRY[provider]?.forceStream === true;
-  const stream =
+  const resolvedStream =
     nativeCodexPassthrough && isCompactResponsesEndpoint(endpointPath)
       ? false
       : resolveStreamFlag(body?.stream, acceptHeader, sourceFormat, {
           userAgent: streamUserAgent,
           streamDefaultMode: apiKeyInfo?.streamDefaultMode,
         });
+  // Operator streaming policy (OMNIROUTE_STREAMING_POLICY, off when unset).
+  const streamingPolicy = applyStreamingPolicy(endpointPath, resolvedStream);
+  if (streamingPolicy.error) {
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId);
+    return createErrorResult(streamingPolicy.error.status, streamingPolicy.error.message);
+  }
+  const stream = streamingPolicy.stream;
 
   // `settings` is already consolidated once near the top of handleChatCore
   // (the "fetch once, reuse" const). A second `const settings` here was a
@@ -3440,6 +3465,7 @@ async function handleChatCoreInner({
       compressionResponseMeta,
       connectionId,
       contextEditingEnabled,
+      contextLimit,
       copilotCompatibleReasoning,
       createErrorResult,
       credentials,
